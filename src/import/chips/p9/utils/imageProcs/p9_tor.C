@@ -106,13 +106,13 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
         GenRingIdList* ring_id_list_common = NULL;
         GenRingIdList* ring_id_list_instance = NULL;
         CHIPLET_DATA  l_cpltData;
-        uint8_t iv_num_variant = 1;
+        uint8_t l_num_variant = 1;
 
         switch (l)
         {
             case PERV_CPLT :
                 l_cpltData  =  PERV::g_pervData;
-                iv_num_variant  = (uint8_t)sizeof(PERV::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(PERV::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) PERV::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) PERV::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) PERV::RING_VARIANT_ORDER;
@@ -120,7 +120,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case N0_CPLT :
                 l_cpltData  =     N0::g_n0Data;
-                iv_num_variant  = (uint8_t)sizeof(N0::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(N0::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) N0::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) N0::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) N0::RING_VARIANT_ORDER;
@@ -128,7 +128,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case N1_CPLT :
                 l_cpltData =   N1::g_n1Data;
-                iv_num_variant  = (uint8_t)sizeof(N1::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(N1::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) N1::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) N1::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) N1::RING_VARIANT_ORDER;
@@ -136,7 +136,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case N2_CPLT :
                 l_cpltData  =    N2::g_n2Data;
-                iv_num_variant  = (uint8_t)sizeof(N2::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(N2::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) N2::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) N2::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) N2::RING_VARIANT_ORDER;
@@ -144,7 +144,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case N3_CPLT :
                 l_cpltData =   N3::g_n3Data;
-                iv_num_variant  = (uint8_t)sizeof(N3::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(N3::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) N3::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) N3::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) N3::RING_VARIANT_ORDER;
@@ -152,7 +152,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case XB_CPLT :
                 l_cpltData = XB::g_xbData;
-                iv_num_variant  = (uint8_t)sizeof(XB::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(XB::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) XB::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) XB::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) XB::RING_VARIANT_ORDER;
@@ -160,7 +160,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case MC_CPLT :
                 l_cpltData = MC::g_mcData;
-                iv_num_variant  = (uint8_t)sizeof(MC::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(MC::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) MC::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) MC::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) MC::RING_VARIANT_ORDER;
@@ -168,7 +168,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case OB0_CPLT :
                 l_cpltData  = OB0::g_ob0Data;
-                iv_num_variant  = (uint8_t)sizeof(OB0::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(OB0::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) OB0::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) OB0::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) OB0::RING_VARIANT_ORDER;
@@ -176,7 +176,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case OB1_CPLT :
                 l_cpltData  = OB1::g_ob1Data;
-                iv_num_variant  = (uint8_t)sizeof(OB1::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(OB1::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) OB1::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) OB1::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) OB1::RING_VARIANT_ORDER;
@@ -184,7 +184,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case OB2_CPLT :
                 l_cpltData  = OB2::g_ob2Data;
-                iv_num_variant  = (uint8_t)sizeof(OB2::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(OB2::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) OB2::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) OB2::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) OB2::RING_VARIANT_ORDER;
@@ -192,7 +192,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case OB3_CPLT :
                 l_cpltData  = OB3::g_ob3Data;
-                iv_num_variant  = (uint8_t)sizeof(OB3::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(OB3::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) OB3::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) OB3::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) OB3::RING_VARIANT_ORDER;
@@ -200,7 +200,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case PCI0_CPLT :
                 l_cpltData  =  PCI0::g_pci0Data;
-                iv_num_variant  = (uint8_t)sizeof(PCI0::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(PCI0::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) PCI0::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) PCI0::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) PCI0::RING_VARIANT_ORDER;
@@ -209,7 +209,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case PCI1_CPLT :
                 l_cpltData =  PCI1::g_pci1Data;
-                iv_num_variant  = (uint8_t)sizeof(PCI1::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(PCI1::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) PCI1::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) PCI1::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) PCI1::RING_VARIANT_ORDER;
@@ -217,7 +217,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case PCI2_CPLT :
                 l_cpltData =  PCI2::g_pci2Data;
-                iv_num_variant  = (uint8_t)sizeof(PCI2::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(PCI2::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) PCI2::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) PCI2::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) PCI2::RING_VARIANT_ORDER;
@@ -225,7 +225,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case EQ_CPLT :
                 l_cpltData  =  EQ::g_eqData;
-                iv_num_variant  = (uint8_t)sizeof(EQ::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(EQ::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) EQ::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) EQ::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) EQ::RING_VARIANT_ORDER;
@@ -233,7 +233,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
 
             case EC_CPLT :
                 l_cpltData =  EC::g_ecData;
-                iv_num_variant  = (uint8_t)sizeof(EC::RingVariants) / sizeof(uint16_t);
+                l_num_variant  = (uint8_t)sizeof(EC::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) EC::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) EC::RING_ID_LIST_INSTANCE;
                 ring_variant_order    = (RingVariantOrder*) EC::RING_VARIANT_ORDER;
@@ -244,20 +244,20 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
                 return TOR_INVALID_CHIPLET;
         }
 
-        iv_num_variant = (i_RingVariant == OVERRIDE) ? 1 : iv_num_variant;
+        l_num_variant = (i_RingVariant == OVERRIDE) ? 1 : l_num_variant;
 
         if (i_dbgl > 1)
         {
             MY_INF(" No of CommonRing %d, No of InstanceRing %d, No of Variants %d \n",
                    l_cpltData.iv_num_common_rings, l_cpltData.iv_num_instance_rings,
-                   iv_num_variant);
+                   l_num_variant);
         }
 
         uint32_t local = 0;
 
         for (uint8_t i = 0; i < l_cpltData.iv_num_common_rings ; i++)
         {
-            for (uint8_t j = 0; j < iv_num_variant ; j++)
+            for (uint8_t j = 0; j < l_num_variant ; j++)
             {
                 if (i_dbgl > 2)
                 {
@@ -386,7 +386,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
         {
             for (uint8_t j = 0; j < l_cpltData.iv_num_instance_rings; j++)
             {
-                for(uint8_t k = 0; k < iv_num_variant ; k++)
+                for(uint8_t k = 0; k < l_num_variant ; k++)
                 {
                     if (i_dbgl > 2)
                     {
@@ -571,7 +571,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
 
     GenRingIdList* ring_id_list_common = NULL;
     GenRingIdList* ring_id_list_instance = NULL;
-    uint8_t iv_num_variant  = (uint8_t)sizeof(EQ::RingVariants) / sizeof(uint16_t);
+    uint8_t l_num_variant  = (uint8_t)sizeof(EQ::RingVariants) / sizeof(uint16_t);
     ring_id_list_common = (GenRingIdList*) EQ::RING_ID_LIST_COMMON;
     ring_id_list_instance = (GenRingIdList*) EQ::RING_ID_LIST_INSTANCE;
 
@@ -579,7 +579,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
 
     for (uint8_t i = 0; i < EQ::g_eqData.iv_num_common_rings ; i++)
     {
-        for (uint8_t j = 0; j < iv_num_variant ; j++)
+        for (uint8_t j = 0; j < l_num_variant ; j++)
         {
             if (i_dbgl > 2)
             {
@@ -708,7 +708,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
     {
         for (uint8_t j = 0; j < EQ::g_eqData.iv_num_instance_rings; j++)
         {
-            for(uint8_t k = 0; k < iv_num_variant ; k++)
+            for(uint8_t k = 0; k < l_num_variant ; k++)
             {
                 if (i_dbgl > 2)
                 {
@@ -887,7 +887,7 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
 
     GenRingIdList* ring_id_list_common = NULL;
     GenRingIdList* ring_id_list_instance = NULL;
-    uint8_t iv_num_variant  = (uint8_t)sizeof(EC::RingVariants) / sizeof(uint16_t);
+    uint8_t l_num_variant  = (uint8_t)sizeof(EC::RingVariants) / sizeof(uint16_t);
     ring_id_list_common = (GenRingIdList*) EC::RING_ID_LIST_COMMON;
     ring_id_list_instance = (GenRingIdList*) EC::RING_ID_LIST_INSTANCE;
 
@@ -895,7 +895,7 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
 
     for (uint8_t i = 0; i < EC::g_ecData.iv_num_common_rings ; i++)
     {
-        for (uint8_t j = 0; j < iv_num_variant ; j++)
+        for (uint8_t j = 0; j < l_num_variant ; j++)
         {
             if (i_dbgl > 2)
             {
@@ -1026,7 +1026,7 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
         {
             for (uint8_t j = 0; j < EC::g_ecData.iv_num_instance_rings; j++)
             {
-                for (uint8_t k = 0; k < iv_num_variant ; k++)
+                for (uint8_t k = 0; k < l_num_variant ; k++)
                 {
                     if (i_dbgl > 2)
                     {
