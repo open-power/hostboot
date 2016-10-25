@@ -1,0 +1,197 @@
+#!/usr/bin/perl
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/buildpnor/parse-pnor $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2015,2016
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+use strict;
+use XML::Simple;
+use Data::Dumper;
+use File::Basename;
+use Cwd qw(abs_path cwd);
+use lib dirname abs_path($0);
+use PnorUtils qw(loadPnorLayout checkFile);
+use Getopt::Long qw(:config pass_through);
+
+################################################################################
+# Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
+# bugs that result in XML parse errors that can be fixed by adjusting white-
+# space (i.e. parse errors that do not make sense).
+################################################################################
+$XML::Simple::PREFERRED_PARSER = 'XML::Parser';
+
+
+my $debug = 0;
+my $help = 0;
+
+my %pnorLayout;
+my %PhysicalOffsets;
+my %globals = ( "branch" => "master" );
+
+GetOptions("debug!" => \$debug,
+           "help" => \$help);
+
+my %commands = ( "display" => \&execute_display,
+                 "help" => \&execute_help,
+               );
+
+if ($help)
+{
+    execute_help();
+}
+
+my $command = shift @ARGV;
+if ($commands{$command})
+{
+    &{$commands{$command}}();
+}
+else
+{
+    execute_help();
+}
+
+foreach my $arg (@ARGV)
+{
+    print "Unprocessed arg: $arg\n" if $debug;
+}
+
+############################## Begin Actions ##################################
+
+sub execute_help
+{
+ my $command = shift @ARGV;
+
+    if ($command eq "")
+    {
+        print "parse-pnor:\n";
+        print "    Parse a PNOR XML and get useful information\n";
+        print "\n";
+        print "    Syntax:\n";
+        print "        parse-pnor [options] <tool>\n";
+        print "\n";
+        print "    Available subtools:\n";
+        foreach my $key (sort keys %commands)
+        {
+            print "        $key\n";
+        }
+        print "\n";
+        print "    Global options:\n";
+        print "        --debug                      Enable debug mode.\n";
+        print "        --help                       Display help on a specific tool.\n";
+    }
+    elsif (not defined $commands{$command})
+    {
+        die "Unknown subcommand: $command.\n";
+    }
+    else
+    {
+        my %help = (
+            "display" =>
+q(
+        Display the XML pnor layout in an easier to read format
+
+        Use option '--gaps' to find unused space
+
+    Options:
+        --layout=<xml-file>     Full path to PNOR layout file [required].
+        --gaps                  Display where gaps are [default=false].
+        --verbose               Display more of the PNOR layout [default=false].
+),
+        );
+
+        print "parse-pnor $command:";
+        print $help{$command};
+    }
+}
+
+sub execute_display
+{
+    my $pnorFile = "";
+    my $verbose = 0;
+    my $gaps = 0;
+
+    GetOptions("layout:s" => \$pnorFile,
+               "verbose" => \$verbose,
+               "gaps" => \$gaps);
+
+    die "Missing pnor layout" if ($pnorFile eq "");
+    checkFile($pnorFile);
+
+    my $rc = loadPnorLayout($pnorFile, \%pnorLayout, \%PhysicalOffsets);
+    die "Error detected from call to loadLayout()" if($rc);
+
+    if (!$verbose)
+    {
+        print "-------------------------------------------------------- \n";
+        print "Name-physicalOffset-physicalRegionSize-physicalRegionEnd \n";
+        print "-------------------------------------------------------- \n";
+    }
+
+    my $curOffset = 0;
+    my $totalFree = 0;
+    # Iterate through all sections of PNOR, including TOC's
+    foreach my $section (sort {$a <=> $b} keys %{$pnorLayout{sections}})
+    {
+        # Get hex format for each value
+        my $offset = sprintf("0x%X",$pnorLayout{sections}{$section}{physicalOffset});
+        my $size = sprintf("0x%X",$pnorLayout{sections}{$section}{physicalRegionSize});
+        my $end = sprintf("0x%X",hex($offset)+hex($size));
+
+        # Check if there is a gap between sections
+        if ($gaps && ($curOffset < hex($offset)))
+        {
+            print "  > Gap Found: addr = ".sprintf("0x%X",$curOffset);
+
+            # Display address and size of gap
+            my $gapSize = hex($offset)-$curOffset;
+            print " size = ".sprintf("0x%X",$gapSize)."\n";
+            $totalFree += $gapSize;
+            $curOffset = hex($offset) + hex($size);
+        }
+        else
+        {
+            $curOffset += hex($size);
+        }
+
+        # Print sections
+        if ($verbose)
+        {
+            print $pnorLayout{sections}{$section}{eyeCatch}."\n";
+            print Dumper $pnorLayout{sections}{$section};
+            print "\n";
+        }
+        else
+        {
+            print $pnorLayout{sections}{$section}{eyeCatch}."-$offset-$size-$end\n";
+        }
+    }
+
+    # Display total free space
+    if($gaps)
+    {
+        my $hexVal = sprintf("0x%X",$totalFree);
+        my $kiloBytes = $totalFree/1024;
+        print "\n---Total Free Space = ".$totalFree." Bytes or ".$kiloBytes." KB";
+        print " (".$hexVal.")\n";
+    }
+}
