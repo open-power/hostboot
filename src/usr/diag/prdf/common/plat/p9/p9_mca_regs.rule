@@ -22,6 +22,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 ###############################################################################
 # Additional registers for mca, not defined in XML
 ###############################################################################
@@ -35,4 +36,122 @@
         scomaddr    0x07010a01;
         capture     group never;
         access      write_only;
+    };
+
+    ############################################################################
+    # P9 Hardware Mark Stores
+    ############################################################################
+    register HW_MS0
+    {
+        name        "P9 Hardware Mark Store rank 0";
+        scomaddr    0x07010AD0;
+        capture     group default;
+    };
+
+    register HW_MS1
+    {
+        name        "P9 Hardware Mark Store rank 1";
+        scomaddr    0x07010AD1;
+        capture     group default;
+    };
+
+    register HW_MS2
+    {
+        name        "P9 Hardware Mark Store rank 2";
+        scomaddr    0x07010AD2;
+        capture     group default;
+    };
+
+    register HW_MS3
+    {
+        name        "P9 Hardware Mark Store rank 3";
+        scomaddr    0x07010AD3;
+        capture     group default;
+    };
+
+    register HW_MS4
+    {
+        name        "P9 Hardware Mark Store rank 4";
+        scomaddr    0x07010AD4;
+        capture     group default;
+    };
+
+    register HW_MS5
+    {
+        name        "P9 Hardware Mark Store rank 5";
+        scomaddr    0x07010AD5;
+        capture     group default;
+    };
+
+    register HW_MS6
+    {
+        name        "P9 Hardware Mark Store rank 6";
+        scomaddr    0x07010AD6;
+        capture     group default;
+    };
+
+    register HW_MS7
+    {
+        name        "P9 Hardware Mark Store rank 7";
+        scomaddr    0x07010AD7;
+        capture     group default;
+    };
+
+    ############################################################################
+    # P9 Firmware Mark Stores
+    ############################################################################
+    register FW_MS0
+    {
+        name        "P9 Firmware Mark Store 0";
+        scomaddr    0x07010AD8;
+        capture     group default;
+    };
+
+    register FW_MS1
+    {
+        name        "P9 Firmware Mark Store 1";
+        scomaddr    0x07010AD9;
+        capture     group default;
+    };
+
+    register FW_MS2
+    {
+        name        "P9 Firmware Mark Store 2";
+        scomaddr    0x07010ADA;
+        capture     group default;
+    };
+
+    register FW_MS3
+    {
+        name        "P9 Firmware Mark Store 3";
+        scomaddr    0x07010ADB;
+        capture     group default;
+    };
+
+    register FW_MS4
+    {
+        name        "P9 Firmware Mark Store 4";
+        scomaddr    0x07010ADC;
+        capture     group default;
+    };
+
+    register FW_MS5
+    {
+        name        "P9 Firmware Mark Store 5";
+        scomaddr    0x07010ADD;
+        capture     group default;
+    };
+
+    register FW_MS6
+    {
+        name        "P9 Firmware Mark Store 6";
+        scomaddr    0x07010ADE;
+        capture     group default;
+    };
+
+    register FW_MS7
+    {
+        name        "P9 Firmware Mark Store 7";
+        scomaddr    0x07010ADF;
+        capture     group default;
     };
