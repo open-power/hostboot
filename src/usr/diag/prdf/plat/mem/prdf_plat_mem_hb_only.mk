@@ -37,6 +37,10 @@ prd_incpath += ${PRD_SRC_PATH}/plat/mem
 # Hostboot only object files common to both IPL and runtime
 ################################################################################
 
+# plat/mem/ (non-rule plugin related)
+prd_obj += prdfMemMark.o
+prd_obj += prdfMemScrubUtils.o
+
 # plat/mem/ (rule plugin related)
 prd_rule_plugin += prdfP9Mca.o
 prd_rule_plugin += prdfP9Mcbist.o
@@ -48,7 +52,6 @@ prd_rule_plugin += prdfP9Mcbist.o
 ifneq (${HOSTBOOT_RUNTIME},1)
 
 # plat/mem/ (non-rule plugin related)
-prd_obj += prdfMemScrubUtils.o
 prd_obj += prdfMemTdCtlr_ipl.o
 prd_obj += prdfMemTps_ipl.o
 prd_obj += prdfMemVcm_ipl.o
