@@ -66,6 +66,7 @@ OBJS += p9_pcie_config.o
 OBJS += p9_setup_bars.o
 OBJS += p9_fbc_utils.o
 OBJS += p9_fbc_smp_utils.o
+OBJS += p9_mpipl_chip_cleanup.o
 
 #include ${PROCEDURE_PATH}/hwp/nest/p9_htm_setup.mk
 #include ${PROCEDURE_PATH}/hwp/nest/p9_pcie_config.mk
