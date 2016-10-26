@@ -83,6 +83,14 @@ enum sizes
     // Number of double words in...
     NUM_DW_IN_128B = 16,
     NUM_DW_IN_64B = 8,
+
+    // MCBIST polling constant for actual HW
+    // The specific value here is not important, only that it is very large to avoid polling timeouts,
+    // but not to avoid any actual hardware timeouts
+    // Note: ~0 is not used as that would cause MCBIST to never timeout even if the hardware is in an infinite loop
+    // You can't get greater than ~0, so you'd never timeout
+    // TODO RTC:166340 - Clean up MCBIST polling
+    OVERLY_LARGE_NUMBER_OF_POLLS = 5000000000000,
 };
 
 enum times
