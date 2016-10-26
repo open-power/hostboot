@@ -34,6 +34,9 @@
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
 
+#include <p9_mpipl_chip_cleanup.H>
+#include  <fapi2/plat_hwp_invoker.H>
+
 #include <vfs/vfs.H>
 #include <dump/dumpif.H>
 
@@ -51,8 +54,7 @@ void* call_host_mpipl_service (void *io_pArgs)
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_mpipl_service entry" );
-//@TODO RTC: 134431 MPIPL Changes for P9 - Placeholder
-#if 0
+
     errlHndl_t l_err = NULL;
     // call proc_mpipl_chip_cleanup.C
     TARGETING::TargetHandleList l_procTargetList;
@@ -61,29 +63,21 @@ void* call_host_mpipl_service (void *io_pArgs)
     //  ---------------------------------------------------------------
     //  run proc_mpipl_chip_cleanup.C on all proc chips
     //  ---------------------------------------------------------------
-    for (TargetHandleList::const_iterator
-         l_iter = l_procTargetList.begin();
-         l_iter != l_procTargetList.end();
-         ++l_iter)
+    for (const auto & l_pProcTarget : l_procTargetList)
     {
-        //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_pProcTarget = *l_iter;
-
         //  write HUID of target
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "target HUID %.8X", TARGETING::get_huid(l_pProcTarget));
 
-        //const fapi::Target l_fapi_pProcTarget( TARGET_TYPE_PROC_CHIP,
-        //                   (const_cast<TARGETING::Target*> (l_pProcTarget)) );
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_pProcTarget((const_cast<TARGETING::Target*> (l_pProcTarget)) );
 
         //  call the HWP with each fapi::Target
-        //FAPI_INVOKE_HWP(l_err, proc_mpipl_chip_cleanup,
-        //                l_fapi_pProcTarget );
+        FAPI_INVOKE_HWP(l_err, p9_mpipl_chip_cleanup, l_fapi_pProcTarget );
 
         if ( l_err )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR : returned from proc_mpipl_chip_cleanup" );
+                    "ERROR : returned from p9_mpipl_chip_cleanup" );
 
             // capture the target data in the elog
             ERRORLOG::ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_err );
@@ -92,25 +86,6 @@ void* call_host_mpipl_service (void *io_pArgs)
             break;
         }
 
-        //  ---------------------------------------------------------------
-        //  run proc_mpipl_ex_cleanup.C on all proc chips
-        //  ---------------------------------------------------------------
-        //@TODO RTC:133831  call the HWP with each fapi::Target
-        //FAPI_INVOKE_HWP(l_err,
-        //                proc_mpipl_ex_cleanup,
-        //                l_fapi_pProcTarget );
-
-        if ( l_err )
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR : returned from proc_mpipl_ex_cleanup" );
-
-            // capture the target data in the elog
-            ERRORLOG::ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_err );
-
-            // since we are doing an mpipl break out, the mpipl has failed
-            break;
-        }
     }
 
     //Determine if we should perform dump ops
@@ -259,7 +234,6 @@ void* call_host_mpipl_service (void *io_pArgs)
         // Commit Error
         errlCommit( l_err, HWPF_COMP_ID );
     }
-#endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_mpipl_service exit" );
