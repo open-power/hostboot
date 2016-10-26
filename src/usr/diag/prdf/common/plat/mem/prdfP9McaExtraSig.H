@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/mem/prdfMemExtraSig.H $         */
+/* $Source: src/usr/diag/prdf/common/plat/mem/prdfP9McaExtraSig.H $       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,13 +23,16 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfMemExtraSig_H
-#define __prdfMemExtraSig_H
+#ifndef __prdfP9McaExtraSig_H
+#define __prdfP9McaExtraSig_H
 
 #include <prdrSignatures.H>
 
-PRDR_ERROR_SIGNATURE(CmdComplete_ERROR, 0xeeee0000, "",
-                     "ERROR: command complete analysis failed" );
+PRDR_ERROR_SIGNATURE(MaintUE,        0xffff0010, "", "Maintenance UE");
+PRDR_ERROR_SIGNATURE(MaintMPE,       0xffff0011, "", "Maintenance MPE");
+PRDR_ERROR_SIGNATURE(MaintHARD_CTE,  0xffff0012, "", "Maintenance HARD CTE");
+PRDR_ERROR_SIGNATURE(MaintSOFT_CTE,  0xffff0013, "", "Maintenance SOFT CTE");
+PRDR_ERROR_SIGNATURE(MaintINTER_CTE, 0xffff0014, "", "Maintenance INTER CTE");
 
-#endif // __prdfMemExtraSig_H
+#endif // __prdfP9McaExtraSig_H
 

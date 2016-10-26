@@ -30,8 +30,8 @@
 #include <prdfMemTdCtlr.H>
 
 // Platform includes
-#include <prdfMemExtraSig.H>
 #include <prdfP9McbistDataBundle.H>
+#include <prdfP9McbistExtraSig.H>
 
 using namespace TARGETING;
 
