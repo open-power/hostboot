@@ -31,7 +31,7 @@ chip p9_mcbist
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
-.include "prdfMemExtraSig.H";
+.include "prdfP9McbistExtraSig.H";
 
  #############################################################################
  #                                                                           #

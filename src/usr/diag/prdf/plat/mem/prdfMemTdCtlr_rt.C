@@ -32,9 +32,9 @@
 // Framework includes
 
 // Platform includes
-#include <prdfMemExtraSig.H>
-#include <prdfP9McbistDataBundle.H>
 #include <prdfPlatServices.H>
+#include <prdfP9McbistDataBundle.H>
+#include <prdfP9McbistExtraSig.H>
 
 using namespace TARGETING;
 
