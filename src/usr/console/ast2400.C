@@ -30,6 +30,7 @@
 #include <kernel/console.H>
 #include <devicefw/driverif.H>
 #include <initservice/bootconfigif.H>
+#include <console/uartif.H>
 
 namespace CONSOLE
 {
