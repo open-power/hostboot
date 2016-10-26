@@ -63,11 +63,71 @@ static fapi2::ReturnCode update_ec_config(
 static fapi2::ReturnCode update_eq_config(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
+
+template< fapi2::TargetType K >
+inline fapi2::ReturnCode set_mc_group(
+    const fapi2::Target<K>& i_target,
+    const uint32_t          i_reg_address,
+    const uint32_t          i_group)
+{
+    FAPI_INF("<< set_mc_group" );
+
+    fapi2::buffer<uint64_t> l_data64 = 0;
+    uint32_t l_present_mc_group = 0x7;
+
+    // Get MULTICAST_GROUP register
+    FAPI_TRY(fapi2::getScom(i_target, i_reg_address, l_data64));
+    l_data64.extractToRight<3, 3>(l_present_mc_group);
+    FAPI_DBG("  l_present_mc_group %X", l_present_mc_group);
+
+    if (l_present_mc_group != i_group)
+    {
+        // Entering group
+        l_data64.insertFromRight<0, 3>(0x7);
+        l_data64.insertFromRight<3, 3>(i_group);
+        // Removed group
+        l_data64.insertFromRight<19, 3>(l_present_mc_group);
+
+        FAPI_TRY(fapi2::putScom(i_target, i_reg_address, l_data64));
+    }
+
+fapi_try_exit:
+    FAPI_INF("<< set_mc_group" );
+    return fapi2::current_err;
+}
+
+// template<>
+// inline fapi2::ReturnCode set_mc_group(
+//     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+//     const uint32_t          i_reg_address,
+//     const uint32_t          i_group);
+//
+//
+// template<>
+// inline fapi2::ReturnCode set_mc_group(
+//     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+//     const uint32_t          i_reg_address,
+//     const uint32_t          i_group);
+//
+// template<>
+// inline fapi2::ReturnCode set_mc_group(
+//     const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
+//     const uint32_t          i_reg_address,
+//     const uint32_t          i_group);
+
 // -----------------------------------------------------------------------------
 //  Constants
 // -----------------------------------------------------------------------------
 static const uint8_t CORE_CHIPLET_START     = 0x20;
 static const uint8_t CORE_CHIPLET_COUNT     = 24;
+
+static const uint8_t ALL_FUNCTIONAL_CHIPLETS_GROUP  = 0;
+static const uint8_t ALL_CORES_GROUP                = 1;
+static const uint8_t CORE_STOP_MC_GROUP             = 3;
+static const uint8_t EQ_STOP_MC_GROUP               = 4;
+static const uint8_t EX_EVEN_STOP_MC_GROUP          = 5;
+static const uint8_t EX_ODD_STOP_MC_GROUP           = 6;
+static const uint8_t BROADCAST_GROUP                = 7;
 
 // See .H for documentation
 fapi2::ReturnCode p9_update_ec_eq_state(
@@ -138,19 +198,27 @@ static fapi2::ReturnCode update_ec_config(
                 // Set this core into the multicast groups.  These should already
                 // be set but we won't assume anything
 
-                // Setting into ALL chiplets group (multicast group 0) using
-                // MULTICAST_GROUP_1 register
+                // Read the MC register 1 to determine if in MC 0.  If already
+                // in the group, leave it there.  If not in group 0, add it
+                // while removing it from the group that it is presently in (eg
+                // as found in bits 3:5)
+
                 FAPI_INF("  Setting EC %d into MC group 0 (All chiplets)",
                          l_present_core_unit_pos);
-                FAPI_TRY(fapi2::putScom(core_functional_it, C_MULTICAST_GROUP_1,
-                                        p9UpdateECEQ::MCGR0_CNFG_SETTINGS));
+                FAPI_TRY(set_mc_group(  core_functional_it,
+                                        C_MULTICAST_GROUP_1,
+                                        ALL_FUNCTIONAL_CHIPLETS_GROUP));
 
-                // Setting into good core group (multicast group 1) using
-                // MULTICAST_GROUP_2 register in the EC chiplets
+                // Read the MC register 2 to determine if in MC 1.  If already
+                // in the group, leave it there.  If not in group 1, add it
+                // while removing it from the group that it is presently in (eg
+                // as found in bits 3:5)
+
                 FAPI_INF("  Setting EC %d into MC group 1 (All core chiplets)",
                          l_present_core_unit_pos);
-                FAPI_TRY(fapi2::putScom(core_functional_it, C_MULTICAST_GROUP_2,
-                                        p9UpdateECEQ::MCGR1_CNFG_SETTINGS));
+                FAPI_TRY(set_mc_group(  core_functional_it,
+                                        C_MULTICAST_GROUP_2,
+                                        ALL_CORES_GROUP));
 
                 // Set the appropriate bit in the Core Configuration Status
                 // Register buffer
@@ -161,8 +229,8 @@ static fapi2::ReturnCode update_ec_config(
                 b_core_functional = true;
 
                 break;
-            }
-        }
+            }  // Current core
+        } // Functional core loop
 
         // If not functional, clear the core chiplet out of all multicast groups
         // As the chiplet is not functional, it can only addressed with the chip
@@ -172,27 +240,29 @@ static fapi2::ReturnCode update_ec_config(
 
             // Clearing from the ALL chiplets group (multicast group 0) using
             // MULTICAST_GROUP_1 register
-            FAPI_INF("  Removing EC %d from MC group 0 (All chiplets)",
-                     l_present_core_unit_pos);
-
             uint32_t address = C_MULTICAST_GROUP_1 +
                                0x01000000 * l_present_core_unit_pos;
-            FAPI_TRY(fapi2::putScom(i_target, address,
-                                    p9UpdateECEQ::MCGR_CLEAR_CNFG_SETTINGS));
+            FAPI_INF("  Removing EC %d from MC group 0 (All chiplets)",
+                     l_present_core_unit_pos);
+            FAPI_TRY(set_mc_group(  i_target,
+                                    address,
+                                    BROADCAST_GROUP));
 
             // Clearing from the good cores (multicast group 1) using
             // MULTICAST_GROUP_2 register
-            FAPI_INF("  Removing EC %d from MC group 1 (All core chiplets)",
-                     l_present_core_unit_pos);
+
             address = C_MULTICAST_GROUP_2 +
                       0x01000000 * l_present_core_unit_pos;
-            FAPI_TRY(fapi2::putScom(i_target, address,
-                                    p9UpdateECEQ::MCGR_CLEAR_CNFG_SETTINGS));
+            FAPI_INF("  Removing EC %d from MC group 1 (All core chiplets)",
+                     l_present_core_unit_pos);
+            FAPI_TRY(set_mc_group(  i_target,
+                                    address,
+                                    BROADCAST_GROUP));
 
             // The Core Configuration Status Register buffer bit is already clear
 
-        }
-    }
+        }  // Non functional cores
+    }  // Present core loop
 
     // Write the recalculated OCC Core Configuration Status Register
     FAPI_INF("  Writing OCC CCSR");
@@ -245,9 +315,7 @@ static fapi2::ReturnCode update_eq_config(
     FAPI_INF("  Number of functional EX regions = %d",
              l_ex_functional_vector.size());
 
-
-
-    // For each functinal EQ,  set the multicast groups to match (including
+    // For each functional EQ,  set the multicast groups to match (including
     // removal of the non-functional ones from all groups)
     for (auto eq_present_it : l_eq_present_vector)
     {
@@ -269,12 +337,16 @@ static fapi2::ReturnCode update_eq_config(
             if (l_functional_eq_unit_pos == l_present_eq_unit_pos)
             {
 
-                // Setting into ALL chiplets group (multicast group 0) using
-                // MULTICAST_GROUP_1 register
+                // Read the MC register 1 to determine if in MC 0.  If already
+                // in the group, leave it there.  If not in group 0, add it
+                // while removing it from the group that it is presently in (eg
+                // as found in bits 3:5)
+
                 FAPI_INF("  Setting EQ %d into MC group 0 (All chiplets)",
-                         l_functional_eq_unit_pos);
-                FAPI_TRY(fapi2::putScom(eq_functional_it, EQ_MULTICAST_GROUP_1,
-                                        p9UpdateECEQ::MCGR0_CNFG_SETTINGS));
+                         l_present_eq_unit_pos);
+                FAPI_TRY(set_mc_group(  eq_functional_it,
+                                        EQ_MULTICAST_GROUP_1,
+                                        ALL_FUNCTIONAL_CHIPLETS_GROUP));
 
                 b_eq_functional = true;
 
@@ -286,17 +358,16 @@ static fapi2::ReturnCode update_eq_config(
         // target, not an EQ target
         if (!b_eq_functional)
         {
-
             // Clearing from the ALL chiplets group (multicast group 0) using
             // MULTICAST_GROUP_1 register
-            FAPI_INF("  Remove EQ %d from MC group 0 (All chiplets)",
+            uint32_t address =  EQ_MULTICAST_GROUP_1 +
+                                0x01000000 * l_present_eq_unit_pos;
+            FAPI_DBG("   address = 0x%X", address);
+            FAPI_INF("   Remove EQ %d from MC group 0 (All chiplets)",
                      l_present_eq_unit_pos);
-            uint32_t address = EQ_MULTICAST_GROUP_1 +
-                               0x01000000 * l_present_eq_unit_pos;
-            FAPI_DBG("  address = 0x%X", address);
-            FAPI_TRY(fapi2::putScom(i_target, address,
-                                    p9UpdateECEQ::MCGR_CLEAR_CNFG_SETTINGS));
-
+            FAPI_TRY(set_mc_group(  i_target,
+                                    address,
+                                    BROADCAST_GROUP));
         }
     }
 
