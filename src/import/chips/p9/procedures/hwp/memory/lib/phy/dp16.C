@@ -50,6 +50,7 @@
 #include <lib/utils/pos.H>
 #include <lib/utils/c_str.H>
 
+using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_DIMM;
 using fapi2::TARGET_TYPE_MCBIST;
@@ -408,6 +409,39 @@ const std::vector<uint64_t> dp16Traits<TARGET_TYPE_MCA>::READ_DELAY_OFFSET_REG =
     MCA_DDRPHY_DP16_READ_DELAY_OFFSET1_RANK_PAIR3_P0_2,
     MCA_DDRPHY_DP16_READ_DELAY_OFFSET1_RANK_PAIR3_P0_3,
     MCA_DDRPHY_DP16_READ_DELAY_OFFSET1_RANK_PAIR3_P0_4,
+};
+
+// Definition of the DISABLE registers, per dp per rank pair
+const std::vector< std::vector<std::pair<uint64_t, uint64_t>> > dp16Traits<TARGET_TYPE_MCA>::BIT_DISABLE_REG =
+{
+    {
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_0, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP0_P0_0 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_1, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP0_P0_1 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_2, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP0_P0_2 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_3, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP0_P0_3 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_4, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP0_P0_4 },
+    },
+    {
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P0_0, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP1_P0_0 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P0_1, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP1_P0_1 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P0_2, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP1_P0_2 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P0_3, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP1_P0_3 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P0_4, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP1_P0_4 },
+    },
+    {
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P0_0, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP2_P0_0 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P0_1, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP2_P0_1 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P0_2, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP2_P0_2 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P0_3, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP2_P0_3 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P0_4, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP2_P0_4 },
+    },
+    {
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P0_0, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP3_P0_0 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P0_1, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP3_P0_1 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P0_2, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP3_P0_2 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P0_3, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP3_P0_3 },
+        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P0_4, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP3_P0_4 },
+    },
 };
 
 ///
@@ -1765,6 +1799,8 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
                                     const fapi2::Target<TARGET_TYPE_DIMM>& i_dimm,
                                     const uint64_t l_rp )
 {
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
     // In a x4 configuration, all bits in the disable registers are used.
     // Named like a local variable so it matches the x8 vector <shrug>
     constexpr uint8_t l_x4_mask = 0b11111111;
@@ -1856,8 +1892,6 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
     };
 
     // The field in the disable bit register address which specifies which rp the register is for.
-    constexpr uint64_t RP_START_BIT = 22;
-    constexpr uint64_t RP_LEN = 2;
     constexpr uint64_t RP_OFFSET = 60;
 
     // The DQS bits (disable 1) are left aligned in a 16 bit register and we have a
@@ -1883,32 +1917,23 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
     fapi2::buffer<uint64_t> l_rpb(l_rp);
     std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> > > l_read;
 
-    // A tasty vector of the disable bits for RP0. We'll add in the RP bits before we scom.
-    std::vector<std::pair<uint64_t, uint64_t>> l_addr =
-    {
-        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_0, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP0_P0_0 },
-        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_1, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP0_P0_1 },
-        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_2, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP0_P0_2 },
-        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_3, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP0_P0_3 },
-        { MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_4, MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP0_P0_4 },
-    };
-
     while (l_rpb != 0)
     {
         // We increment l_which_dp as soon as we enter the loop below
         uint64_t l_which_dp = ~0;
 
+        // A map of the indexes of the bad nibbles. We do bad nibble checking in two phases;
+        // the DQS and the DQ. Since bad bits in the DQ/DQS of the nibble are the same nibble,
+        // we use a map to consolodate the findings. In the end all we care about is whether there
+        // is more than one entry in this map.
+        std::map<uint64_t, uint64_t> l_bad_nibbles;
+        uint64_t l_bad_bits = 0;
+
         // Find the first bit set in the rank pairs - this will tell us which rank pair has a fail
         const auto l_fbs = mss::first_bit_set(uint64_t(l_rpb)) - RP_OFFSET;
 
-        // Fix up the vector so it grabs registers for this rank pair
-        for (auto& r : l_addr)
-        {
-            r.first  = fapi2::buffer<uint64_t>(r.first ).insertFromRight<RP_START_BIT, RP_LEN>(l_fbs);
-            r.second = fapi2::buffer<uint64_t>(r.second).insertFromRight<RP_START_BIT, RP_LEN>(l_fbs);
-
-            FAPI_INF("checking bad bits for RP%d (0x%016lX, 0x%016lX)", l_fbs, r.first, r.second);
-        }
+        const auto l_addr = TT::BIT_DISABLE_REG[l_fbs];
+        FAPI_INF("checking bad bits for RP%d", l_fbs);
 
         FAPI_TRY( mss::scom_suckah(i_target, l_addr, l_read) );
 
@@ -1920,14 +1945,8 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
             uint64_t l_dq_bad_bit_count = 0;
             uint64_t l_dqs_bad_bit_count = 0;
 
-            // A map of the indexes of the bad nibbles. We do bad nibble checking in two phases;
-            // the DQS and the DQ. Since bad bits in the DQ/DQS of the nibble are the same nibble,
-            // we use a map to consolodate the findings. In the end all we care about is whether there
-            // is more than one entry in this map.
-            std::map<uint64_t, uint64_t> l_bad_nibbles;
-            uint64_t l_bad_bits = 0;
-
             l_which_dp += 1;
+            const uint64_t l_which_nibble = l_which_dp * BITS_PER_NIBBLE;
 
             FAPI_INF("read disable0 0x%016lx disable1 0x%016lx", v.first, v.second);
 
@@ -1942,14 +1961,14 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
 
             //
             // Check for a simple fail. In all cases if we see 6 or more bits set in the
-            // disable 0, we have a dead nibble + more than one bit.
+            // disable 0, we have a dead nibble + more than one bit. We don't need to worry about
+            // disable bits because this port will be deconfigured all together.
             //
             l_dq_bad_bit_count = mss::bit_count(uint64_t(v.first));
             FAPI_INF("bad DQ count for port %d DP%d %d", l_which_port, l_which_dp, l_dq_bad_bit_count);
             FAPI_ASSERT(l_dq_bad_bit_count < MIN_BAD_BITS,
                         fapi2::MSS_DISABLED_BITS().set_TARGET_IN_ERROR(i_target),
                         "port %d DP%d too many bad DQ bits 0x%016lx", l_which_port, l_which_dp, v.first);
-
 
             //
             // Find the DQS mask for this DP.
@@ -1988,13 +2007,13 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
                     // We shift it over to mask off the nibble we're checking
                     const uint16_t l_dqs_nibble_mask = 0b1100000000000000 >> (n * BITS_PER_DQS);
 
-                    FAPI_INF("port %d DP%d nibble %d mask: 0x%x dqs: 0x%x",
-                             l_which_port, l_which_dp, n, l_dqs_nibble_mask, v.second);
+                    FAPI_INF("port %d DP%d nibble %d (%d) mask: 0x%x dqs: 0x%x",
+                             l_which_port, l_which_dp, n, n + l_which_nibble, l_dqs_nibble_mask, v.second);
 
                     if ((l_dqs_nibble_mask & v.second) != 0)
                     {
                         FAPI_INF("dqs check indicating %d as a bad nibble", n);
-                        l_bad_nibbles[n] = 1;
+                        l_bad_nibbles[n + l_which_nibble] = 1;
                     }
 
                 }
@@ -2003,7 +2022,7 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
                 // we're done.
                 FAPI_ASSERT(l_bad_nibbles.size() <= MAX_BAD_NIBBLES,
                             fapi2::MSS_DISABLED_BITS().set_TARGET_IN_ERROR(i_target),
-                            "port %d DP%d too many bad nibbles %d", l_which_port, l_which_dp, l_bad_nibbles.size());
+                            "port %d DP%d too many bad nibbles %d", l_which_port, l_which_nibble, l_bad_nibbles.size());
             }
 
             //
@@ -2024,8 +2043,8 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
                     // we add this bit to the total of bad singleton bits.
                     const uint64_t l_bit_count = mss::bit_count(l_dq_nibble_mask & v.first);
 
-                    FAPI_INF("port %d DP%d nibble %d mask: 0x%x dq: 0x%x c: %d",
-                             l_which_port, l_which_dp, n, l_dq_nibble_mask, v.first, l_bit_count);
+                    FAPI_INF("port %d DP%d nibble %d (%d) mask: 0x%x dq: 0x%x c: %d",
+                             l_which_port, l_which_dp, n, n + l_which_nibble, l_dq_nibble_mask, v.first, l_bit_count);
 
 
                     // If we don't have any set bits, we're good to go. If we have more than the max bad bits,
@@ -2035,51 +2054,228 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
                     {
                         if (l_bit_count > MAX_BAD_BITS)
                         {
-                            FAPI_INF("dq check indicating %d as a bad nibble", n);
-                            l_bad_nibbles[n] = 1;
+                            FAPI_INF("dq check indicating %d (%d) as a bad nibble", n, n + l_which_nibble);
+                            l_bad_nibbles[n + l_which_nibble] = 1;
                         }
                         else
                         {
-                            FAPI_INF("dq check indicating nibble %d has a bad bit", n);
+                            FAPI_INF("dq check indicating nibble %d (%d) has a bad bit", n, n + l_which_nibble);
                             l_bad_bits += l_bit_count;
                         }
                     }
                 }
-
-                //
-                // Ok, so now we know how many bad bits we have and how many bad nibbles. If we have more than
-                // one bad nibble, we're cooked. If we have one bad nibble and one bad bit, we're ok. Also, if
-                // we have no bad nibbles and two bad bits (a sly bad nibble) we are ok - one of those bad bits
-                // counts as a bad nibble.
-                //
-                FAPI_ASSERT(l_bad_nibbles.size() <= MAX_BAD_NIBBLES,
-                            fapi2::MSS_DISABLED_BITS().set_TARGET_IN_ERROR(i_target),
-                            "port %d DP%d too many bad nibbles %d",
-                            l_which_port, l_which_dp, l_bad_nibbles.size());
-
-                // If we have one bad nibble, assert that we have one or fewer bad bits
-                if (l_bad_nibbles.size() == MAX_BAD_NIBBLES)
-                {
-                    FAPI_ASSERT(l_bad_bits <= MAX_BAD_BITS,
-                                fapi2::MSS_DISABLED_BITS().set_TARGET_IN_ERROR(i_target),
-                                "port %d DP%d bad nibbles %d + %d bad bits",
-                                l_which_port, l_which_dp, l_bad_nibbles.size(), l_bad_bits);
-                }
-
-                // If we have no bad nibbles, assert we have 2 or fewer bad bits. This is a sly bad nibble
-                // scenario; one of the bits is represents a bad nibble
-                if (l_bad_nibbles.size() == 0)
-                {
-                    FAPI_ASSERT(l_bad_bits <= SLY_BAD_BITS,
-                                fapi2::MSS_DISABLED_BITS().set_TARGET_IN_ERROR(i_target),
-                                "port %d DP%d %d bad bits",
-                                l_which_port, l_which_dp, l_bad_bits);
-                }
             }
+        }
+
+        //
+        // Ok, so now we know how many bad bits we have and how many bad nibbles. If we have more than
+        // one bad nibble, we're cooked. If we have one bad nibble and one bad bit, we're ok. Also, if
+        // we have no bad nibbles and two bad bits (a sly bad nibble) we are ok - one of those bad bits
+        // counts as a bad nibble.
+        //
+        FAPI_ASSERT(l_bad_nibbles.size() <= MAX_BAD_NIBBLES,
+                    fapi2::MSS_DISABLED_BITS().set_TARGET_IN_ERROR(i_target),
+                    "port %d DP%d too many bad nibbles %d",
+                    l_which_port, l_which_dp, l_bad_nibbles.size());
+
+        // If we have one bad nibble, assert that we have one or fewer bad bits
+        if (l_bad_nibbles.size() == MAX_BAD_NIBBLES)
+        {
+            FAPI_ASSERT(l_bad_bits <= MAX_BAD_BITS,
+                        fapi2::MSS_DISABLED_BITS().set_TARGET_IN_ERROR(i_target),
+                        "port %d DP%d bad nibbles %d + %d bad bits",
+                        l_which_port, l_which_dp, l_bad_nibbles.size(), l_bad_bits);
+        }
+
+        // If we have no bad nibbles, assert we have 2 or fewer bad bits. This is a sly bad nibble
+        // scenario; one of the bits is represents a bad nibble
+        if (l_bad_nibbles.size() == 0)
+        {
+            FAPI_ASSERT(l_bad_bits <= SLY_BAD_BITS,
+                        fapi2::MSS_DISABLED_BITS().set_TARGET_IN_ERROR(i_target),
+                        "port %d DP%d %d bad bits",
+                        l_which_port, l_which_dp, l_bad_bits);
         }
 
         // We're all done. Clear the bit
         l_rpb.clearBit(l_fbs + RP_OFFSET);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset the bad-bits masks for a port
+/// @note Read the bad bits from the f/w attributes and stuff them in the
+/// appropriate registers.
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+///
+fapi2::ReturnCode reset_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    // The magic 10 is because there are 80 bits represented in this attribute, and each element is 8 bits.
+    //  So to get to 80, we need 10 bytes.
+    uint8_t l_bad_dq[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10] = { 0 };
+    FAPI_TRY( mss::bad_dq_bitmap(i_target, &(l_bad_dq[0][0][0])) );
+
+    return reset_bad_bits_helper(i_target, l_bad_dq);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset the bad-bits masks for a port - helper for ease of testing
+/// @note Read the bad bits from the f/w attributes and stuff them in the
+/// appropriate registers.
+/// @note The magic 10 is because there are 80 bits represented in this attribute, and each element is 8 bits.
+/// So to get to 80, we need 10 bytes.
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_bad_dq array representing the data from the bad dq bitmap
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+///
+fapi2::ReturnCode reset_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint8_t i_bad_dq[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10] )
+{
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    std::vector<uint64_t> l_ranks;
+
+    // Loop over the ranks, makes things simpler than looping over the DIMM (surprisingly)
+    FAPI_TRY( rank::ranks(i_target, l_ranks) );
+
+    for (const auto& r : l_ranks)
+    {
+        uint64_t l_rp = 0;
+        uint64_t l_dimm_index = rank::get_dimm_from_rank(r);
+        FAPI_TRY( mss::rank::get_pair_from_rank(i_target, r, l_rp) );
+
+        FAPI_INF("processing bad bits for DIMM%d rank %d (%d) rp %d", l_dimm_index, mss::index(r), r, l_rp);
+
+        // We loop over the disable registers for this rank pair, and shift the bits from the attribute
+        // array in to the disable registers
+        {
+            // This is the set of registers for this rank pair. It is indexed by DP. We know the bad bits
+            // [0] and [1] are the 16 bits for DP0, [2],[3] are the 16 for DP1, etc.
+            const auto& l_addrs = TT::BIT_DISABLE_REG[l_rp];
+
+            // This is the section of the attribute we need to use. The result is an array of 10 bytes.
+            const uint8_t* l_bad_bits = &(i_bad_dq[l_dimm_index][mss::index(r)][0]);
+
+            // Where in the array we are, incremented by two for every DP
+            size_t l_byte_index = 0;
+
+            for (const auto& a : l_addrs)
+            {
+                uint64_t l_register_value = (l_bad_bits[l_byte_index] << 8) | l_bad_bits[l_byte_index + 1];
+
+                FAPI_INF("writing %s 0x%0lX value 0x%0lX from 0x%X, 0x%X",
+                         mss::c_str(i_target), a.first, l_register_value,
+                         l_bad_bits[l_byte_index], l_bad_bits[l_byte_index + 1]);
+
+                // TODO RTC: 163674 Only wriiting the DISABLE0 register - not sure what happened to the DQS?
+                FAPI_TRY( mss::putScom(i_target, a.first, l_register_value) );
+                l_byte_index += 2;
+            }
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write disable bits
+/// @note This is different than a register write as it writes attributes which
+/// cause firmware to act on the disabled bits.
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+///
+fapi2::ReturnCode record_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    const auto& l_mcs = mss::find_target<TARGET_TYPE_MCS>(i_target);
+    uint8_t l_value[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10] = { 0 };
+
+    // Process the bad bits into an array. We copy these in to their own array
+    // as it allows the compiler to check indexes where a passed pointer wouldn't
+    // otherwise do.
+    uint8_t l_data[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10] = { 0 };
+    FAPI_TRY( mss::dp16::record_bad_bits_helper(i_target, l_data) );
+
+    // Read the attribute
+    FAPI_TRY( mss::bad_dq_bitmap(l_mcs, &(l_value[0][0][0][0])) );
+
+    // Modify
+    memcpy( &(l_value[mss::index(i_target)][0][0][0]), &(l_data[0][0][0]),
+            MAX_DIMM_PER_PORT * MAX_RANK_PER_DIMM * 10 );
+
+    // Write
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_BAD_DQ_BITMAP, l_mcs, l_value) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write disable bits - helper for testing
+/// @note This is different than a register write as it writes attributes which
+/// cause firmware to act on the disabled bits.
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_bad_dq an array of [MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10] containing the attribute information
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+///
+fapi2::ReturnCode record_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        uint8_t (&o_bad_dq)[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10] )
+{
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    std::vector<uint64_t> l_ranks;
+
+    // Loop over the ranks, makes things simpler than looping over the DIMM (surprisingly)
+    FAPI_TRY( rank::ranks(i_target, l_ranks) );
+
+    for (const auto& r : l_ranks)
+    {
+        uint64_t l_rp = 0;
+        uint64_t l_dimm_index = rank::get_dimm_from_rank(r);
+        FAPI_TRY( mss::rank::get_pair_from_rank(i_target, r, l_rp) );
+
+        FAPI_INF("recording bad bits for DIMM%d rank %d (%d) rp %d", l_dimm_index, mss::index(r), r, l_rp);
+
+        // We loop over the disable registers for this rank pair, and shift the bits from the attribute
+        // array in to the disable registers
+        {
+            // Grab a pointer to our argument simply to make the code a little easier to read
+            uint8_t* l_bad_bits = &(o_bad_dq[l_dimm_index][mss::index(r)][0]);
+
+            // The values we'll pull from the registers in the scom suckah below. We only read the registers for
+            // our current rank pair.
+            std::vector< std::pair< fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> > > l_register_value;
+
+            FAPI_TRY( mss::scom_suckah(i_target, TT::BIT_DISABLE_REG[l_rp], l_register_value) );
+
+            // Where in the array we are, incremented by two for every DP
+            size_t l_byte_index = 0;
+
+            for (const auto& v : l_register_value)
+            {
+                // Grab the left and right bytes from the bad bits register and stick them in the
+                // nth and nth + 1 bytes of the array
+                l_bad_bits[l_byte_index]    = (v.first & 0xFF00) >> 8;
+                l_bad_bits[l_byte_index + 1] = v.first & 0x00FF;
+
+                FAPI_DBG("writing %s value 0x%0lX to 0x%X, 0x%X from 0x%016lx",
+                         mss::c_str(i_target),
+                         v.first,
+                         l_bad_bits[l_byte_index],
+                         l_bad_bits[l_byte_index + 1],
+                         v.first);
+
+                // TODO RTC: 163674 Only writing the DISABLE0 register - not sure what happened to the DQS?
+                l_byte_index += 2;
+            }
+        }
     }
 
 fapi_try_exit:
