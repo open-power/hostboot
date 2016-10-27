@@ -43,7 +43,9 @@
 // mss lib
 #include <lib/spd/spd_factory.H>
 #include <lib/spd/common/spd_decoder.H>
-#include <lib/spd/common/raw_cards.H>
+#include <lib/spd/common/rcw_settings.H>
+#include <lib/spd/rdimm/rdimm_raw_cards.H>
+#include <lib/spd/lrdimm/lrdimm_raw_cards.H>
 #include <lib/utils/checker.H>
 #include <lib/utils/c_str.H>
 #include <lib/utils/conversions.H>
@@ -380,7 +382,6 @@ static fapi2::ReturnCode dram_gen_setter(const fapi2::Target<TARGET_TYPE_DIMM>& 
 
 fapi_try_exit:
     return fapi2::current_err;
-
 }
 
 ///
@@ -448,7 +449,7 @@ fapi_try_exit:
 static fapi2::ReturnCode rdimm_rev_helper(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_encoding_rev,
         const uint8_t i_additions_rev,
-        const rcd01::raw_card_t i_raw_card,
+        const rcw_settings i_raw_card,
         const std::vector<uint8_t>& i_spd_data,
         std::shared_ptr<decoder>& o_fact_obj)
 {
@@ -536,7 +537,7 @@ fapi_try_exit:
 static fapi2::ReturnCode lrdimm_rev_helper(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_encoding_rev,
         const uint8_t i_additions_rev,
-        const rcd01::raw_card_t i_raw_card,
+        const rcw_settings i_raw_card,
         const std::vector<uint8_t>& i_spd_data,
         std::shared_ptr<decoder>& o_fact_obj)
 {
@@ -619,6 +620,59 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Retrieve current raw card settings
+/// based on dimm type and raw card reference rev
+/// @param[in] i_target dimm target
+/// @param[in] i_spd_data SPD data
+/// @param[out] o_raw_card raw card settings
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode raw_card_factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+                                   const std::vector<uint8_t>& i_spd_data,
+                                   rcw_settings& o_raw_card)
+{
+    uint8_t l_dimm_type = 0;
+    uint8_t l_ref_raw_card_rev = 0;
+
+    // Lets find out what raw card we are and grab the right
+    // raw card settings
+    FAPI_TRY( mss::eff_dimm_type(i_target, l_dimm_type) );
+    FAPI_TRY( reference_raw_card(i_target, i_spd_data, l_ref_raw_card_rev) );
+
+    FAPI_INF( "Retrieved dimm_type: %d, raw card reference: 0x%lx from SPD",
+              l_dimm_type, l_ref_raw_card_rev);
+
+    switch(l_dimm_type)
+    {
+        case fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM:
+            if( !find_value_from_key( mss::rdimm::RAW_CARDS, l_ref_raw_card_rev, o_raw_card) )
+            {
+                FAPI_ERR( "Invalid reference raw card recieved for RDIMM: %d", l_ref_raw_card_rev );
+                return fapi2::FAPI2_RC_FALSE;
+            }
+
+            break;
+
+        case fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM:
+            if( !find_value_from_key( mss::lrdimm::RAW_CARDS, l_ref_raw_card_rev, o_raw_card) )
+            {
+                FAPI_ERR( "Invalid reference raw card recieved for LRDIMM: %d", l_ref_raw_card_rev );
+                return fapi2::FAPI2_RC_FALSE;
+            }
+
+            break;
+
+        default:
+            FAPI_ERR( "Recieved invalid dimm type: %d", l_dimm_type);
+            return fapi2::FAPI2_RC_FALSE;
+            break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief       Object factory to select correct decoder
 /// @param[in]   i_target dimm target
 /// @param[in]   i_spd_data SPD data
@@ -640,8 +694,7 @@ fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
     uint8_t l_dimm_type = 0;
     uint8_t l_encoding_rev = 0;
     uint8_t l_additions_rev = 0;
-    uint8_t l_ref_raw_card_rev = 0;
-    rcd01::raw_card_t l_raw_card;
+    rcw_settings l_raw_card;
 
     // Attribute setting needed by mss::c_str() which is used in
     // the SPD decoder for debugging help
@@ -649,23 +702,14 @@ fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
               "%s. Failed to set DIMM type", mss::c_str(i_target) );
     FAPI_TRY( dram_gen_setter(i_target, i_spd_data),
               "%s. Failed to set DRAM generation", mss::c_str(i_target) );
+    FAPI_TRY( raw_card_factory(i_target, i_spd_data, l_raw_card),
+              "%s. Failed raw_card_factory()", mss::c_str(i_target) );
 
     // Get revision levels to figure out what SPD version we are
     FAPI_TRY( rev_encoding_level(i_target, i_spd_data, l_encoding_rev),
               "%s. Failed to decode encoding level", mss::c_str(i_target) );
     FAPI_TRY( rev_additions_level(i_target, i_spd_data,  l_additions_rev),
               "%s. Failed to decode additons level", mss::c_str(i_target) );
-
-    // Lets find out what raw card we are and grab the right
-    // raw card settings
-    FAPI_TRY( reference_raw_card(i_target, i_spd_data, l_ref_raw_card_rev),
-              "%s. Failed to decode reference raw card", mss::c_str(i_target) );
-
-    if( !find_value_from_key( rcd01::RAW_CARDS, l_ref_raw_card_rev, l_raw_card) )
-    {
-        FAPI_ERR( "%s. Invalid reference raw card recieved: %d", mss::c_str(i_target), l_ref_raw_card_rev );
-        return fapi2::FAPI2_RC_FALSE;
-    }
 
     // Get decoder object needed for current dimm type and spd rev
     switch(l_dimm_type)
