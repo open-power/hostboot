@@ -571,6 +571,7 @@ fapi2::ReturnCode ppe_single_step(
     FAPI_DBG("Move i_Rs to SPRG0 : so now SPRG0 has DBCR value");
     l_data64.flush<0>().insertFromRight(ppe_getMtsprInstruction(i_Rs, SPRG0), 0, 32);
     FAPI_DBG("getMtsprInstruction(%d, SPRG0): 0x%16llX", i_Rs, l_data64 );
+    FAPI_TRY(fapi2::putScom(i_target, i_base_address + PPE_XIRAMEDR, l_data64));
 
     FAPI_DBG("Save SPRG0 i.e. DBCR");
     FAPI_TRY(getScom(i_target, i_base_address + PPE_XIRAMDBG, l_data64), "Error in GETSCOM");
@@ -590,7 +591,7 @@ fapi2::ReturnCode ppe_single_step(
     FAPI_TRY(fapi2::putScom(i_target, i_base_address + PPE_XIRAMGA, l_data64 ));
     FAPI_DBG("Restore SPRG0");
     FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
-    FAPI_TRY(putScom(i_target, i_base_address + PPE_XIRAMDBG , l_sprg0_save), "Error in GETSCOM");
+    FAPI_TRY(putScom(i_target, i_base_address + PPE_XIRAMDBG , l_sprg0_save), "Error in PUTSCOM");
 
     while(i_step_count != 0)
     {
