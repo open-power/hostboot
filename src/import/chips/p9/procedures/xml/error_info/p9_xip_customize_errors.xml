@@ -307,4 +307,15 @@
     <ffdc>SYSPHASE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_FAPI_ATTR_SVC_FAIL</rc>
+    <description>FAPI attribute service failed</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>
