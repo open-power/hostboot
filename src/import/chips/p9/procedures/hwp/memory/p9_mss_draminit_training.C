@@ -55,6 +55,8 @@ extern "C"
             const uint16_t i_special_training,
             const uint8_t i_abort_on_error)
     {
+        // Keep track of the last error seen by a port
+        fapi2::ReturnCode l_port_error = fapi2::FAPI2_RC_SUCCESS;
         fapi2::buffer<uint16_t> l_cal_steps_enabled = i_special_training;
 
         FAPI_INF("Start draminit training");
@@ -93,6 +95,10 @@ extern "C"
 
         for( const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
         {
+            // Keep track of the last error seen by a rank pair
+            fapi2::ReturnCode l_rank_pair_error = fapi2::FAPI2_RC_SUCCESS;
+
+
             mss::ccs::program<TARGET_TYPE_MCBIST, TARGET_TYPE_MCA> l_program;
 
             // Setup a series of register probes which we'll see during the polling loop
@@ -195,9 +201,24 @@ extern "C"
                     {
                         goto fapi_try_exit;
                     }
+
+                    // Keep tack of the last cal error we saw.
+                    l_rank_pair_error = fapi2::current_err;
                 }
             }
+
+            // Once we've trained all the rank pairs we can record the bad bits in the attributes if we have an error
+            // This error is the most recent error seen on a port, too, so we keep track of that.
+            if (l_rank_pair_error != fapi2::FAPI2_RC_SUCCESS)
+            {
+                FAPI_TRY( mss::dp16::record_bad_bits(p) );
+                l_port_error = l_rank_pair_error;
+            }
         }
+
+        // So we're calibrated the entire port. If we're here either we didn't have any errors or the last error
+        // seen on a port is the error for this entire controller.
+        fapi2::current_err = l_port_error;
 
     fapi_try_exit:
         FAPI_INF("End draminit training");
