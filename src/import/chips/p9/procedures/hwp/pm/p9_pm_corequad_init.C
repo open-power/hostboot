@@ -445,7 +445,8 @@ fapi2::ReturnCode pm_corequad_reset(
                   (--l_pollCount != 0));
 
             FAPI_ASSERT((l_pollCount != 0),
-                        fapi2::PM_CME_ACTIVE_ERROR().set_CMESTATUS(l_data64),
+                        fapi2::PM_CME_ACTIVE_ERROR()
+                        .set_TARGET_CHIPLET(l_ex_chplt),
                         "ERROR: Failed to stop the CME");
 
             // Clear CME LFIRs

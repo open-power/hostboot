@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_pm_corequad_init_errors.xml $ -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_pm_registers.xml $ -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
@@ -22,23 +22,42 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Register FFDC defintions used by all PM procedures -->
+
 <hwpErrors>
   <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_COREQUAD_BAD_MODE</rc>
-    <description>Unknown mode passed to p9_pm_corequad_init.</description>
-    <ffdc>BADMODE</ffdc>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_CME_ACTIVE_ERROR</rc>
-    <description>The CME was not stopped during the reset of the cores quads
-    </description>
-    <collectRegisterFfdc>
-      <id>CME_FFDC_REGISTERS</id>
-      <target>TARGET_CHIPLET</target>
-      <targetType>TARGET_TYPE_EX</targetType>
-    </collectRegisterFfdc>
-  </hwpError>
+  <registerFfdc>
+    <id>CME_FFDC_REGISTERS</id>
+    <scomRegister>EX_PPE_XIRAMDBG</scomRegister>
+    <scomRegister>EX_CME_LCL_EISR_SCOM</scomRegister>
+    <scomRegister>EX_CME_LCL_EIMR_SCOM</scomRegister>
+    <scomRegister>EX_CME_LCL_EIPR_SCOM</scomRegister>
+    <scomRegister>EX_CME_LCL_EITR_SCOM</scomRegister>
+    <scomRegister>EX_CME_LCL_EISTR_SCOM</scomRegister>
+    <scomRegister>EX_CME_LCL_EINR_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_EIIR</scomRegister>
+    <scomRegister>EX_CME_SCOM_BCECSR_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_PMCRS0_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_PMCRS1_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_FLAGS_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_PMSRS0_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_PMSRS1_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_PSCRS00_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_PSCRS01_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_PSCRS02_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_PSCRS03_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_PSCRS10_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_PSCRS11_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_PSCRS12_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_PSCRS13_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_BCEBAR0</scomRegister>
+    <scomRegister>EX_CME_SCOM_BCEBAR1</scomRegister>
+    <scomRegister>EX_CME_SCOM_LFIR</scomRegister>
+    <scomRegister>EX_CME_SCOM_LFIRACT0</scomRegister>
+    <scomRegister>EX_CME_SCOM_LFIRACT1</scomRegister>
+    <scomRegister>EX_CME_SCOM_LFIRMASK</scomRegister>
+    <scomRegister>EX_CME_SCOM_SRTCH0_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_SRTCH1_SCOM</scomRegister>
+  </registerFfdc>
   <!-- *********************************************************************** -->
 </hwpErrors>
