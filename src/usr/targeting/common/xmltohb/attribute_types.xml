@@ -32457,4 +32457,27 @@ Measured in GB</description>
 </attribute>
 <!--TODO RTC:163418 Get Attribute defaults from MRW for the previous (END)-->
 
+<attribute>
+    <id>BAD_DQ_BITMAP</id>
+    <description>
+      Bad DQ bitmap from a controller point of view.
+      The data is a 10 byte bitmap for each of 4 possible ranks.
+      The bad DQ data is stored in NVRAM, and it is stored in a special format
+      translated to a DIMM Connector point of view.
+      All of these details are hidden from the user of this attribute.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2,2,4,10</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_BAD_DQ_BITMAP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

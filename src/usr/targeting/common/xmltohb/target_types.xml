@@ -1811,6 +1811,7 @@
     <attribute><id>MSS_IGNORE_PLUG_RULES</id></attribute>
     <attribute><id>EFF_DRAM_MFG_ID</id></attribute>
     <attribute><id>EFF_DRAM_TRRD_DLR</id></attribute>
+    <attribute><id>BAD_DQ_BITMAP</id></attribute>
 </targetType>
 
 <targetType>
