@@ -111,7 +111,7 @@ inline fapi2::ReturnCode freq_to_ps(const T i_speed_grade, OT& o_tCK_in_ps )
             break;
 
         default:
-            FAPI_ERR("Invalid dimm speed grade (MT/s) - %d - provided");
+            FAPI_ERR("Invalid dimm speed grade (MT/s) - %d - provided", i_speed_grade);
             return fapi2::FAPI2_RC_INVALID_PARAMETER;
             break;
     }
@@ -149,7 +149,7 @@ fapi2::ReturnCode ps_to_freq(const T i_time_in_ps, OT& o_speed_grade)
             break;
 
         default:
-            FAPI_ERR("Invalid clock period (tCK) - %d - provided");
+            FAPI_ERR("Invalid clock period (tCK) - %d - provided", i_time_in_ps);
             return fapi2::FAPI2_RC_INVALID_PARAMETER;
             break;
     }

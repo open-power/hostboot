@@ -171,6 +171,8 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP2_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP3_REG;
 
+        static const std::vector< std::vector<std::pair<uint64_t, uint64_t>> > BIT_DISABLE_REG;
+
         enum
         {
             DLL_CNTL_INIT_RXDLL_CAL_RESET = MCA_DDRPHY_DP16_DLL_CNTL0_P0_0_01_INIT_RXDLL_CAL_RESET,
@@ -413,7 +415,6 @@ inline fapi2::ReturnCode read_dll_cntl( const fapi2::Target<T>& i_target, fapi2:
 
 fapi_try_exit:
     return fapi2::current_err;
-
 }
 
 ///
@@ -440,7 +441,6 @@ inline fapi2::ReturnCode write_dll_cntl( const fapi2::Target<T>& i_target, const
 
 fapi_try_exit:
     return fapi2::current_err;
-
 }
 
 ///
@@ -846,13 +846,23 @@ fapi2::ReturnCode reset_data_bit_enable( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Reset the bad-bits masks for a port
-/// @tparam T the fapi2::TargetType
-/// @tparam TT the target traits
-/// @param[in] i_target the target (MCA or MBA?)
+/// @note Read the bad bits from the f/w attributes and stuff them in the
+/// appropriate registers.
+/// @param[in] i_target the fapi2 target of the port
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T, typename TT = dp16Traits<T> >
-inline fapi2::ReturnCode reset_bad_bits(const fapi2::Target<T>& i_target);
+fapi2::ReturnCode reset_bad_bits(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+///
+/// @brief Reset the bad-bits masks for a port - helper for testing
+/// @note The magic 10 is because there are 80 bits represented in this attribute, and each element is 8 bits.
+/// So to get to 80, we need 10 bytes.
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_bad_dq array representing the data from the bad dq bitmap
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode reset_bad_bits_helper(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                        const uint8_t i_bad_dq[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10]);
 
 ///
 /// @brief Configure the DP16 io_tx config0 registers
@@ -928,18 +938,6 @@ fapi2::ReturnCode reset_write_clock_enable( const fapi2::Target<fapi2::TARGET_TY
 /// @return FAPI2_RC_SUCCESs iff ok
 ///
 fapi2::ReturnCode reset_data_bit_enable( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
-
-///
-/// @brief Reset the bad-bits masks for a port
-/// @tparam T the fapi2::TargetType
-/// @param[in] i_target the target (MCA or MBA?)
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-inline fapi2::ReturnCode reset_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
-{
-    // Note: We need to do this ... BRS
-    return fapi2::FAPI2_RC_SUCCESS;
-}
 
 ///
 /// @brief Configure the DP16 io_tx config0 registers
@@ -1712,7 +1710,7 @@ template< fapi2::TargetType T, typename TT = dp16Traits<T> >
 fapi2::ReturnCode reset_read_delay_offset_registers( const fapi2::Target<T>& i_target );
 
 ///
-/// @brief Process disable bits and setup controller as necessary
+/// @brief Process disable bits
 /// @param[in] i_target the fapi2 target of the port
 /// @param[in] i_dimm the fapi2 target of the failed DIMM
 /// @param[in] i_rp the rank pairs to check as a bit-map
@@ -1721,6 +1719,26 @@ fapi2::ReturnCode reset_read_delay_offset_registers( const fapi2::Target<T>& i_t
 fapi2::ReturnCode process_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                                     const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
                                     const uint64_t l_rp );
+
+///
+/// @brief Write disable bits
+/// @note This is different than a register write as it writes attributes which
+/// cause firmware to act on the disabled bits.
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+///
+fapi2::ReturnCode record_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+///
+/// @brief Write disable bits - helper for testing
+/// @note This is different than a register write as it writes attributes which
+/// cause firmware to act on the disabled bits.
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_bad_dq an array of [MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10] containing the attribute information
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+///
+fapi2::ReturnCode record_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        uint8_t (&o_bad_dq)[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10] );
 
 } // close namespace dp16
 } // close namespace mss

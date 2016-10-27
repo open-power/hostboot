@@ -22,21 +22,40 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+
 <attributes>
-    <attribute>
-        <id>ATTR_MSS_VPD_DQ_MAP</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            [PORT][Dimm DQ PIN]  The map from the Dual Inline Memory Module (DIMM) Data (DQ) Pin to the Module Package Data (DQ) Pinout
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssUnits></mssUnits>
-        <mssBlobStart>0</mssBlobStart>
-        <mssBlobLength>144</mssBlobLength>
-        <mssAccessorName>vpd_dq_map</mssAccessorName>
-        <array>2 72</array>
-    </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_VPD_DQ_MAP</id>
+    <targetType>TARGET_TYPE_MCS</targetType>
+    <description>
+      [PORT][Dimm DQ PIN]  The map from the Dual Inline Memory Module (DIMM) Data (DQ) Pin to the Module Package Data (DQ) Pinout
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits></mssUnits>
+    <mssBlobStart>0</mssBlobStart>
+    <mssBlobLength>144</mssBlobLength>
+    <mssAccessorName>vpd_dq_map</mssAccessorName>
+    <array>2 72</array>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_BAD_DQ_BITMAP</id>
+    <targetType>TARGET_TYPE_MCS</targetType>
+    <description>
+      Bad DQ bitmap from a controller point of view.
+      The data is a 10 byte bitmap for each of 4 possible ranks.
+      The bad DQ data is stored in NVRAM, and it is stored in a special format
+      translated to a DIMM Connector point of view.
+      All of these details are hidden from the user of this attribute.
+    </description>
+    <valueType>uint8</valueType>
+    <array>2 2 4 10</array>
+    <platInit/>
+    <initToZero/>
+    <writeable/>
+  </attribute>
 
 </attributes>
