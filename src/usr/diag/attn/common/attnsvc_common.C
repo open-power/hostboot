@@ -156,47 +156,32 @@ void ServiceCommon::processAttnPreAck(const TargetHandle_t i_proc)
 
     // do the minimum that is required
     // for sending EOI without getting
-    // another interrupt.  for host attentions
-    // this is clearing the gpio interrupt
-    // type status register
-    // and for xstp,rec,spcl this is
+    // another interrupt. This should be
     // masking the appropriate bit in
-    // ipoll mask
+    // the ipoll mask.
 
-    // read the ipoll status register
-    // to determine the interrupt was
-    // caused by host attn or something
-    // else (xstp,rec,spcl)
+    // Instead of reading the IPOLL status
+    // register, we will just mask all
+    // potential interrupts on HOST side.
 
-    errlHndl_t err = getScom(i_proc, IPOLL_STATUS_REG, data);
+    data = hostMask | nonHostMask;
+
+    // the other thread might be trying to unmask
+    // on the same target.  The mutex ensures
+    // neither thread corrupts the register.
+
+    mutex_lock(&iv_mutex);
+
+    errlHndl_t err = modifyScom(i_proc, IPOLL::address, data, SCOM_OR);
+
+    mutex_unlock(&iv_mutex);
+
+    ATTN_TRACE("processAttnPreAck Host:%llx  NonHost:%llx  Data:%llx",
+                hostMask, nonHostMask, data);
 
     if(err)
     {
         errlCommit(err, ATTN_COMP_ID);
-
-        // assume everything is on
-
-        data = hostMask | nonHostMask;
-    }
-
-    if(data & nonHostMask)
-    {
-        // mask local proc xstp,rec and/or special attns if on.
-
-        // the other thread might be trying to unmask
-        // on the same target.  The mutex ensures
-        // neither thread corrupts the register.
-
-        mutex_lock(&iv_mutex);
-
-        err = modifyScom(i_proc, IPOLL::address, data & nonHostMask, SCOM_OR);
-
-        mutex_unlock(&iv_mutex);
-
-        if(err)
-        {
-            errlCommit(err, ATTN_COMP_ID);
-        }
     }
 }
 
@@ -204,6 +189,8 @@ void ServiceCommon::processAttentions(const TargetHandleList & i_procs)
 {
     errlHndl_t err = NULL;
     AttentionList attentions;
+    // this should be the opposite of what we used for masking in preAck
+    uint64_t  restoreMask = ~(HostMask::host() | HostMask::nonHost());
 
     MemOps & memOps = getMemOps();
     ProcOps & procOps = getProcOps();
@@ -263,10 +250,12 @@ void ServiceCommon::processAttentions(const TargetHandleList & i_procs)
             err = modifyScom(
                     *pit,
                     IPOLL::address,
-                    ~HostMask::nonHost(),
+                    restoreMask,
                     SCOM_AND);
 
             mutex_unlock(&iv_mutex);
+
+            ATTN_TRACE("ProcessATTN:: IPOLL RESTORE :%llx", restoreMask );
 
             if(err)
             {
