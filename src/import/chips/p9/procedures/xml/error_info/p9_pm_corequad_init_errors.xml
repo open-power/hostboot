@@ -34,7 +34,11 @@
     <rc>RC_PM_CME_ACTIVE_ERROR</rc>
     <description>The CME was not stopped during the reset of the cores quads
     </description>
-    <ffdc>CMESTATUS</ffdc>
+    <collectRegisterFfdc>
+      <id>CME_FFDC_REGISTERS</id>
+      <target>TARGET_CHIPLET</target>
+      <targetType>TARGET_TYPE_EX</targetType>
+    </collectRegisterFfdc>
   </hwpError>
   <!-- *********************************************************************** -->
 </hwpErrors>
