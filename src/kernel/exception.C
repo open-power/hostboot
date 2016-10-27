@@ -101,7 +101,11 @@ void kernel_execute_data_storage()
     }
     if (!handled)
     {
-        printk("Data Storage exception on %d: %lx, %lx @ %p\n",
+
+        printk("Data Storage exception! \n"
+               "TID: %d\nBad Address: %lx\n"
+               "Exception Type: %lx\n"
+               "Instruction where it occurred: %p\n",
                t->tid, getDAR(), getDSISR(), t->context.nip);
         MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
         TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
@@ -112,7 +116,10 @@ extern "C"
 void kernel_execute_data_segment()
 {
     task_t* t = TaskManager::getCurrentTask();
-    printk("Data Segment exception on %d: %lx @ %p\n",
+    printk("Data Segment exception!\n"
+           "TID: %d\n"
+           "Exception Type: %lx\n"
+           "Instruction where it occurred:%p\n",
            t->tid, getDAR(), t->context.nip);
     MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
     TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
