@@ -215,6 +215,15 @@
       <attribute>
           <id>ATTR_EFF_DRAM_TRRD_DLR</id>
       </attribute>
+      <attribute>
+          <id>ATTR_SECTOR_BUFFER_STRENGTH</id>
+      </attribute>
+      <attribute>
+          <id>ATTR_PULSE_MODE_ENABLE</id>
+      </attribute>
+      <attribute>
+          <id>ATTR_PULSE_MODE_VALUE</id>
+      </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
