@@ -663,6 +663,28 @@
   <platInit/>
 </attribute>
 
+<attribute>
+  <id>ATTR_SECTOR_BUFFER_STRENGTH</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Sector buffer strength</description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
 
+<attribute>
+  <id>ATTR_PULSE_MODE_ENABLE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>enable the pulse mode</description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_PULSE_MODE_VALUE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>value for pulse mode</description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
 
 </attributes>
