@@ -42,7 +42,7 @@
 // mss lib
 #include <lib/spd/common/spd_decoder.H>
 #include <lib/spd/rdimm/rdimm_decoder.H>
-#include <lib/spd/common/raw_cards.H>
+#include <lib/spd/common/rcw_settings.H>
 #include <lib/utils/checker.H>
 #include <lib/utils/c_str.H>
 #include <lib/utils/find.H>
@@ -70,7 +70,7 @@ namespace spd
 decoder::decoder(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                  const std::vector<uint8_t>& i_spd_data,
                  const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
-                 const rcd01::raw_card_t& i_raw_card)
+                 const rcw_settings& i_raw_card)
     : iv_module_decoder(i_module_decoder),
       iv_spd_data(i_spd_data),
       iv_raw_card(i_raw_card),

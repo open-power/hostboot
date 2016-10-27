@@ -46,7 +46,7 @@
 
 // mss lib
 #include <lib/spd/common/dimm_module_decoder.H>
-#include <lib/spd/common/raw_cards.H>
+#include <lib/spd/common/rcw_settings.H>
 #include <lib/spd/rdimm/rdimm_decoder.H>
 #include <lib/spd/lrdimm/lrdimm_decoder.H>
 #include <lib/utils/c_str.H>
@@ -442,7 +442,7 @@ class decoder
     public:
         std::shared_ptr<dimm_module_decoder> iv_module_decoder;
         std::vector<uint8_t> iv_spd_data;
-        rcd01::raw_card_t iv_raw_card;
+        rcw_settings iv_raw_card;
 
         // Default constructor deleted
         decoder() = delete;
@@ -457,7 +457,7 @@ class decoder
         decoder(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 const std::vector<uint8_t>& i_spd_data,
                 const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
-                const rcd01::raw_card_t& i_raw_card);
+                const rcw_settings& i_raw_card);
 
         ///
         /// @brief Default dtor
@@ -1405,7 +1405,7 @@ class decoder_v1_1 : public decoder
         decoder_v1_1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                      const std::vector<uint8_t>& i_spd_data,
                      const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
-                     const rcd01::raw_card_t& i_raw_card);
+                     const rcw_settings& i_raw_card);
 
         ///
         /// @brief Default dtor

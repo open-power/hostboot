@@ -124,6 +124,18 @@ fapi2::ReturnCode reference_raw_card(const fapi2::Target<fapi2::TARGET_TYPE_DIMM
                                      uint8_t& o_output);
 
 ///
+/// @brief Retrieve current raw card settings
+/// based on dimm type and raw card reference rev
+/// @param[in] i_target dimm target
+/// @param[in] i_spd_data SPD data
+/// @param[out] o_raw_card raw card settings
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode raw_card_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const std::vector<uint8_t>& i_spd_data,
+                                   rcw_settings& o_raw_card);
+
+///
 /// @brief       Object factory to select correct decoder
 /// @param[in]   i_target dimm target
 /// @param[in]   i_spd_data SPD data

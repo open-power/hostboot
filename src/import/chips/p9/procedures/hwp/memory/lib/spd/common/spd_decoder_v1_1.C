@@ -65,7 +65,7 @@ namespace spd
 decoder_v1_1::decoder_v1_1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                            const std::vector<uint8_t>& i_spd_data,
                            const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
-                           const rcd01::raw_card_t& i_raw_card)
+                           const rcw_settings& i_raw_card)
     : decoder(i_target, i_spd_data, i_module_decoder, i_raw_card)
 {}
 
