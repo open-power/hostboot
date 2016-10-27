@@ -819,7 +819,7 @@ fapi2::ReturnCode p9_xip_customize (
     uint32_t        l_maxImageSize, l_imageSize;
     uint32_t        l_maxRingSectionSize;
     uint32_t        l_sectionOffset = 1;
-    uint16_t        l_ddLevel;
+    uint8_t         attrDdLevel = 0;
     uint32_t        l_requestedBootCoreMask = (i_sysPhase == SYSPHASE_HB_SBE) ? io_bootCoreMask : 0x00FFFFFF;
     void*           l_hwRingsSection;
 
@@ -1033,22 +1033,21 @@ fapi2::ReturnCode p9_xip_customize (
 
                     // Check the bootCoreMask to determine if enough cores have been configured.
                     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-                    uint8_t MIN_REQD_ECS = 0;
+                    uint8_t attrMinReqdEcs = 0;
                     uint8_t  l_actualEcCount = 0;
 
-                    FAPI_DBG("MIN_REQD_ECS = 0x%x", MIN_REQD_ECS);
-
-                    l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SBE_IMAGE_MINIMUM_VALID_ECS, FAPI_SYSTEM, MIN_REQD_ECS);
-
-                    FAPI_DBG("MIN_REQD_ECS = 0x%x", MIN_REQD_ECS);
+                    l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SBE_IMAGE_MINIMUM_VALID_ECS, FAPI_SYSTEM, attrMinReqdEcs);
 
                     FAPI_ASSERT( l_fapiRc2.isRC(fapi2::FAPI2_RC_SUCCESS),
                                  fapi2::XIPC_IMAGE_WOULD_OVERFLOW_ADDL_INFO().
                                  set_CHIP_TARGET(i_proc_target).
                                  set_REQUESTED_BOOT_CORE_MASK(l_requestedBootCoreMask).
                                  set_CURRENT_BOOT_CORE_MASK(io_bootCoreMask),
-                                 "Unable to determine ATTR_SBE_IMAGE_MINIMUM_VALID_ECS, so don't"
-                                 " know if the minimum core set was met");
+                                 "FAPI_ATTR_GET(ATTR_SBE_IMAGE_MINIMUM_VALID_ECS) failed."
+                                 " Unable to determine ATTR_SBE_IMAGE_MINIMUM_VALID_ECS,"
+                                 " so don't know if the minimum core set was met." );
+
+                    FAPI_DBG("attrMinReqdEcs = 0x%x", attrMinReqdEcs);
 
                     // Count number of ECs set in bootCoreMask
                     l_actualEcCount = 0;
@@ -1061,12 +1060,12 @@ fapi2::ReturnCode p9_xip_customize (
                         }
                     }
 
-                    FAPI_ASSERT( l_actualEcCount >= MIN_REQD_ECS,
+                    FAPI_ASSERT( l_actualEcCount >= attrMinReqdEcs,
                                  fapi2::XIPC_IMAGE_WOULD_OVERFLOW_BEFORE_REACHING_MIN_ECS().
                                  set_CHIP_TARGET(i_proc_target).
                                  set_REQUESTED_BOOT_CORE_MASK(l_requestedBootCoreMask).
                                  set_CURRENT_BOOT_CORE_MASK(io_bootCoreMask).
-                                 set_MIN_REQD_ECS(MIN_REQD_ECS).
+                                 set_MIN_REQD_ECS(attrMinReqdEcs).
                                  set_ACTUAL_EC_COUNT(l_actualEcCount),
                                  "Image buffer would overflow before reaching the minimum required"
                                  " number of EC boot cores" );
@@ -1075,7 +1074,7 @@ fapi2::ReturnCode p9_xip_customize (
                               "  Final bootCoreMask: 0x%08X\n"
                               "  Number of boot cores: %d\n"
                               "  Min req'd boot cores: %d",
-                              io_bootCoreMask, l_actualEcCount, MIN_REQD_ECS );
+                              io_bootCoreMask, l_actualEcCount, attrMinReqdEcs );
 
                     l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
 
@@ -1191,9 +1190,16 @@ fapi2::ReturnCode p9_xip_customize (
 
             l_hwRingsSection = (void*)((uintptr_t)io_image + l_xipRingsSection.iv_offset);
 
-            // Extract the DD level
-            //@FIXME: CMO: Use attribute service for this. For now, hardcode.
-            l_ddLevel = 0x10;
+            // Extract the DD level to enable retrieval of correct CME/SGPE ring blocks
+            l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_proc_target, attrDdLevel);
+
+            FAPI_ASSERT( l_fapiRc.isRC(fapi2::FAPI2_RC_SUCCESS),
+                         fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
+                         set_CHIP_TARGET(i_proc_target).
+                         set_OCCURRENCE(1),
+                         "FAPI_ATTR_GET(ATTR_EC) failed." );
+
+            FAPI_DBG("attrDdLevel = 0x%x", attrDdLevel);
 
             //------------------------------------------------------------
             // Get the CME or SGPE block of rings from .rings in HW image
@@ -1203,7 +1209,7 @@ fapi2::ReturnCode p9_xip_customize (
                 FAPI_DBG("Getting the CME block of rings from HW image");
 
                 l_rc = tor_get_block_of_rings( l_hwRingsSection,
-                                               l_ddLevel,
+                                               attrDdLevel,
                                                P9_TOR::CME,
                                                P9_TOR::ALLRING,
                                                BASE,
@@ -1216,7 +1222,7 @@ fapi2::ReturnCode p9_xip_customize (
                 FAPI_DBG("Getting the SGPE block of rings from HW image");
 
                 l_rc = tor_get_block_of_rings( l_hwRingsSection,
-                                               l_ddLevel,
+                                               attrDdLevel,
                                                P9_TOR::SGPE,
                                                P9_TOR::ALLRING,
                                                BASE,
