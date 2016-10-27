@@ -104,12 +104,12 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
@@ -129,12 +129,12 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
@@ -154,12 +154,12 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
@@ -179,12 +179,12 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
@@ -204,13 +204,13 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
-    <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
@@ -229,12 +229,12 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
@@ -254,12 +254,12 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
@@ -279,12 +279,12 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
@@ -304,12 +304,12 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
@@ -329,12 +329,12 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
@@ -354,12 +354,12 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
@@ -379,12 +379,12 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>TARGET_WITH_REGISTERS</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
