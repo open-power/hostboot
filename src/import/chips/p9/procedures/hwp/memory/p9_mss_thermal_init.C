@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -47,19 +47,28 @@ extern "C"
 /// @brief configure and start the OCC and thermal cache
 /// @param[in] i_target the controller target
 /// @return FAPI2_RC_SUCCESS iff ok
+/// @note called on cumulus and centaur
 ///
     fapi2::ReturnCode p9_mss_thermal_init( const fapi2::Target<TARGET_TYPE_MCS>& i_target )
     {
         FAPI_INF("Start thermal_init");
 
-        for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
+        //TODO:RTC 164009
+        //Set runtime throttles to safemode values once OCC is working
+#if 0
+
+        for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(i_target))
         {
-            FAPI_TRY(mss::mc::thermal_throttle_scominit(p));
+            FAPI_TRY (mss::mc::set_runtime_throttles_to_safe(l_mca));
         }
 
+#endif
         FAPI_TRY (mss::mc::disable_emergency_throttle(i_target));
+
         FAPI_INF("End thermal_init");
+        return fapi2::FAPI2_RC_SUCCESS;
     fapi_try_exit:
+        FAPI_ERR("Error executing mss_thermal_init");
         return fapi2::current_err;
     }
 } //extern C

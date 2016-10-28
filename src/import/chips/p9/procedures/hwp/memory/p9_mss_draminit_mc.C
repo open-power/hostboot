@@ -85,6 +85,25 @@ extern "C"
                 FAPI_TRY( mss::putScom(p, MCA_RECR, l_data) );
             }
 
+            //Enable Power management based off of mrw_power_control_requested
+            //Needs to be set near end of IPL
+            FAPI_INF("Enable Power min max domains");
+            {
+                fapi2::buffer<uint64_t> l_data;
+                uint8_t  l_pwr_cntrl = 0;
+                FAPI_TRY(mss::getScom(p, MCA_MBARPC0Q, l_data));
+                FAPI_TRY(mss::mrw_power_control_requested(l_pwr_cntrl));
+
+                const bool is_pwr_cntrl = ((l_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_POWER_DOWN)
+                                           || (l_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR)
+                                           || (l_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_STR));
+
+                l_data.writeBit<MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS_ENABLE>(is_pwr_cntrl);
+
+                FAPI_TRY( mss::putScom(p, MCA_MBARPC0Q, l_data) );
+
+            }
+
             // Set the IML Complete bit MBSSQ(3) (SCOM Addr: 0x02011417) to indicate that IML has completed
             // Can't find MBSSQ or the iml_complete bit - asked Steve. Gary VH created this bit as a scratch
             // 'you are hre bit' and it was removed for Nimbus. Gary VH asked for it to be put back in. Not

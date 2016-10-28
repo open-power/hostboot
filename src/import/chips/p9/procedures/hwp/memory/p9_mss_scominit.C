@@ -41,6 +41,7 @@
 #include <lib/utils/count_dimm.H>
 #include <lib/utils/find.H>
 #include <lib/phy/ddr_phy.H>
+#include <lib/mc/mc.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCBIST;
@@ -84,6 +85,9 @@ fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_ta
                 fapi2::current_err = l_rc;
                 goto fapi_try_exit;
             }
+
+            FAPI_INF("mca thermal throttle scominit for %s", mss::c_str(l_mca_target));
+            FAPI_TRY(mss::mc::thermal_throttle_scominit(l_mca_target));
         }
 
         // ... but we do scominit PHY's with no DIMM. There are no attributes needed and we need

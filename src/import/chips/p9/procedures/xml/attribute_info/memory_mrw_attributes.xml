@@ -36,7 +36,7 @@
         Used to thermally protect the system in all supported environmental conditions when OCC is not functional
         Consumer: thermal_init, initfile
     </description>
-    <valueType>uint32</valueType>
+    <valueType>uint16</valueType>
     <default>32</default>
     <platInit/>
     <initToZero/>

@@ -27,10 +27,10 @@
 /// @file p9_mss_thermal_init.H
 /// @brief configure and start the OCC and thermal cache
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
 #ifndef __P9_MSS_THERMAL_INIT__

@@ -154,6 +154,46 @@ namespace mc
 {
 
 ///
+/// @brief set the PWR CNTRL register
+/// @param[in] i_target the mca target
+/// @return fapi2::fapi2_rc_success if ok
+/// @note sets MCA_MCA_MBARPC0Q
+///
+fapi2::ReturnCode set_pwr_cntrl_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+///
+/// @brief set the STR register
+/// @param[in] i_target the mca target
+/// @return fapi2::fapi2_rc_success if ok
+/// @note sets MCA_MBASTR0Q
+///
+fapi2::ReturnCode set_str_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+///
+/// @brief set the safemode throttle register
+/// @param[in] i_target the mca target
+/// @return fapi2::fapi2_rc_success if ok
+/// @note sets MCA_MBA_FARB3Q
+///
+fapi2::ReturnCode set_nm_support (const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+///
+/// @brief set the safemode throttle register
+/// @param[in] i_target the mca target
+/// @return fapi2::fapi2_rc_success if ok
+/// @note sets MCA_MBA_FARB4Q
+///
+fapi2::ReturnCode set_safemode_throttles(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+///
+/// @brief set the runtime throttle register to safemode values
+/// @param[in] i_target the mca target
+/// @return fapi2::fapi2_rc_success if ok
+/// @note sets MCA_MBA_FARB3Q
+///
+fapi2::ReturnCode set_runtime_throttles_to_safe(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+///
 /// @brief safemode throttle values defined from MRW attributes
 /// @param[in] i_target the MCA target
 /// @return FAPI2_RC_SUCCESS iff ok
