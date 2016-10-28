@@ -487,23 +487,59 @@ bool AttrTextToBinaryBlob::attrFileAttrLineToFields(
     return l_success;
 }
 
-
+//******************************************************************************
+void AttrTextToBinaryBlob::updateLabels(
+                                    std::vector<target_label> & io_labels,
+                                    const target_label & i_label_override)
+{
+    for (auto & l_label : io_labels)
+    {
+        if (i_label_override.node != AttributeTank::ATTR_NODE_NA)
+        {
+            l_label.node = i_label_override.node;
+        }
+        if (i_label_override.targetPos != AttributeTank::ATTR_POS_NA)
+        {
+            l_label.targetPos = i_label_override.targetPos;
+        }
+        if (i_label_override.unitPos != AttributeTank::ATTR_UNIT_POS_NA)
+        {
+            l_label.unitPos = i_label_override.unitPos;
+        }
+    }
+}
 
 //******************************************************************************
 bool AttrTextToBinaryBlob::attrFileTargetLineToData(
     const std::string & i_line,
     const AttributeTank::TankLayer i_tankLayer,
     uint32_t & o_targetType,
-    uint16_t & o_targetPos,
-    uint8_t & o_targetUnitPos,
-    uint8_t & o_targetNode)
+    std::vector<target_label> & o_targetLabels)
 {
     /*
      * e.g. "target = k0:n0:s0:centaur.mba:p02:c1"
      * - o_targetType = 0x00000001
-     * - o_targetPos = 2
-     * - o_targetUnitPos = 1
+     * - 1 target specified:
+     *     node: 0, targetPos: 2, unitPos: 1
+     *
+     *
+     * e.g. "target = k0:n0:s0:centaur.mba:p0,3:c1"
+     * - o_targetType = 0x00000001
+     * - 2 targets specified:
+     *     node: 0, targetPos: 0, unitPos: 1
+     *     node: 0, targetPos: 3, unitPos: 1
      */
+
+    // create a generic label
+    target_label l_label;
+
+    // always start with no targets
+    o_targetLabels.clear();
+
+    // find positions
+    size_t l_comma_pos;
+    size_t l_colon_pos;
+
     bool l_err = false;
     // If the target string is not decoded into a non-system target and
     // explicit positions are not found then the caller will get these defaults
@@ -519,9 +555,7 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
         {
             o_targetType = TARGETING::TYPE_SYS;
         }
-        o_targetNode = AttributeTank:: ATTR_NODE_NA;
-        o_targetPos = AttributeTank:: ATTR_POS_NA;
-        o_targetUnitPos = AttributeTank::ATTR_UNIT_POS_NA;
+
         // Find the node, target type, pos and unit-pos
         int l_cageIndex = i_line.find(ATTR_CAGE_NUMBER);
         if(l_cageIndex != std::string::npos )
@@ -541,13 +575,40 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
                 }
                 else
                 {
-                    o_targetNode = strtoul(l_line.c_str(), NULL, 10);
+                    l_colon_pos = l_line.find(':');
+                    l_comma_pos = l_line.find(',');
 
-                    size_t l_pos = l_line.find(':');
-
-                    if (l_pos != std::string::npos)
+                    // make sure comma comes before ending colon
+                    while ((l_comma_pos != std::string::npos) &&
+                           (l_comma_pos < l_colon_pos))
                     {
-                        l_line = l_line.substr(l_pos);
+                        // grab number (stops at first non-numerical character)
+                        l_label.node = strtoul(l_line.c_str(), NULL, 10);
+
+                        // add a new target label node number
+                        o_targetLabels.push_back(l_label);
+
+                        // increment line past the comma
+                        l_line = l_line.substr(l_comma_pos+1);
+
+                        // search for next potential comma
+                        l_comma_pos = l_line.find(',');
+                    }
+                    // grab number (stops at first non-numerical character)
+                    l_label.node = strtoul(l_line.c_str(), NULL, 10);
+
+                    // add the last target label node number
+                    o_targetLabels.push_back(l_label);
+
+                    // turn off overriding node
+                    l_label.node = AttributeTank::ATTR_NODE_NA;
+
+                    // line may have changed size so refind the ending colon
+                    // for the node part
+                    l_colon_pos = l_line.find(':');
+                    if (l_colon_pos != std::string::npos)
+                    {
+                        l_line = l_line.substr(l_colon_pos);
                     }
                     else
                     {
@@ -565,17 +626,24 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
             // Figure out the target type
             // Remove the end of the target string (position and unitpos) before
             // using the line to search for target types
-            auto l_pos = l_line.find(":");
+            l_colon_pos = l_line.find(":");
+
             std::string l_targetType;
+            std::string l_origTargetType;
 
             TargStrToType* chip_type_first = NULL;
             TargStrToType* chip_type_last = NULL;
 
 
             TargStrToType* item = NULL;
-            if( l_pos != std::string::npos)
+            if( l_colon_pos != std::string::npos)
             {
-                l_targetType = l_line.substr(0, l_pos);
+                // save the full target type name
+                l_origTargetType = l_line.substr(0, l_colon_pos);
+
+                // put it into an alterable target type
+                l_targetType = l_origTargetType;
+
                 auto l_dotIndex = l_targetType.find(".");
 
                 if(l_dotIndex != std::string::npos)
@@ -588,7 +656,6 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
                     chip_type_first = &CHIP_UNIT_TYPE_TARG_STR_TO_TYPE[0];
                     chip_type_last = &CHIP_UNIT_TYPE_TARG_STR_TO_TYPE
                     [(sizeof(CHIP_UNIT_TYPE_TARG_STR_TO_TYPE)/sizeof(TargStrToType))-1];
-
                 }
                 else
                 {
@@ -602,7 +669,7 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
 
                 //Search for target type
                 item = std::find( chip_type_first,
-                                      chip_type_last, l_targetType.c_str());
+                                  chip_type_last, l_targetType.c_str());
 
                 if( item != chip_type_last )
                 {
@@ -610,7 +677,9 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
                     // choose fapi2 or targeting type
                     o_targetType = ( i_tankLayer == AttributeTank::TANK_LAYER_TARG ?
                                      item->iv_targType : item->iv_fapiType);
-                    l_line = l_line.substr(l_targetType.length());
+
+                    // skip past the full target type name
+                    l_line = l_line.substr(l_origTargetType.length());
                     l_sysTarget = false;
                 }
                 else
@@ -623,11 +692,13 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
             }
             else
             {
+                // no target type specified, so default to sys target
                 l_sysTarget = true;
             }
 
 
-            // For a non-system target, figure out the position and unit position
+            // For a non-system target,
+            // figure out the position and unit position
             if (l_sysTarget == false)
             {
                 // Figure out the target's position
@@ -641,13 +712,76 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
                     }
                     else
                     {
-                        o_targetPos = strtoul(l_line.c_str(), NULL, 10);
+                        bool firstPos = true;
+                        l_colon_pos = l_line.find(':');
+                        l_comma_pos = l_line.find(',');
+                        std::vector<target_label> origCopy;
 
-                        size_t l_pos = l_line.find(':');
-
-                        if (l_pos != std::string::npos)
+                        while ((l_comma_pos != std::string::npos) &&
+                               (l_comma_pos < l_colon_pos))
                         {
-                            l_line = l_line.substr(l_pos);
+                            // grab targetPos number
+                            // (stops at first non-numerical character)
+                            l_label.targetPos =
+                                strtoul(l_line.c_str(), NULL, 10);
+
+                            if (firstPos)
+                            {
+                                // save a copy of current targets before
+                                // adding targetPos
+                                origCopy = o_targetLabels;
+
+                                // update targetPos of current targets
+                                updateLabels(o_targetLabels, l_label);
+                                firstPos = false;
+                            }
+                            else
+                            {
+                                // update targetPos of original targets
+                                updateLabels(origCopy, l_label);
+
+                                // add these new targetPos targets to
+                                // current target list
+                                o_targetLabels.insert( o_targetLabels.end(),
+                                                       origCopy.begin(),
+                                                       origCopy.end() );
+                            }
+
+                            // skip past the comma
+                            l_line = l_line.substr(l_comma_pos+1);
+
+                            // now look for next potential comma
+                            l_comma_pos = l_line.find(',');
+                        }
+
+                        // grab number (stops at first non-numerical character)
+                        l_label.targetPos = strtoul(l_line.c_str(), NULL, 10);
+                        if (firstPos)
+                        {
+                            // no comma found, so just update
+                            // current target list
+                            updateLabels(o_targetLabels, l_label);
+                        }
+                        else
+                        {
+                            // last targetPos in comma list
+                            // update targetPos of original targets
+                            updateLabels(origCopy, l_label);
+
+                            // add these new targetPos targets to
+                            // the current target list
+                            o_targetLabels.insert(o_targetLabels.end(),
+                                                  origCopy.begin(),
+                                                  origCopy.end());
+                        }
+                        l_label.targetPos = AttributeTank::ATTR_POS_NA;
+
+                        // line may have changed size so refind the ending colon
+                        // for targetPos part
+                        l_colon_pos = l_line.find(':');
+                        if (l_colon_pos != std::string::npos)
+                        {
+                            l_line = l_line.substr(l_colon_pos);
                         }
                         else
                         {
@@ -667,7 +801,63 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
                     }
                     else
                     {
-                        o_targetUnitPos = strtoul(l_line.c_str(), NULL, 10);
+                        bool firstPos = true;
+                        l_comma_pos = l_line.find(',');
+                        std::vector<target_label> origCopy;
+
+                        while (l_comma_pos != std::string::npos)
+                        {
+                            // grab unitPos number
+                            // (stops at first non-numerical character)
+                            l_label.unitPos = strtoul(l_line.c_str(), NULL, 10);
+                            if (firstPos)
+                            {
+                                // save a copy of current targets
+                                // before adding unitPos
+                                origCopy = o_targetLabels;
+
+                                // update unitPos of current targets
+                                updateLabels(o_targetLabels, l_label);
+                                firstPos = false;
+                            }
+                            else
+                            {
+                                // update unitPos of original targets
+                                updateLabels(origCopy, l_label);
+
+                                // add these new unitPos targets to
+                                // the current target list
+                                o_targetLabels.insert( o_targetLabels.end(),
+                                                       origCopy.begin(),
+                                                       origCopy.end() );
+                            }
+                            // skip past the comma
+                            l_line = l_line.substr(l_comma_pos+1);
+
+                            // now look for next potential comma
+                            l_comma_pos = l_line.find(',');
+                        }
+
+                        // grab number (stops at first non-numerical character)
+                        l_label.unitPos = strtoul(l_line.c_str(), NULL, 10);
+                        if (firstPos)
+                        {
+                            // no comma found, so just update
+                            // current target list
+                            updateLabels(o_targetLabels, l_label);
+                        }
+                        else
+                        {
+                            // last unitPos in comma list
+                            // update unitPos of original targets
+                            updateLabels(origCopy, l_label);
+
+                            // add these new unitPos targets to
+                            // the current target list
+                            o_targetLabels.insert(o_targetLabels.end(),
+                                                  origCopy.begin(),
+                                                  origCopy.end());
+                        }
                     }
                 }
             }
@@ -676,7 +866,10 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
         // System targets must have an NA node
         if (l_sysTarget)
         {
-            o_targetNode = AttributeTank::ATTR_NODE_NA;
+            if (o_targetLabels.size() == 0)
+            {
+                o_targetLabels.push_back(l_label);
+            }
         }
 
     } while( 0 );
@@ -847,6 +1040,8 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
     uint16_t l_pos = AttributeTank::ATTR_POS_NA;
     uint8_t l_unitPos = AttributeTank::ATTR_UNIT_POS_NA;
     uint8_t l_node = AttributeTank::ATTR_NODE_NA;
+    std::vector<target_label> l_targetLabels;
+
     uint32_t l_valSize = 0;
     uint8_t * l_pVal = NULL;
     bool l_const = false;
@@ -960,9 +1155,12 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
                 break;
             }
 
+
             // Get the Target Data for this attribute
-            l_pErr = attrFileTargetLineToData(l_targetLine, l_tankLayer, l_targetType,
-                l_pos, l_unitPos, l_node);
+            l_pErr = attrFileTargetLineToData(l_targetLine,
+                                              l_tankLayer,
+                                              l_targetType,
+                                              l_targetLabels);
 
             if (l_pErr)
             {
@@ -978,48 +1176,55 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
                 l_flags = AttributeTank::ATTR_FLAG_CONST;
             }
 
-
-            //Add data to AttributeHeader
-            l_attrData.iv_attrId = l_attrId;
-            l_attrData.iv_targetType = l_targetType;
-            l_attrData.iv_pos = l_pos;
-            l_attrData.iv_unitPos = l_unitPos;
-            l_attrData.iv_node = l_node;
-            l_attrData.iv_flags = l_flags;
-            l_attrData.iv_valSize = l_valSize;
-
-
-            if( g_showDebugLogs )
+            for (const auto & l_label : l_targetLabels)
             {
-                //Print information
-                printf("attrTextToBinaryBlob: ATTR override "
-                         "Id: 0x%08x, TargType: 0x%08x, Pos: 0x%04x, "
-                         "UPos: 0x%02x\n",
-                         l_attrId, l_targetType, l_pos, l_unitPos);
-                printf("attrTextToBinaryBlob: ATTR override "
-                         "Node: 0x%02x, Flags: 0x%02x, Size: 0x%08x",
-                         l_node, l_flags, l_valSize);
-                printf(" Val: 0x");
-                //print the value
-                for(int i = 0; i < l_valSize; i++)
+                l_pos = l_label.targetPos;
+                l_unitPos = l_label.unitPos;
+                l_node = l_label.node;
+
+                //Add data to AttributeHeader
+                l_attrData.iv_attrId = l_attrId;
+                l_attrData.iv_targetType = l_targetType;
+                l_attrData.iv_pos = l_pos;
+                l_attrData.iv_unitPos = l_unitPos;
+                l_attrData.iv_node = l_node;
+                l_attrData.iv_flags = l_flags;
+                l_attrData.iv_valSize = l_valSize;
+
+
+                if( g_showDebugLogs )
                 {
-                    printf("%x", l_pVal[i]);
+                    //Print information
+                    printf("attrTextToBinaryBlob: ATTR override "
+                             "Id: 0x%08x, TargType: 0x%08x, Pos: 0x%04x, "
+                             "UPos: 0x%02x\n",
+                             l_attrId, l_targetType, l_pos, l_unitPos);
+                    printf("attrTextToBinaryBlob: ATTR override "
+                             "Node: 0x%02x, Flags: 0x%02x, Size: 0x%08x",
+                             l_node, l_flags, l_valSize);
+                    printf(" Val: 0x");
+                    //print the value
+                    for(int i = 0; i < l_valSize; i++)
+                    {
+                        printf("%x", l_pVal[i]);
+                    }
+                    printf("\n\n");
                 }
-                printf("\n\n");
-            }
 
-            //write attribute data into a buffer
-            l_pErr = writeDataToBuffer( l_attrData,
-                                      l_tankLayer,
-                                      l_pVal,
-                                      l_attrBlob,
-                                      l_buffer,
-                                      l_totalSize );
+                //write attribute data into a buffer
+                l_pErr = writeDataToBuffer( l_attrData,
+                                          l_tankLayer,
+                                          l_pVal,
+                                          l_attrBlob,
+                                          l_buffer,
+                                          l_totalSize );
 
-            if( l_pErr )
-            {
-                printf("An error occured in writeDataToBuffer\n");
-            }
+                if( l_pErr )
+                {
+                    printf("An error occured in writeDataToBuffer\n");
+                }
+            }  // End of target labels
+
             delete[] l_pVal;
             l_pVal = NULL;
         }
