@@ -61,6 +61,7 @@ OBJS += call_proc_chiplet_enable_ridi.o
 OBJS += call_p9_rng_init_phase1.o
 OBJS += call_host_set_voltages.o
 OBJS += call_host_attnlisten_proc.o
+OBJS += host_proc_pcie_scominit.o
 
 VPATH += ${PROCEDURES_PATH}/hwp/perv/ ${PROCEDURES_PATH}/hwp/nest/
 VPATH += ${PROCEDURES_PATH}/hwp/io/ ${PROCEDURES_PATH}/hwp/initfiles/
