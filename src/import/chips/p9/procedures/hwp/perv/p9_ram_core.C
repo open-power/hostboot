@@ -193,7 +193,7 @@ fapi2::ReturnCode RamCore::ram_setup()
     //1.setup SPRC to use SCRO as SPRD
     l_data.flush<0>();
     FAPI_TRY(fapi2::getScom(iv_target, C_SPR_MODE, l_data));
-    FAPI_TRY(l_data.setBit(C_SPR_MODE_MODEREG_SPRC_LT0_SEL + iv_thread));
+    l_data.insertFromRight<C_SPR_MODE_MODEREG_SPRC_LT0_SEL, 8>(0xFF);
     FAPI_TRY(fapi2::putScom(iv_target, C_SPR_MODE, l_data));
     l_data.flush<0>();
     FAPI_TRY(fapi2::getScom(iv_target, C_SCOMC, l_data));
@@ -243,7 +243,7 @@ fapi2::ReturnCode RamCore::ram_cleanup()
 
     // setup SPRC to use SCRO as SPRD
     FAPI_TRY(fapi2::getScom(iv_target, C_SPR_MODE, l_data));
-    FAPI_TRY(l_data.setBit(C_SPR_MODE_MODEREG_SPRC_LT0_SEL + iv_thread));
+    l_data.insertFromRight<C_SPR_MODE_MODEREG_SPRC_LT0_SEL, 8>(0xFF);
     FAPI_TRY(fapi2::putScom(iv_target, C_SPR_MODE, l_data));
     l_data.flush<0>();
     FAPI_TRY(fapi2::getScom(iv_target, C_SCOMC, l_data));
