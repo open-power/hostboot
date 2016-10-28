@@ -47,8 +47,7 @@ namespace Bootloader{
      * Pointer to location in main storage which bootloader uses as
      * scratch space
      */
-    uint8_t *g_blScratchSpace =
-        reinterpret_cast<uint8_t*>(HBBL_SCRATCH_SPACE_ADDR);
+    uint8_t *g_blScratchSpace = NULL;
 
     /** Apply Secure Signature Validation function.
      *
@@ -86,6 +85,8 @@ namespace Bootloader{
 
         uint32_t l_errCode = PNOR::NO_ERROR;
         uint8_t l_tocUsed = 0;
+        g_blScratchSpace = reinterpret_cast<uint8_t*>(HBBL_SCRATCH_SPACE_ADDR);
+
 
         // Get location of HB base code in PNOR from TOC
         // @TODO RTC:138268 Support multiple sides of PNOR in bootloader
