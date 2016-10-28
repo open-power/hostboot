@@ -56,7 +56,6 @@ the user would like to override along with their new values.
 
 #####Other target examples:
 
-
     - System Target:
         - target
         - target = k0:n0:s0
@@ -64,6 +63,9 @@ the user would like to override along with their new values.
 
     - DIMM Target
         - target = k0:n0:s0:dimm:p06
+
+    - Multiple DIMM Targets
+        - target = k0:n0:s0:dimm:p2,4
 
     - All p8 chips
         - target = k0:n0:s0:p8:pall
@@ -73,7 +75,7 @@ the user would like to override along with their new values.
 
     - Node number specified (Brazos only, for Tuleta, always use n0)
         - target = k0:n1:s0:dimm:p06
-        -  target = k0:nall:s0:dimm:p06
+        - target = k0:nall:s0:dimm:p06
 
 ###Rules:
 
@@ -103,15 +105,15 @@ the user would like to override along with their new values.
         - The next part of the line specifies the target position (for units
         this is the parent chip position)
 
-            - :p0 or :p1 or :p511 or :pall etc (note that 'all' specifies an
-            override for all Targets of the specified type)
+            - :p0 or :p1 or :p1,3 or :p511 or :pall etc (note that 'all'
+              specifies an override for all Targets of the specified type)
 
 
         - The next part of the line specified the target unit position (only
           applicable to targets)
 
-            - :c0 or :c1 or :call etc (note that 'all' specifies an override for
-              all Targets of the specified type)
+            - :c0 or :c1 or :c1,2 or :call etc (note that 'all' specifies
+              an override for all Targets of the specified type)
 
 
     - Lines starting with "ATTR_" specify attribute overrides

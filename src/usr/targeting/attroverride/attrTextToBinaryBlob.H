@@ -34,7 +34,6 @@
 
 namespace AttrTextToBinaryBlob
 {
-
     /**
      * Constant for the maximum number of array dimensions an attribute can have
      */
@@ -160,24 +159,49 @@ namespace AttrTextToBinaryBlob
         bool & o_const);
 
     /**
+     * Structure for target's identification
+     *
+     * node         Target Node Number
+     * targetPos    Target Position
+     * unitPos      Target Unit Position
+     */
+    struct target_label
+    {
+        uint8_t node;
+        uint16_t targetPos;
+        uint8_t unitPos;
+        target_label():node(AttributeTank::ATTR_NODE_NA),
+                       targetPos(AttributeTank::ATTR_POS_NA),
+                       unitPos(AttributeTank::ATTR_UNIT_POS_NA){}
+    };
+
+    /**
+     * @brief Helper function that updates label list
+     *
+     * @param[in/out] io_labels         Label list to be updated
+     * @param[in]     i_label_override  Specifies override values to
+     *                                   apply to each label in list
+     *
+     */
+    static void updateLabels(std::vector<target_label> & io_labels,
+                             const target_label & i_label_override);
+
+    /**
      * @brief Converts a target line from an Attribute Text File to data
      *
      * @param[in]  i_line          Ref to string containing target line
      * @param[in]  i_tankLayer     Firmware layer containing the tank
      * @param[out] o_targetType    Target Type (as stored in tank)
-     * @param[out] o_targetPos     Target Position (as stored in tank)
-     * @param[out] o_targetUnitPos Target Unit Position (as stored in tank)
-     * @param[out] o_targetNode    Target Node Number
+     * @param[out] o_targetLabels  List of target labels
      *
-     * @return - true if the target line was successfully parse, false otherwise
+     * @return - true if the target line was successfully parsed, false otherwise
      */
     static bool attrFileTargetLineToData(
         const std::string & i_line,
         const AttributeTank::TankLayer i_tankLayer,
         uint32_t & o_targetType,
-        uint16_t & o_targetPos,
-        uint8_t & o_targetUnitPos,
-        uint8_t & o_targetNode);
+        std::vector<target_label> & o_targetLabels);
+
 
     /**
      * @brief Converts a set of attribute lines (all for the same attribute)
