@@ -26,6 +26,15 @@
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_MVPD_RING_FUNC_ENDLESS</rc>
+    <description>failed to interprete VPD data buffer</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_MVPD_RING_FUNC_INVALID_PARAMETER</rc>
     <description>MVPD ring function parameter is not valid</description>
     <callout>
@@ -79,6 +88,15 @@
   <hwpError>
     <rc>RC_MVPD_RING_FUNC_INVALID_RECORD</rc>
     <description>MVPD ring function record is not valid</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MVPD_RINGID_DATA_NOT_FOUND</rc>
+    <description>Data for given ringId missing in p9_ringId</description>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
