@@ -83,7 +83,7 @@ namespace SECUREBOOT
         ATTR_PROC_PSI_UNTRUSTED_BAR0_BASE_ADDR,
         ATTR_PROC_PSI_UNTRUSTED_BAR1_BASE_ADDR,
         ATTR_PROC_PSI_UNTRUSTED_BAR0_SIZE,
-        ATTR_PROC_PSI_UNTRUSTED_BAR0_SIZE,
+        ATTR_PROC_PSI_UNTRUSTED_BAR1_SIZE,
         ATTR_PROC_ADU_UNTRUSTED_BAR_BASE_ADDR,
         ATTR_PROC_ADU_UNTRUSTED_BAR_SIZE,
     };
@@ -182,6 +182,7 @@ namespace SECUREBOOT
         }
 
         // lookup the processor target in the map and obtain a pointer to the
+        // array of bar values
         std::map<TARGETING::Target*,uint64_t*>::const_iterator
             l_iter = iv_barValues.find(l_proc);
         if (l_iter == iv_barValues.end())
