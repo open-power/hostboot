@@ -23,4 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_mss_eff_config_thermal
+lib$(PROCEDURE)_DEPLIBS += p9_mss_bulk_pwr_throttles
 $(call BUILD_PROCEDURE)
