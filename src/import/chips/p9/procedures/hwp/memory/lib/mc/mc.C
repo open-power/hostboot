@@ -58,6 +58,179 @@ fapi2::ReturnCode dump_regs( const fapi2::Target<TARGET_TYPE_MCS>& i_target )
 namespace mc
 {
 
+enum throttle_enums
+{
+    NM_RAS_WEIGHT = 0b000,
+    NM_CAS_WEIGHT = 0b001,
+
+    CHANGE_AFTER_SYNC = 0b1,
+
+    MAXALL_MINALL = 0b000,
+    //wait 16 refresh intervals of idle before powering down all ranks
+    MIN_DOMAIN_REDUCTION_TIME = 0x10,
+    //wait 64 refresh intervals of idle before going into STR on all ranks
+    ENTER_STR_TIME = 0x40
+};
+
+///
+/// @brief set the PWR CNTRL register
+/// @param[in] i_target the mca target
+/// @return fapi2::fapi2_rc_success if ok
+/// @note sets MCA_MCA_MBARPC0Q
+///
+fapi2::ReturnCode set_pwr_cntrl_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    uint8_t l_pwr_cntrl = 0;
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY(mrw_power_control_requested(l_pwr_cntrl));
+    FAPI_TRY(mss::getScom(i_target, MCA_MBARPC0Q, l_data));
+
+    l_data.insertFromRight<MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS, MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS_LEN>(MAXALL_MINALL);
+
+    //Write data if PWR_CNTRL_REQUESTED includes power down
+    l_data.writeBit<MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_ENABLE>
+    ((l_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR) ||
+     (l_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_POWER_DOWN));
+
+    //Set the MIN_DOMAIN_REDUCTION time
+    l_data.insertFromRight<MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_TIME, MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_TIME_LEN>
+    (MIN_DOMAIN_REDUCTION_TIME);
+
+    FAPI_TRY(mss::putScom(i_target, MCA_MBARPC0Q, l_data) );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    FAPI_ERR("Error setting power control register MBARPC0Q for target %s", mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief set the STR register
+/// @param[in] i_target the mca target
+/// @return fapi2::fapi2_rc_success if ok
+/// @note sets MCA_MBASTR0Q
+///
+fapi2::ReturnCode set_str_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    uint8_t l_str_enable = 0;
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY(mrw_power_control_requested(l_str_enable));
+    FAPI_TRY(mss::getScom(i_target, MCA_MBASTR0Q, l_data));
+
+    //Write bit if STR should be enabled
+    l_data.writeBit<MCA_MBASTR0Q_CFG_STR_ENABLE>
+    ((l_str_enable == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_STR) ||
+     (l_str_enable == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR));
+
+    l_data.insertFromRight<MCA_MBASTR0Q_CFG_ENTER_STR_TIME, MCA_MBASTR0Q_CFG_ENTER_STR_TIME_LEN>(ENTER_STR_TIME);
+
+    FAPI_TRY(mss::putScom(i_target, MCA_MBASTR0Q, l_data) );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    FAPI_ERR("Error setting the STR register MBASTR0Q for target %s", mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief set the general N/M throttle register
+/// @param[in] i_target the mca target
+/// @return fapi2::fapi2_rc_success if ok
+/// @note sets MCA_MBA_FARB3Q
+///
+fapi2::ReturnCode set_nm_support (const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    uint16_t l_run_slot = 0;
+    uint16_t l_run_port = 0;
+    uint32_t l_throttle_denominator = 0;
+
+    fapi2::buffer<uint64_t> l_data;
+
+    //runtime should be calculated in eff_config_thermal, which is called before scominit in ipl
+    FAPI_TRY(runtime_mem_throttled_n_commands_per_port(i_target, l_run_port));
+    FAPI_TRY(runtime_mem_throttled_n_commands_per_slot(i_target, l_run_slot));
+    FAPI_TRY(mss::mrw_mem_m_dram_clocks(l_throttle_denominator) );
+    FAPI_INF("For target %s throttled n commands per port are %d, per slot are %d, and dram m clocks are %d",
+             mss::c_str(i_target),
+             l_run_port,
+             l_run_slot,
+             l_throttle_denominator);
+    FAPI_TRY(mss::getScom(i_target, MCA_MBA_FARB3Q, l_data));
+
+    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT, MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT_LEN>(l_run_slot);
+    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT, MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT_LEN>(l_run_port);
+    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_M, MCA_MBA_FARB3Q_CFG_NM_M_LEN>(l_throttle_denominator);
+    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_RAS_WEIGHT, MCA_MBA_FARB3Q_CFG_NM_RAS_WEIGHT_LEN>(NM_RAS_WEIGHT);
+    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_CAS_WEIGHT, MCA_MBA_FARB3Q_CFG_NM_CAS_WEIGHT_LEN>(NM_CAS_WEIGHT);
+    l_data.writeBit<MCA_MBA_FARB3Q_CFG_NM_CHANGE_AFTER_SYNC>(CHANGE_AFTER_SYNC);
+
+    FAPI_TRY(mss::putScom(i_target, MCA_MBA_FARB3Q, l_data) );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    FAPI_ERR("Error setting nm throttles for target %s", mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief set the safemode throttle register
+/// @param[in] i_target the mca target
+/// @return fapi2::fapi2_rc_success if ok
+/// @note sets MCA_MBA_FARB4Q
+///
+fapi2::ReturnCode set_safemode_throttles(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    fapi2::buffer<uint64_t> l_data;
+    uint16_t l_throttle_per_slot = 0;
+    uint32_t l_throttle_denominator = 0;
+
+    FAPI_TRY(mss::mrw_mem_m_dram_clocks(l_throttle_denominator) );
+    FAPI_TRY(mss::mrw_safemode_mem_throttled_n_commands_per_port(l_throttle_per_slot) );
+    FAPI_TRY(mss::getScom(i_target, MCA_MBA_FARB4Q, l_data) );
+
+    l_data.insertFromRight<MCA_MBA_FARB4Q_EMERGENCY_M, MCA_MBA_FARB4Q_EMERGENCY_M_LEN>(l_throttle_denominator);
+    l_data.insertFromRight<MCA_MBA_FARB4Q_EMERGENCY_N, MCA_MBA_FARB4Q_EMERGENCY_N_LEN>(l_throttle_per_slot);
+    FAPI_TRY(mss::putScom(i_target, MCA_MBA_FARB4Q, l_data) );
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    FAPI_ERR("Error setting safemode throttles for target %s", mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief set the runtime throttle register to safemode values
+/// @param[in] i_target the mca target
+/// @return fapi2::fapi2_rc_success if ok
+/// @note sets MCA_MBA_FARB3Q
+/// @Will be overwritten by OCC/cronus later in IPL
+/// @called in thermal_init
+///
+fapi2::ReturnCode set_runtime_throttles_to_safe(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    fapi2::buffer<uint64_t> l_data;
+    uint16_t l_throttle_per_port = 0;
+    uint32_t l_throttle_denominator = 0;
+
+    FAPI_TRY(mss::mrw_mem_m_dram_clocks(l_throttle_denominator) );
+    FAPI_TRY(mss::mrw_safemode_mem_throttled_n_commands_per_port(l_throttle_per_port) );
+    FAPI_TRY(mss::getScom(i_target, MCA_MBA_FARB3Q, l_data) );
+
+    //Same value for both throttles
+    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT, MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT_LEN>(l_throttle_per_port);
+    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT, MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT_LEN>(l_throttle_per_port);
+    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_M, MCA_MBA_FARB3Q_CFG_NM_M_LEN>(l_throttle_denominator);
+
+    FAPI_TRY(mss::putScom(i_target, MCA_MBA_FARB3Q, l_data) );
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    FAPI_ERR("Error setting safemode throttles for target %s", mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
 ///
 /// @brief safemode throttle values defined from MRW attributes
 /// @param[in] i_target the MCA target
@@ -66,54 +239,30 @@ namespace mc
 ///
 fapi2::ReturnCode thermal_throttle_scominit (const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
-    uint32_t l_throttle_denominator = 0;
-    FAPI_TRY( mss::mem_m_dram_clocks( i_target, l_throttle_denominator) );
+    FAPI_TRY(set_pwr_cntrl_reg(i_target));
+    FAPI_TRY(set_str_reg(i_target));
+    FAPI_TRY(set_nm_support(i_target));
+    FAPI_TRY(set_safemode_throttles(i_target));
 
-    {
-        fapi2::buffer<uint64_t> l_data;
-        FAPI_TRY(mss::getScom(i_target, MCA_MBA_FARB3Q, l_data));
-
-        uint32_t l_throttle_per_port = 0;
-        FAPI_TRY( mss::mrw_safemode_mem_throttled_n_commands_per_port( l_throttle_per_port) );
-
-        l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT, MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT_LEN>(l_throttle_per_port);
-        l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT, MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT_LEN>(l_throttle_per_port);
-        l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_M, MCA_MBA_FARB3Q_CFG_NM_M_LEN>(l_throttle_denominator);
-
-        l_data.clearBit<MCA_MBA_FARB3Q_CFG_NM_CHANGE_AFTER_SYNC>();
-
-        FAPI_TRY( mss::putScom(i_target, MCA_MBA_FARB3Q, l_data) );
-    }
-
-    {
-        fapi2::buffer<uint64_t> l_data;
-        uint32_t l_throttle_per_slot = 0;
-
-        FAPI_TRY( mss::mrw_safemode_mem_throttled_n_commands_per_port(l_throttle_per_slot) );
-        FAPI_TRY( mss::getScom(i_target, MCA_MBA_FARB4Q, l_data) );
-
-        l_data.insertFromRight<MCA_MBA_FARB4Q_EMERGENCY_M, MCA_MBA_FARB4Q_EMERGENCY_M_LEN>(l_throttle_denominator);
-        l_data.insertFromRight<MCA_MBA_FARB4Q_EMERGENCY_N, MCA_MBA_FARB4Q_EMERGENCY_N_LEN>(l_throttle_per_slot);
-        FAPI_TRY( mss::putScom(i_target, MCA_MBA_FARB4Q, l_data) );
-    }
-
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
+    FAPI_ERR("Error setting scominits for power_thermal values");
     return fapi2::current_err;
 }
 
 ///
-/// @brief Disable emergency mode throttle for thermal_init
-/// @param[in] i_target the MCS target
-/// @return fapi2::FAPI2_RC_SUCCESS if ok
-/// @note Clears MCMODE0_ENABLE_EMER_THROTTLE bit in MCSMODE0
+/// @brief disable emergency mode throttle for thermal_init
+/// @param[in] i_target the mcs target
+/// @return fapi2::fapi2_rc_success if ok
+/// @note clears mcmode0_enable_emer_throttle bit in mcsmode0
 ///
 fapi2::ReturnCode disable_emergency_throttle (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
 {
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_TRY( mss::getScom(i_target, MCS_MCMODE0, l_data));
+    FAPI_TRY(mss::getScom(i_target, MCS_MCMODE0, l_data));
     l_data.clearBit<MCS_MCMODE0_ENABLE_EMER_THROTTLE>();
-    FAPI_TRY( mss::putScom(i_target, MCS_MCMODE0, l_data));
+    FAPI_TRY(mss::putScom(i_target, MCS_MCMODE0, l_data));
 
 fapi_try_exit:
     return fapi2::current_err;
