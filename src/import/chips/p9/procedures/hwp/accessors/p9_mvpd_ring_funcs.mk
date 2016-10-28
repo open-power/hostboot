@@ -26,4 +26,5 @@
 # Include the macros and things for MVPD ring procedures
 PROCEDURE=p9_mvpd_ring_funcs
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/utils/imageProcs)
+lib$(PROCEDURE)_DEPLIBS+=p9_ringId
 $(call BUILD_PROCEDURE)
