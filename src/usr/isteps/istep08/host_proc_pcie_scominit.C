@@ -1,0 +1,661 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/isteps/istep08/host_proc_pcie_scominit.C $            */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+/******************************************************************************/
+// Includes
+/******************************************************************************/
+#include <stdint.h>
+
+#include <trace/interface.H>
+#include <initservice/taskargs.H>
+#include <errl/errlentry.H>
+#include <isteps/hwpisteperror.H>
+#include <errl/errludtarget.H>
+#include <initservice/isteps_trace.H>
+#include <initservice/initserviceif.H>
+
+//  targeting support
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
+
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+#include <devicefw/userif.H>
+#include <config.h>
+#include "host_proc_pcie_scominit.H"
+#include <hwas/common/hwas.H>
+#include <hwas/common/deconfigGard.H>
+
+
+namespace   ISTEP_08
+{
+
+using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
+using   namespace   ERRORLOG;
+using   namespace   TARGETING;
+
+//******************************************************************************
+// Local logical equality operator for matching lane configuration rows
+//******************************************************************************
+
+inline bool operator==(
+    const laneConfigRow& i_lhs,
+    const laneConfigRow& i_rhs)
+    {
+        return ( memcmp(i_lhs.laneSet,i_rhs.laneSet,
+            sizeof(i_lhs.laneSet)) == 0);
+    }
+
+//******************************************************************************
+// _laneMaskToLaneWidth
+//******************************************************************************
+
+LaneWidth _laneMaskToLaneWidth(const uint16_t i_laneMask)
+{
+    LaneWidth laneWidth = LANE_WIDTH_NC;
+    if(i_laneMask == LANE_MASK_X16)
+    {
+        laneWidth = LANE_WIDTH_16X;
+    }
+    else if(   (i_laneMask == LANE_MASK_X8_GRP0)
+            || (i_laneMask == LANE_MASK_X8_GRP1))
+    {
+        laneWidth = LANE_WIDTH_8X;
+    }
+    else if(   (i_laneMask == LANE_MASK_X4_GRP0)
+            || (i_laneMask == LANE_MASK_X4_GRP1))
+    {
+        laneWidth = LANE_WIDTH_4X;
+    }
+
+    return laneWidth;
+}
+
+//******************************************************************************
+// _deconfigPhbsBasedOnPhbMask
+//******************************************************************************
+
+void _deconfigPhbsBasedOnPhbMask(
+    TARGETING::ConstTargetHandle_t const       i_procTarget,
+    TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type& i_phbActiveMask)
+{
+    uint8_t phbNum = 0;
+    errlHndl_t l_err = NULL;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        ENTER_MRK "_deconfigPhbsBasedOnPhbMask: Proc target HUID = "
+        "0x%08X, PHB active mask = 0x%02X.", i_procTarget ?
+        i_procTarget->getAttr<TARGETING::ATTR_HUID>() : 0, i_phbActiveMask);
+
+    // PHB mask bits start at the left most bit - so we must shift the bits
+    // right in order to get the correct masks. This number below should
+    // always be 7.
+    const size_t bitsToRightShift =
+        ((sizeof(i_phbActiveMask)*BITS_PER_BYTE) - 1);
+
+    // Get every functional PEC under the Proc
+    TARGETING::TargetHandleList funcPecList;
+    (void)TARGETING::getChildChiplets(
+        funcPecList,i_procTarget,TARGETING::TYPE_PEC);
+
+     for (TARGETING::TargetHandleList::const_iterator pecItr
+            = funcPecList.begin(); pecItr != funcPecList.end(); ++pecItr)
+    {
+        TargetHandle_t l_pec = *pecItr;
+
+        // Get pec chip's functional PHB units
+        TARGETING::TargetHandleList funcPhbList;
+        (void)TARGETING::getChildChiplets(
+            funcPhbList,l_pec,TARGETING::TYPE_PHB);
+
+        // i_phbActiveMask is a bitmask whose leftmost bit corresponds to
+        // PHB0, followed by bits for PHB1, PHB2, PHB3, PHB4, and PBH5. The
+        // remaining bits are ignored. We need to compare each PHB mask to
+        // its respective PHB and deconfigure it if needed.
+        for (TARGETING::TargetHandleList::const_iterator phbItr
+                = funcPhbList.begin(); phbItr != funcPhbList.end(); ++phbItr)
+        {
+            TargetHandle_t l_phb = *phbItr;
+
+            // Get the PHB unit number
+            phbNum = l_phb->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+            // Subtract the PHB unit number from the constant bitsToRightShift
+            // in order to get the correct amount of bits to shift right.
+            // e.g. for PHB0, the unit number is 0, bitsToRightShift-0 = 7.
+            // We will shift i_phbActiveMask 7 bits right, which means we are
+            // examining bit 0 of the PHB mask. If it is not set - deconfigure
+            // the respective PHB
+            if (!((i_phbActiveMask >> (bitsToRightShift - phbNum)) & 1))
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "PHB %d on PEC %d has been found INACTIVE. Deconfiguring "
+                    "PHB %d.", phbNum,
+                    l_pec->getAttr<TARGETING::ATTR_CHIP_UNIT>(), phbNum);
+
+                l_err = HWAS::theDeconfigGard().deconfigureTarget(
+                     *l_phb, HWAS::DeconfigGard::DECONFIGURED_BY_PHB_DECONFIG);
+
+                if (l_err)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                        "_deconfigPhbsBasedOnPhbMask: Error deconfiguring PHB "
+                        "%d  on PEC %d.", phbNum,
+                        l_pec->getAttr<TARGETING::ATTR_HUID>());
+
+                    ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
+
+                    // Try to deconfigure any other PHBs
+                    delete l_err;
+                    l_err = NULL;
+                }
+            }
+        }//PHB loop
+    }//PEC loop
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        EXIT_MRK "_deconfigPhbsBasedOnPhbMask: i_phbActiveMask = 0x%02X",
+        i_phbActiveMask);
+
+    return;
+}
+
+//******************************************************************************
+// _queryIopsToBifurcateAndPhbsToDisable
+//******************************************************************************
+
+#ifdef DYNAMIC_BIFURCATION
+// Normally a x16 PCIE adapter is driven by one PHB in the processor.
+// Some x16 adapters have two logically different devices integrated
+// onto the same adapter, each acting as a x8 PCIE endpoint driven by
+// its own PHB.  The ability to detect which type of PCIE adapter is
+// present and dynamically reconfigure the PCIE langes / PHBs to support
+// whatever is present is called 'dynamic bifurcation'.  This feature is
+// not officially supported however hooks remain in place to add that
+// support easily.  To enable it, define the DYNAMIC_BIFURCATION flag
+// and implement the guts of the
+// _queryIopsToBifurcateAndPhbsToDisable function.
+
+errlHndl_t _queryIopsToBifurcateAndPhbsToDisable(
+    TARGETING::ConstTargetHandle_t const       i_pecTarget,
+    BifurcatedIopsContainer&                   o_iopList,
+    TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type& o_disabledPhbsMask)
+{
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        ENTER_MRK "_queryIopsToBifurcateAndPhbsToDisable: PEC target "
+        "HUID = 0x%08X.", i_pecTarget ?
+            i_pecTarget->getAttr<TARGETING::ATTR_HUID>() : 0);
+
+    errlHndl_t pError = NULL;
+    o_iopList.clear();
+    o_disabledPhbsMask = 0;
+
+    do {
+
+    // Extension point to return bifurcated IOPs and PHBs to disable.
+    // Assuming no extensions are added, the function returns no IOPs to
+    // bifurcate and no PHBs to disable
+
+    // If implemented, this function should only return error on software code
+    // bug.  Any other condition should result in IOPs not being bifurcated and
+    // host taking care of that condition.
+
+    } while(0);
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        EXIT_MRK "_queryIopsToBifurcateAndPhbsToDisable: EID = 0x%08X, "
+        "PLID = 0x%08X, RC = 0x%08X.",
+        ERRL_GETEID_SAFE(pError),ERRL_GETPLID_SAFE(pError),
+        ERRL_GETRC_SAFE(pError));
+
+    return pError;
+}
+
+#endif
+//*****************************************************************************
+// computeProcPcieConfigAttrs
+//******************************************************************************
+errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
+{
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        ENTER_MRK "computeProcPcieConfigAttrs: Proc chip target HUID = "
+        "0x%08X.",
+        i_pProcChipTarget ?
+            i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>() : 0);
+
+    // Currently there are three PEC config tables for procs with 48 usable PCIE
+    // lanes. In general, the code accumulates the current configuration of
+    // the PECs from the MRW and other dynamic information(such as bifurcation)
+    // then matches that config to one of the rows in the table.  Once a match
+    // is discovered, the PEC config value is  pulled from the matching row and
+    // set in the attributes.
+    const laneConfigRow pec0_laneConfigTable[] =
+        {{{LANE_WIDTH_16X,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_NC},
+           0x00,PHB0_MASK},
+        };
+
+    const laneConfigRow pec1_laneConfigTable[] =
+        {{{LANE_WIDTH_8X,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_8X,
+           LANE_WIDTH_NC},
+           0x00,PHB1_MASK|PHB2_MASK},
+        };
+
+    const laneConfigRow pec2_laneConfigTable[] =
+        {{{LANE_WIDTH_16X,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_NC},
+           0x00,PHB3_MASK},
+
+         {{LANE_WIDTH_8X,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_8X,
+           LANE_WIDTH_NC},
+           0x10,PHB3_MASK|PHB4_MASK},
+
+         {{LANE_WIDTH_8X,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_4X,
+           LANE_WIDTH_4X},
+           0x20,PHB3_MASK|PHB4_MASK|PHB5_MASK},
+        };
+
+    const laneConfigRow* pec0_end = pec0_laneConfigTable +
+        (  sizeof(pec0_laneConfigTable)
+         / sizeof(pec0_laneConfigTable[0]));
+
+    const laneConfigRow* pec1_end = pec1_laneConfigTable +
+        (  sizeof(pec1_laneConfigTable)
+         / sizeof(pec1_laneConfigTable[0]));
+
+    const laneConfigRow* pec2_end = pec2_laneConfigTable +
+        (  sizeof(pec2_laneConfigTable)
+         / sizeof(pec2_laneConfigTable[0]));
+
+    errlHndl_t pError = NULL;
+    const laneConfigRow* pLaneConfigTableBegin = NULL;
+    const laneConfigRow* pLaneConfigTableEnd = NULL;
+    TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type procPhbActiveMask = 0;
+
+    do
+    {
+        assert((i_pProcChipTarget != NULL),"computeProcPcieConfigs was "
+            "passed in a NULL processor target");
+
+        const TARGETING::ATTR_CLASS_type targetClass
+            = i_pProcChipTarget->getAttr<TARGETING::ATTR_CLASS>();
+        const TARGETING::ATTR_TYPE_type targetType
+            = i_pProcChipTarget->getAttr<TARGETING::ATTR_TYPE>();
+        const bool targetPresent =
+            i_pProcChipTarget->getAttr<TARGETING::ATTR_HWAS_STATE>()
+                .present;
+
+        assert(((targetClass == TARGETING::CLASS_CHIP)
+           || (targetType == TARGETING::TYPE_PROC)
+           || (targetPresent)),"computeProcPcieConfigs - input either not a "
+            "processor chip or not present");
+
+        // Set up vector of PECs under this processor
+        PredicateCTM predPec(CLASS_UNIT, TYPE_PEC);
+        TargetHandleList l_pecList;
+        targetService().getAssociated(l_pecList,
+                                      i_pProcChipTarget,
+                                      TargetService::CHILD,
+                                      TargetService::ALL,
+                                      &predPec);
+
+        // Even if the list is empty we still want to go to the bottom of the
+        // fucntion and set PROC_PHB_ACTIVE_MASK
+
+        // Iterate over every PEC to find its config, swap, reversal and
+        // bifurcation attributes
+        for(TargetHandleList::iterator l_pPecIt = l_pecList.begin();
+               l_pPecIt != l_pecList.end(); ++l_pPecIt)
+        {
+            TargetHandle_t l_pec = *l_pPecIt;
+            // Get the PEC id
+            uint8_t l_pecID = l_pec->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+            // Select the correct PEC config table
+            if(l_pecID == 0)
+            {
+                pLaneConfigTableBegin = pec0_laneConfigTable;
+                pLaneConfigTableEnd = pec0_end;
+            }
+            else if (l_pecID == 1)
+            {
+                pLaneConfigTableBegin = pec1_laneConfigTable;
+                pLaneConfigTableEnd = pec1_end;
+            }
+            else if (l_pecID == 2)
+            {
+                pLaneConfigTableBegin = pec2_laneConfigTable;
+                pLaneConfigTableEnd = pec2_end;
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    ERR_MRK "computeProcPcieConfigAttrs> "
+                    "Code bug! Unsupported PEC ID attribute for "
+                    "processor with HUID of 0x%08X.  Expected 0,1 or 2, but "
+                    "read a value of %d. PROC_PCIE_NUM_PEC is %d.",
+                    i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>(),l_pecID,
+                    i_pProcChipTarget->getAttr
+                        <TARGETING::ATTR_PROC_PCIE_NUM_PEC>());
+
+                /*@
+                 * @errortype
+                 * @moduleid         MOD_COMPUTE_PCIE_CONFIG_ATTRS
+                 * @reasoncode       RC_INVALID_ATTR_VALUE
+                 * @userdata1[0:15]  Target's HUID
+                 * @userdata1[16:31] PEC id number
+                 * @userdata2[32:63] ATTR_PROC_PCIE_NUM_PEC attribute value
+                 * @devdesc          Illegal ATTR_PROC_PCIE_NUM_PEC attribute
+                 *                   read from a processor chip target.
+                 * @custdesc         A problem isolated to firmware or firmware
+                 *                   customization occurred during the IPL of
+                 *                   the system.
+                 */
+                pError = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    MOD_COMPUTE_PCIE_CONFIG_ATTRS,
+                    RC_INVALID_ATTR_VALUE,
+                    TWO_UINT32_TO_UINT64(TWO_UINT16_TO_UINT32(
+                        i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>(),
+                        l_pecID),
+                        i_pProcChipTarget->getAttr<
+                            TARGETING::ATTR_PROC_PCIE_NUM_PEC>()),
+                    0,
+                    true);
+                ERRORLOG::ErrlUserDetailsTarget(i_pProcChipTarget)
+                    .addToLog(pError);
+                pError->collectTrace(ISTEP_COMP_NAME);
+                break;
+            }
+
+            TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type disabledPhbs = 0;
+
+#ifdef DYNAMIC_BIFURCATION
+
+            // Figure out which IOPs need bifurcation, and as a result, which
+            // PHBs to disable
+            BifurcatedIopsContainer iopList;
+            pError = _queryIopsToBifurcateAndPhbsToDisable(
+                l_pec,
+                iopList,
+                disabledPhbs);
+            if(pError!=NULL)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    ERR_MRK "computeProcPcieConfigAttrs> "
+                    "Failed in call to _queryIopsToBifurcateAndPhbsToDisable; "
+                    "Proc HUID = 0x%08X.",
+                    i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>());
+                break;
+            }
+#endif
+
+            TARGETING::ATTR_PEC_PCIE_LANE_MASK_NON_BIFURCATED_type
+                laneMaskNonBifurcated = {0};
+            assert(l_pec->tryGetAttr<
+                TARGETING::ATTR_PEC_PCIE_LANE_MASK_NON_BIFURCATED>(
+                    laneMaskNonBifurcated),"Failed to get "
+                    "ATTR_PEC_PCIE_LANE_MASK_NON_BIFURCATED attribute");
+
+            TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_NON_BIFURCATED_type
+                laneReversalNonBifurcated = {0};
+            assert(l_pec->tryGetAttr<
+                TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_NON_BIFURCATED>(
+                    laneReversalNonBifurcated),"Failed to get "
+                    "ATTR_PEC_PCIE_IOP_REVERSAL_NON_BIFURCATED attribute");
+
+            TARGETING::ATTR_PEC_PCIE_IOP_SWAP_NON_BIFURCATED_type
+                laneSwapNonBifurcated = 0;
+            assert(l_pec->tryGetAttr<
+                TARGETING::ATTR_PEC_PCIE_IOP_SWAP_NON_BIFURCATED>(
+                    laneSwapNonBifurcated),"Failed to get "
+                    "ATTR_PEC_PCIE_IOP_SWAP_NON_BIFURCATED attribute");
+
+            TARGETING::ATTR_PROC_PCIE_LANE_MASK_type
+                effectiveLaneMask = {0};
+            memcpy(effectiveLaneMask,laneMaskNonBifurcated,
+                sizeof(effectiveLaneMask));
+
+            TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_type
+                effectiveLaneReversal = {0};
+            memcpy(effectiveLaneReversal,laneReversalNonBifurcated,
+                sizeof(effectiveLaneReversal));
+
+            TARGETING::ATTR_PROC_PCIE_IOP_SWAP_type
+                effectiveLaneSwap = 0;
+
+            // For every lane group of a PEC, we need to see if the lane swap
+            // bit has been set. If the lane is used, and the bit is not set
+            // we set the lane swap bit. Lane swap attribute is a single
+            // attribute per PEC, so once the lane swap is set for one lane
+            // group it will be set for the whole PEC.
+            for(size_t laneGroup = 0;
+                laneGroup <
+                    (sizeof(laneSwapNonBifurcated)/sizeof(effectiveLaneSwap));
+                ++laneGroup)
+            {
+                // If lanes are used and swap not yet set, then set it
+                if((effectiveLaneMask[laneGroup]) && (!effectiveLaneSwap))
+                {
+                     effectiveLaneSwap = laneSwapNonBifurcated;
+                     break;
+                }
+            }
+
+#ifdef DYNAMIC_BIFURCATION
+            TARGETING::ATTR_PEC_PCIE_LANE_MASK_BIFURCATED_type
+                laneMaskBifurcated = {0};
+            assert(l_pec->tryGetAttr<
+                TARGETING::ATTR_PEC_PCIE_LANE_MASK_BIFURCATED>(
+                    laneMaskBifurcated),"Failed to get "
+                    "ATTR_PEC_PCIE_LANE_MASK_BIFURCATED attribute");
+
+            TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_BIFURCATED_type
+                laneReversalBifurcated = {0};
+            assert(l_pec->tryGetAttr<
+                TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_BIFURCATED>(
+                    laneReversalBifurcated),"Failed to get "
+                    "ATTR_PEC_PCIE_IOP_REVERSAL_BIFURCATED attribute");
+
+            TARGETING::ATTR_PEC_PCIE_IOP_SWAP_BIFURCATED_type
+                bifurcatedSwap = {0};
+            assert(l_pec->tryGetAttr<
+                TARGETING::ATTR_PEC_PCIE_IOP_SWAP_BIFURCATED>(
+                    bifurcatedSwap),"Failed to get "
+                    "ATTR_PEC_PCIE_IOP_SWAP_BIFURCATED attribute");
+
+            // Apply any IOP bifurcation settings
+            for(BifurcatedIopsContainer::const_iterator iopItr =
+                iopList.begin(); iopItr != iopList.end();
+                ++iopItr)
+            {
+                BifurcatedIopsContainer::const_reference iop = *iopItr;
+                memcpy(
+                    &effectiveLaneReversal[0],
+                    &laneReversalBifurcated[0],
+                    sizeof(effectiveLaneReversal)/1);
+
+                memcpy(
+                    &effectiveLaneMask[0],
+                    &laneMaskBifurcated[0],
+                    sizeof(effectiveLaneMask)/1);
+
+                // For every lane group of a PEC we need to see if the lane swap
+                // bit has been set. If the lane is used, and the bit is not set
+                // we set the lane swap bit. Lane swap attribute is a single
+                // attribute per PEC, so once the lane swap is set for one lane
+                // group it will be set for the whole PEC.
+                for(size_t laneGroup=0;
+                    laneGroup <
+                        (sizeof(bifurcatedSwap)/sizeof(effectiveLaneSwap));
+                    ++laneGroup)
+                {
+                    // If lanes are used and swap not yet set, then set it
+                    if((effectiveLaneMask[laneGroup]) && (!effectiveLaneSwap))
+                    {
+                        effectiveLaneSwap = bifurcatedSwap[laneGroup];
+                        break;
+                    }
+                }
+            }
+#endif
+
+            l_pec->setAttr<
+                TARGETING::ATTR_PROC_PCIE_LANE_MASK>(effectiveLaneMask);
+
+            l_pec->setAttr<
+                TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL>(effectiveLaneReversal);
+
+            l_pec->setAttr<
+                TARGETING::ATTR_PROC_PCIE_IOP_SWAP>(effectiveLaneSwap);
+
+            TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type pecPhbActiveMask = 0;
+            TARGETING::ATTR_PROC_PCIE_IOP_CONFIG_type iopConfig = 0;
+
+            laneConfigRow effectiveConfig =
+                  {{LANE_WIDTH_NC,
+                   LANE_WIDTH_NC,
+                   LANE_WIDTH_NC,
+                   LANE_WIDTH_NC},
+                    0x00,PHB_MASK_NA};
+
+            // Transform effective config to match lane config table format
+            for(size_t laneGroup = 0;
+                laneGroup < MAX_LANE_GROUPS_PER_PEC;
+                 ++laneGroup)
+            {
+                effectiveConfig.laneSet[laneGroup].width
+                    = _laneMaskToLaneWidth(effectiveLaneMask[laneGroup]);
+            }
+
+            const laneConfigRow* laneConfigItr =
+                std::find(
+                    pLaneConfigTableBegin,
+                    pLaneConfigTableEnd,
+                    effectiveConfig);
+
+            if(laneConfigItr != pLaneConfigTableEnd)
+            {
+                iopConfig = laneConfigItr->laneConfig;
+                pecPhbActiveMask = laneConfigItr->phbActive;
+                // Disable applicable PHBs
+                pecPhbActiveMask &= (~disabledPhbs);
+                // Add the PEC phb mask to the overall Proc PHB mask
+                procPhbActiveMask |= pecPhbActiveMask;
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "MATT TRACE PEC phb active mask = 0x%02X. "
+                    "PROC phb active mask = 0x%02X.",
+                    pecPhbActiveMask, procPhbActiveMask);
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    ERR_MRK "computeProcPcieConfigAttrs> "
+                    "Code bug! PEC PCIE IOP configuration not found. "
+                    "Continuing with no PHBs active. "
+                    "IOP0 Lane set 0: Lane mask = 0x%04X "
+                    "IOP0 Lane set 1: Lane mask = 0x%04X "
+                    "IOP0 Lane set 2: Lane mask = 0x%04X ",
+                    effectiveLaneMask[0],
+                    effectiveLaneMask[1],
+                    effectiveLaneMask[2]);
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "PEC chip target number 0x%08X, HUID = 0x%08X.",
+                    l_pecID, l_pec->getAttr<TARGETING::ATTR_HUID>());
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Proc chip target HUID = 0x%08X.",
+                    i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>());
+                /*@
+                 * @errortype
+                 * @moduleid         MOD_COMPUTE_PCIE_CONFIG_ATTRS
+                 * @reasoncode       RC_INVALID_CONFIGURATION
+                 * @userdata1[0:31]  Target processor chip's HUID
+                 * @userdata1[32:63] Target PEC HUID
+                 * @userdata2[0:15]  PEC lane set 0 lane mask
+                 * @userdata2[16:31] PEC lane set 1 lane mask
+                 * @userdata2[32:63] PEC lane set 2 lane mask
+                 * @devdesc          No valid PCIE IOP configuration found.  All
+                 *                   PHBs on the processor will be disabled.
+                 * @custdesc         A problem isolated to firmware or firmware
+                 *                   customization occurred during the IPL of
+                 *                   the system.
+                 */
+                pError = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    MOD_COMPUTE_PCIE_CONFIG_ATTRS,
+                    RC_INVALID_CONFIGURATION,
+                    TWO_UINT32_TO_UINT64(
+                        i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>(),
+                        l_pec->getAttr<TARGETING::ATTR_HUID>()),
+                    TWO_UINT32_TO_UINT64(
+                        TWO_UINT16_TO_UINT32(
+                        effectiveLaneMask[0],
+                        effectiveLaneMask[1]),
+                        effectiveLaneMask[2]),
+                    true);
+                ERRORLOG::ErrlUserDetailsTarget(i_pProcChipTarget)
+                    .addToLog(pError);
+                pError->collectTrace(ISTEP_COMP_NAME);
+                errlCommit(pError, ISTEP_COMP_ID);
+            }
+
+            procPhbActiveMask |= pecPhbActiveMask;
+            l_pec->setAttr<
+                TARGETING::ATTR_PROC_PCIE_IOP_CONFIG>(iopConfig);
+
+        }// PEC loop
+
+        // Set the procPhbActiveMask
+        i_pProcChipTarget->setAttr<
+            TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE>(procPhbActiveMask);
+
+        // Only deconfigure the PHB's once we have the phbActiveMask attribute
+        // set up for the whole processor
+        (void)_deconfigPhbsBasedOnPhbMask(
+             i_pProcChipTarget,
+             procPhbActiveMask);
+
+    } while(0);
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        EXIT_MRK "computeProcPcieConfigAttrs: EID = 0x%08X, PLID = 0x%08X, "
+        "RC = 0x%08X.",
+        ERRL_GETEID_SAFE(pError),ERRL_GETPLID_SAFE(pError),
+        ERRL_GETRC_SAFE(pError));
+
+    return pError;
+}
+
+};

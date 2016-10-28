@@ -59,7 +59,7 @@
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
-
+#include "host_proc_pcie_scominit.H"
 #include <p9_pcie_scominit.H>
 
 namespace   ISTEP_08
@@ -100,8 +100,7 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
         {
             // Unlike SP which operates on all present procs, the SP-less
             // algorithm only needs to operate on functional ones
-            // TODO-RTC:149525
-            //l_errl = computeProcPcieConfigAttrs(l_cpu_target);
+            l_errl = computeProcPcieConfigAttrs(l_cpu_target);
             if(l_errl != NULL)
             {
                 // Any failure to configure PCIE that makes it to this handler

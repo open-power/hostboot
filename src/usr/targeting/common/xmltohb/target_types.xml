@@ -998,15 +998,19 @@
     <attribute><id>I2C_SLAVE_ADDRESS</id></attribute>
     <attribute>
         <id>PROC_PCIE_NUM_PHB</id>
-        <default>3</default>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>PROC_PCIE_NUM_IOP</id>
-        <default>2</default>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_NUM_PEC</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>PROC_PCIE_NUM_LANES</id>
-        <default>24</default>
+        <default>48</default>
     </attribute>
     <attribute><id>PROC_PCIE_PHB_ACTIVE</id></attribute>
     <attribute><id>PROC_DCM_INSTALLED</id></attribute>
@@ -2006,6 +2010,16 @@
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default> <!-- GARD -->
     </attribute>
+
+    <attribute><id>PROC_PCIE_LANE_MASK</id></attribute>
+    <attribute><id>PEC_PCIE_LANE_MASK_NON_BIFURCATED</id></attribute>
+    <attribute><id>PEC_PCIE_LANE_MASK_BIFURCATED</id></attribute>
+    <attribute><id>PEC_PCIE_IOP_SWAP_NON_BIFURCATED</id></attribute>
+    <attribute><id>PEC_PCIE_IOP_SWAP_BIFURCATED</id></attribute>
+    <attribute><id>PEC_PCIE_IOP_REVERSAL</id></attribute>
+    <attribute><id>PEC_PCIE_IOP_REVERSAL_NON_BIFURCATED</id></attribute>
+    <attribute><id>PEC_PCIE_IOP_REVERSAL_BIFURCATED</id></attribute>
+
 </targetType><!-- unit-pec-power9 -->
 
 <!-- PHB
@@ -2020,7 +2034,7 @@
     </attribute>
     <attribute>
         <id>PROC_PCIE_NUM_LANES</id>
-        <default>32</default>
+        <default>48</default>
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
