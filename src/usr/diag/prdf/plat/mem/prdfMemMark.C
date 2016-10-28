@@ -41,7 +41,6 @@ namespace MarkStore
 //                  Utilities to read/write markstore (MCA)
 //##############################################################################
 
-// TODO: RTC 163595
 //  - We have the ability to set chip marks via the FWMSx registers, but there
 //    are only eight repairs total that we can use in the FWMSx registers.
 //    Therefore we will always use the HWMSx registers for the chip marks on
@@ -66,15 +65,37 @@ uint32_t readChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
     #define PRDF_FUNC "[readChipMark<TYPE_MCA>] "
 
     uint32_t o_rc = SUCCESS;
-
     o_mark = MemMark(); // ensure invalid
 
-    // TODO: RTC 163595
-    //  - HWMSx[0:7] contains the Galois field.
-    //  - If the Galois field is zero, do nothing and use the default contructor
-    //    for o_mark.
+    // get the register name
+    char msName[64];
+    sprintf( msName, "HW_MS%x", i_rank.getMaster() );
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+    // get the mark store register
+    SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
+
+    o_rc = hwms->Read();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Read() failed on %s: i_chip=0x%08x",
+                  msName, i_chip->getHuid() );
+    }
+    else
+    {
+        // HWMSx[0:7] contains the Galois field
+        uint8_t galois = hwms->GetBitFieldJustified(0,8);
+
+        // If the Galois field is zero, do nothing and use the default
+        // constructor for o_mark
+        if (0 != galois)
+        {
+            // get the target
+            TargetHandle_t trgt = i_chip->getTrgt();
+
+            // get the MemMark
+            o_mark = MemMark(trgt, i_rank, galois);
+        }
+    }
 
     return o_rc;
 
@@ -94,14 +115,30 @@ uint32_t writeChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
-    // TODO: RTC 163595
-    //  - HWMSx[0:7] set this to the Galois field.
-    //  - HWMSx[8]   confirmed with the hardware team that this will not trigger
-    //               another MPE attention and that they want this set to 1.
-    //  - HWMSx[9]   set to 1 to enable exit 1 for markstore reads. This is a
-    //               performance improvement because we know the DRAM is bad.
+    // get the register name
+    char msName[64];
+    sprintf( msName, "HW_MS%x", i_rank.getMaster() );
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+    // get the mark store register
+    SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
+
+    // HWMSx[0:7] set this to the Galois field.
+    hwms->SetBitFieldJustified( 0, 8, i_mark.getGalois() );
+
+    // HWMSx[8] confirmed with the hardware team that this will not trigger
+    //          another MPE attention and that they want this set to 1.
+    hwms->SetBit( 8 );
+
+    // HWMSx[9] set to 1 to enable exit 1 for markstore reads. This is a
+    //          performance improvement because we know the DRAM is bad.
+    hwms->SetBit( 9 );
+
+    o_rc = hwms->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on %s: i_chip=0x%08x",
+                  msName, i_chip->getHuid() );
+    }
 
     return o_rc;
 
@@ -118,10 +155,22 @@ uint32_t clearChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
-    // TODO: RTC 163595
-    //  - Clear the entire HWMSx register.
+    // get the register name
+    char msName[64];
+    sprintf( msName, "HW_MS%x", i_rank.getMaster() );
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+    // get the mark store register
+    SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
+
+    // Clear the entire HWMSx register.
+    hwms->clearAllBits();
+
+    o_rc = hwms->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on %s: i_chip=0x%08x",
+                  msName, i_chip->getHuid() );
+    }
 
     return o_rc;
 
@@ -137,21 +186,53 @@ uint32_t readSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
     #define PRDF_FUNC "[readSymbolMark<TYPE_MCA>] "
 
     uint32_t o_rc = SUCCESS;
-
     o_mark = MemMark(); // ensure invalid
 
-    // TODO: RTC 163595
-    //  - FWMSx[0:7] contains the Galois field.
-    //  - If the Galois field is zero:
-    //      - Do nothing and use the default contructor for o_mark.
-    //  - Otherwise, check the other fields for accurancy (assert on failure):
-    //      - FWMSx[8]     should be 1 to indicate a symbol mark.
-    //      - FWMSx[9:11]  should be 0b101 to indicate master rank.
-    //      - FWMSx[12:14] is the master rank and should match the register
-    //                     number.
-    //      - FWMSx[15:22] should be all zeros
+    // get the register name
+    char msName[64];
+    sprintf( msName, "FW_MS%x", i_rank.getMaster() );
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+    // get the mark store register
+    SCAN_COMM_REGISTER_CLASS * fwms = i_chip->getRegister( msName );
+
+    o_rc = fwms->Read();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Read() failed on %s: i_chip=0x%08x",
+                  msName, i_chip->getHuid() );
+    }
+    else
+    {
+        // FWMSx[0:7] contains the Galois field
+        uint8_t galois = fwms->GetBitFieldJustified(0,8);
+
+        // If the Galois field is zero, do nothing and use the default
+        // constructor for o_mark
+        if (0 != galois)
+        {
+            // check other fields for accuracy - assert on failure
+
+            // FWMSx[8] should be 1 to indicate a symbol mark.
+            PRDF_ASSERT( fwms->IsBitSet(8) );
+
+            // FWMSx[9:11] should be 0b101 to indicate master rank.
+            PRDF_ASSERT( 0x5 == fwms->GetBitFieldJustified(9,3) );
+
+            // FWMSx[12:14] is the master rank and should match the register
+            //              number.
+            PRDF_ASSERT( i_rank.getMaster() ==
+                         fwms->GetBitFieldJustified(12,3) );
+
+            // FWMSx[15:22] should be all zeros
+            PRDF_ASSERT( 0x0 == fwms->GetBitFieldJustified(15,8) );
+
+            // get the target
+            TargetHandle_t trgt = i_chip->getTrgt();
+
+            // get the MemMark
+            o_mark = MemMark(trgt, i_rank, galois);
+        }
+    }
 
     return o_rc;
 
@@ -171,17 +252,39 @@ uint32_t writeSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
-    // TODO: RTC 163595
-    // - FWMSx[0:7]   set this to the Galois field.
-    // - FWMSx[8]     set to 1 to indicate a symbol mark.
-    // - FWMSx[9:11]  set to 0b101 to indicate master rank.
-    // - FWMSx[12:14] set this to the master rank which should match the
-    //                register number.
-    // - FWMSx[15:22] set to all zeros
-    // - FWMSx[23]    set to 1 to enable exit 1 for markstore reads. This is a
-    //                performance improvement because we know the symbol is bad.
+    // get the register name
+    char msName[64];
+    sprintf( msName, "FW_MS%x", i_rank.getMaster() );
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+    // get the mark store register
+    SCAN_COMM_REGISTER_CLASS * fwms = i_chip->getRegister( msName );
+
+    // FWMSx[0:7] set this to the Galois field.
+    fwms->SetBitFieldJustified( 0, 8, i_mark.getGalois() );
+
+    // FWMSx[8] set to 1 to indicate a symbol mark.
+    fwms->SetBit( 8 );
+
+    // FWMSx[9:11]  set to 0b101 to indicate master rank.
+    fwms->SetBitFieldJustified( 9, 3, 0x5 );
+
+    // FWMSx[12:14] set this to the master rank which should match the
+    //              register number.
+    fwms->SetBitFieldJustified( 12, 3, i_rank.getMaster() );
+
+    // FWMSx[15:22] set to all zeros
+    fwms->SetBitFieldJustified( 15, 8, 0x0 );
+
+    // FWMSx[23] set to 1 to enable exit 1 for markstore reads. This is a
+    //           performance improvement because we know the symbol is bad.
+    fwms->SetBit( 23 );
+
+    o_rc = fwms->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on %s: i_chip=0x%08x",
+                  msName, i_chip->getHuid() );
+    }
 
     return o_rc;
 
@@ -198,10 +301,22 @@ uint32_t clearSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
-    // TODO: RTC 163595
-    //  - Clear the entire FWMSx register.
+    // get the register name
+    char msName[64];
+    sprintf( msName, "FW_MS%x", i_rank.getMaster() );
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+    // get the mark store register
+    SCAN_COMM_REGISTER_CLASS * fwms = i_chip->getRegister( msName );
+
+    // Clear the entire FWMSx register.
+    fwms->clearAllBits();
+
+    o_rc = fwms->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on %s: i_chip=0x%08x",
+                  msName, i_chip->getHuid() );
+    }
 
     return o_rc;
 
