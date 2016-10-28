@@ -329,17 +329,17 @@ group gOB_LFIR filter singlebit
     /** OB_LFIR[1]
      *  Local errors from GPIO
      */
-    (rOB_LFIR, bit(1)) ? defaultMaskedError;
+    (rOB_LFIR, bit(1)) ? self_th_32perDay;
 
     /** OB_LFIR[2]
      *  local err from CC
      */
-    (rOB_LFIR, bit(2)) ? defaultMaskedError;
+    (rOB_LFIR, bit(2)) ? self_th_32perDay;
 
     /** OB_LFIR[3]
      *  local err from CC
      */
-    (rOB_LFIR, bit(3)) ? defaultMaskedError;
+    (rOB_LFIR, bit(3)) ? self_th_32perDay;
 
     /** OB_LFIR[4]
      *  local err from PSC

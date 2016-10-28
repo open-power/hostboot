@@ -204,17 +204,17 @@ group gEQ_LFIR filter singlebit
     /** EQ_LFIR[1]
      *  Errors from Control
      */
-    (rEQ_LFIR, bit(1)) ? defaultMaskedError;
+    (rEQ_LFIR, bit(1)) ? self_th_32perDay;
 
     /** EQ_LFIR[2]
      *  local err from CC (PCB error)
      */
-    (rEQ_LFIR, bit(2)) ? defaultMaskedError;
+    (rEQ_LFIR, bit(2)) ? self_th_32perDay;
 
     /** EQ_LFIR[3]
      *  local err from CC
      */
-    (rEQ_LFIR, bit(3)) ? defaultMaskedError;
+    (rEQ_LFIR, bit(3)) ? self_th_32perDay;
 
     /** EQ_LFIR[4]
      *  local err from PSC
@@ -297,44 +297,44 @@ group gEQ_LFIR filter singlebit
     (rEQ_LFIR, bit(19)) ? defaultMaskedError;
 
     /** EQ_LFIR[20]
-     *  spare
+     *  Duty cycle adjust err for cache clk
      */
-    (rEQ_LFIR, bit(20)) ? defaultMaskedError;
+    (rEQ_LFIR, bit(20)) ? self_th_32perDay;
 
     /** EQ_LFIR[21]
-     *  local err from duty cycle adjust
+     *  Duty cycle adjust err for ex00_c0
      */
-    (rEQ_LFIR, bit(21)) ? defaultMaskedError;
+    (rEQ_LFIR, bit(21)) ? self_th_32perDay;
 
     /** EQ_LFIR[22]
-     *  local err from duty cycle adjust
+     *  Duty cycle adjust err for ex00_c1
      */
-    (rEQ_LFIR, bit(22)) ? defaultMaskedError;
+    (rEQ_LFIR, bit(22)) ? self_th_32perDay;
 
     /** EQ_LFIR[23]
-     *  local err from duty cycle adjust
+     *  Duty cycle adjust err for ex00_l2
      */
-    (rEQ_LFIR, bit(23)) ? defaultMaskedError;
+    (rEQ_LFIR, bit(23)) ? self_th_32perDay;
 
     /** EQ_LFIR[24]
-     *  local err from duty cycle adjust
+     *  local err from duty cycle adjust ex01_c0
      */
-    (rEQ_LFIR, bit(24)) ? defaultMaskedError;
+    (rEQ_LFIR, bit(24)) ? self_th_32perDay;
 
     /** EQ_LFIR[25]
-     *  local err from duty cycle adjust
+     *  Duty cycle adjust err for ex01_c1
      */
-    (rEQ_LFIR, bit(25)) ? defaultMaskedError;
+    (rEQ_LFIR, bit(25)) ? self_th_32perDay;
 
     /** EQ_LFIR[26]
-     *  local err from duty cycle adjust
+     *  Duty cycle adjust err for ex01_l2
      */
-    (rEQ_LFIR, bit(26)) ? defaultMaskedError;
+    (rEQ_LFIR, bit(26)) ? self_th_32perDay;
 
     /** EQ_LFIR[27]
      *  local err from skew adjust skewadj6way
      */
-    (rEQ_LFIR, bit(27)) ? defaultMaskedError;
+    (rEQ_LFIR, bit(27)) ? self_th_32perDay;
 
     /** EQ_LFIR[28:40]
      *  spare

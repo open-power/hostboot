@@ -247,17 +247,17 @@ group gEC_LFIR filter singlebit
     /** EC_LFIR[1]
      *  Errors from Control
      */
-    (rEC_LFIR, bit(1)) ? defaultMaskedError;
+    (rEC_LFIR, bit(1)) ? self_th_32perDay;
 
     /** EC_LFIR[2]
      *  local err from CC (PCB error)
      */
-    (rEC_LFIR, bit(2)) ? defaultMaskedError;
+    (rEC_LFIR, bit(2)) ? self_th_32perDay;
 
     /** EC_LFIR[3]
      *  local err from CC
      */
-    (rEC_LFIR, bit(3)) ? defaultMaskedError;
+    (rEC_LFIR, bit(3)) ? self_th_32perDay;
 
     /** EC_LFIR[4]
      *  local err from PSC
@@ -415,7 +415,7 @@ group gCOREFIR filter singlebit
     /** COREFIR[14]
      *  Machine check and ME = 0 Err
      */
-    (rCOREFIR, bit(14)) ? defaultMaskedError;
+    (rCOREFIR, bit(14)) ? self_th_1;
 
     /** COREFIR[15]
      *  LSU or IFU detected UE from L2
@@ -640,7 +640,7 @@ group gCOREFIR filter singlebit
     /** COREFIR[55]
      *  Nest hang detected, recovery attempted
      */
-    (rCOREFIR, bit(55)) ? defaultMaskedError;
+    (rCOREFIR, bit(55)) ? self_M_level2_L_th_1;
 
     /** COREFIR[56]
      *  Other Core Recoverable error

@@ -176,17 +176,17 @@ group gPCI_LFIR filter singlebit
     /** PCI_LFIR[1]
      *  local errors from GPIO
      */
-    (rPCI_LFIR, bit(1)) ? defaultMaskedError;
+    (rPCI_LFIR, bit(1)) ? self_th_32perDay;
 
     /** PCI_LFIR[2]
      *  local errors from CC
      */
-    (rPCI_LFIR, bit(2)) ? defaultMaskedError;
+    (rPCI_LFIR, bit(2)) ? self_th_32perDay;
 
     /** PCI_LFIR[3]
      *  local errors from cc
      */
-    (rPCI_LFIR, bit(3)) ? defaultMaskedError;
+    (rPCI_LFIR, bit(3)) ? self_th_32perDay;
 
     /** PCI_LFIR[4]
      *  pcb error from psc
