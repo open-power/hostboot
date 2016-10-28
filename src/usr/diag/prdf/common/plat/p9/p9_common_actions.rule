@@ -175,6 +175,13 @@ actionclass level2_M_self_L_th_1
     threshold1;
 };
 
+actionclass self_M_level2_L_th_1
+{
+    calloutSelfMed;
+    callout2ndLvlLow;
+    threshold1;
+};
+
 ################################################################################
 #                               Dump Types                                     #
 ################################################################################

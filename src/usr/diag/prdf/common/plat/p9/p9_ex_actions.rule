@@ -22,6 +22,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 actionclass level2_M_self_L_dump_SH
 {
     callout2ndLvlMed;
@@ -29,10 +30,10 @@ actionclass level2_M_self_L_dump_SH
     dumpSH;
 };
 
-actionclass self_M_level2_L_th_1
+actionclass level2_M_proc_L_th_1
 {
-    calloutSelfMed;
-    callout2ndLvlLow;
+    callout2ndLvlMed;
+    callout(connected(TYPE_PROC), MRU_LOW);
     threshold1;
 };
 
@@ -41,5 +42,25 @@ actionclass l3_cache_ce
     calloutSelfHigh;
     threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L3_CACHE_CES) );
     funccall("L3CE");
+};
+
+actionclass l3_cache_ue
+{
+    TBDDefaultCallout;
+};
+
+actionclass l2_cache_ce
+{
+    TBDDefaultCallout;
+};
+
+actionclass l2_cache_ue
+{
+    TBDDefaultCallout;
+};
+
+actionclass l2_power_bus_ce
+{
+    TBDDefaultCallout;
 };
 

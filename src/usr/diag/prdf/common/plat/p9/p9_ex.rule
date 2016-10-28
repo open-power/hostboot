@@ -251,12 +251,12 @@ group gL2FIR filter singlebit
     /** L2FIR[0]
      *  L2 cache read CE
      */
-    (rL2FIR, bit(0)) ? defaultMaskedError;
+    (rL2FIR, bit(0)) ? l2_cache_ce;
 
     /** L2FIR[1]
      *  L2 cache read UE
      */
-    (rL2FIR, bit(1)) ? defaultMaskedError;
+    (rL2FIR, bit(1)) ? l2_cache_ue;
 
     /** L2FIR[2]
      *  L2 cache read SUE
@@ -321,7 +321,7 @@ group gL2FIR filter singlebit
     /** L2FIR[14]
      *  Hardware control error
      */
-    (rL2FIR, bit(14)) ? defaultMaskedError;
+    (rL2FIR, bit(14)) ? level2_M_proc_L_th_1;
 
     /** L2FIR[15]
      *  LRU all members in a class line deleted
@@ -346,7 +346,7 @@ group gL2FIR filter singlebit
     /** L2FIR[19]
      *  Rc or NCU Pb data CE error
      */
-    (rL2FIR, bit(19)) ? defaultMaskedError;
+    (rL2FIR, bit(19)) ? l2_power_bus_ce;
 
     /** L2FIR[20]
      *  RC or NCU Pb data UE error
@@ -603,7 +603,7 @@ group gL3FIR filter singlebit
     /** L3FIR[5]
      *  UE detected on L3 cache read
      */
-    (rL3FIR, bit(5)) ? defaultMaskedError;
+    (rL3FIR, bit(5)) ? l3_cache_ue;
 
     /** L3FIR[6]
      *  SUE detected on L3 cache read
@@ -633,7 +633,7 @@ group gL3FIR filter singlebit
     /** L3FIR[11]
      *  L3 cache write data UE from L2
      */
-    (rL3FIR, bit(11)) ? defaultMaskedError;
+    (rL3FIR, bit(11)) ? l3_cache_ue;
 
     /** L3FIR[12]
      *  L3 cache write SUE from L2

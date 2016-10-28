@@ -2218,19 +2218,19 @@ group gTP_LFIR filter singlebit
     (rTP_LFIR, bit(0)) ? self_th_32perDay;
 
     /** TP_LFIR[1]
-     *  PCB error from GPIO
+     *  GPIO: PCB error during CC access
      */
-    (rTP_LFIR, bit(1)) ? defaultMaskedError;
+    (rTP_LFIR, bit(1)) ? self_th_32perDay;
 
     /** TP_LFIR[2]
-     *  PCB error from CC
+     *  CC: PCB error during CC access
      */
-    (rTP_LFIR, bit(2)) ? defaultMaskedError;
+    (rTP_LFIR, bit(2)) ? self_th_32perDay;
 
     /** TP_LFIR[3]
-     *  local errors from CC
+     *  CC local error
      */
-    (rTP_LFIR, bit(3)) ? defaultMaskedError;
+    (rTP_LFIR, bit(3)) ? self_th_32perDay;
 
     /** TP_LFIR[4]
      *  local errors from PSC (PCB error)
@@ -2300,7 +2300,7 @@ group gTP_LFIR filter singlebit
     /** TP_LFIR[17]
      *  local errors from I2CM ( error)
      */
-    (rTP_LFIR, bit(17)) ? defaultMaskedError;
+    (rTP_LFIR, bit(17)) ? self_th_1;
 
     /** TP_LFIR[18]
      *  local errors from TOD ( error)
@@ -2325,22 +2325,22 @@ group gTP_LFIR filter singlebit
     /** TP_LFIR[22]
      *  FIR error from SBE
      */
-    (rTP_LFIR, bit(22)) ? defaultMaskedError;
+    (rTP_LFIR, bit(22)) ? self_th_1;
 
     /** TP_LFIR[23]
      *  FIR error from SBE
      */
-    (rTP_LFIR, bit(23)) ? defaultMaskedError;
+    (rTP_LFIR, bit(23)) ? self_th_1;
 
     /** TP_LFIR[24]
      *  FIR error from SBE
      */
-    (rTP_LFIR, bit(24)) ? defaultMaskedError;
+    (rTP_LFIR, bit(24)) ? self_th_1;
 
     /** TP_LFIR[25]
      *  FIR_IN25: FIR error from SBE
      */
-    (rTP_LFIR, bit(25)) ? defaultMaskedError;
+    (rTP_LFIR, bit(25)) ? self_th_1;
 
     /** TP_LFIR[26]
      *  FIR_IN26: FIR error from SBE
@@ -2350,7 +2350,7 @@ group gTP_LFIR filter singlebit
     /** TP_LFIR[27]
      *  FIR_IN27: FIR error from SBE
      */
-    (rTP_LFIR, bit(27)) ? defaultMaskedError;
+    (rTP_LFIR, bit(27)) ? self_th_1;
 
     /** TP_LFIR[28]
      *  FIR_IN28: FIR error from SBE
@@ -2360,7 +2360,7 @@ group gTP_LFIR filter singlebit
     /** TP_LFIR[29]
      *  FIR_IN29: FIR error from SBE
      */
-    (rTP_LFIR, bit(29)) ? defaultMaskedError;
+    (rTP_LFIR, bit(29)) ? self_th_1;
 
     /** TP_LFIR[30]
      *  FIR_IN30: FIR error from SBE
@@ -2405,17 +2405,17 @@ group gTP_LFIR filter singlebit
     /** TP_LFIR[38]
      *  local errors from pibmem
      */
-    (rTP_LFIR, bit(38)) ? defaultMaskedError;
+    (rTP_LFIR, bit(38)) ? self_th_1;
 
     /** TP_LFIR[39]
      *  local errors from pibmem
      */
-    (rTP_LFIR, bit(39)) ? defaultMaskedError;
+    (rTP_LFIR, bit(39)) ? self_th_1;
 
     /** TP_LFIR[40]
      *  otp uncorrectable error
      */
-    (rTP_LFIR, bit(40)) ? defaultMaskedError;
+    (rTP_LFIR, bit(40)) ? self_th_1;
 
     /** TP_LFIR[41]
      *  xstop in another chiplet
@@ -2837,17 +2837,17 @@ group gN0_LFIR filter singlebit
     /** N0_LFIR[1]
      *  Errors from Control
      */
-    (rN0_LFIR, bit(1)) ? defaultMaskedError;
+    (rN0_LFIR, bit(1)) ? self_th_32perDay;
 
     /** N0_LFIR[2]
      *  local errors from CC (PCB error)
      */
-    (rN0_LFIR, bit(2)) ? defaultMaskedError;
+    (rN0_LFIR, bit(2)) ? self_th_32perDay;
 
     /** N0_LFIR[3]
      *  local errors from CC
      */
-    (rN0_LFIR, bit(3)) ? defaultMaskedError;
+    (rN0_LFIR, bit(3)) ? self_th_32perDay;
 
     /** N0_LFIR[4]
      *  local errors from PSC (PCB error)
@@ -2915,14 +2915,19 @@ group gN0_LFIR filter singlebit
     (rN0_LFIR, bit(16|17|18|19|20|21|22|23)) ? defaultMaskedError;
 
     /** N0_LFIR[24]
-     *  Errors from Bsense IO
+     *  spare
      */
     (rN0_LFIR, bit(24)) ? defaultMaskedError;
 
-    /** N0_LFIR[25:40]
+    /** N0_LFIR[25]
+     *  Errors from Bsense IO
+     */
+    (rN0_LFIR, bit(25)) ? defaultMaskedError;
+
+    /** N0_LFIR[26:40]
      *  spare
      */
-    (rN0_LFIR, bit(25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
+    (rN0_LFIR, bit(26|27|28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
 
     /** N0_LFIR[41]
      *  Malf-alert Broadcast via OOB
@@ -3493,17 +3498,17 @@ group gN1_LFIR filter singlebit
     /** N1_LFIR[1]
      *  local errors from GPIO
      */
-    (rN1_LFIR, bit(1)) ? defaultMaskedError;
+    (rN1_LFIR, bit(1)) ? self_th_32perDay;
 
     /** N1_LFIR[2]
      *  local errors from CC
      */
-    (rN1_LFIR, bit(2)) ? defaultMaskedError;
+    (rN1_LFIR, bit(2)) ? self_th_32perDay;
 
     /** N1_LFIR[3]
      *  local errors from cc
      */
-    (rN1_LFIR, bit(3)) ? defaultMaskedError;
+    (rN1_LFIR, bit(3)) ? self_th_32perDay;
 
     /** N1_LFIR[4]
      *  pcb error from psc
@@ -3601,14 +3606,19 @@ group gN1_LFIR filter singlebit
     (rN1_LFIR, bit(22|23)) ? defaultMaskedError;
 
     /** N1_LFIR[24]
-     *  errors from bsense I/O
+     *  spare
      */
     (rN1_LFIR, bit(24)) ? defaultMaskedError;
 
-    /** N1_LFIR[25:40]
+    /** N1_LFIR[25]
+     *  Errors from Bsense IO
+     */
+    (rN1_LFIR, bit(25)) ? defaultMaskedError;
+
+    /** N1_LFIR[26:40]
      *  spare
      */
-    (rN1_LFIR, bit(25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
+    (rN1_LFIR, bit(26|27|28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
 
     /** N1_LFIR[41]
      *  malfunction alert broadcast via OOB
@@ -4154,17 +4164,17 @@ group gN2_LFIR filter singlebit
     /** N2_LFIR[1]
      *  local errors from GPIO
      */
-    (rN2_LFIR, bit(1)) ? defaultMaskedError;
+    (rN2_LFIR, bit(1)) ? self_th_32perDay;
 
     /** N2_LFIR[2]
      *  local errors from CC
      */
-    (rN2_LFIR, bit(2)) ? defaultMaskedError;
+    (rN2_LFIR, bit(2)) ? self_th_32perDay;
 
     /** N2_LFIR[3]
      *  local errors from cc
      */
-    (rN2_LFIR, bit(3)) ? defaultMaskedError;
+    (rN2_LFIR, bit(3)) ? self_th_32perDay;
 
     /** N2_LFIR[4]
      *  pcb error from psc
@@ -4222,14 +4232,19 @@ group gN2_LFIR filter singlebit
     (rN2_LFIR, bit(14|15|16|17|18|19|20|21|22|23)) ? defaultMaskedError;
 
     /** N2_LFIR[24]
-     *  errors from bsense I/O
+     *  spare
      */
     (rN2_LFIR, bit(24)) ? defaultMaskedError;
 
-    /** N2_LFIR[25:40]
+    /** N2_LFIR[25]
+     *  Errors from Bsense IO
+     */
+    (rN2_LFIR, bit(25)) ? defaultMaskedError;
+
+    /** N2_LFIR[26:40]
      *  spare
      */
-    (rN2_LFIR, bit(25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
+    (rN2_LFIR, bit(26|27|28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
 
     /** N2_LFIR[41]
      *  malfunction alert broadcast via OOB
@@ -4475,17 +4490,17 @@ group gN3_LFIR filter singlebit
     /** N3_LFIR[1]
      *  Errors from Control
      */
-    (rN3_LFIR, bit(1)) ? defaultMaskedError;
+    (rN3_LFIR, bit(1)) ? self_th_32perDay;
 
     /** N3_LFIR[2]
      *  local err from CC (PCB error)
      */
-    (rN3_LFIR, bit(2)) ? defaultMaskedError;
+    (rN3_LFIR, bit(2)) ? self_th_32perDay;
 
     /** N3_LFIR[3]
      *  local err from CC
      */
-    (rN3_LFIR, bit(3)) ? defaultMaskedError;
+    (rN3_LFIR, bit(3)) ? self_th_32perDay;
 
     /** N3_LFIR[4]
      *  local err from PSC
@@ -4588,14 +4603,39 @@ group gN3_LFIR filter singlebit
     (rN3_LFIR, bit(23)) ? defaultMaskedError;
 
     /** N3_LFIR[24]
-     *  Errors from Bsense IO
+     *  spare
      */
     (rN3_LFIR, bit(24)) ? defaultMaskedError;
 
-    /** N3_LFIR[25:40]
+    /** N3_LFIR[25]
+     *  Errors from Bsense IO
+     */
+    (rN3_LFIR, bit(25)) ? defaultMaskedError;
+
+    /** N3_LFIR[26:31]
      *  spare
      */
-    (rN3_LFIR, bit(25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
+    (rN3_LFIR, bit(26|27|28|29|30|31)) ? defaultMaskedError;
+
+    /** N3_LFIR[32]
+     *  FW asserted failsafe timer
+     */
+    (rN3_LFIR, bit(32)) ? self_th_1;
+
+    /** N3_LFIR[33]
+     *  FW asserted system quisce
+     */
+    (rN3_LFIR, bit(33)) ? self_th_1;
+
+    /** N3_LFIR[34]
+     *  FW asserted Chip Quisce
+     */
+    (rN3_LFIR, bit(34)) ? self_th_1;
+
+    /** N3_LFIR[35:40]
+     *  spare
+     */
+    (rN3_LFIR, bit(35|36|37|38|39|40)) ? defaultMaskedError;
 
     /** N3_LFIR[41]
      *  Malfunction Alert broadcast via OOB
@@ -6887,7 +6927,12 @@ group gINTCQFIR filter singlebit
     /** INTCQFIR[46]
      *  INT_CQ_FIR_FIR_PARITY_ERR:
      */
-    (rINTCQFIR, bit(46)) ? self_th_1; # masked on DD1.0
+    (rINTCQFIR, bit(46)) ? defaultMaskedError;
+
+    /** INTCQFIR[46]
+     *  INT_CQ_FIR_FIR_PARITY_ERR:
+     */
+    (rINTCQFIR, bit(46)) ? self_th_1;
 
     /** INTCQFIR[47]
      *  INT_CQ_FIR_PGM_DBG_ACCESS:
@@ -7655,17 +7700,17 @@ group gXB_LFIR filter singlebit
     /** XB_LFIR[1]
      *  local error from GPIO
      */
-    (rXB_LFIR, bit(1)) ? defaultMaskedError;
+    (rXB_LFIR, bit(1)) ? self_th_32perDay;
 
     /** XB_LFIR[2]
      *  local err from CC
      */
-    (rXB_LFIR, bit(2)) ? defaultMaskedError;
+    (rXB_LFIR, bit(2)) ? self_th_32perDay;
 
     /** XB_LFIR[3]
      *  local err from CC
      */
-    (rXB_LFIR, bit(3)) ? defaultMaskedError;
+    (rXB_LFIR, bit(3)) ? self_th_32perDay;
 
     /** XB_LFIR[4]
      *  local err from PSC
@@ -8048,17 +8093,17 @@ group gMC_LFIR_0 filter singlebit
     /** MC_LFIR_0[1]
      *  local errors from GPIO
      */
-    (rMC_LFIR_0, bit(1)) ? defaultMaskedError;
+    (rMC_LFIR_0, bit(1)) ? self_th_32perDay;
 
     /** MC_LFIR_0[2]
      *  local errors from CC
      */
-    (rMC_LFIR_0, bit(2)) ? defaultMaskedError;
+    (rMC_LFIR_0, bit(2)) ? self_th_32perDay;
 
     /** MC_LFIR_0[3]
      *  local errors from cc
      */
-    (rMC_LFIR_0, bit(3)) ? defaultMaskedError;
+    (rMC_LFIR_0, bit(3)) ? self_th_32perDay;
 
     /** MC_LFIR_0[4]
      *  pcb error from psc
@@ -8358,17 +8403,17 @@ group gMC_LFIR_1 filter singlebit
     /** MC_LFIR_1[1]
      *  local errors from GPIO
      */
-    (rMC_LFIR_1, bit(1)) ? defaultMaskedError;
+    (rMC_LFIR_1, bit(1)) ? self_th_32perDay;
 
     /** MC_LFIR_1[2]
      *  local errors from CC
      */
-    (rMC_LFIR_1, bit(2)) ? defaultMaskedError;
+    (rMC_LFIR_1, bit(2)) ? self_th_32perDay;
 
     /** MC_LFIR_1[3]
      *  local errors from cc
      */
-    (rMC_LFIR_1, bit(3)) ? defaultMaskedError;
+    (rMC_LFIR_1, bit(3)) ? self_th_32perDay;
 
     /** MC_LFIR_1[4]
      *  pcb error from psc
