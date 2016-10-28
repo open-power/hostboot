@@ -97,8 +97,8 @@ _dcbz_before_bl:
     li r7, 1
     rotldi r7, r7, 63  ;// set bit mask for ignoring HRMOR
 
-    lis r5, 0
-    addis r5, r5, 2048 ;// 128M (2048 * 0x10000) is start of HBB
+    mfspr r5, HRMOR    ;// start of HBB is HRMOR - 2MB
+    subis r5, r5, 32   ;// 2M (32 * 0x10000) is start of HBB
     or r5, r5, r7      ;// ignore HRMOR
 
     mfspr r6, HRMOR    ;// use HRMOR as start of Bootloader

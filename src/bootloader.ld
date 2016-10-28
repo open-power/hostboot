@@ -25,7 +25,6 @@
 /* IBM_PROLOG_END_TAG                                                     */
 base_load_address = 0x00000000;
 sbe_hb_structures = 0x00000004;
-/* @TODO-RTC:138273-Support multiple nodes using relative HRMOR */
 /* Text section offset = 12KB (space reserved for exception vectors)      */
 text_load_address = 0x00003000;
 

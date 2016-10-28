@@ -52,6 +52,20 @@ extern "C" void enterHBB(uint64_t i_hbb_hrmor, uint64_t i_hbb_offset);
 
 namespace Bootloader{
     /**
+     * @brief Get the current HBBL HRMOR
+     *
+     * Used to know where the bootloader is running
+     */
+    ALWAYS_INLINE
+      inline uint64_t getHRMOR()
+    {
+        register uint64_t hrmor = 0;
+        asm volatile("mfspr %0, 313" : "=r" (hrmor));
+        return hrmor;
+    }
+
+
+    /**
      * @brief Pointer to bootloader scratch space
      *
      * Pointer to location in main storage which bootloader uses as
@@ -105,7 +119,7 @@ namespace Bootloader{
         LENGTH_W_ECC = 9
     };
 
-    /** @enum HbAddrs
+    /**
      *  @brief List of addresses where HBB and HBBL code is stored.
      *
      *  These specify locations where the Hostboot Bootloader code is
@@ -113,30 +127,23 @@ namespace Bootloader{
      *  is copied to various locations as the HBBL works with it.  Then
      *  HBB is copied to its running location and its execution is started.
      */
-    enum HbAddrs
+
+
+    /** Location of working copy of HBB with ECC */
+#define HBB_ECC_WORKING_ADDR    (getHRMOR() - ( 1*MEGABYTE))
+
+    /** Location of working copy of HBB without ECC */
+#define HBB_WORKING_ADDR        (getHRMOR() - ( 1*MEGABYTE))
+
+    /** Location of HBBL scratch space */
+#define HBBL_SCRATCH_SPACE_ADDR (getHRMOR() + (64*KILOBYTE))
+
+    /** Location of running copy of HBB */
+#define HBB_HRMOR               (getHRMOR() - ( 2*MEGABYTE))
+#define HBB_RUNNING_ADDR        (getHRMOR() - ( 2*MEGABYTE))
+
+    enum
     {
-        // @TODO-RTC:138273-Support multiple nodes using relative HRMOR
-
-        /** HRMOR */
-        HBBL_HRMOR = 130*MEGABYTE,
-        HBB_HRMOR = 128*MEGABYTE,
-
-        /** Location of working copy of HBB with ECC */
-        HBB_ECC_WORKING_ADDR = (HBBL_HRMOR + 1*MEGABYTE),
-
-        /** Location of HBBL */
-        HBBL_ADDR = HBBL_HRMOR,
-        /** Location of HBBL exception vectors */
-        HBBL_EXCEPTION_VECTORS_ADDR = HBBL_ADDR,
-        /** Location of HBBL code */
-        HBBL_CODE_ADDR = HBBL_ADDR + 12*KILOBYTE,
-        /** Location of HBBL scratch space */
-        HBBL_SCRATCH_SPACE_ADDR = HBBL_ADDR + 64*KILOBYTE,
-
-        /** Location of working copy of HBB without ECC */
-        HBB_WORKING_ADDR = (HBBL_HRMOR - 1*MEGABYTE),
-        /** Location of running copy of HBB */
-        HBB_RUNNING_ADDR = (HBBL_HRMOR - 2*MEGABYTE),
         /** Offset for starting running copy of HBB */
         HBB_RUNNING_OFFSET = 0,
         /** Mask to indicate HRMOR should be ignored for the address */
