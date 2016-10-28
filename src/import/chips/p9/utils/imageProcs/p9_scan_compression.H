@@ -36,91 +36,48 @@
 /// Compressed Scan Chain Data Structure Format
 ///
 /// The compressed scan ring data structure must be 8-byte aligned in
-/// memory. The container data structure consists of this 24-byte header
+/// memory. The container data structure consists of a header
 /// followed by an arbitrary number of 8 byte doublewords containing the
-/// compressed scan data.  Images are always stored and processed in
-/// big-endian byte order.  This container format is common across all
+/// compressed scan data. Images are always stored and processed in
+/// big-endian byte order. The header format is common across all
 /// decompression algorithms.
+///
+/// ATTENTION:
+/// The RS4v2 CompressedScanData had a 4 byte magic value with 0x34 ("4")
+/// within its third byte, which is at the same byte position as iv_version
+/// now. Users of CompressedScanData which use the magic value to detect
+/// a ring data structure won't be able to distingish old and new
+/// CompressedScanData for iv_version being 0x34. In the very unlikely case
+/// that we would have that many versions of ComprossedScanData, it is
+/// strongly suggested to simply skip 0x34 as version number.
 ///
 /// Bytes - Content
 ///
-/// 0:3 - A 32-bit "magic number" that identifies and validates the
-/// compression algorithm and algorithm version used to compress the data.
+/// 0:1   - A 16-bit "magic number" that identifies and validates the
+/// compression algorithm used to compress the data ("RS").
 ///
-/// 4:7 - The 32-bit size of the entire data structure in \e bytes.  Thi
-/// consists of this 24-byte header plus the compressed scan data.  This value
-/// is always a multiple of 8.
+/// 2     - An 8-bit version number (3 for the time being).
 ///
-/// 8:11 - This 32-bit value is reserved to the compression
-/// algorithm. Typically this field is used to record the 'size' of the
-/// compressed string in units specific to each algorithm.
+/// 3     - An 8-bit type field distinguishing different scan data types
+/// (0 for non-CMSK, 1 for CMSK).
 ///
-/// 12:15 - The length of the original scan chain in \e bits.
+/// 4:5   - The 16-bit size of the uncompressed scan data with
+/// this header in \e bytes. This is not the exact length of actual scan data
+/// in bits, but the number of bytes used by the RS4 encoding to store those
+/// compressed scan bits.
 ///
-/// 16:23 - The 64 bit scan Region and type details
+/// 6:7   - The 16-bit ring ID uniquely identifying the ring.
 ///
-///
-/// 24:27 - The 32 high-order bits of the value written to the Scan Select
-/// register to set up the scan.  The Scan Select register only defines these
-/// bits. (Planned to use scan scom register value)
-///
-/// 28 - The Scan Chain Data Structure version number
-///
-/// 29 - Flush-optimize : Is this byte is non-zero, the ring state to be
-/// modified is the flush state of the ring.
-///
-/// 30 - The ring ID uniquely identifying the repair ring name.
-///
-/// 31 - The 7-bit pervasive chiplet Id + Multicast bit of the chiplet to
-/// scan.  This value is loaded directly into P0.  The decompression
-/// algorithms provide two entry points - one that uses this value as the
-/// chiplet Id, and another that allows the caller to specify the chiplet Id
-/// in the call.
-
+/// 8:11  - scan scom register value
 typedef struct
 {
-
-    /// Magic number - See \ref scan_compression_magic
-    uint32_t iv_magic;
-
-    /// Total size in bytes, including the container header
-    uint32_t iv_size;
-
-    /// Reserved to the algorithm
-    uint32_t iv_algorithmReserved;
-
-    /// Length of the original scan chain in bits
-    uint32_t iv_length;
-
-    /// 64 bit scan select register value
-    uint64_t iv_scanSelect;
-
-    /// Data structure (header) version
-    uint8_t iv_headerVersion;
-
-    /// Flush-state optimization
-    ///
-    /// Normally, modifying the state of the ring requires XOR-ing the
-    /// difference state (the compressed state) with the current ring state as
-    /// it will appear in the Scan Data Register. If the current state of the
-    /// ring is the scan-0 flush state, then by definition the Scan Data
-    /// Register is always 0. Therefore we can simply write the difference to
-    /// the Scan Data Register rather than using a read-XOR-write.
-    uint8_t iv_flushOptimization;
-
-    /// Ring ID uniquely identifying the repair name. (See the list of ring
-    /// name vs ring IDs in p8_ring_identification.c).
-    uint8_t iv_ringId;
-
-    /// 7-bit pervasive chiplet Id + Multicast bit
-    ///
-    /// This field is right-justified in an 8-byte aligned doubleword so that
-    /// the P0 register can be directly updated from the doubelword value in a
-    /// data register.
-    uint8_t iv_chipletId;
-
+    uint16_t iv_magic;
+    uint8_t  iv_version;
+    uint8_t  iv_type;
+    uint16_t iv_size;
+    uint16_t iv_ringId;
+    uint32_t iv_scanAddr;
 } CompressedScanData;
-
 
 /// Endian-translate a CompressedScanData structure
 ///
@@ -141,17 +98,14 @@ compressed_scan_data_translate(CompressedScanData* o_data,
 
 /// Compress a scan string using the RS4 compression algorithm
 ///
-/// \param[in,out] io_data This is a pointer to a memory area which must be
-/// large enough to hold the worst-case result of compressing \a i_string (see
-/// below).  Note that the CompressedScanData is always created in big-endian
-/// format, however the caller can use compresed_scan_data_translate() to
-/// create a copy of the header in host format.
+/// \param[in,out] io_rs4 This is a pointer to a memory area which must be
+/// large enough to hold the worst-case result of compressing \a i_data_str
+/// and \a i_care_str (see below). Note that the CompressedScanData is
+/// always created in big-endian format, however the caller can use
+/// compresed_scan_data_translate() to create a copy of the header in
+/// host format.
 ///
-/// \param[in] i_dataSize The size of \a io_data in bytes.
-///
-/// \param[out] o_imageSize The effective size of the entire compressed scan
-/// data structure (header + compressed data) created in \a io_data, in bytes.
-/// This value will always be a multiple of 8.
+/// \param[in] i_size The size of the buffer pointed to by \a io_rs4.
 ///
 /// \param[in] i_data_str The string to compress.  Scan data to compress is
 /// left-justified in this input string.
@@ -162,61 +116,42 @@ compressed_scan_data_translate(CompressedScanData* o_data,
 /// \param[in] i_length The length of the input string in \e bits.  It is
 /// assumed the \a i_string contains at least (\a i_length + 7) / 8 bytes.
 ///
-/// \param[in] i_scanSelect The 64-bit value written to the Scan Select
-/// register to set up for the scan.
+/// \param[in] i_scanAddr The 32-bit scan address.
 ///
 /// \param[in] i_ringId The ring ID that uniquely identifies the ring name of
-/// a repair ring. (See p8_ring_identification.c for more info.)
-///
-/// \param[in] i_chipletId The 7-bit value for the iv_chipletId field of the
-/// CompressedScanData.
-///
-/// \param[in] i_flushOptimization This input parameter should be set to a
-/// non-0 value if it is known that this ring difference will be applied to a
-/// scan-0 flush state.  This will improve the performance of the
-/// decompress-scan routine. If the initial state of the ring is unknown, set
-/// this parameter to 0.
+/// a repair ring. (See p9_ring_id.h for more info.)
 ///
 /// This API is required for integration with PHYP which does not support
 /// malloc().  Applications in environments supporting malloc() can use
 /// rs4_compress() instead.
 ///
-/// The worst-case compression for RS4 requires 2 nibbles of control overhead
-/// per 15 nibbles of data (17/15), plus a maximum of 2 nibbles of termination.
-/// We always require this worst-case amount of memory including the header and
+/// We always require the worst-case amount of memory including the header and
 /// any rounding required to guarantee that the data size is a multiple of 8
 /// bytes.  The final image size is also rounded up to a multiple of 8 bytes.
-/// If the \a i_dataSize is less than this amount (based on \a i_length) the
+/// If the \a io_size is less than this amount (based on \a i_length) the
 /// call will fail.
 ///
 /// \returns See \ref scan_compression_codes
 int
-_rs4_compress(CompressedScanData* io_data,
-              uint32_t i_dataSize,
-              uint32_t* o_imageSize,
+_rs4_compress(CompressedScanData* io_rs4,
+              const uint32_t i_size,
               const uint8_t* i_data_str,
               const uint8_t* i_care_str,
               const uint32_t i_length,
-              const uint64_t i_scanSelect,
-              const uint8_t i_ringId,
-              const uint8_t i_chipletId,
-              const uint8_t i_flushOptimization);
+              const uint32_t i_scanAddr,
+              const uint16_t i_ringId);
 
 
 /// Compress a scan string using the RS4 compression algorithm
 ///
-/// \param[out] o_data This algorithm uses malloc() to allocate memory for the
-/// compresed data, and returns a pointer to this memory in \a o_data. After
+/// \param[out] o_rs4 This algorithm uses malloc() to allocate memory for the
+/// compressed data, and returns a pointer to this memory in \a o_rs4. After
 /// the call this memory is owned by the caller who is responsible for
 /// free()-ing the data area once it is no longer required. Note that the
 /// CompressedScanData is always created in big-endian format, however the
 /// caller can use compresed_scan_data_translate() to create a copy of the
 /// header in host format.
 ///
-/// \param[out] o_size The effective size of the entire compressed scan data
-/// structure (header + compressed data) pointed to by \a o_data, in bytes.
-/// This value will always be a multiple of 8.
-///
 /// \param[in] i_data_str The string to compress.  Scan data to compress is
 /// left-justified in this input string.
 ///
@@ -226,33 +161,19 @@ _rs4_compress(CompressedScanData* io_data,
 /// \param[in] i_length The length of the input string in \e bits.  It is
 /// assumed the \a i_string contains at least (\a i_length + 7) / 8 bytes.
 ///
-/// \param[in] i_scanSelect The 64-bit value written to the Scan Select
-/// register to set up for the scan. Only the 32 high-order bits are actually
-/// stored.
+/// \param[in] i_scanAddr The 32-bit scan address.
 ///
 /// \param[in] i_ringId The ring ID that uniquely identifies the ring name of
-/// a repair ring. (See p8_ring_identification.c for more info.)
-///
-/// \param[in] i_chipletId The 7-bit value for the iv_chipletId field of the
-/// CompressedScanData.
-///
-/// \param[in] i_flushOptimization This input parameter should be set to a
-/// non-0 value if it is known that this ring difference will be applied to a
-/// scan-0 flush state.  This will improve the performance of the
-/// decompress-scan routine. If the initial state of the ring is unknown, set
-/// this parameter to 0.
+/// a repair ring. (See p9_ring_id.c for more info.)
 ///
 /// \returns See \ref scan_compression_codes
 int
-rs4_compress(CompressedScanData** o_data,
-             uint32_t* o_size,
+rs4_compress(CompressedScanData** o_rs4,
              const uint8_t* i_data_str,
              const uint8_t* i_care_str,
              const uint32_t i_length,
-             const uint64_t i_scanSelect,
-             const uint8_t i_ringId,
-             const uint8_t i_chipletId,
-             const uint8_t i_flushOptimization);
+             const uint32_t i_scanAddr,
+             const uint8_t i_ringId);
 
 
 /// Decompress a scan string compressed using the RS4 compression algorithm
@@ -267,8 +188,7 @@ rs4_compress(CompressedScanData** o_data,
 /// the decompressed care mask, which is the size of the original string in
 /// bits rounded up to the nearest byte.
 ///
-/// \param[in] i_stringSize The size (in bytes) of \a io_data_str and
-/// \a io_care_str.
+/// \param[in] i_size The size in \e bytes of \a io_data_str and \a io_care_str.
 ///
 /// \param[out] o_length The length of the decompressed string in \e bits.
 ///
@@ -283,7 +203,7 @@ rs4_compress(CompressedScanData** o_data,
 int
 _rs4_decompress(uint8_t* io_data_str,
                 uint8_t* io_care_str,
-                uint32_t i_stringSize,
+                uint32_t i_size,
                 uint32_t* o_length,
                 const CompressedScanData* i_rs4);
 
@@ -302,7 +222,7 @@ _rs4_decompress(uint8_t* io_data_str,
 /// in \e bits. The caller may assume that \a o_data_str and o_care_str each
 /// contain at least (\a o_length + 7) / 8 \e bytes.
 ///
-/// \param[in] i_rs4 A pointer to the CompressedScanData header + data to be
+/// \param[in] i_rs4 A pointer to the CompressedScanData header and data to be
 /// decompressed.
 ///
 /// \returns See \ref scan_compression_codes
@@ -328,25 +248,30 @@ rs4_redundant(const CompressedScanData* i_data, int* o_redundant);
 #endif  // __ASSEMBLER__
 
 
-/// The current version of the CompressedScanData structure
-///
-/// This constant is required to be a #define to guarantee consistency between
-/// the header format and cmopiled code.
-#define COMPRESSED_SCAN_DATA_VERSION 2
-
-/// The size of the CompressedScanData  structure
-#define COMPRESSED_SCAN_DATA_SIZE (uint8_t)24
-
-
 /// \defgroup scan_compression_magic Scan Compression Magic Numbers
-/////
+///
 /// @ {
 
 /// RS4 Magic
-#define RS4_MAGIC (uint32_t)0x52533402       /* "RS4" + Version 0x02 */
+#define RS4_MAGIC 0x5253       /* "RS" */
 
 /// @}
 
+/// \defgroup scan_compression_version_type version and type accessors
+///
+/// @{
+
+/// The current version of the CompressedScanData structure
+///
+/// This constant is required to be a #define to guarantee consistency between
+/// the header format and compiled code.
+#define RS4_VERSION 3
+
+/// Scan data types
+#define RS4_SCAN_DATA_TYPE_CMSK     1
+#define RS4_SCAN_DATA_TYPE_NON_CMSK 0
+
+/// @}
 
 /// \defgroup scan_compression_codes Scan Compression Return Codes
 ///
@@ -387,6 +312,9 @@ rs4_redundant(const CompressedScanData* i_data, int* o_redundant);
 
 /// Invalid transition in state machine
 #define SCAN_COMPRESSION_STATE_ERROR 6
+
+/// wrong compression version
+#define SCAN_COMPRESSION_VERSION_ERROR 7
 
 /// @}
 
