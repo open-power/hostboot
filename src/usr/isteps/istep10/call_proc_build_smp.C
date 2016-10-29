@@ -138,15 +138,6 @@ void* call_proc_build_smp (void *io_pArgs)
                 break;
             }
 
-            //Enable PSIHB Interrupts for slave proc
-            l_errl = INTR::enablePsiIntr(curproc);
-            if(l_errl)
-            {
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(curproc).addToLog( l_errl );
-                break;
-            }
-
         }
 
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
@@ -198,6 +189,20 @@ void* call_proc_build_smp (void *io_pArgs)
         while(curproc != procChips.end())
         {
             TARGETING::Target*  l_proc_target = *curproc;
+
+
+            if (l_proc_target != l_masterProc)
+            {
+                //Enable PSIHB Interrupts for slave proc -- moved from above
+                l_errl = INTR::enablePsiIntr(l_proc_target);
+                if(l_errl)
+                {
+                    // capture the target data in the elog
+                    ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
+                    break;
+                }
+            }
+
 
             // If the proc chip supports xscom..
             if (l_proc_target->getAttr<ATTR_PRIMARY_CAPABILITIES>()
