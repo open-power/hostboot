@@ -51,4 +51,18 @@ constexpr const uint64_t eccTraits<fapi2::TARGET_TYPE_MCA>::ERROR_VECTOR_REGS[];
 constexpr const uint8_t eccTraits<fapi2::TARGET_TYPE_MCA>::symbol2galois[];
 constexpr const uint8_t eccTraits<fapi2::TARGET_TYPE_MCA>::symbol2dq[];
 
+// Definition of the symbol error count registers
+const std::vector< uint64_t > eccTraits<fapi2::TARGET_TYPE_MCBIST>::SYMBOL_COUNT_REG =
+{
+    MCBIST_MBSSYMEC0Q,
+    MCBIST_MBSSYMEC1Q,
+    MCBIST_MBSSYMEC2Q,
+    MCBIST_MBSSYMEC3Q,
+    MCBIST_MBSSYMEC4Q,
+    MCBIST_MBSSYMEC5Q,
+    MCBIST_MBSSYMEC6Q,
+    MCBIST_MBSSYMEC7Q,
+    MCBIST_MBSSYMEC8Q,
+};
+
 } // close namespace mss

@@ -268,6 +268,9 @@ class eccTraits<fapi2::TARGET_TYPE_MCBIST>
         static constexpr uint64_t MODAL_SYM_COUNT7_REG = MCBIST_MBSSYMEC7Q;
         static constexpr uint64_t MODAL_SYM_COUNT8_REG = MCBIST_MBSSYMEC8Q;
 
+        // Stores the symbol counter registers in a vector for easier access for MCBIST
+        static const std::vector<uint64_t> SYMBOL_COUNT_REG;
+
         // Fields, can be any size.
         enum
         {
