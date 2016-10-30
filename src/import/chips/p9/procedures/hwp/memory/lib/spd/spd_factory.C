@@ -79,8 +79,8 @@ fapi2::ReturnCode rev_encoding_level(const fapi2::Target<TARGET_TYPE_DIMM>& i_ta
     uint8_t l_raw_byte = i_spd_data[BYTE_INDEX];
 
     // Trace in the front assists w/ debug
-    FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             c_str(i_target),
+    FAPI_INF("%s. SPD data at Byte %d: 0x%llX.",
+             mss::c_str(i_target),
              BYTE_INDEX,
              l_raw_byte);
 
@@ -89,7 +89,7 @@ fapi2::ReturnCode rev_encoding_level(const fapi2::Target<TARGET_TYPE_DIMM>& i_ta
     fapi2::buffer<uint8_t> l_buffer(l_raw_byte);
     l_buffer.extractToRight<ENCODING_LEVEL_START, ENCODING_LEVEL_LEN>(l_field_bits);
 
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    FAPI_INF("%s. Field Bits value: %d", mss::c_str(i_target), l_field_bits);
 
     // Check that value is valid
     constexpr size_t UNDEFINED = 0xF; // per JEDEC spec this value is undefined
@@ -131,7 +131,7 @@ fapi2::ReturnCode rev_additions_level(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
     uint8_t l_raw_byte = i_spd_data[BYTE_INDEX];
 
     // Trace in the front assists w/ debug
-    FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
+    FAPI_INF("%s. SPD data at Byte %d: 0x%llX.",
              mss::c_str(i_target),
              BYTE_INDEX,
              l_raw_byte);
@@ -141,7 +141,7 @@ fapi2::ReturnCode rev_additions_level(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
     uint8_t l_field_bits = 0;
     l_buffer.extractToRight<ADDITIONS_LEVEL_START, ADDITIONS_LEVEL_LEN>(l_field_bits);
 
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    FAPI_INF("%s. Field Bits value: %d", mss::c_str(i_target), l_field_bits);
 
     // Check that value is valid
     constexpr size_t UNDEFINED = 0xF; // per JEDEC spec this value is undefined
@@ -210,7 +210,7 @@ fapi2::ReturnCode base_module_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
     uint8_t l_field_bits = 0;
     l_spd_buffer.extractToRight<BASE_MODULE_START, BASE_MODULE_LEN>(l_field_bits);
 
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    FAPI_INF("%s. Field Bits value: %d", mss::c_str(i_target), l_field_bits);
 
     // Check that value is valid
     bool l_is_val_found = find_value_from_key(BASE_MODULE_TYPE_MAP, l_field_bits, o_value);
@@ -276,9 +276,10 @@ fapi2::ReturnCode dram_device_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
               BYTE_INDEX,
               l_raw_byte,
               "Failed check on SPD dram device type") );
+
     // Print decoded info
     FAPI_INF("%s Device type : %d",
-             c_str(i_target),
+             mss::c_str(i_target),
              o_value);
 
 fapi_try_exit:
@@ -338,11 +339,13 @@ static fapi2::ReturnCode dimm_type_setter(const fapi2::Target<TARGET_TYPE_DIMM>&
     uint8_t l_dimm_types_mcs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     FAPI_TRY( base_module_type(i_target, i_spd_data, o_dimm_type),
-              "Failed to find base module type" );
-    FAPI_TRY( eff_dimm_type(l_mcs, &l_dimm_types_mcs[0][0]) );
+              "%s. Failed to find base module type", mss::c_str(i_target) );
+    FAPI_TRY( eff_dimm_type(l_mcs, &l_dimm_types_mcs[0][0]),
+              "%s. Failed to invoke DIMM type accessor", mss::c_str(i_target));
 
     l_dimm_types_mcs[l_port_num][l_dimm_num] = o_dimm_type;
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_TYPE, l_mcs, l_dimm_types_mcs) );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_TYPE, l_mcs, l_dimm_types_mcs),
+              "%s. Failed to set ATTR_EFF_DIMM_TYPE", mss::c_str(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -365,13 +368,15 @@ static fapi2::ReturnCode dram_gen_setter(const fapi2::Target<TARGET_TYPE_DIMM>& 
     uint8_t l_dram_gen = 0;
     uint8_t l_dram_gen_mcs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
-    FAPI_TRY( eff_dram_gen(l_mcs, &l_dram_gen_mcs[0][0]) );
+    FAPI_TRY( eff_dram_gen(l_mcs, &l_dram_gen_mcs[0][0]),
+              "%s. Failed to inboke DRAM gen accesssor", mss::c_str(i_target) );
     FAPI_TRY( dram_device_type(i_target, i_spd_data, l_dram_gen),
-              "Failed to find base module type" );
+              "%s. Failed to find base module type", mss::c_str(i_target) );
 
     l_dram_gen_mcs[l_port_num][l_dimm_num] = l_dram_gen;
 
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_GEN, l_mcs, l_dram_gen_mcs) );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_GEN, l_mcs, l_dram_gen_mcs),
+              "%s. Failed to set ATTR_EFF_DRAM_GEN", mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -398,15 +403,20 @@ static fapi2::ReturnCode master_ranks_per_dimm_setter(const fapi2::Target<TARGET
     uint8_t l_attrs_dimm_ranks_configed[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Get & update MCS attribute
-    FAPI_TRY( i_pDecoder->num_package_ranks_per_dimm(i_target, l_decoder_val) );
-    FAPI_TRY(eff_num_master_ranks_per_dimm(l_mcs, &l_attrs_master_ranks_per_dimm[0][0]));
-    FAPI_TRY(eff_dimm_ranks_configed(l_mcs, &l_attrs_dimm_ranks_configed[0][0]));
+    FAPI_TRY( i_pDecoder->num_package_ranks_per_dimm(i_target, l_decoder_val),
+              "%s. Failed num_package_ranks_per_dimm()", mss::c_str(i_target) );
+    FAPI_TRY(eff_num_master_ranks_per_dimm(l_mcs, &l_attrs_master_ranks_per_dimm[0][0]),
+             "%s. Failed eff_num_master_ranks_per_dimm()", mss::c_str(i_target) );
+    FAPI_TRY(eff_dimm_ranks_configed(l_mcs, &l_attrs_dimm_ranks_configed[0][0]),
+             "%s. Failed eff_dimm_ranks_configed()", mss::c_str(i_target) );
 
     l_attrs_master_ranks_per_dimm[index(l_mca)][index(i_target)] = l_decoder_val;
 
     // Set configed ranks. Set the bit representing the master rank configured (0 being left most.) So,
     // a 4R DIMM would be 0b11110000 (0xF0). This is used by PRD.
-    FAPI_TRY( l_ranks_configed.setBit(0, l_decoder_val) );
+    FAPI_TRY( l_ranks_configed.setBit(0, l_decoder_val),
+              "%s. Failed to setBit", mss::c_str(i_target) );
+
     l_attrs_dimm_ranks_configed[index(l_mca)][index(i_target)] = l_ranks_configed;
 
     FAPI_INF( "%s Num Master Ranks %d, DIMM Ranks Configed 0x%x",
@@ -414,8 +424,195 @@ static fapi2::ReturnCode master_ranks_per_dimm_setter(const fapi2::Target<TARGET
               l_attrs_master_ranks_per_dimm[index(l_mca)][index(i_target)],
               l_attrs_dimm_ranks_configed[index(l_mca)][index(i_target)] );
 
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, l_mcs, l_attrs_master_ranks_per_dimm) );
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_RANKS_CONFIGED, l_mcs, l_attrs_dimm_ranks_configed) );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, l_mcs, l_attrs_master_ranks_per_dimm),
+              "%s. Failed to set ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM", mss::c_str(i_target) );
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_RANKS_CONFIGED, l_mcs, l_attrs_dimm_ranks_configed),
+              "%s. Failed to set ATTR_EFF_DIMM_RANKS_CONFIGED", mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief       Helper function to return LRDIMM decoder
+/// @param[in]   i_target dimm target
+/// @param[in]   i_encoding_rev encoding revision
+/// @param[in]   i_additions_rev additions revision
+/// @param[in]   i_raw_card raw card reference revision
+/// @param[in]   i_spd_data SPD data
+/// @param[out]  o_fact_obj shared pointer to the factory object
+/// @return      FAPI2_RC_SUCCESS if okay
+/// @note        Factory dependent on SPD revision & dimm type
+///
+static fapi2::ReturnCode rdimm_rev_helper(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_encoding_rev,
+        const uint8_t i_additions_rev,
+        const rcd01::raw_card_t i_raw_card,
+        const std::vector<uint8_t>& i_spd_data,
+        std::shared_ptr<decoder>& o_fact_obj)
+{
+    // This needs to be updated for added revisions
+    constexpr uint64_t HIGHEST_ENCODING_LEVEL = 1;
+    constexpr uint64_t HIGHEST_ADDITIONS_LEVEL = 1;
+
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    std::shared_ptr<dimm_module_decoder> l_module_decoder;
+
+    // SPD Revision format #.#
+    // 1st # = encoding level
+    // 2nd # = additions level
+    switch(i_encoding_rev)
+    {
+        // Skipping case 0 since we shouldn't be using pre-production revisions
+        case 1:
+            switch(i_additions_rev)
+            {
+                // Rev 1.0
+                case 0:
+                    // Life starts out at base revision level
+                    FAPI_INF( "%s. Creating decoder for RDIMM SPD revision 1.0", mss::c_str(i_target) );
+                    l_module_decoder = std::make_shared<rdimm_decoder_v1_0>(i_target, i_spd_data);
+                    o_fact_obj = std::make_shared<decoder>( i_target, i_spd_data, l_module_decoder, i_raw_card );
+                    break;
+
+                case 1:
+                    // Rev 1.1
+                    // Changes to both the general section & rdimm section occured
+                    FAPI_INF( "%s. Creating decoder for RDIMM SPD revision 1.1", mss::c_str(i_target) );
+                    l_module_decoder = std::make_shared<rdimm_decoder_v1_1>(i_target, i_spd_data);
+                    o_fact_obj = std::make_shared<decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
+                    break;
+
+                default:
+                    // For additions level retrieved from SPD higher than highest decoded revision level,
+                    // we default to be highest decoded additions level because they are backward compatable.
+                    // This will need to be updated for every new additions level that is decoded.
+                    FAPI_INF( "%s. Unable to create decoder for retrieved SPD RDIMM revision %d.%d",
+                              mss::c_str(i_target), i_encoding_rev, i_additions_rev );
+
+                    FAPI_INF("%s. Falling back to highest supported, backward-comptable decoder, "
+                             "for SPD RDIMM revision %d.%d",
+                             mss::c_str(i_target), HIGHEST_ENCODING_LEVEL, HIGHEST_ADDITIONS_LEVEL );
+
+                    l_module_decoder = std::make_shared<rdimm_decoder_v1_1>(i_target, i_spd_data);
+                    o_fact_obj = std::make_shared<decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
+                    break;
+
+            }//end additions
+
+            break;
+
+        default:
+            // For encodings level retrieved from SPD higher than highest decoded revision level,
+            // we error out because encoding level changes are NOT backward comptable.
+            // Current this means Rev 2.0+ is no supported
+            FAPI_TRY( mss::check::spd::invalid_factory_sel(i_target,
+                      fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+                      i_encoding_rev,
+                      i_additions_rev,
+                      "Encoding Level unsupported!"),
+                      "%s. Invalid encoding level received: %d",
+                      mss::c_str(i_target), i_encoding_rev);
+
+            break;
+    }// end encodings
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief       Helper function to return LRDIMM decoder
+/// @param[in]   i_target dimm target
+/// @param[in]   i_encoding_rev encoding revision
+/// @param[in]   i_additions_rev additions revision
+/// @param[in]   i_raw_card raw card reference revision
+/// @param[in]   i_spd_data SPD data
+/// @param[out]  o_fact_obj shared pointer to the factory object
+/// @return      FAPI2_RC_SUCCESS if okay
+/// @note        Factory dependent on SPD revision & dimm type
+///
+static fapi2::ReturnCode lrdimm_rev_helper(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_encoding_rev,
+        const uint8_t i_additions_rev,
+        const rcd01::raw_card_t i_raw_card,
+        const std::vector<uint8_t>& i_spd_data,
+        std::shared_ptr<decoder>& o_fact_obj)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    std::shared_ptr<dimm_module_decoder> l_module_decoder;
+
+    // This needs to be updated for added revisions
+    constexpr uint64_t HIGHEST_ENCODING_LEVEL = 2;
+    constexpr uint64_t HIGHEST_ADDITIONS_LEVEL = 1;
+
+    // SPD Revision format #.#
+    // 1st # = encoding level
+    // 2nd # = additions level
+    switch(i_encoding_rev)
+    {
+        // Skipping case 0 since we shouldn't be using pre-production revisions
+        case 1:
+            switch(i_additions_rev)
+            {
+                // Rev 1.0
+                case 0:
+                    // Life starts out at base revision level
+                    FAPI_INF( "%s. Creating decoder for LRDIMM SPD revision 1.0", mss::c_str(i_target) );
+                    l_module_decoder = std::make_shared<lrdimm::decoder_v1_0>(i_target, i_spd_data);
+                    o_fact_obj = std::make_shared<decoder>( i_target, i_spd_data, l_module_decoder, i_raw_card );
+                    break;
+
+                case 1:
+                    // Rev 1.1
+                    // Changes to both the general section & lrdimm section occured
+                    FAPI_INF( "%s. Creating decoder for LRDIMM SPD revision 1.1", mss::c_str(i_target) );
+                    l_module_decoder = std::make_shared<lrdimm::decoder_v1_1>(i_target, i_spd_data);
+                    o_fact_obj = std::make_shared<decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
+                    break;
+
+                case 2:
+                    // Rev 1.2
+                    // Changes lrdimm section occured
+                    // General section remained the same
+                    FAPI_INF( "%s. Creating decoder for LRDIMM SPD revision 1.2", mss::c_str(i_target) );
+                    l_module_decoder = std::make_shared<lrdimm::decoder_v1_2>(i_target, i_spd_data);
+                    o_fact_obj = std::make_shared<decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
+                    break;
+
+                default:
+                    // For additions level retrieved from SPD higher than highest decoded revision level,
+                    // we default to be highest decoded additions level because they are backward compatable.
+                    // This will need to be updated for every new additions level that is decoded.
+                    FAPI_INF( "%s. Unable to create decoder for retrieved SPD LRDIMM revision %d.%d",
+                              mss::c_str(i_target), i_encoding_rev, i_additions_rev );
+
+                    FAPI_INF("%s. Falling back to highest supported, backward-comptable decoder, "
+                             "for SPD LRDIMM revision %d.%d",
+                             mss::c_str(i_target), HIGHEST_ENCODING_LEVEL, HIGHEST_ADDITIONS_LEVEL );
+
+                    l_module_decoder = std::make_shared<lrdimm::decoder_v1_2>(i_target, i_spd_data);
+                    o_fact_obj = std::make_shared<decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
+                    break;
+
+            }//end additions
+
+            break;
+
+        default:
+            // For encodings level retrieved from SPD higher than highest decoded revision level,
+            // we error out because encoding level changes are NOT backward comptable.
+            // Currently this means Rev 2.0+ is not supported
+            FAPI_TRY( mss::check::spd::invalid_factory_sel(i_target,
+                      fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM,
+                      i_encoding_rev,
+                      i_additions_rev,
+                      "Encoding Level unsupported!"),
+                      "%s. Invalid encoding level received: %d",
+                      mss::c_str(i_target), i_encoding_rev);
+            break;
+    }// end encodings
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -436,11 +633,10 @@ fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
     if( i_spd_data.empty() )
     {
         // This won't work with no data
-        FAPI_ERR( "SPD vector of data is empty! Factory requires valid SPD data.");
+        FAPI_ERR( "%s. SPD vector of data is empty! Factory requires valid SPD data.", mss::c_str(i_target) );
         return fapi2::FAPI2_RC_INVALID_PARAMETER;
     }
 
-    std::shared_ptr<dimm_module_decoder> l_module_decoder;
     uint8_t l_dimm_type = 0;
     uint8_t l_encoding_rev = 0;
     uint8_t l_additions_rev = 0;
@@ -449,22 +645,25 @@ fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
 
     // Attribute setting needed by mss::c_str() which is used in
     // the SPD decoder for debugging help
-    FAPI_TRY( dimm_type_setter(i_target, i_spd_data, l_dimm_type) );
-    FAPI_TRY( dram_gen_setter(i_target, i_spd_data) );
+    FAPI_TRY( dimm_type_setter(i_target, i_spd_data, l_dimm_type),
+              "%s. Failed to set DIMM type", mss::c_str(i_target) );
+    FAPI_TRY( dram_gen_setter(i_target, i_spd_data),
+              "%s. Failed to set DRAM generation", mss::c_str(i_target) );
 
     // Get revision levels to figure out what SPD version we are
     FAPI_TRY( rev_encoding_level(i_target, i_spd_data, l_encoding_rev),
-              "Failed to find encoding level" );
+              "%s. Failed to decode encoding level", mss::c_str(i_target) );
     FAPI_TRY( rev_additions_level(i_target, i_spd_data,  l_additions_rev),
-              "Failed to find additons level" );
+              "%s. Failed to decode additons level", mss::c_str(i_target) );
 
     // Lets find out what raw card we are and grab the right
     // raw card settings
-    FAPI_TRY( reference_raw_card(i_target, i_spd_data, l_ref_raw_card_rev) );
+    FAPI_TRY( reference_raw_card(i_target, i_spd_data, l_ref_raw_card_rev),
+              "%s. Failed to decode reference raw card", mss::c_str(i_target) );
 
     if( !find_value_from_key( rcd01::RAW_CARDS, l_ref_raw_card_rev, l_raw_card) )
     {
-        FAPI_ERR( "Invalid reference raw card recieved: %d", l_ref_raw_card_rev );
+        FAPI_ERR( "%s. Invalid reference raw card recieved: %d", mss::c_str(i_target), l_ref_raw_card_rev );
         return fapi2::FAPI2_RC_FALSE;
     }
 
@@ -473,53 +672,28 @@ fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
     {
         // Each dimm type rev is independent
         case fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM:
+            FAPI_TRY( rdimm_rev_helper(i_target,
+                                       l_encoding_rev,
+                                       l_additions_rev,
+                                       l_raw_card,
+                                       i_spd_data,
+                                       o_fact_obj),
+                      "%s. Failed to decode SPD revision for RDIMM, "
+                      "encoding rev: %d, additions rev: %d",
+                      mss::c_str(i_target), l_encoding_rev, l_additions_rev );
+            break;
 
-            // SPD Revision format #.#
-            // 1st # = encoding level
-            // 2nd # = additions level
-            switch(l_encoding_rev)
-            {
-                // Skipping case 0 since we shouldn't be using pre-production revisions
-                case 1:
-                    switch(l_additions_rev)
-                    {
-                        // Rev 1.0
-                        case 0:
-                            // Life starts out at base revision level
-                            l_module_decoder = std::make_shared<rdimm_decoder_v1_0>(i_target, i_spd_data);
-                            o_fact_obj = std::make_shared<decoder>( i_target, i_spd_data, l_module_decoder, l_raw_card );
-                            break;
-
-                        case 1:
-                            // Rev 1.1
-                            // Changes to both the general section & rdimm section occured
-                            l_module_decoder = std::make_shared<rdimm_decoder_v1_1>(i_target, i_spd_data);
-                            o_fact_obj = std::make_shared<decoder_v1_1>( i_target, i_spd_data, l_module_decoder, l_raw_card );
-                            break;
-
-                        default:
-                            // For additions level retrieved from SPD higher than highest decoded revision level,
-                            // we default to be highest decoded additions level because they are backward compatable.
-                            // This will need to be updated for every new additions level that is decoded.
-                            l_module_decoder = std::make_shared<rdimm_decoder_v1_1>(i_target, i_spd_data);
-                            o_fact_obj = std::make_shared<decoder_v1_1>( i_target, i_spd_data, l_module_decoder, l_raw_card );
-                            break;
-
-                    }//end additions
-
-                    break;
-
-                default:
-                    // For encodings level retrieved from SPD higher than highest decoded revision level,
-                    // we error out because encoding level changes are NOT backward comptable.
-                    FAPI_TRY( mss::check::spd::invalid_factory_sel(i_target,
-                              l_dimm_type,
-                              l_encoding_rev,
-                              l_additions_rev,
-                              "Encoding Level unsupported!") );
-                    break;
-            }// end encodings
-
+        // Each dimm type rev is independent
+        case fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM:
+            FAPI_TRY( lrdimm_rev_helper(i_target,
+                                        l_encoding_rev,
+                                        l_additions_rev,
+                                        l_raw_card,
+                                        i_spd_data,
+                                        o_fact_obj),
+                      "%s. Failed to decode SPD revision for LRDIMM, "
+                      "encoding rev: %d, additions rev: %d",
+                      mss::c_str(i_target), l_encoding_rev, l_additions_rev);
             break;
 
         default:
@@ -532,10 +706,11 @@ fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
 
     } // end dimm type
 
-    FAPI_INF("%s: Decoder created for SPD revision %d.%d",
-             c_str(i_target),
-             l_encoding_rev,
-             l_additions_rev);
+    FAPI_INF( "%s: Decoder created for DIMM type: %d, SPD revision %d.%d",
+              mss::c_str(i_target),
+              l_dimm_type,
+              l_encoding_rev,
+              l_additions_rev );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -545,6 +720,7 @@ fapi_try_exit:
 /// @brief       Creates factory object & SPD data caches
 /// @param[in]   i_target controller target
 /// @param[out]  o_factory_caches map of factory objects with a dimm position key
+/// @param[in]   i_pDecoder custom decoder to populate cache (ignored for this specialization)
 /// @return      FAPI2_RC_SUCCESS if okay
 /// @note        This specialization is suited for creating a cache with platform
 ///              SPD data.
@@ -555,23 +731,26 @@ fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_MCS>&
         const std::shared_ptr<decoder>& i_pDecoder)
 {
     // Input decoder for this version of populating cache would get overriden
-    // so I don't bother with it here
+    // so I don't bother with it in this specialization
     std::shared_ptr<decoder> l_pDecoder;
 
     for( const auto& l_dimm : find_targets<TARGET_TYPE_DIMM>(i_target) )
     {
         size_t l_size = 0;
-        FAPI_TRY( fapi2::getSPD(l_dimm, nullptr, l_size) );
+        FAPI_TRY( fapi2::getSPD(l_dimm, nullptr, l_size),
+                  "%s. Failed to retrieve SPD blob size", mss::c_str(i_target) );
 
         {
             // "Container" for SPD data
             std::vector<uint8_t> l_spd(l_size);
 
             // Retrive SPD data
-            FAPI_TRY( fapi2::getSPD(l_dimm, l_spd.data(), l_size) );
+            FAPI_TRY( fapi2::getSPD(l_dimm, l_spd.data(), l_size),
+                      "%s. Failed to retrieve SPD data", mss::c_str(i_target) );
 
             // Retrieve factory object instance & populate spd data for that instance
-            FAPI_TRY( factory(l_dimm, l_spd, l_pDecoder) );
+            FAPI_TRY( factory(l_dimm, l_spd, l_pDecoder),
+                      "%s. Failed SPD factory, could not instantiate decoder object", mss::c_str(i_target) );
 
             // Populate spd caches maps based on dimm pos
             o_factory_caches.emplace( std::make_pair( pos(l_dimm), l_pDecoder ) );
@@ -579,7 +758,8 @@ fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_MCS>&
 
         // Populate some of the DIMM attributes early. This allows the following code to make
         // decisions based on DIMM information. Expressly done after the factory has decided on the SPD version
-        FAPI_TRY( master_ranks_per_dimm_setter(l_dimm, l_pDecoder) );
+        FAPI_TRY( master_ranks_per_dimm_setter(l_dimm, l_pDecoder),
+                  "%s. Failed master_ranks_per_dimm_setter()", mss::c_str(i_target) );
 
     }// end dimm
 
@@ -591,6 +771,7 @@ fapi_try_exit:
 /// @brief       Creates factory object & SPD data caches
 /// @param[in]   i_target the dimm target
 /// @param[out]  o_factory_caches map of factory objects with a dimm position key
+/// @param[in]   i_pDecoder custom decoder to populate cache (nullptr default)
 /// @return      FAPI2_RC_SUCCESS if okay
 /// @note        This specialization is suited for creating a cache with custom
 ///              SPD data (e.g. testing custom SPD).
@@ -603,6 +784,7 @@ fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_DIMM>
     if(i_pDecoder == nullptr)
     {
         // This won't work w/a null parameter
+        FAPI_ERR("%s. Received decoder is NULL!", mss::c_str(i_target) );
         return fapi2::FAPI2_RC_INVALID_PARAMETER;
     }
 
