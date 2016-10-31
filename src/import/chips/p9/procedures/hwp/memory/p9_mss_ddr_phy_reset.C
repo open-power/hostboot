@@ -156,6 +156,9 @@ extern "C"
         FAPI_TRY(mss::change_force_mclk_low(i_target, mss::HIGH),
                  "force_mclk_low (set low) Failed rc = 0x%08X", uint64_t(fapi2::current_err) );
 
+        // Workarounds
+        FAPI_TRY( mss::workarounds::dp16::after_phy_reset(i_target) );
+
         // If mss_unmask_ddrphy_errors gets it's own bad rc,
         // it will commit the passed in rc (if non-zero), and return it's own bad rc.
         // Else if mss_unmask_ddrphy_errors runs clean,
