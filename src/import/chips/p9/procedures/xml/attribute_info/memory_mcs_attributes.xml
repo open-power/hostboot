@@ -1949,6 +1949,21 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_VREF_CAL_ENABLE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            A bit vector denoting bits in every DP16 on the port to be calibrated.
+            That is, all of the set bits will be calibrated for all DP16. A value
+            of zero indicates the calibration should not be run.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>vref_cal_enable</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_CAL_ABORT_ON_ERROR</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>
@@ -2125,6 +2140,27 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>vmem_regulator_max_dimm_count</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_VREF_DAC_NIBBLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>Value for VREF DAC nibbles</description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>vref_dac_nibble</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_VCCD_OVERRIDE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>Whether or not to override VCCD. Defaults to no.</description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>NO = 0, YES = 1</enum>
+        <writeable/>
+        <mssAccessorName>vccd_override</mssAccessorName>
     </attribute>
 
     <attribute>
