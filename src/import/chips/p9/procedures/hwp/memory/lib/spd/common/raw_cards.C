@@ -47,23 +47,6 @@ namespace mss
 namespace rcd01
 {
 
-enum raw_card_rev : uint8_t
-{
-    // TODO RTC:160116 Fill in valid RCD data for LRDIMM
-    B0 = 0x01,
-
-    // RDIMM power-on
-    C1 = 0x22,
-
-    // TK - Change to 0xFF -  AAM
-    // In the spec hex XF (where X - don't care)
-    // means no JEDEC reference raw card design used.
-    // We will want to redefine it to be VBU reference raw card
-    // since it is unlikely we will use a DIMM w/o a
-    // reference caw card design.
-    VBU = 0x23,
-};
-
 ///
 /// @brief raw card B0 settings
 ///
@@ -112,6 +95,29 @@ raw_card_t raw_card_c1( 0x00, // RC00
                         0x07);// RCBX
 
 ///
+/// @brief raw card A1 settings
+///
+raw_card_t raw_card_a1( 0x00, // RC00
+                        0x00, // RC01 (C might be the right answer?)
+                        0x00, // RC02
+                        0x0F, // RC06_07
+                        0x03, // RC08
+                        0x00, // RC09
+                        0x0E, // RC0B
+                        0x00, // RC0C
+                        0x0D, // RC0E
+                        0x00, // RC0F
+                        0x00, // RC1X
+                        0x00, // RC2X
+                        0x00, // RC4X
+                        0x00, // RC5X
+                        0x00, // RC6X
+                        0x00, // RC8X
+                        0x00, // RC9X
+                        0x00, // RCAX
+                        0x07);// RCBX
+
+///
 /// @brief raw card VBU settings
 ///
 raw_card_t raw_card_vbu( 0x00, // RC00
@@ -138,9 +144,13 @@ raw_card_t raw_card_vbu( 0x00, // RC00
 // TODO - RTC:160121 Catch all for adding raw card data for DIMMs
 // Not sure if we can have the same raw card revision for rcd01 and rcd02,
 // if not, then we can move this vector outside of the rcd01 namespace.
+//
+// !! WARNING: THIS VECTOR MUST BE SORTED BY ENUM VALUE!!
+//
 const std::vector< std::pair< uint8_t , rcd01::raw_card_t> > RAW_CARDS =
 {
     {raw_card_rev::B0, rcd01::raw_card_b0},
+    {raw_card_rev::A1, rcd01::raw_card_a1},
     {raw_card_rev::C1, rcd01::raw_card_c1},
     {raw_card_rev::VBU, rcd01::raw_card_vbu},
 };

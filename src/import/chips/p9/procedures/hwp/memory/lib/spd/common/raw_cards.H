@@ -44,6 +44,26 @@ namespace mss
 namespace rcd01
 {
 
+// In the order of the vector below which needs to be sorted by enum value
+enum raw_card_rev : uint8_t
+{
+    // TODO RTC:160116 Fill in valid RCD data for LRDIMM
+    B0 = 0x01,
+
+    A1 = 0x20,
+
+    // RDIMM power-on
+    C1 = 0x22,
+
+    // TK - Change to 0xFF -  AAM
+    // In the spec hex XF (where X - don't care)
+    // means no JEDEC reference raw card design used.
+    // We will want to redefine it to be VBU reference raw card
+    // since it is unlikely we will use a DIMM w/o a
+    // reference caw card design.
+    VBU = 0x23,
+};
+
 ///
 /// @brief raw card VBU settings
 /// @note contains RCD settings for hard-coded values
@@ -75,6 +95,17 @@ struct raw_card_t
     /// @brief default ctor
     ///
     raw_card_t() = default;
+
+    ///
+    /// @brief Equality operator
+    /// @param[in] i_rhs the right-hand side of the == operation
+    /// @return true iff both raw_cards are equal
+    ///
+    inline bool operator==(const raw_card_t& i_rhs) const
+    {
+        // Betting this is faster than all the conditionals ...
+        return (memcmp(this, &i_rhs, sizeof(raw_card_t)) == 0);
+    }
 
     ///
     /// @brief ctor
@@ -143,6 +174,12 @@ struct raw_card_t
     ///
     ~raw_card_t() = default;
 };
+
+// Exposed so we can test them.
+extern raw_card_t raw_card_b0;
+extern raw_card_t raw_card_c1;
+extern raw_card_t raw_card_a1;
+extern raw_card_t raw_card_vbu;
 
 extern const std::vector< std::pair< uint8_t, rcd01::raw_card_t> > RAW_CARDS;
 

@@ -42,6 +42,7 @@
 #include <p9_mss_ddr_phy_reset.H>
 #include <lib/utils/count_dimm.H>
 #include <lib/phy/adr32s.H>
+#include <lib/workarounds/dp16_workarounds.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 
