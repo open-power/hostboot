@@ -147,6 +147,55 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief DP16 workarounds to be run after PHY reset
+/// In DD1.0 Nimbus various work arounds are needed
+/// @param[in] i_target the fapi2 target of the controller
+/// @return fapi2::ReturnValue FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode after_phy_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+{
+    typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+
+    uint8_t is_sim = 0;
+    FAPI_TRY( mss::is_simulation(is_sim) );
+
+    for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
+    {
+        std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>> > l_vreg_coarse;
+        std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>> > l_vref_cntl;
+
+        // Fix up VREG Coarse
+        {
+            // Read, modify, write
+            FAPI_TRY( mss::scom_suckah(p, TT::DLL_VREG_COARSE_REG, l_vreg_coarse) );
+            std::for_each(l_vreg_coarse.begin(), l_vreg_coarse.end(),
+                          [](std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> >& v)
+            {
+                v.first  = mss::workarounds::dp16::vreg_coarse(v.first);
+                v.second = mss::workarounds::dp16::vreg_coarse(v.second);
+            });
+            FAPI_TRY( mss::scom_blastah(p, TT::DLL_VREG_COARSE_REG, l_vreg_coarse) );
+        }
+
+        // Fix up vref dac
+        if (!is_sim)
+        {
+            FAPI_TRY( mss::scom_suckah(p, TT::RD_VREF_CNTRL_REG, l_vref_cntl) );
+            std::for_each(l_vref_cntl.begin(), l_vref_cntl.end(),
+                          [](std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> >& v)
+            {
+                v.first  = mss::workarounds::dp16::vref_dac(v.first);
+                v.second = mss::workarounds::dp16::vref_dac(v.second);
+            });
+            FAPI_TRY( mss::scom_blastah(p, TT::RD_VREF_CNTRL_REG, l_vref_cntl) );
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 namespace wr_vref
 {
 
@@ -484,4 +533,3 @@ fapi_try_exit:
 } // close namespace dp16
 } // close namespace workarounds
 } // close namespace mss
-

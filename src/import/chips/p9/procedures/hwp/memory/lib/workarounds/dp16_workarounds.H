@@ -39,6 +39,9 @@
 #define _MSS_WORKAROUNDS_DP16_H_
 
 #include <fapi2.H>
+#include <p9_mc_scom_addresses.H>
+#include <p9_mc_scom_addresses_fld.H>
+#include <mss_attribute_accessors.H>
 
 namespace mss
 {
@@ -77,6 +80,121 @@ fapi2::ReturnCode rd_dia_config5( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 fapi2::ReturnCode dqsclk_offset( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+///
+/// @brief DP16 DLL_VREG_CONTROL0
+/// In DD1.0 Nimbus VREG control work arounds are needed
+/// @param[in] i_original_value a value to which we add the workaround bits
+/// @return uint64_t the original value with the bits added
+///
+inline uint64_t vreg_control0( const uint64_t i_original_value )
+{
+    // TK: Figure out how we know what part doesn't need this workaround.
+    fapi2::buffer<uint64_t> l_value(i_original_value);
+    uint8_t l_vccd_override = 0;
+
+    FAPI_TRY( mss::vccd_override(l_vccd_override) );
+
+    // No VCCD override, don't mess with the DLL's
+    if (fapi2::ENUM_ATTR_MSS_VCCD_OVERRIDE_YES == l_vccd_override)
+    {
+        l_value.insertFromRight<MCA_DDRPHY_DP16_DLL_VREG_CONTROL0_P0_0_01_RXREG_REF_SEL_DC,
+                                MCA_DDRPHY_DP16_DLL_VREG_CONTROL0_P0_0_01_RXREG_REF_SEL_DC_LEN>(0b111);
+    }
+
+    FAPI_INF("vreg_control0 0x%016lx, 0x%016lx", i_original_value, uint64_t(l_value));
+    return l_value;
+
+fapi_try_exit:
+    // Probably bigger problems ...
+    FAPI_ERR("Unable to get vccd_override attribute");
+    fapi2::Assert(false);
+
+    // Not reached
+    return 0;
+
+}
+
+///
+/// @brief DP16 VREF DAC override
+/// In DD1.0 Nimbus VREF DAC work arounds are needed
+/// @param[in] i_original_value a value to which we add the workaround bits
+/// @return uint64_t the original value with the bits added
+///
+inline uint64_t vref_dac( const uint64_t i_original_value )
+{
+    // TK: Figure out how we know what part doesn't need this workaround.
+    fapi2::buffer<uint64_t> l_value(i_original_value);
+
+    // We have an attribute for VREF DAC nibble, if it's 0 then we'll
+    // not do anything
+    uint8_t l_vref_dac_nibble = 0;
+    FAPI_TRY( mss::vref_dac_nibble(l_vref_dac_nibble) );
+
+    // We want to set the EN_FORCE on no matter what.
+    l_value.setBit<MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0_01_NIB0_EN_FORCE>()
+    .setBit<MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0_01_NIB1_EN_FORCE>();
+
+    // But we only give a new value if they asked for one in the attribute
+    if (l_vref_dac_nibble != 0)
+    {
+        l_value.insertFromRight<MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0_01_NIB0,
+                                MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0_01_NIB0_LEN>(l_vref_dac_nibble)
+                                .insertFromRight<MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0_01_NIB1,
+                                MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0_01_NIB1_LEN>(l_vref_dac_nibble);
+    }
+
+    FAPI_INF("vref_dac 0x%016lx, 0x%016lx", i_original_value, uint64_t(l_value));
+    return l_value;
+
+fapi_try_exit:
+    // Probably bigger problems ...
+    FAPI_ERR("Unable to get vref_dac_nibble attribute");
+    fapi2::Assert(false);
+
+    // Not reached
+    return 0;
+}
+
+///
+/// @brief DP16 VREG Coarse override
+/// In DD1.0 Nimbus VREG Coarse work arounds are needed
+/// @param[in] i_original_value a value to which we add the workaround bits
+/// @return uint64_t the original value with the bits added
+///
+inline uint64_t vreg_coarse( const uint64_t i_original_value )
+{
+    // TK: Figure out how we know what part doesn't need this workaround.
+    fapi2::buffer<uint64_t> l_value(i_original_value);
+    uint8_t l_vccd_override = 0;
+
+    FAPI_TRY( mss::vccd_override(l_vccd_override) );
+
+    if (fapi2::ENUM_ATTR_MSS_VCCD_OVERRIDE_YES == l_vccd_override)
+    {
+        l_value.insertFromRight<MCA_DDRPHY_ADR_DLL_VREG_COARSE_P0_ADR32S0_ADR0_REGS_RXDLL_DAC,
+                                MCA_DDRPHY_ADR_DLL_VREG_COARSE_P0_ADR32S0_ADR0_REGS_RXDLL_DAC_LEN>(0b0000100);
+    }
+
+    FAPI_INF("vref_coarse 0x%016lx, 0x%016lx", i_original_value, uint64_t(l_value));
+    return l_value;
+
+fapi_try_exit:
+    // Probably bigger problems ...
+    FAPI_ERR("Unable to get vccd_override attribute");
+    fapi2::Assert(false);
+
+    // Not reached
+    return 0;
+}
+
+///
+/// @brief DP16 workarounds to be run after PHY reset
+/// In DD1.0 Nimbus various work arounds are needed
+/// @param[in] i_target the fapi2 target of the controller
+/// @return fapi2::ReturnValue FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode after_phy_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 namespace wr_vref
 {
@@ -171,4 +289,3 @@ fapi2::ReturnCode setup_values( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_t
 } // close namespace mss
 
 #endif
-

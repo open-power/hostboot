@@ -50,6 +50,8 @@
 #include <lib/utils/pos.H>
 #include <lib/utils/c_str.H>
 
+#include <lib/workarounds/dp16_workarounds.H>
+
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_DIMM;
@@ -1136,6 +1138,11 @@ fapi2::ReturnCode reset_dll( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
     // Magic numbers are from the PHY team (see the ddry phy initfile, too.) They are, in fact,
     // magic numbers ...
     // TK How about a little broadcast action here? BRS
+    // For DD1.0 we have some workarounds. We send the magic
+    // number in to the work around and it fixes it up as needed.
+    uint64_t l_vreg_cnrtl = mss::workarounds::dp16::vreg_control0(0x6740);
+
+    // TK How about a little broadcast action here? BRS
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_CNFG_REG,        0x0060) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_CNTRL_REG,       0x8100) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_DAC_LOWER_REG,   0x8000) );
@@ -1143,7 +1150,7 @@ fapi2::ReturnCode reset_dll( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SLAVE_LOWER_REG, 0x8000) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SLAVE_UPPER_REG, 0xffe0) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_EXTRA_REG,       0x2020) );
-    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_CNTRL_REG,  0x6740) );
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_CNTRL_REG,  l_vreg_cnrtl) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SW_CNTRL_REG,    0x0800) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_COARSE_REG, 0x0402) );
 
