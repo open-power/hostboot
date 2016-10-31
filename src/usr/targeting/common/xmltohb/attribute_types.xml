@@ -32229,4 +32229,61 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>MSS_VREF_CAL_ENABLE</id>
+    <description>
+        A bit vector denoting bits in every DP16 on the port to be calibrated.
+        That is, all of the set bits will be calibrated for all DP16. A value
+        of zero indicates the calibration should not be run.
+    </description>
+    <simpleType>
+        <uint16_t>
+        </uint16_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_VREF_CAL_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_VREF_DAC_NIBBLE</id>
+    <description>
+        Value for VREF DAC nibbles
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_VREF_DAC_NIBBLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_VCCD_OVERRIDE</id>
+    <description>
+        Whether or not to override VCCD. Defaults to no.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_VCCD_OVERRIDE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

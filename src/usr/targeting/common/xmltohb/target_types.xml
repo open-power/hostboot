@@ -877,6 +877,8 @@
     <attribute><id>IVRM_STABILIZATION_DELAY_NS</id></attribute>
     <attribute><id>SYSTEM_RESCLK_ENABLE</id></attribute>
     <attribute><id>MSS_MRW_REFRESH_RATE_REQUEST</id></attribute>
+    <attribute><id>MSS_VREF_DAC_NIBBLE</id></attribute>
+    <attribute><id>MSS_VCCD_OVERRIDE</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -1795,6 +1797,7 @@
     <attribute><id>EFF_DRAM_TRRD_DLR</id></attribute>
     <attribute><id>BAD_DQ_BITMAP</id></attribute>
     <attribute><id>MSS_DIMM_THERMAL_LIMIT</id></attribute>
+    <attribute><id>MSS_VREF_CAL_ENABLE</id></attribute>
 </targetType>
 
 <targetType>
