@@ -79,8 +79,17 @@ fapi2::ReturnCode writePG(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
     void* i_image)
 {
+    const uint8_t  IMG_PG_ENTRIES = 64;
+    const uint16_t DEFAULT_PG_VAL = 0xffff;
+
     FAPI_DBG ("writePG Entering...");
-    const uint8_t IMG_PG_ENTRIES = 64;
+
+    // Make all chiplets "not good".
+    for (auto l_pg_idx = 0; l_pg_idx < IMG_PG_ENTRIES; l_pg_idx++)
+    {
+        FAPI_TRY( p9_xip_set_element(i_image, "ATTR_PG", l_pg_idx, DEFAULT_PG_VAL),
+                  "Error (1) from p9_xip_set_element (idx %d)", l_pg_idx );
+    }
 
     for (auto l_perv_tgt : i_proc_target.getChildren<fapi2::TARGET_TYPE_PERV>())
     {
@@ -104,7 +113,7 @@ fapi2::ReturnCode writePG(
 
         // Update the image
         FAPI_TRY( p9_xip_set_element(i_image, "ATTR_PG", l_pg_idx, l_pg_data),
-                  "Error from p9_xip_set_element (idx %d)", l_pg_idx );
+                  "Error (2) from p9_xip_set_element (idx %d)", l_pg_idx );
 
         FAPI_DBG("Write value of pg_data[%d] = %08X", l_pg_idx, l_pg_data);
     }
