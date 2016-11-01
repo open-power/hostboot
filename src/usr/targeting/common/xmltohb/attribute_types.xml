@@ -67,8 +67,12 @@
         <value>7</value>
     </enumerator>
     <enumerator>
-        <name>MAX</name>
+        <name>BATTERY</name>
         <value>8</value>
+    </enumerator>
+    <enumerator>
+        <name>MAX</name>
+        <value>9</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>
