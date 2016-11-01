@@ -47,34 +47,15 @@
 #include <p9_misc_scom_addresses_fld.H>
 #include <p9_const_common.H>
 
-enum P9_SBE_COMMON_Private_Constants
-{
-    OTPC_M_MODE_REGISTER_ECC_ENABLE_BIT = 1 // OTPROM mode register MODE_ECC_ENABLE field/bit definitions
-};
 
 fapi2::ReturnCode p9_getecid(const
                              fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip, fapi2::variable_buffer& o_fuseString)
 {
     uint64_t attr_data[2];
-    bool secure_mode = false;
     fapi2::buffer<uint64_t> l_ecid_part0_data64 = 0;
     fapi2::buffer<uint64_t> l_ecid_part1_data64 = 0;
     FAPI_INF("Entering ...");
 
-    FAPI_DBG("determine if security is enabled");
-    fapi2::buffer<uint64_t> l_data64;
-    FAPI_TRY(fapi2::getScom(i_target_chip, PERV_CBS_CS_SCOM, l_data64));
-    secure_mode = l_data64.getBit<4>();
-
-    FAPI_DBG("clear ECC enable before reading ECID data (read-modify-write OTPROM Mode register), insecure mode only");
-
-    if (!secure_mode)
-    {
-        fapi2::buffer<uint64_t> l_data64;
-        FAPI_TRY(fapi2::getScom(i_target_chip, PU_MODE_REGISTER, l_data64));
-        l_data64.clearBit<OTPC_M_MODE_REGISTER_ECC_ENABLE_BIT>();
-        FAPI_TRY(fapi2::putScom(i_target_chip, PU_MODE_REGISTER, l_data64));
-    }
 
     FAPI_DBG("extract and manipulate ECID data");
     FAPI_TRY(fapi2::getScom(i_target_chip, PU_OTPROM0_ECID_PART0_REGISTER, l_ecid_part0_data64));
@@ -94,19 +75,8 @@ fapi2::ReturnCode p9_getecid(const
 
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ECID, i_target_chip, attr_data));
 
-    FAPI_DBG("restore ECC enable setting (insecure mode only)");
-
-    if (!secure_mode)
-    {
-        fapi2::buffer<uint64_t> l_data64;
-        FAPI_TRY(fapi2::getScom(i_target_chip, PU_MODE_REGISTER, l_data64));
-        l_data64.setBit<OTPC_M_MODE_REGISTER_ECC_ENABLE_BIT>();
-        FAPI_TRY(fapi2::putScom(i_target_chip, PU_MODE_REGISTER, l_data64));
-    }
-
     FAPI_INF("Exiting ...");
 
-//    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 
