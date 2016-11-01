@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -49,6 +49,8 @@ namespace HWAS
 #ifdef __HOSTBOOT_RUNTIME // defined in hwas.C
 HWAS_TD_t g_trac_imp_hwas   = NULL; // important - slow
 TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   KILOBYTE );
+HWAS_TD_t g_trac_dbg_hwas   = NULL; // fast debug
+TRAC_INIT(&g_trac_dbg_hwas, "HWAS",   KILOBYTE );
 #endif
 
 using namespace HWAS::COMMON;

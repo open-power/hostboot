@@ -1923,11 +1923,17 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 o_targToDeconfig.push_back(l_curTargetInfo);
                 // Remove target from funcTargets
                 io_funcTargets.erase(it);
+
+                //Just erased current MCBIST, MCA/MCS index invalid
+                l_MCAIndex = __INT_MAX__;
+                l_MCSIndex = __INT_MAX__;
             }
             // Update MCBIST Index
             else
             {
                 l_MCBISTIndex = i;
+                l_MCAIndex = __INT_MAX__; //New MCBIST, MCA index invalid
+                l_MCSIndex = __INT_MAX__; //New MCBIST, MCS index invalid
                 i++;
                 continue;
             }
@@ -1960,6 +1966,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             else
             {
                 l_MCSIndex = i;
+                l_MCAIndex = __INT_MAX__; //New MCS, MCA index invalid
                 i++;
                 continue;
             }
@@ -1972,6 +1979,8 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             if ( l_MCBISTIndex != __INT_MAX__ )
             {
                 i = l_MCBISTIndex;
+                l_MCAIndex = __INT_MAX__; //New MCBIST, MCA index invalid
+                l_MCSIndex = __INT_MAX__; //New MCBIST, MCS index invalid
             }
             // Backtrack to beginning if no MCS has been seen yet
             else
@@ -2114,12 +2123,18 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             o_targToDeconfig.push_back(l_curTargetInfo);
             // Remove target from funcTargets
             io_funcTargets.erase(it);
+            l_MCAIndex = __INT_MAX__; //MCA removed, MCA index invalid
             // Backtrack to last MCS
             if ( l_MCSIndex != __INT_MAX__ )
             {
                 i = l_MCSIndex;
             }
-            // Backtrack to beginning if no MCS has been seen yet
+            // Backtrack to last MCBIST
+            else if ( l_MCBISTIndex != __INT_MAX__ )
+            {
+                i = l_MCBISTIndex;
+            }
+            // Backtrack to beginning if no MCBIST has been seen yet
             else
             {
                 i = 0;
