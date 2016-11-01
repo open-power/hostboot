@@ -2352,4 +2352,12 @@ int tor_append_ring(  void*           i_ringSection,      // Ring section ptr
 }
 
 
+//
+// Inform caller of TOR version.
+//
+uint8_t tor_version( void)
+{
+    return (uint8_t)TOR_VERSION;
+}
+
 };

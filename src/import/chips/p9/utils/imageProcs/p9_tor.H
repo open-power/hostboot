@@ -34,6 +34,8 @@ namespace P9_TOR
 extern const char* ppeTypeName[];
 extern const char* ringVariantName[];
 
+#define  TOR_VERSION  1
+
 typedef struct
 {
     uint32_t sizeOfThis;
@@ -436,6 +438,15 @@ int tor_append_ring(  void*           i_ringSection,
                       uint8_t         i_instanceId,
                       void*           i_rs4Container,
                       uint32_t        i_dbgl = 0 );
+
+
+/// Inform caller of TOR version
+///
+/// \param[in] - none
+///
+/// \retval - TOR version
+uint8_t tor_version( void);
+
 };
 #endif //_P9_TOR_H_
 
