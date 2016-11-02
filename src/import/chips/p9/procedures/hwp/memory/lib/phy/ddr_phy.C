@@ -526,8 +526,8 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
         // bit processing here, and if we can go on and ignore these bad bits, we'll see a succcess here.
         if (dp16::process_bad_bits(i_target, l_failed_dimm, l_rank_pairs) == fapi2::FAPI2_RC_SUCCESS)
         {
-            FAPI_INF("Initial cal - errors reported but repaired ok on %s", mss::c_str(l_failed_dimm));
-            return fapi2::FAPI2_RC_SUCCESS;
+            FAPI_INF("Initial cal - errors reported, but only 1 nibble + 1 bit marked %s", mss::c_str(l_failed_dimm));
+            // TK processing recoverable bad bits ...
         }
     }
 
@@ -1229,5 +1229,3 @@ fapi_try_exit:
 }
 
 } // ns mss
-
-
