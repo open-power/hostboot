@@ -38,200 +38,202 @@ fapi2::ReturnCode p9_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
 
     do
     {
-        {
-            fapi2::variable_buffer l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
-            l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
-                                 l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
+        fapi2::ATTR_EC_Type   l_chip_ec;
+        fapi2::ATTR_NAME_Type l_chip_id;
+        l_rc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id);
 
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
-                break;
-            }
-        }
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC01_PORT1_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
-            l_MC01_PORT1_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC01.PORT1.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
-                                 l_MC01_PORT1_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC01.PORT1.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR getting ATTR_NAME");
+            break;
         }
+
+        l_rc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec);
+
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC01_PORT2_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
-            l_MC01_PORT2_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC01.PORT2.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
-                                 l_MC01_PORT2_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC01.PORT2.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR getting ATTR_EC");
+            break;
         }
+
+        fapi2::variable_buffer l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
+        l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
+                             l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
+
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC01_PORT3_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
-            l_MC01_PORT3_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC01.PORT3.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
-                                 l_MC01_PORT3_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC01.PORT3.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
+            break;
         }
+
+        fapi2::variable_buffer l_MC01_PORT1_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
+        l_MC01_PORT1_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT1.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
+                             l_MC01_PORT1_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
+
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC23_PORT0_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
-            l_MC23_PORT0_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC23.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
-                                 l_MC23_PORT0_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC23.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT1.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
+            break;
         }
+
+        fapi2::variable_buffer l_MC01_PORT2_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
+        l_MC01_PORT2_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT2.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
+                             l_MC01_PORT2_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
+
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC23_PORT1_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
-            l_MC23_PORT1_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC23.PORT1.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
-                                 l_MC23_PORT1_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC23.PORT1.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT2.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
+            break;
         }
+
+        fapi2::variable_buffer l_MC01_PORT3_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
+        l_MC01_PORT3_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT3.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
+                             l_MC01_PORT3_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
+
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC23_PORT2_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
-            l_MC23_PORT2_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC23.PORT2.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
-                                 l_MC23_PORT2_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC23.PORT2.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT3.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
+            break;
         }
+
+        fapi2::variable_buffer l_MC23_PORT0_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
+        l_MC23_PORT0_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
+                             l_MC23_PORT0_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
+
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC23_PORT3_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
-            l_MC23_PORT3_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC23.PORT3.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
-                                 l_MC23_PORT3_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC23.PORT3.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
+            break;
         }
+
+        fapi2::variable_buffer l_MC23_PORT1_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
+        l_MC23_PORT1_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT1.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
+                             l_MC23_PORT1_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
+
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
-            l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
-                                 l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT1.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
+            break;
         }
+
+        fapi2::variable_buffer l_MC23_PORT2_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
+        l_MC23_PORT2_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT2.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
+                             l_MC23_PORT2_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
+
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC01_PORT1_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
-            l_MC01_PORT1_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC01.PORT1.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
-                                 l_MC01_PORT1_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC01.PORT1.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT2.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
+            break;
         }
+
+        fapi2::variable_buffer l_MC23_PORT3_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT(6);
+        l_MC23_PORT3_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT.insertFromRight<uint64_t>(literal_0b111111, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT3.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT",
+                             l_MC23_PORT3_ATCL_CL_CLSCOM_MCPERF0_PREFETCH_LIMIT);
+
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC01_PORT2_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
-            l_MC01_PORT2_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC01.PORT2.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
-                                 l_MC01_PORT2_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC01.PORT2.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT3.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT)");
+            break;
         }
+
+        fapi2::variable_buffer l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
+        l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
+                             l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
+
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC01_PORT3_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
-            l_MC01_PORT3_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC01.PORT3.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
-                                 l_MC01_PORT3_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC01.PORT3.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
+            break;
         }
+
+        fapi2::variable_buffer l_MC01_PORT1_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
+        l_MC01_PORT1_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT1.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
+                             l_MC01_PORT1_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
+
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC23_PORT0_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
-            l_MC23_PORT0_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC23.PORT0.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
-                                 l_MC23_PORT0_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC23.PORT0.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT1.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
+            break;
         }
+
+        fapi2::variable_buffer l_MC01_PORT2_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
+        l_MC01_PORT2_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT2.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
+                             l_MC01_PORT2_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
+
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC23_PORT1_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
-            l_MC23_PORT1_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC23.PORT1.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
-                                 l_MC23_PORT1_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC23.PORT1.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT2.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
+            break;
         }
+
+        fapi2::variable_buffer l_MC01_PORT3_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
+        l_MC01_PORT3_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT3.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
+                             l_MC01_PORT3_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
+
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC23_PORT2_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
-            l_MC23_PORT2_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC23.PORT2.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
-                                 l_MC23_PORT2_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC23.PORT2.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT3.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
+            break;
         }
+
+        fapi2::variable_buffer l_MC23_PORT0_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
+        l_MC23_PORT0_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT0.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
+                             l_MC23_PORT0_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
+
+        if (l_rc)
         {
-            fapi2::variable_buffer l_MC23_PORT3_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
-            l_MC23_PORT3_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
-            l_rc = fapi2::putSpy(TGT0, "MC23.PORT3.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
-                                 l_MC23_PORT3_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putSpy (MC23.PORT3.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
-                break;
-            }
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT0.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
+            break;
         }
+
+        fapi2::variable_buffer l_MC23_PORT1_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
+        l_MC23_PORT1_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT1.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
+                             l_MC23_PORT1_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT1.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
+            break;
+        }
+
+        fapi2::variable_buffer l_MC23_PORT2_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
+        l_MC23_PORT2_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT2.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
+                             l_MC23_PORT2_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT2.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
+            break;
+        }
+
+        fapi2::variable_buffer l_MC23_PORT3_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT(6);
+        l_MC23_PORT3_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT.insertFromRight<uint64_t>(literal_8, 0, 6);
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT3.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT",
+                             l_MC23_PORT3_ATCL_CL_CLSCOM_MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT3.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
+            break;
+        }
+
     }
-    while (0);
+    while(0);
 
     return l_rc;
 }
