@@ -48,14 +48,15 @@ extern "C" {
 //---------------
 // IPC from 405
 //---------------
-
+//Note: These are really not used. They are just for documentation purposes
 enum MESSAGE_ID_IPI2HI
 {
     MSGID_405_INVALID       = 0,
     MSGID_405_START_SUSPEND = 1,
     MSGID_405_CLIPS         = 2,
-    MSGID_405_WOF_CONTROL   = 3,
-    MSGID_405_WOF_VFRT      = 4
+    MSGID_405_SET_PMCR      = 3,
+    MSGID_405_WOF_CONTROL   = 4,
+    MSGID_405_WOF_VFRT      = 5
 };
 
 //
@@ -70,15 +71,15 @@ enum MESSAGE_ID_IPI2HI
 //
 // PMCR Owner
 //
-enum PMCR_OWNER
+typedef enum
 {
     PMCR_OWNER_HOST         = 0,
     PMCR_OWNER_OCC          = 1
-};
+} PMCR_OWNER;
+
 
 typedef struct ipcmsg_base
 {
-    uint8_t   msg_id;
     uint8_t   rc;
 } ipcmsg_base_t;
 
@@ -104,6 +105,15 @@ typedef struct ipcmsg_clip_update
     uint8_t         ps_val_clip_max[MAX_QUADS];
     uint8_t         pad[2];
 } ipcmsg_clip_update_t;
+
+
+typedef struct ipcmsg_set_pmcr
+{
+    ipcmsg_base_t   msg_cb;
+    uint8_t         pad[6];
+    uint64_t        pmcr[MAX_QUADS];
+} ipcmsg_set_pmcr_t;
+
 
 //
 // WOF Control Actions
@@ -132,7 +142,7 @@ typedef struct ipcmsg_wof_vfrt
 // -----------------------------------------------------------------------------
 // Start Pstate Table
 
-#define MAX_PSTATE_TABLE_ENTRIES 256
+#define MAX_OCC_PSTATE_TABLE_ENTRIES 256
 
 /// Pstate Table produce by the PGPE for consumption by OCC Firmware
 ///
@@ -158,7 +168,7 @@ typedef struct
     uint32_t                entries;
 
     /// Internal VDD voltage ID at the output of the PFET header
-    OCCPstateTable_entry_t  table[MAX_PSTATE_TABLE_ENTRIES];
+    OCCPstateTable_entry_t  table[MAX_OCC_PSTATE_TABLE_ENTRIES];
 
 } OCCPstateTable_t;
 
@@ -169,7 +179,7 @@ typedef struct
 // Start FFDC
 
 /// Scopes of the First Failure Data Capture (FFDC) registers
-enum scope_type =
+enum scope_type
 {
     FFDC_CHIP = 0,  // Address is chip scope (eg absolute)
     FFDC_QUAD = 1,  // Address + 0x01000000*quad for good quads from 0 to 5
@@ -178,25 +188,26 @@ enum scope_type =
 };
 
 /// Address types of First Failure Data Capture (FFDC) register addresses
-enum scope_type =
+enum scope_type1
 {
     FFDC_OCI  = 0,   // Address is an OCI address
     FFDC_SCOM = 1    // Address is a SCOM address
 };
 
 /// Register definition of the Hcode FFDC register list
+#define MAX_FFDC_REG_LIST 12
 typedef struct
 {
     uint32_t            address;
-    union address_attribute
-    {
-        uint32_t value;
-        struct
+    /*    union address_attribute
         {
-            uint32_t    address_type : 16;
-            uint32_t    scope        : 16;
-        } attr;
-    }
+            uint32_t value;
+            struct
+            {
+                uint32_t    address_type : 16;
+                uint32_t    scope        : 16;
+            } attr;
+        }*/
 } Hcode_FFDC_entry_t;
 
 /// Hcode FFDC register list
@@ -220,9 +231,9 @@ typedef struct
 /// take 12B x 8 = 96B.  CME scope entries will, at maximum, generate 12B x
 /// 12 CMEs x  4 SCOMs = 576B..  The overall  totla for registers is 96 + 576
 ///
-#define MAX_FFDC_REG_LIST 12
-typedef struct Hcode_FFDC_list =
+/*typedef struct Hcode_FFDC_list
 {
+
     {PERV_TP_OCC_SCOM_OCCLFIR,  FFDC_SCOM, FFDC_CHIP }, // OCC LFIR
     {PU_PBAFIR,                 FFDC_SCOM, FFDC_CHIP }, // PBA LFIR
     {EX_CME_SCOM_LFIR,          FFDC_SCOM, FFDC_CME  }, // CME LFIR
@@ -235,7 +246,8 @@ typedef struct Hcode_FFDC_list =
     {EX_PPE_XIRAMDBG,           FFDC_SCOM, FFDC_CME  }, // CME XSR, SPRG0
     {EX_PPE_XIRAMEDR,           FFDC_SCOM, FFDC_CME  }, // CME IR, EDR
     {EX_PPE_XIDBGPRO,           FFDC_SCOM, FFDC_CME  }, // CME XSR, IAR
-};
+
+};*/
 
 // End FFDC
 // -----------------------------------------------------------------------------
