@@ -48,6 +48,7 @@
 #include <lib/utils/conversions.H>
 #include <lib/power_thermal/throttle.H>
 #include <lib/mss_attribute_accessors.H>
+#include <lib/utils/count_dimm.H>
 
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_MCA;
@@ -57,8 +58,8 @@ extern "C"
 {
 
 ///
-/// @brief Sets number commands allowed within a given data bus utilization.
-/// @param[in] i_targets vector of MCS on the same VDDR domain
+/// @brief Sets number commands allowed within a given port databus utilization.
+/// @param[in] i_targets vector of MCS to set throttle attributes on
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note throttle_per_slot will be equalized so all throttles coming out will be equal to worst case
 ///
@@ -66,22 +67,33 @@ extern "C"
     {
         for( const auto& l_mcs : i_targets )
         {
-            uint32_t l_databus_util [mss::PORTS_PER_MCS];
+            uint32_t l_input_databus_util [mss::PORTS_PER_MCS] = {};
+            uint32_t l_max_databus_util  = {};
             uint32_t l_dram_clocks = 0;
 
-            uint16_t l_throttled_cmds_port[mss::PORTS_PER_MCS];
-            uint16_t l_throttled_cmds_slot[mss::PORTS_PER_MCS];
-            uint32_t l_max_power[mss::PORTS_PER_MCS];
+            uint16_t l_n_port[mss::PORTS_PER_MCS] = {};
+            uint16_t l_n_slot[mss::PORTS_PER_MCS] = {};
+            uint32_t l_max_power[mss::PORTS_PER_MCS] = {};
 
             FAPI_TRY( mss::mrw_mem_m_dram_clocks(l_dram_clocks) );
+
             //Util attribute set by OCC
-            FAPI_TRY( mss::databus_util(l_mcs, l_databus_util) );
+            FAPI_TRY( mss::databus_util(l_mcs, l_input_databus_util) );
+            FAPI_TRY( mss::mrw_max_dram_databus_util(l_max_databus_util));
+
+            FAPI_INF("Input databus utilization is %d and %d", l_input_databus_util[0], l_input_databus_util[1]);
 
             for( const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(l_mcs) )
             {
                 const auto l_port_num = mss::index( l_mca );
+
+                //make sure 0 < input_utilization <= max_utilization
+                uint32_t l_databus_util = ( l_input_databus_util[l_port_num] != 0) ?
+                                          std::min(l_input_databus_util[l_port_num], l_max_databus_util) : mss::power_thermal::MIN_UTIL;
+
                 //Make a throttle object in order to calculate the port power
                 fapi2::ReturnCode l_rc;
+
                 mss::power_thermal::throttle l_throttle (l_mca, l_rc);
                 FAPI_TRY(l_rc, "Error calculating mss::power_thermal::throttle constructor in p9_mss_utils_to_throttles");
 
@@ -89,17 +101,16 @@ extern "C"
                           l_dram_clocks,
                           l_databus_util);
 
-                //Calculate programmable N address operations within M dram clock window
-                l_throttled_cmds_port[l_port_num] = mss::power_thermal::throttled_cmds(l_databus_util[l_port_num],
-                                                    l_dram_clocks );
-                l_throttled_cmds_slot[l_port_num] = l_throttled_cmds_port[l_port_num];
-                //Calculate the port power needed to reach the calculated N value
-                l_max_power[l_port_num] = l_throttle.calc_power_from_n(l_throttled_cmds_slot[l_port_num]);
+                l_throttle.calc_slots_and_power(l_databus_util);
 
                 FAPI_INF( "Calculated N commands per port [%d] = %d commands, maxpower is %d",
                           l_port_num,
-                          l_throttled_cmds_port[l_port_num],
-                          l_max_power[l_port_num]);
+                          l_throttle.iv_n_port,
+                          l_throttle.iv_calc_port_maxpower);
+
+                l_n_slot[l_port_num] = l_throttle.iv_n_slot;
+                l_n_port[l_port_num] = l_throttle.iv_n_port;
+                l_max_power[l_port_num] = l_throttle.iv_calc_port_maxpower;
             }// end for
 
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_PORT_MAXPOWER,
@@ -107,11 +118,14 @@ extern "C"
                                     l_max_power) );
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
                                     l_mcs,
-                                    l_throttled_cmds_slot) );
+                                    l_n_slot) );
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT,
                                     l_mcs,
-                                    l_throttled_cmds_port) );
+                                    l_n_port) );
         }
+
+        //equalize throttles to prevent variable performance
+        FAPI_TRY( mss::power_thermal::equalize_throttles (i_targets));
 
     fapi_try_exit:
         return fapi2::current_err;

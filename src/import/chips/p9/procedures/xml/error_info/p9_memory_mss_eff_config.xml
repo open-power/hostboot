@@ -177,4 +177,67 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_CALC_PORT_POWER_EXCEEDS_MAX</rc>
+    <description>
+      The calculated port power from equalizing throttles exceeds the maximum allowed power
+    </description>
+    <ffdc>CALCULATED_PORT_POWER</ffdc>
+    <ffdc>MAX_POWER_ALLOWED</ffdc>
+    <ffdc>PORT_POS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+          <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+          <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+  </hwpError>
+  <hwpError>
+    <rc>RC_MSS_SLOT_UTIL_EXCEEDS_PORT</rc>
+    <description>
+      The memory throttle per slot (DIMM) exceeds the allowed throttle for the port
+    </description>
+    <ffdc>SLOT_UTIL</ffdc>
+    <ffdc>PORT_UTIL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MCA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_SPLIT_UTIL_CALC_ERROR</rc>
+    <description>
+      Error when splitting up the memory port's utilization
+    </description>
+    <ffdc>MAX_TOTAL_UTIL</ffdc>
+    <ffdc>DIMM_COUNT</ffdc>
+    <ffdc>SLOT_UTIL</ffdc>
+    <ffdc>PORT_UTIL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MCA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+
 </hwpErrors>

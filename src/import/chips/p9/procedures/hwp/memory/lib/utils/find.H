@@ -161,6 +161,17 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
 }
 
 ///
+/// @brief find all the MCS connected to a PROC_CHIP
+/// @param[in] i_target a fapi2::Target PROC_CHIP
+/// @return a vector of fapi2::TARGET_TYPE_MCS
+///
+template<>
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> > find_targets
+( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
+{
+    return i_target.getChildren<fapi2::TARGET_TYPE_MCS>();
+}
+///
 /// @brief find all the MCS connected to an MCBIST
 /// @param[in] i_target a fapi2::Target MCBIST
 /// @return a vector of fapi2::TARGET_TYPE_MCS

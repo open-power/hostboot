@@ -39,12 +39,12 @@
 #include <fapi2.H>
 #include <vector>
 typedef fapi2::ReturnCode (*p9_mss_bulk_pwr_throttles_FP_t) (const
-        std::vector< fapi2::Target< fapi2::TARGET_TYPE_MCS>>&);
+        std::vector< fapi2::Target< fapi2::TARGET_TYPE_MCS>>&, uint8_t l_throttle);
 
 extern "C"
 {
 
-    enum throttle_type : size_t
+    enum throttle_type : uint8_t
     {
         POWER = 0,
         THERMAL = 1,

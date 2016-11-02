@@ -53,6 +53,7 @@ enum throttle_const : size_t
     //MIN_UTIL and IDLE_UTIL are in c%
     MIN_UTIL = 100,
     IDLE_UTIL = 0,
+    MIN_THROTTLE = 1,
 };
 ///
 /// @class throttle
@@ -172,11 +173,18 @@ class throttle
                              const uint32_t i_power_limit,
                              double& o_util);
         ///
+        /// @brief set iv_n_port, iv_n_slot, iv_calc_port_maxpower
+        /// @param[in] i_util_port pass in the calculated port databus utilization
+        ///
+        void calc_slots_and_power (const double i_util_port);
+
+        ///
         ///@brief calculated the output power estimate from the calculated N throttle
-        ///@param[in] i_n_port is the throtte N (address operations) that the power (cW) is be calculated from
+        ///@param[in] i_n_slot the N throttle per slot
+        ///@param[in] i_n_port the N throttle per port
         ///@return the power calculated from the uint
         ///
-        uint32_t calc_power_from_n (const uint16_t i_n_port);
+        uint32_t calc_power_from_n (const uint16_t i_n_slot, const uint16_t i_n_port);
 
         ///
         /// @brief Converts the port maximum databus util to a dimm level based on powerslopes and dimms installed
@@ -188,6 +196,19 @@ class throttle
         ///
         fapi2::ReturnCode calc_databus( const double i_databus_port_max,
                                         double o_databus_dimm_max [MAX_DIMM_PER_PORT]);
+        ///
+        /// @brief Converts the port and slot util to a dimm level based on powerslopes and number of dimms installed
+        /// @param[in] i_util_slot databus utilization for the slot
+        /// @param[in] i_util_port databus utilization for the port
+        /// @param[out] o_util_dimm_max array of dimm utilization values
+        /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff the split is OK
+        /// @note determines worst case utilization per dimms, takes into account port and combine slot throttles
+        ///
+        fapi2::ReturnCode calc_split_util(
+            const double i_util_slot,
+            const double i_util_port,
+            double o_util_dimm_max [MAX_DIMM_PER_PORT]);
+
 
         ///
         /// @brief Calculate ATTR_MSS_CHANNEL_PAIR_MAXPOWER and  ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
@@ -238,7 +259,8 @@ inline uint32_t throttled_cmds(const uint32_t i_databus_util, const uint32_t i_n
 inline double calc_util_from_throttles(const uint16_t i_n_throttles, const uint32_t i_num_dram_clocks)
 {
     constexpr uint32_t l_multiplier = DRAM_BUS_UTILS * UTIL_CONVERSION;
-    return  ( (double(i_n_throttles) * l_multiplier) / i_num_dram_clocks);
+    const auto l_temp = (double(i_n_throttles) * l_multiplier) / i_num_dram_clocks;
+    return  ( (l_temp == 0) ? MIN_THROTTLE : l_temp);
 
 }
 
@@ -274,6 +296,20 @@ fapi2::ReturnCode restore_runtime_throttles( const fapi2::Target<fapi2::TARGET_T
 ///
 fapi2::ReturnCode update_runtime_throttles(const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets);
 
+///
+/// @brief set ATTR_MSS_RUNTIME_MEM_M_DRAM_CLOCKS and ATTR_MSS_MEM_WATT_TARGET
+/// @param[in] i_targets vector of mcs targets all on the same vddr domain
+/// @return FAPI2_RC_SUCCESS iff it was a success
+///
+fapi2::ReturnCode set_runtime_m_and_watt_limit( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets );
+
+///
+/// @brief Equalize the throttles and estimated power at those throttle levels
+/// @param[in] i_targets vector of MCS targets all on the same VDDR domain
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note sets the throttles and power to the worst case
+///
+fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets);
 
 }//power_thermal
 }// mss

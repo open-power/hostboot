@@ -59,7 +59,7 @@ extern "C"
         uint16_t l_total_slope    [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
         uint16_t l_total_int      [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
         uint32_t l_thermal_power  [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
-
+        fapi2::ReturnCode l_rc;
         //Gotta convert into fapi2::buffers. Not very elegant
         //Do it here or in the encode and decode functions
         //Not that pretty :(
@@ -74,10 +74,13 @@ extern "C"
         FAPI_TRY( mss::mrw_pwr_slope (l_tslope.data() ));
         FAPI_TRY( mss::mrw_pwr_intercept (l_tintercept.data()) );
         FAPI_TRY( mss::mrw_thermal_memory_power_limit (l_tthermal_power_limit.data()) );
+        FAPI_TRY( mss::power_thermal::set_runtime_m_and_watt_limit(i_targets));
+
+        for (size_t i = 0; i < mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS; ++i)
         {
-            for (auto l_tslope_iter = l_tslope.begin();  l_tslope_iter != l_tslope.end(); ++l_tslope_iter)
+            for (const auto l_cur : l_tslope)
             {
-                auto l_slope_buf = fapi2::buffer<uint64_t> (*l_tslope_iter);
+                fapi2::buffer<uint64_t> l_slope_buf = l_cur;
 
                 if (l_slope_buf != 0)
                 {
@@ -85,9 +88,9 @@ extern "C"
                 }
             }
 
-            for (auto l_tintercept_iter = l_tintercept.begin(); l_tintercept_iter != l_tintercept.end(); ++l_tintercept_iter)
+            for (auto l_cur : l_tintercept)
             {
-                auto l_intercept_buf = fapi2::buffer<uint64_t> (*l_tintercept_iter);
+                fapi2::buffer<uint64_t> l_intercept_buf = l_cur;
 
                 if (l_intercept_buf != 0)
                 {
@@ -95,11 +98,9 @@ extern "C"
                 }
             }
 
-            for (auto l_tthermal_iter = l_tthermal_power_limit.begin();
-                 l_tthermal_iter != l_tthermal_power_limit.end();
-                 ++l_tthermal_iter)
+            for (auto l_cur : l_tthermal_power_limit)
             {
-                auto l_tthermal_buf = fapi2::buffer<uint64_t> (*l_tthermal_iter);
+                fapi2::buffer<uint64_t> l_tthermal_buf = l_cur;
 
                 if (l_tthermal_buf != 0)
                 {
@@ -148,7 +149,8 @@ extern "C"
         FAPI_INF("Starting bulk_pwr");
         //get the thermal limits, done per dimm and set to worst case for the slot and port throttles
         //Bulk_pwr sets the general, all purpose ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, _PER_PORT, and MAXPOWER ATTRs
-        FAPI_TRY( p9_mss_bulk_pwr_throttles(i_targets, POWER));
+        FAPI_EXEC_HWP(l_rc, p9_mss_bulk_pwr_throttles, i_targets, POWER);
+        FAPI_TRY(l_rc);
 
         //Set runtime throttles to worst case between ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT
         //and ATTR_MSS_MEM_RUNTIME_THROTTLED_N_COMMANDS_PER_SLOT and the _PORT equivalents also
@@ -183,7 +185,8 @@ extern "C"
         }
 
         //Run thermal throttles with the VDDR+VPP power curves
-        FAPI_TRY( p9_mss_bulk_pwr_throttles(i_targets, THERMAL));
+        FAPI_EXEC_HWP(l_rc, p9_mss_bulk_pwr_throttles, i_targets, THERMAL);
+        FAPI_TRY(l_rc);
         //Update everything to worst case
         FAPI_TRY( mss::power_thermal::update_runtime_throttles (i_targets));
 

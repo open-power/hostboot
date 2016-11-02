@@ -269,6 +269,7 @@
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
+    <attribute><id>PROC_PCIE_LANE_EQUALIZATION</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
     <attribute><id>HOT_PLUG_POWER_CONTROLLER_INFO</id></attribute>
     <attribute><id>PROC_R_LOADLINE_VDD_UOHM</id></attribute>
@@ -885,6 +886,7 @@
     <attribute><id>MSS_VREF_DAC_NIBBLE</id></attribute>
     <attribute><id>MSS_VCCD_OVERRIDE</id></attribute>
     <attribute><id>RAW_MTM</id></attribute>
+    <attribute><id>MSS_MEM_PORT_POS_OF_FAIL_THROTTLE</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -1989,10 +1991,6 @@
     <attribute><id>PROC_PCIE_IOP_CONFIG</id></attribute>
 
     <attribute><id>CDM_DOMAIN</id><default>IO</default></attribute>
-    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
-    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default> <!-- GARD -->
-    </attribute>
 </targetType><!-- unit-pec-power9 -->
 
 <!-- PHB
@@ -2241,9 +2239,6 @@
         <default>CAPP</default>
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
-    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default> <!-- GARD -->
-    </attribute>
     <attribute>
         <id>PRIMARY_CAPABILITIES</id>
         <default>
