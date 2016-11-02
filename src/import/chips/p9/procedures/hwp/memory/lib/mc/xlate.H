@@ -52,6 +52,386 @@ namespace mss
 namespace mc
 {
 
+enum rows
+{
+    ROW15,
+    ROW16,
+    ROW17,
+};
+
+enum xlate_ranks
+{
+    // Master ranks
+    M0,
+    M1,
+
+    //  Slave ranks
+    S0,
+    S1,
+    S2,
+};
+
+///
+/// @class rowTraits
+/// @brief a collection of traits associated with the row xlate registers
+/// @tparam T rows enumeration to represent xlate row bits
+///
+template< rows T >
+class rowTraits;
+
+///
+/// @class rowTraits
+/// @brief a collection of traits associated with the row xlate registers
+///
+template< >
+class rowTraits<ROW15>
+{
+    public:
+        static constexpr uint64_t ROW = 15;
+        static constexpr uint64_t  MAX_MAP_VALUE = 0b00111;
+
+        enum
+        {
+            SLOT0_ROW_VALID = MCS_PORT02_MCP0XLT0_SLOT0_ROW15_VALID,
+            ROW_BIT_MAP = MCS_PORT02_MCP0XLT0_R15_BIT_MAP,
+            ROW_BIT_MAP_LEN = MCS_PORT02_MCP0XLT0_R15_BIT_MAP_LEN,
+        };
+};
+
+///
+/// @class rowTraits
+/// @brief a collection of traits associated with the row xlate registers
+///
+template< >
+class rowTraits<ROW16>
+{
+    public:
+        static constexpr uint64_t ROW = 16;
+        static constexpr uint64_t  MAX_MAP_VALUE = 0b00111;
+
+        enum
+        {
+            SLOT0_ROW_VALID = MCS_PORT02_MCP0XLT0_SLOT0_ROW16_VALID,
+            ROW_BIT_MAP = MCS_PORT02_MCP0XLT0_R16_BIT_MAP,
+            ROW_BIT_MAP_LEN = MCS_PORT02_MCP0XLT0_R16_BIT_MAP_LEN,
+        };
+};
+
+///
+/// @class rowTraits
+/// @brief a collection of traits associated with the row xlate registers
+///
+template< >
+class rowTraits<ROW17>
+{
+    public:
+        static constexpr uint64_t ROW = 17;
+        static constexpr uint64_t  MAX_MAP_VALUE = 0b00111;
+        ;
+        enum
+        {
+            SLOT0_ROW_VALID = MCS_PORT02_MCP0XLT0_SLOT0_ROW17_VALID,
+            ROW_BIT_MAP = MCS_PORT02_MCP0XLT0_R17_BIT_MAP,
+            ROW_BIT_MAP_LEN = MCS_PORT02_MCP0XLT0_R17_BIT_MAP_LEN,
+        };
+};
+
+///
+/// @brief Sets row bits on the xlate register
+/// @tparam T row enumerations to represent xlate master row bits
+/// @tparam TT traits type defaults to rowTraits<T>
+/// @param[in] i_map value to set master rank bit map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template< rows T, typename TT = rowTraits<T> >
+inline fapi2::ReturnCode set_xlate_row(const uint64_t i_map,
+                                       const uint64_t i_offset,
+                                       fapi2::buffer<uint64_t>& io_xlate0)
+{
+    if( i_map > TT::MAX_MAP_VALUE)
+    {
+        FAPI_ERR("Received a map value (%d) greater than the max value allowed by MCP0XLT0_R%d_BIT_MAP (%d)",
+                 i_map, TT::ROW, TT::MAX_MAP_VALUE);
+
+        return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
+
+    FAPI_TRY( io_xlate0.setBit( TT::SLOT0_ROW_VALID + i_offset ) );
+    io_xlate0.insertFromRight<TT::ROW_BIT_MAP, TT::ROW_BIT_MAP_LEN>(i_map);
+
+    FAPI_DBG( "Set MCP0XLT0_SLOT%d_ROW%d_VALID at bit %d. "
+              "Set bits for MCP0XLT0_R%d_BIT_MAP with 0x%lx (start: %d, len: %d). "
+              "MCP0XLT0: 0x%016lx.",
+              (i_offset == 0 ? 0 : 1), TT::ROW, TT::SLOT0_ROW_VALID + i_offset, TT::ROW,
+              i_map, TT::ROW_BIT_MAP, TT::ROW_BIT_MAP_LEN,
+              uint64_t(io_xlate0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @class mrankTraits
+/// @brief a collection of traits associated with the master rank xlate registers
+/// @tparam T rank enumerations to represent xlate master rank bits
+///
+template < xlate_ranks T>
+class mrankTraits;
+
+///
+/// @class mrankTraits
+/// @brief a collection of traits associated with the master rank xlate registers
+///
+template< >
+class mrankTraits<M0>
+{
+    public:
+        static constexpr uint64_t RANK = 0;
+        static constexpr uint64_t CLEAR_MAP = 0b00000;
+        static constexpr uint64_t  MAX_MAP_VALUE = 0b111;
+        enum
+        {
+            SLOT0_VALID = MCS_PORT13_MCP0XLT0_SLOT0_M0_VALID,
+            BIT_MAP = MCS_PORT02_MCP0XLT0_M0_BIT_MAP,
+            BIT_MAP_LEN = MCS_PORT02_MCP0XLT0_M0_BIT_MAP_LEN,
+        };
+};
+
+///
+/// @class mrankTraits
+/// @brief a collection of traits associated with the master rank xlate registers
+///
+template< >
+class mrankTraits<M1>
+{
+    public:
+        static constexpr uint64_t RANK = 1;
+        static constexpr uint64_t CLEAR_MAP = 0b00000;
+        static constexpr uint64_t  MAX_MAP_VALUE = 0b10010;
+
+        enum
+        {
+            SLOT0_VALID = MCS_PORT13_MCP0XLT0_SLOT0_M1_VALID,
+            BIT_MAP = MCS_PORT02_MCP0XLT0_M1_BIT_MAP,
+            BIT_MAP_LEN = MCS_PORT02_MCP0XLT0_M1_BIT_MAP_LEN,
+        };
+};
+
+///
+/// @brief Sets master rank bits on the xlate register
+/// @tparam T rank enumerations to represent xlate master rank bits
+/// @tparam TT traits type defaults to mrankTraits<T>
+/// @param[in] i_map value to set master rank bit map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template< xlate_ranks T, typename TT = mrankTraits<T> >
+inline fapi2::ReturnCode set_xlate_mrank(const uint64_t i_map,
+        const uint64_t i_offset,
+        fapi2::buffer<uint64_t>& io_xlate0)
+{
+    if( i_map > TT::MAX_MAP_VALUE)
+    {
+        FAPI_ERR("Received a map value (%d) greater than the max value allowed by MCP0XLT0_M%d_BIT_MAP (%d)",
+                 i_map, TT::RANK, TT::MAX_MAP_VALUE);
+
+        return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
+
+    FAPI_TRY( io_xlate0.setBit(TT::SLOT0_VALID + i_offset) );
+    io_xlate0.insertFromRight<TT::BIT_MAP, TT::BIT_MAP_LEN>(i_map);
+
+    FAPI_DBG("Set MCP0XLT0_SLOT%d_M%d_VALID at bit %d. Set MCP0XLT0_M%d_BIT_MAP with 0x%lx (start: %d, len: %d). "
+             "MCP0XLT0: 0x%016lx.",
+             (i_offset == 0 ? 0 : 1), TT::RANK, TT::SLOT0_VALID + i_offset,
+             TT::RANK, uint64_t(i_map), TT::BIT_MAP, TT::BIT_MAP_LEN,
+             uint64_t(io_xlate0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Clears master rank bits on the xlate register
+/// @tparam T rank enumerations to represent xlate master rank bits
+/// @tparam TT traits type defaults to mrankTraits<T>
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template< xlate_ranks T, typename TT = mrankTraits<T> >
+inline fapi2::ReturnCode clear_xlate_mrank(const uint64_t i_offset,
+        fapi2::buffer<uint64_t>& io_xlate0)
+{
+    FAPI_TRY( io_xlate0.clearBit(TT::SLOT0_VALID + i_offset) );
+    io_xlate0.insertFromRight<TT::BIT_MAP, TT::BIT_MAP_LEN>(TT::CLEAR_MAP);
+
+    FAPI_DBG("Set MCP0XLT0_SLOT%d_M%d_VALID at bit %d. Set MCP0XLT0_M%d_BIT_MAP with 0x%lx (start: %d, len: %d). "
+             "MCP0XLT0: 0x%016lx.",
+             (i_offset == 0 ? 0 : 1), TT::RANK, TT::SLOT0_VALID + i_offset,
+             TT::RANK, TT::CLEAR_MAP, TT::BIT_MAP, TT::BIT_MAP_LEN,
+             uint64_t(io_xlate0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @class srankTraits
+/// @brief a collection of traits associated with the slave rank xlate registers
+/// @tparam T rank enumerations to represent xlate slave rank bits
+///
+template < xlate_ranks T>
+class srankTraits;
+
+///
+/// @class srankTraits
+/// @brief a collection of traits associated with the slave rank xlate registers
+/// for slave rank 0
+///
+template< >
+class srankTraits<S0>
+{
+    public:
+        static constexpr uint64_t RANK = 0;
+        static constexpr uint64_t CLEAR_MAP = 0b00000;
+        static constexpr uint64_t  MAX_MAP_VALUE = 0b10010;
+
+        enum
+        {
+            SLOT0_VALID = MCS_PORT13_MCP0XLT0_SLOT0_S0_VALID,
+            BIT_MAP = MCS_PORT02_MCP0XLT1_S0_BIT_MAP,
+            BIT_MAP_LEN = MCS_PORT02_MCP0XLT1_S0_BIT_MAP_LEN,
+        };
+};
+
+///
+/// @class srankTraits
+/// @brief a collection of traits associated with the slave rank xlate registers
+/// for slave rank 1
+///
+template< >
+class srankTraits<S1>
+{
+    public:
+        static constexpr uint64_t RANK = 1;
+        static constexpr uint64_t CLEAR_MAP = 0b00000;
+        static constexpr uint64_t  MAX_MAP_VALUE = 0b10010;
+
+        enum
+        {
+            SLOT0_VALID = MCS_PORT13_MCP0XLT0_SLOT0_S1_VALID,
+            BIT_MAP = MCS_PORT02_MCP0XLT1_S1_BIT_MAP,
+            BIT_MAP_LEN = MCS_PORT02_MCP0XLT1_S1_BIT_MAP_LEN,
+        };
+};
+
+///
+/// @class srankTraits
+/// @brief a collection of traits associated with the slave rank xlate registers
+/// for slave rank 2
+///
+template< >
+class srankTraits<S2>
+{
+    public:
+        static constexpr uint64_t RANK = 2;
+        static constexpr uint64_t CLEAR_MAP = 0b00000;
+        static constexpr uint64_t  MAX_MAP_VALUE = 0b10010;
+
+        enum
+        {
+            SLOT0_VALID = MCS_PORT13_MCP0XLT0_SLOT0_S2_VALID,
+            BIT_MAP = MCS_PORT02_MCP0XLT1_S2_BIT_MAP,
+            BIT_MAP_LEN = MCS_PORT02_MCP0XLT1_S2_BIT_MAP_LEN,
+        };
+};
+
+///
+/// @brief Sets slave rank bits on the xlate register
+/// @tparam T rank enumerations to represent xlate slave rank bits
+/// @tparam TT traits type defaults to srankTraits<T>
+/// @param[in] i_map value to set slave rank bit map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template< xlate_ranks T, typename TT = srankTraits<T> >
+inline fapi2::ReturnCode set_xlate_srank(const uint64_t i_map,
+        const uint64_t i_offset,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1)
+{
+    if( i_map > TT::MAX_MAP_VALUE)
+    {
+        FAPI_ERR("Received a map value (%d) greater than the max value allowed by MCP0XLT0_S%d_BIT_MAP (%d)",
+                 i_map, TT::RANK, TT::MAX_MAP_VALUE);
+
+        return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
+
+    FAPI_TRY( io_xlate0.setBit(TT::SLOT0_VALID + i_offset) );
+    io_xlate1.insertFromRight<TT::BIT_MAP, TT::BIT_MAP_LEN>(i_map);
+
+    FAPI_DBG("Set MCP0XLT0_SLOT%d_S%d_VALID at bit %d. Set MCP0XLT0_S%d_BIT_MAP with 0x%lx (start: %d, len: %d). "
+             "MCP0XLT0: 0x%016lx, MCP0XLT1: 0x%016lx.",
+             (i_offset == 0 ? 0 : 1), TT::RANK, TT::SLOT0_VALID + i_offset,
+             TT::RANK, uint64_t(i_map), TT::BIT_MAP, TT::BIT_MAP_LEN,
+             uint64_t(io_xlate0), uint64_t(io_xlate1) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Clears slave rank bits on the xlate register
+/// @tparam T rank enumerations to represent xlate slave rank bits
+/// @tparam TT traits type defaults to srankTraits<T>
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template< xlate_ranks T, typename TT = srankTraits<T> >
+inline fapi2::ReturnCode clear_xlate_srank(const uint64_t i_offset,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1)
+{
+    FAPI_TRY( io_xlate0.clearBit(TT::SLOT0_VALID + i_offset) );
+    io_xlate1.insertFromRight<TT::BIT_MAP, TT::BIT_MAP_LEN>(TT::CLEAR_MAP);
+
+    FAPI_DBG("Set MCP0XLT0_SLOT%d_S%d_VALID at bit %d. Set MCP0XLT0_S%d_BIT_MAP with 0x%lx (start: %d, len: %d). "
+             "MCP0XLT0: 0x%016lx, MCP0XLT1: 0x%016lx.",
+             (i_offset == 0 ? 0 : 1), TT::RANK, TT::SLOT0_VALID + i_offset,
+             TT::RANK, TT::CLEAR_MAP, TT::BIT_MAP, TT::BIT_MAP_LEN,
+             uint64_t(io_xlate0), uint64_t(io_xlate1) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set DIMM slot bits
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode set_xlate_dimm_slot(const uint64_t i_offset,
+        fapi2::buffer<uint64_t>& io_xlate0)
+{
+    FAPI_TRY( io_xlate0.setBit(MCS_PORT02_MCP0XLT0_SLOT0_VALID + i_offset) );
+
+    FAPI_DBG("Set MCP0XLT0_SLOT%d_VALID at bit %d. MCP0XLT0: 0x%016lx.",
+             (i_offset == 0 ? 0 : 1), MCS_PORT02_MCP0XLT0_SLOT0_VALID + i_offset, uint64_t(io_xlate0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief A small class to represent the setup of a translation register based on DIMM characteristics
 ///
@@ -63,8 +443,8 @@ struct xlate_setup
     /// @param[in] i_func a function pointer to a function which does the configuring
     ///
     xlate_setup( const dimm::kind i_kind,
-                 void (*i_func)( const dimm::kind&, const uint64_t, const bool,
-                                 fapi2::buffer<uint64_t>&, fapi2::buffer<uint64_t>&, fapi2::buffer<uint64_t>& ) ):
+                 fapi2::ReturnCode (*i_func)( const dimm::kind&, const uint64_t, const bool,
+                         fapi2::buffer<uint64_t>&, fapi2::buffer<uint64_t>&, fapi2::buffer<uint64_t>& ) ):
         iv_kind(i_kind),
         iv_func(i_func)
     {
@@ -74,10 +454,9 @@ struct xlate_setup
     dimm::kind iv_kind;
 
     // The function to call to setup the translation registers to setup for our DIMM kind.
-    void (*iv_func)( const dimm::kind&, const uint64_t, const bool,
-                     fapi2::buffer<uint64_t>&, fapi2::buffer<uint64_t>&, fapi2::buffer<uint64_t>& );
+    fapi2::ReturnCode (*iv_func)( const dimm::kind&, const uint64_t, const bool,
+                                  fapi2::buffer<uint64_t>&, fapi2::buffer<uint64_t>&, fapi2::buffer<uint64_t>& );
 };
-
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -88,13 +467,14 @@ struct xlate_setup
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 2R4Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_2R2T4Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_2R2T4Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -105,13 +485,14 @@ void xlate_dimm_2R2T4Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 2R 8Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_2R2T8Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_2R2T8Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -122,13 +503,14 @@ void xlate_dimm_2R2T8Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 2R 16Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_2R2T16Gbx4( const dimm::kind& i_kind,
-                            const uint64_t i_offset,
-                            const bool i_largest,
-                            fapi2::buffer<uint64_t>& io_xlate0,
-                            fapi2::buffer<uint64_t>& io_xlate1,
-                            fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_2R2T16Gbx4( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -139,13 +521,14 @@ void xlate_dimm_2R2T16Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 2R 2H 3DS 4Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_2R4T4Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_2R4T4Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -156,13 +539,14 @@ void xlate_dimm_2R4T4Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 2R 2H 3DS 8Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_2R4T8Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_2R4T8Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -173,13 +557,14 @@ void xlate_dimm_2R4T8Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 2R 2H 3DS 16Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_2R4T16Gbx4( const dimm::kind& i_kind,
-                            const uint64_t i_offset,
-                            const bool i_largest,
-                            fapi2::buffer<uint64_t>& io_xlate0,
-                            fapi2::buffer<uint64_t>& io_xlate1,
-                            fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_2R4T16Gbx4( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -190,13 +575,14 @@ void xlate_dimm_2R4T16Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 2R 4H 3DS 4Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_2R8T4Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_2R8T4Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -207,13 +593,14 @@ void xlate_dimm_2R8T4Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 2R 4H 3DS 8Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_2R8T8Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_2R8T8Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -224,13 +611,14 @@ void xlate_dimm_2R8T8Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 2R 4H 3DS 16Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_2R8T16Gbx4( const dimm::kind& i_kind,
-                            const uint64_t i_offset,
-                            const bool i_largest,
-                            fapi2::buffer<uint64_t>& io_xlate0,
-                            fapi2::buffer<uint64_t>& io_xlate1,
-                            fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_2R8T16Gbx4( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -241,13 +629,14 @@ void xlate_dimm_2R8T16Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 2R 8H 3DS 4Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_2R16T4Gbx4( const dimm::kind& i_kind,
-                            const uint64_t i_offset,
-                            const bool i_largest,
-                            fapi2::buffer<uint64_t>& io_xlate0,
-                            fapi2::buffer<uint64_t>& io_xlate1,
-                            fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_2R16T4Gbx4( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -258,13 +647,14 @@ void xlate_dimm_2R16T4Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 2R 8H 3DS 8Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_2R16T8Gbx4( const dimm::kind& i_kind,
-                            const uint64_t i_offset,
-                            const bool i_largest,
-                            fapi2::buffer<uint64_t>& io_xlate0,
-                            fapi2::buffer<uint64_t>& io_xlate1,
-                            fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_2R16T8Gbx4( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 );
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
@@ -274,13 +664,14 @@ void xlate_dimm_2R16T8Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 2R 8H 3DS 16Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_2R16T16Gbx4( const dimm::kind& i_kind,
-                             const uint64_t i_offset,
-                             const bool i_largest,
-                             fapi2::buffer<uint64_t>& io_xlate0,
-                             fapi2::buffer<uint64_t>& io_xlate1,
-                             fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_2R16T16Gbx4( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -291,13 +682,14 @@ void xlate_dimm_2R16T16Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 1R 4Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_1R1T4Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_1R1T4Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
@@ -307,13 +699,14 @@ void xlate_dimm_1R1T4Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 1R 8Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_1R1T8Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_1R1T8Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -324,13 +717,14 @@ void xlate_dimm_1R1T8Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 1R 16Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_1R1T16Gbx4( const dimm::kind& i_kind,
-                            const uint64_t i_offset,
-                            const bool i_largest,
-                            fapi2::buffer<uint64_t>& io_xlate0,
-                            fapi2::buffer<uint64_t>& io_xlate1,
-                            fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_1R1T16Gbx4( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -341,13 +735,14 @@ void xlate_dimm_1R1T16Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 1R 2H 3DS 4Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_1R2T4Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_1R2T4Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -358,13 +753,14 @@ void xlate_dimm_1R2T4Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 1R 2H 3DS 8Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_1R2T8Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_1R2T8Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -375,13 +771,14 @@ void xlate_dimm_1R2T8Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 1R 2H 3DS 16Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_1R2T16Gbx4( const dimm::kind& i_kind,
-                            const uint64_t i_offset,
-                            const bool i_largest,
-                            fapi2::buffer<uint64_t>& io_xlate0,
-                            fapi2::buffer<uint64_t>& io_xlate1,
-                            fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_1R2T16Gbx4( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -392,13 +789,14 @@ void xlate_dimm_1R2T16Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 1R 4H 3DS 4Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_1R4T4Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_1R4T4Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -409,13 +807,14 @@ void xlate_dimm_1R4T4Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 1R 4H 3DS 8Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_1R4T8Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_1R4T8Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -426,13 +825,14 @@ void xlate_dimm_1R4T8Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 1R 4H 3DS 16Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_1R4T16Gbx4( const dimm::kind& i_kind,
-                            const uint64_t i_offset,
-                            const bool i_largest,
-                            fapi2::buffer<uint64_t>& io_xlate0,
-                            fapi2::buffer<uint64_t>& io_xlate1,
-                            fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_1R4T16Gbx4( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 );
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
@@ -442,13 +842,14 @@ void xlate_dimm_1R4T16Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 1R 8H 3DS 4Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_1R8T4Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_1R8T4Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
@@ -458,13 +859,14 @@ void xlate_dimm_1R8T4Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 1R 8H 3DS 8Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_1R8T8Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_1R8T8Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -475,13 +877,14 @@ void xlate_dimm_1R8T8Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 1R 8H 3DS 16Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_1R8T16Gbx4( const dimm::kind& i_kind,
-                            const uint64_t i_offset,
-                            const bool i_largest,
-                            fapi2::buffer<uint64_t>& io_xlate0,
-                            fapi2::buffer<uint64_t>& io_xlate1,
-                            fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_1R8T16Gbx4( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -492,13 +895,14 @@ void xlate_dimm_1R8T16Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 4R 4Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_4R4T4Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_4R4T4Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
@@ -508,13 +912,14 @@ void xlate_dimm_4R4T4Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 4R 8Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_4R4T8Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_4R4T8Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
@@ -524,13 +929,14 @@ void xlate_dimm_4R4T8Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 4R 16Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_4R4T16Gbx4( const dimm::kind& i_kind,
-                            const uint64_t i_offset,
-                            const bool i_largest,
-                            fapi2::buffer<uint64_t>& io_xlate0,
-                            fapi2::buffer<uint64_t>& io_xlate1,
-                            fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_4R4T16Gbx4( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 );
 ///
 /// @brief Helper to setup the translation map - useful for testing
 /// @param[in] i_dimm_kinds std::vector of DIMM kind's representing the DIMM (Not const as we sort the vector)
@@ -553,13 +959,14 @@ fapi2::ReturnCode setup_xlate_map_helper( std::vector<dimm::kind>& i_dimm_kinds,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 1R4Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_1R1T4Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_1R1T4Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
@@ -570,13 +977,14 @@ void xlate_dimm_1R1T4Gbx4( const dimm::kind& i_kind,
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
 /// @note Called for 1R 2 total ranks 4Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void xlate_dimm_1R2T4Gbx4( const dimm::kind& i_kind,
-                           const uint64_t i_offset,
-                           const bool i_largest,
-                           fapi2::buffer<uint64_t>& io_xlate0,
-                           fapi2::buffer<uint64_t>& io_xlate1,
-                           fapi2::buffer<uint64_t>& io_xlate2 );
+fapi2::ReturnCode xlate_dimm_1R2T4Gbx4( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 );
 
 } // ns mc
 
