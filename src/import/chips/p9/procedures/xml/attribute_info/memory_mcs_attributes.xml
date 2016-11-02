@@ -1198,6 +1198,19 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_MEM_PORT_POS_OF_FAIL_THROTTLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          This is the fapi position of the port that failed to calculate
+          memory throttles given the passed in watt target and or utilization
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint64</valueType>
+        <writeable/>
+        <mssAccessorName>mem_port_fail_throttle</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_MEM_M_DRAM_CLOCKS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
@@ -1332,7 +1345,7 @@
         <id>ATTR_MSS_DATABUS_UTIL</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Databus utilization limit used to calculate memory throttles and power limit
+            Databus utilization per port limit used to calculate memory throttles and power limit
             creator: OCC
             consumer: mss_utils_to_throttle
         </description>
