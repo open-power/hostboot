@@ -184,19 +184,6 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
     }// dimm
 
-    // Hard-coded RIT protect attribute set (currently not taken account in eff_config)
-    {
-        uint32_t l_m_dram_clocks[mss::PORTS_PER_MCS] = {0x200, 0x200};
-        FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_RUNTIME_MEM_M_DRAM_CLOCKS, i_target, l_m_dram_clocks ) );
-    }
-    //TODO RTC:160060 verify attributes are needed, best place to put them, and correct values
-    // TK hard coded for now, should change at some point. Most of these are set in eff_config_thermal
-    {
-        uint32_t l_mem_watt_target[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {{0x640, 0x640}, {0x640, 0x640}};
-        FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_WATT_TARGET, i_target,
-                                 l_mem_watt_target ) );
-    }
-
     {
         uint16_t l_cal_step[mss::PORTS_PER_MCS] = {0xFAC0, 0xFAC0};
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_CAL_STEP_ENABLE, i_target, l_cal_step) );
