@@ -98,8 +98,8 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                  "Running p9_fab_iovalid HWP on processor target %.8X",
                  TARGETING::get_huid(l_cpu_target) );
-// @TODO RTC:134079 Integrate L2 HWPs for istep 9
-//         FAPI_INVOKE_HWP(l_errl, p9_fab_iovalid, l_fapi2_proc_target, true);
+        FAPI_INVOKE_HWP(l_errl, p9_fab_iovalid, l_fapi2_proc_target,
+                        true, true, false);
         if(l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
