@@ -108,15 +108,14 @@ uint32_t putScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
 
 /**
  * @brief  Starts Background Scrubbing.
- * @param  i_trgt MCA or MBA target.
+ * @param  i_chip MCA or MBA chip.
  * @param  i_rank Will start background scrubbing on the first address of this
  *                slave rank. To ensure the command is started on a master rank
  *                boundary, make sure the slave rank value is 0.
  * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
  */
 template<TARGETING::TYPE T>
-uint32_t startBgScrub( TARGETING::TargetHandle_t i_trgt,
-                       const MemRank & i_rank );
+uint32_t startBgScrub( ExtensibleChip * i_chip, const MemRank & i_rank );
 
 } // end namespace PlatServices
 

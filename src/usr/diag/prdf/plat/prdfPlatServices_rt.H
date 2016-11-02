@@ -64,11 +64,11 @@ void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr );
 
 /**
  * @brief  Stops Background Scrubbing.
- * @param  i_trgt MCBIST, MCA, or MBA target.
+ * @param  i_chip MCBIST, MCA, or MBA chip.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-uint32_t stopBgScrub( TARGETING::TargetHandle_t i_trgt );
+uint32_t stopBgScrub( ExtensibleChip * i_chip );
 
 } // end namespace PlatServices
 
