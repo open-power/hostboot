@@ -42,6 +42,7 @@ $(WRAPPER)_DEPLIBS+=p9_mss_freq
 $(WRAPPER)_DEPLIBS+=p9_mss_eff_config
 $(WRAPPER)_DEPLIBS+=p9_mss_eff_config_thermal
 $(WRAPPER)_DEPLIBS+=p9_mss_bulk_pwr_throttles
+$(WRAPPER)_DEPLIBS+=p9_mss_utils_to_throttle
 $(WRAPPER)_DEPLIBS+=p9_mss_memdiag
 $(WRAPPER)_DEPLIBS+=p9_mss_freq_system
 $(WRAPPER)_DEPLIBS+=p9_mss_volt
