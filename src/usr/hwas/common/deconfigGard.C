@@ -1473,6 +1473,68 @@ void DeconfigGard::_deconfigureByAssoc(
                 break;
             } // TYPE_MEMBUF
 
+            case TYPE_MCA:
+            {
+                // get parent MCS
+                TargetHandleList pParentMcsList;
+                getParentAffinityTargetsByState(pParentMcsList, &i_target,
+                                                CLASS_UNIT, TYPE_MCS, UTIL_FILTER_PRESENT);
+
+                HWAS_ASSERT((pParentMcsList.size() == 1),
+                "HWAS _deconfigureByAssoc: pParentMcsList != 1");
+
+                Target *l_parentMcs = pParentMcsList[0];
+                // if parent MCS hasn't already been deconfigured
+                if (!pParentMcsList.empty() &&
+                    isFunctional(l_parentMcs) &&
+                    !anyChildFunctional(*l_parentMcs))
+                {
+                    // deconfigure parent MCS
+                    HWAS_INF("_deconfigureByAssoc MCS parent with no functional MCAs: %.8X", get_huid(l_parentMcs));
+                    _deconfigureTarget(*l_parentMcs,
+                                        i_errlEid, NULL, i_deconfigRule);
+                    _deconfigureByAssoc(*l_parentMcs,
+                                        i_errlEid,i_deconfigRule);
+                }
+
+                // and we're done, so break;
+                break;
+            }
+
+            case TYPE_MCS:
+            {
+                // get parent MCBIST
+                TargetHandleList pParentMcbistList;
+                getParentAffinityTargetsByState(pParentMcbistList, &i_target,
+                                                CLASS_UNIT, TYPE_MCBIST, UTIL_FILTER_PRESENT);
+
+                HWAS_ASSERT((pParentMcbistList.size() <= 1),
+                            "HWAS _deconfigureByAssoc: MCS has multiple MCBIST parents, this is impossible");
+
+                Target *l_parentMcbist = pParentMcbistList[0];
+
+                // if parent MCBIST hasn't already been deconfigured
+                if (!pParentMcbistList.empty() &&
+                    isFunctional(l_parentMcbist) &&
+                    !anyChildFunctional(*l_parentMcbist))
+                {
+                    // deconfigure parent MCBIST
+                    HWAS_INF("_deconfigureByAssoc MCBIST parent with no functional children: %.8X",
+                    get_huid(l_parentMcbist));
+                    _deconfigureTarget(*l_parentMcbist,
+                                        i_errlEid, NULL, i_deconfigRule);
+                    _deconfigureByAssoc(*l_parentMcbist,
+                                        i_errlEid,i_deconfigRule);
+                }
+                else
+                {
+                    HWAS_ASSERT((pParentMcbistList.size() <= 1),
+                                "HWAS _deconfigureByAssoc: No MCBIST parents for for MCS w/ HUID: %lx", get_huid(&i_target));
+                }
+                // and we're done, so break;
+                break;
+            }
+
             case TYPE_MBA:
             {
                 // get parent MEMBUF (Centaur)
@@ -1694,6 +1756,54 @@ void DeconfigGard::_deconfigureByAssoc(
                         i_errlEid, NULL, i_deconfigRule);
                     _deconfigureByAssoc(const_cast<Target &> (*l_parentMba),
                         i_errlEid, i_deconfigRule);
+                }
+
+                TargetHandleList pParentMcaList;
+                PredicateCTM predMca(CLASS_UNIT, TYPE_MCA);
+                PredicatePostfixExpr funcMca;
+                funcMca.push(&predMca).push(&isFunctional).And();
+                targetService().getAssociated(pParentMcaList,
+                              &i_target,
+                              TargetService::PARENT_BY_AFFINITY,
+                              TargetService::ALL,
+                              &funcMca);
+
+                HWAS_ASSERT((pParentMcaList.size() <= 1),
+                        "HWAS _deconfigureByAssoc: pParentMcaList > 1");
+
+                // if parent MCA hasn't already been deconfigured
+                if (!pParentMcaList.empty())
+                {
+                   Target *l_parentMca = pParentMcaList[0];
+
+                   // get children DIMM that are functional
+                   // NOTE cannot use anyChildFunctional to determine this
+                   // because we need to look at affinity path
+                   TargetHandleList pDimmList;
+                   PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+                   PredicatePostfixExpr funcDimms;
+                   funcDimms.push(&predDimm).push(&isFunctional).And();
+                   targetService().getAssociated(pDimmList,
+                                               l_parentMca,
+                                               TargetService::CHILD_BY_AFFINITY,
+                                               TargetService::ALL,
+                                               &funcDimms);
+
+                   // if parent MCA has no functional memory
+                   if (pDimmList.empty())
+                   {
+                       // deconfigure parent MCA
+                       HWAS_INF("_deconfigureByAssoc MCA parent with no memory: %.8X",
+                               get_huid(l_parentMca));
+                       _deconfigureTarget(const_cast<Target &> (*l_parentMca),
+                                           i_errlEid, NULL, i_deconfigRule);
+                       _deconfigureByAssoc(const_cast<Target &> (*l_parentMca),
+                                           i_errlEid, i_deconfigRule);
+
+                       // and we're done, so break;
+                       break;
+                   }
+
                 }
                 break;
             } // TYPE_DIMM
@@ -2541,6 +2651,8 @@ void DeconfigGard::_clearFCODeconfigure(ConstTargetHandle_t i_nodeTarget)
 }
 //******************************************************************************
 
+//Note this will not find child DIMMs because they are
+//affinity children, not physical
 bool DeconfigGard::anyChildFunctional(Target & i_parent)
 {
     bool retVal = false;
