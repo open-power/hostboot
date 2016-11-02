@@ -59,6 +59,7 @@ typedef struct
     uint32_t TorPpeBlockSize;
 } TorPpeBlock_t;
 
+typedef uint16_t TorRingOffset_t;  // Ring offset value in TOR offset slot
 
 #define TOR_RING_FOUND                        0
 #define TOR_RING_BLOCKS_FOUND                 0
