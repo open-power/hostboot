@@ -222,6 +222,16 @@
         </description>
         <initToZero></initToZero>
         <valueType>uint32</valueType>
+        <enum>
+          4GB = 4,
+          8GB = 8,
+          16GB = 16,
+          32GB = 32,
+          64GB = 64,
+          128GB = 128,
+          256GB = 256,
+          512GB = 512
+        </enum>
         <writeable/>
         <array> 2 2</array>
         <mssUnits>GB</mssUnits>
@@ -1128,14 +1138,24 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Specifies the number of master ranks per DIMM.</description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array> 2 2</array>
-        <mssAccessorName>eff_num_master_ranks_per_dimm</mssAccessorName>
+      <id>ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM</id>
+      <targetType>TARGET_TYPE_MCS</targetType>
+      <description>
+        Specifies the number of master ranks per DIMM.
+        Represents the number of physical ranks on a DIMM.
+        From SPD spec JEDEC Standard No. 21-C: Page 4.1.2.L-4.
+        Byte 12 (Bits 5~3) Number of package ranks per DIMM.
+        Package ranks per DIMM refers to the collections of devices
+        on the module sharing common chip select signals.
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint8</valueType>
+      <enum>
+        1R = 1, 2R = 2, 4R = 4, 8R = 8
+      </enum>
+      <writeable/>
+      <array> 2 2</array>
+      <mssAccessorName>eff_num_master_ranks_per_dimm</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1150,17 +1170,6 @@
       <writeable/>
       <array> 2 2</array>
       <mssAccessorName>eff_dimm_ranks_configed</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_NUM_PACKAGES_PER_RANK</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Specifies the number of DRAM packages per rank.</description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array> 2 2</array>
-        <mssAccessorName>eff_num_packages_per_rank</mssAccessorName>
     </attribute>
 
     <attribute>
