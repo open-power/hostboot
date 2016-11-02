@@ -228,7 +228,9 @@ my $system_policy_file = open_mrw_file($mrwdir, "${sysname}-system-policy.xml");
 my $sysPolicy = parse_xml_file($system_policy_file,
         forcearray=>['proc_r_loadline_vdd','proc_r_distloss_vdd',
         'proc_vrm_voffset_vdd','proc_r_loadline_vcs',
-        'proc_r_distloss_vcs','proc_vrm_voffset_vcs']);
+        'proc_r_distloss_vcs','proc_vrm_voffset_vcs',
+        'proc_r_loadline_vdn','proc_r_distloss_vdn',
+        'proc_vrm_voffset_vdn']);
 
 my $reqPol = $sysPolicy->{"required-policy-settings"};
 
@@ -344,6 +346,10 @@ push @systemAttr,
     "CP_REFCLOCK_RCVR_TERM", $reqPol->{'processor-refclock-receiver-termination'},
     "IO_REFCLOCK_RCVR_TERM", $reqPol->{'pci-refclock-receiver-termination'},
     #TODO RTC: 163418 Set Power Management Attribute Defaults based on MRW values
+    "SYSTEM_WOF_ENABLED", $reqPol->{'system_wof_enabled'},
+    "VDM_ENABLE", $reqPol->{'vdm_enable'},
+    "IVRM_DEADZONE_MV", $reqPol->{'ivrm_deadzone_mv'},
+    "SYSTEM_RESCLK_STEP_DELAY", $reqPol->{'system_resclk_step_delay'},
 ];
 
 if ($reqPol->{'mss_mrw_refresh_rate_request'} eq 'SINGLE')
@@ -514,6 +520,12 @@ $procLoadline{PROC_R_DISTLOSS_VCS_UOHM}{sys}
     = $reqPol->{'proc_r_distloss_vcs' }[0];
 $procLoadline{PROC_VRM_VOFFSET_VCS_UV}{sys}
     = $reqPol->{'proc_vrm_voffset_vcs'}[0];
+$procLoadline{PROC_R_LOADLINE_VDN_UOHM}{sys}
+    = $reqPol->{'proc_r_loadline_vdn' }[0];
+$procLoadline{PROC_R_DISTLOSS_VDN_UOHM}{sys}
+    = $reqPol->{'proc_r_distloss_vdn' }[0];
+$procLoadline{PROC_VRM_VOFFSET_VDN_UV}{sys}
+    = $reqPol->{'proc_vrm_voffset_vdn'}[0];
 
 #Save avsbus data to add to proc target type later
 our %voltageRails = (
@@ -686,7 +698,7 @@ foreach my $i (@{$pmSettings->{'processor-settings'}})
         "PM_UNDERVOLTING_FREQ_MAXIMUM",
             $i->{pm_undervolting_frq_maximum}->{content},
         "PM_SPIVID_PORT_ENABLE", $i->{pm_spivid_port_enable},
-        "APSS_CHIP_SELECT", $i->{pm_apss_chip_select},
+        "PM_APSS_CHIP_SELECT", $i->{pm_apss_chip_select},
         $pbaxAttr, $pbaxId,
         "PBAX_CHIPID", $i->{pm_pbax_chipid},
         "PBAX_BRDCST_ID_VECTOR", $i->{pm_pbax_brdcst_id_vector},
@@ -4022,8 +4034,6 @@ sub generate_proc
         }
         print "    </attribute>\n";
         print "    <attribute>\n";
-        # Remove duplicate when fixed in HWP
-        print "        <id>APSS_CHIP_SELECT</id>\n";
         print "        <id>PM_APSS_CHIP_SELECT</id>\n";
         if( $proc % 2 == 0 ) # proc0 of DCM
         {
@@ -4156,6 +4166,37 @@ sub generate_proc
     print "    <attribute>\n";
     print "        <id>OBUS_RATIO_VALUE</id>\n";
     print "        <default>$obus_ratio</default>\n";
+    print "    </attribute>\n";
+
+    my $freq_regions      = $reqPol->{'system_resclk_freq_regions'};
+    my $freq_region_index = $reqPol->{'system_resclk_freq_region_index'};
+    my $l3_value          = $reqPol->{'system_resclk_l3_value'};
+    my $l3_voltage_thresh = $reqPol->{'system_resclk_l3_voltage_threshold_mv'};
+    my $resclk_value      = $reqPol->{'system_resclk_value'};
+
+    print "    <attribute>\n";
+    print "        <id>SYSTEM_RESCLK_FREQ_REGIONS</id>\n";
+    print "        <default>$freq_regions</default>\n";
+    print "    </attribute>\n";
+
+    print "    <attribute>\n";
+    print "        <id>SYSTEM_RESCLK_FREQ_REGION_INDEX</id>\n";
+    print "        <default>$freq_region_index</default>\n";
+    print "    </attribute>\n";
+
+    print "    <attribute>\n";
+    print "        <id>SYSTEM_RESCLK_L3_VALUE</id>\n";
+    print "        <default>$l3_value</default>\n";
+    print "    </attribute>\n";
+
+    print "    <attribute>\n";
+    print "        <id>SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV</id>\n";
+    print "        <default>$l3_voltage_thresh</default>\n";
+    print "    </attribute>\n";
+
+    print "    <attribute>\n";
+    print "        <id>SYSTEM_RESCLK_VALUE</id>\n";
+    print "        <default>$resclk_value</default>\n";
     print "    </attribute>\n";
 
     print "</targetInstance>\n";
