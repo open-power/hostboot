@@ -118,23 +118,23 @@ void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr )
 //##############################################################################
 
 template<>
-uint32_t stopBgScrub<TYPE_MCBIST>( TargetHandle_t i_trgt )
+uint32_t stopBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip )
 {
     #define PRDF_FUNC "[PlatServices::stopBgScrub<TYPE_MCBIST>] "
 
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MCBIST == getTargetType(i_trgt) );
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
 
     uint32_t rc = SUCCESS;
 
-    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( i_trgt );
+    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( i_chip->getTrgt() );
 
     fapi2::ReturnCode fapi_rc = memdiags::stop( fapiTrgt );
 
     errlHndl_t errl = fapi2::rcToErrl( fapi_rc );
     if ( nullptr != errl )
     {
-        PRDF_ERR( PRDF_FUNC "memdiags::stop(0x%08x) failed", getHuid(i_trgt) );
+        PRDF_ERR( PRDF_FUNC "memdiags::stop(0x%08x) failed", i_chip->getHuid());
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         rc = FAIL;
     }
@@ -147,12 +147,12 @@ uint32_t stopBgScrub<TYPE_MCBIST>( TargetHandle_t i_trgt )
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t stopBgScrub<TYPE_MCA>( TargetHandle_t i_trgt )
+uint32_t stopBgScrub<TYPE_MCA>( ExtensibleChip * i_chip )
 {
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) );
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
-    return stopBgScrub<TYPE_MCBIST>( getConnectedParent(i_trgt, TYPE_MCBIST) );
+    return stopBgScrub<TYPE_MCBIST>( getConnectedParent(i_chip, TYPE_MCBIST) );
 }
 
 //##############################################################################
@@ -160,12 +160,12 @@ uint32_t stopBgScrub<TYPE_MCA>( TargetHandle_t i_trgt )
 //##############################################################################
 
 template<>
-uint32_t stopBgScrub<TYPE_MBA>( TargetHandle_t i_trgt )
+uint32_t stopBgScrub<TYPE_MBA>( ExtensibleChip * i_chip )
 {
     #define PRDF_FUNC "[PlatServices::stopBgScrub<TYPE_MBA>] "
 
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
     uint32_t rc = SUCCESS;
 

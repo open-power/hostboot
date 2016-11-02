@@ -65,31 +65,6 @@ uint32_t startInitialBgScrub( ExtensibleChip * i_chip )
 
     do
     {
-        // Cleanup hardware before starting the maintenance command.
-        o_rc = clearCmdCompleteAttn<T>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "clearCmdCompleteAttn<T>(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        o_rc = clearEccCounters<T>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "clearEccCounters<T>(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        o_rc = clearEccFirs<T>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "clearEccFirs<T>(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
         // Get the first configured rank.
         std::vector<MemRank> ranklist;
         PlatServices::getMasterRanks<T>( i_chip->getTrgt(), ranklist );
@@ -97,7 +72,7 @@ uint32_t startInitialBgScrub( ExtensibleChip * i_chip )
         MemRank rank = ranklist.front();
 
         // Start background scrubbing.
-        o_rc = PlatServices::startBgScrub<T>( i_chip->getTrgt(), rank );
+        o_rc = PlatServices::startBgScrub<T>( i_chip, rank );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "startBgScrub(0x%08x,%d) failed",

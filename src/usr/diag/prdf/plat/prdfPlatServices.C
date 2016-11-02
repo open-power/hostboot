@@ -38,6 +38,8 @@
 #include <prdfTrace.H>
 #include <prdfAssert.h>
 
+#include <prdfMemScrubUtils.H>
+
 #include <iipServiceDataCollector.h>
 #include <UtilHash.H>
 
@@ -293,22 +295,22 @@ TARGETING::TargetHandle_t getActiveRefClk(TARGETING::TargetHandle_t
 //##############################################################################
 
 template<>
-uint32_t startBgScrub<TYPE_MCA>( TargetHandle_t i_trgt, const MemRank & i_rank )
+uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
+                                 const MemRank & i_rank )
 {
     #define PRDF_FUNC "[PlatServices::startBgScrub<TYPE_MCA>] "
 
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) );
+    PRDF_ASSERT( nullptr != i_mcaChip );
+    PRDF_ASSERT( TYPE_MCA == i_mcaChip->getType() );
 
-    uint32_t rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
-    TargetHandle_t mcbTrgt = getConnectedParent( i_trgt, TYPE_MCBIST );
-    PRDF_ASSERT( nullptr != mcbTrgt );
+    // Get the MCBIST fapi target
+    ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
+    PRDF_ASSERT( nullptr != mcbChip );
+    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbChip->getTrgt() );
 
-    uint32_t port = getTargetPosition(i_trgt) % MAX_MCA_PER_MCBIST;
-
-    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbTrgt );
-
+    // Get the stop conditions.
     mss::mcbist::stop_conditions stopCond;
     stopCond.set_thresh_nce_int(1)
             .set_thresh_nce_soft(1)
@@ -318,9 +320,12 @@ uint32_t startBgScrub<TYPE_MCA>( TargetHandle_t i_trgt, const MemRank & i_rank )
             .set_pause_on_aue(mss::ON)
             .set_nce_hard_symbol_count_enable(mss::ON);
 
+    // Get the scrub speed.
     mss::mcbist::speed scrubSpeed = enableFastBgScrub() ? mss::mcbist::LUDICROUS
                                                         : mss::mcbist::BG_SCRUB;
 
+    // Get the first address of the given rank.
+    uint32_t port = i_mcaChip->getPos() % MAX_MCA_PER_MCBIST;
     mss::mcbist::address saddr, eaddr;
     mss::mcbist::address::get_srank_range( port,
                                            i_rank.getDimmSlct(),
@@ -329,18 +334,34 @@ uint32_t startBgScrub<TYPE_MCA>( TargetHandle_t i_trgt, const MemRank & i_rank )
                                            saddr,
                                            eaddr );
 
-    fapi2::ReturnCode fapi_rc = memdiags::background_scrub( fapiTrgt, stopCond,
-                                                            scrubSpeed, saddr );
-
-    errlHndl_t errl = fapi2::rcToErrl( fapi_rc );
-    if ( nullptr != errl )
+    do
     {
-        PRDF_ERR( PRDF_FUNC "memdiags::stop(0x%08x) failed", getHuid(i_trgt) );
-        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-        rc = FAIL;
-    }
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_MCBIST>( mcbChip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      mcbChip->getHuid() );
+            break;
+        }
 
-    return rc;
+        // Start the background scrub command.
+        fapi2::ReturnCode fapi_rc = memdiags::background_scrub( fapiTrgt,
+                                                                stopCond,
+                                                                scrubSpeed,
+                                                                saddr );
+        errlHndl_t errl = fapi2::rcToErrl( fapi_rc );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "memdiags::background_scrub(0x%08x,%d) failed",
+                      mcbChip->getHuid(), i_rank.getMaster() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
 
     #undef PRDF_FUNC
 }
@@ -350,20 +371,33 @@ uint32_t startBgScrub<TYPE_MCA>( TargetHandle_t i_trgt, const MemRank & i_rank )
 //##############################################################################
 
 template<>
-uint32_t startBgScrub<TYPE_MBA>( TargetHandle_t i_trgt,
+uint32_t startBgScrub<TYPE_MBA>( ExtensibleChip * i_mbaChip,
                                  const MemRank & i_rank )
 {
     #define PRDF_FUNC "[PlatServices::startBgScrub<TYPE_MBA>] "
 
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
+    PRDF_ASSERT( nullptr != i_mbaChip );
+    PRDF_ASSERT( TYPE_MBA == i_mbaChip->getType() );
 
-    uint32_t rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
-// TODO RTC 136126
+    do
+    {
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_MBA>( i_mbaChip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_mbaChip->getHuid() );
+            break;
+        }
 
-    return rc;
+        // Start the background scrub command.
+        PRDF_ERR( PRDF_FUNC "function not implemented yet" ); // TODO RTC 136126
+
+    } while (0);
+
+    return o_rc;
 
     #undef PRDF_FUNC
 }

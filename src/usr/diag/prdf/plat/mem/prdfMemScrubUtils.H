@@ -61,6 +61,52 @@ uint32_t clearEccCounters( ExtensibleChip * i_chip );
 template<TARGETING::TYPE T>
 uint32_t clearEccFirs( ExtensibleChip * i_chip );
 
+/**
+ * @brief  Wrapper function that calls clearEccCounters(), clearEccFirs() and
+ *         clearCmdCompleteAttn().
+ * @param  i_chip MBA, MCA, or MCBIST.
+ * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t prepareNextCmd( ExtensibleChip * i_chip )
+{
+    #define PRDF_FUNC "[prepareNextCmd] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        o_rc = clearEccCounters<T>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "clearEccCounters<T>(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        o_rc = clearEccFirs<T>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "clearEccFirs<T>(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        o_rc = clearCmdCompleteAttn<T>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "clearCmdCompleteAttn<T>(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
 /** @brief Contains all supported ECC attentions. Each enum is used in a mask,
  *         so the value of each enum must be unique and disjoint. */
 enum MaintEccAttns
