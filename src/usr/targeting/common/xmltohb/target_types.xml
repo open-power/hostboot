@@ -155,8 +155,6 @@
     <attribute><id>PM_UNDERVOLTING_FRQ_MINIMUM</id></attribute>
     <attribute><id>PM_UNDERVOLTING_FREQ_MAXIMUM</id></attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id></attribute>
-    <!-- remove duplicate when fixed in HWP -->
-    <attribute><id>APSS_CHIP_SELECT</id></attribute>
     <attribute><id>PM_APSS_CHIP_SELECT</id></attribute>
     <attribute><id>PM_PBAX_NODEID</id></attribute>
     <attribute><id>PBAX_GROUPID</id></attribute>
@@ -283,17 +281,6 @@
     <attribute><id>PROC_R_LOADLINE_VCS_UOHM</id></attribute>
     <attribute><id>PROC_R_DISTLOSS_VCS_UOHM</id></attribute>
     <attribute><id>PROC_VRM_VOFFSET_VCS_UV</id></attribute>
-<!-- Remove when fixed in hwsv -->
-    <attribute><id>PROC_R_LOADLINE_VDD</id></attribute>
-    <attribute><id>PROC_R_DISTLOSS_VDD</id></attribute>
-    <attribute><id>PROC_VRM_VOFFSET_VDD</id></attribute>
-    <attribute><id>PROC_R_LOADLINE_VDN</id></attribute>
-    <attribute><id>PROC_R_DISTLOSS_VDN</id></attribute>
-    <attribute><id>PROC_VRM_VOFFSET_VDN</id></attribute>
-    <attribute><id>PROC_R_LOADLINE_VCS</id></attribute>
-    <attribute><id>PROC_R_DISTLOSS_VCS</id></attribute>
-    <attribute><id>PROC_VRM_VOFFSET_VCS</id></attribute>
-<!-- End remove -->
     <attribute><id>ICACHE_LINE_SIZE</id></attribute>
     <attribute><id>ICACHE_ASSOC_SETS</id></attribute>
     <attribute><id>ICACHE_SIZE</id></attribute>
