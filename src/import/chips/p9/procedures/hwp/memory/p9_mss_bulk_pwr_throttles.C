@@ -63,6 +63,7 @@ extern "C"
             throttle_type t)
     {
         FAPI_INF("Start bulk_pwr_throttles");
+        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
         //Check for THERMAL
         if (t == THERMAL)
@@ -100,8 +101,6 @@ extern "C"
                 FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_mcs, l_slot));
                 FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_mcs, l_port));
             }
-
-            //Equalize throttles
         }
         //else do POWER
         else
@@ -140,11 +139,12 @@ extern "C"
                 FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_mcs, l_port));
             }
 
-            //Equalize throttles
         }
 
+        //Set all of the throttles to the lowest value per port for performance reasons
+        FAPI_TRY(mss::power_thermal::equalize_throttles(i_targets));
         FAPI_INF("End bulk_pwr_throttles");
-        return fapi2::FAPI2_RC_SUCCESS;
+        return l_rc;
 
     fapi_try_exit:
         FAPI_ERR("Error calculating bulk_pwr_throttles");
