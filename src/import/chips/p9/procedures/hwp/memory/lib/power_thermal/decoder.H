@@ -68,14 +68,14 @@ enum default_power
 //Currently needs to be in sorted order for lookup to work
 static const std::vector< std::pair<uint32_t , uint8_t> > DIMM_SIZE_MAP =
 {
-    {4, 0b0000},
-    {8, 0b0001},
-    {16, 0b0010},
-    {32, 0b0011},
-    {64, 0b0100},
+    {4,   0b0000},
+    {8,   0b0001},
+    {16,  0b0010},
+    {32,  0b0011},
+    {64,  0b0100},
     {128, 0b0101},
-    {256, 0b0111},
-    {512, 0b1000},
+    {256, 0b0110},
+    {512, 0b0111},
 };
 
 static const std::vector< std::pair<uint8_t , uint8_t> > DIMM_TYPE_MAP =
@@ -94,9 +94,10 @@ static const std::vector< std::pair<uint8_t , uint8_t> > DRAM_GEN_MAP =
 
 static const std::vector <std::pair<uint8_t, uint8_t> > DRAM_WIDTH_MAP =
 {
-    {fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4, 0b00},
-    {fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8, 0b01},
-    {fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X16, 0b10}
+    {fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4, 0b000},
+    {fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8, 0b001},
+    {fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X16, 0b010},
+    {fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X32, 0b011}
 };
 
 static const std::vector< std::pair<uint8_t , uint8_t> > DRAM_DENSITY_MAP =
@@ -111,14 +112,25 @@ static const std::vector< std::pair<uint8_t , uint8_t> > DRAM_DENSITY_MAP =
 static const std::vector <std::pair<uint8_t, uint8_t> > DRAM_STACK_TYPE_MAP =
 {
     {fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_SDP, 0b00},
+    {fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_DDP_QDP, 0b01},
     {fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS, 0b10}
 };
 
+//Note, the first entries of the pairs need to be in sorted order!!
 static const std::vector <std::pair<uint16_t, uint8_t> > DRAM_MFGID_MAP =
 {
-    {0x802C, 0b00},
-    {0x80AD, 0b01},
-    {0x80CE, 0b10}
+    //Kingston
+    {0x0198, 0b011},
+    //A-data
+    {0x04CB, 0b101},
+    //Micron
+    {0x802C, 0b000},
+    //HYNIX
+    {0x80AD, 0b001},
+    //SAMSUNG
+    {0x80CE, 0b010},
+    //Innodisk
+    {0x86F1, 0b100},
 };
 
 static const std::vector < std::pair< uint8_t, uint8_t> > DIMMS_PORT_MAP =
@@ -155,18 +167,18 @@ enum ATTR_DECODE_INFO
     DIMM_TYPE_LEN = 2,
 
     DRAM_WIDTH_START = 8,
-    DRAM_WIDTH_LEN = 2,
+    DRAM_WIDTH_LEN = 3,
 
-    DRAM_DENSITY_START = 10,
+    DRAM_DENSITY_START = 11,
     DRAM_DENSITY_LEN = 3,
 
-    DRAM_STACK_TYPE_START = 13,
+    DRAM_STACK_TYPE_START = 14,
     DRAM_STACK_TYPE_LEN = 2,
 
-    DRAM_MFGID_START = 15,
-    DRAM_MFGID_LEN = 2,
+    DRAM_MFGID_START = 16,
+    DRAM_MFGID_LEN = 3,
 
-    DIMMS_PER_PORT_START = 17,
+    DIMMS_PER_PORT_START = 19,
     DIMMS_PER_PORT_LEN = 2,
 };
 
