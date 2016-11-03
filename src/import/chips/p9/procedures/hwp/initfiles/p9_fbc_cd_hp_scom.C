@@ -197,7 +197,7 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
                 if ((l_def_TRUE == literal_1))
                 {
-                    l_scom_buffer.insert<uint64_t> (literal_0b0, 29, 2, 62 );
+                    l_scom_buffer.insert<uint64_t> (literal_0b00, 29, 2, 62 );
                 }
 
                 if ((l_def_TRUE == literal_1))
@@ -294,25 +294,30 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
                 if ((l_def_SAFE_MODE == literal_1))
                 {
-                    l_scom_buffer.insert<uint64_t> (literal_0b00, 49, 2, 62 );
+                    l_scom_buffer.insert<uint64_t> (literal_0b0, 49, 1, 63 );
                 }
                 else if ((l_def_TRUE == literal_1))
                 {
-                    l_scom_buffer.insert<uint64_t> (literal_0b11, 49, 2, 62 );
+                    l_scom_buffer.insert<uint64_t> (literal_0b1, 49, 1, 63 );
                 }
 
                 if ((l_def_TRUE == literal_1))
                 {
-                    l_scom_buffer.insert<uint64_t> (literal_0b0, 51, 1, 63 );
+                    l_scom_buffer.insert<uint64_t> (literal_0b0, 50, 1, 63 );
                 }
 
                 if ((l_def_SAFE_MODE == literal_1))
                 {
-                    l_scom_buffer.insert<uint64_t> (literal_0b00, 52, 2, 62 );
+                    l_scom_buffer.insert<uint64_t> (literal_0b00, 51, 2, 62 );
                 }
                 else if ((l_def_TRUE == literal_1))
                 {
-                    l_scom_buffer.insert<uint64_t> (literal_0b01, 52, 2, 62 );
+                    l_scom_buffer.insert<uint64_t> (literal_0b01, 51, 2, 62 );
+                }
+
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b0, 53, 1, 63 );
                 }
 
                 if ((l_def_TRUE == literal_1))
