@@ -662,7 +662,7 @@
 <targetInstance>
     <id>sys0node0proc0eq0ex0</id>
     <type>unit-ex-power9</type>
-    <attribute><id>HUID</id><default>0x00061000</default></attribute>
+    <attribute><id>HUID</id><default>0x00060000</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c0</default>
     </attribute>
@@ -695,7 +695,7 @@
 <targetInstance>
     <id>sys0node0proc0eq0ex1</id>
     <type>unit-ex-power9</type>
-    <attribute><id>HUID</id><default>0x00061001</default></attribute>
+    <attribute><id>HUID</id><default>0x00060001</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -729,7 +729,7 @@
 <targetInstance>
     <id>sys0node0proc0eq1ex2</id>
     <type>unit-ex-power9</type>
-    <attribute><id>HUID</id><default>0x00061002</default></attribute>
+    <attribute><id>HUID</id><default>0x00060002</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c2</default>
     </attribute>
@@ -762,7 +762,7 @@
 <targetInstance>
     <id>sys0node0proc0eq1ex3</id>
     <type>unit-ex-power9</type>
-    <attribute><id>HUID</id><default>0x00061003</default></attribute>
+    <attribute><id>HUID</id><default>0x00060003</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c3</default>
     </attribute>
@@ -796,7 +796,7 @@
 <targetInstance>
     <id>sys0node0proc0eq2ex4</id>
     <type>unit-ex-power9</type>
-    <attribute><id>HUID</id><default>0x00061004</default></attribute>
+    <attribute><id>HUID</id><default>0x00060004</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c4</default>
     </attribute>
@@ -829,7 +829,7 @@
 <targetInstance>
     <id>sys0node0proc0eq2ex5</id>
     <type>unit-ex-power9</type>
-    <attribute><id>HUID</id><default>0x00061005</default></attribute>
+    <attribute><id>HUID</id><default>0x00060005</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c5</default>
     </attribute>
@@ -863,7 +863,7 @@
 <targetInstance>
     <id>sys0node0proc0eq3ex6</id>
     <type>unit-ex-power9</type>
-    <attribute><id>HUID</id><default>0x00061006</default></attribute>
+    <attribute><id>HUID</id><default>0x00060006</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c6</default>
     </attribute>
@@ -896,7 +896,7 @@
 <targetInstance>
     <id>sys0node0proc0eq3ex7</id>
     <type>unit-ex-power9</type>
-    <attribute><id>HUID</id><default>0x00061007</default></attribute>
+    <attribute><id>HUID</id><default>0x00060007</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c7</default>
     </attribute>
@@ -930,7 +930,7 @@
 <targetInstance>
     <id>sys0node0proc0eq4ex8</id>
     <type>unit-ex-power9</type>
-    <attribute><id>HUID</id><default>0x00061008</default></attribute>
+    <attribute><id>HUID</id><default>0x00060008</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c8</default>
     </attribute>
@@ -963,7 +963,7 @@
 <targetInstance>
     <id>sys0node0proc0eq4ex9</id>
     <type>unit-ex-power9</type>
-    <attribute><id>HUID</id><default>0x00061009</default></attribute>
+    <attribute><id>HUID</id><default>0x00060009</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c9</default>
     </attribute>
@@ -997,7 +997,7 @@
 <targetInstance>
     <id>sys0node0proc0eq5ex10</id>
     <type>unit-ex-power9</type>
-    <attribute><id>HUID</id><default>0x0006100A</default></attribute>
+    <attribute><id>HUID</id><default>0x0006000A</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c10</default>
     </attribute>
@@ -1030,7 +1030,7 @@
 <targetInstance>
     <id>sys0node0proc0eq5ex11</id>
     <type>unit-ex-power9</type>
-    <attribute><id>HUID</id><default>0x0006100B</default></attribute>
+    <attribute><id>HUID</id><default>0x0006000B</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c11</default>
     </attribute>
@@ -1064,7 +1064,7 @@
 <targetInstance>
     <id>sys0node0proc0eq0ex0core0</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x00071000</default></attribute>
+    <attribute><id>HUID</id><default>0x00070000</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c0</default>
     </attribute>
@@ -1101,7 +1101,7 @@
 <targetInstance>
     <id>sys0node0proc0eq0ex0core1</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x00071001</default></attribute>
+    <attribute><id>HUID</id><default>0x00070001</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -1139,7 +1139,7 @@
 <targetInstance>
     <id>sys0node0proc0eq0ex1core2</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x00071002</default></attribute>
+    <attribute><id>HUID</id><default>0x00070002</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c2</default>
     </attribute>
@@ -1176,7 +1176,7 @@
 <targetInstance>
     <id>sys0node0proc0eq0ex1core3</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x00071003</default></attribute>
+    <attribute><id>HUID</id><default>0x00070003</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c3</default>
     </attribute>
@@ -1214,7 +1214,7 @@
 <targetInstance>
     <id>sys0node0proc0eq1ex2core4</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x00071004</default></attribute>
+    <attribute><id>HUID</id><default>0x00070004</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c4</default>
     </attribute>
@@ -1251,7 +1251,7 @@
 <targetInstance>
     <id>sys0node0proc0eq1ex2core5</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x00071005</default></attribute>
+    <attribute><id>HUID</id><default>0x00070005</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c5</default>
     </attribute>
@@ -1289,7 +1289,7 @@
 <targetInstance>
     <id>sys0node0proc0eq1ex3core6</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x00071006</default></attribute>
+    <attribute><id>HUID</id><default>0x00070006</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c6</default>
     </attribute>
@@ -1326,7 +1326,7 @@
 <targetInstance>
     <id>sys0node0proc0eq1ex3core7</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x00071007</default></attribute>
+    <attribute><id>HUID</id><default>0x00070007</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c7</default>
     </attribute>
@@ -1364,7 +1364,7 @@
 <targetInstance>
     <id>sys0node0proc0eq2ex4core8</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x00071008</default></attribute>
+    <attribute><id>HUID</id><default>0x00070008</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c8</default>
     </attribute>
@@ -1401,7 +1401,7 @@
 <targetInstance>
     <id>sys0node0proc0eq2ex4core9</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x00071009</default></attribute>
+    <attribute><id>HUID</id><default>0x00070009</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c9</default>
     </attribute>
@@ -1439,7 +1439,7 @@
 <targetInstance>
     <id>sys0node0proc0eq2ex5core10</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x0007100A</default></attribute>
+    <attribute><id>HUID</id><default>0x0007000A</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c10</default>
     </attribute>
@@ -1476,7 +1476,7 @@
 <targetInstance>
     <id>sys0node0proc0eq2ex5core11</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x0007100B</default></attribute>
+    <attribute><id>HUID</id><default>0x0007000B</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c11</default>
     </attribute>
@@ -1514,7 +1514,7 @@
 <targetInstance>
     <id>sys0node0proc0eq3ex6core12</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x0007100C</default></attribute>
+    <attribute><id>HUID</id><default>0x0007000C</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c12</default>
     </attribute>
@@ -1551,7 +1551,7 @@
 <targetInstance>
     <id>sys0node0proc0eq3ex6core13</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x0007100D</default></attribute>
+    <attribute><id>HUID</id><default>0x0007000D</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c13</default>
     </attribute>
@@ -1589,7 +1589,7 @@
 <targetInstance>
     <id>sys0node0proc0eq3ex7core14</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x0007100E</default></attribute>
+    <attribute><id>HUID</id><default>0x0007000E</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c14</default>
     </attribute>
@@ -1626,8 +1626,8 @@
 <targetInstance>
     <id>sys0node0proc0eq3ex7core15</id>
     <type>unit-core-power9</type>
-    <attribute><id>HUID</id><default>0x0007100F</default></attribute>
-    <attribute>
+<attribute><id>HUID</id><default>0x0007000F</default></attribute>
+<attribute>
         <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c15</default>
     </attribute>
     <attribute>
@@ -2232,7 +2232,7 @@
 <targetInstance>
     <id>sys0node0proc0mcbist0mcs0mca0</id>
     <type>unit-mca-power9</type>
-    <attribute><id>HUID</id><default>0x00240100</default></attribute>
+    <attribute><id>HUID</id><default>0x00240000</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c0</default>
     </attribute>
@@ -2269,7 +2269,7 @@
 <targetInstance>
     <id>sys0node0proc0mcbist0mcs0mca1</id>
     <type>unit-mca-power9</type>
-    <attribute><id>HUID</id><default>0x00240101</default></attribute>
+    <attribute><id>HUID</id><default>0x00240001</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -2307,7 +2307,7 @@
 <targetInstance>
     <id>sys0node0proc0mcbist0mcs1mca0</id>
     <type>unit-mca-power9</type>
-    <attribute><id>HUID</id><default>0x00240102</default></attribute>
+    <attribute><id>HUID</id><default>0x00240002</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c2</default>
     </attribute>
@@ -2344,7 +2344,7 @@
 <targetInstance>
     <id>sys0node0proc0mcbist0mcs1mca1</id>
     <type>unit-mca-power9</type>
-    <attribute><id>HUID</id><default>0x00240103</default></attribute>
+    <attribute><id>HUID</id><default>0x00240003</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c3</default>
     </attribute>
@@ -2382,7 +2382,7 @@
 <targetInstance>
     <id>sys0node0proc0mcbist1mcs0mca0</id>
     <type>unit-mca-power9</type>
-    <attribute><id>HUID</id><default>0x00240104</default></attribute>
+    <attribute><id>HUID</id><default>0x00240004</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c4</default>
     </attribute>
@@ -2419,7 +2419,7 @@
 <targetInstance>
     <id>sys0node0proc0mcbist1mcs0mca1</id>
     <type>unit-mca-power9</type>
-    <attribute><id>HUID</id><default>0x00240105</default></attribute>
+    <attribute><id>HUID</id><default>0x00240005</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c5</default>
     </attribute>
@@ -2457,7 +2457,7 @@
 <targetInstance>
     <id>sys0node0proc0mcbist1mcs1mca0</id>
     <type>unit-mca-power9</type>
-    <attribute><id>HUID</id><default>0x00240106</default></attribute>
+    <attribute><id>HUID</id><default>0x00240006</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c6</default>
     </attribute>
@@ -2494,7 +2494,7 @@
 <targetInstance>
     <id>sys0node0proc0mcbist1mcs1mca1</id>
     <type>unit-mca-power9</type>
-    <attribute><id>HUID</id><default>0x00240107</default></attribute>
+    <attribute><id>HUID</id><default>0x00240007</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c7</default>
     </attribute>
@@ -2800,7 +2800,7 @@
 <targetInstance>
     <id>sys0node0proc0pec0phb0</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x002E0100</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0000</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.phb:k0:n0:s0:p00:c0</default>
     </attribute>
@@ -2838,7 +2838,7 @@
 <targetInstance>
     <id>sys0node0proc0pec1phb1</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x002E0101</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0001</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.phb:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -2875,7 +2875,7 @@
 <targetInstance>
     <id>sys0node0proc0pec1phb2</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x002E0102</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0002</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.phb:k0:n0:s0:p00:c2</default>
     </attribute>
@@ -2913,7 +2913,7 @@
 <targetInstance>
     <id>sys0node0proc0pec2phb3</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x002E0103</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0003</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.phb:k0:n0:s0:p00:c3</default>
     </attribute>
@@ -2950,7 +2950,7 @@
 <targetInstance>
     <id>sys0node0proc0pec2phb4</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x002E0104</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0004</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.phb:k0:n0:s0:p00:c4</default>
     </attribute>
@@ -2987,7 +2987,7 @@
 <targetInstance>
     <id>sys0node0proc0pec2phb5</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x002E0105</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0005</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.phb:k0:n0:s0:p00:c5</default>
     </attribute>
@@ -3025,7 +3025,7 @@
 <targetInstance>
     <id>sys0node0proc0obus0</id>
     <type>unit-obus-nimbus</type>
-    <attribute><id>HUID</id><default>0x002E0200</default></attribute>
+    <attribute><id>HUID</id><default>0x00280000</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.obus:k0:n0:s0:p00:c0</default>
     </attribute>
@@ -3062,7 +3062,7 @@
 <targetInstance>
     <id>sys0node0proc0obus3</id>
     <type>unit-obus-nimbus</type>
-    <attribute><id>HUID</id><default>0x002E0201</default></attribute>
+    <attribute><id>HUID</id><default>0x00280003</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.obus:k0:n0:s0:p00:c3</default>
     </attribute>
@@ -3168,7 +3168,7 @@
 <targetInstance>
     <id>sys0node0proc0ppe0</id>
     <type>unit-ppe-nimbus</type>
-    <attribute><id>HUID</id><default>0x002E0400</default></attribute>
+    <attribute><id>HUID</id><default>0x002B0000</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p00:c0</default>
     </attribute>
@@ -3197,7 +3197,7 @@
 <targetInstance>
     <id>sys0node0proc0ppe1</id>
     <type>unit-ppe-nimbus</type>
-    <attribute><id>HUID</id><default>0x002E0401</default></attribute>
+    <attribute><id>HUID</id><default>0x002B0001</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -4821,7 +4821,7 @@
 <targetInstance>
     <id>sys0node0proc0xbus1</id>
     <type>unit-xbus-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0601</default></attribute>
+    <attribute><id>HUID</id><default>0x000E0001</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.xbus:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -4862,7 +4862,7 @@
 <targetInstance>
     <id>sys0node0proc0xbus2</id>
     <type>unit-xbus-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0602</default></attribute>
+    <attribute><id>HUID</id><default>0x000E0002</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.xbus:k0:n0:s0:p00:c2</default>
     </attribute>
@@ -8458,7 +8458,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe0</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B0015</default></attribute>
+    <attribute><id>HUID</id><default>0x002B0033</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c0</default>
     </attribute>
@@ -8487,7 +8487,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe10</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B001F</default></attribute>
+    <attribute><id>HUID</id><default>0x002B003D</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c10</default>
     </attribute>
@@ -8516,7 +8516,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe11</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B0020</default></attribute>
+    <attribute><id>HUID</id><default>0x002B003E</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c11</default>
     </attribute>
@@ -8545,7 +8545,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe12</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B0021</default></attribute>
+    <attribute><id>HUID</id><default>0x002B003F</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c12</default>
     </attribute>
@@ -8574,7 +8574,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe13</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B0022</default></attribute>
+    <attribute><id>HUID</id><default>0x002B0040</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c13</default>
     </attribute>
@@ -8603,7 +8603,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe20</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B0029</default></attribute>
+    <attribute><id>HUID</id><default>0x002B0047</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c20</default>
     </attribute>
@@ -8632,7 +8632,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe21</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B002A</default></attribute>
+    <attribute><id>HUID</id><default>0x002B0048</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c21</default>
     </attribute>
@@ -8661,7 +8661,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe22</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B002B</default></attribute>
+    <attribute><id>HUID</id><default>0x002B0049</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c22</default>
     </attribute>
@@ -8690,7 +8690,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe23</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B002C</default></attribute>
+    <attribute><id>HUID</id><default>0x002B004A</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c23</default>
     </attribute>
@@ -8719,7 +8719,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe24</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B002D</default></attribute>
+    <attribute><id>HUID</id><default>0x002B004B</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c24</default>
     </attribute>
@@ -8748,7 +8748,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe25</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B002E</default></attribute>
+    <attribute><id>HUID</id><default>0x002B004C</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c25</default>
     </attribute>
@@ -8777,7 +8777,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe30</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B0033</default></attribute>
+    <attribute><id>HUID</id><default>0x002B0051</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c30</default>
     </attribute>
@@ -8806,7 +8806,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe31</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B0034</default></attribute>
+    <attribute><id>HUID</id><default>0x002B0052</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c31</default>
     </attribute>
@@ -8835,7 +8835,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe32</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B0035</default></attribute>
+    <attribute><id>HUID</id><default>0x002B0053</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c32</default>
     </attribute>
@@ -8864,7 +8864,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe33</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B0036</default></attribute>
+    <attribute><id>HUID</id><default>0x002B0054</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c33</default>
     </attribute>
@@ -8893,7 +8893,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe34</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B0037</default></attribute>
+    <attribute><id>HUID</id><default>0x002B0055</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c34</default>
     </attribute>
@@ -8922,7 +8922,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe35</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B0038</default></attribute>
+    <attribute><id>HUID</id><default>0x002B0056</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c35</default>
     </attribute>
@@ -8951,7 +8951,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe40</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B003D</default></attribute>
+    <attribute><id>HUID</id><default>0x002B005B</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c40</default>
     </attribute>
@@ -8980,7 +8980,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe41</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B003E</default></attribute>
+    <attribute><id>HUID</id><default>0x002B005C</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c41</default>
     </attribute>
@@ -9009,7 +9009,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe42</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B003F</default></attribute>
+    <attribute><id>HUID</id><default>0x002B005D</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c42</default>
     </attribute>
@@ -9038,7 +9038,7 @@
 <targetInstance>
     <id>sys0node0proc1ppe50</id>
     <type>unit-ppe-power9</type>
-    <attribute><id>HUID</id><default>0x000B0047</default></attribute>
+    <attribute><id>HUID</id><default>0x002B0065</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p01:c50</default>
     </attribute>

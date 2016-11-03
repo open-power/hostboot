@@ -60,7 +60,7 @@ class Fapi2GetTargetTest : public CxxTest::TestSuite
                     static_cast<const TARGETING::Target*>(l_tTar.get());
                 l_huid = TARGETING::get_huid(l_platTarget);
                 FAPI_INF("test_fapi2GetTarget EX HUID: %.8x", l_huid);
-                if (l_huid != 0x00061002)
+                if (l_huid != 0x00060002)
                 {
                     TS_FAIL("getTarget: EX HUID is Wrong");
                     break;
@@ -81,7 +81,7 @@ class Fapi2GetTargetTest : public CxxTest::TestSuite
                 }
 
                 // get EX's children (cores) and verify their HUIDs
-                uint32_t l_exp_huids[] = {0x00071004, 0x00071005};
+                uint32_t l_exp_huids[] = {0x00070004, 0x00070005};
                 uint32_t i = 0;
 
                 std::vector<Target<fapi2::TARGET_TYPE_CORE> > l_childCores;
