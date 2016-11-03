@@ -44,9 +44,6 @@ OBJS += proc_set_pba_homer_bar.o
 OBJS += host_establish_ex_chiplet.o
 OBJS += host_start_stop_engine.o
 
-#@TODO RTC:147621 Pull p9_stop_util into a seperate library
-OBJS += p9_stop_util.o
-
 
 include ${ROOTPATH}/procedure.rules.mk
 include $(PROCEDURES_PATH)/hwp/pm/p9_pm_pfet_init.mk

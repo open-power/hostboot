@@ -66,7 +66,7 @@ void* call_mss_draminit_trainadv (void *io_pArgs)
         const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>
           l_fapi_mbcbist_target( l_mcbist_target);
 
-//@TODO RTC:152210 Enable Istep 13 HWPs that are waiting on mirrored files
+        // PLACEHOLDER - HWP may not actually be required
         //  call the HWP with each fapi::Target
 //         FAPI_INVOKE_HWP(l_err, mss_draminit_training_advanced,
 //                        l_fapi_mbcbist_target);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,8 +31,8 @@ namespace ISTEP_11
 void* call_host_prd_hwreconfig (void *io_pArgs)
 {
     errlHndl_t l_err = NULL;
-    //@TODO call p9_switch_cfsim.C HWP
-    //@TODO call p9_enable_reconfig.C
+    //@TODO-RTC:158411 call p9_switch_cfsim.C HWP
+    //@TODO-RTC:158411 call p9_enable_reconfig.C
     return l_err;
 }
 

@@ -46,14 +46,9 @@
 #include <sys/mm.h>
 #include <arch/pirformat.H>
 #include <isteps/hwpf_reasoncodes.H>
-
-// @TODO RTC:134082 remove below block
-// Add P9 - Fake trigger for memory expansion
-#include <kernel/console.H>                  // printk status
 #include <devicefw/userif.H>
 #include <config.h>
 #include <util/misc.H>
-// @TODO RTC:134082 remove above block
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
