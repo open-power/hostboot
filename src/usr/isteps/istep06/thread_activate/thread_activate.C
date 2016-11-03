@@ -198,11 +198,6 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
 
     if(NULL != l_errl)
     {
-        // We may not be able to run with only 4MB
-        // in the long run so need to revist this after
-        // we no longer have to deal with parital good
-        // bringup chips.  TODO: RTC: 60620
-
         //Not worth taking the system down, just assume
         //we only have half the cache available.
         errlCommit(l_errl,ISTEP_COMP_ID);

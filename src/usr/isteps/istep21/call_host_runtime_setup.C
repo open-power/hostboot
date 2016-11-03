@@ -35,7 +35,7 @@
 #include <devtree/devtreeif.H>
 #include <runtime/customize_attrs_for_payload.H>
 #include <targeting/common/util.H>
-
+#include <vpd/vpd_if.H>
 
 #include <hbotcompid.H>
 
@@ -106,15 +106,14 @@ void* call_host_runtime_setup (void *io_pArgs)
         } // end if phyp load
 
 
-        //@TODO RTC:133848
-/*
-        bool l_activateOCC = is_avp_load();
+        bool l_activateOCC = TARGETING::is_avp_load();
 
 #ifdef CONFIG_START_OCC_DURING_BOOT
         l_activateOCC = true;
 #endif
         if(l_activateOCC)
         {
+#if 0 //@TODO-RTC:159931-Start OCC during boot
             l_err = HBOCC::activateOCCs();
             if (l_err)
             {
@@ -122,7 +121,10 @@ void* call_host_runtime_setup (void *io_pArgs)
                        "activateOCCs failed");
                 break;
             }
+#endif
         }
+
+#if 0 //@TODO-RTC:164022-Support max pstate without OCC
 #ifdef CONFIG_SET_NOMINAL_PSTATE
         // Speed up processors.
         l_err = setMaxPstate();
@@ -132,8 +134,10 @@ void* call_host_runtime_setup (void *io_pArgs)
             ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
         }
 #endif
+#endif
 
-        if( is_sapphire_load() && (!INITSERVICE::spBaseServicesEnabled()) )
+        if( TARGETING::is_sapphire_load()
+            && (!INITSERVICE::spBaseServicesEnabled()) )
         {
             // Update the VPD switches for golden side boot
             // Must do this before building the devtree
@@ -164,7 +168,7 @@ void* call_host_runtime_setup (void *io_pArgs)
             }
 
         }
-        else if( is_sapphire_load() )
+        else if( TARGETING::is_sapphire_load() )
         {
             // Find area in HDAT to load devtree.
             uint64_t l_dtAddr = 0;
@@ -189,15 +193,8 @@ void* call_host_runtime_setup (void *io_pArgs)
             }
 
         }
-        else if( is_phyp_load() )
+        else if( TARGETING::is_phyp_load() )
         {
-            //If PHYP then clear out the PORE BARs
-            l_err = clearPoreBars();
-            if( l_err )
-            {
-                break;
-            }
-
             //Update the MDRT value (for MS Dump)
             l_err = RUNTIME::writeActualCount(RUNTIME::MS_DUMP_RESULTS_TBL);
             if(l_err != NULL)
@@ -206,31 +203,9 @@ void* call_host_runtime_setup (void *io_pArgs)
                            "write_MDRT_Count failed" );
                 break;
             }
-
-            // Write the HostServices attributes into mainstore
-            l_err = RUNTIME::populate_attributes();
-            if ( l_err )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Could not populate attributes" );
-                // break from do loop if error occured
-                break;
-            }
-        }
-        else if( !is_avp_load() )
-        {
-            // Write the HostServices attributes into mainstore
-            //  for our testcases
-            l_err = RUNTIME::populate_attributes();
-            if ( l_err )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Could not populate attributes" );
-                // break from do loop if error occured
-                break;
-            }
         }
 
+#if 0 //@TODO-RTC:147565-Core checkstop escalation
         // Revert back to standard runtime mode where core checkstops
         //  do not escalate to system checkstops
         // Workaround for HW286670
@@ -239,9 +214,8 @@ void* call_host_runtime_setup (void *io_pArgs)
         {
             break;
         }
+#endif
 
-        //  - Update HDAT/DEVTREE with tpmd logs
-*/
     } while(0);
 
     if( l_err )

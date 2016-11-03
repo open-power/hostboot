@@ -46,12 +46,7 @@ void* call_host_verify_hdat (void *io_pArgs)
 
     errlHndl_t l_err = NULL;
 
-    // Host Start Payload procedure, per documentation from Patrick.
-    //  - Verify target image
-    //      - TODO - Done via call to Secure Boot ROM.
-    //      - Will be done in future sprints
-
-    // stub for now..
+    //@TODO-RTC:125313-Audit HDAT Contents
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_verify_hdat exit" );

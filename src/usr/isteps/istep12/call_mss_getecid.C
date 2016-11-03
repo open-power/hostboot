@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@ void* call_mss_getecid (void *io_pArgs)
 {
     IStepError l_StepError;
     /*
-    //@TODO RTC:133831
+    //@TODO RTC:144076-Centaur L1 HWP support
     errlHndl_t l_err = NULL;
     uint8_t    l_ddr_port_status = 0;
     uint8_t    l_cache_enable = 0;

@@ -144,7 +144,7 @@ void* call_mss_power_cleanup (void *io_pArgs)
                         l_currMBA0Huid, l_currMBA1Huid);
 
         // Create FAPI Targets.
-        // @TODO RTC:133831
+        // @TODO RTC:155020
         /*const fapi::Target l_fapiCentaurTarget(TARGET_TYPE_MEMBUF_CHIP,
                 (const_cast<TARGETING::Target*>(l_pCentaur)));
         const fapi::Target l_fapiMba0Target(TARGET_TYPE_MBA_CHIPLET,
