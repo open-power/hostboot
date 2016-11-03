@@ -118,6 +118,9 @@ class MdiaCommandMonitorTest: public CxxTest::TestSuite
                      l_monID5 = 0,
                      l_monID6 = 0,
                      l_monID7 = 0;
+
+            mutex_lock(i_mutex);
+
             l_monID1 = l_cm.addMonitor(l_mntCmdTime);
             l_sm.addMonitor(l_monID1);
             l_monID2 = l_cm.addMonitor(l_mntCmdTime);
@@ -158,7 +161,6 @@ class MdiaCommandMonitorTest: public CxxTest::TestSuite
             }
 
             //Wait till all monitorIDs have timed out
-            mutex_lock(i_mutex);
             while(false == l_sm.isTimeoutProcessed())
             {
                 sync_cond_wait(i_cond, i_mutex);
