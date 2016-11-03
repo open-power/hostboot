@@ -27,6 +27,7 @@
 
 #include <iterator>
 #include <util/impl/qsort.H>
+#include <utility>
 
 #ifdef __cplusplus
 namespace std
@@ -119,10 +120,9 @@ namespace std
         inline void
         swap(T& a, T&b )
     {
-        // @TODO RTC:162287 use std::move()
-        T c(a);
-        a=b;
-        b=c;
+        T tmp(std::move(a));
+        a = std::move(b);
+        b = std::move(tmp);
     }
 
     /**
