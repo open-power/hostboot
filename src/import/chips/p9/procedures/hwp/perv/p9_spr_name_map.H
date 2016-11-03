@@ -132,7 +132,7 @@ typedef std::map<std::string, SPRMapEntry>::iterator SPR_MAP_IT;
     _op_(SPRG1    ,273 , ECP.PC.T<??T>_SPRG1                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(SPRG2    ,274 , ECP.PC.T<??T>_SPRG2                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(SPRG3    ,275 , ECP.PC.T<??T>_SPRG3                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
-    _op_(SPRC     ,276 , EXP.EC.CC.C<??C>_MODE_SPRC<??T>                  ,FLAG_READ_WRITE ,SPR_PER_VT         ,64)\
+    _op_(SPRC     ,276 , EXP.EC.CC.PCC<??C>.COMMON.SPR_COMMON.SPRC<??T>   ,FLAG_READ_WRITE ,SPR_PER_VT         ,64)\
     _op_(SPRD     ,277 , N/A                                              ,FLAG_READ_WRITE ,SPR_SHARE_NA       ,64)\
     _op_(CIR      ,283 , ECP.PC.PMU.SPR_CORE.CIR                          ,FLAG_READ_ONLY  ,SPR_SHARED         ,32)\
     _op_(TBL      ,284 , EXP.EC.CC.PCC<??C>.L<??T>_TBL                    ,FLAG_WRITE_ONLY ,SPR_PER_LPAR_VT    ,32)\
