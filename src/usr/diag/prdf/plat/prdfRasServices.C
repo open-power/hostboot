@@ -105,14 +105,6 @@ void ErrDataService::createInitialErrl( ATTENTION_TYPE i_attnType )
 
 //------------------------------------------------------------------------------
 
-void ErrDataService::checkMpIplEligibility( ATTENTION_TYPE i_attnType,
-                                            TargetHandle_t i_dumpTrgt,
-                                            hwTableContent & io_dumpContent )
-{
-    // no-op for Hostboot
-}
-
-//------------------------------------------------------------------------------
 
 bool ErrDataService::checkForceTerm( const ServiceDataCollector & i_sdc,
                                      TargetHandle_t i_dumpTrgt,
