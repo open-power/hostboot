@@ -1618,6 +1618,7 @@ use constant BUS_ORDINAL_FIELD    =>  7;
 use constant DIMM_POS_FIELD       =>  8;
 use constant MBA_SLOT_FIELD       =>  9;
 use constant MBA_PORT_FIELD       => 10;
+use constant DIMM_LOC_CODE_FIELD  => 11;
 
 use constant CDIMM_RID_NODE_MULTIPLIER => 32;
 
@@ -1637,7 +1638,8 @@ foreach my $i (@{$memBus->{'memory-bus'}})
          $i->{mcs}->{target}->{position}, 0,
          $i->{dimm}->{'instance-path'},
          $i->{mba}->{'mba-slot'},
-         $i->{mba}->{'mba-port'}];
+         $i->{mba}->{'mba-port'},
+         $i->{dimm}->{'location-code'}];
 }
 
 # Determine if the DIMMs are CDIMM or JDIMM (IS-DIMM). Check for "not
@@ -6113,8 +6115,12 @@ sub generate_is_dimm
     </attribute>
     ";
 
+        #RID number hack, get it from location code
+        my $dimmLoc = $SMembuses[$i][DIMM_LOC_CODE_FIELD];
+        $dimmLoc =~ s/.*C(.*)/$1/;
+
         # call to do any fsp per-dimm attributes
-        my $dimmHex = sprintf("0xD0%02X",$dimmPos);
+        my $dimmHex = sprintf("0xD0%02X",($dimmLoc-15));
         do_plugin('fsp_dimm', $proc, $dimm, $dimm, $dimmHex );
 
         print "\n</targetInstance>\n";
