@@ -114,7 +114,7 @@ uint32_t getMemReadAddr<TYPE_MCBIST>( ExtensibleChip * i_chip, uint32_t i_pos,
 
     // Check parameters
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCBIST == i_chip->getTrgtType() );
+    PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
     PRDF_ASSERT( i_pos < MAX_MCA_PER_MCBIST );
 
     // Get the register string.
@@ -162,7 +162,7 @@ uint32_t getMemReadAddr<TYPE_MEMBUF>( ExtensibleChip * i_chip, uint32_t i_pos,
 
     // Check parameters
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getTrgtType() );
+    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
     PRDF_ASSERT( i_pos < MAX_MBA_PER_MEMBUF );
 
     // Get the register string.
@@ -211,7 +211,7 @@ uint32_t getMemMaintAddr<TYPE_MCBIST>( ExtensibleChip * i_chip,
 
     // Check parameters
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCBIST == i_chip->getTrgtType() );
+    PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
 
     // Read the address register
     // We need to use ForceRead() here because it is possible we needed to stop
@@ -244,7 +244,7 @@ uint32_t getMemMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr & o_addr )
 
     // Check parameters
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MBA == i_chip->getTrgtType() );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
     // Read the address register
     // We need to use ForceRead() here because it is possible we needed to stop
@@ -277,7 +277,7 @@ uint32_t getMemMaintPort( ExtensibleChip * i_mcbChip,
 
     // Check parameters
     PRDF_ASSERT( nullptr != i_mcbChip );
-    PRDF_ASSERT( TYPE_MCBIST == i_mcbChip->getTrgtType() );
+    PRDF_ASSERT( TYPE_MCBIST == i_mcbChip->getType() );
 
     uint32_t o_rc = SUCCESS;
 

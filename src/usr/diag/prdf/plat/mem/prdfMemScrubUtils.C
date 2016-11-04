@@ -53,7 +53,7 @@ uint32_t __clearFir( ExtensibleChip * i_chip, const char * i_firAnd,
     #define PRDF_FUNC "[__clearFir] "
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( T == i_chip->getTrgtType() );
+    PRDF_ASSERT( T == i_chip->getType() );
 
     SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( i_firAnd );
     reg->SetBitFieldJustified( 0, 64, i_pattern );
@@ -84,7 +84,7 @@ template<>
 uint32_t clearCmdCompleteAttn<TYPE_MCA>( ExtensibleChip * i_chip )
 {
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCA == i_chip->getTrgtType() );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
     ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
 
@@ -107,7 +107,7 @@ uint32_t __clearEccCounters( ExtensibleChip * i_chip, const char * i_reg,
     #define PRDF_FUNC "[__clearEccCounters] "
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( T == i_chip->getTrgtType() );
+    PRDF_ASSERT( T == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
 
@@ -155,7 +155,7 @@ template<>
 uint32_t clearEccCounters<TYPE_MCA>( ExtensibleChip * i_chip )
 {
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCA == i_chip->getTrgtType() );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
     ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
 
@@ -166,12 +166,11 @@ template<>
 uint32_t clearEccCounters<TYPE_MBA>( ExtensibleChip * i_chip )
 {
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MBA == i_chip->getTrgtType() );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
     ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
 
-    uint32_t pos = getTargetPosition( i_chip->getTrgt() );
-    const char * reg = (0 == pos) ? "MBA0_MBSTR" : "MBA1_MBSTR";
+    const char * reg = (0 == i_chip->getPos()) ? "MBA0_MBSTR" : "MBA1_MBSTR";
 
     return __clearEccCounters<TYPE_MEMBUF>( membChip, reg, 53 );
 }
@@ -210,7 +209,7 @@ template<>
 uint32_t clearEccFirs<TYPE_MCA>( ExtensibleChip * i_chip )
 {
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCA == i_chip->getTrgtType() );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
     ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
 
@@ -226,9 +225,8 @@ uint32_t clearEccFirs<TYPE_MBA>( ExtensibleChip * i_chip )
     {
         ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
 
-        uint32_t pos = getTargetPosition( i_chip->getTrgt() );
-        const char * reg = (0 == pos) ? "MBA0_MBSECCFIR_AND"
-                                      : "MBA1_MBSECCFIR_AND";
+        const char * reg = (0 == i_chip->getPos()) ? "MBA0_MBSECCFIR_AND"
+                                                   : "MBA1_MBSECCFIR_AND";
 
         // Clear MBSECCFIR[20:27,36:41]
         o_rc = __clearFir<TYPE_MEMBUF>( membChip, reg, 0xfffff00ff03fffffull );
@@ -257,7 +255,7 @@ uint32_t checkEccFirs<TYPE_MCA>( ExtensibleChip * i_chip,
     o_eccAttns = MAINT_NO_ERROR;
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCA == i_chip->getTrgtType() );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
     ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
     PRDF_ASSERT( nullptr != mcbChip );
@@ -320,13 +318,13 @@ uint32_t checkEccFirs<TYPE_MBA>( ExtensibleChip * i_chip,
     o_eccAttns = MAINT_NO_ERROR;
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MBA == i_chip->getTrgtType() );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
     ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
     PRDF_ASSERT( nullptr != membChip );
 
-    uint32_t pos = getTargetPosition( i_chip->getTrgt() );
-    const char * reg = (0 == pos) ? "MBA0_MBSECCFIR" : "MBA1_MBSECCFIR";
+    const char * reg = (0 == i_chip->getPos()) ? "MBA0_MBSECCFIR"
+                                               : "MBA1_MBSECCFIR";
 
     SCAN_COMM_REGISTER_CLASS * mbseccfir = membChip->getRegister( reg );
     SCAN_COMM_REGISTER_CLASS * mbspa     = i_chip->getRegister( "MBASPA" );
