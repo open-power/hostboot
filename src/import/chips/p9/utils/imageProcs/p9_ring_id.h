@@ -319,6 +319,11 @@ enum RingID
     // Core Chiplet Rings
     // EC0 - EC23 instance specific Ring
     ec_repr = 228,
+
+    // Additional rings
+    ex_l2_fure_1 = 229,
+    ex_l3_fure_1 = 230,
+
     //***************************
     // Rings needed for SBE - End
     //***************************

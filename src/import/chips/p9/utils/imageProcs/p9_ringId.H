@@ -762,6 +762,8 @@ enum RingOffset
     eq_ana_bndy_bucket_25  = 43,
     eq_ana_bndy_l3dcc_bucket_26  = 44,
     eq_ana_mode     = 45,
+    ex_l2_fure_1    = 46,
+    ex_l3_fure_1    = 47,
     // Instance Rings
     eq_repr         = (0 | INSTANCE_RING_MARK),
     ex_l3_repr      = (1 | INSTANCE_RING_MARK),
@@ -773,7 +775,7 @@ enum RingOffset
 static const CHIPLET_DATA g_eqData =
 {
     16, // Quad Chiplet ID range is 16 - 21. The base ID is 16.
-    46, // 46 common rings for Quad chiplet.
+    48, // 48 common rings for Quad chiplet.
     5,  // 5 instance specific rings for each EQ chiplet
     9   // 9 different rings since 2 per EX ring and 1 per EQ
 };
@@ -1060,6 +1062,8 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EC::ec_time                        , "ec_time"                     , EC_TYPE    }, // 226
     { EC::ec_mode                        , "ec_mode"                     , EC_TYPE    }, // 227
     { EC::ec_repr                        , "ec_repr"                     , EC_TYPE    }, // 228
+    { EQ::ex_l2_fure_1                   , "ex_l2_fure_1"                , EQ_TYPE    }, // 229
+    { EQ::ex_l3_fure_1                   , "ex_l3_fure_1"                , EQ_TYPE    }, // 230
 };
 #endif
 #ifdef __PPE__
@@ -1294,6 +1298,8 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EC::ec_time                        , EC_TYPE    }, // 226
     { EC::ec_mode                        , EC_TYPE    }, // 227
     { EC::ec_repr                        , EC_TYPE    }, // 228
+    { EQ::ex_l2_fure_1                   , EQ_TYPE    }, // 229
+    { EQ::ex_l3_fure_1                   , EQ_TYPE    }, // 230
 };
 #endif
 
