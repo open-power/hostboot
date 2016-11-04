@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -37,7 +37,6 @@ MODULE = runtime
 OBJS += populate_hbruntime.o
 OBJS += hdatservice.o
 OBJS += fakepayload.o
-OBJS += tce.o
 OBJS += errlud_hdat.o
 OBJS += customize_attrs_for_payload.o
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,6 +143,34 @@ namespace INTR
         MSG_INTR_COALESCE,          //!< Pending interrupt to be handled
         MSG_INTR_ENABLE_PSI_INTR,   //!< Enable PSIHB Interrupts
     };
+
+
+    //Derived from 15.8 PSIHB Software Interfaces of the p9_cn_psi_hb_regs.pdf
+    //  (splintered off from the P9 Pervasive Workbook)
+    // -- shared with other code (like utiltce)
+    struct PSIHB_SW_INTERFACES_t
+    {
+        uint64_t psihbbar; //Host Bridge Base Address Register    - 0x0
+        uint64_t fspbar;   //FSP Base Address Register            - 0x8
+        uint64_t fspmmr;   //FSP Memory Mask Register             - 0x10
+        uint64_t tceaddr;  //TAR - TCE Address Register           - 0x18
+        uint64_t psihbcr;  //PSI Host Bridge Ctrl/Status Register - 0x20
+        uint64_t psisemr;  //PSIHB Status / Error Mask Register   - 0x28
+        uint64_t reserved2; //Unused / Reserved
+        uint64_t phbdsr;   //PSIHB Debug Setting register         - 0x38
+        uint64_t phbscr;   //PSI Host Bridge Ctrl/Status Register - 0x40
+        uint64_t phbccr;   //PSI Host Bridge clear ctl/status reg - 0x48
+        uint64_t dmaupaddr; //DMA Upper Address Register          - 0x50
+        uint64_t icr;      //Interrupt Control Register           - 0x58
+        uint64_t esbciaddr; //ESB CI Base Address                 - 0x60
+        uint64_t esbnotifyaddr; //ESB Notification Address        - 0x68
+        uint64_t ivtofforig; //IVT Offset Origin Register         - 0x70
+        uint64_t lsiintlevel; //LSI Intr Level Register (lab use  - 0x78
+        uint64_t lsiintstatus; //LSI Interrupt Status register    - 0x80
+        uint64_t reserved3; //Unused / Reserved                   - 0x88
+        uint64_t phbsecure; //PSI Host Bridge Secure Control reg  - 0x90
+    };
+
 
     /**
      * Register a message queue for an interrupt type

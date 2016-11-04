@@ -37,6 +37,7 @@
 #include <runtime/customize_attrs_for_payload.H>
 #include <targeting/common/util.H>
 #include <vpd/vpd_if.H>
+#include <util/utiltce.H>
 
 //SBE interfacing
 #include    <sbeio/sbeioif.H>
@@ -254,12 +255,38 @@ void* call_host_runtime_setup (void *io_pArgs)
         }
 #endif
 
+        // Close PAYLOAD TCEs
+/*      @TODO RTC 168745 - make this call when FSP is ready for TCE Support
+ *                         and add check that we're on a FSP system
+ *      NOTE:  move this call to the start of this function
+ *      NOTE:  add check to do this only on FSP-based systems
+ *        l_err = TCE::utilClosePayloadTces();
+ *       if ( l_err )
+ *       {
+ *           TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+ *                      "Failed TCE::utilClosePayloadTces" );
+ *           // break from do loop if error occured
+ *           break;
+ *       }
+ *
+ *
+ *       // Disable all TCEs
+ *       l_err = TCE::utilDisableTces();
+ *       if ( l_err )
+ *       {
+ *           TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+ *                      "Failed TCE::utilDisableTces" );
+ *           // break from do loop if error occured
+ *           break;
+ *       }
+ */
+
     } while(0);
 
     if( l_err )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "istep start_payload_failed see plid 0x%x", l_err->plid());
+                "istep host_runtime_setup failed see plid 0x%x", l_err->plid());
 
         // Create IStep error log and cross reference error that occurred
         l_StepError.addErrorDetails( l_err );

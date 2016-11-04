@@ -40,21 +40,14 @@ namespace RUNTIME
         MOD_HDATSERVICE_GET_STANDALONE_SECTION  = 0x06, /**< hdatservice.C */
         MOD_HDATSERVICE_GETHOSTDATASECTION  = 0x07, /**< hdatservice.C */
         MOD_HDATSERVICE_VERIFY_HDAT_ADDRESS  = 0x08, /**< hdatservice.C */
-        MOD_TCE_CREATE                  = 0x09,   /**< tce.C */
-        MOD_TCE_INIT_HDW                = 0x0A,   /**< tce.C */
-        MOD_TCE_ALLOCATE                = 0x0B,   /**< tce.C */
-        MOD_TCE_DEALLOCATE              = 0x0C,   /**< tce.C */
-        MOD_TCE_INIT                    = 0x0D,   /**< tce.C */
-        MOD_TCE_MAP                     = 0x0E,   /**< tce.C */
-        MOD_HDATSERVICE_FINDSPIRA       = 0x0F, /** hdatservice.C */
-        MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL = 0x10, /**< hdatservice.C */
-        MOD_HDATSERVICE_MAPREGION       = 0x11, /**< hdatservice.C */
+        MOD_HDATSERVICE_FINDSPIRA       = 0x09, /** hdatservice.C */
+        MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL = 0x0A, /**< hdatservice.C */
+        MOD_HDATSERVICE_MAPREGION       = 0x0B, /**< hdatservice.C */
 
         // customize_attrs_for_payload.C
         MOD_CUST_COMP_NON_PHYP_RT_TARGET = 0x12,
         MOD_CUST_CONF_HBRT_HYP_IDS       = 0x13,
         MOD_POPULATE_RTDATABYNODE        = 0x14,  /**< populate_hbruntime.C */
-
         MOD_PM_RT_LOAD_PM_COMPLEX        = 0x15,  /**< rt_pm.C */
         MOD_PM_RT_HCODE_UPDATE           = 0x16,  /**< rt_pm.C */
     };

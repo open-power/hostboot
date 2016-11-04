@@ -44,6 +44,7 @@
 #include    <targeting/attrrp.H>
 #include    <sys/internode.h>
 #include    <runtime/runtime.H>
+#include    <util/utiltce.H>
 
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
@@ -63,6 +64,20 @@ void* call_host_ipl_complete (void *io_pArgs)
                "call_host_ipl_complete entry" );
     do
     {
+        // Setup the TCEs needed for the FSP to DMA the PAYLOAD
+/*      @TODO RTC 168745 - make this call when FSP is ready for TCE Support
+ *                         and add check that we're on a FSP system
+ *      NOTE:  add check to do this only on FSP-based systems
+ *        l_err = TCE::utilSetupPayloadTces();
+ *
+ *       if( l_err )
+ *       {
+ *           TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+ *                      ERR_MRK"TCE::utilSetupPayloadTces failed");
+ *           break;
+ *       }
+ */
+
         // Initialize the RUNTIME DATA attributes
         // that HDAT needs to allocate memory for us.
         // -----------------------------------------
