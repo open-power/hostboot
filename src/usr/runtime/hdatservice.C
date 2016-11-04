@@ -269,13 +269,13 @@ errlHndl_t hdatService::get_standalone_section(
     if( RUNTIME::HSVC_SYSTEM_DATA == i_section )
     {
         o_dataAddr = reinterpret_cast<uint64_t>(iv_mem_regions[0].virt_addr);
-        o_dataSize = HSVC_TEST_SYSDATA_SIZE;
+        o_dataSize = MPIPL_SYSDATA_SIZE;
     }
     else if( RUNTIME::HSVC_NODE_DATA == i_section )
     {
         o_dataAddr = reinterpret_cast<uint64_t>(iv_mem_regions[0].virt_addr)
-                     + HSVC_TEST_SYSDATA_SIZE;
-        o_dataSize = HSVC_TEST_NODEDATA_SIZE;
+                     + MPIPL_SYSDATA_SIZE;
+        o_dataSize = MPIPL_NODEDATA_SIZE;
     }
     else if( RUNTIME::MS_DUMP_SRC_TBL == i_section )
     {
@@ -514,12 +514,12 @@ errlHndl_t hdatService::loadHostData(void)
             FakePayload::load();
 
             // Map in some arbitrary memory for the HostServices code to use
-            TRACFCOMP( g_trac_runtime, "load_host_data> STANDALONE: Mapping in 0x%X-0x%X (%d MB)", HSVC_TEST_MEMORY_ADDR,
-                HSVC_TEST_MEMORY_ADDR+HSVC_TEST_MEMORY_SIZE,
-                HSVC_TEST_MEMORY_SIZE);
+            TRACFCOMP( g_trac_runtime, "load_host_data> STANDALONE: Mapping in 0x%X-0x%X (%d MB)", MPIPL_ATTR_DATA_ADDR,
+                MPIPL_ATTR_DATA_ADDR+MPIPL_ATTR_DATA_SIZE,
+                MPIPL_ATTR_DATA_SIZE);
 
-            errhdl = mapRegion(HSVC_TEST_MEMORY_ADDR,
-                               HSVC_TEST_MEMORY_SIZE, l_dummy);
+            errhdl = mapRegion(MPIPL_ATTR_DATA_ADDR,
+                               MPIPL_ATTR_DATA_SIZE, l_dummy);
             if(errhdl)
             {
                 break;

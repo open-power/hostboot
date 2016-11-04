@@ -53,6 +53,7 @@ namespace RUNTIME
         // customize_attrs_for_payload.C
         MOD_CUST_COMP_NON_PHYP_RT_TARGET = 0x12,
         MOD_CUST_CONF_HBRT_HYP_IDS       = 0x13,
+        MOD_POPULATE_RTDATABYNODE        = 0x14,  /**< populate_hbruntime.C */
     };
 
     enum RuntimeReasonCode
@@ -84,7 +85,8 @@ namespace RUNTIME
         RC_NOT_ENOUGH_SPACE         = RUNTIME_COMP_ID | 0x18,
         RT_UNIT_TARGET_NOT_FOUND    = RUNTIME_COMP_ID | 0x19,
         RT_TARGET_TYPE_NOT_SUPPORTED = RUNTIME_COMP_ID | 0x1A,
-        RT_NO_PROC_TARGET            = RUNTIME_COMP_ID | 0x1B
+        RT_NO_PROC_TARGET            = RUNTIME_COMP_ID | 0x1B,
+        RC_UNMAP_FAIL                = RUNTIME_COMP_ID | 0x1C,
     };
 
     enum UserDetailsTypes

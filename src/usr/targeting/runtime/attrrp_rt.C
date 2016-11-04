@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@ using namespace ERRORLOG;
 
 namespace TARGETING
 {
-    void AttrRP::startup(errlHndl_t& io_taskRetErrl)
+    void AttrRP::startup(errlHndl_t& io_taskRetErrl, bool isMpipl)
     {
         errlHndl_t l_errl = NULL;
 

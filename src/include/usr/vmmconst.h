@@ -202,14 +202,15 @@ enum BlockPriority
 #define VMM_SIZE_RMVPAGE_TEST (8 * PAGESIZE)
 
 /** Chunk of physical memory to use for HostServices Attributes */
-#define HSVC_TEST_MEMORY_ADDR   (VMM_MEMORY_SIZE + 32*MEGABYTE)
-#define HSVC_TEST_SYSDATA_SIZE  (4*KILOBYTE)  /* match FSP HDAT code */
-#define HSVC_TEST_NODEDATA_SIZE (256000)      /* match FSP HDAT code */
-#define HSVC_TEST_MEMORY_SIZE   \
-   ALIGN_PAGE((HSVC_TEST_SYSDATA_SIZE+HSVC_TEST_NODEDATA_SIZE))
+#define MPIPL_ATTR_DATA_ADDR   (VMM_MEMORY_SIZE + 32*MEGABYTE)
+#define MPIPL_SYSDATA_SIZE  (4*KILOBYTE)  /* match FSP HDAT code */
+#define MPIPL_NODEDATA_SIZE (256000)      /* match FSP HDAT code */
+#define MPIPL_ATTR_DATA_SIZE   \
+   ALIGN_PAGE((MPIPL_SYSDATA_SIZE+MPIPL_NODEDATA_SIZE))
+#define MPIPL_ATTR_VMM_SIZE 0x8001000
 
 /* Chunk of physical memory used for Dump Source Table */
-#define DUMP_TEST_MEMORY_ADDR (HSVC_TEST_MEMORY_ADDR + HSVC_TEST_MEMORY_SIZE)
+#define DUMP_TEST_MEMORY_ADDR (MPIPL_ATTR_DATA_ADDR + MPIPL_ATTR_DATA_SIZE)
 #define DUMP_TEST_MEMORY_SIZE  (4*MEGABYTE)
 
 /** Location of the TCE Table */
