@@ -591,10 +591,13 @@ def magic_instruction_callback(user_arg, cpu, arg):
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         hb_tracBinaryBuffer = cpu.r4
         hb_tracBinaryBufferSz = cpu.r5
-        per_node = 0x200000000000
+        per_node = 0x200000000000   #32TB
+        per_chip = 0x40000000000    #4TB
         hb_hrmor = cpu.hrmor
         node_num = hb_hrmor//per_node
+        chip_num = hb_hrmor//per_chip
         mem_object = None
+        #print ">> hrmor=%X" % hb_hrmor
 
         # Find the entry in the memory map that includes our
         #  base memory region. Can't assume object is "ram"
@@ -603,7 +606,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         for entry in mem_map_entries:
             # 0=base, 1=name, 5=mirrored target, 6=priority
             #print ">> %d:%s" % (entry[0], entry[1])
-            if (entry[0] == (node_num*per_node)) or (entry[0] == hb_hrmor):
+            if (entry[0] == hb_hrmor) or ((entry[0] >= (chip_num*per_chip)) and (entry[0] <= ((chip_num+1)*per_chip))):
                 target = entry[5]
                 priority = entry[6]
                 # Check if there is a target that needs to be investigated that
@@ -620,6 +623,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
                     break
                 elif priority < low_priority:
                     mem_object = simics.SIM_object_name(entry[1])
+                    base_addr = entry[0]
                     #print "Found entry %s for hrmor %d" % (mem_object, hb_hrmor)
                     #break
 
@@ -631,7 +635,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         # Figure out if we are running out of the cache or mainstore
         # Add the HRMOR if we're running from memory
         if 'cache' not in mem_object:
-            hb_tracBinaryBuffer = hb_tracBinaryBuffer + hb_hrmor - per_node*node_num
+            hb_tracBinaryBuffer = hb_tracBinaryBuffer + hb_hrmor - per_node*node_num - base_addr
 
         tracbin = ["hbTracBINARY","hbTracBINARY1","hbTracBINARY2","hbTracBINARY3"]
         tracmerg = ["hbTracMERG","hbTracMERG1","hbTracMERG2","hbTracMERG3"]
@@ -656,6 +660,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         cmd3 = "(get-master-proc %d).proc_fsi2host_mbox->regs[95][1] = 0"%(node_num)
 
         saveCommand = "%s; %s; %s"%(cmd1,cmd2,cmd3)
+        #print "Command=%s" % (saveCommand)
 
         SIM_run_alone(run_command, saveCommand )
 
@@ -686,3 +691,4 @@ SIM_hap_add_callback_range( "Core_Magic_Instruction", magic_instruction_callback
 
 # Run the registration automatically whenever this script is loaded.
 register_hb_debug_framework_tools()
+
