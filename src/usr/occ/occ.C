@@ -210,7 +210,7 @@ namespace HBOCC
     {
         errlHndl_t  l_errl  =   NULL;
         void* homerVirtAddrBase = NULL;
-        uint64_t homerPhysAddrBase = VMM_HOMER_REGION_START_ADDR;
+        uint64_t homerPhysAddrBase = VMM_HOMER_REGION_START_OFFSET;
         bool winkle_loaded = false;
 
         TRACUCOMP( g_fapiTd,
@@ -218,6 +218,10 @@ namespace HBOCC
 
         do {
 #ifndef __HOSTBOOT_RUNTIME
+            // Get the node-offset for our instance by looking at the HRMOR
+            uint64_t l_hrmorBase = cpu_spr_value(CPU_SPR_HRMOR);
+            homerPhysAddrBase += l_hrmorBase;
+
             //OCC requires the build_winkle_images library
             if (  !VFS::module_is_loaded( "libbuild_winkle_images.so" ) )
             {
