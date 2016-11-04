@@ -261,11 +261,12 @@ void SPnorRP::initDaemon()
 /**
  * @brief  Load secure sections into temporary address space and verify them
  */
-void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
+uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
 {
     SectionInfo_t l_info;
     errlHndl_t l_errhdl = NULL;
     bool failedVerify = false;
+    uint64_t l_rc = 0;
 
     do {
         l_errhdl = getSectionInfo(i_id, l_info);
@@ -450,20 +451,23 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
 
     if( l_errhdl )
     {
+        l_rc = EACCES;
         uint32_t l_errPlid = l_errhdl->plid();
         iv_startupRC = l_errhdl->reasonCode();
         TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections there was an error");
         if (failedVerify)
         {
             TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections failed verify");
-            SECUREBOOT::handleSecurebootFailure(l_errhdl);
+            SECUREBOOT::handleSecurebootFailure(l_errhdl,false);
         }
         else
         {
             errlCommit(l_errhdl,PNOR_COMP_ID);
-            INITSERVICE::doShutdown(l_errPlid);
+            INITSERVICE::doShutdown(l_errPlid, true);
         }
     }
+
+    return l_rc;
 }
 
 
@@ -590,15 +594,25 @@ void SPnorRP::waitForMessage()
                     {
                         SectionId l_id =
                                     static_cast<SectionId>(message->data[0]);
-                        if (iv_loadedSections[l_id] == NULL)
+                        do
                         {
-                            LoadRecord* l_record = new LoadRecord;
-                            verifySections(l_record,l_id);
-                            iv_loadedSections[l_id] = l_record;
+                            if (iv_loadedSections[l_id] == NULL)
+                            {
+                                LoadRecord* l_record = new LoadRecord;
+                                uint64_t l_rc = verifySections(l_id, l_record);
+                                if (l_rc)
+                                {
+                                    delete l_record;
+                                    l_record = NULL;
+                                    status_rc = -l_rc;
+                                    break;
+                                }
+                                iv_loadedSections[l_id] = l_record;
 
-                            // cache the record to use fields later as hints
-                            l_rec = *l_record;
-                        }
+                                // cache the record to use fields later as hints
+                                l_rec = *l_record;
+                            }
+                        } while (0);
                     }
                     break;
 
@@ -718,16 +732,18 @@ errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
     //    err = reinterpret_cast<errlHndl_t>(msg->data[1]);
     //}
     //else remove the if clause below at some point
-    if (rc != 0)
+    if (rc != 0 || msg->data[1])
     {
+        // Use rc if non-zero, msg data[1] otherwise.
+        uint64_t l_rc = (rc) ? rc : msg->data[1];
 
-        TRACFCOMP(g_trac_pnor,ERR_MRK"PNOR::loadSecureSection> Error from msg_sendrecv rc=%d",
-                  rc );
+        TRACFCOMP(g_trac_pnor,ERR_MRK"PNOR::loadSecureSection> Error from msg_sendrecv or msg->data[1] rc=0x%X",
+                  l_rc );
         /* @errorlog
          * @severity          ERRL_SEV_CRITICAL_SYS_TERM
          * @moduleid          MOD_PNORRP_LOADSECURESECTION
          * @reasoncode        RC_EXTERNAL_ERROR
-         * @userdata1         returncode from msg_sendrecv()
+         * @userdata1         returncode from msg_sendrecv() or msg->data[1]
          * @userdata2[0:31]   SPNOR message type [LOAD | UNLOAD]
          * @userdata2[32:63]  Section ID
          * @devdesc           Could not load/unload section.
@@ -738,14 +754,14 @@ errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
                          ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                          MOD_PNORRP_LOADSECURESECTION,
                          RC_EXTERNAL_ERROR,
-                         rc,
+                         l_rc,
                          TWO_UINT32_TO_UINT64(PNOR::MSG_LOAD_SECTION,
                                               i_section),
                          true /* Add HB Software Callout */);
         err->collectTrace(PNOR_COMP_NAME);
+        err->collectTrace(SECURE_COMP_NAME);
     }
     msg_free(msg);
-
     return err;
 }
 
@@ -779,9 +795,9 @@ errlHndl_t SPnorRP::miscSectionVerification(const uint8_t *i_vaddr,
             l_errl = baseExtVersCheck((i_vaddr + PAGESIZE));
             break;
         case SBKT:
-            // Ensure the SBKT partition has a valid key transition container
-            // Add PAGESIZE to skip outer container
-            l_errl = keyTransitionCheck((i_vaddr + PAGESIZE));
+            // Ensure the outer container of the SBKT partition has a valid key
+            // transition container
+            l_errl = keyTransitionCheck((i_vaddr));
             break;
         default:
             break;
@@ -806,7 +822,6 @@ errlHndl_t SPnorRP::baseExtVersCheck(const uint8_t *i_vaddr) const
 
     // Calculate hash of HBB's sw signatures
     SHA512_t l_hashSwSigs = {0};
-
     SECUREBOOT::hashBlob(l_hbbContainerHeader.sw_sigs(),
                          l_hbbContainerHeader.totalSwKeysSize(),
                          l_hashSwSigs);
@@ -864,8 +879,8 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
 
     do {
     // Check if the header flags have the key transition bit set
-    SECUREBOOT::ContainerHeader l_nestedConHdr(i_vaddr);
-    if (!l_nestedConHdr.sb_flags()->hw_key_transition)
+    SECUREBOOT::ContainerHeader l_outerConHdr(i_vaddr);
+    if (!l_outerConHdr.sb_flags()->hw_key_transition)
     {
         TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::keyTransitionCheck() - Key transition flag not set");
         /*@
@@ -875,7 +890,7 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
          * @reasoncode      RC_KEY_TRAN_FLAG_UNSET
          * @userdata1       0
          * @userdata2       0
-         * @devdesc         Key transition flag not set in nested SBKT container containing new hw keys
+         * @devdesc         Key transition flag not set in outer SBKT container containing new hw keys
          * @custdesc        Secureboot key transition failure
          */
          l_errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
@@ -889,17 +904,16 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
         break;
     }
 
-// TODO securebootp9 - remove the following #if 0 and address issues
-#if 1
     // Validate nested container is properly signed using new hw keys
-    l_errl = SECUREBOOT::verifyContainer(const_cast<uint8_t*>(i_vaddr),
+    uint8_t * l_nestedVaddr = const_cast<uint8_t*>(i_vaddr) + PAGESIZE;
+    SECUREBOOT::ContainerHeader l_nestedConHdr(l_nestedVaddr);
+    l_errl = SECUREBOOT::verifyContainer(l_nestedVaddr,
                                          l_nestedConHdr.hwKeyHash());
     if (l_errl)
     {
         TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::keyTransitionCheck() - failed verifyContainer");
         break;
     }
-#endif
     }while(0);
 
     return l_errl;

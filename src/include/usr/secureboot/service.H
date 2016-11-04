@@ -104,10 +104,15 @@ namespace SECUREBOOT
     /**
      * @brief Common secureboot handler for secureboot failures.
      *        Properly handles callouts etc.
-     *
-     * @return i_err   - Error log to cascade through failure path.
+     * @param[in/out] io_err Reference to error log handle.  Caller's handle
+     *     will be nullified.  Handle must not be NULL, or function asserts.
+     * @param[in] i_waitForShutdown Whether to wait for system to shutdown (and
+     *     never return from this call) or not (and return from this call).
+     *     In general, code should wait for shutdown unless early in boot before
+     *     basic services are up, or in a resource provider path.
      */
-    void handleSecurebootFailure(errlHndl_t &i_err);
+    void handleSecurebootFailure(
+        errlHndl_t &io_err, bool i_waitForShutdown = true);
 
 }
 

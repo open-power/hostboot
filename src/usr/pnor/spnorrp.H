@@ -121,8 +121,11 @@ class SPnorRP
 
     /**
      * @brief Load secure sections into temporary address space and verify them
+     * @param[in]  i_secId - PNOR section id to verify
+     * @param[in]  o_rec - Load record to store section information in
+     * @return  uint64_t - Return code to pass back to message handler
      */
-    void verifySections(LoadRecord* o_rec, PNOR::SectionId i_id);
+    uint64_t verifySections(PNOR::SectionId i_id, LoadRecord* o_rec);
 
     /**
      * @brief  Message receiver for secure space
@@ -178,10 +181,7 @@ class SPnorRP
     /**
      * @brief  Check if SBKT is properly formatted to then provide the new HW
      *         key hash to transition the system to.
-     * @param[in]  i_vaddr - vaddr points to start SBKT's nested container
-     *                       NOTE: Since this expects the vaddr to point to the
-     *                       start of the nested container, the outer secureboot
-     *                       header must be skipped prior by the caller.
+     * @param[in]  i_vaddr - vaddr points to start of the SBKT container
      *                       NULL will assert
      * @return  errlHndl_t - NULL if success, errlHndl_t otherwise.
      */
