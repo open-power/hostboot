@@ -40,6 +40,14 @@ namespace Util
         UTIL_LIDMGR_RT          = 0x06,
         UTIL_LIDMGR_CLEANUP     = 0x07,       // UtilLidMgr::cleanup
         UTIL_RT_CMDS            = 0x08,       // rt_cmds.C
+        UTIL_TCE_INIT_HDW       = 0x09,       // UtilTceMgr::initTceInHdw
+        UTIL_TCE_ALLOCATE       = 0x0A,       // UtilTceMgr::allocateTces
+        UTIL_TCE_DEALLOCATE     = 0x0B,       // UtilTceMgr::deallocateTces
+        UTIL_TCE_CREATE_TABLE   = 0x0C,       // UtilTceMgr::createTceTable
+        UTIL_TCE_DISABLE_TCES   = 0x0D,       // Util::UTIL_TCE_DISABLE_TCES
+        UTIL_TCE_MAP_PSIHB      = 0x0E,       // UtilTceMgr::mapPsiHostBridge
+        UTIL_TCE_UNMAP_PSIHB    = 0x0F,       // UtilTceMgr::unmapPsiHostBridge
+
     };
 
     enum ReasonCode
@@ -55,6 +63,17 @@ namespace Util
         UTIL_LIDMGR_UNLOAD_RC_FAIL   = UTIL_COMP_ID | 0x09,
         UTIL_LIDMGR_NOT_FOUND        = UTIL_COMP_ID | 0x0A,
         UTIL_LIDMGR_MM_FAIL          = UTIL_COMP_ID | 0x0B,
+        UTIL_TCE_INVALID_SIZE        = UTIL_COMP_ID | 0x0C,
+        UTIL_TCE_ADDR_NOT_ALIGNED    = UTIL_COMP_ID | 0x0D,
+        UTIL_TCE_DEV_MAP_FAIL        = UTIL_COMP_ID | 0x0E,
+        UTIL_TCE_DEV_UNMAP_FAIL      = UTIL_COMP_ID | 0x0F,
+        UTIL_TCE_NOT_ENOUGH_FREE_ENTRIES = UTIL_COMP_ID | 0x10,
+        UTIL_TCE_ENTRY_NOT_CONTIGUOUS    = UTIL_COMP_ID | 0x11,
+        UTIL_TCE_PREVIOUSLY_ALLOCATED    = UTIL_COMP_ID | 0x12,
+        UTIL_TCE_INVALID_COUNT       = UTIL_COMP_ID | 0x13,
+        UTIL_TCE_ALLOC_BLOCK_FAIL    = UTIL_COMP_ID | 0x14,
+        UTIL_TCE_BLOCK_UNMAP_FAIL    = UTIL_COMP_ID | 0x15,
+
     };
 };
 

@@ -228,10 +228,11 @@ enum BlockPriority
 #define DUMP_TEST_MEMORY_ADDR (MPIPL_ATTR_DATA_ADDR + MPIPL_ATTR_DATA_SIZE)
 #define DUMP_TEST_MEMORY_SIZE  (4*MEGABYTE)
 
-/** Location of the TCE Table */
-#define TCE_TABLE_ADDR  (90*MEGABYTE)
+/** Physical memory location of the TCE Table */
+/** - needs to be aligned on 4MB boundary     */
+#define TCE_TABLE_ADDR  (88*MEGABYTE)
 
-// The size if 512K bytes of entries each uint64_t or 8 bytes in size.
+/** The TCE Table size is 512K entries each uint64_t (8 bytes) in size */
 #define TCE_TABLE_SIZE  ((512*KILOBYTE)*sizeof(uint64_t))
 
 #endif /* _VMMCONST_H */

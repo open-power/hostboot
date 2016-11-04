@@ -264,29 +264,6 @@ namespace INTR
                 };
             };
 
-            //Derived from 15.8 PSIHB Software Interfaces of the
-            //  P9 Pervasive Workbook
-            struct PSIHB_SW_INTERFACES_t
-            {
-                uint64_t psihbbar; //Host Bridge Base Address Register    - 0x0
-                uint64_t fspbar;   //FSP Base Address Register            - 0x8
-                uint64_t fspmmr;   //FSP Memory Mask Register             - 0x10
-                uint64_t reserved1; //Unused / Reserved
-                uint64_t psihbcr;  //PSI Host Bridge Ctrl/Status Register - 0x20
-                uint64_t psisemr;  //PSIHB Status / Error Mask Register   - 0x28
-                uint64_t reserved2; //Unused / Reserved
-                uint64_t phbdsr;   //PSIHB Debug Setting register         - 0x38
-                uint64_t phbscr;   //PSI Host Bridge Ctrl/Status Register - 0x40
-                uint64_t phbccr;   //PSI Host Bridge clear ctl/status reg - 0x48
-                uint64_t dmaupaddr; //DMA Upper Address Register          - 0x50
-                uint64_t icr;      //Interrupt Control Register           - 0x58
-                uint64_t esbciaddr; //ESB CI Base Address                 - 0x60
-                uint64_t esbnotifyaddr; //ESB Notification Address        - 0x68
-                uint64_t ivtofforig; //IVT Offset Origin Register         - 0x70
-                uint64_t lsiintlevel; //LSI Int Level Register (lab use)  - 0x78
-                uint64_t lsiintstatus; //LSI Interrupt Status register    - 0x80
-            };
-
             //Found in the PC Register Specification Document
             struct XIVE_IC_THREAD_CONTEXT_t
             {

@@ -2099,9 +2099,11 @@ errlHndl_t  IStepDispatcher::handleCoalesceHostMsg()
 {
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::handleCoalesceHostMsg");
 
-    // Ensure the library is loaded
-    errlHndl_t err = VFS::module_load("libestablish_system_smp.so");
 
+    // Ensure the library is loaded
+    //@TODO RTC:164474
+    //errlHndl_t err = VFS::module_load("libestablish_system_smp.so");
+    errlHndl_t err = NULL;
     if (err)
     {
         TRACFCOMP(g_trac_initsvc, "handleCoalesceHostMsg: Error loading module, PLID = 0x%x",
@@ -2109,7 +2111,7 @@ errlHndl_t  IStepDispatcher::handleCoalesceHostMsg()
     }
     else
     {
-        //@TODO RTC:133831
+        //@TODO RTC:164474
         //err = ESTABLISH_SYSTEM_SMP::call_host_coalesce_host();
         if (err)
         {

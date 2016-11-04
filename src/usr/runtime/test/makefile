@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -27,7 +27,6 @@ ROOTPATH = ../../../..
 MODULE = testruntime
 #@TODO RTC 132750
 #TESTS += hdatservicetest.H
-#TESTS += tcetest.H
 TESTS += test_customize_attrs_for_payload.H
 
 # The testcase depends on the following file, but it is typically only compiled
