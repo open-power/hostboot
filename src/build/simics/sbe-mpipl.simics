@@ -1,0 +1,73 @@
+
+#come down
+sbe-istep 90 1 #change state from RT -> MPIPL
+sbe-istep 90 2 #p9_block_wakeup_intr
+sbe-istep 90 3 #p9_query_core_access_state
+sbe-istep 90 4 #istepMpiplRstClrTpmBits
+#sbe-istep 90 5 #p9_sbe_check_quiesce  (currently has a bug 11/4/2016)
+sbe-istep 90 6 #p9_l2_flush
+sbe-istep 90 7 #p9_l3_flush
+sbe-istep 90 8 #p9_sbe_sequence_drtm
+
+#bringup
+sbe-istep 91 1 #istepMpiplSetFunctionalState (I think)
+sbe-istep 91 2 #p9_quad_power_off (I think)
+sbe-istep 91 3 #istepMpiplSetMPIPLMode (I think)
+#sbe-istep 91 4 #deprecated (I think)
+
+
+#regular
+sbe-istep 4 1
+sbe-istep 4 2
+sbe-istep 4 3
+sbe-istep 4 4
+sbe-istep 4 5
+sbe-istep 4 6
+sbe-istep 4 7
+sbe-istep 4 8
+sbe-istep 4 9
+sbe-istep 4 10
+sbe-istep 4 11
+sbe-istep 4 12
+sbe-istep 4 13
+sbe-istep 4 14
+sbe-istep 4 15
+sbe-istep 4 16
+sbe-istep 4 17
+sbe-istep 4 18
+sbe-istep 4 19
+sbe-istep 4 20
+sbe-istep 4 21
+sbe-istep 4 22
+sbe-istep 4 23
+sbe-istep 4 24
+sbe-istep 4 25
+sbe-istep 4 26
+sbe-istep 4 27
+sbe-istep 4 28
+sbe-istep 4 29
+sbe-istep 4 30
+sbe-istep 4 31
+sbe-istep 4 32
+sbe-istep 4 33
+sbe-istep 4 34
+sbe-istep 5 1
+sbe-istep 5 2
+
+#####################
+# Useful commands
+#####################
+#set istep mode Off
+#($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x5003A "20000000_00000000" 64
+
+#set IAR to bootloader address
+#($hb_cpu).write-reg IAR 0x3000
+
+#trigger core reset
+#($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x05000004 "10000000_00000000" 64
+
+#set PPM General Power Management Mode Register to 0
+#($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x200f0100 "0x00000000_00000000" 64
+
+#set actual/required stop states on PPM STOP_STATE_HIST_OTR_REG
+#($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x200f0113 "0x2B000000_00000000" 64
