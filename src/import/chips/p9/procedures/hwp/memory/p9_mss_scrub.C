@@ -58,9 +58,6 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
 {
     FAPI_INF("Start mss scrub");
 
-    // If we're running in the simulator, we want to only touch the addresses which training touched
-    uint8_t is_sim = 0;
-
     // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
     // attributes for the PHY, etc.
     if (mss::count_dimm(i_target) == 0)
@@ -68,6 +65,24 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
         FAPI_INF("... skipping scrub for %s - no DIMM ...", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
+
+    // If we're running in the simulator, we want to only touch the addresses which training touched
+    uint8_t is_sim = 0;
+    bool l_poll_results = false;
+    fapi2::buffer<uint64_t> l_status;
+
+    // A small vector of addresses to poll during the polling loop
+    static const std::vector<mss::poll_probe<fapi2::TARGET_TYPE_MCBIST>> l_probes =
+    {
+        {i_target, "mcbist current address", MCBIST_MCBMCATQ},
+    };
+
+    // We'll fill in the initial delay below
+    mss::poll_parameters l_poll_parameters(0, 200, 10 * mss::DELAY_1MS, 200, 500);
+    uint64_t l_memory_size = 0;
+
+    FAPI_TRY( mss::eff_memory_size(i_target, l_memory_size) );
+    l_poll_parameters.iv_initial_delay = mss::calculate_initial_delay(i_target, (l_memory_size * mss::BYTES_PER_GB));
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
 
@@ -81,11 +96,25 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     }
 
     // In Cronus on hardware (which is how we got here - f/w doesn't call this) we want
-    // to call sf_init (0's) and then a sf_read.
+    // to call sf_init (0's)
     // TK we need to check FIR given the way this is right now, we should adjust with better stop
     // conditions when we learn more about what we want to find in the lab
     FAPI_TRY( memdiags::sf_init(i_target, mss::mcbist::PATTERN_0) );
-    return memdiags::sf_read(i_target, mss::mcbist::stop_conditions(), mss::mcbist::end_boundary::STOP_AFTER_ADDRESS);
+
+    // Poll for completion.
+    l_poll_results = mss::poll(i_target, MCBIST_MCBISTFIRQ, l_poll_parameters,
+                               [&l_status](const size_t poll_remaining,
+                                           const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_DBG("mcbist firq 0x%llx, remaining: %d", stat_reg, poll_remaining);
+        l_status = stat_reg;
+        return l_status.getBit<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>() == true;
+    },
+    l_probes);
+
+    FAPI_ASSERT( l_poll_results == true,
+                 fapi2::MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT().set_TARGET(i_target),
+                 "p9_mss_scrub (init) timedout %s", mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
