@@ -51,6 +51,20 @@ enum size_of_attrs : size_t
     SIZE_OF_THERMAL_ATTR = 10,
 };
 
+enum default_power
+{
+    //Values are the worst case defaults for power curves
+    //They are the default/ catch-all values from the power curve attributes
+    //Shouldn't be used if system is set up correctly and attributes are available
+    //This will throttle the DIMMs to ~76% dram data bus utilization
+    //(using the mrw regulator power limit of 1700 cW and thermal power limit here of 1940 cW).
+    VDDR_SLOPE = 0x41A,
+    VDDR_INT = 0x384,
+    TOTAL_SLOPE = 0x44C,
+    TOTAL_INT = 0x44C,
+    THERMAL_LIMIT = 0x794,
+};
+
 //Currently needs to be in sorted order for lookup to work
 static const std::vector< std::pair<uint32_t , uint8_t> > DIMM_SIZE_MAP =
 {
