@@ -164,19 +164,10 @@ void* host_discover_targets( void *io_pArgs )
     if (l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "host_discover_targets: MPIPL mode");
+                  "host_discover_targets: MPIPL mode, targeting"
+                  "information has already been loaded from memory"
+                  "when the targeting service started");
 
-        if(INITSERVICE::spBaseServicesEnabled())
-        {
-            // Sync attributes from Fsp
-            l_err = TARGETING::syncAllAttributesFromFsp();
-        }
-        else
-        {
-            //TODO RTC:157651 we need this to be reading from the FSP
-            // For now just discover targets the normal way
-            l_err = HWAS::discoverTargets();
-        }
     }
     else
     {

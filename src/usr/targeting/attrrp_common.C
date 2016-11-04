@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,10 +59,10 @@ namespace TARGETING
         TARG_ASSERT(false, "Assert to exit ~AttrRP");
     }
 
-    void AttrRP::init(errlHndl_t &io_taskRetErrl)
+    void AttrRP::init(errlHndl_t &io_taskRetErrl, bool i_isMpipl)
     {
         // Call startup on singleton instance.
-        Singleton<AttrRP>::instance().startup(io_taskRetErrl);
+        Singleton<AttrRP>::instance().startup(io_taskRetErrl, i_isMpipl);
     }
 
     bool AttrRP::writeSectionData(

@@ -66,12 +66,13 @@ namespace TARGETING
         return NULL;
     }
 
-    void AttrRP::startup(errlHndl_t& io_taskRetErrl)
+    void AttrRP::startup(errlHndl_t& io_taskRetErrl, bool i_isMpipl)
     {
         errlHndl_t l_errl = NULL;
 
         do
         {
+            iv_isMpipl = i_isMpipl;
             // Parse PNOR headers.
             l_errl = this->parseAttrSectHeader();
             if (l_errl)
@@ -217,8 +218,8 @@ namespace TARGETING
             if (rc != 0)
             {
                 /*@
-                 *   @errortype
-                 *   @moduleid          TARG_MOD_ATTRRP
+                 *   @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 *   @moduleid          TARG_MSG_SERVICE_TASK
                  *   @reasoncode        TARG_RC_ATTR_MSG_FAIL
                  *   @userdata1         Virtual Address
                  *   @userdata2         (Msg Type << 32) | Section #
@@ -229,10 +230,13 @@ namespace TARGETING
                  *              address outside a valid range or a message
                  *              request that is invalid for the attribute
                  *              section containing the address.
+                 *
+                 *   @custdesc  Attribute Resource Provider failed to handle
+                 *              request
                  */
                 const bool hbSwError = true;
                 errlHndl_t l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                                  TARG_MOD_ATTRRP,
+                                                  TARG_MSG_SERVICE_TASK,
                                                   TARG_RC_ATTR_MSG_FAIL,
                                                   vAddr,
                                                   TWO_UINT32_TO_UINT64(
@@ -261,13 +265,58 @@ namespace TARGETING
         {
             // Locate attribute section in PNOR.
             PNOR::SectionInfo_t l_pnorSectionInfo;
+            TargetingHeader* l_header = nullptr;
             l_errl = PNOR::getSectionInfo(PNOR::HB_DATA,
                                           l_pnorSectionInfo);
             if (l_errl) break;
-
-            // Find attribute section header.
-            TargetingHeader* l_header =
+            if(!iv_isMpipl)
+            {
+                // Find attribute section header.
+                l_header =
                 reinterpret_cast<TargetingHeader*>(l_pnorSectionInfo.vaddr);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_targeting,
+                           "Reading attributes from memory, NOT PNOR");
+                //Create a block map of the address space we used to store
+                //attribute information on the initial IPL
+                l_header = reinterpret_cast<TargetingHeader*>(
+                mm_block_map(reinterpret_cast<void*>(MPIPL_ATTR_DATA_ADDR),
+                             MPIPL_ATTR_VMM_SIZE));
+                if(l_header == 0)
+                {
+                    TRACFCOMP(g_trac_targeting,
+                              "Failed mapping phys addr: %p for %lx bytes",
+                              MPIPL_ATTR_DATA_ADDR,
+                              MPIPL_ATTR_VMM_SIZE);
+                    //Error mm_block_map returned invalid ptr
+                    /*@
+                    *   @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                    *   @moduleid          TARG_PARSE_ATTR_SECT_HEADER
+                    *   @reasoncode        TARG_RC_MM_BLOCK_MAP_FAIL
+                    *   @userdata1         physical address of target info
+                    *   @userdata2         size we tried to map
+                    *
+                    *   @devdesc   While attempting to map a phys addr to a virtual
+                    *              addr for our targeting information the kernel
+                    *              returned an error
+                    *   @custdesc  Kernel failed to block map memory
+                    */
+                    l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                           TARG_PARSE_ATTR_SECT_HEADER,
+                                           TARG_RC_MM_BLOCK_FAIL,
+                                           MPIPL_ATTR_DATA_ADDR,
+                                           MPIPL_ATTR_VMM_SIZE,
+                                           true);
+                    break;
+                }
+                TRACFCOMP(g_trac_targeting,
+                          "Mapped phys addr: %p to virt addr: %p",
+                          reinterpret_cast<void*>(MPIPL_ATTR_DATA_ADDR),
+                          l_header);
+            }
+
 
             // Validate eye catch.
             if (l_header->eyeCatcher != PNOR_TARG_EYE_CATCHER)
@@ -278,8 +327,8 @@ namespace TARGETING
                           l_header->eyeCatcher,
                           PNOR_TARG_EYE_CATCHER);
                 /*@
-                 *   @errortype
-                 *   @moduleid          TARG_MOD_ATTRRP
+                 *   @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 *   @moduleid          TARG_PARSE_ATTR_SECT_HEADER
                  *   @reasoncode        TARG_RC_BAD_EYECATCH
                  *   @userdata1         Observed Header Eyecatch Value
                  *   @userdata2         Expected Eyecatch Value
@@ -297,7 +346,7 @@ namespace TARGETING
                  *              to be parsed.
                 */
                 l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                       TARG_MOD_ATTRRP,
+                                       TARG_PARSE_ATTR_SECT_HEADER,
                                        TARG_RC_BAD_EYECATCH,
                                        l_header->eyeCatcher,
                                        PNOR_TARG_EYE_CATCHER);
@@ -308,13 +357,28 @@ namespace TARGETING
             iv_sectionCount = l_header->numSections;
             iv_sections = new AttrRP_Section[iv_sectionCount];
 
-            // Find start to first section:
-            //          (PNOR addr + size of header + offset in header).
-            TargetingSection* l_section =
+            TargetingSection* l_section = nullptr;
+            if(!iv_isMpipl)
+            {
+                // Find start to first section:
+                //          (PNOR addr + size of header + offset in header).
+                l_section =
+                        reinterpret_cast<TargetingSection*>(
+                                l_pnorSectionInfo.vaddr + sizeof(TargetingHeader) +
+                                l_header->offsetToSections
+                        );
+            }
+            else
+            {
+                // Find start to first section:
+                // (header address + size of header + offset in header)
+                l_section =
                     reinterpret_cast<TargetingSection*>(
-                            l_pnorSectionInfo.vaddr + sizeof(TargetingHeader) +
-                            l_header->offsetToSections
-                    );
+                        reinterpret_cast<uint64_t>(l_header) +
+                        sizeof(TargetingHeader) + l_header->offsetToSections
+                        );
+
+            }
 
             // Parse each section.
             for (size_t i = 0; i < iv_sectionCount; i++, ++l_section)
@@ -329,8 +393,16 @@ namespace TARGETING
                         static_cast<uint64_t>(
                             TARG_TO_PLAT_PTR(l_header->vmmBaseAddress)) +
                         l_header->vmmSectionOffset*i;
-                iv_sections[i].pnorAddress = l_pnorSectionInfo.vaddr +
-                                             l_section->sectionOffset;
+                if(!iv_isMpipl)
+                {
+                    iv_sections[i].pnorAddress = l_pnorSectionInfo.vaddr + l_section->sectionOffset;
+                }
+                else
+                {
+                    //For MPIPL we are reading from real memory, not pnor flash. Set the real memory address
+                    //in place of the pnor address because that is where we are reading the data from
+                    iv_sections[i].pnorAddress = reinterpret_cast<uint64_t>(l_header) + l_section->sectionOffset;
+                }
                 iv_sections[i].size = l_section->sectionSize;
 
                 TRACFCOMP(g_trac_targeting,
@@ -383,16 +455,17 @@ namespace TARGETING
                     default:
 
                         /*@
-                         *   @errortype
-                         *   @moduleid   TARG_MOD_ATTRRP
+                         *   @errortype  ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                         *   @moduleid   TARG_CREATE_VMM_SECTIONS
                          *   @reasoncode TARG_RC_UNHANDLED_ATTR_SEC_TYPE
                          *   @userdata1  Section type
                          *
                          *   @devdesc    Found unhandled attribute section type
+                         *   @custdesc   FW error, unexpected Attribute section type
                          */
                         const bool hbSwError = true;
                         l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                               TARG_MOD_ATTRRP,
+                                               TARG_CREATE_VMM_SECTIONS,
                                                TARG_RC_UNHANDLED_ATTR_SEC_TYPE,
                                                iv_sections[i].type,
                                                0, hbSwError);
@@ -420,8 +493,8 @@ namespace TARGETING
                 if (rc)
                 {
                     /*@
-                     *   @errortype
-                     *   @moduleid          TARG_MOD_ATTRRP
+                     *   @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                     *   @moduleid          TARG_CREATE_VMM_SECTIONS
                      *   @reasoncode        TARG_RC_MM_BLOCK_FAIL
                      *   @userdata1         vAddress attempting to allocate.
                      *   @userdata2         RC from kernel.
@@ -429,10 +502,11 @@ namespace TARGETING
                      *   @devdesc   While attempting to allocate a virtual
                      *              memory block for an attribute section, the
                      *              kernel returned an error.
+                     *   @custdesc  Kernel failed to block memory
                      */
                     const bool hbSwError = true;
                     l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                           TARG_MOD_ATTRRP,
+                                           TARG_CREATE_VMM_SECTIONS,
                                            TARG_RC_MM_BLOCK_FAIL,
                                            iv_sections[i].vmmAddress,
                                            rc, hbSwError);
@@ -441,6 +515,8 @@ namespace TARGETING
 
                 if(iv_sections[i].type == SECTION_TYPE_PNOR_RW)
                 {
+                    // TODO RTC:164480 For MPIPL we need to map the RW section
+                    // in real memory to virtual address of the section in PNOR
                     /*
                      * Register this memory range to be FLUSHed during
                      * a shutdown.
@@ -458,8 +534,8 @@ namespace TARGETING
                 if (rc)
                 {
                     /*@
-                     *   @errortype
-                     *   @moduleid          TARG_MOD_ATTRRP
+                     *   @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                     *   @moduleid          TARG_CREATE_VMM_SECTIONS
                      *   @reasoncode        TARG_RC_MM_PERM_FAIL
                      *   @userdata1         vAddress attempting to allocate.
                      *   @userdata2         (kernel-rc << 32) | (Permissions)
@@ -467,10 +543,13 @@ namespace TARGETING
                      *   @devdesc   While attempting to set permissions on
                      *              a virtual memory block for an attribute
                      *              section, the kernel returned an error.
+                     *
+                     *   @custdesc  Kernel failed to set permissions on
+                     *              virtual memory block
                      */
                     const bool hbSwError = true;
                     l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                           TARG_MOD_ATTRRP,
+                                           TARG_CREATE_VMM_SECTIONS,
                                            TARG_RC_MM_PERM_FAIL,
                                            iv_sections[i].vmmAddress,
                                            TWO_UINT32_TO_UINT64(rc, l_perm),
@@ -478,6 +557,16 @@ namespace TARGETING
                     break;
                 }
 
+                // The volatile sections in MPIPL need to be copied because
+                // on the MPIPL flow we will not run the HWPs that set these attrs
+                if(((iv_sections[i].type == SECTION_TYPE_HEAP_ZERO_INIT) ||
+                    (iv_sections[i].type == SECTION_TYPE_HB_HEAP_ZERO_INIT)) &&
+                    iv_isMpipl)
+                {
+                    memcpy(reinterpret_cast<void*>(iv_sections[i].vmmAddress),
+                        reinterpret_cast<void*>(iv_sections[i].pnorAddress),
+                        (iv_sections[i].size));
+                }
             } // End iteration through each section
 
             if(l_errl)

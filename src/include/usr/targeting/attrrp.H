@@ -155,7 +155,7 @@ class AttrRP
          *        reported back through the TaskArgs structure to the init
          *        service.
          */
-        static void init(errlHndl_t& io_taskRetErrl);
+        static void init(errlHndl_t& io_taskRetErrl, bool i_isMpipl = false);
 
 #ifndef __HOSTBOOT_RUNTIME
         /**
@@ -193,9 +193,9 @@ class AttrRP
          */
         AttrRP()
 #ifndef __HOSTBOOT_RUNTIME
-            : iv_msgQ(NULL), iv_sections(NULL), iv_sectionCount(0)
+            : iv_msgQ(NULL), iv_sections(NULL), iv_sectionCount(0), iv_isMpipl(false)
 #else
-            : iv_sections(NULL), iv_sectionCount(0)
+            : iv_sections(NULL), iv_sectionCount(0), iv_isMpipl(false)
 #endif
         {
         };
@@ -258,7 +258,7 @@ class AttrRP
          *      output, a NULL error log handle on success, or !NULL handle
          *      on failure
          */
-        void startup(errlHndl_t& io_taskRetErrl);
+        void startup(errlHndl_t& io_taskRetErrl,  bool i_isMpipl = false);
 
 #ifndef __HOSTBOOT_RUNTIME
 
@@ -323,6 +323,8 @@ class AttrRP
 
         // Count of attribute sections.
         size_t iv_sectionCount;
+
+        bool iv_isMpipl;
 };
 
 /**

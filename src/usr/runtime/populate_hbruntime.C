@@ -47,7 +47,8 @@
 #include <sys/internode.h>
 #include <vpd/vpd_if.H>
 #include <targeting/attrrp.H>
-
+#include <sys/mm.h>
+#include <util/align.H>
 
 namespace RUNTIME
 {
@@ -151,6 +152,69 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId)
         // Get ATTRIBUTE data
         TARGETING::AttrRP::save(l_hbrtDataAddr);
 
+        //Create a block map of memory so we can save a copy of the attribute
+        //data incase we need to MPIPL
+        uint64_t l_attrCopyVmemAddr =
+        reinterpret_cast<uint64_t>(mm_block_map(
+            reinterpret_cast<void*>(MPIPL_ATTR_DATA_ADDR),
+            MPIPL_ATTR_VMM_SIZE ));
+
+        //Make sure the address returned from the block map call is not NULL
+        if(l_attrCopyVmemAddr != 0)
+        {
+            //Save the memory map
+            TARGETING::AttrRP::save(l_attrCopyVmemAddr);
+
+            //Make sure to the virtual address because we won't need it anymore
+            int l_rc = mm_block_unmap(reinterpret_cast<void*>(l_attrCopyVmemAddr));
+
+            if(l_rc)
+            {
+                TRACFCOMP( g_trac_runtime,
+                           "populate_RtDataByNode fail to unmap physical addr %p, virt addr %p",
+                           reinterpret_cast<void*>(MPIPL_ATTR_DATA_ADDR),
+                           reinterpret_cast<void*>(l_attrCopyVmemAddr));
+                /*@ errorlog tag
+                * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                * @moduleid        RUNTIME::MOD_POPULATE_RTDATABYNODE
+                * @reasoncode      RUNTIME::RC_UNMAP_FAIL
+                * @userdata1       Phys address we are trying to unmap
+                * @userdata2       Virtual address we are trying to unmap
+                *
+                * @devdesc         Error unmapping a virtual memory map
+                * @custdesc        Kernel failed to unmap memory
+                */
+                l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       RUNTIME::MOD_POPULATE_RTDATABYNODE,
+                                       RUNTIME::RC_UNMAP_FAIL,
+                                       MPIPL_ATTR_DATA_ADDR,
+                                       l_attrCopyVmemAddr,
+                                       true);
+            }
+        }
+        else
+        {
+            TRACFCOMP( g_trac_runtime,
+                       "populate_RtDataByNode fail to map  physical addr %p, size %lx",
+                       reinterpret_cast<void*>(MPIPL_ATTR_DATA_ADDR),
+                       MPIPL_ATTR_VMM_SIZE );
+            /*@ errorlog tag
+            * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @moduleid        RUNTIME::MOD_POPULATE_RTDATABYNODE
+            * @reasoncode      RUNTIME::RC_CANNOT_MAP_MEMORY
+            * @userdata1       Phys address we are trying to unmap
+            * @userdata2       Size of memory we are trying to map
+            *
+            * @devdesc         Error unmapping a virtual memory map
+            * @custdesc        Kernel failed to map memory
+            */
+            l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                   RUNTIME::MOD_POPULATE_RTDATABYNODE,
+                                   RUNTIME::RC_CANNOT_MAP_MEMORY,
+                                   MPIPL_ATTR_DATA_ADDR,
+                                   MPIPL_ATTR_VMM_SIZE,
+                                   true);
+        }
     } while(0);
 
 

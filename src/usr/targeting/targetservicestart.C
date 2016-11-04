@@ -78,7 +78,10 @@ namespace TARGETING
 /*
  * @brief Initialize any attributes that need to be set early on
  */
-static void initializeAttributes(TargetService& i_targetService);
+static void initializeAttributes(TargetService& i_targetService,
+                                 bool i_isMpipl,
+                                 bool i_istepMode,
+                                 ATTR_MASTER_MBOX_SCRATCH_type& i_masterScratch);
 
 /**
  *  @brief Check that at least one processor of our cpu type is being targeted
@@ -101,14 +104,41 @@ static void initTargeting(errlHndl_t& io_pError)
 
     TARG_ENTER();
 
-    AttrRP::init(io_pError);
+    //Need to stash away the master mbox regs as they will
+    //be overwritten
+    bool l_isMpipl = false;
+    bool l_isIstepMode = false;
+    ATTR_MASTER_MBOX_SCRATCH_type l_scratch = {0,0,0,0,0,0,0,0};
+
+    for(size_t i=0; i< sizeof(l_scratch)/sizeof(l_scratch[0]); i++)
+    {
+        l_scratch[i] =
+        Util::readScratchReg(MBOX_SCRATCH_REG1+i);
+    }
+
+    // Check mbox scratch reg 3 for IPL boot options
+    // Specifically istep mode (bit 0) and MPIPL (bit 2)
+    INITSERVICE::SPLESS::MboxScratch3_t l_scratch3;
+    l_scratch3.data32 = l_scratch[SCRATCH_3];
+
+    if(l_scratch3.isMpipl)
+    {
+        TARG_INF("We are running MPIPL mode");
+        l_isMpipl = true;
+    }
+    if(l_scratch3.istepMode)
+    {
+        l_isIstepMode = true;
+    }
+
+    AttrRP::init(io_pError, l_isMpipl);
 
     if (io_pError == NULL)
     {
         TargetService& l_targetService = targetService();
         (void)l_targetService.init();
 
-        initializeAttributes(l_targetService);
+        initializeAttributes(l_targetService, l_isMpipl, l_isIstepMode, l_scratch);
         checkProcessorTargeting(l_targetService);
 
         // Print out top-level model value from loaded targeting values.
@@ -209,12 +239,14 @@ static void checkProcessorTargeting(TargetService& i_targetService)
 /*
  * @brief Initialize any attributes that need to be set early on
  */
-static void initializeAttributes(TargetService& i_targetService)
+static void initializeAttributes(TargetService& i_targetService,
+                                 bool i_isMpipl,
+                                 bool i_istepMode,
+                                 ATTR_MASTER_MBOX_SCRATCH_type& i_masterScratch)
 {
     #define TARG_FN "initializeAttributes()...)"
     TARG_ENTER();
 
-    bool l_isMpipl = false;
     Target* l_pTopLevel = NULL;
 
     i_targetService.getTopLevelTarget(l_pTopLevel);
@@ -244,36 +276,17 @@ static void initializeAttributes(TargetService& i_targetService)
             l_pMasterProcChip->setAttr<ATTR_I2C_SWITCHES>(l_i2c_switches);
 
 
-            //Need to stash away the master mbox regs as they will
-            //be overwritten
-            ATTR_MASTER_MBOX_SCRATCH_type l_scratch;
-            for(size_t i=0; i< sizeof(l_scratch)/sizeof(l_scratch[0]); i++)
-            {
-                l_scratch[i] =
-                  Util::readScratchReg(MBOX_SCRATCH_REG1+i);
-            }
-
-            l_pTopLevel->setAttr<ATTR_MASTER_MBOX_SCRATCH>(l_scratch);
-
-            // Check mbox scratch reg 3 for IPL boot options
-            // Specifically istep mode (bit 0) and MPIPL (bit 2)
-            INITSERVICE::SPLESS::MboxScratch3_t l_scratch3;
-            l_scratch3.data32 = l_scratch[SCRATCH_3];
+            l_pTopLevel->setAttr<ATTR_MASTER_MBOX_SCRATCH>(i_masterScratch);
 
             // Targeting data defaults to non istep, only turn "on" if bit
             // is set so we don't tromp default setting
-            if (l_scratch3.istepMode)
+            if (i_istepMode)
             {
                 l_pTopLevel->setAttr<ATTR_ISTEP_MODE>(1);
             }
-
-            if (l_scratch3.isMpipl)
-            {
-                l_isMpipl = true;
-            }
         }
 
-        if(l_isMpipl)
+        if(i_isMpipl)
         {
             l_pTopLevel->setAttr<ATTR_IS_MPIPL_HB>(1);
         }

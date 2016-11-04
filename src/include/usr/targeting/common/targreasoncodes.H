@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,14 +38,15 @@ namespace TARGETING
 
 enum TargetingModuleId
 {
-    TARG_MOD_TEST         = 0x01,
-    TARG_MOD_ATTRRP       = 0x02,
-    TARG_MOD_ATTR_SYNC    = 0x03,
-    TARG_RT_GET_RT_TARGET = 0x04,
-    TARG_RT_GET_HB_TARGET = 0x05,
-    TARG_GET_ATTR_OVER    = 0x06,
-    TARG_WRITE_PERM_ATTR  = 0x07,
-
+    TARG_MOD_TEST               = 0x01,
+    TARG_MOD_ATTR_SYNC          = 0x02,
+    TARG_RT_GET_RT_TARGET       = 0x03,
+    TARG_RT_GET_HB_TARGET       = 0x04,
+    TARG_GET_ATTR_OVER          = 0x05,
+    TARG_WRITE_PERM_ATTR        = 0x06,
+    TARG_PARSE_ATTR_SECT_HEADER = 0x07,
+    TARG_MSG_SERVICE_TASK       = 0x08,
+    TARG_CREATE_VMM_SECTIONS    = 0x09,
 };
 
 enum TargetingReasonCode
@@ -68,6 +69,7 @@ enum TargetingReasonCode
     TARG_RC_WRITE_PERM_ATTR_TARGET_FAIL     = TARG_COMP_ID | 0x10,
     TARG_RC_WRITE_ATTR_OVER_WRONG_PNOR_SEC  = TARG_COMP_ID | 0x11,
     TARG_RC_WRITE_ATTR_OVER_NO_TANK_LAYER   = TARG_COMP_ID | 0x12,
+    TARG_RC_MM_BLOCK_MAP_FAIL               = TARG_COMP_ID | 0x13,
 };
 
 }; // End TARGETING namespace
