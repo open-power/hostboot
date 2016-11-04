@@ -194,9 +194,16 @@ uint32_t clearEccFirs<TYPE_MCBIST>( ExtensibleChip * i_chip )
             ExtensibleChip * mcaChip = getConnectedChild( i_chip, TYPE_MCA, p );
             if ( nullptr == mcaChip ) continue;
 
-            // Clear MCAECCFIR[20:34,36:37,39]
-            o_rc = __clearFir<TYPE_MCA>( mcaChip, "MCAECCFIR_AND",
-                                         0xfffff00012ffffffull );
+            // Maintenance AUEs/IAUEs will be reported as system checkstops.
+            // Maintenance IMPEs will be reported as recoverable attentions at
+            // all times. Maintence IUEs will be reported as recoverable in the
+            // field (doesn't stop-on-error), however, we will want to stop the
+            // command in MNFG mode for more accuracy in the callout. So clear
+            // MCAECCFIR[20:32,34:35,38] always and MCAECCFIR[37] in MNFG
+            // mode only.
+            uint64_t mask          = 0xfffff0004dffffffull;
+            if ( mfgMode() ) mask &= 0xfffffffffbffffffull;
+            o_rc = __clearFir<TYPE_MCA>( mcaChip, "MCAECCFIR_AND", mask );
             if ( SUCCESS != o_rc ) break;
         }
 

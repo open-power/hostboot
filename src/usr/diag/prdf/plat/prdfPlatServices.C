@@ -317,8 +317,10 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
             .set_thresh_nce_hard(1)
             .set_pause_on_mpe(mss::ON)
             .set_pause_on_ue(mss::ON)
-            .set_pause_on_aue(mss::ON)
             .set_nce_hard_symbol_count_enable(mss::ON);
+
+    // In MNFG mode, stop on RCE_ETE to get an accurate callout for IUEs.
+    if ( mfgMode() ) stopCond.set_thresh_rce(1);
 
     // Get the scrub speed.
     mss::mcbist::speed scrubSpeed = enableFastBgScrub() ? mss::mcbist::LUDICROUS
