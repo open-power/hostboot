@@ -173,6 +173,9 @@ const uint32_t VPD_CP00_PG_MCxx_INDEX[4]    = {7, 7, 8, 8}; // by MCS
 // all good - 3:VITAL, 4:PRV, 5:MCA23, 6:IOM45+, 7:IOM67+, 14:PLLMEM
 const uint32_t VPD_CP00_PG_MCxx_GOOD        = 0xE0FD;
 const uint32_t VPD_CP00_PG_MCxx_PG_MASK     = 0x0300;
+// iom0 and iom4 need to be good for zqcal to work on any
+// of the MCAs on that side
+const uint32_t VPD_CP00_PG_MCA_MAGIC_PORT_MASK = 0x0200;
 const uint32_t VPD_CP00_PG_MCxx_IOMyy[4]    = {0x0200, 0x0100, 0x0200, 0x0100};
 
 const uint32_t VPD_CP00_PG_OB0_INDEX        = 9;

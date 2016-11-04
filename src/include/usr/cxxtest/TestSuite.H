@@ -103,6 +103,11 @@ extern uint64_t g_ModulesCompleted;
     CxxTest::doTrace( )
 
 
+// TS_INFO
+#define  TS_INFO(...)  TRACFCOMP( g_trac_test, "TS_INFO> " __VA_ARGS__ );     \
+    CxxTest::doTrace( )
+
+
 // TS_WARN
 #define TS_WARN(...)    TRACFCOMP( g_trac_test, "!TS_WARN> " __VA_ARGS__ );    \
     CxxTest::doWarn( )

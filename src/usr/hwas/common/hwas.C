@@ -704,6 +704,7 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
             i_desc->getAttr<ATTR_CHIP_UNIT>();
         // 2 MCS chiplets per MCBIST / MCU
         size_t indexMCS = indexMCBIST * 2;
+
         // Check MCS01 bit in N3 entry if first MCBIST / MCU
         if ((0 == indexMCBIST) &&
             ((i_pgData[VPD_CP00_PG_N3_INDEX] &
@@ -747,6 +748,21 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                      VPD_CP00_PG_MCxx_GOOD);
             l_descFunctional = false;
         }
+        else
+        // One MCA (the first one = mca0 or mca4) on each MC must be functional
+        // for zqcal to work on any of the MCAs on that side
+        if ( (i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]] &
+                VPD_CP00_PG_MCA_MAGIC_PORT_MASK) != 0 )
+        {
+            HWAS_INF("pDesc %.8X - MCBIST%d pgData[%d]: "
+                     "0x%04X marked bad because of bad magic MCA port (0x%04X)",
+                     i_desc->getAttr<ATTR_HUID>(), indexMCBIST,
+                     VPD_CP00_PG_MCxx_INDEX[indexMCS],
+                     i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]],
+                     VPD_CP00_PG_MCA_MAGIC_PORT_MASK);
+            l_descFunctional = false;
+        }
+
     }
     else
     if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCS)
@@ -799,6 +815,20 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                       ~VPD_CP00_PG_MCxx_IOMyy[indexMCS]));
             l_descFunctional = false;
         }
+        else
+        // One MCA (the first one = mca0 or mca4) on each MC must be functional
+        // for zqcal to work on any of the MCAs on that side
+        if ( (i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]] &
+              VPD_CP00_PG_MCA_MAGIC_PORT_MASK) != 0 )
+        {
+            HWAS_INF("pDesc %.8X - MCS%d pgData[%d]: "
+                     "0x%04X marked bad because of bad magic MCA port (0x%04X)",
+                     i_desc->getAttr<ATTR_HUID>(), indexMCS,
+                     VPD_CP00_PG_MCxx_INDEX[indexMCS],
+                     i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]],
+                     VPD_CP00_PG_MCA_MAGIC_PORT_MASK);
+            l_descFunctional = false;
+        }
     }
     else
     if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCA)
@@ -818,6 +848,20 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                      i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]],
                      (i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]] &
                       ~VPD_CP00_PG_MCxx_IOMyy[indexMCS]));
+            l_descFunctional = false;
+        }
+        else
+        // One MCA (the first one = mca0 or mca4) on each MC must be functional
+        // for zqcal to work on any of the MCAs on that side
+        if ( (i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]] &
+              VPD_CP00_PG_MCA_MAGIC_PORT_MASK) != 0 )
+        {
+            HWAS_INF("pDesc %.8X - MCA%d pgData[%d]: "
+                     "0x%04X marked bad because of bad magic MCA port (0x%04X)",
+                     i_desc->getAttr<ATTR_HUID>(), indexMCA,
+                     VPD_CP00_PG_MCxx_INDEX[indexMCS],
+                     i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]],
+                     VPD_CP00_PG_MCA_MAGIC_PORT_MASK);
             l_descFunctional = false;
         }
     }
