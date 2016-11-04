@@ -1155,14 +1155,14 @@ fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
 
     // 15. Monitor the DDRPHY_PC_DLL_ZCAL_CAL_STATUS register to determine when calibration is
     // complete. One of the 3 bits will be asserted for ADR and DP16.
-    // To keep things simple, we'll poll for the change in one of the bits. Once that's completed, we'll
+    // To keep things simple, we'll poll for the change in one of the ports. Once that's completed, we'll
     // check the others. If any one has failed, or isn't notifying complete, we'll pop out an error
     mss::poll(l_mca[0], l_dll_status_reg, poll_parameters(),
               [&l_status](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
     {
         FAPI_INF("phy control dll/zcal stat 0x%llx, remaining: %d", stat_reg, poll_remaining);
         l_status = stat_reg;
-        return mss::pc::get_dll_cal_status(l_status) == mss::YES;
+        return mss::pc::get_dll_cal_status(l_status) != mss::INVALID;
     });
 
     for (const auto& p : l_mca)
