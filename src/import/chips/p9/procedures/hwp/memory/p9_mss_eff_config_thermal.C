@@ -67,23 +67,45 @@ extern "C"
         std::vector< uint64_t > l_tintercept (mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS, 0);
         std::vector< uint64_t > l_tthermal_power_limit (mss::power_thermal::SIZE_OF_THERMAL_ATTR, 0);
 
-        std::vector<fapi2::buffer< uint64_t>> l_slope (mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS);
-        std::vector<fapi2::buffer< uint64_t>> l_intercept  (mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS);
-        std::vector<fapi2::buffer< uint64_t>> l_thermal_power_limit (mss::power_thermal::SIZE_OF_THERMAL_ATTR);
+        std::vector<fapi2::buffer< uint64_t>> l_slope = {};
+        std::vector<fapi2::buffer< uint64_t>> l_intercept = {};
+        std::vector<fapi2::buffer< uint64_t>> l_thermal_power_limit = {};
 
         FAPI_TRY( mss::mrw_pwr_slope (l_tslope.data() ));
         FAPI_TRY( mss::mrw_pwr_intercept (l_tintercept.data()) );
         FAPI_TRY( mss::mrw_thermal_memory_power_limit (l_tthermal_power_limit.data()) );
-
-        for (size_t i = 0; i < l_slope.size(); ++i)
         {
-            l_slope[i] = fapi2::buffer<uint64_t> (l_tslope[i]);
-            l_intercept[i] = fapi2::buffer<uint64_t>(l_tintercept[i]);
-        }
+            for (auto l_tslope_iter = l_tslope.begin();  l_tslope_iter != l_tslope.end(); ++l_tslope_iter)
+            {
+                auto l_slope_buf = fapi2::buffer<uint64_t> (*l_tslope_iter);
 
-        for (size_t i = 0; i < l_thermal_power_limit.size(); ++i)
-        {
-            l_thermal_power_limit[i] = fapi2::buffer<uint64_t> (l_tthermal_power_limit[i]);
+                if (l_slope_buf != 0)
+                {
+                    l_slope.push_back(l_slope_buf);
+                }
+            }
+
+            for (auto l_tintercept_iter = l_tintercept.begin(); l_tintercept_iter != l_tintercept.end(); ++l_tintercept_iter)
+            {
+                auto l_intercept_buf = fapi2::buffer<uint64_t> (*l_tintercept_iter);
+
+                if (l_intercept_buf != 0)
+                {
+                    l_intercept.push_back(l_intercept_buf);
+                }
+            }
+
+            for (auto l_tthermal_iter = l_tthermal_power_limit.begin();
+                 l_tthermal_iter != l_tthermal_power_limit.end();
+                 ++l_tthermal_iter)
+            {
+                auto l_tthermal_buf = fapi2::buffer<uint64_t> (*l_tthermal_iter);
+
+                if (l_tthermal_buf != 0)
+                {
+                    l_thermal_power_limit.push_back(l_tthermal_buf);
+                }
+            }
         }
 
         //Restore runtime_throttles from safemode setting
