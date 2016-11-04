@@ -64,7 +64,7 @@ void captureFsiStatusReg( ExtensibleChip * i_chip,
                             bs);
     }
 
-    if( TYPE_PROC == i_chip->getTrgtType() )
+    if( TYPE_PROC == i_chip->getType() )
     {
         uint32_t fsiGp7 = 0;
         rc = getCfam( i_chip, 0x2816, fsiGp7 );

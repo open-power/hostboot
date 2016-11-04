@@ -59,7 +59,7 @@ class MemTdCtlr
     explicit MemTdCtlr( ExtensibleChip * i_chip ) :
         iv_chip( i_chip )
     {
-        PRDF_ASSERT( T == iv_chip->getTrgtType() );
+        PRDF_ASSERT( T == iv_chip->getType() );
     }
 
     /**

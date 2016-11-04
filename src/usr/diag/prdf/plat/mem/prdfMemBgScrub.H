@@ -53,7 +53,7 @@ uint32_t startInitialBgScrub( ExtensibleChip * i_chip )
     #define PRDF_FUNC "[startInitialBgScrub] "
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( T == i_chip->getTrgtType() );
+    PRDF_ASSERT( T == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
 
@@ -119,7 +119,7 @@ uint32_t startInitialBgScrub<TARGETING::TYPE_MCBIST>( ExtensibleChip * i_chip )
     using namespace TARGETING;
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCBIST == i_chip->getTrgtType() );
+    PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
 
     // Find the first configured MCA.
     ExtensibleChip * mcaChip = nullptr;

@@ -108,8 +108,8 @@ class TdEntry
     TdEntry( TdType i_tdType, ExtensibleChip * i_chip, MemRank i_rank ) :
         iv_chip(i_chip), iv_tdType(i_tdType), iv_rank(i_rank)
     {
-        PRDF_ASSERT( (TARGETING::TYPE_MCA == iv_chip->getTrgtType()) ||
-                     (TARGETING::TYPE_MBA == iv_chip->getTrgtType())    );
+        PRDF_ASSERT( (TARGETING::TYPE_MCA == iv_chip->getType()) ||
+                     (TARGETING::TYPE_MBA == iv_chip->getType())    );
     }
 
   protected: // instance variables

@@ -204,9 +204,15 @@ class CHIP_CLASS
     }
 
     /** @return The targeting type associated with this chip. */
-    TARGETING::TYPE getTrgtType() const
+    TARGETING::TYPE getType() const
     {
         return PlatServices::getTargetType( iv_pchipHandle );
+    }
+
+    /** @return The targeting position associated with this chip. */
+    uint32_t getPos() const
+    {
+        return PlatServices::getTargetPosition( iv_pchipHandle );
     }
 
   protected:
