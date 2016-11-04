@@ -362,6 +362,29 @@ inline uint64_t max_ck_ns(const fapi2::Target<T>& i_target, const uint64_t i_clo
     return std::max( i_clocks, ns_to_cycles(i_target, i_time) );
 }
 
+///
+/// @brief Return and estimated time an MCBIST subtest will take to complete
+/// Useful for initial polling delays, probably isn't accurate for much else
+/// as it doesn't take refresh in to account (which will necessarily slow down
+/// the program.)
+/// @param[in] i_target the target from which to gather memory frequency
+/// @param[in] i_bytes number of *bytes* in the address range
+/// @param[in] i_64B_per mss::YES if the command is 64B, mss::NO if it's 128B. Defaults to mss::YES
+/// @return the initial polling delay for this program in ns
+///
+template< fapi2::TargetType T >
+inline uint64_t calculate_initial_delay(const fapi2::Target<T>& i_target,
+                                        const uint64_t i_bytes,
+                                        const bool i_64B_per = mss::YES)
+{
+    // TODO RTC: 164104 Update MCBIST delay calculator. As we learn more about what
+    // the lab really needs, we can probably make this function better.
+    const uint64_t l_bytes_per_cmd = (i_64B_per == mss::YES) ? 64 : 128;
+
+    // Best case is a command takes 4 cycles. Given the number of commands and address space size
+    // we can get some idea of how long to wait before we start polling.
+    return cycles_to_ns(i_target, (i_bytes / l_bytes_per_cmd) * mss::CYCLES_PER_CMD);
+}
 
 };// mss namespace
 

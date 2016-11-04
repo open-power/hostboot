@@ -63,7 +63,8 @@ enum sizes
     MAX_DQ_BITS = 72,              /// TODO RTC:157753 This is Nimbus specific. Should be attribute/trait of processor.
 
     BYTES_PER_GB = 1000000000,      ///< Multiplier to go from GB to B
-    T_PER_MT     = 1000000,          ///< Multiplier to go from MT/s to T/s
+    T_PER_MT     = 1000000,         ///< Multiplier to go from MT/s to T/s
+    CYCLES_PER_CMD  = 4,            ///< Best case cycles per MCBIST command
 
     // All need to be attributes? - BRS
     WR_LVL_BIG_STEP = 0b0111,
