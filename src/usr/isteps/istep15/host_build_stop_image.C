@@ -335,10 +335,9 @@ void* host_build_stop_image (void *io_pArgs)
     do  {
         // Get the node-offset for our instance by looking at the HRMOR
         uint64_t l_memBase = cpu_spr_value(CPU_SPR_HRMOR);
-        // mask off the secureboot offset
-        l_memBase = 0xFFFFF00000000000 & l_memBase;
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "HRMOR=%.16X", l_memBase );
         // Now offset up to our hardcoded region
-        l_memBase += VMM_HOMER_REGION_START_ADDR;
+        l_memBase += VMM_HOMER_REGION_START_OFFSET;
 
         //  Get a chunk of real memory big enough to store all the possible
         //  HCODE images. (4MB is size of HOMER)
@@ -354,7 +353,7 @@ void* host_build_stop_image (void *io_pArgs)
             l_memBase -= VMM_ALL_HOMER_OCC_MEMORY_SIZE;
         }
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "HOMER base = %x", l_memBase);
+                   "HOMER base = %.16X", l_memBase);
         l_pRealMemBase = reinterpret_cast<void * const>(l_memBase );
 
         //Convert the real memory pointer to a pointer in virtual memory

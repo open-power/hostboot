@@ -131,28 +131,30 @@ enum BlockPriority
 /** Page Size in bits per SLBE  */
 #define SLBE_b 12
 
-/** Hardwired pointer to HOMER images in real mem */
-/** HOMER starts at 128MB + 32MB = 160MB */
+/** Hardwired offsets from HRMOR to HOMER images in real mem */
+/** HOMER starts immediately after our HB memory */
+/**    <n0p0 HRMOR = 128MB> + <memory size = 32MB> = 160MB */
 /** HOMER is 4 MB per proc, 8 procs = 32MB */
 /** Each HOMER must start on a 4MB offset to meet OCC requirements */
-#define VMM_HOMER_REGION_START_ADDR (128*MEGABYTE + 32*MEGABYTE)
+#define VMM_HOMER_REGION_START_OFFSET (VMM_MEMORY_SIZE)
 #define VMM_HOMER_INSTANCE_SIZE_IN_MB (4)
 #define VMM_HOMER_INSTANCE_SIZE \
  (VMM_HOMER_INSTANCE_SIZE_IN_MB*MEGABYTE)
 #define VMM_HOMER_REGION_SIZE (VMM_HOMER_INSTANCE_SIZE*8)
+#define VMM_HOMER_REGION_END_OFFSET \
+ (VMM_HOMER_REGION_START_OFFSET + VMM_HOMER_REGION_SIZE)
 /** HOMER_REGION_END = 192MB */
-#define VMM_HOMER_REGION_END_ADDR \
- (VMM_HOMER_REGION_START_ADDR + VMM_HOMER_REGION_SIZE)
 
 /** Physical Memory for OCC common space - 8MB total */
 /** OCC Common must be on an 8MB offset */
 /** Start = End of Homer, currently 192MB */
-#define VMM_OCC_COMMON_START_ADDR VMM_HOMER_REGION_END_ADDR
+#define VMM_OCC_COMMON_START_OFFSET VMM_HOMER_REGION_END_OFFSET
 #define VMM_OCC_COMMON_SIZE_IN_MB 8
 #define VMM_OCC_COMMON_SIZE \
  (VMM_OCC_COMMON_SIZE_IN_MB*MEGABYTE)
-#define VMM_OCC_COMMON_END \
- (VMM_OCC_COMMON_START_ADDR + VMM_OCC_COMMON_SIZE)
+#define VMM_OCC_COMMON_END_OFFSET \
+ (VMM_OCC_COMMON_START_OFFSET + VMM_OCC_COMMON_SIZE)
+/** End of Common Area = 200MB */
 
 /** Total Memory required for HOMERs and OCC Common */
 #define VMM_ALL_HOMER_OCC_MEMORY_SIZE \
