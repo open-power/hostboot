@@ -131,7 +131,7 @@ public:
         TARGETING::HwasState    l_orgHwasState, l_hwasState;
         TARGETING::TargetIterator l_pTarget;
 
-        TS_TRACE( "testHWASReadWrite entry" );
+        TS_INFO( "testHWASReadWrite entry" );
 
         //  write a pattern to all HWAS attributes and then read them back
         for(    l_pTarget = TARGETING::targetService().begin();
@@ -208,7 +208,7 @@ public:
 
         }
 
-        TS_TRACE( "testHWASReadWrite exit" );
+        TS_INFO( "testHWASReadWrite exit" );
     }
 
     /**
@@ -218,7 +218,7 @@ public:
     {
         using namespace TARGETING;
 
-        TS_TRACE( "testHWASplatReadIDEC entry" );
+        TS_INFO( "testHWASplatReadIDEC entry" );
 
         // call platReadIDEC with target that doesn't have an ID/EC
         errlHndl_t l_errl;
@@ -239,7 +239,7 @@ public:
                     "No error from platReadIDEC(pSys).");
         }
 
-        TS_TRACE( "testHWASplatReadIDEC exit" );
+        TS_INFO( "testHWASplatReadIDEC exit" );
     }
 
     /**
@@ -249,7 +249,7 @@ public:
     {
         using namespace TARGETING;
 
-        TS_TRACE( "testHWASplatReadPartialGood entry" );
+        TS_INFO( "testHWASplatReadPartialGood entry" );
 
         // call platReadPartialGood with target that isn't in the VPD
         errlHndl_t l_errl;
@@ -271,7 +271,7 @@ public:
                     "No error from platReadPartialGood(pSys).");
         }
 
-        TS_TRACE( "testHWASplatReadPartialGood exit" );
+        TS_INFO( "testHWASplatReadPartialGood exit" );
     }
 
     /**
@@ -282,7 +282,7 @@ public:
         using namespace HWAS;
         using namespace TARGETING;
 
-        TS_TRACE( "testHWASisChipFunctional entry" );
+        TS_INFO( "testHWASisChipFunctional entry" );
 
         // Get list of all targets with type PROC
         TargetHandleList allProcs;
@@ -311,7 +311,7 @@ public:
             pgData[VPD_CP00_PG_OB0_INDEX + 2] =  l_obus12;
             uint16_t l_mask = 0x8000;
 
-            TS_TRACE( "testHWASisChipFunctional: chip is functional");
+            TS_INFO( "testHWASisChipFunctional: chip is functional");
             if (!isChipFunctional(pTarget, pgData))
             {
                 TS_FAIL("testHWASisChipFunctional>"
@@ -319,7 +319,7 @@ public:
                         isChipFunctional(pTarget, pgData));
             }
 
-            TS_TRACE( "testHWASisChipFunctional: partial good all bad");
+            TS_INFO( "testHWASisChipFunctional: partial good all bad");
             pgData[VPD_CP00_PG_N1_INDEX] |= VPD_CP00_PG_N1_PG_MASK;
             pgData[VPD_CP00_PG_N3_INDEX] |= VPD_CP00_PG_N3_PG_MASK;
             pgData[VPD_CP00_PG_XBUS_INDEX] |= VPD_CP00_PG_XBUS_PG_MASK;
@@ -335,7 +335,7 @@ public:
             pgData[VPD_CP00_PG_N3_INDEX] &= ~VPD_CP00_PG_N3_PG_MASK;
             pgData[VPD_CP00_PG_XBUS_INDEX] = l_xbus;
 
-            TS_TRACE( "testHWASisChipFunctional: FSI is not functional");
+            TS_INFO( "testHWASisChipFunctional: FSI is not functional");
             for (l_mask = 0x8000;
                  l_mask > 0;
                  l_mask >>= 1)
@@ -366,7 +366,7 @@ public:
                     (uint16_t)VPD_CP00_PG_FSI_GOOD;
             }
 
-            TS_TRACE( "testHWASisChipFunctional: PRV is not functional");
+            TS_INFO( "testHWASisChipFunctional: PRV is not functional");
             for (l_mask = 0x8000;
                  l_mask > 0;
                  l_mask >>= 1)
@@ -397,7 +397,7 @@ public:
                     (uint16_t)VPD_CP00_PG_PERVASIVE_GOOD;
             }
 
-            TS_TRACE( "testHWASisChipFunctional: N0 is not functional");
+            TS_INFO( "testHWASisChipFunctional: N0 is not functional");
             for (l_mask = 0x8000;
                  l_mask > 0;
                  l_mask >>= 1)
@@ -428,7 +428,7 @@ public:
                     (uint16_t)VPD_CP00_PG_N0_GOOD;
             }
 
-            TS_TRACE( "testHWASisChipFunctional: N1 is not functional");
+            TS_INFO( "testHWASisChipFunctional: N1 is not functional");
             for (l_mask = 0x8000;
                  l_mask > 0;
                  l_mask >>= 1)
@@ -465,7 +465,7 @@ public:
                     (uint16_t)VPD_CP00_PG_N1_GOOD;
             }
 
-            TS_TRACE( "testHWASisChipFunctional: N2 is not functional");
+            TS_INFO( "testHWASisChipFunctional: N2 is not functional");
             for (l_mask = 0x8000;
                  l_mask > 0;
                  l_mask >>= 1)
@@ -496,7 +496,7 @@ public:
                     (uint16_t)VPD_CP00_PG_N2_GOOD;
             }
 
-            TS_TRACE( "testHWASisChipFunctional: N3 is not functional");
+            TS_INFO( "testHWASisChipFunctional: N3 is not functional");
             for (l_mask = 0x8000;
                  l_mask > 0;
                  l_mask >>= 1)
@@ -533,7 +533,7 @@ public:
                     (uint16_t)VPD_CP00_PG_N3_GOOD;
             }
 
-            TS_TRACE( "testHWASisChipFunctional: XBUS is not functional");
+            TS_INFO( "testHWASisChipFunctional: XBUS is not functional");
             for (l_mask = 0x8000;
                  l_mask > 0;
                  l_mask >>= 1)
@@ -586,7 +586,7 @@ public:
             }
         }
 
-        TS_TRACE( "testHWASisChipFunctional exit" );
+        TS_INFO( "testHWASisChipFunctional exit" );
     }
 
     /**
@@ -600,6 +600,8 @@ public:
         // Get list of present targets with type PROC
         TargetHandleList pCheckPres;
         getAllChips( pCheckPres, TYPE_PROC, true );
+
+        TS_INFO( "testHWASisDescFunctional() entry");
 
         for (TargetHandleList::const_iterator pTarget_it = pCheckPres.begin();
              pTarget_it != pCheckPres.end();
@@ -623,7 +625,6 @@ public:
             pgData[VPD_CP00_PG_OB0_INDEX + 1] =  l_obus12;
             pgData[VPD_CP00_PG_OB0_INDEX + 2] =  l_obus12;
             uint16_t l_mask = 0x8000;
-            uint32_t l_index = VPD_CP00_PG_PERVASIVE_INDEX;
 
             TargetHandleList pDescList;
             targetService().getAssociated( pDescList, pTarget,
@@ -639,7 +640,8 @@ public:
                 char l_type_str[9];
                 char l_pgData[] = "";
 
-                TS_TRACE( "testHWASisDescFunctional: descendant functional");
+                TS_INFO("testHWASisDescFunctional: descendant functional - "
+                        "attr type 0x%04X, chip unit %d", l_type, l_chipUnit);
                 if (!isDescFunctional(pDesc, pgData))
                 {
                     switch(l_type)
@@ -727,6 +729,7 @@ public:
                 else
                 if(MODEL_NIMBUS == l_model)
                 {
+                    bool skipFailCheck = false;
                     // Nimbus has special cases for XBUS, OBUS1, and OBUS2.
                     // These should show up as not functional, so fail if they
                     // come back as functional.
@@ -758,23 +761,26 @@ public:
 
                         default:
                             // Most types should be functional on Nimbus
-                            continue;
+                            skipFailCheck = true;
                             break;
                     }
 
-                    TS_FAIL("testHWASisDescFunctional>"
+                    if (!skipFailCheck)
+                    {
+                        TS_FAIL("testHWASisDescFunctional>"
                             "functional = 0x%x, should be false, "
                             "type = %s, chip unit = %d%s.",
                             isDescFunctional(pDesc, pgData),
                             l_type_str,
                             l_chipUnit,
                             l_pgData);
+                    }
                 }
 
                 switch(l_type)
                 {
                     case TYPE_XBUS:
-                        TS_TRACE( "testHWASisDescFunctional: "
+                        TS_INFO( "testHWASisDescFunctional: "
                                   "XBUS%d is not functional", l_chipUnit);
                         pgData[VPD_CP00_PG_XBUS_INDEX] |=
                             (uint16_t)VPD_CP00_PG_XBUS_IOX[l_chipUnit];
@@ -793,7 +799,7 @@ public:
                         break;
 
                     case TYPE_OBUS:
-                        TS_TRACE( "testHWASisDescFunctional: "
+                        TS_INFO( "testHWASisDescFunctional: "
                                   "OBUS%d is not functional", l_chipUnit);
                         pgData[VPD_CP00_PG_N1_INDEX] |=
                             (uint16_t)VPD_CP00_PG_N1_PBIOO0;
@@ -867,7 +873,7 @@ public:
                         break;
 
                     case TYPE_PEC:
-                        TS_TRACE( "testHWASisDescFunctional: "
+                        TS_INFO( "testHWASisDescFunctional: "
                                   "PCI%d is not functional", l_chipUnit);
                         for (l_mask = 0x8000;
                              l_mask > 0;
@@ -906,7 +912,7 @@ public:
                         break;
 
                     case TYPE_EQ:
-                        TS_TRACE( "testHWASisDescFunctional: "
+                        TS_INFO( "testHWASisDescFunctional: "
                                   "EQ%d is not functional", l_chipUnit);
                         for (l_mask = 0x8000;
                              l_mask > 0;
@@ -949,7 +955,7 @@ public:
                         break;
 
                     case TYPE_EX:
-                        TS_TRACE( "testHWASisDescFunctional: "
+                        TS_INFO( "testHWASisDescFunctional: "
                                   "EX%d is not functional", l_chipUnit);
                         pgData[VPD_CP00_PG_EP0_INDEX + (l_chipUnit / 2)] |=
                             (uint16_t)VPD_CP00_PG_EPx_L3L2REFR[l_chipUnit % 2];
@@ -970,7 +976,7 @@ public:
                         break;
 
                     case TYPE_CORE:
-                        TS_TRACE( "testHWASisDescFunctional: "
+                        TS_INFO( "testHWASisDescFunctional: "
                                   "CORE%d is not functional", l_chipUnit);
                         for (l_mask = 0x8000;
                              l_mask > 0;
@@ -1009,7 +1015,7 @@ public:
                         break;
 
                     case TYPE_MCBIST:
-                        TS_TRACE( "testHWASisDescFunctional: "
+                        TS_INFO( "testHWASisDescFunctional: "
                                   "MCBIST%d is not functional", l_chipUnit);
                         if (l_chipUnit)
                         {
@@ -1084,12 +1090,35 @@ public:
 
                             // Restore the "all good" data
                             pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] =
-                                (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                            (uint16_t)VPD_CP00_PG_MCxx_GOOD;
                         }
+
+                        // TEST WITH BAD MAGIC PORT
+                        pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] |=
+                            VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
+
+
+                        if (isDescFunctional(pDesc, pgData))
+                        {
+                            TS_FAIL("testHWASisDescFunctional>"
+                                    "functional = 0x%x, should be false, "
+                                    "MC%s for MCBIST%d = 0x%04x, "
+                                    "mask = 0x%04x - BAD MAGIC PORT.",
+                                    isDescFunctional(pDesc, pgData),
+                                    l_chipUnit ? "01" : "23",
+                                    l_chipUnit,
+                                    pgData[VPD_CP00_PG_MCxx_INDEX
+                                               [l_chipUnit * 2]],
+                                    VPD_CP00_PG_MCA_MAGIC_PORT_MASK);
+                        }
+
+                        pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] &=
+                            ~VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
+
                         break;
 
                     case TYPE_MCS:
-                        TS_TRACE( "testHWASisDescFunctional: "
+                        TS_INFO( "testHWASisDescFunctional: "
                                   "MCS%d is not functional", l_chipUnit);
                         if (l_chipUnit >= 2)
                         {
@@ -1168,10 +1197,31 @@ public:
                             pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] =
                                 (uint16_t)VPD_CP00_PG_MCxx_GOOD;
                         }
+
+                        // TEST WITH BAD MAGIC PORT (MCA0 or MCA4)
+                        pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] |=
+                            VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
+
+                        if (isDescFunctional(pDesc, pgData))
+                        {
+                            TS_FAIL("testHWASisDescFunctional>"
+                                    "functional = 0x%x, should be false, "
+                                    "MC%s for MCS%d = 0x%04x, "
+                                    "mask = 0x%04x - BAD MAGIC PORT.",
+                                    isDescFunctional(pDesc, pgData),
+                                    l_chipUnit ? "01" : "23",
+                                    l_chipUnit,
+                                    pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]],
+                                    VPD_CP00_PG_MCA_MAGIC_PORT_MASK);
+                        }
+
+                        pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] &=
+                            ~VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
+
                         break;
 
                     case TYPE_MCA:
-                        TS_TRACE( "testHWASisDescFunctional: "
+                        TS_INFO( "testHWASisDescFunctional: "
                                   "MCA%d is not functional", l_chipUnit);
                         pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] |=
                             (uint16_t)VPD_CP00_PG_MCxx_IOMyy[l_chipUnit / 2];
@@ -1190,10 +1240,36 @@ public:
 
                         pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] =
                             (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+
+                        // Try bad MCA Port setting for MCA2/3 & MCA6/7
+                        if ( VPD_CP00_PG_MCxx_IOMyy[l_chipUnit / 2] !=
+                             VPD_CP00_PG_MCA_MAGIC_PORT_MASK )
+                        {
+                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] |=
+                                VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
+
+                            if (isDescFunctional(pDesc, pgData))
+                            {
+                                TS_FAIL("testHWASisDescFunctional>"
+                                        "functional = 0x%x, should be false, "
+                                        "MC%s for MCA%d = 0x%04x "
+                                        "mask = 0x%04x - BAD MAGIC PORT.",
+                                        isDescFunctional(pDesc, pgData),
+                                        (l_chipUnit < 4) ? "01" : "23",
+                                        l_chipUnit,
+                                        pgData[VPD_CP00_PG_MCxx_INDEX
+                                                   [l_chipUnit / 2]],
+                                        VPD_CP00_PG_MCA_MAGIC_PORT_MASK);
+                            }
+
+                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] &=
+                                ~VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
+                        }
+
                         break;
 
                     case TYPE_NV:
-                        TS_TRACE( "testHWASisDescFunctional: "
+                        TS_INFO( "testHWASisDescFunctional: "
                                   "NV is not functional");
                         pgData[VPD_CP00_PG_N3_INDEX] |=
                             (uint16_t)VPD_CP00_PG_N3_NPU;
@@ -1212,38 +1288,36 @@ public:
                         break;
 
                     case TYPE_PERV:
-                        TS_TRACE( "testHWASisDescFunctional: "
+
+                        TS_INFO( "testHWASisDescFunctional: "
                                   "PERV is not functional");
-                        for (l_index = VPD_CP00_PG_PERVASIVE_INDEX;
-                             l_index < VPD_CP00_PG_DATA_ENTRIES;
-                             l_index++)
+
+                        if (pgData[l_chipUnit] &
+                            (uint16_t)VPD_CP00_PG_xxx_VITAL)
                         {
-                            if (pgData[l_index] &
-                                (uint16_t)VPD_CP00_PG_xxx_PERV)
-                            {
-                                // Ignore chiplet lines where PERV is "1"
-                                continue;
-                            }
-                            else
-                            {
-                                // Turn on PERV bit that should be off / good
-                                pgData[l_index] |=
-                                    (uint16_t)VPD_CP00_PG_xxx_PERV;
-                            }
-
-                            if (isDescFunctional(pDesc, pgData))
-                            {
-                                TS_FAIL("testHWASisDescFunctional>"
-                                        "functional = 0x%x, should be false, "
-                                        "PERV(%d) = 0x%04x.",
-                                        isDescFunctional(pDesc, pgData),
-                                        l_index,
-                                        pgData[l_index]);
-                            }
-
-                            // Restore the "all good" data
-                            pgData[l_index] &= ~VPD_CP00_PG_xxx_PERV;
+                            // Ignore chiplet lines where VITAL is "1"
+                            continue;
                         }
+                        else
+                        {
+                            // Turn on VITAL bit that should be off / good
+                            pgData[l_chipUnit] |=
+                                (uint16_t)VPD_CP00_PG_xxx_VITAL;
+                        }
+
+                        if (isDescFunctional(pDesc, pgData))
+                        {
+                            TS_FAIL("testHWASisDescFunctional>"
+                                    "functional = 0x%x, should be false, "
+                                    "PERV(%d) = 0x%04x.",
+                                    isDescFunctional(pDesc, pgData),
+                                    l_chipUnit,
+                                    pgData[l_chipUnit]);
+                        }
+
+                        // Restore the "all good" data
+                        pgData[l_chipUnit] &= ~VPD_CP00_PG_xxx_VITAL;
+
                         break;
 
                     default:
@@ -1252,7 +1326,7 @@ public:
             } // for pDesc_it
         } // for pTarget_it
 
-        TS_TRACE( "testHWASisDescFunctional exit" );
+        TS_INFO( "testHWASisDescFunctional exit" );
     }
 
     /**
@@ -1316,7 +1390,7 @@ public:
             }
         }
 
-        TS_TRACE( "testHWASrestrictECunits exit" );
+        TS_INFO( "testHWASrestrictECunits exit" );
 
     }
 
@@ -1408,7 +1482,7 @@ public:
             }
         } while(0);
 
-        TS_TRACE( "testHWASpervStates exit" );
+        TS_INFO( "testHWASpervStates exit" );
     }
 };
 
