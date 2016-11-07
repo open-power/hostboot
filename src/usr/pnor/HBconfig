@@ -5,7 +5,7 @@ config SFC_IS_IBM_DPSS
         The Serial Flash Controller is the IBM DPSS FPGA.
 
 config SFC_IS_AST2400
-    default y
+    default y if !SFC_IS_AST2500
     depends on !SFC_IS_IBM_DPSS && !SFC_IS_FAKE && !SFC_IS_AST2500
     help
         The Serial Flash Controller is the AST2400 BMC.
