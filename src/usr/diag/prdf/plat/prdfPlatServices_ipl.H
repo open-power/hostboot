@@ -90,6 +90,22 @@ int32_t mssIplUeIsolation( TARGETING::TargetHandle_t i_mba,
                            CenDqBitmap & o_bitmap );
 */
 
+//##############################################################################
+//##                  Nimbus/Centaur Maintenance Command wrappers
+//##############################################################################
+
+/**
+ * @brief  Starts a super fast read command from the first address of the given
+ *         rank to the end of memory.
+ * @param  i_chip MCA or MBA chip.
+ * @param  i_rank Will start the command on the first address of this slave
+ *         rank. To ensure the command is started on a master rank boundary,
+ *         make sure the slave rank value is 0.
+ * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
+ */
+template<TARGETING::TYPE T>
+uint32_t startSfRead( ExtensibleChip * i_chip, const MemRank & i_rank );
+
 } // end namespace PlatServices
 
 } // end namespace PRDF
