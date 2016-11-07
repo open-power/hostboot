@@ -225,15 +225,15 @@ fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::single_port_init()
     }
 
     // The address should have the port and DIMM noted in it. All we need to do is calculate the
-    // remainder of the address, assuming the caller didn't setup an end address already.
-    // *INDENT-OFF*
-    if (iv_const.iv_end_address == 0)
+    // remainder of the address
+    if (iv_is_sim)
     {
-        iv_is_sim ?
-            iv_const.iv_start_address.get_sim_end_address(iv_const.iv_end_address) :
-            iv_const.iv_start_address.get_range<mss::mcbist::address::DIMM>(iv_const.iv_end_address);
+        iv_const.iv_start_address.get_sim_end_address(iv_const.iv_end_address);
     }
-    // *INDENT-ON*
+    else if (iv_const.iv_end_address == 0)
+    {
+        iv_const.iv_start_address.get_range<mss::mcbist::address::DIMM>(iv_const.iv_end_address);
+    }
 
     // Configure the address range
     FAPI_TRY( mss::mcbist::config_address_range0(iv_target, iv_const.iv_start_address, iv_const.iv_end_address) );
@@ -427,51 +427,25 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Super Fast Read All - used to run superfast read on all memory behind the target
-/// @note Uses broadcast mode if possible
-/// @param[in] i_target the target behind which all memory should be read
-/// @param[in] i_stop stop conditions
-/// @param[in] i_end whether to end, and where - defaults to immediate (stop after failed address)
-/// @return FAPI2_RC_SUCCESS iff everything ok
-/// @note The function is asynchronous, and the caller should be looking for a done attention
-///
-template<>
-fapi2::ReturnCode sf_read( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-                           const stop_conditions& i_stop,
-                           const end_boundary i_end )
-{
-    FAPI_INF("superfast read start");
-
-    fapi2::ReturnCode l_rc;
-    constraints l_const(i_stop, speed::LUDICROUS, i_end, mss::mcbist::address());
-    sf_read_operation<TARGET_TYPE_MCBIST> l_read_op(i_target, l_const, l_rc);
-
-    FAPI_ASSERT( l_rc == FAPI2_RC_SUCCESS,
-                 fapi2::MSS_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT().set_TARGET(i_target),
-                 "Unable to initialize the MCBIST engine for a sf read %s", mss::c_str(i_target) );
-
-    return l_read_op.execute();
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Super Fast Read to End of Port - used to run superfast read on all memory behind the target
+/// @tparam T the fapi2::TargetType of the target
 /// @param[in] i_target the target behind which all memory should be read
 /// @param[in] i_stop stop conditions
-/// @param[in] i_address mcbist::address representing the port, dimm, rank
-/// @param[in] i_end whether to end, and where - defaults to immediate (stop after failed address)
+/// @param[in] i_address mcbist::address representing the address from which to start.
+//    Defaults to the first address behind the target
+/// @param[in] i_end whether to end, and where
+///   Defaults to stop after slave rank
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
+/// @note The address is often the port, dimm, rank but this is not enforced in the API.
 ///
 template<>
 fapi2::ReturnCode sf_read( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
                            const stop_conditions& i_stop,
                            const mss::mcbist::address& i_address,
-                           const end_boundary i_end )
+                           const end_boundary i_end)
 {
-    FAPI_INF("superfast read - end of port");
+    FAPI_INF("superfast read - start");
 
     fapi2::ReturnCode l_rc;
     constraints l_const(i_stop, speed::LUDICROUS, i_end, i_address);
@@ -523,29 +497,24 @@ fapi_try_exit:
 /// @brief Scrub - targeted scrub all memory behind the target
 /// @param[in] i_target the target behind which all memory should be scrubbed
 /// @param[in] i_stop stop conditions
-/// @param[in] i_speed the speed to scrub
-/// @param[in] i_address mcbist::address representing the port, dimm, rank
-/// @param[in] i_end whether to end, and where
+/// @param[in] i_start_address mcbist::address representing the address from which to start.
+/// @param[in] i_end_address mcbist::address representing the address at which to end.
+/// @param[in] i_end whether to end, and where (defaults to not stop on error)
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
+/// @note The caller can use the address range functions to calculate the end address as needed
 ///
 template<>
 fapi2::ReturnCode targeted_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
                                   const stop_conditions& i_stop,
-                                  const speed i_speed,
-                                  const mss::mcbist::address& i_address,
+                                  const mss::mcbist::address& i_start_address,
+                                  const mss::mcbist::address& i_end_address,
                                   const end_boundary i_end )
 {
     FAPI_INF("targeted scrub");
 
-    if (i_end == end_boundary::NONE)
-    {
-        FAPI_ERR("targeted scrub must have end boundaries");
-        return FAPI2_RC_INVALID_PARAMETER;
-    }
-
     fapi2::ReturnCode l_rc;
-    constraints l_const(i_stop, i_speed, i_end, i_address);
+    constraints l_const(i_stop, speed::LUDICROUS, i_end, i_start_address, i_end_address);
     targeted_scrub_operation<TARGET_TYPE_MCBIST> l_op(i_target, l_const, l_rc);
 
     FAPI_ASSERT( l_rc == FAPI2_RC_SUCCESS,

@@ -755,16 +755,21 @@ struct constraints
     ///
     /// @brief constraints constructor
     /// @param[in] i_stop stop conditions
+    /// @param[in] i_speed the speed at which to run
+    /// @param[in] i_end_boundary the place to stop on error
     /// @param[in] i_start_address address to start from
+    /// @param[in] i_end_address address to end at (optional, run to end)
     ///
     constraints( const stop_conditions& i_stop,
                  const speed i_speed,
                  const end_boundary i_end_boundary,
-                 const address& i_start_address ):
+                 const address& i_start_address,
+                 const address& i_end_address = mcbist::address(0) ):
         constraints(i_stop, i_start_address)
     {
         iv_end_boundary = i_end_boundary;
         iv_speed = i_speed;
+        iv_end_address = i_end_address;
         FAPI_INF("setting up constraints with end boundary %d and speed 0x%x", i_end_boundary, i_speed);
     }
 

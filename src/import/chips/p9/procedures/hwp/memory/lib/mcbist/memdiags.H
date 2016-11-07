@@ -318,26 +318,15 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target,
                            const uint64_t i_pattern = PATTERN_0 );
 
 ///
-/// @brief Super Fast Read All - used to run superfast read on all memory behind the target
-/// @note Uses broadcast mode if possible
-/// @param[in] i_target the target behind which all memory should be read
-/// @param[in] i_stop stop conditions
-/// @param[in] i_end whether to end, and where - defaults to stop after slave rank
-/// @return FAPI2_RC_SUCCESS iff everything ok
-/// @note The function is asynchronous, and the caller should be looking for a done attention
-///
-template< fapi2::TargetType T >
-fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
-                           const stop_conditions& i_stop,
-                           const end_boundary i_end = end_boundary::STOP_AFTER_SLAVE_RANK );
-
-///
-/// @brief Super Fast Read to End of Port - used to run superfast read on all memory behind the target
+/// @brief Super Fast Read - used to run superfast read on all memory behind the target
+/// Determines ability to braodcast to all ports behind a target, does so if possible.
 /// @tparam T the fapi2::TargetType of the target
 /// @param[in] i_target the target behind which all memory should be read
 /// @param[in] i_stop stop conditions
 /// @param[in] i_address mcbist::address representing the address from which to start.
-/// @param[in] i_end whether to end, and where - defaults to immediate (stop after failed address)
+//    Defaults to the first address behind the target
+/// @param[in] i_end whether to end, and where
+///   Defaults to stop after slave rank
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 /// @note The address is often the port, dimm, rank but this is not enforced in the API.
@@ -345,8 +334,8 @@ fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
 template< fapi2::TargetType T >
 fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
                            const stop_conditions& i_stop,
-                           const mss::mcbist::address& i_address,
-                           const end_boundary i_end = end_boundary::STOP_AFTER_ADDRESS );
+                           const mss::mcbist::address& i_address = mss::mcbist::address(),
+                           const end_boundary i_end = end_boundary::STOP_AFTER_SLAVE_RANK );
 
 ///
 /// @brief Scrub - continuous scrub all memory behind the target
@@ -369,7 +358,8 @@ fapi2::ReturnCode background_scrub( const fapi2::Target<T>& i_target,
 /// @param[in] i_target the target behind which all memory should be scrubbed
 /// @param[in] i_stop stop conditions
 /// @param[in] i_speed the speed to scrub
-/// @param[in] i_address mcbist::address representing the address from which to start.
+/// @param[in] i_start_address mcbist::address representing the address from which to start.
+/// @param[in] i_end_address mcbist::address representing the address at which to end.
 /// @param[in] i_end whether to end, and where
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
@@ -378,8 +368,8 @@ fapi2::ReturnCode background_scrub( const fapi2::Target<T>& i_target,
 template< fapi2::TargetType T >
 fapi2::ReturnCode targeted_scrub( const fapi2::Target<T>& i_target,
                                   const stop_conditions& i_stop,
-                                  const speed i_speed,
-                                  const mss::mcbist::address& i_address,
+                                  const mss::mcbist::address& i_start_address,
+                                  const mss::mcbist::address& i_end_address,
                                   const end_boundary i_end );
 
 ///
