@@ -756,7 +756,7 @@ sub unhexify {
 
 # Determine values of proc pcie attributes
 # Currently
-#   PROC_PCIE_LANE_EQUALIZATION PROC_PCIE_IOP_CONFIG PROC_PCIE_PHB_ACTIVE
+#   PROC_PCIE_LANE_EQUALIZATION_GEN3/4 PROC_PCIE_IOP_CONFIG PROC_PCIE_PHB_ACTIVE
 sub pcie_init ($)
 {
     my $proc = $_[0];
