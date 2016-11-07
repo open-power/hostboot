@@ -38,6 +38,7 @@
 #include <prdfTrace.H>
 
 //#include <prdfCenDqBitmap.H> TODO RTC 136126
+#include <prdfMemScrubUtils.H>
 
 #include <diag/mdia/mdia.H>
 #include <config.h>
@@ -164,6 +165,136 @@ int32_t mssIplUeIsolation( TargetHandle_t i_mba, const CenRank & i_rank,
     #undef PRDF_FUNC
 }
 */
+
+//##############################################################################
+//##                    Nimbus Maintenance Command wrappers
+//##############################################################################
+
+template<>
+uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
+                                const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::startSfRead<TYPE_MCA>] "
+
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+
+    PRDF_ASSERT( nullptr != i_mcaChip );
+    PRDF_ASSERT( TYPE_MCA == i_mcaChip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    // Get the MCBIST fapi target
+    ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
+    PRDF_ASSERT( nullptr != mcbChip );
+    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbChip->getTrgt() );
+
+    // Get the stop conditions.
+    mss::mcbist::stop_conditions stopCond;
+    stopCond.set_pause_on_mpe(mss::ON)
+            .set_pause_on_ue(mss::ON)
+            .set_nce_inter_symbol_count_enable(mss::ON)
+            .set_nce_soft_symbol_count_enable( mss::ON)
+            .set_nce_hard_symbol_count_enable( mss::ON);
+
+    // Stop on hard CEs if MNFG CE checking is enable.
+    if ( isMfgCeCheckingEnabled() ) stopCond.set_pause_on_nce_hard(mss::ON);
+
+    // Get the first address of the given rank.
+    uint32_t port = i_mcaChip->getPos() % MAX_MCA_PER_MCBIST;
+    mss::mcbist::address saddr, eaddr;
+    mss::mcbist::address::get_srank_range( port,
+                                           i_rank.getDimmSlct(),
+                                           i_rank.getRankSlct(),
+                                           i_rank.getSlave(),
+                                           saddr,
+                                           eaddr );
+
+    do
+    {
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_MCBIST>( mcbChip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      mcbChip->getHuid() );
+            break;
+        }
+
+        // Start the super fast read command.
+        // TODO: RTC 159778 - Still waiting for Brian Silver to update this
+        //       interface. In the meantime, tell MDIA that command has
+        //       completed (even though it hasn't) so that we do not hang up
+        //       MDIA and the IPL.
+        o_rc = mdiaSendEventMsg( mcbChip->getTrgt(), MDIA::COMMAND_COMPLETE );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(COMMAND_COMPLETE) failed" );
+        }
+/*
+        fapi2::ReturnCode fapi_rc = memdiags::sf_read( fapiTrgt, stopCond,
+                                                       saddr );
+        errlHndl_t errl = fapi2::rcToErrl( fapi_rc );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "memdiags::sf_read(0x%08x,%d) failed",
+                      mcbChip->getHuid(), i_rank.getMaster() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+*/
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+// This specialization only exists to avoid a lot of extra code in some classes.
+// The input chip must still be an MCA chip.
+template<>
+uint32_t startSfRead<TYPE_MCBIST>( ExtensibleChip * i_mcaChip,
+                                   const MemRank & i_rank )
+{
+    return startSfRead<TYPE_MCA>( i_mcaChip, i_rank );
+}
+
+//##############################################################################
+//##                   Centaur Maintenance Command wrappers
+//##############################################################################
+
+template<>
+uint32_t startSfRead<TYPE_MBA>( ExtensibleChip * i_mbaChip,
+                                const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::startSfRead<TYPE_MBA>] "
+
+    PRDF_ASSERT( nullptr != i_mbaChip );
+    PRDF_ASSERT( TYPE_MBA == i_mbaChip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_MBA>( i_mbaChip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_mbaChip->getHuid() );
+            break;
+        }
+
+        // Start the background scrub command.
+        PRDF_ERR( PRDF_FUNC "function not implemented yet" ); // TODO RTC 136126
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
 
 //------------------------------------------------------------------------------
 
