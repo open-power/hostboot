@@ -23,42 +23,70 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <errl/errlentry.H>
+#include <errl/errlmanager.H>
 #include <devicefw/userif.H>
-
+#include <secureboot/service.H>
 #include "settings.H"
 
 // SECUREBOOT : General driver traces
-trace_desc_t* g_trac_secure = NULL;
-TRAC_INIT(&g_trac_secure, SECURE_COMP_NAME, KILOBYTE); //1K
-
+#include "../common/securetrace.H"
 
 namespace SECUREBOOT
 {
-    const uint64_t Settings::SECURITY_SWITCH_REGISTER = 0x00010005;
-    const uint64_t
-        Settings::SECURITY_SWITCH_TRUSTED_BOOT = 0x4000000000000000ull;
+    using namespace TARGETING;
 
     void Settings::_init()
     {
-        errlHndl_t l_errl = NULL;
-        size_t size = sizeof(iv_regValue);
-
-        // Read / cache security switch setting from processor.
-        l_errl = deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                            &iv_regValue, size,
-                            DEVICE_SCOM_ADDRESS(SECURITY_SWITCH_REGISTER));
-
-        // If this errors, we're in bad shape and shouldn't trust anything.
-        assert(NULL == l_errl);
+        // cache only the enabled flag
+        iv_enabled = (0 != (getSecuritySwitch() &
+                                static_cast<uint64_t>(ProcSecurity::SabBit)));
     }
 
-    bool Settings::getEnabled()
+    bool Settings::getEnabled() const
     {
-        return 0 != (iv_regValue & SECURITY_SWITCH_TRUSTED_BOOT);
+        return iv_enabled;
     }
 
-    uint64_t Settings::getSecuritySwitch()
+    bool Settings::getJumperState() const
     {
-        return iv_regValue;
+        auto l_regValue = readSecurityRegister(
+                        static_cast<uint64_t>(ProcCbsControl::StatusRegister));
+
+        return 0 != (l_regValue &
+                        static_cast<uint64_t>(ProcCbsControl::JumperStateBit));
     }
+
+    uint64_t Settings::getSecuritySwitch() const
+    {
+        return readSecurityRegister(
+                        static_cast<uint64_t>(ProcSecurity::SwitchRegister));
+    }
+
+    uint64_t Settings::readSecurityRegister(const uint64_t i_scomAddress) const
+    {
+        errlHndl_t l_errl = nullptr;
+        uint64_t l_regValue = 0;
+        size_t size = sizeof(l_regValue);
+
+        // Read secure register setting from processor.
+        l_errl = deviceRead(MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                            &l_regValue, size,
+                            DEVICE_SCOM_ADDRESS(i_scomAddress));
+
+        if (nullptr != l_errl)
+        {
+            errlCommit(l_errl, SECURE_COMP_ID);
+            // This assert is needed because the deviceRead returns an
+            // informational error log so the system would otherwise not be
+            // halted.
+            assert(false,"SECUREBOOT::Settings::readSecurityRegister() Unable"
+                        " to read security register");
+        }
+        assert(size == sizeof(l_regValue),
+            "size returned from device read is not the expected size of %i",
+                                                           sizeof(l_regValue));
+
+        return l_regValue;
+    }
+
 }

@@ -23,8 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <secureboot/containerheader.H>
-
-extern trace_desc_t* g_trac_secure;
+#include "../common/securetrace.H"
 
 // Quick change for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
