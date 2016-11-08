@@ -39,6 +39,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 
+#include <lib/mss_attribute_accessors.H>
 #include <lib/utils/scom.H>
 #include <lib/utils/pos.H>
 #include <lib/dimm/kind.H>
@@ -100,7 +101,11 @@ fapi2::ReturnCode end_of_rank( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 {
     using TT = mss::mcbistTraits<TARGET_TYPE_MCBIST>;
 
-    // TODO RTC:160353 - implement DD1 checking when that attribute is available
+    // If we don't need the mcbist work-around, we're done.
+    if (! mss::chip_ec_feature_mcbist_end_of_rank(i_target) )
+    {
+        return FAPI2_RC_SUCCESS;
+    }
 
     // First things first - lets find out if we have an 1R DIMM on our side of the chip.
     const auto l_dimm_kinds = dimm::kind::vector( mss::find_targets<TARGET_TYPE_DIMM>(i_target) );
