@@ -134,10 +134,16 @@ p9_avsbus_voltage_read( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
                                       attrs.RailBusNum, BRIDGE_NUMBER),
              "Initializing avsBus Num %d, bridge %d", attrs.RailBusNum, BRIDGE_NUMBER);
 
+
+    FAPI_INF("Sending an Idle frame before Voltage reads");
+    FAPI_TRY(avsIdleFrame(i_target, attrs.RailBusNum, BRIDGE_NUMBER));
+
     FAPI_INF("Reading the specified voltage rail value");
     FAPI_TRY(avsVoltageRead(i_target, attrs.RailBusNum, BRIDGE_NUMBER,
-                            attrs.RailSelect, &voltage_read_data.o_voltage),
+                            attrs.RailSelect, voltage_read_data.o_voltage),
              "AVS Voltage read transaction failed");
+
+    o_voltage_data.o_voltage = voltage_read_data.o_voltage;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -161,6 +167,9 @@ p9_avsbus_voltage_write( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ta
     FAPI_TRY(avsInitExtVoltageControl(i_target,
                                       attrs.RailBusNum, BRIDGE_NUMBER),
              "Initializing avsBus Num %d, bridge %d", attrs.RailBusNum, BRIDGE_NUMBER);
+
+    FAPI_INF("Sending an Idle frame before Voltage writes");
+    FAPI_TRY(avsIdleFrame(i_target, attrs.RailBusNum, BRIDGE_NUMBER));
 
     // Set the required voltage
     FAPI_INF("Setting the specified voltage rail value");
