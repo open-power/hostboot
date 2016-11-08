@@ -50,6 +50,8 @@ namespace PRDF
 class ExtensibleChip;
 class MemRank;
 
+typedef std::vector<ExtensibleChip *> ExtensibleChipList;
+
 namespace PlatServices
 {
 
@@ -196,6 +198,18 @@ TARGETING::TargetHandle_t getConnectedParent(TARGETING::TargetHandle_t i_target,
 TARGETING::TargetHandle_t getConnectedChild( TARGETING::TargetHandle_t i_target,
                                              TARGETING::TYPE i_connType,
                                              uint32_t i_position );
+
+/**
+ * @brief  ExtensibleChip wrapper for targeting version of getConnected().
+ * @param  i_chip    The given chip.
+ * @param  i_connType  Type of target(s) return in list
+ * @return The connected list of chips. On error, the list will be empty.
+ * @note   If the given chip is the same type as the given type, only the given
+ *         chip is returned in the list.
+ * @note   This function does not support peer-to-peer connections.
+ */
+ExtensibleChipList getConnected( ExtensibleChip * i_chip,
+                                 TARGETING::TYPE i_connType );
 
 /**
  * @brief  ExtensibleChip wrapper for targeting version of getConnectedParent().
