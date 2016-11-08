@@ -42,7 +42,7 @@
 #include <kernel/console.H>
 #include <console/consoleif.H>
 
-extern trace_desc_t* g_trac_secure;
+#include "../common/securetrace.H"
 
 // Quick change for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -97,7 +97,12 @@ bool enabled()
     return Singleton<Settings>::instance().getEnabled();
 }
 
-void handleSecurebootFailure(errlHndl_t &io_err, const bool i_waitForShutdown)
+bool getJumperState()
+{
+    return Singleton<Settings>::instance().getJumperState();
+}
+
+void handleSecurebootFailure(errlHndl_t &io_err, bool i_waitForShutdown)
 {
     TRACFCOMP( g_trac_secure, ENTER_MRK"handleSecurebootFailure()");
 

@@ -36,25 +36,46 @@ namespace SECUREBOOT
     class Settings
     {
         public:
-            Settings() : iv_regValue(0) { _init(); };
+            Settings() : iv_enabled(false) { _init(); };
             ~Settings() {};
 
             /** @brief Determine if Secureboot is enabled. */
-            bool getEnabled();
+            bool getEnabled() const;
 
             /** @brief Get security switch register value */
-            uint64_t getSecuritySwitch();
+            uint64_t getSecuritySwitch() const;
+
+            /** @brief Returns the state of the secure jumper as reported by the
+             *      master processor.
+             *
+             *  @par Detailed Description:
+             *      Returns the state of the secure jumper as reported by the
+             *      master processor.  This should NOT be used to determine
+             *      whether security is enabled, because several conditions are
+             *      aggregated together to determine that.  To query whether
+             *      security is actually enabled or not, call the enabled() API.
+             *      This is a limited-use API intended to be called by trusted
+             *      boot code to determine whether a system shipped with a
+             *      secure jumper applied or removed, in order to decide
+             *      whether to enforce the "TPM Required" policy or not.
+             *  @return Boolean indicating acting master processor's secure
+             *      jumper state
+             *  @retval true Jumper is configured to request HW security.  This
+             *      does not necessarily imply security is enabled, because an
+             *      open SBE can override the HW policy.  Use the getEnabled()
+             *      API to determine whether security is actually enabled.
+             *  @retval false Jumper is configured to disble HW security.
+             */
+            bool getJumperState() const;
 
         private:
             void _init();
 
-            /** Cached register value. */
-            uint64_t iv_regValue;
+            /** helper function to encapsulate the details of register reads */
+            uint64_t readSecurityRegister(const uint64_t i_scomAddress) const;
 
-            /** SCOM address for security settings. */
-            static const uint64_t SECURITY_SWITCH_REGISTER;
-            /** Bitfield mask for Secureboot enable flag. */
-            static const uint64_t SECURITY_SWITCH_TRUSTED_BOOT;
+            /** Cached secure boot enabled value */
+            bool iv_enabled;
     };
 }
 

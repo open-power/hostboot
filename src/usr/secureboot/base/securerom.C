@@ -32,11 +32,10 @@
 #include <devicefw/driverif.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include "../common/securetrace.H"
 
 #include "securerom.H"
 #include "../settings.H"
-
-extern trace_desc_t* g_trac_secure;
 
 // Quick change for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -103,6 +102,8 @@ void getHwHashKeys(sha2_hash_t o_hash)
  Public Methods
  ********************/
 
+// allow external methods to access g_trac_secure
+using namespace SECUREBOOT;
 
 /**
  * @brief Initialize Secure Rom by loading it into memory and

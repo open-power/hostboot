@@ -37,11 +37,14 @@
 
 #include "../securerom.H"
 
-extern trace_desc_t* g_trac_secure;
+#include "../../common/securetrace.H"
 
 // Quick change for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
+
+// simply the syntax of accessing g_trac_secure
+using namespace SECUREBOOT;
 
 /**********************************************************************/
 /*  UTILITY FUNCTIONS                                                 */
