@@ -34,7 +34,7 @@
 #ifndef FAPI2SUBEXECUTOR_H_
 #define FAPI2SUBEXECUTOR_H_
 
-#include <plat_sub_executor.H>
+#include <subroutine_executor.H>
 
 /**
  * @brief Subroutine Executor macro
@@ -42,7 +42,7 @@
  * This macro calls a PLAT macro which will do any platform specific work to
  * execute the Subroutine (e.g. dlopening a shared library)
  */
-#define FAPI_CALL_SUBROUTINE(RC, CHIPOP, FUNC, _args_...) \
-    FAPI_PLAT_CALL_SUBROUTINE(RC, CHIPOP, FUNC, ##_args_)
+#define FAPI_CALL_SUBROUTINE(RC, FUNC, _args_...) \
+    FAPI_PLAT_CALL_SUBROUTINE(RC, FUNC, ##_args_)
 
 #endif // FAPI2SUBEXECUTOR_H_
