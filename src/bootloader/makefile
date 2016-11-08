@@ -36,6 +36,7 @@ OBJS += bl_pnorAccess.o
 OBJS += bl_pnor_utils.o
 OBJS += bl_pnor_ecc.o
 OBJS += bl_builtins.o
+OBJS += bl_terminate.o
 
 OPT_LEVEL = -Os
 

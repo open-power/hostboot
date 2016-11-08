@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/kernel/terminate.H $                              */
+/* $Source: src/bootloader/bl_terminate.C $                               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,48 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/** @file terminate.H
- *  @brief Defines kernel information about the TI data area
- */
-#ifndef __KERNEL_TERMINATE_H
-#define __KERNEL_TERMINATE_H
+#include <bootloader/bootloader.H>
 
-#include <kernel/types.h>
+#define bl_terminate_C
 
+#include <../kernel/terminate.C>
 
-/** @fn terminateExecuteTI
- *  @brief Sequence to execute a TI attn
- */
-void terminateExecuteTI();
-
-/** @fn termWritePlid
- *  Update TI data area with a PLID.
- *  @param[in] i_source:  indicates what type of fail forced the TI
- *  @param[in] i_plid:    plid to be stored
- *  @param[out] NONE:
- */
-void termWritePlid(uint16_t i_source, uint32_t plid);
-
-/** @fn termWriteSRC
- *  Create an SRC and Update the TI data area with the src created
- *  @param[in] i_source:  indicates what type of fail forced the TI
- *  @param[in] i_reasoncode: reasoncode for the failure(assert or shutdown)
- *  @param[in] i_failAddr: i_linkRegister() value (address of failure)
- *  @param[out] NONE:
- */
-void termWriteSRC(uint16_t i_source,
-                    uint16_t i_reasoncode,
-                    uint64_t i_failAddr = 0);
-
-/** @fn termModifySRC
- *  Modify an SRC and the TI data area for Bootloader
- *  @param[in] i_moduleID: moduleID for the failure (used by Bootloader)
- *  @param[in] i_word7: data to set SRC word 7 / @userdata2[0:31] (optional)
- *  @param[in] i_word8: data to set SRC word 8 / @userdata2[32:63] (optional)
- *  @param[out] NONE:
- */
-void termModifySRC(uint8_t i_moduleID,
-                   uint32_t i_word7 = 0,
-                   uint32_t i_word8 = 0);
-
-#endif
+#undef bl_terminate_C

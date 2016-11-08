@@ -67,6 +67,8 @@ BOOTLDR_OBJECTS += bootloader.o
 BOOTLDR_OBJECTS += bl_pnorAccess.o
 BOOTLDR_OBJECTS += bl_pnor_utils.o
 BOOTLDR_OBJECTS += bl_pnor_ecc.o
+BOOTLDR_OBJECTS += bl_terminate.o
+BOOTLDR_OBJECTS += forceattn_p8.o
 
 DIRECT_BOOT_OBJECTS += start.o
 DIRECT_BOOT_OBJECTS += kernel.o

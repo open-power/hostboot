@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <bootloader/bootloader.H>
 #include <bootloader/bootloader_trace.H>
+#include <bootloader/hbblreasoncodes.H>
 #include <bootloader/bl_pnorAccess.H>
 
 #include <lpc_const.H>
@@ -163,10 +164,26 @@ namespace Bootloader{
             else
             {
                 BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_MAIN_REMOVEECC_FAIL);
+                /*@
+                 * @errortype
+                 * @moduleid     MOD_BOOTLOADER_MAIN
+                 * @reasoncode   RC_REMOVE_ECC_FAIL
+                 * @userdata1[0:15]   TI_WITH_SRC
+                 * @userdata1[16:31]  TI_BOOTLOADER
+                 * @userdata1[32:63]  Failing address = 0
+                 * @userdata2[0:31]   Word7 = 0
+                 * @userdata2[32:63]  Word8 = 0
+                 * @devdesc      Uncorrectable ECC error found in HBB
+                 * @custdesc     A problem occurred while running processor
+                 *               boot code.
+                 */
+                bl_terminate(MOD_BOOTLOADER_MAIN,
+                             RC_REMOVE_ECC_FAIL);
             }
         }
         else
         {
+            // Note getHBBSection should have TI'd so won't get here
             BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_MAIN_GETHBBSECTION_FAIL);
         }
 

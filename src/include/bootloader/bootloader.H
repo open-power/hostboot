@@ -36,6 +36,8 @@
 #include <pnor_const.H>
 #include <pnor_utils.H>
 #include <common/ffs_hb.H>
+#include <kernel/terminate.H>
+#include <kernel/hbterminatetypes.H>
 
 extern "C" void task_end_stub();
 extern "C" void enterHBB(uint64_t i_hbb_hrmor, uint64_t i_hbb_offset);
@@ -104,6 +106,42 @@ namespace Bootloader{
                            uint64_t i_destAddr,
                            uint32_t i_size,
                            MMIOLoadStoreSizes i_ld_st_size);
+
+    /**
+     * @brief Handle setting up to terminate Bootloader
+     *
+     * @param[in] i_moduleID    ID for module where terminate is occurring
+     * @param[in] i_reasoncode  Reason code for why terminating
+     * @param[in] i_word7       Data for SRC word 7 / @userdata2[0:31]
+     *                             (optional, default is 0)
+     * @param[in] i_word8       Data for SRC word 8 / @userdata2[32:63]
+     *                             (optional, default is 0)
+     * @param[in] i_executeTI   Flag for calling terminateExecuteTI
+     *                             (optional, default is true)
+     * @param[in] i_failAddr    Address associated with termination
+     *                             (SRC word 6 / @userdata1[32:63],
+     *                              optional, default is 0)
+     */
+    inline void bl_terminate(uint8_t  i_moduleID,
+                             uint16_t i_reasoncode,
+                             uint32_t i_word7 = 0,
+                             uint32_t i_word8 = 0,
+                             bool     i_executeTI = true,
+                             uint64_t i_failAddr = 0)
+    {
+        termWriteSRC(TI_BOOTLOADER,
+                     i_reasoncode,
+                     i_failAddr);
+
+        termModifySRC(i_moduleID,
+                      i_word7,
+                      i_word8);
+
+        if(i_executeTI)
+        {
+            terminateExecuteTI();
+        }
+    }
 
     /** @enum HbbLengths
      *  @brief List of HBB lengths.
