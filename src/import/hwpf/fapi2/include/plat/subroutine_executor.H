@@ -36,20 +36,21 @@
 #ifndef SUBROUTINEEXECUTOR_H_
 #define SUBROUTINEEXECUTOR_H_
 
-#include <plat_subroutine_executor.H>
 #include <fapi2_subroutine_executor.H>
 
 #include <plat_trace.H>
 
 /**
- * @brief Subroutine Executor macro
+ * @brief Subroutine Executor macro example code - Platforms will need to
+ *        implement as needed for their enviroment.
  *
  * This macro calls a PLAT macro which will do any platform specific work to
  * execute the Subroutine (e.g. dlopening a shared library)
  */
-#define FAPI_PLAT_CALL_SUBROUTINE(RC, CHIPOP, FUNC, _args_...) \
+#define FAPI_PLAT_CALL_SUBROUTINE(RC, FUNC, _args...) \
     { \
         FAPI_INF("executing FAPI_PLAT_CALL_SUBROUTINE marco"); \
+        RC = FUNC(_args); \
     }
 
 #endif
