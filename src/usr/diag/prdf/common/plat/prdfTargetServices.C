@@ -605,6 +605,11 @@ TargetHandleList getConnAssoc( TargetHandle_t i_target, TYPE i_connType,
         targetService().getAssociated( o_list, i_target, i_assocType,
                                        TargetService::ALL, &predAnd );
 
+        // Sort by target position.
+        std::sort( o_list.begin(), o_list.end(),
+                   [](TargetHandle_t a, TargetHandle_t b)
+                   { return getTargetPosition(a) < getTargetPosition(b); } );
+
     } while(0);
 
     return o_list;
@@ -848,6 +853,23 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
     return o_child;
 
     #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+ExtensibleChipList getConnected( ExtensibleChip * i_chip, TYPE i_connType )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+
+    ExtensibleChipList o_list; // Default empty list
+
+    TargetHandleList list = getConnected( i_chip->getTrgt(), i_connType );
+    for ( auto & trgt : list )
+    {
+        o_list.push_back( (ExtensibleChip *)systemPtr->GetChip(trgt) );
+    }
+
+    return o_list;
 }
 
 //------------------------------------------------------------------------------
