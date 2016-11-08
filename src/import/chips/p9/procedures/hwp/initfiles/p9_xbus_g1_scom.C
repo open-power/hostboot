@@ -43,7 +43,7 @@ constexpr auto literal_0b0000011 = 0b0000011;
 constexpr auto literal_0b000000 = 0b000000;
 constexpr auto literal_0b100111 = 0b100111;
 constexpr auto literal_0b000001 = 0b000001;
-constexpr auto literal_0b1010 = 0b1010;
+constexpr auto literal_0b1111 = 0b1111;
 constexpr auto literal_0b01 = 0b01;
 constexpr auto literal_0b11 = 0b11;
 constexpr auto literal_0b0010000 = 0b0010000;
@@ -6387,7 +6387,7 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0b1010, 60, 4, 60 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1111, 60, 4, 60 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8008402006010c3full, l_scom_buffer);
@@ -6567,7 +6567,7 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0b1011, 48, 4, 60 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1111, 48, 4, 60 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8009a02006010c3full, l_scom_buffer);
