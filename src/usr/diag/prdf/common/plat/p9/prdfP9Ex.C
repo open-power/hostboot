@@ -59,6 +59,9 @@ PRDF_PLUGIN_DEFINE( p9_ex, Initialize );
 int32_t L3CE( ExtensibleChip * i_chip,
                            STEP_CODE_DATA_STRUCT & i_stepcode )
 {
+
+#if defined(__HOSTBOOT_RUNTIME) || defined(ESW_SIM_COMPILE)
+
     P9ExDataBundle * l_bundle = getExDataBundle(i_chip);
     uint16_t l_maxL3LineDelAllowed = 0;
 
@@ -126,6 +129,8 @@ int32_t L3CE( ExtensibleChip * i_chip,
             i_stepcode.service_data->SetThresholdMaskId(0);
         }
     }
+
+#endif
 
     return SUCCESS;
 } PRDF_PLUGIN_DEFINE(p9_ex, L3CE);
