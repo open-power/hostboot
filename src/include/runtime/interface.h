@@ -107,6 +107,15 @@ enum MemoryError_t
 #define HBRT_WKUP_FORCE_AWAKE  0
 #define HBRT_WKUP_CLEAR_FORCE  1
 
+/**
+ *  Chip ID types included in the chip_id / proc_id / core_id
+ *      passed to the host in several interfaces
+ */
+#define HBRT_PROC_TYPE          0x00000000 //!< PROC chip id type
+#define HBRT_MEMBUF_TYPE        0x80000000 //!< MEMBUF chip id type
+#define HBRT_CORE_TYPE          0x40000000 //!< CORE chip id type
+#define HBRT_CHIPID_TYPE_MASK   0xFF000000 //!< TYPE field
+
 /** @typedef hostInterfaces_t
  *  @brief Interfaces provided by the underlying environment (ex. Sapphire).
  *
@@ -178,7 +187,8 @@ typedef struct hostInterfaces
 
     /**
      *  @brief Scan communication read
-     *  @param[in]  i_chipId   from devtree defn
+     *  @param[in]  i_chipId   processor chip ID
+                               plus ID type, see defines at top
      *  @param[in]  i_scomAddr scom address to read
      *  @param[out] o_scomData pointer to 8-byte data buffer
      *  @return 0 on success else return code
@@ -189,7 +199,8 @@ typedef struct hostInterfaces
 
     /**
      *  @brief Scan communication write
-     *  @param[in] i_chipId   from devtree defn
+     *  @param[in] i_chipId   processor chip ID
+                              plus ID type, see defines at top
      *  @param[in] i_scomAddr scom address to write
      *  @param[in] i_scomData pointer to 8-byte data buffer
      *  @return 0 on success else return code
@@ -228,7 +239,8 @@ typedef struct hostInterfaces
 
     /**
      *  @brief Force a core to be awake, or clear the force
-     *  @param[in] i_core  Core to wake (based on devtree defn)
+     *  @param[in] i_core  Core to wake
+                           plus ID type, see defines at top
      *  @param[in] i_mode  HBRT_WKUP_FORCE_AWAKE
      *                     HBRT_WKUP_CLEAR_FORCE
      *  @return non-zero return code on error
@@ -249,6 +261,7 @@ typedef struct hostInterfaces
      * @brief Report an OCC error to the host
      * @param[in] Failing    status that identifies the nature of the fail
      * @param[in] Identifier that specifies the failing part
+                             plus ID type, see defines at top
      * @platform FSP
      */
     void (*report_failure)( uint64_t i_status, uint64_t i_partId );
@@ -268,6 +281,7 @@ typedef struct hostInterfaces
     /**
      *  @brief Read Pnor
      *  @param[in]  i_proc          processor Id
+     *                              plus ID type, see defines at top
      *  @param[in]  i_partitionName name of the partition to read
      *  @param[in]  i_offset        offset within the partition
      *  @param[out] o_data          pointer to the data read
@@ -283,6 +297,7 @@ typedef struct hostInterfaces
     /**
      *  @brief Write Pnor
      *  @param[in] i_proc          processor Id
+     *                             plus ID type, see defines at top
      *  @param[in] i_partitionName name of the partition to write
      *  @param[in] i_offset        offset withing the partition
      *  @param[in] i_data          pointer to the data to write
@@ -298,6 +313,7 @@ typedef struct hostInterfaces
      *  @brief Read data from an i2c device
      *  @param[in] i_master     chip, engine and port packed into
      *                          a single 64-bit argument
+     *                          chip includes ID type, see defines at top
      *     ---------------------------------------------------
      *     |         chip         |  reserved  |  eng | port |
      *     |         (32)         |    (16)    |  (8) | (8)  |
@@ -318,6 +334,7 @@ typedef struct hostInterfaces
      *  @brief Write data to an i2c device
      *  @param[in] i_master     chip, engine and port packed into
      *                          a single 64-bit argument
+     *                          chip includes ID type, see defines at top
      *    ---------------------------------------------------
      *    |         chip         |  reserved  |  eng | port |
      *    |         (32)         |    (16)    |  (8) | (8)  |
