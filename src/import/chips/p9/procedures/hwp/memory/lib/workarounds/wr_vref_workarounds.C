@@ -61,7 +61,11 @@ fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target
                            uint8_t& o_vrefdq_train_range,
                            uint8_t& o_vrefdq_train_value )
 {
-    // TODO RTC:160353 - Need module/chip rev EC support for workarounds
+    if (! mss::chip_ec_feature_mss_wr_vref(i_target) )
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     FAPI_TRY(mss::workarounds::dp16::wr_vref::error_dram23(i_target));
     FAPI_TRY(mss::workarounds::dp16::wr_vref::setup_values(i_target, i_rp, o_vrefdq_train_range, o_vrefdq_train_value));
 
