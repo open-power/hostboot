@@ -124,7 +124,7 @@ driveVoltageChange(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
     // Drive read transaction to return the voltage on the same rail
     // and wait on o2s_ongoing=0
     FAPI_TRY(avsVoltageRead(i_target, l_avsBusNum, l_o2sBridgeNum,
-                            l_RailSelect, &l_CmdDataRead),
+                            l_RailSelect, l_CmdDataRead),
              "AVS Voltage read transaction failed");
 
     // Compare write voltage value with read voltage value
@@ -309,6 +309,12 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
                                           attrs.vdn_bus_num, BRIDGE_NUMBER),
                  "Initializing avsBus VDN, bridge %d", BRIDGE_NUMBER);
 
+        FAPI_INF("Sending an Idle frame before Voltage writes");
+
+        // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
+        // initialize the AVS slave on VDD bus
+        FAPI_TRY(avsIdleFrame(i_target, attrs.vdd_bus_num, BRIDGE_NUMBER));
+
         // Set Boot VDD Voltage
         FAPI_TRY(avsVoltageWrite(i_target,
                                  attrs.vdd_bus_num,
@@ -318,6 +324,9 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
                  "Setting VDD voltage via AVSBus %d, Bridge %d",
                  attrs.vdd_bus_num,
                  BRIDGE_NUMBER);
+
+        // VDN bus
+        FAPI_TRY(avsIdleFrame(i_target, attrs.vdn_bus_num, BRIDGE_NUMBER));
 
         // Set Boot VDN Voltage
         FAPI_TRY(avsVoltageWrite(i_target,
