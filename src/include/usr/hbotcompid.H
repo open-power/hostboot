@@ -405,6 +405,14 @@ const char SIO_COMP_NAME[] = "sio";
 const compId_t FAPI2_COMP_ID = 0x3300;
 const char FAPI2_COMP_NAME[] = "fapi2";
 
+/** @name HBBL
+ *  Hostboot Bootloader
+ */
+//@{
+const compId_t HBBL_COMP_ID = 0x3400;
+const char HBBL_COMP_NAME[] = "hbbl";
+//@}
+
 /** @name HDAT
  *  HDAT component
  *  @Note HDAT_COMP_ID=0x9000 matches with what
@@ -413,7 +421,6 @@ const char FAPI2_COMP_NAME[] = "fapi2";
 //@{
 const compId_t HDAT_COMP_ID = 0x9000;
 const char HDAT_COMP_NAME[] = "hdat";
-
 
 
 /** @name PRDF

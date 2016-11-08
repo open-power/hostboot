@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,7 @@
 #define __KERNEL_HBTERMINATETYPES_H
 #include <stdint.h>
 
-/** @struct HB_T_SRC_DataAreaw
+/** @struct HB_T_SRC_DataArea
  *  @brief Defines the data space recreating an SRC needed for a TI from kernel
  *  space
  */
@@ -107,6 +107,7 @@ enum hb_terminate_source
     TI_CRIT_ASSERT =   0x0002,
     TI_SHUTDOWN =      0x0003,
     TI_UNHANDLED_EX =  0x0004,
+    TI_BOOTLOADER =    0x0005,
 };
 
 

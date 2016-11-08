@@ -25,6 +25,7 @@
 
 #include <bootloader/bl_pnorAccess.H>
 #include <bootloader/bootloader_trace.H>
+#include <bootloader/hbblreasoncodes.H>
 #include <util/singleton.H>
 #include <bootloader/bootloader.H>
 #ifdef PNORUTILSTEST_H
@@ -48,6 +49,7 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
     do
     {
         o_errCode = PNOR::NO_ERROR;
+        o_pnorStart = NULL;
 
         ffs_hdr* l_ffs_hdr = NULL;
         //zero out the section data for each section
@@ -58,17 +60,36 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
         //make sure that the buffer is not null
         PNOR::checkForNullBuffer(i_tocBuffer, o_errCode, l_ffs_hdr);
 
-        //Subtract the size of the pnor from the end address to find the start
-        o_pnorStart = i_pnorEnd -
-                        (l_ffs_hdr->block_size * l_ffs_hdr->block_count) + 1;
-
         if(o_errCode != PNOR::NO_ERROR)
         {
             BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_READTOC_CHKNULLBUFFER_NULL);
+            // Set TI information but caller decides to TI or not
+            /*@
+             * @errortype
+             * @moduleid     MOD_PNORACC_READTOC
+             * @reasoncode   RC_CHK_NULL_BUFFER
+             * @userdata1[0:15]   TI_WITH_SRC
+             * @userdata1[16:31]  TI_BOOTLOADER
+             * @userdata1[32:63]  Failing address = 0
+             * @userdata2[0:31]   Pointer to TOC buffer
+             * @userdata2[32:63]  Error code
+             * @devdesc      Invalid TOC buffer pointer
+             * @custdesc     A problem occurred while running processor
+             *               boot code.
+             */
+            bl_terminate(Bootloader::MOD_PNORACC_READTOC,
+                         Bootloader::RC_CHK_NULL_BUFFER,
+                         reinterpret_cast<uint64_t>(i_tocBuffer),
+                         o_errCode,
+                         false);
             break;
         }
 
         BOOTLOADER_TRACE(BTLDR_TRC_PA_READTOC_CHECKNULLBUFFER_RTN);
+
+        //Subtract the size of the pnor from the end address to find the start
+        o_pnorStart = i_pnorEnd -
+                        (l_ffs_hdr->block_size * l_ffs_hdr->block_count) + 1;
 
         //Do a checksum on the header
         if(PNOR::pnor_ffs_checksum(l_ffs_hdr, FFS_HDR_SIZE) != 0)
@@ -79,6 +100,25 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
         if(o_errCode != PNOR::NO_ERROR)
         {
             BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_READTOC_HDRCHECKSUM_ERR);
+            // Set TI information but caller decides to TI or not
+            /*@
+             * @errortype
+             * @moduleid     MOD_PNORACC_READTOC
+             * @reasoncode   RC_HDR_CHECKSUM_ERR
+             * @userdata1[0:15]   TI_WITH_SRC
+             * @userdata1[16:31]  TI_BOOTLOADER
+             * @userdata1[32:63]  Failing address = 0
+             * @userdata2[0:31]   Pointer to FFS header
+             * @userdata2[32:63]  Error code
+             * @devdesc      FFS header checksum error
+             * @custdesc     A problem occurred while running processor
+             *               boot code.
+             */
+            bl_terminate(Bootloader::MOD_PNORACC_READTOC,
+                         Bootloader::RC_HDR_CHECKSUM_ERR,
+                         reinterpret_cast<uint64_t>(l_ffs_hdr),
+                         o_errCode,
+                         false);
             break;
         }
 
@@ -90,6 +130,25 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
         if(o_errCode != PNOR::NO_ERROR)
         {
             BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_READTOC_CHECKHEADER_ERR);
+            // Set TI information but caller decides to TI or not
+            /*@
+             * @errortype
+             * @moduleid     MOD_PNORACC_READTOC
+             * @reasoncode   RC_CHECK_HEADER_ERR
+             * @userdata1[0:15]   TI_WITH_SRC
+             * @userdata1[16:31]  TI_BOOTLOADER
+             * @userdata1[32:63]  Failing address = 0
+             * @userdata2[0:31]   Pointer to FFS header
+             * @userdata2[32:63]  Error code
+             * @devdesc      Check FFS header error(s)
+             * @custdesc     A problem occurred while running processor
+             *               boot code.
+             */
+            bl_terminate(Bootloader::MOD_PNORACC_READTOC,
+                         Bootloader::RC_CHECK_HEADER_ERR,
+                         reinterpret_cast<uint64_t>(l_ffs_hdr),
+                         o_errCode,
+                         false);
             break;
         }
         BOOTLOADER_TRACE(BTLDR_TRC_PA_READTOC_CHECKHEADER_RTN);
@@ -106,6 +165,25 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
         if(o_errCode != PNOR::NO_ERROR)
         {
             BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_READTOC_PARSEENTRIES_ERR);
+            // Set TI information but caller decides to TI or not
+            /*@
+             * @errortype
+             * @moduleid     MOD_PNORACC_READTOC
+             * @reasoncode   RC_PARSE_ENTRIES_ERR
+             * @userdata1[0:15]   TI_WITH_SRC
+             * @userdata1[16:31]  TI_BOOTLOADER
+             * @userdata1[32:63]  Failing address = 0
+             * @userdata2[0:31]   Pointer to FFS entry with error
+             * @userdata2[32:63]  Error code
+             * @devdesc      Parse FFS entries error
+             * @custdesc     A problem occurred while running processor
+             *               boot code.
+             */
+            bl_terminate(Bootloader::MOD_PNORACC_READTOC,
+                         Bootloader::RC_PARSE_ENTRIES_ERR,
+                         reinterpret_cast<uint64_t>(l_err_entry),
+                         o_errCode,
+                         false);
             break;
         }
         BOOTLOADER_TRACE(BTLDR_TRC_PA_READTOC_PARSEENTRIES_RTN);
@@ -143,6 +221,10 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
         }
         else
         {
+            // @TODO RTC:164445 Can remove if there is a way to find another TOC
+            // TI with data from readTOC
+            terminateExecuteTI();
+
             //If the first toc was invalid, look for the backup in the start
             Bootloader::handleMMIO(o_pnorStart,
                               reinterpret_cast<uint64_t>(l_tocBuffer),
@@ -157,6 +239,8 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
                 break;
             }
             BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_FINDTOC_READTOC_ERR);
+            // TI with data from readTOC
+            terminateExecuteTI();
         }
 
         break;
@@ -181,6 +265,7 @@ void bl_pnorAccess::getHBBSection(uint64_t i_pnorEnd,
 
         if(o_errCode != PNOR::NO_ERROR)
         {
+            // Note findTOC should have TI'd so won't get here
             BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_GETHBBSECTION_FINDTOC_ERR);
             break;
         }
@@ -190,6 +275,23 @@ void bl_pnorAccess::getHBBSection(uint64_t i_pnorEnd,
         {
             o_errCode = PNOR::NO_HBB_SECTION;
             BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_GETHBBSECTION_FINDTOC_NOHBB);
+            /*@
+             * @errortype
+             * @moduleid     MOD_PNORACC_GETHBBSECT
+             * @reasoncode   RC_NO_HBB_IN_TOC
+             * @userdata1[0:15]   TI_WITH_SRC
+             * @userdata1[16:31]  TI_BOOTLOADER
+             * @userdata1[32:63]  Failing address = 0
+             * @userdata2[0:31]   Pointer to HBB Section data
+             * @userdata2[32:63]  HBB Section flash address
+             * @devdesc      Invalid flash address for HBB
+             * @custdesc     A problem occurred while running processor
+             *               boot code.
+             */
+            bl_terminate(Bootloader::MOD_PNORACC_GETHBBSECT,
+                         Bootloader::RC_NO_HBB_IN_TOC,
+                         reinterpret_cast<uint64_t>(&o_hbbSection),
+                         o_hbbSection.flashAddr);
             break;
         }
     } while(0);

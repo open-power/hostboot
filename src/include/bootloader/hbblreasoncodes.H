@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/kernel/terminate.H $                              */
+/* $Source: src/include/bootloader/hbblreasoncodes.H $                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,48 +22,54 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/** @file terminate.H
- *  @brief Defines kernel information about the TI data area
+#ifndef __HBBLREASONCODES_H
+#define __HBBLREASONCODES_H
+
+
+#include <usr/hbotcompid.H>
+
+
+
+namespace Bootloader
+{
+
+/**
+* @enum hbblModuleId
+*
+* @brief Module Ids used in created errorlogs.  Indicates which
+*      functions an error log was created in.
+*
+*/
+    enum hbblModuleId
+    {
+        MOD_BOOTLOADER_INVALID   = 0x00, /**< Zero is an invalid module id */
+        MOD_BOOTLOADER_TERMINATE = 0x01, /**< bl_terminate.C : save SRC */
+        MOD_BOOTLOADER_MAIN      = 0x02, /**< bootloader.C : main */
+        MOD_PNORACC_READTOC      = 0x03, /**< bl_pnorAccess.C : read TOC */
+        MOD_PNORACC_GETHBBSECT   = 0x04, /**< bl_pnorAccess.C : get HBB sect */
+
+    };
+
+/**
+ * @enum hbblReasonCode
+ *
+ * @brief Reasoncodes used to describe what errors are being indicated.
+ *
  */
-#ifndef __KERNEL_TERMINATE_H
-#define __KERNEL_TERMINATE_H
+    enum hbblReasonCode
+    {
+        RC_ASSERT            = HBBL_COMP_ID | 0x01, /**< Assert */
+        RC_SHUTDOWN          = HBBL_COMP_ID | 0x02, /**< Shutdown */
+        RC_UNHANDLED_EX      = HBBL_COMP_ID | 0x03, /**< Unhandled Exception */
+        RC_REMOVE_ECC_FAIL   = HBBL_COMP_ID | 0x04, /**< Remove ECC Failed */
+        RC_CHK_NULL_BUFFER   = HBBL_COMP_ID | 0x05, /**< Check for NULL Buffr */
+        RC_HDR_CHECKSUM_ERR  = HBBL_COMP_ID | 0x06, /**< Hdr Checksum Error */
+        RC_CHECK_HEADER_ERR  = HBBL_COMP_ID | 0x07, /**< Check Header Error */
+        RC_PARSE_ENTRIES_ERR = HBBL_COMP_ID | 0x08, /**< Parse Entries Error */
+        RC_NO_HBB_IN_TOC     = HBBL_COMP_ID | 0x09, /**< No HBB Sect in TOC */
+    };
 
-#include <kernel/types.h>
+};  // end Bootloader
 
-
-/** @fn terminateExecuteTI
- *  @brief Sequence to execute a TI attn
- */
-void terminateExecuteTI();
-
-/** @fn termWritePlid
- *  Update TI data area with a PLID.
- *  @param[in] i_source:  indicates what type of fail forced the TI
- *  @param[in] i_plid:    plid to be stored
- *  @param[out] NONE:
- */
-void termWritePlid(uint16_t i_source, uint32_t plid);
-
-/** @fn termWriteSRC
- *  Create an SRC and Update the TI data area with the src created
- *  @param[in] i_source:  indicates what type of fail forced the TI
- *  @param[in] i_reasoncode: reasoncode for the failure(assert or shutdown)
- *  @param[in] i_failAddr: i_linkRegister() value (address of failure)
- *  @param[out] NONE:
- */
-void termWriteSRC(uint16_t i_source,
-                    uint16_t i_reasoncode,
-                    uint64_t i_failAddr = 0);
-
-/** @fn termModifySRC
- *  Modify an SRC and the TI data area for Bootloader
- *  @param[in] i_moduleID: moduleID for the failure (used by Bootloader)
- *  @param[in] i_word7: data to set SRC word 7 / @userdata2[0:31] (optional)
- *  @param[in] i_word8: data to set SRC word 8 / @userdata2[32:63] (optional)
- *  @param[out] NONE:
- */
-void termModifySRC(uint8_t i_moduleID,
-                   uint32_t i_word7 = 0,
-                   uint32_t i_word8 = 0);
 
 #endif
