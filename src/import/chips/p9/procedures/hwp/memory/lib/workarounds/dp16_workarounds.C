@@ -72,8 +72,10 @@ fapi2::ReturnCode dqs_polarity( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_t
     // For Monza DDR port 3, one pair of DQS P/N is swapped polarity.  Not in DDR port 7
     const auto l_pos = mss::pos(i_target);
 
-    // TODO RTC:160353 Need module/chip rev EC support for workarounds
-    // Need to check this for Monza only when attribute support for EC levels is in place
+    if (! mss::chip_ec_feature_mss_dqs_polarity(i_target) )
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
     // So we need to make sure our position is 2 or 3 and skip for the other ports.
     if (l_pos == 2)
@@ -105,6 +107,7 @@ fapi2::ReturnCode rd_dia_config5( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i
     // Config provided by S. Wyatt 8/16
     constexpr uint64_t rd_dia_config = 0x0010;
 
+    // Not checking fo EC level as this isn't an EC feature workaround, it's a incorrect documentation workaround.
     static const std::vector<uint64_t> l_addrs =
     {
         MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_0,
@@ -132,6 +135,7 @@ fapi2::ReturnCode dqsclk_offset( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
     // Config provided by S. Wyatt 9/13
     constexpr uint64_t offset_val = 0x0800;
 
+    // Not checking fo EC level as this isn't an EC feature workaround, it's a incorrect documentation workaround.
     static const std::vector<uint64_t> l_addrs =
     {
         MCA_DDRPHY_DP16_DQSCLK_OFFSET_P0_0,
@@ -160,6 +164,8 @@ fapi2::ReturnCode after_phy_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
     uint8_t is_sim = 0;
     FAPI_TRY( mss::is_simulation(is_sim) );
 
+    // This is a collection or workarounds called after phy reset is called. Each individual workaround
+    // below does its own checking for applicable feature/ec levels.
     for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
     {
         std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>> > l_vreg_coarse;
@@ -170,10 +176,11 @@ fapi2::ReturnCode after_phy_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
             // Read, modify, write
             FAPI_TRY( mss::scom_suckah(p, TT::DLL_VREG_COARSE_REG, l_vreg_coarse) );
             std::for_each(l_vreg_coarse.begin(), l_vreg_coarse.end(),
-                          [](std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> >& v)
+                          [&p](std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> >& v)
             {
-                v.first  = mss::workarounds::dp16::vreg_coarse(v.first);
-                v.second = mss::workarounds::dp16::vreg_coarse(v.second);
+                // Checks for EC level
+                v.first  = mss::workarounds::dp16::vreg_coarse(p, v.first);
+                v.second = mss::workarounds::dp16::vreg_coarse(p, v.second);
             });
             FAPI_TRY( mss::scom_blastah(p, TT::DLL_VREG_COARSE_REG, l_vreg_coarse) );
         }
@@ -183,10 +190,11 @@ fapi2::ReturnCode after_phy_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
         {
             FAPI_TRY( mss::scom_suckah(p, TT::RD_VREF_CNTRL_REG, l_vref_cntl) );
             std::for_each(l_vref_cntl.begin(), l_vref_cntl.end(),
-                          [](std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> >& v)
+                          [&p](std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> >& v)
             {
-                v.first  = mss::workarounds::dp16::vref_dac(v.first);
-                v.second = mss::workarounds::dp16::vref_dac(v.second);
+                // Checks for EC level
+                v.first  = mss::workarounds::dp16::vref_dac(p, v.first);
+                v.second = mss::workarounds::dp16::vref_dac(p, v.second);
             });
             FAPI_TRY( mss::scom_blastah(p, TT::RD_VREF_CNTRL_REG, l_vref_cntl) );
         }
@@ -218,7 +226,7 @@ fapi2::ReturnCode error_dram23( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_t
     // disable errors in the reg
     constexpr uint64_t DISABLE_ERRORS = 0xffff;
 
-    // TODO RTC:160353 - Need module/chip rev EC support for workarounds
+    // EC level taken care of in the caller
 
     // note DRAM's 2/3 use the same scom register, so only one scom is needed per DP
     // extra paretheses keep FAPI_TRY happy for two parameter template functions
@@ -245,7 +253,7 @@ template<  >
 fapi2::ReturnCode modify_small_step_for_big_step<fapi2::TARGET_TYPE_MCA>(const uint8_t i_big_step,
         uint8_t& io_small_step)
 {
-    // TODO RTC:160353 - Need module/chip rev EC support for workarounds
+    // EC level taken care of in the caller
 
     // Step size constants
     constexpr uint8_t MAX_BIG_STEP = 0x10;
@@ -254,7 +262,8 @@ fapi2::ReturnCode modify_small_step_for_big_step<fapi2::TARGET_TYPE_MCA>(const u
     // Conversion over to the nearest allowable small step
     // The algorithm takes the register value + 1 when it runs.
     // This avoids cases where it would infinite loop if it had a 0 value in the register
-    // As such, the math to figure out if a big/small step combination is allowed is ((big_step + 1) % (small_step + 1)) == 0
+    // As such, the math to figure out if a big/small step combination is allowed is ((big_step + 1) %
+    // (small_step + 1)) == 0
     // This below chart takes the allowable combinations or the next smallest allowable value.
     constexpr uint8_t SMALL_STEP_CONVERSION[MAX_BIG_STEP][MAX_SMALL_STEP] =
     {
@@ -310,7 +319,7 @@ fapi_try_exit:
 fapi2::ReturnCode write_config0( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t& o_big_step,
                                  uint8_t& o_small_step)
 {
-    // TODO RTC:160353 - Need module/chip rev EC support for workarounds
+    // EC level taken care of in the caller
 
     // Traits declaration
     typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
@@ -359,13 +368,16 @@ fapi2::ReturnCode convert_train_values<fapi2::TARGET_TYPE_MCA>( const uint8_t i_
         uint8_t& io_train_range,
         uint8_t& io_train_value)
 {
+    // EC level taken care of in the caller
+
     // Number of big steps
     constexpr uint8_t NUM_BIG_STEP = 16;
 
     // Value at which Range 2 equals Range 1's 0 value
     constexpr uint8_t CROSSOVER_RANGE = 0b011000;
 
-    // List of allowable maximum ranges.  The math is max = (absolute_max - (big_step_val + 1)) - (absolute_max - (big_step_val + 1)) % (big_step_val + 1)
+    // List of allowable maximum ranges.  The math is max = (absolute_max - (big_step_val + 1)) -
+    // (absolute_max - (big_step_val + 1)) % (big_step_val + 1)
     constexpr uint8_t l_max_allowable_values[NUM_BIG_STEP] =
     {
         73, 72, 69, 68,
@@ -425,6 +437,8 @@ fapi2::ReturnCode get_train_values( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                     uint8_t& o_train_range,
                                     uint8_t& o_train_value)
 {
+    // EC level taken care of in the caller
+
     // Declares variables
     std::vector<uint64_t> l_ranks;
     uint64_t l_rank = 0;
@@ -473,7 +487,7 @@ fapi2::ReturnCode setup_values( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_t
                                 uint8_t& o_train_range,
                                 uint8_t& o_train_value)
 {
-    // TODO RTC:160353 - Need module/chip rev EC support for workarounds
+    // EC level taken care of in the caller
 
     // Traits declaration
     typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;

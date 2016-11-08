@@ -1157,12 +1157,12 @@ fapi2::ReturnCode reset_dll( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
 {
     typedef dp16Traits<TARGET_TYPE_MCA> TT;
 
-    // Magic numbers are from the PHY team (see the ddry phy initfile, too.) They are, in fact,
-    // magic numbers ...
-    // TK How about a little broadcast action here? BRS
     // For DD1.0 we have some workarounds. We send the magic
     // number in to the work around and it fixes it up as needed.
-    uint64_t l_vreg_cnrtl = mss::workarounds::dp16::vreg_control0(0x6740);
+    uint64_t l_vreg_cnrtl = mss::workarounds::dp16::vreg_control0(i_target, 0x6740);
+
+    // Magic numbers are from the PHY team (see the ddry phy initfile, too.) They are, in fact,
+    // magic numbers ...
 
     // TK How about a little broadcast action here? BRS
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_CNFG_REG,        0x0060) );

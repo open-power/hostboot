@@ -28,6 +28,7 @@
 
 #include <fapi2.H>
 #include <lib/mss_utils.H>
+#include <lib/mss_attribute_accessors_manual.H>
 
 
 

@@ -64,7 +64,10 @@ inline std::vector< fapi2::Target<M> > find_targets( const fapi2::Target<T>& i_t
 /// @return an M target.
 ///
 template< fapi2::TargetType M, fapi2::TargetType T >
-inline fapi2::Target<M> find_target( const fapi2::Target<T>& i_target );
+inline fapi2::Target<M> find_target( const fapi2::Target<T>& i_target )
+{
+    return i_target.template getParent<M>();
+}
 
 ///
 /// @brief find the union of functionl targets and any magic targets
@@ -114,17 +117,6 @@ template<>
 inline fapi2::Target<fapi2::TARGET_TYPE_MCBIST> find_target( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
 {
     return i_target.getParent<fapi2::TARGET_TYPE_MCA>().getParent<fapi2::TARGET_TYPE_MCBIST>();
-}
-
-///
-/// @brief find the McBIST given a MCA
-/// @param[in] i_target the fapi2 target MCA
-/// @return a McBIST target.
-///
-template<>
-inline fapi2::Target<fapi2::TARGET_TYPE_MCBIST> find_target( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
-{
-    return i_target.getParent<fapi2::TARGET_TYPE_MCBIST>();
 }
 
 ///
@@ -295,18 +287,6 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets
 }
 
 ///
-/// @brief find the MCS given a MCA
-/// @param[in] i_target the fapi2 target MCA
-/// @return a MCS target.
-///
-template<>
-inline fapi2::Target<fapi2::TARGET_TYPE_MCS> find_target( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
-{
-    return i_target.getParent<fapi2::TARGET_TYPE_MCS>();
-}
-
-
-///
 /// @brief find all the DIMM connected to an MCA
 /// @param[in] i_target a fapi2::Target MCA
 /// @return a vector of fapi2::TARGET_TYPE_DIMM
@@ -330,48 +310,13 @@ inline fapi2::Target<fapi2::TARGET_TYPE_MCS> find_target( const fapi2::Target<fa
 }
 
 ///
-/// @brief find the MCA given a DIMM
-/// @param[in] i_target the fapi2 target DIMM
-/// @return a MCA target.
-///
-template<>
-inline fapi2::Target<fapi2::TARGET_TYPE_MCA> find_target( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
-{
-    return i_target.getParent<fapi2::TARGET_TYPE_MCA>();
-}
-
-
-///
-/// @brief find the McBIST given a MCS
-/// @param[in] i_target the fapi2 target MCS
-/// @return a McBIST target.
-///
-template<>
-inline fapi2::Target<fapi2::TARGET_TYPE_MCBIST> find_target( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
-{
-    return i_target.getParent<fapi2::TARGET_TYPE_MCBIST>();
-}
-
-///
-/// @brief find the PROC_CHIP given a MCBIST
-/// @param[in] i_target the fapi2 target MCBIST
-/// @return a PROC_CHIP target.
-///
-template<>
-inline fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> find_target( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&
-        i_target)
-{
-    return i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-}
-
-///
 /// @brief find all the MCBISTs connected to a PROC_CHIP
 /// @param[in] i_target a fapi2::Target PROC_CHIP
 /// @return a vector of fapi2::TARGET_TYPE_MCBIST
 ///
 template<>
-inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCBIST> > find_targets( const
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCBIST> > find_targets(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
 {
     return i_target.getChildren<fapi2::TARGET_TYPE_MCBIST>();
 }
