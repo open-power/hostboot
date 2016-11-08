@@ -32,8 +32,6 @@
 // *Consumed by : HB
 // *Level       : 2
 ///
-/// @todo (to be considered in L2/L3 development) AVSBus timing parameters
-///  as attributes or not.  They were hardcoded in P8.
 
 #include <p9_avsbus_lib.H>
 #include <p9_avsbus_registers.H>
@@ -48,28 +46,36 @@ avsCRCcalc(const uint32_t i_data)
     //Polynomial= x^3 + x^2 + 1 = 1*x^3 + 0*x^2 + 1*x^1 + 1*x^0 = divisor(1011)
 
     uint32_t l_crc_value = 0;
-    uint32_t l_polynomial = 0xb0000000;
-    uint32_t l_msb = 0x80000000;
+    uint32_t l_data, l_msb_xor, l_crc_0, l_crc_1, l_crc_2, l_data_msb_shifted;
+    uint32_t l_crc = 0;
 
-    l_crc_value = i_data & p9avslib::AVS_CRC_DATA_MASK;
+    // CRC computation code for polynomial 0b1011 for P9
+    l_data = i_data >> 3;
 
-    while (l_crc_value & p9avslib::AVS_CRC_DATA_MASK)
+    for (uint8_t i = 0; i <= 31; i++)
     {
-        if (l_crc_value & l_msb)
-        {
-            //if l_msb is 1'b1, divide by l_polynomial and shift l_polynomial
-            // to the right
-            l_crc_value = l_crc_value ^ l_polynomial;
-            l_polynomial = l_polynomial >> 1;
-        }
-        else
-        {
-            // if l_msb is zero, shift l_polynomial
-            l_polynomial = l_polynomial >> 1;
-        }
 
-        l_msb = l_msb >> 1;
+
+        // Get the Data MSB into LSB position
+        l_data_msb_shifted = (l_data) >> 31;
+
+        // Compute the XOR value
+        l_msb_xor = l_data_msb_shifted ^ ((l_crc & 0x00000004) >> 2);
+
+        l_crc_0 = (l_crc & 0x00000002) << 1;
+        l_crc_1 = (l_crc & 0x00000001) ^ l_msb_xor;
+        l_crc_2 = l_msb_xor;
+
+        l_crc = (l_crc_0) | (l_crc_1 << 1) | (l_crc_2);
+
+        // Shift out the used MSB
+        l_data = l_data << 1;
+
     }
+
+    l_crc_value = l_crc;
+
+    FAPI_INF("The computed CRC Value is %d", l_crc_value)
 
     return l_crc_value;
 }
@@ -87,6 +93,8 @@ avsInitExtVoltageControl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 {
 
     fapi2::buffer<uint64_t> l_data64;
+    uint32_t l_avsbus_frequency, l_value, l_nest_frequency;
+    uint16_t l_divider;
     // if using interrupt clear ongoing in OITR1 and OIEPR0
 
     FAPI_TRY(putScom(i_target, OCB_OITR1,  0));  //edge
@@ -159,13 +167,43 @@ avsInitExtVoltageControl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
     ocb_o2sctrl10a_t O2SCTRL1_value;
     O2SCTRL1_value.fields.o2s_bridge_enable_an = 1;
-    O2SCTRL1_value.fields.o2s_clock_divider_an = 0x04;//@todo attr candidate
+    //O2SCTRL1_value.fields.o2s_clock_divider_an = 0x04;//Attribute supported added below
+
+    //Nest frequency attribute in MHz
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_nest_frequency));
+
+    // AVSBus frequency attribute in KHz
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_AVSBUS_FREQUENCY, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_value));
+
+    if (l_value == 0)
+    {
+        l_avsbus_frequency = p9avslib::AVSBUS_FREQUENCY / 1000;
+    }
+    else
+    {
+        l_avsbus_frequency = l_value / 1000;
+    }
+
+    // Divider = Nest Frequency / (AVSBus Frequency * 8) - 1
+    l_divider = (l_nest_frequency / (l_avsbus_frequency * 8)) - 1;
+
+    FAPI_INF("Nest frequency value is %d", l_nest_frequency);
+    FAPI_INF("AVSBus frequency value is %d", l_avsbus_frequency);
+    FAPI_INF("Divider value is %d", l_divider);
+
+    O2SCTRL1_value.fields.o2s_clock_divider_an = l_divider;
     O2SCTRL1_value.fields.o2s_nr_of_frames_an = 1;
+    O2SCTRL1_value.fields.o2s_cpol_an = 0;
+    O2SCTRL1_value.fields.o2s_cpha_an = 1;
 
 //    O2SCTRL2_value.value  = 0b00000000000000000000000000000000;
 
     l_data64.flush<0>();
     l_data64.insertFromRight<0, 1>(O2SCTRL1_value.fields.o2s_bridge_enable_an);
+    l_data64.insertFromRight<2, 1>(O2SCTRL1_value.fields.o2s_cpol_an);
+    l_data64.insertFromRight<3, 1>(O2SCTRL1_value.fields.o2s_cpha_an);
     l_data64.insertFromRight<4, 10>(O2SCTRL1_value.fields.o2s_clock_divider_an);
     l_data64.insertFromRight<17, 1>(O2SCTRL1_value.fields.o2s_nr_of_frames_an);
 
@@ -272,7 +310,7 @@ avsDriveCommand(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     l_data64 &= p9avslib::OCB_OIMR1_MASK_VALUES[i_avsBusNum][i_o2sBridgeNum];
     FAPI_TRY(putScom(i_target, OCB_OIMR1, l_data64));
 
-    // @todo:  double check on Endianess definition
+    // MSB sent out first always, which should be start code 0b01
     // compose and send frame
     //      CRC(31:29),
     //      l_Reserved(28:13) (read), CmdData(28:13) (write)
@@ -304,6 +342,7 @@ avsDriveCommand(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     l_crc = avsCRCcalc(l_data64WithoutCRC);
 
     l_data64.insertFromRight<29, 3>(l_crc);
+
     FAPI_TRY(putScom(i_target,
                      p9avslib::OCB_O2SWD[i_avsBusNum][i_o2sBridgeNum], l_data64));
 
@@ -323,15 +362,17 @@ avsVoltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                const uint8_t i_avsBusNum,
                const uint8_t i_o2sBridgeNum,
                const uint32_t i_RailSelect,
-               uint32_t* o_Voltage)
+               uint32_t& o_Voltage)
 {
 
     fapi2::buffer<uint64_t> l_data64;
 
+    // Values as per VRM spec
+    // Cmd 0b11, cmd group 0, cmd data type - 0b0000 for voltage read, outbound data = 0xFFFf
     uint32_t l_CmdType     = 3; // read
     uint32_t l_CmdGroup    = 0;
     uint32_t l_CmdDataType = 0;
-    uint32_t l_outboundCmdData = 0;  // @todo check the spec on this for a read
+    uint32_t l_outboundCmdData = 0xFFFF;
 
     // Drive a Read Command
     FAPI_TRY(avsDriveCommand(i_target,
@@ -344,9 +385,12 @@ avsVoltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                              l_outboundCmdData));
 
     // Read returned voltage value from Read frame
-    FAPI_TRY(putScom(i_target,
+    FAPI_TRY(getScom(i_target,
                      p9avslib::OCB_O2SRD[i_avsBusNum][i_o2sBridgeNum], l_data64));
-    *o_Voltage = ((l_data64 >> 8) & 0x0000FFFF) >> 32;
+    // Extracting bits 8:23 , which contains voltage read data
+    o_Voltage = (l_data64 & 0x00FFFF0000000000) >> 40;
+
+    FAPI_INF("Voltage value read is %d mV", o_Voltage);
 
     // @todo L3 insert SET_HWP_RC macro with FFDC
     // FFDC:
@@ -413,7 +457,7 @@ avsIdleFrame(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
              const uint8_t i_avsBusNum,
              const uint8_t i_o2sBridgeNum)
 {
-    fapi2::buffer<uint64_t> l_idleframe = 0xFFFFFFFF00000000ull;
+    fapi2::buffer<uint64_t> l_idleframe = 0xFFFFFFFFFFFFFFFFull;
     fapi2::buffer<uint64_t> l_scomdata;
 
     // clear sticky bits in o2s_status_reg
@@ -428,8 +472,9 @@ avsIdleFrame(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     l_scomdata &= p9avslib::OCB_OIMR1_MASK_VALUES[i_avsBusNum][i_o2sBridgeNum];
     FAPI_TRY(putScom(i_target, OCB_OIMR1, l_scomdata));
 
+    FAPI_INF("Sending idle frame of all 1s");
     // Send the idle frame
-    l_scomdata = l_idleframe << 32;
+    l_scomdata = l_idleframe;
     FAPI_TRY(putScom(i_target,
                      p9avslib::OCB_O2SWD[i_avsBusNum][i_o2sBridgeNum], l_scomdata));
 
