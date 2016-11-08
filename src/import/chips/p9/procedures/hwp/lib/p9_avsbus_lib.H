@@ -137,11 +137,12 @@ enum avslibconstants
 // @todo:  This should be calculated based on time (eg 100ms) and the projected
 // time that a SCOM poll will take.
 // const uint32_t MAX_POLL_COUNT_AVS = 0x1000;
+// AVSBUS_FREQUENCY specified in Khz, Default value 10 MHz
     MAX_POLL_COUNT_AVS = 0x1000,
     AVS_CRC_DATA_MASK = 0xfffffff8,
     O2S_FRAME_SIZE = 0x20,
-    O2S_IN_DELAY1 = 0x3F
-
+    O2S_IN_DELAY1 = 0x3F,
+    AVSBUS_FREQUENCY = 0x2710
 };
 
 // Constant definitions
@@ -231,7 +232,7 @@ avsVoltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                const uint8_t i_avsBusNum,
                const uint8_t i_o2sBridgeNum,
                const uint32_t i_RailSelect,
-               uint32_t* o_Voltage);
+               uint32_t& o_Voltage);
 
 
 ///@brief Perform an AVS write transaction
