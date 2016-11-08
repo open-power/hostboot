@@ -727,16 +727,6 @@ namespace INTR
              */
             errlHndl_t hw_disableIntrMpIpl();
 
-            /**
-             * Read the Psi interrupt source number out of the HW
-             *
-             * @param i_target  Processor target to read value from
-             * @param o_irsn    IRSN of the PSI unit for the processor
-             * @param o_num     Number of interrupts behind IRSN
-             * @return an error handle on error
-             */
-            errlHndl_t getPsiIRSN(TARGETING::Target * i_target,
-                                  uint32_t& o_irsn, uint32_t& o_num);
 
             /**
              * Read the NX interrupt source number out of the HW
@@ -830,6 +820,12 @@ namespace INTR
              * @param[in] _pir - The PIR value (as void*) to check for.
              */
             static void* handleCpuTimeout(void* _pir);
+
+            /**
+             * Reset the INTP components to prepare for MPIPL
+             * @return error log handle
+             */
+            errlHndl_t resetIntpForMpipl(void);
 
     };
 }; // INTR namespace

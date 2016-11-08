@@ -79,6 +79,77 @@ void IntrRp::init( errlHndl_t   &io_errlHndl_t )
     io_errlHndl_t = err ;
 }
 
+errlHndl_t IntrRp::resetIntpForMpipl()
+{
+    errlHndl_t err = NULL;
+    do{
+        TARGETING::TargetHandleList l_funcProcs;
+
+        getAllChips(l_funcProcs, TYPE_PROC);
+
+        //Need to make sure we have all of the functional procs in iv_chipList
+        for(auto & l_procChip : l_funcProcs)
+        {
+            intr_hdlr_t* l_procIntrHdlr = new intr_hdlr_t(l_procChip);
+            //make sure it is not the master, as master has already been added
+            if (l_procIntrHdlr != iv_masterHdlr)
+            {
+                TRACFCOMP(g_trac_intr, "IntrRp::resetIntpForMpipl() Adding slave proc %lx to list of chips.", get_huid(l_procChip));
+                iv_chipList.push_back(l_procIntrHdlr);
+                // Set the common Interrupt BAR Scom Registers for the proc
+                err = setCommonInterruptBARs(l_procIntrHdlr);
+                if (err)
+                {
+                    TRACFCOMP(g_trac_intr, "IntrRp::resetIntpForMpipl() Setting common interrupt Bars on proc %lx.", get_huid(l_procChip));
+                    break;
+                }
+            }
+        }
+
+        //Break if there was an error in the previous for-loop
+        if(err)
+        {
+            break;
+        }
+
+        TRACFCOMP(g_trac_intr, "IntrRp::resetIntpForMpipl() Masking all interrupt sources.");
+        //Mask any future interrupts to avoid receiving anymore while in the process
+        // of resetting the rest of the Interrupt Logic
+        err = maskAllInterruptSources();
+        if (err)
+        {
+            TRACFCOMP(g_trac_intr, "IntrRp::resetIntpForMpipl() Error while masking all interrupt sources.");
+            break;
+        }
+
+        //Reset PSIHB Interrupt Space
+        TRACFCOMP(g_trac_intr, "Reset PSIHB Interrupt Space");
+
+        //First reset INTRP logic for slave procs
+        for(ChipList_t::iterator targ_itr = iv_chipList.begin();
+        targ_itr != iv_chipList.end(); ++targ_itr)
+        {
+            if (*targ_itr != iv_masterHdlr)
+            {
+                PSIHB_SW_INTERFACES_t * this_psihb_ptr = (*targ_itr)->psiHbBaseAddr;
+                this_psihb_ptr->icr = PSI_BRIDGE_INTP_STATUS_CTL_RESET;
+                resetIntUnit(*targ_itr);
+            }
+        }
+
+        //Then reset master proc INTRP logic
+        PSIHB_SW_INTERFACES_t * this_psihb_ptr = iv_masterHdlr->psiHbBaseAddr;
+        this_psihb_ptr->icr = PSI_BRIDGE_INTP_STATUS_CTL_RESET;
+        TRACFCOMP(g_trac_intr, "Reset PSIHB INTR Complete");
+
+        //Reset XIVE Interrupt unit
+        resetIntUnit(iv_masterHdlr);
+
+    }while(0);
+
+    return err;
+}
+
 errlHndl_t IntrRp::_init()
 {
     errlHndl_t l_err = NULL;
@@ -137,6 +208,23 @@ errlHndl_t IntrRp::_init()
             break;
         }
 
+        uint8_t is_mpipl = 0;
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        if(sys &&
+            sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL_HB>(is_mpipl) &&
+            is_mpipl)
+        {
+            TRACFCOMP(g_trac_intr,"Reset interrupt service for MPIPL");
+            l_err = resetIntpForMpipl();
+
+            if(l_err)
+            {
+                TRACFCOMP(g_trac_intr,"Failed to reset interrupt service for MPIPL");
+                break;
+            }
+        }
+
         //Disable Incoming PSI Interrupts
         TRACDCOMP(g_trac_intr, "IntrRp::_init() Disabling PSI Interrupts");
         uint64_t l_disablePsiIntr = PSI_BRIDGE_INTP_STATUS_CTL_DISABLE_PSI;
@@ -152,26 +240,6 @@ errlHndl_t IntrRp::_init()
                              "IntrRp::_init() Error disabling PSI Interrupts.");
             break;
         }
-
-      //TODO RTC 134431
-      #ifdef CONFIG_MPIPL_ENABLED
-        uint8_t is_mpipl = 0;
-        TARGETING::Target * sys = NULL;
-        TARGETING::targetService().getTopLevelTarget(sys);
-        if(sys &&
-           sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL_HB>(is_mpipl) &&
-           is_mpipl)
-        {
-            TRACFCOMP(g_trac_intr,"Disable interupts for MPIPL");
-            l_err = hw_disableIntrMpIpl();
-
-            if(l_err)
-            {
-                errlCommit(l_err,INTR_COMP_ID);
-                l_err = NULL;
-            }
-        }
-      #endif
 
         TRACFCOMP(g_trac_intr, "IntrRp::_init() Masking Interrupts");
         //Mask off all interrupt sources - these will be enabled as SW entities
