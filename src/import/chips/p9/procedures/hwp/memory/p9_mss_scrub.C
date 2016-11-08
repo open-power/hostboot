@@ -78,7 +78,7 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     };
 
     // We'll fill in the initial delay below
-    mss::poll_parameters l_poll_parameters(0, 200, 10 * mss::DELAY_1MS, 200, 500);
+    mss::poll_parameters l_poll_parameters(0, 200, 100 * mss::DELAY_1MS, 200, 500);
     uint64_t l_memory_size = 0;
 
     FAPI_TRY( mss::eff_memory_size(i_target, l_memory_size) );
