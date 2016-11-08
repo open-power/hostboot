@@ -40,11 +40,6 @@ namespace RT_TARG
     {
         MEMBUF_ID_SHIFT = 4,    //!< CHIPID for MEMBUF is '<procid>MMMM'b
         MEMBUF_ID_MASK  = 0x0000000F, //!< valid position bits for MEMBUF
-
-        PROC_TYPE        = 0x00000000, //!< PROC chip id type
-        MEMBUF_TYPE      = 0x80000000, //!< MEMBUF chip id type
-        CORE_TYPE        = 0x40000000, //!< CORE chip id type
-        CHIPID_TYPE_MASK = 0xFF000000, //!< TYPE field
     };
 
 

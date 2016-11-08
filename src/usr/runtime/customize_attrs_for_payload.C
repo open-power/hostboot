@@ -44,6 +44,7 @@
 #include <targeting/common/util.H>
 #include <errl/errludtarget.H>
 #include <runtime/customize_attrs_for_payload.H>
+#include <runtime/interface.h>
 
 extern trace_desc_t *g_trac_runtime;
 
@@ -202,7 +203,7 @@ errlHndl_t computeNonPhypRtTarget(
 
             o_rtTargetId = (o_rtTargetId << RT_TARG::MEMBUF_ID_SHIFT);
             o_rtTargetId += pos;
-            o_rtTargetId |= RT_TARG::MEMBUF_TYPE;
+            o_rtTargetId |= HBRT_MEMBUF_TYPE;
         }
         else if(targetingTargetType == TARGETING::TYPE_CORE)
         {
@@ -224,7 +225,7 @@ errlHndl_t computeNonPhypRtTarget(
             }
 
             o_rtTargetId = PIR_t::createCoreId(o_rtTargetId,pos);
-            o_rtTargetId |= RT_TARG::CORE_TYPE;
+            o_rtTargetId |= HBRT_CORE_TYPE;
         }
         else
         {
@@ -294,13 +295,13 @@ errlHndl_t getRtTypeForTarget(
     switch(targetingTargetType)
     {
         case TARGETING::TYPE_PROC:
-            rtType = RT_TARG::PROC_TYPE;
+            rtType = HBRT_PROC_TYPE;
             break;
         case TARGETING::TYPE_MEMBUF:
-            rtType = RT_TARG::MEMBUF_TYPE;
+            rtType = HBRT_MEMBUF_TYPE;
             break;
         case TARGETING::TYPE_CORE:
-            rtType = RT_TARG::CORE_TYPE;
+            rtType = HBRT_CORE_TYPE;
             break;
         default:
             found = false;
