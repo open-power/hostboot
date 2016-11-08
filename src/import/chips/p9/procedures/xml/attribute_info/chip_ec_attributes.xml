@@ -39,11 +39,11 @@
     </description>
     <chipEcFeature>
       <chip>
-	<name>ENUM_ATTR_NAME_NIMBUS</name>
-	<ec>
-	  <value>0x20</value>
-	  <test>GREATER_THAN_OR_EQUAL</test>
-	</ec>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
       </chip>
     </chipEcFeature>
   </attribute>
@@ -163,12 +163,12 @@
       </chip>
     </chipEcFeature>
   </attribute>
-  <!-- ******************************************************************** --> 
+  <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_VITL_CLOCK_GATING</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      DD1 only: disable local clock gating VITAL. This is used by the 
+      DD1 only: disable local clock gating VITAL. This is used by the
       procedure for p9_sbe_tp_chiplet_init1 and p9_Sbe_chiplet_reset.
     </description>
     <chipEcFeature>
@@ -181,7 +181,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
-  <!-- ******************************************************************** --> 
+  <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW388878</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -198,7 +198,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
-  <!-- ******************************************************************** --> 
+  <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW376651</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -216,7 +216,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
-  <!-- ******************************************************************** --> 
+  <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW389511</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -233,7 +233,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
-  <!-- ******************************************************************** --> 
+  <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_PSI_HALF_SPEED</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -251,5 +251,133 @@
       </chip>
     </chipEcFeature>
   </attribute>
-  <!-- ******************************************************************** --> 
+  <!-- ******************************************************************** -->
+
+  <!-- ******************************************************************** -->
+  <!-- Memory Section                                                       -->
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_UT_EC_NIMBUS_LESS_THAN_TWO_OH</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Attribute used only for memory subsystem unit tests. Tells us whether
+      the chip EC we're running on is less than 2.0 and we're on a Nimbus
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MCBIST_END_OF_RANK</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      MCBIST has a bug where it won't detect the end of a rank properly for
+      a 1R DIMM during super-fast read.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_WR_VREF</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      In DD1 Nimbus in the WR VREF algorithm, certain work-arounds are needed
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_DQS_POLARITY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      For Monza DDR port 2, one pair of DQS P/N is swapped polarity.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_VCCD_OVERRIDE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Override VREG control information
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_VREF_DAC</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      VREF DAC work-around for Nimbus DD1.0
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_VREG_COARSE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      VREG Coarse work-around for Nimbus DD1.0
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <!-- ******************************************************************** -->
+  <!-- End Memory Section                                                   -->
+  <!-- ******************************************************************** -->
 </attributes>
