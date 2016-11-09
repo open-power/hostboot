@@ -1494,6 +1494,10 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             }
 
             {
+                l_scom_buffer.insert<uint64_t> (literal_0b0000000, 40, 7, 57 );
+            }
+
+            {
                 if ((l_TGT1_ATTR_PROC_FABRIC_CCSM_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_CCSM_MODE_ON))
                 {
                     constexpr auto l_PB_COM_PB_CFG_PHYP_IS_GROUP_NEXT_ON = 0x7;
@@ -1927,6 +1931,29 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 {
                     constexpr auto l_PB_COM_PB_CFG_LINK_NA3_ADDR_DIS_NEXT_ON = 0x7;
                     l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_LINK_NA3_ADDR_DIS_NEXT_ON, 11, 1, 62 );
+                }
+            }
+
+            {
+                if (((l_TGT1_ATTR_PROC_FABRIC_A_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_A_BUS_WIDTH_4_BYTE)
+                     && (l_def_A_CMD_RATE_4B_R != literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> ((l_def_A_CMD_RATE_4B_N / l_def_A_CMD_RATE_D), 56, 8, 56 );
+                }
+                else if (((l_TGT1_ATTR_PROC_FABRIC_A_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_A_BUS_WIDTH_4_BYTE)
+                          && (l_def_A_CMD_RATE_4B_R == literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> (((l_def_A_CMD_RATE_4B_N / l_def_A_CMD_RATE_D) - literal_1), 56, 8, 56 );
+                }
+                else if (((l_TGT1_ATTR_PROC_FABRIC_A_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_A_BUS_WIDTH_2_BYTE)
+                          && (l_def_A_CMD_RATE_2B_R != literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> ((l_def_A_CMD_RATE_2B_N / l_def_A_CMD_RATE_D), 56, 8, 56 );
+                }
+                else if (((l_TGT1_ATTR_PROC_FABRIC_A_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_A_BUS_WIDTH_2_BYTE)
+                          && (l_def_A_CMD_RATE_2B_R == literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> (((l_def_A_CMD_RATE_2B_N / l_def_A_CMD_RATE_D) - literal_1), 56, 8, 56 );
                 }
             }
 
@@ -2385,6 +2412,29 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_X_GATHER_ENABLE_NEXT_ON, 50, 1, 62 );
             }
 
+            {
+                if (((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                     && (l_def_X_CMD_RATE_4B_R != literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> ((l_def_X_CMD_RATE_4B_N / l_def_X_CMD_RATE_D), 56, 8, 56 );
+                }
+                else if (((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                          && (l_def_X_CMD_RATE_4B_R == literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> (((l_def_X_CMD_RATE_4B_N / l_def_X_CMD_RATE_D) - literal_1), 56, 8, 56 );
+                }
+                else if (((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                          && (l_def_X_CMD_RATE_2B_R != literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> ((l_def_X_CMD_RATE_2B_N / l_def_X_CMD_RATE_D), 56, 8, 56 );
+                }
+                else if (((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                          && (l_def_X_CMD_RATE_2B_R == literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> (((l_def_X_CMD_RATE_2B_N / l_def_X_CMD_RATE_D) - literal_1), 56, 8, 56 );
+                }
+            }
+
             l_rc = fapi2::putScom(TGT0, 0x5011c0full, l_scom_buffer);
 
             if (l_rc)
@@ -2532,6 +2582,10 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                     constexpr auto l_PB_COM_PB_CFG_OPT3_MODE_NEXT_NV = 0x2a;
                     l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_OPT3_MODE_NEXT_NV, 38, 2, 62 );
                 }
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0b0000000, 40, 7, 57 );
             }
 
             {
@@ -2968,6 +3022,29 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 {
                     constexpr auto l_PB_COM_PB_CFG_LINK_NA3_ADDR_DIS_NEXT_ON = 0x7;
                     l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_LINK_NA3_ADDR_DIS_NEXT_ON, 11, 1, 63 );
+                }
+            }
+
+            {
+                if (((l_TGT1_ATTR_PROC_FABRIC_A_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_A_BUS_WIDTH_4_BYTE)
+                     && (l_def_A_CMD_RATE_4B_R != literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> ((l_def_A_CMD_RATE_4B_N / l_def_A_CMD_RATE_D), 56, 8, 56 );
+                }
+                else if (((l_TGT1_ATTR_PROC_FABRIC_A_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_A_BUS_WIDTH_4_BYTE)
+                          && (l_def_A_CMD_RATE_4B_R == literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> (((l_def_A_CMD_RATE_4B_N / l_def_A_CMD_RATE_D) - literal_1), 56, 8, 56 );
+                }
+                else if (((l_TGT1_ATTR_PROC_FABRIC_A_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_A_BUS_WIDTH_2_BYTE)
+                          && (l_def_A_CMD_RATE_2B_R != literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> ((l_def_A_CMD_RATE_2B_N / l_def_A_CMD_RATE_D), 56, 8, 56 );
+                }
+                else if (((l_TGT1_ATTR_PROC_FABRIC_A_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_A_BUS_WIDTH_2_BYTE)
+                          && (l_def_A_CMD_RATE_2B_R == literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> (((l_def_A_CMD_RATE_2B_N / l_def_A_CMD_RATE_D) - literal_1), 56, 8, 56 );
                 }
             }
 
@@ -3424,6 +3501,29 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             {
                 constexpr auto l_PB_COM_PB_CFG_X_GATHER_ENABLE_NEXT_ON = 0x7;
                 l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_X_GATHER_ENABLE_NEXT_ON, 50, 1, 63 );
+            }
+
+            {
+                if (((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                     && (l_def_X_CMD_RATE_4B_R != literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> ((l_def_X_CMD_RATE_4B_N / l_def_X_CMD_RATE_D), 56, 8, 56 );
+                }
+                else if (((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                          && (l_def_X_CMD_RATE_4B_R == literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> (((l_def_X_CMD_RATE_4B_N / l_def_X_CMD_RATE_D) - literal_1), 56, 8, 56 );
+                }
+                else if (((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                          && (l_def_X_CMD_RATE_2B_R != literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> ((l_def_X_CMD_RATE_2B_N / l_def_X_CMD_RATE_D), 56, 8, 56 );
+                }
+                else if (((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                          && (l_def_X_CMD_RATE_2B_R == literal_0)))
+                {
+                    l_scom_buffer.insert<uint64_t> (((l_def_X_CMD_RATE_2B_N / l_def_X_CMD_RATE_D) - literal_1), 56, 8, 56 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x501200full, l_scom_buffer);
