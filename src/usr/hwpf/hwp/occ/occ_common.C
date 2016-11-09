@@ -24,6 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include    <stdint.h>
+#include    <config.h>
 
 #include    <occ/occ_common.H>
 #include    <occ/occAccess.H>
@@ -65,6 +66,10 @@
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
   #include <diag/prdf/prdfWriteHomerFirData.H>
+#endif
+
+#ifdef CONFIG_SECUREBOOT
+#include <secureboot/service.H>
 #endif
 
 // Easy macro replace for unit testing
@@ -655,13 +660,29 @@ namespace HBOCC
                 break;
             }
 #endif
-            void* occVirt = reinterpret_cast<void *>(i_occImgVaddr);
-            l_errl = loadOCCImageToHomer( occVirt );
-            if( l_errl )
+
+            bool writeHomer = true;
+            #ifdef CONFIG_SECUREBOOT
+            #ifdef __HOSTBOOT_RUNTIME
+            if(SECUREBOOT::enabled())
             {
                 TRACFCOMP(g_fapiImpTd,
-                        ERR_MRK"loadOCC: loadOCCImageToHomer failed!");
-                break;
+                    INFO_MRK "loadOCC: Runtime request and secureboot "
+                    "enabled; not loading new OCC image to HOMER");
+                writeHomer = false;
+            }
+            #endif
+            #endif
+            if(writeHomer)
+            {
+                void* occVirt = reinterpret_cast<void *>(i_occImgVaddr);
+                l_errl = loadOCCImageToHomer( occVirt );
+                if( l_errl )
+                {
+                    TRACFCOMP(g_fapiImpTd,
+                            ERR_MRK"loadOCC: loadOCCImageToHomer failed!");
+                    break;
+                }
             }
           }
         }while(0);
