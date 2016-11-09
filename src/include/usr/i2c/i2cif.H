@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -209,8 +209,6 @@ errlHndl_t i2cEnableSensorCache( TARGETING::Target * i_target );
  */
 enum DeviceType_t
 {
-    //@TODO-RTC:161649-Map these directly to some HDAT constants?
-    //  Or something from MRW?
     DEVTYPE_955x            = 0x01,
     DEVTYPE_SEEPROM         = 0x02,
     DEVTYPE_NUVOTON_TPM     = 0x03,
@@ -220,39 +218,18 @@ enum DeviceType_t
 };
 
 /**
- * Enumeration that defines possible I2C device purposes
- */
-enum DevicePurpose_t
-{
-    //@TODO-RTC:161649-Map these directly to some HDAT constants?
-    //  Or something from MRW?
-    PURPOSE_CABLE_CARD_PRES            = 0x01,
-    PURPOSE_CABLE_CARD_POWER_SENSE     = 0x02,
-    PURPOSE_CABLE_CARD_POWER_CONTROL   = 0x03,
-    PURPOSE_TPM                        = 0x04,
-    PURPOSE_MODULE_VPD                 = 0x05,
-    PURPOSE_DOMM_SPD                   = 0x06,
-    PURPOSE_PROC_MODULE_VPD            = 0x07,
-    PURPOSE_SBE_SEEPROM                = 0x08,
-    PURPOSE_PLANAR_VPD                 = 0x09,
-    PURPOSE_PCI_HOTPLUG                = 0x0A,
-    PURPOSE_UNKNOWN                    = 0xFF,
-};
-
-/**
  * Structure to return I2C information in
  */
 struct DeviceInfo_t
 {
-    //@TODO-RTC:161649-Add more details/comments
-    TARGETING::Target* masterChip;
-    uint8_t engine;
-    uint8_t masterPort;
-    DeviceType_t deviceType;
-    uint8_t addr; //Is this left-shifted or not?
-    uint8_t slavePort;
-    uint8_t busFreqKhz;
-    DevicePurpose_t devicePurpose;
+    TARGETING::Target* masterChip; //< I2C Master Chip
+    uint8_t engine; //< I2C engine (relative to master chip)
+    uint8_t masterPort; //< I2C port (relative to engine)
+    uint8_t deviceType; //< Slave device Type (from enum)
+    uint8_t addr; //< I2C Slave device address (relative to port)
+    uint8_t slavePort; //< I2C Slave Port. 0xFF if N/A
+    uint8_t busFreqKhz; //< Bus speed in KHz
+    uint8_t devicePurpose; //< Slave device purpose (from enum)
 };
 
 /**

@@ -33042,4 +33042,86 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<enumerationType>
+    <id>HDAT_I2C_DEVICE_TYPE</id>
+    <description>Pulled from the MRW, this describes the device
+            type to the HDAT.  This is for I2C devices only.
+    </description>
+    <enumerator>
+        <name>955X</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>SEEPROM</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>NUVOTON_TPM</name>
+        <value>2</value>
+    </enumerator>
+    <enumerator>
+        <name>MEX_FPGA</name>
+        <value>3</value>
+    </enumerator>
+    <enumerator>
+        <name>UCX90XX</name>
+        <value>4</value>
+    </enumerator>
+    <enumerator>
+        <name>UNKNOWN</name>
+        <value>5</value>
+    </enumerator>
+</enumerationType>
+
+<enumerationType>
+    <id>HDAT_I2C_DEVICE_PURPOSE</id>
+    <description>Pulled from the MRW, this describes the device
+            purpose to the HDAT.  This is for I2C devices only.
+    </description>
+    <enumerator>
+        <name>CABLE_CARD_PRES</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>CABLE_CARD_POWER_SENSE</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>CABLE_CARD_POWER_CONTROL</name>
+        <value>2</value>
+    </enumerator>
+    <enumerator>
+        <name>TPM</name>
+        <value>3</value>
+    </enumerator>
+    <enumerator>
+        <name>MODULE_VPD</name>
+        <value>4</value>
+    </enumerator>
+    <enumerator>
+        <name>DIMM_SPD</name>
+        <value>5</value>
+    </enumerator>
+    <enumerator>
+        <name>PROC_MODULE_VPD</name>
+        <value>6</value>
+    </enumerator>
+    <enumerator>
+        <name>SBE_SEEPROM</name>
+        <value>7</value>
+    </enumerator>
+    <enumerator>
+        <name>PLANAR_VPD</name>
+        <value>8</value>
+    </enumerator>
+    <enumerator>
+        <name>PCI_HOTPLUG</name>
+        <value>9</value>
+    </enumerator>
+    <enumerator>
+        <name>UNKNOWN</name>
+        <value>10</value>
+    </enumerator>
+</enumerationType>
+
 </attributes>
