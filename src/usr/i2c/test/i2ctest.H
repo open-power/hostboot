@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1029,6 +1029,27 @@ class I2CTest: public CxxTest::TestSuite
             }
         }
 
+        void test_getDeviceInfo( void )
+        {
+            TRACFCOMP(g_trac_i2c, "test_getDeviceInfo - Start");
+
+            TARGETING::TargetService& tS = TARGETING::targetService();
+            TARGETING::Target * sys = NULL;
+            tS.getTopLevelTarget(sys);
+
+            std::vector<I2C::DeviceInfo_t> l_deviceInfo;
+
+            getDeviceInfo( sys, l_deviceInfo);
+
+            std::vector<I2C::DeviceInfo_t>::const_iterator devInfo_iter;
+            for(devInfo_iter = l_deviceInfo.begin();
+                devInfo_iter != l_deviceInfo.end();
+                devInfo_iter++)
+            {
+                TRACFCOMP(g_trac_i2c, "Found Device Info: Engine %d",devInfo_iter->engine);
+            }
+
+        }
 
         /**
          * @brief Verify the functions that create the userdata values

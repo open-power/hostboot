@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,5 +31,130 @@
      FSP based systems.
      =====================================================================
 -->
+
+<attribute>
+    <id>HDAT_I2C_ENGINE</id>
+    <description>
+        This attribute holds the values of the I2C Engine from the i2c device
+        connections as defined in the MRW.  It is parsed into a struct in i2c.C
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HDAT_I2C_MASTER_PORT</id>
+    <description>
+        This attribute holds the values of the I2C Master Port from the i2c
+        device connections as defined in the MRW.  It is parsed into a
+        struct in i2c.C
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HDAT_I2C_DEVTYPE</id>
+    <description>
+        This attribute holds the values of the I2C device type from the i2c
+        device connections as defined in the MRW.  It is parsed into a
+        struct in i2c.C
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HDAT_I2C_ADDR</id>
+    <description>
+        This attribute holds the values of the I2C address from the i2c
+        device connections as defined in the MRW.  It is parsed into a
+        struct in i2c.C
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HDAT_I2C_SLAVE_PORT</id>
+    <description>
+        This attribute holds the values of the I2C slave port from the i2c
+        device connections as defined in the MRW.  It is parsed into a
+        struct in i2c.C
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HDAT_I2C_BUS_FREQ</id>
+    <description>
+        This attribute holds the values of the I2C bus frequency in Hz from
+        the i2c device connections as defined in the MRW.  It is parsed
+        into a struct in i2c.C
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HDAT_I2C_DEV_PURPOSE</id>
+    <description>
+        This attribute holds the values of the I2C device purpose from the i2c
+        device connections as defined in the MRW.  It is parsed into a
+        struct in i2c.C
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HDAT_I2C_ELEMENTS</id>
+    <description>
+        This attribute holds the number of elements that were found under this
+        particular target, and how many devices are stored in the arrays.
+    </description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
 
 </attributes>
