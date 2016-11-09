@@ -154,6 +154,18 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_XIPC_MVPD_FIELD_SIZE_MESS</rc>
+    <description>MVPD field size mess</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>MVPD_FIELD_SIZE</ffdc>
+    <ffdc>EXPECTED_SIZE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_XIPC_RS4_REDUNDANT_ERROR</rc>
     <description>rs4_redundant() failed</description>
     <callout>
