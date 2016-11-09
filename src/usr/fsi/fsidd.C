@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -228,12 +228,6 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
         }
 
     }while(0);
-
-    if ( l_err )
-    {
-        // On fail, assume no data was read or written
-        io_buflen = 0;
-    }
 
     mutex_unlock(&g_fsiOpMux);//@fixme - RTC:98898
 

@@ -166,11 +166,8 @@ errlHndl_t getFifoScom(TARGETING::Target * i_target,
                                  (uint32_t *)&l_fifoRequest,
                                  (uint32_t *)&l_fifoResponse,
                                  sizeof(fifoGetScomResponse));
-        // return data if no error
-        if (!errl)
-        {
-            o_data = l_fifoResponse.data;
-        }
+        //always return data even if there is an error
+        o_data = l_fifoResponse.data;
     }
     while (0);
 

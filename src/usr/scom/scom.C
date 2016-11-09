@@ -45,6 +45,8 @@
 #include <errl/errludtarget.H>
 #include <errl/errludlogregister.H>
 #include <hw_access_def.H>
+#include <p9_scom_addr.H>
+
 
 
 // Trace definition
@@ -775,6 +777,27 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
         int64_t accessType_flag = 0xFFFFFFFF;
         l_err = doScomOp( i_opType, i_target, io_buffer,
                           io_buflen, accessType_flag, i_addr );
+    }
+
+
+    if( l_err && p9_scom_addr(i_addr).is_multicast() )
+    {
+        //Delete the error if the mask matches the pib err
+        for(auto data : l_err->getUDSections(SCOM_COMP_ID, SCOM::SCOM_UDT_PIB))
+        {
+            //We get the raw data from the userdetails section, which in this
+            //case is the pib_err itself so just check it.
+            if(*reinterpret_cast<uint8_t *>(data) == PIB::PIB_CHIPLET_OFFLINE)
+            {
+                TRACFCOMP(g_trac_scom, "Ignoring error %.8X because it is a"
+                          " multicast scom with a PIB_CHIPLET_OFFLINE error,"
+                          " and this is expected",
+                          l_err->plid() );
+                delete l_err;
+                l_err = NULL;
+                break;
+            }
+        }
     }
 
     //Add some additional FFDC based on the specific operation
