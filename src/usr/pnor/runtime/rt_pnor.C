@@ -210,6 +210,17 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
             (iv_TOC[i_section].version & FFS_VERS_SHA512) ? true : false;
         o_info.sha512perEC  =
            (iv_TOC[i_section].version & FFS_VERS_SHA512_PER_EC) ? true : false;
+
+        #ifdef CONFIG_SECUREBOOT
+        // We don't verify PNOR sections at runtime for P8, but we
+        // still have to bypass the secure header
+        if(PNOR::isSecureSection(i_section))
+        {
+            o_info.vaddr += PAGESIZE;
+            o_info.size -= PAGESIZE;
+        }
+        #endif
+
     } while (0);
 
     TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::getSectionInfo");
