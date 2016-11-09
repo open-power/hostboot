@@ -78,27 +78,6 @@ int32_t PostAnalysis( ExtensibleChip * i_mcbChip,
 {
     #define PRDF_FUNC "[p9_mcbist::PostAnalysis] "
 
-    #ifndef __HOSTBOOT_RUNTIME
-
-    // Send command complete to MDIA.
-    // This must be done in post analysis after attentions have been cleared.
-
-    McbistDataBundle * mcbdb = getMcbistDataBundle( i_mcbChip );
-
-    if ( mcbdb->iv_sendCmdCompleteMsg )
-    {
-        mcbdb->iv_sendCmdCompleteMsg = false;
-
-        int32_t rc = mdiaSendEventMsg( i_mcbChip->getTrgt(),
-                                       MDIA::COMMAND_COMPLETE );
-        if ( SUCCESS != rc )
-        {
-            PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(COMMAND_COMPLETE) failed" );
-        }
-    }
-
-    #endif // not __HOSTBOOT_RUNTIME
-
     return SUCCESS; // Always return SUCCESS for this plugin.
 
     #undef PRDF_FUNC
@@ -123,9 +102,20 @@ int32_t McbistCmdComplete( ExtensibleChip * i_mcbChip,
     #define PRDF_FUNC "[p9_mcbist::McbistCmdComplete] "
 
     // Tell the TD controller there was a command complete attention.
-    getMcbistDataBundle(i_mcbChip)->getTdCtlr()->handleCmdComplete( io_sc );
-
-    return SUCCESS; // Always return SUCCESS for this plugin.
+    McbistDataBundle * db = getMcbistDataBundle( i_mcbChip );
+    if ( SUCCESS != db->getTdCtlr()->handleCmdComplete(io_sc) )
+    {
+        // Something failed. It is possible the command complete attention has
+        // not been cleared. Make the rule code do it.
+        return SUCCESS;
+    }
+    else
+    {
+        // Everything was successful. Whether we started a new command or told
+        // MDIA to do it, the command complete bit has already been cleared.
+        // Don't do it again.
+        return PRD_NO_CLEAR_FIR_BITS;
+    }
 
     #undef PRDF_FUNC
 }

@@ -30,6 +30,7 @@
 #include <prdfMemTdCtlr.H>
 
 // Platform includes
+#include <prdfMemScrubUtils.H>
 #include <prdfP9McbistDataBundle.H>
 #include <prdfP9McbistExtraSig.H>
 
@@ -71,6 +72,14 @@ uint32_t MemTdCtlr<T,D>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
             // end of a rank due to an error (will need to add procedures to the
             // queue to handle the errors and finish the pattern test to the end
             // of memory).
+
+            // Keep track of where the command stopped.
+            o_rc = initStoppedRank();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "initStoppedRank() failed" );
+                break;
+            }
 
             // TODO: RTC 157892 Check why the command stopped and take actions
             //       appropriately. Note that since nothing is happening here at
@@ -128,11 +137,49 @@ uint32_t MemTdCtlr<T,D>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 
     uint32_t o_rc = SUCCESS;
 
-    // The command complete message to MDIA must be sent after clearing the
-    // attention. Otherwise, we may run into a race condition where MDIA may try
-    // to start the next command before PRD clears the FIR bits.
-    D db = static_cast<D>(iv_chip->getDataBundle());
-    db->iv_sendCmdCompleteMsg = true;
+    TdRankListEntry nextRank = iv_rankList.getNext( iv_stoppedRank,
+                                                    iv_broadcastMode );
+
+    do
+    {
+        if ( nextRank <= iv_stoppedRank ) // The command made it to the end.
+        {
+            // Clear all of the counters and maintenance ECC attentions. This
+            // must be done before telling MDIA the command is done. Otherwise,
+            // we may run into a race condition where MDIA may start the next
+            // command and it completes before PRD clears the FIR bits for this
+            // attention.
+            o_rc = prepareNextCmd<T>( iv_chip );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "prepareNextCmd<T>(0x%08x) failed",
+                          iv_chip->getHuid() );
+                break;
+            }
+
+            // The command reached the end of memory. Send a message to MDIA.
+            o_rc = mdiaSendEventMsg(iv_chip->getTrgt(), MDIA::COMMAND_COMPLETE);
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(0x%08x,COMMAND_COMPLETE) "
+                          "failed", iv_chip->getHuid() );
+                break;
+            }
+        }
+        else // There is memory left to test.
+        {
+            // Start a super fast command to the end of memory.
+            o_rc = startSfRead<T>( nextRank.getChip(), nextRank.getRank() );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "startSfRead<T>(0x%08x,%d) failed",
+                          nextRank.getChip()->getHuid(),
+                          nextRank.getRank().getMaster() );
+                break;
+            }
+        }
+
+    } while (0);
 
     return o_rc;
 
@@ -147,5 +194,4 @@ template class MemTdCtlr<TYPE_MCBIST, McbistDataBundle *>;
 //------------------------------------------------------------------------------
 
 } // end namespace PRDF
-
 

@@ -167,7 +167,7 @@ uint32_t getMemReadAddr( ExtensibleChip * i_chip, uint32_t i_pos,
  *
  * The address register in the MCBIST may contain the MCA port information, but
  * that is dependent on the on whether or not the command was run in broadcast
- * mode or not. Therefore, users must call getMemMaintPort() to get the port
+ * mode or not. Therefore, users must call getMcbistMaintPort() to get the port
  * information.
  *
  * @param  i_chip An MBA or MCBIST chip.
@@ -191,8 +191,8 @@ uint32_t getMemMaintAddr( ExtensibleChip * i_chip, MemAddr & o_addr );
  * @param  o_mcaList A list of all MCAs targeted by the command.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-uint32_t getMemMaintPort( ExtensibleChip * i_mcbChip,
-                          std::vector<ExtensibleChip *> & o_mcaList );
+uint32_t getMcbistMaintPort( ExtensibleChip * i_mcbChip,
+                             std::vector<ExtensibleChip *> & o_mcaList );
 
 #endif
 

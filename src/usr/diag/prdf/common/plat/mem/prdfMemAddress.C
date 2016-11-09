@@ -270,10 +270,10 @@ uint32_t getMemMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr & o_addr )
 
 //------------------------------------------------------------------------------
 
-uint32_t getMemMaintPort( ExtensibleChip * i_mcbChip,
-                          std::vector<ExtensibleChip *> & o_mcaList )
+uint32_t getMcbistMaintPort( ExtensibleChip * i_mcbChip,
+                             std::vector<ExtensibleChip *> & o_mcaList )
 {
-    #define PRDF_FUNC "[getMemMaintPort] "
+    #define PRDF_FUNC "[getMcbistMaintPort] "
 
     // Check parameters
     PRDF_ASSERT( nullptr != i_mcbChip );

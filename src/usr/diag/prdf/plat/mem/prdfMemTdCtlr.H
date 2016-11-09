@@ -35,6 +35,7 @@
 
 // Platform includes
 #include <prdfMemTdQueue.H>
+#include <prdfMemTdRankList.H>
 #include <prdfPlatServices.H>
 
 namespace PRDF
@@ -57,7 +58,7 @@ class MemTdCtlr
      * @param i_chip An MCBIST or MBA chip.
      */
     explicit MemTdCtlr( ExtensibleChip * i_chip ) :
-        iv_chip( i_chip )
+        iv_chip( i_chip ), iv_rankList( i_chip )
     {
         PRDF_ASSERT( T == iv_chip->getType() );
     }
@@ -162,6 +163,15 @@ class MemTdCtlr
         return rc;
     }
 
+    /**
+     * @brief  This is called when handling a command complete attention for a
+     *         non-TD command to initialize iv_stoppedRank and iv_broadcastMode,
+     *         which are used to indicate where the command should resume after
+     *         targeted diagnostics is compete.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t initStoppedRank();
+
     #ifdef __HOSTBOOT_RUNTIME
 
     /**
@@ -193,10 +203,26 @@ class MemTdCtlr
     /** The procedure that is currently in progress. */
     TdEntry * iv_curProcedure = nullptr;
 
+    /** A list of all ranks behind iv_chip. */
+    TdRankList<T> iv_rankList;
+
+    /** If a non-TD command stopped somewhere in the middle of memory, PRD will
+     *  need to restart that command on the next configured rank. This variable
+     *  stores where the non-TD command stopped. The non-command will then be
+     *  restarted on the next rank in defaultStep() after all targeted
+     *  diagnostics are complete. */
+    TdRankListEntry iv_stoppedRank;
+
     #ifdef __HOSTBOOT_RUNTIME
 
     /** True if the TD controller has been initialized. False otherwise. */
     bool iv_initialized = false;
+
+    #else // IPL only
+
+    /** Combined with iv_stoppedRank. Indicates if the non-TD command that
+     *  stopped was in broadcast mode or not. */
+    bool iv_broadcastMode = false;
 
     #endif
 

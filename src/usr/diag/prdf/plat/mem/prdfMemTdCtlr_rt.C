@@ -41,6 +41,8 @@ using namespace TARGETING;
 namespace PRDF
 {
 
+using namespace PlatServices;
+
 template <TYPE T, typename D>
 uint32_t MemTdCtlr<T,D>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -63,6 +65,14 @@ uint32_t MemTdCtlr<T,D>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
             // Determine why background scrubbing has stopped, add any necessary
             // procedures to the queue and move on to the next step in the state
             // machine.
+
+            // Keep track of where the command stopped.
+            o_rc = initStoppedRank();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "initStoppedRank() failed" );
+                break;
+            }
 
             // TODO: RTC 136126 Note that since nothing is happening here at
             //       the moment, the code will simply assume the command stopped
@@ -133,7 +143,7 @@ uint32_t MemTdCtlr<T,D>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
         if ( nullptr != iv_curProcedure ) break;
 
         // Stop background scrubbing.
-        o_rc = PlatServices::stopBgScrub<T>( iv_chip );
+        o_rc = stopBgScrub<T>( iv_chip );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "stopBgScrub<T>(0x%08x) failed",
@@ -192,10 +202,19 @@ uint32_t MemTdCtlr<T,D>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 
     uint32_t o_rc = SUCCESS;
 
+    TdRankListEntry nextRank = iv_rankList.getNext( iv_stoppedRank );
+
     do
     {
-        // Restart background scrubbing.
-        // TODO: RTC 136126
+        // Restart background scrubbing on the next rank.
+        o_rc = startBgScrub<T>( nextRank.getChip(), nextRank.getRank() );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "startBgScrub<T>(0x%08x,%d) failed",
+                      nextRank.getChip()->getHuid(),
+                      nextRank.getRank().getMaster() );
+            break;
+        }
 
     } while (0);
 

@@ -370,6 +370,17 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
+// This specialization only exists to avoid a lot of extra code in some classes.
+// The input chip must still be an MCA chip.
+template<>
+uint32_t startBgScrub<TYPE_MCBIST>( ExtensibleChip * i_mcaChip,
+                                    const MemRank & i_rank )
+{
+    return startBgScrub<TYPE_MCA>( i_mcaChip, i_rank );
+}
+
 //##############################################################################
 //##                   Centaur Maintenance Command wrappers
 //##############################################################################
