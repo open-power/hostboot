@@ -196,6 +196,1018 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         }
 
         {
+            l_rc = fapi2::getScom( TGT0, 0x5011020ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011020ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 38, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011020ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011020ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011022ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011022ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0, 28, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1, 40, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2, 52, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x0, 0, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T1, 4, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T2, 16, 12, 52 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011022ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011022ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011028ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011028ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 51, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011028ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011028ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011040ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011040ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 38, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011040ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011040ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011042ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011042ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0, 28, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1, 40, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2, 52, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x0, 0, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T1, 4, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T2, 16, 12, 52 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011042ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011042ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011048ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011048ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 51, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011048ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011048ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011060ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011060ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 38, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011060ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011060ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011062ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011062ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0, 28, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1, 40, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2, 52, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x0, 0, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T1, 4, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T2, 16, 12, 52 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011062ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011062ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011068ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011068ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 51, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011068ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011068ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011100ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011100ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 38, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011100ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011100ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011102ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011102ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0, 28, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1, 40, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2, 52, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x0, 0, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T1, 4, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T2, 16, 12, 52 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011102ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011102ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011108ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011108ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 51, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011108ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011108ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011120ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011120ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 38, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011120ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011120ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011122ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011122ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0, 28, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1, 40, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2, 52, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x0, 0, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T1, 4, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T2, 16, 12, 52 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011122ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011122ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011128ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011128ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 51, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011128ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011128ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011140ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011140ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 38, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011140ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011140ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011142ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011142ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0, 28, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1, 40, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2, 52, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x0, 0, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T1, 4, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T2, 16, 12, 52 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011142ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011142ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011148ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011148ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 51, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011148ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011148ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011160ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011160ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 38, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011160ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011160ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011162ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011162ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0, 28, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1, 40, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2, 52, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x0, 0, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T1, 4, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T2, 16, 12, 52 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011162ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011162ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011168ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011168ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 51, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011168ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011168ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011200ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011200ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 38, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011200ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011200ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011202ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011202ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0, 28, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1, 40, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2, 52, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x0, 0, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T1, 4, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T2, 16, 12, 52 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011202ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011202ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011208ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011208ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 51, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011208ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011208ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011220ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011220ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 38, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011220ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011220ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011222ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011222ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0, 28, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1, 40, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2, 52, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x0, 0, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T1, 4, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T2, 16, 12, 52 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011222ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011222ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011228ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011228ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 51, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011228ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011228ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011240ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011240ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 38, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011240ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011240ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011242ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011242ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0, 28, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1, 40, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2, 52, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x0, 0, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T1, 4, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T2, 16, 12, 52 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011242ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011242ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011248ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011248ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 51, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011248ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011248ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011260ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011260ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 38, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011260ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011260ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011262ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011262ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0, 28, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1, 40, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2, 52, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x0, 0, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T1, 4, 12, 52 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT1_ATTR_PROC_EPS_WRITE_CYCLES_T2, 16, 12, 52 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011262ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011262ull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5011268ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5011268ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
+                                                   || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == literal_2))
+                                                  || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
+                                                 || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)), 51, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5011268ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5011268ull)");
+                break;
+            }
+        }
+
+        {
             l_rc = fapi2::getScom( TGT0, 0x5011403ull, l_scom_buffer );
 
             if (l_rc)
