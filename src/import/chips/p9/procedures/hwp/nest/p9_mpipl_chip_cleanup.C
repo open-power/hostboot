@@ -34,9 +34,6 @@
 //
 //  Additional Note(s):
 //
-//   Checks to see if MCD recovery is already enabled by checking bit 0 of the
-//   even and odd MCD config registers, which is the recovery enable bit.
-//   If the bits are 0, then the procedure enables them to start MCD recovery
 //
 //
 //------------------------------------------------------------------------------
@@ -45,8 +42,6 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p9_mpipl_chip_cleanup.H>
-#include <p9_misc_scom_addresses.H>
-#include <p9_misc_scom_addresses_fld.H>
 
 extern "C"
 {
@@ -56,6 +51,23 @@ extern "C"
 
     //------------------------------------------------------------------------------
     // name: p9_mpipl_chip_cleanup
+    //------------------------------------------------------------------------------
+    // purpose:
+    // Place holder
+    //
+    //------------------------------------------------------------------------------
+    fapi2::ReturnCode p9_mpipl_chip_cleanup(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+    {
+        //This is currently a no-op , leaving it in as a placeholder.
+        return fapi2::current_err;
+    }
+
+
+//Commenting out the old functionality of this code. Was going to delete it but will
+//leave it here incase we need logic like this in the future for some reason
+#if 0
+    //------------------------------------------------------------------------------
+    // name: p9_mpipl_chip_cleanup (DEPRECATED)
     //------------------------------------------------------------------------------
     // purpose:
     // To enable MCD recovery
@@ -92,9 +104,11 @@ extern "C"
         };
 
 
-        // HW386071:  INT unit has a defect that might result in fake ecc errors.  Have to do these four writes and reads to scom registers
-        FAPI_TRY(fapi2::putScom(i_target, PU_INT_VC_VSD_TABLE_ADDR, w_data),
-                 "putScom error selecting address 1");
+    HW386071:
+
+        INT unit has a defect that might result in fake ecc errors.  Have to do these four writes and reads to scom registers
+            FAPI_TRY(fapi2::putScom(i_target, PU_INT_VC_VSD_TABLE_ADDR, w_data),
+                     "putScom error selecting address 1");
 
         FAPI_TRY(fapi2::getScom(i_target, C_INT_VC_VSD_TABLE_DATA, r_data),
                  "getScom error reading from address 1");
@@ -106,31 +120,32 @@ extern "C"
         w_data.flush<0>();
         FAPI_TRY(fapi2::putScom(i_target, C_INT_VC_VSD_TABLE_DATA, w_data),
                  "putScom error writing to address 0");
-        // HW386071
+        HW386071
 
-        //Verify MCD recovery was previously disabled for even and odd slices
-        //If not, this is an error condition
+        Verify MCD recovery was previously disabled for even and odd slices
+        If not, this is an error condition
         for (uint8_t counter = 0; counter < MAX_MCD_DIRS; counter++)
-        {
-            FAPI_DBG("Verifying MCD %s Recovery is disabled", ARY_MCD_DIR_STRS[counter]);
-            FAPI_TRY(fapi2::getScom(i_target, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], fsi_data[counter]),
-                     "getScom error veryfing that MCD recovery is disabled");
+            {
+                FAPI_DBG("Verifying MCD %s Recovery is disabled", ARY_MCD_DIR_STRS[counter]);
+                FAPI_TRY(fapi2::getScom(i_target, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], fsi_data[counter]),
+                         "getScom error veryfing that MCD recovery is disabled");
 
 
-            FAPI_ASSERT(!fsi_data[counter].getBit<PU_BANK0_MCD_REC_ENABLE>(),
-                        fapi2::P9_MPIPL_CHIP_CLEANUP_MCD_NOT_DISABLED().set_TARGET(i_target).set_ADDRESS(
-                            ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]).set_DATA(fsi_data[counter]), "MCD recovery not disabled as expected");
-        }
+                FAPI_ASSERT(!fsi_data[counter].getBit<PU_BANK0_MCD_REC_ENABLE>(),
+                            fapi2::P9_MPIPL_CHIP_CLEANUP_MCD_NOT_DISABLED().set_TARGET(i_target).set_ADDRESS(
+                                ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]).set_DATA(fsi_data[counter]), "MCD recovery not disabled as expected");
+            }
 
-        //Assert bit 0 of MCD Recovery Ctrl regs to enable MCD recovery
+        Assert bit 0 of MCD Recovery Ctrl regs to enable MCD recovery
+
         for (int counter = 0; counter < MAX_MCD_DIRS; counter++)
         {
             FAPI_DBG("Enabling MCD %s Recovery", ARY_MCD_DIR_STRS[counter]);
 
-            //Assert bit 0 of MCD Even or Odd Recovery Control reg to enable recovery
+            Assert bit 0 of MCD Even or Odd Recovery Control reg to enable recovery
             fsi_data[counter].setBit<PU_BANK0_MCD_REC_ENABLE>();
 
-            //Write data to MCD Even or Odd Recovery Control reg
+            Write data to MCD Even or Odd Recovery Control reg
             FAPI_TRY(fapi2::putScom(i_target, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], fsi_data[counter]),
                      "putScom error assert bit 0 of MCD recovery control register");
         }
@@ -140,7 +155,7 @@ extern "C"
         FAPI_DBG("Exiting...");
         return fapi2::current_err;
     }
-
+#endif
 
 
 } // extern "C"
