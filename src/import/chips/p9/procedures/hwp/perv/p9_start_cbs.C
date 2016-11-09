@@ -80,8 +80,7 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     //Setting CBS_CS register value
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
                                     l_data32_cbs_cs));
-    //CFAM.CBS_CS.CBS_CS_PREVENT_SBE_START = l_sbe_start_value
-    l_data32_cbs_cs.writeBit<3>(l_sbe_start_value);
+    l_data32_cbs_cs.writeBit<PERV_CBS_CS_OPTION_PREVENT_SBE_START>(l_sbe_start_value);
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
                                     l_data32_cbs_cs));
 
@@ -89,8 +88,7 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     //Getting PERV_CBS_ENVSTAT register value
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_ENVSTAT_FSI,
                                     l_data32));
-    l_read_vdn_pgood_status =
-        l_data32.getBit<PERV_CBS_ENVSTAT_C4_VDN_GPOOD>();  //l_read_vdn_pgood_status = PERV_CBS_ENVSTAT.PERV_CBS_ENVSTAT_C4_VDN_GPOOD
+    l_read_vdn_pgood_status = l_data32.getBit<PERV_CBS_ENVSTAT_C4_VDN_GPOOD>();
 
     FAPI_ASSERT(l_read_vdn_pgood_status,
                 fapi2::VDN_PGOOD_NOT_SET()
@@ -102,14 +100,15 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     //Setting CBS_CS register value
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
                                     l_data32_cbs_cs));
-    l_data32_cbs_cs.clearBit<0>();  //CFAM.CBS_CS.CBS_CS_START_BOOT_SEQUENCER = 0
+    l_data32_cbs_cs.clearBit<PERV_CBS_CS_START_BOOT_SEQUENCER>();
+    l_data32_cbs_cs.clearBit<PERV_CBS_CS_OPTION_SKIP_SCAN0_CLOCKSTART>();
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
                                     l_data32_cbs_cs));
 
 
     FAPI_DBG("Triggering CFAM Boot Sequencer (CBS) to start");
     //Setting CBS_CS register value
-    l_data32_cbs_cs.setBit<0>();  //CFAM.CBS_CS.CBS_CS_START_BOOT_SEQUENCER = 1
+    l_data32_cbs_cs.setBit<PERV_CBS_CS_START_BOOT_SEQUENCER>();
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
                                     l_data32_cbs_cs));
 
@@ -122,8 +121,8 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
         //Getting CBS_CS register value
         FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
                                         l_data32_cbs_cs));
-        uint32_t l_poll_data = 0;    //uint32_t l_poll_data = CFAM.CBS_CS.CBS_CS_INTERNAL_STATE_VECTOR
-        l_data32_cbs_cs.extractToRight<16, 16>(l_poll_data);
+        uint32_t l_poll_data = 0;
+        l_data32_cbs_cs.extractToRight<PERV_CBS_CS_INTERNAL_STATE_VECTOR, PERV_CBS_CS_INTERNAL_STATE_VECTOR_LEN>(l_poll_data);
 
         if (l_poll_data == CBS_IDLE_VALUE)
         {
@@ -150,7 +149,6 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     //Getting FSI2PIB_STATUS register value
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_FSI2PIB_STATUS_FSI,
                                     l_data32));
-    //l_fsi2pib_status = CFAM.FSI2PIB_STATUS.VDD_NEST_OBSERVE
     l_fsi2pib_status = l_data32.getBit<PERV_FSI2PIB_STATUS_VDD_NEST_OBSERVE>();
 
     FAPI_ASSERT(l_fsi2pib_status,
