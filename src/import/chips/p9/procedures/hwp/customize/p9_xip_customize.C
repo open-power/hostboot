@@ -918,6 +918,82 @@ fapi2::ReturnCode p9_xip_customize (
     }
 
 
+
+    ///////////////////////////////////////////////////////////////////////////
+    // CUSTOMIZE item:     Update PIBMEM repair attributes in Seeprom image
+    // System phase:       HB_SBE
+    ///////////////////////////////////////////////////////////////////////////
+
+    if (i_sysPhase == SYSPHASE_HB_SBE)
+    {
+        uint8_t    l_pibmemRepVersion = 0;
+        uint64_t   l_pibmemRepData[4] = {0};
+        uint32_t   l_sizeMvpdFieldExpected = sizeof(l_pibmemRepVersion) + sizeof(l_pibmemRepData);
+        uint32_t   l_sizeMvpdField = 0;
+        uint8_t*   l_bufMvpdField = (uint8_t*)io_ringBuf1;
+
+        FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
+                               MVPD_KEYWORD_PB,
+                               i_proc_target,
+                               NULL,
+                               l_sizeMvpdField),
+                  "getMvpdField(NULL buffer) failed w/rc=0x%08x",
+                  (uint64_t)fapi2::current_err );
+
+        FAPI_ASSERT( l_sizeMvpdField == l_sizeMvpdFieldExpected,
+                     fapi2::XIPC_MVPD_FIELD_SIZE_MESS().
+                     set_CHIP_TARGET(i_proc_target).
+                     set_MVPD_FIELD_SIZE(l_sizeMvpdField).
+                     set_EXPECTED_SIZE(l_sizeMvpdFieldExpected),
+                     "MVPD field size bug:\n"
+                     "  Returned MVPD field size of PB keyword = %d\n"
+                     "  Anticipated MVPD field size = %d",
+                     l_sizeMvpdField,
+                     l_sizeMvpdFieldExpected );
+
+        FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
+                               MVPD_KEYWORD_PB,
+                               i_proc_target,
+                               l_bufMvpdField,
+                               l_sizeMvpdField),
+                  "getMvpdField(valid buffer) failed w/rc=0x%08x",
+                  (uint64_t)fapi2::current_err );
+
+        // Copy over the data into suitable 8Byte containers
+        l_pibmemRepVersion = (uint8_t)(*l_bufMvpdField);
+        l_pibmemRepData[0] = htobe64( *((uint64_t*)(l_bufMvpdField + 1)) );
+        l_pibmemRepData[1] = htobe64( *((uint64_t*)(l_bufMvpdField + 1 + 8)) );
+        l_pibmemRepData[2] = htobe64( *((uint64_t*)(l_bufMvpdField + 1 + 16)) );
+        l_pibmemRepData[3] = htobe64( *((uint64_t*)(l_bufMvpdField + 1 + 24)) );
+
+        FAPI_DBG("Retrieved Mvpd PB keyword field:\n");
+        FAPI_DBG(" l_pibmemRepVersion = 0x%02x\n"
+                 " l_pibmemRepData[1] = 0x%016llx\n"
+                 " l_pibmemRepData[1] = 0x%016llx\n"
+                 " l_pibmemRepData[2] = 0x%016llx\n"
+                 " l_pibmemRepData[3] = 0x%016llx\n",
+                 l_pibmemRepVersion,
+                 l_pibmemRepData[0],
+                 l_pibmemRepData[1],
+                 l_pibmemRepData[2],
+                 l_pibmemRepData[3]);
+
+        FAPI_TRY( p9_xip_set_scalar(io_image, "ATTR_PIBMEM_REPAIR0", l_pibmemRepData[0]),
+                  "p9_xip_set_scalar(ATTR_PIBMEM_REPAIR0) failed w/rc=0x%08x",
+                  (uint64_t)fapi2::current_err );
+
+        FAPI_TRY( p9_xip_set_scalar(io_image, "ATTR_PIBMEM_REPAIR1", l_pibmemRepData[1]),
+                  "p9_xip_set_scalar(ATTR_PIBMEM_REPAIR1) failed w/rc=0x%08x",
+                  (uint64_t)fapi2::current_err );
+
+        FAPI_TRY( p9_xip_set_scalar(io_image, "ATTR_PIBMEM_REPAIR2", l_pibmemRepData[2]),
+                  "p9_xip_set_scalar(ATTR_PIBMEM_REPAIR2) failed w/rc=0x%08x",
+                  (uint64_t)fapi2::current_err );
+
+    }
+
+
+
     //////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:     Append VPD rings to ring section
     // System phase:       All phases
