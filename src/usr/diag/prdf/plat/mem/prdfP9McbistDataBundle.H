@@ -76,16 +76,6 @@ class McbistDataBundle : public DataBundle
         return iv_tdCtlr;
     }
 
-  public: // instance variables
-
-    #ifndef __HOSTBOOT_RUNTIME
-
-    /** TRUE if a message needs to be sent to MDIA in the post analysis plugin,
-     *  FALSE otherwise. */
-    bool iv_sendCmdCompleteMsg = false;
-
-    #endif
-
   private: // instance variables
 
     /** The MCBIST chip associated with this data bundle. */
