@@ -57,9 +57,7 @@ typedef fapi2::ReturnCode (*p9_mpipl_chip_cleanup_FP_t) (fapi2::Target<fapi2::TA
 extern "C"
 {
     ///  @brief To enable MCD recovery
-
     ///  @param[in] 'i_target' Reference to processor chip target
-
     ///  @return FAPI_RC_SUCCESS if the mpipl_chip_cleanup completes successfully
     fapi2::ReturnCode p9_mpipl_chip_cleanup(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 } //extern "C"
