@@ -33,6 +33,8 @@
 #include <prdfMfgThresholdMgr.H>
 #include <prdfMfgThreshold.H>
 
+using namespace TARGETING;
+
 namespace PRDF
 {
 namespace p9_ex
@@ -49,6 +51,96 @@ int32_t Initialize( ExtensibleChip * i_exChip )
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( p9_ex, Initialize );
+
+/**
+ * @brief  Plugin function called after analysis is complete but before PRD
+ *         exits.
+ * @param  i_exChip An EX chip.
+ * @param  io_sc     The step code data struct.
+ * @note   This is especially useful for any analysis that still needs to be
+ *         done after the framework clears the FIR bits that were at attention.
+ * @return SUCCESS.
+ */
+int32_t PostAnalysis( ExtensibleChip * i_exChip,
+                      STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[p9_ex::PostAnalysis] "
+
+    int32_t l_rc = SUCCESS;
+
+    // For the core_recovery_workaround we need to clear L2FIR[39] if there are
+    // no attentions set in COREFIR_WOF
+    // Note: We clear L2FIR[39] first and then check for attentions in the
+    // COREFIR_WOF afterward to avoid the possibility of accidentally clearing
+    // L2FIR[39] despite new attentions appearing after we read COREFIR_WOF.
+
+    do
+    {
+        // get the L2FIR
+        SCAN_COMM_REGISTER_CLASS * l2fir_and =
+            i_exChip->getRegister("L2FIR_AND");
+        l2fir_and->setAllBits();
+
+        // clear L2FIR[39]
+        l2fir_and->ClearBit(39);
+
+        l_rc = l2fir_and->Write();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR(PRDF_FUNC "ClearBit Write() failed on L2FIR_AND");
+            break;
+        }
+
+        // loop through all cores in EX
+        ExtensibleChipList ecChipList =
+            PlatServices::getConnected(i_exChip, TYPE_CORE);
+
+        for ( auto & ecChip : ecChipList )
+        {
+            // get the COREFIR_WOF
+            SCAN_COMM_REGISTER_CLASS * corefirwof =
+                ecChip->getRegister("COREFIR_WOF");
+            SCAN_COMM_REGISTER_CLASS * corefir_mask =
+                ecChip->getRegister("COREFIR_MASK");
+
+            // ForceRead COREFIR_WOF
+            l_rc  = corefirwof->ForceRead();
+            l_rc |= corefir_mask->ForceRead();
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_ERR(PRDF_FUNC "ForceRead() failed on "
+                                    "COREFIR_WOF/COREFIR_MASK");
+                continue;
+            }
+
+            // if there are attentions in COREFIR_WOF, set L2FIR[39]
+            if ( corefirwof->GetBitFieldJustified(0,64) &
+                 ~corefir_mask->GetBitFieldJustified(0,64) )
+            {
+                SCAN_COMM_REGISTER_CLASS * l2fir_or =
+                    i_exChip->getRegister("L2FIR_OR");
+                l2fir_or->clearAllBits();
+
+                l2fir_or->SetBit(39);
+
+                l_rc = l2fir_or->Write();
+                if ( SUCCESS != l_rc )
+                {
+                    PRDF_ERR(PRDF_FUNC "SetBit Write() failed on L2FIR");
+                }
+
+                // There is no need to check the next core since we only need to
+                // know if there is at least one attention on any core.
+                break;
+            }
+        }
+    }while(0);
+
+    return SUCCESS; // Always return SUCCESS for this plugin.
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( p9_ex, PostAnalysis );
 
 /**
  * @brief Handle an L3 CE

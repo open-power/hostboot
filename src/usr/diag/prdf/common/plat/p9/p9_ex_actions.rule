@@ -64,3 +64,8 @@ actionclass l2_power_bus_ce
     TBDDefaultCallout;
 };
 
+actionclass core_recovery_workaround
+{
+    try( analyze(connected(TYPE_CORE, 0)),
+         analyze(connected(TYPE_CORE, 1)) );
+};
