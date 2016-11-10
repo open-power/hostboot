@@ -145,7 +145,8 @@ namespace SBE
         //NOTE: recycling the same memory space for different
         //steps in the process.
         SBE_ECC_IMG_VADDR = VMM_VADDR_SBE_UPDATE + (VMM_SBE_UPDATE_SIZE / 2),
-        SBE_ECC_IMG_MAX_SIZE = (MAX_SEEPROM_IMAGE_SIZE * 9 / 8),
+        SBE_ECC_IMG_MAX_SIZE = (MAX_SEEPROM_IMAGE_SIZE * 9 / 8) +
+                               (3 * SBE_SEEPROM_ECC_PAD),
     };
 
     // Used for MVPD function

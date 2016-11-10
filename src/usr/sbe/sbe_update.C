@@ -57,6 +57,7 @@
 //  fapi support
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
+#include    <fapi2/hwp_executor.H>
 
 //Procedures
 #include <p9_xip_customize.H>
@@ -838,8 +839,9 @@ namespace SBE
                                uint32_t& io_image_size)
     {
         errlHndl_t err = NULL;
+        P9XipItem l_xipItem;
 
-        TRACUCOMP( g_trac_sbe,
+        TRACFCOMP( g_trac_sbe,
                    ENTER_MRK"appendHbblToSbe(): i_section=%p, "
                             "i_section_size=0x%X, i_image=%p, "
                             "io_image_size=0x%X",
@@ -847,6 +849,66 @@ namespace SBE
                             i_image, io_image_size);
 
         do{
+            // Invoke p9_xip_find to find HBBL image in SBE image
+            fapi2::ReturnCode l_fapi_rc;
+            const char* l_sectionId = ".hbbl";
+            FAPI_EXEC_HWP( l_fapi_rc,
+                           p9_xip_find,
+                           i_image,
+                           l_sectionId,
+                           &l_xipItem );
+
+            // Check the return code
+            if(l_fapi_rc.isRC(P9_XIP_ITEM_NOT_FOUND))
+            {
+                TRACUCOMP( g_trac_sbe, "appendHbblToSbe(): "
+                           "p9_xip_find received expected return code, item "
+                           "not found, rc=0x%X",
+                           l_fapi_rc );
+            }
+            else if(l_fapi_rc.isRC(0) ||
+                    l_fapi_rc.isRC(P9_XIP_DATA_NOT_PRESENT))
+            {
+                TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): "
+                           "p9_xip_find located %s, rc=0x%X",
+                           (l_fapi_rc) ? "TOC only" : "TOC and section data",
+                           int(l_fapi_rc) );
+
+                // Invoke p9_xip_delete_section to delete existing HBBL image
+                // from SBE image
+                void *l_imageBuf = malloc(io_image_size);
+                FAPI_INVOKE_HWP( err,
+                                 p9_xip_delete_section,
+                                 i_image,
+                                 l_imageBuf,
+                                 io_image_size,
+                                 P9_XIP_SECTION_SBE_HBBL );
+                free(l_imageBuf);
+
+                // Check for error
+                if(err)
+                {
+                    TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): "
+                               "p9_xip_delete_section failed, rc=0x%X",
+                               err->reasonCode() );
+
+                    // exit loop
+                    break;
+                }
+            }
+            else
+            {
+                TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): p9_xip_find "
+                           "received unexpected return code, rc=0x%X",
+                           int(l_fapi_rc) );
+                err = fapi2::rcToErrl(l_fapi_rc);\
+                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
+                err->collectTrace(FAPI_TRACE_NAME,384);
+
+                // exit loop
+                break;
+            }
+
             // Invoke p9_xip_section_append to append HBBL image to SBE image
             FAPI_INVOKE_HWP( err,
                              p9_xip_section_append,
@@ -859,7 +921,7 @@ namespace SBE
             // Check for error
             if(err)
             {
-                TRACUCOMP( g_trac_sbe, "appendHbblToSbe(): "
+                TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): "
                            "p9_xip_section_append failed, rc=0x%X",
                            err->reasonCode() );
 
@@ -932,7 +994,7 @@ namespace SBE
             if ( l_err )
             {
                 TRACFCOMP( g_trac_sbe,
-                           ERR_MRK"ringOvd(): FAPI_EXEC_HWP("
+                           ERR_MRK"ringOvd(): FAPI_INVOKE_HWP("
                            "p9_xip_section_append) failed, PLID=0x%x",
                            l_err->plid());
 
@@ -1018,14 +1080,14 @@ namespace SBE
 
                 procIOMask = coreMask;
 
-                uint8_t l_ringSectionBuf[MAX_SEEPROM_IMAGE_SIZE];
                 uint32_t l_ringSectionBufSize = MAX_SEEPROM_IMAGE_SIZE;
+                void* l_ringSectionBuf = malloc(l_ringSectionBufSize);
                 FAPI_INVOKE_HWP( err,
                                  p9_xip_customize,
                                  l_fapiTarg,
                                  io_imgPtr, //image in/out
                                  tmpImgSize,
-                                 (void*)l_ringSectionBuf,
+                                 l_ringSectionBuf,
                                  l_ringSectionBufSize,
                                  SYSPHASE_HB_SBE,
                                  MODEBUILD_IPL,
@@ -1034,9 +1096,10 @@ namespace SBE
                                  (void*)RING_BUF2_VADDR,
                                  (uint32_t)MAX_RING_BUF_SIZE,
                                  procIOMask ); // Bits(8:31) = EC00:EC23
+                free(l_ringSectionBuf);
 
-                // Check for no error
-                if ( NULL == err )
+                // Check for no error and use of input cores
+                if ( (NULL == err) && (procIOMask == coreMask))
                 {
                     // Check if we have a valid ring override section and
                     // append it in if so
@@ -1084,7 +1147,7 @@ namespace SBE
                     // a different procIOMask would work
 
                     TRACFCOMP( g_trac_sbe,
-                               ERR_MRK"procCustomizeSbeImg(): FAPI_EXEC_HWP("
+                               ERR_MRK"procCustomizeSbeImg(): FAPI_INVOKE_HWP("
                                "p9_xip_customize) returned rc=0x%X, "
                                "XIPC_IMAGE_WOULD_OVERFLOW-Retry "
                                "MaxCores=0x%.8X. HUID=0x%X. coreMask=0x%.8X, "
@@ -1133,7 +1196,7 @@ namespace SBE
                 {
                     // Unexpected return code - create err and fail
                     TRACFCOMP( g_trac_sbe,
-                               ERR_MRK"procCustomizeSbeImg(): FAPI_EXEC_HWP("
+                               ERR_MRK"procCustomizeSbeImg(): FAPI_INVOKE_HWP("
                                "p9_xip_customize) failed with rc=0x%X, "
                                "MaxCores=0x%X. HUID=0x%X. coreMask=0x%.8X, "
                                "procIOMask=0x%.8X. coreCount=%d. Create "
@@ -1805,7 +1868,7 @@ namespace SBE
             {
                 err = procCustomizeSbeImg(io_sbeState.target,
                                           sbeHbblImgPtr,  //SBE, HBBL in memory
-                                          FIXED_SEEPROM_WORK_SPACE,  //max size
+                                          MAX_SEEPROM_IMAGE_SIZE,  //max size
                                           reinterpret_cast<void*>
                                               (SBE_IMG_VADDR),  //destination
                                           sbeImgSize);
@@ -1829,7 +1892,7 @@ namespace SBE
 
             TRACUCOMP( g_trac_sbe, "getSbeInfoState() - procCustomizeSbeImg(): "
                        "maxSize=0x%X, actSize=0x%X, crc=0x%X",
-                       FIXED_SEEPROM_WORK_SPACE, sbeImgSize,
+                       MAX_SEEPROM_IMAGE_SIZE, sbeImgSize,
                        io_sbeState.customizedImage_crc);
 
 
