@@ -106,6 +106,7 @@
   <enum>FSP_LESS = 0x0,FSP = 0x1</enum>
   <persistRuntime/>
   <platInit/>
+  <writeable/>
 </attribute>
 
 <attribute>
