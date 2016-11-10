@@ -408,10 +408,15 @@ group gL2FIR filter singlebit
      */
     (rL2FIR, bit(36)) ? self_th_1;
 
-    /** L2FIR[37:39]
+    /** L2FIR[37:38]
      *  spare
      */
-    (rL2FIR, bit(37|38|39)) ? defaultMaskedError;
+    (rL2FIR, bit(37|38)) ? defaultMaskedError;
+
+    /** L2FIR[39]
+     *  Core recovery event
+     */
+    (rL2FIR, bit(39)) ? core_recovery_workaround;
 
     /** L2FIR[40]
      *  scom error

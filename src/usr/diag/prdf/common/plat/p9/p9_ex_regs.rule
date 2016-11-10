@@ -33,3 +33,21 @@
         capture     group never;
     };
 
+    ############################################################################
+    # P9 EX target L2FIR
+    ############################################################################
+    register L2FIR_AND
+    {
+        name        "P9 EX target L2FIR AND";
+        scomaddr    0x010010801;
+        capture     group never;
+        access      write_only;
+    };
+
+    register L2FIR_OR
+    {
+        name        "P9 EX target L2FIR OR";
+        scomaddr    0x10010802;
+        capture     group never;
+        access      write_only;
+    };
