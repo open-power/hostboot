@@ -33,7 +33,6 @@
 
 // Platform includes
 #include <prdfPlatServices.H>
-#include <prdfP9McbistExtraSig.H>
 
 using namespace TARGETING;
 
@@ -41,78 +40,6 @@ namespace PRDF
 {
 
 using namespace PlatServices;
-
-template <TARGETING::TYPE T>
-uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[MemTdCtlr::handleCmdComplete] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Make sure the TD controller is initialized.
-        o_rc = initialize();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "initialize() failed" );
-            break;
-        }
-
-        if ( nullptr == iv_curProcedure )
-        {
-            // Determine why background scrubbing has stopped, add any necessary
-            // procedures to the queue and move on to the next step in the state
-            // machine.
-
-            // Keep track of where the command stopped.
-            o_rc = initStoppedRank();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "initStoppedRank() failed" );
-                break;
-            }
-
-            // TODO: RTC 136126 Note that since nothing is happening here at
-            //       the moment, the code will simply assume the command stopped
-            //       without error and background scrubbing will resume.
-
-            // If the command completed successfully with no error, do not
-            // commit the error log. This is done to suppress unnecessary
-            // information error logs.
-            io_sc.service_data->setDontCommitErrl();
-        }
-
-        // Move onto the next step in the state machine.
-        o_rc = nextStep( io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "nextStep() failed" );
-            break;
-        }
-
-    } while (0);
-
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed on 0x%08x", iv_chip->getHuid() );
-
-        // Just in case it was a legitimate command complete (error log not
-        // committed) but something else failed.
-        io_sc.service_data->clearDontCommitErrl();
-
-        // Change signature indicating there was an error in analysis.
-        io_sc.service_data->SetErrorSig( PRDFSIG_CmdComplete_ERROR );
-
-        // Something definitely failed, so callout 2nd level support.
-        io_sc.service_data->SetCallout( NextLevelSupport_ENUM, MRU_HIGH );
-        io_sc.service_data->setServiceCall();
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
 
 //------------------------------------------------------------------------------
 

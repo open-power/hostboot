@@ -26,6 +26,7 @@
 #include <prdfMemTdCtlr.H>
 
 #include <prdfMemAddress.H>
+#include <prdfP9McbistExtraSig.H>
 
 using namespace TARGETING;
 
@@ -33,6 +34,108 @@ namespace PRDF
 {
 
 using namespace PlatServices;
+
+//------------------------------------------------------------------------------
+
+template <TARGETING::TYPE T>
+uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemTdCtlr::handleCmdComplete] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        #ifdef __HOSTBOOT_RUNTIME
+
+        // Make sure the TD controller is initialized.
+        o_rc = initialize();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "initialize() failed" );
+            break;
+        }
+
+        #else // IPL only
+
+        PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+
+        // Inform MDIA the command has completed and PRD is starting analysis.
+        o_rc = mdiaSendEventMsg( iv_chip->getTrgt(), MDIA::RESET_TIMER );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(RESET_TIMER) failed" );
+            break;
+        }
+
+        #endif
+
+        if ( nullptr == iv_curProcedure )
+        {
+            // There are no TD procedures currently in progress.
+
+            // First, keep track of where the command stopped. Must be done
+            // before calling checkEcc().
+            o_rc = initStoppedRank();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "initStoppedRank() failed" );
+                break;
+            }
+
+            // TODO: RTC 157892 Check why the command stopped and take actions
+            //       appropriately. Note that since nothing is happening here at
+            //       the moment, the code will simply assume the command stopped
+            //       at the end of memory with no errors.
+
+            // If the command completed successfully with no error, the error
+            // log will not have any useful information. Therefore, do not
+            // commit the error log. This is done to avoid useless
+            // informational error logs.
+            io_sc.service_data->setDontCommitErrl();
+        }
+
+        // Move onto the next step in the state machine.
+        o_rc = nextStep( io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "nextStep() failed" );
+            break;
+        }
+
+    } while (0);
+
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Failed on 0x%08x", iv_chip->getHuid() );
+
+        // Just in case it was a legitimate command complete (error log not
+        // committed) but something else failed.
+        io_sc.service_data->clearDontCommitErrl();
+
+        // Change signature indicating there was an error in analysis.
+        io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                          PRDFSIG_CmdComplete_ERROR );
+
+        // Something definitely failed, so callout 2nd level support.
+        io_sc.service_data->SetCallout( NextLevelSupport_ENUM, MRU_HIGH );
+        io_sc.service_data->setServiceCall();
+
+        #ifndef __HOSTBOOT_RUNTIME // IPL only
+
+        // Tell MDIA to skip further analysis on this target.
+        uint32_t l_rc = mdiaSendEventMsg( iv_chip->getTrgt(),
+                                          MDIA::STOP_TESTING );
+        if ( SUCCESS != l_rc )
+            PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(STOP_TESTING) failed" );
+
+        #endif
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
 
 //------------------------------------------------------------------------------
 
@@ -112,6 +215,12 @@ uint32_t MemTdCtlr<TYPE_MBA>::initStoppedRank()
 
     #undef PRDF_FUNC
 }
+
+//------------------------------------------------------------------------------
+
+// Avoid linker errors with the template.
+template class MemTdCtlr<TYPE_MCBIST>;
+template class MemTdCtlr<TYPE_MBA>;
 
 //------------------------------------------------------------------------------
 
