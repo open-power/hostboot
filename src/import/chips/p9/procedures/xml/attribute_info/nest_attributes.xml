@@ -787,6 +787,7 @@
   <valueType>uint64</valueType>
   <writeable/>
   <persistRuntime/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -802,6 +803,7 @@
   <array>8</array>
   <writeable/>
   <persistRuntime/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -817,6 +819,7 @@
   <array>8</array>
   <writeable/>
   <persistRuntime/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************* -->
 <attribute>
@@ -832,6 +835,7 @@
   <valueType>uint64</valueType>
   <writeable/>
   <persistRuntime/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -847,6 +851,7 @@
   <array>4</array>
   <writeable/>
   <persistRuntime/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -862,6 +867,7 @@
   <array>4</array>
   <writeable/>
   <persistRuntime/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -1118,6 +1124,7 @@
   <array>8</array>
   <writeable/>
   <persistRuntime/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -1133,6 +1140,7 @@
   <array>8</array>
   <writeable/>
   <persistRuntime/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************* -->
 <attribute>
@@ -1148,6 +1156,7 @@
   <array>4</array>
   <writeable/>
   <persistRuntime/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************* -->
 <attribute>
@@ -1163,6 +1172,7 @@
   <array>4</array>
   <writeable/>
   <persistRuntime/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************* -->
 
