@@ -26,7 +26,6 @@
 #include <prdfMemTdCtlr.H>
 
 #include <prdfMemAddress.H>
-#include <prdfP9McbistDataBundle.H>
 
 using namespace TARGETING;
 
@@ -38,7 +37,7 @@ using namespace PlatServices;
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t MemTdCtlr<TYPE_MCBIST, McbistDataBundle *>::initStoppedRank()
+uint32_t MemTdCtlr<TYPE_MCBIST>::initStoppedRank()
 {
     #define PRDF_FUNC "[initStoppedRank] "
 
@@ -85,9 +84,8 @@ uint32_t MemTdCtlr<TYPE_MCBIST, McbistDataBundle *>::initStoppedRank()
 
 //------------------------------------------------------------------------------
 
-/* RTC 136128
 template<>
-uint32_t MemTdCtlr<TYPE_MBA, MbaDataBundle *>::initStoppedRank()
+uint32_t MemTdCtlr<TYPE_MBA>::initStoppedRank()
 {
     #define PRDF_FUNC "[initStoppedRank] "
 
@@ -114,7 +112,6 @@ uint32_t MemTdCtlr<TYPE_MBA, MbaDataBundle *>::initStoppedRank()
 
     #undef PRDF_FUNC
 }
-*/
 
 //------------------------------------------------------------------------------
 

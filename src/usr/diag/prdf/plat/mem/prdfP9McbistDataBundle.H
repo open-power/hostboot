@@ -64,13 +64,11 @@ class McbistDataBundle : public DataBundle
     const McbistDataBundle & operator=( const McbistDataBundle & ) = delete;
 
     /** @return The Targeted Diagnostics controller. */
-    MemTdCtlr<TARGETING::TYPE_MCBIST,McbistDataBundle *> * getTdCtlr()
+    MemTdCtlr<TARGETING::TYPE_MCBIST> * getTdCtlr()
     {
-        using namespace TARGETING;
-
         if ( nullptr == iv_tdCtlr )
         {
-            iv_tdCtlr = new MemTdCtlr<TYPE_MCBIST,McbistDataBundle *>{iv_chip};
+            iv_tdCtlr = new MemTdCtlr<TARGETING::TYPE_MCBIST>{iv_chip};
         }
 
         return iv_tdCtlr;
@@ -82,7 +80,7 @@ class McbistDataBundle : public DataBundle
     ExtensibleChip * const iv_chip;
 
     /** The Targeted Diagnostics controller. */
-    MemTdCtlr<TARGETING::TYPE_MCBIST,McbistDataBundle *> * iv_tdCtlr = nullptr;
+    MemTdCtlr<TARGETING::TYPE_MCBIST> * iv_tdCtlr = nullptr;
 };
 
 /**
