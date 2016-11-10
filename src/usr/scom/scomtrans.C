@@ -316,7 +316,7 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
             (!g_wakeupInProgress) &&
             !(i_opMode & fapi2::DO_NOT_DO_WAKEUP) )
         {
-            TRACFCOMP(g_trac_scom,"Determining if Special Wakeup is needed..");
+            TRACDCOMP(g_trac_scom,"Determining if Special Wakeup is needed..");
             bool l_needsWakeup = true;
             for(uint16_t i = 0; i < l_scomPairings.size(); i++)
             {
@@ -328,7 +328,7 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
             }
             if(l_needsWakeup)
             {
-                TRACFCOMP(g_trac_scom,"Special wakeup required, starting now..");
+                TRACDCOMP(g_trac_scom,"Special wakeup required, starting now..");
                 g_wakeupInProgress = true;
 
                 l_err = handleSpecialWakeup(i_target,true);
