@@ -44,7 +44,7 @@ namespace PRDF
 /**
  * @brief A state machine for memory Targeted Diagnostics (TD).
  */
-template <TARGETING::TYPE T, typename D>
+template <TARGETING::TYPE T>
 class MemTdCtlr
 {
   public:

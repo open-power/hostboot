@@ -33,7 +33,6 @@
 
 // Platform includes
 #include <prdfPlatServices.H>
-#include <prdfP9McbistDataBundle.H>
 #include <prdfP9McbistExtraSig.H>
 
 using namespace TARGETING;
@@ -43,8 +42,8 @@ namespace PRDF
 
 using namespace PlatServices;
 
-template <TYPE T, typename D>
-uint32_t MemTdCtlr<T,D>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
+template <TARGETING::TYPE T>
+uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemTdCtlr::handleCmdComplete] "
 
@@ -117,9 +116,9 @@ uint32_t MemTdCtlr<T,D>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-template <TYPE T, typename D>
-uint32_t MemTdCtlr<T,D>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
-                                        TdEntry * i_entry )
+template <TARGETING::TYPE T>
+uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
+                                      TdEntry * i_entry )
 {
     #define PRDF_FUNC "[MemTdCtlr::handleTdEvent] "
 
@@ -169,8 +168,8 @@ uint32_t MemTdCtlr<T,D>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
 
 //------------------------------------------------------------------------------
 
-template <TYPE T, typename D>
-uint32_t MemTdCtlr<T,D>::initialize()
+template <TARGETING::TYPE T>
+uint32_t MemTdCtlr<T>::initialize()
 {
     #define PRDF_FUNC "[MemTdCtlr::initialize] "
 
@@ -195,8 +194,8 @@ uint32_t MemTdCtlr<T,D>::initialize()
 
 //------------------------------------------------------------------------------
 
-template <TYPE T, typename D>
-uint32_t MemTdCtlr<T,D>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
+template <TARGETING::TYPE T>
+uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemTdCtlr::defaultStep] "
 
@@ -226,7 +225,8 @@ uint32_t MemTdCtlr<T,D>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 //------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.
-template class MemTdCtlr<TYPE_MCBIST, McbistDataBundle *>;
+template class MemTdCtlr<TYPE_MCBIST>;
+template class MemTdCtlr<TYPE_MBA>;
 
 //------------------------------------------------------------------------------
 

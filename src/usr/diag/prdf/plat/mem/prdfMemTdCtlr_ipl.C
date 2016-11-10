@@ -31,7 +31,6 @@
 
 // Platform includes
 #include <prdfMemScrubUtils.H>
-#include <prdfP9McbistDataBundle.H>
 #include <prdfP9McbistExtraSig.H>
 
 using namespace TARGETING;
@@ -43,8 +42,8 @@ using namespace PlatServices;
 
 //------------------------------------------------------------------------------
 
-template <TYPE T, typename D>
-uint32_t MemTdCtlr<T,D>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
+template <TARGETING::TYPE T>
+uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemTdCtlr::handleCmdComplete] "
 
@@ -130,8 +129,8 @@ uint32_t MemTdCtlr<T,D>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-template <TYPE T, typename D>
-uint32_t MemTdCtlr<T,D>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
+template <TARGETING::TYPE T>
+uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemTdCtlr::defaultStep] "
 
@@ -189,7 +188,8 @@ uint32_t MemTdCtlr<T,D>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 //------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.
-template class MemTdCtlr<TYPE_MCBIST, McbistDataBundle *>;
+template class MemTdCtlr<TYPE_MCBIST>;
+template class MemTdCtlr<TYPE_MBA>;
 
 //------------------------------------------------------------------------------
 
