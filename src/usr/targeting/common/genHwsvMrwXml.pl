@@ -4090,8 +4090,7 @@ sub generate_proc
     }
 
     my $bootFreq = $reqPol->{'boot-frequency'}->{content};
-    #TODO RTC:162075 need to update this with real MRW value
-    my $divisorRefclk = 133;
+    my $divisorRefclk = $reqPol->{'mb_bit_rate_divisor_refclk'};
 
     #Assume this will be the default, 8
     my $dpllDivider = 8;
