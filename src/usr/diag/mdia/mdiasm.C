@@ -497,7 +497,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                         *((*wit)->workItem),
                         get_huid(target));
 
-                /* @
+                /*@
                  * @errortype
                  * @reasoncode       MDIA::MAINT_COMMAND_HW_TIMED_OUT
                  * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
