@@ -40,6 +40,11 @@ namespace HTMGT
 
     const uint32_t OCC_POLL_DATA_MIN_SIZE = 40;
 
+    const uint16_t OCC_COMM_INIT_COMPLETE = 0x0EFF;
+
+    const uint16_t OCC_INIT_FAILURE = 0xE000;
+
+    const uint16_t OCC_TRACE_BUFFER_SIZE = 0x2000;
 
     enum occStateId
     {
@@ -274,6 +279,15 @@ namespace HTMGT
              * @param[in,out]  i_err  Error log to add data to
              */
             void collectCheckpointScomData(errlHndl_t i_err);
+
+            /**
+             * @brief Add OCC trace buffers to given error log (ERR, IMP, INF)
+             *
+             * @param[in,out] - the error log handle to add user data for
+             */
+            void addOccTrace( errlHndl_t & io_errl );
+
+
 
 
         private:   // functions

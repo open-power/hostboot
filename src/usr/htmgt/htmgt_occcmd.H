@@ -41,6 +41,10 @@ namespace HTMGT
     const uint32_t OCC_MAX_DATA_LENGTH = 0x00001000;
     const uint32_t OCC_RSP_SRAM_ADDR   = 0xFFFBF000;
 
+    const uint32_t OCC_TRACE_ERR       = 0xFFFB4000;
+    const uint32_t OCC_TRACE_INF       = 0xFFFB6000;
+    const uint32_t OCC_TRACE_IMP       = 0xFFFB8000;
+
     // The following header lengths include the 2 byte checksum
     const uint16_t OCC_CMD_HDR_LENGTH = 6;
     const uint16_t OCC_RSP_HDR_LENGTH = 7;
@@ -62,6 +66,7 @@ namespace HTMGT
         OCC_RC_OCC_WATCHDOG_TIMEOUT     = 0xE2,
         OCC_RC_OCC_TIMEOUT              = 0xE3,
         OCC_RC_OCC_HW_ERROR             = 0xE4,
+        OCC_RC_INIT_FAILURE             = 0xE5,
         OCC_RC_OCC_EXCEPTION_RESERVED   = 0xEF,
 
         OCC_COMMAND_IN_PROGRESS         = 0xFF

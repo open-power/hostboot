@@ -859,13 +859,18 @@ namespace HTMGT
                     l_excErr->addFFDC(OCCC_COMP_ID,
                                       sramRspPtr,
                                       std::min(exceptionLength,
-                                               (uint32_t)MAX_FFDC),
+                                      (uint32_t)MAX_FFDC),
                                       1,  // version
                                       exceptionType); // subsection
+
                     if (0xE1 == exceptionType)
                     {
                         iv_Occ->collectCheckpointScomData(l_excErr);
                     }
+
+                    // Add OCC trace buffer to error log (ERR, IMP, INF)
+                    iv_Occ->addOccTrace( l_excErr );
+
                     ERRORLOG::errlCommit(l_excErr, HTMGT_COMP_ID);
 
                     // Save exception so we don't log it again
@@ -920,6 +925,7 @@ namespace HTMGT
             TMGT_ERR("writeOccCmd: Error writing to OCC Circular Buffer,"
                      " rc=0x%04X", l_err->reasonCode());
             iv_Occ->collectCheckpointScomData(l_err);
+            iv_Occ->addOccTrace( l_err );
             l_err->collectTrace("HTMGT");
             ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
         }
@@ -994,16 +1000,18 @@ namespace HTMGT
             // The response buffer did not contain correct sequence number,
             // or status is still in progress ==> timeout
             const uint8_t * const rspBuffer = iv_Occ->iv_homer + OCC_RSP_ADDR;
-            const uint16_t rspLen = OCC_RSP_HDR_LENGTH +
-                UINT16_GET(&rspBuffer[3]);
             l_err->addFFDC(HTMGT_COMP_ID,
                            rspBuffer,
-                           std::min(rspLen, MAX_FFDC),
+                           KILOBYTE,
                            1,
                            SUBSEC_OCC_RSP_DATA);
 
             // timeout waiting for response (no data to return)
             iv_OccRsp.dataLength = 0;
+
+            iv_Occ->collectCheckpointScomData( l_err );
+            iv_Occ->addOccTrace( l_err );
+
         } // end timeout
 
         return l_err;
