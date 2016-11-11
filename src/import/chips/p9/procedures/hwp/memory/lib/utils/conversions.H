@@ -201,7 +201,7 @@ inline OT ps_to_cycles(const fapi2::Target<T>& i_target, const OT i_ps)
     l_remainder = i_ps % l_divisor;
 
     // Make sure we add a cycle if there wasn't an even number of cycles in the input
-    FAPI_INF("converting %dps to %d cycles", i_ps, l_quotient + (l_remainder == 0 ? 0 : l_rounder));
+    FAPI_INF("converting %llups to %llu cycles", i_ps, l_quotient + (l_remainder == 0 ? 0 : l_rounder));
 
     return l_quotient + (l_remainder == 0 ? 0 : l_rounder);
 
