@@ -1751,12 +1751,14 @@ foreach my $i (@{$i2cBus->{'i2c-device'}})
 
     my $max_mem_size = "0x80";
     my $chip_count = "0x02";
+    my $cycle_time = "0x05";
 
     if( ($i->{'content-type'} eq 'PRIMARY_SBE_VPD') ||
         ($i->{'content-type'} eq 'REDUNDANT_SBE_VPD') )
     {
         $max_mem_size = "0x100";
         $chip_count = "0x04";
+        $cycle_time = "0x0A";
     }
 
     push @I2Cdevices, {
@@ -1775,7 +1777,7 @@ foreach my $i (@{$i2cBus->{'i2c-device'}})
          'i2c_max_mem_size' => $max_mem_size,
          'i2c_chip_count' => $chip_count,
          'i2c_write_page_size' =>"0x80",
-         'i2c_write_cycle_time' => "0x05" };
+         'i2c_write_cycle_time' => $cycle_time };
 
     if(( ($i->{'part-type'} eq 'hotplug-controller') &&
              ($i->{'part-id'} eq 'MAX5961')) ||
