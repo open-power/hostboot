@@ -177,11 +177,23 @@ namespace TARGETING
                             rc = -EINVAL;
                             break;
                         }
-                        // Do memcpy from PNOR into physical page.
-                        memcpy(pAddr,
-                               reinterpret_cast<void*>(
-                                    iv_sections[section].pnorAddress + offset),
-                               size);
+                        // if we are NOT in mpipl OR if this IS a r/w section,
+                        // Do a memcpy from PNOR address into physical page.
+                        if(!iv_isMpipl || (iv_sections[section].type == SECTION_TYPE_PNOR_RW)  )
+                        {
+                            memcpy(pAddr,
+                                reinterpret_cast<void*>(
+                                        iv_sections[section].pnorAddress + offset),
+                                size);
+                        }
+                        else
+                        {
+                            // Do memcpy from real memory into physical page.
+                            memcpy(pAddr,
+                                   reinterpret_cast<void*>(
+                                   iv_sections[section].realMemAddress + offset),
+                                   size);
+                        }
                         break;
 
                     case MSG_MM_RP_WRITE:
@@ -393,23 +405,23 @@ namespace TARGETING
                         static_cast<uint64_t>(
                             TARG_TO_PLAT_PTR(l_header->vmmBaseAddress)) +
                         l_header->vmmSectionOffset*i;
-                if(!iv_isMpipl)
-                {
-                    iv_sections[i].pnorAddress = l_pnorSectionInfo.vaddr + l_section->sectionOffset;
-                }
-                else
+
+
+                iv_sections[i].pnorAddress = l_pnorSectionInfo.vaddr + l_section->sectionOffset;
+
+                if(iv_isMpipl)
                 {
                     //For MPIPL we are reading from real memory, not pnor flash. Set the real memory address
-                    //in place of the pnor address because that is where we are reading the data from
-                    iv_sections[i].pnorAddress = reinterpret_cast<uint64_t>(l_header) + l_section->sectionOffset;
+                    iv_sections[i].realMemAddress = reinterpret_cast<uint64_t>(l_header) + l_section->sectionOffset;
                 }
                 iv_sections[i].size = l_section->sectionSize;
 
                 TRACFCOMP(g_trac_targeting,
-                          "Decoded Attribute Section: %d, 0x%lx 0x%lx 0x%lx",
+                          "Decoded Attribute Section: %d, 0x%lx 0x%lx 0x%lx 0x%lx",
                           iv_sections[i].type,
                           iv_sections[i].vmmAddress,
                           iv_sections[i].pnorAddress,
+                          iv_sections[i].realMemAddress,
                           iv_sections[i].size);
 
             }
@@ -527,7 +539,7 @@ namespace TARGETING
                 }
 
                 rc = mm_set_permission(reinterpret_cast<void*>(
-                                                iv_sections[i].vmmAddress),
+                                       iv_sections[i].vmmAddress),
                                        iv_sections[i].size,
                                        l_perm);
 
@@ -559,14 +571,19 @@ namespace TARGETING
 
                 // The volatile sections in MPIPL need to be copied because
                 // on the MPIPL flow we will not run the HWPs that set these attrs
+                // the RW section of the attribute data must be copied
+                // into the vmmAddress in order to make future r/w come
+                // from the pnor address, not real memory
                 if(((iv_sections[i].type == SECTION_TYPE_HEAP_ZERO_INIT) ||
-                    (iv_sections[i].type == SECTION_TYPE_HB_HEAP_ZERO_INIT)) &&
+                    (iv_sections[i].type == SECTION_TYPE_HB_HEAP_ZERO_INIT) ||
+                    (iv_sections[i].type == SECTION_TYPE_PNOR_RW)) &&
                     iv_isMpipl)
                 {
                     memcpy(reinterpret_cast<void*>(iv_sections[i].vmmAddress),
-                        reinterpret_cast<void*>(iv_sections[i].pnorAddress),
+                        reinterpret_cast<void*>(iv_sections[i].realMemAddress),
                         (iv_sections[i].size));
                 }
+
             } // End iteration through each section
 
             if(l_errl)

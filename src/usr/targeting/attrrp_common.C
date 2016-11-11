@@ -42,6 +42,8 @@ namespace TARGETING
         // Location in PNOR virtual address space
         uint64_t     pnorAddress;
 
+        uint64_t     realMemAddress;
+
         // Section size
         uint64_t     size;
     };
