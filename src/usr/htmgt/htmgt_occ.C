@@ -94,7 +94,7 @@ namespace HTMGT
     // Set state of the OCC
     errlHndl_t Occ::setState(const occStateId i_state)
     {
-        errlHndl_t l_err = NULL;
+        errlHndl_t l_err = nullptr;
 
         if (OCC_ROLE_MASTER == iv_role)
         {
@@ -108,7 +108,7 @@ namespace HTMGT
             OccCmd cmd(this, OCC_CMD_SET_STATE,
                        sizeof(l_cmdData), l_cmdData);
             l_err = cmd.sendOccCmd();
-            if (l_err != NULL)
+            if (l_err != nullptr)
             {
                 TMGT_ERR("setState: Failed to set OCC%d state, rc=0x%04X",
                          iv_instance, l_err->reasonCode());
@@ -181,7 +181,7 @@ namespace HTMGT
     // Reset OCC
     bool Occ::resetPrep()
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         bool atThreshold = false;
 
         // Send resetPrep command
@@ -250,18 +250,24 @@ namespace HTMGT
                 TARGETING::getParentChip(iv_target);
             ERRORLOG::ErrlUserDetailsLogRegister l_scom_data(procTarget);
             // Grab circular buffer scom data: (channel 1)
-            //0006B031  OCBCSR1 (Control/Status [1]  Register)
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6B031));
-            //0006A211  OCBSLCS1
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6A211));
-            //0006A214  OCBSHCS1
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6A214));
-            //0006A216  OCBSES1 (Indicates error that occur in an indirect ch)
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6A216));
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6A210));
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6A213));
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6A217));
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6B034));
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C020));//OCB_OCI_IOSR1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C024));//OCB_OCI_OIMR1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C210));//OCB_OCI_OCBSLBR1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C211));//OCB_OCI_OCBSLCS1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C213));//OCB_OCI_OCBSHBR1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C214));//OCB_OCI_OCBSHCS1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C216));//OCB_OCI_OCBSES1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C217));//OCB_OCI_OCBICR1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C218));//OCB_OCI_OCBLWCR1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C21A));//OCB_OCI_OCBLWSR1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C21C));//OCB_OCI_OCBLWSBR1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6D010));//OCB_PIB_OCBAR0
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6D030));//OCB_PIB_OCBAR1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6D031));//OCB_PIB_OCBCSR1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6D034));//OCB_PIB_OCBESR1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6D050));//OCB_PIB_OCBAR2
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6D070));//OCB_PIB_OCBAR3
+
             l_scom_data.addToLog(i_err);
         }
         else
@@ -271,6 +277,80 @@ namespace HTMGT
         }
     } // end Occ::collectCheckpointScomData()
 
+    // Utility function to actually add trace buffer data
+    void addOccTraceBuffer( errlHndl_t & io_errl,
+                            TARGETING::Target * i_pOcc,
+                            uint32_t i_address )
+    {
+        errlHndl_t l_errl = nullptr;
+
+        uint8_t l_sramData[OCC_TRACE_BUFFER_SIZE];
+        //Initialize to 0;
+        memset(l_sramData, 0, OCC_TRACE_BUFFER_SIZE);
+
+        l_errl = HBOCC::readSRAM(i_pOcc,
+                          i_address,
+                          reinterpret_cast<uint64_t*>(l_sramData),
+                          OCC_TRACE_BUFFER_SIZE );
+
+        if ( ( l_errl == nullptr ) &&
+             ( l_sramData != 0 )   &&
+             ( io_errl != nullptr ) )
+        {
+            // Strip off all but last 32 bytes of 00s
+            uint32_t l_dataSize;
+
+            // find first byte of data that is not 00s
+            for( l_dataSize = OCC_TRACE_BUFFER_SIZE;
+               ( l_dataSize > 32) && (l_sramData[l_dataSize-1] == 0x00);
+               --l_dataSize);
+
+            // pad 32 bytes
+            l_dataSize += 32;
+            if(l_dataSize > OCC_TRACE_BUFFER_SIZE)
+            {
+                l_dataSize = OCC_TRACE_BUFFER_SIZE;
+            }
+
+            // Add trace buffer to error log
+            io_errl->addFFDC( HTMGT_COMP_ID,
+                              l_sramData,
+                              l_dataSize,
+                              1, //version
+                              SUBSEC_ADDITIONAL_SRC );
+
+        }
+        else
+        {
+            TMGT_ERR("addOccTraceBuffers: Unable to read OCC trace "
+                    "buffer from SRAM address (0x%08X)",
+                    i_address );
+            if( l_errl != nullptr )
+            {
+                ERRORLOG::errlCommit(l_errl, HTMGT_COMP_ID);
+            }
+        }
+
+
+    }
+
+    void Occ::addOccTrace( errlHndl_t & io_errl )
+    {
+        // Add ERR trace buffer
+        addOccTraceBuffer( io_errl,
+                           iv_target,
+                           OCC_TRACE_ERR );
+
+        // Add IMP trace buffer
+        addOccTraceBuffer( io_errl,
+                           iv_target,
+                           OCC_TRACE_IMP );
+
+        // Add INF trace buffer
+        addOccTraceBuffer( io_errl,
+                           iv_target,
+                           OCC_TRACE_INF );
+    }
 
 
     /////////////////////////////////////////////////////////////////
@@ -281,7 +361,7 @@ namespace HTMGT
 
 
     OccManager::OccManager()
-        :iv_occMaster(NULL),
+        :iv_occMaster(nullptr),
         iv_state(OCC_STATE_UNKNOWN),
         iv_targetState(OCC_STATE_ACTIVE),
         iv_resetCount(0),
@@ -299,7 +379,7 @@ namespace HTMGT
     // Remove all OCC objects
     void OccManager::_removeAllOccs()
     {
-        iv_occMaster = NULL;
+        iv_occMaster = nullptr;
         if (iv_occArray.size() > 0)
         {
             for( const auto & occ : iv_occArray )
@@ -316,12 +396,12 @@ namespace HTMGT
     // Query the functional OCCs and build OCC objects
     errlHndl_t OccManager::_buildOccs()
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         bool safeModeNeeded = false;
         TMGT_INF("_buildOccs called");
 
         // Only build OCC objects once.
-        if((iv_occArray.size() > 0) && (iv_occMaster != NULL))
+        if((iv_occArray.size() > 0) && (iv_occMaster != nullptr))
         {
             TMGT_INF("_buildOccs: Existing OCC Targets kept = %d",
                      iv_occArray.size());
@@ -356,11 +436,11 @@ namespace HTMGT
 #ifdef SIMICS_TESTING
                 // Starting of OCCs is not supported in SIMICS, so fake out
                 // HOMER memory area for testing
-                if (NULL == homer)
+                if (nullptr == homer)
                 {
                     extern uint8_t * G_simicsHomerBuffer;
 
-                    if (NULL == G_simicsHomerBuffer)
+                    if (nullptr == G_simicsHomerBuffer)
                     {
                         // Allocate a fake HOMER area
                         G_simicsHomerBuffer =
@@ -372,7 +452,7 @@ namespace HTMGT
                 }
 #endif
 
-                if ((NULL != homer) && (NULL != homerPhys))
+                if ((nullptr != homer) && (nullptr != homerPhys))
                 {
                     // Get functional OCC (one per proc)
                     TARGETING::TargetHandleList occs;
@@ -399,10 +479,10 @@ namespace HTMGT
                 else
                 {
                     // OCC will not be functional with no HOMER address
-                    TMGT_ERR("_buildOccs: HOMER address for OCC%d is NULL!",
+                    TMGT_ERR("_buildOccs: HOMER address for OCC%d is nullptr!",
                              instance);
                     safeModeNeeded = true;
-                    if (NULL == err)
+                    if (nullptr == err)
                     {
                         /*@
                          * @errortype
@@ -410,7 +490,7 @@ namespace HTMGT
                          * @reasoncode HTMGT_RC_OCC_CRIT_FAILURE
                          * @userdata1  OCC Instance
                          * @userdata2  homer virtual address
-                         * @devdesc Homer pointer is NULL, unable to communicate
+                         * @devdesc Homer pointer is nullptr, unable to communicate
                          *          with the OCCs.  Leaving system in safe mode.
                          */
                         bldErrLog(err,
@@ -423,7 +503,7 @@ namespace HTMGT
                     }
                 }
 
-                if (NULL != iv_occMaster)
+                if (nullptr != iv_occMaster)
                 {
                     // update master occsPresent bit for each slave OCC
                     for( const auto & occ : iv_occArray )
@@ -445,7 +525,7 @@ namespace HTMGT
         if (0 == _getNumOccs())
         {
             TMGT_ERR("_buildOccs: Unable to find any functional OCCs");
-            if (NULL == err)
+            if (nullptr == err)
             {
                 /*@
                  * @errortype
@@ -475,7 +555,7 @@ namespace HTMGT
             // Reset all OCCs
             TMGT_INF("_buildOccs: Calling HBOCC::stopAllOCCs");
             err2 = HBOCC::stopAllOCCs();
-            if (NULL != err2)
+            if (nullptr != err2)
             {
                 TMGT_ERR("_buildOccs: stopAllOCCs failed with rc 0x%04X",
                          err2->reasonCode());
@@ -506,7 +586,7 @@ namespace HTMGT
         occRole role = OCC_ROLE_SLAVE;
         if (true == i_masterCapable)
         {
-            if (NULL == iv_occMaster)
+            if (nullptr == iv_occMaster)
             {
                 // No master assigned yet, use this OCC
                 TMGT_INF("addOcc: OCC%d will be the master", i_instance);
@@ -538,7 +618,7 @@ namespace HTMGT
     // Get pointer to specified OCC
     Occ * OccManager::_getOcc(const uint8_t i_instance)
     {
-        Occ *targetOcc = NULL;
+        Occ *targetOcc = nullptr;
         for( const auto & occ : iv_occArray )
         {
             if (occ->getInstance() == i_instance)
@@ -556,7 +636,7 @@ namespace HTMGT
     // Set the OCC state
     errlHndl_t OccManager::_setOccState(const occStateId i_state)
     {
-        errlHndl_t l_err = NULL;
+        errlHndl_t l_err = nullptr;
 
         occStateId requestedState = i_state;
         if (OCC_STATE_NO_CHANGE == i_state)
@@ -573,11 +653,11 @@ namespace HTMGT
             iv_targetState = requestedState;
 
             l_err = _buildOccs(); // if not already built.
-            if (NULL == l_err)
+            if (nullptr == l_err)
             {
                 // Send poll cmd to confirm comm has been established.
                 // Flush old errors to ensure any new errors will be collected
-                l_err = _sendOccPoll(true, NULL);
+                l_err = _sendOccPoll(true, nullptr);
                 if (l_err)
                 {
                     TMGT_ERR("_setOccState: Poll OCCs failed.");
@@ -585,7 +665,7 @@ namespace HTMGT
                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
                 }
 
-                if (NULL != iv_occMaster)
+                if (nullptr != iv_occMaster)
                 {
                     TMGT_INF("_setOccState(state=0x%02X)", requestedState);
 
@@ -594,7 +674,7 @@ namespace HTMGT
                     do
                     {
                         l_err = iv_occMaster->setState(requestedState);
-                        if (NULL == l_err)
+                        if (nullptr == l_err)
                         {
                             needsRetry = false;
                         }
@@ -631,7 +711,7 @@ namespace HTMGT
                               ERRORLOG::ERRL_SEV_INFORMATIONAL);
                 }
 
-                if (NULL == l_err)
+                if (nullptr == l_err)
                 {
                     // Send poll to query state of all OCCs
                     // and flush any errors reported by the OCCs
@@ -668,7 +748,7 @@ namespace HTMGT
                         }
                     }
 
-                    if (NULL == l_err)
+                    if (nullptr == l_err)
                     {
                         TMGT_INF("_setOccState: All OCCs have reached state "
                                  "0x%02X", requestedState);
@@ -715,11 +795,11 @@ namespace HTMGT
                                       bool i_skipCountIncrement,
                                       bool i_skipComm)
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         bool atThreshold = false;
 
         err = _buildOccs(); // if not a already built.
-        if (NULL == err)
+        if (nullptr == err)
         {
             if (false == int_flags_set(FLAG_RESET_DISABLED))
             {
@@ -734,7 +814,7 @@ namespace HTMGT
                 if (false == i_skipComm)
                 {
                     // Send poll cmd to all OCCs to establish comm
-                    err = _sendOccPoll(false,NULL);
+                    err = _sendOccPoll(false,nullptr);
                     if (err)
                     {
                         TMGT_ERR("_resetOccs: Poll OCCs failed.");
@@ -882,7 +962,7 @@ namespace HTMGT
         io_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                     HWAS::SRCI_PRIORITY_MED);
 
-        TARGETING::Target* sys = NULL;
+        TARGETING::Target* sys = nullptr;
         TARGETING::targetService().getTopLevelTarget(sys);
         const uint8_t safeMode = 1;
 
@@ -909,7 +989,7 @@ namespace HTMGT
     // Wait for all OCCs to reach communications checkpoint
     errlHndl_t OccManager::_waitForOccCheckpoint()
     {
-        errlHndl_t checkpointElog = NULL;
+        errlHndl_t checkpointElog = nullptr;
 #ifdef CONFIG_HTMGT
         // Wait up to 15 seconds for all OCCs to be ready (150 * 100ms = 15s)
         const size_t NS_BETWEEN_READ = 100 * NS_PER_MSEC;
@@ -930,7 +1010,7 @@ namespace HTMGT
                     nanosleep(0, NS_BETWEEN_READ);
 
                     // Read SRAM response buffer to check for OCC checkpoint
-                     errlHndl_t l_err = NULL;
+                     errlHndl_t l_err = nullptr;
                     const uint16_t l_length = 8;
 
                     fapi2::buffer<uint64_t> l_buffer;
@@ -938,11 +1018,16 @@ namespace HTMGT
                                             OCC_RSP_SRAM_ADDR,
                                             l_buffer.pointer(),
                                             l_length);
-                    if (NULL == l_err)
+
+                    if (nullptr == l_err)
                     {
-                        // Check response status for checkpoint (byte 6-7)
+                        // Pull status from response (byte 2)
+                        uint8_t status = 0;
+                        l_buffer.extractToRight<16, 8>(status);
+                        // Pull checkpoint from response (byte 6-7)
                         uint16_t checkpoint = 0;
                         l_buffer.extractToRight<48,16>(checkpoint);
+
                         if (checkpoint != lastCheckpoint)
                         {
                             TMGT_INF("_waitForOccCheckpoint: OCC%d Checkpoint "
@@ -950,13 +1035,29 @@ namespace HTMGT
                                      occ->getInstance(), checkpoint);
                             lastCheckpoint = checkpoint;
                         }
-                        if (0x0EFF == checkpoint)
+                        if ( ( OCC_RC_OCC_INIT_CHECKPOINT == status ) &&
+                             ( OCC_COMM_INIT_COMPLETE == checkpoint) )
                         {
                             TMGT_INF("_waitForOccCheckpoint OCC%d ready!",
                                      occ->getInstance());
 
                             occReady = true;
                             break;
+                        }
+                        if( ( ( checkpoint & OCC_INIT_FAILURE ) ==
+                                             OCC_INIT_FAILURE ) ||
+                              ( status != OCC_RC_OCC_INIT_CHECKPOINT ) )
+                        {
+
+                            TMGT_ERR("_waitForOccCheckpoint: Final checkpoint "
+                                    "not reached byt OCC%d stopped "
+                                    "(0x%02X, 0x%04X)",
+                                    occ->getInstance(),
+                                    status,
+                                    checkpoint );
+
+                           occReady = false;
+                           break;
                         }
                     }
                     else
@@ -973,7 +1074,7 @@ namespace HTMGT
                         else
                         {
                             delete l_err;
-                            l_err = NULL;
+                            l_err = nullptr;
                         }
                     }
                 }
@@ -985,7 +1086,7 @@ namespace HTMGT
                     TMGT_ERR("_waitForOccCheckpoint OCC%d still NOT ready! "
                              "(last checkpoint=0x%04X)",
                              occ->getInstance(), lastCheckpoint);
-                    errlHndl_t l_err = NULL;
+                    errlHndl_t l_err = nullptr;
                     /*@
                      * @errortype
                      * @moduleid HTMGT_MOD_WAIT_FOR_CHECKPOINT
@@ -999,12 +1100,14 @@ namespace HTMGT
                               0, occ->getInstance(), 0, lastCheckpoint,
                               ERRORLOG::ERRL_SEV_PREDICTIVE);
 
-                    occ->collectCheckpointScomData(l_err);
-                    if (NULL == checkpointElog)
+                    occ->collectCheckpointScomData( l_err );
+                    occ->addOccTrace( l_err );
+
+                    if (nullptr == checkpointElog)
                     {
                         // return the first elog
                         checkpointElog = l_err;
-                        l_err = NULL;
+                        l_err = nullptr;
                     }
                     else
                     {
@@ -1012,6 +1115,7 @@ namespace HTMGT
                     }
                     TMGT_ERR("waitForOccCheckpoint OCC%d still NOT ready!",
                              occ->getInstance());
+                    break;
                 }
             }
         }
@@ -1083,7 +1187,7 @@ namespace HTMGT
         uint16_t index = 0;
 
         // If the system is in safemode then can't talk to OCCs (no build/poll)
-        TARGETING::Target* sys = NULL;
+        TARGETING::Target* sys = nullptr;
         TARGETING::targetService().getTopLevelTarget(sys);
         uint8_t safeMode = 0;
         if (sys &&
@@ -1099,7 +1203,7 @@ namespace HTMGT
                 ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
             }
             // Send poll to confirm comm, update states and flush errors
-            err = _sendOccPoll(true, NULL);
+            err = _sendOccPoll(true, nullptr);
             if (err)
             {
                 TMGT_ERR("_getOccData: Poll OCCs failed.");
@@ -1109,7 +1213,7 @@ namespace HTMGT
 
         // First add HTMGT specific data
         o_data[index++] = _getNumOccs();
-        o_data[index++] = (NULL!=iv_occMaster)?iv_occMaster->getInstance():0xFF;
+        o_data[index++] = (nullptr!=iv_occMaster)?iv_occMaster->getInstance():0xFF;
         o_data[index++] = iv_state;
         o_data[index++] = iv_targetState;
         o_data[index++] = iv_resetCount;
@@ -1152,14 +1256,14 @@ namespace HTMGT
     // Set default pstate table type and reset all OCCs to pick them up
     errlHndl_t OccManager::_loadPstates(bool i_normalPstates)
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
 
         // Set default pstate table type
         _setPstateTable(i_normalPstates);
 
         // Reset OCCs to pick up new tables (skip incrementing reset count)
         TMGT_INF("_loadPstates: Resetting OCCs");
-        err = _resetOccs(NULL, true);
+        err = _resetOccs(nullptr, true);
 
         return err;
     }
@@ -1200,7 +1304,7 @@ namespace HTMGT
     // Clear all OCC reset counts
     void OccManager::_clearResetCounts()
     {
-        TARGETING::Target* sys = NULL;
+        TARGETING::Target* sys = nullptr;
         TARGETING::targetService().getTopLevelTarget(sys);
         uint8_t safeMode = 0;
         if (sys)

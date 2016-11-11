@@ -56,7 +56,7 @@ namespace HTMGT
     {
         TMGT_INF(">>processOccStartStatus(%d,0x%p)",
                  i_startCompleted, i_failedOccTarget);
-        errlHndl_t l_err = NULL;
+        errlHndl_t l_err = nullptr;
         uint32_t l_huid = 0;
         if (i_failedOccTarget)
         {
@@ -70,9 +70,9 @@ namespace HTMGT
             {
                 // Query functional OCCs
                 l_err = OccManager::buildOccs();
-                if (NULL == l_err)
+                if (nullptr == l_err)
                 {
-                    if (NULL != OccManager::getMasterOcc())
+                    if (nullptr != OccManager::getMasterOcc())
                     {
                         do
                         {
@@ -82,7 +82,11 @@ namespace HTMGT
 #endif
 
                             // Make sure OCCs are ready for communication
-                            OccManager::waitForOccCheckpoint();
+                            l_err = OccManager::waitForOccCheckpoint();
+                            if( l_err )
+                            {
+                                break;
+                            }
 
 #ifdef __HOSTBOOT_RUNTIME
                             // TODO RTC 124738  Final solution TBD
@@ -178,7 +182,7 @@ namespace HTMGT
                           ERRORLOG::ERRL_SEV_INFORMATIONAL);
             }
 
-            if (NULL != l_err)
+            if (nullptr != l_err)
             {
                 TMGT_ERR("OCCs not all active (rc=0x%04X).  Attempting OCC "
                          "Reset", l_err->reasonCode());
@@ -186,7 +190,7 @@ namespace HTMGT
                              "Attempting OCC Reset",
                              l_err->reasonCode());
                 TMGT_INF("processOccStartStatus: Calling resetOccs");
-                errlHndl_t err2 = OccManager::resetOccs(NULL);
+                errlHndl_t err2 = OccManager::resetOccs(nullptr);
                 if(err2)
                 {
                     TMGT_ERR("OccManager::resetOccs failed with 0x%04X",
@@ -234,7 +238,7 @@ namespace HTMGT
     {
         TMGT_INF(">>processOccError(0x%p)", i_procTarget);
 
-        TARGETING::Target* sys = NULL;
+        TARGETING::Target* sys = nullptr;
         TARGETING::targetService().getTopLevelTarget(sys);
         uint8_t safeMode = 0;
 
@@ -249,9 +253,9 @@ namespace HTMGT
 
         bool polledOneOcc = false;
         errlHndl_t err = OccManager::buildOccs();
-        if (NULL == err)
+        if (nullptr == err)
         {
-            if (i_procTarget != NULL)
+            if (i_procTarget != nullptr)
             {
                 const uint32_t l_huid =
                     i_procTarget->getAttr<TARGETING::ATTR_HUID>();
@@ -286,7 +290,7 @@ namespace HTMGT
                 TMGT_ERR("processOccError(): OCCs need to be reset");
                 // Don't pass failed target as OCC should have already
                 // been marked as failed during the poll.
-                errlHndl_t err = OccManager::resetOccs(NULL);
+                errlHndl_t err = OccManager::resetOccs(nullptr);
                 if(err)
                 {
                     ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
@@ -309,10 +313,10 @@ namespace HTMGT
     void processOccReset(TARGETING::Target * i_proc)
     {
         TMGT_INF(">>processOccReset(0x%p)", i_proc);
-        errlHndl_t errl = NULL;
-        TARGETING::Target * failedOccTarget = NULL;
+        errlHndl_t errl = nullptr;
+        TARGETING::Target * failedOccTarget = nullptr;
 
-        TARGETING::Target* sys = NULL;
+        TARGETING::Target* sys = nullptr;
         TARGETING::targetService().getTopLevelTarget(sys);
         uint8_t safeMode = 0;
 
@@ -324,15 +328,17 @@ namespace HTMGT
             return;
         }
 
-        // Get functional OCC (one per proc)
-        TARGETING::TargetHandleList pOccs;
-        getChildChiplets(pOccs, i_proc, TARGETING::TYPE_OCC);
-        if (pOccs.size() > 0)
+        if( i_proc )
         {
-            failedOccTarget = pOccs[0];
+            TARGETING::TargetHandleList pOccs;
+            getChildChiplets(pOccs, i_proc, TARGETING::TYPE_OCC);
+            if (pOccs.size() > 0)
+            {
+                failedOccTarget = pOccs[0];
+            }
         }
 
-        if(NULL != failedOccTarget)
+        if(nullptr != failedOccTarget)
         {
             uint32_t huid = failedOccTarget->getAttr<TARGETING::ATTR_HUID>();
             TMGT_INF("processOccReset(HUID=0x%08X) called", huid);
@@ -360,7 +366,7 @@ namespace HTMGT
             // Add HB firmware callout
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_MED);
-            ERRORLOG::errlCommit(errl, HTMGT_COMP_ID); // sets errl to NULL
+            ERRORLOG::errlCommit(errl, HTMGT_COMP_ID); // sets errl to nullptr
         }
 
         if (false == int_flags_set(FLAG_EXT_RESET_DISABLED))
@@ -368,7 +374,7 @@ namespace HTMGT
             errl = OccManager::resetOccs(failedOccTarget);
             if(errl)
             {
-                ERRORLOG::errlCommit(errl, HTMGT_COMP_ID); // sets errl to NULL
+                ERRORLOG::errlCommit(errl, HTMGT_COMP_ID); // sets errl to nullptr
             }
         }
         else
@@ -386,8 +392,8 @@ namespace HTMGT
     errlHndl_t enableOccActuation(bool i_occActivation)
     {
         TMGT_INF(">>enableOccActuation(%c)", i_occActivation?'Y':'N');
-        errlHndl_t l_err = NULL;
-        TARGETING::Target* sys = NULL;
+        errlHndl_t l_err = nullptr;
+        TARGETING::Target* sys = nullptr;
 
         // If the system is already in safemode then can't talk to OCCs
         TARGETING::targetService().getTopLevelTarget(sys);
@@ -407,7 +413,7 @@ namespace HTMGT
 
             // Set state for all OCCs
             l_err = OccManager::setOccState(targetState);
-            if (NULL == l_err)
+            if (nullptr == l_err)
             {
                 TMGT_INF("enableOccActuation: OCC states updated to 0x%02X",
                          targetState);
@@ -425,7 +431,7 @@ namespace HTMGT
                 TMGT_ERR("enableOccActuation(): OCCs need to be reset");
                 // Don't pass failed target as OCC should have already
                 // been marked as failed during the poll.
-                l_err = OccManager::resetOccs(NULL);
+                l_err = OccManager::resetOccs(nullptr);
 
                 // NOTE: If the system exceeded its reset count and ended up
                 // in safe mode an error may not be returned here (if a
@@ -442,7 +448,7 @@ namespace HTMGT
             }
         }
 
-        if ((NULL == l_err) && safeMode)
+        if ((nullptr == l_err) && safeMode)
         {
             // Create an elog so the user knows the cmd failed.
             TMGT_ERR("enableOccActuation(): System is in safe mode");
@@ -466,7 +472,7 @@ namespace HTMGT
         }
 
         TMGT_INF("<<enableOccActuation() returning 0x%04X",
-                 (l_err==NULL) ? 0 : l_err->reasonCode());
+                 (l_err==nullptr) ? 0 : l_err->reasonCode());
         return l_err;
 
     } // end enableOccActuation()
@@ -478,7 +484,7 @@ namespace HTMGT
                              uint16_t      & o_attrLength,
                              uint8_t       * o_attrData)
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         uint32_t attrId = 0;
 
         if ((i_data[0] == ATTR_RAW) && (i_length == 5))
@@ -520,12 +526,12 @@ namespace HTMGT
                                uint16_t & o_rspLength,
                                uint8_t *  o_rspData)
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         htmgtReasonCode failingSrc = HTMGT_RC_NO_ERROR;
         o_rspLength = 0;
 
         err = OccManager::buildOccs();
-        if (NULL == err)
+        if (nullptr == err)
         {
             if ((i_cmdLength > 0) && (NULL != i_cmdData))
             {
