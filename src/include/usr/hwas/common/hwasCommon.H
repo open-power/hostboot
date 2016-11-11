@@ -200,6 +200,7 @@ const uint32_t VPD_CP00_PG_EPx_L3L2REFR[2]  = {0x0288, 0x0144};
 const uint32_t VPD_CP00_PG_EC00_INDEX       = 32;
 // all good - 3:VITAL, 4:PRV, 5:C00, 6:C01
 const uint32_t VPD_CP00_PG_ECxx_GOOD        = 0xE1FF;
+const uint32_t VPD_CP00_PG_ECxx_MAX_ENTRIES = 24;
 
 const uint32_t VPD_CP00_PG_MAX_USED_INDEX   = 55;
 const uint32_t VPD_CP00_PG_xxx_VITAL        = 0x1000;

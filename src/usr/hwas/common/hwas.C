@@ -155,6 +155,43 @@ bool areL3L2REFRtripletsValid(uint16_t i_pgData)
     return l_valid;
 }
 
+/**
+ * @brief simple helper fn to check core data for rollup
+ *
+ * @param[in] i_firstCore First core to look at
+ * @param[in] i_numCoresToCheck number of cores to check from first one
+ * @param[in] i_pgData PG keyword VPD
+ *
+ * @return bool All ECxx domains were marked bad
+ *
+ */
+bool allCoresBad(const uint8_t & i_firstCore,
+                 const uint8_t & i_numCoresToCheck,
+                 const uint16_t i_pgData[])
+{
+    bool coresBad = true;
+    uint8_t coreNum = 0;
+    do
+    {
+        // don't look outside of EC core entries
+        if ((i_firstCore + coreNum) >= VPD_CP00_PG_ECxx_MAX_ENTRIES)
+        {
+            HWAS_INF("allCoresBad: requested %d cores beginning at %d, "
+                    "but only able to check %d cores",
+                    i_numCoresToCheck, i_firstCore, coreNum);
+            break;
+        }
+        if (i_pgData[VPD_CP00_PG_EC00_INDEX + i_firstCore + coreNum] ==
+            VPD_CP00_PG_ECxx_GOOD)
+        {
+            coresBad = false;
+        }
+        coreNum++;
+    }
+    while (coresBad && (coreNum < i_numCoresToCheck));
+
+    return coresBad;
+}
 
 errlHndl_t discoverTargets()
 {
@@ -655,6 +692,44 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                      VPD_CP00_PG_EPx_GOOD);
             l_descFunctional = false;
         }
+        else
+        {
+            // Look for a rollup bad status
+            // Either both EXs are bad or all 4 EC's are bad
+
+            // index of first EX of 2 EXs under this EQ
+            uint8_t indexEX = (uint8_t)indexEP * 2;
+
+            // index of first EC of 4 ECs under this EQ
+            uint8_t indexEC = indexEX * 2;
+            uint8_t coresToCheck = 4;
+
+            // check if both EX's are bad
+            if (((i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP] &
+                VPD_CP00_PG_EPx_L3L2REFR[0]) != 0) &&
+                ((i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP] &
+                VPD_CP00_PG_EPx_L3L2REFR[1]) != 0))
+            {
+                HWAS_INF("pDesc %.8X - EQ%d marked bad because its EXs "
+                         "(%d and %d) are both bad",
+                        i_desc->getAttr<ATTR_HUID>(),
+                        indexEP,
+                        indexEX, indexEX+1);
+
+                l_descFunctional = false;
+            }
+            else
+            // check if child cores are bad
+            if (allCoresBad(indexEC, coresToCheck, i_pgData))
+            {
+                HWAS_INF("pDesc %.8X - EQ%d marked bad because its %d CORES "
+                         "(EC%d - EC%d) are all bad",
+                        i_desc->getAttr<ATTR_HUID>(),
+                        indexEP,
+                        coresToCheck, indexEC, indexEC+3);
+                l_descFunctional = false;
+            }
+        }
     }
     else
     if (i_desc->getAttr<ATTR_TYPE>() == TYPE_EX)
@@ -665,6 +740,10 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
         size_t indexEP = indexEX / 2;
         // 2 L3/L2/REFR triplets per EX chiplet
         size_t indexL3L2REFR = indexEX % 2;
+        // 2 EC children per EX
+        uint8_t indexEC = indexEX * 2;
+        uint8_t allCoresToCheck = 2; // 2 CORES per EX
+
         // Check triplet of bits in EPx entry
         if ((i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP] &
              VPD_CP00_PG_EPx_L3L2REFR[indexL3L2REFR]) != 0)
@@ -676,6 +755,20 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                      i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP],
                      (i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP] &
                       ~VPD_CP00_PG_EPx_L3L2REFR[indexL3L2REFR]));
+            l_descFunctional = false;
+        }
+        else
+        // Check that EX does not have 2 bad CORE children
+        if (allCoresBad(indexEC, allCoresToCheck, i_pgData))
+        {
+            HWAS_INF("pDesc %.8X - EX%d marked bad since it has no good cores",
+                    i_desc->getAttr<ATTR_HUID>(), indexEX);
+            HWAS_INF("(core %d: actual 0x%04X, expected 0x%04X) "
+                     "(core %d: actual 0x%04X, expected 0x%04X)",
+                     indexEC, i_pgData[VPD_CP00_PG_EC00_INDEX + indexEC],
+                     VPD_CP00_PG_ECxx_GOOD,
+                     indexEC+1, i_pgData[VPD_CP00_PG_EC00_INDEX + indexEC+1],
+                     VPD_CP00_PG_ECxx_GOOD);
             l_descFunctional = false;
         }
     }

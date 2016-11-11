@@ -639,6 +639,7 @@ public:
                     pDesc->getAttr<ATTR_CHIP_UNIT>();
                 char l_type_str[9];
                 char l_pgData[] = "";
+                uint8_t core_idx;
 
                 TS_INFO("testHWASisDescFunctional: descendant functional - "
                         "attr type 0x%04X, chip unit %d", l_type, l_chipUnit);
@@ -923,7 +924,7 @@ public:
                             //       going through loop, thus creating and
                             //       testing mismatched pairs.
                             if (pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] &
-                                l_mask)
+                                    l_mask)
                             {
                                 // Turn off a bit that should be on
                                 pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] &=
@@ -952,6 +953,70 @@ public:
                             pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] =
                                 (uint16_t)VPD_CP00_PG_EPx_GOOD;
                         }
+
+                        //////////////////////////////////////
+                        // make children bad to check rollup
+                        //////////////////////////////////////
+
+                        // mark bad EX children
+                        TS_INFO("testHWASisDescFunctional>"
+                            "Mark EQ%d's EX chiplets bad", l_chipUnit);
+
+                        // Choosing a single failure for each EX out of
+                        // multiple possibilities
+
+                        // Mark l3x, l2x, and/or refrx bad (x = 0 or 1)
+
+                        // 1st EX bad: mark refr0 as bad
+                        pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] |=
+                            0x0008;
+
+                        // 2nd EX bad: mark L21 as bad too
+                        pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] |=
+                            0x0040;
+
+                        if (isDescFunctional(pDesc, pgData))
+                        {
+                            TS_FAIL("testHWASisDescFunctional>"
+                                    "functional = 0x%x, should be false. "
+                                    "EQ/EP%d = 0x%04x (expected 0x%04X), "
+                                    "EX children were marked bad ",
+                                    isDescFunctional(pDesc, pgData),
+                                    l_chipUnit,
+                                    pgData[VPD_CP00_PG_EP0_INDEX
+                                           + l_chipUnit],
+                                    VPD_CP00_PG_EPx_GOOD);
+                        }
+
+                        // Restore the "all good" data
+                        pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] =
+                                (uint16_t)VPD_CP00_PG_EPx_GOOD;
+
+                        // now try bad CORE rollup
+                        core_idx = (uint8_t)l_chipUnit * 4;
+                        TS_INFO("testHWASisDescFunctional>"
+                            "Now try marking EQ%d cores EC%d - EC%d bad",
+                            l_chipUnit, core_idx, core_idx+3);
+                        for (int i = 0; i < 4; i++)
+                        {
+                            pgData[VPD_CP00_PG_EC00_INDEX + core_idx + i] |=
+                                ~VPD_CP00_PG_ECxx_GOOD;
+                        }
+                        if (isDescFunctional(pDesc, pgData))
+                        {
+                            TS_FAIL("testHWASisDescFunctional>"
+                                "EQ/EP%d functional = 0x%x, should be false. "
+                                "All 4 EC children were marked bad",
+                                l_chipUnit,
+                                isDescFunctional(pDesc, pgData));
+                        }
+                        // Restore the "all good" core data
+                        for (int i = 0; i < 4; i++)
+                        {
+                            pgData[VPD_CP00_PG_EC00_INDEX + core_idx + i] =
+                                VPD_CP00_PG_ECxx_GOOD;
+                        }
+
                         break;
 
                     case TYPE_EX:
@@ -973,6 +1038,32 @@ public:
 
                         pgData[VPD_CP00_PG_EP0_INDEX + (l_chipUnit / 2)] =
                             (uint16_t)VPD_CP00_PG_EPx_GOOD;
+
+                        // Now mark its 2 EC cores as bad and check for rollup
+                        core_idx = (uint8_t)l_chipUnit * 2;
+                        TS_INFO("testHWASisDescFunctional>"
+                            "Now try marking EX%d cores EC%d and EC%d bad",
+                            l_chipUnit, core_idx, core_idx+1);
+                        for (int i = 0; i < 2; i++)
+                        {
+                            pgData[VPD_CP00_PG_EC00_INDEX + core_idx + i] |=
+                                ~VPD_CP00_PG_ECxx_GOOD;
+                        }
+                        if (isDescFunctional(pDesc, pgData))
+                        {
+                            TS_FAIL("testHWASisDescFunctional>"
+                                "EX%d functional = 0x%x, should be false. "
+                                "All 2 EC children were marked bad",
+                                l_chipUnit,
+                                isDescFunctional(pDesc, pgData));
+                        }
+                        // Restore the "all good" core data
+                        for (int i = 0; i < 2; i++)
+                        {
+                            pgData[VPD_CP00_PG_EC00_INDEX + core_idx + i] =
+                                VPD_CP00_PG_ECxx_GOOD;
+                        }
+
                         break;
 
                     case TYPE_CORE:
