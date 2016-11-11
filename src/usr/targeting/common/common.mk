@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2017
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,6 +50,9 @@ ITERATORS_OBJS += rangefilter.o
 TARGET_OBJS += target.o
 TARGET_OBJS += targetservice.o
 TARGET_OBJS += entitypath.o
+
+TARGUTILBASE ?= targutilbase.o # only set UTILBASE if not already defined
+OTHER_OBJS += ${TARGUTILBASE}
 
 OTHER_OBJS += util.o
 OTHER_OBJS += utilFilter.o

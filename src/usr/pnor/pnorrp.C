@@ -53,7 +53,7 @@
 #ifdef CONFIG_SECUREBOOT
 #include <secureboot/service.H>
 #include <secureboot/containerheader.H>
-//#include <secureboot/settings.H>      TODO securebootp9 include settings.H
+#include <secureboot/settings.H>
 #include <secureboot/header.H>
 #include <secureboot/trustedbootif.H>
 #endif
