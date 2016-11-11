@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <initservice/initserviceif.H>
-#include "settings.H"
+#include <secureboot/settings.H>
 #include <secureboot/header.H>
 #include "purge.H"
 #include <kernel/misc.H>
@@ -97,9 +97,14 @@ bool enabled()
     return Singleton<Settings>::instance().getEnabled();
 }
 
-bool getJumperState()
+errlHndl_t getSecuritySwitch(uint64_t& o_regValue, TARGETING::Target* i_targ)
 {
-    return Singleton<Settings>::instance().getJumperState();
+    return Singleton<Settings>::instance().getSecuritySwitch(o_regValue,i_targ);
+}
+
+errlHndl_t getJumperState(SecureJumperState& o_state, TARGETING::Target* i_targ)
+{
+    return Singleton<Settings>::instance().getJumperState(o_state, i_targ);
 }
 
 void handleSecurebootFailure(errlHndl_t &io_err, bool i_waitForShutdown)

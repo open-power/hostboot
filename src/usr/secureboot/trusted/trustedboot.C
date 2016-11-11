@@ -55,7 +55,7 @@
 #include "trustedbootUtils.H"
 #include "tpmLogMgr.H"
 #include "base/trustedbootMsg.H"
-#include "../settings.H"
+#include <secureboot/settings.H>
 
 namespace TRUSTEDBOOT
 {
@@ -506,8 +506,13 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target)
         memset(l_digest, 0, sizeof(uint64_t));
 
         // Security switches
-        uint64_t l_securitySwitchValue = Singleton<SECUREBOOT::Settings>::
-                                                instance().getSecuritySwitch();
+        uint64_t l_securitySwitchValue = 0;
+        l_err = SECUREBOOT::getSecuritySwitch(l_securitySwitchValue,
+                            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
+        if (l_err)
+        {
+            break;
+        }
         TRACFCOMP(g_trac_trustedboot, "security switch value = 0x%X",
                                 l_securitySwitchValue);
         // Extend to TPM - PCR_1
@@ -774,8 +779,19 @@ void tpmVerifyFunctionalTpmExists()
                    "NO FUNCTIONAL TPM FOUND");
 
         // Check to ensure jumper indicates we are running secure
-        if (false) /// @todo Story 161916 Change to call getJumperState
-        //        if (SECUREBOOT::getJumperState())
+        SECUREBOOT::SecureJumperState l_state
+                          = SECUREBOOT::SecureJumperState::SECURITY_DEASSERTED;
+        err = SECUREBOOT::getJumperState(l_state);
+        if (err)
+        {
+            errlCommit(err, SECURE_COMP_ID);
+
+            auto errPlid = err->plid();
+
+            // we should not continue if we could not read the jumper state
+            INITSERVICE::doShutdown(errPlid);
+        }
+        else if (l_state == SECUREBOOT::SecureJumperState::SECURITY_ASSERTED)
         {
             /*@
              * @errortype

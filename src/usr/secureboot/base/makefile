@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -36,6 +36,10 @@ OBJS += trustedboot_base.o
 OBJS += $(if $(CONFIG_TPMDD),trustedbootMsg.o,)
 OBJS += containerheader.o
 OBJS += ${SECUREBOOT_COMMON_OBJS}
+OBJS += targutilbase.o
+
+VPATH += $(ROOTPATH)/src/usr/targeting/common
+EXTRAINCDIR += $(ROOTPATH)/src/include/usr
 
 VPATH += ../common
 

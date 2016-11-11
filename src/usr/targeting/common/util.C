@@ -78,27 +78,6 @@ bool is_vpo( void )
 };
 
 /**
- * @brief Safely fetch the HUID of a Target
- */
-uint32_t get_huid( const Target* i_target )
-{
-    uint32_t huid = 0;
-    if( i_target == NULL )
-    {
-        huid = 0x0;
-    }
-    else if( i_target == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL )
-    {
-        huid = 0xFFFFFFFF;
-    }
-    else
-    {
-        i_target->tryGetAttr<ATTR_HUID>(huid);
-    }
-    return huid;
-}
-
-/**
  * @brief set HWAS Changed flag to subscription mask
  *
  *   This will be used by the HCDB service - when the target has

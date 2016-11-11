@@ -27,6 +27,8 @@
 
 #include <errl/errlentry.H>
 #include <config.h>
+#include <secureboot/settings.H>
+#include <cstdint>
 
 typedef uint8_t SHA512_t[64];
 /* From sha512.h:  */
@@ -82,28 +84,57 @@ namespace SECUREBOOT
 #endif
     //@fixme-RTC:163094-Remove RUNTIME check once the code is there
 
-    /** @brief Returns the state of the secure jumper as reported by the master
-     *      processor.
+    /** @brief Get security switch register value
+     *  @par Detailed Description:
+     *      Returns the state of the security switch register as
+     *      reported by the given processor (via the supplied target
+     *      pointer).
+     *  @param[out] o_regValue The value read from the register if the
+     *      call was successful. If not successful this value is set to
+     *      zero. Check the return value for a non null error log to
+     *      determine if the call was unsuccessful.
+     *  @param[in] i_targ The target processor to obtain the jumper
+     *      state from. Must not be null. Optional parameter that
+     *      defaults to master processor.
+     *  @return errlHndl_t indicating whether the query was successful.
+     *  @retval null if successful otherwise pointer to error log
+     */
+    errlHndl_t getSecuritySwitch(uint64_t& o_regValue,
+            TARGETING::Target* i_targ
+                = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
+
+
+    /** @brief Returns the state of the secure jumper as reported by the
+     *      given processor.
      *
      *  @par Detailed Description:
-     *      Returns the state of the secure jumper as reported by the master
-     *      processor.  This should NOT be used to determine whether security is
-     *      enabled, because several conditions are aggregated together to
-     *      determine that.  To query whether security is actually enabled or
-     *      not, call the enabled() API.  This is a limited-use API intended to
-     *      be called by trusted boot code to determine whether a system shipped
-     *      with a secure jumper applied or removed, in order to decide
+     *      Returns the state of the secure jumper as reported by the
+     *      the given processor.  This should NOT be used to determine
+     *      whether security is enabled, because several conditions are
+     *      aggregated together to determine that.  To query whether
+     *      security is actually enabled or not, call the enabled() API.
+     *      This is a limited-use API intended to be called by trusted
+     *      boot code to determine whether a system shipped with a
+     *      secure jumper applied or removed, in order to decide
      *      whether to enforce the "TPM Required" policy or not.
+     *  @param[out] o_state Provides an enum value of type SecureJumperState
+     *      that can be either SECURITY_DEASSERTED or SECURITY_ASSERTED
+     *      indicating the given processor's secure jumper state.
+     *      Asserted means it is configured to request HW security.  This
+     *      does not necessarily imply security is enabled, because the
+     *      HW can be overridden by some functions.  Use the getEnabled()
+     *      API to determine whether security is actually enabled.
+     *      Deasserted means the jumper is configured to disble HW security.
+     *  @param[in] i_targ The target processor to obtain the jumper
+     *      state from. Must not be null. Optional parameter that
+     *      defaults to master processor.
      *
-     *  @return Boolean indicating acting master processor's secure jumper state
-     *  @retval true Jumper is configured to request HW security.  This does not
-     *      necessarily imply security is enabled, because an open SBE can
-     *      override the HW policy.  Use the enabled() API to determine whether
-     *      security is actually enabled.
-     *  @retval false Jumper is configured to disble HW security.
+     *  @return errlHndl_t indicating whether the query was successful.
+     *  @retval null if successful otherwise pointer to error log.
      */
-    bool getJumperState();
-
+    errlHndl_t getJumperState(SecureJumperState& o_state,
+                TARGETING::Target* i_targ
+                    = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
 
     /**
      * @brief Verify Signed Container
