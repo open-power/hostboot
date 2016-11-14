@@ -3709,7 +3709,10 @@ void getMasterInfo( const TARGETING::Target* i_chip,
         }
 
         MasterInfo_t info;
-        info.scomAddr = 0x000A0000 + engine*0x20;
+
+        //For P9, the base scom address for each i2c engine
+        //can be computed by adding an offset of 0x1000 each time
+        info.scomAddr = 0x000A0000 + engine*P9_ENGINE_SCOM_OFFSET;
         info.engine = engine;
         info.freq = i2cGetNestFreq()*1000*1000; //convert MHz->Hz
         // PIB_CLK = NEST_FREQ /4
