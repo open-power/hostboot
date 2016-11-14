@@ -33,24 +33,43 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_EVID_READVOLTAGE_TIMEOUT</rc>
+    <rc>RC_PM_EVID_READVOLTAGE_TIMEOUT</rc>
     <description>
     A timeout occured reading voltage from an AVSBus interface
     </description>
+    <ffdc>TARGET</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_EVID_WRITEVOLTAGE_TIMEOUT</rc>
+    <rc>RC_PM_VDD_EVID_WRITEVOLTAGE_TIMEOUT</rc>
     <description>
     A timeout occured writing a voltage to an AVSBus interface
     </description>
+    <ffdc>TARGET</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_EVID_IDLEFRAME_TIMEOUT</rc>
+    <rc>RC_PM_VDN_EVID_WRITEVOLTAGE_TIMEOUT</rc>
+    <description>
+    A timeout occured writing a voltage to an AVSBus interface
+    </description>
+    <ffdc>TARGET</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_VCS_EVID_WRITEVOLTAGE_TIMEOUT</rc>
+    <description>
+    A timeout occured writing a voltage to an AVSBus interface
+    </description>
+    <ffdc>TARGET</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_EVID_IDLEFRAME_TIMEOUT</rc>
     <description>
     A timeout occured writing an idle from to an AVSBus interface
     </description>
+    <ffdc>TARGET</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
