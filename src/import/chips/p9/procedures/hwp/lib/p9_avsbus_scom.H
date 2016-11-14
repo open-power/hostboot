@@ -174,7 +174,7 @@ const uint32_t OCB_O2SRD[2][2] =
     OCB_O2SRD0A,
     OCB_O2SRD0B,
     OCB_O2SRD1A,
-    OCB_O2SRD1A
+    OCB_O2SRD1B
 };
 
 } //end of p9avslib namespace
