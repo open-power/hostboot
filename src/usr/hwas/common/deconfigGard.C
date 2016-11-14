@@ -226,11 +226,19 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
                 continue;
             }
 
-
             // if target is unchanged, continue to next in loop
             if (l_predicateHwasChanged(l_pTarget) == false)
             {
                 HWAS_INF("skipping %.8X - GARD changed bit false",
+                        get_huid(l_pTarget));
+                continue;
+            }
+
+            // if record is USER garded then don't clear it here and
+            // continue to next in loop
+            if (l_gardRecord.iv_errorType == GARD_User_Manual)
+            {
+                HWAS_INF("skipping %.8X - GARD user manual",
                         get_huid(l_pTarget));
                 continue;
             }
@@ -286,6 +294,16 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
                     continue;
                 }
 
+                if (l_gardRecord.iv_errorType == GARD_User_Manual)
+                {
+                    // do not clear user garded records
+                    HWAS_INF("Still skipping USER garded record %08X",
+                        get_huid(l_pTarget));
+
+                    // skip this GARD record
+                    continue;
+                }
+
                 // Compare the current GARD record against all the stored
                 // EIDs from the first pass. If there is a match,
                 // clear the GARD record.
@@ -320,6 +338,7 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
                 ++t_iter)
         {
             Target* l_pTarget = *t_iter;
+
             if (l_predicateHwasChanged(l_pTarget))
             {
                 clear_hwas_changed_bit(l_pTarget,HWAS_CHANGED_BIT_GARD);
