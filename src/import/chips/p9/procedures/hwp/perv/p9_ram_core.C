@@ -92,7 +92,7 @@ const uint32_t OPCODE_STXVD2X                      = 0x7C000798;
 const uint32_t OPCODE_MFMSR_TO_GPR0                = 0x7C0000A6;
 const uint32_t OPCODE_MFOCRF_TO_GPR0               = 0x7C100026;
 const uint32_t OPCODE_MTOCRF_FROM_GPR0             = 0x7C100120;
-const uint32_t OPCODE_MTFSF_FROM_GPR0              = 0xFE00058E;
+const uint32_t OPCODE_MTFSF_FROM_FPR0              = 0xFE00058E;
 const uint32_t OPCODE_MFVSCR_TO_VR0                = 0x10000604;
 const uint32_t OPCODE_MTVSCR_FROM_VR0              = 0x10000644;
 
@@ -882,14 +882,17 @@ fapi2::ReturnCode RamCore::put_reg(const Enum_RegType i_type, const uint32_t i_r
 
             FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, l_backup_fpr0));
 
-            //2.put SPR value into GPR0
+            //2.put SPR value into FPR0
             FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, i_buffer[0]));
 
             l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
             FAPI_TRY(ram_opcode(l_opcode, true));
 
+            l_opcode = OPCODE_MTFPRD_FROM_GPR0_TO_FPR0;
+            FAPI_TRY(ram_opcode(l_opcode, true));
+
             //3.create mtfsf opcode, ram into thread
-            l_opcode = OPCODE_MTFSF_FROM_GPR0;
+            l_opcode = OPCODE_MTFSF_FROM_FPR0;
             FAPI_TRY(ram_opcode(l_opcode, true));
 
             //4.restore FPR0
