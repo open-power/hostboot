@@ -99,9 +99,9 @@ typedef std::map<std::string, SPRMapEntry>::iterator SPR_MAP_IT;
     _op_(DSCR     ,17  , ECP.LS.LSPRQX_DSCR<??T>                          ,FLAG_READ_WRITE ,SPR_PER_PT         ,25)\
     _op_(DSISR    ,18  , ECP.LS.T<??T>_DSISR                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,32)\
     _op_(DAR      ,19  , ECP.LS.T<??T>_DAR                                ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
-    _op_(DEC      ,22  , EXP.EC.CC.PCC<??C>.V<??T>_DEC                    ,FLAG_READ_WRITE ,SPR_PER_PT         ,32)\
+    _op_(DEC      ,22  , EXP.EC.CC.PCC<??C>.V<??T>_DEC                    ,FLAG_READ_WRITE ,SPR_PER_VT         ,32)\
     _op_(SDR1     ,25  , ECP.LS.V<??T>_SDR1_MASTER                        ,FLAG_READ_WRITE ,SPR_PER_VT         ,64)\
-    _op_(SRR0     ,26  , ECP.IFU.T<??T>_SRR0                              ,FLAG_READ_WRITE ,SPR_PER_LPAR_VT    ,64)\
+    _op_(SRR0     ,26  , ECP.IFU.T<??T>_SRR0                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(SRR1     ,27  , ECP.SD.T<??T>_SRR1                               ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(CFAR     ,28  , ECP.IFU.T<??T>_CFAR                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(AMR      ,29  , ECP.LS.T<??T>_AMR_MASTER                         ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
@@ -111,9 +111,9 @@ typedef std::map<std::string, SPRMapEntry>::iterator SPR_MAP_IT;
     _op_(TFIAR    ,129 , ECP.IFU.T<??T>_TFIAR                             ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(TEXASR   ,130 , ECP.SD.T<??T>_TEXASR                             ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(TEXASRU  ,131 , ECP.SD.T<??T>_TEXASR                             ,FLAG_READ_WRITE ,SPR_PER_PT         ,32)\
-    _op_(CTRL_RU  ,136 , EXP.EC.CC.PCC<??C>.COMMON.SPR_COMMON.CTRL        ,FLAG_READ_ONLY  ,SPR_PER_PT         ,32)\
-    _op_(TIDR     ,144 , ECP.LS.T<??T>_TIDR                               ,FLAG_READ_WRITE ,SPR_SHARED         ,64)\
-    _op_(CTRL     ,152 , EXP.EC.CC.PCC<??C>.COMMON.SPR_COMMON.CTRL        ,FLAG_WRITE_ONLY ,SPR_PER_PT         ,32)\
+    _op_(CTRL_RU  ,136 , EXP.EC.CC.PCC<??C>.COMMON.SPR_COMMON.CTRL        ,FLAG_READ_ONLY  ,SPR_SHARED         ,32)\
+    _op_(TIDR     ,144 , ECP.LS.T<??T>_TIDR                               ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
+    _op_(CTRL     ,152 , EXP.EC.CC.PCC<??C>.COMMON.SPR_COMMON.CTRL        ,FLAG_WRITE_ONLY ,SPR_SHARED         ,32)\
     _op_(FSCR     ,153 , ECP.SD.T<??T>_FSCR                               ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(UAMOR    ,157 , ECP.LS.T<??T>_UAMOR                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(GSR      ,158 , N/A                                              ,FLAG_READ_WRITE ,SPR_SHARE_NA       ,64)\
