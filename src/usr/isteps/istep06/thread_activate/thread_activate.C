@@ -149,6 +149,8 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
                           DEVICE_MVPD_ADDRESS( theRecord,
                                                theKeyword ) );
 
+        if (l_errl) { break; }
+
         if(theSize != 1)
         {
             /*@
