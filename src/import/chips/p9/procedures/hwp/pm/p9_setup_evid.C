@@ -39,8 +39,6 @@
 ///   - Use Attributes to send VDD, VDN and VCS via the AVS bus to VRMs
 ///
 /// @endverbatim
-/// @todo (to be considered in L2/L3 development) AVSBus timing parameters
-///  as attributes or not.  They were hardcoded in P8.
 
 //-----------------------------------------------------------------------------
 // Includes
@@ -68,13 +66,14 @@ enum P9_SETUP_EVID_CONSTANTS
 // Default voltages if mailbox -> attributes are not setup
     DEFAULT_BOOT_VDD_VOLTAGE_MV = 1000,
     DEFAULT_BOOT_VCS_VOLTAGE_MV = 1050,
-    DEFAULT_BOOT_VDN_VOLTAGE_MV = 900
+    DEFAULT_BOOT_VDN_VOLTAGE_MV = 900,
+    AVSBUS_VOLTAGE_WRITE_RETRY_COUNT = 5
 };
 
 //##############################################################################
 // Function to initiate an eVRM voltage change.
 //##############################################################################
-// @todo - RTC item to track how AVS Voltage write is called through function below
+// Voltage write and Status Check performed in main procedure
 fapi2::ReturnCode
 driveVoltageChange(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                    i_target,
@@ -99,8 +98,6 @@ driveVoltageChange(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
     }
     else
     {
-        //@todo L3 - This need to have a FAPI_ASSERT block with appropriate
-        //error codes used from this procedure's error xml file
         FAPI_ERR("Invalid AVSBus Rail: i_Rail = %u", i_Rail);
         //return fapi2::current_err;
 
@@ -295,6 +292,10 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
     // AVSBus configuration variables
     avsbus_attrs_t attrs;
 
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint8_t> l_data8;
+    uint8_t l_count = 0;
+
     // Read attribute -
     FAPI_TRY(avsInitAttributes(i_target, &attrs, i_action));
 
@@ -309,34 +310,86 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
                                           attrs.vdn_bus_num, BRIDGE_NUMBER),
                  "Initializing avsBus VDN, bridge %d", BRIDGE_NUMBER);
 
-        FAPI_INF("Sending an Idle frame before Voltage writes");
+        while (l_count < AVSBUS_VOLTAGE_WRITE_RETRY_COUNT)
+        {
 
-        // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
-        // initialize the AVS slave on VDD bus
-        FAPI_TRY(avsIdleFrame(i_target, attrs.vdd_bus_num, BRIDGE_NUMBER));
+            FAPI_INF("Sending an Idle frame before Voltage writes");
 
-        // Set Boot VDD Voltage
-        FAPI_TRY(avsVoltageWrite(i_target,
-                                 attrs.vdd_bus_num,
-                                 BRIDGE_NUMBER,
-                                 attrs.vdd_rail_select,
-                                 attrs.vdd_voltage_mv),
-                 "Setting VDD voltage via AVSBus %d, Bridge %d",
-                 attrs.vdd_bus_num,
-                 BRIDGE_NUMBER);
+            // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
+            // initialize the AVS slave on VDD bus
+            FAPI_TRY(avsIdleFrame(i_target, attrs.vdd_bus_num, BRIDGE_NUMBER));
 
-        // VDN bus
-        FAPI_TRY(avsIdleFrame(i_target, attrs.vdn_bus_num, BRIDGE_NUMBER));
+            // Set Boot VDD Voltage
+            FAPI_TRY(avsVoltageWrite(i_target,
+                                     attrs.vdd_bus_num,
+                                     BRIDGE_NUMBER,
+                                     attrs.vdd_rail_select,
+                                     attrs.vdd_voltage_mv),
+                     "Setting VDD voltage via AVSBus %d, Bridge %d",
+                     attrs.vdd_bus_num,
+                     BRIDGE_NUMBER);
 
-        // Set Boot VDN Voltage
-        FAPI_TRY(avsVoltageWrite(i_target,
-                                 attrs.vdn_bus_num,
-                                 BRIDGE_NUMBER,
-                                 attrs.vdn_rail_select,
-                                 attrs.vdn_voltage_mv),
-                 "Setting VDN voltage via AVSBus %d, Bridge %d",
-                 attrs.vdn_bus_num,
-                 BRIDGE_NUMBER);
+            l_data64.flush<0>();
+            l_data8.flush<0>();
+
+            FAPI_TRY(getScom(i_target,
+                             p9avslib::OCB_O2SRD[attrs.vdd_bus_num][BRIDGE_NUMBER], l_data64));
+
+            l_data64.extract(l_data8, 0, 1);
+
+            if (l_data8 == 0)
+            {
+                break;
+            }
+
+            l_count++;
+        }
+
+        if (l_count >= AVSBUS_VOLTAGE_WRITE_RETRY_COUNT)
+        {
+            FAPI_ASSERT(false, fapi2::PM_VDD_EVID_WRITEVOLTAGE_TIMEOUT().set_TARGET(i_target),
+                        "ERROR; Voltage write to VDD rail failed due to bad CRC,unknown command or unavailable resource");
+        }
+
+        l_count = 0;
+
+        while (l_count < AVSBUS_VOLTAGE_WRITE_RETRY_COUNT)
+        {
+
+            // VDN bus
+            FAPI_TRY(avsIdleFrame(i_target, attrs.vdn_bus_num, BRIDGE_NUMBER));
+
+            // Set Boot VDN Voltage
+            FAPI_TRY(avsVoltageWrite(i_target,
+                                     attrs.vdn_bus_num,
+                                     BRIDGE_NUMBER,
+                                     attrs.vdn_rail_select,
+                                     attrs.vdn_voltage_mv),
+                     "Setting VDN voltage via AVSBus %d, Bridge %d",
+                     attrs.vdn_bus_num,
+                     BRIDGE_NUMBER);
+
+            l_data64.flush<0>();
+            l_data8.flush<0>();
+
+            FAPI_TRY(getScom(i_target,
+                             p9avslib::OCB_O2SRD[attrs.vdn_bus_num][BRIDGE_NUMBER], l_data64));
+
+            l_data64.extract(l_data8, 0, 1);
+
+            if (l_data8 == 0)
+            {
+                break;
+            }
+
+            l_count++;
+        }
+
+        if (l_count >= AVSBUS_VOLTAGE_WRITE_RETRY_COUNT)
+        {
+            FAPI_ASSERT(false, fapi2::PM_VDN_EVID_WRITEVOLTAGE_TIMEOUT().set_TARGET(i_target),
+                        "ERROR; Voltage write to VDN rail failed due to bad CRC,unknown command or unavailable resource");
+        }
 
         // Set Boot VCS Voltage
         if(attrs.vcs_bus_num == 0xFF)
@@ -348,14 +401,43 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
         else
         {
 
-            FAPI_TRY(avsVoltageWrite(i_target,
-                                     attrs.vcs_bus_num,
-                                     BRIDGE_NUMBER,
-                                     attrs.vcs_rail_select,
-                                     attrs.vcs_voltage_mv),
-                     "Setting VCS voltage via AVSBus %d, Bridge %d",
-                     attrs.vcs_bus_num,
-                     BRIDGE_NUMBER);
+            l_count = 0;
+
+            while (l_count < AVSBUS_VOLTAGE_WRITE_RETRY_COUNT)
+            {
+
+                FAPI_TRY(avsIdleFrame(i_target, attrs.vcs_bus_num, BRIDGE_NUMBER));
+
+                FAPI_TRY(avsVoltageWrite(i_target,
+                                         attrs.vcs_bus_num,
+                                         BRIDGE_NUMBER,
+                                         attrs.vcs_rail_select,
+                                         attrs.vcs_voltage_mv),
+                         "Setting VCS voltage via AVSBus %d, Bridge %d",
+                         attrs.vcs_bus_num,
+                         BRIDGE_NUMBER);
+
+                l_data64.flush<0>();
+                l_data8.flush<0>();
+
+                FAPI_TRY(getScom(i_target,
+                                 p9avslib::OCB_O2SRD[attrs.vcs_bus_num][BRIDGE_NUMBER], l_data64));
+
+                l_data64.extract(l_data8, 0, 1);
+
+                if (l_data8 == 0)
+                {
+                    break;
+                }
+
+                l_count++;
+            }
+
+            if (l_count >= AVSBUS_VOLTAGE_WRITE_RETRY_COUNT)
+            {
+                FAPI_ASSERT(false, fapi2::PM_VCS_EVID_WRITEVOLTAGE_TIMEOUT().set_TARGET(i_target),
+                            "ERROR; Voltage write to VCS rail failed due to bad CRC/unknown command or unavailable resource");
+            }
         }
     }
 

@@ -26,12 +26,29 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P9_VCS_RAIL_ERR</rc>
+    <rc>RC_PM_VCS_RAIL_ERR</rc>
     <description>
       Procedure: p9_avsbus_voltage
       Programming error via AVSBus.
     </description>
     <ffdc>TARGET</ffdc>
   </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_AVSBUS_READVOLTAGE_TIMEOUT</rc>
+    <description>
+    A timeout occured reading voltage from an AVSBus interface
+    </description>
+    <ffdc>TARGET</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_AVSBUS_WRITEVOLTAGE_TIMEOUT</rc>
+    <description>
+    A timeout occured writing a voltage to an AVSBus interface
+    </description>
+    <ffdc>TARGET</ffdc>
+  </hwpError>
+
   <!-- ******************************************************************** -->
 </hwpErrors>

@@ -52,7 +52,9 @@ enum P9_AVSBUS_VOLTAGE_CONSTANTS
 {
 // By convention, the Pstate GPE will use bridge 0.  Other entities
 // will use bridge 1
-    BRIDGE_NUMBER = 1
+    BRIDGE_NUMBER = 1,
+    AVSBUS_ACCESS_RETRY_COUNT = 5
+
 
 // Default configuration, Bus Numbers and Rail Selects read through attributes
 //    DEFAULT_VDD_BUS_NUMBER = 0,
@@ -99,7 +101,7 @@ p9avsInitAttributes( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         {
             FAPI_ERR("Programming error via AVSBus, VCS rail not connected to AVSBus interface in the system.");
             FAPI_ASSERT(false,
-                        fapi2::P9_VCS_RAIL_ERR()
+                        fapi2::PM_VCS_RAIL_ERR()
                         .set_TARGET(i_target),
                         "ERROR: Programming error via AVSBus, VCS rail not connected to AVSBus interface in the system.");
         }
@@ -124,6 +126,10 @@ p9_avsbus_voltage_read( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
 
     avsbus_data_t voltage_read_data;
 
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint8_t> l_data8;
+    uint8_t l_count = 0;
+
     // Read attribute -
     FAPI_INF("Reading AVSBus attributes for the selected voltage rail");
     FAPI_TRY(p9avsInitAttributes(i_target, i_voltage_rail, &attrs));
@@ -135,13 +141,42 @@ p9_avsbus_voltage_read( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
              "Initializing avsBus Num %d, bridge %d", attrs.RailBusNum, BRIDGE_NUMBER);
 
 
-    FAPI_INF("Sending an Idle frame before Voltage reads");
-    FAPI_TRY(avsIdleFrame(i_target, attrs.RailBusNum, BRIDGE_NUMBER));
+    l_count = 0;
 
-    FAPI_INF("Reading the specified voltage rail value");
-    FAPI_TRY(avsVoltageRead(i_target, attrs.RailBusNum, BRIDGE_NUMBER,
-                            attrs.RailSelect, voltage_read_data.o_voltage),
-             "AVS Voltage read transaction failed");
+    while (l_count < AVSBUS_ACCESS_RETRY_COUNT)
+    {
+
+        FAPI_INF("Sending an Idle frame before Voltage reads");
+        FAPI_TRY(avsIdleFrame(i_target, attrs.RailBusNum, BRIDGE_NUMBER));
+
+        FAPI_INF("Reading the specified voltage rail value");
+        FAPI_TRY(avsVoltageRead(i_target, attrs.RailBusNum, BRIDGE_NUMBER,
+                                attrs.RailSelect, voltage_read_data.o_voltage),
+                 "AVS Voltage read transaction failed");
+
+
+        l_data64.flush<0>();
+        l_data8.flush<0>();
+
+        FAPI_TRY(getScom(i_target,
+                         p9avslib::OCB_O2SRD[attrs.RailBusNum][BRIDGE_NUMBER], l_data64));
+
+        l_data64.extract(l_data8, 0, 1);
+
+        if (l_data8 == 0)
+        {
+            break;
+        }
+
+        l_count++;
+    }
+
+    if (l_count >= AVSBUS_ACCESS_RETRY_COUNT)
+    {
+
+        FAPI_ASSERT(false, fapi2::PM_AVSBUS_READVOLTAGE_TIMEOUT().set_TARGET(i_target),
+                    "ERROR; Voltage read to selected rail failed due to bad CRC,unknown command or unavailable resource");
+    }
 
     o_voltage_data.o_voltage = voltage_read_data.o_voltage;
 
@@ -157,6 +192,9 @@ p9_avsbus_voltage_write( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ta
 {
 
     p9_avsbus_attrs_t attrs;
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint8_t> l_data8;
+    uint8_t l_count = 0;
 
     // Read attribute -
     FAPI_INF("Reading AVSBus attributes for the selected voltage rail");
@@ -168,16 +206,45 @@ p9_avsbus_voltage_write( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ta
                                       attrs.RailBusNum, BRIDGE_NUMBER),
              "Initializing avsBus Num %d, bridge %d", attrs.RailBusNum, BRIDGE_NUMBER);
 
-    FAPI_INF("Sending an Idle frame before Voltage writes");
-    FAPI_TRY(avsIdleFrame(i_target, attrs.RailBusNum, BRIDGE_NUMBER));
 
-    // Set the required voltage
-    FAPI_INF("Setting the specified voltage rail value");
-    FAPI_TRY(avsVoltageWrite(i_target, attrs.RailBusNum, BRIDGE_NUMBER,
-                             attrs.RailSelect, i_Voltage),
-             "Setting voltage via AVSBus %d, Bridge %d failed",
-             attrs.RailBusNum,
-             BRIDGE_NUMBER);
+    l_count = 0;
+
+    while (l_count < AVSBUS_ACCESS_RETRY_COUNT)
+    {
+
+        FAPI_INF("Sending an Idle frame before Voltage writes");
+        FAPI_TRY(avsIdleFrame(i_target, attrs.RailBusNum, BRIDGE_NUMBER));
+
+        // Set the required voltage
+        FAPI_INF("Setting the specified voltage rail value");
+        FAPI_TRY(avsVoltageWrite(i_target, attrs.RailBusNum, BRIDGE_NUMBER,
+                                 attrs.RailSelect, i_Voltage),
+                 "Setting voltage via AVSBus %d, Bridge %d failed",
+                 attrs.RailBusNum,
+                 BRIDGE_NUMBER);
+
+        l_data64.flush<0>();
+        l_data8.flush<0>();
+
+        FAPI_TRY(getScom(i_target,
+                         p9avslib::OCB_O2SRD[attrs.RailBusNum][BRIDGE_NUMBER], l_data64));
+
+        l_data64.extract(l_data8, 0, 1);
+
+        if (l_data8 == 0)
+        {
+            break;
+        }
+
+        l_count++;
+    }
+
+    if (l_count >= AVSBUS_ACCESS_RETRY_COUNT)
+    {
+        FAPI_ASSERT(false, fapi2::PM_AVSBUS_WRITEVOLTAGE_TIMEOUT().set_TARGET(i_target),
+                    "ERROR; Voltage write to selected rail failed due to bad CRC,unknown command or unavailable resource");
+
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
