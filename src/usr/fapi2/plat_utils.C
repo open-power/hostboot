@@ -977,6 +977,8 @@ void logError(
         errlCommit(l_pError, HWPF_COMP_ID);
     }
 
+    //error is committed, no current error
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     return;
 }
 
