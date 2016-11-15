@@ -145,6 +145,7 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
     // See LPCR def, PECE "reg" in Power ISA AS Version: Power8 June 27, 2012
     //  and 23.7.3.5 - 6 in Murano Book 4
     l_lpcrVal   &=  ~(0x0000000000002000) ;
+    l_lpcrVal   |=    0x0000400000000000  ;  //Allow Hyp virt to exit STOP
 
 //@TODO RTC:147565
 //Force Core Checkstops by telling ACTION1 Reg after coming out of winkle
@@ -191,33 +192,48 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
         //PIR_t constructor and read the .word attribute on the new PIR struct
         uint64_t l_pirVal = PIR_t(l_logicalGroupId, l_chipId, l_coreId).word;
 
-        //Call p9_stop_save_cpureg from p9_stop_api to store the MSR SPR value
-        l_rc = p9_stop_save_cpureg( io_image,
-                                    P9_STOP_SPR_MSR,
-                                    l_msrVal,
-                                    l_pirVal);
-        if ( l_rc )
+        //The underlying stop API knows about fused/normal cores.  Need to take
+        //this into account for fused mode.  If we are in fused mode, then
+        //the even core thead 0/1 correspond to physical core 0 and 1
+        //respectively, so both need to be set to populate the STOP image
+        size_t l_fuseThreadAdjust = 0x1;
+        if(is_fused_mode())
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR: MSR: core=0x%x,thread=0x%x,l_rc=0x%x",
-                       l_coreId, l_threadId, l_rc );
-            l_failAddr = P9_STOP_SPR_MSR;
-            break;
+            //If even core set threads 0,1
+            //If odd core skip by setting loop count to 0
+            l_fuseThreadAdjust = (l_coreId%2 == 0x0) ? 2 : 0;
         }
 
+        for(size_t l_fuseAdj = 0; l_fuseAdj < l_fuseThreadAdjust; l_fuseAdj++)
+        {
 
-        //Call p9_stop_save_cpureg from p9_stop_api to store the HRMOR SPR value
-        l_rc = p9_stop_save_cpureg( io_image,
-                                    P9_STOP_SPR_HRMOR,
-                                    l_hrmorVal,
-                                    l_pirVal);
+            //Call p9_stop_save_cpureg to store the MSR SPR value
+            l_rc = p9_stop_save_cpureg( io_image,
+                                        P9_STOP_SPR_MSR,
+                                        l_msrVal,
+                                        l_pirVal | l_fuseAdj);
+            if ( l_rc )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "ERROR: MSR: core=0x%x,thread=0x%x,l_rc=0x%x",
+                           l_coreId, l_threadId, l_rc );
+                l_failAddr = P9_STOP_SPR_MSR;
+                break;
+            }
 
-        if ( l_rc ){
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR: HRMOR: core=0x%x,thread=0x%x,l_rc=0x%x",
-                       l_coreId, l_threadId, l_rc );
-            l_failAddr = P9_STOP_SPR_HRMOR;
-            break;
+            //Call p9_stop_save_cpureg to store the HRMOR SPR value
+            l_rc = p9_stop_save_cpureg( io_image,
+                                        P9_STOP_SPR_HRMOR,
+                                        l_hrmorVal,
+                                        l_pirVal | l_fuseAdj);
+
+            if ( l_rc ){
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "ERROR: HRMOR: core=0x%x,thread=0x%x,l_rc=0x%x",
+                           l_coreId, l_threadId, l_rc );
+                l_failAddr = P9_STOP_SPR_HRMOR;
+                break;
+            }
         }
 
         //  fill in lpcr for each thread
@@ -237,14 +253,14 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
                        l_msrVal, l_lpcrVal, l_hrmorVal  );
 
             //the thread ID is the last 3 bytes of pirVal so you can just OR
-            l_pirVal |= l_threadId;
+            uint64_t l_pirValThread = l_pirVal | l_threadId;
 
             //Call p9_stop_save_cpureg from p9_stop_api
             //to store the LPCR SPR value
             l_rc = p9_stop_save_cpureg( io_image,
                                         P9_STOP_SPR_LPCR,
                                         l_lpcrVal,
-                                        l_pirVal);
+                                        l_pirValThread);
             if ( l_rc )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
