@@ -616,11 +616,11 @@ extern "C"
 
         cmeHeader_t* pCmeHdr = (cmeHeader_t*) & i_pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
         //populate CPMR header
-        pCpmrHdr->fuseModeStatus = i_fusedState ? FUSED_MODE : NONFUSED_MODE;
+        pCpmrHdr->fusedModeStatus = i_fusedState ? FUSED_MODE : NONFUSED_MODE;
         pCmeHdr->g_cme_mode_flags = SWIZZLE_4_BYTE(i_fusedState ? 1 : 0);
 
         FAPI_INF("CPMR SR");
-        FAPI_INF("  Fuse Mode = 0x%08X CME Image Flag = 0x%08X", pCpmrHdr->fuseModeStatus,
+        FAPI_INF("  Fuse Mode = 0x%08X CME Image Flag = 0x%08X", pCpmrHdr->fusedModeStatus,
                  SWIZZLE_4_BYTE(pCmeHdr->g_cme_mode_flags));
         FAPI_DBG("  Offset    = 0x%08X, Header value 0x%08X (Real offset / 32)",
                  SWIZZLE_4_BYTE(pCpmrHdr->cmeImgOffset) * 32,
