@@ -60,6 +60,7 @@
 #include <p9_pm_stop_gpe_init.H>
 #include <p9_pm_pba_init.H>
 #include <p9_pm_pfet_init.H>
+#include <p9_pm_hcd_flags.h>
 //#include <p9_ppe_state.H>  @todo RTC 147996 to incorporate PPE state removing strings.
 
 

@@ -229,12 +229,6 @@ enum P9_HCD_SCAN0_CONSTANTS
     SCAN0_TYPE_ALL_BUT_GPTR_REPR_TIME        = 0xDCF
 };
 
-//OCC FLag defines
-enum PM_GPE_OCCFLG_DEFS
-{
-    SGPE_ACTIVE    = 8
-};
-
 // XSR defines
 enum XSR_DEFS
 {
