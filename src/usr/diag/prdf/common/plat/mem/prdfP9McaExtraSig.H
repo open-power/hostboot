@@ -29,10 +29,15 @@
 #include <prdrSignatures.H>
 
 PRDR_ERROR_SIGNATURE(MaintUE,        0xffff0010, "", "Maintenance UE");
-PRDR_ERROR_SIGNATURE(MaintMPE,       0xffff0011, "", "Maintenance MPE");
-PRDR_ERROR_SIGNATURE(MaintHARD_CTE,  0xffff0012, "", "Maintenance HARD CTE");
-PRDR_ERROR_SIGNATURE(MaintSOFT_CTE,  0xffff0013, "", "Maintenance SOFT CTE");
-PRDR_ERROR_SIGNATURE(MaintINTER_CTE, 0xffff0014, "", "Maintenance INTER CTE");
+PRDR_ERROR_SIGNATURE(MaintIUE,       0xffff0011, "", "Maintenance IUE");
+PRDR_ERROR_SIGNATURE(MaintMPE,       0xffff0012, "", "Maintenance MPE");
+PRDR_ERROR_SIGNATURE(MaintHARD_CTE,  0xffff0013, "", "Maintenance HARD CTE");
+PRDR_ERROR_SIGNATURE(MaintSOFT_CTE,  0xffff0014, "", "Maintenance SOFT CTE");
+PRDR_ERROR_SIGNATURE(MaintINTER_CTE, 0xffff0015, "", "Maintenance INTER CTE");
+
+PRDR_ERROR_SIGNATURE(VcmVerified,    0xffff0020, "", "VCM: verified");
+PRDR_ERROR_SIGNATURE(VcmFalseAlarm,  0xffff0021, "", "VCM: false alarm");
+
 
 #endif // __prdfP9McaExtraSig_H
 
