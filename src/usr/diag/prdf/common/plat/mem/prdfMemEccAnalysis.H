@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/mem/prdfMemTps_rt.H $                  */
+/* $Source: src/usr/diag/prdf/common/plat/mem/prdfMemEccAnalysis.H $      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,53 +23,36 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file prdfMemTps_rt.H */
+#ifndef __prdfMemEccAnalysis_H
+#define __prdfMemEccAnalysis_H
 
-#ifndef __prdfMemTps_rt_H
-#define __prdfMemTps_rt_H
+// Framework includes
+#include <iipServiceDataCollector.h>
+#include <prdfExtensibleChip.H>
 
 // Platform includes
-#include <prdfMemTdQueue.H>
+#include <prdfMemRank.H>
+#include <prdfPlatServices.H>
 
 namespace PRDF
 {
 
-// Only implement specializations of TpsEvent.
-template<TARGETING::TYPE T> class TpsEvent;
-
-// TODO: RTC 136126 Actual implementation of this procedure will be done later.
-/** @brief Two-Phase Scrub procedure for MCA (RT only). */
-template <>
-class TpsEvent<TARGETING::TYPE_MCA> : public TdEntry
+namespace MemEcc
 {
-  public: // functions
 
-    /** @brief Constructor */
-    TpsEvent<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip, MemRank i_rank ) :
-        TdEntry(TPS_EVENT, i_chip, i_rank)
-    {}
+/**
+ * @brief  Analyzes a fetch UE attention.
+ * @param  i_chip   MCA or MBA.
+ * @param  io_sc    The step code data struct.
+ * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T, typename D>
+uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc );
 
-    uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
-
-};
-
-// TODO: RTC 157888 Actual implementation of this procedure will be done later.
-/** @brief Two-Phase Scrub procedure for MBA (RT only). */
-template <>
-class TpsEvent<TARGETING::TYPE_MBA> : public TdEntry
-{
-  public: // functions
-
-    /** @brief Constructor */
-    TpsEvent<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip, MemRank i_rank ) :
-        TdEntry(TPS_EVENT, i_chip, i_rank)
-    {}
-
-    uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
-
-};
+} // end namespace MemEcc
 
 } // end namespace PRDF
 
-#endif // __prdfMemTps_rt_H
+#endif // __prdfMemEccAnalysis_H
 
