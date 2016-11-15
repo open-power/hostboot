@@ -167,7 +167,7 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, const MemRank & i_rank,
             io_sc.service_data->SetCallout( mm );
 
             // Add a new VCM procedure to the queue.
-            TdEntry * e = new VcmEvent<T>{ i_chip, i_rank };
+            TdEntry * e = new VcmEvent<T>{ i_chip, i_rank, chipMark };
             io_queue.push( e );
         }
         else if ( isMfgCeCheckingEnabled() &&

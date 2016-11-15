@@ -30,11 +30,11 @@
 
 // Platform includes
 #include <prdfMemTdQueue.H>
+#include <prdfMemMark.H>
 
 namespace PRDF
 {
 
-// TODO: RTC 157608 Actual implementation of this procedure will be done later.
 /** @brief Verify chip mark procedure. */
 template <TARGETING::TYPE T>
 class VcmEvent : public TdEntry
@@ -42,11 +42,17 @@ class VcmEvent : public TdEntry
   public: // functions
 
     /** @brief Constructor */
-    VcmEvent<T>( ExtensibleChip * i_chip, MemRank i_rank ) :
-        TdEntry(VCM_EVENT, i_chip, i_rank)
-    {}
+    VcmEvent<T>( ExtensibleChip * i_chip, const MemRank & i_rank,
+                 const MemMark & i_mark ) :
+        TdEntry(VCM_EVENT, i_chip, i_rank), iv_mark(i_mark)
+    {
+        PRDF_ASSERT( i_mark.isValid() );
+    }
 
     uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
+
+  private: // instance variables
+    const MemMark iv_mark;
 
 };
 

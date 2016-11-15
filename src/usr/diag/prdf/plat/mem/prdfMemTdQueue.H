@@ -64,6 +64,16 @@ class TdEntry
         TPS_EVENT,     ///< A Two-Phase Scrub event.
     };
 
+    /**
+     * @brief This enum will indicate which VCM or TPS phase we are currently on
+     */
+    enum Phase
+    {
+        TD_PHASE_0,
+        TD_PHASE_1,
+        TD_PHASE_2,
+    };
+
   public: // functions
 
     /** @brief Default destructor */
@@ -118,8 +128,9 @@ class TdEntry
      *  comparisons, but is needed for every TD procedure. */
     ExtensibleChip * const iv_chip;
 
-    const TdType  iv_tdType; ///< The event type (see enum TdType).
-    const MemRank iv_rank;   ///< The rank in which this event occurred.
+    const TdType  iv_tdType;     ///< The event type (see enum TdType).
+    const MemRank iv_rank;       ///< The rank in which this event occurred.
+    Phase iv_phase = TD_PHASE_0; ///< The event phase (see enum Phase).
 };
 
 //------------------------------------------------------------------------------
