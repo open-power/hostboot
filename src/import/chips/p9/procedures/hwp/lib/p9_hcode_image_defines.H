@@ -128,7 +128,7 @@ HCD_HDR_UINT64( magic_number, CPMR_MAGIC_NUMBER);  // CPMR_1.0
 HCD_HDR_UINT32( cpmrbuildDate, 0);
 HCD_HDR_UINT32( cpmrVersion, 0);
 HCD_HDR_UINT8_VEC (cpmrReserveFlags, 7, 0);
-HCD_HDR_UINT8 ( fuseModeStatus, 0);
+HCD_HDR_UINT8 ( fusedModeStatus, 0);
 HCD_HDR_UINT32( cmeImgOffset, 0);
 HCD_HDR_UINT32( cmeImgLength, 0);
 HCD_HDR_UINT32( cmeCommonRingOffset, 0);
