@@ -147,6 +147,9 @@ inline fapi2::ReturnCode calc_nck(const T& i_timing_in_ps,
                  set_CORRECTION_FACTOR(i_inverse_corr_factor),
                  "Overflow occured. Returned data is %d", o_val_nck);
 
+    // If we don't assert, we don't know what's in current_err ...
+    return fapi2::FAPI2_RC_SUCCESS;
+
 fapi_try_exit:
     return fapi2::current_err;
 }
