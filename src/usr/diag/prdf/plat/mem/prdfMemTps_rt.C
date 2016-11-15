@@ -26,7 +26,7 @@
 /** @file prdfMemTps_rt.C */
 
 // Platform includes
-#include <prdfMemTps_rt.H>
+#include <prdfMemTps.H>
 
 using namespace TARGETING;
 
@@ -36,6 +36,7 @@ namespace PRDF
 //------------------------------------------------------------------------------
 
 // TODO: RTC 136126 Actual implementation of this procedure will be done later.
+template<>
 uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                                        bool & o_done )
 {
@@ -55,6 +56,7 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
 //------------------------------------------------------------------------------
 
 // TODO: RTC 157888 Actual implementation of this procedure will be done later.
+template<>
 uint32_t TpsEvent<TYPE_MBA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                                        bool & o_done )
 {

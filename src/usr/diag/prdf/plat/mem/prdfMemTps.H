@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/mem/prdfMemVcm_rt.H $                  */
+/* $Source: src/usr/diag/prdf/plat/mem/prdfMemTps.H $                     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,10 +23,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file prdfMemVcm_rt.H */
+/** @file prdfMemTps.H */
 
-#ifndef __prdfMemVcm_rt_H
-#define __prdfMemVcm_rt_H
+#ifndef __prdfMemTps_H
+#define __prdfMemTps_H
 
 // Platform includes
 #include <prdfMemTdQueue.H>
@@ -34,35 +34,16 @@
 namespace PRDF
 {
 
-// Only implement specializations of VcmEvent.
-template<TARGETING::TYPE T> class VcmEvent;
-
-// TODO: RTC 136126 Actual implementation of this procedure will be done later.
-/** @brief Verify chip mark procedure for MCA (RT only). */
-template <>
-class VcmEvent<TARGETING::TYPE_MCA> : public TdEntry
+// TODO: RTC 157889 Actual implementation of this procedure will be done later.
+/** @brief Two-Phase Scrub procedure. */
+template <TARGETING::TYPE T>
+class TpsEvent : public TdEntry
 {
   public: // functions
 
     /** @brief Constructor */
-    VcmEvent<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip, MemRank i_rank ) :
-        TdEntry(VCM_EVENT, i_chip, i_rank)
-    {}
-
-    uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
-
-};
-
-// TODO: RTC 157888 Actual implementation of this procedure will be done later.
-/** @brief Verify chip mark procedure for MBA (RT only). */
-template <>
-class VcmEvent<TARGETING::TYPE_MBA> : public TdEntry
-{
-  public: // functions
-
-    /** @brief Constructor */
-    VcmEvent<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip, MemRank i_rank ) :
-        TdEntry(VCM_EVENT, i_chip, i_rank)
+    TpsEvent<T>( ExtensibleChip * i_chip, MemRank i_rank ) :
+        TdEntry(TPS_EVENT, i_chip, i_rank)
     {}
 
     uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
@@ -71,5 +52,5 @@ class VcmEvent<TARGETING::TYPE_MBA> : public TdEntry
 
 } // end namespace PRDF
 
-#endif // __prdfMemVcm_rt_H
+#endif // __prdfMemTps_H
 

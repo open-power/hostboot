@@ -32,7 +32,7 @@
 #include <prdfP9McbistDataBundle.H>
 #include <prdfPlatServices.H>
 #ifdef __HOSTBOOT_RUNTIME
-  #include <prdfMemTps_rt.H>
+  #include <prdfMemTps.H>
 #endif
 
 

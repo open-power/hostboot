@@ -33,7 +33,7 @@
 #include <prdfMemMark.H>
 #include <prdfMemoryMru.H>
 #include <prdfMemScrubUtils.H>
-#include <prdfMemVcm_ipl.H>
+#include <prdfMemVcm.H>
 #include <prdfP9McaExtraSig.H>
 
 using namespace TARGETING;
