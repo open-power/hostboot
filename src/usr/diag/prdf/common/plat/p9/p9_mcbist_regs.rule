@@ -184,6 +184,14 @@
     ###########################################################################
     # P9 MCBIST command registers
     ###########################################################################
+
+    register MCBAGRA
+    {
+        name        "P9 MCBIST Address Generator Configuration Register";
+        scomaddr    0x070123D6;
+        capture     group default;
+    };
+
     register MCBMCAT
     {
         name        "P9 Maint Current Address Trap Register";
@@ -197,3 +205,4 @@
         scomaddr    0x070123DB;
         capture     group default;
     };
+
