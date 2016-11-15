@@ -1450,13 +1450,13 @@ void __getSlaveRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
             continue;
 
         // Get the number of slave ranks per master rank.
-        uint8_t numRanks       = getNumRanksPerDimm<T>      ( i_trgt, i_ds );
-        uint8_t numMasterRanks = getNumMasterRanksPerDimm<T>( i_trgt, i_ds );
+        uint8_t numRanks       = getNumRanksPerDimm<T>      ( i_trgt, ds );
+        uint8_t numMasterRanks = getNumMasterRanksPerDimm<T>( i_trgt, ds );
         uint8_t numSlaveRanks  = numRanks / numMasterRanks;
 
         // Get the current list of master ranks for this DIMM select
         std::vector<MemRank> tmpList;
-        getMasterRanks<T>( i_trgt, tmpList, i_ds );
+        getMasterRanks<T>( i_trgt, tmpList, ds );
 
         // Start inserting the slave ranks into the list.
         for ( auto & mrank : tmpList )
