@@ -83,5 +83,17 @@
     </description>
     <ffdc>TARGET</ffdc>
   </hwpError>
-
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CEN_COMMON_STARTCLOCKS_CLK_THOLDS_CHECK_ERR</rc>
+    <description>
+      Procedure: cen_comomn_startclocks
+      Expected THOLD state check failed
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>CHIPLET</ffdc>
+    <ffdc>ACTUAL</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

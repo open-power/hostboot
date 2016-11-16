@@ -34,13 +34,4 @@
     <ffdc>TARGET</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_CEN_CHIPLET_INIT_REPAIR_NOT_ALLOWED_IN_DD1</rc>
-    <description>
-      Procedure: cen_chiplet_init
-      DD1 is not supported by repair command
-    </description>
-    <ffdc>TARGET</ffdc>
-  </hwpError>
 </hwpErrors>
