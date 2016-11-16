@@ -1,0 +1,116 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/import/chips/centaur/procedures/hwp/memory/lib/shared/dimmConsts.H $ */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file dimmConsts.H
+/// @brief DIMM Constants
+///
+/// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
+/// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+/// *HWP Team: Memory
+/// *HWP Level: 2
+/// *HWP Consumed by: HB:CI
+//
+#ifndef DIMMCONSTS_H_
+#define DIMMCONSTS_H_
+
+enum consts : size_t
+{
+    MAX_PORTS_PER_MBA = 2,         ///< Maximum number of ports on an MBA
+    MAX_DIMM_PER_PORT = 2,         ///< Maximum number of DIMMs attached to an MBA PORT
+    MAX_MBA_PER_CEN = 2,           ///< Maximum number of MBAs on a membuf
+    MAX_PORTS_PER_CEN = 4,         ///< Maximum number of ports on a centaur
+    MAX_RANKS_PER_DIMM = 4,        ///< Maximum number of ranks on a DIMM
+    NUM_RANK_GROUPS = 4,           ///< Maximum number of rank groups
+    MAX_RANKS_PER_PORT = 8,        ///< Maximum number of ranks on a port
+    DIMM_DQ_RANK_BITMAP_SIZE = 10, ///< Size in bytes of the Bad DQ bitmap for a rank.
+
+    // This is the number of bits in DIMM_DQ_RANK_BITMAP_SIZE.
+    DIMM_DQ_NUM_DQS = DIMM_DQ_RANK_BITMAP_SIZE * 8, ///< Number of DQs (data query pins).
+
+    // This must be big enough to contain the bitmap for each rank
+    // (MAX_RANKS_PER_DIMM * DIMM_DQ_RANK_BITMAP_SIZE), plus the header
+    DIMM_DQ_SPD_DATA_SIZE = 80,     ///< Size in bytes of Bad DQ Data in DIMM SPD
+
+    // ISDIMM to C4 DQ and DQS constant
+    DIMM_TO_C4_PORTS = 4,           ///< Number of Ports needed in the array
+    DIMM_TO_C4_DQ_ENTRIES = 80,     ///< Number of entries in the DQ attribute
+    DIMM_TO_C4_DQS_ENTRIES = 20,    ///< Number of entries in the DQS attribute
+
+    ISDIMM_MAX_DQ_72 = 72,          ///< Number of DQ pins on an ISDIMM
+    ISDIMM_MAX_DQS_18 = 18,         ///< Number of DQS pins on an ISDIMM
+
+    MAX_ADDR = 19,
+    MAX_CMD = 3,
+    MAX_CNT = 20,
+    MAX_CLK = 8,
+    MAX_DATA_DISABLE = 5,
+
+};
+
+enum mrs : size_t
+{
+    MRS0_BA = 0,
+    MRS1_BA = 1,
+    MRS2_BA = 2,
+    MRS3_BA = 3,
+    MRS4_BA = 4,
+    MRS5_BA = 5,
+    MRS6_BA = 6,
+    INVALID = 255,
+};
+
+enum mss_ccs_status_query_result
+{
+    MSS_STAT_QUERY_PASS = 1,
+    MSS_STAT_QUERY_IN_PROGRESS = 2,
+    MSS_STAT_QUERY_FAIL = 3
+};
+
+enum mss_ccs_data_pattern
+{
+    MSS_CCS_DATA_PATTERN_00 = 1,
+    MSS_CCS_DATA_PATTERN_0F = 2,
+    MSS_CCS_DATA_PATTERN_F0 = 3,
+    MSS_CCS_DATA_PATTERN_FF = 4
+};
+
+constexpr bool MSS_CCS_START = 0;
+constexpr bool MSS_CCS_STOP = 1;
+constexpr uint8_t l_ISDIMM_dqmax = 71;
+constexpr uint8_t l_CDIMM_dqmax = 79;
+constexpr uint8_t CCS_MAX_INSTRUCTION_NUM = 32;
+enum sim_cycles : size_t
+{
+    DELAY_100NS = 100,                ///< 100 ns delay for HW mode (2000 sim cycles if simclk = 20ghz)
+    DELAY_1US = 1000,                 ///< 1 usec delay for HW mode (20000 sim cycles if simclk = 20ghz)
+    DELAY_100US = 100000,             ///< 100 usec delay for HW mode (2000000 sim cycles if simclk = 20ghz)
+    DELAY_500US = 500000,             ///< 500 usec delay for HW mode
+    DELAY_2000SIMCYCLES = 2000,       ///< 2000 sim cycle delay for sim mode (100 ns if simclk = 20Ghz)
+    DELAY_20000SIMCYCLES = 20000,     ///< 20000 sim cycle delay for sim mode (1 usec if simclk = 20Ghz)
+    DELAY_2000000SIMCYCLES = 2000000, ///< 2000000 sim cycle delay for sim mode  (100 usec if simclk = 20Ghz)
+    DELAY_10000000SIMCYCLES = 10000000, ///< 10000000 sim cycle delay for sim mode
+};
+
+#endif

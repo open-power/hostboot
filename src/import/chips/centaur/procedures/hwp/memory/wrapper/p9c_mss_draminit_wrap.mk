@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/centaur/procedures/hwp/memory/01common.mk $
+# $Source: src/import/chips/centaur/procedures/hwp/memory/wrapper/p9c_mss_draminit_wrap.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,15 +22,8 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-CEN_INCLUDES := $(GENPATH)
-CEN_INCLUDES += $(ROOTPATH)
-CEN_INCLUDES += $(ROOTPATH)/chips/centaur/common/include
-CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory
-CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib
-CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib/shared
 
-CEN_CATCH_UNIT_TESTS_INCLUDES := $(ROOTPATH)/hwpf/fapi2/test
-
-# ADD_MEMORY_INCDIRS
-#     This macro will add additional include paths for all memory modules
-ADD_MEMORY_INCDIRS = $(call __ADD_MODULE_INCDIR,$(1),$(CEN_INCLUDES))
+WRAPPER=p9c_mss_draminit_wrap
+$(WRAPPER)_USELIBS+=p9c_mss_draminit
+$(WRAPPER)_DEPLIBS+=cen
+$(call BUILD_WRAPPER)

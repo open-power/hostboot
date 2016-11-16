@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/centaur/procedures/hwp/memory/01common.mk $
+# $Source: src/import/chips/centaur/procedures/hwp/memory/p9c_mss_ddr4_funcs.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -22,15 +22,11 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-CEN_INCLUDES := $(GENPATH)
-CEN_INCLUDES += $(ROOTPATH)
-CEN_INCLUDES += $(ROOTPATH)/chips/centaur/common/include
-CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory
-CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib
-CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib/shared
 
-CEN_CATCH_UNIT_TESTS_INCLUDES := $(ROOTPATH)/hwpf/fapi2/test
+# Include the macros and things for MSS procedures
+-include 01common.mk
 
-# ADD_MEMORY_INCDIRS
-#     This macro will add additional include paths for all memory modules
-ADD_MEMORY_INCDIRS = $(call __ADD_MODULE_INCDIR,$(1),$(CEN_INCLUDES))
+PROCEDURE=p9c_mss_ddr4_funcs
+OBJS+=p9c_mss_funcs.o
+$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call BUILD_PROCEDURE)
