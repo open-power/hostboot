@@ -398,6 +398,31 @@
 </hwpError>
 
 <hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_VREF_ERROR</rc>
+  <description>WR or RD VREF has returned a fail for a given position within this calibration.</description>
+  <ffdc>PORT_POSITION</ffdc>
+  <ffdc>RANKGROUP_POSITION</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_WITH_REGISTERS</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
+    <target>TARGET_WITH_REGISTERS</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
   <rc>RC_MSS_DRAMINIT_PC_ERROR_INFO</rc>
   <description>
     The PHY control has noted an error. The details of the error are contianed
@@ -450,6 +475,32 @@
   </description>
   <ffdc>REGISTER</ffdc>
   <ffdc>VALUE</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_INFO</id>
+    <target>TARGET_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
+  </collectRegisterFfdc>
+  <deconfigure>
+    <target>TARGET_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>TARGET_IN_ERROR</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_FAILED_WRVREF_CAL</rc>
+  <description>
+    A DP16 has failed write VREF calibration
+  </description>
+  <ffdc>REGISTER</ffdc>
+  <ffdc>VALUE</ffdc>
+  <ffdc>MASK</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_INFO</id>
     <target>TARGET_IN_ERROR</target>
