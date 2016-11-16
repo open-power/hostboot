@@ -42,6 +42,8 @@
 //------------------------------------------------------------------------------
 #include <cen_tp_chiplet_init1.H>
 #include <cen_gen_scom_addresses.H>
+#include <cen_gen_scom_addresses_fixes.H>
+#include <cen_common_funcs.H>
 #include <centaur_misc_constants.H>
 
 //------------------------------------------------------------------------------
@@ -63,7 +65,6 @@ cen_tp_chiplet_init1(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_CEN_DMI_REFCLOCK_RCVR_TERM_Type l_dmi_refclock_term;
     fapi2::ATTR_CEN_DDR_REFCLOCK_RCVR_TERM_Type l_ddr_refclock_term;
-    fapi2::ATTR_CEN_EC_FEATURE_SWITCH_DIV24_RUN_MODE_Type l_div24_run_mode;
 
     FAPI_DBG("Fix PIBABORT during warmstart via MAILBOX");
     FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_STATUS_ROX, l_cfam_status_data),
@@ -122,16 +123,10 @@ cen_tp_chiplet_init1(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
     FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
              "Error from putCfamRegister (CEN_FSIGP3, set PLL output enable");
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EC_FEATURE_SWITCH_DIV24_RUN_MODE, i_target, l_div24_run_mode),
-             "Error from FAPI_ATTR_GET (ATTR_CEN_EC_FEATURE_SWITCH_DIV24_RUN_MODE)");
-
-    if (l_div24_run_mode)
-    {
-        FAPI_DBG("Switch DIV24 into run mode");
-        l_fsi_gp4_data.clearBit<16>();
-        FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP4, l_fsi_gp4_data),
-                 "Error from putCfamRegister (CEN_FSIGP4, DIV24 run mode)");
-    }
+    FAPI_DBG("Switch DIV24 into run mode");
+    l_fsi_gp4_data.clearBit<16>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP4, l_fsi_gp4_data),
+             "Error from putCfamRegister (CEN_FSIGP4, DIV24 run mode)");
 
     FAPI_DBG("Release Pervasive Chiplet endpoint reset");
     l_perv_gp3_data.clearBit<1>();
@@ -182,6 +177,15 @@ cen_tp_chiplet_init1(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
     l_fsi_gp3_data.clearBit<24>();
     FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
              "Error from putCfamRegister (CEN_FSIGP3, drop FSI Fence3)");
+
+    // scan0 PLL GPTR ring
+    FAPI_DBG("Scan0 TP PLL GPTR ring");
+    FAPI_TRY(cen_scan0_module(i_target, SCAN_CHIPLET_TP, SCAN_TP_PLL_REGIONS, SCAN_REGION_TP_PLL_GPTR),
+             "Error from cen_scan0_module (scan0 PLL GPTR ring)");
+    // scan0 PLL BNDY/FUNC rings
+    FAPI_DBG("Scan0 TP PLL BNDY/FUNC rings");
+    FAPI_TRY(cen_scan0_module(i_target, SCAN_CHIPLET_TP, SCAN_TP_PLL_REGIONS, SCAN_REGION_TP_PLL_BNDY_FUNC),
+             "Error from cen_scan0_module (scan0 PLL BNDY/FUNC ring)");
 
 fapi_try_exit:
     FAPI_DBG("End");
