@@ -1,0 +1,189 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/centaur/procedures/xml/error_info/p9c_mss_funcs_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!-- @file p9c_mss_funcs_errors.xml -->
+<!-- @brief Error xml for the p9c_mss_funcs procedure -->
+<!-- -->
+<!-- *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com> -->
+<!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 1 -->
+<!-- *HWP Consumed by: FSP:HB -->
+<!-- -->
+
+<hwpErrors>
+<registerFfdc>
+  <id>REG_FFDC_CEN_MSS_CCS_FAILURE</id>
+  <scomRegister>CEN_MBA_CCS_MODEQ</scomRegister>
+  <scomRegister>CEN_MBA_CCS_STATQ</scomRegister>
+  <scomRegister>CEN_MBA_CCS_CNTLQ</scomRegister>
+</registerFfdc>
+
+<registerFfdc>
+  <id>REG_FFDC_CEN_MSS_RCD_PARITY_FAILURE</id>
+  <scomRegister>CEN_MBA_MBACALFIRQ_WOX_OR</scomRegister>
+</registerFfdc>
+
+<!-- Original Source for RC_CEN_MSS_CCS_READ_MISCOMPARE memory_errors.xml -->
+  <hwpError>
+    <rc>RC_CEN_MSS_CCS_READ_MISCOMPARE</rc>
+    <description>The ccs errors at runtime and registers a read miscompare.</description>
+  <ffdc>REG_CONTENTS</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_CEN_MSS_CCS_FAILURE</id>
+    <target>TARGET_MBA_ERROR</target>
+    <targetType>TARGET_TYPE_MBA</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_MBA_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET_MBA_ERROR</target>
+  </deconfigure>
+</hwpError>
+
+<!-- Original Source for RC_CEN_MSS_CCS_UE_SUE memory_errors.xml -->
+  <hwpError>
+    <rc>RC_CEN_MSS_CCS_UE_SUE</rc>
+    <description>The ccs errors at runtime and registers a UE or SUE</description>
+  <ffdc>REG_CONTENTS</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_CEN_MSS_CCS_FAILURE</id>
+    <target>TARGET_MBA_ERROR</target>
+    <targetType>TARGET_TYPE_MBA</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_MBA_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET_MBA_ERROR</target>
+  </deconfigure>
+</hwpError>
+
+<!-- Original Source for RC_CEN_MSS_CCS_CAL_TIMEOUT memory_errors.xml -->
+  <hwpError>
+    <rc>RC_CEN_MSS_CCS_CAL_TIMEOUT</rc>
+    <description>The ccs errors at runtime and registers a calibration operation timeout</description>
+  <ffdc>REG_CONTENTS</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_CEN_MSS_CCS_FAILURE</id>
+    <target>TARGET_MBA_ERROR</target>
+    <targetType>TARGET_TYPE_MBA</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_MBA_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET_MBA_ERROR</target>
+  </deconfigure>
+</hwpError>
+
+<!-- Original Source for RC_CEN_MSS_CCS_HUNG memory_errors.xml -->
+  <hwpError>
+    <rc>RC_CEN_MSS_CCS_HUNG</rc>
+    <description>The ccs failed to return from in_progress status and failed to describe an error further.</description>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_CEN_MSS_CCS_FAILURE</id>
+    <target>TARGET_MBA_ERROR</target>
+    <targetType>TARGET_TYPE_MBA</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_MBA_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET_MBA_ERROR</target>
+  </deconfigure>
+</hwpError>
+
+<!-- Original Source for RC_CEN_MSS_RCD_PARITY_ERROR_LIMIT memory_errors.xml -->
+  <hwpError>
+    <rc>RC_CEN_MSS_RCD_PARITY_ERROR_LIMIT</rc>
+    <description>The number of rcd parity errors have exceeded the maximum allowable number</description>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_CEN_MSS_RCD_PARITY_FAILURE</id>
+    <target>TARGET_MBA_ERROR</target>
+    <targetType>TARGET_TYPE_MBA</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_MBA_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET_MBA_ERROR</target>
+  </deconfigure>
+</hwpError>
+
+<!-- Original Source for RC_CEN_MSS_RCD_PARITY_ERROR_PORT0 memory_errors.xml -->
+  <hwpError>
+    <rc>RC_CEN_MSS_RCD_PARITY_ERROR_PORT0</rc>
+    <description>An rcd parity error has been registered on port_0</description>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_CEN_MSS_RCD_PARITY_FAILURE</id>
+    <target>TARGET_MBA_ERROR</target>
+    <targetType>TARGET_TYPE_MBA</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_MBA_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET_MBA_ERROR</target>
+  </deconfigure>
+</hwpError>
+
+<!-- Original Source for RC_CEN_MSS_RCD_PARITY_ERROR_PORT1 memory_errors.xml -->
+  <hwpError>
+    <rc>RC_CEN_MSS_RCD_PARITY_ERROR_PORT1</rc>
+    <description>An rcd parity error has been registered on port_1</description>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_CEN_MSS_RCD_PARITY_FAILURE</id>
+    <target>TARGET_MBA_ERROR</target>
+    <targetType>TARGET_TYPE_MBA</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_MBA_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET_MBA_ERROR</target>
+  </deconfigure>
+</hwpError>
+
+  <hwpError>
+    <rc>RC_CEN_MSS_CCS_INDEX_OUT_OF_BOUNDS</rc>
+    <description>An invalid CCS array index was passsed to the function.</description>
+    <ffdc>INDEX_VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+</hwpErrors>
