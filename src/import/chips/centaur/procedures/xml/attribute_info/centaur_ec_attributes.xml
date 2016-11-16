@@ -22,6 +22,8 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+
+
 <attributes>
 <!-- ********************************************************************* -->
   <attribute>
@@ -149,7 +151,7 @@
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>
       Returns true if the chip needs to fix the fir_mask register in the DDRPHY.  This is for HW217419.
-	True if: Centaur EC 10
+         True if: Centaur EC 10
     </description>
     <chipEcFeature>
       <chip>
