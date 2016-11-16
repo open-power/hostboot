@@ -23,4 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=cen_tp_chiplet_init1
+OBJS+=cen_common_funcs.o
 $(call BUILD_PROCEDURE)
