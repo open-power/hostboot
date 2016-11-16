@@ -1990,6 +1990,10 @@
     <attribute><id>PROC_PCIE_IOP_CONFIG</id></attribute>
 
     <attribute><id>CDM_DOMAIN</id><default>IO</default></attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!-- GARD -->
+    </attribute>
 </targetType><!-- unit-pec-power9 -->
 
 <!-- PHB
@@ -2238,6 +2242,9 @@
         <default>CAPP</default>
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!-- GARD -->
+    </attribute>
     <attribute>
         <id>PRIMARY_CAPABILITIES</id>
         <default>
