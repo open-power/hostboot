@@ -59,7 +59,6 @@ cen_pll_setup(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     bool l_poll_succeed = false;
 
-    // SBE Address Base Register Setups
     FAPI_DBG("Reset PLL test enable");
     FAPI_TRY(fapi2::getCfamRegister(i_target, CEN_FSIGP4, l_fsi_gp4_data),
              "Error from getCfamRegister (CEN_FSIGP4)");
@@ -113,8 +112,7 @@ cen_pll_setup(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
 
     // Chiplet Init bring-up MEM PLL
 
-    FAPI_DBG( "bring-up the MEM PLL for ARRAYINIT closure" );
-
+    FAPI_DBG( "Bring-up the MEM PLL" );
     FAPI_DBG( "Drop bypass mode before LOCK (tp_pllmem_bypass_en_dc)." );
     FAPI_TRY(fapi2::getCfamRegister(i_target, CEN_PERV_GP3, l_perv_gp3_data),
              "Error from getCfamRegister (CEN_PERV_GP3)");
