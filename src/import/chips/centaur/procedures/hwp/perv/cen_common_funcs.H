@@ -101,4 +101,12 @@ fapi2::ReturnCode
 cen_repair_loader(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
                   const uint64_t i_repair_cmd_validation_entry, const uint64_t i_repair_cmd_star_addr);
 
+/// @brief STARTCLOCKS module
+/// @param[in] i_target The FAPI2 target
+/// @param[in] i_chiplet_id The chiplet ID
+/// @return The FAPI2 return code
+fapi2::ReturnCode
+cen_startclocks_module(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
+                       const uint64_t i_chiplet_id);
+
 #endif
