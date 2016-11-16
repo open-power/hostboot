@@ -2359,5 +2359,81 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Process write vref calibration errors
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+///
+fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    // All PHY registers are 16 bits and start at bit 48 bits 0-47 are filler
+    constexpr uint64_t DATA_START = 48;
+    constexpr uint64_t DATA_LEN = 16;
+
+    // We want the index as we want to grab the register for the error log too.
+    uint64_t l_index = 0;
+    std::vector<std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>>> l_data;
+    std::vector<std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>>> l_mask;
+
+    // Suck all the cal error bits out ...
+    FAPI_TRY( mss::scom_suckah(i_target, TT::WR_VREF_ERROR_REG, l_data) );
+    FAPI_TRY( mss::scom_suckah(i_target, TT::WR_VREF_ERROR_MASK_REG, l_mask) );
+
+    // Loop through both data and mask
+    {
+        // Note: ideally these would be cbegin/cend, but HB doesn't support constant iterators for vectors
+        auto l_data_it = l_data.begin();
+        auto l_mask_it = l_mask.begin();
+
+        for(;
+            l_data_it < l_data.end() && l_mask_it < l_mask.end();
+            ++l_mask_it, ++l_data_it, ++l_index)
+        {
+            // Not sure if there's value add to a function to do these, but it's 2x repetition, so not bad to maintain
+            // First print out the data to log all informational callouts
+            // WR VREF can either escalate "error" bits as errors or informational, based upon a mask
+            FAPI_INF("%s DP[%lu] WR VREF[%d] ERROR 0x%016lx MASK 0x%016lx", mss::c_str(i_target), l_index, 0, l_data_it->first,
+                     l_mask_it->first);
+            FAPI_INF("%s DP[%lu] WR VREF[%d] ERROR 0x%016lx MASK 0x%016lx", mss::c_str(i_target), l_index, 1, l_data_it->second,
+                     l_mask_it->second);
+
+            // Inverts as a 1 bit indicates an informational error. we only want to log true errors
+            fapi2::buffer<uint64_t> l_mask_compare = l_mask_it->first;
+            l_mask_compare.flipBit<DATA_START, DATA_LEN>();
+
+            // Now does bitwise anding to determine what's an actual error w/ the masking
+            FAPI_ASSERT_NOEXIT(0 == (l_mask_compare & l_data_it->first),
+                               fapi2::MSS_FAILED_WRVREF_CAL()
+                               .set_TARGET_IN_ERROR(i_target)
+                               .set_REGISTER(TT::WR_VREF_ERROR_REG[l_index].first)
+                               .set_VALUE(l_data_it->first)
+                               .set_MASK(l_mask_it->first),
+                               "DP16 failed write vref calibration on %s. register 0x%016lx value 0x%016lx mask 0x%016lx",
+                               mss::c_str(i_target), TT::WR_VREF_ERROR_REG[l_index].first, l_data_it->first, l_mask_it->first);
+
+
+            l_mask_compare = l_mask_it->second;
+            l_mask_compare.flipBit<DATA_START, DATA_LEN>();
+
+            FAPI_ASSERT_NOEXIT(0 == (l_mask_compare & l_data_it->second),
+                               fapi2::MSS_FAILED_WRVREF_CAL()
+                               .set_TARGET_IN_ERROR(i_target)
+                               .set_REGISTER(TT::WR_VREF_ERROR_REG[l_index].second)
+                               .set_VALUE(l_data_it->second)
+                               .set_MASK(l_mask_it->second),
+                               "DP16 failed write vref calibration on %s. register 0x%016lx value 0x%016lx mask 0x%016lx",
+                               mss::c_str(i_target), TT::WR_VREF_ERROR_REG[l_index].second, l_data_it->second, l_mask_it->second);
+        }
+    }
+
+    FAPI_INF("WRVREF_CAL_ERROR complete");
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // close namespace dp16
 } // close namespace mss
