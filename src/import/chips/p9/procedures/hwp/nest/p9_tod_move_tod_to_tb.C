@@ -59,164 +59,169 @@ extern "C"
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* target = i_tod_node->i_target;
         uint32_t tod_init_pending_count = 0; // Timeout counter for bits that are cleared by hardware
         uint64_t tfmr_state = 0;
+        uint8_t l_core_id = 0x0;
         //bool is_mdmt = true;
 
         FAPI_DBG("Start");
-        std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>> l_cores = target->getChildren<fapi2::TARGET_TYPE_CORE>();
-        fapi2::Target<fapi2::TARGET_TYPE_CORE> coreTarget = l_cores[0];
+        //Get all the cores on this proc chip
+        auto l_core_targets = target->getChildren<fapi2::TARGET_TYPE_CORE>(fapi2::TARGET_STATE_FUNCTIONAL);
 
-        //-------Timebase Setup--------------
-        //Read TFMR
-        FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR register");
-
-        //Update TFMR bit (00:15) Timebase settings according to processor frequency
-        data.insertFromRight((uint32_t)0xFF, TFMR_MAX_CYC_BET_STEPS, TFMR_MAX_CYC_BET_STEPS_LEN);
-        data.insertFromRight(TFMR_N_CLKS_PER_STEP_4CLK, TFMR_N_CLKS_PER_STEP, TFMR_N_CLKS_PER_STEP_LEN);
-        data.insertFromRight(TFMR_SYNC_BIT_SEL_16US, TFMR_SYNC_BIT_SEL, TFMR_SYNC_BIT_SEL_LEN);
-        data.setBit<TFMR_TB_ECLIPZ>();
-
-        FAPI_TRY(p9_tod_utils_set_tfmr_reg(coreTarget, i_thread_num, data),
-                 "Could not write timebase settings according to processor frequency");
-
-        tod_init_pending_count = 0;
-
-        while(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT)
+        for (auto coreTarget : l_core_targets)
         {
-            FAPI_TRY(fapi2::delay(P9_TOD_UTILS_HW_NS_DELAY, P9_TOD_UTILS_SIM_CYCLE_DELAY), "fapiDelay error");
-            FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR register for polling");
-            data.extract(tfmr_state, TFMR_STATE_START_BIT, TFMR_STATE_NUM_BITS, 60);
+            //-------Timebase Setup--------------
+            //Read TFMR
+            FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR register");
 
-            if (tfmr_state == TFMR_STATE_TB_RESET)
+            //Update TFMR bit (00:15) Timebase settings according to processor frequency
+            data.insertFromRight((uint32_t)0xFF, TFMR_MAX_CYC_BET_STEPS, TFMR_MAX_CYC_BET_STEPS_LEN);
+            data.insertFromRight(TFMR_N_CLKS_PER_STEP_4CLK, TFMR_N_CLKS_PER_STEP, TFMR_N_CLKS_PER_STEP_LEN);
+            data.insertFromRight(TFMR_SYNC_BIT_SEL_16US, TFMR_SYNC_BIT_SEL, TFMR_SYNC_BIT_SEL_LEN);
+            data.setBit<TFMR_TB_ECLIPZ>();
+
+            FAPI_TRY(p9_tod_utils_set_tfmr_reg(coreTarget, i_thread_num, data),
+                     "Could not write timebase settings according to processor frequency");
+
+            tod_init_pending_count = 0;
+
+            while(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT)
             {
-                FAPI_DBG("TFMR in TB_RESET state");
-                break;
+                FAPI_TRY(fapi2::delay(P9_TOD_UTILS_HW_NS_DELAY, P9_TOD_UTILS_SIM_CYCLE_DELAY), "fapiDelay error");
+                FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR register for polling");
+                data.extract(tfmr_state, TFMR_STATE_START_BIT, TFMR_STATE_NUM_BITS, 60);
+
+                if (tfmr_state == TFMR_STATE_TB_RESET)
+                {
+                    FAPI_DBG("TFMR in TB_RESET state");
+                    break;
+                }
+
+                ++tod_init_pending_count;
             }
 
-            ++tod_init_pending_count;
-        }
-
-        FAPI_ASSERT(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT,
-                    fapi2::P9_TOD_INIT_TIMEOUT().set_TARGET(target).set_COUNT(tod_init_pending_count),
-                    "TFMR state machine did not go to reset in time!");
+            FAPI_ASSERT(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT,
+                        fapi2::P9_TOD_INIT_TIMEOUT().set_TARGET(target).set_COUNT(tod_init_pending_count),
+                        "TFMR state machine did not go to reset in time!");
 
 
-        //-------Timebase load_tod_mode_tb(switch Timebase to "Not Set" state)
-        //Update TFMR bit (16) = b'1' load_tod_mod_tb. This prepares the time facility logic to accept a new value for the 64-bit Timebase
-        data.setBit<TFMR_LOAD_TOD_MOD_TB>();
-        FAPI_TRY(p9_tod_utils_set_tfmr_reg(coreTarget, i_thread_num, data), "Could not load_tod_mod_tb");
+            //-------Timebase load_tod_mode_tb(switch Timebase to "Not Set" state)
+            //Update TFMR bit (16) = b'1' load_tod_mod_tb. This prepares the time facility logic to accept a new value for the 64-bit Timebase
+            data.setBit<TFMR_LOAD_TOD_MOD_TB>();
+            FAPI_TRY(p9_tod_utils_set_tfmr_reg(coreTarget, i_thread_num, data), "Could not load_tod_mod_tb");
 
-        //Poll for TFMR bit (16) = b'0'. Hardware clears the bit when the operation is complete. A timeout is indicated by TFMR bit(54) = b'1'
-        tod_init_pending_count = 0;
+            //Poll for TFMR bit (16) = b'0'. Hardware clears the bit when the operation is complete. A timeout is indicated by TFMR bit(54) = b'1'
+            tod_init_pending_count = 0;
 
-        while(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT)
-        {
-            FAPI_TRY(fapi2::delay(P9_TOD_UTILS_HW_NS_DELAY, P9_TOD_UTILS_SIM_CYCLE_DELAY), "fapiDelay error");
-            FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR register for polling");
-            data.extract(tfmr_state, TFMR_STATE_START_BIT, TFMR_STATE_NUM_BITS, 60);
-
-            if (!data.getBit<TFMR_LOAD_TOD_MOD_TB>() && (tfmr_state == TFMR_STATE_TB_NOT_SET))
+            while(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT)
             {
-                FAPI_DBG("TFMR_LOAD_TOD_MOD cleared.");
-                break;
+                FAPI_TRY(fapi2::delay(P9_TOD_UTILS_HW_NS_DELAY, P9_TOD_UTILS_SIM_CYCLE_DELAY), "fapiDelay error");
+                FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR register for polling");
+                data.extract(tfmr_state, TFMR_STATE_START_BIT, TFMR_STATE_NUM_BITS, 60);
+
+                if (!data.getBit<TFMR_LOAD_TOD_MOD_TB>() && (tfmr_state == TFMR_STATE_TB_NOT_SET))
+                {
+                    FAPI_DBG("TFMR_LOAD_TOD_MOD cleared.");
+                    break;
+                }
+
+                ++tod_init_pending_count;
             }
 
-            ++tod_init_pending_count;
-        }
+            FAPI_ASSERT(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT,
+                        fapi2::P9_TOD_INIT_TIMEOUT().set_TARGET(target).set_COUNT(tod_init_pending_count),
+                        "TFMR_LOAD_TOD_MOD did not clear in time!");
 
-        FAPI_ASSERT(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT,
-                    fapi2::P9_TOD_INIT_TIMEOUT().set_TARGET(target).set_COUNT(tod_init_pending_count),
-                    "TFMR_LOAD_TOD_MOD did not clear in time!");
+            //-------TOD interrupt check----------------------
+            //Read TFMR and check for TFMR(51) = b'0'. This indicates no interrupt pending from the TOD which means no STEP errors were detected, and the external TOD oscillator is operating properly.
+            FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR register to check bit 51");
+            FAPI_ASSERT(!data.getBit<51>(), fapi2::P9_TOD_INIT_NOT_RUNNING(),
+                        "STEP errors were detected or the external TOD oscillator is not operating properly");
 
-        //-------TOD interrupt check----------------------
-        //Read TFMR and check for TFMR(51) = b'0'. This indicates no interrupt pending from the TOD which means no STEP errors were detected, and the external TOD oscillator is operating properly.
-        FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR register to check bit 51");
-        FAPI_ASSERT(!data.getBit<51>(), fapi2::P9_TOD_INIT_NOT_RUNNING(),
-                    "STEP errors were detected or the external TOD oscillator is not operating properly");
+            //------Move TOD value to Timebase---------
+            //Update TFMR bit(18) = b'1' move_chip_tod_to_tb. This prepares the time facility logic to accept a new value after a SYNC boundary occurred
+            FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR to move_chip_tod_to_tb");
+            data.setBit<TFMR_MOVE_CHIP_TOD_TO_TB>();
+            FAPI_TRY(p9_tod_utils_set_tfmr_reg(coreTarget, i_thread_num, data), "Could not write TFMR to mvoe chip_tod_to_tb");
 
-        //------Move TOD value to Timebase---------
-        //Update TFMR bit(18) = b'1' move_chip_tod_to_tb. This prepares the time facility logic to accept a new value after a SYNC boundary occurred
-        FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR to move_chip_tod_to_tb");
-        data.setBit<TFMR_MOVE_CHIP_TOD_TO_TB>();
-        FAPI_TRY(p9_tod_utils_set_tfmr_reg(coreTarget, i_thread_num, data), "Could not write TFMR to mvoe chip_tod_to_tb");
+            //We don't check for TB_SYNC_WAIT since that state is fleeting
 
-        //We don't check for TB_SYNC_WAIT since that state is fleeting
+            tod_init_pending_count = 0;
 
-        tod_init_pending_count = 0;
-
-        while(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT)
-        {
-            FAPI_TRY(fapi2::delay(P9_TOD_UTILS_HW_NS_DELAY, P9_TOD_UTILS_SIM_CYCLE_DELAY), "fapiDelay error");
-            FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR register for polling");
-            data.extract(tfmr_state, TFMR_STATE_START_BIT, TFMR_STATE_NUM_BITS, 60);
-
-            if (tfmr_state == TFMR_STATE_GET_TOD)
+            while(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT)
             {
-                FAPI_DBG("TFMR in GET_TOD state");
-                break;
+                FAPI_TRY(fapi2::delay(P9_TOD_UTILS_HW_NS_DELAY, P9_TOD_UTILS_SIM_CYCLE_DELAY), "fapiDelay error");
+                FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR register for polling");
+                data.extract(tfmr_state, TFMR_STATE_START_BIT, TFMR_STATE_NUM_BITS, 60);
+
+                if (tfmr_state == TFMR_STATE_GET_TOD)
+                {
+                    FAPI_DBG("TFMR in GET_TOD state");
+                    break;
+                }
+
+                ++tod_init_pending_count;
             }
 
-            ++tod_init_pending_count;
-        }
-
-        FAPI_ASSERT(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT,
-                    fapi2::P9_TOD_INIT_TIMEOUT().set_TARGET(target).set_COUNT(tod_init_pending_count),
-                    "TFMR state machine did not go to get_tod in time!");
+            FAPI_ASSERT(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT,
+                        fapi2::P9_TOD_INIT_TIMEOUT().set_TARGET(target).set_COUNT(tod_init_pending_count),
+                        "TFMR state machine did not go to get_tod in time!");
 
 
-        //Write TOD_MOVE_TOD_TO_TB_REG(@0x17)[00]=b'1'(move TOD to Timebase). The TOD transfers the TOD value to the Timebase after a SYNC boundary occurred. Note that TOD_TX_TTYPE_CTRL_REG(@0x27)[24:31] needs to be configured before issuing a TOD transfer to Timebase.The address of the PIB slave targeted by the TOD PIB master is configured as 0xNN0126a1 where NN is the configurable slave address specified in TOD_TX_TTYPE_CTRL_REG(@0x27)[24:31].
-        // TODO: read PIR and set for each core
-        data.flush<0>();
-        /*data.insertFromRight(TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_MST_ADDR_CFG_C5,
-                             TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_MST_ADDR_CFG, TOD_TX_TTYPE_CTRL_REG_TX_TTYPE_PIB_MST_ADDR_CFG_LEN);*/
-        data.insertFromRight(0x2E010AA310000000, 0, 64);
-        //data.setBit<25>().setBit<27>();
-        FAPI_TRY(fapi2::putScom(*target, PERV_TOD_TX_TTYPE_CTRL_REG, data), "Could not write PERV_TOD_TX_TTYPE_CTRL_REG");
+            //Write TOD_MOVE_TOD_TO_TB_REG(@0x17)[00]=b'1'(move TOD to Timebase). The TOD transfers the TOD value to the Timebase after a SYNC boundary occurred. Note that TOD_TX_TTYPE_CTRL_REG(@0x27)[24:31] needs to be configured before issuing a TOD transfer to Timebase.The address of the PIB slave targeted by the TOD PIB master is configured as 0xNN0126a1 where NN is the configurable slave address specified in TOD_TX_TTYPE_CTRL_REG(@0x27)[24:31].
+            data.flush<0>();
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, coreTarget, l_core_id));
+            l_core_id = l_core_id + 0x20;
+            data.insertFromRight(l_core_id, 0, 8);
 
-        data.flush<0>();
-        data.setBit<0>();
-        FAPI_TRY(fapi2::putScom(*target, PERV_TOD_MOVE_TOD_TO_TB_REG, data), "Could not write TOD_MOVE_TOD_TO_TB_REG");
+            //This will go the TOD_READ register (0x20010AA3) for the core that we are currently targeting
+            data.insertFromRight(0x010AA310000000, 8, 56);
+            FAPI_TRY(fapi2::putScom(*target, PERV_TOD_TX_TTYPE_CTRL_REG, data), "Could not write PERV_TOD_TX_TTYPE_CTRL_REG");
 
-        tod_init_pending_count = 0;
+            data.flush<0>();
+            data.setBit<0>();
+            FAPI_TRY(fapi2::putScom(*target, PERV_TOD_MOVE_TOD_TO_TB_REG, data), "Could not write TOD_MOVE_TOD_TO_TB_REG");
 
-        while(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT)
-        {
-            FAPI_TRY(fapi2::delay(P9_TOD_UTILS_HW_NS_DELAY, P9_TOD_UTILS_SIM_CYCLE_DELAY), "fapiDelay error");
-            FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR register for polling");
-            data.extract(tfmr_state, TFMR_STATE_START_BIT, TFMR_STATE_NUM_BITS, 60);
+            tod_init_pending_count = 0;
 
-            if (tfmr_state == TFMR_STATE_TB_RUNNING)
+            while(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT)
             {
-                FAPI_DBG("TFMR in TB_RUNNING state");
-                break;
+                FAPI_TRY(fapi2::delay(P9_TOD_UTILS_HW_NS_DELAY, P9_TOD_UTILS_SIM_CYCLE_DELAY), "fapiDelay error");
+                FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR register for polling");
+                data.extract(tfmr_state, TFMR_STATE_START_BIT, TFMR_STATE_NUM_BITS, 60);
+
+                if (tfmr_state == TFMR_STATE_TB_RUNNING)
+                {
+                    FAPI_DBG("TFMR in TB_RUNNING state");
+                    break;
+                }
+
+                ++tod_init_pending_count;
             }
 
-            ++tod_init_pending_count;
-        }
+            FAPI_ASSERT(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT,
+                        fapi2::P9_TOD_INIT_TIMEOUT().set_TARGET(target).set_COUNT(tod_init_pending_count),
+                        "TFMR state machine did not go to TB_RUNNING in time!");
 
-        FAPI_ASSERT(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT,
-                    fapi2::P9_TOD_INIT_TIMEOUT().set_TARGET(target).set_COUNT(tod_init_pending_count),
-                    "TFMR state machine did not go to TB_RUNNING in time!");
+            tod_init_pending_count = 0;
 
-        tod_init_pending_count = 0;
-
-        //Poll for TFMR bit(18) = b'0'. Hardware clears the bit when the operation is complete.
-        while(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT)
-        {
-            FAPI_TRY(fapi2::delay(P9_TOD_UTILS_HW_NS_DELAY, P9_TOD_UTILS_SIM_CYCLE_DELAY), "fapiDelay error");
-            FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR");
-
-            if (!data.getBit<TFMR_MOVE_CHIP_TOD_TO_TB>())
+            //Poll for TFMR bit(18) = b'0'. Hardware clears the bit when the operation is complete.
+            while(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT)
             {
-                FAPI_DBG("TFMR_MOVE_CHIP_TOD_TO_TB cleared.");
-                break;
+                FAPI_TRY(fapi2::delay(P9_TOD_UTILS_HW_NS_DELAY, P9_TOD_UTILS_SIM_CYCLE_DELAY), "fapiDelay error");
+                FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR");
+
+                if (!data.getBit<TFMR_MOVE_CHIP_TOD_TO_TB>())
+                {
+                    FAPI_DBG("TFMR_MOVE_CHIP_TOD_TO_TB cleared.");
+                    break;
+                }
+
+                ++tod_init_pending_count;
             }
 
-            ++tod_init_pending_count;
+            FAPI_ASSERT(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT,
+                        fapi2::P9_TOD_INIT_TIMEOUT().set_TARGET(target).set_COUNT(tod_init_pending_count),
+                        "TFMR_MOVE_CHIP_TOD_TO_TB did not clear in time!");
         }
-
-        FAPI_ASSERT(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT,
-                    fapi2::P9_TOD_INIT_TIMEOUT().set_TARGET(target).set_COUNT(tod_init_pending_count),
-                    "TFMR_MOVE_CHIP_TOD_TO_TB did not clear in time!");
 
         // Finish configuring downstream nodes
         for (std::list<tod_topology_node*>::const_iterator child = (i_tod_node->i_children).begin();
