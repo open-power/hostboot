@@ -75,8 +75,6 @@ cen_chiplet_init(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
     fapi2::buffer<uint64_t> l_nest_clk_scandata0_data = 0;
     uint64_t l_nest_clk_scansel_addr = get_scom_addr(SCAN_CHIPLET_NEST, CEN_GENERIC_CLK_SCANSEL);
     uint64_t l_nest_clk_scandata0_addr = get_scom_addr(SCAN_CHIPLET_NEST, CEN_GENERIC_CLK_SCANDATA0);
-    fapi2::ATTR_CENTAUR_EC_FEATURE_SWITCH_REPAIR_COMMAND_VALIDATION_ENTRIES_Type
-    l_repair_command_validation_entries;
 
     FAPI_DBG("*** Initialize good chiplets "
              "and setup multicast registers ***" );
@@ -135,14 +133,6 @@ cen_chiplet_init(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
 
     //  Repair Loader (exclude TP)
     FAPI_DBG("Invoking repair loader...");
-
-    // DD1 is not allowed for repair command validation entries.
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CENTAUR_EC_FEATURE_SWITCH_REPAIR_COMMAND_VALIDATION_ENTRIES,
-                           i_target, l_repair_command_validation_entries));
-
-    FAPI_ASSERT(l_repair_command_validation_entries,
-                fapi2::CEN_CHIPLET_INIT_REPAIR_NOT_ALLOWED_IN_DD1().set_TARGET(i_target),
-                "DD1 is not supported by repair command!");
 
     FAPI_TRY(cen_repair_loader(i_target, REPAIR_COMMAND_VALIDATION_ENTRIES_DD2, REPAIR_COMMAND_START_ADDRESS));
 
