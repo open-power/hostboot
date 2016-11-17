@@ -102,7 +102,7 @@ use constant
     ARCH_LIMIT_DIMM_PER_MCA => 2,
     ARCH_LIMIT_DIMM_PER_MBA => 4,
     # Note: this is proc per fabric group, vs. physical node
-    ARCH_LIMIT_PROC_PER_FABRIC_GROUP => 8,
+    ARCH_LIMIT_PROC_PER_FABRIC_GROUP => 4,
     ARCH_LIMIT_MEMBUF_PER_DMI => 1,
     ARCH_LIMIT_EX_PER_EQ => MAX_EX_PER_PROC / MAX_EQ_PER_PROC,
     ARCH_LIMIT_MBA_PER_MEMBUF => MAX_MBA_PER_MEMBUF,
@@ -4575,11 +4575,13 @@ sub generate_mcs
 
     my $fapi_pos = calcAndAddFapiPos("mcs",$affinityPath,$mcs_orig,$fapiPosHr);
 
-    #mcs MEMVPD_POS is the same as FAPI_POS on single node systems.
+    #mcs MEMVPD_POS cannot exceed 16, so base on physical position
+    #  instead of FAPI_POS to handle a system with multiple fabric groups
+    my $memvpd_pos = $proc*4 + $mcs_orig;
     print "
     <attribute>
        <id>MEMVPD_POS</id>
-       <default>$fapi_pos</default>
+       <default>$memvpd_pos</default>
      </attribute>";
 
     # call to do any fsp per-mcs attributes
