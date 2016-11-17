@@ -31,6 +31,7 @@ using namespace fapi2;
 
 constexpr auto literal_0b111111 = 0b111111;
 constexpr auto literal_8 = 8;
+constexpr auto literal_0b1 = 0b1;
 
 fapi2::ReturnCode p9_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0)
 {
@@ -229,6 +230,334 @@ fapi2::ReturnCode p9_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
         if (l_rc)
         {
             FAPI_ERR("ERROR executing: putSpy (MC23.PORT3.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT)");
+            break;
+        }
+
+        fapi2::variable_buffer l_MC01_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE(1);
+        l_MC01_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC01_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC01_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC01_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT0.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT0.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT0.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT0.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT0.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT0.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT0.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT0.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        fapi2::variable_buffer l_MC01_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE(1);
+        l_MC01_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC01_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC01_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC01_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT1.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT1.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT1.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT1.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT1.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT1.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT1.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT1.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        fapi2::variable_buffer l_MC01_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE(1);
+        l_MC01_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC01_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC01_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC01_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT2.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT2.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT2.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT2.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT2.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT2.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT2.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT2.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        fapi2::variable_buffer l_MC01_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE(1);
+        l_MC01_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC01_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC01_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC01_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT3.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT3.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT3.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT3.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT3.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT3.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC01.PORT3.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC01_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC01.PORT3.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        fapi2::variable_buffer l_MC23_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE(1);
+        l_MC23_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC23_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC23_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC23_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT0.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT0.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT0.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT0.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT0.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT0.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT0.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT0_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT0.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        fapi2::variable_buffer l_MC23_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE(1);
+        l_MC23_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC23_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC23_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC23_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT1.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT1.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT1.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT1.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT1.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT1.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT1.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT1_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT1.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        fapi2::variable_buffer l_MC23_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE(1);
+        l_MC23_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC23_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC23_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC23_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT2.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT2.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT2.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT2.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT2.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT2.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT2.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT2_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT2.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        fapi2::variable_buffer l_MC23_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE(1);
+        l_MC23_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC23_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC23_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_MC23_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_0b1, 0, 1);
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT3.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT3.READ.RDATA_ARY0.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT3.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT3.READ.RDATA_ARY1.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT3.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT3.READ.RDATA_ARY2.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
+            break;
+        }
+
+        l_rc = fapi2::putSpy(TGT0, "MC23.PORT3.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
+                             l_MC23_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putSpy (MC23.PORT3.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE)");
             break;
         }
 
