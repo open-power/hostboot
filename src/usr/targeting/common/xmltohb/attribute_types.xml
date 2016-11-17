@@ -32343,4 +32343,21 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>XIVE_HW_RESET</id>
+    <description>
+      Used to tell INTRP code whether to use the XIVE HW Reset
+      or a software based reset.
+      0 = Software based reset
+      1 = XIVE HW reset
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 </attributes>

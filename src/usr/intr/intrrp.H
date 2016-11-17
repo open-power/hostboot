@@ -173,18 +173,18 @@ namespace INTR
                 LSI_INTERRUPT   = 0xC000,
 
                 //PSI Host Bridge Constants
-                PSI_BRIDGE_BAR_SCOM_ADDR = 0x0501290A,
-                PSI_BRIDGE_BAR_ENABLE = 0x0000000000000001ULL,
-                PSI_BRIDGE_ENABLE_CEC_INTERRUPT = 0x1000000000000000ULL,
-                PSI_BRIDGE_ESB_BAR_SCOM_ADDR = 0x05012916,
-                PSI_BRIDGE_ENABLE_LSI_INTR_REMOTE = 0x0000000000000000ULL,
+                PSI_BRIDGE_BAR_SCOM_ADDR =               0x0501290A,
+                PSI_BRIDGE_BAR_ENABLE =                  0x0000000000000001ULL,
+                PSI_BRIDGE_ENABLE_CEC_INTERRUPT =        0x1000000000000000ULL,
+                PSI_BRIDGE_ESB_BAR_SCOM_ADDR =           0x05012916,
+                PSI_BRIDGE_ENABLE_LSI_INTR_REMOTE =      0x0000000000000000ULL,
 
                 //PSI Host Bridge ESB Constants
-                PSI_BRIDGE_ESB_BAR_VALID = 0x0000000000000001ULL,
-                PSI_BRIDGE_ESB_NOTIFY_VALID = 0x0000000000000001ULL,
-                PSI_BRIDGE_ESB_OFF_OFFSET = 0xD00,
-                PSI_BRIDGE_ESB_RESET_OFFSET = 0XC00,
-                PSI_BRIDGE_PSU_DOORBELL_REG = 0x000D0063,
+                PSI_BRIDGE_ESB_BAR_VALID =     0x0000000000000001ULL,
+                PSI_BRIDGE_ESB_NOTIFY_VALID =  0x0000000000000001ULL,
+                PSI_BRIDGE_ESB_OFF_OFFSET =    0xD00,
+                PSI_BRIDGE_ESB_RESET_OFFSET =  0XC00,
+                PSI_BRIDGE_PSU_DOORBELL_REG =  0x000D0063,
                 PSI_BRIDGE_PSU_HOST_DOORBELL = 0x8000000000000000,
 
                 //XIVE Interrupt Controller Constants
@@ -205,19 +205,20 @@ namespace INTR
                 XIVE_IVPE_TM_BAR1_MMIO_OFFSET = 0x0006020000000000ULL,
                 XIVE_IVPE_TM_BAR1_VALIDATE = 0x8000000000000000ULL,
                 XIVE_IVPE_QW3_OFFSET = 0x38,
-                XIVE_IVPE_QW3_LSI_ENABLE = 0x81,
+                XIVE_IVPE_QW3_LSI_ENABLE = 0x81,  //bit 0 is VT, bit 7 is le
 
-                PSI_BRIDGE_INTP_STATUS_CTL_SCOM_ADDR = 0x0501290E,
-                PSI_BRIDGE_INTP_STATUS_CTL_CLR_SCOM_ADDR = 0x05012913,
-                PSI_BRIDGE_INTP_STATUS_CTL_ENABLE = 0x8000000000000000ULL,
-                PSI_BRIDGE_INTP_STATUS_CTL_RESET = 0x4000000000000000ULL,
-                PSI_BRIDGE_INTP_STATUS_CTL_DISABLE_PSI = 0x1000000000000000ULL,
+                PSI_BRIDGE_INTP_STATUS_CTL_SCOM_ADDR =    0x0501290E,
+                PSI_BRIDGE_INTP_STATUS_CTL_CLR_SCOM_ADDR =0x05012913,
+                PSI_BRIDGE_INTP_STATUS_CTL_ENABLE =       0x8000000000000000ULL,
+                PSI_BRIDGE_INTP_STATUS_CTL_RESET =        0x4000000000000000ULL,
+                PSI_BRIDGE_INTP_STATUS_CTL_DISABLE_PSI =  0x1000000000000000ULL,
 
                 XIVE_RESET_INT_CQ_RST_CTL_SCOM_ADDR = 0x05013023,
                 XIVE_RESET_POWERBUS_QUIESCE_ENABLE = 0x4000000000000000,
                 XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT = 1000000, //1 millisecond
                 XIVE_RESET_UNIT_ENABLE = 0x8000000000000000,
                 ACK_HYPERVISOR_INT_REG_OFFSET = 0x830/sizeof(uint16_t),
+                PULL_THREAD_CONTEXT_OFFSET = 0x838/sizeof(uint8_t),
                 POWERBUS_STATE_QUIESCE = 0xC000000000000000,
                 MAX_PSU_LONG_TIMEOUT_NS  = 5000*NS_PER_MSEC, //5 seconds
 
@@ -465,12 +466,14 @@ namespace INTR
              * @param[in] i_proc Proc handler for processor to enable
              *                   interrupts for
              */
-            errlHndl_t enableInterrupts(intr_hdlr_t *i_proc) ;
+            errlHndl_t enableInterrupts(intr_hdlr_t *i_proc);
 
             /**
              * Disable hardware from reporting external interupts
+             * @param[in] i_proc Proc handler for processor to enable
+             *                   interrupts for
              */
-            errlHndl_t disableInterrupts();
+            errlHndl_t disableInterrupts(intr_hdlr_t *i_proc);
 
             /**
              * Initialize the interrupt presenter registers
@@ -527,17 +530,21 @@ namespace INTR
              * Set all of the Interrupt BAR scom registers specific
              *   to the master chip.
              * @param[in] i_target, the Target.
+             * @param[in] i_enable, indicator to enable/disable the BAR
              * @return Errorlog from DeviceWrite
              */
-            errlHndl_t setMasterInterruptBARs(TARGETING::Target * i_target);
+            errlHndl_t setMasterInterruptBARs(TARGETING::Target * i_target,
+                                              bool i_enable=true);
 
             /**
              * Set all of the Interrupt BAR scom registers common
              *   to all the chips (procs)
              * @param[in] i_proc, the interrupt handler for one chip
+             * @param[in] i_enable, indicator to enable/disable the BAR
              * @return Errorlog from DeviceWrite
              */
-            errlHndl_t setCommonInterruptBARs(intr_hdlr_t * i_proc);
+            errlHndl_t setCommonInterruptBARs(intr_hdlr_t * i_proc,
+                                              bool i_enable=true);
 
             /**
              * Perform HW Functions to acknowledge Interrupt which will
@@ -592,9 +599,11 @@ namespace INTR
             /**
              * Set the PSI Host Bridge BAR scom register
              * @param[in] i_proc, the proc intrp handler
+             * param[in] i_enable, indicator to enable/disable the BAR
              * @return Errorlog from DeviceWrite
              */
-            errlHndl_t setPsiHbBAR(intr_hdlr_t* i_proc);
+            errlHndl_t setPsiHbBAR(intr_hdlr_t* i_proc,
+                                   bool i_enable);
 
             /**
              * Set the PSI Host Bridge ESB BAR scom register
@@ -608,16 +617,20 @@ namespace INTR
             /**
              * Set the XIVE Thread Management (TM) BAR1 scom register
              * @param[in] i_target, the Target
+             * @param[in] i_enable, indicator to enable/disable the BAR
              * @return Errorlog from DeviceWrite
              */
-            errlHndl_t setXiveIvpeTmBAR1(TARGETING::Target * i_target);
+            errlHndl_t setXiveIvpeTmBAR1(TARGETING::Target * i_target,
+                                         bool i_enable);
 
             /**
              * Set the XIVE Interrupt Controller (IC) BAR scom register
              * @param[in] i_proc, the proc intrp handler
+             * @param[in] i_enable, indicator to enable/disable the BAR
              * @return Errorlog from DeviceWrite
              */
-            errlHndl_t setXiveIcBAR(intr_hdlr_t* i_proc);
+            errlHndl_t setXiveIcBAR(intr_hdlr_t* i_proc,
+                                    bool i_enable);
 
             /**
              * When in LSI mode the IC VPC flags and error, thus we
