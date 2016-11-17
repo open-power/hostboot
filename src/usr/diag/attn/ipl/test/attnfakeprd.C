@@ -79,8 +79,11 @@ errlHndl_t FakePrd::callPrd(const AttentionList & i_attentions)
     AttnList    l_attnList;
     i_attentions.getAttnList(l_attnList);
 
+
+    ATTN_TRACE("fakeCallPrd with Attn Count of %d", l_attnList.size());
+
     // -----------------------------------------------------
-    // asdf bjs @TODO: RTC:151004   (this is FAKE code only)
+    // This is FAKE code only.
     // If you do the EC/MODEL check, it crashes in CXX testcase.
     // Kind of thinking some library missing that is needed when
     // adding these calls, For now, I will just leave them out

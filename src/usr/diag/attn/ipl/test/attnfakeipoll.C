@@ -187,23 +187,11 @@ FakeIpoll::FakeIpoll(
      iv_ipollbits(0),
      iv_presenter(&i_presenter)
 {
-    if(i_type == HOST_ATTN)
-    {
-        // figure out what bits to monitor
-        // in the nest gp1 register, if
-        // this instance is monitoring
-        // HOST attentions.
+    GFIR::getAddress(i_type, iv_address);
+    GFIR::getCheckbits(i_type, iv_gfirbits);
 
-        GP1::forEach(0xffffffffffffffffull, &iv_gfirbits, &getMask);
-        iv_address = GP1::address;
-    }
-
-    else
-    {
-        GFIR::getAddress(i_type, iv_address);
-        GFIR::getCheckbits(i_type, iv_gfirbits);
-    }
 
     IPOLL::getCheckbits(i_type, iv_ipollbits);
 }
-}
+
+} // end namespace

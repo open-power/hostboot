@@ -43,8 +43,9 @@ OBJS += attnmeminject.o
 
 MODULE = testattn
 
-# asdf bjs @TODO: RTC:151004
-#TESTS = *.H
-TESTS = attntestipl.H attntestproc.H
+# @TODO RTC: 164827
+#  attntestmem.H  is only for CENTAUR so can't do this yet
+
+TESTS = attntestipl.H attntestproc.H attntestscom.H attntesttrace.H attntesttest.H attntestlist.H attntestops.H attntestsvc.H
 
 include ${ROOTPATH}/config.mk
