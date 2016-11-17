@@ -121,4 +121,13 @@
     <ffdc>VPDTYPE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_MEM_VPD_POS_OUT_OF_RANGE</rc>
+    <description>ATTR_MEMVPD_POS is out of range</description>
+    <ffdc>MCS_POS</ffdc>
+    <ffdc>MAX_MEMVPD_POS</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VPDTYPE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>
