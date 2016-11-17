@@ -79,10 +79,12 @@
     <targetType>TARGET_TYPE_MCS</targetType>
     <description>
       The position of the MCS target's VPD selector data, relative to the EEPROM
-      that contains its data. For systems with a single EEPROM for all chips,
-      this should be equivalent to ATTR_FAPI_POS (the logical MCA position).
+      that contains its data.  The VPD defition supports up to 16 values per
+      EEPROM.
       For systems with an EEPROM per chip, this value should be equivalent to
       ATTR_CHIP_UNIT_POS.
+      For systems with a single EEPROM for all chips, the value should follow
+      the physical position in such a way to fit within the 16 available slots.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
