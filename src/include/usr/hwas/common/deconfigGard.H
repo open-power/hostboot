@@ -477,6 +477,19 @@ private:
                                     NOT_AT_RUNTIME);
 
     /**
+     * @brief   Enforce deconfiguring entire MCBIST unit if magic
+     *          MCA port is the target
+     *
+     * Called by _deconfigureByAssoc().
+     *
+     * @param[in] i_target   Reference to base Target.
+     * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
+     * @param[in] i_deconfigRule Deconfigure Runtime options
+     */
+    void enforceMagicMcaDeconfig(TARGETING::Target & i_target,
+                                 const uint32_t i_errlEid,
+                                 const DeconfigureFlags i_deconfigRule);
+    /**
      * @brief Deconfigures a Target.
      *
      * This will Deconfigure the Target (set state to non-functional, do any
