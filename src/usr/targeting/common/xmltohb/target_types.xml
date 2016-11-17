@@ -316,6 +316,7 @@
     <attribute><id>PROC_FABRIC_OPTICS_CONFIG_MODE</id></attribute>
     <attribute><id>PROC_FABRIC_A_AGGREGATE</id></attribute>
     <attribute><id>PROC_FABRIC_X_AGGREGATE</id></attribute>
+    <attribute><id>XIVE_HW_RESET</id></attribute>
 </targetType>
 
 <targetType>

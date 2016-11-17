@@ -302,6 +302,7 @@ void IntrRp::acknowledgeInterrupt()
 errlHndl_t IntrRp::resetIntUnit(intr_hdlr_t* i_proc)
 {
     errlHndl_t l_err = NULL;
+
     uint64_t l_barValue = XIVE_RESET_POWERBUS_QUIESCE_ENABLE;
     uint64_t size = sizeof(l_barValue);
     uint32_t l_addr = XIVE_RESET_INT_CQ_RST_CTL_SCOM_ADDR;
@@ -309,109 +310,132 @@ errlHndl_t IntrRp::resetIntUnit(intr_hdlr_t* i_proc)
     TARGETING::Target* procTarget = i_proc->proc;
 
     do {
-        //First quiesce the power bus
-        TRACDCOMP(g_trac_intr, "IntrRp::resetIntUnit() - "
-                           "Quiesce the PowerBus Interface");
-        l_err = deviceWrite(procTarget,
-                            &l_barValue,
-                            size,
-                            DEVICE_SCOM_ADDRESS(l_addr));
 
-        if (l_err)
+        //TODO RTC 160361 - Replace attribute with EC check. Anything greater
+        //  DD20 should do the HW-based reset
+        uint8_t l_doHwReset =
+            iv_masterHdlr->proc->getAttr<TARGETING::ATTR_XIVE_HW_RESET>();
+
+        if (l_doHwReset)
         {
-            TRACFCOMP(g_trac_intr, "IntrRp::resetIntUnit() - "
-                                    "Error Quiescing the PowerBus");
-            break;
-        }
-
-        //A short amount of time is needed to let the powerbus quiesce before
-        // the next step in the reset can occur, so do a short polling loop
-        // for the indicator the power bus has been quiesced
-        uint64_t l_quiesceTimeout = XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT;
-        uint64_t l_timeWaited = 0;
-        uint64_t reg = 0x0;
-
-        do
-        {
-            if (l_timeWaited >= l_quiesceTimeout)
-            {
-                TRACFCOMP(g_trac_intr, "IntrRp::resetIntUnit() - Timeout "
-                          "waiting for PowerBus to quiesce");
-                /*@ errorlog tag
-                 * @errortype       ERRL_SEV_UNRECOVERABLE
-                 * @moduleid        INTR::MOD_INTRRP_RESETINTUNIT
-        `        * @reasoncode      INTR::RC_XIVE_PBUS_QUIESCE_TIMEOUT
-                 * @userdata1       XIVE Powerbus Scom Register Address
-                 * @userdata2       XIVE Powerbus Scom Register Data
-                 *
-                 * @devdesc         Timeout waiting for Powerbus to Quiesce
-                 */
-                l_err = new ERRORLOG::ErrlEntry
-                        (
-                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,    // severity
-                         INTR::MOD_INTRRP_RESETINTUNIT,       // moduleid
-                         INTR::RC_XIVE_PBUS_QUIESCE_TIMEOUT,  // reason code
-                         l_addr,
-                         reg
-                        );
-
-                break;
-            }
-
-            uint64_t scom_len = sizeof(reg);
-
-            //Read the powerbus state
-            l_err = deviceRead( procTarget,
-                                &reg,
-                                scom_len,
+            //Use HW-based XIVE Reset
+            //First quiesce the power bus
+            TRACDCOMP(g_trac_intr, "IntrRp::resetIntUnit() - "
+                               "Quiesce the PowerBus Interface");
+            l_err = deviceWrite(procTarget,
+                                &l_barValue,
+                                size,
                                 DEVICE_SCOM_ADDRESS(l_addr));
-
 
             if (l_err)
             {
-                //Logging below this loop
+                TRACFCOMP(g_trac_intr, "IntrRp::resetIntUnit() - "
+                                        "Error Quiescing the PowerBus");
                 break;
             }
 
+            //A short amount of time is needed to let the powerbus quiesce
+            // before the next step in the reset can occur, so do a short
+            // polling loop for the indicator the power bus has been quiesced
+            uint64_t l_quiesceTimeout = XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT;
+            uint64_t l_timeWaited = 0;
+            uint64_t reg = 0x0;
 
-            if (reg & POWERBUS_STATE_QUIESCE)
+            do
             {
-                //Powerbus Quiesced
+                if (l_timeWaited >= l_quiesceTimeout)
+                {
+                    TRACFCOMP(g_trac_intr, "IntrRp::resetIntUnit() - Timeout "
+                              "waiting for PowerBus to quiesce");
+                    // @errorlog tag
+                    // @errortype       ERRL_SEV_UNRECOVERABLE
+                    // @moduleid        INTR::MOD_INTRRP_RESETINTUNIT
+                    // @reasoncode      INTR::RC_XIVE_PBUS_QUIESCE_TIMEOUT
+                    // @userdata1       XIVE Powerbus Scom Register Address
+                    // @userdata2       XIVE Powerbus Scom Register Data
+                    //
+                    // @devdesc         Timeout waiting for Powerbus to Quiesce
+                    //
+                    l_err = new ERRORLOG::ErrlEntry
+                            (
+                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,    // severity
+                             INTR::MOD_INTRRP_RESETINTUNIT,       // moduleid
+                             INTR::RC_XIVE_PBUS_QUIESCE_TIMEOUT,  // reason code
+                             l_addr,
+                             reg
+                            );
+
+                    break;
+                }
+
+                uint64_t scom_len = sizeof(reg);
+
+                //Read the powerbus state
+                l_err = deviceRead( procTarget,
+                                    &reg,
+                                    scom_len,
+                                    DEVICE_SCOM_ADDRESS(l_addr));
+
+
+                if (l_err)
+                {
+                    //Logging below this loop
+                    break;
+                }
+
+
+                if (reg & POWERBUS_STATE_QUIESCE)
+                {
+                    //Powerbus Quiesced
+                    break;
+                }
+                else
+                {
+                    nanosleep(0,XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT / 10);
+                    l_timeWaited += XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT / 10;
+                }
+            } while(1);
+
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_intr, "Error getting Powerbus state");
+                break;
+             }
+
+            TRACDCOMP(g_trac_intr, "Reset XIVE INT unit");
+            l_barValue = XIVE_RESET_UNIT_ENABLE;
+            l_err = deviceWrite(procTarget,
+                                &l_barValue,
+                                size,
+                                DEVICE_SCOM_ADDRESS(l_addr));
+
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_intr, "Error resetting XIVE INT unit");
                 break;
             }
-            else
+        }
+        else
+        {
+            //Do SW Based XIVE Reset
+            if (i_proc == iv_masterHdlr)
             {
-                nanosleep(0,XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT / 10);
-                l_timeWaited += XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT / 10;
+                l_err = disableInterrupts(i_proc);
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_intr, "IntrRp::resetIntUnit() Error disabling interrupts");
+                    break;
+                }
             }
-        } while(1);
-
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_intr, "Error getting Powerbus state");
-            break;
         }
 
-        TRACDCOMP(g_trac_intr, "Reset XIVE INT unit");
-        l_barValue = XIVE_RESET_UNIT_ENABLE;
-        l_err = deviceWrite(procTarget,
-                            &l_barValue,
-                            size,
-                            DEVICE_SCOM_ADDRESS(l_addr));
-
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_intr, "Error resetting XIVE INT unit");
-            break;
-        }
-
+        //Enable VPC Pull Err regardles of XIVE HW Reset settings
         l_err = enableVPCPullErr(procTarget);
         if (l_err)
         {
-            TRACFCOMP(g_trac_intr, "Error re-enabling VPC Pull Err");
+            TRACFCOMP(g_trac_intr, "IntrRp::resetIntUnit() Error re-enabling VPC Pull Err");
             break;
         }
-
 
     } while (0);
 
@@ -419,6 +443,46 @@ errlHndl_t IntrRp::resetIntUnit(intr_hdlr_t* i_proc)
     {
         TRACFCOMP(g_trac_intr, "Error: Interrupt Engine not reset successfully");
     }
+
+    return l_err;
+}
+
+errlHndl_t IntrRp::disableInterrupts(intr_hdlr_t *i_proc)
+{
+    errlHndl_t l_err = NULL;
+
+    do
+    {
+        //Pull thread context to register - View Section 4.4.4.15 of the
+        // XIVE spec. Doing a 1b MMIO read will clear the cams VT bit.
+        volatile uint8_t * l_pull_thread_ptr = (uint8_t *)iv_xiveTmBar1Address;
+        l_pull_thread_ptr += PULL_THREAD_CONTEXT_OFFSET;
+        eieio();
+
+        uint8_t l_ackRead = *l_pull_thread_ptr;
+        TRACFCOMP(g_trac_intr, "IntrRp::disableInterrupts(),"
+                    " pull thread context read result: %8x", l_ackRead);
+        eieio();
+        sync();
+        TRACFCOMP(g_trac_intr, INFO_MRK"LSI Mode inactive (cams_vt)");
+
+        // Unset Physical Thread Enable register in the PC space for the master
+        //  core - Simply reset both regs.
+        uint64_t * l_ic_ptr = i_proc->xiveIcBarAddr;
+        l_ic_ptr += XIVE_IC_BAR_INT_PC_MMIO_REG_OFFSET;
+
+        volatile XIVE_IC_THREAD_CONTEXT_t * l_xive_ic_ptr =
+                reinterpret_cast<XIVE_IC_THREAD_CONTEXT_t *>(l_ic_ptr);
+
+        TRACFCOMP(g_trac_intr, INFO_MRK"IntrRp::disableInterrupts() "
+                    " Reset phys_thread_enable0_reg: 0x%016lx", 0x0);
+        l_xive_ic_ptr->phys_thread_enable0_set = 0x0;
+
+        TRACFCOMP(g_trac_intr, INFO_MRK"IntrRp::disableInterrupts() "
+                    " Reset phys_thread_enable1_reg: 0x%016lx", 0x0);
+        l_xive_ic_ptr->phys_thread_enable1_set = 0x0;
+
+    } while (0);
 
     return l_err;
 }
@@ -516,23 +580,6 @@ void IntrRp::enableSlaveProcInterruptRouting(intr_hdlr_t *i_proc)
     //Enable Interrupt routing to trigger page written above by setting
     // the Interrupt Control Register to all 0's
     l_psihb_ptr->icr = PSI_BRIDGE_ENABLE_LSI_INTR_REMOTE;
-}
-
-errlHndl_t IntrRp::disableInterrupts()
-{
-    errlHndl_t err = NULL;
-
-    // Disable the interrupt on master processor core, thread 0
-    uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(iv_masterCpu);
-
-    err = checkAddress(baseAddr);
-    if(!err)
-    {
-        uint8_t * cppr = reinterpret_cast<uint8_t*>(baseAddr+CPPR_OFFSET);
-        *cppr = 0;
-    }
-
-    return err;
 }
 
 /**
@@ -764,7 +811,7 @@ void IntrRp::msgHandler()
 
             case MSG_INTR_DISABLE:
                 {
-                    errlHndl_t err = disableInterrupts();
+                    errlHndl_t err = disableInterrupts(iv_masterHdlr);
                     msg->data[1] = reinterpret_cast<uint64_t>(err);
                     msg_respond(iv_msgQ,msg);
                 }
@@ -1322,13 +1369,14 @@ errlHndl_t IntrRp::unmaskInterruptSource(uint8_t l_intr_source,
     return l_err;
 }
 
-errlHndl_t IntrRp::setMasterInterruptBARs(TARGETING::Target * i_target)
+errlHndl_t IntrRp::setMasterInterruptBARs(TARGETING::Target * i_target,
+                                          bool i_enable)
 {
     errlHndl_t l_err = NULL;
 
     do {
 
-        l_err = setXiveIvpeTmBAR1(i_target);
+        l_err = setXiveIvpeTmBAR1(i_target, i_enable);
         if (l_err)
         {
             TRACFCOMP(g_trac_intr, "Error setting XIVE TM BAR1");
@@ -1339,13 +1387,14 @@ errlHndl_t IntrRp::setMasterInterruptBARs(TARGETING::Target * i_target)
     return l_err;
 }
 
-errlHndl_t IntrRp::setCommonInterruptBARs(intr_hdlr_t * i_proc)
+errlHndl_t IntrRp::setCommonInterruptBARs(intr_hdlr_t * i_proc,
+                                          bool i_enable)
 {
     errlHndl_t l_err = NULL;
 
     do {
 
-        l_err = setPsiHbBAR(i_proc);
+        l_err = setPsiHbBAR(i_proc, i_enable);
         if (l_err)
         {
             TRACFCOMP(g_trac_intr, "Error setting PSIHB BAR");
@@ -1360,14 +1409,14 @@ errlHndl_t IntrRp::setCommonInterruptBARs(intr_hdlr_t * i_proc)
             break;
         }
 
-        l_err = setPsiHbEsbBAR(i_proc, true);
+        l_err = setPsiHbEsbBAR(i_proc, i_enable);
         if (l_err)
         {
             TRACFCOMP(g_trac_intr, "Error setting PSIHB ESB BAR");
             break;
         }
 
-        l_err = setXiveIcBAR(i_proc);
+        l_err = setXiveIcBAR(i_proc, i_enable);
         if (l_err)
         {
             TRACFCOMP(g_trac_intr, "Error setting XIVE IC BAR");
@@ -1671,6 +1720,14 @@ void IntrRp::shutDown(uint64_t i_status)
             PSIHB_SW_INTERFACES_t * this_psihb_ptr = (*targ_itr)->psiHbBaseAddr;
             this_psihb_ptr->icr = PSI_BRIDGE_INTP_STATUS_CTL_RESET;
             resetIntUnit(*targ_itr);
+            //Disable common interrupt BARs
+            l_err = setCommonInterruptBARs(*targ_itr, false);
+
+            if (l_err)
+            {
+                delete l_err; //errl cmp already shutdown. Log error + continue
+                TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error disabling Common Interrupt BARs");
+            }
         }
     }
 
@@ -1681,6 +1738,24 @@ void IntrRp::shutDown(uint64_t i_status)
 
     //Reset XIVE Interrupt unit
     resetIntUnit(iv_masterHdlr);
+
+    //Disable common interrupt BARs for master proc
+    l_err = setCommonInterruptBARs(iv_masterHdlr, false);
+    if (l_err)
+    {
+        delete l_err; //errl cmp already shutdown. Log error + continue
+        TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error disabling Common"
+                               " Interrupt BARs for master proc");
+    }
+
+    //Disable master interrupt BARs
+    l_err = setMasterInterruptBARs(iv_masterHdlr->proc, false);
+
+    if (l_err)
+    {
+        delete l_err; //errl cmp already shutdown. Log error + continue
+        TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error disabling Master Interrupt BARs");
+    }
 
 #ifdef CONFIG_ENABLE_P9_IPI
     size_t threads = cpu_thread_count();
@@ -2955,7 +3030,7 @@ errlHndl_t INTR::disableExternalInterrupts()
     return err;
 }
 
-errlHndl_t IntrRp::setPsiHbBAR(intr_hdlr_t *i_proc)
+errlHndl_t IntrRp::setPsiHbBAR(intr_hdlr_t *i_proc, bool i_enable)
 {
     errlHndl_t l_err = NULL;
     TARGETING::Target *l_target = i_proc->proc;
@@ -2963,6 +3038,9 @@ errlHndl_t IntrRp::setPsiHbBAR(intr_hdlr_t *i_proc)
                       l_target->getAttr<TARGETING::ATTR_PSI_BRIDGE_BASE_ADDR>();
 
     do {
+
+        if (!i_enable) { break; } //Don't ever disable, PHYP needs this set
+
         //Get base BAR Value from attribute
         uint64_t l_barValue = l_baseBarValue;
 
@@ -2991,9 +3069,9 @@ errlHndl_t IntrRp::setPsiHbBAR(intr_hdlr_t *i_proc)
                   l_target,l_barValue);
 
         l_err = deviceWrite(l_target,
-                          &l_barValue,
-                          size,
-                          DEVICE_SCOM_ADDRESS(PSI_BRIDGE_BAR_SCOM_ADDR));
+                            &l_barValue,
+                            size,
+                            DEVICE_SCOM_ADDRESS(PSI_BRIDGE_BAR_SCOM_ADDR));
 
         if(l_err)
         {
@@ -3002,12 +3080,10 @@ errlHndl_t IntrRp::setPsiHbBAR(intr_hdlr_t *i_proc)
         }
 
         //Map Memory Internally for HB and store in member variable
-        void *l_psiHbAddress =
-               reinterpret_cast<void *>(l_baseBarValue);
+        void *l_psiHbAddress = reinterpret_cast<void *>(l_baseBarValue);
+        i_proc->psiHbBaseAddr = reinterpret_cast<PSIHB_SW_INTERFACES_t *>
+                   (mmio_dev_map(l_psiHbAddress, PAGE_SIZE));
 
-        i_proc->psiHbBaseAddr =
-               reinterpret_cast<PSIHB_SW_INTERFACES_t *>
-               (mmio_dev_map(l_psiHbAddress, PAGE_SIZE));
     } while(0);
 
     return l_err;
@@ -3072,7 +3148,8 @@ errlHndl_t IntrRp::setPsiHbEsbBAR(intr_hdlr_t *i_proc,
     return l_err;
 }
 
-errlHndl_t IntrRp::setXiveIvpeTmBAR1(TARGETING::Target * i_target)
+errlHndl_t IntrRp::setXiveIvpeTmBAR1(TARGETING::Target * i_target,
+                                     bool i_enable)
 {
     errlHndl_t l_err = NULL;
     uint64_t l_baseBarValue =
@@ -3080,7 +3157,11 @@ errlHndl_t IntrRp::setXiveIvpeTmBAR1(TARGETING::Target * i_target)
 
     do
     {
-        uint64_t l_barValue = l_baseBarValue + XIVE_IVPE_TM_BAR1_VALIDATE;
+        uint64_t l_barValue = l_baseBarValue;
+        if (i_enable)
+        {
+            l_barValue += XIVE_IVPE_TM_BAR1_VALIDATE;
+        }
 
         TRACDCOMP(g_trac_intr,"INTR: Target %p. XIVE IVPE TM BAR1 value: 0x%016lx",
                   i_target,l_barValue);
@@ -3110,7 +3191,7 @@ errlHndl_t IntrRp::setXiveIvpeTmBAR1(TARGETING::Target * i_target)
 }
 
 
-errlHndl_t IntrRp::setXiveIcBAR(intr_hdlr_t *i_proc)
+errlHndl_t IntrRp::setXiveIcBAR(intr_hdlr_t *i_proc, bool i_enable)
 {
     TARGETING::Target *l_target = i_proc->proc;
 
@@ -3119,10 +3200,15 @@ errlHndl_t IntrRp::setXiveIcBAR(intr_hdlr_t *i_proc)
             = l_target->getAttr<TARGETING::ATTR_XIVE_CONTROLLER_BAR_ADDR>();
 
     do {
-        uint64_t l_barValue = l_baseBarValue + XIVE_IC_BAR_VALID;
+        uint64_t l_barValue = l_baseBarValue;
+
+        if (i_enable)
+        {
+            l_barValue += XIVE_IC_BAR_VALID;
+        }
 
         TRACDCOMP(g_trac_intr,"INTR: Target %p. XIVE IC BAR value: 0x%016lx",
-                  l_target,l_barValue);
+                  l_target, l_barValue);
 
         uint64_t size = sizeof(l_barValue);
         l_err = deviceWrite(l_target,
