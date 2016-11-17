@@ -36,6 +36,20 @@
 #include "attntest.H"
 #include <cxxtest/TestSuite.H>
 #include "../../common/attntrace.H"
+#include "attnfakepresenter.H"
+#include "attnfakegfir.H"
+#include <prdf/common/prdfMain_common.H>
+#include "attnfakegp1.H"
+#include "attnfakemcs.H"
+#include "attnfakeipoll.H"
+#include "attnvalidate.H"
+#include "attnfaketarget.H"
+#include "attnrandsource.H"
+#include "attnfakeprd.H"
+#include "../../common/attnproc.H"
+#include <sys/time.h>
+
+
 
 using namespace ATTN;
 using namespace std;
@@ -65,31 +79,41 @@ class AttnSvcTest: public CxxTest::TestSuite
             FakePresenter presenter;
             FakeSystem system;
 
-            FakeGfir xstpGfir(CHECK_STOP),
-                     spclGfir(SPECIAL),
-                     recGfir(RECOVERABLE);
+            FakeGfir xstpGfir(PRDF::CHECK_STOP),
+                   spclGfir(PRDF::SPECIAL),
+                   recGfir(PRDF::RECOVERABLE),
+                   hostAttnGfir(PRDF::HOST_ATTN),
+                   unitCsGfir(PRDF::UNIT_CS);
+
 
             xstpGfir.install(system);
             spclGfir.install(system);
             recGfir.install(system);
+            hostAttnGfir.install(system);
+            unitCsGfir.install(system);
 
-            FakeMcs rec(RECOVERABLE), xstp(CHECK_STOP), special(SPECIAL);
-            FakeGp1 gp1;
+            // @TODO RTC: 164827
+            // When we get CENTAURS, we may need to add host/unit cs
+            // here and install them right below.
+            FakeMcs rec(PRDF::RECOVERABLE),
+                    xstp(PRDF::CHECK_STOP),
+                    special(PRDF::SPECIAL);
 
             xstp.install(system);
             special.install(system);
             rec.install(system);
-            gp1.install(system);
 
-            FakeIpoll xstpIpoll(CHECK_STOP, presenter),
-                      spclIpoll(SPECIAL, presenter),
-                      recIpoll(RECOVERABLE, presenter),
-                      hostIpoll(HOST_ATTN, presenter);
+            FakeIpoll xstpIpoll(PRDF::CHECK_STOP,  presenter),
+                      spclIpoll(PRDF::SPECIAL,     presenter),
+                      recIpoll (PRDF::RECOVERABLE, presenter),
+                      unitIpoll(PRDF::UNIT_CS,     presenter),
+                      hostIpoll(PRDF::HOST_ATTN,   presenter);
 
             xstpIpoll.install(system);
             spclIpoll.install(system);
             recIpoll.install(system);
             hostIpoll.install(system);
+            unitIpoll.install(system);
 
             Validator v;
 
@@ -99,31 +123,34 @@ class AttnSvcTest: public CxxTest::TestSuite
 
             FakeMemTargetService targetSvc(targetPoolSize);
 
-            TargetHandleList membufs, procs;
+            TARGETING::TargetHandleList membufs, procs;
 
-            targetSvc.getAllChips(procs, TYPE_PROC);
-            targetSvc.getAllChips(membufs, TYPE_MEMBUF);
+            targetSvc.getAllChips(procs,   TARGETING::TYPE_PROC);
+            targetSvc.getAllChips(membufs, TARGETING::TYPE_MEMBUF);
 
-            RandSource procSource(iterations,
+            ATTN::RandSource procSource(iterations,
                     maxAttnsPerIteration,
                     system,
                     &procs[0],
                     &procs[0] + procs.size());
 
-            RandSource memSource(
+            // @TODO RTC: 164827
+            // We don't have Centaurs yet
+            /* ATTN::RandSource memSource(
                     iterations,
                     maxAttnsPerIteration,
                     system,
                     &membufs[0],
                     &membufs[0] + membufs.size());
+            */
 
             targetSvc.installTargetService();
 
-            FakePrd prd(system);
+            ATTN::FakePrd prd(system);
 
             prd.installPrd();
 
-            getProcOps().enable();
+            ATTN::getProcOps().enable();
 
             do
             {
@@ -141,11 +168,14 @@ class AttnSvcTest: public CxxTest::TestSuite
                     break;
                 }
 
-                if(!memSource.start())
-                {
-                    TS_FAIL("unexpected error starting source");
-                    break;
-                }
+                // @TODO RTC: 164827
+                // We don't have Centaurs yet
+                /* if(!memSource.start())
+                   {
+                       TS_FAIL("unexpected error starting source");
+                       break;
+                   }
+                */
 
                 if(!procSource.start())
                 {
@@ -155,11 +185,14 @@ class AttnSvcTest: public CxxTest::TestSuite
 
                 // wait for the testcase to finish injecting attentions
 
-                if(!memSource.wait())
-                {
-                    TS_FAIL("unexpected error waiting for source");
-                    break;
-                }
+                // @TODO RTC: 164827
+                // We don't have Centaurs yet on NIMBUS P9
+                /* if(!memSource.wait())
+                   {
+                       TS_FAIL("unexpected error waiting for source");
+                        break;
+                   }
+                */
 
                 if(!procSource.wait())
                 {
