@@ -1306,7 +1306,40 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
 }
 
 //******************************************************************************
+void DeconfigGard::enforceMagicMcaDeconfig(
+        Target & i_target,
+        const uint32_t i_errlEid,
+        const DeconfigureFlags i_deconfigRule)
+{
+    // Check if "magic" port is the target
+    if ((i_target.getAttr<ATTR_TYPE>() == TYPE_MCA) &&
+        ((i_target.getAttr<ATTR_CHIP_UNIT>() % 4) == 0))
+    {
+        HWAS_INF("enforceMagicMcaDeconfig for MCA%d %.8X (i_deconfigRule %d)",
+            i_target.getAttr<ATTR_CHIP_UNIT>(), get_huid(&i_target),
+            i_deconfigRule);
 
+        // magic port found and need to deconfigure its MCBIST parent on down
+
+        // get parent MCBIST
+        TargetHandleList pParentMcbistList;
+        getParentAffinityTargetsByState(pParentMcbistList, &i_target,
+                            CLASS_UNIT, TYPE_MCBIST, UTIL_FILTER_PRESENT);
+
+        HWAS_ASSERT((pParentMcbistList.size() == 1),
+            "HWAS enforceMagicMcaDeconfig: pParentMcbistList != 1");
+
+        Target *l_parentMcbist = pParentMcbistList[0];
+
+        HWAS_INF("enforceMagicMcaDeconfig rollup deconfig to "
+            "MCBIST parent (%.8X)", get_huid(l_parentMcbist));
+
+        _deconfigureTarget(*l_parentMcbist, i_errlEid, NULL, i_deconfigRule);
+        _deconfigureByAssoc(*l_parentMcbist, i_errlEid, i_deconfigRule);
+    }
+}
+
+//******************************************************************************
 void DeconfigGard::_deconfigureByAssoc(
         Target & i_target,
         const uint32_t i_errlEid,
@@ -1518,6 +1551,10 @@ void DeconfigGard::_deconfigureByAssoc(
                     _deconfigureByAssoc(*l_parentMcs,
                                         i_errlEid,i_deconfigRule);
                 }
+
+                // Checks if MCA is the "magic" port, if so,
+                // then deconfig from its MCBIST parent on down
+                enforceMagicMcaDeconfig(i_target, i_errlEid, i_deconfigRule);
 
                 // and we're done, so break;
                 break;
@@ -1894,21 +1931,19 @@ void DeconfigGard::_deconfigureByAssoc(
                                                   TargetService::CHILD,
                                                   TargetService::ALL,
                                                   &isFunctional);
-                    for (TargetHandleList::iterator pChild_it =
-                         pChildList.begin();
-                         pChild_it != pChildList.end();
-                         ++pChild_it)
+
+                    for (const auto & l_pChild: pChildList)
                     {
-                        if( (*pChild_it)->getAttr<ATTR_CHIP_UNIT>() > l_myUnit )
+                        if( l_pChild->getAttr<ATTR_CHIP_UNIT>() > l_myUnit )
                         {
-                            _deconfigureTarget(*(*pChild_it),
+                            _deconfigureTarget(*l_pChild,
                                                i_errlEid, NULL,
                                                i_deconfigRule);
-                            _deconfigureByAssoc(*(*pChild_it),
+                            _deconfigureByAssoc(*l_pChild,
                                                 i_errlEid,i_deconfigRule);
                         }
                     }
-                }               
+                }
 
                 break;
             } // TYPE_PHB
@@ -2636,7 +2671,7 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
                         (*l_mGroupProcInfoIter).procFabricGroup) &&
                         (!((*l_mGroupProcInfoIter).iv_deconfigured)) &&
                         ((*l_mGroupProcInfoIter).procFabricChip ==
-                                (*l_procInfoIter).procFabricChip) )
+                                (*l_procInfoIter).procFabricChip))
                     {
                         // Find xbus peer proc to mark deconfigured
                         for (uint8_t i = 0; i < NUM_X_BUSES; i++)
@@ -2662,7 +2697,7 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
                                              (*l_procInfoIter).
                                              iv_pXProcs[i]->procHUID);
                                     (*l_procInfoIter).iv_pXProcs[i]->
-                                      iv_deconfigured = true;
+                                        iv_deconfigured = true;
                                 }
                             }
                         }
