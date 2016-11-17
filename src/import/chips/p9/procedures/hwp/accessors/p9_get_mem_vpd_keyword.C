@@ -117,6 +117,9 @@ struct mappingDqRow_t // DQ map entries following header
 const size_t DQ_MAP_SIZE    = 36;
 const size_t DQ_BLOB_SIZE   = 160;
 
+// VPD format only supports up to 16 unique MCS entries
+constexpr fapi2::ATTR_MEMVPD_POS_Type MAX_MEMVPD_POS = 16;
+
 
 extern "C"
 {
@@ -240,6 +243,15 @@ extern "C"
                                i_target,
                                l_mcsPos),
                  "p9_get_mem_vpd_keyword: get ATTR_MEMVPD_POS failed");
+        // verify we have a valid MEMVPD_POS
+        FAPI_ASSERT(l_mcsPos < MAX_MEMVPD_POS,
+                    fapi2::GET_MEM_VPD_POS_OUT_OF_RANGE().
+                    set_MCS_POS(l_mcsPos).
+                    set_MAX_MEMVPD_POS(MAX_MEMVPD_POS).
+                    set_TARGET(i_target).
+                    set_VPDTYPE(i_vpd_info.iv_vpd_type),
+                    "ATTR_MEMVPD_POS out of range (=%d)",
+                    l_mcsPos);
         l_mcsMask = (MAPPING_LAYOUT_MCS_0 >> l_mcsPos); //zero based
         FAPI_DBG ("p9_get_mem_vpd_keyword: mca position = %d mask=0x%04x",
                   l_mcsPos, l_mcsMask);
