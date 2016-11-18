@@ -108,7 +108,7 @@ gen_default_images: cp_hbfiles
 	# Call script to generate final bin files for default images
 	${GEN_PNOR_IMAGE_SCRIPT} --build-all ${TARGET_TEST:b--test} \
 		${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
-		--pnorLayout ${DEFAULT_PNOR_LAYOUT} ${KEY_TRANSITION:b--key-transition} \
+		--pnorLayout ${DEFAULT_PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} \
 		${CORRUPT_PARAMS}
 
 clobber_gen_default_images:

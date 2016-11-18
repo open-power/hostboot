@@ -48,6 +48,19 @@ print_usage()
     echo "    --release: Create a full release distribution (all targets)."
     echo "    --vpo: Generate just 'vpo' content."
     echo "    --simics/--fsp: *default* Generate just 'fsp' content"
+    echo "    --hb-standalone: Indicate if in hb-standalone mode for compile optimizing"
+    echo "    --corrupt <Partition name>[= pro|unpro] (Note: requires '--secureboot')"
+    echo "        Partition 'eyeCatch' name to corrupt a byte of."
+    echo "        Optional '= pro|unpro' to indicate which section of the secure container to corrupt."
+    echo "            Default (empty string '') is protected section."
+    echo "            [Note: Some sections only have a protected section so not relevant for all.]"
+    echo "        Multiple '--corrupt' options are allowed, but note the system will checkstop on the"
+    echo "            first bad partition so multiple may not be that useful."
+    echo "        Example: --corrupt HBI --corrupt HBD=unpro"
+    echo "    --sign-mode <development|production>   Indicates how to sign partitions with either development keys or production keys"
+    echo "    --key-transition <imprint|production>   Indicates a key transition is needed and creates a secureboot key transition container."
+    echo "        Note: \"--sign-mode production\" is not allowed with \"--key-transition imprint"
+    echo "        With [--test] will transition to test dev keys, which are a fixed permutation of imprint keys."
 }
 
 # Parse arguments
@@ -103,7 +116,10 @@ do
         ;;
 
         "--key-transition")
-            KEY_TRANSITION=1
+            # Format is "--key-transition <imprint|production>"
+            KEY_TRANSITION_PARAMS="$KEY_TRANSITION_PARAMS $1"
+            shift
+            KEY_TRANSITION_PARAMS="$KEY_TRANSITION_PARAMS $1"
             shift
         ;;
 
@@ -175,6 +191,10 @@ export KEY_TRANSITION
 export CORRUPT_PARAMS
 if [ -n "$CORRUPT_PARAMS" ]; then
     echo "Corruption options = $CORRUPT_PARAMS"
+fi
+export KEY_TRANSITION_PARAMS
+if [ -n "$KEY_TRANSITION_PARAMS" ]; then
+    echo "Key transition options = $KEY_TRANSITION_PARAMS"
 fi
 cd $REPO_ROOT/src/build/mkrules
 make -rR ${DEBUG:=} -f dist.targets.mk $TARGET
