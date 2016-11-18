@@ -141,8 +141,9 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
 
     if( NULL != errl )
     {
-        PRDF_ERR("[ScomAccessor::Access()] Error in "
-                 "PRDF::PlatServices::getScom");
+        PRDF_ERR( "getScom() failed on i_target=0x%08x i_address0x%16llx",
+                  getHuid(i_target), i_address );
+
         rc = PRD_SCANCOM_FAILURE;
         PRDF_ADD_SW_ERR(errl, rc, PRDF_HOM_SCOM, __LINE__);
 
@@ -178,8 +179,9 @@ uint32_t putScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
 
     if( NULL != errl )
     {
-        PRDF_ERR("[ScomAccessor::Access()] Error in "
-                 "PRDF::PlatServices::putScom");
+        PRDF_ERR( "putScom() failed on i_target=0x%08x i_address0x%16llx",
+                  getHuid(i_target), i_address );
+
         rc = PRD_SCANCOM_FAILURE;
         PRDF_ADD_SW_ERR(errl, rc, PRDF_HOM_SCOM, __LINE__);
 
