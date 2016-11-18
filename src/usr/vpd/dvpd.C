@@ -45,7 +45,9 @@
 #include "vpd.H"
 #include "pvpd.H"
 #include <initservice/initserviceif.H>
-
+#ifdef CONFIG_PVPD_READ_FROM_PNOR
+#include "pvpd.H"
+#endif
 
 // ----------------------------------------------
 // Trace definitions
