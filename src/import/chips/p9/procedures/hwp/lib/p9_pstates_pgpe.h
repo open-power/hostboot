@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -218,13 +218,31 @@ typedef struct
     /// Resonant Clock Grid Management Setup
     ResonantClockingSetup resclk;
 
-    //Voltage change step size
-    uint32_t ext_vdd_step_size_mv;
+    //Time b/w ext VRM detects write voltage cmd and when voltage begins to move
+    uint32_t ext_vrm_transition_start_ns;
 
+    //Transition rate for an increasing VDD voltage excursion
+    uint32_t ext_vrm_transition_rate_inc_uv_per_us;
+
+    //Transition rate for an decreasing VDD voltage excursion
+    uint32_t ext_vrm_transition_rate_dec_uv_per_us;
+
+    //Delay to account for VDD rail setting
+    uint32_t ext_vrm_stabilization_time_us;
+
+    //External VRM transition step size
+    uint32_t ext_vrm_step_size_mv;
+
+    //Nest frequency in Mhz. This is used by FIT interrupt
     uint32_t nest_frequency_mhz;
 
+    //Precalculated Pstate-Voltage Slopes
     uint16_t PsVSlopes[VPD_NUM_SLOPES_SET][VPD_NUM_SLOPES_REGION];
+
+    //Precalculated Voltage-Pstates Slopes
     uint16_t VPsSlopes[VPD_NUM_SLOPES_SET][VPD_NUM_SLOPES_REGION];
+
+
     // @todo DPLL Droop Settings.  These need communication to SGPE for STOP
 
 } GlobalPstateParmBlock;
