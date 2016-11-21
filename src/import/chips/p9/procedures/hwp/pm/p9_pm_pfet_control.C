@@ -157,7 +157,7 @@ fapi2::ReturnCode p9_pm_pfet_control_eq(
     }
 
     // Check for all core chiplets in EQ and power on/off targets accordingly
-    for (auto l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>
+    for (auto& l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>
          (fapi2::TARGET_STATE_FUNCTIONAL))
     {
         l_unit_pos = l_core_target.getChipletNumber();
@@ -203,7 +203,7 @@ fapi2::ReturnCode p9_pm_pfet_control_ex(
     FAPI_INF("pfet control for EX chiplet %d", l_unit_pos);
 
     // Check for all core chiplets in EX and power on/off targets accordingly
-    for (auto l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>
+    for (auto& l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>
          (fapi2::TARGET_STATE_FUNCTIONAL))
     {
         l_unit_pos = l_core_target.getChipletNumber();
