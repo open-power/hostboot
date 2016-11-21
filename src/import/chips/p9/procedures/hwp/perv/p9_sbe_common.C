@@ -669,7 +669,7 @@ fapi2::ReturnCode p9_sbe_common_get_pg_vector(const
     fapi2::buffer<uint8_t> l_read_attrunitpos;
     FAPI_INF("p9_sbe_common_get_pg_vector: Entering ...");
 
-    for (auto l_target_cplt : i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV> (fapi2::TARGET_STATE_FUNCTIONAL))
+    for (auto& l_target_cplt : i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV> (fapi2::TARGET_STATE_FUNCTIONAL))
     {
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_target_cplt, l_read_attrunitpos));
         uint8_t bitPos = l_read_attrunitpos;
