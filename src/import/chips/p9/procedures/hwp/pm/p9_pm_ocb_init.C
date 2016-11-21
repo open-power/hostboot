@@ -489,7 +489,7 @@ fapi2::ReturnCode pm_ocb_reset(
     // -------------------------------------------------------------------------
     // Loop over PIB Registers
     // -------------------------------------------------------------------------
-    for (auto chan : v_reset_chan)
+    for (auto& chan : v_reset_chan)
     {
         FAPI_INF(" Reset OCB channel : %d", chan);
 
@@ -521,7 +521,7 @@ fapi2::ReturnCode pm_ocb_reset(
     // -------------------------------------------------------------------------
     // Loop over OCI Registers
     // -------------------------------------------------------------------------
-    for (auto chan : v_reset_chan)
+    for (auto& chan : v_reset_chan)
     {
         FAPI_INF(" Reset OCB channel : %d", chan);
 

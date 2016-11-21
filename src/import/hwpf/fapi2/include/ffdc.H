@@ -179,7 +179,7 @@ class FirstFailureData
         ///
         inline void addErrorInfo(std::vector<std::shared_ptr<ErrorInfoFfdc>>& i_errorInfo)
         {
-            for( auto p : i_errorInfo )
+            for( auto& p : i_errorInfo )
             {
                 iv_info->iv_ffdcs.push_back(p);
             }
