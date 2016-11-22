@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -2126,7 +2126,7 @@ group gTP_LFIR filter singlebit
     /** TP_LFIR[21]
      *  local errors from PORT2 ( error)
      */
-    (rTP_LFIR, bit(21)) ? defaultMaskedError;
+    (rTP_LFIR, bit(21)) ? PcbSlaveInternalParity;
 
     /** TP_LFIR[22]
      *  FIR error from SBE

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <prdfGlobal.H>
 #include <iipSystem.h>
 #include <UtilHash.H>
+#include <prdfP9Pll.H>
 
 #include <prdfP9ProcMbCommonExtraSig.H>
 
@@ -49,6 +50,7 @@ namespace PRDF
 {
 
 using namespace PlatServices;
+using namespace PLL;
 
 //------------------------------------------------------------------------------
 
@@ -82,8 +84,11 @@ bool PllDomain::Query(ATTENTION_TYPE attentionType)
             {
                 ExtensibleChipFunction * l_query =
                                     l_chip->getExtensibleFunction("QueryPll");
-                int32_t rc = (*l_query)(l_chip,PluginDef::bindParm<bool &>(atAttn));
-                // if rc then scom read failed - Error log has already been generated
+                int32_t rc = (*l_query)
+                    (l_chip,PluginDef::bindParm<bool &>(atAttn));
+
+                // if rc then scom read failed
+                // Error log has already been generated
                 if( PRD_POWER_FAULT == rc )
                 {
                     PRDF_ERR( "prdfPllDomain::Query() Power Fault detected!" );
@@ -106,31 +111,40 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                           ATTENTION_TYPE attentionType)
 {
     #define PRDF_FUNC "[PllDomain::Analyze] "
-    typedef ExtensibleChip * ChipPtr;
-    CcAutoDeletePointerVector<ChipPtr> chip(new ChipPtr[GetSize()]());
-    int count = 0;
+    std::vector<ExtensibleChip *> sysRefList;
+    std::vector<ExtensibleChip *> pciList;
+    std::vector<ExtensibleChip *> mfFoList;
+    std::vector<ExtensibleChip *> sysRefFoList;
     int32_t rc = SUCCESS;
+    uint32_t mskErrType =  0;
 
     // Due to clock issues some chips may be moved to non-functional during
     // analysis. In this case, these chips will need to be removed from their
     // domains.
-    typedef std::vector<ExtensibleChip *> NonFuncChips;
-    NonFuncChips nfchips;
+    std::vector<ExtensibleChip *>  nfchips;
 
-    // Count # of chips that had PLL error
+    // Examine each chip in domain
     for(unsigned int index = 0; index < GetSize(); ++index)
     {
+        uint32_t l_errType = 0;
+
         ExtensibleChip * l_chip = LookUp(index);
-        bool atAttn = false;
 
+        // Check if this chip has a clock error
         ExtensibleChipFunction * l_query =
-            l_chip->getExtensibleFunction("QueryPll");
-        rc |= (*l_query)(l_chip,PluginDef::bindParm<bool &>(atAttn));
+            l_chip->getExtensibleFunction("CheckErrorType");
+        rc |= (*l_query)(l_chip,
+            PluginDef::bindParm<uint32_t &> (l_errType));
 
-        if ( atAttn )
+        if ( !PlatServices::isFunctional(l_chip->getTrgt()) )
         {
-            chip()[count] = LookUp(index);
-            ++count;
+            // The chip is now non-functional.
+            nfchips.push_back( l_chip );
+        }
+
+        // Get this chip's capture data for any error
+        if (0 != l_errType)
+        {
             l_chip->CaptureErrorData(
                     serviceData.service_data->GetCaptureData());
             // Capture PllFIRs group
@@ -146,20 +160,29 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                 (*l_captureFfdc)( l_chip,
                 PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
             }
+        }
 
-        }
-        else if ( !PlatServices::isFunctional(l_chip->getTrgt()) )
-        {
-            // The chip is now non-functional.
-            nfchips.push_back( l_chip );
-        }
-    }
+        // Update error lists
+        if (l_errType & SYS_PLL_UNLOCK)
+            sysRefList.push_back( l_chip );
+        if (l_errType & PCI_PLL_UNLOCK)
+            pciList.push_back( l_chip );
+        if (l_errType & SYS_OSC_FAILOVER)
+            mfFoList.push_back( l_chip );
+        if (l_errType & PCI_OSC_FAILOVER)
+            sysRefFoList.push_back( l_chip );
+
+
+    } // end for each chip in domain
 
     // Remove all non-functional chips.
-    for ( NonFuncChips::iterator i = nfchips.begin(); i != nfchips.end(); i++ )
+    for (  auto i : nfchips )
     {
-        systemPtr->RemoveStoppedChips( (*i)->getTrgt() );
+        systemPtr->RemoveStoppedChips( i->getTrgt() );
     }
+
+    // TODO: RTC 155673 - use attributes to callout active clock sources
+    // For Nimbus sys ref and mf ref clock source is the same
 
     // always suspect the clock source
     closeClockSource.Resolve(serviceData);
@@ -168,59 +191,142 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         farClockSource.Resolve(serviceData);
     }
 
-    const uint32_t tmpCount = serviceData.service_data->getMruListSize();
-
-    // If only one detected the error, add it to the callout list.
-    if ( 1 == count )
+    if (sysRefList.size() > 0 || pciList.size() > 0)
     {
-        // Call this chip's CalloutPll plugin if it exists.
-        ExtensibleChipFunction * l_callout =
-                chip()[0]->getExtensibleFunction( "CalloutPll", true );
-        if ( NULL != l_callout )
+        iv_threshold.Resolve(serviceData);
+    }
+
+    if (sysRefList.size() > 0 )
+    {
+         // Test for threshold
+        if(serviceData.service_data->IsAtThreshold())
         {
-            (*l_callout)( chip()[0],
-                PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
+            mskErrType |= SYS_PLL_UNLOCK;
         }
 
-        // If CalloutPll plugin does not add anything new to the callout
-        // list, callout this chip
-        if ( tmpCount == serviceData.service_data->getMruListSize() )
+        // Set Signature
+        serviceData.service_data->GetErrorSignature()->
+            setChipId(sysRefList[0]->getHuid());
+        serviceData.service_data->SetErrorSig( PRDFSIG_PLL_ERROR );
+
+        // If only one detected sys ref error, add it to the callout list.
+        if (sysRefList.size() == 1)
         {
-            // No additional callouts were made so add this chip to the list.
-            serviceData.service_data->SetCallout( chip()[0]->getTrgt());
+            const uint32_t tmpCount =
+                serviceData.service_data->getMruListSize();
+
+            // Call this chip's CalloutPll plugin if it exists.
+            ExtensibleChipFunction * l_callout =
+                    sysRefList[0]->getExtensibleFunction( "CalloutPll", true );
+            if ( NULL != l_callout )
+            {
+                (*l_callout)( sysRefList[0],
+                    PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
+            }
+
+            // If CalloutPll plugin does not add anything new to the callout
+            // list, callout this chip
+            if ( tmpCount == serviceData.service_data->getMruListSize() )
+            {
+                // No additional callouts were made so add this chip to the list
+                serviceData.service_data->SetCallout( sysRefList[0]->getTrgt());
+            }
         }
     }
 
-    iv_threshold.Resolve(serviceData);
-
-    // Test for threshold
-    if(serviceData.service_data->IsAtThreshold())
+    if (pciList.size() > 0)
     {
-        // Mask in all chips in domain
+        // Test for threshold
+        if(serviceData.service_data->IsAtThreshold())
+        {
+            mskErrType |= PCI_PLL_UNLOCK;
+        }
+
+        // Set Signature
+        serviceData.service_data->GetErrorSignature()->
+            setChipId(pciList[0]->getHuid());
+        serviceData.service_data->SetErrorSig( PRDFSIG_PLL_ERROR );
+
+        // If only one detected sys ref error, add it to the callout list.
+        if (pciList.size() == 1)
+        {
+            const uint32_t tmpCount =
+                serviceData.service_data->getMruListSize();
+
+            // Call this chip's CalloutPll plugin if it exists.
+            ExtensibleChipFunction * l_callout =
+                    pciList[0]->getExtensibleFunction( "CalloutPll", true );
+            if ( NULL != l_callout )
+            {
+                (*l_callout)( pciList[0],
+                    PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
+            }
+
+            // If CalloutPll plugin does not add anything new to the callout
+            // list, callout this chip
+            if ( tmpCount == serviceData.service_data->getMruListSize() )
+            {
+                // No additional callouts were made so add this chip to the list
+                serviceData.service_data->SetCallout( sysRefList[0]->getTrgt());
+            }
+        }
+
+    }
+
+    // TODO: RTC 155673 - Handle redundant Osc failovers
+    // Shouldn't see these on nimbus
+    if (mfFoList.size() > 0)
+    {
+        PRDF_ERR( PRDF_FUNC "Unexpected PCI osc failover detected" );
+        mskErrType |= PCI_OSC_FAILOVER;
+        serviceData.service_data->SetCallout( NextLevelSupport_ENUM, MRU_LOW );
+    }
+    if (sysRefFoList.size() > 0)
+    {
+        PRDF_ERR( PRDF_FUNC "Unexpected Sys osc failover detected" );
+        mskErrType |= SYS_OSC_FAILOVER;
+        serviceData.service_data->SetCallout( NextLevelSupport_ENUM, MRU_LOW );
+    }
+
+    if (serviceData.service_data->IsAtThreshold())
+    {
+        // Mask appropriate errors on all chips in domain
         ExtensibleDomainFunction * l_mask =
                             getExtensibleFunction("MaskPll");
         (*l_mask)(this,
-              PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
+              PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, uint32_t>
+                  (serviceData, mskErrType));
     }
-    // Set Signature
-    serviceData.service_data->GetErrorSignature()->
-        setChipId(chip()[0]->getHuid());
-    serviceData.service_data->SetErrorSig( PRDFSIG_PLL_ERROR );
 
-#ifndef __HOSTBOOT_MODULE
-    // Set dump flag dg09a
-    serviceData.service_data->SetDump(iv_dumpContent,chip()[0]->getTrgt());
-#endif
-
-    // Clear PLLs from this domain.
-    ExtensibleDomainFunction * l_clear = getExtensibleFunction("ClearPll");
-    (*l_clear)(this,
-               PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
-
-    // Run any PLL Post Analysis functions from this domain.
-    for(int i = 0; i < count; i++)
+    // Run PLL Post Analysis on any analyzed chips in this domain.
+    for(auto l_chip : sysRefList)
     {
-        ExtensibleChip * l_chip = chip()[i];
+        // Send any special messages indicating there was a PLL error.
+        ExtensibleChipFunction * l_pllPostAnalysis =
+                l_chip->getExtensibleFunction("PllPostAnalysis", true);
+        (*l_pllPostAnalysis)(l_chip,
+                PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
+    }
+
+    for(auto l_chip : pciList)
+    {
+        // Send any special messages indicating there was a PLL error.
+        ExtensibleChipFunction * l_pllPostAnalysis =
+                l_chip->getExtensibleFunction("PllPostAnalysis", true);
+        (*l_pllPostAnalysis)(l_chip,
+                PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
+    }
+
+    for(auto l_chip : mfFoList)
+    {
+        // Send any special messages indicating there was a PLL error.
+        ExtensibleChipFunction * l_pllPostAnalysis =
+                l_chip->getExtensibleFunction("PllPostAnalysis", true);
+        (*l_pllPostAnalysis)(l_chip,
+                PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
+    }
+    for(auto l_chip : sysRefFoList)
+    {
         // Send any special messages indicating there was a PLL error.
         ExtensibleChipFunction * l_pllPostAnalysis =
                 l_chip->getExtensibleFunction("PllPostAnalysis", true);
@@ -278,7 +384,8 @@ PRDF_PLUGIN_DEFINE( PllDomain, ClearPll );
 //------------------------------------------------------------------------------
 
 int32_t PllDomain::MaskPll( ExtensibleDomain * i_domain,
-                            STEP_CODE_DATA_STRUCT & i_sc )
+                            STEP_CODE_DATA_STRUCT & i_sc,
+                            uint32_t i_errType )
 {
     PllDomain * l_domain = (PllDomain *) i_domain;
 
@@ -289,7 +396,8 @@ int32_t PllDomain::MaskPll( ExtensibleDomain * i_domain,
         ExtensibleChipFunction * l_mask =
                             l_chip->getExtensibleFunction("MaskPll");
         (*l_mask)( l_chip,
-                   PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
+            PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, uint32_t>
+                (i_sc, i_errType) );
     }
 
     // Mask children domains.
@@ -300,7 +408,8 @@ int32_t PllDomain::MaskPll( ExtensibleDomain * i_domain,
         ExtensibleDomainFunction * l_mask =
                                 (i->second)->getExtensibleFunction("MaskPll");
         (*l_mask)( i->second,
-                   PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
+            PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, uint32_t>
+                (i_sc, i_errType) );
     }
 
     return SUCCESS;
