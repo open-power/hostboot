@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -299,7 +299,8 @@ class ExprOp1 : public Expr
         int output(FILE * i_file)
             {
                 PRDR_FWRITE(&cv_op, 1, 1, i_file);
-                cv_arg->output(i_file);
+                if (NULL != cv_arg)
+                    cv_arg->output(i_file);
 
                 return 0;
             };
@@ -338,8 +339,10 @@ class ExprOp2 : public Expr
         int output(FILE * i_file)
             {
                 PRDR_FWRITE(&cv_op, 1, 1, i_file);
-                cv_arg[0]->output(i_file);
-                cv_arg[1]->output(i_file);
+                if (NULL != cv_arg[0])
+                    cv_arg[0]->output(i_file);
+                if (NULL != cv_arg[1])
+                    cv_arg[1]->output(i_file);
 
                 return 0;
             };
@@ -665,6 +668,7 @@ class ExprAct_Thresh : public Expr
         {
             cv_thresholdTime[0] = i_fieldTime;
             cv_thresholdTime[1] = i_mfgTime;
+            cv_3 = 0;
         };
 
         int output(FILE * i_file)

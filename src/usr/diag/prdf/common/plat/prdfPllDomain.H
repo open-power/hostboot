@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -139,10 +139,12 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain,
      *         domain and its subdomains.
      * @param  i_domain The target PLL domain.
      * @param  i_sc The step code data struct.
+     * @param  i_errType type of PLL error needing masking
      * @return SUCCESS
      */
     static int32_t MaskPll( ExtensibleDomain * i_domain,
-                            STEP_CODE_DATA_STRUCT & i_sc );
+                            STEP_CODE_DATA_STRUCT & i_sc,
+                            uint32_t i_errType );
 
     /**
      * @brief  Domain level plugin function used to mask PLL attentions in a
