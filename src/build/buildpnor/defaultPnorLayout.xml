@@ -246,4 +246,12 @@ Layout Description
         <side>sideless</side>
         <ecc/>
     </section>
+  <section>
+        <description>OCC Lid (1.125M)</description>
+        <eyeCatch>OCC</eyeCatch>
+        <physicalOffset>0x2AD3000</physicalOffset>
+        <physicalRegionSize>0x120000</physicalRegionSize>
+        <side>sideless</side>
+        <ecc/>
+    </section>
 </pnor>

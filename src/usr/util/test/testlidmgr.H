@@ -77,7 +77,7 @@ public:
             }
 
             PNOR::SectionInfo_t l_lidPnorInfo;
-            l_errl = PNOR::getSectionInfo(PNOR::TEST, l_lidPnorInfo);
+            l_errl = PNOR::getSectionInfo(PNOR::TESTRO, l_lidPnorInfo);
             if(l_errl)
             {
                 errlCommit(l_errl,UTIL_COMP_ID);

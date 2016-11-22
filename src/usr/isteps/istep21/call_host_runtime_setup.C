@@ -28,6 +28,7 @@
 #include <initservice/isteps_trace.H>
 #include <isteps/hwpisteperror.H>
 #include <isteps/istep_reasoncodes.H>
+#include <isteps/pm/pm_common_ext.H>
 #include <initservice/initserviceif.H>
 #include <initservice/istepdispatcherif.H>
 #include <vfs/vfs.H>
@@ -144,23 +145,32 @@ void* call_host_runtime_setup (void *io_pArgs)
 
         } // end if phyp load
 
-
-        bool l_activateOCC = TARGETING::is_avp_load();
-
 #ifdef CONFIG_START_OCC_DURING_BOOT
-        l_activateOCC = true;
+        bool l_activatePM = true;
+#else
+        bool l_activatePM = !(TARGETING::is_phyp_load());
 #endif
-        if(l_activateOCC)
+
+        if(l_activatePM)
         {
-#if 0 //@TODO-RTC:159931-Start OCC during boot
-            l_err = HBOCC::activateOCCs();
+            l_err = HBPM::loadPMAll(HBPM::PM_LOAD);
             if (l_err)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "activateOCCs failed");
-                break;
+                       "loadPMAll failed");
+
+                // Commit the error and continue with the istep
+                errlCommit(l_err, ISTEP_COMP_ID);
             }
-#endif
+            l_err = HBPM::startPMAll();
+            if (l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "startPMAll failed");
+
+                // Commit the error and continue with the istep
+                errlCommit(l_err, ISTEP_COMP_ID);
+            }
         }
 
 #if 0 //@TODO-RTC:164022-Support max pstate without OCC

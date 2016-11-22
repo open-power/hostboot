@@ -54,6 +54,8 @@ namespace RUNTIME
         MOD_CUST_COMP_NON_PHYP_RT_TARGET = 0x12,
         MOD_CUST_CONF_HBRT_HYP_IDS       = 0x13,
         MOD_POPULATE_RTDATABYNODE        = 0x14,  /**< populate_hbruntime.C */
+
+        MOD_PM_RT_LOAD_PM_COMPLEX        = 0x15,  /**< rt_pm.C */
     };
 
     enum RuntimeReasonCode
@@ -87,6 +89,7 @@ namespace RUNTIME
         RT_TARGET_TYPE_NOT_SUPPORTED = RUNTIME_COMP_ID | 0x1A,
         RT_NO_PROC_TARGET            = RUNTIME_COMP_ID | 0x1B,
         RC_UNMAP_FAIL                = RUNTIME_COMP_ID | 0x1C,
+        RC_PM_RT_UNKNOWN_MODE        = RUNTIME_COMP_ID | 0x1D,
     };
 
     enum UserDetailsTypes
