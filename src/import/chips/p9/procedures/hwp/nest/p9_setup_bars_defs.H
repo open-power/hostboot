@@ -303,6 +303,11 @@ struct p9_setup_bars_addr_range
 // MCD
 //
 
+const uint32_t MCD_RECOVERY_PACE_RATE = 0x5;
+const uint32_t MCD_RECOVERY_RTY_COUNT = 0xF;
+const uint32_t MCD_RECOVERY_VG_COUNT = 0x7FFF;
+const uint32_t MCD_VGC_AVAIL_GROUPS = 0xFFFF;
+
 const uint64_t MCD_FIR_ACTION0 = 0x0000000000000000ULL;
 const uint64_t MCD_FIR_ACTION1 = 0x8030000000000000ULL;
 const uint64_t MCD_FIR_MASK    = 0x4C40000000000000ULL;
