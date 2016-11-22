@@ -43,8 +43,8 @@ mutex_t UtilLidMgr::cv_mutex = MUTEX_INITIALIZER;
 UtilLidMgr::UtilLidMgr(uint32_t i_lidId)
 : iv_needUnlock(false)
 ,iv_queueRegistered(false)
-,iv_HbMsgQ(NULL)
-,iv_pLidImage(NULL)
+,iv_HbMsgQ(nullptr)
+,iv_pLidImage(nullptr)
 ,iv_lidImageSize(0)
 ,iv_lidSize(0)
 {
@@ -56,7 +56,7 @@ UtilLidMgr::UtilLidMgr(uint32_t i_lidId)
 ///////////////////////////////////////////////////////////
 UtilLidMgr::~UtilLidMgr()
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     l_err = cleanup();
     if(l_err)
@@ -70,7 +70,7 @@ UtilLidMgr::~UtilLidMgr()
 ///////////////////////////////////////////////////////////
 errlHndl_t UtilLidMgr::getLidSize(size_t& o_lidSize)
 {
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
     o_lidSize = 0;
     bool img_in_pnor = false;
     do{
@@ -141,7 +141,7 @@ errlHndl_t UtilLidMgr::getLidSize(size_t& o_lidSize)
                                           HWAS::SRCI_PRIORITY_MED);
                 // for a syncronous message we need to free the message
                 msg_free( l_pMsg );
-                l_pMsg = NULL;
+                l_pMsg = nullptr;
                 break;
             }
 
@@ -152,7 +152,7 @@ errlHndl_t UtilLidMgr::getLidSize(size_t& o_lidSize)
 
             // for a syncronous message we need to free the message
             msg_free( l_pMsg );
-            l_pMsg = NULL;
+            l_pMsg = nullptr;
         }
 
     }while(0);
@@ -164,8 +164,8 @@ errlHndl_t UtilLidMgr::getLidSize(size_t& o_lidSize)
 ///////////////////////////////////////////////////////////
 errlHndl_t UtilLidMgr::getLidSizePnor(size_t& o_lidSize, bool& o_imgInPnor)
 {
-    errlHndl_t errl = NULL;
-    const char * lidAddr = NULL;
+    errlHndl_t errl = nullptr;
+    const char * lidAddr = nullptr;
 
     o_lidSize = 0;
     o_imgInPnor = false;
@@ -184,7 +184,7 @@ errlHndl_t UtilLidMgr::getLidSizePnor(size_t& o_lidSize, bool& o_imgInPnor)
             {
                 //Lid not in extended image
                 delete errl;
-                errl = NULL;
+                errl = nullptr;
                 break;
             }
 
@@ -216,8 +216,8 @@ errlHndl_t UtilLidMgr::getLidPnor(void* i_dest,
                                   size_t i_destSize,
                                   bool& o_imgInPnor)
 {
-    errlHndl_t errl = NULL;
-    const char * lidAddr = NULL;
+    errlHndl_t errl = nullptr;
+    const char * lidAddr = nullptr;
     size_t lidSize = 0;
 
     o_imgInPnor = false; //assume not found to start.
@@ -240,7 +240,7 @@ errlHndl_t UtilLidMgr::getLidPnor(void* i_dest,
                 {
                     //Lid not in extended image
                     delete errl;
-                    errl = NULL;
+                    errl = nullptr;
                     break;
                 }
             }
@@ -327,13 +327,13 @@ errlHndl_t UtilLidMgr::getLidPnor(void* i_dest,
 ///////////////////////////////////////////////////////////
 errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
 {
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
     uint32_t curLid = 0;
     uint16_t pageNumber = 0;
     size_t dataSize = 0;
     size_t transferred_data = 0;
-    uint8_t* dataPtr = NULL;
-    void* copyOffset = NULL;
+    uint8_t* dataPtr = nullptr;
+    void* copyOffset = nullptr;
     bool img_in_pnor = false;
 
     do{
@@ -406,7 +406,7 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
 
                 // for a syncronous message we need to free the message
                 msg_free( l_pMsg );
-                l_pMsg = NULL;
+                l_pMsg = nullptr;
                 break;
             }
 
@@ -427,7 +427,7 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
                     dataPtr = reinterpret_cast<uint8_t *> (l_pMsg->extra_data);
 
                     if((curLid != iv_lidId) ||
-                       (NULL == dataPtr))
+                       (nullptr == dataPtr))
                     {
                         UTIL_FT(ERR_MRK"getLid: rc 0x%x received from FSP for Sync to HB request",
                                 return_code );
@@ -447,7 +447,7 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
                                              TWO_UINT32_TO_UINT64(curLid,
                                                                   iv_lidId),
                                              TWO_UINT32_TO_UINT64(
-                                                NULL != dataPtr ? *(dataPtr) : 0,
+                                                nullptr != dataPtr?*(dataPtr):0,
                                                                   0)
                                              );
 
@@ -455,7 +455,7 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
                                                   HWAS::SRCI_PRIORITY_HIGH);
 
                         free(l_pMsg->extra_data);
-                        l_pMsg->extra_data = NULL;
+                        l_pMsg->extra_data = nullptr;
                         break;
                     }
 
@@ -488,7 +488,7 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
                                              );
 
                         free(l_pMsg->extra_data);
-                        l_pMsg->extra_data = NULL;
+                        l_pMsg->extra_data = nullptr;
                         break;
 
                     }
@@ -500,7 +500,7 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
                     transferred_data+=dataSize;
 
                     free(l_pMsg->extra_data);
-                    l_pMsg->extra_data = NULL;
+                    l_pMsg->extra_data = nullptr;
 
 
                 } //if UTILLID::PAGE_TO_HB
@@ -549,9 +549,9 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
 errlHndl_t UtilLidMgr::getStoredLidImage(void*& o_pLidImage,
                                          size_t& o_lidImageSize)
 {
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
 
-    if((iv_pLidImage != NULL) && (iv_lidImageSize != 0))
+    if((iv_pLidImage != nullptr) && (iv_lidImageSize != 0))
     {
         o_pLidImage = iv_pLidImage;
         o_lidImageSize = iv_lidImageSize;
@@ -563,9 +563,9 @@ errlHndl_t UtilLidMgr::getStoredLidImage(void*& o_pLidImage,
             errl = getLidSize(iv_lidImageSize);
         }
 
-        if(errl != NULL)
+        if(errl == nullptr)
         {
-            if(iv_pLidImage != NULL)
+            if(iv_pLidImage != nullptr)
             {
                 free(iv_pLidImage);
             }
@@ -601,7 +601,7 @@ errlHndl_t UtilLidMgr::releaseLidImage(void)
 errlHndl_t UtilLidMgr::sendMboxMessage( MBOX_MSG_TYPE type,
                                         msg_t * i_msg )
 {
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
 
     UTIL_DT("type:  0x%04x",   i_msg->type );
     UTIL_DT("data0: 0x%016llx",i_msg->data[0] );
@@ -628,7 +628,7 @@ errlHndl_t UtilLidMgr::sendMboxMessage( MBOX_MSG_TYPE type,
 
         // if the send failed and the message is still valid, check
         // and free the extra data if it exists.
-        if( i_msg != NULL && i_msg->extra_data != NULL )
+        if( i_msg != nullptr && i_msg->extra_data != nullptr )
         {
             free( i_msg->extra_data );
         }
@@ -642,7 +642,7 @@ errlHndl_t UtilLidMgr::sendMboxMessage( MBOX_MSG_TYPE type,
 ///////////////////////////////////////////////////////////
 errlHndl_t UtilLidMgr::createMsgQueue()
 {
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
 
     mutex_lock(&cv_mutex);
     iv_needUnlock = true;
@@ -689,7 +689,7 @@ void UtilLidMgr::unregisterMsgQueue()
 ///////////////////////////////////////////////////////////
 errlHndl_t UtilLidMgr::cleanup()
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     iv_lidSize = 0;
 
@@ -737,10 +737,10 @@ errlHndl_t UtilLidMgr::cleanup()
         }
     }
 
-    if(iv_pLidImage != NULL)
+    if(iv_pLidImage != nullptr)
     {
         free(iv_pLidImage);
-        iv_pLidImage = NULL;
+        iv_pLidImage = nullptr;
     }
 
     iv_lidImageSize = 0;
@@ -752,7 +752,7 @@ errlHndl_t UtilLidMgr::cleanup()
 ///////////////////////////////////////////////////////////
 errlHndl_t UtilLidMgr::setLidId(uint32_t i_lidId)
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     //must call cleanup before updateLid
     l_err = cleanup();

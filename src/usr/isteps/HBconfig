@@ -10,7 +10,7 @@ config SET_NOMINAL_PSTATE
         Set the PState to Nominal just before starting the payload.
 
 config START_OCC_DURING_BOOT
-    default n
+    default y
     help
         Activates all the OCCs during IPL
 

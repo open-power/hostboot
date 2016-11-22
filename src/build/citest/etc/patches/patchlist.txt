@@ -4,3 +4,8 @@ Brief description of the problem or reason for patch
 -CMVC: Defect/Req for checking the changes into fips810
 -Files: list of files
 -Coreq: list of associated changes, e.g. workarounds.presimsetup
+
+L3_0 PURGE REGISTER action in p9n.act uses the wrong register number
+-RTC: 165868
+-Files: p9n.act
+-Coreq: workarounds.postsimsetup

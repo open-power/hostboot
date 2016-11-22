@@ -29,6 +29,7 @@
 #include <errl/errlentry.H>
 #include <util/utillidmgr.H>
 #include <diag/prdf/prdfWriteHomerFirData.H>
+#include <isteps/pm/pm_common_ext.H>
 
 namespace HBPM
 {
@@ -105,12 +106,12 @@ namespace HBPM
      *
      * @param[in] i_target:         Target processor
      * @param[in] i_pImageOut:      Pointer to HOMER image buffer
-     * @param[in] i_mode            Selects initial load vs concurrent reloads
+     * @param[in] i_mode            Selects initial load vs concurrent reload
      * @return errlHndl_t  Error log if loadHcode failed
      */
     errlHndl_t loadHcode( TARGETING::Target* i_target,
                           void* i_pImageOut,
-                          uint32_t i_mode );
+                          loadPmMode i_mode );
 
     /**
      * @brief Execute procedures and steps required to setup for loading
@@ -139,29 +140,51 @@ namespace HBPM
      *                                 proc's OCC image in the homer
      * @param[in] i_occImgVaddr:    Virtual address of current
      *                                 proc's OCC image in the homer
-     * @param[in] i_mode            Selects initial load vs concurrent reloads
+     * @param[in] i_mode            Selects initial load vs concurrent reload
      * @return errlHndl_t  Error log if loadOCCImageToHomer failed
      */
     errlHndl_t loadOCCImageToHomer(TARGETING::Target* i_target,
                                    uint64_t i_occImgPaddr,
                                    uint64_t i_occImgVaddr,
-                                   uint32_t i_mode);
+                                   loadPmMode i_mode);
+
+    /**
+     * @brief Load PM Complex.
+     *
+     * @param[in] i_target:         Target of processor
+     * @param[in] i_homerPhysAddr:  Homer physical address
+     * @param[in] i_commonPhysAddr: OCC common area physical address
+     * @param[in] i_mode:           Load / Reload
+     *      LOAD == i_mode
+     *       - Call pm_reset first
+     *       - Load OCC lid, write OCC config data, build Pstate
+     *         Parameter Blocks, and load Hcode reference image lid
+     *      RELOAD == i_mode
+     *       - Reload OCC lid, rewrite OCC config data, build Pstate
+     *         Parameter Blocks, and rebuild Hcode
+     *
+     * @return errlHndl_t  Error log if loadPMComplex failed
+     */
+    errlHndl_t loadPMComplex(TARGETING::Target * i_target,
+                             uint64_t i_homerPhysAddr,
+                             uint64_t i_commonPhysAddr,
+                             loadPmMode i_mode);
 
     /**
      * @brief Start PM Complex.
      *
      * @param[in] i_target:    target of processor
      *
-     * @return errlHndl_t  Error log of startPMComplex failed
+     * @return errlHndl_t  Error log if startPMComplex failed
      */
-    errlHndl_t startPMComplex (TARGETING::Target* i_target);
+    errlHndl_t startPMComplex(TARGETING::Target* i_target);
 
     /**
      * @brief Reset PM Complex.
      *
      * @param[in] i_target:    target of processor
      *
-     * @return errlHndl_t  Error log of resetPMComplex failed
+     * @return errlHndl_t  Error log if resetPMComplex failed
      */
     errlHndl_t resetPMComplex(TARGETING::Target * i_target);
 

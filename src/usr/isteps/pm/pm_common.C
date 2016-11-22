@@ -26,7 +26,6 @@
 #include    <stdint.h>
 
 #include    <pm/pm_common.H>
-#include    <isteps/pm/pm_common_ext.H>
 
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
@@ -110,9 +109,9 @@ namespace HBPM
             (i_proc_target->getAttr<ATTR_HOMER_VIRT_ADDR>());
 
         if((i_proc_target->getAttr<ATTR_HOMER_PHYS_ADDR>() != i_phys_addr) ||
-            (NULL == l_virt_addr))
+            (nullptr == l_virt_addr))
         {
-            if(NULL != l_virt_addr)
+            if(nullptr != l_virt_addr)
             {
                 rc = HBPM_UNMAP(l_virt_addr);
 
@@ -123,7 +122,7 @@ namespace HBPM
                               "unmap_phys_mem failed, rc=0x%0X",
                               rc);
 
-                    l_virt_addr = NULL;
+                    l_virt_addr = nullptr;
                 }
             }
 
@@ -152,10 +151,10 @@ namespace HBPM
                                      void* i_homer)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   ENTER_MRK"pstateParameterBuild(%p)",
+                   ENTER_MRK"pstateParameterBuild(HOMER:%p)",
                    i_homer);
 
-        errlHndl_t l_errl = NULL;
+        errlHndl_t l_errl = nullptr;
 
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
@@ -195,61 +194,59 @@ namespace HBPM
                                     void* i_occHostDataVirtAddr)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   ENTER_MRK"loadHostDataToHomer(%p)",
-                   i_occHostDataVirtAddr);
+                   ENTER_MRK"loadHostDataToHomer(OccHostDataV:%p)",
+                   i_occHostDataVirtAddr );
 
-        errlHndl_t l_errl = NULL;
+        errlHndl_t l_errl = nullptr;
 
         //Treat virtual address as starting pointer
         //for config struct
-        HBPM::occHostConfigDataArea_t * config_data =
-            reinterpret_cast<HBPM::occHostConfigDataArea_t *>
+        occHostConfigDataArea_t * l_config_data =
+            reinterpret_cast<occHostConfigDataArea_t *>
             (i_occHostDataVirtAddr);
 
         // Get top level system target
         TARGETING::TargetService & tS = TARGETING::targetService();
-        TARGETING::Target * sysTarget = NULL;
+        TARGETING::Target * sysTarget = nullptr;
         tS.getTopLevelTarget( sysTarget );
-        assert( sysTarget != NULL );
+        assert( sysTarget != nullptr );
 
-        uint32_t nestFreq =  sysTarget->getAttr<ATTR_FREQ_PB_MHZ>();
-
-        config_data->version = HBPM::OccHostDataVersion;
-        config_data->nestFrequency = nestFreq;
+        l_config_data->version = OccHostDataVersion;
+        l_config_data->nestFrequency = sysTarget->getAttr<ATTR_FREQ_PB_MHZ>();
 
         // Figure out the interrupt type
         if( INITSERVICE::spBaseServicesEnabled() )
         {
-            config_data->interruptType = USE_FSI2HOST_MAILBOX;
+            l_config_data->interruptType = USE_FSI2HOST_MAILBOX;
         }
         else
         {
-            config_data->interruptType = USE_PSIHB_COMPLEX;
+            l_config_data->interruptType = USE_PSIHB_COMPLEX;
         }
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
         // Figure out the FIR master
-        TARGETING::Target* masterproc = NULL;
+        TARGETING::Target* masterproc = nullptr;
         tS.masterProcChipTargetHandle( masterproc );
         if( masterproc == i_proc )
         {
-            config_data->firMaster = IS_FIR_MASTER;
+            l_config_data->firMaster = IS_FIR_MASTER;
 
             // TODO: RTC 124683 The ability to write the HOMER data
             //        is currently not available at runtime.
 #ifndef __HOSTBOOT_RUNTIME
-            l_errl = PRDF::writeHomerFirData( config_data->firdataConfig,
+            l_errl = PRDF::writeHomerFirData( l_config_data->firdataConfig,
                                           sizeof(config_data->firdataConfig) );
 #endif
 
         }
         else
         {
-            config_data->firMaster = NOT_FIR_MASTER;
+            l_config_data->firMaster = NOT_FIR_MASTER;
         }
 
 #else
-        config_data->firMaster = 0;
+        l_config_data->firMaster = 0;
 #endif
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -264,15 +261,14 @@ namespace HBPM
      */
     errlHndl_t loadHcode( TARGETING::Target* i_target,
                           void* i_pImageOut,
-                          uint32_t i_mode )
+                          loadPmMode i_mode )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   ENTER_MRK"loadHcode(0x%08X, %p, %d)",
-                   get_huid(i_target),
-                   i_pImageOut,
-                   i_mode);
+                   ENTER_MRK"loadHcode(HUID:0x%08X, Image:%p, Mode:%s)",
+                   get_huid(i_target), i_pImageOut,
+                   (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
 
-        errlHndl_t l_errl = NULL;
+        errlHndl_t l_errl = nullptr;
 
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
@@ -293,13 +289,13 @@ namespace HBPM
                 g_pHcodeLidMgr = std::shared_ptr<UtilLidMgr>
                                  (new UtilLidMgr(l_lidId));
             }
-            void* l_pImageIn = NULL;
+            void* l_pImageIn = nullptr;
             size_t l_lidImageSize = 0;
 
             // NOTE: Ideally, there would also be a check to determine if LID
             //       manager already got the new LID, but the currently
             //       available information does not make it possible to do that.
-            if(HBRT_PM_RELOAD == i_mode)
+            if(PM_RELOAD == i_mode)
             {
                 // When reloading, release LID image so any update is used
                 l_errl = g_pHcodeLidMgr->releaseLidImage();
@@ -347,8 +343,8 @@ namespace HBPM
                              l_fapiTarg,
                              l_pImageIn, //reference image
                              i_pImageOut, //homer image buffer
-                             NULL, //default is no ring overrides
-                             (HBRT_PM_LOAD == i_mode)
+                             nullptr, //default is no ring overrides
+                             (PM_LOAD == i_mode)
                                  ? PHASE_IPL : PHASE_REBUILD,
                              l_imgType,
                              l_buffer0,
@@ -462,11 +458,13 @@ namespace HBPM
                             uint64_t i_occImgVaddr, // dest
                             uint64_t i_commonPhysAddr)
     {
-        errlHndl_t l_errl = NULL;
-
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   ENTER_MRK"loadOCCSetup(0x%08X, 0x%08X, 0x%08X)",
-                        i_occImgPaddr, i_occImgVaddr, i_commonPhysAddr);
+                   ENTER_MRK"loadOCCSetup"
+                   "(OccP:0x%08X, OccV:0x%08X, CommonP:0x%08X)",
+                   i_occImgPaddr, i_occImgVaddr, i_commonPhysAddr );
+
+        errlHndl_t l_errl = nullptr;
+
         do{
             // cast OUR type of target to a FAPI type of target.
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
@@ -509,7 +507,7 @@ namespace HBPM
 
             // BAR2 is the OCC Common Area
             // Bar size is in MB
-            TARGETING::Target* sys = NULL;
+            TARGETING::Target* sys = nullptr;
             TARGETING::targetService().getTopLevelTarget(sys);
             sys->setAttr<ATTR_OCC_COMMON_AREA_PHYS_ADDR>(i_commonPhysAddr);
 
@@ -554,40 +552,41 @@ namespace HBPM
     errlHndl_t loadOCCImageToHomer(TARGETING::Target* i_target,
                                    uint64_t i_occImgPaddr,
                                    uint64_t i_occImgVaddr, // dest
-                                   uint32_t i_mode)
+                                   loadPmMode i_mode)
     {
-        errlHndl_t l_errl = NULL;
-
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   ENTER_MRK"loadOCCImageToHomer(0x%08X, 0x%08X)",
+                   ENTER_MRK"loadOCCImageToHomer(OccP:0x%08X, OccV:0x%08X)",
                    i_occImgPaddr, i_occImgVaddr);
+
+        errlHndl_t l_errl = nullptr;
+
         do{
             if(g_pOccLidMgr.get() == nullptr)
             {
                 g_pOccLidMgr = std::shared_ptr<UtilLidMgr>
                                (new UtilLidMgr(Util::OCC_LIDID));
             }
-            void* l_pLidImage = NULL;
+            void* l_pLidImage = nullptr;
             size_t l_lidImageSize = 0;
 
             // NOTE: Ideally, there would also be a check to determine if LID
             //       manager already got the new LID, but the currently
             //       available information does not make it possible to do that.
-            if(HBRT_PM_RELOAD == i_mode)
+            if(PM_RELOAD == i_mode)
             {
                 // When reloading, release LID image so any update is used
                 l_errl = g_pOccLidMgr->releaseLidImage();
-            }
 
-            if (l_errl)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"loadOCCImageToHomer: "
-                           "release stored LID image failed!");
-                l_errl->collectTrace("ISTEPS_TRACE",256);
-                l_errl->collectTrace(FAPI_TRACE_NAME,256);
-                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-                break;
+                if (l_errl)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            ERR_MRK"loadOCCImageToHomer: "
+                            "release stored LID image failed!");
+                    l_errl->collectTrace("ISTEPS_TRACE",256);
+                    l_errl->collectTrace(FAPI_TRACE_NAME,256);
+                    l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+                    break;
+                }
             }
 
             l_errl = g_pOccLidMgr->getStoredLidImage(l_pLidImage,
@@ -603,10 +602,10 @@ namespace HBPM
                 break;
             }
 
-            void* occVirt = reinterpret_cast<void *>(i_occImgVaddr);
+            void* l_occVirt = reinterpret_cast<void *>(i_occImgVaddr);
 
             // copy LID to Homer
-            memcpy(occVirt, l_pLidImage, l_lidImageSize);
+            memcpy(l_occVirt, l_pLidImage, l_lidImageSize);
         }while(0);
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -617,13 +616,143 @@ namespace HBPM
 
 
     /**
+     *  @brief Load OCC/HCODE images into mainstore
+     */
+    errlHndl_t loadPMComplex(TARGETING::Target * i_target,
+                             uint64_t i_homerPhysAddr,
+                             uint64_t i_commonPhysAddr,
+                             loadPmMode i_mode)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   ENTER_MRK"loadPMComplex: %s",
+                   (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
+
+        errlHndl_t l_errl = nullptr;
+
+        do
+        {
+            // Reset the PM complex for LOAD only
+            if( PM_LOAD == i_mode)
+            {
+                l_errl = resetPMComplex(i_target);
+                if( l_errl )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               ERR_MRK"loadPMComplex: "
+                               "reset PM complex failed!" );
+                    break;
+                }
+            }
+
+            void* l_homerVAddr = convertHomerPhysToVirt(i_target,
+                                                        i_homerPhysAddr);
+            if(nullptr == l_homerVAddr)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"loadPMComplex: "
+                           "convertHomerPhysToVirt failed! "
+                           "HOMER_Phys=0x%08X", i_homerPhysAddr );
+                break;
+            }
+
+            uint64_t l_occImgPaddr = i_homerPhysAddr
+                                            + HOMER_OFFSET_TO_OCC_IMG;
+            uint64_t l_occImgVaddr = reinterpret_cast <uint64_t>(l_homerVAddr)
+                                            + HOMER_OFFSET_TO_OCC_IMG;
+
+            l_errl = loadOCCSetup(i_target,
+                                  l_occImgPaddr,
+                                  l_occImgVaddr,
+                                  i_commonPhysAddr);
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"loadPMComplex: "
+                           "loadOCCSetup failed! "
+                           "HUID=0x%08X OCC_Phys=0x%08X "
+                           "OCC_Virt=0x%08X Common_Phys=0x%08X",
+                           get_huid(i_target), l_occImgPaddr,
+                           l_occImgVaddr, i_commonPhysAddr );
+                break;
+            }
+
+            l_errl = loadOCCImageToHomer(i_target,
+                                         l_occImgPaddr,
+                                         l_occImgVaddr,
+                                         i_mode);
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"loadPMComplex: "
+                           "loading OCC failed! "
+                           "HUID=0x08X OCC_Phys=0x%08X "
+                           "OCC_Virt=0x%08X Mode=%s",
+                           get_huid(i_target), l_occImgPaddr, l_occImgVaddr,
+                           (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
+                break;
+            }
+
+            void* l_occDataVaddr = reinterpret_cast <void *>(l_occImgVaddr +
+                                            HOMER_OFFSET_TO_OCC_HOST_DATA);
+
+            l_errl = loadHostDataToHomer(i_target,
+                                         l_occDataVaddr);
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"loadPMComplex: "
+                           "loading Host Data Area failed! "
+                           "HUID=0x08X OCC_Host_Data_Virt=0x%08X",
+                           get_huid(i_target), l_occDataVaddr );
+                break;
+            }
+
+            // @TODO RTC:153885 verify parameters on call
+            l_errl = pstateParameterBuild(i_target,
+                                          l_homerVAddr);
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"loadPMComplex: "
+                           "pstateParameterBuild failed! "
+                           "HUID=0x08X OCC_Virt=0x%08X",
+                           get_huid(i_target), l_occImgVaddr );
+                break;
+            }
+
+            l_errl = loadHcode(i_target,
+                               l_homerVAddr,
+                               i_mode);
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"loadPMComplex: "
+                           "loadHcode failed! "
+                           "HUID=0x08X HOMER_Virt=0x%08X Mode=%s",
+                           get_huid(i_target), l_occImgVaddr,
+                           (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
+                break;
+            }
+
+        } while(0);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   EXIT_MRK"loadPMComplex: RC=0x%X, PLID=0x%lX",
+                   ERRL_GETRC_SAFE(l_errl), ERRL_GETPLID_SAFE(l_errl) );
+
+        return l_errl;
+    }
+
+
+    /**
      * @brief Start PM Complex.
      */
-    errlHndl_t startPMComplex (Target* i_target)
+    errlHndl_t startPMComplex(Target* i_target)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    ENTER_MRK"startPMComplex");
-        errlHndl_t l_errl = NULL;
+
+        errlHndl_t l_errl = nullptr;
 
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
@@ -638,10 +767,12 @@ namespace HBPM
                              l_fapiTarg,
                              p9pm::PM_INIT );
 
-            if ( l_errl != NULL )
+            if ( l_errl != nullptr )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"startPMComplex: p9_pm_init, init failed!" );
+                           ERR_MRK"startPMComplex: "
+                           "p9_pm_init(PM_INIT) failed! "
+                           "HUID=0x08X", get_huid(i_target) );
                 l_errl->collectTrace("ISTEPS_TRACE",256);
 
                 break;
@@ -663,7 +794,8 @@ namespace HBPM
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    ENTER_MRK"resetPMComplex");
-        errlHndl_t l_errl = NULL;
+
+        errlHndl_t l_errl = nullptr;
 
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
@@ -682,7 +814,9 @@ namespace HBPM
             if (l_errl)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"resetPMComplex:p9_pm_init, reset failed!" );
+                           ERR_MRK"resetPMComplex: "
+                           "p9_pm_init(PM_RESET) failed! "
+                           "HUID=0x08X", get_huid(i_target) );
                 l_errl->collectTrace("ISTEPS_TRACE",256);
 
                 break;
@@ -695,6 +829,125 @@ namespace HBPM
                    ERRL_GETRC_SAFE(l_errl), ERRL_GETPLID_SAFE(l_errl) );
         return l_errl;
     } // resetPMComplex
+
+
+    /**
+     *  @brief Load PM complex for all chips
+     */
+    errlHndl_t loadPMAll(loadPmMode i_mode)
+    {
+        errlHndl_t l_errl = nullptr;
+
+        TargetHandleList l_procChips;
+        getAllChips(l_procChips, TYPE_PROC, true);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "loadPMAll: %s %d proc(s) found",
+                   (PM_LOAD == i_mode) ? "LOAD" : "RELOAD",
+                   l_procChips.size() );
+
+        uint64_t l_homerPhysAddr = 0x0;
+        uint64_t l_commonPhysAddr = 0x0;
+
+        for (const auto & l_procChip: l_procChips)
+        {
+            // This attr was set during istep15 HCODE build
+            l_homerPhysAddr =
+                    l_procChip->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
+            l_commonPhysAddr = l_homerPhysAddr + VMM_HOMER_REGION_SIZE;
+
+            l_errl = loadPMComplex(l_procChip,
+                                   l_homerPhysAddr,
+                                   l_commonPhysAddr,
+                                   i_mode);
+            if( l_errl )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"loadPMAll: "
+                           "load PM complex failed!" );
+                break;
+            }
+        }
+
+        return l_errl;
+    } // loadPMAll
+
+
+    /**
+     *  @brief Start PM complex for all chips
+     */
+    errlHndl_t startPMAll()
+    {
+        errlHndl_t l_errl = nullptr;
+
+        TargetHandleList l_procChips;
+        getAllChips(l_procChips, TYPE_PROC, true);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "startPMAll: %d proc(s) found",
+                   l_procChips.size());
+
+        for (const auto & l_procChip: l_procChips)
+        {
+            l_errl = startPMComplex(l_procChip);
+            if( l_errl )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"startPMAll: "
+                           "start PM complex failed!" );
+                break;
+            }
+
+            // RTC 165644 Enable this when readSRAM is available
+            //            Add constants for addr/act/exp values
+            /*
+            // OCC checkpoint
+            l_errl = readSRAM(l_procChip,0xfffbf000,l_buffer);
+            if(((l_buffer.getWord(0)) & 0xFFF) == 0xEFF)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "startPMALL: OCC checkpoint detected" );
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "startPMALL: OCC checkpoint not detected" );
+            }
+            */
+        }
+
+        return l_errl;
+    } // startPMAll
+
+
+    /**
+     *  @brief Reset PM complex for all chips
+     */
+    errlHndl_t resetPMAll()
+    {
+        errlHndl_t l_errl = nullptr;
+
+        TargetHandleList l_procChips;
+        getAllChips(l_procChips, TYPE_PROC, true);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "resetPMAll: %d proc(s) found",
+                   l_procChips.size());
+
+        for (const auto & l_procChip: l_procChips)
+        {
+            l_errl = resetPMComplex(l_procChip);
+            if( l_errl )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"resetPMAll: "
+                           "reset PM complex failed!" );
+                break;
+            }
+        }
+
+        return l_errl;
+    } // resetPMAll
 
 }  // end HBPM namespace
 

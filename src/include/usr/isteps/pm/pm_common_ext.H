@@ -30,6 +30,23 @@
 namespace HBPM
 {
     /**
+     * @brief Enumeration of the load PM complex mode
+     *      LOAD == i_mode
+     *       - Call pm_reset first
+     *       - Load OCC lid, write OCC config data, build Pstate
+     *         Parameter Blocks, and load Hcode reference image lid
+     *      RELOAD == i_mode
+     *       - Reload OCC lid, rewrite OCC config data, build Pstate
+     *         Parameter Blocks, and rebuild Hcode
+     */
+    enum loadPmMode
+    {
+        PM_LOAD         = 0x0,
+        PM_RELOAD       = 0x1,
+        PM_UNKNOWN      = 0xFF,
+    };
+
+    /**
      *  @brief Convert HOMER physical address space to a vitual address
      *  @param[in]  i_proc_target  Processsor target
      *  @param[in]  i_phys_addr    Physical address
@@ -37,6 +54,29 @@ namespace HBPM
      */
     void *convertHomerPhysToVirt( TARGETING::Target* i_proc_target,
                                   uint64_t i_phys_addr);
+
+    /**
+     * @brief Load PM Complex for all proc targets.
+     *
+     * @param[in] i_mode        Load / Reload
+     *
+     * @return errlHndl_t  Error log of loadPMAll failed
+     */
+    errlHndl_t loadPMAll(loadPmMode i_mode);
+
+    /**
+     * @brief Start PM Complex for all proc targets.
+     *
+     * @return errlHndl_t  Error log if startPMAll failed
+     */
+    errlHndl_t startPMAll();
+
+    /**
+     * @brief Reset PM Complex for all proc targets.
+     *
+     * @return errlHndl_t  Error log if resetPMAll failed
+     */
+    errlHndl_t resetPMAll();
 
 } //namespace HBPM ends
 

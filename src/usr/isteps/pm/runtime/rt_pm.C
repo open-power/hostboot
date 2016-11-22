@@ -36,6 +36,7 @@
 
 #include <runtime/interface.h>
 #include <runtime/rt_targeting.H>
+#include <runtime/runtime_reasoncodes.H>
 
 #include <initservice/isteps_trace.H>
 
@@ -44,11 +45,12 @@
 #include    <targeting/common/targetservice.H>
 
 using namespace TARGETING;
+using namespace RUNTIME;
 
 namespace ISTEPS_TRACE
 {
     // declare storage for isteps_trace!
-    trace_desc_t * g_trac_isteps_trace = NULL;
+    trace_desc_t * g_trac_isteps_trace = nullptr;
     TRAC_INIT(&ISTEPS_TRACE::g_trac_isteps_trace, "ISTEPS_TRACE", 2*KILOBYTE);
 }
 
@@ -75,22 +77,19 @@ namespace RTPM
 
     /**
      *  @brief Load OCC/HCODE images into mainstore
+     *  @param[in]  i_chip              Processor Chip ID
+     *  @param[in]  i_homer_addr        Homer physical address
+     *  @param[in]  i_occ_common_addr   OCC common area physical address
+     *  @param[in]  i_mode              PM load / reload
+     *  @return                         Return Code
      */
     int load_pm_complex( uint64_t i_chip,
                          uint64_t i_homer_addr,
                          uint64_t i_occ_common_addr,
                          uint32_t i_mode )
     {
-        // LOAD == i_mode
-        // - Call pm_reset first
-        // - HBRT loads OCC lid, writes OCC config data, builds Pstate
-        //   Parameter Blocks, and loads Hcode reference image lid
-        // RELOAD == i_mode
-        // - HBRT reloads OCC lid, rewrites OCC config data, builds Pstate
-        //   Parameter Blocks, and rebuilds Hcode
-
-        Target* proc_target = NULL;
-        errlHndl_t err = NULL;
+        Target* proc_target = nullptr;
+        errlHndl_t l_err = nullptr;
         int rc = 0;
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -104,8 +103,8 @@ namespace RTPM
         do
         {
             // Utility to convert i_chip to Target
-            err = RT_TARG::getHbTarget(i_chip, proc_target);
-            if(err)
+            l_err = RT_TARG::getHbTarget(i_chip, proc_target);
+            if(l_err)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"load_pm_complex: "
@@ -121,91 +120,58 @@ namespace RTPM
                             get_huid(proc_target));
             }
 
-            err = HBPM::resetPMComplex(proc_target);
-            if( err )
+            HBPM::loadPmMode l_hb_mode = HBPM::PM_UNKNOWN;
+            switch (i_mode)
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"load_pm_complex: "
-                           "reset PM complex failed!" );
-                break;
+                case HBRT_PM_LOAD:
+                    l_hb_mode = HBPM::PM_LOAD;
+                    break;
+                case HBRT_PM_RELOAD:
+                    l_hb_mode = HBPM::PM_RELOAD;
+                    break;
+                default:
+                    /*@
+                    * @errortype
+                    * @moduleid     MOD_PM_RT_LOAD_PM_COMPLEX
+                    * @reasoncode   RC_PM_RT_UNKNOWN_MODE
+                    * @userdata1    HBRT PM Mode
+                    * @userdata2    HUID
+                    * @devdesc      PM load complex unknown mode
+                    */
+                    l_err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                    MOD_PM_RT_LOAD_PM_COMPLEX,
+                                    RC_PM_RT_UNKNOWN_MODE,
+                                    i_mode,
+                                    get_huid(proc_target));
+                    break;
             }
-
-            void* occVirt = HBPM::convertHomerPhysToVirt(proc_target,
-                                                         i_homer_addr);
-            if(NULL == occVirt)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"load_pm_complex: "
-                           "converting physical address to virtual failed!");
-                break;
-            }
-
-            uint64_t l_homer_addr_va = reinterpret_cast <uint64_t>(occVirt);
-
-            err = HBPM::loadOCCSetup(proc_target,
-                                     i_homer_addr,
-                                     l_homer_addr_va,
-                                     i_occ_common_addr);
-            if(err)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"load_pm_complex: "
-                           "setting up OCC load failed!" );
-                break;
-            }
-
-            err = HBPM::loadOCCImageToHomer(proc_target,
-                                            i_homer_addr,
-                                            l_homer_addr_va,
-                                            i_mode);
-            if(err)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"load_pm_complex: "
-                           "loading OCC failed!" );
-                break;
-            }
-
-            void* occHostVirt = reinterpret_cast <void *>(l_homer_addr_va +
-                                HOMER_OFFSET_TO_OCC_HOST_DATA);
-
-            err = HBPM::loadHostDataToHomer(proc_target,
-                                            occHostVirt);
-            if(err)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"load_pm_complex: "
-                           "loading Host Data Area failed!" );
-                break;
-            }
-
-            // @TODO RTC:153885 verify parameters on call
-            err = HBPM::pstateParameterBuild(proc_target,
-                                             occVirt);
-            if(err)
+            if( l_err )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           ERR_MRK"load_pm_complex: "
-                          "building Pstate Parameter Block failed!");
+                          "Unknown Mode 0x%X for HUID=0x%08X",
+                          i_mode, get_huid(proc_target));
                 break;
             }
 
-            err = HBPM::loadHcode(proc_target,
-                                  occVirt,
-                                  i_mode);
-            if(err)
+            l_err = HBPM::loadPMComplex(proc_target,
+                                        i_homer_addr,
+                                        i_occ_common_addr,
+                                        l_hb_mode);
+            if( l_err )
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"load_pm_complex: "
-                          "loadHcode, %s failed!",
-                          (HBRT_PM_LOAD == i_mode) ? "LOAD" : "RELOAD");
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"load_pm_complex: "
+                           "load PM complex failed!" );
                 break;
             }
+
         } while(0);
 
-        if (err)
+        if (l_err)
         {
-            pm_complex_error(err,
+            pm_complex_error(l_err,
                              rc);
         }
 
@@ -215,13 +181,13 @@ namespace RTPM
 
     /**
      *  @brief Start OCC/HCODE on the specified chip
+     *  @param[in]  i_chip              Processor Chip ID
+     *  @return                         Return Code
      */
     int start_pm_complex( uint64_t i_chip )
     {
-        // HBRT executes p9_pm_init(INIT)
-
-        Target* proc_target = NULL;
-        errlHndl_t err = NULL;
+        Target* proc_target = nullptr;
+        errlHndl_t l_err = nullptr;
         int rc = 0;
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -230,8 +196,8 @@ namespace RTPM
         do
         {
             // Utility to convert i_chip to Target
-            err = RT_TARG::getHbTarget(i_chip, proc_target);
-            if( err )
+            l_err = RT_TARG::getHbTarget(i_chip, proc_target);
+            if( l_err )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"start_pm_complex: "
@@ -247,19 +213,20 @@ namespace RTPM
                            get_huid(proc_target));
             }
 
-            err = HBPM::startPMComplex(proc_target);
-            if( err )
+            l_err = HBPM::startPMComplex(proc_target);
+            if( l_err )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"start_pm_complex: "
-                           "starting OCC failed!" );
+                           "start PM complex failed!" );
                 break;
             }
+
         } while(0);
 
-        if ( err )
+        if ( l_err )
         {
-            pm_complex_error(err,
+            pm_complex_error(l_err,
                              rc);
         }
 
@@ -269,13 +236,13 @@ namespace RTPM
 
     /**
      *  @brief Reset OCC/HCODE on the specified chip
+     *  @param[in]  i_chip              Processor Chip ID
+     *  @return                         Return Code
      */
     int reset_pm_complex( uint64_t i_chip )
     {
-        // HBRT executes p9_pm_init(RESET)
-
-        Target* proc_target = NULL;
-        errlHndl_t err = NULL;
+        Target* proc_target = nullptr;
+        errlHndl_t l_err = nullptr;
         int rc = 0;
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -284,8 +251,8 @@ namespace RTPM
         do
         {
             // Utility to convert i_chip to Target
-            err = RT_TARG::getHbTarget(i_chip, proc_target);
-            if( err )
+            l_err = RT_TARG::getHbTarget(i_chip, proc_target);
+            if( l_err )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"reset_pm_complex: "
@@ -301,19 +268,19 @@ namespace RTPM
                            get_huid(proc_target));
             }
 
-            err = HBPM::resetPMComplex(proc_target);
-            if( err )
+            l_err = HBPM::resetPMComplex(proc_target);
+            if( l_err )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"reset_pm_complex: "
-                           "stopping OCC failed!" );
+                           "reset PM complex failed!" );
                 break;
             }
         } while(0);
 
-        if ( err )
+        if ( l_err )
         {
-            pm_complex_error(err,
+            pm_complex_error(l_err,
                              rc);
         }
 

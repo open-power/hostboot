@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,8 +57,10 @@ bool cmpLidToPnor (const std::pair<uint32_t, PNOR::SectionId> p1,
 const std::pair<uint32_t, PNOR::SectionId>
     lidToPnor[] =
     {
-        std::make_pair(Util::TEST_LIDID, PNOR::TEST), // TEST_LIDID = 0x00000111
-        std::make_pair(Util::OCC_LIDID, PNOR::OCC)    // OCC_LIDID  = 0x81e00430
+        std::make_pair(Util::TEST_LIDID, PNOR::TESTRO),         // 0x00000111
+        std::make_pair(Util::OCC_LIDID, PNOR::OCC),             // 0x81e00430
+        std::make_pair(Util::NIMBUS_HCODE_LIDID, PNOR::HCODE),  // 0x81e00602
+        std::make_pair(Util::CUMULUS_HCODE_LIDID, PNOR::HCODE)  // 0x81e00603
     };
 
 // Size of lidToPnor[]
