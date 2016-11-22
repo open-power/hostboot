@@ -214,8 +214,8 @@ p9_setup_bars_mcd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 //   range 0 = MCD_BOT, range 1 = MCD_STR
                 FAPI_TRY(p9_setup_bars_mcd_track_range(i_target,
                                                        l_nm_range[l_nm_range_idx],
-                                                       ((l_nm_range_idx == 0) ? (PU_BANK0_MCD_BOT) : (PU_BANK0_MCD_STR)),
-                                                       ((l_nm_range_idx == 0) ? (PU_MCD1_BANK0_MCD_BOT) : (PU_MCD1_BANK0_MCD_STR))),
+                                                       ((l_nm_range_idx == 0) ? (PU_MCD1_BANK0_MCD_BOT) : (PU_MCD1_BANK0_MCD_STR)),
+                                                       ((l_nm_range_idx == 0) ? (PU_BANK0_MCD_BOT) : (PU_BANK0_MCD_STR))),
                          "Error from p9_setup_bars_mcd_track_range (NM%d)", l_nm_range_idx);
             }
         }
@@ -270,8 +270,8 @@ p9_setup_bars_mcd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             // configure MCD to track this range (MCD_TOP)
             FAPI_TRY(p9_setup_bars_mcd_track_range(i_target,
                                                    l_m_range,
-                                                   PU_BANK0_MCD_TOP,
-                                                   PU_MCD1_BANK0_MCD_TOP),
+                                                   PU_MCD1_BANK0_MCD_TOP,
+                                                   PU_BANK0_MCD_TOP),
                      "Error from p9_setup_bars_mcd_track_range (M");
         }
     }
@@ -280,7 +280,7 @@ p9_setup_bars_mcd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     {
         fapi2::buffer<uint64_t> l_fir_data = 0;
         fapi2::buffer<uint64_t> l_mcd_rec_data = 0;
-        l_mcd_rec_data.setBit<PU_BANK0_MCD_REC_ENABLE>();
+        fapi2::buffer<uint64_t> l_mcd_vgc_data = 0;
 
         // configure FIR
         // clear FIR
@@ -306,11 +306,24 @@ p9_setup_bars_mcd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCD_FIR_MASK_REG, l_fir_data),
                  "Error from putScom (PU_MCD1_MCD_FIR_MASK_REG)");
 
+        // set MCD vectored group configuration
+        l_mcd_vgc_data.insertFromRight<PU_BANK0_MCD_VGC_AVAIL_GROUPS, PU_BANK0_MCD_VGC_AVAIL_GROUPS_LEN>(MCD_VGC_AVAIL_GROUPS);
+        l_mcd_vgc_data.setBit<PU_BANK0_MCD_VGC_HANG_POLL_ENABLE>();
+        FAPI_TRY(fapi2::putScom(i_target, PU_BANK0_MCD_VGC, l_mcd_vgc_data),
+                 "Error from putScom (PU_BANK0_MCD_VGC)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_BANK0_MCD_VGC, l_mcd_vgc_data),
+                 "Error from putScom (PU_MCD1_BANK0_MCD_VGC)");
+
         // enable MCD probes
-        FAPI_TRY(fapi2::putScomUnderMask(i_target, PU_BANK0_MCD_REC, l_mcd_rec_data, l_mcd_rec_data),
-                 "Error from putScomUnderMask (PU_BANK0_MCD_REC)");
-        FAPI_TRY(fapi2::putScomUnderMask(i_target, PU_MCD1_BANK0_MCD_REC, l_mcd_rec_data, l_mcd_rec_data),
-                 "Error from putScomUnderMask (PU_MCD1_BANK0_MCD_REC)");
+        l_mcd_rec_data.setBit<PU_BANK0_MCD_REC_ENABLE>();
+        l_mcd_rec_data.setBit<PU_BANK0_MCD_REC_CONTINUOUS>();
+        l_mcd_rec_data.insertFromRight<PU_BANK0_MCD_REC_PACE, PU_BANK0_MCD_REC_PACE_LEN>(MCD_RECOVERY_PACE_RATE);
+        l_mcd_rec_data.insertFromRight<PU_BANK0_MCD_REC_RTY_COUNT, PU_BANK0_MCD_REC_RTY_COUNT_LEN>(MCD_RECOVERY_RTY_COUNT);
+        l_mcd_rec_data.insertFromRight<PU_BANK0_MCD_REC_VG_COUNT, PU_BANK0_MCD_REC_VG_COUNT_LEN>(MCD_RECOVERY_VG_COUNT);
+        FAPI_TRY(fapi2::putScom(i_target, PU_BANK0_MCD_REC, l_mcd_rec_data),
+                 "Error from putScom (PU_BANK0_MCD_REC)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_BANK0_MCD_REC, l_mcd_rec_data),
+                 "Error from putScom (PU_MCD1_BANK0_MCD_REC)");
     }
 
 fapi_try_exit:
