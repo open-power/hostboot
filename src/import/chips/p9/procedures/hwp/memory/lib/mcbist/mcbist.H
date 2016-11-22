@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -319,6 +319,96 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
             CFG_DGEN_RNDD_SEED2_LEN = MCBIST_MCBRDS1Q_DGEN_RNDD_SEED2_LEN,
             CFG_DGEN_RNDD_DATA_MAPPING = MCBIST_MCBRDS1Q_DGEN_RNDD_DATA_MAPPING,
             CFG_DGEN_RNDD_DATA_MAPPING_LEN = MCBIST_MCBRDS1Q_DGEN_RNDD_DATA_MAPPING_LEN,
+
+            // Bit mapping for MCBIST error log control data (address+ in Nimbus doc)
+            ERROR_LOG_SUBTEST = 0,
+            ERROR_LOG_SUBTEST_LEN = 5,
+            ERROR_LOG_SUBCMD = 5,
+            ERROR_LOG_SUBCMD_LEN = 2,
+            ERROR_LOG_ADDR_DIMM = 7,
+            ERROR_LOG_ADDR_MRANK = 8,
+            ERROR_LOG_ADDR_MRANK_LEN = 2,
+            ERROR_LOG_ADDR_SRANK = 10,
+            ERROR_LOG_ADDR_SRANK_LEN = 3,
+            ERROR_LOG_ADDR_BANK_GROUP = 13,
+            ERROR_LOG_ADDR_BANK_GROUP_LEN = 2,
+            ERROR_LOG_ADDR_BANK = 15,
+            ERROR_LOG_ADDR_BANK_LEN = 3,
+            ERROR_LOG_ADDR_ROW = 18,
+            ERROR_LOG_ADDR_ROW_LEN = 18,
+            ERROR_LOG_ADDR_COLUMN = 36,
+            ERROR_LOG_ADDR_COLUMN_LEN = 8,
+            ERROR_LOG_BEAT = 44,
+            ERROR_LOG_BEAT_LEN = 2,
+            ERROR_LOG_TYPE = 46,
+            ERROR_LOG_TYPE_LEN = 2,
+        };
+
+};
+
+///
+/// @class mcbistTraits
+/// @brief a collection of traits associated with the Nimbus MCA
+///
+template<>
+class mcbistTraits<fapi2::TARGET_TYPE_MCA>
+{
+    public:
+        // MCBIST error log related registers
+        static constexpr uint64_t ERROR_LOG_PTR_REG = MCA_ELPR;
+        static constexpr uint64_t RMW_WRT_BUF_CTL_REG = MCA_WREITE_AACR;
+        static constexpr uint64_t RMW_WRT_BUF_DATA_REG = MCA_AADR;
+        static constexpr uint64_t RMW_WRT_BUF_ECC_REG = MCA_AAER;
+
+        enum
+        {
+            // Register field constants
+            ERROR_LOG_PTR = MCA_ELPR_LOG_POINTER,
+            ERROR_LOG_PTR_LEN = MCA_ELPR_LOG_POINTER_LEN,
+            ERROR_LOG_FULL = MCA_ELPR_LOG_FULL,
+            RMW_WRT_BUFFER_SEL = MCA_WREITE_AACR_BUFFER,
+            RMW_WRT_ADDRESS = MCA_WREITE_AACR_ADDRESS,
+            RMW_WRT_ADDRESS_LEN = MCA_WREITE_AACR_ADDRESS_LEN,
+            RMW_WRT_AUTOINC = MCA_WREITE_AACR_AUTOINC,
+            RMW_WRT_ECCGEN = MCA_WREITE_AACR_ECCGEN,
+
+            // Constants used for field settings
+            SELECT_RMW_BUFFER = 0,
+            SELECT_WRT_BUFFER = 1,
+
+            // Other constants
+            NUM_COMPARE_LOG_ENTRIES = 64,
+            // In compare mode, there is one "info" entry per 4 data (log) entries
+            // so compare mode only uses 16 info entries total in the rmw array
+            NUM_COMPARE_DATA_PER_INFO_LOG = 4,
+            NUM_COMPARE_INFO_ENTRIES = 16,
+        };
+
+};
+
+///
+/// @class mcbistTraits
+/// @brief a collection of traits associated with the Nimbus MCS
+///
+template<>
+class mcbistTraits<fapi2::TARGET_TYPE_MCS>
+{
+    public:
+        // MCBIST error log related registers
+        static constexpr uint64_t RD_BUF_CTL_REG = MCS_PORT02_AACR;
+        static constexpr uint64_t RD_BUF_DATA_REG = MCS_PORT02_AADR;
+        static constexpr uint64_t RD_BUF_ECC_REG = MCS_PORT02_AAER;
+
+        enum
+        {
+            // Register field constants
+            RB_BUFFER_SEL = MCS_PORT02_AACR_BUFFER,
+            RB_ADDRESS = MCS_PORT02_AACR_ADDRESS,
+            RB_ADDRESS_LEN = MCS_PORT02_AACR_ADDRESS_LEN,
+            RB_AUTOINC = MCS_PORT02_AACR_AUTOINC,
+
+            // Other constants
+            NUM_COMPARE_LOG_ENTRIES = 64,
         };
 
 };
@@ -2805,6 +2895,96 @@ template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 inline fapi2::ReturnCode load_thresholds( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
 {
     return load_thresholds(i_target, i_program.iv_thresholds);
+}
+
+///
+/// @brief Read entries from MCBIST Read Modify Write (RMW) array
+/// @tparam T, the fapi2::TargetType
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_start_addr the array address to read first
+/// @param[in] i_num_entries the number of array entries to read
+/// @param[in] i_roll_over_for_compare_mode set to true if only using first
+/// NUM_COMPARE_INFO_ENTRIES of array, so array address rolls over at correct value
+/// @param[out] o_data vector of output data
+/// @param[out] o_ecc_data vector of ecc data
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note The number of entries in the array depends on i_roll_over_for_compare_mode parameter:
+/// (NUM_COMPARE_LOG_ENTRIES for false, NUM_COMPARE_INFO_ENTRIES for true) but user may read more than
+/// that since reads work in a circular buffer fashion
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+fapi2::ReturnCode read_rmw_array(const fapi2::Target<T>& i_target,
+                                 const uint64_t i_start_addr,
+                                 const uint64_t i_num_entries,
+                                 const bool i_roll_over_for_compare_mode,
+                                 std::vector< fapi2::buffer<uint64_t> >& o_data,
+                                 std::vector< fapi2::buffer<uint64_t> >& o_ecc_data);
+
+///
+/// @brief Read entries from MCBIST Read Modify Write (RMW) array
+/// Overload for the case where o_ecc_data is not needed
+/// @tparam T, the fapi2::TargetType
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_start_addr the array address to read first
+/// @param[in] i_num_entries the number of array entries to read
+/// @param[in] i_roll_over_for_compare_mode set to true if only using first
+/// NUM_COMPARE_INFO_ENTRIES of array, so array address rolls over at correct value
+/// @param[out] o_data vector of output data
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note The number of entries in the array depends on i_roll_over_for_compare_mode parameter:
+/// (NUM_COMPARE_LOG_ENTRIES for false, NUM_COMPARE_INFO_ENTRIES for true) but user may read more than
+/// that since reads work in a circular buffer fashion
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode read_rmw_array(const fapi2::Target<T>& i_target,
+                                        const uint64_t i_start_addr,
+                                        const uint64_t i_num_entries,
+                                        const bool i_roll_over_for_compare_mode,
+                                        std::vector< fapi2::buffer<uint64_t> >& o_data)
+{
+    std::vector< fapi2::buffer<uint64_t> > l_temp;
+    return read_rmw_array(i_target, i_start_addr, i_num_entries, i_roll_over_for_compare_mode, o_data, l_temp);
+}
+
+///
+/// @brief Read entries from MCBIST Read Buffer (RB) array
+/// @tparam T, the fapi2::TargetType
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_start_addr the array address to read first
+/// @param[in] i_num_entries the number of array entries to read
+/// @param[out] o_data vector of output data
+/// @param[out] o_ecc_data vector of ecc data
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+fapi2::ReturnCode read_rb_array(const fapi2::Target<T>& i_target,
+                                const uint64_t i_start_addr,
+                                const uint64_t i_num_entries,
+                                std::vector< fapi2::buffer<uint64_t> >& o_data,
+                                std::vector< fapi2::buffer<uint64_t> >& o_ecc_data);
+
+///
+/// @brief Read entries from MCBIST Read Buffer (RB) array
+/// Overload for the case where o_ecc_data is not needed
+/// @tparam T, the fapi2::TargetType
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_start_addr the array address to read first
+/// @param[in] i_num_entries the number of array entries to read
+/// @param[out] o_data vector of output data
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+fapi2::ReturnCode read_rb_array(const fapi2::Target<T>& i_target,
+                                const uint64_t i_start_addr,
+                                const uint64_t i_num_entries,
+                                std::vector< fapi2::buffer<uint64_t> >& o_data)
+{
+    std::vector< fapi2::buffer<uint64_t> > l_temp;
+    return read_rb_array(i_target, i_start_addr, i_num_entries, o_data, l_temp);
 }
 
 } // namespace

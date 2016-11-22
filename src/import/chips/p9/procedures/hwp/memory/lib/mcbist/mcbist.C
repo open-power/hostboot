@@ -40,6 +40,7 @@
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
+using fapi2::TARGET_TYPE_MCS;
 
 namespace mss
 {
@@ -484,6 +485,146 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
     if (!i_program.iv_async)
     {
         return mcbist::poll(i_target, i_program);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read entries from MCBIST Read Modify Write (RMW) array
+/// Specialization for fapi2::TARGET_TYPE_MCA
+/// @param[in] i_target the target to effect
+/// @param[in] i_start_addr the array address to read first
+/// @param[in] i_num_entries the number of array entries to read
+/// @param[in] i_roll_over_for_compare_mode set to true if only using first
+/// NUM_COMPARE_INFO_ENTRIES of array, so array address rolls over at correct value
+/// @param[out] o_data vector of output data
+/// @param[out] o_ecc_data vector of ecc data
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note The number of entries in the array depends on i_roll_over_for_compare_mode parameter:
+/// (NUM_COMPARE_LOG_ENTRIES for false, NUM_COMPARE_INFO_ENTRIES for true) but user may read more than
+/// that since reads work in a circular buffer fashion
+///
+template<>
+fapi2::ReturnCode read_rmw_array(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                 const uint64_t i_start_addr,
+                                 const uint64_t i_num_entries,
+                                 const bool i_roll_over_for_compare_mode,
+                                 std::vector< fapi2::buffer<uint64_t> >& o_data,
+                                 std::vector< fapi2::buffer<uint64_t> >& o_ecc_data)
+{
+    typedef mcbistTraits<fapi2::TARGET_TYPE_MCA> TT;
+
+    fapi2::buffer<uint64_t> l_control_value;
+    fapi2::buffer<uint64_t> l_data;
+    uint64_t l_array_addr = i_start_addr;
+
+    // Clear out any stale values from output vectors
+    o_data.clear();
+    o_ecc_data.clear();
+
+    // Set the control register for the RMW array
+    l_control_value.writeBit<TT::RMW_WRT_BUFFER_SEL>(TT::SELECT_RMW_BUFFER)
+    // set start address
+    .insertFromRight<TT::RMW_WRT_ADDRESS, TT::RMW_WRT_ADDRESS_LEN>(l_array_addr)
+    // enable the auto increment bit
+    .setBit<TT::RMW_WRT_AUTOINC>()
+    // set ecc mode bit off
+    .clearBit<TT::RMW_WRT_ECCGEN>();
+
+    FAPI_INF("Setting the RMW array access control register.");
+    FAPI_TRY( mss::putScom(i_target, TT::RMW_WRT_BUF_CTL_REG, l_control_value) );
+
+    for (uint8_t l_index = 0; l_index < i_num_entries; ++l_index)
+    {
+        // Read info out of RMW array and put into output vector
+        // Note that since we enabled AUTOINC above, reading ECC_REG will increment
+        // the array pointer so the next DATA_REG read will read the next array entry
+        FAPI_TRY( mss::getScom(i_target, TT::RMW_WRT_BUF_DATA_REG, l_data) );
+
+        FAPI_INF("RMW data index %d is: %016lx", l_array_addr, l_data);
+        o_data.push_back(l_data);
+
+        // Need to read ecc register to increment array index
+        FAPI_TRY( mss::getScom(i_target, TT::RMW_WRT_BUF_ECC_REG, l_data) );
+        o_ecc_data.push_back(l_data);
+        ++l_array_addr;
+
+        // Need to manually roll over address if we go beyond NUM_COMPARE_INFO_ENTRIES
+        // Since actual array is bigger than what is used for compare mode
+        if (i_roll_over_for_compare_mode &&
+            (l_array_addr >= TT::NUM_COMPARE_INFO_ENTRIES))
+        {
+            FAPI_INF("Rolling over the RMW array access control register address from %d to %d.", (i_start_addr + l_index), 0);
+            l_control_value.clearBit<TT::RMW_WRT_ADDRESS, TT::RMW_WRT_ADDRESS_LEN>();
+            FAPI_TRY( mss::putScom(i_target, TT::RMW_WRT_BUF_CTL_REG, l_control_value) );
+            l_array_addr = 0;
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read entries from MCBIST Read Buffer (RB) array
+/// Specialization for fapi2::TARGET_TYPE_MCA
+/// @param[in] i_target the target to effect
+/// @param[in] i_start_addr the array address to read first
+/// @param[in] i_num_entries the number of array entries to read
+/// @param[out] o_data vector of output data
+/// @param[out] o_ecc_data vector of ecc data
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template<>
+fapi2::ReturnCode read_rb_array(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                const uint64_t i_start_addr,
+                                const uint64_t i_num_entries,
+                                std::vector< fapi2::buffer<uint64_t> >& o_data,
+                                std::vector< fapi2::buffer<uint64_t> >& o_ecc_data)
+{
+    typedef mcbistTraits<fapi2::TARGET_TYPE_MCS> TT;
+
+    fapi2::buffer<uint64_t> l_control_value;
+    fapi2::buffer<uint64_t> l_data;
+    uint64_t l_array_addr = i_start_addr;
+
+    const auto& l_mcs = mss::find_target<TARGET_TYPE_MCS>(i_target);
+
+    // Clear out any stale values from output vectors
+    o_data.clear();
+    o_ecc_data.clear();
+
+    // set BUFFER according to port position within MCS
+    l_control_value.writeBit<TT::RB_BUFFER_SEL>(mss::relative_pos<fapi2::TARGET_TYPE_MCS>(i_target))
+    // set start address
+    .insertFromRight<TT::RB_ADDRESS, TT::RB_ADDRESS_LEN>(l_array_addr)
+    // enable the auto increment bit
+    .setBit<TT::RB_AUTOINC>();
+
+    FAPI_INF("Setting the RB array access control register.");
+    FAPI_TRY( mss::putScom(l_mcs, TT::RD_BUF_CTL_REG, l_control_value) );
+
+    for (uint8_t l_index = 0; l_index < i_num_entries; ++l_index)
+    {
+        // Note that since we enabled AUTOINC above, reading ECC_REG will increment
+        // the array pointer so the next DATA_REG read will read the next array entry
+        FAPI_TRY( mss::getScom(l_mcs, TT::RD_BUF_DATA_REG, l_data) );
+        FAPI_INF("RB data index %d is: 0x%016lx", l_array_addr, l_data);
+        o_data.push_back(l_data);
+
+        // Need to read ecc register to increment array index
+        FAPI_TRY( mss::getScom(l_mcs, TT::RD_BUF_ECC_REG, l_data) );
+        o_ecc_data.push_back(l_data);
+        ++l_array_addr;
+
+        // Array address automatically rolls over if we go beyond NUM_COMPARE_LOG_ENTRIES
+        if (l_array_addr >= TT::NUM_COMPARE_LOG_ENTRIES)
+        {
+            l_array_addr = 0;
+        }
+
     }
 
 fapi_try_exit:
