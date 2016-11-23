@@ -468,14 +468,6 @@ class SbePsu
         ~SbePsu();
 
         /**
-         * @brief parse the FFDC package from buffer
-         * @param[in]  io_errl        Error Entry object
-         * @retval: true == success, false == failure
-         */
-
-        bool handleFFDCError(ERRORLOG::ErrlEntry * io_errl);
-
-        /**
          * @brief populate the iv_ffdcPackageBuffer
          * @param[in]  i_data        FFDC error data
          * @param[in]  i_len         data buffer len to copy
@@ -495,29 +487,9 @@ class SbePsu
         void * iv_ffdcPackageBuffer;
 
         /**
-         * @brief Magic byte in FFDC header
-         */
-        const uint16_t ffdcMagicByte = 0xFFDC;
-
-        /**
-         * @brief each FFDC word is 4 byte long
-         */
-        const uint8_t ffdcWordLen = 4;
-
-        /**
-         * @brief difference between package length and N words
-         */
-        const uint8_t ffdcPadLen = 6;
-
-        /**
          * @brief FFDC package needs to be 2 pages
          */
         const uint8_t ffdcPackageSize = 2;
-
-        /**
-         * @brief byte pad before word data begins
-         */
-        const uint8_t wordPadding = 12;
 
         /**
          * @brief zero out the FFDC package buffer

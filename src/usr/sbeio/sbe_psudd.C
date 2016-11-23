@@ -40,8 +40,8 @@
 #include <sbeio/sbeioreasoncodes.H>
 #include <initservice/initserviceif.H> //@todo-RTC:149454-Remove
 #include <sbeio/sbe_psudd.H>
+#include <sbeio/sbe_ffdc_parser.H>
 #include <arch/ppc.H>
-#include <util/utilbyte.H>
 #include <kernel/pagemgr.H>
 
 trace_desc_t* g_trac_sbeio;
@@ -253,13 +253,28 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
                                  i_pPsuRequest->mbxReg0,
                                  l_data);
 
-            handleFFDCError(errl);
+            SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
+            l_ffdc_parser->parseFFDCData(iv_ffdcPackageBuffer);
+            uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
+            uint8_t i;
+            for(i = 0; i < l_pkgs; i++)
+            {
+                errl->addFFDC( SBE_COMP_ID,
+                           l_ffdc_parser->getFFDCPackage(i),
+                           l_ffdc_parser->getPackageLength(i),
+                           0,                           // version
+                           ERRORLOG::ERRL_UDT_NOFORMAT, // subversion
+                           false );
+            }
+
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
             MAGIC_INST_GET_SBE_TRACES(
                   i_target->getAttr<TARGETING::ATTR_POSITION>(),
                   SBEIO_PSU_NOT_READY);
+
+            delete l_ffdc_parser;
             break; // return with error
         }
 
@@ -372,13 +387,28 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
                                  i_pPsuRequest->mbxReg0,
                                  o_pPsuResponse->mbxReg4);
 
-            handleFFDCError(errl);
+            SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
+            l_ffdc_parser->parseFFDCData(iv_ffdcPackageBuffer);
+            uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
+            uint8_t i;
+            for(i = 0; i < l_pkgs; i++)
+            {
+                errl->addFFDC( SBE_COMP_ID,
+                           l_ffdc_parser->getFFDCPackage(i),
+                           l_ffdc_parser->getPackageLength(i),
+                           0,                           // version
+                           ERRORLOG::ERRL_UDT_NOFORMAT, // subversion
+                           false );
+            }
+
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
             MAGIC_INST_GET_SBE_TRACES(
                   i_target->getAttr<TARGETING::ATTR_POSITION>(),
                   SBEIO_PSU_RESPONSE_ERROR);
+
+            delete l_ffdc_parser;
             break;
         }
 
@@ -437,13 +467,28 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                                  i_timeout,
                                  0);
 
-            handleFFDCError(errl);
+            SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
+            l_ffdc_parser->parseFFDCData(iv_ffdcPackageBuffer);
+            uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
+            uint8_t i;
+            for(i = 0; i < l_pkgs; i++)
+            {
+                errl->addFFDC( SBE_COMP_ID,
+                           l_ffdc_parser->getFFDCPackage(i),
+                           l_ffdc_parser->getPackageLength(i),
+                           0,                           // version
+                           ERRORLOG::ERRL_UDT_NOFORMAT, // subversion
+                           false );
+            }
+
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
             MAGIC_INST_GET_SBE_TRACES(
                   i_target->getAttr<TARGETING::ATTR_POSITION>(),
                   SBEIO_PSU_RESPONSE_TIMEOUT);
+
+            delete l_ffdc_parser;
             break;
         }
 
@@ -539,106 +584,6 @@ void SbePsu::writeFFDCBuffer( void * i_data, uint8_t i_len) {
         SBE_TRACF(ERR_MRK"writeFFDCBuffer: Buffer size too large: %d",
                       i_len);
     }
-}
-
-/**
- * @brief Read FFDC package(s) iv_ffdcPackageBuffer
- *
- * @param[in]  io_errl Error entry object to inject FFDC errors
- *
- * FFDC package according to the SBE Interface Specification:
- * Dword 0:
- *     byte 0,1: Magic Byte: 0xFFDC
- *     byte 2,3: Length in words (N + 6)
- *     byte 4,5: Sequence Id
- *     byte 6  : Command Class
- *     byte 7  : Command
- * Dword 1:
- *     byte 0-3: Return Code
- *     byte 4-7: Word 0
- * Dword M:
- *     byte 0-3: Word N - 1
- *     byte 4-7: Word N
- */
-
-bool SbePsu::handleFFDCError(ERRORLOG::ErrlEntry * io_errl)
-{
-    uint16_t l_magicByte = 0x00;
-    uint8_t            i = 0;
-    bool              rc = true;
-
-    SBE_TRACD(ENTER_MRK "handleFFDCError");
-    do {
-        // Magic Byte is 1st 2 bytes
-        l_magicByte = UtilByte::bufferTo16uint(
-                    static_cast<char *>(iv_ffdcPackageBuffer) + i);
-
-        if(l_magicByte == ffdcMagicByte)
-        {
-            // Length is next 2 bytes (in words, each word is 4 bytes)
-            uint16_t l_packageLen = UtilByte::bufferTo16uint(
-                    static_cast<char *>(iv_ffdcPackageBuffer) + (i + 2));
-            // In FFDC packet, byte 2 & byte 3 holds the length in words,
-            // which is 6 bytes less than the total package length.
-            uint8_t l_words = l_packageLen - ffdcPadLen;
-            uint8_t l_wordLen = ffdcWordLen * l_words;
-            SBE_TRACD(INFO_MRK"handleFFDCError: Package length: %d, Words: %d", l_packageLen, l_words);
-
-            // Check to see if what we're copying is beyond the buffer size
-            if((uint8_t) (i + wordPadding + l_wordLen) >
-                  PAGESIZE * ffdcPackageSize)
-            {
-                SBE_TRACF(ERR_MRK"handleFFDCError: FFDC Package buffer overflow detected.");
-                rc = false;
-                break;
-            }
-            else
-            {
-                // Extract the words and add to errl
-                void * l_wordBuffer = (void *) malloc(l_wordLen);
-                if(l_wordBuffer == NULL)
-                {
-                    SBE_TRACF(ERR_MRK"handleFFDCError: Failure to allocate memory.");
-                    rc = false;
-                    break;
-                }
-                // Copy data from ffdcPackageBuffer to wordBuffer
-                // starting at 12th byte from current pointer
-                memcpy(static_cast<char *>(iv_ffdcPackageBuffer) + wordPadding,
-                                           l_wordBuffer, l_wordLen);
-
-                ErrlUD *l_errlud = io_errl->addFFDC( SBE_COMP_ID,
-                               l_wordBuffer,
-                               sizeof(l_wordBuffer),
-                               0,                           // version
-                               ERRL_UDT_NOFORMAT,           // subversion
-                               false );
-
-                if(l_errlud == NULL)
-                {
-                    SBE_TRACF(ERR_MRK"handleFFDCError: Failure to add FFDC to error log.");
-                    rc = false;
-                }
-
-                free(l_wordBuffer);
-            }
-            // Skip length of whole package
-            i += l_wordLen + wordPadding;
-        }
-        else
-        {
-            SBE_TRACD(ERR_MRK"handleFFDCError: Invalid FFDC Magic Byte: 0x%04lx",
-                      l_magicByte);
-            break;
-        }
-    } while (l_magicByte != 0x00);
-
-    // zero out the whole thing
-    initFFDCPackageBuffer();
-
-    SBE_TRACD(EXIT_MRK "handleFFDCError");
-    return rc;
-
 }
 
 } //end of namespace SBEIO
