@@ -48,13 +48,12 @@
 #include <p9_pm.H>
 #include <p9_pm_utils.H>
 #include <p9_misc_scom_addresses.H>
+#include <p9_pm_occ_firinit.H>
 #include <p9_pm_firinit.H>
 #include <p9_pm_occ_control.H>
-#include <p9_cpu_special_wakeup.H>
 #include <p9_pm_stop_gpe_init.H>
 #include <p9_pm_occ_gpe_init.H>
 #include <p9_pm_corequad_init.H>
-#include <p9_pm_pba_init.H>
 #include <p9_pm_occ_sram_init.H>
 #include <p9_pm_ocb_init.H>
 #include <p9_pm_pss_init.H>
