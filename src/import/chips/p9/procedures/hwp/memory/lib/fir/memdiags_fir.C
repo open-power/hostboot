@@ -38,51 +38,92 @@
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <lib/utils/scom.H>
+#include <lib/utils/find.H>
+#include <lib/fir/fir.H>
 #include <lib/fir/memdiags_fir.H>
+#include <lib/mc/port.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
+using fapi2::TARGET_TYPE_MCA;
 
 namespace mss
 {
 
+namespace unmask
+{
+
 ///
 /// @brief Unmask and setup actions for memdiags related FIR
-/// @param[in] i_target the fapi2::Target
+/// @param[in] i_target the fapi2::Target MCBIST
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode unmask_memdiags_errors( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
-    FAPI_INF("unmask_memdiags_errors");
+    fapi2::ReturnCode l_rc;
 
-    // Fill our buffer with F's as we're going to clear the bits we want to
-    // unmask and then drop the result in to the _AND register.
-    fapi2::buffer<uint64_t> l_mcbistfir_mask(~0);
-    fapi2::buffer<uint64_t> l_mcbistfir_action0;
-    fapi2::buffer<uint64_t> l_mcbistfir_action1;
+    for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
+    {
+        fir::reg<MCA_FIR> l_ecc64_fir_reg(p, l_rc);
+        FAPI_TRY(l_rc, "unable to create fir::reg for %d", MCA_FIR);
 
-    FAPI_TRY( mss::getScom(i_target, MCBIST_MCBISTFIRACT0, l_mcbistfir_action0) );
-    FAPI_TRY( mss::getScom(i_target, MCBIST_MCBISTFIRACT1, l_mcbistfir_action1) );
+        fir::reg<MCA_MBACALFIRQ> l_cal_fir_reg(p, l_rc);
+        FAPI_TRY(l_rc, "unable to create fir::reg for %d", MCA_MBACALFIRQ);
 
-    // There's not much to do here right now as Marc needs to work out the new FIR
-    // and whatnot for Nimbus. Lets make sure we setup everything as PRD needs it
-    // for sim, and we'll circle back to add the other FIR as the design completes.
+        l_ecc64_fir_reg.checkstop<MCA_FIR_MAINLINE_AUE>()
+        .recoverable_error<MCA_FIR_MAINLINE_UE>()
+        .checkstop<MCA_FIR_MAINLINE_IAUE>()
+        .recoverable_error<MCA_FIR_MAINLINE_IUE>();
 
-    // Don't unmask the main address skipped FIR. First, we rely on the skipping so
-    // we probably don't want any one to see it and second it's broken per Shelton 5/16.
+        // TODO RTC:165157 check for manufacturing flags and don't unmask this if
+        // thresholds policy is enabled.
+        l_ecc64_fir_reg.recoverable_error<MCA_FIR_MAINTENANCE_IUE>();
 
-    // Unmask the program complete bit and setup the actions for an attention
-    l_mcbistfir_action0.setBit<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>();
-    l_mcbistfir_action1.clearBit<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>();
-    l_mcbistfir_mask.clearBit<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>();
+        l_cal_fir_reg.recoverable_error<MCA_MBACALFIRQ_PORT_FAIL>();
 
-    // Hit the and register of the fir mask
-    FAPI_TRY( mss::putScom(i_target, MCBIST_MCBISTFIRACT0, l_mcbistfir_action0) );
-    FAPI_TRY( mss::putScom(i_target, MCBIST_MCBISTFIRACT1, l_mcbistfir_action1) );
-    FAPI_TRY( mss::putScom(i_target, MCBIST_MCBISTFIRMASK_AND, l_mcbistfir_mask) );
+        FAPI_TRY(l_ecc64_fir_reg.write(), "unable to write fir::reg %d", MCA_FIR);
+        FAPI_TRY(l_cal_fir_reg.write(), "unable to write fir::reg %d", MCA_MBACALFIRQ);
+
+        // Note: We also want to include the following setup RCD recovery and port fail
+        FAPI_TRY( mss::change_port_fail_disable(p, mss::LOW) );
+        FAPI_TRY( mss::change_rcd_recovery_disable(p, mss::LOW) );
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Unmask and setup actions for scrub related FIR
+/// @param[in] i_target the fapi2::Target MCBIST
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode after_background_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+{
+    for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
+    {
+        fapi2::ReturnCode l_rc;
+        fir::reg<MCA_FIR> l_ecc64_fir_reg(p, l_rc);
+        FAPI_TRY(l_rc, "unable to create fir::reg for %d", MCA_FIR);
+
+        l_ecc64_fir_reg.recoverable_error<MCA_FIR_MAINLINE_MPE_RANK_0_TO_7,
+                                          MCA_FIR_MAINLINE_MPE_RANK_0_TO_7_LEN>()
+                                          .recoverable_error<MCA_FIR_MAINLINE_NCE>()
+                                          .recoverable_error<MCA_FIR_MAINLINE_TCE>()
+                                          .recoverable_error<MCA_FIR_MAINLINE_IMPE>()
+                                          .recoverable_error<MCA_FIR_MAINTENANCE_IMPE>();
+
+        FAPI_TRY(l_ecc64_fir_reg.write(), "unable to write fir::reg %d", MCA_FIR);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+}
 }

@@ -37,8 +37,12 @@
 #define _MSS_MEMDIAGS_FIR_H_
 
 #include <fapi2.H>
+#include <lib/fir/fir.H>
 
 namespace mss
+{
+
+namespace unmask
 {
 
 ///
@@ -48,7 +52,17 @@ namespace mss
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 template< fapi2::TargetType T >
-fapi2::ReturnCode unmask_memdiags_errors( const fapi2::Target<T>& i_target );
+fapi2::ReturnCode after_memdiags( const fapi2::Target<T>& i_target );
 
+///
+/// @brief Unmask and setup actions for scrub related FIR
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode after_background_scrub( const fapi2::Target<T>& i_target );
+
+}
 }
 #endif

@@ -45,6 +45,7 @@
 #include <lib/dimm/kind.H>
 #include <lib/workarounds/mcbist_workarounds.H>
 #include <lib/mcbist/mcbist.H>
+#include <lib/fir/fir.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_DIMM;
@@ -133,6 +134,30 @@ fapi2::ReturnCode end_of_rank( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
     replace_read_helper(io_program);
 
     return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief WAT debug attention
+/// For Nimbus DD1 the MCBIST engine uses the WAT debug bit as a workaround
+/// @param[in] i_target the fapi2 target of the mcbist
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode wat_debug_attention( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+{
+    // MCBIST attentions are already special attention
+    if (mss::chip_ec_feature_mss_wat_debug_attn(i_target))
+    {
+        fapi2::ReturnCode l_rc;
+        fir::reg<MCBIST_MCBISTFIRQ> mcbist_fir_register(i_target, l_rc);
+        FAPI_TRY(l_rc, "unable to create fir::reg for %d", MCBIST_MCBISTFIRQ);
+
+        FAPI_TRY(mcbist_fir_register.attention<MCBIST_MCBISTFIRQ_WAT_DEBUG_ATTN>().write());
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 } // close namespace mcbist

@@ -430,6 +430,23 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_WAT_DEBUG_ATTN</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      WAT Debug Attention work-around for Nimbus DD1.0
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MSS_HW392781_RDARRAY_CLKGATE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>

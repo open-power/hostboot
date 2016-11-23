@@ -91,6 +91,10 @@ fapi2::ReturnCode dqsclk_offset( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
 inline uint64_t vreg_control0( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                                const uint64_t i_original_value )
 {
+
+// Anuwat has asked that we don't enforce this right now.
+#ifdef ANUWAT_SAYS_DONT_DO_THIS_NOW
+
     fapi2::buffer<uint64_t> l_value(i_original_value);
     uint8_t l_vccd_override = 0;
 
@@ -120,6 +124,11 @@ fapi_try_exit:
     // Not reached
     return 0;
 
+#else
+
+    return i_original_value;
+
+#endif
 }
 
 ///
@@ -177,6 +186,10 @@ fapi_try_exit:
 ///
 inline uint64_t vreg_coarse( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_original_value )
 {
+
+// Anuwat has asked that we don't enforce this right now.
+#ifdef ANUWAT_SAYS_DONT_DO_THIS_NOW
+
     fapi2::buffer<uint64_t> l_value(i_original_value);
     uint8_t l_vccd_override = 0;
 
@@ -204,6 +217,13 @@ fapi_try_exit:
 
     // Not reached
     return 0;
+
+#else
+
+    return i_original_value;
+
+#endif
+
 }
 
 ///

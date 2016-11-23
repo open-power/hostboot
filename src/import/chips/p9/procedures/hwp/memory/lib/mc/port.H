@@ -109,6 +109,7 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
 
             PORT_FAIL_DISABLE = MCA_MBA_FARB0Q_CFG_PORT_FAIL_DISABLE,
             OE_ALWAYS_ON = MCA_MBA_FARB0Q_CFG_OE_ALWAYS_ON,
+            RCD_RECOVERY_DISABLE = MCA_MBA_FARB0Q_CFG_DISABLE_RCD_RECOVERY,
 
             CAL0Q_CAL_INTERVAL_TMR0_ENABLE = MCA_MBA_CAL0Q_CFG_CAL_INTERVAL_TMR0_ENABLE,
             CAL0Q_TIME_BASE_TMR0 = MCA_MBA_CAL0Q_CFG_TIME_BASE_TMR0,
@@ -263,6 +264,28 @@ fapi2::ReturnCode change_port_fail_disable( const fapi2::Target<T>& i_target, st
     FAPI_DBG("Change port fail disable to %s %s", (i_state == HIGH ? "high" : "low"), mss::c_str(i_target));
     FAPI_TRY( mss::getScom(i_target, TT::FARB0Q_REG, l_data) );
     l_data.writeBit<TT::PORT_FAIL_DISABLE>(i_state);
+    FAPI_TRY( mss::putScom(i_target, TT::FARB0Q_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Change the state of the RCD recovery bit
+/// @tparam T, the fapi2 target type of the target
+/// @tparam TT, the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_state the state
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<T> >
+fapi2::ReturnCode change_rcd_recovery_disable( const fapi2::Target<T>& i_target, states i_state )
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_DBG("Change rcd recovery disable to %s %s", (i_state == HIGH ? "high" : "low"), mss::c_str(i_target));
+    FAPI_TRY( mss::getScom(i_target, TT::FARB0Q_REG, l_data) );
+    l_data.writeBit<TT::RCD_RECOVERY_DISABLE>(i_state);
     FAPI_TRY( mss::putScom(i_target, TT::FARB0Q_REG, l_data) );
 
 fapi_try_exit:

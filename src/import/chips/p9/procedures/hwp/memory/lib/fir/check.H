@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/fir/training_fir.H $ */
+/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/fir/check.H $   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -24,8 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file training_fir.H
-/// @brief Subroutines for training FIR
+/// @file check.H
+/// @brief Subroutines for checking MSS FIR
 ///
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP HWP Backup: Marc Gollub <gollub@us.ibm.com>
@@ -33,22 +33,29 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
-#ifndef _MSS_TRAINING_FIR_H_
-#define _MSS_TRAINING_FIR_H_
+#ifndef _MSS_CHECK_FIR_H_
+#define _MSS_CHECK_FIR_H_
 
 #include <fapi2.H>
 
 namespace mss
 {
 
+namespace check
+{
+
 ///
-/// @brief Unmask and setup actions for training related FIR
+/// @brief Check FIR bits during PHY reset
+/// @note For DDRPHYFIR and some MBACALFIR errors, up to and including phy reset, need to
+/// handle within the phy reset procedure, since we may get errors from a 'non-functional'
+/// magic port, which PRD can't analyze.
 /// @tparam T the fapi2::TargetType which hold the FIR bits
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 template< fapi2::TargetType T >
-fapi2::ReturnCode unmask_training_errors( const fapi2::Target<T>& i_target );
+fapi2::ReturnCode during_phy_reset( const fapi2::Target<T>& i_target );
 
+}
 }
 #endif

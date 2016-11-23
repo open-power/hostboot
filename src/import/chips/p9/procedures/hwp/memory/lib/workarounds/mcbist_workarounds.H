@@ -71,6 +71,14 @@ void replace_read_helper(mss::mcbist::program<fapi2::TARGET_TYPE_MCBIST>& i_prog
 fapi2::ReturnCode end_of_rank( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
                                mss::mcbist::program<fapi2::TARGET_TYPE_MCBIST>& i_program );
 
+///
+/// @brief WAT debug attention
+/// For Nimbus DD1 the MCBIST engine uses the WAT debug bit as a workaround
+/// @param[in] i_target the fapi2 target of the mcbist
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode wat_debug_attention( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+
 } // close namespace mcbist
 } // close namespace workarounds
 } // close namespace mss

@@ -42,6 +42,7 @@
 #include <lib/utils/find.H>
 #include <lib/phy/ddr_phy.H>
 #include <lib/mc/mc.H>
+#include <lib/fir/unmask.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCBIST;
@@ -114,6 +115,9 @@ fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_ta
 
     // Initialize via scoms for non-static PHY items.
     FAPI_TRY( mss::phy_scominit(i_target) );
+
+    // Do FIRry things
+    FAPI_TRY( mss::unmask::after_scominit(i_target) );
 
 fapi_try_exit:
     FAPI_INF("End MSS SCOM init");

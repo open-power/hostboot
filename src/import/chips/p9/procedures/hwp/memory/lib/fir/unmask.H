@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/fir/training_fir.C $ */
+/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/fir/unmask.H $  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -24,8 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file training_fir.C
-/// @brief Subroutines for training FIR
+/// @file unmask.H
+/// @brief Subroutines for unmasking and setting up MSS FIR
 ///
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP HWP Backup: Marc Gollub <gollub@us.ibm.com>
@@ -33,47 +33,54 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
+#ifndef _MSS_UNMASK_FIR_H_
+#define _MSS_UNMASK_FIR_H_
+
 #include <fapi2.H>
-#include <p9_mc_scom_addresses.H>
-#include <p9_mc_scom_addresses_fld.H>
-
-#include <lib/utils/scom.H>
-#include <lib/utils/find.H>
-#include <lib/fir/training_fir.H>
-
-using fapi2::TARGET_TYPE_MCBIST;
-using fapi2::TARGET_TYPE_MCA;
 
 namespace mss
 {
 
+namespace unmask
+{
+
 ///
-/// @brief Unmask and setup actions for training related FIR
+/// @brief Unmask and setup actions performed after draminit_mc
+/// @tparam T the fapi2::TargetType which hold the FIR bits
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
-template<>
-fapi2::ReturnCode unmask_training_errors( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
-{
-    // TK complete with all the actions and other FIR when we get there.
-    FAPI_INF("unmask_training_errors");
+template< fapi2::TargetType T >
+fapi2::ReturnCode after_draminit_mc( const fapi2::Target<T>& i_target );
 
-    // All we presently do here is clear the ALERT_N FIR as it's not
-    // reliable until after the RCD has been configured (so before training)
+///
+/// @brief Unmask and setup actions performed after draminit_training
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode after_draminit_training( const fapi2::Target<T>& i_target );
 
-    // Fill our buffer with F's as we're going to clear the bits we want to
-    // unmask and then drop the result in to the _AND register.
-    fapi2::buffer<uint64_t> l_trainingfir_mask(~0);
+///
+/// @brief Unmask and setup actions performed after mss_scominit
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target the fapi2::Target of the MCBIST
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode after_scominit( const fapi2::Target<T>& i_target );
 
-    l_trainingfir_mask.clearBit<MCA_MBACALFIRQ_RCD_PARITY_ERROR>();
+///
+/// @brief Unmask and setup actions performed after mss_ddr_phy_reset
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target the fapi2::Target of the MCBIST
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode after_phy_reset( const fapi2::Target<T>& i_target );
 
-    for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
-    {
-        FAPI_TRY( mss::putScom(p, MCA_MBACALFIRQ_AND, l_trainingfir_mask) );
-    }
 
-fapi_try_exit:
-    return fapi2::current_err;
 }
-
 }
+#endif

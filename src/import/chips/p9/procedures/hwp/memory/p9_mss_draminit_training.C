@@ -38,6 +38,7 @@
 
 #include <p9_mss_draminit_training.H>
 #include <lib/utils/count_dimm.H>
+#include <lib/fir/unmask.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -218,7 +219,11 @@ extern "C"
 
         // So we're calibrated the entire port. If we're here either we didn't have any errors or the last error
         // seen on a port is the error for this entire controller.
-        fapi2::current_err = l_port_error;
+        FAPI_TRY(l_port_error, "Seeing port error, exiting training");
+
+        // Unmask FIR
+        FAPI_TRY( mss::unmask::after_draminit_training(i_target) );
+
 
     fapi_try_exit:
         FAPI_INF("End draminit training");
