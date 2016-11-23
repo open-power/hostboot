@@ -38,7 +38,6 @@
 
 #include <p9_mss_draminit.H>
 #include <lib/utils/count_dimm.H>
-#include <lib/fir/training_fir.H>
 #include <lib/utils/conversions.H>
 #include <lib/dimm/bcw_load.H>
 
@@ -131,10 +130,10 @@ extern "C"
             // Clocks (CK_t,CK_c) need to be started and stable for 10ns or 5tCK
             // (whichever is greater) before CKE goes active.
             constexpr uint64_t DELAY_5TCK = 5;
-            uint64_t l_delay_in_ns = std::max( static_cast<uint64_t>(mss::DELAY_10NS),
-                                               mss::cycles_to_ns(i_target, DELAY_5TCK) );
+            const uint64_t l_delay_in_ns = std::max( static_cast<uint64_t>(mss::DELAY_10NS),
+                                           mss::cycles_to_ns(i_target, DELAY_5TCK) );
 
-            uint64_t l_delay_in_cycles = mss::ns_to_cycles(i_target, l_delay_in_ns);
+            const uint64_t l_delay_in_cycles = mss::ns_to_cycles(i_target, l_delay_in_ns);
 
             // Set our delay (for HW and SIM)
             FAPI_TRY( fapi2::delay(l_delay_in_ns, mss::cycles_to_simcycles(l_delay_in_cycles)) );
@@ -160,10 +159,6 @@ extern "C"
 
         // Load data buffer control words (BCW)
         FAPI_TRY( mss::bcw_load(i_target) );
-
-        // Register has been configured, so we can unmask 'training' errors which includes parity
-        // which we want to see during MRS load
-        FAPI_TRY( mss::unmask_training_errors(i_target) );
 
         // Load MRS
         FAPI_TRY( mss::mrs_load(i_target) );
