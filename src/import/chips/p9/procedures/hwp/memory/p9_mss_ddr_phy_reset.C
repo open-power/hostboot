@@ -43,6 +43,8 @@
 #include <lib/utils/count_dimm.H>
 #include <lib/phy/adr32s.H>
 #include <lib/workarounds/dp16_workarounds.H>
+#include <lib/fir/check.H>
+#include <lib/fir/unmask.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 
@@ -77,7 +79,7 @@ extern "C"
         FAPI_TRY( mss::dp16::reset_sysclk(i_target) );
 
         //    (Note: The chip should already be in this state.)
-        FAPI_DBG("All control signals to the PHYs should already be set to their inactive state, idle state, or inactive values");
+        FAPI_DBG("All control signals to the PHYs should be set to their inactive state, idle state, or inactive values");
 
         // 2. Assert reset to PHY for 32 memory clocks
         FAPI_TRY( mss::change_resetn(i_target, mss::HIGH), "change_resetn for %s failed", mss::c_str(i_target) );
@@ -159,14 +161,17 @@ extern "C"
         // Workarounds
         FAPI_TRY( mss::workarounds::dp16::after_phy_reset(i_target) );
 
-        // If mss_unmask_ddrphy_errors gets it's own bad rc,
-        // it will commit the passed in rc (if non-zero), and return it's own bad rc.
-        // Else if mss_unmask_ddrphy_errors runs clean,
-        // it will just return the passed in rc.
-        // TODO RTC:159727  Need to code..   FAPI_TRY(mss_unmask_ddrphy_errors(i_target, rc));
+        // Unmask the FIR we want unmasked after phy reset is complete. Note this is the "good path."
+        // The algorithm is 'good path do after_phy_reset, all paths (error or not) perform the checks
+        // which are defined in during_phy_reset'. We won't run after_phy_reset (unmask of FIR) unless
+        // we're done with a success.
+        FAPI_TRY( mss::unmask::after_phy_reset(i_target) );
 
     fapi_try_exit:
-        return fapi2::current_err;
+
+        // mss::check::during_phy_reset handles the error/no error case internally. All we need to do is
+        // return the ReturnCode it hands us - it's taken care of commiting anything it needed to.
+        return mss::check::during_phy_reset(i_target);
 
     }
 
