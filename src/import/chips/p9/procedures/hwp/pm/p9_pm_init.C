@@ -42,12 +42,13 @@
 ///    Initialize Cores and Quads
 ///    Initialize OCB channels
 ///    Initialize PSS
-///    Initialize PBA
-///    Mask CME FIRs and Core-Quad Errors
+///    Set the OCC FIR actions
+///    Set the CME, PPM and PBA FIR actions
 ///    Initialize Stop GPE
 ///    Initialize Pstate GPE
-///    Start OCC PPC405
 ///    Clear off pending Special Wakeup requests on all configured EX chiplets
+///    Disable special wakeup of all the EX chiplets
+///    Start OCC PPC405
 ///
 ///  PM_RESET
 ///    Invoke "p9_pm_reset()" to reset the PM OCC complex (Cores, Quads, CMEs,
@@ -169,21 +170,20 @@ fapi2::ReturnCode pm_init(
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After PSS & HWC init"));
 
     //  ************************************************************************
-    //  Initializes PBA
-    //  Note:  This voids the channel used by the GPEs
+    //  Set the OCC FIR actions
     //  ************************************************************************
-    FAPI_DBG("Executing p9_pm_pba_init to initialize PBA");
-    FAPI_EXEC_HWP(l_rc, p9_pm_pba_init, i_target, p9pm::PM_INIT);
-    FAPI_TRY(l_rc, "ERROR: Failed to initialize PBA BUS");
-    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After PBA bus init"));
+    FAPI_DBG("Executing p9_pm_occ_firinit to set FIR actions.");
+    FAPI_EXEC_HWP(l_rc, p9_pm_occ_firinit, i_target, p9pm::PM_INIT);
+    FAPI_TRY(l_rc, "ERROR: Failed to set OCC FIR actions.");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After setting FIRs"));
 
     //  ************************************************************************
-    //  Mask the FIRs as errors can occur in what follows
+    //  Set the FIR actions
     //  ************************************************************************
-    FAPI_DBG("Executing p9_pm_firinit to mask errors/FIRs");
+    FAPI_DBG("Executing p9_pm_firinit to set PBA, PPM, CME FIR actions");
     FAPI_EXEC_HWP(l_rc, p9_pm_firinit, i_target, p9pm::PM_INIT);
-    FAPI_TRY(l_rc, "ERROR: Failed to mask OCC,PBA & CME FIRs/Errors.");
-    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After masking FIRs and Errors"));
+    FAPI_TRY(l_rc, "ERROR: Failed to set PPM, PBA & CME FIRs.");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After setting FIRs"));
 
     //  ************************************************************************
     //  Initialize the STOP GPE Engine
@@ -193,6 +193,15 @@ fapi2::ReturnCode pm_init(
     FAPI_TRY(l_rc, "ERROR: Failed to initialize SGPE");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After SGPE initialization"));
 
+    //  ************************************************************************
+    //  Initialize the PSTATE GPE Engine
+    //  ************************************************************************
+    /* TODO: RTC 157096: Enable pstate GPE initialization in PM_INIT phase
+    FAPI_DBG("Executing p9_pm_pstate_gpe_init to initialize PGPE");
+    FAPI_EXEC_HWP(l_rc, p9_pm_pstate_gpe_init, i_target, p9pm::PM_INIT);
+    FAPI_TRY(l_rc, "ERROR: Failed to initialize PGPE");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After PGPE initialization"));
+    */
     // ************************************************************************
     // Switch off OCC initiated special wakeup on EX to allowSTOP functionality
     // ************************************************************************
@@ -209,16 +218,6 @@ fapi2::ReturnCode pm_init(
                                 false),//Disable splwkup
              "ERROR: Failed to remove EX chiplets from special wakeup");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After EX out of special wakeup"));
-
-    //  ************************************************************************
-    //  Initialize the PSTATE GPE Engine
-    //  ************************************************************************
-    /* TODO: RTC 157096: Enable pstate GPE initialization in PM_INIT phase
-    FAPI_DBG("Executing p9_pm_pstate_gpe_init to initialize PGPE");
-    FAPI_EXEC_HWP(l_rc, p9_pm_pstate_gpe_init, i_target, p9pm::PM_INIT);
-    FAPI_TRY(l_rc, "ERROR: Failed to initialize PGPE");
-    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After PGPE initialization"));
-    */
 
     //  ************************************************************************
     //  Start OCC PPC405

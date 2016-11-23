@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -24,7 +24,8 @@
 # IBM_PROLOG_END_TAG
 
 PROCEDURE=p9_pm_reset
-libp9_pm_reset_DEPLIBS += p9_pm_utils p9_pm_firinit p9_pm_occ_control p9_cpu_special_wakeup_ex p9_pm_stop_gpe_init p9_pm_occ_gpe_init p9_pm_corequad_init p9_pm_pba_init p9_pm_occ_sram_init p9_pm_ocb_init p9_pm_pss_init
+libp9_pm_reset_DEPLIBS += p9_pm_utils p9_pm_occ_firinit p9_pm_firinit p9_pm_occ_control
+libp9_pm_reset_DEPLIBS += p9_pm_stop_gpe_init p9_pm_occ_gpe_init p9_pm_corequad_init p9_pm_occ_sram_init p9_pm_ocb_init p9_pm_pss_init
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/common/pmlib/include/registers)
 $(call BUILD_PROCEDURE)

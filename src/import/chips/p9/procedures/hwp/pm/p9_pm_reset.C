@@ -39,16 +39,14 @@
 ///
 /// @verbatim
 ///
-///     - Mask the PM FIRs
+///     - Mask the OCC FIRs
 ///     - Halt and then Reset the PPC405
 ///     - Put all EX chiplets in special wakeup
-///     - Reset Stop,Pstate and OCC GPEs
+///     - Mask PBA, PPM and CME FIRs
+///     - Reset OCC, PSTATE and STOP GPEs
 ///     - Reset the Cores and Quads
-///     - Reset PBA
-///     - Reset SRAM Controller
 ///     - Reset OCB
 ///     - Reset PSS
-///     - Clear special wakeups
 ///
 /// @endverbatim
 ///
@@ -104,11 +102,11 @@ fapi2::ReturnCode p9_pm_reset(
     fapi2::ReturnCode l_rc;
 
     //  ************************************************************************
-    //  Mask the FIRs as errors can occur in what follows
+    //  Mask the OCC FIRs as errors can occur in what follows
     //  ************************************************************************
-    FAPI_DBG("Executing p9_pm_firinit for masking errors in reset operation.");
-    FAPI_EXEC_HWP(l_rc, p9_pm_firinit, i_target, p9pm::PM_RESET);
-    FAPI_TRY(l_rc, "ERROR: Failed to mask OCC,PBA & CME FIRs.");
+    FAPI_DBG("Executing p9_pm_occ_firinit for masking errors in reset operation.");
+    FAPI_EXEC_HWP(l_rc, p9_pm_occ_firinit, i_target, p9pm::PM_RESET);
+    FAPI_TRY(l_rc, "ERROR: Failed to mask OCC FIRs.");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After masking FIRs"));
 
     // Clear the OCC's PIB I2C engine locks.
@@ -138,22 +136,12 @@ fapi2::ReturnCode p9_pm_reset(
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After EX in special wakeup"));
 
     //  ************************************************************************
-    //  Reset the STOP GPE (Bring it to HALT)
+    //  Mask the PBA & CME FIRs as errors can occur in what follows
     //  ************************************************************************
-    FAPI_DBG("Executing p9_pm_stop_gpe_init to reset SGPE");
-    FAPI_EXEC_HWP(l_rc, p9_pm_stop_gpe_init, i_target, p9pm::PM_RESET);
-    FAPI_TRY(l_rc, "ERROR: Failed to reset SGPE");
-    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After reset of SGPE"));
-
-    //  ************************************************************************
-    //  Reset the PSTATE GPE (Bring it to HALT)
-    //  ************************************************************************
-    FAPI_DBG("Executing p9_pm_pstate_gpe_init to reset PGPE");
-    /* TODO: RTC 157096 - Enable once the procedure is available
-    FAPI_EXEC_HWP(l_rc, p9_pm_pstate_gpe_init, i_target, p9pm::PM_RESET);
-    FAPI_TRY(l_rc, "ERROR: Failed to reset PGPE");
-    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After reset of PGPE"));
-    */
+    FAPI_DBG("Executing p9_pm_firinit for masking errors in reset operation.");
+    FAPI_EXEC_HWP(l_rc, p9_pm_firinit, i_target, p9pm::PM_RESET);
+    FAPI_TRY(l_rc, "ERROR: Failed to mask PBA & CME FIRs.");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After masking FIRs"));
 
     //  ************************************************************************
     //  Issue reset to OCC GPEs ( GPE0 and GPE1) (Bring them to HALT)
@@ -168,6 +156,24 @@ fapi2::ReturnCode p9_pm_reset(
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After reset of OCC GPEs"));
 
     //  ************************************************************************
+    //  Reset the PSTATE GPE (Bring it to HALT)
+    //  ************************************************************************
+    FAPI_DBG("Executing p9_pm_pstate_gpe_init to reset PGPE");
+    /* TODO: RTC 157096 - Enable once the procedure is available
+    FAPI_EXEC_HWP(l_rc, p9_pm_pstate_gpe_init, i_target, p9pm::PM_RESET);
+    FAPI_TRY(l_rc, "ERROR: Failed to reset PGPE");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After reset of PGPE"));
+    */
+
+    //  ************************************************************************
+    //  Reset the STOP GPE (Bring it to HALT)
+    //  ************************************************************************
+    FAPI_DBG("Executing p9_pm_stop_gpe_init to reset SGPE");
+    FAPI_EXEC_HWP(l_rc, p9_pm_stop_gpe_init, i_target, p9pm::PM_RESET);
+    FAPI_TRY(l_rc, "ERROR: Failed to reset SGPE");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After reset of SGPE"));
+
+    //  ************************************************************************
     //  Reset Cores and Quads
     //  ************************************************************************
     FAPI_DBG("Executing p9_pm_corequad_init to reset cores & quads");
@@ -180,15 +186,6 @@ fapi2::ReturnCode p9_pm_reset(
                  );
     FAPI_TRY(l_rc, "ERROR: Failed to reset cores & quads");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After reset of core quad"));
-
-    //  ************************************************************************
-    //  Issue reset to PBA
-    //  Note:  this voids the channel used by the GPEs
-    //  ************************************************************************
-    FAPI_DBG("Executing p9_pm_pba_init to reset PBA");
-    FAPI_EXEC_HWP(l_rc, p9_pm_pba_init, i_target, p9pm::PM_RESET);
-    FAPI_TRY(l_rc, "ERROR: Failed to reset PBA BUS");
-    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After reset of PBA"));
 
     //  ************************************************************************
     //  Issue reset to OCC-SRAM

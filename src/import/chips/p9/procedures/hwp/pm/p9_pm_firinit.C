@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,9 +37,6 @@
 /// High-level procedure flow:
 ///
 /// \verbatim
-///     - call p9_pm_occ_firinit.C
-///     - evaluate RC
-///
 ///     - call p9_pm_pba_firinit.C
 ///     - evaluate RC
 ///
@@ -59,7 +56,6 @@
 // Includes
 // ----------------------------------------------------------------------
 #include <p9_pm_firinit.H>
-#include <p9_pm_occ_firinit.H>
 #include <p9_pm_pba_firinit.H>
 #include <p9_pm_ppm_firinit.H>
 #include <p9_pm_cme_firinit.H>
@@ -78,16 +74,6 @@ fapi2::ReturnCode p9_pm_firinit(
     fapi2::buffer<uint64_t> l_data64;
 
     // CHECKING FOR FIRS BEFORE RESET and INIT
-
-    FAPI_DBG("Checking OCC FIRs");
-    FAPI_TRY(fapi2::getScom(i_target, PERV_TP_OCC_SCOM_OCCLFIR, l_data64),
-             "ERROR: Failed to fetch OCC FIR");
-
-    if(l_data64)
-    {
-        FAPI_INF("WARNING: OCC has active errors");
-    }
-
     FAPI_DBG("Checking PBA FIRs");
     FAPI_TRY(fapi2::getScom(i_target, PU_PBAFIR , l_data64),
              "ERROR: Failed to fetch PBA FIR");
@@ -96,11 +82,6 @@ fapi2::ReturnCode p9_pm_firinit(
     {
         FAPI_INF("WARNING: PBA has active error(s)");
     }
-
-    // Handle OCC FIRs, Masks and actions
-    FAPI_DBG("Calling OCC firinit ...");
-    FAPI_EXEC_HWP(l_rc, p9_pm_occ_firinit, i_target, i_mode);
-    FAPI_TRY(l_rc);
 
     // Handle PBA FIRs, Masks and actions
     FAPI_DBG("Calling PBA firinit ...");

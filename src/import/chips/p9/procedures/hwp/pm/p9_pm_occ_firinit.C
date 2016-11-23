@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,6 +146,27 @@ fapi2::ReturnCode p9_pm_occ_firinit(
     const p9pm::PM_FLOW_MODE i_mode)
 {
     FAPI_IMP("p9_pm_occ_firinit Enter");
+
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint64_t> l_mask64;
+
+    uint64_t l_fir;
+    uint64_t l_mask;
+    uint64_t l_unmaskedErrors;
+
+    FAPI_DBG("Checking OCC FIRs");
+    FAPI_TRY(fapi2::getScom(i_target, PERV_TP_OCC_SCOM_OCCLFIR, l_data64),
+             "ERROR: Failed to fetch OCC FIR");
+    FAPI_TRY(fapi2::getScom(i_target, PERV_TP_OCC_SCOM_OCCLFIRMASK, l_mask64),
+             "ERROR: Failed to fetch OCC FIRMASK");
+    l_data64.extractToRight<0, 64>(l_fir);
+    l_mask64.extractToRight<0, 64>(l_mask);
+    l_unmaskedErrors = l_fir & l_mask;
+
+    if(l_unmaskedErrors)
+    {
+        FAPI_INF("WARNING: OCC has active errors");
+    }
 
     if(i_mode == p9pm::PM_RESET)
     {
