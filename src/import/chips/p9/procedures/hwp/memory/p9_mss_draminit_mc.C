@@ -37,7 +37,7 @@
 #include <mss.H>
 
 #include <p9_mss_draminit_mc.H>
-#include <lib/fir/memdiags_fir.H>
+#include <lib/fir/unmask.H>
 #include <lib/utils/find.H>
 #include <lib/utils/count_dimm.H>
 
@@ -141,7 +141,7 @@ extern "C"
         }
 
         // At this point the DDR interface must be monitored for memory errors. Memory related FIRs should be unmasked.
-        FAPI_TRY( mss::unmask_memdiags_errors(i_target) );
+        FAPI_TRY( mss::unmask::after_draminit_mc(i_target) );
 
     fapi_try_exit:
         FAPI_INF("End draminit MC");
