@@ -376,7 +376,7 @@
     <target>TARGET</target>
   </deconfigure>
 </hwpError>
-  
+
 <hwpError>
 <rc>RC_MSS_INVALID_VPD_VALUE_MC_DRV_IMP_DQ_DQS</rc>
 <description>
@@ -485,6 +485,33 @@
   <deconfigure>
     <target>TARGET</target>
   </deconfigure>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DDR_PHY_RESET_PORT_FIR</rc>
+  <description>
+    The port noted has set an error bit during PHY reset
+  </description>
+  <ffdc>CAL_FIR</ffdc>
+  <ffdc>PHY_FIR</ffdc>
+  <callout>
+    <target>MCA_TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>MCA_TARGET</target>
+  </deconfigure>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DDR_PHY_RESET_PORT_FIRS_REPORTED</rc>
+  <description>
+    One or more ports noted a set error bit during PHY reset
+  </description>
+  <callout>
+    <target>MCBIST_TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
 </hwpError>
 
 </hwpErrors>
