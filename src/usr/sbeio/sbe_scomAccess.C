@@ -153,19 +153,19 @@ errlHndl_t getFifoScom(TARGETING::Target * i_target,
         if (errl) break;
 
         // set up FIFO request message
-        fifoGetScomRequest  l_fifoRequest;
-        fifoGetScomResponse l_fifoResponse;
-        l_fifoRequest.commandClass = SBE_FIFO_CLASS_SCOM_ACCESS;
-        l_fifoRequest.command = SBE_FIFO_CMD_GET_SCOM;
+        SbeFifo::fifoGetScomRequest  l_fifoRequest;
+        SbeFifo::fifoGetScomResponse l_fifoResponse;
+        l_fifoRequest.commandClass = SbeFifo::SBE_FIFO_CLASS_SCOM_ACCESS;
+        l_fifoRequest.command = SbeFifo::SBE_FIFO_CMD_GET_SCOM;
         l_fifoRequest.address = i_addr;
 
         SBE_TRACU("getFifoScom: i_addr=%llX, target=%.8X",
                   i_addr, TARGETING::get_huid(i_target));
 
-        errl = performFifoChipOp(i_target,
+        errl = SbeFifo::getTheInstance().performFifoChipOp(i_target,
                                  (uint32_t *)&l_fifoRequest,
                                  (uint32_t *)&l_fifoResponse,
-                                 sizeof(fifoGetScomResponse));
+                                 sizeof(SbeFifo::fifoGetScomResponse));
         //always return data even if there is an error
         o_data = l_fifoResponse.data;
     }
@@ -191,20 +191,20 @@ errlHndl_t putFifoScom(TARGETING::Target * i_target,
         if (errl) break;
 
         // set up FIFO request message
-        fifoPutScomRequest  l_fifoRequest;
-        fifoPutScomResponse l_fifoResponse;
-        l_fifoRequest.commandClass = SBE_FIFO_CLASS_SCOM_ACCESS;
-        l_fifoRequest.command = SBE_FIFO_CMD_PUT_SCOM;
+        SbeFifo::fifoPutScomRequest  l_fifoRequest;
+        SbeFifo::fifoPutScomResponse l_fifoResponse;
+        l_fifoRequest.commandClass = SbeFifo::SBE_FIFO_CLASS_SCOM_ACCESS;
+        l_fifoRequest.command = SbeFifo::SBE_FIFO_CMD_PUT_SCOM;
         l_fifoRequest.address = i_addr;
         l_fifoRequest.data    = i_data;
 
         SBE_TRACU("putFifoScom: i_addr=%llX, target=%.8X",
                   i_addr, TARGETING::get_huid(i_target));
 
-        errl = performFifoChipOp(i_target,
+        errl = SbeFifo::getTheInstance().performFifoChipOp(i_target,
                                  (uint32_t *)&l_fifoRequest,
                                  (uint32_t *)&l_fifoResponse,
-                                 sizeof(fifoPutScomResponse));
+                                 sizeof(SbeFifo::fifoPutScomResponse));
     }
     while (0);
 
@@ -230,10 +230,10 @@ errlHndl_t putFifoScomUnderMask(TARGETING::Target * i_target,
         if (errl) break;
 
         // set up FIFO request message
-        fifoPutScomUnderMaskRequest  l_fifoRequest;
-        fifoPutScomResponse          l_fifoResponse;
-        l_fifoRequest.commandClass = SBE_FIFO_CLASS_SCOM_ACCESS;
-        l_fifoRequest.command = SBE_FIFO_CMD_PUT_SCOM_UNDER_MASK;
+        SbeFifo::fifoPutScomUnderMaskRequest  l_fifoRequest;
+        SbeFifo::fifoPutScomResponse          l_fifoResponse;
+        l_fifoRequest.commandClass = SbeFifo::SBE_FIFO_CLASS_SCOM_ACCESS;
+        l_fifoRequest.command = SbeFifo::SBE_FIFO_CMD_PUT_SCOM_UNDER_MASK;
         l_fifoRequest.address = i_addr;
         l_fifoRequest.data    = i_data;
         l_fifoRequest.mask    = i_mask;
@@ -242,10 +242,10 @@ errlHndl_t putFifoScomUnderMask(TARGETING::Target * i_target,
                   "i_addr=%llX, target=%.8X, mask=%llX",
                   i_addr, TARGETING::get_huid(i_target),i_mask);
 
-        errl = performFifoChipOp(i_target,
+        errl = SbeFifo::getTheInstance().performFifoChipOp(i_target,
                                  (uint32_t *)&l_fifoRequest,
                                  (uint32_t *)&l_fifoResponse,
-                                 sizeof(fifoPutScomResponse));
+                                 sizeof(SbeFifo::fifoPutScomResponse));
     }
     while (0);
 

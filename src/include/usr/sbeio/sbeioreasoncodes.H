@@ -45,6 +45,7 @@ enum sbeioModuleId
     SBEIO_INVALID_MODULE                = 0x00,
     SBEIO_PSU                           = 0x01,
     SBEIO_FIFO                          = 0x02,
+    SBEIO_FFDC_PARSER                   = 0x03,
 };
 
 /**
@@ -73,6 +74,9 @@ enum sbeioReasonCode
     SBEIO_FIFO_NULL_TARGET             = SBEIO_COMP_ID | 0x17,
     SBEIO_FIFO_MASTER_TARGET           = SBEIO_COMP_ID | 0x18,
     SBEIO_FIFO_SENTINEL_TARGET         = SBEIO_COMP_ID | 0x19,
+
+    // SBE FFDC Parser error codes
+    SBEIO_FFDC_PARSER_BUFF_OVERFLOW    = SBEIO_COMP_ID | 0x1A,
 
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313

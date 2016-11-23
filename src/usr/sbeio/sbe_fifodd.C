@@ -36,9 +36,13 @@
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
 #include <sbeio/sbeioreasoncodes.H>
+#include <errl/errlreasoncodes.H>
 #include "sbe_fifodd.H"
-#include <initservice/initserviceif.H> //@todo-RTC:149454-Remove
-#include <arch/ppc.H>
+#include <sbeio/sbe_ffdc_parser.H>
+#include <initservice/initserviceif.H>
+#include <kernel/pagemgr.H>
+#include <fapi2.H>
+#include <error_info_defs.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -58,15 +62,38 @@ extern trace_desc_t* g_trac_sbeio;
 
 using namespace ERRORLOG;
 
-//TODO RTC 149454 implement error recovery and ffdc
-
 namespace SBEIO
 {
+
+SbeFifo & SbeFifo::getTheInstance()
+{
+    return Singleton<SbeFifo>::instance();
+}
+
+/**
+ * @brief  Constructor
+ */
+SbeFifo::SbeFifo()
+{
+    iv_ffdcPackageBuffer = PageManager::allocatePage(ffdcPackageSize, true);
+    initFFDCPackageBuffer();
+}
+
+/**
+ * @brief  Destructor
+ */
+SbeFifo::~SbeFifo()
+{
+    if(iv_ffdcPackageBuffer != NULL)
+    {
+        PageManager::freePage(iv_ffdcPackageBuffer);
+    }
+}
 
 /**
  * @brief perform SBE PSU chip-op
  */
-errlHndl_t performFifoChipOp(TARGETING::Target * i_target,
+errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
                              uint32_t          * i_pFifoRequest,
                              uint32_t          * i_pFifoResponse,
                              uint32_t            i_responseSize)
@@ -96,8 +123,6 @@ errlHndl_t performFifoChipOp(TARGETING::Target * i_target,
 
     mutex_unlock(&l_fifoOpMux);
 
-    //@todo-RTC:149454-Remove when we have our FFDC in place
-    //Temporarily crash with a known RC so that HWSV collects the SBE FFDC
     if( errl && (SBE_COMP_ID == errl->moduleId()) )
     {
         SBE_TRACF( "Forcing shutdown for FSP to collect FFDC" );
@@ -123,9 +148,6 @@ errlHndl_t performFifoChipOp(TARGETING::Target * i_target,
                              SBEIO_HWSV_COLLECT_SBE_RC,
                              orig_plid,
                              TWO_UINT32_TO_UINT64(orig_rc,orig_mod));
-        MAGIC_INST_GET_SBE_TRACES(
-              i_target->getAttr<TARGETING::ATTR_POSITION>(),
-              SBEIO_HWSV_COLLECT_SBE_RC);
         INITSERVICE::doShutdown( SBEIO_HWSV_COLLECT_SBE_RC );
     }
 
@@ -138,7 +160,7 @@ errlHndl_t performFifoChipOp(TARGETING::Target * i_target,
 /**
  * @brief write FIFO request message
  */
-errlHndl_t writeRequest(TARGETING::Target * i_target,
+errlHndl_t SbeFifo::writeRequest(TARGETING::Target * i_target,
                         uint32_t * i_pFifoRequest)
 {
     errlHndl_t errl = NULL;
@@ -195,7 +217,7 @@ errlHndl_t writeRequest(TARGETING::Target * i_target,
 /**
  * @brief wait for room in upstream fifo to send data
  */
-errlHndl_t waitUpFifoReady(TARGETING::Target * i_target)
+errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
 {
     errlHndl_t errl = NULL;
 
@@ -222,9 +244,6 @@ errlHndl_t waitUpFifoReady(TARGETING::Target * i_target)
             SBE_TRACF(ERR_MRK "waitUpFifoReady: "
                       "timeout waiting for upstream FIFO to be not full");
 
-            //TODO RTC 149454 implement error recovery and ffdc
-            // Consider a new callout for SBE problems.
-
             /*@
              * @errortype
              * @moduleid     SBEIO_FIFO
@@ -233,11 +252,7 @@ errlHndl_t waitUpFifoReady(TARGETING::Target * i_target)
              * @devdesc      Timeout waiting for upstream FIFO to have
              *               room to write
              */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                 SBEIO_FIFO,
-                                 SBEIO_FIFO_UPSTREAM_TIMEOUT,
-                                 MAX_UP_FIFO_TIMEOUT_NS,
-                                 0);
+
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->addHwCallout(  i_target,
@@ -245,9 +260,6 @@ errlHndl_t waitUpFifoReady(TARGETING::Target * i_target)
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
             errl->collectTrace(SBEIO_COMP_NAME);
-            MAGIC_INST_GET_SBE_TRACES(
-                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
-                  SBEIO_FIFO_UPSTREAM_TIMEOUT);
             break;
         }
 
@@ -265,7 +277,7 @@ errlHndl_t waitUpFifoReady(TARGETING::Target * i_target)
 /**
  * @brief Read FIFO response messages
  */
-errlHndl_t readResponse(TARGETING::Target * i_target,
+errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                         uint32_t * i_pFifoRequest,
                         uint32_t * o_pFifoResponse,
                         uint32_t   i_responseSize)
@@ -343,9 +355,6 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
             SBE_TRACF(ERR_MRK "readResponse: no EOT cmd=0x%08x size=%d",
                       i_pFifoRequest[1],i_responseSize);
 
-            //TODO RTC 149454 implement error recovery and ffdc
-            // Consider a new callout for SBE problems.
-
             /*@
              * @errortype
              * @moduleid     SBEIO_FIFO
@@ -359,6 +368,8 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
                                  SBEIO_FIFO_NO_DOWNSTREAM_EOT,
                                  i_pFifoRequest[1],
                                  i_responseSize);
+
+
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->addHwCallout(  i_target,
@@ -366,9 +377,6 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
             errl->collectTrace(SBEIO_COMP_NAME);
-            MAGIC_INST_GET_SBE_TRACES(
-                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
-                  SBEIO_FIFO_NO_DOWNSTREAM_EOT);
             break;
         }
 
@@ -396,9 +404,6 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
             SBE_TRACFBIN("Invalid Response from SBE",
                          o_pFifoResponse,l_recWords*sizeof(l_last));
 
-            //TODO RTC 149454 implement error recovery and ffdc
-            // Consider a new callout for SBE problems.
-
             /*@
              * @errortype
              * @moduleid     SBEIO_FIFO
@@ -418,6 +423,7 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
                                     TWO_UINT16_TO_UINT32(l_last,
                                          l_recWords*sizeof(uint32_t)),
                                     i_responseSize));
+
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->addHwCallout(  i_target,
@@ -425,9 +431,6 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
             errl->collectTrace(SBEIO_COMP_NAME);
-            MAGIC_INST_GET_SBE_TRACES(
-                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
-                  SBEIO_FIFO_INVALID_STATUS_DISTANCE);
             break;
         }
 
@@ -447,12 +450,6 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
                       l_pStatusHeader->primaryStatus,
                       l_pStatusHeader->secondaryStatus);
 
-            //TODO RTC 149454 implement error recovery and ffdc
-            // pibpcb status or ffdc follows the status header
-            // Might have different behavior for something messed up
-            // like !Magic versus bad status returned by the SBE in which
-            // case may be able to parse SBE RCs.
-
             /*@
              * @errortype
              * @moduleid     SBEIO_FIFO
@@ -465,6 +462,7 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
              * @devdesc  Status header does not start with magic number or
              *           non-zero primary or secondary status
              */
+
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  SBEIO_FIFO,
                                  SBEIO_FIFO_RESPONSE_ERROR,
@@ -474,6 +472,54 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
                                          l_pStatusHeader->magic,
                                          l_pStatusHeader->primaryStatus,
                                          l_pStatusHeader->secondaryStatus));
+
+            /*
+             * The FFDC package should start at l_pReceived.
+             * Size of the FFDC package should be l_maxWords - l_recWords
+             */
+
+            writeFFDCBuffer(l_pReceived,
+                            sizeof(uint32_t) * (l_maxWords - l_recWords - 1));
+            SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
+            l_ffdc_parser->parseFFDCData(iv_ffdcPackageBuffer);
+
+            // Go through the buffer, get the RC
+            uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
+            for(uint8_t i = 0; i < l_pkgs; i++)
+            {
+                 uint32_t l_rc = l_ffdc_parser->getPackageRC(i);
+                 // If fapiRC, add data to errorlog
+                 if(l_rc ==  fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA)
+                 {
+                     errl->addFFDC( SBE_COMP_ID,
+                                    l_ffdc_parser->getFFDCPackage(i),
+                                    l_ffdc_parser->getPackageLength(i),
+                                    0,
+                                    ERRORLOG::ERRL_UDT_NOFORMAT,
+                                    false );
+                 }
+                 else
+                 {
+                     using namespace fapi2;
+
+                     fapi2::ReturnCode l_fapiRC;
+
+                     /*
+                      * Put FFDC into sbeFfdc_t struct and
+                      * call FAPI_SET_SBE_ERROR
+                      */
+                     sbeFfdc_t * l_ffdcBuf = new sbeFfdc_t();
+                     l_ffdcBuf->size = l_ffdc_parser->getPackageLength(i);
+                     l_ffdcBuf->data = reinterpret_cast<uint64_t>(
+                                           l_ffdc_parser->getFFDCPackage(i));
+
+                     FAPI_SET_SBE_ERROR(l_fapiRC,
+                                l_rc,
+                                l_ffdcBuf,
+                                i_target->getAttr<TARGETING::ATTR_FAPI_POS>());
+                 }
+            }
+
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->addHwCallout(  i_target,
@@ -481,9 +527,8 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
             errl->collectTrace(SBEIO_COMP_NAME);
-            MAGIC_INST_GET_SBE_TRACES(
-                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
-                  SBEIO_FIFO_RESPONSE_ERROR);
+
+            delete  l_ffdc_parser;
             break;
         }
     }
@@ -501,7 +546,7 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
  *        On return, either a valid word is ready to read,
  *        or the EOT will be set in the returned doorbell status.
  */
-errlHndl_t waitDnFifoReady(TARGETING::Target * i_target,
+errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
                            uint32_t          & o_status)
 {
     errlHndl_t errl = NULL;
@@ -536,8 +581,6 @@ errlHndl_t waitDnFifoReady(TARGETING::Target * i_target,
             SBE_TRACF(ERR_MRK "waitDnFifoReady: "
                       "timeout waiting for downstream FIFO to be not full");
 
-            //TODO RTC 149454 implement error recovery and ffdc
-
             /*@
              * @errortype
              * @moduleid     SBEIO_FIFO
@@ -546,11 +589,7 @@ errlHndl_t waitDnFifoReady(TARGETING::Target * i_target,
              * @devdesc      Timeout waiting for downstream FIFO to have
              *               data to receive
              */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                 SBEIO_FIFO,
-                                 SBEIO_FIFO_DOWNSTREAM_TIMEOUT,
-                                 MAX_UP_FIFO_TIMEOUT_NS,
-                                 0);
+
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->addHwCallout(  i_target,
@@ -558,9 +597,6 @@ errlHndl_t waitDnFifoReady(TARGETING::Target * i_target,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
             errl->collectTrace(SBEIO_COMP_NAME);
-            MAGIC_INST_GET_SBE_TRACES(
-                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
-                  SBEIO_FIFO_DOWNSTREAM_TIMEOUT);
             break;
         }
 
@@ -578,7 +614,7 @@ errlHndl_t waitDnFifoReady(TARGETING::Target * i_target,
 /**
  * @brief read FSI
  */
-errlHndl_t readFsi(TARGETING::Target * i_target,
+errlHndl_t SbeFifo::readFsi(TARGETING::Target * i_target,
                      uint64_t   i_addr,
                      uint32_t * o_pData)
 {
@@ -600,7 +636,7 @@ errlHndl_t readFsi(TARGETING::Target * i_target,
 /**
  * @brief write FSI
  */
-errlHndl_t writeFsi(TARGETING::Target * i_target,
+errlHndl_t SbeFifo::writeFsi(TARGETING::Target * i_target,
                      uint64_t   i_addr,
                      uint32_t * i_pData)
 {
@@ -616,6 +652,33 @@ errlHndl_t writeFsi(TARGETING::Target * i_target,
                     DEVICE_FSI_ADDRESS(i_addr));
 
     return errl;
+}
+
+/**
+ * @brief zero out FFDC Package Buffer
+ */
+
+void SbeFifo::initFFDCPackageBuffer()
+{
+    memset(iv_ffdcPackageBuffer, 0x00, PAGESIZE * ffdcPackageSize);
+}
+
+/**
+ * @brief populate FFDC package buffer
+ * @param[in]  i_data        FFDC error data
+ * @param[in]  i_len         data buffer len to copy
+ */
+void SbeFifo::writeFFDCBuffer( void * i_data, uint32_t i_len) {
+    if(i_len <= PAGESIZE * ffdcPackageSize)
+    {
+        initFFDCPackageBuffer();
+        memcpy(iv_ffdcPackageBuffer, i_data, i_len);
+    }
+    else
+    {
+        SBE_TRACF(ERR_MRK"writeFFDCBuffer: Buffer size too large: %d",
+                      i_len);
+    }
 }
 
 } //end of namespace SBEIO

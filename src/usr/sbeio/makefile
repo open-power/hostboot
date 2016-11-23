@@ -26,6 +26,12 @@ ROOTPATH = ../../..
 
 MODULE = sbeio
 
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
+
 OBJS += sbe_psudd.o
 OBJS += sbe_coreStateControl.o
 OBJS += sbe_psuQuiesce.o
@@ -33,6 +39,7 @@ OBJS += sbe_systemConfig.o
 OBJS += sbe_fifodd.o
 OBJS += sbe_scomAccess.o
 OBJS += sbe_scomAccessdd.o
+OBJS += sbe_ffdc_parser.o
 
 SUBDIRS = test.d
 
