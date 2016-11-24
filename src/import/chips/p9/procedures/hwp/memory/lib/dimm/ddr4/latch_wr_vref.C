@@ -69,43 +69,19 @@ fapi2::ReturnCode add_latch_wr_vref_commands( const fapi2::Target<fapi2::TARGET_
 
     // Adds both VREFDQ train enables
     // Note: this isn't general - assumes Nimbus via MCBIST instruction here BRS
-    ccs::instruction_t<TARGET_TYPE_MCBIST> l_inst_a_side;
-    ccs::instruction_t<TARGET_TYPE_MCBIST> l_inst_b_side;
-
     auto l_mr_override = i_mrs06;
 
-    enable_vref_train_enable(l_mr_override);
-
-    FAPI_TRY(setup_ab_side_vref_train_enable(
-                 i_target,
-                 l_mr_override,
-                 i_rank,
-                 l_inst_a_side,
-                 l_inst_b_side)
-            );
-
     // Add both to the CCS program - JEDEC step 1
-    io_inst.push_back(l_inst_a_side);
-    io_inst.push_back(l_inst_b_side);
+    enable_vref_train_enable(l_mr_override);
+    FAPI_TRY( mrs_engine(i_target, l_mr_override, i_rank, mss::tvrefdqe(i_target), io_inst) );
 
     // Add both to the CCS program - JEDEC step 2
-    io_inst.push_back(l_inst_a_side);
-    io_inst.push_back(l_inst_b_side);
-
-    disable_vref_train_enable(l_mr_override);
+    FAPI_TRY( mrs_engine(i_target, l_mr_override, i_rank, mss::tvrefdqe(i_target), io_inst) );
 
     // Hits VREFDQ train disable - putting the DRAM's back in mainline mode
-    FAPI_TRY(setup_ab_side_vref_train_enable(
-                 i_target,
-                 l_mr_override,
-                 i_rank,
-                 l_inst_a_side,
-                 l_inst_b_side)
-            );
-
     // Add both to the CCS program - JEDEC step 3
-    io_inst.push_back(l_inst_a_side);
-    io_inst.push_back(l_inst_b_side);
+    disable_vref_train_enable(l_mr_override);
+    FAPI_TRY( mrs_engine(i_target, l_mr_override, i_rank, mss::tvrefdqe(i_target), io_inst) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -211,58 +187,6 @@ fapi2::ReturnCode setup_latch_wr_vref_commands_by_rank( const fapi2::Target<fapi
                                         l_mrs06,
                                         i_rank,
                                         io_inst));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief helper function to setup a/b side MR06 commands for the latching function based upon TRAIN_ENABLE
-/// @param[in] i_mrs06, base MRS 06 allows the user to setup custom values and pass it in
-/// @param[in] i_rank, rank on which to latch MRS 06
-/// @param[out] o_a_side, a-side MR06 command
-/// @param[out] o_b_side, b-side MR06 command
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-fapi2::ReturnCode setup_ab_side_vref_train_enable(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const mrs06_data& i_mrs06,
-        const uint64_t& i_rank,
-        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& o_a_side,
-        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& o_b_side)
-{
-    // commands to be latched are MR06
-    constexpr uint8_t WR_VREF_MRS = 6;
-
-    // Note: this isn't general - assumes Nimbus via MCBIST instruction here BRS
-    o_a_side = ccs::mrs_command<fapi2::TARGET_TYPE_MCBIST>(i_target, i_rank, WR_VREF_MRS);
-
-    // Sets up variables
-    const auto l_delay_enter = mss::tvrefdqe(i_target);
-
-    // Thou shalt send 2 MRS, one for the a-side and the other inverted for the b-side.
-    // If we're on an odd-rank then we need to mirror
-    // So configure the A-side, mirror if necessary and invert for the B-side
-    // Gets the actual MR data to pass into CCS
-    FAPI_TRY( mrs06(i_target, i_mrs06, o_a_side, i_rank) );
-
-    FAPI_TRY( mss::address_mirror(i_target, i_rank, o_a_side) );
-    o_b_side = mss::address_invert(o_a_side);
-
-    // Not sure if we can get tricky here and only delay after the b-side MR. The question is whether the delay
-    // is needed/assumed by the register or is purely a DRAM mandated delay. We know we can't go wrong having
-    // both delays but if we can ever confirm that we only need one we can fix this. BRS
-    o_a_side.arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
-                                  MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(l_delay_enter);
-    o_b_side.arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
-                                  MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(l_delay_enter);
-
-    // Dump out the 'decoded' MRS and trace the CCS instructions.
-    FAPI_TRY( mrs06_decode(o_a_side, i_rank) );
-
-    FAPI_INF("MRS%02d (%d) 0x%016llx:0x%016llx %s:rank %d a-side", WR_VREF_MRS, l_delay_enter,
-             o_a_side.arr0, o_a_side.arr1, mss::c_str(i_target), i_rank);
-    FAPI_INF("MRS%02d (%d) 0x%016llx:0x%016llx %s:rank %d b-side", WR_VREF_MRS, l_delay_enter,
-             o_b_side.arr0, o_b_side.arr1, mss::c_str(i_target), i_rank);
 
 fapi_try_exit:
     return fapi2::current_err;
