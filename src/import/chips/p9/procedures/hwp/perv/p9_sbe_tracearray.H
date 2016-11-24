@@ -57,7 +57,7 @@
 #include "p9_tracearray_defs.H"
 
 // structure to represent HWP arguments
-struct proc_gettracearray_args
+struct p9_sbe_tracearray_args
 {
     p9_tracearray_bus_id trace_bus; ///< The trace bus whose associated trace array should be dumped
     bool stop_pre_dump;             ///< Stop the trace array before starting the dump
@@ -75,7 +75,7 @@ static const fapi2::TargetType P9_SBE_TRACEARRAY_TARGET_TYPES =
 //function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_sbe_tracearray_FP_t) (
     const fapi2::Target<P9_SBE_TRACEARRAY_TARGET_TYPES>& i_target,
-    const proc_gettracearray_args& i_args,
+    const p9_sbe_tracearray_args& i_args,
     uint8_t* o_ta_data,
     const uint32_t i_num_rows
 );
@@ -89,7 +89,7 @@ extern "C" {
      * @return The type of target to hand to p9_sbe_tracearray to clearly
      *         identify the array instance.
      */
-    static inline fapi2::TargetType proc_gettracearray_target_type(p9_tracearray_bus_id i_trace_bus)
+    static inline fapi2::TargetType p9_sbe_tracearray_target_type(p9_tracearray_bus_id i_trace_bus)
     {
         /* On SBE there is no support for MCBIST and OBUS fapi targets.
          * But since the usage related to these targets in p9_sbe_tracearray
@@ -116,17 +116,20 @@ extern "C" {
      *        rows requested, from selected trace array via SCOM.
      *        Optionally performing trace stop (prior to dump) and/or
      *        trace restart, reset (after dump).
-     *        If dump is requested along with other control flags, pre-dump control
-     *        would take effect before reading row 0 and post-dump control would
-     *        take effect after reading last row.
+     *        If a partial dump is requested along with other control flags,
+     *        pre-dump control would take effect before reading row 0 and
+     *        post-dump control would take effect after reading last row.
      *
      * @param i_target      Chip or chiplet target. The necessary target type can be
-     *                      queried through proc_gettracearray_target_type().
+     *                      queried through p9_sbe_tracearray_target_type().
      * @param i_args        Argument structure with additional parameters
      * @param o_ta_data     Trace array data. Will contain requested number of trace
      *                      rows from the array concatenated,
      *                      starting with the oldest trace entry after the previous
      *                      dump call and ending with the newest
+     * @param i_cur_row     Current count of the row being extracted.
+     *                      Internally used to determine the order of
+     *                      pre and post dump control in case of partial dump.
      * @param i_num_rows    Number of rows of the tracearray to read.
      *                      By default P9_TRACEARRAY_NUM_ROWS are read
      *
@@ -143,8 +146,9 @@ extern "C" {
      */
     fapi2::ReturnCode p9_sbe_tracearray(
         const fapi2::Target<P9_SBE_TRACEARRAY_TARGET_TYPES>& i_target,
-        const proc_gettracearray_args& i_args,
+        const p9_sbe_tracearray_args& i_args,
         uint64_t* o_ta_data,
+        const uint32_t i_cur_row = 0,
         const uint32_t i_num_rows = P9_TRACEARRAY_NUM_ROWS
     );
 } // extern "C"
