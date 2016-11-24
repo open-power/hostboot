@@ -108,20 +108,6 @@ inline void disable_vref_train_enable(mrs06_data& io_mrs06)
 }
 
 ///
-/// @brief helper function to setup a/b side MR06 commands for the latching function based upon TRAIN_ENABLE
-/// @param[in] i_mrs06, base MRS 06 allows the user to setup custom values and pass it in
-/// @param[in] i_rank, rank on which to latch MRS 06
-/// @param[out] o_a_side, a-side MR06 command
-/// @param[out] o_b_side, b-side MR06 command
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-fapi2::ReturnCode setup_ab_side_vref_train_enable(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const mrs06_data& i_mrs06,
-        const uint64_t& i_rank,
-        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& o_a_side,
-        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& o_b_side);
-
-///
 /// @brief Add latching commands for WR VREF to the instruction array by a given rank
 /// @param[in] i_target, a fapi2::Target<TARGET_TYPE_MCA>
 /// @param[in] i_rank, rank on which to latch MRS 06 - hits all ranks in the rank pair
