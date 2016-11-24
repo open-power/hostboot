@@ -104,7 +104,6 @@ struct mrs_data
 template< fapi2::TargetType T >
 fapi2::ReturnCode mrs_load( const fapi2::Target<T>& i_target );
 
-
 //
 // Implement the polymorphism for mrs_load
 //
