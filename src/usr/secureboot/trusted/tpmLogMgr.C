@@ -103,6 +103,7 @@ namespace TRUSTEDBOOT
             i_val->newEventPtr = i_val->eventLog;
             memset(i_val->eventLog, 0, TPMLOG_BUFFER_SIZE);
 
+            memset(&eventLogEntry, 0, sizeof(eventLogEntry));
             eventData = (TCG_EfiSpecIdEventStruct*) eventLogEntry.event;
 
             // Add the header event log
