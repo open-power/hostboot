@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,7 +78,13 @@ extern trace_desc_t *g_trac_hdat;
 
 const uint32_t HDAT_MULTIPLE = 16;
 
+//each PHB lane size
+const uint32_t NUM_OF_LANES_PER_PHB = 
+       sizeof(TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN3_type)/2;
 
+static_assert( NUM_OF_LANES_PER_PHB == 
+    sizeof(TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN3_type)/2,
+      "no. of lanes per PHB should be 16");
 
 /*******************************************************************************
  * IO HUB constructor
@@ -242,8 +248,8 @@ uint8_t * HdatIoHubFru::setIOHub(uint8_t * io_virt_addr,
     {
         l_hdatHubEntry->hdatIoHubId =
                                   this->iv_hubArray[l_cnt].hdatIoHubId;
-        l_hdatHubEntry->hdatChipId =
-                                  this->iv_hubArray[l_cnt].hdatChipId;
+        l_hdatHubEntry->hdatModuleId =
+                                  this->iv_hubArray[l_cnt].hdatModuleId;
         l_hdatHubEntry->hdatEcLvl =
                                   this->iv_hubArray[l_cnt].hdatEcLvl;
         l_hdatHubEntry->hdatProcChipID =
@@ -261,8 +267,13 @@ uint8_t * HdatIoHubFru::setIOHub(uint8_t * io_virt_addr,
 
         for ( uint16_t l_phbcnt = 0 ; l_phbcnt < HDAT_PHB_LANES; l_phbcnt++)
         {
-            l_hdatHubEntry->hdatLaneEqPHB[l_phbcnt] =
-                               this->iv_hubArray[l_cnt].hdatLaneEqPHB[l_phbcnt];
+            l_hdatHubEntry->hdatLaneEqPHBGen3[l_phbcnt] =
+                           this->iv_hubArray[l_cnt].hdatLaneEqPHBGen3[l_phbcnt];
+        }
+        for ( uint16_t l_phbcnt = 0 ; l_phbcnt < HDAT_PHB_LANES; l_phbcnt++)
+        {
+            l_hdatHubEntry->hdatLaneEqPHBGen4[l_phbcnt] =
+                           this->iv_hubArray[l_cnt].hdatLaneEqPHBGen4[l_phbcnt];
         }
 
         l_hdatHubEntry++;//increase by size of hdatHubEntry_t
@@ -712,17 +723,17 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             TARGETING::ATTR_MODEL_type  l_model =
                             (l_pProcTarget->getAttr<TARGETING::ATTR_MODEL>());
 
-            if(l_model == TARGETING::MODEL_MURANO)
+            if(l_model == TARGETING::MODEL_NIMBUS)
             {
-                l_hub->hdatChipId = HDAT_MODULE_TYPE_ID_MURANO;
+                l_hub->hdatModuleId = HDAT_MODULE_TYPE_ID_NIMBUS_LAGRANGE;
             }
-            else if(l_model == TARGETING::MODEL_VENICE)
+            else if(l_model == TARGETING::MODEL_CUMULUS)
             {
-                l_hub->hdatChipId = HDAT_MODULE_TYPE_ID_VENICE;
+                l_hub->hdatModuleId = HDAT_MODULE_TYPE_ID_CUMULUS_DUOMO;
             }
             else
             {
-                HDAT_ERR("Chip is not in Murano,Venice");
+                HDAT_ERR("Chip is not in Nimbus,Cumulus");
             }
 
             l_hub->hdatEcLvl = l_procEcLevel;
@@ -737,35 +748,47 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             l_hub->hdatFab0PresDetect = l_pProcTarget->
                    getAttr<TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE>();
 
-
-#if 0 //@fixme-165346
-            TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_type l_laneEq = {{0}};
-
-            if(!l_pProcTarget->
-                  tryGetAttr<TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION>(
-                                                              l_laneEq))
+            TARGETING::PredicateHwas l_predHwasFunc;
+            TARGETING::PredicateCTM l_phbPredicate (TARGETING::CLASS_UNIT,
+                                                    TARGETING::TYPE_PHB);
+            TARGETING::PredicatePostfixExpr l_funcPhb;
+            l_funcPhb.push(&l_phbPredicate).push(&l_predHwasFunc).And();
+            
+            TARGETING::TargetHandleList l_phbList;
+            
+            TARGETING::targetService().getAssociated(l_phbList, l_pProcTarget,
+                       TARGETING::TargetService::CHILD,
+                       TARGETING::TargetService::ALL,
+                       &l_funcPhb);
+            // copy the lane data
+            for(uint32_t l_idx = 0; l_idx<l_phbList.size(); ++l_idx)
             {
-                HDAT_ERR("ATTR_PROC_PCIE_LANE_EQUALIZATION"
-                         " not found");
-                /*@
-                 * @errortype
-                 * @moduleid         HDAT::MOD_IOHUB_LOAD_DATA
-                 * @reasoncode       HDAT::RC_TGT_ATTR_NOTFOUND
-                 * @devdesc          Target attribute not found
-                 * @custdesc         Firmware encountered an internal error
-                 */
-                hdatBldErrLog(l_err,
-                              MOD_IOHUB_LOAD_DATA,
-                              RC_TGT_ATTR_NOTFOUND,
-                              0,0,0,0);
-                break;
+                TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN3_type
+                           l_laneEq3 = {0};
+
+                TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN4_type
+                           l_laneEq4 = {0};
+                           
+                TARGETING::Target *l_phbTarget = l_phbList[l_idx];
+                
+                assert( l_phbTarget->
+                   tryGetAttr<TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN3>(
+                       l_laneEq3));
+
+                memcpy((l_hub->hdatLaneEqPHBGen3 +
+                          l_idx*NUM_OF_LANES_PER_PHB), l_laneEq3,
+                          NUM_OF_LANES_PER_PHB*2);
+
+                assert( l_phbTarget->
+                   tryGetAttr<TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN4>(
+                      l_laneEq4));
+
+                memcpy((l_hub->hdatLaneEqPHBGen4 +
+                          l_idx*NUM_OF_LANES_PER_PHB),l_laneEq4,
+                          NUM_OF_LANES_PER_PHB*2);
+                                      
             }
 
-            //copying data from l_laneEq(which is 4x32 bytes) to
-            //uint16_t hdatLaneEqPHB[64]
-            memcpy( l_hub->hdatLaneEqPHB, l_laneEq,
-                     (NUM_BYTES_PER_LANE * HDAT_PHB_LANES));
-#endif //@fixme-165346
 
             //increment counts
             fruData->iv_hubArrayHdr.hdatArrayCnt++;

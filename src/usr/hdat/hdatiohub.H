@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,7 @@
 namespace HDAT
 {
 
-#define HDAT_PHB_LANES  64
+#define HDAT_PHB_LANES  96
 #define NUM_BYTES_PER_LANE 2
 #define NUM_LANES_PER_PHB 16
 
@@ -97,7 +97,7 @@ struct hdatHubEntry_t
   uint8_t      hdatFab0PresDetect;  // 0x0010 I/O hub chip fabric 0
                                     // presence detect bits
   uint8_t      hdatReserved4;       // 0x0011 Reserved
-  uint16_t     hdatChipId;          // 0x0012 Module type Identification
+  uint16_t     hdatModuleId;          // 0x0012 Module type Identification
   uint32_t     hdatEcLvl;           // 0x0014 EC level
   uint32_t     hdatReserved5;       // 0x0018 Affinity domain 2
   uint32_t     hdatReserved6;       // 0x001C Affinity Domain 3
@@ -111,13 +111,14 @@ struct hdatHubEntry_t
   uint16_t     hdatHardwareTopology;// 0x0034 Hardware Topology
   uint32_t     hdatMRID;            // 0x0038 MRU ID of Chip
   uint32_t     hdatMemMapVersion;   // 0x003C Memory Map Version
-  uint16_t     hdatLaneEqPHB[HDAT_PHB_LANES]; // 0x0040 Lane Equalization values
-                                               //from PHB0 to PHB3
+  uint16_t     hdatLaneEqPHBGen3[HDAT_PHB_LANES]; // 0x0040 from PHB0 to PHB5
+  uint16_t     hdatLaneEqPHBGen4[HDAT_PHB_LANES];  //0x0100 Gen4 PHB for PHB 0-5
 
 
 
   hdatHubEntry_t() : hdatProcChipID(0),  hdatHardwareTopology(0),
-  hdatMRID(0xDEADBEEF), hdatMemMapVersion(0xDEADBEEF), hdatLaneEqPHB()
+  hdatMRID(0xDEADBEEF), hdatMemMapVersion(0xDEADBEEF), hdatLaneEqPHBGen3(),
+  hdatLaneEqPHBGen4()
   {
   }
 }  __attribute__ ((packed));
@@ -207,6 +208,10 @@ enum hdatHubStatus
 
 #define HDAT_MODULE_TYPE_ID_MURANO 0x0001
 #define HDAT_MODULE_TYPE_ID_VENICE 0x0010
+
+//@TODO:RTC 166789: Need to access the module type from HB targeting model
+#define HDAT_MODULE_TYPE_ID_NIMBUS_LAGRANGE 0x0022
+#define HDAT_MODULE_TYPE_ID_CUMULUS_DUOMO 0x0030
 
 
 
