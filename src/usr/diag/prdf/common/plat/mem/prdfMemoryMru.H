@@ -47,8 +47,7 @@ class MemoryMru
 {
   public: // Constructors
 
-    /** @brief Default contructor. */
-    MemoryMru();
+    MemoryMru() = delete;  // Don't allow default contructor
 
     /**
      * @brief Constructor from 32-bit representation of a memory MRU.
@@ -98,7 +97,7 @@ class MemoryMru
     TARGETING::TargetHandle_t iv_target; ///< Target
     MemRank iv_rank;                     ///< Target rank
     MemoryMruData::Callout iv_special;   ///< See enum MemoryMruData::Callout
-    MemSymbol iv_symbol; ///< Target symbol
+    MemSymbol iv_symbol;                 ///< Target symbol
 
   private: // local helper functions
 

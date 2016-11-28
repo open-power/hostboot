@@ -42,8 +42,7 @@ class TdRankListEntry
 {
   public:
 
-    /** @brief Default constructor. */
-    TdRankListEntry() = default;
+    TdRankListEntry() = delete; // Don't allow default contructor
 
     /** @brief Constructor from components. */
     TdRankListEntry( ExtensibleChip * i_chip, const MemRank & i_rank ) :
@@ -81,8 +80,8 @@ class TdRankListEntry
 
   private:
 
-    ExtensibleChip * iv_chip; ///< MCA or MBA chip.
-    MemRank          iv_rank; ///< Any rank on the MCA or MBA.
+    ExtensibleChip * iv_chip = nullptr;    ///< MCA or MBA chip.
+    MemRank          iv_rank = MemRank(0); ///< Any rank on the MCA or MBA.
 };
 
 /**
@@ -92,8 +91,6 @@ class TdRankListEntry
 template <TARGETING::TYPE T>
 class TdRankList
 {
-  public: // structs, typedefs
-
   public: // functions
 
     /**

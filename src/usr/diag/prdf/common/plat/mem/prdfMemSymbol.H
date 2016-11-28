@@ -50,11 +50,7 @@ class MemSymbol
   public: // constructor
 
     /** @brief Default constructor. Intentionally creates an invalid symbol. */
-    MemSymbol() :
-        iv_trgt(NULL), iv_rank(),
-        iv_symbol( SYMBOLS_PER_RANK ), iv_pins( CEN_SYMBOL::NO_SYMBOL_DQS ),
-        iv_isDramSpared(false), iv_isEccSpared(false)
-    {}
+    MemSymbol() = default;
 
   private: // constructor
 
@@ -150,12 +146,19 @@ class MemSymbol
 
   private: // instance variables
 
-    TARGETING::TargetHandle_t iv_trgt; ///< Target handle.
-    MemRank iv_rank;                   ///< The rank this symbol is on.
-    uint8_t iv_symbol;                 ///< This symbol's numerical value.
-    uint8_t iv_pins;                   ///< See enum DqMask.
-    bool iv_isDramSpared; ///< TRUE if symbol resides on DRAM spare.
-    bool iv_isEccSpared;  ///< TRUE if symbol resides on ECC spare.
+    TARGETING::TargetHandle_t iv_trgt = nullptr; ///< Target handle.
+
+    /* The rank containing this symbol. */
+    MemRank iv_rank = MemRank(0);
+
+    /* This symbol's numerical value. Initialize to SYMBOLS_PER_RANK to ensure
+     * this object is initially invalid. */
+    uint8_t iv_symbol = SYMBOLS_PER_RANK;
+
+    uint8_t iv_pins = CEN_SYMBOL::NO_SYMBOL_DQS; ///< See enum DqMask.
+
+    bool iv_isDramSpared = false; ///< TRUE if symbol resides on DRAM spare.
+    bool iv_isEccSpared  = false; ///< TRUE if symbol resides on ECC spare.
 };
 
 } // end namespace PRDF

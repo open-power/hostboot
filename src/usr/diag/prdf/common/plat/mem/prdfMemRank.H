@@ -71,7 +71,7 @@ class MemRank
     explicit MemRank( uint8_t i_mrnk, uint8_t i_srnk = 0 ) :
         iv_mrnk(i_mrnk), iv_srnk(i_srnk)
     {
-        PRDF_ASSERT( iv_mrnk < MAX_MRNK_PER_PORT  );
+        PRDF_ASSERT( iv_mrnk < MAX_MRNK_PER_PORT );
         PRDF_ASSERT( iv_srnk < MAX_SRNK_PER_MRNK );
     }
 

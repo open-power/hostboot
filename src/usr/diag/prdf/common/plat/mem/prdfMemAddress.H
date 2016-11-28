@@ -126,10 +126,10 @@ class MemAddr
 
   private: // instance variables
 
-    MemRank  iv_rnk;     ///< Rank
-    uint8_t  iv_bnk = 0; ///< Bank
-    uint32_t iv_row = 0; ///< Row
-    uint16_t iv_col = 0; ///< Column
+    MemRank  iv_rnk = MemRank(0);   ///< Rank
+    uint8_t  iv_bnk = 0;            ///< Bank
+    uint32_t iv_row = 0;            ///< Row
+    uint16_t iv_col = 0;            ///< Column
 };
 
 //------------------------------------------------------------------------------
