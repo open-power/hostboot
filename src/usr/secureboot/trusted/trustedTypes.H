@@ -99,7 +99,7 @@ namespace TRUSTEDBOOT
         // TPM Spec supported
         TPM_SPEC_MAJOR        = 2,
         TPM_SPEC_MINOR        = 0,
-        TPM_SPEC_ERRATA       = 0,
+        TPM_SPEC_ERRATA       = 2,
         TPM_PLATFORM_SERVER   = 1,
 
         // Command structure tags
