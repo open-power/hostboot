@@ -24,7 +24,6 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <prdfParserUtils.H>
-#include <prdfMemConst.H>
 
 namespace PRDF
 {
@@ -104,33 +103,103 @@ uint8_t symbol2PortSlct<TARGETING::TYPE_MBA>( uint8_t i_symbol )
 
 //------------------------------------------------------------------------------
 
-/* TODO: RTC 136126
-uint8_t dram2Symbol( uint8_t i_dram, bool i_isX4Dram )
+template<>
+uint8_t nibble2Symbol<TARGETING::TYPE_MBA>( uint8_t i_x4Dram )
 {
-    const uint8_t dramsPerRank   = i_isX4Dram ? MBA_NIBBLES_PER_RANK
-                                              : MBA_BYTES_PER_RANK;
-
-    const uint8_t symbolsPerDram = i_isX4Dram ? MBA_SYMBOLS_PER_NIBBLE
-                                              : MBA_SYMBOLS_PER_BYTE;
-
-    return (dramsPerRank > i_dram) ? (i_dram * symbolsPerDram)
-                                   : SYMBOLS_PER_RANK;
+    return (MBA_NIBBLES_PER_RANK >i_x4Dram) ? (i_x4Dram *MBA_SYMBOLS_PER_NIBBLE)
+                                            : SYMBOLS_PER_RANK;
 }
 
 //------------------------------------------------------------------------------
 
-uint8_t symbol2Dram( uint8_t i_symbol, bool i_isX4Dram )
+template<>
+uint8_t nibble2Symbol<TARGETING::TYPE_MCA>( uint8_t i_x4Dram )
 {
-    const uint8_t dramsPerRank   = i_isX4Dram ? MBA_NIBBLES_PER_RANK
-                                              : MBA_BYTES_PER_RANK;
+    uint8_t symbol = SYMBOLS_PER_RANK;
 
-    const uint8_t symbolsPerDram = i_isX4Dram ? MBA_SYMBOLS_PER_NIBBLE
-                                              : MBA_SYMBOLS_PER_BYTE;
+    static const uint8_t nibble2symbol[] =
+    {
+        68, 36, 64, 32, 60, 28, // nibbles  0- 5
+        56, 24, 52, 20, 48, 16, // nibbles  6-11
+        44, 12, 40,  8,  4,  0, // nibbles 12-17
+    };
 
-    return (SYMBOLS_PER_RANK > i_symbol) ? (i_symbol / symbolsPerDram)
-                                         : dramsPerRank;
+    if ( NIBBLES_PER_DIMM > i_x4Dram )
+    {
+        symbol = nibble2symbol[i_x4Dram];
+    }
+
+    return symbol;
 }
-*/
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t byte2Symbol<TARGETING::TYPE_MBA>( uint8_t i_x8Dram )
+{
+    return (MBA_BYTES_PER_RANK > i_x8Dram) ? (i_x8Dram * MBA_SYMBOLS_PER_BYTE)
+                                           : SYMBOLS_PER_RANK;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t byte2Symbol<TARGETING::TYPE_MCA>( uint8_t i_x8Dram )
+{
+    uint8_t symbol = SYMBOLS_PER_RANK;
+
+    static const uint8_t byte2symbol[] =
+    {
+        36, 32, 28, // bytes 0-2
+        24, 20, 16, // bytes 3-5
+        12,  8,  0, // bytes 6-8
+    };
+
+    if ( BYTES_PER_DIMM > i_x8Dram )
+    {
+        symbol = byte2symbol[i_x8Dram];
+    }
+
+    return symbol;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t symbol2Nibble<TARGETING::TYPE_MBA>( uint8_t i_symbol )
+{
+    return (SYMBOLS_PER_RANK > i_symbol) ? (i_symbol / MBA_SYMBOLS_PER_NIBBLE)
+                                         : MBA_NIBBLES_PER_RANK;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t symbol2Nibble<TARGETING::TYPE_MCA>( uint8_t i_symbol )
+{
+    return (SYMBOLS_PER_RANK > i_symbol)
+            ? (symbol2Dq<TARGETING::TYPE_MCA>(i_symbol)/4)
+            : MCA_NIBBLES_PER_RANK;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t symbol2Byte<TARGETING::TYPE_MBA>( uint8_t i_symbol )
+{
+    return (SYMBOLS_PER_RANK > i_symbol) ? (i_symbol / MBA_SYMBOLS_PER_BYTE)
+                                         : MBA_BYTES_PER_RANK;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t symbol2Byte<TARGETING::TYPE_MCA>( uint8_t i_symbol )
+{
+    return (SYMBOLS_PER_RANK > i_symbol)
+            ? (symbol2Dq<TARGETING::TYPE_MCA>(i_symbol)/8)
+            : MCA_NIBBLES_PER_RANK;
+}
 
 } // namespace PARSERUTILS
 
