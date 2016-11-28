@@ -54,8 +54,8 @@ namespace PARSERUTILS
 /**
  * Depending on system configuration, a symbol may have more than one DQ. The DQ
  * numbering within a symbol will always be contiguous. Therefore, the first DQ
- * withing the symbol will be will be returned. The user will need to calculate
- * the other DQ values if needed.
+ * within the symbol will be returned. The user will need to calculate the other
+ * DQ values if needed.
  *
  * @param  i_symbol Target symbol.
  * @return The first DQ of the given symbol.
@@ -72,20 +72,36 @@ template<TARGETING::TYPE T>
 uint8_t symbol2PortSlct( uint8_t i_symbol );
 
 /**
- * @brief Find the first symbol of the given DRAM index
- * @param i_dram     The Dram
- * @param i_isX4Dram TRUE if DRAM is x4
+ * @brief Find the first symbol of the given x4 DRAM index
+ * @param i_x4Dram     The x4 Dram index
  * @return The Symbol
  */
-uint8_t dram2Symbol( uint8_t i_dram, bool i_isX4Dram );
+template<TARGETING::TYPE T>
+uint8_t nibble2Symbol( uint8_t i_x4Dram );
 
 /**
- * @brief Find the DRAM index for the given symbol
- * @param i_symbol The symbol
- * @param i_isX4Dram TRUE if DRAM is x4
+ * @brief Find the first symbol of the given x8 DRAM index
+ * @param i_x8Dram     The x8 Dram index
  * @return The Symbol
  */
-uint8_t symbol2Dram( uint8_t i_symbol, bool i_isX4Dram );
+template<TARGETING::TYPE T>
+uint8_t byte2Symbol( uint8_t i_x8Dram );
+
+/**
+ * @brief Find the x4 DRAM index for the given symbol
+ * @param i_symbol The symbol
+ * @return The Symbol
+ */
+template<TARGETING::TYPE T>
+uint8_t symbol2Nibble( uint8_t i_symbol );
+
+/**
+ * @brief Find the x8 DRAM index for the given symbol
+ * @param i_symbol The symbol
+ * @return The Symbol
+ */
+template<TARGETING::TYPE T>
+uint8_t symbol2Byte( uint8_t i_symbol );
 
 } // namespace PARSERUTILS
 
