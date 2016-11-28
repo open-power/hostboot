@@ -1448,9 +1448,13 @@ void __getSlaveRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
             continue;
 
         // Get the number of slave ranks per master rank.
-        uint8_t numRanks       = getNumRanksPerDimm<T>      ( i_trgt, ds );
+        uint8_t numRanks = getNumRanksPerDimm<T>( i_trgt, ds );
+        if ( 0 == numRanks ) continue; // nothing to do
+
         uint8_t numMasterRanks = getNumMasterRanksPerDimm<T>( i_trgt, ds );
-        uint8_t numSlaveRanks  = numRanks / numMasterRanks;
+        PRDF_ASSERT( 0 < numMasterRanks ); // ATTR bug
+
+        uint8_t numSlaveRanks = numRanks / numMasterRanks;
 
         // Get the current list of master ranks for this DIMM select
         std::vector<MemRank> tmpList;
@@ -1506,7 +1510,10 @@ uint8_t __getNumMasterRanksPerDimm( TargetHandle_t i_trgt,
         PRDF_ASSERT( false ); // attribute does not exist for target
     }
 
-    return attr[i_pos][i_ds];
+    uint8_t num = attr[i_pos][i_ds];
+    PRDF_ASSERT( num < MASTER_RANKS_PER_DIMM_SLCT );
+
+    return num;
 
     #undef PRDF_FUNC
 }
@@ -1557,7 +1564,10 @@ uint8_t __getNumRanksPerDimm( TargetHandle_t i_trgt,
         PRDF_ASSERT( false ); // attribute does not exist for target
     }
 
-    return attr[i_pos][i_ds];
+    uint8_t num = attr[i_pos][i_ds];
+    PRDF_ASSERT( num < MASTER_RANKS_PER_DIMM_SLCT*SLAVE_RANKS_PER_MASTER_RANK );
+
+    return num;
 
     #undef PRDF_FUNC
 }

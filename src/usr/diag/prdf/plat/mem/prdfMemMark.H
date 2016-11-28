@@ -71,8 +71,11 @@ class MemMark
 
   private: // instance variables
 
-    uint8_t   iv_galois; ///< Galois field representing any symbol on this mark.
-    MemSymbol iv_symbol; ///< Any symbol on this mark.
+    /** Galois field representing any symbol on this mark. */
+    uint8_t iv_galois = 0;
+
+    /** Any symbol on this mark (must match iv_galois). */
+    MemSymbol iv_symbol = MemSymbol();
 };
 
 //##############################################################################

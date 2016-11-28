@@ -49,6 +49,8 @@ class MemTdCtlr
 {
   public:
 
+    MemTdCtlr() = delete; // Don't allow default contructor
+
     /**
      * @brief Constructor
      *
@@ -58,7 +60,8 @@ class MemTdCtlr
      * @param i_chip An MCBIST or MBA chip.
      */
     explicit MemTdCtlr( ExtensibleChip * i_chip ) :
-        iv_chip( i_chip ), iv_rankList( i_chip )
+        iv_chip( i_chip ), iv_rankList( i_chip ),
+        iv_stoppedRank( i_chip, MemRank(0) )
     {
         PRDF_ASSERT( T == iv_chip->getType() );
     }

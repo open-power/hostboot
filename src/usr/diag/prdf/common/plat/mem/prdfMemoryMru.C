@@ -38,16 +38,10 @@ using namespace MemoryMruData;
 using namespace PlatServices;
 using namespace CEN_SYMBOL;
 
-MemoryMru::MemoryMru() :
-    iv_target(NULL), iv_rank(), iv_special(NO_SPECIAL_CALLOUT)
-{
-    iv_memMruMeld.u = 0;
-}
-
 //------------------------------------------------------------------------------
 
 MemoryMru::MemoryMru( uint32_t i_memMru ) :
-    iv_target(NULL), iv_rank(), iv_special(NO_SPECIAL_CALLOUT)
+    iv_target(NULL), iv_rank(0), iv_special(NO_SPECIAL_CALLOUT)
 {
     #define PRDF_FUNC "[MemoryMru::MemoryMru] "
 
