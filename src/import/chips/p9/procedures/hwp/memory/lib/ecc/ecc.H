@@ -189,6 +189,39 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Query Firmware Marks
+/// @tparam T the fapi2::TargetType - derived
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_marks vector of Galois codes of any marks set
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T >
+inline fapi2::ReturnCode get_fw_marks( const fapi2::Target<T>& i_target,
+                                       std::vector<uint64_t>& o_marks )
+{
+    fapi2::buffer<uint64_t> l_buffer;
+    uint64_t l_galois = 0;
+    auto l_type = mss::ecc::fwms::mark_type::CHIP;
+    auto l_region = mss::ecc::fwms::mark_region::UNIVERSAL;
+    mss::mcbist::address l_address;
+
+    o_marks.clear();
+
+    for (uint64_t l_rank = 0; l_rank < MAX_MRANK_PER_PORT; ++l_rank)
+    {
+        FAPI_TRY( get_fwms(i_target, l_rank, l_galois, l_type, l_region, l_address) );
+
+        if (l_region != mss::ecc::fwms::mark_region::DISABLED)
+        {
+            o_marks.push_back(l_galois);
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Get Mainline NCE address traps
 /// @tparam T the fapi2::TargetType - derived
 /// @param[in] i_target the fapi2 target
