@@ -36,13 +36,8 @@
 //------------------------------------------------------------------------------
 
 
-//## auto_generated
 #include "p9_getecid.H"
-//## auto_generated
-#include "p9_const_common.H"
 
-#include <p9_perv_scom_addresses.H>
-#include <p9_perv_scom_addresses_fld.H>
 #include <p9_misc_scom_addresses.H>
 #include <p9_misc_scom_addresses_fld.H>
 #include <p9_const_common.H>
@@ -54,22 +49,30 @@ fapi2::ReturnCode p9_getecid(const
     uint64_t attr_data[2];
     fapi2::buffer<uint64_t> l_ecid_part0_data64 = 0;
     fapi2::buffer<uint64_t> l_ecid_part1_data64 = 0;
+    fapi2::buffer<uint64_t> l_ecid_part2_data64 = 0;
+    fapi2::variable_buffer l_fuseString(fuseString_len);
     FAPI_INF("Entering ...");
 
 
     FAPI_DBG("extract and manipulate ECID data");
     FAPI_TRY(fapi2::getScom(i_target_chip, PU_OTPROM0_ECID_PART0_REGISTER, l_ecid_part0_data64));
     FAPI_TRY(fapi2::getScom(i_target_chip, PU_OTPROM0_ECID_PART1_REGISTER, l_ecid_part1_data64));
+    FAPI_TRY(fapi2::getScom(i_target_chip, PU_OTPROM0_ECID_PART2_REGISTER, l_ecid_part2_data64));
 
     l_ecid_part0_data64.reverse();
     l_ecid_part1_data64.reverse();
+    l_ecid_part2_data64.reverse();
 
     attr_data[0] = l_ecid_part0_data64();
     attr_data[1] = l_ecid_part1_data64();
 
-    FAPI_TRY(o_fuseString.insert(l_ecid_part0_data64(), 0, 64));
+    FAPI_TRY(l_fuseString.insert(l_ecid_part0_data64(), 0, 64));
 
-    FAPI_TRY(o_fuseString.insert(l_ecid_part1_data64(), 64, 48));
+    FAPI_TRY(l_fuseString.insert(l_ecid_part1_data64(), 64, 64));
+
+    FAPI_TRY(l_fuseString.insert(l_ecid_part2_data64(), 128, 48));
+
+    o_fuseString = l_fuseString;
 
     FAPI_DBG("push fuse string into attribute");
 
