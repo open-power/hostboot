@@ -32,25 +32,6 @@ use feature "state";
 
 use constant
 {
-    MAX_PROC_PER_NODE => 8,
-    MAX_CORE_PER_PROC => 24,
-    MAX_EX_PER_PROC => 12,
-    MAX_EQ_PER_PROC => 6,
-    MAX_ABUS_PER_PROC => 3,
-    MAX_XBUS_PER_PROC => 3,
-    MAX_MCS_PER_PROC => 4,
-    MAX_MCA_PER_PROC => 8,
-    MAX_MCBIST_PER_PROC => 2,
-    MAX_PEC_PER_PROC => 3,    # PEC is same as PBCQ
-    MAX_PHB_PER_PROC => 6,    # PHB is same as PCIE
-    MAX_MBA_PER_MEMBUF => 2,
-    MAX_OBUS_PER_PROC => 4,
-    MAX_PPE_PER_PROC => 51,   #Only 21, but they are sparsely populated
-    MAX_PERV_PER_PROC => 56,  #Only 42, but they are sparsely populated
-    MAX_CAPP_PER_PROC => 2,
-    MAX_SBE_PER_PROC => 1,
-    MAX_NV_PER_PROC => 1,     # FW only for GARD purposes
-    MAX_MI_PER_PROC => 4,
     PERVASIVE_PARENT_CORE_OFFSET => 32,
     PERVASIVE_PARENT_EQ_OFFSET => 16,
     PERVASIVE_PARENT_XBUS_OFFSET => 6,
@@ -63,6 +44,28 @@ use constant
     PERVASIVE_PARENT_NV_OFFSET => 5,
 };
 
+my %maxInstance = (
+    "PROC"  => 8,
+    "CORE"  => 24,
+    "EX"    => 12,
+    "EQ"    => 6,
+    "ABUS"  => 3,
+    "XBUS"  => 3,
+    "OBUS"  => 4,
+    "MCBIST"=> 2,
+    "MCS"   => 4,
+    "MCA"   => 8,
+    "PHB"   => 6, #PHB is same as PCIE
+    "PEC"   => 3, #PEC is same as PBCQ
+    "MBA"   => 2,
+    "PPE"   => 51, #Only 21, but they are sparsely populated
+    "PERV"  => 56, #Only 42, but they are sparsely populated
+    "CAPP"  => 2,
+    "SBE"   => 1,
+    "NV"    => 6, #FW only for GARD purposes
+    "MI"    => 4,
+    "OCC"   => 1,
+);
 sub new
 {
     my $class = shift;
@@ -123,7 +126,8 @@ sub loadXML
     print "Loading MRW XML: $filename\n";
     $self->{xml} =
       XMLin($filename,forcearray => [ 'child_id', 'hidden_child_id', 'bus',
-                                      'property', 'field', 'attribute' ]);
+                                      'property', 'field', 'attribute',
+                                      'enumerator' ]);
 
     if (defined($self->{xml}->{'enumerationTypes'}))
     {
@@ -462,7 +466,6 @@ sub buildHierarchy
     {
         $baseptr = $self->{xml}->{'targetInstances'}->{'targetInstance'};
     }
-
     if ($target eq "")
     {
         ## find system target
@@ -714,8 +717,8 @@ sub buildAffinity
             $self->setAttribute($target, "FAPI_NAME",       $fapi_name);
             $self->setAttribute($target, "PHYS_PATH",       $parent_physical);
             $self->setAttribute($target, "AFFINITY_PATH",   $parent_affinity);
-            $self->setAttribute($target, "ORDINAL_ID",      $pos);
-            $self->setAttribute($target, "POSITION",        $pos);
+            $self->setAttribute($target, "ORDINAL_ID",      $proc);
+            $self->setAttribute($target, "POSITION",        $proc);
 
             $self->setAttribute($target, "FABRIC_GROUP_ID",
                   $self->getAttribute($socket,"FABRIC_GROUP_ID"));
@@ -740,7 +743,6 @@ sub iterateOverChiplets
     my $tgt_type       = $self->getType($target);
 
     my $target_children  = $self->getTargetChildren($target);
-    my $prev_target = "PROC";
 
     if ($target_children eq "")
     {
@@ -816,13 +818,16 @@ sub setCommonAttrForChiplet
 
     my $fapi_name       = getFapiName($tgt_type, $node, $proc, $pos);
 
-    $self->{huid_idx}->{$tgt_type} = $pos;
+
+    #unique offset per system
+    my $offset = ($proc * $maxInstance{$tgt_type}) + $pos;
+    $self->{huid_idx}->{$tgt_type} = $offset;
     $self->setHuid($target, $sys, $node);
     $self->setAttribute($target, "FAPI_NAME",       $fapi_name);
     $self->setAttribute($target, "PHYS_PATH",       $physical_path);
     $self->setAttribute($target, "AFFINITY_PATH",   $affinity_path);
     $self->setAttribute($target, "ORDINAL_ID",      $pos);
-    $self->setAttribute($target, "FAPI_POS",        $pos);
+    $self->setAttribute($target, "FAPI_POS",        $offset);
     $self->setAttribute($target, "REL_POS",         $pos);
 
     my $pervasive_parent= getPervasiveForUnit("$tgt_type$pos");
@@ -904,52 +909,52 @@ sub getPervasiveForUnit
 
     if ( not %unitToPervasive )
     {
-        for my $core (0..MAX_CORE_PER_PROC-1)
+        for my $core (0..$maxInstance{"CORE"}-1)
         {
             $unitToPervasive{"CORE$core"} = PERVASIVE_PARENT_CORE_OFFSET+$core;
         }
-        for my $eq (0..MAX_EQ_PER_PROC-1)
+        for my $eq (0..$maxInstance{"EQ"}-1)
         {
             $unitToPervasive{"EQ$eq"} = PERVASIVE_PARENT_EQ_OFFSET + $eq;
         }
-        for my $xbus (0..MAX_XBUS_PER_PROC-1)
+        for my $xbus (0..$maxInstance{"XBUS"}-1)
         {
             $unitToPervasive{"XBUS$xbus"} = PERVASIVE_PARENT_XBUS_OFFSET;
         }
-        for my $obus (0..MAX_OBUS_PER_PROC-1)
+        for my $obus (0..$maxInstance{"OBUS"}-1)
         {
             $unitToPervasive{"OBUS$obus"} = PERVASIVE_PARENT_OBUS_OFFSET+$obus;
         }
-        for my $capp (0..MAX_CAPP_PER_PROC-1)
+        for my $capp (0..$maxInstance{"CAPP"}-1)
         {
             $unitToPervasive{"CAPP$capp"} = 2 * ($capp+1);
         }
-        for my $mcbist (0..MAX_MCBIST_PER_PROC-1)
+        for my $mcbist (0..$maxInstance{"MCBIST"}-1)
         {
             $unitToPervasive{"MCBIST$mcbist"} =
                 PERVASIVE_PARENT_MCBIST_OFFSET + $mcbist;
         }
-        for my $mcs (0..MAX_MCS_PER_PROC-1)
+        for my $mcs (0..$maxInstance{"MCS"}-1)
         {
             $unitToPervasive{"MCS$mcs"} =
                 PERVASIVE_PARENT_MCS_OFFSET + ($mcs > 1);
         }
-        for my $mca (0..MAX_MCA_PER_PROC-1)
+        for my $mca (0..$maxInstance{"MCA"}-1)
         {
             $unitToPervasive{"MCA$mca"} =
                 PERVASIVE_PARENT_MCA_OFFSET + ($mca > 3);
         }
-        for my $pec (0..MAX_PEC_PER_PROC-1)
+        for my $pec (0..$maxInstance{"PEC"}-1)
         {
             $unitToPervasive{"PEC$pec"} =
                 PERVASIVE_PARENT_PEC_OFFSET + $pec;
         }
-        for my $phb (0..MAX_PHB_PER_PROC-1)
+        for my $phb (0..$maxInstance{"PHB"}-1)
         {
             $unitToPervasive{"PHB$phb"} =
                 PERVASIVE_PARENT_PHB_OFFSET + ($phb>0) + ($phb>2);
         }
-        for my $nv (0..MAX_NV_PER_PROC-1)
+        for my $nv (0..$maxInstance{"NV"}-1)
         {
             $unitToPervasive{"NV$nv"} = PERVASIVE_PARENT_NV_OFFSET;
         }
@@ -1332,16 +1337,16 @@ sub findConnections
     my $target   = shift;
     my $bus_type = shift;
     my $end_type = shift;
+
     my %connections;
     my $num=0;
     my $target_children = $self->getTargetChildren($target);
-
     if ($target_children eq "")
     {
         return "";
     }
 
-    foreach my $child (@{ $self->getTargetChildren($target) })
+    foreach my $child ($self->getAllTargetChildren($target))
     {
         my $child_bus_type = $self->getBusType($child);
         if ($child_bus_type eq $bus_type)
@@ -1353,7 +1358,6 @@ sub findConnections
                 my $type        = $self->getMrwType($dest_parent);
                 my $dest_type   = $self->getType($dest_parent);
                 my $dest_class  = $self->getAttribute($dest_parent,"CLASS");
-
                 if ($type eq "NA")
                 {
                     $type = $dest_type;
@@ -1361,6 +1365,29 @@ sub findConnections
                 if ($type eq "NA") {
                     $type = $dest_class;
                 }
+
+                if ($end_type ne "") {
+                    #Look for an end_type match on any ancestor, as
+                    #connections may have a destination unit with a hierarchy
+                    #like unit->pingroup->muxgroup->chip where the chip has
+                    #the interesting type.
+                    while ($type ne $end_type) {
+
+                        $dest_parent = $self->getTargetParent($dest_parent);
+                        if ($dest_parent eq "") {
+                            last;
+                        }
+
+                        $type = $self->getMrwType($dest_parent);
+                        if ($type eq "NA") {
+                            $type = $self->getType($dest_parent);
+                        }
+                        if ($type eq "NA") {
+                            $type = $self->getAttribute($dest_parent, "CLASS");
+                        }
+                    }
+                }
+
                 if ($type eq $end_type || $end_type eq "")
                 {
                     $connections{CONN}[$num]{SOURCE}=$child;
@@ -1589,7 +1616,6 @@ sub setAttributeField
     my $value     = shift;
     $self->{data}->{TARGETS}->{$target}->{ATTRIBUTES}->{$attribute}->{default}
       ->{field}->{$field}->{value} = $value;
-
     $self->log($target, "Setting Attribute: $attribute ($field) =$value");
 }
 ## returns complex attribute value
@@ -1650,6 +1676,27 @@ sub getTargetChildren
     my $target_ptr = $self->getTarget($target);
     ## this is an array
     return $target_ptr->{CHILDREN};
+}
+
+## returns an array of all child (including grandchildren) target names
+sub getAllTargetChildren
+{
+    my $self   = shift;
+    my $target = shift;
+    my @children;
+
+    my $targets = $self->getTargetChildren($target);
+    if ($targets ne "")
+    {
+        for my $child (@$targets)
+        {
+            push @children, $child;
+            my @more = $self->getAllTargetChildren($child);
+            push @children, @more;
+        }
+    }
+
+    return @children;
 }
 
 sub getEnumValue
@@ -1963,6 +2010,11 @@ C<INDEX>.
 
 Returns an array of target strings representing all the children of target
 C<TARGET_STRING>.
+
+=item getAllTargetChildren(C<TARGET_STRING>)
+
+Returns an array of target strings representing all the children of target
+C<TARGET_STRING>, including grandchildren and below as well.
 
 =item getEnumValue(C<ENUM_TYPE>,C<ENUM_NAME>)
 

@@ -427,16 +427,6 @@ sub processProcessor
        $targetObj->getTargetParent($target);
     $targetObj->copyAttribute($module_target,$target,"LOCATION_CODE");
 
-    ## Copy all attributes from module
-    foreach my $attr (sort (keys
-           %{ $targetObj->getTarget($module_target)->{TARGET}->{attribute} }))
-    {
-        if (($attr ne "TYPE") && ($attr ne "PHYS_PATH"))
-        {
-            $targetObj->copyAttribute($module_target,$target,$attr);
-        }
-    }
-
     ## Copy PCIE attributes from socket
     ## Copy Position attribute from socket
     foreach my $attr (sort (keys
@@ -453,7 +443,7 @@ sub processProcessor
     }
 
     $targetObj->log($target,"Finding master proc");
-    my $lpcs=$targetObj->findConnections($target,"LPC","FSP");
+    my $lpcs=$targetObj->findConnections($target,"LPC","BMC");
     if ($lpcs ne "")
     {
        $targetObj->log ($target, "Setting master proc to $target");
@@ -522,9 +512,9 @@ sub processProcessor
     {
         $targetObj->setAttributeField($target, "FSI_OPTION_FLAGS", "reserved",
             "0");
-        $targetObj->setAttribute($target, "FSI_MASTER_CHIP",    "physical:sys");
+        $targetObj->setAttribute($target, "FSI_MASTER_CHIP",    "physical:sys-0");
         $targetObj->setAttribute($target, "FSI_MASTER_PORT",    "0xFF");
-        $targetObj->setAttribute($target, "ALTFSI_MASTER_CHIP", "physical:sys");
+        $targetObj->setAttribute($target, "ALTFSI_MASTER_CHIP", "physical:sys-0");
         $targetObj->setAttribute($target, "ALTFSI_MASTER_PORT", "0xFF");
         $targetObj->setAttribute($target, "FSI_MASTER_TYPE",    "NO_MASTER");
         $targetObj->setAttribute($target, "FSI_SLAVE_CASCADE",  "0");
@@ -534,6 +524,7 @@ sub processProcessor
     {
         $targetObj->setAttribute($target, "PROC_MASTER_TYPE",
             "NOT_MASTER");
+        $targetObj->setAttribute($target, "ALTFSI_MASTER_CHIP", "physical:sys-0");
     }
     ## Update bus speeds
     processI2cSpeeds($targetObj,$target);
@@ -562,15 +553,19 @@ sub processI2cSpeeds
     $bus_speeds[0][0] = $bus_speeds2[0];
     $bus_speeds[0][1] = $bus_speeds2[1];
     $bus_speeds[0][2] = $bus_speeds2[2];
-    $bus_speeds[1][0] = $bus_speeds2[3];
-    $bus_speeds[1][1] = $bus_speeds2[4];
-    $bus_speeds[1][2] = $bus_speeds2[5];
-    $bus_speeds[2][0] = $bus_speeds2[6];
-    $bus_speeds[2][1] = $bus_speeds2[7];
-    $bus_speeds[2][2] = $bus_speeds2[8];
-    $bus_speeds[3][0] = $bus_speeds2[9];
-    $bus_speeds[3][1] = $bus_speeds2[10];
-    $bus_speeds[3][2] = $bus_speeds2[11];
+    $bus_speeds[0][3] = $bus_speeds2[3];
+    $bus_speeds[1][0] = $bus_speeds2[4];
+    $bus_speeds[1][1] = $bus_speeds2[5];
+    $bus_speeds[1][2] = $bus_speeds2[6];
+    $bus_speeds[1][3] = $bus_speeds2[7];
+    $bus_speeds[2][0] = $bus_speeds2[8];
+    $bus_speeds[2][1] = $bus_speeds2[9];
+    $bus_speeds[2][2] = $bus_speeds2[10];
+    $bus_speeds[2][3] = $bus_speeds2[11];
+    $bus_speeds[3][0] = $bus_speeds2[12];
+    $bus_speeds[3][1] = $bus_speeds2[13];
+    $bus_speeds[3][2] = $bus_speeds2[14];
+    $bus_speeds[3][3] = $bus_speeds2[15];
 
     my $i2cs=$targetObj->findConnections($target,"I2C","");
     if ($i2cs ne "") {
@@ -581,13 +576,11 @@ sub processI2cSpeeds
             my $bus_speed=$targetObj->getBusAttribute(
                   $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_SPEED");
 
-            #@todo RTC:164224 > currently the bus_speed fields are empty in the xml
-=begin
             if ($bus_speed eq "" || $bus_speed==0) {
                 print "ERROR: I2C bus speed not defined for $i2c->{SOURCE}\n";
                 $targetObj->myExit(3);
             }
-=cut
+
             ## choose lowest bus speed
             if ($bus_speeds[$engine][$port] eq "" ||
                   $bus_speeds[$engine][$port]==0  ||
@@ -599,15 +592,19 @@ sub processI2cSpeeds
     $bus_speed_attr = $bus_speeds[0][0].",".
                       $bus_speeds[0][1].",".
                       $bus_speeds[0][2].",".
+                      $bus_speeds[0][3].",".
                       $bus_speeds[1][0].",".
                       $bus_speeds[1][1].",".
                       $bus_speeds[1][2].",".
+                      $bus_speeds[1][3].",".
                       $bus_speeds[2][0].",".
                       $bus_speeds[2][1].",".
                       $bus_speeds[2][2].",".
+                      $bus_speeds[2][3].",".
                       $bus_speeds[3][0].",".
                       $bus_speeds[3][1].",".
-                      $bus_speeds[3][2];
+                      $bus_speeds[3][2].",".
+                      $bus_speeds[3][3];
 
     $targetObj->setAttribute($target,"I2C_BUS_SPEED_ARRAY",$bus_speed_attr);
 }
@@ -626,16 +623,28 @@ sub setupBars
     my $proc   = $targetObj->getAttribute($target, "FABRIC_CHIP_ID");
     $targetObj->{TOPOLOGY}->{$group}->{$proc}++;
 
-    my @bars=("FSP_BASE_ADDR","PSI_BRIDGE_BASE_ADDR",
-              "INTP_BASE_ADDR","PHB_MMIO_ADDRS_64","PHB_MMIO_ADDRS_32",
-              "PHB_XIVE_ESB_ADDRS","PHB_REG_ADDRS","XIVE_ROUTING_ESB_ADDR",
-              "XIVE_ROUTING_END_ADDR","XIVE_PRESENTATION_NVT_ADDR",
-              "VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR",
-              "VAS_USER_WINDOW_CONTEXT_ADDR","LPC_BUS_ADDR",
-              "NVIDIA_NPU_PRIVILEGED_ADDR","NVIDIA_NPU_USER_REG_ADDR",
-              "NVIDIA_PHY0_REG_ADDR","NVIDIA_PHY1_REG_ADDR",
-              "XIVE_CONTROLLER_BAR_ADDR","XIVE_PRESENTATION_BAR_ADDR",
-              "NX_RNG_ADDR");
+    my @bars=(  "FSP_BASE_ADDR",
+                "PSI_BRIDGE_BASE_ADDR",
+                "INTP_BASE_ADDR",
+                "PHB_MMIO_ADDRS_64",
+                "PHB_MMIO_ADDRS_32",
+                "PHB_XIVE_ESB_ADDRS",
+                "PHB_REG_ADDRS",
+                "XIVE_ROUTING_ESB_ADDR",
+                "XIVE_ROUTING_END_ADDR",
+                "XIVE_PRESENTATION_NVT_ADDR",
+                "VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR",
+                "VAS_USER_WINDOW_CONTEXT_ADDR",
+                "LPC_BUS_ADDR",
+                "NVIDIA_NPU_PRIVILEGED_ADDR",
+                "NVIDIA_NPU_USER_REG_ADDR",
+                "NVIDIA_PHY0_REG_ADDR",
+                "NVIDIA_PHY1_REG_ADDR",
+                "PSI_HB_ESB_ADDR",
+                "XIVE_CONTROLLER_BAR_ADDR",
+                "XIVE_PRESENTATION_BAR_ADDR",
+                "XSCOM_BASE_ADDRESS",
+                "NX_RNG_ADDR");
 
     # Attribute only valid in naples-based systems
     if (!$targetObj->isBadAttribute($target,"NPU_MMIO_BAR_BASE_ADDR") ) {
