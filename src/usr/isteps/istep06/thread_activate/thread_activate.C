@@ -83,7 +83,7 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
                i_masterCoreId);
 
     //CH Keyword in LPRx Record of MVPD contains the Cache Deconfig State
-    //the x in LPRx is the core number.
+    //the x in LPRx is the EQ number.
     errlHndl_t  l_errl  =   NULL;
     bool cacheDeconfig = true;
     uint64_t theRecord = 0x0;
@@ -101,22 +101,40 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
         //TODO: use a common utility function for conversion. RTC: 60552
         switch (i_masterCoreId)
         {
-        case 0x0:
+        case 0x00:
+        case 0x01:
+        case 0x02:
+        case 0x03:
             theRecord = MVPD::LRP0;
             break;
-        case 0x1:
+        case 0x04:
+        case 0x05:
+        case 0x06:
+        case 0x07:
             theRecord = MVPD::LRP1;
             break;
-        case 0x2:
+        case 0x08:
+        case 0x09:
+        case 0x0A:
+        case 0x0B:
             theRecord = MVPD::LRP2;
             break;
-        case 0x3:
+        case 0x0C:
+        case 0x0D:
+        case 0x0E:
+        case 0x0F:
             theRecord = MVPD::LRP3;
             break;
-        case 0x4:
+        case 0x10:
+        case 0x11:
+        case 0x12:
+        case 0x13:
             theRecord = MVPD::LRP4;
             break;
-        case 0x5:
+        case 0x14:
+        case 0x15:
+        case 0x16:
+        case 0x17:
             theRecord = MVPD::LRP5;
             break;
         default:
