@@ -3837,7 +3837,7 @@ sub generate_proc
             $fspBase = 0x0006030100000000 + $nodeSize*$lognode +
                          $chipSize*$logid;
             #PSI Link address
-            $psiBase = 0x0006030203000000 + $nodeSize*$psichip +
+            $psiBase = 0x0006030203000000 + $nodeSize*$lognode +
                          $chipSize*$logid;
             last;
         }
