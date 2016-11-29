@@ -76,6 +76,48 @@ const HdatKeywordInfo l_mvpdKeywords[] =
 
 };
 
+/******************************************************************************
+ * hdatGetPcrdDeviceInfo
+ *
+ * @brief Routine returns the Host I2C device entries
+ *
+ * @pre None
+ *
+ * @post None
+ *
+ * @param[in] i_pProcTarget
+ *       The proc target handle
+ * @param[out] o_i2cDevEntries
+ *       The host i2c dev entries
+ *
+ * @return void
+ *
+******************************************************************************/
+void hdatGetPcrdDeviceInfo(TARGETING::Target* i_pProcTarget,
+    std::vector<hdatPcrdHI2cData_t>&o_i2cDevEntries)
+{
+    HDAT_ENTER();
+    //TODO : RTC Story 165230 
+    //Need to populate the data once ready
+    //std::vector<hdatDeviceInfo_t> o_deviceInfo;
+    //getDeviceInfo( TARGETING::Target* i_procTarget,
+    //               std::vector<hdatDeviceInfo_t>& o_deviceInfo );
+    hdatPcrdHI2cData_t l_hostI2cObj;
+    memset(&l_hostI2cObj, 0x00, sizeof(l_hostI2cObj));
+
+    uint32_t l_idx = 0;
+
+    //Hard coded values
+    for (l_idx = 1; l_idx < 3; l_idx++)
+    {
+        l_hostI2cObj.hdatPcrdI2cMasterInfo = l_idx;
+        l_hostI2cObj.hdatPcrdI2cSlaveDevType = l_idx;
+        l_hostI2cObj.hdatPcrdI2cPurpose = l_idx;
+        o_i2cDevEntries.push_back(l_hostI2cObj);
+    }
+    HDAT_EXIT();
+}
+
 /*******************************************************************************
  * hdatSetPcrdHdrs
  *
@@ -124,6 +166,8 @@ static errlHndl_t hdatSetPcrdHdrs(hdatSpPcrd_t *i_pcrd)
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_ASCII_KWD].hdatSize   = 0;
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_CHIP_VPD].hdatOffset = 0;
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_CHIP_VPD].hdatSize   = 0;
+    i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].hdatOffset = 0;
+    i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].hdatSize   = 0;
 
   return l_errlHndl;
 }
@@ -402,12 +446,64 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                     delete[] l_FullMvpd;
                     l_FullMvpd = NULL;
                 }
-            
+
                 // Set the Full mvpd dptr and full pcrd struct sizes
                 this->iv_spPcrd->hdatPcrdIntData
                     [HDAT_PCRD_DA_CHIP_VPD].hdatSize = l_FullMvpdSize;
                 this->iv_spPcrd->hdatHdr.hdatSize += l_FullMvpdSize;
 
+                // Setting Host I2C device entry data
+                uint32_t l_pcrdHI2cTotalSize = 0;
+
+                hdatHDIFDataArray_t *l_hostI2cFullPcrdHdrPtr = NULL;
+                l_hostI2cFullPcrdHdrPtr =
+                    reinterpret_cast<hdatHDIFDataArray_t *>
+                    (l_FullMvpdAddr+l_FullMvpdSize);
+
+                // TODO RTC Story 165230
+                // Need to get i2c Master data correctly
+                std::vector<hdatPcrdHI2cData_t> l_i2cDevEntries;
+
+                hdatGetPcrdDeviceInfo(l_pProcTarget, l_i2cDevEntries);
+
+                l_pcrdHI2cTotalSize = sizeof(hdatHDIFDataArray_t) +
+                    (sizeof(hdatPcrdHI2cData_t) * l_i2cDevEntries.size());
+
+                HDAT_INF("pcrdHI2cNumEntries=0x%x, l_pcrdHI2cTotalSize=0x%x",
+                    l_i2cDevEntries.size(), l_pcrdHI2cTotalSize);
+
+                l_hostI2cFullPcrdHdrPtr->hdatOffset = 0x0010; // All array entries start right after header which is of 4 word size
+                l_hostI2cFullPcrdHdrPtr->hdatArrayCnt =
+                    l_i2cDevEntries.size();
+                l_hostI2cFullPcrdHdrPtr->hdatAllocSize =
+                    sizeof(hdatPcrdHI2cData_t);
+                l_hostI2cFullPcrdHdrPtr->hdatActSize =
+                    sizeof(hdatPcrdHI2cData_t);
+
+                hdatPcrdHI2cData_t *l_hostI2cFullPcrdDataPtr = NULL;
+                l_hostI2cFullPcrdDataPtr =
+                    reinterpret_cast<hdatPcrdHI2cData_t *>
+                    (l_hostI2cFullPcrdHdrPtr+sizeof(hdatHDIFDataArray_t));
+
+                if ( l_i2cDevEntries.size() != 0 )
+                {
+                    //copy data from vector to data ptr
+                    std::copy(l_i2cDevEntries.begin(),
+                        l_i2cDevEntries.end(), l_hostI2cFullPcrdDataPtr);
+                }
+                else
+                {
+                    HDAT_INF("Empty Host I2C device info vector : Size=%d",
+                        l_i2cDevEntries.size());
+                }
+                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].
+                    hdatOffset = this->iv_spPcrd->hdatPcrdIntData
+                    [HDAT_PCRD_DA_CHIP_VPD].hdatOffset + 
+                    this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_CHIP_VPD].
+                    hdatSize;
+                this->iv_spPcrd->hdatPcrdIntData
+                    [HDAT_PCRD_DA_HOST_I2C].hdatSize = l_pcrdHI2cTotalSize;
+                this->iv_spPcrd->hdatHdr.hdatSize += l_pcrdHI2cTotalSize;
             }
             if( NULL != l_errl)
             {

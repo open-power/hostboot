@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,8 +67,9 @@ enum hdatPcrdDataPtrs
     HDAT_PCRD_DA_FRU_ID         = 2,
     HDAT_PCRD_DA_ASCII_KWD      = 3,
     HDAT_PCRD_DA_CHIP_VPD       = 4,
-    HDAT_PCRD_DA_CNT            = 5,
-    HDAT_PCRD_DA_LAST           = 8,
+    HDAT_PCRD_DA_HOST_I2C       = 5,
+    HDAT_PCRD_DA_CNT            = 6,
+    HDAT_PCRD_DA_LAST           = 7,
 };
 
 /*----------------------------------------------------------------------------*/
@@ -108,6 +109,16 @@ struct hdatPcrdChipTod_t
     uint32_t  hdatPcrdTodControlRegister; // 0x0008 Chip Time-of-day
                                           //        control register
 } __attribute__ ((packed));
+
+
+/** @brief Defines the Host I2C device info in the PCRD
+ */
+struct hdatPcrdHI2cData_t
+{
+    uint32_t hdatPcrdI2cMasterInfo;   // 0x0000 Host I2C device info
+    uint32_t hdatPcrdI2cSlaveDevType; // 0x0004 Host I2C slave device type
+    uint32_t hdatPcrdI2cPurpose;      // 0x0008 Host I2C purpose
+}__attribute__ ((packed));
 
 /** @brief Defines the PCRD.
  * FipS updates this portion and DMAs the entire PCRD back to main memory.

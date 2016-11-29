@@ -101,9 +101,12 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
   iv_maxRamCnt(i_ramCnt), iv_actRamCnt(0), iv_maxRamObjSize(0), iv_kwd(NULL),
   iv_ramPadReq(false),iv_addrRange(NULL), iv_ecLvl(NULL), iv_ramPtrs(NULL)
 {
-  HDAT_ENTER( );
+    HDAT_ENTER( );
 
     uint32_t l_slcaIdx = 0;
+    iv_msaHostI2cCnt = 0;
+    iv_msaHostI2cSize = 0;
+    iv_msaI2cDataPtr = NULL;
 
     o_errlHndl = NULL;
     iv_fru.hdatResourceId = i_resourceId;
@@ -369,6 +372,34 @@ errlHndl_t HdatMsArea::addEcEntry(uint32_t i_manfId,
     return l_errlHndl;
 }
 
+/** @brief See the prologue in hdatmsarea.H
+ */ 
+void HdatMsArea::setMsaI2cInfo(
+    std::vector<hdatMsAreaHI2cData_t> &i_I2cDevEntries )
+{
+    HDAT_ENTER();
+    iv_msaI2cHdr.hdatOffset = 0x0010;      // this is just header of 4 words. arrays start at 0x0010
+    iv_msaI2cHdr.hdatArrayCnt = i_I2cDevEntries.size();
+    iv_msaI2cHdr.hdatAllocSize = sizeof(hdatMsAreaHI2cData_t);
+    iv_msaI2cHdr.hdatActSize = sizeof(hdatMsAreaHI2cData_t);
+    iv_msaHostI2cCnt = i_I2cDevEntries.size();
+    iv_msaHostI2cSize = sizeof(hdatHDIFDataArray_t) +
+        (sizeof(hdatMsAreaHI2cData_t) * iv_msaHostI2cCnt);
+    HDAT_INF("iv_msaHostI2cCnt=%d, iv_msaHostI2cSize=%d",
+        iv_msaHostI2cCnt, iv_msaHostI2cSize);
+    if ( i_I2cDevEntries.size() != 0 )
+    {
+        //copy from vector to array
+        std::copy(i_I2cDevEntries.begin(),i_I2cDevEntries.end(),
+            iv_msaI2cDataPtr);
+    }
+    else
+    {
+        HDAT_INF("Empty Host I2C device info vector : Ms Area Id=%d, Size=%d",
+            iv_msId.hdatMsAreaId, i_I2cDevEntries.size());
+    } 
+    HDAT_EXIT();
+}
 
 /** @brief See the prologue in hdatmsarea.H
  */
@@ -480,6 +511,7 @@ void HdatMsArea::finalizeObjSize()
     this->addData(HDAT_MS_AREA_AFF, sizeof(hdatMsAreaAffinity_t));
     this->addData(HDAT_MS_AREA_EC_ARRAY, sizeof(hdatHDIFDataArray_t) +
                     iv_maxEcCnt * sizeof(hdatMsAreaEcLvl_t));
+    this->addData(HDAT_MS_AREA_HOST_I2C, iv_msaHostI2cSize);
 
     this->align();
 
@@ -605,6 +637,14 @@ void HdatMsArea::commit(UtilMem &i_data)
     i_data.write(&iv_ecArrayHdr, sizeof(hdatHDIFDataArray_t));
 
     i_data.write(iv_ecLvl,iv_maxEcCnt * sizeof(hdatMsAreaEcLvl_t));
+
+    i_data.write(&iv_msaI2cHdr, sizeof(hdatHDIFDataArray_t));
+
+    if (NULL != iv_msaI2cDataPtr)
+    {
+        i_data.write(iv_msaI2cDataPtr,
+            (iv_msaHostI2cSize - sizeof(hdatHDIFDataArray_t)));
+    }
 
     this->endCommit(i_data);
 }
