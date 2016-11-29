@@ -738,6 +738,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
                    getAttr<TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE>();
 
 
+#if 0 //@fixme-165346
             TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_type l_laneEq = {{0}};
 
             if(!l_pProcTarget->
@@ -764,6 +765,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             //uint16_t hdatLaneEqPHB[64]
             memcpy( l_hub->hdatLaneEqPHB, l_laneEq,
                      (NUM_BYTES_PER_LANE * HDAT_PHB_LANES));
+#endif //@fixme-165346
 
             //increment counts
             fruData->iv_hubArrayHdr.hdatArrayCnt++;
