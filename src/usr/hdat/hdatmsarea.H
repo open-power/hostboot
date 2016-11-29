@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,10 +76,11 @@ enum hdatMsAreaDataPtrs
     HDAT_MS_AREA_ADDR_RNG  =  4,
     HDAT_MS_AREA_AFF       =  5,
     HDAT_MS_AREA_EC_ARRAY  =  6,
-    HDAT_MS_AREA_RESERVED1 =  7,
-    HDAT_MS_AREA_RESERVED2 =  8,
-    HDAT_MS_AREA_RESERVED3 =  9,
-    HDAT_MS_AREA_LAST      = 10
+    HDAT_MS_AREA_HOST_I2C  =  7,
+    HDAT_MS_AREA_RESERVED1 =  8,
+    HDAT_MS_AREA_RESERVED2 =  9,
+    HDAT_MS_AREA_RESERVED3 = 10,
+    HDAT_MS_AREA_LAST      = 11
 };
 
  
@@ -155,6 +156,14 @@ struct hdatMsAreaEcLvl_t
     uint32_t hdatChipEcLvl;   // 0x0004 Memory interface chip EC level
 }  __attribute__ ((packed));
 
+/** @brief Structure definition for the host I2C devices header
+ */
+struct hdatMsAreaHI2cData_t
+{
+    uint32_t hdatMsaI2cMasterInfo;   // 0x0000 Host I2C device info
+    uint32_t hdatMsaI2cSlaveDevType; // 0x0004 Host I2C slave device type
+    uint32_t hdatMsaI2cPurpose;      // 0x0008 Host I2C purpose
+}  __attribute__ ((packed));
 
 
 /*----------------------------------------------------------------------------*/
@@ -456,6 +465,20 @@ public:
     errlHndl_t addEcEntry(uint32_t i_manfId,
                         uint32_t i_ecLvl);
 
+   /** 
+    * @brief Update the Host I2C device info
+    *
+    * @pre None
+    *
+    * @post None
+    *               
+    * @param i_I2cDevEntries - input parameter - This contains I2C master infoi,
+    *     I2C slave device type and I2C device purpose
+    *
+    * @retval void         
+    */
+   void setMsaI2cInfo (
+       std::vector<hdatMsAreaHI2cData_t>& i_I2cDevEntries );
 
   /**
    * @brief This routine returns the length of all RAM objects associated
@@ -558,6 +581,9 @@ private:
      * @li iv_maxAddrRngCnt   - maximum number of address range entries that
      *                          can be added
      * @li iv_maxEcCnt        - maximum number of EC entries that can be added
+     * @li iv_msaHostI2cCnt   - actual number of host I2C entries that can be
+     *                          added
+     * @li iv_msaHostI2cSize  - total size of host i2c data
      * @li iv_maxRamCnt       - maximum number of RAM objects that can be added
      * @li iv_actRamCnt       - actual number of RAM objects that were added
      * @li iv_maxRamObjSize   - maximum size of any RAM object associated with
@@ -573,12 +599,16 @@ private:
      * @li iv_aff             - CPU affinity information
      * @li iv_ecArrayHdr      - data array header
      * @li iv_ecLvl           - EC level array
+     * @li iv_msaI2cHdr       - Host I2C info header
+     * @li iv_msaI2cEntryPtr - Host I2C info entries
      * @li iv_ramPtrs         - ptr to storage which contains one of more ptrs
      *                          to RAM objects
      */
     uint32_t                iv_kwdSize;
     uint32_t                iv_maxAddrRngCnt;
     uint32_t                iv_maxEcCnt;
+    uint32_t                iv_msaHostI2cCnt;
+    uint32_t                iv_msaHostI2cSize;
     uint32_t                iv_maxRamCnt;
     uint32_t                iv_actRamCnt;
     uint32_t                iv_maxRamObjSize;
@@ -592,6 +622,8 @@ private:
     hdatMsAreaAffinity_t    iv_aff;
     hdatHDIFDataArray_t     iv_ecArrayHdr;
     hdatMsAreaEcLvl_t      *iv_ecLvl;
+    hdatHDIFDataArray_t     iv_msaI2cHdr;
+    hdatMsAreaHI2cData_t   *iv_msaI2cDataPtr;
     HdatRam               **iv_ramPtrs;
 
 
