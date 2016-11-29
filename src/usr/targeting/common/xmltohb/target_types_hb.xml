@@ -258,10 +258,10 @@
     <attribute><id>VPD_SWITCHES</id></attribute>
 </targetTypeExtension>
 
-<targetType>
+<targetTypeExtension>
     <id>unit-xbus-nimbus</id>
     <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
-</targetType>
+</targetTypeExtension>
 
 <targetTypeExtension>
     <id>occ</id>
