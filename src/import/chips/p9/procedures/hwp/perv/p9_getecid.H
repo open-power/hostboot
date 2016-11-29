@@ -42,6 +42,10 @@
 
 #include <fapi2.H>
 
+enum P9_GETECID_Private_Constants
+{
+    fuseString_len = 176 // fuse string length
+};
 
 typedef fapi2::ReturnCode (*p9_getecid_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
         fapi2::variable_buffer& fuseString);
