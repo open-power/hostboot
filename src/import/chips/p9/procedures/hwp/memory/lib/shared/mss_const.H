@@ -52,6 +52,7 @@ enum sizes
     MAX_RANK_PER_DIMM = 4,
     NIBBLES_PER_DP = 4,
     BITS_PER_NIBBLE = 4,
+    BITS_PER_BYTE = 8,
     BITS_PER_DQS = 2,              ///< Differential clock pair
     MAX_RANKS_DIMM1 = 2,           ///< DIMM1 (inner DIMM) can't be a 4R DIMM
     MAX_PRIMARY_RANKS_PER_PORT = 4,
