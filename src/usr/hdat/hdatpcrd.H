@@ -68,8 +68,9 @@ enum hdatPcrdDataPtrs
     HDAT_PCRD_DA_ASCII_KWD      = 3,
     HDAT_PCRD_DA_CHIP_VPD       = 4,
     HDAT_PCRD_DA_HOST_I2C       = 5,
-    HDAT_PCRD_DA_CNT            = 6,
-    HDAT_PCRD_DA_LAST           = 7,
+    HDAT_PCRD_DA_PNOR           = 6,
+    HDAT_PCRD_DA_CNT            = 7,
+    HDAT_PCRD_DA_LAST           = 8,
 };
 
 /*----------------------------------------------------------------------------*/
@@ -120,6 +121,34 @@ struct hdatPcrdHI2cData_t
     uint32_t hdatPcrdI2cPurpose;      // 0x0008 Host I2C purpose
 }__attribute__ ((packed));
 
+
+/* @brief defines PNOR structure in PCRD */
+struct hdatPcrdPnor_t
+{
+    uint8_t hdatPcrdPnorBusType;         //0x0000 bus on which pnor placed
+    uint8_t hdatPcrdPnorReserved1[7];    //0x0001 Reserved
+
+    hdatMsAddr_t hdatPcrdPnorBaseAddr;   //0x0008 base addr of pnor device
+    uint32_t hdatPcrdPnorSize;           //0x0010 size of pnor addr space
+    uint32_t hdatPcrdPnorReserved2;      //0x0014 Reserved
+
+    hdatMsAddr_t hdatPcrdPnorGoldenTOC;  //0x0018 start addr of golden image TOC
+    uint32_t hdatPcrdPnorGoldenTOCsize;  //0x0020 KB size of golden image TOC
+    uint32_t hdatPcrdPnorReserved3;     //0x0024 Reserved
+
+    hdatMsAddr_t hdatPcrdPnorWorkingTOC; //0x0028 working TOC start addr
+    uint32_t hdatPcrdPnorWorkTOCsize;    //0x0030 KB size of working TOC
+    uint32_t hdatPcrdPnorReserved4;      //0x0034 Reserved
+
+    hdatMsAddr_t hdatPcrdPnorPsideTOC;   //0x0038 P-side image TOC start addr
+    uint32_t hdatPcrdPnorPsideTOCsize;   //0x0040 KB size of P-side TOC
+    uint32_t hdatPcrdPnorReserved5;      //0x0044 Reserved
+
+    hdatMsAddr_t hdatPcrdPnorTsideTOC;   //0x0048 T-side TOC start addr
+    uint32_t hdatPcrdPnorTsideTOCsize;   //0x0050 T-side TOC size
+};
+
+
 /** @brief Defines the PCRD.
  * FipS updates this portion and DMAs the entire PCRD back to main memory.
  */
@@ -132,6 +161,7 @@ struct hdatSpPcrd_t
     hdatFruId_t        hdatFruId;
     char               *hdatKwd;
     uint8_t            *vpd_data;
+    hdatPcrdPnor_t     hdatPnorData;
     //add in padding here. uint32_t whatever it is.
 } __attribute__ ((packed));
 
@@ -271,6 +301,21 @@ class HdatPcrd
 
     errlHndl_t hdatSetProcessorInfo(const TARGETING::Target* i_pProcTarget,
                                         uint32_t i_procstatus);
+
+    /**
+     * @brief fetches the pnor data according to the hdat spec
+     *
+     * @pre HdatPcrd Object should be constructed with the main memory address
+     *      Target pointer to the present procs in the system
+     *
+     * @post the pnor data is populated
+     *
+     * @param[out] o_pnorData  the pnor data structure
+     *
+     * @return A null error log handle if successful, else the return code
+     *    pointed to by o_errlHndl
+     */     
+    errlHndl_t fetch_pnor_data( hdatPcrdPnor_t& o_pnorData);
 };
 
 
