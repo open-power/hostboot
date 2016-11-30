@@ -84,6 +84,24 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_PLUG_RULES_OVERRIDDEN_RANK_CONFIG</rc>
+    <description>
+      The DIMM called out represent an unsupported rank configuration
+      because it was expressly disallowed in the MRW
+    </description>
+    <ffdc>RANKS_ON_DIMM0</ffdc>
+    <ffdc>RANKS_ON_DIMM1</ffdc>
+    <ffdc>MRW_VALUE</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_PLUG_RULES_SINGLE_DIMM_IN_WRONG_SLOT</rc>
     <description>
       The lone DIMM plugged in to the called out port is in the wrong slot

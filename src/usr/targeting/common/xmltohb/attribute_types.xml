@@ -32323,4 +32323,24 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>MSS_MRW_UNSUPPORTED_RANK_CONFIG</id>
+    <description>
+      Each MCA value is a 64-bit vector, where each byte represents an unsupported rank configuration.
+      Each nibble in the byte represents the total count of ranks (master and slave)
+      on each DIMM. The left-most nibble represents slot 0 and the right represents 1.
+    </description>
+    <simpleType>
+        <uint64_t>
+        </uint64_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MRW_UNSUPPORTED_RANK_CONFIG</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

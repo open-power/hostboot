@@ -582,4 +582,20 @@
     <mssAccessorName>mrw_supported_freq</mssAccessorName>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MSS_MRW_UNSUPPORTED_RANK_CONFIG</id>
+    <targetType>TARGET_TYPE_MCS</targetType>
+    <description>
+      Each MCA value is a 64-bit vector, where each byte represents an unsupported rank configuration.
+      Each nibble in the byte represents the total count of ranks (master and slave)
+      on each DIMM. The left-most nibble represents slot 0 and the right represents 1.
+    </description>
+    <valueType>uint64</valueType>
+    <array>2</array>
+    <platInit/>
+    <initToZero/>
+    <default> 0 </default>
+    <mssAccessorName>mrw_unsupported_rank_config</mssAccessorName>
+  </attribute>
+
 </attributes>

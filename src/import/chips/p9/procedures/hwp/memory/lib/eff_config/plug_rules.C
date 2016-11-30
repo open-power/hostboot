@@ -56,6 +56,62 @@ namespace plug_rule
 {
 
 ///
+/// @brief Helper to evaluate the unsupported rank config override attribute
+/// @param[in] i_dimm0_ranks count of the ranks on DIMM in slot 0
+/// @param[in] i_dimm1_ranks count of the ranks on DIMM in slot 1
+/// @param[in] i_attr value of the attribute containing the unsupported rank configs
+/// @return true iff this rank config is supported according to the unsupported attribute
+/// @note not to be used to enforce populated/unpopulated - e.g., 0 ranks in both slots is ignored
+///
+bool unsupported_rank_helper(const uint64_t i_dimm0_ranks, const uint64_t i_dimm1_ranks,
+                             const fapi2::buffer<uint64_t>& i_attr)
+{
+    // Quick - if the attribute is 0 (typically is) then we're out.
+    if (i_attr == 0)
+    {
+        FAPI_INF("(%d, %d) is supported, override empty", i_dimm0_ranks, i_dimm1_ranks);
+        return true;
+    }
+
+    // Quick - if both rank configs are 0 (no ranks seen in any slots) we return true. This is always OK.
+    if ((i_dimm0_ranks == 0) && (i_dimm1_ranks == 0))
+    {
+        FAPI_INF("(%d, %d) is always supported", i_dimm0_ranks, i_dimm1_ranks);
+        return true;
+    }
+
+    // We use 8 bits to represent a config in the unsupported ranks attribute. Each 'config' is a byte in
+    // the attribute. The left nibble is the count of ranks on DIMM0, right nibble is the count of unsupported
+    // ranks on DIMM1. Total ranks so we need the bits to represent stacks too.
+    uint64_t l_current_byte  = 0;
+
+    do
+    {
+        uint8_t  l_config = 0;
+        uint64_t l_current_dimm0 = 0;
+        uint64_t l_current_dimm1 = 0;
+
+        i_attr.extractToRight(l_config, l_current_byte * BITS_PER_BYTE, BITS_PER_BYTE);
+
+        fapi2::buffer<uint8_t>(l_config).extractToRight<0,               BITS_PER_NIBBLE>(l_current_dimm0);
+        fapi2::buffer<uint8_t>(l_config).extractToRight<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(l_current_dimm1);
+
+        FAPI_INF("Seeing 0x%x for unsupported rank config (%d, %d)", l_config, l_current_dimm0, l_current_dimm1);
+
+        if ((l_current_dimm0 == i_dimm0_ranks) && (l_current_dimm1 == i_dimm1_ranks))
+        {
+            FAPI_INF("(%d, %d) is unsupported", i_dimm0_ranks, i_dimm1_ranks);
+            return false;
+        }
+
+    }
+    while (++l_current_byte < sizeof(uint64_t));
+
+    FAPI_INF("(%d, %d) is supported", i_dimm0_ranks, i_dimm1_ranks);
+    return true;
+}
+
+///
 /// @brief Helper to find the best represented DIMM type in a vector of dimm::kind
 /// @param[in, out] io_kinds a vector of dimm::kind
 /// @return std::pair representing the type and the count.
@@ -170,11 +226,13 @@ fapi2::ReturnCode dimm_type_mixing(std::vector<dimm::kind>& io_kinds)
 /// @note Reads an MRW attribute to further limit rank configs.
 /// @param[in] i_target the port
 /// @param[in] i_kinds a vector of DIMM (sorted while processing)
+/// @param[in] i_ranks_override value of mrw_unsupported_rank_config attribute
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 /// @note Expects the kind array to represent the DIMM on the port.
 ///
 fapi2::ReturnCode check_rank_config(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-                                    const std::vector<dimm::kind>& i_kinds)
+                                    const std::vector<dimm::kind>& i_kinds,
+                                    const uint64_t i_ranks_override)
 {
     // We need to keep trak of current_err ourselves as the FAPI_ASSERT_NOEXIT macro doesn't.
     fapi2::current_err = FAPI2_RC_SUCCESS;
@@ -193,11 +251,21 @@ fapi2::ReturnCode check_rank_config(const fapi2::Target<TARGET_TYPE_MCA>& i_targ
     if (i_kinds.size() == 1)
     {
         // Sets fapi2::current_err
-        MSS_ASSERT_NOEXIT( mss::index(i_kinds[0].iv_target) == 0,
-                           fapi2::MSS_PLUG_RULES_SINGLE_DIMM_IN_WRONG_SLOT()
-                           .set_MCA_TARGET(i_target)
-                           .set_DIMM_TARGET(i_kinds[0].iv_target),
-                           "%s is in slot 1, should be in slot 0", mss::c_str(i_kinds[0].iv_target));
+        FAPI_ASSERT( mss::index(i_kinds[0].iv_target) == 0,
+                     fapi2::MSS_PLUG_RULES_SINGLE_DIMM_IN_WRONG_SLOT()
+                     .set_MCA_TARGET(i_target)
+                     .set_DIMM_TARGET(i_kinds[0].iv_target),
+                     "%s is in slot 1, should be in slot 0", mss::c_str(i_kinds[0].iv_target));
+
+        // Check to see if the override attribute limits this single slot configuration. Since we assert above
+        // we know now i_kinds[0].iv_target is the DIMM in slot 0
+        FAPI_ASSERT( unsupported_rank_helper(i_kinds[0].iv_total_ranks, 0, i_ranks_override) == true,
+                     fapi2::MSS_PLUG_RULES_OVERRIDDEN_RANK_CONFIG()
+                     .set_RANKS_ON_DIMM0(i_kinds[0].iv_total_ranks)
+                     .set_RANKS_ON_DIMM1(0)
+                     .set_TARGET(i_target),
+                     "MRW overrides this rank configuration (single DIMM) ranks: %d %s",
+                     i_kinds[0].iv_total_ranks, mss::c_str(i_target) );
 
         // Pass or fail, we're done as we only had one DIMM
         return fapi2::current_err;
@@ -212,13 +280,18 @@ fapi2::ReturnCode check_rank_config(const fapi2::Target<TARGET_TYPE_MCA>& i_targ
         // I don't think f/w supports std::count ... There aren't many DIMM on this port ...
         uint64_t l_rank_count = 0;
         const dimm::kind* l_dimm0_kind = nullptr;
+        const dimm::kind* l_dimm1_kind = nullptr;
 
         for (const auto& k : i_kinds)
         {
-            // While we're here, lets look for the DIMM on slot 0 - we'll need it later
+            // While we're here, lets look for the DIMM on slots 0/1 - we'll need them later
             if (mss::index(k.iv_target) == 0)
             {
                 l_dimm0_kind = &k;
+            }
+            else
+            {
+                l_dimm1_kind = &k;
             }
 
             l_rank_count += k.iv_master_ranks;
@@ -227,9 +300,16 @@ fapi2::ReturnCode check_rank_config(const fapi2::Target<TARGET_TYPE_MCA>& i_targ
         // If we get here and we see there's no DIMM in slot 0, we did something very wrong. We shouldn't have
         // passed the i_kinds.size() == 1 test above. So lets assert, shouldn't happen, but tracking the nullptr
         // dereference is harder <grin>
-        if (l_dimm0_kind == nullptr)
+        if ((l_dimm0_kind == nullptr) || (l_dimm1_kind == nullptr))
         {
-            FAPI_ERR("seeing a nullptr for DIMM0, which is terrible %s %d", mss::c_str(i_target), i_kinds.size() );
+            FAPI_ERR("seeing a nullptr for DIMM0 or DIMM1, which is terrible %s %d", mss::c_str(i_target), i_kinds.size() );
+            fapi2::Assert(false);
+        }
+
+        // Belt-and-suspenders as we make this assumption below
+        if (i_kinds.size() > 2)
+        {
+            FAPI_ERR("seeing more than 2 DIMM on this port %s %d", mss::c_str(i_target), i_kinds.size() );
             fapi2::Assert(false);
         }
 
@@ -241,24 +321,28 @@ fapi2::ReturnCode check_rank_config(const fapi2::Target<TARGET_TYPE_MCA>& i_targ
                            "There are more than %d master ranks on %s (%d)",
                            MAX_PRIMARY_RANKS_PER_PORT, mss::c_str(i_target), l_rank_count );
 
-        FAPI_INF("DIMM in slot 0 %s has %d master ranks",
-                 mss::c_str(l_dimm0_kind->iv_target), l_dimm0_kind->iv_master_ranks);
+        FAPI_INF("DIMM in slot 0 %s has %d master ranks, DIMM1 has %d",
+                 mss::c_str(l_dimm0_kind->iv_target), l_dimm0_kind->iv_master_ranks, l_dimm1_kind->iv_master_ranks);
 
         // The DIMM in slot 0 has to have the largest number of master ranks on the port.
-        const auto l_result = std::find_if(i_kinds.begin(), i_kinds.end(), [&l_dimm0_kind](const dimm::kind & k) -> bool
-        {
-            return k.iv_master_ranks > l_dimm0_kind->iv_master_ranks;
-        });
+        FAPI_ASSERT( l_dimm0_kind->iv_master_ranks >= l_dimm1_kind->iv_master_ranks,
+                     fapi2::MSS_PLUG_RULES_INVALID_RANK_CONFIG()
+                     .set_RANKS_ON_DIMM0(l_dimm0_kind->iv_master_ranks)
+                     .set_RANKS_ON_DIMM1(l_dimm1_kind->iv_master_ranks)
+                     .set_TARGET(i_target),
+                     "The DIMM configuration on %s is incorrect. Master ranks on [1][0]: %d,%d",
+                     mss::c_str(i_target), l_dimm0_kind->iv_master_ranks, l_dimm1_kind->iv_master_ranks );
 
-        // Assertion is that we have no DIMM with more ranks - that is, we came to the end without finding
-        // a DIMM with more master ranks than DIMM0
-        MSS_ASSERT_NOEXIT( l_result == i_kinds.end(),
-                           fapi2::MSS_PLUG_RULES_INVALID_RANK_CONFIG()
-                           .set_RANKS_ON_DIMM0(i_kinds[0].iv_master_ranks)
-                           .set_RANKS_ON_DIMM1(i_kinds[1].iv_master_ranks)
-                           .set_TARGET(i_target),
-                           "The DIMM configuration on %s is incorrect. Master ranks on [1][0]: %d,%d",
-                           mss::c_str(i_target), i_kinds[1].iv_master_ranks, i_kinds[0].iv_master_ranks );
+        // Check to see if the override attribute limits this configuration.
+        FAPI_ASSERT( unsupported_rank_helper(l_dimm0_kind->iv_total_ranks,
+                                             l_dimm1_kind->iv_total_ranks,
+                                             i_ranks_override) == true,
+                     fapi2::MSS_PLUG_RULES_OVERRIDDEN_RANK_CONFIG()
+                     .set_RANKS_ON_DIMM0(l_dimm0_kind->iv_total_ranks)
+                     .set_RANKS_ON_DIMM1(l_dimm1_kind->iv_total_ranks)
+                     .set_TARGET(i_target),
+                     "MRW overrides this rank configuration ranks: %d, %d %s",
+                     l_dimm0_kind->iv_total_ranks, l_dimm1_kind->iv_total_ranks, mss::c_str(i_target) );
 
         return fapi2::current_err;
     }
@@ -344,6 +428,8 @@ fapi2::ReturnCode eff_config::enforce_plug_rules(const fapi2::Target<fapi2::TARG
     // decoded and are valid before VPD was asked for.)
     const auto l_dimm_kinds = mss::dimm::kind::vector(l_dimms);
 
+    uint64_t l_ranks_override = 0;
+
     // The user can avoid plug rules with an attribute. This is handy in partial good scenarios
     uint8_t l_ignore_plug_rules = 0;
     FAPI_TRY( mss::ignore_plug_rules(mss::find_target<TARGET_TYPE_MCS>(i_target), l_ignore_plug_rules) );
@@ -354,10 +440,13 @@ fapi2::ReturnCode eff_config::enforce_plug_rules(const fapi2::Target<fapi2::TARG
         return FAPI2_RC_SUCCESS;
     }
 
+    // Get the MRW blacklist for rank configurations
+    FAPI_TRY( mss::mrw_unsupported_rank_config(i_target, l_ranks_override) );
+
     // Note that we do limited rank config checking here. Most of the checking is done via VPD decoding,
     // meaning that if the VPD decoded the config then there's only a few rank related issues we need
     // to check here.
-    FAPI_TRY( plug_rule::check_rank_config(i_target, l_dimm_kinds) );
+    FAPI_TRY( plug_rule::check_rank_config(i_target, l_dimm_kinds, l_ranks_override) );
 
 fapi_try_exit:
     return fapi2::current_err;
