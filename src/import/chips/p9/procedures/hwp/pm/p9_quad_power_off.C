@@ -57,17 +57,15 @@ fapi2::ReturnCode p9_quad_power_off(
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target)
 {
     fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
-    uint32_t l_unit_pos = 0;
 
     FAPI_INF("p9_quad_power_off: Entering...");
 
-    // Get chiplet position
-    l_unit_pos = i_target.getChipletNumber();
-    FAPI_INF("Quad power off chiplet no.%d", l_unit_pos);
+    // Print chiplet position
+    FAPI_INF("Quad power off chiplet no.%d", i_target.getChipletNumber());
 
     // Call the procedure
     FAPI_EXEC_HWP(rc, p9_pm_pfet_control_eq, i_target,
-                  PM_PFET_TYPE_C::BOTH,PM_PFET_TYPE_C::OFF);
+                  PM_PFET_TYPE_C::BOTH, PM_PFET_TYPE_C::OFF);
     FAPI_TRY(rc);
 
 fapi_try_exit:
