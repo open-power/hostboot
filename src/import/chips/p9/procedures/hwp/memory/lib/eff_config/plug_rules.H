@@ -47,6 +47,17 @@ namespace plug_rule
 {
 
 ///
+/// @brief Helper to evaluate the unsupported rank config override attribute
+/// @param[in] i_dimm0_ranks count of the ranks on DIMM in slot 0
+/// @param[in] i_dimm1_ranks count of the ranks on DIMM in slot 1
+/// @param[in] i_attr value of the attribute containing the unsupported rank configs
+/// @return true iff this rank config is supported according to the unsupported attribute
+/// @note not to be used to enforce populated/unpopulated - e.g., 0 ranks in both slots is ignored
+///
+bool unsupported_rank_helper(const uint64_t i_dimm0_ranks, const uint64_t i_dimm1_ranks,
+                             const fapi2::buffer<uint64_t>& i_attr);
+
+///
 /// @brief Helper to find the best represented DIMM type in a vector of dimm::kind
 /// @param[in, out] io_kinds a vector of dimm::kind
 /// @return std::pair representing the type and the count.
@@ -97,11 +108,13 @@ fapi2::ReturnCode dimm_type_mixing(std::vector<dimm::kind>& io_kinds);
 /// @note Reads an MRW attribute to further limit rank configs.
 /// @param[in] i_target the port
 /// @param[in] i_kinds a vector of DIMM (sorted while processing)
+/// @param[in] i_ranks_override value of mrw_unsupported_rank_config attribute
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 /// @note Expects the kind array to represent the DIMM on the port.
 ///
 fapi2::ReturnCode check_rank_config(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                    const std::vector<dimm::kind>& i_kinds);
+                                    const std::vector<dimm::kind>& i_kinds,
+                                    const uint64_t i_ranks_override);
 
 } // plug_rule
 } // mss
