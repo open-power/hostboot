@@ -555,19 +555,33 @@ extern "C"
         pCpmrHdr->cmePstateOffset           =   CPMR_CME_HCODE_OFFSET + SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_offset);
         pCpmrHdr->cmePstateOffset           =   SWIZZLE_4_BYTE(pCpmrHdr->cmePstateOffset);
         pCpmrHdr->cmePstateLength           =   0;
-        pCpmrHdr->cmeCommonRingOffset       =   CPMR_CME_HCODE_OFFSET + SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_offset);
-        pCpmrHdr->cmeCommonRingOffset       =   SWIZZLE_4_BYTE(pCpmrHdr->cmeCommonRingOffset);
         pCpmrHdr->cmeImgLength              =   pCmeHdr->g_cme_hcode_length;// already swizzled
-        pCpmrHdr->cmeCommonRingLength       =   pCmeHdr->g_cme_common_ring_length;
-        pCpmrHdr->coreSpecRingOffset        =   SWIZZLE_4_BYTE(CME_INST_SPEC_RING_START);
-        pCpmrHdr->coreSpecRingLength        =   pCmeHdr->g_cme_max_spec_ring_length; // already swizzled
         pCpmrHdr->coreScomOffset            =   SWIZZLE_4_BYTE(CORE_SCOM_START);
         pCpmrHdr->coreScomLength            =   SWIZZLE_4_BYTE(CORE_SCOM_RES_SIZE);
 
+        if( pCmeHdr->g_cme_common_ring_length )
+        {
+            pCpmrHdr->cmeCommonRingOffset       =   CPMR_CME_HCODE_OFFSET + SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_offset);
+            pCpmrHdr->cmeCommonRingOffset       =   SWIZZLE_4_BYTE(pCpmrHdr->cmeCommonRingOffset);
+            pCpmrHdr->cmeCommonRingLength       =   pCmeHdr->g_cme_common_ring_length;
+        }
+
+        if( pCmeHdr->g_cme_max_spec_ring_length )
+        {
+            pCpmrHdr->coreSpecRingOffset        =   SWIZZLE_4_BYTE(CME_INST_SPEC_RING_START);
+            pCpmrHdr->coreSpecRingLength        =   pCmeHdr->g_cme_max_spec_ring_length; // already swizzled
+        }
+
         //Updating CME Image header
         pCmeHdr->g_cme_magic_number         =   SWIZZLE_8_BYTE(CME_MAGIC_NUMBER);
-        pCmeHdr->g_cme_scom_offset          =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_core_spec_ring_offset) +
-                                                SWIZZLE_4_BYTE(pCmeHdr->g_cme_max_spec_ring_length); //Multiple of 32B block
+
+        pCmeHdr->g_cme_scom_offset          =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_hcode_length) +
+                                                SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_length) +
+                                                SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_length);
+        pCmeHdr->g_cme_scom_offset          =
+            ((pCmeHdr->g_cme_scom_offset + CME_BLOCK_READ_LEN - 1 ) >> CME_BLK_SIZE_SHIFT);
+        //Adding to it instance ring length which is already a multiple of 32B
+        pCmeHdr->g_cme_scom_offset          +=  SWIZZLE_4_BYTE(pCmeHdr->g_cme_max_spec_ring_length);
         pCmeHdr->g_cme_scom_offset          =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_scom_offset);
         pCmeHdr->g_cme_scom_length          =   SWIZZLE_4_BYTE(CORE_SCOM_PER_CME);
 
@@ -578,13 +592,13 @@ extern "C"
         FAPI_INF("  PS Offset       = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_offset));
         FAPI_INF("  PS Size         = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_length));
         FAPI_INF("  CR Offset       = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_offset));
-        FAPI_INF("  CR Size         = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_length));
         FAPI_INF("  CR Ovrd Offset  = 0x%08X", SWIZZLE_4_BYTE(pCmeHdr->g_cme_cmn_ring_ovrd_offset ));
+        FAPI_INF("  CR Size         = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_length));
         FAPI_INF("  CSR Offset      = 0x%08X (Real offset / 32) ", SWIZZLE_4_BYTE(pCmeHdr->g_cme_core_spec_ring_offset));
         FAPI_INF("  CSR Length      = 0x%08X (Real length / 32)", SWIZZLE_4_BYTE(pCmeHdr->g_cme_max_spec_ring_length) );
-        FAPI_INF("  CPMR Phy Add    = 0x%016lx", SWIZZLE_8_BYTE(pCmeHdr->g_cme_cpmr_PhyAddr));
         FAPI_INF("  SCOM Offset     = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_scom_offset));
         FAPI_INF("  SCOM Area Len   = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_scom_length));
+        FAPI_INF("  CPMR Phy Add    = 0x%016lx", SWIZZLE_8_BYTE(pCmeHdr->g_cme_cpmr_PhyAddr));
         FAPI_INF("========================= CME Header End ==================================");
 
         FAPI_INF("==========================CPMR Header===========================================");
@@ -646,10 +660,6 @@ extern "C"
 
         pQpmrHdr->magic_number                  =   SWIZZLE_8_BYTE(QPMR_MAGIC_NUMBER);
         pSgpeHdr->g_sgpe_magic_number           =   SWIZZLE_8_BYTE(SGPE_MAGIC_NUMBER);
-        pSgpeHdr->g_sgpe_cmn_ring_occ_offset    =   pQpmrHdr->sgpeImgLength;
-        pSgpeHdr->g_sgpe_spec_ring_occ_offset   =   SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_cmn_ring_occ_offset) +
-                SWIZZLE_4_BYTE(pQpmrHdr->quadCommonRingLength);
-        pSgpeHdr->g_sgpe_spec_ring_occ_offset   =   SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_spec_ring_occ_offset);
 
         FAPI_INF("==============================QPMR==================================");
         FAPI_INF("  Magic Num               : 0x%16lX", SWIZZLE_8_BYTE(pQpmrHdr->magic_number));
@@ -810,15 +820,20 @@ extern "C"
             o_qpmrHdr.quadScomOffset  = SWIZZLE_4_BYTE(CACHE_SCOM_START);
 
             sgpeHeader_t* pImgHdr = (sgpeHeader_t*)& i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECT];
-            pImgHdr->g_sgpe_cmn_ring_occ_offset = o_qpmrHdr.sgpeImgLength;
+            pImgHdr->g_sgpe_cmn_ring_occ_offset         =   o_qpmrHdr.sgpeImgLength;
+            pImgHdr->g_sgpe_cmn_ring_ovrd_occ_offset    =   0;
+            pImgHdr->g_sgpe_spec_ring_occ_offset        =   0;
+            pImgHdr->g_sgpe_scom_offset                 =   0;
+
 
             FAPI_INF("SGPE Header");
-            FAPI_INF("  Magic Num     = 0x%16lX", SWIZZLE_8_BYTE(pImgHdr->g_sgpe_magic_number));
-            FAPI_INF("  Reset Addr    = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_reset_address));
-            FAPI_INF("  IVPR Addr     = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_ivpr_address));
-            FAPI_INF("  Build Date    = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_build_date));
-            FAPI_INF("  Version       = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_build_ver));
-            FAPI_INF("  CR OCC Offset = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_cmn_ring_occ_offset));
+            FAPI_INF("  Magic Num       = 0x%16lX", SWIZZLE_8_BYTE(pImgHdr->g_sgpe_magic_number));
+            FAPI_INF("  Reset Addr      = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_reset_address));
+            FAPI_INF("  IVPR Addr       = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_ivpr_address));
+            FAPI_INF("  Build Date      = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_build_date));
+            FAPI_INF("  Version         = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_build_ver));
+            FAPI_INF("  CR OCC Offset   = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_cmn_ring_occ_offset));
+            FAPI_INF("  CR Ovrd Offset  = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_cmn_ring_ovrd_occ_offset));
 
         }
         while(0);
@@ -1058,7 +1073,7 @@ extern "C"
             if( rcTemp )
             {
                 FAPI_ERR("Failed to copy PGPE Level2 bootloader");
-                retCode = BUILD_FAIL_SGPE_BL2;
+                retCode = BUILD_FAIL_PGPE_BL2;
                 break;
             }
 
@@ -1355,8 +1370,13 @@ extern "C"
                 pRingPayload = pRingPayload + ringSize;
             }
 
-            io_cmnRingSize += (pRingPayload - pRingStart);
-            ALIGN_DWORD(tempSize, io_cmnRingSize)
+            ringSize = (pRingPayload - pRingStart);
+
+            if( ringSize > CORE_COMMON_RING_INDEX_SIZE )
+            {
+                io_cmnRingSize += (pRingPayload - pRingStart);
+                ALIGN_DWORD(tempSize, io_cmnRingSize)
+            }
         }
         while(0);
 
@@ -1661,6 +1681,7 @@ extern "C"
 
             ringLength  =  SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_offset) + SWIZZLE_4_BYTE(
                                pCmeHdr->g_cme_pstate_region_length);
+            //save the length where hcode ends
             tempLength  =  ringLength;
 
             layoutCmnRingsForCme( i_pHomer,
@@ -1674,25 +1695,41 @@ extern "C"
 
             if( i_pOverride )
             {
-                uint32_t tempOffset = 0;
-                ALIGN_DWORD( tempOffset, ringLength );
-                pCmeHdr->g_cme_cmn_ring_ovrd_offset = ringLength;
+                uint32_t temp = 0;
+                uint32_t tempRc = 0;
+                ALIGN_DWORD( temp, ringLength );
+                temp = ringLength;
 
-                layoutCmeScanOverride( i_pHomer,
-                                       i_pOverride,
-                                       i_chipState,
-                                       i_ringData,
-                                       i_debugMode,
-                                       i_imgType,
-                                       ringLength );
+                tempRc = layoutCmeScanOverride( i_pHomer,
+                                                i_pOverride,
+                                                i_chipState,
+                                                i_ringData,
+                                                i_debugMode,
+                                                i_imgType,
+                                                ringLength );
+
+                if( BUILD_FAIL_OVERRIDE == tempRc )
+                {
+                    //found no core overrides
+                    pCmeHdr->g_cme_cmn_ring_ovrd_offset = 0;
+                }
+                else
+                {
+                    pCmeHdr->g_cme_cmn_ring_ovrd_offset = temp;
+                }
             }
 
-            pCmeHdr->g_cme_common_ring_length = ringLength - tempLength;
-            pCmeHdr->g_cme_core_spec_ring_offset        =
-                SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_offset) + pCmeHdr->g_cme_common_ring_length;
-            pCmeHdr->g_cme_core_spec_ring_offset        =
-                ( ( pCmeHdr->g_cme_core_spec_ring_offset + CME_BLOCK_READ_LEN - 1 ) >> CME_BLK_SIZE_SHIFT );
-            ringLength = (pCmeHdr->g_cme_core_spec_ring_offset << CME_BLK_SIZE_SHIFT );
+            pCmeHdr->g_cme_common_ring_length = ringLength - tempLength; //cmn ring end - hcode end
+
+            if( !pCmeHdr->g_cme_common_ring_length )
+            {
+                //No common ring , so force offset to be 0
+                pCmeHdr->g_cme_common_ring_offset = 0;
+            }
+
+            tempLength = ringLength;
+            tempLength = (( tempLength + CME_BLOCK_READ_LEN - 1 ) >> CME_BLK_SIZE_SHIFT ); //multiple of 32B
+            ringLength = tempLength << CME_BLK_SIZE_SHIFT; //start position of instance rings
 
             layoutInstRingsForCme( i_pHomer,
                                    i_chipState,
@@ -1758,6 +1795,8 @@ extern "C"
                                     ImageType_t i_imgType,
                                     RingBucket& io_sgpeRings )
     {
+        FAPI_DBG("> layoutCmnRingsForSgpe");
+
         uint32_t rc = IMG_BUILD_SUCCESS;
         uint32_t sgpeHcodeSize      =   SWIZZLE_4_BYTE(io_qpmrHdr.sgpeImgLength);
         uint8_t* pCmnRingPayload    =   &i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[sgpeHcodeSize +
@@ -1825,6 +1864,8 @@ extern "C"
 
         }
         while(0);   //building common rings
+
+        FAPI_DBG("< layoutCmnRingsForSgpe");
 
         return rc;
     }
@@ -2001,18 +2042,20 @@ extern "C"
                                     i_imgType,
                                     sgpeRings );
 
-            pSgpeImgHdr->g_sgpe_spec_ring_occ_offset    =   SWIZZLE_4_BYTE(pSgpeImgHdr->g_sgpe_cmn_ring_occ_offset) +
-                    io_qpmrHdr.quadCommonRingLength;
-            pSgpeImgHdr->g_sgpe_scom_offset     =
-                pSgpeImgHdr->g_sgpe_spec_ring_occ_offset + io_qpmrHdr.quadSpecRingLength;
+            if( 0 == io_qpmrHdr.quadCommonRingLength )
+            {
+                //If quad common rings don't exist ensure its offset in image header  is zero
+                pSgpeImgHdr->g_sgpe_cmn_ring_occ_offset = 0;
+            }
 
-            FAPI_DBG("SGPE Header Ring Details ");
-            FAPI_DBG("Common Ring Offset            %d (0x%08X) ",
-                     SWIZZLE_4_BYTE(pSgpeImgHdr->g_sgpe_cmn_ring_occ_offset),
-                     SWIZZLE_4_BYTE(pSgpeImgHdr->g_sgpe_cmn_ring_occ_offset));
-            FAPI_DBG("Instance Ring Offset          %d (0x%08X) ",
-                     SWIZZLE_4_BYTE(pSgpeImgHdr->g_sgpe_spec_ring_occ_offset),
-                     SWIZZLE_4_BYTE(pSgpeImgHdr->g_sgpe_spec_ring_occ_offset));
+            if( io_qpmrHdr.quadSpecRingLength > 0 )
+            {
+                pSgpeImgHdr->g_sgpe_spec_ring_occ_offset    =   io_qpmrHdr.quadCommonRingLength +
+                        SWIZZLE_4_BYTE(io_qpmrHdr.sgpeImgLength);
+                pSgpeImgHdr->g_sgpe_scom_offset             =
+                    SWIZZLE_4_BYTE(io_qpmrHdr.sgpeImgLength) + io_qpmrHdr.quadCommonRingLength +
+                    io_qpmrHdr.quadSpecRingLength;
+            }
         }
         while(0);   //building instance rings
 
