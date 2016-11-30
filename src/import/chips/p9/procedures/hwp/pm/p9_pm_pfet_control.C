@@ -139,14 +139,12 @@ fapi2::ReturnCode p9_pm_pfet_control_eq(
     const PM_PFET_TYPE_C::pfet_force_t i_op)
 {
     fapi2::current_err     = fapi2::FAPI2_RC_SUCCESS;
-    uint32_t l_unit_pos     = 0;
     bool core_target_found = false;
 
     FAPI_INF("p9_pm_pfet_control_eq: Entering...");
 
-    // Get chiplet position
-    l_unit_pos = i_target.getChipletNumber();
-    FAPI_INF("pfet control for EQ chiplet %d", l_unit_pos);
+    // Print chiplet position
+    FAPI_INF("pfet control for EQ chiplet %d", i_target.getChipletNumber());
 
     // When i_op == OFF all functional cores first followed by EQ
     // When i_op == ON EQ first followed by all functional cores
@@ -160,8 +158,7 @@ fapi2::ReturnCode p9_pm_pfet_control_eq(
     for (auto& l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>
          (fapi2::TARGET_STATE_FUNCTIONAL))
     {
-        l_unit_pos = l_core_target.getChipletNumber();
-        FAPI_INF("Core chiplet %d in EQ", l_unit_pos);
+        FAPI_INF("Core chiplet %d in EQ", l_core_target.getChipletNumber());
         FAPI_TRY(pfet_ctrl<fapi2::TargetType::TARGET_TYPE_CORE>(l_core_target,
                  i_rail, i_op), "Error: pfet_ctrl for core!!");
         core_target_found = true;
@@ -176,7 +173,7 @@ fapi2::ReturnCode p9_pm_pfet_control_eq(
     else if( ((i_op == PM_PFET_TYPE_C::ON) && !(core_target_found)) ||
              ((i_op == PM_PFET_TYPE_C::OFF) && !(core_target_found)) )
     {
-        FAPI_INF("EQ chiplet no. %d; No core target found in functional state in this EQ\n", l_unit_pos);
+        FAPI_INF("EQ chiplet no. %d; No core target found in functional state in this EQ\n", i_target.getChipletNumber());
     }
 
     FAPI_INF("p9_pm_pfet_control_eq: ...Exiting");
@@ -193,21 +190,18 @@ fapi2::ReturnCode p9_pm_pfet_control_ex(
     const PM_PFET_TYPE_C::pfet_force_t i_op)
 {
     fapi2::current_err     = fapi2::FAPI2_RC_SUCCESS;
-    uint32_t l_unit_pos     = 0;
     bool core_target_found = false;
 
     FAPI_INF("p9_pm_pfet_control_ex: Entering...");
 
     // Get chiplet position
-    l_unit_pos = i_target.getChipletNumber();
-    FAPI_INF("pfet control for EX chiplet %d", l_unit_pos);
+    FAPI_INF("pfet control for EX chiplet %d", i_target.getChipletNumber());
 
     // Check for all core chiplets in EX and power on/off targets accordingly
     for (auto& l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>
          (fapi2::TARGET_STATE_FUNCTIONAL))
     {
-        l_unit_pos = l_core_target.getChipletNumber();
-        FAPI_INF("Core chiplet %d in EX", l_unit_pos);
+        FAPI_INF("Core chiplet %d in EX", l_core_target.getChipletNumber());
         FAPI_TRY(pfet_ctrl<fapi2::TargetType::TARGET_TYPE_CORE>(l_core_target,
                  i_rail, i_op), "Error: pfet_ctrl for core!!");
         core_target_found = true;
@@ -216,7 +210,8 @@ fapi2::ReturnCode p9_pm_pfet_control_ex(
     // When no functional chiplet target found
     if(!core_target_found)
     {
-        FAPI_INF("EX chiplet no. %d; No core target found in functional state in this EX\n", l_unit_pos);
+        FAPI_INF("EX chiplet no. %d; No core target found in functional state"
+                 " in this EX", i_target.getChipletNumber());
     }
 
     FAPI_INF("p9_pm_pfet_control_ex: ...Exiting");
@@ -257,21 +252,18 @@ fapi2::ReturnCode pfet_ctrl(
     const PM_PFET_TYPE_C::pfet_force_t i_op)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    uint32_t l_unit_pos     = 0;
 
     FAPI_INF("pfet_ctrl: Entering...");
-
-    // Get chiplet position
-    l_unit_pos = i_target.getChipletNumber();
 
     // Check for target passed
     if(i_target.getType() & fapi2::TARGET_TYPE_CORE)
     {
-        FAPI_INF("pfet control for Core chiplet %d", l_unit_pos);
+        FAPI_INF("pfet control for Core chiplet %d",
+                 i_target.getChipletNumber());
     }
     else if(i_target.getType() & fapi2::TARGET_TYPE_EQ)
     {
-        FAPI_INF("pfet control for EQ chiplet %d", l_unit_pos);
+        FAPI_INF("pfet control for EQ chiplet %d", i_target.getChipletNumber());
     }
     else
     {
