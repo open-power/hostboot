@@ -181,7 +181,7 @@ void* call_host_voltage_config( void *io_pArgs )
                     l_ultraTurboFreq = l_voltageData.uTurboFreq;
                     l_turboFreq = l_voltageData.turboFreq;
                     l_vddBootVoltage = l_voltageData.VddPSVltg;
-                    l_vdnBootVoltage = l_voltageData.VddPSVltg;
+                    l_vdnBootVoltage = l_voltageData.VdnPbVltg;
                     l_vcsBootVoltage = l_voltageData.VcsPSVltg;
                     l_firstPass = false;
                 }
