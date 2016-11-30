@@ -47,59 +47,50 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
         }
 
         auto l_def_OBUS_FBC_ENABLED = (l_TGT0_ATTR_OPTICS_CONFIG_MODE == ENUM_ATTR_OPTICS_CONFIG_MODE_SMP);
+        fapi2::buffer<uint64_t> l_scom_buffer;
         {
-            fapi2::buffer<uint64_t> l_scom_buffer;
+            l_rc = fapi2::getScom( TGT0, 0x9010803ull, l_scom_buffer );
+
+            if (l_rc)
             {
-                l_rc = fapi2::getScom( TGT0, 0x901080aull, l_scom_buffer );
+                FAPI_ERR("ERROR executing: getScom (0x9010803ull)");
+                break;
+            }
 
-                if (l_rc)
-                {
-                    FAPI_ERR("ERROR executing: getScom (0x901080aull)");
-                    break;
-                }
+            if (l_def_OBUS_FBC_ENABLED)
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0xFFFFFFFFFFFFFFFF, 0, 64, 0 );
+            }
 
-                {
-                    if (l_def_OBUS_FBC_ENABLED)
-                    {
-                        constexpr auto l_PB_IOO_LL0_CONFIG_LINK_PAIR_ON = 0x1;
-                        l_scom_buffer.insert<uint64_t> (l_PB_IOO_LL0_CONFIG_LINK_PAIR_ON, 0, 1, 63 );
-                    }
-                }
+            l_rc = fapi2::putScom(TGT0, 0x9010803ull, l_scom_buffer);
 
-                l_rc = fapi2::putScom(TGT0, 0x901080aull, l_scom_buffer);
-
-                if (l_rc)
-                {
-                    FAPI_ERR("ERROR executing: putScom (0x901080aull)");
-                    break;
-                }
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x9010803ull)");
+                break;
             }
         }
         {
-            fapi2::buffer<uint64_t> l_scom_buffer;
+            l_rc = fapi2::getScom( TGT0, 0x901080aull, l_scom_buffer );
+
+            if (l_rc)
             {
-                l_rc = fapi2::getScom( TGT0, 0x9010803ull, l_scom_buffer );
+                FAPI_ERR("ERROR executing: getScom (0x901080aull)");
+                break;
+            }
 
-                if (l_rc)
-                {
-                    FAPI_ERR("ERROR executing: getScom (0x9010803ull)");
-                    break;
-                }
+            if (l_def_OBUS_FBC_ENABLED)
+            {
+                constexpr auto l_PB_IOO_LL0_CONFIG_LINK_PAIR_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_PB_IOO_LL0_CONFIG_LINK_PAIR_ON, 0, 1, 63 );
+            }
 
-                {
-                    if (l_def_OBUS_FBC_ENABLED)
-                    {
-                        l_scom_buffer.insert<uint64_t> (literal_0xFFFFFFFFFFFFFFFF, 0, 64, 0 );
-                    }
-                }
+            l_rc = fapi2::putScom(TGT0, 0x901080aull, l_scom_buffer);
 
-                l_rc = fapi2::putScom(TGT0, 0x9010803ull, l_scom_buffer);
-
-                if (l_rc)
-                {
-                    FAPI_ERR("ERROR executing: putScom (0x9010803ull)");
-                    break;
-                }
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x901080aull)");
+                break;
             }
         }
 
