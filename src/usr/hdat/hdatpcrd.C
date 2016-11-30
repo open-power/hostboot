@@ -169,6 +169,10 @@ static errlHndl_t hdatSetPcrdHdrs(hdatSpPcrd_t *i_pcrd)
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].hdatOffset = 0;
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].hdatSize   = 0;
 
+    i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_PNOR].hdatOffset = 0;
+    i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_PNOR].hdatSize   =
+                                                 sizeof(hdatPcrdPnor_t);   
+
   return l_errlHndl;
 }
 
@@ -206,7 +210,7 @@ HdatPcrd::HdatPcrd(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr)
 *******************************************************************************/
 errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = NULL, l_errl1 = NULL;
     do
     {
         // PCRD index
@@ -215,6 +219,8 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
         //Storing offset address for calculating the sizing of each PCRD
         uint8_t *l_offset = reinterpret_cast<uint8_t *> (this->iv_spPcrd);
         uint8_t *l_addr =l_offset;
+
+        hdatPcrdPnor_t * l_pnor = NULL;
 
         // Get Max threads
         ATTR_THREAD_COUNT_type l_coreThreadCount = 0;
@@ -256,6 +262,32 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
         {
             l_procStatus =
                 HDAT_PROC_NOT_INSTALLED | HDAT_PRIM_THREAD | HDAT_TWO_THREAD;
+        }
+
+        //query the master proc
+        TARGETING::Target* l_pMasterProc = NULL;
+        l_errl1 =targetService().queryMasterProcChipTargetHandle(l_pMasterProc);
+
+        if ( l_errl1 )
+        {
+            HDAT_ERR("could not find the master processor,"
+              " the PNOR data will not be added");
+
+            /*@
+             * @errortype
+             * @moduleid         HDAT::MOD_PCRD_LOAD
+             * @reasoncode       RC_TGT_ATTR_NOTFOUND
+             * @devdesc          could not find target
+             * @custdesc         Firmware encountered an internal error
+             */
+            hdatBldErrLog(l_errl1,
+                          MOD_PCRD_LOAD,
+                          RC_TGT_ATTR_NOTFOUND,
+                          0,0,0,0,
+                          ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                          HDAT_VERSION1,
+                          true);
+
         }
 
         //for each procs in the system
@@ -504,7 +536,66 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                 this->iv_spPcrd->hdatPcrdIntData
                     [HDAT_PCRD_DA_HOST_I2C].hdatSize = l_pcrdHI2cTotalSize;
                 this->iv_spPcrd->hdatHdr.hdatSize += l_pcrdHI2cTotalSize;
+
+              
+                uint8_t* l_temp = reinterpret_cast<uint8_t *>
+                                                 (l_hostI2cFullPcrdHdrPtr);
+
+                l_temp += l_pcrdHI2cTotalSize;
+                l_pnor = reinterpret_cast<hdatPcrdPnor_t *>(l_temp);
             }
+
+            if ( l_pProcTarget == l_pMasterProc )
+            {
+                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_PNOR].hdatOffset =
+                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].hdatOffset
+                   + 
+                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].hdatSize;
+
+                hdatMsAddr_t l_hardCodedAddr = {0x00000000, 0x00000000};
+
+                HDAT_DBG("adding pnor data to the master processor");
+                l_pnor->hdatPcrdPnorBusType= 0x00;
+
+                memset(l_pnor->hdatPcrdPnorReserved1,0x0,sizeof(uint8_t) *7);
+
+                memcpy(&l_pnor->hdatPcrdPnorBaseAddr,&l_hardCodedAddr,
+                                                       sizeof(hdatMsAddr_t));
+
+                l_pnor->hdatPcrdPnorSize = 0x0;
+                l_pnor->hdatPcrdPnorReserved2 = 0x0;
+
+                memcpy(&l_pnor->hdatPcrdPnorGoldenTOC,&l_hardCodedAddr,
+                                                        sizeof(hdatMsAddr_t));
+                l_pnor->hdatPcrdPnorGoldenTOCsize = 0x0;
+                l_pnor->hdatPcrdPnorReserved3 = 0x0;
+
+                memcpy(&l_pnor->hdatPcrdPnorWorkingTOC,&l_hardCodedAddr,
+                                                         sizeof(hdatMsAddr_t));
+                l_pnor->hdatPcrdPnorWorkTOCsize = 0x0;
+                l_pnor->hdatPcrdPnorReserved4 = 0x0;
+
+                memcpy(&l_pnor->hdatPcrdPnorPsideTOC,&l_hardCodedAddr,
+                                                         sizeof(hdatMsAddr_t));
+                l_pnor->hdatPcrdPnorPsideTOCsize = 0x0;
+                l_pnor->hdatPcrdPnorReserved5 = 0x0;
+
+                memcpy(&l_pnor->hdatPcrdPnorTsideTOC,&l_hardCodedAddr,
+                                                          sizeof(hdatMsAddr_t));
+                l_pnor->hdatPcrdPnorTsideTOCsize = 0x0;
+            }
+            else
+            {
+                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_PNOR].hdatOffset = 
+                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].hdatOffset
+                   +
+                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].hdatSize;
+
+                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_PNOR].hdatSize
+                                                             = 0;
+                HDAT_DBG("not a master proc, pnor data is not added");
+            }
+
             if( NULL != l_errl)
             {
                 break;
@@ -747,4 +838,13 @@ HdatPcrd :: ~HdatPcrd()
 }
 
 
+errlHndl_t HdatPcrd::fetch_pnor_data( hdatPcrdPnor_t& o_pnorData)
+{
+    errlHndl_t l_err = NULL;
+
+    return l_err;
+
+    //will be implemented once api is available
+    
+}
 } // namespace HDATPcrd
