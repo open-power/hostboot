@@ -21527,12 +21527,13 @@ Measured in GB</description>
     <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_PCIE_IOVALID_ENABLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
     <readable/>
+    <writeable/>
 </attribute>
 <attribute>
     <id>PROC_PCIE_BAR_ENABLE</id>
