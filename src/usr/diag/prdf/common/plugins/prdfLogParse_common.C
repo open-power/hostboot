@@ -671,8 +671,6 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
 
                 snprintf( data, 50, "0x%08x ", pfa.mruList[i].callout );
                 tmpStr = gardTypeToStr( pfa.mruList[i].gardState );
-                MemoryMruData::ExtendedData
-                    extMemMru( pfa.mruList[i].callout );
 
                 switch ( pfa.mruList[i].type )
                 {
@@ -680,7 +678,7 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                         strcat( data, "(MemoryMru) " );
                         strcat( data, tmpStr );
                         i_parser.PrintString( header, data );
-                        parseMemMruData( i_parser, extMemMru );
+                        parseMemMruData( i_parser, pfa.mruList[i].callout );
                         break;
 
                     case PRDcalloutData::TYPE_SYMFRU:

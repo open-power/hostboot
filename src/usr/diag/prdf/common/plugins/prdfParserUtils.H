@@ -68,6 +68,7 @@ uint8_t symbol2Dq( uint8_t i_symbol );
  * @param i_symbol The Symbol
  * @return The Port Select
  */
+template<TARGETING::TYPE T>
 uint8_t symbol2PortSlct( uint8_t i_symbol );
 
 /**

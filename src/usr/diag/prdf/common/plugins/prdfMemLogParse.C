@@ -28,6 +28,7 @@
  */
 
 #include <prdfMemLogParse.H>
+
 #include <errlusrparser.H>
 #include <cstring>
 #include <UtilHash.H>
@@ -36,7 +37,7 @@
 #include <prdfDramRepairUsrData.H>
 #include <prdfParserEnums.H>
 #include <prdfParserUtils.H>
-#include <targeting/common/target.H>
+#include <attributeenums.H>     // For TARGETING::TYPE enum
 
 namespace PRDF
 {
@@ -2771,6 +2772,7 @@ uint8_t dqSiteIdx2DramSiteIdx( uint8_t i_dqSiteIdx, bool i_isX4Dram )
 // Helper functions
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 // Displays symbol value. If symbol is not valid, will display '--' in output.
 void getDramRepairSymbolStr( uint8_t i_value, char * o_str, uint32_t i_strSize )
 {
@@ -2785,7 +2787,6 @@ void getDramRepairSymbolStr( uint8_t i_value, char * o_str, uint32_t i_strSize )
 }
 
 // Gets the string representation for a single bad DQ bitmap entry.
-/* TODO RTC 136126
 void getBadDqBitmapEntry( uint8_t * i_buffer, char * o_str )
 {
     UtilMem membuf( i_buffer, DQ_BITMAP::ENTRY_SIZE );
@@ -2808,6 +2809,7 @@ void getBadDqBitmapEntry( uint8_t * i_buffer, char * o_str )
     }
 }
 */
+
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -2820,35 +2822,22 @@ void initMemMruStrings( MemoryMruData::MemMruMeld i_mm, bool & o_addDramSite,
     memset( o_header, '\0', HEADER_SIZE );
     memset( o_data,   '\0', DATA_SIZE   );
 
-    // Get the slave rank info.
-    char tmp[HEADER_SIZE] = { '\0' };
-    snprintf( tmp, HEADER_SIZE, "S%d", i_mm.s.srank );
+    // Get the position info (default MCA).
+    const char * compStr = "mca";
+    uint8_t      nodePos = i_mm.s.nodePos;
+    uint8_t      chipPos = i_mm.s.procPos;
+    uint8_t      compPos = i_mm.s.chnlPos;
 
-    uint8_t nodePos =  i_mm.s.nodePos;
-
-    // if we are using MBA
-    if ( !i_mm.s.isMca )
+    if ( !i_mm.s.isMca ) // MBA
     {
-        // Get the position info.
-        uint8_t chnlPos = (i_mm.s.procPos << 3) | i_mm.s.chnlPos;
-        uint8_t mbaPos  =  i_mm.s.mbaPos;
-
-        // Build the header string.
-        snprintf( o_header, HEADER_SIZE, "  mba(n%dp%dc%d)%s Rank:M%d%s",
-                nodePos, chnlPos, mbaPos, (chnlPos < 10) ? " " : "",
-                i_mm.s.mrank, tmp );
+        compStr = "mba";
+        chipPos = (i_mm.s.procPos << 3) | i_mm.s.chnlPos;
+        compPos =  i_mm.s.mbaPos;
     }
-    else
-    {
-        // Get the position info.
-        uint8_t procPos = i_mm.s.procPos;
-        uint8_t mcaPos  = i_mm.s.chnlPos;
 
-        // Build the header string.
-        snprintf( o_header, HEADER_SIZE, "  mca(n%dp%dc%d)%s Rank:M%d%s",
-                nodePos, procPos, mcaPos, (procPos < 10) ? " " : "",
-                i_mm.s.mrank, tmp );
-    }
+    // Build the header string.
+    snprintf( o_header, HEADER_SIZE, "  %s(n%dp%dc%d) Rank:m%ds%d",
+              compStr, nodePos, chipPos, compPos, i_mm.s.mrank, i_mm.s.srank );
 
     // Build the generic data string (no DRAM site info).
     switch ( i_mm.s.symbol )
@@ -2894,31 +2883,22 @@ void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
 
     // Get the DQ indexes for site location tables, adjusting for spare DRAM, if
     // needed.
-    uint8_t dqIdx;
-    if (mm.s.isMca)
-    {
-        dqIdx = transDramSpare( symbol2Dq<TYPE_MCA>(symbol),
-                                mm.s.dramSpared );
-    }
-    else
-    {
-        dqIdx = transDramSpare( symbol2Dq<TYPE_MBA>(symbol),
-                                mm.s.dramSpared );
-    }
+    uint8_t dqIdx = mm.s.isMca ? symbol2Dq<TYPE_MCA>(symbol)
+                               : symbol2Dq<TYPE_MBA>(symbol);
+    dqIdx = transDramSpare( dqIdx, mm.s.dramSpared );
 
     // Add the DRAM site info to the current data.
-    // MCAs always uses IS DIMMs
-    if ( i_extMemMru.isBufDimm && !mm.s.isMca ) // Buffered DIMMs
+    if ( i_extMemMru.isBufDimm ) // Centaur DIMMs only
     {
         // Get the DRAM site location information.
         const char * cardName;
         const char ** dramMap;
         const char ** dqMap;
 
-        uint8_t ps = symbol2PortSlct( symbol );
+        uint8_t ps = symbol2PortSlct<TYPE_MBA>( symbol );
 
         if ( SUCCESS == getDramSiteInfo(i_extMemMru.cardType, mm.s.mbaPos, ps,
-                                         mm.s.mrank, cardName, dqMap, dramMap) )
+                                        mm.s.mrank, cardName, dqMap, dramMap) )
         {
             // Add raw card name.
             strcat( io_data, "RC:" );
@@ -2978,6 +2958,21 @@ void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
 
 //------------------------------------------------------------------------------
 
+void parseMemMruData( ErrlUsrParser & i_parser, uint32_t i_memMru )
+{
+    MemoryMruData::MemMruMeld mm; mm.u = i_memMru;
+
+    bool addDramSite;
+    char header[HEADER_SIZE]; char data[DATA_SIZE];
+    initMemMruStrings( mm, addDramSite, header, data );
+
+    // No DRAM site location data available.
+
+    i_parser.PrintString( header, data );
+}
+
+//------------------------------------------------------------------------------
+
 void parseMemMruData( ErrlUsrParser & i_parser,
                       const MemoryMruData::ExtendedData & i_extMemMru )
 {
@@ -2996,6 +2991,7 @@ void parseMemMruData( ErrlUsrParser & i_parser,
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 bool parseMemUeTable( uint8_t  * i_buffer, uint32_t i_buflen,
                       ErrlUsrParser & i_parser )
 {
@@ -3069,8 +3065,10 @@ bool parseMemUeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
     return rc;
 }
+*/
 
 //------------------------------------------------------------------------------
+
 /* TODO RTC 136126
 bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
                       ErrlUsrParser & i_parser )
@@ -3192,6 +3190,7 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 bool parseMemRceTable( uint8_t  * i_buffer, uint32_t i_buflen,
                        ErrlUsrParser & i_parser )
 {
@@ -3235,9 +3234,11 @@ bool parseMemRceTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
     return rc;
 }
+*/
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
                            ErrlUsrParser & i_parser )
 {
@@ -3303,8 +3304,10 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
 
     return rc;
 }
+*/
 
 //------------------------------------------------------------------------------
+
 /* TODO RTC 136126
 bool parseDramRepairsVpd( uint8_t * i_buffer, uint32_t i_buflen,
                           ErrlUsrParser & i_parser )
@@ -3328,7 +3331,9 @@ bool parseDramRepairsVpd( uint8_t * i_buffer, uint32_t i_buflen,
     return rc;
 }
 */
+
 //------------------------------------------------------------------------------
+
 /* TODO RTC 136126
 bool parseBadDqBitmap( uint8_t  * i_buffer, uint32_t i_buflen,
                        ErrlUsrParser & i_parser )
@@ -3353,8 +3358,10 @@ bool parseBadDqBitmap( uint8_t  * i_buffer, uint32_t i_buflen,
     return rc;
 }
 */
+
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
                            ErrlUsrParser & i_parser, uint32_t i_sigId )
 {
@@ -3535,6 +3542,7 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
 
     return o_rc;
 }
+*/
 
 //------------------------------------------------------------------------------
 
