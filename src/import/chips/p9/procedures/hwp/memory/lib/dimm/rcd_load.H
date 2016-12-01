@@ -46,26 +46,6 @@
 namespace mss
 {
 
-struct rcd_data
-{
-    // Which RC# this is
-    fapi2::buffer<uint8_t> iv_rcd;
-
-    // The attribute getter
-    fapi2::ReturnCode (*iv_func)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&, uint8_t&);
-
-    // The delay needed after this RCD word is written
-    uint64_t iv_delay;
-
-    rcd_data( uint64_t i_rcd,
-              fapi2::ReturnCode (*i_func)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&, uint8_t&),
-              uint64_t i_delay ):
-        iv_rcd(i_rcd),
-        iv_func(i_func),
-        iv_delay(i_delay)
-    {}
-};
-
 ///
 /// @brief Perform the rcd_load operations
 /// @tparam T, the fapi2::TargetType of i_target

@@ -42,6 +42,7 @@
 #include <lib/ccs/ccs.H>
 #include <lib/dimm/bcw_load_ddr4.H>
 #include <lib/dimm/bcw_load.H>
+#include <lib/dimm/ddr4/control_word_ddr4.H>
 #include <lib/mss_attribute_accessors.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
@@ -67,10 +68,10 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
 
     // Per DDR4BC01
     uint64_t l_tDLLK = 0;
-    FAPI_TRY( tdllk(i_target, l_tDLLK), "Failed to get tdllk for %s", mss::c_str(i_target) );
+    FAPI_TRY( tdllk(i_target, l_tDLLK), "Failed to get tDLLK for %s", mss::c_str(i_target) );
 
     {
-        static const std::vector< bcw_data > l_bcw_4bit_data =
+        static const std::vector< cw_data > l_bcw_4bit_data =
         {
             // function space #, bcw #, attribute accessor, timing delay
             {  0, 0, eff_dimm_ddr4_bc00, mss::tmrc()   },
@@ -101,20 +102,20 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
         // We set the 4-bit buffer control words first (they live in function space 0
         // hw is supposed to default to function space 0 but Just.In.Case.
         FAPI_TRY( function_space_select<0>(i_target, io_inst) );
-        FAPI_TRY( bcw_engine<BCW_4BIT>(i_target, l_bcw_4bit_data, io_inst) );
+        FAPI_TRY( control_word_engine<BCW_4BIT>(i_target, l_bcw_4bit_data, io_inst) );
 
         // We set our 8-bit buffer control words but switch function space
         // for control words that live in a different one
         // (feels a little on the light side...)
         FAPI_TRY( function_space_select<6>(i_target, io_inst) );
-        FAPI_TRY( bcw_engine<BCW_8BIT>(i_target,
-                                       bcw_data(6, 4, eff_dimm_ddr4_f6bc4x, mss::tmrc()),
-                                       io_inst) );
+        FAPI_TRY( control_word_engine<BCW_8BIT>(i_target,
+                                                cw_data(6, 4, eff_dimm_ddr4_f6bc4x, mss::tmrc()),
+                                                io_inst) );
 
         FAPI_TRY( function_space_select<5>(i_target, io_inst) );
-        FAPI_TRY( bcw_engine<BCW_8BIT>(i_target,
-                                       bcw_data(5, 6, eff_dimm_ddr4_f5bc6x, mss::tmrc()),
-                                       io_inst) );
+        FAPI_TRY( control_word_engine<BCW_8BIT>(i_target,
+                                                cw_data(5, 6, eff_dimm_ddr4_f5bc6x, mss::tmrc()),
+                                                io_inst) );
 
         // Its recommended to always return to the function space
         // "pointer" back to 0 so we always know where we are starting from

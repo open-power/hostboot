@@ -158,9 +158,9 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         // is required before the next DRAM command or BCW write can be issued.
         FAPI_TRY( function_space_select<0>(i_target, io_inst) );
 
-        FAPI_TRY( bcw_engine<BCW_8BIT>(i_target,
-                                       bcw_data(FSPACE, WORD, eff_dimm_ddr4_bc06, mss::tmrc()),
-                                       io_inst) );
+        FAPI_TRY( control_word_engine<BCW_8BIT>(i_target,
+                                                cw_data(FSPACE, WORD, eff_dimm_ddr4_bc06, mss::tmrc()),
+                                                io_inst) );
     }
 
 fapi_try_exit:
