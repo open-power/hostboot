@@ -54,12 +54,8 @@
       The NTLs are not all in the reset state for the NPU   
     </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>NTL_DATA0</ffdc>
-    <ffdc>NTL_DATA1</ffdc>
-    <ffdc>NTL_DATA2</ffdc>
-    <ffdc>NTL_DATA3</ffdc>
-    <ffdc>NTL_DATA4</ffdc>
-    <ffdc>NTL_DATA5</ffdc>
+    <ffdc>NTL_ADDR</ffdc>
+    <ffdc>NTL_DATA</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -67,7 +63,7 @@
     <rc>RC_P9_VAS_QUIESCE_TIMEOUT</rc>
     <description>
       Procedure: p9_sbe_check_quiesce
-      The VAS quiesce was not achieved                                  
+      The VAS quiesce was not achieved 
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>NORTHDATA</ffdc>
@@ -79,7 +75,7 @@
     <rc>RC_P9_NX_PBI_WRITE_IDLE_TIMEOUT</rc>
     <description>
       Procedure: p9_sbe_check_quiesce
-      The PBI Write Idle never happened                                               
+      The PBI Write Idle never happened 
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>DATA</ffdc>
@@ -205,6 +201,18 @@
       0xDEADBEEFDEADBEEF 
     </description>
     <ffdc>CHECKSTOP_DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_INT_WORKAROUND_ERR</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      If we hit an error in the INT unit workaround for DD1 part  
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>DATA</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
