@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -813,7 +813,8 @@ class HdatMsVpd : public HdatHdif
 	    /** 
          * @brief Get the DIMMS list present on the system
          *  
-         * @param[in] i_pTarget Mcs target
+         * @param[in] i_pTarget Mca target
+         * @param[in] i_pMcsTarget Mcs target
          * @param[in] i_membufFruid - membuf fruid decides the parent type
          * @param[out] o_areas list of ram area structure based on the DIMM
          * present.
@@ -827,6 +828,7 @@ class HdatMsVpd : public HdatHdif
          * error handle
          */
         errlHndl_t hdatScanDimms(const TARGETING::Target *i_pTarget,
+                         const TARGETING::Target *i_pMcsTarget,
                          uint32_t i_membufFruid,
                          std::list<hdatRamArea>& o_areas,
                          uint32_t& o_areaSize,

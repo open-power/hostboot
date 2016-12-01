@@ -1054,14 +1054,20 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
         uint32_t l_ueCount = 1;
 
         TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirroringBaseAddress_x =
-                   l_pSysTarget->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
+            l_pSysTarget->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
+
+        TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddress_x =
+            l_mirroringBaseAddress_x;
+
         l_mirroringBaseAddress_x |= HDAT_REAL_ADDRESS_MASK64;
 
         TARGETING::ATTR_MAX_MCS_PER_SYSTEM_type l_maxMsAreas =
                    l_pSysTarget->getAttr<TARGETING::ATTR_MAX_MCS_PER_SYSTEM>();
 
         // Initialize the MS vpd class
-        hdatInit(l_tmpMaxMsAddr,l_tmpMaxMsAddr,l_sizeConfigured,l_maxMsAreas,
+        // TODO : RTC Story 166994 to set the maximum number of Ms Area entries
+        // from new attribute
+        hdatInit(l_tmpMaxMsAddr,l_tmpMaxMsAddr,l_sizeConfigured,l_maxMsAreas*2,
                 l_mostSigAffinityDomain_x,l_ueCount,l_mirroringBaseAddress_x);
 
         TARGETING::ATTR_XSCOM_BASE_ADDRESS_type l_xscomAddr =
@@ -1144,7 +1150,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                 tryGetAttr<TARGETING::ATTR_PROC_MEM_BASES>(l_procMemBases));
 
             //Sharing count for each group
-            TARGETING::ATTR_MSS_MEM_MC_IN_GROUP_type l_mcsSharingCount = {0};
+            TARGETING::ATTR_MSS_MEM_MC_IN_GROUP_type l_mcaSharingCount = {0};
 
             //Group ID for each group, group id will be assigned only
             //if the group is shared
@@ -1195,370 +1201,401 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                     &l_funcMcs);
 
                 //scan all mcs in this proc to get sharing counit
-                for(uint32_t l_idx = 0; l_idx<l_mcsList.size(); ++l_idx)
+                for(uint32_t l_mcsIdx = 0;l_mcsIdx<l_mcsList.size(); ++l_mcsIdx)
                 {
-                    TARGETING::Target *l_pMcsTarget = l_mcsList[l_idx];
+                    TARGETING::Target *l_pMcsTarget = l_mcsList[l_mcsIdx];
 
-                    uint32_t l_mcsInGrp = 0;
-                    if(!hdatFindGroupForMc(l_pProcTarget,
-                                           l_pMcsTarget,
-                                           l_mcsInGrp))
+                    //for each MCA connected to this this MCS
+                    TARGETING::PredicateCTM l_mcaPredicate(
+                        TARGETING::CLASS_UNIT, TARGETING::TYPE_MCA);
+
+                    TARGETING::PredicateHwas l_predMca;
+                    l_predMca.present(true);
+                    TARGETING::PredicatePostfixExpr l_presentMca;
+                    l_presentMca.push(&l_mcaPredicate).push(&l_predMca).And();
+                    TARGETING::TargetHandleList l_mcaList;
+
+                    // Get associated MCAs
+                    TARGETING::targetService().
+                    getAssociated(l_mcaList, l_pMcsTarget,
+                      TARGETING::TargetService::CHILD_BY_AFFINITY,
+                      TARGETING::TargetService::ALL, &l_presentMca);
+
+                    for(uint32_t l_mcaIdx = 0; l_mcaIdx<l_mcaList.size();
+                        ++l_mcaIdx)
                     {
-                        //Skip this MCS is not in any  group
-                        continue;
-                    }
-
-                    //Increment sharing count if mem configured under group.
-                    if(l_procMemSizesBytes[l_mcsInGrp] > 0)
-                    {
-                        l_mcsSharingCount[l_mcsInGrp]++;
-
-                        //Assign sharing group id only if shared
-                        //And only when first instance of sharing is found
-                        if(l_mcsSharingCount[l_mcsInGrp] ==
-                                               HDAT_MIN_NUM_FOR_SHARING)
+                        uint32_t l_mcaInGrp = 0;
+                        TARGETING::Target *l_pMcaTarget =
+                                 l_mcaList[l_mcaIdx];
+                        if(!hdatFindGroupForMc(l_pProcTarget,
+                                               l_pMcaTarget,
+                                               l_mcaInGrp))
                         {
-                            l_mcsSharingGrpIds[l_mcsInGrp] =
-                                l_nxtSharingGroupId;
-                            l_nxtSharingGroupId++;
+                            //Skip this MCA is not in any  group
+                            continue;
+                        }
+
+                        //Increment sharing count if mem configured under group.
+                        if(l_procMemSizesBytes[l_mcaInGrp] > 0)
+                        {
+                            l_mcaSharingCount[l_mcaInGrp]++;
+
+                            //Assign sharing group id only if shared
+                            //And only when first instance of sharing is found
+                            if(l_mcaSharingCount[l_mcaInGrp] ==
+                                                 HDAT_MIN_NUM_FOR_SHARING)
+                            {
+                                l_mcsSharingGrpIds[l_mcaInGrp] =
+                                    l_nxtSharingGroupId;
+                                l_nxtSharingGroupId++;
+                            }
                         }
                     }
-                }
 
-                for(uint32_t l_mcsIdx = 0; l_mcsIdx<l_mcsList.size();
-                    ++l_mcsIdx)
-                {
-                    TARGETING::Target *l_pMcsTarget =
-                        l_mcsList[l_mcsIdx];
-
-                    //Group which this MCS is belonging
-                    uint32_t l_mcsInGrp = 0;
-
-                    if(!hdatFindGroupForMc(l_pProcTarget,
-                                           l_pMcsTarget,
-                                           l_mcsInGrp))
+                    for(uint32_t l_mcaIdx = 0; l_mcaIdx<l_mcaList.size();
+                        ++l_mcaIdx)
                     {
-                        HDAT_INF("No group found for MCS");
-                        //Skip this MCS is not under any group
-                        continue;
-                    }
+                        TARGETING::Target *l_pMcaTarget =
+                            l_mcaList[l_mcaIdx];
 
-                    uint32_t l_mcaFruId = 0;
-                    hdatMemParentType l_parentType = HDAT_MEM_PARENT_CEC_FRU;
+                        //Group which this MCA is belonging
+                        uint32_t l_mcaInGrp = 0;
 
-                    std::list<hdatRamArea> l_areas;
-                    l_areas.clear();
-                    uint32_t                   l_areaSizeInMB = 0;
-                    bool                       l_areaFunctional = false;
-                    uint32_t                   l_numDimms =0;
+                        if(!hdatFindGroupForMc(l_pProcTarget,
+                                               l_pMcaTarget,
+                                               l_mcaInGrp))
+                        {
+                            HDAT_INF("No group found for MCA");
+                            //Skip this MCS is not under any group
+                            continue;
+                        }
 
-                    l_err = hdatScanDimms(l_pMcsTarget,
-                                          l_mcaFruId,
-                                          l_areas,
-                                          l_areaSizeInMB,
-                                          l_numDimms,
-                                          l_areaFunctional,
-                                          l_parentType);
+                        uint32_t l_mcaFruId = 0;
+                        hdatMemParentType l_parentType= HDAT_MEM_PARENT_CEC_FRU;
 
-                    if(NULL != l_err)
-                    {
-                        HDAT_ERR("Error in calling Scan Dimms");
-                        break;
-                    }
+                        std::list<hdatRamArea> l_areas;
+                        l_areas.clear();
+                        uint32_t  l_areaSizeInMB = 0;
+                        bool      l_areaFunctional = false;
+                        uint32_t  l_numDimms =0;
 
-                    HDAT_INF("l_areaSizeInMB:0x%.8X l_numDimms:0x%.8X"
-                        " l_areas.size():0x%.8X", l_areaSizeInMB, l_numDimms,
-                        l_areas.size());
+                        l_err = hdatScanDimms(l_pMcaTarget,
+                                              l_pMcsTarget,
+                                              l_mcaFruId,
+                                              l_areas,
+                                              l_areaSizeInMB,
+                                              l_numDimms,
+                                              l_areaFunctional,
+                                              l_parentType);
 
-                    //Skip if no memory configured under this MCS
-                    if(l_areaSizeInMB == 0)
-                    {
-                        continue;
-                    }
+                        if(NULL != l_err)
+                        {
+                            HDAT_ERR("Error in calling Scan Dimms");
+                            break;
+                        }
 
-                    uint32_t l_maxMemBlocks = 0;
-                    l_err = hdatGetMaxMemoryBlocks(l_pMcsTarget,l_maxMemBlocks);
-                    if(NULL != l_err)
-                    {
-                        HDAT_ERR("Error error in get max blocks");
-                        break;
-                    }
+                        HDAT_INF("l_areaSizeInMB:0x%.8X l_numDimms:0x%.8X "
+                            "l_areas.size():0x%.8X", l_areaSizeInMB, l_numDimms,
+                            l_areas.size());
 
-                    TARGETING::ATTR_SLCA_RID_type l_procRid =
-                        l_pProcTarget->getAttr<TARGETING::ATTR_SLCA_RID>();
+                        //Skip if no memory configured under this MCS
+                        if(l_areaSizeInMB == 0)
+                        {
+                            continue;
+                        }
 
-                    TARGETING::ATTR_SLCA_INDEX_type l_procSlcaIndex =
-                        l_pProcTarget->getAttr<TARGETING::ATTR_SLCA_INDEX>();
+                        uint32_t l_maxMemBlocks = 0;
+                        l_err =
+                            hdatGetMaxMemoryBlocks(l_pMcsTarget,l_maxMemBlocks);
+                        if(NULL != l_err)
+                        {
+                            HDAT_ERR("Error error in get max blocks");
+                            break;
+                        }
 
-                    l_err = addMsAreaFru(l_procRid,
-                                         l_procSlcaIndex,
-                                         l_pProcTarget,
-                                         l_index,
-                                         l_numDimms,
-                                         MAX_CHIP_EC_CNT_PER_MSAREA,
-                                         l_maxMemBlocks);
+                        TARGETING::ATTR_SLCA_RID_type l_procRid =
+                            l_pProcTarget->getAttr<TARGETING::ATTR_SLCA_RID>();
 
-                    if(NULL != l_err)
-                    {
-                        HDAT_ERR("Error adding MSArea %d"
-                                 "Number of Dimms: %d Max Blocks: %d",
-                                 l_index,
-                                 l_numDimms,l_maxMemBlocks);
-                        break;
-                    }
+                        TARGETING::ATTR_SLCA_INDEX_type l_procSlcaIndex =
+                           l_pProcTarget->getAttr<TARGETING::ATTR_SLCA_INDEX>();
 
-                    uint32_t l_memStatus = 0;
-                    //If group is shared with more than one area
-                    if(l_mcsSharingCount[l_mcsInGrp] >=
+                        l_err = addMsAreaFru(l_procRid,
+                                             l_procSlcaIndex,
+                                             l_pProcTarget,
+                                             l_index,
+                                             l_numDimms,
+                                             MAX_CHIP_EC_CNT_PER_MSAREA,
+                                             l_maxMemBlocks);
+
+                        if(NULL != l_err)
+                        {
+                            HDAT_ERR("Error adding MSArea %d"
+                                     "Number of Dimms: %d Max Blocks: %d",
+                                     l_index,
+                                     l_numDimms,l_maxMemBlocks);
+                            break;
+                        }
+
+                        uint32_t l_memStatus = 0;
+                        //If group is shared with more than one area
+                        if(l_mcaSharingCount[l_mcaInGrp] >=
                                                 HDAT_MIN_NUM_FOR_SHARING)
-                    {
-                        l_memStatus = HDAT_MEM_SHARED;
-                        setMsAreaInterleavedId(l_index,
-                                l_mcsSharingGrpIds[l_mcsInGrp]);
-                    }
+                        {
+                            l_memStatus = HDAT_MEM_SHARED;
+                            setMsAreaInterleavedId(l_index,
+                                l_mcsSharingGrpIds[l_mcaInGrp]);
+                        }
 
-                    setMsAreaType(l_index,l_parentType);
-                    setMsAreaSize(l_index,l_areaSizeInMB);
+                        setMsAreaType(l_index,l_parentType);
+                        setMsAreaSize(l_index,l_areaSizeInMB);
 
-                    iv_maxSize.hdatTotSize += l_areaSizeInMB;
+                        iv_maxSize.hdatTotSize += l_areaSizeInMB;
 
-                    l_memStatus |= l_areaFunctional ?
+                        l_memStatus |= l_areaFunctional ?
                          (HDAT_MEM_INSTALLED | HDAT_MEM_FUNCTIONAL) :
                           HDAT_MEM_INSTALLED;
 
-                    setMsAreaStat(l_index, l_memStatus);
+                        setMsAreaStat(l_index, l_memStatus);
 
-                    //Add MCS ec level
-                    uint32_t l_mcsEcLevel = 0;
-                    uint32_t l_mcsChipId = 0;
-                    l_err = hdatGetIdEc(l_pMcsTarget,
-                                        l_mcsEcLevel,
-                                        l_mcsChipId);
-                    if(NULL != l_err)
-                    {
-                        HDAT_ERR("Error in getting MCS ID "
+                        //Add MCS ec level
+                        uint32_t l_mcsEcLevel = 0;
+                        uint32_t l_mcsChipId = 0;
+                        l_err = hdatGetIdEc(l_pMcsTarget,
+                                            l_mcsEcLevel,
+                                            l_mcsChipId);
+                        if(NULL != l_err)
+                        {
+                            HDAT_ERR("Error in getting MCS ID "
                                  "and EC HUID:[0x%08X]",
                                  l_pMcsTarget->getAttr<TARGETING::ATTR_HUID>());
-                        break;
-                    }
+                            break;
+                        }
 
-                    l_err = addEcEntry(l_index,
-                                       l_mcsChipId,
-                                       l_mcsEcLevel);
-                    if(NULL != l_err)
-                    {
-                        HDAT_ERR("Error in adding"
+                        l_err = addEcEntry(l_index,
+                                           l_mcsChipId,
+                                           l_mcsEcLevel);
+                        if(NULL != l_err)
+                        {
+                            HDAT_ERR("Error in adding"
                                  " ID[0x%08X] and EC[0x%08X] to ms area"
                                  " HUID:[0x%08X]",l_mcsChipId,
                                  l_mcsEcLevel,
                                  l_pMcsTarget->getAttr<TARGETING::ATTR_HUID>());
-                        break;
-                    }
+                            break;
+                        }
 
-                    // TODO RTC Story 165230
-                    // Need to get i2c Master data correctly
-                    std::vector<hdatMsAreaHI2cData_t> l_i2cDevEntries;
+                        // TODO RTC Story 165230
+                        // Need to get i2c Master data correctly
+                        std::vector<hdatMsAreaHI2cData_t> l_i2cDevEntries;
 
-                    TARGETING::PredicateCTM l_membufPredicate(TARGETING::CLASS_CHIP,
-                                        TARGETING::TYPE_MEMBUF);
+                        TARGETING::PredicateCTM l_membufPredicate(
+                            TARGETING::CLASS_CHIP, TARGETING::TYPE_MEMBUF);
 
-                    TARGETING::PredicatePostfixExpr l_presentMemBuf;
-                    l_presentMemBuf.push(&l_membufPredicate).
+                        TARGETING::PredicatePostfixExpr l_presentMemBuf;
+                        l_presentMemBuf.push(&l_membufPredicate).
                                           push(&l_predHwasPresent).And();
 
-                    TARGETING::TargetHandleList l_membufList;
+                        TARGETING::TargetHandleList l_membufList;
 
-                    // Find Associated membuf
-                    TARGETING::targetService().getAssociated(l_membufList,
+                        // Find Associated membuf
+                        TARGETING::targetService().getAssociated(l_membufList,
                                     l_pMcsTarget,
                                     TARGETING::TargetService::CHILD_BY_AFFINITY,
                                     TARGETING::TargetService::ALL,
                                     &l_presentMemBuf);
-                    //Skip is there is no Membuf attached to this MCS
-                    if(l_membufList.size() > 0)
-                    {
-                        TARGETING::Target *l_pMembufTarget = l_membufList[0];
-                        if (l_pMembufTarget != NULL)
+                        //Skip is there is no Membuf attached to this MCS
+                        if(l_membufList.size() > 0)
                         {
-                            hdatGetMsaDeviceInfo(l_pMembufTarget,
-                                                 l_i2cDevEntries);
+                            TARGETING::Target *l_pMembufTarget =
+                                l_membufList[0];
+                            if (l_pMembufTarget != NULL)
+                            {
+                                hdatGetMsaDeviceInfo(l_pMembufTarget,
+                                                     l_i2cDevEntries);
+                            }
                         }
-                    }
 
-                    setMsaI2cInfo(l_index, l_i2cDevEntries);
+                        setMsaI2cInfo(l_index, l_i2cDevEntries);
 
-                    std::list<hdatRamArea>::iterator l_area = l_areas.begin();
+                        std::list<hdatRamArea>::iterator l_area =
+                            l_areas.begin();
 
-                    for (uint32_t l_ramId = 0;
-                         l_area != l_areas.end();
-                         ++l_ramId, ++l_area)
-                    {
-                        uint32_t l_status = (l_area)->ivFunctional ?
+                        for (uint32_t l_ramId = 0;
+                             l_area != l_areas.end();
+                             ++l_ramId, ++l_area)
+                        {
+                            uint32_t l_status = (l_area)->ivFunctional ?
                                       (HDAT_RAM_INSTALLED | HDAT_RAM_FUNCTIONAL)
                                       : HDAT_RAM_INSTALLED;
 
-                        TARGETING::Target *l_pDimmTarget =
-                           TARGETING::Target::getTargetFromHuid(l_area->ivHuid);
+                            TARGETING::Target *l_pDimmTarget =
+                            TARGETING::Target::getTargetFromHuid(l_area->ivHuid);
 
-                        TARGETING::ATTR_SLCA_RID_type l_dimmRid =
-                           l_pDimmTarget->getAttr<TARGETING::ATTR_SLCA_RID>();
+                            TARGETING::ATTR_SLCA_RID_type l_dimmRid =
+                            l_pDimmTarget->getAttr<TARGETING::ATTR_SLCA_RID>();
 
-                        TARGETING::ATTR_SLCA_INDEX_type l_dimmSlcaIndex =
-                           l_pDimmTarget->getAttr<TARGETING::ATTR_SLCA_INDEX>();
+                            TARGETING::ATTR_SLCA_INDEX_type l_dimmSlcaIndex =
+                            l_pDimmTarget->getAttr<TARGETING::ATTR_SLCA_INDEX>();
 
-                        l_err = addRamFru(l_index,
-                                          l_pDimmTarget,
-                                          l_dimmRid,
-                                          l_dimmSlcaIndex,
-                                          l_ramId,
-                                          l_status,
-                                          (l_area)->ivSize);
+                            l_err = addRamFru(l_index,
+                                              l_pDimmTarget,
+                                              l_dimmRid,
+                                              l_dimmSlcaIndex,
+                                              l_ramId,
+                                              l_status,
+                                              (l_area)->ivSize);
 
-                        if (l_err) // Failed to add ram fru information
-                        {
-                            HDAT_ERR("Error in adding RAM FRU"
-                                 "Index:%d Rid:[0x%08X] status:[0x%08X]"
-                                 "Size:[0x%08X] RamID:[0x%08X]",
-                                 l_index,(l_area)->ivHuid,
-                                 l_status,(l_area)->ivSize,l_ramId);
-                            ERRORLOG::errlCommit(l_err,HDAT_COMP_ID);
+                            if (l_err) // Failed to add ram fru information
+                            {
+                                HDAT_ERR("Error in adding RAM FRU"
+                                "Index:%d Rid:[0x%08X] status:[0x%08X]"
+                                "Size:[0x%08X] RamID:[0x%08X]",
+                                l_index,(l_area)->ivHuid,
+                                l_status,(l_area)->ivSize,l_ramId);
+                                ERRORLOG::errlCommit(l_err,HDAT_COMP_ID);
 
-                            delete l_err;
-                            l_err = NULL;
-                            continue;
-                        }
-                    }//end of RAM list
+                                delete l_err;
+                                l_err = NULL;
+                                continue;
+                            }
+                        }//end of RAM list
 
-                    l_addr_range.hi = (l_procMemBases[l_mcsInGrp] &
+                        l_addr_range.hi = (l_procMemBases[l_mcaInGrp] &
+                                           0xFFFFFFFF00000000ull) >> 32;
+                        l_addr_range.lo =  l_procMemBases[l_mcaInGrp] &
+                                           0x00000000FFFFFFFFull;
+
+                        l_end = l_addr_range;
+
+                        //Update the range
+                        l_end.hi += (l_procMemSizesBytes[l_mcaInGrp] &
                                        0xFFFFFFFF00000000ull) >> 32;
-                    l_addr_range.lo =  l_procMemBases[l_mcsInGrp] &
+                        l_end.lo += l_procMemSizesBytes[l_mcaInGrp] &
                                        0x00000000FFFFFFFFull;
 
-                    l_end = l_addr_range;
-
-                    //Update the range
-                    l_end.hi += (l_procMemSizesBytes[l_mcsInGrp] &
-                                       0xFFFFFFFF00000000ull) >> 32;
-                    l_end.lo += l_procMemSizesBytes[l_mcsInGrp] &
-                                       0x00000000FFFFFFFFull;
-
-                    HDAT_INF("MCS:0x%08X l_addr_range:0x%08X 0x%08X"
+                        HDAT_INF("MCS:0x%08X l_addr_range:0x%08X 0x%08X"
                          " l_end:0x%08X 0x%08X",
                          l_pMcsTarget->getAttr<TARGETING::ATTR_HUID>(),
                          l_addr_range.hi, l_addr_range.lo,
                          l_end.hi,l_end.lo);
 
-                    uint64_t l_hdatMirrorAddr_x = 0x0ull;
-                    uint64_t l_hdatMirrorAddr = 0x0ull;
-                    uint8_t l_hdatMirrorAlogrithm = 0xFF;
-                    bool l_rangeIsMirrorable = false;
+                        uint64_t l_hdatMirrorAddr_x = 0x0ull;
+                        uint64_t l_hdatMirrorAddr = 0x0ull;
+                        uint8_t l_hdatMirrorAlogrithm = 0xFF;
+                        bool l_rangeIsMirrorable = false;
 
-                    TARGETING::ATTR_PROC_MIRROR_BASES_type l_MirrorAddr = {0};
-                    assert(l_pProcTarget->tryGetAttr<
-                    TARGETING::ATTR_PROC_MIRROR_BASES>(l_MirrorAddr));
+                        TARGETING::ATTR_PROC_MIRROR_BASES_type
+                            l_MirrorAddr = {0};
+                        assert(l_pProcTarget->tryGetAttr<
+                        TARGETING::ATTR_PROC_MIRROR_BASES>(l_MirrorAddr));
 
-                    TARGETING::ATTR_PROC_MIRROR_SIZES_type l_MirrorSize = {0};
-                    assert(l_pProcTarget->tryGetAttr<
-                    TARGETING::ATTR_PROC_MIRROR_SIZES>(l_MirrorSize));
+                        TARGETING::ATTR_PROC_MIRROR_SIZES_type
+                            l_MirrorSize = {0};
+                        assert(l_pProcTarget->tryGetAttr<
+                        TARGETING::ATTR_PROC_MIRROR_SIZES>(l_MirrorSize));
 
-                    TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddress_x =
-                    l_pSysTarget->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
-
-                    uint64_t l_startAddr = (((uint64_t)(l_addr_range.hi) << 32 )
+                        uint64_t l_startAddr =
+                                       (((uint64_t)(l_addr_range.hi) << 32 )
                                        | (uint64_t)(l_addr_range.lo));
-                    l_hdatMirrorAddr_x = (l_startAddr / 2) + l_mirrorBaseAddress_x;
+                        l_hdatMirrorAddr_x =
+                            (l_startAddr / 2) + l_mirrorBaseAddress_x;
 
-                    TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM_type l_payLoadMirrorMem =
-                    l_pSysTarget->getAttr<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>();
+                        TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM_type
+                            l_payLoadMirrorMem =
+                            l_pSysTarget->getAttr<
+                            TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>();
 
-                    HDAT_INF(
+                        HDAT_INF(
                            "Start add : 0x%016llX MirrorBase : 0x%016llX"
                            " MirrorAddr : 0x%016llX PayLoadMirrorMem : 0x%X",
                            l_startAddr, l_mirrorBaseAddress_x,
                            l_hdatMirrorAddr_x, l_payLoadMirrorMem);
 
-                    if ( 0 != l_payLoadMirrorMem )
-                    {
-                        for ( int idx=0 ; idx <
+                        if ( 0 != l_payLoadMirrorMem )
+                        {
+                            for ( int idx=0 ; idx <
                             (int)(sizeof(TARGETING::ATTR_PROC_MIRROR_SIZES_type)
                             / sizeof(uint64_t)) ; idx++ )
-                        {
-                            HDAT_INF("Mirror size : 0x%016llX"
+                            {
+                                HDAT_INF("Mirror size : 0x%016llX"
                                    " MirrorAddr[idx] : 0x%016llX"
                                    " hdatMirrorAddr_x : 0x%016llX",
                                    l_MirrorSize[idx], l_MirrorAddr[idx],
                                    l_hdatMirrorAddr_x);
 
-                            if( (0 != l_MirrorSize[idx]) &&
+                                if( (0 != l_MirrorSize[idx]) &&
                                     (l_MirrorAddr[idx] == l_hdatMirrorAddr_x) )
-                            {
-                                l_rangeIsMirrorable = true;
-                                l_hdatMirrorAddr = l_MirrorAddr[idx]
+                                {
+                                    l_rangeIsMirrorable = true;
+                                    l_hdatMirrorAddr = l_MirrorAddr[idx]
                                                | HDAT_REAL_ADDRESS_MASK64;
-                                break;
+                                    break;
+                                }
                             }
                         }
-                    }
-                    l_err = addMsAreaAddr(l_index,
-                                          l_addr_range,
-                                          l_end,
-                                          l_procChipId,
-                                          l_rangeIsMirrorable,
-                                          l_hdatMirrorAlogrithm,
-                                          l_hdatMirrorAddr);
-                    if(NULL != l_err)
-                    {
-                        HDAT_ERR("Error in adding addMsAreaAddr"
-                             " to ms area index[%d]",
-                             l_index);
-                        break;
-                    }
-
-                    // TODO : RTC Story 159682
-                    // Further CHTM support needs to be added which contains the
-                    // trace array for 24 cores
-                    // Reinitializing the NHTM size  
-                    l_nhtmSize =
-                        l_pProcTarget->getAttr
-                            <TARGETING::ATTR_PROC_NHTM_BAR_SIZE>();
-
-                    uint64_t l_end_addr =
-                         (((uint64_t)(l_end.hi) << 32 ) | (uint64_t)(l_end.lo));
-                    uint64_t l_start_addr = (((uint64_t)(l_addr_range.hi) << 32 )
-                                       | (uint64_t)(l_addr_range.lo));
-                    uint64_t l_size_bytes = (l_areaSizeInMB) * 1024 * 1024;
-
-                    if((0 != l_nhtmSize) &&
-                               (l_size_bytes != (l_end_addr - l_start_addr)))
-                    {
-                        HDAT_INF("NHTM Bar size = 0x%016llX "
-                                                   " MS area size = 0x%016llX"
-                                                   " l_end_addr = 0x%016llX"
-                                                   " l_start_addr = 0x%016llX",
-                             l_nhtmSize,l_size_bytes, l_end_addr, l_start_addr);
-
-                        l_addr_range.lo = l_hdatNhtmStartAddr.lo;
-                        l_addr_range.hi = l_hdatNhtmStartAddr.hi;
-
-                        l_end.lo = l_hdatNhtmEndAddr.lo;
-                        l_end.hi = l_hdatNhtmEndAddr.hi;
-
                         l_err = addMsAreaAddr(l_index,
                                               l_addr_range,
                                               l_end,
                                               l_procChipId,
-                                              false, 0, 0);
+                                              l_rangeIsMirrorable,
+                                              l_hdatMirrorAlogrithm,
+                                              l_hdatMirrorAddr);
                         if(NULL != l_err)
                         {
-                            HDAT_ERR("Error in adding "
-                                     " addMsAreaAddr to ms area index[%d]",
-                                     l_index);
+                            HDAT_ERR("Error in adding addMsAreaAddr"
+                               " to ms area index[%d]",
+                               l_index);
                             break;
                         }
-                        l_nhtmSize=0; //only add 1 entry
-                    }
-                    l_addr_range = l_end;
-                    l_index++;
+
+                        // TODO : RTC Story 159682
+                        // Further CHTM support needs to be added which contains
+                        // the trace array for 24 cores
+                        // Reinitializing the NHTM size  
+                        l_nhtmSize =
+                            l_pProcTarget->getAttr
+                            <TARGETING::ATTR_PROC_NHTM_BAR_SIZE>();
+
+                        uint64_t l_end_addr =
+                         (((uint64_t)(l_end.hi) << 32 ) | (uint64_t)(l_end.lo));
+                        uint64_t l_start_addr =
+                                       (((uint64_t)(l_addr_range.hi) << 32 )
+                                       | (uint64_t)(l_addr_range.lo));
+                        uint64_t l_size_bytes = (l_areaSizeInMB) * 1024 * 1024;
+
+                        if((0 != l_nhtmSize) &&
+                               (l_size_bytes != (l_end_addr - l_start_addr)))
+                        {
+                            HDAT_INF("NHTM Bar size = 0x%016llX "
+                                     " MS area size = 0x%016llX"
+                                     " l_end_addr = 0x%016llX"
+                                     " l_start_addr = 0x%016llX",
+                                     l_nhtmSize,l_size_bytes, l_end_addr,
+                                     l_start_addr);
+
+                            l_addr_range.lo = l_hdatNhtmStartAddr.lo;
+                            l_addr_range.hi = l_hdatNhtmStartAddr.hi;
+
+                            l_end.lo = l_hdatNhtmEndAddr.lo;
+                            l_end.hi = l_hdatNhtmEndAddr.hi;
+
+                            l_err = addMsAreaAddr(l_index,
+                                                  l_addr_range,
+                                                  l_end,
+                                                  l_procChipId,
+                                                  false, 0, 0);
+                            if(NULL != l_err)
+                            {
+                                HDAT_ERR("Error in adding "
+                                     " addMsAreaAddr to ms area index[%d]",
+                                     l_index);
+                                break;
+                            }
+                            l_nhtmSize=0; //only add 1 entry
+                        }
+                        l_addr_range = l_end;
+                        l_index++;
+                    } //end of mca list
                 } //end of MCS list
             } //end of MCBIST list
             if(l_err)
@@ -1596,6 +1633,15 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                 hdatMsAddr_t l_hdatRhbEndAddr;
 
                 l_rhbStartAddr = l_rhbStartAddr * l_dbobId;
+                TARGETING::ATTR_PAYLOAD_BASE_type l_payLoadBase =
+                    l_pSysTarget->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
+                // Since PAYLOAD_BASE is in MB's, converting it to bytes
+                l_rhbStartAddr |= ((uint64_t)(l_payLoadBase)) << 20;
+                l_rhbStartAddr &= 0xFFFFFFFF00000000;
+                if( l_payLoadBase > 0x100 )
+                {
+                    l_rhbStartAddr = 0x40000000000; //4TB hardcode for now
+                }
                 l_hdatRhbStartAddr.hi =
                                 (l_rhbStartAddr & 0xFFFFFFFF00000000ull) >> 32;
                 l_hdatRhbStartAddr.lo =  l_rhbStartAddr & 0x00000000FFFFFFFFull;
@@ -1781,41 +1827,48 @@ uint64_t HdatMsVpd::hdatGetMaxMemConfiguredAddress()
         assert(l_pProcTarget->
                tryGetAttr<TARGETING::ATTR_PROC_MEM_BASES>(l_procMemBases));
 
-        //For each MCS
-        TARGETING::PredicateCTM l_allMcs(TARGETING::CLASS_UNIT,
-                                             TARGETING::TYPE_MCS);
-        TARGETING::PredicateHwas l_funcMcs;
-        l_funcMcs.functional(true);
-        TARGETING::PredicatePostfixExpr l_allFuncMcs;
-        l_allFuncMcs.push(&l_allMcs).push(&l_funcMcs).And();
+        //For each MCA
+        TARGETING::PredicateCTM l_allMca(TARGETING::CLASS_UNIT,
+                                         TARGETING::TYPE_MCA);
+        TARGETING::PredicateHwas l_funcMca;
+        l_funcMca.functional(true);
+        TARGETING::PredicatePostfixExpr l_allFuncMca;
+        l_allFuncMca.push(&l_allMca).push(&l_funcMca).And();
 
-        TARGETING::TargetHandleList l_mcsList;
+        TARGETING::TargetHandleList l_mcaList;
 
         TARGETING::targetService().
-                  getAssociated(l_mcsList, l_pProcTarget,
+                  getAssociated(l_mcaList, l_pProcTarget,
                           TARGETING::TargetService::CHILD,
-                          TARGETING::TargetService::ALL, &l_allFuncMcs);
+                          TARGETING::TargetService::ALL, &l_allFuncMca);
 
-        for(uint32_t i=0; i < l_mcsList.size(); i++)
+        for(uint32_t i=0; i < l_mcaList.size(); i++)
         {
 
-            TARGETING::Target *l_pMcsTarget = l_mcsList[i];
+            TARGETING::Target *l_pMcaTarget = l_mcaList[i];
 
-            uint32_t l_mcsInGroup =  0;
+            uint32_t l_mcaInGroup =  0;
             if(!hdatFindGroupForMc(l_pProcTarget,
-                                       l_pMcsTarget,
-                                       l_mcsInGroup))
+                                   l_pMcaTarget,
+                                   l_mcaInGroup))
             {
+                HDAT_INF("Input target is not in group,"
+                         " MCA HUID:[0x%08X]",
+                         l_pMcaTarget->getAttr<TARGETING::ATTR_HUID>());
                 //Skip this MC not part of any group
                 continue;
             }
 
             if(!l_processedAnyGroup ||
-               (l_procMemBases[l_mcsInGroup] > l_maxBase))
+               (l_procMemBases[l_mcaInGroup] > l_maxBase))
             {
-                l_maxBase = l_procMemBases[l_mcsInGroup];
+                l_maxBase = l_procMemBases[l_mcaInGroup];
                 l_processedAnyGroup = true;
-                l_maxMsAddress = l_maxBase + l_procMemSizesBytes[l_mcsInGroup];
+                l_maxMsAddress = l_maxBase + l_procMemSizesBytes[l_mcaInGroup];
+                HDAT_INF("Max MS Addr l_maxMsAddress: = 0x%016llX,"
+                  "l_maxBase= 0x%016llX,"
+                  "l_procMemSizesBytes[l_mcaInGroup]= 0x%016llX",
+                  l_maxMsAddress, l_maxBase, l_procMemSizesBytes[l_mcaInGroup]);
             }
         }
 
@@ -1877,12 +1930,12 @@ uint64_t HdatMsVpd::hdatGetMaxMemConfiguredAddress()
 //* hdatFindGroupForMc
 //******************************************************************************
 bool HdatMsVpd::hdatFindGroupForMc(const TARGETING::Target *i_pProcTarget,
-                            const TARGETING::Target *i_pMcsTarget,
+                            const TARGETING::Target *i_pMcaTarget,
                             uint32_t& o_groupOfMc)
 {
     bool l_foundGroup = false;
-    TARGETING::ATTR_MSS_MEM_MC_IN_GROUP_type l_mcsGroups = {0};
-    assert(i_pProcTarget != NULL || i_pMcsTarget != NULL);
+    TARGETING::ATTR_MSS_MEM_MC_IN_GROUP_type l_mcaGroups = {0};
+    assert(i_pProcTarget != NULL || i_pMcaTarget != NULL);
 
     assert(!(i_pProcTarget->getAttr<TARGETING::ATTR_TYPE>()
                                                 != TARGETING::TYPE_PROC)||
@@ -1890,29 +1943,27 @@ bool HdatMsVpd::hdatFindGroupForMc(const TARGETING::Target *i_pProcTarget,
                                                 != TARGETING::CLASS_CHIP));
 
     assert(i_pProcTarget->
-             tryGetAttr<TARGETING::ATTR_MSS_MEM_MC_IN_GROUP>(l_mcsGroups));
+             tryGetAttr<TARGETING::ATTR_MSS_MEM_MC_IN_GROUP>(l_mcaGroups));
 
-    assert(!(i_pMcsTarget->getAttr<TARGETING::ATTR_TYPE>()
-                                               != TARGETING::TYPE_MCS)||
-           !(i_pMcsTarget->getAttr<TARGETING::ATTR_CLASS>()
+    assert(!(i_pMcaTarget->getAttr<TARGETING::ATTR_TYPE>()
+                                               != TARGETING::TYPE_MCA)||
+           !(i_pMcaTarget->getAttr<TARGETING::ATTR_CLASS>()
                                                != TARGETING::CLASS_UNIT));
     TARGETING::ATTR_CHIP_UNIT_type l_chipUnit =
-                          i_pMcsTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-    uint32_t l_sizeOfArray  = sizeof(l_mcsGroups)/sizeof(l_mcsGroups[0]);
+                          i_pMcaTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+    uint32_t l_sizeOfArray  = sizeof(l_mcaGroups)/sizeof(l_mcaGroups[0]);
 
-    assert(!(sizeof( l_mcsGroups[0] ) != sizeof(uint8_t)));
+    assert(!(sizeof( l_mcaGroups[0] ) != sizeof(uint8_t)));
 
+    assert(!( l_chipUnit >= ( sizeof( l_mcaGroups[0] ) * HDAT_BITS_PER_BYTE )));
 
-    assert(!( l_chipUnit >= ( sizeof( l_mcsGroups[0] ) * HDAT_BITS_PER_BYTE )));
-
-
-    const uint8_t MC_IN_GROUP_MCS_0  = 0x80;
+    const uint8_t MC_IN_GROUP_MCA_0  = 0x80;
     for(uint32_t l_idx =0; l_idx < l_sizeOfArray;++l_idx)
     {
         //Attribute ATTR_MSS_MEM_MC_IN_GROUP  is an array of bitmask
-        //bit 0 of bitmask corresponds to mcs 0, bit 7 to mcs7
-        if((l_mcsGroups[l_idx] & (MC_IN_GROUP_MCS_0 >> l_chipUnit)) ==
-               (MC_IN_GROUP_MCS_0 >> l_chipUnit))
+        //bit 0 of bitmask corresponds to mca 0, bit 7 to mca7
+        if((l_mcaGroups[l_idx] & (MC_IN_GROUP_MCA_0 >> l_chipUnit)) ==
+               (MC_IN_GROUP_MCA_0 >> l_chipUnit))
         {
             HDAT_INF("hdatFindGroupForMc::: Found group : %d",l_idx);
             o_groupOfMc = l_idx;
@@ -1927,6 +1978,7 @@ bool HdatMsVpd::hdatFindGroupForMc(const TARGETING::Target *i_pProcTarget,
 *  hdatScanDimms
 *******************************************************************************/
 errlHndl_t HdatMsVpd::hdatScanDimms(const TARGETING::Target *i_pTarget,
+                         const TARGETING::Target *i_pMcsTarget,
                          uint32_t i_mcaFruid,
                          std::list<hdatRamArea>& o_areas,
                          uint32_t& o_areaSize,
@@ -1938,139 +1990,123 @@ errlHndl_t HdatMsVpd::hdatScanDimms(const TARGETING::Target *i_pTarget,
 
     do
     {
-        if(i_pTarget->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_MCS)
+        if(i_pTarget->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_MCA)
         {
-            HDAT_ERR("Input Target is type not supported.");
+            HDAT_ERR("Input Target is type not MCA");
+            break;
+        }
+
+        if(i_pMcsTarget->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_MCS)
+        {
+            HDAT_ERR("Input Target is type not MCA");
             break;
         }
 
         TARGETING::ATTR_EFF_DIMM_SIZE_type l_dimSizes = {{0}};
         //Get configured memory size
-        if(!i_pTarget->
+        if(!i_pMcsTarget->
                    tryGetAttr<TARGETING::ATTR_EFF_DIMM_SIZE>(l_dimSizes))
         {
             HDAT_ERR("DIMM size should be available with MCS");
         }
 
-        //for each MCA connected to this this MCS
-        TARGETING::PredicateCTM l_mcaPredicate(TARGETING::CLASS_UNIT,
-                                               TARGETING::TYPE_MCA);
-
-        TARGETING::PredicateHwas l_predMca;
-        l_predMca.present(true);
-        TARGETING::PredicatePostfixExpr l_presentMca;
-        l_presentMca.push(&l_mcaPredicate).push(&l_predMca).And();
-        TARGETING::TargetHandleList l_mcaList;
-
-        // Get associated MCAs
-        TARGETING::targetService().
-             getAssociated(l_mcaList, i_pTarget,
-                      TARGETING::TargetService::CHILD_BY_AFFINITY,
-                      TARGETING::TargetService::ALL, &l_presentMca);
-
-        o_dimmNum = 0;
-        for (uint32_t i = 0; i < l_mcaList.size(); ++i)
+        uint8_t l_mcaPort = 0;
+        if(!i_pTarget->
+                   tryGetAttr<TARGETING::ATTR_REL_POS>(l_mcaPort))
         {
+           HDAT_ERR("REL_POS not there in MCA port");
+        }
+        else
+        {
+            l_mcaPort= l_mcaPort%2;
+        }
+        //[TODO RTC: 47148]
 
-            TARGETING::Target *l_pMcaTarget = l_mcaList[i];
+        //for each DIMM connected to this this MCA
+        TARGETING::PredicateCTM l_dimmPredicate(TARGETING::
+                                                CLASS_LOGICAL_CARD,
+                                                TARGETING::TYPE_DIMM);
+        TARGETING::PredicateHwas l_predDimm;
+        l_predDimm.present(true);
+        TARGETING::PredicatePostfixExpr l_presentDimm;
+        l_presentDimm.push(&l_dimmPredicate).push(&l_predDimm).And();
 
-            //for each DIMM connected to this this MCA
-            TARGETING::PredicateCTM l_dimmPredicate(TARGETING::
-                                                      CLASS_LOGICAL_CARD,
-                                                      TARGETING::TYPE_DIMM);
-            TARGETING::PredicateHwas l_predDimm;
-            l_predDimm.present(true);
-            TARGETING::PredicatePostfixExpr l_presentDimm;
-            l_presentDimm.push(&l_dimmPredicate).push(&l_predDimm).And();
+        TARGETING::TargetHandleList l_dimmList;
 
-            TARGETING::TargetHandleList l_dimmList;
-
-            // Get associated dimms
-            TARGETING::targetService().
-            getAssociated(l_dimmList, l_pMcaTarget,
+        // Get associated dimms
+        TARGETING::targetService().
+        getAssociated(l_dimmList, i_pTarget,
                       TARGETING::TargetService::CHILD_BY_AFFINITY,
                       TARGETING::TargetService::ALL, &l_presentDimm);
 
+        for(uint32_t j=0; j < l_dimmList.size(); ++j)
+        {
+            //fetch each dimm
+            TARGETING::Target *l_pDimmTarget = l_dimmList[j];
 
-            for(uint32_t j=0; j < l_dimmList.size(); ++j)
+            uint32_t l_dimmfru = 0;
+            l_dimmfru = l_pDimmTarget->getAttr<TARGETING::ATTR_FRU_ID>();
+
+            uint8_t l_mcaDimm = 0;
+            TARGETING::ATTR_REL_POS_type l_dimmRelPos = 0;
+
+            if(l_pDimmTarget->
+               tryGetAttr<TARGETING::ATTR_REL_POS>(l_dimmRelPos))
             {
-                //fetch each dimm
-                TARGETING::Target *l_pDimmTarget = l_dimmList[j];
-
-                uint32_t l_dimmfru = 0;
-                l_dimmfru = l_pDimmTarget->getAttr<TARGETING::ATTR_FRU_ID>();
-
-                uint8_t l_mcaDimm = 0;
-                uint8_t l_mcaPort = 0;
-                TARGETING::ATTR_REL_POS_type l_dimmRelPos = 0;
-
-                if(l_pDimmTarget->
+                l_mcaDimm = l_dimmRelPos%2; //2 DIMMs per MCA
+                l_dimmRelPos = 0;
+                if(!i_pTarget->
                     tryGetAttr<TARGETING::ATTR_REL_POS>(l_dimmRelPos))
                 {
-                    l_mcaDimm = l_dimmRelPos%2; //2 DIMMs per MCA
-                    l_dimmRelPos = 0;
-                    if(!l_pMcaTarget->
-                        tryGetAttr<TARGETING::ATTR_REL_POS>(l_dimmRelPos))
-                    {
-                        HDAT_ERR("Attribute REL_POS in MCA is not "
-                                            "present");
-                    }
-                    else
-                    {
-                        l_mcaPort = l_dimmRelPos%2; //2 MCAs per MCS
-                    }
+                    HDAT_ERR("Attribute REL_POS in MCA is not "
+                             "present");
                 }
-                else
-                {
-                    HDAT_ERR("Attribute REL_POS in DIMM "
-                                        "is not present");
-                }
-
-                //Convert GB to MB
-                uint32_t l_dimmSizeInMB =
-                           l_dimSizes[l_mcaPort][l_mcaDimm] * HDAT_MB_PER_GB;
-                uint32_t l_huid = TARGETING::get_huid(l_pDimmTarget);
-
-
-                bool foundArea = false;
-                for (std::list<hdatRamArea>::iterator l_area = o_areas.begin();
-                                                l_area != o_areas.end();
-                                                ++l_area)
-                {
-                    //we do not need to compare each dimm fru id with mca fru id
-                    //to create ram area, by the below logic
-                    //dimms with same fruid will fall into same ram area
-                    //even if they have fru id same with mca
-                    if (l_area->ivfruId == l_dimmfru)//this means soldered dimms
-                    {
-                        foundArea = true;
-                        l_area->ivFunctional = (l_area)->ivFunctional ||
-                                                    isFunctional(l_pDimmTarget);
-                        (l_area)->ivFunctional = true;
-                        (l_area)->ivSize += l_dimmSizeInMB;
-                        break;
-                    }
-                }
-
-                //Search in the list of RAM Areas if not
-                //present create a new ram area
-                if (!foundArea)
-                {
-                    o_dimmNum++;
-                    o_areas.push_back(hdatRamArea(l_huid,
-                                            isFunctional(l_pDimmTarget),
-                                             l_dimmSizeInMB,l_dimmfru));
-                }
-                o_areaSize += l_dimmSizeInMB;
-                o_areaFunctional = o_areaFunctional ||
-                                     isFunctional(l_pDimmTarget);
             }
-            if(l_err != NULL)
+            else
             {
-                //Break of error
-                break;
+                HDAT_ERR("Attribute REL_POS in DIMM "
+                         "is not present");
             }
+
+            //Convert GB to MB
+            uint32_t l_dimmSizeInMB =
+                     l_dimSizes[l_mcaPort][l_mcaDimm] * HDAT_MB_PER_GB;
+            uint32_t l_huid = TARGETING::get_huid(l_pDimmTarget);
+
+            bool foundArea = false;
+            for (std::list<hdatRamArea>::iterator l_area = o_areas.begin();
+                                                  l_area != o_areas.end();
+                                                  ++l_area)
+            {
+                //we do not need to compare each dimm fru id with mca fru id
+                //to create ram area, by the below logic
+                //dimms with same fruid will fall into same ram area
+                //even if they have fru id same with mca
+                if (l_area->ivfruId == l_dimmfru)//this means soldered dimms
+                {
+                    foundArea = true;
+                    l_area->ivFunctional = (l_area)->ivFunctional ||
+                                            isFunctional(l_pDimmTarget);
+                    (l_area)->ivFunctional = true;
+                    (l_area)->ivSize += l_dimmSizeInMB;
+                    break;
+                }
+            }
+
+            //Search in the list of RAM Areas if not
+            //present create a new ram area
+            if (!foundArea)
+            {
+                o_dimmNum++;
+                o_areas.push_back(hdatRamArea(l_huid,
+                                        isFunctional(l_pDimmTarget),
+                                         l_dimmSizeInMB,l_dimmfru));
+            }
+            o_areaSize += l_dimmSizeInMB;
+            o_areaFunctional = o_areaFunctional ||
+                               isFunctional(l_pDimmTarget);
         }
+
         o_parentType = HDAT_MEM_PARENT_CEC_FRU;
 
         if(l_err != NULL)
