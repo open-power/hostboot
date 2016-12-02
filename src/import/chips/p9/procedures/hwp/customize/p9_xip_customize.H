@@ -56,7 +56,7 @@ extern "C"
 ///                                             Out: HW image
 /// @param[in/out] io_imageSize          => Size of image
 ///                                         HB_SBE:
-///                                             In:  MAX_SEEPROM_IMAGE_SIZE
+///                                             In:  >=MAX_SBE_SEEPROM_SIZE
 ///                                             Out: Final size
 ///                                         RT_{CME,SGPE}:
 ///                                             In:  Size of HW image
@@ -72,10 +72,10 @@ extern "C"
 ///                                             Out: Updated .rings section
 /// @param[in/out] io_ringSectionBufSize => In: Size of ring section buffer
 ///                                         HB_SBE:
-///                                             In:  MAX_SEEPROM_IMAGE_SIZE
-///                                             Out: Unchanged
+///                                             In:  Input value of io_imageSize
+///                                             Out: Final size
 ///                                         RT_{CME,SGPE}:
-///                                             In:  MAX_SEEPROM_IMAGE_SIZE
+///                                             In:  >=MAX_SBE_SEEPROM_SIZE
 ///                                             Out: Final size
 /// @param[in] i_sysPhase                => ={HB_SBE, RT_CME, RT_SGPE}
 /// @param[in] i_modeBuild               => ={IPL, REBUILD}
