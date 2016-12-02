@@ -227,7 +227,12 @@
       <attribute>
         <id>ATTR_SYSTEM_RING_DBG_MODE</id>
         <default>0x0</default>
-    </attribute>        
+      </attribute>
+      <attribute>
+        <id>ATTR_MAX_SBE_SEEPROM_SIZE</id>
+        <default>0x40000</default>
+      </attribute>
+
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
