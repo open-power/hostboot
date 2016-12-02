@@ -115,10 +115,10 @@ class MemAddr
      * @param i_bnk Bank   MBA (DDR4): bg1-bg0,b1-b0  (4-bit)
      *                     MBA (DDR3): b2-b0          (3-bit)
      *                     MCBIST:     bg0-bg1,b0-b2  (5-bit)
-     * @param i_row Row    MBA:        c13,c11,c9-c3  (9-bit)
-     *                     MCBIST:     c3-c9          (7-bit)
-     * @param i_col Column MBA:        r17-r0         (18-bit)
+     * @param i_row Row    MBA:        r17-r0         (18-bit)
      *                     MCBIST:     r0-r17         (18-bit)
+     * @param i_col Column MBA:        c13,c11,c9-c3  (9-bit)
+     *                     MCBIST:     c3-c9          (7-bit)
      */
     MemAddr( MemRank i_rnk, uint8_t i_bnk, uint32_t i_row, uint16_t i_col ) :
         iv_rnk(i_rnk), iv_bnk(i_bnk), iv_row(i_row), iv_col(i_col)

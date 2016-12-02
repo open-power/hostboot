@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaUeTable.C $   */
+/* $Source: src/usr/diag/prdf/common/plat/mem/prdfMemUeTable.C $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,11 +23,11 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <prdfCenMbaUeTable.H>
+#include <prdfMemUeTable.H>
 
 #include <algorithm>
 
-// Framwork includes
+// Framework includes
 #include <iipServiceDataCollector.h>
 #include <UtilHash.H>
 
@@ -40,7 +40,7 @@ using namespace UE_TABLE;
 
 //------------------------------------------------------------------------------
 
-void CenMbaUeTable::addEntry( UE_TABLE::Type i_type, const CenAddr & i_addr )
+void MemUeTable::addEntry( UE_TABLE::Type i_type, const MemAddr & i_addr )
 {
     // Create the new entry.
     UeTableData data ( i_type, i_addr );
@@ -69,7 +69,7 @@ void CenMbaUeTable::addEntry( UE_TABLE::Type i_type, const CenAddr & i_addr )
 
 //------------------------------------------------------------------------------
 
-void CenMbaUeTable::addCapData( CaptureData & io_cd )
+void MemUeTable::addCapData( ExtensibleChip * i_chip, CaptureData & io_cd )
 {
     static const size_t sz_word = sizeof(CPU_WORD);
 
@@ -84,27 +84,26 @@ void CenMbaUeTable::addCapData( CaptureData & io_cd )
 
     for ( UeTable::iterator it = iv_table.begin(); it != iv_table.end(); it++ )
     {
-        uint32_t mrnk = it->addr.getRank().getMaster();            //  3-bit
-        uint32_t srnk = it->addr.getRank().getSlave();             //  3-bit
-        uint32_t svld = it->addr.getRank().isSlaveValid() ? 1 : 0; //  1-bit
-        uint32_t bnk  = it->addr.getBank();                        //  4-bit
-        uint32_t row  = it->addr.getRow();                         // 17-bit
-        uint32_t col  = it->addr.getCol();                         // 12-bit
+        uint32_t mrnk = it->addr.getRank().getMaster(); //  3-bit
+        uint32_t srnk = it->addr.getRank().getSlave();  //  3-bit
+        uint32_t bnk  = it->addr.getBank();             //  5-bit (MCA)
+        uint32_t row  = it->addr.getRow();              // 18-bit
+        uint32_t col  = it->addr.getCol();              //  9-bit (MBA)
 
-        uint8_t row0    = (row & 0x10000) >> 16;
-        uint8_t row1_8  = (row & 0x0ff00) >>  8;
-        uint8_t row9_16 =  row & 0x000ff;
+        uint8_t row0_1   = (row & 0x30000) >> 16;
+        uint8_t row2_9   = (row & 0x0ff00) >>  8;
+        uint8_t row10_17 =  row & 0x000ff;
 
-        uint8_t col0_3  = (col & 0xf00) >> 8;
-        uint8_t col4_11 =  col & 0x0ff;
+        uint8_t col0     = (col & 0x100) >> 8;
+        uint8_t col1_8   =  col & 0x0ff;
 
         data[sz_actData  ] = it->count;
         data[sz_actData+1] = it->type << 4; // 4 bits to spare.
-        data[sz_actData+2] = (mrnk << 5) | (srnk << 2) | (svld << 1) | row0;
-        data[sz_actData+3] = row1_8;
-        data[sz_actData+4] = row9_16;
-        data[sz_actData+5] = (bnk << 4) | col0_3;
-        data[sz_actData+6] = col4_11;
+        data[sz_actData+2] = (mrnk << 5) | (srnk << 2) | row0_1;
+        data[sz_actData+3] = row2_9;
+        data[sz_actData+4] = row10_17;
+        data[sz_actData+5] = (bnk << 3) | col0; // 2 bits to spare in between.
+        data[sz_actData+6] = col1_8;
 
         sz_actData += ENTRY_SIZE;
     }
@@ -118,7 +117,7 @@ void CenMbaUeTable::addCapData( CaptureData & io_cd )
 
         // Add data to capture data.
         BIT_STRING_ADDRESS_CLASS bs ( 0, sz_actData*8, (CPU_WORD *) &data );
-        io_cd.Add( iv_mbaTrgt, Util::hashString("MEM_UE_TABLE"), bs );
+        io_cd.Add( i_chip->getTrgt(), Util::hashString("MEM_UE_TABLE"), bs );
     }
 }
 

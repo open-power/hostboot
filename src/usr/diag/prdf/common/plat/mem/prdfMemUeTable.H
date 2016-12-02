@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaUeTable.H $   */
+/* $Source: src/usr/diag/prdf/common/plat/mem/prdfMemUeTable.H $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,18 +23,18 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfCenMbaUeTable_H
-#define __prdfCenMbaUeTable_H
+#ifndef __prdfMemUeTable_H
+#define __prdfMemUeTable_H
 
-/** @file prdfCenMbaUeTable.H */
+/** @file prdfMemUeTable.H */
 
-// Framwork includes
+// Framework includes
 #include <iipCaptureData.h>
-#include <prdfParserEnums.H>
-#include <prdfPlatServices.H>
+#include <prdfExtensibleChip.H>
 
-// Pegasus includes
-#include <prdfCenAddress.H>
+// Platform includes
+#include <prdfMemAddress.H>
+#include <prdfParserEnums.H>
 
 // Other includes
 #include <list>
@@ -44,10 +44,10 @@ namespace PRDF
 
 /**
  * @brief A table of memory UEs.
- * @note  Only one of these tables will exists per MBA.
+ * @note  Only one of these tables will exists per MBA/MCA.
  * @note  So far, this table is used only for FFDC.
  */
-class CenMbaUeTable
+class MemUeTable
 {
 
   private: // constants, enums
@@ -61,27 +61,20 @@ class CenMbaUeTable
   public: // functions
 
     /**
-     * @brief Constructor
-     * @param i_mbaTrgt An MBA target.
-     */
-    explicit CenMbaUeTable( TARGETING::TargetHandle_t i_mbaTrgt ) :
-        iv_mbaTrgt( i_mbaTrgt )
-    {}
-
-    /**
      * @brief Will attempt to add a new entry to the table.
      * @note  If an entry already exists, the entry's count is incremented and
      *        moved to the end of the queue.
      * @param i_type See enum UE_TABLE::Type.
      * @param i_addr The address in which the UE occurred.
      */
-    void addEntry( UE_TABLE::Type i_type, const CenAddr & i_addr );
+    void addEntry( UE_TABLE::Type i_type, const MemAddr & i_addr );
 
     /**
      * @brief Gathers all table data to be stored in capture data.
-     * @param io_cd      Capture data struct.
+     * @param i_chip An MCA or MBA chip.
+     * @param io_cd  Capture data struct.
      */
-    void addCapData( CaptureData & io_cd );
+    void addCapData( ExtensibleChip * i_chip, CaptureData & io_cd );
 
   private: // structs, typedefs
 
@@ -89,7 +82,7 @@ class CenMbaUeTable
     struct UeTableData
     {
         UE_TABLE::Type  type;  ///< See enum UE_TABLE::Type
-        CenAddr         addr;  ///< The address in which the UE occurred
+        MemAddr         addr;  ///< The address in which the UE occurred
         uint8_t         count; ///< Number of times the entry is detected
 
         /** @brief Default constructor. */
@@ -100,7 +93,7 @@ class CenMbaUeTable
          * @param i_type See enum UE_TABLE::Type.
          * @param i_addr The address in which the UE occurred.
          */
-        UeTableData( UE_TABLE::Type i_type, const CenAddr & i_addr ) :
+        UeTableData( UE_TABLE::Type i_type, const MemAddr & i_addr ) :
             type(i_type), addr(i_addr), count(1)
         {}
 
@@ -115,9 +108,6 @@ class CenMbaUeTable
 
   private: // instance variables
 
-    /** MBA associated with this table. */
-    TARGETING::TargetHandle_t iv_mbaTrgt;
-
     /** A FIFO that stores the latest memory UE addresses and their types. This
      *  is not a pure FIFO, because if a new entry matches an existing entry,
      *  the existing entries count is incremented and it is moved to the end of
@@ -129,5 +119,5 @@ class CenMbaUeTable
 
 } // end namespace PRDF
 
-#endif // __prdfCenMbaUeTable_H
+#endif // __prdfMemUeTable_H
 
