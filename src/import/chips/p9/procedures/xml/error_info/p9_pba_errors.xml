@@ -74,5 +74,27 @@
     <ffdc>RUNNING</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_PBA_COHERENT_UTILS_OCB_STATUS_MISMATCH</rc>
+    <description>
+      Procedure: p9_pba_coherent_utils
+      Mismatch in expected state for OCB Status register
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_PBA_COHERENT_UTILS_PBA_FIR_ERR</rc>
+    <description>
+      Procedure: p9_pba_coherent_utils
+      PBA FIR bit active after transaction.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
 
