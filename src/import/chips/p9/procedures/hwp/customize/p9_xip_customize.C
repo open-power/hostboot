@@ -822,20 +822,27 @@ fapi2::ReturnCode p9_xip_customize (
     fapi2::ReturnCode   l_fapiRc2 = fapi2::FAPI2_RC_SUCCESS;
     int                 l_rc = 0; // Non-fapi RC
 
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
     P9XipSection    l_xipRingsSection;
-    uint32_t        l_initialImageSize;
+    uint32_t        l_inputImageSize;
     uint32_t        l_imageSizeWithoutRings;
-    uint32_t        l_maxImageSize, l_imageSize;
+    uint32_t        l_currentImageSize;
+    uint32_t        l_maxImageSize = 0; // Attrib adjusted local value of MAX_SEEPROM_IMAGE_SIZE
     uint32_t        l_maxRingSectionSize;
     uint32_t        l_sectionOffset = 1;
     uint8_t         attrDdLevel = 0;
+    uint32_t        attrMaxSbeSeepromSize = 0;
     uint32_t        l_requestedBootCoreMask = (i_sysPhase == SYSPHASE_HB_SBE) ? io_bootCoreMask : 0x00FFFFFF;
     void*           l_hwRingsSection;
 
 
     FAPI_DBG ("Entering p9_xip_customize w/sysPhase=%d...", i_sysPhase);
 
+
+    // Make copy of the requested bootCoreMask
     io_bootCoreMask = l_requestedBootCoreMask;
+
 
     //-------------------------------------------
     // Check some input buffer parameters:
@@ -864,7 +871,7 @@ fapi2::ReturnCode p9_xip_customize (
                  (uintptr_t)io_ringBuf1,
                  (uintptr_t)io_ringBuf2 );
 
-    l_rc = p9_xip_image_size(io_image, &l_initialImageSize);
+    l_rc = p9_xip_image_size(io_image, &l_inputImageSize);
 
     FAPI_ASSERT( l_rc == 0,
                  fapi2::XIPC_XIP_API_MISC_ERROR().
@@ -874,32 +881,36 @@ fapi2::ReturnCode p9_xip_customize (
                  "p9_xip_image_size() failed (1) w/rc=0x%08X",
                  (uint32_t)l_rc );
 
-    FAPI_ASSERT( io_imageSize >= l_initialImageSize &&
-                 io_ringSectionBufSize == MAX_SEEPROM_IMAGE_SIZE &&
+    // Check that buffer sizes are > or == to some minimum sizes. More precise size checks
+    //   later for each sysPhase. Neither io_imageSize nor io_ringSectionBufSize are
+    //   subject to attrMaxSbeSeepromSize adjust yet, since this is sysPhase dependent.
+    FAPI_ASSERT( (io_imageSize >= l_inputImageSize && io_imageSize >= MAX_SEEPROM_IMAGE_SIZE) &&
+                 io_ringSectionBufSize >= MAX_SEEPROM_IMAGE_SIZE &&
                  i_ringBufSize1 == MAX_RING_BUF_SIZE &&
                  i_ringBufSize2 == MAX_RING_BUF_SIZE,
                  fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
                  set_CHIP_TARGET(i_proc_target).
-                 set_INPUT_IMAGE_SIZE(l_initialImageSize).
+                 set_INPUT_IMAGE_SIZE(l_inputImageSize).
                  set_IMAGE_BUF_SIZE(io_imageSize).
                  set_RING_SECTION_BUF_SIZE(io_ringSectionBufSize).
                  set_RING_BUF_SIZE1(i_ringBufSize1).
                  set_RING_BUF_SIZE2(i_ringBufSize2).
                  set_OCCURRENCE(1),
                  "One or more invalid input buffer sizes:\n"
-                 "  l_initialImageSize=0x%016llx\n"
+                 "  l_inputImageSize=0x%016llx\n"
                  "  io_imageSize=0x%016llx\n"
                  "  io_ringSectionBufSize=0x%016llx\n"
                  "  i_ringBufSize1=0x%016llx\n"
                  "  i_ringBufSize2=0x%016llx\n",
-                 (uintptr_t)l_initialImageSize,
+                 (uintptr_t)l_inputImageSize,
                  (uintptr_t)io_imageSize,
                  (uintptr_t)io_ringSectionBufSize,
                  (uintptr_t)i_ringBufSize1,
                  (uintptr_t)i_ringBufSize2 );
 
 
-    FAPI_DBG("Input image size: %d", l_initialImageSize);
+    FAPI_DBG("Input image size: %d", l_inputImageSize);
+
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -994,6 +1005,79 @@ fapi2::ReturnCode p9_xip_customize (
 
 
 
+    ///////////////////////////////////////////////////////////////////////////
+    // CUSTOMIZE item:  Removal of .toc, .fixed_toc and .strings
+    // System phase:    HB_SBE
+    ///////////////////////////////////////////////////////////////////////////
+
+    if (i_sysPhase == SYSPHASE_HB_SBE)
+    {
+
+        // Get the image size.
+        l_rc = p9_xip_image_size(io_image, &l_currentImageSize);
+
+        FAPI_ASSERT( l_rc == 0,
+                     fapi2::XIPC_XIP_API_MISC_ERROR().
+                     set_CHIP_TARGET(i_proc_target).
+                     set_XIP_RC(l_rc).
+                     set_OCCURRENCE(9),
+                     "p9_xip_image_size() failed (9) w/rc=0x%08X",
+                     (uint32_t)l_rc );
+
+        FAPI_DBG("Image size before XIP section removals: %d", l_currentImageSize);
+
+        // Remove .toc:
+        // This will remove external visibility to image's attributes and other global variables.
+        l_rc = p9_xip_delete_section(io_image, io_ringSectionBuf, l_currentImageSize, P9_XIP_SECTION_TOC);
+
+        FAPI_ASSERT( l_rc == 0,
+                     fapi2::XIPC_SECTION_REMOVAL_ERROR().
+                     set_CHIP_TARGET(i_proc_target).
+                     set_XIP_SECTION(P9_XIP_SECTION_TOC),
+                     "p9_xip_delete_section() failed to remove .toc section w/rc=0x%08X",
+                     (uint32_t)l_rc );
+
+        // Remove .fixedtoc:
+        l_rc = p9_xip_delete_section(io_image, io_ringSectionBuf, l_currentImageSize, P9_XIP_SECTION_FIXED_TOC);
+
+        FAPI_ASSERT( l_rc == 0,
+                     fapi2::XIPC_SECTION_REMOVAL_ERROR().
+                     set_CHIP_TARGET(i_proc_target).
+                     set_XIP_SECTION(P9_XIP_SECTION_FIXED_TOC),
+                     "p9_xip_delete_section() failed to remove .fixedtoc section w/rc=0x%08X",
+                     (uint32_t)l_rc );
+
+        // Remove .strings:
+        // The .strings section must be removed after .toc and .fixed_toc.  Otherwise
+        //   we get an P9_XIP_TOC_ERROR, probably because either of those two sections
+        //   will "complain" on the next XIP API access that info they need in .strings
+        //   is missing, i.e. as part of p9_xip_validate_image().
+        l_rc = p9_xip_delete_section(io_image, io_ringSectionBuf, l_currentImageSize, P9_XIP_SECTION_STRINGS);
+
+        FAPI_ASSERT( l_rc == 0,
+                     fapi2::XIPC_SECTION_REMOVAL_ERROR().
+                     set_CHIP_TARGET(i_proc_target).
+                     set_XIP_SECTION(P9_XIP_SECTION_STRINGS),
+                     "p9_xip_delete_section() failed to remove .fixedtoc section w/rc=0x%08X",
+                     (uint32_t)l_rc );
+
+        // Check the image size.
+        l_rc = p9_xip_image_size(io_image, &l_currentImageSize);
+
+        FAPI_ASSERT( l_rc == 0,
+                     fapi2::XIPC_XIP_API_MISC_ERROR().
+                     set_CHIP_TARGET(i_proc_target).
+                     set_XIP_RC(l_rc).
+                     set_OCCURRENCE(8),
+                     "p9_xip_image_size() failed (7) w/rc=0x%08X",
+                     (uint32_t)l_rc );
+
+        FAPI_DBG("Image size after XIP section removals: %d", l_currentImageSize);
+
+    }
+
+
+
     //////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:     Append VPD rings to ring section
     // System phase:       All phases
@@ -1011,33 +1095,75 @@ fapi2::ReturnCode p9_xip_customize (
 
         case SYSPHASE_HB_SBE:
 
-            FAPI_DBG("Image size before any updates: %d", l_initialImageSize);
+            FAPI_DBG("Image size before any VPD updates: %d", l_currentImageSize);
 
-            FAPI_ASSERT( io_imageSize >= MAX_SEEPROM_IMAGE_SIZE &&
-                         io_ringSectionBufSize == MAX_SEEPROM_IMAGE_SIZE,
+            // Adjust the local size of MAX_SEEPROM_IMAGE_SIZE to accommodate enlarged image for Cronus
+            l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_MAX_SBE_SEEPROM_SIZE, FAPI_SYSTEM, attrMaxSbeSeepromSize);
+
+            FAPI_ASSERT( l_fapiRc2.isRC(fapi2::FAPI2_RC_SUCCESS),
+                         fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
+                         set_CHIP_TARGET(i_proc_target).
+                         set_OCCURRENCE(2),
+                         "FAPI_ATTR_GET(ATTR_MAX_SBE_SEEPROM_SIZE) failed."
+                         " Unable to determine ATTR_MAX_SBE_SEEPROM_SIZE,"
+                         " so don't know what what max image size." );
+
+            if (attrMaxSbeSeepromSize == MAX_SBE_SEEPROM_SIZE)
+            {
+                l_maxImageSize = MAX_SEEPROM_IMAGE_SIZE;
+            }
+            else if (attrMaxSbeSeepromSize > MAX_SBE_SEEPROM_SIZE)
+            {
+                l_maxImageSize = attrMaxSbeSeepromSize;
+            }
+            else
+            {
+                FAPI_ASSERT( false,
+                             fapi2::XIPC_ATTR_MAX_SBE_SEEPROM_SIZE_TOO_SMALL().
+                             set_CHIP_TARGET(i_proc_target).
+                             set_ATTR_MAX_SBE_SEEPROM_SIZE(attrMaxSbeSeepromSize).
+                             set_MAX_SBE_SEEPROM_SIZE(MAX_SBE_SEEPROM_SIZE),
+                             "SBE Seeprom size reported in attribute (=0x%x) is smaller than"
+                             " MAX_SBE_SEEPROM_SIZE (=0x%x)",
+                             attrMaxSbeSeepromSize,
+                             MAX_SBE_SEEPROM_SIZE );
+            }
+
+            FAPI_DBG("Platform adjusted MAX_SEEPROM_IMAGE_SIZE: %d", l_maxImageSize);
+
+            // Make sure current image size isn't already too big for Seeprom
+            FAPI_ASSERT( l_currentImageSize <= l_maxImageSize,
+                         fapi2::XIPC_IMAGE_TOO_LARGE().
+                         set_CHIP_TARGET(i_proc_target).
+                         set_IMAGE_SIZE(l_currentImageSize).
+                         set_MAX_IMAGE_SIZE(l_maxImageSize).
+                         set_OCCURRENCE(1),
+                         "Image size before VPD updates (=%d) already exceeds max image size (=%d)",
+                         l_currentImageSize, l_maxImageSize );
+
+            // Test supplied buffer spaces are big enough to hold max image size
+            FAPI_ASSERT( io_imageSize >= l_maxImageSize,
                          fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
                          set_CHIP_TARGET(i_proc_target).
-                         set_INPUT_IMAGE_SIZE(l_initialImageSize).
+                         set_INPUT_IMAGE_SIZE(l_inputImageSize).
                          set_IMAGE_BUF_SIZE(io_imageSize).
                          set_RING_SECTION_BUF_SIZE(io_ringSectionBufSize).
                          set_RING_BUF_SIZE1(i_ringBufSize1).
                          set_RING_BUF_SIZE2(i_ringBufSize2).
                          set_OCCURRENCE(2),
-                         "One or more invalid input buffer sizes for SBE:\n"
-                         "  MAX_SEEPROM_IMAGE_SIZE=0x%016llx\n"
+                         "One or more invalid input buffer sizes for HB_SBE phase:\n"
+                         "  l_maxImageSize=0x%016llx\n"
                          "  io_imageSize=0x%016llx\n"
                          "  io_ringSectionBufSize=0x%016llx\n",
-                         (uintptr_t)MAX_SEEPROM_IMAGE_SIZE,
+                         (uintptr_t)l_maxImageSize,
                          (uintptr_t)io_imageSize,
                          (uintptr_t)io_ringSectionBufSize );
-
-            l_maxImageSize = MAX_SEEPROM_IMAGE_SIZE;
 
             // Copy, save and delete the .rings section, wherever it is (even if
             //   not the last section), and re-arrange other sections located above
             //   the .rings section.
             // Keep a copy of the original input image, io_image, in io_ringSectionBuf.
-            l_rc = p9_xip_delete_section(io_image, io_ringSectionBuf, l_initialImageSize, P9_XIP_SECTION_SBE_RINGS);
+            l_rc = p9_xip_delete_section(io_image, io_ringSectionBuf, l_currentImageSize, P9_XIP_SECTION_SBE_RINGS);
 
             FAPI_ASSERT( l_rc == 0,
                          fapi2::XIPC_XIP_API_MISC_ERROR().
@@ -1117,7 +1243,6 @@ fapi2::ReturnCode p9_xip_customize (
                              " to the .rings section");
 
                     // Check the bootCoreMask to determine if enough cores have been configured.
-                    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
                     uint8_t attrMinReqdEcs = 0;
                     uint8_t  l_actualEcCount = 0;
 
@@ -1155,6 +1280,8 @@ fapi2::ReturnCode p9_xip_customize (
                                  "Image buffer would overflow before reaching the minimum required"
                                  " number of EC boot cores" );
 
+                    //@TODO: Enable following lines in RTC158106 (Vpd column insertion order)
+#if 0
                     FAPI_INF( "Image is full and with sufficient boot cores:\n"
                               "  Final bootCoreMask: 0x%08X\n"
                               "  Number of boot cores: %d\n"
@@ -1162,6 +1289,7 @@ fapi2::ReturnCode p9_xip_customize (
                               io_bootCoreMask, l_actualEcCount, attrMinReqdEcs );
 
                     l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
+#endif
 
                 }
 
@@ -1186,7 +1314,8 @@ fapi2::ReturnCode p9_xip_customize (
                          set_MAX_IMAGE_SIZE(l_maxImageSize),
                          "Code bug: imageSize would exceed maxImageSize" );
 
-            FAPI_DBG( "Image details: io_ringSectionBufSize=%d l_imageSizeWithoutRings=%d l_maxImageSize=%d",
+            FAPI_DBG( "Image details: io_ringSectionBufSize=%d, l_imageSizeWithoutRings=%d,"
+                      "  l_maxImageSize=%d",
                       io_ringSectionBufSize, l_imageSizeWithoutRings, l_maxImageSize );
 
             //--------------------------------------------------------
@@ -1210,7 +1339,7 @@ fapi2::ReturnCode p9_xip_customize (
 
             FAPI_DBG("sectionOffset=0x%08X", l_sectionOffset);
 
-            l_rc = p9_xip_image_size(io_image, &l_imageSize);
+            l_rc = p9_xip_image_size(io_image, &l_currentImageSize);
 
             FAPI_ASSERT( l_rc == 0,
                          fapi2::XIPC_XIP_API_MISC_ERROR().
@@ -1220,37 +1349,37 @@ fapi2::ReturnCode p9_xip_customize (
                          "p9_xip_image_size() failed (6) w/rc=0x%08X",
                          (uint32_t)l_rc );
 
-            FAPI_DBG( "Seeprom image size after VPD updates: %d", l_imageSize );
+            FAPI_DBG( "Image size after VPD updates: %d", l_currentImageSize );
 
-            FAPI_ASSERT( l_imageSize <= l_maxImageSize,
+            FAPI_ASSERT( l_currentImageSize <= l_maxImageSize,
                          fapi2::XIPC_IMAGE_TOO_LARGE().
                          set_CHIP_TARGET(i_proc_target).
-                         set_IMAGE_SIZE(l_imageSize).
+                         set_IMAGE_SIZE(l_currentImageSize).
                          set_MAX_IMAGE_SIZE(l_maxImageSize).
-                         set_OCCURRENCE(1),
-                         "Seeprom image size after VPD updates (=%d) exceeds max image size (=%d)",
-                         l_imageSize, l_maxImageSize );
+                         set_OCCURRENCE(2),
+                         "Image size after VPD updates (=%d) exceeds max image size (=%d)",
+                         l_currentImageSize, l_maxImageSize );
 
             break;
 
         case SYSPHASE_RT_CME:
         case SYSPHASE_RT_SGPE:
 
-            FAPI_ASSERT( io_imageSize == l_initialImageSize &&
-                         io_ringSectionBufSize == MAX_SEEPROM_IMAGE_SIZE,
+            FAPI_ASSERT( io_imageSize == l_inputImageSize &&
+                         io_ringSectionBufSize >= MAX_SEEPROM_IMAGE_SIZE, //Not subject to attrMaxSbeSeepromSize adjust
                          fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
                          set_CHIP_TARGET(i_proc_target).
-                         set_INPUT_IMAGE_SIZE(l_initialImageSize).
+                         set_INPUT_IMAGE_SIZE(l_inputImageSize).
                          set_IMAGE_BUF_SIZE(io_imageSize).
                          set_RING_SECTION_BUF_SIZE(io_ringSectionBufSize).
                          set_RING_BUF_SIZE1(i_ringBufSize1).
                          set_RING_BUF_SIZE2(i_ringBufSize2).
                          set_OCCURRENCE(3),
-                         "One or more invalid input buffer sizes for CME or SGPE:\n"
-                         "  l_initialImageSize=0x%016llx\n"
+                         "One or more invalid input buffer sizes for RT_CME or RT_SGPE phase:\n"
+                         "  l_inputImageSize=0x%016llx\n"
                          "  io_imageSize=0x%016llx\n"
                          "  io_ringSectionBufSize=0x%016llx\n",
-                         (uintptr_t)l_initialImageSize,
+                         (uintptr_t)l_inputImageSize,
                          (uintptr_t)io_imageSize,
                          (uintptr_t)io_ringSectionBufSize );
 
@@ -1385,75 +1514,6 @@ fapi2::ReturnCode p9_xip_customize (
 
 
     ///////////////////////////////////////////////////////////////////////////
-    // CUSTOMIZE item:  Removal of .toc, .fixed_toc and .strings
-    // System phase:    HB_SBE
-    ///////////////////////////////////////////////////////////////////////////
-
-    if (i_sysPhase == SYSPHASE_HB_SBE)
-    {
-
-        // Remove .toc:
-        // This will remove external visibility to image's attributes and other global variables.
-        l_rc = p9_xip_delete_section(io_image, io_ringSectionBuf, l_imageSize, P9_XIP_SECTION_TOC);
-
-        FAPI_ASSERT( l_rc == 0,
-                     fapi2::XIPC_SECTION_REMOVAL_ERROR().
-                     set_CHIP_TARGET(i_proc_target).
-                     set_XIP_SECTION(P9_XIP_SECTION_TOC),
-                     "p9_xip_delete_section() failed to remove .toc section w/rc=0x%08X",
-                     (uint32_t)l_rc );
-
-        // Remove .fixedtoc:
-        l_rc = p9_xip_delete_section(io_image, io_ringSectionBuf, l_imageSize, P9_XIP_SECTION_FIXED_TOC);
-
-        FAPI_ASSERT( l_rc == 0,
-                     fapi2::XIPC_SECTION_REMOVAL_ERROR().
-                     set_CHIP_TARGET(i_proc_target).
-                     set_XIP_SECTION(P9_XIP_SECTION_FIXED_TOC),
-                     "p9_xip_delete_section() failed to remove .fixedtoc section w/rc=0x%08X",
-                     (uint32_t)l_rc );
-
-        // Remove .strings:
-        // The .strings section must be removed after .toc and .fixed_toc.  Otherwise
-        //   we get an P9_XIP_TOC_ERROR, probably because either of those two sections
-        //   will "complain" on the next XIP API access that info they need in .strings
-        //   is missing, i.e. as part of p9_xip_validate_image().
-        l_rc = p9_xip_delete_section(io_image, io_ringSectionBuf, l_imageSize, P9_XIP_SECTION_STRINGS);
-
-        FAPI_ASSERT( l_rc == 0,
-                     fapi2::XIPC_SECTION_REMOVAL_ERROR().
-                     set_CHIP_TARGET(i_proc_target).
-                     set_XIP_SECTION(P9_XIP_SECTION_STRINGS),
-                     "p9_xip_delete_section() failed to remove .fixedtoc section w/rc=0x%08X",
-                     (uint32_t)l_rc );
-
-        // Check the image size.
-        l_rc = p9_xip_image_size(io_image, &l_imageSize);
-
-        FAPI_ASSERT( l_rc == 0,
-                     fapi2::XIPC_XIP_API_MISC_ERROR().
-                     set_CHIP_TARGET(i_proc_target).
-                     set_XIP_RC(l_rc).
-                     set_OCCURRENCE(8),
-                     "p9_xip_image_size() failed (7) w/rc=0x%08X",
-                     (uint32_t)l_rc );
-
-        FAPI_DBG("Image size after section removals: %d", l_imageSize);
-
-        FAPI_ASSERT( l_imageSize <= l_maxImageSize,
-                     fapi2::XIPC_IMAGE_TOO_LARGE().
-                     set_CHIP_TARGET(i_proc_target).
-                     set_IMAGE_SIZE(l_imageSize).
-                     set_MAX_IMAGE_SIZE(l_maxImageSize).
-                     set_OCCURRENCE(2),
-                     "Final Seeprom image size (=%d) exceeds max image size (=%d)",
-                     l_imageSize, l_maxImageSize );
-
-    }
-
-
-
-    ///////////////////////////////////////////////////////////////////////////
     // Other customizations
     ///////////////////////////////////////////////////////////////////////////
 
@@ -1467,8 +1527,8 @@ fapi2::ReturnCode p9_xip_customize (
 
     if (i_sysPhase == SYSPHASE_HB_SBE)
     {
-        io_imageSize = l_imageSize;
-        FAPI_DBG("Final customized Seeprom image size: %d", io_imageSize);
+        io_imageSize = l_currentImageSize;
+        FAPI_DBG("Final customized image size: %d", io_imageSize);
     }
 
     FAPI_DBG("Final customized .rings section size: %d", io_ringSectionBufSize);
