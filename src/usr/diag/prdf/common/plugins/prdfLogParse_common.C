@@ -422,11 +422,11 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                 i_parser.PrintString( sigHeaderString, "No Data Found" );
             }
-/*  TODO: RTC 136126
             else if ( Util::hashString("MEM_UE_TABLE") == sigId )
             {
                  parseMemUeTable( sigData, sigDataSize, i_parser );
             }
+/*  TODO: RTC 136126
             else if ( Util::hashString("MEM_CE_TABLE") == sigId )
             {
                  parseMemCeTable( sigData, sigDataSize, i_parser );

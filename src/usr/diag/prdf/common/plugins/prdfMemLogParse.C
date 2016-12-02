@@ -2991,7 +2991,6 @@ void parseMemMruData( ErrlUsrParser & i_parser,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
 bool parseMemUeTable( uint8_t  * i_buffer, uint32_t i_buflen,
                       ErrlUsrParser & i_parser )
 {
@@ -3016,23 +3015,21 @@ bool parseMemUeTable( uint8_t  * i_buffer, uint32_t i_buflen,
     {
         uint32_t idx = i * ENTRY_SIZE;
 
-        uint32_t count = i_buffer[idx  ];                           //  8-bit
-        uint32_t type  = i_buffer[idx+1] >> 4;                      //  4-bit
+        uint32_t count    =  i_buffer[idx  ];                           // 8-bit
+        uint32_t type     =  i_buffer[idx+1] >> 4;                      // 4-bit
+        // 4 spare bits                                                 // 4-bit
+        uint32_t mrnk     = (i_buffer[idx+2] >> 5) & 0x7;               // 3-bit
+        uint32_t srnk     = (i_buffer[idx+2] >> 2) & 0x7;               // 3-bit
+        uint32_t row0_1   =  i_buffer[idx+2]       & 0x3;               // 2-bit
+        uint32_t row2_9   =  i_buffer[idx+3];                           // 8-bit
+        uint32_t row10_17 =  i_buffer[idx+4];                           // 8-bit
+        uint32_t bnk      = (i_buffer[idx+5] >> 3) & 0x1f;              // 5-bit
+        // 2 spare bits                                                 // 2-bit
+        uint32_t col0     =  i_buffer[idx+5]       & 0x1;               // 1-bit
+        uint32_t col1_8   =  i_buffer[idx+6];                           // 8-bit
 
-        uint32_t mrnk  = (i_buffer[idx+2] >> 5) & 0x7;              //  3-bit
-        uint32_t srnk  = (i_buffer[idx+2] >> 2) & 0x7;              //  3-bit
-        uint32_t svld  = (i_buffer[idx+2] >> 1) & 0x1;              //  1-bit
-
-        uint32_t row0    = i_buffer[idx+2] & 0x1;
-        uint32_t row1_8  = i_buffer[idx+3];
-        uint32_t row9_16 = i_buffer[idx+4];
-        uint32_t row     = (row0 << 16) | (row1_8 << 8) | row9_16;  // 17-bit
-
-        uint32_t bnk   = i_buffer[idx+5] >> 4;                      //  4-bit
-
-        uint32_t col0_3  = i_buffer[idx+5] & 0xf;
-        uint32_t col4_11 = i_buffer[idx+6];
-        uint32_t col     = (col0_3 << 8) | col4_11;                 // 12-bit
+        uint32_t row = (row0_1 << 16) | (row2_9 << 8) | row10_17;
+        uint32_t col =                  (col0   << 8) | col1_8;
 
         const char * type_str = "UNKNOWN      "; // 13 characters
         switch ( type )
@@ -3043,29 +3040,18 @@ bool parseMemUeTable( uint8_t  * i_buffer, uint32_t i_buflen,
             case FETCH_UE:  type_str = "FETCH_UE     "; break;
         }
 
-        char rank_str[DATA_SIZE]; // 4 characters
-        if ( 1 == svld )
-        {
-            snprintf( rank_str, DATA_SIZE, "m%ds%d", mrnk, srnk );
-        }
-        else
-        {
-            snprintf( rank_str, DATA_SIZE, "m%d  ", mrnk );
-        }
-
         char header[HEADER_SIZE] = { '\0' };
-        snprintf( header, HEADER_SIZE, "    0x%02x %s", count, type_str );
+        snprintf( header, HEADER_SIZE, "    %3d  %s", count, type_str );
 
         char data[DATA_SIZE]     = { '\0' };
-        snprintf( data, DATA_SIZE, "%s  0x%01x 0x%05x  0x%03x",
-                  rank_str, bnk, row, col );
+        snprintf( data, DATA_SIZE, "m%ds%d 0x%02x 0x%05x  0x%03x",
+                  mrnk, srnk, bnk, row, col );
 
         i_parser.PrintString( header, data );
     }
 
     return rc;
 }
-*/
 
 //------------------------------------------------------------------------------
 
