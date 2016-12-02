@@ -79,6 +79,18 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_XIPC_ATTR_MAX_SBE_SEEPROM_SIZE_TOO_SMALL</rc>
+    <description>SBE Seeprom size reported in attribute is smaller than MAX_SBE_SEEPROM_SIZE</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>ATTR_MAX_SBE_SEEPROM_SIZE</ffdc>
+    <ffdc>MAX_SBE_SEEPROM_SIZE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_XIPC_INVALID_VPD_KEYWORD</rc>
     <description>Code bug: Unsupported value of vpdKeyword</description>
     <callout>
@@ -296,7 +308,7 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_IMAGE_TOO_LARGE</rc>
-    <description>Incremental image size exceeds max allowed image size</description>
+    <description>Image size exceeds max allowed image size</description>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
