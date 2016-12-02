@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,7 +104,7 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
     //       successful with no errors because the error log will not be
     //       committed.
     if ( !i_sc.service_data->queryDontCommitErrl() )
-        CenMbaCaptureData::addMemEccData( i_mbaChip, i_sc );
+        MemCaptureData::addEccData<TYPE_MBA>( i_mbaChip, i_sc );
 
     return PRD_NO_CLEAR_FIR_BITS; // FIR bits are cleared by this plugin
 

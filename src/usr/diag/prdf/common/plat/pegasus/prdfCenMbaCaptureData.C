@@ -125,7 +125,7 @@ void addMemChipletFirRegs( ExtensibleChip * i_membChip, CaptureData & io_cd )
 
 //------------------------------------------------------------------------------
 
-void addMemEccData( TargetHandle_t i_mbaTrgt, errlHndl_t io_errl )
+void addEccData( TargetHandle_t i_mbaTrgt, errlHndl_t io_errl )
 {
     CaptureData cd;
 
@@ -136,31 +136,6 @@ void addMemEccData( TargetHandle_t i_mbaTrgt, errlHndl_t io_errl )
     captureDramRepairsVpd( i_mbaTrgt, cd );
 
     ErrDataService::AddCapData( cd, io_errl );
-}
-
-//------------------------------------------------------------------------------
-
-void addMemEccData( ExtensibleChip * i_mbaChip, STEP_CODE_DATA_STRUCT & io_sc )
-{
-    CaptureData & cd = io_sc.service_data->GetCaptureData();
-
-    CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
-    TargetHandle_t mbaTarget = i_mbaChip->GetChipHandle();
-
-    // Add UE table to capture data.
-    mbadb->iv_ueTable.addCapData( cd );
-
-    // Add CE table to capture data.
-    mbadb->iv_ceTable.addCapData( cd );
-
-    // Add RCE table to capture data.
-    mbadb->iv_rceTable.addCapData( cd );
-
-    // Add DRAM repairs data from hardware.
-    captureDramRepairsData( mbaTarget, cd );
-
-    // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd( mbaTarget, cd );
 }
 
 //------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,14 +68,7 @@ void addMemChipletFirRegs( ExtensibleChip * i_membChip, CaptureData & io_cd );
  * @param i_mbaTrgt An MBA target
  * @param o_errl    Error log.
  */
-void addMemEccData( TARGETING::TargetHandle_t i_mbaTrgt, errlHndl_t io_errl );
-
-/**
- * @brief Adds Memory ECC FFDC to an SDC.
- * @param i_mbaChip An MBA chip.
- * @param io_sc     Step code data struct.
- */
-void addMemEccData( ExtensibleChip * i_mbaChip, STEP_CODE_DATA_STRUCT & io_sc );
+void addEccData( TARGETING::TargetHandle_t i_mbaTrgt, errlHndl_t io_errl );
 
 /**
  * @brief Queries hardware for all DRAM repairs data (chip/symbol marks, DRAM
