@@ -299,6 +299,19 @@ class AttrRP
          */
         errlHndl_t createVmmSections();
 
+        /**
+        *  @brief Populates R/W and Heap Zero init sections of HBD from the
+        *         values that we stored before we attempted the MPIPL
+        *
+        *  @par Detailed Description:
+        *      Performs a memcpy from the physical address where HDAT information
+        *      was stored by HBRT to the VMM addresses used by ATTR RP to look up
+        *      attr values
+        *
+        *  @return void
+        */
+        void populateAttrsForMpipl(void);
+
         /** Internal implementation of save function. */
         void* _save(uint64_t&);
 
