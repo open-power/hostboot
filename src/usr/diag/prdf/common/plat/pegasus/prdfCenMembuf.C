@@ -457,7 +457,7 @@ int32_t AnalyzeFetchMpe( ExtensibleChip * i_membChip,
 
     // Add ECC capture data for FFDC.
     if ( NULL != mbaChip )
-        CenMbaCaptureData::addMemEccData( mbaChip, i_sc );
+        MemCaptureData::addEccData<TYPE_MBA>( mbaChip, i_sc );
 
     if ( SUCCESS != l_rc )
     {
@@ -670,7 +670,7 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
 
     // Add ECC capture data for FFDC.
     if ( NULL != mbaChip )
-        CenMbaCaptureData::addMemEccData( mbaChip, i_sc );
+        MemCaptureData::addEccData<TYPE_MBA>( mbaChip, i_sc );
 
     if ( SUCCESS != l_rc )
     {
@@ -753,7 +753,7 @@ int32_t AnalyzeFetchRcePue( ExtensibleChip * i_membChip,
 
     // Add ECC capture data for FFDC.
     if ( NULL != mbaChip )
-        CenMbaCaptureData::addMemEccData( mbaChip, i_sc );
+        MemCaptureData::addEccData<TYPE_MBA>( mbaChip, i_sc );
 
     if ( SUCCESS != l_rc )
     {
@@ -850,7 +850,7 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
 
     // Add ECC capture data for FFDC.
     if ( NULL != mbaChip )
-        CenMbaCaptureData::addMemEccData( mbaChip, i_sc );
+        MemCaptureData::addEccData<TYPE_MBA>( mbaChip, i_sc );
 
     if ( SUCCESS != l_rc )
     {

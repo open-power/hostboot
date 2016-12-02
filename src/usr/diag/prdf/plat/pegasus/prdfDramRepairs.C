@@ -81,7 +81,7 @@ void commitErrl( errlHndl_t i_errl, TargetHandle_t i_mba )
     if ( NULL != i_errl )
     {
         // Add capture data
-        CenMbaCaptureData::addMemEccData( i_mba, i_errl );
+        CenMbaCaptureData::addEccData( i_mba, i_errl );
 
         // Add traces
         i_errl->collectTrace( PRDF_COMP_NAME, 512 );

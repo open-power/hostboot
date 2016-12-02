@@ -39,6 +39,7 @@ prd_incpath += ${PRD_SRC_PATH}/common/plat/mem
 
 # non-rule plugin related
 prd_obj += prdfMemAddress.o
+prd_obj += prdfMemCaptureData.o
 prd_obj += prdfMemSymbol.o
 prd_obj += prdfMemoryMru.o
 prd_obj += prdfMemUeTable.o

@@ -26,6 +26,7 @@
 #include <prdfMemTdCtlr.H>
 
 #include <prdfMemAddress.H>
+#include <prdfMemCaptureData.H>
 #include <prdfP9McbistExtraSig.H>
 
 using namespace TARGETING;
@@ -109,6 +110,13 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
     } while (0);
+
+    // Gather capture data even if something failed above.
+    // NOTE: There is no need to capture the data if the command completed
+    //       successfully with no errors because the error log will not be
+    //       committed.
+    if ( !io_sc.service_data->queryDontCommitErrl() )
+        MemCaptureData::addEccData<T>( iv_chip, io_sc );
 
     if ( SUCCESS != o_rc )
     {
