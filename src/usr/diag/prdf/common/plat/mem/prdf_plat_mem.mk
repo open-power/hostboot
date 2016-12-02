@@ -44,4 +44,5 @@ prd_obj += prdfMemoryMru.o
 prd_obj += prdfMemUeTable.o
 
 # rule plugin related
+prd_rule_plugin += prdfP9Mca_common.o
 
