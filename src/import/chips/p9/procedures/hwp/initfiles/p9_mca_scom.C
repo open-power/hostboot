@@ -85,86 +85,27 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
                               const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT2,
                               const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT3)
 {
-    fapi2::ReturnCode l_rc = 0;
-
-    do
     {
         fapi2::ATTR_PROC_EPS_READ_CYCLES_T0_Type l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T0, TGT3, l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_PROC_EPS_READ_CYCLES_T0)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T0, TGT3, l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0));
         fapi2::ATTR_PROC_EPS_READ_CYCLES_T1_Type l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T1;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T1, TGT3, l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T1);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_PROC_EPS_READ_CYCLES_T1)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T1, TGT3, l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T1));
         fapi2::ATTR_PROC_EPS_READ_CYCLES_T2_Type l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T2;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2, TGT3, l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T2);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_PROC_EPS_READ_CYCLES_T2)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2, TGT3, l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T2));
         fapi2::ATTR_IS_SIMULATION_Type l_TGT3_ATTR_IS_SIMULATION;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT3, l_TGT3_ATTR_IS_SIMULATION);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_IS_SIMULATION)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT3, l_TGT3_ATTR_IS_SIMULATION));
         auto l_def_IS_SIM = (l_TGT3_ATTR_IS_SIMULATION == literal_1);
         auto l_def_IS_HW = (l_TGT3_ATTR_IS_SIMULATION == literal_0);
         fapi2::ATTR_EFF_DIMM_TYPE_Type l_TGT2_ATTR_EFF_DIMM_TYPE;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DIMM_TYPE, TGT2, l_TGT2_ATTR_EFF_DIMM_TYPE);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DIMM_TYPE)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DIMM_TYPE, TGT2, l_TGT2_ATTR_EFF_DIMM_TYPE));
         fapi2::ATTR_CHIP_UNIT_POS_Type l_TGT0_ATTR_CHIP_UNIT_POS;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, TGT0, l_TGT0_ATTR_CHIP_UNIT_POS);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, TGT0, l_TGT0_ATTR_CHIP_UNIT_POS));
         auto l_def_POSITION = l_TGT0_ATTR_CHIP_UNIT_POS;
         auto l_def_PORT_INDEX = (l_def_POSITION % literal_2);
         fapi2::ATTR_EFF_DRAM_CL_Type l_TGT2_ATTR_EFF_DRAM_CL;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_CL, TGT2, l_TGT2_ATTR_EFF_DRAM_CL);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_CL)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_CL, TGT2, l_TGT2_ATTR_EFF_DRAM_CL));
         fapi2::ATTR_MSS_FREQ_Type l_TGT1_ATTR_MSS_FREQ;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_MSS_FREQ, TGT1, l_TGT1_ATTR_MSS_FREQ);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_MSS_FREQ)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_FREQ, TGT1, l_TGT1_ATTR_MSS_FREQ));
         auto l_def_MSS_FREQ_EQ_1866 = (l_TGT1_ATTR_MSS_FREQ < literal_1867);
         auto l_def_MEM_TYPE_1866_13 = (l_def_MSS_FREQ_EQ_1866 && (l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] == literal_13));
         auto l_def_MEM_TYPE_1866_14 = (l_def_MSS_FREQ_EQ_1866 && (l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] == literal_14));
@@ -181,134 +122,36 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
         auto l_def_MEM_TYPE_2667_20 = (l_def_MSS_FREQ_EQ_2667 && (l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] == literal_20));
         auto l_def_RANK_SWITCH_TCK = (literal_4 + ((l_TGT1_ATTR_MSS_FREQ - literal_1866) / literal_267));
         fapi2::ATTR_EFF_DRAM_TCCD_L_Type l_TGT2_ATTR_EFF_DRAM_TCCD_L;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TCCD_L, TGT2, l_TGT2_ATTR_EFF_DRAM_TCCD_L);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_TCCD_L)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TCCD_L, TGT2, l_TGT2_ATTR_EFF_DRAM_TCCD_L));
         fapi2::ATTR_EFF_DRAM_CWL_Type l_TGT2_ATTR_EFF_DRAM_CWL;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_CWL, TGT2, l_TGT2_ATTR_EFF_DRAM_CWL);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_CWL)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_CWL, TGT2, l_TGT2_ATTR_EFF_DRAM_CWL));
         auto l_def_BUS_TURNAROUND_TCK = (literal_4 + ((l_TGT1_ATTR_MSS_FREQ - literal_1866) / literal_267));
         fapi2::ATTR_EFF_DRAM_TWTR_S_Type l_TGT2_ATTR_EFF_DRAM_TWTR_S;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TWTR_S, TGT2, l_TGT2_ATTR_EFF_DRAM_TWTR_S);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_TWTR_S)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TWTR_S, TGT2, l_TGT2_ATTR_EFF_DRAM_TWTR_S));
         fapi2::ATTR_EFF_DRAM_TWTR_L_Type l_TGT2_ATTR_EFF_DRAM_TWTR_L;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TWTR_L, TGT2, l_TGT2_ATTR_EFF_DRAM_TWTR_L);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_TWTR_L)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TWTR_L, TGT2, l_TGT2_ATTR_EFF_DRAM_TWTR_L));
         fapi2::ATTR_EFF_DRAM_TFAW_Type l_TGT2_ATTR_EFF_DRAM_TFAW;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TFAW, TGT2, l_TGT2_ATTR_EFF_DRAM_TFAW);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_TFAW)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TFAW, TGT2, l_TGT2_ATTR_EFF_DRAM_TFAW));
         fapi2::ATTR_EFF_DRAM_TRCD_Type l_TGT2_ATTR_EFF_DRAM_TRCD;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRCD, TGT2, l_TGT2_ATTR_EFF_DRAM_TRCD);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_TRCD)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRCD, TGT2, l_TGT2_ATTR_EFF_DRAM_TRCD));
         fapi2::ATTR_EFF_DRAM_TRP_Type l_TGT2_ATTR_EFF_DRAM_TRP;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRP, TGT2, l_TGT2_ATTR_EFF_DRAM_TRP);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_TRP)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRP, TGT2, l_TGT2_ATTR_EFF_DRAM_TRP));
         fapi2::ATTR_EFF_DRAM_TRAS_Type l_TGT2_ATTR_EFF_DRAM_TRAS;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRAS, TGT2, l_TGT2_ATTR_EFF_DRAM_TRAS);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_TRAS)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRAS, TGT2, l_TGT2_ATTR_EFF_DRAM_TRAS));
         fapi2::ATTR_EFF_DRAM_TWR_Type l_TGT2_ATTR_EFF_DRAM_TWR;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TWR, TGT2, l_TGT2_ATTR_EFF_DRAM_TWR);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_TWR)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TWR, TGT2, l_TGT2_ATTR_EFF_DRAM_TWR));
         fapi2::ATTR_EFF_DRAM_TRTP_Type l_TGT2_ATTR_EFF_DRAM_TRTP;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRTP, TGT2, l_TGT2_ATTR_EFF_DRAM_TRTP);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_TRTP)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRTP, TGT2, l_TGT2_ATTR_EFF_DRAM_TRTP));
         fapi2::ATTR_EFF_DRAM_TRRD_S_Type l_TGT2_ATTR_EFF_DRAM_TRRD_S;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRRD_S, TGT2, l_TGT2_ATTR_EFF_DRAM_TRRD_S);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_TRRD_S)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRRD_S, TGT2, l_TGT2_ATTR_EFF_DRAM_TRRD_S));
         fapi2::ATTR_EFF_DRAM_TRRD_L_Type l_TGT2_ATTR_EFF_DRAM_TRRD_L;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRRD_L, TGT2, l_TGT2_ATTR_EFF_DRAM_TRRD_L);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_TRRD_L)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRRD_L, TGT2, l_TGT2_ATTR_EFF_DRAM_TRRD_L));
         fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_Type l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, TGT2, l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, TGT2, l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM));
         auto l_def_SLOT0_DENOMINATOR = ((l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0] == literal_0x0)
                                         | l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0]);
         fapi2::ATTR_EFF_NUM_RANKS_PER_DIMM_Type l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_NUM_RANKS_PER_DIMM, TGT2, l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_NUM_RANKS_PER_DIMM)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_NUM_RANKS_PER_DIMM, TGT2, l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM));
         auto l_def_SLOT0_DRAM_STACK_HEIGHT = (l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0] /
                                               l_def_SLOT0_DENOMINATOR);
         auto l_def_SLOT1_DENOMINATOR = ((l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_1] == literal_0x0)
@@ -316,82 +159,29 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
         auto l_def_SLOT1_DRAM_STACK_HEIGHT = (l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_1] /
                                               l_def_SLOT1_DENOMINATOR);
         fapi2::ATTR_MSS_VPD_MT_ODT_RD_Type l_TGT2_ATTR_MSS_VPD_MT_ODT_RD;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MT_ODT_RD, TGT2, l_TGT2_ATTR_MSS_VPD_MT_ODT_RD);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_MSS_VPD_MT_ODT_RD)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MT_ODT_RD, TGT2, l_TGT2_ATTR_MSS_VPD_MT_ODT_RD));
         fapi2::ATTR_MSS_VPD_MT_ODT_WR_Type l_TGT2_ATTR_MSS_VPD_MT_ODT_WR;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MT_ODT_WR, TGT2, l_TGT2_ATTR_MSS_VPD_MT_ODT_WR);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_MSS_VPD_MT_ODT_WR)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MT_ODT_WR, TGT2, l_TGT2_ATTR_MSS_VPD_MT_ODT_WR));
         auto l_def_NUM_RANKS = (l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0] +
                                 l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_1]);
         fapi2::ATTR_EFF_DRAM_TREFI_Type l_TGT2_ATTR_EFF_DRAM_TREFI;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TREFI, TGT2, l_TGT2_ATTR_EFF_DRAM_TREFI);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_TREFI)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TREFI, TGT2, l_TGT2_ATTR_EFF_DRAM_TREFI));
         auto l_def_REFRESH_INTERVAL = (l_TGT2_ATTR_EFF_DRAM_TREFI[l_def_PORT_INDEX] / (literal_8 * l_def_NUM_RANKS));
         fapi2::ATTR_EFF_DRAM_TRFC_Type l_TGT2_ATTR_EFF_DRAM_TRFC;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRFC, TGT2, l_TGT2_ATTR_EFF_DRAM_TRFC);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_TRFC)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRFC, TGT2, l_TGT2_ATTR_EFF_DRAM_TRFC));
         fapi2::ATTR_EFF_DRAM_TRFC_DLR_Type l_TGT2_ATTR_EFF_DRAM_TRFC_DLR;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRFC_DLR, TGT2, l_TGT2_ATTR_EFF_DRAM_TRFC_DLR);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_DRAM_TRFC_DLR)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRFC_DLR, TGT2, l_TGT2_ATTR_EFF_DRAM_TRFC_DLR));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
-            l_rc = fapi2::getScom( TGT0, 0x5010824ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x5010824ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5010824ull, l_scom_buffer ));
 
             l_scom_buffer.insert<uint64_t> (literal_0b0100, 28, 4, 60 );
             l_scom_buffer.insert<uint64_t> (literal_0b11100, 50, 5, 59 );
             l_scom_buffer.insert<uint64_t> (literal_0b110, 37, 3, 61 );
-            l_rc = fapi2::putScom(TGT0, 0x5010824ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x5010824ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5010824ull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x5010826ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x5010826ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5010826ull, l_scom_buffer ));
 
             l_scom_buffer.insert<uint64_t> (literal_0x1, 0, 8, 56 );
             l_scom_buffer.insert<uint64_t> ((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0 / literal_4), 8, 8, 56 );
@@ -399,22 +189,10 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             l_scom_buffer.insert<uint64_t> ((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T2 / literal_4), 32, 8, 56 );
             l_scom_buffer.insert<uint64_t> ((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T1 / literal_4), 24, 8, 56 );
             l_scom_buffer.insert<uint64_t> ((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T2 / literal_4), 40, 8, 56 );
-            l_rc = fapi2::putScom(TGT0, 0x5010826ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x5010826ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5010826ull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x701090aull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x701090aull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x701090aull, l_scom_buffer ));
 
             if (l_def_IS_SIM)
             {
@@ -647,22 +425,10 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
 
             l_scom_buffer.insert<uint64_t> (literal_1, 12, 6, 58 );
             l_scom_buffer.insert<uint64_t> (literal_6, 18, 6, 58 );
-            l_rc = fapi2::putScom(TGT0, 0x701090aull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x701090aull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x701090aull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x701090bull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x701090bull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x701090bull, l_scom_buffer ));
 
             l_scom_buffer.insert<uint64_t> ((literal_4 + l_def_RANK_SWITCH_TCK), 0, 4, 60 );
             l_scom_buffer.insert<uint64_t> (literal_4, 4, 4, 60 );
@@ -684,22 +450,10 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
                                              l_TGT2_ATTR_EFF_DRAM_TWTR_S[l_def_PORT_INDEX]), 51, 6, 58 );
             l_scom_buffer.insert<uint64_t> (((l_TGT2_ATTR_EFF_DRAM_CWL[l_def_PORT_INDEX] + literal_4) +
                                              l_TGT2_ATTR_EFF_DRAM_TWTR_S[l_def_PORT_INDEX]), 57, 6, 58 );
-            l_rc = fapi2::putScom(TGT0, 0x701090bull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x701090bull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x701090bull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x701090cull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x701090cull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x701090cull, l_scom_buffer ));
 
             l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_EFF_DRAM_TCCD_L[l_def_PORT_INDEX], 0, 4, 60 );
             l_scom_buffer.insert<uint64_t> (((l_TGT2_ATTR_EFF_DRAM_CWL[l_def_PORT_INDEX] + literal_4) +
@@ -731,61 +485,25 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
                 l_scom_buffer.insert<uint64_t> (literal_11, 60, 4, 60 );
             }
 
-            l_rc = fapi2::putScom(TGT0, 0x701090cull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x701090cull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x701090cull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x701090eull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x701090eull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x701090eull, l_scom_buffer ));
 
             l_scom_buffer.insert<uint64_t> (literal_0b011000, 24, 6, 58 );
-            l_rc = fapi2::putScom(TGT0, 0x701090eull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x701090eull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x701090eull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x7010913ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x7010913ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x7010913ull, l_scom_buffer ));
 
             constexpr auto l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_PARITY_AFTER_CMD_ON = 0x1;
             l_scom_buffer.insert<uint64_t> (l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_PARITY_AFTER_CMD_ON, 38, 1, 63 );
             constexpr auto l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_OE_ALWAYS_ON_ON = 0x1;
             l_scom_buffer.insert<uint64_t> (l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_OE_ALWAYS_ON_ON, 55, 1, 63 );
-            l_rc = fapi2::putScom(TGT0, 0x7010913ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x7010913ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x7010913ull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x7010914ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x7010914ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x7010914ull, l_scom_buffer ));
 
             l_scom_buffer.insert<uint64_t> (literal_0b000, 0, 3, 61 );
             l_scom_buffer.insert<uint64_t> (literal_0b100, 3, 3, 61 );
@@ -869,22 +587,10 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
                 l_scom_buffer.insert<uint64_t> (literal_0b110, 45, 3, 61 );
             }
 
-            l_rc = fapi2::putScom(TGT0, 0x7010914ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x7010914ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x7010914ull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x7010915ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x7010915ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x7010915ull, l_scom_buffer ));
 
             l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_0], 0, 4, 60 );
             l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_1], 4, 4, 60 );
@@ -902,42 +608,18 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_1], 52, 4, 60 );
             l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_2], 56, 4, 60 );
             l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_3], 60, 4, 60 );
-            l_rc = fapi2::putScom(TGT0, 0x7010915ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x7010915ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x7010915ull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x7010932ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x7010932ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x7010932ull, l_scom_buffer ));
 
             l_scom_buffer.insert<uint64_t> (l_def_REFRESH_INTERVAL, 8, 11, 53 );
             l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_EFF_DRAM_TRFC[l_def_PORT_INDEX], 30, 10, 54 );
             l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_EFF_DRAM_TRFC_DLR[l_def_PORT_INDEX], 40, 10, 54 );
-            l_rc = fapi2::putScom(TGT0, 0x7010932ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x7010932ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x7010932ull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x7010934ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x7010934ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x7010934ull, l_scom_buffer ));
 
             if ((l_def_MSS_FREQ_EQ_1866 == literal_1))
             {
@@ -990,22 +672,10 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
                 l_scom_buffer.insert<uint64_t> (literal_9, 6, 5, 59 );
             }
 
-            l_rc = fapi2::putScom(TGT0, 0x7010934ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x7010934ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x7010934ull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x7010935ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x7010935ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x7010935ull, l_scom_buffer ));
 
             if ((l_def_MSS_FREQ_EQ_1866 == literal_1))
             {
@@ -1060,17 +730,10 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
                 l_scom_buffer.insert<uint64_t> (literal_939, 27, 11, 53 );
             }
 
-            l_rc = fapi2::putScom(TGT0, 0x7010935ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x7010935ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x7010935ull, l_scom_buffer));
         }
 
-    }
-    while(0);
-
-    return l_rc;
+    };
+fapi_try_exit:
+    return fapi2::current_err;
 }

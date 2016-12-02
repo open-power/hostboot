@@ -60,62 +60,24 @@ constexpr auto literal_0x000 = 0x000;
 fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0,
                                     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
 {
-    fapi2::ReturnCode l_rc = 0;
-
-    do
     {
         fapi2::ATTR_EC_Type   l_chip_ec;
         fapi2::ATTR_NAME_Type l_chip_id;
-        l_rc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR getting ATTR_NAME");
-            break;
-        }
-
-        l_rc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR getting ATTR_EC");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id));
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec));
         fapi2::ATTR_PROC_FABRIC_ASYNC_SAFE_MODE_Type l_TGT1_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ASYNC_SAFE_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_PROC_FABRIC_ASYNC_SAFE_MODE)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ASYNC_SAFE_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE));
         auto l_def_TRUE = ((l_TGT1_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE == ENUM_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE_SAFE_MODE)
                            || (l_TGT1_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE == ENUM_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE_PERFORMANCE_MODE));
         auto l_def_SAFE_MODE = (l_TGT1_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE == ENUM_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE_SAFE_MODE);
         fapi2::ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_Type l_TGT1_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CORE_FLOOR_RATIO, TGT1, l_TGT1_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_PROC_FABRIC_CORE_FLOOR_RATIO)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CORE_FLOOR_RATIO, TGT1, l_TGT1_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO));
         auto l_def_CORE_FLOOR_RATIO_2_8 = (l_TGT1_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO ==
                                            ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_2_8);
         auto l_def_CORE_FLOOR_RATIO_4_8 = (l_TGT1_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO ==
                                            ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_4_8);
         fapi2::ATTR_PROC_FABRIC_CORE_CEILING_RATIO_Type l_TGT1_ATTR_PROC_FABRIC_CORE_CEILING_RATIO;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CORE_CEILING_RATIO, TGT1, l_TGT1_ATTR_PROC_FABRIC_CORE_CEILING_RATIO);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_PROC_FABRIC_CORE_CEILING_RATIO)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CORE_CEILING_RATIO, TGT1, l_TGT1_ATTR_PROC_FABRIC_CORE_CEILING_RATIO));
         auto l_def_CORE_CEILING_RATIO_8_8 = (l_TGT1_ATTR_PROC_FABRIC_CORE_CEILING_RATIO ==
                                              ENUM_ATTR_PROC_FABRIC_CORE_CEILING_RATIO_RATIO_8_8);
         fapi2::buffer<uint64_t> l_scom_buffer;
@@ -127,13 +89,7 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             l_scom_buffer.insert<uint64_t> (literal_0b000, 60, 3, 61 );
             constexpr auto l_PB_CMD_PB_CFG_INCLUDE_LPC_RTY_NEXT_OFF = 0x0;
             l_scom_buffer.insert<uint64_t> (l_PB_CMD_PB_CFG_INCLUDE_LPC_RTY_NEXT_OFF, 63, 1, 63 );
-            l_rc = fapi2::putScom(TGT0, 0x90000cf405011c11ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x90000cf405011c11ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x90000cf405011c11ull, l_scom_buffer));
         }
         {
             l_scom_buffer.insert<uint64_t> (literal_0x0, 32, 3, 61 );
@@ -144,13 +100,7 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             l_scom_buffer.insert<uint64_t> (literal_0x2, 47, 3, 61 );
             l_scom_buffer.insert<uint64_t> (literal_0x3, 50, 3, 61 );
             l_scom_buffer.insert<uint64_t> (literal_0x7, 53, 3, 61 );
-            l_rc = fapi2::putScom(TGT0, 0x90000e0605011c11ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x90000e0605011c11ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x90000e0605011c11ull, l_scom_buffer));
         }
         {
             l_scom_buffer.insert<uint64_t> (literal_0x00, 28, 5, 59 );
@@ -162,13 +112,7 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             l_scom_buffer.insert<uint64_t> (literal_0x00, 58, 5, 59 );
             constexpr auto l_PB_CMD_PB_CFG_USE_SLOW_GO_RATE_NEXT_ON = 0x1;
             l_scom_buffer.insert<uint64_t> (l_PB_CMD_PB_CFG_USE_SLOW_GO_RATE_NEXT_ON, 63, 1, 63 );
-            l_rc = fapi2::putScom(TGT0, 0x90000e4305011c11ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x90000e4305011c11ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x90000e4305011c11ull, l_scom_buffer));
         }
         {
             if ((l_def_TRUE == literal_1))
@@ -346,21 +290,8 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<uint64_t> (literal_0b0, 63, 1, 63 );
             }
 
-            l_rc = fapi2::putScom(TGT0, 0x90000e6105011811ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x90000e6105011811ull)");
-                break;
-            }
-
-            l_rc = fapi2::putScom(TGT0, 0x90000e6105012011ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x90000e6105012011ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x90000e6105011811ull, l_scom_buffer));
+            FAPI_TRY(fapi2::putScom(TGT0, 0x90000e6105012011ull, l_scom_buffer));
         }
         {
             l_scom_buffer.insert<uint64_t> (literal_0x400, 22, 12, 52 );
@@ -371,26 +302,14 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             l_scom_buffer.insert<uint64_t> (literal_0b010, 55, 3, 61 );
             l_scom_buffer.insert<uint64_t> (literal_0b010, 58, 3, 61 );
             l_scom_buffer.insert<uint64_t> (literal_0b010, 61, 3, 61 );
-            l_rc = fapi2::putScom(TGT0, 0x90000ea205011c11ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x90000ea205011c11ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x90000ea205011c11ull, l_scom_buffer));
         }
         {
             l_scom_buffer.insert<uint64_t> (literal_0x4, 18, 10, 54 );
             l_scom_buffer.insert<uint64_t> (literal_0x141, 28, 12, 52 );
             l_scom_buffer.insert<uint64_t> (literal_0x21B, 40, 12, 52 );
             l_scom_buffer.insert<uint64_t> (literal_0x30D, 52, 12, 52 );
-            l_rc = fapi2::putScom(TGT0, 0x90000ee105011c11ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x90000ee105011c11ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x90000ee105011c11ull, l_scom_buffer));
         }
         {
             l_scom_buffer.insert<uint64_t> (literal_0x0, 16, 3, 61 );
@@ -409,13 +328,7 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             l_scom_buffer.insert<uint64_t> (literal_0x2, 55, 3, 61 );
             l_scom_buffer.insert<uint64_t> (literal_0x3, 58, 3, 61 );
             l_scom_buffer.insert<uint64_t> (literal_0x7, 61, 3, 61 );
-            l_rc = fapi2::putScom(TGT0, 0x90000f0505011c11ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x90000f0505011c11ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x90000f0505011c11ull, l_scom_buffer));
         }
         {
             l_scom_buffer.insert<uint64_t> (literal_0x7, 14, 10, 54 );
@@ -423,13 +336,7 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             l_scom_buffer.insert<uint64_t> (literal_0x5, 34, 10, 54 );
             l_scom_buffer.insert<uint64_t> (literal_0x4, 44, 10, 54 );
             l_scom_buffer.insert<uint64_t> (literal_0x5, 54, 10, 54 );
-            l_rc = fapi2::putScom(TGT0, 0x90000f2005011c11ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x90000f2005011c11ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x90000f2005011c11ull, l_scom_buffer));
         }
         {
             if ((l_def_TRUE == literal_1))
@@ -611,25 +518,11 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<uint64_t> (literal_0x000, 54, 10, 54 );
             }
 
-            l_rc = fapi2::putScom(TGT0, 0x90000f4005011811ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x90000f4005011811ull)");
-                break;
-            }
-
-            l_rc = fapi2::putScom(TGT0, 0x90000f4005012011ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x90000f4005012011ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x90000f4005011811ull, l_scom_buffer));
+            FAPI_TRY(fapi2::putScom(TGT0, 0x90000f4005012011ull, l_scom_buffer));
         }
 
-    }
-    while(0);
-
-    return l_rc;
+    };
+fapi_try_exit:
+    return fapi2::current_err;
 }
