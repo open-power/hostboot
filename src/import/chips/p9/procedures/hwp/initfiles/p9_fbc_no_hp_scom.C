@@ -79,71 +79,29 @@ constexpr auto literal_0xAF = 0xAF;
 fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0,
                                     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
 {
-    fapi2::ReturnCode l_rc = 0;
-
-    do
     {
         fapi2::ATTR_EC_Type   l_chip_ec;
         fapi2::ATTR_NAME_Type l_chip_id;
-        l_rc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR getting ATTR_NAME");
-            break;
-        }
-
-        l_rc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR getting ATTR_EC");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id));
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec));
         fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, TGT0, l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, TGT0,
+                               l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG));
         auto l_def_NUM_A_LINKS_CFG = (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_0] +
                                         l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_1]) + l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_2]) +
                                       l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_3]);
         fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, TGT0, l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, TGT0,
+                               l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG));
         auto l_def_NUM_X_LINKS_CFG = ((((((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_0] +
                                            l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_1]) + l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_2]) +
                                          l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_3]) + l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_4]) +
                                        l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_5]) + l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_6]);
         fapi2::ATTR_PROC_FABRIC_PUMP_MODE_Type l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_PROC_FABRIC_PUMP_MODE)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
-            l_rc = fapi2::getScom( TGT0, 0x501180aull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x501180aull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501180aull, l_scom_buffer ));
 
             if (((l_def_NUM_X_LINKS_CFG == literal_0) && (l_def_NUM_A_LINKS_CFG == literal_0)))
             {
@@ -162,22 +120,10 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64, 23, 7, 43 );
             constexpr auto l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42 = 0x2aaaa;
             l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42, 30, 6, 46 );
-            l_rc = fapi2::putScom(TGT0, 0x501180aull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x501180aull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501180aull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x5011c0aull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x5011c0aull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5011c0aull, l_scom_buffer ));
 
             if (((l_def_NUM_X_LINKS_CFG == literal_0) && (l_def_NUM_A_LINKS_CFG == literal_0)))
             {
@@ -196,22 +142,10 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64, 23, 7, 50 );
             constexpr auto l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42 = 0x2aaaa;
             l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42, 30, 6, 52 );
-            l_rc = fapi2::putScom(TGT0, 0x5011c0aull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x5011c0aull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5011c0aull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x5011c26ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x5011c26ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5011c26ull, l_scom_buffer ));
 
             if ((l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_GROUP))
             {
@@ -373,22 +307,10 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<uint64_t> (literal_0x13, 56, 8, 56 );
             }
 
-            l_rc = fapi2::putScom(TGT0, 0x5011c26ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x5011c26ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5011c26ull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x5011c27ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x5011c27ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5011c27ull, l_scom_buffer ));
 
             if ((l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_GROUP))
             {
@@ -550,22 +472,10 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<uint64_t> (literal_0x1F, 56, 8, 56 );
             }
 
-            l_rc = fapi2::putScom(TGT0, 0x5011c27ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x5011c27ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5011c27ull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x5011c28ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x5011c28ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5011c28ull, l_scom_buffer ));
 
             if (((l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_GROUP)
                  && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -855,22 +765,10 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<uint64_t> (literal_0x37, 56, 8, 56 );
             }
 
-            l_rc = fapi2::putScom(TGT0, 0x5011c28ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x5011c28ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5011c28ull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x5011c29ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x5011c29ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5011c29ull, l_scom_buffer ));
 
             if (((l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_GROUP)
                  && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1160,22 +1058,10 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<uint64_t> (literal_0x4F, 56, 8, 56 );
             }
 
-            l_rc = fapi2::putScom(TGT0, 0x5011c29ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x5011c29ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5011c29ull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x5011c2aull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x5011c2aull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5011c2aull, l_scom_buffer ));
 
             if (((l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_GROUP)
                  && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1465,22 +1351,10 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<uint64_t> (literal_0x4F, 56, 8, 56 );
             }
 
-            l_rc = fapi2::putScom(TGT0, 0x5011c2aull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x5011c2aull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5011c2aull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x5011c2bull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x5011c2bull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5011c2bull, l_scom_buffer ));
 
             if (((l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_GROUP)
                  && (l_def_NUM_X_LINKS_CFG == literal_0)))
@@ -1770,22 +1644,10 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<uint64_t> (literal_0xAF, 56, 8, 56 );
             }
 
-            l_rc = fapi2::putScom(TGT0, 0x5011c2bull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x5011c2bull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5011c2bull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x501200aull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x501200aull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501200aull, l_scom_buffer ));
 
             if (((l_def_NUM_X_LINKS_CFG == literal_0) && (l_def_NUM_A_LINKS_CFG == literal_0)))
             {
@@ -1804,17 +1666,10 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64, 23, 7, 57 );
             constexpr auto l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42 = 0x2aaaa;
             l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42, 30, 6, 58 );
-            l_rc = fapi2::putScom(TGT0, 0x501200aull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x501200aull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501200aull, l_scom_buffer));
         }
 
-    }
-    while(0);
-
-    return l_rc;
+    };
+fapi_try_exit:
+    return fapi2::current_err;
 }
