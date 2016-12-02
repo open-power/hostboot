@@ -90,6 +90,13 @@ namespace TARGETING
             // Spawn daemon thread.
             task_create(&AttrRP::startMsgServiceTask, this);
 
+            if(iv_isMpipl)
+            {
+                populateAttrsForMpipl();
+            }
+
+
+
         } while (false);
 
         // If an error occurred, post to TaskArgs.
@@ -577,7 +584,26 @@ namespace TARGETING
                                            hbSwError);
                     break;
                 }
+            } // End iteration through each section
 
+            if(l_errl)
+            {
+                break;
+            }
+
+        } while (false);
+
+        return l_errl;
+    }
+
+    void AttrRP::populateAttrsForMpipl()
+    {
+        do
+        {
+            // Copy RW, Heap Zero Init sections because we are not
+            // running the isteps that set these attrs during MPIPL
+            for (size_t i = 0; i < iv_sectionCount; ++i)
+            {
                 // The volatile sections in MPIPL need to be copied because
                 // on the MPIPL flow we will not run the HWPs that set these attrs
                 // the RW section of the attribute data must be copied
@@ -593,16 +619,8 @@ namespace TARGETING
                         (iv_sections[i].size));
                 }
 
-            } // End iteration through each section
-
-            if(l_errl)
-            {
-                break;
             }
-
-        } while (false);
-
-        return l_errl;
+        }while(0);
     }
 
     void* AttrRP::save(uint64_t& io_addr)
