@@ -162,11 +162,12 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId)
         //Make sure the address returned from the block map call is not NULL
         if(l_attrCopyVmemAddr != 0)
         {
-            //Save the memory map
-            TARGETING::AttrRP::save(l_attrCopyVmemAddr);
+            //The function save() for AttrRP saves then entire HBD data
+            // section of PNOR to the provided vmm address
+            void * l_region = TARGETING::AttrRP::save(l_attrCopyVmemAddr);
 
-            //Make sure to the virtual address because we won't need it anymore
-            int l_rc = mm_block_unmap(reinterpret_cast<void*>(l_attrCopyVmemAddr));
+            //Make sure to unmap the virtual address because we won't need it anymore
+            int l_rc = mm_block_unmap(reinterpret_cast<void*>(l_region));
 
             if(l_rc)
             {
