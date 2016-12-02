@@ -37,5 +37,24 @@
     <platInit/>
     <persistRuntime/>
   </attribute>
+  <!-- ********************************************************************** -->
+  <attribute>
+    <id>ATTR_MAX_SBE_SEEPROM_SIZE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Defines the maximum Seeprom storage size for the fully-customized SBE image
+      permitted by the platform.
+      For platforms (FSP/HB FW) which require the image to be constrained into a
+      physical storage device (SEEPROM), this should reflect the maximum size of that
+      memory (e.g., 256KB).
+      For platforms (Cronus) which may use a customized image in a virtual
+      envrionment with no physical storage constraints, this size may be
+      larger than the physical SEEPROM size.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************** -->
 </attributes>
 
