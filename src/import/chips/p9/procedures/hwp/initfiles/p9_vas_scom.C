@@ -37,118 +37,40 @@ constexpr auto literal_0x1 = 0x1;
 fapi2::ReturnCode p9_vas_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0,
                               const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
 {
-    fapi2::ReturnCode l_rc = 0;
-
-    do
     {
         fapi2::ATTR_EC_Type   l_chip_ec;
         fapi2::ATTR_NAME_Type l_chip_id;
-        l_rc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR getting ATTR_NAME");
-            break;
-        }
-
-        l_rc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR getting ATTR_EC");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id));
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec));
         fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE_Type l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE);
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_PROC_FABRIC_ADDR_BAR_MODE)");
-            break;
-        }
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
-            l_rc = fapi2::getScom( TGT0, 0x3011803ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x3011803ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x3011803ull, l_scom_buffer ));
 
             l_scom_buffer.insert<uint64_t> (literal_0x00000100000D7FFF, 0, 54, 0 );
-            l_rc = fapi2::putScom(TGT0, 0x3011803ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x3011803ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x3011803ull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x3011806ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x3011806ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x3011806ull, l_scom_buffer ));
 
             l_scom_buffer.insert<uint64_t> (literal_0x0000000000000FFF, 0, 54, 0 );
-            l_rc = fapi2::putScom(TGT0, 0x3011806ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x3011806ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x3011806ull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x3011807ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x3011807ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x3011807ull, l_scom_buffer ));
 
             l_scom_buffer.insert<uint64_t> (literal_0x00FF0203C00C0FFF, 0, 54, 0 );
-            l_rc = fapi2::putScom(TGT0, 0x3011807ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x3011807ull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x3011807ull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x301184dull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x301184dull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x301184dull, l_scom_buffer ));
 
             l_scom_buffer.insert<uint64_t> (literal_0x1, 19, 1, 63 );
-            l_rc = fapi2::putScom(TGT0, 0x301184dull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x301184dull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x301184dull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x301184eull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x301184eull)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x301184eull, l_scom_buffer ));
 
             if ((l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_ADDR_BAR_MODE_SMALL_SYSTEM))
             {
@@ -161,35 +83,16 @@ fapi2::ReturnCode p9_vas_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 l_scom_buffer.insert<uint64_t> (l_VA_VA_SOUTH_VA_EG_EG_SCF_ADDR_BAR_MODE_OFF, 13, 1, 63 );
             }
 
-            l_rc = fapi2::putScom(TGT0, 0x301184eull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x301184eull)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x301184eull, l_scom_buffer));
         }
         {
-            l_rc = fapi2::getScom( TGT0, 0x301184full, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x301184full)");
-                break;
-            }
+            FAPI_TRY(fapi2::getScom( TGT0, 0x301184full, l_scom_buffer ));
 
             l_scom_buffer.insert<uint64_t> (literal_0x1, 0, 1, 63 );
-            l_rc = fapi2::putScom(TGT0, 0x301184full, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x301184full)");
-                break;
-            }
+            FAPI_TRY(fapi2::putScom(TGT0, 0x301184full, l_scom_buffer));
         }
 
-    }
-    while(0);
-
-    return l_rc;
+    };
+fapi_try_exit:
+    return fapi2::current_err;
 }
