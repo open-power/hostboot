@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,9 +37,9 @@
 #include <prdfPlatServices.H>
 
 // Pegasus includes
-#include <prdfCenMbaUeTable.H>
 #include <prdfCenMbaCeTable.H>
 #include <prdfCenMbaRceTable.H>
+#include <prdfMemUeTable.H>
 
 #if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
   #include <prdfCenMbaTdCtlr_ipl.H>
@@ -63,7 +63,7 @@ class CenMbaDataBundleCommon : public DataBundle
      */
     explicit CenMbaDataBundleCommon( ExtensibleChip * i_mbaChip ) :
         iv_mbaChip(i_mbaChip), iv_membChip(NULL), iv_tdCtlr(i_mbaChip),
-        iv_ueTable( i_mbaChip->GetChipHandle()),
+        iv_ueTable(),
         iv_ceTable( i_mbaChip->GetChipHandle()),
         iv_rceTable(i_mbaChip->GetChipHandle())
     {}
@@ -107,7 +107,7 @@ class CenMbaDataBundleCommon : public DataBundle
   public: // instance variables
 
     CenMbaTdCtlr   iv_tdCtlr;      ///< Targeted Diagnostics Controller
-    CenMbaUeTable  iv_ueTable;     ///< UE table for FFDC
+    MemUeTable     iv_ueTable;     ///< UE table for FFDC
     CenMbaCeTable  iv_ceTable;     ///< CE table for FFDC
     CenMbaRceTable iv_rceTable;    ///< RCE table for FFDC
 
