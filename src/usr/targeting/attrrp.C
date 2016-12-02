@@ -392,6 +392,9 @@ namespace TARGETING
 
             }
 
+            //Keep a running offset of how far into our real memory section we are
+            uint64_t l_realMemOffset = 0;
+
             // Parse each section.
             for (size_t i = 0; i < iv_sectionCount; i++, ++l_section)
             {
@@ -407,14 +410,20 @@ namespace TARGETING
                         l_header->vmmSectionOffset*i;
 
 
-                iv_sections[i].pnorAddress = l_pnorSectionInfo.vaddr + l_section->sectionOffset;
+                iv_sections[i].pnorAddress =
+                    l_pnorSectionInfo.vaddr + l_section->sectionOffset;
 
                 if(iv_isMpipl)
                 {
-                    //For MPIPL we are reading from real memory, not pnor flash. Set the real memory address
-                    iv_sections[i].realMemAddress = reinterpret_cast<uint64_t>(l_header) + l_section->sectionOffset;
+                    //For MPIPL we are reading from real memory,
+                    //not pnor flash. Set the real memory address
+                    iv_sections[i].realMemAddress =
+                        reinterpret_cast<uint64_t>(l_header) + l_realMemOffset;
                 }
                 iv_sections[i].size = l_section->sectionSize;
+
+                //Increment our offset variable by the size of this section
+                l_realMemOffset += iv_sections[i].size;
 
                 TRACFCOMP(g_trac_targeting,
                           "Decoded Attribute Section: %d, 0x%lx 0x%lx 0x%lx 0x%lx",
