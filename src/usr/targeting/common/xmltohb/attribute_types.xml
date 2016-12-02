@@ -32379,4 +32379,29 @@ Measured in GB</description>
     <readable/>
 </attribute>
 
+<attribute>
+    <id>MAX_SBE_SEEPROM_SIZE</id>
+    <description>
+      Defines the maximum Seeprom storage size for the fully-customized SBE image
+      permitted by the platform.
+      For platforms (FSP/HB FW) which require the image to be constrained into a
+      physical storage device (SEEPROM), this should reflect the maximum size of that
+      memory (e.g., 256KB).
+      For platforms (Cronus) which may use a customized image in a virtual
+      envrionment with no physical storage constraints, this size may be
+      larger than the physical SEEPROM size.
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0x40000</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MAX_SBE_SEEPROM_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

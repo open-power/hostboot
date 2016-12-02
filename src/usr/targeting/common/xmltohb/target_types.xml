@@ -872,6 +872,7 @@
     <attribute><id>SYSTEM_TYPE</id></attribute>
     <attribute><id>MSS_CAL_ABORT_ON_ERROR</id></attribute>
     <attribute><id>SBE_IMAGE_MINIMUM_VALID_ECS</id></attribute>
+    <attribute><id>MAX_SBE_SEEPROM_SIZE</id></attribute>
     <attribute><id>SBE_SYS_CONFIG</id></attribute>
     <attribute><id>CP_REFCLOCK_RCVR_TERM</id></attribute>
     <attribute><id>IO_REFCLOCK_RCVR_TERM</id></attribute>
