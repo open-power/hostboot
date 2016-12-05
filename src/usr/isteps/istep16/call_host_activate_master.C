@@ -102,7 +102,7 @@ void* call_host_activate_master (void *io_pArgs)
                     TARGETING::get_huid(l_proc_target));
 
         //In the future possibly move default "waitTime" value to SBEIO code
-        uint64_t waitTime = 10000;
+        uint64_t waitTime = 1000000; // bump the wait time to 1 sec
         l_errl = SBEIO::startDeadmanLoop(waitTime);
         if ( l_errl )
         {
