@@ -83,6 +83,10 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId);
 #define HBRT_VPD_SECTION     0
 #define HBRT_ATTRIB_SECTION  1
 
+//Note this means the Reserved Mem sub-section is the 6th
+//(0 based) of the MDT section (See HDAT spec)
+#define MDT_RESERVED_HB_MEM_SECTION 5
+
 /**
  * HDAT Sections
  */
@@ -101,7 +105,8 @@ enum SectionId
     NACA,                 //< NACA
     HBRT,                 //< Hostboot Runtime
     HBRT_DATA,            //< Hostboot Runtime  Data
-    LAST_SECTION = HBRT_DATA   //< Placeholder for arrays
+    RESERVED_MEM,         //< Hostboot's Reserved Mainstore Memory
+    LAST_SECTION = RESERVED_MEM   //< Placeholder for arrays
 };
 
 /**

@@ -296,4 +296,27 @@ struct hdatHBRT_t
 } __attribute__ ((packed));
 
 
+/** @brief Header to array of reserved Hostboot memory address
+*/
+struct hdatMsReservedMemArrayHeader_t
+{
+    uint32_t offsetToArray;     //offSet to Address Range Array
+    uint32_t arrayEntryCount;   //total number of entries (reserved memSections)
+    uint32_t entrySize;         // allotted size of each array entry
+    uint32_t actualContentSize; //actual size of array entries
+}  __attribute__ ((packed));
+
+/** @brief In Reserved Hostboot Memory iaddress range
+*    array element information -
+*/
+struct hdatMsVpdRhbAddrRange_t
+{
+    uint32_t hdatDbobID;               // 0x0000 Node instance
+    uint64_t hdatRhbAddrRngStrAddr;    // 0x0004 Range starting
+    uint64_t hdatRhbAddrRngEndAddr;    // 0x000C Range ending
+    uint32_t hdatRhbLabelSize;         // 0x0014 Label size
+    uint8_t  hdatRhbLabelString[64];   // 0x0019 Label string Ptr
+}  __attribute__ ((packed));
+
+
 #endif
