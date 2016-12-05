@@ -52,6 +52,16 @@ actionclass mainline_ce_ue_handling
     TBDDefaultCallout;
 };
 
+/** Mainline UE handling */
+actionclass mainline_ue_handling
+{
+    SUEGenerationPoint;
+    threshold( field(33 / 30 min ) ); # To prevent flooding. Will be unmasked
+                                      # when background scrubbing resumes after
+                                      # targeted diagnostics is complete.
+    funccall("AnalyzeFetchUe");
+};
+
 /** Handle RCD parity error. */
 actionclass rcd_parity_error
 {

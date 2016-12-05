@@ -41,8 +41,13 @@ class TpsEvent : public TdEntry
 {
   public: // functions
 
-    /** @brief Constructor */
-    TpsEvent<T>( ExtensibleChip * i_chip, MemRank i_rank ) :
+    /**
+     * @brief Constructor
+     * @param i_chip MCA or MBA.
+     * @param i_rank Target rank.
+     * @param i_ban  True to ban all subsequent requests for TPS on this rank.
+     */
+    TpsEvent<T>( ExtensibleChip * i_chip, MemRank i_rank, bool i_ban = false ) :
         TdEntry(TPS_EVENT, i_chip, i_rank)
     {}
 

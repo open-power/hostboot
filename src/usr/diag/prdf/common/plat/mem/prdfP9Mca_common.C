@@ -29,6 +29,7 @@
 #include <prdfPluginMap.H>
 
 // Platform includes
+#include <prdfMemEccAnalysis.H>
 #include <prdfPlatServices.H>
 #include <prdfP9McaDataBundle.H>
 
@@ -78,6 +79,26 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( p9_mca, PostAnalysis );
+
+//##############################################################################
+//
+//                               MCAECCFIR
+//
+//##############################################################################
+
+/**
+ * @brief  MCAECCFIR[14] - Mainline UE.
+ * @param  i_chip MCA chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeFetchUe( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & io_sc )
+{
+    MemEcc::analyzeFetchUe<TYPE_MCA, McaDataBundle *>( i_chip, io_sc );
+    return SUCCESS; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchUe );
 
 } // end namespace p9_mca
 

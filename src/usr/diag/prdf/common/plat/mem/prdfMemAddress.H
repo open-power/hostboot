@@ -138,13 +138,6 @@ class MemAddr
 
 /**
  * @brief  Reads the specified mainline memory read address from hardware.
- *
- * While the address returned will be relative to an MBA or MCA, this function
- * requires the MEMBUF or MCBIST targets and the position of the MBA or MCA
- * relative to the parent. The reason for this is because of where the addresses
- * and FIRs are located on the Nimbus or Centaur. We didn't want to add a lot of
- * hopping around between targets just to make the interface look pretty.
- *
  * @param  i_chip An MEMBUF or MCBIST chip.
  * @param  i_pos  Position of MBA/MCA relative to MEMBUF/MCBIST.
  * @param  i_reg  The target address register.
@@ -154,6 +147,17 @@ class MemAddr
 template<TARGETING::TYPE T>
 uint32_t getMemReadAddr( ExtensibleChip * i_chip, uint32_t i_pos,
                          MemAddr::ReadReg i_reg, MemAddr & o_addr );
+
+/**
+ * @brief  Reads the specified mainline memory read address from hardware.
+ * @param  i_chip MCA or MBA.
+ * @param  i_reg  The target address register.
+ * @param  o_addr The returned address from hardware.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t getMemReadAddr( ExtensibleChip * i_chip, MemAddr::ReadReg i_reg,
+                         MemAddr & o_addr );
 
 #ifdef __HOSTBOOT_MODULE
 

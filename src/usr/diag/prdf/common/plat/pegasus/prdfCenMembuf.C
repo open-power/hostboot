@@ -51,6 +51,7 @@
 #if !defined(__HOSTBOOT_MODULE) || defined(__HOSTBOOT_RUNTIME)
   #include <prdfCenMbaDynMemDealloc_rt.H>
 #endif
+#include <prdfMemEccAnalysis.H>
 
 using namespace TARGETING;
 
@@ -771,98 +772,26 @@ int32_t AnalyzeFetchRcePue( ExtensibleChip * i_membChip,
 //------------------------------------------------------------------------------
 
 /**
- * @brief  MBSECCFIR[19] - Fetch UE.
- * @param  i_membChip A Centaur chip.
- * @param  i_sc       The step code data struct.
- * @param  i_mbaPos   The MBA position.
+ * @brief  MBSECCFIR[19] - Mainline UE.
+ * @param  i_chip MEMBUF chip.
+ * @param  io_sc  The step code data struct.
  * @return SUCCESS
  */
-int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
-                        STEP_CODE_DATA_STRUCT & i_sc, uint32_t i_mbaPos )
-{
-    #define PRDF_FUNC "[AnalyzeFetchUe] "
+#define PLUGIN_FETCH_UE_ERROR( POS ) \
+int32_t AnalyzeFetchUe##POS( ExtensibleChip * i_chip, \
+                             STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    ExtensibleChip * mbaChip = getConnectedChild( i_chip, TYPE_MBA, POS ); \
+    PRDF_ASSERT( nullptr != mbaChip ); \
+    MemEcc::analyzeFetchUe<TYPE_MBA, MbaDataBundle *>( mbaChip, io_sc ); \
+    return SUCCESS; \
+} \
+PRDF_PLUGIN_DEFINE( Membuf, AnalyzeFetchUe##POS );
 
-    int32_t l_rc = SUCCESS;
+PLUGIN_FETCH_UE_ERROR( 0 )
+PLUGIN_FETCH_UE_ERROR( 1 )
 
-    ExtensibleChip * mbaChip = NULL;
-
-    do
-    {
-        // All memory UEs should be customer viewable. Normally, this would be
-        // done by setting the threshold to 1, but we do not want to mask UEs
-        // on the first occurrence.
-        i_sc.service_data->setServiceCall();
-
-        CenMembufDataBundle * membdb = getMembufDataBundle( i_membChip );
-        mbaChip = membdb->getMbaChip( i_mbaPos );
-        if ( NULL == mbaChip )
-        {
-            PRDF_ERR( PRDF_FUNC "getMbaChip() returned NULL" );
-            l_rc = FAIL; break;
-        }
-
-        CenAddr addr;
-        l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_UE_ADDR, addr );
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getCenReadAddr() failed" );
-            break;
-        }
-        CenRank rank = addr.getRank();
-
-        // Add address to UE table.
-        CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
-        mbadb->iv_ueTable.addEntry( UE_TABLE::FETCH_UE, addr );
-
-        // Callout the rank.
-        MemoryMru memmru ( mbaChip->GetChipHandle(), rank,
-                           MemoryMruData::CALLOUT_RANK );
-        i_sc.service_data->SetCallout( memmru );
-
-        if ( CHECK_STOP != i_sc.service_data->getPrimaryAttnType() )
-        {
-            // Add a TPS request to the TD queue and ban any further TPS
-            // requests for this rank.
-            l_rc = mbadb->iv_tdCtlr.handleTdEvent( i_sc, rank,
-                                                  CenMbaTdCtlrCommon::TPS_EVENT,
-                                                  true );
-            if ( SUCCESS != l_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "handleTdEvent() failed: rank=m%ds%d",
-                          rank.getMaster(), rank.getSlave() );
-                // We are not adding break here as we still want to do lmbGard
-                // If you want to add any code after this which depends on
-                // result of handleTdEvent result, add the code judicially.
-            }
-
-            #if !defined(__HOSTBOOT_MODULE) || defined(__HOSTBOOT_RUNTIME)
-            // Send lmb gard message to hypervisor.
-            int32_t lmbRc =  DEALLOC::lmbGard( mbaChip, addr );
-            if ( SUCCESS != lmbRc )
-            {
-                PRDF_ERR( PRDF_FUNC "lmbGard() failed" );
-                l_rc = lmbRc; break;
-            }
-            #endif
-        }
-
-    } while (0);
-
-    // Add ECC capture data for FFDC.
-    if ( NULL != mbaChip )
-        MemCaptureData::addEccData<TYPE_MBA>( mbaChip, i_sc );
-
-    if ( SUCCESS != l_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed: i_membChip=0x%08x i_mbaPos=%d",
-                  i_membChip->GetId(), i_mbaPos );
-        CalloutUtil::defaultError( i_sc );
-    }
-
-    return SUCCESS; // Intentionally return SUCCESS for this plugin
-
-    #undef PRDF_FUNC
-}
+#undef PLUGIN_FETCH_UE_ERROR
 
 //------------------------------------------------------------------------------
 
@@ -1426,8 +1355,6 @@ PRDF_PLUGIN_DEFINE( Membuf, AnalyzeFetch##TYPE##MBA );
 
 PLUGIN_FETCH_ECC_ERROR( Nce, 0 )
 PLUGIN_FETCH_ECC_ERROR( Nce, 1 )
-PLUGIN_FETCH_ECC_ERROR( Ue,  0 )
-PLUGIN_FETCH_ECC_ERROR( Ue,  1 )
 
 #undef PLUGIN_FETCH_ECC_ERROR
 

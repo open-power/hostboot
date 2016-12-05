@@ -292,19 +292,19 @@ void MemoryMru::getCommonVars()
     TARGETING::TYPE trgtType = getTargetType( iv_target );
     PRDF_ASSERT( TYPE_MCA == trgtType || TYPE_MBA == trgtType );
 
-    TargetHandle_t node = getConnectedParent( iv_target, TYPE_NODE );
-    if ( NULL == node )
-    {
-        PRDF_ERR( PRDF_FUNC "Could not find node attached to target 0x%08x",
-                getHuid(iv_target) );
-        PRDF_ASSERT( false );
-    }
-
     TargetHandle_t proc = getConnectedParent( iv_target, TYPE_PROC );
     if ( NULL == proc )
     {
         PRDF_ERR( PRDF_FUNC "Could not find proc attached to target 0x%08x",
                 getHuid(iv_target) );
+        PRDF_ASSERT( false );
+    }
+
+    TargetHandle_t node = getConnectedParent( proc, TYPE_NODE );
+    if ( NULL == node )
+    {
+        PRDF_ERR( PRDF_FUNC "Could not find node attached to target 0x%08x",
+                getHuid(proc) );
         PRDF_ASSERT( false );
     }
 
