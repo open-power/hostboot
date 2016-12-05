@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -343,10 +343,10 @@ fapi2::ReturnCode p9_setup_sbe_config(const
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_8_FSI,
                                     l_read_scratch8));
 
-    //Reading EC attribute to change SECURE system to UNSECURE system
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SECURE2UNSECURE_SETUP, i_target_chip, l_attr_read));
+    //Reading SECURITY_MODE attribute
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SECURITY_MODE, FAPI_SYSTEM, l_attr_read));
 
-    if(l_attr_read)
+    if(l_attr_read.getBit<7>() == 0)
     {
         FAPI_DBG("Reading CBS Control Status register");
         FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_CS_FSI, l_data32_cbs_cs));
