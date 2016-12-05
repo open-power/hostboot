@@ -327,8 +327,8 @@ void* host_build_stop_image (void *io_pArgs)
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_build_stop_image entry" );
 
-    // allocate two temporary work buffer
-    void* l_temp_buffer0 = malloc(MAX_RING_BUF_SIZE);
+    // allocate three temporary work buffers
+    void* l_temp_buffer0 = malloc(MAX_SEEPROM_IMAGE_SIZE);
     void* l_temp_buffer1 = malloc(MAX_RING_BUF_SIZE);
     void* l_temp_buffer2 = malloc(MAX_RING_BUF_SIZE);
 
@@ -440,7 +440,7 @@ void* host_build_stop_image (void *io_pArgs)
                                  PHASE_IPL,
                                  img_type,
                                  l_temp_buffer0,
-                                 MAX_RING_BUF_SIZE,
+                                 MAX_SEEPROM_IMAGE_SIZE,
                                  l_temp_buffer1,
                                  MAX_RING_BUF_SIZE,
                                  l_temp_buffer2,
