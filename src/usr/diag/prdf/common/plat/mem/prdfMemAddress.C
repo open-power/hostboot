@@ -201,6 +201,38 @@ uint32_t getMemReadAddr<TYPE_MEMBUF>( ExtensibleChip * i_chip, uint32_t i_pos,
 
 //------------------------------------------------------------------------------
 
+template<>
+uint32_t getMemReadAddr<TYPE_MCA>( ExtensibleChip * i_chip,
+                                   MemAddr::ReadReg i_reg, MemAddr & o_addr )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+
+    ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
+
+    uint8_t port = i_chip->getPos() % MAX_MCA_PER_MCBIST;
+
+    return getMemReadAddr<TYPE_MCBIST>( mcbChip, port, i_reg, o_addr );
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t getMemReadAddr<TYPE_MBA>( ExtensibleChip * i_chip,
+                                   MemAddr::ReadReg i_reg, MemAddr & o_addr )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
+
+    uint8_t mbaPos = i_chip->getPos();
+
+    return getMemReadAddr<TYPE_MEMBUF>( membChip, mbaPos, i_reg, o_addr );
+}
+
+//------------------------------------------------------------------------------
+
 #ifdef __HOSTBOOT_MODULE
 
 template<>
