@@ -550,7 +550,7 @@ extern "C"
      * @param   i_pChipHomer    points to HOMER image.
      * @return  fapi2 return code.
      */
-    fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer  )
+    fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer )
     {
         uint8_t attrVal = 0;
         uint32_t cmeFlag = 0;
@@ -560,6 +560,7 @@ extern "C"
         cmeHeader_t* pCmeHdr = (cmeHeader_t*) & i_pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
         sgpeHeader_t* pSgpeHdr = (sgpeHeader_t*)& i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECT];
 
+        //Handling flags common to CME and SGPE
 
         FAPI_DBG(" ==================== CME/SGPE Flags =================");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_STOP4_DISABLE,
@@ -614,6 +615,20 @@ extern "C"
 
         FAPI_DBG("STOP_11_to_8           :   %s", attrVal ? "TRUE" : "FALSE" );
 
+        //Handling SGPE specific flag
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE,
+                               FAPI_SYSTEM,
+                               attrVal),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_PROC_FABRIC_ADDR_BAR_MODE");
+
+        //Attribute set to 0x01 for SMALL_SYSTEM
+        if( attrVal )
+        {
+            sgpeFlag |= SGPE_PROC_FAB_ADDR_BAR_MODE_POS;
+        }
+
+        FAPI_DBG("SMALL_SYSTEM           :   %s", attrVal ? "TRUE" : "FALSE" );
+        //Updating flag field in CME/SGPE Image header
         pCmeHdr->g_cme_mode_flags       =   SWIZZLE_4_BYTE(cmeFlag);
         pSgpeHdr->g_sgpe_reserve_flags  =   SWIZZLE_4_BYTE(sgpeFlag);
 
