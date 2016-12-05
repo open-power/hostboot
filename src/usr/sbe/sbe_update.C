@@ -770,11 +770,13 @@ namespace SBE
                        "pnor vaddr = 0x%.16X",
                        pnorSectionId, pnorInfo.vaddr);
 
-            // Look for HBBL end data on 16-byte boundary start at offset 0x2C00
-            // Note: Code takes up at least the first 0x2C00 bytes of the HBBL
-            //       image, so start at that offset to search for this data.
+            // Look for HBBL end data on 16-byte boundary start at offset
+            // HBBL_FUZZY_END_ADDRESS
+            // Note: Code takes up at least the first HBBL_FUZZY_END_ADDRESS
+            //       bytes of the HBBL image, so start at that offset to search
+            //       for this data.
             uint64_t hbblAbsoluteEnd = pnorInfo.vaddr + pnorInfo.size;
-            uint64_t hbblAddr = pnorInfo.vaddr + 0x2C00;
+            uint64_t hbblAddr = pnorInfo.vaddr + HBBL_FUZZY_END_ADDRESS;
             while( hbblAddr < hbblAbsoluteEnd )
             {
                 hbblEndData = reinterpret_cast<hbblEndData_t*>(hbblAddr);

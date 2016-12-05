@@ -37,5 +37,7 @@ OBJS += bl_pnor_utils.o
 OBJS += bl_pnor_ecc.o
 OBJS += bl_builtins.o
 
+OPT_LEVEL = -Os
+
 include ${ROOTPATH}/config.mk
 

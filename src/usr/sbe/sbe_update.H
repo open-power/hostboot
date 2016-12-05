@@ -96,6 +96,7 @@ namespace SBE
 
     // PNOR HBBL Partition constants
     const uint64_t HBBL_START_ADDRESS  = 0x0000000000003000;
+    const uint64_t HBBL_FUZZY_END_ADDRESS = 0x1400;
     const size_t   HBBL_MAX_SIZE       = 20*KILOBYTE;         // 20KB
     const uint64_t HBBL_END_EYECATCHER = 0x4842424C656E6400;  // 'HBBLend\0'
 

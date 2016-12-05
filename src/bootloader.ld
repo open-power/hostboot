@@ -41,6 +41,7 @@ SECTIONS
         *(.text)
         *(.text._*)
         *(.text.*)
+        *(.sfpr)
     }
 
     .rodata ALIGN(0x8): {
