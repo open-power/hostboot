@@ -52,6 +52,12 @@ namespace RUNTIME
 /********************
  Local Constants used for sanity checks
  ********************/
+const hdatHeaderExp_t MDT_HEADER = {
+    0xD1F0,   //id
+    "MS VPD", //name
+    0x0024    //version
+};
+
 const hdatHeaderExp_t HBRT_DATA_HEADER = {
     0xD1F0,   //id
     "HBRT  ", //name
@@ -672,6 +678,57 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             {
                 o_dataSize = 0;
             }
+        }
+        else if (RUNTIME::RESERVED_MEM == i_section)
+        {
+            // Find the right tuple and verify it makes sense
+            hdat5Tuple_t* tuple = NULL;
+            if( iv_spiraS )
+            {
+                tuple = &(iv_spiraS->hdatDataArea[SPIRAS_MDT]);
+            }
+            else if( unlikely(iv_spiraL != NULL) )
+            {
+                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_MDT]);
+            }
+            TRACUCOMP(g_trac_runtime, "MDT_DATA tuple=%p", tuple);
+            errhdl = check_tuple( i_section,
+                                  tuple );
+            if( errhdl ) { break; }
+
+            uint64_t base_addr;
+            errhdl = getSpiraTupleVA(tuple, base_addr);
+            if( errhdl ) { break; }
+
+            hdatHDIF_t* mdt_header =
+              reinterpret_cast<hdatHDIF_t*>(base_addr);
+            TRACUCOMP( g_trac_runtime, "mdt_header=%p", mdt_header );
+
+            // Check the headers and version info
+            errhdl = check_header( mdt_header,
+                                   MDT_HEADER );
+            if( errhdl ) { break; }
+
+            hdatHDIFDataHdr_t* mdt_data_header =
+              reinterpret_cast<hdatHDIFDataHdr_t*>
+              (mdt_header->hdatDataPtrOffset + base_addr);
+
+            errhdl = verify_hdat_address(mdt_data_header,
+                                         mdt_header->hdatDataPtrCnt * sizeof(hdatHDIFDataHdr_t) );
+            if( errhdl ) { break; }
+
+            uint64_t resvMemHdatAddr = mdt_data_header[MDT_RESERVED_HB_MEM_SECTION].hdatOffset + base_addr;
+
+            hdatMsReservedMemArrayHeader_t* reservedMemArrayHeader =
+                reinterpret_cast<hdatMsReservedMemArrayHeader_t *>(resvMemHdatAddr);
+
+            assert(i_instance < reservedMemArrayHeader->arrayEntryCount,
+                     "Instance entered exceeds max reserved mem entry count");
+
+            o_dataAddr = reinterpret_cast<uint64_t>(
+                resvMemHdatAddr + reservedMemArrayHeader->offsetToArray + (i_instance * sizeof(hdatMsVpdRhbAddrRange_t)));
+            //Array Header addr
+            o_dataSize = sizeof(hdatMsVpdRhbAddrRange_t);
         }
         // HB Runtime Data
         else if ( (RUNTIME::HBRT        == i_section) ||
