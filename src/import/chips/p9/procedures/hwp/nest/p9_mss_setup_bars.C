@@ -801,6 +801,16 @@ fapi2::ReturnCode buildMCBarData(
         if ( (l_portInfo[0].numPortsInGroup > 0) ||
              (l_portInfo[1].numPortsInGroup > 0) )
         {
+            // If odd port (port1) has memory and even port (port0) is empty,
+            // program channel id for port0 (because HW looks for id at this
+            // port), zero out port1's group id
+            if ( (l_portInfo[1].numPortsInGroup > 0) &&
+                 (l_portInfo[0].numPortsInGroup == 0) )
+            {
+                l_portInfo[0].channelId = l_portInfo[1].channelId;
+                l_portInfo[1].channelId = 0;
+            }
+
             // Display MCS port info data
             displayMCPortInfoData(l_mcs, l_portInfo);
 
