@@ -22,75 +22,53 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/*****************************************************************************/
-/* linker script for low level firmware                                      */
-/*****************************************************************************/
-
-/* PH: to use the same lds file for 32/64bit, don't specify
- *     OUTPUT_FORMAT, OUTPUT_ARCH here.
- * /
- OUTPUT_FORMAT("elf64-powerpc")
- OUTPUT_ARCH(powerpc64:common)
- */
-
-/* set the entry point */
-ENTRY(_instruction_start)
-
-MEMORY {
-	secure_boot_rom  (IRX): ORIGIN = 0x80001C0000000000, LENGTH = 32K
-/*	untrusted_memory (RW): ORIGIN = 0x8000000000000000, LENGTH = 0x0000000000800000
-*	trusted_memory   (RW): ORIGIN = 0x8000000000800000, LENGTH = 0x800000FFFF800000
-*/
-}
-
 
 SECTIONS {
-	. = 0x80001C0000000000; /* tbrom base address */
+    .text : {
+        *(.branchtable)
+        *(.text)
+        *(.text._*)
+        *(.text.*)
+        *(.sfpr)
+    }
 
-	.branchtable : {
-		. = ALIGN(0x1000);
-	}>secure_boot_rom
+    .rodata ALIGN(0x8): {
+        *(.rodata)
+        *(.rodata.*)
+        . = ALIGN(8);
+        __toc_start = .;
+        *(.toc)
+        *(.opd)
+        *(.got)
+        *(.plt)
+        *(.data.rel.ro.*)
+    }
 
-	.text : {
-		*(.text)
-	}>secure_boot_rom
+    .data ALIGN(0x8): {
+        *(.data)
+        *(.data.*)
+        *(.got1)
+        *(.sdata)
+        *(.bss)
+        *(.bss.*)
+    }
 
-	. = ALIGN(8);
+    end_load_address = .;
 
-	__toc_start = .;
-	.toc : {
-		 *(.toc .got)
-	}>secure_boot_rom
-	. = ALIGN(8);
-	__toc_end = .;
+    .rela : {
+        *(.rela.*)
+    }
 
-	.data : {
-		*(.data)
-		*(.rodata .rodata.*)
-		*(.got1)
-		*(.sdata)
-	}>secure_boot_rom
+    .dynsym : { *(.dynsym) }
+    .dynstr : { *(.dynstr) }
+    .hash : { *(.hash) }
+    .gnu.hash : { *(.gnu.hash) }
+    .eh_frame : { *(.eh_frame) }
 
-	. = ALIGN(8);
-
-	/* PH: opd section must be separate, if i put it in .data,
-	 * the C functions are not present in the generated file....
-	 * If anybody can explain why, i'd be glad to hear...
-	 * Note: the KEEP has been removed was: " KEEP (*(.opd)) "
-	 */
-	.opd ALIGN(8) : {
-		*(.opd)
-	}>secure_boot_rom
-	 
-	. = ALIGN(8);
-	__bss_start = .;
-	.bss : {
-		*(.sbss) *(.scommon)
-		*(.dynbss)
-		*(.bss)
-	}>secure_boot_rom
-	. = ALIGN(8);
-	__bss_end = .;
-	__bss_size = SIZEOF(.bss);
-
+    /DISCARD/ : {
+        *(.comment)
+        *(.gnu.attributes)
+        *(.dtors)
+        *(.interp)
+    }
 }

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -58,6 +58,7 @@ $(IMGDIR)/%.bin: $(IMGDIR)/%.elf \
                   $(addprefix $(IMGDIR)/lib, \
 	              $(addsuffix .so, $($*_EXTENDED_MODULES))) \
 	      ) \
+          $(if $($*_NO_RELOCATION), --no-relocation) \
         $(addprefix $(IMGDIR)/, $($*_DATA_MODULES)) \
         | bzip2 -zc > $(IMGDIR)/.$*.lnkout.bz2'
 	$(C1)$(ROOTPATH)/src/build/tools/addimgid $@ $<

@@ -22,19 +22,11 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/*----------------------------------------------------------------------
- *   (C) COPYRIGHT INTERNATIONAL BUSINESS MACHINES CORPORATION  2010
- *                        ALL RIGHTS RESERVED
- *  IBM Research, Zurich  and  IBM Crypto Competency Center, Copenhagen
- *----------------------------------------------------------------------
- *  Author: Tamas Visegrady (tvi@zurich.ibm.com)
- *----------------------------------------------------------------------*/
 
 #if !defined(__ECVERIFY_H__)
 #define   __ECVERIFY_H__
 
-/** ECDSA verification on fixed curve
- */
+// ECDSA verification on fixed curve
 
 #define EC_HASHBYTES   64     /* SHA-256 */
 #define EC_COORDBYTES  66     /* P-521   */
@@ -46,6 +38,7 @@ typedef uint8_t ecc_signature_t[2*EC_COORDBYTES];
  *          zero     if parameters are valid but signature verification fails
  *          negative if parameters (such as point) are invalid
  */
+extern "C"
 int ec_verify (const uint8_t *publicpt,     /* 2*EC_COORDBYTES */
                const uint8_t *hash,         /*   EC_HASHBYTES  */
                const uint8_t *signature) ;  /* 2*EC_COORDBYTES */

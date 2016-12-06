@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -288,6 +288,7 @@ map<string,size_t> weak_symbols;
 set<string> all_symbols;
 set<string> weak_symbols_to_check;
 bool includes_extended_image = false;
+bool relocation = true;
 
 size_t next_tls_id = 0;
 
@@ -304,7 +305,7 @@ int main(int argc, char** argv)
     if (argc <= 2)
     {
         cout << argv[0] << " <output> <kernel> <modules>"
-            " [--extended=<page_addr> <output> <modules>]" << endl;
+            " [--no-relocation] [--extended=<page_addr> <output> <modules>]" << endl;
         return -1;
     }
 
@@ -317,7 +318,11 @@ int main(int argc, char** argv)
         for (int files = 1; files < argc; files++)
         {
             string fname(argv[files]);
-            if(isOutput)
+            if (0 == fname.compare(0,15,"--no-relocation"))
+            {
+                relocation = false;
+            }
+            else if(isOutput)
             {
                 isOutput = false;
                 output = fopen(fname.c_str(), "w+");
@@ -444,35 +449,39 @@ int main(int argc, char** argv)
         // Only appies to base binary file
         //
 
-        cout << "Updating last address..." << std::hex;
-        const Symbol& last_address_symbol =
-            objects[0].symbols[VFS_TOSTRING(VFS_LAST_ADDRESS)];
-        uint64_t last_address_entry_address =
-            last_address_symbol.address + last_address_symbol.base +
-            objects[0].offset;
-
-        fseek(objects[0].iv_output, last_address_entry_address, SEEK_SET);
-
-        char last_addr_data[sizeof(uint64_t)];
-        bfd_putb64(last_address, last_addr_data);
-        fwrite(last_addr_data, sizeof(uint64_t), 1, objects[0].iv_output);
-
-        cout << last_address << " to " << last_address_entry_address << endl;
-
-        // Output relocation data for single file images. (non-extended)
-        if (!includes_extended_image)
+        // Ignore if relocation not needed for image.
+        if (relocation)
         {
-            fseek(objects[0].iv_output, 0, SEEK_END);
-            char temp64[sizeof(uint64_t)];
+            cout << "Updating last address..." << std::hex;
+            const Symbol& last_address_symbol =
+                objects[0].symbols[VFS_TOSTRING(VFS_LAST_ADDRESS)];
+            uint64_t last_address_entry_address =
+                last_address_symbol.address + last_address_symbol.base +
+                objects[0].offset;
 
-            uint64_t count = all_relocations.size();
-            bfd_putb64(count, temp64);
-            fwrite(temp64, sizeof(uint64_t), 1, objects[0].iv_output);
+            fseek(objects[0].iv_output, last_address_entry_address, SEEK_SET);
 
-            for (int i = 0; i < all_relocations.size(); i++)
+            char last_addr_data[sizeof(uint64_t)];
+            bfd_putb64(last_address, last_addr_data);
+            fwrite(last_addr_data, sizeof(uint64_t), 1, objects[0].iv_output);
+
+            cout << last_address << " to " << last_address_entry_address << endl;
+
+            // Output relocation data for single file images. (non-extended)
+            if (!includes_extended_image)
             {
-                bfd_putb64(all_relocations[i], temp64);
+                fseek(objects[0].iv_output, 0, SEEK_END);
+                char temp64[sizeof(uint64_t)];
+
+                uint64_t count = all_relocations.size();
+                bfd_putb64(count, temp64);
                 fwrite(temp64, sizeof(uint64_t), 1, objects[0].iv_output);
+
+                for (int i = 0; i < all_relocations.size(); i++)
+                {
+                    bfd_putb64(all_relocations[i], temp64);
+                    fwrite(temp64, sizeof(uint64_t), 1, objects[0].iv_output);
+                }
             }
         }
     }
@@ -571,6 +580,8 @@ bool Object::write_object()
 
     if(isELF())
     {
+        // @TODO RTC: 166850 skip text, rodata, data if .size() is 0. It appears
+        // fseek messes up the offset, if there is 0 size.
         // Output TEXT section.
         fseek(iv_output, text.vma_offset, SEEK_CUR);
         if (text.size != fwrite(text.data, 1, text.size, iv_output))
