@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <errl/errlmanager.H>
 #include "scom.H"
 #include "scomtrans.H"
+#include <scom/scomif.H>
 #include <scom/scomreasoncodes.H>
 #include <errl/errludtarget.H>
 #include <initservice/initserviceif.H>
@@ -177,57 +178,86 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
                         va_list i_args)
 {
     errlHndl_t l_err = NULL;
-    TARGETING::Target* l_target_SW = NULL;
 
-    //will hold the value of parent chip for indirect scom
-    TARGETING::Target* l_parentChip =
-          const_cast<TARGETING::Target *>(TARGETING::getParentChip(i_target));
-    uint64_t l_addr = va_arg(i_args,uint64_t);
-    //if opMode is not specified as an argument va_arg will return NULL which is 0
-    uint64_t l_opMode = va_arg(i_args,uint64_t);
+    do {
+        //will hold the value of parent chip for indirect scom
+        TARGETING::Target* l_parentChip = const_cast<TARGETING::Target *>
+                                        (TARGETING::getParentChip(i_target));
+        uint64_t l_addr = va_arg(i_args,uint64_t);
+        // if opMode is not specified as an argument
+        // va_arg will return NULL which=0
+        uint64_t l_opMode = va_arg(i_args,uint64_t);
+        bool l_needsWakeup = false;
 
-    l_err = scomTranslate(i_target, l_addr, l_target_SW, l_opMode);
+        l_err = scomTranslate(i_target,
+                              l_addr,
+                              l_needsWakeup,
+                              l_opMode);
+        if(l_err)
+        {
+            break;
+        }
 
+#if __HOSTBOOT_RUNTIME
+        if(l_needsWakeup)
+        {
+            TRACDCOMP(g_trac_scom,"Special wakeup required, starting now..");
+            g_wakeupInProgress = true;
 
-    if (l_err == NULL)
-    {
+            l_err = handleSpecialWakeup(i_target,true);
+            if(l_err)
+            {
+                TRACFCOMP(g_trac_scom, "startScomProcess: "
+                          "handleSpecialWakeup enable ERROR");
+
+                //capture the target data in the elog
+                ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
+                                                    .addToLog(l_err);
+                l_err->collectTrace(SCOM_COMP_NAME,1024);
+                break;
+            }
+
+            g_wakeupInProgress = false;
+        }
+#endif
+
         // call the routine that will do the indirect scom
         // and then call the correct device driver.
         l_err = SCOM::checkIndirectAndDoScom(i_opType,
-                                            l_parentChip,
-                                            io_buffer,
-                                            io_buflen,
-                                            i_accessType,
-                                            l_addr);
-    }
+                                             l_parentChip,
+                                             io_buffer,
+                                             io_buflen,
+                                             i_accessType,
+                                             l_addr);
 
-    // @todo RTC:124196 need to move this to a more general location so that
-    //       the disable occurs after the HBRT is complete.
+        // @todo RTC:124196 need to move this to a more general location so that
+        //       the disable occurs after the HBRT is complete.
 #if __HOSTBOOT_RUNTIME
-    if(!(l_opMode & fapi2::DO_NOT_DO_WAKEUP) &&
-       (l_target_SW != NULL)          &&
-       !g_wakeupInProgress)
-    {
-        g_wakeupInProgress = true;
-        errlHndl_t l_errSW = NULL;
-
-        l_errSW = handleSpecialWakeup(l_target_SW,false);
-
-        if(l_err != NULL && l_errSW)
+        if(l_needsWakeup && !g_wakeupInProgress)
         {
-            TRACFCOMP(g_trac_scom,"Disable p9_cpu_special_wakeup ERROR");
+            g_wakeupInProgress = true;
+            errlHndl_t l_errSW = NULL;
 
-            // capture the target data in the elog
-            ERRORLOG::ErrlUserDetailsTarget(l_target_SW).addToLog(l_errSW);
-            errlCommit(l_errSW,RUNTIME_COMP_ID);
+            l_errSW = handleSpecialWakeup(i_target,false);
+
+            if(l_err != NULL && l_errSW)
+            {
+                TRACFCOMP(g_trac_scom, "startScomProcess: "
+                          "handleSpecialWakeup disable ERROR");
+
+                // capture the target data in the elog
+                ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errSW);
+                errlCommit(l_errSW,RUNTIME_COMP_ID);
+            }
+            else if(l_errSW)
+            {
+                l_err = l_errSW;
+            }
+            g_wakeupInProgress = false;
         }
-        else if(l_errSW)
-        {
-            l_err = l_errSW;
-        }
-        g_wakeupInProgress = false;
-    }
 #endif
+
+    } while (0);
 
     return l_err;
 }
@@ -235,9 +265,9 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 errlHndl_t scomTranslate(TARGETING::Target * &i_target,
-                        uint64_t & io_addr,
-                        TARGETING::Target * io_target_SW,
-                        uint64_t i_opMode)
+                         uint64_t & io_addr,
+                         bool & o_needsWakeup,
+                         uint64_t i_opMode)
 {
     errlHndl_t l_err = NULL;
 
@@ -247,10 +277,10 @@ errlHndl_t scomTranslate(TARGETING::Target * &i_target,
     //Need to support centaur still @TODO RTC: 139953
 
     l_err = p9_translation(i_target,
-                          l_type,
-                          io_addr,
-                          io_target_SW,
-                          i_opMode);
+                           l_type,
+                           io_addr,
+                           o_needsWakeup,
+                           i_opMode);
 
     return l_err;
 }
@@ -260,7 +290,7 @@ errlHndl_t scomTranslate(TARGETING::Target * &i_target,
 errlHndl_t p9_translation (TARGETING::Target * &i_target,
                            TARGETING::TYPE i_type,
                            uint64_t &io_addr,
-                           TARGETING::Target * io_target_SW,
+                           bool & o_needsWakeup,
                            uint64_t i_opMode)
 {
     errlHndl_t l_err = NULL;
@@ -317,34 +347,14 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
             !(i_opMode & fapi2::DO_NOT_DO_WAKEUP) )
         {
             TRACDCOMP(g_trac_scom,"Determining if Special Wakeup is needed..");
-            bool l_needsWakeup = true;
+            o_needsWakeup = true;
             for(uint16_t i = 0; i < l_scomPairings.size(); i++)
             {
                 if( l_scomPairings[i].chipUnitType == PU_PERV_CHIPUNIT)
                 {
-                    l_needsWakeup = false;
+                    o_needsWakeup = false;
                     break;
                 }
-            }
-            if(l_needsWakeup)
-            {
-                TRACDCOMP(g_trac_scom,"Special wakeup required, starting now..");
-                g_wakeupInProgress = true;
-
-                l_err = handleSpecialWakeup(i_target,true);
-                if(l_err)
-                {
-                    TRACFCOMP(g_trac_scom,
-                              "Enable handleSpecialWakeup ERROR");
-
-                  //capture the target data in the elog
-                  ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
-                  .addToLog(l_err);
-                  l_err->collectTrace(SCOM_COMP_NAME,1024);
-                  break;
-                }
-                io_target_SW = i_target;
-                g_wakeupInProgress = false;
             }
         }
 #endif

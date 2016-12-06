@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -26,9 +26,12 @@
 HOSTBOOT_RUNTIME = 1
 
 ROOTPATH = ../../../../..
+
 VPATH += ../
 
 MODULE = pm_rt
+
+EXTRAINCDIR += ${ROOTPATH}/src/usr/scom/runtime
 
 ## Objects unique to HBRT
 OBJS += rt_pm.o
