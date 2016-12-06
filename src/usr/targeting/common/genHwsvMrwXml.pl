@@ -4853,10 +4853,9 @@ sub generate_pec
     $pciAttr{"PROC_PCIE_PCS_RX_SIGDET_CNTL"} = 'proc_pcie_pcs_rx_sigdet_cntl';
     $pciAttr{"PROC_PCIE_PCS_RX_ROT_CDR_SSC"} = 'proc_pcie_pcs_rx_rot_cdr_ssc';
     $pciAttr{"PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG2"} = 'proc_pcie_pcs_tx_pcie_recv_detect_cntl_reg2';
-    #Below are broken in current fips build-@fixme-RTC:161897
-    #$pciAttr{"PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG1"} = 'proc_pcie_pcs_tx_pcie_recv_detect_cntl_reg1';
-    #$pciAttr{"PROC_PCIE_PCS_SYSTEM_CNTL"} = 'proc_pcie_pcs_system_cntl';
-    #$pciAttr{"PROC_PCIE_PCS_M_CNTL"} = 'proc_pcie_pcs_m_cntl';
+    $pciAttr{"PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG1"} = 'proc_pcie_pcs_tx_pcie_recv_detect_cntl_reg1';
+    $pciAttr{"PROC_PCIE_PCS_SYSTEM_CNTL"} = 'proc_pcie_pcs_system_cntl';
+    $pciAttr{"PROC_PCIE_PCS_M_CNTL"} = 'proc_pcie_pcs_m_cntl';
 
 
     # XML has this structure (iop==pec):
