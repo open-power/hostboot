@@ -199,7 +199,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
-  <!-- ******************************************************************** --> 
+  <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW388878</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -434,6 +434,25 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Data integrity issue requires us to disable clockgate in read array for Nimbus DD1.0
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_TRAINING_BAD_BITS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      For Nimbus pre DD1.02 we want to pass DDR training if we see 'correctable'
+      errors. This isn't the case for post-DD1.02 where we want to pass/fail
+      training based on the results from the PHY itself
     </description>
     <chipEcFeature>
       <chip>
