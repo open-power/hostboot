@@ -420,6 +420,9 @@ enum
 
     //RING LAYOUT
     RING_ALIGN_BOUNDARY         =  0x08,
+
+    //MISC
+    DARN_BAR_EN_POS             = 0x8000000000000000ll,
 };
 
 /**
