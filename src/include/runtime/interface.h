@@ -407,7 +407,8 @@ typedef struct hostInterfaces
      *  @pre HBRT is responsible for enabling special wakeup on the
      *       associated core(s) before calling this interface
      *
-     *  @param  i_homer     start address of the homer image
+     *  @param  i_chipId    processor chip ID
+                            plus ID type, always proc (0x0)
      *  @param  i_section   runtime section to update
      *                      (passthru to pore_gen_scom)
      *  @param  i_operation type of operation to perform
@@ -419,7 +420,7 @@ typedef struct hostInterfaces
      *          Any value other than 0 on failure.
      *  @platform FSP, OpenPOWER
      */
-    int (*hcode_scom_update)( uint64_t i_homer,
+    int (*hcode_scom_update)( uint64_t i_chipId,
                               uint32_t i_section,
                               uint32_t i_operation,
                               uint64_t i_scomAddr,

@@ -31,13 +31,15 @@ namespace HBPM
 {
     /**
      * @brief Enumeration of the load PM complex mode
-     *      LOAD == i_mode
+     *      LOAD
      *       - Call pm_reset first
      *       - Load OCC lid, write OCC config data, build Pstate
      *         Parameter Blocks, and load Hcode reference image lid
-     *      RELOAD == i_mode
+     *      RELOAD
      *       - Reload OCC lid, rewrite OCC config data, build Pstate
      *         Parameter Blocks, and rebuild Hcode
+     *      UNKNOWN
+     *       - Unknown PM load type, do not load OCC/HCODE
      */
     enum loadPmMode
     {
@@ -88,6 +90,25 @@ namespace HBPM
      */
     errlHndl_t getRingOvd(void*& io_overrideImg);
 
+#if __HOSTBOOT_RUNTIME
+    /**
+     *  @brief Modify the SCOM restore section of the HCODE image with the
+     *          given register data
+     *  @param  i_section        Runtime section to update
+     *                           (passthru to pore_gen_scom)
+     *  @param  i_operation      Type of operation to perform
+     *                           (passthru to pore_gen_scom)
+     *  @param  i_target         Target owning the scom address
+     *  @param  i_rel_scom_addr  Fully qualified scom address
+     *  @param  i_scom_data      Data for operation
+     *  @return errlHndl_t
+    */
+    errlHndl_t hcode_update( uint32_t i_section,
+                             uint32_t i_operation,
+                             TARGETING::Target*  i_target,
+                             uint64_t i_rel_scom_addr,
+                             uint64_t i_scom_data );
+#endif
 } //namespace HBPM ends
 
 #endif

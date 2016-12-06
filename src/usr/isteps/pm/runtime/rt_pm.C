@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,9 @@
 //  targeting support
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/targetservice.H>
+
+#include <scom/scomif.H>
+#include "handleSpecialWakeup.H"
 
 using namespace TARGETING;
 using namespace RUNTIME;
@@ -286,6 +289,130 @@ namespace RTPM
 
         return rc;
     }
+
+
+    /**
+    * @brief HCODE update operation
+    */
+    errlHndl_t hcode_update( uint32_t i_section,
+                             uint32_t i_operation,
+                             Target*  i_target,
+                             uint64_t i_rel_scom_addr,
+                             uint64_t i_scom_data )
+    {
+        errlHndl_t l_err = NULL;
+        int rc = 0;
+
+        do {
+            if( g_hostInterfaces == NULL ||
+                g_hostInterfaces->hcode_scom_update == NULL )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"hcode_update: "
+                          "Hypervisor hcode_scom_update interface not linked");
+                /*@
+                * @errortype
+                * @moduleid         MOD_PM_RT_HCODE_UPDATE
+                * @reasoncode       RC_PM_RT_INTERFACE_ERR
+                * @userdata1[0:31]  Target HUID
+                * @userdata1[32:63] SCOM restore section
+                * @userdata2        SCOM address
+                * @devdesc      HCODE scom update runtime interface not linked.
+                */
+                l_err= new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                               MOD_PM_RT_HCODE_UPDATE,
+                                               RC_PM_RT_INTERFACE_ERR,
+                                               TWO_UINT32_TO_UINT64(
+                                                 TARGETING::get_huid(i_target),
+                                                 i_section),
+                                               i_rel_scom_addr);
+                break;
+            }
+
+            // Enable special wakeup
+            l_err = handleSpecialWakeup(i_target,true);
+            if(l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"hcode_update: "
+                           "handleSpecialWakeup enable ERROR" );
+                break;
+            }
+
+            // Get the Proc Chip Id
+            const TARGETING::Target * l_pChipTarget =
+                getParentChip(const_cast<TARGETING::Target *>(i_target));
+            RT_TARG::rtChipId_t l_chipId = 0;
+
+            l_err = RT_TARG::getRtTarget(l_pChipTarget, l_chipId);
+            if(l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"hcode_update: getRtTarget ERROR" );
+                break;
+            }
+
+            // Translate the scom address
+            uint64_t l_scomAddr = i_rel_scom_addr;
+            bool l_needsWakeup = false;     // Ignored - SW already enabled
+
+            l_err = SCOM::scomTranslate(i_target,
+                                        l_scomAddr,
+                                        l_needsWakeup);
+            if(l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"hcode_update: scomTranslate ERROR" );
+                break;
+            }
+
+            rc = g_hostInterfaces->hcode_scom_update(l_chipId,
+                                                     i_section,
+                                                     i_operation,
+                                                     l_scomAddr,
+                                                     i_scom_data);
+            if(rc)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"hcode_update: "
+                          "HCODE scom update failed. "
+                          "rc 0x%X target 0x%llX chipId 0x%llX section 0x%X "
+                          "operation 0x%X scomAddr 0x%llX scomData 0x%llX",
+                          rc, get_huid(i_target), l_chipId, i_section,
+                          i_operation, l_scomAddr, i_scom_data);
+
+                // convert rc to error log
+                /*@
+                * @errortype
+                * @moduleid     MOD_PM_RT_HCODE_UPDATE
+                * @reasoncode   RC_PM_RT_HCODE_UPDATE_ERR
+                * @userdata1    Hypervisor return code
+                * @userdata2    SCOM address
+                * @devdesc      HCODE SCOM update error
+                */
+                l_err=new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                              MOD_PM_RT_HCODE_UPDATE,
+                                              RC_PM_RT_HCODE_UPDATE_ERR,
+                                              rc,
+                                              l_scomAddr);
+                break;
+            }
+
+            // Disable special wakeup
+            l_err = handleSpecialWakeup(i_target,false);
+            if(l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"hcode_update: "
+                           "handleSpecialWakeup disable ERROR" );
+                break;
+            }
+
+        } while (0);
+
+        return l_err;
+    }
+
 
     //------------------------------------------------------------------------
 

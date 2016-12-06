@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,19 +38,14 @@
 #include <fsi/fsiif.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
+#include <scom/scomif.H>
 
 #include <devicefw/driverif.H>
 
 
 extern trace_desc_t* g_trac_scom;
 
-namespace SCOM
-{
-extern errlHndl_t scomTranslate(TARGETING::Target* &i_target,
-                         uint64_t &io_addr,
-                         TARGETING::Target* io_target_SW,
-                         uint64_t i_opMode = 0);
-}
+
 class ScomTest: public CxxTest::TestSuite
 {
 public:
@@ -1108,9 +1103,10 @@ public:
         {
             total++;
             uint64_t tempAddr = test_data[i].initAddr;
+            bool needsWakeup = false;
             l_err  = SCOM::scomTranslate(test_data[i].target,
                     tempAddr,
-                    NULL);
+                    needsWakeup);
 
             if( l_err && !test_data[i].expectError)
             {

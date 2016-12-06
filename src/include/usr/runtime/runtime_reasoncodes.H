@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,7 @@ namespace RUNTIME
         MOD_POPULATE_RTDATABYNODE        = 0x14,  /**< populate_hbruntime.C */
 
         MOD_PM_RT_LOAD_PM_COMPLEX        = 0x15,  /**< rt_pm.C */
+        MOD_PM_RT_HCODE_UPDATE           = 0x16,  /**< rt_pm.C */
     };
 
     enum RuntimeReasonCode
@@ -90,6 +91,8 @@ namespace RUNTIME
         RT_NO_PROC_TARGET            = RUNTIME_COMP_ID | 0x1B,
         RC_UNMAP_FAIL                = RUNTIME_COMP_ID | 0x1C,
         RC_PM_RT_UNKNOWN_MODE        = RUNTIME_COMP_ID | 0x1D,
+        RC_PM_RT_INTERFACE_ERR       = RUNTIME_COMP_ID | 0x1E,
+        RC_PM_RT_HCODE_UPDATE_ERR    = RUNTIME_COMP_ID | 0x1F,
     };
 
     enum UserDetailsTypes

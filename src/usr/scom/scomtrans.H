@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,36 +61,20 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
                   va_list i_args);
 
 /**
- * @brief Performs a SCom Translation of the scom address
- * This function performs the translation and gets the
- * correct target.
- *
- * @param[in]           i_target         SCom target
- * @param[in|out]       io_addr          SCom address
- * @param[in|out]       io_target_SW     target for SW
- * @param[in]           i_opMode         Defaults to 0 (Standard)
- * @return              errlHndl_t
- */
-errlHndl_t scomTranslate(TARGETING::Target * &i_target,
-                        uint64_t & io_addr,
-                        TARGETING::Target * io_target_SW,
-                        uint64_t i_opMode = 0);
-
-/**
  * @brief This function translates a scom address using the
  *        the interface that the HW team provided.
  *
  * @param[in]      i_target      SCom target is passed in
  * @param[in]      i_type        Type of the target
  * @param[in|out]  io_addr       Address to be translated
- * @param[in|out]  io_target_SW  SW target for HBRT
+ * @param[out]     o_needsWakeup Enable SW before scom
  * @param[in]      i_opMode      Defaults to 0 (Standard)
  * @return         errlHndl_t
  */
 errlHndl_t p9_translation (TARGETING::Target * &i_target,
                           TARGETING::TYPE i_type,
                            uint64_t &io_addr,
-                           TARGETING::Target * io_target_SW,
+                           bool & o_needsWakeup,
                            uint64_t i_opMode = 0);
 
 /**
