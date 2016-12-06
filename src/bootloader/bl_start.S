@@ -419,6 +419,10 @@ bootloader_trace:
 bootloader_hbbSection:
     .space 32
 
+.global hbi_ImageId
+hbi_ImageId:
+    .space 128
+
     .balign 16
 .global bootloader_end_eyecatcher
 bootloader_end_eyecatcher:

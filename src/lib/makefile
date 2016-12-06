@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2015
+# Contributors Listed Below - COPYRIGHT 2010,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -26,6 +26,7 @@ ROOTPATH = ../..
 
 OBJS += string.o
 OBJS += string_ext.o
+OBJS += string_utils.o
 OBJS += stdlib.o
 OBJS += ctype.o
 OBJS += assert.o

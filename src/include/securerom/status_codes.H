@@ -22,9 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/****************************************************************************
- *
- ****************************************************************************/
+
 #ifndef STATUS_CODES_H
 #define STATUS_CODES_H
 
@@ -36,15 +34,8 @@
 #endif
 
 // context codes
-#define ROM_INSTRUCTION_START  0x0100
-#define C_INSTRUCTION_START    0x0200
-#define ROM_SELFTEST           0x0300
-#define ROM_VERIFY             0x0400
-// documentaion                0x0600 C_INSTRUCTION_START call of ROM_VERIFY 
+#define ROM_VERIFY             0x0100
 #define ROM_SRESET             0x0E00
-
-#define PHYP_VERIFY            0x1500
-#define PHYP_SHA512_HASH       0x1600
 
 // progress/test codes
 #define BEGIN                  0x0001
@@ -70,7 +61,6 @@
 #define SHA_BAD_TEST           0x0041
 #define ECDSA_GOOD_TEST        0x0042
 #define ECDSA_BAD_TEST         0x0043
-#define SELFTEST_DONE          0x0044
 
 #define TARGET_LOW_TEST        0x0050
 #define TARGET_VALID_TEST      0x0051
@@ -91,9 +81,8 @@
 #define HW_SIGNATURE_TEST      0x0061
 #define PREFIX_ECID_TEST       0x0062
 #define PREFIX_HASH_TEST       0x0063
-#define SPECIAL_NO_ECID_TEST   0x0064
-#define SPECIAL_SIZE_0_TEST    0x0065
-#define SW_KEY_PROTECTION_TEST 0x0066
+#define SW_KEY_PROTECTION_TEST 0x0064
+#define SW_KEY_INVALID_COUNT   0x0065
 
 #define SW_SIGNATURE_TEST      0x0070
 #define HEADER_ECID_TEST       0x0071

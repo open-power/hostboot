@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 #define uint_fast8_t  uint8_t
 
 #ifndef BYTE_ORDER

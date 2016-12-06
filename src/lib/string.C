@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,104 +25,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-extern "C" void *memset(void *vdest, int ch, size_t len)
-{
-    // TODO: align to an 8-byte boundary
-    // Loop, storing 8 bytes every 3 instructions
-    long *ldest = reinterpret_cast<long *>(vdest);
-    if (len >= sizeof(long))
-    {
-	long lch = ch & 0xFF;
-	lch |= lch<<8;
-	lch |= lch<<16;
-	lch |= lch<<32;
-	size_t len8 = len / sizeof(long);
-	size_t i = len8;
-	do
-	{
-	    ldest[--i] = lch;
-	}
-	while( i > 0 );
-	ldest += len8;
-	len -= len8 * sizeof(long);
-    }
-
-    // Loop, storing 1 byte every 3 instructions
-    char *cdest = reinterpret_cast<char *>(ldest);
-    while (len >= sizeof(char))
-    {
-	*cdest++ = ch;
-	len -= sizeof(char);
-    }
-
-    return vdest;
-}
-
 extern "C" void bzero(void *vdest, size_t len)
 {
     memset(vdest, 0, len);
-}
-
-extern "C" void *memcpy(void *vdest, const void *vsrc, size_t len)
-{
-    // TODO: align to an 8-byte boundary?
-
-    // Loop, copying 8 bytes every 5 instructions (TODO: 8/4 should be possible)
-    long *ldest = reinterpret_cast<long *>(vdest);
-    const long *lsrc = reinterpret_cast<const long *>(vsrc);
-
-    while (len >= sizeof(long))
-    {
-	*ldest++ = *lsrc++;
-	len -= sizeof(long);
-    }
-
-    // Loop, copying 1 byte every 4 instructions
-    char *cdest = reinterpret_cast<char *>(ldest);
-    const char *csrc = reinterpret_cast<const char *>(lsrc);
-    for (size_t i = 0; i < len; ++i)
-    {
-	cdest[i] = csrc[i];
-    }
-
-    return vdest;
-}
-
-extern "C" void *memmove(void *vdest, const void *vsrc, size_t len)
-{
-    // Copy first-to-last
-    if (vdest <= vsrc)
-    {
-	return memcpy(vdest,vsrc,len);
-    }
-
-    // Copy last-to-first (TO_DO: optimize)
-    char *dest = reinterpret_cast<char *>(vdest);
-    const char *src = reinterpret_cast<const char *>(vsrc);
-    for (size_t i = len; i > 0;)
-    {
-	--i;
-	dest[i] = src[i];
-    }
-
-    return vdest;
-}
-
-extern "C" int memcmp(const void *p1, const void *p2, size_t len)
-{
-    const char *c1 = reinterpret_cast<const char *>(p1);
-    const char *c2 = reinterpret_cast<const char *>(p2);
-
-    for (size_t i = 0; i < len; ++i)
-    {
-	long n = static_cast<long>(c1[i]) - static_cast<long>(c2[i]);
-	if (n != 0)
-	{
-	    return n;
-	}
-    }
-
-    return 0;
 }
 
 extern "C" void *memmem(const void *haystack, size_t haystacklen,

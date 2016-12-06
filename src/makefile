@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2016
+# Contributors Listed Below - COPYRIGHT 2010,2017
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -34,6 +34,7 @@ SUBDIRS += sys.d
 SUBDIRS += usr.d
 SUBDIRS += build.d
 SUBDIRS += runtime.d
+SUBDIRS += securerom.d
 
 # Reducing HB extended img size for VPO by disabling certain libs using
 # CONFIG_VPO_COMPILE option
@@ -42,9 +43,11 @@ IMGS += hbicore
 IMGS += hbicore_test
 IMGS += hbirt
 IMGS += hbirt_test
+IMGS += securerom
 
 BASE_OBJECTS += string.o
 BASE_OBJECTS += string_ext.o
+BASE_OBJECTS += string_utils.o
 BASE_OBJECTS += ctype.o
 BASE_OBJECTS += math.o
 BASE_OBJECTS += builtins.o
@@ -69,6 +72,13 @@ BOOTLDR_OBJECTS += bl_pnor_utils.o
 BOOTLDR_OBJECTS += bl_pnor_ecc.o
 BOOTLDR_OBJECTS += bl_terminate.o
 BOOTLDR_OBJECTS += forceattn_p8.o
+
+SECUREROM_OBJECTS += branchtable.o
+SECUREROM_OBJECTS += ROM.o
+SECUREROM_OBJECTS += ecverify.o
+SECUREROM_OBJECTS += hw_utils.o
+SECUREROM_OBJECTS += sha512.o
+SECUREROM_OBJECTS += string_utils.o
 
 DIRECT_BOOT_OBJECTS += start.o
 DIRECT_BOOT_OBJECTS += kernel.o
@@ -303,12 +313,17 @@ RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 hbibl_OBJECTS += ${BL_BASE_OBJECTS}
 hbibl_OBJECTS += ${BOOTLDR_OBJECTS}
 hbibl_LDFILE = bootloader.ld
+hbibl_NO_RELOCATION = 1
 
 hbicore_OBJECTS += ${BASE_OBJECTS}
 hbicore_OBJECTS += ${DIRECT_BOOT_OBJECTS}
 hbicore_MODULES += ${BASE_MODULES}
 hbicore_EXTENDED_MODULES += ${EXTENDED_MODULES}
 hbicore_LDFILE = kernel.ld
+
+securerom_OBJECTS += ${SECUREROM_OBJECTS}
+securerom_LDFILE = securerom.ld
+securerom_NO_RELOCATION = 1
 
 # for PRDR_RULE_TABLE_TARGETS
 include ${ROOTPATH}/src/usr/diag/prdf/common/rule/prdf_rule.mk
