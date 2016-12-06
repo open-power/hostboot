@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -31,11 +31,15 @@ HCODE_UTIL+=$(ROOTPATH)/tools/imageProcs/
 HCODE_UTIL+=$(ROOTPATH)/chips/p9/procedures/hwp/customize/
 HCODE_UTIL+=$(ROOTPATH)/chips/p9/common/include/
 HCODE_UTIL+=$(ROOTPATH)/chips/p9/procedures/utils/stopreg/
+HCODE_UTIL+=$(ROOTPATH)/chips/p9/procedures/hwp/nest
+
 lib$(PROCEDURE)_DEPLIBS += p9_scan_ring_util
 lib$(PROCEDURE)_DEPLIBS += p9_xip_image
 lib$(PROCEDURE)_DEPLIBS += p9_tor
 lib$(PROCEDURE)_DEPLIBS += p9_ringId
 lib$(PROCEDURE)_DEPLIBS += p9_stop_util
 lib$(PROCEDURE)_DEPLIBS += p9_stop_api
+lib$(PROCEDURE)_DEPLIBS += p9_fbc_utils
+
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(HCODE_UTIL))
 $(call BUILD_PROCEDURE)

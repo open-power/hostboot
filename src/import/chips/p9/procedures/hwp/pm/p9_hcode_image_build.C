@@ -43,11 +43,13 @@
 #include "p9_stop_util.H"
 #include "p9_scan_ring_util.H"
 #include "p9_tor.H"
-#include "p9_misc_scom_addresses.H"
+#include "p9_quad_scom_addresses.H"
+#include "p9_stop_api.H"
 #include <p9_infrastruct_help.H>
 #include <p9_xip_customize.H>
 #include <p9_ringId.H>
 #include <p9_quad_scom_addresses.H>
+#include <p9_fbc_utils.H>
 
 #ifdef __CRONUS_VER
     #include <string>
@@ -2226,7 +2228,80 @@ extern "C"
         return fapi2::current_err;
     }
 
-    //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+
+    /**
+     * @brief   populates EQ SCOM restore region of HOMER with SCOM restore value for NCU RNG BAR ENABLE.
+     * @param   i_pChipHomer    points to start of P9 HOMER
+     * @param   i_procTgt       fapi2 target for p9 chip.
+     * @return  faip2 return code.
+     */
+    fapi2::ReturnCode populateNcuRingBarScomReg( void* i_pChipHomer, CONST_FAPI2_PROC& i_procTgt )
+    {
+        FAPI_DBG("> populateNcuRingBarScomReg");
+
+        do
+        {
+            uint8_t  attrVal = 0;
+            uint64_t nxRangeBarAddrOffset = 0;
+            uint64_t regNcuRngBarData   = 0;
+            uint64_t baseAddressNm0     = 0;
+            uint64_t baseAddressNm1     = 0;
+            uint64_t baseAddressMirror  = 0;
+            const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NX_RNG_BAR_ENABLE,
+                                   i_procTgt,
+                                   attrVal ),
+                     "Error from FAPI_ATTR_GET for attribute ATTR_PROC_NX_RNG_BAR_ENABLE");
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NX_RNG_BAR_BASE_ADDR_OFFSET,
+                                   FAPI_SYSTEM,
+                                   nxRangeBarAddrOffset ),
+                     "Error from FAPI_ATTR_GET for attribute ATTR_PROC_NX_RNG_BAR_BASE_ADDR_OFFSET");
+
+            FAPI_TRY(p9_fbc_utils_get_chip_base_address(i_procTgt,
+                     baseAddressNm0,
+                     baseAddressNm1,
+                     baseAddressMirror,
+                     regNcuRngBarData),
+                     "Failed in p9_fbc_utils_get_chip_base_address" );
+
+
+            if( fapi2::ENUM_ATTR_PROC_NX_RNG_BAR_ENABLE_ENABLE == attrVal )
+            {
+                //Set bit0 which corresponds to bit DARN_BAR_EN of reg NCU_DAR_BAR
+                regNcuRngBarData |= DARN_BAR_EN_POS ;
+            }
+
+            regNcuRngBarData += nxRangeBarAddrOffset;
+
+            FAPI_DBG("Restore value for EQ_NCU_DARN_BAR_REG 0x%016lx",
+                     regNcuRngBarData );
+
+            StopReturnCode_t stopRc =
+                stopImageSection::p9_stop_save_scom( i_pChipHomer,
+                        EQ_NCU_DARN_BAR_REG,
+                        regNcuRngBarData ,
+                        stopImageSection::P9_STOP_SCOM_REPLACE,
+                        stopImageSection::P9_STOP_SECTION_EQ_SCOM );
+
+            if( stopRc )
+            {
+                FAPI_ERR("Failed to update EQ_NCU_DARN_BAR_REG in Self Restore Image 0x%08x",
+                         stopRc );
+                break;
+            }
+
+        }
+        while(0);
+
+        FAPI_DBG("< populateNcuRingBarScomReg");
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+    //--------------------------------------------------------------------------------------------
 
     /**
      * @brief   populate L2 Epsilon SCOM register.
@@ -2832,6 +2907,9 @@ extern "C"
                 FAPI_ERR("populateEpsilonL3ScomReg failed" );
                 break;
             }
+
+            //populate HOMER with SCOM restore value of NCU RNG BAR SCOM Register
+            populateNcuRingBarScomReg( pChipHomer, i_procTgt );
 
             //validate SRAM Image Sizes of PPE's
             uint32_t sramImgSize = 0;

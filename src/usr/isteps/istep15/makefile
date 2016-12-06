@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -26,6 +26,7 @@ ROOTPATH = ../../../..
 MODULE = istep15
 PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
 EXTRAINCDIR += ${PROCEDURES_PATH}/stop_reg/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
@@ -59,6 +60,7 @@ include $(PROCEDURES_PATH)/hwp/pm/p9_pm_pba_init.mk
 include ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/p9_ringId.mk
 include ${ROOTPATH}/config.mk
 
+VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
 VPATH += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
