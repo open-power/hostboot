@@ -246,7 +246,7 @@ rule rL2FIR
     L2FIR & ~L2FIR_MASK & ~L2FIR_ACT0 &  L2FIR_ACT1;
 };
 
-group gL2FIR filter singlebit
+group gL2FIR filter singlebit, secondarybits( 0, 6 )
 {
     /** L2FIR[0]
      *  L2 cache read CE
@@ -583,7 +583,7 @@ rule rL3FIR
     L3FIR & ~L3FIR_MASK & ~L3FIR_ACT0 &  L3FIR_ACT1;
 };
 
-group gL3FIR filter singlebit
+group gL3FIR filter singlebit, secondarybits( 4, 13 )
 {
     /** L3FIR[0]
      *  L3_RDDSP_SEGR_LCO_ALL_MEM_UNAVAIL_ERR
