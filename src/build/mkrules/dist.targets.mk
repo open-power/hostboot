@@ -79,6 +79,7 @@ COPY_FILES = \
     src/build/buildpnor/PnorUtils.pm:openpower \
     src/usr/targeting/common/processMrw.pl:openpower \
     src/usr/targeting/common/Targets.pm:openpower \
+    src/usr/targeting/common/filter_out_unwanted_attributes.pl:openpower \
     src/usr/targeting/common/xmltohb/mergexml.sh:openpower \
     src/usr/targeting/common/xmltohb/attribute_types.xml:openpower \
     src/usr/targeting/common/xmltohb/attribute_types_hb.xml:openpower \
