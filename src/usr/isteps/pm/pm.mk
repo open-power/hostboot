@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -45,6 +45,8 @@ HWP_IMAGEPROCS_PATH += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 HWP_STOPUTIL_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
 EXTRAINCDIR += ${HWP_STOPUTIL_PATH}
 EXTRAINCDIR += ${HWP_IMAGEPROCS_PATH}
+NEST_UTIL_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
+EXTRAINCDIR += ${NEST_UTIL_PATH}
 
 ## pointer to already consumed procedures.
 
@@ -59,6 +61,7 @@ OBJS += occAccess.o
 VPATH += ${HWP_PM_PATH} ${HWP_CUST_PATH} ${HWP_ACC_PATH}
 VPATH += ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH}
 VPATH += ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH} ${HWP_STOPUTIL_PATH}
+VPATH += ${NEST_UTIL_PATH}
 
 # TODO RTC: 164237
 # Take another look at PM lib
@@ -97,3 +100,4 @@ include ${HWP_IMAGEPROCS_PATH}/p9_ringId.mk
 include ${HWP_STOPUTIL_PATH}/p9_stop_util.mk
 include ${HWP_STOPUTIL_PATH}/p9_stop_api.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_scan_compression.mk
+include ${NEST_UTIL_PATH}/p9_fbc_utils.mk

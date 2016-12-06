@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,6 +135,7 @@ const DepModInfo g_istep15Dependancies = {
         DEP_LIB(libp9_stop_util.so),
         DEP_LIB(libpm.so),
         DEP_LIB(libsbe.so),
+        DEP_LIB(libistep07.so),
         NULL
     }
 };
