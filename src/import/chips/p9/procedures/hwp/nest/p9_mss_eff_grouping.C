@@ -1728,34 +1728,63 @@ void grouping_group3PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
             continue;
         }
 
-        bool potential_group = true;
+        // Rules for group of 3:
+        // 1. All 3 ports must have same amount of memory
+        // 2. Crossed-MCS ports can be grouped if and only if:
+        //      - it's an even port (port0) in the MCS
+        //      - it's an odd port (port1) in the MCS and the even port is empty.
+        //    Ex: MCPORTID_0, MCPORTID_1, MCPORTID_3: MCPORTID_2 must be empty
+        //        MCPORTID_2, MCPORTID_3, MCPORTID_5: MCPORTID_4 must be empty
+        //        MCPORTID_2, MCPORTID_3, MCPORTID_4: OK to group
 
-        for (uint8_t jj = 1; jj < PORTS_PER_GROUP; jj++)
+        // Variable to indicates reason 3 ports can't be group
+        //    0 = OK to group
+        //    1 = One of the ports has unequal amount of memory
+        //    2 = 3rd entry port is odd and its even port has memory.
+        uint8_t l_canNotGroup = 0;
+        uint8_t jj = 0;
+
+        for (jj = 1; jj < PORTS_PER_GROUP; jj++)
         {
             FAPI_DBG("Checking CFG_3MCPORT[%d][%d]: MCPORTID %d:",
                      ii, jj, CFG_3MCPORT[ii][jj]);
 
+            // Skip if this port is already grouped or has different
+            // amount of memory
             if ( (o_groupData.iv_portGrouped[CFG_3MCPORT[ii][jj]]) ||
                  (i_memInfo.iv_portSize[CFG_3MCPORT[ii][0]] !=
                   i_memInfo.iv_portSize[CFG_3MCPORT[ii][jj]]) )
             {
-                // This port is already grouped or does not have the same
-                // size as port 0
-                FAPI_DBG("   Unable to group way by 3: ");
-                FAPI_DBG("      o_groupData.iv_portGrouped[CFG_3MCPORT[%d][%d]] = %d",
-                         ii, jj, o_groupData.iv_portGrouped[CFG_3MCPORT[ii][jj]]);
-                FAPI_DBG("      i_memInfo.iv_portSize[CFG_3MCPORT[%d][0]] = %d GB",
-                         ii, i_memInfo.iv_portSize[CFG_3MCPORT[ii][0]]);
-                FAPI_DBG("      i_memInfo.iv_portSize[CFG_3MCPORT[%d][%d]] = %d GB",
-                         ii, jj, i_memInfo.iv_portSize[CFG_3MCPORT[ii][jj]]);
-
-                potential_group = false;
+                l_canNotGroup = 1;
                 break;
+            }
+
+            // If this is the 3rd entry, the port belong to another MCS.
+            if ( jj == (PORTS_PER_GROUP - 1) ) // 3rd entry
+            {
+                // If this is an odd port of the MCS, its even port
+                // must be empty
+                if ( (CFG_3MCPORT[ii][jj] % 2) &&
+                     (i_memInfo.iv_portSize[CFG_3MCPORT[ii][jj] - 1] != 0) )
+                {
+                    l_canNotGroup = 2;
+                    break;
+                }
             }
         }
 
-        // Group of 3 is possible
-        if (potential_group)
+        if (l_canNotGroup != 0) // Can not group 3 ports
+        {
+            FAPI_DBG("   Unable to group way by 3: Can not group reason: %d",
+                     l_canNotGroup);
+            FAPI_DBG("      o_groupData.iv_portGrouped[CFG_3MCPORT[%d][%d]] = %d",
+                     ii, jj, o_groupData.iv_portGrouped[CFG_3MCPORT[ii][jj]]);
+            FAPI_DBG("      i_memInfo.iv_portSize[CFG_3MCPORT[%d][0]] = %d GB",
+                     ii, i_memInfo.iv_portSize[CFG_3MCPORT[ii][0]]);
+            FAPI_DBG("      i_memInfo.iv_portSize[CFG_3MCPORT[%d][%d]] = %d GB",
+                     ii, jj, i_memInfo.iv_portSize[CFG_3MCPORT[ii][jj]]);
+        }
+        else // Group of 3 is possible
         {
             o_groupData.iv_data[g][PORT_SIZE] =
                 i_memInfo.iv_portSize[CFG_3MCPORT[ii][0]];
@@ -1821,6 +1850,22 @@ void grouping_group2PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
             continue;
         }
 
+        // Rules for group of 2:
+        // 1. Both ports must have the same amount of memory.
+        // 2. Crossed-MCS ports can be grouped if and only if:
+        //      - it's an even port (port0) in the MCS
+        //      - it's an odd port (port1) in the MCS and the even port is empty.
+        //    Ex: MCPORTID_1, MCPORTID_2: MCPORTID_0 must be empty
+        //        MCPORTID_1, MCPORTID_3: MCPORTID_0 and MCPORTID_2 must be empty
+        //        MCPORTID_0, MCPORTID_2: OK to group if memory are equal.
+
+        // Skip if this port is odd and its MCS' even port is not empty
+        if ( (pos % 2) && (i_memInfo.iv_portSize[pos - 1] != 0) )
+        {
+            FAPI_DBG("Skip this odd port because its MCS' even port is not empty, pos = %d", pos);
+            continue;
+        }
+
         // If any of the remaining ungrouped port has the same amount of memory, group it
         for (uint8_t ii = pos + 1; ii < NUM_MC_PORTS_PER_PROC; ii++)
         {
@@ -1830,9 +1875,17 @@ void grouping_group2PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
                 continue;
             }
 
-            // Same amount of memory?
+            // Same amount of memory
             if (i_memInfo.iv_portSize[pos] == i_memInfo.iv_portSize[ii])
             {
+                // If odd port, even port must have no memory
+                if ( (ii % 2) && (i_memInfo.iv_portSize[ii - 1] != 0) )
+                {
+                    FAPI_DBG("Skip this odd port %d because its MCS' even port is not empty, ii = %d", ii);
+                    continue;
+                }
+
+                // Successfully find 2 ports to group
                 o_groupData.iv_data[g][PORT_SIZE] = i_memInfo.iv_portSize[pos];
                 o_groupData.iv_data[g][PORTS_IN_GROUP] = PORTS_PER_GROUP;
                 o_groupData.iv_data[g][GROUP_SIZE] =
