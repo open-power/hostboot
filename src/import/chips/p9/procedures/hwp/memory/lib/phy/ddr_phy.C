@@ -534,7 +534,12 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
         if (dp16::process_bad_bits(i_target, l_failed_dimm, l_rank_pairs) == fapi2::FAPI2_RC_SUCCESS)
         {
             FAPI_INF("Initial cal - errors reported, but only 1 nibble + 1 bit marked %s", mss::c_str(l_failed_dimm));
-            // TK processing recoverable bad bits ...
+
+            // If we're on a pre-DD1.02 Nimbus, Anuwat requests we 'pass' training with 1 nibble + 1 bit.
+            if (mss::chip_ec_feature_mss_training_bad_bits(i_target))
+            {
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
         }
     }
 
