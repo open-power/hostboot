@@ -106,23 +106,28 @@ static inline void reverse( T& io_buffer )
 /// @tparam DS the start bit in the destination buffer - swizzle will count up from here
 /// @tparam L how many bits to swizzle
 /// @tparam SS the start bit in the source buffer - swizzle will count down from here
+/// @tparam SB source buffer type
+/// @tparam DB destination buffer type
 /// @param[in] i_source  source buffer - these bits will be decremented
-/// @param[in] o_destination destination buffer - these bits will be incremented
+/// @param[out] o_destination destination buffer - these bits will be incremented
 /// @return reference to the destination
 ///
 template<uint64_t DS, uint64_t L, uint64_t SS, typename SB, typename DB>
-inline fapi2::buffer<DB>& swizzle( fapi2::buffer<SB> i_source, fapi2::buffer<DB>& o_destination )
+inline fapi2::buffer<DB>& swizzle( const fapi2::buffer<SB>& i_source, fapi2::buffer<DB>& o_destination )
 {
     // Reverse the destination, and then mangle the start bits to get things to line up
     fapi2::buffer<SB> l_tmp(i_source);
-    reverse(i_source);
+    reverse(l_tmp);
+
+    o_destination.template insert < DS, L, (sizeof(SB) * 8) - (SS + 1) > (SB(l_tmp));
 
 #ifdef SWIZZLE_TRACE
-    FAPI_DBG("swizzle o: 0x%016lx s: 0x%016lx d: 0x%016lx ds: %d l: %d ss: %d",
-             l_tmp, i_source, o_destination, DS, L, (sizeof(SB) * 8) - (SS + 1));
+    // s: source, r: reverse, d: destination, ds: distination start, l: length, ss: source start
+    FAPI_DBG("swizzle s: 0x%016llx, r: 0x%016llx, d: 0x%016llx, ds: %d, l: %d, ss: %d",
+             i_source, l_tmp, o_destination, DS, L, (sizeof(SB) * 8) - (SS + 1));
 #endif
 
-    return o_destination.template insert < DS, L, (sizeof(SB) * 8) - (SS + 1) > (SB(i_source));
+    return o_destination;
 }
 
 }

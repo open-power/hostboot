@@ -39,11 +39,14 @@
 #include <fapi2.H>
 
 #include <p9_mc_scom_addresses.H>
+#include <p9_mc_scom_addresses_fld.H>
 
 #include <lib/utils/poll.H>
 #include <lib/utils/swizzle.H>
 #include <lib/mc/port.H>
 #include <lib/shared/mss_const.H>
+
+constexpr uint64_t CKE_HIGH = 0b1111;
 
 // I have a dream that the CCS engine code can be shared among controllers. So, I drive the
 // engine from a set of traits. This might be folly. Allow me to dream. BRS
@@ -116,6 +119,8 @@ class ccsTraits<fapi2::TARGET_TYPE_MCBIST>
             // ARR0
             ARR0_DDR_ADDRESS_0_13 = MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_0_13,
             ARR0_DDR_ADDRESS_0_13_LEN = MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_0_13_LEN,
+            ARR0_DDR_ADDRESS_0_9 = MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_0_13, // Useful for rd/wr cmds
+            ARR0_DDR_ADDRESS_0_9_LEN = 10, // CA bits are 9:0, total length of 10
             ARR0_DDR_ADDRESS_10 = 10, // ADR10 is the 10th bit from the left in Nimbus ARR0
             ARR0_DDR_ADDRESS_17 = MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_17,
             ARR0_DDR_BANK_GROUP_1 = MCBIST_CCS_INST_ARR0_00_DDR_BANK_GROUP_1,
@@ -321,15 +326,15 @@ static void mrs_rcd_helper( fapi2::buffer<uint64_t>& i_arr0 )
     // Generic DDR4 MRS setup (RCD is an MRS)
     //
     // CKE is high Note: P8 set all 4 of these high - not sure if that's correct. BRS
-    i_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(0b1111);
+    i_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_HIGH);
 
     // ACT is high
     i_arr0.setBit<TT::ARR0_DDR_ACTN>();
 
     // RAS, CAS, WE low
-    i_arr0.clearBit<TT::ARR0_DDR_ADDRESS_16>();
-    i_arr0.clearBit<TT::ARR0_DDR_ADDRESS_15>();
-    i_arr0.clearBit<TT::ARR0_DDR_ADDRESS_14>();
+    i_arr0.clearBit<TT::ARR0_DDR_ADDRESS_16>()
+    .template clearBit<TT::ARR0_DDR_ADDRESS_15>()
+    .template clearBit<TT::ARR0_DDR_ADDRESS_14>();
 }
 
 ///
@@ -358,9 +363,9 @@ inline instruction_t<T> rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
     //
     // DDR4: Set BG1 to 0 during an MRS.
     // BG0, BA1:BA0 to 0b111 selects RCW (aka MR7).
-    rcd_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_GROUP_1>();
-    rcd_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_BANK_0_1, TT::ARR0_DDR_BANK_0_1_LEN>(0b11);
-    rcd_boilerplate_arr0.setBit<TT::ARR0_DDR_BANK_GROUP_0>();
+    rcd_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_GROUP_1>()
+    .template insertFromRight<TT::ARR0_DDR_BANK_0_1, TT::ARR0_DDR_BANK_0_1_LEN>(0b11)
+    .template setBit<TT::ARR0_DDR_BANK_GROUP_0>();
 
     // RCD always goes to the 0th rank on the DIMM; either 0 or 4.
     return instruction_t<T>(i_target, (mss::index(i_target) == 0) ? 0 : 4, rcd_boilerplate_arr0, rcd_boilerplate_arr1);
@@ -370,7 +375,7 @@ inline instruction_t<T> rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 /// @brief Create, initialize an MRS CCS command
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_target  the DIMM this instruction is headed for
+/// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
 /// @param[in] i_mrs the specific MRS
 /// @return the MRS CCS instruction
@@ -379,7 +384,8 @@ inline instruction_t<T> rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 /// in this template definition)
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline instruction_t<T> mrs_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_rank,
+inline instruction_t<T> mrs_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const uint64_t i_rank,
                                      const uint64_t i_mrs )
 {
     fapi2::buffer<uint64_t> rcd_boilerplate_arr0;
@@ -421,7 +427,7 @@ inline instruction_t<T> des_command()
     rcd_boilerplate_arr0.setBit<TT::ARR0_DDR_ACTN>();
 
     // CKE is high Note: P8 set all 4 of these high - not sure if that's correct. BRS
-    rcd_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(0b1111);
+    rcd_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_HIGH);
 
     // ACT is high no-care
     // RAS, CAS, WE no-care
@@ -467,7 +473,7 @@ inline instruction_t<T> initial_cal_command(const uint64_t i_rp)
 /// @brief Setup ZQ Long instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_target  the DIMM this instruction is headed for
+/// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
 /// @return the MRS CCS instruction
 /// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
@@ -475,24 +481,182 @@ inline instruction_t<T> initial_cal_command(const uint64_t i_rp)
 /// in this template definition)
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline instruction_t<T> zqcl_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_rank )
+inline instruction_t<T> zqcl_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      const uint64_t i_rank )
 {
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     // CKE is high Note: P8 set all 4 of these high - not sure if that's correct. BRS
-    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(0b1111);
+    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_HIGH);
 
     // ACT is high
     l_boilerplate_arr0.setBit<TT::ARR0_DDR_ACTN>();
 
     // RAS/CAS high, WE low
-    l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_16>();
-    l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_15>();
-    l_boilerplate_arr0.clearBit<TT::ARR0_DDR_ADDRESS_14>();
+    l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_16>()
+    .template setBit<TT::ARR0_DDR_ADDRESS_15>()
+    .template clearBit<TT::ARR0_DDR_ADDRESS_14>();
 
     // ADDR10/AP is high
     l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_10>();
+
+    return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+}
+
+///
+/// @brief Setup read command helper function
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_target the DIMM this instruction is headed for
+/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_bank_addr bank address bits [BG0:BG1] = [62:63] (right aligned)
+/// @param[in] i_bank_group_addr bank group address bits [BA0:BA1] = [62:63] (right aligned)
+/// @param[in] i_column_addr column address bits [A0:A9] = [54:63] (right aligned)
+/// @return the read command CCS instruction
+/// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
+/// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
+/// in this template definition)
+///
+template< fapi2::TargetType T, typename TT = ccsTraits<T> >
+static fapi2::buffer<uint64_t> read_cmd_boilerplate( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint64_t i_rank,
+        const fapi2::buffer<uint64_t>& i_bank_addr = 0,
+        const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
+        const fapi2::buffer<uint64_t>& i_column_addr = 0)
+{
+    // TODO - RTC 166175 Encapsulate command truth table in a subclass for ccs.H
+    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+
+    // CKE is high Note: P8 set all 4 of these high - not sure if that's correct. AAM
+    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE,
+                                       TT::ARR0_DDR_CKE_LEN>(CKE_HIGH);
+
+    // ACT is high
+    l_boilerplate_arr0.setBit<TT::ARR0_DDR_ACTN>();
+
+    // RAS high, CAS low, WE high
+    l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_16>()
+    .template clearBit<TT::ARR0_DDR_ADDRESS_15>()
+    .template setBit<TT::ARR0_DDR_ADDRESS_14>();
+
+    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_BANK_0_1,
+                                       TT::ARR0_DDR_BANK_0_1_LEN>(i_bank_addr);
+
+    // Bank Group takes a little effort - the bits aren't contiguous
+    constexpr uint64_t BG0_BIT = 62;
+    constexpr uint64_t BG1_BIT = 63;
+
+    l_boilerplate_arr0.writeBit<TT::ARR0_DDR_BANK_GROUP_0>(i_bank_group_addr.getBit<BG0_BIT>())
+    .template writeBit<TT::ARR0_DDR_BANK_GROUP_1>(i_bank_group_addr.getBit<BG1_BIT>());
+
+    // CA is A[0:9]
+    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_ADDRESS_0_9,
+                                       TT::ARR0_DDR_ADDRESS_0_9_LEN>(i_column_addr);
+
+    return l_boilerplate_arr0;
+}
+
+///
+/// @brief Setup read command (Fixed BL8 or BC4) instruction
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_target the DIMM this instruction is headed for
+/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_bank_addr bank address bits [BG0:BG1] = [62:63] (right aligned)
+/// @param[in] i_bank_group_addr bank group address bits [BA0:BA1] = [62:63] (right aligned)
+/// @param[in] i_column_addr column address bits [A0:A9] = [54:63] (right aligned)
+/// @return the read command CCS instruction
+/// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
+/// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
+/// in this template definition)
+///
+template< fapi2::TargetType T, typename TT = ccsTraits<T> >
+inline instruction_t<T> rd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                    const uint64_t i_rank,
+                                    const fapi2::buffer<uint64_t>& i_bank_addr = 0,
+                                    const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
+                                    const fapi2::buffer<uint64_t>& i_column_addr = 0)
+{
+    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr1;
+
+    l_boilerplate_arr0 = read_cmd_boilerplate<fapi2::TARGET_TYPE_MCBIST>(i_target, i_rank, i_bank_addr,
+                         i_bank_group_addr, i_column_addr);
+
+    // Setup ADDR10/AP based on read type
+    l_boilerplate_arr0.clearBit<TT::ARR0_DDR_ADDRESS_10>();
+
+    return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+}
+
+///
+/// @brief Setup read w/auto precharge command (Fixed BL8 or BC4) instruction
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_target the DIMM this instruction is headed for
+/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_bank_addr bank address bits [BG0:BG1] = [62:63] (right aligned)
+/// @param[in] i_bank_group_addr bank group address bits [BA0:BA1] = [62:63] (right aligned)
+/// @param[in] i_column_addr column address bits [A0:A9] = [54:63] (right aligned)
+/// @return the read command CCS instruction
+/// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
+/// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
+/// in this template definition)
+///
+template< fapi2::TargetType T, typename TT = ccsTraits<T> >
+inline instruction_t<T> rda_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const uint64_t i_rank,
+                                     const fapi2::buffer<uint64_t>& i_bank_addr = 0,
+                                     const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
+                                     const fapi2::buffer<uint64_t>& i_column_addr = 0)
+{
+    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr1;
+
+    l_boilerplate_arr0 = read_cmd_boilerplate<fapi2::TARGET_TYPE_MCBIST>(i_target, i_rank, i_bank_addr,
+                         i_bank_group_addr, i_column_addr);
+
+    // Setup ADDR10/AP based on read type
+    l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_10>();
+
+    return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+}
+
+///
+/// @brief Setup precharge all banks command instruction
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_target the DIMM this instruction is headed for
+/// @param[in] i_rank the rank on this dimm
+/// @return the precharge all banks command CCS instruction
+/// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
+/// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
+/// in this template definition)
+///
+template< fapi2::TargetType T, typename TT = ccsTraits<T> >
+inline instruction_t<T> precharge_all_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint64_t i_rank )
+{
+    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr1;
+
+    // CKE is high Note: P8 set all 4 of these high - not sure if that's correct. AAM
+    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_HIGH);
+
+    // ACT is high
+    l_boilerplate_arr0.setBit<TT::ARR0_DDR_ACTN>();
+
+    // RAS low, CAS high, WE low
+    l_boilerplate_arr0.clearBit<TT::ARR0_DDR_ADDRESS_16>()
+    .template setBit<TT::ARR0_DDR_ADDRESS_15>()
+    .template clearBit<TT::ARR0_DDR_ADDRESS_14>();
+
+    // Setup ADDR10/AP high
+    l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_10>();
+
+    // From DDR4 Spec table 17:
+    // All other bits from the command truth table or 'V', for valid (1 or 0)
 
     return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
@@ -554,8 +718,8 @@ inline void stop_on_err( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_bu
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 inline void disable_ecc( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer)
 {
-    io_buffer.setBit<TT::DISABLE_ECC_ARRAY_CHK>();
-    io_buffer.setBit<TT::DISABLE_ECC_ARRAY_CORRECTION>();
+    io_buffer.setBit<TT::DISABLE_ECC_ARRAY_CHK>()
+    .template setBit<TT::DISABLE_ECC_ARRAY_CORRECTION>();
 }
 
 ///

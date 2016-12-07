@@ -1570,7 +1570,7 @@
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
-        <enum>SERIAL = 0, PARALLEL = 1, STAGGERED = 2, RESERVED_TEMP= 3</enum>
+        <enum>SERIAL = 0, PARALLEL = 1, STAGGERED = 2</enum>
         <writeable/>
         <array>2</array>
         <mssAccessorName>eff_mpr_rd_format</mssAccessorName>

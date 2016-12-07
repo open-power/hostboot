@@ -999,23 +999,17 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targ
                             std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
 
 ///
-/// @brief Makes CCS instruction to set MPR Mode
+/// @brief  Set MPR Mode
 /// @param[in] i_target a DIMM target
 /// @param[in] i_mode setting for MPR mode
-/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @param[in,out] io_data data we are modifying MPR mode to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T >
-fapi2::ReturnCode set_dram_mpr_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                    const uint64_t i_rank,
-                                    const uint8_t i_mode,
-                                    std::vector< ccs::instruction_t<T> >& io_inst )
+inline fapi2::ReturnCode set_dram_mpr_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_mode,
+        mrs03_data& io_data)
 {
     constexpr uint64_t MAX_MPR_MODE = 0b1;
-    fapi2::ReturnCode l_rc;
-
-    mrs03_data l_data(i_target, l_rc);
-    FAPI_TRY( l_rc, "Unable to instantiate mrs03_data for %s", i_target );
 
     if(i_mode > MAX_MPR_MODE)
     {
@@ -1023,33 +1017,24 @@ fapi2::ReturnCode set_dram_mpr_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
         return fapi2::FAPI2_RC_INVALID_PARAMETER;
     }
 
-    l_data.iv_mpr_mode = i_mode;
-    FAPI_TRY( mrs_engine(i_target, l_data, i_rank, mss::tmrd(), io_inst),
-              "Failed to send MRS03 on %s, rank: %d, delay (in cycles): %d",
-              i_target, i_rank, mss::tmrd());
+    // Update field if input check passes
+    io_data.iv_mpr_mode = i_mode;
 
-fapi_try_exit:
-    return fapi2::current_err;
+    return fapi2::FAPI2_RC_SUCCESS;
 }
 
 ///
-/// @brief Makes CCS instruction to set MPR Read
+/// @brief Set MPR Read
 /// @param[in] i_target a DIMM target
 /// @param[in] i_format setting for MPR read format
-/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @param[in,out] io_data data we are modifying MPR mode to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T >
-fapi2::ReturnCode set_dram_mpr_read(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                    const uint64_t i_rank,
-                                    const uint8_t i_format,
-                                    std::vector< ccs::instruction_t<T> >& io_inst )
+inline fapi2::ReturnCode set_dram_mpr_rd_format(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_format,
+        mrs03_data& io_data)
 {
     constexpr uint64_t MAX_READ_FORMAT = 0b10;
-
-    fapi2::ReturnCode l_rc;
-    mrs03_data l_data(i_target, l_rc);
-    FAPI_TRY( l_rc, "Unable to instantiate mrs03_data for %s", i_target );
 
     if(i_format > MAX_READ_FORMAT)
     {
@@ -1057,33 +1042,24 @@ fapi2::ReturnCode set_dram_mpr_read(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
         return fapi2::FAPI2_RC_INVALID_PARAMETER;
     }
 
-    l_data.iv_read_format = i_format;
-    FAPI_TRY( mrs_engine(i_target, l_data, i_rank, mss::tmrd(), io_inst),
-              "Failed to send MRS03 on %s, rank: %d, delay (in cycles): %d",
-              i_target, i_rank, mss::tmrd());
+    // Update field if input check passes
+    io_data.iv_read_format = i_format;
 
-fapi_try_exit:
-    return fapi2::current_err;
+    return fapi2::FAPI2_RC_SUCCESS;
 }
 
 ///
-/// @brief Makes CCS instruction to set MPR Read
+/// @brief Set MPR page
 /// @param[in] i_target a DIMM target
 /// @param[in] i_page setting for MPR read format
-/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @param[in,out] io_data data we are modifying MPR mode to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T >
-fapi2::ReturnCode set_dram_mpr_page(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                    const uint64_t i_rank,
-                                    const uint8_t i_page,
-                                    std::vector< ccs::instruction_t<T> >& io_inst )
+inline fapi2::ReturnCode set_dram_mpr_page(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_page,
+        mrs03_data& io_data)
 {
     constexpr uint64_t MAX_PAGE = 0b11;
-
-    fapi2::ReturnCode l_rc;
-    mrs03_data l_data(i_target, l_rc);
-    FAPI_TRY( l_rc, "Unable to instantiate mrs03_data for %s", i_target );
 
     if(i_page > MAX_PAGE)
     {
@@ -1091,10 +1067,166 @@ fapi2::ReturnCode set_dram_mpr_page(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
         return fapi2::FAPI2_RC_INVALID_PARAMETER;
     }
 
-    l_data.iv_mpr_page = i_page;
-    FAPI_TRY( mrs_engine(i_target, l_data, i_rank, mss::tmrd(), io_inst),
+    // Update field if input check passes
+    io_data.iv_mpr_page = i_page;
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Makes CCS instruction to set MPR Mode
+/// @tparam T TargetType of the CCS instruction
+/// @param[in] i_target a DIMM target
+/// @param[in] i_mode setting for MPR mode
+/// @param[in] i_rank DIMM rank
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode mpr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                           const uint8_t i_mode,
+                           const uint64_t i_rank,
+                           std::vector< ccs::instruction_t<T> >& io_inst )
+{
+    // From DDR4 spec section 4.10.3 MPR Reads:
+    // tMRD and tMOD must be satisfied after enabling/disabling MPR mode
+    const uint64_t l_delay = std::max( mss::tmod(i_target), mss::tmrd() );
+
+    mrs03_data l_data(i_target, fapi2::current_err);
+    FAPI_TRY(fapi2::current_err, "%s. Failed to initialize mrs03_data for mpr_load", mss::c_str(i_target) );
+
+    FAPI_TRY( set_dram_mpr_mode(i_target, i_mode, l_data),
+              "%s. Failed set_dram_mpr_mode() with a setting of %d",
+              mss::c_str(i_target), i_mode);
+
+    // Make MRS CCS inst
+    FAPI_TRY( mrs_engine(i_target, l_data, i_rank, l_delay, io_inst),
               "Failed to send MRS03 on %s, rank: %d, delay (in cycles): %d",
-              i_target, i_rank, mss::tmrd());
+              mss::c_str(i_target), i_rank, l_delay);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Makes CCS instruction to set MPR Mode
+/// @tparam T TargetType of the CCS instruction
+/// @param[in] i_target a DIMM target
+/// @param[in] i_mode setting for MPR mode
+/// @param[in] i_rd_format MPR read format
+/// @param[in] i_rank DIMM rank
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode mpr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                           const uint8_t i_mode,
+                           const uint8_t i_rd_format,
+                           const uint64_t i_rank,
+                           std::vector< ccs::instruction_t<T> >& io_inst )
+{
+    // From DDR4 spec section 4.10.3 MPR Reads:
+    // tMRD and tMOD must be satisfied after enabling/disabling MPR mode
+    const uint64_t l_delay = std::max( mss::tmod(i_target), mss::tmrd() );
+
+    mrs03_data l_data(i_target, fapi2::current_err);
+    FAPI_TRY(fapi2::current_err, "%s. Failed to initialize mrs03_data for mpr_load", mss::c_str(i_target) );
+
+    FAPI_TRY( set_dram_mpr_mode(i_target, i_mode, l_data),
+              "%s. Failed set_dram_mpr_mode() with a setting of %d",
+              mss::c_str(i_target), i_mode);
+
+    FAPI_TRY( set_dram_mpr_rd_format(i_target, i_rd_format, l_data),
+              "%s. Failed set_dram_mpr_rd_format() with a setting of %d",
+              mss::c_str(i_target), i_rd_format);
+
+    // Make MRS CCS inst
+    FAPI_TRY( mrs_engine(i_target, l_data, i_rank, l_delay, io_inst),
+              "Failed to send MRS03 on %s, rank: %d, delay (in cycles): %d",
+              mss::c_str(i_target), i_rank, l_delay);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Makes CCS instruction for an MPR read
+/// @tparam T TargetType of the CCS instruction
+/// @param[in] i_target a DIMM target
+/// @param[in] i_mode MPR location
+/// @param[in] i_rank DIMM rank
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode mpr_read( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                            const uint64_t i_mpr_loc,
+                            const uint64_t i_rank,
+                            std::vector< ccs::instruction_t<T> >& io_inst )
+{
+    // Right now we only have support for RD and RDA
+    // Unclear if we want the API select the type of read command right now
+    // Note the auto precharge is ignored with MPR mode on so we just do a read cmd
+    ccs::instruction_t<T> l_inst = ccs::rd_command<T> (i_target, i_rank, i_mpr_loc);
+
+    // In MPR Mode:
+    // Reads (back-to-back) from Page 0 may use tCCD_S or tCCD_L timing between read commands
+    // Reads (back-to-back) from Pages 1, 2, or 3 may not use tCCD_S timing between read commands
+    // tCCD_L must be used for timing between read commands
+    uint8_t l_delay = 0;
+
+    if( i_mpr_loc == 0)
+    {
+        // note we are truncating a uint64 to a uint8 but since
+        // the value of tccd_s is always 4....we should be okay
+        l_delay = mss::tccd_s();
+    }
+    else
+    {
+        FAPI_TRY(eff_dram_tccd_l(i_target, l_delay), "Failed to invoke accessor for tCCD_L");
+    }
+
+    // Input type needs to be greater than IDLES_LEN, hence the cast
+    l_inst.arr1.template insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
+                         MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(static_cast<uint64_t>(l_delay));
+
+    FAPI_INF("MPR Read CCS inst 0x%016llx:0x%016llx %s:rank %d, MPR location:%d, delay (in cycles) %d",
+             uint64_t(l_inst.arr0), uint64_t(l_inst.arr1), mss::c_str(i_target), i_rank, i_mpr_loc, l_delay);
+
+    io_inst.push_back(l_inst);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Makes CCS instruction to set precharge all command
+/// @tparam T TargetType of the CCS instruction
+/// @param[in] i_target a DIMM target
+/// @param[in] i_rank DIMM rank
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode precharge_all( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                 const uint64_t i_rank,
+                                 std::vector< ccs::instruction_t<T> >& io_inst )
+{
+    ccs::instruction_t<T> l_inst = ccs::precharge_all_command<T> (i_target, i_rank);
+
+    // From the DDR4 Spec tRP is the precharge command period
+    uint8_t l_delay = 0;
+    FAPI_TRY( eff_dram_trp(i_target, l_delay) );
+
+    // Input type needs to be greater than IDLES_LEN, hence the cast
+    l_inst.arr1.template insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
+                         MCBIST_CCS_INST_ARR1_00_IDLES_LEN>( static_cast<uint64_t>(l_delay));
+
+    FAPI_INF("precharge_all CCS inst 0x%016llx:0x%016llx %s:rank %d, delay (in cycles) %d",
+             uint64_t(l_inst.arr0), uint64_t(l_inst.arr1), mss::c_str(i_target), i_rank, l_delay);
+
+    // Add to CCS program
+    io_inst.push_back(l_inst);
 
 fapi_try_exit:
     return fapi2::current_err;

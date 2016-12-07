@@ -1340,5 +1340,15 @@ inline uint64_t tvrefdqx( const fapi2::Target<T>& i_target )
     return ns_to_cycles(i_target, tVREFDQX);
 }
 
+///
+/// @brief CAS_n to CAS_n command delay for different bank group
+/// @return constexpr value of 4 clocks
+///
+constexpr uint64_t tccd_s()
+{
+    // Per DDR4 Full spec update (79-4A) - timing requirements
+    return 4;
+}
+
 } // mss
 #endif
