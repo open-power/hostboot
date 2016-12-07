@@ -601,6 +601,7 @@
     </description>
     <valueType>int8</valueType>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -619,6 +620,7 @@
     </description>
     <valueType>int8</valueType>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -641,6 +643,7 @@
     </description>
     <valueType>int8</valueType>
     <platInit/>
+    <initToZero/>
   </attribute>
     <!-- ********************************************************************* -->
   <attribute>
@@ -663,6 +666,7 @@
     </description>
     <valueType>int8</valueType>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -685,6 +689,7 @@
     </description>
     <valueType>int8</valueType>
     <platInit/>
+    <initToZero/>
   </attribute>
     <!-- ********************************************************************* -->
   <attribute>
@@ -707,6 +712,7 @@
     </description>
     <valueType>int8</valueType>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -717,15 +723,16 @@
     if OFF, treat STOP4 as STOP4
     if ON, treat STOP4 as STOP2
 
-    Producer: ???
+    Producer: Work-around tools
 
-    Consumer:  p8_hcode_image_build.C
+    Consumer:  p9_hcode_image_build.C
 
     Platform default:  OFF
     </description>
     <valueType>uint8</valueType>
     <enum>OFF=0, ON=1</enum>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -737,13 +744,14 @@
 
     Producer: ???
 
-    Consumer:  p8_hcode_image_build.C
+    Consumer:  p9_hcode_image_build.C
 
     Platform default: ON
     </description>
     <valueType>uint8</valueType>
     <enum>OFF=0, ON=1</enum>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -754,15 +762,16 @@
     if OFF, treat STOP8 as STOP8
     if ON, treat STOP8 as STOP4
 
-    Producer: ???
+    Producer: Work-around tools
 
-    Consumer:  p8_hcode_image_build.C
+    Consumer:  p9_hcode_image_build.C
 
     Platform default:  OFF
     </description>
     <valueType>uint8</valueType>
     <enum>OFF=0, ON=1</enum>
     <platInit/>
+    <initToZero/>
   </attribute>
     <!-- ********************************************************************* -->
   <attribute>
@@ -773,15 +782,16 @@
     if OFF, treat STOP11 as STOP11
     if ON, treat STOP11 as STOP8
 
-    Producer: ???
+    Producer: Work-around tools
 
-    Consumer:  p8_hcode_image_build.C
+    Consumer:  p9_hcode_image_build.C
 
     Platform default:  OFF
     </description>
     <valueType>uint8</valueType>
     <enum>OFF=0, ON=1</enum>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -801,6 +811,7 @@
     <valueType>uint8</valueType>
     <enum>FALSE=0, TRUE=1</enum>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -819,6 +830,7 @@
     <valueType>uint8</valueType>
     <enum>FALSE=0, TRUE=1</enum>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -832,7 +844,7 @@
 
     Consumers: p9_pm_pfet_init
 
-    Platform default:
+    Platform default:250
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -849,7 +861,7 @@
 
     Consumers: p9_pm_pfet_init
 
-    Platform default:
+    latform default:250
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -865,7 +877,7 @@
 
     Consumers: p9_pm_pfet_init
 
-    Platform default:
+    Platform default:  ALLOFF
     </description>
     <valueType>uint8</valueType>
     <enum>
@@ -893,7 +905,7 @@
 
     Consumers: p9_pm_pfet_init
 
-    Platform default:
+    Platform default:  ALLOFF
     </description>
     <valueType>uint8</valueType>
     <enum>
@@ -961,8 +973,8 @@
     </description>
     <initToZero/>
     <valueType>uint8</valueType>
-      <platInit/>
-  </attribute>    
+    <platInit/>
+  </attribute>
   <!-- ********************************************************************* -->
   <attribute>
       <id>ATTR_POUNDV_BUCKET_NUM</id>
@@ -1282,6 +1294,7 @@
           OFF = 0x00,ON = 0x01
       </enum>
       <platInit/>
+      <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1309,10 +1322,23 @@
       <id>ATTR_IVRM_DEADZONE_MV</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <description>
-          Indicates the size of the deadzone where the iVRM cannot regulate
-          (binary in millivolts)
+      Override value for the value of the deadzone where the iVRM cannot regulate
+      (binary in millivolts).
 
-          Producer: MRWB.
+      The deadzone is the difference between the voltage from the external VRM
+      after load line and other losses are removed and the request regulation
+      voltage.  If this difference is smaller than the value of this attribute,
+      the iVRM is forced in to bypass to use the external voltage.
+
+      Producer: MRWB.
+
+      Consumer: p9_pstate_parameter_block ->
+                    CME pstate parameter block
+                    PGPE pstate parameter block
+
+      Handling: p9_pstate_parameter_block reads this attribute. If zero, the
+      value of 50 (0x32) is used. If non-zero, this value is used.
+
       </description>
       <valueType>uint8</valueType>
       <initToZero/>
@@ -1323,67 +1349,107 @@
       <id>ATTR_IVRM_STRENGTH_LOOKUP</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <description>
+      Lookup table used to as part of determining the PFET width to use based
+      on the voltage across the PFET header.
 
-          Producer: MRWB.
+      Producer: MRWB via the iVRM team
+
+      Consumer: p9_pstate_parameter_block ->
+                    CME pstate parameter block
+                    PGPE pstate parameter block
+
       </description>
       <valueType>uint8</valueType>
       <array>64</array>
       <platInit/>
+      <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
       <id>ATTR_IVRM_VIN_MULTIPLIER</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>
+      <description>Multiplier used with the strength lookup to determine the IVRM
+      PFET width.
 
-          Producer: MRWB.
+      Producer: MRWB via the iVRM team
+
+      Consumer: p9_pstate_parameter_block ->
+                    CME pstate parameter block
+                    PGPE pstate parameter block
       </description>
       <valueType>uint8</valueType>
       <array>64</array>
+      <initToZero/>
       <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
       <id>ATTR_IVRM_VIN_MAX_MV</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>
+      <description>Override voltage maximum that is used for the IVRM PFET width
+      calculation.  Setting to 0 will use the default 1100mV.  Setting this to a
+      non-zero value will cause this value to be used instead.
 
-          Producer: MRWB.
+      Producer: MRWB.
+
+      Consumer: p9_pstate_parameter_block ->
+                    CME pstate parameter block
+                    PGPE pstate parameter block
       </description>
       <valueType>uint16</valueType>
       <platInit/>
+      <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
       <id>ATTR_IVRM_STEP_DELAY_NS</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>
+      <description>Time (in nanoseconds) to wait between IVRM steps that are
+      part of a larger transition to the ultimate destination voltage.  The
+      value of 0 is valid to indicate that no delay is necessary.
 
-          Producer: MRWB.
+      Producer: MRWB.
+
+      Consumer: p9_pstate_parameter_block ->
+                    CME pstate parameter block
+                    PGPE pstate parameter block
       </description>
       <valueType>uint16</valueType>
       <platInit/>
+      <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
       <id>ATTR_IVRM_STABILIZATION_DELAY_NS</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <description>
+      Time (in nanoseconds) to wait after the iVRMs indicate "done" in the event
+      extra time is required.
 
-          Producer: MRWB.
+      Producer: MRWB.
+
+      Consumer: p9_pstate_parameter_block ->
+                    CME pstate parameter block
+                    PGPE pstate parameter block
       </description>
       <valueType>uint16</valueType>
       <platInit/>
+      <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_TDP_RDP_CURRENT_FACTOR</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description> TODO RTC 157943 -- Placeholder description
+    This overrides the RDP to TDP Scaling Factor IQ VPD field that is used for
+    Workload Optimized Frequency (WOF) voltage uplifting.
+
     Consumers: p9_pstate_parameter_block
+
     </description>
     <valueType>uint32</valueType>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1411,8 +1477,7 @@
     Minimum delay (in nanoseconds) between clock grid management transition
     steps
 
-    Producer: MRWB
-
+    Producer: MRWB from clock team
     Consumers: p9_build_pstate_datablock ->
                       CME Quad Pstate Region (CQPR) for CM Quad Manager
 
@@ -1420,6 +1485,7 @@
     </description>
     <valueType>uint16</valueType>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1434,11 +1500,14 @@
        ATTR_RESCLK_FREQ_REGIONS[2] LE Region 2 LT ATTR_RESCLK_FREQ_REGIONS[3]
        etc.
 
+    Producer: MRWB from clock team
+
     Consumers: p9_pstate_parameter_block
     </description>
     <valueType>uint8</valueType>
     <array>8</array>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1451,11 +1520,14 @@
     ATTR_RESCLK_FREQ_REGIONS[i] and ATTR_RESCLK_FREQ_REGIONS[i+1] for
     0 LE i LE 7.
 
+    Producer: MRWB from clock team
+
     Consumers: p9_pstate_parameter_block
     </description>
     <valueType>uint8</valueType>
     <array>8</array>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1464,11 +1536,14 @@
     <description>
     Array of Clock strength values that will we written in QACCR by CME Hcode
 
+    Producer: MRWB from clock team
+
     Consumers: p9_pstate_parameter_block
     </description>
     <valueType>uint16</valueType>
     <array>64</array>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1493,11 +1568,14 @@
     ATTR_RESCLK_L3_VOLTAGE_THRESHOLD_MV and then steps 3->0 when going at or
     above the voltage defined by ATTR_RESCLK_L3_VOLTAGE_THRESHOLD_MV.
 
+    Producer: MRWB from clock team
+
     Consumers: p9_pstate_parameter_block
     </description>
     <valueType>uint8</valueType>
     <array>4</array>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1510,24 +1588,46 @@
     strength values put in the hardware for this mode transtion are defined by
     ATTR_RESCLK_L3_VALUE.
 
+    Producer: MRWB from clock team
+
     Consumers: p9_pstate_parameter_block
     </description>
     <valueType>uint16</valueType>
     <platInit/>
-</attribute>
-   <!-- ********************************************************************* -->
-  <attribute>
-      <id>ATTR_SYSTEM_RING_DBG_MODE</id>
-      <description>
-      Debug modes supported for CME/SGPE Scan layout in HOMER.
-      </description>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <valueType>uint8</valueType>
-      <enum>
-          SCAN_RING_NO_DEBUG = 0x00, SCAN_RING_TRACE_DEBUG = 0x01
-      </enum>
-      <initToZero/>
-      <platInit/>
+    <initToZero/>
   </attribute>
-   <!-- ********************************************************************* -->
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_RING_DBG_MODE</id>
+    <description>
+    Debug modes supported for CME/SGPE Scan layout in HOMER.
+    </description>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <valueType>uint8</valueType>
+    <enum>
+        SCAN_RING_NO_DEBUG = 0x00, SCAN_RING_TRACE_DEBUG = 0x01
+    </enum>
+    <initToZero/>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+     <id>ATTR_PERF_24x7_INVOCATION_TIME_MS</id>
+     <description>
+     Time between invocations of the 24x7 performance collection function on
+     GPE1.  The time (in milliseconds) is derived as
+     2^PERF_24x7_INVOCATION_TIME_MS with 0 indicating the function is OFF.
+
+     Consumer: p9_hcode_image_build.c ->
+                  SGPE Header field
+
+     Provided by the Machine Readable Workbook to tune the collection.
+
+     Platform default:  1
+     </description>
+     <targetType>TARGET_TYPE_SYSTEM</targetType>
+     <valueType>uint8</valueType>
+     <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>

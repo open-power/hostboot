@@ -251,9 +251,13 @@
           <id>ATTR_MSS_MRW_DRAM_WRITE_CRC</id>
           <default>0x0</default>
       </attribute>
-       <attribute>
+      <attribute>
           <id>ATTR_MSS_MRW_TEMP_REFRESH_MODE</id>
           <default>0x0</default>
+      </attribute>
+      <attribute>
+        <id>ATTR_PERF_24x7_INVOCATION_TIME_MS</id>
+        <default>0x1</default>
       </attribute>
 <!-- =====================================================================
      End of temporary definitions
