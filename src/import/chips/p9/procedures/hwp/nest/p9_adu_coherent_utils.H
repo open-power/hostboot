@@ -81,8 +81,9 @@ extern"C"
             {
                 CACHE_INHIBIT = 0,
                 DMA_PARTIAL   = 1,
-                PB_OPER       = 2,
-                PMISC_OPER    = 3
+                PB_DIS_OPER   = 2,
+                PMISC_OPER    = 3,
+                PB_INIT_OPER  = 4
             };
 
             // Transaction size
