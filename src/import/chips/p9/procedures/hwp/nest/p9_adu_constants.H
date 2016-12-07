@@ -52,8 +52,9 @@ extern "C"
         // Operation type
         // 0b000: DMA partial
         // 0b001: Cache-inhibited
-        // 0b010: PB op
+        // 0b010: PB disable op
         // 0b011: PMISC op
+        // 0b100: PB enable op
         FLAG_ADU_TTYPE = 0xE0000000ull,                        // Bits 0:2
 
         // Utilize ADU HW auto-increment function
@@ -109,10 +110,11 @@ extern "C"
     };
 
 // Operation type values
-    const uint32_t FLAG_ADU_TTYPE_DMA   = 0x00000000ull;   // DMA partial
-    const uint32_t FLAG_ADU_TTYPE_CI    = 0x20000000ull;   // Cache inhibit
-    const uint32_t FLAG_ADU_TTYPE_PB    = 0x40000000ull;   // PB operation
-    const uint32_t FLAG_ADU_TTYPE_PMISC = 0x60000000ull;   // Switch operation
+    const uint32_t FLAG_ADU_TTYPE_DMA     = 0x00000000ull;   // DMA partial
+    const uint32_t FLAG_ADU_TTYPE_CI      = 0x20000000ull;   // Cache inhibit
+    const uint32_t FLAG_ADU_TTYPE_PB_DIS  = 0x40000000ull;   // PB operation (disable)
+    const uint32_t FLAG_ADU_TTYPE_PMISC   = 0x60000000ull;   // Switch operation
+    const uint32_t FLAG_ADU_TTYPE_PB_INIT = 0x80000000ull;   // PB operation (init)
 
 // Flag size values
     const uint32_t FLAG_SIZE_TSIZE_1   = 0x00000000ull;

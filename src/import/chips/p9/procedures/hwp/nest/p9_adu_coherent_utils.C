@@ -117,7 +117,8 @@ extern "C"
     const uint32_t ALTD_CMD_SCOPE_GROUP         = 0b00000011;
 
     // Values for PB operations
-    const uint32_t ALTD_CMD_PB_OPERATION_TSIZE  = 0b00001000;
+    const uint32_t ALTD_CMD_PB_DIS_OPERATION_TSIZE  = 0b00001000;
+    const uint32_t ALTD_CMD_PB_INIT_OPERATION_TSIZE  = 0b00001011;
     const uint32_t ALTD_CMD_SCOPE_SYSTEM        = 0b00000101;
 
     // Values for PMISC operations
@@ -316,7 +317,7 @@ extern "C"
         fapi2::buffer<uint64_t> altd_cmd_reg_data(0x0);
         fapi2::buffer<uint64_t> altd_addr_reg_data(i_address);
         fapi2::buffer<uint64_t> altd_data_reg_data(0x0);
-        fapi2::buffer<uint64_t> altd_option_reg(0x0);
+        fapi2::buffer<uint64_t> altd_option_reg_data(0x0);
         p9_ADU_oper_flag l_myAduFlag;
         p9_ADU_oper_flag::OperationType_t l_operType;
         p9_ADU_oper_flag::Transaction_size_t l_transSize;
@@ -458,7 +459,8 @@ extern "C"
         // ---------------------------------------------
         // Setting for PB and PMISC operations
         // ---------------------------------------------
-        if ( (l_operType == p9_ADU_oper_flag::PB_OPER) ||
+        if ( (l_operType == p9_ADU_oper_flag::PB_DIS_OPER) ||
+             (l_operType == p9_ADU_oper_flag::PB_INIT_OPER) ||
              (l_operType == p9_ADU_oper_flag::PMISC_OPER) )
         {
 
@@ -485,21 +487,38 @@ extern "C"
             // Set TM_QUIESCE
             altd_cmd_reg_data.setBit<ALTD_CMD_WITH_TM_QUIESCE_BIT>();
 
-
             // ---------------------------------------------------
             // PB specific: TTYPE & TSIZE
             // ---------------------------------------------------
-            if (l_operType == p9_ADU_oper_flag::PB_OPER)
+            if ((l_operType == p9_ADU_oper_flag::PB_DIS_OPER) ||
+                (l_operType == p9_ADU_oper_flag::PB_INIT_OPER))
             {
-                FAPI_DBG("ADU operation type: PB");
+                FAPI_DBG("ADU operation type: PB OPERATION");
 
                 // Set TTYPE
                 altd_cmd_reg_data.insertFromRight<ALTD_CMD_TTYPE_START_BIT,
                                                   ALTD_CMD_TTYPE_NUM_BITS>(ALTD_CMD_TTYPE_PB_OPER);
 
-                // TSIZE for PB operation is fixed value: 0b00001000
-                altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
-                                                  ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_PB_OPERATION_TSIZE);
+                if (l_operType == p9_ADU_oper_flag::PB_DIS_OPER)
+                {
+                    // TSIZE for PB operation is fixed value: 0b00001000
+                    altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
+                                                      ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_PB_DIS_OPERATION_TSIZE);
+                }
+                else
+                {
+                    // Set up quiesce
+                    altd_option_reg_data.setBit<FBC_ALTD_WITH_PRE_QUIESCE>();
+                    altd_option_reg_data.insertFromRight<FBC_ALTD_PRE_QUIESCE_COUNT_START_BIT,
+                                                         FBC_ALTD_PRE_QUIESCE_COUNT_NUM_OF_BITS>
+                                                         (QUIESCE_SWITCH_WAIT_COUNT);
+                    FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_OPTION_REG, altd_option_reg_data),
+                             "Error writing to ALTD_OPTION Register");
+
+                    // TSIZE for PB operation is fixed value: 0b00001011
+                    altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
+                                                      ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_PB_INIT_OPERATION_TSIZE);
+                }
             }
 
             // ---------------------------------------------------

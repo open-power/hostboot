@@ -312,7 +312,7 @@ fapi2::ReturnCode p9_build_smp_sequence_adu(p9_build_smp_system& i_smp,
             break;
 
         case QUIESCE:
-            l_adu_oper_flag.setOperationType(p9_ADU_oper_flag::PB_OPER);
+            l_adu_oper_flag.setOperationType(p9_ADU_oper_flag::PB_DIS_OPER);
             break;
 
         default:
@@ -435,6 +435,37 @@ fapi2::ReturnCode p9_build_smp_sequence_adu(p9_build_smp_system& i_smp,
                 {
                     FAPI_ERR("Error from p9_build_smp_adu_check_status (op)");
                     goto adu_reset_unlock;
+                }
+
+                // workaround for HW397129
+                if (i_action == SWITCH_AB)
+                {
+                    p9_ADU_oper_flag l_adu_oper_flag_reinit;
+                    l_adu_oper_flag_reinit.setOperationType(p9_ADU_oper_flag::PB_INIT_OPER);
+                    l_adu_oper_flag_reinit.setTransactionSize(p9_ADU_oper_flag::TSIZE_1);
+
+                    FAPI_INF("Issuing re-init for HW397129");
+                    l_rc = p9_adu_coherent_setup_adu(*(p_iter->second.target),
+                                                     0,
+                                                     false,      // write
+                                                     l_adu_oper_flag_reinit.setFlag());
+
+                    if (l_rc)
+                    {
+                        FAPI_ERR("Error from p9_adu_coherent_setup_adu (op)");
+                        goto adu_reset_unlock;
+                    }
+
+                    // Check status
+                    l_rc = p9_build_smp_adu_check_status(*(p_iter->second.target),
+                                                         i_smp,
+                                                         true);
+
+                    if (l_rc)
+                    {
+                        FAPI_ERR("Error from p9_build_smp_adu_check_status (op)");
+                        goto adu_reset_unlock;
+                    }
                 }
             }
         }
