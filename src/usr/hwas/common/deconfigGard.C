@@ -1868,21 +1868,47 @@ void DeconfigGard::_deconfigureByAssoc(
             {
                 TargetHandleList pParentPECList;
                 getParentAffinityTargetsByState(pParentPECList, &i_target,
-                        CLASS_UNIT, TYPE_PEC, UTIL_FILTER_PRESENT);
+                                                CLASS_UNIT, TYPE_PEC, UTIL_FILTER_PRESENT);
                 HWAS_ASSERT((pParentPECList.size() == 1),
-                    "HWAS _deconfigureByAssoc: pParentPECList != 1");
+                            "HWAS _deconfigureByAssoc: pParentPECList != 1");
                 Target *l_parentPEC = pParentPECList[0];
 
                 if (isFunctional(l_parentPEC))
                 {
                     if (!anyChildFunctional(*l_parentPEC))
                     {
-                       _deconfigureTarget(*l_parentPEC,
-                          i_errlEid, NULL, i_deconfigRule);
-                       _deconfigureByAssoc(*l_parentPEC,
-                          i_errlEid,i_deconfigRule);
+                        _deconfigureTarget(*l_parentPEC,
+                                           i_errlEid, NULL, i_deconfigRule);
+                        _deconfigureByAssoc(*l_parentPEC,
+                                            i_errlEid,i_deconfigRule);
                     }
-                }
+
+                    // Due to shared resources, need to deconfig any PHB
+                    //  with a higher unit position as the one that we just
+                    //  lost
+                    ATTR_CHIP_UNIT_type l_myUnit =
+                      i_target.getAttr<ATTR_CHIP_UNIT>();
+                    TargetHandleList pChildList;
+                    targetService().getAssociated(pChildList,
+                                                  l_parentPEC,
+                                                  TargetService::CHILD,
+                                                  TargetService::ALL,
+                                                  &isFunctional);
+                    for (TargetHandleList::iterator pChild_it =
+                         pChildList.begin();
+                         pChild_it != pChildList.end();
+                         ++pChild_it)
+                    {
+                        if( (*pChild_it)->getAttr<ATTR_CHIP_UNIT>() > l_myUnit )
+                        {
+                            _deconfigureTarget(*(*pChild_it),
+                                               i_errlEid, NULL,
+                                               i_deconfigRule);
+                            _deconfigureByAssoc(*(*pChild_it),
+                                                i_errlEid,i_deconfigRule);
+                        }
+                    }
+                }               
 
                 break;
             } // TYPE_PHB
