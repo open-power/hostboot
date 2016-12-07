@@ -77,17 +77,18 @@ enum PBA_INIT_FIELDS
     PBA_OCI_MARKER_BASE = 0x40070000,
 
     //Values for PBA Slave Control register fields
-    OCI_MASTER_ID_SLV   = 0x0,
-    OCI_MASTER_ID_MASK  = 0x7,
-    OCI_MASTER_ID_GPE0  = 0x0,
-    OCI_MASTER_ID_GPE1  = 0x1,
-    OCI_MASTER_ID_GPE2  = 0x2,
-    OCI_MASTER_ID_GPE3  = 0x3,
-    OCI_MASTER_ID_ICU   = 0x5,
-    OCI_MASTER_ID_OCB   = 0x6,
-    OCI_MASTER_ID_DCU   = 0x7,
-    OCI_MASTER_ID_PGPE  = OCI_MASTER_ID_GPE2,
-    OCI_MASTER_ID_SGPE  = OCI_MASTER_ID_GPE3,
+    OCI_MASTER_ID_SLV       = 0x0,
+    OCI_MASTER_ID_MASK_ALL  = 0x7,
+    OCI_MASTER_ID_MASK_NONE = 0x0,
+    OCI_MASTER_ID_GPE0      = 0x0,
+    OCI_MASTER_ID_GPE1      = 0x1,
+    OCI_MASTER_ID_GPE2      = 0x2,
+    OCI_MASTER_ID_GPE3      = 0x3,
+    OCI_MASTER_ID_ICU       = 0x5,
+    OCI_MASTER_ID_OCB       = 0x6,
+    OCI_MASTER_ID_DCU       = 0x7,
+    OCI_MASTER_ID_PGPE      = OCI_MASTER_ID_GPE2,
+    OCI_MASTER_ID_SGPE      = OCI_MASTER_ID_GPE3,
 
     /// The number of PBA read buffers
     PBA_READ_BUFFERS = 6,
@@ -602,7 +603,7 @@ pba_slave_setup_boot_phase(
     ps.value = 0;
     ps.fields.enable = 1;
     ps.fields.mid_match_value = OCI_MASTER_ID_SGPE;
-    ps.fields.mid_care_mask   = OCI_MASTER_ID_MASK;
+    ps.fields.mid_care_mask   = OCI_MASTER_ID_MASK_ALL;
 
     ps.fields.read_ttype = PBA_READ_TTYPE_CL_RD_NC;
     ps.fields.read_prefetch_ctl = PBA_READ_PREFETCH_NONE;
@@ -648,7 +649,7 @@ pba_slave_setup_boot_phase(
     ps.value = 0;
     ps.fields.enable = 1;
     ps.fields.mid_match_value = OCI_MASTER_ID_PGPE;
-    ps.fields.mid_care_mask   = OCI_MASTER_ID_MASK;
+    ps.fields.mid_care_mask   = OCI_MASTER_ID_MASK_ALL;
 
     ps.fields.read_ttype = PBA_READ_TTYPE_CL_RD_NC;
     ps.fields.read_prefetch_ctl = PBA_READ_PREFETCH_NONE;
@@ -717,7 +718,7 @@ pba_slave_setup_runtime_phase(
     ps.value = 0;
     ps.fields.enable = 1;
     ps.fields.mid_match_value = OCI_MASTER_ID_SGPE;
-    ps.fields.mid_care_mask = OCI_MASTER_ID_SGPE;
+    ps.fields.mid_care_mask = OCI_MASTER_ID_MASK_ALL;
     ps.fields.read_ttype = PBA_READ_TTYPE_CL_RD_NC;
     ps.fields.read_prefetch_ctl = PBA_READ_PREFETCH_NONE;
     ps.fields.write_ttype = PBA_WRITE_TTYPE_DMA_PR_WR;
@@ -732,22 +733,21 @@ pba_slave_setup_runtime_phase(
     FAPI_TRY(fapi2::putScom(i_target, PU_PBASLVCTL0_SCOM, l_data64),
              "Failed to set Slave 0 control register");
 
-    FAPI_INF("Initialize PBA Slave 1 for SGPE 24x7 use...");
-    // Slave 1 (SGPE 24x7).  This is a read/write slave.  Write gethering is
-    // allowed, but with the shortest possible timeout.
+    FAPI_INF("Disabling PBA Slave 1 ...  No defined run-time use");
+    // Slave 1 is not used during run-time
 
     ps.value = 0;
-    ps.fields.enable = 1;
-    ps.fields.mid_match_value = OCI_MASTER_ID_SGPE;
-    ps.fields.mid_care_mask = OCI_MASTER_ID_SGPE;
-    ps.fields.read_ttype = PBA_READ_TTYPE_CL_RD_NC;
-    ps.fields.read_prefetch_ctl = PBA_READ_PREFETCH_NONE;
-    ps.fields.write_ttype = PBA_WRITE_TTYPE_DMA_PR_WR;
-    ps.fields.wr_gather_timeout = PBA_WRITE_GATHER_TIMEOUT_2_PULSES;
-    ps.fields.buf_alloc_a = 1;
-    ps.fields.buf_alloc_b = 1;
-    ps.fields.buf_alloc_c = 1;
-    ps.fields.buf_alloc_w = 1;
+    ps.fields.enable = 0;
+    ps.fields.mid_match_value = 0;
+    ps.fields.mid_care_mask = OCI_MASTER_ID_MASK_NONE;
+    ps.fields.read_ttype = 0;
+    ps.fields.read_prefetch_ctl = 0;
+    ps.fields.write_ttype = 0;
+    ps.fields.wr_gather_timeout = 0;
+    ps.fields.buf_alloc_a = 0;
+    ps.fields.buf_alloc_b = 0;
+    ps.fields.buf_alloc_c = 0;
+    ps.fields.buf_alloc_w = 0;
 
     l_data64 = ps.value;
 
@@ -761,12 +761,12 @@ pba_slave_setup_runtime_phase(
 
     ps.value = 0;
     ps.fields.enable = 0;
-    ps.fields.mid_match_value = OCI_MASTER_ID_GPE0;
-    ps.fields.mid_care_mask = OCI_MASTER_ID_ICU & OCI_MASTER_ID_DCU;
-    ps.fields.read_ttype = PBA_READ_TTYPE_CL_RD_NC;
-    ps.fields.read_prefetch_ctl = PBA_READ_PREFETCH_NONE;
-    ps.fields.write_ttype = PBA_WRITE_TTYPE_DMA_PR_WR;
-    ps.fields.wr_gather_timeout = PBA_WRITE_GATHER_TIMEOUT_2_PULSES;
+    ps.fields.mid_match_value = 0;
+    ps.fields.mid_care_mask = OCI_MASTER_ID_MASK_NONE;
+    ps.fields.read_ttype = 0;
+    ps.fields.read_prefetch_ctl = 0;
+    ps.fields.write_ttype = 0;
+    ps.fields.wr_gather_timeout = 0;
     ps.fields.buf_alloc_a = 0;
     ps.fields.buf_alloc_b = 0;
     ps.fields.buf_alloc_c = 0;
