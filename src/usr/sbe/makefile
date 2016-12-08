@@ -60,6 +60,7 @@ include ${HWP_ACCESSORS_PATH}/p9_get_mvpd_ring.mk
 include ${HWP_ACCESSORS_PATH}/p9_mvpd_ring_funcs.mk
 include ${HWP_XIP_PATH}/p9_xip_image.mk
 include ${UTILS_PATH}/p9_ring_identification.mk
+include ${UTILS_PATH}/p9_ringId.mk
 include ${UTILS_PATH}/p9_scan_compression.mk
 include ${UTILS_PATH}/p9_tor.mk
 
