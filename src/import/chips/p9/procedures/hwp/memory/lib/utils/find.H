@@ -109,6 +109,17 @@ inline fapi2::Target<fapi2::TARGET_TYPE_MCBIST> find_target( const fapi2::Target
 }
 
 ///
+/// @brief find the MCS given an MCS
+/// @param[in] i_self the fapi2 target MCS
+/// @return a MCS target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_MCS> find_target( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_self)
+{
+    return i_self;
+}
+
+///
 /// @brief find the McBIST given a DIMM
 /// @param[in] i_target the fapi2 target DIMM
 /// @return a McBIST target.

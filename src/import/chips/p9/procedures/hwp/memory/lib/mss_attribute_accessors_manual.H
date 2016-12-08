@@ -37,7 +37,7 @@
 // *HWP Consumed by: Memory
 
 #ifndef MSS_ATTR_ACCESS_MANUAL_H_
-#define MSS_ATTR_ACCESS_MANUALH_
+#define MSS_ATTR_ACCESS_MANUAL_H_
 
 #include <fapi2.H>
 #include <lib/utils/find.H>
@@ -46,10 +46,43 @@ namespace mss
 {
 
 ///
+/// @brief 2N mode helper
+/// When figuring out 2N mode we need to access two attributes. This helper
+/// gives us a place to put that common code
+/// @tparam T the fapi2::TargetType of the input target
+/// @param[in] the target from which to get the 2N mode autoset attribute
+/// @return true iff 2N mode is 'on'
+///
+template< fapi2::TargetType T >
+inline bool two_n_mode_helper(const fapi2::Target<T>& i_target)
+{
+    uint8_t l_2n_autoset = 0;
+    uint8_t l_2n_mrw_mode = 0;
+
+    // There are no VPD enums defined for 2N autoset <shrug>.
+    constexpr uint8_t ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET_2N_MODE = 0x02;
+
+    const auto l_mcs = mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target);
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET, l_mcs, l_2n_autoset) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DRAM_2N_MODE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_2n_mrw_mode) );
+
+    // If the MRW states 'auto' we use what's in VPD, otherwise we use what's in the MRW.
+    return (l_2n_mrw_mode == fapi2::ENUM_ATTR_MSS_MRW_DRAM_2N_MODE_AUTO) ?
+           l_2n_autoset == ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET_2N_MODE :
+           l_2n_mrw_mode == fapi2::ENUM_ATTR_MSS_MRW_DRAM_2N_MODE_FORCE_TO_2N_MODE;
+
+fapi_try_exit:
+    FAPI_ERR("failed accessing vpd_mr_mc_2n_mode_autoset or mrw_dram_2n_mode: 0x%lx (target: %s)",
+             uint64_t(fapi2::current_err), mss::c_str(i_target));
+    fapi2::Assert(false);
+    return false;
+}
+
+///
 /// @brief ATTR_CHIP_EC_FEATURE_MSS_UT_EC_NIMBUS_LESS_THAN_TWO_OH getter
 /// @tparam T the fapi2 target type of the target
 /// @param[in] const ref to the target
-/// @param[out] uint8_t& reference to store the value
 /// @return bool true iff we're on a Nimbus < EC 2.0
 ///
 template< fapi2::TargetType T >
@@ -73,7 +106,6 @@ fapi_try_exit:
 /// @brief ATTR_CHIP_EC_FEATURE_MCBIST_END_OF_RANK getter
 /// @tparam T the fapi2 target type of the target
 /// @param[in] const ref to the target
-/// @param[out] uint8_t& reference to store the value
 /// @return bool true iff feature is enabled
 ///
 template< fapi2::TargetType T >
@@ -97,7 +129,6 @@ fapi_try_exit:
 /// @brief ATTR_CHIP_EC_FEATURE_MSS_WR_VREF getter
 /// @tparam T the fapi2 target type of the target
 /// @param[in] const ref to the target
-/// @param[out] uint8_t& reference to store the value
 /// @return bool true iff feature is enabled
 ///
 template< fapi2::TargetType T >
@@ -121,7 +152,6 @@ fapi_try_exit:
 /// @brief ATTR_CHIP_EC_FEATURE_MSS_DQS_POLARITY getter
 /// @tparam T the fapi2 target type of the target
 /// @param[in] const ref to the target
-/// @param[out] uint8_t& reference to store the value
 /// @return bool true iff feature is enabled
 ///
 template< fapi2::TargetType T >
@@ -145,7 +175,6 @@ fapi_try_exit:
 /// @brief ATTR_CHIP_EC_FEATURE_MSS_VCCD_OVERRIDE getter
 /// @tparam T the fapi2 target type of the target
 /// @param[in] const ref to the target
-/// @param[out] uint8_t& reference to store the value
 /// @return bool true iff feature is enabled
 ///
 template< fapi2::TargetType T >
@@ -169,7 +198,6 @@ fapi_try_exit:
 /// @brief ATTR_CHIP_EC_FEATURE_MSS_VREF_DAC getter
 /// @tparam T the fapi2 target type of the target
 /// @param[in] const ref to the target
-/// @param[out] uint8_t& reference to store the value
 /// @return bool true iff feature is enabled
 ///
 template< fapi2::TargetType T >
@@ -193,7 +221,6 @@ fapi_try_exit:
 /// @brief ATTR_CHIP_EC_FEATURE_MSS_VREG_COARSE getter
 /// @tparam T the fapi2 target type of the target
 /// @param[in] const ref to the target
-/// @param[out] uint8_t& reference to store the value
 /// @return bool true iff feature is enabled
 ///
 template< fapi2::TargetType T >
@@ -217,7 +244,6 @@ fapi_try_exit:
 /// @brief ATTR_CHIP_EC_FEATURE_MSS_WAT_DEBUG_ATTN getter
 /// @tparam T the fapi2 target type of the target
 /// @param[in] const ref to the target
-/// @param[out] uint8_t& reference to store the value
 /// @return bool true iff feature is enabled
 ///
 template< fapi2::TargetType T >
@@ -241,7 +267,6 @@ fapi_try_exit:
 /// @brief ATTR_CHIP_EC_FEATURE_MSS_TRAINING_BAD_BITS getter
 /// @tparam T the fapi2 target type of the target
 /// @param[in] const ref to the target
-/// @param[out] uint8_t& reference to store the value
 /// @return bool true iff feature is enabled
 ///
 template< fapi2::TargetType T >

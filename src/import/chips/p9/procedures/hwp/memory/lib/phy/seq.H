@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
+#include <mss_attribute_accessors_manual.H>
 #include <lib/utils/scom.H>
 
 namespace mss
@@ -111,6 +112,7 @@ class seqTraits<fapi2::TARGET_TYPE_MCA>
             TMRSC_CYCLES_LEN = MCA_DDRPHY_SEQ_MEM_TIMING_PARAM2_P0_TMRSC_CYCLES_LEN,
 
             DELAYED_PARITY = MCA_DDRPHY_SEQ_CONFIG0_P0_DELAYED_PAR,
+            TWO_N_MODE = MCA_DDRPHY_SEQ_CONFIG0_P0_TWO_CYCLE_ADDR_EN,
         };
 
 };
@@ -323,9 +325,9 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = seqTraits<T> >
 inline fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
 {
-    // TK ATTR_VPD_DRAM_2N_MODE_ENABLED  49, 0b1, (def_2N_mode);       # enable 2 cycle addr mode BRS
-
     fapi2::buffer<uint64_t> l_data;
+
+    l_data.writeBit<TT::TWO_N_MODE>(mss::two_n_mode_helper(i_target));
 
     // DDR4 needs delayed partiy TK for DDR5/DDR3 ...
     l_data.setBit<TT::DELAYED_PARITY>();
