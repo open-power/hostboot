@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/sbeio/sbe_systemConfig.C $                            */
+/* $Source: src/usr/sbeio/sbe_psuQuiesce.C $                              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,9 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
-* @file sbe_systemConfig.C
-* @brief System Configuartion Setup Messages to inform the SBE of other
-         procs in the system.
+* @file sbe_psuQuiesce.C
+* @brief Send command to quiesce the SBE
 */
 
 #include <config.h>
@@ -37,48 +36,41 @@
 extern trace_desc_t* g_trac_sbeio;
 
 #define SBE_TRACD(printf_string,args...) \
-TRACDCOMP(g_trac_sbeio,"sendSystemConfig: " printf_string,##args)
+TRACDCOMP(g_trac_sbeio,"psuQuiesce: " printf_string,##args)
 
 #define SBE_TRACF(printf_string,args...) \
-TRACFCOMP(g_trac_sbeio,"sendSystemConfig: " printf_string,##args)
+TRACFCOMP(g_trac_sbeio,"psuQuiesce: " printf_string,##args)
 
 namespace SBEIO
 {
 
     /**
-    * @brief Set the system configuration on the SBE so it is aware of
-    *        the other procs in the system
-    *
-    * @param[in] i_systemConfig uint64 where each bit represents a proc in that position
-    *        Bit position ATTR_PROC_FABRIC_CHIP_ID + (8 * ATTR_PROC_FABRIC_GROUP_ID) = 1
-    *        if that proc is present and functional.
+    * @brief Sends a PSU chipOp to quiesce the SBE
     *
     * @return errlHndl_t Error log handle on failure.
     *
     */
-
-    errlHndl_t sendSystemConfig(const uint64_t i_systemConfig )
+    errlHndl_t psuQuiesce( )
     {
         errlHndl_t errl = NULL;
 
-        SBE_TRACD(ENTER_MRK "sending system configuration from HB -> SBE  i_systemConfig=0x%x",i_systemConfig);
+        SBE_TRACD(ENTER_MRK "sending psu quiesce command from HB -> SBE");
 
+        // set up PSU command message
         SbePsu::psuCommand   l_psuCommand(
                                   SbePsu::SBE_REQUIRE_RESPONSE,  //control flags
                                   SbePsu::SBE_PSU_GENERIC_MESSAGE, //command class
-                                  SbePsu::SBE_CMD_CONTROL_SYSTEM_CONFIG); //command
+                                  SbePsu::SBE_PSU_GENERIC_MSG_QUIESCE); //command
         SbePsu::psuResponse  l_psuResponse;
 
-        // set up PSU command message
-        l_psuCommand.cd2_SetSystemConfig_SystemFabricIdMap = i_systemConfig;
 
         errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(&l_psuCommand,
                                 &l_psuResponse,
                                 SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
-                                SbePsu::SBE_SYSTEM_CONFIG_REQ_USED_REGS,
-                                SbePsu::SBE_SYSTEM_CONFIG_RSP_USED_REGS);
+                                SbePsu::SBE_QUIESCE_REQ_USED_REGS,
+                                SbePsu::SBE_QUIESCE_RSP_USED_REGS);
 
-        SBE_TRACD(EXIT_MRK "sendSystemConfig");
+        SBE_TRACD(EXIT_MRK "psuQuiesce");
 
         return errl;
     };

@@ -62,6 +62,14 @@ namespace SBEIO
     errlHndl_t sendSystemConfig(const uint64_t i_systemConfig );
 
     /**
+    * @brief Sends a PSU chipOp to quiesce the SBE
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t sendPsuQueisceSbeCmd ();
+
+    /**
      * @brief Get SCOM via SBE FIFO
      *
      * @param[in]  i_target  Target to access

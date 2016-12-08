@@ -28,6 +28,7 @@ MODULE = sbeio
 
 OBJS += sbe_psudd.o
 OBJS += sbe_coreStateControl.o
+OBJS += sbe_psuQuiesce.o
 OBJS += sbe_systemConfig.o
 OBJS += sbe_fifodd.o
 OBJS += sbe_scomAccess.o
