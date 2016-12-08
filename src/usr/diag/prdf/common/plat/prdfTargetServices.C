@@ -1399,8 +1399,6 @@ void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
         }
     }
 
-    PRDF_ASSERT( !o_ranks.empty() ); // target configured with no ranks
-
     #undef PRDF_FUNC
 }
 
@@ -1469,8 +1467,6 @@ void __getSlaveRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
             }
         }
     }
-
-    PRDF_ASSERT( !o_ranks.empty() ); // target configured with no ranks
 }
 
 template<>

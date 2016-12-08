@@ -81,6 +81,7 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
 
         std::vector<MemRank> list;
         getSlaveRanks<TYPE_MCA>( i_mcaChip->getTrgt(), list );
+        PRDF_ASSERT( !list.empty() ); // target configured with no ranks
 
         for ( auto & r : list )
         {
@@ -88,7 +89,7 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
             uint32_t rc = mcbdb->getTdCtlr()->handleTdEvent( io_sc, entry );
             if ( SUCCESS != rc )
             {
-                PRDF_ERR( PRDF_FUNC "handleTdEvent(m%ds%s) failed on 0x%08x",
+                PRDF_ERR( PRDF_FUNC "handleTdEvent() failed on 0x%08x",
                           i_mcaChip->getHuid() );
 
                 continue; // Try the other ranks.

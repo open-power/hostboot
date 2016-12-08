@@ -167,6 +167,8 @@ inline TdRankList<TARGETING::TYPE_MCBIST>::TdRankList( ExtensibleChip * i_chip )
     {
         std::vector<MemRank> rankList;
         getSlaveRanks<TYPE_MCA>( mcaChip->getTrgt(), rankList );
+        PRDF_ASSERT( !rankList.empty() ); // target configured with no ranks
+
         for ( auto & rank : rankList )
         {
             iv_list.push_back( TdRankListEntry(mcaChip, rank) );
@@ -186,6 +188,8 @@ inline TdRankList<TARGETING::TYPE_MBA>::TdRankList( ExtensibleChip * i_chip )
 
     std::vector<MemRank> rankList;
     getSlaveRanks<TYPE_MBA>( i_chip->getTrgt(), rankList );
+    PRDF_ASSERT( !rankList.empty() ); // target configured with no ranks
+
     for ( auto & rank : rankList )
     {
         iv_list.push_back( TdRankListEntry(i_chip, rank) );
