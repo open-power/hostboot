@@ -1983,7 +1983,7 @@ class program
                 FAPI_TRY( mss::getScom(i_target, TT::SRERR1_REG, l_read1) );
 
                 FAPI_ASSERT( ((l_read0 == 0) && (l_read1 == 0)),
-                             fapi2::MSS_MEMDIAGS_UE_OR_SUE_IN_LAST_PATTERN()
+                             fapi2::MSS_MEMDIAGS_ERROR_IN_LAST_PATTERN()
                              .set_TARGET(i_target)
                              .set_STATUS0(l_read0)
                              .set_STATUS1(l_read1),
