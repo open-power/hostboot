@@ -110,6 +110,8 @@ extern "C"
         CORE_COMMON_RING_INDEX_SIZE =   sizeof(CoreCmnRingsList_t),
         CORE_SPEC_RING_INDEX_SIZE   =   sizeof(CoreSpecRingList_t),
         RING_START_TO_RS4_OFFSET    =   8,
+        TOR_VER_ONE                 =   1,
+        TOR_VER_TWO                 =   2,
     };
 
     /**
@@ -1225,6 +1227,8 @@ extern "C"
             uint32_t tempRingLength = 0;
             uint32_t tempBufSize = 0;
             bool overrideNotFound = true;
+            uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
+            FAPI_DBG("TOR Version :  0x%02x", P9_TOR::tor_version() );
 
             for( uint32_t ringIndex = 0; ringIndex < EQ::g_eqData.iv_num_common_rings;
                  ringIndex++ )
@@ -1255,7 +1259,7 @@ extern "C"
                 ALIGN_RING_LOC( pOverrideStart, pOvrdRingPayload );
 
                 memcpy( pOvrdRingPayload, i_ringData.iv_pWorkBuf2, tempBufSize);
-                *(pScanRingIndex + ringIndex) = SWIZZLE_2_BYTE((pOvrdRingPayload - pOverrideStart) + RING_START_TO_RS4_OFFSET );
+                *(pScanRingIndex + ringIndex) = SWIZZLE_2_BYTE((pOvrdRingPayload - pOverrideStart) + ringStartToHdrOffset);
 
                 sgpeOvrdRings.setRingOffset(pOvrdRingPayload, sgpeOvrdRings.getCommonRingId( ringIndex ));
                 sgpeOvrdRings.setRingSize( sgpeOvrdRings.getCommonRingId( ringIndex ), tempBufSize );
@@ -1326,6 +1330,7 @@ extern "C"
             uint8_t* pRingStart = &i_pHomer->cpmrRegion.cmeSramRegion[io_cmnRingSize];
             uint16_t* pScanRingIndex = (uint16_t*) pRingStart;
             uint8_t* pRingPayload = pRingStart + CORE_COMMON_RING_INDEX_SIZE;
+            uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
 
             if( !i_imgType.cmeCommonRingBuild )
             {
@@ -1360,8 +1365,8 @@ extern "C"
                 ALIGN_RING_LOC( pRingStart, pRingPayload );
 
                 memcpy( pRingPayload, i_ringData.iv_pWorkBuf1, ringSize );
-                *(pScanRingIndex + ringIndex) = SWIZZLE_2_BYTE((pRingPayload - pRingStart) +
-                                                RING_START_TO_RS4_OFFSET );
+                *(pScanRingIndex + ringIndex) = SWIZZLE_2_BYTE((pRingPayload - pRingStart) + ringStartToHdrOffset);
+
 
                 io_cmeRings.setRingOffset( pRingPayload, io_cmeRings.getCommonRingId( ringIndex ));
                 io_cmeRings.setRingSize( io_cmeRings.getCommonRingId( ringIndex ), ringSize );
@@ -1414,6 +1419,7 @@ extern "C"
         uint32_t maxCoreSpecRingLength = 0;
         uint32_t ringLength = 0;
         uint32_t tempSize = 0;
+        uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
 
         do
         {
@@ -1525,7 +1531,7 @@ extern "C"
                     io_cmeRings.setRingOffset( pRingPayload,
                                                io_cmeRings.getInstRingId(0),
                                                ( MAX_CORES_PER_EX * exId ) + coreId );
-                    *(pScanRingIndex + coreId) = SWIZZLE_2_BYTE((pRingPayload - pRingStart ) + RING_START_TO_RS4_OFFSET );
+                    *(pScanRingIndex + coreId) = SWIZZLE_2_BYTE((pRingPayload - pRingStart ) + ringStartToHdrOffset);
 
                     pRingPayload = pRingPayload + tempSize;
                     io_cmeRings.setRingSize( io_cmeRings.getInstRingId(0), tempSize, ((MAX_CORES_PER_EX * exId) + coreId) );
@@ -1555,6 +1561,7 @@ extern "C"
         uint32_t rc = IMG_BUILD_SUCCESS;
         uint32_t tempRingLength = io_ovrdRingLength;
         uint32_t tempBufSize = 0;
+        uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
 
         RingBucket cmeOvrdRings( PLAT_CME,
                                  (uint8_t*)&i_pHomer->cpmrRegion,
@@ -1606,7 +1613,7 @@ extern "C"
                 ALIGN_RING_LOC( pOverrideStart, pOverrideRingPayload );
 
                 memcpy( pOverrideRingPayload, i_ringData.iv_pWorkBuf2, tempBufSize);
-                *(pScanRingIndex + ringIndex) = SWIZZLE_2_BYTE((pOverrideRingPayload - pOverrideStart) + RING_START_TO_RS4_OFFSET);
+                *(pScanRingIndex + ringIndex) = SWIZZLE_2_BYTE((pOverrideRingPayload - pOverrideStart) + ringStartToHdrOffset);
 
                 cmeOvrdRings.setRingOffset(pOverrideRingPayload, cmeOvrdRings.getCommonRingId( ringIndex ));
                 cmeOvrdRings.setRingSize( cmeOvrdRings.getCommonRingId( ringIndex ), tempBufSize );
@@ -1811,6 +1818,7 @@ extern "C"
         uint32_t ringIndex          =   0;
         uint32_t tempLength         =   0;
         uint32_t tempBufSize        =   i_ringData.iv_sizeWorkBuf1;
+        uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
 
         RingBucket sgpeRings( PLAT_SGPE,
                               (uint8_t*)&i_pHomer->qpmrRegion,
@@ -1853,7 +1861,7 @@ extern "C"
 
                 memcpy( pCmnRingPayload, i_ringData.iv_pWorkBuf1, tempBufSize);
                 io_sgpeRings.setRingOffset( pCmnRingPayload, io_sgpeRings.getCommonRingId( ringIndex ) );
-                *(pCmnRingIndex + ringIndex) = SWIZZLE_2_BYTE((pCmnRingPayload - pRingStart ) + RING_START_TO_RS4_OFFSET );
+                *(pCmnRingIndex + ringIndex) = SWIZZLE_2_BYTE((pCmnRingPayload - pRingStart ) + ringStartToHdrOffset);
                 io_sgpeRings.setRingSize( io_sgpeRings.getCommonRingId( ringIndex ), tempBufSize );
                 io_sgpeRings.extractRing( i_ringData.iv_pWorkBuf1, tempBufSize, io_sgpeRings.getCommonRingId( ringIndex ) );
                 pCmnRingPayload = pCmnRingPayload + tempBufSize;
@@ -1912,6 +1920,7 @@ extern "C"
             uint8_t* pRingStart       = &i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[quadSpecRingStart];
             uint8_t* instRingPayLoad  = &i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[ quadSpecRingStart +
                                         QUAD_SPEC_RING_INDEX_LEN ];
+            uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
 
             for( uint32_t cacheInst = 0; cacheInst < MAX_CACHE_CHIPLET; cacheInst++ )
             {
@@ -1959,7 +1968,7 @@ extern "C"
 
                     memcpy( instRingPayLoad, i_ringData.iv_pWorkBuf1, tempBufSize);
                     io_sgpeRings.setRingOffset( instRingPayLoad, io_sgpeRings.getInstRingId( ringIndex ), chipletId );
-                    *(pCmnRingIndex + ringIndex) = SWIZZLE_2_BYTE((instRingPayLoad - pRingStart ) + RING_START_TO_RS4_OFFSET );
+                    *(pCmnRingIndex + ringIndex) = SWIZZLE_2_BYTE((instRingPayLoad - pRingStart ) + ringStartToHdrOffset);
                     io_sgpeRings.setRingSize( io_sgpeRings.getInstRingId( ringIndex ), tempBufSize, chipletId );
                     instRingPayLoad = instRingPayLoad + tempBufSize;
                     io_sgpeRings.extractRing( i_ringData.iv_pWorkBuf1, tempBufSize, io_sgpeRings.getInstRingId( ringIndex ) );
