@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,16 @@
 //-----------------------------------------------------------------------------------
 const uint8_t P9_PCIE_CONFIG_BAR_SHIFT = 8;
 
+//-----------------------------------------------------------------------------------
+// Constant definitions
+//-----------------------------------------------------------------------------------
+const uint64_t PCI_NFIR_ACTION0_REG = 0x5B0F81E000000000ULL;
+const uint64_t PCI_NFIR_ACTION1_REG = 0x7F0F81E000000000ULL;
+const uint64_t PCI_NFIR_MASK_REG    = 0x0030001C00000000ULL;
+
+const uint64_t PCI_PFIR_ACTION0_REG = 0xB000000000000000ULL;
+const uint64_t PCI_PFIR_ACTION1_REG = 0xB000000000000000ULL;
+const uint64_t PCI_PFIR_MASK_REG    = 0x0E00000000000000ULL;
 
 //-----------------------------------------------------------------------------------
 // Function definitions
@@ -157,55 +167,6 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_phb_chiplets,
                                l_phb_id));
 
-        // Phase2 init step 7_a
-        // PCIBase+StackBase+0xB
-        // 0x00000000_00000000
-        // Clear any spurious pbaib_cerr_rpt bits
-        l_buf = (uint64_t)0x0;
-        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PBAIB_CERR_RPT_REG, l_buf));
-
-        // Phase2 init step 7_b
-        // PCIBase+StackBase+0x0
-        // 0x00000000_00000000
-        // Clear any spurious FIR
-        // bits (PFIR)PFIR
-        l_buf = (uint64_t)0x0;
-        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIR_REG, l_buf));
-
-        // Phase2 init step 8
-        // PCIBase+StackBase+0x8
-        // 0x00000000_00000000
-        // Clear any spurious WOF
-        // bits (PFIRWOF)
-        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRWOF_REG, l_buf));
-
-        // Phase2 init step 9
-        // PCIBase+StackBase+0x6
-        // 0x5B0F8190_00000000
-        // Set the per FIR Bit Action 0 register
-        l_buf = 0xB000000000000000;
-        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRACTION0_REG, l_buf));
-
-        // Phase2 init step 10
-        // PCIBase+StackBase+0x7
-        // 0x7F0F8190_00000000
-        // Set the per FIR Bit Action 1 register
-        l_buf = 0xBE00000000000000;
-        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRACTION1_REG, l_buf));
-
-        // Phase2 init step 11
-        // PCIBase+StackBase+0x3
-        // 0x00000000_00000000
-        // Set FIR Mask Bits to allow errors (PFIRMask)
-        l_buf = 0x0000000000000000;
-        FAPI_DBG("phb%i: %#lx", l_phb_id,  l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRMASK_REG, l_buf));
-
         // Phase2 init step 12_a
         // NestBase+StackBase+0xA
         // 0x00000000_00000000
@@ -226,7 +187,7 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         //FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
         //FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_CERR_RPT1_REG, l_buf));
 
-        // Phase2 init step 12_c
+        // Phase2 init step 7_c
         // NestBase+StackBase+0x0
         // 0x00000000_00000000
         // Clear any spurious FIR
@@ -235,7 +196,7 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_NFIR_REG, l_buf));
 
-        // Phase2 init step 13
+        // Phase2 init step 8
         // NestBase+StackBase+0x8
         // 0x00000000_00000000
         // Clear any spurious WOF
@@ -243,37 +204,74 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_NFIRWOF_REG, l_buf));
 
-        // Phase2 init step 14
+        // Phase2 init step 9
         // NestBase+StackBase+0x6
-        // 0x5B0F8190_00000000
         // Set the per FIR Bit Action 0 register
-        l_buf = 0x5B0F819000000000;
         FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_NFIRACTION0_REG, l_buf));
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_NFIRACTION0_REG, PCI_NFIR_ACTION0_REG));
 
-        // Phase2 init step 15
+        // Phase2 init step 10
         // NestBase+StackBase+0x7
-        // 0x7F0F8190_00000000
         // Set the per FIR Bit Action 1 register
-        l_buf = 0x7F0F819000000000;
         FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_NFIRACTION1_REG, l_buf));
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_NFIRACTION1_REG, PCI_NFIR_ACTION1_REG));
 
-        // Phase2 init step 16
+        // Phase2 init step 11
         // NestBase+StackBase+0x3
-        // 0x00000000_00000000
         // Set FIR Mask Bits to allow errors (NFIRMask)
-        l_buf = 0x0000000000000000;
         FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_NFIRMASK_REG, l_buf));
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_NFIRMASK_REG, PCI_NFIR_MASK_REG));
 
-        // Phase2 init step 17
+        // Phase2 init step 12
         // NestBase+StackBase+0x15
         // 0x00000000_00000000
         // Set Data Freeze Type Register for SUE handling (DFREEZE)
         l_buf = 0x0000000000000000;
         FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PE_DFREEZE_REG, l_buf));
+
+        // Phase2 init step 13_a
+        // PCIBase+StackBase+0xB
+        // 0x00000000_00000000
+        // Clear any spurious pbaib_cerr_rpt bits
+        l_buf = (uint64_t)0x0;
+        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PBAIB_CERR_RPT_REG, l_buf));
+
+        // Phase2 init step 13_b
+        // PCIBase+StackBase+0x0
+        // 0x00000000_00000000
+        // Clear any spurious FIR
+        // bits (PFIR)PFIR
+        l_buf = (uint64_t)0x0;
+        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIR_REG, l_buf));
+
+        // Phase2 init step 14
+        // PCIBase+StackBase+0x8
+        // 0x00000000_00000000
+        // Clear any spurious WOF
+        // bits (PFIRWOF)
+        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRWOF_REG, l_buf));
+
+        // Phase2 init step 15
+        // PCIBase+StackBase+0x6
+        // Set the per FIR Bit Action 0 register
+        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRACTION0_REG, PCI_PFIR_ACTION0_REG));
+
+        // Phase2 init step 16
+        // PCIBase+StackBase+0x7
+        // Set the per FIR Bit Action 1 register
+        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRACTION1_REG, PCI_PFIR_ACTION1_REG));
+
+        // Phase2 init step 17
+        // PCIBase+StackBase+0x3
+        // Set FIR Mask Bits to allow errors (PFIRMask)
+        FAPI_DBG("phb%i: %#lx", l_phb_id,  l_buf());
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRMASK_REG, PCI_PFIR_MASK_REG));
 
         // Get the BAR enable attribute
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_BAR_ENABLE, l_phb_chiplets, l_bar_enables),
@@ -328,6 +326,14 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         l_buf = (uint64_t)0x0;
         FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PHBRESET_REG, l_buf));
+
+        // Configure ETU FIR (all masked)
+        l_buf = (uint64_t)0x0;
+        FAPI_DBG("phb%i ETU FIR setup", l_phb_id);
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_ACT0_REG, l_buf));
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_ACTION1_REG, l_buf));
+        l_buf = (uint64_t)0xFFFFFFFFFFFFFFFFULL;
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_MASK_REG, l_buf));
     }
 
     FAPI_INF("End");

@@ -42,6 +42,17 @@
 #include <p9_misc_scom_addresses_fixes.H>
 #include <p9_misc_scom_addresses_fld.H>
 
+//-----------------------------------------------------------------------------------
+// Constant definitions
+//-----------------------------------------------------------------------------------
+const uint64_t PCI_IOP_FIR_ACTION0_REG = 0x0000000000000000ULL;
+const uint64_t PCI_IOP_FIR_ACTION1_REG = 0xE000000000000000ULL;
+const uint64_t PCI_IOP_FIR_MASK_REG    = 0x1FFFFFFFF8000000ULL;
+
+//-----------------------------------------------------------------------------------
+// Function definitions
+//-----------------------------------------------------------------------------------
+
 /// @brief This function configures a buffer with respect to different pec id
 ///
 /// @param[in]         in_target The target
@@ -229,20 +240,17 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
                     "pec%i: IOP HSS Port Ready status is not set!", l_pec_id);
 
 
-        // Phase1 init step 5 (Set FIR action0)
-        l_buf = 0;
-        FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_ACTION0_REG, l_buf));
+        // Phase1 init step 5 (Set IOP FIR action0)
+        FAPI_DBG("pec%i: %#lx", l_pec_id, PCI_IOP_FIR_ACTION0_REG);
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_ACTION0_REG, PCI_IOP_FIR_ACTION0_REG));
 
-        // Phase1 init step 6 (Set FIR action1)
-        l_buf = 0xE79E79E000000000ULL;
-        FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_ACTION1_REG, l_buf));
+        // Phase1 init step 6 (Set IOP FIR action1)
+        FAPI_DBG("pec%i: %#lx", l_pec_id, PCI_IOP_FIR_ACTION1_REG);
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_ACTION1_REG, PCI_IOP_FIR_ACTION1_REG));
 
-        // Phase1 init step 7 (Set FIR mask)
-        l_buf = 0x1861861FF8000000ULL;
-        FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_MASK_REG, l_buf));
+        // Phase1 init step 7 (Set IOP FIR mask)
+        FAPI_DBG("pec%i: %#lx", l_pec_id, PCI_IOP_FIR_MASK_REG);
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_MASK_REG, PCI_IOP_FIR_MASK_REG));
 
         // Phase1 init step 8-11 (Config 0 - 3)
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_CDR_GAIN, l_pec_chiplets, l_pcs_cdr_gain));
