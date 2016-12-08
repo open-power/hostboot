@@ -884,7 +884,7 @@ fapi2::ReturnCode p9_xip_customize (
     // Check that buffer sizes are > or == to some minimum sizes. More precise size checks
     //   later for each sysPhase. Neither io_imageSize nor io_ringSectionBufSize are
     //   subject to attrMaxSbeSeepromSize adjust yet, since this is sysPhase dependent.
-    FAPI_ASSERT( (io_imageSize >= l_inputImageSize && io_imageSize >= MAX_SEEPROM_IMAGE_SIZE) &&
+    FAPI_ASSERT( (io_imageSize >= l_inputImageSize || io_imageSize >= MAX_SEEPROM_IMAGE_SIZE) &&
                  io_ringSectionBufSize >= MAX_SEEPROM_IMAGE_SIZE &&
                  i_ringBufSize1 == MAX_RING_BUF_SIZE &&
                  i_ringBufSize2 == MAX_RING_BUF_SIZE,
