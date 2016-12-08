@@ -156,12 +156,15 @@ fapi2::ReturnCode reset_config1(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_CONFIG1_P0, l_data) );
 
     l_data.insertFromRight<TT::MEMORY_TYPE, TT::MEMORY_TYPE_LEN>(memory_type[l_type_index][l_gen_index]);
-    l_data.insertFromRight<TT::READ_LATENCY_OFFSET, TT::READ_LATENCY_OFFSET_LEN>(l_rlo);
     l_data.insertFromRight<TT::WRITE_LATENCY_OFFSET, TT::WRITE_LATENCY_OFFSET_LEN>(l_wlo);
 
     // Always set this bit. It forces the PHY to use A12 when figuring out latency. This makes sense in
     // all cases as A12 is 0 for non-3DS in MR0.
     l_data.setBit<TT::DDR4_LATENCY_SW>();
+
+    // If we are 2N mode we add one to the RLO (see also Centaur initfile)
+    l_data.insertFromRight<TT::READ_LATENCY_OFFSET, TT::READ_LATENCY_OFFSET_LEN>(
+        mss::two_n_mode_helper(i_target) ? l_rlo + 1 : l_rlo);
 
     FAPI_TRY( write_config1(i_target, l_data) );
 
