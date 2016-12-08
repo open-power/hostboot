@@ -25,9 +25,13 @@
 
 #include <prdfMemTdCtlr.H>
 
+// Platform includes
 #include <prdfMemAddress.H>
 #include <prdfMemCaptureData.H>
 #include <prdfP9McbistExtraSig.H>
+
+// External includes
+#include <util/misc.H>
 
 using namespace TARGETING;
 
@@ -184,8 +188,32 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::initStoppedRank()
             break;
         }
 
+        ExtensibleChip * mcaChip = portList.front();
+        MemRank          rank    = addr.getRank();
+
+        // ############################ SIMICs only ############################
+        // We have found it to be increasingly difficult to simulate the MCBMCAT
+        // register in SIMICs. We tried copying the address in the MCBEA
+        // registers, but the HWP code will input the last possible address to
+        // the MCBEA registers, but it is likely that this address is not a
+        // configured address. MCBIST commands are tolerant of this, where MBA
+        // maintenance commands are not. Also, there are multiple possible
+        // subtests for MCBIST commands. So it is difficult to determine which
+        // subtest will be the last configured address. To maintain sanity, we
+        // will simply short-circuit the code and ensure we always get the last
+        // configured rank.
+        if ( Util::isSimicsRunning() )
+        {
+            std::vector<MemRank> list;
+            getSlaveRanks<TYPE_MCA>( mcaChip->getTrgt(), list );
+            PRDF_ASSERT( !list.empty() ); // func target with no config ranks
+
+            rank = list.back(); // Get the last configured rank.
+        }
+        // #####################################################################
+
         // Update iv_stoppedRank.
-        iv_stoppedRank = TdRankListEntry ( portList.front(), addr.getRank() );
+        iv_stoppedRank = TdRankListEntry ( mcaChip, rank );
         #ifndef __HOSTBOOT_RUNTIME
         // Update iv_broadcastMode.
         iv_broadcastMode = ( 1 < portList.size() );
