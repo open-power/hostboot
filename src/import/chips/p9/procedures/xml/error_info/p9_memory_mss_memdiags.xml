@@ -62,8 +62,8 @@
   </registerFfdc>
 
   <hwpError>
-    <rc>RC_MSS_MEMDIAGS_UE_OR_SUE_IN_LAST_PATTERN</rc>
-    <description>A UE or SUE was caused by the last MCBIST pattern</description>
+    <rc>RC_MSS_MEMDIAGS_ERROR_IN_LAST_PATTERN</rc>
+    <description>An error was caused by the last MCBIST pattern</description>
     <ffdc>STATUS0</ffdc>
     <ffdc>STATUS1</ffdc>
     <collectRegisterFfdc>
