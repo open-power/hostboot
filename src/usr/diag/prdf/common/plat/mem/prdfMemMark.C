@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/mem/prdfMemMark.C $                    */
+/* $Source: src/usr/diag/prdf/common/plat/mem/prdfMemMark.C $             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */

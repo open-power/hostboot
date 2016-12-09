@@ -41,6 +41,17 @@ namespace MemEcc
 {
 
 /**
+ * @brief  Analyzes a fetch MPE attention.
+ * @param  i_chip   MCA or MBA.
+ * @param  i_rank   Target rank.
+ * @param  io_sc    The step code data struct.
+ * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T, typename D>
+uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
+                          STEP_CODE_DATA_STRUCT & io_sc );
+
+/**
  * @brief  Analyzes a fetch UE attention.
  * @param  i_chip   MCA or MBA.
  * @param  io_sc    The step code data struct.

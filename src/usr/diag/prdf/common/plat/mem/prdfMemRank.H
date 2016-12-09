@@ -94,6 +94,10 @@ class MemRank
                  (this->getSlave()  == i_rank.getSlave() )    );
     }
 
+    /** @brief '!=' operator */
+    bool operator!=( const MemRank & i_rank ) const
+    { return !(*this == i_rank); }
+
     /** @brief '<' operator */
     bool operator<( const MemRank & i_rank ) const
     {

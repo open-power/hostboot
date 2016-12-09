@@ -41,6 +41,7 @@ prd_incpath += ${PRD_SRC_PATH}/common/plat/mem
 prd_obj += prdfMemAddress.o
 prd_obj += prdfMemCaptureData.o
 prd_obj += prdfMemEccAnalysis.o
+prd_obj += prdfMemMark.o
 prd_obj += prdfMemSymbol.o
 prd_obj += prdfMemoryMru.o
 prd_obj += prdfMemUeTable.o

@@ -324,10 +324,45 @@ rule rMCAECCFIR
 
 group gMCAECCFIR filter singlebit
 {
-    /** MCAECCFIR[0:7]
-     *  Mainline read MPE
+    /** MCAECCFIR[0]
+     *  Mainline read MPE on rank 0
      */
-    (rMCAECCFIR, bit(0|1|2|3|4|5|6|7)) ? verify_chip_mark;
+    (rMCAECCFIR, bit(0)) ? verify_chip_mark_0;
+
+    /** MCAECCFIR[1]
+     *  Mainline read MPE on rank 1
+     */
+    (rMCAECCFIR, bit(1)) ? verify_chip_mark_1;
+
+    /** MCAECCFIR[2]
+     *  Mainline read MPE on rank 2
+     */
+    (rMCAECCFIR, bit(2)) ? verify_chip_mark_2;
+
+    /** MCAECCFIR[3]
+     *  Mainline read MPE on rank 3
+     */
+    (rMCAECCFIR, bit(3)) ? verify_chip_mark_3;
+
+    /** MCAECCFIR[4]
+     *  Mainline read MPE on rank 4
+     */
+    (rMCAECCFIR, bit(4)) ? verify_chip_mark_4;
+
+    /** MCAECCFIR[5]
+     *  Mainline read MPE on rank 5
+     */
+    (rMCAECCFIR, bit(5)) ? verify_chip_mark_5;
+
+    /** MCAECCFIR[6]
+     *  Mainline read MPE on rank 6
+     */
+    (rMCAECCFIR, bit(6)) ? verify_chip_mark_6;
+
+    /** MCAECCFIR[7]
+     *  Mainline read MPE on rank 7
+     */
+    (rMCAECCFIR, bit(7)) ? verify_chip_mark_7;
 
     /** MCAECCFIR[8]
      *  Mainline read NCE
