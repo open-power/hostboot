@@ -78,7 +78,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
                               char*           o_ringName,        // Name of ring
                               uint32_t        i_dbgl )           // Debug option
 {
-
+    uint32_t acc_offset = 0;   // Accumulating offset to next TOR offset slot
     uint32_t ring_offset = 0;
     uint16_t chiplet_offset = 0;
     uint32_t next_ring_offset = 0;
@@ -271,7 +271,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
                          || (i_RingVariant == OVERRIDE && i_magic == P9_XIP_MAGIC_SEEPROM)))
                 {
                     strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
-                    int var = l * sizeof(TorPpeBlock_t) + i_ddLevel + temp;
+                    uint32_t var = l * sizeof(TorPpeBlock_t) + i_ddLevel + temp;
                     int temp1 =  var / sizeof(uint32_t);
                     ring_offset =  *((uint32_t*)i_ringSection + temp1);
                     ring_offset = htobe32(ring_offset);
@@ -368,9 +368,10 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
                             return TOR_RING_AVAILABLE_IN_RINGSECTION;
                         }
 
-                        io_ringBlockSize = var + (local * RING_OFFSET_SIZE);
-                        memcpy( (uint8_t*)(*io_ringBlockPtr), &var,
-                                sizeof(uint16_t));
+                        acc_offset = var;
+                        io_ringBlockSize =  acc_offset + (local * RING_OFFSET_SIZE);
+                        memcpy( (uint8_t*)(*io_ringBlockPtr), &acc_offset, sizeof(acc_offset));
+
                         return TOR_RING_FOUND;
                     }
                 }
@@ -498,9 +499,10 @@ int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section
                                         return TOR_RING_AVAILABLE_IN_RINGSECTION;
                                     }
 
-                                    io_ringBlockSize = var + (local * RING_OFFSET_SIZE);
-                                    memcpy( (uint8_t*)(*io_ringBlockPtr), &var,
-                                            sizeof(uint16_t));
+                                    acc_offset = var;
+                                    io_ringBlockSize =  acc_offset + (local * RING_OFFSET_SIZE);
+                                    memcpy( (uint8_t*)(*io_ringBlockPtr), &acc_offset, sizeof(acc_offset));
+
                                     return TOR_RING_FOUND;
                                 }
                             }
@@ -549,6 +551,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
                                char*           o_ringName,        // Name of ring
                                uint32_t        i_dbgl )           // Debug option
 {
+    uint32_t acc_offset = 0;   // Accumulating offset to next TOR offset slot
     uint32_t ring_offset = 0;
     uint16_t chiplet_offset = 0;
     uint32_t next_ring_offset = 0;
@@ -591,7 +594,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
                          RING_PROPERTIES[i_ringId].iv_name) == 0) && ( i_RingVariant == j ))
             {
                 strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
-                int var = 0 + i_ddLevel + temp;
+                uint32_t var = 0 + i_ddLevel + temp;
                 int temp1 =  var / sizeof(uint32_t);
                 ring_offset =  *((uint32_t*)i_ringSection + temp1);
                 ring_offset = htobe32(ring_offset);
@@ -687,9 +690,10 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
                         return TOR_RING_AVAILABLE_IN_RINGSECTION;
                     }
 
-                    io_ringBlockSize = var + (local * RING_OFFSET_SIZE);
-                    memcpy( (uint8_t*)(*io_ringBlockPtr), &var,
-                            sizeof(uint16_t));
+                    acc_offset = var;
+                    io_ringBlockSize =  acc_offset + (local * RING_OFFSET_SIZE);
+                    memcpy( (uint8_t*)(*io_ringBlockPtr), &acc_offset, sizeof(acc_offset));
+
                     return TOR_RING_FOUND;
                 }
             }
@@ -697,7 +701,6 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
             local++;
         }
 
-        //MY_INF ("\n");
     }
 
     // Instance specific single ring extract loop
@@ -819,9 +822,10 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
                                     return TOR_RING_AVAILABLE_IN_RINGSECTION;
                                 }
 
-                                io_ringBlockSize = var + (local * RING_OFFSET_SIZE);
-                                memcpy( (uint8_t*)(*io_ringBlockPtr), &var,
-                                        sizeof(uint16_t));
+                                acc_offset = var;
+                                io_ringBlockSize =  acc_offset + (local * RING_OFFSET_SIZE);
+                                memcpy( (uint8_t*)(*io_ringBlockPtr), &acc_offset, sizeof(acc_offset));
+
                                 return TOR_RING_FOUND;
                             }
                         }
@@ -865,6 +869,7 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
                               char*           o_ringName,        // Name of ring
                               uint32_t        i_dbgl )           // Debug option
 {
+    uint32_t acc_offset = 0;   // Accumulating offset to next TOR offset slot
     uint32_t ring_offset = 0;
     uint16_t chiplet_offset = 0;
     uint32_t next_ring_offset = 0;
@@ -907,7 +912,7 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
                          RING_PROPERTIES[i_ringId].iv_name) == 0) && ( i_RingVariant == j ))
             {
                 strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
-                int var = 0 + i_ddLevel + temp;
+                uint32_t var = 0 + i_ddLevel + temp;
                 int temp1 =  var / sizeof(uint32_t);
                 ring_offset =  *((uint32_t*)i_ringSection + temp1);
                 ring_offset = htobe32(ring_offset);
@@ -1003,9 +1008,10 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
                         return TOR_RING_AVAILABLE_IN_RINGSECTION;
                     }
 
-                    io_ringBlockSize = var + (local * RING_OFFSET_SIZE);
-                    memcpy( (uint8_t*)(*io_ringBlockPtr), &var,
-                            sizeof(uint16_t));
+                    acc_offset = var;
+                    io_ringBlockSize =  acc_offset + (local * RING_OFFSET_SIZE);
+                    memcpy( (uint8_t*)(*io_ringBlockPtr), &acc_offset, sizeof(acc_offset));
+
                     return TOR_RING_FOUND;
                 }
             }
@@ -1139,9 +1145,10 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
                                         return TOR_RING_AVAILABLE_IN_RINGSECTION;
                                     }
 
-                                    io_ringBlockSize = var + (local * RING_OFFSET_SIZE);
-                                    memcpy( (uint8_t*)(*io_ringBlockPtr), &var,
-                                            sizeof(uint16_t));
+                                    acc_offset = var;
+                                    io_ringBlockSize =  acc_offset + (local * RING_OFFSET_SIZE);
+                                    memcpy( (uint8_t*)(*io_ringBlockPtr), &acc_offset, sizeof(acc_offset));
+
                                     return TOR_RING_FOUND;
                                 }
                             }
@@ -2277,8 +2284,8 @@ int tor_append_ring(  void*           i_ringSection,      // Ring section ptr
 {
     uint32_t   rc = 0;
     char       i_ringName[25];
-    uint16_t   l_ringTypeBuf = 0;
-    uint16_t*  l_ringTypeStart = &l_ringTypeBuf;
+    uint32_t   l_ringTypeBuf = 0;
+    uint32_t*  l_ringTypeStart = &l_ringTypeBuf;
     uint8_t    l_instanceId  = i_instanceId;
     RingType_t l_RingType = i_RingType;
     uint32_t   l_ringBlockSize;
@@ -2333,7 +2340,7 @@ int tor_append_ring(  void*           i_ringSection,      // Ring section ptr
     // Current ring offset address contains old rs4 image starting address.
     // When tor_append_ring gets new RS4 ring data. It is appended at end of the
     // .rings section and new ring pointer location is updated at ring offset address
-    l_ringOffsetAddr16 = *l_ringTypeStart;
+    l_ringOffsetAddr16 = (uint16_t)(*l_ringTypeStart);
     l_ringOffsetAddr16 = io_ringSectionSize - l_ringOffsetAddr16;
     l_ringOffsetAddr16 = htobe16(l_ringOffsetAddr16 + sizeof(RingLayout_t));
     memcpy( (uint8_t*)i_ringSection +  l_torOffsetSlot, &l_ringOffsetAddr16,
