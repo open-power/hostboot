@@ -40,11 +40,15 @@ actionclass all_dimm_H_self_L_th_1
     threshold1;
 };
 
-/** Verify Chip Mark...TBD */
-actionclass verify_chip_mark
-{
-    TBDDefaultCallout;
-};
+/** Verify Chip Mark */
+actionclass verify_chip_mark_0 { funccall("AnalyzeFetchMpe_0"); };
+actionclass verify_chip_mark_1 { funccall("AnalyzeFetchMpe_1"); };
+actionclass verify_chip_mark_2 { funccall("AnalyzeFetchMpe_2"); };
+actionclass verify_chip_mark_3 { funccall("AnalyzeFetchMpe_3"); };
+actionclass verify_chip_mark_4 { funccall("AnalyzeFetchMpe_4"); };
+actionclass verify_chip_mark_5 { funccall("AnalyzeFetchMpe_5"); };
+actionclass verify_chip_mark_6 { funccall("AnalyzeFetchMpe_6"); };
+actionclass verify_chip_mark_7 { funccall("AnalyzeFetchMpe_7"); };
 
 /** Mainline CE UE handling...TBD */
 actionclass mainline_ce_ue_handling

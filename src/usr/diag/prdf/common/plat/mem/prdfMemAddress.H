@@ -107,7 +107,7 @@ class MemAddr
                  this->getCol()  == i_addr.getCol() );
     }
 
-  private: // functions
+  public: // functions
 
     /**
      * @brief Constructor from components.

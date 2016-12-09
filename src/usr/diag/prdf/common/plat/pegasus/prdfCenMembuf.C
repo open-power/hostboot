@@ -378,99 +378,41 @@ PRDF_PLUGIN_DEFINE( Membuf, checkSpareBit );
 //##############################################################################
 
 /**
- * @brief  MBSECCFIR[0:7] - Fetch Mark Placed Event (MPE).
- * @param  i_membChip A Centaur chip.
- * @param  i_sc       The step code data struct.
- * @param  i_mbaPos   The MBA position.
- * @param  i_rank     The target rank.
+ * @brief  MBSECCFIR[0:7] - Mailine MPE.
+ * @param  i_chip MEMBUF chip.
+ * @param  io_sc  The step code data struct.
  * @return SUCCESS
  */
-int32_t AnalyzeFetchMpe( ExtensibleChip * i_membChip,
-                         STEP_CODE_DATA_STRUCT & i_sc,
-                         uint32_t i_mbaPos, uint8_t i_rank )
-{
-    #define PRDF_FUNC "[AnalyzeFetchMpe] "
+#define PLUGIN_FETCH_MPE_ERROR( POS, RANK ) \
+int32_t AnalyzeFetchMpe##POS_##RANK( ExtensibleChip * i_chip, \
+                                     STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    ExtensibleChip * mbaChip = getConnectedChild( i_chip, TYPE_MBA, POS ); \
+    PRDF_ASSERT( nullptr != mbaChip ); \
+    MemEcc::analyzeFetchMpe<TYPE_MBA, MbaDataBundle *>( mbaChip, RANK, io_sc );\
+    return SUCCESS; \
+} \
+PRDF_PLUGIN_DEFINE( Membuf, AnalyzeFetchMpe##POS_##RANK );
 
-    int32_t l_rc = SUCCESS;
+PLUGIN_FETCH_MPE_ERROR( 0, 0 )
+PLUGIN_FETCH_MPE_ERROR( 0, 1 )
+PLUGIN_FETCH_MPE_ERROR( 0, 2 )
+PLUGIN_FETCH_MPE_ERROR( 0, 3 )
+PLUGIN_FETCH_MPE_ERROR( 0, 4 )
+PLUGIN_FETCH_MPE_ERROR( 0, 5 )
+PLUGIN_FETCH_MPE_ERROR( 0, 6 )
+PLUGIN_FETCH_MPE_ERROR( 0, 7 )
 
-    ExtensibleChip * mbaChip = NULL;
+PLUGIN_FETCH_MPE_ERROR( 1, 0 )
+PLUGIN_FETCH_MPE_ERROR( 1, 1 )
+PLUGIN_FETCH_MPE_ERROR( 1, 2 )
+PLUGIN_FETCH_MPE_ERROR( 1, 3 )
+PLUGIN_FETCH_MPE_ERROR( 1, 4 )
+PLUGIN_FETCH_MPE_ERROR( 1, 5 )
+PLUGIN_FETCH_MPE_ERROR( 1, 6 )
+PLUGIN_FETCH_MPE_ERROR( 1, 7 )
 
-    do
-    {
-        CenMembufDataBundle * membdb = getMembufDataBundle( i_membChip );
-        mbaChip = membdb->getMbaChip( i_mbaPos );
-        if ( NULL == mbaChip )
-        {
-            PRDF_ERR( PRDF_FUNC "getMbaChip() returned NULL" );
-            l_rc = FAIL; break;
-        }
-
-        CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
-        TargetHandle_t mbaTrgt = mbaChip->GetChipHandle();
-
-        CenAddr addr;
-        l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_MPE_ADDR, addr );
-        if ( SUCCESS != l_rc )
-        {
-           PRDF_ERR( PRDF_FUNC "getCenReadAddr() failed" );
-           break;
-        }
-
-        // If the address does not match the rank that reported the attention,
-        // there are multiple MPE attentions and the address was overwritten.
-        // In this case, add an invalid dummy address to the UE table.
-        if ( addr.getRank().getMaster() != i_rank )
-        {
-            addr = CenAddr( i_rank, 0, 0xffffffff, 0xffffffff, 0xffffffff );
-        }
-
-        mbadb->iv_ueTable.addEntry( UE_TABLE::FETCH_MPE, addr );
-
-        // Get the current mark in hardware.
-        CenRank rank ( addr.getRank() );
-        CenMark mark;
-        l_rc = mssGetMarkStore( mbaTrgt, rank, mark );
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "mssGetMarkStore() failed");
-            break;
-        }
-
-        if ( !mark.getCM().isValid() )
-        {
-            PRDF_ERR( PRDF_FUNC "FIR bit set but no valid chip mark" );
-            l_rc = FAIL; break;
-        }
-
-        // Callout the mark.
-        CalloutUtil::calloutMark( mbaTrgt, rank, mark, i_sc );
-
-        // Tell TD controller to handle VCM event.
-        l_rc = mbadb->iv_tdCtlr.handleTdEvent( i_sc, rank,
-                                               CenMbaTdCtlrCommon::VCM_EVENT );
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "handleTdEvent() failed." );
-            break;
-        }
-
-    } while (0);
-
-    // Add ECC capture data for FFDC.
-    if ( NULL != mbaChip )
-        MemCaptureData::addEccData<TYPE_MBA>( mbaChip, i_sc );
-
-    if ( SUCCESS != l_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed: i_membChip=0x%08x i_mbaPos=%d i_rank=%d",
-                  i_membChip->GetId(), i_mbaPos, i_rank );
-        CalloutUtil::defaultError( i_sc );
-    }
-
-    return SUCCESS; // Intentionally return SUCCESS for this plugin
-
-    #undef PRDF_FUNC
-}
+#undef PLUGIN_FETCH_MPE_ERROR
 
 //------------------------------------------------------------------------------
 
@@ -1377,35 +1319,6 @@ PLUGIN_FETCH_RCE_PREUE_ERROR( PreUe, 0, false )
 PLUGIN_FETCH_RCE_PREUE_ERROR( PreUe, 1, false )
 
 #undef PLUGIN_FETCH_RCE_PREUE_ERROR
-
-// Define the plugins for memory MPE errors.
-#define PLUGIN_MEMORY_MPE_ERROR( MBA, RANK ) \
-int32_t AnalyzeFetchMpe##MBA##_##RANK( ExtensibleChip * i_membChip, \
-                                       STEP_CODE_DATA_STRUCT & i_sc ) \
-{ \
-    return AnalyzeFetchMpe( i_membChip, i_sc, MBA, RANK ); \
-} \
-PRDF_PLUGIN_DEFINE( Membuf, AnalyzeFetchMpe##MBA##_##RANK );
-
-PLUGIN_MEMORY_MPE_ERROR( 0, 0 )
-PLUGIN_MEMORY_MPE_ERROR( 0, 1 )
-PLUGIN_MEMORY_MPE_ERROR( 0, 2 )
-PLUGIN_MEMORY_MPE_ERROR( 0, 3 )
-PLUGIN_MEMORY_MPE_ERROR( 0, 4 )
-PLUGIN_MEMORY_MPE_ERROR( 0, 5 )
-PLUGIN_MEMORY_MPE_ERROR( 0, 6 )
-PLUGIN_MEMORY_MPE_ERROR( 0, 7 )
-
-PLUGIN_MEMORY_MPE_ERROR( 1, 0 )
-PLUGIN_MEMORY_MPE_ERROR( 1, 1 )
-PLUGIN_MEMORY_MPE_ERROR( 1, 2 )
-PLUGIN_MEMORY_MPE_ERROR( 1, 3 )
-PLUGIN_MEMORY_MPE_ERROR( 1, 4 )
-PLUGIN_MEMORY_MPE_ERROR( 1, 5 )
-PLUGIN_MEMORY_MPE_ERROR( 1, 6 )
-PLUGIN_MEMORY_MPE_ERROR( 1, 7 )
-
-#undef PLUGIN_MEMORY_MPE_ERROR
 
 // Define the plugins for RCD parity error memory UE side-effects
 #define PLUGIN_RCD_PARITY_UE_SIDEEFFECTS( MBA ) \

@@ -87,6 +87,35 @@ PRDF_PLUGIN_DEFINE( p9_mca, PostAnalysis );
 //##############################################################################
 
 /**
+ * @brief  MCAECCFIR[0:7] - Mainline MPE.
+ * @param  i_chip MCA chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+#define PLUGIN_FETCH_MPE_ERROR( RANK ) \
+int32_t AnalyzeFetchMpe_##RANK( ExtensibleChip * i_chip, \
+                                STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    MemRank rank ( RANK ); \
+    MemEcc::analyzeFetchMpe<TYPE_MCA, McaDataBundle *>( i_chip, rank, io_sc ); \
+    return SUCCESS; \
+} \
+PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchMpe_##RANK );
+
+PLUGIN_FETCH_MPE_ERROR( 0 )
+PLUGIN_FETCH_MPE_ERROR( 1 )
+PLUGIN_FETCH_MPE_ERROR( 2 )
+PLUGIN_FETCH_MPE_ERROR( 3 )
+PLUGIN_FETCH_MPE_ERROR( 4 )
+PLUGIN_FETCH_MPE_ERROR( 5 )
+PLUGIN_FETCH_MPE_ERROR( 6 )
+PLUGIN_FETCH_MPE_ERROR( 7 )
+
+#undef PLUGIN_FETCH_MPE_ERROR
+
+//------------------------------------------------------------------------------
+
+/**
  * @brief  MCAECCFIR[14] - Mainline UE.
  * @param  i_chip MCA chip.
  * @param  io_sc  The step code data struct.
