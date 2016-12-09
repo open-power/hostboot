@@ -154,6 +154,9 @@ waitkb
 timestamp=`date +'%H:%M:%S'`
 echo "$timestamp Starting autosample test..."
 
+# see simics license usage
+tail -n 500 /afs/rch/usr4/dlarson/public/stats/lic_usage.txt | grep hindsight
+
 # Run set up in current shell
 echo    "run autosimsetup.."
 export AUTOSIM_WORKDIR=$SANDBOXBASE
@@ -171,9 +174,6 @@ fi
 
 waitkb
 
-# Start simics and wait for it to reach standby
-echo "Starting simics"
-
 # If we are running under Jenkins, do "no remote execution" because built in
 # /tmp.
 if [ -z $RUNNING_UNDER_JENKINS -a -z $SANDBOX_IN_TEMP ];
@@ -186,14 +186,39 @@ else
     NRE="--sim_parms -nre"
 fi
 
-#autosim $VERBOSE --startsim --chkpt standby <<< chkpt not working yet
-autosim $NOWIN $VERBOSE --startsim $NRE --notar
-if [ $? -ne 0 ] ; then
-        echo "ERROR: Unable to start simics $?"
-        stopserver      ##  kill the server again.
-        exit 1
-fi
+# Start simics and wait for it to reach standby
+echo "Attempting to start simics"
 
+#autosim $VERBOSE --startsim --chkpt standby <<< chkpt not working yet
+max_start_simics_attempts=5
+current_attempts=0
+while [ $current_attempts -lt $max_start_simics_attempts ]; do
+    echo "> Attempt $current_attempts/$max_start_simics_attempts to start simics"
+    autosim $NOWIN $VERBOSE --startsim $NRE --notar
+    if [ $? -ne 0 ] ; then
+        # Do not fail until max attempts tried
+        if [ $current_attempts -ge $max_start_simics_attempts ]; then
+            echo ">> ERROR: Unable to start simics $?"
+            stopserver      ##  kill the server again.
+            exit 1
+        fi
+        echo ">> Failed: trying to start simics again"
+        sleep 15
+    else
+        echo ">> Success: started simics"
+        break
+    fi
+    ((current_attempts++))
+done
+
+waitkb
+
+# open simics telnet port
+autosim --simtelnet
+if [ $? -ne 0 ] ; then
+    echo "ERROR: Unable to open simics telnet port $?"
+    exit 1
+fi
 
 waitkb
 
