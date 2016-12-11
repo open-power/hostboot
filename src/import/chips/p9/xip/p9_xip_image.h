@@ -1454,6 +1454,9 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
 /// Image has been broken and unable to restore original image.
 #define P9_XIP_CANT_RESTORE_IMAGE 18
 
+/// .rings seciton for specific dd level is larger than the allowable size
+#define P9_XIP_SBE_DD_SIZE_ERR 19
+
 /// Applications can expand this macro to declare an array of string forms of
 /// the error codes if desired.
 #define P9_XIP_ERROR_STRINGS(var)    \
@@ -1477,6 +1480,7 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
         "P9_XIP_HASH_COLLISION",     \
         "P9_XIP_NULL_BUFFER",        \
         "P9_XIP_CANT_RESTORE_IMAGE", \
+        "P9_XIP_SBE_DD_SIZE_ERR",    \
     }
 
 /// Applications can use this macro to safely index the array of error
