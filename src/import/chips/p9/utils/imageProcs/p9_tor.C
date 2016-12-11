@@ -1191,12 +1191,14 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
             MY_INF("tor_access_ring(): No of DD levels: %d \n", ddLevelCount);
         }
 
-        for (uint8_t i = 0; i < ddLevelCount; i++)
+        // start at one since we use that as an offset
+        for (uint8_t i = 1; i <= ddLevelCount; i++)
         {
-            local = 2;
+            local = 2 * (i);
             ddLevelOffset  =  *((uint32_t*)i_ringSection + local);
-            ddLevel = htobe32(ddLevelOffset) >> 24 & 0x000000FF;
-            ddLevelOffset = htobe32(ddLevelOffset) & 0x00FFFFFF;
+
+            ddLevel = be32toh(ddLevelOffset) >> 24 & 0x000000FF;
+            ddLevelOffset = be32toh(ddLevelOffset) & 0x00FFFFFF;
 
             if (i_dbgl > 1)
             {
@@ -1206,12 +1208,11 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
 
             if ( ddLevel == i_ddLevel)
             {
-                ddLevelOffset  =  *((uint32_t*)i_ringSection + local);
-                ddLevelOffset = htobe32(ddLevelOffset) & 0x00FFFFFF;
                 ddLevelOffset = ddLevelOffset + sizeof(TorNumDdLevels_t);
                 local = local + 1;
                 ddBlockSize = *((uint32_t*)i_ringSection + local);
-                ddBlockSize = htobe32(ddBlockSize);
+                ddBlockSize = be32toh(ddBlockSize);
+
                 bDdCheck = 1;
                 break;
             }
