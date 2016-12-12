@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -771,6 +771,59 @@ void HdatIplParms::hdatGetSystemParamters()
     else
     {
         HDAT_ERR("Error in getting SYSTEM_BRAND_NAME");
+    }
+
+    //TODO RTC Story 161867
+    //Need to remove the hard coding data
+    this->iv_hdatIPLParams->iv_sysParms.hdatTpmDrawer = 1;
+
+    TARGETING::ATTR_SECURITY_ENABLE_type l_sysSecuritySetting;
+    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SECURITY_ENABLE>
+                                                        (l_sysSecuritySetting))
+    {
+        this->iv_hdatIPLParams->iv_sysParms.hdatSysSecuritySetting =
+            l_sysSecuritySetting;
+    }
+    else
+    {
+        HDAT_ERR("Error in getting SECURITY_ENABLE attribute");
+    }
+
+    TARGETING::ATTR_TPM_REQUIRED_type l_tpmConfBits;
+    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_TPM_REQUIRED>
+                                                        (l_tpmConfBits))
+    {
+        this->iv_hdatIPLParams->iv_sysParms.hdatTpmConfBits = l_tpmConfBits;
+    }
+    else
+    {
+        HDAT_ERR("Error in getting TPM_REQUIRED attribute");
+    }
+    memset(this->iv_hdatIPLParams->iv_sysParms.hdatHwKeyHashValue, 0x00, 64);
+    memset(this->iv_hdatIPLParams->iv_sysParms.hdatSystemFamily, 0x00, 64);
+
+    TARGETING::ATTR_SYSTEM_FAMILY_type l_systemFamily = {0};
+    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SYSTEM_FAMILY> (l_systemFamily))
+    {
+        strcpy(reinterpret_cast<char*>
+               (this->iv_hdatIPLParams->iv_sysParms.hdatSystemFamily),
+               l_systemFamily);
+    }
+    else
+    {
+        HDAT_ERR("Error in getting SYSTEM_FAMILY");
+    }
+
+    TARGETING::ATTR_SYSTEM_TYPE_type l_systemType = {0};
+    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SYSTEM_TYPE> (l_systemType))
+    {
+        strcpy(reinterpret_cast<char*>
+               (this->iv_hdatIPLParams->iv_sysParms.hdatSystemType),
+               l_systemType);
+    }
+    else
+    {
+        HDAT_ERR("Error in getting SYSTEM_TYPE");
     }
 }
 
