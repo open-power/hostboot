@@ -150,4 +150,16 @@
     </callout>
   </hwpError>
   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_EPSILON_SCOM_UPDATE_FAIL</rc>
+    <description>hcode image build procedure failed to create restore entry for Epsilon SCOM register</description>
+    <ffdc>STOP_API_SCOM_ERR</ffdc>
+    <ffdc>EPSILON_REG_ADDR</ffdc>
+    <ffdc>EPSILON_REG_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>
