@@ -47,7 +47,10 @@
 fapi2::ReturnCode p9_sbe_lpc_init(const
                                   fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
-
+    const uint64_t C_LPC_TIMEOUT_ADDR = 0x00400000C001202C;
+    const uint64_t C_LPC_TIMEOUT_DATA = 0x00000000FE000000;
+    const uint64_t C_OPB_TIMEOUT_ADDR = 0x00400000C0010040;
+    const uint64_t C_OPB_TIMEOUT_DATA = 0x00000000FFFFFFFE;
     fapi2::buffer<uint64_t> l_data64;
     uint8_t l_use_gpio = 0;
     uint8_t l_is_fsp = 0;
@@ -101,6 +104,17 @@ fapi2::ReturnCode p9_sbe_lpc_init(const
         l_data64.clearBit<PU_GPIO_OUTPUT_EN_DO_EN_0>();
         FAPI_TRY(fapi2::putScom(i_target_chip, PU_GPIO_OUTPUT_EN, l_data64));
     }
+
+    //Set up the LPC timeout settings
+    l_data64 = C_LPC_TIMEOUT_ADDR;
+    FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_CMD_REG, l_data64), "Error tring to set LPC timeout address");
+    l_data64 = C_LPC_TIMEOUT_DATA;
+    FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_DATA_REG, l_data64), "Error trying to set LPC timeout data");
+    //Set up the OPB timeout settings
+    l_data64 = C_OPB_TIMEOUT_ADDR;
+    FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_CMD_REG, l_data64), "Error trying to set OPB timeout address");
+    l_data64 = C_OPB_TIMEOUT_DATA;
+    FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_DATA_REG, l_data64), "Error trying to set OPB timeout data");
 
     FAPI_DBG("p9_sbe_lpc_init: Exiting ...");
 
