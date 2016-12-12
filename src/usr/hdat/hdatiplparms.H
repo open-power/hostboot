@@ -103,6 +103,13 @@ struct hdatSysParms_t
     uint8_t  hdatReserved4;            // Reserved
     uint16_t hdatReserved5;            // Reserved
     uint8_t  hdatSystemVendorName[64]; // System Vendor Name
+    uint16_t hdatSysSecuritySetting;   // System Security Settings
+    uint16_t hdatTpmConfBits;          // TPM Configuration Bits
+    uint16_t hdatTpmDrawer;            // TPMs/Drawer
+    uint16_t hdatReserved6;            // Reserved
+    uint8_t  hdatHwKeyHashValue[64];   // Hardware Keys Hash Value
+    char     hdatSystemFamily[64];     // System Family/Vendor Name
+    char     hdatSystemType[64];       // System Type/Vendor Type
 } __attribute__ ((packed));
 
 /** @brief Structure definition for Other IPL Attributes within hdatIPLParams_t

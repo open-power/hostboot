@@ -99,6 +99,8 @@ struct hdatMsAreaId_t
     uint16_t hdatMsAreaParentType; // 0x0002 Memory parent type
     uint16_t hdatMsAreaStatus;   // 0x0004 Status
     uint16_t hdatInterleavedId;  // 0x0006 Id for MS areas which are interleaved
+    uint32_t hdatFsiDevicePathLen; // 0x0008 FSI Device Path – Actual Length
+    uint8_t  hdatFsiDevicePath[64];// 0x000C FSI Device Path
 }  __attribute__ ((packed));
 
 

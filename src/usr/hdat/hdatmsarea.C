@@ -117,6 +117,13 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
 
     iv_msId.hdatMsAreaId = i_msAreaId;
 
+    //TODO : RTC Story 161864
+    //For Nimbus based systems, FSI device path length is always zero so hard
+    //coding the values
+    //But for Cumulus/Centaur based systems, we need to get the actual data
+    iv_msId.hdatFsiDevicePathLen = 0;
+    memset(iv_msId.hdatFsiDevicePath, 0x00, 64);
+  
     iv_addrRngArrayHdr.hdatOffset    = sizeof(hdatHDIFDataArray_t);
     iv_addrRngArrayHdr.hdatArrayCnt  = 0;
     iv_addrRngArrayHdr.hdatAllocSize = sizeof(hdatMsAreaAddrRange_t);
