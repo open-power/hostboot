@@ -47,6 +47,7 @@
 #include <p9_infrastruct_help.H>
 #include <p9_xip_customize.H>
 #include <p9_ringId.H>
+#include <p9_quad_scom_addresses.H>
 
 #ifdef __CRONUS_VER
     #include <string>
@@ -112,6 +113,8 @@ extern "C"
         RING_START_TO_RS4_OFFSET    =   8,
         TOR_VER_ONE                 =   1,
         TOR_VER_TWO                 =   2,
+        QUAD_BIT_POS                =   24,
+        ODD_EVEN_EX_POS             =   0x00000400,
     };
 
     /**
@@ -598,13 +601,13 @@ extern "C"
         FAPI_INF("  CR Size         = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_length));
         FAPI_INF("  CSR Offset      = 0x%08X (Real offset / 32) ", SWIZZLE_4_BYTE(pCmeHdr->g_cme_core_spec_ring_offset));
         FAPI_INF("  CSR Length      = 0x%08X (Real length / 32)", SWIZZLE_4_BYTE(pCmeHdr->g_cme_max_spec_ring_length) );
-        FAPI_INF("  SCOM Offset     = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_scom_offset));
+        FAPI_INF("  SCOM Offset     = 0x%08X (Real offset / 32)",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_scom_offset));
         FAPI_INF("  SCOM Area Len   = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_scom_length));
         FAPI_INF("  CPMR Phy Add    = 0x%016lx", SWIZZLE_8_BYTE(pCmeHdr->g_cme_cpmr_PhyAddr));
         FAPI_INF("========================= CME Header End ==================================");
 
         FAPI_INF("==========================CPMR Header===========================================");
-        FAPI_INF(" CME HC Offset            : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmeImgOffset));
+        FAPI_INF(" CME HC Offset            : 0x%08X (Real offset / 32)", SWIZZLE_4_BYTE(pCpmrHdr->cmeImgOffset));
         FAPI_INF(" CME HC Length            : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmeImgLength));
         FAPI_INF(" PS  Offset               : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmePstateOffset));
         FAPI_INF(" PS  Length               : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmePstateLength));
@@ -2128,6 +2131,404 @@ extern "C"
 
     //---------------------------------------------------------------------------
 
+    /**
+     * @brief   populate L2 Epsilon SCOM register.
+     * @param   i_pChipHomer    points to start of P9 HOMER.
+     * @return  fapi2 return code.
+     */
+    fapi2::ReturnCode populateEpsilonL2ScomReg( void*    i_pChipHomer )
+    {
+        FAPI_DBG("> populateEpsilonL2ScomReg");
+
+        do
+        {
+            uint32_t attrValT0 = 0;
+            uint32_t attrValT1 = 0;
+            uint32_t attrValT2 = 0;
+            uint32_t scomAddr = 0;
+            uint32_t rc = IMG_BUILD_SUCCESS;
+
+            uint64_t l_epsilonScomVal;
+            fapi2::buffer<uint64_t> epsilonValBuf;
+
+            const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+            //=============================================================================
+            //Determine SCOM register data value for EX_L2_RD_EPS_REG by reading attributes
+            //=============================================================================
+
+            //----------------------------- Tier0(T0)--------------------------------------
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T0,
+                                   FAPI_SYSTEM,
+                                   attrValT0 ),
+                     "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T0");
+
+            if( 0 == attrValT0 )
+            {
+                attrValT0 = 0x01;
+            }
+
+            epsilonValBuf.insert<0, 12, 20, uint32_t>( attrValT0 );
+
+            //----------------------------- Tier1(T1)--------------------------------------
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T1,
+                                   FAPI_SYSTEM,
+                                   attrValT1 ),
+                     "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T1");
+
+            if( 0 == attrValT1 )
+            {
+                attrValT1 = 0x01;
+            }
+
+            epsilonValBuf.insert<12, 12, 20, uint32_t>( attrValT1 );
+
+            //----------------------------- Tier2(T2)--------------------------------------
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2,
+                                   FAPI_SYSTEM,
+                                   attrValT2 ),
+                     "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T2");
+
+            if( 0 == attrValT2 )
+            {
+                attrValT2 = 0x01;
+            }
+
+            epsilonValBuf.insert<24, 12, 20, uint32_t>( attrValT2 );
+
+            epsilonValBuf.extract<0, 64>(l_epsilonScomVal);
+
+            //----------------------- Updating SCOM Registers using STOP API --------------------
+            uint32_t eqCnt = 0;
+
+            for( ; eqCnt < MAX_CACHE_CHIPLET; eqCnt++ )
+            {
+                scomAddr = (EX_L2_RD_EPS_REG | (eqCnt << QUAD_BIT_POS));
+                rc = stopImageSection::p9_stop_save_scom( i_pChipHomer,
+                        scomAddr,
+                        l_epsilonScomVal,
+                        stopImageSection::P9_STOP_SCOM_APPEND,
+                        stopImageSection::P9_STOP_SECTION_EQ_SCOM );
+
+                if( rc )
+                {
+                    FAPI_DBG(" p9_stop_save_scom Failed rc 0x%08x", rc );
+                    break;
+                }
+
+                scomAddr |= ODD_EVEN_EX_POS;
+                rc = stopImageSection::p9_stop_save_scom(   i_pChipHomer,
+                        scomAddr,
+                        l_epsilonScomVal,
+                        stopImageSection::P9_STOP_SCOM_APPEND,
+                        stopImageSection::P9_STOP_SECTION_EQ_SCOM );
+
+                if( rc )
+                {
+                    FAPI_DBG(" p9_stop_save_scom Failed rc 0x%08x", rc );
+                    break;
+                }
+            }
+
+            //===============================================================================
+            //Determine SCOM register data value for EX_L2_WR_EPS_REG by reading attributes
+            //===============================================================================
+            l_epsilonScomVal = 0;
+            epsilonValBuf.flush<0>();
+
+            //----------------------------- Tier1(T1)--------------------------------------
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T1,
+                                   FAPI_SYSTEM,
+                                   attrValT1 ),
+                     "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_WRITE_CYCLES_T1");
+
+            if( 0 == attrValT1 )
+            {
+                attrValT1 = 0x01;
+            }
+
+            epsilonValBuf.insert< 0, 12, 20, uint32_t >(attrValT1);
+
+            //----------------------------- Tier2(T2)--------------------------------------
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T2,
+                                   FAPI_SYSTEM,
+                                   attrValT2 ),
+                     "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_WRITE_CYCLES_T2");
+
+            if( 0 == attrValT2 )
+            {
+                //setting 23 and bit 27 to assert corresponding bits in EX_L2_WR_EPS_REG
+                uint64_t attrValWr = 0x0000011000000000ll;
+                epsilonValBuf.insert< 12, 16, 12, uint64_t>(attrValWr);
+            }
+            else
+            {
+                epsilonValBuf.insert< 12, 12, 20, uint32_t >(attrValT2);
+            }
+
+            epsilonValBuf.extract<0, 64>(l_epsilonScomVal);
+
+            //----------------------- Updating SCOM Registers using STOP API --------------------
+
+            for( eqCnt = 0; eqCnt < MAX_CACHE_CHIPLET; eqCnt++ )
+            {
+                scomAddr = (EX_L2_WR_EPS_REG | (eqCnt << QUAD_BIT_POS));
+                FAPI_DBG("Calling STOP API to update SCOM reg 0x%08x value 0x%016llx",
+                         scomAddr, l_epsilonScomVal);
+                rc = stopImageSection::p9_stop_save_scom(   i_pChipHomer,
+                        scomAddr,
+                        l_epsilonScomVal,
+                        stopImageSection::P9_STOP_SCOM_APPEND,
+                        stopImageSection::P9_STOP_SECTION_EQ_SCOM );
+
+                if( rc )
+                {
+                    FAPI_DBG(" p9_stop_save_scom Failed rc 0x%08x", rc );
+                    break;
+                }
+
+                scomAddr |= ODD_EVEN_EX_POS;
+                FAPI_DBG("Calling STOP API to update SCOM reg 0x%08x value 0x%016llx",
+                         scomAddr, l_epsilonScomVal);
+                rc = stopImageSection::p9_stop_save_scom(   i_pChipHomer,
+                        scomAddr,
+                        l_epsilonScomVal,
+                        stopImageSection::P9_STOP_SCOM_APPEND,
+                        stopImageSection::P9_STOP_SECTION_EQ_SCOM );
+
+                if( rc )
+                {
+                    FAPI_DBG(" p9_stop_save_scom Failed rc 0x%08x", rc );
+                    break;
+                }
+            }
+
+            FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rc ),
+                         fapi2::EPSILON_SCOM_UPDATE_FAIL()
+                         .set_STOP_API_SCOM_ERR( rc )
+                         .set_EPSILON_REG_ADDR( scomAddr )
+                         .set_EPSILON_REG_DATA( l_epsilonScomVal ),
+                         "Failed to create restore entry for L2 Epsilon register" );
+
+        }
+        while(0);
+
+        FAPI_DBG("< populateEpsilonL2ScomReg");
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+    //---------------------------------------------------------------------------
+
+    /**
+     * @brief   populate L3 Epsilon SCOM register.
+     * @param   i_pChipHomer    points to start of P9 HOMER.
+     * @return  fapi2 return code.
+     */
+    fapi2::ReturnCode populateEpsilonL3ScomReg( void*    i_pChipHomer )
+    {
+        FAPI_DBG("> populateEpsilonL3ScomReg");
+
+        do
+        {
+            uint32_t attrValT0 = 0;
+            uint32_t attrValT1 = 0;
+            uint32_t attrValT2 = 0;
+            uint32_t scomAddr = 0;
+            uint32_t rc = IMG_BUILD_SUCCESS;
+            uint64_t l_epsilonScomVal;
+            fapi2::buffer<uint64_t> epsilonValBuf;
+
+            const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+            //=====================================================================================
+            //Determine SCOM register data value for EX_L3_RD_EPSILON_CFG_REG by reading attributes
+            //=====================================================================================
+
+            //----------------------------- Tier0(T0)--------------------------------------
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T0,
+                                   FAPI_SYSTEM,
+                                   attrValT0 ),
+                     "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T0");
+
+            if( 0 == attrValT0 )
+            {
+                attrValT0 = 0x01;
+            }
+
+            epsilonValBuf.insert<0, 12, 20, uint32_t>( attrValT0 );
+
+            //----------------------------- Tier1(T1)--------------------------------------
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T1,
+                                   FAPI_SYSTEM,
+                                   attrValT1 ),
+                     "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T1");
+
+            if( 0 == attrValT1 )
+            {
+                attrValT1 = 0x01;
+            }
+
+            epsilonValBuf.insert<12, 12, 20, uint32_t>( attrValT1 );
+
+            //----------------------------- Tier2(T2)--------------------------------------
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2,
+                                   FAPI_SYSTEM,
+                                   attrValT2 ),
+                     "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T2");
+
+            if( 0 == attrValT2 )
+            {
+                attrValT2 = 0x01;
+            }
+
+            epsilonValBuf.insert<24, 12, 20, uint32_t>( attrValT2 );
+
+            epsilonValBuf.extract<0, 64>(l_epsilonScomVal);
+
+            //----------------------- Updating SCOM Registers using STOP API --------------------
+
+            uint32_t eqCnt = 0;
+
+            for( ; eqCnt < MAX_CACHE_CHIPLET; eqCnt++ )
+            {
+                scomAddr = (EX_L3_RD_EPSILON_CFG_REG | (eqCnt << QUAD_BIT_POS));
+
+                FAPI_DBG("Calling STOP API to update SCOM reg 0x%08x value 0x%016llx",
+                         scomAddr, l_epsilonScomVal);
+                rc = stopImageSection::p9_stop_save_scom( i_pChipHomer,
+                        scomAddr,
+                        l_epsilonScomVal,
+                        stopImageSection::P9_STOP_SCOM_APPEND,
+                        stopImageSection::P9_STOP_SECTION_EQ_SCOM );
+
+                if( rc )
+                {
+                    FAPI_DBG(" p9_stop_save_scom Failed rc 0x%08x", rc );
+                    break;
+                }
+
+                scomAddr |= ODD_EVEN_EX_POS;
+                FAPI_DBG("Calling STOP API to update SCOM reg 0x%08x value 0x%016llx",
+                         scomAddr, l_epsilonScomVal);
+                rc = stopImageSection::p9_stop_save_scom(   i_pChipHomer,
+                        scomAddr,
+                        l_epsilonScomVal,
+                        stopImageSection::P9_STOP_SCOM_APPEND,
+                        stopImageSection::P9_STOP_SECTION_EQ_SCOM );
+
+                if( rc )
+                {
+                    FAPI_DBG(" p9_stop_save_scom Failed rc 0x%08x", rc );
+                    break;
+                }
+            }
+
+            //=====================================================================================
+            //Determine SCOM register data value for EX_L3_L3_WR_EPSILON_CFG_REG by reading attributes
+            //=====================================================================================
+
+            l_epsilonScomVal = 0;
+            epsilonValBuf.flush<0>();
+
+            //----------------------------- Tier1(T1)--------------------------------------
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T1,
+                                   FAPI_SYSTEM,
+                                   attrValT1 ),
+                     "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_WRITE_CYCLES_T1");
+
+            if( 0 == attrValT1 )
+            {
+                attrValT1 = 0x01;
+            }
+
+            epsilonValBuf.insert< 0, 12, 20, uint32_t >(attrValT1);
+
+            //----------------------------- Tier2(T2)--------------------------------------
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T2,
+                                   FAPI_SYSTEM,
+                                   attrValT2 ),
+                     "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_WRITE_CYCLES_T2");
+
+            if( 0 == attrValT2 )
+            {
+                uint64_t attrValEpsWr = 0;
+                //setting 23 and bit 33 to assert corresponding bit in EX_L3_L3_WR_EPSILON_CFG_REG
+                attrValEpsWr = 0x0000010040000000ll;
+                epsilonValBuf.insert< 12, 32, 12, uint64_t >(attrValEpsWr);
+            }
+            else
+            {
+                epsilonValBuf.insert< 12, 12, 20, uint32_t >(attrValT2);
+            }
+
+            epsilonValBuf.extract<0, 64>(l_epsilonScomVal);
+
+            //----------------------- Updating SCOM Registers using STOP API --------------------
+
+            for( eqCnt = 0; eqCnt < MAX_CACHE_CHIPLET; eqCnt++ )
+            {
+                scomAddr = (EX_L3_L3_WR_EPSILON_CFG_REG | (eqCnt << QUAD_BIT_POS));
+
+                FAPI_DBG("Calling STOP API to update SCOM reg 0x%08x value 0x%016llx",
+                         scomAddr, l_epsilonScomVal);
+                rc = stopImageSection::p9_stop_save_scom(   i_pChipHomer,
+                        scomAddr,
+                        l_epsilonScomVal,
+                        stopImageSection::P9_STOP_SCOM_APPEND,
+                        stopImageSection::P9_STOP_SECTION_EQ_SCOM );
+
+                if( rc )
+                {
+                    FAPI_DBG(" p9_stop_save_scom Failed rc 0x%08x", rc );
+                    break;
+                }
+
+                scomAddr |= ODD_EVEN_EX_POS;
+
+                FAPI_DBG("Calling STOP API to update SCOM reg 0x%08x value 0x%016llx",
+                         scomAddr, l_epsilonScomVal);
+
+                rc = stopImageSection::p9_stop_save_scom(  i_pChipHomer,
+                        scomAddr,
+                        l_epsilonScomVal,
+                        stopImageSection::P9_STOP_SCOM_APPEND,
+                        stopImageSection::P9_STOP_SECTION_EQ_SCOM );
+
+                if( rc )
+                {
+                    FAPI_DBG(" p9_stop_save_scom Failed rc 0x%08x", rc );
+                    break;
+                }
+            }
+
+            FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rc ),
+                         fapi2::EPSILON_SCOM_UPDATE_FAIL()
+                         .set_STOP_API_SCOM_ERR( rc )
+                         .set_EPSILON_REG_ADDR( scomAddr )
+                         .set_EPSILON_REG_DATA( l_epsilonScomVal ),
+                         "Failed to create restore entry for L3 Epsilon register" );
+
+        }
+        while(0);
+
+        FAPI_DBG("< populateEpsilonL3ScomReg");
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+    //---------------------------------------------------------------------------
+
     fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                                             void* const     i_pImageIn,
                                             void*           i_pHomerImage,
@@ -2316,6 +2717,24 @@ extern "C"
 
             //Update QPMR Header area in HOMER
             updateQpmrHeader( pChipHomer, l_qpmrHdr );
+
+            //Update L2 Epsilon SCOM Registers
+            retCode = populateEpsilonL2ScomReg( pChipHomer );
+
+            if( retCode )
+            {
+                FAPI_ERR("populateEpsilonL2ScomReg failed" );
+                break;
+            }
+
+            //Update L3 Epsilon SCOM Registers
+            retCode = populateEpsilonL3ScomReg( pChipHomer );
+
+            if( retCode )
+            {
+                FAPI_ERR("populateEpsilonL3ScomReg failed" );
+                break;
+            }
 
             //validate SRAM Image Sizes of PPE's
             uint32_t sramImgSize = 0;
