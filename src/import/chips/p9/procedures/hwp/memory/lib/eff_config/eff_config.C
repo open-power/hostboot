@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,8 @@
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
+//utils
+#include <math.h>
 
 // fapi2
 #include <fapi2.H>
@@ -48,7 +50,6 @@
 #include <lib/dimm/rank.H>
 #include <lib/utils/conversions.H>
 #include <lib/utils/find.H>
-#include <math.h>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
@@ -233,6 +234,313 @@ fapi2::ReturnCode eff_config::dram_width(const fapi2::Target<TARGET_TYPE_DIMM>& 
 fapi_try_exit:
     return fapi2::current_err;
 
+}
+
+///
+/// @brief Determines & sets effective config for the RTT_NOM value
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note used for MRS01
+///
+template<>
+fapi2::ReturnCode eff_config::dram_rtt_nom<KIND_RDIMM_DDR4>(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    //Indexing info
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+    const auto l_dimm_num = index(i_target);
+
+    uint8_t l_decoder_val = 0;
+    uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
+
+    //Temp holders to grab attributes to then parse into value for this dimm and rank
+    uint8_t l_rtt_nom[MAX_RANK_PER_DIMM] = {};
+
+    //Size per JEDEC spec
+    constexpr size_t RTT_NOM_SIZE = 8;
+    // Indexed by denominator. So, if RQZ is 240, and you have OHM240, then you're looking
+    // for index 1. So this doesn't correspond directly with the table in the JEDEC spec,
+    // as that's not in "denominator order."
+    //                                   0  RQZ/1  RQZ/2  RQZ/3  RQZ/4  RQZ/5  RQZ/6  RQZ/7
+    constexpr uint8_t rtt_nom_map[] = { 0, 0b100, 0b010, 0b110, 0b001, 0b101, 0b011, 0b111 };
+
+    size_t l_rtt_nom_index = 0;
+    std::vector< uint64_t > l_ranks;
+
+    FAPI_TRY( mss::vpd_mt_dram_rtt_nom(i_target, &(l_rtt_nom[0])) );
+    FAPI_TRY( eff_dram_rtt_nom(l_mcs, &l_mcs_attrs[0][0][0]) );
+
+    //Calculate the value for each rank and store in attribute
+
+    FAPI_TRY(mss::rank::ranks(i_target, l_ranks));
+
+    for (const auto& l_rank : l_ranks)
+    {
+        // We have to be careful about 0
+        l_rtt_nom_index = (l_rtt_nom[mss::index(l_rank)] == 0) ?
+                          0 : fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_NOM_OHM240 / l_rtt_nom[mss::index(l_rank)];
+
+        //Make sure it's a valid index
+        FAPI_ASSERT( (l_rtt_nom_index < RTT_NOM_SIZE),
+                     fapi2::MSS_BAD_MR_PARAMETER()
+                     .set_MR_NUMBER(5)
+                     .set_PARAMETER(RTT_NOM)
+                     .set_PARAMETER_VALUE(l_rtt_nom_index)
+                     .set_DIMM_IN_ERROR(i_target),
+                     "Bad value for RTT NOM: %d (%s)", l_rank, mss::c_str(i_target));
+
+
+        // Map from RTT_NOM array to the value in the map
+        l_decoder_val = rtt_nom_map[l_rtt_nom_index];
+
+        //Store value and move to next rank
+        l_mcs_attrs[l_port_num][l_dimm_num][mss::index(l_rank)] = l_decoder_val;
+    }
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_RTT_NOM, l_mcs, l_mcs_attrs) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for the RTT_NOM value
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note used for MRS01
+///
+template<>
+fapi2::ReturnCode eff_config::dram_rtt_nom<KIND_LRDIMM_DDR4>(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    //Indexing info
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+    const auto l_dimm_num = index(i_target);
+    std::vector< uint64_t > l_ranks;
+
+
+    uint8_t l_decoder_val = 0;
+    uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
+    FAPI_TRY( eff_dram_rtt_nom(l_mcs, &l_mcs_attrs[0][0][0]) );
+
+    //Get the value from the LRDIMM SPD
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_nom( iv_freq, l_decoder_val));
+
+    //Plug into every rank position for the attribute so it'll fit the same style as the RDIMM value
+    //Same value for every rank for LRDIMMs
+    FAPI_TRY(mss::rank::ranks(i_target, l_ranks));
+
+    for (const auto& l_rank : l_ranks)
+    {
+        l_mcs_attrs[l_port_num][l_dimm_num][mss::index(l_rank)] = l_decoder_val;
+    }
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_RTT_NOM, l_mcs, l_mcs_attrs) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+///
+/// @brief Determines & sets effective config for the RTT_WR value from SPD
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note used for MRS02
+///
+template<>
+fapi2::ReturnCode eff_config::dram_rtt_wr<KIND_RDIMM_DDR4>(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+    const auto l_dimm_num = index(i_target);
+    std::vector< uint64_t > l_ranks;
+
+
+    uint8_t l_decoder_val = 0;
+    uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
+
+    FAPI_TRY( eff_dram_rtt_wr(l_mcs, &l_mcs_attrs[0][0][0]) );
+
+    //Get RTT_WR from VPD
+    uint8_t l_dram_rtt_wr[MAX_RANK_PER_DIMM];
+    FAPI_TRY( mss::vpd_mt_dram_rtt_wr(i_target, &(l_dram_rtt_wr[0])) );
+
+    //Calculate the value for each rank and store in attribute
+    FAPI_TRY(mss::rank::ranks(i_target, l_ranks));
+
+    for (const auto& l_rank : l_ranks)
+    {
+        const auto l_index = mss::index(l_rank);
+
+        switch (l_dram_rtt_wr[l_index])
+        {
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_DISABLE:
+                l_decoder_val = 0b000;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_HIGHZ:
+                l_decoder_val = 0b011;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM240:
+                l_decoder_val = 0b010;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM80:
+                l_decoder_val = 0b100;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM120:
+                l_decoder_val = 0b001;
+                break;
+
+            default:
+                FAPI_ERR("unknown RTT_WR 0x%x (%s rank %d), dynamic odt off",
+                         l_dram_rtt_wr[l_index], mss::c_str(i_target), l_rank);
+                l_decoder_val = 0b000;
+                break;
+        };
+
+        //Store value and move to next rank
+        l_mcs_attrs[l_port_num][l_dimm_num][mss::index(l_rank)] = l_decoder_val;
+    }
+
+    //Set the attribute
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_RTT_WR, l_mcs, l_mcs_attrs) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for the RTT_WR value from SPD
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note used for MRS02
+///
+template<>
+fapi2::ReturnCode eff_config::dram_rtt_wr<KIND_LRDIMM_DDR4>(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+    const auto l_dimm_num = index(i_target);
+    std::vector< uint64_t > l_ranks;
+
+
+    uint8_t l_decoder_val = 0;
+    uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
+
+    //Get the value from the LRDIMM SPD
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_wr( iv_freq, l_decoder_val));
+
+    //Plug into every rank position for the attribute so it'll fit the same style as the RDIMM value
+    //Same value for every rank for LRDIMMs
+    FAPI_TRY(mss::rank::ranks(i_target, l_ranks));
+
+    for (const auto& l_rank : l_ranks)
+    {
+        l_mcs_attrs[l_port_num][l_dimm_num][mss::index(l_rank)] = l_decoder_val;
+    }
+
+    //Set the attribute
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_RTT_WR, l_mcs, l_mcs_attrs) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for the RTT_PARK value from SPD
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note used for MRS05
+///
+template <>
+fapi2::ReturnCode eff_config::dram_rtt_park<KIND_RDIMM_DDR4>(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    //Indexing info
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+    const auto l_dimm_num = index(i_target);
+    std::vector< uint64_t > l_ranks;
+
+    uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
+
+    // Indexed by denominator. So, if RQZ is 240, and you have OHM240, then you're looking
+    // for index 1. So this doesn't correspond directly with the table in the JEDEC spec,
+    // as that's not in "denominator order."
+    constexpr uint64_t RTT_PARK_COUNT = 8;
+    //                                                 0  RQZ/1  RQZ/2  RQZ/3  RQZ/4  RQZ/5  RQZ/6  RQZ/7
+    constexpr uint8_t rtt_park_map[RTT_PARK_COUNT] = { 0, 0b100, 0b010, 0b110, 0b001, 0b101, 0b011, 0b111 };
+
+    uint8_t l_rtt_park[MAX_RANK_PER_DIMM];
+
+    FAPI_TRY( mss::vpd_mt_dram_rtt_park(i_target, &(l_rtt_park[0])) );
+    FAPI_TRY( eff_dram_rtt_park(l_mcs, &l_mcs_attrs[0][0][0]) );
+
+    //Calculate the value for each rank and store in attribute
+    FAPI_TRY(mss::rank::ranks(i_target, l_ranks));
+
+
+    for (const auto& l_rank : l_ranks)
+    {
+        const auto l_index = mss::index(l_rank);
+
+        // We have to be careful about 0
+        uint8_t l_rtt_park_index = (l_rtt_park[l_index] == 0) ?
+                                   0 : fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_PARK_240OHM / l_rtt_park[l_index];
+
+        FAPI_ASSERT( (l_rtt_park_index < RTT_PARK_COUNT),
+                     fapi2::MSS_BAD_MR_PARAMETER()
+                     .set_MR_NUMBER(5)
+                     .set_PARAMETER(RTT_PARK)
+                     .set_PARAMETER_VALUE(l_rank)
+                     .set_DIMM_IN_ERROR(i_target),
+                     "Bad value for RTT park: %d (%s)", l_rank, mss::c_str(i_target));
+
+        // Map from RTT_PARK array to the value in the map
+        l_mcs_attrs[l_port_num][l_dimm_num][l_index] = rtt_park_map[l_rtt_park_index];
+    }
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_RTT_PARK, l_mcs, l_mcs_attrs) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for the RTT_PARK value from SPD
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note used for MRS05
+///
+template <>
+fapi2::ReturnCode eff_config::dram_rtt_park<KIND_LRDIMM_DDR4>(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+//Indexing info
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+    const auto l_dimm_num = index(i_target);
+
+    uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
+    uint8_t l_decoder_val_01 = 0;
+    uint8_t l_decoder_val_23 = 0;
+
+    FAPI_TRY( eff_dram_rtt_park(l_mcs, &l_mcs_attrs[0][0][0]) );
+
+    //Get the value from the LRDIMM SPD
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_park_ranks0_1( iv_freq, l_decoder_val_01));;
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_park_ranks2_3( iv_freq, l_decoder_val_23));;
+
+    l_mcs_attrs[l_port_num][l_dimm_num][0] = l_decoder_val_01;
+    l_mcs_attrs[l_port_num][l_dimm_num][1] = l_decoder_val_01;
+    l_mcs_attrs[l_port_num][l_dimm_num][2] = l_decoder_val_23;
+    l_mcs_attrs[l_port_num][l_dimm_num][3] = l_decoder_val_23;
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_RTT_PARK, l_mcs, l_mcs_attrs) );
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -1137,16 +1445,12 @@ fapi2::ReturnCode eff_config::dimm_rc10(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
-    uint64_t l_freq = 0;
-
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc10[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc10(l_mcs, &l_attrs_dimm_rc10[0][0]) );
 
-    // Update MCS attribute
-    FAPI_TRY( mss::freq( mss::find_target<TARGET_TYPE_MCBIST>(i_target), l_freq ) );
 
-    switch(l_freq)
+    switch(iv_freq)
     {
         case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
             l_attrs_dimm_rc10[l_port_num][l_dimm_num] = rc10_encode::DDR4_1866;
@@ -1165,7 +1469,7 @@ fapi2::ReturnCode eff_config::dimm_rc10(const fapi2::Target<TARGET_TYPE_DIMM>& i
             break;
 
         default:
-            FAPI_ERR("Invalid frequency for rc10 encoding received: %d", l_freq);
+            FAPI_ERR("Invalid frequency for rc10 encoding received: %d", iv_freq);
             return fapi2::FAPI2_RC_FALSE;
             break;
     }
@@ -1431,16 +1735,12 @@ fapi2::ReturnCode eff_config::dimm_rc3x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
-    uint64_t l_freq = 0;
     uint8_t l_attrs_dimm_rc_3x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Retrieve MCS attribute data
     FAPI_TRY( eff_dimm_ddr4_rc_3x(l_mcs, &l_attrs_dimm_rc_3x[0][0]) );
 
-    // Update MCS attribute
-    FAPI_TRY( freq(find_target<TARGET_TYPE_MCBIST>(l_mcs), l_freq) );
-
-    switch(l_freq)
+    switch(iv_freq)
     {
         case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
             l_attrs_dimm_rc_3x[l_port_num][l_dimm_num] = rc3x_encode::MT1860_TO_MT1880;
@@ -1459,7 +1759,7 @@ fapi2::ReturnCode eff_config::dimm_rc3x(const fapi2::Target<TARGET_TYPE_DIMM>& i
             break;
 
         default:
-            FAPI_ERR("Invalid frequency for rc_3x encoding received: %d", l_freq);
+            FAPI_ERR("Invalid frequency for rc_3x encoding received: %d", iv_freq);
             return fapi2::FAPI2_RC_FALSE;
             break;
     }
@@ -1882,13 +2182,11 @@ fapi2::ReturnCode eff_config::dram_cwl(const fapi2::Target<TARGET_TYPE_DIMM>& i_
 
     std::vector<uint8_t> l_attrs_cwl(PORTS_PER_MCS, 0);
     uint8_t l_cwl = 0;
-    uint64_t l_freq;
     uint8_t l_preamble = 0;
 
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
-    const auto l_mcbist = find_target <TARGET_TYPE_MCBIST>(i_target);
     // Current index
     const auto l_port_num = index(l_mca);
 
@@ -1906,23 +2204,21 @@ fapi2::ReturnCode eff_config::dram_cwl(const fapi2::Target<TARGET_TYPE_DIMM>& i_
                  mss::c_str(i_target),
                  l_preamble );
 
-    FAPI_TRY( mss::freq(l_mcbist, l_freq) );
-
     // Using an if branch because a ternary conditional wasn't working with params for find_value_from_key
     if (l_preamble == 0)
     {
         FAPI_TRY( mss::find_value_from_key( CWL_TABLE_1,
-                                            l_freq, l_cwl),
+                                            iv_freq, l_cwl),
                   "Failed finding CAS Write Latency (cwl), freq: %d, preamble %d",
-                  l_freq,
+                  iv_freq,
                   l_preamble);
     }
     else
     {
         FAPI_TRY( mss::find_value_from_key( CWL_TABLE_2,
-                                            l_freq, l_cwl),
+                                            iv_freq, l_cwl),
                   "Failed finding CAS Write Latency (cwl), freq: %d, preamble %d",
-                  l_freq,
+                  iv_freq,
                   l_preamble);
 
     }
@@ -2992,7 +3288,6 @@ fapi_try_exit:
 fapi2::ReturnCode eff_config::zqcal_interval(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     std::vector<uint32_t> l_attrs_zqcal_interval(PORTS_PER_MCS, 0);
-    uint64_t l_freq = 0;
 
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -3001,7 +3296,6 @@ fapi2::ReturnCode eff_config::zqcal_interval(const fapi2::Target<TARGET_TYPE_DIM
     // Current index
     const auto l_port_num = index(l_mca);
 
-    FAPI_TRY( mss::freq(find_target<fapi2::TARGET_TYPE_MCBIST>(l_mcs), l_freq));
     FAPI_TRY( eff_zqcal_interval(l_mcs, l_attrs_zqcal_interval.data()) );
 
     // Calculate ZQCAL Interval based on the following equation from Ken:
@@ -3010,7 +3304,7 @@ fapi2::ReturnCode eff_config::zqcal_interval(const fapi2::Target<TARGET_TYPE_DIM
     //     (1.5 * 10) + (0.15 * 150)
     //  (13333 * ATTR_MSS_FREQ) / 2
 
-    l_attrs_zqcal_interval[l_port_num] = 13333 * l_freq / 2;
+    l_attrs_zqcal_interval[l_port_num] = 13333 * iv_freq / 2;
 
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_ZQCAL_INTERVAL,
@@ -3030,7 +3324,6 @@ fapi_try_exit:
 fapi2::ReturnCode eff_config::memcal_interval(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     std::vector<uint32_t> l_attrs_memcal_interval(PORTS_PER_MCS, 0);
-    uint64_t l_freq = 0;
 
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -3039,13 +3332,11 @@ fapi2::ReturnCode eff_config::memcal_interval(const fapi2::Target<TARGET_TYPE_DI
     // Current index
     const auto l_port_num = index(l_mca);
 
-    FAPI_TRY( mss::freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq));
-
     FAPI_TRY( eff_memcal_interval(l_mcs, l_attrs_memcal_interval.data()) );
 
     // Calculate MEMCAL Interval based on 1sec interval across all bits per DP16
     // (62500 * ATTR_MSS_FREQ) / 2
-    l_attrs_memcal_interval[l_port_num] = 62500 * l_freq / 2;
+    l_attrs_memcal_interval[l_port_num] = 62500 * iv_freq / 2;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_MEMCAL_INTERVAL,
                             l_mcs,
@@ -3664,7 +3955,7 @@ fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i
 
     // We need to set up all VPD info before calling getVPD, the API assumes this
     // For MR we need to tell the VPDInfo the frequency (err ... mt/s - why is this mhz?)
-    FAPI_TRY( mss::freq(find_target<TARGET_TYPE_MCBIST>(i_target), l_vpd_info.iv_freq_mhz) );
+    l_vpd_info.iv_freq_mhz = iv_freq;
     FAPI_INF("%s. VPD info - dimm data rate: %d MT/s", mss::c_str(i_target), l_vpd_info.iv_freq_mhz);
 
     // Make sure to create 0 filled blobs for all the possible blobs, not just for the

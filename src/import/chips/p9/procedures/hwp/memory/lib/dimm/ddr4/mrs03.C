@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,17 @@ namespace mss
 
 namespace ddr4
 {
+enum swizzle : uint64_t
+{
+    MPR_PAGE_LENGTH = 2,
+    MPR_PAGE_START = 7,
+    FINE_REFRESH_LENGTH = 3,
+    FINE_REFRESH_START = 7,
+    CRC_WR_LATENCY_LENGTH = 2,
+    CRC_WR_LATENCY_START = 7,
+    READ_FORMAT_LENGTH = 2,
+    READ_FORMAT_START = 7,
+};
 
 ///
 /// @brief mrs03_data ctor
@@ -120,6 +131,7 @@ fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
                         const uint64_t i_rank)
 {
+    //Some consts for the swizzle action
     constexpr uint64_t LOWEST_WL = 4;
     constexpr uint64_t WL_COUNT = 3;
     //                                                 4  5  6
@@ -137,15 +149,15 @@ fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
     l_crc_wr_latency_buffer = crc_wr_latency_map[i_data.iv_crc_wr_latency - LOWEST_WL];
 
-    mss::swizzle<A0, 2, 7>(fapi2::buffer<uint8_t>(i_data.iv_mpr_page), io_inst.arr0);
+    mss::swizzle<A0, MPR_PAGE_LENGTH, MPR_PAGE_START>(fapi2::buffer<uint8_t>(i_data.iv_mpr_page), io_inst.arr0);
     io_inst.arr0.writeBit<A2>(i_data.iv_mpr_mode);
     io_inst.arr0.writeBit<A3>(i_data.iv_geardown);
     io_inst.arr0.writeBit<A4>(i_data.iv_pda);
     io_inst.arr0.writeBit<A5>(i_data.iv_temp_readout);
 
-    mss::swizzle<A6 , 3, 7>(fapi2::buffer<uint8_t>(i_data.iv_fine_refresh), io_inst.arr0);
-    mss::swizzle<A9 , 2, 7>(l_crc_wr_latency_buffer, io_inst.arr0);
-    mss::swizzle<A11, 2, 7>(fapi2::buffer<uint8_t>(i_data.iv_read_format), io_inst.arr0);
+    mss::swizzle<A6, FINE_REFRESH_LENGTH, FINE_REFRESH_START>(fapi2::buffer<uint8_t>(i_data.iv_fine_refresh), io_inst.arr0);
+    mss::swizzle<A9, CRC_WR_LATENCY_LENGTH, CRC_WR_LATENCY_START>(l_crc_wr_latency_buffer, io_inst.arr0);
+    mss::swizzle<A11, READ_FORMAT_LENGTH, READ_FORMAT_START>(fapi2::buffer<uint8_t>(i_data.iv_read_format), io_inst.arr0);
 
     FAPI_INF("MR3: 0x%016llx", uint64_t(io_inst.arr0));
 
@@ -180,6 +192,7 @@ fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIS
                                       fapi2::buffer<uint8_t>& o_crc_wr_latency_buffer,
                                       fapi2::buffer<uint8_t>& o_read_format)
 {
+
     o_mpr_page = 0;
     o_fine_refresh = 0;
     o_crc_wr_latency_buffer = 0;

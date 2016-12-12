@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <lib/eff_config/timing.H>
 #include <lib/utils/conversions.H>
 #include <lib/utils/find.H>
+#include <lib/shared/mss_kind.H>
 namespace mss
 {
 
@@ -60,30 +61,13 @@ class eff_config
         //TK - Make this constructor take this as param - AAM
         std::shared_ptr<spd::decoder> iv_pDecoder;
         int64_t iv_tCK_in_ps;
-
+        uint64_t iv_freq;
         // Assists testing with write ability on these MRW
         // settings that are normally NOT writable
         // using attribute accessors
         // Could create getters & setters...
         uint8_t iv_refresh_mode;
         uint8_t iv_temp_refresh_range;
-
-        //TODO: RTC 159777: Change eff_config class to use iv's for mcs, port and dimm position
-
-        ///
-        /// @brief Constructor
-        /// @param[in] i_target the fapi2::Target which we're configuring (DIMM)
-        /// @param[out] o_rc a return code which determines the success of the constructor
-        ///
-        eff_config( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc )
-        {
-            FAPI_TRY( clock_period(i_target, iv_tCK_in_ps), "Failed to calculate clock period (tCK)" );
-            FAPI_INF("Calculated clock period (tCK): %d  on DIMM %s", iv_tCK_in_ps, mss::c_str(i_target));
-
-        fapi_try_exit:
-            o_rc = fapi2::current_err;
-            return;
-        }
 
         ///
         /// @brief Constructor
@@ -93,10 +77,13 @@ class eff_config
         eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, fapi2::ReturnCode& o_rc )
         {
             FAPI_TRY( clock_period(i_target, iv_tCK_in_ps), "Failed to calculate clock period (tCK)" );
+            FAPI_TRY( mss::freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), iv_freq));
             FAPI_TRY( mss::mrw_temp_refresh_range(iv_temp_refresh_range), "Failed mrw_temp_refresh_range()" );
             FAPI_TRY( mss::mrw_fine_refresh_mode(iv_refresh_mode), "Failed mrw_fine_refresh_mode()" );
 
             FAPI_INF( "Calculated clock period -  tCK (ps): %d for  %s", iv_tCK_in_ps, mss::c_str(i_target) );
+            FAPI_INF("Calculated frequency: %d  on DIMM %s", iv_freq, mss::c_str(i_target));
+
 
         fapi_try_exit:
             o_rc = fapi2::current_err;
@@ -183,6 +170,36 @@ class eff_config
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         fapi2::ReturnCode dram_width(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
+        /// @brief Determines & sets effective config for the RTT_NOM value from SPD
+        /// @tparam kind_t dimm_kind value
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        /// @note used for MRS01
+        ///
+        template<mss::kind_t>
+        fapi2::ReturnCode dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
+        /// @brief Determines & sets effective config for the RTT_NOM value from SPD
+        /// @tparam kind_t dimm_kind value
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        /// @note used for MRS02
+        ///
+        template<mss::kind_t>
+        fapi2::ReturnCode dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
+        /// @brief Determines & sets effective config for the RTT_PARK value from SPD
+        /// @tparam kind_t dimm_kind value
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        /// @note used for MRS05
+        ///
+        template <mss::kind_t>
+        fapi2::ReturnCode dram_rtt_park(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
         /// @brief Determines & sets effective config for dimm rcd mirror mode

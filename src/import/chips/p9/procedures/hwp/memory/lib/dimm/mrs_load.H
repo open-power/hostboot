@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,8 @@ enum mrs_bad_field
     CA_PARITY_LATENCY = 6,
     RTT_PARK = 7,
     TCCD = 8,
+    RANK = 9,
+    RTT_NOM = 10
 };
 
 ///

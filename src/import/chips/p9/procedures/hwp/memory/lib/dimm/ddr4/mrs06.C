@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,6 +104,12 @@ fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
                         const uint64_t i_rank)
 {
+
+    constexpr uint64_t VREFDQ_TRAIN_LENGTH = 6;
+    constexpr uint64_t VREFDQ_TRAIN_START = 7;
+    constexpr uint64_t TCCD_L_LENGTH = 3;
+    constexpr uint64_t TCCD_L_START = 7;
+
     constexpr uint64_t LOWEST_TCCD = 4;
     constexpr uint64_t TCCD_COUNT = 5;
     //                                             4      5     6      7       8
@@ -128,10 +134,10 @@ fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
              i_data.iv_vrefdq_train_range[mss::index(i_rank)],
              i_data.iv_vrefdq_train_enable[mss::index(i_rank)], i_data.iv_tccd_l, uint8_t(l_tccd_l_buffer));
 
-    mss::swizzle<A0, 6, 7>(l_vrefdq_train_value_buffer, io_inst.arr0);
+    mss::swizzle<A0, VREFDQ_TRAIN_LENGTH, VREFDQ_TRAIN_START>(l_vrefdq_train_value_buffer, io_inst.arr0);
     io_inst.arr0.writeBit<A6>(i_data.iv_vrefdq_train_range[mss::index(i_rank)]);
     io_inst.arr0.writeBit<A7>(i_data.iv_vrefdq_train_enable[mss::index(i_rank)]);
-    mss::swizzle<A10, 3, 7>(l_tccd_l_buffer, io_inst.arr0);
+    mss::swizzle<A10, TCCD_L_LENGTH, TCCD_L_START>(l_tccd_l_buffer, io_inst.arr0);
 
     FAPI_INF("MR6: 0x%016llx", uint64_t(io_inst.arr0));
 

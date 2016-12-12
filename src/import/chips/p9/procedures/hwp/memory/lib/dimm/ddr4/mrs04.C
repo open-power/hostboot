@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,6 +126,9 @@ fapi2::ReturnCode mrs04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
                         const uint64_t i_rank)
 {
+    constexpr uint64_t CS_CMD_LATENCY_LENGTH = 3;
+    constexpr uint64_t CS_CMD_LATENCY_START = 7;
+
     constexpr uint64_t CS_CMD_COUNT = 9;
     //                                                       0            3      4      5      6         8
     constexpr uint8_t cs_cmd_latency_map[CS_CMD_COUNT] = { 0b000, 0, 0, 0b001, 0b010, 0b011, 0b100, 0, 0b101 };
@@ -147,7 +150,7 @@ fapi2::ReturnCode mrs04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     io_inst.arr0.writeBit<A3>(i_data.iv_temp_ref_mode);
     io_inst.arr0.writeBit<A4>(i_data.iv_vref_mon);
 
-    mss::swizzle<A6, 3, 7>(l_cs_cmd_latency_buffer, io_inst.arr0);
+    mss::swizzle<A6, CS_CMD_LATENCY_LENGTH, CS_CMD_LATENCY_START>(l_cs_cmd_latency_buffer, io_inst.arr0);
     io_inst.arr0.writeBit<A9>(i_data.iv_ref_abort);
     io_inst.arr0.writeBit<A10>(i_data.iv_rd_pre_train_mode);
     io_inst.arr0.writeBit<A11>(i_data.iv_rd_preamble);

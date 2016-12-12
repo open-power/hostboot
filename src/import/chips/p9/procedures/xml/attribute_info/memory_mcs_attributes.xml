@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -2219,6 +2219,52 @@
         <array>2 2</array>
         <mssAccessorName>eff_dram_module_bus_width</mssAccessorName>
     </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_RTT_NOM</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            RTT_NOM value read to be programmed into MRS02
+            For RDIMMS, this is based off of the VPD
+            For LRDIMMS, this comes from the SPD
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable />
+        <array> 2 2 4</array>
+        <mssAccessorName>eff_dram_rtt_nom</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_RTT_WR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            RTT_WR value read to be programmed into MRS02
+            For RDIMMS, this is based off of the VPD
+            For LRDIMMS, this comes from the SPD
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable />
+        <array> 2 2 4</array>
+        <mssAccessorName>eff_dram_rtt_wr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_RTT_PARK</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            RTT_PARK value read to be programmed into MRS05
+            For RDIMMS, this is based off of the VPD
+            For LRDIMMS, this comes from the SPD
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable />
+        <array> 2 2 4</array>
+        <mssAccessorName>eff_dram_rtt_park</mssAccessorName>
+    </attribute>
+
 
     <attribute>
         <id>ATTR_EFF_DIMM_DDR4_BC00</id>

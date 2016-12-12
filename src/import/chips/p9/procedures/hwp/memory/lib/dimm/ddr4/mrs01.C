@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,7 +65,7 @@ mrs01_data::mrs01_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
     FAPI_TRY( mss::vpd_mt_dram_drv_imp_dq_dqs(i_target, &(iv_odic[0])) );
     FAPI_TRY( mss::eff_dram_al(i_target, iv_additive_latency) );
     FAPI_TRY( mss::eff_dram_wr_lvl_enable(i_target, iv_wl_enable) );
-    FAPI_TRY( mss::vpd_mt_dram_rtt_nom(i_target, &(iv_rtt_nom[0])) );
+    FAPI_TRY( mss::eff_dram_rtt_nom(i_target, &(iv_rtt_nom[0])) );
     FAPI_TRY( mss::eff_dram_tdqs(i_target, iv_tdqs) );
     FAPI_TRY( mss::eff_dram_output_buffer(i_target, iv_qoff) );
 
@@ -114,19 +114,23 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     // Little table to map Output Driver Imepdance Control. 34Ohm is index 0,
     // 48Ohm is index 1
     // Left bit is A2, right bit is A1
-    constexpr uint8_t odic_map[2] = { 0b00, 0b01 };
+    constexpr uint8_t odic_map[] = { 0b00, 0b01 };
 
-    // Indexed by denominator. So, if RQZ is 240, and you have OHM240, then you're looking
-    // for index 1. So this doesn't correspond directly with the table in the JEDEC spec,
-    // as that's not in "denominator order."
-    //                                   0  RQZ/1  RQZ/2  RQZ/3  RQZ/4  RQZ/5  RQZ/6  RQZ/7
-    constexpr uint8_t rtt_nom_map[8] = { 0, 0b100, 0b010, 0b110, 0b001, 0b101, 0b011, 0b111 };
+    constexpr uint64_t ODIC_LENGTH = 2;
+    constexpr uint64_t ODIC_START_BIT = 7;
+    constexpr uint64_t ADDITIVE_LATENCE_LENGTH = 2;
+    constexpr uint64_t ADDITIVE_LATENCE_START_BIT = 7;
+    constexpr uint64_t RTT_NOM_LENGTH = 3;
+    constexpr uint64_t RTT_NOM_START_BIT = 7;
 
-    size_t l_rtt_nom_index = 0;
 
     fapi2::buffer<uint8_t> l_additive_latency;
     fapi2::buffer<uint8_t> l_odic_buffer;
     fapi2::buffer<uint8_t> l_rtt_nom_buffer;
+
+    //check here to make sure the rank indexes correctly into the attribute array
+    //It's equivalent to mss::index(i_rank) < l_rtt_nom.size() if C arrays had a .size() method
+    fapi2::Assert( mss::index(i_rank) < MAX_RANK_PER_DIMM);
 
     FAPI_ASSERT( ((i_data.iv_odic[mss::index(i_rank)] == fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS_OHM34) ||
                   (i_data.iv_odic[mss::index(i_rank)] == fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS_OHM48)),
@@ -141,25 +145,22 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     l_odic_buffer = (i_data.iv_odic[mss::index(i_rank)] == fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS_OHM34) ?
                     odic_map[0] : odic_map[1];
 
-    // We have to be careful about 0
-    l_rtt_nom_index = (i_data.iv_rtt_nom[mss::index(i_rank)] == 0) ?
-                      0 : fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_NOM_OHM240 / i_data.iv_rtt_nom[mss::index(i_rank)];
-
     // Map from RTT_NOM array to the value in the map
-    l_rtt_nom_buffer = rtt_nom_map[l_rtt_nom_index];
+    l_rtt_nom_buffer = i_data.iv_rtt_nom[mss::index(i_rank)];
 
     // Print this here as opposed to the MRS01 ctor as we want to see the specific rtt now information
     FAPI_INF("MR1 rank %d attributes: DLL_ENABLE: 0x%x, ODIC: 0x%x(0x%x), AL: 0x%x, WLE: 0x%x, "
-             "RTT_NOM: 0x%x(0x%x), TDQS: 0x%x, QOFF: 0x%x", i_rank,
+             "RTT_NOM:0x%x, TDQS: 0x%x, QOFF: 0x%x", i_rank,
              i_data.iv_dll_enable, i_data.iv_odic[mss::index(i_rank)], uint8_t(l_odic_buffer), uint8_t(l_additive_latency),
              i_data.iv_wl_enable,
-             i_data.iv_rtt_nom[mss::index(i_rank)], uint8_t(l_rtt_nom_buffer), i_data.iv_tdqs, i_data.iv_qoff);
+             uint8_t(l_rtt_nom_buffer), i_data.iv_tdqs, i_data.iv_qoff);
 
     io_inst.arr0.writeBit<A0>(i_data.iv_dll_enable);
-    mss::swizzle<A1, 2, 7>(l_odic_buffer, io_inst.arr0);
-    mss::swizzle<A3, 2, 7>(fapi2::buffer<uint8_t>(i_data.iv_additive_latency), io_inst.arr0);
+    mss::swizzle<A1, ODIC_LENGTH, ODIC_START_BIT>(l_odic_buffer, io_inst.arr0);
+    mss::swizzle<A3, ADDITIVE_LATENCE_LENGTH, ADDITIVE_LATENCE_START_BIT>(fapi2::buffer<uint8_t>
+            (i_data.iv_additive_latency), io_inst.arr0);
     io_inst.arr0.writeBit<A7>(i_data.iv_wl_enable);
-    mss::swizzle<A8, 3, 7>(l_rtt_nom_buffer, io_inst.arr0);
+    mss::swizzle<A8, RTT_NOM_LENGTH, RTT_NOM_START_BIT>(l_rtt_nom_buffer, io_inst.arr0);
     io_inst.arr0.writeBit<A11>(i_data.iv_tdqs);
     io_inst.arr0.writeBit<A12>(i_data.iv_qoff);
 

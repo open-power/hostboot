@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,9 @@
 #include <lib/utils/pos.H>
 #include <lib/utils/checker.H>
 #include <lib/utils/find.H>
+#include <lib/shared/mss_kind.H>
+#include <lib/utils/find.H>
+
 
 ///
 /// @brief Configure the attributes for each controller
@@ -75,7 +78,9 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
     for( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
     {
         const auto l_dimm_pos = mss::pos(l_dimm);
-
+        uint8_t l_type = 0;
+        uint8_t l_gen = 0;
+        uint64_t l_kind = 0;
         // TODO RTC:152390 Create function to do map checking on cached values
         // Find decoder factory for this dimm position
         auto l_it = l_factory_caches.find(l_dimm_pos);
@@ -182,6 +187,31 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.additive_latency(l_dimm) );
         FAPI_TRY( l_eff_config.data_mask(l_dimm) );
 
+        FAPI_TRY( mss::eff_dram_gen(l_dimm, l_gen) );
+        FAPI_TRY( mss::eff_dimm_type(l_dimm, l_type) );
+        l_kind = mss::dimm_kind (l_type, l_gen);
+
+        //One day we won't need this switch case, we can just specialize the methods via passed in target type
+        //Till then, we have a story
+        //TODO RTC: 166453
+        switch (l_kind)
+        {
+            case mss::KIND_LRDIMM_DDR4:
+                FAPI_TRY( l_eff_config.dram_rtt_nom<mss::KIND_LRDIMM_DDR4>(l_dimm) );
+                FAPI_TRY( l_eff_config.dram_rtt_wr<mss::KIND_LRDIMM_DDR4>(l_dimm) );
+                FAPI_TRY( l_eff_config.dram_rtt_park<mss::KIND_LRDIMM_DDR4>(l_dimm) );
+                break;
+
+            case mss::KIND_RDIMM_DDR4:
+                FAPI_TRY( l_eff_config.dram_rtt_nom<mss::KIND_RDIMM_DDR4>(l_dimm) );
+                FAPI_TRY( l_eff_config.dram_rtt_wr<mss::KIND_RDIMM_DDR4>(l_dimm) );
+                FAPI_TRY( l_eff_config.dram_rtt_park<mss::KIND_RDIMM_DDR4>(l_dimm) );
+                break;
+
+            default:
+                FAPI_ERR("Invalid DIMM type and or gen");
+                return fapi2::FAPI2_RC_INVALID_PARAMETER;
+        };
     }// dimm
 
     {

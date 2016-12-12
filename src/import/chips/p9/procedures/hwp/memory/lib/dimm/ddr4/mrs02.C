@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,7 @@ mrs02_data::mrs02_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
 {
     FAPI_TRY( mss::eff_dram_lpasr(i_target, iv_lpasr) );
     FAPI_TRY( mss::eff_dram_cwl(i_target, iv_cwl) );
-    FAPI_TRY( mss::vpd_mt_dram_rtt_wr(i_target, &(iv_dram_rtt_wr[0])) );
+    FAPI_TRY( mss::eff_dram_rtt_wr(i_target, &(iv_dram_rtt_wr[0])) );
     FAPI_TRY( mss::eff_write_crc(i_target, iv_write_crc) );
 
     o_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -106,6 +106,13 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
                         const uint64_t i_rank)
 {
+    constexpr uint64_t CWL_LENGTH = 3;
+    constexpr uint64_t CWL_START = 7;
+    constexpr uint64_t LPASR_LENGTH = 2;
+    constexpr uint64_t LPASR_START = 7;
+    constexpr uint64_t RTT_WR_LENGTH = 3;
+    constexpr uint64_t RTT_WR_START = 7;
+
     // Index this by subtracting 9 from the CWL attribute value. The table maps CWL attribute value
     // (in clks) to the bit setting in MR2. See the table in the JEDEC spec for the mapping.
     constexpr uint64_t LOWEST_CWL = 9;
@@ -114,7 +121,10 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     constexpr uint8_t cwl_map[CWL_COUNT] = { 0b000, 0b001, 0b010, 0b011, 0, 0b100, 0, 0b101, 0, 0b110, 0, 0b111 };
 
     fapi2::buffer<uint8_t> l_cwl_buffer;
-    fapi2::buffer<uint8_t> l_rtt_wr_buffer;
+
+    fapi2::Assert(mss::index(i_rank) < MAX_RANK_PER_DIMM);
+
+    fapi2::buffer<uint8_t> l_rtt_wr_buffer = i_data.iv_dram_rtt_wr[mss::index(i_rank)];
 
     FAPI_ASSERT((i_data.iv_cwl >= LOWEST_CWL) && (i_data.iv_cwl < (LOWEST_CWL + CWL_COUNT)),
                 fapi2::MSS_BAD_MR_PARAMETER()
@@ -126,45 +136,17 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
     l_cwl_buffer = cwl_map[i_data.iv_cwl - LOWEST_CWL];
 
-    switch (i_data.iv_dram_rtt_wr[i_rank])
-    {
-        case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_DISABLE:
-            l_rtt_wr_buffer = 0b000;
-            break;
-
-        case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_HIGHZ:
-            l_rtt_wr_buffer = 0b011;
-            break;
-
-        case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM240:
-            l_rtt_wr_buffer = 0b010;
-            break;
-
-        case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM80:
-            l_rtt_wr_buffer = 0b100;
-            break;
-
-        case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM120:
-            l_rtt_wr_buffer = 0b001;
-            break;
-
-        default:
-            FAPI_ERR("unknown RTT_WR 0x%x (%s rank %d), dynamic odt off",
-                     i_data.iv_dram_rtt_wr[i_rank], mss::c_str(i_target), i_rank);
-            l_rtt_wr_buffer = 0b000;
-            break;
-    };
 
     // Printed here as opposed to the ctor as it uses the rank information
-    FAPI_INF("MR2 rank %d attributes: LPASR: 0x%x, CWL: 0x%x(0x%x), RTT_WR: 0x%x(0x%x), WRITE_CRC: 0x%x", i_rank,
+    FAPI_INF("MR2 rank %d attributes: LPASR: 0x%x, CWL: 0x%x, RTT_WR: 0x%x(0x%x), WRITE_CRC: 0x%x", i_rank,
              uint8_t(i_data.iv_lpasr), i_data.iv_cwl, uint8_t(l_cwl_buffer),
-             i_data.iv_dram_rtt_wr[i_rank], uint8_t(l_rtt_wr_buffer), i_data.iv_write_crc);
+             uint8_t(l_rtt_wr_buffer), i_data.iv_write_crc);
 
-    mss::swizzle<A3, 3, 7>(l_cwl_buffer, io_inst.arr0);
+    mss::swizzle<A3, CWL_LENGTH, CWL_START>(l_cwl_buffer, io_inst.arr0);
 
-    mss::swizzle<A6, 2, 7>(fapi2::buffer<uint8_t>(i_data.iv_lpasr), io_inst.arr0);
+    mss::swizzle<A6, LPASR_LENGTH, LPASR_START>(fapi2::buffer<uint8_t>(i_data.iv_lpasr), io_inst.arr0);
 
-    mss::swizzle<A9, 3, 7>(l_rtt_wr_buffer, io_inst.arr0);
+    mss::swizzle<A9, RTT_WR_LENGTH, RTT_WR_START>(l_rtt_wr_buffer, io_inst.arr0);
 
     io_inst.arr0.writeBit<A12>(i_data.iv_write_crc);
 

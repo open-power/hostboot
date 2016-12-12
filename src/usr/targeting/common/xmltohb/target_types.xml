@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2017                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -1817,6 +1817,9 @@
     <attribute><id>MSS_DIMM_THERMAL_LIMIT</id></attribute>
     <attribute><id>MSS_VREF_CAL_ENABLE</id></attribute>
     <attribute><id>MSS_MRW_UNSUPPORTED_RANK_CONFIG</id></attribute>
+    <attribute><id>EFF_DRAM_RTT_NOM</id></attribute>
+    <attribute><id>EFF_DRAM_RTT_WR</id></attribute>
+    <attribute><id>EFF_DRAM_RTT_PARK</id></attribute>
 </targetType>
 
 <targetType>
