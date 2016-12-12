@@ -63,6 +63,8 @@ enum mrs_bad_field
     CA_PARITY_LATENCY = 6,
     RTT_PARK = 7,
     TCCD = 8,
+    RANK = 9,
+    RTT_NOM = 10
 };
 
 ///
