@@ -836,7 +836,13 @@ fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_DIMM>
     // Populate custom spd caches maps one dimm at a time
     o_factory_caches.emplace( std::make_pair( pos(i_target), i_pDecoder ) );
 
-    return fapi2::FAPI2_RC_SUCCESS;
+    // Populate some of the DIMM attributes early. This allows the following code to make
+    // decisions based on DIMM information. Expressly done after the factory has decided on the SPD version
+    FAPI_TRY( master_ranks_per_dimm_setter(i_target, i_pDecoder),
+              "%s. Failed master_ranks_per_dimm_setter()", mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 }// spd
