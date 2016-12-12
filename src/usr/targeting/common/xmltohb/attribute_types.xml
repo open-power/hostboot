@@ -32307,6 +32307,24 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>SYSTEM_RING_DBG_MODE</id>
+    <description>
+       Debug modes supported for CME/SGPE Scan layout in HOMER
+       SCAN_RING_NO_DEBUG = 0x00, SCAN_RING_TRACE_DEBUG = 0x01
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_RING_DBG_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>MSS_MEM_PORT_POS_OF_FAIL_THROTTLE</id>
     <description>
         This is the fapi position of the port that failed to calculate
