@@ -118,11 +118,50 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
     const char* PM_MODE_NAME_VAR; //Defines storage for PM_MODE_NAME
     FAPI_INF("Executing p9_stop_gpe_init in mode %s", PM_MODE_NAME(i_mode));
 
+    uint8_t  fusedModeState = 0;
+
     // -------------------------------
     // Initialization:  perform order or dynamic operations to initialize
     // the STOP funciton using necessary Platform or Feature attributes.
     if (i_mode == p9pm::PM_INIT)
     {
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUSED_CORE_MODE,
+                               FAPI_SYSTEM,
+                               fusedModeState),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_FUSED_CORE_MODE");
+
+        //Additional settings for fused mode
+        if (fusedModeState == 1)
+        {
+            uint8_t                 l_core_number = 0;
+            fapi2::buffer<uint64_t> l_data64      = 0;
+
+            auto l_functional_core_vector =
+                i_target.getChildren<fapi2::TARGET_TYPE_CORE>
+                (fapi2::TARGET_STATE_FUNCTIONAL);
+
+            for(auto l_chplt_trgt : l_functional_core_vector)
+            {
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                       l_chplt_trgt,
+                                       l_core_number),
+                         "ERROR: Failed to get the position of the CORE:0x%08X",
+                         l_chplt_trgt);
+                FAPI_DBG("CORE number = %d", l_core_number);
+                l_data64.flush<0>().setBit<C_CPPM_CPMMR_FUSED_CORE_MODE>();
+                FAPI_TRY(fapi2::putScom(l_chplt_trgt, C_CPPM_CPMMR_OR, l_data64),
+                         "ERROR: Failed to switch PM/TP interrupt routing to fused");
+            }
+
+            l_data64.flush<0>();
+            FAPI_TRY(fapi2::getScom(i_target, PU_INT_TCTXT_CFG, l_data64),
+                     "ERROR: Failed to read PU_INT_TCTXT_CFG");
+
+            l_data64.setBit<PU_INT_TCTXT_CFG_CFG_FUSE_CORE_EN>();
+            FAPI_TRY(fapi2::putScom(i_target, PU_INT_TCTXT_CFG, l_data64),
+                     "ERROR: Failed to set Fused core mode in PU_INT_TCTXT_CFG");
+        }
 
         // Initialize the PFET controllers
         FAPI_EXEC_HWP(fapi2::current_err, p9_pm_pfet_init, i_target, i_mode);
