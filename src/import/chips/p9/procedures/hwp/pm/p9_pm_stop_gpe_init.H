@@ -44,8 +44,10 @@
 
 #include <p9_pm.H>
 #include <fapi2.H>
+#include <p9_quad_scom_addresses.H>
+#include <p9_quad_scom_addresses_fld.H>
 #include <p9_misc_scom_addresses.H>
-
+#include <p9_misc_scom_addresses_fld.H>
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_pm_stop_gpe_init_FP_t) (
