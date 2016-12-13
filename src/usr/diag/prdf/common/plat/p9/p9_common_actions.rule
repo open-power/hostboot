@@ -162,10 +162,10 @@ actionclass level2_th_1
     threshold1;
 };
 
-actionclass level2_dump_SH
+actionclass level2_dump_SW
 {
     level2_th_1;
-    dumpSH;
+    dumpSW;
 };
 
 actionclass level2_M_self_L_th_1
@@ -182,15 +182,29 @@ actionclass self_M_level2_L_th_1
     threshold1;
 };
 
+actionclass self_M_level2_L_th_32perDay
+{
+    calloutSelfMed;
+    callout2ndLvlLow;
+    threshold32pday;
+};
+
+actionclass parent_proc_th_1
+{
+    callout(connected(TYPE_PROC), MRU_MED);
+    threshold1;
+};
+
+actionclass level2_M_proc_L_th_1
+{
+    callout2ndLvlMed;
+    callout(connected(TYPE_PROC), MRU_LOW);
+    threshold1;
+};
+
 ################################################################################
 #                               Dump Types                                     #
 ################################################################################
-
-/** Dump SH */
-actionclass dumpSH
-{
-    dump(DUMP_CONTENT_SH);
-};
 
 /** Dump SW */
 actionclass dumpSW
@@ -205,7 +219,16 @@ actionclass dumpSW
 /** Default action for an unexpected unmasked bit */
 actionclass defaultMaskedError
 {
-    dumpSH;
+    callout2ndLvlMed;
+    threshold1;
+};
+
+/** An attention that should be handled by an external source like the
+ *  hypervisor. The attention should not be masked, however, the attention
+ *  should not be routed to PRD either. If it does, there is a bug in the
+ *  initialization of the action registers. */
+actionclass externalAttention
+{
     callout2ndLvlMed;
     threshold1;
 };
@@ -213,7 +236,6 @@ actionclass defaultMaskedError
 /** Default TBD action */
 actionclass TBDDefaultCallout
 {
-    dumpSH;
     callout2ndLvlMed;
     threshold( field(32 / day), mfg(32 / day) );
 };

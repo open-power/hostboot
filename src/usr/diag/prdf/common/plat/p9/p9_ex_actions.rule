@@ -23,20 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 
-actionclass level2_M_self_L_dump_SH
-{
-    callout2ndLvlMed;
-    calloutSelfLow;
-    dumpSH;
-};
-
-actionclass level2_M_proc_L_th_1
-{
-    callout2ndLvlMed;
-    callout(connected(TYPE_PROC), MRU_LOW);
-    threshold1;
-};
-
 actionclass l3_cache_ce
 {
     calloutSelfHigh;

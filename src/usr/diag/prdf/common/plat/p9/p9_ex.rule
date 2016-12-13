@@ -341,7 +341,7 @@ group gL2FIR filter singlebit, secondarybits( 0, 6 )
     /** L2FIR[18]
      *  (RC) store received pb cresp add error
      */
-    (rL2FIR, bit(18)) ? level2_dump_SH;
+    (rL2FIR, bit(18)) ? level2_th_1;
 
     /** L2FIR[19]
      *  Rc or NCU Pb data CE error
@@ -452,22 +452,22 @@ group gNCUFIR filter singlebit
     /** NCUFIR[1]
      *  TLBIE control error.
      */
-    (rNCUFIR, bit(1)) ? level2_M_self_L_dump_SH;
+    (rNCUFIR, bit(1)) ? level2_M_self_L_th_1;
 
     /** NCUFIR[2]
      *  TL or  SLBIEG illegal fields from core.
      */
-    (rNCUFIR, bit(2)) ? level2_M_self_L_dump_SH;
+    (rNCUFIR, bit(2)) ? level2_M_self_L_th_1;
 
     /** NCUFIR[3]
      *  NCU Store Address Error
      */
-    (rNCUFIR, bit(3)) ? level2_M_self_L_dump_SH;
+    (rNCUFIR, bit(3)) ? level2_M_self_L_th_1;
 
     /** NCUFIR[4]
      *  NCU load Address Error
      */
-    (rNCUFIR, bit(4)) ? level2_M_self_L_dump_SH;
+    (rNCUFIR, bit(4)) ? level2_M_self_L_th_1;
 
     /** NCUFIR[5]
      *  Store received ack_dead.
@@ -482,7 +482,7 @@ group gNCUFIR filter singlebit
     /** NCUFIR[7]
      *  MSGSND received addr_err
      */
-    (rNCUFIR, bit(7)) ? level2_M_self_L_dump_SH;
+    (rNCUFIR, bit(7)) ? level2_M_self_L_th_1;
 
     /** NCUFIR[8]
      *  NCU Store Queue Data Parity Err
@@ -492,17 +492,17 @@ group gNCUFIR filter singlebit
     /** NCUFIR[9]
      *  store timed out on pb
      */
-    (rNCUFIR, bit(9)) ? level2_M_self_L_dump_SH;
+    (rNCUFIR, bit(9)) ? level2_M_self_L_th_1;
 
     /** NCUFIR[10]
      *  tlbie master timeout
      */
-    (rNCUFIR, bit(10)) ? level2_M_self_L_dump_SH;
+    (rNCUFIR, bit(10)) ? level2_M_self_L_th_1;
 
     /** NCUFIR[11]
      *  NCU no response to snooped TLBIE
      */
-    (rNCUFIR, bit(11)) ? level2_M_self_L_dump_SH;
+    (rNCUFIR, bit(11)) ? level2_M_self_L_th_1;
 
     /** NCUFIR[12]
      *  ima cresp addr error
@@ -517,7 +517,7 @@ group gNCUFIR filter singlebit
     /** NCUFIR[14]
      *  pmisc cresp addr err
      */
-    (rNCUFIR, bit(14)) ? level2_M_self_L_dump_SH;
+    (rNCUFIR, bit(14)) ? level2_M_self_L_th_1;
 
     /** NCUFIR[15]
      *  PPE read cresp address error
@@ -547,12 +547,12 @@ group gNCUFIR filter singlebit
     /** NCUFIR[20]
      *  darn ttype while darn not enabled
      */
-    (rNCUFIR, bit(20)) ? level2_M_self_L_dump_SH;
+    (rNCUFIR, bit(20)) ? level2_M_self_L_th_1;
 
     /** NCUFIR[21]
      *  addr darn type while darn not enabled
      */
-    (rNCUFIR, bit(21)) ? level2_M_self_L_dump_SH;
+    (rNCUFIR, bit(21)) ? level2_M_self_L_th_1;
 
     /** NCUFIR[22:28]
      *  spare

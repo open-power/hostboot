@@ -2761,17 +2761,17 @@ group gNXCQFIR filter singlebit
     /** NXCQFIR[0]
      *  PBI internal parity error
      */
-    (rNXCQFIR, bit(0)) ? defaultMaskedError;
+    (rNXCQFIR, bit(0)) ? self_th_1;
 
     /** NXCQFIR[1]
      *  PowerBus CE error
      */
-    (rNXCQFIR, bit(1)) ? defaultMaskedError;
+    (rNXCQFIR, bit(1)) ? self_th_32perDay;
 
     /** NXCQFIR[2]
      *  PowerBus UE error
      */
-    (rNXCQFIR, bit(2)) ? defaultMaskedError;
+    (rNXCQFIR, bit(2)) ? self_th_1;
 
     /** NXCQFIR[3]
      *  PBUS_ECC_SUE_FIR: PowerBus SUE error
@@ -2781,42 +2781,42 @@ group gNXCQFIR filter singlebit
     /** NXCQFIR[4]
      *  Inbound array CE error
      */
-    (rNXCQFIR, bit(4)) ? defaultMaskedError;
+    (rNXCQFIR, bit(4)) ? self_th_32perDay;
 
     /** NXCQFIR[5]
      *  Inbound array UE error
      */
-    (rNXCQFIR, bit(5)) ? defaultMaskedError;
+    (rNXCQFIR, bit(5)) ? self_th_1;
 
     /** NXCQFIR[6]
      *  PASTE_REJECT_FIR: Paste request rejected
      */
-    (rNXCQFIR, bit(6)) ? defaultMaskedError;
+    (rNXCQFIR, bit(6)) ? level2_th_1;
 
     /** NXCQFIR[7]
      *  PowerBus command hang error
      */
-    (rNXCQFIR, bit(7)) ? defaultMaskedError;
+    (rNXCQFIR, bit(7)) ? level2_th_1;
 
     /** NXCQFIR[8]
      *  PowerBus read address error
      */
-    (rNXCQFIR, bit(8)) ? defaultMaskedError;
+    (rNXCQFIR, bit(8)) ? self_th_1;
 
     /** NXCQFIR[9]
      *  PowerBus write address error
      */
-    (rNXCQFIR, bit(9)) ? defaultMaskedError;
+    (rNXCQFIR, bit(9)) ? self_th_1;
 
     /** NXCQFIR[10]
      *  PowerBus miscellaneous error
      */
-    (rNXCQFIR, bit(10)) ? defaultMaskedError;
+    (rNXCQFIR, bit(10)) ? self_th_1;
 
     /** NXCQFIR[11]
      *  MMIO_BAR_PE_FIR: MMIO BAR parity error
      */
-    (rNXCQFIR, bit(11)) ? defaultMaskedError;
+    (rNXCQFIR, bit(11)) ? self_th_1;
 
     /** NXCQFIR[12]
      *  UMAC detected SUE on WC Interrupt
@@ -2841,22 +2841,22 @@ group gNXCQFIR filter singlebit
     /** NXCQFIR[16]
      *  internal transfer hang poll time expired
      */
-    (rNXCQFIR, bit(16)) ? defaultMaskedError;
+    (rNXCQFIR, bit(16)) ? self_th_1;
 
     /** NXCQFIR[17]
      *  Parity error on ERAT arrays
      */
-    (rNXCQFIR, bit(17)) ? defaultMaskedError;
+    (rNXCQFIR, bit(17)) ? self_th_1;
 
     /** NXCQFIR[18]
      *  Correctable error on ERAT arrays
      */
-    (rNXCQFIR, bit(18)) ? defaultMaskedError;
+    (rNXCQFIR, bit(18)) ? self_th_32perDay;
 
     /** NXCQFIR[19]
      *  Uncorrectable error on ERAT arrays
      */
-    (rNXCQFIR, bit(19)) ? defaultMaskedError;
+    (rNXCQFIR, bit(19)) ? self_th_32perDay;
 
     /** NXCQFIR[20]
      *  SUE on ERAT arrays
@@ -2866,17 +2866,17 @@ group gNXCQFIR filter singlebit
     /** NXCQFIR[21]
      *  NMMU hang on checkin/checkout request
      */
-    (rNXCQFIR, bit(21)) ? defaultMaskedError;
+    (rNXCQFIR, bit(21)) ? level2_th_1;
 
     /** NXCQFIR[22]
      *  ERAT control logic error
      */
-    (rNXCQFIR, bit(22)) ? defaultMaskedError;
+    (rNXCQFIR, bit(22)) ? self_th_1;
 
     /** NXCQFIR[23]
      *  UEon the Powerbus data for xlate
      */
-    (rNXCQFIR, bit(23)) ? defaultMaskedError;
+    (rNXCQFIR, bit(23)) ? self_th_1;
 
     /** NXCQFIR[24]
      *  SUE on the Powerbus data for xlate
@@ -2896,7 +2896,7 @@ group gNXCQFIR filter singlebit
     /** NXCQFIR[27]
      *  Uncorrectable error on CRB QW0/4
      */
-    (rNXCQFIR, bit(27)) ? defaultMaskedError;
+    (rNXCQFIR, bit(27)) ? self_th_1;
 
     /** NXCQFIR[28]
      *  Special uncorrectable error on CRB QW0/4
@@ -2906,7 +2906,7 @@ group gNXCQFIR filter singlebit
     /** NXCQFIR[29]
      *  UMAC has detected a control logic error
      */
-    (rNXCQFIR, bit(29)) ? defaultMaskedError;
+    (rNXCQFIR, bit(29)) ? self_th_1;
 
     /** NXCQFIR[30]
      *  Reserved fieldUMAC_SCOM_sat_err)
@@ -2921,37 +2921,37 @@ group gNXCQFIR filter singlebit
     /** NXCQFIR[32]
      *  first noise source in the RNG has failed
      */
-    (rNXCQFIR, bit(32)) ? defaultMaskedError;
+    (rNXCQFIR, bit(32)) ? self_th_32perDay;
 
     /** NXCQFIR[33]
      *  second noise source in the RNG failed
      */
-    (rNXCQFIR, bit(33)) ? defaultMaskedError;
+    (rNXCQFIR, bit(33)) ? self_th_32perDay;
 
     /** NXCQFIR[34]
      *  RNG has detected a control logic error
      */
-    (rNXCQFIR, bit(34)) ? defaultMaskedError;
+    (rNXCQFIR, bit(34)) ? self_th_1;
 
     /** NXCQFIR[35]
      *  NMMU has signaled local checkstop
      */
-    (rNXCQFIR, bit(35)) ? defaultMaskedError;
+    (rNXCQFIR, bit(35)) ? self_th_1;
 
     /** NXCQFIR[36]
      *  VAS has signaled local checkstop
      */
-    (rNXCQFIR, bit(36)) ? defaultMaskedError;
+    (rNXCQFIR, bit(36)) ? self_th_1;
 
     /** NXCQFIR[37]
      *  PBCQ has detected a control logic error
      */
-    (rNXCQFIR, bit(37)) ? defaultMaskedError;
+    (rNXCQFIR, bit(37)) ? self_th_1;
 
     /** NXCQFIR[38]
      *  PBCQ detected failed link
      */
-    (rNXCQFIR, bit(38)) ? defaultMaskedError;
+    (rNXCQFIR, bit(38)) ? self_th_1;
 
     /** NXCQFIR[39:41]
      *  Reserved field (Access type is spares)
@@ -3004,22 +3004,22 @@ group gNXDMAENGFIR filter singlebit
     /** NXDMAENGFIR[4]
      *  Channel 0 842 engine ECC CE error
      */
-    (rNXDMAENGFIR, bit(4)) ? defaultMaskedError;
+    (rNXDMAENGFIR, bit(4)) ? self_th_32perDay;
 
     /** NXDMAENGFIR[5]
      *  Channel 0 842 engine ECC UE error
      */
-    (rNXDMAENGFIR, bit(5)) ? defaultMaskedError;
+    (rNXDMAENGFIR, bit(5)) ? self_th_1;
 
     /** NXDMAENGFIR[6]
      *  Channel 1 842 engine ECC CE error
      */
-    (rNXDMAENGFIR, bit(6)) ? defaultMaskedError;
+    (rNXDMAENGFIR, bit(6)) ? self_th_32perDay;
 
     /** NXDMAENGFIR[7]
      *  Channel 1 842 engine ECC UE error
      */
-    (rNXDMAENGFIR, bit(7)) ? defaultMaskedError;
+    (rNXDMAENGFIR, bit(7)) ? self_th_1;
 
     /** NXDMAENGFIR[8]
      *  DMA Non-zero CSB CC detected
@@ -3029,12 +3029,12 @@ group gNXDMAENGFIR filter singlebit
     /** NXDMAENGFIR[9]
      *  DMA array ECC CE error
      */
-    (rNXDMAENGFIR, bit(9)) ? defaultMaskedError;
+    (rNXDMAENGFIR, bit(9)) ? self_th_1;
 
     /** NXDMAENGFIR[10]
      *  DMA outWR/inRD ECC CE error
      */
-    (rNXDMAENGFIR, bit(10)) ? defaultMaskedError;
+    (rNXDMAENGFIR, bit(10)) ? self_th_1;
 
     /** NXDMAENGFIR[11]
      *  Channel 5 amf engine ECC CE error
@@ -3069,17 +3069,17 @@ group gNXDMAENGFIR filter singlebit
     /** NXDMAENGFIR[17]
      *  DMA array ECC UE error
      */
-    (rNXDMAENGFIR, bit(17)) ? defaultMaskedError;
+    (rNXDMAENGFIR, bit(17)) ? self_th_1;
 
     /** NXDMAENGFIR[18]
      *  DMA outWR/inRD ECC UE error
      */
-    (rNXDMAENGFIR, bit(18)) ? defaultMaskedError;
+    (rNXDMAENGFIR, bit(18)) ? self_th_1;
 
     /** NXDMAENGFIR[19]
      *  DMA inRD done error
      */
-    (rNXDMAENGFIR, bit(19)) ? defaultMaskedError;
+    (rNXDMAENGFIR, bit(19)) ? self_th_1;
 
     /** NXDMAENGFIR[20]
      *  Channel 0 invalid state error
@@ -3629,27 +3629,27 @@ group gVASFIR filter singlebit
     /** VASFIR[5]
      *  PowerBus (CQ) Interface Parity Error
      */
-    (rVASFIR, bit(5)) ? defaultMaskedError;
+    (rVASFIR, bit(5)) ? self_th_1;
 
     /** VASFIR[6]
      *  PB(CQ) Addr Error CRESP on Read
      */
-    (rVASFIR, bit(6)) ? defaultMaskedError;
+    (rVASFIR, bit(6)) ? self_th_1;
 
     /** VASFIR[7]
      *  PB (CQ) Address Error CRESP on Read
      */
-    (rVASFIR, bit(7)) ? defaultMaskedError;
+    (rVASFIR, bit(7)) ? self_th_1;
 
     /** VASFIR[8]
      *  Egress Correctable ECC Error
      */
-    (rVASFIR, bit(8)) ? defaultMaskedError;
+    (rVASFIR, bit(8)) ? self_th_5perHour;
 
     /** VASFIR[9]
      *  Ingress Correctable ECC Error
      */
-    (rVASFIR, bit(9)) ? defaultMaskedError;
+    (rVASFIR, bit(9)) ? self_th_5perHour;
 
     /** VASFIR[10]
      *  PB (CQ) CE on inbound/array data
@@ -3659,27 +3659,27 @@ group gVASFIR filter singlebit
     /** VASFIR[11]
      *  WC Correctable ECC Error
      */
-    (rVASFIR, bit(11)) ? defaultMaskedError;
+    (rVASFIR, bit(11)) ? self_th_5perHour;
 
     /** VASFIR[12]
      *  Register/MMIO Correctable ECC Error
      */
-    (rVASFIR, bit(12)) ? defaultMaskedError;
+    (rVASFIR, bit(12)) ? self_th_5perHour;
 
     /** VASFIR[13]
      *  PB Correctable Error on outbound data
      */
-    (rVASFIR, bit(13)) ? defaultMaskedError;
+    (rVASFIR, bit(13)) ? self_th_5perHour;
 
     /** VASFIR[14]
      *  PB Uncorrectable  Error on outbound data
      */
-    (rVASFIR, bit(14)) ? defaultMaskedError;
+    (rVASFIR, bit(14)) ? self_th_1;
 
     /** VASFIR[15]
      *  PB Master State Machine Hang
      */
-    (rVASFIR, bit(15)) ? defaultMaskedError;
+    (rVASFIR, bit(15)) ? self_th_1;
 
     /** VASFIR[16]
      *  EG Uncorrectable ECC Error
@@ -3714,7 +3714,7 @@ group gVASFIR filter singlebit
     /** VASFIR[22]
      *  IN software castout to active window
      */
-    (rVASFIR, bit(22)) ? defaultMaskedError;
+    (rVASFIR, bit(22)) ? self_th_1;
 
     /** VASFIR[23]
      *  spare
@@ -3759,17 +3759,17 @@ group gVASFIR filter singlebit
     /** VASFIR[31]
      *  PB Link Abort Op Received
      */
-    (rVASFIR, bit(31)) ? defaultMaskedError;
+    (rVASFIR, bit(31)) ? self_th_1;
 
     /** VASFIR[32]
      *  MMIO Read to Unimplemented Reg (HYP)
      */
-    (rVASFIR, bit(32)) ? defaultMaskedError;
+    (rVASFIR, bit(32)) ? self_th_1;
 
     /** VASFIR[33]
      *  MMIO Read to Unimplemented Reg (OS)
      */
-    (rVASFIR, bit(33)) ? defaultMaskedError;
+    (rVASFIR, bit(33)) ? self_th_1;
 
     /** VASFIR[34]
      *  MMIO Write to Unimplemented Reg (HYP)
@@ -4469,7 +4469,7 @@ group gNPU0FIR filter singlebit
     /** NPU0FIR[0]
      *  NTL array CE
      */
-    (rNPU0FIR, bit(0)) ? defaultMaskedError;
+    (rNPU0FIR, bit(0)) ? self_th_32perDay;
 
     /** NPU0FIR[1]
      *  NTL header array UE
@@ -4534,7 +4534,7 @@ group gNPU0FIR filter singlebit
     /** NPU0FIR[13]
      *  CQ CTL/SM ASBE Array single-bit CE
      */
-    (rNPU0FIR, bit(13)) ? defaultMaskedError;
+    (rNPU0FIR, bit(13)) ? self_th_32perDay;
 
     /** NPU0FIR[14]
      *  CQ CTL/SM PBR PowerBus Recoverable err
@@ -4544,7 +4544,7 @@ group gNPU0FIR filter singlebit
     /** NPU0FIR[15]
      *  CQ CTL/SM REG Register ring error
      */
-    (rNPU0FIR, bit(15)) ? defaultMaskedError;
+    (rNPU0FIR, bit(15)) ? self_th_32perDay;
 
     /** NPU0FIR[16]
      *  Data UE for MMIO store data
@@ -4574,22 +4574,22 @@ group gNPU0FIR filter singlebit
     /** NPU0FIR[21]
      *  CQ CTL/SM AUE Array UE
      */
-    (rNPU0FIR, bit(21)) ? defaultMaskedError;
+    (rNPU0FIR, bit(21)) ? self_th_1;
 
     /** NPU0FIR[22]
      *  CQ CTL/SM PBP PowerBus parity error
      */
-    (rNPU0FIR, bit(22)) ? defaultMaskedError;
+    (rNPU0FIR, bit(22)) ? self_th_1;
 
     /** NPU0FIR[23]
      *  CQ CTL/SM PBF PowerBus Fatal Error
      */
-    (rNPU0FIR, bit(23)) ? defaultMaskedError;
+    (rNPU0FIR, bit(23)) ? level2_M_self_L_th_1;
 
     /** NPU0FIR[24]
      *  PowerBus configuration error
      */
-    (rNPU0FIR, bit(24)) ? defaultMaskedError;
+    (rNPU0FIR, bit(24)) ? level2_M_self_L_th_1;
 
     /** NPU0FIR[25]
      *  CQ CTL/SM FWD Forward-Progress error
@@ -4599,7 +4599,7 @@ group gNPU0FIR filter singlebit
     /** NPU0FIR[26]
      *  CQ CTL/SM NLG NPU Logic error
      */
-    (rNPU0FIR, bit(26)) ? defaultMaskedError;
+    (rNPU0FIR, bit(26)) ? self_th_1;
 
     /** NPU0FIR[27]
      *  CQ CTL/SM  UT=1 to frozen PE error
@@ -4619,7 +4619,7 @@ group gNPU0FIR filter singlebit
     /** NPU0FIR[30]
      *  CQ DAT ECC CE on data/BE arrays
      */
-    (rNPU0FIR, bit(30)) ? defaultMaskedError;
+    (rNPU0FIR, bit(30)) ? self_M_level2_L_th_32perDay;
 
     /** NPU0FIR[31]
      *  CQ DAT parity error on data/BE latches
@@ -4629,22 +4629,22 @@ group gNPU0FIR filter singlebit
     /** NPU0FIR[32]
      *  CQ DAT parity errs on config regs
      */
-    (rNPU0FIR, bit(32)) ? defaultMaskedError;
+    (rNPU0FIR, bit(32)) ? self_th_1;
 
     /** NPU0FIR[33]
      *  CQ DAT parity errs/PowerBus rtag
      */
-    (rNPU0FIR, bit(33)) ? defaultMaskedError;
+    (rNPU0FIR, bit(33)) ? self_th_1;
 
     /** NPU0FIR[34]
      *  CQ DAT parity errs nternal state latches
      */
-    (rNPU0FIR, bit(34)) ? defaultMaskedError;
+    (rNPU0FIR, bit(34)) ? self_th_1;
 
     /** NPU0FIR[35]
      *  CQ DAT logic error
      */
-    (rNPU0FIR, bit(35)) ? defaultMaskedError;
+    (rNPU0FIR, bit(35)) ? self_th_1;
 
     /** NPU0FIR[36]
      *  Future SUE
@@ -4669,7 +4669,7 @@ group gNPU0FIR filter singlebit
     /** NPU0FIR[41]
      *  XTS correctable errs in XTS SRAM
      */
-    (rNPU0FIR, bit(41)) ? defaultMaskedError;
+    (rNPU0FIR, bit(41)) ? self_M_level2_L_th_32perDay;
 
     /** NPU0FIR[42]
      *  XTS Ues in XTS internal SRAM
@@ -4679,7 +4679,7 @@ group gNPU0FIR filter singlebit
     /** NPU0FIR[43]
      *  XTS CE on incoming stack transactions
      */
-    (rNPU0FIR, bit(43)) ? defaultMaskedError;
+    (rNPU0FIR, bit(43)) ? self_M_level2_L_th_32perDay;
 
     /** NPU0FIR[44]
      *  XTS  errs incoming stack transaction
@@ -4802,7 +4802,7 @@ group gNPU1FIR filter singlebit
     /** NPU1FIR[12]
      *  MISC Register ring error (ie noack)
      */
-    (rNPU1FIR, bit(12)) ? defaultMaskedError;
+    (rNPU1FIR, bit(12)) ? self_th_32perDay;
 
     /** NPU1FIR[13]
      *  MISC Parity error from ibr addr regi
@@ -4857,12 +4857,12 @@ group gNPU1FIR filter singlebit
     /** NPU1FIR[23]
      *  ATS Parity error on TCE cache dir array
      */
-    (rNPU1FIR, bit(23)) ? defaultMaskedError;
+    (rNPU1FIR, bit(23)) ? self_th_32perDay;
 
     /** NPU1FIR[24]
      *  ATS Parity error on TCE cache data array
      */
-    (rNPU1FIR, bit(24)) ? defaultMaskedError;
+    (rNPU1FIR, bit(24)) ? self_th_32perDay;
 
     /** NPU1FIR[25]
      *  ATS ECC UE on Effective Address array
@@ -4872,7 +4872,7 @@ group gNPU1FIR filter singlebit
     /** NPU1FIR[26]
      *  ATS ECC CE on Effective Address array
      */
-    (rNPU1FIR, bit(26)) ? defaultMaskedError;
+    (rNPU1FIR, bit(26)) ? self_th_32perDay;
 
     /** NPU1FIR[27]
      *  ATS ECC UE on TDRmem array
@@ -4892,7 +4892,7 @@ group gNPU1FIR filter singlebit
     /** NPU1FIR[30]
      *  ATS ECC CE on CQ CTL DMA Read
      */
-    (rNPU1FIR, bit(30)) ? defaultMaskedError;
+    (rNPU1FIR, bit(30)) ? self_th_32perDay;
 
     /** NPU1FIR[31]
      *  ATS Parity error on TVT entry
@@ -5114,7 +5114,7 @@ group gPBCENTFIR filter singlebit
     /** PBCENTFIR[10]
      *  pb fsp checkstop
      */
-    (rPBCENTFIR, bit(10)) ? level2_dump_SH;
+    (rPBCENTFIR, bit(10)) ? level2_dump_SW;
 
     /** PBCENTFIR[11:15]
      *  spare
@@ -5372,7 +5372,7 @@ group gPBAFIR filter singlebit
     /** PBAFIR[9]
      *  PBA Unexpected CRESP
      */
-    (rPBAFIR, bit(9)) ? level2_dump_SH;
+    (rPBAFIR, bit(9)) ? level2_th_1;
 
     /** PBAFIR[10]
      *  PBA Unexpected Data PB data received
@@ -5417,7 +5417,7 @@ group gPBAFIR filter singlebit
     /** PBAFIR[18]
      *  PBA CRESP Addr Error
      */
-    (rPBAFIR, bit(18)) ? level2_dump_SH;
+    (rPBAFIR, bit(18)) ? level2_th_1;
 
     /** PBAFIR[19]
      *  BCUE Read Data Parity Error OR MRDERR
@@ -5744,7 +5744,7 @@ group gENHCAFIR filter singlebit
     /** ENHCAFIR[6]
      *  Unexpected data or cresp
      */
-    (rENHCAFIR, bit(6)) ? level2_dump_SH;
+    (rENHCAFIR, bit(6)) ? level2_th_1;
 
     /** ENHCAFIR[7]
      *  Internal Error
@@ -6154,7 +6154,7 @@ group gNMMUCQFIR filter singlebit
     /** NMMUCQFIR[7]
      *  PowerBus Xlate SUE error
      */
-    (rNMMUCQFIR, bit(7)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(7)) ? self_th_1;
 
     /** NMMUCQFIR[8]
      *  PowerBus CE error
@@ -6257,7 +6257,7 @@ group gNMMUFIR filter singlebit
     /** NMMUFIR[2]
      *  Fabric DIn xlat array SUE error
      */
-    (rNMMUFIR, bit(2)) ? defaultMaskedError;
+    (rNMMUFIR, bit(2)) ? self_th_1;
 
     /** NMMUFIR[3]
      *  Fabric mst rd array CE error detected.
@@ -6302,7 +6302,7 @@ group gNMMUFIR filter singlebit
     /** NMMUFIR[11]
      *  SLB multi-hit error detected.
      */
-    (rNMMUFIR, bit(11)) ? level2_dump_SH;
+    (rNMMUFIR, bit(11)) ? level2_th_1;
 
     /** NMMUFIR[12]
      *  TLB directory parity error detected.
@@ -6322,7 +6322,7 @@ group gNMMUFIR filter singlebit
     /** NMMUFIR[15]
      *  TLB multi-hit error detected.
      */
-    (rNMMUFIR, bit(15)) ? level2_dump_SH;
+    (rNMMUFIR, bit(15)) ? level2_th_1;
 
     /** NMMUFIR[16]
      *  Segment fault detected .
@@ -6753,12 +6753,12 @@ group gINTCQFIR filter singlebit
     /** INTCQFIR[49:51]
      *  INT_CQ_FIR_PC_FATAL_ERROR_0_2:
      */
-    (rINTCQFIR, bit(49|50|51)) ? defaultMaskedError;
+    (rINTCQFIR, bit(49|50|51)) ? self_th_1;
 
     /** INTCQFIR[52:54]
      *  INT_CQ_FIR_PC_RECOV_ERROR_0_2:
      */
-    (rINTCQFIR, bit(52|53|54)) ? defaultMaskedError;
+    (rINTCQFIR, bit(52|53|54)) ? self_th_1;
 
     /** INTCQFIR[55:57]
      *  INT_CQ_FIR_PC_INFO_ERROR_0_2:
@@ -6768,12 +6768,12 @@ group gINTCQFIR filter singlebit
     /** INTCQFIR[58:59]
      *  INT_CQ_FIR_VC_FATAL_ERROR_0_1:
      */
-    (rINTCQFIR, bit(58|59)) ? defaultMaskedError;
+    (rINTCQFIR, bit(58|59)) ? self_th_1;
 
     /** INTCQFIR[60:61]
      *  INT_CQ_FIR_VC_RECOV_ERROR_0_1:
      */
-    (rINTCQFIR, bit(60|61)) ? defaultMaskedError;
+    (rINTCQFIR, bit(60|61)) ? self_th_1;
 
     /** INTCQFIR[62:63]
      *  INT_CQ_FIR_VC_INFO_ERROR_0_1:

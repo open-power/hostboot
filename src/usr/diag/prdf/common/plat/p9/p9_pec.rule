@@ -267,17 +267,17 @@ group gIOPCIFIR filter singlebit
     /** IOPCIFIR[0]
      *  HSS ZCAL Calibration Error
      */
-    (rIOPCIFIR, bit(0)) ? defaultMaskedError;
+    (rIOPCIFIR, bit(0)) ? parent_proc_th_1;
 
     /** IOPCIFIR[1]
      *  HSS CAL PLL A Calibration error
      */
-    (rIOPCIFIR, bit(1)) ? defaultMaskedError;
+    (rIOPCIFIR, bit(1)) ? parent_proc_th_1;
 
     /** IOPCIFIR[2]
      *  HSS CAL PLL B Calibration error
      */
-    (rIOPCIFIR, bit(2)) ? defaultMaskedError;
+    (rIOPCIFIR, bit(2)) ? parent_proc_th_1;
 
     /** IOPCIFIR[3]
      *  TX Lane A Calibration Error
