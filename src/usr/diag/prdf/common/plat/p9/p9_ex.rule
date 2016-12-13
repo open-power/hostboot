@@ -414,9 +414,9 @@ group gL2FIR filter singlebit, secondarybits( 0, 6 )
     (rL2FIR, bit(37|38)) ? defaultMaskedError;
 
     /** L2FIR[39]
-     *  Core recovery event
+     *  core recovery event
      */
-    (rL2FIR, bit(39)) ? core_recovery_workaround;
+    (rL2FIR, bit(39)) ? core_recovery_workaround; # NIMBUS_10
 
     /** L2FIR[40]
      *  scom error

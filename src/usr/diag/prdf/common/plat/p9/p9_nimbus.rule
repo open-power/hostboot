@@ -3604,27 +3604,27 @@ group gVASFIR filter singlebit
     /** VASFIR[0]
      *  Egress Hardware Error
      */
-    (rVASFIR, bit(0)) ? defaultMaskedError;
+    (rVASFIR, bit(0)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[1]
      *  Ingress Hardware Error
      */
-    (rVASFIR, bit(1)) ? defaultMaskedError;
+    (rVASFIR, bit(1)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[2]
      *  PowerBus (CQ) Hardware Error
      */
-    (rVASFIR, bit(2)) ? defaultMaskedError;
+    (rVASFIR, bit(2)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[3]
      *  Window Context Cache Hardware Error
      */
-    (rVASFIR, bit(3)) ? defaultMaskedError;
+    (rVASFIR, bit(3)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[4]
      *  Register/MMIO Hardware Error
      */
-    (rVASFIR, bit(4)) ? defaultMaskedError;
+    (rVASFIR, bit(4)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[5]
      *  PowerBus (CQ) Interface Parity Error
@@ -3684,32 +3684,32 @@ group gVASFIR filter singlebit
     /** VASFIR[16]
      *  EG Uncorrectable ECC Error
      */
-    (rVASFIR, bit(16)) ? defaultMaskedError;
+    (rVASFIR, bit(16)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[17]
      *  IN Uncorrectable ECC Error
      */
-    (rVASFIR, bit(17)) ? defaultMaskedError;
+    (rVASFIR, bit(17)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[18]
      *  PB UE on inbound array data
      */
-    (rVASFIR, bit(18)) ? defaultMaskedError;
+    (rVASFIR, bit(18)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[19]
      *  WC Uncorrectable ECC Error
      */
-    (rVASFIR, bit(19)) ? defaultMaskedError;
+    (rVASFIR, bit(19)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[20]
      *  RG/MMIO Uncorrectable ECC Error
      */
-    (rVASFIR, bit(20)) ? defaultMaskedError;
+    (rVASFIR, bit(20)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[21]
      *  IN CAM Parity Error
      */
-    (rVASFIR, bit(21)) ? defaultMaskedError;
+    (rVASFIR, bit(21)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[22]
      *  IN software castout to active window
@@ -3724,32 +3724,32 @@ group gVASFIR filter singlebit
     /** VASFIR[24]
      *  EG Special UE (SUE) Error
      */
-    (rVASFIR, bit(24)) ? defaultMaskedError;
+    (rVASFIR, bit(24)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[25]
      *  IN SUE Error
      */
-    (rVASFIR, bit(25)) ? defaultMaskedError;
+    (rVASFIR, bit(25)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[26]
      *  PB SUE Error
      */
-    (rVASFIR, bit(26)) ? defaultMaskedError;
+    (rVASFIR, bit(26)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[27]
      *  WC SUE Error
      */
-    (rVASFIR, bit(27)) ? defaultMaskedError;
+    (rVASFIR, bit(27)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[28]
      *  RG/MMIO SUE Error
      */
-    (rVASFIR, bit(28)) ? defaultMaskedError;
+    (rVASFIR, bit(28)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[29]
      *  PB Link Error on Read
      */
-    (rVASFIR, bit(29)) ? defaultMaskedError;
+    (rVASFIR, bit(29)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[30]
      *  PB Link Error on Write
@@ -3774,52 +3774,52 @@ group gVASFIR filter singlebit
     /** VASFIR[34]
      *  MMIO Write to Unimplemented Reg (HYP)
      */
-    (rVASFIR, bit(34)) ? defaultMaskedError;
+    (rVASFIR, bit(34)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[35]
      *  MMIO Write to Unimplemented Reg (OS)
      */
-    (rVASFIR, bit(35)) ? defaultMaskedError;
+    (rVASFIR, bit(35)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[36]
      *  non-8B MMIO Detected (HYP)
      */
-    (rVASFIR, bit(36)) ? defaultMaskedError;
+    (rVASFIR, bit(36)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[37]
      *  non-8B MMIO Detected (OS)
      */
-    (rVASFIR, bit(37)) ? defaultMaskedError;
+    (rVASFIR, bit(37)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[38]
      *  Write Monitor Op to non-open Window
      */
-    (rVASFIR, bit(38)) ? defaultMaskedError;
+    (rVASFIR, bit(38)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[39]
      *  Multiple Wr Mon Register Match
      */
-    (rVASFIR, bit(39)) ? defaultMaskedError;
+    (rVASFIR, bit(39)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[40]
      *  Page Migration Requested but not enabled
      */
-    (rVASFIR, bit(40)) ? defaultMaskedError;
+    (rVASFIR, bit(40)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[41]
      *  Page Migration size != FIFO size
      */
-    (rVASFIR, bit(41)) ? defaultMaskedError;
+    (rVASFIR, bit(41)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[42]
      *  ASB Notify not claimed
      */
-    (rVASFIR, bit(42)) ? defaultMaskedError;
+    (rVASFIR, bit(42)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[43]
      *  Write Monitor Op error
      */
-    (rVASFIR, bit(43)) ? defaultMaskedError;
+    (rVASFIR, bit(43)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[44]
      *  VAS rejected a paste command
@@ -3834,7 +3834,7 @@ group gVASFIR filter singlebit
     /** VASFIR[46]
      *  Incoming PB Parity Error
      */
-    (rVASFIR, bit(46)) ? defaultMaskedError;
+    (rVASFIR, bit(46)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[47]
      *  Error from SCOMFIR satellite
@@ -3844,7 +3844,7 @@ group gVASFIR filter singlebit
     /** VASFIR[48]
      *  NX_VAS_Local_XSTOP received
      */
-    (rVASFIR, bit(48)) ? defaultMaskedError;
+    (rVASFIR, bit(48)) ? self_th_1; # NIMBUS_10
 
     /** VASFIR[49]
      *  scom error
@@ -6729,11 +6729,6 @@ group gINTCQFIR filter singlebit
      *  INT_CQ_FIR_UNSOLICITED_PBDATA:
      */
     (rINTCQFIR, bit(45)) ? self_th_1;
-
-    /** INTCQFIR[46]
-     *  INT_CQ_FIR_FIR_PARITY_ERR:
-     */
-    (rINTCQFIR, bit(46)) ? defaultMaskedError;
 
     /** INTCQFIR[46]
      *  INT_CQ_FIR_FIR_PARITY_ERR:
