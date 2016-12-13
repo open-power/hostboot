@@ -1740,7 +1740,12 @@ extern "C"
                                    cmeRings,
                                    ringLength );
 
-            pCmeHdr->g_cme_max_spec_ring_length     =   ( ringLength + CME_BLOCK_READ_LEN - 1 ) >> CME_BLK_SIZE_SHIFT;
+            if( ringLength )
+            {
+                pCmeHdr->g_cme_max_spec_ring_length     =
+                    ( ringLength + CME_BLOCK_READ_LEN - 1 ) >> CME_BLK_SIZE_SHIFT;
+                pCmeHdr->g_cme_core_spec_ring_offset    =   tempLength;
+            }
 
             //Let us handle endianess now
             pCmeHdr->g_cme_common_ring_length       =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_length);
