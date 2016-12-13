@@ -586,7 +586,7 @@ group gMCBISTFIR filter singlebit
     /** MCBISTFIR[12]
      *  MCBIST program complete - WAT workaround
      */
-    (rMCBISTFIR, bit(12)) ? mcbist_program_complete_workaround;
+    (rMCBISTFIR, bit(12)) ? mcbist_program_complete_workaround; # NIMBUS_10
 
     /** MCBISTFIR[10,12]
      *  MCBIST Command Complete

@@ -347,20 +347,10 @@ group gCOREFIR filter singlebit
      */
     (rCOREFIR, bit(3)) ? self_th_1;
 
-    /** COREFIR[3]
-     *  Regfile core checkstop
-     */
-    (rCOREFIR, bit(3)) ? self_th_1;
-
     /** COREFIR[4]
      *  IF Logic Recovery Err
      */
     (rCOREFIR, bit(4)) ? self_th_5perHour;
-
-    /** COREFIR[5]
-     *  If Logic Checkstop
-     */
-    (rCOREFIR, bit(5)) ? self_th_1;
 
     /** COREFIR[5]
      *  If Logic Checkstop
@@ -377,20 +367,10 @@ group gCOREFIR filter singlebit
      */
     (rCOREFIR, bit(8)) ? self_th_1;
 
-    /** COREFIR[8]
-     *  Recovery core checkstop
-     */
-    (rCOREFIR, bit(8)) ? self_th_1;
-
     /** COREFIR[9]
      *  ISU Register File Recoverable Error
      */
     (rCOREFIR, bit(9)) ? self_th_5perHour;
-
-    /** COREFIR[10]
-     *  ISU Regifle Core Checkstop Err
-     */
-    (rCOREFIR, bit(10)) ? self_th_1;
 
     /** COREFIR[10]
      *  ISU Regifle Core Checkstop Err
@@ -462,16 +442,6 @@ group gCOREFIR filter singlebit
      */
     (rCOREFIR, bit(25)) ? self_th_1;
 
-    /** COREFIR[25]
-     *  VS Logic core checkstop
-     */
-    (rCOREFIR, bit(25)) ? self_th_1;
-
-    /** COREFIR[26]
-     *  Core errors while in maintenance mode
-     */
-    (rCOREFIR, bit(26)) ? level2_th_1;
-
     /** COREFIR[26]
      *  Core errors while in maintenance mode
      */
@@ -507,11 +477,6 @@ group gCOREFIR filter singlebit
      */
     (rCOREFIR, bit(32)) ? self_th_1;
 
-    /** COREFIR[32]
-     *  LSU Reg core checkstop
-     */
-    (rCOREFIR, bit(32)) ? self_th_1;
-
     /** COREFIR[33]
      *  Special recovery error, tlb multi-hit
      */
@@ -532,20 +497,10 @@ group gCOREFIR filter singlebit
      */
     (rCOREFIR, bit(36)) ? self_th_1;
 
-    /** COREFIR[36]
-     *  Forward Progress Error
-     */
-    (rCOREFIR, bit(36)) ? self_th_1;
-
     /** COREFIR[37]
      *  LSU logic recoverable error
      */
     (rCOREFIR, bit(37)) ? self_th_5perHour;
-
-    /** COREFIR[38]
-     *  LSU logic core checkstop error
-     */
-    (rCOREFIR, bit(38)) ? self_th_1;
 
     /** COREFIR[38]
      *  LSU logic core checkstop error
@@ -587,11 +542,6 @@ group gCOREFIR filter singlebit
      */
     (rCOREFIR, bit(45)) ? self_th_1;
 
-    /** COREFIR[45]
-     *  PC core cs
-     */
-    (rCOREFIR, bit(45)) ? self_th_1;
-
     /** COREFIR[46]
      *  spare
      */
@@ -607,20 +557,10 @@ group gCOREFIR filter singlebit
      */
     (rCOREFIR, bit(48)) ? self_th_1;
 
-    /** COREFIR[48]
-     *  Hypervisor resource parity error
-     */
-    (rCOREFIR, bit(48)) ? self_th_1;
-
     /** COREFIR[49:51]
      *  spare
      */
     (rCOREFIR, bit(49|50|51)) ? defaultMaskedError;
-
-    /** COREFIR[52]
-     *  Core Hang, recovery failed
-     */
-    (rCOREFIR, bit(52)) ? self_th_1;
 
     /** COREFIR[52]
      *  Core Hang, recovery failed
@@ -652,11 +592,6 @@ group gCOREFIR filter singlebit
      */
     (rCOREFIR, bit(57)) ? self_th_1;
 
-    /** COREFIR[57]
-     *  Other Core Core Checkstop
-     */
-    (rCOREFIR, bit(57)) ? self_th_1;
-
     /** COREFIR[58]
      *  Core chiplet error causing checkstop
      */
@@ -681,11 +616,6 @@ group gCOREFIR filter singlebit
      *  Firmware injected checkstop
      */
     (rCOREFIR, bit(62)) ? defaultMaskedError;
-
-    /** COREFIR[63]
-     *  PHYP injected core checkstop
-     */
-    (rCOREFIR, bit(63)) ? level2_th_1;
 
     /** COREFIR[63]
      *  PHYP injected core checkstop
