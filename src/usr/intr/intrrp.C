@@ -288,14 +288,24 @@ errlHndl_t IntrRp::_init()
 
 void IntrRp::acknowledgeInterrupt()
 {
+
+    //The XIVE HW is expecting these MMIO accesses to come from the
+    // core/thread they were setup (master core, thread 0)
+    // These functions will ensure this code executes there
+    task_affinity_pin();
+    task_affinity_migrate_to_master();
+
     //A uint16 store from the Acknowledge Hypervisor Interrupt
-    // offset in the Thread Management BAR space signals
-    // the interrupt is acknowledged
+    //  offset in the Thread Management BAR space signals
+    //  the interrupt is acknowledged
     volatile uint16_t * l_ack_int_ptr = (uint16_t *)iv_xiveTmBar1Address;
     l_ack_int_ptr += ACK_HYPERVISOR_INT_REG_OFFSET;
     eieio();
-
     uint16_t l_ackRead = *l_ack_int_ptr;
+
+    //MMIO Complete, rest of code can run on any thread
+    task_affinity_unpin();
+
     TRACFCOMP(g_trac_intr, "IntrRp::acknowledgeInterrupt(), read result: %16x", l_ackRead);
 }
 
@@ -1013,6 +1023,13 @@ errlHndl_t IntrRp::sendEOI(uint64_t& i_intSource, PIR_t& i_pir)
             }
         }
 
+
+        //The XIVE HW is expecting these MMIO accesses to come from the
+        // core/thread they were setup (master core, thread 0)
+        // These functions will ensure this code executes there
+        task_affinity_pin();
+        task_affinity_migrate_to_master();
+
         //Send an EOI to the Power bus using the PSIHB ESB Space
         //This is done with a read to the page specific to the interrupt source.
         //Each interrupt source gets one page
@@ -1020,6 +1037,10 @@ errlHndl_t IntrRp::sendEOI(uint64_t& i_intSource, PIR_t& i_pir)
           l_proc->psiHbEsbBaseAddr + ((i_intSource)*PAGE_SIZE)/sizeof(uint64_t);
 
         uint64_t eoiRead = *l_psiHbPowerBusEoiAddr;
+
+        //MMIO Complete, rest of code can run on any thread
+        task_affinity_unpin();
+
         if (eoiRead != 0)
         {
             TRACFCOMP(g_trac_intr, ERR_MRK"IntrRp::sendEOI error sending EOI"
@@ -1045,10 +1066,19 @@ errlHndl_t IntrRp::sendEOI(uint64_t& i_intSource, PIR_t& i_pir)
 
         TRACDCOMP(g_trac_intr, "IntrRp::sendEOI read response: %lx", eoiRead);
 
+        //The XIVE HW is expecting these MMIO accesses to come from the
+        // core/thread they were setup (master core, thread 0)
+        // These functions will ensure this code executes there
+        task_affinity_pin();
+        task_affinity_migrate_to_master();
+
         //EOI Part 2 - LSI ESB Internal to the IVPE of the Master Proc
         volatile uint64_t * l_lsiEoi = iv_masterHdlr->xiveIcBarAddr;
         l_lsiEoi += XIVE_IC_LSI_EOI_OFFSET;
         uint64_t l_intPending = *l_lsiEoi;
+
+        //MMIO Complete, rest of code can run on any thread
+        task_affinity_unpin();
 
         //If an interrupt is pending, HB userspace will send a message to
         // trigger the handling of a 'new' interrupt. In this situation the
