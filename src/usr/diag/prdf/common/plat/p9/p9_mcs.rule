@@ -152,7 +152,7 @@ group gMCFIR filter singlebit
     /** MCFIR[2]
      *  powerbus protocol error
      */
-    (rMCFIR, bit(2)) ? level2_dump_SH;
+    (rMCFIR, bit(2)) ? level2_th_1;
 
     /** MCFIR[3]
      *  bat with with incorrect tty pe
@@ -167,7 +167,7 @@ group gMCFIR filter singlebit
     /** MCFIR[5]
      *  invalid address
      */
-    (rMCFIR, bit(5)) ? level2_dump_SH;
+    (rMCFIR, bit(5)) ? level2_th_1;
 
     /** MCFIR[6]
      *  illegal consumer access

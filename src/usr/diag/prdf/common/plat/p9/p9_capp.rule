@@ -262,12 +262,12 @@ group gCXAFIR filter singlebit
     /** CXAFIR[25]
      *  Misc informational PowerBus error
      */
-    (rCXAFIR, bit(25)) ? defaultMaskedError;
+    (rCXAFIR, bit(25)) ? parent_proc_th_1;
 
     /** CXAFIR[26]
      *  CXA Parity error on PowerBus interface
      */
-    (rCXAFIR, bit(26)) ? defaultMaskedError;
+    (rCXAFIR, bit(26)) ? parent_proc_th_1;
 
     /** CXAFIR[27]
      *  CXA: Any PowerBus data hang poll error
@@ -327,17 +327,17 @@ group gCXAFIR filter singlebit
     /** CXAFIR[38]
      *  CXA: TLBI seq_err.
      */
-    (rCXAFIR, bit(38)) ? defaultMaskedError;
+    (rCXAFIR, bit(38)) ? parent_proc_th_1;
 
     /** CXAFIR[39]
      *  CXA: TLBI bad op error.
      */
-    (rCXAFIR, bit(39)) ? defaultMaskedError;
+    (rCXAFIR, bit(39)) ? parent_proc_th_1;
 
     /** CXAFIR[40]
      *  CXA: PE on TLBI sequence number
      */
-    (rCXAFIR, bit(40)) ? level2_dump_SH;
+    (rCXAFIR, bit(40)) ? level2_th_1;
 
     /** CXAFIR[41]
      *  APC received ack_dead or ack_ed_dead

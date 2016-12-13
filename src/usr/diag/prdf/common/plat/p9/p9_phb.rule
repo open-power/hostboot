@@ -215,7 +215,7 @@ group gPHBNFIR filter singlebit
     /** PHBNFIR[1]
      *  Parity Errors on Registers besides BAR
      */
-    (rPHBNFIR, bit(1)) ? defaultMaskedError;
+    (rPHBNFIR, bit(1)) ? externalAttention;
 
     /** PHBNFIR[2]
      *  Power Bus to PEC CE
@@ -225,12 +225,12 @@ group gPHBNFIR filter singlebit
     /** PHBNFIR[3]
      *  Power Bus to PEC UE
      */
-    (rPHBNFIR, bit(3)) ? defaultMaskedError;
+    (rPHBNFIR, bit(3)) ? externalAttention;
 
     /** PHBNFIR[4]
      *  Power Bus to PEC SUE
      */
-    (rPHBNFIR, bit(4)) ? defaultMaskedError;
+    (rPHBNFIR, bit(4)) ? externalAttention;
 
     /** PHBNFIR[5]
      *  Array CE
@@ -240,12 +240,12 @@ group gPHBNFIR filter singlebit
     /** PHBNFIR[6]
      *  Array UE
      */
-    (rPHBNFIR, bit(6)) ? defaultMaskedError;
+    (rPHBNFIR, bit(6)) ? externalAttention;
 
     /** PHBNFIR[7]
      *  Array SUE
      */
-    (rPHBNFIR, bit(7)) ? defaultMaskedError;
+    (rPHBNFIR, bit(7)) ? externalAttention;
 
     /** PHBNFIR[8]
      *  Register Array Parity Error
@@ -270,27 +270,27 @@ group gPHBNFIR filter singlebit
     /** PHBNFIR[12]
      *  RD ARE Error
      */
-    (rPHBNFIR, bit(12)) ? defaultMaskedError;
+    (rPHBNFIR, bit(12)) ? externalAttention;
 
     /** PHBNFIR[13]
      *  NonRd ARE Error
      */
-    (rPHBNFIR, bit(13)) ? defaultMaskedError;
+    (rPHBNFIR, bit(13)) ? externalAttention;
 
     /** PHBNFIR[14]
      *  PCI Hang
      */
-    (rPHBNFIR, bit(14)) ? defaultMaskedError;
+    (rPHBNFIR, bit(14)) ? externalAttention;
 
     /** PHBNFIR[15]
      *  PCI Clock Error
      */
-    (rPHBNFIR, bit(15)) ? defaultMaskedError;
+    (rPHBNFIR, bit(15)) ? externalAttention;
 
     /** PHBNFIR[16]
      *  AIB Fence
      */
-    (rPHBNFIR, bit(16)) ? defaultMaskedError;
+    (rPHBNFIR, bit(16)) ? externalAttention;
 
     /** PHBNFIR[17]
      *  Hardware Error
@@ -310,37 +310,37 @@ group gPHBNFIR filter singlebit
     /** PHBNFIR[20]
      *  Invalid Combined Response
      */
-    (rPHBNFIR, bit(20)) ? defaultMaskedError;
+    (rPHBNFIR, bit(20)) ? level2_M_proc_L_th_1;
 
     /** PHBNFIR[21]
      *  Power Bus Unsupported Size
      */
-    (rPHBNFIR, bit(21)) ? defaultMaskedError;
+    (rPHBNFIR, bit(21)) ? level2_M_proc_L_th_1;
 
     /** PHBNFIR[22]
      *  Power Bus Unsupported Command
      */
-    (rPHBNFIR, bit(22)) ? defaultMaskedError;
+    (rPHBNFIR, bit(22)) ? level2_M_proc_L_th_1;
 
     /** PHBNFIR[23]
      *  PBAIB error
      */
-    (rPHBNFIR, bit(23)) ? defaultMaskedError;
+    (rPHBNFIR, bit(23)) ? externalAttention;
 
     /** PHBNFIR[24]
      *  CAPP Error
      */
-    (rPHBNFIR, bit(24)) ? defaultMaskedError;
+    (rPHBNFIR, bit(24)) ? externalAttention;
 
     /** PHBNFIR[25]
      *  NMMU Error
      */
-    (rPHBNFIR, bit(25)) ? defaultMaskedError;
+    (rPHBNFIR, bit(25)) ? externalAttention;
 
     /** PHBNFIR[26]
      *  Software Defined
      */
-    (rPHBNFIR, bit(26)) ? defaultMaskedError;
+    (rPHBNFIR, bit(26)) ? externalAttention;
 
     /** PHBNFIR[27]
      *  PEC SCOM Engine Error
