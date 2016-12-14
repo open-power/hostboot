@@ -22,5 +22,75 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!--
+   XML file specifying HWPF attributes for memory workarounds
+   These are needed for memory workarounds which are based on
+   'sub' versions of the modules (i.e., not 1.0/2.0 but 1.02 ...)
+-->
+
 <attributes>
+
+  <attribute>
+    <id>ATTR_DO_MSS_WR_VREF</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      In sub DD1.02 Nimbus in the WR VREF algorithm, certain work-arounds are needed
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>NO = 0, YES = 1</enum>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_DO_MSS_VCCD_OVERRIDE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Override VREG control information sub DD1.02
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>NO = 0, YES = 1</enum>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_DO_MSS_VREF_DAC</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      VREF DAC work-around for Nimbus sub DD1.02
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>NO = 0, YES = 1</enum>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_DO_MSS_VREG_COARSE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      VREG Coarse work-around for Nimbus sub DD1.02
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>NO = 0, YES = 1</enum>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_DO_MSS_TRAINING_BAD_BITS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      For Nimbus pre DD1.02 we want to pass DDR training if we see 'correctable'
+      errors. This isn't the case for post-DD1.02 where we want to pass/fail
+      training based on the results from the PHY itself
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>NO = 0, YES = 1</enum>
+    <writeable/>
+  </attribute>
+
 </attributes>

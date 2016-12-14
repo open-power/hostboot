@@ -136,13 +136,15 @@ inline bool chip_ec_feature_mss_wr_vref(const fapi2::Target<T>& i_target)
 {
     const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
     uint8_t l_value = 0;
+    uint8_t l_do_value = 0;
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_MSS_WR_VREF, l_chip, l_value) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DO_MSS_WR_VREF, l_chip, l_do_value) );
 
-    return l_value != 0;
+    return (l_value != 0) && (l_do_value == fapi2::ENUM_ATTR_DO_MSS_WR_VREF_YES);
 
 fapi_try_exit:
-    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_WR_VREF: 0x%lx (target: %s)",
+    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_WR_VREF or ATTR_DO_MSS_WR_VREF: 0x%lx (target: %s)",
              uint64_t(fapi2::current_err), mss::c_str(i_target));
     fapi2::Assert(false);
     return false;
@@ -182,13 +184,15 @@ inline bool chip_ec_feature_mss_vccd_override(const fapi2::Target<T>& i_target)
 {
     const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
     uint8_t l_value = 0;
+    uint8_t l_do_value = 0;
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_MSS_VCCD_OVERRIDE, l_chip, l_value) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DO_MSS_VCCD_OVERRIDE, l_chip, l_do_value) );
 
-    return l_value != 0;
+    return (l_value != 0) && (l_do_value == fapi2::ENUM_ATTR_DO_MSS_VCCD_OVERRIDE_YES);
 
 fapi_try_exit:
-    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_VCCD_OVERRIDE: 0x%lx (target: %s)",
+    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_VCCD_OVERRIDE or ATTR_DO_MSS_VCCD_OVERRIDE: 0x%lx (target: %s)",
              uint64_t(fapi2::current_err), mss::c_str(i_target));
     fapi2::Assert(false);
     return false;
@@ -205,13 +209,15 @@ inline bool chip_ec_feature_mss_vref_dac(const fapi2::Target<T>& i_target)
 {
     const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
     uint8_t l_value = 0;
+    uint8_t l_do_value = 0;
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_MSS_VREF_DAC, l_chip, l_value) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DO_MSS_VREF_DAC, l_chip, l_do_value) );
 
-    return l_value != 0;
+    return (l_value != 0) && (l_do_value == fapi2::ENUM_ATTR_DO_MSS_VREF_DAC_YES);
 
 fapi_try_exit:
-    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_VREF_DAC: 0x%lx (target: %s)",
+    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_VREF_DAC or ATTR_DO_MSS_VREF_DAC: 0x%lx (target: %s)",
              uint64_t(fapi2::current_err), mss::c_str(i_target));
     fapi2::Assert(false);
     return false;
@@ -228,13 +234,15 @@ inline bool chip_ec_feature_mss_vreg_coarse(const fapi2::Target<T>& i_target)
 {
     const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
     uint8_t l_value = 0;
+    uint8_t l_do_value = 0;
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_MSS_VREG_COARSE, l_chip, l_value) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DO_MSS_VREG_COARSE, l_chip, l_do_value) );
 
-    return l_value != 0;
+    return (l_value != 0) && (l_do_value == fapi2::ENUM_ATTR_DO_MSS_VREG_COARSE_YES);
 
 fapi_try_exit:
-    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_VREG_COARSE: 0x%lx (target: %s)",
+    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_VREG_COARSE or ATTR_DO_MSS_VREG_COARSE: 0x%lx (target: %s)",
              uint64_t(fapi2::current_err), mss::c_str(i_target));
     fapi2::Assert(false);
     return false;
@@ -275,13 +283,16 @@ inline bool chip_ec_feature_mss_training_bad_bits(const fapi2::Target<T>& i_targ
     // TODO RTC:165862 - need to get the minor EC number and check that in here.
     const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
     uint8_t l_value = 0;
+    uint8_t l_do_value = 0;
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_MSS_TRAINING_BAD_BITS, l_chip, l_value) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DO_MSS_TRAINING_BAD_BITS, l_chip, l_do_value) );
 
-    return l_value != 0;
+    return (l_value != 0) && (l_do_value == fapi2::ENUM_ATTR_DO_MSS_TRAINING_BAD_BITS_YES);
 
 fapi_try_exit:
-    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_TRAINING_BAD_BITS: 0x%lx (target: %s)",
+    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_TRAINING_BAD_BITS"
+             " or ATTR_DO_MSS_TRAINING_BAD_BITS: 0x%lx (target: %s)",
              uint64_t(fapi2::current_err), mss::c_str(i_target));
     fapi2::Assert(false);
     return false;

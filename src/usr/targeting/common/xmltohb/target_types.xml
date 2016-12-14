@@ -1278,6 +1278,14 @@
     <attribute><id>TOD_CPU_DATA</id></attribute>
     <attribute><id>PM_SPWUP_IGNORE_XSTOP_FLAG</id></attribute>
     <attribute><id>SECUREBOOT_PROTECT_DECONFIGURED_TPM</id></attribute>
+    <!-- START memory workaround for DD1.02 -->
+    <attribute><id>DO_MSS_WR_VREF</id></attribute>
+    <attribute><id>DO_MSS_VCCD_OVERRIDE</id></attribute>
+    <attribute><id>DO_MSS_VREF_DAC</id></attribute>
+    <attribute><id>DO_MSS_VREG_COARSE</id></attribute>
+    <attribute><id>DO_MSS_TRAINING_BAD_BITS</id></attribute>
+    <!-- END memory workaround for DD1.02 -->
+
 </targetType><!-- chip-processor-power9 -->
 
 <!-- chip-processor-nimbus -->

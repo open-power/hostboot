@@ -44,7 +44,9 @@
 
 enum P9_GETECID_Private_Constants
 {
-    fuseString_len = 176 // fuse string length
+    fuseString_len = 176,       // fuse string length
+    ddLevelMemoryPart1 = 0b110, // bit field in ecid buffer representing DD1.02
+    ddLevelMemoryPart2 = 0b111, // bit field in ecid buffer representing DD1.02
 };
 
 typedef fapi2::ReturnCode (*p9_getecid_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
