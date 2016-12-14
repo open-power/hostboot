@@ -42,9 +42,39 @@
 #include <p9_misc_scom_addresses_fld.H>
 #include <p9_const_common.H>
 
+// The bit locations in ecid_part02 where the DD Level is found. These correspond to ECID bits 173:175
+constexpr uint64_t DD_LEVEL(45);
+constexpr uint64_t DD_LEVEL_LEN(3);
 
-fapi2::ReturnCode p9_getecid(const
-                             fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip, fapi2::variable_buffer& o_fuseString)
+static fapi2::ReturnCode setup_memory_work_around_attributes(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const fapi2::buffer<uint64_t>& i_ecid_part)
+{
+    uint8_t l_version = 0;
+    i_ecid_part.extractToRight<DD_LEVEL, DD_LEVEL_LEN>(l_version);
+
+    // Workarounds for modules which are before 1.02 (memory part 1)
+    if (l_version < ddLevelMemoryPart1)
+    {
+        FAPI_DBG("seeing version < 1.02 (0x%x) setting attributes", l_version);
+
+        // All these attributes have 1 as their 'YES' enum value
+        uint8_t l_value = 1;
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_WR_VREF, i_target, l_value) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_VCCD_OVERRIDE, i_target, l_value) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_VREF_DAC, i_target, l_value) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_VREG_COARSE, i_target, l_value) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_TRAINING_BAD_BITS, i_target, l_value) );
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode p9_getecid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+                             fapi2::variable_buffer& o_fuseString)
 {
     uint64_t attr_data[2];
     fapi2::buffer<uint64_t> l_ecid_part0_data64 = 0;
@@ -77,6 +107,9 @@ fapi2::ReturnCode p9_getecid(const
     FAPI_DBG("push fuse string into attribute");
 
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ECID, i_target_chip, attr_data));
+
+    // Set some attributes memory can used to make work-around decisions.
+    FAPI_TRY( setup_memory_work_around_attributes(i_target_chip, l_ecid_part2_data64) );
 
     FAPI_INF("Exiting ...");
 
