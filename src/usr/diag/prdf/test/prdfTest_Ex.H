@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,21 +48,26 @@ class ExLFIR:public CxxTest::TestSuite
 
         void TestRecoverable(void)
         {
-            PRDS_BEGIN("EXLFIR recoverable attention");
+            PRDS_BEGIN("ECLFIR recoverable attention");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:EX{5}", 0xb53a0007);
-            // GLOBAL_RE_FIR set bit 21
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001B, 0x0000040000000000);
-            // EX_CHIPLET_RE_FIR[1] Attention from EXLFIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10040001, 0x4000000000000000);
-            // set EXLFIR[7]
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x1004000a, 0x0100000000000000);
-            // EXLFIR_ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10040011, 0xFFFFFFFFFFFFFFFF);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
+                                     0x33e70007);
+            // GLOBAL_RE_FIR set bit 32
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B, 0x0000000080000000);
+            // EC_CHIPLET_RE_FIR[1] Attention from ECLFIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
+                            0x20040001, 0x4000000000000000);
+            // set ECLFIR[7]
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
+                            0x2004000a, 0x0100000000000000);
+            // ECLFIR_ACT1
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
+                            0x20040011, 0xFFFFFFFFFFFFFFFF);
+
             PRDS_START_SIM();
             if(!(PRDS_END()))
             {
-                TS_FAIL("Expected Signature Failed EXLFIR recoverable attention");
+                TS_FAIL("Expected Signature Failed ECLFIR recoverable attention");
             }
         }
 
@@ -71,15 +76,18 @@ class ExLFIR:public CxxTest::TestSuite
 
             PRDS_BEGIN("L3CE Test");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:EX{4}", 0xc6b00004);
-            // GLOBAL_RE_FIR bit 20
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001B, 0x0000080000000000);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:EQ{0}:EX{0}", 0xf08d0004);
+            // GLOBAL_RE_FIR bit 16
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B, 0x0000800000000000);
             // EX_CHIPLET_RE_FIR[4] - Analyze L3FIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{4}", 0x10040001, 0x0800000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EQ{0}", 0x10040001,
+                            0x2000000000000000);
             // EX_L3FIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{4}", 0x10010800, 0x0800000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EQ{0}:EX{0}",
+                            0x10011800, 0x0800000000000000);
             // EX_L3FIR_ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{4}", 0x10010807, 0x0800000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EQ{0}:EX{0}",
+                            0x10011807, 0x0800000000000000);
             PRDS_START_SIM();
             if(!(PRDS_END()))
             {
@@ -91,27 +99,37 @@ class ExLFIR:public CxxTest::TestSuite
         {
             PRDS_BEGIN("COREFIR recoverable attention");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:EX{5}", 0xc8e9003c);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
+                                     0xdd3f003c);
+
             // GLOBAL_RE_FIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001B, 0x0000040000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B, 0x0000000080000000);
             // GLOBALUNITXSTPFIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x51040001, 0x0000000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x50040018, 0x0000000000000000);
             // EX_CHIPLET_RE_FIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10040001, 0x2000000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
+                            0x20040001, 0x2000000000000000);
             // EX_CHIPLET_RE_FIR_MASK
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10040002, 0x20ffffc000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
+                            0x20040002, 0x20ffffc000000000);
             // COREFIR bit 60 on
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10013100, 0x0000000000000008);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
+                            0x20010a40, 0x0000000000000008);
             // COREFIR WOF bit 60 on
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10013108, 0x0000000000000008);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
+                            0x20010A48, 0x0000000000000008);
             // COREFIR_ACT0
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10013106, 0x15a20c688a448b01);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
+                            0x20010A46, 0x15a20c688a448b01);
             // COREFIR_ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10013107, 0xfefc17f7ff9c8a09);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
+                            0x20010A47, 0xfefc17f7ff9c8a09);
             // COREHMEER
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x1001329B, 0xac10080000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
+                            0x20010A96, 0xac10080000000000);
             // SPATTN_0
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10013007, 0x0000000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
+                            0x20010A99, 0x0000000000000000);
 
             PRDS_START_SIM();
             if(!(PRDS_END()))

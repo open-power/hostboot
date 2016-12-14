@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -78,17 +78,25 @@ OBJS += prdfsimServices.o
 OBJS += prdsimSignatureParser.o
 OBJS += prdfsimUtil.o
 
-#TODO RTC 148565 - reenable once test cases updated for P9
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ABus.H
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Ex.H
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest.H
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Mba.H
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Mcs.H
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Proc.H
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_XBus.H
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_McsMciFir.H
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ProcCentFir.H
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ProcMbsFir.H
+TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Proc.H
+TESTS += ${PRD_USR_TEST_PATH}/prdfTest.H
+TESTS += ${PRD_USR_TEST_PATH}/prdfTest_XBus.H
+TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ABus.H
+TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ProcCentFir.H
+TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Ex.H
+TESTS += ${PRD_USR_TEST_PATH}/prdfTest_NimbusTpLFir.H
+TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Mcs.H
+
+
+# Wait for PLL code and Ben
 #TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ProcTpLFir.H
+
+#TODO RTC 167288 - Once Cumulus/Centaur are ready we update these
+# Need Centaurs for this (CUMULUS processor chip)
 #TESTS += ${PRD_USR_TEST_PATH}/prdfTest_CentCs.H
+#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Mba.H
+#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ProcMbsFir.H
 #TESTS += ${PRD_USR_TEST_PATH}/prdfTest_CenTpLFir.H
+#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_McsMciFir.H
+
+

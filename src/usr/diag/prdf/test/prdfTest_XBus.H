@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -45,15 +47,15 @@ class XBUSFIR:public CxxTest::TestSuite
         {
             PRDS_BEGIN("XBUSFIR Recoverable attention");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0xdb010000);
-            // GLOBAL_RE_FIR set bit 4
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001B , 0x0800000000000000);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x18fc0000);
+            // GLOBAL_RE_FIR set bit 6
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B , 0x0200000000000000);
             // XBUS_CHIPLET_RE_FIR set bit 1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x04040001, 0x4000000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x06040001, 0x4000000000000000);
             // set bit 0
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0404000a, 0x8000000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0604000a, 0x8000000000000000);
             // ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x04040011, 0xFFFFFFFFFFFFFFFF);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x06040011, 0xFFFFFFFFFFFFFFFF);
             PRDS_START_SIM();
             if(!(PRDS_END()))
             {
@@ -65,24 +67,22 @@ class XBUSFIR:public CxxTest::TestSuite
 
         void TestCheckstop(void)
         {
-            /*
             PRDS_BEGIN("XBUSFIR Checkstop attention");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::CHECK_STOP);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:XBUS{1}", 0xdb010002);
-            // GLOBAL_RE_FIR set bit 4
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001C , 0x0800000000000000);
-            // XBUS_CHIPLET_RE_FIR set bit 3
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:XBUS{1}", 0x04040000, 0x1000000000000000);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x18fc0002);
+            // GLOBAL_CHKSTOP_FIR set bit 6
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001C , 0x0200000000000000);
+            // XBUS_CHIPLET_CHKSTOP_FIR set bit 3
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x06040000, 0x1000000000000000);
             // set bit 2
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:XBUS{1}", 0x0404000a, 0x2000000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0604000a, 0x2000000000000000);
             // ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:XBUS{1}", 0x04040011, 0x0000000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x06040011, 0x0000000000000000);
             PRDS_START_SIM();
             if(!(PRDS_END()))
             {
                 TS_FAIL("Expected Signature Failed XBUSFIR Checkstop attention");
             }
-            */
         }
 };
 #endif

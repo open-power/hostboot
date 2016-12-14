@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -43,66 +45,96 @@ class MCIFIR:public CxxTest::TestSuite
 
         void TestRecoverable(void)
         {
-            PRDS_BEGIN("MCI20 Recoverable attention");
+            PRDS_BEGIN("MCI23 Recoverable attention");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:MCS{4}", 0x2f270000);
-            // GLOBAL_RE_FIR set bit 1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001B , 0x4000000000000000);
-            // TP_CHIPLET_RE_FIR set bit 7
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040001, 0x0100000000000000);
-            // set bit 0
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCS{4}", 0x02011840, 0x8000000000000000);
+
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:MCBIST{1}:MCS{0}", 0xc4f70000);
+
+            // GLOBAL_RE_FIR set bit 3
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B , 0x1000000000000000);
+            // Nest --  set MCS23_0 bit
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x03040001, 0x2000000000000000);
+
+            // MCIFIR  0x05010800 / 0x03010800
+            // set bit 0 -- MC internal RECOV error
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCBIST{1}:MCS{0}", 0x05010800, 0x8000000000000000);
+
+            // MCIFIR  0x05010807 / 0x03010807
             // ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCS{4}", 0x02011847, 0xFFFFFFFFFFFFFFFF);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCBIST{1}:MCS{0}", 0x05010807, 0xFFFFFFFFFFFFFFFF);
+
             PRDS_START_SIM();
             if(!(PRDS_END()))
             {
-                TS_FAIL("Expected Signature Failed MCI20 Recoverable attention");
+                TS_FAIL("Expected Signature Failed MCI23 Recoverable attention");
             }
         }
 
+
         void TestCheckstop(void)
         {
-            /*
-            PRDS_BEGIN("MCI20 Checkstop attention");
+            PRDS_BEGIN("MCI23 Chkstop attention");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::CHECK_STOP);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:MCS{4}", 0x2f270003);
-            // GLOBAL_RE_FIR set bit 1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001C , 0x4000000000000000);
-            // TP_CHIPLET_RE_FIR set bit 9
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040000, 0x0080000000000000);
-            // set bit 3
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCS{4}", 0x02011840, 0x1000000000000000);
+
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:MCBIST{1}:MCS{0}", 0xc4f70001);
+
+            // GLOBAL_CS_FIR set bit 3
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001C , 0x1000000000000000);
+            // Nest --  set MCS23_0 bit
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x03040000, 0x0800000000000000);
+
+            // NEST CHIPLET_RE_FIR set bit 9
+            // MCIFIR  0x05010800 / 0x03010800
+            // set bit 1 -- MC internal non-RECOV error
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCBIST{1}:MCS{0}", 0x05010800, 0x4000000000000000);
+
+            // MCIFIR  0x05010807 / 0x03010807
             // ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCS{4}", 0x02011847, 0x0000000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCBIST{1}:MCS{0}", 0x05010807, 0x0000000000000000);
+
             PRDS_START_SIM();
             if(!(PRDS_END()))
             {
-                TS_FAIL("Expected Signature Failed MCI20 Checkstop attention");
+                TS_FAIL("Expected Signature Failed MCI20 Chkstop attention");
             }
-            */
         }
+
 
         void TestSpecialAttention(void)
         {
             PRDS_BEGIN("MCI20 Special attention");
-            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::SPECIAL);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:MCS{4}", 0x2f270001);
-            // GLOBAL_SPA_FIR set bit 1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001A , 0x4000000000000000);
-            // TP_CHIPLET_RE_FIR set bit 5
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040004, 0x0400000000000000);
-            // set bit 1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCS{4}", 0x02011840, 0x4000000000000000);
-            // ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCS{4}", 0x02011846, 0xFFFFFFFFFFFFFFFF);
+            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::HOST_ATTN);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x5993000a);
+
+            // To treat spec attn as HOST attn
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCBIST{0}", 0x070123E0 , 0x0000000000000001);
+            // GLOBAL HOST Attn_FIR set bit 7
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x50040009 , 0x0100000000000000);
+
+            // MCS chiplet HOST attn_FIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCBIST{0}", 0x07040009, 0x8040000000000000);
+            // MASK
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCBIST{0}", 0x0704001A, 0x0F0FFFFFFFFFFFFF);
+
+            // set bit for maint cmd complete
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCBIST{0}", 0x07012300, 0x0020000000000000);
+            // ACT0 - spec/host
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCBIST{0}", 0x07012306, 0x0020000000000000);
+            // MASK
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:MCBIST{0}", 0x07012303, 0xFFDFFFFFFFFFFFFF);
+
+
+        // Although this will run, PRD code will assert since we are not
+        // running in MDIA mode when we get this host/spec attention.
+        // Hence, need to skip this for now.
+        /*
             PRDS_START_SIM();
             if(!(PRDS_END()))
             {
                 TS_FAIL("Expected Signature Failed MCI20 Special attention");
             }
+        */
         }
-
 };
 
 

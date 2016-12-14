@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -46,9 +48,9 @@ class OCCFIR:public CxxTest::TestSuite
         {
             PRDS_BEGIN("OCCFIR recoverable attention");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x6c290000);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x7d530000);
             // GLOBAL_RE_FIR set bit 1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}",0x570F001B , 0x4000000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}",0x500F001B , 0x4000000000000000);
             // TP_CHIPLET_RE_FIR set bit 2
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040001, 0x2000000000000000);
             // set bit 0
@@ -64,12 +66,11 @@ class OCCFIR:public CxxTest::TestSuite
 
         void  TestCheckStop(void)
         {
-            /*
             PRDS_BEGIN("OCCFIR checkstop attention");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::CHECK_STOP);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x6c290002);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x7d530002);
             // GLOBAL_RE_FIR set bit 1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001C , 0x4000000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001C , 0x4000000000000000);
             // TP_CHIPLET_RE_FIR set bit 4
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040000, 0x0800000000000000);
             //set bit 2
@@ -81,7 +82,6 @@ class OCCFIR:public CxxTest::TestSuite
             {
                 TS_FAIL("Expected Signature Failed OCCFIR checkstop attention");
             }
-            */
         }
 
 };

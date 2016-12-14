@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -45,8 +45,6 @@ OBJS += mdiafakecm.o
 
 MODULE = testmdia
 
-#TODO RTC 148565 - reenable test cases once they are updated
-#TESTS = *.H
-TESTS = mdiatestsm.H
+TESTS = mdiatestsm.H mdiatesttrace.H mdiatest.H mdiatestworkitem.H mdiatestmonitor.H mdiatestmba.H
 
 include ${ROOTPATH}/config.mk
