@@ -222,11 +222,35 @@ fi
 
 waitkb
 
-
 ##  We need to be careful to get hostboot's HRMOR so
-##  allow SBE to boot and for hostboot to get started
-sleep 20
+##  allow SBE and HBBL to boot and for hostboot to get started
+echo "Wait for SBE and Hostboot bootloader to complete."
+echo
+echo "==================================="
+echo
+BL_HRMOR=0x8200000
+loopcount=1
+while true; do
+    sleep 5
+    HRMOR=`autosim $NOWIN --simcmd   "python \"getHRMOR()\""| tr -d '\n\r'`
+    echo "HRMOR = $HRMOR"
+    if [ "$HRMOR" != "$BL_HRMOR" ]; then
+        echo "SBE and Hostboot bootloader completed successfully"
+        break
+    fi
 
+    if [ "$loopcount" -ge 36 ];   then
+        echo "ERROR: timed out after 3 minutes waiting for SBE and Hostboot bootloader completion"
+        autosim $NOWIN --simcmd "sbe-trace 0"
+        autosim $NOWIN --simcmd "hb-bltrace"
+        stopsim
+        stopserver
+        exit 1
+    fi
+    ((loopcount++))     # increment loopcount
+done
+echo
+echo
 
 waitkb
 
@@ -286,9 +310,9 @@ echo
 declare -i timeout=0
 modsstarted=0
 modscompleted=0
-loopcount=0
+loopcount=1
 while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; do
-    sleep 10
+    sleep 20
     ((loopcount++))     # increment loopcount
     echo "loopcount = $loopcount"
 
@@ -323,8 +347,8 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
         exit 1
     fi
 
-    if [ "$loopcount" -gt 90 ];   then
-        echo    "ERROR: timed out after 15 minutes"
+    if [ "$loopcount" -ge 54 ];   then
+        echo    "ERROR: timed out after 18 minutes waiting for until test completion"
         autosim $NOWIN --simcmd   "hb-Ps"
         timeout=$(($modsstarted - $modscompleted))
         break
@@ -378,6 +402,14 @@ if [ $? -ne 0 ] ; then
 fi
 warnings=`cat $SBXHOME/warnings.log |  awk '/0x/ {print strtonum($1)}'`
 
+echo "====> dump hb-bltrace..."
+autosim $NOWIN --simcmd   "pipe hb-bltrace \"cat > ${SBXHOME}/hb-bltrace.log \"" --timeout 300
+if [ $? -ne 0 ] ; then
+echo "ERROR: Unable to run $?"
+       stopsim
+       stopserver
+       exit 1
+fi
 
 echo "====> dump tracecalls..."
 autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$tracecalls_addr 0x08)"     1> $SBXHOME/tracecalls.log  2> /dev/null
