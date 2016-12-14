@@ -51,6 +51,10 @@ $(WRAPPER)_DEPLIBS+=p9_mss_scominit
 $(WRAPPER)_DEPLIBS+=p9_mss_thermal_init
 $(WRAPPER)_DEPLIBS+=p9_mss_throttle_mem
 
+# USELIBS to get the header, DEPLIBS to get the so
+$(WRAPPER)_USELIBS+=p9_getecid
+$(WRAPPER)_DEPLIBS+=p9_getecid
+
 $(WRAPPER)_COMMONFLAGS+=-fno-var-tracking-assignments
 
 $(WRAPPER)_LDFLAGS+= -Wl,-lrt
