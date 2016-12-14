@@ -45,6 +45,7 @@
 #include <targeting/common/trace.H>
 #include <initservice/initserviceif.H>
 #include <util/align.H>
+#include <sys/misc.h>
 
 using namespace INITSERVICE;
 using namespace ERRORLOG;
@@ -300,14 +301,17 @@ namespace TARGETING
                            "Reading attributes from memory, NOT PNOR");
                 //Create a block map of the address space we used to store
                 //attribute information on the initial IPL
+                //Account HRMOR (non 0 base addr)
+                uint64_t    l_attr_data_addr =   cpu_spr_value(CPU_SPR_HRMOR)
+                                                 + MPIPL_ATTR_DATA_ADDR;
                 l_header = reinterpret_cast<TargetingHeader*>(
-                mm_block_map(reinterpret_cast<void*>(MPIPL_ATTR_DATA_ADDR),
+                mm_block_map(reinterpret_cast<void*>(l_attr_data_addr),
                              MPIPL_ATTR_VMM_SIZE));
                 if(l_header == 0)
                 {
                     TRACFCOMP(g_trac_targeting,
                               "Failed mapping phys addr: %p for %lx bytes",
-                              MPIPL_ATTR_DATA_ADDR,
+                              l_attr_data_addr,
                               MPIPL_ATTR_VMM_SIZE);
                     //Error mm_block_map returned invalid ptr
                     /*@
@@ -325,14 +329,14 @@ namespace TARGETING
                     l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                            TARG_PARSE_ATTR_SECT_HEADER,
                                            TARG_RC_MM_BLOCK_FAIL,
-                                           MPIPL_ATTR_DATA_ADDR,
+                                           l_attr_data_addr,
                                            MPIPL_ATTR_VMM_SIZE,
                                            true);
                     break;
                 }
                 TRACFCOMP(g_trac_targeting,
                           "Mapped phys addr: %p to virt addr: %p",
-                          reinterpret_cast<void*>(MPIPL_ATTR_DATA_ADDR),
+                          reinterpret_cast<void*>(l_attr_data_addr),
                           l_header);
             }
 
