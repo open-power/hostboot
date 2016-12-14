@@ -114,7 +114,7 @@ namespace   INITSERVICE
         {
                 ISTEPNAME(16,01,"host_activate_master"),
                 ISTEP_16::call_host_activate_master,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
                 ISTEPNAME(16,02,"host_activate_slave_cores"),

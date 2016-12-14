@@ -119,12 +119,12 @@ namespace   INITSERVICE
         {
                 ISTEPNAME(15,03,"host_establish_ex_chiplet"),
                 ISTEP_15::host_establish_ex_chiplet,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
                 ISTEPNAME(15,04,"host_start_stop_engine"),
                 ISTEP_15::host_start_stop_engine,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
 };
 
