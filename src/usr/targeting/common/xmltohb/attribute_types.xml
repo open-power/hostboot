@@ -32372,4 +32372,97 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>DO_MSS_WR_VREF</id>
+    <description>
+        In sub DD1.02 Nimbus in the WR VREF algorithm, certain work-arounds are needed
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DO_MSS_WR_VREF</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>DO_MSS_VCCD_OVERRIDE</id>
+    <description>
+      Override VREG control information sub DD1.02
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DO_MSS_VCCD_OVERRIDE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
+    <id>DO_MSS_VREF_DAC</id>
+    <description>
+      VREF DAC work-around for Nimbus sub DD1.02
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DO_MSS_VREF_DAC</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>DO_MSS_VREG_COARSE</id>
+    <description>
+        VREG Coarse work-around for Nimbus sub DD1.02
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DO_MSS_VREG_COARSE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>DO_MSS_TRAINING_BAD_BITS</id>
+    <description>
+      For Nimbus pre DD1.02 we want to pass DDR training if we see 'correctable'
+      errors. This isn't the case for post-DD1.02 where we want to pass/fail
+      training based on the results from the PHY itself
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DO_MSS_TRAINING_BAD_BITS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
