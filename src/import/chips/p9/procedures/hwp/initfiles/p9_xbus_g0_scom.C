@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@ constexpr uint64_t literal_0b0000000 = 0b0000000;
 constexpr uint64_t literal_0b0000011 = 0b0000011;
 constexpr uint64_t literal_0b000000 = 0b000000;
 constexpr uint64_t literal_0b100111 = 0b100111;
-constexpr uint64_t literal_0b1111 = 0b1111;
+constexpr uint64_t literal_0b1010 = 0b1010;
 constexpr uint64_t literal_0b01 = 0b01;
 constexpr uint64_t literal_0b11 = 0b11;
 constexpr uint64_t literal_0b0010000 = 0b0010000;
@@ -2977,7 +2977,7 @@ fapi2::ReturnCode p9_xbus_g0_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8008400006010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<60, 4, 60, uint64_t>(literal_0b1111 );
+            l_scom_buffer.insert<60, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8008400006010c3full, l_scom_buffer));
         }
         {
@@ -3034,7 +3034,7 @@ fapi2::ReturnCode p9_xbus_g0_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8009a00006010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1111 );
+            l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1011 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8009a00006010c3full, l_scom_buffer));
         }
         {
