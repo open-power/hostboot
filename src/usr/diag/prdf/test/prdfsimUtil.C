@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -44,6 +46,7 @@ struct epath_array
   EntityPath::PathElement pathE;
 };
 
+// NOTE: Items must be in the order of the entity path
 const epath_array EPATH_ARRAY_MAP[] =
 {
     {"NODE{0}", {TYPE_NODE, 0}},
@@ -56,6 +59,14 @@ const epath_array EPATH_ARRAY_MAP[] =
     {"PROC{5}", {TYPE_PROC, 5}},
     {"PROC{6}", {TYPE_PROC, 6}},
     {"PROC{7}", {TYPE_PROC, 7}},
+
+    {"EQ{0}", {TYPE_EQ, 0}},
+    {"EQ{1}", {TYPE_EQ, 1}},
+    {"EQ{2}", {TYPE_EQ, 2}},
+    {"EQ{3}", {TYPE_EQ, 3}},
+    {"EQ{4}", {TYPE_EQ, 4}},
+    {"EQ{5}", {TYPE_EQ, 5}},
+
     {"EX{0}", {TYPE_EX, 0}},
     {"EX{1}", {TYPE_EX, 1}},
     {"EX{2}", {TYPE_EX, 2}},
@@ -68,25 +79,42 @@ const epath_array EPATH_ARRAY_MAP[] =
     {"EX{9}", {TYPE_EX, 9}},
     {"EX{10}", {TYPE_EX, 10}},
     {"EX{11}", {TYPE_EX, 11}},
-    {"EX{12}", {TYPE_EX, 12}},
-    {"EX{13}", {TYPE_EX, 13}},
-    {"EX{14}", {TYPE_EX, 14}},
-    {"EX{15}", {TYPE_EX, 15}},
-    {"ABUS{0}", {TYPE_ABUS, 0}},
-    {"ABUS{1}", {TYPE_ABUS, 1}},
-    {"ABUS{2}", {TYPE_ABUS, 2}},
-    {"XBUS{0}", {TYPE_XBUS, 0}},
-    {"XBUS{1}", {TYPE_XBUS, 1}},
-    {"XBUS{2}", {TYPE_XBUS, 2}},
-    {"XBUS{3}", {TYPE_XBUS, 3}},
+
+    {"CORE{0}", {TYPE_CORE, 0}},
+    {"CORE{1}", {TYPE_CORE, 1}},
+    {"CORE{2}", {TYPE_CORE, 2}},
+    {"CORE{3}", {TYPE_CORE, 3}},
+    {"CORE{4}", {TYPE_CORE, 4}},
+    {"CORE{5}", {TYPE_CORE, 5}},
+    {"CORE{6}", {TYPE_CORE, 6}},
+    {"CORE{7}", {TYPE_CORE, 7}},
+    {"CORE{8}", {TYPE_CORE, 8}},
+    {"CORE{9}", {TYPE_CORE, 9}},
+    {"CORE{10}",{TYPE_CORE,10}},
+    {"CORE{11}",{TYPE_CORE,11}},
+    {"CORE{12}",{TYPE_CORE,12}},
+    {"CORE{13}",{TYPE_CORE,13}},
+    {"CORE{14}",{TYPE_CORE,14}},
+    {"CORE{15}",{TYPE_CORE,15}},
+    {"CORE{16}",{TYPE_CORE,16}},
+    {"CORE{17}",{TYPE_CORE,17}},
+    {"CORE{18}",{TYPE_CORE,18}},
+    {"CORE{19}",{TYPE_CORE,19}},
+    {"CORE{20}",{TYPE_CORE,20}},
+    {"CORE{21}",{TYPE_CORE,21}},
+    {"CORE{22}",{TYPE_CORE,22}},
+    {"CORE{23}",{TYPE_CORE,23}},
+
+    {"MCBIST{0}", {TYPE_MCBIST, 0}},
+    {"MCBIST{1}", {TYPE_MCBIST, 1}},
+    {"MCBIST{2}", {TYPE_MCBIST, 2}},
+    {"MCBIST{3}", {TYPE_MCBIST, 3}},
+
     {"MCS{0}", {TYPE_MCS, 0}},
     {"MCS{1}", {TYPE_MCS, 1}},
     {"MCS{2}", {TYPE_MCS, 2}},
     {"MCS{3}", {TYPE_MCS, 3}},
-    {"MCS{4}", {TYPE_MCS, 4}},
-    {"MCS{5}", {TYPE_MCS, 5}},
-    {"MCS{6}", {TYPE_MCS, 6}},
-    {"MCS{7}", {TYPE_MCS, 7}},
+
     {"MEMBUF{0}", {TYPE_MEMBUF, 0}},
     {"MEMBUF{1}", {TYPE_MEMBUF, 1}},
     {"MEMBUF{2}", {TYPE_MEMBUF, 2}},
@@ -95,8 +123,9 @@ const epath_array EPATH_ARRAY_MAP[] =
     {"MEMBUF{5}", {TYPE_MEMBUF, 5}},
     {"MEMBUF{6}", {TYPE_MEMBUF, 6}},
     {"MEMBUF{7}", {TYPE_MEMBUF, 7}},
+
     {"MBA{0}", {TYPE_MBA, 0}},
-    {"MBA{1}", {TYPE_MBA, 1}},
+    {"MBA{1}", {TYPE_MBA, 1}}
 };
 
 const uint64_t NUM_EPATH_ARRAY = sizeof(EPATH_ARRAY_MAP)/sizeof(EPATH_ARRAY_MAP[0]);
@@ -166,7 +195,8 @@ TARGETING::Target* string2Target(const char * i_str)
 
     if ( NULL != l_retTarget )
     {
-        PRDF_TRAC("string2Target() l_retTarget=0x%08x, epath=", getHuid(l_retTarget));
+        PRDF_TRAC("string2Target() l_retTarget=0x%08x, epath=see target traces",
+                  getHuid(l_retTarget));
         epath.dump();
     }
 

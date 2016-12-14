@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/test/prdfTest_ABus.H $                      */
+/* $Source: src/usr/diag/prdf/test/prdfTest_NimbusTpLFir.H $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,8 +22,9 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __TEST_PRDFABUSTEST_H
-#define __TEST_PRDFABUSTEST_H
+
+#ifndef __TEST_PRDFCTPLFIR_H
+#define __TEST_PRDFCTPLFIR_H
 
 #ifdef __HOSTBOOT_MODULE
   #include <cxxtest/TestSuite.H>
@@ -39,50 +40,65 @@
 #include <prdfMain.H>
 #include "prdfsimMacros.H"
 
-class PBESFIR:public CxxTest::TestSuite
+class NTPLFIR:public CxxTest::TestSuite
 {
     public:
 
-        void TestRecoverable(void)
+        void TestNimPll(void)
         {
-            PRDS_BEGIN("PBIOOFIR Recoverable attention");
+            PRDS_BEGIN("Nimbus PLL test");
+
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x720C0014);
-            // GLOBAL_RE_FIR set bit 5
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B , 0x0400000000000000);
-            // NEST Chiplet (recov error)  set bit 14
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x05040001, 0x0002000000000000);
-            // set bit 20  (A0 link framer  error)
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x05013800, 0x0000080000000000);
-            // ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x05013807, 0xFFFFFFFFFFFFFFFF);
+
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x00ed0000 );
+
+            //GLOBAL_RE_FIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B, 0x4000000000000000);
+
+            //TP_CHIPLET_RE_FIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040001, 0x4000000000000000);
+
+            //TP_LFIR  -- bit 21:22 on P9
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0104000a, 0x0000060000000000);
+
+            //TP_LFIR_ACT1
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040011, 0xFFFFFFFFFFFFFFFF);
+
             PRDS_START_SIM();
+
             if(!(PRDS_END()))
             {
-                TS_FAIL("Expected Signature Failed PBIOOFIR Recoverable attention");
+                TS_FAIL("Expected Signature Failed Nimbus PLL test");
             }
         }
 
-        void TestCheckstop(void)
+        void TestNimPllAtThreshold(void)
         {
-            PRDS_BEGIN("PBESFIR Checkstop attention");
-            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::CHECK_STOP);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x720c001c);
-            // GLOBAL_RE_FIR set bit 8
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001C , 0x0400000000000000);
-            // NEST Chiplet (chkstop error)  set bit 16
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x05040000,  0x0000800000000000);
+            PRDS_BEGIN("Nimbus PLL test At Threshold");
 
+            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
 
-            // set bit 28  (PSR  A0 even link down error)
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x05013800, 0x0000000800000000);
-            // ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x05013807, 0x0000000000000000);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}",  0x00ed0000 );
+
+            //GLOBAL_RE_FIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B, 0x4000000000000000);
+
+            //TP_CHIPLET_RE_FIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040001, 0x4000000000000000);
+
+            //TP_LFIR  -- bit 21:22 on P9
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0104000a, 0x0000060000000000);
+
+            //TP_LFIR_ACT1
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040011, 0xFFFFFFFFFFFFFFFF);
+
             PRDS_START_SIM();
+
             if(!(PRDS_END()))
             {
-                TS_FAIL("Expected Signature Failed PBESFIR Checkstop attention");
+                TS_FAIL("Nimbus PLL test At Threshold");
             }
         }
+
 };
 #endif

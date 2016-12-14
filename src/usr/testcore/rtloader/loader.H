@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -124,6 +124,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->pnor_read = rt_pnor_read;
                 intf->pnor_write= rt_pnor_write;
                 intf->ipmi_msg= rt_ipmi_msg;
+                intf->clock_gettime = clock_gettime;
 
                 // Call init.
                 runtimeInterfaces_t* rtInterface =

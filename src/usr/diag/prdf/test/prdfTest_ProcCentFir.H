@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -48,19 +50,19 @@ class PCENTFIR:public CxxTest::TestSuite
 
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
 
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}",0x42410004 );
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}",0xfe680004 );
 
             //GLOBAL_RE_FIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001B, 0x2000000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B, 0x0400000000000000);
 
             //PB_CHIPLET_RE_FIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x02040001, 0x0200000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x05040001, 0x0400000000000000);
 
             //PBCENTFIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x02010C40, 0x0800000000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x05011C00, 0x0800000000000000);
 
             //PBCENTFIR_ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x02010C47, 0xFFFFFFFFFFFFFFFF);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x05011C07, 0xFFFFFFFFFFFFFFFF);
 
             PRDS_START_SIM();
 
