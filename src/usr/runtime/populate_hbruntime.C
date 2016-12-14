@@ -154,9 +154,12 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId)
 
         //Create a block map of memory so we can save a copy of the attribute
         //data incase we need to MPIPL
+        //Account HRMOR (non 0 base addr)
+        uint64_t    l_attr_data_addr =   cpu_spr_value(CPU_SPR_HRMOR)
+                                       + MPIPL_ATTR_DATA_ADDR;
         uint64_t l_attrCopyVmemAddr =
         reinterpret_cast<uint64_t>(mm_block_map(
-            reinterpret_cast<void*>(MPIPL_ATTR_DATA_ADDR),
+            reinterpret_cast<void*>(l_attr_data_addr),
             MPIPL_ATTR_VMM_SIZE ));
 
         //Make sure the address returned from the block map call is not NULL
@@ -173,7 +176,7 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId)
             {
                 TRACFCOMP( g_trac_runtime,
                            "populate_RtDataByNode fail to unmap physical addr %p, virt addr %p",
-                           reinterpret_cast<void*>(MPIPL_ATTR_DATA_ADDR),
+                           reinterpret_cast<void*>(l_attr_data_addr),
                            reinterpret_cast<void*>(l_attrCopyVmemAddr));
                 /*@ errorlog tag
                 * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -188,7 +191,7 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId)
                 l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                        RUNTIME::MOD_POPULATE_RTDATABYNODE,
                                        RUNTIME::RC_UNMAP_FAIL,
-                                       MPIPL_ATTR_DATA_ADDR,
+                                       l_attr_data_addr,
                                        l_attrCopyVmemAddr,
                                        true);
             }
@@ -197,7 +200,7 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId)
         {
             TRACFCOMP( g_trac_runtime,
                        "populate_RtDataByNode fail to map  physical addr %p, size %lx",
-                       reinterpret_cast<void*>(MPIPL_ATTR_DATA_ADDR),
+                       reinterpret_cast<void*>(l_attr_data_addr),
                        MPIPL_ATTR_VMM_SIZE );
             /*@ errorlog tag
             * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -212,7 +215,7 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId)
             l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                    RUNTIME::MOD_POPULATE_RTDATABYNODE,
                                    RUNTIME::RC_CANNOT_MAP_MEMORY,
-                                   MPIPL_ATTR_DATA_ADDR,
+                                   l_attr_data_addr,
                                    MPIPL_ATTR_VMM_SIZE,
                                    true);
         }
