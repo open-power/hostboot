@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -134,7 +134,7 @@ fapi2::ReturnCode scom_blastah( const fapi2::Target<T>& i_target,
 {
     size_t count(0);
 
-    for (auto a : i_addrs)
+    for (const auto& a : i_addrs)
     {
         FAPI_TRY( mss::putScom(i_target, a, i_data) );
         ++count;
@@ -162,7 +162,7 @@ fapi2::ReturnCode scom_blastah( const std::vector<fapi2::Target<T> >& i_targets,
 {
     size_t count(0);
 
-    for (auto t : i_targets)
+    for (const auto& t : i_targets)
     {
         FAPI_TRY( mss::putScom(t, i_addr, i_data) );
         ++count;
@@ -190,7 +190,7 @@ fapi2::ReturnCode scom_blastah( const std::vector<fapi2::Target<T> >& i_targets,
 {
     size_t count(0);
 
-    for (auto t : i_targets)
+    for (const auto& t : i_targets)
     {
         FAPI_TRY( mss::scom_blastah(t, i_addrs, i_data) );
         ++count;

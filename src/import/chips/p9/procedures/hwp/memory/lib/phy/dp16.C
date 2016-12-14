@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2430,6 +2430,39 @@ fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
 
     FAPI_INF("WRVREF_CAL_ERROR complete");
     return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write FORCE_FIFO_CAPTURE
+/// Force DQ capture in Read FIFO to support DDR4 LRDIMM calibration
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_state mss::states::ON or mss::states::OFF
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode write_force_fifo_capture( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const mss::states i_state)
+{
+    // TK - Some functions have vector as part of the trait class
+    // while others have within the function <shrug> - AAM
+    static const std::vector< uint64_t > l_addr
+    {
+        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_0,
+        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_1,
+        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_2,
+        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_3,
+        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_4,
+    };
+
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+    fapi2::buffer<uint64_t> l_data;
+
+    l_data.writeBit<TT::FORCE_FIFO_CAPTURE>(i_state);
+
+    FAPI_TRY( mss::scom_blastah(i_target, l_addr, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;

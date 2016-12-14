@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -305,6 +305,9 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             READ_OFFSET_LOWER_LEN = MCA_DDRPHY_DP16_READ_DELAY_OFFSET0_RANK_PAIR0_P0_0_01_LEN,
             READ_OFFSET_UPPER = MCA_DDRPHY_DP16_READ_DELAY_OFFSET0_RANK_PAIR0_P0_0_01_OFFSET1,
             READ_OFFSET_UPPER_LEN = MCA_DDRPHY_DP16_READ_DELAY_OFFSET0_RANK_PAIR0_P0_0_01_OFFSET1_LEN,
+
+            // Read Diagnostic Config 5 (same bit for all MCAs)
+            FORCE_FIFO_CAPTURE = MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_0_01_FORCE_FIFO_CAPTURE,
         };
 };
 
@@ -1756,6 +1759,19 @@ fapi2::ReturnCode process_rdvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
 ///
 fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+///
+/// @brief Write FORCE_FIFO_CAPTURE
+/// Force DQ capture in Read FIFO to support DDR4 LRDIMM calibration
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_state mss::states::ON or mss::states::OFF
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode write_force_fifo_capture( const fapi2::Target<T>& i_target,
+        const mss::states i_state);
 
 } // close namespace dp16
 } // close namespace mss
