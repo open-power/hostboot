@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,17 +161,33 @@ extern "C"
         // Workarounds
         FAPI_TRY( mss::workarounds::dp16::after_phy_reset(i_target) );
 
+        // mss::check::during_phy_reset checks to see if there are any FIR. We do this 'twice' once here
+        // (as part of the good-path) and once if we jump to the fapi_try label.
+        if ((fapi2::current_err = mss::check::during_phy_reset(i_target)) != fapi2::FAPI2_RC_SUCCESS)
+        {
+            goto leave_for_real;
+        }
+
         // Unmask the FIR we want unmasked after phy reset is complete. Note this is the "good path."
         // The algorithm is 'good path do after_phy_reset, all paths (error or not) perform the checks
         // which are defined in during_phy_reset'. We won't run after_phy_reset (unmask of FIR) unless
         // we're done with a success.
         FAPI_TRY( mss::unmask::after_phy_reset(i_target) );
 
+        // Leave as we're all good and checked the FIR already ...
+        return fapi2::current_err;
+
+        // ... here on a bad-path, check FIR and leave ...
     fapi_try_exit:
 
         // mss::check::during_phy_reset handles the error/no error case internally. All we need to do is
         // return the ReturnCode it hands us - it's taken care of commiting anything it needed to.
         return mss::check::during_phy_reset(i_target);
+
+        // ... here if the good-path FIR check found an error. We jumped over the unmasking and are
+        // returning an error to the caller.
+    leave_for_real:
+        return fapi2::current_err;
 
     }
 
