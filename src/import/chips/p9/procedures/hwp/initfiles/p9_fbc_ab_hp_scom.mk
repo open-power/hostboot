@@ -23,5 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_fbc_ab_hp_scom
+%$(PROCEDURE).o : CFLAGS += -fno-var-tracking-assignments
 lib$(PROCEDURE)_COMMONFLAGS+=-fno-var-tracking-assignments
 $(call BUILD_PROCEDURE)
