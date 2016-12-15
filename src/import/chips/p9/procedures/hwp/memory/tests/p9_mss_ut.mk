@@ -50,6 +50,7 @@ $(WRAPPER)_DEPLIBS+=p9_mss_freq_drift
 $(WRAPPER)_DEPLIBS+=p9_mss_scominit
 $(WRAPPER)_DEPLIBS+=p9_mss_thermal_init
 $(WRAPPER)_DEPLIBS+=p9_mss_throttle_mem
+$(WRAPPER)_DEPLIBS+=p9_mss_attr_update
 
 # USELIBS to get the header, DEPLIBS to get the so
 $(WRAPPER)_USELIBS+=p9_getecid
