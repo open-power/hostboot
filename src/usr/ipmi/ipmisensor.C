@@ -222,8 +222,25 @@ namespace SENSOR
                       "sendSetSensorReading()",
                     iv_name, TARGETING::get_huid( iv_target ));
 
-            assert(false);
+            /*@
+             * @errortype       ERRL_SEV_UNRECOVERABLE
+             * @moduleid        IPMI::MOD_IPMISENSOR
+             * @reasoncode      IPMI::RC_SENSOR_NOT_FOUND
+             * @userdata1       Returned sensor number.
+             * @userdata2       bytes [0-3]sensor name
+             *                  bytes [4-7]HUID of target.
+             * @devdesc         Requested sensor attribute not found.
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                IPMI::MOD_IPMISENSOR,
+                IPMI::RC_SENSOR_NOT_FOUND,
+                iv_msg->iv_sensor_number,
+                TWO_UINT32_TO_UINT64( iv_name,
+                                      TARGETING::get_huid( iv_target ) ),
+                true);
 
+            delete iv_msg;
         }
 
         return l_err;
