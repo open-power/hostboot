@@ -149,6 +149,13 @@ class operation
         fapi2::ReturnCode multi_port_init();
 
         ///
+        /// @brief memdiags multi-port address config helper
+        /// Initializes the address configs needed for a multi port operation
+        /// @return FAPI2_RC_SUCCESS iff everything ok
+        ///
+        fapi2::ReturnCode multi_port_addr();
+
+        ///
         /// @brief Single port initializer
         /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
         /// in subclassed constructores more easily.
