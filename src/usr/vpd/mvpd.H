@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,6 +126,14 @@ namespace MVPD
         { n21, "21" },
         { n30, "30" },
         { n31, "31" },
+        { L1, "L1" },
+        { L2, "L2" },
+        { L3, "L3" },
+        { L4, "L4" },
+        { L5, "L5" },
+        { L6, "L6" },
+        { L7, "L7" },
+        { L8, "L8" },
 
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
