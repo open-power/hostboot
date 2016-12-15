@@ -32735,4 +32735,22 @@ Measured in GB</description>
     <readable/>
 </attribute>
 
+<attribute>
+    <id>MSS_MRW_DRAM_WRITE_CRC</id>
+    <description>
+        Enables DRAM Write CRC
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MRW_DRAM_WRITE_CRC</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
 </attributes>
