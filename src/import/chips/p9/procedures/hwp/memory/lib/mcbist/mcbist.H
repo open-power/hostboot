@@ -408,7 +408,7 @@ class subtest_t
         /// @note The port number is relative to the MCBIST
         /// @return the port of the subtest
         ///
-        inline uint64_t get_port()
+        inline uint64_t get_port() const
         {
             uint64_t l_port = 0;
             constexpr uint64_t l_len = (TT::COMPL_2ND_CMD - TT::COMPL_1ST_CMD) + 1;
@@ -420,7 +420,7 @@ class subtest_t
         /// @brief Get the DIMM from this subtest
         /// @return the DIMM this subtest has been configured for
         ///
-        inline uint64_t get_dimm()
+        inline uint64_t get_dimm() const
         {
             return iv_mcbmr.template getBit<TT::COMPL_3RD_CMD>() ? 1 : 0;
         }
