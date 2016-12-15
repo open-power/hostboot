@@ -44,14 +44,13 @@
 // mss lib
 #include <lib/spd/common/spd_decoder.H>
 #include <lib/spd/spd_factory.H>
-#include <lib/eff_config/eff_config.H>
 #include <lib/utils/pos.H>
 #include <lib/utils/checker.H>
 #include <lib/utils/find.H>
 #include <lib/shared/mss_kind.H>
 #include <lib/utils/find.H>
-
-
+#include <lib/dimm/eff_dimm.H>
+#include <lib/eff_config/plug_rules.H>
 ///
 /// @brief Configure the attributes for each controller
 /// @param[in] i_target the controller (e.g., MCS)
@@ -63,10 +62,6 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 {
     fapi2::ReturnCode l_rc;
     std::map<uint32_t, std::shared_ptr<mss::spd::decoder> > l_factory_caches;
-
-    mss::eff_config l_eff_config(i_target, l_rc);
-    FAPI_TRY(l_rc, "Unable to construct eff_config object for for %s", mss::c_str(i_target) );
-
     // Caches
     FAPI_TRY( mss::spd::populate_decoder_caches(i_target, l_factory_caches) );
 
@@ -78,16 +73,15 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
     {
         // Always set VPD attributes unless we enable the SPD_ONLY flag
         // Enables skipping VPD decoder when a valid VPD template isn't available
-        FAPI_TRY( l_eff_config.decode_vpd(i_target),
+        FAPI_TRY( mss::eff_dimm::decode_vpd(i_target),
                   "Unable to decode VPD for %s", mss::c_str(i_target) );
     }
 
     for( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
     {
+        std::shared_ptr<mss::eff_dimm> l_eff_dimm;
+
         const auto l_dimm_pos = mss::pos(l_dimm);
-        uint8_t l_type = 0;
-        uint8_t l_gen = 0;
-        uint64_t l_kind = 0;
 
         // TODO RTC:152390 Create function to do map checking on cached values
         // Find decoder factory for this dimm position
@@ -98,131 +92,119 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
                   l_dimm_pos),
                   "Failed to get valid cache (main decoder)");
 
-        l_eff_config.iv_pDecoder = l_it->second;
+        FAPI_TRY( mss::eff_dimm::eff_dimm_factory( l_dimm, l_it->second, l_eff_dimm));
 
-        // DRAM Gen and DIMM type not needed here since set in spd_factory...
-        // but it doesn't hurt to do it twice
-        FAPI_TRY( l_eff_config.dimm_type(l_dimm, l_it->second->iv_spd_data) );
-        FAPI_TRY( l_eff_config.dram_gen(l_dimm, l_it->second->iv_spd_data) );
-
-        FAPI_TRY( l_eff_config.dram_mfg_id(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_width(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_density(l_dimm) );
-        FAPI_TRY( l_eff_config.ranks_per_dimm(l_dimm) );
-        FAPI_TRY( l_eff_config.primary_stack_type(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_size(l_dimm) );
-        FAPI_TRY( l_eff_config.hybrid_memory_type(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_trefi(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_trfc(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_trfc_dlr(l_dimm) );
-        FAPI_TRY( l_eff_config.rcd_mirror_mode(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_bank_bits(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_row_bits(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_dqs_time(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_tccd_l(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc00(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc01(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc02(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc03(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc04(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc05(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc06_07(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc08(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc09(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc10(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc11(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc12(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc13(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc14(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc15(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc1x(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc2x(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc3x(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc4x(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc5x(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc6x(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc7x(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc8x(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rc9x(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rcax(l_dimm) );
-        FAPI_TRY( l_eff_config.dimm_rcbx(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_twr(l_dimm) );
-        FAPI_TRY( l_eff_config.read_burst_type(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_tm(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_cwl(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_lpasr(l_dimm) );
-        FAPI_TRY( l_eff_config.dll_enable(l_dimm) );
-        FAPI_TRY( l_eff_config.dll_reset(l_dimm) );
-        FAPI_TRY( l_eff_config.write_level_enable(l_dimm) );
-        FAPI_TRY( l_eff_config.output_buffer(l_dimm) );
-        FAPI_TRY( l_eff_config.vref_dq_train_value(l_dimm) );
-        FAPI_TRY( l_eff_config.vref_dq_train_range(l_dimm) );
-        FAPI_TRY( l_eff_config.vref_dq_train_enable(l_dimm) );
-        FAPI_TRY( l_eff_config.ca_parity_latency(l_dimm) );
-        FAPI_TRY( l_eff_config.ca_parity_error_status(l_dimm) );
-        FAPI_TRY( l_eff_config.ca_parity(l_dimm) );
-        FAPI_TRY( l_eff_config.crc_error_clear(l_dimm) );
-        FAPI_TRY( l_eff_config.odt_input_buffer(l_dimm) );
-        FAPI_TRY( l_eff_config.post_package_repair(l_dimm) );
-        FAPI_TRY( l_eff_config.read_preamble_train(l_dimm) );
-        FAPI_TRY( l_eff_config.read_preamble(l_dimm) );
-        FAPI_TRY( l_eff_config.write_preamble(l_dimm) );
-        FAPI_TRY( l_eff_config.self_refresh_abort(l_dimm) );
-        FAPI_TRY( l_eff_config.cs_to_cmd_addr_latency(l_dimm) );
-        FAPI_TRY( l_eff_config.internal_vref_monitor(l_dimm) );
-        FAPI_TRY( l_eff_config.max_powerdown_mode(l_dimm) );
-        FAPI_TRY( l_eff_config.mpr_read_format(l_dimm) );
-        FAPI_TRY( l_eff_config.temp_readout(l_dimm) );
-        FAPI_TRY( l_eff_config.crc_wr_latency(l_dimm) );
-        FAPI_TRY( l_eff_config.per_dram_addressability(l_dimm) );
-        FAPI_TRY( l_eff_config.geardown_mode(l_dimm) );
-        FAPI_TRY( l_eff_config.mpr_page(l_dimm) );
-        FAPI_TRY( l_eff_config.mpr_mode(l_dimm) );
-        FAPI_TRY( l_eff_config.write_crc(l_dimm) );
-        FAPI_TRY( l_eff_config.zqcal_interval(l_dimm) );
-        FAPI_TRY( l_eff_config.memcal_interval(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_trp(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_trcd(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_trc(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_twtr_l(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_twtr_s(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_trrd_s(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_trrd_l(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_trrd_dlr(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_tfaw(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_tfaw_dlr(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_tras(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_trtp(l_dimm) );
-        FAPI_TRY( l_eff_config.read_dbi(l_dimm) );
-        FAPI_TRY( l_eff_config.write_dbi(l_dimm) );
-        FAPI_TRY( l_eff_config.additive_latency(l_dimm) );
-        FAPI_TRY( l_eff_config.data_mask(l_dimm) );
-
-        FAPI_TRY( mss::eff_dram_gen(l_dimm, l_gen) );
-        FAPI_TRY( mss::eff_dimm_type(l_dimm, l_type) );
-        l_kind = mss::dimm_kind (l_type, l_gen);
-
-        //One day we won't need this switch case, we can just specialize the methods via passed in target type
-        //Till then, we have a story
-        //TODO RTC: 166453
-        switch (l_kind)
-        {
-            case mss::KIND_LRDIMM_DDR4:
-                FAPI_TRY( l_eff_config.dram_rtt_nom<mss::KIND_LRDIMM_DDR4>(l_dimm) );
-                FAPI_TRY( l_eff_config.dram_rtt_wr<mss::KIND_LRDIMM_DDR4>(l_dimm) );
-                FAPI_TRY( l_eff_config.dram_rtt_park<mss::KIND_LRDIMM_DDR4>(l_dimm) );
-                break;
-
-            case mss::KIND_RDIMM_DDR4:
-                FAPI_TRY( l_eff_config.dram_rtt_nom<mss::KIND_RDIMM_DDR4>(l_dimm) );
-                FAPI_TRY( l_eff_config.dram_rtt_wr<mss::KIND_RDIMM_DDR4>(l_dimm) );
-                FAPI_TRY( l_eff_config.dram_rtt_park<mss::KIND_RDIMM_DDR4>(l_dimm) );
-                break;
-
-            default:
-                FAPI_ERR("Invalid DIMM type and or gen");
-                return fapi2::FAPI2_RC_INVALID_PARAMETER;
-        };
+        FAPI_TRY( l_eff_dimm->dram_mfg_id() );
+        FAPI_TRY( l_eff_dimm->dram_width() );
+        FAPI_TRY( l_eff_dimm->dram_density() );
+        FAPI_TRY( l_eff_dimm->ranks_per_dimm() );
+        FAPI_TRY( l_eff_dimm->primary_stack_type() );
+        FAPI_TRY( l_eff_dimm->dimm_size() );
+        FAPI_TRY( l_eff_dimm->hybrid_memory_type() );
+        FAPI_TRY( l_eff_dimm->temp_refresh_mode() );
+        FAPI_TRY( l_eff_dimm->dram_trefi() );
+        FAPI_TRY( l_eff_dimm->dram_trfc() );
+        FAPI_TRY( l_eff_dimm->dram_trfc_dlr() );
+        FAPI_TRY( l_eff_dimm->rcd_mirror_mode() );
+        FAPI_TRY( l_eff_dimm->dram_bank_bits() );
+        FAPI_TRY( l_eff_dimm->dram_row_bits() );
+        FAPI_TRY( l_eff_dimm->dram_dqs_time() );
+        FAPI_TRY( l_eff_dimm->dram_tccd_l() );
+        FAPI_TRY( l_eff_dimm->dimm_rc00() );
+        FAPI_TRY( l_eff_dimm->dimm_rc01() );
+        FAPI_TRY( l_eff_dimm->dimm_rc02() );
+        FAPI_TRY( l_eff_dimm->dimm_rc03() );
+        FAPI_TRY( l_eff_dimm->dimm_rc04() );
+        FAPI_TRY( l_eff_dimm->dimm_rc05() );
+        FAPI_TRY( l_eff_dimm->dimm_rc06_07() );
+        FAPI_TRY( l_eff_dimm->dimm_rc08() );
+        FAPI_TRY( l_eff_dimm->dimm_rc09() );
+        FAPI_TRY( l_eff_dimm->dimm_rc10() );
+        FAPI_TRY( l_eff_dimm->dimm_rc11() );
+        FAPI_TRY( l_eff_dimm->dimm_rc12() );
+        FAPI_TRY( l_eff_dimm->dimm_rc13() );
+        FAPI_TRY( l_eff_dimm->dimm_rc14() );
+        FAPI_TRY( l_eff_dimm->dimm_rc15() );
+        FAPI_TRY( l_eff_dimm->dimm_rc1x() );
+        FAPI_TRY( l_eff_dimm->dimm_rc2x() );
+        FAPI_TRY( l_eff_dimm->dimm_rc3x() );
+        FAPI_TRY( l_eff_dimm->dimm_rc4x() );
+        FAPI_TRY( l_eff_dimm->dimm_rc5x() );
+        FAPI_TRY( l_eff_dimm->dimm_rc6x() );
+        FAPI_TRY( l_eff_dimm->dimm_rc7x() );
+        FAPI_TRY( l_eff_dimm->dimm_rc8x() );
+        FAPI_TRY( l_eff_dimm->dimm_rc9x() );
+        FAPI_TRY( l_eff_dimm->dimm_rcax() );
+        FAPI_TRY( l_eff_dimm->dimm_rcbx() );
+        FAPI_TRY( l_eff_dimm->dram_twr() );
+        FAPI_TRY( l_eff_dimm->read_burst_type() );
+        FAPI_TRY( l_eff_dimm->dram_tm() );
+        FAPI_TRY( l_eff_dimm->dram_cwl() );
+        FAPI_TRY( l_eff_dimm->dram_lpasr() );
+        FAPI_TRY( l_eff_dimm->dll_enable() );
+        FAPI_TRY( l_eff_dimm->dll_reset() );
+        FAPI_TRY( l_eff_dimm->write_level_enable() );
+        FAPI_TRY( l_eff_dimm->output_buffer() );
+        FAPI_TRY( l_eff_dimm->vref_dq_train_value() );
+        FAPI_TRY( l_eff_dimm->vref_dq_train_range() );
+        FAPI_TRY( l_eff_dimm->vref_dq_train_enable() );
+        FAPI_TRY( l_eff_dimm->ca_parity_latency() );
+        FAPI_TRY( l_eff_dimm->ca_parity_error_status() );
+        FAPI_TRY( l_eff_dimm->ca_parity() );
+        FAPI_TRY( l_eff_dimm->crc_error_clear() );
+        FAPI_TRY( l_eff_dimm->odt_input_buffer() );
+        FAPI_TRY( l_eff_dimm->post_package_repair() );
+        FAPI_TRY( l_eff_dimm->read_preamble_train() );
+        FAPI_TRY( l_eff_dimm->read_preamble() );
+        FAPI_TRY( l_eff_dimm->write_preamble() );
+        FAPI_TRY( l_eff_dimm->self_refresh_abort() );
+        FAPI_TRY( l_eff_dimm->cs_to_cmd_addr_latency() );
+        FAPI_TRY( l_eff_dimm->internal_vref_monitor() );
+        FAPI_TRY( l_eff_dimm->max_powerdown_mode() );
+        FAPI_TRY( l_eff_dimm->mpr_read_format() );
+        FAPI_TRY( l_eff_dimm->temp_readout() );
+        FAPI_TRY( l_eff_dimm->crc_wr_latency() );
+        FAPI_TRY( l_eff_dimm->per_dram_addressability() );
+        FAPI_TRY( l_eff_dimm->geardown_mode() );
+        FAPI_TRY( l_eff_dimm->mpr_page() );
+        FAPI_TRY( l_eff_dimm->mpr_mode() );
+        FAPI_TRY( l_eff_dimm->write_crc() );
+        FAPI_TRY( l_eff_dimm->zqcal_interval() );
+        FAPI_TRY( l_eff_dimm->memcal_interval() );
+        FAPI_TRY( l_eff_dimm->dram_trp() );
+        FAPI_TRY( l_eff_dimm->dram_trcd() );
+        FAPI_TRY( l_eff_dimm->dram_trc() );
+        FAPI_TRY( l_eff_dimm->dram_twtr_l() );
+        FAPI_TRY( l_eff_dimm->dram_twtr_s() );
+        FAPI_TRY( l_eff_dimm->dram_trrd_s() );
+        FAPI_TRY( l_eff_dimm->dram_trrd_l() );
+        FAPI_TRY( l_eff_dimm->dram_trrd_dlr() );
+        FAPI_TRY( l_eff_dimm->dram_tfaw() );
+        FAPI_TRY( l_eff_dimm->dram_tfaw_dlr() );
+        FAPI_TRY( l_eff_dimm->dram_tras() );
+        FAPI_TRY( l_eff_dimm->dram_trtp() );
+        FAPI_TRY( l_eff_dimm->read_dbi() );
+        FAPI_TRY( l_eff_dimm->write_dbi() );
+        FAPI_TRY( l_eff_dimm->additive_latency() );
+        FAPI_TRY( l_eff_dimm->data_mask() );
+        FAPI_TRY( l_eff_dimm->dimm_bc00());
+        FAPI_TRY( l_eff_dimm->dimm_bc01());
+        FAPI_TRY( l_eff_dimm->dimm_bc02());
+        FAPI_TRY( l_eff_dimm->dimm_bc03());
+        FAPI_TRY( l_eff_dimm->dimm_bc04());
+        FAPI_TRY( l_eff_dimm->dimm_bc05());
+        FAPI_TRY( l_eff_dimm->dimm_bc07());
+        FAPI_TRY( l_eff_dimm->dimm_bc08());
+        FAPI_TRY( l_eff_dimm->dimm_bc09());
+        FAPI_TRY( l_eff_dimm->dimm_bc0a());
+        FAPI_TRY( l_eff_dimm->dimm_bc0b());
+        FAPI_TRY( l_eff_dimm->dimm_bc0c());
+        FAPI_TRY( l_eff_dimm->dimm_bc0d());
+        FAPI_TRY( l_eff_dimm->dimm_bc0e());
+        FAPI_TRY( l_eff_dimm->dimm_bc0f());
+        FAPI_TRY( l_eff_dimm->dram_rtt_nom () );
+        FAPI_TRY( l_eff_dimm->dram_rtt_wr  () );
+        FAPI_TRY( l_eff_dimm->dram_rtt_park() );
     }// dimm
 
     // TODO RTC:160060 Clean up hard coded values at bottom of eff_config
@@ -233,15 +215,8 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_CAL_STEP_ENABLE, i_target, l_cal_step) );
     }
 
-    {
-        // TODO RTC:162080 Logically link ATTR_MSS_MRW_TEMP_REFRESH_RANGE and MODE
-        uint8_t l_temp_refresh_mode[mss::PORTS_PER_MCS] =
-        {fapi2::ENUM_ATTR_EFF_TEMP_REFRESH_MODE_DISABLE, fapi2::ENUM_ATTR_EFF_TEMP_REFRESH_MODE_DISABLE};
-        FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_EFF_TEMP_REFRESH_MODE, i_target, l_temp_refresh_mode ) );
-    }
-
     // Check plug rules. We check the MCS, and this will iterate down to children as needed.
-    FAPI_TRY( l_eff_config.enforce_plug_rules(i_target) );
+    FAPI_TRY( mss::plug_rule::enforce_plug_rules(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
