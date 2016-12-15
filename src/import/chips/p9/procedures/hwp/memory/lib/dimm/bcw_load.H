@@ -42,34 +42,9 @@
 
 #include <lib/utils/c_str.H>
 #include <lib/shared/mss_kind.H>
-#include <lib/dimm/ddr4/control_word_ddr4.H>
 
 namespace mss
 {
-
-///
-/// @brief Sets the function space for the BCW
-/// @tparam T the functon space number we want
-/// @param[in] i_target a DIMM target
-/// @param[in,out] io_inst a vector of CCS instructions we should add to
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-template< uint64_t T >
-inline fapi2::ReturnCode function_space_select(const fapi2::Target< fapi2::TARGET_TYPE_DIMM >& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
-{
-    // function space bits for the function space selector are
-    // don't cares.  We choose 0 for simplicity.
-    constexpr uint8_t FSPACE = 0;
-    constexpr uint8_t WORD = 7;
-
-    FAPI_TRY( control_word_engine<BCW_8BIT>(i_target,
-                                            cw_data( FSPACE, WORD, T, mss::tmrd() ),
-                                            io_inst) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 ///
 /// @brief Perform the bcw_load operations

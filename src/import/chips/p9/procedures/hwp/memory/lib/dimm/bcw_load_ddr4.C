@@ -41,8 +41,8 @@
 #include <lib/eff_config/timing.H>
 #include <lib/ccs/ccs.H>
 #include <lib/dimm/bcw_load_ddr4.H>
-#include <lib/dimm/bcw_load.H>
 #include <lib/dimm/ddr4/control_word_ddr4.H>
+#include <lib/dimm/ddr4/data_buffer_ddr4.H>
 #include <lib/mss_attribute_accessors.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
@@ -74,21 +74,21 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
         static const std::vector< cw_data > l_bcw_4bit_data =
         {
             // function space #, bcw #, attribute accessor, timing delay
-            {  0, 0, eff_dimm_ddr4_bc00, mss::tmrc()   },
-            {  0, 1, eff_dimm_ddr4_bc01, mss::tmrc()   },
-            {  0, 2, eff_dimm_ddr4_bc02, mss::tmrc()   },
-            {  0, 3, eff_dimm_ddr4_bc03, mss::tmrc()   },
-            {  0, 4, eff_dimm_ddr4_bc04, mss::tmrc()   },
-            {  0, 5, eff_dimm_ddr4_bc05, mss::tmrc()   },
-            {  0, 7, eff_dimm_ddr4_bc07, mss::tmrc()   },
-            {  0, 9, eff_dimm_ddr4_bc09, mss::tmrc()   },
-            {  0, 8, eff_dimm_ddr4_bc08, mss::tmrc()   },
-            {  0, 10, eff_dimm_ddr4_bc0a, l_tDLLK      },
-            {  0, 11, eff_dimm_ddr4_bc0b, mss::tmrc()  },
-            {  0, 12, eff_dimm_ddr4_bc0c, mss::tmrc()  },
-            {  0, 13, eff_dimm_ddr4_bc0d, mss::tmrc()  },
-            {  0, 14, eff_dimm_ddr4_bc0e, mss::tmrc()  },
-            {  0, 15, eff_dimm_ddr4_bc0f, mss::tmrc()  },
+            { FUNC_SPACE_0,  DQ_RTT_NOM_CW,         eff_dimm_ddr4_bc00,  mss::tmrc() },
+            { FUNC_SPACE_0,  DQ_RTT_WR_CW,          eff_dimm_ddr4_bc01,  mss::tmrc() },
+            { FUNC_SPACE_0,  DQ_RTT_PARK_CW,        eff_dimm_ddr4_bc02,  mss::tmrc() },
+            { FUNC_SPACE_0,  DQ_DRIVER_CW,          eff_dimm_ddr4_bc03,  mss::tmrc() },
+            { FUNC_SPACE_0,  MDQ_RTT_CW,            eff_dimm_ddr4_bc04,  mss::tmrc() },
+            { FUNC_SPACE_0,  MDQ_DRIVER_CW,         eff_dimm_ddr4_bc05,  mss::tmrc() },
+            { FUNC_SPACE_0,  RANK_PRESENCE_CW,      eff_dimm_ddr4_bc07,  mss::tmrc() },
+            { FUNC_SPACE_0,  RANK_SELECTION_CW,     eff_dimm_ddr4_bc08,  mss::tmrc() },
+            { FUNC_SPACE_0,  POWER_SAVING_CW,       eff_dimm_ddr4_bc09,  mss::tmrc() },
+            { FUNC_SPACE_0,  OPERATING_SPEED,       eff_dimm_ddr4_bc0a,  l_tDLLK     },
+            { FUNC_SPACE_0,  VOLT_AND_SLEW_RATE_CW, eff_dimm_ddr4_bc0b,  mss::tmrc() },
+            { FUNC_SPACE_0,  BUFF_TRAIN_MODE_CW,    eff_dimm_ddr4_bc0c,  mss::tmrc() },
+            { FUNC_SPACE_0,  LDQ_OPERATION_CW,      eff_dimm_ddr4_bc0d,  mss::tmrc() },
+            { FUNC_SPACE_0,  PARITY_CW,             eff_dimm_ddr4_bc0e,  mss::tmrc() },
+            { FUNC_SPACE_0,  ERROR_STATUS_CW,       eff_dimm_ddr4_bc0f,  mss::tmrc() },
         };
 
         // This initialization may be vendor specific.  We might need a different
@@ -101,25 +101,28 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
 
         // We set the 4-bit buffer control words first (they live in function space 0
         // hw is supposed to default to function space 0 but Just.In.Case.
-        FAPI_TRY( function_space_select<0>(i_target, io_inst) );
+        FAPI_TRY( ddr4::function_space_select<0>(i_target, io_inst) );
         FAPI_TRY( control_word_engine<BCW_4BIT>(i_target, l_bcw_4bit_data, io_inst) );
 
-        // We set our 8-bit buffer control words but switch function space
-        // for control words that live in a different one
-        // (feels a little on the light side...)
-        FAPI_TRY( function_space_select<6>(i_target, io_inst) );
-        FAPI_TRY( control_word_engine<BCW_8BIT>(i_target,
-                                                cw_data(6, 4, eff_dimm_ddr4_f6bc4x, mss::tmrc()),
-                                                io_inst) );
+        // We set our 8-bit buffer control words but have to switch function space
+        // number for different control words.  So it doesn't fit cleanly into a
+        // vector like the 4-bit buffer control words that are all in function space 0
+        // (feels like we should be initializing more control word....)
+        {
+            cw_data l_data(FUNC_SPACE_6, BUFF_TRAIN_CONFIG_CW, eff_dimm_ddr4_f6bc4x, mss::tmrc());
+            FAPI_TRY( ddr4::function_space_select<6>(i_target, io_inst) );
+            FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, io_inst) );
+        }
 
-        FAPI_TRY( function_space_select<5>(i_target, io_inst) );
-        FAPI_TRY( control_word_engine<BCW_8BIT>(i_target,
-                                                cw_data(5, 6, eff_dimm_ddr4_f5bc6x, mss::tmrc()),
-                                                io_inst) );
+        {
+            cw_data l_data(FUNC_SPACE_5, DRAM_VREF_CW, eff_dimm_ddr4_f5bc6x, mss::tmrc());
+            FAPI_TRY( ddr4::function_space_select<5>(i_target, io_inst) );
+            FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, io_inst) );
+        }
 
         // Its recommended to always return to the function space
         // "pointer" back to 0 so we always know where we are starting from
-        FAPI_TRY( function_space_select<0>(i_target, io_inst) );
+        FAPI_TRY( ddr4::function_space_select<0>(i_target, io_inst) );
     }
 
 fapi_try_exit:
