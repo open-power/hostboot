@@ -374,7 +374,55 @@ extern "C"
         return exChipletId;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    void initScomRegion( Homerlayout_t* i_pChipHomer, PlatId i_platId )
+    {
+        FAPI_DBG(">initScomRegion");
+
+        do
+        {
+            uint32_t* pInitScom = NULL;
+            uint32_t initLength = MAX_CACHE_CHIPLET;
+            uint32_t fillPattern = SWIZZLE_4_BYTE(PAD_OPCODE);
+
+            if( ( PLAT_SELF != i_platId ) && ( PLAT_SGPE != i_platId ) )
+            {
+                FAPI_ERR("SCOM Region not defined for given platform 0x%08x", i_platId );
+                break;
+            }
+
+            if( PLAT_SELF == i_platId )
+            {
+                pInitScom = (uint32_t*)i_pChipHomer->cpmrRegion.selfRestoreRegion.coreScom;
+                initLength = MAX_CORES_PER_CHIP;
+
+            }
+
+            if( PLAT_SGPE == i_platId )
+            {
+                pInitScom = (uint32_t*)i_pChipHomer->qpmrRegion.cacheScomRegion;
+            }
+
+            uint32_t wordCnt = 0;
+            uint32_t scomSize = CACHE_SCOM_RESTORE_SIZE >> 2;
+
+            for( wordCnt = 0; wordCnt < scomSize; wordCnt++ )
+            {
+                memcpy( (pInitScom + wordCnt), &fillPattern, sizeof(uint32_t) );
+            }
+
+            fillPattern = SWIZZLE_4_BYTE(BLR_INST);
+
+            for( wordCnt = 0; wordCnt < initLength; wordCnt++ )
+            {
+                memcpy( (pInitScom + (wordCnt * SCOM_RESTORE_PER_CHIPLET)) , &fillPattern, sizeof(uint32_t) );
+            }
+        }
+        while(0);
+
+        FAPI_DBG("<initScomRegion");
+    }
+    //-------------------------------------------------------------------------------------------------
 
     uint32_t validateSramImageSize( Homerlayout_t* i_pChipHomer, uint32_t& o_sramImgSize )
     {
@@ -909,6 +957,8 @@ extern "C"
                 break;
             }
 
+            initScomRegion( i_pChipHomer, PLAT_SGPE );
+
             o_qpmrHdr.sgpeImgOffset = o_qpmrHdr.bootLoaderOffset + SGPE_LVL_2_BOOT_LOAD_SIZE;
 
             FAPI_DBG("SGPE Hcode       QPMR Offset = 0x%08X, Size = 0x%08X",
@@ -1025,10 +1075,29 @@ extern "C"
             //Padding SPR restore area with ATTN Opcode
             FAPI_INF("Padding CPMR Core Restore portion with Attn opcodes");
             uint32_t wordCnt = 0;
-            uint32_t l_fillPattern = SWIZZLE_4_BYTE(PAD_OPCODE);
+            uint32_t l_fillBlr  = SWIZZLE_4_BYTE(BLR_INST);
+            uint32_t l_fillAttn = SWIZZLE_4_BYTE(PAD_OPCODE);
 
             while( wordCnt < CORE_RESTORE_SIZE )
             {
+
+                uint32_t l_fillPattern = 0;
+
+                if( ( 0 == wordCnt ) || ( 0 == ( wordCnt % THREAD_RESTORE_AREA_SIZE ) ))
+                {
+                    l_fillPattern = l_fillBlr;
+                }
+                else
+                {
+                    l_fillPattern = l_fillAttn;
+                }
+
+                //Lab Need: First instruction in thread SPR restore region should be a blr instruction.
+                //This helps in a specific lab scenario. If Self Restore region is populated only for
+                //select number of threads, other threads will not hit attention during the self restore
+                //sequence. Instead, execution will hit a blr and control should return to thread launcher
+                //region.
+
                 memcpy( (uint32_t*)&i_pChipHomer->cpmrRegion.selfRestoreRegion.coreSelfRestore[wordCnt],
                         &l_fillPattern,
                         sizeof( uint32_t ));
@@ -1036,6 +1105,7 @@ extern "C"
             }
 
             updateCpmrHeaderSR( i_pChipHomer, i_fusedState );
+            initScomRegion( i_pChipHomer, PLAT_SELF );
         }
         while(0);
 
@@ -1205,7 +1275,7 @@ extern "C"
         return retCode;
     }
 
-    //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
     /**
      * @brief   get a blob of platform rings in a temp buffer.
@@ -1292,7 +1362,7 @@ extern "C"
         return retCode;
     }
 
-    //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
     uint32_t layoutSgpeScanOverride( Homerlayout_t*   i_pHomer,
                                      void* i_pOverride,
@@ -1403,7 +1473,7 @@ extern "C"
         return rc;
     }
 
-    //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
     /**
      * @brief   creates a lean scan ring layout for core specific rings in HOMER.
@@ -1497,7 +1567,7 @@ extern "C"
         return rc;
     }
 
-    //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
     /**
      * @brief   creates a lean scan ring layout for core specific rings in HOMER.
      * @param   i_pHOMER        points to HOMER image.
@@ -1657,7 +1727,7 @@ extern "C"
         return rc;
     }
 
-    //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
     uint32_t layoutCmeScanOverride( Homerlayout_t*   i_pHomer,
                                     void* i_pOverride,
@@ -1752,7 +1822,7 @@ extern "C"
         return rc;
     }
 
-    //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
     /**
      * @brief   creates a lean scan ring layout for core rings in HOMER.
@@ -1894,7 +1964,7 @@ extern "C"
     }
 
 
-    //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
     /**
      * @brief   creates a scan ring layout for quad common rings in HOMER.
