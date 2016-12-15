@@ -27,8 +27,6 @@
 #define _P9_RINGID_H_
 
 #include <stdint.h>
-#include <stddef.h>
-
 #include <p9_ring_id.h>
 
 // General Ring ID list structure
@@ -40,7 +38,7 @@ typedef struct
     uint8_t      instanceIdMax;    // the max instanceId
     uint8_t      vpdKeyword;
     uint8_t      pllCopy;     // 0,1,2,3,4,5 -- No of PLL copies required
-    uint32_t     scanScomAddress;
+    uint64_t     scanRegionType;
 } GenRingIdList;
 
 typedef enum RingVariant   // Base variables
@@ -1304,26 +1302,5 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EQ::ex_l3_fure_1                   , EQ_TYPE    }, // 230
 };
 #endif
-
-// returns our own chiplet enum value for this ringId
-CHIPLET_TYPE
-p9_ringid_get_chiplet(
-    RingID i_ringId);
-
-// returns data structures defined for chiplet type
-// as determined by ringId
-void
-p9_ringid_get_chiplet_properties(
-    CHIPLET_TYPE       i_chiplet,
-    CHIPLET_DATA**     o_cpltData,
-    GenRingIdList**    o_ringComm,
-    GenRingIdList**    o_ringInst,
-    RingVariantOrder** o_varOrder,
-    uint8_t*           o_varNumb);
-
-// returns properties of a ring as determined by ringId
-GenRingIdList*
-p9_ringid_get_ring_properties(
-    RingID i_ringId);
 
 #endif
