@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,9 +38,9 @@
 #include <mss.H>
 #include <lib/mss_vpd_decoder.H>
 
-#include <lib/eff_config/eff_config.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/assert_noexit.H>
+#include <lib/eff_config/plug_rules.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
@@ -358,7 +358,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target (MCS)
 /// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
 ///
-fapi2::ReturnCode eff_config::enforce_plug_rules(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
+fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
 {
     // Check per-MCS plug rules. If those all pass, check each of our MCA
 
@@ -410,7 +410,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target (MCA)
 /// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
 ///
-fapi2::ReturnCode eff_config::enforce_plug_rules(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
     const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(i_target);
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,21 @@ namespace mss
 
 namespace plug_rule
 {
+
+
+///
+/// @brief Enforce the plug-rules per MCS
+/// @param[in] i_target FAPI2 target (MCS)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
+///
+fapi2::ReturnCode enforce_plug_rules(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target);
+
+///
+/// @brief Enforce the plug-rules per MCA
+/// @param[in] i_target FAPI2 target (MCA)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
+///
+fapi2::ReturnCode enforce_plug_rules(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
 
 ///
 /// @brief Helper to evaluate the unsupported rank config override attribute

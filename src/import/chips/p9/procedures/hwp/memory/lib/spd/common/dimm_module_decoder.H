@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,7 +143,7 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes number of rows of DRAMs on RDIMM
+        /// @brief Decodes register and buffer type for LRDIMMs
         /// @param[out] o_output  encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         /// @note SPD Byte 131 (Bits 7~4)

@@ -145,7 +145,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>OHM34 = 34, OHM48 = 48</enum>
+        <enum>OHM30 = 30, OHM34 = 34, OHM40 = 40, OHM48 = 48</enum>
         <mssUnits>ohm</mssUnits>
         <mssBlobStart>22</mssBlobStart>
         <mssBlobLength>16</mssBlobLength>

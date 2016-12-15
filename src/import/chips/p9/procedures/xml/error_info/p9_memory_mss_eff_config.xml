@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -238,6 +238,90 @@
       <target>MCA_TARGET</target>
     </deconfigure>
   </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_LRDIMM_DB</rc>
+    <description>
+      Error with the LRDIMM databuffer type
+    </description>
+    <ffdc>DATA_BUFFER_GEN</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_UNSUPPORTED_DIMM_KIND</rc>
+    <description>
+      DIMM plugged in is not supported
+    </description>
+    <ffdc>DIMM_KIND</ffdc>
+    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>DRAM_GEN</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_RTT_WR</rc>
+    <description>
+        An invalid encoding recieved from VPD for RTT_WR/dynamic ODT value
+    </description>
+    <ffdc>RTT_WR</ffdc>
+    <ffdc>RANK</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_FREQ</rc>
+    <description>
+        An invalid Freq value has been set
+    </description>
+    <ffdc>FREQ</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+ </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_ERROR_CREATING_EFF_CONFIG_DIMM_OBJECT</rc>
+    <description>
+        Failed to create a dimm object, probably due to bad attribute settings
+    </description>
+    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>DRAM_GEN</ffdc>
+    <ffdc>REG_AND_BUFF_TYPE</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+
+
+
 
 
 </hwpErrors>
