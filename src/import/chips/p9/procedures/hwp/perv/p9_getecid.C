@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,9 +61,16 @@ static fapi2::ReturnCode setup_memory_work_around_attributes(
         // All these attributes have 1 as their 'YES' enum value
         uint8_t l_value = 1;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_WR_VREF, i_target, l_value) );
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_VCCD_OVERRIDE, i_target, l_value) );
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_VREF_DAC, i_target, l_value) );
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_VREG_COARSE, i_target, l_value) );
+    }
+
+    // Workarounds for modules which are before 1.03 (memory part 2)
+    if (l_version < ddLevelMemoryPart2)
+    {
+        FAPI_DBG("seeing version < 1.03 (0x%x) setting attributes", l_version);
+
+        // All these attributes have 1 as their 'YES' enum value
+        uint8_t l_value = 1;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_TRAINING_BAD_BITS, i_target, l_value) );
     }
 
@@ -117,4 +124,3 @@ fapi_try_exit:
     return fapi2::current_err;
 
 }
-

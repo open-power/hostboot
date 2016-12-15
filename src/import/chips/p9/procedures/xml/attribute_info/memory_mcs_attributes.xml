@@ -2166,11 +2166,12 @@
 
     <attribute>
         <id>ATTR_MSS_VREF_DAC_NIBBLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Value for VREF DAC nibbles</description>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>Value for VREF DAC nibble</description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
+        <array> 2 </array>
         <mssAccessorName>vref_dac_nibble</mssAccessorName>
     </attribute>
 
@@ -3115,6 +3116,19 @@
         <enum>NO = 0, YES = 1</enum>
         <mssUnits> bool </mssUnits>
         <mssAccessorName>ignore_plug_rules</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_MVPD_FWMS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Mark store records from MPVD Lx keyword
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint32</valueType>
+        <writeable/>
+        <array> 2 8 </array>
+        <mssAccessorName>mvpd_fwms</mssAccessorName>
     </attribute>
 
 </attributes>

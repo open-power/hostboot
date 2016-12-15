@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,20 +170,6 @@ fapi2::ReturnCode after_phy_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
     {
         std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>> > l_vreg_coarse;
         std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>> > l_vref_cntl;
-
-        // Fix up VREG Coarse
-        {
-            // Read, modify, write
-            FAPI_TRY( mss::scom_suckah(p, TT::DLL_VREG_COARSE_REG, l_vreg_coarse) );
-            std::for_each(l_vreg_coarse.begin(), l_vreg_coarse.end(),
-                          [&p](std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> >& v)
-            {
-                // Checks for EC level
-                v.first  = mss::workarounds::dp16::vreg_coarse(p, v.first);
-                v.second = mss::workarounds::dp16::vreg_coarse(p, v.second);
-            });
-            FAPI_TRY( mss::scom_blastah(p, TT::DLL_VREG_COARSE_REG, l_vreg_coarse) );
-        }
 
         // Fix up vref dac
         if (!is_sim)

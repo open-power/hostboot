@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -173,7 +173,7 @@ fapi2::ReturnCode after_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
     // to Nimbus. If they can be generic,this whole thing can go back in the H file and the specifics
     // of the registers and bits can be handled generically.
 
-    for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
+    for (const auto& p : mss::find_targets_with_magic<TARGET_TYPE_MCA>(i_target))
     {
         fir::reg<MCA_IOM_PHY0_DDRPHY_FIR_REG> l_mca_fir_reg(p, l_rc);
         FAPI_TRY(l_rc, "unable to create fir::reg for %d", MCA_IOM_PHY0_DDRPHY_FIR_REG);

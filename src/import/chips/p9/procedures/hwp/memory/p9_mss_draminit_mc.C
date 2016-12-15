@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <fapi2.H>
 #include <mss.H>
 
+#include <p9_mc_scom_addresses_fld.H>
 #include <p9_mss_draminit_mc.H>
 #include <lib/fir/unmask.H>
 #include <lib/utils/find.H>
@@ -138,6 +139,9 @@ extern "C"
 
             // Step Six: Setup Control Bit ECC
             FAPI_TRY( mss::enable_read_ecc(p) );
+
+            // apply marks from MVPD
+            FAPI_TRY( mss::apply_mark_store(p) );
         }
 
         // At this point the DDR interface must be monitored for memory errors. Memory related FIRs should be unmasked.

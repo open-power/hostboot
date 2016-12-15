@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,27 @@
 
 #include <fapi2.H>
 
+// Lx version 1 parsing/extraction constants
+// section offsets
+constexpr uint8_t Lx_V1_R_OFFSET_TO_F0S = 24;
+constexpr uint8_t Lx_V1_R_OFFSET_TO_F1S = 82;
+constexpr uint8_t Lx_V1_R_OFFSET_TO_F2S = 140;
+constexpr uint8_t Lx_V1_R_OFFSET_TO_F3S = 198;
+
 typedef fapi2::ReturnCode (*p9_mss_attr_update_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCS>&);
+
+// Define some of the helper API so we can test them in CI
+///
+/// @brief Given target and memory frequency, return MVPD Lx keyword and
+///        offset to first byte in frequency-specific customization section
+/// @param[in] i_target the port target (e.g., MCA)
+/// @param[out] o_keyword Lx keyword ID for this port
+/// @param[out] o_s_offset frequency-specific section byte offset
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode p9_mss_attr_update_get_lx_offsets( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        fapi2::MvpdKeyword& o_keyword,
+        uint8_t& o_s_offset);
 
 extern "C"
 {

@@ -884,7 +884,6 @@
     <attribute><id>IVRM_STABILIZATION_DELAY_NS</id></attribute>
     <attribute><id>SYSTEM_RESCLK_ENABLE</id></attribute>
     <attribute><id>MSS_MRW_REFRESH_RATE_REQUEST</id></attribute>
-    <attribute><id>MSS_VREF_DAC_NIBBLE</id></attribute>
     <attribute><id>MSS_VCCD_OVERRIDE</id></attribute>
     <attribute><id>RAW_MTM</id></attribute>
     <attribute><id>MSS_MEM_PORT_POS_OF_FAIL_THROTTLE</id></attribute>
@@ -1279,9 +1278,7 @@
     <attribute><id>SECUREBOOT_PROTECT_DECONFIGURED_TPM</id></attribute>
     <!-- START memory workaround for DD1.02 -->
     <attribute><id>DO_MSS_WR_VREF</id></attribute>
-    <attribute><id>DO_MSS_VCCD_OVERRIDE</id></attribute>
     <attribute><id>DO_MSS_VREF_DAC</id></attribute>
-    <attribute><id>DO_MSS_VREG_COARSE</id></attribute>
     <attribute><id>DO_MSS_TRAINING_BAD_BITS</id></attribute>
     <!-- END memory workaround for DD1.02 -->
 
@@ -1820,6 +1817,8 @@
     <attribute><id>EFF_DRAM_RTT_NOM</id></attribute>
     <attribute><id>EFF_DRAM_RTT_WR</id></attribute>
     <attribute><id>EFF_DRAM_RTT_PARK</id></attribute>
+    <attribute><id>MSS_VREF_DAC_NIBBLE</id></attribute>
+    <attribute><id>MSS_MVPD_FWMS</id></attribute>
 </targetType>
 
 <targetType>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,11 +93,14 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
     FAPI_TRY( mss::eff_memcal_interval(i_target, l_memcal_interval) );
     FAPI_TRY( mss::eff_zqcal_interval(i_target, l_zqcal_interval) );
 
+    // TODO RTC: 166433 Leave periodics off (0's) by default for the time being
+#ifdef TODO_166433_PERIODICS
     FAPI_TRY( mss::mrw_periodic_memcal_mode_options(l_per_memcal_mode_options) );
     FAPI_INF("mrw_periodic_memcal_mode_options: 0x%02x", l_per_memcal_mode_options);
 
     FAPI_TRY( mss::mrw_periodic_zqcal_mode_options(l_per_zqcal_mode_options) );
     FAPI_INF("mrw_periodic_zqcal_mode_options: 0x%02x", l_per_memcal_mode_options);
+#endif
 
     // TODO RTC:155854 We haven't done the work for calculating init cal periods
     // in effective config yet, and the MC setup below is hard wired for sim

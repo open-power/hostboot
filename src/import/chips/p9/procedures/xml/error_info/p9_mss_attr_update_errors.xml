@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/import/chips/p9/procedures/xml/attribute_info/memory_workarounds_attributes.xml $ -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_mss_attr_update_errors.xml $ -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
@@ -22,51 +22,27 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-
-<!--
-   XML file specifying HWPF attributes for memory workarounds
-   These are needed for memory workarounds which are based on
-   'sub' versions of the modules (i.e., not 1.0/2.0 but 1.02 ...)
--->
-
-<attributes>
-
-  <attribute>
-    <id>ATTR_DO_MSS_WR_VREF</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+<!-- Error definitions for p9_mss_attr_update -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_MSS_ATTR_UPDATE_MVPD_VERSION_ERR</rc>
     <description>
-      In sub DD1.02 Nimbus in the WR VREF algorithm, certain work-arounds are needed
+      Procedure: p9_mss_attr_update
+      Unsupported MVPD CRP0 Lx Keyword version
     </description>
-    <initToZero></initToZero>
-    <valueType>uint8</valueType>
-    <enum>NO = 0, YES = 1</enum>
-    <writeable/>
-  </attribute>
-
-  <attribute>
-    <id>ATTR_DO_MSS_VREF_DAC</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VERSION</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_MSS_ATTR_UPDATE_MVPD_READ_ERR</rc>
     <description>
-      VREF DAC work-around for Nimbus sub DD1.02
+      Procedure: p9_mss_attr_update
+      Unexpected MVPD CRP0 Lx Keyword size
     </description>
-    <initToZero></initToZero>
-    <valueType>uint8</valueType>
-    <enum>NO = 0, YES = 1</enum>
-    <writeable/>
-  </attribute>
-
-  <attribute>
-    <id>ATTR_DO_MSS_TRAINING_BAD_BITS</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      For Nimbus pre DD1.02 we want to pass DDR training if we see 'correctable'
-      errors. This isn't the case for post-DD1.02 where we want to pass/fail
-      training based on the results from the PHY itself
-    </description>
-    <initToZero></initToZero>
-    <valueType>uint8</valueType>
-    <enum>NO = 0, YES = 1</enum>
-    <writeable/>
-  </attribute>
-
-</attributes>
+    <ffdc>TARGET</ffdc>
+    <ffdc>KEYWORD_SIZE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>

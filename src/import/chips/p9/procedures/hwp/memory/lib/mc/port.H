@@ -40,6 +40,7 @@
 
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
+#include <lib/mss_attribute_accessors.H>
 
 #include <lib/shared/mss_const.H>
 #include <lib/utils/scom.H>
@@ -504,6 +505,36 @@ fapi2::ReturnCode ddr_resetn( const fapi2::Target<T>& i_target, const bool i_sta
 
 fapi_try_exit:
     FAPI_ERR("Unable to change resetn: %s (%d)", mss::c_str(i_target), i_state);
+    return fapi2::current_err;
+}
+
+///
+/// @brief Apply mark store bits from module VPD
+/// @tparam T, the fapi2 target type of the target
+/// @tparam TT, the class traits for the port
+/// @param[in] i_target A target representing a port
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<T> >
+fapi2::ReturnCode apply_mark_store( const fapi2::Target<T>& i_target )
+{
+    FAPI_INF("Enable marks from MVPD");
+
+    uint32_t l_fwms[MARK_STORE_COUNT];
+
+    FAPI_TRY( mss::mvpd_fwms(i_target, &(l_fwms[0])) );
+
+    for (size_t l_mark = 0; l_mark < MARK_STORE_COUNT; ++l_mark)
+    {
+        if (l_fwms[l_mark] != 0)
+        {
+            fapi2::buffer<uint64_t> l_fwms_data;
+            l_fwms_data.insertFromRight < MCA_FWMS0_MARK, MCA_FWMS0_EXIT_1 - MCA_FWMS0_MARK + 1 > (l_fwms[l_mark]);
+            FAPI_TRY( mss::putScom(i_target, MCA_FWMS0 + l_mark, l_fwms_data) );
+        }
+    }
+
+fapi_try_exit:
     return fapi2::current_err;
 }
 
