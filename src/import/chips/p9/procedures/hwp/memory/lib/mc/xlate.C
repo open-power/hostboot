@@ -1172,8 +1172,8 @@ fapi2::ReturnCode xlate_dimm_1R1T8Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R16_MAP_ALL_1R(0b00110);
-    constexpr uint64_t R16_MAP_NOT_ALL_1R(0b00101);
+    constexpr uint64_t R16_MAP_ALL_1R(0b00101);
+    constexpr uint64_t R16_MAP_NOT_ALL_1R(0b00110);
     const auto R16_MAP = all_slots_1R_helper(i_kind.iv_target) ? R16_MAP_ALL_1R : R16_MAP_NOT_ALL_1R;
 
     // We're more or less a 1R 4Gbx4 with an extra row. So lets setup like that and add our row in.
@@ -1209,8 +1209,8 @@ fapi2::ReturnCode xlate_dimm_1R1T16Gbx4( const dimm::kind& i_kind,
         fapi2::buffer<uint64_t>& io_xlate1,
         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R17_MAP_ALL_1R(0b00101);
-    constexpr uint64_t R17_MAP_NOT_ALL_1R(0b00100);
+    constexpr uint64_t R17_MAP_ALL_1R(0b00100);
+    constexpr uint64_t R17_MAP_NOT_ALL_1R(0b00101);
     const auto R17_MAP = all_slots_1R_helper(i_kind.iv_target) ? R17_MAP_ALL_1R : R17_MAP_NOT_ALL_1R;
 
     // We're more or less a 1R 8Gbx4 with an extra row. So lets setup like that and add our row in.
