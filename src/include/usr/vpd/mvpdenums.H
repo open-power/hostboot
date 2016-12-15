@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -115,6 +115,14 @@ enum mvpdKeyword
     n21         = 0x20,
     n30         = 0x21,
     n31         = 0x22,
+    L1          = 0x23,
+    L2          = 0x24,
+    L3          = 0x25,
+    L4          = 0x26,
+    L5          = 0x27,
+    L6          = 0x28,
+    L7          = 0x29,
+    L8          = 0x2A,
 
     // Last Keyword
     MVPD_LAST_KEYWORD,
