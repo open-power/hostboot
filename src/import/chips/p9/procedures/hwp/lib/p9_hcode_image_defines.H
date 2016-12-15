@@ -307,11 +307,14 @@ enum
     MAX_CORES_PER_EX            = 2,
     CORE0_CHIPLET_ID            = 0x20,
     PAD_OPCODE                  = 0x00000200,   //ATTN Opcode
+    BLR_INST                    = 0x4e800020,   //blr instruction
+    THREAD_RESTORE_AREA_SIZE    = 2048,
     PPE_RESERVE_AREA            = 0x200,
     FUSED_MODE                  = 0xBB,
     NONFUSED_MODE               = 0xAA,
     PK_DBG_PTR_AREA_SIZE        = 64,
     SCOM_ENTRY_SIZE             = 16,           // 4B pad, 4B address, 8B data
+    SCOM_RESTORE_PER_CHIPLET    = 64, // size in words (16B * 16)/4
 
     //---- QPMR  ----
     QPMR_OFFSET                 = HOMER_QPMR_REGION_NUM * ONE_MB,

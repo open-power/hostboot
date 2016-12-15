@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,8 +64,7 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t threadArea[THREAD_SECTN_SIZE];
-    uint8_t reserve[THREAD_AREA_SIZE - THREAD_SECTN_SIZE];
+    uint8_t threadArea[THREAD_AREA_SIZE];
     uint8_t coreArea[CORE_SPR_SECTN_SIZE];
 } SprRestoreArea_t;
 
