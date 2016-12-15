@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -237,6 +237,14 @@ fapi2::ReturnCode MvpdKeywordXlate(const fapi2::MvpdKeyword i_fapiKeyword,
         {MVPD::PB,  MVPD_KEYWORD_PB},
         {MVPD::CH,  MVPD_KEYWORD_CH},
         {MVPD::IQ,  MVPD_KEYWORD_IQ},
+        {MVPD::L1,  MVPD_KEYWORD_L1},
+        {MVPD::L2,  MVPD_KEYWORD_L2},
+        {MVPD::L3,  MVPD_KEYWORD_L3},
+        {MVPD::L4,  MVPD_KEYWORD_L4},
+        {MVPD::L5,  MVPD_KEYWORD_L5},
+        {MVPD::L6,  MVPD_KEYWORD_L6},
+        {MVPD::L7,  MVPD_KEYWORD_L7},
+        {MVPD::L8,  MVPD_KEYWORD_L8},
 
         /*Keywords available in HB but not in FAPI enum*/
         //{MVPD::PM,  MVPD_KEYWORD_PM},

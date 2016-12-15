@@ -32084,12 +32084,32 @@ Measured in GB</description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_VREF_DAC_NIBBLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MVPD_FWMS</id>
+    <description>
+        Mark store records from MPVD Lx keyword
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2,8</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MVPD_FWMS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -32256,6 +32276,7 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<!-- @fixme RTC:166754 Remove old attribute -->
 <attribute>
     <id>DO_MSS_VCCD_OVERRIDE</id>
     <description>
@@ -32293,6 +32314,7 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<!-- @fixme RTC:166754 Remove old attribute -->
 <attribute>
     <id>DO_MSS_VREG_COARSE</id>
     <description>
