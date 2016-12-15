@@ -65,7 +65,7 @@ extern "C"
      *                   MVPD_RECORD_CP00 - MVPD_KEYWORD_PDG
      * @param i_fapiTarget      -   cpu target
      * @param i_chipletId       -   Chiplet ID
-     * @param i_evenOdd         -   Even (0) or odd (1) EX. Disregarded for other chiplets.
+     * @param i_evenOddMask     -   Mask to choose even or odd EX. O for all other chiplets
      * @param i_ringId          -   Ring ID
      * @param i_pRingBuf        -   pointer to a buffer allocated by the caller
      *                              to receive the ring header and data.
@@ -86,7 +86,7 @@ extern "C"
      *                              caller does compression and decompression.
      *  Buffer:   io_rRingBufsize returns xNN.
      *    byte x0  CompressedScanData structure (rs4 header)
-     *    byte x0C compressed data (sizeof CompressedScanData is 0x0C)
+     *    byte x18 compressed data (sizeof CompressedScanData is 0x18)
      *    byte xNN last byte of compressed data
      *
      * @return fapi2::ReturnCode -   FAPI_RC_SUCCESS if success,
@@ -97,7 +97,7 @@ extern "C"
                             const Target<TARGET_TYPE_PROC_CHIP>&
                             i_fapiTarget,
                             const uint8_t  i_chipletId,
-                            const uint8_t  i_evenOdd,
+                            const uint64_t i_evenOddMask,
                             const uint8_t  i_ringId,
                             uint8_t*       io_pRingBuf,
                             uint32_t&      io_rRingBufsize );
