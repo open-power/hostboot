@@ -146,52 +146,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief memdiags multi-port init helper
-/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
-/// in subclassed constructors more easily.
-/// @return FAPI2_RC_SUCCESS iff everything ok
-///
-template<>
-fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::multi_port_init()
-{
-    FAPI_INF("multi-port init %s", mss::c_str(iv_target));
-
-    // Deterimine which ports are functional and whether we can broadcast to them
-    // TK on the broadcast BRS
-    // Disable braodcast mode - disabled by default
-    // For each functional port, setup 2 INIT subtests, one per DIMM select
-    for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(iv_target))
-    {
-        // Run in ECC mode, 64B writes (superfast mode)
-        for (const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(p))
-        {
-            // Don't destroy the subtest passed in, copy it
-            auto l_subtest = iv_subtest;
-
-            l_subtest.enable_port(mss::relative_pos<TARGET_TYPE_MCBIST>(p));
-            l_subtest.enable_dimm(mss::index(d));
-            iv_program.iv_subtests.push_back(l_subtest);
-            FAPI_INF("adding superfast subtest for %s (dimm %d)", mss::c_str(d), mss::index(d));
-        }
-    }
-
-    // A operation which has an end address of 0 means 'to the end'
-    if (iv_const.iv_end_address == 0)
-    {
-        iv_const.iv_start_address.get_range<mss::mcbist::address::DIMM>(iv_const.iv_end_address);
-    }
-
-    // Configure the address range
-    FAPI_TRY( mss::mcbist::config_address_range0(iv_target, iv_const.iv_start_address, iv_const.iv_end_address) );
-
-    // Initialize the common sections
-    FAPI_TRY( base_init() );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Single port initializer
 /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
 /// in subclassed constructors more easily.
@@ -200,7 +154,7 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::single_port_init()
 {
-    FAPI_INF("single port init");
+    FAPI_INF("single port init %s", mss::c_str(iv_target));
 
     const uint64_t l_relative_port_number = iv_const.iv_start_address.get_port();
     const uint64_t l_dimm_number = iv_const.iv_start_address.get_dimm();
@@ -230,13 +184,165 @@ fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::single_port_init()
     {
         iv_const.iv_start_address.get_sim_end_address(iv_const.iv_end_address);
     }
-    else if (iv_const.iv_end_address == 0)
+    else if (iv_const.iv_end_address == mss::mcbist::address::LARGEST_ADDRESS)
     {
+        // Only the DIMM range as we don't want to cross ports.
         iv_const.iv_start_address.get_range<mss::mcbist::address::DIMM>(iv_const.iv_end_address);
     }
 
     // Configure the address range
     FAPI_TRY( mss::mcbist::config_address_range0(iv_target, iv_const.iv_start_address, iv_const.iv_end_address) );
+
+    // Initialize the common sections
+    FAPI_TRY( base_init() );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper to encapsualte the setting of multi-port address configurations
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::multi_port_addr()
+{
+    mss::mcbist::address l_end_of_start_port;
+    mss::mcbist::address l_end_of_complete_port(mss::mcbist::address::LARGEST_ADDRESS);
+    mss::mcbist::address l_start_of_end_port;
+
+    // The last address in the start port is the start address thru the "DIMM range" (all addresses left on this DIMM)
+    iv_const.iv_start_address.get_range<mss::mcbist::address::DIMM>(l_end_of_start_port);
+
+    // The first address in the end port is the 0th address of the 0th DIMM on said port.
+    l_start_of_end_port.set_port(iv_const.iv_end_address.get_port());
+
+    // Before we do anything else, fix up the address for sim. The end address given has to be limted so
+    // we don't run too many cycles. Also, if there are intermediate ports the end addresses of those ports
+    // need to be limited as well - they override the end address of a complete port (which is otherwise the
+    // largest address.)
+    if (iv_is_sim)
+    {
+        iv_const.iv_start_address.get_sim_end_address(l_end_of_start_port);
+        mss::mcbist::address().get_sim_end_address(l_end_of_complete_port);
+        l_start_of_end_port.get_sim_end_address(iv_const.iv_end_address);
+    }
+
+    FAPI_INF("last addr in start port 0x%016lx first addr in end port 0x%016lx",
+             uint64_t(l_end_of_start_port), uint64_t(l_start_of_end_port));
+
+    // We know we have three address configs: start address -> end of DIMM, 0 -> end of DIMM and 0 -> end address.
+    FAPI_TRY( mss::mcbist::config_address_range0(iv_target, iv_const.iv_start_address, l_end_of_start_port) );
+    FAPI_TRY( mss::mcbist::config_address_range1(iv_target, mss::mcbist::address(), l_end_of_complete_port) );
+    FAPI_TRY( mss::mcbist::config_address_range2(iv_target, l_start_of_end_port, iv_const.iv_end_address) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief memdiags multi-port init helper
+/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+/// in subclassed constructors more easily.
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template<>
+fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::multi_port_init()
+{
+    FAPI_INF("multi-port init %s", mss::c_str(iv_target));
+
+    // Deterimine which ports are functional and whether we can broadcast to them
+    // TK on the broadcast BRS
+    // Disable braodcast mode - disabled by default
+
+    // We need to do three things here. One is to create a subtest which starts at start address and runs to
+    // the end of the port. Next, create subtests to go from the start of the next port to the end of the
+    // next port. Last we need a subtest which goes from the start of the last port to the end address specified
+    // in the end address. Notice this may mean one subtest (start and end are on the same port) or it might
+    // mean two subtests (start is one one port, end is on the next.) Or it might mean threee or more subtests.
+
+    // Get the port/DIMM information for the addresses. This is an integral value which allows us to index
+    // all the DIMM across a controller.
+    uint64_t l_portdimm_start_address = iv_const.iv_start_address.get_port_dimm();
+    uint64_t l_portdimm_end_address = iv_const.iv_end_address.get_port_dimm();
+
+    FAPI_INF("start port/dimm: %d end port/dimm: %d", l_portdimm_start_address, l_portdimm_end_address);
+
+    // Since start address <= end address we can handle the single port case simply
+    if (l_portdimm_start_address == l_portdimm_end_address)
+    {
+        // Single port case; simple.
+        FAPI_TRY( single_port_init() );
+        return fapi2::current_err;
+    }
+
+    fapi2::Assert(l_portdimm_start_address < l_portdimm_end_address);
+
+    // If we're here we know start port < end port. We want to run one subtest (for each DIMM) from start_address
+    // to the max range of the start address port, then one subtest (for each DIMM) for each port between the
+    // start/end ports and one test (for each DIMM) from the start of the end port to the end address.
+
+    // Setup the address configurations
+    FAPI_TRY( multi_port_addr() );
+
+    // Loop over all the DIMM on this MCBIST. Check the port/DIMM value for what to do.
+    for (const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(iv_target))
+    {
+        // The port/DIMM value for this DIMM is a three-bit field where the left-two are the relative position
+        // in the controller and the right-most is the DIMMs index. We use this to decide how to process this dimm
+        uint64_t l_rel_port = mss::relative_pos<TARGET_TYPE_MCBIST>(mss::find_target<TARGET_TYPE_MCA>(d));
+        uint64_t l_dimm =  mss::index(d);
+        const uint64_t l_portdimm_this_dimm = (l_rel_port << 1) | l_dimm;
+
+        FAPI_INF("port/dimm %d, port/dimm start: %d", l_portdimm_this_dimm, l_portdimm_start_address);
+
+        // No need to process DIMM which are lower as they're not between the start and the end of the port.
+        if (l_portdimm_this_dimm < l_portdimm_start_address)
+        {
+            continue;
+        }
+
+        // Ok, we're gonna need to push on a subtest.
+        auto l_subtest = iv_subtest;
+
+        l_subtest.enable_port(l_rel_port);
+        l_subtest.enable_dimm(l_dimm);
+
+        // Ok this is the starting point. We know it's address selection is config0
+        if (l_portdimm_this_dimm == l_portdimm_start_address)
+        {
+            l_subtest.change_addr_sel(0);
+        }
+
+        // If this DIMM represents the end, we know that's address config2
+        else if (l_portdimm_this_dimm == l_portdimm_end_address)
+        {
+            l_subtest.change_addr_sel(2);
+        }
+
+        // Otherwise, we're someplace in between - address config1
+        else
+        {
+            l_subtest.change_addr_sel(1);
+        }
+
+        iv_program.iv_subtests.push_back(l_subtest);
+        FAPI_INF("adding subtest for %s (port: %d dimm %d)", mss::c_str(iv_target), l_rel_port, l_dimm);
+    }
+
+    // Here's an interesting problem. PRD (and others maybe) expect the operation to proceed in address-order.
+    // That is, when PRD finds an address it stops on, it wants to continue from there "to the end." That means
+    // we need to keep the subtests sorted, otherwise PRD could pass one subtest come upon a fail in a subsequent
+    // subtest and re-test something it already passed. So we sort the resulting iv_subtest vector by port/DIMM
+    // in the subtest.
+    std::sort(iv_program.iv_subtests.begin(), iv_program.iv_subtests.end(),
+              [](const decltype(iv_subtest)& a, const decltype(iv_subtest)& b) -> bool
+    {
+        uint64_t l_a_portdimm = (a.get_port() << 1) | a.get_dimm();
+        uint64_t l_b_portdimm = (b.get_port() << 1) | b.get_dimm();
+
+        return l_a_portdimm > l_b_portdimm;
+    });
 
     // Initialize the common sections
     FAPI_TRY( base_init() );
@@ -427,7 +533,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Super Fast Read to End of Port - used to run superfast read on all memory behind the target
+/// @brief Super Fast Read to End of MCBIST - used to run superfast read on all memory behind the target
 /// @tparam T the fapi2::TargetType of the target
 /// @param[in] i_target the target behind which all memory should be read
 /// @param[in] i_stop stop conditions
@@ -449,7 +555,7 @@ fapi2::ReturnCode sf_read( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
 
     fapi2::ReturnCode l_rc;
     constraints l_const(i_stop, speed::LUDICROUS, i_end, i_address);
-    sf_read_eop_operation<TARGET_TYPE_MCBIST> l_read_op(i_target, l_const, l_rc);
+    sf_read_operation<TARGET_TYPE_MCBIST> l_read_op(i_target, l_const, l_rc);
 
     FAPI_ASSERT( l_rc == FAPI2_RC_SUCCESS,
                  fapi2::MSS_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT().set_TARGET(i_target),

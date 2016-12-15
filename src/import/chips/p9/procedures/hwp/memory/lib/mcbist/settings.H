@@ -713,7 +713,7 @@ struct constraints
         iv_end_boundary(NONE),
         iv_speed(LUDICROUS),
         iv_start_address(0),
-        iv_end_address(0)
+        iv_end_address(mcbist::address::LARGEST_ADDRESS)
     {
     }
 
@@ -764,13 +764,19 @@ struct constraints
                  const speed i_speed,
                  const end_boundary i_end_boundary,
                  const address& i_start_address,
-                 const address& i_end_address = mcbist::address(0) ):
+                 const address& i_end_address = mcbist::address(mcbist::address::LARGEST_ADDRESS) ):
         constraints(i_stop, i_start_address)
     {
         iv_end_boundary = i_end_boundary;
         iv_speed = i_speed;
         iv_end_address = i_end_address;
         FAPI_INF("setting up constraints with end boundary %d and speed 0x%x", i_end_boundary, i_speed);
+
+        // If our end address is 'before' our start address, make the end address the same as the start.
+        if (iv_start_address > iv_end_address)
+        {
+            iv_end_address = iv_start_address;
+        }
     }
 
     stop_conditions iv_stop;
