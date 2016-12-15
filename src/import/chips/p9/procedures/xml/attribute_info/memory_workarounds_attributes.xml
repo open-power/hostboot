@@ -44,34 +44,10 @@
   </attribute>
 
   <attribute>
-    <id>ATTR_DO_MSS_VCCD_OVERRIDE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Override VREG control information sub DD1.02
-    </description>
-    <initToZero></initToZero>
-    <valueType>uint8</valueType>
-    <enum>NO = 0, YES = 1</enum>
-    <writeable/>
-  </attribute>
-
-  <attribute>
     <id>ATTR_DO_MSS_VREF_DAC</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       VREF DAC work-around for Nimbus sub DD1.02
-    </description>
-    <initToZero></initToZero>
-    <valueType>uint8</valueType>
-    <enum>NO = 0, YES = 1</enum>
-    <writeable/>
-  </attribute>
-
-  <attribute>
-    <id>ATTR_DO_MSS_VREG_COARSE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      VREG Coarse work-around for Nimbus sub DD1.02
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
