@@ -63,6 +63,8 @@ enum sizes
     MAX_NUM_CAL_SLEW_RATES = 4,    ///< 3V/ns, 4V/ns, 5V/ns, 6V/n
     MAX_DQ_BITS = 72,              /// TODO RTC:157753 This is Nimbus specific. Should be attribute/trait of processor.
 
+    MARK_STORE_COUNT = 8,          ///< Elements in a VPD mark/store array
+
     BYTES_PER_GB = 1000000000,      ///< Multiplier to go from GB to B
     T_PER_MT     = 1000000,         ///< Multiplier to go from MT/s to T/s
     CYCLES_PER_CMD  = 4,            ///< Best case cycles per MCBIST command
