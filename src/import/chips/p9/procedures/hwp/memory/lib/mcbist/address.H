@@ -107,6 +107,13 @@ class address
 
         address() = default;
 
+        static constexpr uint64_t LARGEST_ADDRESS = ~0 >> MAGIC_PAD;
+
+        // Used when accessing an integral value containing a port and DIMM combination
+        static constexpr uint64_t DIMM_BIT = 63;
+        static constexpr uint64_t PORT_START = 61;
+        static constexpr uint64_t PORT_LEN = 2;
+
         ///
         /// @brief Construct an address from a uint64_t (scom'ed value)
         /// @param[in] i_value representing an address; say from a trap register
@@ -298,11 +305,40 @@ class address
 
         ///
         /// @brief Get the DIMM value for an address
-        /// @return right-aligned uint64_t representing the vaule
+        /// @return right-aligned uint64_t representing the value
         ///
         inline uint64_t get_dimm() const
         {
             return (get_field<DIMM>() == true ? 1 : 0);
+        }
+
+        ///
+        /// @brief Set the port and DIMM value for an address
+        /// @param[in] i_value the value to set
+        /// @return address& for method chaining
+        /// @note Useful for indexing all ports/DIMM on a controller
+        ///
+        inline address& set_port_dimm( const fapi2::buffer<uint64_t> i_value )
+        {
+            uint64_t l_read_port = 0;
+
+            i_value.extractToRight<PORT_START, PORT_LEN>(l_read_port);
+            return set_dimm(i_value.getBit<DIMM_BIT>()).set_port(l_read_port);
+        }
+
+        ///
+        /// @brief Get the port and DIMM value for an address
+        /// @return right-aligned uint64_t representing the value
+        /// @note Useful for indexing all ports/DIMM on a controller
+        ///
+        inline uint64_t get_port_dimm() const
+        {
+            fapi2::buffer<uint64_t> l_value;
+
+            l_value.insertFromRight<PORT_START, PORT_LEN>(get_port());
+            l_value.writeBit<DIMM_BIT>(get_field<DIMM>());
+
+            return l_value;
         }
 
         ///
