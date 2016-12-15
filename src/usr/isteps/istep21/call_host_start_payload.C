@@ -50,6 +50,7 @@
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_cpu_special_wakeup.H>
+#include <ipmi/ipmiwatchdog.H>
 
 
 using namespace ERRORLOG;

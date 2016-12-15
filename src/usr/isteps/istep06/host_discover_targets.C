@@ -45,6 +45,8 @@
 #include <hwas/hwasPlat.H>
 #include <vpd/vpd_if.H>
 #include <console/consoleif.H>
+#include <ipmi/ipmifruinv.H>
+#include <ipmi/ipmisensor.H>
 
 #ifdef CONFIG_PRINT_SYSTEM_INFO
 #include <stdio.h>
