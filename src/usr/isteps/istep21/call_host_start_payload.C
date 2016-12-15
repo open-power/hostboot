@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +51,7 @@
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_cpu_special_wakeup.H>
+#include <ipmi/ipmiwatchdog.H>
 
 
 using namespace ERRORLOG;
