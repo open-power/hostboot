@@ -146,6 +146,26 @@ void* call_host_slave_sbe_config(void *io_pArgs)
                 // Commit Error
                 errlCommit( l_errl, ISTEP_COMP_ID );
             }
+
+            l_errl = SBE::updateSbeBootSeeprom(l_cpu_target,
+                                               l_pMasterProcTarget);
+
+            if( l_errl )
+            {
+                ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
+
+                // Create IStep error log and cross ref error that occurred
+                l_stepError.addErrorDetails( l_errl );
+
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "ERROR : updateSbeBootSeeprom target %.8X, "
+                           "PLID=0x%x",
+                           TARGETING::get_huid(l_cpu_target),
+                           l_errl->plid() );
+
+                // Commit Error
+                errlCommit( l_errl, ISTEP_COMP_ID );
+            }
         }
     } // end of cycling through all processor chips
 

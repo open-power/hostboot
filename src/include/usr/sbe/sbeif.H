@@ -148,6 +148,18 @@ namespace SBE
     */
     void setNestFreqAttributes( uint32_t i_nestFreq );
 
+    /**
+     * @brief Updates which Seeprom was used to boot the SBE
+     *
+     * @param[in] i_target      Target processor to update
+     *
+     * @param[in] i_masterProc  Master processor target
+     *
+     * @return errlHndl_t       Error log handle on failure.
+     */
+    errlHndl_t updateSbeBootSeeprom(TARGETING::Target* i_target,
+                                    TARGETING::Target* i_masterProc);
+
 } //end namespace SBE
 
 #endif /* _SBEIF_H */

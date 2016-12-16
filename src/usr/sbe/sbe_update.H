@@ -85,7 +85,8 @@ namespace SBE
                                                 - SBE_SEEPROM_ECC_PAD
                                                 - SBE_VERSION_SPACE_WITH_ECC;
 
-    // Used to read SBE Boot Side from processor (PERV_SB_CS_SCOM 0x00050008)
+    // Used to read SBE Boot Side from processor
+    // (PERV_SB_CS_SCOM 0x00050008 or PERV_SB_CS_FSI 0x2808)
     const uint64_t SBE_BOOT_SELECT_MASK = 0x0000400000000000;
 
     // PNOR SBE and SBEC Partition constants
