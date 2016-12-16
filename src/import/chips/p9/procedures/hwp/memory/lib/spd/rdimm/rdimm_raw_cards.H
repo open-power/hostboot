@@ -61,6 +61,8 @@ enum raw_card_rev : uint8_t
     // since it is unlikely we will use a DIMM w/o a
     // reference caw card design.
     VBU = 0x23,
+
+    C2 = 0x42,
 };
 
 // Raw cards can share the same raw card # between RDIMM and LRDIMMs so
@@ -72,6 +74,7 @@ extern const std::vector< std::pair< uint8_t, rcw_settings> > RAW_CARDS;
 
 // Exposed so we can test them.
 extern rcw_settings rdimm_rc_c1;
+extern rcw_settings rdimm_rc_c2;
 extern rcw_settings rdimm_rc_a1;
 extern rcw_settings rdimm_rc_vbu;
 
