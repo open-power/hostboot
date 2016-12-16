@@ -52,16 +52,21 @@ namespace wr_vref
 /// @brief Executes WR VREF workarounds
 /// @param[in] i_target the fapi2 target of the port
 /// @param[in] i_rp - the rank pair to execute the override on
+/// @param[in] i_cal_steps_enabled - cal steps to exectue, used to see if WR VREF needs to be exectued
 /// @param[out] o_vrefdq_train_range - training range value
 /// @param[out] o_vrefdq_train_value - training value value
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                           const uint64_t& i_rp,
+                           const uint64_t i_rp,
+                           const fapi2::buffer<uint16_t>& i_cal_steps_enabled,
                            uint8_t& o_vrefdq_train_range,
                            uint8_t& o_vrefdq_train_value )
 {
-    if (! mss::chip_ec_feature_mss_wr_vref(i_target) )
+    // Skip running WR VREF workarounds if:
+    // 1) the chip does not need to have the workaround run
+    // 2) WR VREF has not been requested in the calibration steps
+    if ((! mss::chip_ec_feature_mss_wr_vref(i_target)) || (!i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>()))
     {
         return fapi2::FAPI2_RC_SUCCESS;
     }

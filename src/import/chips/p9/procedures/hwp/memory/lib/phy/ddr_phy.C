@@ -815,7 +815,6 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                     fapi2::buffer<uint16_t> i_cal_steps_enabled)
 {
     fapi2::buffer<uint64_t> l_cal_config;
-    fapi2::buffer<uint64_t> l_vref_config;
     uint8_t is_sim = 0;
     uint8_t cal_abort_on_error = 0;
     uint16_t l_vref_cal_enable = 0;
@@ -887,51 +886,45 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
         FAPI_TRY( mss::rc::write_vref_config1(i_target, l_data) );
     }
 
-    // Write Centering
+    // Configures WR VREF config register to run 1D (write centering only) or 2D (write centering + VREF) calibration
     {
-        static const std::vector<uint64_t> l_vref_regs =
-        {
-            MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0,
-            MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_1,
-            MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_2,
-            MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_3,
-            MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_4
-        };
 
-        if (i_cal_steps_enabled.getBit<WRITE_CTR>())
+        std::vector<fapi2::buffer<uint64_t>> l_vref_config;
+        FAPI_TRY( mss::scom_suckah(i_target, mss::dp16Traits<fapi2::TARGET_TYPE_MCA>::WR_VREF_CONFIG0_REG, l_vref_config) );
+
+        // Loops and sets or clears the 2D VREF bit on all DPs
+        // Note: 2D VREF needs to be a 0 in the reg if it is to be enabled, hence the not in the write bit function
+        for(auto& l_data : l_vref_config)
         {
-            l_vref_config.setBit<MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_1D_CHICKEN_SWITCH>();
+            l_data.writeBit<MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_1D_CHICKEN_SWITCH>
+            (!i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>());
         }
 
-        // loops through all RP's running workarounds and latching the VREF's as need be
-        for(const auto& l_rp : i_rank_pairs)
-        {
-            // Overrides will be set by mss::workarounds::wr_vref::execute.
-            // If the execute code is skipped, then it will read from the attributes
-            uint8_t l_vrefdq_train_range_override = mss::ddr4::USE_DEFAULT_WR_VREF_SETTINGS;
-            uint8_t l_vrefdq_train_value_override = mss::ddr4::USE_DEFAULT_WR_VREF_SETTINGS;
+        FAPI_TRY(mss::scom_blastah(i_target,  mss::dp16Traits<fapi2::TARGET_TYPE_MCA>::WR_VREF_CONFIG0_REG, l_vref_config));
+    }
 
-            // Runs the workaround
-            if (i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>())
-            {
-                l_vref_config.clearBit<MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_1D_CHICKEN_SWITCH>();
+    // Latches in the WR VREF values
+    // loops through all RP's running workarounds and latching the VREF's as need be
+    for(const auto& l_rp : i_rank_pairs)
+    {
+        // Overrides will be set by mss::workarounds::wr_vref::execute.
+        // If the execute code is skipped, then it will read from the attributes
+        uint8_t l_vrefdq_train_range_override = mss::ddr4::USE_DEFAULT_WR_VREF_SETTINGS;
+        uint8_t l_vrefdq_train_value_override = mss::ddr4::USE_DEFAULT_WR_VREF_SETTINGS;
 
-                // Runs WR VREF workarounds if needed
-                // it will check and see if it needs to run, if not it will return success - needs 0th rankpair to hit
+        // Runs WR VREF workarounds if needed
+        // it will check and see if it needs to run, if not it will return success
+        FAPI_TRY( mss::workarounds::wr_vref::execute(i_target,
+                  l_rp,
+                  i_cal_steps_enabled,
+                  l_vrefdq_train_range_override,
+                  l_vrefdq_train_value_override) );
 
-                FAPI_TRY( mss::workarounds::wr_vref::execute(i_target, l_rp, l_vrefdq_train_range_override,
-                          l_vrefdq_train_value_override) );
-            }
-
-            // Latches the VREF's
-            FAPI_TRY( mss::ddr4::latch_wr_vref_commands_by_rank_pair( i_target,
-                      l_rp,
-                      l_vrefdq_train_range_override,
-                      l_vrefdq_train_value_override ) );
-        }
-
-        FAPI_INF("wr_vref_config: 0x%016lu", l_vref_config);
-        FAPI_TRY( mss::scom_blastah(i_target, l_vref_regs, l_vref_config) );
+        // Latches the VREF's
+        FAPI_TRY( mss::ddr4::latch_wr_vref_commands_by_rank_pair( i_target,
+                  l_rp,
+                  l_vrefdq_train_range_override,
+                  l_vrefdq_train_value_override ) );
     }
 
     // Note: This rank encoding isn't used if the cal is initiated from the CCS engine

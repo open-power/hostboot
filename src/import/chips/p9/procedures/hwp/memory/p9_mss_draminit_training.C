@@ -145,6 +145,7 @@ extern "C"
             //
             // Grab the attribute which contains the information on what cal steps we should run
             // if the i_specal_training bits have not been specified.
+            // TODO RTC:166422 update training code to set cal step enable and consume it everywhere locally
             if (i_special_training == 0)
             {
                 FAPI_TRY( mss::cal_step_enable(p, l_cal_steps_enabled) );
