@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,6 +107,7 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
 
             ECC_CHECK_DISABLE = MCA_RECR_MBSECCQ_DISABLE_MEMORY_ECC_CHECK_CORRECT,
             ECC_CORRECT_DISABLE = MCA_RECR_MBSECCQ_DISABLE_MEMORY_ECC_CORRECT,
+            ECC_USE_ADDR_HASH = MCA_RECR_MBSECCQ_USE_ADDRESS_HASH,
 
             PORT_FAIL_DISABLE = MCA_MBA_FARB0Q_CFG_PORT_FAIL_DISABLE,
             OE_ALWAYS_ON = MCA_MBA_FARB0Q_CFG_OE_ALWAYS_ON,
@@ -396,6 +397,7 @@ fapi2::ReturnCode enable_read_ecc( const fapi2::Target<T>& i_target )
     FAPI_TRY( mss::getScom(i_target, TT::ECC_REG, l_data) );
     l_data.clearBit<TT::ECC_CHECK_DISABLE>();
     l_data.clearBit<TT::ECC_CORRECT_DISABLE>();
+    l_data.setBit<TT::ECC_USE_ADDR_HASH>();
 
     // The preferred operating mode is 11 (INVERT_DATA_TOGGLE_CHECKS)   which stores data complemented
     // (because most bits are '0', and the dram bus pulls up, so transmitting 1s is least power)  but
