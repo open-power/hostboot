@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -24,6 +24,15 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for p9_mvpd_ring_funcs procedure -->
 <hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MVPD_RING_FUNC_ENDLESS</rc>
+    <description>failed to interprete VPD data buffer</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_MVPD_RING_FUNC_INVALID_PARAMETER</rc>
@@ -79,6 +88,15 @@
   <hwpError>
     <rc>RC_MVPD_RING_FUNC_INVALID_RECORD</rc>
     <description>MVPD ring function record is not valid</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MVPD_RINGID_DATA_NOT_FOUND</rc>
+    <description>Data for given ringId missing in p9_ringId</description>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

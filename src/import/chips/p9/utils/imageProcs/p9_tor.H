@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,20 +28,15 @@
 #include "p9_ring_id.h"
 #include "p9_ringId.H"
 
+#define MAX_TOR_RING_OFFSET  (256*256-1)  // Max value of 2Byte uint
+
 namespace P9_TOR
 {
 
 extern const char* ppeTypeName[];
 extern const char* ringVariantName[];
 
-#define  TOR_VERSION  1
-
-typedef struct
-{
-    uint32_t sizeOfThis;
-    uint16_t sizeOfCmsk;
-    uint16_t sizeOfMeta; // Exact size of meta data. Arbitrary size. Not null terminated
-} RingLayout_t;
+#define  TOR_VERSION  2
 
 typedef struct
 {
@@ -63,26 +58,28 @@ typedef struct
 
 typedef uint16_t TorRingOffset_t;  // Ring offset value in TOR offset slot
 
+#define TOR_SUCCESS                           0
 #define TOR_RING_FOUND                        0
 #define TOR_RING_BLOCKS_FOUND                 0
-#define TOR_APPEND_RING_DONE                  0
 #define TOR_RING_NOT_FOUND                    1
-#define TOR_INVALID_RING_ID                   2
-#define TOR_AMBIGUOUS_API_PARMS               3
-#define TOR_SECTION_NOT_FOUND                 4
-#define TOR_DD_LEVEL_NOT_FOUND                5
-#define TOR_OP_BUFFER_INVALID                 6
-#define TOR_OP_BUFFER_SIZE_EXCEEDED           7
+#define TOR_AMBIGUOUS_API_PARMS               2
+#define TOR_SECTION_NOT_FOUND                 3
+#define TOR_DD_LEVEL_NOT_FOUND                4
+#define TOR_OP_BUFFER_INVALID                 5
+#define TOR_OP_BUFFER_SIZE_EXCEEDED           6
+#define TOR_INVALID_RING_ID                   7
 #define TOR_INVALID_INSTANCE_ID               8
 #define TOR_INVALID_CHIPLET                   9
-#define TOR_IMAGE_DOES_NOT_SUPPORT_CME       10
-#define TOR_IMAGE_DOES_NOT_SUPPORT_SGPE      11
-#define TOR_IMAGE_DOES_NOT_SUPPORT_DD_LEVEL  12
-#define TOR_IMAGE_DOES_NOT_SUPPORT_PPE_LEVEL 13
-#define TOR_RING_AVAILABLE_IN_RINGSECTION    14  // Ring is already present
-#define TOR_BUFFER_TOO_SMALL                 15
-#define TOR_TOO_MANY_DD_LEVELS               16
-
+#define TOR_INVALID_RING_BLOCK_TYPE          10
+#define TOR_INVALID_MAGIC_NUMBER             11
+#define TOR_IMAGE_DOES_NOT_SUPPORT_CME       12
+#define TOR_IMAGE_DOES_NOT_SUPPORT_SGPE      13
+#define TOR_IMAGE_DOES_NOT_SUPPORT_DD_LEVEL  14
+#define TOR_IMAGE_DOES_NOT_SUPPORT_PPE_LEVEL 15
+#define TOR_RING_AVAILABLE_IN_RINGSECTION    16  // Ring is already present
+#define TOR_BUFFER_TOO_SMALL                 17
+#define TOR_TOO_MANY_DD_LEVELS               18
+#define TOR_OFFSET_TOO_BIG                   19
 
 // Different options to extract data using tor_access_ring API
 typedef enum RingBlockType
@@ -387,8 +384,8 @@ int tor_get_block_of_rings ( void*          i_ringSection,
 /// It contains details of p9 Ring which is used for scanning operation.
 ///  TOR API supports SEEPROM image format.
 ///
-/// \param[in/out]  io_ringSectionSize A value to indicate actual size of
-/// i_ringSection data passed in as input On return, updated size of section.
+/// \param[in/out]  io_ringSectionSize   In: Exact size of i_ringSection.
+/// Out: Updated size of i_ringSection.
 /// Note: Caller manages this buffer and must make sure the RS4 ring fits
 /// before making this call
 ///

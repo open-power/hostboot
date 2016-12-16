@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,7 +72,7 @@ extern "C"
      * @param i_keyword        - Keyword enumerator
      * @param i_fapiTarget     - cpu target
      * @param i_chipletId      - Chiplet ID
-     * @param i_evenOddMask    - Mask to choose even or odd EX. O for all other chiplets
+     * @param i_evenOddMask    - Even (0) or odd (1) EX. Disregarded for other chiplets.
      * @param i_ringId         - Ring ID
      * @param i_pRingBuf       - The buffer to receive or send the ring
      * @param io_rRingBufsize  - Size of ring / ring buffer
@@ -86,7 +86,7 @@ extern "C"
                              const Target<TARGET_TYPE_PROC_CHIP>&
                              i_fapiTarget,
                              const uint8_t        i_chipletId,
-                             const uint64_t       i_evenOddMask,
+                             const uint8_t        i_evenOdd,
                              const uint8_t        i_ringId,
                              uint8_t*             i_pRingBuf,
                              uint32_t&            io_rRingBufsize );

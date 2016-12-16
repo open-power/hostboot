@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,17 +48,17 @@ extern "C"
                                    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                                    & i_fapiTarget,
                                    const uint8_t       i_chipletId,
-                                   const uint64_t      i_evenOddMask,
+                                   const uint8_t       i_evenOdd,
                                    const uint8_t       i_ringId,
                                    uint8_t*            i_pRingBuf,
                                    uint32_t&           io_rRingBufsize )
     {
         fapi2::ReturnCode        l_fapirc;
 
-        FAPI_DBG("getMvpdRing: Called w/ringId=0x%x, chipletId=0x%x, evenOddMask=0x%016llx, size=0x%x",
+        FAPI_DBG("getMvpdRing: Called w/ringId=0x%x, chipletId=0x%x, evenOdd=0x%x, size=0x%x",
                  i_ringId,
                  i_chipletId,
-                 i_evenOddMask,
+                 i_evenOdd,
                  io_rRingBufsize  );
 
         // common get and set processing
@@ -67,7 +67,7 @@ extern "C"
                                  i_keyword,
                                  i_fapiTarget,
                                  i_chipletId,
-                                 i_evenOddMask,
+                                 i_evenOdd,
                                  i_ringId,
                                  i_pRingBuf,
                                  io_rRingBufsize );
