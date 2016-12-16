@@ -216,12 +216,13 @@ enum BlockPriority
 #define VMM_SIZE_RMVPAGE_TEST (8 * PAGESIZE)
 
 /** Chunk of physical memory to use for HostServices Attributes */
-#define MPIPL_ATTR_DATA_ADDR   (VMM_MEMORY_SIZE + 32*MEGABYTE)
+#define MPIPL_ATTR_DATA_ADDR   \
+  VMM_OCC_COMMON_END_OFFSET + VMM_OCC_COMMON_SIZE /* currently 200MB */
 #define MPIPL_SYSDATA_SIZE  (4*KILOBYTE)  /* match FSP HDAT code */
 #define MPIPL_NODEDATA_SIZE (256000)      /* match FSP HDAT code */
 #define MPIPL_ATTR_DATA_SIZE   \
    ALIGN_PAGE((MPIPL_SYSDATA_SIZE+MPIPL_NODEDATA_SIZE))
-#define MPIPL_ATTR_VMM_SIZE 0x8001000
+#define MPIPL_ATTR_VMM_SIZE (1*MEGABYTE)
 
 /* Chunk of physical memory used for Dump Source Table */
 #define DUMP_TEST_MEMORY_ADDR (MPIPL_ATTR_DATA_ADDR + MPIPL_ATTR_DATA_SIZE)
