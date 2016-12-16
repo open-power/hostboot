@@ -6089,29 +6089,28 @@ sub generate_is_dimm
 {
     my ($fapiPosHr) = @_;
 
-    #@todo-RTC:160360-Use this i2c info to populate thermal sensors
+    # Use this i2c info to populate thermal sensors
     # From the i2c busses, grab the information for the DIMMs, if any.
-#    my @dimmI2C;
-#    my $i2c_file = open_mrw_file($mrwdir, "${sysname}-i2c-busses.xml");
-#    my $i2cSettings = XMLin($i2c_file);
-#
-#    foreach my $i (@{$i2cSettings->{'i2c-device'}})
-#    {
-#        if ( $i->{'part-id'} eq 'DIMM_SPD' )
-#        {
-#            # Adjust instance path to match Membus DIMM instance path
-#            my $tmp_ip = $i->{'instance-path'};
-#            $tmp_ip =~ s/\/DIMM_SPD-0$//;
-#            $tmp_ip =~ s/ddr._dimm_generic/dimm/;
-#
-#            push @dimmI2C, {
-#                'port'=>$i->{'i2c-master'}->{'i2c-port'},
-#                'devAddr'=>$i->{'address'},
-#                'engine'=>$i->{'i2c-master'}->{'i2c-engine'},
-#                'engine'=>0,
-#                'ipath'=>$tmp_ip  };
-#        }
-#    }
+    my @dimmI2C;
+    my $i2c_file = open_mrw_file($mrwdir, "${sysname}-i2c-busses.xml");
+    my $i2cSettings = XMLin($i2c_file);
+
+    foreach my $i (@{$i2cSettings->{'i2c-device'}})
+    {
+        # look for THERMAL_SENSOR data from Host-connected side
+        if ( $i->{'part-id'} eq 'DIMM_THERMAL_SENSOR' &&
+            ($i->{'i2c-master'}->{'host-connected'} eq "1") )
+        {
+            my $node = $i->{'card-target'}->{'node'};
+            my $pos = $i->{'card-target'}->{'position'};
+
+            $dimmI2C[$node][$pos] = {
+                   'port'=> $i->{'i2c-master'}->{'i2c-port'},
+                'devAddr'=> $i->{'address'},
+                 'engine'=> $i->{'i2c-master'}->{'i2c-engine'}
+                 };
+        }
+    }
 
     print "\n<!-- $SYSNAME JEDEC DIMMs -->\n";
     for my $i ( 0 .. $#SMembuses )
@@ -6186,8 +6185,23 @@ sub generate_is_dimm
     <attribute>
         <id>REL_POS</id>
         <default>$dimm_drop</default>
+    </attribute>";
+
+        # Add TEMP_SENSOR_I2C_CONFIG
+        if (exists $dimmI2C[$node][$pos])
+        {
+        print "
+    <attribute>
+        <id>TEMP_SENSOR_I2C_CONFIG</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-$sys/node-$node/dimm-$dimm</value></field>
+            <field><id>engine</id><value>". $dimmI2C[$node][$pos]->{engine} ."</value></field>
+            <field><id>port</id><value>". $dimmI2C[$node][$pos]->{port} ."</value></field>
+            <field><id>devAddr</id><value>0x". $dimmI2C[$node][$pos]->{devAddr} ."</value></field>
+        </default>
     </attribute>
     ";
+        }
 
         #RID number hack, get it from location code
         my $dimmLoc = $SMembuses[$i][DIMM_LOC_CODE_FIELD];
