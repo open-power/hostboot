@@ -58,6 +58,7 @@
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
 #include    <fapi2/hwp_executor.H>
+#include    <fapi2/hw_access.H>
 
 //Procedures
 #include <p9_xip_customize.H>
@@ -1667,6 +1668,111 @@ namespace SBE
     }
 
 /////////////////////////////////////////////////////////////////////
+    errlHndl_t updateSbeBootSeeprom(TARGETING::Target* i_target,
+                                    TARGETING::Target* i_masterProc)
+    {
+        TRACFCOMP( g_trac_sbe, ENTER_MRK"updateSbeBootSeeprom()" );
+
+        errlHndl_t err = NULL;
+        fapi2::ReturnCode l_fapi_rc;
+        sbeSeepromSide_t l_masterBootSide = SBE_SEEPROM_INVALID;
+        fapi2::buffer<uint32_t> l_read_reg;
+        const uint32_t l_sbeBootSelectMask = SBE_BOOT_SELECT_MASK >> 32;
+
+        // cast OUR type of target to a FAPI type of target.
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiTarg(i_target);
+
+        do{
+            // Grab the SBE boot side for the master proc
+            err = getSbeBootSeeprom(i_masterProc,
+                                    l_masterBootSide);
+
+
+            if( err )
+            {
+                TRACFCOMP( g_trac_sbe,
+                           ERR_MRK"updateSbeBootSeeprom(): getSbeBootSeeprom, "
+                           "RC=0x%X, PLID=0x%lX",
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
+                break;
+            }
+
+            // Read PERV_SB_CS_FSI 0x2808 for target proc
+            l_fapi_rc = fapi2::getCfamRegister(l_fapiTarg,
+                                               PERV_SB_CS_FSI,
+                                               l_read_reg);
+
+            if(!l_fapi_rc.isRC(0))
+            {
+                err = fapi2::rcToErrl(l_fapi_rc);
+                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
+                err->collectTrace(FAPI_TRACE_NAME,384);
+
+                TRACFCOMP( g_trac_sbe,
+                           ERR_MRK"updateSbeBootSeeprom(): getCfamRegister, "
+                           "PERV_SB_CS_FSI (0x%.4X), proc target = %.8X, "
+                           "RC=0x%X, PLID=0x%lX",
+                           PERV_SB_CS_FSI, // 0x2808
+                           TARGETING::get_huid(i_target),
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
+                break;
+            }
+
+            // Master boot side is 0
+            if(SBE_SEEPROM0 == l_masterBootSide)
+            {
+                // Clear bit for side 1
+                l_read_reg &= ~l_sbeBootSelectMask;
+
+                TRACFCOMP( g_trac_sbe,
+                           INFO_MRK"updateSbeBootSeeprom(): l_read_reg=0x%.8X "
+                           "set SBE boot side 0 for proc=%.8X",
+                           l_read_reg,
+                           TARGETING::get_huid(i_target) );
+            }
+            // Master boot side is 1
+            else if(SBE_SEEPROM1 == l_masterBootSide)
+            {
+                // Set bit for side 1
+                l_read_reg |= l_sbeBootSelectMask;
+
+                TRACFCOMP( g_trac_sbe,
+                           INFO_MRK"updateSbeBootSeeprom(): l_read_reg=0x%.8X "
+                           "set SBE boot side 1 for proc=%.8X",
+                           l_read_reg,
+                           TARGETING::get_huid(i_target) );
+            }
+
+            l_fapi_rc = fapi2::putCfamRegister(l_fapiTarg,
+                                               PERV_SB_CS_FSI,
+                                               l_read_reg);
+
+            if(!l_fapi_rc.isRC(0))
+            {
+                err = fapi2::rcToErrl(l_fapi_rc);
+                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
+                err->collectTrace(FAPI_TRACE_NAME,384);
+
+                TRACFCOMP( g_trac_sbe,
+                           ERR_MRK"updateSbeBootSeeprom(): putCfamRegister, "
+                           "PERV_SB_CS_FSI (0x%.4X), proc target = %.8X, "
+                           "RC=0x%X, PLID=0x%lX",
+                           PERV_SB_CS_FSI, // 0x2808
+                           TARGETING::get_huid(i_target),
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
+                break;
+            }
+        }while(0);
+
+        TRACFCOMP( g_trac_sbe, EXIT_MRK"updateSbeBootSeeprom()" );
+
+        return err;
+    }
+
+/////////////////////////////////////////////////////////////////////
     errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState,
                                sbeUpdateCheckType& i_check_type)
     {
@@ -2286,7 +2392,7 @@ namespace SBE
                      * @userdata2[0:31]     Size - No Ecc
                      * @userdata2[32:63]    Size - ECC
                      * @devdesc      ECC or Data Miscompare Fail Reading Back
-                     *               SBE Verion Information
+                     *               SBE Version Information
                      */
                     err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                         SBE_UPDATE_SEEPROMS,
@@ -3541,7 +3647,7 @@ namespace SBE
              * @userdata2[0:31]   Original SEEPROM 0 CRC
              * @userdata2[32:63]  Original SEEPROM 1 CRC
              * @devdesc      Successful Update of SBE SEEPROM
-             *               SBE Verion Information
+             *               SBE Version Information
              */
             err_info = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                      SBE_PERFORM_UPDATE_ACTIONS,
@@ -4195,7 +4301,7 @@ namespace SBE
                          * @reasoncode   SBE_MASTER_VERSION_DOWNLEVEL
                          * @userdata1    Master Target HUID
                          * @userdata2    Master Target Loop Index
-                         * @devdesc      SBE Image Verion Miscompare with
+                         * @devdesc      SBE Image Version Miscompare with
                          *               Master Target
                          */
                         err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
@@ -4353,7 +4459,7 @@ namespace SBE
                      * @reasoncode   SBE_MISCOMPARE_WITH_MASTER_VERSION
                      * @userdata1    Master Target HUID
                      * @userdata2    Comparison Target HUID
-                     * @devdesc      SBE Verion Miscompare with Master Target
+                     * @devdesc      SBE Version Miscompare with Master Target
                      */
                     err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                         SBE_MASTER_VERSION_COMPARE,
