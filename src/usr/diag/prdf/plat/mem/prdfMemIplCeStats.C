@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/pegasus/prdfCenMbaIplCeStats.C $       */
+/* $Source: src/usr/diag/prdf/plat/mem/prdfMemIplCeStats.C $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file  prdfCenMbaIplCeStats.C
+/** @file  prdfMemIplCeStats.C
  *  @brief Contains IPL CE related code.
  */
 
@@ -37,12 +37,13 @@
 #include <prdf_service_codes.H>
 
 // Pegasus includes
-#include <prdfCenMbaExtraSig.H>
-#include <prdfCenMbaIplCeStats.H>
-#include <prdfCenMbaThresholds.H>
-#include <prdfCenMemUtils.H>
+#include <prdfP9McaExtraSig.H>
+#include <prdfMemIplCeStats.H>
+#include <prdfParserUtils.H>
+#include <prdfMemThresholds.H>
+#include <prdfMemUtils.H>
 #include <prdfMemoryMru.H>
-#include <prdfPlatCalloutUtil.H>
+//#include <prdfPlatCalloutUtil.H>
 
 using namespace TARGETING;
 
@@ -51,12 +52,13 @@ namespace PRDF
 
 using namespace PlatServices;
 using namespace HWAS;
+using namespace PARSERUTILS;
 
 //------------------------------------------------------------------------------
 
-void CenMbaIplCeStats::banAnalysis( const CenRank & i_rank )
+template<>
+void MemIplCeStats<TYPE_MBA>::banAnalysis( const MemRank & i_rank )
 {
-
     for ( uint8_t i = 0; i < MAX_PORT_PER_MBA; i++ )
     {
         HalfRankKey banKey = { i_rank, i };
@@ -66,7 +68,20 @@ void CenMbaIplCeStats::banAnalysis( const CenRank & i_rank )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaIplCeStats::banAnalysis( const CenRank & i_rank,
+template<>
+void MemIplCeStats<TYPE_MCA>::banAnalysis( const MemRank & i_rank )
+{
+    for ( uint8_t i = 0; i < MAX_PORT_PER_MCBIST; i++ )
+    {
+        HalfRankKey banKey = { i_rank, i };
+        iv_bannedAnalysis[banKey] = true;
+    }
+}
+
+
+//------------------------------------------------------------------------------
+template<TYPE T>
+int32_t MemIplCeStats<T>::banAnalysis( const MemRank & i_rank,
                                        uint8_t i_portSlct )
 {
     int32_t o_rc = SUCCESS;
@@ -91,18 +106,20 @@ int32_t CenMbaIplCeStats::banAnalysis( const CenRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaIplCeStats::collectStats( const CenRank & i_stopRank )
+template<TYPE T>
+int32_t MemIplCeStats<T>::collectStats( const MemRank & i_stopRank )
 {
-    #define PRDF_FUNC "[CenMbaIplCeStats::collectStats] "
+    #define PRDF_FUNC "[MemIplCeStats::collectStats] "
     int32_t o_rc = SUCCESS;
     do
     {
-        MemUtils::MaintSymbols symData; CenSymbol junk;
-        o_rc = MemUtils::collectCeStats( iv_mbaChip, i_stopRank, symData, junk);
+        MemUtils::MaintSymbols symData; MemSymbol junk;
+        o_rc = MemUtils::collectCeStats<T>( iv_chip, i_stopRank, symData,
+                                            junk );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats() failed. MBA:0X%08X",
-                      getHuid( iv_mbaChip->GetChipHandle() ) );
+            PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats failed. chip:0X%08X",
+                      getHuid( iv_chip->getTrgt() ) );
             break;
         }
 
@@ -116,7 +133,7 @@ int32_t CenMbaIplCeStats::collectStats( const CenRank & i_stopRank )
             uint8_t dram = symData[i].symbol.getDram();
             uint8_t portSlct = symData[i].symbol.getPortSlct();
 
-            // Check if analysis is banned.
+            // Check if analysis is banned
             HalfRankKey banKey = { i_stopRank, portSlct };
 
             // Check if the rank has already been banned. Note that [] will
@@ -138,7 +155,7 @@ int32_t CenMbaIplCeStats::collectStats( const CenRank & i_stopRank )
             iv_rankMap[rankKey] += symData[i].count;
 
             // In case of dimm select, rank select does not matter
-            CenRank dimmRank( dimmSlct << DIMM_SLCT_PER_PORT );
+            MemRank dimmRank( dimmSlct << DIMM_SLCT_PER_PORT );
             // Increment the soft CEs per half dimm select.
             HalfRankKey dsKey = { dimmRank, portSlct };
             iv_dsMap[dsKey] += symData[i].count;
@@ -157,38 +174,39 @@ int32_t CenMbaIplCeStats::collectStats( const CenRank & i_stopRank )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaIplCeStats::analyzeStats( bool & o_callOutsMade )
+template<TYPE T>
+int32_t MemIplCeStats<T>::analyzeStats( bool & o_callOutsMade )
 {
-    #define PRDF_FUNC "CenMbaIplCeStats::analyzeStats "
+    #define PRDF_FUNC "MemIplCeStats::analyzeStats "
     int32_t o_rc = SUCCESS;
 
     o_callOutsMade = false;
 
     do
     {
-        TargetHandle_t mbaTrgt = iv_mbaChip->GetChipHandle();
+        TargetHandle_t trgt = iv_chip->getTrgt();
 
         o_rc = calloutCePerDram( o_callOutsMade );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC " calloutCePerDram() failed. MBA:0X%08X",
-                      getHuid( mbaTrgt ) );
+            PRDF_ERR( PRDF_FUNC " calloutCePerDram() failed. trgt:0X%08X",
+                      getHuid( trgt ) );
             break;
         }
 
         o_rc = calloutCePerRank( o_callOutsMade );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "calloutCePerRank() failed. MBA:0X%08X",
-                      getHuid( mbaTrgt ) );
+            PRDF_ERR( PRDF_FUNC "calloutCePerRank() failed. trgt:0X%08X",
+                      getHuid( trgt ) );
             break;
         }
 
         o_rc = calloutCePerDs( o_callOutsMade );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC " calloutCePerDs() failed. MBA:0X%08X",
-                      getHuid( mbaTrgt ) );
+            PRDF_ERR( PRDF_FUNC " calloutCePerDs() failed. trgt:0X%08X",
+                      getHuid( trgt ) );
             break;
         }
 
@@ -200,19 +218,21 @@ int32_t CenMbaIplCeStats::analyzeStats( bool & o_callOutsMade )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaIplCeStats::calloutHardCes( const CenRank & i_stopRank )
+template<TYPE T>
+int32_t MemIplCeStats<T>::calloutHardCes( const MemRank & i_stopRank )
 {
-    #define PRDF_FUNC "[CenMbaIplCeStats::calloutHardCes] "
-    TargetHandle_t mbaTrgt = iv_mbaChip->GetChipHandle();
+    #define PRDF_FUNC "[MemIplCeStats::calloutHardCes] "
+    TargetHandle_t trgt = iv_chip->getTrgt();
     int32_t o_rc = SUCCESS;
     do
     {
-        MemUtils::MaintSymbols symData; CenSymbol junk;
-        o_rc = MemUtils::collectCeStats( iv_mbaChip, i_stopRank, symData, junk);
+        MemUtils::MaintSymbols symData; MemSymbol junk;
+        o_rc = MemUtils::collectCeStats<T>( iv_chip, i_stopRank, symData,
+                                            junk );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats() failed. MBA:0X%08X",
-                      getHuid( iv_mbaChip->GetChipHandle() ) );
+            PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats() failed.chip:0X%08X",
+                      getHuid( iv_chip->getTrgt() ) );
             break;
         }
 
@@ -229,7 +249,7 @@ int32_t CenMbaIplCeStats::calloutHardCes( const CenRank & i_stopRank )
                 continue;
 
             // At this point a hard CE was found, callout the symbol.
-            MemoryMru memMru ( mbaTrgt, symData[i].symbol.getRank(),
+            MemoryMru memMru ( trgt, symData[i].symbol.getRank(),
                                symData[i].symbol );
 
             // We are creating and committing error log here. It is different
@@ -246,7 +266,7 @@ int32_t CenMbaIplCeStats::calloutHardCes( const CenRank & i_stopRank )
                               PRDF_MNFG_IPL_CE_ANALYSIS,
                               LIC_REFCODE,
                               PRDF_DETECTED_FAIL_HARDWARE,
-                              getHuid( mbaTrgt ),
+                              getHuid( trgt ),
                               0, PRDFSIG_MnfgIplHardCE, 0);
             addMruAndCommitErrl( memMru, l_errl);
 
@@ -260,34 +280,35 @@ int32_t CenMbaIplCeStats::calloutHardCes( const CenRank & i_stopRank )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaIplCeStats::calloutCePerDram( bool & o_callOutsMade )
+template<TYPE T>
+int32_t MemIplCeStats<T>::calloutCePerDram( bool & o_callOutsMade )
 {
-    #define PRDF_FUNC "[CenMbaIplCeStats::calloutCePerDram] "
+    #define PRDF_FUNC "[MemIplCeStats::calloutCePerDram] "
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mbaTrgt = iv_mbaChip->GetChipHandle();
+    TargetHandle_t trgt = iv_chip->getTrgt();
 
-    for ( CePerDramMap::iterator dramIter = iv_dramMap.begin();
+    for ( typename CePerDramMap::iterator dramIter = iv_dramMap.begin();
           dramIter != iv_dramMap.end(); dramIter++ )
     {
-        // First, check if this half rank is banned from analysis.
-        HalfRankKey banKey = { dramIter->first.rank,
-                               dramIter->first.portSlct };
+        // First, check if this half rank is banned from analysis
+        HalfRankKey banKey = { dramIter->first.rank, dramIter->first.portSlct };
 
         // Check if the rank has already been banned. Note that [] will create
-        // the an entry if one does not exist, so used find() instead to check
+        // the entry if one does not exist, so used find() instead to check
         // for existence in the map.
         if ( iv_bannedAnalysis.end() != iv_bannedAnalysis.find(banKey) )
             continue;
 
         // Get the CEs per DRAM threshold.
-        uint16_t dramTh, junk0, junk1;
-        o_rc = getMnfgMemCeTh( iv_mbaChip, dramIter->first.rank, dramTh,
-                                       junk0, junk1 );
+        uint16_t dramTh = 1, junk0, junk1;
+
+        o_rc = getMnfgMemCeTh<T>( iv_chip, dramIter->first.rank, dramTh,
+                                  junk0, junk1 );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getMnfgMemCeTh() failed. MBA:0x%08X",
-                      getHuid( mbaTrgt ) );
+            PRDF_ERR( PRDF_FUNC "getMnfgMemCeTh() failed. trgt:0x%08X",
+                      getHuid( trgt ) );
             break;
         }
 
@@ -298,13 +319,13 @@ int32_t CenMbaIplCeStats::calloutCePerDram( bool & o_callOutsMade )
 
         // At this point a threshold has been reached. Callout a single symbol
         // found in this dram.
-        for ( CESymbols::iterator symIter = iv_ceSymbols.begin();
+        for ( typename CESymbols::iterator symIter = iv_ceSymbols.begin();
               symIter != iv_ceSymbols.end(); symIter++ )
         {
             if ( (dramIter->first.rank == symIter->symbol.getRank() ) &&
                  (dramIter->first.dram == symIter->symbol.getDram() ) )
             {
-                MemoryMru memMru ( mbaTrgt, symIter->symbol.getRank() ,
+                MemoryMru memMru ( trgt, symIter->symbol.getRank(),
                                    symIter->symbol );
 
                 errlHndl_t l_errl = NULL;
@@ -317,7 +338,7 @@ int32_t CenMbaIplCeStats::calloutCePerDram( bool & o_callOutsMade )
                               PRDF_MNFG_IPL_CE_ANALYSIS,
                               LIC_REFCODE,
                               PRDF_DETECTED_FAIL_HARDWARE,
-                              getHuid( mbaTrgt ),
+                              getHuid( trgt ),
                               0, PRDFSIG_MnfgIplDramCTE, 0);
 
                 addMruAndCommitErrl( memMru, l_errl);
@@ -338,19 +359,19 @@ int32_t CenMbaIplCeStats::calloutCePerDram( bool & o_callOutsMade )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaIplCeStats::calloutCePerRank( bool & o_callOutsMade )
+template<TYPE T>
+int32_t MemIplCeStats<T>::calloutCePerRank( bool & o_callOutsMade )
 {
-    #define PRDF_FUNC "[CenMbaIplCeStats::calloutCePerRank] "
+    #define PRDF_FUNC "[MemIplCeStats::calloutCePerRank] "
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mbaTrgt = iv_mbaChip->GetChipHandle();
+    TargetHandle_t trgt = iv_chip->getTrgt();
 
-    for ( CePerHalfRankMap::iterator rankIter = iv_rankMap.begin();
+    for ( typename CePerHalfRankMap::iterator rankIter = iv_rankMap.begin();
           rankIter != iv_rankMap.end(); rankIter++ )
     {
-        // First, check if this half rank is banned from analysis.
-        HalfRankKey banKey = { rankIter->first.rank,
-                               rankIter->first.portSlct };
+        // First, check if this half rank is banned from analysis
+        HalfRankKey banKey = { rankIter->first.rank, rankIter->first.portSlct };
 
         // Check if the rank has already been banned. Note that [] will create
         // the an entry if one does not exist, so used find() instead to check
@@ -360,12 +381,12 @@ int32_t CenMbaIplCeStats::calloutCePerRank( bool & o_callOutsMade )
 
         // Get the CEs per rank threshold.
         uint16_t junk0, rankTh, junk1;
-        o_rc = getMnfgMemCeTh( iv_mbaChip, rankIter->first.rank, junk0,
-                               rankTh, junk1 );
+        o_rc = getMnfgMemCeTh<T>( iv_chip, rankIter->first.rank, junk0,
+                                  rankTh, junk1 );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getMnfgMemCeTh() failed. MBA:0x%08X",
-                      getHuid( mbaTrgt ) );
+            PRDF_ERR( PRDF_FUNC "getMnfgMemCeTh() failed. trgt:0x%08X",
+                      getHuid( trgt ) );
             break;
         }
 
@@ -376,14 +397,13 @@ int32_t CenMbaIplCeStats::calloutCePerRank( bool & o_callOutsMade )
 
         // At this point a threshold has been reached. Callout a single symbol
         // found in this rank.
-        for ( CESymbols::iterator symIter = iv_ceSymbols.begin();
+        for ( typename CESymbols::iterator symIter = iv_ceSymbols.begin();
               symIter != iv_ceSymbols.end(); symIter++ )
         {
-            if ( (rankIter->first.rank == symIter->symbol.getRank() ) &&
-                 (rankIter->first.portSlct ==
-                                        symIter->symbol.getPortSlct()) )
+            if ( (rankIter->first.rank == symIter->symbol.getRank()) &&
+                 (rankIter->first.portSlct == symIter->symbol.getPortSlct()) )
             {
-                MemoryMru memMru ( mbaTrgt, symIter->symbol.getRank() ,
+                MemoryMru memMru ( trgt, symIter->symbol.getRank(),
                                    symIter->symbol );
 
                 errlHndl_t l_errl = NULL;
@@ -396,7 +416,7 @@ int32_t CenMbaIplCeStats::calloutCePerRank( bool & o_callOutsMade )
                               PRDF_MNFG_IPL_CE_ANALYSIS,
                               LIC_REFCODE,
                               PRDF_DETECTED_FAIL_HARDWARE,
-                              getHuid( mbaTrgt ),
+                              getHuid( trgt ),
                               0, PRDFSIG_MnfgIplRankCTE, 0);
 
                 addMruAndCommitErrl( memMru, l_errl);
@@ -416,19 +436,18 @@ int32_t CenMbaIplCeStats::calloutCePerRank( bool & o_callOutsMade )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaIplCeStats::calloutCePerDs( bool & o_callOutsMade )
+template<TYPE T>
+int32_t MemIplCeStats<T>::calloutCePerDs( bool & o_callOutsMade )
 {
-    #define PRDF_FUNC "[CenMbaIplCeStats::calloutCePerDs] "
+    #define PRDF_FUNC "[MemIplCeStats::calloutCePerDs] "
     int32_t o_rc = SUCCESS;
+    TargetHandle_t trgt = iv_chip->getTrgt();
 
-    TargetHandle_t mbaTrgt = iv_mbaChip->GetChipHandle();
-
-    for ( CePerHalfDsMap::iterator dsIter = iv_dsMap.begin();
+    for ( typename CePerHalfDsMap::iterator dsIter = iv_dsMap.begin();
           dsIter != iv_dsMap.end(); dsIter++ )
     {
-        // First, check if this half dimm select is banned from analysis.
-        HalfRankKey banKey = { dsIter->first.rank,
-                               dsIter->first.portSlct };
+        // First, check if this half fimm select is banned from analysis
+        HalfRankKey banKey = { dsIter->first.rank, dsIter->first.portSlct };
 
         // Check if the rank has already been banned. Note that [] will create
         // the an entry if one does not exist, so used find() instead to check
@@ -438,12 +457,12 @@ int32_t CenMbaIplCeStats::calloutCePerDs( bool & o_callOutsMade )
 
         // Get the CEs per dimm select threshold.
         uint16_t junk0, junk1, dsTh;
-        o_rc = getMnfgMemCeTh( iv_mbaChip, dsIter->first.rank, junk0,
-                               junk1, dsTh );
+        o_rc = getMnfgMemCeTh<T>( iv_chip, dsIter->first.rank, junk0,
+                                  junk1, dsTh );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getMnfgMemCeTh() failed. MBA:0x%08X",
-                      getHuid( mbaTrgt ) );
+            PRDF_ERR( PRDF_FUNC "getMnfgMemCeTh() failed. trgt:0x%08X",
+                      getHuid( trgt ) );
             break;
         }
 
@@ -454,15 +473,14 @@ int32_t CenMbaIplCeStats::calloutCePerDs( bool & o_callOutsMade )
 
         // At this point a threshold has been reached. Callout a single symbol
         // found in this dimm select.
-        for ( CESymbols::iterator symIter = iv_ceSymbols.begin();
+        for ( typename CESymbols::iterator symIter = iv_ceSymbols.begin();
               symIter != iv_ceSymbols.end(); symIter++ )
         {
             if ( (dsIter->first.rank.getDimmSlct()  ==
-                                symIter->symbol.getRank().getDimmSlct() )
-                && (dsIter->first.portSlct ==
-                                          symIter->symbol.getPortSlct()) )
+                                symIter->symbol.getRank().getDimmSlct()) &&
+                 (dsIter->first.portSlct == symIter->symbol.getPortSlct()) )
             {
-                MemoryMru memMru ( mbaTrgt, symIter->symbol.getRank() ,
+                MemoryMru memMru ( trgt, symIter->symbol.getRank() ,
                                    symIter->symbol );
 
                 errlHndl_t l_errl = NULL;
@@ -474,7 +492,7 @@ int32_t CenMbaIplCeStats::calloutCePerDs( bool & o_callOutsMade )
                               PRDF_MNFG_IPL_CE_ANALYSIS,
                               LIC_REFCODE,
                               PRDF_DETECTED_FAIL_HARDWARE,
-                              getHuid(mbaTrgt),
+                              getHuid(trgt),
                               0, PRDFSIG_MnfgIplDsCTE, 0);
 
                 addMruAndCommitErrl( memMru, l_errl);
@@ -494,14 +512,16 @@ int32_t CenMbaIplCeStats::calloutCePerDs( bool & o_callOutsMade )
 
 //------------------------------------------------------------------------------
 
-void CenMbaIplCeStats::addMruAndCommitErrl( const MemoryMru & i_memmru,
-                                            errlHndl_t i_errl )
+template<TYPE T>
+void MemIplCeStats<T>::addMruAndCommitErrl( const MemoryMru & i_memmru,
+                                   errlHndl_t i_errl )
 {
     // Add MemoryMru callouts and FFDC
-    CalloutUtil::calloutMemoryMru( i_errl, i_memmru,
-                                   SRCI_PRIORITY_HIGH,
-                                   HWAS::DELAYED_DECONFIG,
-                                   HWAS::GARD_Predictive );
+    //TODO RTC 168770
+    //CalloutUtil::calloutMemoryMru( i_errl, i_memmru,
+    //                               SRCI_PRIORITY_HIGH,
+    //                               HWAS::DELAYED_DECONFIG,
+    //                               HWAS::GARD_Predictive );
 
     // Add traces
     i_errl->collectTrace( PRDF_COMP_NAME, 512 );
@@ -509,5 +529,11 @@ void CenMbaIplCeStats::addMruAndCommitErrl( const MemoryMru & i_memmru,
     // Commit the error log
     ERRORLOG::errlCommit( i_errl, PRDF_COMP_ID );
 }
+
+//------------------------------------------------------------------------------
+
+// need these templates to avoid linker errors
+template class MemIplCeStats<TYPE_MCA>;
+template class MemIplCeStats<TYPE_MBA>;
 
 } // end namespace PRDF
