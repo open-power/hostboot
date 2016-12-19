@@ -1077,92 +1077,6 @@ foreach my $dmi (@{$dmibus->{'dmi-bus'}})
     push @dbus_centaur, [ $node, $membuf, $swap, $tx_swap, $rx_swap ];
 }
 
-#------------------------------------------------------------------------------
-# Process the proc-vrds MRW file
-#------------------------------------------------------------------------------
-my $proc_vrds_file = open_mrw_file($mrwdir, "${sysname}-proc-vrds.xml");
-my $mrwProcVoltageDomains = parse_xml_file($proc_vrds_file,
-                                 forcearray=>['proc-vrd-connection']);
-our %vrdHash = ();
-my %procVrdUuidHash;
-my %procVrdIdHash;
-my %validProcVrdTypes
-    = ('VCS' => 1, 'VDN' => 1, 'VIO' => 1, 'VDDR' => 1, 'VDD' => 1);
-
-use constant VRD_PROC_I2C_DEVICE_PATH => 'vrdProcI2cDevicePath';
-use constant VRD_PROC_I2C_ADDRESS => 'vrdProcI2cAddress';
-use constant VRD_PROC_DOMAIN_TYPE => 'vrdProcDomainType';
-use constant VRD_PROC_DOMAIN_ID => 'vrdProcDomainId';
-use constant VRD_PROC_UUID => 'vrdProcUuid';
-
-foreach my $mrwProcVoltageDomain (
-    @{$mrwProcVoltageDomains->{'proc-vrd-connection'}})
-{
-
-    if( (!exists $mrwProcVoltageDomain->{'vrd'}->{'i2c-dev-path'})
-      ||(!exists $mrwProcVoltageDomain->{'vrd'}->{'i2c-address'})
-      ||(ref($mrwProcVoltageDomain->{'vrd'}->{'i2c-dev-path'}) eq "HASH")
-       || (ref($mrwProcVoltageDomain->{'vrd'}->{'i2c-address'}) eq "HASH")
-       || ($mrwProcVoltageDomain->{'vrd'}->{'i2c-dev-path'} eq "")
-       || ($mrwProcVoltageDomain->{'vrd'}->{'i2c-address'} eq ""))
-   {
-       next;
-   }
-
-    my $procVrdDev  = $mrwProcVoltageDomain->{'vrd'}->{'i2c-dev-path'};
-    my $procVrdAddr = $mrwProcVoltageDomain->{'vrd'}->{'i2c-address'};
-    my $procVrdType = uc $mrwProcVoltageDomain->{'vrd'}->{'type'};
-    my $procInstance =
-        "n"  . $mrwProcVoltageDomain->{'proc'}->{'target'}->{'node'} .
-        ":p" . $mrwProcVoltageDomain->{'proc'}->{'target'}->{'position'};
-
-
-    if(!exists $validProcVrdTypes{$procVrdType})
-    {
-        print STDOUT "Illegal VRD type of $procVrdType used\n";
-        next;
-    }
-
-    if(!exists $procVrdIdHash{$procVrdType})
-    {
-        $procVrdIdHash{$procVrdType} = 1; # changed to 1 as 0 = invalid
-    }
-    my $uuid = -1;
-    foreach my $vrd (keys %vrdHash )
-    {
-        if(   ($vrdHash{$vrd}{VRD_PROC_I2C_DEVICE_PATH} eq $procVrdDev )
-           && ($vrdHash{$vrd}{VRD_PROC_I2C_ADDRESS}     eq $procVrdAddr)
-           && ($vrdHash{$vrd}{VRD_PROC_DOMAIN_TYPE}     eq $procVrdType) )
-        {
-            # print STDOUT "-> Duplicate VRD: $vrd  ($procInstance)\n";
-            # print STDOUT "-> Device path: $procVrdDev + Address: $procVrdAddr\n";
-            # print STDOUT "-> VR Domain Type: $procVrdType\n";
-            # print STDOUT "-> VR Domain ID: $vrdHash{$vrd}{VRD_PROC_DOMAIN_ID}\n";
-            $uuid =  $vrd;
-            last;
-        }
-    }
-
-    if($uuid == -1)
-    {
-        my $vrd = scalar keys %vrdHash;
-        $vrdHash{$vrd}{VRD_PROC_I2C_DEVICE_PATH} = $procVrdDev;
-        $vrdHash{$vrd}{VRD_PROC_I2C_ADDRESS} = $procVrdAddr;
-        $vrdHash{$vrd}{VRD_PROC_DOMAIN_TYPE} = $procVrdType;
-        $vrdHash{$vrd}{VRD_PROC_DOMAIN_ID} =
-            $procVrdIdHash{$procVrdType}++;
-        $uuid = $vrd;
-        if(0)
-        {
-            print STDOUT "** New vrd: $vrd  ($procInstance)\n";
-            print STDOUT "Device path: $procVrdDev + Address: $procVrdAddr\n";
-            print STDOUT "VRD Domain Type: $procVrdType\n";
-            print STDOUT "VRD Domain ID: $vrdHash{$vrd}{VRD_PROC_DOMAIN_ID}\n";
-        }
-    }
-    $procVrdUuidHash{$procInstance}{$procVrdType}{VRD_PROC_UUID} = $uuid;
-}
-
 
 #------------------------------------------------------------------------------
 # Process the dimm-vrds MRW file
@@ -1276,6 +1190,111 @@ if($vrmDebug)
         print STDOUT "VRM addr: " .  $vrmHash{$vrm}{VRM_I2C_ADDRESS} . "\n";
     }
 }
+
+#------------------------------------------------------------------------------
+# Process the proc-vrds MRW file
+#------------------------------------------------------------------------------
+my $proc_vrds_file = open_mrw_file($mrwdir, "${sysname}-proc-vrds.xml");
+my $mrwProcVoltageDomains = parse_xml_file($proc_vrds_file,
+                                 forcearray=>['proc-vrd-connection']);
+our %vrdHash = ();
+my %procVrdUuidHash;
+my %mcBistVrmUuidHash;
+my %procVrdIdHash;
+my %validProcVrdTypes
+    = ('VCS' => 1, 'VDN' => 1, 'VIO' => 1, 'VDDR' => 1, 'VDD' => 1);
+
+use constant VRD_PROC_I2C_DEVICE_PATH => 'vrdProcI2cDevicePath';
+use constant VRD_PROC_I2C_ADDRESS => 'vrdProcI2cAddress';
+use constant VRD_PROC_DOMAIN_TYPE => 'vrdProcDomainType';
+use constant VRD_PROC_DOMAIN_ID => 'vrdProcDomainId';
+use constant VRD_PROC_UUID => 'vrdProcUuid';
+
+foreach my $mrwProcVoltageDomain (
+    @{$mrwProcVoltageDomains->{'proc-vrd-connection'}})
+{
+
+    if( (!exists $mrwProcVoltageDomain->{'vrd'}->{'i2c-dev-path'})
+      ||(!exists $mrwProcVoltageDomain->{'vrd'}->{'i2c-address'})
+      ||(ref($mrwProcVoltageDomain->{'vrd'}->{'i2c-dev-path'}) eq "HASH")
+       || (ref($mrwProcVoltageDomain->{'vrd'}->{'i2c-address'}) eq "HASH")
+       || ($mrwProcVoltageDomain->{'vrd'}->{'i2c-dev-path'} eq "")
+       || ($mrwProcVoltageDomain->{'vrd'}->{'i2c-address'} eq ""))
+   {
+       next;
+   }
+
+    my $procVrdDev  = $mrwProcVoltageDomain->{'vrd'}->{'i2c-dev-path'};
+    my $procVrdAddr = $mrwProcVoltageDomain->{'vrd'}->{'i2c-address'};
+    my $procVrdType = uc $mrwProcVoltageDomain->{'vrd'}->{'type'};
+    my $procInstance =
+        "n"  . $mrwProcVoltageDomain->{'proc'}->{'target'}->{'node'} .
+        ":p" . $mrwProcVoltageDomain->{'proc'}->{'target'}->{'position'};
+
+
+    if(!exists $validProcVrdTypes{$procVrdType})
+    {
+        print STDOUT "Illegal VRD type of $procVrdType used\n";
+        next;
+    }
+
+    if(!exists $procVrdIdHash{$procVrdType})
+    {
+        $procVrdIdHash{$procVrdType} = 1; # changed to 1 as 0 = invalid
+    }
+    my $uuid = -1;
+    foreach my $vrd (keys %vrdHash )
+    {
+        if(   ($vrdHash{$vrd}{VRD_PROC_I2C_DEVICE_PATH} eq $procVrdDev )
+           && ($vrdHash{$vrd}{VRD_PROC_I2C_ADDRESS}     eq $procVrdAddr)
+           && ($vrdHash{$vrd}{VRD_PROC_DOMAIN_TYPE}     eq $procVrdType) )
+        {
+            # print STDOUT "-> Duplicate VRD: $vrd  ($procInstance)\n";
+            # print STDOUT "-> Device path: $procVrdDev + Address: $procVrdAddr\n";
+            # print STDOUT "-> VR Domain Type: $procVrdType\n";
+            # print STDOUT "-> VR Domain ID: $vrdHash{$vrd}{VRD_PROC_DOMAIN_ID}\n";
+            $uuid =  $vrd;
+            last;
+        }
+    }
+
+    if($uuid == -1)
+    {
+        my $vrd = scalar keys %vrdHash;
+        $vrdHash{$vrd}{VRD_PROC_I2C_DEVICE_PATH} = $procVrdDev;
+        $vrdHash{$vrd}{VRD_PROC_I2C_ADDRESS} = $procVrdAddr;
+        $vrdHash{$vrd}{VRD_PROC_DOMAIN_TYPE} = $procVrdType;
+        $vrdHash{$vrd}{VRD_PROC_DOMAIN_ID} =
+            $procVrdIdHash{$procVrdType}++;
+        $uuid = $vrd;
+
+        #Need to manually add in the VDDR from vrd to vrm.  This is specific to all IBM
+        #systems that use serverwiz 1 formatting == one and only ZZ system
+        if($procVrdType eq "VDDR")
+        {
+            if(!exists $vrmIdHash{$procVrdType})
+            {
+                $vrmIdHash{procVrdType} = 1; # changed to 1 as 0 = invalid
+            }
+            my $vrm = scalar keys %vrmHash;
+            $vrmHash{$vrm}{VRM_I2C_DEVICE_PATH} = $procVrdDev;
+            $vrmHash{$vrm}{VRM_I2C_ADDRESS} = $procVrdAddr;
+            $vrmHash{$vrm}{VRM_DOMAIN_TYPE} = $procVrdType;
+            $vrmHash{$vrm}{VRM_DOMAIN_ID} = $vrmIdHash{$procVrdType}++;
+            $mcBistVrmUuidHash{$procInstance}{$procVrdType}{VRM_UUID} = $vrm;
+        }
+
+        if(0)
+        {
+            print STDOUT "** New vrd: $vrd  ($procInstance)\n";
+            print STDOUT "Device path: $procVrdDev + Address: $procVrdAddr\n";
+            print STDOUT "VRD Domain Type: $procVrdType\n";
+            print STDOUT "VRD Domain ID: $vrdHash{$vrd}{VRD_PROC_DOMAIN_ID}\n";
+        }
+    }
+    $procVrdUuidHash{$procInstance}{$procVrdType}{VRD_PROC_UUID} = $uuid;
+}
+
 
 #------------------------------------------------------------------------------
 # Process the cec-chips and pcie-busses MRW files
@@ -2872,6 +2891,18 @@ sub addVoltageDomainIDs
       }
     }
   }
+
+  ## Add in the domain for VDDR for this proc (on ZZ proc based)
+  my $procInstance = "n0:p$proc";
+  my $key = $mcBistVrmUuidHash{$procInstance}{"VDDR"}{VRM_UUID};
+  my $domain_id = $vrmHash{$key}{VRM_DOMAIN_ID};
+  $o_vrm_uuids{ "VDDR" } = $key;
+  print "\n"
+            . "    <attribute>\n"
+            . "        <id>VDDR_ID</id>\n"
+            . "        <default>$domain_id</default>\n"
+            . "    </attribute>";
+
   return %o_vrm_uuids;
 }
 
