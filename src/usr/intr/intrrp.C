@@ -85,15 +85,18 @@ errlHndl_t IntrRp::resetIntpForMpipl()
     do{
         TARGETING::TargetHandleList l_funcProcs;
 
+        TARGETING::Target* masterProc = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle( masterProc );
+
         getAllChips(l_funcProcs, TYPE_PROC);
 
         //Need to make sure we have all of the functional procs in iv_chipList
-        for(auto & l_procChip : l_funcProcs)
+        for(const auto & l_procChip : l_funcProcs)
         {
-            intr_hdlr_t* l_procIntrHdlr = new intr_hdlr_t(l_procChip);
             //make sure it is not the master, as master has already been added
-            if (l_procIntrHdlr != iv_masterHdlr)
+            if (l_procChip != masterProc)
             {
+                intr_hdlr_t* l_procIntrHdlr = new intr_hdlr_t(l_procChip);
                 TRACFCOMP(g_trac_intr, "IntrRp::resetIntpForMpipl() Adding slave proc %lx to list of chips.", get_huid(l_procChip));
                 iv_chipList.push_back(l_procIntrHdlr);
                 // Set the common Interrupt BAR Scom Registers for the proc
