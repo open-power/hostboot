@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMemUtils.H $     */
+/* $Source: src/usr/diag/prdf/plat/mem/prdfMemUtils.H $                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,11 +23,11 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef prdfCenMemUtils_H
-#define prdfCenMemUtils_H
+#ifndef prdfMemUtils_H
+#define prdfMemUtils_H
 
-/** @file  prdfCenMemUtils.H
- *  @brief General utility functions for Centaur
+/** @file  prdfMemUtils.H
+ *  @brief General utility functions for memory
  */
 
 //------------------------------------------------------------------------------
@@ -35,7 +35,7 @@
 //------------------------------------------------------------------------------
 
 #include <vector>
-#include <prdfCenSymbol.H>
+#include <prdfMemSymbol.H>
 #include <prdfParserEnums.H>
 
 namespace PRDF
@@ -48,23 +48,6 @@ namespace MemUtils
 {
 
 //==============================================================================
-//  Constants and Enums
-//==============================================================================
-
-/**
- * @brief Lists all possible sizes for a DRAM.
- * @note  These values must match the definition of MBAXCR[6:7]. They are
- *        important for calculations.
- */
-enum DramSize
-{
-    SIZE_2GB  = 0,
-    SIZE_4GB  = 1,
-    SIZE_8GB  = 2,
-    SIZE_16GB = 3,
-};
-
-//==============================================================================
 //  Maintenance statistics
 //==============================================================================
 
@@ -73,7 +56,7 @@ enum DramSize
  */
 struct SymbolData
 {
-    CenSymbol symbol;
+    MemSymbol symbol;
     uint8_t count;
     SymbolData() : count(0) {}
 };
@@ -86,37 +69,11 @@ inline bool sortSymDataCount( const SymbolData & i, const SymbolData & j )
     return i.count < j.count;
 }
 
-/** Functor for MaintSymbols to match a DRAM. */
-class MatchSymDataDram
-{
-  public:
-    explicit MatchSymDataDram( const CenSymbol & i_d ) : iv_d(i_d.getDram()) {}
-
-    bool operator() ( const SymbolData & i_data ) const
-    { return ( iv_d == i_data.symbol.getDram() ); }
-
-  private:
-    uint8_t iv_d;
-};
-
-/** Functor for MaintSymbols to match a symbol. */
-class MatchSymDataSymbol
-{
-  public:
-    explicit MatchSymDataSymbol( const CenSymbol & i_s ) : iv_s(i_s) {}
-
-    bool operator() ( const SymbolData & i_data ) const
-    { return ( iv_s == i_data.symbol ); }
-
-  private:
-    CenSymbol iv_s;
-};
-
 /**
  * @brief  Queries the per symbol counters and returns a sorted list of symbols
  *         with a count greater than or equal to the given threshold.
  * @note   The returned list will be sorted from lowest count to highest count.
- * @param  i_mbaChip     Target MBA chip.
+ * @param  i_chip        Target mba or mca chip.
  * @param  i_rank        Target rank.
  * @param  o_maintStats  Returns the list of symbols and counts.
  * @param  o_chipMark    This represents the DRAM in which a chip mark should be
@@ -138,27 +95,19 @@ class MatchSymDataSymbol
  *                       return code.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
-                        MaintSymbols & o_maintStats, CenSymbol & o_chipMark,
+template<TARGETING::TYPE T>
+int32_t collectCeStats( ExtensibleChip * i_chip, const MemRank & i_rank,
+                        MaintSymbols & o_maintStats, MemSymbol & o_chipMark,
                         uint8_t i_thr = 1 );
 
 /**
- * @brief  Clears the per symbol CE counters on a target MBA (via MEMBUF and MBA
- *         position number).
- * @param  i_membChip MEMBUF chip.
- * @param  i_mbaPos   MBA positions number (0-1).
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ * @brief  Gets DRAM size for an MBA or MCA.
+ * @param  i_chip     MBA or MCA chip.
+ * @param  i_dimmSlct DIMM select.
+ * @return size for a DRAM
  */
-int32_t clearPerSymbolCounters( ExtensibleChip * i_membChip,
-                                uint32_t i_mbaPos );
-
-/**
- * @brief  Gets DRAM size for an MBA.
- * @param  i_mbaChip   MBA chip.
- * @param  o_size  size for a DRAM.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-int32_t getDramSize( ExtensibleChip * i_mbaChip, uint8_t & o_size );
+template<TARGETING::TYPE T>
+uint8_t getDramSize( ExtensibleChip * i_chip, uint8_t i_dimmSlct );
 
 /**
  * @brief  Check for channel fail attentions on the MCS side of the DMI bus.
@@ -170,7 +119,7 @@ int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
                              STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
- * @brief  Cleanup for channel CS on Centaur.
+ * @brief  Cleanup for channel CS.
  * @param  i_mbChip   Membuf chip.
  * @param  i_sc  Service Data Collector.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
