@@ -144,7 +144,24 @@ void* call_host_voltage_config( void *io_pArgs )
                          get_huid(l_proc),
                          0,
                          true /*HB SW error*/ );
-                break;
+                l_err->addHwCallout(l_proc,
+                                    HWAS::SRCI_PRIORITY_HIGH,
+                                    HWAS::NO_DECONFIG,
+                                    HWAS::GARD_NULL );
+
+                // We will allow this for the lab as long as this isn't the
+                //  master processor
+                TARGETING::Target* l_masterProc = NULL;
+                targetService().masterProcChipTargetHandle( l_masterProc );
+                if( l_masterProc == l_proc )
+                {
+                    break;
+                }
+
+                // Commit Error
+                errlCommit( l_err, ISTEP_COMP_ID );
+
+                continue;
             }
             //  for each child EQ target
             for( const auto & l_eq : l_eqList )
