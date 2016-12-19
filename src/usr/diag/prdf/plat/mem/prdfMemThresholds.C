@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaThresholds_common.C $ */
+/* $Source: src/usr/diag/prdf/plat/mem/prdfMemThresholds.C $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,8 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file  prdfCenMbaThresholds_common.C
- *  @brief Utility functions used to get specific Centaur thresholds.
+/** @file  prdfMemThresholds.C
+ *  @brief Utility functions used to get specific memory thresholds.
  */
 
 // Framework includes
@@ -32,9 +32,9 @@
 #include <prdfMfgThresholdMgr.H>
 #include <prdfPlatServices.H>
 
-// Pegasus includes
-#include <prdfCenMbaThresholds.H>
-#include <prdfCenMemUtils.H>
+// Platform includes
+#include <prdfMemThresholds.H>
+#include <prdfMemUtils.H>
 
 using namespace TARGETING;
 
@@ -48,6 +48,27 @@ static uint32_t MBA_RCE_NON_MNFG_TH = 8;
 
 // Non MNFG Scrub soft/intermittent CE threshold
 static uint32_t MBA_SCRUB_CE_NON_MNFG_TH = 80;
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  Returns the manufacturing memory CE thresholds Per 2GB ( base ).
+ */
+uint8_t getMnfgCeTh()
+{
+    #ifndef __HOSTBOOT_RUNTIME
+
+    return MfgThresholdMgr::getInstance()->
+            getThreshold( TARGETING::ATTR_MNFG_TH_CEN_MBA_IPL_SOFT_CE_TH_ALGO );
+
+    #else
+
+    return MfgThresholdMgr::getInstance()->
+            getThreshold( TARGETING::ATTR_MNFG_TH_CEN_MBA_RT_SOFT_CE_TH_ALGO );
+
+    #endif
+
+}
 
 //------------------------------------------------------------------------------
 
@@ -69,7 +90,8 @@ ThresholdResolution::ThresholdPolicy getRceThreshold()
 
 //------------------------------------------------------------------------------
 
-int32_t getMnfgMemCeTh( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
+template <TYPE T>
+int32_t getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
                         uint16_t & o_cePerDram, uint16_t & o_cePerHalfRank,
                         uint16_t & o_cePerDimm )
 {
@@ -91,20 +113,14 @@ int32_t getMnfgMemCeTh( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
         }
 
         // Get DRAM size
-        uint8_t size = 0;
-        o_rc = MemUtils::getDramSize( i_mbaChip, size );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "MemUtils::getDramSize() failed" );
-            break;
-        }
+        uint8_t size = MemUtils::getDramSize<T>( i_chip, i_rank.getDimmSlct() );
 
         // Get number of ranks per DIMM select.
-        uint8_t rankCount = getRanksPerDimm( i_mbaChip->GetChipHandle(),
-                                             i_rank.getDimmSlct() );
+        uint8_t rankCount = getNumRanksPerDimm<T>(
+                                i_chip->getTrgt(), i_rank.getDimmSlct() );
         if ( 0 == rankCount )
         {
-            PRDF_ERR( PRDF_FUNC "PlatServices::getRanksPerDimm() failed" );
+            PRDF_ERR( PRDF_FUNC "PlatServices::getNumRanksPerDimm() failed" );
             o_rc = FAIL; break;
         }
 
@@ -134,9 +150,19 @@ int32_t getMnfgMemCeTh( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
+// need these templates to avoid linker errors
+template int32_t getMnfgMemCeTh<TYPE_MCA>( ExtensibleChip * i_chip,
+                    const MemRank & i_rank, uint16_t & o_cePerDram,
+                    uint16_t & o_cePerHalfRank, uint16_t & o_cePerDimm );
 
-int32_t getScrubCeThreshold( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
+template int32_t getMnfgMemCeTh<TYPE_MBA>( ExtensibleChip * i_chip,
+                    const MemRank & i_rank, uint16_t & o_cePerDram,
+                    uint16_t & o_cePerHalfRank, uint16_t & o_cePerDimm );
+
+
+//------------------------------------------------------------------------------
+template <TYPE T>
+int32_t getScrubCeThreshold( ExtensibleChip * i_chip, const MemRank & i_rank,
                              uint16_t & o_thr )
 {
     #define PRDF_FUNC "[getScrubCeThreshold] "
@@ -150,7 +176,7 @@ int32_t getScrubCeThreshold( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
         uint16_t junk1 = 0;
         uint16_t junk2 = 0;
 
-        o_rc = getMnfgMemCeTh( i_mbaChip, i_rank, o_thr, junk1, junk2 );
+        o_rc = getMnfgMemCeTh<T>( i_chip, i_rank, o_thr, junk1, junk2 );
         if ( SUCCESS != o_rc )
             PRDF_ERR( PRDF_FUNC "getMnfgMemCeTh() failed" );
 
@@ -163,6 +189,13 @@ int32_t getScrubCeThreshold( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
 
     #undef PRDF_FUNC
 }
+
+// need these templates to avoid linker errors
+template int32_t getScrubCeThreshold<TYPE_MCA>( ExtensibleChip * i_chip,
+                    const MemRank & i_rank, uint16_t & o_thr );
+template int32_t getScrubCeThreshold<TYPE_MBA>( ExtensibleChip * i_chip,
+                    const MemRank & i_rank, uint16_t & o_thr );
+
 
 } // end namespace PRDF
 
