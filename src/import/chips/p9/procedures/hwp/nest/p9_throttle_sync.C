@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,102 @@
 /// Constant definitions
 ///----------------------------------------------------------------------------
 const uint8_t SUPER_SYNC_BIT   = 14;
+const uint8_t MAX_MC_SIDES_PER_PROC = 2; // MC01, MC23
+
+// Structure that holds the potential master MCS for a MC side (MC01/MC23)
+struct mcSideInfo_t
+{
+    bool masterMcsFound = false;
+    // Master MCS for this MC side
+    fapi2::Target<fapi2::TARGET_TYPE_MCS> masterMcs;
+};
+
+
+///
+/// @brief Programming master MCS
+///        Writes MCS_MCSYNC reg to set the input MCS as the master.
+///
+/// @param[in]  i_mcsTarget  The MCS target to be programmed as master.
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode progMasterMcs(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_mcsTarget)
+{
+    FAPI_DBG("Entering");
+    fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_scomData(0);
+    fapi2::buffer<uint64_t> l_scomMask(0);
+
+    // -------------------------------------------------------------------
+    // 1. Reset sync command
+    // -------------------------------------------------------------------
+
+    // Note:
+    // MCS_MCSYNC reg bit 16 is now used to setup SYNC_GO for both channels.
+    // Bit 17 is now reserved (it was MCS_MCSYNC_SYNC_GO_CH1 before)
+    //   REGISTER MCSYNC(mcsync(0:27), 0x000000000);
+    //      MCSYNC.address(SCOM) += 0x00000015;
+    //      MCSYNC.comment = "MC Sync Command Register (MCSYNC)";
+    //      MCSYNC.attr(part_decl) = "0:7   = MCSYNC_Channel_Select"
+    //                               "8:15  = MCSYNC_Sync_Type"
+    //                               "16    = MCSYNC_Sync_Go"
+    //                               "17:27 = MCSYNC_Reserved";
+    //      MCSYNC.attr(access) = "**::SCOM = RW";
+    //      MCSYNC.attr(parity) = "mcSYNC_pe";
+    //      MCSYNC.attr(wpulse) = "act_sc15";
+
+    l_scomMask.flush<0>().setBit<MCS_MCSYNC_SYNC_GO_CH0>();
+    l_scomData.flush<0>();
+    FAPI_TRY(fapi2::putScomUnderMask(i_mcsTarget, MCS_MCSYNC,
+                                     l_scomData, l_scomMask),
+             "putScomUnderMask() returns an error (Sync reset), Addr 0x%.16llX",
+             MCS_MCSYNC);
+
+    // --------------------------------------------------------------
+    // 2. Setup MC Sync Command Register data for master MCS
+    // --------------------------------------------------------------
+    // Clear buffers
+    l_scomData.flush<0>();
+    l_scomMask.flush<0>();
+
+    // Setup MCSYNC_CHANNEL_SELECT
+    // Set ALL channels with or without DIMMs (bits 0:7)
+    l_scomData.setBit<MCS_MCSYNC_CHANNEL_SELECT,
+                      MCS_MCSYNC_CHANNEL_SELECT_LEN>();
+    l_scomMask.setBit<MCS_MCSYNC_CHANNEL_SELECT,
+                      MCS_MCSYNC_CHANNEL_SELECT_LEN>();
+
+    // Setup MCSYNC_SYNC_TYPE
+    // Set all sync types except Super Sync
+    l_scomData.setBit<MCS_MCSYNC_SYNC_TYPE,
+                      MCS_MCSYNC_SYNC_TYPE_LEN>().clearBit(SUPER_SYNC_BIT);
+    l_scomMask.setBit<MCS_MCSYNC_SYNC_TYPE,
+                      MCS_MCSYNC_SYNC_TYPE_LEN>();
+
+    // Setup SYNC_GO (bit 16 is now used for both channels)
+    l_scomMask.setBit<MCS_MCSYNC_SYNC_GO_CH0>();
+    l_scomData.setBit<MCS_MCSYNC_SYNC_GO_CH0>();
+
+    // --------------------------------------------------------------
+    // 3. Write to MC Sync Command Register of master MCS
+    // --------------------------------------------------------------
+    // Write to MCSYNC reg
+    FAPI_INF("Writing MCS_MCSYNC reg 0x%.16llX: Mask 0x%.16llX , Data 0x%.16llX",
+             MCS_MCSYNC, l_scomMask, l_scomData);
+
+    FAPI_TRY(fapi2::putScomUnderMask(i_mcsTarget, MCS_MCSYNC,
+                                     l_scomData, l_scomMask),
+             "putScomUnderMask() returns an error (Sync), MCS_MCSYNC reg 0x%.16llX",
+             MCS_MCSYNC);
+
+    // Note: No need to read Sync replay count and retry in P9.
+
+fapi_try_exit:
+    FAPI_DBG("Exiting");
+    return fapi2::current_err;
+}
+
 
 ///
 /// @brief Perform throttle sync on the Memory Controllers
@@ -69,129 +165,92 @@ fapi2::ReturnCode throttleSync(
 {
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    fapi2::buffer<uint64_t> l_scomData(0);
-    fapi2::buffer<uint64_t> l_scomMask(0);
-    bool l_mcaWithDimm[MAX_MCA_PER_PROC];
-    fapi2::Target<fapi2::TARGET_TYPE_MCS> l_masterMcs;
-    fapi2::Target<fapi2::TARGET_TYPE_MCA> l_mca;
-    uint8_t l_masterMcsPos = 0;
-    uint8_t l_mcaPos = 0;
+    mcSideInfo_t l_mcSide[MAX_MC_SIDES_PER_PROC];
+    uint8_t l_sideNum = 0;
+    uint8_t l_pos = 0;
+    uint8_t l_numMasterProgrammed = 0;
 
-    // Initialize
-    memset(l_mcaWithDimm, false, sizeof(l_mcaWithDimm));
-
-    // --------------------------------------------------------------
-    // 1. Determine the 'master' MCS and mark which MCA ports have
-    //    dimms attached
-    // --------------------------------------------------------------
-    bool l_masterMcsFound = false;
-
-    for (auto l_mcs :  i_mcTargets)
+    // Initialization
+    for (l_sideNum = 0; l_sideNum < MAX_MC_SIDES_PER_PROC; l_sideNum++)
     {
-        // Find first MCS that has DIMM attached
+        l_mcSide[l_sideNum].masterMcsFound = false;
+    }
+
+    // ---------------------------------------------------------------------
+    // 1. Pick the first MCS with DIMMS as potential master
+    //    for both MC sides (MC01/MC23)
+    // ---------------------------------------------------------------------
+    for (auto l_mcs : i_mcTargets)
+    {
         std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > l_dimms =
             mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_mcs);
 
         if (l_dimms.size() > 0)
         {
-            // Set first MCS with DIMM attached to be master
-            if (l_masterMcsFound == false)
-            {
-                l_masterMcs = l_mcs;
-                l_masterMcsFound = true;
-            }
+            // This MCS has DIMMs attached, find out which MC side it
+            // belongs to:
+            //    l_sideNum = 0 --> MC01
+            //                1 --> MC23
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mcs,
+                                   l_pos),
+                     "Error getting ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                     (uint64_t)fapi2::current_err);
+            l_sideNum = l_pos / MAX_MC_SIDES_PER_PROC;
 
-            // Loop over the DIMM list to mark the MCAs that own them
-            for (auto l_thisDimm : l_dimms)
+            FAPI_INF("MCS %u has DIMMs", l_pos);
+
+            // If there's no master MCS marked for this side yet, mark
+            // this MCS as master
+            if (l_mcSide[l_sideNum].masterMcsFound == false)
             {
-                l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(l_thisDimm);
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mca, l_mcaPos),
-                         "Error getting ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
-                         (uint64_t)fapi2::current_err);
-                l_mcaWithDimm[l_mcaPos] = true;
+                FAPI_INF("Mark MCS %u as master for MC side %",
+                         l_pos, l_sideNum);
+                l_mcSide[l_sideNum].masterMcsFound = true;
+                l_mcSide[l_sideNum].masterMcs = l_mcs;
             }
         }
     }
 
-    // No master found
-    if (l_masterMcsFound == false)
+    // --------------------------------------------------------------
+    // 2. Program the master MCS
+    // --------------------------------------------------------------
+    for (l_sideNum = 0; l_sideNum < MAX_MC_SIDES_PER_PROC; l_sideNum++)
     {
-        // Nothing to do with this proc, exit
-        // Note: This is a common scenario on Cronus platform.
-        goto fapi_try_exit;
+        // If there is a potential master MCS found for this side
+        if (l_mcSide[l_sideNum].masterMcsFound == true)
+        {
+            // No master MCS programmed for either side yet,
+            // go ahead and program this MCS as master.
+            if (l_numMasterProgrammed == 0)
+            {
+                FAPI_TRY(progMasterMcs(l_mcSide[l_sideNum].masterMcs),
+                         "programMasterMcs() returns error"
+                         "NumMasterProgrammed %d, l_rc 0x%.8X",
+                         l_numMasterProgrammed, (uint64_t)fapi2::current_err);
+                l_numMasterProgrammed++;
+            }
+            else
+            {
+                // A master MCS is already programmed on MC side 0 (MC01).
+                // HW397255 requires to also program a master MCS on MC23 if
+                // it has DIMMs.
+                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_chip =
+                    l_mcSide[l_sideNum].masterMcs.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+                fapi2::ATTR_CHIP_EC_FEATURE_HW397255_Type l_HW397255_enabled;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW397255,
+                                       l_chip, l_HW397255_enabled),
+                         "Error getting the ATTR_CHIP_EC_FEATURE_HW397255");
+
+                if (l_HW397255_enabled)
+                {
+                    FAPI_TRY(progMasterMcs(l_mcSide[l_sideNum].masterMcs),
+                             "programMasterMcs() returns error"
+                             "NumMasterProgrammed %d, l_rc 0x%.8X",
+                             l_numMasterProgrammed, (uint64_t)fapi2::current_err);
+                }
+            }
+        }
     }
-
-    // Display MCS/MCA with DIMM attached
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_masterMcs,
-                           l_masterMcsPos),
-             "Error getting ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-    FAPI_INF("Master MCS pos %u", l_masterMcsPos);
-    FAPI_DBG("MCA with DIMM attached:");
-
-    for (uint8_t ii = 0; ii < MAX_MCA_PER_PROC; ii++)
-    {
-        FAPI_DBG("    MCA[%u] %u", ii, l_mcaWithDimm[ii]);
-    }
-
-    // -------------------------------------------------------------------
-    // 2. Reset sync command on both channels to make sure they are clean
-    // -------------------------------------------------------------------
-    // Reset the sync command on both channels to make sure they are clean
-    l_scomMask.flush<0>().setBit<MCS_MCSYNC_SYNC_GO_CH0>();
-    l_scomData.flush<0>();
-
-    FAPI_TRY(fapi2::putScomUnderMask(l_masterMcs, MCS_MCSYNC,
-                                     l_scomData, l_scomMask),
-             "putScomUnderMask() returns an error (Sync reset), Addr 0x%.16llX",
-             MCS_MCSYNC);
-
-    // --------------------------------------------------------------
-    // 3. Setup MC Sync Command Register data for master MCS
-    // --------------------------------------------------------------
-
-    // Clear buffers
-    l_scomData.flush<0>();
-    l_scomMask.flush<0>();
-
-    // Setup MCSYNC_CHANNEL_SELECT
-    // Set ALL channels with or without DIMMs (bits 0:7)
-    l_scomData.setBit<MCS_MCSYNC_CHANNEL_SELECT,
-                      MCS_MCSYNC_CHANNEL_SELECT_LEN>();
-    l_scomMask.setBit<MCS_MCSYNC_CHANNEL_SELECT,
-                      MCS_MCSYNC_CHANNEL_SELECT_LEN>();
-
-    // Setup MCSYNC_SYNC_TYPE
-    // Set all sync types except Super Sync
-    l_scomData.setBit<MCS_MCSYNC_SYNC_TYPE,
-                      MCS_MCSYNC_SYNC_TYPE_LEN>().clearBit(SUPER_SYNC_BIT);
-    l_scomMask.setBit<MCS_MCSYNC_SYNC_TYPE,
-                      MCS_MCSYNC_SYNC_TYPE_LEN>();
-
-    // Setup SYNC_GO, pick either MCA port of the master MCS, but the port
-    // must have DIMM connected.
-    l_mcaPos = l_masterMcsPos * 2; // 1st MCS postion of the master MCS
-
-    if (l_mcaWithDimm[l_mcaPos] == true)
-    {
-        l_scomMask.setBit<MCS_MCSYNC_SYNC_GO_CH0>();
-        l_scomData.setBit<MCS_MCSYNC_SYNC_GO_CH0>();
-    }
-
-    // --------------------------------------------------------------
-    // 4. Write to MC Sync Command Register of master MCS
-    // --------------------------------------------------------------
-
-    // Write to MCSYNC reg
-    FAPI_INF("Writing MCS_MCSYNC reg 0x%.16llX: Mask 0x%.16llX , Data 0x%.16llX",
-             MCS_MCSYNC, l_scomMask, l_scomData);
-
-    FAPI_TRY(fapi2::putScomUnderMask(l_masterMcs, MCS_MCSYNC,
-                                     l_scomData, l_scomMask),
-             "putScomUnderMask() returns an error (Sync), MCS_MCSYNC reg 0x%.16llX",
-             MCS_MCSYNC);
-
-    // Note: No need to read Sync replay count and retry in P9.
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
