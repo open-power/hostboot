@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -206,3 +206,69 @@
         capture     group default;
     };
 
+    ###########################################################################
+    # P9 MCBIST Modal Symbol Counter Registers
+    ###########################################################################
+
+    register MCB_MBSSYMEC0
+    {
+        name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC0Q";
+        scomaddr    0x07012358;
+        capture     group default;
+    };
+
+    register MCB_MBSSYMEC1
+    {
+        name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC1Q";
+        scomaddr    0x07012359;
+        capture     group default;
+    };
+
+    register MCB_MBSSYMEC2
+    {
+        name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC2Q";
+        scomaddr    0x0701235A;
+        capture     group default;
+    };
+
+    register MCB_MBSSYMEC3
+    {
+        name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC3Q";
+        scomaddr    0x0701235B;
+        capture     group default;
+    };
+
+    register MCB_MBSSYMEC4
+    {
+        name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC4Q";
+        scomaddr    0x0701235C;
+        capture     group default;
+    };
+
+    register MCB_MBSSYMEC5
+    {
+        name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC5Q";
+        scomaddr    0x0701235D;
+        capture     group default;
+    };
+
+    register MCB_MBSSYMEC6
+    {
+        name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC6Q";
+        scomaddr    0x0701235E;
+        capture     group default;
+    };
+
+    register MCB_MBSSYMEC7
+    {
+        name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC7Q";
+        scomaddr    0x0701235F;
+        capture     group default;
+    };
+
+    register MCB_MBSSYMEC8
+    {
+        name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC8Q";
+        scomaddr    0x07012360;
+        capture     group default;
+    };
