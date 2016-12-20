@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,24 +40,21 @@ constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_13 = 13;
 constexpr uint64_t literal_1867 = 1867;
-constexpr uint64_t literal_19 = 19;
+constexpr uint64_t literal_22 = 22;
 constexpr uint64_t literal_14 = 14;
-constexpr uint64_t literal_20 = 20;
 constexpr uint64_t literal_15 = 15;
 constexpr uint64_t literal_2134 = 2134;
-constexpr uint64_t literal_21 = 21;
-constexpr uint64_t literal_16 = 16;
-constexpr uint64_t literal_22 = 22;
-constexpr uint64_t literal_2401 = 2401;
-constexpr uint64_t literal_23 = 23;
-constexpr uint64_t literal_18 = 18;
-constexpr uint64_t literal_24 = 24;
-constexpr uint64_t literal_2667 = 2667;
-constexpr uint64_t literal_25 = 25;
 constexpr uint64_t literal_26 = 26;
-constexpr uint64_t literal_3 = 3;
-constexpr uint64_t literal_27 = 27;
+constexpr uint64_t literal_16 = 16;
+constexpr uint64_t literal_2401 = 2401;
+constexpr uint64_t literal_18 = 18;
+constexpr uint64_t literal_2667 = 2667;
+constexpr uint64_t literal_19 = 19;
 constexpr uint64_t literal_28 = 28;
+constexpr uint64_t literal_20 = 20;
+constexpr uint64_t literal_3 = 3;
+constexpr uint64_t literal_24 = 24;
+constexpr uint64_t literal_30 = 30;
 constexpr uint64_t literal_5 = 5;
 constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_7 = 7;
@@ -201,87 +198,87 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             else if ((((l_def_MEM_TYPE_1866_13 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_19 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_22 );
             }
             else if ((((l_def_MEM_TYPE_1866_14 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_20 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_22 );
             }
             else if ((((l_def_MEM_TYPE_2133_15 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_21 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_26 );
             }
             else if ((((l_def_MEM_TYPE_2133_16 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_22 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_26 );
             }
             else if ((((l_def_MEM_TYPE_2400_16 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_22 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_26 );
             }
             else if ((((l_def_MEM_TYPE_2400_17 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_23 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_26 );
             }
             else if ((((l_def_MEM_TYPE_2400_18 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_24 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_26 );
             }
             else if ((((l_def_MEM_TYPE_2667_18 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_24 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_26 );
             }
             else if ((((l_def_MEM_TYPE_2667_19 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_25 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_28 );
             }
             else if ((((l_def_MEM_TYPE_2667_20 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_26 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_28 );
             }
             else if ((((l_def_MEM_TYPE_1866_13 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_21 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_24 );
             }
             else if ((((l_def_MEM_TYPE_1866_14 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_22 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_24 );
             }
             else if ((((l_def_MEM_TYPE_2133_15 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_23 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_28 );
             }
             else if ((((l_def_MEM_TYPE_2133_16 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_24 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_28 );
             }
             else if ((((l_def_MEM_TYPE_2400_16 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_24 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_28 );
             }
             else if ((((l_def_MEM_TYPE_2400_17 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_25 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_28 );
             }
             else if ((((l_def_MEM_TYPE_2400_18 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_26 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_28 );
             }
             else if ((((l_def_MEM_TYPE_2667_18 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
@@ -291,12 +288,12 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             else if ((((l_def_MEM_TYPE_2667_19 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_27 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_30 );
             }
             else if ((((l_def_MEM_TYPE_2667_20 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_28 );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_30 );
             }
 
             if (((l_def_MSS_FREQ_EQ_1866 == literal_1) && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)))
