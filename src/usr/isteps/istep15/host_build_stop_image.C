@@ -429,6 +429,9 @@ void* host_build_stop_image (void *io_pArgs)
                 uint32_t    l_sizeImageOut  =
                   ((P9_MAX_PROCS * (4 * MEGABYTE)));
 
+                //Make sure that the HOMER is zeroed out for the MPIPL path
+                memset(l_pImageOut, 0, 4 * MEGABYTE);
+
                 //Set default values, used later by p9_hcode_build
                 l_procChip->setAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>
                                                         (l_procRealMemAddr);
