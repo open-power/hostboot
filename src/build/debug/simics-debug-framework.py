@@ -604,9 +604,11 @@ def magic_instruction_callback(user_arg, cpu, arg):
         low_priority = 10
         mem_map_entries = (conf.system_cmp0.phys_mem).map
         for entry in mem_map_entries:
-            # 0=base, 1=name, 5=mirrored target, 6=priority
+            # 0=base, 1=name, 4=size 5=mirrored target, 6=priority
             #print ">> %d:%s" % (entry[0], entry[1])
-            if (entry[0] == hb_hrmor) or ((entry[0] >= (chip_num*per_chip)) and (entry[0] <= ((chip_num+1)*per_chip))):
+            #check if base == hrmor, or if memory space encompasses the
+            #entire base memory which is:  hrmor + 0x2000000 (32 MB)
+            if (entry[0] == hb_hrmor) or ((entry[0] < hb_hrmor) and (entry[0] + entry[4] >= hb_hrmor + 0x2000000 )):
                 target = entry[5]
                 priority = entry[6]
                 # Check if there is a target that needs to be investigated that
@@ -625,6 +627,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
                     mem_object = simics.SIM_object_name(entry[1])
                     base_addr = entry[0]
                     #print "Found entry %s for hrmor %d" % (mem_object, hb_hrmor)
+                    low_priority = priority
                     #break
 
         if mem_object == None:
