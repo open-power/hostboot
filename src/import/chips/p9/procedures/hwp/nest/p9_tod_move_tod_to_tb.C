@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -169,6 +169,7 @@ extern "C"
             //Write TOD_MOVE_TOD_TO_TB_REG(@0x17)[00]=b'1'(move TOD to Timebase). The TOD transfers the TOD value to the Timebase after a SYNC boundary occurred. Note that TOD_TX_TTYPE_CTRL_REG(@0x27)[24:31] needs to be configured before issuing a TOD transfer to Timebase.The address of the PIB slave targeted by the TOD PIB master is configured as 0xNN0126a1 where NN is the configurable slave address specified in TOD_TX_TTYPE_CTRL_REG(@0x27)[24:31].
             data.flush<0>();
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, coreTarget, l_core_id));
+            //0x20 is the "base" chiplet number for all the cores that's why we add it to the core id
             l_core_id = l_core_id + 0x20;
             data.insertFromRight(l_core_id, 0, 8);
 
