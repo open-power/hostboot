@@ -389,7 +389,37 @@ errlHndl_t configureHbrtHypIds(const bool i_configForPhyp)
                 hbrtHypId =
                     pEx->getAttr<TARGETING::ATTR_ORDINAL_ID>();
             }
-            else
+            else if( (*pIt)->getAttr<TARGETING::ATTR_TYPE>()
+                     == TARGETING::TYPE_MEMBUF )
+            {
+                //MEMBUF
+                // 0b1000.0000.0000.0000.0000.0PPP.PPPP.MMMM
+                // where PP is the parent proc's id, MMMM is memory channel
+                //
+                TARGETING::TargetHandleList targetList;
+
+                getParentAffinityTargets(targetList,
+                                         (*pIt),
+                                         TARGETING::CLASS_UNIT,
+                                         TARGETING::TYPE_MCS);
+                assert( !targetList.empty() );
+
+                auto mcs_target = targetList[0];
+                auto pos = mcs_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+                targetList.clear();
+                getParentAffinityTargets(targetList,
+                                         mcs_target,
+                                         TARGETING::CLASS_CHIP,
+                                         TARGETING::TYPE_PROC);
+                assert( !targetList.empty() );
+
+                auto procTarget = targetList[0];
+                hbrtHypId = procTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+                hbrtHypId = (hbrtHypId << RT_TARG::MEMBUF_ID_SHIFT);
+                hbrtHypId += pos;
+            }
+            else // just PROC
             {
                 hbrtHypId = (*pIt)->getAttr<TARGETING::ATTR_ORDINAL_ID>();
             }
