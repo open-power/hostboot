@@ -756,13 +756,14 @@ fapi2::ReturnCode setup_HTM_MEM(
     // Note: Yes, write same value to both engines.
     for (uint8_t ii = 0; ii < NUM_NHTM_ENGINES; ii++)
     {
+        // MEM_ALLOC must switch from 0->1 for this setup to complete
+        l_scomData.clearBit<PU_HTM0_HTM_MEM_HTMSC_ALLOC>();
         FAPI_TRY(fapi2::putScom(i_target, NHTM_modeRegList[ii] + HTM_MEM,
                                 l_scomData),
                  "setup_HTM_MEM: putScom returns error (1): Addr 0x%016llX, "
                  "l_rc 0x%.8X",  NHTM_modeRegList[ii] + HTM_MEM,
                  (uint64_t)fapi2::current_err);
 
-        // MEM_ALLOC must switch from 0->1 for this setup to complete
         l_scomData.setBit<PU_HTM0_HTM_MEM_HTMSC_ALLOC>();
         FAPI_TRY(fapi2::putScom(i_target, NHTM_modeRegList[ii] + HTM_MEM,
                                 l_scomData),
@@ -972,7 +973,7 @@ fapi2::ReturnCode setup_HTM_MODE(
     FAPI_DBG("  ATTR_HTMSC_MODE_VGTARGET              0x%.8X", l_uint32_attr);
     l_scomData.insertFromRight<PU_HTM0_HTM_MODE_HTMSC_VGTARGET,
                                PU_HTM0_HTM_MODE_HTMSC_VGTARGET_LEN>
-                               (l_uint32_attr);
+                               (~l_uint32_attr);
 
     // Display HTM_MODE reg setup value
     FAPI_INF("setup_HTM_MODE: HTM_MODE reg setup: 0x%016llX", l_scomData);
