@@ -498,7 +498,7 @@
   <id>ATTR_HTMSC_MODE_VGTARGET</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description> Nest HTM: VG target mode.
-                HTM Collection Mode Register (24:39).
+                Stores inverse of HTM Collection Mode Register (24:39).
                 Vg Target bits should be configured if HTM_MEM[scope] is Vg
                 or if Disable Group Scope=1
   </description>
