@@ -148,6 +148,10 @@ errlHndl_t IntrRp::resetIntpForMpipl()
         //Reset XIVE Interrupt unit
         resetIntUnit(iv_masterHdlr);
 
+        //Clear out the mask list because pq state buffer gets cleared after
+        //resetting the XIVE Interrupt unit
+        iv_maskList.clear();
+
     }while(0);
 
     return err;
