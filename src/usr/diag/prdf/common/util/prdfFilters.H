@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -397,12 +397,43 @@ class SecondaryBitsFilter: public FilterClass
      * @param  io_sdc      reference to STEP_CODE_DATA struct.
      * @return true if bit key is modified false otherwise.
      */
-    virtual bool Apply( BitKey & ioBitList, STEP_CODE_DATA_STRUCT & io_sdc );
+    virtual bool Apply( BitKey & io_bitList, STEP_CODE_DATA_STRUCT & io_sdc );
 
   private: // data
 
     std::vector<uint8_t> iv_secBitList; // list of bit pos marked as secondary
 
+};
+
+class CsRootCauseFilter: public FilterClass
+{
+    public:
+
+      /** @brief default constructor */
+      CsRootCauseFilter() = default;
+
+      /**
+       * @brief   constructor
+       * @param   i_bitList  list of bits identifed as cs_root_cause in a FIR
+       */
+      CsRootCauseFilter( const std::vector<uint8_t> & i_bitList )
+      {
+          iv_csCauseBitList = i_bitList;
+      }
+
+      /**
+       * @brief  will only consider bits specified in cs_root_cause filter as
+       *         possible checkstop root causes in the given BitKey
+       * @param  i_bitList  bitkey on which cs_root_cause filter needs to act
+       * @param  io_sdc     reference to STEP_CODE_DATA struct
+       * @return true if bit key is modified, false otherwise
+       */
+      virtual bool Apply( BitKey & io_bitList, STEP_CODE_DATA_STRUCT & io_sdc );
+
+    private: // data
+
+      // list of bit pos marked as cs_root_cause
+      std::vector<uint8_t> iv_csCauseBitList;
 };
 
 } //End namespace PRDF

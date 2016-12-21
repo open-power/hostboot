@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1068,6 +1068,25 @@ void RuleMetaData::createGroup(Group * i_group,
         FilterClass * l_filter = new SecondaryBitsFilter( l_bits );
         i_group->AddFilter( l_filter, true );
 
+    }
+
+    std::vector<uint8_t> l_bits;
+    CreateBitString::execute(l_bits,
+            i_data.cv_loadChip->cv_groupCsRootCauseBits[i_groupId]);
+
+    // Do CS_ROOT_CAUSE filter flags
+    if ( i_data.cv_loadChip->cv_groupFlags[i_groupId] &
+         Prdr::PRDR_GROUP_FILTER_CS_ROOT_CAUSE )
+    {
+        FilterClass * l_filter = new CsRootCauseFilter( l_bits );
+        i_group->AddFilter( l_filter, true );
+    }
+
+    if ( i_data.cv_loadChip->cv_groupFlags[i_groupId] &
+         Prdr::PRDR_GROUP_FILTER_CS_ROOT_CAUSE_NULL )
+    {
+        FilterClass * l_filter = new CsRootCauseFilter();
+        i_group->AddFilter( l_filter, true );
     }
 
     // Do Priority filter flag.

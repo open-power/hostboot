@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -202,6 +202,7 @@ namespace Prdr
             uint8_t *       cv_groupFlags;
             Expr **         cv_groupPriorityBits;
             Expr **         cv_groupSecondaryBits;
+            Expr **         cv_groupCsRootCauseBits;
             Expr **         cv_groups;
             uint16_t        cv_actionCount;
             uint16_t *      cv_actionSize;
@@ -211,7 +212,8 @@ namespace Prdr
                          cv_ruleCount(0), cv_rules(NULL),
                          cv_groupCount(0), cv_groupSize(NULL),
                          cv_groupFlags(NULL), cv_groupPriorityBits(NULL),
-                         cv_groupSecondaryBits(NULL), cv_groups(NULL),
+                         cv_groupSecondaryBits(NULL),
+                         cv_groupCsRootCauseBits(NULL), cv_groups(NULL),
                          cv_actionCount(0), cv_actionSize(NULL),
                          cv_actions(NULL)
             {
@@ -228,6 +230,10 @@ namespace Prdr
 
                     if ( NULL != cv_groupSecondaryBits[i] )
                         delete cv_groupSecondaryBits[i];
+
+                    if ( NULL != cv_groupCsRootCauseBits[i] )
+                        delete cv_groupCsRootCauseBits[i];
+
                     if (NULL != cv_groups[i])
                         delete[] cv_groups[i];
                 }
@@ -237,6 +243,8 @@ namespace Prdr
                 if (NULL != cv_groupPriorityBits) delete[] cv_groupPriorityBits;
                 if ( NULL != cv_groupSecondaryBits )
                     delete[] cv_groupSecondaryBits;
+                if ( NULL != cv_groupCsRootCauseBits )
+                    delete[] cv_groupCsRootCauseBits;
                 for (int i = 0; i < cv_actionCount; i++)
                     if (NULL != cv_actions[i]) delete[] cv_actions[i];
                 if (NULL != cv_actions) delete[] cv_actions;

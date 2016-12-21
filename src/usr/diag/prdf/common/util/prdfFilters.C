@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -214,6 +214,59 @@ bool SecondaryBitsFilter::Apply( BitKey & io_bitList,
         {
             // So, we have no primary bits on. We have one or more secondary bit
             // on.
+            io_sdc.service_data->setSecondaryErrFlag();
+        }
+
+    }while(0);
+
+    return l_modified;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+bool CsRootCauseFilter::Apply( BitKey & io_bitList,
+                               STEP_CODE_DATA_STRUCT & io_sdc )
+{
+    #define PRDF_FUNC  "[CsRootCauseFilter::Apply] "
+
+    bool l_modified = false;
+
+    do
+    {
+
+        // This filter should only be applied on the primary pass.
+        if ( !io_sdc.service_data->isPrimaryPass() ) break;
+
+        // This filter should only be applied if the primary attention type is
+        // CHECK_STOP
+        if ( CHECK_STOP != io_sdc.service_data->getPrimaryAttnType() ) break;
+
+        // This filter should only be applied if the secondary attention type is
+        // RE or UNIT_CS
+        if ( (RECOVERABLE != io_sdc.service_data->getSecondaryAttnType()) &&
+             (UNIT_CS != io_sdc.service_data->getSecondaryAttnType()) ) break;
+
+        // If no bit is set in the bit key, let us skip this apply
+        if ( 0 == io_bitList.size() )
+            break;
+
+        // Return bits from the bit list that are in the filter list
+        BitKey removalList(io_bitList);
+        if ( !iv_csCauseBitList.empty() )
+        {
+            removalList.removeBits(iv_csCauseBitList);
+        }
+        if (0 != removalList.size())
+        {
+            io_bitList.removeBits(removalList);
+            l_modified = true;
+        }
+
+        if ( 0 == io_bitList.size() )
+        {
+            // We have no primary bits on, but one or more cs_root_cause bits on
             io_sdc.service_data->setSecondaryErrFlag();
         }
 

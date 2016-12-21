@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@ class Group
         std::list<Expr *> cv_rules;
         Expr * cv_priorityList;
         Expr * cv_secondaryList;
+        Expr * cv_csRootCauseList;
 
         char cv_op;
         uint8_t cv_flags;
@@ -55,12 +56,14 @@ class Group
         Group() :
             cv_priorityList(NULL),
             cv_secondaryList(NULL),
+            cv_csRootCauseList(NULL),
             cv_op(Prdr::GROUP),
             cv_flags(0),
             cv_doxcomment() {};
         Group(char o) :
             cv_priorityList(NULL),
             cv_secondaryList(NULL),
+            cv_csRootCauseList(NULL),
             cv_op(o),
             cv_flags(0),
             cv_doxcomment() {};
@@ -83,6 +86,12 @@ class Group
             if ( NULL != i_l->cv_secondaryList )
             {
                 i_r->cv_secondaryList = i_l->cv_secondaryList;
+            }
+
+            // Set CS root cause bit list
+            if ( NULL != i_l->cv_csRootCauseList )
+            {
+                i_r->cv_csRootCauseList = i_l->cv_csRootCauseList;
             }
 
         };
@@ -199,6 +208,13 @@ class Group
                     {
                         cv_secondaryList->output( i_file );
                     }
+                    if ( Prdr::PRDR_GROUP_FILTER_CS_ROOT_CAUSE & cv_flags)
+                    {
+                        if ( NULL != cv_csRootCauseList )
+                        {
+                            cv_csRootCauseList->output( i_file );
+                        }
+                    }
                 }
 
                 for (std::list<Expr *>::iterator i = cv_rules.begin();
@@ -263,6 +279,33 @@ class Group_Filter_Secondary : public Group_Filter
     private:
     Expr * iv_secList;
 };
+
+class Group_Filter_CS_Root_Cause : public Group_Filter
+{
+    public:
+    Group_Filter_CS_Root_Cause() : iv_csCauseList(NULL) {};
+
+    Group_Filter_CS_Root_Cause( Expr * i_list ) : iv_csCauseList( i_list ) {};
+
+    void AddFilter( Group * i_group )
+    {
+        i_group->cv_flags |= Prdr::PRDR_GROUP_FILTER_CS_ROOT_CAUSE;
+        i_group->cv_csRootCauseList = iv_csCauseList;
+    };
+
+    private:
+    Expr * iv_csCauseList;
+};
+
+class Group_Filter_CS_Root_Cause_Null : public Group_Filter
+{
+    public:
+        void AddFilter(Group * i_group)
+            {
+                i_group->cv_flags |= Prdr::PRDR_GROUP_FILTER_CS_ROOT_CAUSE_NULL;
+            };
+};
+
 } // end namespace PRDR_COMPILER
 
 #endif
