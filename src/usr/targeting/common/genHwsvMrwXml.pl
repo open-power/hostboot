@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -2950,15 +2950,10 @@ sub generate_sys
         <default>$plat</default>
     </attribute>\n";
 
-    #TODO CQ:SW352246 Replace hardcoded defaults with MRW values
+    my $mss_mrw_supported_freq = $reqPol->{'mss_mrw_supported_freq'};
     print "    <attribute>
       <id>MSS_MRW_SUPPORTED_FREQ</id>
-      <default>
-        2133,
-        2400,
-        0,
-        0
-      </default>
+      <default> $mss_mrw_supported_freq </default>
     </attribute>\n";
 
     print "    <!-- System Attributes from MRW -->\n";
