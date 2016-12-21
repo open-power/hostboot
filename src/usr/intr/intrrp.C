@@ -466,6 +466,13 @@ errlHndl_t IntrRp::disableInterrupts(intr_hdlr_t *i_proc)
 
     do
     {
+        //Disable Incoming PSI Interrupts
+        PSIHB_SW_INTERFACES_t * l_psihb_ptr = i_proc->psiHbBaseAddr;
+
+        //Clear bit to disable PSI CEC interrupts
+        l_psihb_ptr->psihbcr =
+             (l_psihb_ptr->psihbcr & ~PSI_BRIDGE_INTP_STATUS_CTL_DISABLE_PSI);
+
         //Pull thread context to register - View Section 4.4.4.15 of the
         // XIVE spec. Doing a 1b MMIO read will clear the cams VT bit.
         volatile uint8_t * l_pull_thread_ptr = (uint8_t *)iv_xiveTmBar1Address;
