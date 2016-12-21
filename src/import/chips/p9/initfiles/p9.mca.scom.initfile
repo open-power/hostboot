@@ -381,6 +381,7 @@ ispy  MCP.PORT0.SRQ.PC.MBAREF0Q_CFG_REFR_TSV_STACK [when=S] {
   MCS.ATTR_EFF_DRAM_TRFC_DLR[def_PORT_INDEX];
 }
 
+
 #  RPC0 SCOM REGISTER    #
 
 ispy  MCP.PORT0.SRQ.PC.MBARPC0Q_CFG_PUP_PDN [when=S] {         # tCKE
@@ -437,6 +438,13 @@ ispy  MCP.PORT0.SRQ.PC.MBASTR0Q_CFG_TXSDLL [when=S] {
   768,                               (def_MSS_FREQ_EQ_2400==1);
   939,                               (def_MSS_FREQ_EQ_2667==1);
 }
+
+# Make Safe Refresh Match Refresh Interval
+ispy  MCP.PORT0.SRQ.PC.MBASTR0Q_CFG_SAFE_REFRESH_INTERVAL [when=S] {
+  spyv;
+  def_REFRESH_INTERVAL;
+}
+
 
 # CID
 # Slot 0

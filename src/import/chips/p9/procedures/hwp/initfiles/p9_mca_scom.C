@@ -727,6 +727,7 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
                 l_scom_buffer.insert<27, 11, 53, uint64_t>(literal_939 );
             }
 
+            l_scom_buffer.insert<46, 11, 53, uint64_t>(l_def_REFRESH_INTERVAL );
             FAPI_TRY(fapi2::putScom(TGT0, 0x7010935ull, l_scom_buffer));
         }
 
