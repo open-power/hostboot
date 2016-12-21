@@ -219,7 +219,7 @@ rule rMCACALFIR
     MCACALFIR & ~MCACALFIR_MASK &  MCACALFIR_ACT0 &  MCACALFIR_ACT1;
 };
 
-group gMCACALFIR filter singlebit
+group gMCACALFIR filter singlebit, cs_root_cause
 {
     /** MCACALFIR[0]
      *  A MBA recoverable error has occurred.
@@ -324,7 +324,7 @@ rule rMCAECCFIR
     MCAECCFIR & ~MCAECCFIR_MASK &  MCAECCFIR_ACT0 &  MCAECCFIR_ACT1;
 };
 
-group gMCAECCFIR filter singlebit
+group gMCAECCFIR filter singlebit, cs_root_cause( 14 )
 {
     /** MCAECCFIR[0]
      *  Mainline read MPE on rank 0

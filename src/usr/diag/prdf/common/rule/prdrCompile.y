@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,6 +161,7 @@ using namespace PRDR_COMPILER;
 %token PRDR_FILTER_SINGLE_BIT
 %token PRDR_FILTER_PRIORITY
 %token PRDR_FILTER_SECONDARY
+%token PRDR_FILTER_CS_ROOT_CAUSE
 
     /* Terminal tokens for Doxygen-style comments */
 %token <str_ptr> PRDR_DOX_COMMENT
@@ -607,6 +608,19 @@ grpfilt_item: PRDR_FILTER_SECONDARY '(' bitandlist ')'
     }
 ;
 
+grpfilt_item: PRDR_FILTER_CS_ROOT_CAUSE '(' bitandlist ')'
+    {
+        $$ = new std::list<Group_Filter *>;
+        $$->push_back(new Group_Filter_CS_Root_Cause($3));
+    }
+;
+
+grpfilt_item: PRDR_FILTER_CS_ROOT_CAUSE
+    {
+        $$ = new std::list<Group_Filter *>;
+        $$->push_back(new Group_Filter_CS_Root_Cause_Null);
+    }
+;
 
 grouplines:     { $$ = new Group(); }
         | grouplines groupline ';'

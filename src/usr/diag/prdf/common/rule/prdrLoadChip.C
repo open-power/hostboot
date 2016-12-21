@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -232,6 +232,7 @@ errlHndl_t LoadChip(UtilStream & i_stream, Chip & o_chip)
             o_chip.cv_groupFlags = new uint8_t[o_chip.cv_groupCount];
             o_chip.cv_groupPriorityBits = new Expr * [o_chip.cv_groupCount];
             o_chip.cv_groupSecondaryBits = new Expr * [o_chip.cv_groupCount];
+            o_chip.cv_groupCsRootCauseBits = new Expr * [o_chip.cv_groupCount];
             for (uint32_t i = 0; i < o_chip.cv_groupCount; i++)
             {
                 i_stream >> l_temp[0]; // should be 'G'
@@ -246,7 +247,7 @@ errlHndl_t LoadChip(UtilStream & i_stream, Chip & o_chip)
                 }
                 else
                 {
-                    o_chip.cv_groupPriorityBits[i] = NULL;
+                    o_chip.cv_groupPriorityBits[i] = nullptr;
                 }
 
                 //check if secondary filter has been specified
@@ -257,8 +258,20 @@ errlHndl_t LoadChip(UtilStream & i_stream, Chip & o_chip)
                 }
                 else
                 {
-                    o_chip.cv_groupSecondaryBits[i] = NULL;
+                    o_chip.cv_groupSecondaryBits[i] = nullptr;
                 }
+
+                //check if cs_root_cause filter has been specified
+                if( PRDR_GROUP_FILTER_CS_ROOT_CAUSE & o_chip.cv_groupFlags[i] )
+                {
+                    o_chip.cv_groupCsRootCauseBits[i] = new Expr();
+                    ReadExpr(i_stream, *o_chip.cv_groupCsRootCauseBits[i]);
+                }
+                else
+                {
+                    o_chip.cv_groupCsRootCauseBits[i] = nullptr;
+                }
+
                 if (0 != o_chip.cv_groupSize[i])
                 {
                     o_chip.cv_groups[i] = new Expr[o_chip.cv_groupSize[i]];
