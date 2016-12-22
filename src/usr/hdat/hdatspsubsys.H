@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,8 +82,27 @@ struct hdatSpImpl_t
     uint16_t hdatStatus;    // 0x0004 SP functionality/status
     uint8_t  hdatChipVer;   // 0x0006 SP chip DD level
     uint8_t  hdatReserved1; // 0x0007 padding for alignment
+    char     hdatBmcFamily[64];  // 0x0008 bmc family
 } __attribute__ ((packed));   
 
+/** @brief Structure for uart interrupt info
+*/
+struct uartIntData_t
+{
+     uint8_t hdatUARTIntrNum;// UART Interrupt number
+     uint8_t hdatTriggerType;// UART interrupt trigger type
+     uint8_t hdatResrved2[2];// Reserved
+};
+
+/** @brief Structure for Bulk Transfer Interrupt info
+*/
+
+struct btIntData_t
+{
+     uint8_t hdatSMSAttnIntrNum;
+     uint8_t hdatBMCtoHostRespIntrNum;
+     uint8_t hdatReserved[2];
+};
 
 /** @brief Structure definition for the I/O path to the service processor
  */
@@ -92,13 +111,19 @@ struct hdatSpIoPath_t
     uint16_t     hdatPathType;          // 0x0000 I/O path type
     uint16_t     hdatLinkStatus;        // 0x0002 PSI Link status
     uint8_t      hdatML2ChipVer;        // 0x0004 Chip DD level of ML2 controller
-    uint8_t      hdatResvd[1];          // 0x0005 Reserved
-    uint16_t     hdatSlcaCnt;           // 0x0006 Count of entries in hdatSlxaIdx
-    uint16_t     hdatSlcaIdx[8];        // 0x0008 Array of SLCA indexes
-    uint32_t     hdatProcChipId;        // 0x0018 Processor chip id
-    uint8_t      hdatResvd1[4];         // 0x001C Padding for alignment      
-    hdatMsAddr_t hdatGxcBaseAddr;       // 0x0020 PSI GX Base address   
-
+    uint8_t      hdatResvd[3];          // 0x0005 Reserved
+    uint32_t     hdatProcChipId;        // 0x0008 Processor chip id 
+    uint32_t     hdatLPCHCBarIOAdrSpc;  // 0x000C LPCHC BAR for I/O Adr Space
+    uint32_t     hdatLPCHCBarMemAdrSpc; // 0x0010 LPCHC BAR for MemAdr Space
+    uint32_t     hdatLPCHCBarFwAdrSpc;  // 0x0014 LPCHC BAR for FW Adr Space
+    uint32_t     hdatLPCHCBarIntRegSpc; // 0x0018 LPCHC BAR for Internal Reg Space
+    uint32_t     hdatReserved1;         // 0x001C Reserved
+    uint64_t     hdatBarOfUARTDev;      // 0x0020 BAR of UART device on LPC bus
+    uint32_t     hdatSizeofUARTAdrSpc;  // 0x0028 Size of UART device adr space
+    uint32_t     hdatUARTFreqHz;        // 0x002C Clock Frequcny of UART buad clock
+    uint32_t     hdatCurUARTDevBaudRate;// 0x0030 Current Baud rate of UART device
+    uartIntData_t  hdatUARTInterruptDetails; // 0x0034 UART interrupt details
+    btIntData_t    hdatBTInterruptDetails;   // 0x0048 Bulk Tansfer Interrupt Details
 } __attribute__ ((packed));
 
 #define HDAT_NON_FUNCTIONAL 0 // PSI link is not functional
