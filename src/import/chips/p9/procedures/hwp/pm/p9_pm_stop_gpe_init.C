@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -236,6 +236,18 @@ fapi2::ReturnCode stop_gpe_init(
     uint32_t                l_timeout_in_MS = TIMEOUT_COUNT;
 
     FAPI_IMP(">> stop_gpe_init......");
+
+    // First check if SGPE_ACTIVE is not set in OCCFLAG register
+    FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCFLG_SCOM, l_occ_flag));
+
+    if (l_occ_flag.getBit<p9hcd::SGPE_ACTIVE>() == 1)
+    {
+        FAPI_INF("WARNING: SGPE_ACTIVE flag is already set in OCCFLAG register, continuing with after clearing that active_bit");
+        l_occ_flag.flush<0>();
+        l_occ_flag.setBit<p9hcd::SGPE_ACTIVE>();
+        FAPI_TRY(putScom(i_target, PU_OCB_OCI_OCCFLG_CLEAR, l_occ_flag),
+                 "ERROR: Failed to clear sgpe_active bit in OCCFLG register");
+    }
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_STOPGPE_BOOT_COPIER_IVPR_OFFSET,
                             i_target,

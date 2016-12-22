@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -29,6 +29,17 @@
     <description>Unknown mode passed to p9_pm_stop_gpe_init.
     </description>
     <ffdc>BADMODE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_STOP_GPE_INIT_ACTIVE_FLAG_SET</rc>
+    <description> SGPE_ACTIVE Flag is already set when stop_gpe_init was called.
+    </description>
+    <collectRegisterFfdc>
+      <id>SGPE_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
