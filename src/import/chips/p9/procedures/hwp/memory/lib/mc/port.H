@@ -75,6 +75,7 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
         static constexpr uint64_t CAL1Q_REG = MCA_MBA_CAL1Q;
         static constexpr uint64_t CAL2Q_REG = MCA_MBA_CAL2Q;
         static constexpr uint64_t CAL3Q_REG = MCA_MBA_CAL3Q;
+        static constexpr uint64_t DSM0Q_REG = MCA_MBA_DSM0Q;
 
         static constexpr uint64_t PHY_ZQCAL_REG = MCA_DDRPHY_PC_PER_ZCAL_CONFIG_P0;
         static constexpr uint64_t PHY_PERIODIC_CAL_CONFIG_REG = MCA_DDRPHY_PC_PER_CAL_CONFIG_P0;
@@ -85,12 +86,13 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
         static constexpr uint64_t MAGIC_NUMBER_SIM = 765;
         static constexpr uint64_t MAGIC_NUMBER_NOT_SIM = 196605;
 
-        // # DPHY01_DDRPHY_PC_RELOAD_VALUE0_P0             0x005   0x8000c0050301143f
+        // DPHY01_DDRPHY_PC_RELOAD_VALUE0_P0   0x005   0x8000c0050301143f
         // scom 0x800(0,1)C0050301143F {   # _P[0:1]
-        // bits    ,       scom_data       ,       expr                    ;
-        // #       0:47    ,       0x000000000000, any                             ;       # reserved
-        // 48 ,       0b0                     ,       any                             ;       # PERIODIC_CAL_REQ_EN
-        // 49:63   ,  0x0001          ,       any                             ;       # PERIODIC_RELOAD_VALUE0
+        // bits  , scom_data      , expr ;
+        // 0:47  , 0x000000000000 , any  ; # reserved
+        // 48    , 0b0            , any  ; # PERIODIC_CAL_REQ_EN
+        // 49:63 , 0x0001         , any  ; # PERIODIC_RELOAD_VALUE0
+        // }
         static constexpr uint64_t PHY_PERIODIC_CAL_RELOAD_VALUE = 0x1;
 
         enum
@@ -219,6 +221,9 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
             CAL3Q_ALL_PERIODIC_LENGTH_LEN = MCA_MBA_CAL3Q_CFG_ALL_PERIODIC_LENGTH_LEN,
             CAL3Q_FREEZE_ON_PARITY_ERROR_DIS = MCA_MBA_CAL3Q_CFG_FREEZE_ON_PARITY_ERROR_DIS,
 
+            DSM0Q_CFG_RDTAG_DLY = MCA_MBA_DSM0Q_CFG_RDTAG_DLY,
+            DSM0Q_CFG_RDTAG_DLY_LEN = MCA_MBA_DSM0Q_CFG_RDTAG_DLY_LEN,
+
             PER_ZCAL_ENA_RANK = MCA_DDRPHY_PC_PER_ZCAL_CONFIG_P0_ENA_RANK,
             PER_ZCAL_ENA_RANK_LEN = MCA_DDRPHY_PC_PER_ZCAL_CONFIG_P0_ENA_RANK_LEN,
             PER_ZCAL_NEXT_RANK = MCA_DDRPHY_PC_PER_ZCAL_CONFIG_P0_NEXT_RANK,
@@ -245,15 +250,50 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
             PER_START = MCA_DDRPHY_PC_PER_CAL_CONFIG_P0_START,
             PER_ABORT_ON_ERR_EN = MCA_DDRPHY_PC_PER_CAL_CONFIG_P0_ABORT_ON_ERR_EN,
             PER_DD2_FIX_DIS = MCA_DDRPHY_PC_PER_CAL_CONFIG_P0_DD2_FIX_DIS,
-
         };
 };
 
+///
+/// @brief Change the rdtag delay value
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_delay new RDTAG_DLY value (in cycles) to set
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<T> >
+fapi2::ReturnCode change_rdtag_delay( const fapi2::Target<T>& i_target, const uint64_t i_delay )
+{
+    // RDTAG is only 6 bits in length, input could be bigger
+    // so we just let the user know of an invalid input.
+    // This is a programming error so we assert out.
+    // 6 bits - 0b0011 1111 (right aligned)
+    constexpr uint64_t MAX_DELAY = 0x3F;
+
+    if( i_delay > MAX_DELAY )
+    {
+        FAPI_ERR("Invalid delay received: %d, largest possible: %d", i_delay, MAX_DELAY);
+        fapi2::Assert(false);
+    }
+
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_DBG( "Change RDTAG_DLY to %d %s",  i_delay, mss::c_str(i_target) );
+
+    FAPI_TRY( mss::getScom(i_target, TT::DSM0Q_REG, l_data) );
+    l_data.insertFromRight<TT::DSM0Q_CFG_RDTAG_DLY, TT::DSM0Q_CFG_RDTAG_DLY_LEN>(i_delay);
+    FAPI_TRY( mss::putScom(i_target, TT::DSM0Q_REG, l_data) );
+
+    FAPI_INF( "DSM0Q_REG 0x%016lx for %s", uint64_t(l_data), mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Change the state of the port_fail_disable bit
-/// @tparam T, the fapi2 target type of the target
-/// @tparam TT, the class traits for the port
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
 /// @param[in] i_target the target
 /// @param[in] i_state the state
 /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -274,8 +314,8 @@ fapi_try_exit:
 
 ///
 /// @brief Change the state of the RCD recovery bit
-/// @tparam T, the fapi2 target type of the target
-/// @tparam TT, the class traits for the port
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
 /// @param[in] i_target the target
 /// @param[in] i_state the state
 /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -296,8 +336,8 @@ fapi_try_exit:
 
 ///
 /// @brief Change the state of the output enable always-on bit
-/// @tparam T, the fapi2 target type of the target
-/// @tparam TT, the class traits for the port
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
 /// @param[in] i_target the target
 /// @param[in] i_state the state
 /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -318,8 +358,8 @@ fapi_try_exit:
 
 ///
 /// @brief Change the state of the addr_mux_sel bit
-/// @tparam T, the fapi2 target type of the target
-/// @tparam TT, the class traits for the port
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
 /// @param[in] i_target the target
 /// @param[in] i_state the state
 /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -341,8 +381,8 @@ fapi_try_exit:
 
 ///
 /// @brief Change the state of the MC Refresh enable bit
-/// @tparam T, the fapi2 target type of the target
-/// @tparam TT, the class traits for the port
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
 /// @param[in] i_target the target
 /// @param[in] i_state the state
 /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -363,8 +403,8 @@ fapi_try_exit:
 
 ///
 /// @brief Enable the MC Periodic calibration functionality
-/// @tparam T, the fapi2 target type of the target
-/// @tparam TT, the class traits for the port
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
 /// @param[in] i_target the target
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
@@ -381,8 +421,8 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
 
 ///
 /// @brief Enable Read ECC checking
-/// @tparam T, the fapi2 target type of the target
-/// @tparam TT, the class traits for the port
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
 /// @param[in] i_target the target
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
@@ -425,8 +465,8 @@ fapi_try_exit:
 //
 ///
 /// @brief Secure the entry criteria for draminit
-/// @tparam T, the fapi2 target type of the target
-/// @tparam TT, the class traits for the port
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
 /// @param[in] i_target A target representing a port
 /// @return FAPI2_RC_SUCCESS if and only if ok
 // This is in this header as it's hoped to be able to be shared. Seems to make more
@@ -453,8 +493,8 @@ fapi_try_exit:
 
 ///
 /// @brief Drive memory clocks
-/// @tparam T, the fapi2 target type of the target
-/// @tparam TT, the class traits for the port
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
 /// @param[in] i_target A target representing a port
 /// @param[in] i_pclk phy p clock - right most 2 bits
 /// @param[in] i_nclk phy n clock - right most 2 bits
@@ -483,8 +523,8 @@ fapi_try_exit:
 
 ///
 /// @brief Set DDR resetn
-/// @tparam T, the fapi2 target type of the target
-/// @tparam TT, the class traits for the port
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
 /// @param[in] i_target A target representing a port
 /// @param[in] i_state high or low
 /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -540,5 +580,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-}
+}// mss
+
 #endif
