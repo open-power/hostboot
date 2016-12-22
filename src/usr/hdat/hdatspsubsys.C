@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,9 @@
 #include <sys/mm.h>
 #include <sys/mmio.h>
 #include <pnor/pnorif.H>
+#include <lpc/lpc_const.H>
+#include <console/uartif.H>
+#include <ipmi/ipmiif.H>
 #include <util/align.H>
 #include "hdatspsubsys.H"
 #include "hdathdif.H"
@@ -132,8 +135,6 @@ static errlHndl_t hdatGetPathInfo(
         o_pathArray[o_arrayHdr.hdatArrayCnt].
                                 hdatLinkStatus = HDAT_CURRENT_LINK;
         o_pathArray[o_arrayHdr.hdatArrayCnt].hdatML2ChipVer  = 0x10;
-        o_pathArray[o_arrayHdr.hdatArrayCnt].
-                                hdatSlcaCnt  = LPC_PATH_FRU_CNT_FOR_BMC;
 
         // Get the master proc handle.
 
@@ -164,11 +165,45 @@ static errlHndl_t hdatGetPathInfo(
             o_pathArray[o_arrayHdr.hdatArrayCnt].hdatProcChipId =
                 l_pMasterProcChipTargetHandle->getAttr<ATTR_ORDINAL_ID>();
 
-            uint64_t l_gxcBaseAddr = 0;
-            memcpy(&o_pathArray[o_arrayHdr.hdatArrayCnt].hdatGxcBaseAddr,
-                    &l_gxcBaseAddr,
-                  sizeof(o_pathArray[o_arrayHdr.hdatArrayCnt].hdatGxcBaseAddr));
         }
+
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatLPCHCBarIOAdrSpc =
+                                                            LPC::LPCHC_IO_SPACE;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatLPCHCBarMemAdrSpc =
+                                                            LPC::LPCHC_MEM_SPACE;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatLPCHCBarFwAdrSpc =
+                                                         LPC::LPCHC_FW_SPACE;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatLPCHCBarIntRegSpc =
+                                                         LPC::LPCHC_REG_SPACE;
+#ifdef CONFIG_CONSOLE
+        CONSOLE::UartInfo_t l_uartInfo = CONSOLE::getUartInfo();
+    
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBarOfUARTDev = 
+                                                    l_uartInfo.lpcBaseAddr;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatSizeofUARTAdrSpc =
+                                                    l_uartInfo.lpcSize;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatUARTFreqHz =
+                                                    l_uartInfo.clockFreqHz;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatCurUARTDevBaudRate =
+                                                    l_uartInfo.freqHz;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatUARTInterruptDetails.
+                                hdatUARTIntrNum = l_uartInfo.interruptNum;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatUARTInterruptDetails.
+                                hdatTriggerType = l_uartInfo.interruptTrigger;
+#endif
+
+#ifdef CONFIG_BMC_IPMI
+        IPMI::BmcInfo_t l_bmcInfo = IPMI::getBmcInfo();
+        
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBARofBTDevAdrSpc =
+                                                l_bmcInfo.bulkTransferLpcBaseAddr;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatSizeofBTDevAdrSpc =
+                                                l_bmcInfo.bulkTransferSize;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBTInterruptDetails.
+                                 hdatSMSAttnIntrNum = l_bmcInfo.smsAttnInterrupt;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBTInterruptDetails.
+                                 hdatBMCtoHostRespIntrNum = l_bmcInfo.bmcToHostInterrupt;
+#endif
 
         // LPC link doesn't have any FRU's in the path
         // except the end points Service Processor and master proc
@@ -357,6 +392,45 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
         iv_impl.hdatStatus = HDAT_SP_INSTALLED;
             iv_impl.hdatStatus |= HDAT_SP_PRIMARY;
             iv_impl.hdatStatus |=  HDAT_SP_FUNCTIONAL;
+#if 0  // TODO : RTC 166755
+        TARGETING::PredicateCTM l_bmcFilter(CLASS_CHIP, TYPE_SP, MODEL_BMC);
+        TARGETING::PredicateHwas l_pred;
+        l_pred.present(true);
+        TARGETING::PredicatePostfixExpr l_presentSp;
+        l_presentSp.push(&l_bmcFilter).push(&l_pred).And();
+
+        TARGETING::TargetRangeFilter l_filter(
+                            TARGETING::targetService().begin(),
+                            TARGETING::targetService().end(),
+                            &l_presentSp);
+
+        // As of now we are not supporting any other bmc stacks.But there is a scope for 
+        // improvement here by using data driven approach. TODO : RTC@166476
+        if(l_filter)
+        {
+            strcpy( iv_impl.hdatBmcFamily , "ibm,bmc,openbmc");
+        }
+        else
+        {
+            /*@
+            * @errortype
+            * @moduleid         HDAT::MOD_HDAT_SPSUBSYS_FILL_DATA_PTRS
+            * @reasoncode       HDAT::RC_NO_BMC_TARGET_FOUND
+            * @devdesc          No BMC target found
+            * @custdesc         Firmware encountered an internal
+            *                   error while retrieving target data
+            */
+            hdatBldErrLog(l_errlHndl,
+                          MOD_HDAT_SPSUBSYS_FILL_DATA_PTRS,
+                          RC_NO_BMC_TARGET_FOUND,
+                          0,0,0,0);
+
+            HDAT_ERR("No BMC found on this machine");
+            break;
+
+        }
+#endif
+        strcpy( iv_impl.hdatBmcFamily , "ibm,ast2500,openbmc");
 
         // Fill the FRU data 
         iv_fru.hdatSlcaIdx = 0;

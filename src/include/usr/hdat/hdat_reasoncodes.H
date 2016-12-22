@@ -102,6 +102,7 @@ enum HDATModuleId
   MOD_NACA_GET_MEM             = 0x2b,
   MOD_HBRT_LOAD_DATA           = 0x2c,
   MOD_UTIL_FULL_MVPD_READ_FUNC = 0x2d,
+  MOD_HDAT_SPSUBSYS_FILL_DATA_PTRS = 0x2e,
 };
 
 
@@ -144,7 +145,8 @@ enum HDATReasonCode
     RC_DATA_AREA_FAIL                 = HDAT_COMP_ID | 0x19,
     RC_NULL_PTR_PASSED                = HDAT_COMP_ID | 0x1a,
     RC_INVALID_NACA                   = HDAT_COMP_ID | 0x1b,
-    RC_DEV_READ_VPD_FAIL              = HDAT_COMP_ID | 0x1c,  
+    RC_DEV_READ_VPD_FAIL              = HDAT_COMP_ID | 0x1c,
+    RC_NO_BMC_TARGET_FOUND            = HDAT_COMP_ID | 0x1d,  
 };
 
 }  //namespace HDAT
