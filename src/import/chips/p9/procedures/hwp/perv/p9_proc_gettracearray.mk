@@ -23,4 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_proc_gettracearray
+OBJS += p9_sbe_tracearray.o
 $(call BUILD_PROCEDURE)
+

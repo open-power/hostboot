@@ -41,7 +41,7 @@
 //------------------------------------------------------------------------------
 // *HWP HW Owner        : Joachim Fenkes <fenkes@de.ibm.com>
 // *HWP HW Backup Owner : Joe McGill <jmcgill@us.ibm.com>
-// *HWP FW Owner        : Thi Tran <thi@us.ibm.com>
+// *HWP FW Owner        : Shakeeb Pasha <shakeebbk@in.ibm.com>
 // *HWP Team            : Perv
 // *HWP Level           : 2
 // *HWP Consumed by     : FSP
@@ -57,23 +57,14 @@
 #include <fapi2.H>
 #include "p9_tracearray_defs.H"
 
+#include "p9_sbe_tracearray.H"
+
 static const fapi2::TargetType PROC_GETTRACEARRAY_TARGET_TYPES =
     fapi2::TARGET_TYPE_PROC_CHIP |
     fapi2::TARGET_TYPE_OBUS |
     fapi2::TARGET_TYPE_MCBIST |
     fapi2::TARGET_TYPE_EX |
     fapi2::TARGET_TYPE_CORE;
-
-// structure to represent HWP arguments
-struct proc_gettracearray_args
-{
-    p9_tracearray_bus_id trace_bus;      ///< The trace bus whose associated trace array should be dumped
-    bool stop_pre_dump;                  ///< Stop the trace array before starting the dump
-    bool ignore_mux_setting;             ///< Do not fail if the primary trace mux is set to a different bus
-    bool collect_dump;                   ///< Do dump the trace array; useful if you just want to start/stop
-    bool reset_post_dump;                ///< Reset the debug logic after dumping
-    bool restart_post_dump;              ///< Start the trace array after dumping
-};
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode
