@@ -918,6 +918,8 @@
     <attribute><id>POUND_W_STATIC_DATA_ENABLE</id></attribute>
     <attribute><id>PGPE_HCODE_FUNCTION_ENABLE</id></attribute>
     <attribute><id>SYSTEM_DISABLE_QUEUED_SCAN</id></attribute>
+    <attribute><id>PERF_24x7_INVOCATION_TIME_MS</id></attribute>
+    <attribute><id>AUX_FUNC_INVOCATION_TIME_MS</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
