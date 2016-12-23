@@ -43,8 +43,8 @@
 // *HWP HW Backup Owner : Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner        : Shakeeb Pasha<shakeebbk@in.ibm.com>
 // *HWP Team            : Perv
-// *HWP Level           : 1
-// *HWP Consumed by     : SBE
+// *HWP Level           : 2
+// *HWP Consumed by     : Conus, SBE
 //------------------------------------------------------------------------------
 
 #ifndef _P9_SBE_TRACEARRAY_H
@@ -56,8 +56,22 @@
 #include <fapi2.H>
 #include "p9_tracearray_defs.H"
 
+constexpr uint32_t P9_TRACEARRAY_FIRST_ROW  = 0;
+constexpr uint32_t MCBIST_CHIPLET_ID_START  = 0x07;
+constexpr uint32_t MCBIST_CHIPLET_ID_END    = 0x08;
+constexpr uint32_t OBUS_CHIPLET_ID_START    = 0x09;
+constexpr uint32_t OBUS_CHIPLET_ID_END      = 0x0C;
+
+#define IS_MCBIST(chipletId) \
+    ((chipletId >= MCBIST_CHIPLET_ID_START) && \
+     (chipletId <= MCBIST_CHIPLET_ID_END))
+
+#define IS_OBUS(chipletId) \
+    ((chipletId >= OBUS_CHIPLET_ID_START) && \
+     (chipletId <= OBUS_CHIPLET_ID_END))
+
 // structure to represent HWP arguments
-struct p9_sbe_tracearray_args
+struct proc_gettracearray_args
 {
     p9_tracearray_bus_id trace_bus; ///< The trace bus whose associated trace array should be dumped
     bool stop_pre_dump;             ///< Stop the trace array before starting the dump
@@ -69,14 +83,16 @@ struct p9_sbe_tracearray_args
 
 static const fapi2::TargetType P9_SBE_TRACEARRAY_TARGET_TYPES =
     fapi2::TARGET_TYPE_PROC_CHIP |
+    fapi2::TARGET_TYPE_PERV |
     fapi2::TARGET_TYPE_EX |
     fapi2::TARGET_TYPE_CORE;
 
 //function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_sbe_tracearray_FP_t) (
     const fapi2::Target<P9_SBE_TRACEARRAY_TARGET_TYPES>& i_target,
-    const p9_sbe_tracearray_args& i_args,
-    uint8_t* o_ta_data,
+    const proc_gettracearray_args& i_args,
+    uint64_t* o_ta_data,
+    const uint32_t i_cur_row,
     const uint32_t i_num_rows
 );
 
@@ -89,15 +105,16 @@ extern "C" {
      * @return The type of target to hand to p9_sbe_tracearray to clearly
      *         identify the array instance.
      */
-    static inline fapi2::TargetType p9_sbe_tracearray_target_type(p9_tracearray_bus_id i_trace_bus)
+    static inline fapi2::TargetType p9_sbe_tracearray_target_type(
+        p9_tracearray_bus_id i_trace_bus)
     {
-        /* On SBE there is no support for MCBIST and OBUS fapi targets.
-         * But since the usage related to these targets in p9_sbe_tracearray
-         * is only for SCOMs with fully qualified adresses, PROC
-         * target is used for MCBIST and OBUS as well */
-        if (i_trace_bus <= _PROC_TB_LAST_MC_TARGET)
+        if (i_trace_bus <= _PROC_TB_LAST_PROC_TARGET)
         {
             return fapi2::TARGET_TYPE_PROC_CHIP;
+        }
+        else if (i_trace_bus <= _PROC_TB_LAST_MC_TARGET)
+        {
+            return fapi2::TARGET_TYPE_PERV;
         }
         else if (i_trace_bus <= _PROC_TB_LAST_EX_TARGET)
         {
@@ -108,8 +125,6 @@ extern "C" {
             return fapi2::TARGET_TYPE_CORE;
         }
     }
-
-
 
     /* TODO via RTC:164528 - Look at optimization to improve performance
      * @brief Retrieve trace array data, based on the number of
@@ -137,18 +152,22 @@ extern "C" {
      *             if trace array dump sequence completes successfully,
      *         RC_PROC_GETTRACEARRAY_INVALID_BUS
      *             if an invalid trace bus ID has been requested
+     *         RC_PROC_GETTRACEARRAY_INVALID_TARGET
+     *             if the supplied target type does not match the requested trace bus
      *         RC_PROC_GETTRACEARRAY_CORE_NOT_DUMPABLE
      *             if a core trace array has been requested but the chip's core
      *             is not dumpable via SCOM -> use fastarray instead
+     *         RC_PROC_GETTRACEARRAY_TRACE_RUNNING
+     *             if trace array is running when dump collection is attempted,
      *         RC_PROC_GETTRACEARRAY_TRACE_MUX_INCORRECT
      *             if the primary trace mux is not set up to trace the requested bus,
      *         else FAPI getscom/putscom return code for failing operation
      */
     fapi2::ReturnCode p9_sbe_tracearray(
         const fapi2::Target<P9_SBE_TRACEARRAY_TARGET_TYPES>& i_target,
-        const p9_sbe_tracearray_args& i_args,
+        const proc_gettracearray_args& i_args,
         uint64_t* o_ta_data,
-        const uint32_t i_cur_row = 0,
+        const uint32_t i_cur_row = P9_TRACEARRAY_FIRST_ROW,
         const uint32_t i_num_rows = P9_TRACEARRAY_NUM_ROWS
     );
 } // extern "C"
