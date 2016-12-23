@@ -90,8 +90,8 @@ HCD_HDR_UINT32( quadSpecRingOffset, 0);
 HCD_HDR_UINT32( quadSpecRingLength, 0);
 HCD_HDR_UINT32( quadScomOffset, 0);
 HCD_HDR_UINT32( quadScomLength, 0);
-HCD_HDR_UINT32( quad24x7Offset, 0);
-HCD_HDR_UINT32( quad24x7Length, 0);
+HCD_HDR_UINT32( quadAuxOffset, 0);
+HCD_HDR_UINT32( quadAuxLength, 0);
 HCD_HDR_UINT32( stopFfdcOffset, 0);
 HCD_HDR_UINT32( stopFfdcLength, 0);
 HCD_HDR_PAD(512);
@@ -229,8 +229,10 @@ HCD_HDR_UINT32(g_sgpe_spec_ring_occ_offset, 0);
 HCD_HDR_UINT32(g_sgpe_scom_offset, 0);
 HCD_HDR_UINT32(g_sgpe_scom_mem_offset, 0);
 HCD_HDR_UINT32(g_sgpe_scom_mem_length, 0);
-HCD_HDR_UINT32(g_sgpe_24x7_offset, 0);
-HCD_HDR_UINT32(g_sgpe_24x7_length, 0);
+HCD_HDR_UINT32(g_sgpe_aux_offset, 0);
+HCD_HDR_UINT32(g_sgpe_aux_length, 0);
+HCD_HDR_UINT32(g_sgpe_aux_control, 0);
+HCD_HDR_UINT32(g_sgpe_reserve4, 0);
 HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #ifdef __ASSEMBLER__
 .endm

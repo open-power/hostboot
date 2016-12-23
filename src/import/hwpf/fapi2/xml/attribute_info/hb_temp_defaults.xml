@@ -157,6 +157,10 @@
         <id>ATTR_SYSTEM_DISABLE_QUEUED_SCAN</id>
         <default>0x00</default>
     </attribute>
+    <attribute>
+        <id>ATTR_AUX_FUNC_INVOCATION_TIME_MS</id>
+        <default>0x01</default>
+    </attribute>
 
 <!-- =====================================================================
      End of temporary definitions

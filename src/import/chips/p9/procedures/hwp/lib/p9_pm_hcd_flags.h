@@ -66,8 +66,8 @@ typedef union occ_flags
         uint32_t  sgpe_StopExitsIgnored         : 1;
         uint32_t  sgpe_StopEntryIgnored         : 1;
         uint32_t  reserved2                     : 1;
-        uint32_t  sgpe_24x7_Activate            : 1;
-        uint32_t  sgpe_24x7_Active              : 1;
+        uint32_t  sgpe_Aux_Activate             : 1;
+        uint32_t  sgpe_Aux_Active               : 1;
         uint32_t  pib_I2CMasterEngine1Lock      : 2;
         uint32_t  pib_I2CMasterEngine2Lock      : 2;
         uint32_t  pib_I2CMasterEngine3Lock      : 2;
@@ -81,8 +81,8 @@ typedef union occ_flags
         uint32_t  pib_I2CMasterEngine3Lock      : 2;
         uint32_t  pib_I2CMasterEngine2Lock      : 2;
         uint32_t  pib_I2CMasterEngine1Lock      : 2;
-        uint32_t  sgpe_24x7_Active              : 1;
-        uint32_t  sgpe_24x7_Activate            : 1;
+        uint32_t  sgpe_Aux_Active               : 1;
+        uint32_t  sgpe_Aux_Activate             : 1;
         uint32_t  reserved2                     : 1;
         uint32_t  sgpe_StopEntryIgnored         : 1;
         uint32_t  sgpe_StopExitsIgnored         : 1;

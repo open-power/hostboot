@@ -172,8 +172,8 @@
      Producer:  Machine Readable Workbook
      Consumers:
      p9_set_avsbus_voltage (tool);
- 	       p9_build_pstate_datablock ->
- 		      Pstate Parameter Block (PSPB) for PGPE
+            p9_build_pstate_datablock ->
+               Pstate Parameter Block (PSPB) for PGPE
    </description>
    <valueType>uint8</valueType>
    <platInit/>
@@ -1566,8 +1566,8 @@
      <id>ATTR_PERF_24x7_INVOCATION_TIME_MS</id>
      <description>
      Time between invocations of the 24x7 performance collection function on
-     GPE1.  The time (in milliseconds) is derived as
-     2^PERF_24x7_INVOCATION_TIME_MS with 0 indicating the function is OFF.
+     GPE1.  The time (in milliseconds) is derived as  2^PERF_24x7_INVOCATION_TIME_MS
+     with 0 indicating the function is OFF.
 
      Consumer: p9_hcode_image_build.c ->
                   SGPE Header field
@@ -1578,6 +1578,7 @@
      </description>
      <targetType>TARGET_TYPE_SYSTEM</targetType>
      <valueType>uint8</valueType>
+     <initToZero/>
      <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -1650,6 +1651,26 @@
     </enum>
     <platInit/>
     <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+     <id>ATTR_AUX_FUNC_INVOCATION_TIME_MS</id>
+     <description>
+     Time between invocations of auxiliary function on
+     GPE1.  The time (in milliseconds) is derived as  2^ATTR_AUX_FUNC_INVOCATION_TIME_MS
+     with 0 indicating the function is OFF.
+
+     Consumer: p9_hcode_image_build.c ->
+                  SGPE Header field
+
+     Provided by the Machine Readable Workbook to tune the collection.
+
+     Platform default:  1
+     </description>
+     <targetType>TARGET_TYPE_SYSTEM</targetType>
+     <valueType>uint8</valueType>
+     <initToZero/>
+     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>
