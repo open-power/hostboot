@@ -103,4 +103,13 @@
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MVPD_RING_REDUNDANT_DATA</rc>
+    <description>MVPD ring has redundant data</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>
