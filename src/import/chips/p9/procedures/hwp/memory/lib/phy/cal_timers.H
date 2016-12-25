@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -241,7 +241,8 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     i_poll.iv_sim_delay = mss::cycles_to_simcycles(mss::ns_to_cycles(i_target, i_poll.iv_delay));
 
     // Round up to the cycles left after the initial delay
-    l_ns_left = std::max(0L, (int64_t(mss::cycles_to_ns(i_target, l_total_cycles)) - int64_t(i_poll.iv_initial_delay)));
+    l_ns_left = std::max(int64_t(0), (int64_t(mss::cycles_to_ns(i_target,
+                                      l_total_cycles)) - int64_t(i_poll.iv_initial_delay)));
     i_poll.iv_poll_count = l_ns_left / i_poll.iv_delay;
     i_poll.iv_poll_count += l_ns_left % i_poll.iv_delay ? 0 : 1;
 
