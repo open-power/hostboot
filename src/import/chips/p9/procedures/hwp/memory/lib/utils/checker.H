@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,53 @@ namespace mss
 {
 namespace check
 {
+///
+/// @brief checks for invalid DQ data captured by from read FIFO
+/// used for LRDIMM training appliations
+/// @param[in]  i_target the dimm target
+/// @param[in]  i_conditional conditional that we are testing against
+/// @param[in]  i_data DQ data from DRAM
+/// @param[in]  i_phase_timing phase timing we are iterating through
+/// @param[in]  i_nibble nibble we are iterating through
+/// @return fapi2::FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode invalid_dq_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        bool i_conditional,
+        const fapi2::variable_buffer& i_data,
+        const uint64_t i_phase_timing,
+        const uint64_t i_nibble )
+{
+    constexpr uint64_t AADR_START = 0;
+    constexpr uint64_t AADR_LEN = 64;
+
+    constexpr uint64_t AAER_START = 64;
+    constexpr uint64_t AAER_LEN = 8;
+
+    uint64_t l_aaer = 0; // ecc
+    uint64_t l_aadr = 0; // data
+
+    // Can't printout the variable buffer directly. Extracting
+    // data of interest for debugging purposes
+    FAPI_TRY( i_data.extractToRight(l_aadr, AADR_START, AADR_LEN),
+              "Failed to extract AADR data, start: %d, len: %d", AADR_START, AADR_LEN);
+
+    FAPI_TRY( i_data.extractToRight(l_aaer, AAER_START, AAER_LEN),
+              "Failed to extract AAER data, start: %d, len: %d", AAER_START, AAER_LEN);
+
+    FAPI_ASSERT(i_conditional,
+                fapi2::MSS_INVALID_DQ_DATA().
+                set_PHASE_TIMING(i_phase_timing).
+                set_NIBBLE(i_nibble).
+                set_DIMM_TARGET(i_target).
+                set_AADR(l_aadr).
+                set_AAER(l_aaer),
+                "%s. Invalid data received for phase: %d, nibble: %d, AADR: %d, AAER: %d.",
+                mss::c_str(i_target), i_phase_timing,
+                i_nibble, l_aadr, l_aaer );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief      Checks homogenous DDR4 dimm configuration (e.g. DDR4)

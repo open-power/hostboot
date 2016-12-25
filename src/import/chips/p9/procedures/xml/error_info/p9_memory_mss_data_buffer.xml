@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -44,6 +44,26 @@
       invalid decoding of SPD data, or invalid user input.
     </description>
     <ffdc>NUM_PKG_RANKS</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_DQ_DATA</rc>
+    <description>
+      Recieved an invalid data from DQ during MREP
+      or DWL data buffer training.
+    </description>
+    <ffdc>PHASE_TIMING</ffdc>
+    <ffdc>NIBBLE</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>AADR</ffdc>
+    <ffdc>AAER</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>

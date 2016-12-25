@@ -62,6 +62,7 @@ enum sizes
     MAX_NUM_IMP = 4,               ///< number of impedances valid per slew type
     MAX_NUM_CAL_SLEW_RATES = 4,    ///< 3V/ns, 4V/ns, 5V/ns, 6V/n
     MAX_DQ_BITS = 72,              /// TODO RTC:157753 This is Nimbus specific. Should be attribute/trait of processor.
+    MAX_DQ_NIBBLES_X4 = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For x4's there are 18 DQ nibbles for DQ 72 bits
 
     MARK_STORE_COUNT = 8,          ///< Elements in a VPD mark/store array
 
