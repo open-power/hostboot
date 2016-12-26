@@ -413,11 +413,13 @@ sub execute_pre_release
     my $level = "";
     my $checkInDir = "";
     my $released = "";
+    my $track = "";
 
     GetOptions("release:s" => \$release);
     GetOptions("level:s" => \$level);
     GetOptions("checkInDir:s" => \$checkInDir);
     GetOptions("released:s" => \$released);
+    GetOptions("track:s" => \$track);
 
     die "Missing release" if ($release eq "");
     die "Missing level" if ($level eq "");
@@ -430,21 +432,29 @@ sub execute_pre_release
         $CMVC_FILES .= "src/hbfw/img/hostboot_securerom.bin ";
     }
 
-    # CMVC open feature
-    my $open_feature = "Feature -open -component $globals{component}";
-    $open_feature .= " -remarks \"Hostboot Release - $level\" -verbose";
-    # Get the Feature number from the output, should be the only numbers.
-    my $feature = run_system_command($open_feature);
-    $feature =~ s/[^0-9]//g;
 
-    # CMVC assign feature
-    run_system_command("Feature -assign $feature -owner $globals{cmvcUser} -verbose");
+    if($track eq "")
+    {
+        # CMVC open feature
+        my $open_feature = "Feature -open -component $globals{component}";
+        $open_feature .= " -remarks \"Hostboot Release - $level\" -verbose";
+        # Get the Feature number from the output, should be the only numbers.
+        my $feature = run_system_command($open_feature);
+        $feature =~ s/[^0-9]//g;
 
-    # CMVC accept feature
-    run_system_command("Feature -accept $feature -verbose");
+        # CMVC assign feature
+        run_system_command("Feature -assign $feature -owner $globals{cmvcUser} -verbose");
 
-    # CMVC create track
-    run_system_command("Track -create -release $release -feature $feature -verbose");
+        # CMVC accept feature
+        run_system_command("Feature -accept $feature -verbose");
+
+        # CMVC create track
+        run_system_command("Track -create -release $release -feature $feature -verbose");
+    }
+    else
+    {
+        $feature = $track;
+    }
 
     # Add in cmvc coReqs and cmvc preReqs
     execute_cmvc_reqs($feature,$level,$released,$release);
