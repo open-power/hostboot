@@ -33,6 +33,8 @@
 // *HWP Level:          2
 // *HWP Consumed by:    Hostboot: Phyp
 
+// *INDENT-OFF*
+
 //--------------------------------------------------------------------------
 // Includes
 //--------------------------------------------------------------------------
@@ -473,11 +475,10 @@ fapi2::ReturnCode validateSramImageSize( Homerlayout_t* i_pChipHomer, uint32_t& 
     uint32_t rc = IMG_BUILD_SUCCESS;
 
     ImgSizeBank sizebank;
-    sgpeHeader_t* pSgpeHdr = (sgpeHeader_t*)& i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
     cmeHeader_t* pCmeHdr = (cmeHeader_t*) & i_pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
+    QpmrHeaderLayout_t* pQpmrHdr = ( QpmrHeaderLayout_t*) & (i_pChipHomer->qpmrRegion.sgpeRegion.qpmrHeader);
     PpmrHeader_t* pPpmrHdr = ( PpmrHeader_t* ) i_pChipHomer->ppmrRegion.ppmrHeader;
-
-    o_sramImgSize =  SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_scom_offset);
+    o_sramImgSize =  SWIZZLE_4_BYTE(pQpmrHdr->sgpeSramImageSize);
 
     rc = sizebank.isSizeGood( PLAT_SGPE, SGPE_SRAM_IMAGE, o_sramImgSize, NULL , 0 );
     FAPI_IMP("SGPE SRAM Image Size : 0x%08X Size Check : %s", o_sramImgSize, rc ? "FAILURE" : "SUCCESS" );
@@ -902,6 +903,11 @@ void updateQpmrHeader( Homerlayout_t* i_pChipHomer, QpmrHeaderLayout_t& io_qpmrH
 {
     QpmrHeaderLayout_t* pQpmrHdr = ( QpmrHeaderLayout_t*) & (i_pChipHomer->qpmrRegion.sgpeRegion.qpmrHeader);
     sgpeHeader_t* pSgpeHdr = (sgpeHeader_t*)& i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
+    io_qpmrHdr.sgpeSramImageSize = SWIZZLE_4_BYTE(io_qpmrHdr.sgpeImgLength) +
+                                   SWIZZLE_4_BYTE(io_qpmrHdr.quadCommonRingLength) +
+                                   SWIZZLE_4_BYTE(io_qpmrHdr.quadSpecRingLength);
+
+    io_qpmrHdr.sgpeSramImageSize = SWIZZLE_4_BYTE(io_qpmrHdr.sgpeSramImageSize);
     memcpy( pQpmrHdr, &io_qpmrHdr, sizeof( QpmrHeaderLayout_t ) );
     pQpmrHdr->magic_number                  =   SWIZZLE_8_BYTE(QPMR_MAGIC_NUMBER);
     pSgpeHdr->g_sgpe_magic_number           =   SWIZZLE_8_BYTE(SGPE_MAGIC_NUMBER);
@@ -927,6 +933,7 @@ void updateQpmrHeader( Homerlayout_t* i_pChipHomer, QpmrHeaderLayout_t& io_qpmrH
     FAPI_DBG("  Quad Spec Ring Length   : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadSpecRingLength) );
     FAPI_INF("  Quad SCOM Offset        : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadScomOffset) );
     FAPI_INF("  Quad SCOM Length        : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadScomLength) );
+    FAPI_DBG("  SGPE SRAM Img Size      : 0x%08x", SWIZZLE_4_BYTE(pQpmrHdr->sgpeSramImageSize ) );
     FAPI_DBG("==============================QPMR Ends==============================");
 
     FAPI_DBG("===========================SGPE Image Hdr=============================");
@@ -3585,3 +3592,5 @@ fapi_try_exit:
 } //namespace p9_hcodeImageBuild ends
 
 }// extern "C"
+
+// *INDENT-ON*
