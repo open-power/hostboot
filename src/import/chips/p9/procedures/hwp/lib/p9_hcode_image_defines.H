@@ -94,6 +94,8 @@ HCD_HDR_UINT32( quadAuxOffset, 0);
 HCD_HDR_UINT32( quadAuxLength, 0);
 HCD_HDR_UINT32( stopFfdcOffset, 0);
 HCD_HDR_UINT32( stopFfdcLength, 0);
+HCD_HDR_UINT32( sgpeBootProgCode, 0 );
+HCD_HDR_UINT32( sgpeSramImageSize, 0 );
 HCD_HDR_PAD(512);
 #ifdef __ASSEMBLER__
 .endm
