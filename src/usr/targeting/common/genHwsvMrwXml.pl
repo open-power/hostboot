@@ -303,7 +303,7 @@ push @systemAttr,
     "MNFG_XBUS_MIN_EYE_WIDTH", $reqPol->{'mnfg-xbus-min-eye-width'},
     "REDUNDANT_CLOCKS", $reqPol->{'redundant-clocks'},
     "MSS_MRW_POWER_CONTROL_REQUESTED", (uc $reqPol->{'mss_mrw_mem_power_control_requested'}),
-    #TODO RTC:163193 Add genHwsvMrwXml support for MSS_MRW_IDLE_POWER_CONTROL_REQUESTED
+    "MSS_MRW_IDLE_POWER_CONTROL_REQUESTED", (uc $reqPol->{'mss_mrw_idle_power_control_requested'}),
     "MNFG_TH_P8EX_L2_CACHE_CES", $reqPol->{'mnfg_th_p8ex_l2_cache_ces'},
     "MNFG_TH_P8EX_L2_DIR_CES", $reqPol->{'mnfg_th_p8ex_l2_dir_ces'},
     "MNFG_TH_P8EX_L3_CACHE_CES", $reqPol->{'mnfg_th_p8ex_l3_cache_ces'},
