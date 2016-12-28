@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,13 +60,16 @@ namespace Bootloader
     {
         RC_ASSERT            = HBBL_COMP_ID | 0x01, /**< Assert */
         RC_SHUTDOWN          = HBBL_COMP_ID | 0x02, /**< Shutdown */
-        RC_UNHANDLED_EX      = HBBL_COMP_ID | 0x03, /**< Unhandled Exception */
-        RC_REMOVE_ECC_FAIL   = HBBL_COMP_ID | 0x04, /**< Remove ECC Failed */
-        RC_CHK_NULL_BUFFER   = HBBL_COMP_ID | 0x05, /**< Check for NULL Buffr */
-        RC_HDR_CHECKSUM_ERR  = HBBL_COMP_ID | 0x06, /**< Hdr Checksum Error */
-        RC_CHECK_HEADER_ERR  = HBBL_COMP_ID | 0x07, /**< Check Header Error */
-        RC_PARSE_ENTRIES_ERR = HBBL_COMP_ID | 0x08, /**< Parse Entries Error */
-        RC_NO_HBB_IN_TOC     = HBBL_COMP_ID | 0x09, /**< No HBB Sect in TOC */
+        RC_STD_EXCEPTION     = HBBL_COMP_ID | 0x03, /**< Standard Exception */
+        RC_STD_EX_W_DSISR    = HBBL_COMP_ID | 0x04, /**< Std Except w/ DSISR */
+        RC_STD_EX_W_SRR1     = HBBL_COMP_ID | 0x05, /**< Std Except w/ SRR1 */
+        RC_HYPE_EXCEPTION    = HBBL_COMP_ID | 0x06, /**< Hypervisor Exception */
+        RC_REMOVE_ECC_FAIL   = HBBL_COMP_ID | 0x07, /**< Remove ECC Failed */
+        RC_CHK_NULL_BUFFER   = HBBL_COMP_ID | 0x08, /**< Check for NULL Buffr */
+        RC_HDR_CHECKSUM_ERR  = HBBL_COMP_ID | 0x09, /**< Hdr Checksum Error */
+        RC_CHECK_HEADER_ERR  = HBBL_COMP_ID | 0x0A, /**< Check Header Error */
+        RC_PARSE_ENTRIES_ERR = HBBL_COMP_ID | 0x0B, /**< Parse Entries Error */
+        RC_NO_HBB_IN_TOC     = HBBL_COMP_ID | 0x0C, /**< No HBB Sect in TOC */
     };
 
 };  // end Bootloader
