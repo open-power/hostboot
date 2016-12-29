@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,5 +60,33 @@ REG64( OBUS_2_LL2_IOOL_CONTROL,
        RULL(0x0B01080B), SH_UNT_OBUS_2, SH_ACS_SCOM );
 REG64( OBUS_2_LL2_LL2_LL2_PB_IOOL_FIR_REG,
        RULL(0x0B010800), SH_UNT_OBUS_2, SH_ACS_SCOM );
+
+REG64( OBUS_0_IOPPE_PPE_FIR_ACTION0_REG,
+       RULL(0x09011046), SH_UNT_OBUS_0, SH_ACS_SCOM );
+REG64( OBUS_0_IOPPE_PPE_FIR_ACTION1_REG,
+       RULL(0x09011047), SH_UNT_OBUS_0, SH_ACS_SCOM );
+REG64( OBUS_0_IOPPE_PPE_FIR_MASK_REG,
+       RULL(0x09011043), SH_UNT_OBUS_0, SH_ACS_SCOM );
+
+REG64( OBUS_1_IOPPE_PPE_FIR_ACTION0_REG,
+       RULL(0x0A011046), SH_UNT_OBUS_1, SH_ACS_SCOM );
+REG64( OBUS_1_IOPPE_PPE_FIR_ACTION1_REG,
+       RULL(0x0A011047), SH_UNT_OBUS_1, SH_ACS_SCOM );
+REG64( OBUS_1_IOPPE_PPE_FIR_MASK_REG,
+       RULL(0x0A011043), SH_UNT_OBUS_1, SH_ACS_SCOM );
+
+REG64( OBUS_2_IOPPE_PPE_FIR_ACTION0_REG,
+       RULL(0x0B011046), SH_UNT_OBUS_2, SH_ACS_SCOM );
+REG64( OBUS_2_IOPPE_PPE_FIR_ACTION1_REG,
+       RULL(0x0B011047), SH_UNT_OBUS_2, SH_ACS_SCOM );
+REG64( OBUS_2_IOPPE_PPE_FIR_MASK_REG,
+       RULL(0x0B011043), SH_UNT_OBUS_2, SH_ACS_SCOM );
+
+REG64( OBUS_3_IOPPE_PPE_FIR_ACTION0_REG,
+       RULL(0x0C011046), SH_UNT_OBUS_3, SH_ACS_SCOM );
+REG64( OBUS_3_IOPPE_PPE_FIR_ACTION1_REG,
+       RULL(0x0C011047), SH_UNT_OBUS_3, SH_ACS_SCOM );
+REG64( OBUS_3_IOPPE_PPE_FIR_MASK_REG,
+       RULL(0x0C011043), SH_UNT_OBUS_3, SH_ACS_SCOM );
 
 #endif
