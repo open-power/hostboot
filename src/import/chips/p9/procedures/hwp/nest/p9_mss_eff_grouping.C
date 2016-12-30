@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1839,6 +1839,8 @@ void grouping_group2PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
 
     for (uint8_t pos = 0; pos < NUM_MC_PORTS_PER_PROC; pos++)
     {
+        FAPI_DBG("Trying to group port %u with another port..", pos);
+
         // Skip if port is already grouped or has no memory
         if ( (o_groupData.iv_portGrouped[pos]) ||
              (i_memInfo.iv_portSize[pos] == 0) )
@@ -1851,7 +1853,7 @@ void grouping_group2PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
         }
 
         // Rules for group of 2:
-        // 1. Both ports must have the same amount of memory.
+        // 1. Both ports must not be grouped yet and have the same amount of memory.
         // 2. Crossed-MCS ports can be grouped if and only if:
         //      - it's an even port (port0) in the MCS
         //      - it's an odd port (port1) in the MCS and the even port is empty.
@@ -1859,50 +1861,50 @@ void grouping_group2PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
         //        MCPORTID_1, MCPORTID_3: MCPORTID_0 and MCPORTID_2 must be empty
         //        MCPORTID_0, MCPORTID_2: OK to group if memory are equal.
 
-        // Skip if this port is odd and its MCS' even port is not empty
-        if ( (pos % 2) && (i_memInfo.iv_portSize[pos - 1] != 0) )
-        {
-            FAPI_DBG("Skip this odd port because its MCS' even port is not empty, pos = %d", pos);
-            continue;
-        }
-
-        // If any of the remaining ungrouped port has the same amount of memory, group it
+        // Check to see if any remaining ungrouped port has the same amount of memory
         for (uint8_t ii = pos + 1; ii < NUM_MC_PORTS_PER_PROC; ii++)
         {
+            FAPI_DBG("Checking if base port %u can be grouped with port %u", pos, ii);
+
+            // Can not group if this port already grouped or has different memory size
             if ( (o_groupData.iv_portGrouped[ii]) ||
-                 (i_memInfo.iv_portSize[ii] == 0) )
+                 (i_memInfo.iv_portSize[ii] != i_memInfo.iv_portSize[pos]) )
             {
+                FAPI_DBG("Skip port %u, it's already grouped or memsize is not equal", ii);
                 continue;
             }
 
-            // Same amount of memory
-            if (i_memInfo.iv_portSize[pos] == i_memInfo.iv_portSize[ii])
+            // Check if 'pos' and 'ii' are on different MCS
+            if ( (pos / 2) != (ii / 2) )
             {
-                // If odd port, even port must have no memory
-                if ( (ii % 2) && (i_memInfo.iv_portSize[ii - 1] != 0) )
+                // Ports 'pos' and 'ii' are on different MCS.
+                // Can't not group if they are odd ports and their even port
+                // is not empty
+                if ( ((pos % 2) && (i_memInfo.iv_portSize[pos - 1] != 0)) ||
+                     ((ii % 2)  && (i_memInfo.iv_portSize[ii - 1]  != 0)) )
                 {
-                    FAPI_DBG("Skip this odd port %d because its MCS' even port is not empty, ii = %d", ii);
+                    FAPI_DBG("Crossed MCS, can't group port %u and %u because even port is not empty", pos, ii);
                     continue;
                 }
-
-                // Successfully find 2 ports to group
-                o_groupData.iv_data[g][PORT_SIZE] = i_memInfo.iv_portSize[pos];
-                o_groupData.iv_data[g][PORTS_IN_GROUP] = PORTS_PER_GROUP;
-                o_groupData.iv_data[g][GROUP_SIZE] =
-                    PORTS_PER_GROUP * i_memInfo.iv_portSize[pos];
-                o_groupData.iv_data[g][MEMBER_IDX(0)] = pos;
-                o_groupData.iv_data[g][MEMBER_IDX(1)] = ii;
-                g++;
-
-                // Record which MC ports were grouped
-                o_groupData.iv_portGrouped[pos] = true;
-                o_groupData.iv_portGrouped[ii] = true;
-
-                FAPI_INF("grouping_group2PortsPerGroup: Successfully grouped 2 "
-                         "MC ports: %u, %u", pos, ii);
-
-                break; // Break out of remaining port loop
             }
+
+            // Successfully find 2 ports to group
+            o_groupData.iv_data[g][PORT_SIZE] = i_memInfo.iv_portSize[pos];
+            o_groupData.iv_data[g][PORTS_IN_GROUP] = PORTS_PER_GROUP;
+            o_groupData.iv_data[g][GROUP_SIZE] =
+                PORTS_PER_GROUP * i_memInfo.iv_portSize[pos];
+            o_groupData.iv_data[g][MEMBER_IDX(0)] = pos;
+            o_groupData.iv_data[g][MEMBER_IDX(1)] = ii;
+            g++;
+
+            // Record which MC ports were grouped
+            o_groupData.iv_portGrouped[pos] = true;
+            o_groupData.iv_portGrouped[ii] = true;
+
+            FAPI_INF("grouping_group2PortsPerGroup: Successfully grouped 2 "
+                     "MC ports: %u, %u", pos, ii);
+
+            break; // Break out of remaining port loop
         }
     }
 
