@@ -2495,67 +2495,57 @@ void calculateEffectiveEC()
 errlHndl_t markDisabledMcas()
 {
     errlHndl_t l_errl = nullptr;
-    uint8_t lxData[HWAS::VPD_CRP0_LX_DATA_LENGTH];
+    uint8_t lxData[HWAS::VPD_CRP0_LX_HDR_DATA_LENGTH];
 
     HWAS_INF("markDisabledMcas entry");
 
     do
     {
-        //Get all functional chips
-        TARGETING::TargetHandleList l_procList;
-        getAllChips(l_procList, TYPE_PROC);
+        //Get the functional MCAs
+        TargetHandleList l_mcaList;
+        getAllChiplets(l_mcaList, TYPE_MCA, true);
 
-        //Loop through all functional procs
-        for(auto l_proc : l_procList)
+        for (auto l_mca : l_mcaList)
         {
-            //Get the functional MCAs for this proc
-            TargetHandleList l_mcaList;
-            getChildChiplets(l_mcaList, l_proc, TYPE_MCA, true);
-
-            for (auto l_mca : l_mcaList)
-            {
-                // fill the Lx data buffer with zeros
-                memset(lxData, 0x00, VPD_CRP0_LX_DATA_LENGTH);
+            // fill the Lx data buffer with zeros
+            memset(lxData, 0x00, VPD_CRP0_LX_HDR_DATA_LENGTH);
 
 #ifdef __HOSTBOOT_MODULE
-                //@TODO RTC:167294 Need to remove conditional after
-                //                 additional implementation
-                //Read Lx keyword for associated proc and MCA
-                l_errl = platReadLx(l_proc,
-                                    l_mca,
-                                    lxData);
+            //@TODO RTC:167294 Need to remove conditional after
+            //                 additional implementation
+            //Read Lx keyword for associated proc and MCA
+            l_errl = platReadLx(l_mca,
+                                lxData);
 #endif
 
-                if (l_errl)
-                {
-                    // commit the error but keep going
-                    errlCommit(l_errl, HWAS_COMP_ID);
-                }
+            if (l_errl)
+            {
+                // commit the error but keep going
+                errlCommit(l_errl, HWAS_COMP_ID);
+            }
 
-                if (lxData[VPD_CRP0_LX_FREQ_INDEP_INDEX
-                                + VPD_CRP0_LX_PORT_DISABLED] != 0)
-                {
-                    // Since port is disabled, MCA is not functional, but
-                    // it's present.
-                    enableHwasState(l_mca,
-                                    true, // present
-                                    false, // not functional
-                                    DeconfigGard::DECONFIGURED_BY_DISABLED_PORT
-                                    );
-                    HWAS_DBG("MCA %.8X - marked present, not functional",
-                             l_mca->getAttr<ATTR_HUID>());
+            if (lxData[VPD_CRP0_LX_FREQ_INDEP_INDEX
+                       + VPD_CRP0_LX_PORT_DISABLED] != 0)
+            {
+                // Since port is disabled, MCA is not functional, but
+                // it's present.
+                enableHwasState(l_mca,
+                                true, // present
+                                false, // not functional
+                                DeconfigGard::DECONFIGURED_BY_DISABLED_PORT);
+                HWAS_DBG("MCA %.8X - marked present, not functional",
+                         l_mca->getAttr<ATTR_HUID>());
 
-                    TargetInfo l_TargetInfo;
-                    l_TargetInfo.affinityPath =
-                        l_mca->getAttr<ATTR_AFFINITY_PATH>();
-                    l_TargetInfo.pThisTarget = l_mca;
-                    l_TargetInfo.type = l_mca->getAttr<ATTR_TYPE>();
-                    l_TargetInfo.reason =
-                        DeconfigGard::DECONFIGURED_BY_DISABLED_PORT;
+                TargetInfo l_TargetInfo;
+                l_TargetInfo.affinityPath =
+                    l_mca->getAttr<ATTR_AFFINITY_PATH>();
+                l_TargetInfo.pThisTarget = l_mca;
+                l_TargetInfo.type = l_mca->getAttr<ATTR_TYPE>();
+                l_TargetInfo.reason =
+                    DeconfigGard::DECONFIGURED_BY_DISABLED_PORT;
 
-                    // Deconfigure child targets for this MCA
-                    deconfigPresentByAssoc(l_TargetInfo);
-                }
+                // Deconfigure child targets for this MCA
+                deconfigPresentByAssoc(l_TargetInfo);
             }
         }
 

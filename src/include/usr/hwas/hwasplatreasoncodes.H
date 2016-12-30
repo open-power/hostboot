@@ -49,6 +49,7 @@ namespace HWAS
         RC_GARD_REPOSITORY_FULL             = HWAS_COMP_ID | 0x82,
         RC_BAD_CHIPID                       = HWAS_COMP_ID | 0x83,
         RC_BAD_LX                           = HWAS_COMP_ID | 0x84,
+        RC_BAD_MCA                          = HWAS_COMP_ID | 0x85,
     };
 };
 
