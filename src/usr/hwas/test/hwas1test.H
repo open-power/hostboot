@@ -1545,6 +1545,8 @@ public:
         using namespace HWAS;
         using namespace TARGETING;
 
+        TS_INFO( "testHWASpervStates entry" );
+
         // find top level target
         Target * pSys;
         targetService().getTopLevelTarget(pSys);
@@ -1638,30 +1640,67 @@ public:
         TS_INFO( "testHWASplatReadLx entry" );
 
         // call platReadLx with target that isn't in the VPD
-        errlHndl_t l_errl;
+        errlHndl_t l_errl = nullptr;
 
+        // Get system target
         Target* pSys;
         targetService().getTopLevelTarget(pSys);
 
+        // Get processor targets
         TARGETING::TargetHandleList l_procList;
         getAllChips(l_procList, TYPE_PROC);
 
-        TargetHandleList l_mcaList;
-        getChildChiplets(l_mcaList, *(l_procList.begin()), TYPE_MCA, true);
+        // Get children of first processor target
+        TargetHandleList l_childList;
+        getChildChiplets(l_childList, *(l_procList.begin()), TYPE_NA, false);
 
-        uint8_t lxData[HWAS::VPD_CRP0_LX_DATA_LENGTH];
+        uint8_t lxData[HWAS::VPD_CRP0_LX_HDR_DATA_LENGTH];
 
-        l_errl = HWAS::platReadLx(pSys, *(l_mcaList.begin()), lxData);
+        // Try using system target which does not have a chip unit attribute
+        l_errl = HWAS::platReadLx(pSys, lxData);
 
+        // Check that an error log is returned
         if (l_errl)
         {
             // error log is expected case, delete it
             delete l_errl;
+            l_errl = nullptr;
         }
         else
         {
-            TS_FAIL("testHWASplatReadLx>"
-                    "No error from platReadLx(pSys, *(l_mcaList.begin()).");
+            TS_FAIL("testHWASplatReadLx> No error from platReadLx(pSys).");
+        }
+
+        // Find a target that has a large chip unit and use that target
+        for( const auto & l_child_target: l_childList )
+        {
+            uint8_t l_chip_unit;
+            if (l_child_target->
+                tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_chip_unit))
+            {
+                // Check if chip unit attribute is large enough
+                if(l_chip_unit >= HWAS::VPD_CRP0_LX_MAX_X)
+                {
+                    // Try using target which has larger than expected chip unit
+                    l_errl = HWAS::platReadLx(l_child_target, lxData);
+
+                    // Check that an error log is returned
+                    if (l_errl)
+                    {
+                        // error log is expected case, delete it
+                        delete l_errl;
+                        l_errl = nullptr;
+                    }
+                    else
+                    {
+                        TS_FAIL("testHWASplatReadLx> No error from "
+                                "platReadLx(l_child_target 0x%8X).",
+                                l_child_target->getAttr<ATTR_HUID>());
+                    }
+
+                    break;
+                }
+            }
         }
 
         TS_INFO( "testHWASplatReadLx exit" );
