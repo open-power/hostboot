@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -108,6 +108,7 @@ COPY_RENAME_FILES = \
     img/makefile:src/build/mkrules/hbfw/img/makefile:fsp \
     hbicore.bin:img/hbicore$(UNDERSCORE_TEST).bin:vpo \
     img/hostboot_bootloader.bin:img/hbibl.bin:fsp,openpower,vpo \
+    img/hostboot_securerom.bin:img/securerom.bin:fsp,openpower,vpo \
     img/hostboot.bin:img/hbicore$(UNDERSCORE_TEST).bin:fsp,openpower \
     img/hostboot_extended.bin:img/hbicore$(UNDERSCORE_TEST)_extended.bin:fsp,openpower \
     img/hostboot_runtime.bin:img/hbirt$(UNDERSCORE_TEST).bin:fsp,openpower \
@@ -120,8 +121,11 @@ COPY_RENAME_FILES = \
     hbibl.syms:img/hbibl.syms:tools,vpo,openpower \
     hbibl.list.bz2:img/hbibl.list.bz2:tools,vpo,openpower \
     hbibl.bin.modinfo:img/hbibl.bin.modinfo:tools,vpo,openpower \
+    securerom.syms:img/securerom.syms:tools,vpo,openpower \
+    securerom.list.bz2:img/securerom.list.bz2:tools,vpo,openpower \
+    securerom.bin.modinfo:img/securerom.bin.modinfo:tools,vpo,openpower \
     $(foreach file, $(call ROOTPATH_WILDCARD,src/build/debug/Hostboot/*.pm), \
-	Hostboot/$(notdir $(file)):$(file):tools,vpo,openpower)
+    Hostboot/$(notdir $(file)):$(file):tools,vpo,openpower)
 
 #
 # Symbolic links created in the target.
@@ -193,6 +197,9 @@ simics.tar_CONTENTS = \
     img/hbibl.syms \
     img/hbibl.list.bz2 \
     img/hbibl.bin.modinfo \
+    img/securerom.syms \
+    img/securerom.list.bz2 \
+    img/securerom.bin.modinfo \
     img/errlparser \
     img/isteplist.csv \
     img/hbotStringFile \

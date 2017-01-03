@@ -154,11 +154,13 @@ extern "C"
  *
  * @param[in] void*              Address of function offset into Secure ROM
  * @param[in] ROM_container_raw* Pointer to effective address of container
- * @param[in] ROM_hw_params*     HW params to pass in. Includes HW keys' hash
+ * @param[in/out] ROM_hw_params* HW params to pass in (including HW keys' hash)
+ *                               Additionally, error information is written to
+ *                               the HW params log.
  *
  * @return ROM_response ROM_DONE on sucess ROM_FAILURE otherwise
  */
-ROM_response call_rom_verify(void*, ROM_container_raw*, ROM_hw_params*);
+ROM_response call_rom_verify(void*, const ROM_container_raw*, ROM_hw_params*);
 
 /**
  * @brief Call rom SHA512 code

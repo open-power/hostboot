@@ -45,6 +45,7 @@ VPATH += ../common
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/secureboot/trusted/base
 VPATH += ${ROOTPATH}/src/usr/secureboot/trusted/base
+VPATH += ${ROOTPATH}/src/securerom
 
 CFLAGS += -iquote ../
 include ${ROOTPATH}/config.mk
