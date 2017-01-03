@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -309,8 +309,8 @@ const uint32_t MCD_RECOVERY_VG_COUNT = 0x7FFF;
 const uint32_t MCD_VGC_AVAIL_GROUPS = 0xFFFF;
 
 const uint64_t MCD_FIR_ACTION0 = 0x0000000000000000ULL;
-const uint64_t MCD_FIR_ACTION1 = 0x8030000000000000ULL;
-const uint64_t MCD_FIR_MASK    = 0x4C40000000000000ULL;
+const uint64_t MCD_FIR_ACTION1 = 0x8000000000000000ULL;
+const uint64_t MCD_FIR_MASK    = 0x4C70000000000000ULL;
 
 
 //
