@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -41,9 +41,14 @@ BINARY_FILES = $(IMGDIR)/dimmspd.dat:9852a0ed166442ef69ecd91a0379f282419a371f
 #found for procs CCIN 54E3
 BINARY_FILES += $(IMGDIR)/procmvpd.dat:65759fa4aebd2e3b42b25309504a3007b3b51036
 BINARY_FILES += $(IMGDIR)/procmvpd_ven.dat:dd8507bec946283260f82af212ed32feaeb3363a
-BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:ba375e622c39f44a8adab626e222437ffcdffd16
 BINARY_FILES += $(IMGDIR)/vpo_sysmvpd.dat:f83bbcdd56defb5d155399774c4d721de25a8e96
 BINARY_FILES += $(IMGDIR)/vpo_djvpd.dat:eb4dce98f19ebfe77243be1c56d3d0eaa1889d90
+
+# Nimbus Module VPD
+# Copied from /afs/btv.ibm.com/u/sgrom/public/vpd_images/p9_dd10/module-p9-dd10-simics_v15_rs4v2.bin
+#   on 1/3/2017
+# Modified PG record to have proper XBUS data and only the first 4 cores
+BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:ca32d9418a7ff3781a2989b230c2f915e20d47af
 
 
 #Update to Centaur DD2.0 for CCIN 31E8
