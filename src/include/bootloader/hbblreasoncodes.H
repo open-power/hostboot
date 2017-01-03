@@ -47,6 +47,7 @@ namespace Bootloader
         MOD_BOOTLOADER_MAIN      = 0x02, /**< bootloader.C : main */
         MOD_PNORACC_READTOC      = 0x03, /**< bl_pnorAccess.C : read TOC */
         MOD_PNORACC_GETHBBSECT   = 0x04, /**< bl_pnorAccess.C : get HBB sect */
+        MOD_BOOTLOADER_VERIFY    = 0x05, /**< bootloader.C : verifyContainer */
 
     };
 

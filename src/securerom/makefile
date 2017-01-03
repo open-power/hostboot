@@ -43,6 +43,7 @@ OBJS += ROM.o
 OBJS += sha512.o
 OBJS += ecverify.o
 OBJS += hw_utils.o
+OBJS += rom_entry.o
 
 OPT_LEVEL = -Os
 

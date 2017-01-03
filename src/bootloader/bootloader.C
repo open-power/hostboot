@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,9 +37,17 @@
 #include <ecc.H>
 
 #include <stdlib.h>
+#include <util/align.H>
+#include <string.h>
+#include <limits.h>
+
+#include <securerom/ROM.H>
+#include <config.h>
+#include <secureboot/secure_reasoncodes.H>
 
 extern uint64_t kernel_other_thread_spinlock;
 extern PNOR::SectionData_t bootloader_hbbSection;
+extern char bootloader_end_address;
 
 namespace Bootloader{
     /**
@@ -50,13 +58,111 @@ namespace Bootloader{
      */
     uint8_t *g_blScratchSpace = NULL;
 
-    /** Apply Secure Signature Validation function.
-     *
-     *  @note Currently just a stub.
-     */
-    void applySecureSignatureValidation()
+    // @TODO RTC:166847 - remove tmp_hw_key_hash and use actual hw key hash
+    const uint64_t tmp_hw_key_hash[] =
     {
-        // (just an empty stub function for now) @TODO RTC:143902
+        0x40d487ff7380ed6a,
+        0xd54775d5795fea0d,
+        0xe2f541fea9db06b8,
+        0x466a42a320e65f75,
+        0xb48665460017d907,
+        0x515dc2a5f9fc5095,
+        0x4d6ee0c9b67d219d,
+        0xfb7085351d01d6d1
+    };
+
+    // @TODO RTC:167740 remove magic number check once fsp/op signs HBB
+    /**
+     * @brief  Memcmp a vaddr to the known secureboot magic number
+     *
+     * @param[in]   i_vaddr: vaddr of secureboot header to check for magic number
+     *                       Note: must point to a buffer of size >= 4 bytes
+     *
+     * @return  bool - True if the magic number and starting bytes of the vaddr
+     *                 match. False otherwise.
+     */
+    bool cmpSecurebootMagicNumber(const uint8_t* i_vaddr)
+    {
+        return memcmp(&ROM_MAGIC_NUMBER, i_vaddr, sizeof(ROM_MAGIC_NUMBER))==0;
+    }
+
+    /**
+     * @brief Verify Container against system hash keys
+     *
+     * @param[in] i_pContainer  Void pointer to effective address
+     *                          of container
+     * NOTE : no-op if Config Secureboot not enabled.
+     *
+     * @return N/A
+     */
+    void verifyContainer(const void * i_pContainer)
+    {
+#ifdef CONFIG_SECUREBOOT
+        // @TODO RTC:167740 remove magic number check once fsp/op signs HBB
+        if (cmpSecurebootMagicNumber(reinterpret_cast<const uint8_t*>
+                                     (i_pContainer)))
+        {
+            BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_HBB_START);
+
+            uint64_t l_rc = 0;
+
+            const void * l_pBootloaderEnd = &bootloader_end_address;
+
+            // Get starting address of ROM code which is the next 8 byte aligned
+            // address after the bootloader end.
+            uint64_t l_size = 0;
+            memcpy (&l_size, l_pBootloaderEnd, sizeof(l_size));
+            uint64_t l_rom_startAddr = getHRMOR() + ALIGN_8(l_size);
+
+            // Set startAddr to ROM_verify() function at an offset of Secure ROM
+            uint64_t l_rom_verify_startAddr = l_rom_startAddr
+                                              + ROM_VERIFY_FUNCTION_OFFSET;
+
+            // Declare local input struct
+            ROM_hw_params l_hw_parms;
+
+            // Clear/zero-out the struct since we want 0 ('zero') values for
+            // struct elements my_ecid, entry_point and log
+            memset(&l_hw_parms, 0, sizeof(ROM_hw_params));
+
+            // Use current hw hash key
+            memcpy (&l_hw_parms.hw_key_hash, &tmp_hw_key_hash, sizeof(sha2_hash_t));
+
+            const ROM_container_raw* l_container =
+                           reinterpret_cast<const ROM_container_raw*>(i_pContainer);
+
+            l_rc = call_rom_verify(reinterpret_cast<void*>
+                                   (l_rom_verify_startAddr),
+                                   l_container,
+                                   &l_hw_parms);
+
+            if (l_rc != 0)
+            {
+                // Verification of Container failed.
+                BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_HBB_FAIL);
+                /*@
+                 * @errortype
+                 * @moduleid     MOD_BOOTLOADER_VERIFY
+                 * @reasoncode   SECUREBOOT::RC_ROM_VERIFY
+                 * @userdata1    ROM return code
+                 * @userdata2    ROM_hw_params log
+                 * @devdesc      ROM verification failed
+                 * @custdesc     Platform security violation detected
+                 */
+                bl_terminate(MOD_BOOTLOADER_VERIFY,
+                             SECUREBOOT::RC_ROM_VERIFY,
+                             l_rc,
+                             l_hw_parms.log);
+
+            }
+
+            BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_HBB_SUCCESS);
+        }
+        else
+        {
+            BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_HBB_SKIP);
+        }
+#endif
     }
 
 
@@ -87,7 +193,6 @@ namespace Bootloader{
         uint32_t l_errCode = PNOR::NO_ERROR;
         uint8_t l_tocUsed = 0;
         g_blScratchSpace = reinterpret_cast<uint8_t*>(HBBL_SCRATCH_SPACE_ADDR);
-
 
         // Get location of HB base code in PNOR from TOC
         // @TODO RTC:138268 Support multiple sides of PNOR in bootloader
@@ -139,17 +244,23 @@ namespace Bootloader{
 
             if (rc != PNOR::ECC::UNCORRECTABLE)
             {
-                // Apply secure signature validation @TODO RTC:143902
-                applySecureSignatureValidation();
-                BOOTLOADER_TRACE(BTLDR_TRC_MAIN_APPLYSECSIGVAL_RTN);
-
-                // Copy HBB image into address where it executes
                 uint64_t *l_src_addr =
                    reinterpret_cast<uint64_t*>(HBB_WORKING_ADDR |
                                                IGNORE_HRMOR_MASK);
+
                 uint64_t *l_dest_addr =
                    reinterpret_cast<uint64_t*>(HBB_RUNNING_ADDR |
                                                IGNORE_HRMOR_MASK);
+                // ROM verification of HBB image
+                verifyContainer(l_src_addr);
+
+                // Increment past secure header
+#ifdef CONFIG_SECUREBOOT
+                l_src_addr += PAGE_SIZE/sizeof(uint64_t);
+                l_hbbLength -= PAGE_SIZE;
+#endif
+
+                // Copy HBB image into address where it executes
                 for(uint32_t i = 0;
                     i < l_hbbLength / sizeof(uint64_t);
                     i++)

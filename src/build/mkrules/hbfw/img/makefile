@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -56,11 +56,12 @@ ENGD_SRCPATH = ${SRCPATH:S/hbfw\/img/engd\/href/g}
 # Input default images
 BOOTLDR_IMG = hostboot_bootloader.bin
 HBBL_IMG = hbbl.bin
+HB_SECROM_IMG = hostboot_securerom.bin
 HBB_IMG = hostboot.bin
 HBB_ECC_IMG = hostboot.bin.ecc
 HBI_IMG =  hostboot_extended.bin
 HBRT_IMG = hostboot_runtime.bin
-BASE_IMAGES = ${BOOTLDR_IMG} ${HBB_IMG} ${HBI_IMG} ${HBRT_IMG}
+BASE_IMAGES = ${BOOTLDR_IMG} ${HB_SECROM_IMG} ${HBB_IMG} ${HBI_IMG} ${HBRT_IMG}
 
 # Input fake images
 HBI_FAKE_IMG = hostboot_extended.bin.fake
@@ -91,6 +92,9 @@ FINAL_OUTPUT_IMAGES = ${HBBL_FINAL_IMG} ${HBB_FINAL_IMG} ${HBI_FINAL_IMG} \
 					  ${HBEL_FINAL_IMG} ${GUARD_FINAL_IMG} ${GLOBAL_FINAL_IMG} \
 					  ${DJVPD_FINAL_IMG} ${MVPD_FINAL_IMG} ${CVPD_FINAL_IMG} \
 					  ${PAYLOAD_FINAL_IMG} ${RINGOVD_FINAL_IMG} ${SBKT_FINAL_IMG}
+
+# Temp images
+HB_TEMP_IMG = hb_temp.bin
 
 # Aggregate
 ALL_DEFAULT_IMAGES = ${DEFAULT_INPUT_IMAGES} ${FINAL_OUTPUT_IMAGES}
@@ -128,7 +132,10 @@ gen_default_images: cp_hbfiles
     # Remove offset from start of Bootloader image for HBBL partition
     # Actual code is offset from HRMOR by 12k = 12 1k-blocks (space
     # reserved for exception vectors)
-	dd if=${BOOTLDR_IMG} of=${HBBL_IMG} ibs=1k skip=12 conv=sync
+	dd if=${BOOTLDR_IMG} of=${HBBL_IMG} ibs=8 skip=1536 conv=sync
+
+	# Append Hostboot securerom code to the HBBl section
+	cat ${HB_SECROM_IMG} >> ${HBBL_IMG}
 
 	# Call script to generate final bin files for default images
 	${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS}

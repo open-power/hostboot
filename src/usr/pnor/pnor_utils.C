@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -363,6 +363,7 @@ bool PNOR::isSecureSection(const uint32_t i_section)
 // TODO securebootp9 uncomment these sections as they become ready for
 // inclusion in p9. Remove this comment after the last one.
 #ifdef CONFIG_SECUREBOOT
+    return i_section == HB_BASE_CODE;
 //    return i_section == HB_EXT_CODE ||
 //           i_section == HB_DATA ||
 //           i_section == SBE_IPL ||

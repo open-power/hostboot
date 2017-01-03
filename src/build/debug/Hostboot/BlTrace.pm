@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -34,8 +34,11 @@ my %traceText = (
     "11" => "Main getHBBSection returned",
     "12" => "Main handleMMIO to working location returned",
     "13" => "Main removeECC returned",
-    "14" => "Main applySecureSignatureValidation returned",
-    "15" => "Main copy HBB to running location done",
+    # @TODO RTC:167740 remove magic number check once fsp/op signs HBB
+    "14" => "main verifyBaseImage skip verification - no magic number ",
+    "15" => "main verifyBaseImage started",
+    "16" => "main verifyBaseImage succeeded",
+    "17" => "Main copy HBB to running location done",
     "20" => "HandleMMIO started",
     "21" => "HandleMMIO started using BYTESIZE",
     "24" => "HandleMMIO started using WORDSIZE",
@@ -71,6 +74,7 @@ my %traceText = (
     "F8" => "Utils parseEntries size extends beyond Flash",
     "F9" => "PNOR Access getHBBSection findTOC error",
     "FA" => "PNOR Access getHBBSection findTOC no HBB section",
+    "FB" => "main verifyBaseImage failed",
 );
 
 sub formatTrace
@@ -97,9 +101,20 @@ sub formatTrace
             $traceDataRaw .= " ";
         }
 
-        if ($traceText{$traceHexStr} ne "")
+        if (exists $traceText{$traceHexStr})
         {
-            $traceDataText .= "$traceHexStr  $traceText{$traceHexStr}\n";
+            if ($traceText{$traceHexStr} ne "")
+            {
+                $traceDataText .= "$traceHexStr  $traceText{$traceHexStr}\n";
+            }
+            else
+            {
+                $traceDataText .= "$traceHexStr  NO TRACE TEXT FOUND - check BlTrace.pm\n";
+            }
+        }
+        else
+        {
+            $traceDataText .= "$traceHexStr  UNKNOWN HEX FOUND - check BlTrace.pm\n";
         }
     }
 
