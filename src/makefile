@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2016
+# Contributors Listed Below - COPYRIGHT 2010,2017
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -239,7 +239,7 @@ RUNTIME_MODULES += hwp_rt
 RUNTIME_MODULES += plat_rt
 RUNTIME_MODULES += build_winkle_images_rt
 RUNTIME_MODULES += occ_rt
-RUNTIME_MODULES += pstates
+RUNTIME_MODULES += pstates_rt
 RUNTIME_MODULES += $(if $(CONFIG_HTMGT),htmgt_rt)
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),bus_training_rt)
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),attn_rt)
