@@ -107,7 +107,6 @@ struct EffGroupingSysAttrs
     // Public data
     uint8_t iv_selectiveMode = 0;        // ATTR_MEM_MIRROR_PLACEMENT_POLICY
     uint8_t iv_hwMirrorEnabled = 0;      // ATTR_MRW_HW_MIRRORING_ENABLE
-    uint8_t iv_fabricAddrBarMode = 0;    // ATTR_PROC_FABRIC_ADDR_BAR_MODE
     uint8_t iv_groupsAllowed = 0;        // ATTR_MSS_INTERLEAVE_ENABLE
 };
 
@@ -131,12 +130,6 @@ fapi2::ReturnCode EffGroupingSysAttrs::getAttrs()
              "Error getting ATTR_MRW_HW_MIRRORING_ENABLE, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
-    // Get Fabric address BAR mode
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE,
-                           FAPI_SYSTEM, iv_fabricAddrBarMode),
-             "Error getting ATTR_PROC_FABRIC_ADDR_BAR_MODE, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
     // Get interleave option
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_INTERLEAVE_ENABLE, FAPI_SYSTEM,
                            iv_groupsAllowed),
@@ -147,7 +140,6 @@ fapi2::ReturnCode EffGroupingSysAttrs::getAttrs()
     FAPI_INF("EffGroupingSysAttrs: ");
     FAPI_INF("   ATTR_MEM_MIRROR_PLACEMENT_POLICY 0x%.8X", iv_selectiveMode);
     FAPI_INF("   ATTR_MRW_HW_MIRRORING_ENABLE 0x%.8X", iv_hwMirrorEnabled);
-    FAPI_INF("   ATTR_PROC_FABRIC_ADDR_BAR_MODE 0x%.8X", iv_fabricAddrBarMode);
     FAPI_INF("   ATTR_MSS_INTERLEAVE_ENABLE 0x%.8X", iv_groupsAllowed);
 
 fapi_try_exit:
