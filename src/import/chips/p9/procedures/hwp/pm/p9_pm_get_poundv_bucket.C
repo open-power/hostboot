@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,11 +39,6 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket(
 {
     FAPI_IMP("Entering p9_pm_get_poundv_bucket ....");
 
-
-    //Create a pointer version of the out param o_data so that
-    // we can access bytes individually
-    uint8_t* l_tempBuffer = reinterpret_cast<uint8_t*>(malloc(sizeof(o_data)));
-
     //Set up a char array to hold the bucket data from an attr read
     fapi2::ATTR_POUNDV_BUCKET_DATA_Type l_bucketAttr;
 
@@ -52,33 +47,9 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket(
                            i_target,
                            l_bucketAttr));
 
-
-#ifndef _BIG_ENDIAN
-    //The first byte is simply a uint8 that describes the bucket ID
-    l_tempBuffer[0] = l_bucketAttr[0];
-
-    //Skipping the first byte (which has already been taken of) start reading
-    //the voltage data 2 bytes at a time.
-    for(uint8_t offset = 1; offset < sizeof(o_data); offset += 2)
-    {
-        //Switch from Big Endian to Little Endian
-        l_tempBuffer[offset] = l_bucketAttr[offset + 1];
-        l_tempBuffer[offset + 1] = l_bucketAttr[offset];
-    }
-
-    memcpy(&o_data,
-           l_tempBuffer,
-           sizeof(o_data));
-
-#else
-    memcpy(&o_data,
-           l_bucketAttr,
-           sizeof(o_data));
-#endif
-
+    memcpy(&o_data, l_bucketAttr, sizeof(o_data));
 
 fapi_try_exit:
-    free(l_tempBuffer);
     FAPI_IMP("Exiting p9_pm_get_poundv_bucket ....");
 
     return fapi2::current_err;

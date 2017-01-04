@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,7 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
     uint32_t l_sysNestFreq = 0;
     fapi2::voltageBucketData_t* l_currentBucket = NULL;
     uint8_t l_numMatches = 0;
+    uint16_t l_pbFreq = 0;
 
     fapi2::MvpdRecord lrpRecord = fapi2::MVPD_RECORD_LAST;
     //To read MVPD we will need the proc parent of the inputted EQ target
@@ -186,7 +187,13 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
 
             for(int i = 0; i < NUM_BUCKETS; i++)
             {
-                if(l_buckets[i].pbFreq == l_sysNestFreq)
+#ifndef _BIG_ENDIAN
+                l_pbFreq = ( (((l_buckets[i].pbFreq) >> 8) & 0x00FF) | (((l_buckets[i].pbFreq) << 8) & 0xFF00) );
+#else
+                l_pbFreq = l_buckets[i].pbFreq;
+#endif
+
+                if(l_pbFreq == l_sysNestFreq)
                 {
                     l_numMatches++;
 
@@ -196,7 +203,7 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
                                  " Multiple buckets (%d) reporting the same nest frequency"
                                  " Bucket Nest = %d Bucket ID = %d, First Bucket = %d",
                                  l_numMatches,
-                                 l_buckets[i].pbFreq,
+                                 l_pbFreq,
                                  (i + 1),
                                  l_currentBucket);
 
@@ -208,7 +215,7 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
                 }
 
                 //save FFDC in case we fail
-                l_bucketNestFreqs[i] = l_buckets[i].pbFreq;
+                l_bucketNestFreqs[i] = l_pbFreq;
             }
 
             if(l_numMatches == 1)
