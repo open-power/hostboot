@@ -43,12 +43,8 @@
 // Includes
 // ----------------------------------------------------------------------
 #include <fapi2.H>
-//#include <p9_pstates.h>
-//#include <pstate_tables.h>
-//#include <lab_pstates.h>
-//#include <pstates.h>
-//#include <p9_pm.H>
 #include <p9_pstate_parameter_block.H>
+#include "p9_pm_get_poundv_bucket.H"
 
 // START OF PSTATE PARAMETER BLOCK function
 
@@ -502,10 +498,9 @@ proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 {
 
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_EQ>> l_eqChiplets;
-    uint8_t*   l_buffer         =  reinterpret_cast<uint8_t*>(malloc(PDV_BUFFER_ALLOC) );
+    fapi2::voltageBucketData_t l_poundv_data;
+    uint8_t*   l_buffer         =  reinterpret_cast<uint8_t*>(malloc(sizeof(l_poundv_data)) );
     uint8_t*   l_buffer_inc;
-    uint32_t   l_bufferSize     = 512;
-    uint32_t   l_record         = 0;
     uint32_t   chiplet_mvpd_data[PV_D][PV_W];
     uint8_t    j                = 0;
     uint8_t    i                = 0;
@@ -533,38 +528,18 @@ proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         for (j = 0; j < l_eqChiplets.size(); j++)
         {
 
-            l_bufferSize      = 512;
             uint8_t l_chipNum = 0xFF;
 
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_eqChiplets[j], l_chipNum));
 
             FAPI_INF("Chip Number => %u", l_chipNum);
 
-            // set l_record to appropriate lprx record (add quad number to lrp0)
-            l_record = (uint32_t)fapi2::MVPD_RECORD_LRP0 + l_chipNum;
-
-            FAPI_INF("Record Number => %u", l_record);
             // clear out buffer to known value before calling fapiGetMvpdField
-            memset(l_buffer, 0, 512);
+            memset(l_buffer, 0, sizeof(l_poundv_data));
 
-            //@todo RTC 162565 - Change code to use POUNDV accessor function
-            // Get Chiplet MVPD data and put in chiplet_mvpd_data using accessor function
-            FAPI_TRY(getMvpdField((fapi2::MvpdRecord)l_record,
-                                  fapi2::MVPD_KEYWORD_PDV,
-                                  i_target,
-                                  l_buffer,
-                                  l_bufferSize));
+            FAPI_TRY(p9_pm_get_poundv_bucket(l_eqChiplets[j], l_poundv_data));
 
-            // check buffer size
-            if (l_bufferSize < PDV_BUFFER_SIZE)
-            {
-                FAPI_ERR("**** ERROR : Wrong size buffer returned from fapiGetMvpdField for #V => %d",
-                         l_bufferSize );
-                // @todo-L3
-                //const uint32_t &BUFFER_SIZE = l_bufferSize;             //const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& CHIP_TARGET= i_target;
-                //FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PDV_BUFFER_SIZE_ERROR);
-                break;
-            }
+            memcpy(l_buffer, &l_poundv_data, sizeof(l_poundv_data));
 
             // clear array
             memset(chiplet_mvpd_data, 0, sizeof(chiplet_mvpd_data));
@@ -572,8 +547,6 @@ proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             // fill chiplet_mvpd_data 2d array with data iN buffer (skip first byte - bucket id)
 #define UINT16_GET(__uint8_ptr)   ((uint16_t)( ( (*((const uint8_t *)(__uint8_ptr)) << 8) | *((const uint8_t *)(__uint8_ptr) + 1) ) ))
 
-            //@todo RTC 162565 - Change code to use POUNDV accessor function
-            // use copy of allocated buffer pointer to increment through buffer
             l_buffer_inc = l_buffer;
 
             bucket_id = *l_buffer_inc;
