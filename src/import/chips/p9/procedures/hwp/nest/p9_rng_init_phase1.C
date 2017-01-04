@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,20 +65,13 @@ const uint16_t  NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH        = 0x48;
 const uint16_t  NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH        = 0x48;
 
 // RNG Self Test Register 1 constants
+// adaptive proportion soft fail threshold (Setting [0:6] to 0x02)
+const uint8_t NX_RNG_ST1_ADAPTEST_SOFT_FAIL_TH = 0x02;
 // adaptive proportion 1bit match threshold min (648; Assuming H = 0.8)
 const uint16_t NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN         = 0x0288;
 // adaptive proportion 1bit match threshold max (1400; Assuming H = 0.8)
 const uint16_t NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX         = 0x0578;
 
-// RNG Self Test Register 2 constants
-// Adaptive Proportion Soft Fail Counter - RRN RNG0 (2; Will fail if we see 3 adaptest fails)
-const uint8_t  NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_RRN_RNG0  = 0x02;
-// Adaptive Proportion Soft Fail Counter - RRN RNG1 (2; Will fail if we see 3 adaptest fails)
-const uint8_t  NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_RRN_RNG1  = 0x02;
-// Adaptive Proportion Soft Fail Counter - CRN RNG0 (2; Will fail if we see 3 adaptest fails)
-const uint8_t  NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_CRN_RNG0  = 0x02;
-// Adaptive Proportion Soft Fail Counter - CRN RNG1 (2; Will fail if we see 3 adaptest fails)
-const uint8_t  NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_CRN_RNG1  = 0x02;
 
 // RNG Self Test Register 3 constants
 // sample rate RRN enable (Use RRNs)
@@ -171,22 +164,6 @@ p9_rng_init_phase1(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 
     FAPI_TRY(fapi2::putScom(i_target, PU_NX_RNG_ST1, l_rng_st1_data),
              "Error from putScom (NX RNG Self Test Register 1)");
-
-    // configure RNG Self Test Register 2
-    FAPI_TRY(fapi2::getScom(i_target, PU_NX_RNG_ST2, l_rng_st2_data),
-             "Error from getScom (NX RNG Self Test Register 2)");
-
-    l_rng_st2_data.insertFromRight<PU_NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_RRN_RNG0, PU_NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_RRN_RNG0_LEN>
-    (NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_RRN_RNG0);
-    l_rng_st2_data.insertFromRight<PU_NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_RRN_RNG1, PU_NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_RRN_RNG1_LEN>
-    (NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_RRN_RNG1);
-    l_rng_st2_data.insertFromRight<PU_NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_CRN_RNG0, PU_NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_CRN_RNG0_LEN>
-    (NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_CRN_RNG0);
-    l_rng_st2_data.insertFromRight<PU_NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_CRN_RNG1, PU_NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_CRN_RNG1_LEN>
-    (NX_RNG_ST2_ADAPTEST_SOFT_FAIL_COUNT_CRN_RNG1);
-
-    FAPI_TRY(fapi2::putScom(i_target, PU_NX_RNG_ST2, l_rng_st2_data),
-             "Error from putScom (NX RNG Self Test Register 2)");
 
     // write RNG Self Test Register 3
     FAPI_TRY(fapi2::getScom(i_target, PU_NX_RNG_ST3, l_rng_st3_data),
