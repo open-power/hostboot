@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -259,7 +259,7 @@ void bl_pnorAccess::getHBBSection(uint64_t i_pnorEnd,
     BOOTLOADER_TRACE(BTLDR_TRC_PA_GETHBBSECTION_START);
     do
     {
-        PNOR::SectionData_t l_TOC[PNOR::NUM_SECTIONS];
+        PNOR::SectionData_t l_TOC[PNOR::NUM_SECTIONS+1];
 
         findTOC(i_pnorEnd, l_TOC, o_errCode, o_tocUsed, o_pnorStart);
 
