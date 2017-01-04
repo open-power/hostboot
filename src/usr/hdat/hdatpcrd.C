@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -606,8 +606,17 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
         }
 
         //set supported stop level
+        TARGETING::Target *l_pSysTarget = NULL;
+        (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
+        if(l_pSysTarget == NULL)
+        {
+            HDAT_ERR("Error in getting Top Level Target");
+            assert(l_pSysTarget != NULL);
+        }
+
         iv_spPcrd->hdatChipData.hdatPcrdStopLevelSupport =
-            i_pProcTarget->getAttr<TARGETING::ATTR_SUPPORTED_STOP_STATES>();
+            l_pSysTarget->getAttr<TARGETING::ATTR_SUPPORTED_STOP_STATES>();
+
     }
     while(0);
     return l_errl;
