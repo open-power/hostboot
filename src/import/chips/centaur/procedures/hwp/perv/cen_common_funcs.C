@@ -74,9 +74,9 @@ cen_scan0_module(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
     fapi2::buffer<uint64_t> l_gp1_data = 0;
     fapi2::buffer<uint64_t> l_clk_region_data = i_clk_region_data;
     fapi2::buffer<uint64_t> l_clk_scansel_data = i_clk_scansel_data;
-    uint64_t l_clk_region_addr = get_scom_addr(i_chiplet_id, GENERIC_CLK_REGION);
-    uint64_t l_clk_scansel_addr = get_scom_addr(i_chiplet_id, GENERIC_CLK_SCANSEL);
-    uint64_t l_opcg_cntl0_addr = get_scom_addr(i_chiplet_id, GENERIC_OPCG_CNTL0);
+    uint64_t l_clk_region_addr = get_scom_addr(i_chiplet_id, CEN_GENERIC_CLK_REGION);
+    uint64_t l_clk_scansel_addr = get_scom_addr(i_chiplet_id, CEN_GENERIC_CLK_SCANSEL);
+    uint64_t l_opcg_cntl0_addr = get_scom_addr(i_chiplet_id, CEN_GENERIC_OPCG_CNTL0);
     uint64_t l_gp1_addr_multi_cast = 0;
     uint64_t l_multicast_read_and = i_chiplet_id;
     bool l_poll_succeed = false;
@@ -113,7 +113,7 @@ cen_scan0_module(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
     //cen_osm_poll
     FAPI_DBG("<scan0> : Start polling for SCAN0 complete ...");
 
-    l_gp1_addr_multi_cast = get_scom_addr(l_multicast_read_and, GENERIC_GP1);
+    l_gp1_addr_multi_cast = get_scom_addr(l_multicast_read_and, CEN_GENERIC_GP1);
 
     for (uint32_t i = 0; i < MAX_FLUSH_LOOPS; i++)
     {
@@ -155,13 +155,13 @@ cen_arrayinit_module(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
     fapi2::buffer<uint64_t> l_gp1_data = 0;
     fapi2::buffer<uint64_t> l_opcg_cntl0_data = 0;
     fapi2::buffer<uint64_t> l_opcg_cntl2_data = 0;
-    uint64_t l_gp0_addr_and = get_scom_addr(i_chiplet_id, GENERIC_GP0_AND);
-    uint64_t l_gp0_addr_or = get_scom_addr(i_chiplet_id, GENERIC_GP0_OR);
+    uint64_t l_gp0_addr_and = get_scom_addr(i_chiplet_id, CEN_GENERIC_GP0_AND);
+    uint64_t l_gp0_addr_or = get_scom_addr(i_chiplet_id, CEN_GENERIC_GP0_OR);
     uint64_t l_gp1_addr_multi_cast = 0;
-    uint64_t l_clk_region_addr = get_scom_addr(i_chiplet_id, GENERIC_CLK_REGION);
-    uint64_t l_opcg_cntl0_addr = get_scom_addr(i_chiplet_id, GENERIC_OPCG_CNTL0);
+    uint64_t l_clk_region_addr = get_scom_addr(i_chiplet_id, CEN_GENERIC_CLK_REGION);
+    uint64_t l_opcg_cntl0_addr = get_scom_addr(i_chiplet_id, CEN_GENERIC_OPCG_CNTL0);
     uint64_t l_opcg_cntl0_addr_multi_cast = 0;
-    uint64_t l_opcg_cntl2_addr = get_scom_addr(i_chiplet_id, GENERIC_OPCG_CNTL2);
+    uint64_t l_opcg_cntl2_addr = get_scom_addr(i_chiplet_id, CEN_GENERIC_OPCG_CNTL2);
     uint64_t l_opcg_cntl2_addr_multi_cast = 0;
     uint64_t l_multicast_read_or = i_chiplet_id;
     uint64_t l_multicast_read_and = i_chiplet_id;
@@ -193,7 +193,7 @@ cen_arrayinit_module(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
     FAPI_TRY(fapi2::putScom(i_target, l_clk_region_addr, i_clock_region));
 
     FAPI_DBG("<cen_arrayinit> : Setup loopcount and run-N mode");
-    l_opcg_cntl0_addr_multi_cast = get_scom_addr(l_multicast_read_or, GENERIC_OPCG_CNTL0);
+    l_opcg_cntl0_addr_multi_cast = get_scom_addr(l_multicast_read_or, CEN_GENERIC_OPCG_CNTL0);
     FAPI_TRY(fapi2::getScom(i_target, l_opcg_cntl0_addr_multi_cast, l_opcg_cntl0_data));
     // And with mask bit(0:20), starting from bit 0, totally 21 bits.
     l_opcg_cntl0_data &= fapi2::buffer<uint64_t>().setBit<0, 21>();
@@ -201,7 +201,7 @@ cen_arrayinit_module(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
     FAPI_TRY(fapi2::putScom(i_target, l_opcg_cntl0_addr, l_opcg_cntl0_data));
 
     FAPI_DBG("<cen_arrayinit> : Setup IDLE count and OPCG engine start ABIST");
-    l_opcg_cntl2_addr_multi_cast = get_scom_addr(l_multicast_read_or, GENERIC_OPCG_CNTL2);
+    l_opcg_cntl2_addr_multi_cast = get_scom_addr(l_multicast_read_or, CEN_GENERIC_OPCG_CNTL2);
     FAPI_TRY(fapi2::getScom(i_target, l_opcg_cntl2_addr_multi_cast, l_opcg_cntl2_data));
     // And with mask bit(36:63), starting from bit 36, totally 28 bits.
     l_opcg_cntl2_data &= fapi2::buffer<uint64_t>().setBit<36, 28>();
@@ -214,7 +214,7 @@ cen_arrayinit_module(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
     FAPI_TRY(fapi2::putScom(i_target, l_opcg_cntl0_addr, l_opcg_cntl0_data));
 
     FAPI_DBG("<cen_arrayinit> : Poll for OPCG done bit");
-    l_gp1_addr_multi_cast = get_scom_addr(l_multicast_read_and, GENERIC_GP1);
+    l_gp1_addr_multi_cast = get_scom_addr(l_multicast_read_and, CEN_GENERIC_GP1);
 
     for (uint32_t i = 0; i < MAX_FLUSH_LOOPS; i++)
     {
@@ -237,7 +237,7 @@ cen_arrayinit_module(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
                 "Centaur arrayinit module timed out polling for OPCG done!");
 
     FAPI_DBG("<cen_arrayinit> : OPCG done, clear Run-N mode");
-    l_opcg_cntl0_addr_multi_cast = get_scom_addr(l_multicast_read_and, GENERIC_OPCG_CNTL0);
+    l_opcg_cntl0_addr_multi_cast = get_scom_addr(l_multicast_read_and, CEN_GENERIC_OPCG_CNTL0);
     FAPI_TRY(fapi2::getScom(i_target, l_opcg_cntl0_addr_multi_cast, l_opcg_cntl0_data));
     l_opcg_cntl0_data &= 0x7FFFF80000000000;
     FAPI_TRY(fapi2::putScom(i_target, l_opcg_cntl0_addr, l_opcg_cntl0_data));
@@ -269,13 +269,13 @@ cen_repair_loader(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
     uint64_t                temp_data_64;
     uint32_t                poll_cnt = MAX_REPAIR_POLL_LOOPS;
 
-    FAPI_TRY(fapi2::getScom(i_target, ECID_PART_1, l_ecid_part1));
+    FAPI_TRY(fapi2::getScom(i_target, CEN_OTPROM0_ECID_PART1_REGISTER_RO, l_ecid_part1));
     FAPI_TRY(l_ecid_part1.extract(temp_data_64, 0, 64));
 
     if (temp_data_64 != 0)
     {
         FAPI_DBG("<repair_loader>: Reading Status Register to verify engine is idle...");
-        FAPI_TRY(fapi2::getScom(i_target, FSI_REPAIR_STATUS, l_repair_status));
+        FAPI_TRY(fapi2::getScom(i_target, CEN_RLDCOMP_RLDLOG_STATUS_REGISTER_ROX, l_repair_status));
         FAPI_TRY(l_repair_status.extract(temp_data_64, 0, 64));
 
         FAPI_ASSERT(temp_data_64 != 0,
@@ -284,17 +284,17 @@ cen_repair_loader(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
                     "<repair_loader>: ERROR: Repair loader reports busy, but engine should be idle!");
 
         FAPI_DBG("<repair_loader>: Writing Command Validation Register");
-        FAPI_TRY(fapi2::putScom(i_target, FSI_REPAIR_CMD_VALID, l_repair_cmd_valid));
+        FAPI_TRY(fapi2::putScom(i_target, CEN_RLDCOMP_RLDLOG_CMDVAL_REGISTER, l_repair_cmd_valid));
 
         FAPI_DBG("<repair_loader>: Writing Command Register to start engine");
-        FAPI_TRY(fapi2::putScom(i_target, FSI_REPAIR_CMD, l_repair_cmd_start_addr));
+        FAPI_TRY(fapi2::putScom(i_target, CEN_RLDCOMP_RLDLOG_COMMAND_REGISTER, l_repair_cmd_start_addr));
 
         FAPI_DBG("<repair_loader>: Polling repair loader Status Register...");
 
         do
         {
             FAPI_TRY(fapi2::delay(NANO_FLUSH_DELAY, SIM_FLUSH_DELAY));
-            FAPI_TRY(fapi2::getScom(i_target, FSI_REPAIR_STATUS, l_repair_status));
+            FAPI_TRY(fapi2::getScom(i_target, CEN_RLDCOMP_RLDLOG_STATUS_REGISTER_ROX, l_repair_status));
             temp_data_64 = l_repair_status & REPAIR_STATUS_POLL_MASK;
             poll_cnt--;
         }
@@ -325,7 +325,7 @@ cen_repair_loader(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
                     " Expected: 0x%016llX, actual: 0x%016llX",
                     REPAIR_STATUS_CHECK_EXP, temp_data_64);
 
-        FAPI_TRY(fapi2::getScom(i_target, FSI_REPAIR_ECC_TRAP, l_repair_ecc_trap));
+        FAPI_TRY(fapi2::getScom(i_target, CEN_RLDCOMP_RLDLOG_ECCTRAP_REGISTER_ROX, l_repair_ecc_trap));
         FAPI_INF("<repair_loader>: Checking ECC Trap Register status...");
         FAPI_INF("<repair_loader>:   CE NUMBER              = 0x%01llX", l_repair_ecc_trap.getBit<0, 4>());
         FAPI_INF("<repair_loader>:   UE NUMBER              = 0x%01llX", l_repair_ecc_trap.getBit<4, 4>());

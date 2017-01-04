@@ -41,7 +41,8 @@
 #define _CEN_COMMON_FUNCS_H
 
 #include <fapi2.H>
-#include <centaur_misc_scom_addresses.H>
+#include <cen_gen_scom_addresses.H>
+#include <cen_gen_scom_addresses_fixes.H>
 #include <centaur_misc_constants.H>
 
 /// @brief Determine if a chiplet id is a multicast write operation
