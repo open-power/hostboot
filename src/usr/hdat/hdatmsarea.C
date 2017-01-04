@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,21 +50,20 @@ uint32_t HdatMsArea::cv_actualCnt;
 
 static vpdData cvpdData[] =
 {
-//    { CVPD::VINI, CVPD::RT },
-    { CVPD::VINI, CVPD::DR },
-    { CVPD::VINI, CVPD::FN },
-    { CVPD::VINI, CVPD::PN },
-    { CVPD::VINI, CVPD::SN },
-    { CVPD::VINI, CVPD::CC },
-//    { CVPD::VINI, CVPD::PR },
-    //{ CVPD::VINI, CVPD::SZ },
-    { CVPD::VINI, CVPD::HE },
-    { CVPD::VINI, CVPD::CT },
-    { CVPD::VINI, CVPD::HW },
- //   { CVPD::VINI, CVPD::B3 },
- //   { CVPD::VINI, CVPD::B4 },
- //   { CVPD::VINI, CVPD::B7 },
-    { CVPD::VINI, CVPD::PF },
+//    { MVPD::VINI, MVPD::RT },
+    { MVPD::VINI, MVPD::DR },
+    { MVPD::VINI, MVPD::FN },
+    { MVPD::VINI, MVPD::PN },
+    { MVPD::VINI, MVPD::SN },
+    { MVPD::VINI, MVPD::CC },
+//    { MVPD::VINI, MVPD::PR },
+    //{ MVPD::VINI, MVPD::SZ },
+    { MVPD::VINI, MVPD::HE },
+    { MVPD::VINI, MVPD::CT },
+    { MVPD::VINI, MVPD::HW },
+ //   { MVPD::VINI, MVPD::B3 },
+ //   { MVPD::VINI, MVPD::B4 },
+ //   { MVPD::VINI, MVPD::B7 },
 };
 
 const HdatKeywordInfo l_cvpdKeywords[] =

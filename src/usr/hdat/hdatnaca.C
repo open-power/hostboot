@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 
 using namespace TARGETING;
 
+#define LID_SPACE 128*MEGABYTE //Bounded lid space blocked for building hdat structs.
 namespace HDAT
 {
 extern trace_desc_t *g_trac_hdat;
@@ -57,7 +58,7 @@ errlHndl_t hdatGetNacaFromMem(hdatNaca_t &o_naca)
         // Mapping the uncompressed region. HDAT areas are at the hrmor address
         // + the naca offset so we are reading the entire area of 256 MB.
         l_virtualAddress = mm_block_map(reinterpret_cast<void*>(l_hrmor),
-                                        l_hrmor );
+                                        LID_SPACE );
 
         // Reading the data at hrmor + Naca offset
         hdatNaca_t* l_naca = reinterpret_cast<hdatNaca_t*>(
