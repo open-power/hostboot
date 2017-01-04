@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -252,6 +252,16 @@ done
 echo
 echo
 
+# Grab Bootloader trace before it gets destroyed
+echo "====> dump hb-bltrace..."
+autosim $NOWIN --simcmd   "pipe hb-bltrace \"cat > ${SBXHOME}/hb-bltrace.log \"" --timeout 300
+if [ $? -ne 0 ] ; then
+echo "ERROR: Unable to run $?"
+       stopsim
+       stopserver
+       exit 1
+fi
+
 waitkb
 
 ##  grep for totaltests, etc.  These will appear in the hbicore_test.syms file and
@@ -401,15 +411,6 @@ if [ $? -ne 0 ] ; then
         exit 1
 fi
 warnings=`cat $SBXHOME/warnings.log |  awk '/0x/ {print strtonum($1)}'`
-
-echo "====> dump hb-bltrace..."
-autosim $NOWIN --simcmd   "pipe hb-bltrace \"cat > ${SBXHOME}/hb-bltrace.log \"" --timeout 300
-if [ $? -ne 0 ] ; then
-echo "ERROR: Unable to run $?"
-       stopsim
-       stopserver
-       exit 1
-fi
 
 echo "====> dump tracecalls..."
 autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$tracecalls_addr 0x08)"     1> $SBXHOME/tracecalls.log  2> /dev/null
