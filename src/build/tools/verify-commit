@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -25,9 +25,15 @@
 # IBM_PROLOG_END_TAG
 
 use strict;
+use Getopt::Long qw(:config pass_through);
 
 my $issueFound = 0;
 my $errorFound = 0;
+my $warningCount = 0;
+my $showAll = 0;
+
+use constant MAX_WARNINGS => 5;
+use constant MAX_CODE_LINE_LENGTH => 80;
 
 my $projectName = $ENV{'PROJECT_NAME'};
 # Relative path of import tree from project root
@@ -35,6 +41,8 @@ my $importPrefix = $ENV{'IMPORT_REL_PATH'}."/";
 
 my $rtcNumber = rtc_workitem_num();
 my $cqNumber = cq_workitem_num();
+
+GetOptions("show-all" => \$showAll);
 
 verifyPatchSet();       # Verify the patch contents.
 verifyCommitMsg();      # Verify the commit message.
@@ -45,6 +53,13 @@ verifyTodoFixme();      # Make sure there are no TODO/FIXME
 if ($issueFound)
 {
     print "------------------------------------------------------------\n";
+    my $hiddenWarnings = $warningCount - MAX_WARNINGS;
+    if ($hiddenWarnings > 0 && !$showAll)
+    {
+        print "    $hiddenWarnings Warning(s) Hidden\n";
+        print "    Run 'verify-commit --show-all'\n";
+        print "------------------------------------------------------------\n";
+    }
 }
 
 # Return a bad RC if we found an error.  Let warnings pass.
@@ -121,7 +136,7 @@ sub verifyPatchSet
 # @sub verifyFileLine
 #
 # Checks a particular line of the file for the following issues:
-#     * Warning: Lines longer than 80 characters, except in trace statement.
+#     * Warning: Lines longer than MAX_CODE_LINE_LENGTH characters, except in trace statement.
 #     * Warning: Trailing whitespace.
 #     * Warning: Tab characters outside of makefiles.
 #     * Warning: TODO or FIXME type tag without a corresponding RTC number.
@@ -139,21 +154,21 @@ sub verifyFileLine
     }
 
     # Check line length.
-    if (length($line) > 80)
+    if (length($line) > MAX_CODE_LINE_LENGTH)
     {
-        # Allow trace statements to slide.
         if (($line =~ m/TRAC[DSFU]/) ||
             ($line =~m/TS_FAIL/) ||
             ($line =~m/printk/) ||
             ($line =~m/displayf/) ||
-            ($line =~ m/FAPI_(INF|IMP|ERR|DBG|SCAN)/))
+            ($line =~ m/FAPI_(INF|IMP|ERR|DBG|SCAN)/) ||
+            ($line =~ m/print/))
         {
         }
         else
         {
             warning($file,$line,$count,
-                    (sprintf "Length is more than 80 characters (%d).",
-                     length($line))
+                    (sprintf "Length is more than %d characters (%d).",
+                     MAX_CODE_LINE_LENGTH, length($line))
                    );
         }
     }
@@ -169,7 +184,8 @@ sub verifyFileLine
     if ($line =~ m/\t/)
     {
         # Makefiles are ok (require tabs).
-        if (not (($file =~ m/makefile/) || ($file =~ m/\.mk/)))
+        if (not (($file =~ m/makefile/) || ($file =~ m/Makefile/) ||
+                ($file =~ m/\.mk/)))
         {
             warning($file,$line,$count,
                     "Tab character found.");
@@ -223,6 +239,7 @@ sub verifyCommitMsg
     my $lineCount = 0;
     my $rtcTag = "";
     my $cqTag = "";
+    my $changeId = "";
     my $taggedLine = "";
     my $untaggedLine = "";
 
@@ -306,13 +323,30 @@ sub verifyCommitMsg
             }
         }
 
+        if ($line =~ m/^\s*Change-Id:\s*[I][\w]+(.*)/)
+        {
+            if ("" ne $changeId)
+            {
+                error("Commit Message",$line,$lineCount,
+                      "Mulitple Change-Id's found.");
+            }
+
+            $changeId = $line;
+            if ("" ne $1)
+            {
+                error("Commit Message",$line,$lineCount,
+                        (sprintf "Change-Id format incorrect (%s).", $1));
+            }
+        }
+
         # Identify if this is a tagged line or a non-tagged line and store
         # away.
         if ($line =~ m/^\s*[A-Za-z0-9\-_]+:[^:]/)
         {
             # We allow lines that look like tags in the topic like...
             # "FOO: Adding support for BAR."
-            if ($lineCount > 1)
+            # Unless the Change-Id is in the topic
+            if ($lineCount > 1 || ($line =~ m/Change-Id/))
             {
                 $taggedLine = $line;
             }
@@ -328,6 +362,13 @@ sub verifyCommitMsg
     {
         warning("Commit Message","<end-of-file>",$lineCount,
                 "Neither RTC nor CQ tag found.");
+    }
+
+    # Error for missing Change-Id.
+    if ("" eq $changeId)
+    {
+        error("Commit Message","<end-of-file>",$lineCount,
+                "Change-Id not found.");
     }
 
     # Error for a mix of tag / untagged in the last section (ie. untagged
@@ -406,12 +447,17 @@ sub check_cq_todo_fixme
 sub warning
 {
     my ($file, $line, $count, $statement) = @_;
-    print "------------------------------------------------------------\n";
-    print "WARNING: $statement\n";
-    print "  $file:$count\n";
-    print "    $line\n";
+
+    if ($warningCount < MAX_WARNINGS || $showAll)
+    {
+        print "------------------------------------------------------------\n";
+        print "WARNING: $statement\n";
+        print "  $file:$count\n";
+        print "    $line\n";
+    }
 
     $issueFound = 1;
+    $warningCount++;
 }
 
 sub strong_warning
