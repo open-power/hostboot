@@ -37,14 +37,11 @@
 // *HWP Consumed by: HB
 //
 
-// TODO: RTC 163585 (replace SCOM address constants/fields with auto-generated
-//                   contents from headers)
-
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
 #include <cen_tp_chiplet_init1.H>
-#include <centaur_misc_scom_addresses.H>
+#include <cen_gen_scom_addresses.H>
 #include <centaur_misc_constants.H>
 
 //------------------------------------------------------------------------------
@@ -69,15 +66,15 @@ cen_tp_chiplet_init1(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
     fapi2::ATTR_CEN_EC_FEATURE_SWITCH_DIV24_RUN_MODE_Type l_div24_run_mode;
 
     FAPI_DBG("Fix PIBABORT during warmstart via MAILBOX");
-    FAPI_TRY(fapi2::putCfamRegister(i_target, FSI2PIB_STATUS, l_cfam_status_data),
-             "Error from putCfamRegister (FSI2PIB_STATUS)");
-    FAPI_TRY(fapi2::putCfamRegister(i_target, FSI2PIB_RESET, l_cfam_status_data),
-             "Error from putCfamRegister (FSI2PIB_RESET)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_STATUS_ROX, l_cfam_status_data),
+             "Error from putCfamRegister (CEN_STATUS_ROX)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_RESET_WO, l_cfam_status_data),
+             "Error from putCfamRegister (CEN_RESET_WO)");
 
     // initialize FSI GP registers
     FAPI_DBG("Initialize FSI GP Registers");
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from putCfamRegister (CFAM_FSI_GP3, init)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from putCfamRegister (CEN_FSIGP3, init)");
 
     // insert customized refclock termination attribute data
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_DMI_REFCLOCK_RCVR_TERM, FAPI_SYSTEM, l_dmi_refclock_term),
@@ -86,35 +83,35 @@ cen_tp_chiplet_init1(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
              "Error from FAPI_ATTR_GET (ATTR_CEN_DDR_REFCLOCK_RCVR_TERM)");
     l_fsi_gp4_data.insertFromRight<8, 2>(l_dmi_refclock_term & 0x3);
     l_fsi_gp4_data.insertFromRight<10, 2>(l_ddr_refclock_term & 0x3);
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP4, l_fsi_gp4_data),
-             "Error from putCfamRegister (CFAM_FSI_GP4, init)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP4, l_fsi_gp4_data),
+             "Error from putCfamRegister (CEN_FSIGP4, init)");
 
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP5, CFAM_FSI_GP5_RESET_DATA),
-             "Error from putCfamRegister (CFAM_FSI_GP5, init)");
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP6, CFAM_FSI_GP6_RESET_DATA),
-             "Error from putCfamRegister (CFAM_FSI_GP6, init)");
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP7, CFAM_FSI_GP7_RESET_DATA),
-             "Error from putCfamRegister (CFAM_FSI_GP7, init)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP5, CFAM_FSI_GP5_RESET_DATA),
+             "Error from putCfamRegister (CEN_FSIGP5, init)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP6, CFAM_FSI_GP6_RESET_DATA),
+             "Error from putCfamRegister (CEN_FSIGP6, init)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP7, CFAM_FSI_GP7_RESET_DATA),
+             "Error from putCfamRegister (CEN_FSIGP7, init)");
 
     // initialze Pervasive GP3 register
     FAPI_DBG("Initialize Pervasive GP3 Register");
-    FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_GP3, l_perv_gp3_data),
-             "Error from putCfamRegister (PERV_GP3, init");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_PERV_GP3, l_perv_gp3_data),
+             "Error from putCfamRegister (CEN_PERV_GP3, init");
 
     // drop fences, check VDD
     FAPI_DBG("Drop VDD2VIO fence");
     l_fsi_gp3_data.clearBit<27>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from putCfamRegister (CFAM_FSI_GP3, drop VDD2VIO fence)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from putCfamRegister (CEN_FSIGP3, drop VDD2VIO fence)");
 
     FAPI_DBG("Drop FSI Fence2");
     l_fsi_gp3_data.clearBit<23>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from putCfamRegister (CFAM_FSI_GP3, drop FSI Fence2)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from putCfamRegister (CEN_FSIGP3, drop FSI Fence2)");
 
     FAPI_DBG("Check VDD indicator");
-    FAPI_TRY(fapi2::getCfamRegister(i_target, FSI2PIB_STATUS, l_cfam_status_data),
-             "Error from getCfamRegister (FSI2PIB_STATUS)");
+    FAPI_TRY(fapi2::getCfamRegister(i_target, CEN_STATUS_ROX, l_cfam_status_data),
+             "Error from getCfamRegister (CEN_STATUS_ROX)");
     FAPI_ASSERT(l_cfam_status_data.getBit<16>(),
                 fapi2::CEN_TP_CHIPLET_INIT1_VDD_SENSE_ERR().
                 set_TARGET(i_target),
@@ -122,8 +119,8 @@ cen_tp_chiplet_init1(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
 
     FAPI_DBG("Set PLL output enable");
     l_fsi_gp3_data.setBit<29>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from putCfamRegister (CFAM_FSI_GP3, set PLL output enable");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from putCfamRegister (CEN_FSIGP3, set PLL output enable");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EC_FEATURE_SWITCH_DIV24_RUN_MODE, i_target, l_div24_run_mode),
              "Error from FAPI_ATTR_GET (ATTR_CEN_EC_FEATURE_SWITCH_DIV24_RUN_MODE)");
@@ -132,59 +129,59 @@ cen_tp_chiplet_init1(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
     {
         FAPI_DBG("Switch DIV24 into run mode");
         l_fsi_gp4_data.clearBit<16>();
-        FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP4, l_fsi_gp4_data),
-                 "Error from putCfamRegister (CFAM_FSI_GP4, DIV24 run mode)");
+        FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP4, l_fsi_gp4_data),
+                 "Error from putCfamRegister (CEN_FSIGP4, DIV24 run mode)");
     }
 
     FAPI_DBG("Release Pervasive Chiplet endpoint reset");
     l_perv_gp3_data.clearBit<1>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_GP3, l_perv_gp3_data),
-             "Error from putCfamRegister (PERV_GP3, release endpoint reset");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_PERV_GP3, l_perv_gp3_data),
+             "Error from putCfamRegister (CEN_PERV_GP3, release endpoint reset");
 
     FAPI_DBG("Set PLL test enable");
     l_fsi_gp4_data.setBit<24>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP4, l_fsi_gp4_data),
-             "Error from putCfamRegister (CFAM_FSI_GP4, PLL test enable)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP4, l_fsi_gp4_data),
+             "Error from putCfamRegister (CEN_FSIGP4, PLL test enable)");
 
     FAPI_DBG("Assert Pervasive Chiplet endpoint reset");
     l_perv_gp3_data.setBit<1>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_GP3, l_perv_gp3_data),
-             "Error from putCfamRegister (PERV_GP3, set endpoint reset");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_PERV_GP3, l_perv_gp3_data),
+             "Error from putCfamRegister (CEN_PERV_GP3, set endpoint reset");
 
     FAPI_DBG("Start VITL clocks in Pervasive Chiplet");
     l_perv_gp3_data.clearBit<16>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_GP3, l_perv_gp3_data),
-             "Error from putCfamRegister (PERV_GP3, start VITL clocks");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_PERV_GP3, l_perv_gp3_data),
+             "Error from putCfamRegister (CEN_PERV_GP3, start VITL clocks");
 
     FAPI_DBG("Release Pervasive Chiplet endpoint reset");
     l_perv_gp3_data.clearBit<1>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_GP3, l_perv_gp3_data),
-             "Error from putCfamRegister (PERV_GP3, release endpoint reset");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_PERV_GP3, l_perv_gp3_data),
+             "Error from putCfamRegister (CEN_PERV_GP3, release endpoint reset");
 
     FAPI_DBG("Release PCB reset");
     l_fsi_gp3_data.clearBit<22>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from putCfamRegister (CFAM_FSI_GP3, release PCB reset");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from putCfamRegister (CEN_FSIGP3, release PCB reset");
 
     FAPI_DBG("Set Pervasive Chiplet enable");
     l_perv_gp3_data.setBit<0>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_GP3, l_perv_gp3_data),
-             "Error from putCfamRegister (PERV_GP3, chiplet enable");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_PERV_GP3, l_perv_gp3_data),
+             "Error from putCfamRegister (CEN_PERV_GP3, chiplet enable");
 
     FAPI_DBG("Drop FSI Fence4");
     l_fsi_gp3_data.clearBit<25>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from putCfamRegister (CFAM_FSI_GP3, drop FSI Fence4)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from putCfamRegister (CEN_FSIGP3, drop FSI Fence4)");
 
     FAPI_DBG("Drop Pervasive Chiplet fence");
     l_perv_gp3_data.clearBit<18>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_GP3, l_perv_gp3_data),
-             "Error from putCfamRegister (PERV_GP3, drop chiplet fence");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_PERV_GP3, l_perv_gp3_data),
+             "Error from putCfamRegister (CEN_PERV_GP3, drop chiplet fence");
 
     FAPI_DBG("Drop FSI Fence3");
     l_fsi_gp3_data.clearBit<24>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from putCfamRegister (CFAM_FSI_GP3, drop FSI Fence3)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from putCfamRegister (CEN_FSIGP3, drop FSI Fence3)");
 
 fapi_try_exit:
     FAPI_DBG("End");
