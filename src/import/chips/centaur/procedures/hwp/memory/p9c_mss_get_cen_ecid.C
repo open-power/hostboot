@@ -111,13 +111,13 @@ extern "C" {
 
         // mark HWP entry
         FAPI_IMP("Entering mss_get_cen_ecid....");
-        FAPI_TRY(fapi2::getScom( i_target, ECID_PART_0_0x00010000, scom ),
+        FAPI_TRY(fapi2::getScom( i_target, CEN_OTPROM0_ECID_PART0_REGISTER_RO, scom ),
                  "mss_get_cen_ecid: could not read scom address 0x00010000");
         scom.reverse();
         FAPI_TRY(scom.extract(ecid_struct.io_ecid[0], 0, 64));
 
         //gets the second part of the ecid and sets the attribute
-        FAPI_TRY(fapi2::getScom( i_target, ECID_PART_1_0x00010001, scom ),
+        FAPI_TRY(fapi2::getScom( i_target, CEN_OTPROM0_ECID_PART1_REGISTER_RO, scom ),
                  "mss_get_cen_ecid: could not read scom address 0x00010001" );
         scom.reverse();
         FAPI_TRY(scom.extract(ecid_struct.io_ecid[1], 0, 64));

@@ -40,7 +40,7 @@
 //------------------------------------------------------------------------------
 
 #include <fapi2.H>
-#include <cen_scom_addresses.H>
+#include <cen_gen_scom_addresses.H>
 
 //defines enumerators
 enum mss_get_cen_ecid_ddr_status
