@@ -52,6 +52,7 @@ enum P9_SETUP_SBE_CONFIG_Private_Constants
     ATTR_I2C_BUS_DIV_REF_LENGTH = 16,
     ATTR_BOOT_FLAGS_STARTBIT = 0,
     ATTR_BOOT_FLAGS_LENGTH = 32,
+    ATTR_PUMP_CHIP_IS_GROUP = 23,
     ATTR_PROC_FABRIC_GROUP_ID_STARTBIT = 26,
     ATTR_PROC_FABRIC_GROUP_ID_LENGTH = 3,
     ATTR_PROC_FABRIC_CHIP_ID_STARTBIT = 29,
@@ -302,6 +303,8 @@ fapi2::ReturnCode p9_setup_sbe_config(const
     }
     //set_scratch6_reg
     {
+        uint8_t l_pump_mode;
+
         FAPI_DBG("Reading Scratch_reg6");
         //Getting SCRATCH_REGISTER_6 register value
         FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_6_FSI,
@@ -318,6 +321,20 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         else
         {
             l_read_scratch_reg.setBit<24>();
+        }
+
+        FAPI_DBG("Reading PUMP MODE");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE,
+                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                               l_pump_mode));
+
+        if (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_GROUP)
+        {
+            l_read_scratch_reg.setBit<ATTR_PUMP_CHIP_IS_GROUP>();
+        }
+        else
+        {
+            l_read_scratch_reg.clearBit<ATTR_PUMP_CHIP_IS_GROUP>();
         }
 
         FAPI_DBG("Reading ATTR_PROC_FABRIC_GROUP and CHIP_ID");

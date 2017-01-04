@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,25 +66,9 @@ const uint32_t PU_FBC_MODE_PB_INITIALIZED_BIT = 0;
 // system ID (large system)
 const uint8_t FABRIC_ADDR_LS_SYSTEM_ID_START_BIT = 8;
 const uint8_t FABRIC_ADDR_LS_SYSTEM_ID_END_BIT = 12;
-// system ID (small system)
-const uint8_t FABRIC_ADDR_SS_SYSTEM_ID_FLD0_START_BIT = 8;
-const uint8_t FABRIC_ADDR_SS_SYSTEM_ID_FLD0_END_BIT = 12;
-const uint8_t FABRIC_ADDR_SS_SYSTEM_ID_FLD0_SHIFT = 5;
-const uint8_t FABRIC_ADDR_SS_SYSTEM_ID_FLD0_MASK = 0x1F;
-const uint8_t FABRIC_ADDR_SS_SYSTEM_ID_FLD1_START_BIT = 15;
-const uint8_t FABRIC_ADDR_SS_SYSTEM_ID_FLD1_END_BIT = 16;
-const uint8_t FABRIC_ADDR_SS_SYSTEM_ID_FLD1_SHIFT = 3;
-const uint8_t FABRIC_ADDR_SS_SYSTEM_ID_FLD1_MASK = 0x3;
-const uint8_t FABRIC_ADDR_SS_SYSTEM_ID_FLD2_START_BIT = 19;
-const uint8_t FABRIC_ADDR_SS_SYSTEM_ID_FLD2_END_BIT = 21;
-const uint8_t FABRIC_ADDR_SS_SYSTEM_ID_FLD2_SHIFT = 0;
-const uint8_t FABRIC_ADDR_SS_SYSTEM_ID_FLD2_MASK = 0x7;
 // group ID (large system)
 const uint8_t FABRIC_ADDR_LS_GROUP_ID_START_BIT = 15;
 const uint8_t FABRIC_ADDR_LS_GROUP_ID_END_BIT = 18;
-// group ID (small system)
-const uint8_t FABRIC_ADDR_SS_GROUP_ID_START_BIT = 17;
-const uint8_t FABRIC_ADDR_SS_GROUP_ID_END_BIT = 18;
 // chip ID (large system)
 const uint8_t FABRIC_ADDR_LS_CHIP_ID_START_BIT = 19;
 const uint8_t FABRIC_ADDR_LS_CHIP_ID_END_BIT = 21;
@@ -166,7 +150,6 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
     uint32_t l_fabric_system_id;
     uint8_t l_fabric_group_id;
     uint8_t l_fabric_chip_id;
-    uint8_t l_fabric_addr_bar_mode;
     uint8_t l_mirror_policy;
     fapi2::buffer<uint64_t> l_base_address;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
@@ -182,55 +165,21 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CHIP_ID, i_target, l_fabric_chip_id),
              "Error from FAPI_ATTR_GET (ATTR_FABRIC_CHIP_ID)");
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE, FAPI_SYSTEM, l_fabric_addr_bar_mode),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_ADDR_BAR_MODE)");
-
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY, FAPI_SYSTEM, l_mirror_policy),
              "Error from FAPI_ATTR_GET (ATTR_MEM_MIRROR_PLACEMENT_POLICY)");
 
     // apply system ID
     // occupies one field for large system map, split into three fields for small system map
-    if (l_fabric_addr_bar_mode == fapi2::ENUM_ATTR_PROC_FABRIC_ADDR_BAR_MODE_LARGE_SYSTEM)
-    {
-        l_base_address.insertFromRight < FABRIC_ADDR_LS_SYSTEM_ID_START_BIT,
-                                       (FABRIC_ADDR_LS_SYSTEM_ID_END_BIT - FABRIC_ADDR_LS_SYSTEM_ID_START_BIT + 1) > (l_fabric_system_id);
-    }
-    else
-    {
-        uint32_t l_fabric_system_id_fld = (l_fabric_system_id >> FABRIC_ADDR_SS_SYSTEM_ID_FLD0_SHIFT) &
-                                          FABRIC_ADDR_SS_SYSTEM_ID_FLD0_MASK;
-        l_base_address.insertFromRight < FABRIC_ADDR_SS_SYSTEM_ID_FLD0_START_BIT,
-                                       (FABRIC_ADDR_SS_SYSTEM_ID_FLD0_END_BIT - FABRIC_ADDR_SS_SYSTEM_ID_FLD0_START_BIT + 1) > (l_fabric_system_id_fld);
-
-        l_fabric_system_id_fld = (l_fabric_system_id >> FABRIC_ADDR_SS_SYSTEM_ID_FLD1_SHIFT) &
-                                 FABRIC_ADDR_SS_SYSTEM_ID_FLD1_MASK;
-        l_base_address.insertFromRight < FABRIC_ADDR_SS_SYSTEM_ID_FLD1_START_BIT,
-                                       (FABRIC_ADDR_SS_SYSTEM_ID_FLD1_END_BIT - FABRIC_ADDR_SS_SYSTEM_ID_FLD1_START_BIT + 1) > (l_fabric_system_id_fld);
-
-        l_fabric_system_id_fld = (l_fabric_system_id >> FABRIC_ADDR_SS_SYSTEM_ID_FLD2_SHIFT) &
-                                 FABRIC_ADDR_SS_SYSTEM_ID_FLD2_MASK;
-        l_base_address.insertFromRight < FABRIC_ADDR_SS_SYSTEM_ID_FLD2_START_BIT,
-                                       (FABRIC_ADDR_SS_SYSTEM_ID_FLD2_END_BIT - FABRIC_ADDR_SS_SYSTEM_ID_FLD2_START_BIT + 1) > (l_fabric_system_id_fld);
-    }
+    l_base_address.insertFromRight < FABRIC_ADDR_LS_SYSTEM_ID_START_BIT,
+                                   (FABRIC_ADDR_LS_SYSTEM_ID_END_BIT - FABRIC_ADDR_LS_SYSTEM_ID_START_BIT + 1) > (l_fabric_system_id);
 
     // apply group ID
-    if (l_fabric_addr_bar_mode == fapi2::ENUM_ATTR_PROC_FABRIC_ADDR_BAR_MODE_LARGE_SYSTEM)
-    {
-        l_base_address.insertFromRight < FABRIC_ADDR_LS_GROUP_ID_START_BIT,
-                                       (FABRIC_ADDR_LS_GROUP_ID_END_BIT - FABRIC_ADDR_LS_GROUP_ID_START_BIT + 1) > (l_fabric_group_id);
-    }
-    else
-    {
-        l_base_address.insertFromRight < FABRIC_ADDR_SS_GROUP_ID_START_BIT,
-                                       (FABRIC_ADDR_SS_GROUP_ID_END_BIT - FABRIC_ADDR_SS_GROUP_ID_START_BIT + 1) > (l_fabric_group_id);
-    }
+    l_base_address.insertFromRight < FABRIC_ADDR_LS_GROUP_ID_START_BIT,
+                                   (FABRIC_ADDR_LS_GROUP_ID_END_BIT - FABRIC_ADDR_LS_GROUP_ID_START_BIT + 1) > (l_fabric_group_id);
 
     // apply chip ID (relevant for large system map only)
-    if (l_fabric_addr_bar_mode == fapi2::ENUM_ATTR_PROC_FABRIC_ADDR_BAR_MODE_LARGE_SYSTEM)
-    {
-        l_base_address.insertFromRight < FABRIC_ADDR_LS_CHIP_ID_START_BIT,
-                                       (FABRIC_ADDR_LS_CHIP_ID_END_BIT - FABRIC_ADDR_LS_CHIP_ID_START_BIT + 1) > (l_fabric_chip_id);
-    }
+    l_base_address.insertFromRight < FABRIC_ADDR_LS_CHIP_ID_START_BIT,
+                                   (FABRIC_ADDR_LS_CHIP_ID_END_BIT - FABRIC_ADDR_LS_CHIP_ID_START_BIT + 1) > (l_fabric_chip_id);
 
     // set output addresses based on application of msel
     if (l_mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)

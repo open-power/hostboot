@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -230,6 +230,7 @@
     CHIP_IS_GROUP = 0x02
   </enum>
   <platInit/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -243,8 +244,7 @@
   </description>
   <valueType>uint8</valueType>
   <enum>
-    OFF = 0x0,
-    ON = 0x1
+    OFF = 0x0
   </enum>
   <platInit/>
 </attribute>
@@ -332,8 +332,7 @@
   </description>
   <valueType>uint8</valueType>
   <enum>
-    LARGE_SYSTEM = 0x0,
-    SMALL_SYSTEM = 0x1
+    LARGE_SYSTEM = 0x0
   </enum>
   <platInit/>
 </attribute>

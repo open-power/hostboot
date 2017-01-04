@@ -2373,6 +2373,7 @@
     <persistency>non-volatile</persistency>
     <hasStringConversion/>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_FABRIC_PUMP_MODE</id>
         <macro>DIRECT</macro>
@@ -21129,9 +21130,8 @@ Measured in GB</description>
   <description>
     Processor SMP topology configuration.
     0 = default = 1 or 2 hop topology (PHYP image spans system)
-    1 = 3 hop topology (PHYP image spans group).
     Provided by the MRW.
-    OFF = 0x0 (default), ON = 0x1
+    OFF = 0x0 (default)
   </description>
   <simpleType>
     <uint8_t>
@@ -21219,7 +21219,6 @@ Measured in GB</description>
   <description>
     Processor memory map configuration.
     0 = large system address map (default)
-    1 = small system address map
     Provided by the MRW.
   </description>
   <simpleType>
