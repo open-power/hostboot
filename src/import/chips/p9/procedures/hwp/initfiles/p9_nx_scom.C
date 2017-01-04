@@ -50,8 +50,6 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
         fapi2::ATTR_NAME_Type l_chip_id;
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec));
-        fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE_Type l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x2011041ull, l_scom_buffer ));
@@ -273,18 +271,8 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
 
             constexpr auto l_NX_PBI_CQ_WRAP_NXCQ_SCOM_RD_GO_M_QOS_ON = 0x1;
             l_scom_buffer.insert<22, 1, 63, uint64_t>(l_NX_PBI_CQ_WRAP_NXCQ_SCOM_RD_GO_M_QOS_ON );
-
-            if ((l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_ADDR_BAR_MODE_SMALL_SYSTEM))
-            {
-                constexpr auto l_NX_PBI_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_ON = 0x1;
-                l_scom_buffer.insert<23, 1, 63, uint64_t>(l_NX_PBI_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_ON );
-            }
-            else if ((l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_ADDR_BAR_MODE_LARGE_SYSTEM))
-            {
-                constexpr auto l_NX_PBI_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_OFF = 0x0;
-                l_scom_buffer.insert<23, 1, 63, uint64_t>(l_NX_PBI_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_OFF );
-            }
-
+            constexpr auto l_NX_PBI_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_OFF = 0x0;
+            l_scom_buffer.insert<23, 1, 63, uint64_t>(l_NX_PBI_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_OFF );
             l_scom_buffer.insert<25, 2, 62, uint64_t>(literal_1 );
             l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_0xFC );
             l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0xFC );
