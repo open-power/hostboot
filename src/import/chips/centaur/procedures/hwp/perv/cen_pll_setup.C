@@ -41,7 +41,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <cen_pll_setup.H>
-#include <centaur_misc_scom_addresses.H>
+#include <cen_gen_scom_addresses.H>
 #include <centaur_misc_constants.H>
 
 //------------------------------------------------------------------------------
@@ -61,39 +61,39 @@ cen_pll_setup(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
 
     // SBE Address Base Register Setups
     FAPI_DBG("Reset PLL test enable");
-    FAPI_TRY(fapi2::getCfamRegister(i_target, CFAM_FSI_GP4, l_fsi_gp4_data),
-             "Error from getCfamRegister (CFAM_FSI_GP4)");
+    FAPI_TRY(fapi2::getCfamRegister(i_target, CEN_FSIGP4, l_fsi_gp4_data),
+             "Error from getCfamRegister (CEN_FSIGP4)");
     l_fsi_gp4_data.clearBit<24>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP4, l_fsi_gp4_data),
-             "Error from putCfamRegister (CFAM_FSI_GP4)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP4, l_fsi_gp4_data),
+             "Error from putCfamRegister (CEN_FSIGP4)");
 
     FAPI_DBG( "PLL Leave Reset State" );
-    FAPI_TRY(fapi2::getCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from getCfamRegister (CFAM_FSI_GP3)");
+    FAPI_TRY(fapi2::getCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from getCfamRegister (CEN_FSIGP3)");
     l_fsi_gp3_data.clearBit<28>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from putCfamRegister (CFAM_FSI_GP3)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from putCfamRegister (CEN_FSIGP3)");
 
     FAPI_DBG( "Centaur only: Nest PLL Leave Reset State" );
-    FAPI_TRY(fapi2::getCfamRegister(i_target, CFAM_FSI_GP4, l_fsi_gp4_data),
-             "Error from getCfamRegister (CFAM_FSI_GP4)");
+    FAPI_TRY(fapi2::getCfamRegister(i_target, CEN_FSIGP4, l_fsi_gp4_data),
+             "Error from getCfamRegister (CEN_FSIGP4)");
     l_fsi_gp4_data.clearBit<16>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP4, l_fsi_gp4_data),
-             "Error from putCfamRegister (CFAM_FSI_GP4)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP4, l_fsi_gp4_data),
+             "Error from putCfamRegister (CEN_FSIGP4)");
 
     FAPI_DBG( "Drop Nest PLL bypass GP3MIR(5)=0  tp_pllbyp_dc" );
-    FAPI_TRY(fapi2::getCfamRegister(i_target, PERV_GP3, l_perv_gp3_data),
-             "Error from getCfamRegister (PERV_GP3)");
+    FAPI_TRY(fapi2::getCfamRegister(i_target, CEN_PERV_GP3, l_perv_gp3_data),
+             "Error from getCfamRegister (CEN_PERV_GP3)");
     l_perv_gp3_data.clearBit<5>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_GP3, l_perv_gp3_data),
-             "Error from putCfamRegister (PERV_GP3)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_PERV_GP3, l_perv_gp3_data),
+             "Error from putCfamRegister (CEN_PERV_GP3)");
 
     FAPI_DBG( "Poll FSI2PIB-Status(24) for (nest) pll lock bits." );
 
     for (uint32_t i = 0; i < MAX_FLUSH_LOOPS; i++)
     {
-        FAPI_TRY(fapi2::getCfamRegister(i_target, FSI2PIB_STATUS, l_cfam_status_data),
-                 "Error from getCfamRegister (FSI2PIB_STATUS)");
+        FAPI_TRY(fapi2::getCfamRegister(i_target, CEN_STATUS_ROX, l_cfam_status_data),
+                 "Error from getCfamRegister (CEN_STATUS_ROX)");
 
         FAPI_DBG( "Polling... FSI2PIB-Status(24)." );
 
@@ -116,19 +116,19 @@ cen_pll_setup(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
     FAPI_DBG( "bring-up the MEM PLL for ARRAYINIT closure" );
 
     FAPI_DBG( "Drop bypass mode before LOCK (tp_pllmem_bypass_en_dc)." );
-    FAPI_TRY(fapi2::getCfamRegister(i_target, PERV_GP3, l_perv_gp3_data),
-             "Error from getCfamRegister (PERV_GP3)");
+    FAPI_TRY(fapi2::getCfamRegister(i_target, CEN_PERV_GP3, l_perv_gp3_data),
+             "Error from getCfamRegister (CEN_PERV_GP3)");
     l_perv_gp3_data.clearBit<17>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_GP3, l_perv_gp3_data),
-             "Error from putCfamRegister (PERV_GP3)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_PERV_GP3, l_perv_gp3_data),
+             "Error from putCfamRegister (CEN_PERV_GP3)");
 
     FAPI_DBG( "Poll FSI2PIB-Status(25) for (mem) pll lock bits." );
     l_poll_succeed = false;
 
     for (uint32_t i = 0; i < MAX_FLUSH_LOOPS; i++)
     {
-        FAPI_TRY(fapi2::getCfamRegister(i_target, FSI2PIB_STATUS, l_cfam_status_data),
-                 "Error from getCfamRegister (FSI2PIB_STATUS)");
+        FAPI_TRY(fapi2::getCfamRegister(i_target, CEN_STATUS_ROX, l_cfam_status_data),
+                 "Error from getCfamRegister (CEN_STATUS_ROX)");
 
         FAPI_DBG( "Polling... FSI2PIB-Status(25)." );
 
