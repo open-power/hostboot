@@ -32,6 +32,7 @@
 
 #include    <sys/misc.h>
 #include    <sys/mm.h>
+#include <sys/time.h>
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
@@ -62,6 +63,7 @@
 #include <p9_hcode_image_defines.H>
 
 #include <arch/ppc.H>
+#include <occ/occAccess.H>
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
   #include <diag/prdf/prdfWriteHomerFirData.H>
@@ -91,6 +93,10 @@ namespace HBPM
     constexpr uint64_t OCC_HOST_AREA_SIZE_IN_MB = OCC_HOST_AREA_SIZE / ONE_MB;
     constexpr uint64_t HOMER_INSTANCE_SIZE_IN_MB =
         sizeof(Homerlayout_t) / ONE_MB;
+
+    constexpr uint32_t OCC_SRAM_RSP_ADDR   = 0xFFFBF000;
+    constexpr uint16_t OCC_CHKPT_COMPLETE  = 0x0EFF;
+
 
     std::shared_ptr<UtilLidMgr> g_pOccLidMgr (nullptr);
     std::shared_ptr<UtilLidMgr> g_pHcodeLidMgr (nullptr);
@@ -667,6 +673,12 @@ namespace HBPM
                 break;
             }
 
+            // Zero out the HOMER memory for LOAD only
+            if(PM_LOAD == i_mode)
+            {
+                memset(l_homerVAddr, 0, VMM_HOMER_INSTANCE_SIZE);
+            }
+
             uint64_t l_occImgPaddr = i_homerPhysAddr
                                             + HOMER_OFFSET_TO_OCC_IMG;
             uint64_t l_occImgVaddr = reinterpret_cast <uint64_t>(l_homerVAddr)
@@ -844,9 +856,10 @@ namespace HBPM
 
 
     /**
-     *  @brief Load PM complex for all chips
+     *  @brief Load and start PM complex for all chips
      */
-    errlHndl_t loadPMAll(loadPmMode i_mode)
+    errlHndl_t loadAndStartPMAll(loadPmMode i_mode,
+                                 TARGETING::Target* & o_failTarget)
     {
         errlHndl_t l_errl = nullptr;
 
@@ -854,7 +867,7 @@ namespace HBPM
         getAllChips(l_procChips, TYPE_PROC, true);
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "loadPMAll: %s %d proc(s) found",
+                   "loadAndStartPMAll: %s %d proc(s) found",
                    (PM_LOAD == i_mode) ? "LOAD" : "RELOAD",
                    l_procChips.size() );
 
@@ -875,61 +888,25 @@ namespace HBPM
             if( l_errl )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"loadPMAll: "
+                           ERR_MRK"loadAndStartPMAll: "
                            "load PM complex failed!" );
+                o_failTarget = l_procChip;
                 break;
             }
-        }
 
-        return l_errl;
-    } // loadPMAll
-
-
-    /**
-     *  @brief Start PM complex for all chips
-     */
-    errlHndl_t startPMAll()
-    {
-        errlHndl_t l_errl = nullptr;
-
-        TargetHandleList l_procChips;
-        getAllChips(l_procChips, TYPE_PROC, true);
-
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "startPMAll: %d proc(s) found",
-                   l_procChips.size());
-
-        for (const auto & l_procChip: l_procChips)
-        {
             l_errl = startPMComplex(l_procChip);
             if( l_errl )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"startPMAll: "
+                           ERR_MRK"loadAndStartPMAll: "
                            "start PM complex failed!" );
+                o_failTarget = l_procChip;
                 break;
             }
-
-            // RTC 165644 Enable this when readSRAM is available
-            //            Add constants for addr/act/exp values
-            /*
-            // OCC checkpoint
-            l_errl = readSRAM(l_procChip,0xfffbf000,l_buffer);
-            if(((l_buffer.getWord(0)) & 0xFFF) == 0xEFF)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "startPMALL: OCC checkpoint detected" );
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "startPMALL: OCC checkpoint not detected" );
-            }
-            */
         }
 
         return l_errl;
-    } // startPMAll
+    } // loadAndStartPMAll
 
 
     /**
@@ -960,6 +937,113 @@ namespace HBPM
 
         return l_errl;
     } // resetPMAll
+
+
+    /**
+     *  @brief Verify all OCCs at checkpoint
+     */
+    errlHndl_t verifyOccChkptAll()
+    {
+        errlHndl_t l_errl = nullptr;
+
+        TargetHandleList l_procChips;
+        getAllChips(l_procChips, TYPE_PROC, true);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "verifyOccChkptAll: %d proc(s) found",
+                   l_procChips.size());
+
+        // Wait up to 15 seconds for all OCCs to be ready (150 * 100ms = 15s)
+        const size_t NS_BETWEEN_READ = 100 * NS_PER_MSEC;
+        const size_t READ_RETRY_LIMIT = 150;
+        const uint16_t l_readLength = 8;
+
+        for (const auto & l_procChip: l_procChips)
+        {
+            uint64_t l_checkpoint = 0x0;
+            uint8_t retryCount = 0;
+            bool chkptReached = false;
+
+            while (retryCount++ < READ_RETRY_LIMIT)
+            {
+                // Read SRAM response buffer to check for OCC checkpoint
+                l_errl = HBOCC::readSRAM( l_procChip,OCC_SRAM_RSP_ADDR,
+                                          &(l_checkpoint),
+                                          l_readLength );
+
+                if( l_errl )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "verifyOccChkptAll: SRAM read failed "
+                        "HUID 0x%X", get_huid(l_procChip));
+                    break;
+                }
+
+                if( OCC_CHKPT_COMPLETE == (l_checkpoint & 0xFFFF) )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "verifyOccChkptAll: OCC checkpoint detected "
+                        "HUID 0x%X", get_huid(l_procChip));
+                    chkptReached = true;
+                    break;
+                }
+
+                // Sleep before we check again
+                nanosleep(0, NS_BETWEEN_READ);
+            }
+
+            if( l_errl )
+            {
+                break;
+            }
+
+            if( !chkptReached )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "verifyOccChkptAll: Timeout waiting for OCC checkpoint "
+                    "HUID 0x%X Checkpoint 0x%08X",
+                     get_huid(l_procChip), l_checkpoint);
+
+                /*@
+                * @errortype
+                * @reasoncode  ISTEP::RC_PM_OCC_CHKPT_TIMEOUT
+                * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                * @moduleid    ISTEP::MOD_PM_VERIFY_OCC_CHKPT
+                * @userdata1   HUID
+                * @userdata2   Checkpoint value
+                * @devdesc     Timeout waiting for OCC checkpoint
+                * @custdesc    A problem occurred during the IPL
+                *              of the system.
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        ISTEP::MOD_PM_VERIFY_OCC_CHKPT,
+                                        ISTEP::RC_PM_OCC_CHKPT_TIMEOUT,
+                                        get_huid(l_procChip),
+                                        l_checkpoint,
+                                        true);
+
+                TARGETING::TargetHandleList l_Occs;
+                getChildChiplets(l_Occs, l_procChip, TARGETING::TYPE_OCC);
+
+                if( l_Occs[0] != nullptr )
+                {
+                    l_errl->addHwCallout( l_Occs[0],
+                                          HWAS::SRCI_PRIORITY_HIGH,
+                                          HWAS::NO_DECONFIG,
+                                          HWAS::GARD_NULL );
+                }
+
+                l_errl->collectTrace(FAPI_TRACE_NAME,256);
+                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+                l_errl->collectTrace("ISTEPS_TRACE",256);
+
+                break;
+            }
+        }
+
+        return l_errl;
+    } // verifyOccChkptAll
 
 
     /**

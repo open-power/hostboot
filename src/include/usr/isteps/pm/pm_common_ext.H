@@ -58,20 +58,15 @@ namespace HBPM
                                   uint64_t i_phys_addr);
 
     /**
-     * @brief Load PM Complex for all proc targets.
+     * @brief Load and start PM Complex for all proc targets.
      *
-     * @param[in] i_mode        Load / Reload
+     * @param[in]  i_mode           Load / Reload
+     * @param[out] o_failTarget     Failing proc target
      *
-     * @return errlHndl_t  Error log of loadPMAll failed
+     * @return errlHndl_t  Error log of loadAndStartPMAll failed
      */
-    errlHndl_t loadPMAll(loadPmMode i_mode);
-
-    /**
-     * @brief Start PM Complex for all proc targets.
-     *
-     * @return errlHndl_t  Error log if startPMAll failed
-     */
-    errlHndl_t startPMAll();
+    errlHndl_t loadAndStartPMAll( loadPmMode i_mode,
+                                  TARGETING::Target* & o_proc_target);
 
     /**
      * @brief Reset PM Complex for all proc targets.
@@ -79,6 +74,13 @@ namespace HBPM
      * @return errlHndl_t  Error log if resetPMAll failed
      */
     errlHndl_t resetPMAll();
+
+    /**
+     * @brief Verify all OCCs at checkpoint.
+     *
+     * @return errlHndl_t  Error log if verifyOccChkptAll failed
+     */
+    errlHndl_t verifyOccChkptAll();
 
     /**
      * @brief Fetch the ring overrides (if they exist)
