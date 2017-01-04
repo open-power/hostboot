@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,7 @@ namespace ISTEP
         MOD_CHECK_SLAVE_SBE_SEEPROM_COMPLETE              = 0x11,
         MOD_PM_LOAD_HOST_DATA_TO_SRAM                     = 0x12,
         MOD_VOLTAGE_CONFIG                                = 0x13,
+        MOD_PM_VERIFY_OCC_CHKPT                           = 0x14,
     };
 
     /**
@@ -88,6 +89,7 @@ namespace ISTEP
         RC_NO_FUNCTIONAL_PROCS                   = ISTEP_COMP_ID | 0x19,
         RC_NO_PRESENT_EQS                        = ISTEP_COMP_ID | 0x1A,
         RC_NOMINAL_FREQ_MISMATCH                 = ISTEP_COMP_ID | 0x1B,
+        RC_PM_OCC_CHKPT_TIMEOUT                  = ISTEP_COMP_ID | 0x1C,
     };
 
 };

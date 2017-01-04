@@ -153,24 +153,38 @@ void* call_host_runtime_setup (void *io_pArgs)
 
         if(l_activatePM)
         {
-            l_err = HBPM::loadPMAll(HBPM::PM_LOAD);
+            TARGETING::Target* l_failTarget = NULL;
+            bool pmStartSuccess = true;
+
+            l_err = loadAndStartPMAll(HBPM::PM_LOAD, l_failTarget);
             if (l_err)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "loadPMAll failed");
+                           "loadAndStartPMAll failed");
 
                 // Commit the error and continue with the istep
                 errlCommit(l_err, ISTEP_COMP_ID);
+                pmStartSuccess = false;
             }
-            l_err = HBPM::startPMAll();
-            if (l_err)
+
+#ifdef CONFIG_HTMGT
+            // Report PM status to HTMGT
+            HTMGT::processOccStartStatus(pmStartSuccess,l_failTarget);
+#else
+            // Verify all OCCs have reached the checkpoint
+            if (pmStartSuccess)
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "startPMAll failed");
+                l_err = HBPM::verifyOccChkptAll();
+                if (l_err)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "verifyOccCheckpointAll failed");
 
-                // Commit the error and continue with the istep
-                errlCommit(l_err, ISTEP_COMP_ID);
+                    // Commit the error and continue with the istep
+                    errlCommit(l_err, ISTEP_COMP_ID);
+                }
             }
+#endif
         }
 
 #if 0 //@TODO-RTC:164022-Support max pstate without OCC
