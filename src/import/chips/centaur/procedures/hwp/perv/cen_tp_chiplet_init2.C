@@ -73,10 +73,10 @@ cen_tp_chiplet_init2(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
 
     FAPI_DBG("Clock Start command (PIB, NET only). ");
     l_pcb_clk_region_data = CLOCK_START_REGIONS_PIBNET;
-    FAPI_TRY(fapi2::putScom(i_target, TP_CLK_REGION, l_pcb_clk_region_data),
+    FAPI_TRY(fapi2::putScom(i_target, CEN_CLK_REGION_PCB, l_pcb_clk_region_data),
              "Error from putScom (TP_CLK_REGION)");
 
-    FAPI_TRY(fapi2::getScom(i_target, TP_CLK_STATUS, l_pcb_clk_status),
+    FAPI_TRY(fapi2::getScom(i_target, CEN_CLOCK_STAT_PCB, l_pcb_clk_status),
              "Error from getScom (TP_CLK_STATUS)");
 
     FAPI_TRY(l_pcb_clk_status.extract(temp_data_64, 0, 64),
@@ -90,31 +90,31 @@ cen_tp_chiplet_init2(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
 
     FAPI_DBG("PIB, NET running now.");
     FAPI_DBG("Assert PCB reset");
-    FAPI_TRY(fapi2::getCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from gettCfamRegister (CFAM_FSI_GP3)");
+    FAPI_TRY(fapi2::getCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from gettCfamRegister (CEN_FSIGP3)");
     l_fsi_gp3_data.setBit<22>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from putCfamRegister (CFAM_FSI_GP3)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from putCfamRegister (CEN_FSIGP3)");
 
     FAPI_DBG("PIB2PCB switch mux, set to operational");
     l_fsi_gp3_data.clearBit<20>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from putCfamRegister (CFAM_FSI_GP3)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from putCfamRegister (CEN_FSIGP3)");
 
     FAPI_DBG("Deassert PCB reset");
     l_fsi_gp3_data.clearBit<22>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from putCfamRegister (CFAM_FSI_GP3)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from putCfamRegister (CEN_FSIGP3)");
 
     FAPI_DBG("Drop global_ep_reset signal");
     l_fsi_gp3_data.clearBit<31>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from putCfamRegister (CFAM_FSI_GP3)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from putCfamRegister (CEN_FSIGP3)");
 
     FAPI_DBG("Switch Pervasive Chiplet OOB Mux");
     l_fsi_gp3_data.clearBit<21>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target, CFAM_FSI_GP3, l_fsi_gp3_data),
-             "Error from putCfamRegister (CFAM_FSI_GP3)");
+    FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_FSIGP3, l_fsi_gp3_data),
+             "Error from putCfamRegister (CEN_FSIGP3)");
 
     FAPI_DBG("Invoking repair loader...");
     FAPI_TRY(cen_repair_loader(i_target, REPAIR_CMD_VALIDATION_ENTRIES, REPAIR_CMD_START_ADDR),
