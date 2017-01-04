@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,7 +79,7 @@ extern "C"
             fapi2::buffer<uint64_t> l_status;
 
             // A small vector of addresses to poll during the polling loop
-            static const std::vector<mss::poll_probe<fapi2::TARGET_TYPE_MCBIST>> l_probes =
+            const std::vector<mss::poll_probe<fapi2::TARGET_TYPE_MCBIST>> l_probes =
             {
                 {i_target, "mcbist current address", MCBIST_MCBMCATQ},
             };

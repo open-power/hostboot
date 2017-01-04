@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,8 +154,10 @@ struct poll_parameters
 /// as poll() does not return a fapi2::ReturnCode
 ///
 template< fapi2::TargetType T, typename L, fapi2::TargetType P = fapi2::TARGET_TYPE_MCA >
-inline bool poll(const fapi2::Target<T>& i_target, const uint64_t i_addr,
-                 const poll_parameters i_params, L i_fn,
+inline bool poll(const fapi2::Target<T>& i_target,
+                 const uint64_t i_addr,
+                 const poll_parameters i_params,
+                 L i_fn,
                  const std::vector< poll_probe<P> >& i_probes = std::vector< poll_probe<P> >() )
 {
     fapi2::buffer<uint64_t> l_reg;
@@ -170,7 +172,7 @@ inline bool poll(const fapi2::Target<T>& i_target, const uint64_t i_addr,
     for ( size_t l_poll_limit = i_params.iv_poll_count; l_poll_limit > 0; --l_poll_limit )
     {
         // Output anything in the probes
-        for (auto p : i_probes)
+        for (const auto& p : i_probes)
         {
             fapi2::buffer<uint64_t> l_data;
             FAPI_TRY( mss::getScom(p.iv_target, p.iv_register, l_data) );
