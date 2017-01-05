@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -121,6 +121,14 @@ void clear_hwas_changed_bit(Target * i_target, const HWAS_CHANGED_BIT i_bit);
  * @return  True if PHYP will be loaded and started
  */
 bool is_phyp_load( ATTR_PAYLOAD_KIND_type* o_type = NULL );
+
+/*
+ * brief   Checks if we are loading no payload (PAYLOAD_KIND_NONE)
+ * @description  Looks at both ATTR_PAYLOAD_KIND
+ *    to determine if we are really have no payload
+ * @return  True if No payload will be loaded or started
+ */
+bool is_no_load( void );
 
 /**
  * @brief  Utility function to determine if Sapphire is the payload

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -655,27 +655,23 @@ namespace TARGETING
     {
         TRACDCOMP(g_trac_targeting, "AttrRP::save: top @ 0x%lx", io_addr);
 
-        // Find total size of the sections.
-        uint64_t l_size = maxSize();
-
         void* region = reinterpret_cast<void*>(io_addr);
         uint8_t* pointer = reinterpret_cast<uint8_t*>(region);
 
-        // For PHYP adjunct partition, use HDAT ptr as is
-        bool  l_isPhyp = TARGETING::is_phyp_load();
-        if (!l_isPhyp)
+        if (TARGETING::is_no_load())
         {
+            // Find total size of the sections.
+            uint64_t l_size = maxSize();
+
             io_addr = ALIGN_PAGE_DOWN(io_addr);
             // Determine bottom of the address region.
             io_addr = io_addr - l_size;
-            // Align to 64KB for Opal
+            // Align to 64KB for No Payload
             io_addr = ALIGN_DOWN_X(io_addr,64*KILOBYTE);
-
             // Map in region.
             region = mm_block_map(reinterpret_cast<void*>(io_addr),l_size);
             pointer = reinterpret_cast<uint8_t*>(region);
-
-        } // end if NOT PHYP
+        }
 
         // Copy content.
         for (size_t i = 0; i < iv_sectionCount; ++i)

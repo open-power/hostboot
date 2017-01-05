@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -492,10 +492,9 @@ errlHndl_t hdatService::loadHostData(void)
         payload_kind = TARGETING::PAYLOAD_KIND_PHYP;
 #endif
 
-        //If PHYP or Sapphire w/SP Base Services
+        //If PHYP or Sapphire
         if( (TARGETING::PAYLOAD_KIND_PHYP == payload_kind ) ||
-            ((TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind ) &&
-             INITSERVICE::spBaseServicesEnabled()))
+            (TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind ))
         {
             // PHYP
             TARGETING::ATTR_PAYLOAD_BASE_type payload_base
@@ -600,10 +599,9 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             // we're all done
             break;
         }
-        //If payload is not (PHYP or Sapphire w/SP Base Services )
+        //If payload is not (PHYP or Sapphire)
         else if( !((TARGETING::PAYLOAD_KIND_PHYP == payload_kind ) ||
-            ((TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind ) &&
-             INITSERVICE::spBaseServicesEnabled())))
+            (TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind )))
         {
             TRACFCOMP( g_trac_runtime, "getHostDataSection> There is no host data for PAYLOAD_KIND=%d", payload_kind );
             /*@
@@ -1203,10 +1201,9 @@ errlHndl_t hdatService::updateHostDataSectionActual( SectionId i_section,
             // we're all done -- don't need to do anything
             break;
         }
-        //If payload is not (PHYP or Sapphire w/SP Base Services)
+        //If payload is not (PHYP or Sapphire)
         else if( !((TARGETING::PAYLOAD_KIND_PHYP == payload_kind ) ||
-            ((TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind ) &&
-             INITSERVICE::spBaseServicesEnabled())))
+                   (TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind )))
         {
             TRACFCOMP( g_trac_runtime, "get_host_data_section> There is no host data for PAYLOAD_KIND=%d", payload_kind );
             /*@

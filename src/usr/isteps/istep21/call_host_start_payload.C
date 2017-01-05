@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -357,13 +357,6 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
             if( err )
             {
                 break;
-            }
-
-            // In Sapphire mode when SP Base Services is not enabled
-            // grab the address of the previously loaded payload (step 20.1)
-            if( is_sapphire_load() && (!INITSERVICE::spBaseServicesEnabled()))
-            {
-                payloadData = DEVTREE::get_flatdevtree_phys_addr();
             }
         }
 
