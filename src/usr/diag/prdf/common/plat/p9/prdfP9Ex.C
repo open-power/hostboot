@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,9 @@ using namespace TARGETING;
 
 namespace PRDF
 {
+
+using namespace PlatServices;
+
 namespace p9_ex
 {
 
@@ -68,73 +71,96 @@ int32_t PostAnalysis( ExtensibleChip * i_exChip,
 
     int32_t l_rc = SUCCESS;
 
-    // For the core_recovery_workaround we need to clear L2FIR[39] if there are
-    // no attentions set in COREFIR_WOF
-    // Note: We clear L2FIR[39] first and then check for attentions in the
-    // COREFIR_WOF afterward to avoid the possibility of accidentally clearing
-    // L2FIR[39] despite new attentions appearing after we read COREFIR_WOF.
+    //##########################################################################
+    // Start Nimbus DD1.0 core recovery workaround
+    //##########################################################################
 
     do
     {
-        // get the L2FIR
-        SCAN_COMM_REGISTER_CLASS * l2fir_and =
-            i_exChip->getRegister("L2FIR_AND");
-        l2fir_and->setAllBits();
+        if ( MODEL_NIMBUS != getChipModel(i_exChip->getTrgt()) ||
+             0x10         != getChipLevel(i_exChip->getTrgt()) )
+        {
+            break; // nothing to do
+        }
 
-        // clear L2FIR[39]
-        l2fir_and->ClearBit(39);
+        // If there was an attention from L2FIR[39], the rule code would have
+        // then analyzed one of the two attached cores. There is no mechanism in
+        // the rule code to come back to this bit and clear it. So we must do
+        // that here.
 
-        l_rc = l2fir_and->Write();
+        // Only need to clear the FIR if it is currently set.
+        SCAN_COMM_REGISTER_CLASS * l2fir = i_exChip->getRegister("L2FIR");
+        l_rc = l2fir->Read();
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR(PRDF_FUNC "ClearBit Write() failed on L2FIR_AND");
+            PRDF_ERR( PRDF_FUNC "Read() failed on L2FIR" );
             break;
         }
 
-        // loop through all cores in EX
-        ExtensibleChipList ecChipList =
-            PlatServices::getConnected(i_exChip, TYPE_CORE);
+        if ( !l2fir->IsBitSet(39) ) break; // nothing to do
 
+        // Clear the FIR bit.
+        SCAN_COMM_REGISTER_CLASS * l2fir_and =
+            i_exChip->getRegister("L2FIR_AND");
+        l2fir_and->setAllBits();
+        l2fir_and->ClearBit(39);
+        l_rc = l2fir_and->Write();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on L2FIR_AND" );
+            break;
+        }
+
+        // The workaround is not level driven. So we need to check the
+        // current value of the COREFIR WOFs to determine if there is a new
+        // attention.
+
+        ExtensibleChipList ecChipList = getConnected( i_exChip, TYPE_CORE );
         for ( auto & ecChip : ecChipList )
         {
-            // get the COREFIR_WOF
-            SCAN_COMM_REGISTER_CLASS * corefirwof =
+            SCAN_COMM_REGISTER_CLASS * corefir_wof =
                 ecChip->getRegister("COREFIR_WOF");
             SCAN_COMM_REGISTER_CLASS * corefir_mask =
                 ecChip->getRegister("COREFIR_MASK");
 
-            // ForceRead COREFIR_WOF
-            l_rc  = corefirwof->ForceRead();
+            // A ForceRead() is required because a new attention may have
+            // occured after the initial analysis.
+            l_rc  = corefir_wof->ForceRead();
             l_rc |= corefir_mask->ForceRead();
             if ( SUCCESS != l_rc )
             {
-                PRDF_ERR(PRDF_FUNC "ForceRead() failed on "
-                                    "COREFIR_WOF/COREFIR_MASK");
-                continue;
+                PRDF_ERR( PRDF_FUNC "ForceRead() failed on "
+                          "COREFIR_WOF/COREFIR_MASK" );
+                continue; // Try the other core.
             }
 
-            // if there are attentions in COREFIR_WOF, set L2FIR[39]
-            if ( corefirwof->GetBitFieldJustified(0,64) &
+            // If there are attentions in the COREFIR_WOF, set L2FIR[39].
+            if (  corefir_wof->GetBitFieldJustified(0,64) &
                  ~corefir_mask->GetBitFieldJustified(0,64) )
             {
                 SCAN_COMM_REGISTER_CLASS * l2fir_or =
                     i_exChip->getRegister("L2FIR_OR");
                 l2fir_or->clearAllBits();
-
                 l2fir_or->SetBit(39);
-
                 l_rc = l2fir_or->Write();
                 if ( SUCCESS != l_rc )
                 {
-                    PRDF_ERR(PRDF_FUNC "SetBit Write() failed on L2FIR");
+                    PRDF_ERR( PRDF_FUNC "Write() failed on L2FIR_OR" );
+                    continue; // Try the other core.
                 }
 
-                // There is no need to check the next core since we only need to
-                // know if there is at least one attention on any core.
+                // At this point there is no need to check the other core
+                // since we only need to know if there is at least one
+                // attention on any core.
                 break;
             }
         }
-    }while(0);
+
+    } while(0);
+
+    //##########################################################################
+    // End Nimbus DD1.0 core recovery workaround
+    //##########################################################################
 
     return SUCCESS; // Always return SUCCESS for this plugin.
 
