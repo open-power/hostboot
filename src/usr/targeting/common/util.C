@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -208,6 +208,17 @@ bool is_avp_load(void)
       sys->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
     return ((mnfg_flags & TARGETING::MNFG_FLAG_AVP_ENABLE)
        || (mnfg_flags & TARGETING::MNFG_FLAG_HDAT_AVP_ENABLE));
+}
+
+/**
+ * @brief   Checks if we are loading no Payload (PAYLOAD_KIND_NONE)
+ */
+bool is_no_load(void)
+{
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    assert(sys != NULL);
+    return (PAYLOAD_KIND_NONE == sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>());
 }
 
 /**

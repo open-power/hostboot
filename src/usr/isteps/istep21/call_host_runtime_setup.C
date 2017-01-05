@@ -129,10 +129,11 @@ void* call_host_runtime_setup (void *io_pArgs)
             break;
         }
 
-        // Fill in Hostboot runtime data for all nodes
-        // (adjunct partition)
-        if( TARGETING::is_phyp_load() )
+        // Fill in Hostboot runtime data if there is a PAYLOAD
+        if( !(TARGETING::is_no_load()) )
         {
+            // Fill in Hostboot runtime data for all nodes
+            // (adjunct partition)
             // Write the HB runtime data into mainstore
             l_err = RUNTIME::populate_hbRuntimeData();
             if ( l_err )
@@ -142,8 +143,7 @@ void* call_host_runtime_setup (void *io_pArgs)
                 // break from do loop if error occured
                 break;
             }
-
-        } // end if phyp load
+        }
 
 #ifdef CONFIG_START_OCC_DURING_BOOT
         bool l_activatePM = !(TARGETING::is_phyp_load());
@@ -193,17 +193,6 @@ void* call_host_runtime_setup (void *io_pArgs)
             l_err = VPD::goldenSwitchUpdate();
             if ( l_err )
             {
-                break;
-            }
-
-            // Write the devtree out in Sapphire mode when SP Base Services not
-            // enabled
-            l_err = DEVTREE::build_flatdevtree();
-            if ( l_err )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Could not build dev tree" );
-                // break from do loop if error occured
                 break;
             }
 

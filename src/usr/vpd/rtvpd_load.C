@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,10 +111,8 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & o_vpd_addr)
         void* vptr = reinterpret_cast<void*>(o_vpd_addr);
         uint8_t* vpd_ptr = reinterpret_cast<uint8_t*>(vptr);
 
-        // OPAL builds everything at top of memory.
-        // PHYP adjunct partition will use HDAT memory ptrs
-        bool  l_isPhyp = TARGETING::is_phyp_load();
-        if (!l_isPhyp)
+        bool l_is_no_load = TARGETING::is_no_load();
+        if( l_is_no_load )
         {
             o_vpd_addr = TARGETING::get_top_mem_addr();
             assert (o_vpd_addr != 0,
@@ -127,8 +125,7 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & o_vpd_addr)
             vpd_ptr = reinterpret_cast<uint8_t*>(vptr);
 
             assert(vptr != NULL,"bld_devtree: Could not map VPD memory");
-        } // if NOT phyp
-
+        }
 
         err = bld_vpd_image(PNOR::DIMM_JEDEC_VPD,
                                  vpd_ptr,
@@ -156,7 +153,7 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & o_vpd_addr)
             break;
         }
 
-        if (!l_isPhyp)
+        if ( l_is_no_load )
         {
             mm_block_unmap(vptr);
         }
