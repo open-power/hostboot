@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -302,7 +302,7 @@ sub main
     if ( ! isReadyBitOn() )
     {
         ::userDisplay   "Ready bit is off, must run splessmode first.\n";
-        exit;
+        exit 1;
     }
 
     if ( $opt_clear_trace )
@@ -808,7 +808,7 @@ sub runIStep( $$ )
     if ( $result == -1 )
     {
         ::userDisplay   "-----------------------------------------------------------------\n";
-        exit;
+        exit 1;
     }
     else
     {
@@ -820,7 +820,7 @@ sub runIStep( $$ )
         if ( $taskStatus != 0 )
         {
             ::userDisplay   "Istep $stsIStep.$stsSubstep FAILED , task status is $taskStatus, check error logs\n" ;
-            exit;
+            exit 1;
         }
         else
         {
@@ -833,7 +833,7 @@ sub runIStep( $$ )
             }
             elsif ( $taskStatus != 0 )
             {
-                exit;
+                exit 1;
             }
         }
     }
