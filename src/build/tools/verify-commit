@@ -33,8 +33,13 @@ my $projectName = $ENV{'PROJECT_NAME'};
 # Relative path of import tree from project root
 my $importPrefix = $ENV{'IMPORT_REL_PATH'}."/";
 
+my $rtcNumber = rtc_workitem_num();
+my $cqNumber = cq_workitem_num();
+
 verifyPatchSet();       # Verify the patch contents.
 verifyCommitMsg();      # Verify the commit message.
+verifyTodoFixme();      # Make sure there are no TODO/FIXME
+                        # associated with current RTC/CQ
 
 # Finish out the divider.
 if ($issueFound)
@@ -334,6 +339,70 @@ sub verifyCommitMsg
     }
 }
 
+# sub verifyTodoFixme
+#
+# Verifies that there are no Todo or Fixme
+# tags in the code with the current commit's
+# RTC or CQ number.
+#
+sub verifyTodoFixme
+{
+    my $file;
+    my $commentText;
+    my $lineNumber;
+    # Get the list of TODO/FIXME lines in src/
+    open TODO_LIST, "egrep -rn '(TODO.*(CQ|RTC).*)|(FIXME.*(CQ|RTC).*)' src/* |"
+        or die "Cannot get the list of TODO/FIXME lines.\n";
+
+    while(my $line = <TODO_LIST>)
+    {
+        chomp $line;
+        if(check_rtc_todo_fixme($line))
+        {
+            ($file, $commentText, $lineNumber) = parse_todo_fixme_line($line);
+            strong_warning($file, $commentText, $lineNumber,
+             "TODO/FIXME tag with the same RTC number as in the current commit message.");
+        }
+        elsif(check_cq_todo_fixme($line))
+        {
+            ($file, $commentText, $lineNumber) = parse_todo_fixme_line($line);
+            strong_warning($file, $commentText, $lineNumber,
+              "TODO/FIXME tag with the same CQ number as in the current commit message.");
+        }
+    }
+}
+
+sub parse_todo_fixme_line
+{
+    my $line = shift;
+    my ($file, $lineNumber, $commentText) = split(/:/, $line, 3);
+    return ($file, $commentText, $lineNumber);
+}
+
+sub check_rtc_todo_fixme
+{
+    my $line = shift;
+    if($line =~ m/RTC\s*:*\s*([0-9]+)/ &&
+           $1 eq $rtcNumber && $rtcNumber ne "")
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+sub check_cq_todo_fixme
+{
+    my $line = shift;
+    if($line =~ m/CQ\s*:*\s*([A-Z][A-Z][0-9]+)/ &&
+          $1 eq $cqNumber && $cqNumber ne "")
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
 sub warning
 {
     my ($file, $line, $count, $statement) = @_;
@@ -343,6 +412,20 @@ sub warning
     print "    $line\n";
 
     $issueFound = 1;
+}
+
+sub strong_warning
+{
+    my ($file, $line, $count, $statement) = @_;
+
+    # Always show strong warnings
+    print "------------------------------------------------------------\n";
+    print "***WARNING: $statement\n";
+    print "  $file:$count\n";
+    print "    $line\n";
+
+    $issueFound = 1;
+    $warningCount++;
 }
 
 sub error
@@ -355,5 +438,91 @@ sub error
 
     $issueFound = 1;
     $errorFound = 1;
+}
+
+# sub rtc_workitem_num
+#
+#  Determines the RTC WorkItem associated with a git commit.
+#
+#  @param[in] commit - The git commit, or no parameter for last commit
+#
+#  @return string - RTC WorkItem number (or "").
+#
+sub rtc_workitem_num
+{
+    my $commit = shift;
+    my $message;
+
+    if(defined($commit))
+    {
+        $message = git_commit_msg($commit);
+    }
+    else
+    {
+        $message = git_commit_msg("");
+    }
+
+    if ($message =~ m/RTC:\s*([0-9]+)/)
+    {
+        return $1;
+    }
+    else
+    {
+        return "";
+    }
+}
+
+
+# sub cq_workitem_num
+#
+# Determines the CQ WorkItem associated with a git commit.
+#
+# @param[in] commit - The git commit, or no parameter for last commit
+#
+# @return string - CQ WorkItem number (or "").
+#
+sub cq_workitem_num
+{
+    my $commit = shift;
+    my $message;
+
+    if(defined($commit))
+    {
+        $message = git_commit_msg($commit);
+    }
+    else
+    {
+        $message = git_commit_msg("");
+    }
+
+    if ($message =~ m/CQ:\s*([A-Z][A-Z][0-9]+)/)
+    {
+        return $1;
+    }
+    else
+    {
+        return "";
+    }
+}
+
+# sub git_commit_msg
+#
+# Get the entire commit message associated with a commit.
+#
+# @param[in] commit - The commit to examine.
+# @return string - The commit message.
+#
+sub git_commit_msg
+{
+    my $commit = shift;
+    open COMMAND, "git log -n1 --pretty=%B $commit |";
+    my $message = "";
+    while (my $line = <COMMAND>)
+    {
+        $message = $message.$line;
+    }
+    close COMMAND;
+
+    return $message;
 }
 
