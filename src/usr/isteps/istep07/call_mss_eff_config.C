@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -209,7 +209,7 @@ void*    call_mss_eff_config( void *io_pArgs )
 
     std::map<ATTR_VDDR_ID_type,TARGETING::TargetHandleList> l_domainIdGroups;
     TARGETING::TargetHandleList l_mcbistTargetList;
-    getAllChiplets(l_mcsTargetList, TYPE_MCBIST);
+    getAllChiplets(l_mcbistTargetList, TYPE_MCBIST);
 
     // Iterate over all MCBIST, calling mss_eff_config_thermal
     for (const auto & l_mcbist_target : l_mcbistTargetList)
