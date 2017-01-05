@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -27,31 +27,34 @@ ROOTPATH = ../../../..
 MODULE = istep18
 PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 
+NEST_HWP_PATH += ${PROCEDURES_PATH}/hwp/nest
+
+
+VPATH += ${NEST_HWP_PATH}
+
+#Add all the objs for istep 18
+OBJS += tod_init.o
+
+#Add all the extra include paths
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
+EXTRAINCDIR += ${NEST_HWP_PATH}
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps
+
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/tod_init
 EXTRAINCDIR += ${PROCEDURES_PATH}
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps
 
 
-## pointer to common HWP files
-
-#@TODO-RTC:149253-Add TOD support
-OBJS += tod_init.o
-#OBJS += TodControls.o
-#OBJS += TodDrawer.o
-#OBJS += TodProc.o
-#OBJS += TodSvc.o
-#OBJS += TodSvcUtil.o
-#OBJS += TodHwpIntf.o
-#OBJS += TodTopologyManager.o
-
-#OBJS += proc_tod_setup.o
-#OBJS += proc_tod_save_config.o
-#OBJS += proc_tod_init.o
-#OBJS += proc_tod_utils.o
-#OBJS += call_tod_setup.o
-#OBJS += call_tod_init.o
-
+#Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk
+
+#Include all the procedure makefiles
+include $(NEST_HWP_PATH)/p9_tod_utils.mk
+include $(NEST_HWP_PATH)/p9_tod_setup.mk
+include $(NEST_HWP_PATH)/p9_tod_init.mk
+
 include ${ROOTPATH}/config.mk
