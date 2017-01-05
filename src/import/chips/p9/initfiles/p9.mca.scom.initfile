@@ -519,75 +519,138 @@ ispy MCP.PORT0.SRQ.MBA_FARB1Q_CFG_SLOT1_S7_CID [when=S] {
 # ODT RD
 # Slot 0
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK0_RD_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][0];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][0] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][0] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][0] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][0] >> 2; # assuming it only takes right most bit since right justified
 }
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK1_RD_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][1];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][1] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][1] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][1] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][1] >> 2; # assuming it only takes right most bit since right justified
 }
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK2_RD_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][2];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][2] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][2] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][2] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][2] >> 2; # assuming it only takes right most bit since right justified
 }
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK3_RD_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][3];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][3] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][3] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][3] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][0][3] >> 2; # assuming it only takes right most bit since right justified
 }
 # Slot 1
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK4_RD_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][0];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][0] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][0] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][0] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][0] >> 2; # assuming it only takes right most bit since right justified
 }
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK5_RD_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][1];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][1] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][1] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][1] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][1] >> 2; # assuming it only takes right most bit since right justified
 }
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK6_RD_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][2];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][2] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][2] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][2] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][2] >> 2; # assuming it only takes right most bit since right justified
 }
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK7_RD_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][3];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][3] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][3] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][3] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_RD[def_PORT_INDEX][1][3] >> 2; # assuming it only takes right most bit since right justified
 }
 
 # ODT WR
 # Slot 0
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK0_WR_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][0];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][0] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][0] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][0] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][0] >> 2; # assuming it only takes right most bit since right justified
 }
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK1_WR_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][1];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][1] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][1] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][1] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][1] >> 2; # assuming it only takes right most bit since right justified
 }
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK2_WR_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][2];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][2] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][2] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][2] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][2] >> 2; # assuming it only takes right most bit since right justified
 }
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK3_WR_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][3];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][3] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][3] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][3] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][0][3] >> 2; # assuming it only takes right most bit since right justified
 }
 # Slot 1
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK4_WR_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][0];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][0] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][0] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][0] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][0] >> 2; # assuming it only takes right most bit since right justified
 }
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK5_WR_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][1];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][1] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][1] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][1] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][1] >> 2; # assuming it only takes right most bit since right justified
 }
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK6_WR_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][2];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][2] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][2] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][2] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][2] >> 2; # assuming it only takes right most bit since right justified
 }
 ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK7_WR_ODT [when=S] {
-  spyv;
-  MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][3];
+  bits, spyv;
+  # ATTR is AB--CD-- but for SPY need ABCD
+  0, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][3] >> 7; # assuming it only takes right most bit since right justified
+  1, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][3] >> 6; # assuming it only takes right most bit since right justified
+  2, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][3] >> 3; # assuming it only takes right most bit since right justified
+  3, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][3] >> 2; # assuming it only takes right most bit since right justified
 }
-
 
 
 

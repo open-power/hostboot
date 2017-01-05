@@ -562,22 +562,134 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x7010915ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_0] );
-            l_scom_buffer.insert<4, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_1] );
-            l_scom_buffer.insert<8, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_2] );
-            l_scom_buffer.insert<12, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_3] );
-            l_scom_buffer.insert<16, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_0] );
-            l_scom_buffer.insert<20, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_1] );
-            l_scom_buffer.insert<24, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_2] );
-            l_scom_buffer.insert<28, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_3] );
-            l_scom_buffer.insert<32, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_0] );
-            l_scom_buffer.insert<36, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_1] );
-            l_scom_buffer.insert<40, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_2] );
-            l_scom_buffer.insert<44, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_3] );
-            l_scom_buffer.insert<48, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_0] );
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_1] );
-            l_scom_buffer.insert<56, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_2] );
-            l_scom_buffer.insert<60, 4, 60, uint64_t>(l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_3] );
+            l_scom_buffer.insert<0, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_0] >>
+                    literal_7) );
+            l_scom_buffer.insert<1, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_0] >>
+                    literal_6) );
+            l_scom_buffer.insert<2, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_0] >>
+                    literal_3) );
+            l_scom_buffer.insert<3, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_0] >>
+                    literal_2) );
+            l_scom_buffer.insert<4, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_1] >>
+                    literal_7) );
+            l_scom_buffer.insert<5, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_1] >>
+                    literal_6) );
+            l_scom_buffer.insert<6, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_1] >>
+                    literal_3) );
+            l_scom_buffer.insert<7, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_1] >>
+                    literal_2) );
+            l_scom_buffer.insert<8, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_2] >>
+                    literal_7) );
+            l_scom_buffer.insert<9, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_2] >>
+                    literal_6) );
+            l_scom_buffer.insert<10, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_2] >>
+                    literal_3) );
+            l_scom_buffer.insert<11, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_2] >>
+                    literal_2) );
+            l_scom_buffer.insert<12, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_3] >>
+                    literal_7) );
+            l_scom_buffer.insert<13, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_3] >>
+                    literal_6) );
+            l_scom_buffer.insert<14, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_3] >>
+                    literal_3) );
+            l_scom_buffer.insert<15, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_3] >>
+                    literal_2) );
+            l_scom_buffer.insert<16, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_0] >>
+                    literal_7) );
+            l_scom_buffer.insert<17, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_0] >>
+                    literal_6) );
+            l_scom_buffer.insert<18, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_0] >>
+                    literal_3) );
+            l_scom_buffer.insert<19, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_0] >>
+                    literal_2) );
+            l_scom_buffer.insert<20, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_1] >>
+                    literal_7) );
+            l_scom_buffer.insert<21, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_1] >>
+                    literal_6) );
+            l_scom_buffer.insert<22, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_1] >>
+                    literal_3) );
+            l_scom_buffer.insert<23, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_1] >>
+                    literal_2) );
+            l_scom_buffer.insert<24, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_2] >>
+                    literal_7) );
+            l_scom_buffer.insert<25, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_2] >>
+                    literal_6) );
+            l_scom_buffer.insert<26, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_2] >>
+                    literal_3) );
+            l_scom_buffer.insert<27, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_2] >>
+                    literal_2) );
+            l_scom_buffer.insert<28, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_3] >>
+                    literal_7) );
+            l_scom_buffer.insert<29, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_3] >>
+                    literal_6) );
+            l_scom_buffer.insert<30, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_3] >>
+                    literal_3) );
+            l_scom_buffer.insert<31, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_3] >>
+                    literal_2) );
+            l_scom_buffer.insert<32, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_0] >>
+                    literal_7) );
+            l_scom_buffer.insert<33, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_0] >>
+                    literal_6) );
+            l_scom_buffer.insert<34, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_0] >>
+                    literal_3) );
+            l_scom_buffer.insert<35, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_0] >>
+                    literal_2) );
+            l_scom_buffer.insert<36, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_1] >>
+                    literal_7) );
+            l_scom_buffer.insert<37, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_1] >>
+                    literal_6) );
+            l_scom_buffer.insert<38, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_1] >>
+                    literal_3) );
+            l_scom_buffer.insert<39, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_1] >>
+                    literal_2) );
+            l_scom_buffer.insert<40, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_2] >>
+                    literal_7) );
+            l_scom_buffer.insert<41, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_2] >>
+                    literal_6) );
+            l_scom_buffer.insert<42, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_2] >>
+                    literal_3) );
+            l_scom_buffer.insert<43, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_2] >>
+                    literal_2) );
+            l_scom_buffer.insert<44, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_3] >>
+                    literal_7) );
+            l_scom_buffer.insert<45, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_3] >>
+                    literal_6) );
+            l_scom_buffer.insert<46, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_3] >>
+                    literal_3) );
+            l_scom_buffer.insert<47, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_3] >>
+                    literal_2) );
+            l_scom_buffer.insert<48, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_0] >>
+                    literal_7) );
+            l_scom_buffer.insert<49, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_0] >>
+                    literal_6) );
+            l_scom_buffer.insert<50, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_0] >>
+                    literal_3) );
+            l_scom_buffer.insert<51, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_0] >>
+                    literal_2) );
+            l_scom_buffer.insert<52, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_1] >>
+                    literal_7) );
+            l_scom_buffer.insert<53, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_1] >>
+                    literal_6) );
+            l_scom_buffer.insert<54, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_1] >>
+                    literal_3) );
+            l_scom_buffer.insert<55, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_1] >>
+                    literal_2) );
+            l_scom_buffer.insert<56, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_2] >>
+                    literal_7) );
+            l_scom_buffer.insert<57, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_2] >>
+                    literal_6) );
+            l_scom_buffer.insert<58, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_2] >>
+                    literal_3) );
+            l_scom_buffer.insert<59, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_2] >>
+                    literal_2) );
+            l_scom_buffer.insert<60, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_3] >>
+                    literal_7) );
+            l_scom_buffer.insert<61, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_3] >>
+                    literal_6) );
+            l_scom_buffer.insert<62, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_3] >>
+                    literal_3) );
+            l_scom_buffer.insert<63, 1, 63, uint64_t>((l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_3] >>
+                    literal_2) );
             FAPI_TRY(fapi2::putScom(TGT0, 0x7010915ull, l_scom_buffer));
         }
         {
