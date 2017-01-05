@@ -2228,6 +2228,70 @@ extern "C"
         return fapi2::current_err;
     }
 
+    //---------------------------------------------------------------------------
+    /**
+     * @brief Set the Fabric System, Group and Chip IDs into SGPE and CME headers
+     * @brief   i_pChipHomer points to start of HOMER
+     */
+    fapi2::ReturnCode setFabricIds( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PROC& i_procTgt )
+    {
+
+        uint32_t l_system_id;
+        uint8_t  l_group_id;
+        uint8_t  l_chip_id;
+        fapi2::buffer<uint16_t> l_location_id = 0;
+        uint16_t l_locationVal = 0;
+
+        cmeHeader_t* pCmeHdr = (cmeHeader_t*) & i_pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
+        sgpeHeader_t* pSgpeHdr = (sgpeHeader_t*)& i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECT];
+
+        FAPI_DBG(" ==================== Fabric IDs =================");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SYSTEM_ID,
+                               i_procTgt,
+                               l_system_id),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_PROC_FABRIC_SYSTEM_ID");
+
+        FAPI_DBG("Fabric System ID       :   0x%04X", l_system_id);
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_GROUP_ID,
+                               i_procTgt,
+                               l_group_id),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_PROC_FABRIC_GROUP_ID");
+
+        FAPI_DBG("Fabric Group ID        :   0x%01X", l_group_id);
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CHIP_ID,
+                               i_procTgt,
+                               l_chip_id),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_PROC_FABRIC_CHIP_ID");
+
+        FAPI_DBG("Fabric Chip ID         :   0x%01X", l_chip_id);
+
+        // Create a unit16_t Location Ids in the form of:
+        //    0:3   Å Group ID (loaded from ATTR_PROC_FABRIC_GROUP_ID)
+        //    4:6    ÅChip ID (loaded from ATTR_PROC_FABRIC_CHIP_ID)
+        //    7       0
+        //    8:12   ÅSystem ID (loaded from ATTR_PROC_FABRIC_SYSTEM_ID)
+        //    13:15 Å 00
+
+        l_location_id.insert < 0, 4, 8 - 4,  uint8_t > ( l_group_id );
+        l_location_id.insert < 4, 3, 8 - 3,  uint8_t > ( l_chip_id );
+        l_location_id.insert < 8, 5, 32 - 5, uint32_t > ( l_system_id );
+
+        FAPI_DBG("Location ID            :   0x%04X", l_location_id);
+
+        l_location_id.extract<0, 16>(l_locationVal);
+        // Populate the CME Header
+        pCmeHdr->g_cme_location_id = SWIZZLE_2_BYTE(l_locationVal);
+
+        // Populate the SGPE Header
+        pSgpeHdr->g_sgpe_location_id = SWIZZLE_2_BYTE(l_locationVal);
+
+    fapi_try_exit:
+        return fapi2::current_err;
+
+    }
+
 //---------------------------------------------------------------------------------------------------
 
     /**
@@ -2922,7 +2986,11 @@ extern "C"
             //Update CME/SGPE Flags in respective image header.
             updateImageFlags( pChipHomer );
 
-            //Finally update the attributes storing PGPE and SGPE's boot copier offset.
+            //Set the Fabric IDs
+            FAPI_TRY(setFabricIds( pChipHomer, i_procTgt ),
+                     "Failed to set Fabric IDs");
+
+            //Update the attributes storing PGPE and SGPE's boot copier offset.
             retCode = updateGpeAttributes( pChipHomer, i_procTgt );
 
             if( retCode )
