@@ -36,6 +36,7 @@
 # Files used to check what target type attributes are
 #      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/chips/p9/procedures/xml/attribute_info/memory_mcs_attributes.xml
 #      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/chips/p9/procedures/xml/attribute_info/memory_spd_attributes.xml
+#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/chips/p9/procedures/xml/attribute_info/memory_mr_attributes.xml
 #      Example:
 #           <id>ATTR_EFF_NUM_RANKS_PER_DIMM</id>
 #           <targetType>TARGET_TYPE_MCS</targetType>
@@ -301,15 +302,8 @@ ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RDTAG_DLY [when=S] {         # ATTR_EFF_DIMM_T
 
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_WRDATA_DLY [when=S] {
   spyv, expr;
-  3,                                 ((def_MSS_FREQ_EQ_1866==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-  4,                                 ((def_MSS_FREQ_EQ_2133==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-  5,                                 ((def_MSS_FREQ_EQ_2400==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-  6,                                 ((def_MSS_FREQ_EQ_2667==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-
-  2,                                 ((def_MSS_FREQ_EQ_1866==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
-  3,                                 ((def_MSS_FREQ_EQ_2133==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
-  4,                                 ((def_MSS_FREQ_EQ_2400==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
-  5,                                 ((def_MSS_FREQ_EQ_2667==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
+  MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX] + MCS.ATTR_MSS_VPD_MR_DPHY_WLO[def_PORT_INDEX] - 8,     (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1); #     RDIMM
+  MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX] + MCS.ATTR_MSS_VPD_MR_DPHY_WLO[def_PORT_INDEX] - 9,     (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]!=1); # not RDIMM
 }
 
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_WRDONE_DLY [when=S] {
