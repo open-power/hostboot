@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -231,12 +231,14 @@ namespace FREQVOLTSVC
         TARGETING::ATTR_FREQ_CORE_MAX_type l_sysLowestTurboFreq = 0x0;
         TARGETING::ATTR_ULTRA_TURBO_FREQ_MHZ_type
                                            l_sysLowestUltraTurboFreq = 0x0;
+        bool l_useNpuFrequency = false;
 
         // Get system frequency
         l_err = getSysFreq(l_sysHighestPowerSaveFreq,
                            l_sysNomFreq,
                            l_sysLowestTurboFreq,
-                           l_sysLowestUltraTurboFreq);
+                           l_sysLowestUltraTurboFreq,
+                           l_useNpuFrequency);
         if (l_err != NULL)
         {
             TRACFCOMP( g_fapiTd,ERR_MRK"Error getting system frequency");
@@ -263,8 +265,25 @@ namespace FREQVOLTSVC
                        < TARGETING::ATTR_FREQ_CORE_MAX > (l_sysLowestTurboFreq);
 
             // Set min freq attribute based on power save
-            (void)l_pTopLevel->setAttr<TARGETING::ATTR_MIN_FREQ_MHZ>
+            // If this system is a Naples, and subsquently has a NPU, we need
+            // to set the MIN_FREQ_MHZ to the higer of the NEST_FREQ or
+            // MIN_FREQ_MHZ
+            if(l_useNpuFrequency)
+            {
+                uint32_t l_nestFreq = l_pTopLevel->
+                    getAttr<TARGETING::ATTR_NEST_FREQ_MHZ>();
+                uint32_t l_npuFreq = (l_nestFreq > l_sysHighestPowerSaveFreq) ?
+                                         l_nestFreq : l_sysHighestPowerSaveFreq;
+                TRACFCOMP(g_fapiTd, "Found NPU link system, setting "
+                    "ATTR_MIN_FREQ_MHZ to 0x%08X", l_npuFreq);
+                (void)l_pTopLevel->setAttr<TARGETING::ATTR_MIN_FREQ_MHZ>
+                                                    (l_npuFreq);
+            }
+            else
+            {
+                (void)l_pTopLevel->setAttr<TARGETING::ATTR_MIN_FREQ_MHZ>
                                                     (l_sysHighestPowerSaveFreq);
+            }
 
             // Set min ultra turbo freq attribute
             (void)l_pTopLevel->setAttr<TARGETING::ATTR_ULTRA_TURBO_FREQ_MHZ>
@@ -303,7 +322,8 @@ namespace FREQVOLTSVC
           TARGETING::ATTR_NOMINAL_FREQ_MHZ_type & o_sysNomFreqMhz,
           TARGETING::ATTR_FREQ_CORE_MAX_type & o_sysVPDTurboMaxFreqMhz,
           TARGETING::ATTR_ULTRA_TURBO_FREQ_MHZ_type &
-                                                   o_sysVPDUltraTurboMinFreqMhz)
+                                                   o_sysVPDUltraTurboMinFreqMhz,
+          bool & o_useNpuFrequency)
     {
         uint32_t   l_minsysVPDTurboMaxFreqMhz = 0;
         uint32_t   l_maxsysVPDPowerSaveMinFreqMhz = 0;
@@ -317,6 +337,7 @@ namespace FREQVOLTSVC
             o_sysVPDTurboMaxFreqMhz = 0;
             o_sysVPDPowerSaveMinFreqMhz = 0;
             o_sysVPDUltraTurboMinFreqMhz = 0;
+            o_useNpuFrequency = false;
 
             //Get the top level (system) target  handle
             TARGETING::Target* l_pTopLevel = NULL;
@@ -367,6 +388,13 @@ namespace FREQVOLTSVC
                 fapi::Target l_pFapiChipTarget(fapi::TARGET_TYPE_PROC_CHIP,
                             (const_cast<TARGETING::Target*>(l_pChipTarget) ));
 
+                // Check if this chip is a naples and if so, set
+                // o_useNpuFrequency
+                if((l_pChipTarget->getAttr<TARGETING::ATTR_MODEL>()
+                    == TARGETING::MODEL_NAPLES) && (!o_useNpuFrequency))
+                {
+                    o_useNpuFrequency = true;
+                }
                 // Get core number for record number
                 TARGETING::ATTR_CHIP_UNIT_type l_coreNum =
                         l_pTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
@@ -563,10 +591,12 @@ namespace FREQVOLTSVC
         TRACFCOMP(g_fapiTd,EXIT_MRK"o_sysNomFreqMhz: 0x%08X, "
                   "o_sysVPDTurboMaxFreqMhz: 0x%08X, "
                   "o_sysVPDPowerSaveMinFreqMhz: 0x%08X, "
-                  "o_sysVPDUltraTurboFreqMhz: 0x%08x",
+                  "o_sysVPDUltraTurboFreqMhz: 0x%08x"
+                  "o_useNpuFrequency: %d",
                    o_sysNomFreqMhz, o_sysVPDTurboMaxFreqMhz,
                    o_sysVPDPowerSaveMinFreqMhz,
-                   o_sysVPDUltraTurboMinFreqMhz );
+                   o_sysVPDUltraTurboMinFreqMhz,
+                   o_useNpuFrequency );
 
         return l_err;
     }

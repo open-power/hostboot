@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -131,6 +131,8 @@ static const uint32_t PROC_BOOT_VOLT_VCS_MASK = 0x0000ff00;
      * @param[out] o_sysVPDUltraTurboMinFreqMhz
      *     On success, holds lowest ultra turbo frequency
      *     On failure, set to zero.
+     * @param[out] o_useNpuFrequency
+     *     Set true if system has a NPU and needs to use the nest frequency
      *
      * @return Error log handle indicating the status of the request
      *
@@ -141,7 +143,8 @@ static const uint32_t PROC_BOOT_VOLT_VCS_MASK = 0x0000ff00;
         uint32_t & o_sysVPDPowerSaveMinFreqMhz,
         TARGETING::ATTR_NOMINAL_FREQ_MHZ_type & o_sysNomFreqMhz,
         TARGETING::ATTR_FREQ_CORE_MAX_type & o_sysVPDTurboMaxFreqMhz,
-        TARGETING::ATTR_ULTRA_TURBO_FREQ_MHZ_type & o_sysVPDUltraMinFreqMhz);
+        TARGETING::ATTR_ULTRA_TURBO_FREQ_MHZ_type & o_sysVPDUltraMinFreqMhz,
+        bool & o_useNpuFrequency);
 
     /**
      * @brief Verify the system boot frequency attribute
