@@ -625,7 +625,7 @@ private:
     hdatHDIFDataArray_t     iv_ecArrayHdr;
     hdatMsAreaEcLvl_t      *iv_ecLvl;
     hdatHDIFDataArray_t     iv_msaI2cHdr;
-    hdatMsAreaHI2cData_t   *iv_msaI2cDataPtr;
+    uint8_t                *iv_msaI2cDataPtr;
     HdatRam               **iv_ramPtrs;
 
 

@@ -214,7 +214,8 @@ HdatMsArea::~HdatMsArea()
         l_curPtr = reinterpret_cast<HdatRam **>(reinterpret_cast<char*>(l_curPtr)
                     + sizeof(HdatRam *));
     }
-
+    
+    delete[] iv_msaI2cDataPtr;
     delete[] iv_kwd;
     delete[] iv_addrRange;
     delete[] iv_ecLvl;
@@ -396,9 +397,10 @@ void HdatMsArea::setMsaI2cInfo(
         iv_msaHostI2cCnt, iv_msaHostI2cSize);
     if ( i_I2cDevEntries.size() != 0 )
     {
-        //copy from vector to array
-        std::copy(i_I2cDevEntries.begin(),i_I2cDevEntries.end(),
-            iv_msaI2cDataPtr);
+        iv_msaI2cDataPtr = new uint8_t[sizeof(hdatMsAreaHI2cData_t) * iv_msaHostI2cCnt];
+        memcpy(iv_msaI2cDataPtr , i_I2cDevEntries.begin() ,
+                    (sizeof(hdatMsAreaHI2cData_t) * iv_msaHostI2cCnt));  
+
     }
     else
     {
