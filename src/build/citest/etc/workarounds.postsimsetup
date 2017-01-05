@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -33,11 +33,3 @@
 #mkdir -p $sb/simu/data/cec-chip/
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
-
-## Need SIMIC action file changes for Ia5b6fb14cdfcb8a04f49846d346ced8e2ba4719e
-echo "Applying additional action file changes"
-sbex -r fips910 -t 1012603
-echo "+++ Removing L3_0 PURGE REGISTER from p9n.act"
-mkdir -p $sb/simu/data/cec-chip/
-cp $BACKING_BUILD/src/simu/data/cec-chip/p9n.act $sb/simu/data/cec-chip
-patch -p0 $sb/simu/data/cec-chip/p9n.act $PROJECT_ROOT/src/build/citest/etc/patches/p9n.patch
