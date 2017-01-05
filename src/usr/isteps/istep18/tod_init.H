@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,5 +24,13 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef TOD_INIT_H
 #define TOD_INIT_H
+
+namespace   ISTEP_18
+{
+
+    void build_proc_topology(tod_topology_node &i_tod_node);
+    void delete_proc_topology(tod_topology_node &i_tod_node);
+
+};
 
 #endif
