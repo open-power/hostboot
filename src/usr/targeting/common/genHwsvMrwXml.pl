@@ -6116,34 +6116,39 @@ sub generate_is_dimm
         }
 
         my $ipath = $SMembuses[$i][DIMM_PATH_FIELD];
-        my $proc = $SMembuses[$i][MCS_TARGET_FIELD];
-        my $mcs = $proc;
-        my $mca = $SMembuses[$i][MCA_TARGET_FIELD];
-        $proc =~ s/.*:p(.*):.*/$1/;
-        $mcs =~ s/.*mcs(.*)/$1/;
-        $mca =~ s/.*mca(.*)/$1/;
         my $pos = $SMembuses[$i][DIMM_TARGET_FIELD];
         $pos =~ s/.*:p(.*)/$1/;
         my $dimm = $SMembuses[$i][DIMM_PATH_FIELD];
         $dimm =~ s/.*dimm-(.*)/$1/;
 
-        my $dimmPos = $SMembuses[$i][DIMM_POS_FIELD];
-        $dimmPos =~ s/.*dimm-(.*)/$1/;
-
-        my $uidstr = sprintf("0x%02X03%04X",${node},$dimm+${node}*512);
         my $fapi_name = sprintf("dimm:k0:n%d:s0:p%02d",
                                 $node, $dimm);
 
-        $mcs = (($mca - ($mca%2))/2)%2;
-        my $mcbist = ($mca - ($mca%4))/4;
-        $mca = $mca % 2;
-        my $dimm_rel_mca = $dimm % 2;
+        # PROC position relative to node and MCA position relative to PROC.
+        my $tmp = $SMembuses[$i][MCA_TARGET_FIELD];
+        my ( $proc, $mca ) = ( $1, $2 ) if ( $tmp =~ ":p([0-9]+):mca([0-9]+)" );
 
-        my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc"
-            . "/mcbist-$mcbist/mcs-$mcs/mca-$mca/dimm-$dimm_rel_mca";
+        # MCBIST, MCS, MCA, and DIMM relative positions for affinity path.
+        my $mcb_rel_proc = int($mca/4) % ARCH_LIMIT_MCBIST_PER_PROC;
+        my $mcs_rel_mcb  = int($mca/2) % ARCH_LIMIT_MCS_PER_MCBIST;
+        my $mca_rel_mcs  =     $mca    % ARCH_LIMIT_MCA_PER_MCS;
+        my $dimm_rel_mca =     $dimm   % ARCH_LIMIT_DIMM_PER_MCA;
+
+        my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc" .
+                           "/mcbist-$mcb_rel_proc/mcs-$mcs_rel_mcb" .
+                           "/mca-$mca_rel_mcs/dimm-$dimm_rel_mca";
+
+        # DIMM relative to NODE using affinity path for HUID. Note that this is
+        # different than the DIMM position used in $dimm, which is from the
+        # instance path and changes based on board configuation.
+        my $dimm_rel_node = $proc * MAX_MCA_PER_PROC * ARCH_LIMIT_DIMM_PER_MCA +
+                            $mca * ARCH_LIMIT_DIMM_PER_MCA +
+                            $dimm_rel_mca;
+
+        my $uidstr = sprintf( "0x%02X03%04X", $node, $dimm_rel_node );
 
         # add dimm to mcbist array
-        push(@{$mcbist_dimms{$node . $proc."_".$mcbist}}, "n${node}:p${pos}");
+        push(@{$mcbist_dimms{$node . $proc."_".$mcb_rel_proc}}, "n${node}:p${pos}");
 
         print "\n<!-- DIMM n${node}:p${pos} -->\n";
         print "
