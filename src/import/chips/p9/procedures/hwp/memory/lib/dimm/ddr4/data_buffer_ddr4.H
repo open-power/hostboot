@@ -39,6 +39,7 @@
 #include <vector>
 #include <fapi2.H>
 #include <lib/utils/c_str.H>
+#include <lib/shared/mss_const.H>
 #include <lib/dimm/bcw_load_ddr4.H>
 #include <lib/phy/dp16.H>
 #include <lib/dimm/ddr4/control_word_ddr4.H>
@@ -85,8 +86,9 @@ enum db02_def : size_t
     FUNC_SPACE_SELECT_CW = 0x7,
 
     // 8 bit BCWs
-    BUFF_TRAIN_CONFIG_CW = 0x4,
+    BUFF_CONFIG_CW = 0x1,
     DRAM_VREF_CW = 0x6,
+    BUFF_TRAIN_CONFIG_CW = 0x4,
 };
 
 namespace ddr4
@@ -199,13 +201,44 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Boilerplate for setting & printing BCWs
+/// @tparam T the functon space number we want
+/// @param[in] i_target a DIMM target
+/// @param[in] i_data control word data
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< mss::control_word T >
+static fapi2::ReturnCode settings_boilerplate(const fapi2::Target< fapi2::TARGET_TYPE_DIMM >& i_target,
+        const cw_data& i_data,
+        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
+{
+    FAPI_TRY( function_space_select(i_target, i_data.iv_func_space, io_inst),
+              "%s. Failed to select function space %d",
+              mss::c_str(i_target), uint8_t(i_data.iv_func_space) );
+
+    FAPI_TRY( control_word_engine<T>(i_target, i_data, io_inst),
+              "%s. Failed control_word_engine for 8-bit BCW (F%dBC%02lxX)",
+              mss::c_str(i_target), uint8_t(i_data.iv_func_space), uint8_t(i_data.iv_number) );
+
+    // I don't know what already existed in this ccs instruction vector beforehand so
+    // I use the back() method to access the last added ccs instruction of interest
+    FAPI_INF("%s. F%dBC%02lx ccs inst 0x%016llx:0x%016llx, data: %d",
+             mss::c_str(i_target), uint8_t(i_data.iv_func_space), uint8_t(i_data.iv_number),
+             uint64_t(io_inst.back().arr0), uint64_t(io_inst.back().arr1), uint8_t(i_data.iv_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Sets data buffer training mode control word
 /// @tparam T TargetType of the CCS instruction
 /// @param[in] i_target the DIMM target
 /// @param[in] i_mode buffer training mode
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS iff ok
-/// @note Sets buffer control word  (BC0C) setting
+/// @note Sets buffer control word (BC0C) setting
 ///
 template< fapi2::TargetType T >
 inline fapi2::ReturnCode set_buffer_training( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
@@ -232,20 +265,7 @@ inline fapi2::ReturnCode set_buffer_training( const fapi2::Target<fapi2::TARGET_
     fapi2::Assert(find_value_from_key(BUFF_TRAINING, i_mode, l_encoding));
 
     cw_data l_data(FUNC_SPACE_0, BUFF_TRAIN_MODE_CW, l_encoding, mss::tmrc());
-
-    FAPI_TRY( function_space_select(i_target, l_data.iv_func_space, io_inst),
-              "%s. Failed to select function space %d",
-              mss::c_str(i_target), uint8_t(l_data.iv_func_space) );
-
-    FAPI_TRY( control_word_engine<BCW_4BIT>(i_target, l_data, io_inst),
-              "%s. Failed control_word_engine for 4-bit BCW (F%dBC%02lx)",
-              mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number) );
-
-    // I don't know what already existed in this ccs instruction vector beforehand so
-    // I use the back() method to access the last added ccs instruction of interest
-    FAPI_INF("%s. F%dBC%02lx ccs inst 0x%016llx:0x%016llx, data: %d",
-             mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number),
-             uint64_t(io_inst.back().arr0), uint64_t(io_inst.back().arr1), uint8_t(l_data.iv_data) );
+    FAPI_TRY( settings_boilerplate<BCW_4BIT>(i_target, l_data, io_inst) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -322,21 +342,7 @@ inline fapi2::ReturnCode set_rank_presence( const fapi2::Target<fapi2::TARGET_TY
               mss::c_str(i_target), i_num_package_ranks );
     {
         cw_data l_data(FUNC_SPACE_0, RANK_PRESENCE_CW, l_encoding, mss::tmrc());
-
-        FAPI_TRY( function_space_select(i_target, l_data.iv_func_space, io_inst),
-                  "%s. Failed to select function space %d",
-                  mss::c_str(i_target), uint8_t(l_data.iv_func_space) );
-
-        FAPI_TRY( control_word_engine<BCW_4BIT>(i_target, l_data, io_inst),
-                  "%s. Failed control_word_engine for 4-bit BCW (F%dBC%02lx)",
-                  mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number) );
-
-        // I don't know what already existed in this ccs instruction vector beforehand so
-        // I use the back() method to access the last added ccs instruction of interest
-        FAPI_INF("%s. F%dBC%02lx ccs inst 0x%016llx:0x%016llx, data: %d",
-                 mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number),
-                 uint64_t(io_inst.back().arr0), uint64_t(io_inst.back().arr1), uint8_t(l_data.iv_data) );
-
+        FAPI_TRY( settings_boilerplate<BCW_4BIT>(i_target, l_data, io_inst) );
     }
 
 fapi_try_exit:
@@ -377,20 +383,7 @@ fapi2::ReturnCode set_mrep_timing_control( const fapi2::Target<fapi2::TARGET_TYP
 
     // Function space is determined by rank index for control word since it has a [0:3] range
     cw_data l_data( mss::index(i_rank), N, i_trained_timing, mss::tmrc() );
-
-    FAPI_TRY( function_space_select(i_target, l_data.iv_func_space, io_inst),
-              "%s. Failed to select function space %d",
-              mss::c_str(i_target), uint8_t(l_data.iv_func_space) );
-
-    FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, io_inst),
-              "%s. Failed control_word_engine for 8-bit BCW (F%dBC%02lxX)",
-              mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number) );
-
-    // I don't know what already existed in this ccs instruction vector beforehand so
-    // I use the back() method to access the last added ccs instruction of interest
-    FAPI_INF("%s. F%dBC%02lxX ccs inst 0x%016llx:0x%016llx, data: %d",
-             mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number),
-             uint64_t(io_inst.back().arr0), uint64_t(io_inst.back().arr1), uint8_t(l_data.iv_data) );
+    FAPI_TRY( settings_boilerplate<BCW_8BIT>(i_target, l_data, io_inst) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -424,20 +417,38 @@ inline fapi2::ReturnCode set_command_space( const fapi2::Target<fapi2::TARGET_TY
     // After issuing a data buffer command via writes to BC06 waiting for tMRC(16 tCK)
     // is required before the next DRAM command or BCW write can be issued.
     cw_data l_data(FUNC_SPACE_0, CMD_SPACE_CW, i_command, mss::tmrc());
+    FAPI_TRY( settings_boilerplate<BCW_4BIT>(i_target, l_data, io_inst) );
 
-    FAPI_TRY( function_space_select(i_target, l_data.iv_func_space, io_inst),
-              "%s. Failed to select function space %d",
-              mss::c_str(i_target), uint8_t(l_data.iv_func_space) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-    FAPI_TRY( control_word_engine<BCW_4BIT>(i_target, l_data, io_inst),
-              "%s. Failed control_word_engine for 4-bit BCW (F%dBC%02lx)",
-              mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number) );
+///
+/// @brief Sets per buffer addressibility (PBA) mode
+/// @tparam T TargetType of the CCS instruction
+/// @param[in] i_target the DIMM target
+/// @param[in] i_state mss::ON or mss::OFF
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note Sets DA0 setting for buffer control word (F0BC1x)
+///
+template< fapi2::TargetType T>
+inline fapi2::ReturnCode set_pba_mode( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                       const mss::states i_state,
+                                       std::vector< ccs::instruction_t<T> >& io_inst )
+{
+    constexpr uint64_t MAX_VALID = 1;
 
-    // I don't know what already existed in this ccs instruction vector beforehand so
-    // I use the back() method to access the last added ccs instruction of interest
-    FAPI_INF("%s. F%dBC%02lx ccs inst 0x%016llx:0x%016llx, data: %d",
-             mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number),
-             uint64_t(io_inst.back().arr0), uint64_t(io_inst.back().arr1), uint8_t(l_data.iv_data) );
+    // User input programming error asserts program termination
+    if( i_state > MAX_VALID )
+    {
+        FAPI_ERR( "%s. Invalid setting received: %d, largest valid PBA setting is %d",
+                  mss::c_str(i_target), i_state, MAX_VALID );
+        fapi2::Assert(false);
+    }
+
+    cw_data l_data(FUNC_SPACE_0, BUFF_CONFIG_CW, i_state, mss::tmrc());
+    FAPI_TRY( settings_boilerplate<BCW_8BIT>(i_target, l_data, io_inst) );
 
 fapi_try_exit:
     return fapi2::current_err;
