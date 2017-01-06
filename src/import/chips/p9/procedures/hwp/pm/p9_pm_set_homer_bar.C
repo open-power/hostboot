@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,7 +90,7 @@
 // ------------------------------------------------------------------------------
 // Constant definitions
 // ------------------------------------------------------------------------------
-static const uint64_t BAR_MASK_MB_ALIGN = 0x00000000000FFFFFull;
+static const uint64_t BAR_MASK_4MB_ALIGN = 0x00000000003FFFFFull;
 
 // The value here will yield the appropriate nibble for accessing the PowerBus
 
@@ -136,12 +136,12 @@ p9_pm_set_homer_bar(  const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                 fapi2::P9_PM_SET_HOMER_BAR_SIZE_INVALID().set_MEM_BAR(i_mem_bar)
                 .set_MEM_SIZE(i_mem_size),
                 "ERROR:HOMER Size is 0 but BAR is non-zero:0x%16llx", i_mem_bar);
-    // check that bar address passed in 1MB aligned(eg bits 44:63 are zero)
+    // check that bar address passed in 4MB aligned(eg bits 44:63 are zero)
 
-    region_masked_address = i_mem_bar & BAR_MASK_MB_ALIGN;
-    FAPI_ASSERT(!(region_masked_address != 0),
-                fapi2::P9_PM_SET_HOMER_BAR_NOT_1MB_ALIGNED().set_MEM_BAR(i_mem_bar),
-                "ERROR: i_mem_bar:0x%16llx is not 1MB aligned ", i_mem_bar);
+    region_masked_address = i_mem_bar & BAR_MASK_4MB_ALIGN;
+    FAPI_ASSERT((region_masked_address == 0),
+                fapi2::P9_PM_SET_HOMER_BAR_NOT_4MB_ALIGNED().set_MEM_BAR(i_mem_bar),
+                "ERROR: i_mem_bar:0x%16llx is not 4MB aligned ", i_mem_bar);
 
     FAPI_DBG("Calling pba_bar_config with BAR %x Addr: 0x%16llX  Size: 0x%16llX",
              PBA_BAR0, i_mem_bar, i_mem_size);
