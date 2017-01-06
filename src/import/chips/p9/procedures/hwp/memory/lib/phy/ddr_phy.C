@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1210,7 +1210,7 @@ fapi2::ReturnCode flush_output_drivers( const fapi2::Target<fapi2::TARGET_TYPE_M
     // Need to run on the magic ports too
     const auto l_ports = mss::find_targets_with_magic<TARGET_TYPE_MCA>(i_target);
     const auto& l_force_atest_reg = adr32sTraits<TARGET_TYPE_MCA>::OUTPUT_DRIVER_REG;
-    const auto& l_data_dir_reg = dp16Traits<TARGET_TYPE_MCA>::DATA_BIT_DIR1;
+    const auto& l_data_dir_reg = dp16Traits<TARGET_TYPE_MCA>::DATA_BIT_DIR1_REG;
 
     // Per PHY review 8/16, setup the DATA_BIT_DIR1 with advance_ping_pong and delay_ping_pong_half
     mss::dp16::set_adv_pp(l_dp16_data, mss::HIGH);

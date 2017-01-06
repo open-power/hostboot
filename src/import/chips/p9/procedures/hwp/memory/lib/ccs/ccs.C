@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -258,13 +258,12 @@ fapi_try_exit:
 /// @tparam TT the ccsTraits associated with T - derived
 /// @param[in] fapi2::Target<TARGET_TYPE_MCBIST>& the target to effect
 /// @param[in,out] the buffer representing the mode register
-/// @param[in] bool true iff Copy CKE signals to CKE Spare on both ports
-/// @return void
+/// @param[in] mss::states - mss::ON iff Copy CKE signals to CKE Spare on both ports
 /// @note no-op for p9n
 ///
 template<>
 void copy_cke_to_spare_cke<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_MCBIST>&,
-        fapi2::buffer<uint64_t>&, bool )
+        fapi2::buffer<uint64_t>&, states )
 {
     return;
 }

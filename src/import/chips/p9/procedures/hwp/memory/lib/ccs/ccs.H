@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -702,7 +702,7 @@ fapi_try_exit:
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline void stop_on_err( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const bool i_value)
+inline void stop_on_err( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const states i_value)
 {
     io_buffer.writeBit<TT::STOP_ON_ERR>(i_value);
 }
@@ -733,7 +733,7 @@ inline void disable_ecc( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_bu
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline void ue_disable( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const bool i_value)
+inline void ue_disable( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const states i_value)
 {
     io_buffer.writeBit<TT::UE_DISABLE>(i_value);
 }
@@ -744,11 +744,11 @@ inline void ue_disable( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buf
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] the target to effect
 /// @param[in,out] io_buffer the buffer representing the mode register
-/// @param[in] i_value true iff delay parity a cycle
+/// @param[in] i_value mss::ON iff delay parity a cycle
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline void parity_after_cmd( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const bool i_value)
+inline void parity_after_cmd( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const states i_value)
 {
     io_buffer.writeBit<TT::CFG_PARITY_AFTER_CMD>(i_value);
 }
@@ -781,12 +781,12 @@ inline void cal_count( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buff
 /// @tparam TT the ccsTraits associated with T - derived
 /// @param[in] i_target the target to effect
 /// @param[in,out] io_buffer the buffer representing the mode register
-/// @param[in] i_value bool true iff Copy CKE signals to CKE Spare on both ports
+/// @param[in] i_value mss::ON iff Copy CKE signals to CKE Spare on both ports
 /// @note no-op for p9n
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-void copy_cke_to_spare_cke( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const bool i_value);
+void copy_cke_to_spare_cke( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const states i_value);
 
 ///
 /// @brief Read the modeq register appropriate for this target
