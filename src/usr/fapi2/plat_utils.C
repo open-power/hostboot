@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <error_info.H>
 #include <assert.h>
 #include <plat_utils.H>
+#include <hw_access.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <hwpf_fapi2_reasoncodes.H>
@@ -66,9 +67,11 @@ TRAC_INIT(&g_fapiMfgTd, FAPI_MFG_TRACE_NAME, 4*KILOBYTE);
 namespace fapi2
 {
 
+//@fixme-RTC:147599
 // Define global current_err
 //thread_local ReturnCode current_err;
 ReturnCode current_err;
+
 ///
 /// @brief Translates a FAPI callout priority to an HWAS callout priority
 ///
@@ -850,6 +853,8 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
                                                MOD_FAPI2_RC_TO_ERRL,
                                                RC_HWP_GENERATED_ERROR,
                                                l_rcValue);
+            // Note - If location of RC value changes, must update
+            //   ErrlEntry::getFapiRC accordingly
 
             // Add the rcValue as FFDC. This will explain what the error was
             l_pError->addFFDC(HWPF_COMP_ID, &l_rcValue, sizeof(l_rcValue), 1,
@@ -1040,5 +1045,37 @@ fapi2::ReturnCode platSpecialWakeup(const Target<TARGET_TYPE_ALL>& i_target,
     // fapiSpecialWakeup enable/disable calls
     return fapi_rc;
 }
+
+//@fixme-RTC:147599-Remove when thread-local storage works right
+///
+/// @brief Mutex to prevent multiple threads from running HWPs at the same time
+///
+mutex_t g_fapi2Mux = MUTEX_INITIALIZER;
+
+//@fixme-RTC:147599-Remove when thread-local storage works right
+///
+/// @brief Lock or unlock the HWP futex
+/// @param[i] i_lock  true:lock the mutex, false:unlock
+///
+void hwpLock( bool i_lock )
+{
+    if( i_lock )
+    {
+        mutex_lock(&g_fapi2Mux);
+        // Clear out all of our global (fake TLS) vars before we start
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        fapi2::opMode = fapi2::NORMAL;
+        fapi2::setPIBErrorMask(0);
+    }
+    else
+    {
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        fapi2::opMode = fapi2::NORMAL;
+        fapi2::setPIBErrorMask(0);
+        // Clear out all of our global (fake TLS) vars after we finish
+        mutex_unlock(&g_fapi2Mux);
+    }
+}
+
 
 } //end namespace

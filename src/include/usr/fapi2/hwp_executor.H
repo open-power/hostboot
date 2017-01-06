@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,9 +45,6 @@
  * Call the HWP directly.
  */
 #define FAPI_PLAT_EXEC_HWP(RC, FUNC, _args_...) \
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;\
-    fapi2::opMode = fapi2::NORMAL;\
-    fapi2::setPIBErrorMask(0);\
     RC = FUNC(_args_)
 
 #endif // HWPEXECUTOR_H_

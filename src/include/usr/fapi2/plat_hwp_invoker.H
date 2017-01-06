@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,15 @@
 #include <plat_utils.H>
 #include <xscom/piberror.H>
 
+namespace fapi2 {
+//@fixme-RTC:147599-Remove when thread-local storage works right
+///
+/// @brief Lock or unlock the HWP futex
+/// @param[i] i_lock  true:lock the mutex, false:unlock
+///
+void hwpLock( bool i_lock );
+}
+
 /**
  * @brief HWP Invoker macro
  *
@@ -59,6 +68,7 @@
 
 #define FAPI_INVOKE_HWP(ERRHNDL, FUNC, _args_...) \
     {\
+        fapi2::hwpLock(true); \
         fapi2::ReturnCode l_rc; \
         FAPI_EXEC_HWP(l_rc, FUNC, ##_args_); \
         ERRHNDL = fapi2::rcToErrl(l_rc);\
@@ -66,6 +76,7 @@
             ERRHNDL->collectTrace(FAPI_IMP_TRACE_NAME,256);\
             ERRHNDL->collectTrace(FAPI_TRACE_NAME,384);\
         }\
+        fapi2::hwpLock(false); \
     }
 
 #endif // PLATHWPINVOKER_H_

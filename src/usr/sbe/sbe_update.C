@@ -923,36 +923,30 @@ namespace SBE
                             i_image, io_image_size);
 
         do{
-            // Invoke p9_xip_find to find HBBL image in SBE image
-            fapi2::ReturnCode l_fapi_rc;
+            // Call p9_xip_find to find HBBL image in SBE image
             const char* l_sectionId = ".hbbl";
-            FAPI_EXEC_HWP( l_fapi_rc,
-                           p9_xip_find,
-                           i_image,
-                           l_sectionId,
-                           &l_xipItem );
+            // Note - this is not a fapi2 function
+            int xip_rc = p9_xip_find( i_image, l_sectionId, &l_xipItem );
 
             // Check the return code
-            if(l_fapi_rc.isRC(P9_XIP_ITEM_NOT_FOUND))
+            if( xip_rc == P9_XIP_ITEM_NOT_FOUND )
             {
                 TRACUCOMP( g_trac_sbe, "appendHbblToSbe(): "
                            "p9_xip_find received expected return code, item "
                            "not found, rc=0x%X",
-                           l_fapi_rc );
+                           xip_rc );
             }
-            else if(l_fapi_rc.isRC(0) ||
-                    l_fapi_rc.isRC(P9_XIP_DATA_NOT_PRESENT))
+            else if( xip_rc == P9_XIP_DATA_NOT_PRESENT )
             {
                 TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): "
                            "p9_xip_find located %s, rc=0x%X",
-                           (l_fapi_rc) ? "TOC only" : "TOC and section data",
-                           int(l_fapi_rc) );
+                           xip_rc ? "TOC only" : "TOC and section data",
+                           xip_rc );
 
-                // Invoke p9_xip_delete_section to delete existing HBBL image
+                // Call p9_xip_delete_section to delete existing HBBL image
                 // from SBE image
                 void *l_imageBuf = malloc(io_image_size);
-                FAPI_INVOKE_HWP( err,
-                                 p9_xip_delete_section,
+                xip_rc = p9_xip_delete_section(
                                  i_image,
                                  l_imageBuf,
                                  io_image_size,
@@ -960,11 +954,28 @@ namespace SBE
                 free(l_imageBuf);
 
                 // Check for error
-                if(err)
+                if( xip_rc )
                 {
                     TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): "
                                "p9_xip_delete_section failed, rc=0x%X",
-                               err->reasonCode() );
+                               xip_rc );
+                    /*@
+                     * @errortype
+                     * @moduleid     SBE_APPEND_HBBL
+                     * @reasoncode   ERROR_FROM_XIP_DELETE
+                     * @userdata1    rc from p9_xip_delete
+                     * @userdata2    <unused>
+                     * @devdesc      Bad RC from p9_xip_delete
+                     * @custdesc     A problem occurred while updating processor
+                     *               boot code.
+                     */
+                    err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                        SBE_APPEND_HBBL,
+                                        ERROR_FROM_XIP_DELETE,
+                                        xip_rc,
+                                        0,
+                                        true /* SW error */);
+                    err->collectTrace(SBE_COMP_NAME);
 
                     // exit loop
                     break;
@@ -974,8 +985,24 @@ namespace SBE
             {
                 TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): p9_xip_find "
                            "received unexpected return code, rc=0x%X",
-                           int(l_fapi_rc) );
-                err = fapi2::rcToErrl(l_fapi_rc);\
+                           xip_rc );
+                /*@
+                 * @errortype
+                 * @moduleid     SBE_APPEND_HBBL
+                 * @reasoncode   ERROR_FROM_XIP_FIND
+                 * @userdata1    rc from p9_xip_find
+                 * @userdata2    <unused>
+                 * @devdesc      Bad RC from p9_xip_find
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
+                 */
+                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                    SBE_APPEND_HBBL,
+                                    ERROR_FROM_XIP_FIND,
+                                    xip_rc,
+                                    0,
+                                    true /* SW error */);
+                err->collectTrace(SBE_COMP_NAME);
                 err->collectTrace(FAPI_IMP_TRACE_NAME,256);
                 err->collectTrace(FAPI_TRACE_NAME,384);
 
