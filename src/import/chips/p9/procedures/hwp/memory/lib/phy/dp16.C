@@ -194,7 +194,7 @@ const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::
 
 // Definition of the DP16 Data Bit Dir1 registers
 // All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
-const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::DATA_BIT_DIR1 =
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::DATA_BIT_DIR1_REG
 {
     MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0,
     MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_1,
@@ -471,6 +471,33 @@ const std::vector< std::vector<std::pair<uint64_t, uint64_t>> > dp16Traits<TARGE
 // we need these declarations here in order for the linker to see the definitions
 constexpr const uint64_t dp16Traits<fapi2::TARGET_TYPE_MCA>::GATE_DELAY_BIT_POS[];
 constexpr const uint64_t dp16Traits<fapi2::TARGET_TYPE_MCA>::BLUE_WATERFALL_BIT_POS[];
+
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::DATA_BIT_ENABLE0_REG =
+{
+    MCA_DDRPHY_DP16_DATA_BIT_ENABLE0_P0_0,
+    MCA_DDRPHY_DP16_DATA_BIT_ENABLE0_P0_1,
+    MCA_DDRPHY_DP16_DATA_BIT_ENABLE0_P0_2,
+    MCA_DDRPHY_DP16_DATA_BIT_ENABLE0_P0_3,
+    MCA_DDRPHY_DP16_DATA_BIT_ENABLE0_P0_4,
+};
+
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::DATA_BIT_ENABLE1_REG =
+{
+    MCA_0_DDRPHY_DP16_DATA_BIT_ENABLE1_P0_0,
+    MCA_0_DDRPHY_DP16_DATA_BIT_ENABLE1_P0_1,
+    MCA_0_DDRPHY_DP16_DATA_BIT_ENABLE1_P0_2,
+    MCA_0_DDRPHY_DP16_DATA_BIT_ENABLE1_P0_3,
+    MCA_0_DDRPHY_DP16_DATA_BIT_ENABLE1_P0_4,
+};
+
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::RD_DIA_CONFIG5_REG =
+{
+    MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_0,
+    MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_1,
+    MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_2,
+    MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_3,
+    MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_4,
+};
 
 ///
 /// @brief Given a RD_VREF value, create a PHY 'standard' bit field for that percentage.
@@ -2440,33 +2467,73 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Write FORCE_FIFO_CAPTURE
+/// @brief Write FORCE_FIFO_CAPTURE to all DP16 instances
 /// Force DQ capture in Read FIFO to support DDR4 LRDIMM calibration
 /// @param[in] i_target the fapi2 target of the port
 /// @param[in] i_state mss::states::ON or mss::states::OFF
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode write_force_fifo_capture( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+fapi2::ReturnCode write_force_dq_capture( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const mss::states i_state)
 {
-    // TK - Some functions have vector as part of the trait class
-    // while others have within the function <shrug> - AAM
-    static const std::vector< uint64_t > l_addr
-    {
-        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_0,
-        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_1,
-        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_2,
-        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_3,
-        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_4,
-    };
-
     typedef dp16Traits<TARGET_TYPE_MCA> TT;
-    fapi2::buffer<uint64_t> l_data;
 
+    fapi2::buffer<uint64_t> l_data;
     l_data.writeBit<TT::FORCE_FIFO_CAPTURE>(i_state);
 
-    FAPI_TRY( mss::scom_blastah(i_target, l_addr, l_data) );
+    FAPI_TRY( mss::scom_blastah(i_target, TT::RD_DIA_CONFIG5_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Writes DATA_BIT_ENABLE0 to all DP16 instances
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_state mss::states::ON or mss::states::OFF
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< >
+fapi2::ReturnCode write_data_bit_enable0( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const mss::states i_state)
+{
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    // '1'b indicates the DP16 bit is enabled, and is used for sending or receiving
+    // data to or from the memory device.
+    // '0'b indicates the DP16 bit is not used to send or receive data
+    fapi2::buffer<uint64_t> l_data;
+    l_data.writeBit<TT::DATA_BIT_ENABLE0, TT::DATA_BIT_ENABLE0_LEN>(i_state);
+
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DATA_BIT_ENABLE0_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write DFT_FORCE_OUTPUTS to all DP16 instances
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_state mss::states::ON or mss::states::OFF
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< >
+fapi2::ReturnCode write_dft_force_outputs( const fapi2::Target< fapi2::TARGET_TYPE_MCA >& i_target,
+        const mss::states i_state)
+{
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    // The 24 outputs of the DP16 are forced to a low-impedance state the corresponding DATA_BIT_ENABLE bit is '1'b
+    // and forced to a high-impedence state when the corresponding DATA_BIT_ENABLE bit is '0'b
+
+    // When a DP16 output is forced to a low-z state, the value driven out, '1'b or '0'b , is determined
+    // by the corresponding DATA_BIT_DIR bit value.
+    // The 24 outputs of the DP16 are not forced when set with '0'b
+    fapi2::buffer<uint64_t> l_data;
+    l_data.writeBit<TT::DFT_FORCE_OUTPUTS>(i_state);
+
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DATA_BIT_ENABLE1_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
