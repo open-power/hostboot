@@ -254,6 +254,28 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
 };
 
 ///
+/// @brief Read the rdtag delay value
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[out] o_delay RDTAG_DLY value (in cycles)
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<T> >
+fapi2::ReturnCode read_rdtag_delay( const fapi2::Target<T>& i_target, uint64_t& o_delay )
+{
+
+    fapi2::buffer<uint64_t> l_data;
+    FAPI_TRY( mss::getScom(i_target, TT::DSM0Q_REG, l_data) );
+    l_data.template extractToRight<TT::DSM0Q_CFG_RDTAG_DLY, TT::DSM0Q_CFG_RDTAG_DLY_LEN>(o_delay);
+
+    FAPI_INF( "RDTAG_DLY %d for %s", uint64_t(o_delay), mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Change the rdtag delay value
 /// @tparam T the fapi2 target type of the target
 /// @tparam TT the class traits for the port
@@ -278,7 +300,7 @@ fapi2::ReturnCode change_rdtag_delay( const fapi2::Target<T>& i_target, const ui
 
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_DBG( "Change RDTAG_DLY to %d %s",  i_delay, mss::c_str(i_target) );
+    FAPI_DBG( "Change RDTAG_DLY to %d for %s",  i_delay, mss::c_str(i_target) );
 
     FAPI_TRY( mss::getScom(i_target, TT::DSM0Q_REG, l_data) );
     l_data.insertFromRight<TT::DSM0Q_CFG_RDTAG_DLY, TT::DSM0Q_CFG_RDTAG_DLY_LEN>(i_delay);
