@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,6 +88,7 @@ typedef fapi2::ReturnCode (*p9_pcie_scominit_FP_t) (const fapi2::Target<fapi2::T
 //-----------------------------------------------------------------------------------
 
 const uint8_t NUM_PCS_CONFIG = 4;
+const uint8_t NUM_PCIE_LANES = 16;
 const uint8_t NUM_M_CONFIG = 4;
 const uint8_t PEC0_IOP_CONFIG_START_BIT = 13;
 const uint8_t PEC1_IOP_CONFIG_START_BIT = 14;
@@ -104,11 +105,62 @@ const uint8_t PEC2_IOP_IOVALID_ENABLE_START_BIT = 4;
 const uint8_t PEC_IOP_REFCLOCK_ENABLE_START_BIT = 32;
 const uint8_t PEC_IOP_PMA_RESET_START_BIT = 29;
 const uint8_t PEC_IOP_PIPE_RESET_START_BIT = 28;
+const uint8_t PEC_IOP_HSS_PORT_READY_START_BIT = 58;
 
-const uint32_t PCS_CONFIG_MODE0 = 0xA0006;
+const uint64_t  PEC_IOP_PLLA_VCO_COURSE_CAL_REGISTER1 = 0x800005010D010C3F;
+const uint64_t  PEC_IOP_PLLB_VCO_COURSE_CAL_REGISTER1 = 0x800005410D010C3F;
+const uint64_t  PEC_IOP_RX_DFE_FUNC_REGISTER1 = 0x8000049F0D010C3F;
+const uint64_t  PEC_IOP_RX_DFE_FUNC_REGISTER2 = 0x800004A00D010C3F;
+
+const uint64_t  RX_VGA_CTRL3_REGISTER[NUM_PCIE_LANES] =
+{
+    0x8000008D0D010C3F,
+    0x800000CD0D010C3F,
+    0x8000018D0D010C3F,
+    0x800001CD0D010C3F,
+    0x8000028D0D010C3F,
+    0x800002CD0D010C3F,
+    0x8000038D0D010C3F,
+    0x800003CD0D010C3F,
+    0x8000088D0D010C3F,
+    0x800008CD0D010C3F,
+    0x8000098D0D010C3F,
+    0x800009CD0D010C3F,
+    0x80000A8D0D010C3F,
+    0x80000ACD0D010C3F,
+    0x80000B8D0D010C3F,
+    0x80000BCD0D010C3F,
+};
+
+const uint64_t  RX_LOFF_CNTL_REGISTER[NUM_PCIE_LANES] =
+{
+    0x800000A60D010C3F,
+    0x800000E60D010C3F,
+    0x800001A60D010C3F,
+    0x800001E60D010C3F,
+    0x800002A60D010C3F,
+    0x800002E60D010C3F,
+    0x800003A60D010C3F,
+    0x800003E60D010C3F,
+    0x800008A60D010C3F,
+    0x800008E60D010C3F,
+    0x800009A60D010C3F,
+    0x800009E60D010C3F,
+    0x80000AA60D010C3F,
+    0x80000AE60D010C3F,
+    0x80000BA60D010C3F,
+    0x80000BE60D010C3F,
+
+};
+
+const uint32_t PCS_CONFIG_MODE0 = 0xA006;
 const uint32_t PCS_CONFIG_MODE1 = 0xA805;
 const uint32_t PCS_CONFIG_MODE2 = 0xB071;
 const uint32_t PCS_CONFIG_MODE3 = 0xB870;
+
+const uint32_t MAX_NUM_POLLS = 100; //Maximum number of iterations (So, 400ns * 100 = 40us before timeout)
+const uint64_t PMA_RESET_NANO_SEC_DELAY = 400; //400ns to wait for PMA RESET to go through
+const uint64_t PMA_RESET_CYC_DELAY = 400; //400ns to wait for PMA RESET to go through
 
 extern "C" {
 

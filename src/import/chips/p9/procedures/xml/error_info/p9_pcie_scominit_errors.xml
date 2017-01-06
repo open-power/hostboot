@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,5 +31,29 @@
       Invalid pec id encountered.
     </description>
     <ffdc>TARGET</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_IOP_HSS_PORT_NOT_READY</rc>
+    <description>
+      Procedure: p9_pcie_scominit
+      IOP HSS Port PLLA and PLLB are not in ready state.
+      Cannot SCOM to PMA register space.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PLLA_ADDR</ffdc>
+    <ffdc>PLLA_DATA</ffdc>
+    <ffdc>PLLB_ADDR</ffdc>
+    <ffdc>PLLB_DATA</ffdc>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <!-- Add hw callout -->
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>

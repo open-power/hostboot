@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -34,6 +34,16 @@
       consumer: p9_pcie_scominit
       firmware notes:
         Encoded PCIE IOP lane configuration
+        PEC0 - CFG[0:1] => CFG[0:1] = PHB0(0:15)
+        PEC1 - CFG[0:3] => CFG[0:1] = PHB1(0:7)
+        		=> CFG[2:3] = PHB2(0:7)
+        PEC2 - CFG[0:5] => CFG[0:1] = 0b00; CFG[2:3] = PHB3(0:15)
+        				    CFG[4:5] = don't care
+        		=> CFG[0:1] = 0b01; CFG[2:3] = PHB3(0:7)
+        		   		    CFG[4:5] = PHB4(0:7)
+        		=> CFG[0:1] = 0b10; CFG[2:3] = PHB3(0:7)
+        		   		    CFG[4]   = PHB4(0:3)
+        		   		    CFG[5]   = PHB5(0:3)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -49,6 +59,12 @@
       consumer: p9_pcie_scominit
       firmware notes:
         Encoded PCIE IOP swap configuration
+        PEC0 - SWP[0]   => SWP[0] = PHB0(0:15)
+        PEC1 - SWP[0:1] => SWP[0] = PHB1(0:7)
+        		=> SWP[1] = PHB2(0:7)
+        PEC2 - SWP[0:2] => SWP[0] = PHB3(0:7) or PHB3(0:15)
+        		=> SWP[1] = PHB4(0:3) or PHB4(0:7) or don't care if disabled
+        		=> SWP[2] = PHB5(0:3) or don't care if disabled
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -62,6 +78,14 @@
       PCIE iovalid enable valid mask
       creator: platform
       consumer: p9_pcie_scominit
+      firmware notes:
+        Encoded PCIE IO Valid configuration
+        PEC0 - IOVALID[0]   => IOVALID[0] = PHB0
+        PEC1 - IOVALID[0:1] => IOVALID[0] = PHB1
+        		    => IOVALID[1] = PHB2
+        PEC2 - IOVALID[0:2] => IOVALID[0] = PHB3
+        		    => IOVALID[1] = PHB4
+        		    => IOVALID[2] = PHB5
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -75,6 +99,9 @@
       PCIE refclock enable valid mask
       creator: platform
       consumer: p9_pcie_scominit
+      firmware notes:
+        Only one REFCLK enable bit exists across all PECs. There is no granualarity
+        to control REFCLK enables on a per PHB basis.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -237,40 +264,61 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PROC_PCIE_PCS_RX_LOFF_CONTROL</id>
+    <id>ATTR_PROC_PCIE_PCS_RX_PK_INIT</id>
     <targetType>TARGET_TYPE_PEC</targetType>
     <description>
-      PCS rx loff control
+      PCS rx vga peak init value
       creator: platform
       consumer: p9_pcie_scominit
       firmware notes:
-        The value of rx loff control for PCS.
+        The value of rx vga peak init for PCS.
         Array index: Configuration number
         index 0~3 for CONFIG0~3
+        lane 0~15 for each PCIE Lane
     </description>
-    <valueType>uint16</valueType>
-    <array>4</array>
+    <valueType>uint8</valueType>
+    <array>4 16</array>
     <platInit/>
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PROC_PCIE_PCS_RX_VGA_CONTRL_REGISTER3</id>
+    <id>ATTR_PROC_PCIE_PCS_RX_INIT_GAIN</id>
     <targetType>TARGET_TYPE_PEC</targetType>
     <description>
-      PCS rx vga control register3
+      PCS rx vga gain init value
       creator: platform
       consumer: p9_pcie_scominit
       firmware notes:
-        The value of rx vga control register3.
+        The value of rx vga gain init for PCS.
+        Array index: Configuration number
+        index 0~3 for CONFIG0~3
+        lane 0~15 for each PCIE Lane
+    </description>
+    <valueType>uint8</valueType>
+    <array>4 16</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_RX_SIGDET_LVL</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      PCS rx sigdet lvl value
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        The value of rx sigdet lvl for PCS.
         Array index: Configuration number
         index 0~3 for CONFIG0~3
     </description>
-    <valueType>uint16</valueType>
+    <valueType>uint8</valueType>
     <array>4</array>
     <platInit/>
     <persistRuntime/>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_PCIE_PCS_RX_ROT_CDR_LOOKAHEAD</id>
     <targetType>TARGET_TYPE_PEC</targetType>
@@ -285,6 +333,7 @@
     <platInit/>
     <persistRuntime/>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_PCIE_PCS_RX_ROT_CDR_SSC</id>
     <targetType>TARGET_TYPE_PEC</targetType>
@@ -299,6 +348,39 @@
     <platInit/>
     <persistRuntime/>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_RX_ROT_EXTEL</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS RX ROT extel latch
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        0 for internal (default)
+        1 for external (freezes phase rotators)
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_RX_ROT_RST_FW</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS RX ROT rstfw latch
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        0 normal, flywheel is enabled (default)
+        1 assert reset to the phase rotator flywheel (disable the flywheel)
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_PCIE_PCS_PCLCK_CNTL_PLLA</id>
     <targetType>TARGET_TYPE_PEC</targetType>
@@ -323,6 +405,7 @@
     <platInit/>
     <persistRuntime/>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_PCIE_PCS_TX_DCLCK_ROT</id>
     <targetType>TARGET_TYPE_PEC</targetType>
@@ -335,18 +418,7 @@
     <platInit/>
     <persistRuntime/>
   </attribute>
-  <attribute>
-    <id>ATTR_PROC_PCIE_PCS_TX_FIFO_CONFIG_OFFSET</id>
-    <targetType>TARGET_TYPE_PEC</targetType>
-    <description>
-      Value of PCS tx fifo config offset
-      creator: platform
-      consumer: p9_pcie_scominit
-    </description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG1</id>
     <targetType>TARGET_TYPE_PEC</targetType>
@@ -359,6 +431,7 @@
     <platInit/>
     <persistRuntime/>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG2</id>
     <targetType>TARGET_TYPE_PEC</targetType>
@@ -371,6 +444,7 @@
     <platInit/>
     <persistRuntime/>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_PCIE_PCS_TX_POWER_SEQ_ENABLE</id>
     <targetType>TARGET_TYPE_PEC</targetType>
@@ -383,18 +457,7 @@
     <platInit/>
     <persistRuntime/>
   </attribute>
-  <attribute>
-    <id>ATTR_PROC_PCIE_PCS_RX_PHASE_ROTATOR_CNTL</id>
-    <targetType>TARGET_TYPE_PEC</targetType>
-    <description>
-      Value of PCS rx phase rotator control
-      creator: platform
-      consumer: p9_pcie_scominit
-    </description>
-    <valueType>uint16</valueType>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_PCIE_PCS_RX_VGA_CNTL_REG1</id>
     <targetType>TARGET_TYPE_PEC</targetType>
@@ -407,6 +470,7 @@
     <platInit/>
     <persistRuntime/>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_PCIE_PCS_RX_VGA_CNTL_REG2</id>
     <targetType>TARGET_TYPE_PEC</targetType>
@@ -419,18 +483,20 @@
     <platInit/>
     <persistRuntime/>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PROC_PCIE_PCS_RX_SIGDET_CNTL</id>
+    <id>ATTR_PROC_PCIE_PCS_RX_DFE_FDDC</id>
     <targetType>TARGET_TYPE_PEC</targetType>
     <description>
-      Value of PCS rx sigdet control
+      Value of PCS rx dfe func fddc control latch
       creator: platform
       consumer: p9_pcie_scominit
     </description>
-    <valueType>uint16</valueType>
+    <valueType>uint8</valueType>
     <platInit/>
     <persistRuntime/>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_PCIE_PCS_SYSTEM_CNTL</id>
     <targetType>TARGET_TYPE_PEC</targetType>
@@ -443,6 +509,7 @@
     <platInit/>
     <persistRuntime/>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_PCIE_PCS_M_CNTL</id>
     <targetType>TARGET_TYPE_PEC</targetType>

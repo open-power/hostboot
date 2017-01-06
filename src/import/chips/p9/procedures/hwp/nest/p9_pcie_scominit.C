@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,17 +97,23 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     uint8_t l_attr_proc_pcie_iovalid_enable = 0;
     uint8_t l_attr_proc_pcie_refclock_enable = 0;
     fapi2::buffer<uint64_t> l_buf = 0;
+    fapi2::buffer<uint64_t> l_buf2 = 0;
     unsigned char l_pec_id = 0;
     auto l_pec_chiplets_vec = i_target.getChildren<fapi2::TARGET_TYPE_PEC>();
     uint32_t l_pcs_config_mode[NUM_PCS_CONFIG] = {PCS_CONFIG_MODE0, PCS_CONFIG_MODE1, PCS_CONFIG_MODE2, PCS_CONFIG_MODE3};
     uint8_t l_pcs_cdr_gain[NUM_PCS_CONFIG] = {0};
-    uint16_t l_pcs_loff_control[NUM_PCS_CONFIG] = {0};
-    uint16_t l_pcs_vga_control_register3[NUM_PCS_CONFIG] = {0};
+    uint8_t l_pcs_pk_init[NUM_PCS_CONFIG][NUM_PCIE_LANES] = {0};
+    uint8_t l_pcs_init_gain[NUM_PCS_CONFIG][NUM_PCIE_LANES] = {0};
+    uint8_t l_pcs_sigdet_lvl[NUM_PCS_CONFIG] = {0};
     uint16_t l_pcs_m_cntl[NUM_M_CONFIG] = {0};
     uint8_t l_pcs_rot_cntl_cdr_lookahead = 0;
     uint8_t l_pcs_rot_cntl_cdr_ssc = 0;
+    uint8_t l_pcs_rot_cntl_extel = 0;
+    uint8_t l_pcs_rot_cntl_rst_fw = 0;
+    uint8_t l_pcs_rx_dfe_fddc = 0;
     uint8_t l_attr_8 = 0;
     uint16_t l_attr_16 = 0;
+    uint32_t l_poll_counter; //Number of iterations while polling for PLLA and PLLB Port Ready Status
 
     FAPI_DBG("target vec size: %#x", l_pec_chiplets_vec.size());
     FAPI_DBG("l_buf: %#x", l_buf());
@@ -170,6 +176,59 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_CLEAR, l_buf));
 
+        FAPI_TRY(fapi2::delay(PMA_RESET_NANO_SEC_DELAY, PMA_RESET_CYC_DELAY), "fapiDelay error.");
+
+        l_buf = 0;
+        FAPI_TRY(l_buf.insertFromRight(1, PEC_IOP_PMA_RESET_START_BIT, 1));
+        FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_OR, l_buf));
+
+        FAPI_TRY(fapi2::delay(PMA_RESET_NANO_SEC_DELAY, PMA_RESET_CYC_DELAY), "fapiDelay error.");
+
+        l_buf = 0;
+        FAPI_TRY(l_buf.insertFromRight(1, PEC_IOP_PMA_RESET_START_BIT, 1));
+        FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_CLEAR, l_buf));
+
+        FAPI_DBG("pec%i: Poll for PRTREADY status on PLLA and PLLB.", l_pec_id);
+        l_poll_counter = 0; //Reset poll counter
+
+        while (l_poll_counter < MAX_NUM_POLLS)
+        {
+            l_poll_counter++;
+            FAPI_TRY(fapi2::delay(PMA_RESET_NANO_SEC_DELAY, PMA_RESET_CYC_DELAY), "fapiDelay error.");
+
+            //Read PLLA VCO Course Calibration Register into l_buf
+            FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_IOP_PLLA_VCO_COURSE_CAL_REGISTER1, l_buf),
+                     "Could not retrieve IOP PLLA VCO Course Calibration Register 1.");
+            FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
+
+            //Read PLLB VCO Course Calibration Register into l_buf
+            FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_IOP_PLLB_VCO_COURSE_CAL_REGISTER1, l_buf2),
+                     "Could not retrieve IOP PLLB VCO Course Calibration Register 1.");
+            FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf2());
+
+            //Check PRTEADY PLLA and PLLB status bit
+            if ((l_buf.getBit(PEC_IOP_HSS_PORT_READY_START_BIT) || l_buf2.getBit(PEC_IOP_HSS_PORT_READY_START_BIT)))
+            {
+
+                FAPI_DBG("pec%i: HSS Port is ready.", l_pec_id);
+                break;
+            }
+        }
+
+        FAPI_DBG("pec%i: IOP HSS Port Ready status (poll counter = %d).", l_pec_id, l_poll_counter);
+
+        FAPI_ASSERT(l_poll_counter < MAX_NUM_POLLS,
+                    fapi2::P9_IOP_HSS_PORT_NOT_READY()
+                    .set_TARGET(l_pec_chiplets)
+                    .set_PLLA_ADDR(PEC_IOP_PLLA_VCO_COURSE_CAL_REGISTER1)
+                    .set_PLLA_DATA(l_buf)
+                    .set_PLLB_ADDR(PEC_IOP_PLLB_VCO_COURSE_CAL_REGISTER1)
+                    .set_PLLB_DATA(l_buf2),
+                    "pec%i: IOP HSS Port Ready status is not set!", l_pec_id);
+
+
         // Phase1 init step 5 (Set FIR action0)
         l_buf = 0;
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
@@ -186,38 +245,45 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_MASK_REG, l_buf));
 
         // Phase1 init step 8-11 (Config 0 - 3)
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_CDR_GAIN, l_pec_chiplets,
-                               l_pcs_cdr_gain));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_LOFF_CONTROL, l_pec_chiplets,
-                               l_pcs_loff_control));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_VGA_CONTRL_REGISTER3, l_pec_chiplets,
-                               l_pcs_vga_control_register3));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_CDR_GAIN, l_pec_chiplets, l_pcs_cdr_gain));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_INIT_GAIN, l_pec_chiplets, l_pcs_init_gain));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_PK_INIT, l_pec_chiplets, l_pcs_pk_init));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_SIGDET_LVL, l_pec_chiplets, l_pcs_sigdet_lvl));
 
         for (int i = 0; i < NUM_PCS_CONFIG; i++)
         {
             // RX Config Mode
             l_buf = 0;
             FAPI_TRY(l_buf.insertFromRight(l_pcs_config_mode[i], 48, 16));
-            FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
+            FAPI_DBG("pec%i cfg%i: %#lx", l_pec_id, i, l_buf());
             FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_CONFIG_MODE_REG, l_buf));
 
             // RX CDR GAIN
             FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_PCS_RX_CDR_GAIN_REG, l_buf));
             FAPI_TRY(l_buf.insertFromRight(l_pcs_cdr_gain[i], 56, 8));
-            FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
+            FAPI_DBG("pec%i cfg%i: %#lx", l_pec_id, i, l_buf());
             FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_CDR_GAIN_REG, l_buf));
 
-            // RX LOFF CONTROL
-            l_buf = 0;
-            FAPI_TRY(l_buf.insertFromRight(l_pcs_loff_control[i], 48, 16));
-            FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-            FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_LOFF_CONTROL_REG, l_buf));
+            for  (int l_lane = 0; l_lane < NUM_PCIE_LANES; l_lane++)
+            {
+                // RX INITGAIN
+                FAPI_TRY(fapi2::getScom(l_pec_chiplets, RX_VGA_CTRL3_REGISTER[l_lane], l_buf));
+                FAPI_TRY(l_buf.insertFromRight(l_pcs_init_gain[i][l_lane], 48, 5));
+                FAPI_DBG("pec%i cfg%i lane%i: %#lx", l_pec_id, i, l_lane, l_buf());
+                FAPI_TRY(fapi2::putScom(l_pec_chiplets, RX_VGA_CTRL3_REGISTER[l_lane], l_buf));
 
-            // RX VGA CONTROL REGISTER3
-            l_buf = 0;
-            FAPI_TRY(l_buf.insertFromRight(l_pcs_vga_control_register3[i], 48, 16));
-            FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-            FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_VGA_CONTROL3_REG, l_buf));
+                // RX PKINIT
+                FAPI_TRY(fapi2::getScom(l_pec_chiplets, RX_LOFF_CNTL_REGISTER[l_lane], l_buf));
+                FAPI_TRY(l_buf.insertFromRight(l_pcs_pk_init[i][l_lane], 58, 6));
+                FAPI_DBG("pec%i cfg%i lane%i: %#lx", l_pec_id, i, l_lane, l_buf());
+                FAPI_TRY(fapi2::putScom(l_pec_chiplets, RX_LOFF_CNTL_REGISTER[l_lane], l_buf));
+            }
+
+            // RX SIGDET LVL
+            FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_PCS_RX_SIGDET_CONTROL_REG, l_buf));
+            FAPI_TRY(l_buf.insertFromRight(l_pcs_sigdet_lvl[i], 59, 5));
+            FAPI_DBG("pec%i cfg%i: %#lx", l_pec_id, i, l_buf());
+            FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_SIGDET_CONTROL_REG, l_buf));
         }
 
         // Phase1 init step 12 (RX Rot Cntl CDR Lookahead Disabled,SSC Disabled)
@@ -225,9 +291,15 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
                                l_pcs_rot_cntl_cdr_lookahead));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_ROT_CDR_SSC, l_pec_chiplets,
                                l_pcs_rot_cntl_cdr_ssc));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_ROT_EXTEL, l_pec_chiplets,
+                               l_pcs_rot_cntl_extel));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_ROT_RST_FW, l_pec_chiplets,
+                               l_pcs_rot_cntl_rst_fw));
         FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_PCS_RX_ROT_CNTL_REG, l_buf));
         FAPI_TRY(l_buf.insertFromRight(l_pcs_rot_cntl_cdr_lookahead, 55, 1));
         FAPI_TRY(l_buf.insertFromRight(l_pcs_rot_cntl_cdr_ssc, 63, 1));
+        FAPI_TRY(l_buf.insertFromRight(l_pcs_rot_cntl_extel, 59, 1));
+        FAPI_TRY(l_buf.insertFromRight(l_pcs_rot_cntl_rst_fw, 62, 1));
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_ROT_CNTL_REG, l_buf));
 
@@ -252,52 +324,39 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
                                        PEC_PCS_TX_DCLCK_ROTATOR_REG,
                                        48, 16);
 
-        // Phase1 init step 17 (TX FIFO Config Offset)
-        SET_REG_RMW_WITH_SINGLE_ATTR_8(fapi2::ATTR_PROC_PCIE_PCS_TX_FIFO_CONFIG_OFFSET,
-                                       PEC_PCS_TX_FIFO_CONFIG_OFFSET_REG,
-                                       59, 5);
-
-        // Phase1 init step 18 (TX PCIe Receiver Detect Control Register 1)
+        // Phase1 init step 17 (TX PCIe Receiver Detect Control Register 1)
         SET_REG_WR_WITH_SINGLE_ATTR_16(fapi2::ATTR_PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG1,
                                        PEC_PCS_TX_PCIE_REC_DETECT_CNTL1_REG,
                                        48, 16);
 
-        // Phase1 init step 19 (TX PCIe Receiver Detect Control Register 2)
+        // Phase1 init step 18 (TX PCIe Receiver Detect Control Register 2)
         SET_REG_WR_WITH_SINGLE_ATTR_16(fapi2::ATTR_PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG2,
                                        PEC_PCS_TX_PCIE_REC_DETECT_CNTL2_REG,
                                        48, 16);
 
-        // Phase1 init step 20 (TX Power Sequence Enable)
+        // Phase1 init step 19 (TX Power Sequence Enable)
         SET_REG_RMW_WITH_SINGLE_ATTR_8(fapi2::ATTR_PROC_PCIE_PCS_TX_POWER_SEQ_ENABLE,
                                        PEC_PCS_TX_POWER_SEQ_ENABLE_REG,
                                        56, 7);
 
-        // Phase1 init step 21 (RX Phase Rotator Control)
-        SET_REG_WR_WITH_SINGLE_ATTR_16(fapi2::ATTR_PROC_PCIE_PCS_RX_PHASE_ROTATOR_CNTL,
-                                       PEC_PCS_RX_ROT_CNTL_REG,
-                                       48, 16);
-
-        // Phase1 init step 22 (RX VGA Control Register 1)
+        // Phase1 init step 20 (RX VGA Control Register 1)
         SET_REG_WR_WITH_SINGLE_ATTR_16(fapi2::ATTR_PROC_PCIE_PCS_RX_VGA_CNTL_REG1,
                                        PEC_PCS_RX_VGA_CONTROL1_REG,
                                        48, 16);
 
-        // Phase1 init step 23 (RX VGA Control Register 2)
+        // Phase1 init step 21 (RX VGA Control Register 2)
         SET_REG_WR_WITH_SINGLE_ATTR_16(fapi2::ATTR_PROC_PCIE_PCS_RX_VGA_CNTL_REG2,
                                        PEC_PCS_RX_VGA_CONTROL2_REG,
                                        48, 16);
 
-        // Phase1 init step 24 (RX SIGDET Control)
-        SET_REG_WR_WITH_SINGLE_ATTR_16(fapi2::ATTR_PROC_PCIE_PCS_RX_SIGDET_CNTL,
-                                       PEC_PCS_RX_SIGDET_CONTROL_REG,
-                                       48, 16);
-        // Phase1 init step 25
-        l_buf = 0;
-        FAPI_TRY(l_buf.insertFromRight(1, PEC_IOP_PIPE_RESET_START_BIT, 1));
+        // Phase1 init step 22 (RX DFE Func Control Register 1)
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_DFE_FDDC, l_pec_chiplets, l_pcs_rx_dfe_fddc));
+        FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_IOP_RX_DFE_FUNC_REGISTER1, l_buf));
+        FAPI_TRY(l_buf.insertFromRight(l_pcs_rx_dfe_fddc, 50, 1));
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_CLEAR, l_buf));
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_IOP_RX_DFE_FUNC_REGISTER1, l_buf));
 
-        // Phase1 init step 26 (PCS System Control)
+        // Phase1 init step 23 (PCS System Control)
         SET_REG_RMW_WITH_SINGLE_ATTR_16(fapi2::ATTR_PROC_PCIE_PCS_SYSTEM_CNTL,
                                         PEC_PCS_SYS_CONTROL_REG,
                                         55, 9);
@@ -305,25 +364,37 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_M_CNTL, l_pec_chiplets,
                                l_pcs_m_cntl));
 
-        // Phase1 init step 27 (PCS M1 Control)
+        // Phase1 init step 24 (PCS M1 Control)
         SET_REG_RMW(l_pcs_m_cntl[0],
                     PEC_PCS_M1_CONTROL_REG,
                     55, 9);
 
-        // Phase1 init step 28 (PCS M2 Control)
+        // Phase1 init step 25 (PCS M2 Control)
         SET_REG_RMW(l_pcs_m_cntl[1],
                     PEC_PCS_M1_CONTROL_REG,
                     55, 9);
 
-        // Phase1 init step 29 (PCS M3 Control)
+        // Phase1 init step 26 (PCS M3 Control)
         SET_REG_RMW(l_pcs_m_cntl[2],
                     PEC_PCS_M1_CONTROL_REG,
                     55, 9);
 
-        // Phase1 init step 30 (PCS M4 Control)
+        // Phase1 init step 27 (PCS M4 Control)
         SET_REG_RMW(l_pcs_m_cntl[3],
                     PEC_PCS_M1_CONTROL_REG,
                     55, 9);
+
+        //Delay a minimum of 200ns to allow prior SCOM programming to take effect
+        FAPI_TRY(fapi2::delay(PMA_RESET_NANO_SEC_DELAY, PMA_RESET_CYC_DELAY), "fapiDelay error.");
+
+        // Phase1 init step 28
+        l_buf = 0;
+        FAPI_TRY(l_buf.insertFromRight(1, PEC_IOP_PIPE_RESET_START_BIT, 1));
+        FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_CLEAR, l_buf));
+
+        //Delay a minimum of 300ns for reset to complete. Inherent delay before deasserting PCS PIPE Reset is enough here.
+
     }
 
     FAPI_INF("End");
