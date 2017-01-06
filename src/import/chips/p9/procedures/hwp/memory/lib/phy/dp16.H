@@ -144,7 +144,7 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< uint64_t > DLL_CNFG_REG;
         static const std::vector< uint64_t > RD_VREF_CAL_ENABLE_REG;
         static const std::vector< uint64_t > RD_VREF_CAL_ERROR_REG;
-        static const std::vector< uint64_t > DATA_BIT_DIR1;
+        static const std::vector< uint64_t > DATA_BIT_DIR1_REG;
         static const std::vector< uint64_t > PR_STATIC_OFFSET_REG;
         static const std::vector< uint64_t > IO_TX_FET_SLICE_REG;
         static const std::vector< uint64_t > IO_TX_PFET_TERM_REG;
@@ -179,6 +179,10 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP2_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP3_REG;
 
+        static const std::vector< uint64_t > RD_DIA_CONFIG5_REG;
+        static const std::vector< uint64_t > DATA_BIT_ENABLE0_REG;
+        static const std::vector< uint64_t > DATA_BIT_ENABLE1_REG;
+
         // Definitions of the gate delay and waterfall bits' locations
         constexpr static const uint64_t GATE_DELAY_BIT_POS[NUM_QUAD_PER_DP16] =
         {
@@ -207,7 +211,6 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             TSYS_DATA = MCA_DDRPHY_DP16_WRCLK_PR_P0_0_01_TSYS,
             TSYS_DATA_LEN = MCA_DDRPHY_DP16_WRCLK_PR_P0_0_01_TSYS_LEN,
 
-            // Seriously PHY guys?
             AC_BOOST_WR_DOWN = MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_0_01_S0ACENSLICENDRV_DC,
             AC_BOOST_WR_DOWN_LEN = MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_0_01_S0ACENSLICENDRV_DC_LEN,
             AC_BOOST_WR_UP = MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_0_01_S0ACENSLICEPDRV_DC,
@@ -331,6 +334,10 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
 
             // Read Diagnostic Config 5 (same bit for all MCAs)
             FORCE_FIFO_CAPTURE = MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_0_01_FORCE_FIFO_CAPTURE,
+
+            DATA_BIT_ENABLE0 = MCA_DDRPHY_DP16_DATA_BIT_ENABLE0_P0_0_01_ENABLE_15,
+            DATA_BIT_ENABLE0_LEN = MCA_DDRPHY_DP16_DATA_BIT_ENABLE0_P0_0_01_ENABLE_15_LEN,
+            DFT_FORCE_OUTPUTS = MCA_DDRPHY_DP16_DATA_BIT_ENABLE1_P0_0_01_DFT_FORCE_OUTPUTS,
         };
 };
 
@@ -688,7 +695,6 @@ inline void set_dll_cal_reset( fapi2::buffer<uint64_t>& o_data, const states i_s
     o_data.writeBit<TT::DLL_CNTL_INIT_RXDLL_CAL_RESET>(i_state);
 }
 
-
 ///
 /// @brief Read DATA_BIT_DIR1
 /// @tparam I DP16 instance
@@ -703,7 +709,7 @@ inline fapi2::ReturnCode read_data_bit_dir1( const fapi2::Target<T>& i_target, f
 {
     static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
 
-    FAPI_TRY( mss::getScom(i_target, TT::DATA_BIT_DIR1[I], o_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::DATA_BIT_DIR1_REG[I], o_data) );
     FAPI_INF("data_bit_dir1 dp16%d: 0x%016lx", I, o_data);
 
 fapi_try_exit:
@@ -726,7 +732,7 @@ inline fapi2::ReturnCode write_data_bit_dir1( const fapi2::Target<T>& i_target, 
     static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
 
     FAPI_INF("data_bit_dir1 dp16%d: 0x%016lx", I, i_data);
-    FAPI_TRY( mss::putScom(i_target, TT::DATA_BIT_DIR1[I], i_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::DATA_BIT_DIR1_REG[I], i_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1791,9 +1797,35 @@ fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
 /// @param[in] i_target the fapi2 target of the port
 /// @param[in] i_state mss::states::ON or mss::states::OFF
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note '1'b Forces DQ capture in Read FIFO to support DDR4 LRDIMM calibration.
+/// '0'b Normal operation
 ///
 template< fapi2::TargetType T, typename TT = dp16Traits<T> >
-fapi2::ReturnCode write_force_fifo_capture( const fapi2::Target<T>& i_target,
+fapi2::ReturnCode write_force_dq_capture( const fapi2::Target<T>& i_target,
+        const mss::states i_state);
+
+///
+/// @brief Write DATA_BIT_ENABLE0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_state mss::states::ON or mss::states::OFF
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode write_data_bit_enable0( const fapi2::Target<T>& i_target,
+        const mss::states i_state);
+
+///
+/// @brief Write DFT_FORCE_OUTPUTS
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_state mss::states::ON or mss::states::OFF
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode write_dft_force_outputs( const fapi2::Target<T>& i_target,
         const mss::states i_state);
 
 ///
