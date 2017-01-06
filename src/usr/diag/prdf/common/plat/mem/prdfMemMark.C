@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,10 +74,10 @@ uint32_t readChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
     // get the mark store register
     SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
 
-    o_rc = hwms->Read();
+    o_rc = hwms->ForceRead(); // always read latest
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC "Read() failed on %s: i_chip=0x%08x",
+        PRDF_ERR( PRDF_FUNC "ForceRead() failed on %s: i_chip=0x%08x",
                   msName, i_chip->getHuid() );
     }
     else
@@ -195,10 +195,10 @@ uint32_t readSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
     // get the mark store register
     SCAN_COMM_REGISTER_CLASS * fwms = i_chip->getRegister( msName );
 
-    o_rc = fwms->Read();
+    o_rc = fwms->ForceRead(); // always read latest
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC "Read() failed on %s: i_chip=0x%08x",
+        PRDF_ERR( PRDF_FUNC "ForceRead() failed on %s: i_chip=0x%08x",
                   msName, i_chip->getHuid() );
     }
     else
