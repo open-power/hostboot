@@ -1988,6 +1988,12 @@
 
     <attribute><id>PROC_PCIE_IOVALID_ENABLE</id></attribute>
     <attribute><id>PROC_PCIE_PCS_RX_CDR_GAIN</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_PK_INIT</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_INIT_GAIN</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_SIGDET_LVL</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_ROT_EXTEL</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_ROT_RST_FW</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_DFE_FDDC</id></attribute>
     <attribute><id>PROC_PCIE_PCS_RX_LOFF_CONTROL</id></attribute>
     <attribute><id>PROC_PCIE_PCS_RX_VGA_CONTRL_REGISTER3</id></attribute>
     <attribute><id>PROC_PCIE_PCS_RX_ROT_CDR_LOOKAHEAD</id></attribute>

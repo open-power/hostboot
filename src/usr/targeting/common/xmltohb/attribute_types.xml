@@ -21752,6 +21752,155 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>PROC_PCIE_PCS_RX_PK_INIT</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+      PCS rx vga peak init value
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        The value of rx vga peak init for PCS.
+        Array index: Configuration number
+        index 0~3 for CONFIG0~3
+        lane 0~15 for each PCIE Lane
+    </description>
+    <simpleType>
+        <uint8_t>
+           <default>0</default>
+        </uint8_t>
+        <array>4,16</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_PK_INIT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_RX_INIT_GAIN</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+      PCS rx vga gain init value
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        The value of rx vga gain init for PCS.
+        Array index: Configuration number
+        index 0~3 for CONFIG0~3
+        lane 0~15 for each PCIE Lane
+    </description>
+    <simpleType>
+        <uint8_t>
+           <default>0</default>
+        </uint8_t>
+        <array>4,16</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_INIT_GAIN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_RX_SIGDET_LVL</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+      PCS rx sigdet lvl value
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        The value of rx sigdet lvl for PCS.
+        Array index: Configuration number
+        index 0~3 for CONFIG0~3
+    </description>
+    <simpleType>
+        <uint8_t>
+           <default>0x0B</default>
+        </uint8_t>
+        <array>4</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_SIGDET_LVL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_RX_ROT_EXTEL</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+      Value of PCS RX ROT extel latch
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        0 for internal (default)
+        1 for external (freezes phase rotators)
+    </description>
+    <simpleType>
+        <uint8_t>
+           <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_ROT_EXTEL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_RX_ROT_RST_FW</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+      Value of PCS RX ROT rstfw latch
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        0 normal, flywheel is enabled (default)
+        1 assert reset to the phase rotator flywheel (disable the flywheel)
+    </description>
+    <simpleType>
+        <uint8_t>
+           <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_ROT_RST_FW</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_RX_DFE_FDDC</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+      Value of PCS rx dfe func fddc control latch
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <simpleType>
+        <uint8_t>
+           <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_DFE_FDDC</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>PROC_PCIE_PCS_RX_LOFF_CONTROL</id>
     <!-- TARGET_TYPE_PEC -->
     <description>
