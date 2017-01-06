@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -655,10 +655,28 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
         }
     }
     else
-    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_PEC)
+    if ((i_desc->getAttr<ATTR_TYPE>() == TYPE_PEC)
+         || (i_desc->getAttr<ATTR_TYPE>() == TYPE_PHB))
     {
+        Target * l_targ = NULL;
+
+        if (i_desc->getAttr<ATTR_TYPE>() == TYPE_PHB)
+        {
+            //First get Parent PEC target as there are no PG bits for PHB
+            TargetHandleList pParentPECList;
+            getParentAffinityTargetsByState(pParentPECList, i_desc,
+                        CLASS_UNIT, TYPE_PEC, UTIL_FILTER_ALL);
+            HWAS_ASSERT((pParentPECList.size() == 1),
+                        "isDescFunctional(): pParentPECList != 1");
+            l_targ = pParentPECList[0];
+        }
+        else
+        {
+            l_targ = const_cast<TARGETING::Target*>(i_desc);
+        }
+
         ATTR_CHIP_UNIT_type indexPCI =
-            i_desc->getAttr<ATTR_CHIP_UNIT>();
+            l_targ->getAttr<ATTR_CHIP_UNIT>();
         // Check all bits in PCIx entry
         if (i_pgData[VPD_CP00_PG_PCI0_INDEX + indexPCI] !=
             VPD_CP00_PG_PCIx_GOOD[indexPCI])

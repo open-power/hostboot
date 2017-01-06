@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -911,7 +911,59 @@ public:
                                 (uint16_t)VPD_CP00_PG_PCIx_GOOD[l_chipUnit];
                         }
                         break;
+                    case TYPE_PHB:
+                      {
+                        TS_INFO( "testHWASisDescFunctional: "
+                                  "PCI%d is not functional for PHB target",
+                                  l_chipUnit);
+                        //First get Parent PEC target as there are no PG bits
+                        //  for PHB
+                        TargetHandleList pParentPECList;
+                        getParentAffinityTargetsByState(pParentPECList, pDesc,
+                                     CLASS_UNIT, TYPE_PEC, UTIL_FILTER_PRESENT);
+                        HWAS_ASSERT((pParentPECList.size() == 1),
+                            "testHWASisDescFunctional(): pParentPECList != 1");
+                        Target *l_parentPEC = pParentPECList[0];
 
+                        //Check if parent PEC's PG Data marks it good
+                        ATTR_CHIP_UNIT_type l_indexPCI =
+                                l_parentPEC->getAttr<ATTR_CHIP_UNIT>();
+
+                        for (l_mask = 0x8000;
+                             l_mask > 0;
+                             l_mask >>= 1)
+                        {
+                            if (pgData[VPD_CP00_PG_PCI0_INDEX + l_indexPCI] &
+                                l_mask)
+                            {
+                                // Turn off a bit that should be on
+                                pgData[VPD_CP00_PG_PCI0_INDEX + l_indexPCI] &=
+                                    ~l_mask;
+                            }
+                            else
+                            {
+                                // Turn on a bit that should be off
+                                pgData[VPD_CP00_PG_PCI0_INDEX + l_indexPCI] |=
+                                    l_mask;
+                            }
+
+                            if (isDescFunctional(pDesc, pgData))
+                            {
+                                TS_FAIL("testHWASisDescFunctional>"
+                                        "functional = 0x%x, should be false, "
+                                        "PCI%d = 0x%04x, mask = 0x%04x",
+                                        isDescFunctional(pDesc, pgData),
+                                        l_indexPCI,
+                                        pgData[VPD_CP00_PG_PCI0_INDEX
+                                               + l_indexPCI],
+                                        l_mask);
+                            }
+                           // Restore the "all good" data
+                           pgData[VPD_CP00_PG_PCI0_INDEX + l_indexPCI] =
+                                (uint16_t)VPD_CP00_PG_PCIx_GOOD[l_indexPCI];
+                        }
+                        break;
+                      }
                     case TYPE_EQ:
                         TS_INFO( "testHWASisDescFunctional: "
                                   "EQ%d is not functional", l_chipUnit);
