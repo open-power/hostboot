@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -921,7 +921,7 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
 
 bool PNOR::cmpSecurebootMagicNumber(const uint8_t* i_vaddr)
 {
-    return memcmp(&MAGIC_NUMBER, i_vaddr, sizeof(MAGIC_NUMBER)) == 0;
+    return memcmp(&ROM_MAGIC_NUMBER, i_vaddr, sizeof(ROM_MAGIC_NUMBER)) == 0;
 }
 
 errlHndl_t PNOR::hasSecurebootMagicNumber(const SectionId i_section,

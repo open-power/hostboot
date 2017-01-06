@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,7 @@ void ContainerHeader::parse_header(const void* i_header)
 
     // Early check if magic number is valid, as a quick check to try and prevent
     // any storage exceptions while parsing header.
-    assert(iv_headerInfo.hw_hdr.magic_number == MAGIC_NUMBER,
+    assert(iv_headerInfo.hw_hdr.magic_number == ROM_MAGIC_NUMBER,
            "ContainerHeader: magic number = 0x%08X not valid",
            iv_headerInfo.hw_hdr.magic_number);
 
@@ -195,7 +195,7 @@ const SHA512_t* ContainerHeader::hwKeyHash() const
 void ContainerHeader::validate()
 {
     iv_isValid = (iv_hdrBytesRead <= MAX_SECURE_HEADER_SIZE)
-        && (iv_headerInfo.hw_hdr.magic_number == MAGIC_NUMBER)
+        && (iv_headerInfo.hw_hdr.magic_number == ROM_MAGIC_NUMBER)
         && (iv_headerInfo.hw_hdr.version == ROM_VERSION)
         && (iv_headerInfo.hw_prefix_hdr.ver_alg.version == ROM_VERSION)
         && (iv_headerInfo.hw_prefix_hdr.ver_alg.hash_alg == ROM_HASH_ALG)

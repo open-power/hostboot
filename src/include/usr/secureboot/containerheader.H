@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 
 #include <errl/errlentry.H>
 #include <secureboot/service.H>
-#include <secureboot/rom.H>
+#include <securerom/ROM.H>
 
 // Forward Declaration
 class SecureROMTest;

@@ -35,8 +35,6 @@
 #define HASH_ALG_SHA512     1
 #define SIG_ALG_ECDSA521    1
 
-#define ROM_MAGIC_NUMBER     0x17082011
-
 typedef struct
 {
   uint16_t     version;     // (1: see versions above)
@@ -129,5 +127,92 @@ typedef struct
 extern void ROM_sreset (void);
 extern "C" ROM_response ROM_verify (ROM_container_raw* container,
                                     ROM_hw_params* params);
+
+/************************* END OF ORIGINAL ROM CODE ***************************/
+
+/* Offsets needed to call functions in jump table at start of ROM code.
+   See img/securerom.list.bz2 and search for SHA512_Hash and ROM_verify
+   E.g.
+    0000000000000018 <_SHA512_Hash>:
+    0000000000000028 <_ROM_verify>:
+*/
+#define SHA512_HASH_FUNCTION_OFFSET 0x18
+#define ROM_VERIFY_FUNCTION_OFFSET 0x28
+
+// Need this for the following definition
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+// Interfaces for Assembly Functions to call into Secure ROM
+// - 1st parameter is address of function offset into Secure ROM,
+//   followed by additional parameters as necssary
+
+/**
+ * @brief Call rom verify code against system hash keys
+ *
+ * @param[in] void*              Address of function offset into Secure ROM
+ * @param[in] ROM_container_raw* Pointer to effective address of container
+ * @param[in] ROM_hw_params*     HW params to pass in. Includes HW keys' hash
+ *
+ * @return ROM_response ROM_DONE on sucess ROM_FAILURE otherwise
+ */
+ROM_response call_rom_verify(void*, ROM_container_raw*, ROM_hw_params*);
+
+/**
+ * @brief Call rom SHA512 code
+ *
+ * @param[in] void*            Address of function offset into Secure ROM
+ * @param[in] sha2_byte*       Pointer to effective address of blob to hash
+ * @param[in] size_t           Size of blob to hash
+ * @param[in/out] sha2_hash_t* Pointer to resulting hash value
+ *
+ * @return N/A
+ */
+void call_rom_SHA512(void*, const sha2_byte *, size_t, sha2_hash_t*);
+
+#ifdef __cplusplus
+}
+#endif
+
+// Consts used for container header validation
+const uint32_t ROM_MAGIC_NUMBER = 0x17082011;
+const uint16_t ROM_VERSION = 1;
+const uint8_t ROM_HASH_ALG = 1;
+const uint8_t ROM_SIG_ALG = 1;
+const uint8_t HW_KEY_COUNT = 3;
+const uint8_t SW_KEY_COUNT_MIN = 1;
+const uint8_t SW_KEY_COUNT_MAX = 3;
+const size_t MAX_SECURE_HEADER_SIZE = 4096;
+
+// Security Flags
+
+// HW Security Flags
+enum HW_SB_FLAGS
+{
+    HB_FW_FLAG = 0x80000000,
+    OPAL_FLAG = 0x40000000,
+    PHYP_FLAG = 0x20000000,
+    KEY_TRANSITION_FLAG = 0x00000001
+};
+
+// SW Security Flags
+enum SW_SB_FLAGS
+{
+    // placeholder
+};
+
+// Structure to store all hw and sw flag values in a container header
+struct sb_flags_t
+{
+    sb_flags_t() : hw_hb_fw(false), hw_opal(false), hw_phyp(false),
+                   hw_key_transition(false) {}
+    bool hw_hb_fw;
+    bool hw_opal;
+    bool hw_phyp;
+    bool hw_key_transition;
+};
+
 
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -562,7 +562,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                 else
                 {
                     uint32_t l_badMagicHeader = 0;
-                    memcpy(&l_badMagicHeader, l_vaddr, sizeof(MAGIC_NUMBER));
+                    memcpy(&l_badMagicHeader, l_vaddr, sizeof(ROM_MAGIC_NUMBER));
                     TRACFCOMP( g_trac_pnor, ERR_MRK"PnorRP::getSectionInfo: magic number not valid to parse container for section = %s magic number = 0x%X",
                                o_info.name, l_badMagicHeader);
                 /*@
