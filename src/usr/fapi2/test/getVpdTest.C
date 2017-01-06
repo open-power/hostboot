@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <getVpdTest.H>
 #include <p9_get_mem_vpd_keyword.H>
 #include <attribute_service.H>
+#include <errl/errlmanager.H>
 
 //The following commented out section can be restored for unit testing
 //#undef FAPI_DBG
@@ -204,27 +205,30 @@ void testDecode_MR(void)
 
         // set up VPDInfo
         fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_info(fapi2::MR);
-        l_info.iv_freq_mhz = 2133; // index = 0
+        l_info.iv_freq_mhz = 2133; // bit1
         l_info.iv_rank_count_dimm_0 = 1;
         l_info.iv_rank_count_dimm_1 = 4;
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
         // set up the mapping data
         uint8_t l_pMapping[VPD_KEYWORD_SIZE] = {
-                // Header: version=1, num entries=5, reserved
-                1,5,0,
-               // miss: mcs match, pair match, freq miss
-               0xff,0xff,0xff,0xff,0x7f,'0',
-               // miss: mcs match, pair missing, freq match
-               0xff,0xff,0xfe,0xff,0xff,'1',
-               // miss: mcs miss, pair match, freq match
-               0x7f,0xff,0xff,0xff,0xff,'2',
-               // match:
-               0x80,0x00,0x01,0x00,0x80,'3', // <-- should be this one
-               // match everything
-               0xff,0xff,0xff,0xff,0xff,'4',
-               // zero out rest
-               0};
+            // Header: version=1, num entries=5, reserved
+            1,5,0,
+            //Rows are : mcs,mcs,  rank,rank,  freq,  kw
+
+            // miss: mcs match, pair match, freq miss
+            0xff,0xff,0xff,0xff,0x80,'0',
+            // miss: mcs match, pair missing, freq match
+            0xff,0xff,0xfe,0xff,0x40,'1',
+            // miss: mcs miss, pair match, freq match
+            0x7f,0xff,0xff,0xff,0xff,'2',
+            // match:
+            0x80,0x00,0x01,0x00,0x40,'3', // <-- should be this one
+            // match everything
+            0xff,0xff,0xff,0xff,0xff,'4',
+            // zero out rest
+            0
+        };
 
         // decode keyword
         keywordInfo_t l_keywordInfo = {0};
@@ -246,7 +250,7 @@ void testDecode_MR(void)
 
         // compare to expected test data
         numTests++;
-        if ( (l_keywordInfo.kwName[0] != 'J' ) &&
+        if ( (l_keywordInfo.kwName[0] != 'J' ) ||
              (l_keywordInfo.kwName[1] != '3' ) )
         {
             TS_FAIL  ("testDecode_MR:: unexpected keyword name returned"
@@ -254,6 +258,29 @@ void testDecode_MR(void)
                      l_keywordInfo.kwName[0],l_keywordInfo.kwName[1],'J','3');
             numFails++;
         }
+
+        // force a bad path by removing good entry
+        l_pMapping[1] = 3; //num entries
+        l_keywordInfo = {0};
+        numTests++;
+
+        FAPI_EXEC_HWP(l_rc,
+                      p9_get_mem_vpd_keyword,
+                      l_fapiTarget,
+                      l_info,
+                      l_pMapping,
+                      VPD_KEYWORD_SIZE,
+                      l_keywordInfo);
+        if(!l_rc)
+        {
+            TS_FAIL("testDecode_MR:: p9_get_mem_vpd_keyword did not fail as expected");
+            FAPI_INF("testDecode_MR> keyword=%c%c", l_keywordInfo.kwName[0], l_keywordInfo.kwName[1] );
+            numFails++;
+            break; // decode failed
+        }
+        // commit the log so we can inspect the FFDC manually
+        errlHndl_t l_err = fapi2::rcToErrl(l_rc);
+        errlCommit( l_err, CXXTEST_COMP_ID );
 
     }
     while(0);
