@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,12 @@
 
 
 using namespace fapi2;
+
+//This function does nothing, it is used to call FAPI_INVOKE on
+fapi2::ReturnCode empty_function(void)
+{
+    return fapi2::current_err;
+}
 
 
 class Fapi2HwAccessTest : public CxxTest::TestSuite
@@ -191,16 +197,6 @@ void test_fapi2HwAccess()
         }
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_opmodetest_getsetopmode);
-        if(l_errl)
-        {
-            TS_FAIL("p9_opmodetest_getsetopmode !!");
-            numFails++;
-            delete l_errl; // delete unexpected error log so we dont get
-                           // a false negative on the next case
-        }
-
-        numTests++;
         uint8_t failed = 0;
         FAPI_INVOKE_HWP(l_errl,
                         p9_opmodetest_ignorehwerr,
@@ -215,15 +211,6 @@ void test_fapi2HwAccess()
             {
                 errlCommit(l_errl,FAPI2_COMP_ID);
             }
-        }
-
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_piberrmask_getsettest);
-        if(l_errl)
-        {
-            TS_FAIL("p9_piberrmask_getsettest returned an error!");
-            numFails++;
-            errlCommit(l_errl,FAPI2_COMP_ID);
         }
 
         numTests++;
@@ -274,6 +261,102 @@ void test_fapi2HwAccess()
 
     FAPI_INF("fapi2HwAccessTest Test Complete. %d/%d fails",  numFails , numTests);
 }
+
+void test_piberrmask()
+{
+    FAPI_INF("Entering test_piberrmask...");
+    FAPI_INF("Ensure that getPIBErrorMask return 0 initially");
+
+    errlHndl_t l_errl = NULL;
+
+    do
+    {
+        uint8_t mask = fapi2::getPIBErrorMask();
+        if(mask != 0)
+        {
+            TS_FAIL("test_piberrmask>> Expected fapi2::getPIBErrorMask to return (0x0) but instead returned 0x%x", mask);
+            break;
+        }
+
+        FAPI_INF("Setting pib_err_mask to PIB_CHIPLET_OFFLINE (0x2) and checking that we get it back with getPIBErrorMask");
+
+        fapi2::setPIBErrorMask((uint8_t)PIB::PIB_CHIPLET_OFFLINE);
+        mask = fapi2::getPIBErrorMask();
+        if(mask != PIB::PIB_CHIPLET_OFFLINE)
+        {
+            TS_FAIL("test_piberrmask>> Expected fapi2::getPIBErrorMask to return 0x2 but instead returned 0x%x", mask);
+            break;
+        }
+
+        //Call FAPI_INVOKE on an empty function to test if
+        //it resets the pib err mask
+        FAPI_INVOKE_HWP(l_errl,empty_function);
+        if( l_errl )
+        {
+            TS_FAIL("test_piberrmask got an error !!");
+            delete l_errl; // delete unexpected error log so we dont get
+                           // a false negative on the next case
+        }
+
+        mask = fapi2::getPIBErrorMask();
+        if(mask != 0)
+        {
+            TS_FAIL("test_piberrmask>> Expected fapi2::getPIBErrorMask to return PIB_NO_ERROR (0x0) but instead returned %x , FAPI_INVOKE failed to reset pib_err_mask", mask);
+            break;
+        }
+
+    }while(0);
+
+    FAPI_INF("Exiting test_piberrmask...");
+}
+
+
+void test_getsetopmode()
+{
+    FAPI_INF("Enter test_getsetopmode");
+    FAPI_INF("Ensure that getOpMode return NORMAL initially");
+
+    do
+    {
+        fapi2::OpModes mode = fapi2::getOpMode();
+        if(mode != fapi2::NORMAL)
+        {
+            TS_FAIL("test_getsetopmode>> Expected fapi2::getOpMode to return fapi2::NORMAL (0x0) but instead returned %x", mode);
+            break;
+        }
+
+        FAPI_INF("Setting opMode to IGNORE_HW_ERROR (0x1) and checking that we get it back with getOpMode");
+
+        fapi2::setOpMode(fapi2::IGNORE_HW_ERROR);
+        mode = fapi2::getOpMode();
+        if(mode != fapi2::IGNORE_HW_ERROR)
+        {
+            TS_FAIL("test_getsetopmode>> Expected fapi2::getOpMode to return fapi2::IGNORE_HW_ERROR (0x1) but instead returned %x", mode);
+            break;
+        }
+
+        //Call FAPI_INVOKE on an empty function to test if it resets the opMode
+        errlHndl_t l_errl = NULL;
+        FAPI_INVOKE_HWP(l_errl,empty_function);
+        if( l_errl )
+        {
+            TS_FAIL("test_getsetopmode got an error !!");
+            delete l_errl; // delete unexpected error log so we dont get
+                           // a false negative on the next case
+        }
+
+        mode = fapi2::getOpMode();
+        if(mode != fapi2::NORMAL)
+        {
+            TS_FAIL("test_getsetopmode>> Expected fapi2::getOpMode to return fapi2::NORMAL (0x0) but instead returned %x , FAPI_INVOKE failed to reset opmode", mode);
+            break;
+        }
+
+    }while(0);
+
+    FAPI_INF("Exiting test_getsetopmode");
+}
+
 
 };
 

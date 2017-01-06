@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,14 +72,11 @@ fapi2::ReturnCode p9_cfamtest_getcfam_pass(
 fapi2::ReturnCode p9_cfamtest_putcfam_pass(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
-fapi2::ReturnCode p9_opmodetest_getsetopmode();
-
 fapi2::ReturnCode p9_platPutRingWRingID_pass();
 
 fapi2::ReturnCode p9_opmodetest_ignorehwerr(
                 fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 uint8_t fail);
-fapi2::ReturnCode p9_piberrmask_getsettest();
 
 fapi2::ReturnCode p9_piberrmask_masktest(
                 fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
