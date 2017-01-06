@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,75 @@ namespace spd
 {
 namespace lrdimm
 {
+///
+/// @brief Decodes register output drive strength for data buffer control (BCOM, BODT, BKCE)
+/// @param[out] o_output encoded drive strength
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 138 (Bit 4)
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 4
+/// @note Page 4.1.2.12.3 - 76
+///
+fapi2::ReturnCode decoder_v1_2::bcom_bcke_bodt_drive_strength(uint8_t& o_output)
+{
+    // Extracting desired bits
+    uint8_t l_field_bits = extract_spd_field< BCOM_BODT_BCKE_DRIVE_STRENGTH >(iv_target, iv_spd_data);
+    FAPI_INF("Field Bits value: %d", l_field_bits);
+
+    // This checks my extracting params returns a value within bound
+    constexpr size_t MAX_VALID_VAL = 1;
+
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
+              l_field_bits <= MAX_VALID_VAL,
+              BCOM_BODT_BCKE_DRIVE_STRENGTH.iv_byte,
+              l_field_bits,
+              "Failed bounds check for Register Output Driver for data buffer control (BCOM, BODT, BCKE)") );
+
+    // Update output only if check passes
+    o_output = l_field_bits;
+
+    FAPI_INF("%s. Register Output Driver for data buffer control (BCOM, BODT, BCKE): %d",
+             mss::c_str(iv_target),
+             o_output);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Decodes register output drive strength for data buffer control (BCK)
+/// @param[out] o_output encoded drive strength
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 138 (Bit 5)
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 4
+/// @note Page 4.1.2.12.3 - 76
+///
+fapi2::ReturnCode decoder_v1_2::bck_output_drive_strength(uint8_t& o_output)
+{
+    // Extracting desired bits
+    uint8_t l_field_bits = extract_spd_field< BCK_DRIVE_STRENGTH >(iv_target, iv_spd_data);
+    FAPI_INF("Field Bits value: %d", l_field_bits);
+
+    // This checks my extracting params returns a value within bound
+    constexpr size_t MAX_VALID_VAL = 1;
+
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
+              l_field_bits <= MAX_VALID_VAL,
+              BCK_DRIVE_STRENGTH.iv_byte,
+              l_field_bits,
+              "Failed bounds check for Register Output Driver for data buffer control (BCK)") );
+
+    // Update output only if check passes
+    o_output = l_field_bits;
+
+    FAPI_INF("%s. Register Output Driver for data buffer control (BCK): %d",
+             mss::c_str(iv_target),
+             o_output);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Decodes RCD output slew rate control
@@ -64,7 +133,7 @@ namespace lrdimm
 /// @note SPD Byte 138 (Bit 6)
 /// @note Item JEDEC Standard No. 21-C
 /// @note DDR4 SPD Document Release 4
-/// @note Page 4.1.2.L-4 - 70
+/// @note Page 4.1.2.L-4 - 76
 ///
 fapi2::ReturnCode decoder_v1_2::slew_rate_control(uint8_t& o_output)
 {
@@ -73,7 +142,7 @@ fapi2::ReturnCode decoder_v1_2::slew_rate_control(uint8_t& o_output)
     FAPI_INF("Field Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
-    constexpr size_t MAX_VALID_VAL = 0b1111;
+    constexpr size_t MAX_VALID_VAL = 0b1;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits <= MAX_VALID_VAL, // extract sanity check

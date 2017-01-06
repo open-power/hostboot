@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -558,29 +558,6 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 4.1.2.12.3 - 66
         ///
         virtual fapi2::ReturnCode a_side_clk_output_driver(uint8_t& o_output) override;
-
-        ///
-        /// @brief Decodes register output drive strength for data buffer control (BCOM, BODT, BKCE)
-        /// @param[out] o_output encoded drive strength
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 138 (Bit 4)
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 3
-        /// @note Page 4.1.2.12.3 - 66
-        ///
-        virtual fapi2::ReturnCode bcom_bcke_bodt_drive_strength(uint8_t& o_output) override;
-
-        ///
-        /// @brief Decodes register output drive strength for data buffer control (BCK)
-        /// @param[out] o_output encoded drive strength
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 138 (Bit 5)
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 3
-        /// @note Page 4.1.2.12.3 - 66
-        ///
-        virtual fapi2::ReturnCode bck_output_drive_strength(uint8_t& o_output) override;
-
 };
 
 ///
@@ -607,6 +584,28 @@ class decoder_v1_2 : public  decoder_v1_1
         /// @brief default dtor
         ///
         virtual ~decoder_v1_2() = default;
+
+        ///
+        /// @brief Decodes register output drive strength for data buffer control (BCOM, BODT, BKCE)
+        /// @param[out] o_output encoded drive strength
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note SPD Byte 138 (Bit 4)
+        /// @note Item JEDEC Standard No. 21-C
+        /// @note DDR4 SPD Document Release 3
+        /// @note Page 4.1.2.12.3 - 66
+        ///
+        virtual fapi2::ReturnCode bcom_bcke_bodt_drive_strength(uint8_t& o_output) override;
+
+        ///
+        /// @brief Decodes register output drive strength for data buffer control (BCK)
+        /// @param[out] o_output encoded drive strength
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note SPD Byte 138 (Bit 5)
+        /// @note Item JEDEC Standard No. 21-C
+        /// @note DDR4 SPD Document Release 3
+        /// @note Page 4.1.2.12.3 - 66
+        ///
+        virtual fapi2::ReturnCode bck_output_drive_strength(uint8_t& o_output) override;
 
         ///
         /// @brief Decodes RCD output slew rate control

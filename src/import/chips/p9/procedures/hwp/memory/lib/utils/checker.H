@@ -95,7 +95,7 @@ fapi_try_exit:
 ///
 /// @brief      Checks homogenous DDR4 dimm configuration (e.g. DDR4)
 /// @param[in]  i_target the controller target
-/// @return     FAPI2_RC_SUCCESS iff ok
+/// @return     fapi2::FAPI2_RC_SUCCESS iff ok
 ///
 inline fapi2::ReturnCode dram_type(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
 {
@@ -159,6 +159,7 @@ inline fapi2::ReturnCode fail_for_invalid_map(const fapi2::Target<fapi2::TARGET_
                 i_key,
                 i_data);
 
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -194,6 +195,7 @@ inline fapi2::ReturnCode fail_for_invalid_value(const fapi2::Target<fapi2::TARGE
                 i_spd_byte_index,
                 i_spd_data);
 
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 
@@ -254,6 +256,7 @@ inline fapi2::ReturnCode invalid_factory_sel(const fapi2::Target<fapi2::TARGET_T
                 i_dimm_type,
                 i_encoding_rev,
                 i_additions_rev);
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }// invalid_factory_sel
@@ -279,6 +282,7 @@ inline fapi2::ReturnCode invalid_cache(const fapi2::Target<fapi2::TARGET_TYPE_DI
                 c_str(i_target),
                 i_dimm_pos);
 
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }// invalid_factory_sel

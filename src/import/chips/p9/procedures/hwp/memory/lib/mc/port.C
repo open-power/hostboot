@@ -102,12 +102,8 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
     FAPI_INF("mrw_periodic_zqcal_mode_options: 0x%02x", l_per_memcal_mode_options);
 #endif
 
-    // TODO RTC:155854 We haven't done the work for calculating init cal periods
-    // in effective config yet, and the MC setup below is hard wired for sim
-
     FAPI_INF("memcal interval %dck, zqcal interval %dck", l_memcal_interval, l_zqcal_interval);
 
-    // I think we can do these in any event BRS
     {
         // From Steve Powell, 4/16
         // 0xFFFFFFFFFFFFFFF0
