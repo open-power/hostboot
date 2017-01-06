@@ -93,7 +93,7 @@ extern "C"
         }
 
         // Clean out any previous calibration results, set bad-bits and configure the ranks.
-        FAPI_DBG("MCA's on this McBIST: %d", i_target.getChildren<TARGET_TYPE_MCA>().size());
+        FAPI_DBG("MCA's on this McBIST: %d", mss::find_targets<TARGET_TYPE_MCA>(i_target).size());
 
         for( const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
         {
@@ -114,7 +114,6 @@ extern "C"
             // time it takes one rank to train one training algorithm times the number of
             // ranks we're going to train. We fail-safe as worst-case we simply poll the
             // register too much - so we can tune this as we learn more.
-            l_program.iv_poll.iv_initial_sim_delay = mss::DELAY_100US;
             l_program.iv_poll.iv_initial_sim_delay = 200;
             l_program.iv_poll.iv_poll_count = 0xFFFF;
 
