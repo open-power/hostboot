@@ -47,7 +47,35 @@ try {
     run-python-file (lookup-file hbfw/hb-simdebug.py)
 } except { echo "ERROR: Failed to load Hostboot debug tools." }
 
+# Determine security state
+$hw_security=(shell "echo $SECURITY_HW_POLICY")
+if($hw_security == "") {
+    # Assume default (no HW security) if not specified
+    $hw_security = "0"
+}
 
+if(($hw_security != "1") and ($hw_security != "0")) {
+    # Emit warning and assume default
+    echo ("SECURITY: WARNING! Bad value "+
+        $hw_security+" for HW security policy, defaulting to 0")
+    $hw_security = "0"
+}
+echo "SECURITY: HW security policy set to "+$hw_security
+
+# Translate security state to SIMICS jumper state
+$jumperApplied=TRUE
+if($hw_security == "1") {
+    $jumperApplied=FALSE
+}
+
+# Load jumper state to each processor
+foreach $procX in (get-object-list p9_proc) {
+
+    # Set logical jumper state in SIMICS based on HW policy
+    #     "TRUE"=jumper applied(security disabled, default)
+    #     "FALSE"=jumper removed(security enabled)
+    (($procX)->secure_jumper=$jumperApplied)
+}
 
 ########################### WORKAROUNDS ####################################
 # Setup the mailbox.
