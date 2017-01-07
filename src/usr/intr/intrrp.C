@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -477,6 +477,12 @@ errlHndl_t IntrRp::disableInterrupts(intr_hdlr_t *i_proc)
         l_psihb_ptr->psihbcr =
              (l_psihb_ptr->psihbcr & ~PSI_BRIDGE_INTP_STATUS_CTL_DISABLE_PSI);
 
+        //The XIVE HW is expecting these MMIO accesses to come from the
+        // core/thread they were setup (master core, thread 0)
+        // These functions will ensure this code executes there
+        task_affinity_pin();
+        task_affinity_migrate_to_master();
+
         //Pull thread context to register - View Section 4.4.4.15 of the
         // XIVE spec. Doing a 1b MMIO read will clear the cams VT bit.
         volatile uint8_t * l_pull_thread_ptr = (uint8_t *)iv_xiveTmBar1Address;
@@ -489,6 +495,9 @@ errlHndl_t IntrRp::disableInterrupts(intr_hdlr_t *i_proc)
         eieio();
         sync();
         TRACFCOMP(g_trac_intr, INFO_MRK"LSI Mode inactive (cams_vt)");
+
+        //MMIO Complete, rest of code can run on any thread
+        task_affinity_unpin();
 
         // Unset Physical Thread Enable register in the PC space for the master
         //  core - Simply reset both regs.
