@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -244,8 +244,8 @@ errlHndl_t nodePresenceDetect(DeviceFW::OperationType i_opType,
         return l_errl;
     }
 
-#if defined(CONFIG_PVPD_READ_FROM_HW) && defined(CONFIG_PVPD_READ_FROM_PNOR)
     pvpd_present = VPD::pvpdPresent( i_target );
+#if(defined( CONFIG_PVPD_READ_FROM_HW ) && !defined( __HOSTBOOT_RUNTIME) )
     if( pvpd_present )
     {
         // Check if the VPD data in the PNOR matches the SEEPROM
