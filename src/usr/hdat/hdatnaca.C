@@ -156,8 +156,17 @@ void *  call_hdat_steps( void *io_pArgs )
     hdat5Tuple_t l_spirasHostEntry, l_spirhCpuCtrlEntry;
     do {
 
-        //true => FSP present. OR ! running on PHYP mode
-        if(INITSERVICE::spBaseServicesEnabled() || !(is_phyp_load()))
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys != NULL);
+
+        // Figure out what kind of payload we have
+        TARGETING::PAYLOAD_KIND payload_kind
+                 = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
+
+        //true => FSP present. OR Payload Kind None
+        if(INITSERVICE::spBaseServicesEnabled() ||
+                    payload_kind == TARGETING::PAYLOAD_KIND_NONE  )
         {
             break;
         }
