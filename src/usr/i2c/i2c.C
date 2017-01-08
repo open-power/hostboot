@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2486,7 +2486,6 @@ errlHndl_t i2cToggleClockLine(TARGETING::Target * i_target,
 errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
                                     misc_args_t & i_args)
 {
-
     errlHndl_t err = NULL;
     mode_reg_t mode;
     uint64_t l_speed = I2C_BUS_SPEED_FROM_MRW;
@@ -2533,6 +2532,24 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
         // Need to send slave stop to all ports with a device on the engine
         for( uint32_t port = 0; port < P8_MASTER_PORTS; port++ )
         {
+            //Check if diag mode should be skipped
+            TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+
+            if (l_type == TARGETING::TYPE_PROC)
+            {
+                uint8_t l_disable_diag_mode =
+                        i_target->getAttr<
+                         TARGETING::ATTR_DISABLE_I2C_ENGINE2_PORT0_DIAG_MODE>();
+
+                // P9 engine 2 port 0 has a limitation where the diag mode
+                // cannot be used. -- skip it if the attribute state it
+                // should not be used
+                if (l_disable_diag_mode
+                                && (0 == port) && (2 == i_args.engine))
+                {
+                    continue;
+                }
+            }
 
             // Only send stop to a port if there are devices on it
             l_speed = speed_array[i_args.engine][port];
