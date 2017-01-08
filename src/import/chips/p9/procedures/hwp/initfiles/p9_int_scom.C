@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,12 +32,12 @@ using namespace fapi2;
 constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_0x0070000072040140 = 0x0070000072040140;
-constexpr uint64_t literal_0x0000004000028000 = 0x0000004000028000;
-constexpr uint64_t literal_0x00000000040101C3 = 0x00000000040101C3;
-constexpr uint64_t literal_0x9554021F80100E0C = 0x9554021F80100E0C;
+constexpr uint64_t literal_0x0000004004028000 = 0x0000004004028000;
+constexpr uint64_t literal_0x0000000000000000 = 0x0000000000000000;
+constexpr uint64_t literal_0x9554021F80110FCF = 0x9554021F80110FCF;
 constexpr uint64_t literal_0b00 = 0b00;
 constexpr uint64_t literal_0x010003FF00100020 = 0x010003FF00100020;
-constexpr uint64_t literal_0xD8DFB200FFAFFFD7 = 0xD8DFB200FFAFFFD7;
+constexpr uint64_t literal_0xD8DFB200DFAFFFD7 = 0xD8DFB200DFAFFFD7;
 constexpr uint64_t literal_0x0008002000002002 = 0x0008002000002002;
 constexpr uint64_t literal_0xEF6437D2DE7DD3FD = 0xEF6437D2DE7DD3FD;
 constexpr uint64_t literal_0x0002000410000000 = 0x0002000410000000;
@@ -92,19 +92,19 @@ fapi2::ReturnCode p9_int_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5013033ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x0000004000028000 );
+            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x0000004004028000 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5013033ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5013036ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x00000000040101C3 );
+            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x0000000000000000 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5013036ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5013037ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x9554021F80100E0C );
+            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x9554021F80110FCF );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5013037ull, l_scom_buffer));
         }
         {
@@ -122,7 +122,7 @@ fapi2::ReturnCode p9_int_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5013141ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0xD8DFB200FFAFFFD7 );
+            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0xD8DFB200DFAFFFD7 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5013141ull, l_scom_buffer));
         }
         {
