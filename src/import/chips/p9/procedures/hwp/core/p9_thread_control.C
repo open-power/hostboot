@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -431,11 +431,13 @@ fapi2::ReturnCode p9_thread_control_sreset(
     {
         fapi2::buffer<uint64_t> l_mode_data;
 
-        FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
-                 "p9_thread_control_step: getScom error when reading ras_modreg for threads 0x%x",
-                 i_threads);
+        // SW375288: Reads to C_RAS_MODEREG causes SPR corruption.  For now, the code will assume no other
+        // bits are set and only set/clear mr_fence_interrupts
+        //FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
+        //         "p9_thread_control_step: getScom error when reading ras_modreg for threads 0x%x",
+        //         i_threads);
+        //l_mode_data.clearBit<RAS_MODE_MR_FENCE_INTERRUPTS>();
 
-        l_mode_data.clearBit<RAS_MODE_MR_FENCE_INTERRUPTS>();
         FAPI_TRY(fapi2::putScom(i_target, C_RAS_MODEREG, l_mode_data),
                  "p9_thread_control_step: putScom error when issuing ras_modreg step mode for threads 0x%x",
                  i_threads);
@@ -513,11 +515,12 @@ fapi2::ReturnCode p9_thread_control_start(
     {
         fapi2::buffer<uint64_t> l_mode_data;
 
-        FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
-                 "p9_thread_control_step: getScom error when reading ras_modreg for threads 0x%x",
-                 i_threads);
-
-        l_mode_data.clearBit<RAS_MODE_MR_FENCE_INTERRUPTS>();
+        // SW375288: Reads to C_RAS_MODEREG causes SPR corruption.  For now, the code will assume no other
+        // bits are set and only set/clear mr_fence_interrupts
+        //FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
+        //         "p9_thread_control_step: getScom error when reading ras_modreg for threads 0x%x",
+        //         i_threads);
+        //l_mode_data.clearBit<RAS_MODE_MR_FENCE_INTERRUPTS>();
         FAPI_TRY(fapi2::putScom(i_target, C_RAS_MODEREG, l_mode_data),
                  "p9_thread_control_step: putScom error when issuing ras_modreg step mode for threads 0x%x",
                  i_threads);
@@ -603,9 +606,12 @@ fapi2::ReturnCode p9_thread_control_stop(
         // Block interrupts while stopped
         {
             fapi2::buffer<uint64_t> l_mode_data;
-            FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
-                     "p9_thread_control_step: getScom error when reading ras_modreg for threads 0x%x",
-                     i_threads);
+
+            // SW375288: Reads to C_RAS_MODEREG causes SPR corruption.  For now, the code will assume no other
+            // bits are set and only set/clear mr_fence_interrupts
+            //FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
+            //         "p9_thread_control_step: getScom error when reading ras_modreg for threads 0x%x",
+            //         i_threads);
 
             l_mode_data.setBit<RAS_MODE_MR_FENCE_INTERRUPTS>();
             FAPI_TRY(fapi2::putScom(i_target, C_RAS_MODEREG, l_mode_data),
