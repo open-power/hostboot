@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,13 +43,6 @@ using namespace ERRORLOG;
 
 namespace ATTN
 {
-enum
-{
-    // interrupts to host bridge -IPOLL MASK
-    ROUTE_TO_HOST      = 0x0400000000000000ull
-};
-
-
 
 /**
  * @brief calculated mask cache for ipoll
@@ -124,10 +117,6 @@ errlHndl_t ServiceCommon::configureInterrupts(
         // enable attentions in ipoll mask
         mask = HostMask::nonHost();
         mask |= HostMask::host();
-
-        // We never messed with FSP mask bits in P8, so
-        // not doing it on P9 either.
-        mask |= ATTN::ROUTE_TO_HOST;
 
         // this doesn't have an and/or reg for some reason...
         err = modifyScom(*it,
