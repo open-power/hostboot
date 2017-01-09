@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,12 +83,6 @@ class adrTraits<fapi2::TARGET_TYPE_MCA>
             ADR_DELAY_ODD = MCA_DDRPHY_ADR_DELAY0_P0_ADR0_01_DELAY1,
             ADR_DELAY_LEN = MCA_DDRPHY_ADR_DELAY0_P0_ADR0_01_DELAY1_LEN,
 
-
-            //The bit field locations for the IO_FET_SLICE_ENABLE registers are hardcoded here, rather than using the field values,
-            //because the current engineering data has out of date values for the bit fields and are incorrect.
-            //John Bialas gave me the correct bit values, noted below.
-            //Lanes below are lanes per register
-            //TODO RTC:159171 - update the bit fields when the engineering data is updated to be correct
             ADR_IO_FET_SLICE_EN_MAP0_ADR0 = MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0,
             ADR_IO_FET_SLICE_EN_MAP1_ADR0 = MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR0,
             ADR_IO_FET_SLICE_EN_MAP0_ADR1 = MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR1,
@@ -98,13 +92,13 @@ class adrTraits<fapi2::TARGET_TYPE_MCA>
             ADR_IO_FET_SLICE_EN_MAP0_ADR3 = MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR3,
             ADR_IO_FET_SLICE_EN_MAP1_ADR3 = MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR3,
             ADR_IO_FET_SLICE_EN_LANE0_POS = MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0_01_SEL0,
-            ADR_IO_FET_SLICE_EN_LANE1_POS = 50,
-            ADR_IO_FET_SLICE_EN_LANE2_POS = 52,
-            ADR_IO_FET_SLICE_EN_LANE3_POS = 54,
-            ADR_IO_FET_SLICE_EN_LANE4_POS = 56,
-            ADR_IO_FET_SLICE_EN_LANE5_POS = 58,
-            ADR_IO_FET_SLICE_EN_LANE6_POS = 60,
-            ADR_IO_FET_SLICE_EN_LANE7_POS = 62,
+            ADR_IO_FET_SLICE_EN_LANE1_POS = MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0_01_SEL1,
+            ADR_IO_FET_SLICE_EN_LANE2_POS = MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0_01_SEL2,
+            ADR_IO_FET_SLICE_EN_LANE3_POS = MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0_01_SEL3,
+            ADR_IO_FET_SLICE_EN_LANE4_POS = MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0_01_SEL4,
+            ADR_IO_FET_SLICE_EN_LANE5_POS = MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0_01_SEL5,
+            ADR_IO_FET_SLICE_EN_LANE6_POS = MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0_01_SEL6,
+            ADR_IO_FET_SLICE_EN_LANE7_POS = MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0_01_SEL7,
             NUM_CLK_LANES = 4,
             NUM_CMD_ADDR_LANES = 23,
             NUM_CNTL_LANES = 10,
