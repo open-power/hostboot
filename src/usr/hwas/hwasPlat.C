@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -157,6 +157,9 @@ errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
         uint8_t ec = (((id_ec & 0xF000000000000000ull) >> 56) |
                       ((id_ec & 0x00F0000000000000ull) >> 52));
         i_target->setAttr<ATTR_EC>(ec);
+
+        // until we read ECID, HDAT_EC==EC
+        i_target->setAttr<ATTR_HDAT_EC>(ec);
 
         // ID - nibbles 1,5,3,4
         //                         01234567

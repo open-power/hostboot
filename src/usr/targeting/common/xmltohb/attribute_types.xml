@@ -2006,6 +2006,42 @@
 </attribute>
 
 <attribute>
+    <id>HDAT_EC</id>
+    <description>
+       Indicates the chip's EC level, distinct from ATTR_EC to handle
+       non-standard mini-ECs, e.g. 1.01, separate from the real
+       hardware-defined EC level.  By default, ATTR_HDAT_EC==ATTR_EC
+       unless the chip has a mini-EC.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>MINI_EC</id>
+    <description>
+       Specifies extra mini-EC versions beyond the standard Major.Minor
+       Ex. 1.04 -> ATTR_EC=0x10, ATTR_MINI_EC=4
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+       <id>ATTR_MINI_EC</id>
+       <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>CHIP_ID</id>
     <description>attribute indicating the chip's ID</description>
     <simpleType>
