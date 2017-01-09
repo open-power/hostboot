@@ -94,6 +94,12 @@
     <attribute>
         <id>FRU_ID</id>
     </attribute>
+    <attribute>
+        <id>HDAT_EC</id>
+    </attribute>
+    <attribute>
+        <id>MINI_EC</id>
+    </attribute>
 </targetType>
 
 <targetType>
