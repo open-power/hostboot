@@ -98,7 +98,7 @@ define def_PORT_INDEX     =   def_POSITION % 2;
 define def_MSS_FREQ_EQ_1866     =   (                                  (MCBIST.ATTR_MSS_FREQ<1867));
 define def_MSS_FREQ_EQ_2133     =   ((MCBIST.ATTR_MSS_FREQ>=1867)  &&  (MCBIST.ATTR_MSS_FREQ<2134));
 define def_MSS_FREQ_EQ_2400     =   ((MCBIST.ATTR_MSS_FREQ>=2134)  &&  (MCBIST.ATTR_MSS_FREQ<2401));
-define def_MSS_FREQ_EQ_2667     =   ((MCBIST.ATTR_MSS_FREQ>=2667)                                 );
+define def_MSS_FREQ_EQ_2666     =   ((MCBIST.ATTR_MSS_FREQ>=2666)                                 );
 
 define def_MEM_TYPE_1866_13   =   def_MSS_FREQ_EQ_1866    &&  ( MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] == 13 );
 define def_MEM_TYPE_1866_14   =   def_MSS_FREQ_EQ_1866    &&  ( MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] == 14 );
@@ -107,9 +107,9 @@ define def_MEM_TYPE_2133_16   =   def_MSS_FREQ_EQ_2133    &&  ( MCS.ATTR_EFF_DRA
 define def_MEM_TYPE_2400_16   =   def_MSS_FREQ_EQ_2400    &&  ( MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] == 16 );
 define def_MEM_TYPE_2400_17   =   def_MSS_FREQ_EQ_2400    &&  ( MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] == 17 );
 define def_MEM_TYPE_2400_18   =   def_MSS_FREQ_EQ_2400    &&  ( MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] == 18 );
-define def_MEM_TYPE_2667_18   =   def_MSS_FREQ_EQ_2667    &&  ( MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] == 18 );
-define def_MEM_TYPE_2667_19   =   def_MSS_FREQ_EQ_2667    &&  ( MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] == 19 );
-define def_MEM_TYPE_2667_20   =   def_MSS_FREQ_EQ_2667    &&  ( MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] == 20 );
+define def_MEM_TYPE_2666_18   =   def_MSS_FREQ_EQ_2666    &&  ( MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] == 18 );
+define def_MEM_TYPE_2666_19   =   def_MSS_FREQ_EQ_2666    &&  ( MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] == 19 );
+define def_MEM_TYPE_2666_20   =   def_MSS_FREQ_EQ_2666    &&  ( MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] == 20 );
 
 define def_NUM_RANKS            = (   MCS.ATTR_EFF_NUM_RANKS_PER_DIMM[def_PORT_INDEX][0]
                                     + MCS.ATTR_EFF_NUM_RANKS_PER_DIMM[def_PORT_INDEX][1] );
@@ -117,8 +117,8 @@ define def_NUM_RANKS            = (   MCS.ATTR_EFF_NUM_RANKS_PER_DIMM[def_PORT_I
 # We don't have a div 0 problem here as we don't run this if we don't have DIMM so the number of ranks won't be 0.
 define def_REFRESH_INTERVAL     =   ((MCS.ATTR_EFF_DRAM_TREFI[def_PORT_INDEX])/(8*def_NUM_RANKS));
 
-define def_RANK_SWITCH_TCK      =   4 + ((MCBIST.ATTR_MSS_FREQ-1866)/267);         # 1866: 4  2133: 5  2400: 6  2667: 7
-define def_BUS_TURNAROUND_TCK   =   4 + ((MCBIST.ATTR_MSS_FREQ-1866)/267);         # 1866: 4  2133: 5  2400: 6  2667: 7
+define def_RANK_SWITCH_TCK      =   4 + ((MCBIST.ATTR_MSS_FREQ-1866)/267);         # 1866: 4  2133: 5  2400: 6  2666: 7
+define def_BUS_TURNAROUND_TCK   =   4 + ((MCBIST.ATTR_MSS_FREQ-1866)/267);         # 1866: 4  2133: 5  2400: 6  2666: 7
 
 # Funky ... If the attribute is 0, then the value of the == operation will be 1 which bitwise-or'd with 0 gives us 1. If the attribute is != 0, then the
 # value of the == operation will be 0 which when bitwise-or'd with the attribute will give us the attribute value. Love, Prachi, Jenny, Shelton and Brian.
@@ -266,7 +266,7 @@ ispy  MCP.PORT0.SRQ.MBA_TMR1Q_CFG_ACT_TO_DIFF_RANK_DLY [when=S] {
   8,                                 (def_MSS_FREQ_EQ_1866==1);
   9,                                 (def_MSS_FREQ_EQ_2133==1);
   10,                                (def_MSS_FREQ_EQ_2400==1);
-  11,                                (def_MSS_FREQ_EQ_2667==1);
+  11,                                (def_MSS_FREQ_EQ_2666==1);
 }
 
 
@@ -284,9 +284,9 @@ ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RDTAG_DLY [when=S] {         # ATTR_EFF_DIMM_T
   26,                                ((def_MEM_TYPE_2400_16==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
   26,                                ((def_MEM_TYPE_2400_17==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
   26,                                ((def_MEM_TYPE_2400_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
-  26,                                ((def_MEM_TYPE_2667_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
-  28,                                ((def_MEM_TYPE_2667_19==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
-  28,                                ((def_MEM_TYPE_2667_20==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
+  26,                                ((def_MEM_TYPE_2666_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
+  28,                                ((def_MEM_TYPE_2666_19==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
+  28,                                ((def_MEM_TYPE_2666_20==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
 
   24,                                ((def_MEM_TYPE_1866_13==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
   24,                                ((def_MEM_TYPE_1866_14==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
@@ -295,9 +295,9 @@ ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RDTAG_DLY [when=S] {         # ATTR_EFF_DIMM_T
   28,                                ((def_MEM_TYPE_2400_16==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
   28,                                ((def_MEM_TYPE_2400_17==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
   28,                                ((def_MEM_TYPE_2400_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
-  26,                                ((def_MEM_TYPE_2667_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
-  30,                                ((def_MEM_TYPE_2667_19==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
-  30,                                ((def_MEM_TYPE_2667_20==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
+  26,                                ((def_MEM_TYPE_2666_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
+  30,                                ((def_MEM_TYPE_2666_19==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
+  30,                                ((def_MEM_TYPE_2666_20==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
 }
 
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_WRDATA_DLY [when=S] {
@@ -320,9 +320,9 @@ ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RODT_START_DLY [when=S] {
    7,                                (def_MEM_TYPE_2400_16==1);
    8,                                (def_MEM_TYPE_2400_17==1);
    9,                                (def_MEM_TYPE_2400_18==1);
-   9,                                (def_MEM_TYPE_2667_18==1);
-  10,                                (def_MEM_TYPE_2667_19==1);
-  11,                                (def_MEM_TYPE_2667_20==1);
+   9,                                (def_MEM_TYPE_2666_18==1);
+  10,                                (def_MEM_TYPE_2666_19==1);
+  11,                                (def_MEM_TYPE_2666_20==1);
 }
 
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RODT_END_DLY [when=S] {
@@ -334,9 +334,9 @@ ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RODT_END_DLY [when=S] {
   12,                                (def_MEM_TYPE_2400_16==1);
   13,                                (def_MEM_TYPE_2400_17==1);
   14,                                (def_MEM_TYPE_2400_18==1);
-  14,                                (def_MEM_TYPE_2667_18==1);
-  15,                                (def_MEM_TYPE_2667_19==1);
-  16,                                (def_MEM_TYPE_2667_20==1);
+  14,                                (def_MEM_TYPE_2666_18==1);
+  15,                                (def_MEM_TYPE_2666_19==1);
+  16,                                (def_MEM_TYPE_2666_20==1);
 }
 
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_WODT_START_DLY [when=S] {
@@ -383,7 +383,7 @@ ispy  MCP.PORT0.SRQ.PC.MBARPC0Q_CFG_PUP_PDN [when=S] {         # tCKE
   5,                                 (def_MSS_FREQ_EQ_1866==1);
   6,                                 (def_MSS_FREQ_EQ_2133==1);
   6,                                 (def_MSS_FREQ_EQ_2400==1);
-  7,                                 (def_MSS_FREQ_EQ_2667==1);
+  7,                                 (def_MSS_FREQ_EQ_2666==1);
 }
 
 ispy  MCP.PORT0.SRQ.PC.MBARPC0Q_CFG_PDN_PUP [when=S] {         # tPD
@@ -391,7 +391,7 @@ ispy  MCP.PORT0.SRQ.PC.MBARPC0Q_CFG_PDN_PUP [when=S] {         # tPD
   5,                                 (def_MSS_FREQ_EQ_1866==1);
   6,                                 (def_MSS_FREQ_EQ_2133==1);
   6,                                 (def_MSS_FREQ_EQ_2400==1);
-  7,                                 (def_MSS_FREQ_EQ_2667==1);
+  7,                                 (def_MSS_FREQ_EQ_2666==1);
 }
 
 ispy  MCP.PORT0.SRQ.PC.MBARPC0Q_CFG_PUP_AVAIL [when=S] {       # tXP
@@ -399,7 +399,7 @@ ispy  MCP.PORT0.SRQ.PC.MBARPC0Q_CFG_PUP_AVAIL [when=S] {       # tXP
   6,                                 (def_MSS_FREQ_EQ_1866==1);
   7,                                 (def_MSS_FREQ_EQ_2133==1);
   8,                                 (def_MSS_FREQ_EQ_2400==1);
-  9,                                 (def_MSS_FREQ_EQ_2667==1);
+  9,                                 (def_MSS_FREQ_EQ_2666==1);
 }
 
 #  STR0 SCOM REGISTER    #
@@ -409,7 +409,7 @@ ispy  MCP.PORT0.SRQ.PC.MBASTR0Q_CFG_TCKSRE [when=S] {
   10,                                (def_MSS_FREQ_EQ_1866==1);
   11,                                (def_MSS_FREQ_EQ_2133==1);
   12,                                (def_MSS_FREQ_EQ_2400==1);
-  14,                                (def_MSS_FREQ_EQ_2667==1);
+  14,                                (def_MSS_FREQ_EQ_2666==1);
 }
 
 ispy  MCP.PORT0.SRQ.PC.MBASTR0Q_CFG_TCKSRX [when=S] {
@@ -417,7 +417,7 @@ ispy  MCP.PORT0.SRQ.PC.MBASTR0Q_CFG_TCKSRX [when=S] {
   10,                                (def_MSS_FREQ_EQ_1866==1);
   11,                                (def_MSS_FREQ_EQ_2133==1);
   12,                                (def_MSS_FREQ_EQ_2400==1);
-  14,                                (def_MSS_FREQ_EQ_2667==1);
+  14,                                (def_MSS_FREQ_EQ_2666==1);
 }
 
 ispy  MCP.PORT0.SRQ.PC.MBASTR0Q_CFG_TCKESR [when=S] {
@@ -430,7 +430,7 @@ ispy  MCP.PORT0.SRQ.PC.MBASTR0Q_CFG_TXSDLL [when=S] {
   597,                               (def_MSS_FREQ_EQ_1866==1);
   768,                               (def_MSS_FREQ_EQ_2133==1);
   768,                               (def_MSS_FREQ_EQ_2400==1);
-  939,                               (def_MSS_FREQ_EQ_2667==1);
+  939,                               (def_MSS_FREQ_EQ_2666==1);
 }
 
 # Make Safe Refresh Match Refresh Interval

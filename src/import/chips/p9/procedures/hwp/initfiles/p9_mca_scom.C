@@ -48,7 +48,7 @@ constexpr uint64_t literal_26 = 26;
 constexpr uint64_t literal_16 = 16;
 constexpr uint64_t literal_2401 = 2401;
 constexpr uint64_t literal_18 = 18;
-constexpr uint64_t literal_2667 = 2667;
+constexpr uint64_t literal_2666 = 2666;
 constexpr uint64_t literal_19 = 19;
 constexpr uint64_t literal_28 = 28;
 constexpr uint64_t literal_20 = 20;
@@ -113,10 +113,10 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
         uint64_t l_def_MEM_TYPE_2400_16 = (l_def_MSS_FREQ_EQ_2400 && (l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] == literal_16));
         uint64_t l_def_MEM_TYPE_2400_17 = (l_def_MSS_FREQ_EQ_2400 && (l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] == literal_17));
         uint64_t l_def_MEM_TYPE_2400_18 = (l_def_MSS_FREQ_EQ_2400 && (l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] == literal_18));
-        uint64_t l_def_MSS_FREQ_EQ_2667 = (l_TGT1_ATTR_MSS_FREQ >= literal_2667);
-        uint64_t l_def_MEM_TYPE_2667_18 = (l_def_MSS_FREQ_EQ_2667 && (l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] == literal_18));
-        uint64_t l_def_MEM_TYPE_2667_19 = (l_def_MSS_FREQ_EQ_2667 && (l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] == literal_19));
-        uint64_t l_def_MEM_TYPE_2667_20 = (l_def_MSS_FREQ_EQ_2667 && (l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] == literal_20));
+        uint64_t l_def_MSS_FREQ_EQ_2666 = (l_TGT1_ATTR_MSS_FREQ >= literal_2666);
+        uint64_t l_def_MEM_TYPE_2666_18 = (l_def_MSS_FREQ_EQ_2666 && (l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] == literal_18));
+        uint64_t l_def_MEM_TYPE_2666_19 = (l_def_MSS_FREQ_EQ_2666 && (l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] == literal_19));
+        uint64_t l_def_MEM_TYPE_2666_20 = (l_def_MSS_FREQ_EQ_2666 && (l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] == literal_20));
         fapi2::ATTR_MSS_VPD_MR_DPHY_WLO_Type l_TGT2_ATTR_MSS_VPD_MR_DPHY_WLO;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MR_DPHY_WLO, TGT2, l_TGT2_ATTR_MSS_VPD_MR_DPHY_WLO));
         fapi2::ATTR_EFF_DRAM_CWL_Type l_TGT2_ATTR_EFF_DRAM_CWL;
@@ -232,17 +232,17 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             {
                 l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_26 );
             }
-            else if ((((l_def_MEM_TYPE_2667_18 == literal_1)
+            else if ((((l_def_MEM_TYPE_2666_18 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)) && l_def_IS_HW))
             {
                 l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_26 );
             }
-            else if ((((l_def_MEM_TYPE_2667_19 == literal_1)
+            else if ((((l_def_MEM_TYPE_2666_19 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)) && l_def_IS_HW))
             {
                 l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_28 );
             }
-            else if ((((l_def_MEM_TYPE_2667_20 == literal_1)
+            else if ((((l_def_MEM_TYPE_2666_20 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)) && l_def_IS_HW))
             {
                 l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_28 );
@@ -282,17 +282,17 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             {
                 l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_28 );
             }
-            else if ((((l_def_MEM_TYPE_2667_18 == literal_1)
+            else if ((((l_def_MEM_TYPE_2666_18 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
             {
                 l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_26 );
             }
-            else if ((((l_def_MEM_TYPE_2667_19 == literal_1)
+            else if ((((l_def_MEM_TYPE_2666_19 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
             {
                 l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_30 );
             }
-            else if ((((l_def_MEM_TYPE_2667_20 == literal_1)
+            else if ((((l_def_MEM_TYPE_2666_20 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
             {
                 l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_30 );
@@ -339,15 +339,15 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             {
                 l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_9 );
             }
-            else if ((l_def_MEM_TYPE_2667_18 == literal_1))
+            else if ((l_def_MEM_TYPE_2666_18 == literal_1))
             {
                 l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_9 );
             }
-            else if ((l_def_MEM_TYPE_2667_19 == literal_1))
+            else if ((l_def_MEM_TYPE_2666_19 == literal_1))
             {
                 l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_10 );
             }
-            else if ((l_def_MEM_TYPE_2667_20 == literal_1))
+            else if ((l_def_MEM_TYPE_2666_20 == literal_1))
             {
                 l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_11 );
             }
@@ -380,15 +380,15 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             {
                 l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_14 );
             }
-            else if ((l_def_MEM_TYPE_2667_18 == literal_1))
+            else if ((l_def_MEM_TYPE_2666_18 == literal_1))
             {
                 l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_14 );
             }
-            else if ((l_def_MEM_TYPE_2667_19 == literal_1))
+            else if ((l_def_MEM_TYPE_2666_19 == literal_1))
             {
                 l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_15 );
             }
-            else if ((l_def_MEM_TYPE_2667_20 == literal_1))
+            else if ((l_def_MEM_TYPE_2666_20 == literal_1))
             {
                 l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_16 );
             }
@@ -450,7 +450,7 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             {
                 l_scom_buffer.insert<60, 4, 60, uint64_t>(literal_10 );
             }
-            else if ((l_def_MSS_FREQ_EQ_2667 == literal_1))
+            else if ((l_def_MSS_FREQ_EQ_2666 == literal_1))
             {
                 l_scom_buffer.insert<60, 4, 60, uint64_t>(literal_11 );
             }
@@ -715,7 +715,7 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             {
                 l_scom_buffer.insert<16, 5, 59, uint64_t>(literal_6 );
             }
-            else if ((l_def_MSS_FREQ_EQ_2667 == literal_1))
+            else if ((l_def_MSS_FREQ_EQ_2666 == literal_1))
             {
                 l_scom_buffer.insert<16, 5, 59, uint64_t>(literal_7 );
             }
@@ -732,7 +732,7 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             {
                 l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_6 );
             }
-            else if ((l_def_MSS_FREQ_EQ_2667 == literal_1))
+            else if ((l_def_MSS_FREQ_EQ_2666 == literal_1))
             {
                 l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_7 );
             }
@@ -749,7 +749,7 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             {
                 l_scom_buffer.insert<6, 5, 59, uint64_t>(literal_8 );
             }
-            else if ((l_def_MSS_FREQ_EQ_2667 == literal_1))
+            else if ((l_def_MSS_FREQ_EQ_2666 == literal_1))
             {
                 l_scom_buffer.insert<6, 5, 59, uint64_t>(literal_9 );
             }
@@ -771,7 +771,7 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             {
                 l_scom_buffer.insert<17, 5, 59, uint64_t>(literal_12 );
             }
-            else if ((l_def_MSS_FREQ_EQ_2667 == literal_1))
+            else if ((l_def_MSS_FREQ_EQ_2666 == literal_1))
             {
                 l_scom_buffer.insert<17, 5, 59, uint64_t>(literal_14 );
             }
@@ -788,7 +788,7 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             {
                 l_scom_buffer.insert<22, 5, 59, uint64_t>(literal_12 );
             }
-            else if ((l_def_MSS_FREQ_EQ_2667 == literal_1))
+            else if ((l_def_MSS_FREQ_EQ_2666 == literal_1))
             {
                 l_scom_buffer.insert<22, 5, 59, uint64_t>(literal_14 );
             }
@@ -807,7 +807,7 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             {
                 l_scom_buffer.insert<27, 11, 53, uint64_t>(literal_768 );
             }
-            else if ((l_def_MSS_FREQ_EQ_2667 == literal_1))
+            else if ((l_def_MSS_FREQ_EQ_2666 == literal_1))
             {
                 l_scom_buffer.insert<27, 11, 53, uint64_t>(literal_939 );
             }
