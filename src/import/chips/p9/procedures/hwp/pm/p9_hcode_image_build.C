@@ -615,7 +615,7 @@ extern "C"
             sgpeFlag |= SGPE_STOP_11_TO_8_BIT_POS;
         }
 
-        FAPI_DBG("STOP_11_to_8           :   %s", attrVal ? "TRUE" : "FALSE" );
+        FAPI_DBG("STOP_11_to_8          :   %s", attrVal ? "TRUE" : "FALSE" );
 
         //Handling SGPE specific flag
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE,
@@ -629,7 +629,7 @@ extern "C"
             sgpeFlag |= SGPE_PROC_FAB_ADDR_BAR_MODE_POS;
         }
 
-        FAPI_DBG("SMALL_SYSTEM           :   %s", attrVal ? "TRUE" : "FALSE" );
+        FAPI_DBG("SMALL_SYSTEM          :   %s", attrVal ? "TRUE" : "FALSE" );
         //Updating flag field in CME/SGPE Image header
         pCmeHdr->g_cme_mode_flags       =   SWIZZLE_4_BYTE(cmeFlag);
         pSgpeHdr->g_sgpe_reserve_flags  =   SWIZZLE_4_BYTE(sgpeFlag);
@@ -1575,8 +1575,11 @@ extern "C"
                 maxCoreSpecRingLength = ringLength > maxCoreSpecRingLength ? ringLength : maxCoreSpecRingLength;
             }
 
-            maxCoreSpecRingLength += sizeof(CoreSpecRingList_t);
-            ROUND_OFF_32B(maxCoreSpecRingLength);
+            if( maxCoreSpecRingLength > 0 )
+            {
+                maxCoreSpecRingLength += sizeof(CoreSpecRingList_t);
+                ROUND_OFF_32B(maxCoreSpecRingLength);
+            }
 
             FAPI_DBG("Max Instance Spec Ring 0x%08X", maxCoreSpecRingLength);
             // Let us copy the rings now.
@@ -1588,7 +1591,7 @@ extern "C"
             for( uint32_t exId = 0; exId < MAX_CME_PER_CHIP; exId++ )
             {
                 pRingStart = (uint8_t*)&i_pHomer->cpmrRegion.cmeSramRegion[io_ringLength + ( exId * maxCoreSpecRingLength ) ];
-                pRingPayload = &i_pHomer->cpmrRegion.cmeSramRegion[ io_ringLength + ( exId * maxCoreSpecRingLength ) ];
+                pRingPayload = pRingStart + sizeof(CoreSpecRingList_t);
                 pScanRingIndex = (uint16_t*)pRingStart;
 
                 if( !i_chipState.isExFunctional( exId ) )
