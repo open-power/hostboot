@@ -426,11 +426,11 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                  parseMemUeTable( sigData, sigDataSize, i_parser );
             }
-/*  TODO: RTC 136126
             else if ( Util::hashString("MEM_CE_TABLE") == sigId )
             {
                  parseMemCeTable( sigData, sigDataSize, i_parser );
             }
+/*  TODO: RTC 136126
             else if ( Util::hashString("MEM_RCE_TABLE") == sigId )
             {
                  parseMemRceTable( sigData, sigDataSize, i_parser );
