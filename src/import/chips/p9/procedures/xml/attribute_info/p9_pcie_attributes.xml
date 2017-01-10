@@ -363,6 +363,7 @@
     <valueType>uint8</valueType>
     <platInit/>
     <persistRuntime/>
+    <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -495,6 +496,7 @@
     <valueType>uint8</valueType>
     <platInit/>
     <persistRuntime/>
+    <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>

@@ -45,6 +45,7 @@
 enum P9_GETECID_Private_Constants
 {
     fuseString_len = 176,       // fuse string length
+    ddLevelPciePart = 0b100,    // bit field in ecid buffer representing DD1.01
     ddLevelMemoryPart1 = 0b110, // bit field in ecid buffer representing DD1.02
     ddLevelMemoryPart2 = 0b111, // bit field in ecid buffer representing DD1.03
 };
