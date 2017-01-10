@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -95,6 +95,12 @@ getFilesToParse($compPath);
 getFilesToParse($compIncPath);
 getFilesToParse($genFilesPath);
 getPluginDirsToParse($compPath);
+
+#Add kernel/lib files for TI SRC descriptions
+getReasonCodeFiles($base."/src/include/kernel");
+getFilesToParse($base."/src/kernel");
+getFilesToParse($base."/src/lib");
+
 
 if ($DEBUG)
 {

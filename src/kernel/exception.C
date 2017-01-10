@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -406,6 +406,16 @@ void kernel_execute_unhandled_exception()
            exception, t->tid, t->context.nip);
     MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
 
-    termWriteSRC(TI_UNHANDLED_EX, RC_UNHANDLED_EX, exception);
+    /*@
+     * @errortype
+     * @moduleid     KERNEL::MOD_KERNEL_INVALID
+     * @reasoncode   KERNEL::RC_UNHANDLED_EX
+     * @userdata1    Exception type
+     * @userdata2    <unused>
+     * @devdesc      Kernel encountered an unhandled exception.
+     * @custdesc     Boot firmware has crashed with an internal
+     *               error.
+     */
+    termWriteSRC(TI_UNHANDLED_EX, KERNEL::RC_UNHANDLED_EX, exception);
     terminateExecuteTI();
 }
