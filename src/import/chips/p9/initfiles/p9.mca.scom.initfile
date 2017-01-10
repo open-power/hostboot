@@ -273,31 +273,26 @@ ispy  MCP.PORT0.SRQ.MBA_TMR1Q_CFG_ACT_TO_DIFF_RANK_DLY [when=S] {
 #   DSM0 SCOM REGISTER   #
 # DRAM TIMING PARAMETERS #
 
-# TODO RTC: 166455 NEED TO GET THE FORMULA FOR THIS - CURRENTLY GUESSES!
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RDTAG_DLY [when=S] {         # ATTR_EFF_DIMM_TYPE:  CDIMM = 0 RDIMM = 1 UDIMM = 2 LRDIMM = 3
   spyv, expr;
-  17,                                def_IS_SIM;
-  22,                                ((def_MEM_TYPE_1866_13==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
-  22,                                ((def_MEM_TYPE_1866_14==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
-  26,                                ((def_MEM_TYPE_2133_15==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
-  26,                                ((def_MEM_TYPE_2133_16==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
-  26,                                ((def_MEM_TYPE_2400_16==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
-  26,                                ((def_MEM_TYPE_2400_17==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
-  26,                                ((def_MEM_TYPE_2400_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
-  26,                                ((def_MEM_TYPE_2666_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
-  28,                                ((def_MEM_TYPE_2666_19==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
-  28,                                ((def_MEM_TYPE_2666_20==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
 
-  24,                                ((def_MEM_TYPE_1866_13==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
-  24,                                ((def_MEM_TYPE_1866_14==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
-  28,                                ((def_MEM_TYPE_2133_15==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
-  28,                                ((def_MEM_TYPE_2133_16==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
-  28,                                ((def_MEM_TYPE_2400_16==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
-  28,                                ((def_MEM_TYPE_2400_17==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
-  28,                                ((def_MEM_TYPE_2400_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
-  26,                                ((def_MEM_TYPE_2666_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
-  30,                                ((def_MEM_TYPE_2666_19==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
-  30,                                ((def_MEM_TYPE_2666_20==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
+  # rdtag_dly + 3 + rdptrdly > PHY DELAY + CL 
+  # rdtag_dly > PHY DELAY + CL - 3 - rdptrdly
+  #     PHY DELAY = 12 for 1866 and 2133, 13 for 2400 and 2666, +1 for LRDIMM
+  #     rdptrdly = 1
+
+  17,                                def_IS_SIM;
+
+  8  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_1866==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1) && def_IS_HW; # RDIMM
+  8  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2133==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1) && def_IS_HW; # RDIMM
+  9  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2400==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1) && def_IS_HW; # RDIMM
+  9  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2666==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1) && def_IS_HW; # RDIMM
+
+  9  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_1866==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3) && def_IS_HW; # LRDIMM
+  9  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2133==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3) && def_IS_HW; # LRDIMM
+  10 + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2400==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3) && def_IS_HW; # LRDIMM
+  10 + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2666==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3) && def_IS_HW; # LRDIMM
+
 }
 
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_WRDATA_DLY [when=S] {
