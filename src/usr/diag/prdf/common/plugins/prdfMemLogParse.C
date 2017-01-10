@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3055,7 +3055,6 @@ bool parseMemUeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
 bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
                       ErrlUsrParser & i_parser )
 {
@@ -3064,8 +3063,10 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
     bool o_rc = true;
 
     if ( NULL == i_buffer ) return false; // Something failed in parser.
+    if ( i_buflen < METADATA_SIZE )
+        return false; // Something failed in parser.
 
-    const uint32_t entries = i_buflen / ENTRY_SIZE;
+    const uint32_t entries = (i_buflen - METADATA_SIZE ) / ENTRY_SIZE;
 
     i_parser.PrintNumber( " MEM_CE_TABLE", "%d", entries );
 
@@ -3076,94 +3077,92 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
     hd = "---- - ---- ------- ------ ---- ---- - - ------";
     i_parser.PrintString( hh, hd );
 
-    for ( uint32_t i = 0; i < entries; i++ )
+    // Get the metadata info.
+    uint8_t isMba  = (i_buffer[0] >> 7) & 0x1;                          // 1-bit
+    uint8_t mbaPos = (i_buffer[0] >> 6) & 0x1;                          // 1-bit
+    // 6 spare bits                                                     // 6-bit
+    uint8_t rcType =  i_buffer[1];                                      // 8-bit
+    // Bytes 2-7 are currently unused.
+
+    // Get the entry info.
+    for ( uint32_t idx = METADATA_SIZE; idx < i_buflen;
+          idx += CE_TABLE::ENTRY_SIZE )
     {
-        uint32_t idx = i * ENTRY_SIZE;
+        uint32_t count    =  i_buffer[idx  ];                           // 8-bit
+        // 5 spare bits                                                 // 5-bit
+        uint32_t isSp     = (i_buffer[idx+1] >> 2) & 0x1;               // 1-bit
+        uint32_t isEcc    = (i_buffer[idx+1] >> 1) & 0x1;               // 1-bit
+        uint32_t ps       =  i_buffer[idx+1]       & 0x1;               // 1-bit
+        uint32_t isHard   = (i_buffer[idx+2] >> 7) & 0x1;               // 1-bit
+        uint32_t active   = (i_buffer[idx+2] >> 6) & 0x1;               // 1-bit
+        uint32_t dram     =  i_buffer[idx+2]       & 0x3f;              // 6-bit
+        uint32_t dramPins =  i_buffer[idx+3];                           // 8-bit
+        uint32_t mrnk     = (i_buffer[idx+4] >> 5) & 0x7;               // 3-bit
+        uint32_t srnk     = (i_buffer[idx+4] >> 2) & 0x7;               // 3-bit
+        uint32_t row0_1   =  i_buffer[idx+4]       & 0x3;               // 2-bit
+        uint32_t row2_9   =  i_buffer[idx+5];                           // 8-bit
+        uint32_t row10_17 =  i_buffer[idx+6];                           // 8-bit
+        uint32_t bnk      = (i_buffer[idx+7] >> 3) & 0x1f;              // 5-bit
+        // 2 spare bits                                                 // 2-bit
+        uint32_t col0     =  i_buffer[idx+7]       & 0x1;               // 1-bit
+        uint32_t col1_8   =  i_buffer[idx+8];                           // 8-bit
 
-        uint32_t count = i_buffer[idx];                             //  8-bit
-
-        uint32_t type13 = (i_buffer[idx+1] >> 5) & 0x7;             //  3-bit
-        uint32_t mbaPos = (i_buffer[idx+1] >> 4) & 0x1;             //  1-bit
-        uint32_t ps     = (i_buffer[idx+1] >> 3) & 0x1;             //  1-bit
-        uint32_t isSp   = (i_buffer[idx+1] >> 2) & 0x1;             //  1-bit
-        uint32_t isEcc  = (i_buffer[idx+1] >> 1) & 0x1;             //  1-bit
-        uint32_t type0  =  i_buffer[idx+1]       & 0x1;             //  1-bit
-
-        uint32_t type = type0 << 3 | type13;
-
-        uint8_t  isHard = (i_buffer[idx+2] >> 7) & 0x1;             //  1-bit
-        uint8_t  active = (i_buffer[idx+2] >> 6) & 0x1;             //  1-bit
-        uint8_t  dram   =  i_buffer[idx+2]       & 0x3f;            //  6-bit
-
-        uint32_t dramPins = i_buffer[idx+3];                        //  8-bit
-
-        uint32_t mrnk  = (i_buffer[idx+4] >> 5) & 0x7;              //  3-bit
-        uint32_t srnk  = (i_buffer[idx+4] >> 2) & 0x7;              //  3-bit
-        uint32_t svld  = (i_buffer[idx+4] >> 1) & 0x1;              //  1-bit
-
-        uint32_t row0    = i_buffer[idx+4] & 0x1;
-        uint32_t row1_8  = i_buffer[idx+5];
-        uint32_t row9_16 = i_buffer[idx+6];
-        uint32_t row     = (row0 << 16) | (row1_8 << 8) | row9_16;  // 17-bit
-
-        uint32_t bnk   = i_buffer[idx+7] >> 4;                      //  4-bit
-
-        uint32_t col0_3  = i_buffer[idx+7] & 0xf;
-        uint32_t col4_11 = i_buffer[idx+8];
-        uint32_t col     = (col0_3 << 8) | col4_11;                 // 12-bit
+        uint32_t row = (row0_1 << 16) | (row2_9 << 8) | row10_17;
+        uint32_t col =                  (col0   << 8) | col1_8;
 
         char active_char = ( 1 == active ) ? 'Y':'N';
         char isHard_char = ( 1 == isHard ) ? 'Y':'N';
         char isSp_char   = ( 1 == isSp   ) ? 'Y':'N';
         char isEcc_char  = ( 1 == isEcc  ) ? 'Y':'N';
 
-        // Get the DRAM site location information.
-        const char * cardName;
-        const char ** dqMap;
-        const char ** dramMap;
-        int32_t l_rc = getDramSiteInfo( type, mbaPos, ps, mrnk,
-                                        cardName, dqMap, dramMap );
-
-        // Check if DIMM has x4 DRAMs.
-        bool x4Dram;
-        l_rc |= isX4Dram( type, x4Dram );
-
-        // Get the DRAM site string.
+        const char * cardName_str = "";
+        const char * portSlct_str = " "; // intentionally an empty space.
         const char * dramSite_str = "";
-        if ( (SUCCESS == l_rc) &&
-             (dram < (x4Dram ? X4DRAMS_PER_RANK : X8DRAMS_PER_RANK)) )
-        {
-            // Get the DRAM index for site location table.
-            uint8_t symbol  = transEccSpare( dram2Symbol(dram, x4Dram),
-                                             (1 == isEcc) );
-            uint8_t dqIdx   = transDramSpare( symbol2Dq(symbol),
-                                              (1 == isSp) );
-            uint8_t dramIdx = dqSiteIdx2DramSiteIdx( dqIdx, x4Dram );
 
-            dramSite_str = dramMap[dramIdx];
-        }
+        if ( 1 == isMba )
+        {
+            // Get the DRAM site location information.
+            const char ** dqMap;
+            const char ** dramMap;
+            int32_t l_rc = getDramSiteInfo( rcType, mbaPos, ps, mrnk,
+                                            cardName_str, dqMap, dramMap );
 
-        // Get the rank string.
-        char rank_str[DATA_SIZE]; // 4 characters
-        if ( 1 == svld )
-        {
-            snprintf( rank_str, DATA_SIZE, "m%ds%d", mrnk, srnk );
-        }
-        else
-        {
-            snprintf( rank_str, DATA_SIZE, "m%d  ", mrnk );
+            // Check if DIMM has x4 DRAMs.
+            bool x4Dram;
+            l_rc |= isX4Dram( rcType, x4Dram );
+
+            // Get the DRAM site string.
+            if ( (SUCCESS == l_rc) &&
+                 (dram < (x4Dram ? MBA_NIBBLES_PER_RANK : MBA_BYTES_PER_RANK)) )
+            {
+                uint8_t tmp = x4Dram ? nibble2Symbol<TYPE_MBA>(dram)
+                                     : byte2Symbol  <TYPE_MBA>(dram);
+
+                // Get the DRAM index for site location table.
+                uint8_t symbol  = transEccSpare( tmp, (1 == isEcc) );
+                uint8_t dqIdx   = transDramSpare( symbol2Dq<TYPE_MBA>(symbol),
+                                                  (1 == isSp) );
+                uint8_t dramIdx = dqSiteIdx2DramSiteIdx( dqIdx, x4Dram );
+
+                dramSite_str = dramMap[dramIdx];
+            }
+
+            // Get the port select string.
+            char tmp[DATA_SIZE] = { '\0' };
+            snprintf( tmp, DATA_SIZE, "%1d", ps );
+            portSlct_str = tmp;
         }
 
         // Build the header string.
         char header[HEADER_SIZE] = { '\0' };
-        snprintf( header, HEADER_SIZE, "  %c %c  0x%02x %s ", active_char,
-                  isHard_char, count, cardName );
+        snprintf( header, HEADER_SIZE, "  %c %c  %3d  %s ", active_char,
+                  isHard_char, count, cardName_str );
 
         // Build the data string.
         char data[DATA_SIZE] = { '\0' };
         snprintf( data, DATA_SIZE,
-                  "%s %1d  0x%1x 0x%05x  0x%03x   %2d 0x%02x %c %c %s",
-                  rank_str, ps, bnk, row, col, dram, dramPins,
+                  "m%ds%d %s 0x%02x 0x%05x  0x%03x   %2d 0x%02x %c %c %s",
+                  mrnk, srnk, portSlct_str, bnk, row, col, dram, dramPins,
                   isSp_char, isEcc_char, dramSite_str );
 
         // Print the line.
@@ -3172,7 +3171,6 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
     return o_rc;
 }
-*/
 
 //------------------------------------------------------------------------------
 

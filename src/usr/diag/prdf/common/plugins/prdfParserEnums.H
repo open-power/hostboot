@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -136,10 +136,12 @@ namespace CE_TABLE
 {
     enum
     {
+        METADATA_SIZE =  8, ///< Number of bytes for the table metadata.
+
         MAX_ENTRIES = 32, ///< Maximum number of entries allow in table.
         ENTRY_SIZE  =  9, ///< Number of bytes per entry.
 
-        MAX_SIZE = MAX_ENTRIES * ENTRY_SIZE, ///< Maximum table size.
+        MAX_SIZE = METADATA_SIZE + MAX_ENTRIES * ENTRY_SIZE, ///< Maximum size.
     };
 
 } // namespace CE_TABLE

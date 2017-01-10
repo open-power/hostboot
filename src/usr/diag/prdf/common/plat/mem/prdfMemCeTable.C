@@ -190,12 +190,30 @@ void MemCeTable::addCapData( ExtensibleChip * i_chip, CaptureData & io_cd )
     // Centaur specific info.
     uint8_t isMba  = 0;
     uint8_t mbaPos = 0;
+    uint8_t rcType = CEN_SYMBOL::WIRING_INVALID;
     if ( TYPE_MBA == i_chip->getType() )
     {
         isMba  = 1;
         mbaPos = getTargetPosition( i_chip->getTrgt() );
+
+        /* TODO: RTC 157888
+        if ( SUCCESS != getMemBufRawCardType(i_chip->getTrgt(), rcType) )
+        {
+            PRDF_ERR( "[MemCeTable::addCapData] getMemBufRawCardType(0x%08x) "
+                      "failed", i_chip->getHuid() );
+            rcType = CEN_SYMBOL::WIRING_INVALID; // Just in case.
+        }
+        */
     }
 
+    // Fill in the header info.
+    data[0] = (isMba << 7) | (mbaPos << 6); // 6 spare bits
+    data[1] = rcType;
+    // Bytes 2-7 are currently unused.
+
+    sz_actData += METADATA_SIZE;
+
+    // Fill in the entry info.
     for ( CeTable::iterator it = iv_table.begin(); it != iv_table.end(); it++ )
     {
         uint32_t mrnk = it->addr.getRank().getMaster(); //  3-bit
@@ -217,9 +235,8 @@ void MemCeTable::addCapData( ExtensibleChip * i_chip, CaptureData & io_cd )
         uint8_t isEcc  = it->isEccSpared  ? 1 : 0;
 
         data[sz_actData  ] = it->count;
-        data[sz_actData+1] = // 3 bits spare here.
-                             (mbaPos << 4) | (it->portSlct << 3) |
-                             (isSp << 2) | (isEcc << 1) | isMba;
+        data[sz_actData+1] = // 5 bits spare here.
+                             (isSp << 2) | (isEcc << 1) | it->portSlct;
         data[sz_actData+2] = (isHard << 7) | (active << 6) | (it->dram & 0x3f);
         data[sz_actData+3] = it->dramPins;
         data[sz_actData+4] = (mrnk << 5) | (srnk << 2) | row0_1;
