@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,13 +39,13 @@ typedef union sbeMsgReg
         uint32_t reserved1 : 3; ///< Reserved
         uint32_t prevState : 4; ///< Previous SBE state
         uint32_t currState : 4; ///< Current SBE state
-        uint32_t majorStep : 4; ///< Last major istep executed by the SBE
-        uint32_t minorStep : 8; ///< Last minor istep executed by the SBE
-        uint32_t reserved2 : 8; ///< Reserved
+        uint32_t majorStep : 8; ///< Last major istep executed by the SBE
+        uint32_t minorStep : 6; ///< Last minor istep executed by the SBE
+        uint32_t reserved2 : 6; ///< Reserved
 #else
-        uint32_t reserved2 : 8; ///< Reserved
-        uint32_t minorStep : 8; ///< Last minor istep executed by the SBE
-        uint32_t majorStep : 4; ///< Last major istep executed by the SBE
+        uint32_t reserved2 : 6; ///< Reserved
+        uint32_t minorStep : 6; ///< Last minor istep executed by the SBE
+        uint32_t majorStep : 8; ///< Last major istep executed by the SBE
         uint32_t currState : 4; ///< Current SBE state
         uint32_t prevState : 4; ///< Previous SBE state
         uint32_t reserved1 : 3; ///< Reserved
@@ -61,19 +61,17 @@ typedef union sbeMsgReg
 typedef enum sbeState
 {
     SBE_STATE_UNKNOWN = 0x0, // Unkown, initial state
-    SBE_STATE_FFDC_COLLECT = 0x1, // Waiting for FFDC collection after a reset
-    SBE_STATE_IPLING = 0x2, // IPL'ing - autonomous mode (transient)
-    SBE_STATE_ISTEP = 0x3, // ISTEP - Running IPL by steps (transient)
+    SBE_STATE_IPLING  = 0x1, // IPL'ing - autonomous mode (transient)
+    SBE_STATE_ISTEP   = 0x2, // ISTEP - Running IPL by steps (transient)
+    SBE_STATE_MPIPL   = 0x3, // MPIPL
     SBE_STATE_RUNTIME = 0x4, // SBE Runtime
-    SBE_STATE_MPIPL = 0x5, // MPIPL
-    SBE_STATE_DMT = 0x6, // Dead Man Timer State (transient)
-    SBE_STATE_DUMP = 0x7, // Dumping
-    SBE_STATE_FAILURE = 0x8, // Internal SBE failure
-    SBE_STATE_QUIESCE = 0x9, // Final state - needs SBE reset to get out
-    SBE_STATE_ABORT = 0xA, // SBE was asked to abort - need reset to get out
+    SBE_STATE_DMT     = 0x5, // Dead Man Timer State (transient)
+    SBE_STATE_DUMP    = 0x6, // Dumping
+    SBE_STATE_FAILURE = 0x7, // Internal SBE failure
+    SBE_STATE_QUIESCE = 0x8, // Final state - needs SBE reset to get out
 
     // Max States, Always keep it at the last of the enum and sequential
-    SBE_MAX_STATE = 0xB,
+    SBE_MAX_STATE     = 0x9,
     // Don't count this in the state, just to intialize the state variables
     SBE_INVALID_STATE = 0xF,
 } sbeState_t;
