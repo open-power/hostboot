@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -77,8 +79,18 @@ extern "C" void __assert(AssertBehavior i_assertb, int i_line)
             printk("Assertion failed @%p on line %d. (kassert)\n",
                    linkRegister(), i_line);
 
+            /*@
+             * @errortype
+             * @moduleid     KERNEL::MOD_KERNEL_INVALID
+             * @reasoncode   KERNEL::RC_ASSERT
+             * @userdata1    Failing address
+             * @userdata2    <unused>
+             * @devdesc      Kernel has asserted
+             * @custdesc     Boot firmware has crashed with an internal
+             *               error.
+             */
             // Call function to create SRC and update TI Data area
-            termWriteSRC(TI_KERNEL_ASSERT, RC_ASSERT,
+            termWriteSRC(TI_KERNEL_ASSERT, KERNEL::RC_ASSERT,
                          reinterpret_cast<uint64_t>(linkRegister()));
 
             // Call to force TI

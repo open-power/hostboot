@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -467,9 +467,18 @@ void CpuManager::forceMemoryPeriodic()
 
 void CpuManager::critAssert(uint64_t i_failAddr)
 {
+    /*@
+     * @errortype
+     * @moduleid     KERNEL::MOD_KERNEL_INVALID
+     * @reasoncode   KERNEL::RC_SHUTDOWN
+     * @userdata1    Failing address
+     * @userdata2    <unused>
+     * @devdesc      Kernel encountered an unhandled exception.
+     * @custdesc     Boot firmware has crashed with an internal
+     *               error.
+     */
     /* create SRC amd call terminate immediate*/
-
-    termWriteSRC(TI_CRIT_ASSERT,RC_SHUTDOWN, i_failAddr);
+    termWriteSRC(TI_CRIT_ASSERT,KERNEL::RC_SHUTDOWN, i_failAddr);
 
     class ExecuteCritAssert : public DeferredWork
     {
