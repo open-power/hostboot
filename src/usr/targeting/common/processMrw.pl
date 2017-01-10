@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -103,10 +103,6 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
     {
         processProcessor($targetObj, $target);
     }
-    elsif ($type eq "MEMBUF")
-    {
-        processMembuf($targetObj, $target);
-    }
     elsif ($type eq "APSS")
     {
         processApss($targetObj, $target);
@@ -177,6 +173,11 @@ sub processSystem
     $targetObj->setAttribute($target, "MAX_PROC_CHIPS_PER_NODE",
         $targetObj->{NUM_PROCS_PER_NODE});
     parseBitwise($targetObj,$target,"CDM_POLICIES");
+
+    my ($num,$base,$group_offset,$proc_offset,$offset) = split(/,/,
+         $targetObj->getAttribute($target,"XSCOM_BASE_ADDRESS"));
+
+    $targetObj->setAttribute($target, "XSCOM_BASE_ADDRESS", $base);
 
 }
 
@@ -570,6 +571,16 @@ sub processI2cSpeeds
     my $i2cs=$targetObj->findConnections($target,"I2C","");
     if ($i2cs ne "") {
         foreach my $i2c (@{$i2cs->{CONN}}) {
+            my $dest_type = $targetObj->getTargetType($i2c->{DEST_PARENT});
+            my $parent_target =$targetObj->getTargetParent($i2c->{DEST_PARENT});
+            if ($dest_type eq "chip-spd-device") {
+                 setEepromAttributes($targetObj,
+                       "EEPROM_VPD_PRIMARY_INFO",$parent_target,
+                       $i2c);
+            } elsif ($dest_type eq "chip-dimm-thermal-sensor") {
+                 setDimmTempAttributes($targetObj, $parent_target, $i2c);
+            }
+
             my $port=oct($targetObj->getAttribute($i2c->{SOURCE},"I2C_PORT"));
             my $engine=oct($targetObj->getAttribute(
                            $i2c->{SOURCE},"I2C_ENGINE"));
@@ -663,7 +674,10 @@ sub setupBars
         my $value="";
         if ($num==0)
         {
-            $value=$base;
+            my $b=sprintf("0x%016s",substr((
+                        $i_base+$i_node_offset*$group+
+                        $i_proc_offset*$proc)->as_hex(),2));
+            $value=$b;
         }
         else
         {
@@ -1167,27 +1181,6 @@ sub processMembuf
 
     processMembufVpdAssociation($targetObj,$target);
 
-    ## finds which gpio expander that controls vddr regs for membufs
-    my $gpioexp=$targetObj->findConnections($target,"I2C","GPIO_EXPANDER");
-    if ($gpioexp ne "" ) {
-        my $vreg=$targetObj->findConnections(
-            $gpioexp->{CONN}->[0]->{DEST_PARENT},"GPIO","VOLTAGE_REGULATOR");
-        if ($vreg ne "") {
-            my $vddPin = $targetObj->getAttribute(
-                 $vreg->{CONN}->[0]->{SOURCE},"CHIP_UNIT");
-            my $membufs=$targetObj->findConnections(
-               $vreg->{CONN}->[0]->{DEST_PARENT},"POWER","MEMBUF");
-            if ($membufs ne "") {
-                foreach my $membuf (@{$membufs->{CONN}}) {
-                    my $aff = $targetObj->getAttribute($membuf->{DEST_PARENT},
-                        "PHYS_PATH");
-                    setGpioAttributes($targetObj,$membuf->{DEST_PARENT},
-                        $gpioexp->{CONN}->[0],$vddPin);
-
-                }
-            }
-        }
-    }
     ## find port mapping
     my %dimm_portmap;
     foreach my $child (@{$targetObj->getTargetChildren($target)})
@@ -1286,14 +1279,16 @@ sub setEepromAttributes
 
     my $port = $targetObj->getAttribute($conn_target->{SOURCE}, "I2C_PORT");
     my $engine = $targetObj->getAttribute($conn_target->{SOURCE}, "I2C_ENGINE");
-    my $addr = $targetObj->getBusAttribute($conn_target->{SOURCE},
-            $conn_target->{BUS_NUM}, "I2C_ADDRESS");
+    #my $addr = $targetObj->getBusAttribute($conn_target->{SOURCE},
+    #        $conn_target->{BUS_NUM}, "I2C_ADDRESS");
+
+    my $addr = $targetObj->getAttribute($conn_target->{DEST},"I2C_ADDRESS");
 
     my $path = $targetObj->getAttribute($conn_target->{SOURCE_PARENT},
                "PHYS_PATH");
     my $mem  = $targetObj->getAttribute($conn_target->{DEST_PARENT},
                "MEMORY_SIZE_IN_KB");
-    my $count  = 2; # default for VPD SEEPROMs
+    my $count  = 1; # default for VPD SEEPROMs
     my $cycle  = $targetObj->getAttribute($conn_target->{DEST_PARENT},
                "WRITE_CYCLE_TIME");
     my $page  = $targetObj->getAttribute($conn_target->{DEST_PARENT},
@@ -1315,6 +1310,25 @@ sub setEepromAttributes
     {
         $targetObj->setAttributeField($target, $name, "fruId", $fru);
     }
+}
+sub setDimmTempAttributes
+{
+    my $targetObj = shift;
+    my $target = shift;
+    my $conn_target = shift;
+    my $fru = shift;
+
+    my $name = "TEMP_SENSOR_I2C_CONFIG";
+    my $port = $targetObj->getAttribute($conn_target->{SOURCE}, "I2C_PORT");
+    my $engine = $targetObj->getAttribute($conn_target->{SOURCE}, "I2C_ENGINE");
+    my $addr = $targetObj->getAttribute($conn_target->{DEST},"I2C_ADDRESS");
+    my $path = $targetObj->getAttribute($conn_target->{SOURCE_PARENT},
+               "PHYS_PATH");
+
+    $targetObj->setAttributeField($target, $name, "i2cMasterPath", $path);
+    $targetObj->setAttributeField($target, $name, "port", $port);
+    $targetObj->setAttributeField($target, $name, "devAddr", $addr);
+    $targetObj->setAttributeField($target, $name, "engine", $engine);
 }
 
 

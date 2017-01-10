@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -75,6 +75,7 @@ sub new
         targeting    => undef,
         enumerations => undef,
         MAX_MCS      => 0,
+        UNIT_COUNTS  => undef,
         master_proc  => undef,
         huid_idx     => undef,
         mru_idx      => undef,
@@ -367,7 +368,9 @@ sub printAttribute
     }
     else
     {
-        print $fh "\t\t<default>$value</default>\n";
+        if ($value ne "") {
+                print $fh "\t\t<default>$value</default>\n";
+        }
     }
     print $fh "\t</attribute>\n";
 }
@@ -611,6 +614,19 @@ sub buildAffinity
 
     $self->{membuf_inst_num}=0;
 
+    ## count children target types
+    foreach my $target (sort keys %{ $self->{data}->{TARGETS} })
+    {
+        my $children = $self->getTargetChildren($target);
+        if ($children ne "") {
+             foreach my $child (@{ $children })
+             {
+                  my $type = $self->getType($child);
+                  $self->{UNIT_COUNTS}->{$target}->{$type}++;
+             }
+        }
+    }
+
     foreach my $target (sort keys %{ $self->{data}->{TARGETS} })
     {
         my $target_ptr = $self->{data}->{TARGETS}{$target};
@@ -684,6 +700,20 @@ sub buildAffinity
         elsif ($type eq "PROC")
         {
             $proc++;
+            my $num_mcs = 0;
+            ### count number of MCSs
+            foreach my $unit (@{ $self->{data}->{TARGETS}{$target}{CHILDREN} })
+            {
+                my $unit_type = $self->getType($unit);
+                if ($unit_type eq "MCBIST")
+                {
+                    $num_mcs+=2;  # 2 MCS's per MCBIST
+                }
+            }
+            if ($num_mcs > $self->{MAX_MCS})
+            {
+                $self->{MAX_MCS} = $num_mcs;
+            }
 
             $self->{NUM_PROCS_PER_NODE} = $proc + 1;
 
@@ -978,12 +1008,10 @@ sub processDimms
             my $proc_target         = $self->getTargetParent($mcbist_target);
             my $dimm_connector_tgt  = $self->getTargetParent($dimm);
 
-            my $mca     = $self->getAttribute($mca_target,         "CHIP_UNIT");
-            my $mcs     = $self->getAttribute($mcs_target,         "CHIP_UNIT");
-            my $mcbist  = $self->getAttribute($mcbist_target,      "CHIP_UNIT");
-            my $dimm_pos= $self->getAttribute($dimm_connector_tgt, "POSITION");
-
-            $dimm_pos   = ($dimm_pos*2) + $port_num;
+            my $mca     = $self->getAttribute($mca_target,       "CHIP_UNIT")%2;
+            my $mcs     = $self->getAttribute($mcs_target,       "CHIP_UNIT")%2;
+            my $mcbist  = $self->getAttribute($mcbist_target,    "CHIP_UNIT");
+            my $dimm_pos= $self->getAttribute($dimm_connector_tgt,"POSITION");
 
             $self->setAttribute($dimm, "AFFINITY_PATH",
                 $self->getAttribute($mcbist_target, "AFFINITY_PATH")
@@ -998,10 +1026,31 @@ sub processDimms
             $self->setAttribute($dimm,"FAPI_NAME",
                     getFapiName($type, $node, $dimm_pos));
 
-            $self->setAttribute($dimm, "FAPI_POS",  $dimm_pos);
             $self->setAttribute($dimm, "ORDINAL_ID",$dimm_pos);
             $self->setAttribute($dimm, "POSITION",  $dimm_pos);
             $self->setAttribute($dimm, "VPD_REC_NUM", $dimm_pos);
+            $self->setAttribute($dimm, "REL_POS", $port_num);
+            $self->setAttribute($dimm, "MBA_DIMM", $port_num); #which dimm
+            $self->setAttribute($dimm, "MBA_PORT", 0);  #0, each MCA is a port
+
+            ## set all FAPI_POS
+            my $DIMM_PER_CHANNEL = 2;
+            my $mcbist_pos = $proc * $self->{UNIT_COUNTS}->
+              {$proc_target}->{MCBIST} +
+              $self->getAttribute($mcbist_target,"REL_POS");
+            my $mcs_pos = $mcbist_pos * $self->{UNIT_COUNTS}->
+              {$mcbist_target}->{MCS} +
+              $self->getAttribute($mcs_target,"REL_POS");
+            my $mca_pos = $mcs_pos * $self->{UNIT_COUNTS}->
+              {$mcs_target}->{MCA} +
+              $self->getAttribute($mca_target,"REL_POS");
+            my $dimm_pos = $mca_pos * $DIMM_PER_CHANNEL +
+                        $self->getAttribute($dimm,"REL_POS");
+
+            $self->setAttribute($mcbist_target, "FAPI_POS",  $mcbist_pos);
+            $self->setAttribute($mcs_target, "FAPI_POS",  $mcs_pos);
+            $self->setAttribute($mca_target, "FAPI_POS",  $mca_pos);
+            $self->setAttribute($dimm, "FAPI_POS",  $dimm_pos);
 
             $self->{huid_idx}->{$type} = $dimm_pos;
             $self->setHuid($dimm, $sys, $node);
@@ -1015,6 +1064,7 @@ sub processDimms
     }
 
 }
+
 sub processMcs
 {
 #@TODO RTC:163874

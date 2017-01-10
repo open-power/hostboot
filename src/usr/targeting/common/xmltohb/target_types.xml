@@ -1762,7 +1762,6 @@
     <attribute><id>MSS_VPD_MT_MC_DQ_ACBOOST_WR_UP</id></attribute>
     <attribute><id>MSS_VPD_MT_MC_DQ_CTLE_CAP</id></attribute>
     <attribute><id>MSS_VPD_MT_MC_DQ_CTLE_RES</id></attribute>
-    <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
     <attribute><id>VPD_REC_NUM</id></attribute>
     <attribute><id>EFF_DRAM_GEN</id></attribute>
     <attribute><id>EFF_DIMM_TYPE</id></attribute>
