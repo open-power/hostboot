@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,9 +103,49 @@ MemSymbol MemSymbol::fromGalois( TargetHandle_t i_trgt, const MemRank & i_rank,
 
 uint8_t MemSymbol::getDq() const
 {
-    return TYPE_MBA == getTargetType(iv_trgt) ? symbol2Dq<TYPE_MBA>(iv_symbol)
-                                              : symbol2Dq<TYPE_MCA>(iv_symbol);
+    bool isMba = TYPE_MBA == getTargetType(iv_trgt);
+
+    return isMba ? symbol2Dq<TYPE_MBA>(iv_symbol)
+                 : symbol2Dq<TYPE_MCA>(iv_symbol);
 }
 
+//------------------------------------------------------------------------------
+
+uint8_t MemSymbol::getPortSlct() const
+{
+    bool isMba = TYPE_MBA == getTargetType(iv_trgt);
+
+    return isMba ? symbol2PortSlct<TYPE_MBA>(iv_symbol)
+                 : symbol2PortSlct<TYPE_MCA>(iv_symbol);
+}
+
+//------------------------------------------------------------------------------
+
+uint8_t MemSymbol::getDram() const
+{
+    bool isMba = TYPE_MBA == getTargetType(iv_trgt);
+    bool isX4  = isDramWidthX4( iv_trgt );
+
+    return isMba ? isX4 ? symbol2Nibble<TYPE_MBA>( iv_symbol )
+                        : symbol2Byte  <TYPE_MBA>( iv_symbol )
+                 : isX4 ? symbol2Nibble<TYPE_MCA>( iv_symbol )
+                        : symbol2Byte  <TYPE_MCA>( iv_symbol );
+}
+
+//------------------------------------------------------------------------------
+
+uint8_t MemSymbol::getDramPins() const
+{
+    bool isMba = TYPE_MBA == getTargetType(iv_trgt);
+    bool isX4  = isDramWidthX4( iv_trgt );
+
+    uint32_t dps = isMba ? MBA_DQS_PER_SYMBOL : MCA_DQS_PER_SYMBOL;
+    uint32_t spd = isMba ? isX4 ? MBA_SYMBOLS_PER_NIBBLE : MBA_SYMBOLS_PER_BYTE
+                         : isX4 ? MCA_SYMBOLS_PER_NIBBLE : MCA_SYMBOLS_PER_BYTE;
+
+    return iv_pins << (((spd - 1) - (iv_symbol % spd)) * dps);
+}
+
+//------------------------------------------------------------------------------
 
 } // end namespace PRDF
