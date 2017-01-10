@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,6 +104,17 @@ class MemSymbol
 
     /** @return rank associated with this symbol. */
     MemRank getRank() const { return iv_rank; };
+
+    /** @return The port select for this symbol. Only relevant on MBA. Will
+     *          always return 0 for MCA. */
+    uint8_t getPortSlct() const;
+
+    /** @return The DRAM index for this symbol. */
+    uint8_t getDram() const;
+
+    /** @return The bad pins associated with this symbol in relation to the DRAM
+     *          (x4 mode is 4-bits, x8 mode is 8-bits). */
+    uint8_t getDramPins() const;
 
     /** @return Marks this symbol as steered to a DRAM spare. */
     void setDramSpared() { iv_isDramSpared = true; }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,6 +99,16 @@ uint8_t symbol2PortSlct<TARGETING::TYPE_MBA>( uint8_t i_symbol )
     }
 
     return portSlct;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t symbol2PortSlct<TARGETING::TYPE_MCA>( uint8_t i_symbol )
+{
+    // Port select does not exist on MCA. Always return 0 so that code will
+    // continue to work.
+    return 0;
 }
 
 //------------------------------------------------------------------------------
