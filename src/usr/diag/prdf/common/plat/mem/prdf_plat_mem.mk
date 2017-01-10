@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -40,6 +40,7 @@ prd_incpath += ${PRD_SRC_PATH}/common/plat/mem
 # non-rule plugin related
 prd_obj += prdfMemAddress.o
 prd_obj += prdfMemCaptureData.o
+prd_obj += prdfMemCeTable.o
 prd_obj += prdfMemEccAnalysis.o
 prd_obj += prdfMemMark.o
 prd_obj += prdfMemSymbol.o

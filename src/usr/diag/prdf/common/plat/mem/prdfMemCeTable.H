@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaCeTable.H $   */
+/* $Source: src/usr/diag/prdf/common/plat/mem/prdfMemCeTable.H $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,19 +23,19 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfCenMbaCeTable_H
-#define __prdfCenMbaCeTable_H
+#ifndef __prdfMemCeTable_H
+#define __prdfMemCeTable_H
 
-/** @file  prdfCenMbaCeTable.H */
+/** @file  prdfMemCeTable.H */
 
 // Framwork includes
 #include <iipCaptureData.h>
-#include <prdfParserEnums.H>
-#include <prdfPlatServices.H>
+#include <prdfExtensibleChip.H>
 
 // Pegasus includes
-#include <prdfCenAddress.H>
-#include <prdfCenSymbol.H>
+#include <prdfMemAddress.H>
+#include <prdfMemSymbol.H>
+#include <prdfParserEnums.H>
 
 // Other includes
 #include <list>
@@ -43,15 +43,13 @@
 namespace PRDF
 {
 
-class CenMark;
-
 /**
  * @brief A table of memory CEs.
- * @note  Only one of these tables will exist per MBA.
+ * @note  Only one of these tables will exist per MBA/MCA.
  * @note  Will be used to determine when to do a TPS procedure for Targeted
  *        Diagnostics at runtime. Will be used for FFDC only during Hostboot.
  */
-class CenMbaCeTable
+class MemCeTable
 {
 
   public: // constants, enums
@@ -79,14 +77,6 @@ class CenMbaCeTable
   public: // functions
 
     /**
-     * @brief Constructor
-     * @param i_mbaTrgt An MBA target.
-     */
-    explicit CenMbaCeTable( TARGETING::TargetHandle_t i_mbaTrgt ) :
-        iv_mbaTrgt( i_mbaTrgt )
-    {}
-
-    /**
      * @brief  Will attempt to add a new entry to the table.
      *
      * If an entry already exists, the entry's count is incremented. Otherwise,
@@ -101,19 +91,14 @@ class CenMbaCeTable
      * @param  i_isHard TRUE if a hard CE was detected on this address/symbol.
      * @return Mask of possible return codes (see enum AddEntryRc).
      */
-    uint32_t addEntry( const CenAddr & i_addr, const CenSymbol & i_symbol,
+    uint32_t addEntry( const MemAddr & i_addr, const MemSymbol & i_symbol,
                        bool i_isHard = false );
-
-    /**
-     * @brief Deactivates all entries in the table.
-     */
-    void deactivateAll();
 
     /**
      * @brief Deactivates all entries covered by a rank.
      * @param i_rank The target rank.
      */
-    void deactivateRank( const CenRank & i_rank );
+    void deactivateRank( const MemRank & i_rank );
 
     /**
      * @brief Iterates the entire table and returns the number of unique entries
@@ -121,19 +106,19 @@ class CenMbaCeTable
      * @param i_rank      The failing rank.
      * @param i_symbol    The failing symbol.
      * @param o_dramCount The entry count for the target dram.
-     * @param o_hrCount   The entry count for the target half-rank (per rank
-     *                    per port select).
+     * @param o_rankCount The entry count for the target rank per logical DIMM.
      * @param o_dimmCount The entry count for the target logical DIMM.
      */
-    void getMnfgCounts( const CenRank & i_rank, const CenSymbol & i_symbol,
-                        uint32_t & o_dramCount, uint32_t & o_hrCount,
+    void getMnfgCounts( const MemRank & i_rank, const MemSymbol & i_symbol,
+                        uint32_t & o_dramCount, uint32_t & o_rankCount,
                         uint32_t & o_dimmCount );
 
     /**
      * @brief Gathers all table data to be stored in capture data.
-     * @param io_cd      Capture data struct.
+     * @param i_chip An MCA or MBA chip.
+     * @param io_cd  Capture data struct.
      */
-    void addCapData( CaptureData & io_cd );
+    void addCapData( ExtensibleChip * i_chip, CaptureData & io_cd );
 
   private: // structs, typedefs
 
@@ -142,11 +127,10 @@ class CenMbaCeTable
     {
         bool    active;              ///< TRUE if this entry is active
         uint8_t count;               ///< Number of times this entry is detected
-        CenAddr addr;                ///< Physical address of this entry
+        MemAddr addr;                ///< Physical address of this entry
         uint8_t dram;                ///< The DRAM in which the CE was detected
         uint8_t dramPins;            ///< The failing pins of the DRAM
-        uint8_t portSlct;            ///< The port select of the DRAM
-        CEN_SYMBOL::WiringType type; ///< The wiring type
+        uint8_t portSlct;            ///< The port select of the DRAM (MBA only)
         bool    isHard;              ///< TRUE if a hard CE was detected
         bool    isDramSpared;        ///< TRUE if on spare DRAM
         bool    isEccSpared;         ///< TRUE if on ECC spare
@@ -154,8 +138,7 @@ class CenMbaCeTable
         /** @brief Default constructor. */
         TableData() :
             active(false), count(0), addr(), dram(0), dramPins(0), portSlct(0),
-            type(CEN_SYMBOL::WIRING_INVALID), isHard(false),
-            isDramSpared(false), isEccSpared(false)
+            isHard(false), isDramSpared(false), isEccSpared(false)
         {}
 
         /**
@@ -165,13 +148,12 @@ class CenMbaCeTable
          * @param i_dramPins The failing pins of the DRAM
          * @param i_type     The wiring type (for DRAM site locations).
          */
-        TableData( const CenAddr & i_addr, uint8_t i_dram, uint8_t i_dramPins,
-                   uint8_t i_portSlct, CEN_SYMBOL::WiringType i_type,
-                   bool i_isHard, bool i_isDramSpared, bool i_isEccSpared ) :
+        TableData( const MemAddr & i_addr, uint8_t i_dram, uint8_t i_dramPins,
+                   uint8_t i_portSlct, bool i_isHard, bool i_isDramSpared,
+                   bool i_isEccSpared ) :
             active(true), count(1), addr(i_addr), dram(i_dram),
-            dramPins(i_dramPins), portSlct(i_portSlct), type(i_type),
-            isHard(i_isHard), isDramSpared(i_isDramSpared),
-            isEccSpared(i_isEccSpared)
+            dramPins(i_dramPins), portSlct(i_portSlct), isHard(i_isHard),
+            isDramSpared(i_isDramSpared), isEccSpared(i_isEccSpared)
         {}
 
         /** An entry is equivalent if the address and DRAM match. */
@@ -185,9 +167,6 @@ class CenMbaCeTable
 
   private: // instance variables
 
-    /** MBA associated with this table. */
-    TARGETING::TargetHandle_t iv_mbaTrgt;
-
     /** A storage container for memory fetch CE errors. */
     CeTable iv_table;
 
@@ -195,5 +174,5 @@ class CenMbaCeTable
 
 } // end namespace PRDF
 
-#endif // __prdfCenMbaCeTable_H
+#endif // __prdfMemCeTable_H
 

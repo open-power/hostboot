@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaCeTable.C $   */
+/* $Source: src/usr/diag/prdf/common/plat/mem/prdfMemCeTable.C $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,17 +23,13 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <prdfCenMbaCeTable.H>
+#include <prdfMemCeTable.H>
 
 #include <algorithm>
 
 // Framwork includes
 #include <iipServiceDataCollector.h>
-#include <prdfPlatServices.H>
 #include <UtilHash.H>
-
-// Pegasus includes
-#include <prdfCenMarkstore.H>
 
 using namespace TARGETING;
 
@@ -45,14 +41,13 @@ using namespace CE_TABLE;
 
 //------------------------------------------------------------------------------
 
-uint32_t CenMbaCeTable::addEntry( const CenAddr & i_addr,
-                                  const CenSymbol & i_symbol, bool i_isHard )
+uint32_t MemCeTable::addEntry( const MemAddr & i_addr,
+                               const MemSymbol & i_symbol, bool i_isHard )
 {
     uint32_t o_rc = NO_TH_REACHED;
 
     TableData data ( i_addr, i_symbol.getDram(), i_symbol.getDramPins(),
-                     i_symbol.getPortSlct(), i_symbol.getWiringType(),
-                     i_isHard, i_symbol.isDramSpared(),
+                     i_symbol.getPortSlct(), i_isHard, i_symbol.isDramSpared(),
                      i_symbol.isEccSpared() );
 
     // First, check if the entry already exists. If so, increment its count and
@@ -86,7 +81,7 @@ uint32_t CenMbaCeTable::addEntry( const CenAddr & i_addr,
 
     // Get number of entries in this table on the same rank as the new entry and
     // threshold if needed.
-    CenRank thisRank = data.addr.getRank();
+    MemRank thisRank = data.addr.getRank();
     uint32_t rankCount = 0;
     for ( CeTable::iterator it = iv_table.begin(); it != iv_table.end(); it++ )
     {
@@ -130,18 +125,7 @@ uint32_t CenMbaCeTable::addEntry( const CenAddr & i_addr,
 
 //------------------------------------------------------------------------------
 
-void CenMbaCeTable::deactivateAll()
-{
-    // NOTE: We don't want to reset the count here because it will be used for
-    //       FFDC. Instead the count will be reset in addEntry() if the entry is
-    //       not active.
-    for ( CeTable::iterator it = iv_table.begin(); it != iv_table.end(); it++ )
-        it->active = false;
-}
-
-//------------------------------------------------------------------------------
-
-void CenMbaCeTable::deactivateRank( const CenRank & i_rank )
+void MemCeTable::deactivateRank( const MemRank & i_rank )
 {
     // NOTE: We don't want to reset the count here because it will be used for
     //       FFDC. Instead the count will be reset in addEntry() if the entry is
@@ -155,13 +139,13 @@ void CenMbaCeTable::deactivateRank( const CenRank & i_rank )
 
 //------------------------------------------------------------------------------
 
-void CenMbaCeTable::getMnfgCounts( const CenRank & i_rank,
-                                   const CenSymbol & i_symbol,
-                                   uint32_t & o_dramCount,
-                                   uint32_t & o_hrCount,
-                                   uint32_t & o_dimmCount )
+void MemCeTable::getMnfgCounts( const MemRank & i_rank,
+                                const MemSymbol & i_symbol,
+                                uint32_t & o_dramCount,
+                                uint32_t & o_rankCount,
+                                uint32_t & o_dimmCount )
 {
-    o_dramCount = 0; o_hrCount = 0; o_dimmCount = 0;
+    o_dramCount = 0; o_rankCount = 0; o_dimmCount = 0;
 
     const uint32_t dram = i_symbol.getDram();
     const uint32_t ps   = i_symbol.getPortSlct();
@@ -171,7 +155,7 @@ void CenMbaCeTable::getMnfgCounts( const CenRank & i_rank,
     {
         if ( ps != it->portSlct ) continue;
 
-        CenRank itRank = it->addr.getRank();
+        MemRank itRank = it->addr.getRank();
 
         if ( ds == itRank.getDimmSlct() )
         {
@@ -179,7 +163,7 @@ void CenMbaCeTable::getMnfgCounts( const CenRank & i_rank,
 
             if ( i_rank == itRank )
             {
-                o_hrCount++;
+                o_rankCount++;
 
                 if ( dram == it->dram )
                     o_dramCount++;
@@ -190,7 +174,7 @@ void CenMbaCeTable::getMnfgCounts( const CenRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-void CenMbaCeTable::addCapData( CaptureData & io_cd )
+void MemCeTable::addCapData( ExtensibleChip * i_chip, CaptureData & io_cd )
 {
     static const size_t sz_word = sizeof(CPU_WORD);
 
@@ -203,23 +187,29 @@ void CenMbaCeTable::addCapData( CaptureData & io_cd )
 
     size_t sz_actData = 0;
 
-    uint32_t mbaPos = getTargetPosition( iv_mbaTrgt );
+    // Centaur specific info.
+    uint8_t isMba  = 0;
+    uint8_t mbaPos = 0;
+    if ( TYPE_MBA == i_chip->getType() )
+    {
+        isMba  = 1;
+        mbaPos = getTargetPosition( i_chip->getTrgt() );
+    }
 
     for ( CeTable::iterator it = iv_table.begin(); it != iv_table.end(); it++ )
     {
-        uint32_t mrnk = it->addr.getRank().getMaster();            //  3-bit
-        uint32_t srnk = it->addr.getRank().getSlave();             //  3-bit
-        uint32_t svld = it->addr.getRank().isSlaveValid() ? 1 : 0; //  1-bit
-        uint32_t bnk  = it->addr.getBank();                        //  4-bit
-        uint32_t row  = it->addr.getRow();                         // 17-bit
-        uint32_t col  = it->addr.getCol();                         // 12-bit
+        uint32_t mrnk = it->addr.getRank().getMaster(); //  3-bit
+        uint32_t srnk = it->addr.getRank().getSlave();  //  3-bit
+        uint32_t bnk  = it->addr.getBank();             //  5-bit (MCA)
+        uint32_t row  = it->addr.getRow();              // 18-bit
+        uint32_t col  = it->addr.getCol();              //  9-bit (MBA)
 
-        uint8_t row0    = (row & 0x10000) >> 16;
-        uint8_t row1_8  = (row & 0x0ff00) >>  8;
-        uint8_t row9_16 =  row & 0x000ff;
+        uint8_t row0_1   = (row & 0x30000) >> 16;
+        uint8_t row2_9   = (row & 0x0ff00) >>  8;
+        uint8_t row10_17 =  row & 0x000ff;
 
-        uint8_t col0_3  = (col & 0xf00) >> 8;
-        uint8_t col4_11 =  col & 0x0ff;
+        uint8_t col0     = (col & 0x100) >> 8;
+        uint8_t col1_8   =  col & 0x0ff;
 
         uint8_t active = it->active ? 1 : 0;
         uint8_t isHard = it->isHard ? 1 : 0;
@@ -227,17 +217,16 @@ void CenMbaCeTable::addCapData( CaptureData & io_cd )
         uint8_t isEcc  = it->isEccSpared  ? 1 : 0;
 
         data[sz_actData  ] = it->count;
-        data[sz_actData+1] = ((it->type & 0x7) << 5) |
+        data[sz_actData+1] = // 3 bits spare here.
                              (mbaPos << 4) | (it->portSlct << 3) |
-                             (isSp << 2) | (isEcc << 1) |
-                             ((it->type & 0x8) >> 3);
+                             (isSp << 2) | (isEcc << 1) | isMba;
         data[sz_actData+2] = (isHard << 7) | (active << 6) | (it->dram & 0x3f);
         data[sz_actData+3] = it->dramPins;
-        data[sz_actData+4] = (mrnk << 5) | (srnk << 2) | (svld << 1) | row0;
-        data[sz_actData+5] = row1_8;
-        data[sz_actData+6] = row9_16;
-        data[sz_actData+7] = (bnk << 4) | col0_3;
-        data[sz_actData+8] = col4_11;
+        data[sz_actData+4] = (mrnk << 5) | (srnk << 2) | row0_1;
+        data[sz_actData+5] = row2_9;
+        data[sz_actData+6] = row10_17;
+        data[sz_actData+7] = (bnk << 3) | col0; // 2 bits to spare in between.
+        data[sz_actData+8] = col1_8;
 
         sz_actData += ENTRY_SIZE;
     }
@@ -251,7 +240,7 @@ void CenMbaCeTable::addCapData( CaptureData & io_cd )
 
         // Add data to capture data.
         BIT_STRING_ADDRESS_CLASS bs ( 0, sz_actData*8, (CPU_WORD *) &data );
-        io_cd.Add( iv_mbaTrgt, Util::hashString("MEM_CE_TABLE"), bs );
+        io_cd.Add( i_chip->getTrgt(), Util::hashString("MEM_CE_TABLE"), bs );
     }
 }
 
