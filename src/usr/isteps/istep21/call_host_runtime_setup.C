@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,9 +146,9 @@ void* call_host_runtime_setup (void *io_pArgs)
         } // end if phyp load
 
 #ifdef CONFIG_START_OCC_DURING_BOOT
-        bool l_activatePM = true;
-#else
         bool l_activatePM = !(TARGETING::is_phyp_load());
+#else
+        bool l_activatePM = false;
 #endif
 
         if(l_activatePM)
