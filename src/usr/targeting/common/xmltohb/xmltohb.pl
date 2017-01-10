@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -41,6 +41,7 @@ use strict;
 # Use of the following packages
 ################################################################################
 
+use Carp;
 use Getopt::Long;
 use Pod::Usage;
 use XML::Simple;
@@ -211,7 +212,7 @@ if( !($cfgSrcOutputDir =~ "none") )
 {
 
     open(ATTR_TARG_MAP_FILE,">$cfgSrcOutputDir"."targAttrOverrideData.H")
-      or fatal("Target Attribute data file: \"$cfgSrcOutputDir"
+      or croak("Target Attribute data file: \"$cfgSrcOutputDir"
         . "getTargAttrData.C\" could not be opened.");
     my $targAttrFile = *ATTR_TARG_MAP_FILE;
     writeTargAttrMap($attributes, $targAttrFile);
@@ -219,7 +220,7 @@ if( !($cfgSrcOutputDir =~ "none") )
 
 
     open(TRAIT_FILE,">$cfgSrcOutputDir"."attributetraits.H")
-      or fatal ("Trait file: \"$cfgSrcOutputDir"
+      or croak ("Trait file: \"$cfgSrcOutputDir"
         . "attributetraits.H\" could not be opened.");
     my $traitFile = *TRAIT_FILE;
     writeTraitFileHeader($attributes,$traitFile);
@@ -228,7 +229,7 @@ if( !($cfgSrcOutputDir =~ "none") )
     close $traitFile;
 
     open(ATTR_FILE,">$cfgSrcOutputDir"."attributeenums.H")
-      or fatal ("Attribute enum file: \"$cfgSrcOutputDir"
+      or croak ("Attribute enum file: \"$cfgSrcOutputDir"
         . "attributeenums.H\" could not be opened.");
     my $enumFile = *ATTR_FILE;
     writeEnumFileHeader($enumFile);
@@ -238,7 +239,7 @@ if( !($cfgSrcOutputDir =~ "none") )
     close $enumFile;
 
     open(STRING_HEADER_FILE,">$cfgSrcOutputDir"."attributestrings.H")
-      or fatal ("Attribute string header file: \"$cfgSrcOutputDir"
+      or croak ("Attribute string header file: \"$cfgSrcOutputDir"
         . "attributestrings.H\" could not be opened.");
     my $stringHeaderFile = *STRING_HEADER_FILE;
     writeStringHeaderFileHeader($stringHeaderFile);
@@ -247,7 +248,7 @@ if( !($cfgSrcOutputDir =~ "none") )
     close $stringHeaderFile;
 
     open(STRING_IMPLEMENTATION_FILE,">$cfgSrcOutputDir"."attributestrings.C")
-      or fatal ("Attribute string source file: \"$cfgSrcOutputDir"
+      or croak ("Attribute string source file: \"$cfgSrcOutputDir"
         . "attributestrings.C\" could not be opened.");
     my $stringImplementationFile = *STRING_IMPLEMENTATION_FILE;
     writeStringImplementationFileHeader($stringImplementationFile);
@@ -257,7 +258,7 @@ if( !($cfgSrcOutputDir =~ "none") )
     close $stringImplementationFile;
 
     open(STRUCTS_HEADER_FILE,">$cfgSrcOutputDir"."attributestructs.H")
-      or fatal ("Attribute struct file: \"$cfgSrcOutputDir"
+      or croak ("Attribute struct file: \"$cfgSrcOutputDir"
         . "attributestructs.H\" could not be opened.");
     my $structFile = *STRUCTS_HEADER_FILE;
     writeStructFileHeader($structFile);
@@ -266,14 +267,14 @@ if( !($cfgSrcOutputDir =~ "none") )
     close $structFile;
 
     open(PNOR_HEADER_DEF_FILE,">$cfgSrcOutputDir"."pnortargeting.H")
-      or fatal ("Targeting header definition header file: \"$cfgSrcOutputDir"
+      or croak ("Targeting header definition header file: \"$cfgSrcOutputDir"
         . "pnortargeting.H\" could not be opened.");
     my $pnorHeaderDefFile = *PNOR_HEADER_DEF_FILE;
     writeHeaderFormatHeaderFile($pnorHeaderDefFile);
     close $pnorHeaderDefFile;
 
     open(FAPI_PLAT_ATTR_MACROS_FILE,">$cfgSrcOutputDir"."fapiplatattrmacros.H")
-      or fatal ("FAPI platform attribute macro header file: \"$cfgSrcOutputDir"
+      or croak ("FAPI platform attribute macro header file: \"$cfgSrcOutputDir"
         . "fapiplatattrmacros.H\" could not be opened.");
     my $fapiPlatAttrMacrosHeaderFile = *FAPI_PLAT_ATTR_MACROS_FILE;
     writeFapiPlatAttrMacrosHeaderFileHeader ($fapiPlatAttrMacrosHeaderFile);
@@ -283,7 +284,7 @@ if( !($cfgSrcOutputDir =~ "none") )
     close $fapiPlatAttrMacrosHeaderFile;
 
     open(ATTR_ATTRERRL_C_FILE,">$cfgSrcOutputDir"."errludattribute.C")
-      or fatal ("Attribute errlog C file: \"$cfgSrcOutputDir"
+      or croak ("Attribute errlog C file: \"$cfgSrcOutputDir"
         . "errludattribute.C\" could not be opened.");
     my $attrErrlCFile = *ATTR_ATTRERRL_C_FILE;
     writeAttrErrlCFile($attributes,$attrErrlCFile);
@@ -291,42 +292,42 @@ if( !($cfgSrcOutputDir =~ "none") )
 
     mkdir("$cfgSrcOutputDir/errl");
     open(ATTR_ATTRERRL_H_FILE,">$cfgSrcOutputDir"."errl/errludattribute.H")
-      or fatal ("Attribute errlog H file: \"$cfgSrcOutputDir"
+      or croak ("Attribute errlog H file: \"$cfgSrcOutputDir"
         . "errl/errludattribute.H\" could not be opened.");
     my $attrErrlHFile = *ATTR_ATTRERRL_H_FILE;
     writeAttrErrlHFile($attributes,$attrErrlHFile);
     close $attrErrlHFile;
 
     open(ATTR_TARGETERRL_C_FILE,">$cfgSrcOutputDir"."errludtarget.C")
-      or fatal ("Target errlog C file: \"$cfgSrcOutputDir"
+      or croak ("Target errlog C file: \"$cfgSrcOutputDir"
         . "errludtarget.C\" could not be opened.");
     my $targetErrlCFile = *ATTR_TARGETERRL_C_FILE;
     writeTargetErrlCFile($attributes,$targetErrlCFile);
     close $targetErrlCFile;
 
     open(ATTR_TARGETERRL_H_FILE,">$cfgSrcOutputDir"."errl/errludtarget.H")
-      or fatal ("Target errlog H file: \"$cfgSrcOutputDir"
+      or croak ("Target errlog H file: \"$cfgSrcOutputDir"
         . "errl/errludtarget.H\" could not be opened.");
     my $targetErrlHFile = *ATTR_TARGETERRL_H_FILE;
     writeTargetErrlHFile($attributes,$targetErrlHFile);
     close $targetErrlHFile;
 
     open(ATTR_INFO_CSV_FILE,">$cfgSrcOutputDir"."targAttrInfo.csv")
-      or fatal ("Attribute info csv file: \"$cfgSrcOutputDir"
+      or croak ("Attribute info csv file: \"$cfgSrcOutputDir"
         . "targAttrInfo.csv\" could not be opened.");
     my $attrInfoCsvFile = *ATTR_INFO_CSV_FILE;
     writeAttrInfoCsvFile($attributes,$attrInfoCsvFile);
     close $attrInfoCsvFile;
 
     open(MAP_ATTR_METADATA_H_FILE,">$cfgSrcOutputDir"."mapattrmetadata.H")
-      or fatal ("Attribute metadata map file Header: \"$cfgSrcOutputDir"
+      or croak ("Attribute metadata map file Header: \"$cfgSrcOutputDir"
         . "mapattrmetadata.H\" could not be opened.");
     my $attrMetadataMapHFile = *MAP_ATTR_METADATA_H_FILE;
     writeAttrMetadataMapHFile($attrMetadataMapHFile);
     close $attrMetadataMapHFile;
 
     open(MAP_ATTR_METADATA_C_FILE,">$cfgSrcOutputDir"."mapattrmetadata.C")
-      or fatal ("Attribute metadata map C file: \"$cfgSrcOutputDir"
+      or croak ("Attribute metadata map C file: \"$cfgSrcOutputDir"
         . "mapattrmetadata.C\" could not be opened.");
     my $attrMetadataMapCFile = *MAP_ATTR_METADATA_C_FILE;
     writeAttrMetadataMapCFileHeader($attrMetadataMapCFile);
@@ -335,14 +336,14 @@ if( !($cfgSrcOutputDir =~ "none") )
     close $attrMetadataMapCFile;
 
     open(MAP_ATTR_SIZE_H_FILE,">$cfgSrcOutputDir"."mapsystemattrsize.H")
-      or fatal ("Attribute size map file Header: \"$cfgSrcOutputDir"
+      or croak ("Attribute size map file Header: \"$cfgSrcOutputDir"
         . "mapsystemattrsize.H\" could not be opened.");
     my $attrSizeMapHFile = *MAP_ATTR_SIZE_H_FILE;
     writeAttrSizeMapHFile($attrSizeMapHFile);
     close $attrSizeMapHFile;
 
     open(MAP_ATTR_SIZE_C_FILE,">$cfgSrcOutputDir"."mapsystemattrsize.C")
-      or fatal ("Attribute size map file: \"$cfgSrcOutputDir"
+      or croak ("Attribute size map file: \"$cfgSrcOutputDir"
         . "mapsystemattrsize.C\" could not be opened.");
     my $attrSizeMapCFile = *MAP_ATTR_SIZE_C_FILE;
     writeAttrSizeMapCFileHeader($attrSizeMapCFile);
@@ -384,7 +385,7 @@ if( !($cfgImgOutputDir =~ "none") )
 
     # Generate combined targeting file (FSP-only)
     open(PNOR_TARGETING_FILE,">$cfgImgOutputDir".$cfgImgOutputFile)
-      or fatal ("Targeting image file: \"$cfgImgOutputDir"
+      or croak ("Targeting image file: \"$cfgImgOutputDir"
         . "$cfgImgOutputFile\" could not be opened.");
     binmode(PNOR_TARGETING_FILE);
     print PNOR_TARGETING_FILE "$combinedData";
@@ -394,7 +395,7 @@ if( !($cfgImgOutputDir =~ "none") )
     {
         # Generate protected payload file
         open(PNOR_TARGETING_FILE,">$cfgImgOutputDir"."$cfgImgOutputFile.protected")
-          or fatal ("Targeting image file: \"$cfgImgOutputDir"
+          or croak ("Targeting image file: \"$cfgImgOutputDir"
             . "$cfgImgOutputFile.protected\" could not be opened.");
         binmode(PNOR_TARGETING_FILE);
         print PNOR_TARGETING_FILE "$protectedData";
@@ -402,7 +403,7 @@ if( !($cfgImgOutputDir =~ "none") )
 
         # Generate unprotected payload file
         open(PNOR_TARGETING_FILE,">$cfgImgOutputDir"."$cfgImgOutputFile.unprotected")
-          or fatal ("Targeting image file: \"$cfgImgOutputDir"
+          or croak ("Targeting image file: \"$cfgImgOutputDir"
             . "$cfgImgOutputFile.unprotected\" could not be opened.");
         binmode(PNOR_TARGETING_FILE);
         print PNOR_TARGETING_FILE "$unprotectedData";
@@ -418,29 +419,6 @@ if( !($cfgImgOutputDir =~ "none") )
 
 exit(0);
 
-################################################################################
-# Report a fatal error and quit
-################################################################################
-
-sub DEBUG_FUNCTIONS { }
-sub fatal {
-    my($msg) = @_;
-
-    print STDERR "[FATAL!] $msg\n";
-
-    for(my $caller = 1; ; $caller++)
-    {
-        my ($package, $filename, $callerLine,
-            $subr, $has_args, $wantarray )= caller($caller);
-        my $line = (caller($caller-1))[2];
-        if(!$line) { last; }
-
-        print STDERR "     $caller: $subr" . "(". $line . ")\n";
-    }
-
-    exit(1);
-}
-
 sub VALIDATION_FUNCTIONS { }
 
 ################################################################################
@@ -453,7 +431,7 @@ sub validateSubElements {
     if($mustBeHash && (ref($element) ne "HASH"))
     {
         print "name=$name, mustBeHash=$mustBeHash, element=$element, criteria=$criteria \n";
-        fatal("$name must be in the form of a hash.");
+        croak("$name must be in the form of a hash.");
     }
 
     # print keys %{$element} . "\n";
@@ -462,7 +440,7 @@ sub validateSubElements {
     {
         if(!exists $criteria->{$subElementName})
         {
-            fatal("$name element cannot have child element of type "
+            croak("$name element cannot have child element of type "
                   . "\"$subElementName\".");
         }
     }
@@ -472,7 +450,7 @@ sub validateSubElements {
         if(   ($criteria->{$subElementName}{required} == 1)
            && (!exists $element->{$subElementName}))
         {
-            fatal("$name element missing required child element "
+            croak("$name element missing required child element "
                   . "\"$subElementName\".");
         }
 
@@ -480,7 +458,7 @@ sub validateSubElements {
            && ($criteria->{$subElementName}{isscalar} == 1)
              && (ref ($element->{$subElementName}) eq "HASH"))
         {
-            fatal("$name element child element \"$subElementName\" should be "
+            croak("$name element child element \"$subElementName\" should be "
                   . "scalar, but is a hash.");
         }
     }
@@ -613,7 +591,7 @@ sub handleTgtPtrAttributesFsp
                     $peerHUID = getPeerHuid($targetInstance);
                     if($peerHUID == INVALID_HUID)
                     {
-                        fatal("HUID for Peer Target not found for "
+                        croak("HUID for Peer Target not found for "
                             . "Peer Target [$attr->{default}]\n");
                     }
                     elsif($peerHUID == PEER_HUID_NOT_PRESENT)
@@ -810,7 +788,7 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
             if(   !exists $hwpfToHbAttrMap->{id}
                || !exists $hwpfToHbAttrMap->{macro})
             {
-                fatal("id,macro fields required\n");
+                croak("id,macro fields required\n");
             }
 
             my $fapiReadable  = 0;
@@ -855,7 +833,7 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
                         {
                             if ($hwpfToHbAttrMap->{macro} ne "DIRECT")
                             {
-                                fatal("FAPI non-platInit attr " .
+                                croak("FAPI non-platInit attr " .
                                       "'$hwpfToHbAttrMap->{id}' is " .
                                       "'$hwpfToHbAttrMap->{macro}', " .
                                       "it must be DIRECT");
@@ -865,7 +843,7 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
                             {
                                 if ($attribute->{persistency} ne "non-volatile")
                                 {
-                                    fatal("FAPI non-platInit attr " .
+                                    croak("FAPI non-platInit attr " .
                                           "'$hwpfToHbAttrMap->{id}' is " .
                                           "'$attribute->{persistency}', " .
                                           "it must be non-volatile");
@@ -878,7 +856,7 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
                                 if($attribute->{persistency} ne
                                    "volatile-zeroed")
                                 {
-                                     fatal("FAPI non-platInit attr " .
+                                     croak("FAPI non-platInit attr " .
                                       "'$hwpfToHbAttrMap->{id}' is " .
                                       "'$attribute->{persistency}', " .
                                       "it must be volatile-zeroed");
@@ -911,7 +889,7 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
                     }
                     else
                     {
-                        fatal("FAPI attribute $hwpfToHbAttrMap->{id} requires " .
+                        croak("FAPI attribute $hwpfToHbAttrMap->{id} requires " .
                             "platform supply readable attribute.");
                     }
                 }
@@ -928,7 +906,7 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
                     }
                     else
                     {
-                        fatal("FAPI attribute $hwpfToHbAttrMap->{id} requires "
+                        croak("FAPI attribute $hwpfToHbAttrMap->{id} requires "
                             . "platform supply writeable attribute.");
                     }
                 }
@@ -1297,7 +1275,7 @@ sub getEnumerationType {
 
     if(!exists $matchingEnumeration->{id})
     {
-        fatal("Could not find enumeration with ID of " . $id . "\n");
+        croak("Could not find enumeration with ID of " . $id . "\n");
     }
 
     return $matchingEnumeration;
@@ -1373,7 +1351,7 @@ sub writeStructFileStructs {
             my $complexType = $attribute->{complexType};
             if(!exists $complexType->{description})
             {
-                fatal("ERROR: Complex type requires a 'description'.");
+                croak("ERROR: Complex type requires a 'description'.");
             }
 
             print $outFile "/**\n";
@@ -1915,7 +1893,7 @@ sub writeTraitFileTraits {
 
             if($type eq "")
             {
-                fatal("Unsupported simpleType child element for "
+                croak("Unsupported simpleType child element for "
                     . "attribute $attribute->{id}.  Keys are ("
                     . join(',',sort(keys %{$simpleType})) . ")");
             }
@@ -1930,7 +1908,7 @@ sub writeTraitFileTraits {
         }
         else
         {
-            fatal("Could not determine attribute data type for attribute "
+            croak("Could not determine attribute data type for attribute "
                 . "$attribute->{id}.");
         }
 
@@ -2783,7 +2761,7 @@ sub writeAttrMetadataMapCFile{
 
             if(!(exists $finalAttrhash{$key}->{persistency}))
             {
-                fatal("Attribute[$key] should have persistency by default");
+                croak("Attribute[$key] should have persistency by default");
             }
             if($finalAttrhash{$key}->{persistency} eq "non-volatile")
             {
@@ -2802,7 +2780,7 @@ sub writeAttrMetadataMapCFile{
             }
             else
             {
-                fatal("Not a defined" .
+                croak("Not a defined" .
                     "Persistency[$finalAttrhash{$key}->{persistency}] for" .
                     "attribute [$key]");
             }
@@ -3651,7 +3629,7 @@ sub getAttributeIdEnumeration {
             # fatal error if multiple IDs hash to same value
             if ( $attribute->{id} ne $attrValHash{$attributeHexVal28bit} )
             {
-               fatal(
+               croak(
                  "Error:Duplicate AttributeId hashvalue for $attribute->{id} "
                      . "and $attrValHash{$attributeHexVal28bit}");
             }
@@ -3661,7 +3639,7 @@ sub getAttributeIdEnumeration {
             # attribute_types_hb.xml or attributes_types_fsp.
             else
             {
-               fatal("Error: AttributeId $attribute->{id} "
+               croak("Error: AttributeId $attribute->{id} "
                      . "defined multiple times");
             }
         }
@@ -3809,7 +3787,7 @@ sub packString{
 
     if(($length + 1) > $sizeInclNull)
     {
-        fatal("ERROR: Supplied string exceeds allows length");
+        croak("ERROR: Supplied string exceeds allows length");
     }
 
     return pack("Z$sizeInclNull",$value);
@@ -3852,13 +3830,13 @@ sub sizeBlockAligned {
        || (!defined $blockSize)
        || (!defined $oneBlockMinimum) )
     {
-        fatal("Caller must specify 'size', 'blockSize', 'oneBlockMinimum' "
+        croak("Caller must specify 'size', 'blockSize', 'oneBlockMinimum' "
             . "args.");
     }
 
     if(!$blockSize)
     {
-        fatal("'blockSize' arg must be > 0.");
+        croak("'blockSize' arg must be > 0.");
     }
 
     if(($size % $blockSize) || (($size==0) && $oneBlockMinimum) )
@@ -4029,13 +4007,13 @@ sub enforceFspMutex {
 
     if($value != 0)
     {
-        fatal("FSP mutex attribute default must always be 0, "
+        croak("FSP mutex attribute default must always be 0, "
               . "was $value instead.");
     }
 
     if($attribute->{persistency} ne "volatile-zeroed")
     {
-        fatal("FSP mutex attribute persistency must be volatile-zeroed, "
+        croak("FSP mutex attribute persistency must be volatile-zeroed, "
               . "was $attribute->{persistency} instead");
     }
 }
@@ -4049,13 +4027,13 @@ sub enforceHbMutex {
 
     if($value != 0)
     {
-        fatal("HB mutex attribute default must always be 0, "
+        croak("HB mutex attribute default must always be 0, "
               . "was $value instead.");
     }
 
     if($attribute->{persistency} ne "volatile-zeroed")
     {
-        fatal("HB mutex attribute persistency must be volatile-zeroed, "
+        croak("HB mutex attribute persistency must be volatile-zeroed, "
               . "was $attribute->{persistency} instead");
     }
 }
@@ -4069,23 +4047,23 @@ sub enforceString {
 
     if(!exists $attribute->{simpleType})
     {
-        fatal("ERROR: Tried to enforce string policies on a non-simple type");
+        croak("ERROR: Tried to enforce string policies on a non-simple type");
     }
 
     if(!exists $attribute->{simpleType}->{string})
     {
-        fatal("ERROR: Did not find expected string element");
+        croak("ERROR: Did not find expected string element");
     }
 
     if(!exists $attribute->{simpleType}->{string}->{sizeInclNull})
     {
-        fatal("ERROR: Did not find expected string sizeInclNull element");
+        croak("ERROR: Did not find expected string sizeInclNull element");
     }
 
     my $size = $attribute->{simpleType}->{string}->{sizeInclNull};
     if($size <= 1)
     {
-        fatal("ERROR: String size must be > 1 (string of size one is "
+        croak("ERROR: String size must be > 1 (string of size one is "
             . "only big enough to hold the empty string, which is not "
             . "useful)");
     }
@@ -4195,12 +4173,12 @@ sub getAttributeDefault {
                 }
                 else
                 {
-                    fatal("Cannot provide default for unsupported nativeType.");
+                    croak("Cannot provide default for unsupported nativeType.");
                 }
             }
             else
             {
-                fatal("Unrecognized value type.");
+                croak("Unrecognized value type.");
             }
 
             last;
@@ -4294,7 +4272,7 @@ sub packEnumeration {
 
     if( (length $binaryData) < 1)
     {
-        fatal("Failed to write binary data for enumeration.");
+        croak("Failed to write binary data for enumeration.");
     }
 
     #print "           Enum description: ", $enumeration->{description}, "\n";
@@ -4355,7 +4333,7 @@ sub enumNameToValue {
     {
         my $enumerationName = $enumeration->{id};
 
-        fatal("Could not convert enumerator name \"$enumeratorName\"into "
+        croak("Could not convert enumerator name \"$enumeratorName\"into "
             . "enumerator value in \"$enumerationName\".");
     }
 
@@ -4419,7 +4397,7 @@ sub accumulate {
 
     if($bits > $simpleTypeProperties->{$type}{bits})
     {
-        main::fatal("Too many bits ($bits) for type ($type).");
+        croak("Too many bits ($bits) for type ($type).");
     }
 
     if($self->{_currentType} eq "")
@@ -4596,7 +4574,7 @@ sub packComplexType {
                     }
                     else
                     {
-                        fatal("Field type $field->{type} not supported in "
+                        croak("Field type $field->{type} not supported in "
                             . "complex type.");
                     }
                 }
@@ -4607,7 +4585,7 @@ sub packComplexType {
 
         if(!$found)
         {
-            fatal("Could not find value for field $field->{name} of type $field->{type}");
+            croak("Could not find value for field $field->{name} of type $field->{type}");
         }
     }
 
@@ -4643,12 +4621,12 @@ sub packEntityPath {
     }
     else
     {
-        fatal("Unsupported entity path type of [$value], [$typeStr], [$path].");
+        croak("Unsupported entity path type of [$value], [$typeStr], [$path].");
     }
 
     if( (scalar @paths) > $maxPathElements)
     {
-        fatal("Path elements cannot be greater than $maxPathElements.");
+        croak("Path elements cannot be greater than $maxPathElements.");
     }
 
     if($cfgBigEndian)
@@ -4836,7 +4814,7 @@ sub packAttribute {
 
         if( (length $binaryData) < 1)
         {
-            fatal("Error requested simple type not supported.  Keys are ("
+            croak("Error requested simple type not supported.  Keys are ("
                 . join(',',sort(keys %{$simpleType})) . ")");
         }
     }
@@ -4849,7 +4827,7 @@ sub packAttribute {
         }
         else
         {
-            fatal("Warning cannot serialize non-hash complex type.");
+            croak("Warning cannot serialize non-hash complex type.");
         }
     }
     elsif(exists $attribute->{nativeType})
@@ -4860,18 +4838,18 @@ sub packAttribute {
         }
         else
         {
-            fatal("Error nativeType not supported on attribute ID = "
+            croak("Error nativeType not supported on attribute ID = "
                 . "$attribute->{id}.");
         }
     }
     else
     {
-        fatal("Unsupported attribute type on attribute ID = $attribute->{id}.");
+        croak("Unsupported attribute type on attribute ID = $attribute->{id}.");
     }
 
     if( (length $binaryData) < 1)
     {
-        fatal("Serialization failed for attribute ID = $attribute->{id}.");
+        croak("Serialization failed for attribute ID = $attribute->{id}.");
     }
 
     return ($binaryData,$alignment);
@@ -4886,7 +4864,7 @@ sub getPnorBaseAddress {
     my $pnorBaseAddress = 0;
 
     open(VMM_CONSTS_FILE,"<$vmmConstsFile")
-      or fatal ("VMM Constants file: \"$vmmConstsFile\" could not be opened.");
+      or croak ("VMM Constants file: \"$vmmConstsFile\" could not be opened.");
 
     foreach my $line (<VMM_CONSTS_FILE>)
     {
@@ -4903,7 +4881,7 @@ sub getPnorBaseAddress {
 
     if($pnorBaseAddress == 0)
     {
-        fatal("PNOR base address was zero!");
+        croak("PNOR base address was zero!");
     }
 
     return $pnorBaseAddress;
@@ -5371,7 +5349,7 @@ sub generateTargetingImage {
             }
             else
             {
-                fatal("Target instance \"$targetInstance->{id}\" cannot "
+                croak("Target instance \"$targetInstance->{id}\" cannot "
                     . "override attribute \"$attr->{id}\" unless "
                     . "the attribute has already been defined in the target "
                     . "type inheritance chain.");
@@ -5421,7 +5399,7 @@ sub generateTargetingImage {
             my $attributeDef = $attributeDefCache{$attributeId};
             if (not defined $attributeDef)
             {
-                fatal("Attribute $attributeId is not found.");
+                croak("Attribute $attributeId is not found.");
             }
 
             my $ifFspOnlyTargetWithCommonAttr = "false";
@@ -5472,7 +5450,7 @@ sub generateTargetingImage {
                 }
                 else
                 {
-                    fatal("Persistency '$attributeDef->{persistency}' is not "
+                    croak("Persistency '$attributeDef->{persistency}' is not "
                           . "supported for fspOnly attribute '$attributeId'.");
                 }
             }
@@ -5484,7 +5462,7 @@ sub generateTargetingImage {
                 }
                 else
                 {
-                    fatal("Persistency '$attributeDef->{persistency}' is not "
+                    croak("Persistency '$attributeDef->{persistency}' is not "
                           . "supported for hbOnly attribute '$attributeId'.");
                 }
             }
@@ -5508,7 +5486,7 @@ sub generateTargetingImage {
             }
             else
             {
-                fatal("Persistency '$attributeDef->{persistency}' is not "
+                croak("Persistency '$attributeDef->{persistency}' is not "
                       . "supported for attribute '$attributeId'.");
             }
 
@@ -5801,7 +5779,7 @@ sub generateTargetingImage {
 
             else
             {
-                fatal("Could not find a suitable section.");
+                croak("Could not find a suitable section.");
             }
 
             $attributesWritten++;
@@ -5812,7 +5790,7 @@ sub generateTargetingImage {
 
     if($numAttributes != $attributesWritten)
     {
-        fatal("Number of attributes expected, $numAttributes, does not match "
+        croak("Number of attributes expected, $numAttributes, does not match "
               . "what was written to PNOR, $attributesWritten.");
     }
 
@@ -6016,7 +5994,7 @@ sub generateTargetingImage {
     # First 256 bytes is  RO header (pad if necessary)
     if((length $headerBinData) > $headerSize)
     {
-        fatal("Header data of length " . (length $headerBinData) . " is larger "
+        croak("Header data of length " . (length $headerBinData) . " is larger "
             . "than allocated amount of $headerSize.");
     }
 
@@ -6135,23 +6113,23 @@ sub generateTargetingImage {
     {
         unless (-e $cfgBiosXmlFile)
         {
-            fatal("BIOS XML file $cfgBiosXmlFile does not exist.\n");
+            croak("BIOS XML file $cfgBiosXmlFile does not exist.\n");
         }
 
         unless (defined $cfgBiosSchemaFile)
         {
-            fatal("BIOS XML file $cfgBiosXmlFile specified, but a BIOS schema "
+            croak("BIOS XML file $cfgBiosXmlFile specified, but a BIOS schema "
                 . "file was not.\n");
         }
 
         unless (-e $cfgBiosSchemaFile)
         {
-            fatal("BIOS schema file $cfgBiosSchemaFile does not exist.\n");
+            croak("BIOS schema file $cfgBiosSchemaFile does not exist.\n");
         }
 
         unless (defined $cfgBiosOutputFile)
         {
-            fatal("BIOS output file not specified.\n");
+            croak("BIOS output file not specified.\n");
         }
 
         my $bios = new
@@ -6166,7 +6144,7 @@ sub generateTargetingImage {
 sub generateXMLforSM {
 
     open(SM_TARGET_FILE,">".$CfgSMAttrFile)
-        or fatal ("Targeting SM file: $CfgSMAttrFile "
+        or croak ("Targeting SM file: $CfgSMAttrFile "
             . "could not be opened.");
     my $Count = @attrDataforSM;
 
@@ -6239,7 +6217,7 @@ sub load
             $self->{_libXmlParser}->parse_file($self->{_biosInputXmlFile});
     };
 
-    main::fatal ("Failed to parse BIOS file [$self->{_biosInputXmlFile}].\n"
+    croak ("Failed to parse BIOS file [$self->{_biosInputXmlFile}].\n"
         . " Reason: $@") if $@;
 
     eval
@@ -6248,7 +6226,7 @@ sub load
             XML::LibXML::Schema->new(location => $self->{_biosSchemaXsdFile} );
     };
 
-    main::fatal ("Failed to load valid schema [$self->{_biosSchemaXsdFile}].\n"
+    croak ("Failed to load valid schema [$self->{_biosSchemaXsdFile}].\n"
         . "Reason: $@") if $@;
 
     eval
@@ -6256,7 +6234,7 @@ sub load
         $biosSchemaXsd->validate($self->{_biosXmlDoc})
     };
 
-    main::fatal ("Failed to validate [$self->{_biosInputXmlFile}] "
+    croak ("Failed to validate [$self->{_biosInputXmlFile}] "
         . "using schema [$self->{_biosSchemaXsdFile}].\n"
         . "Reason: $@") if $@;
 }
@@ -6278,17 +6256,17 @@ sub export
     else
     {
         open(OUTPUT_XML,">$self->{_biosOutputXmlFile}") or
-            main::fatal("Could not open output BIOS XML file "
+            croak("Could not open output BIOS XML file "
                 . "[$self->{_biosOutputXmlFile}] for writing.\n"
                 . "Reason: $!");
 
         print OUTPUT_XML $self->{_biosXmlDoc}->toString() or
-            main::fatal ("Failed write output BIOS XML file "
+            croak ("Failed write output BIOS XML file "
                 . "[$self->{_biosOutputXmlFile}].\n"
                 . "Reason: $!");
 
         close OUTPUT_XML or
-            main::fatal ("Failed to close output BIOS XML file "
+            croak ("Failed to close output BIOS XML file "
                 . "[$self->{_biosOutputXmlFile}].\n"
                 . "Reason: $!");
     }
@@ -6336,7 +6314,7 @@ sub processBios
         # Attribute must be defined in targeting
         if(!exists $attrMapRef->{$attributeId})
         {
-            main::fatal("BIOS definition specified attribute $attributeId, but "
+            croak("BIOS definition specified attribute $attributeId, but "
                 . "that attribute is not defined in targeting.\n");
         }
 
@@ -6344,7 +6322,7 @@ sub processBios
         if($attrMapRef->{$attributeId}{persistency} ne "volatile"
              && $attrMapRef->{$attributeId}{persistency} ne "volatile-zeroed")
         {
-            main::fatal("BIOS definition specified attribute $attributeId, but "
+            croak("BIOS definition specified attribute $attributeId, but "
                 . "that attribute is neither volatile nor volatile-zeroed "
                 . "in targeting.  Actual persistency is "
                 . "$attrMapRef->{$attributeId}{persistency}.\n");
@@ -6355,7 +6333,7 @@ sub processBios
         my $writeable = exists $attrMapRef->{$attributeId}{writeable} ? 1 : 0;
         if(!$readable || $writeable)
         {
-            main::fatal("BIOS definition specified attribute $attributeId, but "
+            croak("BIOS definition specified attribute $attributeId, but "
                 . "that attribute is not read-only in targeting.  "
                 . "Readable? " . $readable
                 . " writeable? " . $writeable . "\n");
@@ -6365,7 +6343,7 @@ sub processBios
         my $fspOnly = exists $attrMapRef->{$attributeId}{fspOnly} ? 1 : 0;
         if($fspOnly)
         {
-            main::fatal("BIOS definition specified attribute $attributeId, but "
+            croak("BIOS definition specified attribute $attributeId, but "
                 . "that attribute is FSP only in targeting.\n");
         }
 
@@ -6378,7 +6356,7 @@ sub processBios
         my $nativeType = exists $attrMapRef->{$attributeId}{nativeType} ? 1 : 0;
         if(!$simpleType)
         {
-            main::fatal("BIOS definition specified attribute $attributeId, but "
+            croak("BIOS definition specified attribute $attributeId, but "
                 . "that attribute is not a simple type in targeting.  "
                 . "Complex type? $complexType, native type? $nativeType.\n");
         }
@@ -6459,7 +6437,7 @@ sub processBios
         }
         if(!$validType)
         {
-            main::fatal("BIOS definition specified attribute $attributeId, but "
+            croak("BIOS definition specified attribute $attributeId, but "
                 . "that attribute's type is not supported in BIOS context. "
                 . "Dump of type:\n"
                 . ::Dumper($attrMapRef->{$attributeId}{simpleType}) . "\n");
@@ -6468,7 +6446,7 @@ sub processBios
         # Simple type must not be array
         if(exists $attrMapRef->{$attributeId}{simpleType}{array})
         {
-            main::fatal("BIOS definition specified attribute $attributeId, but "
+            croak("BIOS definition specified attribute $attributeId, but "
                 . "that attribute is an array which is not supported in "
                 . "BIOS context.\n");
         }
@@ -6486,7 +6464,7 @@ sub processBios
             }
             else
             {
-                main::fatal("BIOS definition specified attribute $attributeId, "
+                croak("BIOS definition specified attribute $attributeId, "
                     . "but attribute definition does not give a display name, "
                     . "so BIOS config must (but failed to do so).\n");
             }
@@ -6505,7 +6483,7 @@ sub processBios
             }
             else
             {
-                main::fatal("BIOS definition specified attribute $attributeId, "
+                croak("BIOS definition specified attribute $attributeId, "
                     . "but attribute definition does not give a description, "
                     . "so BIOS config must (but failed to do so).\n");
             }
@@ -6558,7 +6536,7 @@ sub processBios
                 my @childElements = $targetRestriction->findnodes('./*');
                 if(scalar @childElements == 0)
                 {
-                    main::fatal("BIOS definition specified attribute "
+                    croak("BIOS definition specified attribute "
                         . "$attributeId, but requested targetRestriction with "
                         . "no parameters.\n");
                 }
@@ -6743,7 +6721,7 @@ sub processBios
                 # target/attribute
                 if(defined $attrTargAttrSetByBios{$target}{$attributeId})
                 {
-                    main::fatal("$target, $attributeId set by multiple BIOS "
+                    croak("$target, $attributeId set by multiple BIOS "
                         . "definitions.\n");
                 }
                 else
@@ -6761,7 +6739,7 @@ sub processBios
                 elsif(   $instanceRef->{$target}{$attributeId}{default}
                       != $default )
                 {
-                    main::fatal("BIOS definition specified attribute "
+                    croak("BIOS definition specified attribute "
                         . "$attributeId, but default values are not same "
                         . "across all qualifying targets.  "
                         . "$target/ $attributeId = "
@@ -6773,7 +6751,7 @@ sub processBios
         # If no targets had the attribute
         if(!defined $default || !defined $size)
         {
-            main::fatal("BIOS definition specified attribute $attributeId, but "
+            croak("BIOS definition specified attribute $attributeId, but "
                 . "after considering target restrictions/etc., no "
                 . "valid targets were found.\n");
         }
@@ -6823,7 +6801,7 @@ sub processBios
                             # rest previously found for this attribute
                             if(exists $foundAllowed{$overrideName})
                             {
-                                main::fatal("BIOS definition specified "
+                                croak("BIOS definition specified "
                                     . "attribute $attributeId, and supplied "
                                     . "override to allowed enumeration values, "
                                     . "but duplicated a value of "
@@ -6844,7 +6822,7 @@ sub processBios
 
                     if(!$nameFound)
                     {
-                        main::fatal("BIOS definition specified attribute "
+                        croak("BIOS definition specified attribute "
                             . "$attributeId, and supplied override to allowed "
                             . "enumeration values, but requested enumerator "
                             . "$overrideName is not valid.\n");
@@ -6877,7 +6855,7 @@ sub processBios
                             # Must not duplicate already overridden enumerator
                             if(exists $textOverrideAllowed{$overrideName})
                             {
-                                main::fatal("BIOS definition specified "
+                                croak("BIOS definition specified "
                                      . "attribute $attributeId, and supplied "
                                      . "override to allowed enumerator, "
                                      . "but already overrode this "
@@ -6887,7 +6865,7 @@ sub processBios
                             elsif(   !exists $foundAllowed{$overrideName}
                                   && $enableRestrictions)
                             {
-                                main::fatal("BIOS definition specified "
+                                croak("BIOS definition specified "
                                      . "attribute $attributeId, and supplied "
                                      . "override to allowed enumerator, but "
                                      . "this enumerator $overrideName is "
@@ -6917,7 +6895,7 @@ sub processBios
 
                     if(!$nameFound)
                     {
-                        main::fatal("BIOS definition specified attribute "
+                        croak("BIOS definition specified attribute "
                             . "$attributeId, and supplied override to allowed "
                             . "enumeration, but requested invalid enumerator "
                             . "name to override of $overrideName.\n");
@@ -6936,7 +6914,7 @@ sub processBios
                     # default then can't continue
                     if($default eq  $enumerator->{name})
                     {
-                        main::fatal("BIOS definition specified attribute "
+                        croak("BIOS definition specified attribute "
                             . "$attributeId as not allowing "
                             . "$enumerator->{name}, but that is the attribute "
                             . "default.\n");
@@ -6950,7 +6928,7 @@ sub processBios
 
                 if(!exists $enumerator->{'display-name'})
                 {
-                    main::fatal("BIOS definition specified attribute "
+                    croak("BIOS definition specified attribute "
                         . "$attributeId, and supplied override to enumerator "
                         . "$enumerator->{name}, but there is no "
                         . "display-name.\n");
@@ -6962,7 +6940,7 @@ sub processBios
 
                 if(!exists $enumerator->{description})
                 {
-                    main::fatal("BIOS definition specified attribute "
+                    croak("BIOS definition specified attribute "
                         . "$attributeId, and supplied override to enumerator "
                         . "$enumerator->{name}, but there is no "
                         . "description.\n");
@@ -6981,7 +6959,7 @@ sub processBios
         # No enums allowed to be specified
         elsif(scalar @enumerationOverrideElement)
         {
-                main::fatal("BIOS definition specified attribute $attributeId, "
+                croak("BIOS definition specified attribute $attributeId, "
                     . "and supplied enumerated values, but this is not an "
                     . "enumeration attribute, it is of type $attrType.\n");
         }
@@ -6997,7 +6975,7 @@ sub processBios
             # If range override not allowed for this attribute, bail
             if($typeHash{$attrType}{ror} != 1)
             {
-                main::fatal("BIOS definition specified attribute $attributeId, "
+                croak("BIOS definition specified attribute $attributeId, "
                     . "and supplied numeric override, but this attribute "
                     . "type does not support such override.  Type is "
                     . "$attrType.\n");
@@ -7017,7 +6995,7 @@ sub processBios
 
                 if($rawMin < $min || $rawMin > $max)
                 {
-                    main::fatal("BIOS definition specified attribute "
+                    croak("BIOS definition specified attribute "
                         . "$attributeId, and supplied valid start or end "
                         . "range, but min out of range. requested "
                         . "min = $rawMin, allowed min = "
@@ -7034,7 +7012,7 @@ sub processBios
 
                 if($rawMax > $max || $rawMax < $min)
                 {
-                    main::fatal("BIOS definition specified attribute "
+                    croak("BIOS definition specified attribute "
                         . "$attributeId, and supplied valid start or end "
                         . "range, but max out of range. requested "
                         . "max = $rawMax, current min = $min, "
@@ -7048,7 +7026,7 @@ sub processBios
             # Min must be <= Max
             if($min > $max)
             {
-                main::fatal("BIOS definition specified attribute "
+                croak("BIOS definition specified attribute "
                     . "$attributeId, and supplied valid start or end "
                     . "range, but min > max. min = $min, "
                     . "max = $max.\n");
@@ -7058,7 +7036,7 @@ sub processBios
             # a range
             if(defined $allowedRange{$min})
             {
-                main::fatal("Already range starting at $min.\n");
+                croak("Already range starting at $min.\n");
             }
 
             $allowedRange{$min} = $max;
@@ -7089,7 +7067,7 @@ sub processBios
 
                 if($rangeKey <= $max)
                 {
-                    main::fatal("Range starting with $rangeKey overlaps "
+                    croak("Range starting with $rangeKey overlaps "
                         . "range ending at $max.\n");
                 }
 
@@ -7099,7 +7077,7 @@ sub processBios
 
             if(!$defaultInRange)
             {
-                main::fatal("Default value $default not in any valid range.\n");
+                croak("Default value $default not in any valid range.\n");
             }
         }
 
