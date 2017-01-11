@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,30 +75,12 @@ namespace SBE
 
 
     /**
-     * @enum sbeUpdateCheckType
-     *
-     * @brief Determines what types of checks are performed on the SBE Seeproms
-     *        to determine if an update is necessary.
-     *
-     */
-    enum sbeUpdateCheckType
-    {
-        SBE_UPDATE_CHECK_ALL                   = 0x00,
-        SBE_UPDATE_ONLY_CHECK_NEST_FREQ        = 0x01
-    };
-
-    /**
      * @brief Iterates through all the functional processors and updates
      *        the SBE Image in a SEEPROM, if necessary.
      *
-     * @param[in] i_check_type    Indicates what types of checks are performed
-     *                            on the SBE Seeproms to determine if an update
-     *                            is necessary.
-     *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t updateProcessorSbeSeeproms(
-                   sbeUpdateCheckType i_check_type = SBE_UPDATE_CHECK_ALL);
+    errlHndl_t updateProcessorSbeSeeproms();
 
     /**
      * @brief Iterates through all the functional processors and resolves
@@ -124,15 +106,6 @@ namespace SBE
     errlHndl_t isGoldenSide( bool & o_isGolden );
 
    /**
-    * @brief Determines what nest frequency we booted from
-    *
-    * @param[out] o_bootNestFreq - The nest frequency the system last booted on.
-    *
-    * @return errlHndl_t Error log handle on error.
-    */
-    errlHndl_t getBootNestFreq( uint32_t & o_bootNestFreq );
-
-   /**
     * @brief Determines if we booted in synchronous memory mode or not
     *
     * @param[out] o_mcSyncMode - The MC sync mode the system last booted with.
@@ -140,13 +113,6 @@ namespace SBE
     * @return errlHndl_t Error log handle on error.
     */
     errlHndl_t getBootMcSyncMode( uint8_t& o_mcSyncMode );
-
-   /**
-    * @brief Set all of the attributes that are based on the PB/Nest Freq
-    *
-    * @param[in] i_nestFreq - Nest/PB Frequency to base settings on.
-    */
-    void setNestFreqAttributes( uint32_t i_nestFreq );
 
     /**
      * @brief Updates which Seeprom was used to boot the SBE

@@ -774,6 +774,9 @@
     <!-- attributes for sbe_start -->
     <attribute><id>BOOT_FLAGS</id></attribute>
     <attribute><id>NEST_PLL_BUCKET</id></attribute>
+    <attribute><id>NEST_PLL_FREQ_BUCKETS</id></attribute>
+    <attribute><id>NEST_PLL_FREQ_LIST</id></attribute>
+    <attribute><id>NEST_PLL_FREQ_I2CDIV_LIST</id></attribute>
     <attribute><id>RISK_LEVEL</id></attribute>
     <attribute><id>SYS_FORCE_ALL_CORES</id></attribute>
     <attribute><id>DISABLE_HBBL_VECTORS</id></attribute>

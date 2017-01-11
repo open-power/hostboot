@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -692,13 +692,23 @@ bool Target::uninstallWriteAttributeCallback()
 // setFrequencyAttributes
 //******************************************************************************
 void setFrequencyAttributes( Target * i_sys,
-                             uint32_t i_newNestFreq,
-                             uint32_t i_i2cBusDiv )
+                             uint32_t i_newNestFreq )
 {
+    #define TARG_FN "setFrequencyAttributes"
+    TARG_ENTER();
+
     // Calculate the new value for PIB_I2C_NEST_PLL using old freq attributes.
     uint32_t l_oldPll = i_sys->getAttr<TARGETING::ATTR_PIB_I2C_NEST_PLL>();
     uint32_t l_oldNestFreq = i_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
     uint32_t l_newPll = (i_newNestFreq * l_oldPll)/l_oldNestFreq;
+
+    // Needed for NEST_PLL_BUCKET
+    uint32_t l_i2cBusDiv = 0;
+    size_t l_bucket;
+    uint8_t nest_pll_freq_buckets =
+        i_sys->getAttr<TARGETING::ATTR_NEST_PLL_FREQ_BUCKETS>();
+    TARGETING::ATTR_NEST_PLL_FREQ_LIST_type freq_list;
+    TARGETING::ATTR_NEST_PLL_FREQ_I2CDIV_LIST_type i2cdiv_list;
 
     //FREQ_PB_MHZ
     uint32_t l_freqPb = i_newNestFreq;
@@ -715,6 +725,39 @@ void setFrequencyAttributes( Target * i_sys,
             l_oldPll,
             l_newPll);
 
+    //NEST_PLL_BUCKET
+    TARG_ASSERT((i_sys->tryGetAttr
+                    <TARGETING::ATTR_NEST_PLL_FREQ_LIST>(freq_list)),
+                "TARGETING::setFrequencyAttributes: "
+                "Error getting nest PLL frequency list attribute");
+    TARG_ASSERT((i_sys->tryGetAttr
+                    <TARGETING::ATTR_NEST_PLL_FREQ_I2CDIV_LIST>(i2cdiv_list)),
+                "TARGETING::setFrequencyAttributes: "
+                "Error getting nest PLL frequency I2C divisor list attribute");
+    for( l_bucket = 1; l_bucket <= nest_pll_freq_buckets; l_bucket++ )
+    {
+        TRACFCOMP(g_trac_targeting,
+                  "Bucket %d with freq %d and i2cdiv %d",
+                  l_bucket,
+                  freq_list[l_bucket-1],
+                  i2cdiv_list[l_bucket-1]);
+        // The nest PLL bucket IDs are numbered 1 - 5. Subtract 1 to
+        // take zero-based indexing into account.
+        if( freq_list[l_bucket-1] == i_newNestFreq )
+        {
+            TRACFCOMP(g_trac_targeting,
+                      "ATTR_NEST_PLL_BUCKET getting set to %x",
+                      l_bucket);
+            i_sys->setAttr<TARGETING::ATTR_NEST_PLL_BUCKET>(l_bucket);
+            l_i2cBusDiv = i2cdiv_list[l_bucket-1];
+            break;
+        }
+    }
+    TARG_ASSERT(l_bucket <= nest_pll_freq_buckets,
+                "TARGETING::setFrequencyAttributes: "
+                "Error finding nest PLL bucket for nest frequency %d",
+                i_newNestFreq);
+
     // Get the processor targets to set the i2c bus divisor.
     TARGETING::TargetHandleList l_procList;
     TARGETING::getAllChips( l_procList,
@@ -727,9 +770,11 @@ void setFrequencyAttributes( Target * i_sys,
         l_procTarget != l_procList.end();
         ++l_procTarget )
     {
-        (*l_procTarget)->setAttr<TARGETING::ATTR_I2C_BUS_DIV_NEST>(i_i2cBusDiv);
+        (*l_procTarget)->setAttr<TARGETING::ATTR_I2C_BUS_DIV_NEST>(l_i2cBusDiv);
     }
 
+    TARG_EXIT();
+    #undef TARG_FN
 }
 
 

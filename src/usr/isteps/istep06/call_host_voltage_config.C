@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,18 +39,63 @@
 
 #include    <p9_pm_get_poundv_bucket.H>
 #include    <p9_setup_evid.H>
+#include    <p9_frequency_buckets.H>
 
-//SBE
-#include    <sbe/sbeif.H>
-
-#include <initservice/mboxRegs.H>
-#include <p9_frequency_buckets.H>
+#include    <initservice/mboxRegs.H>
 
 using namespace TARGETING;
 
 
 namespace ISTEP_06
 {
+
+errlHndl_t getBootNestFreq( uint32_t & o_bootNestFreq )
+{
+    errlHndl_t l_err = nullptr;
+
+    INITSERVICE::SPLESS::MboxScratch4_t l_scratch4;
+
+    TARGETING::Target * l_sys = nullptr;
+    (void) TARGETING::targetService().getTopLevelTarget( l_sys );
+    assert( l_sys, "getBootNestFreq() system target is NULL");
+
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               ENTER_MRK"Enter getBootNestFreq()");
+    do
+    {
+        TARGETING::ATTR_MASTER_MBOX_SCRATCH_type l_scratchRegs;
+        assert(l_sys->tryGetAttr
+                         <TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
+               "getBootNestFreq() failed to get MASTER_MBOX_SCRATCH");
+        l_scratch4.data32 = l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_4];
+
+        TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "The nest PLL bucket id is %d",
+                  l_scratch4.nestPllBucket );
+
+        size_t sizeOfPll = sizeof(NEST_PLL_FREQ_LIST)/
+                           sizeof(NEST_PLL_FREQ_LIST[0]);
+
+        assert((uint8_t)(l_scratch4.nestPllBucket-1) < (uint8_t) sizeOfPll );
+
+        // The nest PLL bucket IDs are numbered 1 - 5. Subtract 1 to
+        // take zero-based indexing into account.
+        o_bootNestFreq = NEST_PLL_FREQ_LIST[l_scratch4.nestPllBucket-1];
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "getBootNestFreq::The boot frequency was %d: Bucket Id = %d",
+                  o_bootNestFreq,
+                  l_scratch4.nestPllBucket );
+
+
+    }while( 0 );
+    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              EXIT_MRK "Exit getBootNestFreq()");
+
+    return l_err;
+}
+
 
 void* call_host_voltage_config( void *io_pArgs )
 {
@@ -91,13 +136,13 @@ void* call_host_voltage_config( void *io_pArgs )
         targetService().getTopLevelTarget(l_sys);
 
         // Set the Nest frequency to whatever we boot with
-        l_err = SBE::getBootNestFreq( l_nestFreq );
+        l_err = getBootNestFreq( l_nestFreq );
 
         if( l_err )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "call_host_voltage_config.C::"
-                    "Failed getting the boot nest frequency from the SBE");
+                    "Failed getting the boot nest frequency");
             break;
         }
 
@@ -313,22 +358,8 @@ void* call_host_voltage_config( void *io_pArgs )
                 l_turboFreq, l_ultraTurboFreq );
 
         // Setup the remaining attributes that are based on PB/Nest
-        SBE::setNestFreqAttributes(l_nestFreq);
-
-        //NEST_PLL_BUCKET
-        for( size_t l_bucket = 1; l_bucket <= NEST_PLL_FREQ_BUCKETS; l_bucket++ )
-        {
-            // The nest PLL bucket IDs are numbered 1 - 5. Subtract 1 to
-            // take zero-based indexing into account.
-            if( NEST_PLL_FREQ_LIST[l_bucket-1] == l_nestFreq )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ATTR_NEST_PLL_BUCKET getting set to %x",
-                          l_bucket);
-                l_sys->setAttr<TARGETING::ATTR_NEST_PLL_BUCKET>(l_bucket);
-                break;
-            }
-        }
+        TARGETING::setFrequencyAttributes(l_sys,
+                                          l_nestFreq);
 
     } while( 0 );
 

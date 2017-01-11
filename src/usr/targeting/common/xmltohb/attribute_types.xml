@@ -20111,6 +20111,72 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!-- ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+     @todo: RTC:167266 set attributes from HWP nest PLL bucket data
+     ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== -->
+<attribute>
+  <id>NEST_PLL_FREQ_BUCKETS</id>
+  <description>
+      Constant defining number of NEST PLL frequency options ('buckets')
+      to be built into unsigned HW image.
+  </description>
+  <simpleType>
+      <uint8_t>
+          <default>0x05</default>
+      </uint8_t>
+  </simpleType>
+  <persistency>volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_NEST_PLL_FREQ_BUCKETS</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>NEST_PLL_FREQ_LIST</id>
+  <description>
+      Nest PLL frequency in MHZ
+      index is bucket number
+  </description>
+  <simpleType>
+      <uint32_t>
+          <default>1600,1866,2000,2133,2400</default>
+      </uint32_t>
+      <array>5</array>
+  </simpleType>
+  <persistency>volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_NEST_PLL_FREQ_LIST</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>NEST_PLL_FREQ_I2CDIV_LIST</id>
+  <description>
+      I2C bus divisor
+      index is bucket number
+      The values in this list will be factor of 1:64 to the NEST_PLL_FREQ_LIST
+  </description>
+  <simpleType>
+      <uint32_t>
+          <default>25,29,31,33,37</default>
+      </uint32_t>
+      <array>5</array>
+  </simpleType>
+  <persistency>volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_NEST_PLL_FREQ_I2CDIV_LIST</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+<!-- ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+     @todo: RTC:167266 set attributes from HWP nest PLL bucket data
+     ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== -->
+
 <attribute>
   <id>BOOT_FREQ</id>
   <description>EQ boot frequency</description>
