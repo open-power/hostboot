@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -116,7 +116,7 @@ rule rMCS
 
 };
 
-group gMCS attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
+group gMCS attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN filter singlebit
 {
     (rMCS, bit(0)) ? analyze(gMCFIR);
 };

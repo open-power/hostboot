@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -226,7 +226,7 @@ rule rEX
 
 };
 
-group gEX attntype CHECK_STOP, RECOVERABLE
+group gEX attntype CHECK_STOP, RECOVERABLE filter singlebit
 {
     (rEX, bit(0)) ? analyze(gL2FIR);
     (rEX, bit(1)) ? analyze(gNCUFIR);
