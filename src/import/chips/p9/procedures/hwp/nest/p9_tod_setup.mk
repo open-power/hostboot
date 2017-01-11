@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -23,6 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_tod_setup
-OBJS+=p9_tod_utils.o
 $(call BUILD_PROCEDURE)
 
