@@ -121,6 +121,7 @@ enum MvpdKeyword
     MVPD_KEYWORD_L6  = 0x29,
     MVPD_KEYWORD_L7  = 0x2a,
     MVPD_KEYWORD_L8  = 0x2b,
+    MVPD_KEYWORD_PDW = 0x2c,
     MVPD_KEYWORD_LAST, //useful for testcases
     MVPD_KEYWORD_FIRST = MVPD_KEYWORD_VD, //useful for testcases
 };
