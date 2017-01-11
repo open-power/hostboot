@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,8 +73,9 @@ enum FakeScanRing_t
  */
 enum RingDebugMode_t
 {
-    SCAN_RING_NO_DEBUG      =   0x00,
-    SCAN_RING_TRACE_DEBUG   =   0x01,
+    SCAN_RING_NO_DEBUG          =   0x00,
+    SCAN_RING_TRACE_DEBUG       =   0x01,
+    SCAN_RING_TRACE_DEEP_DEBUG  =   0x02,
 };
 /**
  * @brief   models a fake ring for debug.

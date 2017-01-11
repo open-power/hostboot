@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -131,9 +131,10 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_SCAN_RING_BUILD_FAIL</rc>
-    <description>hcode image build procedure failed to add PGPE image</description>
-    <ffdc>RING_FAIL_RC</ffdc>
+    <rc>RC_SCAN_RING_EXTRACTION_FAIL</rc>
+    <description>hcode image build procedure failed to extract scan rings</description>
+    <ffdc>EXTRACTION_FAIL_PLAT</ffdc>
+    <ffdc>EXTRACTION_FAILURE_CODE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -141,9 +142,43 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_IMG_EXCEED_SRAM_SIZE</rc>
-    <description>Size of image exceeded the SRAM size of platform</description>
+    <rc>RC_SCAN_RING_PLACEMENT_FAIL</rc>
+    <description>hcode image build procedure failed to place rings in HOMER</description>
+    <ffdc>PLACEMENT_FAIL_PLAT</ffdc>
+    <ffdc>PLACEMENT_FAILURE_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_CME_IMG_EXCEED_SRAM_SIZE</rc>
+    <description>Size of CME image exceeded the SRAM size</description>
     <ffdc>BAD_IMG_SIZE</ffdc>
+    <ffdc>MAX_CME_IMG_SIZE_ALLOWED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SGPE_IMG_EXCEED_SRAM_SIZE</rc>
+    <description>Size of SGPE image exceeded the size allowed in OCC SRAM</description>
+    <ffdc>BAD_IMG_SIZE</ffdc>
+    <ffdc>MAX_SGPE_IMG_SIZE_ALLOWED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PGPE_IMG_EXCEED_SRAM_SIZE</rc>
+    <description>Size of PGPE image exceeded the size allowed in OCC SRAM</description>
+    <ffdc>BAD_IMG_SIZE</ffdc>
+    <ffdc>MAX_PGPE_IMG_SIZE_ALLOWED</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
