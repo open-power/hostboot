@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -687,11 +687,9 @@ const char* Target::getAttrAsString() const
  * @param[in] i_sys - top level system target to set attributes for
  * @param[in] i_newNestFreq - the new nest frequency to base all the attributes
  *                            off of.
- * @param[in] i_i2cBusDiv - The i2c bus divisor
  */
 void setFrequencyAttributes(Target * i_sys,
-                            uint32_t i_newNestFreq,
-                            uint32_t i_i2cBusDiv);
+                            uint32_t i_newNestFreq);
 
 
 // WARNING: The following #include imports any platform specific template

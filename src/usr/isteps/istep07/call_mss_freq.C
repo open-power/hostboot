@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -201,6 +201,10 @@ void*    call_mss_freq( void *io_pArgs )
                       " Original Nest: %d New Nest: %d"
                       " Original syncMode: %d New syncMode: %d",
                       l_originalNest, l_newNest, l_bootSyncMode, l_mcSyncMode );
+
+            TARGETING::setFrequencyAttributes(l_sys,
+                                              l_newNest);
+
             l_err = SBE::updateProcessorSbeSeeproms();
 
             if( l_err )

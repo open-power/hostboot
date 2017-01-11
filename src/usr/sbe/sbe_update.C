@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -66,7 +66,6 @@
 #include <p9_xip_image.h>
 
 #include <p9_perv_scom_addresses.H>
-#include <p9_frequency_buckets.H>
 #include <initservice/mboxRegs.H>
 
 
@@ -93,7 +92,7 @@ using namespace TARGETING;
 
 namespace SBE
 {
-    errlHndl_t updateProcessorSbeSeeproms(sbeUpdateCheckType i_check_type)
+    errlHndl_t updateProcessorSbeSeeproms()
     {
         errlHndl_t err = NULL;
         errlHndl_t err_cleanup = NULL;
@@ -104,8 +103,7 @@ namespace SBE
         bool l_restartNeeded   = false;
 
         TRACUCOMP( g_trac_sbe,
-                   ENTER_MRK"updateProcessorSbeSeeproms(): i_check_type=%d",
-                   i_check_type);
+                   ENTER_MRK"updateProcessorSbeSeeproms()");
 
         do{
 
@@ -281,8 +279,7 @@ namespace SBE
                     sbeState.target_is_master = false;
                 }
 
-                err = getSbeInfoState(sbeState,
-                                      i_check_type);
+                err = getSbeInfoState(sbeState);
 
                 if (err)
                 {
@@ -297,26 +294,11 @@ namespace SBE
                 }
 
 
-                // Continue if we're just doing the nest freq check and don't
-                // have a mismatch
-                if ( ( i_check_type == SBE_UPDATE_ONLY_CHECK_NEST_FREQ ) &&
-                     ( sbeState.seeprom_0_ver_Nest_Freq_Mismatch == false ) &&
-                     ( sbeState.seeprom_1_ver_Nest_Freq_Mismatch == false ) )
-                {
-                    TRACFCOMP( g_trac_sbe,
-                               INFO_MRK"updateProcessorSbeSeeproms(): "
-                               "Only looking for Nest Freq Mismatch and "
-                               "none found for Target UID=0x%X",
-                               TARGETING::get_huid(sbeState.target));
-
-                    sbeState.update_actions = CLEAR_ACTIONS;
-                }
-
                 /**********************************************/
                 /*  Determine update actions for this target  */
                 /**********************************************/
                 // Skip if we got an error collecting SBE Info State
-                else if ( err == NULL )
+                if ( err == NULL )
                 {
                     err = getTargetUpdateActions(sbeState);
                     if (err)
@@ -383,6 +365,79 @@ namespace SBE
                     errlCommit( err, SBE_COMP_ID );
                 }
 
+                /* ---------------------------------------------------------
+                   Start hack to fix SBE Boot Select changing to 1 and never
+                   being reset back to 0.  @TODO RTC:167179 for removal.
+                   --------------------------------------------------------- */
+                if( (sbeState.target_is_master == true) &&
+                    (l_restartNeeded == true) )
+                {
+                    // Read PERV_SB_CS_SCOM 0x00050008
+                    uint64_t scomData = 0x0;
+                    size_t op_size = sizeof(scomData);
+                    err = deviceRead( sbeState.target,
+                                      &scomData,
+                                      op_size,
+                                      DEVICE_SCOM_ADDRESS(PERV_SB_CS_SCOM) );
+                    if( err )
+                    {
+                        // Something failed on the read.  Commit the error here
+                        // and continue with the Re-IPL Request
+                        TRACFCOMP(g_trac_sbe,
+                                  ERR_MRK"updateProcessorSbeSeeproms() - Error "
+                                  "reading SB CS SCOM (0x%.8X) from Target :"
+                                  "HUID=0x%.8X, RC=0x%X, PLID=0x%lX",
+                                  PERV_SB_CS_SCOM, // 0x00050008
+                                  TARGETING::get_huid(sbeState.target),
+                                  ERRL_GETRC_SAFE(err),
+                                  ERRL_GETPLID_SAFE(err));
+                        errlCommit( err, SBE_COMP_ID );
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_sbe,
+                                  INFO_MRK"updateProcessorSbeSeeproms() - Read "
+                                  "SB CS SCOM (0x%.8X) from Target :"
+                                  "HUID=0x%.8X as 0x%X",
+                                  PERV_SB_CS_SCOM, // 0x00050008
+                                  TARGETING::get_huid(sbeState.target),
+                                  scomData );
+                    }
+                    scomData &= ~SBE_BOOT_SELECT_MASK; // Clear SBE Boot Select
+                    err = deviceWrite( sbeState.target,
+                                       &scomData,
+                                       op_size,
+                                       DEVICE_SCOM_ADDRESS(PERV_SB_CS_SCOM) );
+                    if( err )
+                    {
+                        // Something failed on the write.  Commit the error here
+                        // and continue with the Re-IPL Request
+                        TRACFCOMP(g_trac_sbe,
+                                  ERR_MRK"updateProcessorSbeSeeproms() - Error "
+                                  "writing SB CS SCOM (0x%.8X) to Target :"
+                                  "HUID=0x%.8X, RC=0x%X, PLID=0x%lX",
+                                  PERV_SB_CS_SCOM, // 0x00050008
+                                  TARGETING::get_huid(sbeState.target),
+                                  ERRL_GETRC_SAFE(err),
+                                  ERRL_GETPLID_SAFE(err));
+                        errlCommit( err, SBE_COMP_ID );
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_sbe,
+                                  INFO_MRK"updateProcessorSbeSeeproms() - Wrote"
+                                  " SB CS SCOM (0x%.8X) to Target :"
+                                  "HUID=0x%.8X as 0x%X",
+                                  PERV_SB_CS_SCOM, // 0x00050008
+                                  TARGETING::get_huid(sbeState.target),
+                                  scomData );
+                    }
+                }
+                /* ---------------------------------------------------------
+                   End hack to fix SBE Boot Select changing to 1 and never
+                   being reset back to 0.  @TODO RTC:167179 for removal.
+                   --------------------------------------------------------- */
+
                 // Push this sbeState onto the vector
                 sbeStates_vector.push_back(sbeState);
 
@@ -431,6 +486,26 @@ namespace SBE
 #endif
 
 #ifndef CONFIG_BMC_IPMI
+                // Sync all attributes to the FSP before doing the Shutdown
+                err = syncAllAttributesToFsp();
+                if( err )
+                {
+                    // Something failed on the sync.  Commit the error here
+                    // and continue with the Re-IPL Request
+                    TRACFCOMP( g_trac_sbe,
+                               ERR_MRK"updateProcessorSbeSeeproms() - Error "
+                               "syncing attributes to FSP, RC=0x%X, PLID=0x%lX",
+                               ERRL_GETRC_SAFE(err),
+                               ERRL_GETPLID_SAFE(err));
+                    errlCommit( err, SBE_COMP_ID );
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_sbe,
+                               INFO_MRK"updateProcessorSbeSeeproms() - Sync "
+                               "Attributes to FSP" );
+                }
+
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"updateProcessorSbeSeeproms(): Calling "
                            "INITSERVICE::doShutdown() with "
@@ -444,19 +519,15 @@ namespace SBE
             /* Deconfigure any Processors that have a Version different */
             /*   from the Master Processor's Version                    */
             /************************************************************/
-            // skip if we're only checking for NEST_FREQ mismatch
-            if ( i_check_type != SBE_UPDATE_ONLY_CHECK_NEST_FREQ )
-            {
-                err = masterVersionCompare(sbeStates_vector);
+            err = masterVersionCompare(sbeStates_vector);
 
-                if ( err )
-                {
-                    // Something failed on the check
-                    TRACFCOMP( g_trac_sbe,
-                               INFO_MRK"updateProcessorSbeSeeproms(): Call to "
-                               "masterVersionCompare() failed rc=0x%.4X",
-                               err->reasonCode());
-                }
+            if ( err )
+            {
+                // Something failed on the check
+                TRACFCOMP( g_trac_sbe,
+                           INFO_MRK"updateProcessorSbeSeeproms(): Call to "
+                           "masterVersionCompare() failed rc=0x%.4X",
+                           err->reasonCode());
             }
 
         }while(0);
@@ -1773,8 +1844,7 @@ namespace SBE
     }
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState,
-                               sbeUpdateCheckType& i_check_type)
+    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState)
     {
 
         TRACUCOMP( g_trac_sbe,
@@ -1783,7 +1853,6 @@ namespace SBE
 
 
         errlHndl_t err = NULL;
-        bool skip_customization = false;
         void *sbeHbblImgPtr = NULL;
 
         do{
@@ -1841,34 +1910,6 @@ namespace SBE
                      &(io_sbeState.seeprom_1_ver),
                      sizeof(sbeSeepromVersionInfo_t));
 
-
-            // Check NEST_FREQ settings
-            err = checkNestFreqSettings(io_sbeState);
-
-            if (err)
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
-                           "Error returned from checkNestFreqSettings(), "
-                           "RC=0x%X, PLID=0x%lX",
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
-                break;
-            }
-            else if ((i_check_type == SBE_UPDATE_ONLY_CHECK_NEST_FREQ) &&
-                     (io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch == false) &&
-                     (io_sbeState.seeprom_1_ver_Nest_Freq_Mismatch == false))
-            {
-                TRACFCOMP( g_trac_sbe,
-                           INFO_MRK"getSbeInfoState(): "
-                           "Only looking for Nest Freq Mismatch and "
-                           "none found for Target UID=0x%X. Skipping "
-                           "SBE customization",
-                           TARGETING::get_huid(io_sbeState.target));
-
-                // Skipping SBE customization, but still need other info like
-                // MVPD in the case another processor requires a re-IPL
-                skip_customization = true;
-            }
 
             /*******************************************/
             /*  Get PNOR SBE Version Information       */
@@ -1972,15 +2013,12 @@ namespace SBE
             /*  Calculate CRC of the image             */
             /*******************************************/
             size_t sbeImgSize = 0;
-            if ( skip_customization == false )
-            {
-                err = procCustomizeSbeImg(io_sbeState.target,
-                                          sbeHbblImgPtr,  //SBE, HBBL in memory
-                                          MAX_SEEPROM_IMAGE_SIZE,  //max size
-                                          reinterpret_cast<void*>
-                                              (SBE_IMG_VADDR),  //destination
-                                          sbeImgSize);
-            }
+            err = procCustomizeSbeImg(io_sbeState.target,
+                                      sbeHbblImgPtr,  //SBE, HBBL in memory
+                                      MAX_SEEPROM_IMAGE_SIZE,  //max size
+                                      reinterpret_cast<void*>
+                                          (SBE_IMG_VADDR),  //destination
+                                      sbeImgSize);
 
             if(err)
             {
@@ -1998,7 +2036,7 @@ namespace SBE
                                              (SBE_IMG_VADDR),
                                              sbeImgSize) ;
 
-            TRACUCOMP( g_trac_sbe, "getSbeInfoState() - procCustomizeSbeImg(): "
+            TRACFCOMP( g_trac_sbe, "getSbeInfoState() - procCustomizeSbeImg(): "
                        "maxSize=0x%X, actSize=0x%X, crc=0x%X",
                        MAX_SEEPROM_IMAGE_SIZE, sbeImgSize,
                        io_sbeState.customizedImage_crc);
@@ -2682,31 +2720,28 @@ namespace SBE
             }
 
             if ( ( pnor_check_dirty ||
-                   crc_check_dirty  ||
-                   io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch )
+                   crc_check_dirty )
                  && !isSimics_check )
             {
                 seeprom_0_isDirty = true;
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom0 "
                            "dirty: pnor=%d, crc=%d (custom=0x%X/s0=0x%X), "
-                           "nest_freq=%d, isSimics=%d",
+                           "isSimics=%d",
                            TARGETING::get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
                            io_sbeState.customizedImage_crc,
                            io_sbeState.seeprom_0_ver.data_crc,
-                           io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch,
                            isSimics_check);
             }
             else
             {
-                TRACUCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom0 "
+                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom0 "
                            "flagged as clean: pnor=%d, crc=%d "
-                           "(custom=0x%X/s0=0x%X), nest_freq=%d, isSimics=%d",
+                           "(custom=0x%X/s0=0x%X), isSimics=%d",
                            TARGETING::get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
                            io_sbeState.customizedImage_crc,
                            io_sbeState.seeprom_0_ver.data_crc,
-                           io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch,
                            isSimics_check);
             }
 
@@ -2744,31 +2779,28 @@ namespace SBE
             }
 
             if ( (pnor_check_dirty ||
-                  crc_check_dirty  ||
-                  io_sbeState.seeprom_1_ver_Nest_Freq_Mismatch )
+                  crc_check_dirty )
                  && !isSimics_check )
             {
                 seeprom_1_isDirty = true;
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom1 "
                            "dirty: pnor=%d, crc=%d (custom=0x%X/s1=0x%X), "
-                           "nest_freq=%d, isSimics=%d",
+                           "isSimics=%d",
                            TARGETING::get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
                            io_sbeState.customizedImage_crc,
                            io_sbeState.seeprom_1_ver.data_crc,
-                           io_sbeState.seeprom_1_ver_Nest_Freq_Mismatch,
                            isSimics_check);
             }
             else
             {
-                TRACUCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom1 "
+                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom1 "
                            "flagged as clean: pnor=%d, crc=%d "
-                           "(custom=0x%X/s1=0x%X), nest_freq=%d, isSimics=%d",
+                           "(custom=0x%X/s1=0x%X), isSimics=%d",
                            TARGETING::get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
                            io_sbeState.customizedImage_crc,
                            io_sbeState.seeprom_1_ver.data_crc,
-                           io_sbeState.seeprom_1_ver_Nest_Freq_Mismatch,
                            isSimics_check);
             }
 
@@ -2806,15 +2838,11 @@ namespace SBE
             {
                 current_side_isDirty = seeprom_0_isDirty;
                 alt_side_isDirty     = seeprom_1_isDirty;
-                io_sbeState.cur_seeprom_ver_Nest_Freq_Mismatch =
-                            io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch;
             }
             else
             {
                 current_side_isDirty = seeprom_1_isDirty;
                 alt_side_isDirty     = seeprom_0_isDirty;
-                io_sbeState.cur_seeprom_ver_Nest_Freq_Mismatch =
-                            io_sbeState.seeprom_1_ver_Nest_Freq_Mismatch;
             }
 
             // Set system_situation - bits defined in sbe_update.H
@@ -2876,19 +2904,9 @@ namespace SBE
                         &(io_sbeState.customizedImage_crc),
                         sizeof(io_sbeState.new_seeprom_ver.data_crc));
 
-                if (  io_sbeState.update_actions & UPDATE_SBE )
-                {
-                    TARGETING::targetService().getTopLevelTarget( l_sys );
-                    io_sbeState.new_seeprom_ver.nest_freq_mhz =
-                             l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
-                }
-                else
-                {
-                    // UPDATE_NEST_FREQ: set the nest freq to what the
-                    // current SBE Seeprom booted from
-                     io_sbeState.new_seeprom_ver.nest_freq_mhz =
-                                 io_sbeState.mproc_nest_freq_mhz;
-                }
+                TARGETING::targetService().getTopLevelTarget( l_sys );
+                io_sbeState.new_seeprom_ver.nest_freq_mhz =
+                         l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
 
                 // If there was an ECC fail on either SEEPROM, do a read-back
                 // Check when writing this information to the SEEPROM
@@ -2896,7 +2914,7 @@ namespace SBE
                                 io_sbeState.seeprom_0_ver_ECC_fail ||
                                 io_sbeState.seeprom_1_ver_ECC_fail);
 
-                TRACDBIN( g_trac_sbe,
+                TRACFBIN( g_trac_sbe,
                           "getTargetUpdateActions() - New SBE Version Info",
                           &(io_sbeState.new_seeprom_ver),
                           sizeof(sbeSeepromVersionInfo_t));
@@ -2989,30 +3007,10 @@ namespace SBE
 
                 if ( pnor_side_info.isGolden == true )
                 {
-                    // Check for NEST_FREQ mismatch
-                    if ( ( io_sbeState.target_is_master == true ) &&
-                         ( io_sbeState.cur_seeprom_ver_Nest_Freq_Mismatch
-                                       == true ) )
-                    {
-                        l_actions |= DO_UPDATE;
-                        l_actions |= UPDATE_NEST_FREQ;
+                    // Nothing to do (covered in istep 6 function)
+                    l_actions = CLEAR_ACTIONS;
 
-                        TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                            "Booting Master Proc READ_ONLY SEEPROM pointing at "
-                            "PNOR's GOLDEN side and NEST_FREQ mismatch. Update "
-                            "NEST_FREQ. Continue IPL. "
-                            "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
-                            TARGETING::get_huid(io_sbeState.target),
-                            i_system_situation, l_actions,
-                            io_sbeState.mvpdSbKeyword.flags);
-                    }
-
-                    else
-                    {
-                        // Nothing to do (covered in istep 6 function)
-                        l_actions = CLEAR_ACTIONS;
-
-                        TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                             "Booting READ_ONLY SEEPROM pointing at PNOR's "
                             "GOLDEN side. No updates for cur side=%d. Continue "
                             "IPL. (sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
@@ -3020,38 +3018,17 @@ namespace SBE
                             io_sbeState.cur_seeprom_side,
                             i_system_situation, l_actions,
                             io_sbeState.mvpdSbKeyword.flags);
-                    }
                 }
                 else if (  ( pnor_side_info.hasOtherSide == false ) &&
                          ( io_sbeState.cur_seeprom_side == READ_ONLY_SEEPROM ) )
                 {
-                    // Check for NEST_FREQ mismatch
-                    if ( ( io_sbeState.target_is_master == true ) &&
-                         ( io_sbeState.cur_seeprom_ver_Nest_Freq_Mismatch
-                                       == true ) )
-                    {
-                        l_actions |= DO_UPDATE;
-                        l_actions |= UPDATE_NEST_FREQ;
+                    // Even though current seeprom is not pointing at PNOR's
+                    // GOLDEN side, treat like READ_ONLY if booting from
+                    // READ_ONLY seeprom and PNOR does not have another side
+                    // - No Update (ie, Palmetto configuration)
+                    l_actions = CLEAR_ACTIONS;
 
-                        TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                            "Treating cur of Master Proc like READ_ONLY SBE "
-                            "SEEPROM and NEST_FREQ mismatch. Update "
-                            "NEST_FREQ. Continue IPL. "
-                            "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
-                            TARGETING::get_huid(io_sbeState.target),
-                            i_system_situation, l_actions,
-                            io_sbeState.mvpdSbKeyword.flags);
-                    }
-                    else
-                    {
-
-                        // Even though current seeprom is not pointing at PNOR's
-                        // GOLDEN side, treat like READ_ONLY if booting from
-                        // READ_ONLY seeprom and PNOR does not have another side
-                        // - No Update (ie, Palmetto configuration)
-                        l_actions = CLEAR_ACTIONS;
-
-                        TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "Treating cur like READ_ONLY SBE SEEPROM. "
                                "No updates for cur side=%d. Continue IPL. "
                                "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
@@ -3059,7 +3036,6 @@ namespace SBE
                                io_sbeState.cur_seeprom_side,
                                i_system_situation, l_actions,
                                io_sbeState.mvpdSbKeyword.flags);
-                    }
                 }
                 else // proceed to update this side
                 {
@@ -3522,43 +3498,6 @@ namespace SBE
                            io_sbeState.cur_seeprom_side,
                            i_system_situation, io_actions);
         }
-    }
-
-/////////////////////////////////////////////////////////////////////
-    void setNestFreqAttributes(uint32_t i_nestFreq)
-    {
-        INITSERVICE::SPLESS::MboxScratch4_t l_scratch4;
-        uint32_t l_i2cBusDiv = 0;
-
-        // Call targeting function to update NEST_FREQ
-        TargetService& tS = targetService();
-        TARGETING::Target * l_sys = nullptr;
-        TARGETING::Target * l_masterProc = nullptr;
-
-        (void) tS.getTopLevelTarget( l_sys );
-        assert( l_sys, "setNestFreqAttributes() system target is NULL");
-
-        (void) tS.masterProcChipTargetHandle( l_masterProc );
-        assert( l_masterProc, "setNestFreqAttributes() "
-                "Master Proc target is NULL");
-
-        // Get the i2c bus divisor
-        TARGETING::ATTR_MASTER_MBOX_SCRATCH_type l_scratchRegs;
-        assert(l_sys->tryGetAttr
-                   <TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
-               "setNestFreqAttributes() failed to get MASTER_MBOX_SCRATCH");
-        l_scratch4.data32 = l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_4];
-
-        // The Nest PLL Bucket ID ranges 1-5. Subtract 1 for zero-based indexing
-        l_i2cBusDiv = NEST_PLL_FREQ_I2CDIV_LIST[l_scratch4.nestPllBucket-1];
-
-        TRACFCOMP(g_trac_sbe, "setNestFreqAttributes(): "
-                  "UPDATE_NEST_FREQ to %d ",
-                  i_nestFreq);
-
-        TARGETING::setFrequencyAttributes(l_sys,
-                                          i_nestFreq,
-                                          l_i2cBusDiv );
     }
 
 /////////////////////////////////////////////////////////////////////
@@ -4609,270 +4548,6 @@ namespace SBE
         }while( 0 );
 #endif
         return l_errl;
-    }
-
-
-/////////////////////////////////////////////////////////////////////
-    void checkSeepromNestFreq(TARGETING::Target* i_tgt,
-                              uint32_t i_default_nest_freq,
-                              uint32_t i_struct_version,
-                              uint32_t i_seeprom_nest_freq,
-                              size_t   i_seeprom_num,
-                              bool &   o_mismatch)
-    {
-
-        TARGETING::Target * l_sys = nullptr;
-        TARGETING::targetService().getTopLevelTarget( l_sys );
-        uint32_t l_current_nest_freq =
-            l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
-
-        TRACUCOMP( g_trac_sbe,
-                   ENTER_MRK"checkSeepromNestFreq: tgt=0x%X current_freq=%d, "
-                   "default_freq=%d, version=0x%X, i_seeprom_nest_freq=%d, "
-                   "seeprom_num=%d",
-                   TARGETING::get_huid(i_tgt), l_current_nest_freq,
-                   i_default_nest_freq, i_struct_version,
-                   i_seeprom_nest_freq, i_seeprom_num);
-
-        o_mismatch = false;
-
-        // Check Seeprom
-        if ( STRUCT_VERSION_CHECK(i_struct_version) &&
-             i_seeprom_nest_freq != 0 )
-        {
-            // Only version that tracks the nest freq when the image was
-            // customized
-            if ( l_current_nest_freq == i_seeprom_nest_freq )
-            {
-                TRACUCOMP( g_trac_sbe,"checkSeepromNestFreq: tgt=0x%X: "
-                           "Seeprom%d: ver%d found and current "
-                           "nest_freq(%d) and image nest_freq(%d) match",
-                           TARGETING::get_huid(i_tgt),
-                           i_seeprom_num, i_struct_version,
-                           l_current_nest_freq,
-                           i_seeprom_nest_freq);
-            }
-            else
-            {
-                o_mismatch = true;
-                TRACFCOMP( g_trac_sbe,"checkSeepromNestFreq: tgt=0x%X: "
-                           "Seeprom%d: ver%d found and current "
-                           "nest_freq(%d) and image nest_freq(%d) DO NOT match",
-                           TARGETING::get_huid(i_tgt),
-                           i_seeprom_num, i_struct_version,
-                           l_current_nest_freq, i_seeprom_nest_freq);
-            }
-        }
-
-        else
-        {
-            // Either uninitialized, simics, corrupted, etc
-            // Assume SBE image created with the module's default frequency
-            if ( l_current_nest_freq == i_default_nest_freq )
-            {
-                TRACUCOMP( g_trac_sbe,"checkSeepromNestFreq: tgt=0x%X: "
-                           "Seeprom%d: ver=0x%X found and current "
-                           "nest_freq(%d) and default nest_freq(%d) match",
-                           TARGETING::get_huid(i_tgt),
-                           i_seeprom_num, i_struct_version,
-                           l_current_nest_freq, i_default_nest_freq);
-            }
-            else
-            {
-                o_mismatch = true;
-                TRACFCOMP( g_trac_sbe,"checkSeepromNestFreq: tgt=0x%X: "
-                           "Seeprom%d: ver=0x%X found and current "
-                           "nest_freq(%d) and default nest_freq(%d) "
-                           "DO NOT match. ",
-                           TARGETING::get_huid(i_tgt),
-                           i_seeprom_num, i_struct_version,
-                           l_current_nest_freq, i_default_nest_freq);
-            }
-
-        }
-
-        TRACUCOMP( g_trac_sbe,
-                   EXIT_MRK"checkSeepromNestFreq: tgt=0x%X "
-                   "Seeprom%d: return o_mismatch=%d",
-                   TARGETING::get_huid(i_tgt), i_seeprom_num, o_mismatch);
-
-        return;
-    }
-
-/////////////////////////////////////////////////////////////////////
-    errlHndl_t getBootNestFreq( uint32_t & o_bootNestFreq )
-    {
-        errlHndl_t l_err = nullptr;
-
-        INITSERVICE::SPLESS::MboxScratch4_t l_scratch4;
-
-        TARGETING::Target * l_masterProcTarget = NULL;
-        TARGETING::targetService()
-                    .masterProcChipTargetHandle( l_masterProcTarget );
-
-        TARGETING::Target * l_sys = nullptr;
-        (void) TARGETING::targetService().getTopLevelTarget( l_sys );
-        assert( l_sys, "getBootNestFreq() system target is NULL");
-
-
-        TRACFCOMP( g_trac_sbe, ENTER_MRK"Enter getBootNestFreq()");
-        do
-        {
-            TARGETING::ATTR_MASTER_MBOX_SCRATCH_type l_scratchRegs;
-            assert(l_sys->tryGetAttr
-                         <TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
-                   "getBootNestFreq() failed to get MASTER_MBOX_SCRATCH");
-            l_scratch4.data32 = l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_4];
-
-            TRACFCOMP(g_trac_sbe,
-                    "The nest PLL bucket id is %d",
-                    l_scratch4.nestPllBucket );
-
-            size_t sizeOfPll = sizeof(NEST_PLL_FREQ_LIST)/
-                               sizeof(NEST_PLL_FREQ_LIST[0]);
-
-            assert((uint8_t)(l_scratch4.nestPllBucket-1) < (uint8_t) sizeOfPll );
-
-            // The nest PLL bucket IDs are numbered 1 - 5. Subtract 1 to
-            // take zero-based indexing into account.
-            o_bootNestFreq = NEST_PLL_FREQ_LIST[l_scratch4.nestPllBucket-1];
-
-            TRACFCOMP(g_trac_sbe, "getBootNestFreq::The boot frequency was %d: Bucket Id = %d",
-                    o_bootNestFreq,
-                    l_scratch4.nestPllBucket );
-
-
-        }while( 0 );
-        TRACUCOMP(g_trac_sbe,EXIT_MRK "Exit getBootNestFreq()");
-
-        return l_err;
-    }
-
-/////////////////////////////////////////////////////////////////////
-    errlHndl_t checkNestFreqSettings(sbeTargetState_t& io_sbeState)
-    {
-        TRACFCOMP( g_trac_sbe,
-                   ENTER_MRK"checkNestFreqSettings(): HUID:0x%08X",
-                   TARGETING::get_huid(io_sbeState.target));
-
-        errlHndl_t err = NULL;
-        uint32_t default_nest_freq = 0;
-
-        do{
-
-            // Set defaults
-            io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch = false;
-            io_sbeState.seeprom_1_ver_Nest_Freq_Mismatch = false;
-
-            // Retrieve the boot frequency we booted from
-            err = getBootNestFreq(default_nest_freq);
-
-            if( err )
-            {
-                TRACFCOMP(g_trac_sbe,
-                     "There was an error getting the default boot frequency");
-
-                break;
-            }
-
-            TRACFCOMP( g_trac_sbe,"checkNestFreqSettings(): ATTR_FREQ_PB_MHZ"
-                       " Boot Frequency=%d",
-                       default_nest_freq);
-            TRACUCOMP( g_trac_sbe,"checkNestFreqSettings(): "
-                       "seeprom0 ver=%d freq=%d seeprom1 ver=%d freq=%d",
-                       io_sbeState.seeprom_0_ver.struct_version,
-                       io_sbeState.seeprom_0_ver.nest_freq_mhz,
-                       io_sbeState.seeprom_1_ver.struct_version,
-                       io_sbeState.seeprom_1_ver.nest_freq_mhz);
-
-            // Check Seeprom 0
-            checkSeepromNestFreq(io_sbeState.target,
-                                 default_nest_freq,
-                                 io_sbeState.seeprom_0_ver.struct_version,
-                                 io_sbeState.seeprom_0_ver.nest_freq_mhz,
-                                 0,
-                                 io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch);
-
-            // Check Seeprom 1
-            checkSeepromNestFreq(io_sbeState.target,
-                                 default_nest_freq,
-                                 io_sbeState.seeprom_1_ver.struct_version,
-                                 io_sbeState.seeprom_1_ver.nest_freq_mhz,
-                                 1,
-                                 io_sbeState.seeprom_1_ver_Nest_Freq_Mismatch);
-
-            // Set the frequency at which the master processor booted from
-            if ( io_sbeState.target_is_master == true )
-            {
-                //Get Current (boot) Side
-                sbeSeepromSide_t tmp_cur_side = SBE_SEEPROM_INVALID;
-                err = getSbeBootSeeprom(io_sbeState.target, tmp_cur_side);
-                if(err)
-                {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"checkNestFreqSettings() - "
-                               "Error returned from getSbeBootSeeprom(), "
-                               "RC=0x%X, PLID=0x%lX",
-                               ERRL_GETRC_SAFE(err),
-                               ERRL_GETPLID_SAFE(err));
-
-                    // Assume it was default frequency for this module
-                    io_sbeState.mproc_nest_freq_mhz = default_nest_freq;
-
-                    break;
-                }
-
-                if (tmp_cur_side == SBE_SEEPROM0)
-                {
-                    if ( STRUCT_VERSION_CHECK(
-                             io_sbeState.seeprom_0_ver.struct_version) &&
-                         io_sbeState.seeprom_0_ver.nest_freq_mhz != 0 )
-                    {
-                        io_sbeState.mproc_nest_freq_mhz =
-                                    io_sbeState.seeprom_0_ver.nest_freq_mhz;
-                    }
-                    else
-                    {
-                        // Assume it was default frequency for this module
-                        io_sbeState.mproc_nest_freq_mhz = default_nest_freq;
-                    }
-                }
-                else if ( tmp_cur_side == SBE_SEEPROM1 )
-                {
-                    if ( STRUCT_VERSION_CHECK(
-                             io_sbeState.seeprom_1_ver.struct_version) &&
-                         io_sbeState.seeprom_1_ver.nest_freq_mhz != 0 )
-                    {
-                        io_sbeState.mproc_nest_freq_mhz =
-                                    io_sbeState.seeprom_1_ver.nest_freq_mhz;
-                    }
-                    else
-                    {
-                        // Assume it was default frequency for this module
-                        io_sbeState.mproc_nest_freq_mhz = default_nest_freq;
-                    }
-                }
-                else
-                {
-                    // Assume it was default frequency for this module
-                    io_sbeState.mproc_nest_freq_mhz = default_nest_freq;
-                }
-
-            }
-
-            TRACUCOMP( g_trac_sbe,"checkNestFreqSettings(): s0-mismatch=%d, "
-                       "s1-mismatch=%d, mproc_nest_freq_mhz=%d",
-                       io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch,
-                       io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch,
-                       io_sbeState.mproc_nest_freq_mhz);
-
-        }while(0);
-
-
-        TRACFCOMP( g_trac_sbe,
-                   EXIT_MRK"checkNestFreqSettings");
-
-        return err;
-
     }
 
 

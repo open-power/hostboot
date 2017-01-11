@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -780,11 +780,8 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // set bad ec just for comparison to local_ec later
             sbeState.ec = 0xFF;
 
-            // send input part to perform all checks
-            sbeUpdateCheckType i_check_type = SBE_UPDATE_CHECK_ALL;
-
             total++;
-            err = getSbeInfoState(sbeState, i_check_type);
+            err = getSbeInfoState(sbeState);
             if(err)
             {
                 fails++;
