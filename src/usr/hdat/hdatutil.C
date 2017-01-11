@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,12 +145,12 @@ errlHndl_t hdatGetIdEc(const Target *i_pTarget,
         if(i_pTarget->getAttr<TARGETING::ATTR_CLASS>() != TARGETING::CLASS_CHIP)
         {
             l_pCTarget = getParentChip(i_pTarget);
-            o_ecLevel = l_pCTarget->getAttr<TARGETING::ATTR_EC>();
+            o_ecLevel = l_pCTarget->getAttr<TARGETING::ATTR_HDAT_EC>();
             o_chipId = l_pCTarget->getAttr<TARGETING::ATTR_CHIP_ID>();
         }
         else
         {
-            o_ecLevel = i_pTarget->getAttr<TARGETING::ATTR_EC>();
+            o_ecLevel = i_pTarget->getAttr<TARGETING::ATTR_HDAT_EC>();
             o_chipId =  i_pTarget->getAttr<TARGETING::ATTR_CHIP_ID>();
         }
     }
