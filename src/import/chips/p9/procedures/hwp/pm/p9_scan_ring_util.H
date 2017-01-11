@@ -73,8 +73,9 @@ enum FakeScanRing_t
  */
 enum RingDebugMode_t
 {
-    SCAN_RING_NO_DEBUG      =   0x00,
-    SCAN_RING_TRACE_DEBUG   =   0x01,
+    SCAN_RING_NO_DEBUG          =   0x00,
+    SCAN_RING_TRACE_DEBUG       =   0x01,
+    SCAN_RING_TRACE_DEEP_DEBUG  =   0x02,
 };
 /**
  * @brief   models a fake ring for debug.
