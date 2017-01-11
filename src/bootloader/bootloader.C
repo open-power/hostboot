@@ -58,18 +58,16 @@ namespace Bootloader{
      */
     uint8_t *g_blScratchSpace = NULL;
 
-    // @TODO RTC:166847 - remove tmp_hw_key_hash and use actual hw key hash
-    const uint64_t tmp_hw_key_hash[] =
+    /**
+     * @brief  Retrieve the internal hardware hash key from secure ROM object.
+     * @param[out] o_hash  Reference to the sha2_hash_t array to copy the
+     *                     hash to.
+     */
+    void setHwKeyHash(sha2_hash_t o_hash)
     {
-        0x40d487ff7380ed6a,
-        0xd54775d5795fea0d,
-        0xe2f541fea9db06b8,
-        0x466a42a320e65f75,
-        0xb48665460017d907,
-        0x515dc2a5f9fc5095,
-        0x4d6ee0c9b67d219d,
-        0xfb7085351d01d6d1
-    };
+        memcpy(o_hash, reinterpret_cast<void *>(HW_KEYS_HASH_ADDR),
+               sizeof(sha2_hash_t));
+    }
 
     // @TODO RTC:167740 remove magic number check once fsp/op signs HBB
     /**
@@ -95,7 +93,8 @@ namespace Bootloader{
      *
      * @return N/A
      */
-    void verifyContainer(const void * i_pContainer)
+    void verifyContainer(const void * i_pContainer,
+                         const sha2_hash_t* i_hwKeyHash)
     {
 #ifdef CONFIG_SECUREBOOT
         // @TODO RTC:167740 remove magic number check once fsp/op signs HBB
@@ -125,8 +124,9 @@ namespace Bootloader{
             // struct elements my_ecid, entry_point and log
             memset(&l_hw_parms, 0, sizeof(ROM_hw_params));
 
+
             // Use current hw hash key
-            memcpy (&l_hw_parms.hw_key_hash, &tmp_hw_key_hash, sizeof(sha2_hash_t));
+            memcpy (&l_hw_parms.hw_key_hash, i_hwKeyHash, sizeof(sha2_hash_t));
 
             const ROM_container_raw* l_container =
                            reinterpret_cast<const ROM_container_raw*>(i_pContainer);
@@ -251,8 +251,13 @@ namespace Bootloader{
                 uint64_t *l_dest_addr =
                    reinterpret_cast<uint64_t*>(HBB_RUNNING_ADDR |
                                                IGNORE_HRMOR_MASK);
+
+                // Get HW keys hash
+                sha2_hash_t l_hwKeyHash{0};
+                setHwKeyHash(l_hwKeyHash);
+
                 // ROM verification of HBB image
-                verifyContainer(l_src_addr);
+                verifyContainer(l_src_addr, &l_hwKeyHash);
 
                 // Increment past secure header
 #ifdef CONFIG_SECUREBOOT

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -166,7 +166,13 @@ namespace Bootloader{
      *  HBB is copied to its running location and its execution is started.
      */
 
-
+    /** Max size of HBBL without ECC. Must match PNOR layout for eyeCatch HBBL*/
+#define MAX_HBBL_SIZE (20 * KILOBYTE)
+    /** Size of exception vector reserved space at start of the HBBL section*/
+#define HBBL_EXCEPTION_VECTOR_SIZE (12 * KILOBYTE)
+    /** HW Keys hash is placed in the last 64 bytes of the HBBL */
+#define HW_KEYS_HASH_ADDR (getHRMOR() + HBBL_EXCEPTION_VECTOR_SIZE \
+                           + MAX_HBBL_SIZE - 64)
     /** Location of working copy of HBB with ECC */
 #define HBB_ECC_WORKING_ADDR    (getHRMOR() - ( 1*MEGABYTE))
 

@@ -99,6 +99,9 @@ HB_TEMP_IMG = hb_temp.bin
 # Aggregate
 ALL_DEFAULT_IMAGES = ${DEFAULT_INPUT_IMAGES} ${FINAL_OUTPUT_IMAGES}
 
+# Imprint hw keys' hash
+IMPRINT_HW_KEY_HASH = ${imprintHwKeyHash:P}
+
 # Script to manipulate bin files to prepare for buildpnor (install_all phase)
 # Note: sections with no input files are zero filled images and pass EMPTY as
 #       their input file name. This is so the script knows it needs to generate
@@ -114,7 +117,8 @@ GEN_PNOR_IMAGE_SCRIPT = ${genPnorImages.pl:P}
     GEN_DEFAULT_BIN_FILES = HBBL=${HBBL_IMG},HBB=${HBB_IMG},HBI=${HBI_IMG},HBRT=${HBRT_IMG},TEST=EMPTY,TESTRO=EMPTY,HBEL=EMPTY,GUARD=EMPTY,GLOBAL=EMPTY,PAYLOAD=EMPTY,CVPD=EMPTY,MVPD=EMPTY,DJVPD=EMPTY,RINGOVD=EMPTY,SBKT=EMPTY
     DEFAULT_PARAMS = --build-all ${TARGET_TEST:b--test} \
                      ${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
-                     --pnorLayout ${DEFAULT_PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS}
+                     --pnorLayout ${DEFAULT_PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS} \
+                     --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
 .else
     DEFAULT_PNOR_LAYOUT = ${pnorLayoutFake.xml:P}
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
@@ -238,7 +242,7 @@ TEMP_IMG = temp.bin
     #@TODO RTC:163810 - Put SBEC back "--systemBinFile  SBEC=${${SBEC_IMG}:P}"
     SYSTEM_SPECIFIC_PARAMS = ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot} \
                              --pnorLayout ${DEFAULT_PNOR_LAYOUT} ${CORRUPT_PARAMS} \
-                             --systemBinFiles ${GEN_NIMBUS_BIN_FILES}
+                             --systemBinFiles ${GEN_NIMBUS_BIN_FILES} --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
 .else
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
     #@TODO securebootp9 - Put `HBD=${${NIMBUS_VPO_HBD_IMG}:P}` back into genPnorImage parameters

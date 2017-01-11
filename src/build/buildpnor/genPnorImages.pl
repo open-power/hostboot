@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -77,6 +77,8 @@ use constant OP_SIGNING_FLAG => " -flags ";
 use constant OP_BUILD_FLAG => 0x80000000;
 use constant FIPS_BUILD_FLAG => 0x40000000;
 use constant KEY_TRANSITION_FLAG => 0x00000001;
+# Size of HW keys' Hash
+use constant HW_KEYS_HASH_SIZE => 64;
 
 # TODO: RTC 163655
 # Implement dynamic support for choosing FSP or op-build flag type.
@@ -112,6 +114,7 @@ my $help = 0;
 my %partitionsToCorrupt = ();
 my $sign_mode = $DEVELOPMENT;
 my $sb_signing_config_file = "";
+my $hwKeyHashFile = "";
 
 GetOptions("binDir:s" => \$bin_dir,
            "secureboot" => \$secureboot,
@@ -124,6 +127,7 @@ GetOptions("binDir:s" => \$bin_dir,
            "corrupt:s" => \%partitionsToCorrupt,
            "sign-mode:s" => \$sign_mode,
            "sb-signing-config-file:s" => \$sb_signing_config_file,
+           "hwKeyHashFile:s" => \$hwKeyHashFile,
            "help" => \$help);
 
 if ($help)
@@ -412,8 +416,9 @@ foreach my $header (keys %sb_hdrs)
 # If a dependency is not specified in the hash used, use default behavior.
 ################################################################################
 # Hardcoded defined order that binfiles should be handled.
-my %partitionDeps = ( HBB => 0,
-                      HBI => 1);
+my %partitionDeps = ( HBBL => 0,
+                      HBB => 1,
+                      HBI => 2);
 sub partitionDepSort
 {
     # If $a exists but $b does not, set $a < $b
@@ -528,6 +533,31 @@ sub manipulateImages
             # FSP workaround to keep original bin names
             my $fsp_file = $bin_file;
             my $fsp_prefix = "";
+
+            # HBBL + ROM combination
+            if ($eyeCatch eq "HBBL")
+            {
+                # Ensure there is enough room at the end of the HBBL partition
+                # to store the HW keys' hash.
+                my $hbblRawSize = (-s $bin_file or die "Cannot get size of file $bin_file");
+                print "HBBL raw size (no padding/ecc) = $hbblRawSize/$size\n";
+                if ($hbblRawSize > $size - HW_KEYS_HASH_SIZE)
+                {
+                    die "HBBL cannot fit HW Keys' Hash (64 bytes) at the end without overwriting real data";
+                }
+
+                # Pad HBBL to max size
+                run_command("cp $bin_file $tempImages{TEMP_BIN}");
+                run_command("dd if=$tempImages{TEMP_BIN} of=$bin_file ibs=$size conv=sync");
+
+                # Add HW key hash to end of HBBL - 64 Bytes
+                my $hwKeyHashStart = (-s $bin_file or die "Cannot get size of file $bin_file")
+                                      - HW_KEYS_HASH_SIZE;
+
+                # dd used with seek to add the hw keys' hash at the end of the hbbl
+                # padded bin file
+                run_command("dd if=$hwKeyHashFile conv=notrunc of=$bin_file bs=1 seek=\$(($hwKeyHashStart))");
+            }
 
             # Header Phase
             if(   ($sectionHash{$layoutKey}{sha512Version} eq "yes")
@@ -699,6 +729,11 @@ sub manipulateImages
                 # possibly larger than partition size and does not need to be
                 # fully padded. Size adjustments made in checkSpaceConstraints
                 run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
+            }
+            # HBBL was already padded
+            elsif ($eyeCatch eq "HBBL")
+            {
+                run_command("cp $tempImages{HDR_PHASE} $tempImages{PAD_PHASE}");
             }
             else
             {
