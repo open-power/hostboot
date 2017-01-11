@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,8 +138,8 @@ fapi2::ReturnCode pfet_set_voff(
 /// @return delays in this register are in terms of PPM clock period
 
 uint8_t convert_delay_to_value (
-    const uint32_t   i_delay,
-    const uint32_t   i_attr_proc_nest_frequency);
+    const uint32_t i_delay_ns,
+    const uint32_t i_proc_nest_frequency_MHz);
 
 // ----------------------------------------------------------------------
 // Function definitions
@@ -222,7 +222,7 @@ fapi2::ReturnCode pfet_init(
     uint8_t                     l_pfet_powerup_delay_value = 0;
     uint8_t                     l_pfet_powerdown_delay_value = 0;
 
-    uint32_t                    l_proc_refclk_frequency;
+    uint32_t                    l_proc_nest_frequency;
     uint32_t                    l_pfet_powerup_delay_ns;
     uint32_t                    l_pfet_powerdown_delay_ns;
     uint8_t                     l_pfet_vdd_voff_sel;
@@ -255,11 +255,11 @@ fapi2::ReturnCode pfet_init(
     //  ******************************************************************
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     /// ----------------------------------------------------------
-    l_proc_refclk_frequency = 0;
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FREQ_PROC_REFCLOCK_KHZ,
+    l_proc_nest_frequency = 0;
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ,
                             FAPI_SYSTEM,
-                            l_proc_refclk_frequency),
-              "Error getting ATTR_FREQ_PROC_REFCLOCK");
+                            l_proc_nest_frequency),
+              "Error getting ATTR_FREQ_PB_MHZ");
 
 
     /// ----------------------------------------------------------
@@ -293,24 +293,24 @@ fapi2::ReturnCode pfet_init(
 
     l_pfet_powerup_delay_value =
         convert_delay_to_value( l_pfet_powerup_delay_ns,
-                                l_proc_refclk_frequency);
+                                l_proc_nest_frequency);
 
     l_pfet_powerdown_delay_value =
         convert_delay_to_value( l_pfet_powerdown_delay_ns,
-                                l_proc_refclk_frequency);
+                                l_proc_nest_frequency);
 
 
     FAPI_DBG("PFET Power Up Delay");
     FAPI_DBG("  ATTR_PM_PFET_POWERUP_DELAY_NS      : %d (0x%X)",
-             l_pfet_powerup_delay_value,
-             l_pfet_powerup_delay_value);
-    FAPI_DBG("  pfet_powerup_delay_value           :  %X", l_pfet_powerup_delay_value);
+             l_pfet_powerup_delay_ns,
+             l_pfet_powerup_delay_ns);
+    FAPI_DBG("  pfet_powerup_delay_value           : %X", l_pfet_powerup_delay_value);
 
     FAPI_DBG("PFET Power Down Delay");
     FAPI_DBG("  ATTR_PM_PFET_POWERDOWN_DELAY_NS    : %d (0x%X)",
-             l_pfet_powerdown_delay_value,
-             l_pfet_powerdown_delay_value);
-    FAPI_DBG("  pfet_powerdown_delay_value         :  %X", l_pfet_powerdown_delay_value);
+             l_pfet_powerdown_delay_ns,
+             l_pfet_powerdown_delay_ns);
+    FAPI_DBG("  pfet_powerdown_delay_value         : %X", l_pfet_powerdown_delay_value);
 
 
     //  ******************************************************************
@@ -455,89 +455,90 @@ fapi_try_exit:
 //------------------------------------------------------------------------------
 // convert_delay_to_value
 //  Helper function to convert time values (binary in ns)to hardware delays
+//
+//  The hardware uses a 1 in the power of 2 bit position of a 16 bit counter
+//  to indicate a delay match.  As the LSb of the counter will become a 1 every
+//  other cycle, there is an inherent multiply by 2 built in.  Thus, the smallest
+//  delay possible is 2 x the counter frequency (eg for a 2GHz nest with PFET
+//  controller logic running at /4 of that indicates a 2ns cycle time.  With a
+//  power of 2 of 0 (eg bit 15 of the counter) indicates a match on that LSb
+//  every 4ns).
 //------------------------------------------------------------------------------
 // @todo can this be done in a better way?
 uint8_t
-convert_delay_to_value (uint32_t i_delay,
-                        uint32_t i_proc_nest_frequency)
+convert_delay_to_value (const uint32_t i_delay_ns,
+                        const uint32_t i_proc_nest_frequency_MHz)
 {
-    uint8_t   pfet_delay_value;
+    uint8_t   pfet_delay_value = 0xFF;  // An illegal value
     uint64_t  dly;
-    //  attr_proc_nest_frequency [MHz]
-    //  delay [ns]
-    //  pfet_delay_value = 15 - log2( i_delay * i_attr_proc_nest_frequency/1000);
-    //  since log2 function is not available, this is done manually
-    //  pfet_delay_value = 15 - log2( dly );
-    dly = ( i_delay * i_proc_nest_frequency );
 
-    if ( dly <= 1400 )
+    //  i_attr_proc_nest_frequency_MHz (Mcycles/s * M/M = cycles/us)
+
+    //  PPM cycle time (ns/cycle) = 1/PPM frequency_MHz [1/(cycles/us)]
+    //                            = 1/PPM frequency_MHz [us/cycle]
+    //                            = (1/PPM frequency_MHz)* 1000 ns/cycle
+    //
+    //  PPM frequency_MHz (cycles/us) =  i_attr_proc_nest_frequency_MHz / 4 (cycles/us)
+    //
+    //  delay_ns = 2 * PPM cycle time (ns) * 2**(15-N)
+    //          where N (pfet_delay value) is the bit position of a 16 bit counter
+    //          that has the least significant bit toggling every other cycle.
+    //          The every other cycle is the reason for the 2 * cycle time.
+    //
+    //  delay_ns / (2 * PPM cycle time (ns)) = 2**(15-N)
+    //  (delay_ns / 2) * PPM frequency (cycles/ns) = 2**(15-N)
+    //  (delay_ns / 2) * PPM frequency_MHz/1000 (cycles/us * us/1000ns -> cycles/ns) = 2**(15-N)
+    //  log2(delay_ns/2 * PPM Frequency_MHz/1000) = 15-N
+    //  N (pfet_delay_value) = 15 - log2(delay_ns/2 * PPM Frequency_MHz/1000);
+    //  N (pfet_delay_value) = 15 - log2(i_delay_ns/2 * (i_attr_proc_nest_frequency_MHz/4)/1000);
+    //
+    //  dly = i_delay_ns/2 * (i_attr_proc_nest_frequency_MHz/4)/1000
+    //  pfet_delay_value = 15 - log2( dly );
+
+    dly = i_delay_ns / 2 * (i_proc_nest_frequency_MHz / 4 ) / 1000;
+    FAPI_DBG("i_delay_ns = %d (0x%X), i_proc_nest_frequency_MHz = %d (0x%X), "
+             "ppm_frequency_MHz = %d (0x%X),  dly = %d (0x%08llX)",
+             i_delay_ns, i_delay_ns,
+             i_proc_nest_frequency_MHz, i_proc_nest_frequency_MHz,
+             i_proc_nest_frequency_MHz / 4, i_proc_nest_frequency_MHz / 4,
+             dly, dly );
+
+    uint16_t pow2bit_value = 0x8000;
+    uint16_t value   = (uint16_t)dly;
+
+    // For log2, walk a 1 across the data to find the 2**i that is less than
+    // or equal.
+    for (uint32_t i = 0; i < 16; ++i)
     {
-        pfet_delay_value = 15 - 0 ;
+        if (pow2bit_value == value)         // Matched exactly.  We found the bit
+        {
+            FAPI_DBG("EQ i = %d pow2bit_value = 0x%04X,  value = 0x%04X", i, pow2bit_value, value);
+            pfet_delay_value = i;
+            break;
+        }
+        else if (pow2bit_value < value)     // Found bit that was less than
+        {
+            if (i == 0)
+            {
+                FAPI_DBG("LT but saturated: i = %d pow2bit_value = 0x%04X,  value = 0x%04X", i, pow2bit_value, value);
+                pfet_delay_value = i;
+            }
+            else
+            {
+                FAPI_DBG("LT but rounding up: i = %d pow2bit_value = 0x%04X,  value = 0x%04X", i, pow2bit_value, value);
+                pfet_delay_value = i - 1;   // Power of 2 eg round up
+            }
+
+            break;
+        }
+        else                                // shift it right to check the next bit
+        {
+            pow2bit_value >>= 1;
+        }
     }
-    else if (( 1400   < dly ) && ( dly <= 2800 )  )
-    {
-        pfet_delay_value = 15 - 1 ;
-    }
-    else if (( 2800   < dly ) && ( dly <= 5600 )  )
-    {
-        pfet_delay_value = 15 - 2 ;
-    }
-    else if (( 5600   < dly ) && ( dly <= 11500 ) )
-    {
-        pfet_delay_value = 15 - 3 ;
-    }
-    else if (( 11500  < dly ) && ( dly <= 23000 )   )
-    {
-        pfet_delay_value = 15 - 4 ;
-    }
-    else if (( 23000  < dly ) && ( dly <= 46000 )   )
-    {
-        pfet_delay_value = 15 - 5 ;
-    }
-    else if (( 46000  < dly ) && ( dly <= 92000 )   )
-    {
-        pfet_delay_value = 15 - 6 ;
-    }
-    else if (( 92000  < dly ) && ( dly <= 182000 )  )
-    {
-        pfet_delay_value = 15 - 7 ;
-    }
-    else if (( 182000 < dly ) && ( dly <= 364000 )  )
-    {
-        pfet_delay_value = 15 - 8 ;
-    }
-    else if (( 364000 < dly ) && ( dly <= 728000 )  )
-    {
-        pfet_delay_value = 15 - 9 ;
-    }
-    else if (( 728000 < dly ) && ( dly <= 1456000 ) )
-    {
-        pfet_delay_value = 15 - 10;
-    }
-    else if (( 1456000 < dly ) && ( dly <= 2912000 ) )
-    {
-        pfet_delay_value = 15 - 11;
-    }
-    else if (( 2912000 < dly ) && ( dly <= 5824000 ) )
-    {
-        pfet_delay_value = 15 - 12;
-    }
-    else if (( 5824000 < dly ) && ( dly <= 11648000 ))
-    {
-        pfet_delay_value = 15 - 13;
-    }
-    else if (( 11648000 < dly ) && ( dly <= 23296000 ))
-    {
-        pfet_delay_value = 15 - 14;
-    }
-    else if  ( 23296000 < dly )
-    {
-        pfet_delay_value = 15 - 15;
-    }
-    else
-    {
-        pfet_delay_value = 15 - 15;
-    }
+
+    FAPI_DBG("pfet_delay_value = %d (0x%X))",
+             pfet_delay_value, pfet_delay_value );
 
     return (pfet_delay_value);
 }
