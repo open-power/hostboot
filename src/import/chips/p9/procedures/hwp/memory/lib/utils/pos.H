@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,54 +84,22 @@ class posTraits<fapi2::TARGET_TYPE_PROC_CHIP>
 template< fapi2::TargetType T, typename TT = posTraits<T> >
 inline typename TT::pos_type pos(const fapi2::Target<T>& i_target)
 {
-    typename TT::pos_type i_pos = 0;
+    typename TT::pos_type l_pos = 0;
 
     // Don't use FAPI_TRY as you'll mess up fapi2::current_err which
     // lmits where this can be used.
-    if (FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, i_pos) != fapi2::FAPI2_RC_SUCCESS)
+    if (FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_pos) != fapi2::FAPI2_RC_SUCCESS)
     {
         goto fapi_try_exit;
     }
 
-    return i_pos;
+    return l_pos;
 
 fapi_try_exit:
     // If we can't get our unit position, we're in other trouble
     FAPI_ERR("can't get our chip unit position");
-
-    // Cronusflex doesn't support Assert.
-    // Enable once move to dev complete - AAM
-#if MOVED_AWAY_FROM_CRONUSFLEX
     fapi2::Assert(false);
-#endif
     return 0;
-}
-
-///
-/// @brief Return a DIMM's position from a fapi2 target
-/// @param[in] i_target a target representing the target in question
-/// @return The position relative to the chip
-///
-template<>
-inline posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type pos(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
-{
-    posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type i_pos = 0;
-
-    if (FAPI_ATTR_GET(fapi2::ATTR_POS, i_target, i_pos) != fapi2::FAPI2_RC_SUCCESS)
-    {
-        goto fapi_try_exit;
-    }
-
-    return i_pos;
-
-fapi_try_exit:
-    // If we can't get our position, we're in other trouble
-    FAPI_ERR("can't get our position");
-#if MOVED_AWAY_FROM_CRONUSFLEX
-    fapi2::Assert(false);
-#endif
-    return 0;
-
 }
 
 ///
@@ -143,25 +111,58 @@ template<>
 inline posTraits<fapi2::TARGET_TYPE_PROC_CHIP>::pos_type pos(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    posTraits<fapi2::TARGET_TYPE_PROC_CHIP>::pos_type i_pos = 0;
+    posTraits<fapi2::TARGET_TYPE_PROC_CHIP>::pos_type l_pos = 0;
 
-    if (FAPI_ATTR_GET(fapi2::ATTR_POS, i_target, i_pos) != fapi2::FAPI2_RC_SUCCESS)
+    if (FAPI_ATTR_GET(fapi2::ATTR_POS, i_target, l_pos) != fapi2::FAPI2_RC_SUCCESS)
     {
         goto fapi_try_exit;
     }
 
-    return i_pos;
+    return l_pos;
 
 fapi_try_exit:
     // If we can't get our position, we're in other trouble
     FAPI_ERR("can't get our position");
-#if MOVED_AWAY_FROM_CRONUSFLEX
     fapi2::Assert(false);
-#endif
     return 0;
 
 }
 
+///
+/// @brief Return a DIMM's position from a fapi2 target
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to the chip
+///
+template<>
+inline posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type pos(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+{
+    // Proc 0 is DIMM 0-15, proc 2 is 64-79 - 64 is the stride between processors
+    constexpr uint64_t DIMM_STRIDE_PER_PROC = 64;
+    constexpr uint64_t TOTAL_DIMM = MC_PER_MODULE * MCS_PER_MC * PORTS_PER_MCS * MAX_DIMM_PER_PORT;
+
+    posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type l_pos = 0;
+
+    // Using fapi2 rather than mss::find as this is pretty low level stuff.
+    const auto l_proc_pos =
+        mss::template pos(i_target.getParent<fapi2::TARGET_TYPE_MCA>().getParent<fapi2::TARGET_TYPE_PROC_CHIP>());
+
+    if (FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_target, l_pos) != fapi2::FAPI2_RC_SUCCESS)
+    {
+        goto fapi_try_exit;
+    }
+
+    // To get the FAPI_POS to the equivilent of ATTR_POS, we need to normalize the fapi_pos value
+    // to the processor (stride across which ever processor we're on) and then add in the delta
+    // per processor as ATTR_POS isn't processor relative (delta is the total dimm on a processor)
+    return ((l_pos - (l_proc_pos * DIMM_STRIDE_PER_PROC)) % TOTAL_DIMM) + (TOTAL_DIMM * l_proc_pos);
+
+fapi_try_exit:
+    // If we can't get our position, we're in other trouble
+    FAPI_ERR("can't get our fapi position");
+    fapi2::Assert(false);
+    return 0;
+
+}
 
 ///
 /// @brief Return a target's relative position from a fapi2 target
@@ -234,23 +235,21 @@ relative_pos<fapi2::TARGET_TYPE_MCS>(const fapi2::Target<fapi2::TARGET_TYPE_MCA>
 template< fapi2::TargetType T, typename TT = posTraits<T> >
 inline uint32_t fapi_pos(const fapi2::Target<T>& i_target)
 {
-    uint32_t i_pos = 0;
+    uint32_t l_pos = 0;
 
     // Don't use FAPI_TRY as you'll mess up fapi2::current_err which
     // lmits where this can be used.
-    if (FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_target, i_pos) != fapi2::FAPI2_RC_SUCCESS)
+    if (FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_target, l_pos) != fapi2::FAPI2_RC_SUCCESS)
     {
         goto fapi_try_exit;
     }
 
-    return i_pos;
+    return l_pos;
 
 fapi_try_exit:
     // If we can't get our fapi position, we're in other trouble
     FAPI_ERR("can't get our fapi position");
-#if MOVED_AWAY_FROM_CRONUSFLEX
     fapi2::Assert(false);
-#endif
     return 0;
 }
 
