@@ -267,7 +267,7 @@
 
       Valid range: 500KHz to 2500KHz
 
-      Consumer: p8_pss_init
+      Consumer: p9_pss_init
 
       Overridden by the Machine Readable Workbook.
 
@@ -1534,17 +1534,17 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_SYSTEM_RING_DBG_MODE</id>
-    <description>
-    Debug modes supported for CME/SGPE Scan layout in HOMER.
-    </description>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <valueType>uint8</valueType>
-    <enum>
-        SCAN_RING_NO_DEBUG = 0x00, SCAN_RING_TRACE_DEBUG = 0x01
-    </enum>
-    <initToZero/>
-    <platInit/>
+      <id>ATTR_SYSTEM_RING_DBG_MODE</id>
+      <description>
+      Debug modes supported for CME/SGPE Scan layout in HOMER.
+      </description>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <valueType>uint8</valueType>
+      <enum>
+          SCAN_RING_NO_DEBUG = 0x00, SCAN_RING_TRACE_DEBUG = 0x01, SCAN_RING_DEEP_DEBUG = 0x02
+      </enum>
+      <initToZero/>
+      <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
