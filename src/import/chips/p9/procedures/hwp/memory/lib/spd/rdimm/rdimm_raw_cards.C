@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -117,6 +117,29 @@ rcw_settings  rdimm_rc_a1( 0x00, // RC00
                            0x07);// RCBX
 
 ///
+/// @brief raw card B2 settings
+///
+rcw_settings rdimm_rc_b2( 0x00, // RC00
+                          0x00, // RC01 (C might be the right answer?)
+                          0x00, // RC02
+                          0x0F, // RC06_07
+                          0x03, // RC08
+                          0x00, // RC09
+                          0x0E, // RC0B
+                          0x00, // RC0C
+                          0x0D, // RC0E
+                          0x00, // RC0F
+                          0x00, // RC1X
+                          0x00, // RC2X
+                          0x00, // RC4X
+                          0x00, // RC5X
+                          0x00, // RC6X
+                          0x00, // RC8X
+                          0x00, // RC9X
+                          0x00, // RCAX
+                          0x07);// RCBX
+
+///
 /// @brief raw card VBU settings
 ///
 rcw_settings rdimm_rc_vbu( 0x00, // RC00
@@ -150,6 +173,7 @@ const std::vector< std::pair< uint8_t , rcw_settings> > RAW_CARDS =
     {raw_card_rev::A1, rdimm_rc_a1},
     {raw_card_rev::C1, rdimm_rc_c1},
     {raw_card_rev::VBU, rdimm_rc_vbu},
+    {raw_card_rev::B2, rdimm_rc_b2},
     {raw_card_rev::C2, rdimm_rc_c2},
 };
 

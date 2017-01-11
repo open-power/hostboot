@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,7 @@ enum raw_card_rev : uint8_t
     // since it is unlikely we will use a DIMM w/o a
     // reference caw card design.
     VBU = 0x23,
-
+    B2 = 0x41,
     C2 = 0x42,
 };
 
@@ -76,6 +76,7 @@ extern const std::vector< std::pair< uint8_t, rcw_settings> > RAW_CARDS;
 extern rcw_settings rdimm_rc_c1;
 extern rcw_settings rdimm_rc_c2;
 extern rcw_settings rdimm_rc_a1;
+extern rcw_settings rdimm_rc_b2;
 extern rcw_settings rdimm_rc_vbu;
 
 }// mss
