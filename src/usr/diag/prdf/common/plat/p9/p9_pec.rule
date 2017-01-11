@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -148,7 +148,7 @@ rule rPEC
 
 };
 
-group gPEC attntype CHECK_STOP, RECOVERABLE
+group gPEC attntype CHECK_STOP, RECOVERABLE filter singlebit
 {
     (rPEC, bit(0)) ? analyze(gPCI_LFIR);
     (rPEC, bit(1)) ? analyze(gIOPCIFIR);

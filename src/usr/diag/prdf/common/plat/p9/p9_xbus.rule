@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -152,7 +152,7 @@ rule rXBUS
 
 };
 
-group gXBUS attntype CHECK_STOP, RECOVERABLE, UNIT_CS
+group gXBUS attntype CHECK_STOP, RECOVERABLE, UNIT_CS filter singlebit
 {
     (rXBUS, bit(0)) ? analyze(gIOXBFIR);
     (rXBUS, bit(1)) ? analyze(gIOELFIR);
