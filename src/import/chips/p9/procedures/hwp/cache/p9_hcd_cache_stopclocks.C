@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -106,7 +106,7 @@ p9_hcd_cache_stopclocks(
     if (!l_data64.getBit<15>())
     {
         FAPI_DBG("Gracefully turn off power management, if fail, continue anyways");
-        /// @todo suspend_pm()
+        /// @todo RTC158181 suspend_pm()
     }
 
     FAPI_DBG("Check cache clock controller status");
