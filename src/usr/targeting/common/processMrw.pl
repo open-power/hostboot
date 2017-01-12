@@ -475,13 +475,9 @@ sub processProcessor
         {
             processFsi($targetObj, $child, $target);
         }
-        elsif ($child_type eq "PCI_CONFIGS")
+        elsif ($child_type eq "PEC")
         {
-            foreach my $pci_child (@{ $targetObj->getTargetChildren($child) })
-            {
-                #@TODO RTC:161404
-                #processPcie($targetObj, $pci_child, $target);
-            }
+            processPec($targetObj, $child, $target);
         }
         elsif ($child_type eq "MCBIST")
         {
@@ -880,15 +876,15 @@ sub processFsi
 }
 
 #--------------------------------------------------
-## PCIE
+## PEC
 ##
 ## Creates attributes from abstract PCI attributes on bus
 
-sub processPcie
+sub processPec
 {
     my $targetObj    = shift;
-    my $target       = shift;
-    my $parentTarget = shift;
+    my $target       = shift; # PEC
+    my $parentTarget = shift; # PROC
 
 
     ## process pcie config target
@@ -898,80 +894,59 @@ sub processPcie
     ## Get config children
     my @lane_swap;
     $lane_swap[0][0] = 0;
-    $lane_swap[0][1] = 0;
     $lane_swap[1][0] = 0;
-    $lane_swap[1][1] = 0;
     $lane_swap[2][0] = 0;
-    $lane_swap[2][1] = 0;
+    $lane_swap[3][0] = 0;
 
     my @lane_mask;
     $lane_mask[0][0] = "0x0000";
-    $lane_mask[0][1] = "0x0000";
     $lane_mask[1][0] = "0x0000";
-    $lane_mask[1][1] = "0x0000";
     $lane_mask[2][0] = "0x0000";
-    $lane_mask[2][1] = "0x0000";
+    $lane_mask[3][0] = "0x0000";
 
     my @lane_rev;
     $lane_rev[0][0] = "";
-    $lane_rev[0][1] = "";
     $lane_rev[1][0] = "";
-    $lane_rev[1][1] = "";
     $lane_rev[2][0] = "";
-    $lane_rev[2][1] = "";
+    $lane_rev[3][0] = "";
 
     my @is_slot;
     $is_slot[0][0] = 0;
-    $is_slot[0][1] = 0;
     $is_slot[1][0] = 0;
-    $is_slot[1][1] = 0;
     $is_slot[2][0] = 0;
-    $is_slot[2][1] = 0;
+    $is_slot[3][0] = 0;
 
     my $phb_config = "00000000";
 
     my %cfg_check;
     my @equalization;
 
-    my $wiring_table = $targetObj->getAttribute($target,"PCIE_LANE_SWAP_TABLE");
-    $wiring_table=~s/\s+//g;
-    $wiring_table=~s/\t+//g;
-    $wiring_table=~s/\n+//g;
+    # TODO RTC:167304
+    #my $wiring_table = $targetObj->getAttribute
+    #                   ($target,"PCIE_LANE_SWAP_TABLE");
+    #$wiring_table=~s/\s+//g;
+    #$wiring_table=~s/\t+//g;
+    #$wiring_table=~s/\n+//g;
 
-    my @t = split(/,/,$wiring_table);
-    my %iop_swap;
+    #my @t = split(/,/,$wiring_table);
+    #my %iop_swap;
 
     #iop_swap{iop}{clk swap}{clk group reversal}
-    $iop_swap{0}{0}{'00'}=$t[0];
-    $iop_swap{0}{0}{'10'}=$t[1];
-    $iop_swap{0}{0}{'01'}=$t[2];
-    $iop_swap{0}{0}{'11'}=$t[3];
-    $iop_swap{0}{1}{'00'}=$t[4];
-    $iop_swap{0}{1}{'10'}=$t[5];
-    $iop_swap{0}{1}{'01'}=$t[6];
-    $iop_swap{0}{1}{'11'}=$t[7];
-
-    $iop_swap{1}{0}{'00'}=$t[8];
-    $iop_swap{1}{0}{'10'}=$t[9];
-    $iop_swap{1}{0}{'01'}=$t[10];
-    $iop_swap{1}{0}{'11'}=$t[11];
-    $iop_swap{1}{1}{'00'}=$t[12];
-    $iop_swap{1}{1}{'10'}=$t[13];
-    $iop_swap{1}{1}{'01'}=$t[14];
-    $iop_swap{1}{1}{'11'}=$t[15];
-
-
-    $iop_swap{2}{0}{'00'}=$t[16];
-    $iop_swap{2}{0}{'01'}=$t[17];
-    $iop_swap{2}{0}{'10'}=$t[18];
-    $iop_swap{2}{0}{'11'}=$t[19];
-    $iop_swap{2}{1}{'00'}=$t[20];
-    $iop_swap{2}{1}{'10'}=$t[21];
-    $iop_swap{2}{1}{'01'}=$t[22];
-    $iop_swap{2}{1}{'11'}=$t[23];
+    #$iop_swap{0}{0}{'00'}=$t[0];
+    #$iop_swap{0}{0}{'10'}=$t[1];
+    #$iop_swap{0}{0}{'01'}=$t[2];
+    #$iop_swap{0}{0}{'11'}=$t[3];
+    #$iop_swap{0}{1}{'00'}=$t[4];
+    #$iop_swap{0}{1}{'10'}=$t[5];
+    #$iop_swap{0}{1}{'01'}=$t[6];
+    #$iop_swap{0}{1}{'11'}=$t[7];
+    #$iop_swap{0}{2}{'00'}=$t[8];
+    #$iop_swap{0}{2}{'10'}=$t[9];
+    #$iop_swap{0}{2}{'01'}=$t[10];
+    #$iop_swap{0}{2}{'11'}=$t[11];
 
     my @lane_eq;
-    my $NUM_PHBS=4;
+    my $NUM_PHBS=6;
     for (my $p=0;$p<$NUM_PHBS;$p++)
     {
         for (my $lane=0;$lane<16;$lane++)
@@ -979,134 +954,150 @@ sub processPcie
            $equalization[$p][$lane] = "0x00,0x00";
         }
     }
-    my $found=0;
-    foreach my $child (@{ $targetObj->getTargetChildren($target) })
+    foreach my $pec_config_child (@{ $targetObj->getTargetChildren($target) })
     {
-        my $num_connections = $targetObj->getNumConnections($child);
-        if ($num_connections > 0)
+        foreach my $phb_child (@{ $targetObj->getTargetChildren
+                                                  ($pec_config_child) })
         {
-            $found=1;
-            my $pci_endpoint=$targetObj->getFirstConnectionDestination($child);
-
-            my $bus = $targetObj->getConnectionBus($target, 0);
-            my $iop_num = $targetObj->getAttribute($child, "IOP_NUM");
-            my $swap_clks=$targetObj->getBusAttribute($child, 0,
-                         "PCIE_SWAP_CLKS");
-
-            my $lane_rev=$targetObj->getBusAttribute($child, 0,
-                         "LANE_REVERSAL");
-
-            my $phb_num = $targetObj->getAttribute($child, "PHB_NUM");
-            my $lane_set = $targetObj->getAttribute($child, "PCIE_LANE_SET");
-            my $capi = $targetObj->getAttribute($child, "ENABLE_CAPI");
-
-            my $pci_endpoint_type =
-              $targetObj->getAttribute(
-                $targetObj->getTargetParent($pci_endpoint), "CLASS");
-
-            if ($pci_endpoint_type eq "CARD")
+            foreach my $phb_config_child (@{ $targetObj->getTargetChildren
+                                                             ($phb_child) })
             {
-                $is_slot[$iop_num][$lane_set] = 1;
-            }
-            $lane_swap[$iop_num][$lane_set] =
-              $targetObj->getBusAttribute($child, 0, "PCIE_SWAP_CLKS");
-            $lane_mask[$iop_num][$lane_set] =
-              $targetObj->getAttribute($child, "PCIE_LANE_MASK");
-            $lane_rev[$iop_num][$lane_set] =
-              $targetObj->getBusAttribute($child, 0, "LANE_REVERSAL");
-            my $eq = $targetObj->getBusAttribute($child, 0,
-              "PCIE_LANE_EQUALIZATION");
-            my @eqs = split(/\,/,$eq);
-            for (my $e=0;$e<@eqs;$e=$e+3)
-            {
-                if ($eqs[$e] eq "all")
+                my $num_connections = $targetObj->getNumConnections
+                                                      ($phb_config_child);
+                if ($num_connections > 0)
                 {
-                    for (my $lane=0;$lane<16;$lane++)
+                    # We have a PHB conncetion
+                    # We need to create the PEC attributes
+                    my $iop_num = $targetObj->getAttribute
+                                      ($phb_config_child, "IOP_NUM");
+                    my $phb_num = $targetObj->getAttribute
+                                      ($phb_config_child, "PHB_NUM");
+                    my $lane_group = $targetObj->getAttribute
+                                      ($phb_config_child, "PCIE_LANE_GROUP");
+
+                    my $pci_endpoint=$targetObj->getFirstConnectionDestination
+                                                     ($phb_config_child);
+                    my $pci_endpoint_type =
+                        $targetObj->getAttribute(
+                          $targetObj->getTargetParent($pci_endpoint), "CLASS");
+
+                    if ($pci_endpoint_type eq "CARD")
                     {
-                        $equalization[$phb_num][$lane]=
-                              $eqs[$e+1].",".$eqs[$e+2];
+                        $is_slot[$lane_group][0] = 1;
                     }
-                }
-                else
-                {
-                    $equalization[$phb_num][$eqs[$e]] =
-                              $eqs[$e+1].",".$eqs[$e+2];
-                }
-            }
-            substr($phb_config, $phb_num, 1, "1");
-        }
-    }
-    if ($found)
-    {
-    my $hex = sprintf('%X', oct("0b$phb_config"));
 
-    $targetObj->setAttribute($parentTarget, "PROC_PCIE_PHB_ACTIVE","0x" . $hex);
-    my $lane_mask_attr = sprintf("%s,%s,%s,%s,%s,%s",
-        $lane_mask[0][0], $lane_mask[0][1],
-        $lane_mask[1][0], $lane_mask[1][1],
-        $lane_mask[2][0], $lane_mask[2][1]);
-    $targetObj->setAttribute($parentTarget, "PROC_PCIE_LANE_MASK",
-        $lane_mask_attr);
-    $targetObj->setAttribute($parentTarget,"PROC_PCIE_LANE_MASK_NON_BIFURCATED",
-        $lane_mask_attr);
-    $targetObj->setAttribute($parentTarget, "PROC_PCIE_LANE_MASK_BIFURCATED",
-        "0,0,0,0");
+                    $lane_swap[$lane_group][0] =
+                        $targetObj->getBusAttribute
+                            ($phb_config_child, 0, "PCIE_SWAP_CLKS");
+                    $lane_mask[$lane_group][0] =
+                        $targetObj->getAttribute
+                            ($phb_config_child, "PCIE_LANE_MASK");
+                    $lane_rev[$lane_group][0] =
+                        $targetObj->getBusAttribute
+                            ($phb_config_child, 0, "LANE_REVERSAL");
 
-    my @iop_swap_lu;
-    my @iop_lane_swap;
-    for (my $iop=0;$iop<3;$iop++)
-    {
-        $iop_lane_swap[$iop] = $lane_swap[$iop][0] | $lane_swap[$iop][1];
-        my $lane_rev = $lane_rev[$iop][0].$lane_rev[$iop][1];
-        $iop_swap_lu[$iop]=
-                 "0b".$iop_swap{$iop}{$iop_lane_swap[$iop]}{$lane_rev};
-        if ($iop_swap_lu[$iop] eq "") {
-          die "PCIE config for $iop,$iop_lane_swap[$iop],$lane_rev not found\n";
-        }
-    }
 
-    my $lane_rev_attr0 = sprintf("%s,%s,%s",
-                            oct($iop_swap_lu[0]),
-                            oct($iop_swap_lu[1]),
-                            oct($iop_swap_lu[2]));
-    my $lane_rev_attr1 = sprintf("%s,0,%s,0,%s,0",
-                            oct($iop_swap_lu[0]),
-                            oct($iop_swap_lu[1]),
-                            oct($iop_swap_lu[2]));
+                    my $eq = $targetObj->getBusAttribute
+                        ($phb_config_child, 0, "PCIE_LANE_EQUALIZATION");
+                    my @eqs = split(/\,/,$eq);
+                    for (my $e=0;$e<@eqs;$e=$e+3)
+                    {
+                        if ($eqs[$e] eq "all")
+                        {
+                            for (my $lane=0;$lane<16;$lane++)
+                            {
+                                $equalization[$phb_num][$lane]=
+                                    $eqs[$e+1].",".$eqs[$e+2];
+                            }
+                        }
+                        else
+                        {
+                            $equalization[$phb_num][$eqs[$e]] =
+                                $eqs[$e+1].",".$eqs[$e+2];
+                        }
+                    }
 
-    $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_SWAP",
-        $lane_rev_attr0);
-    $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_SWAP_NON_BIFURCATED",
-        $lane_rev_attr1);
-    $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_SWAP_BIFURCATED",
-        "0,0,0,0");
-    $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_REVERSAL",
-        "0,0,0,0");
-    $targetObj->setAttribute($parentTarget,
-        "PROC_PCIE_IOP_REVERSAL_NON_BIFURCATED","0,0,0,0");
-    $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_REVERSAL_BIFURCATED",
-        "0,0,0,0");
+                    my $swap_clks=$targetObj->getBusAttribute
+                        ($phb_config_child, 0, "PCIE_SWAP_CLKS");
 
-    my $is_slot_attr = sprintf("%s,%s,%s,%s,%s,%s",
-                        $is_slot[0][0], $is_slot[0][1],
-                        $is_slot[1][0], $is_slot[1][1],
-                        $is_slot[2][0], $is_slot[2][1]);
-    $targetObj->setAttribute($parentTarget, "PROC_PCIE_IS_SLOT", $is_slot_attr);
+                    my $lane_rev=$targetObj->getBusAttribute
+                        ($phb_config_child, 0, "LANE_REVERSAL");
 
-    ## don't support DSMP
-    $targetObj->setAttribute($parentTarget, "PROC_PCIE_DSMP_CAPABLE","0,0,0,0");
-    my $eq_str="";
-    for (my $p=0;$p<$NUM_PHBS;$p++)
-    {
-        for (my $lane=0;$lane<16;$lane++)
-        {
-            $eq_str=$eq_str.$equalization[$p][$lane].",";
-        }
-    }
-    $eq_str = substr($eq_str,0,length($eq_str)-1);
-    $targetObj->setAttribute($parentTarget,"PROC_PCIE_LANE_EQUALIZATION",
-         $eq_str);
-    }
+                    # TODO RTC:167304
+                    #my $capi = $targetObj->getAttribute($child, "ENABLE_CAPI");
+
+                    $targetObj->setAttribute
+                        ($parentTarget, "PROC_PCIE_PHB_ACTIVE","0x0");
+                    my $lane_mask_attr = sprintf("%s,%s,%s,%s",
+                        $lane_mask[0][0], $lane_mask[1][0],
+                        $lane_mask[2][0], $lane_mask[3][0]);
+                    $targetObj->setAttribute($target, "PROC_PCIE_LANE_MASK",
+                        $lane_mask_attr);
+                    $targetObj->setAttribute($target,
+                        "PEC_PCIE_LANE_MASK_NON_BIFURCATED", $lane_mask_attr);
+                    $targetObj->setAttribute
+                        ($target, "PEC_PCIE_LANE_MASK_BIFURCATED", "0,0,0,0");
+
+                    #TODO RTC:167304
+                    # my @iop_swap_lu;
+                    # my @iop_lane_swap;
+                    # for (my $iop=0;$iop<3;$iop++)
+                    # {
+                    #     $iop_lane_swap[$iop] =
+                    #         $lane_swap[$iop][0] | $lane_swap[$iop][1];
+                    #     my $lane_rev = $lane_rev[$iop][0].$lane_rev[$iop][1];
+                    #     $iop_swap_lu[$iop]=
+                    #    "0b".$iop_swap{$iop}{$iop_lane_swap[$iop]}{$lane_rev};
+                    #     if ($iop_swap_lu[$iop] eq "") {
+                    #       die "PCIE config for $iop,$iop_lane_swap[$iop], "
+                    #           "$lane_rev not found\n";
+                    #     }
+                    # }
+                    # my $lane_rev_attr0 = sprintf("%s,%s,%s",
+                    #                         oct($iop_swap_lu[0]),
+                    #                         oct($iop_swap_lu[1]),
+                    #                         oct($iop_swap_lu[2]));
+                    # my $lane_rev_attr1 = sprintf("%s,0,%s,0,%s,0",
+                    #                         oct($iop_swap_lu[0]),
+                    #                         oct($iop_swap_lu[1]),
+                    #                         oct($iop_swap_lu[2]));
+                    # $targetObj->setAttribute($target, "PROC_PCIE_IOP_SWAP",
+                    #     $lane_rev_attr0);
+                    # $targetObj->setAttribute($target,
+                    #     "PEC_PCIE_IOP_SWAP_NON_BIFURCATED", $lane_rev_attr1);
+                    $targetObj->setAttribute($target,
+                        "PEC_PCIE_IOP_SWAP_BIFURCATED", "0");
+                    $targetObj->setAttribute($target,
+                        "PEC_PCIE_IOP_REVERSAL", "0");
+                    $targetObj->setAttribute($target,
+                        "PEC_PCIE_IOP_REVERSAL_NON_BIFURCATED","0");
+                    $targetObj->setAttribute($target,
+                        "PEC_PCIE_IOP_REVERSAL_BIFURCATED", "0");
+
+                    # TODO RTC:167304
+                    #my $is_slot_attr = sprintf("%s,%s,%s,%s,%s,%s",
+                    #                    $is_slot[0][0], $is_slot[0][1],
+                    #                    $is_slot[1][0], $is_slot[1][1],
+                    #                    $is_slot[2][0], $is_slot[2][1]);
+                    #$targetObj->setAttribute($target, "PROC_PCIE_IS_SLOT",
+                    #                                       $is_slot_attr);
+
+                    #my $eq_str="";
+                    #for (my $p=0;$p<$NUM_PHBS;$p++)
+                    #{
+                    #    for (my $lane=0;$lane<16;$lane++)
+                    #    {
+                    #        $eq_str=$eq_str.$equalization[$p][$lane].",";
+                    #    }
+                    #}
+                    #$eq_str = substr($eq_str,0,length($eq_str)-1);
+                    #$targetObj->setAttribute($target,
+                    #     "PROC_PCIE_LANE_EQUALIZATION", $eq_str);
+
+                } # Found connection
+            } # PHB bus loop
+        } # PHB loop
+    } # PEC config loop
 }
 #--------------------------------------------------
 ## OCC
