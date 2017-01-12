@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -163,6 +163,8 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
 
         l_coreThreadCount = l_pTopLevel->getAttr<ATTR_THREAD_COUNT>();
         uint32_t l_procStatus;
+        HDAT_DBG("Core Thread Count[%d]",  l_coreThreadCount);
+
         if ( l_coreThreadCount == HDAT_MAX_EIGHT_THREADS_SUPPORTED )
         {
             l_procStatus =
@@ -195,7 +197,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
             uint32_t Procstatus = 0;
 
             uint32_t l_procFabricId =
-                    l_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+                    l_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
 
             uint64_t l_procIntrBase =
                       l_pProcTarget->getAttr<TARGETING::ATTR_INTP_BASE_ADDR>();
@@ -248,16 +250,21 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                         l_threadIndex, this->iv_spPcia[index].hdatThreadData.
                         pciaThreadData[l_threadIndex].pciaPhysThreadId);
 
-                    /* Proc ID Reg is NNNCCCPPPPTTT
-                      Where           NNN           is node number
-                                         CCC        is Chip
-                                            PPPP    is the core number
-                                                TTT is thread id
+
+                        /* Proc ID Reg for split core is NNNNCCC0PPPPPTT
+                           Where           NNNN  is node number
+                                                 left shift by 11 bits
+                                           CCC   is Chip
+                                                 left shift by 8 bits
+                                           PPPPP is the core number
+                                                 left shift by 2 bits
+                                           TT    is thread id
                     */
-                    uint32_t l_ThreadProcIdReg = l_procFabricId * 0x400;
-                    l_ThreadProcIdReg += l_procPosition*0x80;
-                    l_ThreadProcIdReg += (l_coreNum * l_coreThreadCount) +
-                                          l_threadIndex;
+                    // PIR generation for split core mode
+                    uint32_t     l_ThreadProcIdReg =  l_procFabricId << 11 |
+                                             l_procPosition << 8  |
+                                             l_coreNum << 2       |
+                                             l_threadIndex;
 
                     hdatSetPciaHdrs(&this->iv_spPcia[index]);
                     this->iv_spPcia[index].hdatCoreData.pciaProcStatus
@@ -273,14 +280,12 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                     Procstatus = isFunctional(l_pTarget) ?
                                            HDAT_PROC_USABLE :
                                            HDAT_PROC_NOT_USABLE;
+                    l_procStatus &= ~HDAT_PROC_STAT_MASK;
+                    l_procStatus |= Procstatus;
 
-                    Procstatus |= HDAT_EIGHT_THREAD;
-
-                    uint32_t l_stat = this->iv_spPcia[index].hdatCoreData.
-                                    pciaProcStatus & HDAT_PROC_STAT_MASK;
                     this->iv_spPcia[index].hdatCoreData.pciaProcStatus =
-                        (static_cast<hdatProcStatus> (Procstatus)
-                         | l_stat ) & HDAT_EXIST_FLAGS_MASK_FOR_PCIA;
+                        (static_cast<hdatProcStatus> (l_procStatus)
+                        ) & HDAT_EXIST_FLAGS_MASK_FOR_PCIA;
 
                     //IBASE ADDRESS + NNNN + 000
                     //Where NNNN = Thread Number =
@@ -472,7 +477,7 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
 
         uint32_t l_nodeOrdId = l_pNodeTarget->getAttr<ATTR_ORDINAL_ID>();
 
-        uint32_t l_fabNodeId = i_pProcTarget->getAttr<ATTR_FABRIC_NODE_ID>();
+        uint32_t l_fabNodeId = i_pProcTarget->getAttr<ATTR_FABRIC_GROUP_ID>();
 
         //Set the Internal Drawer Node ID
         iv_spPcia[i_index].hdatCoreData.pciaDrawerNodeID = l_fabNodeId;

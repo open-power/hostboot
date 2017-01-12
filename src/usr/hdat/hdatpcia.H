@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,7 @@ namespace HDAT
 
 const uint16_t HDAT_PCIA_VERSION    = 0x01;
 const char HDAT_PCIA_STRUCT_NAME[7] = "SPPCIA";
-const uint32_t HDAT_PROC_STAT_MASK  = 0x00008000;
+const uint32_t HDAT_PROC_STAT_MASK  = 0xC0000000;
 
 // Bits in the proc/exist flags for PCIA data
  #define HDAT_EXIST_FLAGS_MASK_FOR_PCIA  0xD0FF0000
