@@ -233,7 +233,7 @@ sub printAttribute
     $filter{ENABLE_CAPI}                                            = 1;
     $filter{PCIE_CONFIG_NUM}                                        = 1;
     $filter{PCIE_LANE_MASK}                                         = 1;
-    $filter{PCIE_LANE_SET}                                          = 1;
+    $filter{PCIE_LANE_GROUP}                                        = 1;
     $filter{PCIE_NUM_LANES}                                         = 1;
     $filter{PHB_NUM}                                                = 1;
     $filter{IOP_NUM}                                                = 1;
@@ -765,17 +765,43 @@ sub iterateOverChiplets
     {
         foreach my $child (@{ $self->getTargetChildren($target) })
         {
-            my $unit_ptr        = $self->getTarget($child);
-            my $unit_type       = $self->getType($child);
-            #System XML has some sensor target as hidden children
-            #of targets. We don't care for sensors in this function
-            #So, we can avoid them with this conditional
-            if ($unit_type ne "NA" && $unit_type ne "FSI" &&
-                $unit_type ne "PCI")
+            # For PEC childern, we need to remove any targets that are not
+            # connected. If no PHB connections are found, do not set attributes
+            if ($tgt_type eq "PEC")
             {
-                #set common attrs for child
-                $self->setCommonAttrForChiplet($child, $sys, $node, $proc);
-                $self->iterateOverChiplets($child, $sys, $node, $proc);
+                my $pec_num = $self->getAttribute($target, "CHIP_UNIT");
+                $self->setAttribute($child,"AFFINITY_PATH",$self
+                    ->getAttribute($target,"AFFINITY_PATH"));
+                $self->setAttribute($child,"PHYS_PATH",$self
+                    ->getAttribute($target,"PHYS_PATH"));
+
+                foreach my $phb (@{ $self->getTargetChildren($child) })
+                {
+                    my $phb_num = $self->getAttribute($phb, "CHIP_UNIT");
+                    foreach my $pcibus (@{ $self->getTargetChildren($phb) })
+                    {
+                        if ($self->getNumConnections($pcibus) > 0)
+                        {
+                            $self->setCommonAttrForChiplet
+                                ($phb, $sys, $node, $proc);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                my $unit_ptr        = $self->getTarget($child);
+                my $unit_type       = $self->getType($child);
+                #System XML has some sensor target as hidden children
+                #of targets. We don't care for sensors in this function
+                #So, we can avoid them with this conditional
+                if ($unit_type ne "NA" && $unit_type ne "FSI" &&
+                    $unit_type ne "PCI")
+                {
+                    #set common attrs for child
+                    $self->setCommonAttrForChiplet($child, $sys, $node, $proc);
+                    $self->iterateOverChiplets($child, $sys, $node, $proc);
+                }
             }
         }
     }
