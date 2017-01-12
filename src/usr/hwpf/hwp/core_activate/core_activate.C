@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -520,12 +520,12 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                         // occurred
                         l_stepError.addErrorDetails( l_errl );
 
-                        // Commit Error
-                        errlCommit( l_errl, HWPF_COMP_ID );
-
                         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                                 "ERROR : enable p8_cpu_special_wakeup, "
                                 "PLID=0x%x", l_errl->plid()  );
+
+                        // Commit Error
+                        errlCommit( l_errl, HWPF_COMP_ID );
                     }
                     else
                     {
@@ -621,12 +621,12 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                     // Create IStep error log and cross ref error that occurred
                     l_stepError.addErrorDetails( l_errl );
 
-                    // Commit Error
-                    errlCommit( l_errl, HWPF_COMP_ID );
-
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                              "ERROR : proc_post_winkle, PLID=0x%x",
                              l_errl->plid()  );
+
+                    // Commit Error
+                    errlCommit( l_errl, HWPF_COMP_ID );
                 }
                 else
                 {
