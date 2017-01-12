@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,6 +97,8 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                                                l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_1]) + l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_2]) +
                                              l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_3]) + l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_4]) +
                                            l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_5]) + l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_6]);
+        fapi2::ATTR_CHIP_EC_FEATURE_HW383616_Type l_TGT0_ATTR_CHIP_EC_FEATURE_HW383616;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW383616, TGT0, l_TGT0_ATTR_CHIP_EC_FEATURE_HW383616));
         fapi2::ATTR_PROC_FABRIC_PUMP_MODE_Type l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE));
         fapi2::buffer<uint64_t> l_scom_buffer;
@@ -114,10 +116,28 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<4, 1, 61, uint64_t>(l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_OFF );
             }
 
-            constexpr auto l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 = 0x102040;
-            l_scom_buffer.insert<16, 7, 43, uint64_t>(l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 );
-            constexpr auto l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 = 0x102040;
-            l_scom_buffer.insert<23, 7, 43, uint64_t>(l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 );
+            if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW383616 != literal_0))
+            {
+                constexpr auto l_PB_COM_PB_CFG_SP_HW_MARK_CNT_63 = 0xfdfbf;
+                l_scom_buffer.insert<16, 7, 43, uint64_t>(l_PB_COM_PB_CFG_SP_HW_MARK_CNT_63 );
+            }
+            else if (( true ))
+            {
+                constexpr auto l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 = 0x102040;
+                l_scom_buffer.insert<16, 7, 43, uint64_t>(l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 );
+            }
+
+            if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW383616 != literal_0))
+            {
+                constexpr auto l_PB_COM_PB_CFG_GP_HW_MARK_CNT_63 = 0xfdfbf;
+                l_scom_buffer.insert<23, 7, 43, uint64_t>(l_PB_COM_PB_CFG_GP_HW_MARK_CNT_63 );
+            }
+            else if (( true ))
+            {
+                constexpr auto l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 = 0x102040;
+                l_scom_buffer.insert<23, 7, 43, uint64_t>(l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 );
+            }
+
             constexpr auto l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42 = 0x2aaaa;
             l_scom_buffer.insert<30, 6, 46, uint64_t>(l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x501180aull, l_scom_buffer));
@@ -136,10 +156,28 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<4, 1, 62, uint64_t>(l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_OFF );
             }
 
-            constexpr auto l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 = 0x102040;
-            l_scom_buffer.insert<16, 7, 50, uint64_t>(l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 );
-            constexpr auto l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 = 0x102040;
-            l_scom_buffer.insert<23, 7, 50, uint64_t>(l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 );
+            if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW383616 != literal_0))
+            {
+                constexpr auto l_PB_COM_PB_CFG_SP_HW_MARK_CNT_63 = 0xfdfbf;
+                l_scom_buffer.insert<16, 7, 50, uint64_t>(l_PB_COM_PB_CFG_SP_HW_MARK_CNT_63 );
+            }
+            else if (( true ))
+            {
+                constexpr auto l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 = 0x102040;
+                l_scom_buffer.insert<16, 7, 50, uint64_t>(l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 );
+            }
+
+            if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW383616 != literal_0))
+            {
+                constexpr auto l_PB_COM_PB_CFG_GP_HW_MARK_CNT_63 = 0xfdfbf;
+                l_scom_buffer.insert<23, 7, 50, uint64_t>(l_PB_COM_PB_CFG_GP_HW_MARK_CNT_63 );
+            }
+            else if (( true ))
+            {
+                constexpr auto l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 = 0x102040;
+                l_scom_buffer.insert<23, 7, 50, uint64_t>(l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 );
+            }
+
             constexpr auto l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42 = 0x2aaaa;
             l_scom_buffer.insert<30, 6, 52, uint64_t>(l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5011c0aull, l_scom_buffer));
@@ -1660,10 +1698,28 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<4, 1, 63, uint64_t>(l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_OFF );
             }
 
-            constexpr auto l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 = 0x102040;
-            l_scom_buffer.insert<16, 7, 57, uint64_t>(l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 );
-            constexpr auto l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 = 0x102040;
-            l_scom_buffer.insert<23, 7, 57, uint64_t>(l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 );
+            if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW383616 != literal_0))
+            {
+                constexpr auto l_PB_COM_PB_CFG_SP_HW_MARK_CNT_63 = 0xfdfbf;
+                l_scom_buffer.insert<16, 7, 57, uint64_t>(l_PB_COM_PB_CFG_SP_HW_MARK_CNT_63 );
+            }
+            else if (( true ))
+            {
+                constexpr auto l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 = 0x102040;
+                l_scom_buffer.insert<16, 7, 57, uint64_t>(l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 );
+            }
+
+            if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW383616 != literal_0))
+            {
+                constexpr auto l_PB_COM_PB_CFG_GP_HW_MARK_CNT_63 = 0xfdfbf;
+                l_scom_buffer.insert<23, 7, 57, uint64_t>(l_PB_COM_PB_CFG_GP_HW_MARK_CNT_63 );
+            }
+            else if (( true ))
+            {
+                constexpr auto l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 = 0x102040;
+                l_scom_buffer.insert<23, 7, 57, uint64_t>(l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 );
+            }
+
             constexpr auto l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42 = 0x2aaaa;
             l_scom_buffer.insert<30, 6, 58, uint64_t>(l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x501200aull, l_scom_buffer));
