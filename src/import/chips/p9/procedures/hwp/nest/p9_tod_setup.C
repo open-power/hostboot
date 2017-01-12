@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -318,6 +318,10 @@ extern "C"
                                  PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION_LEN>(STEP_CHECK_CPS_DEVIATION_75_00_PCENT);
             data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT,
                                  PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT_LEN>(STEP_CHECK_VALIDITY_COUNT_8);
+            data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION, PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION_LEN>
+            (STEP_CHECK_CPS_DEVIATION_75_00_PCENT);
+            data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR, PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR_LEN>
+            (STEP_CHECK_CPS_DEVIATION_FACTOR_1);
         }
         else // (i_tod_sel==TOD_SECONDARY)
         {
@@ -334,7 +338,7 @@ extern "C"
 
         //In either case set the S_PATH_REMOTE_SYNC_MISS_COUNT_MAX to 1
         data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_MISS_COUNT_MAX, PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_MISS_COUNT_MAX_LEN>
-        (S_PATH_REMOTE_SYNC_MISS_COUNT_1);
+        (S_PATH_REMOTE_SYNC_MISS_COUNT_2);
 
         FAPI_TRY(fapi2::putScom(*target, PERV_TOD_S_PATH_CTRL_REG, data),
                  "fapiPutScom error for PERV_TOD_S_PATH_CTRL_REG SCOM.");

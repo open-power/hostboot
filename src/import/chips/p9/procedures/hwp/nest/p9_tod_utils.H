@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -267,7 +267,7 @@ const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_6 = 6;
 const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_7 = 7;
 
 //The number of syncs that we are ok with the slave path missing (this must be set to at least 1 or there will be a fail)
-const uint32_t S_PATH_REMOTE_SYNC_MISS_COUNT_1 = 1;
+const uint32_t S_PATH_REMOTE_SYNC_MISS_COUNT_2 = 5;
 
 //I don't see this one listed in the P9 documentation
 const uint32_t TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VAL_3F  = 0x3F;
