@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -830,9 +830,14 @@ p9_setup_bars(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     // PSI
     FAPI_TRY(p9_setup_bars_psi(i_target, FAPI_SYSTEM, l_chip_info),
              "Error from p9_setup_bars_psi");
+
     // NPU
-    FAPI_TRY(p9_setup_bars_npu(i_target, FAPI_SYSTEM, l_chip_info),
-             "Error from p9_setup_bars_npu");
+    if (i_target.getChildren<fapi2::TARGET_TYPE_NV>(fapi2::TARGET_STATE_FUNCTIONAL).size())
+    {
+        FAPI_TRY(p9_setup_bars_npu(i_target, FAPI_SYSTEM, l_chip_info),
+                 "Error from p9_setup_bars_npu");
+    }
+
     // MCD
     FAPI_TRY(p9_setup_bars_mcd(i_target, FAPI_SYSTEM, l_chip_info),
              "Error from p9_setup_bars_mcd");
