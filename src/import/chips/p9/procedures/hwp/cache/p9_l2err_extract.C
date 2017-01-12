@@ -71,7 +71,8 @@ extern "C"
     fapi2::ReturnCode p9_l2err_extract(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
                                        const fapi2::variable_buffer& i_ta_data,
                                        p9_l2err_extract_err_type i_err_type,
-                                       p9_l2err_extract_err_data& o_err_data)
+                                       p9_l2err_extract_err_data& o_err_data,
+                                       bool& o_error_found)
     {
         uint32_t                rc_ecmd = 0;
         // other vars
@@ -231,14 +232,14 @@ extern "C"
 
         FAPI_DBG("Found UE or CE: error_found = %i", error_found);
 
-        //log an error if nothing was found based on what the user was looking for
-        FAPI_ASSERT(error_found,
-                    fapi2::P9_L2ERR_EXTRACT_NO_CEUE_FOUND()
-                    .set_TARGET(i_target)
-                    .set_TA_DATA(i_ta_data)
-                    .set_ERR_REQ_TYPE(i_err_type),
-                    "No CE or UE found in trace array.");
+        o_error_found = error_found;
 
+        // Don't panic if error is not found.
+        if (!error_found)
+        {
+            FAPI_DBG("No error is found!");
+            return fapi2::current_err;
+        }
 
         //generate compression indexes, we will use these to look back for data
         l_ce_trace_index = trace_index;
