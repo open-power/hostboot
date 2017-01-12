@@ -620,7 +620,7 @@ rule rDDRPHYFIR
     DDRPHYFIR & ~DDRPHYFIR_MASK & ~DDRPHYFIR_ACT0 &  DDRPHYFIR_ACT1;
 };
 
-group gDDRPHYFIR filter singlebit
+group gDDRPHYFIR filter singlebit, cs_root_cause
 {
     /** DDRPHYFIR[54]
      *  Non-recoverable FSM error

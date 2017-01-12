@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -237,7 +237,7 @@ rule rEC_LFIR
     EC_LFIR & ~EC_LFIR_MASK & ~EC_LFIR_ACT0 &  EC_LFIR_ACT1;
 };
 
-group gEC_LFIR filter singlebit
+group gEC_LFIR filter singlebit, cs_root_cause
 {
     /** EC_LFIR[0]
      *  CFIR internal parity error
@@ -325,7 +325,7 @@ rule rCOREFIR
     COREFIR & ~COREFIR_MASK &  COREFIR_ACT0 &  COREFIR_ACT1;
 };
 
-group gCOREFIR filter singlebit
+group gCOREFIR filter singlebit, cs_root_cause
 {
     /** COREFIR[0]
      *  IFU SRAM Recoverable error
