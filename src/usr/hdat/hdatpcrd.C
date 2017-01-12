@@ -692,7 +692,7 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
         }
 
         uint32_t l_procFabricId =
-                    i_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+                    i_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
 
         // Set fabric nodeid (NNN) and chip (CC) into xscom id:  NN_N0CC
         uint32_t l_XscomChipId =
