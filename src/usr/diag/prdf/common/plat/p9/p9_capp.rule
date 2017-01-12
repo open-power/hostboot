@@ -132,7 +132,7 @@ rule rCXAFIR
     CXAFIR & ~CXAFIR_MASK &  CXAFIR_ACT0 &  CXAFIR_ACT1;
 };
 
-group gCXAFIR filter singlebit
+group gCXAFIR filter singlebit, cs_root_cause
 {
     /** CXAFIR[0]
      *  CXA Informational PE

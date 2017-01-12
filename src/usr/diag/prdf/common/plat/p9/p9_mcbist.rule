@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -411,7 +411,7 @@ rule rMC_LFIR
     MC_LFIR & ~MC_LFIR_MASK & ~MC_LFIR_ACT0 &  MC_LFIR_ACT1;
 };
 
-group gMC_LFIR filter singlebit
+group gMC_LFIR filter singlebit, cs_root_cause
 {
     /** MC_LFIR[0]
      *  cir internal parity error
@@ -521,7 +521,7 @@ rule rMCBISTFIR
     MCBISTFIR & ~MCBISTFIR_MASK &  MCBISTFIR_ACT0 &  MCBISTFIR_ACT1;
 };
 
-group gMCBISTFIR filter singlebit
+group gMCBISTFIR filter singlebit, cs_root_cause
 {
     /** MCBISTFIR[0]
      *  INVALID_MAINT_ADDRESS

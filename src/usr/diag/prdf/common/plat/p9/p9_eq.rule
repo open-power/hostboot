@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -194,7 +194,7 @@ rule rEQ_LFIR
     EQ_LFIR & ~EQ_LFIR_MASK & ~EQ_LFIR_ACT0 &  EQ_LFIR_ACT1;
 };
 
-group gEQ_LFIR filter singlebit
+group gEQ_LFIR filter singlebit, cs_root_cause
 {
     /** EQ_LFIR[0]
      *  CFIR internal parity error

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -319,7 +319,7 @@ rule rOB_LFIR
     OB_LFIR & ~OB_LFIR_MASK & ~OB_LFIR_ACT0 &  OB_LFIR_ACT1;
 };
 
-group gOB_LFIR filter singlebit
+group gOB_LFIR filter singlebit, cs_root_cause
 {
     /** OB_LFIR[0]
      *  CFIR internal parity error
@@ -415,7 +415,7 @@ rule rIOOLFIR
     IOOLFIR & ~IOOLFIR_MASK & ~IOOLFIR_ACT0 &  IOOLFIR_ACT1;
 };
 
-group gIOOLFIR filter singlebit
+group gIOOLFIR filter singlebit, cs_root_cause
 {
     /** IOOLFIR[0]
      *  link0 trained
@@ -748,7 +748,7 @@ rule rIOOBFIR
     IOOBFIR & ~IOOBFIR_MASK &  IOOBFIR_ACT0 &  IOOBFIR_ACT1;
 };
 
-group gIOOBFIR filter singlebit
+group gIOOBFIR filter singlebit, cs_root_cause
 {
     /** IOOBFIR[0]
      *  A RX state machine error
@@ -796,7 +796,7 @@ rule rOBPPEFIR
     OBPPEFIR & ~OBPPEFIR_MASK &  OBPPEFIR_ACT0 &  OBPPEFIR_ACT1;
 };
 
-group gOBPPEFIR filter singlebit
+group gOBPPEFIR filter singlebit, cs_root_cause
 {
     /** OBPPEFIR[0:3]
      *  PPE general error.

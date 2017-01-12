@@ -166,7 +166,7 @@ rule rPCI_LFIR
     PCI_LFIR & ~PCI_LFIR_MASK & ~PCI_LFIR_ACT0 &  PCI_LFIR_ACT1;
 };
 
-group gPCI_LFIR filter singlebit
+group gPCI_LFIR filter singlebit, cs_root_cause
 {
     /** PCI_LFIR[0]
      *  cir internal parity error
@@ -262,7 +262,7 @@ rule rIOPCIFIR
     IOPCIFIR & ~IOPCIFIR_MASK & ~IOPCIFIR_ACT0 &  IOPCIFIR_ACT1;
 };
 
-group gIOPCIFIR filter singlebit
+group gIOPCIFIR filter singlebit, cs_root_cause
 {
     /** IOPCIFIR[0]
      *  HSS ZCAL Calibration Error

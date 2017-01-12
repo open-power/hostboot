@@ -2016,7 +2016,7 @@ rule rTP_LFIR
     TP_LFIR & ~TP_LFIR_MASK & ~TP_LFIR_ACT0 &  TP_LFIR_ACT1;
 };
 
-group gTP_LFIR filter singlebit
+group gTP_LFIR filter singlebit, cs_root_cause
 {
     /** TP_LFIR[0]
      *  CFIR internal parity error
@@ -2242,7 +2242,7 @@ rule rOCCFIR
     OCCFIR & ~OCCFIR_MASK & ~OCCFIR_ACT0 &  OCCFIR_ACT1;
 };
 
-group gOCCFIR filter singlebit
+group gOCCFIR filter singlebit, cs_root_cause
 {
     /** OCCFIR[0]
      *  OCC_FW0
@@ -2633,7 +2633,7 @@ rule rN0_LFIR
     N0_LFIR & ~N0_LFIR_MASK & ~N0_LFIR_ACT0 &  N0_LFIR_ACT1;
 };
 
-group gN0_LFIR filter singlebit
+group gN0_LFIR filter singlebit, cs_root_cause
 {
     /** N0_LFIR[0]
      *  CFIR internal parity error
@@ -2756,7 +2756,7 @@ rule rNXCQFIR
     NXCQFIR & ~NXCQFIR_MASK &  NXCQFIR_ACT0 &  NXCQFIR_ACT1;
 };
 
-group gNXCQFIR filter singlebit
+group gNXCQFIR filter singlebit, cs_root_cause
 {
     /** NXCQFIR[0]
      *  PBI internal parity error
@@ -2984,7 +2984,7 @@ rule rNXDMAENGFIR
     NXDMAENGFIR & ~NXDMAENGFIR_MASK &  NXDMAENGFIR_ACT0 &  NXDMAENGFIR_ACT1;
 };
 
-group gNXDMAENGFIR filter singlebit
+group gNXDMAENGFIR filter singlebit, cs_root_cause
 {
     /** NXDMAENGFIR[0]
      *  spare
@@ -3294,7 +3294,7 @@ rule rN1_LFIR
     N1_LFIR & ~N1_LFIR_MASK & ~N1_LFIR_ACT0 &  N1_LFIR_ACT1;
 };
 
-group gN1_LFIR filter singlebit
+group gN1_LFIR filter singlebit, cs_root_cause
 {
     /** N1_LFIR[0]
      *  cir internal parity error
@@ -3445,7 +3445,7 @@ rule rMCDFIR_0
     MCDFIR_0 & ~MCDFIR_0_MASK & ~MCDFIR_0_ACT0 &  MCDFIR_0_ACT1;
 };
 
-group gMCDFIR_0 filter singlebit
+group gMCDFIR_0 filter singlebit, cs_root_cause
 {
     /** MCDFIR_0[0]
      *  MCD array had a unrecoverable ECC error
@@ -3521,7 +3521,7 @@ rule rMCDFIR_1
     MCDFIR_1 & ~MCDFIR_1_MASK & ~MCDFIR_1_ACT0 &  MCDFIR_1_ACT1;
 };
 
-group gMCDFIR_1 filter singlebit
+group gMCDFIR_1 filter singlebit, cs_root_cause
 {
     /** MCDFIR_1[0]
      *  MCD array had a unrecoverable ECC error
@@ -3960,7 +3960,7 @@ rule rN2_LFIR
     N2_LFIR & ~N2_LFIR_MASK & ~N2_LFIR_ACT0 &  N2_LFIR_ACT1;
 };
 
-group gN2_LFIR filter singlebit
+group gN2_LFIR filter singlebit, cs_root_cause
 {
     /** N2_LFIR[0]
      *  cir internal parity error
@@ -4071,7 +4071,7 @@ rule rPSIFIR
     PSIFIR & ~PSIFIR_MASK & ~PSIFIR_ACT0 &  PSIFIR_ACT1;
 };
 
-group gPSIFIR filter singlebit
+group gPSIFIR filter singlebit, cs_root_cause
 {
     /** PSIFIR[0:4]
      *  spare
@@ -4286,7 +4286,7 @@ rule rN3_LFIR
     N3_LFIR & ~N3_LFIR_MASK & ~N3_LFIR_ACT0 &  N3_LFIR_ACT1;
 };
 
-group gN3_LFIR filter singlebit
+group gN3_LFIR filter singlebit, cs_root_cause
 {
     /** N3_LFIR[0]
      *  CFIR internal parity error
@@ -4464,7 +4464,7 @@ rule rNPU0FIR
     NPU0FIR & ~NPU0FIR_MASK &  NPU0FIR_ACT0 &  NPU0FIR_ACT1;
 };
 
-group gNPU0FIR filter singlebit
+group gNPU0FIR filter singlebit, cs_root_cause
 {
     /** NPU0FIR[0]
      *  NTL array CE
@@ -4737,7 +4737,7 @@ rule rNPU1FIR
     NPU1FIR & ~NPU1FIR_MASK &  NPU1FIR_ACT0 &  NPU1FIR_ACT1;
 };
 
-group gNPU1FIR filter singlebit
+group gNPU1FIR filter singlebit, cs_root_cause
 {
     /** NPU1FIR[0]
      *  NDL Brick0 stall
@@ -4948,7 +4948,7 @@ rule rPBWESTFIR
     PBWESTFIR & ~PBWESTFIR_MASK & ~PBWESTFIR_ACT0 &  PBWESTFIR_ACT1;
 };
 
-group gPBWESTFIR filter singlebit
+group gPBWESTFIR filter singlebit, cs_root_cause
 {
     /** PBWESTFIR[0]
      *  pbeq0 hw1 error, PE in custom array
@@ -5059,7 +5059,7 @@ rule rPBCENTFIR
     PBCENTFIR & ~PBCENTFIR_MASK & ~PBCENTFIR_ACT0 &  PBCENTFIR_ACT1;
 };
 
-group gPBCENTFIR filter singlebit
+group gPBCENTFIR filter singlebit, cs_root_cause
 {
     /** PBCENTFIR[0]
      *  pb protocol_error
@@ -5145,7 +5145,7 @@ rule rPBEASTFIR
     PBEASTFIR & ~PBEASTFIR_MASK & ~PBEASTFIR_ACT0 &  PBEASTFIR_ACT1;
 };
 
-group gPBEASTFIR filter singlebit
+group gPBEASTFIR filter singlebit, cs_root_cause
 {
     /** PBEASTFIR[0]
      *  pbieq4_pbh_hw1_error
@@ -5236,7 +5236,7 @@ rule rPBPPEFIR
     PBPPEFIR & ~PBPPEFIR_MASK & ~PBPPEFIR_ACT0 &  PBPPEFIR_ACT1;
 };
 
-group gPBPPEFIR filter singlebit
+group gPBPPEFIR filter singlebit, cs_root_cause
 {
     /** PBPPEFIR[0]
      *  PPE asserted an internally detected err
@@ -5322,7 +5322,7 @@ rule rPBAFIR
     PBAFIR & ~PBAFIR_MASK & ~PBAFIR_ACT0 &  PBAFIR_ACT1;
 };
 
-group gPBAFIR filter singlebit
+group gPBAFIR filter singlebit, cs_root_cause
 {
     /** PBAFIR[0]
      *  PBA OCI Addr PE err
@@ -5558,7 +5558,7 @@ rule rPSIHBFIR
     PSIHBFIR & ~PSIHBFIR_MASK & ~PSIHBFIR_ACT0 &  PSIHBFIR_ACT1;
 };
 
-group gPSIHBFIR filter singlebit
+group gPSIHBFIR filter singlebit, cs_root_cause
 {
     /** PSIHBFIR[0]
      *  CE from PowerBus data
@@ -5709,7 +5709,7 @@ rule rENHCAFIR
     ENHCAFIR & ~ENHCAFIR_MASK & ~ENHCAFIR_ACT0 &  ENHCAFIR_ACT1;
 };
 
-group gENHCAFIR filter singlebit
+group gENHCAFIR filter singlebit, cs_root_cause
 {
     /** ENHCAFIR[0]
      *  PB0 data UE
@@ -5845,7 +5845,7 @@ rule rEHHCAFIR
     EHHCAFIR & ~EHHCAFIR_MASK & ~EHHCAFIR_ACT0 &  EHHCAFIR_ACT1;
 };
 
-group gEHHCAFIR filter singlebit
+group gEHHCAFIR filter singlebit, cs_root_cause
 {
     /** EHHCAFIR[0]
      *  array0_a CE
@@ -6041,7 +6041,7 @@ rule rPBAMFIR
     PBAMFIR & ~PBAMFIR_MASK & ~PBAMFIR_ACT0 &  PBAMFIR_ACT1;
 };
 
-group gPBAMFIR filter singlebit
+group gPBAMFIR filter singlebit, cs_root_cause
 {
     /** PBAMFIR[0]
      *  action0_for_invalid_transfer_size
@@ -6114,7 +6114,7 @@ rule rNMMUCQFIR
     NMMUCQFIR & ~NMMUCQFIR_MASK &  NMMUCQFIR_ACT0 &  NMMUCQFIR_ACT1;
 };
 
-group gNMMUCQFIR filter singlebit
+group gNMMUCQFIR filter singlebit, cs_root_cause
 {
     /** NMMUCQFIR[0]
      *  PBI_PE_FIR: PBI internal parity error
@@ -6242,7 +6242,7 @@ rule rNMMUFIR
     NMMUFIR & ~NMMUFIR_MASK &  NMMUFIR_ACT0 &  NMMUFIR_ACT1;
 };
 
-group gNMMUFIR filter singlebit
+group gNMMUFIR filter singlebit, cs_root_cause
 {
     /** NMMUFIR[0]
      *  Fabric DIn xlat array CE error detected.
@@ -6498,7 +6498,7 @@ rule rINTCQFIR
     INTCQFIR & ~INTCQFIR_MASK & ~INTCQFIR_ACT0 &  INTCQFIR_ACT1;
 };
 
-group gINTCQFIR filter singlebit
+group gINTCQFIR filter singlebit, cs_root_cause
 {
     /** INTCQFIR[0]
      *  INT_CQ_FIR_PI_ECC_CE:
@@ -6789,7 +6789,7 @@ rule rPBIOEFIR
     PBIOEFIR & ~PBIOEFIR_MASK & ~PBIOEFIR_ACT0 &  PBIOEFIR_ACT1;
 };
 
-group gPBIOEFIR filter singlebit
+group gPBIOEFIR filter singlebit, cs_root_cause
 {
     /** PBIOEFIR[0]
      *  fmr00 trained
@@ -7075,7 +7075,7 @@ rule rPBIOOFIR
     PBIOOFIR & ~PBIOOFIR_MASK & ~PBIOOFIR_ACT0 &  PBIOOFIR_ACT1;
 };
 
-group gPBIOOFIR filter singlebit
+group gPBIOOFIR filter singlebit, cs_root_cause
 {
     /** PBIOOFIR[0]
      *  fmr00 trained
@@ -7491,7 +7491,7 @@ rule rXB_LFIR
     XB_LFIR & ~XB_LFIR_MASK & ~XB_LFIR_ACT0 &  XB_LFIR_ACT1;
 };
 
-group gXB_LFIR filter singlebit
+group gXB_LFIR filter singlebit, cs_root_cause
 {
     /** XB_LFIR[0]
      *  CFIR internal parity error
@@ -7599,7 +7599,7 @@ rule rXBPPEFIR
     XBPPEFIR & ~XBPPEFIR_MASK &  XBPPEFIR_ACT0 &  XBPPEFIR_ACT1;
 };
 
-group gXBPPEFIR filter singlebit
+group gXBPPEFIR filter singlebit, cs_root_cause
 {
     /** XBPPEFIR[0]
      *  PPE general error.

@@ -137,7 +137,7 @@ rule rMCFIR
     MCFIR & ~MCFIR_MASK &  MCFIR_ACT0 &  MCFIR_ACT1;
 };
 
-group gMCFIR filter singlebit
+group gMCFIR filter singlebit, cs_root_cause( 0, 6, 8, 9 )
 {
     /** MCFIR[0]
      *  mc internal recoverable eror

@@ -205,7 +205,7 @@ rule rPHBNFIR
     PHBNFIR & ~PHBNFIR_MASK & ~PHBNFIR_ACT0 &  PHBNFIR_ACT1;
 };
 
-group gPHBNFIR filter singlebit
+group gPHBNFIR filter singlebit, cs_root_cause
 {
     /** PHBNFIR[0]
      *  BAR Parity Error
@@ -371,7 +371,7 @@ rule rPCIFIR
     PCIFIR & ~PCIFIR_MASK & ~PCIFIR_ACT0 &  PCIFIR_ACT1;
 };
 
-group gPCIFIR filter singlebit
+group gPCIFIR filter singlebit, cs_root_cause
 {
     /** PCIFIR[0]
      *  PBAIB register parity error
@@ -422,7 +422,7 @@ rule rETUFIR
     ETUFIR & ~ETUFIR_MASK & ~ETUFIR_ACT0 &  ETUFIR_ACT1;
 };
 
-group gETUFIR filter singlebit
+group gETUFIR filter singlebit, cs_root_cause
 {
     /** ETUFIR[0]
      *  AIB_COMMAND_INVALID
