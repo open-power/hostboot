@@ -85,7 +85,8 @@ typedef fapi2::ReturnCode
 (*p9_l2err_extract_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_EX>&,
                           const fapi2::variable_buffer&,
                           p9_l2err_extract_err_type,
-                          p9_l2err_extract_err_data&);
+                          p9_l2err_extract_err_data&,
+                          bool&);
 
 extern "C"
 {
@@ -97,15 +98,17 @@ extern "C"
 // function: FAPI2 p9_l2err_extract HWP entry point
 //           Parse and extract L2 error information from provided
 //           L2_T0 trace array that has been stopped on an L2 CE or UE.
-// parameters: i_target     => chiplet target for callouts
-//             i_ta_data    => ecmdDataBufferBase that contains the trace data
-//             i_err_type   => type of error that is to be extracted (CE,UE,both)
-//             o_err_data   => failing location information for CE or UE
+// parameters: i_target      => chiplet target for callouts
+//             i_ta_data     => ecmdDataBufferBase that contains the trace data
+//             i_err_type    => type of error that is to be extracted (CE,UE,both)
+//             o_err_data    => failing location information for CE or UE
+//             o_error_found => error is found
 
     fapi2::ReturnCode p9_l2err_extract(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
                                        const fapi2::variable_buffer& i_ta_data,
                                        p9_l2err_extract_err_type i_err_type,
-                                       p9_l2err_extract_err_data& o_err_data);
+                                       p9_l2err_extract_err_data& o_err_data,
+                                       bool& o_error_found);
 
 } // extern "C"
 
