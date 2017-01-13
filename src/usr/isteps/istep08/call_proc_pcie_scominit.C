@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,14 +78,6 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
     errlHndl_t          l_errl      =   NULL;
     IStepError          l_StepError;
 
-    bool spBaseServicesEnabled = INITSERVICE::spBaseServicesEnabled();
-
-    //
-    //  get the master Proc target, we want to IGNORE this one.
-    //
-    TARGETING::Target* l_pMasterProcTarget = NULL;
-    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
-
     //
     //  get a list of all the procs in the system
     //
@@ -94,34 +86,28 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
 
     for (const auto & l_cpu_target: l_cpuTargetList)
     {
-        // Compute the PCIE attribute config on all non-SP systems, since SP
-        // won't be there to do it.
-        if(!spBaseServicesEnabled)
+        // Compute the PCIE attribute config on all systems
+        l_errl = computeProcPcieConfigAttrs(l_cpu_target);
+        if(l_errl != NULL)
         {
-            // Unlike SP which operates on all present procs, the SP-less
-            // algorithm only needs to operate on functional ones
-            l_errl = computeProcPcieConfigAttrs(l_cpu_target);
-            if(l_errl != NULL)
-            {
-                // Any failure to configure PCIE that makes it to this handler
-                // implies a firmware bug that should be fixed, everything else
-                // is tolerated internally (usually as disabled PHBs)
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                         ERR_MRK "call_proc_pcie_scominit> Failed in call to "
-                         "computeProcPcieConfigAttrs for target with HUID = "
-                         "0x%08X",
-                        l_cpu_target->getAttr<TARGETING::ATTR_HUID>() );
-                l_StepError.addErrorDetails(l_errl);
-                errlCommit( l_errl, ISTEP_COMP_ID );
-            }
+            // Any failure to configure PCIE that makes it to this handler
+            // implies a firmware bug that should be fixed, everything else
+            // is tolerated internally (usually as disabled PHBs)
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       ERR_MRK "call_proc_pcie_scominit> Failed in call to "
+                       "computeProcPcieConfigAttrs for target with HUID = "
+                       "0x%08X",
+                       l_cpu_target->getAttr<TARGETING::ATTR_HUID>() );
+            l_StepError.addErrorDetails(l_errl);
+            errlCommit( l_errl, ISTEP_COMP_ID );
         }
 
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2_proc_target(
-                l_cpu_target);
+                                                                 l_cpu_target);
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                 "Running p9_pcie_scominit HWP on "
-                 "target HUID %.8X", TARGETING::get_huid(l_cpu_target) );
+                   "Running p9_pcie_scominit HWP on "
+                   "target HUID %.8X", TARGETING::get_huid(l_cpu_target) );
 
         //  call the HWP with each fapi2::Target
         FAPI_INVOKE_HWP(l_errl, p9_pcie_scominit, l_fapi2_proc_target);
@@ -129,8 +115,8 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
         if (l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "ERROR 0x%.8X : p9_pcie_scominit HWP returned error",
-                     l_errl->reasonCode() );
+                       "ERROR 0x%.8X : p9_pcie_scominit HWP returned error",
+                       l_errl->reasonCode() );
 
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
@@ -145,7 +131,7 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "SUCCESS :  proc_pcie_scominit HWP" );
+                       "SUCCESS :  proc_pcie_scominit HWP" );
         }
     } // end of looping through all processors
 
