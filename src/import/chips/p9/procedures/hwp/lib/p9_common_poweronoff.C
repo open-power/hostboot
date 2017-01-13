@@ -73,7 +73,12 @@ const uint64_t PPM_PFSNS[2] =   { C_PPM_PFSNS,
                                   EQ_PPM_PFSNS
                                 };
 
-enum { FSM_IDLE_POLLING_HW_NS_DELAY = 10000,
+// With a PFET step delay of 250ns and 8 steps, the PFET controller needs ~2us to
+// complete.  A 500 delay keeps the SGPE off of the PCB bus to let other traffic
+// through while potentially adding .5us to the STOP11 time.  For this and the SBE
+// usage of this (istep 4), this trade-off is acceptable.
+
+enum { FSM_IDLE_POLLING_HW_NS_DELAY = 500,
        FSM_IDLE_POLLING_SIM_CYCLE_DELAY = 320000,
        PFET_STATE_LENGTH = 2,
        VXX_PG_SEL_LEN = 4
