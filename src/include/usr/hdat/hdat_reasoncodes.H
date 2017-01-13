@@ -105,6 +105,7 @@ enum HDATModuleId
   MOD_HDAT_SPSUBSYS_FILL_DATA_PTRS = 0x2e,
   MOD_UTIL_PVPD_FULL_READ_FUNC = 0x2f,
   MOD_UTIL_MVPD                = 0x30,
+  MOD_HDAT_IPMI_DTOR           = 0x31,
 };
 
 
