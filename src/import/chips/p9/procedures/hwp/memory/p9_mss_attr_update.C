@@ -58,6 +58,7 @@ constexpr uint32_t CRP0_Lx_RECORD_SIZE_EXP = 255;
 
 // offset of keyword version information
 constexpr uint8_t Lx_VERSION_OFFSET = 0;
+constexpr uint8_t Lx_V2_VALUE = 2;
 constexpr uint8_t Lx_V1_VALUE = 1;
 constexpr uint8_t Lx_V0_VALUE = 0;
 
@@ -483,10 +484,11 @@ p9_mss_attr_update_lx_mvpd(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
              "Error from getMvpdField (CRP0, keyword:%d, retrieval) on target: %s",
              l_keyword, mss::c_str(l_chip_target));
 
-    // check version number. currently v0 == v1, so we check for either and make sure we
-    // use the V1 offsets.
+    // check version number, currently all supported versions use the same offsets
+    // for the purpose of this HWP
     FAPI_ASSERT(((l_keyword_data[Lx_VERSION_OFFSET] == Lx_V0_VALUE) ||
-                 (l_keyword_data[Lx_VERSION_OFFSET] == Lx_V1_VALUE)),
+                 (l_keyword_data[Lx_VERSION_OFFSET] == Lx_V1_VALUE) ||
+                 (l_keyword_data[Lx_VERSION_OFFSET] == Lx_V2_VALUE)),
                 fapi2::P9_MSS_ATTR_UPDATE_MVPD_VERSION_ERR().
                 set_TARGET(l_chip_target).
                 set_VERSION(l_keyword_data[Lx_VERSION_OFFSET]),
