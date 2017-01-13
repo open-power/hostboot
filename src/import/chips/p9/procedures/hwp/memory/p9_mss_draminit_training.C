@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -130,13 +130,11 @@ extern "C"
 
             // The following registers must be configured to the correct operating environment:
 
-            // • Section 5.2.5.10 SEQ ODT Write Configuration {0-3} on page 422
-            FAPI_TRY( mss::reset_odt_config(p) );
-
             // These are reset in phy_scominit
-            // • Section 5.2.6.1 WC Configuration 0 Register on page 434
-            // • Section 5.2.6.2 WC Configuration 1 Register on page 436
-            // • Section 5.2.6.3 WC Configuration 2 Register on page 438
+            // Section 5.2.5.10 SEQ ODT Write Configuration {0-3} on page 422
+            // Section 5.2.6.1 WC Configuration 0 Register on page 434
+            // Section 5.2.6.2 WC Configuration 1 Register on page 436
+            // Section 5.2.6.3 WC Configuration 2 Register on page 438
 
             // Get our rank pairs.
             FAPI_TRY( mss::rank::get_rank_pairs(p, l_pairs) );

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -384,6 +384,7 @@ inline fapi2::ReturnCode reset( const fapi2::Target<T>& i_target )
     FAPI_TRY( reset_timing1(i_target) );
     FAPI_TRY( reset_timing2(i_target) );
     FAPI_TRY( reset_rd_wr_data(i_target) );
+    FAPI_TRY( reset_odt_config(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -394,4 +395,3 @@ fapi_try_exit:
 } // close namespace mss
 
 #endif
-
