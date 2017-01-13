@@ -49,5 +49,6 @@ OBJS += hdathostservices.o
 OBJS += hdathbrt.o
 OBJS += hdatspiraS.o
 OBJS += hdatspiraH.o
+OBJS += hdatipmi.o
 
 include ${ROOTPATH}/config.mk

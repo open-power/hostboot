@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,8 +80,9 @@ enum hdatSpiraSDataAreas
   HDAT_SPIRAS_PCRD             = 13,   // PCRD (Chip related data area)
   HDAT_SPIRAS_HOSTSR           = 14,   // HOSTSR (Host service data)
   HDAT_SPIRAS_HBRT             = 15,   //HBRT (runtime data)
+  HDAT_SPIRAS_IPMI             = 16,   // IPMI Sensor MApping Data
 
-  HDAT_SPIRAS_DA_LAST          = 16
+  HDAT_SPIRAS_DA_LAST          = 17
 };
 
 
