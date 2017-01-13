@@ -71,9 +71,9 @@
 // -----------------------------------------------------------------------------
 enum PPM_MASK
 {
-    CME_FIRMASK = 0x0,
-    CORE_ERRMASK = 0x0,
-    QUAD_ERRMASK = 0x0
+    CME_FIRMASK = 0xFFFFFFFF,
+    CORE_ERRMASK = 0xFFFFFFFF,
+    QUAD_ERRMASK = 0xFFFFFFFF
 };
 
 // -----------------------------------------------------------------------------
