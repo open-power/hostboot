@@ -489,9 +489,7 @@ fapi2::ReturnCode pm_corequad_reset(
                 // Allow PCB Access
                 // Set bit 0 : PPM_WRITE_DISABLE
                 FAPI_INF("Allow PCB access to PPM");
-                l_address = C_CPPM_CPMMR;
-                FAPI_TRY(fapi2::getScom(l_core_chplt, l_address, l_data64));
-                l_data64.setBit<0>();
+                l_data64.flush<0>().setBit<0>();
                 l_address =  C_CPPM_CPMMR_CLEAR;
                 FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_data64),
                          "ERROR: Failed to allow PCB access to PPM");
