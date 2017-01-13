@@ -24,13 +24,13 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 
 <!-- -->
-<!-- @file memory_mss_timing.xml -->
+<!-- @file memory_mss_eff_config.xml -->
 <!-- @brief Error xml for timing.H -->
 <!-- -->
 <!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
 <!-- *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
-<!-- *HWP Level: 1 -->
+<!-- *HWP Level: 2 -->
 <!-- *HWP Consumed by: HB:FSP -->
 <!-- -->
 
@@ -131,115 +131,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_NO_POWER_THERMAL_ATTR_FOUND</rc>
-    <description>
-      There was no match or value found in decoding the power thermal attributes
-    </description>
-    <ffdc>GENERATED_KEY</ffdc>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_NO_DATABUS_UTILIZATION</rc>
-    <description>
-      There are 2 DIMMS on the port but both have 0 databus utilization
-    </description>
-    <ffdc>PORT_DATABUS_UTIL</ffdc>
-    <callout>
-      <target>MCA_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>MCA_TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_CALC_POWER_CURVE_DIVIDE_BY_ZERO</rc>
-    <description>
-      Denominator equals 0
-    </description>
-    <ffdc>PORT_DATABUS_UTIL</ffdc>
-    <ffdc>UTIL_CONVERSION</ffdc>
-    <ffdc>IDLE_UTIL</ffdc>
-    <callout>
-      <target>MCA_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>MCA_TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_CALC_PORT_POWER_EXCEEDS_MAX</rc>
-    <description>
-      The calculated port power from equalizing throttles exceeds the maximum allowed power
-    </description>
-    <ffdc>CALCULATED_PORT_POWER</ffdc>
-    <ffdc>MAX_POWER_ALLOWED</ffdc>
-    <ffdc>PORT_POS</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <childTargets>
-          <parent>MCA_TARGET</parent>
-          <childType>TARGET_TYPE_DIMM</childType>
-          <childNumber>EX_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-      <priority>MEDIUM</priority>
-    </callout>
-    <deconfigure>
-       <childTargets>
-          <parent>MCA_TARGET</parent>
-          <childType>TARGET_TYPE_DIMM</childType>
-          <childNumber>EX_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-    </deconfigure>
-  </hwpError>
-  <hwpError>
-    <rc>RC_MSS_SLOT_UTIL_EXCEEDS_PORT</rc>
-    <description>
-      The memory throttle per slot (DIMM) exceeds the allowed throttle for the port
-    </description>
-    <ffdc>SLOT_UTIL</ffdc>
-    <ffdc>PORT_UTIL</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>MCA_TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_SPLIT_UTIL_CALC_ERROR</rc>
-    <description>
-      Error when splitting up the memory port's utilization
-    </description>
-    <ffdc>MAX_TOTAL_UTIL</ffdc>
-    <ffdc>DIMM_COUNT</ffdc>
-    <ffdc>SLOT_UTIL</ffdc>
-    <ffdc>PORT_UTIL</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>MCA_TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_INVALID_LRDIMM_DB</rc>
     <description>
       Error with the LRDIMM databuffer type
@@ -300,7 +191,7 @@
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
- </hwpError>
+  </hwpError>
 
   <hwpError>
     <rc>RC_MSS_ERROR_CREATING_EFF_CONFIG_DIMM_OBJECT</rc>
@@ -318,10 +209,4 @@
       <target>DIMM_TARGET</target>
     </deconfigure>
   </hwpError>
-
-
-
-
-
-
 </hwpErrors>
