@@ -647,6 +647,16 @@ ispy MCP.PORT0.SRQ.MBA_FARB2Q_CFG_RANK7_WR_ODT [when=S] {
   3, MCS.ATTR_MSS_VPD_MT_ODT_WR[def_PORT_INDEX][1][3] >> 2; # assuming it only takes right most bit since right justified
 }
 
+ispy MCP.PORT0.SRQ.PC.MBAREF0Q_CFG_REFRESH_PRIORITY_THRESHOLD [when=S] {
+  spyv;
+  3;
+}
+
+ispy MCP.PORT0.SRQ.PC.MBAREF0Q_CFG_REFR_CHECK_INTERVAL [when=S] {
+  spyv;
+  ( def_REFRESH_INTERVAL * def_NUM_RANKS * 6 ) / 5;
+}
+
 
 
 ####################################################

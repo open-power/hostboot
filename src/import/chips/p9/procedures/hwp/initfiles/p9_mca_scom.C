@@ -634,6 +634,8 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             l_scom_buffer.insert<8, 11, 53, uint64_t>(l_def_REFRESH_INTERVAL );
             l_scom_buffer.insert<30, 10, 54, uint64_t>(l_TGT2_ATTR_EFF_DRAM_TRFC[l_def_PORT_INDEX] );
             l_scom_buffer.insert<40, 10, 54, uint64_t>(l_TGT2_ATTR_EFF_DRAM_TRFC_DLR[l_def_PORT_INDEX] );
+            l_scom_buffer.insert<5, 3, 61, uint64_t>(literal_3 );
+            l_scom_buffer.insert<50, 11, 53, uint64_t>((((l_def_REFRESH_INTERVAL * l_def_NUM_RANKS) * literal_6) / literal_5) );
             FAPI_TRY(fapi2::putScom(TGT0, 0x7010932ull, l_scom_buffer));
         }
         {
