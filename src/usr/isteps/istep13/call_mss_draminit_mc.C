@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,6 +103,22 @@ void* call_mss_draminit_mc (void *io_pArgs)
         }
 
     } // End; memBuf loop
+
+
+    //TODO RTC:167292 Remove this workaround that is clearing this scom register
+    fapi2::buffer<uint64_t> l_data64;
+    l_data64.flush<0>();
+    // Get all MCAs
+    TARGETING::TargetHandleList l_mcaTargetList;
+    getAllChiplets(l_mcaTargetList, TYPE_MCA);
+
+    //Clear out the MBA_FARB3Q reg(0x7010916) on all MCAs
+    for (const auto & l_mca_target : l_mcaTargetList)
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MCA> l_fapi_mca_target
+        (l_mca_target);
+        fapi2::putScom(l_fapi_mca_target, 0x7010916, l_data64);
+    }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc exit" );
 
