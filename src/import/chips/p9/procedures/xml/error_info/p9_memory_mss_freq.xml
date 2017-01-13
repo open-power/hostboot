@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -30,7 +30,7 @@
 <!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
 <!-- *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
-<!-- *HWP Level: 1 -->
+<!-- *HWP Level: 3 -->
 <!-- *HWP Consumed by: HB:FSP -->
 <!-- -->
 
@@ -115,7 +115,6 @@
     <ffdc>NEST_FREQ</ffdc>
   </hwpError>
 
-  <!-- TK - Should this be FFDC or just return FAPI2_RC_FALSE? - AAM -->
   <hwpError>
     <rc>RC_MSS_UNSUPPORTED_FREQ_CALCULATED</rc>
     <description>The frequency calculated with spd data is not supported by the jedec standards.</description>
@@ -163,4 +162,36 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_TOO_MANY_DIMMS_ON_PORT</rc>
+    <description>There seem to be too many dimms on the port</description>
+    <ffdc>DIMM_COUNT</ffdc>
+    <callout>
+      <target>MCA_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MCA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_TOO_MANY_PRIMARY_RANKS_ON_DIMM</rc>
+    <description>There seem to be too many primary ranks seen on the dimm</description>
+    <ffdc>RANK_COUNT</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FREQ_INDEX_TOO_LARGE</rc>
+    <description>Error calculating the index into max_freq array</description>
+    <ffdc>INDEX</ffdc>
+    <ffdc>NUM_MAX_FREQS</ffdc>
+  </hwpError>
 </hwpErrors>

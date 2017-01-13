@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Andre A. Marin  <aamarin@us.ibm.com>
 // *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 #include <vector>
 #include <map>
@@ -64,12 +64,12 @@ extern "C"
         // attributes for the PHY, etc. If there is even one DIMM on any of this list of MCBIST,
         // we do the right thing.
         uint64_t l_dimm_count = 0;
-        std::for_each( i_targets.begin(), i_targets.end(),
+        std::for_each( i_targets.begin(),
+                       i_targets.end(),
                        [&l_dimm_count](const fapi2::Target<TARGET_TYPE_MCBIST>& i_target)
         {
             l_dimm_count += mss::count_dimm(i_target);
-        }
-                     );
+        } );
 
         if (l_dimm_count == 0)
         {

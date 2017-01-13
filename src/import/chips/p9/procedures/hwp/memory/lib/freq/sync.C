@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #include  <vector>
@@ -169,8 +169,10 @@ bool deconfigure(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
                               .set_MSS_FREQ(i_dimm_speed)
                               .set_NEST_FREQ(i_nest_freq)
                               .set_MCS_TARGET(l_mcs),
-                              "Deconfiguring %s",
-                              mss::c_str(l_mcs) );
+                              "Deconfiguring %s due to unequal frequencies: mss: %d, nest: %d",
+                              mss::c_str(l_mcs),
+                              i_dimm_speed,
+                              i_nest_freq );
         }// end for
     }// end if
 
@@ -280,8 +282,11 @@ fapi2::ReturnCode select_sync_mode(const std::map< fapi2::Target<TARGET_TYPE_MCB
             break;
 
         default:
+            // Switches on an enum class
+            // The only valid speed_equality values are NOT_EQUAL and EQUAL.
+            // If it's something else ,I think it's a code error and really shouldn't be possible, thus fapi2::Assert below
             FAPI_ERR("Invalid speed_equality parameter!");
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            fapi2::Assert(false);
             break;
     }// end switch
 
@@ -362,7 +367,7 @@ fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCS>& i
     io_freqs.clear();
 
     // This magic number isn't the number of frequencies supported by the hardware, it's the number
-    // of frequencies in the attribute or VPD. They may be different (see *1 below)
+    // of frequencies in the attribute or VPD. They may be different
     if (i_freqs.size() != NUM_VPD_FREQS)
     {
         FAPI_ERR("incorrect number of frequencies for %s (%d)", mss::c_str(i_target), i_freqs.size());
@@ -372,7 +377,7 @@ fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCS>& i
     FAPI_INF("unsorted supported freqs %d %d %d %d",
              i_freqs[0], i_freqs[1], i_freqs[2], i_freqs[3]);
 
-    // (*1) This is the number of elelments in the max_allowed_dimm_freq attribute, not the frequencies of
+    // This is the number of elements in the max_allowed_dimm_freq attribute, not the frequencies of
     // the system. Hence the magic number.
     if (i_max_freqs.size() != NUM_MAX_FREQS)
     {
@@ -389,12 +394,13 @@ fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCS>& i
         const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(p);
         uint64_t l_dimms_on_port = l_dimms.size();
 
-        // Just a quick check but we're in deep yogurt if this triggers
-        if (l_dimms_on_port > MAX_DIMM_PER_PORT)
-        {
-            FAPI_ERR("seeing %d DIMM on port %s", l_dimms_on_port, mss::c_str(p));
-            fapi2::Assert(false);
-        }
+        FAPI_ASSERT( (l_dimms_on_port <= MAX_DIMM_PER_PORT),
+                     fapi2::MSS_TOO_MANY_DIMMS_ON_PORT()
+                     .set_DIMM_COUNT(l_dimms_on_port)
+                     .set_MCA_TARGET(p),
+                     "Seeing %d DIMM on port %s",
+                     l_dimms_on_port,
+                     mss::c_str(p));
 
         for (const auto& d : l_dimms)
         {
@@ -404,11 +410,13 @@ fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCS>& i
             FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_num_master_ranks) );
 
             // Just a quick check but we're in deep yogurt if this triggers
-            if (l_num_master_ranks > MAX_PRIMARY_RANKS_PER_PORT)
-            {
-                FAPI_ERR("seeing %d primary ranks on DIMM %s", l_num_master_ranks, mss::c_str(d));
-                fapi2::Assert(false);
-            }
+            FAPI_ASSERT( (l_num_master_ranks <= MAX_RANK_PER_DIMM),
+                         fapi2::MSS_TOO_MANY_PRIMARY_RANKS_ON_DIMM()
+                         .set_RANK_COUNT(l_num_master_ranks)
+                         .set_DIMM_TARGET(p),
+                         "seeing %d primary ranks on DIMM %s",
+                         l_dimms_on_port,
+                         mss::c_str(d));
 
             FAPI_INF("%s rank config %d drop %d yields max freq attribute index of %d (%d)",
                      mss::c_str(d), l_num_master_ranks, l_dimms_on_port,
@@ -417,13 +425,15 @@ fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCS>& i
 
             l_index = l_indexes[l_dimms_on_port - 1][l_num_master_ranks - 1];
 
-            // Just a quick check but we're in deep yogurt if this triggers
-            if (l_index > NUM_MAX_FREQS)
-            {
-                FAPI_ERR("seeing %d index for %d DIMM and %d ranks on DIMM %s",
-                         l_index, l_dimms_on_port, l_num_master_ranks, mss::c_str(d));
-                fapi2::Assert(false);
-            }
+            FAPI_ASSERT( (l_index < NUM_MAX_FREQS),
+                         fapi2::MSS_FREQ_INDEX_TOO_LARGE()
+                         .set_INDEX(l_index)
+                         .set_NUM_MAX_FREQS(NUM_MAX_FREQS),
+                         "seeing %d index for %d DIMM and %d ranks on DIMM %s",
+                         l_index,
+                         l_dimms_on_port,
+                         l_num_master_ranks,
+                         mss::c_str(d));
 
             l_our_max_freq = std::min(l_our_max_freq, i_max_freqs[l_index]);
         }
@@ -460,7 +470,7 @@ fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCS>& i
     // Sort it so we know supported min is io_freq.begin and supported max is io_freq.end - 1
     std::sort(io_freqs.begin(), io_freqs.end());
 
-    // If we have an empty set, we have a pro'lem
+    // If we have an empty set, we have a problem
     FAPI_ASSERT(io_freqs.size() != 0,
                 fapi2::MSS_VPD_FREQ_MAX_FREQ_EMPTY_SET()
                 .set_MSS_VPD_FREQ_0(i_freqs[0])
@@ -487,7 +497,7 @@ fapi_try_exit:
 /// @param[in] reference to a std::vector<uint32_t> of freqs
 /// @return bool, true iff input freq is supported
 ///
-fapi2::ReturnCode is_freq_supported(const uint32_t i_freq, const std::vector<uint32_t>& i_freqs)
+bool is_freq_supported(const uint32_t i_freq, const std::vector<uint32_t>& i_freqs)
 {
     return std::binary_search(i_freqs.begin(), i_freqs.end(), i_freq);
 }

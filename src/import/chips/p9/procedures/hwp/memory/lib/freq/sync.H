@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,7 @@
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_SYNC_H_
@@ -124,7 +124,7 @@ fapi2::ReturnCode supported_freqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i
 /// @param[in] reference to a std::vector<uint32_t> of freqs
 /// @return bool, true iff input freq is supported
 ///
-fapi2::ReturnCode is_freq_supported(const uint32_t i_freq, const std::vector<uint32_t>& i_freqs);
+bool is_freq_supported(const uint32_t i_freq, const std::vector<uint32_t>& i_freqs);
 
 
 }// mss

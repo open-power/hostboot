@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 // *HWP HWP Backup: Andre A. Marin  <aamarin@us.ibm.com>
 // *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <p9_mss_volt.H>
@@ -61,12 +61,11 @@ using fapi2::FAPI2_RC_SUCCESS;
 extern "C"
 {
 
-
-///
-/// @brief Calculate and save off rail voltages
-/// @param[in] i_targets vector of controllers (e.g., MCS)
-/// @return FAPI2_RC_SUCCESS iff ok
-///
+    ///
+    /// @brief Calculate and save off rail voltages
+    /// @param[in] i_targets vector of controllers (e.g., MCS)
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
     fapi2::ReturnCode p9_mss_volt( const std::vector< fapi2::Target<TARGET_TYPE_MCS> >& i_targets )
     {
         // Loop through MCS
@@ -82,7 +81,7 @@ extern "C"
             // Get dimms for each MCS
             for ( const auto& l_dimm : mss::find_targets<TARGET_TYPE_DIMM> (l_mcs))
             {
-                const auto& l_dimm_pos = mss::pos(l_dimm);
+                const auto l_dimm_pos = mss::pos(l_dimm);
 
                 // Find decoder factory for this dimm position
                 auto l_it = l_factory_caches.find(l_dimm_pos);
@@ -117,8 +116,8 @@ extern "C"
             // Set the attributes for this MCS, values are in mss_const.H
             // TK : will need to change attribute target according to voltage rails in the future
             FAPI_TRY (mss::set_voltage_attributes (l_mcs,
-                                                   uint64_t(mss::DDR4_NOMINAL_VOLTAGE),
-                                                   uint64_t(mss::DDR4_VPP_VOLTAGE)),
+                                                   mss::DDR4_NOMINAL_VOLTAGE,
+                                                   mss::DDR4_VPP_VOLTAGE),
                       "Failed to set volt attributes");
         } // mcs
 
