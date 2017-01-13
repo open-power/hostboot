@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2016
+# Contributors Listed Below - COPYRIGHT 2014,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -61,7 +61,9 @@ export bbsrc=$BACKING_BUILD/src
 echo "----Running presimsetup workarounds."
 if [ -f ${CITESTPATH}/etc/workarounds.presimsetup ];
 then
-    ${CITESTPATH}/etc/workarounds.presimsetup || exit -1
+    execute_in_sandbox "export BACKING_BUILD=\$bb && \
+                        ${CITESTPATH}/etc/workarounds.presimsetup"  "ppc" \
+                        || exit -1
 fi
 
 # Run start_simics to populate simics directories.
@@ -73,6 +75,8 @@ execute_in_sandbox "start_simics -no_start -machine $MACHINE -batch_mode" \
 echo "----Running postsimsetup workarounds."
 if [ -f ${CITESTPATH}/etc/workarounds.postsimsetup ];
 then
-    ${CITESTPATH}/etc/workarounds.postsimsetup || exit -1
+    execute_in_sandbox "export BACKING_BUILD=\$bb && \
+                       ${CITESTPATH}/etc/workarounds.postsimsetup"  "ppc" \
+                   || exit -1
 fi
 
