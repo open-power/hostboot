@@ -1,0 +1,155 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_memory_mss_eff_config_thermal.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!-- -->
+<!-- @file memory_mss_timing.xml -->
+<!-- @brief Error xml for timing.H -->
+<!-- -->
+<!-- *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com> -->
+<!-- *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 2 -->
+<!-- *HWP Consumed by: HB:FSP -->
+<!-- -->
+
+<hwpErrors>
+
+  <hwpError>
+    <rc>RC_MSS_NO_POWER_THERMAL_ATTR_FOUND</rc>
+    <description>
+      There was no match or value found in decoding the power thermal attributes
+    </description>
+    <ffdc>GENERATED_KEY</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_NO_DATABUS_UTILIZATION</rc>
+    <description>
+      There are 2 DIMMS on the port but both have 0 databus utilization
+    </description>
+    <ffdc>PORT_DATABUS_UTIL</ffdc>
+    <callout>
+      <target>MCA_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MCA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_CALC_POWER_CURVE_DIVIDE_BY_ZERO</rc>
+    <description>
+      Denominator equals 0
+    </description>
+    <ffdc>PORT_DATABUS_UTIL</ffdc>
+    <ffdc>UTIL_CONVERSION</ffdc>
+    <ffdc>IDLE_UTIL</ffdc>
+    <callout>
+      <target>MCA_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MCA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_CALC_PORT_POWER_EXCEEDS_MAX</rc>
+    <description>
+      The calculated port power from equalizing throttles exceeds the maximum allowed power
+    </description>
+    <ffdc>CALCULATED_PORT_POWER</ffdc>
+    <ffdc>MAX_POWER_ALLOWED</ffdc>
+    <ffdc>PORT_POS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+          <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+          <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_SLOT_UTIL_EXCEEDS_PORT</rc>
+    <description>
+      The memory throttle per slot (DIMM) exceeds the allowed throttle for the port
+    </description>
+    <ffdc>SLOT_UTIL</ffdc>
+    <ffdc>PORT_UTIL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MCA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_SPLIT_UTIL_CALC_ERROR</rc>
+    <description>
+      Error when splitting up the memory port's utilization
+    </description>
+    <ffdc>MAX_TOTAL_UTIL</ffdc>
+    <ffdc>DIMM_COUNT</ffdc>
+    <ffdc>SLOT_UTIL</ffdc>
+    <ffdc>PORT_UTIL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MCA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAX_DIMMS_ON_VMEM_REGULATOR_NOT_SET</rc>
+    <description>
+      MRW attribute  mrw_max_number_dimms_possible_per_vmem_regulator equals 0
+    </description>
+  </hwpError>
+</hwpErrors>
