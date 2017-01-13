@@ -4736,7 +4736,6 @@ sub generate_mcbist
     my $physicalPath="physical:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist";
     my $affinityPath="affinity:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist";
 
-    #Chiplet ID range for 2 MCBIST start with 0x07
     my $chipletId = sprintf("0x%X",($mcbist + 0x07));
 
     print "
@@ -4883,6 +4882,32 @@ sub generate_pec
     $pciAttr{"PROC_PCIE_PCS_SYSTEM_CNTL"} = 'proc_pcie_pcs_system_cntl';
     $pciAttr{"PROC_PCIE_PCS_M_CNTL"} = 'proc_pcie_pcs_m_cntl';
 
+    # PCIE Hack to set PEC PCIE_LANE_MASK and PCIE_IOP_SWAP attributes
+    my %pciOtherAttr;
+    if ($pec == 0)
+    {
+        $pciOtherAttr{"PROC_PCIE_LANE_MASK"} = "0xFFFF, 0x0000, 0x0000, 0x0000";
+    }
+    elsif ($pec == 1)
+    {
+        $pciOtherAttr{"PROC_PCIE_LANE_MASK"} = "0xFF00, 0x0000, 0x00FF, 0x0000";
+        if (($proc == 0) || ($proc == 1))
+        {
+            $pciOtherAttr{"PROC_PCIE_IOP_SWAP"} = 0x2;
+        }
+    }
+    elsif ($pec == 2)
+    {
+        $pciOtherAttr{"PROC_PCIE_LANE_MASK"} = "0xFF00, 0x0000, 0x00FF, 0x0000";
+        if ($proc == 0)
+        {
+            $pciOtherAttr{"PROC_PCIE_IOP_SWAP"} = 0x6;
+        }
+        elsif ($proc == 1)
+        {
+            $pciOtherAttr{"PROC_PCIE_IOP_SWAP"} = 0x4;
+        }
+    }
 
     # XML has this structure (iop==pec):
     #   <processor-settings>
@@ -4908,6 +4933,18 @@ sub generate_pec
         <default>$procsetting->{$mrwname}</default>
     </attribute>\n";
         }
+
+        foreach my $attr ( keys %pciOtherAttr )
+        {
+
+
+            my $val = $pciOtherAttr{$attr};
+            print "    <attribute>
+        <id>$attr</id>
+        <default>$val</default>
+    </attribute>\n";
+        }
+
     }
 
     # call to do any fsp per-pec attributes

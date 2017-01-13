@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -256,7 +256,8 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
            LANE_WIDTH_NC,
            LANE_WIDTH_NC,
            LANE_WIDTH_NC},
-           0x00,PHB0_MASK},
+           0x00,PHB0_MASK,
+           PHB_X16_MAC_MAP, 0x01},
         };
 
     const laneConfigRow pec1_laneConfigTable[] =
@@ -264,7 +265,8 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
            LANE_WIDTH_NC,
            LANE_WIDTH_8X,
            LANE_WIDTH_NC},
-           0x00,PHB1_MASK|PHB2_MASK},
+           0x00,PHB1_MASK|PHB2_MASK,
+           PHB_X8_X8_MAC_MAP, 0x03},
         };
 
     const laneConfigRow pec2_laneConfigTable[] =
@@ -272,19 +274,22 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
            LANE_WIDTH_NC,
            LANE_WIDTH_NC,
            LANE_WIDTH_NC},
-           0x00,PHB3_MASK},
+           0x00,PHB3_MASK,
+           PHB_X16_MAC_MAP, 0x4},
 
          {{LANE_WIDTH_8X,
            LANE_WIDTH_NC,
            LANE_WIDTH_8X,
            LANE_WIDTH_NC},
-           0x10,PHB3_MASK|PHB4_MASK},
+           0x10,PHB3_MASK|PHB4_MASK,
+           PHB_X8_X8_MAC_MAP, 0x6},
 
          {{LANE_WIDTH_8X,
            LANE_WIDTH_NC,
            LANE_WIDTH_4X,
            LANE_WIDTH_4X},
-           0x20,PHB3_MASK|PHB4_MASK|PHB5_MASK},
+           0x20,PHB3_MASK|PHB4_MASK|PHB5_MASK,
+           PHB_X8_X4_X4_MAC_MAP, 0x07},
         };
 
     const laneConfigRow* pec0_end = pec0_laneConfigTable +
@@ -402,154 +407,184 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
 
             TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type disabledPhbs = 0;
 
-#ifdef DYNAMIC_BIFURCATION
-
-            // Figure out which IOPs need bifurcation, and as a result, which
-            // PHBs to disable
-            BifurcatedIopsContainer iopList;
-            pError = _queryIopsToBifurcateAndPhbsToDisable(
-                l_pec,
-                iopList,
-                disabledPhbs);
-            if(pError!=NULL)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    ERR_MRK "computeProcPcieConfigAttrs> "
-                    "Failed in call to _queryIopsToBifurcateAndPhbsToDisable; "
-                    "Proc HUID = 0x%08X.",
-                    i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>());
-                break;
-            }
-#endif
-
-            TARGETING::ATTR_PEC_PCIE_LANE_MASK_NON_BIFURCATED_type
-                laneMaskNonBifurcated = {0};
-            assert(l_pec->tryGetAttr<
-                TARGETING::ATTR_PEC_PCIE_LANE_MASK_NON_BIFURCATED>(
-                    laneMaskNonBifurcated),"Failed to get "
-                    "ATTR_PEC_PCIE_LANE_MASK_NON_BIFURCATED attribute");
-
-            TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_NON_BIFURCATED_type
-                laneReversalNonBifurcated = {0};
-            assert(l_pec->tryGetAttr<
-                TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_NON_BIFURCATED>(
-                    laneReversalNonBifurcated),"Failed to get "
-                    "ATTR_PEC_PCIE_IOP_REVERSAL_NON_BIFURCATED attribute");
-
-            TARGETING::ATTR_PEC_PCIE_IOP_SWAP_NON_BIFURCATED_type
-                laneSwapNonBifurcated = 0;
-            assert(l_pec->tryGetAttr<
-                TARGETING::ATTR_PEC_PCIE_IOP_SWAP_NON_BIFURCATED>(
-                    laneSwapNonBifurcated),"Failed to get "
-                    "ATTR_PEC_PCIE_IOP_SWAP_NON_BIFURCATED attribute");
-
             TARGETING::ATTR_PROC_PCIE_LANE_MASK_type
-                effectiveLaneMask = {0};
-            memcpy(effectiveLaneMask,laneMaskNonBifurcated,
-                sizeof(effectiveLaneMask));
+              effectiveLaneMask = {0};
 
             TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_type
-                effectiveLaneReversal = {0};
-            memcpy(effectiveLaneReversal,laneReversalNonBifurcated,
-                sizeof(effectiveLaneReversal));
+              effectiveLaneReversal = {0};
 
             TARGETING::ATTR_PROC_PCIE_IOP_SWAP_type
-                effectiveLaneSwap = 0;
+              effectiveLaneSwap = 0;
 
-            // For every lane group of a PEC, we need to see if the lane swap
-            // bit has been set. If the lane is used, and the bit is not set
-            // we set the lane swap bit. Lane swap attribute is a single
-            // attribute per PEC, so once the lane swap is set for one lane
-            // group it will be set for the whole PEC.
-            for(size_t laneGroup = 0;
-                laneGroup <
-                    (sizeof(laneSwapNonBifurcated)/sizeof(effectiveLaneSwap));
-                ++laneGroup)
+            //Only attempt to determine the lane config on FSPless systems
+            //On FSP based systems it has already been determined
+            if (!INITSERVICE::spBaseServicesEnabled())
             {
-                // If lanes are used and swap not yet set, then set it
-                if((effectiveLaneMask[laneGroup]) && (!effectiveLaneSwap))
-                {
-                     effectiveLaneSwap = laneSwapNonBifurcated;
-                     break;
-                }
-            }
-
 #ifdef DYNAMIC_BIFURCATION
-            TARGETING::ATTR_PEC_PCIE_LANE_MASK_BIFURCATED_type
-                laneMaskBifurcated = {0};
-            assert(l_pec->tryGetAttr<
-                TARGETING::ATTR_PEC_PCIE_LANE_MASK_BIFURCATED>(
-                    laneMaskBifurcated),"Failed to get "
-                    "ATTR_PEC_PCIE_LANE_MASK_BIFURCATED attribute");
+                // Figure out which IOPs need bifurcation, and as a
+                // result, which PHBs to disable
+                BifurcatedIopsContainer iopList;
+                pError = _queryIopsToBifurcateAndPhbsToDisable(
+                                                               l_pec,
+                                                               iopList,
+                                                               disabledPhbs);
+                if(pError!=NULL)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              ERR_MRK "computeProcPcieConfigAttrs> "
+                              "Failed in call to"
+                              "_queryIopsToBifurcateAndPhbsToDisable; "
+                              "Proc HUID = 0x%08X.",
+                              i_pProcChipTarget->getAttr
+                              <TARGETING::ATTR_HUID>());
+                    break;
+                }
+#endif
 
-            TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_BIFURCATED_type
-                laneReversalBifurcated = {0};
-            assert(l_pec->tryGetAttr<
-                TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_BIFURCATED>(
-                    laneReversalBifurcated),"Failed to get "
-                    "ATTR_PEC_PCIE_IOP_REVERSAL_BIFURCATED attribute");
+                TARGETING::ATTR_PEC_PCIE_LANE_MASK_NON_BIFURCATED_type
+                  laneMaskNonBifurcated = {0};
+                assert(l_pec->tryGetAttr<
+                         TARGETING::ATTR_PEC_PCIE_LANE_MASK_NON_BIFURCATED>(
+                         laneMaskNonBifurcated),"Failed to get "
+                         "ATTR_PEC_PCIE_LANE_MASK_NON_BIFURCATED attribute");
 
-            TARGETING::ATTR_PEC_PCIE_IOP_SWAP_BIFURCATED_type
-                bifurcatedSwap = {0};
-            assert(l_pec->tryGetAttr<
-                TARGETING::ATTR_PEC_PCIE_IOP_SWAP_BIFURCATED>(
-                    bifurcatedSwap),"Failed to get "
-                    "ATTR_PEC_PCIE_IOP_SWAP_BIFURCATED attribute");
+                TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_NON_BIFURCATED_type
+                  laneReversalNonBifurcated = {0};
+                assert(l_pec->tryGetAttr<
+                         TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_NON_BIFURCATED>(
+                         laneReversalNonBifurcated),"Failed to get "
+                         "ATTR_PEC_PCIE_IOP_REVERSAL_NON_BIFURCATED attribute");
 
-            // Apply any IOP bifurcation settings
-            for(BifurcatedIopsContainer::const_iterator iopItr =
-                iopList.begin(); iopItr != iopList.end();
-                ++iopItr)
-            {
-                BifurcatedIopsContainer::const_reference iop = *iopItr;
-                memcpy(
-                    &effectiveLaneReversal[0],
-                    &laneReversalBifurcated[0],
-                    sizeof(effectiveLaneReversal)/1);
+                TARGETING::ATTR_PEC_PCIE_IOP_SWAP_NON_BIFURCATED_type
+                  laneSwapNonBifurcated = 0;
+                assert(l_pec->tryGetAttr<
+                       TARGETING::ATTR_PEC_PCIE_IOP_SWAP_NON_BIFURCATED>(
+                       laneSwapNonBifurcated),"Failed to get "
+                       "ATTR_PEC_PCIE_IOP_SWAP_NON_BIFURCATED attribute");
 
-                memcpy(
-                    &effectiveLaneMask[0],
-                    &laneMaskBifurcated[0],
-                    sizeof(effectiveLaneMask)/1);
+                memcpy(effectiveLaneMask,laneMaskNonBifurcated,
+                       sizeof(effectiveLaneMask));
 
-                // For every lane group of a PEC we need to see if the lane swap
+                memcpy(effectiveLaneReversal,laneReversalNonBifurcated,
+                       sizeof(effectiveLaneReversal));
+
+                // For every lane group of a PEC, need to see if the lane swap
                 // bit has been set. If the lane is used, and the bit is not set
                 // we set the lane swap bit. Lane swap attribute is a single
                 // attribute per PEC, so once the lane swap is set for one lane
                 // group it will be set for the whole PEC.
-                for(size_t laneGroup=0;
+                for(size_t laneGroup = 0;
                     laneGroup <
-                        (sizeof(bifurcatedSwap)/sizeof(effectiveLaneSwap));
+                      (sizeof(laneSwapNonBifurcated)/sizeof(effectiveLaneSwap));
                     ++laneGroup)
                 {
                     // If lanes are used and swap not yet set, then set it
                     if((effectiveLaneMask[laneGroup]) && (!effectiveLaneSwap))
                     {
-                        effectiveLaneSwap = bifurcatedSwap[laneGroup];
+                        effectiveLaneSwap = laneSwapNonBifurcated;
                         break;
                     }
                 }
-            }
+
+#ifdef DYNAMIC_BIFURCATION
+                TARGETING::ATTR_PEC_PCIE_LANE_MASK_BIFURCATED_type
+                  laneMaskBifurcated = {0};
+                assert(l_pec->tryGetAttr<
+                       TARGETING::ATTR_PEC_PCIE_LANE_MASK_BIFURCATED>(
+                       laneMaskBifurcated),"Failed to get "
+                       "ATTR_PEC_PCIE_LANE_MASK_BIFURCATED attribute");
+
+                TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_BIFURCATED_type
+                  laneReversalBifurcated = {0};
+                assert(l_pec->tryGetAttr<
+                       TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_BIFURCATED>(
+                       laneReversalBifurcated),"Failed to get "
+                       "ATTR_PEC_PCIE_IOP_REVERSAL_BIFURCATED attribute");
+
+                TARGETING::ATTR_PEC_PCIE_IOP_SWAP_BIFURCATED_type
+                  bifurcatedSwap = {0};
+                assert(l_pec->tryGetAttr<
+                       TARGETING::ATTR_PEC_PCIE_IOP_SWAP_BIFURCATED>(
+                       bifurcatedSwap),"Failed to get "
+                       "ATTR_PEC_PCIE_IOP_SWAP_BIFURCATED attribute");
+
+                // Apply any IOP bifurcation settings
+                for(BifurcatedIopsContainer::const_iterator iopItr =
+                    iopList.begin(); iopItr != iopList.end();
+                    ++iopItr)
+                {
+                    BifurcatedIopsContainer::const_reference iop = *iopItr;
+                    memcpy(
+                           &effectiveLaneReversal[0],
+                           &laneReversalBifurcated[0],
+                           sizeof(effectiveLaneReversal)/1);
+
+                    memcpy(
+                           &effectiveLaneMask[0],
+                           &laneMaskBifurcated[0],
+                           sizeof(effectiveLaneMask)/1);
+
+                    // For every lane group of a PEC we need to see if
+                    // the lane swap bit has been set. If the lane is
+                    // used, and the bit is not set we set the lane swap
+                    // bit. Lane swap attribute is a single attribute per
+                    // PEC, so once the lane swap is set for one lane
+                    // group it will be set for the whole PEC.
+                    for(size_t laneGroup=0;
+                        laneGroup <
+                          (sizeof(bifurcatedSwap)/sizeof(effectiveLaneSwap));
+                        ++laneGroup)
+                    {
+                        // If lanes are used and swap not yet set, then set it
+                        if((effectiveLaneMask[laneGroup]) &&
+                           (!effectiveLaneSwap))
+                        {
+                            effectiveLaneSwap = bifurcatedSwap[laneGroup];
+                            break;
+                        }
+                    }
+                }
 #endif
+                l_pec->setAttr<
+                  TARGETING::ATTR_PROC_PCIE_LANE_MASK>(effectiveLaneMask);
 
-            l_pec->setAttr<
-                TARGETING::ATTR_PROC_PCIE_LANE_MASK>(effectiveLaneMask);
+                l_pec->setAttr<
+                  TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL>(effectiveLaneReversal);
 
-            l_pec->setAttr<
-                TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL>(effectiveLaneReversal);
+                l_pec->setAttr<
+                  TARGETING::ATTR_PROC_PCIE_IOP_SWAP>(effectiveLaneSwap);
+            }
+            else
+            {
+                assert(l_pec->tryGetAttr<
+                       TARGETING::ATTR_PROC_PCIE_LANE_MASK>(effectiveLaneMask),
+                       "Failed to get ATTR_PROC_PCIE_LANE_MASK attribute");
 
-            l_pec->setAttr<
-                TARGETING::ATTR_PROC_PCIE_IOP_SWAP>(effectiveLaneSwap);
+                assert(l_pec->tryGetAttr<
+                       TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL>
+                       (effectiveLaneReversal),
+                       "Failed to get ATTR_PEC_PCIE_IOP_REVERSAL attribute");
+
+                assert(l_pec->tryGetAttr<
+                       TARGETING::ATTR_PROC_PCIE_IOP_SWAP>(effectiveLaneSwap),
+                       "Failed to get ATTR_PROC_PCIE_IOP_SWAP attribute");
+            }
 
             TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type pecPhbActiveMask = 0;
             TARGETING::ATTR_PROC_PCIE_IOP_CONFIG_type iopConfig = 0;
+            TARGETING::ATTR_PROC_PCIE_IOVALID_ENABLE_type ioValid = 0;
+            TARGETING::ATTR_PROC_PCIE_REFCLOCK_ENABLE_type refEnable = 0;
+            TARGETING::ATTR_PROC_PCIE_PCS_SYSTEM_CNTL_type macCntl = 0;
 
             laneConfigRow effectiveConfig =
                   {{LANE_WIDTH_NC,
                    LANE_WIDTH_NC,
                    LANE_WIDTH_NC,
                    LANE_WIDTH_NC},
-                    0x00,PHB_MASK_NA};
+                    0x00,PHB_MASK_NA,
+                    PHB_X16_MAC_MAP,
+                    0x00,
+                   };
 
             // Transform effective config to match lane config table format
             for(size_t laneGroup = 0;
@@ -569,15 +604,14 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
             if(laneConfigItr != pLaneConfigTableEnd)
             {
                 iopConfig = laneConfigItr->laneConfig;
+                ioValid = laneConfigItr->iovalid;
+                refEnable = 0x1;
+                macCntl = laneConfigItr->phb_to_pcieMAC;
                 pecPhbActiveMask = laneConfigItr->phbActive;
                 // Disable applicable PHBs
                 pecPhbActiveMask &= (~disabledPhbs);
                 // Add the PEC phb mask to the overall Proc PHB mask
                 procPhbActiveMask |= pecPhbActiveMask;
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "MATT TRACE PEC phb active mask = 0x%02X. "
-                    "PROC phb active mask = 0x%02X.",
-                    pecPhbActiveMask, procPhbActiveMask);
             }
             else
             {
@@ -634,6 +668,14 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
             procPhbActiveMask |= pecPhbActiveMask;
             l_pec->setAttr<
                 TARGETING::ATTR_PROC_PCIE_IOP_CONFIG>(iopConfig);
+            l_pec->setAttr<
+                  TARGETING::ATTR_PROC_PCIE_REFCLOCK_ENABLE>(refEnable);
+            l_pec->setAttr<
+                  TARGETING::ATTR_PROC_PCIE_PCS_SYSTEM_CNTL>(macCntl);
+            //TODO: RTC 167302 - Remove below setting after PHB targets in
+            // OpenPower XML files
+            l_pec->setAttr<
+                  TARGETING::ATTR_PROC_PCIE_IOVALID_ENABLE>(ioValid);
 
         }// PEC loop
 

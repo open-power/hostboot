@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,6 +92,8 @@ struct laneConfigRow
     // PHB4 = 0x08
     // PHB5 = 0x04
     uint8_t phbActive;
+    uint16_t phb_to_pcieMAC;
+    uint8_t iovalid;
 };
 
 /**
@@ -115,6 +117,16 @@ enum LaneMask
     LANE_MASK_X8_GRP1 = 0x00FF,
     LANE_MASK_X4_GRP0 = 0x00F0,
     LANE_MASK_X4_GRP1 = 0x000F,
+};
+
+/**
+ *  @brief Enumeration of PHB to PCI MAC mappings
+ */
+enum PhbToMAC
+{
+    PHB_X16_MAC_MAP      = 0x0000,
+    PHB_X8_X8_MAC_MAP    = 0x0050,
+    PHB_X8_X4_X4_MAC_MAP = 0x0090,
 };
 
 /**

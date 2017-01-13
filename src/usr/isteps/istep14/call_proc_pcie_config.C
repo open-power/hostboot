@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,7 @@
 #include <errl/errludtarget.H>
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
+#include <initservice/initserviceif.H>
 
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
@@ -75,64 +76,71 @@ bool compareChipUnits(TARGETING::Target *l_t1,
 *******************************************************************/
 void setup_pcie_iovalid_enable(const TARGETING::Target * i_procTarget)
 {
-    // Get list of PEC chiplets downstream from the given proc chip
-    TARGETING::TargetHandleList l_pecList;
-
-    getChildAffinityTargetsByState( l_pecList,
-                          i_procTarget,
-                          TARGETING::CLASS_NA,
-                          TARGETING::TYPE_PEC,
-                          TARGETING::UTIL_FILTER_ALL);
-
-    for (auto l_pecTarget : l_pecList)
+    //Only do this on FSP based systems, until the OpenPOWER
+    //XML supports Phb targets
+    if (INITSERVICE::spBaseServicesEnabled())
     {
-        // Get list of PHB chiplets downstream from the given PEC chiplet
-        TARGETING::TargetHandleList l_phbList;
+        // Get list of PEC chiplets downstream from the given proc chip
+        TARGETING::TargetHandleList l_pecList;
 
-        getChildAffinityTargetsByState( l_phbList,
-                          const_cast<TARGETING::Target*>(l_pecTarget),
-                          TARGETING::CLASS_NA,
-                          TARGETING::TYPE_PHB,
-                          TARGETING::UTIL_FILTER_ALL);
+        getChildAffinityTargetsByState( l_pecList,
+                                        i_procTarget,
+                                        TARGETING::CLASS_NA,
+                                        TARGETING::TYPE_PEC,
+                                        TARGETING::UTIL_FILTER_ALL);
 
-
-        // default to all invalid
-        ATTR_PROC_PCIE_IOVALID_ENABLE_type l_iovalid = 0;
-
-        // arrange phb targets from largest to smallest based on unit
-        // ex.  PHB5, PHB4, PHB3
-        std::sort(l_phbList.begin(),l_phbList.end(),compareChipUnits);
-        for(uint32_t k = 0; k<l_phbList.size(); ++k)
+        for (auto l_pecTarget : l_pecList)
         {
-            const fapi2::Target<fapi2::TARGET_TYPE_PHB>
-                l_fapi_phb_target(l_phbList[k]);
+            // Get list of PHB chiplets downstream from the given PEC chiplet
+            TARGETING::TargetHandleList l_phbList;
 
-            if(l_fapi_phb_target.isFunctional())
-            {
-                TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "PHB%d functional",
-                    (l_phbList[k])->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+            getChildAffinityTargetsByState( l_phbList,
+                       const_cast<TARGETING::Target*>(l_pecTarget),
+                       TARGETING::CLASS_NA,
+                       TARGETING::TYPE_PHB,
+                       TARGETING::UTIL_FILTER_ALL);
 
-                // filled in bitwise,
-                // largest PHB unit on the right to smallest leftword
-                // ex. l_iovalid = 0b00000110 : PHB3, PHB4 functional, PHB5 not
-                l_iovalid |= (1<<k);
-            }
-            else
+
+            // default to all invalid
+            ATTR_PROC_PCIE_IOVALID_ENABLE_type l_iovalid = 0;
+
+            // arrange phb targets from largest to smallest based on unit
+            // ex.  PHB5, PHB4, PHB3
+            std::sort(l_phbList.begin(),l_phbList.end(),compareChipUnits);
+            for(uint32_t k = 0; k<l_phbList.size(); ++k)
             {
-                TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "PHB%d not functional",
-                    (l_phbList[k])->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                const fapi2::Target<fapi2::TARGET_TYPE_PHB>
+                  l_fapi_phb_target(l_phbList[k]);
+
+                if(l_fapi_phb_target.isFunctional())
+                {
+                    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "PHB%d functional",
+                          (l_phbList[k])->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+
+                    // filled in bitwise,
+                    // largest PHB unit on the right to smallest leftword
+                    // ex. l_iovalid = 0b00000110 : PHB3, PHB4 functional,
+                    //                 PHB5 not
+                    l_iovalid |= (1<<k);
+                }
+                else
+                {
+                    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "PHB%d not functional",
+                          (l_phbList[k])->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                }
             }
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                     "PROC %.8X PEC%d -> ATTR_PROC_PCIE_IOVALID_ENABLE: 0x%02X",
+                     TARGETING::get_huid(i_procTarget),
+                     l_pecTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>(),
+                     l_iovalid);
+
+            l_pecTarget->setAttr
+                  <TARGETING::ATTR_PROC_PCIE_IOVALID_ENABLE>(l_iovalid);
         }
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "PROC %.8X PEC%d -> ATTR_PROC_PCIE_IOVALID_ENABLE: 0x%02X",
-                TARGETING::get_huid(i_procTarget),
-                l_pecTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>(),
-                l_iovalid);
-
-        l_pecTarget->setAttr<TARGETING::ATTR_PROC_PCIE_IOVALID_ENABLE>(l_iovalid);
     }
 }
 
