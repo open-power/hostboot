@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -803,7 +803,7 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
     //Add some additional FFDC based on the specific operation
     if( l_err )
     {
-        addScomFailFFDC( l_err, i_target, i_addr );
+        //TODO for P9 RTC 167311 addScomFailFFDC( l_err, i_target, i_addr );
     }
 
     return l_err;
