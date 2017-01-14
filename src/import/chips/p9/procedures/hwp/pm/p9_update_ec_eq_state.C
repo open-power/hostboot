@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,6 +133,8 @@ static const uint8_t BROADCAST_GROUP                = 7;
 fapi2::ReturnCode p9_update_ec_eq_state(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
+    fapi2::buffer<uint64_t> l_data64 = 0;
+
     FAPI_IMP("> p9_update_ec_eq_state");
 
     FAPI_TRY(update_ec_config(i_target),
@@ -140,6 +142,20 @@ fapi2::ReturnCode p9_update_ec_eq_state(
 
     FAPI_TRY(update_eq_config(i_target),
              "Error update_cache_config detected");
+
+
+    //If this is NOT the master processor then need to set
+    //the default value the OCC Quad Status Status Register
+    //As the SBE doesn't do this on the slave chips
+    FAPI_TRY(fapi2::getScom(i_target, PU_OCB_OCI_QSSR_SCOM, l_data64));
+
+    if(l_data64() == 0x0)
+    {
+        l_data64.setBit<0, 12>();       // L2 Stopped
+        l_data64.setBit<14, 6>();      // Quad Stopped
+        FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_QSSR_SCOM2, l_data64));
+    }
+
 
 fapi_try_exit:
     FAPI_INF("< p9_update_ec_eq_state");
