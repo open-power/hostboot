@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -200,6 +200,15 @@ void setChipletGardsOnProc(TARGETING::Target * i_procTarget);
  *
  */
 void calculateEffectiveEC();
+
+
+/**
+ * @brief Mark any MCA units that are present but have a disabled port as
+ *        non-functional
+ *
+ * @return error log handle
+ */
+errlHndl_t markDisabledMcas();
 
 };   // end namespace
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -262,6 +262,37 @@ errlHndl_t platReadPR(const TARGETING::TargetHandle_t &i_target,
 
 // constants the platReadPR will use for looking at the VPD data
 const uint32_t VPD_VINI_PR_DATA_LENGTH      = 8; //@deprecrated
+
+
+/**
+ * @brief platform specific code to determine the Lx vector of the input
+ *  target. The platform specific code is responsible for returning the
+ *  vector. The caller is responsible for allocating and de-allocating the
+ *  space.
+ *
+ * @param[in]  i_proc      processor target to read the Lx keyword from
+ * @param[in]  i_mca       MCA target indicating which Lx keyword to read
+ * @param[out] o_lxData    pointer to area that will hold the Lx keyword
+ *                          read from VPD; must be malloc'ed by the caller,
+ *                          and must be VPD_CRP0_LX_DATA_LENGTH in size.
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error
+ *                          NULL if no errors;
+ */
+errlHndl_t platReadLx(const TARGETING::TargetHandle_t &i_proc,
+                      const TARGETING::TargetHandle_t &i_mca,
+                      void *o_lxData);
+
+// constants the platReadLx will use for looking at the VPD data
+const uint32_t VPD_CRP0_LX_HDR_LENGTH       = 1;
+const uint32_t VPD_CRP0_LX_DATA_LENGTH      = 256;
+
+const uint32_t VPD_CRP0_LX_FREQ_INDEP_INDEX = 8;
+const uint32_t VPD_CRP0_LX_PORT_DISABLED    = 0;
+
+const uint8_t  VPD_CRP0_LX_MIN_X            = 1;
+const uint8_t  VPD_CRP0_LX_MAX_X            = 8;
+
 
 /**
  * @brief platform specific code to read the Field Core Override
