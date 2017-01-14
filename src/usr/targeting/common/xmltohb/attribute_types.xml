@@ -12595,7 +12595,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>PROC_PCIE_REFCLOCK_ENABLE</id><!-- @deprecated -->
+    <id>PROC_PCIE_REFCLOCK_ENABLE</id>
     <description>PCIE refclock enable valid mask
       PCIE refclock enable valid mask
       creator: platform
