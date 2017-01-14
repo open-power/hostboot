@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -75,6 +75,7 @@ OBJS += p9_mpipl_chip_cleanup.o
 
 # include ${PROCEDURE_PATH}/hwp/memory/p9_mss_memdiag.mk
 # include ${PROCEDURE_PATH}/hwp/memory/p9_mss_thermal_init.mk
+include ${PROCEDURE_PATH}/hwp/nest/p9_throttle_sync.mk
 include ${PROCEDURE_PATH}/hwp/memory/p9_mss_power_cleanup.mk
 include ${ROOTPATH}/config.mk
 
