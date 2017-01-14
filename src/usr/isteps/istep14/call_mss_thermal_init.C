@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
 #include    <p9_mss_thermal_init.H>
+#include    <p9_throttle_sync.H>
 
 
 using   namespace   ISTEP;
@@ -50,14 +51,10 @@ namespace ISTEP_14
 void* call_mss_thermal_init (void *io_pArgs)
 {
     IStepError  l_StepError;
-
+    errlHndl_t  l_errl  =   nullptr;
 //@TODO RTC:144076 L1 HWPs for Centaur+Cumulus
 #if 0
     // -- Cumulus only ---
-    errlHndl_t  l_errl  =   NULL;
-
-    do
-    {
         // Get all Centaur targets
         TARGETING::TargetHandleList l_memBufTargetList;
         getAllChiplets(l_memBufTargetList, TYPE_MCBIST );
@@ -115,37 +112,36 @@ void* call_mss_thermal_init (void *io_pArgs)
         {
             break;
         }
-
+        #endif
+    do
+    {
         // Run proc throttle sync
         // Get all functional proc chip targets
-        TARGETING::TargetHandleList l_cpuTargetList;
-        getAllChips(l_cpuTargetList, TYPE_PROC);
+        //Use targeting code to get a list of all processors
+        TARGETING::TargetHandleList l_procChips;
+        getAllChips( l_procChips, TARGETING::TYPE_PROC   );
 
-        for (TARGETING::TargetHandleList::const_iterator
-             l_cpuIter = l_cpuTargetList.begin();
-             l_cpuIter != l_cpuTargetList.end();
-             ++l_cpuIter)
+        for (const auto & l_procChip: l_procChips)
         {
-            const TARGETING::Target* l_pTarget = *l_cpuIter;
+            //Convert the TARGETING::Target into a fapi2::Target by passing
+            //l_procChip into the fapi2::Target constructor
+            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2CpuTarget((l_procChip));
 
-            //fapi::Target l_fapiproc_target( TARGET_TYPE_PROC_CHIP,
-            //     (const_cast<TARGETING::Target*>(l_pTarget)));
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Running p9_throttle_sync HWP on "
+                   "target HUID %.8X", TARGETING::get_huid(l_procChip));
 
-            //TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            //        "Running proc_throttle_sync HWP on "
-            //        "target HUID %.8X", TARGETING::get_huid(l_pTarget));
-
-            // Call proc_throttle_sync
-            //FAPI_INVOKE_HWP( l_errl, proc_throttle_sync, l_fapiproc_target );
+            // Call p9_throttle_sync
+            FAPI_INVOKE_HWP( l_errl, p9_throttle_sync, l_fapi2CpuTarget );
 
             if (l_errl)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: proc_throttle_sync HWP returns error",
+                          "ERROR 0x%.8X: p9_throttle_sync HWP returns error",
                           l_errl->reasonCode());
 
                 // Capture the target data in the elog
-                ErrlUserDetailsTarget(l_pTarget).addToLog(l_errl);
+                ErrlUserDetailsTarget(l_procChip).addToLog(l_errl);
 
                 // Create IStep error log and cross reference
                 //  to error that occurred
@@ -159,7 +155,7 @@ void* call_mss_thermal_init (void *io_pArgs)
             else
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS :  proc_throttle_sync HWP( )" );
+                           "SUCCESS :  p9_throttle_sync HWP( )" );
             }
         }
 
@@ -171,7 +167,7 @@ void* call_mss_thermal_init (void *io_pArgs)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "SUCCESS : call_mss_thermal_init" );
     }
-#endif
+
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
