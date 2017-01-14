@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@ namespace HWAS
         MOD_HOST_DISCOVER_TARGETS = 0x80,
         MOD_PLAT_DECONFIG_GARD    = 0x81,
         MOD_PLAT_READIDEC         = 0x82,
+        MOD_PLAT_READLX           = 0x83,
     };
 
     enum HwasPlatReasonCode
@@ -47,6 +48,7 @@ namespace HWAS
         RC_TARGET_NOT_GARDABLE              = HWAS_COMP_ID | 0x81,
         RC_GARD_REPOSITORY_FULL             = HWAS_COMP_ID | 0x82,
         RC_BAD_CHIPID                       = HWAS_COMP_ID | 0x83,
+        RC_BAD_LX                           = HWAS_COMP_ID | 0x84,
     };
 };
 

@@ -1627,6 +1627,45 @@ public:
 
         TS_INFO( "testHWASpervStates exit" );
     }
+
+    /**
+     * @brief   test platReadLx
+     */
+    void testHWASplatReadLx()
+    {
+        using namespace TARGETING;
+
+        TS_INFO( "testHWASplatReadLx entry" );
+
+        // call platReadLx with target that isn't in the VPD
+        errlHndl_t l_errl;
+
+        Target* pSys;
+        targetService().getTopLevelTarget(pSys);
+
+        TARGETING::TargetHandleList l_procList;
+        getAllChips(l_procList, TYPE_PROC);
+
+        TargetHandleList l_mcaList;
+        getChildChiplets(l_mcaList, *(l_procList.begin()), TYPE_MCA, true);
+
+        uint8_t lxData[HWAS::VPD_CRP0_LX_DATA_LENGTH];
+
+        l_errl = HWAS::platReadLx(pSys, *(l_mcaList.begin()), lxData);
+
+        if (l_errl)
+        {
+            // error log is expected case, delete it
+            delete l_errl;
+        }
+        else
+        {
+            TS_FAIL("testHWASplatReadLx>"
+                    "No error from platReadLx(pSys, *(l_mcaList.begin()).");
+        }
+
+        TS_INFO( "testHWASplatReadLx exit" );
+    }
 };
 
 #endif //

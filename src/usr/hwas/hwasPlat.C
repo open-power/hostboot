@@ -303,6 +303,82 @@ errlHndl_t platReadPR(const TargetHandle_t &i_target,
 } // platReadPR
 
 //******************************************************************************
+// platReadLx function
+//******************************************************************************
+errlHndl_t platReadLx(const TargetHandle_t &i_proc,
+                      const TargetHandle_t &i_mca,
+                      void *o_lxData)
+{
+    errlHndl_t errl = nullptr;
+    uint8_t l_chip_unit = i_mca->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+    uint8_t l_x = VPD_CRP0_LX_MIN_X + l_chip_unit;
+
+    HWAS_DBG( "i_proc %.8X, i_mca %.8X, Lx = L%1d",
+              i_proc->getAttr<ATTR_HUID>(),
+              i_mca->getAttr<ATTR_HUID>(),
+              l_x);
+
+    //Look for an invalid x value
+    if( l_x > VPD_CRP0_LX_MAX_X)
+    {
+        HWAS_ERR("Invalid Lx with x=%1d for MCA %.8X on %.8X",
+                 l_x,
+                 i_mca->getAttr<ATTR_HUID>(),
+                 i_proc->getAttr<ATTR_HUID>());
+        /*@
+         * @errortype    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid     HWAS::MOD_PLAT_READLX
+         * @reasoncode   HWAS::RC_BAD_LX
+         * @userdata1[0:31]     Target proc HUID
+         * @userdata1[32:63]    Target MCA HUID
+         * @userdata2    Value of x for Lx keyword
+         * @devdesc      platReadLx> Invalid Lx keyword
+         */
+        errl = new ERRORLOG::ErrlEntry(
+                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       HWAS::MOD_PLAT_READLX,
+                                       HWAS::RC_BAD_LX,
+                                       TWO_UINT32_TO_UINT64(
+                                           TARGETING::get_huid(i_proc),
+                                           TARGETING::get_huid(i_mca)),
+                                       l_x);
+
+        // make code the highest callout
+        errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                  HWAS::SRCI_PRIORITY_HIGH);
+    }
+
+    if (errl == nullptr)
+    {   // no error, so we got a valid chip unit value back
+        // call deviceRead() to find the Lx record
+        uint8_t lxRaw[VPD_CRP0_LX_HDR_LENGTH + VPD_CRP0_LX_DATA_LENGTH];
+        size_t lxSize = sizeof(lxRaw);
+
+        errl = deviceRead(i_proc, lxRaw, lxSize,
+                          DEVICE_MVPD_ADDRESS(MVPD::CRP0,
+                                              MVPD::L1 + l_chip_unit));
+
+        if (errl != nullptr)
+        {   // trace the error condition
+            HWAS_INF( "i_proc %.8X, i_mca %.8X - failed L%1d read",
+                      i_proc->getAttr<ATTR_HUID>(),
+                      i_mca->getAttr<ATTR_HUID>(),
+                      l_x);
+        }
+        else
+        {
+            // skip past the header
+            void *lxData = static_cast<void *>(&lxRaw[0]);
+            HWAS_DBG_BIN("Lx record", lxData, VPD_CRP0_LX_DATA_LENGTH);
+            // copy the data back into the caller's buffer
+            memcpy(o_lxData, lxData, VPD_CRP0_LX_DATA_LENGTH);
+        }
+    }
+
+    return errl;
+} // platReadLx
+
+//******************************************************************************
 // platGetFCO function
 //******************************************************************************
 errlHndl_t platGetFCO(const TargetHandle_t &i_node,
