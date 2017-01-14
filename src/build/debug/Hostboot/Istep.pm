@@ -123,7 +123,7 @@ my  $hbCount =   $ENV{'HB_COUNT'};
 if ( !defined( $hbCount ) || ( $hbCount eq "" ) )
 {
     ##  set default
-    $hbCount    =   0xff;     ##  default that should work for all env
+    $hbCount    =   0x2ff;     ##  default that should work for all env
 }
 
 ## init global variables
