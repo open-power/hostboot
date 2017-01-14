@@ -55,9 +55,11 @@
 ///
 /// @brief Configure the attributes for each controller
 /// @param[in] i_target the controller (e.g., MCS)
+/// @param[in] i_decode_spd_only options to set VPD and SPD attrs only
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target )
+fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+                                     const bool i_decode_spd_only )
 {
     fapi2::ReturnCode l_rc;
     std::map<uint32_t, std::shared_ptr<mss::spd::decoder> > l_factory_caches;
@@ -72,8 +74,13 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
     // the rank information and for that we need the SPD caches (which we get when we populate the cache.)
     // However, we need to do the VPD decode before the others so that they might
     // be able to use VPD information to make decisions about setting up eff attributes.
-    FAPI_TRY( l_eff_config.decode_vpd(i_target),
-              "Unable to decode VPD for %s", mss::c_str(i_target) );
+    if( !i_decode_spd_only )
+    {
+        // Always set VPD attributes unless we enable the SPD_ONLY flag
+        // Enables skipping VPD decoder when a valid VPD template isn't available
+        FAPI_TRY( l_eff_config.decode_vpd(i_target),
+                  "Unable to decode VPD for %s", mss::c_str(i_target) );
+    }
 
     for( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
     {
@@ -81,6 +88,7 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         uint8_t l_type = 0;
         uint8_t l_gen = 0;
         uint64_t l_kind = 0;
+
         // TODO RTC:152390 Create function to do map checking on cached values
         // Find decoder factory for this dimm position
         auto l_it = l_factory_caches.find(l_dimm_pos);
@@ -92,9 +100,12 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
         l_eff_config.iv_pDecoder = l_it->second;
 
+        // DRAM Gen and DIMM type not needed here since set in spd_factory...
+        // but it doesn't hurt to do it twice
         FAPI_TRY( l_eff_config.dimm_type(l_dimm, l_it->second->iv_spd_data) );
-        FAPI_TRY( l_eff_config.dram_mfg_id(l_dimm) );
         FAPI_TRY( l_eff_config.dram_gen(l_dimm, l_it->second->iv_spd_data) );
+
+        FAPI_TRY( l_eff_config.dram_mfg_id(l_dimm) );
         FAPI_TRY( l_eff_config.dram_width(l_dimm) );
         FAPI_TRY( l_eff_config.dram_density(l_dimm) );
         FAPI_TRY( l_eff_config.ranks_per_dimm(l_dimm) );
@@ -214,6 +225,9 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         };
     }// dimm
 
+    // TODO RTC:160060 Clean up hard coded values at bottom of eff_config
+    // Don't set these attributes if we only want to set VPD attributes
+    // This will be cleaner once we resolve attributes below
     {
         uint16_t l_cal_step[mss::PORTS_PER_MCS] = {0xFAC0, 0xFAC0};
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_CAL_STEP_ENABLE, i_target, l_cal_step) );

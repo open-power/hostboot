@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,17 +38,20 @@
 
 #include <fapi2.H>
 
-typedef fapi2::ReturnCode (*p9_mss_eff_config_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCS>&);
+typedef fapi2::ReturnCode (*p9_mss_eff_config_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCS>&,
+        const bool i_decode_spd_only);
 
 extern "C"
 {
 
-///
-/// @brief Configure the attributes for each controller
-/// @param[in] i_target the controller (e.g., MCS)
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-    fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target );
+    ///
+    /// @brief Configure the attributes for each controller
+    /// @param[in] i_target the controller (e.g., MCS)
+    /// @param[in] i_decode_spd_only options to set VPD and SPD attrs only
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+                                         const bool i_decode_spd_only = false );
 
 }
 
