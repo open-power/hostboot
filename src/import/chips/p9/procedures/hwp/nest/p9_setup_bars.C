@@ -478,6 +478,10 @@ p9_setup_bars_npu(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 {
     FAPI_DBG("Start");
 
+    uint8_t l_is_dd1 = 0x1ull;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_DD1_ADDR, i_target, l_is_dd1),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_DD1_ADDR)");
+
     // PHY0
     {
         fapi2::ATTR_PROC_NPU_PHY0_BAR_ENABLE_Type l_phy0_enable;
@@ -497,7 +501,7 @@ p9_setup_bars_npu(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                         .set_BAR_OFFSET(l_phy0_offset)
                         .set_BAR_OFFSET_MASK(P9_SETUP_BARS_OFFSET_MASK_2_MB)
                         .set_BAR_OVERLAP(l_phy0_offset & P9_SETUP_BARS_OFFSET_MASK_2_MB),
-                        "NPU PHY0 BAR offset attribute is not aligned to HW implementation");
+                        "NPU PHY0 BAR offset attribute is not aligned to HW implementation for DD1 level");
 
             l_phy0_bar &= NPU_BAR_BASE_ADDR_MASK;
             l_phy0_bar += l_phy0_offset;
@@ -506,8 +510,16 @@ p9_setup_bars_npu(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
             for (uint8_t ll = 0; ll < NPU_NUM_BAR_SHADOWS; ll++)
             {
-                FAPI_TRY(fapi2::putScom(i_target, NPU_PHY0_BAR_REGS[ll], l_phy0_bar),
-                         "Error from putScom (0x08X)", NPU_PHY0_BAR_REGS[ll]);
+                if (l_is_dd1 == 0)
+                {
+                    FAPI_TRY(fapi2::putScom(i_target, NPU_PHY0_BAR_REGS_DD2[ll], l_phy0_bar),
+                             "Error from putScom (0x08X)", NPU_PHY0_BAR_REGS_DD2[ll]);
+                }
+                else
+                {
+                    FAPI_TRY(fapi2::putScom(i_target, NPU_PHY0_BAR_REGS[ll], l_phy0_bar),
+                             "Error from putScom (0x08X)", NPU_PHY0_BAR_REGS[ll]);
+                }
             }
         }
     }
@@ -540,8 +552,17 @@ p9_setup_bars_npu(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
             for (uint8_t ll = 0; ll < NPU_NUM_BAR_SHADOWS; ll++)
             {
-                FAPI_TRY(fapi2::putScom(i_target, NPU_PHY1_BAR_REGS[ll], l_phy1_bar),
-                         "Error from putScom (0x08X)", NPU_PHY1_BAR_REGS[ll]);
+                if (l_is_dd1 == 0)
+                {
+                    FAPI_TRY(fapi2::putScom(i_target, NPU_PHY1_BAR_REGS_DD2[ll], l_phy1_bar),
+                             "Error from putScom (0x08X)", NPU_PHY1_BAR_REGS_DD2[ll]);
+                }
+                else
+                {
+
+                    FAPI_TRY(fapi2::putScom(i_target, NPU_PHY1_BAR_REGS[ll], l_phy1_bar),
+                             "Error from putScom (0x08X)", NPU_PHY1_BAR_REGS[ll]);
+                }
             }
         }
     }
@@ -565,7 +586,7 @@ p9_setup_bars_npu(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                         .set_BAR_OFFSET(l_mmio_offset)
                         .set_BAR_OFFSET_MASK(P9_SETUP_BARS_OFFSET_MASK_16_MB)
                         .set_BAR_OVERLAP(l_mmio_offset & P9_SETUP_BARS_OFFSET_MASK_2_MB),
-                        "NPU MMIO BAR offset attribute is not aligned to HW implementation");
+                        "NPU MMIO BAR offset attribute is not aligned to HW implementation for DD1 level");
 
             l_mmio_bar &= NPU_BAR_BASE_ADDR_MASK;
             l_mmio_bar += l_mmio_offset;
@@ -574,8 +595,17 @@ p9_setup_bars_npu(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
             for (uint8_t ll = 0; ll < NPU_NUM_BAR_SHADOWS; ll++)
             {
-                FAPI_TRY(fapi2::putScom(i_target, NPU_MMIO_BAR_REGS[ll], l_mmio_bar),
-                         "Error from putScom (0x08X)", NPU_MMIO_BAR_REGS[ll]);
+                if (l_is_dd1 == 0)
+                {
+                    FAPI_TRY(fapi2::putScom(i_target, NPU_MMIO_BAR_REGS_DD2[ll], l_mmio_bar),
+                             "Error from putScom (0x08X)", NPU_MMIO_BAR_REGS_DD2[ll]);
+                }
+                else
+                {
+
+                    FAPI_TRY(fapi2::putScom(i_target, NPU_MMIO_BAR_REGS[ll], l_mmio_bar),
+                             "Error from putScom (0x08X)", NPU_MMIO_BAR_REGS[ll]);
+                }
             }
         }
     }
