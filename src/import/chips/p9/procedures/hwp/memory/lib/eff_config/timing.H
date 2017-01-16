@@ -68,15 +68,15 @@ enum guard_band : uint16_t
     // when doing integer math, we add-in the inverse correction factor
     // Formula used for derivation:
     // Guardband = 1000 * (1000* correction_factor) - 1
-    INVERSE_DDR3_CORRECTION_FACTOR = 989,
-    INVERSE_DDR4_CORRECTION_FACTOR = 974,
+    INVERSE_DDR3_CORRECTION_FACTOR = 989, ///< DDR3 correction factor
+    INVERSE_DDR4_CORRECTION_FACTOR = 974, ///< DDR4 correction factor
 };
 
-enum class refresh_rate : uint8_t
+enum refresh_rate : uint8_t
 {
-    REF1X = 1,
-    REF2X = 2,
-    REF4X = 4,
+    REF1X = 1, ///< Refresh rate 1X
+    REF2X = 2, ///< Refresh rate 2X
+    REF4X = 4, ///< Refresh rate 4X
 };
 
 namespace spd

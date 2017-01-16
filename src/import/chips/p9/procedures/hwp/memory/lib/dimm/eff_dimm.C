@@ -636,7 +636,7 @@ fapi2::ReturnCode eff_dimm::dram_trefi()
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL:
 
             FAPI_TRY( calc_trefi( mss::refresh_rate::REF1X,
-                                  iv_temp_refresh_range,
+                                  iv_refresh_rate_request,
                                   l_trefi_in_ps),
                       "Failed to calculate tREF1 for target %s", mss::c_str(iv_dimm) );
             break;
@@ -645,7 +645,7 @@ fapi2::ReturnCode eff_dimm::dram_trefi()
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_2X:
 
             FAPI_TRY( calc_trefi( mss::refresh_rate::REF2X,
-                                  iv_temp_refresh_range,
+                                  iv_refresh_rate_request,
                                   l_trefi_in_ps),
                       "Failed to calculate tREF2 for target %s", mss::c_str(iv_dimm) );
             break;
@@ -654,7 +654,7 @@ fapi2::ReturnCode eff_dimm::dram_trefi()
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_4X:
 
             FAPI_TRY( calc_trefi( mss::refresh_rate::REF4X,
-                                  iv_temp_refresh_range,
+                                  iv_refresh_rate_request,
                                   l_trefi_in_ps),
                       "Failed to calculate tREF4  for target %s", mss::c_str(iv_dimm) );
             break;
@@ -674,7 +674,9 @@ fapi2::ReturnCode eff_dimm::dram_trefi()
 
     {
         // Calculate refresh cycle time in nCK & set attribute
+        constexpr double PERCENT_ADJUST = 0.999;
         std::vector<uint16_t> l_mcs_attrs_trefi(PORTS_PER_MCS, 0);
+
         uint64_t l_trefi_in_nck  = 0;
 
         // Retrieve MCS attribute data
@@ -686,6 +688,16 @@ fapi2::ReturnCode eff_dimm::dram_trefi()
                                   INVERSE_DDR4_CORRECTION_FACTOR,
                                   l_trefi_in_nck),
                    "Error in calculating tREFI for target %s, with value of l_trefi_in_ps: %d", mss::c_str(iv_dimm), l_trefi_in_ps);
+
+        // Per Mike P., requested 99.9% of tREFI calculation to avoid any latency impact and violation of any
+        // refresh specification (across all number of ranks and frequencies) observed during lab tests.
+
+        FAPI_INF("For %s, adjusting tREFI calculation by 99.9%, calculated tREFI (nck): %lu, adjusted tREFI (nck): %lu,",
+                 mss::c_str(iv_dimm), l_trefi_in_nck, l_trefi_in_nck * PERCENT_ADJUST);
+
+        // The compiler does this under the covers but just to be explicit on intent:
+        // Floating point arithmetic and truncation of result saved to an unsigned integer
+        l_trefi_in_nck = static_cast<double>(l_trefi_in_nck * PERCENT_ADJUST);
 
         FAPI_INF("tCK (ps): %d, tREFI (ps): %d, tREFI (nck): %d",
                  iv_tCK_in_ps, l_trefi_in_ps, l_trefi_in_nck);
