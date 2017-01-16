@@ -386,6 +386,19 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_INVALID_REFRESH_RATE_REQUEST</rc>
+    <description>
+      Invalid refresh request rate received.
+      Possibly due to bad MRW setting for ATTR_MSS_MRW_REFRESH_RATE_REQUEST.
+    </description>
+    <ffdc>REFRESH_RATE_REQUEST</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_INVALID_FINE_REFRESH</rc>
     <description>
         Incorrect FINE Refresh Mode received
