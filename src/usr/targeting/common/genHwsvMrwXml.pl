@@ -1796,7 +1796,10 @@ foreach my $i (@{$i2cBus->{'i2c-device'}})
          'i2c_max_mem_size' => $max_mem_size,
          'i2c_chip_count' => $chip_count,
          'i2c_write_page_size' =>"0x80",
-         'i2c_write_cycle_time' => $cycle_time };
+         'i2c_write_cycle_time' => $cycle_time,
+         'i2c_instance_path' => $i->{'instance-path'},
+         'i2c_card_id' => $i->{'card-id'},
+         'i2c_part_type' => $i->{'part-type'} } ;
 
     if(( ($i->{'part-type'} eq 'hotplug-controller') &&
              ($i->{'part-id'} eq 'MAX5961')) ||
@@ -1813,6 +1816,18 @@ foreach my $i (@{$i2cBus->{'i2c-device'}})
              'i2c_slaveAddr'=>$i->{'address'},
              'i2c_instPath'=>$i->{'instance-path'}};
      }
+}
+
+# If proc has a TPM, cache the I2C device index
+my %tpmI2cIndex = ();
+for my $i ( 0 .. $#I2Cdevices )
+{
+    if($I2Cdevices[$i]{i2c_part_type} eq "tpm")
+    {
+        my $node=$I2Cdevices[$i]{i2cm_node};
+        my $position=$I2Cdevices[$i]{i2cm_pos};
+        $tpmI2cIndex{"n${node}p${position}"}=$i;
+    }
 }
 
 my $i2c_host_file = open_mrw_file($mrwdir, "${sysname}-host-i2c.xml");
@@ -1856,7 +1871,6 @@ foreach my $i (@{$i2cHost->{'host-i2c-connection'}})
 #   mba (to for membuf before it)
 #   L4
 #   (Repeat for remaining membuf)
-#
 
 # Sort the target array based on Target Type,Node,Position and Chip-Unit.
 my @SortedTargets = sort byTargetTypeNodePosChipunit @Targets;
@@ -1963,6 +1977,7 @@ my $hasProc = 0;
 my $hash_ax_buses;
 my $axBusesHuidInit = 0;
 
+my $tpmOrdinalId=0;
 for (my $curnode = 0; $curnode <= $MAXNODE; $curnode++)
 {
 
@@ -2184,6 +2199,13 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         # call to do any fsp per-proc targets (ie, occ, psi)
         do_plugin('fsp_proc_targets', $proc, $i, $proc_ordinal_id,
                     $STargets[$i][NODE_FIELD], $STargets[$i][POS_FIELD]);
+
+        if(exists $tpmI2cIndex{"n${node}p${proc}"})
+        {
+            generate_tpm($proc, $tpmOrdinalId);
+            ++$tpmOrdinalId;
+        }
+
     }
     elsif ($STargets[$i][NAME_FIELD] eq "ex")
     {
@@ -6302,6 +6324,87 @@ sub generate_centaur_dimm
                            $fapiPosHr);
         }
     }
+}
+
+sub generate_tpm
+{
+    my ($proc, $ordinalId) = @_;
+
+    # Get the index of the TPM i2c device within the i2Cdevices container
+    my $i=$tpmI2cIndex{"n${node}p${proc}"};
+
+    # Compute the TPM position; find i2c card name within i2c instance path
+    # and extract the instance, which equals the position
+    my $cardId = $I2Cdevices[$i]{i2c_card_id};
+    my $instancePath = $I2Cdevices[$i]{i2c_instance_path};
+    $instancePath =~ /$cardId-(\d+)/;
+    my $position = $1;
+
+    # Build the TPM_INFO attribute
+    my %tpmInfo = ();
+    $tpmInfo{tpmEnabled} = "1"; # Fixed, not in MRW
+    $tpmInfo{i2cMasterPath} = "physical:sys-0/node-${node}/proc-${proc}";
+    $tpmInfo{port} = "$I2Cdevices[$i]{i2c_port}";
+    $tpmInfo{devAddrLocality0} = "0x$I2Cdevices[$i]{i2c_devAddr}";
+    $tpmInfo{devAddrLocality4} = "0xA6"; # Fixed, not in MRW
+    $tpmInfo{engine} = "$I2Cdevices[$i]{i2c_engine}";
+    $tpmInfo{byteAddrOffset} = "0x01"; # Fixed, not in MRW
+
+    my $tpmAttr = "\n";
+    foreach my $field ( sort keys %tpmInfo )
+    {
+        $tpmAttr .=
+              "            <field>\n"
+            . "                <id>$field</id>\n"
+            . "                <value>$tpmInfo{$field}</value>\n"
+            . "            </field>\n";
+    }
+    $tpmAttr .= "        ";
+
+    # Compute the rest of the attributes
+    my $huidAttr = sprintf("0x%02X31%04X",${node},$position);
+    my $physPathAttr = "physical:sys-$sys/node-$node/tpm-$position";
+    my $affinityPathAttr = "affinity:sys-$sys/node-$node/tpm-$position";
+    my $ordinalIdAttr = "$ordinalId";
+    my $positionAttr = $position;
+    my $instancePathAttr = "$instancePath";
+    my $mruIdAttr = get_mruid($instancePath);
+
+    # Load the attributes into a hash and build the attribute output string
+    my %attrs = ();
+    $attrs{TPM_INFO}{VALUE}="$tpmAttr";
+    $attrs{HUID}{VALUE}="$huidAttr";
+    $attrs{PHYS_PATH}{VALUE}="$physPathAttr";
+    $attrs{AFFINITY_PATH}{VALUE}="$affinityPathAttr";
+    $attrs{ORDINAL_ID}{VALUE}="$ordinalIdAttr";
+    $attrs{POSITION}{VALUE}="$positionAttr";
+    $attrs{INSTANCE_PATH}{VALUE}="$instancePathAttr";
+    $attrs{INSTANCE_PATH}{TYPE}="compileAttribute";
+    $attrs{MRU_ID}{VALUE}="$mruIdAttr";
+
+    my $attrOutput = "";
+    foreach my $attr ( sort keys %attrs )
+    {
+        my $type = exists $attrs{$attr}{TYPE} ? $attrs{$attr}{TYPE} :
+            "attribute";
+        $attrOutput .=
+              "    <${type}>\n"
+            . "        <id>$attr</id>\n"
+            . "        <default>$attrs{$attr}{VALUE}</default>\n"
+            . "    </${type}>\n";
+    }
+
+    # Output the target
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}tpm$position</id>
+    <type>chip-tpm-cectpm</type>\n";
+    print "$attrOutput";
+
+    # call the fsp per-tpm attribute handler
+    do_plugin('fsp_tpm', $ordinalId);
+
+    print "\n</targetInstance>\n";
 }
 
 # Since each Centaur has only one dimm, it is assumed to be attached to port 0
