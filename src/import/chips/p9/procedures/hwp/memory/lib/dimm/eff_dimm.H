@@ -65,7 +65,7 @@ class eff_dimm
         // using attribute accessors
         // Could create getters & setters...
         uint8_t iv_refresh_mode;
-        uint8_t iv_temp_refresh_range;
+        uint8_t iv_refresh_rate_request;
 
         //Delete the default
         eff_dimm () = delete;
@@ -92,7 +92,7 @@ class eff_dimm
 
             FAPI_TRY( clock_period(iv_dimm, iv_tCK_in_ps), "Failed to calculate clock period (tCK)" );
 
-            FAPI_TRY( mss::mrw_temp_refresh_range(iv_temp_refresh_range), "Failed mrw_temp_refresh_range()" );
+            FAPI_TRY( mss::mrw_refresh_rate_request(iv_refresh_rate_request), "Failed mrw_temp_refresh_rate_request()" );
             FAPI_TRY( mss::mrw_fine_refresh_mode(iv_refresh_mode), "Failed mrw_fine_refresh_mode()" );
 
             FAPI_TRY( mss::freq(find_target<fapi2::TARGET_TYPE_MCBIST>(iv_dimm), iv_freq));
