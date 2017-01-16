@@ -1674,7 +1674,33 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
 
             mode.value = 0x0ull;
             mode.bit_rate_div = i_args.bit_rate_divisor;
-            mode.port_num = i_args.port;
+
+            //On P9 the mapping of I2C ports isn't logical
+            //in FSI mode
+            //  Engine 0, HB doesn't use, but port 0 == FSI 1
+            //            HB doesn't use, but port 1 == FSI 3
+            //            Port 2,3 are not connected
+            //  Engine 1, FSI ports == HB ports
+            //  Engine 2, Host only ports
+            //  Engine 3, port 0 = FSI 13
+            //            port 1 = FSI 14
+            //            port 2,3 are not connected
+            // @TODO RTC 167460 -- account for centaur and other
+            //        and this same mapping other places in I2C DD
+            if ( i_args.switches.useFsiI2C &&
+                 0 == i_args.engine)
+            {
+                mode.port_num = (i_args.port * 2) +1;
+            }
+            else if ( i_args.switches.useFsiI2C &&
+                 3 == i_args.engine)
+            {
+                mode.port_num = 13 + i_args.port;
+            }
+            else
+            {
+                mode.port_num = i_args.port;
+            }
 
 
             TRACUCOMP( g_trac_i2c,"i2cSetup(): set mode = 0x%lx", mode.value);
@@ -2544,10 +2570,21 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
                 // P9 engine 2 port 0 has a limitation where the diag mode
                 // cannot be used. -- skip it if the attribute state it
                 // should not be used
-                if (l_disable_diag_mode
-                                && (0 == port) && (2 == i_args.engine))
+                // This also applies to FSI mode for engine 0,1,2 ports 0..3
+                // as they directly map to FSI port 0..3 which have SBE
+                // security
+                if (l_disable_diag_mode)
                 {
-                    continue;
+                    if(((0 == port) && (2 == i_args.engine)) || //host
+                     ((i_args.switches.useFsiI2C) && (i_args.engine < 3))) //FSI
+                    {
+                        TRACFCOMP( g_trac_i2c,
+                                   "Not doing i2cForceResetAndUnlock() for"
+                                   "tgt=0x%X: e/p= %d/%d due to P9 diag mode"
+                                   "limitations", TARGETING::get_huid(i_target),
+                                   i_args.engine, port);
+                        continue;
+                    }
                 }
             }
 
