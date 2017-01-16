@@ -170,6 +170,8 @@ enum P9_HCD_MULTICAST_CONSTANTS
 enum P9_HCD_CLK_CTRL_CONSTANTS
 {
     CLK_STOP_CMD                             = BIT64(0),
+    CLK_STOP_CMD_SLAVE                       = BIT64(0) | BIT64(2),
+    CLK_STOP_CMD_MASTER                      = BIT64(0) | BIT64(3),
     CLK_START_CMD                            = BIT64(1),
     CLK_REGION_PERV                          = BIT64(4),
     CLK_REGION_ANEP                          = BIT64(10),
