@@ -67,13 +67,15 @@ fapi2::ReturnCode
 p9_hcd_cache_stopclocks(
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
     const p9hcd::P9_HCD_CLK_CTRL_CONSTANTS      i_select_regions,
-    const p9hcd::P9_HCD_EX_CTRL_CONSTANTS       i_select_ex)
+    const p9hcd::P9_HCD_EX_CTRL_CONSTANTS       i_select_ex,
+    const bool i_sync_stop_quad_clk)
 {
     FAPI_INF(">>p9_hcd_cache_stopclocks: regions[%016llx] ex[%d]",
              i_select_regions, i_select_ex);
     fapi2::ReturnCode                              l_rc;
     fapi2::buffer<uint64_t>                        l_data64;
     fapi2::buffer<uint64_t>                        l_temp64;
+    uint64_t                                       l_region_clock              = 0;
     uint64_t                                       l_l3mask_pscom              = 0;
     uint32_t                                       l_loops1ms                  = 0;
     uint32_t                                       l_scom_addr                 = 0;
@@ -193,7 +195,7 @@ p9_hcd_cache_stopclocks(
     // Stop L2 clocks
     // -------------------------------
 
-    if (i_select_ex)
+    if (i_select_ex && !i_sync_stop_quad_clk)
         FAPI_EXEC_HWP(fapi2::current_err,
                       p9_hcd_l2_stopclocks,
                       i_target, i_select_ex);
@@ -205,10 +207,33 @@ p9_hcd_cache_stopclocks(
     FAPI_DBG("Clear all SCAN_REGION_TYPE bits");
     FAPI_TRY(putScom(i_target, EQ_SCAN_REGION_TYPE, MASK_ZERO));
 
-    FAPI_DBG("Stop cache clocks via CLK_REGION");
-    l_data64 = (p9hcd::CLK_STOP_CMD  |
-                i_select_regions     |
-                p9hcd::CLK_THOLD_ALL);
+    l_region_clock = i_select_regions;
+
+    if(i_sync_stop_quad_clk)
+    {
+        if (i_select_ex & p9hcd::EVEN_EX)
+        {
+            l_region_clock |= p9hcd::CLK_REGION_EX0_L2;
+        }
+
+        if (i_select_ex & p9hcd::ODD_EX)
+        {
+            l_region_clock |= p9hcd::CLK_REGION_EX1_L2;
+        }
+
+        FAPI_DBG("Stop cache clocks via CLK_REGION in master mode to perform stop quad clocks synchronously");
+        l_data64 = (p9hcd::CLK_STOP_CMD_MASTER  |
+                    l_region_clock  |
+                    p9hcd::CLK_THOLD_ALL);
+    }
+    else
+    {
+        FAPI_DBG("Stop cache clocks via CLK_REGION");
+        l_data64 = (p9hcd::CLK_STOP_CMD  |
+                    l_region_clock       |
+                    p9hcd::CLK_THOLD_ALL);
+    }
+
     FAPI_TRY(putScom(i_target, EQ_CLK_REGION, l_data64));
 
     FAPI_DBG("Poll for cache clocks stopped via CPLT_STAT0[8]");
@@ -230,7 +255,7 @@ p9_hcd_cache_stopclocks(
     FAPI_DBG("Check cache clocks stopped");
     FAPI_TRY(getScom(i_target, EQ_CLOCK_STAT_SL, l_data64));
 
-    FAPI_ASSERT((((~l_data64) & i_select_regions) == 0),
+    FAPI_ASSERT((((~l_data64) & l_region_clock) == 0),
                 fapi2::PMPROC_CACHECLKSTOP_FAILED().set_EQCLKSTAT(l_data64),
                 "Cache Clock Stop Failed");
     FAPI_DBG("Cache clocks stopped now");
@@ -243,7 +268,7 @@ p9_hcd_cache_stopclocks(
     FAPI_TRY(putScom(i_target, EQ_CPLT_CTRL1_OR, MASK_SET(3)));
 
     FAPI_DBG("Assert regional fences via CPLT_CTRL1[4-14]");
-    FAPI_TRY(putScom(i_target, EQ_CPLT_CTRL1_OR, i_select_regions));
+    FAPI_TRY(putScom(i_target, EQ_CPLT_CTRL1_OR, l_region_clock));
 
     // Gate the PCBMux request so scanning doesn't cause random requests
     for(auto& it : l_core_functional_vector)
@@ -281,7 +306,7 @@ p9_hcd_cache_stopclocks(
     // QCCR[2/6] L3_EX0/1_EDRAM_VROW_VBLH_ENABLE_DC
     // QCCR[3/7] EDRAM_VPP_ENABLE_DC
 
-    if (i_select_regions & p9hcd::CLK_REGION_EX0_REFR)
+    if (l_region_clock & p9hcd::CLK_REGION_EX0_REFR)
     {
         FAPI_DBG("Sequence EX0 EDRAM disables via QPPM_QCCR[0-3]");
         FAPI_TRY(putScom(i_target, EQ_QPPM_QCCR_WCLEAR, MASK_SET(3)));
@@ -290,7 +315,7 @@ p9_hcd_cache_stopclocks(
         FAPI_TRY(putScom(i_target, EQ_QPPM_QCCR_WCLEAR, MASK_SET(0)));
     }
 
-    if (i_select_regions & p9hcd::CLK_REGION_EX1_REFR)
+    if (l_region_clock & p9hcd::CLK_REGION_EX1_REFR)
     {
         FAPI_DBG("Sequence EX1 EDRAM disables via QPPM_QCCR[4-7]");
         FAPI_TRY(putScom(i_target, EQ_QPPM_QCCR_WCLEAR, MASK_SET(7)));
