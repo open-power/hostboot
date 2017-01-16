@@ -158,7 +158,7 @@
     </enum>
     <default>0x0</default>
     <initToZero/>
-    <mssAccessorName>mrw_refresh_rate_select</mssAccessorName>
+    <mssAccessorName>mrw_refresh_rate_request</mssAccessorName>
   </attribute>
 
   <attribute>
