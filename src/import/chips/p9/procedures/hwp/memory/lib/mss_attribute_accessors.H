@@ -19920,7 +19920,7 @@ fapi_try_exit:
 /// us (SINGLE_10_PERCENT_FASTER) 3.51 us
 /// (DOUBLE_10_PERCENT_FASTER)
 ///
-inline fapi2::ReturnCode mrw_refresh_rate_select(uint8_t& o_value)
+inline fapi2::ReturnCode mrw_refresh_rate_request(uint8_t& o_value)
 {
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_REFRESH_RATE_REQUEST, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
