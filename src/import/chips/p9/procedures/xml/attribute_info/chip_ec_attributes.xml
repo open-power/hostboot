@@ -2435,6 +2435,24 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_DD1_ADDR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      DD1 only: Use the DD1 register addresses for the PHY0 BAR registers, PHY1 BAR registers, and MMIO BAR registers 
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
 
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW397129</id>>
