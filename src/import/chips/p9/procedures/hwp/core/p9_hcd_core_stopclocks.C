@@ -32,7 +32,7 @@
 // *HWP Backup HWP Owner   : Greg Still     <stillgs@us.ibm.com>
 // *HWP FW Owner           : Sangeetha T S  <sangeet2@in.ibm.com>
 // *HWP Team               : PM
-// *HWP Consumed by        : HB:PREV
+// *HWP Consumed by        : HB:PERV
 // *HWP Level              : 2
 
 //------------------------------------------------------------------------------
@@ -65,7 +65,8 @@ enum P9_HCD_CORE_STOPCLOCKS_CONSTANTS
 
 fapi2::ReturnCode
 p9_hcd_core_stopclocks(
-    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+    const bool i_sync_stop_quad_clk)
 {
     FAPI_INF(">>p9_hcd_core_stopclocks");
     fapi2::ReturnCode                              l_rc;
@@ -159,35 +160,47 @@ p9_hcd_core_stopclocks(
     FAPI_DBG("Clear all SCAN_REGION_TYPE bits");
     FAPI_TRY(putScom(i_target, C_SCAN_REGION_TYPE, MASK_ZERO));
 
-    FAPI_DBG("Stop core clocks(all but pll) via CLK_REGION");
-    l_data64 = (p9hcd::CLK_STOP_CMD           |
-                p9hcd::CLK_REGION_ALL_BUT_PLL |
-                p9hcd::CLK_THOLD_ALL);
-    FAPI_TRY(putScom(i_target, C_CLK_REGION, l_data64));
-
-    FAPI_DBG("Poll for core clocks stopped via CPLT_STAT0[8]");
-    l_loops1ms = 1E6 / CORE_CLK_STOP_POLLING_HW_NS_DELAY;
-
-    do
+    if(i_sync_stop_quad_clk)
     {
-        fapi2::delay(CORE_CLK_STOP_POLLING_HW_NS_DELAY,
-                     CORE_CLK_STOP_POLLING_SIM_CYCLE_DELAY);
+        FAPI_DBG("Stop core clocks(all but pll) via CLK_REGION in SLAVE mode");
+        l_data64 = (p9hcd::CLK_STOP_CMD_SLAVE     |
+                    p9hcd::CLK_REGION_ALL_BUT_PLL |
+                    p9hcd::CLK_THOLD_ALL);
+        FAPI_TRY(putScom(i_target, C_CLK_REGION, l_data64));
 
-        FAPI_TRY(getScom(i_target, C_CPLT_STAT0, l_data64));
     }
-    while((l_data64.getBit<8>() != 1) && ((--l_loops1ms) != 0));
+    else
+    {
+        FAPI_DBG("Stop core clocks(all but pll) via CLK_REGION");
+        l_data64 = (p9hcd::CLK_STOP_CMD           |
+                    p9hcd::CLK_REGION_ALL_BUT_PLL |
+                    p9hcd::CLK_THOLD_ALL);
+        FAPI_TRY(putScom(i_target, C_CLK_REGION, l_data64));
 
-    FAPI_ASSERT((l_loops1ms != 0),
-                fapi2::PMPROC_CORECLKSTOP_TIMEOUT().set_CORECPLTSTAT(l_data64),
-                "Core Clock Stop Timeout");
+        FAPI_DBG("Poll for core clocks stopped via CPLT_STAT0[8]");
+        l_loops1ms = 1E6 / CORE_CLK_STOP_POLLING_HW_NS_DELAY;
 
-    FAPI_DBG("Check core clocks stopped via CLOCK_STAT_SL[4-13]");
-    FAPI_TRY(getScom(i_target, C_CLOCK_STAT_SL, l_data64));
+        do
+        {
+            fapi2::delay(CORE_CLK_STOP_POLLING_HW_NS_DELAY,
+                         CORE_CLK_STOP_POLLING_SIM_CYCLE_DELAY);
 
-    FAPI_ASSERT((((~l_data64) & p9hcd::CLK_REGION_ALL_BUT_PLL) == 0),
-                fapi2::PMPROC_CORECLKSTOP_FAILED().set_CORECLKSTAT(l_data64),
-                "Core Clock Stop Failed");
-    FAPI_DBG("Core clocks stopped now");
+            FAPI_TRY(getScom(i_target, C_CPLT_STAT0, l_data64));
+        }
+        while((l_data64.getBit<8>() != 1) && ((--l_loops1ms) != 0));
+
+        FAPI_ASSERT((l_loops1ms != 0),
+                    fapi2::PMPROC_CORECLKSTOP_TIMEOUT().set_CORECPLTSTAT(l_data64),
+                    "Core Clock Stop Timeout");
+
+        FAPI_DBG("Check core clocks stopped via CLOCK_STAT_SL[4-13]");
+        FAPI_TRY(getScom(i_target, C_CLOCK_STAT_SL, l_data64));
+
+        FAPI_ASSERT((((~l_data64) & p9hcd::CLK_REGION_ALL_BUT_PLL) == 0),
+                    fapi2::PMPROC_CORECLKSTOP_FAILED().set_CORECLKSTAT(l_data64),
+                    "Core Clock Stop Failed");
+        FAPI_DBG("Core clocks stopped now");
+    }
 
     // -------------------------------
     // Disable core clock sync

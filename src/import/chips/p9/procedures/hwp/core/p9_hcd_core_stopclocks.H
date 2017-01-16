@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 // *HWP Backup HWP Owner   : Greg Still     <stillgs@us.ibm.com>
 // *HWP FW Owner           : Sangeetha T S  <sangeet2@in.ibm.com>
 // *HWP Team               : PM
-// *HWP Consumed by        : HB:PREV
+// *HWP Consumed by        : HB:PERV
 // *HWP Level              : 2
 
 #ifndef __P9_HCD_CORE_STOPCLOCKS_H__
@@ -42,17 +42,20 @@
 /// @typedef p9_hcd_core_stopclocks_FP_t
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_hcd_core_stopclocks_FP_t) (
-    const fapi2::Target<fapi2::TARGET_TYPE_CORE>&);
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>&,
+    const bool);
 
 extern "C"
 {
 
 /// @brief Quad Clock Stop
 /// @param [in] i_target TARGET_TYPE_EX target
+/// @param [in] i_sync_stop_quad_clk to stop CACHE & CORE chiplet clocks synchronously
 /// @return FAPI2_RC_SUCCESS if success, else error code
     fapi2::ReturnCode
     p9_hcd_core_stopclocks(
-        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+        const bool i_sync_stop_quad_clk = false);
 
 }
 
