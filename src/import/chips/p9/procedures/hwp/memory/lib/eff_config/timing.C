@@ -88,49 +88,56 @@ static const std::vector<std::pair<uint8_t, uint64_t> > TRFC_DLR4 =
 ///
 /// @brief Calculates refresh interval time
 /// @param[in] i_mode fine refresh rate mode
-/// @param[in] i_temp_refresh_range temperature refresh range
+/// @param[in] i_refresh_request_rate refresh rate
 /// @param[out] o_value timing val in ps
 /// @return fapi2::ReturnCode
 ///
 fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
-                              const uint8_t i_temp_refresh_range,
+                              const uint8_t i_refresh_request_rate,
                               uint64_t& o_timing )
 {
-    uint64_t l_multiplier = 0;
-    uint64_t l_quotient = 0;
-    uint64_t l_remainder = 0;
+    uint64_t l_refresh_request = 0;
+    constexpr double TEN_PERCENT_FASTER = 0.90;
 
-    switch(i_temp_refresh_range)
+    switch(i_refresh_request_rate)
     {
-        case fapi2::ENUM_ATTR_MSS_MRW_TEMP_REFRESH_RANGE_NORMAL:
-            l_multiplier = temp_mode::NORMAL;
+        case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_SINGLE:
+            l_refresh_request = TREFI_BASE;
             break;
 
-        case fapi2::ENUM_ATTR_MSS_MRW_TEMP_REFRESH_RANGE_EXTEND:
-            l_multiplier = temp_mode::EXTENDED;
+        case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_DOUBLE:
+            // We are truncating but there is no remainder with TREFI_BASE, so we are okay
+            l_refresh_request = TREFI_BASE / 2;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_SINGLE_10_PERCENT_FASTER:
+            // We are truncating but there is no remainder with TREFI_BASE, so we are okay
+            // 10% faster so 100% - 10% = 90%
+            l_refresh_request = TREFI_BASE * TEN_PERCENT_FASTER;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_DOUBLE_10_PERCENT_FASTER:
+            // We are truncating but there is no remainder with TREFI_BASE, so we are okay
+            // 10% faster so 100% - 10% = 90%
+            l_refresh_request = (TREFI_BASE / 2) * TEN_PERCENT_FASTER;
             break;
 
         default:
-            // Temperature Refresh Range will be a platform attribute set by the MRW,
-            // which they "shouldn't" mess up as long as use "attribute" enums.
-            // if someone messes this up we can at least catch it
-            FAPI_ASSERT( false,
-                         fapi2::MSS_INVALID_TEMP_REFRESH()
-                         .set_TEMP_REFRESH_RANGE(i_temp_refresh_range),
-                         "Incorrect Temperature Ref. Range received: %d ",
-                         i_temp_refresh_range);
+            // Will catch incorrect MRW value set
+            FAPI_ASSERT(false,
+                        fapi2::MSS_INVALID_REFRESH_RATE_REQUEST().set_REFRESH_RATE_REQUEST(i_refresh_request_rate),
+                        "Incorrect refresh request rate received: %d ", i_refresh_request_rate);
             break;
     }
 
-    l_quotient = TREFI_BASE / ( int64_t(i_mode) * l_multiplier );
-    l_remainder = TREFI_BASE % ( int64_t(i_mode) * l_multiplier );
-    o_timing = l_quotient + (l_remainder == 0 ? 0 : 1);
+    o_timing =  (l_refresh_request / i_mode);
 
-    FAPI_INF( "tREFI: %d, quotient: %d, remainder: %d, tREFI_base: %d",
-              o_timing, l_quotient, l_remainder, TREFI_BASE );
+    FAPI_INF( "tREFI (ps): %d, refresh request (ps): %d, tREFI_base (ps): %d, REF%dX",
+              o_timing, l_refresh_request, TREFI_BASE, i_mode );
 
-    // FAPI_ASSERT doesn't set current error to good
+    // FAPI_ASSERT doesn't set current_err as good
     return fapi2::FAPI2_RC_SUCCESS;
+
 fapi_try_exit:
     return fapi2::current_err;
 }
