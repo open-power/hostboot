@@ -5247,6 +5247,12 @@ sub generate_xbus
         }
     }
 
+    #TODO RTC:167400 Use MRW values once they are available
+    if($xbus == 2)
+    {
+        $tx_swap = sprintf("0x%X", 0x80);
+    }
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}xbus$xbus</id>
