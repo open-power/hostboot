@@ -193,7 +193,6 @@
     SLOW = 0x01
   </enum>
   <platInit/>
-  <writeable/>
  </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -291,7 +290,6 @@
     CHIP_IS_GROUP = 0x02
   </enum>
   <platInit/>
-  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -421,10 +419,6 @@
   </description>
   <valueType>uint8</valueType>
   <platInit/>
-  <!-- TODO: Story 155081
-       Not supposed to be writeable, PPE needs to resolve this issue in
-       p9_sbe_attr_setup.C -->
-  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -438,10 +432,6 @@
   </description>
   <valueType>uint8</valueType>
   <platInit/>
-  <!-- TODO: Story 155081
-       Not supposed to be writeable, PPE needs to resolve this issue in
-       p9_sbe_attr_setup.C -->
-  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -454,10 +444,6 @@
   </description>
   <valueType>uint8</valueType>
   <platInit/>
-  <!-- TODO: Story 155081
-       Not supposed to be writeable, PPE needs to resolve this issue in
-       p9_sbe_attr_setup.C -->
-  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -781,11 +767,8 @@
   <valueType>uint8</valueType>
   <enum>HB_IPL = 0x1,HB_RUNTIME = 0x2,CACHE_CONTAINED = 0x4,CHIP_CONTAINED = 0x8,NONHB_IPL = 0x10</enum>
   <persistRuntime/>
-  <platInit/>
-  <!-- TODO: Story 155081
-       Not supposed to be writeable, PPE needs to resolve this issue in
-       p9_sbe_attr_setup.C -->
   <writeable/>
+  <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -800,10 +783,6 @@
     TRUE = 0x1
   </enum>
   <platInit/>
-  <!-- TODO: Story 155081
-       Not supposed to be writeable, PPE needs to resolve this issue in
-       sberegaccess.C -->
-  <writeable/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->

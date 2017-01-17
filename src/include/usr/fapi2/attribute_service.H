@@ -407,9 +407,5 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platGetSecurityMode(VAL)
-#define ATTR_SECURITY_MODE_SETMACRO(ID, TARGET, VAL) \
-    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
-    ? fapi2::ReturnCode() : \
-    fapi2::platAttrSvc::platSetSecurityMode()
 
 #endif // ATTRIBUTESERVICE_H_
