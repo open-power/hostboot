@@ -858,7 +858,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             }
             total++;
 
-//            err = performUpdateActions(sbeState); @TODO RTC:158899 Seem to need to quiesce SBE before updating
+            err = performUpdateActions(sbeState);
             if(err)
             {
                 fails++;
@@ -867,7 +867,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             }
 
             // Make sure MVPD and SBE were updated
-/*            if ( ! ( ( sbeState.update_actions & MVPD_UPDATE_COMPLETE ) &&
+            if ( ! ( ( sbeState.update_actions & MVPD_UPDATE_COMPLETE ) &&
                      ( sbeState.update_actions & SBE_UPDATE_COMPLETE  ) ) )
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"testSbeUpdateTarget(): "
@@ -876,7 +876,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
                 fails++;
                 TS_FAIL("testSbeUpdateTarget() - performUpdateActions() did not complete actions");
                 break;
-            } @TODO RTC:158899 Seem to need to quiesce SBE before updating */
+            }
 
 
         }while(0);

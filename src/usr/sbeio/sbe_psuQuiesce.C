@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,12 +45,14 @@ namespace SBEIO
 {
 
     /**
-    * @brief Sends a PSU chipOp to quiesce the SBE
-    *
-    * @return errlHndl_t Error log handle on failure.
-    *
-    */
-    errlHndl_t psuQuiesce( )
+     * @brief Sends a PSU chipOp to quiesce the SBE
+     *
+     * @param[in]  i_target  Target with SBE to quiesce
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     */
+    errlHndl_t sendPsuQuiesceSbe(TARGETING::Target * i_target)
     {
         errlHndl_t errl = NULL;
 
@@ -64,13 +66,14 @@ namespace SBEIO
         SbePsu::psuResponse  l_psuResponse;
 
 
-        errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(&l_psuCommand,
+        errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(i_target,
+                                &l_psuCommand,
                                 &l_psuResponse,
                                 SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                                 SbePsu::SBE_QUIESCE_REQ_USED_REGS,
                                 SbePsu::SBE_QUIESCE_RSP_USED_REGS);
 
-        SBE_TRACD(EXIT_MRK "psuQuiesce");
+        SBE_TRACD(EXIT_MRK "sendPsuQuiesceSbe");
 
         return errl;
     };

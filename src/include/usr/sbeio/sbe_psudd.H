@@ -440,19 +440,21 @@ class SbePsu
         };
 
         /**
-         * @Brief perform SBE PSU chip-op
+         * @brief perform SBE PSU chip-op
          *
+         * @param[in]  i_target       Proc target to use for PSU Request
          * @param[in]  i_pPsuRequest  Pointer to PSU request commands
          * @param[out] o_pPsuResponse Pointer to PSU response
          * @param[in]  i_timeout      Time out for response
          * @param[in]  i_reqMsgs      4 bit mask telling which regs to write
          * @param[in]  i_rspMsgs      4 bit mask telling which regs to read
          */
-        errlHndl_t performPsuChipOp(psuCommand     * i_pPsuCommand,
-                                    psuResponse    * o_pPsuResponse,
-                                    const uint64_t   i_timeout,
-                                    uint8_t          i_reqMsgs,
-                                    uint8_t          i_rspMsgs);
+        errlHndl_t performPsuChipOp(TARGETING::Target * i_target,
+                                    psuCommand        * i_pPsuRequest,
+                                    psuResponse       * o_pPsuResponse,
+                                    const uint64_t      i_timeout,
+                                    uint8_t             i_reqMsgs,
+                                    uint8_t             i_rspMsgs);
 
     protected:
 

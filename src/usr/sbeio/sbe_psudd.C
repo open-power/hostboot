@@ -35,7 +35,6 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <targeting/common/target.H>
-#include <targeting/common/targetservice.H>
 #include <errl/errlreasoncodes.H>
 #include <sbeio/sbeioreasoncodes.H>
 #include <initservice/initserviceif.H> //@todo-RTC:149454-Remove
@@ -111,21 +110,22 @@ SbePsu::~SbePsu()
 /**
  * @brief perform SBE PSU chip-op
  *
+ * @param[in]  i_target       Proc target to use for PSU Request
  * @param[in]  i_pPsuRequest  Pointer to PSU request commands
  * @param[out] o_pPsuResponse Pointer to PSU response
  * @param[in]  i_timeout      Time out for response
  * @param[in]  i_reqMsgs      4 bit mask telling which regs to write
  * @param[in]  i_rspMsgs      4 bit mask telling which regs to read
  */
-errlHndl_t SbePsu::performPsuChipOp(psuCommand     * i_pPsuRequest,
-                            psuResponse    * o_pPsuResponse,
-                            const uint64_t   i_timeout,
-                            uint8_t          i_reqMsgs,
-                            uint8_t          i_rspMsgs)
+errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target * i_target,
+                                    psuCommand     * i_pPsuRequest,
+                                    psuResponse    * o_pPsuResponse,
+                                    const uint64_t   i_timeout,
+                                    uint8_t          i_reqMsgs,
+                                    uint8_t          i_rspMsgs)
 
 {
     errlHndl_t errl = NULL;
-    TARGETING::Target * l_target = NULL;
     static mutex_t l_psuOpMux = MUTEX_INITIALIZER;
 
     SBE_TRACD(ENTER_MRK "performPsuChipOp");
@@ -133,14 +133,13 @@ errlHndl_t SbePsu::performPsuChipOp(psuCommand     * i_pPsuRequest,
     //Serialize access to PSU
     mutex_lock(&l_psuOpMux);
 
-    //Use master proc for SBE PSU access
-    (void)TARGETING::targetService().masterProcChipTargetHandle(l_target);
-    assert(l_target,"performPsuChipOp: master proc target is NULL");
+    // Check that target is not NULL
+    assert(i_target != nullptr,"performPsuChipOp: proc target is NULL");
 
     do
     {
         // write PSU Request
-        errl = writeRequest(l_target,
+        errl = writeRequest(i_target,
                             i_pPsuRequest,
                             i_reqMsgs);
         if (errl)//error has been generated
@@ -151,7 +150,7 @@ errlHndl_t SbePsu::performPsuChipOp(psuCommand     * i_pPsuRequest,
         }
 
         // read PSU response and check results
-        errl = readResponse(l_target,
+        errl = readResponse(i_target,
                              i_pPsuRequest,
                              o_pPsuResponse,
                              i_timeout,
@@ -194,7 +193,7 @@ errlHndl_t SbePsu::performPsuChipOp(psuCommand     * i_pPsuRequest,
                              orig_plid,
                              TWO_UINT32_TO_UINT64(orig_rc,orig_mod));
         MAGIC_INST_GET_SBE_TRACES(
-              l_target->getAttr<TARGETING::ATTR_POSITION>(),
+              i_target->getAttr<TARGETING::ATTR_POSITION>(),
               SBEIO_HWSV_COLLECT_SBE_RC);
         INITSERVICE::doShutdown( SBEIO_HWSV_COLLECT_SBE_RC );
     }

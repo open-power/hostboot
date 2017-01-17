@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include <errl/errlmanager.H>
 #include <sbeio/sbeioif.H>
 #include <sbeio/sbe_psudd.H>
+#include <targeting/common/targetservice.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -63,6 +64,10 @@ namespace SBEIO
 
         SBE_TRACD(ENTER_MRK "sending system configuration from HB -> SBE  i_systemConfig=0x%x",i_systemConfig);
 
+        // Find master proc for target of PSU command
+        TARGETING::Target * l_master = nullptr;
+        (void)TARGETING::targetService().masterProcChipTargetHandle(l_master);
+
         SbePsu::psuCommand   l_psuCommand(
                                   SbePsu::SBE_REQUIRE_RESPONSE,  //control flags
                                   SbePsu::SBE_PSU_GENERIC_MESSAGE, //command class
@@ -72,7 +77,8 @@ namespace SBEIO
         // set up PSU command message
         l_psuCommand.cd2_SetSystemConfig_SystemFabricIdMap = i_systemConfig;
 
-        errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(&l_psuCommand,
+        errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(l_master,
+                                &l_psuCommand,
                                 &l_psuResponse,
                                 SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                                 SbePsu::SBE_SYSTEM_CONFIG_REQ_USED_REGS,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -317,11 +317,14 @@ errlHndl_t sbeScanPerformOp(TARGETING::Target * i_target, va_list i_args)
                       ":: sbeScanPerformOp() RingMode:%.8X ",
                       l_psuCommand.cd3_PutRing_RingMode );
 
-    l_errl = SBEIO::SbePsu::getTheInstance().performPsuChipOp(&l_psuCommand,
+    /*
+    l_errl = SBEIO::SbePsu::getTheInstance().performPsuChipOp(nullptr,
+                    &l_psuCommand,
                     &l_psuResponse,
                     SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                     SbePsu::SBE_DMCONTROL_START_REQ_USED_REGS,
                     SbePsu::SBE_DMCONTROL_START_RSP_USED_REGS);
+                    */
 
     TRACFCOMP( g_trac_scandd, EXIT_MRK "exiting :: sbeScanPerformOp()");
 
