@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,7 +141,7 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
 
     if( NULL != errl )
     {
-        PRDF_ERR( "getScom() failed on i_target=0x%08x i_address0x%016llx",
+        PRDF_ERR( "getScom() failed on i_target=0x%08x i_address=0x%016llx",
                   getHuid(i_target), i_address );
 
         rc = PRD_SCANCOM_FAILURE;
@@ -179,7 +179,7 @@ uint32_t putScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
 
     if( NULL != errl )
     {
-        PRDF_ERR( "putScom() failed on i_target=0x%08x i_address0x%016llx",
+        PRDF_ERR( "putScom() failed on i_target=0x%08x i_address=0x%016llx",
                   getHuid(i_target), i_address );
 
         rc = PRD_SCANCOM_FAILURE;
