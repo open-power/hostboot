@@ -2179,7 +2179,7 @@ errlHndl_t IntrRp::blindIssueEOIs(TARGETING::Target * i_proc)
             ++core)
         {
             FABRIC_CHIP_ID_ATTR chip = i_proc->getAttr<ATTR_FABRIC_CHIP_ID>();
-            FABRIC_NODE_ID_ATTR node = i_proc->getAttr<ATTR_FABRIC_NODE_ID>();
+            FABRIC_GROUP_ID_ATTR node = i_proc->getAttr<ATTR_FABRIC_GROUP_ID>();
             CHIP_UNIT_ATTR coreId =
                                 (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
@@ -2397,7 +2397,7 @@ void IntrRp::allowAllInterrupts(TARGETING::Target* i_core)
     const TARGETING::Target * proc = getParentChip(i_core);
 
     FABRIC_CHIP_ID_ATTR chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
-    FABRIC_NODE_ID_ATTR node = proc->getAttr<ATTR_FABRIC_NODE_ID>();
+    FABRIC_GROUP_ID_ATTR node = proc->getAttr<ATTR_FABRIC_GROUP_ID>();
     CHIP_UNIT_ATTR coreId = i_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
     PIR_t pir(0);
@@ -2421,7 +2421,7 @@ void IntrRp::disableAllInterrupts(TARGETING::Target* i_core)
     const TARGETING::Target * proc = getParentChip(i_core);
 
     FABRIC_CHIP_ID_ATTR  chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
-    FABRIC_NODE_ID_ATTR node = proc->getAttr<ATTR_FABRIC_NODE_ID>();
+    FABRIC_GROUP_ID_ATTR node = proc->getAttr<ATTR_FABRIC_GROUP_ID>();
     CHIP_UNIT_ATTR coreId = i_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
     PIR_t pir(0);
@@ -2456,7 +2456,7 @@ void IntrRp::drainMpIplInterrupts(TARGETING::TargetHandleList & i_cores)
             const TARGETING::Target * proc = getParentChip(*core);
 
             FABRIC_CHIP_ID_ATTR chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
-            FABRIC_NODE_ID_ATTR node = proc->getAttr<ATTR_FABRIC_NODE_ID>();
+            FABRIC_GROUP_ID_ATTR node = proc->getAttr<ATTR_FABRIC_GROUP_ID>();
             CHIP_UNIT_ATTR coreId =
                               (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
