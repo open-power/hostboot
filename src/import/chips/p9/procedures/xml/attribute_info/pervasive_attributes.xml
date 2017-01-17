@@ -34,10 +34,6 @@
   <description>setup clock mux settings</description>
   <valueType>uint32</valueType>
   <platInit/>
-  <!-- TODO: Story 155081
-       Not supposed to be writeable, PPE needs to resolve this issue in
-       p9_sbe_attr_setup.C -->
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -55,7 +51,6 @@
   <valueType>uint16</valueType>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -65,7 +60,6 @@
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -75,7 +69,6 @@
   <valueType>uint32</valueType>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -106,7 +99,6 @@
   <enum>FSP_LESS = 0x0,FSP = 0x1</enum>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -137,7 +129,6 @@
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -147,7 +138,6 @@
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -157,7 +147,6 @@
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -167,7 +156,6 @@
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -177,7 +165,6 @@
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -196,7 +183,6 @@
   <valueType>uint16</valueType>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -208,7 +194,6 @@
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -220,7 +205,6 @@
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -239,7 +223,6 @@
   <valueType>uint32</valueType>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -384,7 +367,6 @@
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -464,7 +446,6 @@
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -474,7 +455,6 @@
   </description>
   <valueType>uint8</valueType>
   <persistRuntime/>
-  <platInit/>
   <writeable/>
 </attribute>
 
@@ -486,7 +466,6 @@
   </description>
   <valueType>uint8</valueType>
   <persistRuntime/>
-  <platInit/>
   <writeable/>
 </attribute>
 
@@ -496,7 +475,6 @@
   <description>Holds the state of Security Access Bit (SAB)</description>
   <valueType>uint8</valueType>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -512,7 +490,6 @@
   </description>
   <valueType>uint8</valueType>
   <platInit/>
-  <writeable/>
   <initToZero/>
 </attribute>
 
@@ -525,9 +502,6 @@
   <initToZero/>
 </attribute>
 
-<!-- TODO: Story 155081
-     Not supposed to be writeable, PPE needs to resolve this issue in
-     p9_sbe_attr_setup.C -->
 <attribute>
     <id>ATTR_OBUS_RATIO_VALUE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -538,7 +512,6 @@
     <valueType>uint8</valueType>
     <persistRuntime/>
     <platInit/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -547,7 +520,6 @@
     <description>Pibmem repair attribute 0</description>
     <valueType>uint64</valueType>
     <persistRuntime/>
-    <platInit/>
     <writeable/>
 </attribute>
 
@@ -557,7 +529,6 @@
      <description>Pibmem repair attribute 1</description>
      <valueType>uint64</valueType>
      <persistRuntime/>
-     <platInit/>
      <writeable/>
 </attribute>
 
@@ -567,7 +538,6 @@
      <description>Pibmem repair attribute 2</description>
      <valueType>uint64</valueType>
      <persistRuntime/>
-     <platInit/>
      <writeable/>
 </attribute>
 
@@ -585,10 +555,6 @@
     <description>To skip the locking sequence and check for lock of CP filter PLL</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <!-- TODO: Story 155081
-         Not supposed to be writeable, PPE needs to resolve this issue in
-         p9_sbe_attr_setup.C -->
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -597,10 +563,6 @@
     <description>To skip the locking sequence and check for lock of SS filter PLL</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <!-- TODO: Story 155081
-         Not supposed to be writeable, PPE needs to resolve this issue in
-         p9_sbe_attr_setup.C -->
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -609,10 +571,6 @@
     <description>To skip the locking sequence and check for lock of IO filter PLL</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <!-- TODO: Story 155081
-         Not supposed to be writeable, PPE needs to resolve this issue in
-         p9_sbe_attr_setup.C -->
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -621,10 +579,6 @@
     <description>Skip locking sequence and check for lock of DPLL</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <!-- TODO: Story 155081
-         Not supposed to be writeable, PPE needs to resolve this issue in
-         p9_sbe_attr_setup.C -->
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -633,10 +587,6 @@
     <description>Skip the locking sequence and check for lock of NEST/MEM/XBUS/OBUS/PCI PLLs</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <!-- TODO: Story 155081
-         Not supposed to be writeable, PPE needs to resolve this issue in
-         p9_sbe_attr_setup.C -->
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -675,7 +625,6 @@
   <description>System Configurtion information - 1 indicates a chip present</description>
   <valueType>uint64</valueType>
   <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -784,7 +733,6 @@
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
-  <writeable/>
 </attribute>
 
 </attributes>
