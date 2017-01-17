@@ -335,6 +335,20 @@ namespace LD_CR_FFDC
 
 } // namespace LD_CR_FFDC
 
+namespace TD_CTLR_DATA
+{
+    static const char * const START = "TDCTLR_STATE_DATA_START";
+    static const char * const END   = "TDCTLR_STATE_DATA_END";
+
+    // We don't use 0 as one of the enum values here so we can ensure our data
+    // is non-zero when we add the tdCtlr state to the capture data
+    enum Version
+    {
+        IPL = 1,
+        RT  = 2,
+    };
+} // namespace TD_CTLR_DATA
+
 #ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
 } // end namespace HOSTBOOT
 #endif

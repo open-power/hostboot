@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,7 @@
 #include <prdfMemAddress.H>
 #include <prdfMemCaptureData.H>
 #include <prdfP9McbistExtraSig.H>
+#include <prdfParserEnums.H>
 
 // External includes
 #include <util/misc.H>
@@ -60,6 +61,8 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
             PRDF_ERR( PRDF_FUNC "initialize() failed" );
             break;
         }
+
+        collectStateCaptureData( io_sc, TD_CTLR_DATA::START );
 
         #else // IPL only
 
@@ -147,6 +150,10 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
             PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(STOP_TESTING) failed" );
 
         #endif
+    }
+    else
+    {
+        collectStateCaptureData( io_sc, TD_CTLR_DATA::END );
     }
 
     return o_rc;

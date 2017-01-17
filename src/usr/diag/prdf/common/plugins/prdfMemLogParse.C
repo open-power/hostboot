@@ -3351,9 +3351,9 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
 {
     bool o_rc = true;
 
-    if ( Util::hashString("TDCTLR_STATE_DATA_START") == i_sigId )
+    if ( Util::hashString(TD_CTLR_DATA::START) == i_sigId )
         i_parser.PrintString( " TDCTLR_STATE_DATA_START", "" );
-    else if ( Util::hashString("TDCTLR_STATE_DATA_END") == i_sigId )
+    else if ( Util::hashString(TD_CTLR_DATA::END) == i_sigId )
         i_parser.PrintString( " TDCTLR_STATE_DATA_END", "" );
 
     // These are copies of the enums in prdfCenMbaTdCtlr_common.H. This is not

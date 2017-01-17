@@ -447,8 +447,8 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                  parseBadDqBitmap( sigData, sigDataSize, i_parser );
             }
-            else if ( (Util::hashString("TDCTLR_STATE_DATA_START") == sigId) ||
-                      (Util::hashString("TDCTLR_STATE_DATA_END")   == sigId) )
+            else if ( (Util::hashString(TD_CTLR_DATA::START) == sigId) ||
+                      (Util::hashString(TD_CTLR_DATA::END)   == sigId) )
             {
                  parseTdCtlrStateData( sigData, sigDataSize, i_parser, sigId );
             }

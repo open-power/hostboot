@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,8 +60,9 @@ class TdEntry
      */
     enum TdType
     {
-        VCM_EVENT = 0, ///< A Verify Chip Mark event.
-        TPS_EVENT,     ///< A Two-Phase Scrub event.
+        VCM_EVENT = 0,       ///< A Verify Chip Mark event.
+        TPS_EVENT,           ///< A Two-Phase Scrub event.
+        INVALID_EVENT = 0xf, ///< Used to denote that no event is in progress
     };
 
     /**
@@ -106,6 +107,15 @@ class TdEntry
     {
         return this->iv_tdType < i_e.iv_tdType;
     }
+
+    /** @return The event type */
+    TdType getType() const { return iv_tdType; }
+
+    /** @return The rank in which this event occurred */
+    MemRank getRank() const { return iv_rank; }
+
+    /** @return The event phase */
+    Phase getPhase() const { return iv_phase; }
 
   protected: // functions
 
