@@ -50,6 +50,7 @@
 #include <console/consoleif.H>
 #include <config.h>
 #include <sbe/sbeif.H>
+#include <sbeio/sbeioif.H>
 #include <sbe/sbereasoncodes.H>
 #include "sbe_update.H"
 #include "sbe_resolve_sides.H"
@@ -2597,6 +2598,26 @@ namespace SBE
             TRACDBIN(g_trac_sbe,"updateSeepromSide()-start of IMG - ECC",
                      reinterpret_cast<void*>(SBE_ECC_IMG_VADDR), 0x80);
 
+
+            //Quiesce the SBE before writing current SBE
+            if ( ( ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY )
+                   &&
+                   ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) )
+                 ||
+                 ( ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_BACKUP )
+                   &&
+                   ( io_sbeState.cur_seeprom_side == SBE_SEEPROM1 ) ) )
+            {
+                err = SBEIO::sendPsuQuiesceSbe(io_sbeState.target);
+
+                if(err)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
+                               "quiescing SBE.  RC=0x%X, PLID=0x%lX",
+                               ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err));
+                    break;
+                }
+            }
 
             //Write new data to seeprom
             TRACFCOMP( g_trac_sbe, INFO_MRK"updateSeepromSide(): Write New "

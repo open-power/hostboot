@@ -159,7 +159,7 @@ namespace SBE
     enum sbeSeepromSide_t
     {
         SBE_SEEPROM0         = 0x00,   // corresponds to EEPROM::SBE_PRIMARY
-        SBE_SEEPROM1         = 0x01,   // corresponts to EEPROM::SBE_BACKUP
+        SBE_SEEPROM1         = 0x01,   // corresponds to EEPROM::SBE_BACKUP
         SBE_SEEPROM_INVALID  = 0xFF,
     };
 

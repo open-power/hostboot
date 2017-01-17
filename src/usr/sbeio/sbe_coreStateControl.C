@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <errl/errlmanager.H>
 #include <sbeio/sbeioif.H>
 #include <sbeio/sbe_psudd.H>
+#include <targeting/common/targetservice.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -59,6 +60,10 @@ errlHndl_t startDeadmanLoop(const uint64_t i_waitTime )
 
     SBE_TRACD(ENTER_MRK "startDeadmanLoop waitTime=0x%x",i_waitTime);
 
+    // Find master proc for target of PSU command
+    TARGETING::Target * l_master = nullptr;
+    (void)TARGETING::targetService().masterProcChipTargetHandle(l_master);
+
     SbePsu::psuCommand   l_psuCommand(
          SbePsu::SBE_DMCONTROL_START |
              SbePsu::SBE_DMCONTROL_RESPONSE_REQUIRED,      //control flags
@@ -69,7 +74,8 @@ errlHndl_t startDeadmanLoop(const uint64_t i_waitTime )
     // set up PSU command message
     l_psuCommand.cd1_ControlDeadmanLoop_WaitTime = i_waitTime;
 
-    errl = SBEIO::SbePsu::getTheInstance().performPsuChipOp(&l_psuCommand,
+    errl = SBEIO::SbePsu::getTheInstance().performPsuChipOp(l_master,
+                            &l_psuCommand,
                             &l_psuResponse,
                             SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                             SbePsu::SBE_DMCONTROL_START_REQ_USED_REGS,
@@ -94,6 +100,10 @@ errlHndl_t stopDeadmanLoop()
 
     SBE_TRACD(ENTER_MRK "stopDeadmanLoop");
 
+    // Find master proc for target of PSU command
+    TARGETING::Target * l_master = nullptr;
+    (void)TARGETING::targetService().masterProcChipTargetHandle(l_master);
+
     SbePsu::psuCommand   l_psuCommand(
          SbePsu::SBE_DMCONTROL_STOP +
              SbePsu::SBE_DMCONTROL_RESPONSE_REQUIRED,        //control flags
@@ -101,7 +111,8 @@ errlHndl_t stopDeadmanLoop()
          SbePsu::SBE_CMD_CONTROL_DEADMAN_LOOP);              //comand
     SbePsu::psuResponse  l_psuResponse;
 
-    errl = SBEIO::SbePsu::getTheInstance().performPsuChipOp(&l_psuCommand,
+    errl = SBEIO::SbePsu::getTheInstance().performPsuChipOp(l_master,
+                            &l_psuCommand,
                             &l_psuResponse,
                             SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                             SbePsu::SBE_DMCONTROL_STOP_REQ_USED_REGS,
