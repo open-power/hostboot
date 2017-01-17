@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -436,7 +436,8 @@
         <id>ATTR_MSS_VPD_MT_ODT_RD</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            READ, On Die Termination triggering bitmap.
+            READ, On Die Termination triggering bitmap. Use bitmap to determine which ODT to fire for the designated rank.
+            The bits in 8 bit field are [Dimm0 ODT0][Dimm0 ODT1][N/A][N/A][Dimm1 ODT0][Dimm1 ODT1][N/A][N/A]
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -452,7 +453,8 @@
         <id>ATTR_MSS_VPD_MT_ODT_WR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            WRITE, On Die Termination triggering bitmap.
+            WRITE, On Die Termination triggering bitmap. Use bitmap to determine which ODT to fire for the designated rank.
+            The bits in 8 bit field are [Dimm0 ODT0][Dimm0 ODT1][N/A][N/A][Dimm1 ODT0][Dimm1 ODT1][N/A][N/A]
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -469,7 +471,8 @@
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Number of clocks used for read/write preamble. Calibration only uses 1 nCK preamble (DEFAULT). Mainline has both 1 nCK and 2 nCK preamble option.
-            "0" means 1 nCK preamble, "1" means 2 nCK preamble. Bit 3 for READ preamble, and Bit 7 for WRITE preamble. E.g. 0b 00010001
+            The value of "0" means 1 nCK preamble, the value of "1" means 2 nCK preamble. Bit 3 for READ preamble, and Bit 7 for WRITE preamble.
+            E.g. 0b00010001 means 2 nCK preamble for both READ and WRITE
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
