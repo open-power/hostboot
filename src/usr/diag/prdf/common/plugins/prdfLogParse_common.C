@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -182,7 +182,7 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
         case TYPE_CORE:
             l_chip    = l_chip / MAX_EC_PER_PROC;
             l_chiplet = l_chiplet % MAX_EC_PER_PROC;
-            snprintf( o_chipName, i_sz_chipName, "(ecn%dp%dc%d)",
+            snprintf( o_chipName, i_sz_chipName, "ec(n%dp%dc%d)",
                       l_node, l_chip, l_chiplet );
             break;
 
