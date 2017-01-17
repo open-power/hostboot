@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -123,7 +123,14 @@ fapi2::ReturnCode end_of_rank( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         return FAPI2_RC_SUCCESS;
     }
 
-    if( ! io_program.iv_config.getBit<TT::MCBIST_CFG_PAUSE_AFTER_RANK>() )
+    // Keep in mind that pause-on-error-mode is two bits and it doesn't encode master/slave. The
+    // end_boundary enums are constructed such that STOP_AFTER_MASTER_RANK is really stop on
+    // either master or slave for the purposes of this field. So, checking stop-after-master-rank
+    // will catch both master and slave pauses which is correct for this work-around.
+    uint64_t l_pause_mode = 0;
+    io_program.iv_config.extractToRight<TT::CFG_PAUSE_ON_ERROR_MODE, TT::CFG_PAUSE_ON_ERROR_MODE_LEN>(l_pause_mode);
+
+    if( l_pause_mode != mss::mcbist::end_boundary::STOP_AFTER_MASTER_RANK )
     {
         FAPI_INF("not checking rank boundaries on this MCBIST (%s), we're ok", mss::c_str(i_target));
         return FAPI2_RC_SUCCESS;
