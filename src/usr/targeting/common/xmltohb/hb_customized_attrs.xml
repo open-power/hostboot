@@ -55,7 +55,7 @@
      <!-- =====================================================================
      Start of customizations
      ================================================================= -->
- <attribute>
+     <attribute>
           <id>ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8</id>
           <default>5</default>
      </attribute>
@@ -297,6 +297,7 @@
     <attribute>
           <id>ATTR_NEST_PLL_BUCKET</id>
           <default>0x05</default>
+          <writeable/>
      </attribute>
 
     <attribute>
@@ -316,7 +317,7 @@
 
     <attribute>
           <id>ATTR_SYSTEM_IPL_PHASE</id>
-          <default>0x01</default>
+          <default>HB_IPL</default>
      </attribute>
 
     <attribute>
@@ -528,6 +529,12 @@
      </attribute>
 
     <attribute>
+          <id>ATTR_SYSTEM_RESCLK_DISABLE</id>
+          <default>0x00</default>
+          <writeable/>
+    </attribute>
+
+    <attribute>
           <id>ATTR_BACKUP_SEEPROM_SELECT</id>
           <writeable/>
     </attribute>
@@ -545,11 +552,13 @@
 
     <attribute>
           <id>ATTR_PROC_EFF_FABRIC_GROUP_ID</id>
+          <writeable/>
           <no_export/>
     </attribute>
 
     <attribute>
           <id>ATTR_PROC_EFF_FABRIC_CHIP_ID</id>
+          <writeable/>
           <no_export/>
     </attribute>
 
@@ -560,6 +569,11 @@
 
     <attribute>
           <id>ATTR_EI_BUS_TX_LANE_INVERT</id>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_DMI_REFCLOCK_SWIZZLE</id>
           <no_export/>
     </attribute>
 
@@ -584,10 +598,29 @@
     </attribute>
 
     <attribute>
-          <id>ATTR_EI_BUS_TX_MSBSWAP</id>
-          <global/>
+          <id>ATTR_PROC_SBE_MASTER_CHIP</id>
+          <writeable/>
     </attribute>
 
+    <attribute>
+          <id>ATTR_RISK_LEVEL</id>
+          <writeable/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_BOOT_FLAGS</id>
+          <writeable/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_EC_GARD</id>
+          <writeable/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_EQ_GARD</id>
+          <writeable/>
+    </attribute>
     <attribute><id>ATTR_CEN_MSS_ALLOW_SINGLE_PORT</id><default>FALSE</default></attribute>
     <attribute><id>ATTR_CEN_VPD_DIMM_RCD_OUTPUT_TIMING</id><default>0x01,0x00,0x01,0x00</default></attribute>
 
@@ -608,7 +641,7 @@
     <attribute><id>ATTR_CEN_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id><default>0x01</default></attribute>
     <attribute><id>ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id><default>0x00000060</default></attribute>
     <attribute><id>ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id><default>0x00000020</default></attribute>
- 
+
     <attribute><id>ATTR_CEN_VPD_DRV_IMP_DQ_DQS</id><default>OHM34_FFE0,OHM34_FFE0</default></attribute>
     <attribute><id>ATTR_CEN_VPD_SLEW_RATE_DQ_DQS</id><default>0x03,0x03</default></attribute>
     <attribute><id>ATTR_CEN_EFF_CEN_DRV_IMP_DQ_DQS</id><default>OHM34_FFE0,OHM34_FFE0</default></attribute>
