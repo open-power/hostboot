@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -185,6 +185,16 @@ class MemTdCtlr
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
     uint32_t checkEcc( bool & o_errorsFound, STEP_CODE_DATA_STRUCT & io_sc );
+
+    /**
+     * @brief Adds the TD controller state to the  capture data.
+     * @param io_sc      The step code data struct.
+     * @param i_startEnd Description tag for the capture data. Used to
+     *        distinguish between data captured at the beginning or end of
+     *        analysis.
+     */
+    void collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
+                                  const char * i_startEnd );
 
     #ifdef __HOSTBOOT_RUNTIME
 

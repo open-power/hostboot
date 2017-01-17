@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -226,6 +226,19 @@ uint32_t MemTdCtlr<TYPE_MBA>::checkEcc( bool & o_errorsFound,
     */
 
     return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template <TARGETING::TYPE T>
+void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
+                                            const char * i_startEnd )
+{
+    #define PRDF_FUNC "[MemTdCtlr<T>::collectStateCaptureData] "
+
+    // TODO RTC 167827
 
     #undef PRDF_FUNC
 }
