@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -538,7 +538,7 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
 
             // Compute the processor id to match what HDAT uses
             uint64_t node_id =
-              (*procIter)->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+              (*procIter)->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
             uint64_t chip_id =
               (*procIter)->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
             uint32_t procid = (node_id << 3) | (chip_id); //NNNCCC

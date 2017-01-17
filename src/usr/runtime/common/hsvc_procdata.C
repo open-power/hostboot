@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@ HSVC_LOAD_ATTR( ATTR_CHIP_REGIONS_TO_ENABLE );
 HSVC_LOAD_ATTR_P( ATTR_EC );
 HSVC_LOAD_ATTR( ATTR_EX_L2_SINGLE_MEMBER_ENABLE );
 HSVC_LOAD_ATTR( ATTR_FABRIC_CHIP_ID );
-HSVC_LOAD_ATTR( ATTR_FABRIC_NODE_ID );
+HSVC_LOAD_ATTR( ATTR_FABRIC_GROUP_ID );
 HSVC_LOAD_ATTR( ATTR_FSI_GP_REG_SCOM_ACCESS );
 HSVC_LOAD_ATTR( ATTR_I2C_SLAVE_ADDRESS );
 HSVC_LOAD_ATTR_P( ATTR_NAME );
