@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,9 +42,17 @@ namespace IPMIFRUINV
         COMMON_HEADER_FORMAT_SIZE     = 8, //size in bytes
         DEFAULT_CHASSIS_TYPE          = 0x05,
         DEFAULT_FRU_OFFSET            = 0,
+        TYPELENGTH_SIZE_MASK          = 0x3F, //bits 5:0 define num data bytes
         MAX_ASCII_FIELD_SIZE          = 0x3F, //size in bytes
         MAX_RECORD_SIZE               = 0xFF, //size in bytes
     };
+
+    enum commonHeaderEntryOffsets
+    {
+        HEADER_FORMART_VERSION = 0,
+        PRODUCT_INFO_AREA      = 4,
+    };
+
 };
 
 

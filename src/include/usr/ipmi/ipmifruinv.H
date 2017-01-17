@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,13 @@ namespace IPMIFRUINV
      */
     void setData(bool i_updateData=false);
 
+   /**
+    * @brief Reads the entire FRU inventory record
+    * @param[in] deviceId, The Record number to be read
+    * @param[o_data] The resultant pointer to the record data read
+   */
+    void readFruData(uint8_t i_deviceId, uint8_t *o_data);
+
     /**
      * @brief Clears fru data from BMC
      * @param[in] fruId, The fruId to be cleared
@@ -69,6 +76,14 @@ namespace IPMIFRUINV
                    std::vector< std::pair<TARGETING::TargetHandle_t, uint8_t> >&
                                                                io_potentialFrus,
                                   bool i_updateData);
+
+    /**
+     * @brief Reads the Serial Number of the Product Info Area and returns it
+     * @param[in] fruId, The Record number to be read
+     * @return the pointer with the serial number - The caller is required
+     *    to clear up this memory
+     */
+    char* getProductSN(uint8_t i_fruId);
 
 };
 

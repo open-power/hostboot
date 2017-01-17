@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,7 @@ extern trace_desc_t * g_trac_ipmi;
 #ifdef CONFIG_BMC_IPMI
 
 const uint8_t writeDataHeader = 3;
+const uint8_t readDataCmd     = 4;
 
 /**
  * setup _start and handle barrier
@@ -106,6 +107,11 @@ void IpmiFRU::execute(void)
 
                 // done with the msg
                 msg_free(msg);
+                break;
+
+            case IPMIFRU::MSG_READ_FRU_DATA:
+                sendReadFruData(msg);
+                msg_respond(iv_msgQ, msg);
                 break;
             };
         } // while
@@ -191,6 +197,79 @@ void IpmiFRU::sendWriteFruData(msg_t *i_msg)
     return;
 } // sendWriteFruData
 
+void IpmiFRU::sendReadFruData(msg_t *i_msg)
+{
+    errlHndl_t err = NULL;
+
+    const uint8_t &l_deviceId = (i_msg->data[0] >> 32);
+    uint16_t l_offset = (i_msg->data[0] & 0xFFFFFFFF);
+    size_t l_dataSize = i_msg->data[1]; // FRU data size
+    uint8_t *l_data = static_cast<uint8_t*>(i_msg->extra_data);
+
+    uint16_t l_dataOffset = 0; // start at the l_data[0]
+    size_t l_fruSize = 0;
+
+    //TODO RTC 167956
+    const size_t l_maxBuffer = 16;
+
+    IPMI_TRAC(ENTER_MRK "sendReadFruData for dev 0x%x, size %d",
+                l_deviceId, l_dataSize);
+
+    while ((l_dataSize > 0) && (err == NULL))
+    {
+        size_t this_size = readDataCmd;
+        uint8_t *this_data = new uint8_t[this_size];
+
+        l_fruSize = std::min(l_dataSize, l_maxBuffer); // read data size
+
+        // copy device ID, offset, fru data to new buffer
+        this_data[0] = l_deviceId;
+        this_data[1] = l_offset & 0xFF;
+        this_data[2] = l_offset >> 8;
+        this_data[3] = l_fruSize;
+
+        IPMI_TRAC(INFO_MRK "sending read_fru_data fru size %d offset %d, "
+                           "data offset %d",
+                           l_fruSize, l_offset, l_dataOffset);
+
+        IPMI::completion_code cc = IPMI::CC_UNKBAD;
+        err = IPMI::sendrecv(IPMI::read_fru_data(), cc, this_size, this_data);
+        if (err)
+        {
+            IPMI_TRAC(ERR_MRK "Failed to send read_fru_data dev 0x%x",
+                    l_deviceId);
+            // err is set, so we'll break out of the while loop
+        }
+        else if (cc != IPMI::CC_OK)
+        {
+            IPMI_TRAC(ERR_MRK "Failed to send read_fru_data dev 0x%x CC 0x%x",
+                    l_deviceId, cc);
+            // stop sending; breaks out of the while loop
+            l_dataSize = 0;
+        } else {
+            this_size = this_data[0];
+            this_size = std::min(this_size, l_dataSize);
+            memcpy(l_data + l_dataOffset, &this_data[1], this_size);
+            // update the offsets for the next time around
+            l_offset += l_fruSize;
+            l_dataOffset += l_fruSize;
+            l_dataSize -= l_fruSize;
+        }
+
+        //  delete the buffer returned from sendrecv
+        delete [] this_data;
+    }
+
+    if (err)
+    {
+        err->collectTrace(IPMI_COMP_NAME);
+        errlCommit(err, IPMI_COMP_ID);
+    }
+
+    return;
+} // sendReadFruData
+
+
 namespace IPMIFRU
 {
     ///
@@ -231,6 +310,49 @@ namespace IPMIFRU
         IPMI_TRAC(EXIT_MRK "writeData");
         return;
     } // writeData
+
+    void readData(uint8_t i_deviceId, uint8_t *io_data)
+    {
+        IPMI_TRAC(ENTER_MRK "readData(deviceId 0x%x", i_deviceId);
+
+        // one message queue to the FRU thread
+        static msg_q_t mq = Singleton<IpmiFRU>::instance().msgQueue();
+        uint32_t i_offset = 0;
+        size_t i_dataSize = IPMIFRU::MAX_RECORD_SIZE;
+
+        // send data in msg to fru thread
+        msg_t *msg = msg_allocate();
+
+        msg->type = MSG_READ_FRU_DATA;
+        msg->data[0] = (static_cast<uint64_t>(i_deviceId) << 32) | i_offset;
+        msg->data[1] = i_dataSize;
+
+        //Setup data structure to pass in message to read FRU record
+        uint8_t *l_data = new uint8_t[i_dataSize];
+        memset(l_data, 0, i_dataSize);
+        memset(io_data, 0, i_dataSize);
+        msg->extra_data = l_data;
+
+        //Send the msg (sync) to the fru thread
+        int rc = msg_sendrecv(mq, msg);
+
+        //Return code is non-zero when the message queue is invalid
+        //or the message type is invalid.
+        if ( rc )
+        {
+            IPMI_TRAC(ERR_MRK "Failed (rc=%d) to send message to read"
+                              "FRU Inventory Record: %d",
+                              rc, i_deviceId);
+            delete [] l_data; // delete, since msg wasn't sent
+            return;
+        }
+
+        //Copy data from local data structure to output data structure
+        memcpy(&io_data[0], l_data, i_dataSize);
+        msg_free(msg);
+
+        return;
+    }
 
 }; // IPMIFRU namespace
 #endif // CONFIG_BMC_IPMI

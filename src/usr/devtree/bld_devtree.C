@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -53,6 +53,7 @@
 #include <secureboot/trustedbootif.H>
 #include <secureboot/service.H>
 #include <ipmi/ipmisensor.H>
+#include <ipmi/ipmifruinv.H>
 #include <fapi.H>
 #include <fapiPlatHwpInvoker.H> // for fapi::fapiRcToErrl()
 #include <vpd/mvpdenums.H>
@@ -1856,8 +1857,22 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
             TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'\0'};
             l_pNode->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_sn);
             str_chomp(reinterpret_cast<char*>(&l_sn[0]));
-            i_dt->addPropertyString(rootNode, "serial-number",
+            i_dt->addPropertyString(rootNode, "ibm,board-serial-number",
                                     reinterpret_cast<char*>(&l_sn[0]));
+
+            #ifdef CONFIG_BMC_SERIAL
+              #ifdef CONFIG_BMC_IPMI
+                //Get Product Serial Number from Backplane
+                char* l_sn_prod = NULL;
+                l_sn_prod = IPMIFRUINV::getProductSN(0);
+                i_dt->addPropertyString(rootNode, "serial-number",
+                                         reinterpret_cast<char*>(l_sn_prod));
+                //getProductSN requires the caller to delete the char array
+                delete[] l_sn_prod;
+                l_sn_prod = NULL;
+              #endif
+            #endif
+
         }
         // just delete any errors we get, this isn't critical
         if( errhdl )

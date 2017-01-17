@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <pnor/pnorif.H>
+#include <console/consoleif.H>
 
 extern trace_desc_t * g_trac_ipmi;
 
@@ -756,7 +757,6 @@ errlHndl_t backplaneIpmiFruInv::buildBoardInfoArea(
         io_data.push_back(0);
         io_data.push_back(0);
         io_data.push_back(0);
-
 
         //Set Vendor Name - ascii formatted data
         l_errl = addVpdData(io_data, PVPD::OPFR, PVPD::VN, true);
@@ -1540,6 +1540,87 @@ void IPMIFRUINV::setData(bool i_updateData)
     return;
 }
 
+void IPMIFRUINV::readFruData(uint8_t i_deviceId, uint8_t *o_data)
+{
+    //Use IMPIFRU::readData to send data to service processor
+    // it will do any error handling and memory management
+    IPMIFRU::readData(i_deviceId, o_data);
+}
+
+char * IPMIFRUINV::getProductSN(uint8_t i_deviceId)
+{
+    //If we cannot read the product serial number, default is 0's (set below)
+    char * l_prodSN = NULL;
+
+    //First read the entire record that contains the SN
+    uint8_t *l_record = new uint8_t[IPMIFRU::MAX_RECORD_SIZE];
+    memset(l_record, 0, IPMIFRU::MAX_RECORD_SIZE);
+    readFruData(i_deviceId, l_record);
+
+    do {
+
+        //Code only supports version 1 of the FRU spec if for whatever reason
+        //  we didn't get data, this would be 0
+        if (l_record[IPMIFRUINV::HEADER_FORMART_VERSION]
+                                       != IPMIFRUINV::SPEC_VERSION)
+        {
+            TRACFCOMP(g_trac_ipmi, "FW does not support IPMI FRU Version: %d",
+                        l_record[1]);
+            break;
+        }
+
+        //Get the offset in the record pointed to the product info area
+        //  (where the SN is located)
+        uint8_t l_prodInfoOffset = l_record[IPMIFRUINV::PRODUCT_INFO_AREA];
+
+        if (l_prodInfoOffset == IPMIFRUINV::RECORD_NOT_PRESENT)
+        {
+            TRACFCOMP(g_trac_ipmi, "Product Info Area Not present "
+                        "- returning empty SN");
+            break;
+        }
+
+        //Start at the beginning of the Product Info Record and traverse to the
+        // serial number entry
+        uint8_t l_prodIndex = l_prodInfoOffset * RECORD_UNIT_OF_MEASUREMENT;
+        l_prodIndex += 3; //Version, Length Byte, Language Code
+
+        //MFG NAME Length + TYPELENGTH Byte
+        l_prodIndex += ((TYPELENGTH_SIZE_MASK&l_record[l_prodIndex]) + 1);
+
+        //Prod NAME Length + TYPELENGTH Byte
+        l_prodIndex += ((TYPELENGTH_SIZE_MASK&l_record[l_prodIndex]) + 1);
+
+        //Prod Part/Model Number Length + TYPELENGTH Byte
+        l_prodIndex += ((TYPELENGTH_SIZE_MASK&l_record[l_prodIndex]) + 1);
+
+        //Prod Version Length + TYPELEGNTH Byte
+        l_prodIndex += ((TYPELENGTH_SIZE_MASK&l_record[l_prodIndex]) + 1);
+
+        //Serial number located after Prod Version
+        uint8_t l_prodSNOffset = l_prodIndex;
+        uint8_t l_prodSNsize = TYPELENGTH_SIZE_MASK&l_record[l_prodSNOffset];
+
+        //Grab Serial Number as char array
+        l_prodSN = new char[l_prodSNsize+1];
+        memcpy(l_prodSN, &l_record[l_prodSNOffset+1], l_prodSNsize);
+        l_prodSN[l_prodSNsize] = '\0';
+
+        //Can skip the rest.
+
+    } while (0);
+
+    if (l_prodSN == NULL)
+    {
+        l_prodSN = new char[9];
+        memset(l_prodSN, 0, 8);
+        l_prodSN[8] = '\0';
+    }
+
+    delete[] l_record;
+
+    return l_prodSN;
+}
 
 void IPMIFRUINV::gatherClearData(const TARGETING::Target* i_pSys,
                                     std::map<uint8_t,bool>& io_frusToClear)

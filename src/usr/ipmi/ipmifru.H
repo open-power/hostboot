@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,8 @@
 #include <stdint.h>
 #include <ipmi/ipmiif.H>
 #include "ipmibt.H"
+#include <console/consoleif.H>
+
 
 /**
  *
@@ -44,12 +46,23 @@ namespace IPMIFRU
     void writeData(uint8_t i_deviceId, uint8_t *i_data,
             uint32_t i_dataSize, uint32_t i_offset = 0);
 
+    /*
+     * @brief Read the IPMI FRU Record
+     * @param[in] deviceId - The device ID to be read
+     * @param[in/out] data - The buffer pointing to the data read
+     */
+    void readData(uint8_t i_deviceId, uint8_t *io_data);
+
     enum msg_type
     {
         MSG_WRITE_FRU_DATA, // async message - no reply
-
+        MSG_READ_FRU_DATA,  // sync message  - has reply
         // Used to check range. Leave as last.
-        MSG_LAST_TYPE = MSG_WRITE_FRU_DATA,
+        MSG_LAST_TYPE = MSG_READ_FRU_DATA,
+    };
+    enum record_info
+    {
+        MAX_RECORD_SIZE = 256,
     };
 }
 
@@ -94,6 +107,12 @@ class IpmiFRU
      * @param[in] i_msg
      */
     void sendWriteFruData(msg_t *i_msg);
+
+    /**
+     * @brief Handle a message with fru inventory data; msg is sync
+     * #param[in] i_msg
+     */
+    void sendReadFruData(msg_t *i_msg);
 
     /**
      * ipmi fru msg queue
