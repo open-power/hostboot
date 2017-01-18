@@ -234,6 +234,95 @@ errlHndl_t _queryIopsToBifurcateAndPhbsToDisable(
 }
 
 #endif
+
+/******************************************************************
+* compareChipUnits
+*
+* Check if chip unit of l_t1 > l_t2
+*
+*******************************************************************/
+bool compareChipUnits(TARGETING::Target *l_t1,
+                      TARGETING::Target *l_t2)
+{
+    bool l_result = false;
+    assert((l_t1 != NULL) && (l_t2 != NULL));
+
+    l_result = l_t1->getAttr<TARGETING::ATTR_CHIP_UNIT>() >
+               l_t2->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+    return l_result;
+}
+
+/******************************************************************
+* setup_pcie_iovalid_enable
+*
+* Setup ATTR_PROC_PCIE_IOVALID_ENABLE on i_procTarget's PEC children
+*
+*******************************************************************/
+void setup_pcie_iovalid_enable(const TARGETING::Target * i_procTarget)
+{
+    // Get list of PEC chiplets downstream from the given proc chip
+    TARGETING::TargetHandleList l_pecList;
+
+    getChildAffinityTargetsByState( l_pecList,
+                                    i_procTarget,
+                                    TARGETING::CLASS_NA,
+                                    TARGETING::TYPE_PEC,
+                                    TARGETING::UTIL_FILTER_ALL);
+
+    for (auto l_pecTarget : l_pecList)
+    {
+        // Get list of PHB chiplets downstream from the given PEC chiplet
+        TARGETING::TargetHandleList l_phbList;
+
+        getChildAffinityTargetsByState( l_phbList,
+                   const_cast<TARGETING::Target*>(l_pecTarget),
+                   TARGETING::CLASS_NA,
+                   TARGETING::TYPE_PHB,
+                   TARGETING::UTIL_FILTER_ALL);
+
+        // default to all invalid
+        ATTR_PROC_PCIE_IOVALID_ENABLE_type l_iovalid = 0;
+
+        // arrange phb targets from largest to smallest based on unit
+        // ex.  PHB5, PHB4, PHB3
+        std::sort(l_phbList.begin(),l_phbList.end(),compareChipUnits);
+        for(uint32_t k = 0; k<l_phbList.size(); ++k)
+        {
+            const fapi2::Target<fapi2::TARGET_TYPE_PHB>
+             l_fapi_phb_target(l_phbList[k]);
+
+            if(l_fapi_phb_target.isFunctional())
+            {
+                TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "PHB%d functional",
+                      (l_phbList[k])->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+
+                // filled in bitwise, largest PHB unit on the right to smallest
+                // leftword. ex. l_iovalid = 0b00000110 : PHB3, PHB4 functional
+                // PHB5 not
+                l_iovalid |= (1<<k);
+            }
+            else
+            {
+                TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "PHB%d not functional",
+                      (l_phbList[k])->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+            }
+        }
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                 "PROC %.8X PEC%d -> ATTR_PROC_PCIE_IOVALID_ENABLE: 0x%02X",
+                 TARGETING::get_huid(i_procTarget),
+                 l_pecTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>(),
+                 l_iovalid);
+
+        l_pecTarget->setAttr
+              <TARGETING::ATTR_PROC_PCIE_IOVALID_ENABLE>(l_iovalid);
+    }
+}
+
+
 //*****************************************************************************
 // computeProcPcieConfigAttrs
 //******************************************************************************
@@ -257,7 +346,7 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
            LANE_WIDTH_NC,
            LANE_WIDTH_NC},
            0x00,PHB0_MASK,
-           PHB_X16_MAC_MAP, 0x01},
+           PHB_X16_MAC_MAP},
         };
 
     const laneConfigRow pec1_laneConfigTable[] =
@@ -266,7 +355,7 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
            LANE_WIDTH_8X,
            LANE_WIDTH_NC},
            0x00,PHB1_MASK|PHB2_MASK,
-           PHB_X8_X8_MAC_MAP, 0x03},
+           PHB_X8_X8_MAC_MAP},
         };
 
     const laneConfigRow pec2_laneConfigTable[] =
@@ -275,21 +364,21 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
            LANE_WIDTH_NC,
            LANE_WIDTH_NC},
            0x00,PHB3_MASK,
-           PHB_X16_MAC_MAP, 0x4},
+           PHB_X16_MAC_MAP},
 
          {{LANE_WIDTH_8X,
            LANE_WIDTH_NC,
            LANE_WIDTH_8X,
            LANE_WIDTH_NC},
            0x10,PHB3_MASK|PHB4_MASK,
-           PHB_X8_X8_MAC_MAP, 0x6},
+           PHB_X8_X8_MAC_MAP},
 
          {{LANE_WIDTH_8X,
            LANE_WIDTH_NC,
            LANE_WIDTH_4X,
            LANE_WIDTH_4X},
            0x20,PHB3_MASK|PHB4_MASK|PHB5_MASK,
-           PHB_X8_X4_X4_MAC_MAP, 0x07},
+           PHB_X8_X4_X4_MAC_MAP},
         };
 
     const laneConfigRow* pec0_end = pec0_laneConfigTable +
@@ -572,7 +661,6 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
 
             TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type pecPhbActiveMask = 0;
             TARGETING::ATTR_PROC_PCIE_IOP_CONFIG_type iopConfig = 0;
-            TARGETING::ATTR_PROC_PCIE_IOVALID_ENABLE_type ioValid = 0;
             TARGETING::ATTR_PROC_PCIE_REFCLOCK_ENABLE_type refEnable = 0;
             TARGETING::ATTR_PROC_PCIE_PCS_SYSTEM_CNTL_type macCntl = 0;
 
@@ -583,7 +671,6 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
                    LANE_WIDTH_NC},
                     0x00,PHB_MASK_NA,
                     PHB_X16_MAC_MAP,
-                    0x00,
                    };
 
             // Transform effective config to match lane config table format
@@ -604,7 +691,6 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
             if(laneConfigItr != pLaneConfigTableEnd)
             {
                 iopConfig = laneConfigItr->laneConfig;
-                ioValid = laneConfigItr->iovalid;
                 refEnable = 0x1;
                 macCntl = laneConfigItr->phb_to_pcieMAC;
                 pecPhbActiveMask = laneConfigItr->phbActive;
@@ -672,10 +758,6 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
                   TARGETING::ATTR_PROC_PCIE_REFCLOCK_ENABLE>(refEnable);
             l_pec->setAttr<
                   TARGETING::ATTR_PROC_PCIE_PCS_SYSTEM_CNTL>(macCntl);
-            //TODO: RTC 167302 - Remove below setting after PHB targets in
-            // OpenPower XML files
-            l_pec->setAttr<
-                  TARGETING::ATTR_PROC_PCIE_IOVALID_ENABLE>(ioValid);
 
         }// PEC loop
 
@@ -688,6 +770,10 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
         (void)_deconfigPhbsBasedOnPhbMask(
              i_pProcChipTarget,
              procPhbActiveMask);
+
+        // setup ATTR_PROC_PCIE_IOVALID_ENABLE for this processor
+        // This has to be done after the PHB's are disabled
+        setup_pcie_iovalid_enable(i_pProcChipTarget);
 
     } while(0);
 

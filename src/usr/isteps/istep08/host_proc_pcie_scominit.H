@@ -93,7 +93,6 @@ struct laneConfigRow
     // PHB5 = 0x04
     uint8_t phbActive;
     uint16_t phb_to_pcieMAC;
-    uint8_t iovalid;
 };
 
 /**
