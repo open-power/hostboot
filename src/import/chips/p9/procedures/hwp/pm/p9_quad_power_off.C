@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,7 @@
 fapi2::ReturnCode p9_quad_power_off(
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target)
 {
+    fapi2::buffer<uint64_t> l_data64;
     fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
 
     FAPI_INF("p9_quad_power_off: Entering...");
@@ -63,6 +64,14 @@ fapi2::ReturnCode p9_quad_power_off(
     // Print chiplet position
     FAPI_INF("Quad power off chiplet no.%d", i_target.getChipletNumber());
 
+    l_data64.setBit<20>();
+    l_data64.setBit<22>();
+    l_data64.setBit<24>();
+    l_data64.setBit<26>();
+
+    FAPI_TRY(fapi2::putScom(i_target,
+                            EQ_QPPM_QPMMR_CLEAR,
+                            l_data64));
     // Call the procedure
     FAPI_EXEC_HWP(rc, p9_pm_pfet_control_eq, i_target,
                   PM_PFET_TYPE_C::BOTH, PM_PFET_TYPE_C::OFF);
