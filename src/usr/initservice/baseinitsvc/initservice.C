@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -800,7 +800,7 @@ void InitService::doShutdown(uint64_t i_status,
             (i->msgPriority <= LAST_PRE_MEM_FLUSH_PRIORITY));
         ++i)
     {
-            TRACDCOMP(g_trac_initsvc,"notify priority=0x%x, queue=0x%x", i->msgPriority, i->msgQ );
+            TRACFCOMP(g_trac_initsvc,"notify priority=0x%x, queue=0x%x", i->msgPriority, i->msgQ );
             l_msg->type = i->msgType;
             l_msg->data[0] = worst_status;
             (void)msg_sendrecv(i->msgQ,l_msg);
