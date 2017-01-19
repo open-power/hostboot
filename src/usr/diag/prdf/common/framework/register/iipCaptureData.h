@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -230,7 +230,7 @@ public:
    </ul><br>
    */
   void Add( TARGETING::TargetHandle_t i_pchipHandle, int scomId,
-            BIT_STRING_CLASS & bs, Place place = BACK);
+            const BIT_STRING_CLASS & bs, Place place = BACK);
 
   // dg02 end
 
@@ -338,11 +338,11 @@ private:
 
   DataContainerType             data;
 
-  /**
-   Private function to facilitate the adding of caputre data to the internal vector
-   */
-  void AddDataElement(Data &dataElement, SCAN_COMM_REGISTER_CLASS & scr, Place place, RegType type);
-  //$TEMP @jl04 Changed AddDataElement to include a Register type.
+    /** Private function to facilitate the adding of caputre data to the
+     *  internal vector */
+    void AddDataElement( TARGETING::TargetHandle_t i_trgt, int i_scomId,
+                         const BIT_STRING_CLASS * i_bs, Place i_place,
+                         RegType i_type = PRIMARY );
 
   // Predicate for deciding to delete an element of data from a Capture Data list.
   class prdfCompareCaptureDataType : public std::unary_function<Data &, bool>

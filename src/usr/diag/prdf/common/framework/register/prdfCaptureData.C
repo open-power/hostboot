@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,8 @@
 #include <iipCaptureData.h>
 #include <string.h>
 #include <algorithm>    // @jl04 a Add this for the Drop function.
+
+using namespace TARGETING;
 
 namespace PRDF
 {
@@ -74,63 +76,69 @@ void CaptureData::Clear(void)
   }                             /* if not empty */
 }
 
+//------------------------------------------------------------------------------
 
-// @jl04 c Changed this to add the type parm.
-void CaptureData::Add(  TARGETING::TargetHandle_t i_pchipHandle, int scomId,
-                        SCAN_COMM_REGISTER_CLASS & scr, Place place, RegType type)
+void CaptureData::AddDataElement( TargetHandle_t i_trgt, int i_scomId,
+                                  const BIT_STRING_CLASS * i_bs,
+                                  Place i_place, RegType i_type )
 {
-  uint16_t bufferLength = scr.GetBitLength() / 8;
+    // Initial values of the bit string buffer if i_bs has a zero value.
+    uint8_t * buf = nullptr;
+    size_t sz_buf = 0;
 
-  if((scr.GetBitLength() % 8) != 0)
-    bufferLength += 1;
+    // Add buffer only if the value is non-zero.
+    if ( !i_bs->IsZero() )
+    {
+        // Get the size of i_bs and ensure byte alignment.
+        sz_buf = (i_bs->GetLength() + 8-1) / 8;
 
-  Data dataElement(i_pchipHandle, scomId, bufferLength, NULL);
+        // Since we are using a BitString below, which does everything on a
+        // CPU_WORD boundary, we must make sure the buffer is CPU_WORD aligned.
+        const size_t sz_word = sizeof(CPU_WORD);
+        sz_buf = ((sz_buf + sz_word-1) / sz_word) * sz_word;
 
-  AddDataElement(dataElement, scr, place, type);
+        // Allocate memory for the buffer.
+        buf = new uint8_t[sz_buf];
+        memset( buf, 0x00, sz_buf );
+
+        // Use a BitString to copy i_bs to the buffer.
+        BIT_STRING_ADDRESS_CLASS bs ( 0, i_bs->GetLength(), (CPU_WORD *)buf );
+        bs.SetBits( *i_bs );
+
+        // Create the new data element.
+        Data element( i_trgt, i_scomId, sz_buf, buf );
+        element.registerType = i_type;
+
+        // Add the new element to the data.
+        if ( FRONT == i_place )
+            data.insert( data.begin(), element );
+        else
+            data.push_back( element );
+    }
 }
 
-// start dg02
-void CaptureData::Add( TARGETING::TargetHandle_t i_pchipHandle, int scomId,
-                       BIT_STRING_CLASS & bs, Place place)
+//------------------------------------------------------------------------------
+
+void CaptureData::Add( TargetHandle_t i_trgt, int32_t i_scomId,
+                       SCAN_COMM_REGISTER_CLASS & io_scr,
+                       Place i_place, RegType i_type )
 {
-  uint16_t bufferLength = bs.GetLength() / 8;
-
-  if((bs.GetLength() % 8) != 0)
-    bufferLength += 1;
-
-  Data dataElement(i_pchipHandle, scomId, bufferLength, NULL);
-
-  DataIterator dataIterator;
-
-  if(place == FRONT)
-  {
-    data.insert(data.begin(), dataElement);
-    dataIterator = data.begin();
-  }
-  else
-  {
-    data.push_back(dataElement);
-    dataIterator = data.end();
-    dataIterator--;
-  }
-  if(!bs.IsZero())
-  {
-    uint8_t *bufferPtr = new uint8_t[(*dataIterator).dataByteLength];
-    BIT_STRING_ADDRESS_CLASS bitString(0, bs.GetLength(), (CPU_WORD *) bufferPtr);
-
-    bitString.SetBits(bs);
-    (*dataIterator).dataPtr = bufferPtr;
-  }
-  else
-  {
-    (*dataIterator).dataByteLength = 0;
-  }
-
-
+    if ( SUCCESS == io_scr.Read() )
+    {
+        AddDataElement( i_trgt, i_scomId, io_scr.GetBitString(),
+                        i_place, i_type );
+    }
 }
 
-// end dg02
+//------------------------------------------------------------------------------
 
+void CaptureData::Add( TargetHandle_t i_trgt, int i_scomId,
+                       const BIT_STRING_CLASS & i_bs, Place i_place )
+{
+    AddDataElement( i_trgt, i_scomId, &i_bs, i_place );
+}
+
+//------------------------------------------------------------------------------
 
 // start jl04a
 void CaptureData::Drop(RegType i_type)
@@ -145,55 +153,7 @@ void CaptureData::Drop(RegType i_type)
 }
 // end jl04a
 
-// @jl04 c Changed the AddDataElement to include a type.
-void CaptureData::AddDataElement( Data & dataElement,
-                                  SCAN_COMM_REGISTER_CLASS & scr,
-                                  Place place, RegType type )
-{
-  DataIterator dataIterator;
-
-  if(place == FRONT)
-  {
-    data.insert(data.begin(), dataElement);
-    dataIterator = data.begin();
-  }
-  else
-  {
-    data.push_back(dataElement);
-    dataIterator = data.end();
-    dataIterator--;
-  }
-
-//$TEMP @jl04 or @jl05.
-      (*dataIterator).registerType = type;
-//$TEMP @jl04 or @jl05.
-
-  if(scr.Read() == SUCCESS)
-  {
-    const BIT_STRING_CLASS *bitStringPtr = scr.GetBitString();
-
-    if(!bitStringPtr->IsZero())
-    {
-      uint8_t *bufferPtr = new uint8_t[(*dataIterator).dataByteLength];
-      BIT_STRING_ADDRESS_CLASS bitString(0, bitStringPtr->GetLength(),
-                                         (CPU_WORD *) bufferPtr);
-
-      bitString.SetBits(*bitStringPtr);
-      (*dataIterator).dataPtr = bufferPtr;
-    }
-    else
-    {
-      (*dataIterator).dataByteLength = 0;
-    }
-  }
-  else
-  {
-    // Zero out data length if SCRs failed
-    (*dataIterator).dataByteLength = 0;
-  }
-
-}
-// ------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 /* CaptureData Format:
  *        capture data -> ( <chip header> <registers> )*
@@ -202,8 +162,6 @@ void CaptureData::AddDataElement( Data & dataElement,
  */
 unsigned int CaptureData::Copy(uint8_t *i_buffer, unsigned int i_bufferSize) const
 {
-    using namespace TARGETING;
-
     TargetHandle_t  l_pcurrentChipHandle =NULL ;
     uint8_t * l_entryCountPos = NULL;
     uint32_t l_regEntries = 0;
@@ -300,8 +258,6 @@ unsigned int CaptureData::Copy(uint8_t *i_buffer, unsigned int i_bufferSize) con
 // dg08a -->
 CaptureData & CaptureData::operator=(const uint8_t *i_flatdata)
 {
-    using namespace TARGETING;
-
     uint32_t l_tmp32 = 0;
     uint16_t l_tmp16 = 0;
 
