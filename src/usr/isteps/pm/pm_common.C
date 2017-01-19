@@ -52,6 +52,7 @@
 #include    <initservice/initserviceif.H>
 
 #include <runtime/interface.h>
+#include <secureboot/service.H>
 
 // Procedures
 #include <p9_pm_pba_bar_config.H>
@@ -338,12 +339,23 @@ namespace HBPM
 
             ImageType_t l_imgType;
 
+            // Check if we have a valid ring override section and
+            //  include it in if so
+            void* l_ringOverrides = NULL;
+            l_errl = HBPM::getRingOvd(l_ringOverrides);
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"loadHcode(): Error in call to getRingOvd!");
+                break;
+            }
+
             FAPI_INVOKE_HWP( l_errl,
                              p9_hcode_image_build,
                              l_fapiTarg,
                              l_pImageIn, //reference image
                              i_pImageOut, //homer image buffer
-                             nullptr, //default is no ring overrides
+                             l_ringOverrides,
                              (PM_LOAD == i_mode)
                                  ? PHASE_IPL : PHASE_REBUILD,
                              l_imgType,
@@ -948,6 +960,64 @@ namespace HBPM
 
         return l_errl;
     } // resetPMAll
+
+
+    /**
+     *  @brief Fetch the ring overrides (if they exist)
+     */
+    errlHndl_t getRingOvd(void*& io_overrideImg)
+    {
+        errlHndl_t l_err = nullptr;
+
+        do {
+            io_overrideImg = nullptr;
+
+            // No overrides in secure mode
+            if( SECUREBOOT::enabled() )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           INFO_MRK"getRingOvd(): No overrides in secure mode");
+                break;
+            }
+
+            PNOR::SectionInfo_t l_pnorRingOvd;
+            l_err = PNOR::getSectionInfo(PNOR::RINGOVD, l_pnorRingOvd);
+            if(l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"getRingOvd():Error trying to read RINGOVD "
+                           "from PNOR!");
+                break;
+            }
+            if(l_pnorRingOvd.size == 0)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           INFO_MRK"getRingOvd(): No RINGOVD section in PNOR");
+                break;
+            }
+
+            TRACDBIN( ISTEPS_TRACE::g_trac_isteps_trace,
+                      "getRingOvd():100 bytes of RINGOVD section",
+                      (void *)l_pnorRingOvd.vaddr,100);
+
+            // If first 8 bytes are just FF's then we know there's no override
+            if((*(static_cast<uint64_t *>((void *)l_pnorRingOvd.vaddr))) ==
+                    0xFFFFFFFFFFFFFFFF)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           INFO_MRK"getRingOvd():No overrides in RINGOVD section "
+                           "found");
+                break;
+            }
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       INFO_MRK"getRingOvd():Found valid ring overrides");
+            io_overrideImg = reinterpret_cast<void*>(l_pnorRingOvd.vaddr);
+
+        }while(0);
+
+        return l_err;
+    }
 
 }  // end HBPM namespace
 
