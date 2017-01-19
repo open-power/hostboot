@@ -78,6 +78,9 @@ fapi2::ReturnCode p9_io_obus_scominit( const fapi2::Target<fapi2::TARGET_TYPE_OB
     // get system target
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_system_target;
 
+    // get a proc target
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc_target = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
     // assert IO reset to power-up bus endpoint logic
     FAPI_TRY( io::rmw( OPT_IORESET_HARD_BUS0, i_target, GROUP_00, LANE_00, SET_RESET ) );
 
@@ -87,7 +90,7 @@ fapi2::ReturnCode p9_io_obus_scominit( const fapi2::Target<fapi2::TARGET_TYPE_OB
     FAPI_TRY( io::rmw( OPT_IORESET_HARD_BUS0, i_target, GROUP_00, LANE_00, CLEAR_RESET ) );
 
     FAPI_INF("Invoke FAPI procedure core: input_target");
-    FAPI_EXEC_HWP(rc, p9_obus_scom, i_target, l_system_target);
+    FAPI_EXEC_HWP(rc, p9_obus_scom, i_target, l_system_target, l_proc_target);
 
     // mark HWP exit
     FAPI_INF("p9_io_obus_scominit: ...Exiting");
