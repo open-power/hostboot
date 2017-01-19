@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -395,40 +395,20 @@ void BitString::Clear
 //
 // End Function Specification //////////////////////////////////////
 
-bool BitString::IsEqual
-(
- const BitString& string
- ) const
+bool BitString::IsEqual( const BitString & i_string ) const
 {
-  uint32_t o;
-  uint32_t l;
+    if ( ivLength != i_string.ivLength )
+        return false; // size not equal
 
-  bool equal = false;
-
-  if(ivLength == string.ivLength)
-  {
-    o = 0;
-    l = ivLength;
-    while(true)
+    for ( uint32_t pos = 0; pos < ivLength; pos += WORD_BIT_LENGTH )
     {
-      if(l < WORD_BIT_LENGTH)
-      {
-        equal = (GetField(o, l) == string.GetField(o, l));
-        break;
-      }
+        uint32_t len = std::min( ivLength - pos, (uint32_t)WORD_BIT_LENGTH );
 
-      if(!(equal = (GetField(o, WORD_BIT_LENGTH) ==
-                    string.GetField(o, WORD_BIT_LENGTH))))
-      {
-        break;
-      }
-
-      o += WORD_BIT_LENGTH;
-      l -= WORD_BIT_LENGTH;
+        if ( GetField(pos, len) != i_string.GetField(pos, len) )
+            return false; // bit strings do not match
     }
-  }
 
-  return(equal);
+    return true; // bit strings match
 }
 
 // Function Specification //////////////////////////////////////////
@@ -446,31 +426,17 @@ bool BitString::IsEqual
 //
 // End Function Specification //////////////////////////////////////
 
-bool BitString::IsZero(void) const
+bool BitString::IsZero() const
 {
-  uint32_t o = 0;
-  uint32_t l = ivLength;
-
-  bool zero;
-
-  while(true)
-  {
-    if(l < WORD_BIT_LENGTH)
+    for ( uint32_t pos = 0; pos < ivLength; pos += WORD_BIT_LENGTH )
     {
-      zero = (GetField(o, l) == 0);
-      break;
+        uint32_t len = std::min( ivLength - pos, (uint32_t)WORD_BIT_LENGTH );
+
+        if ( 0 != GetField(pos, len) )
+            return false; // something is non-zero
     }
 
-    if(!(zero = (GetField(o, WORD_BIT_LENGTH) == 0)))
-    {
-      break;
-    }
-
-    o += WORD_BIT_LENGTH;
-    l -= WORD_BIT_LENGTH;
-  }
-
-  return(zero);
+    return true; // everything was zero
 }
 
 // Function Specification //////////////////////////////////////////
