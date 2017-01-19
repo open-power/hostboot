@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,7 +78,7 @@ fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_ta
         {
             FAPI_INF("mca scominit for %s", mss::c_str(l_mca_target));
             FAPI_EXEC_HWP(l_rc, p9_mca_scom, l_mca_target, i_target, l_mca_target.getParent<fapi2::TARGET_TYPE_MCS>(),
-                          FAPI_SYSTEM );
+                          FAPI_SYSTEM, i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>());
 
             if (l_rc)
             {
@@ -94,7 +94,7 @@ fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_ta
         // ... but we do scominit PHY's with no DIMM. There are no attributes needed and we need
         // to make sure we init the magic port.
         FAPI_INF("phy scominit for %s", mss::c_str(l_mca_target));
-        FAPI_EXEC_HWP(l_rc, p9_ddrphy_scom, l_mca_target);
+        FAPI_EXEC_HWP(l_rc, p9_ddrphy_scom, l_mca_target, i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>());
 
         if (l_rc)
         {

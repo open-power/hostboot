@@ -73,6 +73,7 @@ target_type 0 TARGET_TYPE_MCA;
 target_type 1 TARGET_TYPE_MCBIST;
 target_type 2 TARGET_TYPE_MCS;
 target_type 3 TARGET_TYPE_SYSTEM;
+target_type 4 TARGET_TYPE_PROC_CHIP;
 
 
 define MCBIST = TGT1; # If referencing Attr from mcbist, add "MCBIST." in front

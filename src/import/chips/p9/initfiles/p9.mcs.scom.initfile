@@ -42,7 +42,7 @@
 ## Syntax Notes
 # Compiler expects spys to be all caps
 
- 
+
 #--******************************************************************************
 #-- Required keywords/variables
 #--******************************************************************************
@@ -51,6 +51,7 @@ SyntaxVersion = 3
 
 target_type 0 TARGET_TYPE_MCS;
 target_type 1 TARGET_TYPE_SYSTEM;
+target_type 2 TARGET_TYPE_PROC_CHIP;
 
 
 #--******************************************************************************

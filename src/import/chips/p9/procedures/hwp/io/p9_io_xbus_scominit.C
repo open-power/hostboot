@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -130,6 +130,9 @@ fapi2::ReturnCode p9_io_xbus_scominit(
     // get system target
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_system_target;
 
+    // get proc chip to pass for EC level checks in procedure
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc =
+        i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
     // assert IO reset to power-up bus endpoint logic
     // read-modify-write, set single reset bit (HW auto-clears)
@@ -194,7 +197,7 @@ fapi2::ReturnCode p9_io_xbus_scominit(
 
         case ENUM_ATTR_XBUS_GROUP_1:
             FAPI_INF("Group 1:Invoke FAPI procedure core: input_target");
-            FAPI_EXEC_HWP(rc, p9_xbus_g1_scom, i_target, l_system_target);
+            FAPI_EXEC_HWP(rc, p9_xbus_g1_scom, i_target, l_system_target, l_proc);
 
             if( rc )
             {
@@ -204,7 +207,7 @@ fapi2::ReturnCode p9_io_xbus_scominit(
             }
 
             FAPI_INF("Group 1:Invoke FAPI procedure core: connected_target");
-            FAPI_EXEC_HWP(rc, p9_xbus_g1_scom, i_connected_target, l_system_target);
+            FAPI_EXEC_HWP(rc, p9_xbus_g1_scom, i_connected_target, l_system_target, l_proc);
 
             if( rc )
             {

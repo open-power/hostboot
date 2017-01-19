@@ -112,7 +112,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     {
         fapi2::toString(l_mcs_target, l_chipletTargetStr, sizeof(l_chipletTargetStr));
         FAPI_DBG("Invoking p9.mcs.scom.initfile on target %s...", l_chipletTargetStr);
-        FAPI_EXEC_HWP(l_rc, p9_mcs_scom, l_mcs_target, FAPI_SYSTEM);
+        FAPI_EXEC_HWP(l_rc, p9_mcs_scom, l_mcs_target, FAPI_SYSTEM, i_target);
 
         if (l_rc)
         {
@@ -164,7 +164,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     {
         fapi2::toString(*l_iter, l_chipletTargetStr, sizeof(l_chipletTargetStr));
         FAPI_DBG("Invoking p9.fbc.ioe_dl.scom.initfile on target %s...", l_chipletTargetStr);
-        FAPI_EXEC_HWP(l_rc, p9_fbc_ioe_dl_scom, *l_iter);
+        FAPI_EXEC_HWP(l_rc, p9_fbc_ioe_dl_scom, *l_iter, i_target);
 
         if (l_rc)
         {
@@ -274,7 +274,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     {
         fapi2::toString(l_capp, l_chipletTargetStr, sizeof(l_chipletTargetStr));
         FAPI_DBG("Invoking p9.cxa.scom.initfile on target %s...", l_chipletTargetStr);
-        FAPI_EXEC_HWP(l_rc, p9_cxa_scom, l_capp, FAPI_SYSTEM);
+        FAPI_EXEC_HWP(l_rc, p9_cxa_scom, l_capp, FAPI_SYSTEM, i_target);
 
         if (l_rc)
         {
