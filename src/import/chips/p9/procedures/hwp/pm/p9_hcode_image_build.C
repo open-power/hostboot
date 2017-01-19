@@ -2315,6 +2315,7 @@ extern "C"
             uint64_t baseAddressNm0     = 0;
             uint64_t baseAddressNm1     = 0;
             uint64_t baseAddressMirror  = 0;
+            uint32_t ncuBarRegisterAddr = 0;
             const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NX_RNG_BAR_ENABLE,
@@ -2343,21 +2344,28 @@ extern "C"
 
             regNcuRngBarData += nxRangeBarAddrOffset;
 
-            FAPI_DBG("Restore value for EQ_NCU_DARN_BAR_REG 0x%016lx",
-                     regNcuRngBarData );
-
-            StopReturnCode_t stopRc =
-                stopImageSection::p9_stop_save_scom( i_pChipHomer,
-                        EQ_NCU_DARN_BAR_REG,
-                        regNcuRngBarData ,
-                        stopImageSection::P9_STOP_SCOM_REPLACE,
-                        stopImageSection::P9_STOP_SECTION_EQ_SCOM );
-
-            if( stopRc )
+            for( uint32_t exIndex = 0; exIndex < MAX_CME_PER_CHIP; exIndex++ )
             {
-                FAPI_ERR("Failed to update EQ_NCU_DARN_BAR_REG in Self Restore Image 0x%08x",
-                         stopRc );
-                break;
+                ncuBarRegisterAddr = EX_0_NCU_DARN_BAR_REG;
+                ncuBarRegisterAddr |= (( exIndex >> 1) << 24 );
+                ncuBarRegisterAddr |= ( exIndex & 0x01 ) ? 0x0400 : 0x0000;
+
+                FAPI_DBG("CME%d NCU_DARN_BAR Addr 0x%08x Data 0x%016lx ",
+                         exIndex, ncuBarRegisterAddr, regNcuRngBarData );
+
+                StopReturnCode_t stopRc =
+                    stopImageSection::p9_stop_save_scom( i_pChipHomer,
+                            ncuBarRegisterAddr,
+                            regNcuRngBarData ,
+                            stopImageSection::P9_STOP_SCOM_REPLACE,
+                            stopImageSection::P9_STOP_SECTION_EQ_SCOM );
+
+                if( stopRc )
+                {
+                    FAPI_ERR("Failed to update CME%d NCU_DARN_RNG_BAR Reg RC: 0x%08x",
+                             exIndex, stopRc );
+                    break;
+                }
             }
 
         }
