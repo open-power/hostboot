@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 #include    <sys/mm.h>
 #include    <usr/vmmconst.h>
 #include    <arch/pirformat.H>
+#include    <isteps/pm/pm_common_ext.H>
 
 //Error handling and tracing
 #include    <errl/errlentry.H>
@@ -54,6 +55,8 @@
 #include    <p9_stop_api.H>
 #include    <p9_xip_image.h>
 #include    <p9_infrastruct_help.H>
+#include    <p9_hcode_image_defines.H>
+#include    <p9_xip_section_append.H>
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -65,7 +68,6 @@ using   namespace   fapi2;
 
 namespace ISTEP_15
 {
-
 
 /**
  *  @brief Load HCODE image and return a pointer to it, or NULL
@@ -449,13 +451,25 @@ void* host_build_stop_image (void *io_pArgs)
                 //Default constructor sets the appropriate settings
                 ImageType_t img_type;
 
+                // Check if we have a valid ring override section and
+                //  include it in if so
+                void* l_ringOverrides = NULL;
+                l_errl = HBPM::getRingOvd(l_ringOverrides);
+                if(l_errl)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               ERR_MRK"host_build_stop_image(): "
+                               "Error in call to getRingOvd!");
+                    break;
+                }
+
                 //Call p9_hcode_image_build.C HWP
                 FAPI_INVOKE_HWP( l_errl,
                                  p9_hcode_image_build,
                                  l_fapiCpuTarget,
                                  reinterpret_cast<void*>(l_pHcodeImage),
                                  l_pImageOut, //homer image buffer
-                                 NULL, //default is no ring overrides
+                                 l_ringOverrides,
                                  PHASE_IPL,
                                  img_type,
                                  l_temp_buffer0,
@@ -475,9 +489,9 @@ void* host_build_stop_image (void *io_pArgs)
                     break;
                 }
 
-                l_errl =   applyHcodeGenCpuRegs( l_procChip,
-                                                l_pImageOut,
-                                                l_sizeImageOut );
+                l_errl = applyHcodeGenCpuRegs( l_procChip,
+                                               l_pImageOut,
+                                               l_sizeImageOut );
                 if ( l_errl )
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -568,4 +582,5 @@ void* host_build_stop_image (void *io_pArgs)
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }
+
 };

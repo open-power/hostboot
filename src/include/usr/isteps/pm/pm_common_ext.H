@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,6 +77,16 @@ namespace HBPM
      * @return errlHndl_t  Error log if resetPMAll failed
      */
     errlHndl_t resetPMAll();
+
+    /**
+     * @brief Fetch the ring overrides (if they exist)
+     *
+     * @param[inout] io_overrideImg   NULL if image not in PNOR or is blank,
+     *        else pointer to override data
+     *
+     * @return errlHndl_t  Error log if resetPMAll failed
+     */
+    errlHndl_t getRingOvd(void*& io_overrideImg);
 
 } //namespace HBPM ends
 

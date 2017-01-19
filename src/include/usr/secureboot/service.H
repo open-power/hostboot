@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
 #define __SECUREBOOT_SERVICE_H
 
 #include <errl/errlentry.H>
+#include <config.h>
 
 typedef uint8_t SHA512_t[64];
 /* From sha512.h:  */
@@ -74,7 +75,12 @@ namespace SECUREBOOT
 
     /** @brief Determines if Secureboot is enabled.
      */
+#if defined(CONFIG_SECUREBOOT) && !defined(__HOSTBOOT_RUNTIME)
     bool enabled();
+#else
+    inline bool enabled() { return false; };
+#endif
+    //@fixme-RTC:163094-Remove RUNTIME check once the code is there
 
     /** @brief Returns the state of the secure jumper as reported by the master
      *      processor.
