@@ -51,6 +51,9 @@ TRAC_INIT(&g_trac_sbeio, SBEIO_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
     TRACFCOMP(g_trac_sbeio,"psudd: " printf_string,##args)
 #define SBE_TRACD(printf_string,args...) \
     TRACDCOMP(g_trac_sbeio,"psudd: " printf_string,##args)
+#define SBE_TRACFBIN(printf_string,args...) \
+    TRACFBIN(g_trac_sbeio,"psudd: " printf_string,##args)
+
 
 using namespace ERRORLOG;
 
@@ -217,6 +220,7 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
     {
         // assign sequence ID and save to check that response matches
         i_pPsuRequest->seqID = ++l_seqID;
+        SBE_TRACF("Sending Req = %.16X", i_pPsuRequest->mbxReg0);
 
         // Read SBE doorbell to confirm ready to accept command.
         // Since the device driver single threads the requests, we should
@@ -330,12 +334,8 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
         uint64_t   l_addr     = PSU_HOST_SBE_MBOX4_REG;
         for (uint8_t i=0;i<4;i++)
         {
-            if (0x01 & i_rspMsgs) // read register if non-reserved
-            {
-                errl = readScom(i_target,l_addr,l_pMessage);
-                break;
-            }
-            i_rspMsgs>>=1;
+            errl = readScom(i_target,l_addr,l_pMessage);
+            if (errl) break;
             l_addr++;
             l_pMessage++;
         }
@@ -353,13 +353,16 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
         {
 
             SBE_TRACF(ERR_MRK "sbe_psudd.C :: readResponse: failing response status "
-                      " cmd=0x%08x prim=0x%08x secondary=0x%08x",
+                      " cmd=0x%02x%02x prim=0x%08x secondary=0x%08x"
                       " expected seqID=%d actual seqID=%d",
-                      i_pPsuRequest[1],
+                      i_pPsuRequest->commandClass,
+                      i_pPsuRequest->command,
                       o_pPsuResponse->primaryStatus,
                       o_pPsuResponse->secondaryStatus,
                       i_pPsuRequest->seqID,
                       o_pPsuResponse->seqID);
+            SBE_TRACFBIN( "Full response:", o_pPsuResponse, sizeof(psuResponse) );
+
             /*@
              * @errortype
              * @moduleid     SBEIO_PSU
@@ -545,7 +548,7 @@ errlHndl_t SbePsu::writeScom(TARGETING::Target * i_target,
     errlHndl_t errl = NULL;
 
     SBE_TRACD("  writeScom addr=0x%08lx data=0x%016lx",
-                         i_addr,*i_pData);
+              i_addr,*i_pData);
     size_t l_64bitSize = sizeof(uint64_t);
     errl = deviceOp(DeviceFW::WRITE,
                     i_target,
