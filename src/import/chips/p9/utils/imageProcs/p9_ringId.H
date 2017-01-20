@@ -36,15 +36,22 @@
     #include <p9_ring_id.h>
 #endif
 
+enum RingClass
+{
+    EKB_RING,
+    EKB_FSM_RING,
+    VPD_RING,
+    NUM_RING_CLASSES
+};
+
 // General Ring ID list structure
 typedef struct
 {
     const char*  ringName;
     uint8_t      ringId;
-    uint8_t      instanceIdMin;    // the min instanceId
-    uint8_t      instanceIdMax;    // the max instanceId
-    uint8_t      vpdKeyword;
-    uint8_t      pllCopy;     // 0,1,2,3,4,5 -- No of PLL copies required
+    uint8_t      instanceIdMin;
+    uint8_t      instanceIdMax;
+    RingClass    ringClass;
     uint32_t     scanScomAddress;
 } GenRingIdList;
 
