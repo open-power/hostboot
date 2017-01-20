@@ -210,12 +210,6 @@ fapi2::ReturnCode pm_corequad_init(
         FAPI_TRY(fapi2::putScom(l_quad_chplt, l_address, l_data64),
                  "ERROR: Failed to restore the QUAD PPM Error Mask");
 
-        // Clear CME Flags
-        FAPI_INF("Clear CME Flags");
-        l_data64.flush<1>();
-        l_address = EQ_CME_SCOM_FLAGS_CLEAR;
-        FAPI_TRY(fapi2::putScom(l_quad_chplt, l_address, l_data64),
-                 "ERROR: Failed to reset CME Flags");
 
         auto l_exChiplets = l_quad_chplt.getChildren<fapi2::TARGET_TYPE_EX>
                             (fapi2::TARGET_STATE_FUNCTIONAL);
@@ -230,6 +224,15 @@ fapi2::ReturnCode pm_corequad_init(
                      "ERROR: Failed to get the position of the EX:0x%08X",
                      l_ex_chplt);
             FAPI_DBG("EX number = %d", l_chpltNumber);
+
+            // Clear CME Flags
+            FAPI_INF("Clear CME Flags");
+            l_data64.flush<1>();
+            // SCOM1 is the CLEAR address
+            l_address = EX_CME_SCOM_FLAGS_SCOM1;
+            FAPI_TRY(fapi2::putScom(l_ex_chplt, l_address, l_data64),
+                     "ERROR: Failed to reset CME Flags");
+
 
             // Setup / Clear CME SRAM Scrub
             // Set bit 1         : SRAM SCRUB enable
