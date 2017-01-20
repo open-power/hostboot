@@ -45,6 +45,7 @@
 #include <lib/shared/mss_const.H>
 #include <lib/utils/scom.H>
 #include <lib/utils/c_str.H>
+#include <lib/dimm/rank.H>
 
 namespace mss
 {
@@ -77,7 +78,10 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
         static constexpr uint64_t CAL3Q_REG = MCA_MBA_CAL3Q;
         static constexpr uint64_t DSM0Q_REG = MCA_MBA_DSM0Q;
 
+        // Danger Will Robinson <wave robot arms> MCA_DDRPHY_PC_PER_ZCAL_CONFIG_P0 uses PHY rank ordinal numbers
+        // which are different between PHYs. So if you're playing with this register, be sure to map rank numbers.
         static constexpr uint64_t PHY_ZQCAL_REG = MCA_DDRPHY_PC_PER_ZCAL_CONFIG_P0;
+
         static constexpr uint64_t PHY_PERIODIC_CAL_CONFIG_REG = MCA_DDRPHY_PC_PER_CAL_CONFIG_P0;
         static constexpr uint64_t PHY_PERIODIC_CAL_RELOAD_REG = MCA_DDRPHY_PC_RELOAD_VALUE0_P0;
         static constexpr uint64_t PHY_CAL_TIMER_RELOAD_REG = MCA_DDRPHY_PC_CAL_TIMER_RELOAD_VALUE_P0;
@@ -597,6 +601,34 @@ fapi2::ReturnCode apply_mark_store( const fapi2::Target<T>& i_target )
             FAPI_TRY( mss::putScom(i_target, MCA_FWMS0 + l_mark, l_fwms_data) );
         }
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset the ZCAL config register.
+/// @warning This maps PHY rank numbers per target
+/// @tparam T, the fapi2 target type of the target
+/// @param[in] i_target A target representing a port
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<T> >
+fapi2::ReturnCode reset_zqcal_config( const fapi2::Target<T>& i_target )
+{
+    fapi2::buffer<uint64_t> l_phy_zqcal_config;
+    std::vector<uint64_t> l_ranks;
+
+    FAPI_TRY( mss::rank::ranks(i_target, l_ranks) );
+
+    for (const auto r : l_ranks)
+    {
+        l_phy_zqcal_config.setBit(TT::PER_ZCAL_ENA_RANK + rank::map_rank_ordinal_to_phy(i_target, r));
+    }
+
+    // Write the ZQCAL periodic config
+    FAPI_INF("zcal periodic config: 0x%016lx", l_phy_zqcal_config);
+    FAPI_TRY( mss::putScom(i_target, TT::PHY_ZQCAL_REG, l_phy_zqcal_config) );
 
 fapi_try_exit:
     return fapi2::current_err;
