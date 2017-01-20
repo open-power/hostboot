@@ -31,9 +31,9 @@
 ///
 
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Andre A. Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef __P9_MSS_UTILS_TO_THROTTLE__
@@ -48,11 +48,13 @@ typedef fapi2::ReturnCode (*p9_mss_utils_to_throttle_FP_t) (const
 extern "C"
 {
 
-///
-/// @brief Set the N throttle attributes for a given dram data bus utilization.
-/// @param[in] i_targets vector of MCS on the same VDDR domain
-/// @return FAPI2_RC_SUCCESS iff ok
-/// @note throttle_per_slot will be equalized so all throttles coming out will be equal to worst case
+    ///
+    /// @brief Sets number commands allowed within a given port databus utilization.
+    /// @param[in] i_targets vector of MCS to set throttle attributes on
+    /// @return FAPI2_RC_SUCCESS iff ok
+    /// @note ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT will be set to worst case of all slots passed in
+    /// @note output ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT, and ATTR_MSS_PORT_MAXPOWER
+    ///
     fapi2::ReturnCode p9_mss_utils_to_throttle( const std::vector <fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets );
 }
 
