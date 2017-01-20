@@ -204,7 +204,6 @@
     <platInit/>
     <default>0x00000200</default>
     <initToZero/>
-    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_mem_m_dram_clocks</mssAccessorName>
   </attribute>
 
@@ -222,7 +221,6 @@
     <mssUnits>c%</mssUnits>
     <default>0x00002328</default>
     <initToZero/>
-    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_max_dram_databus_util</mssAccessorName>
   </attribute>
 
@@ -256,7 +254,6 @@
     <platInit/>
     <default>OFF</default>
     <initToZero/>
-    <!-- little comment to tell us this might change during power/thermal implemetation -->
     <mssAccessorName>mrw_power_control_requested</mssAccessorName>
   </attribute>
 
@@ -421,7 +418,6 @@
     <platInit/>
     <initToZero/>
     <default>NORMAL</default>
-    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_fine_refresh_mode</mssAccessorName>
   </attribute>
 
@@ -442,7 +438,6 @@
     <platInit/>
     <initToZero/>
     <default>EXTEND</default>
-    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_temp_refresh_range</mssAccessorName>
   </attribute>
 
@@ -619,6 +614,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
+    <initToZero/>
     <enum> DISABLE = 0, ENABLE = 1 </enum>
     <default> 0  </default>
     <mssAccessorName>mrw_temp_refresh_mode</mssAccessorName>
