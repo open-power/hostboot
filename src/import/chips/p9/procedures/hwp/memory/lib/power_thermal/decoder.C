@@ -157,8 +157,7 @@ fapi2::ReturnCode decoder::find_slope (const std::vector<fapi2::buffer<uint64_t>
     //The last value should always be the default value
     FAPI_ASSERT(l_value_iterator != i_slope.end(),
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()
-                .set_GENERATED_KEY(iv_gen_key)
-                .set_DIMM_TARGET(iv_kind.iv_target),
+                .set_GENERATED_KEY(iv_gen_key),
                 "Couldn't find %s value for generated key:%08lx, for target %s. "
                 "DIMM values for generated key are "
                 "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d",
@@ -198,8 +197,7 @@ fapi2::ReturnCode decoder::find_intercept (const std::vector<fapi2::buffer<uint6
     //The last value should always be the default value
     FAPI_ASSERT(l_value_iterator != i_intercept.end(),
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()
-                .set_GENERATED_KEY(iv_gen_key)
-                .set_DIMM_TARGET(iv_kind.iv_target),
+                .set_GENERATED_KEY(iv_gen_key),
                 "Couldn't find %s value for generated key:%08lx, for target %s. "
                 "DIMM values for generated key are "
                 "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d",
@@ -239,8 +237,7 @@ fapi2::ReturnCode decoder::find_thermal_power_limit (const std::vector<fapi2::bu
     //The last value should always be the default value
     FAPI_ASSERT(l_value_iterator != i_thermal_limits.end(),
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()
-                .set_GENERATED_KEY(iv_gen_key)
-                .set_DIMM_TARGET(iv_kind.iv_target),
+                .set_GENERATED_KEY(iv_gen_key),
                 "Couldn't find %s value for generated key:%8lx, for target %s. "
                 "DIMM values for generated key are "
                 "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d",
