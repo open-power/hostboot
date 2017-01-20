@@ -59,9 +59,6 @@ enum MESSAGE_ID_IPI2HI
 //
 // Return Codes
 //
-//\todo
-//Get feedback from Martha and Greg on these return codes
-//
 #define PGPE_RC_SUCCESS                         0x01
 #define PGPE_WOF_RC_NOT_ENABLED                 0x10
 #define PGPE_RC_PSTATES_DISABLED                0x11
@@ -275,10 +272,10 @@ typedef union quad_state0
         uint64_t quad1_pstate             : 8;  // Pstate of Quad 1; 0xFF indicates EQ is off
         uint64_t quad2_pstate             : 8;  // Pstate of Quad 2; 0xFF indicates EQ is off
         uint64_t quad3_pstate             : 8;  // Pstate of Quad 3; 0xFF indicates EQ is off
-        uint64_t core_poweron_state       : 16; // bit vector: 0:core0, 1:core1, ..., 15:core15
-        uint64_t ivrm_state               : 4;  // ivrm state: bit vector 0:quad0, 1:quad1, 2:quad2, 3;quad3
-        uint64_t ivrm_state_rsvd          : 4;
-        uint64_t external_vrm_setpoint    : 8;  // set point in mV
+        uint64_t active_cores             : 16; // bit vector: 0:core0, 1:core1, ..., 15:core15
+    uint64_t ivrm_state               :
+        8;  // ivrm state: bit vector 0:quad0, 1:quad1, 2:quad2, 3;quad3, 4: quad4, 5: quad5, 6-7:reserved
+        uint64_t reserved                 : 8;  // reserved for future use
     } fields;
 } quad_state0_t;
 
@@ -294,14 +291,46 @@ typedef union quad_state1
     {
         uint64_t quad4_pstate             : 8;  // Pstate of Quad 4; 0xFF indicates EQ is off
         uint64_t quad5_pstate             : 8;  // Pstate of Quad 5; 0xFF indicates EQ is off
-        uint64_t reserved                 : 16;
-        uint64_t ivrm_state               : 2;  // ivrm state: bit vector 0:quad4, 1:quad5
-        uint64_t ivrm_state_rsvd          : 6;
-        uint64_t core_poweron_state       : 8;  // bit vector: 0:core16, 1:core17, ..., 7:core23
-        uint64_t requested_active_quad    : 8;
-        uint64_t external_vrm_setpoint    : 8;  // set point in mV
+        uint64_t reserved0                : 16;
+        uint64_t active_cores             : 16; // bit vector: 0:core16, 1:core17, ..., 7:core23
+    uint64_t ivrm_state               :
+        8;  // ivrm state: bit vector 0:quad0, 1:quad1, 2:quad2, 3;quad3, 4: quad4, 5: quad5, 6-7:reserved
+        uint64_t reserved1                : 8;  // reserved for future use
     } fields;
 } quad_state1_t;
+
+typedef union pgpe_wof_state
+{
+    uint64_t value;
+    struct
+    {
+        uint32_t high_order;
+        uint32_t low_order;
+    } words;
+    struct
+    {
+        uint64_t reserved0              : 8;
+        uint64_t fclip_ps               : 8;
+        uint64_t vclip_mv               : 16;
+        uint64_t fratio                 : 16;
+        uint64_t vratio                 : 16;
+    } fields;
+} pgpe_wof_state_t;
+
+typedef union requested_active_quads
+{
+    uint64_t value;
+    struct
+    {
+        uint32_t high_order;
+        uint32_t low_order;
+    } words;
+    struct
+    {
+        uint64_t reserved                   : 56;
+        uint64_t requested_active_quads     : 8;
+    } fields;
+} requested_active_quads_t;
 
 // End Quad State
 // -----------------------------------------------------------------------------
@@ -320,6 +349,12 @@ typedef struct
 
     /// Actual Pstate 1 - Quads 4, 5
     quad_state1_t       quad_pstate_1;
+
+    ///PGPE WOF State
+    pgpe_wof_state_t    pgpe_wof_state;
+
+    ///Requested Active Quads
+    requested_active_quads_t    req_active_quads;
 
     /// FFDC Address list
     Hcode_FFDC_list_t   ffdc_list;
