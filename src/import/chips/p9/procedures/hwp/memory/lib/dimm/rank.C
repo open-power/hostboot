@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,7 +82,7 @@ namespace rank
 {
 
 //
-// Static table of rank pair assignments. Some of thoem won't be valid depending on
+// Static table of rank pair assignments. Some of them won't be valid depending on
 // the plug rules (which may be OpenPOWER, IBM, etc.) Some also won't make sense
 // -- 3 rank DIMM? -- but it doesn't take up much space and lord knows stranger things
 // have happened ... Won't hurt to have this defined JustInCase(tm).
@@ -92,11 +92,11 @@ namespace rank
 // TODO RTC 160869: Review hard coded values, possibly make into traits?
 static const std::vector< std::vector< std::pair< uint64_t, uint64_t > > > rank_pair_assignments =
 {
-    { {0x0000, 0x0000}, {0x1000, 0x0000}, {0x1030, 0x0000}, {0x1030, 0x5000}, {0x1030, 0x5070} },
-    { {0x9000, 0x0000}, {0x1090, 0x0000}, {0x1090, 0x3000}, {0x1090, 0x3050}, {0x1090, 0x5730} },
-    { {0x90B0, 0x0000}, {0x1090, 0xB000}, {0x1090, 0x30B0}, {0x1390, 0x50B0}, {0x1390, 0x57B0} },
-    { {0x90B0, 0xD000}, {0x1090, 0xB0D0}, {0x109B, 0x30D0}, {0x139B, 0x50D0}, {0x139B, 0x57D0} },
-    { {0x90B0, 0xD0F0}, {0x1090, 0xB0DF}, {0x109B, 0x30DF}, {0x139B, 0x50DF}, {0x139B, 0x57DF} },
+    { {0x0000, 0x0000}, {0x1000, 0x0000}, {0x1030, 0x0000}, {0x1530, 0x0000}, {0x1537, 0x0000} },
+    { {0x0000, 0x9000}, {0x1000, 0x9000}, {0x1030, 0x9000}, {0x1530, 0x9000}, {0x1537, 0x9000} },
+    { {0x0000, 0x90B0}, {0x1000, 0x90B0}, {0x1030, 0x90B0}, {0x1530, 0x90B0}, {0x1537, 0x90B0} },
+    { {0x0000, 0x9DB0}, {0x1000, 0x9DB0}, {0x1030, 0x9DB0}, {0x1530, 0x9DB0}, {0x1537, 0x9DB0} },
+    { {0x0000, 0x9DBF}, {0x1000, 0x9DBF}, {0x1030, 0x9DBF}, {0x1530, 0x9DBF}, {0x1537, 0x9DBF} },
 };
 
 //
@@ -106,11 +106,11 @@ static const std::vector< std::vector< std::pair< uint64_t, uint64_t > > > rank_
 //
 static const std::vector< std::vector< std::vector< uint64_t > > > primary_rank_pairs =
 {
-    { {},           {0},          {0, 1},       {0, 1, 2},    {0, 1, 2, 3} },
-    { {4},          {0, 4},       {0, 4, 1},    {0, 4, 2, 1}, {0, 4, 2, 1} },
-    { {4, 5},       {0, 4, 5},    {0, 4, 1, 5}, {0, 4, 2, 5}, {0, 4, 2, 5} },
-    { {4, 5},       {0, 4, 5},    {0, 4, 1, 5}, {0, 4, 2, 5}, {0, 4, 2, 5} },
-    { {4, 5, 6, 7}, {0, 4, 5, 6}, {0, 4, 1, 6}, {0, 4, 2, 6}, {0, 4, 2, 6} },
+    { {},                       {0},                {0, 1},       {0, 1},       {0, 1} },
+    { {NO_RANK, NO_RANK, 4},    {0, NO_RANK, 4},    {0, 1, 4},    {0, 1, 4},    {0, 1, 4} },
+    { {NO_RANK, NO_RANK, 4, 5}, {0, NO_RANK, 4, 5}, {0, 1, 4, 5}, {0, 1, 4, 5}, {0, 1, 4, 5} },
+    { {NO_RANK, NO_RANK, 4, 5}, {0, NO_RANK, 4, 5}, {0, 1, 4, 5}, {0, 1, 4, 5}, {0, 1, 4, 5} },
+    { {NO_RANK, NO_RANK, 4, 5}, {0, NO_RANK, 4, 5}, {0, 1, 4, 5}, {0, 1, 4, 5}, {0, 1, 4, 5} },
 };
 
 //
@@ -122,17 +122,6 @@ static const std::vector< std::vector< std::vector< uint64_t > > > single_dimm_r
     { {},           {0},          {0, 1},       {0, 1, 2},    {0, 1, 2, 3} },
     { {},           {4},          {4, 5},       {4, 5, 6},    {4, 5, 6, 7} },
 };
-
-// These fields represent the rank fields and valid bits from rank_pair_assignments
-constexpr uint64_t EVEN_PRIMARY_RANK = 48;
-constexpr uint64_t EVEN_SECONDARY_RANK = 52;
-constexpr uint64_t ODD_PRIMARY_RANK = 56;
-constexpr uint64_t ODD_SECONDARY_RANK = 60;
-constexpr uint64_t RANK_LEN = 3;
-constexpr uint64_t EVEN_PRIMARY_VALID = 51;
-constexpr uint64_t EVEN_SECONDARY_VALID = 55;
-constexpr uint64_t ODD_PRIMARY_VALID = 59;
-constexpr uint64_t ODD_SECONDARY_VALID = 63;
 
 ///
 /// @brief Return true iff this rank is on thie DIMM
@@ -186,7 +175,7 @@ size_t get_dimm_from_rank(const uint64_t i_rank)
 }
 
 ///
-/// @brief Return a vector of rank numbers which represent the primary rank pairs for this dimm
+/// @brief Return a vector of rank numbers which represent the primary rank pairs for this port
 /// @tparam T the target type
 /// @param[in] i_target  TARGET_TYPE_MCA
 /// @param[out] o_rps a vector of rank_pairs
@@ -200,13 +189,23 @@ fapi2::ReturnCode primary_ranks( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
     // Get the count of rank pairs for both DIMM on the port
     std::vector<uint8_t> l_rank_count(MAX_DIMM_PER_PORT, 0);
 
-    for (auto d : i_target.getChildren<TARGET_TYPE_DIMM>())
+    for (const auto d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
         FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_rank_count[mss::index(d)]) );
     }
 
     FAPI_DBG("ranks: %d, %d", l_rank_count[0], l_rank_count[1]);
-    o_rps = primary_rank_pairs[l_rank_count[1]][l_rank_count[0]];
+
+    // Walk through rank pair table and skip empty pairs
+    o_rps.clear();
+
+    for (const auto l_rank : primary_rank_pairs[l_rank_count[1]][l_rank_count[0]])
+    {
+        if (l_rank != NO_RANK)
+        {
+            o_rps.push_back(l_rank);
+        }
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -229,7 +228,7 @@ fapi2::ReturnCode primary_ranks( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
 
     o_rps.clear();
 
-    for (auto r : l_prs)
+    for (const auto r : l_prs)
     {
         if (is_rank_on_dimm(i_target, r))
         {
@@ -272,7 +271,7 @@ fapi2::ReturnCode ranks( const fapi2::Target<TARGET_TYPE_MCA>& i_target, std::ve
     std::vector< uint64_t > l_ranks;
     o_ranks.clear();
 
-    for (auto d : i_target.getChildren<TARGET_TYPE_DIMM>())
+    for (const auto d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
         FAPI_TRY( ranks(d, l_ranks) );
         o_ranks.insert(o_ranks.end(), l_ranks.begin(), l_ranks.end());
@@ -300,7 +299,7 @@ fapi2::ReturnCode get_rank_pair_assignments(const fapi2::Target<TARGET_TYPE_MCA>
     // Get the count of rank pairs for all DIMM on the port
     std::vector<uint8_t> l_rank_count(MAX_DIMM_PER_PORT, 0);
 
-    for (auto d : i_target.getChildren<TARGET_TYPE_DIMM>())
+    for (const auto d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
         FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_rank_count[mss::index(d)]) );
     }
@@ -423,18 +422,29 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode get_rank_pairs(const fapi2::Target<TARGET_TYPE_MCA>& i_target, std::vector<uint64_t>& o_pairs)
 {
-    std::vector< uint64_t > l_prs;
     uint64_t l_index = 0;
+    std::vector<uint64_t> l_prs;
 
-    FAPI_TRY( primary_ranks(i_target, l_prs) );
+    // Get the count of rank pairs for both DIMM on the port
+    std::vector<uint8_t> l_rank_count(MAX_DIMM_PER_PORT, 0);
 
+    for (const auto d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_rank_count[mss::index(d)]) );
+    }
+
+    // Walk through rank pair table and skip empty pairs
     o_pairs.clear();
+    l_prs = primary_rank_pairs[l_rank_count[1]][l_rank_count[0]];
 
     // Can't use for (auto rp : l_prs) as rp is unused. BRS
     for (auto rp_iter = l_prs.begin(); rp_iter != l_prs.end(); ++rp_iter)
     {
-        o_pairs.push_back(l_index);
-        l_index += 1;
+        if (*rp_iter != NO_RANK)
+        {
+            o_pairs.push_back(l_index);
+            l_index += 1;
+        }
     }
 
 fapi_try_exit:

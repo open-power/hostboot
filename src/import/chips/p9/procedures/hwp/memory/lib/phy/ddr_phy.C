@@ -960,17 +960,26 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
 
 ///
 /// @brief Setup odt_wr/rd_config
-/// @param[in] i_target the MCA target associated with this cal setup
+/// @param[in] i_target the MCA target
+/// @param[in] i_dimm_count the number of DIMM presently on the target
+/// @param[in] i_odt_rd the RD ODT values from VPD
+/// @param[in] i_odt_wr the WR ODT values from VPD
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode reset_odt_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+    const uint64_t i_dimm_count,
+    const uint8_t i_odt_rd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM],
+    const uint8_t i_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM])
 {
-    uint8_t l_odt_rd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
-    uint8_t l_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    // The fields in the ODT VPD are 8 bits wide, but we only use the left-most 2 bits
+    // of each nibble. The encoding for each rank in the VPD is
+    // [Dimm0 ODT0][Dimm0 ODT1][N/A][N/A][Dimm1 ODT0][Dimm1 ODT1][N/A][N/A]
 
-    FAPI_TRY( mss::vpd_mt_odt_rd(i_target, &(l_odt_rd[0][0])) );
-    FAPI_TRY( mss::vpd_mt_odt_wr(i_target, &(l_odt_wr[0][0])) );
+    constexpr uint64_t BIT_FIELD0_START = 0;
+    constexpr uint64_t BIT_FIELD1_START = 4;
+    constexpr uint64_t BIT_FIELD_LENGTH = 2;
 
     // Nimbus PHY is more or less hard-wired for 2 DIMM/port 4R/DIMM
     // So there's not much point in looping over DIMM or ranks.
@@ -983,56 +992,57 @@ fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
         // 48:55, ATTR_VPD_ODT_RD[0][0][0]; # when Read of Rank0
         // 56:63, ATTR_VPD_ODT_RD[0][0][1]; # when Read of Rank1
         fapi2::buffer<uint64_t> l_data;
+        uint8_t l_vpd_0 = 0;
+        uint8_t l_vpd_1 = 0;
 
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES0,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES0_LEN>(l_odt_rd[0][0]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES1,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES1_LEN>(l_odt_rd[0][1]);
+        // Extract the 2 DIMM0 bits we need from the VPD.
+        fapi2::buffer<uint8_t>(i_odt_rd[0][0]).extract<BIT_FIELD0_START, BIT_FIELD_LENGTH>(l_vpd_0);
+        fapi2::buffer<uint8_t>(i_odt_rd[0][1]).extract<BIT_FIELD0_START, BIT_FIELD_LENGTH>(l_vpd_1);
+        // Extract the 2 DIMM1 bits we need from the VPD.
+        fapi2::buffer<uint8_t>(i_odt_rd[0][0]).extract<BIT_FIELD1_START, BIT_FIELD_LENGTH, BIT_FIELD_LENGTH>(l_vpd_0);
+        fapi2::buffer<uint8_t>(i_odt_rd[0][1]).extract<BIT_FIELD1_START, BIT_FIELD_LENGTH, BIT_FIELD_LENGTH>(l_vpd_1);
+
+        FAPI_DBG("vpd: 0x%02x extract: 0x%02x", i_odt_rd[0][0], l_vpd_0);
+        FAPI_DBG("vpd: 0x%02x extract: 0x%02x", i_odt_rd[0][1], l_vpd_1);
+
+        l_data.insert<MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES0, BITS_PER_NIBBLE>(l_vpd_0);
+        l_data.insert<MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES1, BITS_PER_NIBBLE>(l_vpd_1);
         FAPI_INF("odt_rd_config0: 0x%016llx", uint64_t(l_data));
         FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0, l_data) );
     }
 
+    // Remember Centaur-canonical rank numbering is different from Nimbus numbering. Here,
+    // we need to lay the canonically defined VPD into the proper subfield based on DIMM config.
     {
-        // DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG1_P0
-        // 48:55, ATTR_VPD_ODT_RD[0][0][2]; # when Read of Rank2
-        // 56:63, ATTR_VPD_ODT_RD[0][0][3]; # when Read of Rank3
-        fapi2::buffer<uint64_t> l_data;
+        // "dual drop" which means what is in the VPD as ranks 4/5 go in to 2/3
+        fapi2::buffer<uint8_t> l_values2 = (i_dimm_count == MAX_DIMM_PER_PORT) ? i_odt_rd[1][0] : i_odt_rd[0][2];
+        fapi2::buffer<uint8_t> l_values3 = (i_dimm_count == MAX_DIMM_PER_PORT) ? i_odt_rd[1][1] : i_odt_rd[0][3];
 
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES2,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES2_LEN>(l_odt_rd[0][2]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES3,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES3_LEN>(l_odt_rd[0][3]);
-        FAPI_INF("odt_rd_config1: 0x%016llx", uint64_t(l_data));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0, l_data) );
-    }
+        uint8_t l_vpd_2 = 0;
+        uint8_t l_vpd_3 = 0;
 
-    {
+        // Extract the 2 DIMM0 bits we need from the VPD.
+        l_values2.extract<BIT_FIELD0_START, BIT_FIELD_LENGTH>(l_vpd_2);
+        l_values3.extract<BIT_FIELD0_START, BIT_FIELD_LENGTH>(l_vpd_3);
+        // Extract the 2 DIMM1 bits we need from the VPD.
+        l_values2.extract<BIT_FIELD1_START, BIT_FIELD_LENGTH, BIT_FIELD_LENGTH>(l_vpd_2);
+        l_values3.extract<BIT_FIELD1_START, BIT_FIELD_LENGTH, BIT_FIELD_LENGTH>(l_vpd_3);
+
+        FAPI_DBG("vpd: 0x%02x extract: 0x%02x", l_values2, l_vpd_2);
+        FAPI_DBG("vpd: 0x%02x extract: 0x%02x", l_values3, l_vpd_3);
+
         // DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG2_P0
         // 48:55, ATTR_VPD_ODT_RD[0][1][0]; # when Read of Rank4
         // 56:63, ATTR_VPD_ODT_RD[0][1][1]; # when Read of Rank5
         fapi2::buffer<uint64_t> l_data;
 
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES4,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES4_LEN>(l_odt_rd[1][0]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES5,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES5_LEN>(l_odt_rd[1][1]);
-        FAPI_INF("odt_rd_config2: 0x%016llx", uint64_t(l_data));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0, l_data) );
+        l_data.insert<MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES2, BITS_PER_NIBBLE>(l_vpd_2);
+        l_data.insert<MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES3, BITS_PER_NIBBLE>(l_vpd_3);
+        FAPI_INF("odt_rd_config1: 0x%016llx", uint64_t(l_data));
+        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0, l_data) );
     }
 
-    {
-        // DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG3_P0
-        // 48:55, ATTR_VPD_ODT_RD[0][1][2]; # when Read of Rank6
-        // 56:63, ATTR_VPD_ODT_RD[0][1][3]; # when Read of Rank7
-        fapi2::buffer<uint64_t> l_data;
-
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES6,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES6_LEN>(l_odt_rd[1][2]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES7,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES7_LEN>(l_odt_rd[1][3]);
-        FAPI_INF("odt_rd_config3: 0x%016llx", uint64_t(l_data));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0, l_data) );
-    }
+    // TODO RTC:167929 Can ODT VPD processing be shared between RD and WR?
 
     //
     // ODT Write
@@ -1042,56 +1052,76 @@ fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
         // 48:55, ATTR_VPD_ODT_WR[0][0][0]; # when Read of Rank0
         // 56:63, ATTR_VPD_ODT_WR[0][0][1]; # when Read of Rank1
         fapi2::buffer<uint64_t> l_data;
+        uint8_t l_vpd_0 = 0;
+        uint8_t l_vpd_1 = 0;
 
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES0,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES0_LEN>(l_odt_wr[0][0]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES1,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES1_LEN>(l_odt_wr[0][1]);
+        // Extract the 2 DIMM0 bits we need from the VPD.
+        fapi2::buffer<uint8_t>(i_odt_wr[0][0]).extract<BIT_FIELD0_START, BIT_FIELD_LENGTH>(l_vpd_0);
+        fapi2::buffer<uint8_t>(i_odt_wr[0][1]).extract<BIT_FIELD0_START, BIT_FIELD_LENGTH>(l_vpd_1);
+        // Extract the 2 DIMM1 bits we need from the VPD.
+        fapi2::buffer<uint8_t>(i_odt_wr[0][0]).extract<BIT_FIELD1_START, BIT_FIELD_LENGTH, BIT_FIELD_LENGTH>(l_vpd_0);
+        fapi2::buffer<uint8_t>(i_odt_wr[0][1]).extract<BIT_FIELD1_START, BIT_FIELD_LENGTH, BIT_FIELD_LENGTH>(l_vpd_1);
+
+        FAPI_DBG("vpd: 0x%02x extract: 0x%02x", i_odt_wr[0][0], l_vpd_0);
+        FAPI_DBG("vpd: 0x%02x extract: 0x%02x", i_odt_wr[0][1], l_vpd_1);
+
+        l_data.insert<MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES0, BITS_PER_NIBBLE>(l_vpd_0);
+        l_data.insert<MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES1, BITS_PER_NIBBLE>(l_vpd_1);
         FAPI_INF("odt_wr_config0: 0x%016llx", uint64_t(l_data));
         FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0, l_data) );
     }
 
     {
-        // DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG1_P0
-        // 48:55, ATTR_VPD_ODT_WR[0][0][2]; # when Read of Rank2
-        // 56:63, ATTR_VPD_ODT_WR[0][0][3]; # when Read of Rank3
-        fapi2::buffer<uint64_t> l_data;
+        // "dual drop" which means what is in the VPD as ranks 4/5 go in to 2/3
+        fapi2::buffer<uint8_t> l_values2 = (i_dimm_count == MAX_DIMM_PER_PORT) ? i_odt_wr[1][0] : i_odt_wr[0][2];
+        fapi2::buffer<uint8_t> l_values3 = (i_dimm_count == MAX_DIMM_PER_PORT) ? i_odt_wr[1][1] : i_odt_wr[0][3];
 
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES2,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES2_LEN>(l_odt_wr[0][2]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES3,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES3_LEN>(l_odt_wr[0][3]);
-        FAPI_INF("odt_wr_config1: 0x%016llx", uint64_t(l_data));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0, l_data) );
-    }
+        uint8_t l_vpd_2 = 0;
+        uint8_t l_vpd_3 = 0;
 
-    {
+        // Extract the 2 DIMM0 bits we need from the VPD.
+        l_values2.extract<BIT_FIELD0_START, BIT_FIELD_LENGTH>(l_vpd_2);
+        l_values3.extract<BIT_FIELD0_START, BIT_FIELD_LENGTH>(l_vpd_3);
+        // Extract the 2 DIMM1 bits we need from the VPD.
+        l_values2.extract<BIT_FIELD1_START, BIT_FIELD_LENGTH, BIT_FIELD_LENGTH>(l_vpd_2);
+        l_values3.extract<BIT_FIELD1_START, BIT_FIELD_LENGTH, BIT_FIELD_LENGTH>(l_vpd_3);
+
+        FAPI_DBG("vpd: 0x%02x extract: 0x%02x", l_values2, l_vpd_2);
+        FAPI_DBG("vpd: 0x%02x extract: 0x%02x", l_values3, l_vpd_3);
+
         // DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG2_P0
         // 48:55, ATTR_VPD_ODT_WR[0][1][0]; # when Read of Rank4
         // 56:63, ATTR_VPD_ODT_WR[0][1][1]; # when Read of Rank5
         fapi2::buffer<uint64_t> l_data;
 
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES4,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES4_LEN>(l_odt_wr[1][0]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES5,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES5_LEN>(l_odt_wr[1][1]);
-        FAPI_INF("odt_wr_config2: 0x%016llx", uint64_t(l_data));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0, l_data) );
+        l_data.insert<MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES2, BITS_PER_NIBBLE>(l_vpd_2);
+        l_data.insert<MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES3, BITS_PER_NIBBLE>(l_vpd_3);
+        FAPI_INF("odt_wr_config1: 0x%016llx", uint64_t(l_data));
+        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0, l_data) );
     }
 
-    {
-        // DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG3_P0
-        // 48:55, ATTR_VPD_ODT_WR[0][1][2]; # when Read of Rank6
-        // 56:63, ATTR_VPD_ODT_WR[0][1][3]; # when Read of Rank7
-        fapi2::buffer<uint64_t> l_data;
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES6,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES6_LEN>(l_odt_wr[1][2]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES7,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES7_LEN>(l_odt_wr[1][3]);
-        FAPI_INF("odt_wr_config3: 0x%016llx", uint64_t(l_data));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0, l_data) );
-    }
+///
+/// @brief Setup odt_wr/rd_config, reads attributes
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    uint8_t l_odt_rd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t l_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+
+    uint64_t l_dimm_count = count_dimm(i_target);
+
+    FAPI_TRY( mss::vpd_mt_odt_rd(i_target, &(l_odt_rd[0][0])) );
+    FAPI_TRY( mss::vpd_mt_odt_wr(i_target, &(l_odt_wr[0][0])) );
+
+    return reset_odt_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
+               i_target, l_dimm_count, l_odt_rd, l_odt_wr);
 
 fapi_try_exit:
     return fapi2::current_err;

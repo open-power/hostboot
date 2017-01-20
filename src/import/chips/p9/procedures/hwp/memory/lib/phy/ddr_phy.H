@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -149,8 +149,41 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                     const uint64_t i_rank,
                                     const fapi2::buffer<uint16_t> i_cal_steps_enabled);
 
+// TODO RTC: 157753 tparams P and R can be pulled from an MCA trait once we have it
 ///
 /// @brief Setup odt_wr/rd_config
+/// @tparam T the target type of the MCA/MBA
+/// @tparam P the maximum DIMM per T
+/// @tparam R the maximum rank per DIMM on T
+/// @param[in] i_target the target
+/// @param[in] i_dimm_count the number of DIMM presently on the target
+/// @param[in] i_odt_rd the RD ODT values from VPD
+/// @param[in] i_odt_wr the WR ODT values from VPD
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T, uint64_t P, uint64_t R >
+fapi2::ReturnCode reset_odt_config_helper( const fapi2::Target<T>& i_target,
+        const uint64_t i_dimm_count,
+        const uint8_t i_odt_rd[P][R],
+        const uint8_t i_odt_wr[P][R] );
+
+///
+/// @brief Setup odt_wr/rd_config
+/// @param[in] i_target the MCA target
+/// @param[in] i_dimm_count the number of DIMM presently on the target
+/// @param[in] i_odt_rd the RD ODT values from VPD
+/// @param[in] i_odt_wr the WR ODT values from VPD
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode reset_odt_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+    const uint64_t i_dimm_count,
+    const uint8_t i_odt_rd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM],
+    const uint8_t i_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM]);
+
+///
+/// @brief Setup odt_wr/rd_config, reads attributes
 /// @tparam T the target type of the MCA/MBA
 /// @param[in] i_target the target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
@@ -159,7 +192,7 @@ template< fapi2::TargetType T >
 fapi2::ReturnCode reset_odt_config( const fapi2::Target<T>& i_target );
 
 ///
-/// @brief Setup odt_wr/rd_config
+/// @brief Setup odt_wr/rd_config, reads attributes
 /// @param[in] i_target the MCA target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///

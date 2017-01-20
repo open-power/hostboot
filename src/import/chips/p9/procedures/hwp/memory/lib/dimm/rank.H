@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/utils/scom.H>
 #include <lib/utils/num.H>
+#include <lib/utils/count_dimm.H>
 
 namespace mss
 {
@@ -53,6 +54,18 @@ enum
     TERTIARY = 2,
     QUATERNARY = 3,
     NO_RANK = 999,
+
+    // These enums represent the rank fields and valid bits from rank_pair_assignments
+    EVEN_PRIMARY_RANK = 48,
+    EVEN_SECONDARY_RANK = 52,
+    ODD_PRIMARY_RANK = 56,
+    ODD_SECONDARY_RANK = 60,
+    RANK_LEN = 3,
+    EVEN_PRIMARY_VALID = 51,
+    EVEN_SECONDARY_VALID = 55,
+    ODD_PRIMARY_VALID = 59,
+    ODD_SECONDARY_VALID = 63,
+
 };
 
 ///
@@ -290,6 +303,284 @@ namespace rank
 {
 
 ///
+/// @brief Maps a rank's canonical number to the proper ordinal number for the PHY
+/// @param[in] i_count the number of DIMM to be considered
+/// @param[in] i_rank the rank number to be mapped
+/// @return the mapped value
+// i_rank passed by value to save a local variable in the caller
+///
+template <fapi2::TargetType T>
+inline uint64_t map_rank_ordinal_to_phy( const size_t i_count, const uint64_t i_rank );
+
+///
+/// @brief Maps a rank's canonical number to the proper ordinal number for the PHY
+/// @param[in] i_count the number of DIMM to be considered
+/// @param[in] i_rank the rank number to be mapped
+/// @return the mapped value
+// i_rank passed by value to save a local
+///
+template <>
+inline uint64_t map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>( const size_t i_count, const uint64_t i_rank )
+{
+    if (i_count == 0)
+    {
+        FAPI_ERR("seeing 0 DIMM?");
+        fapi2::Assert(false);
+    }
+
+    if ((i_count == MAX_DIMM_PER_PORT) && (i_rank >= RANK_MID_POINT))
+    {
+        return i_rank - MAX_RANKS_DIMM1;
+    }
+
+    // Nothing to do in the single drop case. Nothing to do for {0,1} on a dual drop either
+    return i_rank;
+}
+
+///
+/// @brief Maps a rank's canonical number to the proper ordinal number for the PHY
+/// @param[in] i_target the fapi2 target of the MCA
+/// @param[in] i_rank the rank number to be mapped
+/// @return the mapped value
+// i_rank passed by value to save a local
+///
+inline uint64_t map_rank_ordinal_to_phy( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_rank )
+{
+    return map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>(count_dimm(i_target), i_rank);
+}
+
+///
+/// @brief Maps a ranks canonical number to the proper ordinal number
+/// for the PHY
+/// @param[in] i_target the fapi2 target of the MBA
+/// @param[in] i_rank the rank number to be mapped
+/// @return the mapped value
+// i_rank passed by value to save a local
+///
+inline uint64_t map_rank_ordinal_to_phy( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target, const uint64_t i_rank )
+{
+    // NOOP for Centaur
+    return i_rank;
+}
+
+///
+/// @brief Maps a rank's canonical number from the proper ordinal number for the PHY
+/// @param[in] i_count the number of DIMM to be considered
+/// @param[in] i_rank the rank number to be mapped
+/// @return the mapped value
+// i_rank passed by value to save a local
+///
+template <fapi2::TargetType T>
+inline uint64_t map_rank_ordinal_from_phy( const size_t i_count, const uint64_t i_rank );
+
+///
+/// @brief Maps a rank's canonical number from the proper ordinal number for the PHY
+/// @param[in] i_count the number of DIMM to be considered
+/// @param[in] i_rank the rank number to be mapped
+/// @return the mapped value
+// i_rank passed by value to save a local
+///
+template <>
+inline uint64_t map_rank_ordinal_from_phy<fapi2::TARGET_TYPE_MCA>( const size_t i_count, const uint64_t i_rank )
+{
+    if (i_count == 0)
+    {
+        FAPI_ERR("seeing 0 DIMM?");
+        fapi2::Assert(false);
+    }
+
+    if ((i_count == MAX_DIMM_PER_PORT) && ((i_rank + MAX_RANKS_DIMM1) >= RANK_MID_POINT))
+    {
+        return i_rank + MAX_RANKS_DIMM1;
+    }
+
+    // Nothing to do in the single drop case. Nothing to do for {0,1} on a dual drop either
+    return i_rank;
+}
+
+///
+/// @brief Maps a rank's canonical number from the proper ordinal number for the PHY
+/// @param[in] i_target the fapi2 target of the MCA
+/// @param[in] i_rank the rank number to be mapped
+/// @return the mapped value
+// i_rank passed by value to save a local
+///
+inline uint64_t map_rank_ordinal_from_phy( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rank )
+{
+    return map_rank_ordinal_from_phy<fapi2::TARGET_TYPE_MCA>(count_dimm(i_target), i_rank);
+}
+
+///
+/// @brief Maps a ranks canonical number to the proper ordinal number
+/// for the PHY
+/// @param[in] i_target the fapi2 target of the MBA
+/// @param[in] i_rank the rank number to be mapped
+/// @return the mapped value
+// i_rank passed by value to save a local
+///
+inline uint64_t map_rank_ordinal_from_phy( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        const uint64_t i_rank )
+{
+    // NOOP for Centaur
+    return i_rank;
+}
+
+///
+/// @brief Convert rank indexes in a rank_pair reg value from MC perspective to PHY perspective
+/// @tparam T fapi2 Target Type the type of the MC target
+/// @param[in] i_count the number of DIMM to be considered
+/// @param[in] i_rp_reg value of RANK_PAIR register
+/// @param[in, out] io_data the register value with mapped rank indexes
+///
+template< fapi2::TargetType T >
+inline void map_rank_pair_to_phy( const size_t i_count,
+                                  const fapi2::buffer<uint64_t>& i_rp_reg_value,
+                                  fapi2::buffer<uint64_t>& io_data );
+
+///
+/// @brief Convert rank indexes in a rank_pair reg value from MC perspective to PHY perspective
+/// Specialization for TARGET_TYPE_MCA
+/// @param[in] i_count the number of DIMM to be considered
+/// @param[in] i_rp_reg value of RANK_PAIR register
+/// @param[in, out] io_data the register value with mapped rank indexes
+///
+template<>
+inline void map_rank_pair_to_phy<fapi2::TARGET_TYPE_MCA>( const size_t i_count,
+        const fapi2::buffer<uint64_t>& i_rp_reg_value,
+        fapi2::buffer<uint64_t>& io_data )
+{
+    uint64_t l_rank = 0;
+
+    // copy over so we get the valid bits
+    io_data = i_rp_reg_value;
+
+    // No mapping necessary if single drop
+    if (i_count != 1)
+    {
+        i_rp_reg_value.extractToRight<EVEN_PRIMARY_RANK, RANK_LEN>(l_rank);
+        l_rank = map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>(i_count, l_rank);
+        io_data.insertFromRight<EVEN_PRIMARY_RANK, RANK_LEN>(l_rank);
+
+        i_rp_reg_value.extractToRight<EVEN_SECONDARY_RANK, RANK_LEN>(l_rank);
+        l_rank = map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>(i_count, l_rank);
+        io_data.insertFromRight<EVEN_SECONDARY_RANK, RANK_LEN>(l_rank);
+
+        i_rp_reg_value.extractToRight<ODD_PRIMARY_RANK, RANK_LEN>(l_rank);
+        l_rank = map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>(i_count, l_rank);
+        io_data.insertFromRight<ODD_PRIMARY_RANK, RANK_LEN>(l_rank);
+
+        i_rp_reg_value.extractToRight<ODD_SECONDARY_RANK, RANK_LEN>(l_rank);
+        l_rank = map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>(i_count, l_rank);
+        io_data.insertFromRight<ODD_SECONDARY_RANK, RANK_LEN>(l_rank);
+    }
+}
+
+///
+/// @brief Convert rank indexes in a rank_pair reg value from MC perspective to PHY perspective
+/// @param[in] i_target the fapi2 target of the MCA
+/// @param[in] i_rp_reg value of RANK_PAIR register
+/// @param[in, out] io_data the register value with mapped rank indexes
+///
+inline void map_rank_pair_to_phy( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                  const fapi2::buffer<uint64_t>& i_rp_reg_value,
+                                  fapi2::buffer<uint64_t>& io_data )
+{
+    map_rank_pair_to_phy<fapi2::TARGET_TYPE_MCA>(count_dimm(i_target), i_rp_reg_value, io_data);
+}
+
+///
+/// @brief Convert rank indexes in a rank_pair reg value from MC perspective to PHY perspective
+/// @param[in] i_target the fapi2 target of the MCA
+/// @param[in] i_rp_reg value of RANK_PAIR register
+/// @param[in, out] io_data the register value with mapped rank indexes
+///
+inline void map_rank_pair_to_phy( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                  const fapi2::buffer<uint64_t>& i_rp_reg_value,
+                                  fapi2::buffer<uint64_t>& io_data )
+{
+    // NOOP for Centaur
+    io_data = i_rp_reg_value;
+}
+
+///
+/// @brief Convert rank indexes in a rank_pair reg value from PHY perspective to MC perspective
+/// @tparam T fapi2 Target Type the type of the MC target
+/// @param[in] i_count the number of DIMM to be considered
+/// @param[in] i_rp_reg value of RANK_PAIR register
+/// @param[in, out] io_data the register value with mapped rank indexes
+///
+template< fapi2::TargetType T >
+inline void map_rank_pair_from_phy( const size_t i_count,
+                                    const fapi2::buffer<uint64_t>& i_rp_reg_value,
+                                    fapi2::buffer<uint64_t>& io_data );
+
+///
+/// @brief Convert rank indexes in a rank_pair reg value from PHY perspective to MC perspective
+/// Specialization for TARGET_TYPE_MCA
+/// @param[in] i_count the number of DIMM to be considered
+/// @param[in] i_rp_reg value of RANK_PAIR register
+/// @param[in, out] io_data the register value with mapped rank indexes
+///
+template<>
+inline void map_rank_pair_from_phy<fapi2::TARGET_TYPE_MCA>( const size_t i_count,
+        const fapi2::buffer<uint64_t>& i_rp_reg_value,
+        fapi2::buffer<uint64_t>& io_data )
+{
+    uint64_t l_rank = 0;
+
+    // copy over so we get the valid bits
+    io_data = i_rp_reg_value;
+
+    // No mapping necessary if single drop
+    if (i_count != 1)
+    {
+        i_rp_reg_value.extractToRight<EVEN_PRIMARY_RANK, RANK_LEN>(l_rank);
+        l_rank = map_rank_ordinal_from_phy<fapi2::TARGET_TYPE_MCA>(i_count, l_rank);
+        io_data.insertFromRight<EVEN_PRIMARY_RANK, RANK_LEN>(l_rank);
+
+        i_rp_reg_value.extractToRight<EVEN_SECONDARY_RANK, RANK_LEN>(l_rank);
+        l_rank = map_rank_ordinal_from_phy<fapi2::TARGET_TYPE_MCA>(i_count, l_rank);
+        io_data.insertFromRight<EVEN_SECONDARY_RANK, RANK_LEN>(l_rank);
+
+        i_rp_reg_value.extractToRight<ODD_PRIMARY_RANK, RANK_LEN>(l_rank);
+        l_rank = map_rank_ordinal_from_phy<fapi2::TARGET_TYPE_MCA>(i_count, l_rank);
+        io_data.insertFromRight<ODD_PRIMARY_RANK, RANK_LEN>(l_rank);
+
+        i_rp_reg_value.extractToRight<ODD_SECONDARY_RANK, RANK_LEN>(l_rank);
+        l_rank = map_rank_ordinal_from_phy<fapi2::TARGET_TYPE_MCA>(i_count, l_rank);
+        io_data.insertFromRight<ODD_SECONDARY_RANK, RANK_LEN>(l_rank);
+    }
+}
+
+///
+/// @brief Convert rank indexes in a rank_pair reg value from PHY perspective to MC perspective
+/// @param[in] i_target the fapi2 target of the MCA
+/// @param[in] i_rp_reg value of RANK_PAIR register
+/// @param[in, out] io_data the register value with mapped rank indexes
+///
+inline void map_rank_pair_from_phy( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                    const fapi2::buffer<uint64_t>& i_rp_reg_value,
+                                    fapi2::buffer<uint64_t>& io_data )
+{
+    map_rank_pair_from_phy<fapi2::TARGET_TYPE_MCA>(count_dimm(i_target), i_rp_reg_value, io_data);
+}
+
+///
+/// @brief Convert rank indexes in a rank_pair reg value from PHY perspective to MC perspective
+/// @param[in] i_target the fapi2 target of the MCA
+/// @param[in] i_rp_reg value of RANK_PAIR register
+/// @param[in, out] io_data the register value with mapped rank indexes
+///
+inline void map_rank_pair_from_phy( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                    const fapi2::buffer<uint64_t>& i_rp_reg_value,
+                                    fapi2::buffer<uint64_t>& io_data )
+{
+    // NOOP for Centaur
+    io_data = i_rp_reg_value;
+}
+
+///
 /// @brief Return a vector of rank numbers which represent the ranks for this dimm
 /// @tparam T the target type you'd like the associated ranks for
 /// @param[in] i_target
@@ -379,9 +670,11 @@ fapi2::ReturnCode get_pair_from_rank(const fapi2::Target<T>& i_target, const uin
 template< uint64_t RP, uint64_t N, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> >
 inline fapi2::ReturnCode read_rank_pair_reg( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
+    fapi2::buffer<uint64_t> l_buf;
     static_assert((N < TT::NUM_RANK_PAIR_REGS), "Rank pair register index failed range check");
-    FAPI_TRY( mss::getScom(i_target, TT::RANK_PAIR_REGS[N], o_data) );
-    FAPI_INF("read_rank_pair_reg: 0x%016lx", o_data);
+    FAPI_TRY( mss::getScom(i_target, TT::RANK_PAIR_REGS[N], l_buf) );
+    FAPI_INF("read_rank_pair_reg: 0x%016lx", l_buf);
+    map_rank_pair_from_phy(i_target, l_buf, o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -399,9 +692,11 @@ fapi_try_exit:
 template< uint64_t RP, uint64_t N, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> >
 inline fapi2::ReturnCode write_rank_pair_reg( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
+    fapi2::buffer<uint64_t> l_buf;
     static_assert((N < TT::NUM_RANK_PAIR_REGS), "Rank pair register index failed range check");
-    FAPI_TRY( mss::putScom(i_target, TT::RANK_PAIR_REGS[N], i_data) );
-    FAPI_INF("write_rank_pair_reg: 0x%016lx", i_data);
+    map_rank_pair_to_phy(i_target, i_data, l_buf);
+    FAPI_TRY( mss::putScom(i_target, TT::RANK_PAIR_REGS[N], l_buf) );
+    FAPI_INF("write_rank_pair_reg: 0x%016lx", l_buf);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -730,10 +1025,15 @@ fapi2::ReturnCode set_ranks_in_pair( const fapi2::Target<T>& i_target,
     }
 
     // Read the rank pair register(s)
+    fapi2::buffer<uint64_t> l_reg;
     std::vector<fapi2::buffer<uint64_t>> l_data;
     uint64_t l_ordinal = 0;
 
-    FAPI_TRY( scom_suckah(i_target, TT::RANK_PAIR_REGS, l_data) );
+    // Use the reg API here so we get the PHY to MC rank conversion
+    FAPI_TRY( (mss::rank::read_rank_pair_reg< RP, 0 >(i_target, l_reg)) );
+    l_data.push_back(l_reg);
+    FAPI_TRY( (mss::rank::read_rank_pair_reg< RP, 1 >(i_target, l_reg)) );
+    l_data.push_back(l_reg);
 
     // Modify
     for (const auto l_rank : i_ranks)
@@ -750,8 +1050,9 @@ fapi2::ReturnCode set_ranks_in_pair( const fapi2::Target<T>& i_target,
         ++l_ordinal;
     }
 
-    // Write
-    FAPI_TRY( scom_blastah(i_target, TT::RANK_PAIR_REGS, l_data) );
+    // Use the reg API here so we get the MC to PHY rank conversion
+    FAPI_TRY( (mss::rank::write_rank_pair_reg< RP, 0 >(i_target, l_data[0])) );
+    FAPI_TRY( (mss::rank::write_rank_pair_reg< RP, 1 >(i_target, l_data[1])) );
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -776,9 +1077,14 @@ fapi2::ReturnCode get_ranks_in_pair( const fapi2::Target<T>& i_target,
     o_ranks.clear();
 
     // Read the rank pair register(s)
+    fapi2::buffer<uint64_t> l_reg;
     std::vector<fapi2::buffer<uint64_t>> l_data;
 
-    FAPI_TRY( scom_suckah(i_target, TT::RANK_PAIR_REGS, l_data) );
+    // Use the reg API here so we get the PHY to MC rank conversion
+    FAPI_TRY( (mss::rank::read_rank_pair_reg< RP, 0 >(i_target, l_reg)) );
+    l_data.push_back(l_reg);
+    FAPI_TRY( (mss::rank::read_rank_pair_reg< RP, 1 >(i_target, l_reg)) );
+    l_data.push_back(l_reg);
 
     // Get data
     for (uint64_t l_ordinal = 0; l_ordinal < TT::NUM_RANKS_IN_PAIR; ++l_ordinal)
