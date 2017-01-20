@@ -77,8 +77,6 @@ enum VpdKeyword
     VPD_KEYWORD_PDG = 0,
     VPD_KEYWORD_PDR = 1,
     NUM_OF_VPD_TYPES = 2,
-    NON_VPD_RING = 3,
-    NON_VPD_PLL_RING = 4,
 };
 
 
