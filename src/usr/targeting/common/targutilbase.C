@@ -27,6 +27,13 @@
 namespace TARGETING
 {
 
+
+// master sentinel defined here to make available before targeting is up
+Target* const MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
+    = (sizeof(void*) == 4) ?
+        reinterpret_cast<TARGETING::Target* const>(0xFFFFFFFF)
+      : reinterpret_cast<TARGETING::Target* const>(0xFFFFFFFFFFFFFFFFULL);
+
 /**
  * @brief Safely fetch the HUID of a Target
  */

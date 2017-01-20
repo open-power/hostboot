@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -134,10 +134,7 @@ namespace TARGETING
  *      DD framework to bring PNOR device driver online.  Note this target
  *      cannot be used as input to any target service APIs.
  */
-static Target* const MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
-    = (sizeof(void*) == 4) ?
-        reinterpret_cast<TARGETING::Target* const>(0xFFFFFFFF)
-      : reinterpret_cast<TARGETING::Target* const>(0xFFFFFFFFFFFFFFFFULL);
+extern Target* const MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
 /**
  *  @brief TargetService class
