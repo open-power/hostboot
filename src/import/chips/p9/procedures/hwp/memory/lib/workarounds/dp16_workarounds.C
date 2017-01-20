@@ -105,7 +105,9 @@ fapi_try_exit:
 fapi2::ReturnCode rd_dia_config5( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     // Config provided by S. Wyatt 8/16
-    constexpr uint64_t rd_dia_config = 0x0010;
+    // 8 corresponds to bit 52 and is a workaround for periodic calibration related fails.
+    // Currently, it looks like this workaround will be required for all versions of Nimbus, so just hard coding it
+    constexpr uint64_t rd_dia_config = 0x0810;
 
     // Not checking fo EC level as this isn't an EC feature workaround, it's a incorrect documentation workaround.
     static const std::vector<uint64_t> l_addrs =
