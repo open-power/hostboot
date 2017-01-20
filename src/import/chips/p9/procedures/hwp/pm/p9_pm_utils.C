@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -210,6 +210,28 @@ fapi2::ReturnCode p9_pm_glob_fir_trace(
         {
             FAPI_INF("TP LFIR is **ACTIVE** %s", i_msg);
         }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode special_wakeup_all(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const bool i_enable)
+{
+    FAPI_INF("special_wakeup_all Enter");
+
+    fapi2::ReturnCode l_rc;
+    auto l_exChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EX>
+                        (fapi2::TARGET_STATE_FUNCTIONAL);
+
+    // For each EX target
+    for (auto l_ex_chplt : l_exChiplets)
+    {
+        FAPI_DBG("Running special wakeup on ex chiplet 0x%08X ", l_ex_chplt);
+
+        FAPI_TRY( fapi2::specialWakeup( l_ex_chplt, i_enable ) );
     }
 
 fapi_try_exit:

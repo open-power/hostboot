@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -200,6 +200,15 @@ fapi2::ReturnCode pm_init(
     FAPI_TRY(clear_occ_special_wakeups(i_target),
              "ERROR: Failed to clear off the wakeup");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "EX targets off special wakeup"));
+
+    //  ************************************************************************
+    //  Take all EX chiplets out of special wakeup
+    //  ************************************************************************
+    FAPI_DBG("Disable special wakeup for all functional  EX targets.");
+    FAPI_TRY(special_wakeup_all(i_target,
+                                false),//Disable splwkup
+             "ERROR: Failed to remove EX chiplets from special wakeup");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After EX out of special wakeup"));
 
     //  ************************************************************************
     //  Initialize the PSTATE GPE Engine
