@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,9 +49,16 @@
 #include <targeting/attrrp.H>
 #include <sys/mm.h>
 #include <util/align.H>
+#include <secureboot/trustedbootif.H>
+#include <secureboot/service.H>
+#include <config.h>
+
 
 namespace RUNTIME
 {
+
+// used for populating the TPM required bit in HDAT
+const uint16_t TPM_REQUIRED_BIT = 0x8000; //leftmost bit of uint16_t set to 1
 
 trace_desc_t *g_trac_runtime = NULL;
 TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
@@ -225,6 +232,112 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId)
     return(l_elog);
 } // end populate_RtDataByNode
 
+
+errlHndl_t populate_hbSecurebootData ( void )
+{
+    using namespace TARGETING;
+
+    errlHndl_t l_elog = nullptr;
+
+    do {
+
+    const uint64_t l_instance = 0; // pass 0 since sys parms has only one record
+    uint64_t l_hbrtDataAddr = 0;
+    uint64_t l_hbrtDataSizeMax = 0;
+    l_elog = RUNTIME::get_host_data_section(RUNTIME::IPLPARMS_SYSTEM,
+                                                l_instance,
+                                                l_hbrtDataAddr,
+                                                l_hbrtDataSizeMax);
+    if(l_elog != nullptr)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_hbSecurebootData: "
+            "get_host_data_section() failed for system IPL parameters section");
+        break;
+    }
+
+    hdatSysParms_t* const l_sysParmsPtr
+                            = reinterpret_cast<hdatSysParms_t*>(l_hbrtDataAddr);
+
+    typedef struct sysSecSets
+    {
+        // bit 0: Code Container Digital Signature Checking
+        uint16_t secureboot : 1;
+        // bit 1: Measurements Extended to Secure Boot TPM
+        uint16_t trustedboot : 1;
+        uint16_t reserved : 14;
+    } SysSecSets;
+
+    // populate system security settings in hdat
+    SysSecSets* const l_sysSecSets =
+        reinterpret_cast<SysSecSets*>(&l_sysParmsPtr->hdatSysSecuritySetting);
+
+    // populate secure setting for trusted boot
+    bool trusted = false;
+    #ifdef CONFIG_TPMDD
+        trusted = TRUSTEDBOOT::enabled();
+    #endif
+    l_sysSecSets->trustedboot = trusted? 1: 0;
+
+    // populate secure setting for secureboot
+    bool secure = false;
+    #ifdef CONFIG_SECUREBOOT
+        secure = SECUREBOOT::enabled();
+    #endif
+    l_sysSecSets->secureboot = secure? 1: 0;
+
+    // populate TPM config bits in hdat
+    bool tpmRequired = false;
+    #ifdef CONFIG_TRUSTEDBOOT
+        tpmRequired = TRUSTEDBOOT::isTpmRequired();
+    #endif
+
+    l_sysParmsPtr->hdatTpmConfBits = tpmRequired? TPM_REQUIRED_BIT: 0;
+
+    // find max # of TPMs per drawer and populate hdat with it
+
+    // look for class ENC type NODE and class chip TPM to find TPMs
+    TARGETING::TargetHandleList l_nodeEncList;
+
+    getEncResources(l_nodeEncList, TYPE_NODE, UTIL_FILTER_ALL);
+
+    uint16_t l_maxTpms = 0;
+
+    // loop thru the nodes and check number of TPMs
+    for (TargetHandleList::const_iterator
+        l_node_iter = l_nodeEncList.begin();
+        l_node_iter != l_nodeEncList.end();
+        ++l_node_iter)
+    {
+        // for this Node, get a list of tpms
+        TARGETING::TargetHandleList l_tpmChipList;
+
+        getChildAffinityTargets ( l_tpmChipList, *l_node_iter,
+                        TARGETING::CLASS_CHIP, TYPE_TPM, false );
+
+        size_t l_numTpms = l_tpmChipList.size();
+
+        if (l_numTpms > l_maxTpms)
+        {
+            l_maxTpms = static_cast<uint16_t>(l_numTpms);
+        }
+    }
+
+    l_sysParmsPtr->hdatTpmDrawer = l_maxTpms;
+    TRACFCOMP(g_trac_runtime,"Max TPMs = 0x%04X", l_maxTpms);
+
+    // populate hw key hash in hdat
+    #ifdef CONFIG_SECUREBOOT
+    auto hash = l_sysParmsPtr->hdatHwKeyHashValue;
+    SECUREBOOT::getHwKeyHash(hash);
+    #else
+    memset(l_sysParmsPtr->hdatHwKeyHashValue,0,
+                                 sizeof(l_sysParmsPtr->hdatHwKeyHashValue));
+    #endif
+
+    } while(0);
+
+    return (l_elog);
+} // end populate_hbRuntiome
 
 errlHndl_t populate_hbRuntimeData( void )
 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,6 @@
 // Copied from FipS:src/hdat/fsp/hdatnaca.H
 // offset in mainstore where NACA starts
 const uint64_t HDAT_NACA_OFFSET = 0x00004000;
-
 
 /* NOTE: Most of these structures were copied and adapted from the HDAT
  component in FipS.  They do not need to be kept exactly in sync so long
@@ -255,6 +254,18 @@ struct hdatSysParms_t
     uint8_t  vTpmEnabled;
     uint8_t  hdatReserved;
     uint16_t hdatDispWheel;
+    uint32_t hdatNestFreq;             // Nest Clock Frequency in MHz
+    uint8_t  hdatSplitCoreMode;        // Split Core Mode
+    uint8_t  hdatReserved4;            // Reserved
+    uint16_t hdatReserved5;            // Reserved
+    uint8_t  hdatSystemVendorName[64]; // System Vendor Name
+    uint16_t hdatSysSecuritySetting;   // System Security Settings
+    uint16_t hdatTpmConfBits;          // TPM Configuration Bits
+    uint16_t hdatTpmDrawer;            // TPMs/Drawer
+    uint16_t hdatReserved6;            // Reserved
+    uint8_t  hdatHwKeyHashValue[64];   // Hardware Keys Hash Value
+    char     hdatSystemFamily[64];     // System Family/Vendor Name
+    char     hdatSystemType[64];       // System Type/Vendor Type
 } __attribute__ ((packed));
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,6 +67,17 @@ errlHndl_t load_host_data( void );
  * @return errlHndl_t NULL on Success
  */
 errlHndl_t populate_hbRuntimeData( void );
+
+/**
+ * @brief Populate HB secureboot data in mainstore
+ *
+ * @description  Populates the System Parameters section of HDAT with
+ *     values acquired via the secureboot module from a verified source, and
+ *     so, henceforth are available to the host at runtime.
+ *
+ * @return errlHndl_t NULL on Success
+ */
+errlHndl_t populate_hbSecurebootData( void );
 
 /**
  * @brief Fills in HBRT for given NODE
