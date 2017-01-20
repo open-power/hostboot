@@ -81,19 +81,6 @@ enum PPM_MASK
 // -----------------------------------------------------------------------------
 
 ///
-/// @brief Sets or clears special wake-up on all configured EX on a target
-///
-/// @param[in] i_target Chip target
-/// @param[in] i_enable true = enable. false = disable.
-///
-/// @return FAPI2_RC_SUCCESS If the special wake-up is successful,
-///         else error code.
-///
-fapi2::ReturnCode special_wakeup_all(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    bool i_enable);
-
-///
 /// @brief Clear the Deep Exit Masks
 ///
 /// @param[in] i_target Chip target
@@ -238,28 +225,6 @@ fapi2::ReturnCode p9_pm_reset(
 
 fapi_try_exit:
     FAPI_IMP("Exiting p9_pm_reset ...");
-    return fapi2::current_err;
-}
-
-fapi2::ReturnCode special_wakeup_all(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const bool i_enable)
-{
-    FAPI_INF("special_wakeup_all Enter");
-
-    fapi2::ReturnCode l_rc;
-    auto l_exChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EX>
-                        (fapi2::TARGET_STATE_FUNCTIONAL);
-
-    // For each EX target
-    for (auto l_ex_chplt : l_exChiplets)
-    {
-        FAPI_DBG("Running special wakeup on ex chiplet 0x%08X ", l_ex_chplt);
-
-        FAPI_TRY( fapi2::specialWakeup( l_ex_chplt, i_enable ) );
-    }
-
-fapi_try_exit:
     return fapi2::current_err;
 }
 
