@@ -53,7 +53,7 @@ namespace HDAT
 
 #define HDAT_NUM_P7_PCRD_ENTRIES    32
 #define HDAT_FULL_MVPD_SIZE 0x10000
-const uint16_t HDAT_PCRD_VERSION    = 0x0D;
+const uint16_t HDAT_PCRD_VERSION    = 0x20;
 const char HDAT_PCRD_STRUCT_NAME[7] = "SPPCRD";
 
 /** @enum hdatDataPtrs
@@ -98,8 +98,9 @@ struct hdatPcrdChipInfo_t
     uint32_t  hdatPcrdFabricId;         // 0x0030 Internal Drawer Node ID
                                         //         (Fabric Id)
     uint32_t  hdatPcrdCcmNodeID;        // 0x0034 CCM Node ID
-    uint32_t  hdatPcrdCappFunctional;   // 0x0038 Capp functional state
-    uint32_t  hdatPcrdStopLevelSupport; // 0x003C Supported Stop Level
+    uint32_t  hdatPcrdCappFunc_unit0;   // 0x0038 Capp functional state unit0
+    uint32_t  hdatPcrdCappFunc_unit1;   // 0x003C Capp functional state unit1
+    uint32_t  hdatPcrdStopLevelSupport; // 0x0040 Supported Stop Level
 } __attribute__ ((packed));
 
 /* @brief Defines 'chip time-of-day structure in the PCRD */
