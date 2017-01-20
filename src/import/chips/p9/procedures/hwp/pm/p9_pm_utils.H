@@ -64,4 +64,15 @@ fapi2::ReturnCode p9_pm_glob_fir_trace(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const char* i_msg);
 
+///
+/// @brief Sets or clears special wake-up on all configured EX on a target
+/// @param[in] i_target Chip target
+/// @param[in] i_enable true = enable. false = disable.
+/// @return FAPI2_RC_SUCCESS If the special wake-up is successful,
+///         else error code.
+///
+fapi2::ReturnCode special_wakeup_all(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    bool i_enable);
+
 #endif // _P9_PM_UTILS_H_
