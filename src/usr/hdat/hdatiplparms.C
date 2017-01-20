@@ -773,32 +773,15 @@ void HdatIplParms::hdatGetSystemParamters()
         HDAT_ERR("Error in getting SYSTEM_BRAND_NAME");
     }
 
-    //TODO RTC Story 161867
-    //Need to remove the hard coding data
-    this->iv_hdatIPLParams->iv_sysParms.hdatTpmDrawer = 1;
+    // The next 4 fields are set to their final values in a common handler
+    // in istep 21.1, to avoid trust issues when HDAT is initially populated
+    // by a service processor
+    this->iv_hdatIPLParams->iv_sysParms.hdatSysSecuritySetting = 0;
 
-    TARGETING::ATTR_SECURITY_ENABLE_type l_sysSecuritySetting;
-    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SECURITY_ENABLE>
-                                                        (l_sysSecuritySetting))
-    {
-        this->iv_hdatIPLParams->iv_sysParms.hdatSysSecuritySetting =
-            l_sysSecuritySetting;
-    }
-    else
-    {
-        HDAT_ERR("Error in getting SECURITY_ENABLE attribute");
-    }
+    this->iv_hdatIPLParams->iv_sysParms.hdatTpmConfBits = 0;
 
-    TARGETING::ATTR_TPM_REQUIRED_type l_tpmConfBits;
-    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_TPM_REQUIRED>
-                                                        (l_tpmConfBits))
-    {
-        this->iv_hdatIPLParams->iv_sysParms.hdatTpmConfBits = l_tpmConfBits;
-    }
-    else
-    {
-        HDAT_ERR("Error in getting TPM_REQUIRED attribute");
-    }
+    this->iv_hdatIPLParams->iv_sysParms.hdatTpmDrawer = 0;
+
     memset(this->iv_hdatIPLParams->iv_sysParms.hdatHwKeyHashValue, 0x00, 64);
     memset(this->iv_hdatIPLParams->iv_sysParms.hdatSystemFamily, 0x00, 64);
 

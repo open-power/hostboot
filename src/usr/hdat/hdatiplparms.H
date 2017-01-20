@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,6 @@ namespace HDAT
 
 const uint16_t HDAT_IPL_PARAMS_VERSION    = 0x5F;
 const char HDAT_IPLP_STRUCT_NAME[7] = "IPLPMS";
-
 
 
 /** @enum hdatDataPtrs

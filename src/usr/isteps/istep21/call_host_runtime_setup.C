@@ -74,8 +74,10 @@ void* call_host_runtime_setup (void *io_pArgs)
         for(auto l_proc : l_procChips)
         {
             //Get fabric info from proc
-            uint8_t l_fabricChipId = l_proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-            uint8_t l_fabricGroupId = l_proc->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
+            uint8_t l_fabricChipId =
+                            l_proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+            uint8_t l_fabricGroupId =
+                            l_proc->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
             //Calculate what bit position this will be
             uint8_t l_bitPos = l_fabricChipId + (8 * l_fabricGroupId);
 
@@ -132,6 +134,15 @@ void* call_host_runtime_setup (void *io_pArgs)
         // Fill in Hostboot runtime data if there is a PAYLOAD
         if( !(TARGETING::is_no_load()) )
         {
+            // API call to fix up the secureboot fields
+            l_err = RUNTIME::populate_hbSecurebootData();
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "Failed hbSecurebotData setup" );
+                break;
+            }
+
             // Fill in Hostboot runtime data for all nodes
             // (adjunct partition)
             // Write the HB runtime data into mainstore
