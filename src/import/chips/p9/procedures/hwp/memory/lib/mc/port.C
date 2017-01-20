@@ -35,7 +35,6 @@
 
 #include <fapi2.H>
 #include <lib/mc/port.H>
-#include <lib/dimm/rank.H>
 #include <lib/shared/mss_const.H>
 #include <lib/utils/scom.H>
 
@@ -80,14 +79,13 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
     fapi2::buffer<uint16_t> l_per_zqcal_mode_options = 0;
 
     fapi2::buffer<uint64_t> l_periodic_cal_config;
-    fapi2::buffer<uint64_t> l_phy_zqcal_config;
 
     std::vector<uint64_t> l_pairs;
 
     FAPI_INF("Enable periodic cal");
 
     uint8_t is_sim = 0;
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), is_sim) );
+    FAPI_TRY( mss::is_simulation(is_sim) );
 
     // Even if we're in sim, do these so that we do the attribute work (even though the values aren't used.)
     FAPI_TRY( mss::eff_memcal_interval(i_target, l_memcal_interval) );
@@ -128,8 +126,6 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
     // ZQCAL
     if (l_per_zqcal_mode_options != 0)
     {
-        std::vector<uint64_t> l_ranks;
-
         //
         // Configure the controller
         //
@@ -162,19 +158,10 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
         //
 
         // Setup PER_ZCAL_CONFIG based on the number of ranks on the DIMM in either slot.
-        FAPI_TRY( mss::rank::ranks(i_target, l_ranks) );
-
-        for (auto r : l_ranks)
-        {
-            l_phy_zqcal_config.setBit(TT::PER_ZCAL_ENA_RANK + r);
-        }
+        FAPI_TRY( reset_zqcal_config(i_target) );
 
         // No ZQCAL in sim
         l_periodic_cal_config.writeBit<TT::PER_ENA_ZCAL>(is_sim ? 0 : 1);
-
-        // Write the ZQCAL periodic config
-        FAPI_INF("zcal periodic config: 0x%016lx", l_phy_zqcal_config);
-        FAPI_TRY( mss::putScom(i_target, TT::PHY_ZQCAL_REG, l_phy_zqcal_config) );
 
         // Write the ZQCAL timer reload register
         // # DPHY01_DDRPHY_PC_ZCAL_TIMER_RELOAD_VALUE_P0   0x00A   0x8000c0090301143f
@@ -210,7 +197,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
 
         FAPI_TRY( mss::rank::get_rank_pairs(i_target, l_pairs) );
 
-        for (auto pair : l_pairs)
+        for (const auto pair : l_pairs)
         {
             l_rank_config.setBit(pair);
         }
