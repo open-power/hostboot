@@ -22,20 +22,18 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-
+<!--                                                                        -->
+<!-- @file memory_mss_timing.xml                                            -->
+<!-- @brief Error xml for timing.H                                          -->
 <!-- -->
-<!-- @file memory_mss_timing.xml -->
-<!-- @brief Error xml for timing.H -->
-<!-- -->
-<!-- *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com> -->
-<!-- *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com> -->
-<!-- *HWP Team: Memory -->
-<!-- *HWP Level: 2 -->
-<!-- *HWP Consumed by: HB:FSP -->
+<!-- *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>                     -->
+<!-- *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>                     -->
+<!-- *HWP Team: Memory                                                      -->
+<!-- *HWP Level: 3                                                          -->
+<!-- *HWP Consumed by: HB:FSP                                               -->
 <!-- -->
 
 <hwpErrors>
-
   <hwpError>
     <rc>RC_MSS_NO_POWER_THERMAL_ATTR_FOUND</rc>
     <description>
@@ -43,12 +41,31 @@
     </description>
     <ffdc>GENERATED_KEY</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_POWER_INTERCEPT_NOT_SET</rc>
+    <description>
+      The attribute ATTR_MSS_TOTAL_POWER_INTERCEPT was not set and equals 0
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_POWER_SLOPE_NOT_SET</rc>
+    <description>
+      The attribute ATTR_MSS_TOTAL_POWER_INTERCEPT was not set and equals 0
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -57,13 +74,11 @@
       There are 2 DIMMS on the port but both have 0 databus utilization
     </description>
     <ffdc>PORT_DATABUS_UTIL</ffdc>
+    <ffdc>DIMM_COUNT</ffdc>
     <callout>
-      <target>MCA_TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>MCA_TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -74,16 +89,53 @@
     <ffdc>PORT_DATABUS_UTIL</ffdc>
     <ffdc>UTIL_CONVERSION</ffdc>
     <ffdc>IDLE_UTIL</ffdc>
+    <ffdc>RESULT</ffdc>
     <callout>
-      <target>MCA_TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>MCA_TARGET</target>
-    </deconfigure>
   </hwpError>
 
-  <hwpError>
+ <hwpError>
+    <rc>RC_MSS_NO_PORT_POWER_LIMIT</rc>
+    <description>
+        Got 0 when calculating port power limit.
+        Either no dimms or attribute MEM_WATT_TARGET wasn't set
+    </description>
+    <ffdc>COUNT_DIMMS</ffdc>
+    <ffdc>PORT_POWER_LIMIT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+ </hwpError>
+
+ <hwpError>
+    <rc>RC_MSS_NO_PORT_POWER</rc>
+    <description>
+        Got 0 when calculating port power limits using the DIMMs databus utilization
+    </description>
+    <ffdc>COUNT_DIMMS</ffdc>
+    <ffdc>MAX_UTILIZATION_DIMM_0</ffdc>
+    <ffdc>MAX_UTILIZATION_DIMM_1</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+ </hwpError>
+
+ <hwpError>
+    <rc>RC_MSS_M_DRAM_CLOCKS_EQUALS_ZERO</rc>
+    <description>
+        ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS was not set and equals zero
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+ </hwpError>
+
+ <hwpError>
     <rc>RC_MSS_CALC_PORT_POWER_EXCEEDS_MAX</rc>
     <description>
       The calculated port power from equalizing throttles exceeds the maximum allowed power
@@ -110,9 +162,9 @@
           <childNumber>EX_NUMBER_IN_ERROR</childNumber>
       </childTargets>
     </deconfigure>
-</hwpError>
+ </hwpError>
 
-<hwpError>
+ <hwpError>
     <rc>RC_MSS_SLOT_UTIL_EXCEEDS_PORT</rc>
     <description>
       The memory throttle per slot (DIMM) exceeds the allowed throttle for the port
@@ -123,12 +175,9 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>MCA_TARGET</target>
-    </deconfigure>
-  </hwpError>
+ </hwpError>
 
-  <hwpError>
+ <hwpError>
     <rc>RC_MSS_SPLIT_UTIL_CALC_ERROR</rc>
     <description>
       Error when splitting up the memory port's utilization
@@ -141,15 +190,32 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>MCA_TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_MAX_DIMMS_ON_VMEM_REGULATOR_NOT_SET</rc>
+    <rc>RC_MSS_EMPTY_VECTOR_PASSED_TO_EFF_CONFIG_THERMAL</rc>
     <description>
-      MRW attribute  mrw_max_number_dimms_possible_per_vmem_regulator equals 0
+        There are either no DIMMS or no MCS in the vector passed into the memory power thermal functions
     </description>
-  </hwpError>
+    <ffdc>MCS_COUNT</ffdc>
+    <ffdc>DIMM_COUNT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+ </hwpError>
+
+ <hwpError>
+     <rc>RC_MSS_OUTPUT_OVERFLOW_CALC_UTIL</rc>
+    <description>
+        Type of output variable is not large enough for the calculations
+    </description>
+    <ffdc>RESULT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+ </hwpError>
+
+
 </hwpErrors>

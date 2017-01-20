@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_POWER_THROTTLE_
@@ -82,7 +82,7 @@ class throttle
         ///
         inline void calc_power_uplift (const uint8_t i_uplift, double& o_value)
         {
-            o_value *= (1 + (double(i_uplift) / PERCENT_CONVERSION));
+            o_value *= (1 + (static_cast<double>(i_uplift) / PERCENT_CONVERSION));
         }
 
     public:
@@ -113,7 +113,7 @@ class throttle
         /// @param[in] i_target MCA target to call power thermal stuff on
         /// @param[out] o_rc fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ctor was successful
         ///
-        throttle( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_mca, fapi2::ReturnCode o_rc);
+        throttle( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_mca, fapi2::ReturnCode& o_rc);
 
         //
         // @brief Destructor
@@ -126,12 +126,13 @@ class throttle
         /// @param[in] i_max_util  the utilization of the port at maximum possible (mrw or calculated)
         /// @param[out] o_port_power_idle max value of port power in cW
         /// @param[out] o_port_power_max max value of port power in cW
+        /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff the split is OK
         /// @note Called twice in p9_mss_bulk_pwr_throttles
         ///
-        void calc_port_power( const double i_idle_util [MAX_DIMM_PER_PORT],
-                              const double i_max_util [MAX_DIMM_PER_PORT],
-                              double& o_port_power_idle,
-                              double& o_port_power_max);
+        fapi2::ReturnCode calc_port_power( const double i_idle_util [MAX_DIMM_PER_PORT],
+                                           const double i_max_util [MAX_DIMM_PER_PORT],
+                                           double& o_port_power_idle,
+                                           double& o_port_power_max);
         ///
         /// @brief Calculates max and min power usages based off of DIMM power curves
         /// @param[in] i_databus_port_max max databus utilization for the port (either calculated or mrw)
@@ -152,6 +153,7 @@ class throttle
         /// @param[in] i_power_max double of the port's power consumption at max utilization
         /// @param[out] o_power_slope
         /// @param[out] o_power_int
+        /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff the split is OK
         /// @note Called in p9_mss_bulk_pwr_throttles
         /// @note Power curve needed to calculate the utilization
         ///
@@ -175,16 +177,18 @@ class throttle
         ///
         /// @brief set iv_n_port, iv_n_slot, iv_calc_port_maxpower
         /// @param[in] i_util_port pass in the calculated port databus utilization
+        /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
         ///
-        void calc_slots_and_power (const double i_util_port);
+        fapi2::ReturnCode calc_slots_and_power (const double i_util_port);
 
         ///
-        ///@brief calculated the output power estimate from the calculated N throttle
-        ///@param[in] i_n_slot the N throttle per slot
-        ///@param[in] i_n_port the N throttle per port
-        ///@return the power calculated from the uint
+        /// @brief calculated the output power estimate from the calculated N throttle
+        /// @param[in] i_n_slot the N throttle per slot
+        /// @param[in] i_n_port the N throttle per port
+        /// @param[out] o_power the calculated power
+        /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff the split is OK
         ///
-        uint32_t calc_power_from_n (const uint16_t i_n_slot, const uint16_t i_n_port);
+        fapi2::ReturnCode calc_power_from_n (const uint16_t i_n_slot, const uint16_t i_n_port, uint32_t& o_power);
 
         ///
         /// @brief Converts the port maximum databus util to a dimm level based on powerslopes and dimms installed
@@ -252,21 +256,47 @@ inline uint32_t throttled_cmds(const uint32_t i_databus_util, const uint32_t i_n
 /// @brief Calculate the port databus utilization based off of N throttles and M dram clocks
 /// @param[in] i_n_throttles N (address operations) allowed within a window of M DRAM clocks
 /// @param[in] i_num_dram_clocks window of M DRAM clocks
-/// @return number of throttled commands allowed
+/// @param[out] o_calc_util
+/// @return FAPI2_RC_SUCCESS iff method was a success
 /// @note Uses N/M Throttling.
 /// @note DRAM databus utilization = N * 4 * 10000 / M
 ///
-inline double calc_util_from_throttles(const uint16_t i_n_throttles, const uint32_t i_num_dram_clocks)
+template<typename T>
+fapi2::ReturnCode calc_util_from_throttles(const uint16_t i_n_throttles,
+        const uint32_t i_num_dram_clocks,
+        T& o_calc_util)
 {
     constexpr uint32_t l_multiplier = DRAM_BUS_UTILS * UTIL_CONVERSION;
-    const auto l_temp = (double(i_n_throttles) * l_multiplier) / i_num_dram_clocks;
-    return  ( (l_temp == 0) ? MIN_THROTTLE : l_temp);
+    FAPI_ASSERT( (i_num_dram_clocks != 0),
+                 fapi2::MSS_M_DRAM_CLOCKS_EQUALS_ZERO(),
+                 "ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS was not set and equals zero");
 
+    o_calc_util = (static_cast<double>(i_n_throttles) * l_multiplier) / i_num_dram_clocks;
+
+    // Best way to check for overflow if o_calc_util can be a double?
+    // If o_calc_util overflows, the value inside will be below the expected outcome
+    // So compare o_calc_util with the calculated value, but store calculated value in largest storage
+    // Compare ">=" because o_calc_util can be a double, and so we can't compare just equality due to truncation
+    FAPI_ASSERT( o_calc_util >= static_cast<uint64_t>((static_cast<double>(i_n_throttles) * l_multiplier) /
+                 i_num_dram_clocks),
+                 fapi2::MSS_OUTPUT_OVERFLOW_CALC_UTIL()
+                 .set_RESULT((static_cast<double>(i_n_throttles) * l_multiplier) / i_num_dram_clocks),
+                 "Overflow of output variable in calc_util_from_throttles throttles: %d, multiplier %d, dram_clocks %d",
+                 i_n_throttles,
+                 l_multiplier,
+                 i_num_dram_clocks);
+
+    o_calc_util = ( (o_calc_util == 0) ? MIN_UTIL : o_calc_util);
+
+    FAPI_INF("In calc_util_from_throttles, calculated %f for output utilization", o_calc_util);
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
 /// @brief Determines if the double has decimal digits and adds 1 and rounds if true
-/// @param[in] io_val the double to be rounded up if trialing digits
+/// @param[in] i_val the double to be rounded up if trialing digits
 /// @return the input value rounded up to the next whole digit
 /// @note Called in p9_mss_bulk_pwr_throttles
 ///

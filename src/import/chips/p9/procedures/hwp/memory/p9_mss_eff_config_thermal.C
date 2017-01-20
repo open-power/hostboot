@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@ extern "C"
     /// @brief Perform thermal calculations as part of the effective configuration
     /// @param[in] i_targets an array of MCS targets all on the same VDDR domain
     /// @return FAPI2_RC_SUCCESS iff ok
-    ///
+    /// @note sets ATTR_MSS_MEM_WATT_TARGET, ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT and _PER_SLOT, and ATTR_MSS_PORT_MAXPOWER
     fapi2::ReturnCode p9_mss_eff_config_thermal( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets )
     {
 
@@ -60,6 +60,7 @@ extern "C"
         uint16_t l_total_int      [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
         uint32_t l_thermal_power  [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
         fapi2::ReturnCode l_rc;
+
         //Gotta convert into fapi2::buffers. Not very elegant
         //Do it here or in the encode and decode functions
         //Not that pretty :(
@@ -71,10 +72,16 @@ extern "C"
         std::vector<fapi2::buffer< uint64_t>> l_intercept = {};
         std::vector<fapi2::buffer< uint64_t>> l_thermal_power_limit = {};
 
+        //Get the vectors of power curves and thermal power limits to convert to buffers
         FAPI_TRY( mss::mrw_pwr_slope (l_tslope.data() ));
         FAPI_TRY( mss::mrw_pwr_intercept (l_tintercept.data()) );
         FAPI_TRY( mss::mrw_thermal_memory_power_limit (l_tthermal_power_limit.data()) );
         FAPI_TRY( mss::power_thermal::set_runtime_m_and_watt_limit(i_targets));
+
+        FAPI_ASSERT( i_targets.size() != 0,
+                     fapi2::MSS_EMPTY_VECTOR_PASSED_TO_EFF_CONFIG_THERMAL()
+                     .set_MCS_COUNT(0),
+                     "Empty vector passed into p9_mss_eff_config_thermal procedure");
 
         for (size_t i = 0; i < mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS; ++i)
         {
@@ -150,7 +157,7 @@ extern "C"
         //get the thermal limits, done per dimm and set to worst case for the slot and port throttles
         //Bulk_pwr sets the general, all purpose ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, _PER_PORT, and MAXPOWER ATTRs
         FAPI_EXEC_HWP(l_rc, p9_mss_bulk_pwr_throttles, i_targets, POWER);
-        FAPI_TRY(l_rc);
+        FAPI_TRY(l_rc, "Failed running p9_mss_bulk_pwr_throttles");
 
         //Set runtime throttles to worst case between ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT
         //and ATTR_MSS_MEM_RUNTIME_THROTTLED_N_COMMANDS_PER_SLOT and the _PORT equivalents also
@@ -174,7 +181,7 @@ extern "C"
             FAPI_INF( "VDDR+VPP power curve slope is %d, int is %d, thermal_power is %d", l_total_slope[0][0], l_total_int[0][0],
                       l_thermal_power[0][0]);
 
-            //Set the power attribute (TOTAL_PWR) to vpp+vdd power slope
+            //Set the power curve attributes (TOTAL_PWR) to vpp+vdd power slope and intercept
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_TOTAL_PWR_SLOPE,
                                     l_mcs,
                                     l_total_slope));
@@ -186,7 +193,7 @@ extern "C"
 
         //Run thermal throttles with the VDDR+VPP power curves
         FAPI_EXEC_HWP(l_rc, p9_mss_bulk_pwr_throttles, i_targets, THERMAL);
-        FAPI_TRY(l_rc);
+        FAPI_TRY(l_rc, "Failed running p9_mss_bulk_pwr_throttles with THERMAL throttling in p9_mss_eff_config_thermal");
         //Update everything to worst case
         FAPI_TRY( mss::power_thermal::update_runtime_throttles (i_targets));
 

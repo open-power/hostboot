@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,9 +28,9 @@
 /// @brief Set the throttle attributes based on a power limit for the dimms on the channel pair
 ///
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Andre A. Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 #include <vector>
 
@@ -46,99 +46,65 @@ using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_DIMM;
 extern "C"
 {
-
-///
-/// @brief Set ATTR_MSS_PORT_MAXPOWER, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT
-/// @param[in] i_targets vector of MCS's on the same VDDR domain
-/// @param[in] thermal boolean to determine whether to calculate throttles based on the power regulator or thermal limits
-/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
-/// @note Called in p9_mss_bulk_pwr_throttles
-/// @note determines the throttle levels based off of the port's power curve,
-/// sets the slot throttles to the same
-/// @note Enums are POWER for power egulator throttles and THERMAL for thermal throttles
-/// @note equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
-///
-
+    ///
+    /// @brief Set ATTR_MSS_PORT_MAXPOWER, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT
+    /// @param[in] i_targets vector of MCS's on the same VDDR domain
+    /// @param[in] i_throttle_type thermal boolean to determine whether to calculate throttles based on the power regulator or thermal limits
+    /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+    /// @note Called in p9_mss_bulk_pwr_throttles
+    /// @note determines the throttle levels based off of the port's power curve,
+    /// sets the slot throttles to the same
+    /// @note Enums are POWER for power egulator throttles and THERMAL for thermal throttles
+    /// @note equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
+    ///
     fapi2::ReturnCode p9_mss_bulk_pwr_throttles( const std::vector< fapi2::Target<TARGET_TYPE_MCS> >& i_targets,
-            throttle_type t)
+            const throttle_type i_throttle_type)
     {
-        FAPI_INF("Start bulk_pwr_throttles");
-        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+        FAPI_INF("Start p9_mss_bulk_pwr_throttles for %s type throttling",
+                 (( i_throttle_type == THERMAL) ? "THERMAL" : "POWER"));
+        fapi2::ReturnCode l_rc;
 
-        //Check for THERMAL
-        if (t == THERMAL)
+        for ( const auto& l_mcs : i_targets)
         {
-            for ( const auto& l_mcs : i_targets)
+            uint16_t l_slot [mss::PORTS_PER_MCS] = {};
+            uint16_t l_port [mss::PORTS_PER_MCS] = {};
+            uint32_t l_power [mss::PORTS_PER_MCS] = {};
+
+            for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(l_mcs))
             {
-                uint16_t l_slot [mss::PORTS_PER_MCS] = {};
-                uint16_t l_port [mss::PORTS_PER_MCS] = {};
-                uint32_t l_power [mss::PORTS_PER_MCS] = {};
-
-                for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(l_mcs))
+                //Don't run if there are no dimms on the port
+                if (mss::count_dimm(l_mca) == 0)
                 {
-                    //Don't run if there are no dimms on the port
-                    if (mss::count_dimm(l_mca) == 0)
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    const uint8_t l_pos = mss::index(l_mca);
-                    fapi2::ReturnCode l_rc;
-                    mss::power_thermal::throttle l_pwr_struct(l_mca, l_rc);
-                    FAPI_TRY(l_rc, "Error constructing mss:power_thermal::throttle object for target %s",
-                             mss::c_str(l_mca));
+                const uint8_t l_pos = mss::index(l_mca);
+
+                mss::power_thermal::throttle l_pwr_struct(l_mca, l_rc);
+                FAPI_TRY(l_rc, "Error constructing mss:power_thermal::throttle object for target %s",
+                         mss::c_str(l_mca));
+
+                //Let's do the actual work now
+                if ( i_throttle_type == THERMAL)
+                {
                     FAPI_TRY (l_pwr_struct.thermal_throttles());
-
-                    l_slot[l_pos] = l_pwr_struct.iv_n_slot;
-                    l_port[l_pos] = l_pwr_struct.iv_n_port;
-                    l_power[l_pos] = l_pwr_struct.iv_calc_port_maxpower;
                 }
-
-                FAPI_INF("Port maxpower is %d, %d slot is %d, %d, port is %d %d",
-                         l_power[0], l_power[1], l_slot[0], l_slot[1], l_port[0], l_port[1]);
-
-                FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_MSS_PORT_MAXPOWER, l_mcs, l_power));
-                FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_mcs, l_slot));
-                FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_mcs, l_port));
-            }
-        }
-        //else do POWER
-        else
-        {
-            for ( const auto& l_mcs : i_targets)
-            {
-                uint16_t l_slot [mss::PORTS_PER_MCS] = {};
-                uint16_t l_port [mss::PORTS_PER_MCS] = {};
-                uint32_t l_power [mss::PORTS_PER_MCS] = {};
-
-                for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(l_mcs))
+                else
                 {
-                    //Don't run if there are no dimms on the port
-                    if (mss::count_dimm(l_mca) == 0)
-                    {
-                        continue;
-                    }
-
-                    uint8_t l_pos = mss::index(l_mca);
-                    fapi2::ReturnCode l_rc;
-                    mss::power_thermal::throttle l_pwr_struct(l_mca, l_rc);
-                    FAPI_TRY(l_rc, "Error constructing mss:power_thermal::throttle object for target %s",
-                             mss::c_str(l_mca));
-
                     FAPI_TRY (l_pwr_struct.power_regulator_throttles());
-
-                    l_slot[l_pos] = l_pwr_struct.iv_n_slot;
-                    l_port[l_pos] = l_pwr_struct.iv_n_port;
-                    l_power[l_pos] = l_pwr_struct.iv_calc_port_maxpower;
                 }
 
-                FAPI_INF("Port maxpower is %d, %d slot is %d, %d, port is %d %d",
-                         l_power[0], l_power[1], l_slot[0], l_slot[1], l_port[0], l_port[1]);
-                FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_MSS_PORT_MAXPOWER, l_mcs, l_power));
-                FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_mcs, l_slot));
-                FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_mcs, l_port));
+                l_slot[l_pos] = l_pwr_struct.iv_n_slot;
+                l_port[l_pos] = l_pwr_struct.iv_n_port;
+                l_power[l_pos] = l_pwr_struct.iv_calc_port_maxpower;
+
+                FAPI_INF("For target %s Calculated power is %d, throttle per slot is %d, throttle per port is %d",
+                         mss::c_str(l_mca), l_power[l_pos], l_slot[l_pos], l_port[l_pos]);
             }
 
+            FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_MSS_PORT_MAXPOWER, l_mcs, l_power));
+            FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_mcs, l_slot));
+            FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_mcs, l_port));
         }
 
         //Set all of the throttles to the lowest value per port for performance reasons
@@ -147,7 +113,9 @@ extern "C"
         return l_rc;
 
     fapi_try_exit:
-        FAPI_ERR("Error calculating bulk_pwr_throttles");
-        return fapi2::current_err;
+        FAPI_ERR("Error calculating bulk_pwr_throttles using %s throttling",
+                 ((i_throttle_type == POWER) ? "power" : "thermal"));
+        return l_rc;
     }
 } //extern C
+

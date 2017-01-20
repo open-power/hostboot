@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,9 +31,9 @@
 ///
 
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Andre A. Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <p9_mss_utils_to_throttle.H>
@@ -57,14 +57,19 @@ using fapi2::TARGET_TYPE_DIMM;
 extern "C"
 {
 
-///
-/// @brief Sets number commands allowed within a given port databus utilization.
-/// @param[in] i_targets vector of MCS to set throttle attributes on
-/// @return FAPI2_RC_SUCCESS iff ok
-/// @note throttle_per_slot will be equalized so all throttles coming out will be equal to worst case
-///
+    ///
+    /// @brief Sets number commands allowed within a given port databus utilization.
+    /// @param[in] i_targets vector of MCS to set throttle attributes on
+    /// @return FAPI2_RC_SUCCESS iff ok
+    /// @note ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT will be set to worst case of all slots passed in
+    /// @note inpute ATTR_MSS_DATABUS_UTIL and ATTR_MSS_MEM_WATT_TARGET
+    /// @note output ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT, and ATTR_MSS_PORT_MAXPOWER
+    /// @note Does not set runtime throttles or set registers to throttle values`
+    ///
     fapi2::ReturnCode p9_mss_utils_to_throttle( const std::vector< fapi2::Target<TARGET_TYPE_MCS> >& i_targets )
     {
+        FAPI_INF("Entering p9_mss_utils_to_throttle");
+
         for( const auto& l_mcs : i_targets )
         {
             uint32_t l_input_databus_util [mss::PORTS_PER_MCS] = {};
@@ -81,15 +86,24 @@ extern "C"
             FAPI_TRY( mss::databus_util(l_mcs, l_input_databus_util) );
             FAPI_TRY( mss::mrw_max_dram_databus_util(l_max_databus_util));
 
-            FAPI_INF("Input databus utilization is %d and %d", l_input_databus_util[0], l_input_databus_util[1]);
-
             for( const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(l_mcs) )
             {
-                const auto l_port_num = mss::index( l_mca );
+                FAPI_INF("Input databus utilization for %s is %d",
+                         mss::c_str(l_mca),
+                         l_input_databus_util[mss::index(l_mca)]);
 
-                //make sure 0 < input_utilization <= max_utilization
-                uint32_t l_databus_util = ( l_input_databus_util[l_port_num] != 0) ?
-                                          std::min(l_input_databus_util[l_port_num], l_max_databus_util) : mss::power_thermal::MIN_UTIL;
+                const auto l_port_num = mss::index(l_mca );
+                const auto l_count = mss::count_dimm(l_mca);
+
+                if (l_count == 0)
+                {
+                    continue;
+                }
+
+                //Make sure 0 < input_utilization <= max_utilization
+                const uint32_t l_databus_util = ( l_input_databus_util[l_port_num] != 0) ?
+                                                std::min(l_input_databus_util[l_port_num], l_max_databus_util)
+                                                : mss::power_thermal::MIN_UTIL;
 
                 //Make a throttle object in order to calculate the port power
                 fapi2::ReturnCode l_rc;
@@ -97,15 +111,17 @@ extern "C"
                 mss::power_thermal::throttle l_throttle (l_mca, l_rc);
                 FAPI_TRY(l_rc, "Error calculating mss::power_thermal::throttle constructor in p9_mss_utils_to_throttles");
 
-                FAPI_INF( "MRW dram clock window: %d, databus utilization: %d",
+                FAPI_INF( "%s MRW dram clock window: %d, databus utilization: %d",
+                          mss::c_str(l_mca),
                           l_dram_clocks,
                           l_databus_util);
 
-                l_throttle.calc_slots_and_power(l_databus_util);
+                FAPI_TRY( l_throttle.calc_slots_and_power(l_databus_util));
 
-                FAPI_INF( "Calculated N commands per port [%d] = %d commands, maxpower is %d",
-                          l_port_num,
+                FAPI_INF( "Calculated N commands per port %s = %d commands per %d dram clock window, maxpower is %d",
+                          mss::c_str(l_mca),
                           l_throttle.iv_n_port,
+                          l_dram_clocks,
                           l_throttle.iv_calc_port_maxpower);
 
                 l_n_slot[l_port_num] = l_throttle.iv_n_slot;
