@@ -5,11 +5,6 @@ Brief description of the problem or reason for patch
 -Files: list of files
 -Coreq: list of associated changes, e.g. workarounds.presimsetup
 
-L3_0 PURGE REGISTER action in p9n.act uses the wrong register number
--RTC: 165868
--Files: p9n.act
--Coreq: workarounds.postsimsetup
-
 Need additional actions for PCIE scom init PMA reset
 -RTC: 167283
 -CMVC: 1014186
