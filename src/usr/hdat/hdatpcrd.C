@@ -777,7 +777,8 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
                     l_pNodeTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
 
         //set CAPP functional state
-        iv_spPcrd->hdatChipData.hdatPcrdCappFunctional = 0;
+        iv_spPcrd->hdatChipData.hdatPcrdCappFunc_unit0 = 0;
+        iv_spPcrd->hdatChipData.hdatPcrdCappFunc_unit1 = 0;
         TARGETING::PredicateCTM l_predCapp(TARGETING::CLASS_UNIT,
                                            TARGETING::TYPE_CAPP);
         TARGETING::TargetHandleList l_predCapplist;
@@ -785,13 +786,20 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
                                   TARGETING::TargetService::CHILD,
                                   TARGETING::TargetService::ALL, &l_predCapp);
 
-        if (l_predCapplist.size() > 0)
+        if (l_predCapplist.size() > 0 )
         {
             TARGETING::Target *l_predCappTarget = l_predCapplist[0];
-            iv_spPcrd->hdatChipData.hdatPcrdCappFunctional =
+            iv_spPcrd->hdatChipData.hdatPcrdCappFunc_unit0 =
+                           isFunctional(l_predCappTarget)?1:0;
+        }
+        if (l_predCapplist.size() > 1 )
+        {
+            TARGETING::Target *l_predCappTarget = l_predCapplist[1];
+            iv_spPcrd->hdatChipData.hdatPcrdCappFunc_unit1 =
                            isFunctional(l_predCappTarget)?1:0;
         }
 
+                                                                               
         //set supported stop level
         TARGETING::Target *l_pSysTarget = NULL;
         (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
