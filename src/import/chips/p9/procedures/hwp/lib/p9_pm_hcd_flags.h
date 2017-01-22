@@ -143,6 +143,31 @@ namespace p9hcd
 {
 #endif
 
+//Enum form of CME FLAGs.
+enum PM_CME_CMEFLG_DEFS
+{
+    CME_STOP_READY                      = 0,
+    CME_PMCR_READY                      = 1,
+    CME_QMGR_READY                      = 2,
+    CME_QMGR_MASTER                     = 3,
+    CME_RCLK_OPERABLE                   = 4,
+    CME_IVRM_OPERABLE                   = 5,
+    CME_VDM_OPERABLE                    = 6,
+    CME_OCC_HB_SAFE_MODE                = 7,
+    CME_BLOCK_STOP_EXIT_ENABLED_C0      = 8,
+    CME_BLOCK_STOP_EXIT_ENABLED_C1      = 9,
+    CME_BLOCK_STOP_ENTRY_ENABLED_C0     = 10,
+    CME_BLOCK_STOP_ENTRY_ENABLED_C1     = 11,
+    // Reserve 12:24
+    CME_FREQ_UPDATE_DISABLE             = 25,
+    CME_EX_ID                           = 26,
+    CME_SIBLING_FUNCTIONAL              = 27,
+    CME_STOP_ENTRY_FIRST_C0             = 28,
+    CME_STOP_ENTRY_FIRST_C1             = 29,
+    CME_CORE0_GOOD                      = 30,
+    CME_CORE1_GOOD                      = 31
+};
+
 //Enum form of OCC FLAGs.
 enum PM_GPE_OCCFLG_DEFS
 {
@@ -152,10 +177,10 @@ enum PM_GPE_OCCFLG_DEFS
     PGPE_SAFE_MODE                      = 2,
     PM_COMPLEX_SUSPEND                  = 3,
     SGPE_ACTIVE                         = 8,
-    SGPE_IGNORE_STOP_EXITS              = 9,
-    SGPE_IGNORE_STOP_ENTRY              = 10,
-    SGPE_STOP_EXITS_IGNORED             = 11,
-    SGPE_STOP_ENTRIES_IGNORED           = 12,
+    SGPE_IGNORE_STOP_CONTROL            = 9,
+    SGPE_IGNORE_STOP_ACTION             = 10,
+    SGPE_IGNORE_STOP_EXITS              = 11,
+    SGPE_IGNORE_STOP_ENTRIES            = 12,
     SGPE_24_7_ACTIVATE                  = 14,
     SGPE_24_7_ACTIVE                    = 15,
     PIB_I2C_MASTER_ENGINE_1_LOCK_BIT0   = 16, //BIT0 ored BIT1 gives the field
