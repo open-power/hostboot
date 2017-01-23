@@ -1597,25 +1597,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_TEMP_REFRESH_MODE</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Temp controlled ref mode. This is for DDR4 MRS4.
-            Computed in mss_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 0, ENABLE = 1</enum>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>eff_temp_refresh_mode</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_INTERNAL_VREF_MONITOR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
