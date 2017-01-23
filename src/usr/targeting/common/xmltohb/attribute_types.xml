@@ -20217,6 +20217,30 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>SBE_UPDATE_DISABLE</id>
+    <description>
+      Control execution of updateProcessorSbeSeeproms()
+
+      if OFF, enable SBE update of processor SEEPROM
+      if ON, disable SBE update of processor SEEPROM
+
+      Consumer:  sbe_update.C
+
+      Default:  OFF
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SBE_UPDATE_DISABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
   <id>BOOT_FLAGS</id>
   <description>Switch to using a flag to indicate SEEPROM side SBE</description>
   <simpleType>

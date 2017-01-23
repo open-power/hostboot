@@ -133,6 +133,16 @@ namespace SBE
             assert(sys, "updateProcessorSbeSeeproms() system target is NULL");
 
             /*****************************************************************/
+            /* Skip Update if ATTR_SBE_UPDATE_DISABLE is set                 */
+            /*****************************************************************/
+            if ( sys->getAttr<ATTR_SBE_UPDATE_DISABLE>() ) // true => disable
+            {
+                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update skipped due to "
+                           "system attribute SBE_UPDATE_DISABLE being set");
+                break;
+            }
+
+            /*****************************************************************/
             /* Skip Update if MNFG_FLAG_FSP_UPDATE_SBE_IMAGE is set          */
             /* AND there is a FSP present                                    */
             /*****************************************************************/
@@ -277,6 +287,15 @@ namespace SBE
                 else
                 {
                     sbeState.target_is_master = false;
+
+                    // If running in simics, don't do the update
+                    if ( Util::isSimicsRunning() )
+                    {
+                        // Push this sbeState onto the vector
+                        sbeStates_vector.push_back(sbeState);
+
+                        break;
+                    }
                 }
 
                 err = getSbeInfoState(sbeState);
