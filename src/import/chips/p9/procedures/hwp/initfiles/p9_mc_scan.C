@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@ using namespace fapi2;
 constexpr uint64_t literal_0b111111 = 0b111111;
 constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_0b1 = 0b1;
+constexpr uint64_t literal_1 = 1;
 
 fapi2::ReturnCode p9_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0)
 {
@@ -208,6 +209,18 @@ fapi2::ReturnCode p9_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
                                l_MC23_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE));
         FAPI_TRY(fapi2::putSpy(TGT0, "MC23.PORT3.READ.RDATA_ARY3.SFT_MAC.SFT.LCBCNTL_BLK_RF.CLOCKGATE_DISABLE",
                                l_MC23_PORT3_READ_RDATA_ARY0_SFT_MAC_SFT_LCBCNTL_BLK_RF_CLOCKGATE_DISABLE));
+        fapi2::variable_buffer l_MC01_PBI01_LCBCNTL_BLK1_CLOCKGATE_DISABLE(1);
+        l_MC01_PBI01_LCBCNTL_BLK1_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_1, 0, 1);
+        FAPI_TRY(fapi2::putSpy(TGT0, "MC01.PBI01.LCBCNTL_BLK1.CLOCKGATE_DISABLE", l_MC01_PBI01_LCBCNTL_BLK1_CLOCKGATE_DISABLE));
+        fapi2::variable_buffer l_MC01_PBI23_LCBCNTL_BLK1_CLOCKGATE_DISABLE(1);
+        l_MC01_PBI23_LCBCNTL_BLK1_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_1, 0, 1);
+        FAPI_TRY(fapi2::putSpy(TGT0, "MC01.PBI23.LCBCNTL_BLK1.CLOCKGATE_DISABLE", l_MC01_PBI23_LCBCNTL_BLK1_CLOCKGATE_DISABLE));
+        fapi2::variable_buffer l_MC23_PBI01_LCBCNTL_BLK1_CLOCKGATE_DISABLE(1);
+        l_MC23_PBI01_LCBCNTL_BLK1_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_1, 0, 1);
+        FAPI_TRY(fapi2::putSpy(TGT0, "MC23.PBI01.LCBCNTL_BLK1.CLOCKGATE_DISABLE", l_MC23_PBI01_LCBCNTL_BLK1_CLOCKGATE_DISABLE));
+        fapi2::variable_buffer l_MC23_PBI23_LCBCNTL_BLK1_CLOCKGATE_DISABLE(1);
+        l_MC23_PBI23_LCBCNTL_BLK1_CLOCKGATE_DISABLE.insertFromRight<uint64_t>(literal_1, 0, 1);
+        FAPI_TRY(fapi2::putSpy(TGT0, "MC23.PBI23.LCBCNTL_BLK1.CLOCKGATE_DISABLE", l_MC23_PBI23_LCBCNTL_BLK1_CLOCKGATE_DISABLE));
 
     };
 fapi_try_exit:
