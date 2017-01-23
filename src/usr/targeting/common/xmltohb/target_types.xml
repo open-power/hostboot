@@ -899,6 +899,7 @@
     <attribute><id>RAW_MTM</id></attribute>
     <attribute><id>MSS_MEM_PORT_POS_OF_FAIL_THROTTLE</id></attribute>
     <attribute><id>SYSTEM_RING_DBG_MODE</id></attribute>
+    <attribute><id>NEST_LEAKAGE_PERCENT</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->

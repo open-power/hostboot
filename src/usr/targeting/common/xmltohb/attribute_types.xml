@@ -4936,6 +4936,29 @@ The value of Psafe needs to be at or below the nominal Pstate to make sure safe 
 </attribute>
 
 <attribute>
+    <id>NEST_LEAKAGE_PERCENT</id>
+    <description>
+        SYSTEM Attribute
+        Nest leakage percentage used to calculate the Core leakage. Will
+        eventually be read into OCC Pstate Parameter Block so the OCC can
+        see it for it's calculations.
+
+        Valid Values: 0% thru 100%
+        Producer: Machine Readable Workbook
+        Consumer: OCC Firmware
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_NEST_LEAKAGE_PERCENT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>PM_RESONANT_CLOCK_ENABLE</id>
     <description>
       PROC_CHIP Attribute
