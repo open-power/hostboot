@@ -251,6 +251,10 @@
           <id>ATTR_MSS_MRW_DRAM_WRITE_CRC</id>
           <default>0x0</default>
       </attribute>
+       <attribute>
+          <id>ATTR_MSS_MRW_TEMP_REFRESH_MODE</id>
+          <default>0x0</default>
+      </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->

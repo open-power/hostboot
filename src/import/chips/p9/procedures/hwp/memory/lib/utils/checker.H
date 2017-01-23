@@ -164,6 +164,13 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Checks to make sure ATTR_MSS_MRW_TEMP_REFRESH_MODE and ATTR_MSS_MRW_FINE_REFRESH_MODE are set correctly
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note from DDR4 DRAM Spec (79-4B) 4.9.4 page 48
+///
+fapi2::ReturnCode temp_refresh_mode();
+
 namespace spd
 {
 

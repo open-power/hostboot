@@ -609,4 +609,18 @@
     <mssAccessorName>mrw_dram_write_crc</mssAccessorName>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MSS_MRW_TEMP_REFRESH_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Used in MR4 A3
+        Temperature refresh mode
+        Should be defaulted to disable
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum> DISABLE = 0, ENABLE = 1 </enum>
+    <default> 0  </default>
+    <mssAccessorName>mrw_temp_refresh_mode</mssAccessorName>
+  </attribute>
 </attributes>

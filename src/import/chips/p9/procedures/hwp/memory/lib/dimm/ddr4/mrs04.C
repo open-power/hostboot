@@ -57,7 +57,7 @@ namespace ddr4
 mrs04_data::mrs04_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc ):
     iv_max_pd_mode(fapi2::ENUM_ATTR_EFF_MAX_POWERDOWN_MODE_DISABLE),
     iv_temp_refresh_range(fapi2::ENUM_ATTR_MSS_MRW_TEMP_REFRESH_RANGE_NORMAL),
-    iv_temp_ref_mode(fapi2::ENUM_ATTR_EFF_TEMP_REFRESH_MODE_DISABLE),
+    iv_temp_ref_mode(fapi2::ENUM_ATTR_MSS_MRW_TEMP_REFRESH_MODE_DISABLE),
     iv_vref_mon(fapi2::ENUM_ATTR_EFF_INTERNAL_VREF_MONITOR_DISABLE),
     iv_cs_cmd_latency(fapi2::ENUM_ATTR_EFF_CS_CMD_LATENCY_DISABLE),
     iv_ref_abort(fapi2::ENUM_ATTR_EFF_SELF_REF_ABORT_DISABLE),
@@ -68,7 +68,7 @@ mrs04_data::mrs04_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
 {
     FAPI_TRY( mss::eff_max_powerdown_mode(i_target, iv_max_pd_mode) );
     FAPI_TRY( mss::mrw_temp_refresh_range(iv_temp_refresh_range) );
-    FAPI_TRY( mss::eff_temp_refresh_mode(i_target, iv_temp_ref_mode) );
+    FAPI_TRY( mss::mrw_temp_refresh_mode(iv_temp_ref_mode) );
     FAPI_TRY( mss::eff_internal_vref_monitor(i_target, iv_vref_mon) );
     FAPI_TRY( mss::eff_cs_cmd_latency(i_target, iv_cs_cmd_latency) );
     FAPI_TRY( mss::eff_self_ref_abort(i_target, iv_ref_abort) );
@@ -84,6 +84,7 @@ mrs04_data::mrs04_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
              iv_cs_cmd_latency, iv_ref_abort,
              iv_rd_pre_train_mode, iv_rd_preamble, iv_wr_preamble, iv_ppr);
 
+    //Let's make sure the temp_refresh_mode attribute is valid, even though it's mrw, gotta double check spec
     o_rc = fapi2::FAPI2_RC_SUCCESS;
     return;
 
