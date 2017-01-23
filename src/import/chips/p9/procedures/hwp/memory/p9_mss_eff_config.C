@@ -101,7 +101,6 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_dimm->primary_stack_type() );
         FAPI_TRY( l_eff_dimm->dimm_size() );
         FAPI_TRY( l_eff_dimm->hybrid_memory_type() );
-        FAPI_TRY( l_eff_dimm->temp_refresh_mode() );
         FAPI_TRY( l_eff_dimm->dram_trefi() );
         FAPI_TRY( l_eff_dimm->dram_trfc() );
         FAPI_TRY( l_eff_dimm->dram_trfc_dlr() );
@@ -205,6 +204,9 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_dimm->dram_rtt_nom () );
         FAPI_TRY( l_eff_dimm->dram_rtt_wr  () );
         FAPI_TRY( l_eff_dimm->dram_rtt_park() );
+
+        //Let's do some checking
+        FAPI_TRY( mss::check::temp_refresh_mode());
     }// dimm
 
     // TODO RTC:160060 Clean up hard coded values at bottom of eff_config
