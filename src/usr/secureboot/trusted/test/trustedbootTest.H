@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -716,7 +716,8 @@ class TrustedBootTest: public CxxTest::TestSuite
             // Let's see if the requested chip is functional
             target.role = TPM_PRIMARY;
             errlHndl_t err = tpmReadAttributes (target.tpmTarget,
-                                                tpmInfo);
+                                                tpmInfo,
+                                                TPM_LOCALITY_0);
 
             if (NULL != err)
             {

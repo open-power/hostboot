@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -486,7 +486,8 @@ void add_i2c_info( const TARGETING::Target* i_targ,
         {
 
             // Lookup i2c info for the TPM
-            err = TPMDD::tpmReadAttributes(tpm->tpmTarget, tpmInfo);
+            err = TPMDD::tpmReadAttributes(tpm->tpmTarget, tpmInfo,
+                                           TPMDD::TPM_LOCALITY_0);
             if (NULL != err)
             {
                 // Unable to get info we skip this guy
@@ -1302,7 +1303,8 @@ void load_tpmlog(devTree * i_dt, uint64_t& io_address)
 
             // We need to build the devtree path to find this TPM node
             // Lookup i2c info for the TPM
-            l_errl = TPMDD::tpmReadAttributes(l_tpm->tpmTarget, l_tpmInfo);
+            l_errl = TPMDD::tpmReadAttributes(l_tpm->tpmTarget, l_tpmInfo,
+                                              TPMDD::TPM_LOCALITY_0);
             if (l_errl)
             {
                 errlCommit(l_errl, DEVTREE_COMP_ID);

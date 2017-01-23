@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,15 @@ enum tpm_addr_size_t
     ONE_BYTE_ADDR   = 1,
     TWO_BYTE_ADDR   = 2,
     LAST_DEVICE_TYPE
+};
+
+/**
+ * @brief TPM Locality to address for operation
+ */
+enum tpm_locality_t
+{
+    TPM_LOCALITY_0 = 0,
+    TPM_LOCALITY_4 = 4,
 };
 
 /**
@@ -92,11 +101,14 @@ bool tpmPresence ( TARGETING::Target * i_target);
  * @param[in/out] io_tpmInfo The structure that will contain the attribute data
  *      read from the target device.  Chip field must be set
  *
+ * @param[in] i_locality TPM locality to address
+ *
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
-                               tpm_info_t & io_tpmInfo );
+                               tpm_info_t & io_tpmInfo,
+                               tpm_locality_t i_locality);
 
 
 };  // end namespace TPMDD

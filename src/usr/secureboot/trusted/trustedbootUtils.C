@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,8 @@ namespace TRUSTEDBOOT
 errlHndl_t tpmTransmit(TpmTarget * io_target,
                        uint8_t* io_buffer,
                        size_t i_cmdSize,
-                       size_t i_bufsize )
+                       size_t i_bufsize,
+                       tpm_locality_t i_locality)
 {
     errlHndl_t err = NULL;
 
@@ -67,7 +68,8 @@ errlHndl_t tpmTransmit(TpmTarget * io_target,
                          io_buffer,
                          i_bufsize,
                          DEVICE_TPM_ADDRESS(TPMDD::TPM_OP_TRANSMIT,
-                                            i_cmdSize));
+                                            i_cmdSize,
+                                            i_locality));
         if (NULL != err)
         {
             break;

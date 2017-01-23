@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,8 @@ namespace TRUSTEDBOOT
 
 errlHndl_t tpmTransmitCommand(TpmTarget * io_target,
                               uint8_t* io_buffer,
-                              size_t i_bufsize )
+                              size_t i_bufsize,
+                              tpm_locality_t i_locality)
 {
     errlHndl_t err = TB_SUCCESS;
     uint8_t* transmitBuf = NULL;
@@ -87,7 +88,8 @@ errlHndl_t tpmTransmitCommand(TpmTarget * io_target,
         err = tpmTransmit(io_target,
                           transmitBuf,
                           cmdSize,
-                          dataSize);
+                          dataSize,
+                          i_locality);
 
         if (TB_SUCCESS != err)
         {
@@ -244,6 +246,7 @@ errlHndl_t tpmMarshalCommandData(TPM2_BaseIn* i_cmd,
                    * @userdata1      Command Code
                    * @userdata2      0
                    * @devdesc        Unsupported command code during marshal
+                   * @custdesc       Failure detected in security subsystem
                    */
                   err = tpmCreateErrorLog(MOD_TPM_MARSHALCMDDATA,
                                           RC_TPM_MARSHAL_INVALID_CMD,
@@ -284,6 +287,7 @@ errlHndl_t tpmMarshalCommandData(TPM2_BaseIn* i_cmd,
          * @userdata1      stage
          * @userdata2      0
          * @devdesc        Marshaling error detected
+         * @custdesc       Failure detected in security subsystem
          */
         err = tpmCreateErrorLog(MOD_TPM_MARSHALCMDDATA,
                                 RC_TPM_MARSHALING_FAIL,
@@ -391,6 +395,7 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
                    * @userdata1      commandcode
                    * @userdata2      stage
                    * @devdesc        Unsupported command code during unmarshal
+                   * @custdesc       Failure detected in security subsystem
                    */
                   err = tpmCreateErrorLog(MOD_TPM_UNMARSHALRESPDATA,
                                           RC_TPM_UNMARSHAL_INVALID_CMD,
@@ -415,6 +420,7 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
          * @userdata1      Stage
          * @userdata2      Remaining response buffer size
          * @devdesc        Unmarshaling error detected
+         * @custdesc       Failure detected in security subsystem
          */
         err = tpmCreateErrorLog(MOD_TPM_UNMARSHALRESPDATA,
                                 RC_TPM_UNMARSHALING_FAIL,
@@ -462,7 +468,8 @@ errlHndl_t tpmCmdStartup(TpmTarget* io_target)
 
         err = tpmTransmitCommand(io_target,
                                  dataBuf,
-                                 sizeof(dataBuf));
+                                 sizeof(dataBuf),
+                                 TPM_LOCALITY_0);
 
         if (TB_SUCCESS != err)
         {
@@ -474,7 +481,7 @@ errlHndl_t tpmCmdStartup(TpmTarget* io_target)
         else if (TPM_SUCCESS != resp->responseCode)
         {
             TRACFCOMP( g_trac_trustedboot,
-                       "TPM STARTUP OP Fail %X : ",
+                       "TPM STARTUP OP Fail Ret(0x%X) : ",
                        resp->responseCode);
 
             /*@
@@ -484,7 +491,8 @@ errlHndl_t tpmCmdStartup(TpmTarget* io_target)
              * @moduleid       MOD_TPM_CMD_STARTUP
              * @userdata1      responseCode
              * @userdata2      0
-             * @devdesc        Invalid operation type.
+             * @devdesc        TPM_Startup operation failure.
+             * @custdesc       Failure detected in security subsystem
              */
             err = tpmCreateErrorLog(MOD_TPM_CMD_STARTUP,
                                     RC_TPM_START_FAIL,
@@ -533,7 +541,8 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
 
         err = tpmTransmitCommand(io_target,
                                  dataBuf,
-                                 sizeof(dataBuf));
+                                 sizeof(dataBuf),
+                                 TPM_LOCALITY_0);
 
         if (TB_SUCCESS != err)
         {
@@ -546,7 +555,7 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
         if (TPM_SUCCESS != resp->base.responseCode)
         {
             TRACFCOMP( g_trac_trustedboot,
-                       "TPM GETCAP OP Fail %X Size(%d) ",
+                       "TPM GETCAP OP Fail Ret(0x%X) Size(%d) ",
                        resp->base.responseCode,
                        (int)dataSize);
 
@@ -558,6 +567,7 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
              * @userdata1      responseCode
              * @userdata2      0
              * @devdesc        Command failure reading TPM FW version.
+             * @custdesc       Failure detected in security subsystem
              */
             err = tpmCreateErrorLog(MOD_TPM_CMD_GETCAPFWVERSION,
                                     RC_TPM_GETCAP_FAIL,
@@ -591,6 +601,7 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
                  * @userdata1      capability
                  * @userdata2      property
                  * @devdesc        Command failure reading TPM FW version.
+                 * @custdesc       Failure detected in security subsystem
                  */
                 err = tpmCreateErrorLog(MOD_TPM_CMD_GETCAPFWVERSION,
                                         RC_TPM_GETCAP_FW_INVALID_RESP,
@@ -625,7 +636,8 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
 
         err = tpmTransmitCommand(io_target,
                                  dataBuf,
-                                 sizeof(dataBuf));
+                                 sizeof(dataBuf),
+                                 TPM_LOCALITY_0);
 
         if (TB_SUCCESS != err)
         {
@@ -639,7 +651,7 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
             (TPM_SUCCESS != resp->base.responseCode))
         {
             TRACFCOMP( g_trac_trustedboot,
-                       "TPM GETCAP2 OP Fail %X Size(%d) ",
+                       "TPM GETCAP2 OP Fail Ret(0x%X) Size(%d) ",
                        resp->base.responseCode,
                        (int)dataSize);
 
@@ -651,6 +663,7 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
              * @userdata1      responseCode
              * @userdata2      0
              * @devdesc        Command failure reading TPM FW version.
+             * @custdesc       Failure detected in security subsystem
              */
             err = tpmCreateErrorLog(MOD_TPM_CMD_GETCAPFWVERSION,
                                     RC_TPM_GETCAP2_FAIL,
@@ -684,6 +697,7 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
                  * @userdata1      capability
                  * @userdata2      property
                  * @devdesc        Command failure reading TPM FW version.
+                 * @custdesc       Failure detected in security subsystem
                  */
                 err = tpmCreateErrorLog(MOD_TPM_CMD_GETCAPFWVERSION,
                                         RC_TPM_GETCAP2_FW_INVALID_RESP,
@@ -797,7 +811,8 @@ errlHndl_t tpmCmdPcrExtend2Hash(TpmTarget * io_target,
              * @userdata2[0:15] Full Digest Size 1
              * @userdata2[16:31] Full Digest Size 2
              * @userdata2[32:63] PCR
-             * @devdesc        Unmarshaling error detected
+             * @devdesc        PCR Extend invalid arguments detected
+             * @custdesc       Failure detected in security subsystem
              */
             err = tpmCreateErrorLog(MOD_TPM_CMD_PCREXTEND,
                                     RC_TPM_INVALID_ARGS,
@@ -831,7 +846,8 @@ errlHndl_t tpmCmdPcrExtend2Hash(TpmTarget * io_target,
 
         err = tpmTransmitCommand(io_target,
                                  dataBuf,
-                                 sizeof(dataBuf));
+                                 sizeof(dataBuf),
+                                 TPM_LOCALITY_0);
 
         if (TB_SUCCESS != err)
         {
@@ -844,7 +860,7 @@ errlHndl_t tpmCmdPcrExtend2Hash(TpmTarget * io_target,
                  || (TPM_SUCCESS != resp->responseCode))
         {
             TRACFCOMP( g_trac_trustedboot,
-                       "TPM PCRExtend OP Fail Ret(%X) ExSize(%d) Size(%d) ",
+                       "TPM PCRExtend OP Fail Ret(0x%X) ExSize(%d) Size(%d) ",
                        resp->responseCode,
                        (int)sizeof(TPM2_BaseOut),
                        (int)dataSize);
@@ -856,7 +872,8 @@ errlHndl_t tpmCmdPcrExtend2Hash(TpmTarget * io_target,
              * @moduleid       MOD_TPM_CMD_PCREXTEND
              * @userdata1      responseCode
              * @userdata2      dataSize
-             * @devdesc        Command failure reading TPM FW version.
+             * @devdesc        Command failure performing PCR extend.
+             * @custdesc       Failure detected in security subsystem
              */
             err = tpmCreateErrorLog(MOD_TPM_CMD_PCREXTEND,
                                     RC_TPM_COMMAND_FAIL,
@@ -921,7 +938,8 @@ errlHndl_t tpmCmdPcrRead(TpmTarget* io_target,
              * @userdata1      Digest Ptr
              * @userdata2[0:31] Full Digest Size
              * @userdata2[32:63] PCR
-             * @devdesc        Unmarshaling error detected
+             * @devdesc        pcr read invalid arguments
+             * @custdesc       Failure detected in security subsystem
              */
             err = tpmCreateErrorLog(MOD_TPM_CMD_PCRREAD,
                                     RC_TPM_INVALID_ARGS,
@@ -944,7 +962,8 @@ errlHndl_t tpmCmdPcrRead(TpmTarget* io_target,
 
         err = tpmTransmitCommand(io_target,
                                  dataBuf,
-                                 sizeof(dataBuf));
+                                 sizeof(dataBuf),
+                                 TPM_LOCALITY_0);
 
         if (TB_SUCCESS != err)
         {
@@ -959,7 +978,7 @@ errlHndl_t tpmCmdPcrRead(TpmTarget* io_target,
                  (resp->pcrValues.digests[0].size != fullDigestSize))
         {
             TRACFCOMP( g_trac_trustedboot,
-                       "TPM PCRRead OP Fail Ret(%X) ExSize(%d) "
+                       "TPM PCRRead OP Fail Ret(0x%X) ExSize(%d) "
                        "Size(%d) Cnt(%d) DSize(%d)",
                        resp->base.responseCode,
                        (int)sizeof(TPM2_BaseOut),
@@ -974,7 +993,8 @@ errlHndl_t tpmCmdPcrRead(TpmTarget* io_target,
              * @moduleid       MOD_TPM_CMD_PCRREAD
              * @userdata1      responseCode
              * @userdata2      dataSize
-             * @devdesc        Command failure reading TPM FW version.
+             * @devdesc        Command failure performing PCR read.
+             * @custdesc       Failure detected in security subsystem
              */
             err = tpmCreateErrorLog(MOD_TPM_CMD_PCRREAD,
                                     RC_TPM_COMMAND_FAIL,

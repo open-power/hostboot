@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,6 +80,12 @@ namespace TRUSTEDBOOT
         PCR_6     = 6,
         PCR_7     = 7,
         PCR_DEBUG = 16,
+        PCR_DRTM_17 = 17,
+        PCR_DRTM_18 = 18,
+        PCR_DRTM_19 = 19,
+        PCR_DRTM_20 = 20,
+        PCR_DRTM_21 = 21,
+        PCR_DRTM_22 = 22,
         PLATFORM_PCR = 24, ///< The number of PCR required by the platform spec
         IMPLEMENTATION_PCR = 24, ///< The number of PCRs implemented by TPM
     } TPM_Pcr;
