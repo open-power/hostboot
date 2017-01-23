@@ -458,31 +458,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Determines & sets effective config for temperature controlled refresh mode
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-/// @note from DDR4 Spec (79-4B) 4.9.4 page 48
-///
-fapi2::ReturnCode eff_dimm::temp_refresh_mode()
-{
-    uint8_t l_mcs_attrs [mss::PORTS_PER_MCS] = {};
-
-    FAPI_TRY(mss::eff_temp_refresh_mode (iv_mcs, &l_mcs_attrs[0]));
-
-    // If fine refresh mode is normal, enable temperature control refresh mode
-    // Otherwise disable the temperature control refresh
-    l_mcs_attrs[iv_port_index] = (iv_refresh_mode == fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL) ?
-                                 fapi2::ENUM_ATTR_EFF_TEMP_REFRESH_MODE_ENABLE :
-                                 fapi2::ENUM_ATTR_EFF_TEMP_REFRESH_MODE_DISABLE;
-    FAPI_INF("%s: temperature control refresh mode is %d", mss::c_str(iv_dimm), l_mcs_attrs[iv_port_index]);
-    FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_EFF_TEMP_REFRESH_MODE, iv_mcs, l_mcs_attrs ) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-};
-
-
-
-///
 /// @brief Determines & sets effective config for refresh interval time (tREFI)
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
