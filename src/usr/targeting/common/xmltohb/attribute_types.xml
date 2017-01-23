@@ -4948,7 +4948,9 @@ The value of Psafe needs to be at or below the nominal Pstate to make sure safe 
         Consumer: OCC Firmware
     </description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint8_t>
+            <default>60</default>
+        </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>

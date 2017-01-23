@@ -350,6 +350,8 @@ push @systemAttr,
     "VDM_ENABLE", $reqPol->{'vdm_enable'},
     "IVRM_DEADZONE_MV", $reqPol->{'ivrm_deadzone_mv'},
     "SYSTEM_RESCLK_STEP_DELAY", $reqPol->{'system_resclk_step_delay'},
+    #TODO RTC: 167921 Add MRW parsing code to perl scripts to populate ATTR_NEST_LEAKAGE_PERCENT
+    "NEST_LEAKAGE_PERCENT", 60,
 ];
 
 if ($reqPol->{'mss_mrw_refresh_rate_request'} eq 'SINGLE')
