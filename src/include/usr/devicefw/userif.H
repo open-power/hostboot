@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -326,11 +326,14 @@ namespace DeviceFW
      *                            tpm_op_types_t in tpmddif.H
      * @param[in] i_command_len Command length to write during transmit
      *                            operations
+     * @param[in] i_locality The TPM locality to use. See tpm_locality_t
+     *                            in tpmddif.H
      */
-    #define DEVICE_TPM_ADDRESS( i_tpm_op, i_command_len )\
+    #define DEVICE_TPM_ADDRESS( i_tpm_op, i_command_len, i_locality )  \
         DeviceFW::TPM,\
             static_cast<uint64_t>(( i_tpm_op )),\
-            static_cast<uint64_t>(( i_command_len ))
+            static_cast<uint64_t>(( i_command_len )),\
+            static_cast<uint64_t>(( i_locality ))
 
     /**
      * Construct the device addressing parameters for the GPIO port extender ops

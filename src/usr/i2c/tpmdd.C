@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -102,23 +102,28 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
     tpm_info_t tpmInfo;
     uint64_t commandSize = 0;
     bool unlock = false;
+    tpm_locality_t locality = TPM_LOCALITY_0;
 
-    tpmInfo.operation = ((TPMDD::tpm_op_types_t)va_arg( i_args, uint64_t ));
+    tpmInfo.operation = static_cast<TPMDD::tpm_op_types_t>
+        (va_arg( i_args, uint64_t ));
     commandSize = va_arg( i_args, uint64_t );
+    locality = static_cast<TPMDD::tpm_locality_t>(va_arg( i_args, uint64_t ));
 
     TRACDCOMP( g_trac_tpmdd,
                ENTER_MRK"tpmPerformOp()" );
 
     TRACUCOMP (g_trac_tpmdd, ENTER_MRK"tpmPerformOp(): "
-               "i_opType=%d, operation=%d, buflen=%d, cmdlen=%d",
-               (uint64_t) i_opType, tpmInfo.operation, io_buflen,
+               "i_opType=%d, operation=%d, loc=%d, buflen=%d, cmdlen=%d",
+               (uint64_t) i_opType, tpmInfo.operation,
+               locality, io_buflen,
                commandSize);
 
     do
     {
         // Read Attributes needed to complete the operation
         err = tpmReadAttributes( i_target,
-                                 tpmInfo );
+                                 tpmInfo,
+                                 locality);
 
         if( err )
         {
@@ -306,7 +311,8 @@ bool tpmPresence ( TARGETING::Target * i_target)
 
         // Read Attributes needed to complete the operation
         err = tpmReadAttributes( i_target,
-                                 tpmInfo );
+                                 tpmInfo,
+                                 TPM_LOCALITY_0);
 
         if( err )
         {
@@ -1125,7 +1131,8 @@ errlHndl_t tpmPrepareAddress ( void * io_buffer,
 // tpmReadAttributes
 // ------------------------------------------------------------------
 errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
-                               tpm_info_t & io_tpmInfo )
+                               tpm_info_t & io_tpmInfo,
+                               tpm_locality_t i_locality )
 {
     errlHndl_t err = NULL;
 
@@ -1177,8 +1184,18 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
 
         // Successful reading of Attribute, so extract the data
         io_tpmInfo.port          = tpmData.port;
-        io_tpmInfo.devAddr       = tpmData.devAddrLocality0;
-        /// @TODO RTC: 134415 Need to handle locality4
+        if (TPM_LOCALITY_0 == i_locality)
+        {
+            io_tpmInfo.devAddr       = tpmData.devAddrLocality0;
+        }
+        else if (TPM_LOCALITY_4 == i_locality)
+        {
+            io_tpmInfo.devAddr       = tpmData.devAddrLocality4;
+        }
+        else
+        {
+            assert(false, "Unsupported locality");
+        }
         io_tpmInfo.engine        = tpmData.engine;
         io_tpmInfo.i2cMasterPath = tpmData.i2cMasterPath;
         io_tpmInfo.tpmEnabled    = tpmData.tpmEnabled;

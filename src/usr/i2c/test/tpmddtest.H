@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,7 +76,8 @@ class TPMDDTest: public CxxTest::TestSuite
                 // Let's see if the requested chip is functional
                 tpm_info_t tpmInfo;
                 memset(&tpmInfo, 0, sizeof(tpm_info_t));
-                errlHndl_t err = tpmReadAttributes (testTarget, tpmInfo);
+                errlHndl_t err = tpmReadAttributes (testTarget, tpmInfo,
+                                                    TPM_LOCALITY_0);
 
                 if (NULL != err)
                 {
@@ -127,7 +128,8 @@ class TPMDDTest: public CxxTest::TestSuite
                                  &data,
                                  dataSize,
                                  DEVICE_TPM_ADDRESS( TPM_OP_READVENDORID,
-                                                     0) );
+                                                     0,
+                                                     TPM_LOCALITY_0) );
 
                 if( NULL != err )
                 {
@@ -191,7 +193,8 @@ class TPMDDTest: public CxxTest::TestSuite
                                  &data,
                                  dataSize,
                                  DEVICE_TPM_ADDRESS( TPM_OP_LASTOP,
-                                                     0) );
+                                                     0,
+                                                     TPM_LOCALITY_0) );
 
                 if( NULL == err )
                 {
@@ -216,7 +219,8 @@ class TPMDDTest: public CxxTest::TestSuite
                                 &data,
                                 dataSize,
                                 DEVICE_TPM_ADDRESS( TPM_OP_READVENDORID,
-                                                    0) );
+                                                    0,
+                                                    TPM_LOCALITY_0) );
 
                 if( NULL == err )
                 {
@@ -273,7 +277,8 @@ class TPMDDTest: public CxxTest::TestSuite
                                  &data,
                                  dataSize,
                                  DEVICE_TPM_ADDRESS( TPM_OP_READVENDORID,
-                                                     0) );
+                                                     0,
+                                                     TPM_LOCALITY_0) );
 
                 if( NULL == err ||
                     err->reasonCode() != TPM_OVERFLOW_ERROR)
@@ -423,7 +428,8 @@ class TPMDDTest: public CxxTest::TestSuite
                                  &data,
                                  dataSize,
                                  DEVICE_TPM_ADDRESS( TPM_OP_TRANSMIT,
-                                                     cmdSize) );
+                                                     cmdSize,
+                                                     TPM_LOCALITY_0) );
 
                 TRUSTEDBOOT::TPM2_BaseOut* resp =
                     reinterpret_cast<TRUSTEDBOOT::TPM2_BaseOut*>(data);
@@ -511,7 +517,8 @@ class TPMDDTest: public CxxTest::TestSuite
                                  &data,
                                  dataSize,
                                  DEVICE_TPM_ADDRESS(TPM_OP_TRANSMIT,
-                                                    cmdSize) );
+                                                    cmdSize,
+                                                    TPM_LOCALITY_0) );
 
                 if( NULL == err ||
                     err->reasonCode() != TPM_OVERFLOW_ERROR)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,7 @@
 #include <initservice/initserviceif.H>
 #include <ipmi/ipmisensor.H>
 #include <config.h>
+#include <i2c/tpmddif.H>
 #include "trustedboot.H"
 #include "trustedTypes.H"
 #include "trustedbootCmds.H"
@@ -203,7 +204,8 @@ void* host_update_master_tpm( void *io_pArgs )
             {
                 memset(&tpmData, 0, sizeof(tpmData));
                 errlHndl_t readErr = tpmReadAttributes(tpmList[tpmNum],
-                                                       tpmData);
+                                                       tpmData,
+                                                       TPM_LOCALITY_0);
                 if (NULL != readErr)
                 {
                     // We are just looking for configured TPMs here
@@ -293,7 +295,8 @@ void* host_update_master_tpm( void *io_pArgs )
             memset(&tpmInfo, 0, sizeof(tpmInfo));
             errlHndl_t tmpErr = TPMDD::tpmReadAttributes(
                                  systemTpms.tpm[TPM_BACKUP_INDEX].tpmTarget,
-                                 tpmInfo);
+                                 tpmInfo,
+                                 TPM_LOCALITY_0);
             if (NULL != tmpErr || !tpmInfo.tpmEnabled)
             {
                 TRACUCOMP( g_trac_trustedboot,
@@ -372,11 +375,17 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target)
         io_target.initAttempted = true;
         io_target.failed = false;
 
-        // TPM_STARTUP
-        err = tpmCmdStartup(&io_target);
-        if (NULL != err)
+        bool drtm = false;
+        /// @todo #157140 Add ability to check for DRTM
+        // Don't run STARTUP during DRTM
+        if (!drtm)
         {
-            break;
+            // TPM_STARTUP
+            err = tpmCmdStartup(&io_target);
+            if (NULL != err)
+            {
+                break;
+            }
         }
 
         // TPM_GETCAPABILITY to read FW Version
@@ -386,6 +395,11 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target)
             break;
         }
 
+        // For a DRTM we need to reset PCRs 17-22
+        if (drtm)
+        {
+            /// @todo Implement PCR reset
+        }
 
     } while ( 0 );
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,10 @@
 // -----------------------------------------------
 // Includes
 // -----------------------------------------------
+#ifdef __HOSTBOOT_MODULE
+#include <i2c/tpmddif.H>
+using namespace TPMDD;
+#endif
 #include "trustedTypes.H"
 
 #ifdef __cplusplus
@@ -52,13 +56,15 @@ namespace TRUSTEDBOOT
  * @param[in/out] io_buffer Input the command buffer to send, response on exit
  * @param[in] i_cmdSize Size of provided command in bytes
  * @param[in] i_bufsize Size of io_buffer in bytes
+ * @param[in] i_locality TPM locality to use
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *       error log.
  */
 errlHndl_t tpmTransmit(TpmTarget * io_target,
                        uint8_t* io_buffer,
                        size_t i_cmdSize,
-                       size_t i_bufsize );
+                       size_t i_bufsize,
+                       tpm_locality_t i_locality);
 
 /**
  * @brief Create an error log entry for potential logging
