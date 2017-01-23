@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -686,6 +686,15 @@
   <description>value for pulse mode</description>
   <valueType>uint8</valueType>
   <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_NDL_MESHCTRL_SETUP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Control NDL training:meshctrl setup</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <writeable/>
 </attribute>
 
 </attributes>

@@ -44,28 +44,25 @@
 
 enum P9_SETUP_SBE_CONFIG_Private_Constants
 {
-    ATTR_EQ_GARD_STARTBIT = 0,
-    ATTR_EQ_GARD_LENGTH = 6,
-    ATTR_EC_GARD_STARTBIT = 8,
-    ATTR_EC_GARD_LENGTH = 24,
-    ATTR_I2C_BUS_DIV_REF_STARTBIT = 0,
-    ATTR_I2C_BUS_DIV_REF_LENGTH = 16,
-    ATTR_BOOT_FLAGS_STARTBIT = 0,
-    ATTR_BOOT_FLAGS_LENGTH = 32,
-    ATTR_PUMP_CHIP_IS_GROUP = 23,
-    ATTR_PROC_FABRIC_GROUP_ID_STARTBIT = 26,
-    ATTR_PROC_FABRIC_GROUP_ID_LENGTH = 3,
-    ATTR_PROC_FABRIC_CHIP_ID_STARTBIT = 29,
-    ATTR_PROC_FABRIC_CHIP_ID_LENGTH = 3,
-    ATTR_CC_IPL_BIT = 0,
-    ATTR_INIT_ALL_CORES_BIT = 1,
-    ATTR_RISK_LEVEL_BIT = 2,
-    ATTR_DISABLE_HBBL_VECTORS_BIT = 3,
-    ATTR_MC_SYNC_MODE_BIT = 4,
-    ATTR_PLL_MUX_STARTBIT = 12,
-    ATTR_PLL_MUX_LENGTH = 20,
+    // Scratch_reg_1
+    ATTR_EQ_GARD_STARTBIT             = 0,
+    ATTR_EQ_GARD_LENGTH               = 6,
+    ATTR_EC_GARD_STARTBIT             = 8,
+    ATTR_EC_GARD_LENGTH               = 24,
 
-    // Scratch4 reg bit definitions
+    // Scratch_reg_2
+    ATTR_I2C_BUS_DIV_REF_STARTBIT      = 0,
+    ATTR_I2C_BUS_DIV_REF_LENGTH        = 16,
+    ATTR_OPTICS_CONFIG_MODE_OBUS0_BIT  = 16,
+    ATTR_OPTICS_CONFIG_MODE_OBUS1_BIT  = 17,
+    ATTR_OPTICS_CONFIG_MODE_OBUS2_BIT  = 18,
+    ATTR_OPTICS_CONFIG_MODE_OBUS3_BIT  = 19,
+
+    // Scratch_reg_3
+    ATTR_BOOT_FLAGS_STARTBIT           = 0,
+    ATTR_BOOT_FLAGS_LENGTH             = 32,
+
+    // Scratch_reg_4
     ATTR_BOOT_FREQ_MULT_STARTBIT       = 0,
     ATTR_BOOT_FREQ_MULT_LENGTH         = 16,
     ATTR_NEST_PLL_BUCKET_STARTBIT      = 24,
@@ -76,6 +73,22 @@ enum P9_SETUP_SBE_CONFIG_Private_Constants
     ATTR_DPLL_BYPASS_BIT               = 19,
     ATTR_NEST_MEM_X_O_PCI_BYPASS_BIT   = 20,
     ATTR_OBUS_RATIO_VALUE_BIT          = 21,
+
+    // Scratch_reg_5
+    ATTR_PLL_MUX_STARTBIT              = 12,
+    ATTR_PLL_MUX_LENGTH                = 20,
+    ATTR_CC_IPL_BIT                    = 0,
+    ATTR_INIT_ALL_CORES_BIT            = 1,
+    ATTR_RISK_LEVEL_BIT                = 2,
+    ATTR_DISABLE_HBBL_VECTORS_BIT      = 3,
+    ATTR_MC_SYNC_MODE_BIT              = 4,
+
+    // Scratch_reg_6
+    ATTR_PROC_FABRIC_GROUP_ID_STARTBIT = 26,
+    ATTR_PROC_FABRIC_GROUP_ID_LENGTH   = 3,
+    ATTR_PROC_FABRIC_CHIP_ID_STARTBIT  = 29,
+    ATTR_PROC_FABRIC_CHIP_ID_LENGTH    = 3,
+    ATTR_PUMP_CHIP_IS_GROUP            = 23,
 };
 
 
@@ -92,6 +105,7 @@ fapi2::ReturnCode p9_setup_sbe_config(const
     fapi2::buffer<uint32_t> l_data32_cbs_cs;
     fapi2::buffer<uint8_t> l_attr_read;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_OPTICS_CONFIG_MODE_Type l_optics_cfg_mode;
     FAPI_INF("p9_setup_sbe_config::  Entering ...");
 
     FAPI_DBG("Read Scratch8 for validity of Scratch register");
@@ -127,6 +141,7 @@ fapi2::ReturnCode p9_setup_sbe_config(const
     }
     //set_scratch2_reg
     {
+
         FAPI_DBG("Reading Scratch_reg2");
         //Getting SCRATCH_REGISTER_2 register value
         FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_2_FSI,
@@ -136,6 +151,43 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_I2C_BUS_DIV_REF, i_target_chip, l_read_4));
 
         l_read_scratch_reg.insertFromRight< ATTR_I2C_BUS_DIV_REF_STARTBIT, ATTR_I2C_BUS_DIV_REF_LENGTH >(l_read_4);
+
+        for (auto& targ : i_target_chip.getChildren<fapi2::TARGET_TYPE_OBUS>() )
+        {
+            // OBUS
+            uint32_t l_chipletID = targ.getChipletNumber();
+            FAPI_DBG("Reading ATTR_OPTICS_CONFIG_MODE");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OPTICS_CONFIG_MODE, targ, l_optics_cfg_mode),
+                     "Error from FAPI_ATTR_GET(ATTR_OPTICS_CONFIG_MODE)");
+
+            if (l_chipletID == 9)
+            {
+                l_read_scratch_reg.writeBit<ATTR_OPTICS_CONFIG_MODE_OBUS0_BIT>(((l_optics_cfg_mode ==
+                        fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP)
+                        || (l_optics_cfg_mode == fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_CAPI)) ? (1) : (0));
+            }
+
+            if (l_chipletID == 10)
+            {
+                l_read_scratch_reg.writeBit<ATTR_OPTICS_CONFIG_MODE_OBUS1_BIT>(((l_optics_cfg_mode ==
+                        fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP)
+                        || (l_optics_cfg_mode == fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_CAPI)) ? (1) : (0));
+            }
+
+            if (l_chipletID == 11)
+            {
+                l_read_scratch_reg.writeBit<ATTR_OPTICS_CONFIG_MODE_OBUS2_BIT>(((l_optics_cfg_mode ==
+                        fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP)
+                        || (l_optics_cfg_mode == fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_CAPI)) ? (1) : (0));
+            }
+
+            if (l_chipletID == 12)
+            {
+                l_read_scratch_reg.writeBit<ATTR_OPTICS_CONFIG_MODE_OBUS3_BIT>(((l_optics_cfg_mode ==
+                        fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP)
+                        || (l_optics_cfg_mode == fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_CAPI)) ? (1) : (0));
+            }
+        }
 
         FAPI_DBG("Setting up value of Scratch_reg2");
         //Setting SCRATCH_REGISTER_2 register value

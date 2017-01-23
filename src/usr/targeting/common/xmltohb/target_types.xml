@@ -323,6 +323,7 @@
     <attribute><id>PROC_FABRIC_X_AGGREGATE</id></attribute>
     <attribute><id>XIVE_HW_RESET</id></attribute>
     <attribute><id>DISABLE_I2C_ENGINE2_PORT0_DIAG_MODE</id></attribute>
+    <attribute><id>NDL_MESHCTRL_SETUP</id></attribute>
 </targetType>
 
 <targetType>

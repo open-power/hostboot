@@ -32820,4 +32820,20 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>NDL_MESHCTRL_SETUP</id>
+    <description>Control NDL training:meshctrl setup</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_NDL_MESHCTRL_SETUP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
