@@ -896,6 +896,7 @@
     <attribute><id>IVRM_STABILIZATION_DELAY_NS</id></attribute>
     <attribute><id>SYSTEM_RESCLK_ENABLE</id></attribute>
     <attribute><id>MSS_MRW_REFRESH_RATE_REQUEST</id></attribute>
+    <attribute><id>MSS_MRW_TEMP_REFRESH_MODE</id></attribute>
     <attribute><id>MSS_VCCD_OVERRIDE</id></attribute>
     <attribute><id>RAW_MTM</id></attribute>
     <attribute><id>MSS_MEM_PORT_POS_OF_FAIL_THROTTLE</id></attribute>
