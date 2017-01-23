@@ -192,6 +192,128 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Fixes blue waterfall values in a port
+/// @param[in] i_target - the target to operate on
+/// @param[in] i_always_run - ignores the attribute and always run - default = false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode fix_blue_waterfall_gate( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const bool i_always_run )
+{
+    // Checks if the workaround needs to be run
+    const bool l_attr_value = mss::chip_ec_feature_blue_waterfall_adjust(i_target);
+
+    if(!l_attr_value && !i_always_run)
+    {
+        FAPI_DBG("Skipping running fix_blue_waterfall_gate i_always_run %s attr %s", i_always_run ? "true" : "false",
+                 l_attr_value ? "true" : "false" );
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Loops through the first 4 DP's as the last DP is a DP08 so we only need to do 2 quads
+    // TK update to hit all rank pairs
+    const std::vector<std::vector<std::pair<uint64_t, uint64_t>>> l_dp16_registers =
+    {
+        {
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP0_P0_0},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP0_P0_1},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP0_P0_2},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP0_P0_3},
+        },
+        {
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP1_P0_0},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP1_P0_1},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP1_P0_2},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP1_P0_3},
+        },
+        {
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP2_P0_0},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP2_P0_1},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP2_P0_2},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP2_P0_3},
+        },
+        {
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_0, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP3_P0_0},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_1, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP3_P0_1},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_2, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP3_P0_2},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_3, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP3_P0_3},
+        },
+    };
+    const std::vector<std::pair<uint64_t, uint64_t>> l_dp08_registers =
+    {
+        {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP0_P0_4},
+        {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP1_P0_4},
+        {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP2_P0_4},
+        {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_4, MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP3_P0_4},
+    };
+
+    // Gets the number of primary ranks to loop through
+    std::vector<uint64_t> l_primary_ranks;
+    FAPI_TRY(mss::rank::primary_ranks(i_target, l_primary_ranks));
+
+    // Loops through all configured rank pairs
+    for(uint64_t l_rp = 0; l_rp < l_primary_ranks.size(); ++l_rp)
+    {
+        // Loops through all DP16s
+        for(const auto& l_reg : l_dp16_registers[l_rp])
+        {
+            fapi2::buffer<uint64_t> l_waterfall;
+            fapi2::buffer<uint64_t> l_gate_delay;
+
+            // Getscoms
+            FAPI_TRY(mss::getScom(i_target, l_reg.first, l_waterfall), "Failed to getScom from 0x%016lx", l_reg.first);
+            FAPI_TRY(mss::getScom(i_target, l_reg.second, l_gate_delay), "Failed to getScom from 0x%016lx", l_reg.second);
+
+            // Updates the data for all quads
+            update_blue_waterfall_gate_delay_for_quad<0>(l_waterfall, l_gate_delay);
+            update_blue_waterfall_gate_delay_for_quad<1>(l_waterfall, l_gate_delay);
+            update_blue_waterfall_gate_delay_for_quad<2>(l_waterfall, l_gate_delay);
+            update_blue_waterfall_gate_delay_for_quad<3>(l_waterfall, l_gate_delay);
+
+            // Putscoms
+            FAPI_TRY(mss::putScom(i_target, l_reg.first, l_waterfall), "Failed to putScom to 0x%016lx", l_reg.first);
+            FAPI_TRY(mss::putScom(i_target, l_reg.second, l_gate_delay), "Failed to putScom to 0x%016lx", l_reg.second);
+        }
+
+        // Now for the odd man out - the DP08, as it only has two quads.
+        // Note: We are not modifying the non-existant quads, as changing values in the non-existant DP08 has caused FIRs
+        {
+            fapi2::buffer<uint64_t> l_waterfall;
+            fapi2::buffer<uint64_t> l_gate_delay;
+
+            // Getscoms
+            FAPI_TRY(mss::getScom(i_target, l_dp08_registers[l_rp].first, l_waterfall), "Failed to getScom from 0x%016lx",
+                     l_dp08_registers[l_rp].first);
+            FAPI_TRY(mss::getScom(i_target, l_dp08_registers[l_rp].second, l_gate_delay), "Failed to getScom from 0x%016lx",
+                     l_dp08_registers[l_rp].second);
+
+            // Updates the data for all quads
+            update_blue_waterfall_gate_delay_for_quad<0>(l_waterfall, l_gate_delay);
+            update_blue_waterfall_gate_delay_for_quad<1>(l_waterfall, l_gate_delay);
+
+            // Putscoms
+            FAPI_TRY(mss::putScom(i_target, l_dp08_registers[l_rp].first, l_waterfall), "Failed to putScom to 0x%016lx",
+                     l_dp08_registers[l_rp].first);
+            FAPI_TRY(mss::putScom(i_target, l_dp08_registers[l_rp].second, l_gate_delay), "Failed to putScom to 0x%016lx",
+                     l_dp08_registers[l_rp].second);
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Modifies HW calibration results based upon workarounds
+/// @param[in]  i_target - the target to operate on
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode modify_calibration_results( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    return fix_blue_waterfall_gate( i_target );
+}
+
 namespace wr_vref
 {
 
