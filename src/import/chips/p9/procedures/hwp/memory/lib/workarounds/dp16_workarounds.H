@@ -42,6 +42,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <mss_attribute_accessors.H>
+#include <lib/phy/dp16.H>
 
 namespace mss
 {
@@ -184,6 +185,72 @@ fapi_try_exit:
 /// @return fapi2::ReturnValue FAPI2_RC_SUCCESS if ok
 ///
 fapi2::ReturnCode after_phy_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+
+///
+/// @brief Updates gate delay and blue waterfall (aka RDCLK phase select) values based upon blue waterfall values
+/// @param[in,out] io_blue_waterfall - the blue waterfall value
+/// @param[in,out] io_gate_delay     - the gate delay value
+///
+inline void update_blue_waterfall_gate_delay(uint64_t& io_blue_waterfall, uint64_t& io_gate_delay)
+{
+    // The PHY should never have a blue waterfall value of a 0 - if so, change it to a 3, and decrease one off the gate delay
+    // The blue waterfall is a quarter clock cycle delay - the current thinking is that a value of a 0 is a value of a 4
+    // In this case the delay was large enough, so that a value of a 3 rolled over to another clock cycle.
+    // The value of a 0 is considered to be incorrect but can be passable, as the gate delay calibrates in an extra cycle of delay
+    // So, if there is a 0 value in the blue waterfall, change it to the max, a 3, and subtract one off the gate delay to have correct timing
+    constexpr uint64_t BW_INCORRECT = 0;
+    constexpr uint64_t BW_MAX = 3;
+
+    // Check if a correction is needed
+    if(io_blue_waterfall == BW_INCORRECT)
+    {
+        io_blue_waterfall = BW_MAX;
+        // Does a check to make sure the value doesn't underflow
+        io_gate_delay     = ((io_gate_delay == 0) ? 0 : (io_gate_delay - 1));
+    }
+}
+
+///
+/// @brief Gets the blue waterfall and gate delay values for a given DP quad
+/// @tparam uint64_t QUAD - which quad to access
+/// @param[in,out] io_waterfall_reg   - waterfall register data
+/// @param[in,out] io_gate_reg        - gate delay register information
+///
+template< uint64_t QUAD>
+void update_blue_waterfall_gate_delay_for_quad(fapi2::buffer<uint64_t>& io_waterfall_reg,
+        fapi2::buffer<uint64_t>& io_gate_reg)
+{
+    constexpr uint64_t NUM_QUAD = 4;
+    // Valid quad values are from 0-3, exit if the requested value is greater
+    static_assert(QUAD < NUM_QUAD, "Inserted quad value is greater than or equal to 4");
+
+    // Gets the data for this Quad
+    auto l_blue_waterfall = mss::dp16::get_blue_waterfall<QUAD>(io_waterfall_reg);
+    auto l_gate_delay     = mss::dp16::get_gate_delay<QUAD>(io_gate_reg);
+
+    // Updates the waterfall and gate delay
+    update_blue_waterfall_gate_delay(l_blue_waterfall, l_gate_delay);
+
+    // Sets the data back into the register
+    mss::dp16::set_blue_waterfall<QUAD>(io_waterfall_reg, l_blue_waterfall);
+    mss::dp16::set_gate_delay<QUAD>(io_gate_reg, l_gate_delay);
+}
+
+///
+/// @brief Fixes blue waterfall values in a port
+/// @param[in] i_target - the target to operate on
+/// @param[in] i_always_run - ignores the attribute and always run - default = false - this is used in lab code to force the workaround to be run
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode fix_blue_waterfall_gate( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const bool i_always_run = false );
+
+///
+/// @brief Modifies HW calibration results based upon workarounds
+/// @param[in]  i_target - the target to operate on
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode modify_calibration_results( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 namespace wr_vref
 {
