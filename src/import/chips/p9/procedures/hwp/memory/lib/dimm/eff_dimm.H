@@ -152,12 +152,6 @@ class eff_dimm
         fapi2::ReturnCode hybrid_memory_type();
 
         ///
-        /// @brief Determines & sets effective config for temperature controlled refresh mode
-        /// @return fapi2::FAPI2_RC_SUCCESS if okay
-        ///
-        fapi2::ReturnCode temp_refresh_mode();
-
-        ///
         /// @brief Determines & sets effective config for refresh interval time (tREFI)
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
