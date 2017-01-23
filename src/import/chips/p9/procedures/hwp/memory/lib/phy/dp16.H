@@ -123,6 +123,9 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         // Maximum number of DRAM's per DP
         static constexpr uint64_t MAX_DRAM_PER_DP = 4;
 
+        // Number of quads per DP16
+        static constexpr uint64_t NUM_QUAD_PER_DP16  = 4;
+
         // Number of instances of the DLL per DP16. Used for checking parameters, the rest of the
         // code assumes 2 DLL per DP16. There are no DLL in Centaur so we don't need to worry about
         // any of this for some time.
@@ -164,7 +167,7 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
 
         static const std::vector<std::vector<std::pair<uint64_t, uint64_t>>> BIT_DISABLE_REG;
 
-        //WR VREF registers
+        // WR VREF registers
         static const std::vector< uint64_t > WR_VREF_CONFIG0_REG;
         static const std::vector< uint64_t > WR_VREF_CONFIG1_REG;
         static const std::vector< uint64_t > WR_VREF_STATUS0_REG;
@@ -175,6 +178,22 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP1_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP2_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP3_REG;
+
+        // Definitions of the gate delay and waterfall bits' locations
+        constexpr static const uint64_t GATE_DELAY_BIT_POS[NUM_QUAD_PER_DP16] =
+        {
+            MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP0_P0_0_01_N0,
+            MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP0_P0_0_01_N1,
+            MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP0_P0_0_01_N2,
+            MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP0_P0_0_01_N3,
+        };
+        constexpr static const uint64_t BLUE_WATERFALL_BIT_POS[NUM_QUAD_PER_DP16] =
+        {
+            MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT0,
+            MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT1,
+            MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT2,
+            MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT3,
+        };
 
         enum
         {
@@ -223,6 +242,10 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             IO_TX_PFET_TERM = MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_0,
             IO_TX_PFET_TERM_EN_P_WR = MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_0_01_EN_P_WR,
             IO_TX_PFET_TERM_EN_P_WR_LEN = MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_0_01_EN_P_WR_LEN,
+
+            GATE_DELAY_LEN = MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP0_P0_0_01_N0_LEN,
+            // Both blue and red waterfalls are the same number of bits
+            WATERFALL_LEN = MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT0_LEN,
 
             ////////////////////////////////////////
             // WR VREF register field information //
@@ -1772,6 +1795,74 @@ fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
 template< fapi2::TargetType T, typename TT = dp16Traits<T> >
 fapi2::ReturnCode write_force_fifo_capture( const fapi2::Target<T>& i_target,
         const mss::states i_state);
+
+///
+/// @brief Get the blue waterfall for the given quad
+/// @tparam uint64_t QUAD - which quad to access
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_data the value of the register
+/// @return value of the blue waterfall
+///
+template< uint64_t QUAD, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline uint64_t get_blue_waterfall( const fapi2::buffer<uint64_t>& i_data )
+{
+
+    static_assert(QUAD < TT::NUM_QUAD_PER_DP16, "Inserted quad value is not less than the maximum value");
+    uint64_t l_waterfall = 0;
+    i_data.extractToRight<TT::BLUE_WATERFALL_BIT_POS[QUAD], TT::WATERFALL_LEN>(l_waterfall);
+    return l_waterfall;
+}
+
+///
+/// @brief Get the gate delay for the given quad
+/// @tparam uint64_t QUAD - which quad to access
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_data the value of the register
+/// @return value of the gate delay
+///
+template< uint64_t QUAD, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline uint64_t get_gate_delay( const fapi2::buffer<uint64_t>& i_data )
+{
+
+    static_assert(QUAD < TT::NUM_QUAD_PER_DP16, "Inserted quad value is not less than the maximum value");
+    uint64_t l_gate_delay = 0;
+    i_data.extractToRight<TT::GATE_DELAY_BIT_POS[QUAD], TT::GATE_DELAY_LEN>(l_gate_delay);
+    return l_gate_delay;
+}
+
+///
+/// @brief Set the blue waterfall for the given quad
+/// @tparam uint64_t QUAD - which quad to access
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in,out] io_data the value of the register
+/// @param[in] value of the blue waterfall
+///
+template< uint64_t QUAD, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline void set_blue_waterfall( fapi2::buffer<uint64_t>& io_data, const uint64_t i_waterfall )
+{
+
+    static_assert(QUAD < TT::NUM_QUAD_PER_DP16, "QUAD value is not less than the maximum value");
+    io_data.insertFromRight<TT::BLUE_WATERFALL_BIT_POS[QUAD], TT::WATERFALL_LEN>(i_waterfall);
+}
+
+///
+/// @brief Set the gate delay for the given quad
+/// @tparam uint64_t QUAD - which quad to access
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in,out] io_data the value of the register
+/// @param[in] value of the gate delay
+///
+template< uint64_t QUAD, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline void set_gate_delay( fapi2::buffer<uint64_t>& io_data, const uint64_t i_gate_delay )
+{
+
+    static_assert(QUAD < TT::NUM_QUAD_PER_DP16, "QUAD value is not less than the maximum value");
+    io_data.insertFromRight<TT::GATE_DELAY_BIT_POS[QUAD], TT::GATE_DELAY_LEN>(i_gate_delay);
+}
 
 } // close namespace dp16
 } // close namespace mss
