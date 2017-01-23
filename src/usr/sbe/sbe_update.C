@@ -1727,7 +1727,7 @@ namespace SBE
         errlHndl_t err = NULL;
         uint64_t scomData = 0x0;
 
-        o_bootSide = SBE_SEEPROM0;
+        o_bootSide = SBE_SEEPROM_INVALID;
 
         do{
 
@@ -1769,9 +1769,14 @@ namespace SBE
                            ERRL_GETPLID_SAFE(err));
                 break;
             }
+
             if(scomData & SBE_BOOT_SELECT_MASK)
             {
                 o_bootSide = SBE_SEEPROM1;
+            }
+            else
+            {
+                o_bootSide = SBE_SEEPROM0;
             }
 
         }while(0);
