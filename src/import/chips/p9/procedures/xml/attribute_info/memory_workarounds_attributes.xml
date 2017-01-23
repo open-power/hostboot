@@ -69,4 +69,18 @@
     <writeable/>
   </attribute>
 
+  <attribute>
+    <id>ATTR_DO_BLUE_WATERFALL_ADJUST</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      For Nimbus pre DD1.** we want to adjust the blue waterfall values
+      and their associated gate delays if the blue waterfalls are 0.
+      Post DD1.** will have a hardware enabled fix for this.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>NO = 0, YES = 1</enum>
+    <writeable/>
+  </attribute>
+
 </attributes>
