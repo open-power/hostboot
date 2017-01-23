@@ -92,3 +92,9 @@ ispy  MC01.PBI01.SCOMFIR.MCPERF1_ENABLE_PF_DROP_SRQ [when=S] {
   0;
 }
 
+# HW400075 Always set MDI to 1 for ttypes cp_me and cp_m
+ispy  MC01.PBI01.SCOMFIR.MCMODE2_DISABLE_MDI0 [when=S && ATTR_CHIP_EC_FEATURE_HW40075] {
+  spyv;
+  0b0001100000000;
+}
+
