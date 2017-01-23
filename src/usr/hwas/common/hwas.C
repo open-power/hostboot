@@ -1032,7 +1032,44 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
     return l_descFunctional;
 } // isDescFunctional
 
+void forceEcExEqDeconfig(const TARGETING::TargetHandle_t i_core,
+                         const bool i_present,
+                         const uint32_t i_deconfigReason)
+{
+    TargetHandleList pECList;
+    TargetHandleList pEXList;
 
+    //Deconfig the EC
+    enableHwasState(i_core, i_present, false, i_deconfigReason);
+    HWAS_INF("pEC   %.8X - marked %spresent, NOT functional",
+             i_core->getAttr<ATTR_HUID>(), i_present ? "" : "NOT ");
+
+    //Get parent EX and see if any other cores, if none, deconfig
+    auto exType = TARGETING::TYPE_EX;
+    auto eqType = TARGETING::TYPE_EQ;
+
+    TARGETING::Target* l_ex = const_cast<TARGETING::Target*>(
+                                    getParent(i_core, exType));
+    getChildChiplets(pECList, l_ex, TYPE_CORE, true);
+    if(pECList.size() == 0)
+    {
+        enableHwasState(l_ex, i_present, false, i_deconfigReason);
+        HWAS_INF("pEX   %.8X - marked %spresent, NOT functional",
+                 l_ex->getAttr<ATTR_HUID>(), i_present ? "" : "NOT ");
+
+        //Now get the parent EQ and check to see if it should be deconfigured
+        TARGETING::Target* l_eq = const_cast<TARGETING::Target*>(
+                                         getParent(l_ex, eqType));
+        getChildChiplets(pEXList, l_eq, TYPE_EX, true);
+        if(pEXList.size() == 0)
+        {
+            enableHwasState(l_eq, i_present, false, i_deconfigReason);
+            HWAS_INF("pEQ   %.8X - marked %spresent, NOT functional",
+                     l_eq->getAttr<ATTR_HUID>(), i_present ? "" : "NOT ");
+        }
+    }
+
+}
 
 errlHndl_t restrictECunits(
     std::vector <procRestrict_t> &i_procList,
@@ -1093,8 +1130,9 @@ errlHndl_t restrictECunits(
                 break;
             }
 
-            // get this proc's (CHILD) functional EX units
-            getChildChiplets(pEXList[i], pProc, TYPE_EX, true);
+            // get this proc's (CHILD) EX units
+            // Need to get all so we init the pEC_it array
+            getChildChiplets(pEXList[i], pProc, TYPE_EX, false);
 
             if (!pEXList[i].empty())
             {
@@ -1116,15 +1154,15 @@ errlHndl_t restrictECunits(
                     getChildChiplets(pECList[i][j], pEX,
                                      TYPE_CORE, true);
 
+                    // keep a pointer into that list
+                    pEC_it[i][j] = pECList[i][j].begin();
+
                     if (!pECList[i][j].empty())
                     {
                         // sort the list by ATTR_HUID to ensure that we
                         //  start at the same place each time
                         std::sort(pECList[i][j].begin(), pECList[i][j].end(),
                                   compareTargetHuid);
-
-                        // keep a pointer into that list
-                        pEC_it[i][j] = pECList[i][j].begin();
 
                         // keep local count of current functional EC units
                         if (pECList[i][j].size() == 2)
@@ -1161,7 +1199,7 @@ errlHndl_t restrictECunits(
         if( is_fused_mode() )
         {
             // only allow complete pairs
-            maxECs = std::min( currentPairedECs*2, maxECs );
+            maxECs = std::min( currentPairedECs, maxECs );
         }
 
         if ((currentPairedECs + currentSingleECs) <= maxECs)
@@ -1231,12 +1269,7 @@ errlHndl_t restrictECunits(
                     {
                         // got an EC to be restricted and marked not functional
                         TargetHandle_t l_pEC = *(pEC_it[i][j]);
-                        enableHwasState(l_pEC, i_present,
-                                        false, i_deconfigReason);
-                        HWAS_INF("pEC   %.8X - marked %spresent,"
-                                 " NOT functional",
-                                 l_pEC->getAttr<ATTR_HUID>(),
-                                 i_present ? "" : "NOT ");
+                        forceEcExEqDeconfig(l_pEC, i_present, i_deconfigReason);
                     }
 
                     (pEC_it[i][j])++; // next ec in this ex's list
