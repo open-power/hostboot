@@ -59,13 +59,16 @@
       from platform.
     </description>
     <ffdc>FINE_REF_MODE</ffdc>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_FINE_REFRESH_MODE_WITH_TEMP_REFRESH_MODE_ENABLED</rc>
+    <description>
+        Invalid fine refresh mode recieved due to temperature fresh mode being enabled
+        If ATTR_MSS_MRW_TEMP_REFRESH_MODE is enabled, only NORMAL mode is allowed for FINE_REFRESH_MODE
+    </description>
+    <ffdc>FINE_REF_MODE</ffdc>
+    <ffdc>TEMP_REF_MODE</ffdc>
   </hwpError>
 
   <hwpError>
