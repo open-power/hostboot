@@ -1295,6 +1295,7 @@
     <attribute><id>DO_MSS_VREF_DAC</id></attribute>
     <attribute><id>DO_MSS_TRAINING_BAD_BITS</id></attribute>
     <!-- END memory workaround for DD1.02 -->
+    <attribute><id>DO_BLUE_WATERFALL_ADJUST</id></attribute>
 
 </targetType><!-- chip-processor-power9 -->
 

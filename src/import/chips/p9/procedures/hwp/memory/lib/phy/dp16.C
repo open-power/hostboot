@@ -468,6 +468,10 @@ const std::vector< std::vector<std::pair<uint64_t, uint64_t>> > dp16Traits<TARGE
     },
 };
 
+// we need these declarations here in order for the linker to see the definitions
+constexpr const uint64_t dp16Traits<fapi2::TARGET_TYPE_MCA>::GATE_DELAY_BIT_POS[];
+constexpr const uint64_t dp16Traits<fapi2::TARGET_TYPE_MCA>::BLUE_WATERFALL_BIT_POS[];
+
 ///
 /// @brief Given a RD_VREF value, create a PHY 'standard' bit field for that percentage.
 /// @tparam T fapi2 Target Type - derived

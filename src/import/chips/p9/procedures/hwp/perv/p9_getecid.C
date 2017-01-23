@@ -123,6 +123,7 @@ static fapi2::ReturnCode setup_memory_work_around_attributes(
         // All these attributes have 1 as their 'YES' enum value
         uint8_t l_value = 1;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_TRAINING_BAD_BITS, i_target, l_value) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_BLUE_WATERFALL_ADJUST, i_target, l_value) );
     }
 
     return fapi2::FAPI2_RC_SUCCESS;

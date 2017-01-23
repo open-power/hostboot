@@ -31,7 +31,7 @@
 /// a work-around they'd be burdened with updating this file.
 ///
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Steven Glancy <sglancy@usi.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: Memory
@@ -248,6 +248,31 @@ inline bool chip_ec_feature_mss_training_bad_bits(const fapi2::Target<T>& i_targ
 fapi_try_exit:
     FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_TRAINING_BAD_BITS"
              " or ATTR_DO_MSS_TRAINING_BAD_BITS: 0x%lx (target: %s)",
+             uint64_t(fapi2::current_err), mss::c_str(i_target));
+    fapi2::Assert(false);
+    return false;
+}
+
+///
+/// @brief ATTR_CHIP_EC_FEATURE_MSS_BLUE_WATERFALL_ADJUST getter
+/// @tparam T the fapi2 target type of the target
+/// @param[in] const ref to the target
+/// @return bool true iff feature is enabled
+///
+template< fapi2::TargetType T >
+inline bool chip_ec_feature_blue_waterfall_adjust(const fapi2::Target<T>& i_target)
+{
+    const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
+    uint8_t l_value = 0;
+    uint8_t l_do_value = 0;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_MSS_BLUE_WATERFALL_ADJUST, l_chip, l_value) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DO_BLUE_WATERFALL_ADJUST, l_chip, l_do_value) );
+
+    return (l_value != 0) && (l_do_value == fapi2::ENUM_ATTR_DO_BLUE_WATERFALL_ADJUST_YES);
+
+fapi_try_exit:
+    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_WR_VREF or ATTR_DO_MSS_WR_VREF: 0x%lx (target: %s)",
              uint64_t(fapi2::current_err), mss::c_str(i_target));
     fapi2::Assert(false);
     return false;

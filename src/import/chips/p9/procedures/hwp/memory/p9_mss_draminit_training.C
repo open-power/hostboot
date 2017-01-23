@@ -38,6 +38,7 @@
 
 #include <p9_mss_draminit_training.H>
 #include <lib/utils/count_dimm.H>
+#include <lib/workarounds/dp16_workarounds.H>
 #include <lib/fir/unmask.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
@@ -190,6 +191,9 @@ extern "C"
                 // If we got a cal timeout, or another CCS error just leave now. If we got success, check the error
                 // bits for a cal failure. We'll return the proper ReturnCode so all we need to do is FAPI_TRY.
                 FAPI_TRY( mss::ccs::execute(i_target, l_program, p) );
+
+                // Modifies the training steps, based upon workarounds - adding this here so it always gets run
+                FAPI_TRY( mss::workarounds::dp16::modify_calibration_results( p ) );
 
                 // If we're aborting on error we can just FAPI_TRY. If we're not, we don't want to exit if there's
                 // an error but we want to log the error and keep on keeping on.
