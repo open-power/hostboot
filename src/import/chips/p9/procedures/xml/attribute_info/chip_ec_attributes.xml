@@ -2061,6 +2061,24 @@
     </chipEcFeature>
   </attribute>
 
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_BLUE_WATERFALL_ADJUST</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      In DD1.** Nimbus, the blue waterfall can calibrate to an incorrect value. In DD2 Nimbus,
+      This isn't the case as the HW will not allow this calibration value
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
   <!-- ******************************************************************** -->
   <!-- End Memory Section                                                   -->
   <!-- ******************************************************************** -->
