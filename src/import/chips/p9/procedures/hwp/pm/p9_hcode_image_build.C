@@ -1347,7 +1347,7 @@ extern "C"
                                           CACH0_CHIPLET_ID,
                                           &i_ringData.iv_pWorkBuf2,
                                           tempBufSize,
-                                          1 );
+                                          0 );
 
                 if( (i_ringData.iv_sizeWorkBuf2 == tempBufSize) || (0 == tempBufSize ) ||
                     ( 0 != rc ) )
@@ -1452,7 +1452,7 @@ extern "C"
                                           CORE0_CHIPLET_ID ,
                                           &i_ringData.iv_pWorkBuf1,
                                           ringSize,
-                                          1 );
+                                          0 );
 
                 if( ( i_ringData.iv_sizeWorkBuf1 == ringSize ) || ( 0 == ringSize ) ||
                     ( 0 != rc ) )
@@ -1558,7 +1558,7 @@ extern "C"
                                               CORE0_CHIPLET_ID + ((2 * exId) + coreId),
                                               &i_ringData.iv_pWorkBuf1,
                                               tempSize,
-                                              1 );
+                                              0 );
 
                     if( (i_ringData.iv_sizeWorkBuf1 == tempSize) || (0 == tempSize ) ||
                         ( 0 != rc ) )
@@ -1618,7 +1618,7 @@ extern "C"
                                               CORE0_CHIPLET_ID + ((2 * exId) + coreId),
                                               &i_ringData.iv_pWorkBuf1,
                                               tempSize,
-                                              1 );
+                                              0 );
 
                     if( (i_ringData.iv_sizeWorkBuf1 == tempSize) || (0 == tempSize ) ||
                         ( 0 != rc ) )
@@ -1703,7 +1703,7 @@ extern "C"
                                           CORE0_CHIPLET_ID,
                                           &i_ringData.iv_pWorkBuf2,
                                           tempBufSize,
-                                          1 );
+                                          0 );
 
                 if( (i_ringData.iv_sizeWorkBuf2 == tempBufSize) || (0 == tempBufSize ) ||
                     ( 0 != rc ) )
@@ -1950,7 +1950,7 @@ extern "C"
                                           CACH0_CHIPLET_ID,
                                           &i_ringData.iv_pWorkBuf1,
                                           tempBufSize,
-                                          1 );
+                                          0 );
 
                 if( (i_ringData.iv_sizeWorkBuf1 == tempBufSize) || (0 == tempBufSize ) ||
                     ( 0 != rc ) )
@@ -2057,7 +2057,7 @@ extern "C"
                                               chipletId,
                                               &i_ringData.iv_pWorkBuf1,
                                               tempBufSize,
-                                              1 );
+                                              0 );
 
                     if( (i_ringData.iv_sizeWorkBuf1 == tempBufSize) || (0 == tempBufSize ) ||
                         ( 0 != rc ) )
