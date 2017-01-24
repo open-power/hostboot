@@ -19775,6 +19775,39 @@ Measured in GB</description>
     </enumerator>
 </enumerationType>
 
+<enumerationType>
+    <id>WOF_POWER_LIMIT</id>
+    <description>Enumeration to select WOF Power Limit</description>
+    <enumerator>
+        <name>NOMINAL</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>TURBO</name>
+        <value>1</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>WOF_POWER_LIMIT</id>
+    <description>
+      System control to set the power limit for Workload Optimized
+      Frequency (WOF) algorithms.  This is used to select the
+      proper VFRT tables.
+      Producer: TMGT
+      Consumers: FW that selects VFRT tables
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+
 <attribute>
     <id>SYSTEM_RESCLK_STEP_DELAY</id>
     <description>
