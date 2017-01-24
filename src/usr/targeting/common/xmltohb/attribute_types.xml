@@ -32924,6 +32924,32 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>EFF_RANK_GROUP_OVERRIDE</id>
+    <description>
+        
+          Override PHY RANK_PAIR settings. First uint16 value is for RANK_PAIR0
+          register value, and second is for RANK_PAIR1. Note that DIMM1 ranks in
+          a dual-drop config will be converted from Centaur canonical number
+          (4,5) to correct PHY settings (2,3). Set this attribute to zero
+          to use default settings.
+        
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>0x0</default>
+        </uint16_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_RANK_GROUP_OVERRIDE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>DISABLE_I2C_ENGINE2_PORT0_DIAG_MODE</id>
     <description>
         Used to tell I2C code whether to run

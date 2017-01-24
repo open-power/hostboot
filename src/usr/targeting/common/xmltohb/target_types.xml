@@ -1847,6 +1847,7 @@
     <attribute><id>EFF_DRAM_RTT_NOM</id></attribute>
     <attribute><id>EFF_DRAM_RTT_WR</id></attribute>
     <attribute><id>EFF_DRAM_RTT_PARK</id></attribute>
+    <attribute><id>EFF_RANK_GROUP_OVERRIDE</id></attribute>
     <attribute><id>MSS_VREF_DAC_NIBBLE</id></attribute>
     <attribute><id>MSS_MVPD_FWMS</id></attribute>
 </targetType>

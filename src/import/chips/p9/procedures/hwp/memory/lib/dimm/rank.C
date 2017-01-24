@@ -246,7 +246,7 @@ fapi2::ReturnCode primary_ranks( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
     // Get the count of rank pairs for both DIMM on the port
     std::vector<uint8_t> l_rank_count(MAX_DIMM_PER_PORT, 0);
 
-    for (const auto d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    for (const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
         FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_rank_count[mss::index(d)]) );
     }
@@ -328,7 +328,7 @@ fapi2::ReturnCode ranks( const fapi2::Target<TARGET_TYPE_MCA>& i_target, std::ve
     std::vector< uint64_t > l_ranks;
     o_ranks.clear();
 
-    for (const auto d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    for (const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
         FAPI_TRY( ranks(d, l_ranks) );
         o_ranks.insert(o_ranks.end(), l_ranks.begin(), l_ranks.end());
@@ -353,15 +353,25 @@ template<>
 fapi2::ReturnCode get_rank_pair_assignments(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
         std::pair<uint64_t, uint64_t>& o_registers)
 {
-    // Get the count of rank pairs for all DIMM on the port
-    std::vector<uint8_t> l_rank_count(MAX_DIMM_PER_PORT, 0);
+    // TODO RTC:160869 add enum for rank pair 0 when it gets created
+    typedef rankPairTraits<fapi2::TARGET_TYPE_MCA, 0> RPT;
 
-    for (const auto d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    std::vector<uint8_t> l_rank_count(MAX_DIMM_PER_PORT, 0);
+    uint16_t l_regs[RPT::NUM_RANK_PAIR_REGS] = {0};
+
+    for (const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
         FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_rank_count[mss::index(d)]) );
     }
 
-    o_registers = rank_pair_assignments[l_rank_count[1]][l_rank_count[0]];
+    // Get the override attribute setting
+    FAPI_TRY( mss::eff_rank_group_override(i_target, l_regs) );
+
+    // If the override attribute is zero, use the default assignments that correspond to the rank count.
+    // Need only to check the first array entry since we need a valid primary rank in RP0 due to plug rules.
+    o_registers = (l_regs[0] == 0) ?
+                  rank_pair_assignments[l_rank_count[1]][l_rank_count[0]] :
+                  std::make_pair(static_cast<uint64_t>(l_regs[0]), static_cast<uint64_t>(l_regs[1]));
 
     FAPI_DBG("rank pair assignments for %s. [%d,%d] (0x%08llx, 0x%08llx)",
              mss::c_str(i_target), l_rank_count[1], l_rank_count[0], o_registers.first, o_registers.second);
@@ -479,30 +489,69 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode get_rank_pairs(const fapi2::Target<TARGET_TYPE_MCA>& i_target, std::vector<uint64_t>& o_pairs)
 {
+    // TODO RTC:160869 add enum for rank pair 0 when it gets created
+    typedef rankPairTraits<fapi2::TARGET_TYPE_MCA, 0> RPT;
+
     uint64_t l_index = 0;
     std::vector<uint64_t> l_prs;
+    uint16_t l_regs[RPT::NUM_RANK_PAIR_REGS] = {0};
+
+    o_pairs.clear();
 
     // Get the count of rank pairs for both DIMM on the port
     std::vector<uint8_t> l_rank_count(MAX_DIMM_PER_PORT, 0);
 
-    for (const auto d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    for (const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
         FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_rank_count[mss::index(d)]) );
     }
 
-    // Walk through rank pair table and skip empty pairs
-    o_pairs.clear();
-    l_prs = primary_rank_pairs[l_rank_count[1]][l_rank_count[0]];
+    // Get the override attribute setting
+    FAPI_TRY( mss::eff_rank_group_override(i_target, l_regs) );
 
-    // Can't use for (auto rp : l_prs) as rp is unused. BRS
-    for (auto rp_iter = l_prs.begin(); rp_iter != l_prs.end(); ++rp_iter)
+    // If the override attribute is zero, use the default assignments that correspond to the rank count
+    if (l_regs[0] == 0)
     {
-        if (*rp_iter != NO_RANK)
+        l_prs = primary_rank_pairs[l_rank_count[1]][l_rank_count[0]];
+
+        // Walk through rank pair table and skip empty pairs
+        // Can't use for (auto rp : l_prs) as rp is unused. BRS
+        for (auto rp_iter = l_prs.begin(); rp_iter != l_prs.end(); ++rp_iter)
         {
-            o_pairs.push_back(l_index);
+            if (*rp_iter != NO_RANK)
+            {
+                o_pairs.push_back(l_index);
+            }
+
+            l_index += 1;
+        }
+    }
+    // Else we have to derive the assignments from the override
+    else
+    {
+        // Check RP0
+        if (fapi2::buffer<uint64_t>(l_regs[0]).getBit<EVEN_PRIMARY_VALID>())
+        {
+            o_pairs.push_back(0);
         }
 
-        l_index += 1;
+        // Check RP1
+        if (fapi2::buffer<uint64_t>(l_regs[0]).getBit<ODD_PRIMARY_VALID>())
+        {
+            o_pairs.push_back(1);
+        }
+
+        // Check RP2
+        if (fapi2::buffer<uint64_t>(l_regs[1]).getBit<EVEN_PRIMARY_VALID>())
+        {
+            o_pairs.push_back(2);
+        }
+
+        // Check RP3
+        if (fapi2::buffer<uint64_t>(l_regs[1]).getBit<ODD_PRIMARY_VALID>())
+        {
+            o_pairs.push_back(3);
+        }
     }
 
 fapi_try_exit:

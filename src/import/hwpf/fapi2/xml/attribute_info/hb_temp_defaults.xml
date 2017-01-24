@@ -112,6 +112,10 @@
          <id>ATTR_IO_OBUS_TX_FFE_POSTCURSOR</id>
          <default>0x0</default>
      </attribute>
+     <attribute>
+         <id>ATTR_EFF_RANK_GROUP_OVERRIDE</id>
+         <default>0x0</default>
+     </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
