@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -113,6 +113,13 @@ sub main
         $debug = 1;
     }
 
+    # Check for a different output directory
+    my $outdir = "./";
+    if (defined $args->{"outdir"})
+    {
+        $outdir = $args->{"outdir"};
+    }
+
     # Read the current memory state.
     my $memstate_addr = ::read64(0x2000 + 0x8); # Read descriptor address.
     $memstate_addr += 0x10; # Memory state is 3rd entry into descriptor.
@@ -122,9 +129,9 @@ sub main
     #Get current timestamp and open a corresponding file.
     my $timeStamp = `date +%Y%m%d%H%M`;
     chomp $timeStamp;
-    my  $hbDumpFile =   "hbdump.$timeStamp";
+    my $hbDumpFile = "$outdir\hbdump.$timeStamp";
 
-    ::userDisplay "Dumping Hostboot to Open output file $hbDumpFile\n";
+    ::userDisplay "Dumping Hostboot to $hbDumpFile\n";
     open( OUTFH, ">$hbDumpFile" )   or die "can't open $hbDumpFile: $!\n";
     binmode(OUTFH);
 
@@ -166,5 +173,9 @@ sub helpInfo
     my %info = (
         name => "Dump",
         intro => ["Dumps the entire Hostboot buffer to a file."],
+        options => {
+                    "outdir=<path>" =>  ["Output directory for dump file"],
+                    "debug" => ["More debug output."],
+                   },
     );
 }
