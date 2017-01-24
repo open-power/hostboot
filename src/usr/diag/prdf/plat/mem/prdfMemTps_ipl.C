@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,16 +26,23 @@
 /** @file prdfMemTps_ipl.C */
 
 // Platform includes
+#include <prdfMemEccAnalysis.H>
+#include <prdfMemIplCeStats.H>
+#include <prdfMemMark.H>
+#include <prdfMemScrubUtils.H>
 #include <prdfMemTps.H>
+#include <prdfP9McaExtraSig.H>
+#include <prdfPlatServices.H>
 
 using namespace TARGETING;
 
 namespace PRDF
 {
 
+using namespace PlatServices;
+
 //------------------------------------------------------------------------------
 
-// TODO: RTC 157608 Actual implementation of this procedure will be done later.
 template<>
 uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                                        bool & o_done )
@@ -43,10 +50,132 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
     #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::nextStep] "
 
     uint32_t o_rc = SUCCESS;
-
     o_done = true;
+    MemIplCeStats<TYPE_MCA> ceStats( iv_chip );
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+    do
+    {
+        //only done in MNFG IPL CE Handling mode
+        PRDF_ASSERT( isMfgCeCheckingEnabled() );
+
+        //phase 0
+        if ( TD_PHASE_0 == iv_phase )
+        {
+            //start TPS phase 1
+            o_rc = startTpsPhase1<TYPE_MCA>( iv_chip, iv_rank );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Call to 'startTpsPhase1 failed on chip: "
+                          "0x%08x", iv_chip->getHuid() );
+                break;
+            }
+            iv_phase = TD_PHASE_1;
+
+        }
+        //phase 1/2
+        else
+        {
+            //collect the CE statistics for later analysis use
+            o_rc = ceStats.collectStats( iv_rank );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Call to 'ceStats.collectStats' failed "
+                          "on chip: 0x%08x", iv_chip->getHuid() );
+                break;
+            }
+
+            //get the ecc attentions
+            uint32_t eccAttns;
+            o_rc = checkEccFirs<TYPE_MCA>( iv_chip, eccAttns );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Call to 'checkEccFirs' failed on chip: "
+                          "0x%08x", iv_chip->getHuid() );
+                break;
+            }
+
+            //if there was a UE or IUE
+            if ( (eccAttns & MAINT_UE) || (eccAttns & MAINT_IUE) )
+            {
+                //UE
+                if ( eccAttns & MAINT_UE )
+                {
+                    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                                      PRDFSIG_MaintUE );
+                }
+                //IUE
+                else
+                {
+                    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                                      PRDFSIG_MaintIUE );
+                }
+
+                //Add the rank to the callout list
+                MemoryMru memmru(iv_chip->getTrgt(), iv_rank,
+                        MemoryMruData::CALLOUT_RANK);
+                io_sc.service_data->SetCallout( memmru );
+
+                //Make the error log predictive
+                io_sc.service_data->setServiceCall();
+
+                //Abort this procedure
+                o_done = true;
+            }
+            //else if there was an MPE
+            else if ( eccAttns & MAINT_MPE )
+            {
+                //Add the mark to the callout list
+                MemMark chipMark;
+                o_rc = MarkStore::readChipMark<TYPE_MCA>( iv_chip, iv_rank,
+                                                          chipMark );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,%d) failed",
+                            iv_chip->getHuid(), iv_rank.getMaster() );
+                    break;
+                }
+
+                MemoryMru memmru( iv_chip->getTrgt(), iv_rank,
+                                  chipMark.getSymbol() );
+                io_sc.service_data->SetCallout( memmru );
+
+                //Add a VCM procedure to the queue
+                MemEcc::addVcmEvent<TYPE_MCA>( iv_chip, iv_rank, chipMark,
+                                               io_sc );
+
+                //Abort this procedure
+                o_done = true;
+            }
+            else
+            {
+                //Add the rank to the callout list
+                MemoryMru memmru(iv_chip->getTrgt(), iv_rank,
+                        MemoryMruData::CALLOUT_RANK);
+                io_sc.service_data->SetCallout( memmru );
+
+                //phase 1
+                if ( TD_PHASE_1 == iv_phase )
+                {
+                    //Start TPS phase 2
+                    o_rc = startTpsPhase2<TYPE_MCA>( iv_chip, iv_rank );
+                    if ( SUCCESS != o_rc )
+                    {
+                        PRDF_ERR( PRDF_FUNC "Call to 'startTpsPhase2 failed on "
+                                "chip: 0x%08x", iv_chip->getHuid() );
+                        break;
+                    }
+                    iv_phase = TD_PHASE_2;
+                }
+                //phase 2
+                else
+                {
+                    //Abort this procedure
+                    o_done = true;
+                }
+            }
+        }
+
+    }while(0);
 
     return o_rc;
 

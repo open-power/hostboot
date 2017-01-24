@@ -33,6 +33,13 @@
 // Platform includes
 #include <prdfMemRank.H>
 #include <prdfPlatServices.H>
+#include <prdfMemMark.H>
+
+#ifdef __HOSTBOOT_MODULE
+  #include <prdfMemTps.H>
+  #include <prdfMemVcm.H>
+  #include <prdfP9McbistDataBundle.H>
+#endif
 
 namespace PRDF
 {
@@ -71,6 +78,18 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 template<TARGETING::TYPE T, typename D>
 uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
                          STEP_CODE_DATA_STRUCT & io_sc );
+
+#ifdef __HOSTBOOT_MODULE
+
+template<TARGETING::TYPE T>
+uint32_t addVcmEvent( ExtensibleChip * i_chip, const MemRank & i_rank,
+                      const MemMark & i_mark, STEP_CODE_DATA_STRUCT & io_sc );
+
+template<TARGETING::TYPE T>
+uint32_t addTpsEvent( ExtensibleChip * i_chip, const MemRank & i_rank,
+                      STEP_CODE_DATA_STRUCT & io_sc, bool i_banTps = false );
+
+#endif
 
 } // end namespace MemEcc
 
