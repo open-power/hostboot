@@ -60,17 +60,20 @@ static fapi2::ReturnCode setup_pcie_work_around_attributes(
                                l_ec_feature_pcie_lock_phase_rotator),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_PCIE_LOCK_PHASE_ROTATOR)");
 
+        uint8_t l_value = 0;
+
         if (l_ec_feature_pcie_lock_phase_rotator && (l_version < ddLevelPciePart))
         {
-            FAPI_DBG("seeing version 1.00 (0x%x) setting attributes", l_version);
-            uint8_t l_value = 1;
-
-            for (auto& l_pec_trgt : i_target.getChildren<fapi2::TARGET_TYPE_PEC>(fapi2::TARGET_STATE_FUNCTIONAL))
-            {
-                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_PCIE_PCS_RX_ROT_EXTEL, l_pec_trgt, l_value),
-                         "Error from FAPI_ATTR_SET (ATTR_PROC_PCIE_PCS_RX_ROT_EXTEL)");
-            }
+            FAPI_DBG("seeing version 1.00 (0x%x) setting ATTR_PROC_PCIE_PCS_RX_ROT_EXTEL", l_version);
+            l_value = 1;
         }
+
+        for (auto& l_pec_trgt : i_target.getChildren<fapi2::TARGET_TYPE_PEC>(fapi2::TARGET_STATE_FUNCTIONAL))
+        {
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_PCIE_PCS_RX_ROT_EXTEL, l_pec_trgt, l_value),
+                     "Error from FAPI_ATTR_SET (ATTR_PROC_PCIE_PCS_RX_ROT_EXTEL)");
+        }
+
     }
     {
         // Workarounds for DD1.01/DD1.02 modules
@@ -78,16 +81,18 @@ static fapi2::ReturnCode setup_pcie_work_around_attributes(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_PCIE_DISABLE_FDDC, i_target, l_ec_feature_pcie_disable_fddc),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_PCIE_DISABLE_FDDC)");
 
+        uint8_t l_value = 1;
+
         if (l_ec_feature_pcie_disable_fddc && (l_version >= ddLevelPciePart))
         {
-            FAPI_DBG("seeing version >= 1.01 (0x%x) setting attributes", l_version);
-            uint8_t l_value = 0;
+            FAPI_DBG("seeing version >= 1.01 (0x%x) clearing ATTR_PROC_PCIE_PCS_RX_DFE_FDDC", l_version);
+            l_value = 0;
+        }
 
-            for (auto& l_pec_trgt : i_target.getChildren<fapi2::TARGET_TYPE_PEC>(fapi2::TARGET_STATE_FUNCTIONAL))
-            {
-                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_PCIE_PCS_RX_DFE_FDDC, l_pec_trgt, l_value),
-                         "Error from FAPI_ATTR_SET (ATTR_PROC_PCIE_PCS_RX_DFE_FDDC)");
-            }
+        for (auto& l_pec_trgt : i_target.getChildren<fapi2::TARGET_TYPE_PEC>(fapi2::TARGET_STATE_FUNCTIONAL))
+        {
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_PCIE_PCS_RX_DFE_FDDC, l_pec_trgt, l_value),
+                     "Error from FAPI_ATTR_SET (ATTR_PROC_PCIE_PCS_RX_DFE_FDDC)");
         }
     }
 

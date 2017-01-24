@@ -33,17 +33,66 @@
       creator: platform
       consumer: p9_pcie_scominit
       firmware notes:
+        These are config dependent attributes based on PCIe Lane/sideband signal routing and PCIe endpoints attached.
+
         Encoded PCIE IOP lane configuration
-        PEC0 - CFG[0:1] => CFG[0:1] = PHB0(0:15)
-        PEC1 - CFG[0:3] => CFG[0:1] = PHB1(0:7)
-        		=> CFG[2:3] = PHB2(0:7)
-        PEC2 - CFG[0:5] => CFG[0:1] = 0b00; CFG[2:3] = PHB3(0:15)
-        				    CFG[4:5] = don't care
-        		=> CFG[0:1] = 0b01; CFG[2:3] = PHB3(0:7)
-        		   		    CFG[4:5] = PHB4(0:7)
-        		=> CFG[0:1] = 0b10; CFG[2:3] = PHB3(0:7)
-        		   		    CFG[4]   = PHB4(0:3)
-        		   		    CFG[5]   = PHB5(0:3)
+        PEC0:
+        PHB0    CFG[0:1]
+                SWP[0]
+
+        Examples:
+        Config #1 PEC0 Lane Config[0:1] = 0b00
+        PHB0 Swap bit[0] = 0    (Straight lane wiring)
+
+        Config #2 PEC0 Lane Config[0:1] = 0b00
+        PHB0 Swap bit[0] = 1    (Reverse lane wiring)
+
+
+        PEC1:
+        PHB1    CFG[0:1]
+                SWP[0]
+
+        PHB2    CFG[2:3]
+                SWP[1]
+
+	Examples:
+        Config #1 PEC1 Lane Config[0:3] = 0b0000
+        PHB1 Swap bit[0] = 0    (Straight lane wiring)
+        PHB2 Swap bit[1] = 0    (Straight lane wiring)
+
+        Config #2 PEC1 Lane Config[0:3] = 0b0000
+        PHB1 Swap bit[0] = 1    (Reverse lane wiring)
+        PHB2 Swap bit[1] = 0    (Straight lane wiring)
+
+
+        PEC2:
+        CFG[0:1] = 0b00 PHB3    CFG[2:3]; SWP[0]
+                                CFG[4:5] = don't care
+                                SWP[1:2] = don't care
+
+        CFG[0:1] = 0b01 PHB3    CFG[2:3]; SWP[0]
+                                PHB4    CFG[4:5]; SWP[1]
+                                PHB5    SWP[2] = don't care
+
+        CFG[0:1] = 0b10 PHB3    CFG[2:3]; SWP[0]
+                                PHB4    CFG[4]; SWP[1]
+                                PHB5    CFG[5]; SWP[2]
+	
+	Examples:
+        Config #1 (PEC2 Lane Config[0:5] = 0b000000)
+        PHB3 Swap bit[0] = 0    (Straight lane wiring)
+        PHB4 Swap bit[1] = don't care
+        PHB5 Swap bit[2] = don't care
+
+        Config #1 (PEC2 Lane Config[0:5] = 0b010000)
+        PHB3 Swap bit[0] = 1    (Reverse lane wiring)
+        PHB4 Swap bit[1] = 0    (Straight lane wiring)
+        PHB5 Swap bit[2] = don't care
+
+        Config #3 (PEC2 Lane Config[0:5] = 0b100000)
+        PHB3 Swap bit[0] = 1    (Reverse lane wiring)
+        PHB4 Swap bit[1] = 0    (Straight lane wiring)
+        PHB5 Swap bit[2] = 1    (Reverse lane wiring)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -58,6 +107,8 @@
       creator: platform
       consumer: p9_pcie_scominit
       firmware notes:
+        These are config dependent attributes based on PCIe Lane/sideband signal routing and PCIe endpoints attached.
+
         Encoded PCIE IOP swap configuration
         PEC0 - SWP[0]   => SWP[0] = PHB0(0:15)
         PEC1 - SWP[0:1] => SWP[0] = PHB1(0:7)
@@ -79,6 +130,7 @@
       creator: platform
       consumer: p9_pcie_scominit
       firmware notes:
+	These are config dependent attributes based on PCIe Lane/sideband signal routing and PCIe endpoints attached.
         Encoded PCIE IO Valid configuration
         PEC0 - IOVALID[0]   => IOVALID[0] = PHB0
         PEC1 - IOVALID[0:1] => IOVALID[0] = PHB1
@@ -100,6 +152,7 @@
       creator: platform
       consumer: p9_pcie_scominit
       firmware notes:
+	These are config dependent attributes based on PEC enablement.
         Only one REFCLK enable bit exists across all PECs. There is no granualarity
         to control REFCLK enables on a per PHB basis.
     </description>
@@ -253,6 +306,7 @@
       creator: platform
       consumer: p9_pcie_scominit
       firmware notes:
+        This is a MRW seting.
         The value of rx cdr gains for PCS.
         Array index: Configuration number
         index 0~3 for CONFIG0~3
@@ -271,6 +325,7 @@
       creator: platform
       consumer: p9_pcie_scominit
       firmware notes:
+	This is a MRW setting.
         The value of rx vga peak init for PCS.
         Array index: Configuration number
         index 0~3 for CONFIG0~3
@@ -290,6 +345,7 @@
       creator: platform
       consumer: p9_pcie_scominit
       firmware notes:
+	This is a MRW setting.
         The value of rx vga gain init for PCS.
         Array index: Configuration number
         index 0~3 for CONFIG0~3
@@ -309,6 +365,7 @@
       creator: platform
       consumer: p9_pcie_scominit
       firmware notes:
+	This is a MRW setting.
         The value of rx sigdet lvl for PCS.
         Array index: Configuration number
         index 0~3 for CONFIG0~3
@@ -327,7 +384,10 @@
       creator: platform
       consumer: p9_pcie_scominit
       firmware notes:
-        0 for disable, 1 for enable
+        This is a MRW setting.
+        0 for disable (default)
+	1 for enable
+        Used for spread spectrum enablement.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -342,7 +402,10 @@
       creator: platform
       consumer: p9_pcie_scominit
       firmware notes:
-        0 for disable, 1 for enable
+        This is a MRW setting.
+        0 for disable (default)
+	1 for enable
+        Used for Spread Spectrum enablement.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -354,16 +417,17 @@
     <targetType>TARGET_TYPE_PEC</targetType>
     <description>
       Value of PCS RX ROT extel latch
-      creator: platform
+      creator: p9_getecid
       consumer: p9_pcie_scominit
       firmware notes:
         0 for internal (default)
         1 for external (freezes phase rotators)
+        For DD1.00 parts, this needs to be set to 1.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
     <persistRuntime/>
     <writeable/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -374,6 +438,7 @@
       creator: platform
       consumer: p9_pcie_scominit
       firmware notes:
+        This is a common setting that can be overwritten by code logic.
         0 normal, flywheel is enabled (default)
         1 assert reset to the phase rotator flywheel (disable the flywheel)
     </description>
@@ -389,11 +454,14 @@
       Value of PCS pclck control plla
       creator: platform
       consumer: p9_pcie_scominit
+      firmware notes:
+        This is a common setting that can be overwritten by code logic.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
     <persistRuntime/>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_PCIE_PCS_PCLCK_CNTL_PLLB</id>
     <targetType>TARGET_TYPE_PEC</targetType>
@@ -401,6 +469,8 @@
       Value of PCS pclck control pllb
       creator: platform
       consumer: p9_pcie_scominit
+      firmware notes:
+        This is a common setting that can be overwritten by code logic.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -414,6 +484,8 @@
       Value of PCS tx dclck rotator override
       creator: platform
       consumer: p9_pcie_scominit
+      firmware notes:
+        This is a common setting that can be overwritten by code logic.
     </description>
     <valueType>uint16</valueType>
     <platInit/>
@@ -427,6 +499,8 @@
       Value of PCS tx pcie receiver detect control register 1
       creator: platform
       consumer: p9_pcie_scominit
+      firmware notes:
+        This is a common setting that can be overwritten by code logic.
     </description>
     <valueType>uint16</valueType>
     <platInit/>
@@ -440,6 +514,8 @@
       Value of PCS tx pcie receiver detect control register 2
       creator: platform
       consumer: p9_pcie_scominit
+      firmware notes:
+        This is a common setting that can be overwritten by code logic.
     </description>
     <valueType>uint16</valueType>
     <platInit/>
@@ -453,6 +529,8 @@
       Value of PCS tx power sequence enable
       creator: platform
       consumer: p9_pcie_scominit
+      firmware notes:
+        This is a common setting that can be overwritten by code logic.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -466,6 +544,8 @@
       Value of PCS rx vga control register 1
       creator: platform
       consumer: p9_pcie_scominit
+      firmware notes:
+        This is a common setting that can be overwritten by code logic.
     </description>
     <valueType>uint16</valueType>
     <platInit/>
@@ -479,6 +559,8 @@
       Value of PCS rx vga control register 2
       creator: platform
       consumer: p9_pcie_scominit
+      firmware notes:
+        This is a common setting that can be overwritten by code logic.
     </description>
     <valueType>uint16</valueType>
     <platInit/>
@@ -490,11 +572,14 @@
     <targetType>TARGET_TYPE_PEC</targetType>
     <description>
       Value of PCS rx dfe func fddc control latch
-      creator: platform
+      creator: p9_getecid
       consumer: p9_pcie_scominit
+      firmware notes:
+        0 disable Dynamic Data Centering
+        1 enable Dynamic Data Centering (default)
+        For DD1.0X parts, this needs to be set to 0.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
     <persistRuntime/>
     <writeable/>
   </attribute>
@@ -506,6 +591,14 @@
       Value of PCS system control
       creator: platform
       consumer: p9_pcie_scominit
+      firmware notes:
+      These are config dependent attributes based on PCIe Lane/sideband signal routing and PCIe endpoints attached.
+      There are four groups of four lanes: 0-3 (A-D), 4-7 (E-H), 8-11(I-L), and 12-15(M-P). Each lane group can be assigned to a MAC interface. The supported configurations are as follows:
+        1. MAC #1 = x16, MAC #2 = N/A, MAC #3 = N/A, MAC #4 = N/A : PCS_SYSTEM_CONTROL_REG = 0x0000.
+        2. MAC #1 = x8,  MAC #2 = x8,  MAC #3 = N/A, MAC #4 = N/A : PCS_SYSTEM_CONTROL_REG = 0x0050.
+        3. MAC #1 = x8,  MAC #2 = x4,  MAC #3 = x4,  MAC #4 = N/A : PCS_SYSTEM_CONTROL_REG = 0x0090.
+
+        All other configurations are not supported.
     </description>
     <valueType>uint16</valueType>
     <platInit/>
@@ -519,6 +612,7 @@
       Value of PCS m1-m4 control
       creator: platform
       consumer: p9_pcie_scominit
+      This is a common setting that can be overwritten by code logic.
       Array index: 
           0 -> M1
           1 -> M2
@@ -531,4 +625,3 @@
     <persistRuntime/>
   </attribute>
 </attributes>
-
