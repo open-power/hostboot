@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,6 @@
 namespace PRDF
 {
 
-// TODO: RTC 157889 Actual implementation of this procedure will be done later.
 /** @brief Two-Phase Scrub procedure. */
 template <TARGETING::TYPE T>
 class TpsEvent : public TdEntry

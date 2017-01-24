@@ -48,6 +48,22 @@ using namespace PlatServices;
 //------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
+uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
+                                      TdEntry * i_entry )
+{
+    #define PRDF_FUNC "[MemTdCtlr::handleTdEvent] "
+
+    // Add this entry to the queue.
+    iv_queue.push( i_entry );
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template <TARGETING::TYPE T>
 uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemTdCtlr::defaultStep] "

@@ -28,14 +28,7 @@
 // Platform includes
 #include <prdfMemAddress.H>
 #include <prdfMemCaptureData.H>
-#include <prdfMemMark.H>
 #include <prdfP9McaDataBundle.H>
-
-#ifdef __HOSTBOOT_RUNTIME
-  #include <prdfMemTps.H>
-  #include <prdfMemVcm.H>
-  #include <prdfP9McbistDataBundle.H>
-#endif
 
 using namespace TARGETING;
 
@@ -94,17 +87,13 @@ void calloutMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-#ifdef __HOSTBOOT_RUNTIME
-
-template<TARGETING::TYPE T>
-uint32_t __addVcmEvent( ExtensibleChip * i_chip, const MemRank & i_rank,
-                        const MemMark & i_mark, STEP_CODE_DATA_STRUCT & io_sc );
+#ifdef __HOSTBOOT_MODULE
 
 template<>
-uint32_t __addVcmEvent<TYPE_MCA>( ExtensibleChip * i_chip,
-                                  const MemRank & i_rank,
-                                  const MemMark & i_mark,
-                                  STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t addVcmEvent<TYPE_MCA>( ExtensibleChip * i_chip,
+                                const MemRank & i_rank,
+                                const MemMark & i_mark,
+                                STEP_CODE_DATA_STRUCT & io_sc )
 {
     PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
@@ -119,10 +108,10 @@ uint32_t __addVcmEvent<TYPE_MCA>( ExtensibleChip * i_chip,
 
 /* TODO: RTC 144083
 template<>
-uint32_t __addVcmEvent<TYPE_MBA>( ExtensibleChip * i_chip,
-                                  const MemRank & i_rank,
-                                  const MemMark & i_mark,
-                                  STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t addVcmEvent<TYPE_MBA>( ExtensibleChip * i_chip,
+                                const MemRank & i_rank,
+                                const MemMark & i_mark,
+                                STEP_CODE_DATA_STRUCT & io_sc )
 {
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
@@ -138,16 +127,13 @@ uint32_t __addVcmEvent<TYPE_MBA>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-#ifdef __HOSTBOOT_RUNTIME
+#ifdef __HOSTBOOT_MODULE
 
-template<TARGETING::TYPE T>
-uint32_t __addTpsEvent( ExtensibleChip * i_chip, const MemRank & i_rank,
-                        STEP_CODE_DATA_STRUCT & io_sc, bool i_banTps = false );
 
 template<>
-uint32_t __addTpsEvent<TYPE_MCA>( ExtensibleChip * i_chip,
-                                  const MemRank & i_rank,
-                                  STEP_CODE_DATA_STRUCT & io_sc, bool i_banTps )
+uint32_t addTpsEvent<TYPE_MCA>( ExtensibleChip * i_chip,
+                                const MemRank & i_rank,
+                                STEP_CODE_DATA_STRUCT & io_sc, bool i_banTps )
 {
     PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
@@ -163,9 +149,9 @@ uint32_t __addTpsEvent<TYPE_MCA>( ExtensibleChip * i_chip,
 
 /* TODO: RTC 144083
 template<>
-uint32_t __addTpsEvent<TYPE_MBA>( ExtensibleChip * i_chip,
-                                  const MemRank & i_rank,
-                                  STEP_CODE_DATA_STRUCT & io_sc, bool i_banTps )
+uint32_t addTpsEvent<TYPE_MBA>( ExtensibleChip * i_chip,
+                                const MemRank & i_rank,
+                                STEP_CODE_DATA_STRUCT & io_sc, bool i_banTps )
 {
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
@@ -243,10 +229,10 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
         io_sc.service_data->SetCallout( mm );
 
         // Add a VCM request to the TD queue.
-        o_rc = __addVcmEvent<T>( i_chip, i_rank, chipMark, io_sc );
+        o_rc = addVcmEvent<T>( i_chip, i_rank, chipMark, io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "__addVcmEvent() failed: i_chip=0x%08x "
+            PRDF_ERR( PRDF_FUNC "addVcmEvent() failed: i_chip=0x%08x "
                       "i_rank=%d,%d", i_chip->getHuid(), i_rank.getMaster(),
                       i_rank.getSlave() );
             break;
@@ -311,10 +297,10 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
 
         // Add a TPS request to the TD queue and ban any further TPS requests
         // for this rank.
-        o_rc = __addTpsEvent<T>( i_chip, rank, io_sc, true );
+        o_rc = addTpsEvent<T>( i_chip, rank, io_sc, true );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "__addTpsEvent() failed: i_chip=0x%08x "
+            PRDF_ERR( PRDF_FUNC "addTpsEvent() failed: i_chip=0x%08x "
                       "rank=%d,%d", i_chip->getHuid(), rank.getMaster(),
                       rank.getSlave() );
             // NOTE: We are not adding a break here because we still want to do
