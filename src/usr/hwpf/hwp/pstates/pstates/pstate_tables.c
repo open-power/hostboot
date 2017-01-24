@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pstate_tables.c,v 1.26 2015/08/20 17:04:06 stillgs Exp $
+// $Id: pstate_tables.c,v 1.27 2017/01/19 17:42:08 stillgs Exp $
 
 /// \file pstate_tables.c
 /// \brief This file contains code used to generate Pstate tables from real or
@@ -302,6 +302,27 @@ chip_characterization_create(ChipCharacterization *characterization,
                         ops[gpst_points].vdd_uv +              // Base Point with bias but no system effects
                         vdd_dist_uplift_uv +                   // Distribution loss based on apportioned current
                         parameters->vdd_voffset_uv;            // Offset present
+                        
+                    // -- SWfoobar Begin
+                    // Per analysis by the system characterization team, an 
+                    // additional uplift is needed if the number of cores is
+                    // below the maximum number of cores where a package uplift
+                    // is introduced.
+                    if (c < PACKAGE_DIST_UPLIFT_MAX_CORES)
+                    {
+                        printf("VDD set point voltage before package uplift for %d cores: ops[%d].vdd_corrected_wof_uv[%d] = %u"  TRACE_NEWLINE,
+                            c+1, gpst_points, c, ops[gpst_points].vdd_corrected_wof_uv[c]);
+                            
+                        ops[gpst_points].vdd_corrected_wof_uv[c] += PACKAGE_DIST_UPLIFT_VDD_UV;
+                        
+                    }
+                    else
+                    {
+                    printf("VDD set point voltage not modified for package uplift for %d cores (index = %d)"  TRACE_NEWLINE,
+                            c+1, c);
+                    }
+                    
+                    // -- SWfoobar End 
 
                     printf( "ops[%d].vdd_uv = %u "
                             "ratio = %f "
@@ -337,6 +358,27 @@ chip_characterization_create(ChipCharacterization *characterization,
                         ops[gpst_points].vcs_uv +              // Base Point with bias but no system effects
                         vcs_dist_uplift_uv +                   // Distribution loss based on apportioned current
                         parameters->vcs_voffset_uv;            // Offset present
+                    
+                    // -- SWfoobar Begin
+                    // Per analysis by the system characterization team, an 
+                    // additional uplift is needed if the number of cores is
+                    // below the maximum number of cores where a package uplift
+                    // is introduced.
+                    if (c < PACKAGE_DIST_UPLIFT_MAX_CORES)
+                    {
+                        printf("VCS set point voltage before package uplift for %d cores: ops[%d].vcs_corrected_wof_uv[%d] = %u"  TRACE_NEWLINE,
+                            c+1, gpst_points, c, ops[gpst_points].vcs_corrected_wof_uv[c]);
+                            
+                        ops[gpst_points].vcs_corrected_wof_uv[c] += PACKAGE_DIST_UPLIFT_VCS_UV;
+                        
+                    }
+                    else
+                    {
+                    printf("VCS set point voltage not modified for package uplift for %d cores (index = %d)"  TRACE_NEWLINE,
+                            c+1, c);
+                    }
+                    
+                    // -- SWfoobar End 
 
                     printf( "ops[%d].vcs_uv = %u "
                             "ratio = %f "
@@ -362,20 +404,19 @@ chip_characterization_create(ChipCharacterization *characterization,
                 }
             }
 
-            printf("gpst_points %u "
-                "ops[gpst_points].vdd_uv = %u "
-                "ops[gpst_points].vcs_uv = %u "
-                "ops[gpst_points].vdd_maxreg_uv = %u "
-                "ops[gpst_points].vcs_maxreg_uv = %u "
-                "ops[gpst_points].idd_ma = %u "
-                "ops[gpst_points].ics_ma = %u" TRACE_NEWLINE,
-                gpst_points,
-                ops[gpst_points].vdd_uv,
-                ops[gpst_points].vcs_uv,
-                ops[gpst_points].vdd_maxreg_uv,
-                ops[gpst_points].vcs_maxreg_uv,
-                ops[gpst_points].idd_ma,
-                ops[gpst_points].ics_ma);
+            printf("ops[%d].vdd_uv = %u "
+                "ops[%d].vcs_uv = %u "
+                "ops[%d].vdd_maxreg_uv = %u "
+                "ops[%d].vcs_maxreg_uv = %u "
+                "ops[%d].idd_ma = %u "
+                "ops[%d].ics_ma = %u" TRACE_NEWLINE,               
+                gpst_points, ops[gpst_points].vdd_uv,
+                gpst_points, ops[gpst_points].vcs_uv,
+                gpst_points, ops[gpst_points].vdd_maxreg_uv,
+                gpst_points, ops[gpst_points].vcs_maxreg_uv,
+                gpst_points, ops[gpst_points].idd_ma,
+                gpst_points, ops[gpst_points].ics_ma);
+                
             gpst_points++;
         }
 

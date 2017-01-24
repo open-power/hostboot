@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -26,7 +26,7 @@
 #ifndef __PSTATES_H__
 #define __PSTATES_H__
 
-// $Id: pstates.h,v 1.14 2015/06/01 19:02:17 stillgs Exp $
+// $Id: pstates.h,v 1.15 2017/01/19 17:42:08 stillgs Exp $
 
 /// \file pstates.h
 /// \brief Pstate structures and support routines for OCC product firmware
@@ -100,6 +100,12 @@
 /// WOF Items
 #define NUM_ACTIVE_CORES 12
 #define MAX_UT_PSTATES   64     // Oversized
+
+// -- SWfoobar Begin
+#define PACKAGE_DIST_UPLIFT_VDD_UV  12500
+#define PACKAGE_DIST_UPLIFT_VCS_UV  12500
+#define PACKAGE_DIST_UPLIFT_MAX_CORES  7    // This comes from emperical characterization data
+// -- SWfoobar End
 
 // Error/Panic codes for support routines
 
