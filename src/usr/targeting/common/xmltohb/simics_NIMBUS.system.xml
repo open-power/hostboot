@@ -179,6 +179,10 @@
         <id>MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
         <default>0xFFFFF800000006AE</default>
     </attribute>
+    <attribute>
+        <id>MAX_PROC_CHIPS_PER_NODE</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->

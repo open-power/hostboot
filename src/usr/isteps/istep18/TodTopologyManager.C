@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,27 +22,34 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
 /**
  *  @file TodTopologyManager.C
  *
  *  @brief TOD Topology Manager class implementation. Responsible for
  *      creating/modifying the primary and secondary topologies.
- *
- *  HWP_IGNORE_VERSION_CHECK
- *
  */
 
+
+//------------------------------------------------------------------------------
+//Includes
+//------------------------------------------------------------------------------
+//#include <buffer.H>
+
+//TARGETING
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
-#include <tod_init/tod_init_reasoncodes.H>
+#include "TodUtils.H"
 #include "TodTopologyManager.H"
 #include "TodControls.H"
 #include "TodDrawer.H"
 #include "TodProc.H"
 #include "TodTrace.H"
+#include <p9_tod_utils.H>
+#include <isteps/tod_init_reasoncodes.H>
 
-using namespace TARGETING;
+extern "C" {
+
+using namespace fapi2;
 
 namespace TOD
 {
@@ -57,31 +64,26 @@ static const char* NO_BUS  = "NONE";
 static const char* X_BUS_0 = "XBUS0";
 static const char* X_BUS_1 = "XBUS1";
 static const char* X_BUS_2 = "XBUS2";
-static const char* X_BUS_3 = "XBUS3";
-static const char* A_BUS_0 = "ABUS0";
-static const char* A_BUS_1 = "ABUS1";
-static const char* A_BUS_2 = "ABUS2";
 
 //******************************************************************************
 //TodTopologyManager::TodTopologyManager
 //******************************************************************************
 TodTopologyManager::TodTopologyManager(
-                        const proc_tod_setup_tod_sel i_topologyType) :
+                        const p9_tod_setup_tod_sel i_topologyType) :
     iv_topologyType(i_topologyType)
 {
     TOD_ENTER("Topology type 0X%.8X", i_topologyType);
 
-    TOD_EXIT("TodTopologyManager constructor");
+    TOD_EXIT();
 }
-
 //******************************************************************************
 //TodTopologyManager::~TodTopologyManager
 //******************************************************************************
 TodTopologyManager::~TodTopologyManager()
 {
-    TOD_ENTER("TodTopologyManager destructor");
+    TOD_ENTER();
 
-    TOD_EXIT("TodTopologyManager destructor");
+    TOD_EXIT();
 }
 
 //******************************************************************************
@@ -89,7 +91,7 @@ TodTopologyManager::~TodTopologyManager()
 //******************************************************************************
 errlHndl_t TodTopologyManager::create()
 {
-    TOD_ENTER("create");
+    TOD_ENTER("TodTopologyManager::create");
 
     errlHndl_t l_errHdl = NULL;
 
@@ -103,7 +105,8 @@ errlHndl_t TodTopologyManager::create()
     do
     {
         //1) Pick the MDMT.
-        l_errHdl = TodControls::getTheInstance().pickMdmt(iv_topologyType);
+        l_errHdl =
+            TOD::pickMdmt(iv_topologyType);
         if(l_errHdl)
         {
             TOD_ERR("Couldn't pick MDMT.");
@@ -112,8 +115,7 @@ errlHndl_t TodTopologyManager::create()
 
         //Get the TOD drawers
         TodDrawerContainer l_todDrwList;
-        TodControls::getTheInstance().getDrawers(iv_topologyType,
-                                                     l_todDrwList);
+        TOD::getDrawers(iv_topologyType, l_todDrwList);
         //Find the TOD system master drawer (the one in which the MDMT lies)
         TodDrawer* l_pMasterDrawer = NULL;
         for(TodDrawerContainer::const_iterator l_itr = l_todDrwList.begin();
@@ -124,7 +126,7 @@ errlHndl_t TodTopologyManager::create()
             {
                 l_pMasterDrawer = *l_itr;
                 TOD_INF("TOD drawer(0x%.2X) is the master drawer",
-                         l_pMasterDrawer->getId());
+                l_pMasterDrawer->getId());
                 break;
             }
         }
@@ -133,16 +135,18 @@ errlHndl_t TodTopologyManager::create()
             TOD_ERR("TOD master drawer not found");
             /*@
              * @errortype
-             * @reasoncode   TOD_CREATION_ERR
              * @moduleid     TOD_TOPOLOGY_CREATE
+             * @reasoncode   TOD_CREATION_ERR
              * @userdata1    Topology type : primary/secondary
              * @devdesc      TOD master drawer not found
+             * @custdesc     Host failed to boot because there was a problem
+             *               configuring Time Of Day on the Host processors
              */
             l_errHdl = new ERRORLOG::ErrlEntry(
-                               ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                               TOD_TOPOLOGY_CREATE,
-                               TOD_CREATION_ERR,
-                               iv_topologyType );
+                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                         TOD_TOPOLOGY_CREATE,
+                         TOD_CREATION_ERR,
+                         iv_topologyType);
             break;
         }
 
@@ -153,6 +157,7 @@ errlHndl_t TodTopologyManager::create()
             TOD_ERR("Couldn't wire one or more processors for "
                      "the master TOD drawer(0x%.2X)",
                      l_pMasterDrawer->getId());
+
             break;
         }
 
@@ -207,7 +212,7 @@ errlHndl_t TodTopologyManager::create()
         }
     }while(0);
 
-    TOD_EXIT("create. errHdl = %p", l_errHdl);
+    TOD_EXIT();
 
     return l_errHdl;
 }
@@ -217,7 +222,7 @@ errlHndl_t TodTopologyManager::create()
 //******************************************************************************
 errlHndl_t TodTopologyManager::wireProcs(const TodDrawer* i_pTodDrawer)
 {
-    TOD_ENTER("wireProcs");
+    TOD_ENTER();
 
     errlHndl_t l_errHdl = NULL;
 
@@ -228,20 +233,22 @@ errlHndl_t TodTopologyManager::wireProcs(const TodDrawer* i_pTodDrawer)
             TOD_ERR("TOD drawer not specified");
             /*@
              * @errortype
-             * @reasoncode   TOD_CREATION_ERR_NO_DRAWER
              * @moduleid     TOD_WIRE_PROCS
+             * @reasoncode   TOD_INVALID_PARAM
              * @userdata1    Topology type : primary/secondary
              * @devdesc      TOD drawer not specified
+             * @custdesc     Service Processor Firmware encountered an internal
+             *               error
              */
             l_errHdl = new ERRORLOG::ErrlEntry(
-                               ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                               TOD_WIRE_PROCS,
-                               TOD_CREATION_ERR_NO_DRAWER,
-                               iv_topologyType );
+                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                         TOD_WIRE_PROCS,
+                         TOD_INVALID_PARAM,
+                         iv_topologyType);
             break;
         }
 
-        TOD_INF("TOD drawer id %d", i_pTodDrawer->getId());
+        TOD_INF("TOD drawer id 0x%.2X", i_pTodDrawer->getId());
 
         //The algorithm to wire procs in a TOD drawer goes as follows :
         /*
@@ -294,8 +301,10 @@ errlHndl_t TodTopologyManager::wireProcs(const TodDrawer* i_pTodDrawer)
                 {
                     TOD_ERR("Error tying to connect target 0x%.8X "
                     "to source 0x%.8X.",
-                    (*l_targetItr)->getTarget()->getAttr<ATTR_HUID>(),
-                    (*l_sourceItr)->getTarget()->getAttr<ATTR_HUID>());
+                    (*l_targetItr)->getTarget()->
+                    getAttr<TARGETING::ATTR_HUID>(),
+                    (*l_sourceItr)->getTarget()->
+                    getAttr<TARGETING::ATTR_HUID>());
                     break;
                 }
                 if(l_connected)
@@ -320,34 +329,39 @@ errlHndl_t TodTopologyManager::wireProcs(const TodDrawer* i_pTodDrawer)
         }
         if(false == l_targetsList.empty())
         {
+
             //We couldn't connect one or more procs in this drawer
             TOD_ERR("TOD drawer(0x%.2X) has one or more procs not connected. "
             "0x%.8X is the first such proc.",
             i_pTodDrawer->getId(),
-            (*(l_targetsList.begin()))->getTarget()->getAttr<ATTR_HUID>());
+            (*(l_targetsList.begin()))->getTarget()->
+            getAttr<TARGETING::ATTR_HUID>());
+
             /*@
              * @errortype
-             * @reasoncode   TOD_CREATION_ERR
              * @moduleid     TOD_WIRE_PROCS
-             * @userdata1    DrawerId = bit[0:31], Topology type = bit[32:63]
+             * @reasoncode   TOD_CREATION_ERR
+             * @userdata1[0:31]  Topology type : primary/secondary
+             * @userdata1[32:63] TOD drawer id
              * @userdata2    HUID of first disconnected proc
              * @devdesc      TOD drawer has one or more disconnected procs
+             * @custdesc     Host failed to boot because there was a problem
+             *               configuring Time Of Day on the Host processors
              */
-            uint64_t l_data = i_pTodDrawer->getId();
-            l_data <<= 32;
-            l_data |= iv_topologyType;
             l_errHdl = new ERRORLOG::ErrlEntry(
-                               ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                               TOD_WIRE_PROCS,
-                               TOD_CREATION_ERR,
-                               l_data,
-                               (*(l_targetsList.begin()))->getTarget()->
-                                 getAttr<ATTR_HUID>());
+                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                         TOD_WIRE_PROCS,
+                         TOD_CREATION_ERR,
+                         TWO_UINT32_TO_UINT64(
+                             iv_topologyType,
+                             i_pTodDrawer->getId()),
+                         (*(l_targetsList.begin()))->getTarget()->
+                         getAttr<TARGETING::ATTR_HUID>());
             break;
         }
     }while(0);
 
-    TOD_EXIT("wireProcs. errHdl = %p", l_errHdl);
+    TOD_EXIT();
 
     return l_errHdl;
 }
@@ -357,7 +371,7 @@ errlHndl_t TodTopologyManager::wireProcs(const TodDrawer* i_pTodDrawer)
 //******************************************************************************
 errlHndl_t TodTopologyManager::wireTodDrawer(TodDrawer* i_pTodDrawer)
 {
-    TOD_ENTER("wireTodDrawer");
+    TOD_ENTER("wireTodDawer");
 
     errlHndl_t l_errHdl = NULL;
 
@@ -368,20 +382,22 @@ errlHndl_t TodTopologyManager::wireTodDrawer(TodDrawer* i_pTodDrawer)
             TOD_ERR("TOD drawer not specified");
             /*@
              * @errortype
-             * @reasoncode   TOD_CREATION_ERR
              * @moduleid     TOD_WIRE_DRAWERS
+             * @reasoncode   TOD_INVALID_PARAM
              * @userdata1    Topology type : primary/secondary
              * @devdesc      TOD drawer not specified
+             * @custdesc     Service Processor Firmware encountered an internal
+             *               error
              */
             l_errHdl = new ERRORLOG::ErrlEntry(
-                               ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                               TOD_WIRE_DRAWERS,
-                               TOD_CREATION_ERR,
-                               iv_topologyType);
+                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                         TOD_WIRE_DRAWERS,
+                         TOD_INVALID_PARAM,
+                         iv_topologyType);
             break;
         }
 
-        TOD_INF("TOD drawer id %d", i_pTodDrawer->getId());
+        TOD_INF("TOD drawer id 0x%.2X", i_pTodDrawer->getId());
 
         //The algorithm to wire the slave TOD drawers to the mater TOD
         //drawer (to the MDMT to be specific) goes as follows :
@@ -393,24 +409,26 @@ errlHndl_t TodTopologyManager::wireTodDrawer(TodDrawer* i_pTodDrawer)
         */
 
         //Get the MDMT
-        TodProc* l_pMDMT =
-                    TodControls::getTheInstance().getMDMT(iv_topologyType);
+        TodProc* l_pMDMT = TOD::getMDMT(iv_topologyType);
         if(NULL == l_pMDMT)
         {
             TOD_ERR("MDMT not found for topology type 0X%.8X",
                      iv_topologyType);
             /*@
              * @errortype
-             * @reasoncode   TOD_NO_MASTER_PROC
              * @moduleid     TOD_WIRE_DRAWERS
+             * @reasoncode   TOD_MASTER_TARGET_NOT_FOUND
              * @userdata1    Topology type : primary/secondary
              * @devdesc      MDMT could not be found
+             * @custdesc     Service Processor Firmware couldn't detect any
+             *               functional master processor required to boot the
+             *               host
              */
             l_errHdl = new ERRORLOG::ErrlEntry(
-                               ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                               TOD_WIRE_DRAWERS,
-                               TOD_NO_MASTER_PROC,
-                               iv_topologyType);
+                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                         TOD_WIRE_DRAWERS,
+                         TOD_MASTER_TARGET_NOT_FOUND,
+                         iv_topologyType);
             break;
         }
 
@@ -439,8 +457,8 @@ errlHndl_t TodTopologyManager::wireTodDrawer(TodDrawer* i_pTodDrawer)
             {
                 TOD_ERR("Error tying to connect target 0x%.4X "
                          "to MDMT 0x%.8X.",
-                         (*l_itr)->getTarget()->getAttr<ATTR_HUID>(),
-                         l_pMDMT->getTarget()->getAttr<ATTR_HUID>());
+                         (*l_itr)->getTarget()->getAttr<TARGETING::ATTR_HUID>(),
+                         l_pMDMT->getTarget()->getAttr<TARGETING::ATTR_HUID>());
                 break;
             }
             if(l_connected)
@@ -461,23 +479,25 @@ errlHndl_t TodTopologyManager::wireTodDrawer(TodDrawer* i_pTodDrawer)
                      i_pTodDrawer->getId());
             /*@
              * @errortype
-             * @reasoncode   TOD_CANNOT_WIRE_DRAWER
              * @moduleid     TOD_WIRE_DRAWERS
+             * @reasoncode   TOD_CREATION_ERR
              * @userdata1    Topology type : primary/secondary
              * @userdata2    TOD drawer id
              * @devdesc      TOD drawer couldn't be wired
+             * @custdesc     Host failed to boot because there was a problem
+             *               configuring Time Of Day on the Host processors
              */
             l_errHdl = new ERRORLOG::ErrlEntry(
-                               ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                               TOD_WIRE_DRAWERS,
-                               TOD_CANNOT_WIRE_DRAWER,
-                               iv_topologyType,
-                               i_pTodDrawer->getId());
+                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                         TOD_WIRE_DRAWERS,
+                         TOD_CREATION_ERR,
+                         iv_topologyType,
+                         i_pTodDrawer->getId());
             break;
         }
     }while(0);
 
-    TOD_EXIT("wireTodDrawer. errHdl = %p", l_errHdl);
+    TOD_EXIT();
 
     return l_errHdl;
 }
@@ -489,15 +509,11 @@ void TodTopologyManager::dumpTopology() const
 {
     TOD_ENTER("dumpTopology");
 
-    static const char* busnames[8] = {0};
+    static const char* busnames[BUS_MAX+1] = {0};
     busnames[NONE] = NO_BUS;
     busnames[XBUS0] = X_BUS_0;
     busnames[XBUS1] = X_BUS_1;
     busnames[XBUS2] = X_BUS_2;
-    busnames[XBUS3] = X_BUS_3;
-    busnames[ABUS0] = A_BUS_0;
-    busnames[ABUS1] = A_BUS_1;
-    busnames[ABUS2] = A_BUS_2;
 
     static const char* topologynames[2] = {0};
     topologynames[TOD_PRIMARY] = TOD_PRIMARY_TOPOLOGY;
@@ -510,20 +526,28 @@ void TodTopologyManager::dumpTopology() const
                  topologynames[iv_topologyType]);
         //Get the TOD drawers
         TodDrawerContainer l_todDrwList;
-        TodControls::getTheInstance().getDrawers(iv_topologyType, l_todDrwList);
-        TodDrawerContainer::const_iterator l_drwItr = l_todDrwList.begin();
+        TOD::getDrawers(iv_topologyType, l_todDrwList);
+        TodDrawerContainer::const_iterator l_drwItr =
+                                                       l_todDrwList.begin();
         while(l_todDrwList.end() != l_drwItr)
         {
             TOD_INF("TOPOLOGY DUMP> TOD Drawer(0x%.2X)",(*l_drwItr)->getId());
             //Get the procs on this drawer
             TodProcContainer l_procList = (*l_drwItr)->getProcs();
 
-            TOD_INF("TOPOLOGY DUMP> "
-                    "parent_huid---bus out---bus in---child_huid");
-            TodProcContainer::const_iterator l_procItr = l_procList.begin();
+            TOD_INF("TOPOLOGY DUMP> parent---bus out---bus in---child");
+            TodProcContainer::const_iterator l_procItr =
+                                                           l_procList.begin();
+            //FIX_ME_BEFORE_PRODUCTION_TASK32
+            //bool l_ecmdTargetFound = false;
             while(l_procList.end() != l_procItr)
             {
-                //Get the children for this TOD proc
+                if(TodProc::TOD_MASTER == (*l_procItr)->getMasterType())
+                {
+                    TOD_INF("Proc 0x%.8X is the MDMT",
+                    (*l_procItr)->getTarget()->getAttr<TARGETING::ATTR_HUID>());
+                }
+
                 TodProcContainer l_childList;
                 (*l_procItr)->getChildren(l_childList);
                 TodProcContainer::const_iterator l_childItr =
@@ -531,11 +555,11 @@ void TodTopologyManager::dumpTopology() const
                 while(l_childList.end() != l_childItr)
                 {
                     TOD_INF("TOPOLOGY DUMP> 0x%08X---%s---%s---0x%08X",
-                             (*l_procItr)->getTarget()->getAttr<ATTR_HUID>(),
-                             busnames[(*l_childItr)->getBusIn()],
-                             busnames[(*l_childItr)->getBusOut()],
-                             (*l_childItr)->getTarget()->getAttr<ATTR_HUID>());
-                    ++l_childItr;
+                      (*l_procItr)->getTarget()->getAttr<TARGETING::ATTR_HUID>(),
+                      busnames[(*l_childItr)->getBusIn()],
+                      busnames[(*l_childItr)->getBusOut()],
+                      (*l_childItr)->getTarget()->getAttr<TARGETING::ATTR_HUID>());
+                      ++l_childItr;
                 }
                 ++l_procItr;
             }
@@ -552,7 +576,7 @@ void TodTopologyManager::dumpTopology() const
 //******************************************************************************
 void TodTopologyManager::dumpTodRegs() const
 {
-    TOD_ENTER("dumpTodRegs");
+    TOD_ENTER();
 
     static const char* topologynames[2] = {0};
     topologynames[TOD_PRIMARY] = TOD_PRIMARY_TOPOLOGY;
@@ -562,50 +586,63 @@ void TodTopologyManager::dumpTodRegs() const
     {
         TOD_INF("TOD REGDUMP> Start, topology type %s",
                  topologynames[iv_topologyType]);
+
+        fapi2::variable_buffer l_regData(64);
         //Get the TOD drawers
         TodDrawerContainer l_todDrwList;
-        TodControls::getTheInstance().getDrawers(iv_topologyType, l_todDrwList);
+        TOD::getDrawers(iv_topologyType, l_todDrwList);
         TodDrawerContainer::const_iterator l_drwItr = l_todDrwList.begin();
         while(l_todDrwList.end() != l_drwItr)
         {
             TOD_INF("TOD REGDUMP> TOD Drawer(0x%.2X)",(*l_drwItr)->getId());
             //Get the procs on this drawer
             TodProcContainer l_procList = (*l_drwItr)->getProcs();
-            TodProcContainer::const_iterator l_procItr = l_procList.begin();
+            TodProcContainer::const_iterator l_procItr =
+                                                           l_procList.begin();
             while(l_procList.end() != l_procItr)
             {
                 TOD_INF("TOD REGDUMP> Proc HUID 0x%.8X",
-                    (*l_procItr)->getTarget()->getAttr<ATTR_HUID>());
+                    (*l_procItr)->getTarget()->getAttr<TARGETING::ATTR_HUID>());
                 if(TodProc::TOD_MASTER == (*l_procItr)->getMasterType())
                 {
-                   TOD_INF("TOD REGDUMP> This proc is the MDMT");
+                    TOD_INF("TOD REGDUMP> This proc is the MDMT");
                 }
-                else if(TodProc::DRAWER_MASTER == (*l_procItr)->getMasterType())
+                else if(TodProc::DRAWER_MASTER ==
+                       (*l_procItr)->getMasterType())
                 {
                     TOD_INF("TOD REGDUMP> This proc is the SDMT "
                              " for this drawer");
                 }
-                proc_tod_setup_conf_regs l_todRegs;
+                p9_tod_setup_conf_regs l_todRegs;
                 (*l_procItr)->getTodRegs(l_todRegs);
+                l_regData.set(l_todRegs.tod_m_path_ctrl_reg(), 0);
                 TOD_INF("TOD REGDUMP> MASTER PATH CONTROL REG 0x%.16llX",
-                         l_todRegs.tod_m_path_ctrl_reg.getDoubleWord(0));
+                        l_regData.get<uint32_t>(0));
+                l_regData.set(l_todRegs.tod_pri_port_0_ctrl_reg(), 0);
                 TOD_INF("TOD REGDUMP> PORT 0 PRIMARY CONFIG REG 0x%.16llX",
-                         l_todRegs.tod_pri_port_0_ctrl_reg.getDoubleWord(0));
+                        l_regData.get<uint32_t>(0));
+                l_regData.set(l_todRegs.tod_pri_port_1_ctrl_reg(), 0);
                 TOD_INF("TOD REGDUMP> PORT 1 PRIMARY CONFIG REG 0x%.16llX",
-                         l_todRegs.tod_pri_port_1_ctrl_reg.getDoubleWord(0));
+                        l_regData.get<uint32_t>(0));
+                l_regData.set(l_todRegs.tod_sec_port_0_ctrl_reg(), 0);
                 TOD_INF("TOD REGDUMP> PORT 0 SECONDARY CONFIG REG 0x%.16llX",
-                         l_todRegs.tod_sec_port_0_ctrl_reg.getDoubleWord(0));
+                        l_regData.get<uint32_t>(0));
+                l_regData.set(l_todRegs.tod_sec_port_1_ctrl_reg(), 0);
                 TOD_INF("TOD REGDUMP> PORT 1 SECONDARY CONFIG REG 0x%.16llX",
-                         l_todRegs.tod_sec_port_1_ctrl_reg.getDoubleWord(0));
+                        l_regData.get<uint32_t>(0));
+                 l_regData.set(l_todRegs.tod_s_path_ctrl_reg(), 0);
                 TOD_INF("TOD REGDUMP> SLAVE PATH CONTROL REG 0x%.16llX",
-                         l_todRegs.tod_s_path_ctrl_reg.getDoubleWord(0));
+                        l_regData.get<uint32_t>(0));
+                l_regData.set(l_todRegs.tod_i_path_ctrl_reg(), 0);
                 TOD_INF("TOD REGDUMP> INTERNAL PATH CONTROL REG 0x%.16llX",
-                         l_todRegs.tod_i_path_ctrl_reg.getDoubleWord(0));
+                        l_regData.get<uint32_t>(0));
+                l_regData.set(l_todRegs.tod_pss_mss_ctrl_reg(), 0);
                 TOD_INF("TOD REGDUMP> PRIMARY/SECONDARY MASTER/SLAVE CONTROL"
                          " REG 0x%.16llX",
-                         l_todRegs.tod_pss_mss_ctrl_reg.getDoubleWord(0));
+                        l_regData.get<uint32_t>(0));
+                l_regData.set(l_todRegs.tod_chip_ctrl_reg(), 0);
                 TOD_INF("TOD REGDUMP> CHIP CONTROL REG 0x%.16llX",
-                         l_todRegs.tod_chip_ctrl_reg.getDoubleWord(0));
+                        l_regData.get<uint32_t>(0));
                 ++l_procItr;
             }
             ++l_drwItr;
@@ -613,7 +650,63 @@ void TodTopologyManager::dumpTodRegs() const
         TOD_INF("TOD REGDUMP> End");
     }while(0);
 
-    TOD_EXIT("dumpTodRegs");
+    TOD_EXIT();
+}
+
+//******************************************************************************
+//TodTopologyManager::wireProcsInSmpWrapMode
+//******************************************************************************
+errlHndl_t TodTopologyManager::wireProcsInSmpWrapMode(
+                                       TodProcContainer& io_sourcesList,
+                                       TodProcContainer& io_targetsList)
+{
+    TOD_ENTER();
+
+    errlHndl_t l_errHdl = NULL;
+
+    do
+    {
+        TodProcContainer::iterator l_sourceItr = io_sourcesList.begin();
+        TodProcContainer::iterator l_targetItr;
+        bool l_connected = false;
+        while((NULL == l_errHdl) && (io_sourcesList.end() != l_sourceItr))
+        {
+            for(l_targetItr = io_targetsList.begin();
+                l_targetItr != io_targetsList.end();)
+            {
+                l_errHdl = (*l_sourceItr)->connect(*l_targetItr,
+                                                   TARGETING::TYPE_ABUS,
+                                                   l_connected);
+                if(l_errHdl)
+                {
+                    TOD_ERR("Error tying to connect target 0x%.8X "
+                    "to source 0x%.8X.",
+                    (*l_targetItr)->getTarget()->
+                    getAttr<TARGETING::ATTR_HUID>(),
+                    (*l_sourceItr)->getTarget()->
+                    getAttr<TARGETING::ATTR_HUID>());
+                    break;
+                }
+                if(l_connected)
+                {
+                    io_sourcesList.push_back(*l_targetItr);
+                    (*l_sourceItr)->addChild(*l_targetItr);
+                    l_targetItr = io_targetsList.erase(l_targetItr);
+                }
+                else
+                {
+                    ++l_targetItr;
+                }
+            }
+            ++l_sourceItr;
+        }
+    }while(0);
+
+    TOD_EXIT();
+
+    return l_errHdl;
 }
 
 } //namespace TOD
+
+}

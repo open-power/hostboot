@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep18/TodAssert.H $                          */
+/* $Source: src/usr/isteps/istep18/call_tod_init.C $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,38 +22,51 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef TODASSERT_H
-#define TODASSERT_H
 
 /**
- *  @file TodAssert.H
+ *  @file call_tod_init.C
  *
- *  There are two different assert types provided:
- *      Standard assert behavior:
- *              assert(foo)
+ *  HWP_IGNORE_VERSION_CHECK
  *
- *      Standard assert behavior with a custom trace message:
- *              assert(foo, "This is a trace %d", 1234)
  */
 
-#include <assert.h>
+/******************************************************************************/
+// Includes
+/******************************************************************************/
 
-namespace TOD
+#include <trace/interface.H>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+#include <targeting/common/targetservice.H>
+#include <initservice/initserviceif.H>
+#include <isteps/hwpisteperror.H>
+
+#include "TodTrace.H"
+#include "TodSvc.H"
+
+using namespace ISTEP_ERROR;
+
+namespace   ISTEP_18
 {
 
-/**
- *  @brief Forward common tod assert requests to platform specific handler
- *
- *  @par Detailed Description:
- *      Forwards assert request to platform specific assert macro which verifies
- *      condition, calls custom trace if provided, and ultimately calls platform
- *      assert
- *
- *  @param[in] expr,...
- *      Printf-like expression to act as the assert message
- */
-#define TOD_ERR_ASSERT(expr,...) \
-    assert(expr,__VA_ARGS__)
+void * call_tod_init(void *dummy)
+{
+    IStepError l_stepError;
+    errlHndl_t l_errl = NULL;
+    TOD_ENTER("call_tod_init");
+
+    if (!INITSERVICE::spBaseServicesEnabled())
+    {
+        l_errl = TOD::todInit();
+
+        if (l_errl)
+        {
+            l_stepError.addErrorDetails( l_errl );
+            TOD_ERR("todInit() return errl handle %p", l_errl);
+            errlCommit( l_errl, TOD_COMP_ID );
+        }
+    }
+    return l_stepError.getErrorHandle();
 }
 
-#endif
+}   // end namespace

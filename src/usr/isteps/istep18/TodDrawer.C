@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,25 +22,29 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
 /**
  *  @file TodDrawer.C
  *
  *  @brief The file implements methods of TodDrawer class
- *
- *  HWP_IGNORE_VERSION_CHECK
- *
  */
 
 //------------------------------------------------------------------------------
 //Includes
 //------------------------------------------------------------------------------
-#include "TodSvcUtil.H"
-#include "TodDrawer.H"
-#include "TodAssert.H"
-#include "TodTrace.H"
-#include <tod_init/tod_init_reasoncodes.H>
+//Targeting support
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/util.H>
+#include <attributeenums.H>
 
+#include "TodControls.H"
+#include "TodProc.H"
+#include "TodDrawer.H"
+#include "TodUtils.H"
+#include <hwas/common/deconfigGard.H>
+//Standard library
+#include <list>
+#include "TodUtils.H"
+#include <isteps/tod_init_reasoncodes.H>
 
 namespace TOD
 {
@@ -49,19 +53,25 @@ namespace TOD
 // TodDrawer::TodDrawer
 //******************************************************************************
 TodDrawer::TodDrawer(const uint8_t i_drawerId,
-                     const TARGETING::Target* i_parentNode):
+                             const TARGETING::Target* i_parentNode):
     iv_todDrawerId(i_drawerId),
     iv_isTodMaster(false),
     iv_parentNodeTarget(i_parentNode)
 {
-    TOD_ASSERT(iv_parentNodeTarget,
-           "Error creating TOD drawer with id 0x%.2X, parent node"
-           "pointer passed as NULL", i_drawerId);
-
-    TOD_ENTER("Created TOD drawer with id 0x%.2X, parent node 0x%.8X",
-               i_drawerId,
-               i_parentNode->getAttr<TARGETING::ATTR_HUID>());
-    TOD_EXIT("TodDrawer constructor");
+    do
+    {
+      if (!iv_parentNodeTarget)
+      {
+          TOD_ERR_ASSERT(0, "Error creating TOD drawer with id 0x%.2X,"
+          "parent node pointer passed as NULL",
+          i_drawerId);
+          break;
+      }
+      TOD_ENTER("Created TOD drawer with id 0x%.2X, parent node 0x%.8X",
+                 i_drawerId,
+                 i_parentNode->getAttr<TARGETING::ATTR_HUID>());
+    } while (0);
+    TOD_EXIT();
 }
 
 //******************************************************************************
@@ -69,7 +79,7 @@ TodDrawer::TodDrawer(const uint8_t i_drawerId,
 //******************************************************************************
 TodDrawer::~TodDrawer()
 {
-    TOD_ENTER("TodDrawer destructor");
+    TOD_ENTER();
 
     for(TodProcContainer::iterator l_itr = iv_todProcList.begin();
         l_itr != iv_todProcList.end();
@@ -78,7 +88,7 @@ TodDrawer::~TodDrawer()
         delete (*l_itr);
     }
     iv_todProcList.clear();
-    TOD_EXIT("TodDrawer destructor");
+    TOD_EXIT();
 }
 
 //******************************************************************************
@@ -87,7 +97,8 @@ TodDrawer::~TodDrawer()
 void TodDrawer::getProcWithMaxCores(
                 const TodProc* i_procToIgnore,
                 TodProc*& o_pTodProc,
-                uint32_t& o_coreCount) const
+                uint32_t& o_coreCount,
+                TodProcContainer* i_pProcList) const
 {
     TOD_ENTER("getProcWithMaxCores");
     o_pTodProc =  NULL;
@@ -107,9 +118,11 @@ void TodDrawer::getProcWithMaxCores(
         TodProc* l_pSelectedTarget = NULL;
         uint32_t l_maxCores = 0;
 
+        const TodProcContainer &l_procList =
+            i_pProcList ? *i_pProcList : iv_todProcList;
         for(TodProcContainer::const_iterator l_procIter =
-            iv_todProcList.begin();
-            l_procIter != iv_todProcList.end();
+            l_procList.begin();
+            l_procIter != l_procList.end();
             ++l_procIter)
         {
             if((NULL != i_procToIgnore) &&
@@ -136,7 +149,7 @@ void TodDrawer::getProcWithMaxCores(
         {
             o_pTodProc = l_pSelectedTarget;
             o_coreCount = l_maxCores;
-            TOD_INF("getProcWithMaxCores,On drawer %d, processor 0x%08X "
+            TOD_INF("getProcWithMaxCores,On drawer 0x%2X, processor 0x%08X "
             "has maximum cores count = %d ",
             iv_todDrawerId,
             l_pSelectedTarget->getTarget()->getAttr<TARGETING::ATTR_HUID>(),
@@ -145,7 +158,7 @@ void TodDrawer::getProcWithMaxCores(
 
     }while(0);
 
-    TOD_EXIT("getProcWithMaxCores");
+    TOD_EXIT();
 }
 
 
@@ -154,7 +167,7 @@ void TodDrawer::getProcWithMaxCores(
 //******************************************************************************
 errlHndl_t TodDrawer::findMasterProc(TodProc*& o_drawerMaster) const
 {
-    TOD_ENTER("findMasterProc");
+    TOD_ENTER();
 
     errlHndl_t l_errHdl = NULL;
 
@@ -177,24 +190,104 @@ errlHndl_t TodDrawer::findMasterProc(TodProc*& o_drawerMaster) const
             TOD_ERR("No master proc for drawer 0x%.2X",iv_todDrawerId);
             /*@
              * @errortype
-             * @reasoncode   TOD_NO_MASTER_PROC
              * @moduleid     TOD_FIND_MASTER_PROC
+             * @reasoncode   TOD_NO_MASTER_PROC
              * @userdata1    TOD drawer id
              * @devdesc      No master proc set for this drawer
+             * @custdesc     Service Processor Firmware couldn't detect any
+             *               functional master processor required to boot the
+             *               host
              */
-             l_errHdl = new ERRORLOG::ErrlEntry(
-                               ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                               TOD_LOG_INVALID_CONFIG,
-                               TOD_INVALID_CONFIG,
-                               iv_todDrawerId, 0);
+
+            l_errHdl = new ERRORLOG::ErrlEntry(
+                           ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                           TOD_FIND_MASTER_PROC,
+                           TOD_NO_MASTER_PROC,
+                           iv_todDrawerId);
         }
     }while(0);
 
     o_drawerMaster = l_pMasterProc;
 
-    TOD_EXIT("findMasterProc, errHdl = %p", l_errHdl);
+    TOD_EXIT();
 
     return l_errHdl;
+}
+
+//******************************************************************************
+// TodDrawer::addProc
+//******************************************************************************
+void TodDrawer::addProc(TodProc* i_proc)
+{
+    if(i_proc)
+    {
+        iv_todProcList.push_back(i_proc);
+    }
+    else
+    {
+        TOD_ERR_ASSERT("Code bug! Null Proc Target passed!");
+    }
+}
+
+//******************************************************************************
+// TodDrawer::getPotentialMdmts
+//******************************************************************************
+void TodDrawer::getPotentialMdmts(
+        TodProcContainer& o_procList) const
+{
+    TOD_ENTER("TodDrawer::getPotentialMdmts");
+    bool l_isGARDed = false;
+    errlHndl_t l_errHndl = NULL;
+
+    const TARGETING::Target* l_procTarget = NULL;
+
+    for(const auto & l_procItr : iv_todProcList)
+    {
+
+        l_procTarget = l_procItr->getTarget();
+
+        //Check if the target is not black listed
+        if ( !(TOD::isProcBlackListed(l_procTarget)) )
+        {
+            //Check if the target is not garded
+            l_errHndl = TOD::checkGardStatusOfTarget(l_procTarget,
+                        l_isGARDed);
+
+            if(l_errHndl)
+            {
+                TOD_ERR("Failed in checkGardStatusOfTarget() to get the "
+                        " GARD state for the target 0x%.8x",
+                        GETHUID(l_procTarget));
+
+                //Ignore this target as the gard status for this target
+                //could not be obtained.
+                continue;
+            }
+
+            TARGETING::ATTR_HWAS_STATE_type l_state =
+                l_procTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
+
+            if ( (!l_isGARDed) ||
+                 (l_state.deconfiguredByEid ==
+                  HWAS::DeconfigGard::CONFIGURED_BY_RESOURCE_RECOVERY) )
+            {
+                o_procList.push_back(l_procItr);
+            }
+            else
+            {
+                TOD_INF("PROC target 0x%.8x cannot be choosen as MDMT as"
+                "its garded",GETHUID(l_procTarget));
+            }
+        }
+        else
+        {
+            TOD_INF("PROC target 0x%.8x cannot be choosen as MDMT as it"
+            "is backlisted",GETHUID(l_procTarget));
+        }
+        l_isGARDed = false;
+
+    }//End of for loop
+    TOD_EXIT();
 }
 
 }//end of namespace

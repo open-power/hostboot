@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,6 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
 /**
  *  @file TodProc.C
  *
@@ -35,15 +34,27 @@
 //------------------------------------------------------------------------------
 //Includes
 //------------------------------------------------------------------------------
-#include <targeting/common/attributes.H>
+//Standard library
+#include <list>
+//Targeting support
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
-#include <tod_init/tod_init_reasoncodes.H>
+#include <isteps/tod_init_reasoncodes.H>
 #include "TodDrawer.H"
 #include "TodProc.H"
 #include "TodTypes.H"
+#include "TodControls.H"
+#include <hwas/common/deconfigGard.H>
 #include "TodAssert.H"
 #include "TodTrace.H"
+//HWPF
+#include <fapi2_target.H>
+#include <target_types.H>
+#include "TodUtils.H"
+
+extern "C" {
+
+using namespace fapi2;
 
 namespace TOD
 {
@@ -59,13 +70,26 @@ TodProc::TodProc(
            iv_tod_node_data(NULL),
            iv_masterType(NOT_MASTER)
 {
-    TOD_ASSERT(iv_procTarget, "Target input i_procTarget is NULL ");
-    TOD_ASSERT(iv_parentDrawer, "TOD drawer input iv_parentDrawer is NULL ");
+    TOD_ENTER();
+
+    do
+    {
+      if(!iv_procTarget)
+      {
+          TOD_ERR_ASSERT("Target input i_procTarget is NULL ");
+          break;
+      }
+      if(!iv_parentDrawer)
+      {
+          TOD_ERR_ASSERT("TOD drawer input iv_parentDrawer is NULL ");
+          break;
+      }
 
     TOD_ENTER("Created proc 0x%.8X on drawer 0x%.2X",
-               iv_procTarget->getAttr<TARGETING::ATTR_HUID>(),
-               iv_parentDrawer->getId());
+                 iv_procTarget->getAttr<TARGETING::ATTR_HUID>(),
+                 iv_parentDrawer->getId());
     init();
+    } while (0);
 
     TOD_EXIT("TodProc constructor");
 }
@@ -84,6 +108,7 @@ TodProc::~TodProc()
         delete iv_tod_node_data;
         iv_tod_node_data = NULL;
     }
+
     iv_xbusTargetList.clear();
     iv_abusTargetList.clear();
 
@@ -108,8 +133,12 @@ void TodProc::setMasterType(const ProcMasterType i_masterType)
 
     iv_masterType = i_masterType;
     iv_tod_node_data->i_drawer_master = true;
+    TOD_IMP("Proc 0X%.8X is the drawer master for TOD drawer 0x%.2X",
+             GETHUID(iv_procTarget), iv_parentDrawer->getId());
     if(TOD_MASTER == i_masterType)
     {
+        TOD_IMP("Proc 0X%.8X is a TOD master",
+                 GETHUID(iv_procTarget));
         iv_tod_node_data->i_tod_master = true;
     }
 
@@ -133,10 +162,9 @@ void TodProc::init()
     }
     iv_tod_node_data = new tod_topology_node();
     //Initialize the iv_tod_node_data structure
-    iv_tod_node_data->i_target = new fapi::Target;
-    iv_tod_node_data->i_target->setType(fapi::TARGET_TYPE_PROC_CHIP);
-    iv_tod_node_data->i_target->set
-       (reinterpret_cast<void*>(const_cast<TARGETING::Target*>(iv_procTarget)));
+    iv_tod_node_data->i_target = new
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+        (const_cast<TARGETING::Target*>(iv_procTarget));
     iv_tod_node_data->i_tod_master = false;
     iv_tod_node_data->i_drawer_master = false;
     iv_tod_node_data->i_bus_rx = NONE;
@@ -257,93 +285,116 @@ errlHndl_t TodProc::connect(
         //Step 3: If a match is found then fill the i_bus_tx and i_bus_rx
         //attributes for the destination proc and return
 
-        const TARGETING::Target * l_proc = NULL;
+        //Predicates tp look for a functional proc who's HUID is same as
+        //that of i_destination. This predicate will be applied as a result
+        //filter to getPeerTargets to determine the connected proc.
+        TARGETING::PredicateCTM
+            l_procFilter(TARGETING::CLASS_CHIP,TARGETING::TYPE_PROC);
+        TARGETING::PredicateIsFunctional l_funcFilter;
+        TARGETING::PredicateAttrVal<TARGETING::ATTR_HUID>
+            l_huidFilter(
+                i_destination->getTarget()->getAttr<TARGETING::ATTR_HUID>());
+        TARGETING::PredicatePostfixExpr l_resFilter;
+        l_resFilter.
+            push(&l_procFilter).
+            push(&l_funcFilter).
+            And().
+            push(&l_huidFilter).
+            And();
+
+        TARGETING::TargetHandleList l_procList;
         TARGETING::TargetHandleList l_busList;
 
         TARGETING::TargetHandleList::iterator l_busIter = (*l_pBusList).begin();
         for(;l_busIter != (*l_pBusList).end() ; ++l_busIter)
         {
+            l_procList.clear();
             l_busList.clear();
 
-            //Get the peer target for this bus connection
-            //I need to know the peer's (bus endpoint) attributes such as
-            //HUID, chip unit. Applying a result filter will get me the proc
-            //on the other end, but will abstract away the bus, which is not
-            //what I want.
-            getPeerTargets(
+            //Need this call without result filter to get a handle to the
+            //peer (bus). I need to access its HUID and chip unit.
+            TARGETING::getPeerTargets(
                  l_busList,
-                *l_busIter,
+                 *l_busIter,
                  NULL,
                  NULL);
 
-            //There should be only 1 peer
-            if(1 == l_busList.size())
+            //The call below is to determine the connected proc
+            TARGETING::getPeerTargets(
+                 l_procList,
+                 *l_busIter,
+                 NULL,
+                 //result filter to get the connected proc
+                 &l_resFilter);
+
+            if(l_procList.size())
             {
-                l_proc = getParentChip(l_busList[0]);
-
-                if((l_proc) &&
-                   l_proc->getAttr<TARGETING::ATTR_HWAS_STATE>().functional &&
-                   (l_proc->getAttr<TARGETING::ATTR_HUID>() ==
-                       i_destination->iv_procTarget->
-                           getAttr<TARGETING::ATTR_HUID>()))
+                if(l_busList.empty())
                 {
-                    //We found a connection :
-                    //iv_procTarget --- i_busChipUnitType --- i_destination
-                    TOD_INF("Source processor 0x%.8X connects with the "
-                        "destination processor 0x%.8X over "
-                        "source bus 0x%.8X and destination bus 0x%.8X "
-                        "via bus type 0x%.8X",
-                        iv_procTarget->getAttr<TARGETING::ATTR_HUID>(),
-                        i_destination->iv_procTarget->
-                            getAttr<TARGETING::ATTR_HUID>(),
+                    //This is unlikely, since the proc list is not empty,
+                    //we should have also found a bus, but just a safety check.
+                    TOD_ERR_ASSERT(0,
+                        "Couldn't find a peer for bus 0x%.8X on proc 0x%.8X",
                         (*l_busIter)->getAttr<TARGETING::ATTR_HUID>(),
-                        l_busList[0]->getAttr<TARGETING::ATTR_HUID>(),
-                        i_busChipUnitType);
-
-                    //Determine the bus type as per our format, for eg XBUS0
-                    //ATTR_CHIP_UNIT gives the instance number of
-                    //the bus and it has direct correspondance to
-                    //the port no.
-                    //For instance a processor has two A buses
-                    //then the one with ATTR_CHIP_UNIT 0 will be A0
-                    //and the one with ATTR_CHIP_UNIT 1 will be A1
-                    proc_tod_setup_bus l_busOut = NONE;
-                    proc_tod_setup_bus l_busIn = NONE;
-                    l_errHndl = getBusPort(i_busChipUnitType,
-                                    (*l_busIter)->
-                                        getAttr<TARGETING::ATTR_CHIP_UNIT>(),
-                                    l_busOut);
-                    if(NULL == l_errHndl)
-                    {
-                        l_errHndl = getBusPort(i_busChipUnitType,
-                            l_busList[0]->
-                                getAttr<TARGETING::ATTR_CHIP_UNIT>(),
-                            l_busIn);
-                    }
-                    if(l_errHndl)
-                    {
-                        //Should not be hitting this path if HW procedure is
-                        //correctly defining all the bus types and ports
-                        TOD_ERR("proc_tod_setup_bus type not found for "
-                            "port 0x%.2X of bus type 0x%.8X. Source processor "
-                            "0x%.8X, destination processor 0x%.8X",
-                            (*l_busIter)->
-                                getAttr<TARGETING::ATTR_CHIP_UNIT>(),
-                            i_busChipUnitType,
-                            iv_procTarget->
-                                getAttr<TARGETING::ATTR_HUID>(),
-                            i_destination->iv_procTarget->
-                                getAttr<TARGETING::ATTR_HUID>());
-                        break;
-                    }
-
-                    //Set the bus connections for i_destination :
-                    //Bus out from this proc = l_busOut;
-                    //Bus in to destination = l_busIn;
-                    i_destination->setConnections(l_busOut, l_busIn);
-                    o_isConnected = true;
+                        iv_procTarget->getAttr<TARGETING::ATTR_HUID>());
                     break;
                 }
+                //We found a connection :
+                //iv_procTarget --- i_busChipUnitType --- i_destination
+                TOD_INF("Source processor 0x%.8X connects with the "
+                    "destination processor 0x%.8X over "
+                    "source bus 0x%.8X and destination bus 0x%.8X "
+                    "via bus type 0x%.8X",
+                    iv_procTarget->getAttr<TARGETING::ATTR_HUID>(),
+                    i_destination->iv_procTarget->
+                        getAttr<TARGETING::ATTR_HUID>(),
+                    (*l_busIter)->getAttr<TARGETING::ATTR_HUID>(),
+                    l_busList[0]->getAttr<TARGETING::ATTR_HUID>(),
+                    i_busChipUnitType);
+
+                //Determine the bus type as per our format, for eg XBUS0
+                //ATTR_CHIP_UNIT gives the instance number of
+                //the bus and it has direct correspondance to
+                //the port no.
+                //For instance a processor has two A buses
+                //then the one with ATTR_CHIP_UNIT 0 will be A0
+                //and the one with ATTR_CHIP_UNIT 1 will be A1
+                p9_tod_setup_bus l_busOut = NONE;
+                p9_tod_setup_bus l_busIn = NONE;
+                l_errHndl = getBusPort(i_busChipUnitType,
+                                (*l_busIter)->
+                                    getAttr<TARGETING::ATTR_CHIP_UNIT>(),
+                                l_busOut);
+                if(NULL == l_errHndl)
+                {
+                    l_errHndl = getBusPort(i_busChipUnitType,
+                        l_busList[0]->
+                            getAttr<TARGETING::ATTR_CHIP_UNIT>(),
+                        l_busIn);
+                }
+                else
+                {
+                    //Should not be hitting this path if HW procedure is
+                    //correctly defining all the bus types and ports
+                    TOD_ERR("p9_tod_setup_bus type not found for "
+                        "port 0x%.2X of bus type 0x%.8X. Source processor "
+                        "0x%.8X, destination processor 0x%.8X",
+                        (*l_busIter)->
+                            getAttr<TARGETING::ATTR_CHIP_UNIT>(),
+                        i_busChipUnitType,
+                        iv_procTarget->
+                            getAttr<TARGETING::ATTR_HUID>(),
+                        i_destination->iv_procTarget->
+                            getAttr<TARGETING::ATTR_HUID>());
+                    break;
+                }
+
+                //Set the bus connections for i_destination :
+                //Bus out from this proc = l_busOut;
+                //Bus in to destination = l_busIn;
+                i_destination->setConnections(l_busOut, l_busIn);
+                o_isConnected = true;
+                break;
             }
         }
         if(l_errHndl)
@@ -363,7 +414,7 @@ errlHndl_t TodProc::connect(
 errlHndl_t TodProc::getBusPort(
         const TARGETING::TYPE  i_busChipUnitType,
         const uint32_t  i_busPort,
-        proc_tod_setup_bus& o_busPort) const
+        p9_tod_setup_bus& o_busPort) const
 {
     TOD_ENTER("getBusPort");
 
@@ -382,8 +433,8 @@ errlHndl_t TodProc::getBusPort(
             case 2:
                 o_busPort = XBUS2;
                 break;
-            case 3:
-                o_busPort = XBUS3;
+            case 7:
+                o_busPort = XBUS7;
                 break;
             default:
                 TOD_ERR("Port 0x%.8X not supported for X bus",
@@ -398,15 +449,6 @@ errlHndl_t TodProc::getBusPort(
     {
         switch(i_busPort)
         {
-            case 0:
-                o_busPort = ABUS0;
-                break;
-            case 1:
-                o_busPort = ABUS1;
-                break;
-            case 2:
-                o_busPort = ABUS2;
-                break;
             default:
                 TOD_ERR("Port 0x%.8X not supported for A bus",
                     i_busPort);
@@ -427,7 +469,6 @@ errlHndl_t TodProc::getBusPort(
     return l_errHndl;
 }
 
-
 //******************************************************************************
 //TodProc::logUnsupportedBusType
 //******************************************************************************
@@ -444,12 +485,13 @@ void TodProc::logUnsupportedBusType(const int32_t i_busChipUnitType,
      *               getBusPort method has not been updated to support all the
      *               bus type on a given system.
      *               Resolution:Development team should be contacted.
+     * @custdesc     Service Processor Firmware encountered an internal error
      */
-     io_errHdl = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                        TOD_LOG_UNSUPPORTED_BUSTYPE,
-                        TOD_UNSUPPORTED_BUSTYPE,
-                        i_busChipUnitType, 0);
+    io_errHdl = new ERRORLOG::ErrlEntry(
+                           ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                           TOD_MOD_LOG_UNSUPPORTED_BUSTYPE,
+                           TOD_UNSUPPORTED_BUSTYPE,
+                           i_busChipUnitType);
 }
 
 //******************************************************************************
@@ -462,8 +504,8 @@ void TodProc::logUnsupportedBusPort(
 {
     /*@
      * @errortype
-     * @reasoncode   TOD_UNSUPPORTED_BUSPORT
      * @moduleid     TOD_LOG_UNSUPPORTED_BUSPORT
+     * @reasoncode   TOD_UNSUPPORTED_BUSPORT
      * @userdata1    Bus port that is not currently supported
      * @userdata2    Bus Type for which the unsupported port has been reported
      * @devdesc      Error: Unsupported bus port was detected for the specified
@@ -472,12 +514,14 @@ void TodProc::logUnsupportedBusPort(
      *               getBusPort method has not been updated to support all the
      *               possible port for a bus on a given system type.
      *               Resolution:Development team should be contacted.
+     * @custdescoff     Service Processor Firmware encountered an internal error
      */
-     io_errHdl = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                        TOD_LOG_UNSUPPORTED_BUSPORT,
-                        TOD_UNSUPPORTED_BUSPORT,
-                        i_busPort, i_busChipUnitType);
+    io_errHdl = new ERRORLOG::ErrlEntry(
+                           ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                           TOD_MOD_LOG_UNSUPPORTED_BUSTYPE,
+                           TOD_UNSUPPORTED_BUSPORT,
+                           i_busPort,
+                           i_busChipUnitType);
 }
 
 //******************************************************************************
@@ -500,7 +544,7 @@ void TodProc::addChild(TodProc* i_child)
 //******************************************************************************
 // TodProc::getTodRegs
 //******************************************************************************
-void TodProc::getTodRegs(proc_tod_setup_conf_regs& o_todRegs) const
+void TodProc::getTodRegs(p9_tod_setup_conf_regs& o_todRegs) const
 {
     o_todRegs.tod_m_path_ctrl_reg =
         iv_tod_node_data->o_todRegs.tod_m_path_ctrl_reg;
@@ -527,22 +571,43 @@ void TodProc::getTodRegs(proc_tod_setup_conf_regs& o_todRegs) const
 //******************************************************************************
 void TodProc::setTodChipData(TodChipData& o_todChipData) const
 {
-    proc_tod_setup_conf_regs& l_todRegs = iv_tod_node_data->o_todRegs;
+    p9_tod_setup_conf_regs& l_todRegs = iv_tod_node_data->o_todRegs;
 
     o_todChipData.header.chipID = iv_procTarget->
-        getAttr<TARGETING::ATTR_POSITION>();
+        getAttr<TARGETING::ATTR_ORDINAL_ID>();
 
     o_todChipData.header.flags |= TOD_FUNC;
 
-    o_todChipData.regs.mpcr = l_todRegs.tod_m_path_ctrl_reg.getWord(0);
-    o_todChipData.regs.pcrp0 =  l_todRegs.tod_pri_port_0_ctrl_reg.getWord(0);
-    o_todChipData.regs.pcrp1 = l_todRegs.tod_pri_port_1_ctrl_reg.getWord(0);
-    o_todChipData.regs.scrp0 = l_todRegs.tod_sec_port_0_ctrl_reg.getWord(0);
-    o_todChipData.regs.scrp1 = l_todRegs.tod_sec_port_1_ctrl_reg.getWord(0);
-    o_todChipData.regs.spcr = l_todRegs.tod_s_path_ctrl_reg.getWord(0);
-    o_todChipData.regs.ipcr = l_todRegs.tod_i_path_ctrl_reg.getWord(0);
-    o_todChipData.regs.psmscr = l_todRegs.tod_pss_mss_ctrl_reg.getWord(0);
-    o_todChipData.regs.ccr = l_todRegs.tod_chip_ctrl_reg.getWord(0);
+    fapi2::variable_buffer l_regData((uint32_t)64);
+
+    l_regData.set(l_todRegs.tod_m_path_ctrl_reg(), 0);
+    o_todChipData.regs.mpcr = l_regData.get<uint32_t>(0);
+
+    l_regData.set(l_todRegs.tod_pri_port_0_ctrl_reg(), 0);
+    o_todChipData.regs.pcrp0 = l_regData.get<uint32_t>(0);
+
+    l_regData.set(l_todRegs.tod_pri_port_1_ctrl_reg(), 0);
+    o_todChipData.regs.pcrp1 = l_regData.get<uint32_t>(0);
+
+    l_regData.set(l_todRegs.tod_sec_port_0_ctrl_reg(), 0);
+    o_todChipData.regs.scrp0 = l_regData.get<uint32_t>(0);
+
+    l_regData.set(l_todRegs.tod_sec_port_1_ctrl_reg(), 0);
+    o_todChipData.regs.scrp1 = l_regData.get<uint32_t>(0);
+
+    l_regData.set(l_todRegs.tod_s_path_ctrl_reg(), 0);
+    o_todChipData.regs.spcr = l_regData.get<uint32_t>(0);
+
+    l_regData.set(l_todRegs.tod_i_path_ctrl_reg(), 0);
+    o_todChipData.regs.ipcr = l_regData.get<uint32_t>(0);
+
+    l_regData.set(l_todRegs.tod_pss_mss_ctrl_reg(), 0);
+    o_todChipData.regs.psmscr = l_regData.get<uint32_t>(0);
+
+    l_regData.set(l_todRegs.tod_chip_ctrl_reg(), 0);
+    o_todChipData.regs.ccr = l_regData.get<uint32_t>(0);
 }
 
-} //end of namespace
+}//end of namespace
+
+}

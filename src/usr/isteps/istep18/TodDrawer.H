@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,24 +24,34 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef TODDRAWER_H
 #define TODDRAWER_H
-
 /**
  *  @file TodDrawer.H
  *
  *  @brief Contains TodDrawer class declaration
  *
- *  HWP_IGNORE_VERSION_CHECK
- *
  */
 
-#include <targeting/common/attributes.H>
-#include <targeting/common/targetservice.H>
+//------------------------------------------------------------------------------
+//Includes
+//------------------------------------------------------------------------------
+//Targeting support
+#include <attributetraits.H>
+#include "TodSvcUtil.H"
 #include "TodProc.H"
 
 namespace TOD
 {
 
-class TodDrawer;  // forward declaration
+//------------------------------------------------------------------------------
+//Forward declarations
+//------------------------------------------------------------------------------
+class TodDrawer;
+class TodControls;
+class TodProc;
+
+//------------------------------------------------------------------------------
+//Typedefs
+//------------------------------------------------------------------------------
 typedef std::list<TodDrawer*> TodDrawerContainer;
 
 /**
@@ -83,7 +93,7 @@ public:
      * @brief Destructor for the TodDrawer object.
      *
      * @par Detailed Description:
-     *     Will destroy all HwsvTodProc objects that were added to this TOD
+     *     Will destroy all TodProc objects that were added to this TOD
      *     drawer.
      */
     ~TodDrawer();
@@ -98,7 +108,8 @@ public:
      *     TodTopologyManager will use this method to determine which
      *     processor is the master for that drawer.
      *     The method will go over the iv_todProcList and return the processor
-     *     that is marked as TodProc::TOD_MASTER or TodProc::DRAWER_MASTER
+     *     that is marked as TodProc::TOD_MASTER or
+     *     TodProc::DRAWER_MASTER
      *
      * @param[out] o_drawerMaster
      *     It will be set to master processor's address if master processor is
@@ -108,9 +119,9 @@ public:
      *
      * @return Error log handle, indicates status of request
      * @retval NULL indicates that master processor was successfully found
-     * @retval !NULL indicates that the master processor could not be found
+     * @retval NULL indicates that the master processor could not be found
      *     successfully. The only possible reason for returning NULL can be
-     *     that this method was called out of sequence i.e even before
+     *     that this method method was called out of sequence i.e even before
      *     TodTopologyManager designated a processor on a given TOD drawer as
      *     master for that drawer.
      *
@@ -143,7 +154,7 @@ public:
      *    for primar/secondary topology and MDMT has to be chosen for the
      *    other topology, peviously chosen MDMT should be avoided.
      *
-     * @param[out] o_pTodProc, It will carry back pointer to the HwsvTodProc
+     * @param[out] o_pTodProc, It will carry back pointer to the TodProc
      *    object that has the maximum number of cores.
      *    In the unlikely case of TOD drawer not having any processor with
      *    functional cores, this parameter will be set to NULL
@@ -152,12 +163,18 @@ public:
      *    found on processor with max functional core count. In case o_pTodProc
      *    is set to NULL this will be zero.
      *
+     * @param[in] i_pProcList If non NULL, this will be our input set instead of
+     *     the set of all procs on this drawer. Useful if caller has already
+     *     identified the set of procs on this drawer for which the one with max
+     *     no. of cores is to be determined.
+     *
      * @return N/A
      */
     void getProcWithMaxCores(
            const TodProc * i_procToIgnore,
            TodProc *& o_pTodProc,
-           uint32_t& o_coreCount)const;
+           uint32_t& o_coreCount,
+           TodProcContainer* i_pProcList = NULL) const;
 
     /**
      * @brief Getter method for iv_todProcList
@@ -186,17 +203,14 @@ public:
     }
 
     /**
-     * @brief Adds a processor to this TOD drawer
+     * @brief Adds a processor to this TOD drawer.
      *
      * @param[in] i_proc
-     *    A VTodProc pointer correspnding to the proc to be added
+     *    A TodProc pointer correspnding to the proc to be added.
      *
      * @return N/A
      */
-    void addProc(TodProc* i_proc)
-    {
-        iv_todProcList.push_back(i_proc);
-    }
+    void addProc(TodProc* i_proc);
 
     /**
      * @brief Get this TOD drawer's id (this will be
@@ -205,7 +219,7 @@ public:
      * @return TOD drawer's id
      * @retval corresponding fabric node's id
      */
-    TARGETING::ATTR_FABRIC_NODE_ID_type getId() const
+    TARGETING::ATTR_FABRIC_GROUP_ID_type getId() const
     {
         return iv_todDrawerId;
     }
@@ -232,23 +246,45 @@ public:
         return iv_parentNodeTarget;
     }
 
+    /**
+     * @brief Returns a list of procs on this drawer that can potentially be
+     *     MDMT
+     *
+     * @par Detailed Description:
+     *     For a processor to be a potential MDMT it has to fulfill the
+     *     following criteria.
+     *     1) Processor should not be garded and it should not be on the
+     *     blacklist.
+     *     2) Processor should be connected to OSC that is neither garded not
+     *     present on the blacklist.
+     *     3) Processor should not be connected to the oscillator that is acting
+     *     as MDMT source on an existing alternate toplogy. The
+     *     Such oscillator target will be provided as input to this method.
+     *
+     * @param[out] o_procList list of procs
+     *
+     * @return N/A
+     */
+    void getPotentialMdmts(TodProcContainer& o_procList)const;
+
 private:
     //List of TodProc objects that belongs to TodDrawer instance
     TodProcContainer iv_todProcList;
 
     //TOD drawer id, the value of this attribute will be derived from
-    //ATTR_FABRIC_NODE_ID attribute of the processors that belong to this
+    //ATTR_FABRIC_GROUP_ID attribute of the processors that belong to this
     //TOD drawer, all the processors belonging to this TOD drawer will share
-    //the same value for ATTR_FABRIC_NODE_ID
-    TARGETING::ATTR_FABRIC_NODE_ID_type iv_todDrawerId;
+    //the same value for ATTR_FABRIC_GROUP_ID
+    TARGETING::ATTR_FABRIC_GROUP_ID_type iv_todDrawerId;
 
     //This data member will identify if the current drawer is a Tod master
     bool iv_isTodMaster;
 
     //Target pointer of the node to which TodDrawer belongs
     const TARGETING::Target * iv_parentNodeTarget;
+
 };
 
-} //end of namespace
-
+}//end of namespace
 #endif //TODDRAWER_H
+

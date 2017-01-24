@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,25 +22,28 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
+#ifndef TODCONTROLS_H
+#define TODCONTROLS_H
 /**
  *  @file TodControls.H
  *
- *  @brief This file declares the methods and members of TodControls class
- *
- *  HWP_IGNORE_VERSION_CHECK
- *
+ *  @brief Contains TodControls class declaration
+ *      TodControls class will maintain the data structures required for
+ *      creating/modifying TOD topologies
  */
-
-#ifndef TODCONTROLS_H
-#define TODCONTROLS_H
 
 //------------------------------------------------------------------------------
 //Includes
 //------------------------------------------------------------------------------
-#include <util/singleton.H>
-#include "proc_tod_utils.H"
+//System Include
+
+#include  <util/singleton.H>
+#include  <vector>
 #include "TodDrawer.H"
+#include "TodProc.H"
+#include "TodSvcUtil.H"
+#include "TodAssert.H"
+#include "TodTrace.H"
 
 namespace TOD
 {
@@ -56,7 +59,15 @@ struct TodChipData;
 //------------------------------------------------------------------------------
 //Typedefs
 //------------------------------------------------------------------------------
+//Use "thesTodControls_t::Instance()" to access the singleton via reference
+typedef Singleton<TodControls> theTodControls_t;
 typedef std::vector<TodChipData> TodChipDataContainer;
+typedef std::vector<TARGETING::ConstTargetHandle_t>
+    BlacListedProcContainer;
+typedef std::vector<TARGETING::ConstTargetHandle_t>
+    GardedProcContainer;
+typedef std::vector<TARGETING::ATTR_HUID_type>
+    GardedTargetsContainer;
 
 //------------------------------------------------------------------------------
 //Static globals
@@ -66,8 +77,13 @@ const static uint8_t TOD_NUM_CONFIGS = 2;
 const static uint8_t TOD_PSS_MSS_STATUS_REG_00040008_ACTIVE_BIT = 0;
 const static uint8_t TOD_PSS_MSS_CTRL_REG_00040007_PRIMARY_MDMT_BIT = 1;
 const static uint8_t TOD_PSS_MSS_CTRL_REG_00040007_SECONDARY_MDMT_BIT = 9;
-
-const static uint32_t TOD_INVALID_UNITID = 0xFFFFFFEF;
+const static uint8_t TOD_PSS_MSS_STATUS_REG_00040008_PRI_M_S_TOD_SEL = 13;
+const static uint8_t TOD_PSS_MSS_STATUS_REG_00040008_PRI_M_S_DRAWER_SEL = 14;
+const static uint8_t TOD_PSS_MSS_STATUS_REG_00040008_SEC_M_S_TOD_SEL = 17;
+const static uint8_t TOD_PSS_MSS_STATUS_REG_00040008_SEC_M_S_DRAWER_SEL = 18;
+const static uint8_t TOD_FSM_REG_TOD_IS_RUNNING = 4;
+const uint32_t TOD_HUID_INVALID = 0xFFFFFFFF;
+const uint32_t FSP_INVALID_RID = 0x0;
 
 /**
  * @class TodControls
@@ -111,8 +127,8 @@ public:
      *    available in the system
      *
      * @par Detailed Description:
-     *    TOD drawers are represented by HwsvTodDrawer class, that
-     *    basically provides a grouping of the HwsvTodProc objects such
+     *    TOD drawers are represented by TodDrawer class, that
+     *    basically provides a grouping of the TodProc objects such
      *    that processor chips beloning to a specific drawer connect
      *    over X bus and inter drawer connection is over A bus. TOD drawer
      *    is analogous to fabic node on the system.
@@ -128,7 +144,7 @@ public:
      *    At the end of operation TOD topology infrastructure will either
      *    have iv_primTodDrawer or iv_secTodDrawerList completed with each
      *    drawer having a list of functional proc chips represented as
-     *    HwsvTodProc pointers.
+     *    TodProc pointers.
      *
      * @param[in] i_config
      *    Indicates the primary/secondary topology
@@ -147,7 +163,7 @@ public:
      *     any returned error created by this function will be a non-reported
      *     tracing event error log.
      */
-    errlHndl_t buildTodDrawers(const proc_tod_setup_tod_sel i_config);
+    errlHndl_t buildTodDrawers(const p9_tod_setup_tod_sel i_config);
 
     /**
      * @brief This method will pick MDMT chip for the configuration
@@ -191,7 +207,7 @@ public:
      *     any returned error created by this function will be a non-reported
      *     tracing event error log.
      */
-    errlHndl_t pickMdmt(const proc_tod_setup_tod_sel i_config);
+    errlHndl_t pickMdmt(const p9_tod_setup_tod_sel i_config);
 
     /**
      * @brief Destroy information pertaining to topology type
@@ -202,7 +218,7 @@ public:
      *
      * @return N/A
      */
-    void destroy(const proc_tod_setup_tod_sel i_config);
+    void destroy(const p9_tod_setup_tod_sel i_config);
 
     /**
      * @brief Gets a list of TOD drawers for a specific
@@ -212,11 +228,11 @@ public:
      *    Indicates the primary/secondary topology
      *
      * @param[out] o_drawerList
-     *    list of HwsvTodDrawer pointers, empty in case of error
+     *    list of TodDrawer pointers, empty in case of error
      *
      * @return N/A
      */
-    void getDrawers(const proc_tod_setup_tod_sel i_config,
+    void getDrawers(const p9_tod_setup_tod_sel i_config,
                     TodDrawerContainer& o_drawerList) const
     {
         o_drawerList = iv_todConfig[i_config].iv_todDrawerList;
@@ -229,11 +245,11 @@ public:
      *    Indicates the primary/secondary topology
      *
      * @param[out] o_pMDMT
-     *     The HwsvTodProc pointer corresponding to the MDMT. NULL if error.
+     *     The TodProc pointer corresponding to the MDMT. NULL if error.
      *
      * @return Pointer to the data member iv_todConfig[i_config].iv_mdmt
      */
-    TodProc* getMDMT(const proc_tod_setup_tod_sel i_config) const
+    TodProc* getMDMT(const p9_tod_setup_tod_sel i_config) const
     {
         return iv_todConfig[i_config].iv_mdmt;
     }
@@ -251,7 +267,7 @@ public:
      *
      * @return NA
      */
-    void setConfigStatus(const proc_tod_setup_tod_sel i_config,
+    void setConfigStatus(const p9_tod_setup_tod_sel i_config,
                         const bool i_isConfigured )
     {
         iv_todConfig[i_config].iv_isConfigured = i_isConfigured;
@@ -267,7 +283,7 @@ public:
      *
      * @return bool, indicating iv_isConfigured's value
      */
-    bool getConfigStatus(const proc_tod_setup_tod_sel i_config) const
+    bool getConfigStatus(const p9_tod_setup_tod_sel i_config) const
     {
         return iv_todConfig[i_config].iv_isConfigured;
     }
@@ -305,17 +321,15 @@ public:
      */
      errlHndl_t isTodRunning ( bool& o_isTodRunning)const;
 
-
-
      /**
-      * @brief This method will save TOD topology register data for HDAT
+      * @brief This method will provide TOD topology register data to HDAT
       *
       * @par Detailed Description:
       *     HWSV needs to share TOD topology data with HDAT.
       *     HWSV also needs to persist with TOD topology data across non-memory
       *     preserving IPL's.
       *     Both the above requirements will be fulfilled by writing data
-      *     to an attribute per proc.
+      *     to a file.
       *     This method will take the TOD register data and put it in the format
       *     required by HDAT, and then call helper method to write the same to a
       *     file
@@ -328,30 +342,32 @@ public:
       *     building one of the topologies i.e. primary could be built but not
       *     the secondary then primary should be passed as i_config.
       *
-      * @return NULL if successful
-      *         !NULL otherwise
+      * @return Error log handle indicating the status of the request.
+      * @retval NULL if successful
+      * @retval !NULL if failed to write TOD configuration data
+      *
+      *      Error log handle points to a valid error log object whose primary
+      *      SRC reason code (pError->getSRC()->reasonCode()) indicates the type
+      *      of error.
+      *
+      * @note It is up to the caller to change the severity of the returned
+      *     error based on what it decides to do with it. By default any
+      *     returned error created by this function will be a non-reported
+      *     tracing event error log.
       */
-     errlHndl_t writeTodProcData(const proc_tod_setup_tod_sel i_config);
+     errlHndl_t writeTodProcData(const p9_tod_setup_tod_sel i_config);
 
+     //Temporary method for bringup
+     //Issue 132460 -- This method  is temporarily provided for bringup
 
-    /**
-     * @brief This method will be used to return Tod Data for all procs
-     *        by reading the TOD data from chip attribute
-     *
-     * @param[in]: o_todChipDataVector
-     *             is populated with TOD data
-     *
-     * @return if it cannot read from attribute TOD_ASSERT() will be invoked
-     */
-    errlHndl_t getTodProcDataFromAttribute(
-            std::vector<TodChipData>& o_todChipDataVector )const;
-
+     //errlHndl_t writeTodProcDataFromBuffer(std::vector<TodChipData>&
+     //                       i_todChipDataVector );
 
      /**
       *
       * @brief Getter method for iv_todChipDataVector
       *
-      * @return Constant reference to vector<hwsvTodChipData> that will carry
+      * @return Constant reference to vector<TodChipData> that will carry
       *      back iv_todChipDataVector
       *
       */
@@ -360,132 +376,563 @@ public:
          return iv_todChipDataVector;
      }
 
-protected:
-    /**
-     * @brief Constructor for the TodControls object.
-     */
-    TodControls();
+     /**
+      *
+      * @brief This method will determine if the input processor target is
+      *      available in the precessor blacklist or not.
+      *
+      * @param[in] i_procTarget
+      *      The input processor target.
+      *      The input target must not be NULL, and it must be of the processor
+      *      type only.
+      *
+      * @return bool
+      *      True if input processor target is blacklisted false otherwise
+      *
+      */
+     bool  isProcBlackListed (
+             TARGETING::ConstTargetHandle_t i_procTarget
+             )const;
+     /**
+      *
+      * @brief queryActiveConfig method will help to find the active TOD
+      *     topology when ChipTOD HW is running, it will also report ChipTOD HW
+      *     status (i.e. wheather it is currently running)and the MDMT belonging
+      *     to active configuration.
+      *     Calling code should ensure that it does not modifies active
+      *     configuration when TOD HW is running.
+      *
+      * @par Detailed Description:
+      *     This method ports logic from P7.
+      *     Bits 00:02 of the TOD status register ( 0x40008 ), indicates the
+      *     topology that is currently active in HW.
+      *
+      * @param[out] o_activeConfig, active configuration [primary | secondary]
+      *     In case the TOD HW is not running then primary will be returned.
+      *
+      * @param[out] o_isTodRunning, It will indicate if TOD HW logic is running
+      *     or not?
+      *
+      * @param[out] o_mdmtOnActiveTopology, target pointer of MDMT on active
+      *     topology. In case of error or TOD HW logic is not running then this
+      *     parameter will be NULL.
+      *
+      * @param[in] i_determineTodRunningState, This is a boolean variable that
+      *     will determine if this method determines the TOD running state or
+      *     not, this is done to reduce the number of SCOM operations in those
+      *     flows where knowledge of running state is not required. Defaults to
+      *     true i.e. determine the running state.
+      *
+      * @return Error log handle that will indicate if method was successfully
+      *      able to determine various parameters or not
+      *
+      * @retval  NULL , Indicates success
+      * @retval !NULL , Failed getting all the output parameters,in this case
+      *      values of o_configAction,o_isTodRunning should not be considered
+      *      for any further action.
+      *
+      *      This API may return one of the following "special" reason codes:
+      *      NA
+      *
+      * @note It is up to the caller to change the severity of the
+      *     returned error based on what it decides to do with it. By default
+      *     any returned error created by this function will be a non-reported
+      *     tracing event error log.
+      */
 
-    /**
-     * @brief Destructor for the TodControls object.
-     */
-    ~TodControls();
+     errlHndl_t queryActiveConfig( p9_tod_setup_tod_sel& o_activeConfig,
+             bool& o_isTodRunning,
+             TARGETING::Target*& o_mdmtOnActiveTopology,
+             bool i_determineTodRunningState=true) const;
+
+      /**
+       *
+       * @brief getConfiguredMdmt method will determine primary and secondary
+       *      MDMT, if they are configured, using TOD register data.
+       *
+       * @par Detailed Description:
+       *      TOD control register (0x40007) has bits that
+       *      will be set for the processor when it is designated as primary
+       *      MDMT or secondary MDMT. In case TOD HW indicates that MDMT is not
+       *      set, output variables will be NULL.
+       *
+       * @param[out] o_primaryMdmt, Parameter in which target pointer of primary
+       *      MDMT will be returned, it will be set to NULL if TOD HW does not
+       *      shows that primary MDMT is configured.
+       *
+       * @param[out] o_secondaryMdmt, Parameter in which target pointer of
+       *      secondary MDMT will be returned, it will be set to NULL if TOD HW
+       *      does not show that secondary MDMT is configured.
+       *
+       * @return Error log handle indicating the status of request.
+       * @retval  NULL , Indicates that method successfully executed its
+       *      algorithm for determining MDMTs, however the individual output
+       *      parameters must be checked to determine if the respective MDMT
+       *      were found or not.
+       * @retval !NULL , Indicates a problem condition where method was not able
+       *      to complete all the steps for determining MDMTs successfully. In
+       *      the error condition output parameters should be ignored.
+       *
+       *      This API may return one of the following "special" reason codes:
+       *      NA
+       * @note It is up to the caller to change the severity of the
+       *     returned error based on what it decides to do with it. By default
+       *     any returned error created by this function will be a non-reported
+       *     tracing event error log.
+       */
+      errlHndl_t getConfiguredMdmt(TARGETING::Target*& o_primaryMdmt,
+              TARGETING::Target*& o_secondaryMdmt)const;
+
+      /**
+       * @brief For the input config fills up iv_todConfig with MDMT and OSC
+       *     info. Input proc is set as the master and the input drawer as the
+       *     master drawer. Will also ask the proc to pick an OSC from which it
+       *     can receive signals. Caller can provide an i_avoidOscHUID, this
+       *     will help choose a redundant OSC for the redundant topology.
+       *
+       * @param[in] i_config
+       *    Indicates the primary/secondary topology
+       *
+       * @param[in] i_proc
+       *     TodProc pointer, must not be NULL.
+       *
+       * @param[in] i_drawer
+       *     TodDrawer pointer, must not be NULL.
+       *
+       * @return Error log handle indicating the status of the request.
+       * @retval NULL if the MDMT was set
+       * @retval !NULL if MDMT couldn't be set
+       *
+       *     This API may return one of the following "special" reason codes:
+       *     NA
+       *
+       * @note It is up to the caller to change the severity of the
+       *     returned error based on what it decides to do with it. By default
+       *     any returned error created by this function will be a non-reported
+       *     tracing event error log.
+       */
+      errlHndl_t setMdmt(const p9_tod_setup_tod_sel i_config,
+              TodProc* i_proc,
+              TodDrawer* i_drawer);
+
+      /**
+       * @brief This method is has similar functionality as setMdmt except that
+       *     it will presume that OSC has already been configured for the
+       *     processor chip that is going to be designated as MDMT.
+       *
+       * @par Detailed Description:
+       *     The use case for this method is when we need to use the already
+       *     configured values of MDMT and the OSC source for it. This may
+       *     happen when TOD service gets a request for re-configuring the
+       *     backup topology after RR because of which the in memory copy of
+       *     active topology no longer exists.
+       *
+       * @param[in] i_config
+       *    Indicates the primary/secondary topology
+       *
+       * @param[in] i_proc
+       *     TodProc pointer, must not be NULL.
+       *
+       * @param[in] i_drawer
+       *     TodDrawer pointer
+       *
+       * @return NA
+       *
+       */
+      void setMdmtOfActiveConfig( const p9_tod_setup_tod_sel i_config,
+              TodProc* i_proc,
+              TodDrawer* i_drawer);
+
+      /**
+       * @brief This method will collect gard records from system model and keep
+       *       the HUIDs of garded targets on the system in local cache.
+       *       It is done with the aim of avoiding repeated requests to the
+       *       system model DB for checking the garded state of processors and
+       *       OSCs, which can be time taking.
+       *
+       * @return Error log handle indicating the status of the request.
+       * @retval NULL if gard records could be retrieved successfully from
+       *       system model.
+       * @retval !NULL if this method failed to build the local data structure
+       *       of the garded targets on the system.
+       *
+       */
+      errlHndl_t    buildGardedTargetsList();
+
+      /**
+       * @brief Given a target this method will tell whether it is garded or
+       *       not. This  method will look into local cache it that was already
+       *       initialized else it will go and look into the system model.
+       *
+       * @param[in] i_target  Input target whose gard status needs to be
+       *        determined.
+       * @param[out] o_isTargetGarded Boolean parameter to return the gard
+       *        status of the input target to the caller.
+       *
+       * @return Error log handle indicating the status of the request.
+       * @retval NULL if gard gard status of the input target could be
+       *        successfully determined.
+       * @retval !NULL if this method failed to build the local data structure
+       *       of the garded targets on the system.
+       *
+       */
+      errlHndl_t    checkGardStatusOfTarget(
+              TARGETING::ConstTargetHandle_t i_target,
+              bool&  o_isTargetGarded);
+
+      /**
+       *
+       * @brief Interface to clear the local list of garded targets on the
+       * system.
+       *
+       * @return NA
+       */
+      void  clearGardedTargetsList()
+      {
+          TOD_INF("Clearing the list of garded targets");
+          iv_gardedTargets.clear();
+          iv_gardListInitialized = false;
+      }
+
+protected:
+      /**
+       * @brief Constructor for the TodControls object.
+       */
+       TodControls();
+
+      /**
+       * @brief Destructor for the TodControls object.
+       */
+       ~TodControls();
+
 
 private:
 
-    /**
-     *
-     * @brief queryActiveConfig method will help to find the active TOD topology
-     *     when ChipTOD HW is running,It will also report ChipTOD HW status.
-     *     i.e. wheather it is currently running. In case ChipTOD HW is running
-     *     active configuration should never be modified.
-     *
-     * @par Detailed Description:
-     *     This method ports logic from P7.
-     *     Bits 00:02 of the TOD status register ( 0x40008 ), indicates the
-     *     topology that is currently active in HW.
-     *
-     * @param[out] o_activeConfig, active configuration [primary | secondary]
-     *     In case the TOD HW is not running then primary will be returned.
-     *
-     * @param[out] o_isTodRunning, It will indicate if HW is running or not
-     *
-     * @return Error log handle that will indicate if method was successfully
-     *      able to determine various parameters or not
-     * @retval  NULL , Indicates success
-     * @retval !NULL , Failed getting all the output parameters,in this case
-     *      values of o_configAction,o_isTodRunning should not be considered for
-     *      any further action.
-     *
-     *      This API may return one of the following "special" reason codes:
-     *      NA
-     *
-     * @note It is up to the caller to change the severity of the
-     *     returned error based on what it decides to do with it. By default
-     *     any returned error created by this function will be a non-reported
-     *     tracing event error log.
-     */
+      /**
+       *
+       * @brief Add new target to the processor blacklist
+       *
+       * @param[in] i_ProcTarget
+       *       Processor target that needs to be added to blacklist of
+       *       processors.
+       *       Caller must ensure that the input target is neither
+       *       NULL nor of non-processor type.
+       *
+       * @return NA
+       *
+       */
+      void  addProcToBlackList(TARGETING::ConstTargetHandle_t i_procTarget)
+      {
+          if ( !i_procTarget )
+          {
+              TOD_ERR_ASSERT("Input target cannot be NULL for "
+                      "addProcToBlackList");
+          }
 
-     errlHndl_t queryActiveConfig( proc_tod_setup_tod_sel& o_activeConfig,
-                                   bool& o_isTodRunning) const;
+          if (
+                  ( GETCLASS(i_procTarget) != TARGETING::CLASS_CHIP )
+                  ||
+                  ( GETTYPE(i_procTarget) != TARGETING::TYPE_PROC))
+          {
+              TOD_ERR_ASSERT(" Only processor target allowed as input for "
+                      " addProcToBlackList");
+          }
 
-    /**
-     *
-     * @brief getConfiguredMdmt method will determine primary and secondary MDMT
-     *      ,if they are configured, using TOD register data.
-     *
-     * @par Detailed Description:
-     *      TOD control register (0x40007) has bits that
-     *      will be set for the processor when it is designated as primary MDMT
-     *      or secondary MDMT. In case TOD HW indicates that MDMT is not set,
-     *      output variables will be NULL.
-     *
-     * @param[out] o_primaryMdmt, Parameter in which target pointer of primary
-     *      MDMT will be returned, it will be set to NULL if TOD HW does not
-     *      shows that primary MDMT is configured.
-     *
-     * @param[out] o_secondaryMdmt, Parameter in which target pointer of
-     *      secondary MDMT will be returned, it will be set to NULL if TOD HW
-     *      does not show that secondary MDMT is configured.
-     *
-     * @return Error log handle indicating the status of request.
-     * @retval  NULL , Indicates that method successfully executed its
-     *      algorithm for determining MDMTs, however the individual output
-     *      parameters must be checked to determine if the respective MDMT were
-     *      found or not.
-     * @retval !NULL , Indicates a problem condition where method was not able
-     *      to complete all the steps for determining MDMTs successfully. In the
-     *      error condition output parameters should be ignored.
-     *
-     *      This API may return one of the following "special" reason codes:
-     *      NA
-     * @note It is up to the caller to change the severity of the
-     *     returned error based on what it decides to do with it. By default
-     *     any returned error created by this function will be a non-reported
-     *     tracing event error log.
-     */
-     errlHndl_t getConfiguredMdmt(TARGETING::Target*& o_primaryMdmt,
-                         TARGETING::Target*& o_secondaryMdmt)const;
+          iv_BlackListedProcs.push_back(i_procTarget);
+      }
 
-     /**
-      * @brief This method will be used to determine if the data read from
-      *     TodSystemData file indicates at least one functional processor
-      *
-      * @retval boolean value indicating presence or absence of valid data
-      * @retval false , There is useful data
-      * @retval true, No useful data found
-      */
-     bool  hasNoValidData(const std::vector<TodChipData>&
-             i_todChipDataVector)const;
+      /**
+       * @brief This method will be used to determine if the data read from
+       *     TodSystemData file indicates at least one functional processor
+       *
+       * @retval boolean value indicating presence or absence of valid data
+       * @retval false , There is useful data
+       * @retval true, No useful data found
+       */
+      bool  hasNoValidData(const std::vector<TodChipData>&
+              i_todChipDataVector)const;
 
-    //Datastructure for a TOD topology :
-    //A list of TOD drawers (which will contain a list of HWSVTodProc's)
-    //The MDMT for this topology
-    struct TodConfig{
-        TodDrawerContainer iv_todDrawerList;
-        TodProc* iv_mdmt;
-        bool iv_isConfigured;
-        TodConfig() :
-            iv_mdmt(NULL),
-            iv_isConfigured(false)
-        {
-        }
-    };
+public:
+      /**
+       * @brief Given the MDMT for TOD config alternate to i_config,
+       *     picks the MDMT for i_config based on the following criteria
+       *
+       * @par Detailed Description:
+       *      Whenever there is an existing MDMT for the opposite configuration
+       *      following criteria will decide the MDMT for this configuration
+       *
+       *      First of all we'll look only at TOD drawers having at least one
+       *      proc with OSC input. Of all such procs across TOD drawers, we'll
+       *      pick the one with max no of cores
+       *
+       *      We'll run the below algorithm twice, first time we'll try to pick
+       *      an MDMT with redundant OSC.
+       *      If we don't find one, we'll run it again witout the redundant OSC
+       *      constraint.
+       *      That way we'll maximise reliability : best case we'll find the
+       *      MDMT connected to a redundant OSC on some other node.
+       *
+       *      1.MDMT will be chosen from a node other that the node on which
+       *      this MDMT exists, in case of multinode systems.
+       *      2.In single node system MDMT will be chosen from a different
+       *      fabric node (tod drawer).
+       *      3.Last a processor different from MDMT on the same fabric node
+       *      will be chosen, if other options are not feasible
+       *
+       * @param[in] i_otherConfigMdmt
+       *     TodProc pointer to the MDMT of the config alternate to i_config
+       *
+       * @param[in] i_config
+       *    Indicates the primary/secondary topology, alternate to the one in
+       *    which i_otherConfigMdmt is the MDMT
+       *
+       * @param[in] i_setMdmt
+       *     Represents an special case where the method will find the MDMT but
+       *     not set it, this case will be used when some part of code just
+       *     wants to validate if MDMT can be found under given constraints or
+       *     not.
+       *
+       * @return TodProc pointer to new MDMT, NULL if couldn't be chosen
+       */
 
-    //Disabled copy constructor and assignment operator
-    TodControls(const TodControls& rhs);
-    TodControls& operator=(const TodControls& rhs);
+      TodProc* pickMdmt(const TodProc* i_otherConfigMdmt,
+              const p9_tod_setup_tod_sel& i_config,
+              const bool i_setMdmt = true);
 
-    //Array of TOD configs
-    //The fact that TOD_PRIMARY and TOD_SECONDARY are defined as 0 and 1
-    //make then as appropriate indices to the array
-    //iv_todConfig[0] -> primary
-    //iv_todConfig[1] -> secondary
-    TodConfig iv_todConfig[TOD_NUM_CONFIGS];
+private:
 
-    //hwsvTodChipData for the whole system (in ordinal order)
-    TodChipDataContainer iv_todChipDataVector;
+      //Datastructure for a TOD topology :
+      //A list of TOD drawers (which will contain a list of TodProc's)
+      //The MDMT for this topology
+      struct TodConfig{
+          TodDrawerContainer iv_todDrawerList;
+          TodProc* iv_mdmt;
+          bool iv_isConfigured;
+          TodConfig() :
+              iv_mdmt(NULL),
+              iv_isConfigured(false)
+          {
+          }
+      };
+
+      //Disabled copy constructor and assignment operator
+      TodControls(const TodControls& rhs);
+      TodControls& operator=(const TodControls& rhs);
+
+      //Array of TOD configs
+      //The fact that TOD_PRIMARY and TOD_SECONDARY are defined as 0 and 1
+      //make then as appropriate indices to the array
+      //iv_todConfig[0] -> primary
+      //iv_todConfig[1] -> secondary
+      TodConfig iv_todConfig[TOD_NUM_CONFIGS];
+
+      //TodChipData for the whole system (in ordinal order)
+      TodChipDataContainer iv_todChipDataVector;
+
+      //Black listed processors that should not be considered as MDMT
+      BlacListedProcContainer iv_BlackListedProcs;
+
+
+      //List of garded targets on the system
+      GardedTargetsContainer iv_gardedTargets;
+
+      //Boolean value to indicate whether container iv_gardedTargets  is
+      //initialized or not
+      bool  iv_gardListInitialized;
+
+      /* @brief enum for disable or Enable of Nag */
+      enum NagUpdateAction{
+          ENABLE_NAG = 0x0,
+          DISABLE_NAG = 0x1,
+          NAG_INVALID = 0x2,
+      };
+
+
+      //NOTE:Extended mod ids have PLACEHOLDER MODID which needs to be used
+      //first when one is required.
+      enum ExtendedModId
+      {
+          EMOD_TOD_BUILD_BLACKLIST = 0x132,
+          EMOD_TOD_INIT = 0x10E,
+          EMOD_TOD_INIT_HWP = 0x10F,
+      };
+
+      /**
+       * @brief struct for returning gard records
+       *
+       */
+      struct GardedUnit_t{
+          TARGETING::ATTR_HUID_type       iv_huid;  //HUID of garded unit
+          TARGETING::ATTR_HUID_type       iv_nodeHuid; //Node containing the unit
+          uint32_t                        iv_errlogId; //Garded Error log
+          HWAS::GARD_ErrorType            iv_errType; //Type of gard error
+          TARGETING::CDM_DOMAIN           iv_domain; //CDM Domain of the unit
+          TARGETING::ATTR_TYPE_type       iv_type; //Type of the unit
+          TARGETING::ATTR_CLASS_type      iv_class; //Class of the unit
+          uint32_t                        iv_rid; //RID of the unit
+          NagUpdateAction             iv_nagDisabled; // Default to NAG enable
+          GardedUnit_t() : iv_huid(TOD_HUID_INVALID),
+                           iv_nodeHuid(TOD_HUID_INVALID),
+                           iv_errlogId(0),
+                           iv_errType(HWAS::GARD_NULL),
+                           iv_domain(TARGETING::CDM_DOMAIN_NONE),
+                           iv_type(TARGETING::TYPE_NA),
+                           iv_class(TARGETING::CLASS_NA),
+                           iv_rid(FSP_INVALID_RID),
+                           iv_nagDisabled(ENABLE_NAG)
+          {
+          }
+
+      };
+      typedef std::list<GardedUnit_t> GardedUnitList_t;
+
+      /**
+       * @brief - This function returns all  gard records in a system
+       * or node based on input huid
+       *
+       * @param[in] i_pTarget Target pointer to node or system, cannot be NULL
+       * @param[out] o_gardedUnitList List of garded records
+       *
+       * @return Error log handle indicating the status of the request
+       * @retval NULL on success
+       * @retval !NULL  Error log handle, on failure
+       *
+       * @note It is up to the caller to change the severity of the returned
+       *       error based on what it decides to do with it. By default any
+       *       returned error created by this function will be a non-reported
+       *       tracing event error log.
+       */
+      errlHndl_t gardGetGardedUnits(
+              const TARGETING::Target* const i_pTarget,
+              GardedUnitList_t &o_gardedUnitList);
+
+      /**
+       * @brief Return the physical path as string
+       *
+       * @param[in] i_path
+       * The physical path of a target
+       *
+       *
+       * @return string contains the string format of the path
+       */
+
+      const char * getPhysicalPathString(
+              const TARGETING::ATTR_PHYS_PATH_type &i_path);
+
+      /**
+       * @brief Get Target based on the PHYSICAL Path
+       *
+       * @param[in] i_path
+       * Supplied PHYSICAL PATH
+       *
+       * @param[out] o_Target
+       * Pointer to Target
+       *
+       * @return errlHndl_t
+       * Returns error handle if supplied physical path
+       * is not valid
+       * else NULL
+       */
+
+      errlHndl_t getTargetFromPhysicalPath(
+          const TARGETING::ATTR_PHYS_PATH_type &i_path,
+                TARGETING::Target*&  o_pTarget);
+
+      /**
+       * @brief Get parent of input CLASS for a Target
+       *
+       * @par Description:
+       * Given a target, gets first target higher in the containment hierarchy
+       * whose class matches the specified class.
+       *
+       * @param[in] i_pTarget
+       * Input target pointer. Must not be NULL (otherwise call will return an
+       * error log).  Must be a valid target from the system blueprint.
+       *
+       * @param[in] i_class
+       * Class which constrains the search result.  CLASS_NA is not enforced,
+       * but it will never find a matching parent.  Also note that if search
+       * is for a chip parent of a chip, or other illogical searches, it will
+       * not find a matching parent.  See attributeenums.H for class values.
+       *
+       * @param[out] o_parent_target
+       * Parent Target; ignore on error.  Note: points to a blueprint target
+       * which may or may not actually be present (source target must be
+       * present to have assurances about presence of parent)
+       *
+       * @return errlHndl_t Error log handle indicating the status of the
+       *  operation
+       * @retval NULL Success, returned target is valid
+       * @retval !NULL Failure; returned target is invalid.  Primary SRC
+       *  reason codes
+       * may be set to the following (others may be possible):
+       * TOD_UTIL_REASON_NULL_TG: Supplied target is NULL
+       * TOD_UTIL_REASON_PARENT_NOT_FOUND: Parent target of specified class
+       * was not found
+       */
+
+       errlHndl_t getParent(const TARGETING::Target *i_pTarget,
+                     const TARGETING::CLASS i_class,
+                     TARGETING::Target *& o_parent_target);
+
+
 };
 
+// Wrapper function for TodControls::getDrawers instance
+void getDrawers(const p9_tod_setup_tod_sel i_config,
+             TodDrawerContainer& o_drawerList);
+
+// Wrapper function for TodControls::isProcBlackListed instance
+bool isProcBlackListed(TARGETING::ConstTargetHandle_t i_procTarget);
+
+// Wrapper function for TodControls::getMDMT instance
+TodProc* getMDMT(const p9_tod_setup_tod_sel i_config);
+
+// Wrapper function for TodControls::pickMdmt instance
+errlHndl_t pickMdmt(const p9_tod_setup_tod_sel i_config);
+
+// Wrapper function for TodControls::isTodRunning instance
+errlHndl_t isTodRunning(bool& o_isTodRunning);
+
+// Wrapper function for TodControls::checkGardStatusOfTarget instance
+errlHndl_t checkGardStatusOfTarget(
+              TARGETING::ConstTargetHandle_t i_target,
+              bool&  o_isTargetGarded);
+
+// Wrapper function for TodControls::destroy instance
+void destroy(const p9_tod_setup_tod_sel i_config);
+
+// Wrapper function for TodControls::buildTodDrawers instance
+errlHndl_t buildTodDrawers(const p9_tod_setup_tod_sel i_config);
+
+// Wrapper function for TodControls::buildGardedTargetsList instance
+errlHndl_t buildGardedTargetsList();
+
+// Wrapper function for TodControls::setConfigStatus instance
+void setConfigStatus(const p9_tod_setup_tod_sel i_config,
+              const bool i_isConfigured );
+
+// Wrapper function for TodControls::getConfiguredMdmt instance
+errlHndl_t getConfiguredMdmt(TARGETING::Target*& o_primaryMdmt,
+              TARGETING::Target*& o_secondaryMdmt);
+
+// Wrapper function for TodControls::writeTodProcData instance
+errlHndl_t writeTodProcData(const p9_tod_setup_tod_sel i_config);
+
+// Wrapper function for TodControls::clearGardedTargetsList instance
+void  clearGardedTargetsList();
+
+// Wrapper function for TodControls::queryActiveConfig instance
+errlHndl_t queryActiveConfig(p9_tod_setup_tod_sel& o_activeConfig,
+             bool& o_isTodRunning,
+             TARGETING::Target*& o_mdmtOnActiveTopology,
+             bool i_determineTodRunningState);
+
+// Wrapper function for TodControls::setMdmtOfActiveConfig instance
+void setMdmtOfActiveConfig(const p9_tod_setup_tod_sel i_config,
+             TodProc* i_proc,
+             TodDrawer* i_drawer);
+
 } //end of namespace
+
 #endif //TODCONTROLS_H
