@@ -116,6 +116,15 @@
 #define REGION_NOMINAL_TURBO        0
 #define REGION_TURBO_ULTRA          2
 
+// Different points considered for calculating slopes
+#define NUM_VPD_PTS_SET             4
+#define VPD_PT_SET_RAW              0
+#define VPD_PT_SET_SYSP             1
+#define VPD_PT_SET_BIASED           2
+#define VPD_PT_SET_BIASED_SYSP      3
+
+#define EVID_SLOPE_FP_SHIFT         13
+
 
 /// IDDQ readings,
 #define IDDQ_MEASUREMENTS 6
