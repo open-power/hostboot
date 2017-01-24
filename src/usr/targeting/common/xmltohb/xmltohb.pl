@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -4347,8 +4347,10 @@ sub enumNameToValue {
     {
         my $enumerationName = $enumeration->{id};
 
-        fatal("Could not convert enumerator name \"$enumeratorName\"into "
-            . "enumerator value in \"$enumerationName\".");
+        print STDOUT $enumeration;
+
+        fatal("dc99> Could not convert enumerator name \"$enumeratorName\"into "
+            . "enumerator value in \"$enumerationName\". enum="); #dc99
     }
 
     if($enumeratorValue < 0)
@@ -4703,7 +4705,12 @@ sub packSingleSimpleTypeAttribute {
     {
         my $enumeration = getEnumerationType($$attributesRef,$simpleType->
             {enumeration}->{id});
-
+        #print STDOUT "id=$simpleType->{enumeration}->{id}\n";
+        #print STDOUT "value=$value\n";
+        #my %dummy1 = %{$enumeration};
+        #foreach (sort keys %dummy1) {
+        #    print STDOUT "---$_ : $dummy1{$_}\n";
+        #}
         # Here $value is the enumerator name
         my $enumeratorValue = enumNameToValue($enumeration,$value);
         $$binaryDataRef .= packEnumeration($enumeration,$enumeratorValue);
