@@ -25,36 +25,32 @@
 ROOTPATH = ../../../..
 
 MODULE = istep18
-PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 
-NEST_HWP_PATH += ${PROCEDURES_PATH}/hwp/nest
-
-
-VPATH += ${NEST_HWP_PATH}
-
-#Add all the objs for istep 18
-OBJS += tod_init.o
-
-#Add all the extra include paths
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
-EXTRAINCDIR += ${NEST_HWP_PATH}
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps
-
+PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
 ##      support for Targeting and fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/tod_init
 EXTRAINCDIR += ${PROCEDURES_PATH}
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 
+## pointer to common HWP files
 
-#Required include before all the procedure.mk are included
+OBJS += call_tod_init.o
+OBJS += call_tod_setup.o
+OBJS += TodControls.o
+OBJS += TodDrawer.o
+OBJS += TodProc.o
+OBJS += TodSvc.o
+OBJS += TodUtils.o
+OBJS += TodSvcUtil.o
+OBJS += TodHwpIntf.o
+OBJS += TodTopologyManager.o
+
 include ${ROOTPATH}/procedure.rules.mk
-
-#Include all the procedure makefiles
-include $(NEST_HWP_PATH)/p9_tod_utils.mk
-include $(NEST_HWP_PATH)/p9_tod_setup.mk
-include $(NEST_HWP_PATH)/p9_tod_init.mk
-
+include ${PROCEDURES_PATH}/p9_tod_init.mk
+include ${PROCEDURES_PATH}/p9_tod_setup.mk
+include ${PROCEDURES_PATH}/p9_tod_utils.mk
+include ${PROCEDURES_PATH}/p9_tod_save_config.mk
 include ${ROOTPATH}/config.mk
+
+VPATH += ${PROCEDURES_PATH}

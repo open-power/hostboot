@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep18/tod_init.H $                           */
+/* $Source: src/usr/isteps/istep18/call_tod_setup.C $                     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,15 +22,52 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef TOD_INIT_H
-#define TOD_INIT_H
+
+/**
+ *  @file call_tod_setup.C
+ *
+ *  HWP_IGNORE_VERSION_CHECK
+ *
+ */
+
+/******************************************************************************/
+// Includes
+/******************************************************************************/
+
+#include <trace/interface.H>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+#include <targeting/common/targetservice.H>
+#include <initservice/initserviceif.H>
+#include <isteps/hwpisteperror.H>
+
+#include "TodTrace.H"
+#include "TodSvc.H"
+
+using namespace ISTEP_ERROR;
 
 namespace   ISTEP_18
 {
 
-    void build_proc_topology(tod_topology_node &i_tod_node);
-    void delete_proc_topology(tod_topology_node &i_tod_node);
+void * call_tod_setup(void *dummy)
+{
+    IStepError l_stepError;
+    errlHndl_t l_errl = NULL;
 
-};
+    TOD_ENTER("call_tod_setup");
 
-#endif
+    if (!INITSERVICE::spBaseServicesEnabled())
+    {
+        l_errl = TOD::todSetup();
+
+        if (l_errl)
+        {
+            l_stepError.addErrorDetails( l_errl );
+            TOD_ERR("todSetup() return errl handle %p", l_errl);
+            errlCommit( l_errl, TOD_COMP_ID );
+        }
+    }
+    return l_stepError.getErrorHandle();
+}
+
+}   // end namespace

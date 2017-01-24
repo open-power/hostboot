@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,18 @@ namespace TOD
         TOD_WIRE_PROCS                        = 0x10,
         TOD_WIRE_DRAWERS                      = 0x11,
         TOD_INIT_HWP                          = 0x12,
+        TOD_INIT_ALREADY_RUNNING              = 0x13,
+        TOD_RESET_BACKUP                      = 0x14,
+        TOD_MDMT_TOPOLOGY                     = 0x15,
+        TOD_BUILD_BLACKLIST                   = 0x16,
+        TOD_ENDPOINT_CALLOUT                  = 0x17,
+        TOD_STEP_CHECK_RESET_HWP              = 0x18,
+        TOD_FUNCTIONAL_TARGET                 = 0x19,
+        TOD_UTIL_HNDL_ECMD_BUF_RC             = 0x1A,
+        TOD_CONTROLS_GET_TARGET               = 0x1B,
+        TOD_UTIL_MOD_GET_PARENT               = 0x1C,
+        TOD_MOD_LOG_UNSUPPORTED_BUSTYPE       = 0x1D,
+        TOD_IS_MPIPL                          = 0x1E,
     };
 
     enum TODReasonCode
@@ -70,6 +82,23 @@ namespace TOD
         TOD_CREATION_ERR                      = TOD_COMP_ID | 0x0D,
         TOD_CREATION_ERR_NO_DRAWER            = TOD_COMP_ID | 0x0E,
         TOD_CANNOT_WIRE_DRAWER                = TOD_COMP_ID | 0x0F,
+        TOD_INVALID_PARAM                     = TOD_COMP_ID | 0x11,
+        TOD_MASTER_TARGET_NOT_FOUND           = TOD_COMP_ID | 0x12,
+        TOD_NO_VALID_MDMT_FOUND               = TOD_COMP_ID | 0x13,
+        TOD_NO_MDMT_ON_ACTIVE_CONFIG          = TOD_COMP_ID | 0x14,
+        TOD_MASTER_PATH_ERROR                 = TOD_COMP_ID | 0x15,
+        TOD_HWP_EXECUTION_FAILED              = TOD_COMP_ID | 0x16,
+        TOD_PARENT_NOT_FOUND                  = TOD_COMP_ID | 0x17,
+        TOD_DRAWER_SET_MDMT                   = TOD_COMP_ID | 0x18,
+        TOD_TOP_LEVEL_TARGET_NOT_FOUND        = TOD_COMP_ID | 0x19,
+    };
+
+    enum TODUserDetailDataSubSection
+    {
+        EMOD_TOD_SET_ACTIVE_MDMT              = 0x01,
+        EMOD_TOD_INIT_HWP                     = 0x02,
+        EMOD_TOD_INIT                         = 0x03,
+        EMOD_CALLOUT_TOD_ENDPOINT             = 0x04,
     };
 
 };

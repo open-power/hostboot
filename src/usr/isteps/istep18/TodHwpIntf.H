@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,7 +24,6 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef TODHWPINTF_H
 #define TODHWPINTF_H
-
 /**
  *  @file TodHwpIntf.H
  *
@@ -34,11 +33,18 @@
  *
  */
 
-#include <errl/errlentry.H>
-#include "proc_tod_utils.H"
 
+//------------------------------------------------------------------------------
+//Includes
+//------------------------------------------------------------------------------
+#include "TodProc.H"
+#include <p9_tod_utils.H>
+#include <errl/errlentry.H>
 namespace TOD
 {
+
+class TodProc;
+class TodControls;
 
 /**
  *  @brief Invokes the TOD setup hardware procedure
@@ -64,7 +70,7 @@ namespace TOD
  *      any returned error created by this function will be a non-reported
  *      tracing event error log.
  */
-errlHndl_t todSetupHwp(const proc_tod_setup_tod_sel i_topologyType);
+errlHndl_t todSetupHwp(const p9_tod_setup_tod_sel i_topologyType);
 
 /**
  *  @brief Invokes the TOD registry read HWP.
@@ -74,7 +80,7 @@ errlHndl_t todSetupHwp(const proc_tod_setup_tod_sel i_topologyType);
  *      topology and fills up, for each TOD proc datastructure, an output
  *      field which corresponds to the TOD registers for that proc. The HWP
  *      gets the register content by scomming the register.
- *      Check proc_tod_utils.H : proc_tod_setup_conf_regs for the list of regs.
+ *      Check p9_tod_utils.H : proc_tod_setup_conf_regs for the list of regs.
  *
  *  @param[in] i_topologyType
  *      Topology type : primary/secondary
@@ -92,13 +98,15 @@ errlHndl_t todSetupHwp(const proc_tod_setup_tod_sel i_topologyType);
  *      any returned error created by this function will be a non-reported
  *      tracing event error log.
  */
-errlHndl_t todSaveRegsHwp(const proc_tod_setup_tod_sel i_topologyType);
+errlHndl_t todSaveRegsHwp(const p9_tod_setup_tod_sel i_topologyType);
 
 /**
- *  @brief Invokes the TOD init HWP.
+ *  @brief Invokes the TOD Initialization hardware procedure
  *
- *  @param[in] i_topologyType
- *      Topology type : primary/secondary
+ *  @note Detailed Description:
+ *       This interface invokes the procedure which initializes the
+ *       time of day logic on the functional P8 processors to running
+ *       state.
  *
  *  @return Error log handle indicating the status of the request
  *  @retval NULL  HWP executed succesfully
@@ -113,8 +121,7 @@ errlHndl_t todSaveRegsHwp(const proc_tod_setup_tod_sel i_topologyType);
  *      any returned error created by this function will be a non-reported
  *      tracing event error log.
  */
-errlHndl_t todInitHwp(const proc_tod_setup_tod_sel i_topologyType);
+errlHndl_t todInitHwp();
 
-} //namespace TOD
-
+}
 #endif //TODHWPINTF_H

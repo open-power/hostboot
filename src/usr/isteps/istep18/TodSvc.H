@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,7 +24,6 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef TODSVC_H
 #define TODSVC_H
-
 /**
  *  @file TodSvc.H
  *
@@ -35,10 +34,24 @@
  *
  */
 
+
+//------------------------------------------------------------------------------
+//Includes
+//------------------------------------------------------------------------------
+
 #include <util/singleton.H>
+#include <targeting/common/targetservice.H>
+
+#include <p9_tod_utils.H>
+#include <sys/time.h>
 
 namespace TOD
 {
+
+class TodControls;
+//Use "theTodSvc_t::Instance()" to access the singleton via reference
+class TodSvc;
+typedef Singleton<TodSvc> theTodSvc_t;
 
 /**
  * @class TodSvc
@@ -58,7 +71,7 @@ public:
 
     /**
      * @brief This interface should be called during IPL to setup the
-     *     time of day logic on the P8 processors sitting on the system.
+     *     time of day logic on the P9 processors sitting on the system.
      *
      * @par Detailed Description:
      *     All processors of a symmetric multiprocessor model must appear to
@@ -72,7 +85,7 @@ public:
      *     Since the procs are connected by fabric buses, a signal sent out by
      *     the oscillator will reach the procs at different times. Besides,
      *     there are multiple bus paths to propagate TOD signals. To solve these
-     *     issues, we (FSP HWSV) need to create a TOD topology. A TOD topology
+     *     issues, we (FSP) need to create a TOD topology. A TOD topology
      *     has a single Master Drawer Master TOD processor chip (MDMT), which
      *     receives input directly from the oscillator. The MDMT will propagate
      *     signals to other procs, MDSTs (Master Drawer Slave TOD Chips),
@@ -125,35 +138,6 @@ public:
      *
      * @return Error log handle indicating the status of the request.
      * @retval NULL if successful
-     * @retval !NULL if failed to setup TOD
-     *
-     *     Error log handle points to a valid error log object whose primary
-     *     SRC reason code (pError->getSRC()->reasonCode()) indicates the type
-     *     of error.
-     *
-     * @note It is up to the caller to change the severity of the
-     *     returned error based on what it decides to do with it. By default
-     *     any returned error created by this function will be a non-reported
-     *     tracing event error log.
-     */
-    errlHndl_t todInit();
-
-    /**
-     * @brief Reads the Time Of Day (TOD) value from the TOD register on
-     *     the processor chip and returns the same.
-     *
-     * @par Detailed Description:
-     *     This interface will read the TOD value from the TOD value register.
-     *     We could read this from any of the processor that's part of the
-     *     TOD topology, since the TOD value should be in sync across procs,
-     *     so we'll read this from the MDMT's register.
-     *
-     * @param[out] o_todValue
-     *     64-bit contents of the TOD value register will be copied here
-     *     in a big-endian format. Will be 0 on error.
-     *
-     * @return Error log handle indicating the status of the request.
-     * @retval NULL if successful
      * @retval !NULL if failed to read TOD value
      *
      *     Error log handle points to a valid error log object whose primary
@@ -165,7 +149,38 @@ public:
      *     any returned error created by this function will be a non-reported
      *     tracing event error log.
      */
+
     errlHndl_t readTod(uint64_t& o_todValue) const;
+
+     /**
+     * @brief This interface should be called during IPL to initialize the
+     *     time of day logic on the P9 processors to running state.
+     *
+     * @par Detailed Description:
+     *  Once the TOD topology is setup on the system , the todinit is called
+     *  to initialize the time of day logic on the P9 processors to running
+     *  state. FSPFW needs to do this initialization explicitly for the
+     *  Manufacturing AVP tests to pass. Once the FSP reaches runtime PHYP
+     *  re-initializes it to the running state.
+     *
+     * @return Error log handle indicating the status of the request.
+     * @retval NULL if successful
+     * @retval !NULL if failed to setup TOD
+     *
+     *     Error log handle points to a valid error log object whose primary
+     *     SRC reason code (pError->getSRC()->reasonCode()) indicates the type
+     *     of error.
+     *
+     * @note It is up to the caller to change the severity of the
+     *     returned error based on what it decides to do with it. By default
+     *     any returned error created by this function will be a non-reported
+     *     tracing event error log.
+     *
+     * @note This initialization should be called only by the istep after the
+     * tod is setup.
+     *
+     */
+    errlHndl_t todInit();
 
 protected:
     /**
@@ -183,13 +198,63 @@ protected:
     ~TodSvc();
 
 private:
+
+    /**
+     * @brief This is a helper method to resetBackup and will be called to find
+     *      out from HW the MDMT on active topology, and set it in TOD controls.
+     *
+     * @par Detailed Description:
+     *      During resetBackup it may happen that FSP has done a RR before
+     *      resetBackup was called in such circumstance the in memory copy of
+     *      topology would have been lost. In order to re-configure the backup
+     *      with adequate redundancy we want to have MDMT of active topology
+     *      configured in TOD controls.
+     *
+     * @param[in] i_activeConfig
+     *      Indicates the TOD configuration ( primary/secondary ) for which the
+     *      MDMT is to be set
+     *
+     * @return Error log handle indicating the status of the request
+     * @retval NULL Indicates success
+     *       !NULL means failed to set the  MDMT for the active topology
+     *
+     */
+    errlHndl_t setActiveMdmtForResetBackup(
+        const p9_tod_setup_tod_sel i_activeConfig);
+
     //Disabled copy constructor and assignment operator
     TodSvc(const TodSvc& rhs);
     TodSvc& operator=(const TodSvc& rhs);
 
-    //Indicates if we've already setup TOD
-    bool iv_todSetup;
+    /**
+     *  @brief This method checks if in MPIPL path using attribue ATTR_IS_MPIPL
+     *
+     *  @param[out] o_mpIPL
+     *      Boolean which indicates if in MPIPL path
+     *      TRUE if MPIPL. FALSE if not.
+     *
+     *  @return Error log handle indicating the status of the request
+     *  @retval NULL  Successfully checked if system in MPIPL path or not
+     *  @retval !NULL Error checking if system in MPIPL path or not
+     *      Error log handle points to a valid error log object whose primary
+     *      SRC reason code (pError->getSRC()->reasonCode()) indicates the type
+     *      of error
+     *
+     *  @note It is up to the caller to change the severity of the
+     *      returned error based on what it decides to do with it. By default
+     *      any returned error created by this function will be a non-reported
+     *      tracing event error log.
+     */
+
+    errlHndl_t isMPIPL( bool& o_mpIPL );
+
 };
+
+// Wrapper function for TodSvc::todInit instance
+errlHndl_t todInit();
+
+// Wrapper function for TodSvc::todSetup instance
+errlHndl_t todSetup();
 
 } //namespace TOD
 

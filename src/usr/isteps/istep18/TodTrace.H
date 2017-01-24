@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,8 @@ namespace TOD
 #define TOD_ERR(args...)   TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,\
                                 ERR_MRK" TOD:: " args)
 #define TOD_INF(args...)   TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,\
+                                INFO_MRK" TOD:: " args)
+#define TOD_IMP(args...)   TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,\
                                 INFO_MRK" TOD:: " args)
 
 // debug traces -------------------

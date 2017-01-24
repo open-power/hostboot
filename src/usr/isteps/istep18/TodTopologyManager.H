@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,19 +24,22 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef TODTOPOLOGYMANAGER_H
 #define TODTOPOLOGYMANAGER_H
-
 /**
  *  @file TodTopologyManager.H
  *
  *  @brief TOD Topology Manager class definition. Responsible for
  *      creating/modifying the primary and secondary topologies
- *
- *  HWP_IGNORE_VERSION_CHECK
- *
  */
 
-#include <errl/errlentry.H>
-#include "proc_tod_utils/proc_tod_utils.H"
+
+//------------------------------------------------------------------------------
+//Includes
+//------------------------------------------------------------------------------
+
+#include "TodProc.H"
+
+//HWPF - For TOD constants
+#include <p9_tod_utils.H>
 
 namespace TOD
 {
@@ -45,7 +48,13 @@ namespace TOD
 //Forward declarations
 //------------------------------------------------------------------------------
 class TodDrawer;
+class TodControls;
 
+/**
+ * @class TodSvc
+ *
+ * @brief Creates TOD topologies
+ */
 class TodTopologyManager
 {
 public:
@@ -62,7 +71,7 @@ public:
      * @param[in] i_type
      *     Primary(TOD_PRIMARY) or Secondary(TOD_SECONDARY)
      */
-    TodTopologyManager(const proc_tod_setup_tod_sel i_type);
+    TodTopologyManager(const p9_tod_setup_tod_sel i_type);
 
     /**
      * @brief Destructor.
@@ -120,7 +129,7 @@ private:
      *     processors in the input TOD drawer
      *
      * @param[in] i_pTodDrawer
-     *     Pointer to a HwsvTodDrawer
+     *     Pointer to a TodDrawer
      *
      * @return Error log handle indicating the status of the request.
      * @retval NULL if successful
@@ -161,11 +170,42 @@ private:
      */
     errlHndl_t wireTodDrawer(TodDrawer* i_pTodDrawer);
 
+    /**
+     * @brief Wires, or sets the A bus connection paths between
+     *     intra-drawer processors. Such connections exist in the
+     *     wrap test mode.
+     *
+     * @param[in/out] io_sourcesList
+     *     List of procs that may be connected to. List grows as we
+     *     connect procs, each newly connected proc is a potential
+     *     source.
+     *
+     * @param[in/out] io_targetsList
+     *     List of procs that need to be connected. Once a proc is
+     *     connected, it is removed from this list.
+     *
+     * @return Error log handle indicating the status of the request.
+     * @retval NULL if successful
+     * @retval !NULL if failed to wire one or more procs in the TOD drawer
+     *
+     *     Error log handle points to a valid error log object whose primary
+     *     SRC reason code (pError->getSRC()->reasonCode()) indicates the type
+     *     of error.
+     *
+     * @note It is up to the caller to change the severity of the
+     *     returned error based on what it decides to do with it. By default
+     *     any returned error created by this function will be a non-reported
+     *     tracing event error log.
+     */
+    errlHndl_t wireProcsInSmpWrapMode(
+                   TodProcContainer& io_sourcesList,
+                   TodProcContainer& io_targetsList);
+
     //Holds the type of the topology this manager is working on :
     //primary/secondary
-    proc_tod_setup_tod_sel iv_topologyType;
+    p9_tod_setup_tod_sel iv_topologyType;
+
 };
 
 } //namespace TOD
-
 #endif //#define TODTOPOLOGYMANAGER_H
