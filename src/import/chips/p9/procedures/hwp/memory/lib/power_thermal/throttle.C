@@ -742,6 +742,16 @@ fapi2::ReturnCode set_runtime_m_and_watt_limit( const std::vector< fapi2::Target
     //Calculate max power available / number of dimms configured on the VDDR rail
     l_watt_target = (l_vmem_power_limit_dimm * l_max_dimms) / l_count_dimms_vec;
 
+    // If we have too many dimms, deconfigure the first MCS
+    // We know there are MCSs on the vector due to the check above
+    FAPI_ASSERT( (l_count_dimms_vec <= l_max_dimms),
+                 fapi2::MSS_DIMM_COUNT_EXCEEDS_VMEM_REGULATOR_LIMIT()
+                 .set_MAX_DIMM_AMOUNT(l_max_dimms)
+                 .set_DIMMS_SEEN(l_count_dimms_vec),
+                 "The number of dimms counted (%d) on the vector of MCS surpasses the limit (%d)",
+                 l_count_dimms_vec,
+                 l_max_dimms);
+
     FAPI_INF("Calculated ATTR_MSS_MEM_WATT_TARGET is %d, power_limit dimm is %d, max_dimms is %d, count dimms on vector is %d",
              l_watt_target,
              l_vmem_power_limit_dimm,
