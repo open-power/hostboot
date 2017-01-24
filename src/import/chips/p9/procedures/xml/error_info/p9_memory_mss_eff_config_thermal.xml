@@ -217,5 +217,17 @@
     </callout>
  </hwpError>
 
-
+ <hwpError>
+    <rc>RC_MSS_DIMM_COUNT_EXCEEDS_VMEM_REGULATOR_LIMIT</rc>
+    <description>
+        The number of dimms counted on the vector of MCS passed into p9_mss_eff_config_thermal
+        exceeds the limit defined in ATTR_MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR
+    </description>
+    <ffdc>MAX_DIMM_AMOUNT</ffdc>
+    <ffdc>DIMMS_SEEN</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
 </hwpErrors>
