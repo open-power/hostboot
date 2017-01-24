@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -207,6 +207,10 @@ void* call_host_activate_slave_cores (void *io_pArgs)
 
             if( l_errl )
             {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR : enable p9_cpu_special_wakeup_core, "
+                        "PLID=0x%x", l_errl->plid()  );
+
                 ErrlUserDetailsTarget(*l_core).addToLog( l_errl );
 
                 // Create IStep error log and cross ref error that
@@ -215,10 +219,6 @@ void* call_host_activate_slave_cores (void *io_pArgs)
 
                 // Commit Error
                 errlCommit( l_errl, HWPF_COMP_ID );
-
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR : enable p9_cpu_special_wakeup_core, "
-                        "PLID=0x%x", l_errl->plid()  );
             }
             else
             {
