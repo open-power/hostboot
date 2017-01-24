@@ -358,8 +358,7 @@ def hexDumpToNumber(hexlist):
 # Fetch the current HRMOR value.
 def getHRMOR():
     # Note: will default to using the currently selected cpu
-    runStr  =  "($hb_cpu).read-reg HRMOR"
-    ( result, out )  =   quiet_run_command( runStr, output_modes.regular )
+    result = SIM_get_object(simenv.hb_cpu).hrmor
     return result
 
 
