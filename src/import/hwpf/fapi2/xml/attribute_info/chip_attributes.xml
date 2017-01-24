@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -54,6 +54,23 @@
     <!-- To make HWPs data driven, this is a privileged attribute that cannot
          be accessed by normal HWPs. -->
     <privileged/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MINI_EC</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        Specifies extra mini-EC versions beyond the standard Major.Minor DD
+        level, e.g. 1.02 would have ATTR_EC=0x10, ATTR_MINI_EC=2
+        Set by HWP as needed depending on how it is determined.
+        Note: This should not be used directly for checks in HWPs, instead
+          explicit attributes should be created for each workaround/change.
+          This is here for FW to consume in non-HWP code (e.g. PHYP) and/or
+          for display in FFDC or inventory lists.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>
