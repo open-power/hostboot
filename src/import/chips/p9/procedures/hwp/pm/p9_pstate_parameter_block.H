@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -389,7 +389,8 @@ load_wof_attributes ( PstateSuperStructure* io_pss,
 
 fapi2::ReturnCode
 load_mvpd_operating_point ( const uint32_t i_src[PV_D][PV_W],
-                            VpdOperatingPoint* o_dest);
+                            VpdOperatingPoint* o_dest,
+                            uint32_t i_frequency_step_khz);
 
 /// ----------------------------------------------------------------
 /// @brief Get VDM parameters from attributes
@@ -423,6 +424,56 @@ proc_res_clock_setup ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
 fapi2::ReturnCode
 proc_get_ivrm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                       IvrmParmBlock* o_ivrmpb);
+
+
+//
+// p9_pstate_compute_vpd_pts
+//
+void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[VPD_PV_POINTS],
+                               GlobalPstateParmBlock* i_gppb);
+//
+// p9_pstate_compute_PsV_slopes
+//
+// Computes slope of voltage-PState curve and PState-voltage
+//
+// PState(Frequency) on y-axis, Voltage is on x-axis for VF curve
+// Interpolation formula: (y-y0)/(x-x0) = (y1-y0)/(x1-x0)
+// m   = (x1-x0)/(y1-y0), then use this to calculate voltage, x = (y-y0)*m + x0
+// 1/m = (y1-y0)/(x1-x0) here, then use this to calculate pstate(frequency), y = (x-x0)*m + y0
+// Region 0 is b/w POWERSAVE and NOMINAL
+// Region 1 is b/w NOMINAL and TURBO
+// Region 2 is between TURBO and ULTRA_TURBO
+//
+// Inflection Point 3 is ULTRA_TURBO
+// Inflection Point 2 is TURBO
+// Inflection Point 1 is NOMINAL
+// Inflection Point 0 is POWERSAVE
+//
+void p9_pstate_compute_PsV_slopes(VpdOperatingPoint i_operating_points[][4],
+                                  GlobalPstateParmBlock* o_gppb);
+
+/// Print a GlobalPstateParameterBlock structure on a given stream
+///
+/// @param[in] gppb The Global Pstate Parameter Block to print
+void
+gppb_print(GlobalPstateParmBlock* i_gppb);
+
+
+/// Print an OCCPstateParameterBlock structure on a given stream
+///
+/// @param[in] oppb The OCC Pstate Parameter Block to print
+void
+oppb_print(OCCPstateParmBlock* i_oppb);
+
+
+/// Convert frequency to Pstate number
+///
+/// @param[in]     gppb     The Global Pstate Parameter Block
+/// @param[in]     freq_khz Input frequency to convert
+/// @param[out]    Computed Pstate
+int freq2pState (const GlobalPstateParmBlock* gppb,
+                 const uint32_t freq_khz,
+                 Pstate* pstate);
 
 /// @typedef p9_pstate_parameter_block_FP_t
 /// function pointer typedef definition for HWP call support

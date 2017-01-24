@@ -149,13 +149,6 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
              "Bias application function failed");
 
     // -----------------------------------------------
-    // populate VpdOperatingPoint with biased MVPD attributes
-    // -----------------------------------------------
-    VpdOperatingPoint s132a_vpd[VPD_PV_POINTS];
-
-    FAPI_TRY(load_mvpd_operating_point(attr_mvpd_voltage_control, s132a_vpd), "Loading MVPD operating point failed");
-
-    // -----------------------------------------------
     // System power distribution parameters
     // -----------------------------------------------
     // VDD rail
@@ -216,14 +209,20 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     // Pstate Options @todo RTC 161279, Check what needs to be populated here
 
     // @todo RTC 161279 - Corresponds to Pstate 0 . Setting to ULTRA TURBO frequency point. REVIEW with Greg
-    l_globalppb.reference_frequency_khz = (attr_mvpd_voltage_control[ULTRA][0] / 1000);
+    l_globalppb.reference_frequency_khz = revle32((attr_mvpd_voltage_control[ULTRA][0] * 1000));
+    FAPI_INF("Pstate Base Frequency %X (%d)",
+             revle32(l_globalppb.reference_frequency_khz),
+             revle32(l_globalppb.reference_frequency_khz));
 
     // frequency_step_khz
     l_frequency_step_khz = (attr.attr_freq_proc_refclock_khz / attr.attr_proc_dpll_divider);
     l_globalppb.frequency_step_khz = l_frequency_step_khz;
 
+    // -----------------------------------------------
+    // populate VpdOperatingPoint with biased MVPD attributes
+    // -----------------------------------------------
     // VPD operating point
-    FAPI_TRY(load_mvpd_operating_point(attr_mvpd_voltage_control, l_globalppb.operating_points),
+    FAPI_TRY(load_mvpd_operating_point(attr_mvpd_voltage_control, l_globalppb.operating_points, l_frequency_step_khz),
              "Loading MVPD operating point failed");
 
     // VpdBias External and Internal Biases for Global and Local parameter block
@@ -260,6 +259,15 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     // Resonant Clock Grid Management Setup
     l_globalppb.resclk = l_resclk_setup;
 
+    VpdOperatingPoint l_operating_points[NUM_VPD_PTS_SET][VPD_PV_POINTS];
+    // Compute VPD points
+    p9_pstate_compute_vpd_pts(l_operating_points, &l_globalppb);
+
+    // Calculate pre-calculated slopes
+    p9_pstate_compute_PsV_slopes(l_operating_points, &l_globalppb);
+
+    gppb_print(&(l_globalppb));
+
     // -----------------------------------------------
     // Local parameter block
     // -----------------------------------------------
@@ -269,7 +277,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     l_localppb.qmflags = l_qm_flags;
 
     // VPD operating point
-    FAPI_TRY(load_mvpd_operating_point(attr_mvpd_voltage_control, l_localppb.operating_points),
+    FAPI_TRY(load_mvpd_operating_point(attr_mvpd_voltage_control, l_localppb.operating_points, l_frequency_step_khz),
              "Loading MVPD operating point failed");
 
     l_localppb.vdd_sysparm = l_vdd_sysparm;
@@ -289,7 +297,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     l_occppb.magic = revle64(PSTATE_PARMSBLOCK_MAGIC);
 
     // VPD operating point
-    FAPI_TRY(load_mvpd_operating_point(attr_mvpd_voltage_control, l_occppb.operating_points),
+    FAPI_TRY(load_mvpd_operating_point(attr_mvpd_voltage_control, l_occppb.operating_points, l_frequency_step_khz),
              "Loading MVPD operating point failed");
 
     l_occppb.vdd_sysparm = l_vdd_sysparm;
@@ -300,7 +308,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
     //WOFElements - @todo RTC 161279 (VID Modification table not populated)
     l_occppb.wof.wof_enabled = attr.attr_system_wof_enabled;
-    l_occppb.wof.tdp_rdp_factor = attr.attr_tdp_rdp_current_factor;
+    l_occppb.wof.tdp_rdp_factor = revle32(attr.attr_tdp_rdp_current_factor);
 
     // frequency_min_khz - Value from Power save operating point after biases
     l_occppb.frequency_min_khz = (attr_mvpd_voltage_control[POWERSAVE][0] / 1000);
@@ -1133,171 +1141,742 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-#if 0
-ReturnCode proc_upd_psafe_ps (PstateSuperStructure* pss,
-                              const AttributeList* attr)
-
-/// ------------------------------------------------------------
-/// \brief Update Floor_pstate
-/// \param[inout] *pss   => pointer to pstate superstructure
-/// \param[in]    *attr  => pointer to attribute list structure
-/// ------------------------------------------------------------
-
-ReturnCode proc_upd_floor_ps (PstateSuperStructure* pss,
-                              const AttributeList* attr)
-{
-
-    ReturnCode load_wof_attributes (PstateSuperStructure * pss,
-                                    const AttributeList * attr)
-    {
-
-#endif
-
 /// ------------------------------------------------------------
 /// \brief Copy VPD operating point into destination in assending order
 /// \param[in]  &src[VPD_PV_POINTS]   => reference to source VPD structure (array)
 /// \param[out] *dest[VPD_PV_POINTS]  => pointer to destination VpdOperatingPoint structure
+//  \param[in]  i_frequency_step_khz  => Base frequency value for pstate calculation
 /// ------------------------------------------------------------
+fapi2::ReturnCode
+load_mvpd_operating_point ( const uint32_t i_src[PV_D][PV_W],
+                            VpdOperatingPoint* o_dest,
+                            uint32_t i_frequency_step_khz)
+{
+    const uint8_t pv_op_order[VPD_PV_POINTS] = VPD_PV_ORDER;
 
-        fapi2::ReturnCode
-        load_mvpd_operating_point ( const uint32_t i_src[PV_D][PV_W],
-                                    VpdOperatingPoint * o_dest)
+    for (uint32_t i = 0; i < VPD_PV_POINTS; i++)
+    {
+        o_dest[i].frequency_mhz  = revle32(i_src[pv_op_order[i]][0]);
+        o_dest[i].vdd_mv        = revle32(i_src[pv_op_order[i]][1]);
+        o_dest[i].idd_100ma      = revle32(i_src[pv_op_order[i]][2]);
+        //o_dest[i].vdd_maxreg_5mv = i_src[pv_op_order[i]][1] - DEAD_ZONE_5MV;
+        o_dest[i].vcs_mv        = revle32(i_src[pv_op_order[i]][3]);
+        o_dest[i].ics_100ma      = revle32(i_src[pv_op_order[i]][4]);
+        //o_dest[i].vcs_maxreg_5mv = i_src[pv_op_order[i]][3] - DEAD_ZONE_5MV;
+        o_dest[i].pstate = (i_src[ULTRA][0] - i_src[pv_op_order[i]][0]) * 1000 / i_frequency_step_khz;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+} // end attr2wof
+
+
+fapi2::ReturnCode
+proc_get_vdm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                     VDMParmBlock* o_vdmpb)
+{
+    uint8_t l_droop_small_override[VPD_PV_POINTS + 1];
+    uint8_t l_droop_large_override[VPD_PV_POINTS + 1];
+    uint8_t l_droop_extreme_override[VPD_PV_POINTS + 1];
+    uint8_t l_overvolt_override[VPD_PV_POINTS + 1];
+    uint16_t l_fmin_override_khz[VPD_PV_POINTS + 1];
+    uint16_t l_fmax_override_khz[VPD_PV_POINTS + 1];
+    uint8_t l_vid_compare_override_mv[VPD_PV_POINTS + 1];
+    uint8_t l_vdm_response;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_DROOP_SMALL_OVERRIDE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_droop_small_override));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_DROOP_LARGE_OVERRIDE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_droop_large_override));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_DROOP_EXTREME_OVERRIDE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_droop_extreme_override));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_OVERVOLT_OVERRIDE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_overvolt_override));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_FMIN_OVERRIDE_KHZ, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_fmin_override_khz));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_FMAX_OVERRIDE_KHZ, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_fmax_override_khz));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_VID_COMPARE_OVERRIDE_MV, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_vid_compare_override_mv));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DPLL_VDM_RESPONSE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_vdm_response));
+
+    o_vdmpb->droop_small_override_enable = l_droop_small_override[VPD_PV_POINTS];
+    o_vdmpb->droop_large_override_enable = l_droop_large_override[VPD_PV_POINTS];
+    o_vdmpb->droop_extreme_override_enable = l_droop_extreme_override[VPD_PV_POINTS];
+    o_vdmpb->overvolt_override_enable = l_overvolt_override[VPD_PV_POINTS];
+    o_vdmpb->fmin_override_khz_enable = l_fmin_override_khz[VPD_PV_POINTS];
+    o_vdmpb->fmax_override_khz_enable = l_fmax_override_khz[VPD_PV_POINTS];
+    o_vdmpb->vid_compare_override_mv_enable = l_vid_compare_override_mv[VPD_PV_POINTS];
+
+    o_vdmpb->vdm_response = l_vdm_response;
+
+    for (uint8_t i = 0; i < VPD_PV_POINTS; i++)
+    {
+        o_vdmpb->droop_small_override[i] = l_droop_small_override[i];
+        o_vdmpb->droop_large_override[i] = l_droop_large_override[i];
+        o_vdmpb->droop_extreme_override[i] = l_droop_extreme_override[i];
+        o_vdmpb->overvolt_override[i] = l_overvolt_override[i];
+        o_vdmpb->fmin_override_khz[i] = l_fmin_override_khz[i];
+        o_vdmpb->fmax_override_khz[i] = l_fmax_override_khz[i];
+        o_vdmpb->vid_compare_override_mv[i] = l_vid_compare_override_mv[i];
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+fapi2::ReturnCode
+proc_res_clock_setup ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                       ResonantClockingSetup* o_resclk_setup)
+{
+
+    uint16_t l_steparray[RESCLK_STEPS];
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_STEP_DELAY, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           o_resclk_setup->step_delay_ns));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGIONS, i_target,
+                           o_resclk_setup->resclk_freq));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGION_INDEX, i_target,
+                           o_resclk_setup->resclk_index));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VALUE, i_target,
+                           o_resclk_setup->l3_steparray));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV, i_target,
+                           o_resclk_setup->l3_threshold_mv));
+
+    // Resonant Clocking Step array
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_VALUE, i_target,
+                           l_steparray));
+
+    for (uint8_t i = 0; i < RESCLK_STEPS; i++)
+    {
+        o_resclk_setup->steparray[i].value = l_steparray[i];
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode
+proc_get_ivrm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                      IvrmParmBlock* o_ivrmpb)
+{
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_STRENGTH_LOOKUP, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           o_ivrmpb->strength_lookup));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_VIN_MULTIPLIER, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           o_ivrmpb->vin_multiplier));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_VIN_MAX_MV, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           o_ivrmpb->vin_max_mv));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_STEP_DELAY_NS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           o_ivrmpb->step_delay_ns));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_STABILIZATION_DELAY_NS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           o_ivrmpb->stablization_delay_ns));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_DEADZONE_MV, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           o_ivrmpb->deadzone_mv));
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+//
+//p9_pstate_compute_vpd_pts
+//
+void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[VPD_PV_POINTS],
+                               GlobalPstateParmBlock* i_gppb)
+{
+    int p = 0;
+
+    const uint8_t pv_op_order[VPD_PV_POINTS] = VPD_PV_ORDER;
+
+    //RAW POINTS. We just copy them as is
+    for (p = 0; p < VPD_PV_POINTS; p++)
+    {
+        o_operating_points[VPD_PT_SET_RAW][pv_op_order[p]].vdd_mv = revle32(i_gppb->operating_points[p].vdd_mv) ;
+        o_operating_points[VPD_PT_SET_RAW][pv_op_order[p]].vcs_mv = revle32(i_gppb->operating_points[p].vcs_mv);
+        o_operating_points[VPD_PT_SET_RAW][pv_op_order[p]].idd_100ma = revle32(i_gppb->operating_points[p].idd_100ma);
+        o_operating_points[VPD_PT_SET_RAW][pv_op_order[p]].ics_100ma = revle32(i_gppb->operating_points[p].ics_100ma);
+        o_operating_points[VPD_PT_SET_RAW][pv_op_order[p]].frequency_mhz = revle32(i_gppb->operating_points[p].frequency_mhz);
+        o_operating_points[VPD_PT_SET_RAW][pv_op_order[p]].pstate = i_gppb->operating_points[p].pstate;
+    }
+
+    //SYSTEM PARAMS APPLIED POINTS
+    //We first calculate everything in uV, and then divide by 1000. Doing this ensures
+    //that integer division doesn't result in 0 for intermediate terms
+    for (p = 0; p < VPD_PV_POINTS; p++)
+    {
+        o_operating_points[VPD_PT_SET_SYSP][pv_op_order[p]].vdd_mv =
+            revle32((i_gppb->operating_points[p].vdd_mv * 1000 +
+                     ((i_gppb->operating_points[p].idd_100ma * 100) * (i_gppb->vdd_sysparm.loadline_uohm +
+                             i_gppb->vdd_sysparm.distloss_uohm)) +
+                     (i_gppb->vdd_sysparm.distoffset_uv)) / 1000) ;
+        o_operating_points[VPD_PT_SET_SYSP][pv_op_order[p]].vcs_mv =
+            revle32( (i_gppb->operating_points[p].vcs_mv * 1000 +
+                      ((i_gppb->operating_points[p].ics_100ma * 100) * (i_gppb->vcs_sysparm.loadline_uohm +
+                              i_gppb->vcs_sysparm.distloss_uohm)) +
+                      (i_gppb->vcs_sysparm.distoffset_uv)) / 1000) ;
+        o_operating_points[VPD_PT_SET_SYSP][pv_op_order[p]].idd_100ma = revle32(i_gppb->operating_points[p].idd_100ma);
+        o_operating_points[VPD_PT_SET_SYSP][pv_op_order[p]].ics_100ma = revle32(i_gppb->operating_points[p].ics_100ma);
+        o_operating_points[VPD_PT_SET_SYSP][pv_op_order[p]].frequency_mhz = revle32(i_gppb->operating_points[p].frequency_mhz);
+        o_operating_points[VPD_PT_SET_SYSP][pv_op_order[p]].pstate = i_gppb->operating_points[p].pstate;
+    }
+
+    //BIASED POINTS
+    for (p = 0; p < VPD_PV_POINTS; p++)
+    {
+        o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].vdd_mv = ((revle32(i_gppb->operating_points[p].vdd_mv) *
+                (200 + i_gppb->ext_biases[p].vdd_ext_hp)) / 200);
+        o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].vcs_mv = ((revle32(i_gppb->operating_points[p].vcs_mv) *
+                (200 + i_gppb->ext_biases[p].vcs_ext_hp)) / 200);
+        o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].idd_100ma = revle32(i_gppb->operating_points[p].idd_100ma);
+        o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].ics_100ma = revle32(i_gppb->operating_points[p].ics_100ma);
+        o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].frequency_mhz = ((revle32(
+                    i_gppb->operating_points[p].frequency_mhz) *
+                (200 + i_gppb->ext_biases[p].frequency_hp)) / 200);
+    }
+
+    for (p = 0; p < VPD_PV_POINTS; p++)
+    {
+        o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].pstate =
+            (((o_operating_points[VPD_PT_SET_BIASED][ULTRA].frequency_mhz -
+               o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].frequency_mhz) *
+              1000) /
+             revle32(i_gppb->frequency_step_khz));
+    }
+
+    //BIASED POINTS and SYSTEM PARMS APPLIED POINTS
+    //We first calculate everything in uV, and then divide by 1000. Doing this ensures
+    //that integer division doesn't result in 0 for intermediate terms
+    for (p = 0; p < VPD_PV_POINTS; p++)
+    {
+        o_operating_points[VPD_PT_SET_BIASED_SYSP][pv_op_order[p]].vdd_mv =
+            (((o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].vdd_mv * 1000) +
+              ((o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].idd_100ma * 100) *
+               revle32((i_gppb->vdd_sysparm.loadline_uohm + i_gppb->vdd_sysparm.distloss_uohm))) +
+              revle32((i_gppb->vdd_sysparm.distoffset_uv))) / 1000 );
+        o_operating_points[VPD_PT_SET_BIASED_SYSP][pv_op_order[p]].vcs_mv =
+            (((o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].vcs_mv * 1000) +
+              ((o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].ics_100ma * 100) *
+               revle32((i_gppb->vcs_sysparm.loadline_uohm + i_gppb->vcs_sysparm.distloss_uohm))) +
+              revle32((i_gppb->vcs_sysparm.distoffset_uv))) / 1000 );
+        o_operating_points[VPD_PT_SET_BIASED_SYSP][pv_op_order[p]].idd_100ma =
+            (o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].idd_100ma);
+        o_operating_points[VPD_PT_SET_BIASED_SYSP][pv_op_order[p]].ics_100ma =
+            (o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].ics_100ma);
+        o_operating_points[VPD_PT_SET_BIASED_SYSP][pv_op_order[p]].frequency_mhz =
+            (o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].frequency_mhz);
+        o_operating_points[VPD_PT_SET_BIASED_SYSP][pv_op_order[p]].pstate =
+            o_operating_points[VPD_PT_SET_BIASED][pv_op_order[p]].pstate;
+    }
+}
+
+
+//
+// p9_pstate_compute_PsV_slopes
+//
+//Computes slope of voltage-PState curve and PState-voltage
+//
+//PState(Frequency) on y-axis, Voltage is on x-axis for VF curve
+//Interpolation formula: (y-y0)/(x-x0) = (y1-y0)/(x1-x0)
+//m   = (x1-x0)/(y1-y0), then use this to calculate voltage, x = (y-y0)*m + x0
+//1/m = (y1-y0)/(x1-x0) here, then use this to calculate pstate(frequency), y = (x-x0)*m + y0
+//Region 0 is b/w POWERSAVE and NOMINAL
+//Region 1 is b/w NOMINAL and TURBO
+//Region 2 is between TURBO and ULTRA_TURBO
+//
+//Inflection Point 3 is ULTRA_TURBO
+//Inflection Point 2 is TURBO
+//Inflection Point 1 is NOMINAL
+//Inflection Point 0 is POWERSAVE
+//
+void p9_pstate_compute_PsV_slopes(VpdOperatingPoint i_operating_points[][4],
+                                  GlobalPstateParmBlock* o_gppb)
+{
+    uint32_t tmp;
+    uint32_t eVidFP[VPD_PV_POINTS];
+
+    //
+    //RAW VPD PTS SLOPES
+    //
+    //convert to a fixed-point number
+    eVidFP[POWERSAVE] = i_operating_points[VPD_PT_SET_RAW][POWERSAVE].vdd_mv << EVID_SLOPE_FP_SHIFT;
+    eVidFP[NOMINAL] = i_operating_points[VPD_PT_SET_RAW][NOMINAL].vdd_mv << EVID_SLOPE_FP_SHIFT;
+    eVidFP[TURBO] = i_operating_points[VPD_PT_SET_RAW][TURBO].vdd_mv << EVID_SLOPE_FP_SHIFT;
+    eVidFP[ULTRA] = i_operating_points[VPD_PT_SET_RAW][ULTRA].vdd_mv << EVID_SLOPE_FP_SHIFT;
+
+    FAPI_INF("eVidFP[POWERSAVE] %u %04x", eVidFP[POWERSAVE], i_operating_points[VPD_PT_SET_RAW][POWERSAVE].vdd_mv);
+    FAPI_INF("eVidFP[NOMINAL] %u %04x", eVidFP[NOMINAL], i_operating_points[VPD_PT_SET_RAW][NOMINAL].vdd_mv);
+    FAPI_INF("eVidFP[TURBO] %u", eVidFP[TURBO]);
+    FAPI_INF("eVidFP[ULTRA] %u", eVidFP[ULTRA]);
+
+    //Calculate slopes
+    tmp = (uint32_t)(eVidFP[NOMINAL] - eVidFP[POWERSAVE]) /
+          (uint32_t)(-i_operating_points[VPD_PT_SET_RAW][NOMINAL].pstate + i_operating_points[VPD_PT_SET_RAW][POWERSAVE].pstate);
+    o_gppb->PsVSlopes[VPD_SLOPES_RAW][REGION_POWERSAVE_NOMINAL] = revle16((uint16_t)tmp);
+    FAPI_INF("PsVSlopes[VPD_SLOPES_RAW][REGION_POWERSAVE_NOMINAL] %u tmp %u",
+             (revle16(o_gppb->PsVSlopes[VPD_SLOPES_RAW][REGION_POWERSAVE_NOMINAL])), (tmp));
+
+    tmp = (uint32_t)(eVidFP[TURBO] - eVidFP[NOMINAL]) /
+          (uint32_t)(-i_operating_points[VPD_PT_SET_RAW][TURBO].pstate + i_operating_points[VPD_PT_SET_RAW][NOMINAL].pstate);
+    o_gppb->PsVSlopes[VPD_SLOPES_RAW][REGION_NOMINAL_TURBO] = revle16((uint16_t)tmp);
+    FAPI_INF("PsVSlopes[VPD_SLOPES_RAW][REGION_NOMINAL_TURBO] %u tmp %u",
+             (revle16(o_gppb->PsVSlopes[VPD_SLOPES_RAW][REGION_NOMINAL_TURBO])), (tmp));
+
+    tmp = (uint32_t)(eVidFP[ULTRA] - eVidFP[TURBO]) /
+          (uint32_t)(-i_operating_points[VPD_PT_SET_RAW][ULTRA].pstate + i_operating_points[VPD_PT_SET_RAW][TURBO].pstate);
+    o_gppb->PsVSlopes[VPD_SLOPES_RAW][REGION_TURBO_ULTRA] = revle16((uint16_t)tmp);
+    FAPI_INF("PsVSlopes[VPD_SLOPES_RAW][REGION_TURBO_ULTRA] %u tmp %u",
+             (revle16(o_gppb->PsVSlopes[VPD_SLOPES_RAW][REGION_TURBO_ULTRA])), (tmp));
+
+    //Calculate inverted slopes
+    tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_RAW][NOMINAL].pstate +
+                       i_operating_points[VPD_PT_SET_RAW][POWERSAVE].pstate) << EVID_SLOPE_FP_SHIFT)
+           / (uint32_t) (i_operating_points[VPD_PT_SET_RAW][NOMINAL].vdd_mv -
+                         i_operating_points[VPD_PT_SET_RAW][POWERSAVE].vdd_mv);
+    o_gppb->VPsSlopes[VPD_SLOPES_RAW][REGION_POWERSAVE_NOMINAL] = revle16((uint16_t)tmp);
+    FAPI_INF("VPsSlopes[VPD_SLOPES_RAW][REGION_POWERSAVE_NOMINAL] %u tmp %u",
+             (revle16(o_gppb->VPsSlopes[VPD_SLOPES_RAW][REGION_POWERSAVE_NOMINAL])), (tmp));
+
+    tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_RAW][TURBO].pstate +
+                       i_operating_points[VPD_PT_SET_RAW][NOMINAL].pstate) << EVID_SLOPE_FP_SHIFT)
+           / (uint32_t) (i_operating_points[VPD_PT_SET_RAW][TURBO].vdd_mv -
+                         i_operating_points[VPD_PT_SET_RAW][NOMINAL].vdd_mv);
+    o_gppb->VPsSlopes[VPD_SLOPES_RAW][REGION_NOMINAL_TURBO] = revle16((uint16_t)tmp);
+    FAPI_INF("VPsSlopes[VPD_SLOPES_RAW][REGION_NOMINAL_TURBO] %u tmp %u",
+             (revle16(o_gppb->VPsSlopes[VPD_SLOPES_RAW][REGION_NOMINAL_TURBO])), (tmp));
+
+    tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_RAW][ULTRA].pstate +
+                       i_operating_points[VPD_PT_SET_RAW][TURBO].pstate) << EVID_SLOPE_FP_SHIFT)
+           / (uint32_t) (i_operating_points[VPD_PT_SET_RAW][ULTRA].vdd_mv -
+                         i_operating_points[VPD_PT_SET_RAW][TURBO].vdd_mv);
+    o_gppb->VPsSlopes[VPD_SLOPES_RAW][REGION_TURBO_ULTRA] = revle16((uint16_t)tmp);
+    FAPI_INF("VPsSlopes[VPD_SLOPES_RAW][REGION_TURBO_ULTRA] %u tmp %u",
+             (revle16(o_gppb->VPsSlopes[VPD_SLOPES_RAW][REGION_TURBO_ULTRA])), (tmp));
+
+    //
+    //BIASED VPD PTS SLOPES
+    //
+    //convert to fixed-point number
+    eVidFP[POWERSAVE] = i_operating_points[VPD_PT_SET_BIASED][POWERSAVE].vdd_mv << EVID_SLOPE_FP_SHIFT;
+    eVidFP[NOMINAL] = i_operating_points[VPD_PT_SET_BIASED][NOMINAL].vdd_mv << EVID_SLOPE_FP_SHIFT;
+    eVidFP[TURBO] = i_operating_points[VPD_PT_SET_BIASED][TURBO].vdd_mv << EVID_SLOPE_FP_SHIFT;
+    eVidFP[ULTRA] = i_operating_points[VPD_PT_SET_BIASED][ULTRA].vdd_mv << EVID_SLOPE_FP_SHIFT;
+
+    FAPI_INF("eVidFP[POWERSAVE] Biased %u", eVidFP[POWERSAVE]);
+    FAPI_INF("eVidFP[NOMINAL] Biased %u", eVidFP[NOMINAL]);
+    FAPI_INF("eVidFP[TURBO] Biased %u", eVidFP[TURBO]);
+    FAPI_INF("eVidFP[ULTRA] Biased %u", eVidFP[ULTRA]);
+
+    //Calculate slopes
+    tmp = (uint32_t)(eVidFP[NOMINAL] - eVidFP[POWERSAVE]) /
+          (uint32_t)(-i_operating_points[VPD_PT_SET_BIASED][NOMINAL].pstate +
+                     i_operating_points[VPD_PT_SET_BIASED][POWERSAVE].pstate);
+    o_gppb->PsVSlopes[VPD_SLOPES_BIASED][REGION_POWERSAVE_NOMINAL] = revle16((uint16_t)tmp);
+    FAPI_INF("PsVSlopes[VPD_SLOPES_BIASED][REGION_POWERSAVE_NOMINAL] %u tmp %u",
+             (revle16(o_gppb->PsVSlopes[VPD_SLOPES_BIASED][REGION_POWERSAVE_NOMINAL])), (tmp));
+
+    tmp = (uint32_t)(eVidFP[TURBO] - eVidFP[NOMINAL]) /
+          (uint32_t)(-i_operating_points[VPD_PT_SET_BIASED][TURBO].pstate +
+                     i_operating_points[VPD_PT_SET_BIASED][NOMINAL].pstate);
+    o_gppb->PsVSlopes[VPD_SLOPES_BIASED][REGION_NOMINAL_TURBO] = revle16((uint16_t)tmp);
+    FAPI_INF("PsVSlopes[VPD_SLOPES_BIASED][REGION_NOMINAL_TURBO] %u tmp %u",
+             (revle16(o_gppb->PsVSlopes[VPD_SLOPES_BIASED][REGION_NOMINAL_TURBO])), (tmp));
+
+    tmp = (uint32_t)(eVidFP[ULTRA] - eVidFP[TURBO]) /
+          (uint32_t)(-i_operating_points[VPD_PT_SET_BIASED][ULTRA].pstate + i_operating_points[VPD_PT_SET_BIASED][TURBO].pstate);
+    o_gppb->PsVSlopes[VPD_SLOPES_BIASED][REGION_TURBO_ULTRA] = revle16((uint16_t)tmp);
+    FAPI_INF("PsVSlopes[VPD_SLOPES_BIASED][REGION_TURBO_ULTRA] %u tmp %u",
+             (revle16(o_gppb->PsVSlopes[VPD_SLOPES_BIASED][REGION_TURBO_ULTRA])), (tmp));
+
+    //Calculate inverted slopes
+    tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_BIASED][NOMINAL].pstate +
+                       i_operating_points[VPD_PT_SET_BIASED][POWERSAVE].pstate) << EVID_SLOPE_FP_SHIFT)
+           / (uint32_t) (i_operating_points[VPD_PT_SET_BIASED][NOMINAL].vdd_mv -
+                         i_operating_points[VPD_PT_SET_BIASED][POWERSAVE].vdd_mv);
+    o_gppb->VPsSlopes[VPD_SLOPES_BIASED][REGION_POWERSAVE_NOMINAL] = revle16((uint16_t)tmp);
+    FAPI_INF ("VPsSlopes[VPD_SLOPES_BIASED][REGION_POWERSAVE_NOMINAL] %u tmp %u",
+              (revle16(o_gppb->VPsSlopes[VPD_SLOPES_BIASED][REGION_POWERSAVE_NOMINAL])), (tmp));
+
+    tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_BIASED][TURBO].pstate +
+                       i_operating_points[VPD_PT_SET_BIASED][NOMINAL].pstate) << EVID_SLOPE_FP_SHIFT)
+           / (uint32_t) (i_operating_points[VPD_PT_SET_BIASED][TURBO].vdd_mv -
+                         i_operating_points[VPD_PT_SET_BIASED][NOMINAL].vdd_mv);
+    o_gppb->VPsSlopes[VPD_SLOPES_BIASED][REGION_NOMINAL_TURBO] = revle16((uint16_t)tmp);
+    FAPI_INF("VPsSlopes[VPD_SLOPES_BIASED][REGION_NOMINAL_TURBO] %u tmp %u",
+             (revle16(o_gppb->VPsSlopes[VPD_SLOPES_BIASED][REGION_NOMINAL_TURBO])), (tmp));
+
+    tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_BIASED][ULTRA].pstate +
+                       i_operating_points[VPD_PT_SET_BIASED][TURBO].pstate) << EVID_SLOPE_FP_SHIFT)
+           / (uint32_t) (i_operating_points[VPD_PT_SET_BIASED][ULTRA].vdd_mv -
+                         i_operating_points[VPD_PT_SET_BIASED][TURBO].vdd_mv);
+    o_gppb->VPsSlopes[VPD_SLOPES_BIASED][REGION_TURBO_ULTRA] = revle16((uint16_t)tmp);
+    FAPI_INF("VPsSlopes[VPD_SLOPES_BIASED][REGION_TURBO_ULTRA] %u tmp %u",
+             (revle16(o_gppb->VPsSlopes[VPD_SLOPES_BIASED][REGION_TURBO_ULTRA])), (tmp));
+}
+
+/// Print a GlobalPstateParameterBlock structure on a given stream
+///
+/// \param gppb The Global Pstate Parameter Block print
+
+void
+gppb_print(GlobalPstateParmBlock* i_gppb)
+{
+
+    static const uint32_t   BUFFSIZE = 256;
+    char                    l_buffer[BUFFSIZE];
+    char                    l_temp_buffer[BUFFSIZE];
+
+    // Put out the endian-corrected scalars
+
+    FAPI_INF("---------------------------------------------------------------------------------------");
+    FAPI_INF("Global Pstate Parameter Block @ %p", i_gppb);
+    FAPI_INF("---------------------------------------------------------------------------------------");
+
+//    sprintf(l_buffer, "Magic:               %llu", revle64(i_gppb->magic));
+    FAPI_INF("Options:             %X", revle32(i_gppb->options.options));
+    FAPI_INF("Reference Frequency: %X (%d)",
+             revle32(i_gppb->reference_frequency_khz), revle32(i_gppb->reference_frequency_khz));
+    FAPI_INF("Frequency Step Size: %X (%d)",
+             revle32(i_gppb->frequency_step_khz), revle32(i_gppb->frequency_step_khz));
+
+    FAPI_INF("Operating Points:     Frequency     VDD(mV)    IDD(100mA)     VCS(mV)    ICS(100mA)");
+
+    for (uint32_t i = 0; i < VPD_PV_POINTS; i++)
+    {
+        sprintf(l_buffer, "                 ");
+        sprintf(l_temp_buffer, " %04X (%4d) ",
+                revle32(i_gppb->operating_points[i].frequency_mhz),
+                revle32(i_gppb->operating_points[i].frequency_mhz));
+        strcat(l_buffer, l_temp_buffer);
+
+        sprintf(l_temp_buffer, " %04X (%4d) ",
+                revle32(i_gppb->operating_points[i].vdd_mv),
+                revle32(i_gppb->operating_points[i].vdd_mv));
+        strcat(l_buffer, l_temp_buffer);
+
+        sprintf(l_temp_buffer, " %04X (%4d) ",
+                revle32(i_gppb->operating_points[i].idd_100ma),
+                revle32(i_gppb->operating_points[i].idd_100ma));
+        strcat(l_buffer, l_temp_buffer);
+
+        sprintf(l_temp_buffer, " %04X (%4d) ",
+                revle32(i_gppb->operating_points[i].vcs_mv),
+                revle32(i_gppb->operating_points[i].vcs_mv));
+        strcat(l_buffer, l_temp_buffer);
+
+        sprintf(l_temp_buffer, " %04X (%3d) ",
+                revle32(i_gppb->operating_points[i].ics_100ma),
+                revle32(i_gppb->operating_points[i].ics_100ma));
+        strcat(l_buffer, l_temp_buffer);
+        FAPI_INF("%s", l_buffer);
+    }
+
+    FAPI_INF("System Parameters:            VDD        VCS        VDN");
+    sprintf(l_buffer, "   Load line (uOhm)        ");
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_gppb->vdd_sysparm.loadline_uohm),
+            revle32(i_gppb->vdd_sysparm.loadline_uohm));
+    strcat(l_buffer, l_temp_buffer);
+
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_gppb->vcs_sysparm.loadline_uohm),
+            revle32(i_gppb->vcs_sysparm.loadline_uohm));
+    strcat(l_buffer, l_temp_buffer);
+
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_gppb->vdn_sysparm.loadline_uohm),
+            revle32(i_gppb->vdn_sysparm.loadline_uohm));
+    strcat(l_buffer, l_temp_buffer);
+    FAPI_INF("%s", l_buffer);
+
+    sprintf(l_buffer, "   Distribution Loss (uOhm)");
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_gppb->vdd_sysparm.distloss_uohm),
+            revle32(i_gppb->vdd_sysparm.distloss_uohm));
+    strcat(l_buffer, l_temp_buffer);
+
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_gppb->vcs_sysparm.distloss_uohm),
+            revle32(i_gppb->vcs_sysparm.distloss_uohm));
+    strcat(l_buffer, l_temp_buffer);
+
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_gppb->vdn_sysparm.distloss_uohm),
+            revle32(i_gppb->vdn_sysparm.distloss_uohm));
+    strcat(l_buffer, l_temp_buffer);
+    FAPI_INF("%s", l_buffer);
+
+    sprintf(l_buffer, "   Offset (uV)             ");
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_gppb->vdd_sysparm.distoffset_uv),
+            revle32(i_gppb->vdd_sysparm.distoffset_uv));
+    strcat(l_buffer, l_temp_buffer);
+
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_gppb->vcs_sysparm.distoffset_uv),
+            revle32(i_gppb->vcs_sysparm.distoffset_uv));
+    strcat(l_buffer, l_temp_buffer);
+
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_gppb->vdn_sysparm.distoffset_uv),
+            revle32(i_gppb->vdn_sysparm.distoffset_uv));
+    strcat(l_buffer, l_temp_buffer);
+    FAPI_INF("%s", l_buffer);
+
+    FAPI_INF("Safe Parameters:");
+    FAPI_INF("   Frequency  %04X (%3d) ",
+             revle32(i_gppb->safe_frequency_khz),
+             revle32(i_gppb->safe_frequency_khz));
+    FAPI_INF("   Voltage    %04X (%3d)",
+             revle32(i_gppb->safe_voltage_mv),
+             revle32(i_gppb->safe_voltage_mv));
+
+    FAPI_INF("Pstate Stepping Parameters:");
+    FAPI_INF("   Delay range exponent %04X (%3d) ",
+             revle32(i_gppb->vrm_stepdelay_range),
+             revle32(i_gppb->vrm_stepdelay_range));
+    FAPI_INF("   Significand  %04X (%3d)",
+             revle32(i_gppb->vrm_stepdelay_value),
+             revle32(i_gppb->vrm_stepdelay_value));
+
+    FAPI_INF("External VRM Parameters:\n");
+    FAPI_INF("   VRM Transition Start %04X (%3d)",
+             revle32(i_gppb->ext_vrm_transition_start_ns),
+             revle32(i_gppb->ext_vrm_transition_start_ns));
+    FAPI_INF("   VRM Transition Rate - Rising %04X (%3d) (uv/us)",
+             revle32(i_gppb->ext_vrm_transition_rate_inc_uv_per_us),
+             revle32(i_gppb->ext_vrm_transition_rate_inc_uv_per_us));
+    FAPI_INF("   VRM Transition Rate - Falling (uv/us) %04X (%3d)",
+             revle32(i_gppb->ext_vrm_transition_rate_dec_uv_per_us),
+             revle32(i_gppb->ext_vrm_transition_rate_dec_uv_per_us));
+    FAPI_INF("   VRM Settling Time (us) %04X (%3d)",
+             revle32(i_gppb->ext_vrm_transition_rate_dec_uv_per_us),
+             revle32(i_gppb->ext_vrm_transition_rate_dec_uv_per_us));
+    FAPI_INF("   VRM Transition Step Size (mV) %04X (%3d)",
+             revle32(i_gppb->ext_vrm_step_size_mv),
+             revle32(i_gppb->ext_vrm_step_size_mv));
+
+    FAPI_INF("Nest Frequency: %04X (%3d)",
+             revle32(i_gppb->nest_frequency_mhz),
+             revle32(i_gppb->nest_frequency_mhz));
+
+    FAPI_INF("PsVSlopes: ");
+    strcpy(l_buffer, "   Regions ");
+
+    for (uint32_t j = 0; j <  VPD_NUM_SLOPES_REGION; ++j)
+    {
+        sprintf(l_temp_buffer, "    %d     ", j);
+        strcat(l_buffer, l_temp_buffer);
+    }
+
+    FAPI_INF("%s", l_buffer);
+
+    for (uint32_t i = 0; i < VPD_NUM_SLOPES_SET; i++)
+    {
+        sprintf(l_buffer, " Set %d : ", i);
+
+        for (uint32_t j = 0; j < VPD_NUM_SLOPES_REGION; j++)
         {
-
-            const uint8_t pv_op_order[VPD_PV_POINTS] = VPD_PV_ORDER;
-
-            for (uint32_t i = 0; i < VPD_PV_POINTS; i++)
-            {
-                o_dest[i].frequency_mhz  = i_src[pv_op_order[i]][0];
-                o_dest[i].vdd_mv        = i_src[pv_op_order[i]][1];
-                o_dest[i].idd_100ma      = i_src[pv_op_order[i]][2];
-                //o_dest[i].vdd_maxreg_5mv = i_src[pv_op_order[i]][1] - DEAD_ZONE_5MV;
-                o_dest[i].vcs_mv        = i_src[pv_op_order[i]][3];
-                o_dest[i].ics_100ma      = i_src[pv_op_order[i]][4];
-                //o_dest[i].vcs_maxreg_5mv = i_src[pv_op_order[i]][3] - DEAD_ZONE_5MV;
-            }
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        } // end attr2wof
-
-
-        fapi2::ReturnCode
-        proc_get_vdm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                             VDMParmBlock * o_vdmpb)
-        {
-
-            uint8_t l_droop_small_override[VPD_PV_POINTS + 1];
-            uint8_t l_droop_large_override[VPD_PV_POINTS + 1];
-            uint8_t l_droop_extreme_override[VPD_PV_POINTS + 1];
-            uint8_t l_overvolt_override[VPD_PV_POINTS + 1];
-            uint16_t l_fmin_override_khz[VPD_PV_POINTS + 1];
-            uint16_t l_fmax_override_khz[VPD_PV_POINTS + 1];
-            uint8_t l_vid_compare_override_mv[VPD_PV_POINTS + 1];
-            uint8_t l_vdm_response;
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_DROOP_SMALL_OVERRIDE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                   l_droop_small_override));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_DROOP_LARGE_OVERRIDE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                   l_droop_large_override));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_DROOP_EXTREME_OVERRIDE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                   l_droop_extreme_override));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_OVERVOLT_OVERRIDE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                   l_overvolt_override));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_FMIN_OVERRIDE_KHZ, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                   l_fmin_override_khz));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_FMAX_OVERRIDE_KHZ, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                   l_fmax_override_khz));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_VID_COMPARE_OVERRIDE_MV, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                   l_vid_compare_override_mv));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DPLL_VDM_RESPONSE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_vdm_response));
-
-            o_vdmpb->droop_small_override_enable = l_droop_small_override[VPD_PV_POINTS];
-            o_vdmpb->droop_large_override_enable = l_droop_large_override[VPD_PV_POINTS];
-            o_vdmpb->droop_extreme_override_enable = l_droop_extreme_override[VPD_PV_POINTS];
-            o_vdmpb->overvolt_override_enable = l_overvolt_override[VPD_PV_POINTS];
-            o_vdmpb->fmin_override_khz_enable = l_fmin_override_khz[VPD_PV_POINTS];
-            o_vdmpb->fmax_override_khz_enable = l_fmax_override_khz[VPD_PV_POINTS];
-            o_vdmpb->vid_compare_override_mv_enable = l_vid_compare_override_mv[VPD_PV_POINTS];
-
-            o_vdmpb->vdm_response = l_vdm_response;
-
-            for (uint8_t i = 0; i < VPD_PV_POINTS; i++)
-            {
-                o_vdmpb->droop_small_override[i] = l_droop_small_override[i];
-                o_vdmpb->droop_large_override[i] = l_droop_large_override[i];
-                o_vdmpb->droop_extreme_override[i] = l_droop_extreme_override[i];
-                o_vdmpb->overvolt_override[i] = l_overvolt_override[i];
-                o_vdmpb->fmin_override_khz[i] = l_fmin_override_khz[i];
-                o_vdmpb->fmax_override_khz[i] = l_fmax_override_khz[i];
-                o_vdmpb->vid_compare_override_mv[i] = l_vid_compare_override_mv[i];
-            }
-
-        fapi_try_exit:
-            return fapi2::current_err;
-
-//return fapi2::FAPI2_RC_SUCCESS;
+            sprintf(l_temp_buffer, " %04X (%4d) ",
+                    revle32(i_gppb->PsVSlopes[i][j]),
+                    revle32(i_gppb->PsVSlopes[i][j]));
+            strcat(l_buffer, l_temp_buffer);
         }
 
-        fapi2::ReturnCode
-        proc_res_clock_setup ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                               ResonantClockingSetup * o_resclk_setup)
+        FAPI_INF("%s", l_buffer);
+    }
+
+    FAPI_INF("%s", l_buffer);
+
+    FAPI_INF("VPsSlopes: ");
+    strcpy(l_buffer, "   Regions ");
+
+    for (uint32_t j = 0; j <  VPD_NUM_SLOPES_REGION; ++j)
+    {
+        sprintf(l_temp_buffer, "    %d     ", j);
+        strcat(l_buffer, l_temp_buffer);
+    }
+
+    for (uint32_t i = 0; i < VPD_NUM_SLOPES_SET; i++)
+    {
+        sprintf(l_buffer, " Set %d : ", i);
+
+        for (uint32_t j = 0; j < VPD_NUM_SLOPES_REGION; j++)
         {
-
-            uint16_t l_steparray[RESCLK_STEPS];
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_STEP_DELAY, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                   o_resclk_setup->step_delay_ns));
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGIONS, i_target,
-                                   o_resclk_setup->resclk_freq));
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGION_INDEX, i_target,
-                                   o_resclk_setup->resclk_index));
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VALUE, i_target,
-                                   o_resclk_setup->l3_steparray));
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV, i_target,
-                                   o_resclk_setup->l3_threshold_mv));
-
-// Resonant Clocking Step array
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_VALUE, i_target,
-                                   l_steparray));
-
-            for (uint8_t i = 0; i < RESCLK_STEPS; i++)
-            {
-                o_resclk_setup->steparray[i].value = l_steparray[i];
-            }
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            sprintf(l_temp_buffer, " %04X (%4d) ",
+                    revle32(i_gppb->VPsSlopes[i][j]),
+                    revle32(i_gppb->VPsSlopes[i][j]));
+            strcat(l_buffer, l_temp_buffer);
         }
 
-        fapi2::ReturnCode
-        proc_get_ivrm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                              IvrmParmBlock * o_ivrmpb)
-        {
+        FAPI_INF("%s", l_buffer);
+    }
 
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_STRENGTH_LOOKUP, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                   o_ivrmpb->strength_lookup));
+    FAPI_INF("---------------------------------------------------------------------------------------");
+}
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_VIN_MULTIPLIER, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                   o_ivrmpb->vin_multiplier));
+/// Print an OCCPstateParameterBlock structure on a given stream
+///
+/// \param oppb The OCC Pstate Parameter Block print
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_VIN_MAX_MV, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                   o_ivrmpb->vin_max_mv));
+void
+oppb_print(OCCPstateParmBlock* i_oppb)
+{
+    static const uint32_t   BUFFSIZE = 256;
+    char                    l_buffer[BUFFSIZE];
+    char                    l_temp_buffer[BUFFSIZE];
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_STEP_DELAY_NS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                   o_ivrmpb->step_delay_ns));
+    // Put out the endian-corrected scalars
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_STABILIZATION_DELAY_NS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                   o_ivrmpb->stablization_delay_ns));
+    FAPI_INF("---------------------------------------------------------------------------------------");
+    FAPI_INF("OCC Pstate Parameter Block @ %p", i_oppb);
+    FAPI_INF("---------------------------------------------------------------------------------------");
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_DEADZONE_MV, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                   o_ivrmpb->deadzone_mv));
+//    fprintf(stream, "Magic:               %llu\n", revle64(i_oppb->magic));
+    FAPI_INF("Operating Points:     Frequency     VDD(mV)    IDD(100mA)     VCS(mV)    ICS(100mA)");
 
-        fapi_try_exit:
-            return fapi2::current_err;
+    for (uint32_t i = 0; i < VPD_PV_POINTS; i++)
+    {
+        sprintf(l_buffer, "                 ");
+        sprintf(l_temp_buffer, " %04X (%4d) ",
+                revle32(i_oppb->operating_points[i].frequency_mhz),
+                revle32(i_oppb->operating_points[i].frequency_mhz));
+        strcat(l_buffer, l_temp_buffer);
 
-        }
+        sprintf(l_temp_buffer, " %04X (%4d) ",
+                revle32(i_oppb->operating_points[i].vdd_mv),
+                revle32(i_oppb->operating_points[i].vdd_mv));
+        strcat(l_buffer, l_temp_buffer);
+
+        sprintf(l_temp_buffer, " %04X (%4d) ",
+                revle32(i_oppb->operating_points[i].idd_100ma),
+                revle32(i_oppb->operating_points[i].idd_100ma));
+        strcat(l_buffer, l_temp_buffer);
+
+        sprintf(l_temp_buffer, " %04X (%4d) ",
+                revle32(i_oppb->operating_points[i].vcs_mv),
+                revle32(i_oppb->operating_points[i].vcs_mv));
+        strcat(l_buffer, l_temp_buffer);
+
+        sprintf(l_temp_buffer, " %04X (%3d) ",
+                revle32(i_oppb->operating_points[i].ics_100ma),
+                revle32(i_oppb->operating_points[i].ics_100ma));
+        strcat(l_buffer, l_temp_buffer);
+        FAPI_INF("%s", l_buffer);
+    }
+
+    FAPI_INF("System Parameters:            VDD        VCS        VDN");
+    sprintf(l_buffer, "   Load line (uOhm)        ");
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_oppb->vdd_sysparm.loadline_uohm),
+            revle32(i_oppb->vdd_sysparm.loadline_uohm));
+    strcat(l_buffer, l_temp_buffer);
+
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_oppb->vcs_sysparm.loadline_uohm),
+            revle32(i_oppb->vcs_sysparm.loadline_uohm));
+    strcat(l_buffer, l_temp_buffer);
+
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_oppb->vdn_sysparm.loadline_uohm),
+            revle32(i_oppb->vdn_sysparm.loadline_uohm));
+    strcat(l_buffer, l_temp_buffer);
+    FAPI_INF("%s", l_buffer);
+
+    sprintf(l_buffer, "   Distribution Loss (uOhm)");
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_oppb->vdd_sysparm.distloss_uohm),
+            revle32(i_oppb->vdd_sysparm.distloss_uohm));
+    strcat(l_buffer, l_temp_buffer);
+
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_oppb->vcs_sysparm.distloss_uohm),
+            revle32(i_oppb->vcs_sysparm.distloss_uohm));
+    strcat(l_buffer, l_temp_buffer);
+
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_oppb->vdn_sysparm.distloss_uohm),
+            revle32(i_oppb->vdn_sysparm.distloss_uohm));
+    strcat(l_buffer, l_temp_buffer);
+    FAPI_INF("%s", l_buffer);
+
+    sprintf(l_buffer, "   Offset (uV)             ");
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_oppb->vdd_sysparm.distoffset_uv),
+            revle32(i_oppb->vdd_sysparm.distoffset_uv));
+    strcat(l_buffer, l_temp_buffer);
+
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_oppb->vcs_sysparm.distoffset_uv),
+            revle32(i_oppb->vcs_sysparm.distoffset_uv));
+    strcat(l_buffer, l_temp_buffer);
+
+    sprintf(l_temp_buffer, " %04X (%3d) ",
+            revle32(i_oppb->vdn_sysparm.distoffset_uv),
+            revle32(i_oppb->vdn_sysparm.distoffset_uv));
+    strcat(l_buffer, l_temp_buffer);
+    FAPI_INF("%s", l_buffer);
+
+    FAPI_INF("Frequency Minumum (kHz):      %04X (%3d)",
+             revle32(i_oppb->frequency_min_khz),
+             revle32(i_oppb->frequency_min_khz));
+
+    FAPI_INF("Frequency Maximum (kHz):     %04X (%3d)",
+             revle32(i_oppb->frequency_max_khz),
+             revle32(i_oppb->frequency_max_khz));
+
+    FAPI_INF("Frequency Step (kHz):        %04X (%3d)",
+             revle32(i_oppb->frequency_step_khz),
+             revle32(i_oppb->frequency_step_khz));
+
+    FAPI_INF("Pstate of Minimum Frequency: %02X (%3d)",
+             i_oppb->pstate_min,
+             i_oppb->pstate_min);
+
+    FAPI_INF("---------------------------------------------------------------------------------------");
+}
+
+
+// Convert frequency to Pstate number
+///
+/// \param stream The output stream
+
+int freq2pState (const GlobalPstateParmBlock* gppb,
+                 const uint32_t freq_khz,
+                 Pstate* pstate)
+{
+    int rc = 0;
+    float pstate32 = 0;
+
+    // ----------------------------------
+    // compute pstate for given frequency
+    // ----------------------------------
+    pstate32 = ((float)(revle32(gppb->reference_frequency_khz) - freq_khz)) / (float)revle32(gppb->frequency_step_khz);
+    *pstate    = (Pstate)pstate32;
+
+    // ------------------------------
+    // perform pstate bounds checking
+    // ------------------------------
+    if (pstate32 > PSTATE_MIN)
+    {
+        rc = -PSTATE_LT_PSTATE_MIN;
+    }
+
+    if (pstate32 < PSTATE_MAX)
+    {
+        rc = -PSTATE_GT_PSTATE_MAX;
+    }
+
+    return rc;
+}
+
