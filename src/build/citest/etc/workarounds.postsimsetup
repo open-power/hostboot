@@ -32,22 +32,29 @@
 #mkdir -p $sb/simu/data/cec-chip/
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
-#pull in new actions in p9_memory.act RTC 171066
-#pull in SBE makefile change for DD2.1
-sbex -t 1032604
-cd $sb/sbei/sbfw/
-mk -a && mk install_all
-cd -
+
 
 #changes needed for Cumulus
 #@TODO RTC:178949
 echo "Applying SIMICS workaround to support Cumulus"
 sbex -t 1031560
-sbex -t 1032617
-sbex -t 1033442
 cd $sb/simu
 mk -a
 
 echo "Copying centaur and p9c action files"
 sbex -t 1032952
 sbex -t 1033805
+
+#pull in href tor
+sbex -t 1035576
+#pull in hwsv tor
+sbex -t 1034144
+
+
+mkdir $sb/../obj/ppc/hwsv/server/buildhwpfimport/hwpf2/tools/x86_binaries -p
+cp /gsa/rchgsa/home/c/r/crgeddes/documents/hbBuild/p9_ipl_build $sb/../obj/ppc/hwsv/server/buildhwpfimport/hwpf2/tools/x86_binaries/
+
+
+
+
+
