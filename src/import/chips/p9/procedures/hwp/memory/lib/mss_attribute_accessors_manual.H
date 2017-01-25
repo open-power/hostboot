@@ -159,6 +159,9 @@ fapi_try_exit:
 template< fapi2::TargetType T >
 inline bool chip_ec_feature_mss_dqs_polarity(const fapi2::Target<T>& i_target)
 {
+    // Seeing better results with Monza and LaGrange by switching this off
+    // TODO RTC:168029 - Remove DQS polarity EC feature if turning it off is a permanent fix.
+#ifdef DO_POLARITY_WORKAROUND
     const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
     uint8_t l_value = 0;
 
@@ -170,6 +173,8 @@ fapi_try_exit:
     FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_DQS_POLARITY: 0x%lx (target: %s)",
              uint64_t(fapi2::current_err), mss::c_str(i_target));
     fapi2::Assert(false);
+#endif
+
     return false;
 }
 
