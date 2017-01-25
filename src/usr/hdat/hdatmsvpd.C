@@ -1107,6 +1107,73 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
             TARGETING::ATTR_ORDINAL_ID_type l_procChipId
                          = l_pProcTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
 
+
+            //For each MCA
+            TARGETING::PredicateCTM l_allMca(TARGETING::CLASS_UNIT,
+                                         TARGETING::TYPE_MCA);
+            TARGETING::PredicateHwas l_funcMca;
+            l_funcMca.functional(true);
+            TARGETING::PredicatePostfixExpr l_allFuncMca;
+            l_allFuncMca.push(&l_allMca).push(&l_funcMca).And();
+
+            TARGETING::TargetHandleList l_mcaList;
+
+            TARGETING::targetService().
+                  getAssociated(l_mcaList, l_pProcTarget,
+                          TARGETING::TargetService::CHILD,
+                          TARGETING::TargetService::ALL, &l_allFuncMca);
+
+            TARGETING::ATTR_PROC_MEM_BASES_type l_procMemBases = {0};
+            assert(l_pProcTarget->
+                    tryGetAttr<TARGETING::ATTR_PROC_MEM_BASES>(l_procMemBases));
+
+            //Sharing count for each group
+            TARGETING::ATTR_MSS_MEM_MC_IN_GROUP_type l_mcaSharingCount = {0};
+
+            //Group ID for each group, group id will be assigned only
+            //if the group is shared
+            TARGETING::ATTR_MSS_MEM_MC_IN_GROUP_type l_mcsSharingGrpIds = {0};
+
+            //Size configured under each group
+            TARGETING::ATTR_PROC_MEM_SIZES_type l_procMemSizesBytes = {0};
+
+            assert(l_pProcTarget->tryGetAttr<TARGETING::ATTR_PROC_MEM_SIZES>
+                                                         (l_procMemSizesBytes));
+
+
+
+            for(uint32_t l_mcaIdx = 0; l_mcaIdx<l_mcaList.size();
+                        ++l_mcaIdx)
+            {
+                uint32_t l_mcaInGrp = 0;
+                TARGETING::Target *l_pMcaTarget =
+                                 l_mcaList[l_mcaIdx];
+                if(!hdatFindGroupForMc(l_pProcTarget,
+                                   l_pMcaTarget,
+                                   l_mcaInGrp))
+                {
+                    //Skip this MCA is not in any  group
+                    continue;
+                }
+
+                //Increment sharing count if mem configured under group.
+                if(l_procMemSizesBytes[l_mcaInGrp] > 0)
+                {
+                    l_mcaSharingCount[l_mcaInGrp]++;
+
+                    //Assign sharing group id only if shared
+                    //And only when first instance of sharing is found
+                    if(l_mcaSharingCount[l_mcaInGrp] ==
+                                         HDAT_MIN_NUM_FOR_SHARING)
+                    {
+                        l_mcsSharingGrpIds[l_mcaInGrp] =
+                                    l_nxtSharingGroupId;
+                        l_nxtSharingGroupId++;
+                    }
+                }
+            }
+
+
             // TODO : RTC Story 159682
             // Further CHTM support needs to be added which contains the trace
             // array for 24 cores
@@ -1114,14 +1181,14 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
             hdatMsAddr_t l_hdatNhtmEndAddr;
 
             TARGETING::ATTR_PROC_NHTM_BAR_BASE_ADDR_type l_nhtmStartAddr =
-              l_pProcTarget->getAttr<TARGETING::ATTR_PROC_NHTM_BAR_BASE_ADDR>();
+                  l_pProcTarget->getAttr<TARGETING::ATTR_PROC_NHTM_BAR_BASE_ADDR>();
             TARGETING::ATTR_PROC_NHTM_BAR_SIZE_type l_nhtmSize =
               l_pProcTarget->getAttr<TARGETING::ATTR_PROC_NHTM_BAR_SIZE>();
 
             if( 0 != l_nhtmSize )
             {
                 l_hdatNhtmStartAddr.hi =
-                             (l_nhtmStartAddr & 0xFFFFFFFF00000000ull) >> 32;
+                                 (l_nhtmStartAddr & 0xFFFFFFFF00000000ull) >> 32;
                 l_hdatNhtmStartAddr.lo =
                               l_nhtmStartAddr & 0x00000000FFFFFFFFull;
                 l_hdatNhtmStartAddr.hi |= HDAT_REAL_ADDRESS_MASK;
@@ -1145,28 +1212,12 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                             l_nhtmSize);
             }
 
-            TARGETING::ATTR_PROC_MEM_BASES_type l_procMemBases = {0};
-            assert(l_pProcTarget->
-                tryGetAttr<TARGETING::ATTR_PROC_MEM_BASES>(l_procMemBases));
-
-            //Sharing count for each group
-            TARGETING::ATTR_MSS_MEM_MC_IN_GROUP_type l_mcaSharingCount = {0};
-
-            //Group ID for each group, group id will be assigned only
-            //if the group is shared
-            TARGETING::ATTR_MSS_MEM_MC_IN_GROUP_type l_mcsSharingGrpIds = {0};
-
-            //Size configured under each group
-            TARGETING::ATTR_PROC_MEM_SIZES_type l_procMemSizesBytes = {0};
-
-            assert(l_pProcTarget->tryGetAttr<TARGETING::ATTR_PROC_MEM_SIZES>
-                                                         (l_procMemSizesBytes));
 
             TARGETING::PredicateCTM l_mcbistPredicate(TARGETING::CLASS_UNIT,
                                     TARGETING::TYPE_MCBIST);
 
             TARGETING::PredicatePostfixExpr l_presentMcbist;
-            l_presentMcbist.push(&l_mcbistPredicate).
+                l_presentMcbist.push(&l_mcbistPredicate).
                          push(&l_predHwasFunc).And();
 
             TARGETING::TargetHandleList l_mcbistList;
@@ -1189,7 +1240,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                                        TARGETING::TYPE_MCS);
 
                 TARGETING::PredicatePostfixExpr l_funcMcs;
-                l_funcMcs.push(&l_mcsPredicate).push(&l_predHwasFunc).And();
+                    l_funcMcs.push(&l_mcsPredicate).push(&l_predHwasFunc).And();
 
                 TARGETING::TargetHandleList l_mcsList;
 
@@ -1218,39 +1269,9 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                     // Get associated MCAs
                     TARGETING::targetService().
                     getAssociated(l_mcaList, l_pMcsTarget,
-                      TARGETING::TargetService::CHILD_BY_AFFINITY,
-                      TARGETING::TargetService::ALL, &l_presentMca);
+                          TARGETING::TargetService::CHILD_BY_AFFINITY,
+                          TARGETING::TargetService::ALL, &l_presentMca);
 
-                    for(uint32_t l_mcaIdx = 0; l_mcaIdx<l_mcaList.size();
-                        ++l_mcaIdx)
-                    {
-                        uint32_t l_mcaInGrp = 0;
-                        TARGETING::Target *l_pMcaTarget =
-                                 l_mcaList[l_mcaIdx];
-                        if(!hdatFindGroupForMc(l_pProcTarget,
-                                               l_pMcaTarget,
-                                               l_mcaInGrp))
-                        {
-                            //Skip this MCA is not in any  group
-                            continue;
-                        }
-
-                        //Increment sharing count if mem configured under group.
-                        if(l_procMemSizesBytes[l_mcaInGrp] > 0)
-                        {
-                            l_mcaSharingCount[l_mcaInGrp]++;
-
-                            //Assign sharing group id only if shared
-                            //And only when first instance of sharing is found
-                            if(l_mcaSharingCount[l_mcaInGrp] ==
-                                                 HDAT_MIN_NUM_FOR_SHARING)
-                            {
-                                l_mcsSharingGrpIds[l_mcaInGrp] =
-                                    l_nxtSharingGroupId;
-                                l_nxtSharingGroupId++;
-                            }
-                        }
-                    }
 
                     for(uint32_t l_mcaIdx = 0; l_mcaIdx<l_mcaList.size();
                         ++l_mcaIdx)
