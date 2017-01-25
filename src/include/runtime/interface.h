@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -655,10 +655,10 @@ typedef struct runtimeInterfaces
      *      Must not be NULL.  Container is assumed to be stripped of any ECC
      *      and must start with a valid secure header (which contains the
      *      container size information)
-     *  @param[in] i_pHwHashKey Pointer to a valid hardware hash key.
+     *  @param[in] i_pHwKeyHash Pointer to a valid hardware keys' hash.
      *      Must not be NULL.
-     *  @param[in] i_hwHashKeySize Size of the hardware hash key.
-     *      A value which incorrectly states the size of the hardware hash key
+     *  @param[in] i_hwKeyHashSize Size of the hardware keys' hash.
+     *      A value which incorrectly states the size of the hardware keys' hash
      *      will be detected as a verification error or worse, an illegal memory
      *      access.  Must not be 0.
      *  @note If secureboot is compiled out, the function pointer will be set to
@@ -672,8 +672,8 @@ typedef struct runtimeInterfaces
      */
     int (*verify_container)(
         const void*  i_pContainer,
-        const void*  i_pHwHashKey,
-              size_t i_hwHashKeySize);
+        const void*  i_pHwKeyHash,
+              size_t i_hwKeyHashSize);
 
     // Reserve some space for future growth.
     // do NOT ever change this number, even if you add functions.

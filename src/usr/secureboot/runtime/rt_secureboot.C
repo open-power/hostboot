@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,17 +38,17 @@ namespace SECUREBOOT
 
 int verify_container(
     const void*  i_pContainer,
-    const void*  i_pHwHashKey,
-    const size_t i_hwHashKeySize)
+    const void*  i_pHwKeyHash,
+    const size_t i_hwKeyHashSize)
 {
     int rc = 0;
 
-   SB_ENTER(
+    SB_ENTER(
         "verify_container: "
         "container ptr = %p, "
-        "HW hash key ptr = %p, "
-        "HW hash key size = %d",
-        i_pContainer,i_pHwHashKey,i_hwHashKeySize);
+        "HW keys' hash ptr = %p, "
+        "HW keys' hash size = %d",
+        i_pContainer,i_pHwKeyHash,i_hwKeyHashSize);
 
     // TODO: RTC 156485
     // Implement guts of verify_container

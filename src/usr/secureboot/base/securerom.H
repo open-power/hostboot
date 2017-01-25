@@ -71,13 +71,28 @@ class SecureROM
         errlHndl_t hashBlob(const void * i_blob, size_t i_size, SHA512_t io_buf) const;
 
         /**
-         * @brief Retrieve the internal hardware hash key from secure ROM
+         * @brief Retrieve the internal hardware keys' hash from secure ROM
          *        object.
          *
          * @param[out] o_hash  Reference to the sha2_hash_t array to copy the
          *                     hash to.
          */
-        void getHwHashKeys(sha2_hash_t o_hash);
+        void getHwKeyHash(sha2_hash_t o_hash);
+
+        /*
+         * @brief Hash the concatenation of N Blobs
+         *
+         * Asserts if any blob pointer is NULL
+         *
+         * @param[in]  i_blobs     Vector of pairs composed of a void
+         *                         pointer to effective address and size
+         *                         of the blob to concatenate
+         * @param[out] o_buf       SHA512 hash
+         *
+         * @return errlHndl_t  NULL on success
+         */
+        errlHndl_t hashConcatBlobs (const blobPair_t &i_blobs,
+                                    SHA512_t o_buf) const;
 
     protected:
 
@@ -104,21 +119,20 @@ class SecureROM
         void * iv_device_ptr;
 
         /**
-         * Hash Key Retrieved From System
+         * HW key' hash retrieved from system
          */
-        sha2_hash_t iv_hash_key;
-
+        sha2_hash_t iv_key_hash;
 
         /********************************************
          * Private Functions
          ********************************************/
 
         /**
-         * @brief Retrieves HW Keys from the system
+         * @brief Retrieves HW keys' hash from the system
          *
          * @return errlHndl_t  NULL on success
          */
-        errlHndl_t getHwHashKeys();
+        errlHndl_t getHwKeyHash();
 
         /**
          * @brief Static instance function for testcase only

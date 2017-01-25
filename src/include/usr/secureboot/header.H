@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,10 +59,8 @@ namespace SECUREBOOT
                 iv_data=NULL;
             }
 
-            // TODO securebootp9 This is from p9 code. See the corresponding
-            // comment in header.C for more info.
-            /** @brief Extract header from original HRMOR - 1 page address. */
-            void loadBaseHeader();
+            // @TODO RTC 168021 Converge to single method of reading
+            // secure header
 
             /**
              *  @brief Extracts base image (HBB) header (ECC removed) from
@@ -72,6 +70,9 @@ namespace SECUREBOOT
              *  @warning Asserts if header is already cached (code bug)
              */
             void loadSecurely();
+
+            // @TODO RTC 168021 Converge to single method of reading
+            // secure header
 
             /**
              *  @brief Caches non-secure PNOR copy of the base image (HBB)

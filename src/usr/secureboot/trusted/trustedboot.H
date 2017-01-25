@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,8 @@ extern trace_desc_t* g_trac_trustedboot;
 
 namespace TRUSTEDBOOT
 {
+
+const size_t DEFAULT_BIN_TRACE_SIZE = 128;
 
 /// Common static values
 enum

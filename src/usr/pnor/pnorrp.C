@@ -329,29 +329,34 @@ void PnorRP::initDaemon()
             break;
         }
 
+        // @TODO RTC 168021 Remove the non-secure extension path and
+        // always used the converged HBB extension path.
+
+        // If secured, extend base image (HBB) when Hostboot first starts.
+        // Since HBB is never re-loaded, inhibit extending this image in
+        // runtime code.
         #ifndef __HOSTBOOT_RUNTIME
         #ifdef CONFIG_SECUREBOOT
-        if(!SECUREBOOT::enabled())
+        //TODO: RTC 167581
+        // When RTC 166848 is available, add restrictions back in when
+        // base image header copy availability is detected
+        // if(!SECUREBOOT::enabled())
         {
-
-            // If in secure mode, we already have securely obtained the header
-            // because we copied it before the blind purge.  In non-secure mode,
-            // cache the header from PNOR (susceptible to attacks).  This is ok
-            // because there are already no security guarantees in non-secure
-            // mode.  We need to get the HBB address separately because the
-            // OC ignores the header
+            // If compliant bootloader was present, it saved the HBB header
+            // to a known location accessible to HBB.  Until that bootloader
+            // is widely distributed, when in non-secure mode in lab,
+            // manufacturing, etc., read the header directly from PNOR.
             PNOR::SideInfo_t pnorInfo = {PNOR::WORKING};
             l_errhdl = PnorRP::getSideInfo(PNOR::WORKING, pnorInfo);
-            if(l_errhdl != NULL)
+            if(l_errhdl != nullptr)
             {
                 break;
             }
 
-            const SectionData_t* pHbb = &iv_TOC[PNOR::HB_BASE_CODE];
-            bool ecc = (pHbb->integrity == FFS_INTEG_ECC_PROTECT) ? true :false;
+            const SectionData_t* const pHbb = &iv_TOC[PNOR::HB_BASE_CODE];
+            const bool ecc = (pHbb->integrity == FFS_INTEG_ECC_PROTECT) ?
+                true :false;
 
-            // We have to read two pages because the secure header is a page by
-            // itself, but it is prefixed by the SBE header
             uint8_t pHeader[PAGESIZE] = {0};
             uint64_t fatalError = 0;
             l_errhdl = readFromDevice(
@@ -364,12 +369,12 @@ void PnorRP::initDaemon()
             // If fatalError != 0 there is an uncorrectable ECC error (UE).
             // In that case, continue on with inaccurate data, as
             // readFromDevice API will initiate a shutdown
-            if(l_errhdl != NULL)
+            if(l_errhdl != nullptr)
             {
                 break;
             }
 
-            // Skip the SBE header on the HBB image to get the real header
+            // Cache the header
             (void)SECUREBOOT::baseHeader().setNonSecurely(
                 pHeader);
         }

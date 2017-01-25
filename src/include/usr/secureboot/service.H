@@ -28,9 +28,13 @@
 #include <errl/errlentry.H>
 #include <config.h>
 #include <secureboot/settings.H>
+#include <utility>
 #include <cstdint>
 
 typedef uint8_t SHA512_t[64];
+
+typedef std::vector< std::pair<void*,size_t> > blobPair_t;
+
 /* From sha512.h:  */
 #define SHA512_DIGEST_LENGTH 64
 typedef uint8_t __attribute__((aligned(8))) sha2_hash_t[ \
@@ -160,12 +164,26 @@ namespace SECUREBOOT
     errlHndl_t hashBlob(const void * i_blob, size_t i_size, SHA512_t o_buf);
 
     /**
-     * @brief Retrieve the internal hardware hash key from secure ROM
-     *        object.
+     * @brief Retrieve the internal hardware keys' hash used to validate
+     *     containers
      * @param[out] o_hash  Reference to the sha2_hash_t array to copy the
      *                     hash to.
      */
-    void getHwHashKeys(sha2_hash_t o_hash);
+     void getHwKeyHash(sha2_hash_t o_hash);
+
+     /*
+      * @brief Hash the concatenation of N Blobs
+      *
+      *  Asserts if any blob pointer is NULL
+      *
+      * @param[in]  i_blobs     Vector of pairs composed of a void
+      *                         pointer to effective address and size
+      *                         of the blob to concatenate
+      * @param[out] o_buf       SHA512 hash
+      *
+      * @return errlHndl_t  NULL on success
+      */
+    errlHndl_t hashConcatBlobs(const blobPair_t &i_blobs, SHA512_t o_buf);
 
     /**
      * @brief Common secureboot handler for secureboot failures.

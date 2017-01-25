@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -298,28 +298,31 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
 
             }
 
-            if (o_TOC[l_secId].version == FFS_VERS_SHA512)
+            // @TODO RTC 168021 Remove legacy extensions when all
+            // secure sections are supported
+            auto isSecure = PNOR::isSecureSection(l_secId);
+            if (   o_TOC[l_secId].version == FFS_VERS_SHA512
+                && !isSecure)
             {
-              TRACFCOMP(g_trac_pnor, "PNOR::parseTOC: Incrementing"
-                              " Flash Address for SHA Header");
-              uint32_t l_addr = o_TOC[l_secId].flashAddr;
-              size_t l_headerSize = 0;
-              if (o_TOC[l_secId].integrity == FFS_INTEG_ECC_PROTECT)
-              {
-                  l_headerSize = PAGESIZE_PLUS_ECC;
-              }
-              else
-              {
-                  l_headerSize = PAGESIZE;
-              }
-              l_errhdl = PNOR::extendHash(l_addr, l_headerSize,
-                                          cv_EYECATCHER[l_secId]);
-              if (l_errhdl)
-              {
-                  break;
-              }
+                // For non-secure sections with a SHA512 header, the
+                // flash address has incremented past the header, so
+                // back up by the header size (accounting for ECC) in order
+                // to extend the header
+                auto addr = o_TOC[l_secId].flashAddr;
+                size_t headerSize =
+                    (o_TOC[l_secId].integrity == FFS_INTEG_ECC_PROTECT) ?
+                    PAGESIZE_PLUS_ECC : PAGESIZE;
+                addr -= headerSize;
+
+                l_errhdl = PNOR::extendHash(addr, headerSize,
+                                            cv_EYECATCHER[l_secId]);
+                if (l_errhdl)
+                {
+                    break;
+                }
             }
         }
+
         for(int tmpId = 0;
         tmpId < PNOR::NUM_SECTIONS;
         tmpId ++ )
@@ -335,6 +338,8 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
     return l_errhdl;
 }
 
+// @TODO RTC 168021 Remove legacy extensions when all secure sections are
+// supported
 errlHndl_t PNOR::extendHash(uint64_t i_addr, size_t i_size, const char* i_name)
 {
     errlHndl_t l_errhdl = NULL;
