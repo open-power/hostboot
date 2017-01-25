@@ -50,7 +50,7 @@ namespace rdimm
 enum raw_card_rev : uint8_t
 {
     A1 = 0x20,
-
+    B1 = 0x21,
     // RDIMM power-on
     C1 = 0x22,
 
@@ -76,6 +76,7 @@ extern const std::vector< std::pair< uint8_t, rcw_settings> > RAW_CARDS;
 extern rcw_settings rdimm_rc_c1;
 extern rcw_settings rdimm_rc_c2;
 extern rcw_settings rdimm_rc_a1;
+extern rcw_settings rdimm_rc_b1;
 extern rcw_settings rdimm_rc_b2;
 extern rcw_settings rdimm_rc_vbu;
 
