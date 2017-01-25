@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -134,8 +134,34 @@ public:
               const uint16_t i_reasonCode,
               const uint64_t i_user1 = 0,
               const uint64_t i_user2 = 0,
-              const bool i_hbSwError = false );
+              const bool i_hbSwError = false);
 
+    /**
+     * @brief   ErrlEntry constructor. Builds an error log with info
+     * constructed from the input.
+     * Event type, Sub System, SRC type, and Terminate state are defaulted
+     * to the most common values for Host Boot environment.  These values
+     * can also be set to specific values by users if needed.
+     * For available values, see errltypes.H
+     * To understand the meaning of these values, refer to the
+     * Platform Event Log and SRC PLDD at: https://mcdoc.boeblingen.de.
+     * ibm.com/out/out.ViewDocument.php?documentid=1675
+     *
+     * The backtrace is captured as user detail data. Use removeBackTrace to
+     * remove
+     *
+     * The order of parameters is arranged so that Host Boot error log
+     * is as close to SP as possible.
+     *
+     * @param[in]   i_sev           Log's severity. See errltypes.H for
+     *                              available values
+     * @param[in]   i_srcWords      The SRC words that will fill in other
+     *                              parameters
+     * @return  None
+     */
+
+    ErrlEntry(const errlSeverity_t i_sev,
+                     uint32_t i_srcWords[9]);
     /**
      * @brief   Destructor
      *
@@ -766,9 +792,9 @@ private:
 
 private:
     // Data Members
+    ErrlSrc         iv_Src;        // primary SRC section
     ErrlPrvt        iv_Private;    // private header object
     ErrlUH          iv_User;       // user header object
-    ErrlSrc         iv_Src;        // primary SRC section
     std::vector<ErrlUD*> iv_SectionVector;  // list of user defined sections
     std::vector<uint64_t> iv_btAddrs;       // list of addresses for the backtrace
     ErrlUserDetailsBackTrace * iv_pBackTrace; // Pointer to back trace

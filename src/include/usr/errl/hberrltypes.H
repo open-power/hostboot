@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,6 +83,36 @@ namespace ERRORLOG { class ErrlEntry; };
 #define FOUR_UINT8_TO_UINT32(mostleft_8, left_8, right_8, mostright_8) \
         ( (TO_UINT32(TWO_UINT8_TO_UINT16(mostleft_8, left_8)) << 16) | \
           (TO_UINT32(TWO_UINT8_TO_UINT16(right_8, mostright_8))) )
+
+
+/**
+ * @brief SRC type definitions
+ * Needs to fit into 1 byte for flattening purposes.
+ *
+ * This represents the byte in an SRC in position
+ * XX......  such as BC in BC81F00B.
+ *
+ * Refer to errlentry.H and this setter:
+ * void ErrlEntry::setSrcType(const srcType_t i_srcType)
+ *
+ */
+enum srcType_t
+{
+    SRCI_INTERVENTION_REQ    = 0xA1,
+    SRCI_MACH_CHECK          = 0xB1,
+    SRCI_ERR_INFO            = 0xB1,
+    SRCI_IPL_STATUS          = 0xC1,
+    SRCI_GENERAL_STATUS      = 0xD1,
+    SRCI_DUMP_STATUS         = 0xD1,
+
+    HBT_INTERVENTION_REQ   = 0xAC,
+    HBT_ERR_INFO           = 0xBC,
+    HBT_IPL_STATUS         = 0xCC,
+    HBT_GENERAL_STATUS     = 0xDC,
+
+    POWR_PHYP_STATUS   = 0x10,
+};
+
 
 namespace ERRORLOG
 {
@@ -203,29 +233,6 @@ enum errlEventType_t
     ERRL_ETYPE_CONCURRENT_MAINTENANCE   = 0x40,
     ERRL_ETYPE_CAPACITY_UPGRADE         = 0x60,
 };
-
-
-
-
-/**
- * @brief SRC type definitions
- * Needs to fit into 1 byte for flattening purposes.
- *
- * This represents the byte in an SRC in position
- * XX......  such as BC in BC81F00B.
- *
- * Refer to errlentry.H and this setter:
- * void ErrlEntry::setSrcType(const srcType_t i_srcType)
- *
- */
-enum srcType_t
-{
-    SRC_INTERVENTION_REQ   = 0xAC,
-    SRC_ERR_INFO           = 0xBC,
-    SRC_IPL_STATUS         = 0xCC,
-    SRC_GENERAL_STATUS     = 0xDC,
-};
-
 
 /**
  * @brief Sub system definitions

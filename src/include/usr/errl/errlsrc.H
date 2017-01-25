@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -82,6 +84,14 @@ private:
              uint64_t  i_user1,
              uint64_t  i_user2 );
 
+    /**
+     * @brief Constructor. Pass in items destined for the primary SRC
+     * section in the error log.
+     *
+     * @param[in] i_srcWords    SRC Words
+     *
+     */
+    ErrlSrc( uint32_t   i_srcWords[9]);
 
     /** @brief Destructor.  */
     ~ErrlSrc();
@@ -150,15 +160,31 @@ private:
      */
     uint64_t aschex2bin(char c) const;
 
+    /*
+     * @brief Fill in the SRC words with current data. This is called
+     *        at the beginning of flatten()
+     */
+    void setSRCWords();
+
+    /*
+     * @brief Fill in the other class variables from the src words.
+     *        This is only called if we go through the correct constructor
+     */
+    void formatSRCWords();
+
     // Instance data
-    srcType_t       iv_srcType : 8; // SRC type, the ?? in SRC ??xxxxxx
-    uint8_t         iv_modId;       // module ID
-    uint16_t        iv_reasonCode;  // reason code
-    epubSubSystem_t iv_ssid : 8 ;   // subsystem type, the ?? in SRC xx??xxxx
-    uint64_t        iv_user1;       // user data 1
-    uint64_t        iv_user2;       // user data 2
-    bool            iv_deconfig;    // true if there is a deconfigure callout
-    bool            iv_gard;        // true if there is a gard callout
+    srcType_t       iv_srcType : 8;  // SRC type, the ?? in SRC ??xxxxxx
+    uint8_t         iv_modId;        // module ID
+    uint16_t        iv_reasonCode;   // reason code
+    epubSubSystem_t iv_ssid : 8 ;    // subsystem type, the ?? in SRC xx??xxxx
+    uint64_t        iv_user1;        // user data 1
+    uint64_t        iv_user2;        // user data 2
+    bool            iv_deconfig;     // true if there is a deconfigure callout
+    bool            iv_gard;         // true if there is a gard callout
+    uint32_t        iv_srcWords[9]; // filled in to match what PRD needs
+
+    //when true, the error log is formed from the given src words.
+    bool iv_fromSRCWords;
 };
 
 
