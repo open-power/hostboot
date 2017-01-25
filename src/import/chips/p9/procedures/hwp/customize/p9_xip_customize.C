@@ -302,7 +302,6 @@ fapi2::ReturnCode get_overlays_ring(
     // Get Gptr overlay ring from overlays section into ringBuf2
     l_rc = P9_TOR::tor_get_single_ring(
                i_overlaysSection,
-               P9_XIP_MAGIC_SEEPROM,
                l_ddLevel,
                i_ringId,
                P9_TOR::SBE,
