@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,9 +161,11 @@ void Service::processIntrQMsgPreAck(const msg_t & i_msg)
 
     TargetHandle_t proc = NULL;
 
+    // 32 bits:    22 unused,  3:node, 3:chip,
+    //  1:interProcInterrupt,  3:InterruptSourceNumber
     INTR::XISR_t xisr;
 
-    xisr.u32 = i_msg.data[0];
+    xisr.u32 = i_msg.data[1];
 
     TargetHandleList procs;
     getTargetService().getAllChips(procs, TYPE_PROC);
