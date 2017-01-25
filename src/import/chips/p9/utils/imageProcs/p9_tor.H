@@ -25,7 +25,6 @@
 #ifndef _P9_TOR_H_
 #define _P9_TOR_H_
 
-#include "p9_ring_id.h"
 #include "p9_ringId.H"
 
 #define MAX_TOR_RING_OFFSET  (256*256-1)  // Max value of 2Byte uint
@@ -36,7 +35,7 @@ namespace P9_TOR
 extern const char* ppeTypeName[];
 extern const char* ringVariantName[];
 
-#define  TOR_VERSION  2
+#define  TOR_VERSION  3
 
 //
 // TOR Magic values for top-level TOR image and TOR sub-images
@@ -53,7 +52,34 @@ enum TorMagicNum
     TOR_MAGIC_CEN   = (uint32_t)0x544F524E,   // "TORN"
 };
 
+//
+// Chip types to represent p9n, p9c, centaur
+//
+enum ChipType
+{
+    CT_P9N,
+    CT_P9C,
+    CT_CEN,
+    NUM_CHIP_TYPES
+};
+
 typedef uint8_t ChipType_t;
+const ChipType_t INVALID_CHIP_TYPE = 0xff;
+
+typedef struct ChipTypeList
+{
+    const char* name;
+    ChipType_t  type;
+} ChipTypeList_t;
+
+const ChipTypeList_t CHIP_TYPE_LIST[] =
+{
+    {"p9n",     CT_P9N},
+    {"p9c",     CT_P9C},
+    {"cen",     CT_CEN},
+};
+
+
 
 //
 // TOR header field (appears in top of every HW, SBE, CEN, OVRD, etc ring section)
@@ -65,26 +91,26 @@ typedef struct
     ChipType_t chipType;    // Value from ChipType enum
     uint8_t    ddLevel;     // =0xff if MAGIC_HW, >0 all other MAGICs
     uint8_t    numDdLevels; // >0 if MAGIC_HW, =1 all other MAGICs
-    uint32_t   size;        // Size of the TOR ringSection.
+    uint32_t   size;        // A place holder for now, but will be used in a later commit.
 } TorHeader_t;
 
+#define UNDEFINED_DD_LEVEL (uint8_t)0xff
+
+//
+// Subsequent TOR fields (listed in order they appear in TOR for easier understanding)
+//
+typedef struct
+{
+    uint32_t offset;
+    uint32_t size;
+    uint8_t  ddLevel;
+    uint8_t  reserved[3];
+} TorDdBlock_t;
 
 typedef struct
 {
-    uint32_t TorNumDdLevels;
-    uint32_t reserved;
-} TorNumDdLevels_t;
-
-typedef struct
-{
-    uint32_t TorDdLevelAndOffset;
-    uint32_t TorDdBlockSize;
-} TorDdLevelBlock_t;
-
-typedef struct
-{
-    uint32_t TorPpeTypeOffset;
-    uint32_t TorPpeBlockSize;
+    uint32_t offset;
+    uint32_t size;
 } TorPpeBlock_t;
 
 typedef struct
@@ -94,6 +120,13 @@ typedef struct
 } TorCpltBlock_t;
 
 typedef uint16_t TorRingOffset_t;  // Ring offset value in TOR offset slot
+
+//@FIXME Discard asap
+typedef enum TorOffsetSize
+{
+    RING_OFFSET_SIZE = 2,
+    CPLT_OFFSET_SIZE = 4
+} TorOffsetSize_t;
 
 #define TOR_SUCCESS                           0
 #define TOR_RING_FOUND                        0
@@ -117,6 +150,7 @@ typedef uint16_t TorRingOffset_t;  // Ring offset value in TOR offset slot
 #define TOR_BUFFER_TOO_SMALL                 17
 #define TOR_TOO_MANY_DD_LEVELS               18
 #define TOR_OFFSET_TOO_BIG                   19
+#define TOR_INVALID_VARIANT                  20
 
 // Different options to extract data using tor_access_ring API
 typedef enum RingBlockType
@@ -142,12 +176,6 @@ typedef enum PpeType
     NUM_PPE_TYPES = 0x03
 } PpeType_t;
 
-typedef enum TorOffsetSize
-{
-    RING_OFFSET_SIZE = 2,
-    CPLT_OFFSET_SIZE = 4
-} TorOffsetSize_t;
-
 ///
 /// ****************************************************************************
 /// Function declares.
@@ -160,9 +188,6 @@ typedef enum TorOffsetSize
 /// It contains details of p9 Ring, which is used for scanning operation.
 /// TOR API supports two type of binary image. 1) HW image format and 2)
 /// SEEPROM image format binary
-///
-/// \param[in]  i_magic A uint64_t variable to indicate XIP image format
-/// ring section passed
 ///
 /// \param[in]  i_ringId A enum to indicate unique ID for the ring
 ///
@@ -211,8 +236,7 @@ typedef enum TorOffsetSize
 /// and the following n number of operation based on the call.
 ///
 /// GET_SINGLE_RING (\a i_ringVariant) - traverse on \a i_ringSection buffer
-/// based on the following input param \a i_magic which gives details of image
-/// type, \a i_ringId which gives ring info, \a i_ddLevel which gives dd spec
+/// based on \a i_ringId which gives ring info, \a i_ddLevel which gives dd spec
 /// (Used only for HW image/optional for other image) i_ppeType which gives ppe
 /// type info, \a i_ringVarint gives ring variant info and \a io_instance which
 /// gives chiplet instance specific while accessing instance specific ring and
@@ -222,33 +246,29 @@ typedef enum TorOffsetSize
 /// data copied into io_ringBlockPtr. \a o_ringName returns ring string name.
 ///
 /// GET_DD_LEVEL_RINGS (\a i_ringVariant) - traverse on \a i_ringSection
-/// buffer based on the following input param \a i_magic which gives details
-/// of image type and \a i_ddLevel which gives dd spec(Used only for HW image
+/// buffer based on \a i_ddLevel which gives dd spec (used only for HW image
 /// /optional  for other image) On return, \a io_ringBlockPtr contains DD level
 /// specific ring section and \a io_ringBlockSize contains size of the data
 /// copied into io_ringBlockPtr. \a Other params are optional.
 /// This ringVariant works on HW image.
 ///
 /// GET_PPE_LEVEL_RINGS (\a i_ringVariant) - traverse on \a i_ringSection
-/// buffer based on the following input param \a i_magic which gives the detail
-/// of image type, i_ppeType which gives ppe type info  and \a i_ddLevel which
-/// gives dd spec(Used only for HW image/optional for other image) On return,
+/// buffer based on \a i_ppeType which gives ppe type info  and \a i_ddLevel which
+/// gives dd spec used only for HW image/optional for other image) On return,
 /// \a io_ringBlockPtr contains PPE type specific ring section and
 /// \a io_ringBlockSize contains size of the data copied into io_ringBlockPtr.
 /// \a Other params are optional. This ringVariant works on HW image.
 ///
 /// GET_CPLT_LEVEL_RINGS (\a i_ringVariant) - traverse on \a i_ringSection
-/// buffer based on the following input param \a i_magic which gives the detail
-/// of image type, i_ppeType which gives ppe type info, \a i_ddLevel which gives
-/// dd spec(Used only for HW image/optional for other image) and \a io_RingType
+/// buffer based on \a i_ppeType which gives ppe type info, \a i_ddLevel which gives
+/// dd spec (used only for HW image/optional for other image) and \a io_RingType
 /// which gives ring type info. On return, \a io_ringBlockPtr contains chiplet
 /// specific ring type ring section and \a io_ringBlockSize contains size of
 /// the data copied into io_ringBlockPtr. \a Other params are optional.
 ///
 /// PUT_SINGLE_RING (\a i_ringVariant) - traverse on \a i_ringSection buffer
-/// based on the following input param \a i_magic which gives detail of image
-/// type, \a i_ringId which gives ring info, \a i_ddLevel which gives dd spec
-/// (Used only for HW image/optional for other image), i_ppeType which gives
+/// based on \a i_ringId which gives ring info, \a i_ddLevel which gives dd spec
+/// (used only for HW image/optional for other image), i_ppeType which gives
 /// ppe type info, \a i_ringVarint gives ring variant info and \a io_instance
 /// which gives chiplet instance specific while accessing instance specific
 /// ring and returns chiplet number while accessing common ring. On return,
@@ -261,7 +281,6 @@ typedef enum TorOffsetSize
 ///
 /// \retval non-0 See \ref TOR API RETURN errors
 int tor_access_ring( void*           i_ringSection, // Ring address Ptr any of .rings, .overrides and .overlays.
-                     uint64_t        i_magic,          // Image Magic Number
                      RingID          i_ringId,         // Unique ring ID
                      uint16_t        i_ddLevel,        // DD level info
                      PpeType_t       i_PpeType,        // PPE type : SBE, CME, etc
@@ -281,9 +300,6 @@ int tor_access_ring( void*           i_ringSection, // Ring address Ptr any of .
 /// \param[in]  i_ringSection A pointer to a Ring section binary image.
 /// It contain details of p9 Ring which is used for scanning operation.
 /// TOR API supports HW image format  only
-///
-/// \param[in]  i_magic A uint64_t variable to indicate XIP image format
-/// ring section passed
 ///
 /// \param[in]  i_ringId A enum to indicate unique ID for the ring
 ///
@@ -316,7 +332,6 @@ int tor_access_ring( void*           i_ringSection, // Ring address Ptr any of .
 ///
 /// \retval non-0 See \ref TOR API RETURN errors
 int tor_get_single_ring ( void*          i_ringSection,
-                          uint64_t       i_magic,          // Image Magic Number
                           uint16_t       i_ddLevel,
                           RingID         i_ringId,
                           PpeType_t      i_PpeType,

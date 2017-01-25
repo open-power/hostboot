@@ -2006,7 +2006,6 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
                       sgpeOvrdRings.getRingName( quadCmnOvrdRingId ) );
 
             rc = tor_get_single_ring( i_pOverride,
-                                      P9_XIP_MAGIC_SEEPROM,
                                       i_chipState.getChipLevel(),
                                       quadCmnOvrdRingId,
                                       P9_TOR::SBE,
@@ -2486,7 +2485,6 @@ fapi2::ReturnCode layoutCmnRingsForCme( Homerlayout_t*   i_pHomer,
             }
 
             rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
-                                      P9_XIP_MAGIC_CME,
                                       i_chipState.getChipLevel(),
                                       coreCmnRingId,
                                       P9_TOR::CME,
@@ -2604,7 +2602,6 @@ fapi2::ReturnCode layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
 
                 tempSize = i_ringData.iv_sizeWorkBuf1;
                 rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
-                                          P9_XIP_MAGIC_CME,
                                           i_chipState.getChipLevel(),
                                           io_cmeRings.getInstRingId(0),
                                           P9_TOR::CME,
@@ -2669,7 +2666,6 @@ fapi2::ReturnCode layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
 
                 tempSize = i_ringData.iv_sizeWorkBuf1;
                 rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
-                                          P9_XIP_MAGIC_CME,
                                           i_chipState.getChipLevel(),
                                           io_cmeRings.getInstRingId(0),
                                           P9_TOR::CME,
@@ -2780,7 +2776,6 @@ fapi2::ReturnCode layoutCmeScanOverride( Homerlayout_t*   i_pHomer,
                       cmeOvrdRings.getRingName( coreCmnOvrdRingId ) );
 
             rc = tor_get_single_ring( i_pOverride,
-                                      P9_XIP_MAGIC_SEEPROM,
                                       i_chipState.getChipLevel(),
                                       coreCmnOvrdRingId,
                                       P9_TOR::SBE,
@@ -3132,7 +3127,6 @@ fapi2::ReturnCode layoutCmnRingsForSgpe( Homerlayout_t*     i_pHomer,
                 l_ringVariant = BASE;
             }
             rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
-                                      P9_XIP_MAGIC_SGPE,
                                       i_chipState.getChipLevel(),
                                       torRingId,
                                       P9_TOR::SGPE,
@@ -3251,7 +3245,6 @@ fapi2::ReturnCode layoutInstRingsForSgpe( Homerlayout_t*     i_pHomer,
 
                 quadSpecRingId = io_sgpeRings.getInstRingId( ringIndex );
                 rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
-                                          P9_XIP_MAGIC_SGPE,
                                           i_chipState.getChipLevel(),
                                           quadSpecRingId,
                                           P9_TOR::SGPE,

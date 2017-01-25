@@ -68,9 +68,10 @@ typedef enum RingVariant   // Base variables
     NOT_VALID = 0xff
 } RingVariant_t;
 
+#define P9_RINGID_VARIANT_ORDER_SIZE 3
 typedef struct
 {
-    uint8_t  variant[3];
+    uint8_t  variant[P9_RINGID_VARIANT_ORDER_SIZE];
 } RingVariantOrder;
 
 
@@ -244,6 +245,7 @@ const uint8_t INSTANCE_RING_MASK = 0x7F;
 
 namespace PERV
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -289,6 +291,7 @@ static const CHIPLET_DATA g_pervData =
 
 namespace N0
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -318,12 +321,13 @@ static const CHIPLET_DATA g_n0Data =
     2, // N0 Chiplet ID is 2.
     9, // 9 common rings for N0 Chiplet
     3, // 3 instance specific rings for N0 chiplet
-    3
+    3  // FIXME: number of variants? doesn't match RingVariants below!
 };
 };
 
 namespace N1
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -363,6 +367,7 @@ static const CHIPLET_DATA g_n1Data =
 
 namespace N2
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -398,6 +403,7 @@ static const CHIPLET_DATA g_n2Data =
 
 namespace N3
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -434,6 +440,7 @@ static const CHIPLET_DATA g_n3Data =
 
 namespace XB
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -476,6 +483,7 @@ static const CHIPLET_DATA g_xbData =
 
 namespace MC
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -519,6 +527,7 @@ static const CHIPLET_DATA g_mcData =
 
 namespace OB0
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -551,6 +560,7 @@ static const CHIPLET_DATA g_ob0Data =
 
 namespace OB1
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -584,6 +594,7 @@ static const CHIPLET_DATA g_ob1Data =
 
 namespace OB2
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -616,6 +627,7 @@ static const CHIPLET_DATA g_ob2Data =
 
 namespace OB3
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -647,6 +659,7 @@ static const CHIPLET_DATA g_ob3Data =
 }; // end of namespace OB2
 namespace PCI0
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -676,6 +689,7 @@ static const CHIPLET_DATA g_pci0Data =
 
 namespace PCI1
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -705,6 +719,7 @@ static const CHIPLET_DATA g_pci1Data =
 
 namespace PCI2
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -735,6 +750,7 @@ static const CHIPLET_DATA g_pci2Data =
 
 namespace EQ
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -832,6 +848,7 @@ static const CHIPLET_DATA g_eqData =
 
 namespace EC
 {
+// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
 struct RingVariants
 {
     uint16_t iv_base;
@@ -868,7 +885,7 @@ static const uint8_t INVALID_RING = 0xFF;
 #ifndef __PPE__
 struct ringProperties_t
 {
-    uint8_t iv_torOffSet;
+    uint8_t iv_torOffSet;  // FIXME: misnomer
     char iv_name[50];
     CHIPLET_TYPE iv_type;
 };
