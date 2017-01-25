@@ -582,7 +582,7 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target)
 
         // HW Key Hash
         sha2_hash_t l_hw_key_hash;
-        SECUREBOOT::getHwHashKeys(l_hw_key_hash);
+        SECUREBOOT::getHwKeyHash(l_hw_key_hash);
         l_err = pcrExtend(PCR_1, l_hw_key_hash,
                           sizeof(sha2_hash_t),"HW KEY HASH");
         if (l_err)

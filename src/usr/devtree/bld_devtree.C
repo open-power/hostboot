@@ -2279,7 +2279,7 @@ errlHndl_t bld_fdt_secureboot(devTree * i_dt, bool i_smallTree)
 
         dtOffset_t secBootNode = i_dt->addNode(rootNode, "ibm,secureboot");
         sha2_hash_t hw_key_hash;
-        SECUREBOOT::getHwHashKeys(hw_key_hash);
+        SECUREBOOT::getHwKeyHash(hw_key_hash);
 
         i_dt->addPropertyBytes(secBootNode, "hw-key-hash",
                                reinterpret_cast<uint8_t*>(hw_key_hash),

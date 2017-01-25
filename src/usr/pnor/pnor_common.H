@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,6 +72,9 @@ namespace PNOR {
      */
      void physicalToMmioOffset(uint64_t  i_hbbAddress,
                                uint64_t& o_mmioOffset);
+
+    // @TODO RTC 168021 Remove legacy extensions when all secure sections
+    // are supported via story 168021
 
     /**
      * @brief Reads version header of section, hashes it, and extends to tpm

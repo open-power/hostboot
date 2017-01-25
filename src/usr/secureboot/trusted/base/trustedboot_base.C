@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,10 @@
 #include <errl/errludstring.H>
 #include <secureboot/trustedbootif.H>
 #include <secureboot/trustedboot_reasoncodes.H>
+#include <secureboot/header.H>
+#include <secureboot/containerheader.H>
+#include <pnor/pnorif.H>
+#include <config.h>
 #include "../trustedboot.H"
 #include "../trustedbootCmds.H"
 #include "../trustedbootUtils.H"
@@ -51,7 +55,7 @@
 // Trace definitions
 // ----------------------------------------------
 #ifdef CONFIG_TPMDD
-trace_desc_t* g_trac_trustedboot = NULL;
+trace_desc_t* g_trac_trustedboot = nullptr;
 TRAC_INIT( & g_trac_trustedboot, "TRBOOT", KILOBYTE );
 #endif
 
@@ -59,6 +63,9 @@ namespace TRUSTEDBOOT
 {
 
 #ifdef CONFIG_TPMDD
+// Const string to append to PCR extension messages
+const char* const FW_KEY_HASH_EXT = " FW KEY HASH";
+
 /// Global object to store TPM status
 SystemTpms systemTpms;
 
@@ -255,26 +262,189 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
     return err;
 }
 
-errlHndl_t extendPnorSectionHash(const SECUREBOOT::ContainerHeader& i_conHdr,
-                                 const void* i_vaddr,
-                                 const PNOR::SectionId i_sec)
+errlHndl_t extendPnorSectionHash(
+    const SECUREBOOT::ContainerHeader& i_conHdr,
+    const void* const                  i_vaddr,
+    const PNOR::SectionId              i_sec)
 {
-    errlHndl_t l_errhdl = NULL;
+    errlHndl_t pError = nullptr;
 
-    // TODO securebootp9
-    // remove the following code and implement based on p8 code
-    TRACFCOMP(g_trac_trustedboot, "ExtendPnorSectionHash called for section %d and "
-              " address %.16llX with payload text size %i"
-              "but not unimplemented in p9", i_sec, i_vaddr);
+#ifdef CONFIG_TPMDD
 
-    return l_errhdl;
+    do {
+
+    PNOR::SectionInfo_t sectionInfo;
+    pError = PNOR::getSectionInfo(i_sec,sectionInfo);
+    if(pError)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK " Failed in call to "
+            "getSectionInfo() with section ID = %d.",
+            i_sec);
+        break;
+    }
+
+    TRACDCOMP(g_trac_trustedboot, ENTER_MRK " extendPnorSectionHash for "
+        "section: %s",sectionInfo.name);
+
+    const size_t protectedSize = i_conHdr.payloadTextSize();
+
+    // Generate pcr extension message
+    char swKeyMsg[strlen(sectionInfo.name) + strlen(FW_KEY_HASH_EXT) + 1];
+    memset(swKeyMsg, 0, sizeof(swKeyMsg));
+    strcat(swKeyMsg,sectionInfo.name);
+    strcat(swKeyMsg,FW_KEY_HASH_EXT);
+
+    TPM_Pcr pnorHashPcr = PCR_0;
+    // PAYLOAD is the only section that needs its hash extended to PCR_4
+    if (i_sec == PNOR::PAYLOAD)
+    {
+        pnorHashPcr = PCR_4;
+    }
+    // Extend swKeyHash to the next PCR after the hash extension PCR.
+    const TPM_Pcr swKeyHashPcr = static_cast<TPM_Pcr>(pnorHashPcr + 1);
+
+    if (SECUREBOOT::enabled())
+    {
+        // If secureboot is enabled, use protected hash in header
+        pError = TRUSTEDBOOT::pcrExtend(pnorHashPcr,
+              reinterpret_cast<const uint8_t*>(i_conHdr.payloadTextHash()),
+              sizeof(SHA512_t),
+              sectionInfo.name);
+        if (pError)
+        {
+            TRACFCOMP(g_trac_trustedboot, ERR_MRK " Failed in call to "
+                "pcrExtend() (extend payload text hash) for section %s.",
+                sectionInfo.name);
+            break;
+        }
+
+        // Extend SW public key hash
+        pError = TRUSTEDBOOT::pcrExtend(swKeyHashPcr,
+                    reinterpret_cast<const uint8_t*>(i_conHdr.swKeyHash()),
+                    sizeof(SHA512_t),
+                    swKeyMsg);
+        if (pError)
+        {
+            TRACFCOMP(g_trac_trustedboot, ERR_MRK " Failed in call to "
+                "pcrExtend() (extend SW public key hash) for section %s.",
+                sectionInfo.name);
+            break;
+        }
+    }
+    else
+    {
+        // If secureboot is not enabled, measure protected section
+        SHA512_t hash = {0};
+        SECUREBOOT::hashBlob(i_vaddr, protectedSize, hash);
+        pError = TRUSTEDBOOT::pcrExtend(pnorHashPcr, hash,
+                                        sizeof(SHA512_t),
+                                        sectionInfo.name);
+        if (pError)
+        {
+            TRACFCOMP(g_trac_trustedboot, ERR_MRK " Failed in call to "
+                "pcrExtend() (extend payload text) for section %s.",
+                sectionInfo.name);
+            break;
+        }
+    }
+
+    } while(0);
+
+    TRACDCOMP(g_trac_trustedboot, EXIT_MRK " extendPnorSectionHash");
+
+#endif
+
+    return pError;
 }
 
 errlHndl_t extendBaseImage()
 {
-    errlHndl_t pError = NULL;
-    // TODO securebootp9
-    // implement extendBaseImage based on p8 code
+    errlHndl_t pError = nullptr;
+
+#ifdef CONFIG_TPMDD
+
+    TRACFCOMP(g_trac_trustedboot, ENTER_MRK " extendBaseImage()");
+
+    do {
+
+    // Query the HBB header and code address
+    const void* pHbbHeader = nullptr;
+
+    (void)SECUREBOOT::baseHeader().getHeader(
+        pHbbHeader);
+
+    // Fatal code bug if either address is nullptr
+    if(pHbbHeader == nullptr)
+    {
+        assert(false,"BUG! In extendBaseImage(), cached header address is "
+            "nullptr");
+    }
+
+    TRACDBIN(g_trac_trustedboot,"Base Header",pHbbHeader,
+        TRUSTEDBOOT::DEFAULT_BIN_TRACE_SIZE);
+
+    // TODO: RTC 168021
+    // Need to remove this when HBB has a secure header across all platforms
+    // -or- a more general compatibility mechanism has been created allowing
+    // some platforms to stage in support
+    if(!PNOR::cmpSecurebootMagicNumber(
+           reinterpret_cast<const uint8_t*>(pHbbHeader)))
+    {
+        TRACFCOMP(g_trac_trustedboot, INFO_MRK " HBB header is not a secure "
+            "header; inhibiting extending base image measurement");
+        break;
+    }
+
+    // Build a container header object from the raw header
+    const SECUREBOOT::ContainerHeader hbbContainerHeader(pHbbHeader);
+
+    const void* pHbbVa = nullptr;
+    if(!SECUREBOOT::enabled())
+    {
+        PNOR::SectionInfo_t l_info;
+
+        // @TODO RTC 168021 Remove this path since header will always be
+        // cached
+        pError = getSectionInfo(PNOR::HB_BASE_CODE, l_info);
+        if(pError)
+        {
+            TRACFCOMP(g_trac_trustedboot, ERR_MRK "Failed in call to "
+                "getSectionInfo for HBB section");
+            break;
+        }
+
+        if(l_info.vaddr == 0)
+        {
+            assert(false,"BUG! In extendBaseImage(), HBB virtual address "
+                "was 0");
+        }
+
+        pHbbVa = reinterpret_cast<const void*>(
+            l_info.vaddr);
+
+        TRACDBIN(g_trac_trustedboot,"PNOR Base Code",pHbbVa,
+            TRUSTEDBOOT::DEFAULT_BIN_TRACE_SIZE);
+    }
+
+    // Extend the HBB measurement to the TPM
+    pError = extendPnorSectionHash(
+        hbbContainerHeader,
+        pHbbVa,
+        PNOR::HB_BASE_CODE);
+
+    if(pError)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK "Failed in call to "
+            "extendPnorSectionHash() for HBB section.");
+        break;
+    }
+
+    } while(0);
+
+    TRACFCOMP(g_trac_trustedboot, EXIT_MRK " extendBaseImage()");
+
+#endif
+
     return pError;
 }
 

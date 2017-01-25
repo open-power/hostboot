@@ -68,7 +68,7 @@ void* initializeBase(void* unused)
         // Load original secureboot header.
         if (enabled())
         {
-            Singleton<Header>::instance().loadBaseHeader();
+            Singleton<Header>::instance().loadSecurely();
         }
 
         // Extend memory footprint into lower portion of cache.
