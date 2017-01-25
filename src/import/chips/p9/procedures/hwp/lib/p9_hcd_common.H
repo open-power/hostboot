@@ -263,6 +263,11 @@ enum SLAVE_CONFIG_DEFS
     CFG_PM_DISABLE     = 6,
     CFG_PM_MUX_DISABLE = 7
 };
+enum SICR_DEFS
+{
+    PCBMUX_REQ_C0 = 10,
+    PCBMUX_REQ_C1 = 11
+};
 
 } // END OF NAMESPACE p9hcd
 
