@@ -335,6 +335,8 @@ push @systemAttr,
     "MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS", $reqPol->{'mss_mrw_periodic_memcal_mode_options'},
     "MSS_MRW_PERIODIC_ZQCAL_MODE_OPTIONS", $reqPol->{'mss_mrw_periodic_zqcal_mode_options'},
     "MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT", $reqPol->{'mss_mrw_safemode_mem_throttled_n_commands_per_port'},
+    "MSS_MRW_PWR_SLOPE", $reqPol->{'mss_mrw_pwr_slope'},
+    "MSS_MRW_PWR_INTERCEPT", $reqPol->{'mss_mrw_pwr_intercept'},
     "PROC_FSP_MMIO_MASK_SIZE", 0x0000000100000000,
     "PROC_FSP_BAR_SIZE", 0xFFFFFC00FFFFFFFF,
     "PROC_FSP_BAR_BASE_ADDR_OFFSET", 0x0000030100000000 ,
@@ -345,13 +347,24 @@ push @systemAttr,
     "PROC_NPU_MMIO_BAR_BASE_ADDR_OFFSET", 0x0000030200000000,
     "CP_REFCLOCK_RCVR_TERM", $reqPol->{'processor-refclock-receiver-termination'},
     "IO_REFCLOCK_RCVR_TERM", $reqPol->{'pci-refclock-receiver-termination'},
-    #TODO RTC: 163418 Set Power Management Attribute Defaults based on MRW values
     "SYSTEM_WOF_ENABLED", $reqPol->{'system_wof_enabled'},
     "VDM_ENABLE", $reqPol->{'vdm_enable'},
     "IVRM_DEADZONE_MV", $reqPol->{'ivrm_deadzone_mv'},
     "SYSTEM_RESCLK_STEP_DELAY", $reqPol->{'system_resclk_step_delay'},
     #TODO RTC: 167921 Add MRW parsing code to perl scripts to populate ATTR_NEST_LEAKAGE_PERCENT
     "NEST_LEAKAGE_PERCENT", 60,
+    "TDP_RDP_CURRENT_FACTOR", $reqPol->{'tdp_rdp_current_factor'},
+    "PM_SAFE_VOLTAGE_MV", $reqPol->{'pm_safe_voltage_mv'},
+    "IVRM_STRENGTH_LOOKUP", $reqPol->{'ivrm_strength_lookup'},
+    "IVRM_VIN_MULTIPLIER", $reqPol->{'ivrm_vin_multiplier'},
+    "IVRM_VIN_MAX_MV", $reqPol->{'ivrm_vin_max_mv'},
+    "IVRM_STEP_DELAY_NS", $reqPol->{'ivrm_step_delay_ns'},
+    "IVRM_STABILIZATION_DELAY_NS", $reqPol->{'ivrm_stabilization_delay_ns'},
+    "SYSTEM_RESCLK_ENABLE", $reqPol->{'system_resclk_enable'},
+    "STOP4_DISABLE", $reqPol->{'stop4_disable'},
+    "STOP5_DISABLE", $reqPol->{'stop5_disable'},
+    "STOP8_DISABLE", $reqPol->{'stop8_disable'},
+    "STOP11_DISABLE", $reqPol->{'stop11_disable'},
 ];
 
 if ($reqPol->{'mss_mrw_refresh_rate_request'} eq 'SINGLE')
@@ -681,10 +694,10 @@ my $pbaxId;
 
 foreach my $i (@{$pmSettings->{'processor-settings'}})
 {
-    if(exists $i->{pm_pbax_groupid})
+    if(exists $i->{pbax_groupid})
     {
         $pbaxAttr = "PBAX_GROUPID";
-        $pbaxId = $i->{pm_pbax_groupid};
+        $pbaxId = $i->{pbax_groupid};
     }
     else
     {

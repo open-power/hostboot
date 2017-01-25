@@ -5661,8 +5661,6 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     </description>
     <simpleType>
         <uint8_t>
-<!-- TODO RTC:162070 Temporary default -->
-            <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -31459,8 +31457,6 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint32_t>
-<!-- TODO RTC:162072 Temporary default -->
-            <default>0</default>
         </uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -32286,7 +32282,6 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
-<!--TODO RTC:163418 Get Attribute defaults from MRW for the following (START)-->
 <attribute>
     <id>PM_SAFE_VOLTAGE_MV</id>
     <description>
@@ -32392,7 +32387,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>SYSTEM_RESCLK_ENABLE</id> <!-- <vdm_enable>OFF</vdm_enable> ??-->
+    <id>SYSTEM_RESCLK_ENABLE</id>
     <description>
       Controls the enablement of resonant clocking in the system.
 
@@ -32413,7 +32408,6 @@ Measured in GB</description>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
-<!--TODO RTC:163418 Get Attribute defaults from MRW for the previous (END)-->
 
 <attribute>
     <id>BAD_DQ_BITMAP</id>
