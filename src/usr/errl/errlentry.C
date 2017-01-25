@@ -192,11 +192,9 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
                      const uint64_t i_user1,
                      const uint64_t i_user2,
                      const bool i_hbSwError ) :
+    iv_Src( HBT_ERR_INFO, i_modId, i_reasonCode, i_user1, i_user2 ),
     iv_Private( static_cast<compId_t>(i_reasonCode & 0xFF00)),
     iv_User( i_sev ),
-    // The SRC_ERR_INFO becomes part of the SRC; example, B1 in SRC B180xxxx
-    // iv_Src assigns the epubSubSystem_t; example, 80 in SRC B180xxxx
-    iv_Src( SRC_ERR_INFO, i_modId, i_reasonCode, i_user1, i_user2 ),
     iv_termState(TERM_STATE_UNKNOWN),
     iv_sevFinal(false),
     iv_skipShowingLog(true)
@@ -214,6 +212,26 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
         addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                              HWAS::SRCI_PRIORITY_HIGH );
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
+                     uint32_t i_srcWords[9] ):
+    iv_Src( i_srcWords ),
+    iv_Private( static_cast<compId_t>((iv_Src.iv_reasonCode) & 0xFF00)),
+    iv_User( i_sev ),
+    iv_termState(TERM_STATE_UNKNOWN),
+    iv_sevFinal(false),
+    iv_skipShowingLog(true)
+{
+    #ifdef CONFIG_ERRL_ENTRY_TRACE
+    TRACFCOMP( g_trac_errl, ERR_MRK"Error created : Source Words=[0]:%.4X,[1]:%.4X,[2]:%.4X,[3]:%.4X,[4]:%.4X,[5]:%.4X,[6]:%.4X,[7]:%.4X,[8]:%.4X",i_srcWords[0],i_srcWords[1],i_srcWords[2],i_srcWords[3],i_srcWords[4],i_srcWords[5],i_srcWords[6],i_srcWords[7],i_srcWords[8]);
+    #else
+    TRACDCOMP( g_trac_errl, ERR_MRK"Error created : Source Words=[0]:%.4X,[1]:%.4X,[2]:%.4X,[3]:%.4X,[4]:%.4X,[5]:%.4X,[6]:%.4X,[7]:%.4X,[8]:%.4X",i_srcWords[0],i_srcWords[1],i_srcWords[2],i_srcWords[3],i_srcWords[4],i_srcWords[5],i_srcWords[6],i_srcWords[7],i_srcWords[8]);
+    #endif
+    // Collect the Backtrace and add it to the error log
+    iv_pBackTrace = new ErrlUserDetailsBackTrace();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
