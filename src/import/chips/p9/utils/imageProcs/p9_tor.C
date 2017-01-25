@@ -541,7 +541,10 @@ int get_ring_from_sbe_image( void*           i_ringSection,     // Ring section 
         }
     }
 
-    MY_ERR("i_ringId=0x%x is an invalid ring ID for SBE", i_ringId);
+    if (i_dbgl > 0)
+    {
+        MY_DBG("i_ringId=0x%x is an invalid ring ID for SBE\n", i_ringId);
+    }
 
     return TOR_INVALID_RING_ID;
 
