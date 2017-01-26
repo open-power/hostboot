@@ -672,7 +672,12 @@ extern "C"
 
         if( pCmeHdr->g_cme_max_spec_ring_length )
         {
-            pCpmrHdr->coreSpecRingOffset        =   SWIZZLE_4_BYTE(CME_INST_SPEC_RING_START);
+            pCpmrHdr->coreSpecRingOffset        =   ( SWIZZLE_4_BYTE(pCpmrHdr->cmeImgOffset) << CME_BLK_SIZE_SHIFT ) +
+                                                    SWIZZLE_4_BYTE( pCpmrHdr->cmeImgLength) +
+                                                    SWIZZLE_4_BYTE(pCpmrHdr->cmePstateLength) +
+                                                    SWIZZLE_4_BYTE(pCpmrHdr->cmeCommonRingLength);
+            pCpmrHdr->coreSpecRingOffset        =   (pCpmrHdr->coreSpecRingOffset + CME_BLOCK_READ_LEN - 1) >> CME_BLK_SIZE_SHIFT;
+            pCpmrHdr->coreSpecRingOffset        =   SWIZZLE_4_BYTE(pCpmrHdr->coreSpecRingOffset);
             pCpmrHdr->coreSpecRingLength        =   pCmeHdr->g_cme_max_spec_ring_length; // already swizzled
         }
 
