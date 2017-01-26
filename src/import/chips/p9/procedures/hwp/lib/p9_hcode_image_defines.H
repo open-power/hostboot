@@ -386,7 +386,6 @@ enum
     CME_INSTRUMENTATION_SIZE    = HALF_KB,      // per CME
     INSTRUMENTATION_COUNTERS    = HALF_KB,      // (???)
     CME_SRAM_HCODE_OFFSET       = 0x00, //(???)
-    CME_INST_SPEC_RING_START    = 300 * ONE_KB,
     CME_REGION_START            =  (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
     CME_BLOCK_READ_LEN          = 32,
     CME_BLK_SIZE_SHIFT          = 0x05,
