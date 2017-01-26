@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -250,6 +250,28 @@ errlHndl_t putFifoScomUnderMask(TARGETING::Target * i_target,
     while (0);
 
     SBE_TRACD(EXIT_MRK "putFifoScomUnderMask");
+
+    return errl;
+};
+
+// Reset FSI SBE FIFO
+errlHndl_t sendFifoReset(TARGETING::Target * i_target)
+{
+    errlHndl_t errl = NULL;
+
+    SBE_TRACD(ENTER_MRK "sendFifoReset");
+
+    do
+    {
+        // error check input parameters
+        errl = fifoScomInterfaceChecks(i_target, 0x0);
+        if (errl) break;
+
+        errl = SbeFifo::getTheInstance().performFifoReset(i_target);
+    }
+    while (0);
+
+    SBE_TRACD(EXIT_MRK "sendFifoReset");
 
     return errl;
 };
