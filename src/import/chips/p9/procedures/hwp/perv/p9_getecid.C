@@ -42,6 +42,19 @@
 #include <p9_misc_scom_addresses_fld.H>
 #include <p9_const_common.H>
 
+enum DD1_MiniEC_Consts
+{
+    dd_101             = 0b100, // bit field in ecid buffer representing DD1.01
+    dd_102             = 0b110, // bit field in ecid buffer representing DD1.02
+    dd_103             = 0b111, // bit field in ecid buffer representing DD1.03
+
+    ddLevelMemoryPart1 = dd_102,
+    ddLevelMemoryPart2 = dd_103,
+
+    ddLevelPciePart    = dd_101,
+
+};
+
 // The bit locations in ecid_part02 where the DD Level is found. These correspond to ECID bits 173:175
 constexpr uint64_t DD_LEVEL(45);
 constexpr uint64_t DD_LEVEL_LEN(3);
@@ -107,6 +120,17 @@ static fapi2::ReturnCode setup_memory_work_around_attributes(
     const fapi2::buffer<uint64_t>& i_ecid_part)
 {
     uint8_t l_version = 0;
+    fapi2::ATTR_MINI_EC_Type l_miniEc = 0;
+    fapi2::ATTR_EC_Type l_chipEc = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_target, l_chipEc));
+
+    if( l_chipEc != 0x10 )
+    {
+        // Nothing to do if this isn't DD1.0
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     i_ecid_part.extractToRight<DD_LEVEL, DD_LEVEL_LEN>(l_version);
 
     // Workarounds for modules which are before 1.02 (memory part 1)
@@ -135,6 +159,25 @@ static fapi2::ReturnCode setup_memory_work_around_attributes(
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_SKIP_RD_VREF_VREFSENSE_OVERRIDE,  i_target, l_value) );
     }
 
+    // Set the Mini-EC level for firmware to consume
+    switch( l_version )
+    {
+        case(dd_101):
+            l_miniEc = 1;
+            break;
+
+        case(dd_102):
+            l_miniEc = 2;
+            break;
+
+        case(dd_103):
+            l_miniEc = 3;
+            break;
+    }
+
+    FAPI_INF("MiniEC=%d", l_miniEc);
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MINI_EC, i_target, l_miniEc) );
+
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
@@ -148,7 +191,7 @@ fapi2::ReturnCode p9_getecid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
     fapi2::buffer<uint64_t> l_ecid_part0_data64 = 0;
     fapi2::buffer<uint64_t> l_ecid_part1_data64 = 0;
     fapi2::buffer<uint64_t> l_ecid_part2_data64 = 0;
-    fapi2::variable_buffer l_fuseString(fuseString_len);
+    fapi2::variable_buffer l_fuseString(p9_getecid_fuseString_len);
     FAPI_INF("Entering ...");
 
 
