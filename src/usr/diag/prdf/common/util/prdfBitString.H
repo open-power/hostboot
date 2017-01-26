@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,23 +57,6 @@
 /*  User Types                                                        */
 /*--------------------------------------------------------------------*/
 
-// Type Specification //////////////////////////////////////////////////
-//
-// Title:  CPU_WORD
-//
-// Purpose:  This type is used to take advantage of the most efficient
-//           memory reference size for a specific CPU architecture.
-//           This type definition is provided only to handle the case
-//           where no previous defintions exists.
-//
-// End Type Specification //////////////////////////////////////////////
-
-#ifndef CPU_WORD
-
-typedef uint32_t CPU_WORD;
-
-#endif
-
 /*--------------------------------------------------------------------*/
 /*  Constants                                                         */
 /*--------------------------------------------------------------------*/
@@ -94,6 +77,19 @@ namespace PRDF
 {
 
 class BitStringBuffer;
+
+/** This type is used to take advantage of the most efficient memory reference
+ *  size for a specific CPU architecture. */
+typedef uint32_t CPU_WORD;
+
+/** Size of a CPU_WORD */
+constexpr uint32_t CPU_WORD_SIZE = sizeof(CPU_WORD);
+
+/** Bit length of a CPU_WORD */
+constexpr uint32_t CPU_WORD_BIT_LEN = CPU_WORD_SIZE * 8;
+
+/** A CPU_WORD with all of the bits set to 1. */
+constexpr CPU_WORD CPU_WORD_MASK = static_cast<CPU_WORD>(-1);
 
 /*--------------------------------------------------------------------*/
 /*  Function Prototypes                                               */
@@ -119,7 +115,7 @@ class BitStringBuffer;
  and as the interface type for the field.  This interface
  allows normal interaction with the builtin types.
  Accessing the Bit String is accomplished in units of n
- bits where n equals (sizeof(CPU_WORD) * 8).  This CPU_WORD
+ bits where n equals CPU_WORD_BIT_LEN.  This CPU_WORD
  type is defined to take advantage of the target CPU's
  most efficient memory access instructions.  However, the
  semantics of the Bit String class are identical
@@ -141,7 +137,7 @@ class BitStringBuffer;
  zero.
 
  \verbatim
- 0 1 2 3 .... 15 16 17 ....     (sizeof(CPU_WORD) - 1)
+ 0 1 2 3 .... 15 16 17 ....     (CPU_WORD_SIZE - 1)
 
  B B B B ....  B  0  0 ....              0
  \endverbatim
@@ -154,7 +150,7 @@ class BitStringBuffer;
  would be as follows.
 
  \verbatim
- 0 1 2 3 ....              ....  (sizeof(CPU_WORD) - 1)
+ 0 1 2 3 ....              ....  (CPU_WORD_SIZE - 1)
 
  0 0 0 0 ....  B B B B  B  ....             B
  \endverbatim
@@ -229,7 +225,7 @@ public:
    \param starting bit position
    \param # of bits in the field
    \return Returned value is left justified (See GetFieldJustified)
-   \pre (bit_position + length) <= GetLength(); length <= sizeof(CPU_WORD)*8
+   \pre (bit_position + length) <= GetLength(); length <= CPU_WORD_BIT_LEN
    \post none
    */
   CPU_WORD GetField(uint32_t bit_position,uint32_t length) const;
@@ -239,7 +235,7 @@ public:
    \param starting bit position
    \param # of bits in the field
    \return Returned value is right justified (See GetField)
-   \pre (bit_position + length) <= GetLength(); length <= sizeof(CPU_WORD)*8
+   \pre (bit_position + length) <= GetLength(); length <= CPU_WORD_BIT_LEN
    \post none
    */
   CPU_WORD GetFieldJustify(uint32_t bit_position,uint32_t length) const;
@@ -248,7 +244,7 @@ public:
    Set value into a subfield within the bitstring
    \param starting bit position
    \param # of bits in the field
-   \pre (bit_position + length) <= GetLength(); length <= sizeof(CPU_WORD)*8
+   \pre (bit_position + length) <= GetLength(); length <= CPU_WORD_BIT_LEN
    \post The bits are set from value (value assumed left justified)
    \verbatim
           this   -> '00100110011....'b
@@ -263,7 +259,7 @@ public:
    Set value into a subfield within the bitstring
    \param starting bit position
    \param # of bits in the field
-   \pre (bit_position + length) <= GetLength(); length <= sizeof(CPU_WORD)*8
+   \pre (bit_position + length) <= GetLength(); length <= CPU_WORD_BIT_LEN
    \post The bits are set from value (value assumed right justified)
    \verbatim
           this   -> '00100110011....'b
@@ -406,7 +402,7 @@ public:
    Utility to Right justify a "Left-justified" value
    \param iLen: length of bit field to justify
    \param iValue: the value to justify
-   \pre iLen <= sizeof(CPU_WORD)*8
+   \pre iLen <= CPU_WORD_BIT_LEN
    */
   static CPU_WORD RIGHT_SHIFT(uint32_t iLen,
                               CPU_WORD iValue);
@@ -415,7 +411,7 @@ public:
    Utility to Left justify a "right-justified" value
    \param iLen: length of bit field to justify
    \param iValue: the value to justify
-   \pre iLen <= sizeof(CPU_WORD)*8
+   \pre iLen <= CPU_WORD_BIT_LEN
    */
   static CPU_WORD LEFT_SHIFT(uint32_t l,
                              CPU_WORD value);
@@ -512,18 +508,6 @@ protected:
    Set the memory address of the string representation
    */
   void SetMemoryAddress(CPU_WORD *iBuffer) { ivBuffer = iBuffer; }
-
-  // Enum Specification //////////////////////////////////////////////
-  //
-  // Purpose:  This enummerated constant is used for member function
-  //           implementation.
-  //
-  // End Enum Specification //////////////////////////////////////////
-
-  enum
-  {
-    WORD_BIT_LENGTH = sizeof(CPU_WORD) * 8
-  };
 
 private:
 
@@ -696,7 +680,7 @@ std::ostream & operator<<( std::ostream & out,
 // Side-effects:  None.
 //
 // Dependencies:  Parameter length(l) must be less than
-//                sizeof(CPU_WORD) for proper results.
+//                CPU_WORD_SIZE for proper results.
 //
 // End Function Specification //////////////////////////////////////
 
@@ -710,9 +694,9 @@ CPU_WORD BitString::RIGHT_SHIFT
  )
 /*!o Bit field value                                             */
 {
-  //  assert(l <= WORD_BIT_LENGTH);
+  //  assert(l <= CPU_WORD_BIT_LEN);
 
-  return(value >> (WORD_BIT_LENGTH - l));
+  return(value >> (CPU_WORD_BIT_LEN - l));
 }
 
 // Function Specification ///////////////////////////////////////////
@@ -727,7 +711,7 @@ CPU_WORD BitString::RIGHT_SHIFT
 // Side-effects:  None.
 //
 // Dependencies:  Parameter length(l) must be less than
-//                sizeof(CPU_WORD) for proper results.
+//                CPU_WORD_SIZE for proper results.
 //
 // End Function Specification //////////////////////////////////////
 
@@ -738,7 +722,7 @@ CPU_WORD BitString::LEFT_SHIFT
  CPU_WORD value
  )
 {
-  return(value << (WORD_BIT_LENGTH - l));
+  return(value << (CPU_WORD_BIT_LEN - l));
 }
 
 inline
@@ -787,7 +771,7 @@ void BitString::Pattern(CPU_WORD pattern,uint32_t pattern_bit_length)
 inline
 void BitString::Pattern(CPU_WORD pattern)
 {
-  Pattern(0, GetLength(), pattern, sizeof(CPU_WORD));
+  Pattern(0, GetLength(), pattern, CPU_WORD_SIZE);
 }
 
 
