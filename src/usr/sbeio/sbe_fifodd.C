@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -152,6 +152,30 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
     }
 
     SBE_TRACD(EXIT_MRK "performFifoChipOp");
+
+    return errl;
+}
+
+
+/**
+ * @brief perform SBE FIFO Reset
+ */
+errlHndl_t SbeFifo::performFifoReset(TARGETING::Target * i_target)
+{
+    errlHndl_t errl = NULL;
+    static mutex_t l_fifoOpMux = MUTEX_INITIALIZER;
+
+    SBE_TRACF(ENTER_MRK "sending FSI SBEFIFO Reset to HUID 0x%x",
+              TARGETING::get_huid(i_target));
+
+    //Serialize access to the FIFO
+    mutex_lock(&l_fifoOpMux);
+
+    // Perform a write to the DNFIFO Reset to cleanup the fifo
+    uint32_t l_dummy = 0xDEAD;
+    errl = writeFsi(i_target,SBE_FIFO_DNFIFO_RESET,&l_dummy);
+
+    mutex_unlock(&l_fifoOpMux);
 
     return errl;
 }

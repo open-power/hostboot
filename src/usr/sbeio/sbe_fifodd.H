@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -249,6 +249,17 @@ class SbeFifo
                                      uint32_t * i_pFifoRequest,
                                      uint32_t * i_pFifoResponse,
                                      uint32_t   i_responseSize);
+
+        /**
+         * @Brief perform SBE FIFO reset
+         *
+         *        NOT to be used on running SBE -- only for IPL
+         *
+         * @param[in]  i_target        Target to access
+         *
+         * @return errlHndl_t Error log handle on failure.
+         */
+        errlHndl_t performFifoReset(TARGETING::Target * i_target);
 
 
     protected:

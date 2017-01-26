@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,7 @@
 #include <sys/time.h>
 #include <devicefw/userif.H>
 #include <i2c/i2cif.H>
+#include <sbeio/sbeioif.H>
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
@@ -96,6 +97,20 @@ void* call_host_cbs_start(void *io_pArgs)
     {
         if (l_cpu_target != l_pMasterProcTarget)
         {
+            //Before starting the CBS (and thus the SBE) on slave procs
+            //Make sure the SBE FIFO is clean by doing a full reset of
+            //the fifo
+            l_errl = SBEIO::sendFifoReset(l_cpu_target);
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR : call sendFifoReset, "
+                          "PLID=0x%x", l_errl->plid()  );
+                l_stepError.addErrorDetails(l_errl);
+                errlCommit(l_errl, ISTEP_COMP_ID);
+                continue; //Don't continue on this chip if failed
+            }
+
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapi2_proc_target (l_cpu_target);
 

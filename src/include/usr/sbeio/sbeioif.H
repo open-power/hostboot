@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,6 +111,22 @@ namespace SBEIO
                                     uint64_t            i_addr,
                                     uint64_t            i_data,
                                     uint64_t            i_mask);
+
+    /**
+     * @brief Issue Reset to SBE FIFO.  Note this can ONLY be
+     *        done on slave processors on FSI SBE FIFO path
+     *        never on the master chip.  This function is
+     *        only intended to be used to cleanup the FIFO
+     *        on IPLs -- as it doesn't follow the protocol
+     *        with a running SBE
+     *
+     *
+     * @param[in]  i_target  Target to access
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     */
+    errlHndl_t sendFifoReset(TARGETING::Target * i_target);
 
 } //end namespace SBEIO
 
