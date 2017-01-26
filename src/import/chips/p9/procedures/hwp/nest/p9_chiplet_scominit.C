@@ -76,15 +76,6 @@ const uint64_t FBC_IOO_DL_FIR_ACTION0 = 0x0000000000000000ULL;
 const uint64_t FBC_IOO_DL_FIR_ACTION1 = 0x0303C0000300FFFCULL;
 const uint64_t FBC_IOO_DL_FIR_MASK    = 0xFCFC3FFFFCFF0003ULL;
 
-const uint64_t HCA_EH_FIR_ACTION0     = 0x0000000000000000ULL;
-const uint64_t HCA_EH_FIR_ACTION1     = 0x0000000000000000ULL;
-const uint64_t HCA_EH_FIR_MASK        = 0xFFFFFFFFF0000000ULL;
-
-const uint64_t HCA_EN_FIR_ACTION0     = 0x0000000000000000ULL;
-const uint64_t HCA_EN_FIR_ACTION1     = 0x0000000000000000ULL;
-const uint64_t HCA_EN_FIR_MASK        = 0xFFFFFF0000000000ULL;
-
-
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -287,23 +278,6 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
         FAPI_ERR("Error from p9_vas_scom");
         fapi2::current_err = l_rc;
         goto fapi_try_exit;
-    }
-
-    // HCA setup
-    {
-        FAPI_TRY(fapi2::putScom(i_target, PU_EHHCA_FIR_ACTION0_REG, HCA_EH_FIR_ACTION0),
-                 "Error from putScom (PU_EHHCA_FIR_ACTION0_REG)");
-        FAPI_TRY(fapi2::putScom(i_target, PU_EHHCA_FIR_ACTION1_REG, HCA_EH_FIR_ACTION1),
-                 "Error from putScom (PU_EHHCA_FIR_ACTION0_REG)");
-        FAPI_TRY(fapi2::putScom(i_target, PU_EHHCA_FIR_MASK_REG, HCA_EH_FIR_MASK),
-                 "Error from putScom (PU_EHHCA_FIR_MASK_REG)");
-
-        FAPI_TRY(fapi2::putScom(i_target, PU_ENHCA_FIR_ACTION0_REG, HCA_EN_FIR_ACTION0),
-                 "Error from putScom (PU_ENHCA_FIR_ACTION0_REG)");
-        FAPI_TRY(fapi2::putScom(i_target, PU_ENHCA_FIR_ACTION1_REG, HCA_EN_FIR_ACTION1),
-                 "Error from putScom (PU_ENHCA_FIR_ACTION0_REG)");
-        FAPI_TRY(fapi2::putScom(i_target, PU_ENHCA_FIR_MASK_REG, HCA_EN_FIR_MASK),
-                 "Error from putScom (PU_ENHCA_FIR_MASK_REG)");
     }
 
 fapi_try_exit:
