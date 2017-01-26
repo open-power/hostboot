@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,23 +63,6 @@ namespace PRDF
 /*--------------------------------------------------------------------*/
 /*  User Types                                                        */
 /*--------------------------------------------------------------------*/
-
-// Type Specification //////////////////////////////////////////////////
-//
-// Title:  CPU_WORD
-//
-// Purpose:  This type is used to take advantage of the most efficient
-//           memory reference size for a specific CPU architecture.
-//           This type definition is provided only to handle the case
-//           where no previous defintions exists.
-//
-// End Type Specification //////////////////////////////////////////////
-
-#ifndef CPU_WORD
-
-typedef uint32_t CPU_WORD;
-
-#endif
 
 /*--------------------------------------------------------------------*/
 /*  Constants                                                         */
