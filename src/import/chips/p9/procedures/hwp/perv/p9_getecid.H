@@ -42,12 +42,9 @@
 
 #include <fapi2.H>
 
-enum P9_GETECID_Private_Constants
+enum P9_GETECID_Public_Constants
 {
-    fuseString_len = 192,       // fuse string length
-    ddLevelPciePart = 0b100,    // bit field in ecid buffer representing DD1.01
-    ddLevelMemoryPart1 = 0b110, // bit field in ecid buffer representing DD1.02
-    ddLevelMemoryPart2 = 0b111, // bit field in ecid buffer representing DD1.03
+    p9_getecid_fuseString_len = 192,       // fuse string length
 };
 
 typedef fapi2::ReturnCode (*p9_getecid_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
