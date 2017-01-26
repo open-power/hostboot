@@ -816,7 +816,18 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     FAPI_DBG("System VDM Enable   :   %s", attrVal ? "TRUE" : "FALSE" );
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_PROC_FABRIC_PUMP_MODE_MODE");
 
+    //Attribute set to 0x01 for CHIP_IS_NODE
+    if( attrVal )
+    {
+        sgpeFlag |= SGPE_PROC_FAB_PUMP_MODE_BIT_POS;
+    }
+
+    FAPI_DBG("FAB_PUMP_MODE       :   %s", attrVal ? "TRUE" : "FALSE" );
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_ENABLED,
                            FAPI_SYSTEM,
