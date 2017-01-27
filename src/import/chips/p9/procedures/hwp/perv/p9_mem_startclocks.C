@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,11 +66,17 @@ static fapi2::ReturnCode p9_mem_startclocks_cplt_ctrl_action_function(
 static fapi2::ReturnCode p9_mem_startclocks_flushmode(
     const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet);
 
+static fapi2::ReturnCode p9_mem_startclocks_regions_setup(
+    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet,
+    const fapi2::buffer<uint16_t> i_regions_except_vital_pll,
+    fapi2::buffer<uint64_t>& o_regions_enabled_after_pg);
+
 fapi2::ReturnCode p9_mem_startclocks(const
                                      fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
     uint8_t l_sync_mode = 0;
     fapi2::buffer<uint64_t> l_pg_vector;
+    fapi2::buffer<uint64_t> l_clock_regions;
     FAPI_DBG("Entering ...");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, i_target_chip, l_sync_mode),
@@ -91,9 +97,12 @@ fapi2::ReturnCode p9_mem_startclocks(const
             FAPI_INF("Call module align chiplets for Mc chiplets");
             FAPI_TRY(p9_sbe_common_align_chiplets(l_trgt_chplt));
 
+            FAPI_TRY(p9_mem_startclocks_regions_setup(l_trgt_chplt,
+                     REGIONS_ALL_EXCEPT_VITAL_NESTPLL, l_clock_regions));
+
             FAPI_INF("Call module clock start stop for MC01, MC23.");
             FAPI_TRY(p9_sbe_common_clock_start_stop(l_trgt_chplt, CLOCK_CMD,
-                                                    DONT_STARTSLAVE, DONT_STARTMASTER, REGIONS_ALL_EXCEPT_VITAL_NESTPLL,
+                                                    DONT_STARTSLAVE, DONT_STARTMASTER, l_clock_regions,
                                                     CLOCK_TYPES));
 
             FAPI_INF("Call p9_mem_startclocks_fence_setup_function for Mc chiplets ");
@@ -173,41 +182,22 @@ static fapi2::ReturnCode p9_mem_startclocks_cplt_ctrl_action_function(
 
     // Local variable and constant definition
     fapi2::buffer <uint16_t> l_attr_pg;
+    fapi2::buffer <uint16_t> l_cplt_ctrl_init;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, i_target_chiplet, l_attr_pg));
 
     l_attr_pg.invert();
+    l_attr_pg.extractToRight<4, 11>(l_cplt_ctrl_init);
 
-    FAPI_INF("Drop partial good fences");
+    FAPI_DBG("Drop partial good fences");
     //Setting CPLT_CTRL1 register value
     l_data64.flush<0>();
-    //CPLT_CTRL1.TC_VITL_REGION_FENCE = l_attr_pg.getBit<19>()
     l_data64.writeBit<PEC_CPLT_CTRL1_TC_VITL_REGION_FENCE>(l_attr_pg.getBit<3>());
-    //CPLT_CTRL1.TC_PERV_REGION_FENCE = l_attr_pg.getBit<20>()
-    l_data64.writeBit<PEC_CPLT_CTRL1_TC_PERV_REGION_FENCE>(l_attr_pg.getBit<4>());
-    //CPLT_CTRL1.TC_REGION1_FENCE = l_attr_pg.getBit<21>()
-    l_data64.writeBit<PEC_CPLT_CTRL1_TC_REGION1_FENCE>(l_attr_pg.getBit<5>());
-    //CPLT_CTRL1.TC_REGION2_FENCE = l_attr_pg.getBit<22>()
-    l_data64.writeBit<PEC_CPLT_CTRL1_TC_REGION2_FENCE>(l_attr_pg.getBit<6>());
-    //CPLT_CTRL1.TC_REGION3_FENCE = l_attr_pg.getBit<23>()
-    l_data64.writeBit<PERV_1_CPLT_CTRL1_TC_REGION3_FENCE>(l_attr_pg.getBit<7>());
-    //CPLT_CTRL1.TC_REGION4_FENCE = l_attr_pg.getBit<24>()
-    l_data64.writeBit<EQ_CPLT_CTRL1_TC_REGION4_FENCE>(l_attr_pg.getBit<8>());
-    //CPLT_CTRL1.TC_REGION5_FENCE = l_attr_pg.getBit<25>()
-    l_data64.writeBit<EQ_CPLT_CTRL1_TC_REGION5_FENCE>(l_attr_pg.getBit<9>());
-    //CPLT_CTRL1.TC_REGION6_FENCE = l_attr_pg.getBit<26>()
-    l_data64.writeBit<EQ_CPLT_CTRL1_TC_REGION6_FENCE>(l_attr_pg.getBit<10>());
-    //CPLT_CTRL1.TC_REGION7_FENCE = l_attr_pg.getBit<27>()
-    l_data64.writeBit<EQ_CPLT_CTRL1_TC_REGION7_FENCE>(l_attr_pg.getBit<11>());
-    //CPLT_CTRL1.UNUSED_12B = l_attr_pg.getBit<28>()
-    l_data64.writeBit<PEC_CPLT_CTRL1_UNUSED_12B>(l_attr_pg.getBit<12>());
-    //CPLT_CTRL1.UNUSED_13B = l_attr_pg.getBit<29>()
-    l_data64.writeBit<PEC_CPLT_CTRL1_UNUSED_13B>(l_attr_pg.getBit<13>());
-    //CPLT_CTRL1.UNUSED_14B = l_attr_pg.getBit<30>()
-    l_data64.writeBit<PEC_CPLT_CTRL1_UNUSED_14B>(l_attr_pg.getBit<14>());
+    //CPLT_CTRL1.TC_ALL_REGIONS_FENCE = l_cplt_ctrl_init
+    l_data64.insertFromRight<4, 11>(l_cplt_ctrl_init);
     FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_CPLT_CTRL1_CLEAR, l_data64));
 
-    FAPI_INF("reset abistclk_muxsel and syncclk_muxsel");
+    FAPI_DBG("reset abistclk_muxsel and syncclk_muxsel");
     //Setting CPLT_CTRL0 register value
     l_data64.flush<0>();
     //CPLT_CTRL0.CTRL_CC_ABSTCLK_MUXSEL_DC = 1
@@ -233,7 +223,7 @@ static fapi2::ReturnCode p9_mem_startclocks_flushmode(
     fapi2::buffer<uint64_t> l_data64;
     FAPI_DBG("Entering ...");
 
-    FAPI_INF("Clear flush_inhibit to go in to flush mode");
+    FAPI_DBG("Clear flush_inhibit to go in to flush mode");
     //Setting CPLT_CTRL0 register value
     l_data64.flush<0>();
     //CPLT_CTRL0.CTRL_CC_FLUSHMODE_INH_DC = 0
@@ -241,6 +231,45 @@ static fapi2::ReturnCode p9_mem_startclocks_flushmode(
     FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_CPLT_CTRL0_CLEAR, l_data64));
 
     FAPI_DBG("Exiting ...");
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+/// @brief Region value settings : The anding of REGIONS_ALL_EXCEPT_VITAL_NESTPLL, ATTR_PG
+//  disables PLL region and retains enabled regions info from chiplet pg attribute.
+///
+/// @param[in]     i_target_chiplet   Reference to TARGET_TYPE_PERV target
+/// @param[in]     i_regions_except_vital_pll   regions except vital and pll
+/// @param[out]    o_regions_enabled_after_pg   enabled regions value after anding with ATTR_PG
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+static fapi2::ReturnCode p9_mem_startclocks_regions_setup(const
+        fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet,
+        const fapi2::buffer<uint16_t> i_regions_except_vital_pll,
+        fapi2::buffer<uint64_t>& o_regions_enabled_after_pg)
+{
+    fapi2::buffer<uint16_t> l_read_attr = 0;
+    fapi2::buffer<uint16_t> l_read_attr_invert = 0;
+    fapi2::buffer<uint16_t> l_read_attr_shift1_right = 0;
+
+    FAPI_DBG("p9_mem_startclocks_regions_setup: Entering ...");
+
+    FAPI_DBG("Reading ATTR_PG");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, i_target_chiplet, l_read_attr));
+
+    if ( l_read_attr == 0x0 )
+    {
+        o_regions_enabled_after_pg = static_cast<uint64_t>(i_regions_except_vital_pll) ;
+    }
+    else
+    {
+        l_read_attr_invert = l_read_attr.invert();
+        l_read_attr_shift1_right = (l_read_attr_invert >> 1);
+        o_regions_enabled_after_pg = (i_regions_except_vital_pll & l_read_attr_shift1_right);
+    }
+
+    FAPI_DBG("p9_mem_startclocks_regions_setup : Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;
