@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2016
+# Contributors Listed Below - COPYRIGHT 2010,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -66,6 +66,8 @@ OBJS += machchk.o
 
 OBJS += doorbell.o
 OBJS += workitem.o
+
+OBJS += bltohbdatamgr.o
 
 include ${ROOTPATH}/config.mk
 

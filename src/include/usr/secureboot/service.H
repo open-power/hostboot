@@ -186,9 +186,9 @@ namespace SECUREBOOT
      * @param[in]  i_size    Size of blob in bytes
      * @param[out] o_hash    SHA512 hash
      *
-     * @return errlHndl_t  NULL on success
+     * @return N/A
      */
-    errlHndl_t hashBlob(const void * i_blob, size_t i_size, SHA512_t o_buf);
+    void hashBlob(const void * i_blob, size_t i_size, SHA512_t o_buf);
 
     /**
      * @brief Retrieve the internal hardware keys' hash used to validate
@@ -208,9 +208,9 @@ namespace SECUREBOOT
       *                         of the blob to concatenate
       * @param[out] o_buf       SHA512 hash
       *
-      * @return errlHndl_t  NULL on success
+      * @return N/A
       */
-    errlHndl_t hashConcatBlobs(const blobPair_t &i_blobs, SHA512_t o_buf);
+    void hashConcatBlobs(const blobPair_t &i_blobs, SHA512_t o_buf);
 
     /**
      * @brief Common secureboot handler for secureboot failures.

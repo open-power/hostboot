@@ -69,7 +69,7 @@ struct BlToHbData
                    branchtableOffset(0), secureRom(nullptr),
                    secureRomSize(0), hwKeysHash(nullptr),
                    hwKeysHashSize(0), hbbHeader(nullptr),
-                   hbbHeaderSize(0), totalSize(0) {}
+                   hbbHeaderSize(0) {}
 
     // Simple way to tell if data is valid
     uint64_t eyeCatch;
@@ -89,8 +89,6 @@ struct BlToHbData
     const void* hbbHeader;
     // size of Hostboot base header
     size_t hbbHeaderSize;
-    // Total size of data preserved by the Kernel
-    size_t totalSize;
 } __attribute__((packed));
 
 /**

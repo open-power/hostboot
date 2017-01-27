@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -35,6 +37,9 @@
 #include <sys/vfs.h>
 #include <kernel/deferred.H>
 #include <kernel/misc.H>
+#include <util/align.H>
+#include <securerom/sha512.H>
+#include <kernel/bltohbdatamgr.H>
 
 #include <stdlib.h>
 
@@ -64,6 +69,54 @@ int main()
 
     Kernel& kernel = Singleton<Kernel>::instance();
     kernel.cppBootstrap();
+
+    // Get pointer to BL and HB comm data
+    const auto l_pBltoHbData = reinterpret_cast<const Bootloader::BlToHbData*>(
+                                                        BLTOHB_COMM_DATA_ADDR);
+
+    if ( Bootloader::BlToHbDataValid(l_pBltoHbData) )
+    {
+        printk("Valid BL to HB communication data\n");
+
+        // Make copy of structure so to not modify original pointers
+        auto l_blToHbDataCopy = *l_pBltoHbData;
+
+        // Get destination location that will be preserved by the pagemgr
+        auto l_pBltoHbDataStart = reinterpret_cast<uint8_t *>(
+                                                 VmmManager::BLTOHB_DATA_START);
+        // Copy in SecureRom
+        memcpy(l_pBltoHbDataStart,
+               l_blToHbDataCopy.secureRom,
+               l_blToHbDataCopy.secureRomSize);
+        // Change pointer to new location and increment
+        l_blToHbDataCopy.secureRom = l_pBltoHbDataStart;
+        l_pBltoHbDataStart += l_blToHbDataCopy.secureRomSize;
+
+        // Copy in HW keys' Hash
+        memcpy(l_pBltoHbDataStart,
+               l_blToHbDataCopy.hwKeysHash,
+               l_blToHbDataCopy.hwKeysHashSize);
+        // Change pointer to new location and increment
+        l_blToHbDataCopy.hwKeysHash = l_pBltoHbDataStart;
+        l_pBltoHbDataStart += l_blToHbDataCopy.hwKeysHashSize;
+
+        // Copy in HBB header
+        memcpy(l_pBltoHbDataStart,
+               l_blToHbDataCopy.hbbHeader,
+               l_blToHbDataCopy.hbbHeaderSize);
+        // Change pointer to new location
+        l_blToHbDataCopy.hbbHeader = l_pBltoHbDataStart;
+
+        // Initialize Secureboot Data class
+        g_BlToHbDataManager.initValid(l_blToHbDataCopy);
+    }
+    else
+    {
+        printk("Invalid BL to HB communication data\n");
+        // Force invalidation of securebootdata
+        g_BlToHbDataManager.initInvalid();
+    }
+
     kernel.memBootstrap();
     kernel.cpuBootstrap();
 

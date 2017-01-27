@@ -23,14 +23,17 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __SECUREBOOT_SECUREROM_H
-#define __SECUREBOOT_SECUREROM_H
+#ifndef __SECUREBOOT_SECUREROMMANAGER_H
+#define __SECUREBOOT_SECUREROMMANAGER_H
 
 #include <errl/errlentry.H>
 #include <securerom/ROM.H>
+#include <utility>
+
+typedef std::vector< std::pair<void*,size_t> > blobPair_t;
 
 /** @class SecureRomManager
- *  @brief Class for loading and interacting with SecureRomManager in memory
+ *  @brief Class for loading and interacting with SecureROM in memory
  */
 class SecureRomManager
 {
@@ -64,11 +67,11 @@ class SecureRomManager
          * @param[in] i_blob        Void pointer to effective address
          *                              of blob
          * @param[in] i_size        Size of blob in bytes
-         * @param[in/out] io_buf    Resulting hash buffer
+         * @param[out] o_buf        Resulting hash buffer
          *
-         * @return errlHndl_t  NULL on success
+         * @return N/A
          */
-        errlHndl_t hashBlob(const void * i_blob, size_t i_size, SHA512_t io_buf) const;
+        void hashBlob(const void * i_blob, size_t i_size, SHA512_t o_buf) const;
 
         /**
          * @brief Retrieve the internal hardware keys' hash from secure ROM
@@ -89,22 +92,30 @@ class SecureRomManager
          *                         of the blob to concatenate
          * @param[out] o_buf       SHA512 hash
          *
-         * @return errlHndl_t  NULL on success
+         * @return N/A
          */
-        errlHndl_t hashConcatBlobs (const blobPair_t &i_blobs,
-                                    SHA512_t o_buf) const;
+        void hashConcatBlobs (const blobPair_t &i_blobs, SHA512_t o_buf) const;
+
+        /*
+         * @brief Getter for private "is valid" variable
+         *
+         * @return bool - True if valid, false otherwise
+         */
+        bool isValid();
 
     protected:
 
         /**
-         * @brief Constructor
+         * @brief  Constructor
          */
-        SecureRomManager();
+        SecureRomManager():iv_securerom(nullptr),
+                           iv_secureromValid(false),
+                           iv_key_hash(nullptr) {}
 
         /**
          * @brief Destructor
          */
-        ~SecureRomManager();
+        ~SecureRomManager() {}
 
     private:
 
@@ -113,15 +124,19 @@ class SecureRomManager
          ********************************************/
 
         /**
-         * Void pointer to effective address location of Secure ROM
-         *  in memory
+         * Void pointer to effective address location of Secure ROM in memory
          */
-        void * iv_device_ptr;
+        const void * iv_securerom;
+
+        /**
+         * Cached valid check if secure rom is valid
+         */
+        bool iv_secureromValid;
 
         /**
          * HW key' hash retrieved from system
          */
-        sha2_hash_t iv_key_hash;
+        const sha2_hash_t* iv_key_hash;
 
         /********************************************
          * Private Functions
@@ -129,33 +144,9 @@ class SecureRomManager
 
         /**
          * @brief Retrieves HW keys' hash from the system
-         *
-         * @return errlHndl_t  NULL on success
          */
-        errlHndl_t getHwKeyHash();
-
-        /**
-         * @brief Static instance function for testcase only
-         */
-        static SecureRomManager& getInstance();
-
-
-        /**
-         * @brief Safely Frees Allocated Memory
-         */
-        void _cleanup();
-
-
-        /********************************************
-         * Friend(s)
-         ********************************************/
-
-        // let my testcase poke around
-        friend class SecureRomManagerTest;
-
+        void getHwKeyHash();
 
 }; // end of SecureRomManager class
-
-
 
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <sys/syscall.h>
 #include <assert.h>
 #include <kernel/memstate.H>
+#include <kernel/bltohbdatamgr.H>
 
 
 size_t PageManager::cv_coalesce_count = 0;
@@ -208,6 +209,15 @@ void PageManager::_initialize()
     page_t* endAddr = reinterpret_cast<page_t*>(VmmManager::INITIAL_MEM_SIZE);
     printk("Initializing PageManager starting at %p...", startAddr);
 
+    // Add on secureboot data size to end of reserved space
+    size_t securebootDataSize = 0;
+    if (g_BlToHbDataManager.isValid())
+    {
+        securebootDataSize = g_BlToHbDataManager.getPreservedSize();
+    }
+    size_t l_endReservedPage = VmmManager::END_RESERVED_PAGE
+                               + securebootDataSize;
+
     // Calculate chunks along the top half of the L3 and erase them.
     uint64_t currentBlock = reinterpret_cast<uint64_t>(startAddr);
     do
@@ -225,17 +235,17 @@ void PageManager::_initialize()
 
         // Check if this block starts in the hole.
         if ((currentBlock >= VmmManager::FIRST_RESERVED_PAGE) &&
-            (currentBlock < VmmManager::END_RESERVED_PAGE))
+            (currentBlock < l_endReservedPage))
         {
             // End of the block is in the hole, skip.
-            if (endBlock < VmmManager::END_RESERVED_PAGE)
+            if (endBlock < l_endReservedPage)
             {
                 currentBlock = ALIGN_MEGABYTE(endBlock);
                 continue;
             }
 
             // Advance the current block past the hole.
-            currentBlock = VmmManager::END_RESERVED_PAGE;
+            currentBlock = l_endReservedPage;
         }
 
         // Check if the block is has the hole in it.
@@ -243,7 +253,7 @@ void PageManager::_initialize()
             (currentBlock < VmmManager::FIRST_RESERVED_PAGE))
         {
             // Hole is at the end of the block, shrink it down.
-            if (endBlock < VmmManager::END_RESERVED_PAGE)
+            if (endBlock < l_endReservedPage)
             {
                 endBlock = VmmManager::FIRST_RESERVED_PAGE;
             }
@@ -262,7 +272,7 @@ void PageManager::_initialize()
                 iv_heap.addMemory(currentBlock, hole_end / PAGESIZE);
                 totalPages += (hole_end / PAGESIZE);
 
-                currentBlock = VmmManager::END_RESERVED_PAGE;
+                currentBlock = l_endReservedPage;
             }
         }
 
