@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -169,7 +169,7 @@ BitKey & BitKey::operator=(const BitString & bit_string)
     BitString bs(iv_Capacity,DataPtr());
     bs.Pattern(0x00000000);
   }
-  ReAllocate(bit_string.GetLength());
+  ReAllocate(bit_string.getBitLen());
   BitString dbs(iv_Capacity,DataPtr());
   dbs.SetBits(bit_string);
   return(*this);

@@ -27,10 +27,6 @@
  *  @brief BitString and BitStringBuffer class Definitions
  */
 
-/*--------------------------------------------------------------------*/
-/*  Includes                                                          */
-/*--------------------------------------------------------------------*/
-
 #define PRDFBITSTRING_CPP
 
 #include <prdfBitString.H>
@@ -42,36 +38,9 @@
 namespace PRDF
 {
 
-/*--------------------------------------------------------------------*/
-/*  User Types                                                        */
-/*--------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------*/
-/*  Constants                                                         */
-/*--------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------*/
-/*  Macros                                                            */
-/*--------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------*/
-/*  Internal Function Prototypes                                      */
-/*--------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------*/
-/*  Global Variables                                                  */
-/*--------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------*/
-/*  Static Variables                                                  */
-/*--------------------------------------------------------------------*/
-
-
-BitString::~BitString(void)
-{
-}
-
-// ------------------------------------------------------------------------------------------------
+//##############################################################################
+//                             BitString class
+//##############################################################################
 
 uint32_t BitString::GetSetCount(uint32_t bit_position,
                                     uint32_t leng
@@ -79,7 +48,7 @@ uint32_t BitString::GetSetCount(uint32_t bit_position,
 {
   uint32_t end_position = bit_position + leng;
 
-  PRDF_ASSERT(end_position <= ivLength);
+  PRDF_ASSERT(end_position <= iv_bitLen);
 
   uint32_t count = 0;
 
@@ -104,10 +73,10 @@ CPU_WORD BitString::GetField
  uint32_t iLen
  ) const
 {
-  PRDF_ASSERT((iBitPos + iLen) <= ivLength);
+  PRDF_ASSERT((iBitPos + iLen) <= iv_bitLen);
   PRDF_ASSERT(iLen <= CPU_WORD_BIT_LEN);
   CPU_WORD value = 0;             //dg02a
-  if(GetMemoryAddress() != NULL)  //dg02a
+  if(getBufAddr() != NULL)  //dg02a
   {                               //dg02a
     CPU_WORD * address = GetRelativePosition(iBitPos,iBitPos);
     value = *address << iBitPos;
@@ -150,10 +119,10 @@ void BitString::SetField
  CPU_WORD value
  )
 {
-  PRDF_ASSERT((bit_position + iLen) <= ivLength);
+  PRDF_ASSERT((bit_position + iLen) <= iv_bitLen);
   PRDF_ASSERT(iLen <= CPU_WORD_BIT_LEN);
 
-  if(ivBuffer != NULL || value != 0)  //dg02a
+  if(iv_bufAddr != NULL || value != 0)  //dg02a
   {                                   //dg02a
     CPU_WORD * address = GetRelativePositionAlloc(bit_position,bit_position); // dg02c
     CPU_WORD mask = CPU_WORD_MASK;
@@ -202,19 +171,19 @@ void BitString::SetBits
   bool copyforward = true;
 
   // How Much to really move
-  iLen = std::min(iLen,string.GetLength() - iPos);
-  iLen = std::min(iLen,GetLength() - iDpos);
+  iLen = std::min(iLen,string.getBitLen() - iPos);
+  iLen = std::min(iLen,getBitLen() - iDpos);
 
   // copy the right direction to prevent overlapping
   uint32_t sRelativeOffset = 0;
   uint32_t dRelativeOffset = 0;
   CPU_WORD * sourceAddress = NULL;      //dg02a
   CPU_WORD * destAddress   = NULL;      //dg02a
-  if(string.GetMemoryAddress() != NULL) //dg02a
+  if(string.getBufAddr() != NULL) //dg02a
   {                                     //dg02a
     sourceAddress = string.GetRelativePosition(sRelativeOffset,iPos);
   } // else assume source is all zeros    dg02a
-  if(GetMemoryAddress() != NULL)        //dg02a
+  if(getBufAddr() != NULL)        //dg02a
   {                                     //dg02a
     destAddress = GetRelativePosition(dRelativeOffset,iDpos);
   }                                     //dg02a
@@ -290,7 +259,7 @@ void BitString::Pattern
  uint32_t pattern_bit_length
  )
 {
-  PRDF_ASSERT(((o + l) <= ivLength) &&
+  PRDF_ASSERT(((o + l) <= iv_bitLen) &&
          (pattern_bit_length <= CPU_WORD_BIT_LEN));
 
   uint32_t current_offset;
@@ -397,12 +366,12 @@ void BitString::Clear
 
 bool BitString::IsEqual( const BitString & i_string ) const
 {
-    if ( ivLength != i_string.ivLength )
+    if ( iv_bitLen != i_string.iv_bitLen )
         return false; // size not equal
 
-    for ( uint32_t pos = 0; pos < ivLength; pos += CPU_WORD_BIT_LEN )
+    for ( uint32_t pos = 0; pos < iv_bitLen; pos += CPU_WORD_BIT_LEN )
     {
-        uint32_t len = std::min( ivLength - pos, (uint32_t)CPU_WORD_BIT_LEN );
+        uint32_t len = std::min( iv_bitLen - pos, (uint32_t)CPU_WORD_BIT_LEN );
 
         if ( GetField(pos, len) != i_string.GetField(pos, len) )
             return false; // bit strings do not match
@@ -428,9 +397,9 @@ bool BitString::IsEqual( const BitString & i_string ) const
 
 bool BitString::IsZero() const
 {
-    for ( uint32_t pos = 0; pos < ivLength; pos += CPU_WORD_BIT_LEN )
+    for ( uint32_t pos = 0; pos < iv_bitLen; pos += CPU_WORD_BIT_LEN )
     {
-        uint32_t len = std::min( ivLength - pos, (uint32_t)CPU_WORD_BIT_LEN );
+        uint32_t len = std::min( iv_bitLen - pos, (uint32_t)CPU_WORD_BIT_LEN );
 
         if ( 0 != GetField(pos, len) )
             return false; // something is non-zero
@@ -484,7 +453,7 @@ void BitString::Mask
   uint32_t l;
 
   /* Use smaller length                                               */
-  l = std::min(ivLength, string.ivLength);
+  l = std::min(iv_bitLen, string.iv_bitLen);
 
   current_offset = 0;
   while(true)
@@ -514,9 +483,9 @@ void BitString::Mask
 
 CPU_WORD * BitString::GetRelativePosition(uint32_t & oBitOffset, uint32_t iBitPos) const
 {
-  PRDF_ASSERT(ivBuffer != NULL);
+  PRDF_ASSERT(iv_bufAddr != NULL);
   oBitOffset = iBitPos % CPU_WORD_BIT_LEN;
-  return ivBuffer + (iBitPos/CPU_WORD_BIT_LEN);
+  return iv_bufAddr + (iBitPos/CPU_WORD_BIT_LEN);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -524,7 +493,7 @@ CPU_WORD * BitString::GetRelativePosition(uint32_t & oBitOffset, uint32_t iBitPo
 CPU_WORD * BitStringBuffer::GetRelativePositionAlloc(uint32_t & oBitOffset, uint32_t iBitPos)
 {
   // The non-constant version of GetRelativePostion
-  if(GetMemoryAddress() == NULL) SetBuffer();  // alocate memory
+  if(getBufAddr() == NULL) SetBuffer();  // alocate memory
   return GetRelativePosition(oBitOffset, iBitPos);
 }
 // dg02a - end
@@ -583,9 +552,9 @@ BitStringOffset & BitStringOffset::operator=(const BitString & i_bs)
 BitStringBuffer operator~(const BitString & bs)
 {
   BitStringBuffer bsb(bs);
-  for(uint32_t pos = 0; pos < bsb.GetLength(); pos += CPU_WORD_BIT_LEN)
+  for(uint32_t pos = 0; pos < bsb.getBitLen(); pos += CPU_WORD_BIT_LEN)
   {
-    uint32_t len = bsb.GetLength() - pos;
+    uint32_t len = bsb.getBitLen() - pos;
     len = std::min(len,CPU_WORD_BIT_LEN);
     CPU_WORD value = ~(bsb.GetField(pos,len));
     bsb.SetField(pos,len,value);
@@ -598,12 +567,12 @@ BitStringBuffer operator~(const BitString & bs)
 
 BitStringBuffer BitString::operator&(const BitString & bs) const
 {
-  BitStringBuffer bsb(std::min(this->GetLength(), bs.GetLength()));
+  BitStringBuffer bsb(std::min(this->getBitLen(), bs.getBitLen()));
   for(uint32_t pos = 0;
-      pos < std::min(this->GetLength(), bs.GetLength());
+      pos < std::min(this->getBitLen(), bs.getBitLen());
       pos += CPU_WORD_BIT_LEN)
   {
-    uint32_t len = std::min(this->GetLength(), bs.GetLength()) - pos;
+    uint32_t len = std::min(this->getBitLen(), bs.getBitLen()) - pos;
     len = std::min(len,CPU_WORD_BIT_LEN);
     CPU_WORD value = this->GetField(pos,len) & bs.GetField(pos,len);
     bsb.SetField(pos,len,value);
@@ -616,12 +585,12 @@ BitStringBuffer BitString::operator&(const BitString & bs) const
 
 BitStringBuffer BitString::operator|(const BitString & bs) const
 {
-  BitStringBuffer bsb(std::min(this->GetLength(), bs.GetLength()));
+  BitStringBuffer bsb(std::min(this->getBitLen(), bs.getBitLen()));
   for(uint32_t pos = 0;
-      pos < std::min(this->GetLength(), bs.GetLength());
+      pos < std::min(this->getBitLen(), bs.getBitLen());
       pos += CPU_WORD_BIT_LEN)
   {
-    uint32_t len = std::min(this->GetLength(), bs.GetLength()) - pos;
+    uint32_t len = std::min(this->getBitLen(), bs.getBitLen()) - pos;
     len = std::min(len,CPU_WORD_BIT_LEN);
     CPU_WORD value = this->GetField(pos,len) | bs.GetField(pos,len);
     bsb.SetField(pos,len,value);
@@ -634,14 +603,14 @@ BitStringBuffer BitString::operator|(const BitString & bs) const
 
 BitStringBuffer BitString::operator>>(uint32_t count) const
 {
-  BitStringBuffer l_bsb(this->GetLength());
+  BitStringBuffer l_bsb(this->getBitLen());
   BitString * l_bsbp = &l_bsb; // dg03a - stupid trick to get to GetRelativePositionAlloc()
   //  l_bsb.Clear();
-  if(count < this->GetLength())
+  if(count < this->getBitLen())
   {
     //bso overlays bsb at offset = count
     uint32_t l_dummy;
-    BitStringOffset bso(count,l_bsb.GetLength() - count,
+    BitStringOffset bso(count,l_bsb.getBitLen() - count,
                             l_bsbp->GetRelativePositionAlloc(l_dummy,0)); //dg03c
     bso.SetBits(*this);
   }
@@ -652,12 +621,12 @@ BitStringBuffer BitString::operator>>(uint32_t count) const
 
 BitStringBuffer BitString::operator<<(uint32_t count) const
 {
-  BitStringBuffer l_bsb(this->GetLength());
+  BitStringBuffer l_bsb(this->getBitLen());
   //  l_bsb.Clear();
-  if(count < this->GetLength())
+  if(count < this->getBitLen())
   {
     // bso overlays *this at offset = count
-    BitStringOffset bso(count,this->GetLength() - count,this->GetMemoryAddress());
+    BitStringOffset bso(count,this->getBitLen() - count,this->getBufAddr());
     l_bsb.SetBits(bso);
   }
   return l_bsb;
@@ -709,7 +678,7 @@ ivByteCapacity(ibc)
 
 BitStringBuffer::BitStringBuffer(const BitString & string)
 :
-BitString(string.GetLength(),NULL),
+BitString(string.getBitLen(),NULL),
 ivByteCapacity(0)
 {
   if(!string.IsZero())  //dg02a - only allocate if bits are on
@@ -722,7 +691,7 @@ ivByteCapacity(0)
 // The True copy constructor  mk00a
 BitStringBuffer::BitStringBuffer(const BitStringBuffer & string)
 :
-BitString(string.GetLength(),NULL),
+BitString(string.getBitLen(),NULL),
 ivByteCapacity(string.ivByteCapacity)
 {
   if(!string.IsZero())  //dg02a - only allocate if bits are on
@@ -746,7 +715,7 @@ ivByteCapacity(string.ivByteCapacity)
 
 BitStringBuffer::~BitStringBuffer(void)
 {
-  delete [] GetMemoryAddress();
+  delete [] getBufAddr();
 }
 
 // Function Specification ///////////////////////////////////////////
@@ -774,10 +743,10 @@ BitStringBuffer & BitStringBuffer::operator=
   // Check for assignment to self
   if(this != &string)
   {
-    delete[] GetMemoryAddress();
+    delete[] getBufAddr();
     // Assign base class part
     BitString::operator=(string);
-    SetMemoryAddress(NULL);
+    setBufAddr(NULL);
 
     // Assign derived class part
     ivByteCapacity = string.ivByteCapacity;
@@ -795,11 +764,11 @@ BitStringBuffer & BitStringBuffer::operator=
 
 BitStringBuffer & BitStringBuffer::operator=(const BitString & string)
 {
-  delete [] GetMemoryAddress();
+  delete [] getBufAddr();
 
   // Assign base class part
   BitString::operator=(string); //copy it to this
-  SetMemoryAddress(NULL);
+  setBufAddr(NULL);
 
   // Assign derived class part
   ivByteCapacity = 0;
@@ -830,20 +799,21 @@ BitStringBuffer & BitStringBuffer::operator=(const BitString & string)
 
 void BitStringBuffer::SetBuffer(void)
 {
-  uint32_t byte_count = GetLength() / CPU_WORD_BIT_LEN;
+  uint32_t byte_count = getBitLen() / CPU_WORD_BIT_LEN;
 
   // Account for remainder of division with an additional byte
-  if((GetLength() % CPU_WORD_BIT_LEN) != 0)
+  if((getBitLen() % CPU_WORD_BIT_LEN) != 0)
   {
     byte_count++;
   }
 
   byte_count = std::max(ivByteCapacity, byte_count);
 
-  delete [] GetMemoryAddress();
-  SetMemoryAddress(new CPU_WORD[byte_count]);
+  delete [] getBufAddr();
+  setBufAddr(new CPU_WORD[byte_count]);
   Clear();
 }
+
 /*--------------------------------------------------------------------*/
 /*  IO Stream Conditional Support                                     */
 /*--------------------------------------------------------------------*/
@@ -855,9 +825,9 @@ std::ostream & operator<<(std::ostream & out,
 {
   const uint32_t bit_field_length = CPU_WORD_BIT_LEN;
   out << std::hex;
-  for(uint32_t pos = 0; pos < bit_string.GetLength(); pos += bit_field_length)
+  for(uint32_t pos = 0; pos < bit_string.getBitLen(); pos += bit_field_length)
   {
-    uint32_t len = bit_string.GetLength() - pos;
+    uint32_t len = bit_string.getBitLen() - pos;
     len = std::min(len,bit_field_length);
     CPU_WORD value = bit_string.GetField(pos,len);
     out << std::setw(bit_field_length/4) << std::setfill('0') << value << " ";

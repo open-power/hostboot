@@ -30,10 +30,6 @@
  *  @brief BitString and BitStringBuffer class declarations
  */
 
-/*--------------------------------------------------------------------*/
-/*  Includes                                                          */
-/*--------------------------------------------------------------------*/
-
 #if !defined(PRDF_TYPES_H)
 #include <prdf_types.h>
 #endif
@@ -48,30 +44,6 @@
 #endif
 
 #include <prdfAssert.h>
-
-/*--------------------------------------------------------------------*/
-/*  Forward References                                                */
-/*--------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------*/
-/*  User Types                                                        */
-/*--------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------*/
-/*  Constants                                                         */
-/*--------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------*/
-/*  Macros                                                            */
-/*--------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------*/
-/*  Global Variables                                                  */
-/*--------------------------------------------------------------------*/
-
-//--------------------------------------------------------------------
-//  Forward References
-//--------------------------------------------------------------------
 
 namespace PRDF
 {
@@ -91,103 +63,80 @@ constexpr uint32_t CPU_WORD_BIT_LEN = CPU_WORD_SIZE * 8;
 /** A CPU_WORD with all of the bits set to 1. */
 constexpr CPU_WORD CPU_WORD_MASK = static_cast<CPU_WORD>(-1);
 
-/*--------------------------------------------------------------------*/
-/*  Function Prototypes                                               */
-/*--------------------------------------------------------------------*/
+//##############################################################################
+//                             BitString class
+//##############################################################################
 
-//! BitString
-/*!
- BitString is general purpose class providing access to a bit string in memory.
- \remarks
- The Bit String models a contiguous sequence of bits in memory from 0 to n.
- In the BitString class the start of the string is aligned with the memory
- address provided. The BitStringOffset class allows the starting bit string
- to occur on any bit in memory. The length of the bit string may be any length up to
- the value a uint32_t can hold. ( the BitStringOffset limits the length such that
- the start bit offset + length must not exceed the max value of a uint32_t).
-
- The BitString and BitStringOffset classes do not own the memory storage used to hold
- the bitstring data, it only accesses and manipulate the bits in the range specified.
- The BitStringBuffer is a version of the bits string class that manages its' own storage.
- Operations are performed on the Bit String using either a single bit or a field.
-
- The CPU_WORD type is used internally to reference memory
- and as the interface type for the field.  This interface
- allows normal interaction with the builtin types.
- Accessing the Bit String is accomplished in units of n
- bits where n equals CPU_WORD_BIT_LEN.  This CPU_WORD
- type is defined to take advantage of the target CPU's
- most efficient memory access instructions.  However, the
- semantics of the Bit String class are identical
- regardless of the actual type of CPU_WORD.
-
- \verbatim
- Bit positions are specified  0 to (length - 1) from left to right.
-
- 0 1 2 3 .... (length - 1)
-
- B B B B ....       B
- \endverbatim
-
- \remarks
- When the CPU_WORD is used in SetField() and GetField uses
- an identical bit order.  For example, if only 16 bits of
- the CPU_WORD were used, then the 16 left most bits would
- contain the field data and the remaining bits would be
- zero.
-
- \verbatim
- 0 1 2 3 .... 15 16 17 ....     (CPU_WORD_SIZE - 1)
-
- B B B B ....  B  0  0 ....              0
- \endverbatim
-
- \remarks
- A static member function RIGHT_SHIFT() is provided for
- shifting the bits the apppropriate number of positions so
- that the resulting value is right justified. For example,
- after using RIGHT_SHIFT() on the above field the result
- would be as follows.
-
- \verbatim
- 0 1 2 3 ....              ....  (CPU_WORD_SIZE - 1)
-
- 0 0 0 0 ....  B B B B  B  ....             B
- \endverbatim
-
- \remarks
- The static member function LEFT_SHIFT() performs the
- inverse operation.  The resulting value is left justified.
-
- \remarks
- The length of a Bit String is only limited by the amount
- of memory that contains the bits and the representation
- of length (16-bits).
-*/
+/**
+ * A BitString is general purpose class providing the ability to manipulate
+ * individual bits within an allocated section of contiguous memory.
+ *
+ * A BitString does not "own" the memory, it only accesses and manipulates the
+ * bits in the range specified. Users will need to ensure memory is allocated
+ * and deallocated appropriately. As an alternative, a BitStringBuffer is a
+ * BitString that will allocate and maintain its own memory.
+ *
+ * The length of a BitString is only limited by the amount of memory that
+ * contains the data buffer.
+ *
+ * The CPU_WORD type is used internally to reference memory and as the interface
+ * type for the field. Ensure that any buffer allocated for a BitString is
+ * CPU_WORD aligned so that the BitString does not accidentally access memory
+ * beyond availability. For example, say we have a buffer allocated for 6 byte
+ * (48 bits) and those 6 bytes are allocated at the very end of accessible
+ * memory. When the BitString tries to access the second CPU_WORD, which
+ * contains the last 2 bytes of the buffer, an expection will be thrown because
+ * the BitString always access an entire CPU_WORD (4 bytes) at a time and the
+ * last two bytes are not accessible. Utilize the static function
+ * getNumCpuWords() to get the minimum number of CPU_WORDs required to allocate
+ * sufficient space in the buffer. For example, getNumCpuWords(48) returns 2.
+ *
+ * The bit positions are ordered 0 to n (left to right), where n is the bit
+ * length minus one. Be default, position 0 will be the first bit of the
+ * buffer's start address. The BitStringOffset class allows users to input an
+ * offset anywhere within the buffer, which is then used as position 0. This is
+ * useful when the data within the buffer is a right-justified.
+ */
 class BitString
 {
-public:
+  public: // functions
 
-  /*!
-   Constructor
-   \param Length of bitstring
-   \param memory address of bit string storage
-   \pre   None.
-   \post  None.
-   */
-  BitString(uint32_t i_length, CPU_WORD * i_address)
-  :
-  ivLength(i_length),
-  ivBuffer(i_address)
-  {
-  }
+    /**
+     * @brief Constructor
+     * @param i_bitLen  The number of bits in the bit string.
+     * @param i_bufAddr The starting address of the memory buffer.
+     * @post  It is possible that i_bitLen may not be CPU_WORD
+     *        aligned, however, the memory space allocated for i_bufAddr must be
+     *        CPU_WORD aligned to avoid functions in this class accessing memory
+     *        outside the available memory space. Use getNumCpuWords() to
+     *        calulate the number of CPU_WORDs needed to allocate sufficient
+     *        memory space.
+     */
+    BitString( uint32_t i_bitLen, CPU_WORD * i_bufAddr ) :
+        iv_bitLen(i_bitLen), iv_bufAddr(i_bufAddr)
+    {}
 
-  /*!
-   Destructor
-   \notes This destructor does nothing. It is required for proper destruction
-   of derived classes.
-   */
-  virtual ~BitString(void);
+    /** @brief Destructor */
+    virtual ~BitString() {}
+
+    /** @return The number of bits in the bit string buffer. */
+    uint32_t getBitLen() const { return iv_bitLen; }
+
+    /** @return The address of the bit string buffer. Note that this may
+     *          return nullptr. */
+    CPU_WORD * getBufAddr() const { return iv_bufAddr; }
+
+    /**
+     * @param i_bitLen The number of bits for a bit string.
+     * @param i_offset Optional starting position of the bit string within the
+     *                 memory buffer.
+     * @return The minimum number of CPU_WORDs required to allocate sufficient
+     *         memory space for a bit string.
+     */
+    static uint32_t getNumCpuWords( uint32_t i_bitLen, uint32_t i_offset = 0 )
+    {
+        return (i_bitLen + i_offset + CPU_WORD_BIT_LEN-1) / CPU_WORD_BIT_LEN;
+    }
 
   /*!
    Comparison
@@ -199,14 +148,6 @@ public:
   }
 
   /*!
-   Get the number of bits in the bitstring
-   \returns length of bitstring
-   \pre None
-   \pos None
-   */
-  uint32_t GetLength(void) const { return ivLength; }
-
-  /*!
    Get the number of bits that are set ("1")
    */
   uint32_t GetSetCount(void) const;
@@ -215,7 +156,7 @@ public:
    Get the number of bits that are set ("1") in a specific range
    \param starting bit position
    \param # of bits in the range
-   \pre bit_position + leng <= GetLength();
+   \pre bit_position + leng <= getBitLen();
    \post none
    */
   uint32_t GetSetCount(uint32_t bit_position, uint32_t leng) const;
@@ -225,7 +166,7 @@ public:
    \param starting bit position
    \param # of bits in the field
    \return Returned value is left justified (See GetFieldJustified)
-   \pre (bit_position + length) <= GetLength(); length <= CPU_WORD_BIT_LEN
+   \pre (bit_position + length) <= getBitLen(); length <= CPU_WORD_BIT_LEN
    \post none
    */
   CPU_WORD GetField(uint32_t bit_position,uint32_t length) const;
@@ -235,7 +176,7 @@ public:
    \param starting bit position
    \param # of bits in the field
    \return Returned value is right justified (See GetField)
-   \pre (bit_position + length) <= GetLength(); length <= CPU_WORD_BIT_LEN
+   \pre (bit_position + length) <= getBitLen(); length <= CPU_WORD_BIT_LEN
    \post none
    */
   CPU_WORD GetFieldJustify(uint32_t bit_position,uint32_t length) const;
@@ -244,7 +185,7 @@ public:
    Set value into a subfield within the bitstring
    \param starting bit position
    \param # of bits in the field
-   \pre (bit_position + length) <= GetLength(); length <= CPU_WORD_BIT_LEN
+   \pre (bit_position + length) <= getBitLen(); length <= CPU_WORD_BIT_LEN
    \post The bits are set from value (value assumed left justified)
    \verbatim
           this   -> '00100110011....'b
@@ -259,7 +200,7 @@ public:
    Set value into a subfield within the bitstring
    \param starting bit position
    \param # of bits in the field
-   \pre (bit_position + length) <= GetLength(); length <= CPU_WORD_BIT_LEN
+   \pre (bit_position + length) <= getBitLen(); length <= CPU_WORD_BIT_LEN
    \post The bits are set from value (value assumed right justified)
    \verbatim
           this   -> '00100110011....'b
@@ -301,7 +242,7 @@ public:
    \param iLen: # of bits to modify
    \param iPattern: Pattern to set
    \param iPatternLen: # of bit in pattern to use (right justfied)
-   \pre  (iPos + iLen) <= GetLength()
+   \pre  (iPos + iLen) <= getBitLen()
    \post Range of specified bits filled with pattern. The pattern is repeated as needed
    \verbatim
         Examples:  iPos(0), iLen(10), iPattern(0xA), iPatternLen(4)
@@ -480,7 +421,17 @@ public:
    */
   virtual CPU_WORD * GetRelativePositionAlloc(uint32_t & oBitOffset, uint32_t iBitPos);//dg02a
 
-protected:
+  protected: // functions
+
+    /**
+     * @param i_newBufAddr The starting address of the new bit string buffer.
+     * @pre   Before calling this function, make sure you deallocate the old
+     *        buffer to avoid memory leaks.
+     */
+    void setBufAddr( CPU_WORD * i_newBufAddr ) { iv_bufAddr = i_newBufAddr; }
+
+    /** @param i_newBitLen The new bit length of this bit string buffer. */
+    void setBitLen( uint32_t i_newBitLen ) { iv_bitLen = i_newBitLen; }
 
   /*!
    Assignment operator
@@ -497,27 +448,11 @@ protected:
    */
   virtual CPU_WORD * GetRelativePosition(uint32_t & oBitOffset, uint32_t iBitPos) const;
 
-  /*!
-   Proides address of the bit string storage
-   @NOTE: WARNING!! this may return NULL if there is no storage on a BitStringBuffer because bits
-          have not yet been set. - use GetRelativePositionAlloc() to force storage allocation
-   */
-  CPU_WORD * GetMemoryAddress(void) const { return ivBuffer; }
+  private: // instance variables
 
-  /*!
-   Set the memory address of the string representation
-   */
-  void SetMemoryAddress(CPU_WORD *iBuffer) { ivBuffer = iBuffer; }
-
-private:
-
-
-
-  uint32_t                      ivLength;
-  CPU_WORD *                    ivBuffer;
-
+    uint32_t   iv_bitLen;  ///< The bit length of this buffer.
+    CPU_WORD * iv_bufAddr; ///< The beginning address of this buffer.
 };
-
 
 //! BitStringBuffer
 /*!
@@ -731,8 +666,8 @@ BitString & BitString::operator=
  const BitString & string
  )
 {
-  ivLength = string.ivLength;
-  ivBuffer = string.ivBuffer;
+  iv_bitLen = string.iv_bitLen;
+  iv_bufAddr = string.iv_bufAddr;
   return(*this);
 }
 
@@ -764,25 +699,25 @@ CPU_WORD * BitString::GetRelativePositionAlloc(uint32_t & oBitOffset, uint32_t i
 inline
 void BitString::Pattern(CPU_WORD pattern,uint32_t pattern_bit_length)
 {
-  Pattern(0, GetLength(), pattern, pattern_bit_length);
+  Pattern(0, getBitLen(), pattern, pattern_bit_length);
 }
 
 
 inline
 void BitString::Pattern(CPU_WORD pattern)
 {
-  Pattern(0, GetLength(), pattern, CPU_WORD_SIZE);
+  Pattern(0, getBitLen(), pattern, CPU_WORD_SIZE);
 }
 
 
 inline uint32_t BitString::GetSetCount(void) const
 {
-  return(GetSetCount(0, GetLength()));
+  return(GetSetCount(0, getBitLen()));
 }
 
 inline void BitString::SetBits(const BitString & string)
 {
-  SetBits(string, 0, string.GetLength());
+  SetBits(string, 0, string.getBitLen());
 }
 
 } // end namespace PRDF
