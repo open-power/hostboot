@@ -31,6 +31,8 @@ chip p9_mca
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
+.include "prdfP9McaExtraSig.H";
+
  #############################################################################
  #                                                                           #
  #  ######                                                                   #
