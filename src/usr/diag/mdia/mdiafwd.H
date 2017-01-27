@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,6 +91,7 @@ enum
 
     // mcbist unit regs
     MCBIST_FIR              = 0x07012300,
+    MCBIST_FIR_AND          = 0x07012301,
     MCBIST_FIR_MASK         = 0x07012303,
     MCBIST_FIR_ACT0         = 0x07012306,
     MCBIST_FIR_ACT1         = 0x07012307,
