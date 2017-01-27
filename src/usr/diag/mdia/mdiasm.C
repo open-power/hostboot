@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -353,9 +353,10 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 size_t sz_uint64 = sizeof(uint64_t);
 
                 // Init data for MCBIST.
-                uint64_t firAddr = MCBIST_FIR;
-                uint64_t mskAddr = MCBIST_FIR_MASK;
-                uint64_t bitMask = 0x0020000000000000;
+                uint64_t firAddr    = MCBIST_FIR;
+                uint64_t firAndAddr = MCBIST_FIR_AND;
+                uint64_t mskAddr    = MCBIST_FIR_MASK;
+                uint64_t bitMask    = 0x0028000000000000;
 
                 // Change if target type is MBA.
                 if ( TYPE_MBA == trgtType )
@@ -368,6 +369,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 // Check for command complete. If set, don't time out.
                 err = deviceRead( target, &firData, sz_uint64,
                                   DEVICE_SCOM_ADDRESS(firAddr) );
+
                 if ( nullptr != err )
                 {
                     MDIA_FAST("sm: deviceRead on 0x%08X failed HUID:0x%08X",
@@ -380,6 +382,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                     firData &= bitMask;
                 }
 
+                // TODO RTC 168088
                 if ( 0 != firData )
                 {
                     err = deviceRead( target, &mskData, sz_uint64,
@@ -443,6 +446,31 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                     break;
                 }
 
+                /*@
+                 * @errortype
+                 * @reasoncode       MDIA::MAINT_COMMAND_HW_TIMED_OUT
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         MDIA::PROCESS_COMMAND_TIMEOUT
+                 * @userData1        Associated memory diag work item
+                 * @userData2        Target HUID
+                 * @devdesc          A maint command HW timed out
+                 */
+                errlHndl_t timeoutErrl = new ErrlEntry(
+                        ERRL_SEV_UNRECOVERABLE,
+                        PROCESS_COMMAND_TIMEOUT,
+                        MAINT_COMMAND_HW_TIMED_OUT,
+                        *((*wit)->workItem),
+                        get_huid(target));
+
+                // collect ffdc
+
+                addTimeoutFFDC(target, timeoutErrl);
+
+                timeoutErrl->addHwCallout(target,
+                        HWAS::SRCI_PRIORITY_HIGH,
+                        HWAS::DELAYED_DECONFIG,
+                        HWAS::GARD_NULL);
+
                 // If maint cmd complete bit is not on, time out
                 MDIA_FAST("sm: stopping command: %p", target);
                 //target type is MBA
@@ -477,11 +505,26 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 {
                     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
                     fapi2::ReturnCode fapirc = memdiags::stop(fapiMcbist);
+
                     err = fapi2::rcToErrl(fapirc);
 
                     if ( nullptr != err )
                     {
                         MDIA_ERR("sm: memdiags::stop failed");
+                        errlCommit(err, MDIA_COMP_ID);
+                    }
+
+                    //memdiags::stop will set the command complete attention so
+                    //we need to clear those
+                    bitMask = ~bitMask;
+
+                    err = deviceWrite( target, &bitMask, sz_uint64,
+                                       DEVICE_SCOM_ADDRESS(firAndAddr) );
+
+                    if ( nullptr != err )
+                    {
+                        MDIA_FAST( "sm: deviceWrite on 0x%08X failed, HUID: "
+                                   "0x%08X", firAddr, get_huid(target) );
                         errlCommit(err, MDIA_COMP_ID);
                     }
                 }
@@ -497,32 +540,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                         *((*wit)->workItem),
                         get_huid(target));
 
-                /*@
-                 * @errortype
-                 * @reasoncode       MDIA::MAINT_COMMAND_HW_TIMED_OUT
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         MDIA::PROCESS_COMMAND_TIMEOUT
-                 * @userData1        Associated memory diag work item
-                 * @userData2        Target HUID
-                 * @devdesc          A maint command HW timed out
-                 */
-                err = new ErrlEntry(
-                        ERRL_SEV_UNRECOVERABLE,
-                        PROCESS_COMMAND_TIMEOUT,
-                        MAINT_COMMAND_HW_TIMED_OUT,
-                        *((*wit)->workItem),
-                        get_huid(target));
-
-                // collect ffdc
-
-                addTimeoutFFDC(target, err);
-
-                err->addHwCallout(target,
-                        HWAS::SRCI_PRIORITY_HIGH,
-                        HWAS::DELAYED_DECONFIG,
-                        HWAS::GARD_NULL);
-
-                errlCommit(err, MDIA_COMP_ID);
+                errlCommit(timeoutErrl, MDIA_COMP_ID);
 
                 break;
             }
