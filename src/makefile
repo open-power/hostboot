@@ -133,6 +133,7 @@ DIRECT_BOOT_OBJECTS += cpuid.o
 DIRECT_BOOT_OBJECTS += stdlib.o
 DIRECT_BOOT_OBJECTS += assert.o
 DIRECT_BOOT_OBJECTS += workitem.o
+DIRECT_BOOT_OBJECTS += bltohbdatamgr.o
 
 BASE_MODULES += trace
 BASE_MODULES += errl
@@ -212,7 +213,7 @@ TESTCASE_MODULES += testpnor
 TESTCASE_MODULES += testvfs
 TESTCASE_MODULES += testutil
 TESTCASE_MODULES += testscan
-TESTCASE_MODULES += $(if $(CONFIG_ROM_CODE_PRESENT),testsecureboot)
+TESTCASE_MODULES += testsecureboot
 TESTCASE_MODULES += testfsiscom
 TESTCASE_MODULES += testlpc
 TESTCASE_MODULES += $(if $(CONFIG_HTMGT),testhtmgt)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,8 @@ class VmmManager
              *  etc.  Use these constants to define the hole. */
             FIRST_RESERVED_PAGE = INITIAL_PT_OFFSET,
             END_RESERVED_PAGE = INITIAL_PT_OFFSET + PTSIZE + MBOX_DMA_SIZE,
+
+            BLTOHB_DATA_START = END_RESERVED_PAGE,
 
             // Tells processor to ignore HRMOR
             FORCE_PHYS_ADDR = 0x8000000000000000,

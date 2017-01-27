@@ -22,8 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __SECUREROMTEST_H
-#define __SECURETOMTEST_H
+#ifndef __SECUREROMMANAGERTEST_H
+#define __SECUREROMMANAGERTEST_H
 
 
 #include <sys/mm.h>
@@ -34,6 +34,7 @@
 #include <errl/errlmanager.H>
 #include <secureboot/service.H>
 #include <secureboot/secure_reasoncodes.H>
+#include <kernel/bltohbdatamgr.H>
 
 #include "../securerommgr.H"
 
@@ -54,26 +55,26 @@ using namespace SECUREBOOT;
 // Moves signed files from PNOR to paged-in memory
 errlHndl_t loadSignedFile( const char * i_signedFile_name,
                            void * & o_signedFile_pageAddr,
-                           size_t & o_signedFile_size     );
+                           size_t & o_signedFile_size,
+                           uint64_t & o_signedFile_virtAddr);
 
 // Safely removes signed files from memory
 void unloadSignedFile( void * & io_signedFile_pageAddr,
                        size_t & io_signedFile_size     );
 
 // secureboot_signed_container was generated using this hw hash key. If another
-// key is in pibmem, this test will always fail.
-const uint64_t hw_key_hash[] =
+// key is in the HBBL, this test will always fail.
+const sha2_hash_t hw_key_hash =
 {
-    0x40d487ff7380ed6a,
-    0xd54775d5795fea0d,
-    0xe2f541fea9db06b8,
-    0x466a42a320e65f75,
-    0xb48665460017d907,
-    0x515dc2a5f9fc5095,
-    0x4d6ee0c9b67d219d,
-    0xfb7085351d01d6d1
+    0x40,0xd4,0x87,0xff,0x73,0x80,0xed,0x6a,
+    0xd5,0x47,0x75,0xd5,0x79,0x5f,0xea,0x0d,
+    0xe2,0xf5,0x41,0xfe,0xa9,0xdb,0x06,0xb8,
+    0x46,0x6a,0x42,0xa3,0x20,0xe6,0x5f,0x75,
+    0xb4,0x86,0x65,0x46,0x00,0x17,0xd9,0x07,
+    0x51,0x5d,0xc2,0xa5,0xf9,0xfc,0x50,0x95,
+    0x4d,0x6e,0xe0,0xc9,0xb6,0x7d,0x21,0x9d,
+    0xfb,0x70,0x85,0x35,0x1d,0x01,0xd6,0xd1
 };
-
 
 /**********************************************************************/
 /*  End of UTILITY FUNCTIONS                                          */
@@ -88,7 +89,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
      */
     void test_verify(void)
     {
-        TRACFCOMP(g_trac_secure,ENTER_MRK"SecureRomManagerTest::test_verify>");
+        TRACUCOMP(g_trac_secure,ENTER_MRK"SecureRomManagerTest::test_verify>");
 
         errlHndl_t  l_errl  =   NULL;
 
@@ -100,37 +101,19 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         const char * signedFile_name =   "secureboot_signed_container";
         void *  signedFile_pageAddr  =   NULL;
         size_t  signedFile_size      =   0;
+        uint64_t signedFile_vaddr    =   0;
 
         // Call utility function
         l_errl = loadSignedFile( signedFile_name,
                                  signedFile_pageAddr,
-                                 signedFile_size);
-
+                                 signedFile_size,
+                                 signedFile_vaddr);
         if (l_errl)
         {
             TS_FAIL("SecureRomManagerTest::test_verify: loadSignedFile() Failed");
             errlCommit(l_errl, SECURE_COMP_ID);
             return;
         }
-
-        TRACUCOMP(g_trac_secure, "SecureRomManagerTest::test_verify: "
-                  "signedFile info: addr = %p, size=0x%x",
-                  signedFile_pageAddr, signedFile_size);
-
-        SecureRomManager l_sRom;
-
-        // Call initializeSecureRomManager()
-        l_errl = l_sRom.initialize();
-
-        if (l_errl)
-        {
-            TS_FAIL("SecureRomManagerTest::test_verify: initializeSecureRomManager() Failed");
-            errlCommit(l_errl, SECURE_COMP_ID);
-            return;
-        }
-
-        // Set hardware keys' hash
-        memcpy (& l_sRom.iv_key_hash, &hw_key_hash, sizeof(sha2_hash_t));
 
         /*******************************************************************/
         /* Call verify function                                            */
@@ -139,8 +122,8 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         // Warn about the exception being handled during verification
         printkd("test_verify(): expect to see 'mfsr r2 to CFAR handled': ");
 
-        l_errl = l_sRom.verifyContainer( signedFile_pageAddr);
-
+        l_errl = SECUREBOOT::verifyContainer(signedFile_pageAddr,
+                                             &hw_key_hash);
         if (l_errl)
         {
             TS_FAIL("SecureRomManagerTest::test_verify: verifyContainer() Failed");
@@ -149,15 +132,51 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         }
 
         /*******************************************************************/
-        /* Unload "secureboot_signed_container" from memory                      */
+        /* Unload "secureboot_signed_container" from memory                */
         /*******************************************************************/
         if ( signedFile_pageAddr != NULL   )
         {
             unloadSignedFile( signedFile_pageAddr, signedFile_size);
         }
 
-        TRACFCOMP(g_trac_secure,EXIT_MRK"SecureRomManagerTest::test_verify");
-    };
+        TRACUCOMP(g_trac_secure,EXIT_MRK"SecureRomManagerTest::test_verify");
+    }
+
+    /**
+     * @brief Secure ROM Test - Test sha512 hash
+     */
+    void test_sha512(void)
+    {
+        TRACUCOMP(g_trac_secure,ENTER_MRK"SecureRomManagerTest::test_sha512>");
+
+        // Constants for sha512 test
+        const sha2_byte l_text[]={"The quick brown fox jumps over the lazy dog"};
+        // Do not include NULL character in sha512 test
+        size_t l_textSize = 43;
+        const uint64_t l_textHash[] =
+        {
+            0x07E547D9586F6A73,
+            0xF73FBAC0435ED769,
+            0x51218FB7D0C8D788,
+            0xA309D785436BBB64,
+            0x2E93A252A954F239,
+            0x12547D1E8A3B5ED6,
+            0xE1BFD7097821233F,
+            0xA0538F3DB854FEE6
+        };
+
+        // Result hash
+        SHA512_t l_resultHash = {0};
+        SECUREBOOT::hashBlob(&l_text, l_textSize, l_resultHash);
+
+        // Ensure calculated result matches expected result
+        if (memcmp(l_textHash, l_resultHash, SHA512_DIGEST_LENGTH) != 0)
+        {
+            TS_FAIL("SecureRomManagerTest::test_sha512: hashBlob() Failed");
+        }
+
+        TRACUCOMP(g_trac_secure,EXIT_MRK"SecureRomManagerTest::test_sha512");
+    }
 };
 
 /**********************************************************************/
@@ -167,7 +186,8 @@ class SecureRomManagerTest : public CxxTest::TestSuite
 // Moved secureboot_signed_container from PNOR to paged-in memory
 errlHndl_t loadSignedFile( const char * i_signedFile_name,
                                 void * & o_signedFile_pageAddr,
-                                size_t & o_signedFile_size     )
+                                size_t & o_signedFile_size,
+                                uint64_t & o_signedFile_virtAddr)
 {
 
         errlHndl_t  l_errl  =   NULL;
@@ -198,6 +218,9 @@ errlHndl_t loadSignedFile( const char * i_signedFile_name,
 
             return l_errl;
         }
+
+        // Get the VFS virtual address
+        o_signedFile_virtAddr = reinterpret_cast<uint64_t>(l_signedFile_virtAddr);
 
         // Request contiguous memory block to copy in file
         size_t l_num_pages = ALIGN_PAGE(o_signedFile_size)/PAGESIZE;

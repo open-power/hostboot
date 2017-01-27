@@ -29,11 +29,6 @@ config P9_PAGE_TABLE
     help
         Use the P9 version of the page table setup
 
-config ROM_CODE_PRESENT
-    default n
-    help
-        Indicates that ROM code is available to call
-
 config INCLUDE_XML_OPPOWERVM
     default y
     help
