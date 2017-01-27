@@ -57,21 +57,38 @@ fapi2::ReturnCode p9_quad_power_off(
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target)
 {
     fapi2::buffer<uint64_t> l_data64;
+    constexpr uint64_t l_rawData = 0x1100000000000000ULL; // Bit 3 & 7 are set to be manipulated
+    constexpr uint32_t MAX_CORE_PER_QUAD = 4;
     fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
+    uint32_t l_cnt = 0;
 
     FAPI_INF("p9_quad_power_off: Entering...");
 
     // Print chiplet position
     FAPI_INF("Quad power off chiplet no.%d", i_target.getChipletNumber());
 
+    FAPI_DBG("Disabling bits 20/22/24/26 in EQ_QPPM_QPMMR_CLEAR, to gain access"
+             " to PFET controller, otherwise Quad Power off scom will fail");
     l_data64.setBit<20>();
     l_data64.setBit<22>();
     l_data64.setBit<24>();
     l_data64.setBit<26>();
+    FAPI_TRY(fapi2::putScom(i_target, EQ_QPPM_QPMMR_CLEAR, l_data64));
 
-    FAPI_TRY(fapi2::putScom(i_target,
-                            EQ_QPPM_QPMMR_CLEAR,
-                            l_data64));
+    // QPPM_QUAD_CTRL_REG
+    do
+    {
+        // EX0, Enables the EDRAM charge pumps in L3 EX0, on power down they
+        // must be de-asserted in the opposite order 3 -> 0
+        // EX1, Enables the EDRAM charge pumps in L3 EX1, on power down they
+        // must be de-asserted in the opposite order 7 -> 4
+        FAPI_DBG("De-asserting EDRAM charge pumps in Ex0 & Ex1 in Sequence for "
+                 "Reg EQ_QPPM_QCCR_SCOM1, Data Value [0x%0X%0X]",
+                 uint32_t((l_rawData << l_cnt) >> 32), uint32_t(l_rawData << l_cnt));
+        FAPI_TRY(fapi2::putScom(i_target, EQ_QPPM_QCCR_SCOM1, (l_rawData << l_cnt)));
+    }
+    while(++l_cnt < MAX_CORE_PER_QUAD);
+
     // Call the procedure
     FAPI_EXEC_HWP(rc, p9_pm_pfet_control_eq, i_target,
                   PM_PFET_TYPE_C::BOTH, PM_PFET_TYPE_C::OFF);
