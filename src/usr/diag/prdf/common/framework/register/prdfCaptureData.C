@@ -90,7 +90,7 @@ void CaptureData::AddDataElement( TargetHandle_t i_trgt, int i_scomId,
     if ( !i_bs->IsZero() )
     {
         // Get the size of i_bs and ensure byte alignment.
-        sz_buf = (i_bs->GetLength() + 8-1) / 8;
+        sz_buf = (i_bs->getBitLen() + 8-1) / 8;
 
         // Since we are using a BitString below, which does everything on a
         // CPU_WORD boundary, we must make sure the buffer is CPU_WORD aligned.
@@ -102,7 +102,7 @@ void CaptureData::AddDataElement( TargetHandle_t i_trgt, int i_scomId,
         memset( buf, 0x00, sz_buf );
 
         // Use a BitString to copy i_bs to the buffer.
-        BIT_STRING_ADDRESS_CLASS bs ( 0, i_bs->GetLength(), (CPU_WORD *)buf );
+        BIT_STRING_ADDRESS_CLASS bs ( 0, i_bs->getBitLen(), (CPU_WORD *)buf );
         bs.SetBits( *i_bs );
 
         // Create the new data element.

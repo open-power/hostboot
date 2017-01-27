@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,8 +89,8 @@ namespace PRDF
         //PRDF_DENTER( "ScrDB::Read() huid: 0x%X, addr: 0x%016X",
         //            getHuid(i_ptargetHandle), registerId );
         DataList data;
-        unsigned int dataWordSize = bs.GetLength()/32;
-        dataWordSize += (bs.GetLength() % 32) ? 1 : 0;
+        unsigned int dataWordSize = bs.getBitLen()/32;
+        dataWordSize += (bs.getBitLen() % 32) ? 1 : 0;
 
         // if the register has a predetermined value than get it
         if(pChipset.find(i_ptargetHandle) != pChipset.end())
@@ -142,9 +142,9 @@ namespace PRDF
                     getHuid(i_ptargetHandle), registerId,
                     bs.GetFieldJustify(0,32), bs.GetFieldJustify(32,32) );
 
-        unsigned int dataWordSize = bs.GetLength()/32;
+        unsigned int dataWordSize = bs.getBitLen()/32;
         //    PRDF_TRAC("dataWordSize1: %d", dataWordSize);
-        dataWordSize += (bs.GetLength() % 32) ? 1 : 0;
+        dataWordSize += (bs.getBitLen() % 32) ? 1 : 0;
         //    PRDF_TRAC("dataWordSize2: %d", dataWordSize);
         DataList data;
 

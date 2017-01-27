@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1997,2014              */
+/* Contributors Listed Below - COPYRIGHT 1997,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -195,13 +197,13 @@ void SCAN_COMM_REGISTER_CLASS::ClearBit
 void SCAN_COMM_REGISTER_CLASS::clearAllBits()
 {
     BIT_STRING_CLASS & bitString = AccessBitString();
-    bitString.Pattern( 0, bitString.GetLength(), 0x00000000, 32 );
+    bitString.Pattern( 0, bitString.getBitLen(), 0x00000000, 32 );
 }
 
 void SCAN_COMM_REGISTER_CLASS::setAllBits()
 {
     BIT_STRING_CLASS & bitString = AccessBitString();
-    bitString.Pattern( 0, bitString.GetLength(), 0xffffffff, 32 );
+    bitString.Pattern( 0, bitString.getBitLen(), 0xffffffff, 32 );
 }
 
 //------------------------------------------------------------------------------
