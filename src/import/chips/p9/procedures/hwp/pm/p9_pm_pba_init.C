@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -529,7 +529,7 @@ fapi_try_exit:
 /// PBA slave 0 is used to boot the SGPE and the OCC PPC405.
 ///
 /// PBA slave 1 is used to boot the OCC PPC405.
-
+///
 /// PBA slave 2 is used to boot the PGPE.  It is setup as a read/write slave
 /// as the PGPE as to write to HOMER memory during this phase.
 ///
@@ -540,11 +540,13 @@ fapi_try_exit:
 ///
 /// PBA slave 0 is used by the SGPE to read HOMER memory.
 ///
-/// PBA slave 1 is used by OCC GPEs to access Centaur memory buffers.  It is
-/// setup by OCC GPE firmware.
+/// PBA slave 1 is used by OCC GPE1 to access Centaur memory buffers and for
+/// writing 24x7 performance information. It is setup for basic read/write
+/// by this procedure;  any modifications tto this setup will be done by
+/// OCC GPE firmware.
 ///
-/// PBA Slave 2 is used by OCC GPEs to access OCC owned memory regions for
-/// GPU sensor data.
+/// PBA slave 2 is used to by the PGPE to write trace and characterization
+/// data to memory.
 ///
 /// PBA Slave 3 is used by the SBE and is setup by the SBE to map the OCB to
 /// mainstory.  This procedure set does not deal with this slave.
@@ -712,7 +714,7 @@ pba_slave_setup_runtime_phase(
     FAPI_TRY(fapi2::putScom(i_target, PU_PBAMODE_SCOM, l_data64),
              "Failed to set PBA MODE register");
 
-    FAPI_INF("Initialize PBA Slave 0 for SGPE STOP use...");
+    FAPI_INF("Initialize PBA Slave 0 for SGPE STOP use ...");
     // Slave 0 (SGPE STOP).  This is a read/write slave in the event that
     // the STOP functions needs to write to memory..
     ps.value = 0;
@@ -733,44 +735,44 @@ pba_slave_setup_runtime_phase(
     FAPI_TRY(fapi2::putScom(i_target, PU_PBASLVCTL0_SCOM, l_data64),
              "Failed to set Slave 0 control register");
 
-    FAPI_INF("Disabling PBA Slave 1 ...  No defined run-time use");
-    // Slave 1 is not used during run-time
-
+    FAPI_INF("Initialize PBA Slave 1 for GPE1 (OCC firmware) use ...");
+    // Slave 1 (GPE 1).  This is a read/write slave.  Write gathering is
+    // allowed, but with the shortest possible timeout.
     ps.value = 0;
-    ps.fields.enable = 0;
-    ps.fields.mid_match_value = 0;
-    ps.fields.mid_care_mask = OCI_MASTER_ID_MASK_NONE;
-    ps.fields.read_ttype = 0;
-    ps.fields.read_prefetch_ctl = 0;
-    ps.fields.write_ttype = 0;
-    ps.fields.wr_gather_timeout = 0;
-    ps.fields.buf_alloc_a = 0;
-    ps.fields.buf_alloc_b = 0;
-    ps.fields.buf_alloc_c = 0;
-    ps.fields.buf_alloc_w = 0;
+    ps.fields.enable = 1;
+    ps.fields.mid_match_value = OCI_MASTER_ID_GPE1;
+    ps.fields.mid_care_mask = OCI_MASTER_ID_MASK_ALL;
+    ps.fields.read_ttype = PBA_READ_TTYPE_CL_RD_NC;
+    ps.fields.read_prefetch_ctl = PBA_READ_PREFETCH_NONE;
+    ps.fields.write_ttype = PBA_WRITE_TTYPE_DMA_PR_WR;
+    ps.fields.wr_gather_timeout = PBA_WRITE_GATHER_TIMEOUT_2_PULSES;
+    ps.fields.buf_alloc_a = 1;
+    ps.fields.buf_alloc_b = 1;
+    ps.fields.buf_alloc_c = 1;
+    ps.fields.buf_alloc_w = 1;
 
     l_data64 = ps.value;
 
     FAPI_TRY(fapi2::putScom(i_target, PU_PBASLVCTL1_SCOM, l_data64),
              "Failed to set Slave 1 control register");
 
-
-    FAPI_INF("Disabling PBA Slave 2 ...  To be enabled/setup by OCC Firmware");
-    // Slave 2 - used by OCC.   Tear this down to ensure that it is properly
-    // setup by OCC.
+    FAPI_INF("Initialize PBA Slave 2 for PGPE Pstates/WOF use ...");
+    // Slave 2 (PGPE Boot).  This is a read/write slave.  Write gethering is
+    // allowed, but with the shortest possible timeout. This slave is
+    // effectively disabled soon after IPL.
 
     ps.value = 0;
-    ps.fields.enable = 0;
-    ps.fields.mid_match_value = 0;
-    ps.fields.mid_care_mask = OCI_MASTER_ID_MASK_NONE;
-    ps.fields.read_ttype = 0;
-    ps.fields.read_prefetch_ctl = 0;
-    ps.fields.write_ttype = 0;
-    ps.fields.wr_gather_timeout = 0;
-    ps.fields.buf_alloc_a = 0;
-    ps.fields.buf_alloc_b = 0;
-    ps.fields.buf_alloc_c = 0;
-    ps.fields.buf_alloc_w = 0;
+    ps.fields.enable = 1;
+    ps.fields.mid_match_value = OCI_MASTER_ID_PGPE;
+    ps.fields.mid_care_mask   = OCI_MASTER_ID_MASK_ALL;
+    ps.fields.read_ttype = PBA_READ_TTYPE_CL_RD_NC;
+    ps.fields.read_prefetch_ctl = PBA_READ_PREFETCH_NONE;
+    ps.fields.write_ttype = PBA_WRITE_TTYPE_DMA_PR_WR;
+    ps.fields.wr_gather_timeout = PBA_WRITE_GATHER_TIMEOUT_2_PULSES;
+    ps.fields.buf_alloc_a = 1;
+    ps.fields.buf_alloc_b = 1;
+    ps.fields.buf_alloc_c = 1;
+    ps.fields.buf_alloc_w = 1;
 
     l_data64 = ps.value;
 
