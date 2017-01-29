@@ -39,36 +39,78 @@
     <description>Unknown mode passed to p9_pm_pstate_gpe_init.
     </description>
     <ffdc>BADMODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PSTATE_GPE_INIT_TIMEOUT</rc>
-    <description> Pstate GPE init timedout while waiting for PGPE ACtive in OCCFLG register.
+    <description> Pstate GPE init timed out while waiting for PGPE ACtive in OCC
+    SCRATCH2.
     </description>
     <collectRegisterFfdc>
       <id>ERROR_STATUS_OF_PGPE</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_GPE_INIT_DEBUG_HALT</rc>
+    <description> Pstate GPE init detected a Debug Halt condition.  This should only
+    assert in a development debug environment.
+    </description>
+    <collectRegisterFfdc>
+      <id>ERROR_STATUS_OF_PGPE</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PSTATE_GPE_RESET_TIMEOUT</rc>
-    <description> Pstate GPE init timedout while waiting for HALT status in XSR register.
+    <description> Pstate GPE init timed out while waiting for HALT status in XSR register.
     </description>
     <collectRegisterFfdc>
       <id>ERROR_STATUS_OF_PGPE</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PSTATE_GPE_PBA_INIT_FAILED</rc>
     <description> Pstate GPE called to p9_pm_pba_init failed.
     </description>
+    <!-- @todo RTC 168127 Create a PBA collectRegister Ffdc element to call -->
     <ffdc>TARGET</ffdc>
     <ffdc>MODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

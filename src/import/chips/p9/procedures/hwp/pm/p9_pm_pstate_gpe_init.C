@@ -71,7 +71,8 @@ fapi2::ReturnCode pstate_gpe_init(
     fapi2::buffer<uint64_t> l_xcr;
     fapi2::buffer<uint64_t> l_xsr;
     fapi2::buffer<uint64_t> l_ivpr;
-    uint32_t                l_ivpr_offset;
+    uint32_t                l_ivpr_offset = 0;
+    uint32_t                l_xsr_halt_condition = 0;
     uint32_t                l_timeout_counter = TIMEOUT_COUNT;
 
     FAPI_IMP(">> pstate_gpe_init......");
@@ -120,13 +121,22 @@ fapi2::ReturnCode pstate_gpe_init(
           (l_xsr.getBit<p9hcd::HALTED_STATE>() != 1) &&
           (--l_timeout_counter != 0));
 
-    if(( 1 == l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>() ))
-    {
-        FAPI_INF("PGPE was activated successfully!!!!");
-    }
+    // Extract the halt condition
+    l_xsr.extractToRight<uint32_t>(l_xsr_halt_condition,
+                                   p9hcd::HALT_CONDITION_START,
+                                   p9hcd::HALT_CONDITION_LEN);
+    FAPI_DBG("halt state: XSR: 0x%016lx condition: %d",
+             l_xsr, l_xsr_halt_condition);
+
+    // Check for a debug halt condition
+    FAPI_ASSERT(!((l_xsr.getBit<p9hcd::HALTED_STATE>() == 1) &&
+                  ((l_xsr_halt_condition == p9hcd::DEBUG_HALT ||
+                    l_xsr_halt_condition == p9hcd::DBCR_HALT)   )),
+                fapi2::PSTATE_GPE_INIT_DEBUG_HALT(),
+                "Pstate GPE Debug Halt detected");
 
     // @todo 146665 Need to collect PGPE state. Operations to PPEs should
-    // use a p9ppe namespace clase when created
+    // use a p9ppe namespace class when created
 
     // When PGPE fails to boot, assert out
     FAPI_ASSERT((l_timeout_counter != 0 &&
@@ -134,6 +144,11 @@ fapi2::ReturnCode pstate_gpe_init(
                  l_xsr.getBit<p9hcd::HALTED_STATE>() != 1),
                 fapi2::PSTATE_GPE_INIT_TIMEOUT(),
                 "Pstate GPE Init timeout");
+
+    if(( 1 == l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>() ))
+    {
+        FAPI_INF("  PGPE was activated successfully!!!!");
+    }
 
 fapi_try_exit:
     FAPI_IMP("<< pstate_gpe_init......");
@@ -248,6 +263,6 @@ fapi2::ReturnCode p9_pm_pstate_gpe_init(
     }
 
 fapi_try_exit:
-    FAPI_INF("< p9_pm_pstate_gpe_init");
+    FAPI_IMP("< p9_pm_pstate_gpe_init");
     return fapi2::current_err;
 }
