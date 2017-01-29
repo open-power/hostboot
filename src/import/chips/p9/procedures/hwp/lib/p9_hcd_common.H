@@ -234,7 +234,16 @@ enum P9_HCD_SCAN0_CONSTANTS
 // XSR defines
 enum XSR_DEFS
 {
-    HALTED_STATE    = 0
+    HALTED_STATE         = 0,
+    HALT_CONDITION_START = 1,
+    HALT_CONDITION_LEN   = 3,
+    XCR_CMD_HALT         = 1,
+    WDT_HALT             = 2,
+    UMI_HALT             = 3,
+    DEBUG_HALT           = 4,
+    DBCR_HALT            = 5,
+    INPUT_HALT           = 6,
+    HW_FAILURE           = 7
 };
 
 // XCR defines
