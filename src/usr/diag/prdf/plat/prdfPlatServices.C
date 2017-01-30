@@ -120,9 +120,8 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
 {
     errlHndl_t errl = NULL;
     uint32_t rc = SUCCESS;
-    uint32_t tempBitOffset;
     size_t bsize = (io_bs.getBitLen()+7)/8;
-    CPU_WORD* buffer = io_bs.GetRelativePositionAlloc(tempBitOffset, 0);
+    CPU_WORD* buffer = io_bs.getBufAddr();
 
     errl = deviceRead(i_target, buffer, bsize, DEVICE_SCOM_ADDRESS(i_address));
 
@@ -171,9 +170,8 @@ uint32_t putScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
 {
     errlHndl_t errl = NULL;
     uint32_t rc = SUCCESS;
-    uint32_t tempBitOffset;
     size_t bsize = (io_bs.getBitLen()+7)/8;
-    CPU_WORD* buffer = io_bs.GetRelativePositionAlloc(tempBitOffset, 0);
+    CPU_WORD* buffer = io_bs.getBufAddr();
 
     errl = deviceWrite(i_target, buffer, bsize, DEVICE_SCOM_ADDRESS(i_address));
 

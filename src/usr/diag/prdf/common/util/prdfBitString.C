@@ -124,7 +124,7 @@ void BitString::SetField
 
   if(iv_bufAddr != NULL || value != 0)  //dg02a
   {                                   //dg02a
-    CPU_WORD * address = GetRelativePositionAlloc(bit_position,bit_position); // dg02c
+    CPU_WORD * address = GetRelativePosition(bit_position,bit_position); // dg02c
     CPU_WORD mask = CPU_WORD_MASK;
 
     mask <<= (CPU_WORD_BIT_LEN - iLen);
@@ -489,29 +489,12 @@ CPU_WORD * BitString::GetRelativePosition(uint32_t & oBitOffset, uint32_t iBitPo
 }
 
 //-------------------------------------------------------------------------------------------------
-// dg02a - start
-CPU_WORD * BitStringBuffer::GetRelativePositionAlloc(uint32_t & oBitOffset, uint32_t iBitPos)
-{
-  // The non-constant version of GetRelativePostion
-  if(getBufAddr() == NULL) SetBuffer();  // alocate memory
-  return GetRelativePosition(oBitOffset, iBitPos);
-}
-// dg02a - end
-//-------------------------------------------------------------------------------------------------
 
 CPU_WORD * BitStringOffset::GetRelativePosition(uint32_t & oBitOffset, uint32_t iBitPos) const
 {
   iBitPos += ivOffset;
   return BitString::GetRelativePosition(oBitOffset,iBitPos);
 }
-
-//dg04a -start
-CPU_WORD * BitStringOffset::GetRelativePositionAlloc(uint32_t & oBitOffset, uint32_t iBitPos)
-{
-  iBitPos += ivOffset;
-  return BitString::GetRelativePosition(oBitOffset, iBitPos);
-}
-//dg04a - end
 
 //-------------------------------------------------------------------------------------------------
 
@@ -604,14 +587,14 @@ BitStringBuffer BitString::operator|(const BitString & bs) const
 BitStringBuffer BitString::operator>>(uint32_t count) const
 {
   BitStringBuffer l_bsb(this->getBitLen());
-  BitString * l_bsbp = &l_bsb; // dg03a - stupid trick to get to GetRelativePositionAlloc()
+  BitString * l_bsbp = &l_bsb; // dg03a - stupid trick to get to GetRelativePosition()
   //  l_bsb.Clear();
   if(count < this->getBitLen())
   {
     //bso overlays bsb at offset = count
     uint32_t l_dummy;
     BitStringOffset bso(count,l_bsb.getBitLen() - count,
-                            l_bsbp->GetRelativePositionAlloc(l_dummy,0)); //dg03c
+                            l_bsbp->GetRelativePosition(l_dummy,0)); //dg03c
     bso.SetBits(*this);
   }
   return l_bsb;
@@ -632,186 +615,78 @@ BitStringBuffer BitString::operator<<(uint32_t count) const
   return l_bsb;
 }
 
-// Function Specification //////////////////////////////////////////
-//
-// Title:  BitStringBuffer (Constructor)
-//
-// Purpose:  This constuctor initializes the data members.
-//
-// Side-effects:  This instance is initialized.
-//                Memory is allocated.
-//                Bit String values are undefined.
-//
-// Dependencies:  None.
-//
-// End Function Specification //////////////////////////////////////
+//##############################################################################
+//                          BitStringBuffer class
+//##############################################################################
 
-BitStringBuffer::BitStringBuffer
-(
- uint32_t iLen,
- unsigned int ibc
- )
-:
-BitString(iLen, NULL),
-ivByteCapacity(ibc)
+BitStringBuffer::BitStringBuffer( uint32_t i_bitLen ) :
+    BitString( i_bitLen, nullptr )
 {
-//  SetBuffer();  //dg02d
+    initBuffer();
 }
 
-// Function Specification ///////////////////////////////////////////
-//
-// Title:  BitStringBuffer (Copy constructor)
-//
-// Purpose:  This constuctor initializes the data members.  This copy
-//           constructor uses a "deep" copy.  This constructor will
-//           also handle any class derived from the Bit String base
-//           class.
-//
-// Side-effects:  This instance is initialized.
-//                Bit String values are are copied.
-//
-// Dependencies:  None.
-//
-// Time Complexity:  Dominated by the time complexity of SetBits()
-//
-// End Function Specification //////////////////////////////////////
+//------------------------------------------------------------------------------
 
-BitStringBuffer::BitStringBuffer(const BitString & string)
-:
-BitString(string.getBitLen(),NULL),
-ivByteCapacity(0)
+BitStringBuffer::~BitStringBuffer()
 {
-  if(!string.IsZero())  //dg02a - only allocate if bits are on
-  {                     //dg02a
-    SetBuffer();
-    SetBits(string);
-  }                     //dg02a
+    delete [] getBufAddr();
 }
 
-// The True copy constructor  mk00a
-BitStringBuffer::BitStringBuffer(const BitStringBuffer & string)
-:
-BitString(string.getBitLen(),NULL),
-ivByteCapacity(string.ivByteCapacity)
+//------------------------------------------------------------------------------
+
+BitStringBuffer::BitStringBuffer( const BitString & i_bs ) :
+    BitString( i_bs.getBitLen(), nullptr )
 {
-  if(!string.IsZero())  //dg02a - only allocate if bits are on
-  {                     //dg02a
-    SetBuffer();
-    SetBits(string);
-  }                     //dg02a
+    initBuffer();
+    if ( !i_bs.IsZero() ) SetBits( i_bs );
 }
 
-// Function Specification ///////////////////////////////////////////
-//
-// Title:  ~BitStringBuffer (Virtual Destructor)
-//
-// Purpose:  This destructor deallocates the buffer memory.
-//
-//  Side-effects:  Memory is deallocated.
-//
-//  Dependencies:  None.
-//
-// End Function Specification //////////////////////////////////////
+//------------------------------------------------------------------------------
 
-BitStringBuffer::~BitStringBuffer(void)
+BitStringBuffer::BitStringBuffer( const BitStringBuffer & i_bsb ) :
+    BitString( i_bsb.getBitLen(), nullptr )
 {
-  delete [] getBufAddr();
+    initBuffer();
+    if ( !i_bsb.IsZero() ) SetBits( i_bsb );
 }
 
-// Function Specification ///////////////////////////////////////////
-//
-// Title:  operator= (Assignment operator)
-//
-// Purpose:  This assignment operator assigns the offset and length
-//           data members.  A new buffer is allocated for the and
-//           the assinged Bit String contents are assigned.
-//
-// Side-effects:  Data members are modified.
-//                Memory is allocated.
-//
-// Dependencies:  None.
-//
-// Time Complexity:  Proportional to time complexity of SetBits()
-//
-// End Function Specification //////////////////////////////////////
+//------------------------------------------------------------------------------
 
-BitStringBuffer & BitStringBuffer::operator=
-(
- const BitStringBuffer & string
- )
+BitStringBuffer & BitStringBuffer::operator=( const BitString & i_bs )
 {
-  // Check for assignment to self
-  if(this != &string)
-  {
-    delete[] getBufAddr();
-    // Assign base class part
-    BitString::operator=(string);
-    setBufAddr(NULL);
+    setBitLen( i_bs.getBitLen() );
+    initBuffer();
+    if ( !i_bs.IsZero() ) SetBits( i_bs );
 
-    // Assign derived class part
-    ivByteCapacity = string.ivByteCapacity;
-
-    // Allocate memory and copy the Bits
-    if(!string.IsZero())  //dg02a - only allocate if bits are on
-    {                     //dg02a
-      SetBuffer();
-      SetBits(string);
-    }                     //dg02a
-  }
-
-  return(*this);
+    return *this;
 }
 
-BitStringBuffer & BitStringBuffer::operator=(const BitString & string)
+//------------------------------------------------------------------------------
+
+BitStringBuffer & BitStringBuffer::operator=( const BitStringBuffer & i_bsb )
 {
-  delete [] getBufAddr();
+    if ( this != &i_bsb ) // Check for assignment to self
+    {
+        setBitLen( i_bsb.getBitLen() );
+        initBuffer();
+        if ( !i_bsb.IsZero() ) SetBits( i_bsb );
+    }
 
-  // Assign base class part
-  BitString::operator=(string); //copy it to this
-  setBufAddr(NULL);
-
-  // Assign derived class part
-  ivByteCapacity = 0;
-
-  // Allocate memory and copy the Bits
-  if(!string.IsZero())  //dg02a - only allocate if bits are on
-  {                     //dg02a
-    SetBuffer();
-    SetBits(string);
-  }                     //dg02a
-
-  return(*this);
+    return *this;
 }
-// Function Specification //////////////////////////////////////////
-//
-// Title:  Set Buffer
-//
-// Purpose:  This function allocates memory for the buffer.  Any
-//           memory that has been previously allocated is
-//           deallocated.
-//
-// Side-effects:  Memory is allocated.
-//
-// Dependencies:  This function must be called at least once prior
-//                to the first Bit String access.
-//
-// End Function Specification //////////////////////////////////////
 
-void BitStringBuffer::SetBuffer(void)
+//------------------------------------------------------------------------------
+
+void BitStringBuffer::initBuffer()
 {
-  uint32_t byte_count = getBitLen() / CPU_WORD_BIT_LEN;
+    // Deallocate the current buffer.
+    delete [] getBufAddr();
 
-  // Account for remainder of division with an additional byte
-  if((getBitLen() % CPU_WORD_BIT_LEN) != 0)
-  {
-    byte_count++;
-  }
+    // Allocate the new buffer.
+    setBufAddr( new CPU_WORD[ getNumCpuWords(getBitLen()) ] );
 
-  byte_count = std::max(ivByteCapacity, byte_count);
-
-  delete [] getBufAddr();
-  setBufAddr(new CPU_WORD[byte_count]);
-  Clear();
+    // Clear the new buffer.
+    Clear();
 }
 
 /*--------------------------------------------------------------------*/

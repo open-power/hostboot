@@ -409,18 +409,6 @@ class BitString
    */
   BitStringBuffer operator<<(uint32_t count) const;
 
-  /**
-   * @brief Gets the CPU_WORD bounded memory address and the relative bit offset
-   *  within the CPU_WORD that corresponds to the provided bit position in the
-   *  bit string
-   *
-   * @param iBitPos    Bit position in the bit string
-   * @param oBitOffset Relative bit offset in the CPU_WORD
-   *
-   * @return memory address of the CPU_WORD
-   */
-  virtual CPU_WORD * GetRelativePositionAlloc(uint32_t & oBitOffset, uint32_t iBitPos);//dg02a
-
   protected: // functions
 
     /**
@@ -454,78 +442,45 @@ class BitString
     CPU_WORD * iv_bufAddr; ///< The beginning address of this buffer.
 };
 
-//! BitStringBuffer
-/*!
- BitStringBuffer provides a Bit String in an associated buffer in memory.
- \remarks
- The Bit String Buffer provides all of the functionality
- of the base class along with the maintenance of memory
- allocated to hold the Bit String.  The buffer is "owned"
- by the Bit String Buffer. Sufficient memory
- is allocated and deallocted in the constructor and
- destructor, respectively.  In addition, the assignemnt
- operator will adjust the amount of memory needed as
- necessary for the assignment. A byte capacity value is also maintained.
- The internal buffer is always guaranteed to have this capacity of bytes.
-*/
+//##############################################################################
+//                          BitStringBuffer class
+//##############################################################################
+
+/** A BitStringBuffer is a BitString that maintains its own buffer in memory. It
+ *  guarantees that sufficient memory is allocated and deallocated in the
+ *  constructor and destructor, respectively. In addition, the assignment
+ *  operator will adjust the amount of memory needed, as necessary, for the
+ *  assignment. */
 class BitStringBuffer : public BitString
 {
-public:
+  public: // functions
 
-  /*!
-   Constructor
-   \param iLen: Number of bits in the string
-   \param iByteCapacity: The minimum storage size to be allocated. default=0
-   \notes If iByteCapcity is zero or too small than the storage size is calculated
-          from iLen, rounded up to the nearest CPU_WORD.
-   */
-  BitStringBuffer(uint32_t iLen,
-                      unsigned int iByteCapacity = 0);
+    /**
+     * @brief Constructor
+     * @param i_bitLen Number of bits in the string.
+     */
+    explicit BitStringBuffer( uint32_t i_bitLen );
 
-  /*!
-   Copy Constructor
-   \param reference bits string
-   */
-  BitStringBuffer(const BitString & string);
+    /** @brief Destructor */
+    ~BitStringBuffer();
 
-  /*!
-   Copy Constructor
-   \param reference bits string
-   */
-  BitStringBuffer (const BitStringBuffer & string);
+    /** @brief Copy constructor from BitString */
+    BitStringBuffer( const BitString & i_bs );
 
-  /*!
-   Destructor
-   */
-  virtual ~BitStringBuffer(void);
+    /** @brief Copy constructor from BitStringBuffer */
+    BitStringBuffer( const BitStringBuffer & i_bsb );
 
-  /*!
-   Assignment
-   \param reference bit string
-   */
-  BitStringBuffer & operator=(const BitStringBuffer & string);
+    /** @brief Assignment from BitString */
+    BitStringBuffer & operator=( const BitString & i_bs );
 
-  /*!
-   Assignment
-   \param reference bit string
-   */
-  virtual BitStringBuffer & operator=(const BitString & string);
+    /** @brief Assignment from BitStringBuffer */
+    BitStringBuffer & operator=( const BitStringBuffer & i_bsb );
 
-protected: // functions  dg02a
+  private: // functions
 
-  virtual CPU_WORD * GetRelativePositionAlloc(uint32_t & oBitOffset, uint32_t iBitPos);//dg02a
-
-private: // functions
-
-  /*!
-   allocate or re-allocate buffer
-   */
-  void SetBuffer(void);
-
-private: // data
-
-  unsigned int            ivByteCapacity;
-
+    /** @brief Deallocates the old buffer, if needed, and initializes the new
+     *         buffer. */
+    void initBuffer();
 };
 
 //! BitStringOffset
@@ -580,7 +535,6 @@ protected:  // functions
    \param iBitPos Bit position in the bit string
    */
   virtual CPU_WORD * GetRelativePosition(uint32_t & oBitOffset, uint32_t iBitPos) const;
-  virtual CPU_WORD * GetRelativePositionAlloc(uint32_t & oBitOffset, uint32_t iBitPos); //dg04a
 private:  // data
 
   uint32_t ivOffset;
@@ -669,12 +623,6 @@ BitString & BitString::operator=
   iv_bitLen = string.iv_bitLen;
   iv_bufAddr = string.iv_bufAddr;
   return(*this);
-}
-
-inline
-CPU_WORD * BitString::GetRelativePositionAlloc(uint32_t & oBitOffset, uint32_t iBitPos)
-{
-  return BitString::GetRelativePosition(oBitOffset,iBitPos);
 }
 
 // Function Specification //////////////////////////////////////////
