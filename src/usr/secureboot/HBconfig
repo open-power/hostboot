@@ -3,3 +3,17 @@ config SECUREBOOT
     default y
     help
         Enable secure boot
+
+config DRTM #TODO RTC: 170487 Disable for relevant platforms
+    default y if (SECUREBOOT && TPMDD)
+    depends on (SECUREBOOT && TPMDD)
+    help
+        Enable DRTM support
+
+config DRTM_TRIGGERING #TODO RTC: 170487 Disable for relevant platforms
+    default y if DRTM
+    depends on DRTM
+    help
+        Enable triggering DRTM from Hostboot when the
+        ATTR_FORCE_PRE_PAYLOAD_DRTM attribute is overridden
+

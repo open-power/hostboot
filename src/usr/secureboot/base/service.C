@@ -109,6 +109,22 @@ errlHndl_t getJumperState(SecureJumperState& o_state, TARGETING::Target* i_targ)
     return Singleton<Settings>::instance().getJumperState(o_state, i_targ);
 }
 
+errlHndl_t clearSecuritySwitchBits(
+    const std::vector<SECUREBOOT::ProcSecurity>& i_bits,
+          TARGETING::Target* const               i_pTarget)
+{
+    return Singleton<Settings>::instance().clearSecuritySwitchBits(
+        i_bits, i_pTarget);
+}
+
+errlHndl_t setSecuritySwitchBits(
+    const std::vector<SECUREBOOT::ProcSecurity>& i_bits,
+          TARGETING::Target* const               i_pTarget)
+{
+    return Singleton<Settings>::instance().setSecuritySwitchBits(
+        i_bits, i_pTarget);
+}
+
 void handleSecurebootFailure(errlHndl_t &io_err, bool i_waitForShutdown)
 {
     TRACFCOMP( g_trac_secure, ENTER_MRK"handleSecurebootFailure()");

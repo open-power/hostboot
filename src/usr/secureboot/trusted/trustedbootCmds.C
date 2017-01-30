@@ -37,6 +37,8 @@
 // ----------------------------------------------
 #include <string.h>
 #include <stdlib.h>
+#include <config.h>
+
 #ifdef __HOSTBOOT_MODULE
 #include <secureboot/trustedboot_reasoncodes.H>
 #else
@@ -46,6 +48,10 @@
 #include "trustedbootUtils.H"
 #include "trustedboot.H"
 #include "trustedTypes.H"
+
+#ifdef CONFIG_DRTM
+#include <secureboot/drtm.H>
+#endif
 
 #ifdef __cplusplus
 namespace TRUSTEDBOOT
@@ -844,10 +850,26 @@ errlHndl_t tpmCmdPcrExtend2Hash(TpmTarget * io_target,
                     i_digestSize_2 : fullDigestSize_2));
         }
 
+        tpm_locality_t tpmLocality = TPM_LOCALITY_0;
+#ifdef CONFIG_DRTM
+        bool drtmMpipl = false;
+        SECUREBOOT::DRTM::isDrtmMpipl(drtmMpipl);
+        if(drtmMpipl)
+        {
+            assert(i_pcr == TRUSTEDBOOT::PCR_DRTM_17,
+                "BUG! All DRTM extensions must be to PCR 17 (instead of %d)",
+                i_pcr);
+
+            TRACFCOMP(g_trac_trustedboot,
+                INFO_MRK " tpmCmdPcrExtend2Hash(): DRTM active, redirecting "
+                "PCR extend request from locality 0 to locality 2.");
+            tpmLocality = TPM_LOCALITY_2;
+        }
+#endif
         err = tpmTransmitCommand(io_target,
                                  dataBuf,
                                  sizeof(dataBuf),
-                                 TPM_LOCALITY_0);
+                                 tpmLocality);
 
         if (TB_SUCCESS != err)
         {

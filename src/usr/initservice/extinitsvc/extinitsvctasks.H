@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -66,6 +66,20 @@ const TaskInfo g_exttaskinfolist[]   =   {
             {
                 START_TASK,                        // task type
                 EXT_IMAGE,                         // extended image module
+            }
+        },
+#endif
+
+#ifdef CONFIG_SECUREBOOT
+        /**
+         *  @brief Secureboot extended
+         */
+        {
+            "libsecureboot_ext.so",                // taskname
+            NULL,                                  // no pointer to fn
+            {
+                INIT_TASK,                         // task type
+                EXT_IMAGE,                         // Extended Module
             }
         },
 #endif

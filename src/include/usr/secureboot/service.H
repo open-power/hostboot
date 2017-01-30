@@ -48,20 +48,6 @@ typedef uint8_t PAGE_TABLE_ENTRY_t[HASH_PAGE_TABLE_ENTRY_SIZE];
 
 namespace SECUREBOOT
 {
-    // these constants represent the scom addresses and masks we need
-    // to obtain secure boot settings from the system
-    enum class ProcSecurity : uint64_t
-    {
-        SabBit = 0x8000000000000000ull,
-        SwitchRegister = 0x00010005ull,
-    };
-
-    enum class ProcCbsControl : uint64_t
-    {
-        JumperStateBit = 0x0400000000000000ull,
-        StatusRegister = 0x00050001ull,
-    };
-
     /** @brief Perform initialization of Secureboot for the Base image.
      *
      *  - Copy secure header from original location.
@@ -107,6 +93,47 @@ namespace SECUREBOOT
             TARGETING::Target* i_targ
                 = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
 
+    /**
+     *  @brief  Clear specified bits in the processor security switch register
+     *
+     *  @par Detailed Description:
+     *      Clears the specified bits in the processor security switch register.
+     *
+     *  @param[in] i_bits Vector of ProcSecurity (bit) enums
+     *  @param[in] i_pTarget Processor target to write.  Must be either
+     *      the master processor target sentinel or valid processor target.
+     *      Must not be NULL.
+     *
+     *  @return errHndl_t Error log handle indicating success or failure
+     *  @retval nullptr  Cleared specified security switch register bits
+     *      successfully
+     *  @retval !nullptr Error log providing failure details
+     */
+    errlHndl_t clearSecuritySwitchBits(
+        const std::vector<SECUREBOOT::ProcSecurity>& i_bits,
+              TARGETING::Target*                     i_pTarget =
+              TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
+
+    /**
+     *  @brief  Set specified bits in the processor security switch register
+     *
+     *  @par Detailed Description:
+     *      Sets the specified bits in the processor security switch register.
+     *
+     *  @param[in] i_bits Vector of ProcSecurity (bit) enums
+     *  @param[in] i_pTarget Processor target to write.  Must be either
+     *      the master processor target sentinel or valid processor target.
+     *      Must not be NULL.
+     *
+     *  @return errHndl_t Error log handle indicating success or failure
+     *  @retval nullptr  Set specified security switch register bits
+     *      successfully
+     *  @retval !nullptr Error log providing failure details
+     */
+    errlHndl_t setSecuritySwitchBits(
+        const std::vector<SECUREBOOT::ProcSecurity>& i_bits,
+              TARGETING::Target*                     i_pTarget =
+              TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
 
     /** @brief Returns the state of the secure jumper as reported by the
      *      given processor.

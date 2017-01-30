@@ -52,6 +52,11 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_cpu_special_wakeup.H>
 #include <ipmi/ipmiwatchdog.H>
+#include <config.h>
+
+#ifdef CONFIG_DRTM_TRIGGERING
+#include <secureboot/drtm.H>
+#endif
 
 
 using namespace ERRORLOG;
@@ -194,6 +199,40 @@ void* call_host_start_payload (void *io_pArgs)
         //  - Run CXX testcases
         l_errl = INITSERVICE::executeUnitTests();
     }
+
+#ifdef CONFIG_DRTM_TRIGGERING
+
+    if(l_errl == nullptr)
+    {
+        bool drtmMpipl = false;
+        SECUREBOOT::DRTM::isDrtmMpipl(drtmMpipl);
+        if(!drtmMpipl)
+        {
+            TARGETING::Target* pSysTarget = nullptr;
+            TARGETING::targetService().getTopLevelTarget(pSysTarget);
+            if(pSysTarget == nullptr)
+            {
+                assert(false,"call_host_start_payload: BUG! System target was "
+                    "nullptr.");
+            }
+
+            auto forceDrtm = pSysTarget->getAttr<
+                TARGETING::ATTR_FORCE_PRE_PAYLOAD_DRTM>();
+
+            if(forceDrtm)
+            {
+                l_errl = SECUREBOOT::DRTM::initiateDrtm();
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                        "call_host_start_payload: Failed in call to "
+                        "initiateDrtm()");
+                }
+            }
+        }
+    }
+
+#endif
 
     if( l_errl == NULL )
     {

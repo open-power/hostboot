@@ -56,6 +56,9 @@
 #include "tpmLogMgr.H"
 #include "base/trustedbootMsg.H"
 #include <secureboot/settings.H>
+#ifdef CONFIG_DRTM
+#include <secureboot/drtm.H>
+#endif
 
 namespace TRUSTEDBOOT
 {
@@ -375,10 +378,18 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target)
         io_target.initAttempted = true;
         io_target.failed = false;
 
-        bool drtm = false;
-        /// @todo #157140 Add ability to check for DRTM
+        bool sendStartup = true;
+
+#ifdef CONFIG_DRTM
+        bool drtmMpipl = false;
+        (void)SECUREBOOT::DRTM::isDrtmMpipl(drtmMpipl);
+        if(drtmMpipl)
+        {
+            sendStartup = false;
+        }
+#endif
         // Don't run STARTUP during DRTM
-        if (!drtm)
+        if (sendStartup)
         {
             // TPM_STARTUP
             err = tpmCmdStartup(&io_target);
@@ -395,11 +406,13 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target)
             break;
         }
 
+#ifdef CONFIG_DRTM
         // For a DRTM we need to reset PCRs 17-22
-        if (drtm)
+        if (drtmMpipl)
         {
-            /// @todo Implement PCR reset
+            /// @TODO RTC 167667 Implement PCR reset
         }
+#endif
 
     } while ( 0 );
 
@@ -596,7 +609,7 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target)
 }
 
 void pcrExtendSingleTpm(TpmTarget & io_target,
-                        TPM_Pcr i_pcr,
+                        const TPM_Pcr i_pcr,
                         TPM_Alg_Id i_algId,
                         const uint8_t* i_digest,
                         size_t  i_digestSize,
@@ -605,6 +618,26 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
     errlHndl_t err = NULL;
     TCG_PCR_EVENT2 eventLog;
     bool unlock = false;
+
+    TPM_Pcr pcr = i_pcr;
+    bool useStaticLog = true;
+
+#ifdef CONFIG_DRTM
+    // In a DRTM flow, all extensions must be re-rerouted to PCR 17
+    // (which will end up using locality 2).
+    bool drtmMpipl = false;
+    (void)SECUREBOOT::DRTM::isDrtmMpipl(drtmMpipl);
+    if(drtmMpipl)
+    {
+        TRACFCOMP(g_trac_trustedboot,
+            INFO_MRK " pcrExtendSingleTpm(): DRTM active; re-routing PCR %d "
+            "extend to PCR 17",
+            i_pcr);
+
+        pcr = PCR_DRTM_17;
+        useStaticLog = false;
+    }
+#endif
 
     memset(&eventLog, 0, sizeof(eventLog));
     do
@@ -617,22 +650,29 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
              !io_target.failed)
         {
             // Fill in TCG_PCR_EVENT2 and add to log
-            eventLog = TpmLogMgr_genLogEventPcrExtend(i_pcr,
+            eventLog = TpmLogMgr_genLogEventPcrExtend(pcr,
                                                       i_algId, i_digest,
                                                       i_digestSize,
                                                       TPM_ALG_SHA1, i_digest,
                                                       i_digestSize,
                                                       i_logMsg);
-            err = TpmLogMgr_addEvent(io_target.logMgr,&eventLog);
-            if (NULL != err)
+            if(useStaticLog)
             {
-                break;
+                err = TpmLogMgr_addEvent(io_target.logMgr,&eventLog);
+                if (NULL != err)
+                {
+                    break;
+                }
             }
+
+            // TODO: RTC 145689: Add DRTM support for using dynamic
+            // log instead of static log; until then, inhibit DRTM logging
+            // entirely
 
             // Perform the requested extension and also force into the
             // SHA1 bank
             err = tpmCmdPcrExtend2Hash(&io_target,
-                                       i_pcr,
+                                       pcr,
                                        i_algId,
                                        i_digest,
                                        i_digestSize,
@@ -685,16 +725,34 @@ void pcrExtendSeparator(TpmTarget & io_target)
         mutex_lock( &io_target.tpmMutex );
         unlock = true;
 
-        for (TPM_Pcr curPcr = PCR_0; curPcr <= PCR_7;
-             curPcr = static_cast<TPM_Pcr>(curPcr + 1))
-        {
+        std::vector<TPM_Pcr> pcrs =
+            {PCR_0,PCR_1,PCR_2,PCR_3,PCR_4,PCR_5,PCR_6,PCR_7};
+        bool useStaticLog = true;
 
+#ifdef CONFIG_DRTM
+        // In a DRTM flow, all extensions must be re-rerouted to PCR 17
+        // (which will end up using locality 2).
+        bool drtmMpipl = false;
+        (void)SECUREBOOT::DRTM::isDrtmMpipl(drtmMpipl);
+        if(drtmMpipl)
+        {
+            TRACFCOMP(g_trac_trustedboot,
+                INFO_MRK " pcrExtendSeparator(): DRTM active; extending "
+                "separator to PCR 17 instead of PCR 0..7.");
+
+            pcrs = { PCR_DRTM_17 };
+            useStaticLog = false;
+        }
+#endif
+
+        for (const auto &pcr : pcrs)
+        {
             // Log the separator
             if (io_target.available &&
                 !io_target.failed)
             {
                 // Fill in TCG_PCR_EVENT2 and add to log
-                eventLog = TpmLogMgr_genLogEventPcrExtend(curPcr,
+                eventLog = TpmLogMgr_genLogEventPcrExtend(pcr,
                                                           TPM_ALG_SHA1,
                                                           sha1_digest,
                                                           sizeof(sha1_digest),
@@ -702,15 +760,24 @@ void pcrExtendSeparator(TpmTarget & io_target)
                                                           sha256_digest,
                                                           sizeof(sha256_digest),
                                                           logMsg);
-                err = TpmLogMgr_addEvent(io_target.logMgr,&eventLog);
-                if (NULL != err)
+
+                if(useStaticLog)
                 {
-                    break;
+                    err = TpmLogMgr_addEvent(io_target.logMgr,&eventLog);
+                    if (NULL != err)
+                    {
+                        break;
+                    }
                 }
+
+                // TODO: RTC 145689: Add DRTM support for using dynamic
+                // log (which will happen any time useStaticLog is false).
+                // Until then, we cannot log DRTM events, since they are only
+                // allowed to go to the dynamic log
 
                 // Perform the requested extension
                 err = tpmCmdPcrExtend2Hash(&io_target,
-                                           curPcr,
+                                           pcr,
                                            TPM_ALG_SHA1,
                                            sha1_digest,
                                            sizeof(sha1_digest),

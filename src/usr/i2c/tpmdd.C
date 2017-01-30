@@ -795,7 +795,7 @@ errlHndl_t tpmWrite ( void * i_buffer,
                 {
                     TRACFCOMP(g_trac_tpmdd,
                               ERR_MRK"tpmWrite(): I2C Write-Offset! "
-                              "p/e/dA=%d/%d/0x%X, OP=%d, ",
+                              "p/e/dA=%d/%d/0x%X, OP=%d, "
                               "offset=0x%X, aS=%d, len=%d",
                               i_tpmInfo.port,
                               i_tpmInfo.engine, i_tpmInfo.devAddr,

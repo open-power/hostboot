@@ -29,6 +29,7 @@
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
 #include <cstdint>
+#include <vector>
 
 namespace SECUREBOOT
 {
@@ -36,6 +37,39 @@ namespace SECUREBOOT
     {
         SECURITY_DEASSERTED = 0b0,
         SECURITY_ASSERTED = 0b1,
+    };
+
+    // these constants represent the scom addresses and masks we need
+    // to obtain secure boot settings from the system
+    enum class ProcSecurity : uint64_t
+    {
+        SabBit   = 0x8000000000000000ull, // Secure access (mirrored)
+        LLPBit   = 0x4000000000000000ull, // Late launch primary
+        LLSBit   = 0x2000000000000000ull, // Late launch secondary
+        LQABit   = 0x1000000000000000ull, // Local quiesce achieved
+        SULBit   = 0x0800000000000000ull, // Security update lock
+        L4ABit   = 0x0400000000000000ull, // Locality 4 access
+        SDBBit   = 0x0200000000000000ull, // Secure chip debug mode
+        CMFSIBit = 0x0100000000000000ull, // cMFSI access protection
+        ABUSBit  = 0x0080000000000000ull, // Abus mailbox protection
+        RNGBit   = 0x0040000000000000ull, // Random number generator lock
+        // Spare = 0x0020000000000000ull,
+        // Spare = 0x0010000000000000ull,
+        TDPBit   = 0x0008000000000000ull, // TPM deconfig protection
+        // Spare = 0x0004000000000000ull,
+        // Spare = 0x0002000000000000ull,
+        // Spare = 0x0001000000000000ull,
+
+        SwitchRegister = 0x00010005ull,
+        SwitchRegisterClear = 0x00010006ull,
+    };
+
+    enum class ProcCbsControl : uint64_t
+    {
+        SabBit         = 0x0800000000000000ull, // Secure access
+        JumperStateBit = 0x0400000000000000ull, // Secure jumper
+
+        StatusRegister = 0x00050001ull,
     };
 
     /** @class Settings
@@ -57,6 +91,23 @@ namespace SECUREBOOT
             errlHndl_t getSecuritySwitch(uint64_t& o_regValue,
                 TARGETING::Target* i_targ
                     = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) const;
+
+            /**
+             *  @brief Clear bits in the processor security swith register.  See
+             *      full documentation in service.H.
+             */
+            errlHndl_t clearSecuritySwitchBits(
+                const std::vector<SECUREBOOT::ProcSecurity>& i_bits,
+                      TARGETING::Target*                     i_pTarget =
+                      TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) const;
+            /**
+             *  @brief Set bits in the processor security swith register.  See
+             *      full documentation in service.H.
+             */
+            errlHndl_t setSecuritySwitchBits(
+                const std::vector<SECUREBOOT::ProcSecurity>& i_bits,
+                      TARGETING::Target*                     i_pTarget =
+                      TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) const;
 
             /** @brief Returns the state of the secure jumper as reported by the
              *      given processor.  See wrapper in Secureboot's service.H
@@ -90,6 +141,28 @@ namespace SECUREBOOT
             errlHndl_t readSecurityRegister(TARGETING::Target* i_targ,
                                            const uint64_t i_scomAddress,
                                             uint64_t& o_regValue) const;
+
+            /**
+             *  @brief  Write a generic security related register
+             *
+             *  @par Detailed Description:
+             *      Writes a given security register given a proc target, SCOM
+             *      address, and value.
+             *
+             *  @param[in] i_pTarget Processor target to write.  Must be either
+             *      the master processor target sentinel or valid processor
+             *      target. Must not be NULL.
+             *  @param[in] i_scomAddress SCOM address to write
+             *  @param[in] i_data Data to write to given SCOM address
+             *
+             *  @return errHndl_t Error log handle indicating success or failure
+             *  @retval nullptr  Wrote data to SCOM address successfully
+             *  @retval !nullptr Error log providing failure details
+             */
+            errlHndl_t writeSecurityRegister(
+                       TARGETING::Target* i_pTarget,
+                       uint64_t           i_scomAddress,
+                       uint64_t           i_data) const;
 
             /** Cached secure boot enabled value */
             bool iv_enabled;
