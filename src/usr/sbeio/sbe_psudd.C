@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -221,9 +221,8 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
         // Read SBE doorbell to confirm ready to accept command.
         // Since the device driver single threads the requests, we should
         // never see not being ready to send a request.
-        uint64_t l_addr = PSU_SBE_DOORBELL_REG_RW;
         uint64_t l_data = 0;
-        errl = readScom(i_target,l_addr,&l_data);
+        errl = readScom(i_target,PSU_SBE_DOORBELL_REG_RW,&l_data);
         if (errl) break;
         if (l_data & SBE_DOORBELL)
         {
@@ -280,7 +279,7 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
 
         //write the command registers
         uint64_t * l_pMessage = (uint64_t *)i_pPsuRequest;
-        l_addr     = PSU_HOST_SBE_MBOX0_REG;
+        uint64_t l_addr = PSU_HOST_SBE_MBOX0_REG;
         for (uint8_t i=0;i<4;i++)
         {
             if (0x01 & i_reqMsgs) // write register if non-reserved
@@ -295,9 +294,8 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
         if (errl) break;
 
         //notify PSU command is ready
-        l_addr = PSU_SBE_DOORBELL_REG_OR;
         l_data = SBE_DOORBELL;
-        errl = writeScom(i_target,l_addr,&l_data);
+        errl = writeScom(i_target,PSU_SBE_DOORBELL_REG_OR,&l_data);
         if (errl) break;
 
     }
@@ -344,9 +342,8 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
         if (errl) break;
 
         //notify PSU response has been read
-        l_addr = PSU_HOST_DOORBELL_REG_AND;
         uint64_t l_data = HOST_CLEAR_RESPONSE_WAITING;
-        errl = writeScom(i_target,l_addr,&l_data);
+        errl = writeScom(i_target,PSU_HOST_DOORBELL_REG_AND,&l_data);
         if (errl) break;
 
         //check status and seq ID in response messages
@@ -431,14 +428,13 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
     SBE_TRACD(ENTER_MRK "pollForPsuComplete");
 
     uint64_t l_elapsed_time_ns = 0;
-    uint64_t l_addr = PSU_HOST_DOORBELL_REG_RW;
     uint64_t l_data = 0;
     bool     l_trace = true; //initialize so first call is traced
 
     do
     {
         // read response doorbell to see if ready
-        errl = readScom(i_target,l_addr,&l_data,l_trace);
+        errl = readScom(i_target,PSU_HOST_DOORBELL_REG_RW,&l_data,l_trace);
         if (errl) break; // return with error
 
         // check if response is now ready to be read
@@ -451,7 +447,8 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
         if (l_elapsed_time_ns > i_timeout )
         {
             SBE_TRACF(ERR_MRK "pollForPsuComplete: "
-                      "timeout waiting for PSU request to complete");
+                      "timeout waiting for PSU request to complete"
+                      ": doorbell=%.8X", l_data);
 
             /*@
              * @errortype

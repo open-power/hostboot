@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -384,9 +384,10 @@ class SbePsu
 
         /**
          * @brief timeout values
-         *
+         * Making this value big enough to handle being queued up
+         *  behind a slow FSP operation (e.g. getmempba)
          */
-        static const uint64_t MAX_PSU_SHORT_TIMEOUT_NS=100*NS_PER_MSEC; //=100ms
+        static const uint64_t MAX_PSU_SHORT_TIMEOUT_NS=90*NS_PER_SEC; //=90sec
 
         /**
          * @brief enums for primary SBE response
