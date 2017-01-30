@@ -37,21 +37,25 @@
 #include <p9_mss_memdiag.H>
 
 #include <lib/utils/poll.H>
+#include <lib/utils/find.H>
 #include <lib/utils/count_dimm.H>
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/mcbist.H>
+#include <lib/mc/port.H>
+#include <lib/ecc/ecc.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_SYSTEM;
+using fapi2::TARGET_TYPE_MCA;
 
 extern "C"
 {
-///
-/// @brief Pattern test the DRAM
-/// @param[in] i_target the McBIST of the ports of the dram you're training
-/// @return FAPI2_RC_SUCCESS iff ok
-///
+    ///
+    /// @brief Pattern test the DRAM
+    /// @param[in] i_target the McBIST of the ports of the dram you're training
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
     fapi2::ReturnCode p9_mss_memdiag( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
     {
         FAPI_INF("Start memdiag");
@@ -66,6 +70,54 @@ extern "C"
 
         uint8_t is_sim = false;
         FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+
+        // Read the bad_dq_bitmap attribute and place corresponding symbol and chip marks
+        for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(i_target))
+        {
+            fapi2::buffer<uint8_t> l_repairs_applied;
+            fapi2::buffer<uint8_t> l_repairs_exceeded;
+            std::vector<uint64_t> l_ranks;
+
+            FAPI_TRY( mss::restore_repairs( l_mca, l_repairs_applied, l_repairs_exceeded) );
+
+            // assert if we have exceeded the allowed repairs
+            for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_mca))
+            {
+                FAPI_ASSERT( !(l_repairs_exceeded.getBit(mss::index(l_dimm))),
+                             fapi2::MSS_MEMDIAGS_REPAIRS_EXCEEDED().set_TARGET(l_dimm),
+                             "p9_mss_memdiag bad bit repairs exceeded %s", mss::c_str(l_dimm) );
+            }
+
+#ifdef __HOSTBOOT_MODULE
+            // assert if both chip and symbol marks exist for any given rank
+            FAPI_TRY( mss::rank::ranks(l_mca, l_ranks) );
+
+            for (const auto l_rank : l_ranks)
+            {
+                if (l_repairs_applied.getBit(l_rank))
+                {
+                    uint64_t l_galois = 0;
+                    mss::states l_confirmed = mss::NO;
+                    // check for chip mark in hardware mark store
+                    FAPI_TRY( mss::ecc::get_hwms(l_mca, l_rank, l_galois, l_confirmed) );
+
+                    if (l_confirmed)
+                    {
+                        auto l_type = mss::ecc::fwms::mark_type::CHIP;
+                        auto l_region = mss::ecc::fwms::mark_region::DISABLED;
+                        auto l_addr = mss::mcbist::address(0);
+                        // check for symbol mark in firmware mark store
+                        FAPI_TRY( mss::ecc::get_fwms(l_mca, l_rank, l_galois, l_type, l_region, l_addr) );
+
+                        FAPI_ASSERT( l_region == mss::ecc::fwms::mark_region::DISABLED,
+                                     fapi2::MSS_MEMDIAGS_CHIPMARK_AND_SYMBOLMARK().set_TARGET(l_mca).set_RANK(l_rank),
+                                     "p9_mss_memdiag both chip mark and symbol mark on rank %d: %s", l_rank, mss::c_str(l_mca) );
+                    }
+                }
+            }
+
+#endif
+        }
 
         // We start the sf_init (write 0's) and it'll tickle the MCBIST complete FIR. PRD will see that
         // and start a background scrub.
