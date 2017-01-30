@@ -51,6 +51,7 @@ COPY_FILES = \
     src/build/debug/hb-dump-debug:tools,vpo,openpower \
     src/build/debug/vpo-debug-framework.pl:vpo \
     src/build/debug/ecmd-debug-framework.pl:openpower \
+    src/build/debug/eSEL_ami.pl:openpower \
     src/build/debug/fsp-memdump.sh:tools,vpo \
     src/build/vpo/hb-dump:vpo \
     src/build/vpo/hb-istep:vpo \
