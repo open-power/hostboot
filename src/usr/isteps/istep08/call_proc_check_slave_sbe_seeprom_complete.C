@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <devicefw/userif.H>
 #include <i2c/i2cif.H>
 #include <sbe/sbeif.H>
+#include <util/misc.H>
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
@@ -118,9 +119,15 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
         // Each slave sbe gets 60s to respond with the fact that it's
         // booted and at runtime (stable state)
-        const uint64_t SBE_TIMEOUT_NSEC = 60*NS_PER_SEC; //60sec
+        uint64_t SBE_TIMEOUT_NSEC = 60*NS_PER_SEC; //60sec
+        // Bump this up really high for Simics, things are slow there
+        if( Util::isSimicsRunning() )
+        {
+            SBE_TIMEOUT_NSEC *= 10;
+        }
         const uint64_t SBE_NUM_LOOPS = 100;
         const uint64_t SBE_WAIT_SLEEP = (SBE_TIMEOUT_NSEC/SBE_NUM_LOOPS);
+
         sbeMsgReg_t l_sbeReg;
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
