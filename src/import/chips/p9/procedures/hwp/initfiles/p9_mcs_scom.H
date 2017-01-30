@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,12 +31,14 @@
 #include <fapi2.H>
 
 
-typedef fapi2::ReturnCode (*p9_mcs_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MCS>&);
+typedef fapi2::ReturnCode (*p9_mcs_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MCS>&,
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
 
 extern "C"
 {
 
-    fapi2::ReturnCode p9_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0);
+    fapi2::ReturnCode p9_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0,
+                                  const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1);
 
 }
 
