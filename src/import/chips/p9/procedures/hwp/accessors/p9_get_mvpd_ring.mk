@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -26,4 +26,5 @@
 # Include the macros and things for MVPD ring procedures
 PROCEDURE=p9_get_mvpd_ring
 lib$(PROCEDURE)_DEPLIBS+=p9_mvpd_ring_funcs
+lib$(PROCEDURE)_DEPLIBS+=p9_ringId
 $(call BUILD_PROCEDURE)
