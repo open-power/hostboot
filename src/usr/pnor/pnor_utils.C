@@ -70,7 +70,7 @@ const char* cv_EYECATCHER[] = {
     "CVPD",      /**< PNOR::CENTAUR_VPD      : Centaur VPD */
     "NVRAM",     /**< PNOR::NVRAM            : OPAL Storage */
     "OCC",       /**< PNOR::OCC              : OCC LID */
-    "FIRDATA",   /**< PNOR::FIRDATA          : FIRDATA */
+    "FIRDATA",   /**< PNOR::FIRDATA          : FIRs for checkstop analysis */
     "ATTR_TMP",  /**< PNOR::ATTR_TMP         : Temporary Attribute Overrides */
     "ATTR_PERM", /**< PNOR::ATTR_PERM        : Permanent Attribute Overrides */
     "CAPP",      /**< PNOR::CAPP             : CAPP LID */
@@ -81,6 +81,7 @@ const char* cv_EYECATCHER[] = {
     "BACKUP_PART", /**PNOR::BACKUP_PART      : Backup of PART*/
     "POWERVM",   /**< PNOR::POWERVM          : Power VM data */
     "RINGOVD",   /**< PNOR::RINGOVD          : Ring overrides */
+    "WOFDATA",   /**< PNOR::WOFDATA          : VFRT data tables for WOF */
 };
 
 /**

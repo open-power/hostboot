@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -251,6 +251,16 @@ Layout Description
         <eyeCatch>OCC</eyeCatch>
         <physicalOffset>0x2AD3000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
+        <side>sideless</side>
+        <ecc/>
+    </section>
+    <section>
+        <description>VFRT data for WOF (3MB)</description>
+        <!-- We need 266KB per module sort, going to support
+             10 sorts by default, plus ECC  -->
+        <eyeCatch>WOFDATA</eyeCatch>
+        <physicalOffset>0x2BF3000</physicalOffset>
+        <physicalRegionSize>0x300000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
     </section>

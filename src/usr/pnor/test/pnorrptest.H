@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -64,8 +64,7 @@ class PnorRpTest : public CxxTest::TestSuite
         PNOR::SectionInfo_t info;
         errlHndl_t errhdl = NULL;
 
-        //Only check required sections.  Some are currently optional due to
-        //Storage limitations in VPO.
+        //Only check required sections.
         const PNOR::SectionId testSections[] = {
             PNOR::TOC,            /**< Table of Contents */
             PNOR::HB_EXT_CODE,    /**< Hostboot Extended Image */
@@ -73,8 +72,9 @@ class PnorRpTest : public CxxTest::TestSuite
             PNOR::DIMM_JEDEC_VPD, /**< DIMM JEDEC VPD */
             PNOR::MODULE_VPD,     /**< Module VPD */
             PNOR::RINGOVD,        /**< Ring override data */
+            PNOR::WOFDATA,        /**< WOF data */
         };
-        uint64_t numSections = 6;
+        uint64_t numSections = sizeof(testSections)/sizeof(testSections[0]);
 
         for( uint64_t idx = 0; idx < numSections; idx++)
         {
