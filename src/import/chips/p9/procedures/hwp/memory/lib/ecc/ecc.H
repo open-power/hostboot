@@ -109,6 +109,7 @@ inline fapi2::ReturnCode set_hwms( const fapi2::Target<T>& i_target,
 
         mss::ecc::hwms::set_chipmark(l_buffer, i_galois);
         mss::ecc::hwms::set_confirmed(l_buffer, mss::YES);
+        mss::ecc::hwms::set_exit_1(l_buffer, mss::YES);
     }
 
     FAPI_TRY( mss::ecc::hwms::write(i_target, i_rank, l_buffer) );
@@ -189,11 +190,46 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Query Hardware Marks
+/// @tparam T the fapi2::TargetType - derived
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_marks vector of Galois codes of any marks set
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note no rank information is returned
+///
+template< fapi2::TargetType T >
+inline fapi2::ReturnCode get_hw_marks( const fapi2::Target<T>& i_target,
+                                       std::vector<uint64_t>& o_marks )
+{
+    fapi2::buffer<uint64_t> l_buffer;
+    uint64_t l_galois = 0;
+    auto l_confirmed = mss::states::NO;
+
+    o_marks.clear();
+
+    for (uint64_t l_rank = 0; l_rank < MAX_MRANK_PER_PORT; ++l_rank)
+    {
+        FAPI_TRY( get_hwms(i_target, l_rank, l_galois, l_confirmed) );
+
+        if (l_confirmed == mss::states::YES)
+        {
+            o_marks.push_back(l_galois);
+        }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Query Firmware Marks
 /// @tparam T the fapi2::TargetType - derived
 /// @param[in] i_target the fapi2 target
 /// @param[out] o_marks vector of Galois codes of any marks set
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note no rank information is returned
 ///
 template< fapi2::TargetType T >
 inline fapi2::ReturnCode get_fw_marks( const fapi2::Target<T>& i_target,
@@ -216,6 +252,8 @@ inline fapi2::ReturnCode get_fw_marks( const fapi2::Target<T>& i_target,
             o_marks.push_back(l_galois);
         }
     }
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;

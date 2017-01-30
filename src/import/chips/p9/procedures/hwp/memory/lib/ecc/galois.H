@@ -132,6 +132,46 @@ fapi2::ReturnCode symbol_to_dq( const uint8_t i_symbol, uint8_t& o_dq )
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
+///
+/// @brief Return DQ index from a given Galois code
+/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to eccTraits<T>
+/// @param[in] i_galois the Galois code
+/// @param[out] o_dq DQ index represented by given Galois code
+/// @return FAPI2_RC_SUCCESS iff all is ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = eccTraits<T> >
+fapi2::ReturnCode galois_to_dq( const uint8_t i_galois, uint8_t& o_dq  )
+{
+    uint8_t l_symbol = 0;
+
+    FAPI_TRY( galois_to_symbol<T>(i_galois, l_symbol) );
+    FAPI_TRY( symbol_to_dq<T>(l_symbol, o_dq) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Return Galois code from a given DQ index
+/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to eccTraits<T>
+/// @param[in] i_dq the DQ index
+/// @param[out] o_galois Galois code represented by given symbol
+/// @return FAPI2_RC_SUCCESS iff all is ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = eccTraits<T> >
+fapi2::ReturnCode dq_to_galois( const uint8_t i_dq, uint8_t& o_galois )
+{
+    uint8_t l_symbol = 0;
+
+    FAPI_TRY( mss::ecc::dq_to_symbol<T>(i_dq, l_symbol) );
+    FAPI_TRY( mss::ecc::symbol_to_galois<T>(l_symbol, o_galois) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // close namespace ecc
 
 } // close namespace mss

@@ -51,6 +51,7 @@ enum sizes
     MAX_DIMM_PER_PORT = 2,
     MAX_RANK_PER_DIMM = 4,
     NIBBLES_PER_DP = 4,
+    NIBBLES_PER_BYTE = 2,
     BITS_PER_NIBBLE = 4,
     BITS_PER_BYTE = 8,
     BITS_PER_DQS = 2,              ///< Differential clock pair
@@ -65,6 +66,7 @@ enum sizes
     MAX_DQ_NIBBLES_X4 = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For x4's there are 18 DQ nibbles for DQ 72 bits
 
     MARK_STORE_COUNT = 8,          ///< Elements in a VPD mark/store array
+    BAD_DQ_BYTE_COUNT = 10,        ///< Elements in a BAD_DQ_BITMAP attribute array
 
     BYTES_PER_GB = 1000000000,      ///< Multiplier to go from GB to B
     T_PER_MT     = 1000000,         ///< Multiplier to go from MT/s to T/s

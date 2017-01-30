@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -59,6 +59,27 @@
     <scomRegister>MCBIST_MCBEA1Q</scomRegister>
     <scomRegister>MCBIST_MCBEA2Q</scomRegister>
     <scomRegister>MCBIST_MCBEA3Q</scomRegister>
+  </registerFfdc>
+
+  <registerFfdc>
+    <id>REG_FFDC_MSS_MARK_REPAIR_FAILURE</id>
+    <scomRegister>MCA_HWMS0</scomRegister>
+    <scomRegister>MCA_WDF_HWMS1</scomRegister>
+    <scomRegister>MCA_HWMS2</scomRegister>
+    <scomRegister>MCA_HWMS3</scomRegister>
+    <scomRegister>MCA_HWMS4</scomRegister>
+    <scomRegister>MCA_HWMS5</scomRegister>
+    <scomRegister>MCA_HWMS6</scomRegister>
+    <scomRegister>MCA_HWMS7</scomRegister>
+
+    <scomRegister>MCA_FWMS0</scomRegister>
+    <scomRegister>MCA_WREITE_FWMS1</scomRegister>
+    <scomRegister>MCA_FWMS2</scomRegister>
+    <scomRegister>MCA_FWMS3</scomRegister>
+    <scomRegister>MCA_FWMS4</scomRegister>
+    <scomRegister>MCA_FWMS5</scomRegister>
+    <scomRegister>MCA_FWMS6</scomRegister>
+    <scomRegister>MCA_FWMS7</scomRegister>
   </registerFfdc>
 
   <hwpError>
@@ -240,6 +261,37 @@
     <rc>RC_MSS_MEMDIAGS_NO_MCBIST_SUBTESTS</rc>
     <description>Attempt to run an MCBIST program with no subtests</description>
     <ffdc>TARGET</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_REPAIRS_EXCEEDED</rc>
+    <description>A mark repair operation failed to repair enough bad bits</description>
+    <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MARK_REPAIR_FAILURE</id>
+      <target>TARGET</target>
+      <targetType>TARGET_TYPE_MCA</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_CHIPMARK_AND_SYMBOLMARK</rc>
+    <description>A mark repair operation set both a chipmark and symbol mark on one rank</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RANK</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MARK_REPAIR_FAILURE</id>
+      <target>TARGET</target>
+      <targetType>TARGET_TYPE_MCA</targetType>
+    </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
