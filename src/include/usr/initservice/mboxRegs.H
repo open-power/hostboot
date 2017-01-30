@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,6 +96,16 @@ namespace SPLESS
             uint32_t mcSyncMode          :1;    //4
             uint32_t reserved            :7;    //5:11
             uint32_t clockPllMux         :20;   //12:31
+        } PACKED;
+    };
+
+    // Mailbox Scratch Register 7
+    union MboxScratch7_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t drtmPayloadAddrMb   :32;   //0
         } PACKED;
     };
 

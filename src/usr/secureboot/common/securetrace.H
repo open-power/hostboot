@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,5 +60,11 @@ extern trace_desc_t* g_trac_secure;
 
 #define SB_DBG_BIN(args...) \
     TRACDBIN(SECUREBOOT::g_trac_secure,args)
+
+#define SB_UNIT(args...) \
+    TRACUCOMP(SECUREBOOT::g_trac_secure,"U> " args)
+
+#define SB_UNIT_BIN(args...) \
+    TRACUBIN(SECUREBOOT::g_trac_secure,args)
 
 #endif

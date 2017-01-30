@@ -81,6 +81,9 @@
     <attribute><id>OCC_COMMON_AREA_PHYS_ADDR</id> </attribute>
     <attribute><id>ATTN_CHK_ALL_PROCS</id> </attribute>
     <attribute><id>MASTER_MBOX_SCRATCH</id> </attribute>
+    <attribute><id>IS_DRTM_MPIPL_HB</id></attribute>
+    <attribute><id>DRTM_PAYLOAD_ADDR_MB_HB</id></attribute>
+    <attribute><id>FORCE_PRE_PAYLOAD_DRTM</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

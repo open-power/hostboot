@@ -38,6 +38,7 @@ namespace SECUREBOOT
         MOD_SECURE_ROM_CLEANUP          = 0x04,
         MOD_SECURE_ROM_SHA512           = 0x05,
         MOD_SECURE_READ_REG             = 0x06,
+        MOD_SECURE_WRITE_REG            = 0x07,
    };
 
     enum SECUREReasonCode

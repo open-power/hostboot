@@ -55,7 +55,11 @@
 #include <errl/errlmanager.H>
 #include <devicefw/userif.H>
 #include <config.h>
+#include <initservice/initserviceif.H>
 
+#ifdef CONFIG_DRTM
+#include <secureboot/drtm.H>
+#endif
 
 using namespace INITSERVICE::SPLESS;
 //******************************************************************************
@@ -150,6 +154,23 @@ static void initTargeting(errlHndl_t& io_pError)
             TARG_INF("Initialized targeting for model: %s",
                      l_pTopLevel->getAttrAsString<ATTR_MODEL>());
         }
+
+#ifdef CONFIG_DRTM
+        const INITSERVICE::SPLESS::MboxScratch7_t scratch7 =
+            {.data32 = l_scratch[SCRATCH_7] };
+        const INITSERVICE::SPLESS::MboxScratch8_t scratch8 =
+            {.data32 = l_scratch[SCRATCH_8] };
+
+        errlHndl_t pError = SECUREBOOT::DRTM::discoverDrtmState(
+            scratch7,scratch8);
+        if(pError)
+        {
+            auto plid = pError->plid();
+            errlCommit(pError,SECURE_COMP_ID);
+            // TODO: RTC 167205: Better GA error handling
+            INITSERVICE::doShutdown(plid, true);
+        }
+#endif
 
 // No error module loaded in VPO to save load time
 #ifndef CONFIG_VPO_COMPILE

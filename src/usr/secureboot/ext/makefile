@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2017
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +26,7 @@ ROOTPATH = ../../../..
 MODULE = secureboot_ext
 SUBDIRS +=
 
-OBJS +=
+OBJS += $(if $(CONFIG_DRTM),drtm.o)
 
 CFLAGS += -iquote ../
 include ${ROOTPATH}/config.mk

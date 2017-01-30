@@ -129,6 +129,141 @@ namespace SECUREBOOT
         return l_errl;
     }
 
+    errlHndl_t Settings::clearSecuritySwitchBits(
+        const std::vector<SECUREBOOT::ProcSecurity>& i_bits,
+              TARGETING::Target* const               i_pTarget) const
+    {
+        uint64_t bitsToClear = 0;
+        for(const auto &bit : i_bits)
+        {
+            bitsToClear |= static_cast<uint64_t>(bit);
+        }
+
+        auto pError = writeSecurityRegister(
+            i_pTarget,
+            static_cast<uint64_t>(ProcSecurity::SwitchRegisterClear),
+            bitsToClear);
+
+        if(pError)
+        {
+            SB_ERR("clearSecuritySwitchBits: writeSecurityRegister "
+                "(SwitchRegisterClear) failed. Target HUID = 0x%08X, data = "
+                "0x%016llX.",
+                get_huid(i_pTarget),bitsToClear);
+            SB_ERR("clearSecuritySwitchBits: plid=0x%08X, eid=0x%08X, "
+                "reason=0x%04X",
+                ERRL_GETPLID_SAFE(pError),
+                ERRL_GETEID_SAFE(pError),
+                ERRL_GETRC_SAFE(pError));
+        }
+
+        return pError;
+    }
+
+    errlHndl_t Settings::setSecuritySwitchBits(
+        const std::vector<SECUREBOOT::ProcSecurity>& i_bits,
+              TARGETING::Target* const               i_pTarget) const
+    {
+        uint64_t bitsToSet = 0;
+        for(const auto &bit : i_bits)
+        {
+            bitsToSet |= static_cast<uint64_t>(bit);
+        }
+
+        auto pError = writeSecurityRegister(
+            i_pTarget,
+            static_cast<uint64_t>(ProcSecurity::SwitchRegister),
+            bitsToSet);
+
+        if(pError)
+        {
+            SB_ERR("setSecuritySwitchBits: writeSecurityRegister "
+                "(SwitchRegister) failed. Target HUID = 0x%08X, data = "
+                "0x%016llX.",
+                get_huid(i_pTarget),bitsToSet);
+            SB_ERR("setSecuritySwitchBits: plid=0x%08X, eid=0x%08X, "
+                "reason=0x%04X",
+                ERRL_GETPLID_SAFE(pError),
+                ERRL_GETEID_SAFE(pError),
+                ERRL_GETRC_SAFE(pError));
+        }
+
+        return pError;
+    }
+
+    errlHndl_t Settings::writeSecurityRegister(
+              TARGETING::Target* const i_pTarget,
+        const uint64_t                 i_scomAddress,
+        const uint64_t                 i_data) const
+    {
+        errlHndl_t pError = nullptr;
+
+        do
+        {
+
+        // Target must be the sentinel or some other non-NULL proc value
+        if (   (i_pTarget != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+            && (   (i_pTarget == nullptr)
+                || (   (i_pTarget->getAttr<TARGETING::ATTR_TYPE>())
+                    != (TARGETING::TYPE_PROC) ) ) )
+        {
+            SB_ERR("writeSecurityRegister: Caller invoked API with bad target; "
+                "Target HUID = 0x%08X.",get_huid(i_pTarget));
+            /*@
+             * @errortype
+             * @severity   ERRL_SEV_UNRECOVERABLE
+             * @moduleid   SECUREBOOT::MOD_SECURE_WRITE_REG
+             * @reasoncode SECUREBOOT::RC_SECURE_BAD_TARGET
+             * @userdata1  Target pointer value
+             * @userdata2  Target's HUID or 0 if NULL target pointer
+             * @devdesc    Invalid target used to write security
+             *             register.
+             * @custdesc   Unexpected internal firmware error.
+             */
+            pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                SECUREBOOT::MOD_SECURE_WRITE_REG,
+                SECUREBOOT::RC_SECURE_BAD_TARGET,
+                reinterpret_cast<uint64_t>(i_pTarget),
+                TO_UINT64(get_huid(i_pTarget)),
+                true);
+            pError->collectTrace(SECURE_COMP_NAME, ERROR_TRACE_SIZE);
+            break;
+        }
+
+        // Write security switch settings to processor
+        const size_t expSize = sizeof(i_data);
+        size_t actSize = expSize;
+        pError = deviceWrite(
+            i_pTarget,
+            const_cast<uint64_t*>(&i_data), actSize,
+            DEVICE_SCOM_ADDRESS(i_scomAddress));
+        if (nullptr != pError)
+        {
+            SB_ERR("writeSecurityRegister: deviceWrite failed; target HUID = "
+                "0x%08X, SCOM addr = 0x%016llX, data = 0x%016llX.",
+                get_huid(i_pTarget),i_scomAddress,i_data);
+            break;
+        }
+
+        assert(actSize == expSize,
+            "writeSecurityRegister: BUG! size returned from device write (%d) "
+            "is not the expected size of %d",actSize,expSize);
+
+        } while(0);
+
+        if(pError)
+        {
+            SB_ERR("writeSecurityRegister: plid=0x%08X, eid=0x%08X, "
+                "reason=0x%04X",
+                ERRL_GETPLID_SAFE(pError),
+                ERRL_GETEID_SAFE(pError),
+                ERRL_GETRC_SAFE(pError));
+        }
+
+        return pError;
+    }
+
     errlHndl_t Settings::readSecurityRegister(Target* i_targ,
                                             const uint64_t i_scomAddress,
                                             uint64_t& o_regValue) const
