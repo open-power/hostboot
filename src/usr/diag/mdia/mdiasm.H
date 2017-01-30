@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,8 +41,11 @@
 namespace MDIA
 {
 
-//MBA timeout value - 30 secs
-static const uint64_t MAINT_CMD_TIMEOUT = 30000000000;
+// HW timeout value - 30 secs
+// Nimbus DD1.0 has a workaround that will go over 30 seconds. Will need to bump
+// it up for now. May consider lowering it later, but only if there is a
+// problem.
+static const uint64_t MAINT_CMD_TIMEOUT = 30000000000 * 10;
 
 //Longer MBA timeout to be used when continuous tracing is enabled - 30 min
 static const uint64_t MAINT_CMD_TIMEOUT_LONG = 1800000000000;
