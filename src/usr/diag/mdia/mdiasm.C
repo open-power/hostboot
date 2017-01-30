@@ -403,8 +403,8 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                     // Committing an info log to help debug SW timeout
                     if((*wit)->timeoutCnt >= MAINT_CMD_TIMEOUT_LOG)
                     {
-                        MDIA_FAST("sm: committing a SW timed out info log "
-                                  "for %x", get_huid(target));
+                        MDIA_FAST("sm: committing a SW timeout info log "
+                                  "for HUID:0x%08X", get_huid(target));
 
                         /*@
                          * @errortype
@@ -435,9 +435,10 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                         (*wit)->timeoutCnt++;
                     }
 
-                    MDIA_FAST("sm: work item %d reset SW timed out on: %x, "
-                              "timeoutCnt: %d", *((*wit)->workItem),
-                              get_huid(target), (*wit)->timeoutCnt);
+                    MDIA_FAST("sm: work item %d reset SW timed out on "
+                              "HUID:0x%08X, timeoutCnt: %d",
+                              *((*wit)->workItem), get_huid(target),
+                              (*wit)->timeoutCnt);
                     // register a new timeout monitor
                     uint64_t monitorId =
                         getMonitor().addMonitor(MAINT_CMD_TIMEOUT);
@@ -472,7 +473,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                         HWAS::GARD_NULL);
 
                 // If maint cmd complete bit is not on, time out
-                MDIA_FAST("sm: stopping command: %p", target);
+                MDIA_FAST("sm: stopping command HUID:0x%08X", get_huid(target));
                 //target type is MBA
                 if ( TYPE_MBA == trgtType )
                 {
@@ -535,10 +536,8 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 wkflprop = *wit;
 
                 // log a timeout event
-                MDIA_ERR("sm: command %p: %d HW timed out on: %x",
-                        target,
-                        *((*wit)->workItem),
-                        get_huid(target));
+                MDIA_ERR("sm: workItem %d HW timeout on HUID:0x%08X",
+                         *((*wit)->workItem), get_huid(target));
 
                 errlCommit(timeoutErrl, MDIA_COMP_ID);
 
@@ -746,7 +745,7 @@ bool StateMachine::scheduleWorkItem(WorkFlowProperties & i_wfp)
 
         TargetHandle_t target = getTarget(i_wfp);
 
-        MDIA_FAST("sm: dispatching work item %d for: %p, priority: %d, "
+        MDIA_FAST("sm: dispatching work item %d for: 0x%08x, priority: %d, "
                 "unit: %d", *i_wfp.workItem,
                 get_huid(target),
                 priority,
@@ -802,7 +801,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
         uint64_t workItem = *i_wfp->workItem;
 
-        MDIA_FAST("sm: executing work item %d for: %x",
+        MDIA_FAST("sm: executing work item %d for: 0x%08x",
                 workItem, get_huid(getTarget(*i_wfp)));
 
         mutex_unlock(&iv_mutex);
