@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,8 +54,8 @@ enum SectionId
     MODULE_VPD,     /**< Module VPD */
     CENTAUR_VPD,    /**< Centaur VPD */
     NVRAM,          /**< Opal NVRAM */
-    OCC,            /**< OCC lid */
-    FIRDATA,        /**< FIRDATA */
+    OCC,            /**< OCC image */
+    FIRDATA,        /**< FIR data for checkstop analysis */
     ATTR_TMP,       /**< Temporary Attribute Override */
     ATTR_PERM,      /**< Permanent Attribute Override */
     CAPP,           /**< CAPP lid */
@@ -63,9 +63,10 @@ enum SectionId
     HB_BOOTLOADER,  /**< Hostboot Bootloader image */
     TEST,           /**< Scratch space for PNOR test cases */
     TESTRO,         /**< Scratch space for PNOR ReadOnly test cases */
-    BACKUP_PART,     /**< Backup of TOC*/
+    BACKUP_PART,    /**< Backup of TOC*/
     POWERVM,        /**< Power VM data */
     RINGOVD,        /**< Ring override data */
+    WOFDATA,        /**< VFRT data tables for WOF */
     NUM_SECTIONS,   /**< Number of defined sections */
 
     FIRST_SECTION = TOC,  /**< First section (for looping) */
