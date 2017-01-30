@@ -11908,6 +11908,7 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/sp-0</default>
     </attribute>
+    <attribute><id>HUID</id><default>0x00320000</default></attribute>
 </targetInstance>
 
 <targetInstance>

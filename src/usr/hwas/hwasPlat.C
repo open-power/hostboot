@@ -468,6 +468,18 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 #endif
         }
 
+        // if CLASS_SP
+        // Hostboot is told everything it needs to know about the
+        //  SP at compile time so just mark the target as present
+        //  by default
+        if (pTarget->getAttr<ATTR_TYPE>() == TYPE_SP)
+        {
+            HWAS_DBG("pTarget %.8X - detected present",
+                pTarget->getAttr<ATTR_HUID>());
+            pTarget_it++;
+            continue;
+        }
+
         // call deviceRead() to see if they are present
         bool present = false;
         size_t presentSize = sizeof(present);
