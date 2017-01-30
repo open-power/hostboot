@@ -46,7 +46,7 @@ constexpr uint64_t literal_13 = 13;
 constexpr uint64_t literal_0b0001100 = 0b0001100;
 constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_0x1F = 0x1F;
-constexpr uint64_t literal_0x3E = 0x3E;
+constexpr uint64_t literal_0x3F = 0x3F;
 constexpr uint64_t literal_0x40 = 0x40;
 constexpr uint64_t literal_0x3C = 0x3C;
 constexpr uint64_t literal_0b0101 = 0b0101;
@@ -304,8 +304,8 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
             if ((l_def_X0_ENABLED && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW384245 != literal_0)))
             {
-                l_scom_buffer.insert<1, 7, 57, uint64_t>(literal_0x3E );
-                l_scom_buffer.insert<33, 7, 57, uint64_t>(literal_0x3E );
+                l_scom_buffer.insert<1, 7, 57, uint64_t>(literal_0x3F );
+                l_scom_buffer.insert<33, 7, 57, uint64_t>(literal_0x3F );
             }
             else if (l_def_X0_ENABLED)
             {
@@ -337,8 +337,8 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
             if ((l_def_X1_ENABLED && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW384245 != literal_0)))
             {
-                l_scom_buffer.insert<1, 7, 57, uint64_t>(literal_0x3E );
-                l_scom_buffer.insert<33, 7, 57, uint64_t>(literal_0x3E );
+                l_scom_buffer.insert<1, 7, 57, uint64_t>(literal_0x3F );
+                l_scom_buffer.insert<33, 7, 57, uint64_t>(literal_0x3F );
             }
             else if (l_def_X1_ENABLED)
             {
@@ -370,8 +370,8 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
             if ((l_def_X2_ENABLED && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW384245 != literal_0)))
             {
-                l_scom_buffer.insert<1, 7, 57, uint64_t>(literal_0x3E );
-                l_scom_buffer.insert<33, 7, 57, uint64_t>(literal_0x3E );
+                l_scom_buffer.insert<1, 7, 57, uint64_t>(literal_0x3F );
+                l_scom_buffer.insert<33, 7, 57, uint64_t>(literal_0x3F );
             }
             else if (l_def_X2_ENABLED)
             {
