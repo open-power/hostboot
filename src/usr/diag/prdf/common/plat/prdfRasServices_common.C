@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -314,7 +314,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         }
         else if ( PRDcalloutData::TYPE_MEMMRU == thiscallout.getType() )
         {
-/* TODO RTC 136125
             MemoryMru memMru (thiscallout.flatten());
             SrcWord9 = memMru.toUint32(); // Get MemMru value
 
@@ -328,7 +327,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             {
                 sappHwNoGardReq = true;
             }
-*/
         }
         else // PRDcalloutData::TYPE_TARGET
         {
@@ -592,7 +590,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         }
         else if ( PRDcalloutData::TYPE_MEMMRU == thiscallout.getType() )
         {
-/* TODO RTC 136125
             MemoryMru memMru (thiscallout.flatten());
 
             TargetHandleList partList = memMru.getCalloutList();
@@ -607,7 +604,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                                      errlSev,
                                      l_diagUpdate );
             }
-*/
         }
         else if ( PRDcalloutData::TYPE_SYMFRU == thiscallout.getType() )
         {
