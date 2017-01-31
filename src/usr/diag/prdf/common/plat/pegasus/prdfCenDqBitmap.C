@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -410,7 +410,7 @@ void CenDqBitmap::getCaptureData( CaptureData & o_cd ) const
     for ( uint32_t i = 0; i < (sz_capData/sz_word); i++ )
         ((CPU_WORD*)capData)[i] = htonl(((CPU_WORD*)capData)[i]);
 
-    BIT_STRING_ADDRESS_CLASS bs ( 0, sz_capData*8, (CPU_WORD *) &capData );
+    BitString bs ( sz_capData*8, (CPU_WORD *) &capData );
     o_cd.Add( iv_mba, Util::hashString("BAD_DQ_BITMAP"), bs );
 }
 

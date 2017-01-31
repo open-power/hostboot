@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -240,7 +240,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTrgt,
             #endif
 
             // Allocate space for the capture data.
-            BIT_STRING_ADDRESS_CLASS dramRepairData ( 0,( dramStream.size() )*8,
+            BitString dramRepairData ( ( dramStream.size() )*8,
                                                (CPU_WORD *) dramStream.base() );
             io_cd.Add( i_mbaTrgt, Util::hashString("DRAM_REPAIRS_DATA"),
                        dramRepairData );
@@ -324,7 +324,7 @@ void captureDramRepairsVpd( TargetHandle_t i_mbaTrgt, CaptureData & io_cd )
             ((CPU_WORD*)capData)[i] = htonl(((CPU_WORD*)capData)[i]);
 
         // Add data to capture data.
-        BIT_STRING_ADDRESS_CLASS bs ( 0, sz_capData*8, (CPU_WORD *) &capData );
+        BitString bs ( sz_capData*8, (CPU_WORD *) &capData );
         io_cd.Add( i_mbaTrgt, Util::hashString("DRAM_REPAIRS_VPD"), bs );
 
     }while(0);

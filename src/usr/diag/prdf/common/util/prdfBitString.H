@@ -93,7 +93,7 @@ constexpr CPU_WORD CPU_WORD_MASK = static_cast<CPU_WORD>(-1);
  *
  * The bit positions are ordered 0 to n (left to right), where n is the bit
  * length minus one. Be default, position 0 will be the first bit of the
- * buffer's start address. The BitStringOffset class allows users to input an
+ * buffer's start address. The optional constructor allows users to input an
  * offset anywhere within the buffer, which is then used as position 0. This is
  * useful when the data within the buffer is a right-justified.
  */
@@ -105,15 +105,18 @@ class BitString
      * @brief Constructor
      * @param i_bitLen  The number of bits in the bit string.
      * @param i_bufAddr The starting address of the memory buffer.
-     * @post  It is possible that i_bitLen may not be CPU_WORD
+     * @param i_offset  Optional input to indicate the actual starting position
+     *                  of the bit string within the memory buffer.
+     * @post  It is possible that i_bitLen + i_offset may not be CPU_WORD
      *        aligned, however, the memory space allocated for i_bufAddr must be
      *        CPU_WORD aligned to avoid functions in this class accessing memory
      *        outside the available memory space. Use getNumCpuWords() to
      *        calulate the number of CPU_WORDs needed to allocate sufficient
      *        memory space.
      */
-    BitString( uint32_t i_bitLen, CPU_WORD * i_bufAddr ) :
-        iv_bitLen(i_bitLen), iv_bufAddr(i_bufAddr)
+    BitString( uint32_t i_bitLen, CPU_WORD * i_bufAddr,
+               uint32_t i_offset = 0 ) :
+        iv_bitLen(i_bitLen), iv_bufAddr(i_bufAddr), iv_offset(i_offset)
     {}
 
     /** @brief Destructor */
@@ -424,19 +427,26 @@ class BitString
    */
   virtual BitString & operator=(const BitString & string);
 
-  /*!
-   Gets the CPU_WORD bounded memory address and the relative bit offset within the CPU_WORD
-   that corresponds to the provided bit position in the bit string.
-   \returns memory address of CPU_WORD
-   \returns relative bit offset in the CPU_WORD
-   \param iBitPos Bit position in the bit string
-   */
-  virtual CPU_WORD * GetRelativePosition(uint32_t & oBitOffset, uint32_t iBitPos) const;
+  private: // functions
+
+    /**
+     * @brief  Given a bit position within the bit string, this function returns
+     *         the address that contains the bit position and the bit position
+     *         relative to that address.
+     * @param  o_relPos The returned relative position.
+     * @param  i_absPos The inputted absolute position.
+     * @return The relative address.
+     * @pre    nullptr != getBufAddr()
+     * @pre    i_absPos < getBitLen()
+     */
+    CPU_WORD * getRelativePosition( uint32_t & o_relPos,
+                                    uint32_t   i_absPos ) const;
 
   private: // instance variables
 
     uint32_t   iv_bitLen;  ///< The bit length of this buffer.
     CPU_WORD * iv_bufAddr; ///< The beginning address of this buffer.
+    uint32_t   iv_offset;  ///< Start position offset
 };
 
 //##############################################################################
@@ -479,64 +489,6 @@ class BitStringBuffer : public BitString
      *         buffer. */
     void initBuffer();
 };
-
-//! BitStringOffset
-/*!
- BitStringOffset provides a Bit String that allows a starting position that
- is not limited to a memory aligned boundary.
- \remarks
- The Bit String Offset provides the ability to specify a start bit offset from the
- address provided as the start position of the bit string. The class will
- not modify memory outside the bit string range.
-*/
-class BitStringOffset:public BitString
-{
-public:
-  /*!
-   Constructor
-   \param i_offset The bit offset from address of the start of the bitstring
-   \param i_len The number of bits in the bitstring
-   \param i_address The memory address to base the bitstring on
-   */
-  BitStringOffset(uint32_t i_offset, uint32_t i_len, CPU_WORD * i_address)
-  : BitString(i_len,i_address), ivOffset(i_offset) {}
-
-  /*!
-   Destructor - this class does not own it's storage
-   */
-  virtual ~BitStringOffset(void);
-
-  /*!
-   Copy Constructor
-   */
-   BitStringOffset(const BitStringOffset &i_bs);
-
-   /*!
-    Assignment
-    */
-   BitStringOffset & operator=(const BitStringOffset & i_bs);
-
-   /*!
-    Assignment
-    */
-   virtual BitStringOffset & operator=(const BitString & i_bs);
-
-
-protected:  // functions
-
-  /*!
-   Gets the CPU_WORD bounded memory address and the relative bit offset within the CPU_WORD
-   that corresponds to the provided bit position in the bit string.
-   \returns memory address of CPU_WORD
-   \returns relative bit offset in the CPU_WORD
-   \param iBitPos Bit position in the bit string
-   */
-  virtual CPU_WORD * GetRelativePosition(uint32_t & oBitOffset, uint32_t iBitPos) const;
-private:  // data
-
-  uint32_t ivOffset;
-};
-
 
 /*--------------------------------------------------------------------*/
 /*  IO Stream Conditional Support                                     */

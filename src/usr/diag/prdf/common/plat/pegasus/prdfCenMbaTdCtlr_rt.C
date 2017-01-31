@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3254,7 +3254,7 @@ void CenMbaTdCtlr::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
 
     // Add the capture data.
     CaptureData & cd = io_sc.service_data->GetCaptureData();
-    BIT_STRING_ADDRESS_CLASS bs ( 0, sz_actData*8, (CPU_WORD *) &data );
+    BitString bs ( sz_actData*8, (CPU_WORD *) &data );
     cd.Add( iv_mbaTrgt, Util::hashString(i_descTag), bs );
 }
 
