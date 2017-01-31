@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace Util
         UTIL_LIDMGR_GETLIDPNOR  = 0x05,       // UtilLidMgr::getLidPnor
         UTIL_LIDMGR_RT          = 0x06,
         UTIL_LIDMGR_CLEANUP     = 0x07,       // UtilLidMgr::cleanup
+        UTIL_RT_CMDS            = 0x08,       // rt_cmds.C
     };
 
     enum ReasonCode

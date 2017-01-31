@@ -71,6 +71,16 @@ namespace fapi2
     }
 }
 
+
+// for friend declaration
+namespace Util
+{
+    void cmd_getattr( char*& o_output,
+                      uint32_t i_huid,
+                      uint32_t i_attrId,
+                      uint32_t i_size );
+}
+
 namespace util
 {
     class Mutex;
@@ -594,6 +604,14 @@ class Target
        * @brief allow targetattrbulksync access to the target class store.
        */
       friend class TargetAttrBulkSync;
+
+      /*
+       * @brief allow rt_cmds to use private _tryGetAttr.
+       */
+      friend void Util::cmd_getattr( char*& o_output,
+                                     uint32_t i_huid,
+                                     uint32_t i_attrId,
+                                     uint32_t i_size );
 
 } PACKED;
 
