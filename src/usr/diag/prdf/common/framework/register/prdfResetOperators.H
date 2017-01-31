@@ -187,7 +187,7 @@ class AndOperator : public RegisterResetOperator
         {
             if(bl_length != 0) // Check for bits to reset
             {
-                BIT_STRING_BUFFER_CLASS bs(writeReg->GetBitLength());
+                BitStringBuffer bs(writeReg->GetBitLength());
                 bs.setAll(); // set all to 1's.
 
                 uint32_t i;
@@ -308,7 +308,7 @@ class NotOperator : public RegisterResetOperator
         }
         else // RESETOPERATOR_MASK
         {
-            BIT_STRING_BUFFER_CLASS bs(writeReg->GetBitLength());
+            BitStringBuffer bs(writeReg->GetBitLength());
             bs.setAll(); // set all to 1's.
             writeReg->SetBitString(&bs); // Copy bit-string to register.
             rc = writeReg->Write();    // Write hardware

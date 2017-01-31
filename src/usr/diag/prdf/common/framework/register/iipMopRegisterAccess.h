@@ -47,7 +47,7 @@
 //
 //   void foo(MopRegisterAccess & mra)
 //   {
-//     BIT_STRING_BUFFER_CLASS bitString(80);  // 80 bits
+//     BitStringBuffer bitString(80);  // 80 bits
 //
 //     mra.Access(bitString, READ);
 //     ...

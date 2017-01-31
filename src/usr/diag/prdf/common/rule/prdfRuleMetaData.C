@@ -737,7 +737,7 @@ SCAN_COMM_REGISTER_CLASS * RuleMetaData::createVirtualRegister(
         case Prdr::BIT_STR:
             {
                 uint32_t l_size = i_vReg->cv_bitStrVect.size();
-                BIT_STRING_BUFFER_CLASS l_bs(l_size * 64);
+                BitStringBuffer l_bs(l_size * 64);
 
                 for (uint32_t i = 0; i < l_size; i++)
                 {
