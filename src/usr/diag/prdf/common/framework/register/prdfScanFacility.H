@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -153,7 +153,7 @@ public:
    * @post only one instance of the register with this BIT_STRING value will
    * exist.
    */
-  SCAN_COMM_REGISTER_CLASS & GetConstantRegister(BIT_STRING_CLASS i_val);
+  SCAN_COMM_REGISTER_CLASS & GetConstantRegister(const BitStringBuffer & i_val);
   /**
    * @brief Get a plugin  register
    * @param Reference to target less flyweight object

@@ -641,7 +641,7 @@ class ConstantRegister : public SCAN_COMM_REGISTER_CLASS
         SCAN_COMM_REGISTER_CLASS( ), iv_iBS(0)
     {}
 
-    ConstantRegister(BIT_STRING_CLASS i_arg) :
+    ConstantRegister( const BitStringBuffer & i_arg ) :
         SCAN_COMM_REGISTER_CLASS( ), iv_iBS(i_arg)
     {}
 

@@ -375,13 +375,15 @@ class BitString
     /** @param i_newBitLen The new bit length of this bit string buffer. */
     void setBitLen( uint32_t i_newBitLen ) { iv_bitLen = i_newBitLen; }
 
-  /*!
-   Assignment operator
-   \param string Reference bit string
-   */
-  virtual BitString & operator=(const BitString & string);
-
   private: // functions
+
+    // Prevent the assignment operator and copy constructor from a
+    // BitStringBuffer. While technically these could be done. We run into
+    // serious problems like with the operator functions above that all return
+    // a BitStringBuffer. If we allowed these, the BitString would end up
+    // pointing to memory that is no longer in context.
+    BitString & operator=( const BitStringBuffer & i_bsb );
+    BitString( const BitStringBuffer & i_bsb );
 
     /**
      * @brief  Given a bit position within the bit string, this function returns
@@ -455,17 +457,6 @@ std::ostream & operator<<( std::ostream & out,
                       const BitString & bit_string);
 
 #endif
-
-inline
-BitString & BitString::operator=
-(
- const BitString & string
- )
-{
-  iv_bitLen = string.iv_bitLen;
-  iv_bufAddr = string.iv_bufAddr;
-  return(*this);
-}
 
 } // end namespace PRDF
 
