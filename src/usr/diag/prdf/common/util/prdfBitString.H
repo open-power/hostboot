@@ -228,6 +228,17 @@ class BitString
         setString( i_sStr, 0, i_sStr.getBitLen() );
     }
 
+    /**
+     * @brief Masks (clears) any bits set in this string that correspond to bits
+     *        set in the given string (this & ~mask).
+     * @param i_mask The mask string.
+     * @note  If the length of the given string is greater than the length of
+     *        this string, then the extra bits are ignored.
+     * @note  If the length of the given string is less than the length of this
+     *        string, then the extra bits in this string are not modified.
+     */
+    void maskString( const BitString & i_mask );
+
   /*!
    Comparison
    \remarks The bitstrings must be the same length and have the same bits set to be equal
@@ -333,30 +344,6 @@ class BitString
    \returns [true | false]
    */
   bool IsZero(void) const;
-
-  /*!
-   Mask off (Clear) bits positions in this string that are Set in the string provided
-   \param bitString containing the mask
-   \post Set bit positions in string provided are cleared in this string
-   \notes If the parameter string is longer than this string than extra bits are ignored.
-          If the parameter string is shorter than this string than extra bits in this string
-          are not modified.
-   \verbatim
-    Examples:  Parameter String:  1001
-               Old String:       1100
-               New String:       0100
-
-               Parameter String:  100111
-               Old String:       1100
-               New String:       0100
-
-               Parameter String:  1001
-               Old String:       110001
-               New String:       010001
-
-   \endverbatim
-   */
-  void Mask(const BitString & string);
 
   /*!
    Utility to Right justify a "Left-justified" value
