@@ -51,6 +51,9 @@ typedef fapi2::ReturnCode (*p9_sbe_lpc_init_FP_t)(const
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 extern "C"
 {
+    const uint64_t LPC_LRESET_OE = 23;
+    const uint64_t LPC_LRESET_OUT = 22;
+    const uint64_t LPCM_OPB_MASTER_CONTROL_REG = 0xC0010008;
     const uint32_t CPLT_CONF1_TC_LP_RESET = 12;
     fapi2::ReturnCode p9_sbe_lpc_init(const
                                       fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);

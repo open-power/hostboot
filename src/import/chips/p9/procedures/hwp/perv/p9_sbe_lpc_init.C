@@ -61,6 +61,34 @@ fapi2::ReturnCode p9_sbe_lpc_init(const
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SP_MODE, i_target_chip, l_is_fsp), "Error getting ATTR_IS_SP_MODE");
 
+    //For DD2 and beyond we want to use the lpc reset that will reset the external LPC Bus attached devices -- this is what was broken in DD1
+    if (l_use_gpio == 0)
+    {
+        //Write to the LPCM OPB Master Control Register (address x'C001 0008')
+        fapi2::buffer<uint64_t> l_lpcm_opb_master_control_register_data(0);
+        l_lpcm_opb_master_control_register_data.setBit<PU_LPC_CMD_REG_RNW>().insertFromRight<PU_LPC_CMD_REG_ADR, PU_LPC_CMD_REG_ADR_LEN>
+        (LPCM_OPB_MASTER_CONTROL_REG).insertFromRight<PU_LPC_CMD_REG_SIZE, PU_LPC_CMD_REG_SIZE_LEN>(0x4);
+        FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_CMD_REG, l_lpcm_opb_master_control_register_data),
+                 "Erro writing the LPC_CMD_REG to get the current reset value");
+        FAPI_TRY(fapi2::getScom(i_target_chip, PU_LPC_DATA_REG, l_data64), "Error getting the reset value");
+        //Set register bit 23 lpc_lreset_oe to b'1'
+        l_data64.setBit<LPC_LRESET_OE>();
+        l_lpcm_opb_master_control_register_data.clearBit<PU_LPC_CMD_REG_RNW>();
+        FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_CMD_REG, l_lpcm_opb_master_control_register_data),
+                 "Error writing to the LPC_CMD_REG to set lpc_lreset_oe");
+        FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_DATA_REG, l_data64), "Error setting lpc_lreset_oe");
+        //Set register bit 22 lpc_reset_out to b'1'
+        l_data64.setBit<LPC_LRESET_OUT>();
+        FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_CMD_REG, l_lpcm_opb_master_control_register_data),
+                 "Error writing to the LPC_CMD_REG to set the lpc_reset_out");
+        FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_DATA_REG, l_data64), "Error setting lpc_reset_out");
+        //Clear register bits 22 and 23 to b'00'
+        l_data64.clearBit<LPC_LRESET_OE>().clearBit<LPC_LRESET_OUT>();
+        FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_CMD_REG, l_lpcm_opb_master_control_register_data),
+                 "Error writing to the LPC_CMD_REG to clear lpc_lreset_oe and lpc_reset_out");
+        FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_DATA_REG, l_data64), "Error clearing lpc_lreset_oe and lpc_reset_out");
+    }
+
     if ((l_use_gpio != 0) && (l_is_fsp == fapi2::ENUM_ATTR_IS_SP_MODE_FSP))
     {
         //LPC Reset active
@@ -73,6 +101,7 @@ fapi2::ReturnCode p9_sbe_lpc_init(const
         FAPI_TRY(fapi2::putScom(i_target_chip, PU_GPIO_OUTPUT_EN, l_data64));
     }
 
+    //Do the functional reset that resets the internal registers
     //Settting registers to do an LPC functional reset
     l_data64.flush<0>().setBit<CPLT_CONF1_TC_LP_RESET>();
     FAPI_TRY(fapi2::putScom(i_target_chip, PERV_N3_CPLT_CONF1_OR, l_data64));
