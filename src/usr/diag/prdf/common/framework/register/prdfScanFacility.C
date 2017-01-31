@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -166,8 +166,8 @@ SCAN_COMM_REGISTER_CLASS &  ScanFacility::GetAttnTypeRegister(
 
 //------------------------------------------------------------------------------
 
-SCAN_COMM_REGISTER_CLASS &  ScanFacility::GetConstantRegister(
-                                                    BIT_STRING_CLASS i_val )
+SCAN_COMM_REGISTER_CLASS & ScanFacility::GetConstantRegister(
+                                                const BitStringBuffer & i_val )
 {
   ConstantRegister r(i_val);
   return iv_constRegFw.get(r);
