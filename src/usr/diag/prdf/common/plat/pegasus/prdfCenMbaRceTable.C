@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -114,7 +114,7 @@ void CenMbaRceTable::addCapData( CaptureData & io_cd )
             ((CPU_WORD*)data)[i] = htonl(((CPU_WORD*)data)[i]);
 
         // Add data to capture data.
-        BIT_STRING_ADDRESS_CLASS bs ( 0, sz_actData*8, (CPU_WORD *) &data );
+        BitString bs ( sz_actData*8, (CPU_WORD *) &data );
         io_cd.Add( iv_mbaTrgt, Util::hashString("MEM_RCE_TABLE"), bs );
     }
 }

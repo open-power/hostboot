@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2014              */
+/* Contributors Listed Below - COPYRIGHT 2002,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -34,7 +36,6 @@ namespace PRDF
 
 #define BIT_LIST_CLASS           BitKey
 #define BIT_STRING_CLASS         BitString
-#define BIT_STRING_ADDRESS_CLASS BitStringOffset
 #define BIT_STRING_BUFFER_CLASS  BitStringBuffer
 #define FILTER_CLASS             FilterClass
 

@@ -45,7 +45,7 @@
 //  {
 //    ErrorRegisterMask erm(scr,resMap);
 //    uint32_t mask_data[] = {0x00000000, 0xFFFFFFFF};
-//    erm.SetMaskBits(BIT_STRING_ADDRESS_CLASS(0,64,mask_data));
+//    erm.SetMaskBits(BitString(64,mask_data));
 //    ...
 //    int32_t rc = er.Analyze(error_data);
 //    ...

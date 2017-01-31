@@ -54,7 +54,7 @@ CPU_WORD BitString::getField( uint32_t i_pos, uint32_t i_len ) const
 
     // Get the relative address and position of the field.
     uint32_t relPos = 0;
-    CPU_WORD * relAddr = GetRelativePosition( relPos, i_pos );
+    CPU_WORD * relAddr = getRelativePosition( relPos, i_pos );
 
     // The return value may cross two CPU_WORD addresses. Get length of each
     // chunk, mask to clear the right-handed bits, and the shift value to make
@@ -96,7 +96,7 @@ void BitString::setField( uint32_t i_pos, uint32_t i_len, CPU_WORD i_val )
 
     // Get the relative address and position of the field.
     uint32_t relPos = 0;
-    CPU_WORD * relAddr = GetRelativePosition( relPos, i_pos );
+    CPU_WORD * relAddr = getRelativePosition( relPos, i_pos );
 
     // The value is left-justified. Ignore all other bits.
     CPU_WORD mask = CPU_WORD_MASK << (CPU_WORD_BIT_LEN - i_len);
@@ -127,7 +127,7 @@ void BitString::setPattern( uint32_t i_sPos, uint32_t i_sLen,
     PRDF_ASSERT(i_pLen <= CPU_WORD_BIT_LEN);     // i_pLen length must be valid
 
     // Get a bit string for the pattern subset (right justified).
-    BitStringOffset bso ( CPU_WORD_BIT_LEN - i_pLen, i_pLen, &i_pattern );
+    BitString bso ( i_pLen, &i_pattern, CPU_WORD_BIT_LEN - i_pLen );
 
     // Iterate the range in chunks the size of i_pLen.
     uint32_t endPos = i_sPos + i_sLen;
@@ -165,8 +165,8 @@ void BitString::setString( const BitString & i_sStr, uint32_t i_sPos,
     // The bit strings may be in overlapping memory spaces. So we need to copy
     // the data in the correct direction to prevent overlapping.
     uint32_t sRelOffset = 0, dRelOffset = 0;
-    CPU_WORD * sRelAddr = i_sStr.GetRelativePosition( sRelOffset, i_sPos );
-    CPU_WORD * dRelAddr =        GetRelativePosition( dRelOffset, i_dPos );
+    CPU_WORD * sRelAddr = i_sStr.getRelativePosition( sRelOffset, i_sPos );
+    CPU_WORD * dRelAddr =        getRelativePosition( dRelOffset, i_dPos );
 
     // Copy the data.
     if ( (dRelAddr == sRelAddr) && (dRelOffset == sRelOffset) )
@@ -370,43 +370,6 @@ bool BitString::IsZero() const
 
 //-------------------------------------------------------------------------------------------------
 
-CPU_WORD * BitString::GetRelativePosition(uint32_t & oBitOffset, uint32_t iBitPos) const
-{
-  PRDF_ASSERT(iv_bufAddr != NULL);
-  oBitOffset = iBitPos % CPU_WORD_BIT_LEN;
-  return iv_bufAddr + (iBitPos/CPU_WORD_BIT_LEN);
-}
-
-//-------------------------------------------------------------------------------------------------
-
-CPU_WORD * BitStringOffset::GetRelativePosition(uint32_t & oBitOffset, uint32_t iBitPos) const
-{
-  iBitPos += ivOffset;
-  return BitString::GetRelativePosition(oBitOffset,iBitPos);
-}
-
-//-------------------------------------------------------------------------------------------------
-
-BitStringOffset::~BitStringOffset(void) {}
-
-//-------------------------------------------------------------------------------------------------
-
-BitStringOffset & BitStringOffset::operator=(const BitStringOffset & i_bs)
-{
-  BitString::operator=(i_bs);
-  ivOffset = i_bs.ivOffset;
-  return *this;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-BitStringOffset & BitStringOffset::operator=(const BitString & i_bs)
-{
-  BitString::operator=(i_bs);
-  ivOffset = 0;
-  return *this;
-}
-
 // Function Specification //////////////////////////////////////////
 //
 // Title:  Do a bitwise NOT of the bitstring
@@ -476,14 +439,14 @@ BitStringBuffer BitString::operator|(const BitString & bs) const
 BitStringBuffer BitString::operator>>(uint32_t count) const
 {
   BitStringBuffer l_bsb(this->getBitLen());
-  BitString * l_bsbp = &l_bsb; // dg03a - stupid trick to get to GetRelativePosition()
+  BitString * l_bsbp = &l_bsb; // dg03a - stupid trick to get to getRelativePosition()
   //  l_bsb.clearAll();
   if(count < this->getBitLen())
   {
     //bso overlays bsb at offset = count
     uint32_t l_dummy;
-    BitStringOffset bso(count,l_bsb.getBitLen() - count,
-                            l_bsbp->GetRelativePosition(l_dummy,0)); //dg03c
+    BitString bso( l_bsb.getBitLen() - count,
+                   l_bsbp->getRelativePosition(l_dummy,0), count );
     bso.setString(*this);
   }
   return l_bsb;
@@ -498,10 +461,23 @@ BitStringBuffer BitString::operator<<(uint32_t count) const
   if(count < this->getBitLen())
   {
     // bso overlays *this at offset = count
-    BitStringOffset bso(count,this->getBitLen() - count,this->getBufAddr());
+    BitString bso ( this->getBitLen() - count, this->getBufAddr(), count );
     l_bsb.setString(bso);
   }
   return l_bsb;
+}
+
+//------------------------------------------------------------------------------
+
+CPU_WORD * BitString::getRelativePosition( uint32_t & o_relPos,
+                                           uint32_t   i_absPos ) const
+{
+    PRDF_ASSERT( nullptr != getBufAddr() ); // must to have a valid address
+    PRDF_ASSERT( i_absPos < getBitLen() );  // must be a valid position
+
+    o_relPos = (i_absPos + iv_offset) % CPU_WORD_BIT_LEN;
+
+    return iv_bufAddr + ((i_absPos + iv_offset) / CPU_WORD_BIT_LEN);
 }
 
 //##############################################################################

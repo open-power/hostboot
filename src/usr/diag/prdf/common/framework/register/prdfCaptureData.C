@@ -102,7 +102,7 @@ void CaptureData::AddDataElement( TargetHandle_t i_trgt, int i_scomId,
         memset( buf, 0x00, sz_buf );
 
         // Use a BitString to copy i_bs to the buffer.
-        BIT_STRING_ADDRESS_CLASS bs ( 0, i_bs->getBitLen(), (CPU_WORD *)buf );
+        BitString bs ( i_bs->getBitLen(), (CPU_WORD *)buf );
         bs.setString( *i_bs );
 
         // Create the new data element.

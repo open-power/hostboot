@@ -256,7 +256,7 @@ void MemCeTable::addCapData( ExtensibleChip * i_chip, CaptureData & io_cd )
             ((CPU_WORD*)data)[i] = htonl(((CPU_WORD*)data)[i]);
 
         // Add data to capture data.
-        BIT_STRING_ADDRESS_CLASS bs ( 0, sz_actData*8, (CPU_WORD *) &data );
+        BitString bs ( sz_actData*8, (CPU_WORD *) &data );
         io_cd.Add( i_chip->getTrgt(), Util::hashString("MEM_CE_TABLE"), bs );
     }
 }

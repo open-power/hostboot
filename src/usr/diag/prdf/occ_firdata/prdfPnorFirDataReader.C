@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -128,7 +128,7 @@ void PnorFirDataReader::addFfdc( errlHndl_t io_errl ) const
             memcpy( &data[idx], &(it->second.scomErrs), u16 ); idx += u16;
         }
 
-        BIT_STRING_ADDRESS_CLASS bs ( 0, sz_data * 8, (CPU_WORD *)&data );
+        BitString bs ( sz_data * 8, (CPU_WORD *)&data );
 
         CaptureData cd;
         cd.Add( getSystemTarget(), Util::hashString("OCC_CS_FFDC"), bs );
