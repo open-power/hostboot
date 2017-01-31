@@ -53,7 +53,10 @@
 enum P9_HCD_CACHE_STOPCLOCKS_CONSTANTS
 {
     CACHE_CLK_STOP_POLLING_HW_NS_DELAY     = 10000,
-    CACHE_CLK_STOP_POLLING_SIM_CYCLE_DELAY = 320000
+    CACHE_CLK_STOP_POLLING_SIM_CYCLE_DELAY = 320000,
+    PB_PURGE_CACHE_STOP_POLLING_DELAY_HW_MILLISEC = 1000000ULL, // 1msec
+    PB_PURGE_CACHE_STOP_POLLING_DELAY_SIM_CYCLES = 10000ULL,
+    PB_PURGE_CACHE_STOP_POLLING_TIMEOUT = 10,
 };
 
 //------------------------------------------------------------------------------
@@ -75,9 +78,58 @@ p9_hcd_cache_stopclocks(
     uint32_t                                       l_loops1ms;
     uint8_t                                        l_attr_chip_unit_pos = 0;
     uint8_t                                        l_attr_vdm_enable;
+    uint8_t                                        l_is_mpipl = 0x0;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sys;
     auto l_perv = i_target.getParent<fapi2::TARGET_TYPE_PERV>();
     auto l_chip = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, l_sys, l_is_mpipl));
+
+    if(l_is_mpipl)
+    {
+        // PB_PURGE related SCOMs should be added to the beginning of
+        // p9_hcd_cache_stopclocks, these scoms should only be done if the clock
+        // region including PBIEQ clock domain is being stopped, which
+        // incidentally should always be the case for MPIPL
+        l_data64.flush<0>();
+        l_data64.setBit<30>();
+        // Set bit 30 in EQ_QPPM_QCCR_SCOM2(100F01BF) Reg, Pulse to the
+        // Powerbus logic in the Cache clock domain to request them to purge
+        // their async buffers in preparation to power off the Quad
+        FAPI_TRY(fapi2::putScom(i_target, EQ_QPPM_QCCR_SCOM2, l_data64));
+
+        l_data64.flush<0>();
+        uint32_t l_timeout = PB_PURGE_CACHE_STOP_POLLING_TIMEOUT;
+
+        do
+        {
+            // Acknowledgement from Powerbus that the buffers are empty
+            // and can safely be fenced & clocked off.
+            FAPI_TRY(fapi2::getScom(i_target, EQ_QPPM_QCCR_SCOM, l_data64));
+            bool l_poll_data = l_data64.getBit<31>();
+
+            if(l_poll_data == 1)
+            {
+                break;
+            }
+
+            FAPI_TRY(fapi2::delay(PB_PURGE_CACHE_STOP_POLLING_DELAY_HW_MILLISEC,
+                                  PB_PURGE_CACHE_STOP_POLLING_DELAY_SIM_CYCLES),
+                     "Error from delay"); //1msec delay
+        }
+        while(--l_timeout != 0);
+
+        // Error if Timeout happens
+        FAPI_ASSERT((l_timeout != 0),
+                    fapi2::QPPM_QCCR_PB_PURGE_DONE_LVL_TIMEOUT()
+                    .set_TARGET(i_target)
+                    .set_EQPPMQCCR(l_data64),
+                    "QPPM_QCCR_PB_PURGE_DONE_LVL Reg bit 31 not set.");
+
+        l_data64.flush<0>();
+        l_data64.setBit<30>();
+        FAPI_TRY(fapi2::putScom(i_target, EQ_QPPM_QCCR_SCOM1, l_data64));
+    }
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_ENABLE,    l_sys,
                            l_attr_vdm_enable));
@@ -99,7 +151,6 @@ p9_hcd_cache_stopclocks(
     // -----------------------------
     // Prepare to stop cache clocks
     // -----------------------------
-
     FAPI_DBG("Check PM_RESET_STATE_INDICATOR via GPMMR[15]");
     FAPI_TRY(getScom(i_target, EQ_PPM_GPMMR_SCOM, l_data64));
 
