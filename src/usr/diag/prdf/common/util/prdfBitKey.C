@@ -137,7 +137,7 @@ BitKey & BitKey::operator=(const BitKey & bit_list)
   if(iv_Capacity)
   {
     BitString bs(iv_Capacity,DataPtr());
-    bs.Pattern(0x00000000);
+    bs.clearAll();
   }
   ReAllocate(bit_list.iv_Capacity);
   if(IsDirect()) // implies bit_list is also direct
@@ -167,7 +167,7 @@ BitKey & BitKey::operator=(const BitString & bit_string)
   if(iv_Capacity)
   {
     BitString bs(iv_Capacity,DataPtr());
-    bs.Pattern(0x00000000);
+    bs.clearAll();
   }
   ReAllocate(bit_string.getBitLen());
   BitString dbs(iv_Capacity,DataPtr());
@@ -182,7 +182,7 @@ BitKey & BitKey::operator=(const char * string_ptr)
   if(iv_Capacity)
   {
     BitString bs(iv_Capacity,DataPtr());
-    bs.Pattern(0x00000000);
+    bs.clearAll();
   }
 
   while(*string_ptr != '\0')
@@ -360,7 +360,7 @@ void BitKey::ReAllocate(uint32_t i_len)
     {
       uint32_t * newBuffer = new uint32_t[wordsize];
       BitString dbs(iv_Capacity,newBuffer);
-      dbs.Pattern(0x00000000);
+      dbs.clearAll();
       BitString sbs(oldSize,oldPtr);
       dbs.SetBits(sbs);
       iv_storage1 = 0;

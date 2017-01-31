@@ -42,6 +42,35 @@ namespace PRDF
 //                             BitString class
 //##############################################################################
 
+void BitString::setPattern( uint32_t i_sPos, uint32_t i_sLen,
+                            CPU_WORD i_pattern, uint32_t i_pLen )
+{
+    PRDF_ASSERT(nullptr != getBufAddr());        // must to have a valid address
+    PRDF_ASSERT(0 < i_sLen);                     // must have at least one bit
+    PRDF_ASSERT(i_sPos + i_sLen <= getBitLen()); // field must be within range
+    PRDF_ASSERT(0 < i_pLen);                     // must have at least one bit
+    PRDF_ASSERT(i_pLen <= CPU_WORD_BIT_LEN);     // i_pLen length must be valid
+
+    // Get a bit string for the pattern subset (right justified).
+    BitStringOffset bso ( CPU_WORD_BIT_LEN - i_pLen, i_pLen, &i_pattern );
+
+    // Iterate the range in chunks the size of i_pLen.
+    uint32_t endPos = i_sPos + i_sLen;
+    for ( uint32_t pos = i_sPos; pos < endPos; pos += i_pLen )
+    {
+        // The true chunk size is either i_pLen or the leftovers at the end.
+        uint32_t len = std::min( i_pLen, endPos - pos );
+
+        // Get this chunk's pattern value, truncate (left justified) if needed.
+        CPU_WORD pattern = bso.GetField( 0, len );
+
+        // Set the pattern in this string.
+        SetField( pos, len, pattern );
+    }
+}
+
+//------------------------------------------------------------------------------
+
 uint32_t BitString::GetSetCount(uint32_t bit_position,
                                     uint32_t leng
                                     ) const
@@ -217,69 +246,6 @@ void BitString::SetBits
       CPU_WORD value = source->GetField(iPos,len);
       SetField(iDpos,len,value);
       iLen -= len;
-    }
-  }
-}
-
-// ------------------------------------------------------------------------------------------------
-
-// Function Specification //////////////////////////////////////////
-//
-//  Title:  Pattern
-//
-//  Purpose:  This function sets the the specified bits with the
-//            specifed pattern.  The number of bits sets is
-//            specified by the length and begins at the specified
-//            offest.  The pattern is repeated as often as necessary
-//            as specified by the pattern_bit_length.
-//
-//  Side-effects:  Bit String may be modified.
-//
-//  Dependencies:  Parameters must specifiy valid bits in both the
-//                 bit string and the pattern.
-//
-// Time Complexity:  O(m) where m is the number of bits to modify
-//                   (parameter l)
-//
-//  Examples:  o(0), l(10), pattern(0xA), pattern_bit_length(4)
-//             Old String: 0000000000
-//             New String: 1010101010
-//
-//             o(3), l(4), pattern(0x3), pattern_bit_length(3)
-//             Old String: 0001001000
-//             New String: 0000110000
-//
-// End Function Specification //////////////////////////////////////
-
-void BitString::Pattern
-(
- uint32_t o,
- uint32_t l,
- CPU_WORD pattern,
- uint32_t pattern_bit_length
- )
-{
-  PRDF_ASSERT(((o + l) <= iv_bitLen) &&
-         (pattern_bit_length <= CPU_WORD_BIT_LEN));
-
-  uint32_t current_offset;
-
-  //  current_offset = offset + o;
-  current_offset = o;
-  while(true)
-  {
-    if(l > pattern_bit_length)
-    {
-      /* Set values using full CPU_WORDs                              */
-      SetField(current_offset, pattern_bit_length, pattern);
-      l -= pattern_bit_length;
-      current_offset += pattern_bit_length;
-    }
-    else
-    {
-      /* Set value in remainder of last CPU_WORD                      */
-      SetField(current_offset, l, pattern);
-      break;
     }
   }
 }
@@ -588,7 +554,7 @@ BitStringBuffer BitString::operator>>(uint32_t count) const
 {
   BitStringBuffer l_bsb(this->getBitLen());
   BitString * l_bsbp = &l_bsb; // dg03a - stupid trick to get to GetRelativePosition()
-  //  l_bsb.Clear();
+  //  l_bsb.clearAll();
   if(count < this->getBitLen())
   {
     //bso overlays bsb at offset = count
@@ -605,7 +571,7 @@ BitStringBuffer BitString::operator>>(uint32_t count) const
 BitStringBuffer BitString::operator<<(uint32_t count) const
 {
   BitStringBuffer l_bsb(this->getBitLen());
-  //  l_bsb.Clear();
+  //  l_bsb.clearAll();
   if(count < this->getBitLen())
   {
     // bso overlays *this at offset = count
@@ -686,7 +652,7 @@ void BitStringBuffer::initBuffer()
     setBufAddr( new CPU_WORD[ getNumCpuWords(getBitLen()) ] );
 
     // Clear the new buffer.
-    Clear();
+    if ( !IsZero() ) clearAll();
 }
 
 /*--------------------------------------------------------------------*/

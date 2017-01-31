@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,7 +99,7 @@ public:
                 TS_FAIL("Unexpected error calling PRDF::PlatServices::putScom");
                 break;
             }
-            bs.Clear();
+            bs.clearAll();
 
             rc = PRDF::PlatServices::getScom(target, bs, address);
 

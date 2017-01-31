@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,7 +84,7 @@ bitString(r.GetBitLength()),
 bitStringMask(r.GetBitLength()),
 xMaskScr(maskScr)
 {
-  bitStringMask.Pattern(0);
+  bitStringMask.clearAll();
 }
 
 ErrorRegisterMask::ErrorRegisterMask
@@ -100,7 +100,7 @@ bitString(r.GetBitLength()),
 bitStringMask(r.GetBitLength()),
 xMaskScr(maskScr)
 {
-  bitStringMask.Pattern(0);     // clear software mask
+  bitStringMask.clearAll();     // clear software mask
 }
 
 // **********************************************************************

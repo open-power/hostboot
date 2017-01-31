@@ -138,6 +138,62 @@ class BitString
         return (i_bitLen + i_offset + CPU_WORD_BIT_LEN-1) / CPU_WORD_BIT_LEN;
     }
 
+    /** @brief Sets the entire bit string to 1's. */
+    void setAll() { setPattern(CPU_WORD_MASK); }
+
+    /** @brief Sets the entire bit string to 0's. */
+    void clearAll() { setPattern(0); }
+
+    /**
+     * @brief Sets a range within the string based on the pattern and length
+     *        provided.
+     * @param i_sPos    Starting position of this string.
+     * @param i_sLen    The length of the target range.
+     * @param i_pattern The pattern to set (right justified).
+     * @param i_pLen    The length of the pattern.
+     * @pre   nullptr != getBufAddr()
+     * @pre   0 < i_sLen
+     * @pre   i_sPos + i_sLen <= getBitLen()
+     * @pre   0 < i_pLen <= CPU_WORD_BIT_LEN
+     * @post  The pattern is repeated/truncated as needed.
+     *
+     * Examples:  i_sPos(0), i_sLen(10), i_pattern(0xA), i_pLen(4)
+     *            Old String: 0000000000
+     *            New String: 1010101010
+     *
+     *            i_sPos(3), i_sLen(4), i_pattern(0x3), i_pLen(3)
+     *            Old String: 0001001000
+     *            New String: 0000110000
+     */
+    void setPattern( uint32_t i_sPos, uint32_t i_sLen,
+                     CPU_WORD i_pattern, uint32_t i_pLen );
+
+    /**
+     * @brief Sets entire string based on the pattern and length provided.
+     * @param i_pattern The pattern to set (right justified).
+     * @param i_pLen    The length of the pattern.
+     * @note  See definition above for prerequisites.
+     * @post  The entire string is filled with the pattern.
+     * @post  The pattern is repeated/truncated as needed.
+     */
+    void setPattern( CPU_WORD i_pattern, uint32_t i_pLen )
+    {
+        setPattern( 0, getBitLen(), i_pattern, i_pLen );
+    }
+
+    /**
+     * @brief Sets entire string based on the pattern provided (length of
+     *        CPU_WORD).
+     * @param i_pattern The pattern to set.
+     * @note  See definition above for prerequisites.
+     * @post  The entire string is filled with the pattern.
+     * @post  The pattern is repeated/truncated as needed.
+     */
+    void setPattern( CPU_WORD i_pattern )
+    {
+        setPattern( i_pattern, CPU_WORD_BIT_LEN );
+    }
+
   /*!
    Comparison
    \remarks The bitstrings must be the same length and have the same bits set to be equal
@@ -237,45 +293,6 @@ class BitString
                unsigned int dpos = 0);
 
   /*!
-   Set bits in this string based on the range and pattern provided
-   \param iPos: bit pos in this string to start
-   \param iLen: # of bits to modify
-   \param iPattern: Pattern to set
-   \param iPatternLen: # of bit in pattern to use (right justfied)
-   \pre  (iPos + iLen) <= getBitLen()
-   \post Range of specified bits filled with pattern. The pattern is repeated as needed
-   \verbatim
-        Examples:  iPos(0), iLen(10), iPattern(0xA), iPatternLen(4)
-        Old String: 0000000000
-        New String: 1010101010
-
-        iPos(3), iLen(4), iPattern(0x3), iPatternLen(3)
-        Old String: 0001001000
-        New String: 0000110000
-   \endverbatim
-   */
-  void Pattern(uint32_t iPos,
-               uint32_t iLen,
-               CPU_WORD iPattern,
-               uint32_t pattern_bit_length);
-
-  /*!
-   Set entire string based on the pattern provided
-   \param iPattern: Pattern to set
-   \param iPatternLen: # of bit in pattern to use (right justfied)
-   \post BitString is filled with pattern. The pattern is repeated/truncated as needed
-   */
-  void Pattern(CPU_WORD iPattern,
-               uint32_t iPatternLen);
-
-  /*!
-   Set entire string based on the pattern provided
-   \param iPattern: Pattern to set
-   \post BitString is filled with pattern. The pattern is repeated/truncated as needed
-   */
-  void Pattern(CPU_WORD pattern);
-
-  /*!
    Query if bit is set (1)
    \returns [true|false]
    \param iPos: bit position to test
@@ -295,12 +312,6 @@ class BitString
    \post IsSet(iPos) == false
    */
   void Clear(uint32_t bit_position);
-
-  /*!
-   Clear the entire bit string
-   \post IsZero() == true
-   */
-  void Clear(void) { Pattern(0); }
 
   /*!
    Test equivalence
@@ -624,39 +635,6 @@ BitString & BitString::operator=
   iv_bufAddr = string.iv_bufAddr;
   return(*this);
 }
-
-// Function Specification //////////////////////////////////////////
-//
-//  Title:  Pattern
-//
-//  Purpose:  This function sets this entire Bit String with the
-//            specifed pattern.  The pattern is repeated as often as
-//            necessary as specified by the pattern_bit_length.
-//
-//  Side-effects:  Bit String is be modified.
-//
-//  Dependencies:  None.
-//
-//  Time Complexity: O(m) where m is the number of bits to modify
-//                   (parameter l)
-//
-//  Examples:  See Pattern(uint32_t, uint32_t, CPU_WORD, uint32_t)
-//
-// End Function Specification //////////////////////////////////////
-
-inline
-void BitString::Pattern(CPU_WORD pattern,uint32_t pattern_bit_length)
-{
-  Pattern(0, getBitLen(), pattern, pattern_bit_length);
-}
-
-
-inline
-void BitString::Pattern(CPU_WORD pattern)
-{
-  Pattern(0, getBitLen(), pattern, CPU_WORD_SIZE);
-}
-
 
 inline uint32_t BitString::GetSetCount(void) const
 {
