@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -253,7 +253,7 @@ fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::multi_port_init()
 
     // Deterimine which ports are functional and whether we can broadcast to them
     // TK on the broadcast BRS
-    // Disable braodcast mode - disabled by default
+    // Disable broadcast mode - disabled by default
 
     // We need to do three things here. One is to create a subtest which starts at start address and runs to
     // the end of the port. Next, create subtests to go from the start of the next port to the end of the
@@ -263,8 +263,8 @@ fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::multi_port_init()
 
     // Get the port/DIMM information for the addresses. This is an integral value which allows us to index
     // all the DIMM across a controller.
-    uint64_t l_portdimm_start_address = iv_const.iv_start_address.get_port_dimm();
-    uint64_t l_portdimm_end_address = iv_const.iv_end_address.get_port_dimm();
+    const uint64_t l_portdimm_start_address = iv_const.iv_start_address.get_port_dimm();
+    const uint64_t l_portdimm_end_address = iv_const.iv_end_address.get_port_dimm();
 
     FAPI_INF("start port/dimm: %d end port/dimm: %d", l_portdimm_start_address, l_portdimm_end_address);
 
@@ -341,7 +341,7 @@ fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::multi_port_init()
         uint64_t l_a_portdimm = (a.get_port() << 1) | a.get_dimm();
         uint64_t l_b_portdimm = (b.get_port() << 1) | b.get_dimm();
 
-        return l_a_portdimm > l_b_portdimm;
+        return l_a_portdimm < l_b_portdimm;
     });
 
     // Initialize the common sections
