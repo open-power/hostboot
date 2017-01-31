@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef HDATMSVPD_H
 #define HDATMSVPD_H
- 
+
 /**
  *  @file hdatmsvpd.H
  *
@@ -60,6 +60,7 @@ const uint32_t HDAT_BITS_PER_BYTE = 8;
 const uint32_t HDAT_MB_PER_GB = 1024;
 const uint32_t MAX_CHIP_EC_CNT_PER_MSAREA = 2;
 const uint32_t HDAT_START_INSTANCE = 0;
+const uint32_t HDAT_RHB_MAX_RANGE_ENTRIES = 15;
 
 
 /** @brief Structure version number
@@ -81,7 +82,7 @@ enum hdatMsVpdDataPtrs
   HDAT_MS_VPD_IMT_ADDR_RNG = 3,
   HDAT_MS_VPD_UE_ADDR_RNG  = 4,
   HDAT_MS_VPD_HB_ADDR_RNG  = 5,
-  HDAT_MS_VPD_LAST         = 6 
+  HDAT_MS_VPD_LAST         = 6
 };
 
 
@@ -113,11 +114,11 @@ struct hdatRamArea
     uint32_t ivfruId;
     hdatRamArea(uint32_t i_huid,
                 bool status,
-                uint32_t dimmSize,uint32_t i_fruId) : 
+                uint32_t dimmSize,uint32_t i_fruId) :
                 ivHuid(i_huid),
                 ivFunctional(status),
                 ivSize(dimmSize),
-                ivfruId(i_fruId) { 
+                ivfruId(i_fruId) {
                 }
 };
 
@@ -179,13 +180,13 @@ struct hdatMsVpdUEAddrRange_t
  */
 struct hdatMsVpdRhbAddrRange_t
 {
-    uint32_t hdatDbobID;                              // 0x0000 Node instance
-                                                      //        number
+    uint32_t hdatRhbRngType:8;                        // 0x0000 Range type
+    uint32_t hdatRhbRngId:24;                         // 0x0001 Range ID
     hdatMsAddr_t hdatRhbAddrRngStrAddr;               // 0x0004 Range starting
                                                       //        address
     hdatMsAddr_t hdatRhbAddrRngEndAddr;               // 0x000C Range ending
                                                       //        address+1
-    uint32_t hdatRhbLabelSize;                        // 0x0014 Label size 
+    uint32_t hdatRhbLabelSize;                        // 0x0014 Label size
     uint8_t hdatRhbLabelString[HDAT_MS_RHB_LABEL_LEN];// 0x0019 Label string Ptr
 }  __attribute__ ((packed));
 
@@ -276,7 +277,7 @@ enum hdatBsrMode
  *              CEC Server process.
  *
  *              Contained within the mainstore VPD object are mainstore area
- *              objects and RAM objects.  
+ *              objects and RAM objects.
  *
  * Thread safety:  An HdatMsVpd object is not thread safe.  That is, a single
  *                 object cannot be shared and used concurrently by multiple
@@ -294,7 +295,7 @@ class HdatMsVpd : public HdatHdif
 {
     public:
 
-        /** 
+        /**
          * @brief Construct an HdatMsVpd object.
          *
          *  This is the constructor for the HdatMsVpd object.
@@ -442,13 +443,13 @@ class HdatMsVpd : public HdatHdif
          * @param[in] i_resourceId - The FRU's resource id
          * @param[in] i_msAreaId   - A unique id for each main store area
          * associated with a mainstore VPD object.  The id starts at
-         *                       0 and is incremented by 1 for each new 
+         *                       0 and is incremented by 1 for each new
          *                       mainstore area.
          * @param[in] i_ramCnt     - The number of RAM objects that will be
          *                       added to the mainstore area.  If an exact count
          *                       cannot be computed, a maximum number can be
          *                       provided.
-         * @param[in] i_chipEcCnt  - The number of EC entries that will be 
+         * @param[in] i_chipEcCnt  - The number of EC entries that will be
          * added to the mainstore area. If an exact count cannot be
          *                       computed, a maximum number can be provided.
          * @param[in] i_addrRngCnt - The number of address range entries that
@@ -481,9 +482,9 @@ class HdatMsVpd : public HdatHdif
          * @post None
          *
          * @param[in] i_msAreaId - A unique id for each main store area
-         *                     associated with a mainstore VPD object.  The id 
-         *                     identifies the mainstore area that is to be 
-         *                     updated.               
+         *                     associated with a mainstore VPD object.  The id
+         *                     identifies the mainstore area that is to be
+         *                     updated.
          * @param[in] i_type     - This specifies the type of memory card
          *                     for this mainstore area.
          */
@@ -491,42 +492,42 @@ class HdatMsVpd : public HdatHdif
                            hdatMemParentType i_type);
 
 
-        /** 
+        /**
          * @brief Update the mainstore area to specify the status of the memory
          * DIMMS
          *
          * @pre The i_msAreaId parameter must be for a valid mainstore area that
-         * was added with the addMsAreaFru() method.HDAT does not check or 
+         * was added with the addMsAreaFru() method.HDAT does not check or
          * enforce that this is a valid main store area ID.
          *
          * @post None
          *
-         * @param[in] i_msAreaId - A unique id for each main store area 
-         *                  associated with a mainstore VPD object.  The id 
+         * @param[in] i_msAreaId - A unique id for each main store area
+         *                  associated with a mainstore VPD object.  The id
          *                  identifies the mainstore area that is to be updated.
          * @param[in] i_status   - See the hdatMsAreaStatus enum.  The value
-         *                     specified here can be a bitwise OR of the enum 
+         *                     specified here can be a bitwise OR of the enum
          *                     values.
          */
         void setMsAreaStat(uint16_t i_msAreaId,
                            uint16_t i_status);
 
 
-        /** 
+        /**
          * @brief Update the mainstore area with an id for interleaved memory
          *
          * @pre The i_msAreaId parameter must be for a valid mainstore area that
-         *  was added with the addMsAreaFru() method.HDAT does not check or 
+         *  was added with the addMsAreaFru() method.HDAT does not check or
          *  enforce that this is a valid main store area ID.
          *
          * @post None
          *
          * @param[in] i_msAreaId - A unique id for each main store area
-         *                   associated with a mainstore VPD object.  The id 
+         *                   associated with a mainstore VPD object.  The id
          *                   identifies the mainstore area that is to be updated
          * @param[in] i_id  - An identifier from 0 to N which is the same
-         *                  for each MS area which is interleaved.  In 
-         *                  addition, the HDAT_MEM_SHARED status attribute 
+         *                  for each MS area which is interleaved.  In
+         *                  addition, the HDAT_MEM_SHARED status attribute
          *                  must have been used for this
          *                  MS area when setMsAreaStat() was called.
          */
@@ -534,139 +535,139 @@ class HdatMsVpd : public HdatHdif
                                     uint16_t i_id);
 
 
-        /** 
-         * @brief Update the mainstore area to specify the total size of the 
+        /**
+         * @brief Update the mainstore area to specify the total size of the
          *      mainstore area.
          *
          * @pre The i_msAreaId parameter must be for a valid mainstore area that
-         *  was added with the addMsAreaFru() method.  HDAT does not check or 
+         *  was added with the addMsAreaFru() method.  HDAT does not check or
          *  enforce that this is a valid main store area ID.
          *
          * @post None
          *
-         * @param[in] i_msAreaId - A unique id for each main store area 
-         *                     associated with a mainstore VPD object. The id 
-         *                     identifies the mainstore area that is to be 
-         *                     updated.               
+         * @param[in] i_msAreaId - A unique id for each main store area
+         *                     associated with a mainstore VPD object. The id
+         *                     identifies the mainstore area that is to be
+         *                     updated.
          * @param[in] i_size  - The total size of the configured mainstore
-         *                     area in megabytes.  It is the (high address of 
-         *                     the mainstore area + 1 minus the low address of 
+         *                     area in megabytes.  It is the (high address of
+         *                     the mainstore area + 1 minus the low address of
          *                     the mainstore area) divided by 1 megabyte.
          */
         void setMsAreaSize(uint16_t i_msAreaId,
                            uint32_t i_size);
 
 
-        /** 
+        /**
          * @brief Update the mainstore area to specify associated processor id
          *
          * @pre The i_msAreaId parameter must be for a valid mainstore area that
-         *   was added with the addMsAreaFru() method.  HDAT does not check or 
+         *   was added with the addMsAreaFru() method.  HDAT does not check or
          *   enforce that this is a valid main store area ID.
          *
          * @post None
          *
          * @param[in] i_msAreaId  - A unique id for each main store area
-         *                         associated with a mainstore VPD object.  
-         *                         The id identifies the mainstore area that is 
-         *                         to be updated.               
-         * @param[in] i_moduleId   - The Module Id of the processor     
+         *                         associated with a mainstore VPD object.
+         *                         The id identifies the mainstore area that is
+         *                         to be updated.
+         * @param[in] i_moduleId   - The Module Id of the processor
          *                         associated with this mainstore area.
          */
         void setMsAreaModuleId(uint16_t i_msAreaId,
                                uint32_t i_moduleId);
 
 
-        /** 
+        /**
          * @brief Update the mainstore area to specify the affinity domain
          *
          * @pre The i_msAreaId parameter must be for a valid mainstore area that
-         *  was added with the addMsAreaFru() method.  HDAT does not check or 
+         *  was added with the addMsAreaFru() method.  HDAT does not check or
          *  enforce that this is a valid main store area ID.
          *
          * @post None
          *
          * @param[in] i_msAreaId  - A unique id for each main store area
-         *                         associated with a mainstore VPD object.  
-         *                         The id identifies the mainstore area that is 
-         *                         to be updated.               
-         * @param[in] i_affinityDomain - The affinity domain     
+         *                         associated with a mainstore VPD object.
+         *                         The id identifies the mainstore area that is
+         *                         to be updated.
+         * @param[in] i_affinityDomain - The affinity domain
          *                           associated with this mainstore area.
          */
         void setMsAreaAffinityDomain(uint16_t i_msAreaId,
                                      uint32_t i_affinityDomain);
 
 
-        /** 
+        /**
          * @brief Update the mainstore area to specify the memory address range
-         *        More than one address range can be added.              
+         *        More than one address range can be added.
          *
          * @pre The i_msAreaId parameter must be for a valid mainstore area that
-         *  was added with the addMsAreaFru() method.  HDAT does not check or 
+         *  was added with the addMsAreaFru() method.  HDAT does not check or
          *  enforce that this is a valid main store area ID.
          *
          * @post None
          *
          * @param[in] i_msAreaId  - A unique id for each main store area
          *                       associated with a mainstore VPD object.  The id
-         *                       identifies the mainstore area that is to be 
-         *                       updated.               
-         * @param[in] i_start   - The starting address of the range 
+         *                       identifies the mainstore area that is to be
+         *                       updated.
+         * @param[in] i_start   - The starting address of the range
          * @param[in] i_end     - The ending address of the range + 1
-         * @param[in] i_procChipId - which is the chip id of the physical 
+         * @param[in] i_procChipId - which is the chip id of the physical
          *                          processor
          * @param[in] i_rangeIsMirrorable - Specifies whether the range is
          *                              mirrorable
          * @param[in] i_mirroringAlgorithm - Specifies hardware mirroring
          *                               algorithm to use
          * @param[in] i_startMirrAddr - Specifies the starting mirrorable
-         *                          address for range 
+         *                          address for range
          *
-         * @return A null error log handle if successful, else the return code 
+         * @return A null error log handle if successful, else the return code
          * pointed to by errlHndl_t contains one of:
          *
-         * @retval HDAT_ARRAY_ERROR        
+         * @retval HDAT_ARRAY_ERROR
          */
         errlHndl_t addMsAreaAddr(uint16_t i_msAreaId,
                                  hdatMsAddr_t &i_start,
                                  hdatMsAddr_t &i_end,
                                  uint32_t i_procChipId,
-				 bool i_rangeIsMirrorable = false, 
-				 uint8_t i_mirroringAlgorithm = 0,
-				 uint64_t i_startMirrAddr = 0);  
+                                 bool i_rangeIsMirrorable = false,
+                                 uint8_t i_mirroringAlgorithm = 0,
+                                 uint64_t i_startMirrAddr = 0);
 
 
-        /** 
+        /**
          * @brief Add engineering change information for memory interface chips
          *
-         * @pre The first EC entry added must be for the memory controller.  
-         * HDAT has no way of validating or enforcing this so it is up to the 
+         * @pre The first EC entry added must be for the memory controller.
+         * HDAT has no way of validating or enforcing this so it is up to the
          * user of the method to do this correctly.
          *
          *      The i_msAreaId parameter must be for a valid mainstore area that
-         *      was added with the addMsAreaFru() method.HDAT does not check or 
+         *      was added with the addMsAreaFru() method.HDAT does not check or
          *      enforce that this is a valid main store area ID.
          *
-         * @post One cannot add any more engineering change entries than was 
+         * @post One cannot add any more engineering change entries than was
          * specified by the i_chipEcCnt parameter on the addMsAreaFru method.
          *
          * @param[in] i_msAreaId -A unique id for each main store area
-         *                     associated with a mainstore VPD object.  The id 
-         *                     identifies the mainstore area that is to be 
-         *                     updated.               
-         * @param[in] i_manfId  - Chip's manufacturing id                 
+         *                     associated with a mainstore VPD object.  The id
+         *                     identifies the mainstore area that is to be
+         *                     updated.
+         * @param[in] i_manfId  - Chip's manufacturing id
          * @param[in] i_ecLvl   - Chip's engineering change level
          *
-         * @return A null error log handle if successful, else the return code 
+         * @return A null error log handle if successful, else the return code
          * pointed to by errlHndl_t contains one of:
          *
-         * @retval HDAT_ARRAY_ERROR        
+         * @retval HDAT_ARRAY_ERROR
          */
         errlHndl_t addEcEntry(uint16_t i_msAreaId,
                               uint32_t i_manfId,
                               uint32_t i_ecLvl);
-        
-	    /** 
+
+        /**
          * @brief Update the mainstore area to specify the host I2C device info
          *
          * @pre The i_msAreaId parameter must be for a valid mainstore area that
@@ -678,26 +679,26 @@ class HdatMsVpd : public HdatHdif
          * @param i_msAreaId     - input parameter - A unique id for each main
          *                         store area associated with a mainstore VPD
          *                         object.  The id identifies the mainstore area
-         *                         that is to be updated.               
+         *                         that is to be updated.
          * @param i_I2cDevEntries- input parameter - host I2c device info
          */
         void setMsaI2cInfo(uint16_t i_msAreaId,
             std::vector<hdatMsAreaHI2cData_t>& i_I2cDevEntries);
 
-        /** 
+        /**
          * @brief Add a RAM area FRU.
          *
          *   After a mainstore area has been added to the mainstore VBPD object,
          *   one or more RAM FRUs must be added to the mainstore area.
          *
-         * @pre A mainstore area must have been previously created so this RAM 
+         * @pre A mainstore area must have been previously created so this RAM
          *  area can be added to it.
          *
          *      The i_msAreaId parameter must be for a valid mainstore area that
-         *      was added with the addMsAreaFru() method.  HDAT does not check 
+         *      was added with the addMsAreaFru() method.  HDAT does not check
          *      or enforce that this is a valid main store area ID.
          *
-         * @post A RAM card's VPD definiton has been added to the object.  Heap 
+         * @post A RAM card's VPD definiton has been added to the object.  Heap
          * storage has been allocated.
          *
          * @param[in] i_msAreaId - The id of the mainstore area this
@@ -710,7 +711,7 @@ class HdatMsVpd : public HdatHdif
          * @param[in] i_size     -the total size of configured mainstore in this
          *                       RAM area
          *
-         * @return A null error log handle if successful, else the return code 
+         * @return A null error log handle if successful, else the return code
          *  pointed to by errlHndl_t contains one of:
          *
          * @retval HDAT_ALLOC_ERROR
@@ -722,8 +723,8 @@ class HdatMsVpd : public HdatHdif
                              uint32_t i_slcaIndex,
                              uint16_t i_ramId,
                              uint16_t i_status,
-                             uint32_t i_size); 
-        /** 
+                             uint32_t i_size);
+        /**
          * @brief Initialization of HdatMsVpd object.
          *
          *       If you are constructing this object on the heap by using new, then
@@ -737,24 +738,24 @@ class HdatMsVpd : public HdatHdif
          *
          * @pre None
          *
-         * @post An HdatMsVpd object has been initialized.  Heap storage has 
+         * @post An HdatMsVpd object has been initialized.  Heap storage has
          * been allocated.
          *
          * @param[in] i_maxMsAddr  - maximum configured main store address
          * @param[in] i_maxMsCcmAddr - maximum main store address that could be
-         *                         configured if memory was added with 
-         *                         concurrent maintenance.If concurrent 
-         *                         maintenance cannot be performed on this 
-         *                         machine,this parameter has the same value as 
+         *                         configured if memory was added with
+         *                         concurrent maintenance.If concurrent
+         *                         maintenance cannot be performed on this
+         *                         machine,this parameter has the same value as
          *                         i_maxMsAddr.
          * @param[in] i_msSize   - total size of configured main store in
          *                         mega-bytes. (number of mega-bytes from lowest
-         *                         main store address to highest main store 
+         *                         main store address to highest main store
          *                         address minus the number of mega-bytes of a
          *                         ddress holes)
          * @param[in] i_msAreaCnt  The count of the number of main store areas
-         *                         that will be defined by using the 
-         *                         addMsAreaFru() method below.If the actual 
+         *                         that will be defined by using the
+         *                         addMsAreaFru() method below.If the actual
          *                         count cannot be derived when this object is
          *                         constructed, a maximum count can be supplied.
          * @param[in] i_MostSigAffinityDomain -most significant affinity domain.
@@ -764,7 +765,7 @@ class HdatMsVpd : public HdatHdif
          * @param[in] i_ueAreaCnt - Maximum number of UE Address ranges
          * @param[in] i_MirrMemStartAddr - The address of the start of
          *                         mirrorable memory
-         *                         
+         *
          */
         void hdatInit(hdatMsAddr_t &i_maxMsAddr,
                          hdatMsAddr_t &i_maxMsCcmAddr,
@@ -774,32 +775,32 @@ class HdatMsVpd : public HdatHdif
                          uint32_t i_ueAreaCnt,
                          uint64_t i_MirrMemStartAddr);
 
-	    /** 
+        /**
          * @brief Gather MS data for HDAT
          *  @par Description:
          *   This function collects various MS attributes and fills MS Data area
-         *  
+         *
          * @param[in] o_size - total size written
          * @param[in] o_count - total count of ms vpd instance
          *
-         * @return A null error log handle if successful, else the return code 
+         * @return A null error log handle if successful, else the return code
          * pointed to by o_errlHndl contains one of:
          *
          * @retval HDAT_ARRAY_ERROR
          */
         errlHndl_t  hdatLoadMsData(uint32_t &o_size, uint32_t &o_count);
 
-	    /** 
+        /**
          * @brief Gets maximum configured memory address
-         *  
+         *
          *
          * @return value of  ms address
          */
         uint64_t hdatGetMaxMemConfiguredAddress();
 
-	    /** 
+        /**
          * @brief Fetches the group of MC
-         *  
+         *
          * @param[in] i_pTarget Proc target
          * @param[in] i_pMcsTarget MCS target
          * @param[out] o_groupOfMc MC group value
@@ -810,9 +811,9 @@ class HdatMsVpd : public HdatHdif
                             const TARGETING::Target *i_pMcsTarget,
                             uint32_t& o_groupOfMc);
 
-	    /** 
+        /**
          * @brief Get the DIMMS list present on the system
-         *  
+         *
          * @param[in] i_pTarget Mca target
          * @param[in] i_pMcsTarget Mcs target
          * @param[in] i_membufFruid - membuf fruid decides the parent type
@@ -836,9 +837,9 @@ class HdatMsVpd : public HdatHdif
                          bool& o_areaFunctional,
                          hdatMemParentType& i_parentType);
 
-	    /** 
+        /**
          * @brief Get max memory blocks connected to membuf
-         *  
+         *
          * @param[in] i_pTarget Mcs target
          * @param[out] o_maxMemoryBlocks - max memory block value
          *
@@ -848,24 +849,24 @@ class HdatMsVpd : public HdatHdif
         errlHndl_t  hdatGetMaxMemoryBlocks(const TARGETING::Target *i_pTarget,
                                    uint32_t &o_maxMemoryBlocks);
 
-	    /** 
+        /**
          * @brief Write the data to Mainstore area space
-         *  
+         *
          * @param[in] i_addr - MS address
          * @param[in] i_size - total size to be written
          *
          */
         void commit(void * i_addr,uint32_t i_size);
 
-	    /** 
+        /**
          * @brief Get total size of MS data to be written
-         *  
-         * @param[out] o_size - total size value 
+         *
+         * @param[out] o_size - total size value
          *
          */
          void getTotalSize(uint32_t &o_size);
 
-	    /** 
+        /**
          * @brief Print an HdatMsVpd object.
          *
          * This method is a debug mthod which prints out a mainstore VPD object.
@@ -879,7 +880,7 @@ class HdatMsVpd : public HdatHdif
 
     protected:
 
-        /** 
+        /**
          * @brief After all MS area objects have been created, this routine must
          *   be called to see if they are all the same size.If they are not, the
          *        smaller one(s) will be adjusted with padding so they are all
@@ -897,7 +898,7 @@ class HdatMsVpd : public HdatHdif
 
 
     private:
- 
+
 
         /** Object Instance Data
          *
