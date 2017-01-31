@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -190,7 +190,7 @@ int32_t AndResetErrorRegister::Reset(const BitKey & bit_list,
   if(bl_length !=0)
   {
     BIT_STRING_BUFFER_CLASS bs(xAndResetScr.GetBitLength());
-    bs.Pattern(0xffffffff,32); // set to all ones
+    bs.setAll(); // set to all ones
     uint32_t i;
     for(i = 0; i < bl_length; ++i)  // Turn off all bits used to isolate problem
     {

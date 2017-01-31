@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -200,7 +200,7 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
             }
 
             case MopRegisterAccess::READ:
-                bs.Pattern(0x00000000); // clear all bits
+                bs.clearAll(); // clear all bits
 
                 rc = PRDF::PlatServices::getScom(i_target, bs, registerId);
 

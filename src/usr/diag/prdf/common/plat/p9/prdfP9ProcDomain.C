@@ -214,17 +214,17 @@ void ProcDomain::SortForXstop()
 
     // Get initial list (all chips).
     BIT_STRING_BUFFER_CLASS l_current(GetSize());
-    l_current.Pattern(0,GetSize(),0xFFFFFFFF, 32); // turn on all bits.
+    l_current.setAll(); // turn on all bits.
 
     // Do reduction.
     // When done, l_prev will have the minimal list.
     BIT_STRING_BUFFER_CLASS l_prev(GetSize());
-    l_prev.Clear();
+    l_prev.clearAll();
 
     while ((!(l_current == l_prev)) && (!l_current.IsZero()))
     {
         l_prev = l_current;
-        l_current.Clear();
+        l_current.clearAll();
 
         for (uint32_t i = 0; i < GetSize(); i++)
         {

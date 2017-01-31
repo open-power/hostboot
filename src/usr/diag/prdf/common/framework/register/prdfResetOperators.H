@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,7 +188,7 @@ class AndOperator : public RegisterResetOperator
             if(bl_length != 0) // Check for bits to reset
             {
                 BIT_STRING_BUFFER_CLASS bs(writeReg->GetBitLength());
-                bs.Pattern(0xffffffff, 32); // set all to 1's.
+                bs.setAll(); // set all to 1's.
 
                 uint32_t i;
                 for(i = 0; i < bl_length; ++i)  // Turn off all bits specified
@@ -309,7 +309,7 @@ class NotOperator : public RegisterResetOperator
         else // RESETOPERATOR_MASK
         {
             BIT_STRING_BUFFER_CLASS bs(writeReg->GetBitLength());
-            bs.Pattern(0xffffffff, 32); // set all to 1's.
+            bs.setAll(); // set all to 1's.
             writeReg->SetBitString(&bs); // Copy bit-string to register.
             rc = writeReg->Write();    // Write hardware
         }

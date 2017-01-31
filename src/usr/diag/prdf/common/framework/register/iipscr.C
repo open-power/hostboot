@@ -197,13 +197,13 @@ void SCAN_COMM_REGISTER_CLASS::ClearBit
 void SCAN_COMM_REGISTER_CLASS::clearAllBits()
 {
     BIT_STRING_CLASS & bitString = AccessBitString();
-    bitString.Pattern( 0, bitString.getBitLen(), 0x00000000, 32 );
+    bitString.clearAll();
 }
 
 void SCAN_COMM_REGISTER_CLASS::setAllBits()
 {
     BIT_STRING_CLASS & bitString = AccessBitString();
-    bitString.Pattern( 0, bitString.getBitLen(), 0xffffffff, 32 );
+    bitString.setAll();
 }
 
 //------------------------------------------------------------------------------

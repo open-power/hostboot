@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,7 +122,7 @@ class SummaryRegister : public SCAN_COMM_REGISTER_CLASS
     const BIT_STRING_CLASS * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
-        iv_bs->Clear();
+        iv_bs->clearAll();
 
         PRDF::BitString tmp = *iv_child->GetBitString(i_type);
 
