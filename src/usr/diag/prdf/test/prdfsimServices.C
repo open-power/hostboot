@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -181,8 +181,8 @@ namespace PRDF
         TARGETING::Target* l_ptargetHandle = string2Target(i_epath);
         CPU_WORD l_cpuWord[(64)/(sizeof(CPU_WORD)*8)] = {0};
         BIT_STRING_CLASS l_bs(64, l_cpuWord);
-        l_bs.SetFieldJustify(0, 32, (i_data >> 32) & 0xFFFFFFFF);
-        l_bs.SetFieldJustify(32, 32, (i_data & 0xFFFFFFFF));
+        l_bs.setFieldJustify(0, 32, (i_data >> 32) & 0xFFFFFFFF);
+        l_bs.setFieldJustify(32, 32, (i_data & 0xFFFFFFFF));
 
         iv_ScrDB->processCmd(l_ptargetHandle,
                              l_bs,
@@ -197,8 +197,8 @@ namespace PRDF
         TARGETING::Target* l_ptargetHandle = string2Target(i_epath);
         CPU_WORD l_cpuWord[(64)/(sizeof(CPU_WORD)*8)] = {0};
         BIT_STRING_CLASS l_bs(64, l_cpuWord);
-        l_bs.SetFieldJustify(0, 32, (i_data >> 32) & 0xFFFFFFFF);
-        l_bs.SetFieldJustify(32, 32, (i_data & 0xFFFFFFFF));
+        l_bs.setFieldJustify(0, 32, (i_data >> 32) & 0xFFFFFFFF);
+        l_bs.setFieldJustify(32, 32, (i_data & 0xFFFFFFFF));
 
         iv_ScrDB->processCmd(l_ptargetHandle,
                              l_bs,

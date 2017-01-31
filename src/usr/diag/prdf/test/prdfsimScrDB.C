@@ -124,7 +124,7 @@ namespace PRDF
         {
             for(unsigned int i = 0; i < data.size(); ++i)
             {
-                bs.SetFieldJustify((i*32), 32, data[i]);
+                bs.setFieldJustify((i*32), 32, data[i]);
             }
             PRDF_TRAC( "ScrDB::Read() huid: %X, addr: %016X, data: %08X %08X",
                            getHuid(i_ptargetHandle), registerId, data[0],
@@ -140,7 +140,7 @@ namespace PRDF
     {
         PRDF_TRAC( "ScrDB::Write() huid: %X, addr: %016X, data: %08X %08X",
                     getHuid(i_ptargetHandle), registerId,
-                    bs.GetFieldJustify(0,32), bs.GetFieldJustify(32,32) );
+                    bs.getFieldJustify(0,32), bs.getFieldJustify(32,32) );
 
         unsigned int dataWordSize = bs.getBitLen()/32;
         //    PRDF_TRAC("dataWordSize1: %d", dataWordSize);
@@ -149,8 +149,8 @@ namespace PRDF
         DataList data;
 
         // parse all data given
-        data.push_back(bs.GetFieldJustify(0,32));
-        data.push_back(bs.GetFieldJustify(32,32));
+        data.push_back(bs.getFieldJustify(0,32));
+        data.push_back(bs.getFieldJustify(32,32));
         //    PRDF_TRAC("parse all data given");
         // look for expected data
         DataList expectedData;
@@ -206,13 +206,13 @@ namespace PRDF
     {
         PRDF_TRAC( "ScrDB::Expect() huid: %X, addr: %016X, data: %08X %08X",
                     getHuid(i_ptargetHandle), registerId,
-                    bs.GetFieldJustify(0,32), bs.GetFieldJustify(32,32) );
+                    bs.getFieldJustify(0,32), bs.getFieldJustify(32,32) );
 
         SimScrDataSet eValues;
         DataList data;
         // parse all data given
-        data.push_back(bs.GetFieldJustify(0,32));
-        data.push_back(bs.GetFieldJustify(32,32));
+        data.push_back(bs.getFieldJustify(0,32));
+        data.push_back(bs.getFieldJustify(32,32));
 
         eValues.AddData(data);
 

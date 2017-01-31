@@ -741,9 +741,9 @@ SCAN_COMM_REGISTER_CLASS * RuleMetaData::createVirtualRegister(
 
                 for (uint32_t i = 0; i < l_size; i++)
                 {
-                    l_bs.SetFieldJustify(32*(2*i)    , 32,
+                    l_bs.setFieldJustify(32*(2*i)    , 32,
                            (i_vReg->cv_bitStrVect[i] >> 32) & 0xFFFFFFFF);
-                    l_bs.SetFieldJustify(32*((2*i)+1), 32,
+                    l_bs.setFieldJustify(32*((2*i)+1), 32,
                            (i_vReg->cv_bitStrVect[i] & 0xFFFFFFFF));
                 }
 
