@@ -55,7 +55,7 @@ extern "C"
                                    fapi2::MvpdKeyword  i_keyword,
                                    const uint8_t       i_chipletId,
                                    const uint8_t       i_evenOdd,
-                                   const uint8_t       i_ringId,
+                                   const RingId_t      i_ringId,
                                    uint8_t*            o_pRingBuf,
                                    uint32_t&           io_rRingBufsize )
     {
