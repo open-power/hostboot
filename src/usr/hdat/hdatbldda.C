@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,7 @@ namespace HDAT
 // Backplane keyword and record details
 static vpdData pvpdData[] =
 {
+    { PVPD::VINI, PVPD::RT },
     { PVPD::VINI, PVPD::DR },
     { PVPD::VINI, PVPD::CE },
     { PVPD::VINI, PVPD::VZ },
@@ -71,15 +72,18 @@ static vpdData pvpdData[] =
     { PVPD::VINI, PVPD::B4 },
     { PVPD::VINI, PVPD::B7 },
     { PVPD::VINI, PVPD::PF },
+    { PVPD::OPFR, PVPD::RT },
     { PVPD::OPFR, PVPD::VP },
     { PVPD::OPFR, PVPD::VS },
     { PVPD::OPFR, PVPD::DR },
     { PVPD::OPFR, PVPD::VN },
+    { PVPD::OSYS, PVPD::RT },
     { PVPD::OSYS, PVPD::MM },
     { PVPD::OSYS, PVPD::SS },
 };
 const HdatKeywordInfo l_pvpdKeywords[] =
 {
+    { PVPD::RT,  "RT" },
     { PVPD::DR,  "DR" },
     { PVPD::CE,  "CE" },
     { PVPD::VZ,  "VZ" },

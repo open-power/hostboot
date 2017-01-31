@@ -61,6 +61,7 @@ uint32_t HdatSpSubsys::cv_actualCnt;
 
 vpdData mvpdDataTable[] =
 {
+    { MVPD::VINI, MVPD::RT },
     { MVPD::VINI, MVPD::DR },
     { MVPD::VINI, MVPD::VZ },
     { MVPD::VINI, MVPD::CC },
@@ -76,6 +77,7 @@ vpdData mvpdDataTable[] =
 
 const HdatKeywordInfo l_mvpdKeywords[] =
 {
+    { MVPD::RT, "RT" },
     { MVPD::DR, "DR" },
     { MVPD::VZ, "VZ" },
     { MVPD::CC, "CC" },

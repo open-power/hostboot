@@ -50,7 +50,7 @@ uint32_t HdatMsArea::cv_actualCnt;
 
 static vpdData cvpdData[] =
 {
-//    { MVPD::VINI, MVPD::RT },
+    { MVPD::VINI, MVPD::RT },
     { MVPD::VINI, MVPD::DR },
     { MVPD::VINI, MVPD::FN },
     { MVPD::VINI, MVPD::PN },
@@ -68,6 +68,7 @@ static vpdData cvpdData[] =
 
 const HdatKeywordInfo l_cvpdKeywords[] =
 {
+    { CVPD::RT,  "RT" },
     { CVPD::DR,  "DR" },
     { CVPD::FN,  "FN" },
     { CVPD::PN,  "PN" },

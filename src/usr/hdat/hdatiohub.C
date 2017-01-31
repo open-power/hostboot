@@ -39,6 +39,7 @@ namespace HDAT
 
 vpdData mvpdData[] =
 {
+    { PVPD::VINI, PVPD::RT },
     { PVPD::VINI, PVPD::DR },
     { PVPD::VINI, PVPD::CE },
     { PVPD::VINI, PVPD::VZ },
@@ -57,7 +58,7 @@ vpdData mvpdData[] =
 
 const HdatKeywordInfo l_pvpdKeywords[] =
 {
-
+    { PVPD::RT,  "RT" },
     { PVPD::DR,  "DR" },
     { PVPD::CE,  "CE" },
     { PVPD::VZ,  "VZ" },
