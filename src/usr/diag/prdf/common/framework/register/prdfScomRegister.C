@@ -75,16 +75,16 @@ namespace PRDF
 
 // ---------------------------------------------------------------------
 
-void ScomRegister::SetBitString( const BIT_STRING_CLASS *bs )
+void ScomRegister::SetBitString( const BitString *bs )
 {
-    BIT_STRING_CLASS & l_string  = AccessBitString();
+    BitString & l_string  = AccessBitString();
     l_string.setString(*bs);
 }
 
 
 //------------------------------------------------------------------------------
 
-const BIT_STRING_CLASS * ScomRegister::GetBitString(ATTENTION_TYPE i_type) const
+const BitString * ScomRegister::GetBitString(ATTENTION_TYPE i_type) const
 {
     // Calling Read() will ensure that an entry exists in the cache and the
     // entry has at been synched with hardware at least once. Note that we
@@ -101,7 +101,7 @@ const BIT_STRING_CLASS * ScomRegister::GetBitString(ATTENTION_TYPE i_type) const
 
 //------------------------------------------------------------------------------
 
-BIT_STRING_CLASS & ScomRegister::AccessBitString()
+BitString & ScomRegister::AccessBitString()
 {
     // Calling Read() will ensure that an entry exists in the cache and the
     // entry has at been synched with hardware at least once. Note that we
@@ -212,7 +212,7 @@ uint32_t ScomRegister::Write()
 
 //------------------------------------------------------------------------------
 
-uint32_t ScomRegister::Access( BIT_STRING_CLASS & bs,
+uint32_t ScomRegister::Access( BitString & bs,
                                MopRegisterAccess::Operation op ) const
 {
     int32_t l_rc = SCR_ACCESS_FAILED;
@@ -237,13 +237,13 @@ ExtensibleChip* ScomRegister::getChip( )const
 bool ScomRegister::queryCache() const
 {
     RegDataCache & cache = RegDataCache::getCachedRegisters();
-    BIT_STRING_CLASS * bs = cache.queryCache( getChip(), this );
+    BitString * bs = cache.queryCache( getChip(), this );
     return ( NULL != bs );
 }
 
 //------------------------------------------------------------------------------
 
-BIT_STRING_CLASS & ScomRegister::readCache() const
+BitString & ScomRegister::readCache() const
 {
     RegDataCache & cache = RegDataCache::getCachedRegisters();
     return cache.read( getChip(), this );

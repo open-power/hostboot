@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,7 +143,7 @@ int32_t ErrorRegister::Analyze( STEP_CODE_DATA_STRUCT & io_sdc )
     }
 
     // Get Data from hardware
-    const BIT_STRING_CLASS &bs =
+    const BitString &bs =
                 Read( io_sdc.service_data->getSecondaryAttnType() );
     BitKey bl;     // null bit list has length 0
 
@@ -229,7 +229,7 @@ int32_t ErrorRegister::Analyze( STEP_CODE_DATA_STRUCT & io_sdc )
 
 /*---------------------------------------------------------------------*/
 
-const BIT_STRING_CLASS & ErrorRegister::Read(ATTENTION_TYPE i_attn)
+const BitString & ErrorRegister::Read(ATTENTION_TYPE i_attn)
 {
     scr_rc = scr.Read();
     return (*scr.GetBitString(i_attn));
@@ -237,7 +237,7 @@ const BIT_STRING_CLASS & ErrorRegister::Read(ATTENTION_TYPE i_attn)
 
 /*---------------------------------------------------------------------*/
 
-BitKey ErrorRegister::Filter( const BIT_STRING_CLASS & bs )
+BitKey ErrorRegister::Filter( const BitString & bs )
 {
     BitKey bit_list;
     bit_list = bs;

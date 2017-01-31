@@ -105,7 +105,7 @@ xMaskScr(maskScr)
 
 // **********************************************************************
 
-const BIT_STRING_CLASS & ErrorRegisterMask::Read()
+const BitString & ErrorRegisterMask::Read()
 {
   scr_rc = scr.Read();
   bitString = *scr.GetBitString();
@@ -155,7 +155,7 @@ int32_t ErrorRegisterMask::Reset(const BIT_LIST_CLASS & bit_list,
 
 // ***************************************************************************
 
-BIT_LIST_CLASS ErrorRegisterFilter::Filter( const BIT_STRING_CLASS & bs,
+BIT_LIST_CLASS ErrorRegisterFilter::Filter( const BitString & bs,
                                             STEP_CODE_DATA_STRUCT & io_sdc )
 {
     BIT_LIST_CLASS bit_list;

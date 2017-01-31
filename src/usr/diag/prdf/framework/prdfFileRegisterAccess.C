@@ -35,7 +35,7 @@ namespace PRDF
 
 errlHndl_t FileScomAccessor::Access(
                             TargetHandle_t i_target,
-                            BIT_STRING_CLASS & bs,
+                            BitString & bs,
                             uint64_t registerId,
                             MopRegisterAccess::Operation operation) const
 {

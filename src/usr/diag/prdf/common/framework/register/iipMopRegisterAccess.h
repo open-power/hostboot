@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,7 +66,7 @@
 namespace PRDF
 {
 // Forward References
-class BIT_STRING_CLASS;
+class BitString;
 
 class MopRegisterAccess
 {
@@ -137,7 +137,7 @@ public:
   //
   // End Function Specification ****************************************
 
-  virtual uint32_t Access(BIT_STRING_CLASS & bs,
+  virtual uint32_t Access(BitString & bs,
                        uint64_t registerId,
                        Operation operation) const = 0;
   // Function Specification ********************************************

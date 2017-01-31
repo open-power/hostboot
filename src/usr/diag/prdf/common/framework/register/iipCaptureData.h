@@ -116,7 +116,7 @@ namespace PRDF
 // Forward Declarations
 class SCAN_COMM_REGISTER_CLASS;
 class ScanCommRegisterAccess;
-class BIT_STRING_CLASS;
+class BitString;
 
 // @jl04 a start
 // @jl04 a Added this enumeration for error log compression, elimination of secondary regs.
@@ -221,7 +221,7 @@ public:
    <ul>
    <br><b>Parameter:  i_pchipHandle Handle of chip object
    <br><b>Parameter:  scan comm id (unique one btye code representing scan comm address)
-   <br><b>Parameter:  BIT_STRING_CLASS
+   <br><b>Parameter:  BitString
    <br><b>Parameter:  Optional location in capure vector [FRONT | BACK] def = BACK
    <br><b>Returns:   Nothing
    <br><b>Requires:  Nothing
@@ -230,7 +230,7 @@ public:
    </ul><br>
    */
   void Add( TARGETING::TargetHandle_t i_pchipHandle, int scomId,
-            const BIT_STRING_CLASS & bs, Place place = BACK);
+            const BitString & bs, Place place = BACK);
 
   // dg02 end
 
@@ -341,7 +341,7 @@ private:
     /** Private function to facilitate the adding of caputre data to the
      *  internal vector */
     void AddDataElement( TARGETING::TargetHandle_t i_trgt, int i_scomId,
-                         const BIT_STRING_CLASS * i_bs, Place i_place,
+                         const BitString * i_bs, Place i_place,
                          RegType i_type = PRIMARY );
 
   // Predicate for deciding to delete an element of data from a Capture Data list.

@@ -203,7 +203,7 @@ class SCAN_COMM_REGISTER_CLASS
                             then extra mask bits are ignored.
    </ul><br>
    */
-  uint32_t Read(BIT_STRING_CLASS & mask);
+  uint32_t Read(BitString & mask);
 
   /**
    Write hardware register (pure virtual)
@@ -282,7 +282,7 @@ class SCAN_COMM_REGISTER_CLASS
    </ul><br>
    */
   virtual
-  const BIT_STRING_CLASS * GetBitString(ATTENTION_TYPE
+  const BitString * GetBitString(ATTENTION_TYPE
                                         i_type = INVALID_ATTENTION_TYPE
                                        ) const = 0;
 
@@ -300,7 +300,7 @@ class SCAN_COMM_REGISTER_CLASS
                             Write() is called
    </ul><br>
    */
-  virtual void SetBitString(const BIT_STRING_CLASS * bs) = 0;
+  virtual void SetBitString(const BitString * bs) = 0;
 
   /**
    SetBit
@@ -401,7 +401,7 @@ protected:
    <br><b>Promises      </b> None.
    </ul><br>
    */
-  virtual BIT_STRING_CLASS & AccessBitString(void) = 0;
+  virtual BitString & AccessBitString(void) = 0;
 private: // Data
   static const int DEFAULT_BIT_LENGTH = 64;
 

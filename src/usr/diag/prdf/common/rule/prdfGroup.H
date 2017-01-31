@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,8 +96,8 @@ class Group : public ErrorRegisterType
         virtual bool FilterUndo(BitKey & i_bit_list) { return false; }
 
     protected:
-        const BIT_STRING_CLASS & Read(ATTENTION_TYPE i_attn);
-        BIT_LIST_CLASS Filter(const BIT_STRING_CLASS &);
+        const BitString & Read(ATTENTION_TYPE i_attn);
+        BIT_LIST_CLASS Filter(const BitString &);
         int32_t Lookup(STEP_CODE_DATA_STRUCT &, BIT_LIST_CLASS &);
         int32_t Reset(const BIT_LIST_CLASS &, STEP_CODE_DATA_STRUCT &);
 

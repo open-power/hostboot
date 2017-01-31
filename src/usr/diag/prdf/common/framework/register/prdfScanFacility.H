@@ -149,7 +149,7 @@ public:
 
   /**
    * @brief Get a PrdfConstantRegister
-   * @param BIT_STRING_CLASS - the bit string constant to use.
+   * @param BitString - the bit string constant to use.
    * @post only one instance of the register with this BIT_STRING value will
    * exist.
    */

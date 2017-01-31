@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -131,7 +131,7 @@ protected:  // functions
    * @param   io_sdc    reference to STEP_CODE_DATA struct
    * @return  bit key
    */
-  virtual BitKey Filter( const BIT_STRING_CLASS & bs,
+  virtual BitKey Filter( const BitString & bs,
                          STEP_CODE_DATA_STRUCT & io_sdc );
 
   /**

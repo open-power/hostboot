@@ -180,7 +180,7 @@ namespace PRDF
     {
         TARGETING::Target* l_ptargetHandle = string2Target(i_epath);
         CPU_WORD l_cpuWord[(64)/(sizeof(CPU_WORD)*8)] = {0};
-        BIT_STRING_CLASS l_bs(64, l_cpuWord);
+        BitString l_bs(64, l_cpuWord);
         l_bs.setFieldJustify(0, 32, (i_data >> 32) & 0xFFFFFFFF);
         l_bs.setFieldJustify(32, 32, (i_data & 0xFFFFFFFF));
 
@@ -196,7 +196,7 @@ namespace PRDF
     {
         TARGETING::Target* l_ptargetHandle = string2Target(i_epath);
         CPU_WORD l_cpuWord[(64)/(sizeof(CPU_WORD)*8)] = {0};
-        BIT_STRING_CLASS l_bs(64, l_cpuWord);
+        BitString l_bs(64, l_cpuWord);
         l_bs.setFieldJustify(0, 32, (i_data >> 32) & 0xFFFFFFFF);
         l_bs.setFieldJustify(32, 32, (i_data & 0xFFFFFFFF));
 
@@ -207,7 +207,7 @@ namespace PRDF
     }
 
     void SimServices::processCmd(TARGETING::TargetHandle_t i_ptargetHandle,
-                                     BIT_STRING_CLASS & bs,
+                                     BitString & bs,
                                      uint64_t registerId,
                                      ScrDB::SimOp i_op)
     {

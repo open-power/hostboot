@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 1996,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -81,10 +83,10 @@ class ScomRegister : public SCAN_COMM_REGISTER_CLASS
     /**
      * @brief     Returns the pointer to bit string
      * @param     i_type               attention type
-     * @return    BIT_STRING_CLASS *   pointer to bit string
+     * @return    BitString *   pointer to bit string
      */
 
-    virtual const BIT_STRING_CLASS * GetBitString(ATTENTION_TYPE i_type =
+    virtual const BitString * GetBitString(ATTENTION_TYPE i_type =
                                                   INVALID_ATTENTION_TYPE) const;
     /**
      * @brief     Updates bit string contents associated with register
@@ -92,7 +94,7 @@ class ScomRegister : public SCAN_COMM_REGISTER_CLASS
      * @return    Nil
      */
 
-    virtual void SetBitString(const BIT_STRING_CLASS * i_bs) ;
+    virtual void SetBitString(const BitString * i_bs) ;
 
     /**
      * @brief     Returns length of the bits string associated with register
@@ -190,7 +192,7 @@ class ScomRegister : public SCAN_COMM_REGISTER_CLASS
     * @brief    Returns reference to bit string associated with register
     * @return   Refer to function description
    */
-    virtual BIT_STRING_CLASS & AccessBitString( );
+    virtual BitString & AccessBitString( );
     /**
      * @brief     Gets the register read and write done by calling access
      *            function of scom  accessor service.
@@ -198,7 +200,7 @@ class ScomRegister : public SCAN_COMM_REGISTER_CLASS
      * @param     Read or write operation
      * @return    [SUCCESS|FAIL]
      */
-    uint32_t Access( BIT_STRING_CLASS & bs,
+    uint32_t Access( BitString & bs,
                      MopRegisterAccess::Operation op )const;
 
     /**
@@ -218,7 +220,7 @@ private: // functions
      * @brief  Reads register contents from cache.
      * @return Reference to bit string buffer maintained in cache.
      */
-    BIT_STRING_CLASS & readCache() const;
+    BitString & readCache() const;
 
     /**
      * @brief     Deletes one or all entry in the cache

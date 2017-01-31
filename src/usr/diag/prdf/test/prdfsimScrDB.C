@@ -53,7 +53,7 @@ namespace PRDF
     }
 
     void ScrDB::processCmd(TARGETING::TargetHandle_t i_ptargetHandle,
-                           BIT_STRING_CLASS & bs,
+                           BitString & bs,
                            uint64_t registerId,
                            SimOp i_op)
     {
@@ -83,7 +83,7 @@ namespace PRDF
     }
 
     void ScrDB::Read(TARGETING::TargetHandle_t i_ptargetHandle,
-                     BIT_STRING_CLASS & bs,
+                     BitString & bs,
                      uint64_t registerId)
     {
         //PRDF_DENTER( "ScrDB::Read() huid: 0x%X, addr: 0x%016X",
@@ -135,7 +135,7 @@ namespace PRDF
     }
 
     void ScrDB::Write(TARGETING::TargetHandle_t i_ptargetHandle,
-                      BIT_STRING_CLASS & bs,
+                      BitString & bs,
                       uint64_t registerId)
     {
         PRDF_TRAC( "ScrDB::Write() huid: %X, addr: %016X, data: %08X %08X",
@@ -201,7 +201,7 @@ namespace PRDF
 
 
     void ScrDB::Expect(TARGETING::TargetHandle_t i_ptargetHandle,
-                       BIT_STRING_CLASS & bs,
+                       BitString & bs,
                        uint64_t registerId)
     {
         PRDF_TRAC( "ScrDB::Expect() huid: %X, addr: %016X, data: %08X %08X",

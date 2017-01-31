@@ -110,7 +110,7 @@ void ScomService::setScomAccessor(ScomAccessor & i_ScomAccessor)
 }
 
 uint32_t ScomService::Access(TargetHandle_t i_target,
-                             BIT_STRING_CLASS & bs,
+                             BitString & bs,
                              uint64_t registerId,
                              MopRegisterAccess::Operation operation) const
 {
@@ -129,7 +129,7 @@ uint32_t ScomService::Access(TargetHandle_t i_target,
 
 
 uint32_t ScomAccessor::Access(TargetHandle_t i_target,
-                                BIT_STRING_CLASS & bs,
+                                BitString & bs,
                                 uint64_t registerId,
                                 MopRegisterAccess::Operation operation) const
 {

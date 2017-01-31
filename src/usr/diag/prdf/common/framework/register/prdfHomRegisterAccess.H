@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,7 +73,7 @@ class ScomAccessor
      *       register state
      */
     virtual uint32_t Access( TARGETING::TargetHandle_t i_target,
-                             BIT_STRING_CLASS & bs,
+                             BitString & bs,
                              uint64_t registerId,
                              MopRegisterAccess::Operation operation) const;
 
@@ -131,7 +131,7 @@ class ScomService
     /**
      Access the scan com register
      @param i_target Target to access the register
-     @param BIT_STRING_CLASS - holds data read or to write
+     @param BitString - holds data read or to write
      @param register address
      @param [READ|WRITE]
      @returns [SUCCESS|FAIL]
@@ -140,7 +140,7 @@ class ScomService
      @note
      */
     virtual uint32_t Access(TARGETING::TargetHandle_t i_target,
-                            BIT_STRING_CLASS & bs,
+                            BitString & bs,
                             uint64_t registerId,
                             MopRegisterAccess::Operation operation) const;
 

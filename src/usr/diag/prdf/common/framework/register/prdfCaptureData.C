@@ -79,7 +79,7 @@ void CaptureData::Clear(void)
 //------------------------------------------------------------------------------
 
 void CaptureData::AddDataElement( TargetHandle_t i_trgt, int i_scomId,
-                                  const BIT_STRING_CLASS * i_bs,
+                                  const BitString * i_bs,
                                   Place i_place, RegType i_type )
 {
     // Initial values of the bit string buffer if i_bs has a zero value.
@@ -133,7 +133,7 @@ void CaptureData::Add( TargetHandle_t i_trgt, int32_t i_scomId,
 //------------------------------------------------------------------------------
 
 void CaptureData::Add( TargetHandle_t i_trgt, int i_scomId,
-                       const BIT_STRING_CLASS & i_bs, Place i_place )
+                       const BitString & i_bs, Place i_place )
 {
     AddDataElement( i_trgt, i_scomId, &i_bs, i_place );
 }

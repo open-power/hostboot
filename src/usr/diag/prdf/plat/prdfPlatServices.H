@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,7 +87,7 @@ inline bool isSmpCoherent() { return false; }
  *
  * @return SUCCESS or PRD_SCANCOM_FAILURE
  */
-uint32_t getScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
+uint32_t getScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
                    uint64_t i_address);
 
 /**
@@ -99,7 +99,7 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
  *
  * @return SUCCESS or PRD_SCANCOM_FAILURE
  */
-uint32_t putScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
+uint32_t putScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
                    uint64_t i_address);
 
 //##############################################################################

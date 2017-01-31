@@ -110,7 +110,7 @@ SCAN_COMM_REGISTER_CLASS::~SCAN_COMM_REGISTER_CLASS
 
 uint32_t SCAN_COMM_REGISTER_CLASS::Read
 (
- BIT_STRING_CLASS & mask
+ BitString & mask
  /*!i Reference to Bit String mask                                */
  )
 /*!o Error return code                                           */
@@ -119,7 +119,7 @@ uint32_t SCAN_COMM_REGISTER_CLASS::Read
 
   if(rc == SUCCESS)
   {
-    BIT_STRING_CLASS & bitString = AccessBitString();
+    BitString & bitString = AccessBitString();
     bitString.maskString(mask);
   }
 
@@ -149,7 +149,7 @@ void SCAN_COMM_REGISTER_CLASS::SetBit
 /*!o No value returned                                           */
 {
 
-  BIT_STRING_CLASS & bitString = AccessBitString();
+  BitString & bitString = AccessBitString();
   bitString.setBit(bit_position);
 }
 
@@ -175,7 +175,7 @@ void SCAN_COMM_REGISTER_CLASS::ClearBit
  )
 /*!o No value returned                                           */
 {
-  BIT_STRING_CLASS & bitString = AccessBitString();
+  BitString & bitString = AccessBitString();
   bitString.clearBit(bit_position);
 }
 
@@ -196,13 +196,13 @@ void SCAN_COMM_REGISTER_CLASS::ClearBit
 
 void SCAN_COMM_REGISTER_CLASS::clearAllBits()
 {
-    BIT_STRING_CLASS & bitString = AccessBitString();
+    BitString & bitString = AccessBitString();
     bitString.clearAll();
 }
 
 void SCAN_COMM_REGISTER_CLASS::setAllBits()
 {
-    BIT_STRING_CLASS & bitString = AccessBitString();
+    BitString & bitString = AccessBitString();
     bitString.setAll();
 }
 
@@ -219,7 +219,7 @@ uint64_t SCAN_COMM_REGISTER_CLASS::GetBitFieldJustified( uint32_t i_pos,
 
     PRDF_ASSERT( pos_end <= len_uint64 );
 
-    const BIT_STRING_CLASS * bs = GetBitString();
+    const BitString * bs = GetBitString();
 
     for ( uint32_t pos = i_pos; pos < pos_end; pos += len_cpu_word )
     {
@@ -248,7 +248,7 @@ void SCAN_COMM_REGISTER_CLASS::SetBitFieldJustified( uint32_t i_pos,
 
     PRDF_ASSERT( i_pos + i_len <= len_uint64 );
 
-    BIT_STRING_CLASS & bs = AccessBitString();
+    BitString & bs = AccessBitString();
 
     for ( uint32_t offset = 0; offset < i_len; offset += len_cpu_word )
     {

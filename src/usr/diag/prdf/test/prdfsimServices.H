@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -63,7 +65,7 @@ class SimServices
                     uint64_t i_address,
                     uint64_t i_data);
     void processCmd(TARGETING::TargetHandle_t i_ptargetHandle,
-                    BIT_STRING_CLASS & bs,
+                    BitString & bs,
                     uint64_t registerId,
                     ScrDB::SimOp i_op);
     // ScrDB functions end ------------------------------

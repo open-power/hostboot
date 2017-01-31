@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 1996,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -140,7 +142,7 @@ protected:
                             return code from mops scr access
    </ul><br>
    */
-  virtual const BIT_STRING_CLASS & Read(ATTENTION_TYPE i_attn);
+  virtual const BitString & Read(ATTENTION_TYPE i_attn);
 
   /**
    Filter the bit string (if a filter is provided) & convert it to a BitList
@@ -153,7 +155,7 @@ protected:
    <br><b>Notes:       </b> The default implementation does not have a filter
    </ul><br>
    */
-  virtual BIT_LIST_CLASS Filter(const BIT_STRING_CLASS & bs);
+  virtual BIT_LIST_CLASS Filter(const BitString & bs);
 
   virtual bool FilterUndo(BitKey & i_bit_list) { return false; }
   /**

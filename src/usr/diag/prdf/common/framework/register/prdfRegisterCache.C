@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -43,11 +45,11 @@ RegDataCache::~RegDataCache()
 
 //------------------------------------------------------------------------------
 
-BIT_STRING_CLASS & RegDataCache::read( ExtensibleChip * i_chip,
+BitString & RegDataCache::read( ExtensibleChip * i_chip,
                                        const SCAN_COMM_REGISTER_CLASS * i_reg )
 {
     ScomRegisterAccess l_scomAccessKey ( *i_reg, i_chip );
-    BIT_STRING_CLASS * l_pBitString = queryCache( l_scomAccessKey );
+    BitString * l_pBitString = queryCache( l_scomAccessKey );
 
     if ( NULL == l_pBitString )
     {
@@ -94,7 +96,7 @@ void RegDataCache::flush( ExtensibleChip* i_pChip,
 
 //------------------------------------------------------------------------------
 
-BIT_STRING_CLASS * RegDataCache::queryCache(
+BitString * RegDataCache::queryCache(
                             ExtensibleChip* i_pChip,
                             const SCAN_COMM_REGISTER_CLASS * i_pRegister )const
 {
@@ -104,10 +106,10 @@ BIT_STRING_CLASS * RegDataCache::queryCache(
 
 //------------------------------------------------------------------------------
 
-BIT_STRING_CLASS * RegDataCache::queryCache(
+BitString * RegDataCache::queryCache(
                         const ScomRegisterAccess & i_scomAccessKey ) const
 {
-    BIT_STRING_CLASS * l_pBitString = NULL;
+    BitString * l_pBitString = NULL;
     CacheDump::const_iterator itDump = iv_cachedRead.find( i_scomAccessKey );
     if( iv_cachedRead.end() != itDump )
     {

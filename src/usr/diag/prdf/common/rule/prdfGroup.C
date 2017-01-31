@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -263,13 +263,13 @@ void Group::AddFilter(FilterClass * i_filter, bool i_addFirst )
 
 
 
-const BIT_STRING_CLASS & Group::Read(ATTENTION_TYPE i_attn)
+const BitString & Group::Read(ATTENTION_TYPE i_attn)
 {
     static BIT_STRING_BUFFER_CLASS a(64);
     return a;
 };
 
-BIT_LIST_CLASS Group::Filter(const BIT_STRING_CLASS & i)
+BIT_LIST_CLASS Group::Filter(const BitString & i)
 {
     return BIT_LIST_CLASS();
 };

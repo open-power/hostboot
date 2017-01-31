@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,14 +62,14 @@ class FileScomAccessor : public ScomAccessor
     /**
      * Access the scom register using file.
      * @param i_target Target to access the register
-     * @param BIT_STRING_CLASS - holds data read or to write
+     * @param BitString - holds data read or to write
      * @param register address
      * @param [READ|WRITE]
      * @returns NULL if success, valid error handle otherwise
      * @pre bs.Length() must be size of register data to read/write
      */
     virtual errlHndl_t Access(TARGETING::TargetHandle_t i_target,
-                            BIT_STRING_CLASS & bs,
+                            BitString & bs,
                             uint64_t registerId,
                             MopRegisterAccess::Operation operation) const;
 };
