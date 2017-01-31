@@ -41,7 +41,8 @@
 #include <target.H>
 #include <target_types.H>
 #include <hw_access_def.H>
-#include <p9_ringId.H>
+#include <common_ringId.H>
+#include <p9_ring_id.h>
 
 namespace fapi2
 {

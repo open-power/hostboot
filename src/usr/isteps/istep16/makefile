@@ -39,6 +39,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/pmlib/include/registers/
 

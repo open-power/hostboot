@@ -56,6 +56,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
 EXTRAINCDIR += ${NEST_HWP_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${PM_HWP_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/include/registers

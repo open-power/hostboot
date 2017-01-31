@@ -38,6 +38,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${NEST_HWP_PATH}
 EXTRAINCDIR += ${INITFILES_HWP_PATH}

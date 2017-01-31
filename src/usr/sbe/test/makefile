@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -33,6 +33,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 
 include ${ROOTPATH}/config.mk
