@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,6 +71,7 @@ errlHndl_t getDiagnosticMode(
             o_mode = ONE_PATTERN;
         }
 
+/* TODO RTC 168270
         // Only need to check hw changed state attributes
         // when not already set to exhaustive and not in simics
         if(( NINE_PATTERNS != o_mode ) &&
@@ -81,6 +82,7 @@ errlHndl_t getDiagnosticMode(
                 o_mode = NINE_PATTERNS;
             }
         }
+*/
 
     } while(0);
 
