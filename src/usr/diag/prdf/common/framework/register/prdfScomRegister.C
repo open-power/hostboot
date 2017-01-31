@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,7 +78,7 @@ namespace PRDF
 void ScomRegister::SetBitString( const BIT_STRING_CLASS *bs )
 {
     BIT_STRING_CLASS & l_string  = AccessBitString();
-    l_string.SetBits(*bs);
+    l_string.setString(*bs);
 }
 
 
