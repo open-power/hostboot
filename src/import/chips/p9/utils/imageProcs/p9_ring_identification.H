@@ -37,13 +37,13 @@
 #endif
 #include <stdlib.h>
 #include <string.h>
-#include <p9_ring_id.h>
+#include <common_ringId.H>
 
 // MVPD Ring ID list structure.
 typedef struct
 {
     const char*  ringName;
-    RingID       ringId;
+    RingId_t     ringId;
     uint8_t      instanceIdMin;    // the min instanceId
     uint8_t      instanceIdMax;    // the max instanceId
     uint8_t      vpdKeyword;
@@ -95,9 +95,6 @@ enum VpdRingClass
     VPD_RING_CLASS_EC_INS = 10, // Indicates EC instance rings
     VPD_RING_CLASS_LAST = 11,
 };
-
-
-#define MVPD_END_OF_DATA_MAGIC (uint32_t)0x454E4400 // "END "
 
 
 #endif
