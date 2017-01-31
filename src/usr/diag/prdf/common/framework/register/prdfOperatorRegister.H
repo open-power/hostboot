@@ -569,27 +569,27 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
         switch (i_type)
         {
             case CHECK_STOP:
-                (*iv_bs) = BIT_STRING_BUFFER_CLASS(
+                (*iv_bs) = BitStringBuffer(
                                             *iv_check->GetBitString(i_type));
                 break;
 
             case RECOVERABLE:
-                (*iv_bs) = BIT_STRING_BUFFER_CLASS(
+                (*iv_bs) = BitStringBuffer(
                                             *iv_recov->GetBitString(i_type));
                 break;
 
             case SPECIAL:
-                (*iv_bs) = BIT_STRING_BUFFER_CLASS(
+                (*iv_bs) = BitStringBuffer(
                                             *iv_special->GetBitString(i_type));
                 break;
 
             case PROC_CS:
-                (*iv_bs) = BIT_STRING_BUFFER_CLASS(
+                (*iv_bs) = BitStringBuffer(
                                             *iv_proccs->GetBitString(i_type));
                 break;
 
             case HOST_ATTN:
-                (*iv_bs) = BIT_STRING_BUFFER_CLASS(
+                (*iv_bs) = BitStringBuffer(
                                             *iv_hostattn->GetBitString(i_type));
                 break;
         }

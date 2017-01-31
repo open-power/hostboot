@@ -213,12 +213,12 @@ void ProcDomain::SortForXstop()
     // Currently does not do cycle elimination.
 
     // Get initial list (all chips).
-    BIT_STRING_BUFFER_CLASS l_current(GetSize());
+    BitStringBuffer l_current(GetSize());
     l_current.setAll(); // turn on all bits.
 
     // Do reduction.
     // When done, l_prev will have the minimal list.
-    BIT_STRING_BUFFER_CLASS l_prev(GetSize());
+    BitStringBuffer l_prev(GetSize());
     l_prev.clearAll();
 
     while ((!(l_current == l_prev)) && (!l_current.isZero()))

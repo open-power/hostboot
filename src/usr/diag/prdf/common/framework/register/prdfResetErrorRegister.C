@@ -189,7 +189,7 @@ int32_t AndResetErrorRegister::Reset(const BitKey & bit_list,
   uint32_t bl_length = bit_list.size();
   if(bl_length !=0)
   {
-    BIT_STRING_BUFFER_CLASS bs(xAndResetScr.GetBitLength());
+    BitStringBuffer bs(xAndResetScr.GetBitLength());
     bs.setAll(); // set to all ones
     uint32_t i;
     for(i = 0; i < bl_length; ++i)  // Turn off all bits used to isolate problem

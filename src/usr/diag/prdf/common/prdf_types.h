@@ -35,8 +35,6 @@ namespace PRDF
 {
 
 #define BIT_LIST_CLASS           BitKey
-#define BitString         BitString
-#define BIT_STRING_BUFFER_CLASS  BitStringBuffer
 #define FILTER_CLASS             FilterClass
 
 } // end namespace PRDF

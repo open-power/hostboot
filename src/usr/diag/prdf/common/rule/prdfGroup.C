@@ -265,7 +265,7 @@ void Group::AddFilter(FilterClass * i_filter, bool i_addFirst )
 
 const BitString & Group::Read(ATTENTION_TYPE i_attn)
 {
-    static BIT_STRING_BUFFER_CLASS a(64);
+    static BitStringBuffer a(64);
     return a;
 };
 

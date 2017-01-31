@@ -204,8 +204,8 @@ private:  // functions
 
 protected: // Data
 
-  BIT_STRING_BUFFER_CLASS   bitString;
-  BIT_STRING_BUFFER_CLASS   bitStringMask;
+  BitStringBuffer   bitString;
+  BitStringBuffer   bitStringMask;
 
 private:  // Data
 
