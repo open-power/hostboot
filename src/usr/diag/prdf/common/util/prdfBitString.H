@@ -345,66 +345,23 @@ class BitString
     /** @return The number of bits that are set(1) in this string. */
     uint32_t getSetCount() const { return getSetCount( 0, getBitLen() ); }
 
-  /*!
-   Comparison
-   \remarks The bitstrings must be the same length and have the same bits set to be equal
-   */
-  int operator==(const BitString & string) const
-  {
-    return(isEqual(string));
-  }
+    /** @brief Comparison operator. */
+    bool operator==( const BitString & i_str ) const { return isEqual(i_str); }
 
-  /*!
-   bitwise NOT
-   \returns a bit-wise inverted copy of the specified bit string
-   */
+    /** @brief Bitwise NOT operator. */
+    BitStringBuffer operator~() const;
 
-  friend BitStringBuffer operator~(const BitString & bs);
-  BitStringBuffer operator&(const BitString & bs) const;
-  BitStringBuffer operator|(const BitString & bs) const;
+    /** @brief Bitwise AND operator. */
+    BitStringBuffer operator&( const BitString & i_bs ) const;
 
-  /*!
-   Left shift
-   \returns bitstring left shifted by count
-   \note: the returned bit string is the same length as the source.
-   \verbatim
-    Example:
-                       |---|---|---|---|---|---|---|---|
-    BitString content: | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 0 |
-                       |---|---|---|---|---|---|---|---|
-           bit offset   0   1   2   3   4   5   6   7
+    /** @brief Bitwise OR operator. */
+    BitStringBuffer operator|( const BitString & i_bs ) const;
 
-    operator>>(5)
+    /** @brief Right shift operator. */
+    BitStringBuffer operator>>( uint32_t i_shift ) const;
 
-                       |---|---|---|---|---|---|---|---|
-    BitString result:  | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 |
-                       |---|---|---|---|---|---|---|---|
-
-
-   \endverbatim
-   */
-  BitStringBuffer operator>>(uint32_t count) const;
-
-  /*!
-   Right shift
-   \returns a bitstring left shifted by count
-   \note: the returned bit string is the same length as the source.
-   \verbatim
-    Example:
-                       |---|---|---|---|---|---|---|---|
-    BitString content: | 0 | 0 | 0 | 1 | 1 | 1 | 0 | 0 |
-                       |---|---|---|---|---|---|---|---|
-           bit offset   0   1   2   3   4   5   6   7
-
-    operator<<(4)
-
-                       |---|---|---|---|---|---|---|---|
-    BitString result:  | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
-                       |---|---|---|---|---|---|---|---|
-
-   \endverbatim
-   */
-  BitStringBuffer operator<<(uint32_t count) const;
+    /** @brief Left shift operator. */
+    BitStringBuffer operator<<( uint32_t i_shift ) const;
 
   protected: // functions
 

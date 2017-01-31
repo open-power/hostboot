@@ -270,103 +270,103 @@ uint32_t BitString::getSetCount( uint32_t i_pos, uint32_t i_len ) const
     return count;
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-// Function Specification //////////////////////////////////////////
-//
-// Title:  Do a bitwise NOT of the bitstring
-//
-// Purpose:  This function returns the NOT'd value of the bitstring.
-//
-// Side-effects:  None.
-//
-// Dependencies:  None.
-//
-// Time Complexity:  O(m) where m is the length of Bit String
-//
-// End Function Specification //////////////////////////////////////
-
-BitStringBuffer operator~(const BitString & bs)
+BitStringBuffer BitString::operator~() const
 {
-  BitStringBuffer bsb(bs);
-  for(uint32_t pos = 0; pos < bsb.getBitLen(); pos += CPU_WORD_BIT_LEN)
-  {
-    uint32_t len = bsb.getBitLen() - pos;
-    len = std::min(len,CPU_WORD_BIT_LEN);
-    CPU_WORD value = ~(bsb.getField(pos,len));
-    bsb.setField(pos,len,value);
-  }
+    BitStringBuffer bsb( getBitLen() );
 
-  return bsb;
+    for ( uint32_t pos = 0; pos < getBitLen(); pos += CPU_WORD_BIT_LEN )
+    {
+        uint32_t len = std::min( getBitLen() - pos, CPU_WORD_BIT_LEN );
+
+        CPU_WORD dVal = getField( pos, len );
+
+        bsb.setField( pos, len, ~dVal );
+    }
+
+    return bsb;
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-BitStringBuffer BitString::operator&(const BitString & bs) const
+BitStringBuffer BitString::operator&( const BitString & i_bs ) const
 {
-  BitStringBuffer bsb(std::min(this->getBitLen(), bs.getBitLen()));
-  for(uint32_t pos = 0;
-      pos < std::min(this->getBitLen(), bs.getBitLen());
-      pos += CPU_WORD_BIT_LEN)
-  {
-    uint32_t len = std::min(this->getBitLen(), bs.getBitLen()) - pos;
-    len = std::min(len,CPU_WORD_BIT_LEN);
-    CPU_WORD value = this->getField(pos,len) & bs.getField(pos,len);
-    bsb.setField(pos,len,value);
-  }
+    // Get the length of the smallest string.
+    uint32_t actLen = std::min( getBitLen(), i_bs.getBitLen() );
 
-  return bsb;
+    BitStringBuffer bsb( actLen );
+
+    for ( uint32_t pos = 0; pos < actLen; pos += CPU_WORD_BIT_LEN )
+    {
+        uint32_t len = std::min( actLen - pos, CPU_WORD_BIT_LEN );
+
+        CPU_WORD dVal =      getField( pos, len );
+        CPU_WORD sVal = i_bs.getField( pos, len );
+
+        bsb.setField( pos, len, dVal & sVal );
+    }
+
+    return bsb;
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-BitStringBuffer BitString::operator|(const BitString & bs) const
+BitStringBuffer BitString::operator|( const BitString & i_bs ) const
 {
-  BitStringBuffer bsb(std::min(this->getBitLen(), bs.getBitLen()));
-  for(uint32_t pos = 0;
-      pos < std::min(this->getBitLen(), bs.getBitLen());
-      pos += CPU_WORD_BIT_LEN)
-  {
-    uint32_t len = std::min(this->getBitLen(), bs.getBitLen()) - pos;
-    len = std::min(len,CPU_WORD_BIT_LEN);
-    CPU_WORD value = this->getField(pos,len) | bs.getField(pos,len);
-    bsb.setField(pos,len,value);
-  }
+    // Get the length of the smallest string.
+    uint32_t actLen = std::min( getBitLen(), i_bs.getBitLen() );
 
-  return bsb;
+    BitStringBuffer bsb( actLen );
+
+    for ( uint32_t pos = 0; pos < actLen; pos += CPU_WORD_BIT_LEN )
+    {
+        uint32_t len = std::min( actLen - pos, CPU_WORD_BIT_LEN );
+
+        CPU_WORD dVal =      getField( pos, len );
+        CPU_WORD sVal = i_bs.getField( pos, len );
+
+        bsb.setField( pos, len, dVal | sVal );
+    }
+
+    return bsb;
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-BitStringBuffer BitString::operator>>(uint32_t count) const
+BitStringBuffer BitString::operator>>( uint32_t i_shift ) const
 {
-  BitStringBuffer l_bsb(this->getBitLen());
-  BitString * l_bsbp = &l_bsb; // dg03a - stupid trick to get to getRelativePosition()
-  //  l_bsb.clearAll();
-  if(count < this->getBitLen())
-  {
-    //bso overlays bsb at offset = count
-    uint32_t l_dummy;
-    BitString bso( l_bsb.getBitLen() - count,
-                   l_bsbp->getRelativePosition(l_dummy,0), count );
-    bso.setString(*this);
-  }
-  return l_bsb;
+    BitStringBuffer bsb( getBitLen() ); // default all zeros
+
+    if ( i_shift < getBitLen() )
+    {
+        // bso overlays bsb, containing the shifted offset.
+        BitString bso ( bsb.getBitLen() - i_shift, bsb.getBufAddr(), i_shift );
+
+        // Copy this into bso.
+        bso.setString( *this );
+    }
+
+    return bsb;
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-BitStringBuffer BitString::operator<<(uint32_t count) const
+BitStringBuffer BitString::operator<<( uint32_t i_shift ) const
 {
-  BitStringBuffer l_bsb(this->getBitLen());
-  //  l_bsb.clearAll();
-  if(count < this->getBitLen())
-  {
-    // bso overlays *this at offset = count
-    BitString bso ( this->getBitLen() - count, this->getBufAddr(), count );
-    l_bsb.setString(bso);
-  }
-  return l_bsb;
+    BitStringBuffer bsb( getBitLen() ); // default all zeros
+
+    if ( i_shift < getBitLen() )
+    {
+        // bso overlays *this, containing the shifted offset.
+        BitString bso ( this->getBitLen() - i_shift, this->getBufAddr(),
+                        i_shift );
+
+        // Copy bso into bsb.
+        bsb.setString( bso );
+    }
+
+    return bsb;
 }
 
 //------------------------------------------------------------------------------
