@@ -185,7 +185,7 @@ void ProcDomain::SortForXstop()
         {
             for (uint32_t k = 0; k < GetSize(); k++)
                 if ((*j) == LookUp(k)->GetChipHandle())
-                    l_externalChips.Set(k);
+                    l_externalChips.setBit(k);
         };
 
         // Check if is internal.
@@ -221,29 +221,29 @@ void ProcDomain::SortForXstop()
     BIT_STRING_BUFFER_CLASS l_prev(GetSize());
     l_prev.clearAll();
 
-    while ((!(l_current == l_prev)) && (!l_current.IsZero()))
+    while ((!(l_current == l_prev)) && (!l_current.isZero()))
     {
         l_prev = l_current;
         l_current.clearAll();
 
         for (uint32_t i = 0; i < GetSize(); i++)
         {
-            if (l_prev.IsSet(i)) // skip if this chip isn't in the pool.
+            if (l_prev.isBitSet(i)) // skip if this chip isn't in the pool.
                 for (uint32_t j = 0; j < GetSize(); j++)
                 {
                     ptr.u = &l_externalDrivers[i]; // zs01
-                    if ( BitString(GetSize(), ptr.c).IsSet(j) )
-                        l_current.Set(j);
+                    if ( BitString(GetSize(), ptr.c).isBitSet(j) )
+                        l_current.setBit(j);
                 }
         }
     }
 
     // Hopefully, we got just one chip left...
-    if (1 == l_prev.GetSetCount())
+    if (1 == l_prev.getSetCount())
     {
         // Now find it.
         for (uint32_t i = 0; i < GetSize(); i++)
-            if ((l_prev.IsSet(i)) &&
+            if ((l_prev.isBitSet(i)) &&
                 (l_internalCS[i] || (0 == l_internalOnlyCount)))
             {
                 MoveToFront(i);
@@ -421,7 +421,7 @@ int32_t ProcDomain::OrderTheseChips(ATTENTION_TYPE attentionType,
         {
             for (uint32_t k = 0; k < i_chips.size(); k++)
                 if ((*j) == LookUp(k)->GetChipHandle())
-                    l_externalChips.Set(k);
+                    l_externalChips.setBit(k);
         };
 
         // Check if is internal.

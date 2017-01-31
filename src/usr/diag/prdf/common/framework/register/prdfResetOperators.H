@@ -193,7 +193,7 @@ class AndOperator : public RegisterResetOperator
                 uint32_t i;
                 for(i = 0; i < bl_length; ++i)  // Turn off all bits specified
                 {
-                    bs.Clear(bl.getListValue(i));
+                    bs.clearBit(bl.getListValue(i));
                 }
                 writeReg->SetBitString(&bs); // Copy bit-string to register.
                 rc = writeReg->Write();    // Write hardware

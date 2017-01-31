@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -308,7 +308,7 @@ class SCAN_COMM_REGISTER_CLASS
    <br><b>Parameters:  </b> Position of bit to set (= 1)
    <br><b>Returns:     </b> None.
    <br><b>Requirements:</b> bit position < GetBitString()->Length()
-   <br><b>Promises:    </b> GetBitString()->IsSet(bit_position) == true
+   <br><b>Promises:    </b> GetBitString()->isBitSet(bit_position) == true
    <br><b>Exceptions:  </b> None.
    <br><b> Notes:      </b> Register value is not reflected in hardware until
                             Write() is called
@@ -322,7 +322,7 @@ class SCAN_COMM_REGISTER_CLASS
    <br><b>Parameters:  </b> Position of bit to clear (= 0)
    <br><b>Returns:     </b> None.
    <br><b>Requirements:</b> bit position < GetBitString()->Length()
-   <br><b>Promises:    </b> GetBitString()->IsSet(bit_position) == false
+   <br><b>Promises:    </b> GetBitString()->isBitSet(bit_position) == false
    <br><b>Exceptions:  </b> None.
    <br><b> Notes:      </b> Register value is not reflected in hardware until
                             Write() is called
@@ -337,7 +337,7 @@ class SCAN_COMM_REGISTER_CLASS
      * @return TRUE if the bit is set, FALSE otherwise.
      */
     bool IsBitSet( uint32_t i_bitPos )
-    {  return GetBitString()->IsSet(i_bitPos);  }
+    {  return GetBitString()->isBitSet(i_bitPos);  }
 
     /** @brief Flushes all bits to 0. */
     void clearAllBits();
@@ -375,7 +375,7 @@ class SCAN_COMM_REGISTER_CLASS
    </ul><br>
    */
   bool BitStringIsZero()
-  { return GetBitString()->IsZero(); }
+  { return GetBitString()->isZero(); }
 
    /**
     *@brief    Returns TYPE_NA as type of Target associated with register.Actual

@@ -150,7 +150,7 @@ void SCAN_COMM_REGISTER_CLASS::SetBit
 {
 
   BIT_STRING_CLASS & bitString = AccessBitString();
-  bitString.Set(bit_position);
+  bitString.setBit(bit_position);
 }
 
 // Function Specification //////////////////////////////////////////
@@ -176,7 +176,7 @@ void SCAN_COMM_REGISTER_CLASS::ClearBit
 /*!o No value returned                                           */
 {
   BIT_STRING_CLASS & bitString = AccessBitString();
-  bitString.Clear(bit_position);
+  bitString.clearBit(bit_position);
 }
 
 
