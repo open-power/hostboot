@@ -71,7 +71,6 @@ errlHndl_t getDiagnosticMode(
             o_mode = ONE_PATTERN;
         }
 
-/* TODO RTC 168270
         // Only need to check hw changed state attributes
         // when not already set to exhaustive and not in simics
         if(( NINE_PATTERNS != o_mode ) &&
@@ -82,7 +81,6 @@ errlHndl_t getDiagnosticMode(
                 o_mode = NINE_PATTERNS;
             }
         }
-*/
 
     } while(0);
 
@@ -186,95 +184,128 @@ TargetHandleList getMemTargetsForQueryOrClear(
 
         if( ! dimmList.empty() )
         {
-            o_list.insert(o_list.begin(), dimmList.begin(),
-                          dimmList.end());
+            o_list.insert(o_list.begin(), dimmList.begin(), dimmList.end());
         }
 
-        // add associated Centaur
-        TargetHandleList targetList;
-        getParentAffinityTargets(targetList,
-                                 i_trgt,
-                                 CLASS_CHIP,
-                                 TYPE_MEMBUF);
+        TYPE trgtType = i_trgt->getAttr<ATTR_TYPE>();
 
-        if( targetList.empty() )
+        // mcbist target
+        if ( TYPE_MCBIST == trgtType )
         {
-            MDIA_FAST(FUNC "no connected centaur "
-                    "for mba: %x", get_huid(i_trgt));
-            break;
-        }
+            // add associated MCBIST
+            o_list.push_back( i_trgt );
 
-        TargetHandle_t centaur = targetList[0];
+            // add associated MCAs
+            TargetHandleList mcaList;
+            getChildAffinityTargets(mcaList, i_trgt, CLASS_UNIT, TYPE_MCA);
 
-        // if query flag is not set, check to make sure
-        // all of the dimms connected to this centaur
-        // have cleared hw chagned state attributes
-        // before adding this centaur/mcs to the list.
-        // This is needed because we only clear
-        // the centaur/mcs attribute when all of the
-        // dimms' attributes from both mbas have cleared.
-        if(false == i_queryOnly)
-        {
-            targetList.clear();
-            getChildAffinityTargets(targetList,
-                                    centaur,
-                                    CLASS_NA,
-                                    TYPE_DIMM);
-
-            if( ! targetList.empty() )
+            if ( !mcaList.empty() )
             {
-                TargetHandleList::iterator target;
+                o_list.insert( o_list.end(), mcaList.begin(), mcaList.end() );
+            }
 
-                for(target = targetList.begin();
-                    target != targetList.end(); ++target)
+        }
+        // MBA target
+        else
+        {
+            // add associated Centaur
+            TargetHandleList targetList;
+            getParentAffinityTargets(targetList,
+                    i_trgt,
+                    CLASS_CHIP,
+                    TYPE_MEMBUF);
+
+            if( targetList.empty() )
+            {
+                MDIA_FAST(FUNC "no connected centaur "
+                        "for mba: %x", get_huid(i_trgt));
+                break;
+            }
+
+            TargetHandle_t centaur = targetList[0];
+
+            // if query flag is not set, check to make sure
+            // all of the dimms connected to this centaur
+            // have cleared hw chagned state attributes
+            // before adding this centaur/mcs to the list.
+            // This is needed because we only clear
+            // the centaur/mcs attribute when all of the
+            // dimms' attributes from both mbas have cleared.
+            if(false == i_queryOnly)
+            {
+                targetList.clear();
+                getChildAffinityTargets(targetList,
+                        centaur,
+                        CLASS_NA,
+                        TYPE_DIMM);
+
+                if( ! targetList.empty() )
                 {
-                    // exclude dimms belong to the current mba
-                    // because their attributes will be cleared
-                    if(dimmList.end() !=
-                             std::find(dimmList.begin(),
-                                       dimmList.end(), *target))
-                    {
-                        continue;
-                    }
+                    TargetHandleList::iterator target;
 
-                    ATTR_HWAS_STATE_CHANGED_FLAG_type hwChangeFlag;
-                    hwChangeFlag =
-                      (*target)->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
-
-                    if(HWAS_CHANGED_BIT_MEMDIAG & hwChangeFlag)
+                    for(target = targetList.begin();
+                            target != targetList.end(); ++target)
                     {
-                        MDIA_FAST(FUNC "hwChangedState is not cleared "
-                                  "for dimm: %x", get_huid(*target));
-                        centaur = NULL; // don't add centaur and mcs
-                        break;
+                        // exclude dimms belong to the current mba
+                        // because their attributes will be cleared
+                        if(dimmList.end() !=
+                                std::find(dimmList.begin(),
+                                    dimmList.end(), *target))
+                        {
+                            continue;
+                        }
+
+                        ATTR_HWAS_STATE_CHANGED_FLAG_type hwChangeFlag;
+                        hwChangeFlag =
+                            (*target)->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
+
+                        if(HWAS_CHANGED_BIT_MEMDIAG & hwChangeFlag)
+                        {
+                            MDIA_FAST(FUNC "hwChangedState is not cleared "
+                                    "for dimm: %x", get_huid(*target));
+                            centaur = NULL; // don't add centaur and mcs and mba
+                            break;
+                        }
                     }
                 }
             }
-        }
 
-        if(NULL == centaur)
-        {
-            break;
-        }
+            if(NULL == centaur)
+            {
+                break;
+            }
 
-        o_list.push_back(centaur);
+            o_list.push_back(centaur);
 
-        // get connected mcs target
-        targetList.clear();
+            // get connected mcs target
+            targetList.clear();
 
-        getParentAffinityTargets(targetList,
-                                 centaur,
-                                 CLASS_UNIT,
-                                 TYPE_MCS);
+            getParentAffinityTargets(targetList,
+                                     centaur,
+                                     CLASS_UNIT,
+                                     TYPE_MCS);
 
-        if( ! targetList.empty() )
-        {
-            o_list.push_back(targetList[0]);
+            if( !targetList.empty() )
+            {
+                o_list.push_back(targetList[0]);
+            }
+
+            // add associated MBAs
+            targetList.clear();
+
+            getChildAffinityTargets(targetList, i_trgt, CLASS_UNIT, TYPE_MBA);
+
+            if ( !targetList.empty() )
+            {
+                o_list.insert( o_list.end(), targetList.begin(),
+                               targetList.end() );
+            }
+
         }
 
     } while(0);
 
-    MDIA_DBG(FUNC "mba: %x, size: %d",
+    MDIA_DBG(FUNC "i_trgt HUID: %x, size: %d",
              get_huid(i_trgt), o_list.size());
 
     return o_list;
