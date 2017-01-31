@@ -199,8 +199,29 @@ class BitString
         setField( i_pos, i_len, i_val << (CPU_WORD_BIT_LEN - i_len) );
     }
 
+    /**
+     * @param  i_pos The target position.
+     * @return True if the bit at the given position is set(1), false otherwise.
+     * @pre    i_pos < getBitLen().
+     */
+    bool isBitSet( uint32_t i_pos ) const { return 0 != getField(i_pos, 1); }
+
+    /**
+     * @brief Sets the target position to 1.
+     * @param i_pos The target position.
+     * @pre   i_pos < getBitLen().
+     */
+    void setBit( uint32_t i_pos ) { setFieldJustify( i_pos, 1, 1 ); }
+
     /** @brief Sets the entire bit string to 1's. */
     void setAll() { setPattern(CPU_WORD_MASK); }
+
+    /**
+     * @brief Sets the target position to 0.
+     * @param i_pos The target position.
+     * @pre   i_pos < getBitLen().
+     */
+    void clearBit( uint32_t i_pos ) { setFieldJustify( i_pos, 1, 0 ); }
 
     /** @brief Sets the entire bit string to 0's. */
     void clearAll() { setPattern(0); }
@@ -300,62 +321,38 @@ class BitString
      */
     void maskString( const BitString & i_mask );
 
+    /**
+     * @param  i_str The string to compare.
+     * @return True if the strings are equivalent, false otherwise.
+     * @pre    Both strings must be of equal length and have same values to be
+     *         equal.
+     */
+    bool isEqual( const BitString & i_str ) const;
+
+    /** @return True if there are no bit set(1) in this bit string, false
+     *          otherwise. */
+    bool isZero() const;
+
+    /**
+     * @param  i_pos The starting position of the target range.
+     * @param  i_len The length of the target range.
+     * @return The number of bits that are set(1) in given range of this string.
+     * @pre    nullptr != getBufAddr()
+     * @pre    i_pos + i_len <= getBitLen()
+     */
+    uint32_t getSetCount( uint32_t i_pos, uint32_t i_len ) const;
+
+    /** @return The number of bits that are set(1) in this string. */
+    uint32_t getSetCount() const { return getSetCount( 0, getBitLen() ); }
+
   /*!
    Comparison
    \remarks The bitstrings must be the same length and have the same bits set to be equal
    */
   int operator==(const BitString & string) const
   {
-    return(IsEqual(string));
+    return(isEqual(string));
   }
-
-  /*!
-   Get the number of bits that are set ("1")
-   */
-  uint32_t GetSetCount(void) const;
-
-  /*!
-   Get the number of bits that are set ("1") in a specific range
-   \param starting bit position
-   \param # of bits in the range
-   \pre bit_position + leng <= getBitLen();
-   \post none
-   */
-  uint32_t GetSetCount(uint32_t bit_position, uint32_t leng) const;
-
-  /*!
-   Query if bit is set (1)
-   \returns [true|false]
-   \param iPos: bit position to test
-   */
-  bool IsSet(uint32_t iPos) const;
-
-  /*!
-   Set a bit (1) at the specified position
-   \param iPos: bit position to test
-   \post IsSet(iPos) == true
-   */
-  void Set( uint32_t iPos);
-
-  /*!
-   Clear or ReSet a bit (0) at the specified position
-   \param iPos: bit position to clear
-   \post IsSet(iPos) == false
-   */
-  void Clear(uint32_t bit_position);
-
-  /*!
-   Test equivalence
-   \returns [true | false]
-   \notes Both strings must be of equal length and have same values to be equal
-   */
-  bool IsEqual( const BitString & string) const;
-
-  /*!
-   Query state of no bits set(1)
-   \returns [true | false]
-   */
-  bool IsZero(void) const;
 
   /*!
    bitwise NOT
@@ -511,11 +508,6 @@ BitString & BitString::operator=
   iv_bitLen = string.iv_bitLen;
   iv_bufAddr = string.iv_bufAddr;
   return(*this);
-}
-
-inline uint32_t BitString::GetSetCount(void) const
-{
-  return(GetSetCount(0, getBitLen()));
 }
 
 } // end namespace PRDF

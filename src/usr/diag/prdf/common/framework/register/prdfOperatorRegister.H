@@ -127,9 +127,9 @@ class SummaryRegister : public SCAN_COMM_REGISTER_CLASS
         PRDF::BitString tmp = *iv_child->GetBitString(i_type);
 
         //if any bits are set in iv_child, then set the iv_amount bit
-        if (0 != tmp.GetSetCount())
+        if (0 != tmp.getSetCount())
         {
-            iv_bs->Set(0);
+            iv_bs->setBit(0);
             *iv_bs = *iv_bs >> iv_amount;
         }
         return iv_bs;

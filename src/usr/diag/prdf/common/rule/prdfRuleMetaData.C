@@ -569,7 +569,7 @@ int32_t RuleMetaData::CaptureErrorData( CaptureData & io_cap,
             {
                 const BIT_STRING_CLASS *l_bitStringPtr =
                                         l_primReg->GetBitString();
-                if(l_bitStringPtr->IsZero())
+                if(l_bitStringPtr->isZero())
                 {
                     //skip capture data if corresponding primary FIR is
                     //zero.

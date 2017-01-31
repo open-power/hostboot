@@ -88,7 +88,7 @@ public:
             }
 
             //spare bit in OCC fir
-            bs.Set(61);
+            bs.setBit(61);
 
             rc = PRDF::PlatServices::putScom(target, bs, address);
 

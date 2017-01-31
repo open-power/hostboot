@@ -134,7 +134,7 @@ public:
    <br><b>Parameters:  </b> bit position
    <br><b>Returns:     </b> None.
    <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> bitStringMask.IsSet(bitPosition) == true.
+   <br><b>Promises:    </b> bitStringMask.isBitSet(bitPosition) == true.
 
    <br><b>Exceptions:  </b> None.
    <br><b>Notes:       </b> The bitstring read from hardware during Read()
@@ -215,7 +215,7 @@ private:  // Data
 };
 
 inline void ErrorRegisterMask::SetMaskBit(uint32_t bitPosition)
-{ bitStringMask.Set(bitPosition); }
+{ bitStringMask.setBit(bitPosition); }
 
 inline void ErrorRegisterMask::SetMaskBits(const BIT_STRING_CLASS & bitString)
 { bitStringMask.setString(bitString); }

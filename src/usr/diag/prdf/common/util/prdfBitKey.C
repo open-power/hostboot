@@ -274,7 +274,7 @@ uint32_t BitKey::getListValue(uint32_t n) const
   BitString bs(iv_Capacity,(CPU_WORD *)cDataPtr());
   for(uint32_t i = 0; i < iv_Capacity; ++i)
   {
-    if(bs.IsSet(i)) ++setCount;
+    if(bs.isBitSet(i)) ++setCount;
     if(setCount == n)
     {
       bitPos = i;
@@ -289,7 +289,7 @@ uint32_t BitKey::getListValue(uint32_t n) const
 uint32_t BitKey::size(void) const
 {
   const BitString bs(iv_Capacity,(CPU_WORD *)cDataPtr());
-  return bs.GetSetCount();
+  return bs.getSetCount();
 }
 
 //------------------------------------------------------------------------------
@@ -299,7 +299,7 @@ void BitKey::removeBit(uint32_t n)
   if(n < size())
   {
     BitString bs(iv_Capacity,DataPtr());
-    bs.Clear(getListValue(n));
+    bs.clearBit(getListValue(n));
   }
 }
 
@@ -312,9 +312,9 @@ void BitKey::removeBit(void)
   while(i != 0)
   {
     --i;
-    if(bs.IsSet(i))
+    if(bs.isBitSet(i))
     {
-      bs.Clear(i);
+      bs.clearBit(i);
       break;
     }
   }
@@ -338,7 +338,7 @@ void BitKey::setBit(uint32_t i_bitValue)
     ReAllocate(i_bitValue+1);
   }
   BitString bs(iv_Capacity,DataPtr());
-  bs.Set(i_bitValue);
+  bs.setBit(i_bitValue);
 }
 
 //------------------------------------------------------------------------------
@@ -362,7 +362,7 @@ void BitKey::ReAllocate(uint32_t i_len)
       BitString dbs(iv_Capacity,newBuffer);
       dbs.clearAll();
       BitString sbs(oldSize,oldPtr);
-      if ( !sbs.IsZero() ) dbs.setString(sbs);
+      if ( !sbs.isZero() ) dbs.setString(sbs);
       iv_storage1 = 0;
       if(!wasDirect) // from indirect
       {

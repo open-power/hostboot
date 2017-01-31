@@ -221,151 +221,53 @@ void BitString::maskString( const BitString & i_mask )
 
 //------------------------------------------------------------------------------
 
-uint32_t BitString::GetSetCount(uint32_t bit_position,
-                                    uint32_t leng
-                                    ) const
+bool BitString::isEqual( const BitString & i_str ) const
 {
-  uint32_t end_position = bit_position + leng;
-
-  PRDF_ASSERT(end_position <= iv_bitLen);
-
-  uint32_t count = 0;
-
-  while(bit_position < end_position)
-  {
-    if(IsSet(bit_position))
-    {
-      count++;
-    }
-
-    bit_position++;
-  }
-
-  return(count);
-}
-
-// Function Specification //////////////////////////////////////////
-//
-//  Title:  Is Set
-//
-//  Purpose:  This function determines if the specified bit position
-//            in the string is set(1).
-//
-//  Side-effects:  None.
-//
-//  Dependencies:  bit_position must be in the string
-//
-// End Function Specification //////////////////////////////////////
-
-bool BitString::IsSet
-(
- uint32_t bit_position
- )  const
-{
-  return (getField(bit_position,1) != 0);
-}
-
-// Function Specification //////////////////////////////////////////////
-//
-// Title:  Set
-//
-//  Purpose:  This function sets(1) the specified bit position in
-//            the string.
-//
-//  Side-effects:  Bit String may be modified.
-//
-//  Dependencies:  bit_position must be in the string
-//
-// End Function Specification //////////////////////////////////////////
-
-void BitString::Set
-(
- uint32_t bit_position
- )
-{
-  setField(bit_position,1,CPU_WORD_MASK);
-}
-
-// Function Specification //////////////////////////////////////////////
-//
-// Title:  Clear
-//
-//  Purpose:  This function clears(0) the specified bit position in
-//            the string.
-//
-//  Side-effects:  Bit String may be modified.
-//
-//  Dependencies:  bit_position must be in the string
-//
-// End Function Specification //////////////////////////////////////////
-
-void BitString::Clear
-(
- uint32_t bit_position
- )
-{
-  setField(bit_position,1,0);
-}
-
-// Function Specification //////////////////////////////////////////
-//
-//  Title:  Is Equal
-//
-//  Purpose:  This function compares the values of the Bit String
-//            memory for each bit position in the string. If the
-//            Bit String lengths do not match, then the Bit Strings
-//            are not equal.
-//
-//  Side-effects:  None.
-//
-//  Dependencies:  None.
-//
-// Time Complexity:  O(m) where m is the length
-//
-// End Function Specification //////////////////////////////////////
-
-bool BitString::IsEqual( const BitString & i_string ) const
-{
-    if ( iv_bitLen != i_string.iv_bitLen )
+    if ( getBitLen() != i_str.getBitLen() )
         return false; // size not equal
 
-    for ( uint32_t pos = 0; pos < iv_bitLen; pos += CPU_WORD_BIT_LEN )
+    for ( uint32_t pos = 0; pos < getBitLen(); pos += CPU_WORD_BIT_LEN )
     {
-        uint32_t len = std::min( iv_bitLen - pos, (uint32_t)CPU_WORD_BIT_LEN );
+        uint32_t len = std::min( getBitLen() - pos, CPU_WORD_BIT_LEN );
 
-        if ( getField(pos, len) != i_string.getField(pos, len) )
+        if ( getField(pos, len) != i_str.getField(pos, len) )
             return false; // bit strings do not match
     }
 
     return true; // bit strings match
 }
 
-// Function Specification //////////////////////////////////////////
-//
-//  Title:  Is Zero
-//
-//  Purpose:  This function compares the values of the Bit String
-//            with zero.
-//
-//  Side-effects:  None.
-//
-//  Dependencies:  None.
-//
-// Time Complexity:  O(m) where m is the length
-//
-// End Function Specification //////////////////////////////////////
+//------------------------------------------------------------------------------
 
-bool BitString::IsZero() const
+bool BitString::isZero() const
 {
-    for ( uint32_t pos = 0; pos < iv_bitLen; pos += CPU_WORD_BIT_LEN )
+    for ( uint32_t pos = 0; pos < getBitLen(); pos += CPU_WORD_BIT_LEN )
     {
-        uint32_t len = std::min( iv_bitLen - pos, (uint32_t)CPU_WORD_BIT_LEN );
+        uint32_t len = std::min( getBitLen() - pos, CPU_WORD_BIT_LEN );
 
         if ( 0 != getField(pos, len) )
             return false; // something is non-zero
     }
 
     return true; // everything was zero
+}
+
+//------------------------------------------------------------------------------
+
+uint32_t BitString::getSetCount( uint32_t i_pos, uint32_t i_len ) const
+{
+    uint32_t endPos = i_pos + i_len;
+
+    PRDF_ASSERT( endPos <= getBitLen() );
+
+    uint32_t count = 0;
+
+    for ( uint32_t i = i_pos; i < endPos; i++ )
+    {
+        if ( isBitSet(i) ) count++;
+    }
+
+    return count;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -503,7 +405,7 @@ BitStringBuffer::BitStringBuffer( const BitString & i_bs ) :
     BitString( i_bs.getBitLen(), nullptr )
 {
     initBuffer();
-    if ( !i_bs.IsZero() ) setString( i_bs );
+    if ( !i_bs.isZero() ) setString( i_bs );
 }
 
 //------------------------------------------------------------------------------
@@ -512,7 +414,7 @@ BitStringBuffer::BitStringBuffer( const BitStringBuffer & i_bsb ) :
     BitString( i_bsb.getBitLen(), nullptr )
 {
     initBuffer();
-    if ( !i_bsb.IsZero() ) setString( i_bsb );
+    if ( !i_bsb.isZero() ) setString( i_bsb );
 }
 
 //------------------------------------------------------------------------------
@@ -521,7 +423,7 @@ BitStringBuffer & BitStringBuffer::operator=( const BitString & i_bs )
 {
     setBitLen( i_bs.getBitLen() );
     initBuffer();
-    if ( !i_bs.IsZero() ) setString( i_bs );
+    if ( !i_bs.isZero() ) setString( i_bs );
 
     return *this;
 }
@@ -534,7 +436,7 @@ BitStringBuffer & BitStringBuffer::operator=( const BitStringBuffer & i_bsb )
     {
         setBitLen( i_bsb.getBitLen() );
         initBuffer();
-        if ( !i_bsb.IsZero() ) setString( i_bsb );
+        if ( !i_bsb.isZero() ) setString( i_bsb );
     }
 
     return *this;
@@ -551,7 +453,7 @@ void BitStringBuffer::initBuffer()
     setBufAddr( new CPU_WORD[ getNumCpuWords(getBitLen()) ] );
 
     // Clear the new buffer.
-    if ( !IsZero() ) clearAll();
+    if ( !isZero() ) clearAll();
 }
 
 /*--------------------------------------------------------------------*/

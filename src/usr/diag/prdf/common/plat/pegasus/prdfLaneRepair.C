@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -111,9 +111,9 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
             PRDF_INF( PRDF_FUNC "New failed lane on RX HUID 0x%08x: %d",
                       getHuid(rxBusTgt), *lane);
             if (*lane < 64)
-                l_newLaneMap0to63.Set(*lane);
+                l_newLaneMap0to63.setBit(*lane);
             else if (*lane < 127)
-                l_newLaneMap64to127.Set(*lane - 64);
+                l_newLaneMap64to127.setBit(*lane - 64);
             else
             {
                 PRDF_ERR( PRDF_FUNC "Invalid lane number %d: rxBusTgt=0x%08x",
@@ -153,9 +153,9 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
                  lane != rx_vpdLanes.end(); ++lane)
             {
                 if (*lane < 64)
-                    l_vpdLaneMap0to63.Set(*lane);
+                    l_vpdLaneMap0to63.setBit(*lane);
                 else if (*lane < 127)
-                    l_vpdLaneMap64to127.Set(*lane - 64);
+                    l_vpdLaneMap64to127.setBit(*lane - 64);
                 else
                 {
                     PRDF_ERR( PRDF_FUNC "Invalid VPD lane number %d: "

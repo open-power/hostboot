@@ -194,7 +194,7 @@ int32_t AndResetErrorRegister::Reset(const BitKey & bit_list,
     uint32_t i;
     for(i = 0; i < bl_length; ++i)  // Turn off all bits used to isolate problem
     {
-      bs.Clear(bit_list.getListValue(i));
+      bs.clearBit(bit_list.getListValue(i));
     }
     xAndResetScr.SetBitString(&bs); // copy bs to SCR bit string
     rc = xAndResetScr.Write();   // Write hardware (result = Hareware value ANDed with bs)

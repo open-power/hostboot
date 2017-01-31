@@ -87,7 +87,7 @@ void CaptureData::AddDataElement( TargetHandle_t i_trgt, int i_scomId,
     size_t sz_buf = 0;
 
     // Add buffer only if the value is non-zero.
-    if ( !i_bs->IsZero() )
+    if ( !i_bs->isZero() )
     {
         // Get the size of i_bs and ensure byte alignment.
         sz_buf = (i_bs->getBitLen() + 8-1) / 8;
