@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -218,7 +218,7 @@ inline void ErrorRegisterMask::SetMaskBit(uint32_t bitPosition)
 { bitStringMask.Set(bitPosition); }
 
 inline void ErrorRegisterMask::SetMaskBits(const BIT_STRING_CLASS & bitString)
-{ bitStringMask.SetBits(bitString); }
+{ bitStringMask.setString(bitString); }
 
 } // end namespace PRDF
 

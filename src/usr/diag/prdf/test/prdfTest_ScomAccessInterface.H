@@ -92,7 +92,7 @@ public:
 
             rc = PRDF::PlatServices::putScom(target, bs, address);
 
-            exp.SetBits(bs);
+            exp.setString(bs);
 
             if (SUCCESS != rc)
             {

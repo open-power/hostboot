@@ -103,7 +103,7 @@ void CaptureData::AddDataElement( TargetHandle_t i_trgt, int i_scomId,
 
         // Use a BitString to copy i_bs to the buffer.
         BIT_STRING_ADDRESS_CLASS bs ( 0, i_bs->getBitLen(), (CPU_WORD *)buf );
-        bs.SetBits( *i_bs );
+        bs.setString( *i_bs );
 
         // Create the new data element.
         Data element( i_trgt, i_scomId, sz_buf, buf );

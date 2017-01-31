@@ -171,7 +171,7 @@ BitKey & BitKey::operator=(const BitString & bit_string)
   }
   ReAllocate(bit_string.getBitLen());
   BitString dbs(iv_Capacity,DataPtr());
-  dbs.SetBits(bit_string);
+  dbs.setString(bit_string);
   return(*this);
 }
 
@@ -362,7 +362,7 @@ void BitKey::ReAllocate(uint32_t i_len)
       BitString dbs(iv_Capacity,newBuffer);
       dbs.clearAll();
       BitString sbs(oldSize,oldPtr);
-      dbs.SetBits(sbs);
+      if ( !sbs.IsZero() ) dbs.setString(sbs);
       iv_storage1 = 0;
       if(!wasDirect) // from indirect
       {

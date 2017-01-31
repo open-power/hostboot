@@ -71,6 +71,63 @@ void BitString::setPattern( uint32_t i_sPos, uint32_t i_sLen,
 
 //------------------------------------------------------------------------------
 
+void BitString::setString( const BitString & i_sStr, uint32_t i_sPos,
+                           uint32_t i_sLen, uint32_t i_dPos )
+{
+    // Ensure the source parameters are valid.
+    PRDF_ASSERT( nullptr != i_sStr.getBufAddr() );
+    PRDF_ASSERT( 0 < i_sLen ); // at least one bit to copy
+    PRDF_ASSERT( i_sPos + i_sLen <= i_sStr.getBitLen() );
+
+    // Ensure the destination has at least one bit available to copy.
+    PRDF_ASSERT( nullptr != getBufAddr() );
+    PRDF_ASSERT( i_dPos < getBitLen() );
+
+    // If the source length is greater than the destination length than the
+    // extra source bits are ignored.
+    uint32_t actLen = std::min( i_sLen, getBitLen() - i_dPos );
+
+    // The bit strings may be in overlapping memory spaces. So we need to copy
+    // the data in the correct direction to prevent overlapping.
+    uint32_t sRelOffset = 0, dRelOffset = 0;
+    CPU_WORD * sRelAddr = i_sStr.GetRelativePosition( sRelOffset, i_sPos );
+    CPU_WORD * dRelAddr =        GetRelativePosition( dRelOffset, i_dPos );
+
+    // Copy the data.
+    if ( (dRelAddr == sRelAddr) && (dRelOffset == sRelOffset) )
+    {
+        // Do nothing. The source and destination are the same.
+    }
+    else if ( (dRelAddr < sRelAddr) ||
+              ((dRelAddr == sRelAddr) && (dRelOffset < sRelOffset)) )
+    {
+        // Copy the data forward.
+        for ( uint32_t pos = 0; pos < actLen; pos += CPU_WORD_BIT_LEN )
+        {
+            uint32_t len = std::min( actLen - pos, CPU_WORD_BIT_LEN );
+
+            CPU_WORD value = i_sStr.GetField( i_sPos + pos, len );
+            SetField( i_dPos + pos, len, value );
+        }
+    }
+    else // Copy the data backwards.
+    {
+        // Get the first position of the last chunk (CPU_WORD aligned).
+        uint32_t lastPos = ((actLen-1) / CPU_WORD_BIT_LEN) * CPU_WORD_BIT_LEN;
+
+        // Start with the last chunk and work backwards.
+        for ( int32_t pos = lastPos; 0 <= pos; pos -= CPU_WORD_BIT_LEN )
+        {
+            uint32_t len = std::min( actLen - pos, CPU_WORD_BIT_LEN );
+
+            CPU_WORD value = i_sStr.GetField( i_sPos + pos, len );
+            SetField( i_dPos + pos, len, value );
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+
 uint32_t BitString::GetSetCount(uint32_t bit_position,
                                     uint32_t leng
                                     ) const
@@ -184,70 +241,6 @@ void BitString::SetFieldJustify
   value = LEFT_SHIFT(length, value);
 
   SetField(bit_position, length, value);
-}
-
-// ------------------------------------------------------------------------------------------------
-
-void BitString::SetBits
-(
- const BitString & string, // source string
- unsigned int iPos,               // source start pos
- unsigned int iLen,               // length
- unsigned int iDpos               // dest start pos
- )
-{
-  const BitString * source = &string;
-  bool copyforward = true;
-
-  // How Much to really move
-  iLen = std::min(iLen,string.getBitLen() - iPos);
-  iLen = std::min(iLen,getBitLen() - iDpos);
-
-  // copy the right direction to prevent overlapping
-  uint32_t sRelativeOffset = 0;
-  uint32_t dRelativeOffset = 0;
-  CPU_WORD * sourceAddress = NULL;      //dg02a
-  CPU_WORD * destAddress   = NULL;      //dg02a
-  if(string.getBufAddr() != NULL) //dg02a
-  {                                     //dg02a
-    sourceAddress = string.GetRelativePosition(sRelativeOffset,iPos);
-  } // else assume source is all zeros    dg02a
-  if(getBufAddr() != NULL)        //dg02a
-  {                                     //dg02a
-    destAddress = GetRelativePosition(dRelativeOffset,iDpos);
-  }                                     //dg02a
-  if((sourceAddress < destAddress) ||
-     ((sourceAddress == destAddress) && (sRelativeOffset < dRelativeOffset)))
-  {
-    copyforward = false;
-  }
-  // else copyforward
-
-  if(copyforward)
-  {
-    while(iLen)
-    {
-      uint32_t len = std::min(iLen,(uint32_t)CPU_WORD_BIT_LEN);
-      CPU_WORD value = string.GetField(iPos,len);
-      SetField(iDpos,len,value);
-      iLen -= len;
-      iPos += len;
-      iDpos += len;
-    }
-  } else
-  {
-    iPos += iLen;
-    iDpos += iLen;
-    while(iLen)
-    {
-      uint32_t len = std::min(iLen,(uint32_t)CPU_WORD_BIT_LEN);
-      iPos -= len;
-      iDpos -= len;
-      CPU_WORD value = source->GetField(iPos,len);
-      SetField(iDpos,len,value);
-      iLen -= len;
-    }
-  }
 }
 
 // Function Specification //////////////////////////////////////////
@@ -561,7 +554,7 @@ BitStringBuffer BitString::operator>>(uint32_t count) const
     uint32_t l_dummy;
     BitStringOffset bso(count,l_bsb.getBitLen() - count,
                             l_bsbp->GetRelativePosition(l_dummy,0)); //dg03c
-    bso.SetBits(*this);
+    bso.setString(*this);
   }
   return l_bsb;
 }
@@ -576,7 +569,7 @@ BitStringBuffer BitString::operator<<(uint32_t count) const
   {
     // bso overlays *this at offset = count
     BitStringOffset bso(count,this->getBitLen() - count,this->getBufAddr());
-    l_bsb.SetBits(bso);
+    l_bsb.setString(bso);
   }
   return l_bsb;
 }
@@ -604,7 +597,7 @@ BitStringBuffer::BitStringBuffer( const BitString & i_bs ) :
     BitString( i_bs.getBitLen(), nullptr )
 {
     initBuffer();
-    if ( !i_bs.IsZero() ) SetBits( i_bs );
+    if ( !i_bs.IsZero() ) setString( i_bs );
 }
 
 //------------------------------------------------------------------------------
@@ -613,7 +606,7 @@ BitStringBuffer::BitStringBuffer( const BitStringBuffer & i_bsb ) :
     BitString( i_bsb.getBitLen(), nullptr )
 {
     initBuffer();
-    if ( !i_bsb.IsZero() ) SetBits( i_bsb );
+    if ( !i_bsb.IsZero() ) setString( i_bsb );
 }
 
 //------------------------------------------------------------------------------
@@ -622,7 +615,7 @@ BitStringBuffer & BitStringBuffer::operator=( const BitString & i_bs )
 {
     setBitLen( i_bs.getBitLen() );
     initBuffer();
-    if ( !i_bs.IsZero() ) SetBits( i_bs );
+    if ( !i_bs.IsZero() ) setString( i_bs );
 
     return *this;
 }
@@ -635,7 +628,7 @@ BitStringBuffer & BitStringBuffer::operator=( const BitStringBuffer & i_bsb )
     {
         setBitLen( i_bsb.getBitLen() );
         initBuffer();
-        if ( !i_bsb.IsZero() ) SetBits( i_bsb );
+        if ( !i_bsb.IsZero() ) setString( i_bsb );
     }
 
     return *this;

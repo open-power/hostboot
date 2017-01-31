@@ -194,6 +194,40 @@ class BitString
         setPattern( i_pattern, CPU_WORD_BIT_LEN );
     }
 
+    /**
+     * @brief Set bits in this string based on the given string.
+     * @param i_sStr The source string.
+     * @param i_sPos The starting position of the source string.
+     * @param i_sLen The number of bits to copy from the source string.
+     * @param i_dPos The starting position of the this string.
+     * @pre   nullptr != getBufAddr()
+     * @pre   nullptr != i_sStr.getBufAddr()
+     * @pre   0 < i_sLen
+     * @pre   i_sPos + i_sLen <= i_sStr.getBitLen()
+     * @pre   i_dPos < getBitLen()
+     * @post  Source bits in given range are copied to this starting at i_dPos.
+     * @note  If the length of the given string is greater than the length of
+     *        this string, then the extra bits are ignored.
+     * @note  If the length of the given string is less than the length of this
+     *        string, then the extra bits in this string are not modified.
+     * @note  This string and the source string may specify overlapping memory.
+     */
+    void setString( const BitString & i_sStr, uint32_t i_sPos,
+                    uint32_t i_sLen, uint32_t i_dPos = 0 );
+
+    /**
+     * @brief Set bits in this string based on the provided string.
+     * @param i_sStr The source string.
+     * @note  This will try to copy as much of the source as possible to this
+     *        string, starting with the first bit in each string.
+     * @note  See the other definition of this function for details and
+     *        restrictions.
+     */
+    void setString( const BitString & i_sStr )
+    {
+        setString( i_sStr, 0, i_sStr.getBitLen() );
+    }
+
   /*!
    Comparison
    \remarks The bitstrings must be the same length and have the same bits set to be equal
@@ -265,32 +299,6 @@ class BitString
    \endverbatim
    */
   void SetFieldJustify(uint32_t bit_position,uint32_t length,CPU_WORD value);
-
-  /*!
-   Set bits in this string based on provided string
-   \param source string
-   \post source bits are copied to this
-   \notes if source len > this len than extra source bits ignored.
-          if source len < this len than extra bits in this are uneffected
-          Bit strings may specify overlapping memory
-   */
-  void SetBits(const BitString & string);
-
-  /*!
-   Set bits in this string based on provided string
-   \param string: source string
-   \param pos: bit pos in source to start copy from
-   \param len: # of bits to copy
-   \param dpos: start bit pos in this string to copy to (def = 0)
-   \post source bits in given range are copied to this starting at dpos
-   \notes only bit in the given range are effected. if more source bits are
-          given than space in this string than the extra source bit are ignored.
-          Bit strings may specify overlapping memory.
-   */
-  void SetBits(const BitString & string,
-               unsigned int pos,
-               unsigned int len,
-               unsigned int dpos = 0);
 
   /*!
    Query if bit is set (1)
@@ -639,11 +647,6 @@ BitString & BitString::operator=
 inline uint32_t BitString::GetSetCount(void) const
 {
   return(GetSetCount(0, getBitLen()));
-}
-
-inline void BitString::SetBits(const BitString & string)
-{
-  SetBits(string, 0, string.getBitLen());
 }
 
 } // end namespace PRDF
