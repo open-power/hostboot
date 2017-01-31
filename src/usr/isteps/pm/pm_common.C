@@ -341,7 +341,7 @@ namespace HBPM
 
             // Check if we have a valid ring override section and
             //  include it in if so
-            void* l_ringOverrides = NULL;
+            void* l_ringOverrides = nullptr;
             l_errl = HBPM::getRingOvd(l_ringOverrides);
             if(l_errl)
             {
@@ -971,6 +971,10 @@ namespace HBPM
 
         do {
             io_overrideImg = nullptr;
+
+#ifdef __HOSTBOOT_RUNTIME
+            break;
+#endif
 
             // No overrides in secure mode
             if( SECUREBOOT::enabled() )
