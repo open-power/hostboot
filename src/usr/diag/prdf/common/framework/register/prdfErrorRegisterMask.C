@@ -110,14 +110,14 @@ const BIT_STRING_CLASS & ErrorRegisterMask::Read()
   scr_rc = scr.Read();
   bitString = *scr.GetBitString();
   // apply software mask
-  bitString.Mask(bitStringMask);
+  bitString.maskString(bitStringMask);
   // apply hardware mask - if scan comm register for it was specified
   if(&xMaskScr != NULL)  /*constant condition*/        // dg00
   {                                                    // dg00
     int32_t rc = xMaskScr.Read();                       // dg00
     if(rc == SUCCESS)                                  // dg00
     {                                                  // dg00
-      bitString.Mask(*(xMaskScr.GetBitString()));      // dg00
+      bitString.maskString(*(xMaskScr.GetBitString()));      // dg00
     }                                                  // dg00
   }                                                    // dg00
 

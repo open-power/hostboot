@@ -128,6 +128,24 @@ void BitString::setString( const BitString & i_sStr, uint32_t i_sPos,
 
 //------------------------------------------------------------------------------
 
+void BitString::maskString( const BitString & i_mask )
+{
+    // Get the length of the smallest string.
+    uint32_t actLen = std::min( getBitLen(), i_mask.getBitLen() );
+
+    for ( uint32_t pos = 0; pos < actLen; pos += CPU_WORD_BIT_LEN )
+    {
+        uint32_t len = std::min( actLen - pos, CPU_WORD_BIT_LEN );
+
+        CPU_WORD dVal =        GetField( pos, len );
+        CPU_WORD sVal = i_mask.GetField( pos, len );
+
+        SetField( pos, len, dVal & ~sVal );
+    }
+}
+
+//------------------------------------------------------------------------------
+
 uint32_t BitString::GetSetCount(uint32_t bit_position,
                                     uint32_t leng
                                     ) const
@@ -365,77 +383,6 @@ bool BitString::IsZero() const
     }
 
     return true; // everything was zero
-}
-
-// Function Specification //////////////////////////////////////////
-//
-//  Title:  Mask
-//
-//  Purpose:  This function masks the bits in the string with the
-//            corresponding bits in the specified Bit String.  For
-//            each corresponding position, if the bit in the
-//            parameter Bit String is set(1), the bit in this string
-//            is cleared(0). If the length of the parameter string
-//            is greater than the length of this string, then the
-//            extra bits are ignored.  If the length of the
-//            parameter string are less than this the length of
-//            this string, then the extra bits in this string are
-//            not modified.
-//
-//  Side-effects:  Bit String may be modified.
-//
-//  Dependencies:  None.
-//
-//  Time Complexity:  O(m) where m is the length
-//
-//  Examples:  Parameter String:  1001
-//             Old String:       1100
-//             New String:       0100
-//
-//             Parameter String:  100111
-//             Old String:       1100
-//             New String:       0100
-//
-//             Parameter String:  1001
-//             Old String:       110001
-//             New String:       010001
-//
-// End Function Specification //////////////////////////////////////
-
-void BitString::Mask
-(
- const BitString & string
- )
-{
-  CPU_WORD value, string_value;
-  uint32_t current_offset;
-  uint32_t l;
-
-  /* Use smaller length                                               */
-  l = std::min(iv_bitLen, string.iv_bitLen);
-
-  current_offset = 0;
-  while(true)
-  {
-    if(l > CPU_WORD_BIT_LEN)
-    {
-      /* Set values using full CPU_WORDs                              */
-      value = GetField(current_offset, CPU_WORD_BIT_LEN);
-      string_value = string.GetField(current_offset, CPU_WORD_BIT_LEN);
-      SetField(current_offset, CPU_WORD_BIT_LEN,
-               value & (~string_value));
-      l -= CPU_WORD_BIT_LEN;
-      current_offset += CPU_WORD_BIT_LEN;
-    }
-    else
-    {
-      /* Set value in remainder of last CPU_WORD                      */
-      value = GetField(current_offset, l);
-      string_value = string.GetField(current_offset, l);
-      SetField(current_offset, l, value & (~string_value));
-      break;
-    }
-  }
 }
 
 //-------------------------------------------------------------------------------------------------

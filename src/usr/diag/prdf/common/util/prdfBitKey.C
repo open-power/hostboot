@@ -326,7 +326,7 @@ void BitKey::removeBits(const BitKey & i_bk)
 {
   BitString mybs(iv_Capacity,(CPU_WORD *)DataPtr());
   const BitString yobs(i_bk.iv_Capacity,(CPU_WORD *)i_bk.cDataPtr());
-  mybs.Mask(yobs);
+  mybs.maskString(yobs);
 }
 
 //------------------------------------------------------------------------------

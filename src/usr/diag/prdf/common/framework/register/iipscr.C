@@ -120,7 +120,7 @@ uint32_t SCAN_COMM_REGISTER_CLASS::Read
   if(rc == SUCCESS)
   {
     BIT_STRING_CLASS & bitString = AccessBitString();
-    bitString.Mask(mask);
+    bitString.maskString(mask);
   }
 
   return(rc);
