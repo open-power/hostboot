@@ -24,7 +24,13 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <string.h>
+#include <common_ringId.H>
+
+namespace P9_RID
+{
+
 #include "p9_ringId.H"
+
 
 namespace PERV
 {
@@ -453,13 +459,19 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, CC, RL };
 };
 
-CHIPLET_TYPE p9_ringid_get_chiplet(RingID i_ringId)
+
+}; // namespace P9_RID
+
+
+using namespace P9_RID;
+
+ChipletType_t P9_RID::p9_ringid_get_chiplet(RingId_t i_ringId)
 {
     return RING_PROPERTIES[i_ringId].iv_type;
 }
 
-void p9_ringid_get_chiplet_properties(
-    CHIPLET_TYPE       i_chiplet,
+void P9_RID::p9_ringid_get_chiplet_properties(
+    ChipletType_t      i_chiplet,
     CHIPLET_DATA**     o_cpltData,
     GenRingIdList**    o_ringComm,
     GenRingIdList**    o_ringInst,
@@ -606,7 +618,7 @@ void p9_ringid_get_chiplet_properties(
     }
 }
 
-GenRingIdList* p9_ringid_get_ring_properties(RingID i_ringId)
+GenRingIdList* P9_RID::p9_ringid_get_ring_properties(RingId_t i_ringId)
 {
     CHIPLET_DATA*     l_cpltData;
     GenRingIdList*    l_ringList[2];    // 0: common, 1: instance
@@ -614,8 +626,8 @@ GenRingIdList* p9_ringid_get_ring_properties(RingID i_ringId)
     uint8_t           l_varNumb;
     int               i, j, n;
 
-    p9_ringid_get_chiplet_properties(
-        p9_ringid_get_chiplet(i_ringId),
+    P9_RID::p9_ringid_get_chiplet_properties(
+        P9_RID::p9_ringid_get_chiplet(i_ringId),
         &l_cpltData, &l_ringList[0], &l_ringList[1], &l_varOrder, &l_varNumb);
 
     if (!l_ringList[0])
