@@ -91,6 +91,12 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             FAPI_TRY(fapi2::putScom(TGT0, 0x5011008ull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501101bull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501101bull, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5011020ull, l_scom_buffer ));
 
             l_scom_buffer.insert<38, 1, 63, uint64_t>(((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
@@ -118,6 +124,12 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                     || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
                     || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)) );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5011028ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501103bull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501103bull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5011040ull, l_scom_buffer ));
@@ -149,6 +161,12 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             FAPI_TRY(fapi2::putScom(TGT0, 0x5011048ull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501105bull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501105bull, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5011060ull, l_scom_buffer ));
 
             l_scom_buffer.insert<38, 1, 63, uint64_t>(((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
@@ -176,6 +194,12 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                     || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
                     || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)) );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5011068ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501107bull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501107bull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5011100ull, l_scom_buffer ));
@@ -207,6 +231,12 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             FAPI_TRY(fapi2::putScom(TGT0, 0x5011108ull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501111bull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501111bull, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5011120ull, l_scom_buffer ));
 
             l_scom_buffer.insert<38, 1, 63, uint64_t>(((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
@@ -234,6 +264,12 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                     || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
                     || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)) );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5011128ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501113bull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501113bull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5011140ull, l_scom_buffer ));
@@ -265,6 +301,12 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             FAPI_TRY(fapi2::putScom(TGT0, 0x5011148ull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501115bull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501115bull, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5011160ull, l_scom_buffer ));
 
             l_scom_buffer.insert<38, 1, 63, uint64_t>(((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
@@ -292,6 +334,12 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                     || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
                     || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)) );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5011168ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501117bull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501117bull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5011200ull, l_scom_buffer ));
@@ -323,6 +371,12 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             FAPI_TRY(fapi2::putScom(TGT0, 0x5011208ull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501121bull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501121bull, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5011220ull, l_scom_buffer ));
 
             l_scom_buffer.insert<38, 1, 63, uint64_t>(((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
@@ -350,6 +404,12 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                     || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
                     || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)) );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5011228ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501123bull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501123bull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5011240ull, l_scom_buffer ));
@@ -381,6 +441,12 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             FAPI_TRY(fapi2::putScom(TGT0, 0x5011248ull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501125bull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501125bull, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5011260ull, l_scom_buffer ));
 
             l_scom_buffer.insert<38, 1, 63, uint64_t>(((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] == literal_2)
@@ -408,6 +474,12 @@ fapi2::ReturnCode p9_npu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                     || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == literal_2))
                     || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == literal_2)) );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5011268ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501127bull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501127bull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5011403ull, l_scom_buffer ));
