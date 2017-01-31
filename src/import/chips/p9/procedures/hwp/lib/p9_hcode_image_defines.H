@@ -53,7 +53,6 @@
 #ifndef __ASSEMBLER__
 #ifdef __cplusplus
 #ifndef __PPE_PLAT
-#include <p9_ringId.H>
 namespace p9_hcodeImageBuild
 {
 #endif //__PPE_PLAT
