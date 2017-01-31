@@ -309,7 +309,7 @@ CaptureData & CaptureData::operator=(const uint8_t *i_flatdata)
             BitStringBuffer bs(bytecount * 8);
             for(uint32_t bc = 0; bc < bytecount; ++bc)
             {
-                bs.SetFieldJustify(bc*8,8,(CPU_WORD)(*(i_flatdata+bc))); //mp01a
+                bs.setFieldJustify(bc*8,8,(CPU_WORD)(*(i_flatdata+bc))); //mp01a
             }
             i_flatdata += bytecount;
 

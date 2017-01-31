@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,15 +50,15 @@ errlHndl_t FileScomAccessor::Access(
     {
         case MopRegisterAccess::WRITE:
             // TODO: RTC 62076 move BitString class to 64-bit
-            data = (((uint64_t)bs.GetFieldJustify( 0, 32)) << 32) |
-                    ((uint64_t)bs.GetFieldJustify(32, 32));
+            data = (((uint64_t)bs.getFieldJustify( 0, 32)) << 32) |
+                    ((uint64_t)bs.getFieldJustify(32, 32));
             firData.putScom( i_target, registerId, data);
             break;
         case MopRegisterAccess::READ:
             firData.getScom( i_target, registerId, data);
             // TODO: RTC 62076 move BitString class to 64-bit
-            bs.SetFieldJustify( 0, 32, data >> 32);
-            bs.SetFieldJustify(32, 32, data      );
+            bs.setFieldJustify( 0, 32, data >> 32);
+            bs.setFieldJustify(32, 32, data      );
             break;
         default:
             PRDF_ERR(PRDF_FUNC "Wrong Operation:%u", operation);

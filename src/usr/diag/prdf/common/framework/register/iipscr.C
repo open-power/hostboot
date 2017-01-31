@@ -231,7 +231,7 @@ uint64_t SCAN_COMM_REGISTER_CLASS::GetBitFieldJustified( uint32_t i_pos,
         o_value <<= len_chunk; // Make room for new chunk.
 
         // Get chunk.
-        o_value |= static_cast<uint64_t>(bs->GetFieldJustify(pos, len_chunk));
+        o_value |= static_cast<uint64_t>(bs->getFieldJustify(pos, len_chunk));
     }
 
     return o_value;
@@ -261,7 +261,7 @@ void SCAN_COMM_REGISTER_CLASS::SetBitFieldJustified( uint32_t i_pos,
         value >>= i_len - (offset + len_chunk); // right justify
 
         // Set chunk.
-        bs.SetFieldJustify( i_pos + offset, len_chunk,
+        bs.setFieldJustify( i_pos + offset, len_chunk,
                             static_cast<CPU_WORD>(value) );
     }
 }

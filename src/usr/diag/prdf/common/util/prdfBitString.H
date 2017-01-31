@@ -138,6 +138,64 @@ class BitString
         return (i_bitLen + i_offset + CPU_WORD_BIT_LEN-1) / CPU_WORD_BIT_LEN;
     }
 
+    /**
+     * @brief  Returns a left-justified value of the given length from the bit
+     *         string starting at the given position.
+     * @param  i_pos The starting position of the target range.
+     * @param  i_len The number of bits of the target range.
+     * @return The value of the field range specified (left-justified).
+     * @pre    nullptr != getBufAddr()
+     * @pre    0 < i_len
+     * @pre    i_len <= CPU_WORD_BIT_LEN
+     * @pre    i_pos + i_len <= getBitLen()
+     */
+    CPU_WORD getField( uint32_t i_pos, uint32_t i_len ) const;
+
+    /**
+     * @brief  Returns a right-justified value of the given length from the bit
+     *         string starting at the given position.
+     * @param  i_pos The starting position of the target range.
+     * @param  i_len The number of bits of the target range.
+     * @return The value of the field range specified (right-justified).
+     * @pre    nullptr != getBufAddr()
+     * @pre    0 < i_len
+     * @pre    i_len <= CPU_WORD_BIT_LEN
+     * @pre    i_pos + i_len <= getBitLen()
+     */
+    CPU_WORD getFieldJustify( uint32_t i_pos, uint32_t i_len ) const
+    {
+        return getField(i_pos, i_len) >> (CPU_WORD_BIT_LEN - i_len);
+    }
+
+    /**
+     * @brief  Sets a left-justified value of the given length into the bit
+     *         string starting at the given position.
+     * @param i_pos The starting position of the target range.
+     * @param i_len The number of bits of the target range.
+     * @param i_val The left-justified value to set.
+     * @pre   nullptr != getBufAddr()
+     * @pre   0 < i_len
+     * @pre   i_len <= CPU_WORD_BIT_LEN
+     * @pre   i_pos + i_len <= getBitLen()
+     */
+    void setField( uint32_t i_pos, uint32_t i_len, CPU_WORD i_val );
+
+    /**
+     * @brief  Sets a right-justified value of the given length into the bit
+     *         string starting at the given position.
+     * @param i_pos The starting position of the target range.
+     * @param i_len The number of bits of the target range.
+     * @param i_val The right-justified value to set.
+     * @pre   nullptr != getBufAddr()
+     * @pre   0 < i_len
+     * @pre   i_len <= CPU_WORD_BIT_LEN
+     * @pre   i_pos + i_len <= getBitLen()
+     */
+    void setFieldJustify( uint32_t i_pos, uint32_t i_len, CPU_WORD i_val )
+    {
+        setField( i_pos, i_len, i_val << (CPU_WORD_BIT_LEN - i_len) );
+    }
+
     /** @brief Sets the entire bit string to 1's. */
     void setAll() { setPattern(CPU_WORD_MASK); }
 
@@ -263,55 +321,6 @@ class BitString
   uint32_t GetSetCount(uint32_t bit_position, uint32_t leng) const;
 
   /*!
-   Get a copy of a subfield within the bitstring
-   \param starting bit position
-   \param # of bits in the field
-   \return Returned value is left justified (See GetFieldJustified)
-   \pre (bit_position + length) <= getBitLen(); length <= CPU_WORD_BIT_LEN
-   \post none
-   */
-  CPU_WORD GetField(uint32_t bit_position,uint32_t length) const;
-
-  /*!
-   Get a copy of a subfield within the bitstring
-   \param starting bit position
-   \param # of bits in the field
-   \return Returned value is right justified (See GetField)
-   \pre (bit_position + length) <= getBitLen(); length <= CPU_WORD_BIT_LEN
-   \post none
-   */
-  CPU_WORD GetFieldJustify(uint32_t bit_position,uint32_t length) const;
-
-  /*!
-   Set value into a subfield within the bitstring
-   \param starting bit position
-   \param # of bits in the field
-   \pre (bit_position + length) <= getBitLen(); length <= CPU_WORD_BIT_LEN
-   \post The bits are set from value (value assumed left justified)
-   \verbatim
-          this   -> '00100110011....'b
-          SetField(3,5,0xf8000000)
-          result -> '00111111011....'b
-   \endverbatim
-   */
-  void SetField(uint32_t bit_position,uint32_t length,CPU_WORD value);
-
-
-  /*!
-   Set value into a subfield within the bitstring
-   \param starting bit position
-   \param # of bits in the field
-   \pre (bit_position + length) <= getBitLen(); length <= CPU_WORD_BIT_LEN
-   \post The bits are set from value (value assumed right justified)
-   \verbatim
-          this   -> '00100110011....'b
-          SetField(3,5,0x0000001f)
-          result -> '00111111011....'b
-   \endverbatim
-   */
-  void SetFieldJustify(uint32_t bit_position,uint32_t length,CPU_WORD value);
-
-  /*!
    Query if bit is set (1)
    \returns [true|false]
    \param iPos: bit position to test
@@ -344,24 +353,6 @@ class BitString
    \returns [true | false]
    */
   bool IsZero(void) const;
-
-  /*!
-   Utility to Right justify a "Left-justified" value
-   \param iLen: length of bit field to justify
-   \param iValue: the value to justify
-   \pre iLen <= CPU_WORD_BIT_LEN
-   */
-  static CPU_WORD RIGHT_SHIFT(uint32_t iLen,
-                              CPU_WORD iValue);
-
-  /*!
-   Utility to Left justify a "right-justified" value
-   \param iLen: length of bit field to justify
-   \param iValue: the value to justify
-   \pre iLen <= CPU_WORD_BIT_LEN
-   */
-  static CPU_WORD LEFT_SHIFT(uint32_t l,
-                             CPU_WORD value);
 
   /*!
    bitwise NOT
@@ -558,67 +549,6 @@ std::ostream & operator<<( std::ostream & out,
                       const BitString & bit_string);
 
 #endif
-
-/*--------------------------------------------------------------------*/
-/*  Inline Member Function Definitions                                */
-/*--------------------------------------------------------------------*/
-
-// Function Specification ///////////////////////////////////////////
-//
-// Title:  RIGHT_SHIFT
-//
-// Purpose:  This function shifts the bit field right so that the
-//           specified number of bits are contained in the right most
-//           bits in the value.  The resulting value is right
-//           justified.
-//
-// Side-effects:  None.
-//
-// Dependencies:  Parameter length(l) must be less than
-//                CPU_WORD_SIZE for proper results.
-//
-// End Function Specification //////////////////////////////////////
-
-inline
-CPU_WORD BitString::RIGHT_SHIFT
-(
- uint32_t l,
- /*!i Length of bit field                                         */
- CPU_WORD value
- /*!i Bit field value to shift                                    */
- )
-/*!o Bit field value                                             */
-{
-  //  assert(l <= CPU_WORD_BIT_LEN);
-
-  return(value >> (CPU_WORD_BIT_LEN - l));
-}
-
-// Function Specification ///////////////////////////////////////////
-//
-// Title:  LEFT_SHIFT
-//
-// Purpose:  This function shifts the bit field left so that the
-//           specified number of bits are contained in the left most
-//           bits in the value.  The resulting value is left
-//           justified.
-//
-// Side-effects:  None.
-//
-// Dependencies:  Parameter length(l) must be less than
-//                CPU_WORD_SIZE for proper results.
-//
-// End Function Specification //////////////////////////////////////
-
-inline
-CPU_WORD BitString::LEFT_SHIFT
-(
- uint32_t l,
- CPU_WORD value
- )
-{
-  return(value << (CPU_WORD_BIT_LEN - l));
-}
 
 inline
 BitString & BitString::operator=
