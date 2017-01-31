@@ -37,18 +37,22 @@
 //  *HWP Consumed by: HOSTBOOT, CRONUS
 //
 
-#include    <stdint.h>
+#include  <stdint.h>
+#include  <p9_scan_compression.H>
+
+namespace P9_RID
+{
+#include  <p9_ringId.H>
+}
+
+#include  <p9_mvpd_ring_funcs.H>
 
 //  fapi2 support
-#include    <fapi2.H>
-#include    <utils.H>
-#include    <mvpd_access.H>
-#include    <p9_mvpd_ring_funcs.H>
+#include  <fapi2.H>
+#include  <utils.H>
+#include  <mvpd_access.H>
 
-//      pull in CompressedScanData def from proc_slw_build HWP
-#include <p9_scan_compression.H>
-#include <p9_ring_identification.H>
-#include <p9_ringId.H>
+using   namespace P9_RID;
 
 extern "C"
 {
@@ -61,7 +65,7 @@ extern "C"
             & i_fapiTarget,
             CompressedScanData* i_pRing,
             uint8_t             i_chipletId,
-            uint8_t             i_ringId,
+            RingId_t            i_ringId,
             uint32_t            i_ringBufsize);
 
     fapi2::ReturnCode mvpdRingFuncFind( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
@@ -70,7 +74,7 @@ extern "C"
                                         fapi2::MvpdKeyword   i_keyword,
                                         const uint8_t   i_chipletId,
                                         const uint8_t   i_evenOdd,
-                                        const uint8_t   i_ringId,
+                                        const RingId_t  i_ringId,
                                         uint8_t*        i_pRecordBuf,
                                         uint32_t        i_recordBufLenfapi,
                                         uint8_t*&       o_rRingBuf,
@@ -208,7 +212,7 @@ extern "C"
                                     fapi2::MvpdKeyword   i_keyword,
                                     const uint8_t        i_chipletId,
                                     const uint8_t        i_evenOdd,
-                                    const uint8_t        i_ringId,
+                                    const RingId_t       i_ringId,
                                     uint8_t*             o_pRingBuf,
                                     uint32_t&            io_rRingBufsize )
     {
@@ -439,7 +443,7 @@ extern "C"
                                            & i_fapiTarget,
                                            const uint8_t       i_chipletId,
                                            const uint8_t       i_evenOdd,
-                                           const uint8_t       i_ringId,
+                                           const RingId_t      i_ringId,
                                            uint8_t**           io_pBufLeft,
                                            uint32_t*           io_pBufLenLeft,
                                            CompressedScanData** o_pScanData)
@@ -523,14 +527,15 @@ extern "C"
 
         // check if this ring matches the given criteria
         // (ring ID, chiplet Id, and even/odd for EX)
-        if ( l_pScanDataOld->iv_ringId == i_ringId       &&
+        if ( ( i_ringId <= 0xff &&
+               l_pScanDataOld->iv_ringId == i_ringId )   &&
              l_pScanDataOld->iv_chipletId == i_chipletId &&
-             (l_evenOddMask == 0 ||
-              be64toh(l_pScanDataOld->iv_scanSelect) & l_evenOddMask) )
+             ( l_evenOddMask == 0 ||
+               be64toh(l_pScanDataOld->iv_scanSelect) & l_evenOddMask ) )
         {
             // look up ring in p9_ringId and retrieve scanAddr
-            GenRingIdList* l_ringProp = p9_ringid_get_ring_properties(
-                                            (RingID)i_ringId);
+            GenRingIdList* l_ringProp = p9_ringid_get_ring_properties(i_ringId);
+
             FAPI_ASSERT(l_ringProp,
                         fapi2::MVPD_RINGID_DATA_NOT_FOUND().
                         set_CHIP_TARGET(i_fapiTarget).
@@ -608,7 +613,7 @@ extern "C"
                                            & i_fapiTarget,
                                            const uint8_t       i_chipletId,
                                            const uint8_t       i_evenOdd,
-                                           const uint8_t       i_ringId,
+                                           const RingId_t      i_ringId,
                                            uint8_t**           io_pBufLeft,
                                            uint32_t*           io_pBufLenLeft,
                                            CompressedScanData** o_pScanData)
@@ -746,7 +751,7 @@ extern "C"
                                         fapi2::MvpdKeyword  i_keyword,
                                         const uint8_t       i_chipletId,
                                         const uint8_t       i_evenOdd,
-                                        const uint8_t       i_ringId,
+                                        const RingId_t      i_ringId,
                                         uint8_t*            i_pRecordBuf,
                                         uint32_t            i_recordBufLen,
                                         uint8_t*&           o_rpRing,
@@ -888,7 +893,7 @@ extern "C"
         & i_fapiTarget,
         CompressedScanData*  i_pRingBuf,
         uint8_t              i_chipletId,
-        uint8_t              i_ringId,
+        RingId_t             i_ringId,
         uint32_t             i_ringBufsize)
     {
         uint8_t l_failedTestVec = 0x00;
