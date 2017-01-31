@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 1996,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -52,7 +54,7 @@ namespace PRDF
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
-class BIT_STRING_CLASS;
+class BitString;
 struct STEP_CODE_DATA_STRUCT;
 
 class ErrorRegisterType
@@ -103,7 +105,7 @@ class ErrorRegisterType
 
 protected:
 
-  virtual const BIT_STRING_CLASS & Read(ATTENTION_TYPE i_attn) = 0;
+  virtual const BitString & Read(ATTENTION_TYPE i_attn) = 0;
   // Function Specification ********************************************
   //
   // Purpose:      Read data in from hardware for this error register
@@ -118,7 +120,7 @@ protected:
   //
   // End Function Specification ****************************************
 
-  virtual BitKey Filter(const BIT_STRING_CLASS & bs) = 0;
+  virtual BitKey Filter(const BitString & bs) = 0;
   // Function Specification ********************************************
   //
   // Purpose:      Filter out unwanted bits in the bit string.

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -33,7 +35,7 @@
 #include <prdfScomRegisterAccess.H>
 #include <prdfTargetFwdRef.H>
 
-class BIT_STRING_CLASS;
+class BitString;
 
 namespace PRDF
 {
@@ -76,7 +78,7 @@ class RegDataCache
      * @param i_reg  Pointer to register to be read.
      * @return A reference to the data buffer associated with the register.
      */
-    BIT_STRING_CLASS & read( ExtensibleChip * i_chip,
+    BitString & read( ExtensibleChip * i_chip,
                              const SCAN_COMM_REGISTER_CLASS * i_reg );
 
     /**
@@ -97,7 +99,7 @@ class RegDataCache
      * @param i_pRegister   base part of register entry to be queried in cache.
      * @return pointer to cache entry associated with a given register
      */
-     BIT_STRING_CLASS * queryCache( ExtensibleChip* i_pChip,
+     BitString * queryCache( ExtensibleChip* i_pChip,
                             const SCAN_COMM_REGISTER_CLASS * i_pRegister )const;
     /**
      * @brief Queries if a specific entry exist in cache.
@@ -105,11 +107,11 @@ class RegDataCache
      * @return pointer to cache entry associated with a given register
      */
 
-    BIT_STRING_CLASS * queryCache(
+    BitString * queryCache(
                         const ScomRegisterAccess & i_scomAccessKey )const;
   private: // data
 
-    typedef std::map<ScomRegisterAccess, BIT_STRING_CLASS *> CacheDump;
+    typedef std::map<ScomRegisterAccess, BitString *> CacheDump;
     CacheDump iv_cachedRead;
 
 };

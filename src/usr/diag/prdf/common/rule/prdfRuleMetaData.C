@@ -567,7 +567,7 @@ int32_t RuleMetaData::CaptureErrorData( CaptureData & io_cap,
 
             if( l_primReg )
             {
-                const BIT_STRING_CLASS *l_bitStringPtr =
+                const BitString *l_bitStringPtr =
                                         l_primReg->GetBitString();
                 if(l_bitStringPtr->isZero())
                 {

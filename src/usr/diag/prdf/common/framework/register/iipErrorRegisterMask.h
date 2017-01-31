@@ -159,7 +159,7 @@ public:
                             to using it for any Analysis.
    </ul><br>
    */
-  void SetMaskBits(const BIT_STRING_CLASS & bitString);
+  void SetMaskBits(const BitString & bitString);
 
 protected:
 
@@ -176,7 +176,7 @@ protected:
                             return code from mops scr access
    </ul><br>
    */
-  virtual const BIT_STRING_CLASS & Read();
+  virtual const BitString & Read();
 
 
   /**
@@ -217,7 +217,7 @@ private:  // Data
 inline void ErrorRegisterMask::SetMaskBit(uint32_t bitPosition)
 { bitStringMask.setBit(bitPosition); }
 
-inline void ErrorRegisterMask::SetMaskBits(const BIT_STRING_CLASS & bitString)
+inline void ErrorRegisterMask::SetMaskBits(const BitString & bitString)
 { bitStringMask.setString(bitString); }
 
 } // end namespace PRDF

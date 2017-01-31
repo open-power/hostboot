@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -84,7 +86,7 @@ namespace PRDF
 
             //  void processCmd(const std::string & cmd, std::string & response);
             void processCmd(TARGETING::TargetHandle_t i_ptargetHandle,
-                            BIT_STRING_CLASS & bs,
+                            BitString & bs,
                             uint64_t registerId,
                             SimOp i_op);
 
@@ -92,13 +94,13 @@ namespace PRDF
         private:
 
             void Read(TARGETING::TargetHandle_t i_ptargetHandle,
-                      BIT_STRING_CLASS & bs,
+                      BitString & bs,
                       uint64_t registerId);
             void Write(TARGETING::TargetHandle_t i_ptargetHandle,
-                       BIT_STRING_CLASS & bs,
+                       BitString & bs,
                        uint64_t registerId);
             void Expect(TARGETING::TargetHandle_t i_ptargetHandle,
-                        BIT_STRING_CLASS & bs,
+                        BitString & bs,
                         uint64_t registerId);
             //  void Setup(std::istringstream & iss, std::string & response);
             //  void Expect(std::istringstream & iss, std::string & response);

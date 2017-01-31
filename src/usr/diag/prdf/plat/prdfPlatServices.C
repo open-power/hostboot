@@ -115,7 +115,7 @@ bool isSpConfigFsp()
 
 //------------------------------------------------------------------------------
 
-uint32_t getScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
+uint32_t getScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
                    uint64_t i_address)
 {
     errlHndl_t errl = NULL;
@@ -165,7 +165,7 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
 
 //------------------------------------------------------------------------------
 
-uint32_t putScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
+uint32_t putScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
                    uint64_t i_address)
 {
     errlHndl_t errl = NULL;

@@ -61,7 +61,7 @@ class NotRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint32_t Read() const { return iv_child->Read();  }
     virtual uint32_t Write()      { return iv_child->Write(); }
 
-    const BIT_STRING_CLASS * GetBitString(
+    const BitString * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
         (*iv_bs) = ~(*iv_child->GetBitString(i_type));
@@ -81,8 +81,8 @@ class NotRegister : public SCAN_COMM_REGISTER_CLASS
     { return iv_child >= r.iv_child; }
 
   protected:
-    BIT_STRING_CLASS & AccessBitString(void) { return iv_iBS; }
-    void SetBitString(const BIT_STRING_CLASS *) {}
+    BitString & AccessBitString(void) { return iv_iBS; }
+    void SetBitString(const BitString *) {}
 
   private:
     SCAN_COMM_REGISTER_CLASS * iv_child;
@@ -119,7 +119,7 @@ class SummaryRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint32_t Read() const { return iv_child->Read();  }
     virtual uint32_t Write()      { return iv_child->Write(); }
 
-    const BIT_STRING_CLASS * GetBitString(
+    const BitString * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
         iv_bs->clearAll();
@@ -156,8 +156,8 @@ class SummaryRegister : public SCAN_COMM_REGISTER_CLASS
     }
 
   protected:
-    BIT_STRING_CLASS & AccessBitString(void) { return iv_iBS; }
-    void SetBitString(const BIT_STRING_CLASS *) {}
+    BitString & AccessBitString(void) { return iv_iBS; }
+    void SetBitString(const BitString *) {}
 
   private:
     SCAN_COMM_REGISTER_CLASS * iv_child;
@@ -195,7 +195,7 @@ class LeftShiftRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint32_t Read() const { return iv_child->Read();  }
     virtual uint32_t Write()      { return iv_child->Write(); }
 
-    const BIT_STRING_CLASS * GetBitString(
+    const BitString * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
         (*iv_bs) = (*iv_child->GetBitString(i_type)) << iv_amount;
@@ -223,8 +223,8 @@ class LeftShiftRegister : public SCAN_COMM_REGISTER_CLASS
     }
 
   protected:
-    BIT_STRING_CLASS & AccessBitString(void) { return iv_iBS; }
-    void SetBitString(const BIT_STRING_CLASS *) {}
+    BitString & AccessBitString(void) { return iv_iBS; }
+    void SetBitString(const BitString *) {}
 
   private:
     SCAN_COMM_REGISTER_CLASS * iv_child;
@@ -262,7 +262,7 @@ class RightShiftRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint32_t Read() const { return iv_child->Read();  }
     virtual uint32_t Write()      { return iv_child->Write(); }
 
-    const BIT_STRING_CLASS * GetBitString(
+    const BitString * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
         (*iv_bs) = (*iv_child->GetBitString(i_type)) >> iv_amount;
@@ -290,8 +290,8 @@ class RightShiftRegister : public SCAN_COMM_REGISTER_CLASS
     }
 
   protected:
-    BIT_STRING_CLASS & AccessBitString(void) { return iv_iBS; }
-    void SetBitString(const BIT_STRING_CLASS *) {}
+    BitString & AccessBitString(void) { return iv_iBS; }
+    void SetBitString(const BitString *) {}
 
   private:
     SCAN_COMM_REGISTER_CLASS * iv_child;
@@ -338,7 +338,7 @@ class AndRegister : public SCAN_COMM_REGISTER_CLASS
         return iv_left->Write() | iv_right->Write();
     }
 
-    const BIT_STRING_CLASS * GetBitString(
+    const BitString * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
         (*iv_bs) = *iv_left->GetBitString(i_type);
@@ -372,8 +372,8 @@ class AndRegister : public SCAN_COMM_REGISTER_CLASS
     }
 
   protected:
-    BIT_STRING_CLASS & AccessBitString(void) { return iv_iBS; }
-    void SetBitString(const BIT_STRING_CLASS *) {}
+    BitString & AccessBitString(void) { return iv_iBS; }
+    void SetBitString(const BitString *) {}
 
   private:
     SCAN_COMM_REGISTER_CLASS * iv_left;
@@ -421,7 +421,7 @@ class OrRegister : public SCAN_COMM_REGISTER_CLASS
         return iv_left->Write() | iv_right->Write();
     }
 
-    const BIT_STRING_CLASS * GetBitString(
+    const BitString * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE ) const
     {
         (*iv_bs) = *iv_left->GetBitString(i_type);
@@ -455,8 +455,8 @@ class OrRegister : public SCAN_COMM_REGISTER_CLASS
     }
 
   protected:
-    BIT_STRING_CLASS & AccessBitString(void) { return iv_iBS; }
-    void SetBitString(const BIT_STRING_CLASS *) {}
+    BitString & AccessBitString(void) { return iv_iBS; }
+    void SetBitString(const BitString *) {}
 
   private:
     SCAN_COMM_REGISTER_CLASS * iv_left;
@@ -482,15 +482,15 @@ class NullRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint32_t Read() const { return 0; }
     virtual uint32_t Write()      { return 0; }
 
-    const BIT_STRING_CLASS * GetBitString(
+    const BitString * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
         return &iv_iBS;
     }
 
   protected:
-    BIT_STRING_CLASS & AccessBitString(void) { return iv_iBS; }
-    void SetBitString(const BIT_STRING_CLASS *) {}
+    BitString & AccessBitString(void) { return iv_iBS; }
+    void SetBitString(const BitString *) {}
 
   private:
     BitStringBuffer iv_iBS;
@@ -563,7 +563,7 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
                iv_hostattn->Write();
     }
 
-    const BIT_STRING_CLASS * GetBitString(
+    const BitString * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
         switch (i_type)
@@ -618,8 +618,8 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
     }
 
   protected:
-    BIT_STRING_CLASS & AccessBitString(void) { return iv_iBS; }
-    void SetBitString(const BIT_STRING_CLASS *) {}
+    BitString & AccessBitString(void) { return iv_iBS; }
+    void SetBitString(const BitString *) {}
 
   private:
     static NullRegister cv_null;
@@ -654,7 +654,7 @@ class ConstantRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint32_t Read() const { return SUCCESS; }
     virtual uint32_t Write()      { return SUCCESS; }
 
-    const BIT_STRING_CLASS * GetBitString(
+    const BitString * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
         return &iv_iBS;
@@ -669,8 +669,8 @@ class ConstantRegister : public SCAN_COMM_REGISTER_CLASS
     { return r.iv_iBS == iv_iBS; }
 
   protected:
-    BIT_STRING_CLASS & AccessBitString(void) { return iv_iBS; }
-    void SetBitString(const BIT_STRING_CLASS *) {}
+    BitString & AccessBitString(void) { return iv_iBS; }
+    void SetBitString(const BitString *) {}
 
   private:
     BitStringBuffer iv_iBS;

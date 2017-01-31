@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@ SimScomAccessor::~SimScomAccessor()
 }
 
 uint32_t SimScomAccessor::Access(TARGETING::TargetHandle_t i_target,
-                                     BIT_STRING_CLASS & bs,
+                                     BitString & bs,
                                      uint64_t registerId,
                                      MopRegisterAccess::Operation operation) const
 {
