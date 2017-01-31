@@ -46,6 +46,8 @@ enum mvpdRingFuncOp
     MVPD_RING_SET,
 };
 
+#define MVPD_END_OF_DATA_MAGIC (uint32_t)0x454E4400 // "END "
+
 typedef ReturnCode (*mvpdRingFuncs_FP_t) (
     const Target<TARGET_TYPE_PROC_CHIP>&,
     mvpdRingFuncOp,
@@ -53,7 +55,7 @@ typedef ReturnCode (*mvpdRingFuncs_FP_t) (
     MvpdKeyword,
     const uint8_t,
     const uint64_t,
-    const uint8_t,
+    const RingId_t,
     uint8_t*,
     uint32_t& );
 
@@ -87,7 +89,7 @@ extern "C"
                              MvpdKeyword          i_keyword,
                              const uint8_t        i_chipletId,
                              const uint8_t        i_evenOdd,
-                             const uint8_t        i_ringId,
+                             const RingId_t       i_ringId,
                              uint8_t*             o_pRingBuf,
                              uint32_t&            io_rRingBufsize );
 
