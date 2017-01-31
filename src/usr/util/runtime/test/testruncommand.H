@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,5 +79,54 @@ class RunCommandTest : public CxxTest::TestSuite
         {
             TS_FAIL( "testRunCommandBad> Error from no args" );
         }
+    }
+
+
+    /**
+     *  @brief Test scom operations
+     */
+    void testRunCommandScom(void)
+    {
+        int rc = 0;
+        char* outstr = NULL;
+
+        char arg0[10]; memcpy( arg0, "getscom", 8 );
+        char arg1[15]; memcpy( arg1, "0x00050000", 11 );//proc0
+        char arg2[15]; memcpy( arg2, "0x02010803", 11 );//CXA FIR Mask
+        char arg3[30]; memcpy( arg3, "0x1122334455667788", 19 );
+        const char* argv[] = { arg0, arg1, arg2, arg3 };
+
+        // do a read
+        rc = (getRuntimeInterfaces()->run_command)( 3, argv, &outstr );
+        if( rc )
+        {
+            TS_FAIL( "testRunCommandScom1> rc=%d", rc );
+        }
+        TRACFCOMP( Util::g_util_trace, "testRunCommandScom1> rc=%d :: %s",
+                                        rc, outstr == NULL ? "null" : outstr );
+        if( outstr ) delete[] outstr;
+
+        // do a write
+        memcpy( arg0, "putscom", 8 );
+        rc = (getRuntimeInterfaces()->run_command)( 4, argv, &outstr );
+        if( rc )
+        {
+            TS_FAIL( "testRunCommandScom2> rc=%d", rc );
+        }
+        TRACFCOMP( Util::g_util_trace, "testRunCommandScom2> rc=%d :: %s",
+                                        rc, outstr == NULL ? "null" : outstr );
+        if( outstr ) delete[] outstr;
+
+        // read again to check data (in trace only)
+        memcpy( arg0, "getscom", 8 );
+        rc = (getRuntimeInterfaces()->run_command)( 3, argv, &outstr );
+        if( rc )
+        {
+            TS_FAIL( "testRunCommandScom3> rc=%d", rc );
+        }
+        TRACFCOMP( Util::g_util_trace, "testRunCommandScom3> rc=%d :: %s",
+                                        rc, outstr == NULL ? "null" : outstr );
+        if( outstr ) delete[] outstr;
+
     }
 };

@@ -231,12 +231,13 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         {
             int rc = 0;
 
-            TRACFCOMP(g_trac_hbrt,
-                      "Scom write chipid: 0x%08x Address: 0x%08x",
-                      chipid,
-                      addr);
-
             uint64_t * data64 = static_cast<uint64_t *>(data);
+
+            TRACFCOMP(g_trac_hbrt,
+                      "Scom write chipid:0x%.8x Address:0x%08x Data:0x%16x",
+                      chipid,
+                      addr,
+                      *data64);
 
             SCOM_KEY scomKey(chipid,addr);
             cv_scomMap[scomKey] = *data64;
