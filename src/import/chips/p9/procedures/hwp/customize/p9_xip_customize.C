@@ -48,7 +48,6 @@
 #include <p9_tor.H>
 #include <p9_scan_compression.H>
 #include <p9_infrastruct_help.H>
-#include <p9_ringId.H>
 
 enum MvpdRingStatus
 {
@@ -267,7 +266,7 @@ fapi_try_exit:
 // Parameter list:
 // const fapi2::Target &i_target:    Processor chip target.
 // void*     i_overlaysSection:  Pointer to extracted DD section in hw image
-// RingID    i_ringId:           GPTR ring id
+// RingId_t  i_ringId:           GPTR ring id
 // void*     io_ringBuf2:        Work buffer which contains RS4 overlay ring on return.
 // void*     io_ringBuf3:        Work buffer which contains data+care raw overlay ring on return.
 // uint32_t* o_ovlyUncmpSize     Uncompressed overlay ring size
@@ -278,10 +277,10 @@ int get_overlays_ring(
 fapi2::ReturnCode get_overlays_ring(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
 #endif
-    void* i_overlaysSection,
-    RingID i_ringId,
-    void** io_ringBuf2,
-    void** io_ringBuf3,
+    void*     i_overlaysSection,
+    RingId_t  i_ringId,
+    void**    io_ringBuf2,
+    void**    io_ringBuf3,
     uint32_t* o_ovlyUncmpSize)
 {
     ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
@@ -300,11 +299,11 @@ fapi2::ReturnCode get_overlays_ring(
     FAPI_DBG("Entering get_overlays_ring");
 
     // Get Gptr overlay ring from overlays section into ringBuf2
-    l_rc = P9_TOR::tor_get_single_ring(
+    l_rc = tor_get_single_ring(
                i_overlaysSection,
                l_ddLevel,
                i_ringId,
-               P9_TOR::SBE,
+               PT_SBE,
                OVERLAY,
                l_instanceId,
                io_ringBuf2,  //Has RS4 Gptr overlay ring on return
@@ -557,7 +556,7 @@ fapi2::ReturnCode process_gptr_rings(
     ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     uint32_t l_ovlyUncmpSize = 0;
-    RingID   l_vpdRingId   = (RingID)be16toh(((CompressedScanData*)io_vpdRing)->iv_ringId);
+    RingId_t l_vpdRingId   = (RingId_t)be16toh(((CompressedScanData*)io_vpdRing)->iv_ringId);
     uint32_t l_vpdScanAddr = be32toh(((CompressedScanData*)io_vpdRing)->iv_scanAddr);
 
     FAPI_DBG("Entering process_gptr_rings");
@@ -873,106 +872,20 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                                   (i_ring.vpdRingClass == VPD_RING_CLASS_EX_INS ? 1 : 0)) +
                                  i_evenOdd;
 
+        PpeType_t l_PpeType;
+
         switch (i_sysPhase)
         {
             case SYSPHASE_HB_SBE:
-                l_rc = tor_append_ring(
-                           i_ringSection,
-                           io_ringSectionSize, // In: Exact size. Out: Updated size.
-                           i_ringBuf2,
-                           i_ringBufSize2,  // Max size.
-                           (RingID)i_ring.ringId,
-                           P9_TOR::SBE,     // We're working on the SBE image
-                           P9_TOR::ALLRING, // No-care
-                           BASE,            // All VPD rings are Base ringVariant
-                           l_chipletTorId,  // Chiplet instance TOR Index
-                           i_vpdRing );     // The VPD RS4 ring container
-
-                if (l_rc == TOR_SUCCESS)
-                {
-                    FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
-                             i_ring.ringId, i_evenOdd, i_chipletId);
-                }
-                else
-                {
-                    FAPI_ASSERT( false,
-                                 fapi2::XIPC_TOR_APPEND_RING_FAILED().
-                                 set_CHIP_TARGET(i_procTarget).
-                                 set_TOR_RC(l_rc).
-                                 set_RING_ID(i_ring.ringId).
-                                 set_OCCURRENCE(1),
-                                 "tor_append_ring() failed in HB_SBE phase w/l_rc=%d for ringId=0x%x",
-                                 l_rc, i_ring.ringId );
-                }
-
+                l_PpeType = PT_SBE;
                 break;
 
             case SYSPHASE_RT_CME:
-                l_rc = tor_append_ring(
-                           i_ringSection,
-                           io_ringSectionSize, // In: Exact size. Out: Updated size.
-                           i_ringBuf2,
-                           i_ringBufSize2,  // Max size.
-                           (RingID)i_ring.ringId,
-                           P9_TOR::CME,     // We're working on the SBE image
-                           P9_TOR::ALLRING, // No-care
-                           BASE,            // All VPD rings are Base ringVariant
-                           l_chipletTorId,  // Chiplet instance ID
-                           i_vpdRing );     // The VPD RS4 ring container
-
-                if (l_rc == TOR_SUCCESS)
-                {
-                    FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
-                             i_ring.ringId, i_evenOdd, i_chipletId);
-                }
-                else
-                {
-                    FAPI_ASSERT( false,
-                                 fapi2::XIPC_TOR_APPEND_RING_FAILED().
-                                 set_CHIP_TARGET(i_procTarget).
-                                 set_TOR_RC(l_rc).
-                                 set_RING_ID(i_ring.ringId).
-                                 set_OCCURRENCE(2),
-                                 "tor_append_ring() failed in RT_CME phase w/l_rc=%d for ringId=0x%x",
-                                 l_rc, i_ring.ringId );
-                }
-
-                FAPI_DBG("(After tor_append) io_ringSectionSize = %d", io_ringSectionSize);
-
+                l_PpeType = PT_CME;
                 break;
 
             case SYSPHASE_RT_SGPE:
-                l_rc = tor_append_ring(
-                           i_ringSection,
-                           io_ringSectionSize, // In: Exact size. Out: Updated size.
-                           i_ringBuf2,
-                           i_ringBufSize2,  // Max size.
-                           (RingID)i_ring.ringId,
-                           P9_TOR::SGPE,    // We're working on the SGPE image
-                           P9_TOR::ALLRING, // No-care
-                           BASE,            // All VPD rings are Base ringVariant
-                           l_chipletTorId,  // Chiplet instance ID
-                           i_vpdRing );     // The VPD RS4 ring container
-
-                if (l_rc == TOR_SUCCESS)
-                {
-                    FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
-                             i_ring.ringId, i_evenOdd, i_chipletId);
-                }
-                else
-                {
-                    FAPI_ASSERT( false,
-                                 fapi2::XIPC_TOR_APPEND_RING_FAILED().
-                                 set_CHIP_TARGET(i_procTarget).
-                                 set_TOR_RC(l_rc).
-                                 set_RING_ID(i_ring.ringId).
-                                 set_OCCURRENCE(3),
-                                 "tor_append_ring() failed in RT_SGPE phase w/l_rc=%d for ringId=0x%x",
-                                 l_rc, i_ring.ringId );
-                }
-
-                FAPI_DBG("(After tor_append) io_ringSectionSize = %d", io_ringSectionSize);
-
+                l_PpeType = PT_SGPE;
                 break;
 
             default:
@@ -985,6 +898,32 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                              i_sysPhase );
                 break;
         } // End switch(sysPhase)
+
+        l_rc = tor_append_ring(
+                   i_ringSection,
+                   io_ringSectionSize, // In: Exact size. Out: Updated size.
+                   i_ringBuf2,
+                   i_ringBufSize2,  // Max size.
+                   i_ring.ringId,
+                   l_PpeType,
+                   ALLRING, // No-care
+                   BASE,            // All VPD rings are Base ringVariant
+                   l_chipletTorId,  // Chiplet instance TOR Index
+                   i_vpdRing );     // The VPD RS4 ring container
+
+        FAPI_ASSERT( l_rc == TOR_SUCCESS,
+                     fapi2::XIPC_TOR_APPEND_RING_FAILED().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_TOR_RC(l_rc).
+                     set_RING_ID(i_ring.ringId).
+                     set_OCCURRENCE(1),
+                     "tor_append_ring() failed in phase %d w/l_rc=%d for ringId=0x%x",
+                     l_PpeType, l_rc, i_ring.ringId );
+
+        FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
+                 i_ring.ringId, i_evenOdd, i_chipletId);
+
+        FAPI_DBG("(After tor_append) io_ringSectionSize = %d", io_ringSectionSize);
     }
     else if ((uint32_t)l_fapiRc == RC_MVPD_RING_NOT_FOUND)
     {
@@ -1184,7 +1123,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
     uint8_t l_ringStatusInMvpd            = RING_SCAN;
     bool    l_bImgOutOfSpace              = false;
     uint8_t l_eqNumWhenOutOfSpace         = 0xF;   // Assign invalid value to check for correctness of value when used
-    uint8_t l_ringType                    = RING_TYPES::COMMON_RING;
+    RingType_t l_ringType = INVALID_RING_TYPE;
 
     // Initialize activeCoreMask to be filled up with EC column filling as it progresses
     uint32_t l_activeCoreMask  = 0x0;
@@ -1210,7 +1149,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
 
     // 1- Add all common rings
     // -----------------------
-    l_ringType = RING_TYPES::COMMON_RING;
+    l_ringType = COMMON_RING;
 
     for (auto vpdType = 0; vpdType < NUM_OF_VPD_TYPES; vpdType++)
     {
@@ -1318,7 +1257,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
     // The step #2 instance part is updated looping over chipletId
     // to fill up one core chipletId "column" at a time (RTC158106).
 
-    l_ringType = RING_TYPES::INSTANCE_RING;
+    l_ringType = INSTANCE_RING;
 
     {
         // Initialize ring id list from VPD_RINGS[1]
@@ -1631,7 +1570,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
 
 fapi_try_exit:
 
-    if( (l_ringType == RING_TYPES::COMMON_RING) &&
+    if( (l_ringType == COMMON_RING) &&
         (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS) )
     {
         //Error handling:
@@ -1642,7 +1581,7 @@ fapi_try_exit:
         FAPI_DBG("Exiting fetch_and_insert_vpd_rings");
         return fapi2::current_err;
     }
-    else if( (l_ringType == RING_TYPES::INSTANCE_RING) &&
+    else if( (l_ringType == INSTANCE_RING) &&
              (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS) )
     {
         //Error handling: Any other 'unknown/unexpected' error reported
@@ -2517,32 +2456,26 @@ ReturnCode p9_xip_customize (
             //------------------------------------------------------------
             // Get the CME or SGPE block of rings from .rings in HW image
             //------------------------------------------------------------
+            PpeType_t l_PpeType;
+
             if ( i_sysPhase == SYSPHASE_RT_CME )
             {
-                FAPI_DBG("Getting the CME block of rings from HW image");
-
-                l_rc = tor_get_block_of_rings( l_hwRingsSection,
-                                               attrDdLevel,
-                                               P9_TOR::CME,
-                                               P9_TOR::ALLRING,
-                                               BASE,
-                                               0,
-                                               &io_ringSectionBuf,
-                                               io_ringSectionBufSize );
+                l_PpeType = PT_CME;
             }
             else
             {
-                FAPI_DBG("Getting the SGPE block of rings from HW image");
-
-                l_rc = tor_get_block_of_rings( l_hwRingsSection,
-                                               attrDdLevel,
-                                               P9_TOR::SGPE,
-                                               P9_TOR::ALLRING,
-                                               BASE,
-                                               0,
-                                               &io_ringSectionBuf,
-                                               io_ringSectionBufSize );
+                l_PpeType = PT_SGPE;
             }
+
+            FAPI_DBG("Getting the Phase %d block of rings from HW image", l_PpeType);
+            l_rc = tor_get_block_of_rings( l_hwRingsSection,
+                                           attrDdLevel,
+                                           l_PpeType,
+                                           ALLRING,
+                                           BASE,
+                                           0,
+                                           &io_ringSectionBuf,
+                                           io_ringSectionBufSize );
 
             FAPI_ASSERT( l_rc == 0,
                          fapi2::XIPC_TOR_GET_BLOCK_OF_RINGS_FAILED().

@@ -25,12 +25,9 @@
 #ifndef _P9_TOR_H_
 #define _P9_TOR_H_
 
-#include "p9_ringId.H"
+#include <common_ringId.H>
 
 #define MAX_TOR_RING_OFFSET  (256*256-1)  // Max value of 2Byte uint
-
-namespace P9_TOR
-{
 
 extern const char* ppeTypeName[];
 extern const char* ringVariantName[];
@@ -53,35 +50,6 @@ enum TorMagicNum
 };
 
 //
-// Chip types to represent p9n, p9c, centaur
-//
-enum ChipType
-{
-    CT_P9N,
-    CT_P9C,
-    CT_CEN,
-    NUM_CHIP_TYPES
-};
-
-typedef uint8_t ChipType_t;
-const ChipType_t INVALID_CHIP_TYPE = 0xff;
-
-typedef struct ChipTypeList
-{
-    const char* name;
-    ChipType_t  type;
-} ChipTypeList_t;
-
-const ChipTypeList_t CHIP_TYPE_LIST[] =
-{
-    {"p9n",     CT_P9N},
-    {"p9c",     CT_P9C},
-    {"cen",     CT_CEN},
-};
-
-
-
-//
 // TOR header field (appears in top of every HW, SBE, CEN, OVRD, etc ring section)
 //
 typedef struct
@@ -91,7 +59,7 @@ typedef struct
     ChipType_t chipType;    // Value from ChipType enum
     uint8_t    ddLevel;     // =0xff if MAGIC_HW, >0 all other MAGICs
     uint8_t    numDdLevels; // >0 if MAGIC_HW, =1 all other MAGICs
-    uint32_t   size;        // A place holder for now, but will be used in a later commit.
+    uint32_t   size;        // Size of the TOR ringSection.
 } TorHeader_t;
 
 #define UNDEFINED_DD_LEVEL (uint8_t)0xff
@@ -161,20 +129,13 @@ typedef enum RingBlockType
     PUT_SINGLE_RING      = 0x03
 } RingBlockType_t;
 
-typedef enum RingType
+enum PpeType
 {
-    COMMON   = 0x00,
-    INSTANCE = 0x01,
-    ALLRING  = 0x02
-} RingType_t;
-
-typedef enum PpeType
-{
-    SBE           = 0x00,
-    CME           = 0x01,
-    SGPE          = 0x02,
+    PT_SBE        = 0x00,
+    PT_CME        = 0x01,
+    PT_SGPE       = 0x02,
     NUM_PPE_TYPES = 0x03
-} PpeType_t;
+};
 
 ///
 /// ****************************************************************************
@@ -281,7 +242,7 @@ typedef enum PpeType
 ///
 /// \retval non-0 See \ref TOR API RETURN errors
 int tor_access_ring( void*           i_ringSection, // Ring address Ptr any of .rings, .overrides and .overlays.
-                     RingID          i_ringId,         // Unique ring ID
+                     RingId_t        i_ringId,         // Unique ring ID
                      uint16_t        i_ddLevel,        // DD level info
                      PpeType_t       i_PpeType,        // PPE type : SBE, CME, etc
                      RingType_t&     io_RingType,      // 0: Common 1: Instance
@@ -333,7 +294,7 @@ int tor_access_ring( void*           i_ringSection, // Ring address Ptr any of .
 /// \retval non-0 See \ref TOR API RETURN errors
 int tor_get_single_ring ( void*          i_ringSection,
                           uint16_t       i_ddLevel,
-                          RingID         i_ringId,
+                          RingId_t       i_ringId,
                           PpeType_t      i_PpeType,
                           RingVariant_t  i_RingVariant,
                           uint8_t        i_instanceId,
@@ -441,7 +402,7 @@ int tor_append_ring(  void*           i_ringSection,
                       uint32_t&       io_ringSectionSize,
                       void*           i_ringBuffer,
                       const uint32_t  i_ringBufferSize,
-                      RingID          i_ringId,
+                      RingId_t        i_ringId,
                       PpeType_t       i_ppeType,
                       RingType_t      i_RingType,
                       RingVariant_t   i_RingVariant,
@@ -457,6 +418,5 @@ int tor_append_ring(  void*           i_ringSection,
 /// \retval - TOR version
 uint8_t tor_version( void);
 
-};
 #endif //_P9_TOR_H_
 

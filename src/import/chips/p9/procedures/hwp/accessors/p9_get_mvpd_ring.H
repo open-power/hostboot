@@ -45,7 +45,7 @@ typedef ReturnCode (*getMvpdRing_FP_t) (
     MvpdKeyword,
     const uint8_t,
     const uint64_t,
-    const uint8_t,
+    const RingId_t,
     uint8_t*,
     uint32_t& );
 
@@ -98,7 +98,7 @@ extern "C"
                             MvpdKeyword    i_keyword,
                             const uint8_t  i_chipletId,
                             const uint8_t  i_evenOdd,
-                            const uint8_t  i_ringId,
+                            const RingId_t i_ringId,
                             uint8_t*       o_pRingBuf,
                             uint32_t&      io_rRingBufsize );
 

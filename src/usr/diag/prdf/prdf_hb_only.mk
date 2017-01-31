@@ -71,6 +71,7 @@ prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
 prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+prd_incpath += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 prd_incpath += ${ROOTPATH}/src/import/hwpf/fapi2/include
 prd_incpath += ${ROOTPATH}/src/import/
 

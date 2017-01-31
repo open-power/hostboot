@@ -25,12 +25,15 @@
 #ifdef WIN32
     #include "win32_stdint.h"
     #include "p9_ring_identification.H"
+    #include "p9_ring_id.h"
 #else
     #ifdef __sun
         #include <sys/int_types.h>
         #include "p9_ring_identification.H"
+        #include "p9_ring_id.h"
     #else
         #include <p9_ring_identification.H>
+        #include <p9_ring_id.h>
     #endif
 #endif
 

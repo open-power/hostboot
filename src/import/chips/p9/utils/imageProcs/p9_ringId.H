@@ -26,54 +26,40 @@
 #ifndef _P9_RINGID_H_
 #define _P9_RINGID_H_
 
-
 #ifdef WIN32
     #include "win32_stdint.h"
     #include "p9_ring_id.h"
+    #include <common_ringId.H>
 #else
     #include <stdint.h>
     #include <stddef.h>
+    #include <common_ringId.H>
     #include <p9_ring_id.h>
 #endif
 
-enum RingClass
+enum CHIPLET_TYPE
 {
-    EKB_RING,
-    EKB_FSM_RING,
-    EKB_STUMPED_RING,
-    EKB_CMSK_RING,
-    VPD_RING,
-    NUM_RING_CLASSES
+    PERV_TYPE,
+    N0_TYPE,
+    N1_TYPE,
+    N2_TYPE,
+    N3_TYPE,
+    XB_TYPE,
+    MC_TYPE,
+    OB0_TYPE,
+    OB1_TYPE,
+    OB2_TYPE,
+    OB3_TYPE,
+    PCI0_TYPE,
+    PCI1_TYPE,
+    PCI2_TYPE,
+    EQ_TYPE,
+    EC_TYPE,
+    SBE_NOOF_CHIPLETS
 };
 
-// General Ring ID list structure
-typedef struct
-{
-    const char*  ringName;
-    uint8_t      ringId;
-    uint8_t      instanceIdMin;
-    uint8_t      instanceIdMax;
-    RingClass    ringClass;
-    uint32_t     scanScomAddress;
-} GenRingIdList;
-
-typedef enum RingVariant   // Base variables
-{
-    BASE     = 0x00,
-    CC       = 0x01,
-    RL       = 0x02,
-    OVERRIDE = 0x03,
-    OVERLAY  = 0x04,
-    NUM_RING_VARIANTS = 0x05,
-    NOT_VALID = 0xff
-} RingVariant_t;
-
-#define P9_RINGID_VARIANT_ORDER_SIZE 3
-typedef struct
-{
-    uint8_t  variant[P9_RINGID_VARIANT_ORDER_SIZE];
-} RingVariantOrder;
-
+#define SGPE_NOOF_CHIPLETS  1
+#define CME_NOOF_CHIPLETS   1
 
 namespace PERV
 {
@@ -187,62 +173,6 @@ extern const GenRingIdList RING_ID_LIST_INSTANCE[];
 extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
-namespace RING_TYPES
-{
-enum RINGTYPE
-{
-    COMMON_RING = 0,
-    INSTANCE_RING = 1
-};
-
-}; //end of RS4 namespace
-
-enum CHIPLET_TYPE : uint8_t
-{
-    PERV_TYPE,
-    N0_TYPE,
-    N1_TYPE,
-    N2_TYPE,
-    N3_TYPE,
-    XB_TYPE,
-    MC_TYPE,
-    OB0_TYPE,
-    OB1_TYPE,
-    OB2_TYPE,
-    OB3_TYPE,
-    PCI0_TYPE,
-    PCI1_TYPE,
-    PCI2_TYPE,
-    EQ_TYPE,
-    EC_TYPE,
-    SBE_NOOF_CHIPLETS
-};
-
-#define SGPE_NOOF_CHIPLETS  1
-#define CME_NOOF_CHIPLETS   1
-
-struct CHIPLET_DATA
-{
-    // This is the chiplet-ID of the first instance of the Chiplet
-    uint8_t iv_base_chiplet_number;
-
-    // The no.of common rings for the Chiplet
-    uint8_t iv_num_common_rings;
-
-    // The no.of instance rings for the Chiplet (w/different ringId values)
-    uint8_t iv_num_instance_rings;
-
-    // The no.of instance rings for the Chiplet (w/different ringId values
-    // AND different scanAddress values)
-    uint8_t iv_num_instance_rings_scan_addrs;
-};
-
-// This is used to Set (Mark) the left-most bit
-const uint8_t INSTANCE_RING_MARK = 0x80;
-//
-// This is used to Set (Mark) the left-most bit
-const uint8_t INSTANCE_RING_MASK = 0x7F;
-
 namespace PERV
 {
 // FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
@@ -321,7 +251,7 @@ static const CHIPLET_DATA g_n0Data =
     2, // N0 Chiplet ID is 2.
     9, // 9 common rings for N0 Chiplet
     3, // 3 instance specific rings for N0 chiplet
-    3  // FIXME: number of variants? doesn't match RingVariants below!
+    3
 };
 };
 
@@ -878,27 +808,9 @@ static const CHIPLET_DATA g_ecData =
 };
 }; // end of namespace EC
 
-static const uint8_t INVALID_RING = 0xFF;
-
-// This structure is needed for mapping a RingID to it's corresponding name.
-// The names will be used by the build scripts when generating the TOR.
-#ifndef __PPE__
-struct ringProperties_t
-{
-    uint8_t iv_torOffSet;  // FIXME: misnomer
-    char iv_name[50];
-    CHIPLET_TYPE iv_type;
-};
-#endif
-#ifdef __PPE__
-struct ringProperties_t
-{
-    uint8_t iv_torOffSet;
-    CHIPLET_TYPE iv_type;
-};
-#endif
 
 #ifndef __PPE__
+
 static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 {
     { PERV::perv_fure                    , "perv_fure"                   , PERV_TYPE  }, // 0
@@ -919,9 +831,9 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { PERV::perv_pll_func                , "perv_pll_func"               , PERV_TYPE  }, // 15
     { PERV::perv_repr                    , "perv_repr"                   , PERV_TYPE  }, // 16
     { PERV::occ_repr                     , "occ_repr"                    , PERV_TYPE  }, // 17
-    { INVALID_RING                       , "invalid"                     , PERV_TYPE  }, // 18
-    { INVALID_RING                       , "invalid"                     , PERV_TYPE  }, // 19
-    { INVALID_RING                       , "invalid"                     , PERV_TYPE  }, // 20
+    { INVALID_RING_OFFSET                , "invalid"                     , PERV_TYPE  }, // 18
+    { INVALID_RING_OFFSET                , "invalid"                     , PERV_TYPE  }, // 19
+    { INVALID_RING_OFFSET                , "invalid"                     , PERV_TYPE  }, // 20
     { N0::n0_fure                        , "n0_fure"                     , N0_TYPE    }, // 21
     { N0::n0_gptr                        , "n0_gptr"                     , N0_TYPE    }, // 22
     { N0::n0_time                        , "n0_time"                     , N0_TYPE    }, // 23
@@ -962,7 +874,7 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { N2::n2_repr                        , "n2_repr"                     , N2_TYPE    }, // 58
     { N2::n2_cxa1_repr                   , "n2_cxa1_repr"                , N2_TYPE    }, // 59
     { N2::n2_psi_repr                    , "n2_psi_repr"                 , N2_TYPE    }, // 60
-    { INVALID_RING                       , "invalid"                     , N2_TYPE    }, // 61
+    { INVALID_RING_OFFSET                , "invalid"                     , N2_TYPE    }, // 61
     { N3::n3_fure                        , "n3_fure"                     , N3_TYPE    }, // 62
     { N3::n3_gptr                        , "n3_gptr"                     , N3_TYPE    }, // 63
     { N3::n3_time                        , "n3_time"                     , N3_TYPE    }, // 64
@@ -995,8 +907,8 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { XB::xb_io0_repr                    , "xb_io0_repr"                 , XB_TYPE    }, // 91
     { XB::xb_io1_repr                    , "xb_io1_repr"                 , XB_TYPE    }, // 92
     { XB::xb_io2_repr                    , "xb_io2_repr"                 , XB_TYPE    }, // 93
-    { INVALID_RING                       , "invalid"                     , XB_TYPE    }, // 94
-    { INVALID_RING                       , "invalid"                     , XB_TYPE    }, // 95
+    { INVALID_RING_OFFSET                , "invalid"                     , XB_TYPE    }, // 94
+    { INVALID_RING_OFFSET                , "invalid"                     , XB_TYPE    }, // 95
     { MC::mc_fure                        , "mc_fure"                     , MC_TYPE    }, // 96
     { MC::mc_gptr                        , "mc_gptr"                     , MC_TYPE    }, // 97
     { MC::mc_time                        , "mc_time"                     , MC_TYPE    }, // 98
@@ -1053,8 +965,8 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { OB3::ob3_fure                      , "ob3_fure"                    , OB3_TYPE   }, // 149
     { OB3::ob3_pll_bndy_bucket_3         , "ob3_pll_bndy_bucket_3"       , OB3_TYPE   }, // 150
     { OB3::ob3_repr                      , "ob3_repr"                    , OB3_TYPE   }, // 151
-    { INVALID_RING                       , "invalid"                     , OB3_TYPE   }, // 152
-    { INVALID_RING                       , "invalid"                     , OB3_TYPE   }, // 153
+    { INVALID_RING_OFFSET                , "invalid"                     , OB3_TYPE   }, // 152
+    { INVALID_RING_OFFSET                , "invalid"                     , OB3_TYPE   }, // 153
     { PCI0::pci0_fure                    , "pci0_fure"                   , PCI0_TYPE  }, // 154
     { PCI0::pci0_gptr                    , "pci0_gptr"                   , PCI0_TYPE  }, // 155
     { PCI0::pci0_time                    , "pci0_time"                   , PCI0_TYPE  }, // 156
@@ -1130,8 +1042,8 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EC::ec_time                        , "ec_time"                     , EC_TYPE    }, // 226
     { EC::ec_mode                        , "ec_mode"                     , EC_TYPE    }, // 227
     { EC::ec_repr                        , "ec_repr"                     , EC_TYPE    }, // 228
-    { INVALID_RING                       , "invalid"                     , EQ_TYPE    }, // 229
-    { INVALID_RING                       , "invalid"                     , EQ_TYPE    }, // 230
+    { INVALID_RING_OFFSET                , "invalid"                     , EQ_TYPE    }, // 229
+    { INVALID_RING_OFFSET                , "invalid"                     , EQ_TYPE    }, // 230
     { EC::ec_abst                        , "ec_abst"                     , EC_TYPE    }, // 231
     { EQ::eq_ana_bndy_bucket_26          , "eq_ana_bndy_bucket_26"       , EQ_TYPE    }, // 232
     { EQ::eq_ana_bndy_bucket_27          , "eq_ana_bndy_bucket_27"       , EQ_TYPE    }, // 233
@@ -1156,6 +1068,7 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EC::ec_cmsk                        , "ec_cmsk"                     , EC_TYPE    }, // 252
 };
 #endif
+
 #ifdef __PPE__
 static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 {
@@ -1177,9 +1090,9 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { PERV::perv_pll_func                , PERV_TYPE  }, // 15
     { PERV::perv_repr                    , PERV_TYPE  }, // 16
     { PERV::occ_repr                     , PERV_TYPE  }, // 17
-    { INVALID_RING                       , PERV_TYPE  }, // 18
-    { INVALID_RING                       , PERV_TYPE  }, // 19
-    { INVALID_RING                       , PERV_TYPE  }, // 20
+    { INVALID_RING_OFFSET                , PERV_TYPE  }, // 18
+    { INVALID_RING_OFFSET                , PERV_TYPE  }, // 19
+    { INVALID_RING_OFFSET                , PERV_TYPE  }, // 20
     { N0::n0_fure                        , N0_TYPE    }, // 21
     { N0::n0_gptr                        , N0_TYPE    }, // 22
     { N0::n0_time                        , N0_TYPE    }, // 23
@@ -1220,7 +1133,7 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { N2::n2_repr                        , N2_TYPE    }, // 58
     { N2::n2_cxa1_repr                   , N2_TYPE    }, // 59
     { N2::n2_psi_repr                    , N2_TYPE    }, // 60
-    { INVALID_RING                       , N2_TYPE    }, // 61
+    { INVALID_RING_OFFSET                , N2_TYPE    }, // 61
     { N3::n3_fure                        , N3_TYPE    }, // 62
     { N3::n3_gptr                        , N3_TYPE    }, // 63
     { N3::n3_time                        , N3_TYPE    }, // 64
@@ -1253,8 +1166,8 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { XB::xb_io0_repr                    , XB_TYPE    }, // 91
     { XB::xb_io1_repr                    , XB_TYPE    }, // 92
     { XB::xb_io2_repr                    , XB_TYPE    }, // 93
-    { INVALID_RING                       , XB_TYPE    }, // 94
-    { INVALID_RING                       , XB_TYPE    }, // 95
+    { INVALID_RING_OFFSET                , XB_TYPE    }, // 94
+    { INVALID_RING_OFFSET                , XB_TYPE    }, // 95
     { MC::mc_fure                        , MC_TYPE    }, // 96
     { MC::mc_gptr                        , MC_TYPE    }, // 97
     { MC::mc_time                        , MC_TYPE    }, // 98
@@ -1311,8 +1224,8 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { OB3::ob3_fure                      , OB3_TYPE   }, // 149
     { OB3::ob3_pll_bndy_bucket_3         , OB3_TYPE   }, // 150
     { OB3::ob3_repr                      , OB3_TYPE   }, // 151
-    { INVALID_RING                       , OB3_TYPE   }, // 152
-    { INVALID_RING                       , OB3_TYPE   }, // 153
+    { INVALID_RING_OFFSET                , OB3_TYPE   }, // 152
+    { INVALID_RING_OFFSET                , OB3_TYPE   }, // 153
     { PCI0::pci0_fure                    , PCI0_TYPE  }, // 154
     { PCI0::pci0_gptr                    , PCI0_TYPE  }, // 155
     { PCI0::pci0_time                    , PCI0_TYPE  }, // 156
@@ -1388,8 +1301,8 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EC::ec_time                        , EC_TYPE    }, // 226
     { EC::ec_mode                        , EC_TYPE    }, // 227
     { EC::ec_repr                        , EC_TYPE    }, // 228
-    { INVALID_RING                       , EQ_TYPE    }, // 229
-    { INVALID_RING                       , EQ_TYPE    }, // 230
+    { INVALID_RING_OFFSET                , EQ_TYPE    }, // 229
+    { INVALID_RING_OFFSET                , EQ_TYPE    }, // 230
     { EC::ec_abst                        , EC_TYPE    }, // 231
     { EQ::eq_ana_bndy_bucket_26          , EQ_TYPE    }, // 232
     { EQ::eq_ana_bndy_bucket_27          , EQ_TYPE    }, // 233
@@ -1416,15 +1329,15 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 #endif
 
 // returns our own chiplet enum value for this ringId
-CHIPLET_TYPE
+ChipletType_t
 p9_ringid_get_chiplet(
-    RingID i_ringId);
+    RingId_t i_ringId);
 
 // returns data structures defined for chiplet type
 // as determined by ringId
 void
 p9_ringid_get_chiplet_properties(
-    CHIPLET_TYPE       i_chiplet,
+    ChipletType_t      i_chiplet,
     CHIPLET_DATA**     o_cpltData,
     GenRingIdList**    o_ringComm,
     GenRingIdList**    o_ringInst,
@@ -1434,6 +1347,6 @@ p9_ringid_get_chiplet_properties(
 // returns properties of a ring as determined by ringId
 GenRingIdList*
 p9_ringid_get_ring_properties(
-    RingID i_ringId);
+    RingId_t i_ringId);
 
 #endif
