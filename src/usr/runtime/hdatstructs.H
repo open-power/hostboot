@@ -317,16 +317,18 @@ struct hdatMsReservedMemArrayHeader_t
     uint32_t actualContentSize; //actual size of array entries
 }  __attribute__ ((packed));
 
-/** @brief In Reserved Hostboot Memory iaddress range
+/** @brief In Reserved Hostboot Memory address range
 *    array element information -
 */
 struct hdatMsVpdRhbAddrRange_t
 {
-    uint32_t hdatDbobID;               // 0x0000 Node instance
+    uint8_t  hdatRhbRngType;           // 0x0000 Range type
+    uint8_t  hdatRhbRngRes;            // 0x0001 Reserved
+    uint16_t hdatRhbRngId;             // 0x0002 Range ID
     uint64_t hdatRhbAddrRngStrAddr;    // 0x0004 Range starting
     uint64_t hdatRhbAddrRngEndAddr;    // 0x000C Range ending
     uint32_t hdatRhbLabelSize;         // 0x0014 Label size
-    uint8_t  hdatRhbLabelString[64];   // 0x0019 Label string Ptr
+    uint8_t  hdatRhbLabelString[64];   // 0x0018 Label string Ptr
 }  __attribute__ ((packed));
 
 

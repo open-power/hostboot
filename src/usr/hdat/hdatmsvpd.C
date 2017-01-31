@@ -142,7 +142,7 @@ void HdatMsVpd::hdatInit(hdatMsAddr_t &i_maxMsAddr,
     iv_RHBaddrRngArrayHdr.hdatAllocSize = sizeof(hdatMsVpdRhbAddrRange_t);
     iv_RHBaddrRngArrayHdr.hdatActSize   = sizeof(hdatMsVpdRhbAddrRange_t);
 
-    iv_maxRHBAddrRngCnt = hdatGetMaxCecNodes();
+    iv_maxRHBAddrRngCnt = HDAT_RHB_MAX_RANGE_ENTRIES * hdatGetMaxCecNodes();
 
     // Allocate space for the mainstore area entries and IMT Addr Range array
     iv_msAreaPtrs = new HdatMsArea*[iv_maxMsAreaCnt];
@@ -328,7 +328,8 @@ errlHndl_t HdatMsVpd::addRHBAddrRange(uint32_t i_dbob_id, hdatMsAddr_t &i_start,
         <char*>(iv_RHBaddrRangeArray) + (iv_RHBaddrRngArrayHdr.hdatArrayCnt *
         sizeof(hdatMsVpdRhbAddrRange_t)));
 
-        l_addr->hdatDbobID            = i_dbob_id;
+        l_addr->hdatRhbRngType        = 0x0;
+        l_addr->hdatRhbRngId          = i_dbob_id;
         l_addr->hdatRhbAddrRngStrAddr = i_start;
         l_addr->hdatRhbAddrRngEndAddr = i_end;
         //TODO : : RTC Story 159684
@@ -343,7 +344,7 @@ errlHndl_t HdatMsVpd::addRHBAddrRange(uint32_t i_dbob_id, hdatMsAddr_t &i_start,
         }
 
         memset(l_addr->hdatRhbLabelString, 0x00, HDAT_MS_RHB_LABEL_LEN);
- 
+
         if (i_labelStringPtr != NULL)
         {
             for(uint8_t l_idx = 0; l_idx < l_addr->hdatRhbLabelSize; l_idx++)
@@ -1192,7 +1193,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                 l_hdatNhtmStartAddr.lo =
                               l_nhtmStartAddr & 0x00000000FFFFFFFFull;
                 l_hdatNhtmStartAddr.hi |= HDAT_REAL_ADDRESS_MASK;
- 
+
                 l_nhtmSize = l_nhtmStartAddr + l_nhtmSize;
                 l_hdatNhtmEndAddr.hi =
                              (l_nhtmSize & 0xFFFFFFFF00000000ull) >> 32;
@@ -1572,7 +1573,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                         // TODO : RTC Story 159682
                         // Further CHTM support needs to be added which contains
                         // the trace array for 24 cores
-                        // Reinitializing the NHTM size  
+                        // Reinitializing the NHTM size
                         l_nhtmSize =
                             l_pProcTarget->getAttr
                             <TARGETING::ATTR_PROC_NHTM_BAR_SIZE>();
@@ -1638,7 +1639,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                              &l_functionalnode);
 
         TARGETING::ATTR_HB_RSV_MEM_SIZE_MB_type l_rhbSize =
-                   l_pSysTarget->getAttr<TARGETING::ATTR_HB_RSV_MEM_SIZE_MB>();
+            l_pSysTarget->getAttr<TARGETING::ATTR_HB_RSV_MEM_SIZE_MB>();
         if( 0 != l_rhbSize )
         {
             for(;l_nodes;++l_nodes)
@@ -1682,9 +1683,25 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                 uint32_t l_rhbLabelSize = 0;
                 uint8_t* l_rhbLabelStringPtr = NULL;
 
-                addRHBAddrRange(l_dbobId, l_hdatRhbStartAddr, 
+                addRHBAddrRange(l_dbobId, l_hdatRhbStartAddr,
                                 l_hdatRhbEndAddr, l_rhbLabelSize,
                                 l_rhbLabelStringPtr);
+
+                TARGETING::ATTR_HB_RSV_MEM_SIZE_MB_type l_rhbEntries =
+                    l_pSysTarget->getAttr
+                        <TARGETING::ATTR_HDAT_RSV_MEM_NUM_SECTIONS>();
+
+                l_dbobId = 0x0;
+                l_hdatRhbStartAddr.lo = 0x0;
+                l_hdatRhbStartAddr.hi = 0x0;
+                l_hdatRhbEndAddr.lo = 0x0;
+                l_hdatRhbEndAddr.hi = 0x0;
+                for(uint32_t l_entry=0; l_entry<l_rhbEntries; l_entry++)
+                {
+                    addRHBAddrRange(l_dbobId, l_hdatRhbStartAddr,
+                                    l_hdatRhbEndAddr, l_rhbLabelSize,
+                                    l_rhbLabelStringPtr);
+                }
             }
         }
         else
