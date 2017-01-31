@@ -32,6 +32,7 @@
 #ifndef __ASSEMBLER__
 
 #include <stdint.h>
+#include <common_ringId.H>
 
 /// Compressed Scan Chain Data Structure Format
 ///
@@ -75,7 +76,7 @@ typedef struct
     uint8_t  iv_version;
     uint8_t  iv_type;
     uint16_t iv_size;
-    uint16_t iv_ringId;
+    RingId_t iv_ringId;
     uint32_t iv_scanAddr;
 } CompressedScanData;
 
@@ -118,8 +119,8 @@ compressed_scan_data_translate(CompressedScanData* o_data,
 ///
 /// \param[in] i_scanAddr The 32-bit scan address.
 ///
-/// \param[in] i_ringId The ring ID that uniquely identifies the ring name of
-/// a repair ring. (See p9_ring_id.h for more info.)
+/// \param[in] i_ringId The ring ID that uniquely identifies the ring. (See
+/// <ChipType> ring ID header files for more info.)
 ///
 /// This API is required for integration with PHYP which does not support
 /// malloc().  Applications in environments supporting malloc() can use
@@ -139,7 +140,7 @@ _rs4_compress(CompressedScanData* io_rs4,
               const uint8_t* i_care_str,
               const uint32_t i_length,
               const uint32_t i_scanAddr,
-              const uint16_t i_ringId);
+              const RingId_t i_ringId);
 
 
 /// Compress a scan string using the RS4 compression algorithm
@@ -163,8 +164,8 @@ _rs4_compress(CompressedScanData* io_rs4,
 ///
 /// \param[in] i_scanAddr The 32-bit scan address.
 ///
-/// \param[in] i_ringId The ring ID that uniquely identifies the ring name of
-/// a repair ring. (See p9_ring_id.c for more info.)
+/// \param[in] i_ringId The ring ID that uniquely identifies the ring. (See
+/// <ChipType> ring ID header files for more info.)
 ///
 /// \returns See \ref scan_compression_codes
 int
@@ -173,7 +174,7 @@ rs4_compress(CompressedScanData** o_rs4,
              const uint8_t* i_care_str,
              const uint32_t i_length,
              const uint32_t i_scanAddr,
-             const uint8_t i_ringId);
+             const RingId_t i_ringId);
 
 
 /// Decompress a scan string compressed using the RS4 compression algorithm
