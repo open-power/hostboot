@@ -1993,7 +1993,8 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
         uint8_t* pOvrdRingPayload = pOverrideStart + QUAD_COMMON_RING_INDEX_SIZE;
         uint32_t tempRingLength = 0;
         uint32_t tempBufSize = 0;
-        FAPI_DBG("TOR Version :  0x%02x", P9_TOR::tor_version() );
+
+        FAPI_DBG("TOR Version :  0x%02x", tor_version() );
 
         RingID quadCmnOvrdRingId;
         for( uint32_t ringIndex = 0; ringIndex < MAX_HOMER_QUAD_CMN_RINGS;
@@ -2008,7 +2009,7 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
             rc = tor_get_single_ring( i_pOverride,
                                       i_chipState.getChipLevel(),
                                       quadCmnOvrdRingId,
-                                      P9_TOR::SBE,
+                                      PT_SBE,
                                       OVERRIDE,
                                       CACHE0_CHIPLET_ID,
                                       &i_ringData.iv_pWorkBuf2,
@@ -2038,7 +2039,7 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
 
             memcpy( pOvrdRingPayload, i_ringData.iv_pWorkBuf2, tempBufSize);
             uint16_t*  pScanRingIndex = (uint16_t*)pOverrideStart;
-            uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
+            uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
 
             *(pScanRingIndex + ringIndex) = SWIZZLE_2_BYTE((pOvrdRingPayload - pOverrideStart) + ringStartToHdrOffset);
 
@@ -2487,7 +2488,7 @@ fapi2::ReturnCode layoutCmnRingsForCme( Homerlayout_t*   i_pHomer,
             rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
                                       i_chipState.getChipLevel(),
                                       coreCmnRingId,
-                                      P9_TOR::CME,
+                                      PT_CME,
                                       l_ringVariant,
                                       CORE0_CHIPLET_ID ,
                                       &i_ringData.iv_pWorkBuf1,
@@ -2517,7 +2518,7 @@ fapi2::ReturnCode layoutCmnRingsForCme( Homerlayout_t*   i_pHomer,
                      "Failed To Complete CME Ring Layout" );
 
             uint16_t* pScanRingIndex = (uint16_t*) pRingStart;
-            uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
+            uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
             memcpy( pRingPayload, i_ringData.iv_pWorkBuf1, ringSize );
             *(pScanRingIndex + ringIndex) = SWIZZLE_2_BYTE((pRingPayload - pRingStart) + ringStartToHdrOffset);
 
@@ -2577,7 +2578,7 @@ fapi2::ReturnCode layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
     uint32_t ringLength = 0;
     uint32_t tempSize = 0;
     uint32_t tempRepairLength = 0;
-    uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
+    uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
 
     if( i_imgType.cmeHcodeBuild )
     {
@@ -2604,7 +2605,7 @@ fapi2::ReturnCode layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
                 rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
                                           i_chipState.getChipLevel(),
                                           io_cmeRings.getInstRingId(0),
-                                          P9_TOR::CME,
+                                          PT_CME,
                                           i_ringVariant,
                                           CORE0_CHIPLET_ID + ((2 * exId) + coreId),
                                           &i_ringData.iv_pWorkBuf1,
@@ -2668,7 +2669,7 @@ fapi2::ReturnCode layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
                 rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
                                           i_chipState.getChipLevel(),
                                           io_cmeRings.getInstRingId(0),
-                                          P9_TOR::CME,
+                                          PT_CME,
                                           i_ringVariant,
                                           CORE0_CHIPLET_ID + ((2 * exId) + coreId),
                                           &i_ringData.iv_pWorkBuf1,
@@ -2747,7 +2748,7 @@ fapi2::ReturnCode layoutCmeScanOverride( Homerlayout_t*   i_pHomer,
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     uint32_t tempRingLength = io_ovrdRingLength;
     uint32_t tempBufSize = 0;
-    uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
+    uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
 
     RingBucket cmeOvrdRings( PLAT_CME,
                              (uint8_t*)&i_pHomer->cpmrRegion,
@@ -2778,7 +2779,7 @@ fapi2::ReturnCode layoutCmeScanOverride( Homerlayout_t*   i_pHomer,
             rc = tor_get_single_ring( i_pOverride,
                                       i_chipState.getChipLevel(),
                                       coreCmnOvrdRingId,
-                                      P9_TOR::SBE,
+                                      PT_SBE,
                                       OVERRIDE,
                                       CORE0_CHIPLET_ID,
                                       &i_ringData.iv_pWorkBuf2,
@@ -3088,7 +3089,7 @@ fapi2::ReturnCode layoutCmnRingsForSgpe( Homerlayout_t*     i_pHomer,
     RingID torRingId;
     uint32_t tempLength         =   0;
     uint32_t tempBufSize        =   i_ringData.iv_sizeWorkBuf1;
-    uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
+    uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
 
     RingBucket sgpeRings( PLAT_SGPE,
                           (uint8_t*)&i_pHomer->qpmrRegion,
@@ -3129,7 +3130,7 @@ fapi2::ReturnCode layoutCmnRingsForSgpe( Homerlayout_t*     i_pHomer,
             rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
                                       i_chipState.getChipLevel(),
                                       torRingId,
-                                      P9_TOR::SGPE,
+                                      PT_SGPE,
                                       l_ringVariant,
                                       CACHE0_CHIPLET_ID,
                                       &i_ringData.iv_pWorkBuf1,
@@ -3217,8 +3218,7 @@ fapi2::ReturnCode layoutInstRingsForSgpe( Homerlayout_t*     i_pHomer,
         uint8_t* pRingStart       = &i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[quadSpecRingStart];
         uint8_t* instRingPayLoad  = &i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[ quadSpecRingStart +
                                     QUAD_SPEC_RING_INDEX_LEN ];
-
-        uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
+        uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
 
         RingID quadSpecRingId;
 
@@ -3247,7 +3247,7 @@ fapi2::ReturnCode layoutInstRingsForSgpe( Homerlayout_t*     i_pHomer,
                 rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
                                           i_chipState.getChipLevel(),
                                           quadSpecRingId,
-                                          P9_TOR::SGPE,
+                                          PT_SGPE,
                                           i_ringVariant,
                                           chipletId,
                                           &i_ringData.iv_pWorkBuf1,
