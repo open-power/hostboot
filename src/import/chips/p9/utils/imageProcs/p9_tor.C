@@ -42,11 +42,13 @@
 // it is used pass by value
 //
 #include "p9_tor.H"
+namespace P9_RID
+{
+#include "p9_ringId.H"
+}
 #include "p9_scan_compression.H"
 #include "p9_infrastruct_help.H"
 
-namespace P9_TOR
-{
 
 // These strings must adhere precisely to the enum of PpeType.
 const char* ppeTypeName[] = { "SBE",
@@ -70,7 +72,7 @@ const char* ringVariantName[] = { "BASE",
 //////////////////////////////////////////////////////////////////////////////////
 static
 int get_ring_from_sbe_image( void*           i_ringSection,     // Ring section ptr
-                             RingID          i_ringId,          // Ring ID
+                             RingId_t        i_ringId,          // Ring ID
                              uint16_t        i_ddLevelOffset,   // DD level offset (wrt i_ringSection)
                              RingType_t&     io_RingType,       // Common, Instance
                              RingVariant_t   i_RingVariant,     // Base,CC, RL, Ovrd, Ovly
@@ -127,12 +129,15 @@ int get_ring_from_sbe_image( void*           i_ringSection,     // Ring section 
     ppe_cplt_offset = ppe_offset + sizeof(TorHeader_t);
 
     // Looper for each SBE chiplet
-    for (int iCplt = 0; iCplt < SBE_NOOF_CHIPLETS; iCplt++)
+    for (ChipletType_t iCplt = 0; iCplt < P9_RID::SBE_NOOF_CHIPLETS; iCplt++)
     {
-        p9_ringid_get_chiplet_properties(
-            (CHIPLET_TYPE)iCplt,
-            &l_cpltData, &ring_id_list_common, &ring_id_list_instance,
-            &ring_variant_order, &l_num_variant);
+        P9_RID::p9_ringid_get_chiplet_properties(
+            iCplt,
+            &l_cpltData,
+            &ring_id_list_common,
+            &ring_id_list_instance,
+            &ring_variant_order,
+            &l_num_variant);
 
         if (!ring_id_list_common)
         {
@@ -166,12 +171,12 @@ int get_ring_from_sbe_image( void*           i_ringSection,     // Ring section 
                 }
 
                 if ( ( strcmp( (ring_id_list_common + i)->ringName,
-                               RING_PROPERTIES[i_ringId].iv_name) == 0 ) &&
+                               P9_RID::RING_PROPERTIES[i_ringId].iv_name) == 0 ) &&
                      ( i_RingVariant == ring_variant_order->variant[iVariant] ||
                        torMagic == TOR_MAGIC_OVRD ||
                        torMagic == TOR_MAGIC_OVLY ) )
                 {
-                    strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
+                    strcpy(o_ringName, P9_RID::RING_PROPERTIES[i_ringId].iv_name);
                     acc_offset = dd_level_offset +
                                  ppe_cplt_offset +
                                  iCplt * sizeof(TorPpeBlock_t);
@@ -192,7 +197,7 @@ int get_ring_from_sbe_image( void*           i_ringSection,     // Ring section 
                                      ring_offset;
                         ring_size = be16toh( ((CompressedScanData*)
                                               ((uint8_t*)i_ringSection + acc_offset))->iv_size );
-                        io_RingType = COMMON;
+                        io_RingType = COMMON_RING;
 
                         if (ring_offset)
                         {
@@ -298,14 +303,14 @@ int get_ring_from_sbe_image( void*           i_ringSection,     // Ring section 
                     }
 
                     if (strcmp( (ring_id_list_instance + j)->ringName,
-                                RING_PROPERTIES[i_ringId].iv_name) == 0)
+                                P9_RID::RING_PROPERTIES[i_ringId].iv_name) == 0)
                     {
                         if ( io_instanceId >=  (ring_id_list_instance + 0)->instanceIdMin
                              &&  io_instanceId  <= (ring_id_list_instance + 0)->instanceIdMax )
                         {
                             if (i == io_instanceId && i_RingVariant == ring_variant_order->variant[iVariant])
                             {
-                                strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
+                                strcpy(o_ringName, P9_RID::RING_PROPERTIES[i_ringId].iv_name);
 
                                 acc_offset = dd_level_offset +
                                              ppe_cplt_offset +
@@ -332,7 +337,7 @@ int get_ring_from_sbe_image( void*           i_ringSection,     // Ring section 
                                     ring_size = be16toh( ((CompressedScanData*)
                                                           ((uint8_t*)i_ringSection +
                                                            acc_offset))->iv_size );
-                                    io_RingType = INSTANCE;
+                                    io_RingType = INSTANCE_RING;
 
                                     if (ring_offset)
                                     {
@@ -455,7 +460,7 @@ int get_ring_from_sbe_image( void*           i_ringSection,     // Ring section 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static
 int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring section ptr
-                               RingID          i_ringId,          // Ring ID
+                               RingId_t        i_ringId,          // Ring ID
                                uint16_t        i_ddLevelOffset,   // DD level offset
                                RingType_t&     io_RingType,       // Common, Instance
                                RingVariant_t   i_RingVariant,     // Base,CC, RL, Ovrd, Ovly
@@ -466,7 +471,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
                                char*           o_ringName,        // Name of ring
                                uint32_t        i_dbgl )           // Debug option
 {
-    uint32_t     torMagic;
+    uint32_t torMagic;
     uint32_t acc_offset = 0;   // Accumulating offset to next TOR offset slot
     uint32_t ring_offset = 0;
     uint16_t chiplet_offset = 0;
@@ -505,13 +510,13 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
 
     GenRingIdList* ring_id_list_common = NULL;
     GenRingIdList* ring_id_list_instance = NULL;
-    uint8_t l_num_variant  = (uint8_t)sizeof(EQ::RingVariants) / sizeof(uint16_t);
-    ring_id_list_common = (GenRingIdList*) EQ::RING_ID_LIST_COMMON;
-    ring_id_list_instance = (GenRingIdList*) EQ::RING_ID_LIST_INSTANCE;
+    uint8_t l_num_variant  = (uint8_t)sizeof(P9_RID::EQ::RingVariants) / sizeof(uint16_t);
+    ring_id_list_common = (GenRingIdList*) P9_RID::EQ::RING_ID_LIST_COMMON;
+    ring_id_list_instance = (GenRingIdList*) P9_RID::EQ::RING_ID_LIST_INSTANCE;
 
     uint32_t local = 0;
 
-    for (uint8_t i = 0; i < EQ::g_eqData.iv_num_common_rings ; i++)
+    for (uint8_t i = 0; i < P9_RID::EQ::g_eqData.iv_num_common_rings ; i++)
     {
         for (uint8_t j = 0; j < l_num_variant ; j++)
         {
@@ -522,9 +527,9 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
             }
 
             if ((strcmp( (ring_id_list_common + i)->ringName,
-                         RING_PROPERTIES[i_ringId].iv_name) == 0) && ( i_RingVariant == j ))
+                         P9_RID::RING_PROPERTIES[i_ringId].iv_name) == 0) && ( i_RingVariant == j ))
             {
-                strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
+                strcpy(o_ringName, P9_RID::RING_PROPERTIES[i_ringId].iv_name);
                 uint32_t var = 0 + i_ddLevelOffset + ppe_cplt_offset;
                 int temp1 =  var / sizeof(uint32_t);
                 ring_offset =  *((uint32_t*)i_ringSection + temp1);
@@ -540,7 +545,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
                     ringSize = be16toh( ((CompressedScanData*)
                                          ((uint8_t*)i_ringSection +
                                           var))->iv_size );
-                    io_RingType = COMMON;
+                    io_RingType = COMMON_RING;
 
                     if (chiplet_offset)
                     {
@@ -623,7 +628,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
     for(uint8_t i = (ring_id_list_instance + 0)->instanceIdMin;
         i < (ring_id_list_instance + 0)->instanceIdMax + 1 ; i++)
     {
-        for (uint8_t j = 0; j < EQ::g_eqData.iv_num_instance_rings; j++)
+        for (uint8_t j = 0; j < P9_RID::EQ::g_eqData.iv_num_instance_rings; j++)
         {
             for(uint8_t k = 0; k < l_num_variant ; k++)
             {
@@ -634,14 +639,14 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
                 }
 
                 if  (strcmp( (ring_id_list_instance + j)->ringName,
-                             RING_PROPERTIES[i_ringId].iv_name) == 0)
+                             P9_RID::RING_PROPERTIES[i_ringId].iv_name) == 0)
                 {
                     if ( io_instanceId >=  (ring_id_list_instance + 0)->instanceIdMin
                          &&  io_instanceId  <= (ring_id_list_instance + 0)->instanceIdMax )
                     {
                         if ( i == io_instanceId && k == i_RingVariant )
                         {
-                            strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
+                            strcpy(o_ringName, P9_RID::RING_PROPERTIES[i_ringId].iv_name);
                             uint32_t var = CPLT_OFFSET_SIZE + i_ddLevelOffset + ppe_cplt_offset;
                             int temp1 =  var / sizeof(uint32_t);
                             ring_offset =  *((uint32_t*)i_ringSection + temp1);
@@ -657,7 +662,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
                                 ringSize = be16toh( ((CompressedScanData*)
                                                      ((uint8_t*)i_ringSection +
                                                       var))->iv_size );
-                                io_RingType = INSTANCE;
+                                io_RingType = INSTANCE_RING;
 
                                 if (chiplet_offset)
                                 {
@@ -766,7 +771,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static
 int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section ptr
-                              RingID          i_ringId,          // Ring ID
+                              RingId_t        i_ringId,          // Ring ID
                               uint16_t        i_ddLevelOffset,   // DD level offset
                               RingType_t&     io_RingType,       // Common, Instance
                               RingVariant_t   i_RingVariant,     // Base,CC, RL, Ovrd, Ovly
@@ -812,13 +817,13 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
 
     GenRingIdList* ring_id_list_common = NULL;
     GenRingIdList* ring_id_list_instance = NULL;
-    uint8_t l_num_variant  = (uint8_t)sizeof(EC::RingVariants) / sizeof(uint16_t);
-    ring_id_list_common = (GenRingIdList*) EC::RING_ID_LIST_COMMON;
-    ring_id_list_instance = (GenRingIdList*) EC::RING_ID_LIST_INSTANCE;
+    uint8_t l_num_variant  = (uint8_t)sizeof(P9_RID::EC::RingVariants) / sizeof(uint16_t);
+    ring_id_list_common = (GenRingIdList*) P9_RID::EC::RING_ID_LIST_COMMON;
+    ring_id_list_instance = (GenRingIdList*) P9_RID::EC::RING_ID_LIST_INSTANCE;
 
     uint32_t local = 0;
 
-    for (uint8_t i = 0; i < EC::g_ecData.iv_num_common_rings ; i++)
+    for (uint8_t i = 0; i < P9_RID::EC::g_ecData.iv_num_common_rings ; i++)
     {
         for (uint8_t j = 0; j < l_num_variant ; j++)
         {
@@ -829,9 +834,9 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
             }
 
             if ((strcmp( (ring_id_list_common + i)->ringName,
-                         RING_PROPERTIES[i_ringId].iv_name) == 0) && ( i_RingVariant == j ))
+                         P9_RID::RING_PROPERTIES[i_ringId].iv_name) == 0) && ( i_RingVariant == j ))
             {
-                strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
+                strcpy(o_ringName, P9_RID::RING_PROPERTIES[i_ringId].iv_name);
                 uint32_t var = 0 + i_ddLevelOffset + ppe_cplt_offset;
                 int temp1 =  var / sizeof(uint32_t);
                 ring_offset =  *((uint32_t*)i_ringSection + temp1);
@@ -847,7 +852,7 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
                     ringSize = be16toh( ((CompressedScanData*)
                                          ((uint8_t*)i_ringSection +
                                           var))->iv_size );
-                    io_RingType = COMMON;
+                    io_RingType = COMMON_RING;
 
                     if (chiplet_offset)
                     {
@@ -930,7 +935,7 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
           i <= (ring_id_list_instance + 0)->instanceIdMax;
           i++ )
     {
-        for (uint8_t j = 0; j < EC::g_ecData.iv_num_instance_rings; j++)
+        for (uint8_t j = 0; j < P9_RID::EC::g_ecData.iv_num_instance_rings; j++)
         {
             for (uint8_t k = 0; k < l_num_variant ; k++)
             {
@@ -941,14 +946,14 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
                 }
 
                 if (strcmp( (ring_id_list_instance + j)->ringName,
-                            RING_PROPERTIES[i_ringId].iv_name) == 0)
+                            P9_RID::RING_PROPERTIES[i_ringId].iv_name) == 0)
                 {
                     if ( io_instanceId >=  (ring_id_list_instance + 0)->instanceIdMin
                          &&  io_instanceId  <= (ring_id_list_instance + 0)->instanceIdMax )
                     {
                         if ( i == io_instanceId && k == i_RingVariant )
                         {
-                            strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
+                            strcpy(o_ringName, P9_RID::RING_PROPERTIES[i_ringId].iv_name);
                             uint32_t var = i_ddLevelOffset + ppe_cplt_offset + CPLT_OFFSET_SIZE;
                             int temp1 =  var / CPLT_OFFSET_SIZE;
                             ring_offset =  *((uint32_t*)i_ringSection + temp1);
@@ -964,7 +969,7 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
                                 ringSize = be16toh( ((CompressedScanData*)
                                                      ((uint8_t*)i_ringSection +
                                                       var))->iv_size );
-                                io_RingType = INSTANCE;
+                                io_RingType = INSTANCE_RING;
 
                                 if (chiplet_offset)
                                 {
@@ -1069,7 +1074,7 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
 ///
 //////////////////////////////////////////////////////////////////////////////////////////
 int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
-                      RingID          i_ringId,          // Ring ID
+                      RingId_t        i_ringId,          // Ring ID
                       uint16_t        i_ddLevel,         // DD level
                       PpeType_t       i_PpeType,         // SBE, CME, SGPE
                       RingType_t&     io_RingType,       // Common, Instance
@@ -1159,7 +1164,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
               torMagic == TOR_MAGIC_OVRD ||
               torMagic == TOR_MAGIC_OVLY )
     {
-        if ( i_PpeType == CME || i_PpeType == SGPE
+        if ( i_PpeType == PT_CME || i_PpeType == PT_SGPE
              || i_RingBlockType == GET_DD_LEVEL_RINGS
              || i_RingBlockType == GET_PPE_LEVEL_RINGS )
         {
@@ -1174,7 +1179,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
     }
     else if (torMagic == TOR_MAGIC_CME)
     {
-        if ( i_PpeType == SBE || i_PpeType == SGPE
+        if ( i_PpeType == PT_SBE || i_PpeType == PT_SGPE
              || i_RingBlockType == GET_DD_LEVEL_RINGS
              || i_RingBlockType == GET_PPE_LEVEL_RINGS )
         {
@@ -1189,7 +1194,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
     }
     else if (torMagic == TOR_MAGIC_SGPE)
     {
-        if ( i_PpeType == SBE || i_PpeType == CME
+        if ( i_PpeType == PT_SBE || i_PpeType == PT_CME
              || i_RingBlockType == GET_DD_LEVEL_RINGS
              || i_RingBlockType == GET_PPE_LEVEL_RINGS )
         {
@@ -1249,7 +1254,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
         uint32_t l_ppe_offset = 0;
         uint32_t l_ppe_size   = 0;
 
-        if (i_PpeType == SBE)
+        if (i_PpeType == PT_SBE)
         {
             temp = ddLevelOffset >> 2;
 
@@ -1263,7 +1268,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
             l_ppe_size = *((uint32_t*)i_ringSection + temp + 1 );
             l_ppe_size = be32toh(l_ppe_size);
         }
-        else if (i_PpeType == CME)
+        else if (i_PpeType == PT_CME)
         {
             temp = (ddLevelOffset >> 2) + 2;
 
@@ -1277,7 +1282,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
             l_ppe_size = *((uint32_t*)i_ringSection + temp + 1 );
             l_ppe_size = be32toh(l_ppe_size);
         }
-        else if (i_PpeType == SGPE)
+        else if (i_PpeType == PT_SGPE)
         {
 
             temp = (ddLevelOffset >> 2) + sizeof(uint32_t);
@@ -1320,7 +1325,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
     else if ( i_RingBlockType == GET_SINGLE_RING ||
               i_RingBlockType == PUT_SINGLE_RING )
     {
-        if ( i_PpeType == SBE &&
+        if ( i_PpeType == PT_SBE &&
              ( torMagic == TOR_MAGIC_HW   ||
                torMagic == TOR_MAGIC_SBE  ||
                torMagic == TOR_MAGIC_OVRD ||
@@ -1358,7 +1363,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                 return TOR_RING_BLOCKS_FOUND;
             }
         }
-        else if ( i_PpeType == CME &&
+        else if ( i_PpeType == PT_CME &&
                   ( torMagic == TOR_MAGIC_HW ||
                     torMagic == TOR_MAGIC_CME ) )
         {
@@ -1379,7 +1384,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                 if (i_dbgl > 0)
                 {
                     MY_INF("\t After CME single ring call, %s ring container is not found \n",
-                           RING_PROPERTIES[i_ringId].iv_name);
+                           P9_RID::RING_PROPERTIES[i_ringId].iv_name);
                 }
 
                 return rc;
@@ -1408,7 +1413,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                 if (i_dbgl > 0)
                 {
                     MY_INF("\t After CME single ring call, There is no TOR slot for %s %d\n",
-                           RING_PROPERTIES[i_ringId].iv_name, i_ringId);
+                           P9_RID::RING_PROPERTIES[i_ringId].iv_name, i_ringId);
                 }
 
                 return rc;
@@ -1424,7 +1429,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                 return TOR_RING_BLOCKS_FOUND;
             }
         }
-        else if ( i_PpeType == SGPE &&
+        else if ( i_PpeType == PT_SGPE &&
                   ( torMagic == TOR_MAGIC_HW ||
                     torMagic == TOR_MAGIC_SGPE ) )
         {
@@ -1445,7 +1450,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                 if (i_dbgl > 0)
                 {
                     MY_INF("\t After SGPE single ring call, %s ring container is not found \n",
-                           RING_PROPERTIES[i_ringId].iv_name);
+                           P9_RID::RING_PROPERTIES[i_ringId].iv_name);
                 }
 
                 return rc;
@@ -1474,7 +1479,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                 if (i_dbgl > 0)
                 {
                     MY_INF("\t After SGPE single ring call, There is no TOR slot for %s %d\n",
-                           RING_PROPERTIES[i_ringId].iv_name, i_ringId);
+                           P9_RID::RING_PROPERTIES[i_ringId].iv_name, i_ringId);
                 }
 
                 return rc;
@@ -1523,7 +1528,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
 /////////////////////////////////////////////////////////////////////////////////////
 int tor_get_single_ring ( void*         i_ringSection,     // Ring section ptr
                           uint16_t      i_ddLevel,         // DD level
-                          RingID        i_ringId,          // Ring ID
+                          RingId_t      i_ringId,          // Ring ID
                           PpeType_t     i_PpeType,         // SBE, CME, SGPE
                           RingVariant_t i_RingVariant,     // Base,CC, RL, Ovrd, Ovly
                           uint8_t       i_instanceId,      // Instance ID
@@ -1536,7 +1541,7 @@ int tor_get_single_ring ( void*         i_ringSection,     // Ring section ptr
     char i_ringName[25];
     //@FIXME: This should really be ALLRING. But it's not used as input.
     RingType_t l_ringType;
-    l_ringType = COMMON;
+    l_ringType = COMMON_RING;
 
     if (i_dbgl > 1)
     {
@@ -1594,7 +1599,7 @@ int tor_get_block_of_rings ( void*           i_ringSection,     // Ring section 
     {
         // Get block of rings specific to a PPE type
         rc = tor_access_ring( i_ringSection,
-                              NUM_RING_IDS,
+                              P9_RID::NUM_RING_IDS,
                               i_ddLevel,
                               i_PpeType,
                               i_ringType,
@@ -1611,7 +1616,7 @@ int tor_get_block_of_rings ( void*           i_ringSection,     // Ring section 
     {
         // Get DD level block of rings
         rc = tor_access_ring( i_ringSection,
-                              NUM_RING_IDS,
+                              P9_RID::NUM_RING_IDS,
                               i_ddLevel,
                               i_PpeType,
                               i_ringType,
@@ -1650,7 +1655,7 @@ int tor_append_ring(  void*           i_ringSection,      // Ring section ptr
                       // Out: Updated size of ring section.
                       void*           i_ringBuffer,       // Ring work buffer
                       const uint32_t  i_ringBufferSize,   // Max size of ring work buffer
-                      RingID          i_ringId,           // Ring ID
+                      RingId_t        i_ringId,           // Ring ID
                       PpeType_t       i_PpeType,          // SBE, CME, SGPE
                       RingType_t      i_RingType,         // Common, Instance
                       RingVariant_t   i_RingVariant,      // Base,CC, RL, Ovrd, Ovly
@@ -1737,5 +1742,3 @@ uint8_t tor_version( void)
 {
     return (uint8_t)TOR_VERSION;
 }
-
-};
