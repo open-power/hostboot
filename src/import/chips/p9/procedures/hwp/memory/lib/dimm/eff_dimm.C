@@ -1135,7 +1135,6 @@ fapi2::ReturnCode eff_dimm::dimm_rc08()
     uint8_t l_num_slave_ranks = 0;
 
     FAPI_TRY( eff_dimm_ddr4_rc08(iv_mcs, &l_attrs_dimm_rc08[0][0]) );
-
     FAPI_TRY(iv_pDecoder->num_package_ranks_per_dimm(l_master_ranks) );
 
     // Pulling this one from the decoder
@@ -1227,9 +1226,11 @@ fapi2::ReturnCode eff_dimm::dimm_rc08()
     };
 
     // Let's set the other bits
-    l_buffer.writeBit<uint64_t(QXPAR_LOCATION)>(PARITY_ENABLE);
+    l_buffer.writeBit<QXPAR_LOCATION>(PARITY_ENABLE);
 
-    l_buffer.writeBit<uint64_t(DA17_QA17_LOCATION)>(DA17_QA17_ENABLE);
+    // We only need the 17th Address bit if we have 16G dense drams
+    // TK: come back and do disable if not needed
+    l_buffer.writeBit<DA17_QA17_LOCATION>(DA17_QA17_ENABLE);
 
     l_attrs_dimm_rc08[iv_port_index][iv_dimm_index] = l_buffer;
 
