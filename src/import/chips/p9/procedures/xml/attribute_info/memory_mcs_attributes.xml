@@ -692,7 +692,7 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_DIMM_DDR4_RC10</id>
+        <id>ATTR_EFF_DIMM_DDR4_RC0A</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>RDIMM Operating Speed;  Read from ATTR_MSS_FREQ; Default value - 00. Values Range from 00 to 09. No need to calculate; User can override with desired experimental value.
         creator: mss_eff_cnfg
@@ -702,11 +702,11 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc10</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc0a</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_DIMM_DDR4_RC11</id>
+        <id>ATTR_EFF_DIMM_DDR4_RC0B</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Operating Voltage VDD and VrefCA Source Control Word; Read from ATTR_MSS_VOLT_VDDR. Default value - 14. Values Range from 00 to 15 decimal.  No need to calculate; User can override with desired experimental value.
         creator: mss_eff_cnfg
@@ -716,11 +716,11 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc11</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc0b</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_DIMM_DDR4_RC12</id>
+        <id>ATTR_EFF_DIMM_DDR4_RC0C</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0RC0C - Training Control Word; Default value - 00. Values Range from 00 to 07 decimal.No need to calculate; User can override with desired experimental value.
         creator: mss_eff_cnfg
@@ -730,11 +730,11 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc12</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc0c</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_DIMM_DDR4_RC13</id>
+        <id>ATTR_EFF_DIMM_DDR4_RC0D</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0RC0D - DIMM Configuration Control Word; Default value - 0B. Values Range from 00 to 15 decimal. Dynamically calculated using 4 bits[0:3] Bit 0 - Address Mirroring; Bit 1 - Rdimm(1)/Lrdimm (0) ; Bit 2 - N/A ; Bit 3 - CS Mode (Direct / Quad CS mode etc);
         creator: mss_eff_cnfg
@@ -744,11 +744,11 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc13</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc0d</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_DIMM_DDR4_RC14</id>
+        <id>ATTR_EFF_DIMM_DDR4_RC0E</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0RC0E - Parity Control Word;  Default value - 00. Check from ATTR_EFF_CA_PARITY and assign; Values Range from 00 to 0F.
         creator: mss_eff_cnfg
@@ -758,11 +758,11 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc14</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc0e</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_DIMM_DDR4_RC15</id>
+        <id>ATTR_EFF_DIMM_DDR4_RC0F</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0RC0F - Command Latency Adder Control Word;  Default value - 04. Values Range from 00 to 04. No need to calculate; User can override with desired experimental value.
         creator: mss_eff_cnfg
@@ -772,7 +772,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc15</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc0f</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2072,8 +2072,8 @@
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             LRDIMM additional RCD control words as set by DIMM SPD:
-            F[3,4]RC10, F[3,4]RC11, F[5,6]RC10, F[5,6]RC11, F[7,8]RC10, F[7,8]RC11, F[9,10]RC10, F[9,10]RC11,
-            F[1]RC8, F[3]RC9, F[3]RC8, F[1]RC11, F[1]RC12, F[1]RC13, F[1]RC14, F[1]RC15.
+            F[3,4]RC0A, F[3,4]RC0B, F[5,6]RC0A, F[5,6]RC0B, F[7,8]RC0A, F[7,8]RC0B, F[9,10]RC0A, F[9,10]RC0B,
+            F[1]RC8, F[3]RC9, F[3]RC8, F[1]RC0B, F[1]RC0C, F[1]RC0D, F[1]RC0E, F[1]RC0F.
             Eff config should set this up
         </description>
         <initToZero></initToZero>
