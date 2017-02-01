@@ -58,8 +58,8 @@ class NTPLFIR:public CxxTest::TestSuite
             //TP_CHIPLET_RE_FIR
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040001, 0x4000000000000000);
 
-            //TP_LFIR  -- bit 21:22 on P9
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0104000a, 0x0000060000000000);
+            //TP_LFIR  -- bit 21 on P9
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0104000a, 0x0000040000000000);
 
             //TP_LFIR_ACT1
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040011, 0xFFFFFFFFFFFFFFFF);
@@ -69,11 +69,7 @@ class NTPLFIR:public CxxTest::TestSuite
                             0x0000004000000000);
 
             //TP_ERROR_REG
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x010F001F, 0x0000000000000000);
-
-            //OBUS_ERROR_REG
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:OBUS{0}", 0x090F001F,
-                           0x0000004000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x010F001F, 0x0000004000000000);
 
             PRDS_START_SIM();
 
@@ -97,8 +93,8 @@ class NTPLFIR:public CxxTest::TestSuite
             //TP_CHIPLET_RE_FIR
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040001, 0x4000000000000000);
 
-            //TP_LFIR  -- bit 21:22 on P9
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0104000a, 0x0000060000000000);
+            //TP_LFIR  -- bit 21 on P9
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0104000a, 0x0000040000000000);
 
             //TP_LFIR_ACT1
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040011, 0xFFFFFFFFFFFFFFFF);
@@ -108,11 +104,7 @@ class NTPLFIR:public CxxTest::TestSuite
                             0x0000004000000000);
 
             //TP_ERROR_REG
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x010F001F, 0x0000000000000000);
-
-            //OBUS_ERROR_REG
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:OBUS{0}", 0x090F001F,
-                           0x0000004000000000);
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x010F001F, 0x0000004000000000);
 
             PRDS_START_SIM();
 
