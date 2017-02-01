@@ -645,26 +645,37 @@ fapi2::ReturnCode raw_card_factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
     switch(l_dimm_type)
     {
         case fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM:
-            if( !find_value_from_key( mss::rdimm::RAW_CARDS, l_ref_raw_card_rev, o_raw_card) )
-            {
-                FAPI_ERR( "Invalid reference raw card recieved for RDIMM: %d", l_ref_raw_card_rev );
-                return fapi2::FAPI2_RC_FALSE;
-            }
 
+            FAPI_ASSERT( find_value_from_key( mss::rdimm::RAW_CARDS, l_ref_raw_card_rev, o_raw_card),
+                         fapi2::MSS_INVALID_RAW_CARD()
+                         .set_DIMM_TYPE(l_dimm_type)
+                         .set_RAW_CARD_REV(l_ref_raw_card_rev)
+                         .set_DIMM_TARGET(i_target),
+                         "Invalid reference raw card recieved for RDIMM: %d for %s",
+                         l_ref_raw_card_rev,
+                         mss::c_str(i_target) );
             break;
 
         case fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM:
-            if( !find_value_from_key( mss::lrdimm::RAW_CARDS, l_ref_raw_card_rev, o_raw_card) )
-            {
-                FAPI_ERR( "Invalid reference raw card recieved for LRDIMM: %d", l_ref_raw_card_rev );
-                return fapi2::FAPI2_RC_FALSE;
-            }
 
+            FAPI_ASSERT( find_value_from_key( mss::lrdimm::RAW_CARDS, l_ref_raw_card_rev, o_raw_card),
+                         fapi2::MSS_INVALID_RAW_CARD()
+                         .set_DIMM_TYPE(l_dimm_type)
+                         .set_RAW_CARD_REV(l_ref_raw_card_rev)
+                         .set_DIMM_TARGET(i_target),
+                         "Invalid reference raw card recieved for LRDIMM: %d for %s",
+                         l_ref_raw_card_rev,
+                         mss::c_str(i_target));
             break;
 
         default:
-            FAPI_ERR( "Recieved invalid dimm type: %d", l_dimm_type);
-            return fapi2::FAPI2_RC_FALSE;
+
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_DIMM_TYPE()
+                         .set_DIMM_TYPE(l_dimm_type)
+                         .set_TARGET(i_target),
+                         "Recieved invalid dimm type: %d for %s",
+                         l_dimm_type, mss::c_str(i_target) );
             break;
     }
 
