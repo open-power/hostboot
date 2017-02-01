@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -35,3 +35,6 @@ include ${ROOTPATH}/config.mk
 # To find errldisplaydata.C - it is generated
 # by ../errl/parser/genErrlParsers.pl
 vpath %.C ${GENDIR}
+
+#To find hbfwErrDisplayPlatHwpErr add extra include paths
+EXTRAINCDIR += ${GENDIR}/plugins
