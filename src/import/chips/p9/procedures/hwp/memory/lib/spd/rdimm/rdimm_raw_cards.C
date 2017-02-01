@@ -53,7 +53,6 @@ rcw_settings rdimm_rc_c1( 0x00, // RC00
                           0x00, // RC01 (C might be the right answer?)
                           0x00, // RC02
                           0x0F, // RC06_07
-                          0x03, // RC08
                           0x00, // RC09
                           0x0E, // RC0B
                           0x00, // RC0C
@@ -77,7 +76,6 @@ rcw_settings rdimm_rc_c2( 0x00, // RC00
                           0x00, // RC01 (C might be the right answer?)
                           0x00, // RC02
                           0x0F, // RC06_07
-                          0x03, // RC08
                           0x00, // RC09
                           0x0E, // RC0B
                           0x00, // RC0C
@@ -100,7 +98,6 @@ rcw_settings  rdimm_rc_a1( 0x00, // RC00
                            0x00, // RC01 (C might be the right answer?)
                            0x00, // RC02
                            0x0F, // RC06_07
-                           0x03, // RC08
                            0x00, // RC09
                            0x0E, // RC0B
                            0x00, // RC0C
@@ -124,7 +121,6 @@ rcw_settings rdimm_rc_b1( 0x00, // RC00
                           0x00, // RC01 (C might be the right answer?)
                           0x00, // RC02
                           0x0F, // RC06_07
-                          0x03, // RC08 //Should be set in eff_config, decided via 3DS/ SDP
                           0x00, // RC09 //Should be set in eff_config for CKE power DOWN modep:q
                           0x0E, // RC0B
                           0x00, // RC0C
@@ -147,7 +143,6 @@ rcw_settings rdimm_rc_b2( 0x00, // RC00
                           0x00, // RC01 (C might be the right answer?)
                           0x00, // RC02
                           0x0F, // RC06_07
-                          0x03, // RC08
                           0x00, // RC09
                           0x0E, // RC0B
                           0x00, // RC0C
@@ -170,7 +165,6 @@ rcw_settings rdimm_rc_vbu( 0x00, // RC00
                            0x00, // RC01
                            0x00, // RC02
                            0x0F, // RC06_07
-                           0x03, // RC08
                            0x00, // RC09
                            0x0E, // RC0B
                            0x00, // RC0C

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,6 @@ struct rcw_settings
     uint64_t iv_rc01;
     uint64_t iv_rc02;
     uint64_t iv_rc06_07;
-    uint64_t iv_rc08;
     uint64_t iv_rc09;
     uint64_t iv_rc0b;
     uint64_t iv_rc0c;
@@ -103,7 +102,6 @@ struct rcw_settings
     /// @param[in] i_rc01 setting for register control word (RC01)
     /// @param[in] i_rc02 setting for register control word (RC02)
     /// @param[in] i_rc06_07 setting for register control word (RCO6 & RC07)
-    /// @param[in] i_rc08 setting for register control word (RC08)
     /// @param[in] i_rc09 setting for register control word (RC09)
     /// @param[in] i_rc0b setting for register control word (RC0B)
     /// @param[in] i_rc0c setting for register control word (RC0C)
@@ -123,7 +121,6 @@ struct rcw_settings
                             const uint64_t i_rc01,
                             const uint64_t i_rc02,
                             const uint64_t i_rc06_07,
-                            const uint64_t i_rc08,
                             const uint64_t i_rc09,
                             const uint64_t i_rc0b,
                             const uint64_t i_rc0c,
@@ -142,7 +139,6 @@ struct rcw_settings
           iv_rc01(i_rc01),
           iv_rc02(i_rc02),
           iv_rc06_07(i_rc06_07),
-          iv_rc08(i_rc08),
           iv_rc09(i_rc09),
           iv_rc0b(i_rc0b),
           iv_rc0c(i_rc0c),

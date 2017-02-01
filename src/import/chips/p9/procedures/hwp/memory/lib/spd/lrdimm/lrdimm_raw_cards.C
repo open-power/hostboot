@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,6 @@ rcw_settings lrdimm_rc_b0( 0x00, // RC00
                            0x00, // RC01 (C might be the right answer)
                            0x00, // RC02
                            0x1F, // RC06_7
-                           0x03, // RC08
                            0x00, // RC09
                            0x0E, // RC0B
                            0x00, // RC0C

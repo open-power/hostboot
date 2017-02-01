@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,12 +76,12 @@ fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
         {  FS0, 6, eff_dimm_ddr4_rc06_07, mss::tmrd()  },
         {  FS0, 8, eff_dimm_ddr4_rc08, mss::tmrd()     },
         {  FS0, 9, eff_dimm_ddr4_rc09, mss::tmrd()     },
-        {  FS0, 10, eff_dimm_ddr4_rc10, tSTAB          },
-        {  FS0, 11, eff_dimm_ddr4_rc11, mss::tmrd()    },
-        {  FS0, 12, eff_dimm_ddr4_rc12, mss::tmrd()    },
-        {  FS0, 13, eff_dimm_ddr4_rc13, mss::tmrd()    },
-        {  FS0, 14, eff_dimm_ddr4_rc14, mss::tmrd()    },
-        {  FS0, 15, eff_dimm_ddr4_rc15, mss::tmrd()    },
+        {  FS0, 10, eff_dimm_ddr4_rc0a, tSTAB          },
+        {  FS0, 11, eff_dimm_ddr4_rc0b, mss::tmrd()    },
+        {  FS0, 12, eff_dimm_ddr4_rc0c, mss::tmrd()    },
+        {  FS0, 13, eff_dimm_ddr4_rc0d, mss::tmrd()    },
+        {  FS0, 14, eff_dimm_ddr4_rc0e, mss::tmrd()    },
+        {  FS0, 15, eff_dimm_ddr4_rc0f, mss::tmrd()    },
     };
 
     // RCD 8-bit data - integral represents rc#

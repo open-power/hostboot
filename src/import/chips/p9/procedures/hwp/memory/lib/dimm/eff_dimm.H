@@ -207,6 +207,12 @@ class eff_dimm
         fapi2::ReturnCode dram_row_bits();
 
         ///
+        /// @brief Determines & sets effective config for the die count for the DIMM
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode prim_die_count();
+
+        ///
         /// @brief Determines & sets effective config for number of ranks per dimm
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
@@ -285,40 +291,40 @@ class eff_dimm
         fapi2::ReturnCode dimm_rc09();
 
         ///
-        /// @brief Determines & sets effective config for DIMM RC10
+        /// @brief Determines & sets effective config for DIMM RC0A
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        fapi2::ReturnCode dimm_rc10();
+        fapi2::ReturnCode dimm_rc0a();
 
         ///
-        /// @brief Determines & sets effective config for DIMM RC11
+        /// @brief Determines & sets effective config for DIMM RC0B
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        fapi2::ReturnCode dimm_rc11();
+        fapi2::ReturnCode dimm_rc0b();
 
         ///
-        /// @brief Determines & sets effective config for DIMM RC12
+        /// @brief Determines & sets effective config for DIMM RC0C
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        fapi2::ReturnCode dimm_rc12();
+        fapi2::ReturnCode dimm_rc0c();
 
         ///
-        /// @brief Determines & sets effective config for DIMM RC13
+        /// @brief Determines & sets effective config for DIMM RC0D
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        fapi2::ReturnCode dimm_rc13();
+        fapi2::ReturnCode dimm_rc0d();
 
         ///
-        /// @brief Determines & sets effective config for DIMM RC14
+        /// @brief Determines & sets effective config for DIMM RC0E
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        fapi2::ReturnCode dimm_rc14();
+        fapi2::ReturnCode dimm_rc0e();
 
         ///
-        /// @brief Determines & sets effective config for DIMM RC15
+        /// @brief Determines & sets effective config for DIMM RC0F
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        fapi2::ReturnCode dimm_rc15();
+        fapi2::ReturnCode dimm_rc0f();
 
         ///
         /// @brief Determines & sets effective config for DIMM RC_1x

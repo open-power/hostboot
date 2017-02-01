@@ -58,14 +58,42 @@ using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCBIST;
 
 ///
-/// @brief bit encodings for Frequencies RC0A (RC10)
+/// @brief bit encodings for Frequencies RC08
+/// @note valid frequency values for Nimbus systems
+/// From DDR4 Register v1.0
+/// DA[3] : DA17 Input Buffer and QxA17
+/// DA[2] QxPAR disabled
+/// DA [1:0] QxC[2:0] (Chip ID)
+///
+enum rc08_encode : uint64_t
+{
+    CID_START = 6,
+    CID_LENGTH = 2,
+    ALL_ENABLE = 0b00,
+    ONE_ZERO_ENABLE = 0b01,
+    TWO_ONE_ENABLE = 0b10,
+    ALL_DISABLE = 0b11,
+    DA17_START = 4,
+    DA17_LENGTH = 1,
+    DA17_QA17_LOCATION = 4,
+    DA17_QA17_ENABLE = 0b0,
+    DA17_QA17_DISABLE = 0b1,
+    QXPAR_LOCATION = 5,
+    PARITY_ENABLE = 0,
+    PARITY_DISABLE = 1,
+    MAX_SLAVE_RANKS = 8,
+    NUM_SLAVE_RANKS_ENCODED_IN_TWO_BITS = 4,
+};
+
+///
+/// @brief bit encodings for Frequencies RC0A (RC0A)
 /// @note valid frequency values for Nimbus systems
 /// From DDR4 Register v1.0
 /// More encodings available but they won't be used due to system constrains
 ///
 //  TODO: RTC 167542
 //Do we need to implement v2.0? It would be easy with the new structure - JLH
-enum rc10_encode : uint8_t
+enum rc0a_encode : uint8_t
 {
     DDR4_1866 = 0b001,
     DDR4_2133 = 0b010,
@@ -74,10 +102,10 @@ enum rc10_encode : uint8_t
 };
 
 ///
-/// @brief bit encodings for RC0D (RC10 here) - DIMM Configuration Control Word RC0D (RC10 here)
+/// @brief bit encodings for RC0D (RC0A here) - DIMM Configuration Control Word RC0D (RC0A here)
 /// From DDR4 Register v1.0
 ///
-enum rc13_encode : uint8_t
+enum rc0d_encode : uint8_t
 {
     DIRECT_CS_MODE = 0, ///< Direct DualCS mode: Register uses two DCS_n inputes
     LRDIMM = 0,
@@ -298,7 +326,8 @@ fapi2::ReturnCode eff_dimm::dram_mfg_id()
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_mfg_id(iv_mcs, &l_mcs_attrs[0][0]), "Failed accessing ATTR_MSS_EFF_DRAM_MFG_ID" );
-    FAPI_TRY( iv_pDecoder->dram_manufacturer_id_code(l_decoder_val), "Failed getting dram id code from SPD" );
+    FAPI_TRY( iv_pDecoder->dram_manufacturer_id_code(l_decoder_val), "Failed getting dram id code from SPD %s",
+              mss::c_str(iv_dimm) );
 
     l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_MFG_ID, iv_mcs, l_mcs_attrs), "Failed to set ATTR_EFF_DRAM_MFG_ID" );
@@ -318,7 +347,7 @@ fapi2::ReturnCode eff_dimm::dram_width()
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Get & update MCS attribute
-    FAPI_TRY( iv_pDecoder->device_width(l_decoder_val), "Failed accessing device width from SPD" );
+    FAPI_TRY( iv_pDecoder->device_width(l_decoder_val), "Failed accessing device width from SPD %s", mss::c_str(iv_dimm) );
     FAPI_TRY( eff_dram_width(iv_mcs, &l_mcs_attrs[0][0]), "Failed getting EFF_DRAM_WIDTH" );
 
     l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
@@ -337,7 +366,7 @@ fapi2::ReturnCode eff_dimm::dram_density()
 {
 
     uint8_t l_decoder_val = 0;
-    FAPI_TRY( iv_pDecoder->sdram_density(l_decoder_val), "Failed to get dram_density from SPD" );
+    FAPI_TRY( iv_pDecoder->sdram_density(l_decoder_val), "Failed to get dram_density from SPD %s", mss::c_str(iv_dimm) );
 
     // Get & update MCS attribute
     {
@@ -364,11 +393,33 @@ fapi2::ReturnCode eff_dimm::ranks_per_dimm()
     // Get & update MCS attribute
     FAPI_TRY( eff_num_ranks_per_dimm(iv_mcs, &l_attrs_ranks_per_dimm[0][0]), "Failed to get EFF_NUM_RANKS_PER_DIMM" );
     FAPI_TRY( iv_pDecoder->logical_ranks_per_dimm(l_ranks_per_dimm),
-              "Failed to get logical_ranks_per_dimm from SPD" );
+              "Failed to get logical_ranks_per_dimm from SPD %s", mss::c_str(iv_dimm) );
 
     l_attrs_ranks_per_dimm[iv_port_index][iv_dimm_index] = l_ranks_per_dimm;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_NUM_RANKS_PER_DIMM, iv_mcs, l_attrs_ranks_per_dimm),
               "Failed to set ATTR_EFF_NUM_RANKS_PER_DIMM" );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for the die count for the DIMM
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::prim_die_count()
+{
+    uint8_t l_die_count = 0;
+    uint8_t l_attr[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+
+    // Get & update MCS attribute
+    FAPI_TRY( eff_prim_die_count(iv_mcs, &l_attr[0][0]), "Failed to get EFF_PRIM_DIE_COUNT" );
+    FAPI_TRY( iv_pDecoder->prim_sdram_die_count(l_die_count),
+              "Failed to get the die count for the dimm %s", mss::c_str(iv_dimm) );
+
+    l_attr[iv_port_index][iv_dimm_index] = l_die_count;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_PRIM_DIE_COUNT, iv_mcs, l_attr),
+              "Failed to set ATTR_EFF_PRIM_DIE_COUNT" );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -380,16 +431,50 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::primary_stack_type()
 {
-    uint8_t l_decoder_val = 0;
-    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(l_decoder_val),
-              "Failed to get dram_signal_loading from SPD" );
+    uint8_t l_stack_type = 0;
+    uint8_t l_package_type = 0;
+
+    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(l_stack_type),
+              "Failed to get dram_signal_loading from SPD %s", mss::c_str(iv_dimm) );
+    FAPI_TRY( iv_pDecoder->prim_sdram_package_type(l_package_type),
+              "Failed to get prim_sdram_package_type from SPD %s", mss::c_str(iv_dimm) );
+
+    // Check to see if monolithic DRAM/ SDP
+    switch (l_package_type)
+    {
+        case mss::spd::MONOLITHIC:
+            // JEDEC standard says if the SPD says monolithic in A[7],
+            // stack type must be 00 or "SDP" which is what our enum is set to
+            FAPI_ASSERT( (l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_SDP),
+                         fapi2::MSS_BAD_SPD()
+                         .set_VALUE(l_stack_type)
+                         .set_BYTE(6)
+                         .set_DIMM_TARGET(iv_dimm),
+                         "Invalid SPD for calculating ATTR_EFF_PRIM_STACK_TYPE");
+
+            break;
+
+        case mss::spd::NON_MONOLITHIC:
+            FAPI_ASSERT( (l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_DDP_QDP) ||
+                         (l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS),
+                         fapi2::MSS_BAD_SPD()
+                         .set_VALUE(l_stack_type)
+                         .set_BYTE(6)
+                         .set_DIMM_TARGET(iv_dimm),
+                         "Invalid SPD for calculating ATTR_EFF_PRIM_STACK_TYPE");
+            break;
+
+        default:
+            FAPI_ERR("Error decoding prim_sdram_package_type");
+            fapi2::Assert(false);
+    };
 
     // Get & update MCS attribute
     {
         uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
         FAPI_TRY( eff_prim_stack_type(iv_mcs, &l_mcs_attrs[0][0]), "Failed to get ATTR_MSS_EFF_PRIM_STACK_TYPE" );
 
-        l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
+        l_mcs_attrs[iv_port_index][iv_dimm_index] = l_stack_type;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_PRIM_STACK_TYPE, iv_mcs, l_mcs_attrs), "Failed to set EFF_PRIM_STACK_TYPE" );
     }
 
@@ -411,11 +496,11 @@ fapi2::ReturnCode eff_dimm::dimm_size()
     uint8_t l_sdram_density = 0;
     uint8_t l_logical_rank_per_dimm = 0;
 
-    FAPI_TRY( iv_pDecoder->device_width(l_sdram_width), "Failed to get device width from SPD" );
-    FAPI_TRY( iv_pDecoder->prim_bus_width(l_bus_width), "Failed to get prim bus width from SPD" );
-    FAPI_TRY( iv_pDecoder->sdram_density(l_sdram_density), "Failed to get dram density from SPD" );
+    FAPI_TRY( iv_pDecoder->device_width(l_sdram_width), "Failed to get device width from SPD %s", mss::c_str(iv_dimm) );
+    FAPI_TRY( iv_pDecoder->prim_bus_width(l_bus_width), "Failed to get prim bus width from SPD %s", mss::c_str(iv_dimm) );
+    FAPI_TRY( iv_pDecoder->sdram_density(l_sdram_density), "Failed to get dram density from SPD %s", mss::c_str(iv_dimm) );
     FAPI_TRY( iv_pDecoder->logical_ranks_per_dimm(l_logical_rank_per_dimm),
-              "Failed to get logical ranks from SPD" );
+              "Failed to get logical ranks from SPD %s", mss::c_str(iv_dimm) );
 
     {
         // Calculate dimm size
@@ -447,7 +532,7 @@ fapi2::ReturnCode eff_dimm::hybrid_memory_type()
 
     // Get & update MCS attribute
     FAPI_TRY( eff_hybrid_memory_type(iv_mcs, &l_mcs_attrs[0][0]), "Failed to get ATTR_MSS_HYBRID_MEMORY_TYPE" );
-    FAPI_TRY(iv_pDecoder->hybrid_media(l_decoder_val), "Failed to get Hybrid_media from SPD");
+    FAPI_TRY(iv_pDecoder->hybrid_media(l_decoder_val), "Failed to get Hybrid_media from SPD %s", mss::c_str(iv_dimm));
 
     l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_HYBRID_MEMORY_TYPE, iv_mcs, l_mcs_attrs),
@@ -505,7 +590,7 @@ fapi2::ReturnCode eff_dimm::dram_trefi()
                         mss::c_str(iv_dimm),
                         iv_refresh_mode);
             break;
-    }
+    };
 
     {
         // Calculate refresh cycle time in nCK & set attribute
@@ -1038,17 +1123,118 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC08
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note DA[1:0] enable/ disable QxC
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc08()
 {
-    // Retrieve MCS attribute data
+    uint8_t l_stack_type = 0;
     uint8_t l_attrs_dimm_rc08[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    fapi2::buffer<uint8_t> l_buffer = 0;
+    uint8_t l_total_ranks = 0;
+    uint8_t l_master_ranks = 0;
+    uint8_t l_num_slave_ranks = 0;
+
     FAPI_TRY( eff_dimm_ddr4_rc08(iv_mcs, &l_attrs_dimm_rc08[0][0]) );
 
-    // Update MCS attribute
-    l_attrs_dimm_rc08[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc08;
+    FAPI_TRY(iv_pDecoder->num_package_ranks_per_dimm(l_master_ranks) );
+
+    // Pulling this one from the decoder
+    FAPI_TRY( iv_pDecoder->logical_ranks_per_dimm(l_total_ranks),
+              "Failed to get logical_ranks_per_dimm from SPD %s", mss::c_str(iv_dimm) );
+
+    // Calling the this eff_dimm's setter function and then the function to get the attribute
+    // While this is less efficient than calling the decoder function, it makes testing 3DS DIMMs easier
+    // This allows us to use attribute overrides to test the DIMMS as SDP's
+    FAPI_TRY( primary_stack_type());
+    FAPI_TRY( eff_prim_stack_type(iv_dimm, l_stack_type));
+
+    // Little assert, but this shouldn't be possibly and should be caught in the decoder function
+    fapi2::Assert(l_master_ranks != 0);
+
+    // Slave ranks = total ranks (aka logical ranks)  / master ranks (aka package ranks)
+    l_num_slave_ranks = l_total_ranks / l_master_ranks;
+
+    // If we are 3DS we need to enable chip ID signal with QxC
+    switch( l_stack_type)
+    {
+        case fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_DDP_QDP:
+        case fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_SDP:
+            // Don't need the chip ID signals enabled because no slave ranks
+            l_buffer.insertFromRight<CID_START, CID_LENGTH> (ALL_DISABLE);
+            break;
+
+        // If 3DS, we have slave ranks and thus need some chip ID bits to be enabled
+        case fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS:
+
+            // Check according Rank Matrix for Summetrical Modules
+            // Page 24 of DDR4 SPD Contents JC-45-2220.01x
+            // 3DS DIMM has to have 2 or more logical ranks per package rank
+            // Meaning, it has to have at least 2 slave ranks for each "master" rank
+            // If it does not or we are testing just 1 package rank, we should set the stack type to SDP
+            FAPI_ASSERT( l_total_ranks > l_master_ranks,
+                         fapi2::MSS_INVALID_CALCULATED_NUM_SLAVE_RANKS()
+                         .set_NUM_SLAVE_RANKS(l_num_slave_ranks)
+                         .set_NUM_TOTAL_RANKS(l_total_ranks)
+                         .set_NUM_MASTER_RANKS(l_master_ranks),
+                         "For target %s: Invalid total_ranks %d seen with %d master ranks",
+                         mss::c_str(iv_dimm),
+                         l_total_ranks,
+                         l_master_ranks);
+
+
+            FAPI_INF("Target %s seeing %d total ranks, %d master ranks, %d slave ranks",
+                     mss::c_str(iv_dimm),
+                     l_total_ranks,
+                     l_master_ranks,
+                     l_num_slave_ranks);
+
+            // Double check we calculated this correctly
+            FAPI_ASSERT( ((l_num_slave_ranks != 0) ||  (l_num_slave_ranks < 8)),
+                         fapi2::MSS_INVALID_CALCULATED_NUM_SLAVE_RANKS()
+                         .set_NUM_SLAVE_RANKS(l_num_slave_ranks)
+                         .set_NUM_TOTAL_RANKS(l_total_ranks)
+                         .set_NUM_MASTER_RANKS(l_master_ranks),
+                         "For target %s: Invalid number of slave ranks calculated (%d) from (total_ranks %d / master %d)",
+                         mss::c_str(iv_dimm),
+                         l_num_slave_ranks,
+                         l_total_ranks,
+                         l_master_ranks);
+
+            // Only need 2 bits to encode 4 slave ranks with chip IDs
+            if (l_num_slave_ranks < NUM_SLAVE_RANKS_ENCODED_IN_TWO_BITS)
+            {
+
+                l_buffer.insertFromRight<CID_START, CID_LENGTH>( ONE_ZERO_ENABLE);
+            }
+            else
+            {
+                // 4-8 slave ranks, Gonna need all three bits
+                l_buffer.insertFromRight<CID_START, CID_LENGTH>( ALL_ENABLE);
+            }
+
+            break;
+
+        default:
+            FAPI_ERR("Target %s: Error, incorrect ATTR_EFF_PRIM_STACK_TYPE found", mss::c_str(iv_dimm));
+            // If this fails
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_PRIM_STACK_TYPE()
+                         .set_STACK_TYPE(l_stack_type)
+                         .set_DIMM_TARGET(iv_dimm),
+                         "For target %s: An invalid stack type (%d) found for MSS ATTR_EFF_PRIM_STACK_TYPE",
+                         mss::c_str(iv_dimm),
+                         l_stack_type);
+    };
+
+    // Let's set the other bits
+    l_buffer.writeBit<uint64_t(QXPAR_LOCATION)>(PARITY_ENABLE);
+
+    l_buffer.writeBit<uint64_t(DA17_QA17_LOCATION)>(DA17_QA17_ENABLE);
+
+    l_attrs_dimm_rc08[iv_port_index][iv_dimm_index] = l_buffer;
 
     FAPI_INF( "%s: RC08 setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc08[iv_port_index][iv_dimm_index] );
+
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC08, iv_mcs, l_attrs_dimm_rc08) );
 
 fapi_try_exit:
@@ -1062,7 +1248,6 @@ fapi_try_exit:
 fapi2::ReturnCode eff_dimm::dimm_rc09()
 {
     // TODO - RTC 160118: Clean up eff_config boiler plate that can moved into helper functions
-
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc09[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc09(iv_mcs, &l_attrs_dimm_rc09[0][0]) );
@@ -1078,98 +1263,98 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Determines & sets effective config for DIMM RC10
+/// @brief Determines & sets effective config for DIMM RC0A
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_dimm::dimm_rc10()
+fapi2::ReturnCode eff_dimm::dimm_rc0a()
 {
     // Retrieve MCS attribute data
-    uint8_t l_attrs_dimm_rc10[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-    FAPI_TRY( eff_dimm_ddr4_rc10(iv_mcs, &l_attrs_dimm_rc10[0][0]) );
+    uint8_t l_attrs_dimm_rc0a[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY( eff_dimm_ddr4_rc0a(iv_mcs, &l_attrs_dimm_rc0a[0][0]) );
 
 
     switch(iv_freq)
     {
         case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
-            l_attrs_dimm_rc10[iv_port_index][iv_dimm_index] = rc10_encode::DDR4_1866;
+            l_attrs_dimm_rc0a[iv_port_index][iv_dimm_index] = rc0a_encode::DDR4_1866;
             break;
 
         case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
-            l_attrs_dimm_rc10[iv_port_index][iv_dimm_index] = rc10_encode::DDR4_2133;
+            l_attrs_dimm_rc0a[iv_port_index][iv_dimm_index] = rc0a_encode::DDR4_2133;
             break;
 
         case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
-            l_attrs_dimm_rc10[iv_port_index][iv_dimm_index] = rc10_encode::DDR4_2400;
+            l_attrs_dimm_rc0a[iv_port_index][iv_dimm_index] = rc0a_encode::DDR4_2400;
             break;
 
         case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
-            l_attrs_dimm_rc10[iv_port_index][iv_dimm_index] = rc10_encode::DDR4_2666;
+            l_attrs_dimm_rc0a[iv_port_index][iv_dimm_index] = rc0a_encode::DDR4_2666;
             break;
 
         default:
-            FAPI_ERR("Invalid frequency for rc10 encoding received: %d", iv_freq);
+            FAPI_ERR("Invalid frequency for RC0a encoding received: %d", iv_freq);
             return fapi2::FAPI2_RC_FALSE;
             break;
     }
 
-    FAPI_INF( "%s: RC10 setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc10[iv_port_index][iv_dimm_index] );
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC10, iv_mcs, l_attrs_dimm_rc10) );
+    FAPI_INF( "%s: RC0A setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc0a[iv_port_index][iv_dimm_index] );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC0A, iv_mcs, l_attrs_dimm_rc0a) );
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief Determines & sets effective config for DIMM RC11
+/// @brief Determines & sets effective config for DIMM RC0B
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_dimm::dimm_rc11()
+fapi2::ReturnCode eff_dimm::dimm_rc0b()
 {
     // Retrieve MCS attribute data
-    uint8_t l_attrs_dimm_rc11[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-    FAPI_TRY( eff_dimm_ddr4_rc11(iv_mcs, &l_attrs_dimm_rc11[0][0]) );
+    uint8_t l_attrs_dimm_rc0b[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY( eff_dimm_ddr4_rc0b(iv_mcs, &l_attrs_dimm_rc0b[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc11[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc0b;
+    l_attrs_dimm_rc0b[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc0b;
 
-    FAPI_INF( "%s: RC11 setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc11[iv_port_index][iv_dimm_index] );
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC11, iv_mcs, l_attrs_dimm_rc11) );
+    FAPI_INF( "%s: RC0B setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc0b[iv_port_index][iv_dimm_index] );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC0B, iv_mcs, l_attrs_dimm_rc0b) );
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief Determines & sets effective config for DIMM RC12
+/// @brief Determines & sets effective config for DIMM RC0C
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_dimm::dimm_rc12()
+fapi2::ReturnCode eff_dimm::dimm_rc0c()
 {
     // Retrieve MCS attribute data
-    uint8_t l_attrs_dimm_rc12[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-    FAPI_TRY( eff_dimm_ddr4_rc12(iv_mcs, &l_attrs_dimm_rc12[0][0]) );
+    uint8_t l_attrs_dimm_rc0c[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY( eff_dimm_ddr4_rc0c(iv_mcs, &l_attrs_dimm_rc0c[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc12[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc0c;
+    l_attrs_dimm_rc0c[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc0c;
 
-    FAPI_INF( "%s: R12 setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc12[iv_port_index][iv_dimm_index] );
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC12, iv_mcs, l_attrs_dimm_rc12) );
+    FAPI_INF( "%s: RC0C setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc0c[iv_port_index][iv_dimm_index] );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC0C, iv_mcs, l_attrs_dimm_rc0c) );
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief Determines & sets effective config for DIMM RC13
+/// @brief Determines & sets effective config for DIMM RC0D
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_dimm::dimm_rc13()
+fapi2::ReturnCode eff_dimm::dimm_rc0d()
 {
-    uint8_t l_attrs_dimm_rc13[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    uint8_t l_attrs_dimm_rc0d[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     fapi2::buffer<uint8_t> l_buffer;
 
     // TODO - RTC 160116: Fix RC0D chip select setting for LRDIMMs
-    constexpr uint8_t l_cs_mode = rc13_encode::DIRECT_CS_MODE;
+    constexpr uint8_t l_cs_mode = rc0d_encode::DIRECT_CS_MODE;
     uint8_t l_mirror_mode = 0;
     uint8_t l_dimm_type = 0;
     uint8_t l_module_type = 0;
@@ -1177,8 +1362,8 @@ fapi2::ReturnCode eff_dimm::dimm_rc13()
     FAPI_TRY( spd::base_module_type(iv_dimm, iv_pDecoder->iv_spd_data, l_module_type) );
 
     l_dimm_type = (l_module_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ?
-                  rc13_encode::RDIMM :
-                  rc13_encode::LRDIMM;
+                  rc0d_encode::RDIMM :
+                  rc0d_encode::LRDIMM;
 
     FAPI_TRY( iv_pDecoder->iv_module_decoder->register_to_dram_addr_mapping(l_mirror_mode) );
 
@@ -1202,54 +1387,54 @@ fapi2::ReturnCode eff_dimm::dimm_rc13()
     }
 
     // Retrieve MCS attribute data
-    FAPI_TRY( eff_dimm_ddr4_rc13(iv_mcs, &l_attrs_dimm_rc13[0][0]) );
+    FAPI_TRY( eff_dimm_ddr4_rc0d(iv_mcs, &l_attrs_dimm_rc0d[0][0]) );
 
     // Update MCS attribute
     FAPI_TRY( spd::base_module_type(iv_dimm, iv_pDecoder->iv_spd_data, l_dimm_type) );
-    l_attrs_dimm_rc13[iv_port_index][iv_dimm_index] = l_buffer;
+    l_attrs_dimm_rc0d[iv_port_index][iv_dimm_index] = l_buffer;
 
-    FAPI_INF( "%s: RC13 setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc13[iv_port_index][iv_dimm_index] );
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC13, iv_mcs, l_attrs_dimm_rc13) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Determines & sets effective config for DIMM RC14
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode eff_dimm::dimm_rc14()
-{
-    // Retrieve MCS attribute data
-    uint8_t l_attrs_dimm_rc14[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-    FAPI_TRY( eff_dimm_ddr4_rc14(iv_mcs, &l_attrs_dimm_rc14[0][0]) );
-
-    // Update MCS attribute
-    l_attrs_dimm_rc14[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc0e;
-
-    FAPI_INF( "%s: RC14 setting: 0x%0x", mss::c_str(iv_dimm), l_attrs_dimm_rc14[iv_port_index][iv_dimm_index] );
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC14, iv_mcs, l_attrs_dimm_rc14) );
+    FAPI_INF( "%s: RC0D setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc0d[iv_port_index][iv_dimm_index] );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC0D, iv_mcs, l_attrs_dimm_rc0d) );
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief Determines & sets effective config for DIMM RC15
+/// @brief Determines & sets effective config for DIMM RC0E
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_dimm::dimm_rc15()
+fapi2::ReturnCode eff_dimm::dimm_rc0e()
 {
     // Retrieve MCS attribute data
-    uint8_t l_attrs_dimm_rc15[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-    FAPI_TRY( eff_dimm_ddr4_rc15(iv_mcs, &l_attrs_dimm_rc15[0][0]) );
+    uint8_t l_attrs_dimm_rc0e[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY( eff_dimm_ddr4_rc0e(iv_mcs, &l_attrs_dimm_rc0e[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc15[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc0f;
+    l_attrs_dimm_rc0e[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc0e;
 
-    FAPI_INF( "%s: RC15 setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc15[iv_port_index][iv_dimm_index] );
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC15, iv_mcs, l_attrs_dimm_rc15) );
+    FAPI_INF( "%s: RC0E setting: 0x%0x", mss::c_str(iv_dimm), l_attrs_dimm_rc0e[iv_port_index][iv_dimm_index] );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC0E, iv_mcs, l_attrs_dimm_rc0e) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for DIMM RC0F
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::dimm_rc0f()
+{
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc0f[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY( eff_dimm_ddr4_rc0f(iv_mcs, &l_attrs_dimm_rc0f[0][0]) );
+
+    // Update MCS attribute
+    l_attrs_dimm_rc0f[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc0f;
+
+    FAPI_INF( "%s: RC0F setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc0f[iv_port_index][iv_dimm_index] );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC0F, iv_mcs, l_attrs_dimm_rc0f) );
 
 fapi_try_exit:
     return fapi2::current_err;
