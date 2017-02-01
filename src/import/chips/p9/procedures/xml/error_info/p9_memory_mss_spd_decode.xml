@@ -84,4 +84,21 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+      <rc>RC_MSS_INVALID_RAW_CARD</rc>
+    <description>
+        Recieved a raw card that currently isn't supported in code
+    </description>
+    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>RAW_CARD_REV</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+
 </hwpErrors>
