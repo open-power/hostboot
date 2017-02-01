@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -164,6 +164,11 @@ private:
      * @brief Displays a "target" type error log component
      */
     static void displayTarget (void *data, size_t size);
+
+    /**
+     * @brief Displays a HWPF error log user details
+     */
+    static void displayHwpf (void *data, size_t size, uint8_t i_type);
 };
 
 } // End namespace

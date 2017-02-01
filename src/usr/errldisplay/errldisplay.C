@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -65,6 +65,12 @@
 #include <console/consoleif.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/iterators/targetiterator.H>
+
+#ifdef CONFIG_CONSOLE_OUTPUT_FFDCDISPLAY
+//Generated hearder files for HWP parsing
+#include <hbfwErrDisplayPlatHwpErr.H>
+#include <hbfwErrDisplayPlatHwpFFDC.H>
+#endif
 
 namespace ERRORLOGDISPLAY
 {
@@ -144,111 +150,261 @@ const char * ErrLogDisplay::findComponentName (compId_t i_compId)
     return "unknown";
 }
 
+void displayCalloutTarget (uint8_t * epRaw, size_t& o_size)
+{
+    // Data is formatted as a callout_ud_t followed by an entity path.
+    // Note that in error data unused entity path elements are
+    // eliminated, so use data to find the length
+    const uint8_t pathTypeLength = *epRaw;
+
+    //# of ep elements (2 bytes each) are in lower nibble of first elem
+    //Master sentinel is 0xF0 so size is correct @ 1
+    o_size = ((pathTypeLength & 0x0F) * 2)+1;
+
+    const char * ep_str = "MASTER PROCESSOR SENTINEL";
+    char * tmp_str = NULL;
+    if( *epRaw != HWAS::TARGET_IS_SENTINEL )
+    {
+        TARGETING::EntityPath ep;
+
+        if ((o_size > sizeof(TARGETING::EntityPath)))
+        {
+            ep_str = "MALFORMED UD Entity Path";
+            o_size = 0; //stay safe
+        }
+        else
+        {
+            memcpy (reinterpret_cast<uint8_t*>(&ep), epRaw,o_size);
+            tmp_str = ep.toString();
+            ep_str = tmp_str;
+        }
+    }
+
+    CONSOLE::displayf(NULL, "  Target                   : %s", ep_str);
+    free(tmp_str);
+}
+
 void ErrLogDisplay::displayCallout (void *data, size_t size)
 {
+    CONSOLE::displayf(NULL,
+                      "------------------------------------------------");
+
     // Parse encoded callout data.  See ErrlUserDetailsCallout class in
     // errludcallout.C for (undocumented) encoding details.
     if (size >= sizeof(HWAS::callout_ud_t))
     {
         HWAS::callout_ud_t* callout =
             reinterpret_cast<HWAS::callout_ud_t*>(data);
-        size_t l_curSize = sizeof(HWAS::callout_ud_t);
+
+        size_t  displayTarget = 0;
+        bool displayGard = false;
+        HWAS::GARD_ErrorType l_gard = HWAS::GARD_Fatal;
+        bool displayDeconfig = false;
+        HWAS::DeconfigEnum   l_deconfig = HWAS::DECONFIG;
 
         switch ( callout->type )
         {
             case HWAS::CLOCK_CALLOUT:
-                CONSOLE::displayf(NULL, "  CLOCK ERROR" );
-                CONSOLE::displayf(NULL, "  clockType: %d",
-                                 static_cast<int>( callout->clockType ) );
+                switch (callout->clockType)
+                {
+#define case_CLOCK_TYPE(_type) \
+case HWAS::_type: CONSOLE::displayf(NULL, "  Clock Type               : %s", #_type); break;
+                    case_CLOCK_TYPE(TODCLK_TYPE)
+                    case_CLOCK_TYPE(MEMCLK_TYPE)
+                    case_CLOCK_TYPE(OSCREFCLK_TYPE)
+                    case_CLOCK_TYPE(OSCPCICLK_TYPE)
+                    default:
+                        CONSOLE::displayf(NULL, "  Clock Type               : UNKNOWN 0x%X",
+                                          callout->clockType);
+                } // switch clockType
+#undef case_CLOCK_TYPE
+
+                displayGard = true;
+                l_gard = callout->clkGardErrorType;
+                displayDeconfig = true;
+                l_deconfig = callout->clkDeconfigState;
+                displayTarget = 1;
                 break;
+
+            case HWAS::PART_CALLOUT:
+                switch (callout->partType)
+                {
+#define case_PART_TYPE(_type) \
+case HWAS::_type: CONSOLE::displayf(NULL, "  Part Type                : %s", #_type); break;
+                    case_PART_TYPE(FLASH_CONTROLLER_PART_TYPE)
+                    case_PART_TYPE(PNOR_PART_TYPE)
+                    case_PART_TYPE(SBE_SEEPROM_PART_TYPE)
+                    case_PART_TYPE(VPD_PART_TYPE)
+                    case_PART_TYPE(LPC_SLAVE_PART_TYPE)
+                    case_PART_TYPE(GPIO_EXPANDER_PART_TYPE)
+                    case_PART_TYPE(SPIVID_SLAVE_PART_TYPE)
+                    default:
+                        CONSOLE::displayf(NULL, "  Part Type                : UNKNOWN 0x%X",
+                                          callout->partType);
+                } // switch partType
+#undef case_PART_TYPE
+
+                displayGard = true;
+                l_gard = callout->partGardErrorType;
+                displayDeconfig = true;
+                l_deconfig = callout->partDeconfigState;
+                displayTarget = 1;
+                break;
+
             case HWAS::BUS_CALLOUT:
-                CONSOLE::displayf(NULL, "  BUS ERROR" );
-                CONSOLE::displayf(NULL, "  busType: %d",
-                                 static_cast<int>( callout->busType ) );
-                // Data is formatted as a callout_ud_t followed by 2 entity paths
-                // representing each side of the link.
-                if (size < (l_curSize + sizeof(uint8_t)))
+                switch (callout->busType)
                 {
-                    break;
-                }
-                callout++;
+#define case_BUS_TYPE(_type) \
+case HWAS::_type: CONSOLE::displayf(NULL, "  Bus Type                 : %s", #_type); break;
+                    case_BUS_TYPE(FSI_BUS_TYPE)
+                    case_BUS_TYPE(DMI_BUS_TYPE)
+                    case_BUS_TYPE(A_BUS_TYPE)
+                    case_BUS_TYPE(X_BUS_TYPE)
+                    case_BUS_TYPE(I2C_BUS_TYPE)
+                    case_BUS_TYPE(PSI_BUS_TYPE)
+                    case_BUS_TYPE(O_BUS_TYPE)
+                    default:
+                        CONSOLE::displayf(NULL, "  Bus Type                 : UNKNOWN 0x%X",
+                                          callout->busType);
+                } // switch partType
+#undef case_BUS_TYPE
 
-                CONSOLE::displayf(NULL, "  First link: " );
-                if( *reinterpret_cast<uint8_t*>( callout )
-                    == HWAS::TARGET_IS_SENTINEL )
-                {
-                    CONSOLE::displayf(NULL, "MASTER PROCESSOR SENTINEL" );
-                }
-                else
-                {
-                    if (size < (l_curSize + sizeof(TARGETING::EntityPath)))
-                    {
-                        break;
-                    }
-                    l_curSize += sizeof(TARGETING::EntityPath);
-
-                    TARGETING::EntityPath *ep =
-                        reinterpret_cast<TARGETING::EntityPath*>( callout );
-                    CONSOLE::displayf(NULL, "%s", ep->toString() );
-
-                    if (size < (l_curSize + sizeof(uint8_t)) )
-                    {
-                        break;
-                    }
-                    ep++;
-
-                    CONSOLE::displayf(NULL, "  Second link: " );
-                    if( *reinterpret_cast<uint8_t*>( ep )
-                        == HWAS::TARGET_IS_SENTINEL )
-                    {
-                        CONSOLE::displayf(NULL, "MASTER PROCESSOR SENTINEL" );
-                    }
-                    else
-                    {
-                        if (size < (l_curSize + sizeof(TARGETING::EntityPath)))
-                        {
-                            break;
-                        }
-                        CONSOLE::displayf(NULL, "%s", ep->toString() );
-                    }
-                }
+                // Data is formatted as a callout_ud_t followed by 2 entity
+                // paths representing each side of the link.
+                displayTarget = 2;
                 break;
+
             case HWAS::HW_CALLOUT:
-                CONSOLE::displayf(NULL, "  HW CALLOUT" );
-                CONSOLE::displayf(NULL, "  Reporting CPU ID: %d",
-                                  callout->cpuid );
-                // Data is formatted as a callout_ud_t followed by an entity path.
-                if (size < (l_curSize + sizeof(uint8_t)))
-                {
-                    break;
-                }
-                callout++;
+                CONSOLE::displayf(NULL, "  Callout type             : Hardware Callout");
+                CONSOLE::displayf(NULL, "  CPU id                   : %d", callout->cpuid);
 
-                CONSOLE::displayf(NULL, "  Called out entity:" );
-                if( *reinterpret_cast<uint8_t*>( callout )
-                    == HWAS::TARGET_IS_SENTINEL )
-                {
-                    CONSOLE::displayf(NULL, "MASTER PROCESSOR SENTINEL" );
-                }
-                else
-                {
-                    if (size < (l_curSize + sizeof(TARGETING::EntityPath)))
-                    {
-                        break;
-                    }
-                    TARGETING::EntityPath *ep =
-                        reinterpret_cast<TARGETING::EntityPath*>( callout );
-                    CONSOLE::displayf(NULL, "%s", ep->toString() );
-                }
+                displayGard = true;
+                l_gard = callout->gardErrorType;
+                displayDeconfig = true;
+                l_deconfig = callout->deconfigState;
+                displayTarget = 1;
                 break;
+
             case HWAS::PROCEDURE_CALLOUT:
-                CONSOLE::displayf(NULL, "  PROCEDURE ERROR" );
-                CONSOLE::displayf(NULL, "  Procedure: %d",
-                                 static_cast<int>( callout->procedure ) );
+                CONSOLE::displayf(NULL, "  Callout type             : Procedure Callout");
+                switch (callout->procedure)
+                {
+#define case_PROCEDURE(_type) \
+case HWAS::_type: CONSOLE::displayf(NULL, "  Procedure                : %s", #_type); break;
+                    case_PROCEDURE(EPUB_PRC_NONE)
+                    case_PROCEDURE(EPUB_PRC_FIND_DECONFIGURED_PART)
+                    case_PROCEDURE(EPUB_PRC_SP_CODE)
+                    case_PROCEDURE(EPUB_PRC_PHYP_CODE)
+                    case_PROCEDURE(EPUB_PRC_ALL_PROCS)
+                    case_PROCEDURE(EPUB_PRC_ALL_MEMCRDS)
+                    case_PROCEDURE(EPUB_PRC_INVALID_PART)
+                    case_PROCEDURE(EPUB_PRC_LVL_SUPP)
+                    case_PROCEDURE(EPUB_PRC_PROCPATH)
+                    case_PROCEDURE(EPUB_PRC_NO_VPD_FOR_FRU)
+                    case_PROCEDURE(EPUB_PRC_MEMORY_PLUGGING_ERROR)
+                    case_PROCEDURE(EPUB_PRC_FSI_PATH)
+                    case_PROCEDURE(EPUB_PRC_PROC_AB_BUS)
+                    case_PROCEDURE(EPUB_PRC_PROC_XYZ_BUS)
+                    case_PROCEDURE(EPUB_PRC_MEMBUS_ERROR)
+                    case_PROCEDURE(EPUB_PRC_EIBUS_ERROR)
+                    case_PROCEDURE(EPUB_PRC_POWER_ERROR)
+                    case_PROCEDURE(EPUB_PRC_MEMORY_UE)
+                    case_PROCEDURE(EPUB_PRC_PERFORMANCE_DEGRADED)
+                    case_PROCEDURE(EPUB_PRC_HB_CODE)
+                    case_PROCEDURE(EPUB_PRC_TOD_CLOCK_ERR)
+                    case_PROCEDURE(EPUB_PRC_COOLING_SYSTEM_ERR)
+                    case_PROCEDURE(EPUB_PRC_FW_VERIFICATION_ERR)
+                    case_PROCEDURE(EPUB_PRC_GPU_ISOLATION_PROCEDURE)
+                    default:
+                        CONSOLE::displayf(NULL, "  Procedure                : UNKNOWN: 0x%X",
+                                          callout->procedure);
+                        break;
+                } // switch procedure
+#undef case_PROCEDURE
+                break;
+            default:
+                CONSOLE::displayf(NULL, "  Callout type             : UNKNOWN: 0x%X",
+                                  callout->type);
                 break;
         }
+
+
+        ///////////////////////////
+        // Display all the common stuff
+        ///////////////////////////
+
+        //Display the number of targets indicated above
+        uint8_t * epRaw = reinterpret_cast<uint8_t*>( callout+1 ); //ptr math
+        size_t l_size = 0;
+        for(size_t numT = 0 ; numT < displayTarget; numT++)
+        {
+            // Data is formatted as a callout_ud_t followed by an entity path
+            // Multiple EP are packed together
+            epRaw += l_size;
+            displayCalloutTarget(epRaw,l_size);
+        }
+
+        if(displayDeconfig)
+        {
+            switch (l_deconfig)
+            {
+#define case_DECONFIG_STATE(_type) \
+case HWAS::_type: CONSOLE::displayf(NULL, "  Deconfig State           : %s", #_type); break;
+                case_DECONFIG_STATE(NO_DECONFIG)
+                case_DECONFIG_STATE(DECONFIG)
+                case_DECONFIG_STATE(DELAYED_DECONFIG)
+                default:
+                    CONSOLE::displayf(NULL, "  Deconfig State           : UNKNOWN: 0x%X",
+                                      l_deconfig);
+                    break;
+            } // switch deconfigState
+#undef case_DECONFIG_STATE
+        }
+
+        if(displayGard)
+        {
+            switch (l_gard)
+            {
+#define case_GARD_ERROR_TYPE(_type) \
+case HWAS::_type: CONSOLE::displayf(NULL, "  GARD Error Type          : %s", #_type); break;
+                case_GARD_ERROR_TYPE(GARD_NULL)
+                case_GARD_ERROR_TYPE(GARD_User_Manual)
+                case_GARD_ERROR_TYPE(GARD_Unrecoverable)
+                case_GARD_ERROR_TYPE(GARD_Fatal)
+                case_GARD_ERROR_TYPE(GARD_Predictive)
+                case_GARD_ERROR_TYPE(GARD_Power)
+                case_GARD_ERROR_TYPE(GARD_PHYP)
+                case_GARD_ERROR_TYPE(GARD_Void)
+                default:
+                    CONSOLE::displayf(NULL, "  GARD Error Type          : UNKNOWN: 0x%X",
+                                      l_gard);
+                    break;
+            } // switch gardState
+#undef case_GARD_ERROR_TYPE
+        }
+
+        switch (callout->priority)
+        {
+#define case_PRIORITY(_type) \
+case HWAS::_type: CONSOLE::displayf(NULL, "  Priority                 : %s", #_type); break;
+            case_PRIORITY(SRCI_PRIORITY_LOW)
+            case_PRIORITY(SRCI_PRIORITY_MEDC)
+            case_PRIORITY(SRCI_PRIORITY_MEDB)
+            case_PRIORITY(SRCI_PRIORITY_MEDA)
+            case_PRIORITY(SRCI_PRIORITY_MED)
+            case_PRIORITY(SRCI_PRIORITY_HIGH)
+            default:
+                CONSOLE::displayf(NULL, "  Priority                 : UNKNOWN: 0x%X",
+                                  callout->priority);
+                break;
+        } // switch priority
+#undef case_PRIORITY
     }
 }
+
+//Display a "Target".  This is a misnomer in that HB uses a "target"
+// User detail section for lots of things.  We are only going to look
+// for HWPF subtypes and display those
 
 void ErrLogDisplay::displayTarget(void *data, size_t size)
 {
@@ -256,7 +412,7 @@ void ErrLogDisplay::displayTarget(void *data, size_t size)
 
     // The first part of the buffer is a TargetLabel_t.
     ERRORLOG::TargetLabel_t *label =
-        reinterpret_cast<ERRORLOG::TargetLabel_t*>( char_buf );
+      reinterpret_cast<ERRORLOG::TargetLabel_t*>( char_buf );
 
     if( label->tag == 0xffffffff )
     {
@@ -269,13 +425,13 @@ void ErrLogDisplay::displayTarget(void *data, size_t size)
         // We only care about the HUID and can look up the Target based on that.
         char_buf += sizeof(ERRORLOG::TargetLabel_t);
         TARGETING::AttributeTraits<TARGETING::ATTR_HUID>::Type *huid =
-            reinterpret_cast<TARGETING::AttributeTraits<
-                TARGETING::ATTR_HUID>::Type*>( char_buf );
+          reinterpret_cast<TARGETING::AttributeTraits<
+          TARGETING::ATTR_HUID>::Type*>( char_buf );
         CONSOLE::displayf(NULL, "  HUID: %08x", *huid );
 
         // Look up the HUID across all targets.
         for ( TARGETING::TargetIterator ti = TARGETING::targetService().begin();
-            ti != TARGETING::targetService().end(); ++ti )
+              ti != TARGETING::targetService().end(); ++ti )
         {
             TARGETING::AttributeTraits<TARGETING::ATTR_HUID>::Type tmp_huid;
             if( ti->tryGetAttr<TARGETING::ATTR_HUID>( tmp_huid ) &&
@@ -283,15 +439,46 @@ void ErrLogDisplay::displayTarget(void *data, size_t size)
             {
                 TARGETING::Target *target = *ti;
                 CONSOLE::displayf(NULL,
-                    "  Phys path: %s",
-                    target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString() );
+                  "  Phys path: %s",
+                  target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString() );
                 CONSOLE::displayf(NULL,
-                    "  Affinity path: %s",
-                    target->getAttr<TARGETING::ATTR_AFFINITY_PATH>().toString() );
+                  "  Affinity path: %s",
+                  target->getAttr<TARGETING::ATTR_AFFINITY_PATH>().toString());
                 break;
             }
         }
     }
+}
+
+void ErrLogDisplay::displayHwpf(void *data, size_t size, uint8_t i_type)
+{
+#ifdef CONFIG_CONSOLE_OUTPUT_FFDCDISPLAY
+
+    uint32_t *word_buf = reinterpret_cast<uint32_t*>( data );
+
+    switch ( i_type )
+    {
+    case ERRORLOG::ERRL_UDT_STRING:
+        //this is error code str -- single word of data is HWPF RC
+        CONSOLE::displayf(NULL,
+                          "------------------------------------------------");
+        fapi2::hbfwErrDisplayHwpRc(*word_buf);
+        break;
+
+    case ERRORLOG::ERRL_UDT_TARGET:
+        {
+            //this is HWPF FFDC.  First word is hash, rest of data is hex
+            //reserve space for 16 words of data with spaces between
+
+            CONSOLE::displayf(NULL,
+                 "------------------------------------------------");
+            void * buf = reinterpret_cast<void*>(
+                             reinterpret_cast<char*>( data )+4);
+            fapi2::hbfwErrDisplayHwpRcFFDC(*word_buf,buf, size-4);
+            break;
+        }
+    }
+#endif
 }
 
 //
@@ -300,7 +487,6 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
                                 compId_t i_committerComp)
 {
     TRACDCOMP( g_trac_errldisp, ENTER_MRK "ErrLogDisplay::msgDisplay" );
-
 
     do
     {
@@ -315,9 +501,9 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
 
         CONSOLE::displayf(NULL,
                           "================================================");
-        CONSOLE::displayf(NULL, "Error reported by %s (0x%04X)",
+        CONSOLE::displayf(NULL, "Error reported by %s (0x%04X) PLID 0x%08X",
                          findComponentName( i_committerComp ),
-                         i_committerComp );
+                         i_committerComp, i_err->plid() );
         CONSOLE::displayf(NULL, "  %s", info->descriptString);
         CONSOLE::displayf(NULL, "  ModuleId   0x%02x %s",
                           i_err->moduleId(), info->moduleName);
@@ -328,34 +514,33 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
         CONSOLE::displayf(NULL, "  UserData2  %s : 0x%016lx",
                           info->userData2String, i_err->getUserData2());
 
-        // Loop through and print all of the user data sections.
+
+        // Loop through and print interesting  user data sections.
         for ( size_t i = 0; i < i_err->iv_SectionVector.size(); ++i )
         {
             ERRORLOG::ErrlUD *user_data = i_err->iv_SectionVector[i];
-            CONSOLE::displayf(NULL, "User Data Section %d, type %c%c", (int) i,
-                             (user_data->iv_header.iv_sid >> 8) & 0xff,
-                             user_data->iv_header.iv_sid & 0xff );
-            CONSOLE::displayf(NULL, "  Subsection type 0x%02x",
-                             user_data->iv_header.iv_sst );
-            CONSOLE::displayf(NULL, "  ComponentId %s (0x%04x)",
-                             findComponentName( user_data->iv_header.iv_compId ),
-                             user_data->iv_header.iv_compId );
-            switch ( user_data->iv_header.iv_sst )
+            //HWPF subsections abuse the rules... handle it special
+            if(user_data->iv_header.iv_compId == HWPF_COMP_ID)
             {
-                case ERRORLOG::ERRL_UDT_TARGET:
-                    CONSOLE::displayf(NULL, "  TARGET" );
-                    displayTarget( user_data->iv_pData, user_data->iv_Size );
-                    break;
+                displayHwpf( user_data->iv_pData, user_data->iv_Size,
+                             user_data->iv_header.iv_sst);
+            }
+            else
+            {
+                switch ( user_data->iv_header.iv_sst )
+                {
                 case ERRORLOG::ERRL_UDT_CALLOUT:
-                    CONSOLE::displayf(NULL, "  CALLOUT" );
                     displayCallout( user_data->iv_pData, user_data->iv_Size );
                     break;
+
                 case ERRORLOG::ERRL_UDT_STRING:
-                    CONSOLE::displayf(NULL, "  STRING" );
+                    CONSOLE::displayf(NULL,
+                       "------------------------------------------------");
                     CONSOLE::displayf(NULL,
                         "  %s",
                         reinterpret_cast<char*>( user_data->iv_pData ) );
                     break;
+                }
             }
         }
 

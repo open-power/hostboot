@@ -4,3 +4,11 @@ config CONSOLE_OUTPUT_ERRORDISPLAY
     help
         This is used to display errlogs in a human readable form
         Error Display will only work when the Console is configured
+
+config CONSOLE_OUTPUT_FFDCDISPLAY
+    default n
+    depends on CONSOLE_OUTPUT_ERRORDISPLAY
+    help
+        This is used to display verbose HWP error information to the
+        console in a a human readable form.  Note it adds ~0.25 MB
+        to the extended image size
