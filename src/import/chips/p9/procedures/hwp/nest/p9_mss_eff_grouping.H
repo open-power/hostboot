@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,6 +79,7 @@ const uint8_t NUM_OF_ALT_MEM_REGIONS = 2; // 2 memory holes
 // For Nimbus, MC port is an MCA (8 MCAs)
 // For Cumulus, MC port is a DMI (8 DMIs)
 // -------------------------------------------------------
+const uint8_t NUM_MCS_PER_PROC = 4;
 const uint8_t NUM_MC_PORTS_PER_PROC = 8;
 const uint8_t NUM_DIMMS_PER_DRAM_PORT = 2; // 2 DIMMs per DRAM port
 
