@@ -51,18 +51,18 @@ enum raw_card_rev : uint8_t
 {
     A1 = 0x20,
     B1 = 0x21,
+
     // RDIMM power-on
     C1 = 0x22,
 
-    // TK - Change to 0xFF -  AAM
-    // In the spec hex XF (where X - don't care)
-    // means no JEDEC reference raw card design used.
-    // We will want to redefine it to be VBU reference raw card
-    // since it is unlikely we will use a DIMM w/o a
-    // reference caw card design.
+    // TK - Change VBU value to a no-op value or a value that will never be reached -JLH
     VBU = 0x23,
+
     B2 = 0x41,
     C2 = 0x42,
+
+    // Default settings used for DIMMs that do not use a JEDEC raw card reference
+    CUSTOM = 0xFF,
 };
 
 // Raw cards can share the same raw card # between RDIMM and LRDIMMs so
@@ -78,6 +78,7 @@ extern rcw_settings rdimm_rc_c2;
 extern rcw_settings rdimm_rc_a1;
 extern rcw_settings rdimm_rc_b1;
 extern rcw_settings rdimm_rc_b2;
+extern rcw_settings rdimm_rc_custom;
 extern rcw_settings rdimm_rc_vbu;
 
 }// mss

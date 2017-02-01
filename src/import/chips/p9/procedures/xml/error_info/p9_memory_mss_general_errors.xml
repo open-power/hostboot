@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -43,6 +43,22 @@
     </description>
     <ffdc>KEY</ffdc>
     <ffdc>DATA</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    </hwpError>
+
+   <hwpError>
+    <rc>RC_MSS_INVALID_DIMM_TYPE</rc>
+    <description>
+      An invalid/unsupported DIMM type was received.  This is possibly due
+      to SPD decoding errors or incorrect setting of ATTR_EFF_DIMM_TYPE attribute.
+    </description>
+    <ffdc>DIMM_TYPE</ffdc>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
