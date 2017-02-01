@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -152,34 +152,28 @@ class cas_latency
 
         ///
         /// @brief      Retrieves SDRAM Minimum CAS Latency Time (tAAmin) from SPD
-        /// @param[in]  i_target the dimm target
         /// @param[in]  i_pDecoder the SPD decoder
         /// @param[out] o_value tCKmin value in ps
         /// @return     FAPI2_RC_SUCCESS iff ok
         ///
-        fapi2::ReturnCode get_taamin(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                     const std::shared_ptr<mss::spd::decoder>& i_pDecoder,
+        fapi2::ReturnCode get_taamin(const std::shared_ptr<mss::spd::decoder>& i_pDecoder,
                                      uint64_t& o_value);
         ///
         /// @brief      Retrieves SDRAM Minimum Cycle Time (tCKmin) from SPD
-        /// @param[in]  i_target the dimm target
         /// @param[in]  i_pDecoder the SPD decoder
         /// @param[out] o_value tCKmin value in ps
         /// @return     FAPI2_RC_SUCCESS iff ok
         ///
-        fapi2::ReturnCode get_tckmin(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                     const std::shared_ptr<mss::spd::decoder>& i_pDecoder,
+        fapi2::ReturnCode get_tckmin(const std::shared_ptr<mss::spd::decoder>& i_pDecoder,
                                      uint64_t& o_value);
 
         ///
         /// @brief      Retrieves SDRAM Maximum Cycle Time (tCKmax) from SPD
-        /// @param[in]  i_target the dimm target
         /// @param[in]  i_pDecoder SPD decoder
         /// @param[out] o_value tCKmax value in ps
         /// @return     FAPI2_RC_SUCCESS iff ok
         ///
-        fapi2::ReturnCode get_tckmax(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                     const std::shared_ptr<mss::spd::decoder>& i_pDecoder,
+        fapi2::ReturnCode get_tckmax(const std::shared_ptr<mss::spd::decoder>& i_pDecoder,
                                      uint64_t& o_value);
 
         ///

@@ -298,7 +298,7 @@ fapi2::ReturnCode eff_dimm::dram_mfg_id()
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_mfg_id(iv_mcs, &l_mcs_attrs[0][0]), "Failed accessing ATTR_MSS_EFF_DRAM_MFG_ID" );
-    FAPI_TRY( iv_pDecoder->dram_manufacturer_id_code(iv_dimm, l_decoder_val), "Failed getting dram id code from SPD" );
+    FAPI_TRY( iv_pDecoder->dram_manufacturer_id_code(l_decoder_val), "Failed getting dram id code from SPD" );
 
     l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_MFG_ID, iv_mcs, l_mcs_attrs), "Failed to set ATTR_EFF_DRAM_MFG_ID" );
@@ -318,7 +318,7 @@ fapi2::ReturnCode eff_dimm::dram_width()
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Get & update MCS attribute
-    FAPI_TRY( iv_pDecoder->device_width(iv_dimm, l_decoder_val), "Failed accessing device width from SPD" );
+    FAPI_TRY( iv_pDecoder->device_width(l_decoder_val), "Failed accessing device width from SPD" );
     FAPI_TRY( eff_dram_width(iv_mcs, &l_mcs_attrs[0][0]), "Failed getting EFF_DRAM_WIDTH" );
 
     l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
@@ -337,7 +337,7 @@ fapi2::ReturnCode eff_dimm::dram_density()
 {
 
     uint8_t l_decoder_val = 0;
-    FAPI_TRY( iv_pDecoder->sdram_density(iv_dimm, l_decoder_val), "Failed to get dram_density from SPD" );
+    FAPI_TRY( iv_pDecoder->sdram_density(l_decoder_val), "Failed to get dram_density from SPD" );
 
     // Get & update MCS attribute
     {
@@ -363,7 +363,7 @@ fapi2::ReturnCode eff_dimm::ranks_per_dimm()
 
     // Get & update MCS attribute
     FAPI_TRY( eff_num_ranks_per_dimm(iv_mcs, &l_attrs_ranks_per_dimm[0][0]), "Failed to get EFF_NUM_RANKS_PER_DIMM" );
-    FAPI_TRY( iv_pDecoder->logical_ranks_per_dimm(iv_dimm, l_ranks_per_dimm),
+    FAPI_TRY( iv_pDecoder->logical_ranks_per_dimm(l_ranks_per_dimm),
               "Failed to get logical_ranks_per_dimm from SPD" );
 
     l_attrs_ranks_per_dimm[iv_port_index][iv_dimm_index] = l_ranks_per_dimm;
@@ -381,7 +381,7 @@ fapi_try_exit:
 fapi2::ReturnCode eff_dimm::primary_stack_type()
 {
     uint8_t l_decoder_val = 0;
-    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(iv_dimm, l_decoder_val),
+    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(l_decoder_val),
               "Failed to get dram_signal_loading from SPD" );
 
     // Get & update MCS attribute
@@ -411,10 +411,10 @@ fapi2::ReturnCode eff_dimm::dimm_size()
     uint8_t l_sdram_density = 0;
     uint8_t l_logical_rank_per_dimm = 0;
 
-    FAPI_TRY( iv_pDecoder->device_width(iv_dimm, l_sdram_width), "Failed to get device width from SPD" );
-    FAPI_TRY( iv_pDecoder->prim_bus_width(iv_dimm, l_bus_width), "Failed to get prim bus width from SPD" );
-    FAPI_TRY( iv_pDecoder->sdram_density(iv_dimm, l_sdram_density), "Failed to get dram density from SPD" );
-    FAPI_TRY( iv_pDecoder->logical_ranks_per_dimm(iv_dimm, l_logical_rank_per_dimm),
+    FAPI_TRY( iv_pDecoder->device_width(l_sdram_width), "Failed to get device width from SPD" );
+    FAPI_TRY( iv_pDecoder->prim_bus_width(l_bus_width), "Failed to get prim bus width from SPD" );
+    FAPI_TRY( iv_pDecoder->sdram_density(l_sdram_density), "Failed to get dram density from SPD" );
+    FAPI_TRY( iv_pDecoder->logical_ranks_per_dimm(l_logical_rank_per_dimm),
               "Failed to get logical ranks from SPD" );
 
     {
@@ -447,7 +447,7 @@ fapi2::ReturnCode eff_dimm::hybrid_memory_type()
 
     // Get & update MCS attribute
     FAPI_TRY( eff_hybrid_memory_type(iv_mcs, &l_mcs_attrs[0][0]), "Failed to get ATTR_MSS_HYBRID_MEMORY_TYPE" );
-    FAPI_TRY(iv_pDecoder->hybrid_media(iv_dimm, l_decoder_val), "Failed to get Hybrid_media from SPD");
+    FAPI_TRY(iv_pDecoder->hybrid_media(l_decoder_val), "Failed to get Hybrid_media from SPD");
 
     l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_HYBRID_MEMORY_TYPE, iv_mcs, l_mcs_attrs),
@@ -579,19 +579,19 @@ fapi2::ReturnCode eff_dimm::dram_trfc()
     switch(iv_refresh_mode)
     {
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL:
-            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_1(iv_dimm, l_trfc_mtb),
+            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_1(l_trfc_mtb),
                       "Failed to decode SPD for tRFC1" );
             break;
 
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_2X:
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_2X:
-            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_2(iv_dimm, l_trfc_mtb),
+            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_2(l_trfc_mtb),
                       "Failed to decode SPD for tRFC2" );
             break;
 
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_4X:
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_4X:
-            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_4(iv_dimm, l_trfc_mtb),
+            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_4(l_trfc_mtb),
                       "Failed to decode SPD for tRFC4" );
             break;
 
@@ -615,8 +615,8 @@ fapi2::ReturnCode eff_dimm::dram_trfc()
         int64_t l_ftb = 0;
         int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(iv_dimm, l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(iv_dimm, l_ftb) );
+        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb) );
 
         FAPI_INF( "medium timebase (ps): %ld, fine timebase (ps): %ld, tRFC (MTB): %ld, tRFC(FTB): %ld",
                   l_mtb, l_ftb, l_trfc_mtb, l_trfc_ftb );
@@ -669,7 +669,7 @@ fapi2::ReturnCode eff_dimm::dram_trfc_dlr()
     std::vector<uint8_t> l_mcs_attrs_trfc_dlr(PORTS_PER_MCS, 0);
 
     // Retrieve map params
-    FAPI_TRY( iv_pDecoder->sdram_density(iv_dimm, l_density), "Failed to get sdram density");
+    FAPI_TRY( iv_pDecoder->sdram_density(l_density), "Failed to get sdram density");
     FAPI_TRY(  mss::mrw_fine_refresh_mode(iv_refresh_mode), "Failed to get MRW attribute for fine refresh mode" );
 
     FAPI_INF("Retrieved SDRAM density: %d, fine refresh mode: %d",
@@ -734,7 +734,7 @@ fapi2::ReturnCode eff_dimm::dram_bank_bits()
     uint8_t l_attrs_bank_bits[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     FAPI_TRY( eff_dram_bank_bits(iv_mcs, &l_attrs_bank_bits[0][0]) );
-    FAPI_TRY( iv_pDecoder->bank_bits(iv_dimm, l_bank_bits) );
+    FAPI_TRY( iv_pDecoder->bank_bits(l_bank_bits) );
 
     l_attrs_bank_bits[iv_port_index][iv_dimm_index] = l_bank_bits;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_BANK_BITS, iv_mcs, l_attrs_bank_bits) );
@@ -753,7 +753,7 @@ fapi2::ReturnCode eff_dimm::dram_row_bits()
     uint8_t l_attrs_row_bits[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     FAPI_TRY( eff_dram_row_bits(iv_mcs, &l_attrs_row_bits[0][0]) );
-    FAPI_TRY( iv_pDecoder->row_address_bits(iv_dimm, l_row_bits) );
+    FAPI_TRY( iv_pDecoder->row_address_bits(l_row_bits) );
 
     l_attrs_row_bits[iv_port_index][iv_dimm_index] = l_row_bits;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_ROW_BITS, iv_mcs, l_attrs_row_bits) );
@@ -773,7 +773,7 @@ fapi2::ReturnCode eff_dimm::dram_dqs_time()
     uint8_t l_dram_width = 0;
 
     // Get the DRAM width
-    FAPI_TRY( iv_pDecoder->device_width(iv_dimm, l_dram_width) );
+    FAPI_TRY( iv_pDecoder->device_width(l_dram_width) );
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_tdqs(iv_mcs, &l_attrs_dqs_time[0]) );
@@ -810,13 +810,13 @@ fapi2::ReturnCode eff_dimm::dram_tccd_l()
         int64_t l_tccd_mtb = 0;
         int64_t l_tccd_ftb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(iv_dimm, l_mtb),
+        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb),
                   "Failed medium_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(iv_dimm, l_ftb),
+        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb),
                   "Failed fine_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->min_tccd_l(iv_dimm, l_tccd_mtb),
+        FAPI_TRY( iv_pDecoder->min_tccd_l(l_tccd_mtb),
                   "Failed min_tccd_l() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_offset_min_tccd_l(iv_dimm, l_tccd_ftb),
+        FAPI_TRY( iv_pDecoder->fine_offset_min_tccd_l(l_tccd_ftb),
                   "Failed fine_offset_min_tccd_l() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tCCD_L (MTB): %ld, tCCD_L(FTB): %ld",
@@ -1571,11 +1571,11 @@ fapi2::ReturnCode eff_dimm::dram_twr()
         int64_t l_ftb = 0;
         int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(iv_dimm, l_mtb),
+        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb),
                   "Failed medium_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(iv_dimm, l_ftb),
+        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb),
                   "Failed fine_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->min_write_recovery_time(iv_dimm, l_twr_mtb),
+        FAPI_TRY( iv_pDecoder->min_write_recovery_time(l_twr_mtb),
                   "Failed min_write_recovery_time() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tWR (MTB): %ld, tWR(FTB): %ld",
@@ -2147,7 +2147,7 @@ fapi2::ReturnCode eff_dimm::post_package_repair()
     uint8_t l_attrs_dram_ppr[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     FAPI_TRY( eff_dram_ppr(iv_mcs, &l_attrs_dram_ppr[0][0]) );
-    FAPI_TRY( iv_pDecoder->post_package_repair(iv_dimm, l_decoder_val) );
+    FAPI_TRY( iv_pDecoder->post_package_repair(l_decoder_val) );
 
     l_attrs_dram_ppr[iv_port_index][iv_dimm_index] = l_decoder_val;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_PPR, iv_mcs, l_attrs_dram_ppr),
@@ -2601,13 +2601,13 @@ fapi2::ReturnCode eff_dimm::dram_trp()
         int64_t l_ftb = 0;
         int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(iv_dimm, l_mtb),
+        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb),
                   "Failed medium_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(iv_dimm, l_ftb),
+        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb),
                   "Failed fine_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->min_row_precharge_delay_time(iv_dimm, l_trp_mtb),
+        FAPI_TRY( iv_pDecoder->min_row_precharge_delay_time(l_trp_mtb),
                   "Failed min_row_precharge_delay_time() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_offset_min_trp(iv_dimm, l_trp_ftb),
+        FAPI_TRY( iv_pDecoder->fine_offset_min_trp(l_trp_ftb),
                   "Failed fine_offset_min_trp() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tRP (MTB): %ld, tRP(FTB): %ld",
@@ -2668,13 +2668,13 @@ fapi2::ReturnCode eff_dimm::dram_trcd()
         int64_t l_ftb = 0;
         int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(iv_dimm, l_mtb),
+        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb),
                   "Failed medium_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(iv_dimm, l_ftb),
+        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb),
                   "Failed fine_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->min_ras_to_cas_delay_time(iv_dimm, l_trcd_mtb),
+        FAPI_TRY( iv_pDecoder->min_ras_to_cas_delay_time(l_trcd_mtb),
                   "Failed min_ras_to_cas_delay_time() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_offset_min_trcd(iv_dimm, l_trcd_ftb),
+        FAPI_TRY( iv_pDecoder->fine_offset_min_trcd(l_trcd_ftb),
                   "Failed fine_offset_min_trcd() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("medium timebase MTB (ps): %ld, fine timebase FTB (ps): %ld, tRCD (MTB): %ld, tRCD (FTB): %ld",
@@ -2723,13 +2723,13 @@ fapi2::ReturnCode eff_dimm::dram_trc()
         int64_t l_ftb = 0;
         int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(iv_dimm, l_mtb),
+        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb),
                   "Failed medium_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(iv_dimm, l_ftb),
+        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb),
                   "Failed fine_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->min_active_to_active_refresh_delay_time(iv_dimm, l_trc_mtb),
+        FAPI_TRY( iv_pDecoder->min_active_to_active_refresh_delay_time(l_trc_mtb),
                   "Failed min_active_to_active_refresh_delay_time() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_offset_min_trc(iv_dimm, l_trc_ftb),
+        FAPI_TRY( iv_pDecoder->fine_offset_min_trc(l_trc_ftb),
                   "Failed fine_offset_min_trc() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("medium timebase MTB (ps): %ld, fine timebase FTB (ps): %ld, tRCmin (MTB): %ld, tRCmin(FTB): %ld",
@@ -2779,9 +2779,9 @@ fapi2::ReturnCode eff_dimm::dram_twtr_l()
         int64_t l_ftb = 0;
         int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(iv_dimm, l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(iv_dimm, l_ftb) );
-        FAPI_TRY( iv_pDecoder->min_twtr_l(iv_dimm, l_twtr_l_mtb) );
+        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb) );
+        FAPI_TRY( iv_pDecoder->min_twtr_l(l_twtr_l_mtb) );
 
         FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tWTR_S (MTB): %ld, tWTR_S (FTB): %ld",
                  l_mtb, l_ftb, l_twtr_l_mtb, l_twtr_l_ftb );
@@ -2830,9 +2830,9 @@ fapi2::ReturnCode eff_dimm::dram_twtr_s()
         int64_t l_ftb = 0;
         int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(iv_dimm, l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(iv_dimm, l_ftb) );
-        FAPI_TRY( iv_pDecoder->min_twtr_s(iv_dimm, l_twtr_s_mtb) );
+        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb) );
+        FAPI_TRY( iv_pDecoder->min_twtr_s(l_twtr_s_mtb) );
 
         FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tWTR_S (MTB): %ld, tWTR_S (FTB): %ld",
                  l_mtb, l_ftb, l_twtr_s_mtb, l_twtr_s_ftb );
@@ -2877,8 +2877,8 @@ fapi2::ReturnCode eff_dimm::dram_trrd_s()
     uint8_t l_stack_type = 0;
     uint8_t l_dram_width = 0;
 
-    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(iv_dimm, l_stack_type) );
-    FAPI_TRY( iv_pDecoder->device_width(iv_dimm, l_dram_width),
+    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(l_stack_type) );
+    FAPI_TRY( iv_pDecoder->device_width(l_dram_width),
               "Failed to access device_width()");
 
     // From the SPD Spec:
@@ -2926,9 +2926,9 @@ fapi2::ReturnCode eff_dimm::dram_trrd_l()
     uint8_t l_stack_type = 0;
     uint8_t l_dram_width = 0;
 
-    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(iv_dimm, l_stack_type),
+    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(l_stack_type),
               "Failed prim_sdram_signal_loading()" );
-    FAPI_TRY( iv_pDecoder->device_width(iv_dimm, l_dram_width),
+    FAPI_TRY( iv_pDecoder->device_width(l_dram_width),
               "Failed to access device_width()");
 
     // From the SPD Spec:
@@ -3000,9 +3000,9 @@ fapi2::ReturnCode eff_dimm::dram_tfaw()
     uint8_t l_stack_type = 0;
     uint8_t l_dram_width = 0;
 
-    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(iv_dimm, l_stack_type),
+    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(l_stack_type),
               "Failed prim_sdram_signal_loading()");
-    FAPI_TRY( iv_pDecoder->device_width(iv_dimm, l_dram_width),
+    FAPI_TRY( iv_pDecoder->device_width(l_dram_width),
               "Failed device_width()");
 
     if( l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS)
@@ -3202,7 +3202,7 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_nom()
     FAPI_TRY( eff_dram_rtt_nom(iv_mcs, &l_mcs_attrs[0][0][0]) );
 
     // Get the value from the LRDIMM SPD
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_nom( iv_freq, l_decoder_val));
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_nom(iv_freq, l_decoder_val));
 
     // Plug into every rank position for the attribute so it'll fit the same style as the RDIMM value
     // Same value for every rank for LRDIMMs
@@ -3283,7 +3283,7 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_wr()
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
 
     // Get the value from the LRDIMM SPD
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_wr( iv_freq, l_decoder_val));
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_wr(iv_freq, l_decoder_val));
 
     // Plug into every rank position for the attribute so it'll fit the same style as the RDIMM value
     // Same value for every rank for LRDIMMs
@@ -3359,8 +3359,8 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_park()
     FAPI_TRY( eff_dram_rtt_park(iv_mcs, &l_mcs_attrs[0][0][0]) );
 
     // Get the value from the LRDIMM SPD
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_park_ranks0_1( iv_freq, l_decoder_val_01));;
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_park_ranks2_3( iv_freq, l_decoder_val_23));;
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_park_ranks0_1(iv_freq, l_decoder_val_01) );
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_park_ranks2_3(iv_freq, l_decoder_val_23) );
 
     // Setting the four rank values for this dimm
     // Rank 0 and 1 have the same value, l_decoder_val_01
@@ -3676,7 +3676,7 @@ fapi2::ReturnCode eff_lrdimm::dimm_bc04()
     // So the encoding from the SPD is the same as the encoding for the buffer control encoding
     // Simple grab and insert
     // Value is checked in decoder function for validity
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->data_buffer_mdq_rtt( iv_freq, l_decoder_val));
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->data_buffer_mdq_rtt(iv_freq, l_decoder_val) );
 
     // Update MCS attribute
 
@@ -3704,7 +3704,7 @@ fapi2::ReturnCode eff_lrdimm::dimm_bc05()
     FAPI_TRY( eff_dimm_ddr4_bc05(iv_mcs, &l_attrs_dimm_bc05[0][0]) );
 
     // Same as BC04, grab from SPD and put into BC
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->data_buffer_mdq_drive_strength( iv_freq, l_decoder_val));
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->data_buffer_mdq_drive_strength(iv_freq, l_decoder_val) );
     l_attrs_dimm_bc05[iv_port_index][iv_dimm_index] = l_decoder_val;
 
     FAPI_INF("%s: BC05 settting (MDQ Drive Strenght): %d", mss::c_str(iv_dimm),
@@ -3735,7 +3735,7 @@ fapi2::ReturnCode eff_lrdimm::dimm_bc07()
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_bc07[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
-    FAPI_TRY( iv_pDecoder->num_package_ranks_per_dimm(iv_dimm, l_ranks_per_dimm) );
+    FAPI_TRY( iv_pDecoder->num_package_ranks_per_dimm(l_ranks_per_dimm) );
 
     FAPI_TRY( eff_dimm_ddr4_bc07(iv_mcs, &l_attrs_dimm_bc07[0][0]) );
 

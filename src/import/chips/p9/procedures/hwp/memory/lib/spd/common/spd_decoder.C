@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,15 +71,14 @@ decoder::decoder(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                  const std::vector<uint8_t>& i_spd_data,
                  const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
                  const rcw_settings& i_raw_card)
-    : iv_module_decoder(i_module_decoder),
+    : iv_target(i_target),
+      iv_module_decoder(i_module_decoder),
       iv_spd_data(i_spd_data),
-      iv_raw_card(i_raw_card),
-      iv_target(i_target)
+      iv_raw_card(i_raw_card)
 {}
 
 ///
 /// @brief Decodes number of used SPD bytes
-/// @param[in] i_target dimm target
 /// @param[out] o_value number of SPD bytes used
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note Decodes SPD Byte 0 bits(0~3)
@@ -87,8 +86,7 @@ decoder::decoder(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 /// @note Page 14
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::number_of_used_bytes(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint16_t& o_value)
+fapi2::ReturnCode decoder::number_of_used_bytes( uint16_t& o_value )
 {
     // =========================================================
     // Byte 0 maps
@@ -107,22 +105,20 @@ fapi2::ReturnCode decoder::number_of_used_bytes(const fapi2::Target<TARGET_TYPE_
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 0;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, BYTES_USED_START, BYTES_USED_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< BYTES_USED >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(BYTES_USED_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              BYTES_USED.iv_byte,
               l_field_bits,
               "Failed check on SPD used bytes") );
 
     FAPI_INF("%s. Bytes Used: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -131,7 +127,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes total number of SPD bytes
-/// @param[in] i_target dimm target
 /// @param[out] o_value number of total SPD bytes
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note Decodes SPD Byte 0 (bits 4~6)
@@ -139,8 +134,7 @@ fapi_try_exit:
 /// @note Page 14
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::number_of_total_bytes(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint16_t& o_value)
+fapi2::ReturnCode decoder::number_of_total_bytes( uint16_t& o_value )
 {
 
     // =========================================================
@@ -158,22 +152,20 @@ fapi2::ReturnCode decoder::number_of_total_bytes(const fapi2::Target<TARGET_TYPE
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 0;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, BYTES_TOTAL_START, BYTES_TOTAL_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< TOTAL_BYTES_USED >(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(BYTES_TOTAL_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              TOTAL_BYTES_USED.iv_byte,
               l_field_bits,
               "Failed check on SPD total bytes") );
 
     FAPI_INF("%s. Total Bytes: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -182,7 +174,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes hybrid media field from SPD
-/// @param[in] i_target dimm target
 /// @param[out] o_value enum representing hybrid memory type
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note Decodes SPD Byte 3 (bits 4~6)
@@ -190,8 +181,7 @@ fapi_try_exit:
 /// @note Page 17
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::hybrid_media(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                        uint8_t& o_value)
+fapi2::ReturnCode decoder::hybrid_media( uint8_t& o_value)
 {
     // For General Section rev 1.0 of the SPD,
     // Decodes SPD Byte 3 (bits 4~6) were reserved
@@ -204,7 +194,6 @@ fapi2::ReturnCode decoder::hybrid_media(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
 ///
 /// @brief Decodes hybrid field from SPD
-/// @param[in] i_target
 /// @param[out] o_value enum representing if module is hybrid
 /// @return fapi2::ReturnCode
 /// @note Decodes SPD Byte 3 (bit 7)
@@ -212,8 +201,7 @@ fapi2::ReturnCode decoder::hybrid_media(const fapi2::Target<TARGET_TYPE_DIMM>& i
 /// @note Page 17
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::hybrid(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                  uint8_t& o_value)
+fapi2::ReturnCode decoder::hybrid( uint8_t& o_value)
 {
     // For General Section rev 1.0 of the SPD,
     // Decodes SPD Byte 3 (bit 7) were reserved
@@ -225,7 +213,6 @@ fapi2::ReturnCode decoder::hybrid(const fapi2::Target<TARGET_TYPE_DIMM>& i_targe
 
 ///
 /// @brief Decodes SDRAM density from SPD
-/// @param[in] i_target dimm target
 /// @param[out] o_value SDRAM density in GBs
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 4 (bits 0~3)
@@ -233,8 +220,7 @@ fapi2::ReturnCode decoder::hybrid(const fapi2::Target<TARGET_TYPE_DIMM>& i_targe
 /// @note Page 18
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::sdram_density(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::sdram_density( uint8_t& o_value)
 {
     // =========================================================
     // Byte 4 maps
@@ -255,22 +241,20 @@ fapi2::ReturnCode decoder::sdram_density(const fapi2::Target<TARGET_TYPE_DIMM>& 
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 4;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, SDRAM_CAPACITY_START, SDRAM_CAPACITY_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< SDRAM_CAPACITY >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Check to assure SPD DRAM capacity (map) wont be at invalid values
     bool l_is_val_found = mss::find_value_from_key(SDRAM_DENSITY_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              SDRAM_CAPACITY.iv_byte,
               l_field_bits,
               "Failed check for SPD DRAM capacity") );
 
     FAPI_INF("%s. SDRAM density: %d Gb",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -279,7 +263,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes number of SDRAM bank_bits from SPD
-/// @param[in] i_target dimm target
 /// @param[out] o_value Number of SDRAM bank bits
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 4 (bits 5~4)
@@ -287,8 +270,7 @@ fapi_try_exit:
 /// @note Page 18
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::bank_bits(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                     uint8_t& o_value)
+fapi2::ReturnCode decoder::bank_bits( uint8_t& o_value)
 
 {
     // =========================================================
@@ -306,22 +288,20 @@ fapi2::ReturnCode decoder::bank_bits(const fapi2::Target<TARGET_TYPE_DIMM>& i_ta
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 4;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, SDRAM_BANKS_START, SDRAM_BANKS_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< SDRAM_BANKS >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Check to assure SPD DRAM capacity (map) wont be at invalid values
     bool l_is_val_found = mss::find_value_from_key(BANK_ADDR_BITS_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              SDRAM_BANKS.iv_byte,
               l_field_bits,
               "Failed check for SPD DRAM banks") );
 
     FAPI_INF("%s. Number of banks address bits: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -330,7 +310,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes number of SDRAM bank group bits from SPD
-/// @param[in] i_target dimm target
 /// @param[out] o_value Number of SDRAM bank group bits
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 4 (bits 6~7)
@@ -338,8 +317,7 @@ fapi_try_exit:
 /// @note Page 18
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::bank_group_bits(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::bank_group_bits( uint8_t& o_value)
 {
     // =========================================================
     // Byte 4 maps
@@ -357,22 +335,20 @@ fapi2::ReturnCode decoder::bank_group_bits(const fapi2::Target<TARGET_TYPE_DIMM>
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 4;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, BANK_GROUP_START, BANK_GROUP_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< BANK_GROUP >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Check to assure SPD DRAM capacity (map) wont be at invalid values
     bool l_is_val_found = mss::find_value_from_key(BANK_GROUP_BITS_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              BANK_GROUP.iv_byte,
               l_field_bits,
               "Failed check for SPD DRAM bank groups") );
 
     FAPI_INF("%s. Number of bank group bits: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -381,7 +357,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes number of SDRAM column address bits
-/// @param[in] i_target dimm target
 /// @param[out] o_value number of column address bits
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 5 (bits 2~0)
@@ -389,8 +364,7 @@ fapi_try_exit:
 /// @note Page 18
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::column_address_bits(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::column_address_bits( uint8_t& o_value)
 {
     // =========================================================
     // Byte 5 maps
@@ -409,22 +383,20 @@ fapi2::ReturnCode decoder::column_address_bits(const fapi2::Target<TARGET_TYPE_D
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 5;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, COL_ADDRESS_START, COL_ADDRESS_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< COL_ADDRESS >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Check to assure SPD DRAM capacity (map) wont be at invalid values
     bool l_is_val_found = mss::find_value_from_key(COLUMN_ADDRESS_BITS_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              COL_ADDRESS.iv_byte,
               l_field_bits,
               "Failed check for SDRAM Column Address Bits") );
 
     FAPI_INF("%s. Number of Column Address Bits: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -433,7 +405,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes number of SDRAM row address bits
-/// @param[in] i_target dimm target
 /// @param[out] o_value number of row address bits
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 5 (bits 5~3)
@@ -441,8 +412,7 @@ fapi_try_exit:
 /// @note Page 18
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::row_address_bits(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::row_address_bits( uint8_t& o_value)
 {
     // =========================================================
     // Byte 5 maps
@@ -464,22 +434,20 @@ fapi2::ReturnCode decoder::row_address_bits(const fapi2::Target<TARGET_TYPE_DIMM
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 5;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, ROW_ADDRESS_START, ROW_ADDRESS_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< ROW_ADDRESS >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Check to assure SPD DRAM capacity (map) wont be at invalid values
     bool l_is_val_found = mss::find_value_from_key(ROW_ADDRESS_BITS_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd:: fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd:: fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              ROW_ADDRESS.iv_byte,
               l_field_bits,
               "Failed check for SDRAM Row Address Bits") );
 
     FAPI_INF("%s. Number of Row Address Bits: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -489,7 +457,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Primary SDRAM signal loading
-/// @param[in] i_target dimm target
 /// @param[out] o_value enum representing signal loading type
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 6 (bits 1~0)
@@ -497,8 +464,7 @@ fapi_try_exit:
 /// @note Page 19
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::prim_sdram_signal_loading(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::prim_sdram_signal_loading( uint8_t& o_value)
 {
     // =========================================================
     // Byte 6 maps
@@ -516,23 +482,20 @@ fapi2::ReturnCode decoder::prim_sdram_signal_loading(const fapi2::Target<TARGET_
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 6;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, PRIM_SIGNAL_LOAD_START, PRIM_SIGNAL_LOAD_LEN >(i_target,
-                           iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< PRIM_SIGNAL_LOADING >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(PRIM_SIGNAL_LOADING_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd:: fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd:: fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              PRIM_SIGNAL_LOADING.iv_byte,
               l_field_bits,
               "Failed check for Primary SDRAM Signal Loading") );
 
     FAPI_INF("%s. Primary SDRAM Signal Loading: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -541,7 +504,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Primary SDRAM die count
-/// @param[in] i_target dimm target
 /// @param[out] o_value die count
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 6 (bits 6~4)
@@ -549,8 +511,7 @@ fapi_try_exit:
 /// @note Page 19
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::prim_sdram_die_count(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::prim_sdram_die_count( uint8_t& o_value)
 {
     // =========================================================
     // Byte 6 maps
@@ -573,22 +534,20 @@ fapi2::ReturnCode decoder::prim_sdram_die_count(const fapi2::Target<TARGET_TYPE_
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 6;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, PRIM_DIE_COUNT_START, PRIM_DIE_COUNT_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< PRIM_DIE_COUNT >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(PRIM_DIE_COUNT_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd:: fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd:: fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              PRIM_DIE_COUNT.iv_byte,
               l_field_bits,
               "Failed check for SDRAM Row Address Bits") );
 
     FAPI_INF("%s. Number of Row Address Bits: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -596,8 +555,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Decodes Primary SDRAM  package type
-/// @param[in] i_target dimm target
+/// @brief Decodes Primary SDRAM package type
 /// @param[out] o_value enum representing package type
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 6 (bit 7)
@@ -605,8 +563,7 @@ fapi_try_exit:
 /// @note Page 19
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::prim_sdram_package_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::prim_sdram_package_type( uint8_t& o_value)
 {
     // =========================================================
     // Byte 6 maps
@@ -623,23 +580,20 @@ fapi2::ReturnCode decoder::prim_sdram_package_type(const fapi2::Target<TARGET_TY
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 6;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, PRIM_PACKAGE_TYPE_START, PRIM_PACKAGE_TYPE_LEN >(i_target,
-                           iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< PRIM_PACKAGE_TYPE >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(PRIM_PACKAGE_TYPE_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              PRIM_PACKAGE_TYPE.iv_byte,
               l_field_bits,
               "Failed check for Primary SDRAM package type") );
 
     FAPI_INF("%s. Primary SDRAM package type: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -649,7 +603,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decode SDRAM Maximum activate count
-/// @param[in] i_target dimm target
 /// @param[out] o_value enum representing max activate count
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 7 (bits 3~0)
@@ -657,8 +610,7 @@ fapi_try_exit:
 /// @note Page 20
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::maximum_activate_count(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint32_t& o_value)
+fapi2::ReturnCode decoder::maximum_activate_count( uint32_t& o_value )
 {
     // =========================================================
     // Byte 7 maps
@@ -681,22 +633,20 @@ fapi2::ReturnCode decoder::maximum_activate_count(const fapi2::Target<TARGET_TYP
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 7;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, MAC_START, MAC_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< MAC >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(MAC_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              MAC.iv_byte,
               l_field_bits,
               "Failed check for SDRAM Maximum Active Count (MAC)") );
 
     FAPI_INF("%s. Maximum Active Count (MAC): %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -705,7 +655,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decode SDRAM Maximum activate window (multiplier), tREFI uknown at this point
-/// @param[in]  i_target dimm target
 /// @param[out] o_value max activate window multiplier
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 7 (bits 3~0)
@@ -713,8 +662,7 @@ fapi_try_exit:
 /// @note Page 20
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::maximum_activate_window_multiplier(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint32_t& o_value)
+fapi2::ReturnCode decoder::maximum_activate_window_multiplier( uint32_t& o_value )
 {
     // =========================================================
     // Byte 7 maps
@@ -733,22 +681,20 @@ fapi2::ReturnCode decoder::maximum_activate_window_multiplier(const fapi2::Targe
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 7;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, TMAW_START, TMAW_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< TMAW >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(TMAW_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              TMAW.iv_byte,
               l_field_bits,
               "Failed check for Maximum Active Window (tMAW)") );
 
     FAPI_INF("%s. Maximum Active Window multiplier: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -757,7 +703,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decode Post package repair (PPR)
-/// @param[in] i_target dimm target
 /// @param[out] o_value enum representing if (hard) PPR is supported
 /// @return fapi2::ReturnCode
 /// @note SPD Byte 9 (bits 7~6)
@@ -765,8 +710,7 @@ fapi_try_exit:
 /// @note Page 21
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::post_package_repair(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::post_package_repair( uint8_t& o_value)
 {
     // =========================================================
     // Byte 9 maps
@@ -783,22 +727,20 @@ fapi2::ReturnCode decoder::post_package_repair(const fapi2::Target<TARGET_TYPE_D
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 9;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, PPR_START, PPR_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< PPR >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(PPR_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              PPR.iv_byte,
               l_field_bits,
               "Failed check for PPR") );
 
     FAPI_INF("%s. Post Package Repair (PPR): %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -807,7 +749,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Secondary SDRAM signal loading
-/// @param[in] i_target dimm target
 /// @param[out] o_value enum representing signal loading type
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 10 (bits 1~0)
@@ -815,8 +756,7 @@ fapi_try_exit:
 /// @note Page 22
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::sec_sdram_signal_loading(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::sec_sdram_signal_loading( uint8_t& o_value)
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 10 (bits 1~0) were reserved
@@ -829,7 +769,6 @@ fapi2::ReturnCode decoder::sec_sdram_signal_loading(const fapi2::Target<TARGET_T
 
 ///
 /// @brief Decode Soft post package repair (soft PPR)
-/// @param[in] i_target dimm target
 /// @param[out] o_value enum representing if soft PPR is supported
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 9 (bit 5)
@@ -837,8 +776,7 @@ fapi2::ReturnCode decoder::sec_sdram_signal_loading(const fapi2::Target<TARGET_T
 /// @note Page 21
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::soft_post_package_repair(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::soft_post_package_repair( uint8_t& o_value)
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 9 (bit 5) was reserved
@@ -850,7 +788,6 @@ fapi2::ReturnCode decoder::soft_post_package_repair(const fapi2::Target<TARGET_T
 
 ///
 /// @brief Decodes Secondary DRAM Density Ratio
-/// @param[in] i_target dimm target
 /// @param[out] o_value raw bits from SPD
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 10 (bits 3~2)
@@ -858,8 +795,7 @@ fapi2::ReturnCode decoder::soft_post_package_repair(const fapi2::Target<TARGET_T
 /// @note Page 22
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::sec_dram_density_ratio(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::sec_dram_density_ratio( uint8_t& o_value)
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 10 (bits 3~2) were reserved
@@ -872,7 +808,6 @@ fapi2::ReturnCode decoder::sec_dram_density_ratio(const fapi2::Target<TARGET_TYP
 
 ///
 /// @brief Decodes Secondary SDRAM die count
-/// @param[in] i_target dimm target
 /// @param[out] o_value die count
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 10 (bits 6~4)
@@ -880,8 +815,7 @@ fapi2::ReturnCode decoder::sec_dram_density_ratio(const fapi2::Target<TARGET_TYP
 /// @note Page 22
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::sec_sdram_die_count(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::sec_sdram_die_count( uint8_t& o_value)
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 10 (bits 6~4) were reserved
@@ -894,7 +828,6 @@ fapi2::ReturnCode decoder::sec_sdram_die_count(const fapi2::Target<TARGET_TYPE_D
 
 ///
 /// @brief Decodes Secondary SDRAM package type
-/// @param[in] i_target dimm target
 /// @param[out] o_value  enum representing package type
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 10 (bit 7)
@@ -902,8 +835,7 @@ fapi2::ReturnCode decoder::sec_sdram_die_count(const fapi2::Target<TARGET_TYPE_D
 /// @note Page 22
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::sec_sdram_package_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::sec_sdram_package_type( uint8_t& o_value)
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 10 (bit 7) was reserved
@@ -916,7 +848,6 @@ fapi2::ReturnCode decoder::sec_sdram_package_type(const fapi2::Target<TARGET_TYP
 
 ///
 /// @brief Decode Module Nominal Voltage, VDD
-/// @param[in] i_target dimm target
 /// @param[out] o_value enum representing if 1.2V is operable
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 11 (bit 0)
@@ -924,8 +855,7 @@ fapi2::ReturnCode decoder::sec_sdram_package_type(const fapi2::Target<TARGET_TYP
 /// @note Page 23
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::operable_nominal_voltage(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::operable_nominal_voltage( uint8_t& o_value)
 {
     // =========================================================
     // Byte 11 maps
@@ -942,22 +872,20 @@ fapi2::ReturnCode decoder::operable_nominal_voltage(const fapi2::Target<TARGET_T
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 11;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, OPERABLE_START, OPERABLE_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< OPERABLE_FLD >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(OPERABLE_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              OPERABLE_FLD.iv_byte,
               l_field_bits,
               "Failed check for Operable nominal voltage") );
 
     FAPI_INF("%s. Operable: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -966,7 +894,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decode Module Nominal Voltage, VDD
-/// @param[in] i_target dimm target
 /// @param[out] o_value enum representing if 1.2V is endurant
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 11 (bit 1)
@@ -974,8 +901,7 @@ fapi_try_exit:
 /// @note Page 23
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::endurant_nominal_voltage(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::endurant_nominal_voltage( uint8_t& o_value)
 {
     // =========================================================
     // Byte 11 maps
@@ -992,22 +918,21 @@ fapi2::ReturnCode decoder::endurant_nominal_voltage(const fapi2::Target<TARGET_T
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 11;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, ENDURANT_START, ENDURANT_LEN >(i_target, iv_spd_data);
+    const uint8_t l_field_bits = extract_spd_field< ENDURANT_FLD >(iv_target, iv_spd_data);
 
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(ENDURANT_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              ENDURANT_FLD.iv_byte,
               l_field_bits,
               "Failed check for Endurant nominal voltage") );
 
     FAPI_INF("%s. Endurant: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1016,7 +941,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes SDRAM device width
-/// @param[in] i_target dimm target
 /// @param[out] o_value device width in bits
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 12 (bits 2~0)
@@ -1024,8 +948,7 @@ fapi_try_exit:
 /// @note Page 23
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::device_width(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                        uint8_t& o_value)
+fapi2::ReturnCode decoder::device_width( uint8_t& o_value)
 {
     // =========================================================
     // Byte 12 maps
@@ -1045,22 +968,20 @@ fapi2::ReturnCode decoder::device_width(const fapi2::Target<TARGET_TYPE_DIMM>& i
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 12;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, SDRAM_WIDTH_START, SDRAM_WIDTH_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< SDRAM_WIDTH >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(DEVICE_WIDTH_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              SDRAM_WIDTH.iv_byte,
               l_field_bits,
               "Failed check for Device Width") );
 
     FAPI_INF("%s. Device Width: %d bits",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1070,7 +991,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes number of package ranks per DIMM
-/// @param[in] i_target dimm target
 /// @param[out] o_value number of package ranks per DIMM
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 12 (bits 5~3)
@@ -1078,8 +998,7 @@ fapi_try_exit:
 /// @note Page 23
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::num_package_ranks_per_dimm(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::num_package_ranks_per_dimm( uint8_t& o_value)
 {
     // =========================================================
     // Byte 12 maps
@@ -1099,22 +1018,20 @@ fapi2::ReturnCode decoder::num_package_ranks_per_dimm(const fapi2::Target<TARGET
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 12;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, PACKAGE_RANKS_START, PACKAGE_RANKS_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< PACKAGE_RANKS >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(NUM_PACKAGE_RANKS_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              PACKAGE_RANKS.iv_byte,
               l_field_bits,
               "Failed check for Num Package Ranks Per DIMM") );
 
     FAPI_INF("%s. Num Package Ranks per DIMM: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1123,7 +1040,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Rank Mix
-/// @param[in] i_target dimm target
 /// @param[out] o_value rank mix value from SPD
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 12 (bit 6)
@@ -1131,8 +1047,7 @@ fapi_try_exit:
 /// @note Page 23
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::rank_mix(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                    uint8_t& o_value)
+fapi2::ReturnCode decoder::rank_mix( uint8_t& o_value)
 {
     // For General Section rev 1.0 of the SPD,
     // Decodes SPD Byte 3 (bits 4~6) were reserved
@@ -1145,7 +1060,6 @@ fapi2::ReturnCode decoder::rank_mix(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
 
 ///
 /// @brief Decodes primary bus width
-/// @param[in] i_target dimm target
 /// @param[out] o_value primary bus width in bits
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 13 (bits 2~0)
@@ -1153,8 +1067,7 @@ fapi2::ReturnCode decoder::rank_mix(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
 /// @note Page 27
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::prim_bus_width(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::prim_bus_width( uint8_t& o_value)
 {
     // =========================================================
     // Byte 13 maps
@@ -1174,22 +1087,20 @@ fapi2::ReturnCode decoder::prim_bus_width(const fapi2::Target<TARGET_TYPE_DIMM>&
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 13;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, BUS_WIDTH_START, BUS_WIDTH_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< BUS_WIDTH >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(BUS_WIDTH_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              BUS_WIDTH.iv_byte,
               l_field_bits,
               "Failed check for Primary Bus Width") );
 
     FAPI_INF("%s. Primary Bus Width: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1198,7 +1109,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes bus width extension
-/// @param[in] i_target dimm target
 /// @param[out] o_value bus width extension in bits
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 13 (bits 2~0)
@@ -1206,8 +1116,7 @@ fapi_try_exit:
 /// @note Page 28
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::bus_width_extension(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::bus_width_extension( uint8_t& o_value)
 {
     // =========================================================
     // Byte 13 maps
@@ -1224,22 +1133,20 @@ fapi2::ReturnCode decoder::bus_width_extension(const fapi2::Target<TARGET_TYPE_D
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 13;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, BUS_EXT_WIDTH_START, BUS_EXT_WIDTH_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< BUS_EXT_WIDTH >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(BUS_WIDTH_EXT_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              BUS_EXT_WIDTH.iv_byte,
               l_field_bits,
               "Failed check for Bus Width Extension") );
 
     FAPI_INF("%s. Bus Width Extension (bits): %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1249,7 +1156,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decode Module Thermal Sensor
-/// @param[in] i_target dimm target
 /// @param[out] o_value thermal sensor value from SPD
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 14 (bit 7)
@@ -1257,20 +1163,17 @@ fapi_try_exit:
 /// @note Page 28
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::thermal_sensor(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::thermal_sensor( uint8_t& o_value)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 14;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, THERM_SENSOR_START, THERM_SENSOR_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< THERM_SENSOR >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Check for valid value
     constexpr size_t INVALID_VALUE = 2; // single bit value 0 or 1
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits < INVALID_VALUE,
-              BYTE_INDEX,
+              THERM_SENSOR.iv_byte,
               l_field_bits,
               "Failed check for Thermal Sensor") );
 
@@ -1278,7 +1181,7 @@ fapi2::ReturnCode decoder::thermal_sensor(const fapi2::Target<TARGET_TYPE_DIMM>&
     o_value = l_field_bits;
 
     FAPI_INF("%s. Thermal Sensor: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1287,7 +1190,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decode Extended Base Module Type
-/// @param[in] i_target dimm target
 /// @param[out] o_value raw data from SPD
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 15 (bits 3~0)
@@ -1295,21 +1197,18 @@ fapi_try_exit:
 /// @note Page 28
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::extended_base_module_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::extended_base_module_type( uint8_t& o_value)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 15;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, EXT_MOD_TYPE_START, EXT_MOD_TYPE_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< EXTENDED_MODULE_TYPE >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Check for valid value
     // Currently reserved to 0b000
     constexpr size_t RESERVED = 0;
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits == RESERVED,
-              BYTE_INDEX,
+              EXTENDED_MODULE_TYPE.iv_byte,
               l_field_bits,
               "Failed check for Extended Base Module Type") );
 
@@ -1317,7 +1216,7 @@ fapi2::ReturnCode decoder::extended_base_module_type(const fapi2::Target<TARGET_
     o_value = l_field_bits;
 
     FAPI_INF("%s. Extended Base Module Type: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1327,7 +1226,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decode Fine Timebase
-/// @param[in] i_target dimm target
 /// @param[out] o_value fine_timebase from SPD in picoseconds
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 17 (bits 1~0)
@@ -1335,8 +1233,7 @@ fapi_try_exit:
 /// @note Page 29
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::fine_timebase(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::fine_timebase( int64_t& o_value)
 {
     // =========================================================
     // Byte 17 maps
@@ -1354,22 +1251,20 @@ fapi2::ReturnCode decoder::fine_timebase(const fapi2::Target<TARGET_TYPE_DIMM>& 
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 17;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, FINE_TIMEBASE_START, FINE_TIMEBASE_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< FINE_TIMEBASE >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(FINE_TIMEBASE_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              FINE_TIMEBASE.iv_byte,
               l_field_bits,
               "Failed check for Fine Timebase") );
 
     FAPI_INF("%s. Fine Timebase: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1378,7 +1273,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decode Medium Timebase
-/// @param[in] i_target dimm target
 /// @param[out] o_value  medium timebase from SPD in picoseconds
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 17 (bits 3~2)
@@ -1386,8 +1280,7 @@ fapi_try_exit:
 /// @note Page 29
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::medium_timebase(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::medium_timebase( int64_t& o_value)
 {
     // =========================================================
     // Byte 17 maps
@@ -1405,22 +1298,20 @@ fapi2::ReturnCode decoder::medium_timebase(const fapi2::Target<TARGET_TYPE_DIMM>
     };
 
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 17;
-    uint8_t l_field_bits = extract_spd_field< BYTE_INDEX, MED_TIMEBASE_START, MED_TIMEBASE_LEN >(i_target, iv_spd_data);
-
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< MEDIUM_TIMEBASE >(iv_target, iv_spd_data);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Find map value
     bool l_is_val_found = mss::find_value_from_key(MEDIUM_TIMEBASE_MAP, l_field_bits, o_value);
 
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_is_val_found,
-              BYTE_INDEX,
+              MEDIUM_TIMEBASE.iv_byte,
               l_field_bits,
               "Failed check for Medium Timebase") );
 
     FAPI_INF("%s. Medium Timebase: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1430,7 +1321,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes SDRAM Minimum Cycle Time in MTB
-/// @param[in] i_target dimm target
 /// @param[out] o_value tCKmin in MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 18
@@ -1442,8 +1332,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tCKmin (SPD byte 125)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder::min_cycle_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::min_cycle_time( int64_t& o_value )
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 18;
@@ -1451,7 +1340,7 @@ fapi2::ReturnCode decoder::min_cycle_time(const fapi2::Target<fapi2::TARGET_TYPE
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: %d.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              l_timing_val);
 
@@ -1459,7 +1348,7 @@ fapi2::ReturnCode decoder::min_cycle_time(const fapi2::Target<fapi2::TARGET_TYPE
     constexpr int64_t TIMING_LOWER_BOUND = 1; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 255; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -1470,7 +1359,7 @@ fapi2::ReturnCode decoder::min_cycle_time(const fapi2::Target<fapi2::TARGET_TYPE
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Cycle Time (tCKmin) in MTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1479,7 +1368,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes SDRAM Maximum Cycle Time in MTB
-/// @param[in] i_target dimm target
 /// @param[out] o_value tCKmax in MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 19
@@ -1491,8 +1379,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tCKmax (SPD byte 124)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder::max_cycle_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::max_cycle_time( int64_t& o_value )
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 19;
@@ -1500,7 +1387,7 @@ fapi2::ReturnCode decoder::max_cycle_time(const fapi2::Target<fapi2::TARGET_TYPE
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: %d.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              l_timing_val);
 
@@ -1508,7 +1395,7 @@ fapi2::ReturnCode decoder::max_cycle_time(const fapi2::Target<fapi2::TARGET_TYPE
     constexpr int64_t TIMING_LOWER_BOUND = 1; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 255; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -1519,7 +1406,7 @@ fapi2::ReturnCode decoder::max_cycle_time(const fapi2::Target<fapi2::TARGET_TYPE
     o_value = l_timing_val;
 
     FAPI_INF("%s. Maximum Cycle Time (tCKmax) in MTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1529,7 +1416,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decode CAS Latencies Supported
-/// @param[in] i_target dimm target
 /// @param[out] o_value bitmap of supported CAS latencies
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Bytes 20-23
@@ -1537,35 +1423,34 @@ fapi_try_exit:
 /// @note Page 33-34
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::supported_cas_latencies(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint64_t& o_value)
+fapi2::ReturnCode decoder::supported_cas_latencies( uint64_t& o_value )
 {
     // Trace print in the front assists w/ debug
     constexpr size_t FIRST_BYTE = 20;
     uint8_t first_raw_byte = iv_spd_data[FIRST_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              FIRST_BYTE,
              first_raw_byte);
 
     constexpr size_t SEC_BYTE = 21;
     uint8_t sec_raw_byte = iv_spd_data[SEC_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              SEC_BYTE,
              sec_raw_byte);
 
     constexpr size_t THIRD_BYTE = 22;
     uint8_t third_raw_byte = iv_spd_data[THIRD_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              THIRD_BYTE,
              third_raw_byte);
 
     constexpr size_t FOURTH_BYTE = 23;
     uint8_t fourth_raw_byte = iv_spd_data[FOURTH_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              FOURTH_BYTE,
              fourth_raw_byte);
 
@@ -1584,7 +1469,7 @@ fapi2::ReturnCode decoder::supported_cas_latencies(const fapi2::Target<TARGET_TY
 
     // Check for a valid value
     uint64_t l_supported_cl = l_buffer;
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_supported_cl <= MAX_VALID_VAL,
               FOURTH_BYTE,
               fourth_raw_byte,
@@ -1594,7 +1479,7 @@ fapi2::ReturnCode decoder::supported_cas_latencies(const fapi2::Target<TARGET_TY
     o_value = l_supported_cl;
 
     FAPI_INF("%s. CAS latencies supported (bitmap): 0x%llX",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1604,7 +1489,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes SDRAM Minimum CAS Latency Time in MTB
-/// @param[in] i_target dimm target
 /// @param[out] o_value tAAmin in MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 24
@@ -1616,8 +1500,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tAAmin (SPD byte 123)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder::min_cas_latency_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::min_cas_latency_time( int64_t& o_value )
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 24;
@@ -1625,7 +1508,7 @@ fapi2::ReturnCode decoder::min_cas_latency_time(const fapi2::Target<fapi2::TARGE
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              l_timing_val);
 
@@ -1633,7 +1516,7 @@ fapi2::ReturnCode decoder::min_cas_latency_time(const fapi2::Target<fapi2::TARGE
     constexpr int64_t TIMING_LOWER_BOUND = 1; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 255; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -1644,7 +1527,7 @@ fapi2::ReturnCode decoder::min_cas_latency_time(const fapi2::Target<fapi2::TARGE
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum CAS Latency Time (tAAmin) in MTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1653,7 +1536,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes SDRAM Minimum RAS to CAS Delay Time in MTB
-/// @param[in] i_target dimm target
 /// @param[out] o_value tRCDmin in MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 25
@@ -1665,9 +1547,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tRCDmin (SPD byte 122)
 /// used for correction to get the actual value
 ///
-fapi2::ReturnCode decoder::min_ras_to_cas_delay_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-
-        int64_t& o_value)
+fapi2::ReturnCode decoder::min_ras_to_cas_delay_time( int64_t& o_value )
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 25;
@@ -1675,7 +1555,7 @@ fapi2::ReturnCode decoder::min_ras_to_cas_delay_time(const fapi2::Target<fapi2::
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              l_timing_val);
 
@@ -1683,7 +1563,7 @@ fapi2::ReturnCode decoder::min_ras_to_cas_delay_time(const fapi2::Target<fapi2::
     constexpr int64_t TIMING_LOWER_BOUND = 1; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 255; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -1694,7 +1574,7 @@ fapi2::ReturnCode decoder::min_ras_to_cas_delay_time(const fapi2::Target<fapi2::
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum RAS to CAS Delay Time (tRCDmin) in MTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1703,7 +1583,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes SDRAM Minimum Row Precharge Delay Time in MTB
-/// @param[in] i_target dimm target
 /// @param[out] o_value tRPmin in MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 26
@@ -1715,8 +1594,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tRPmin (SPD byte 121)
 /// used for correction to get the actual value
 ///
-fapi2::ReturnCode decoder::min_row_precharge_delay_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::min_row_precharge_delay_time( int64_t& o_value )
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 26;
@@ -1724,7 +1602,7 @@ fapi2::ReturnCode decoder::min_row_precharge_delay_time(const fapi2::Target<fapi
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              l_timing_val);
 
@@ -1732,7 +1610,7 @@ fapi2::ReturnCode decoder::min_row_precharge_delay_time(const fapi2::Target<fapi
     constexpr int64_t TIMING_LOWER_BOUND = 1; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 255; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -1743,7 +1621,7 @@ fapi2::ReturnCode decoder::min_row_precharge_delay_time(const fapi2::Target<fapi
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Row Precharge Delay Time (tRPmin) in MTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1753,7 +1631,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes SDRAM Minimum Active to Precharge Delay Time in MTB
-/// @param[in] i_target dimm target
 /// @param[out] o_value tRASmin in MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 27 (bits 3~0) & Byte 28 (bits 7~0)
@@ -1761,15 +1638,12 @@ fapi_try_exit:
 /// @note Page 38
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::min_active_to_precharge_delay_time(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::min_active_to_precharge_delay_time( int64_t& o_value)
 {
-    constexpr size_t BYTE_INDEX_MSN = 27;
-    uint8_t tRASmin_MSN = extract_spd_field< BYTE_INDEX_MSN, TRASMIN_MSN_START, TRASMIN_MSN_LEN >(i_target, iv_spd_data);
+    uint8_t tRASmin_MSN = extract_spd_field< TRASMIN_MSN >(iv_target, iv_spd_data);
     FAPI_INF("MSN Field Bits value: %lu", tRASmin_MSN);
 
-    constexpr size_t BYTE_INDEX_LSB = 28;
-    uint8_t tRASmin_LSB = extract_spd_field< BYTE_INDEX_LSB, TRASMIN_LSB_START, TRASMIN_LSB_LEN >(i_target, iv_spd_data);
+    uint8_t tRASmin_LSB = extract_spd_field< TRASMIN_LSB >(iv_target, iv_spd_data);
     FAPI_INF("LSB Field Bits value: %lu", tRASmin_LSB);
 
     // Combining bits to create timing value (in a buffer)
@@ -1795,7 +1669,7 @@ fapi2::ReturnCode decoder::min_active_to_precharge_delay_time(const fapi2::Targe
     // But byte 28 of the JEDEC spec explains how to piece this together - AAM
     constexpr size_t ERROR_BYTE_INDEX = 28;
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              ERROR_BYTE_INDEX,
@@ -1806,7 +1680,7 @@ fapi2::ReturnCode decoder::min_active_to_precharge_delay_time(const fapi2::Targe
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Active to Precharge Delay Time (tRASmin) in MTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1816,7 +1690,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes SDRAM Minimum Active to Active/Refresh Delay Time in MTB
-/// @param[in] i_target dimm target
 /// @param[out] o_value tRCmin in MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 27 (bits 7~4) & SPD Byte 29 (bits 7~0)
@@ -1828,15 +1701,12 @@ fapi_try_exit:
 /// integer and the Fine Offset for tRCmin (SPD byte 120)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder::min_active_to_active_refresh_delay_time(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::min_active_to_active_refresh_delay_time( int64_t& o_value)
 {
-    constexpr size_t BYTE_INDEX_MSN = 27;
-    uint8_t tRCmin_MSN = extract_spd_field< BYTE_INDEX_MSN, TRCMIN_MSN_START, TRCMIN_MSN_LEN >(i_target, iv_spd_data);
+    uint8_t tRCmin_MSN = extract_spd_field< TRCMIN_MSN >(iv_target, iv_spd_data);
     FAPI_INF("MSN Field Bits value: %lu", tRCmin_MSN);
 
-    constexpr size_t BYTE_INDEX_LSB = 29;
-    uint8_t tRCmin_LSB = extract_spd_field< BYTE_INDEX_LSB, TRCMIN_LSB_START, TRCMIN_LSB_LEN >(i_target, iv_spd_data);
+    uint8_t tRCmin_LSB = extract_spd_field< TRCMIN_LSB >(iv_target, iv_spd_data);
     FAPI_INF("LSB Field Bits value: %lu", tRCmin_LSB);
 
     // Combining bits to create timing value (in a buffer)
@@ -1861,7 +1731,7 @@ fapi2::ReturnCode decoder::min_active_to_active_refresh_delay_time(const fapi2::
     // But byte 29 of the JEDEC spec explains how to piece this together - AAM
     constexpr size_t ERROR_BYTE_INDEX = 29;
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              ERROR_BYTE_INDEX,
@@ -1872,7 +1742,7 @@ fapi2::ReturnCode decoder::min_active_to_active_refresh_delay_time(const fapi2::
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Active to Active/Refresh Delay Time (tRCmin) in MTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1882,7 +1752,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 1
-/// @param[in] i_target dimm target
 /// @param[out] o_value tRFC1min in MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 30 & Byte 31
@@ -1890,14 +1759,13 @@ fapi_try_exit:
 /// @note Page 39-40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_1(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_1( int64_t& o_value)
 {
-    constexpr size_t BYTE_INDEX_MSB = 31;
-    uint8_t tRFC1min_MSB = extract_spd_field< BYTE_INDEX_MSB, TRFC1MIN_MSB_START, TRFC1MIN_MSB_LEN >(i_target, iv_spd_data);
+    uint8_t tRFC1min_MSB = extract_spd_field< TRFC1MIN_MSB >(iv_target, iv_spd_data);
+    FAPI_INF("MSB Field Bits value: %lu", tRFC1min_MSB);
 
-    constexpr size_t BYTE_INDEX_LSB = 30;
-    uint8_t tRFC1min_LSB = extract_spd_field< BYTE_INDEX_LSB, TRFC1MIN_LSB_START, TRFC1MIN_LSB_LEN >(i_target, iv_spd_data);
+    uint8_t tRFC1min_LSB = extract_spd_field< TRFC1MIN_LSB >(iv_target, iv_spd_data);
+    FAPI_INF("LSB Field Bits value: %lu", tRFC1min_LSB);
 
     // Combining bits to create timing value (in a buffer)
     constexpr size_t MSB_START = 48;
@@ -1922,7 +1790,7 @@ fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_1(const fapi2::Target
     // Chose one of them (byte 30) to for error printout of this decode
     constexpr size_t ERROR_BYTE_INDEX = 30;
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              ERROR_BYTE_INDEX,
@@ -1933,7 +1801,7 @@ fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_1(const fapi2::Target
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Refresh Recovery Delay Time 1 (tRFC1min) in MTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -1942,7 +1810,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 2
-/// @param[in] i_target dimm target
 /// @param[out] o_value tRFC2min in MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 32 & Byte 33
@@ -1950,14 +1817,13 @@ fapi_try_exit:
 /// @note Page 40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_2(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_2( int64_t& o_value)
 {
-    constexpr size_t BYTE_INDEX_MSB = 33;
-    uint8_t tRFC2min_MSB = extract_spd_field< BYTE_INDEX_MSB, TRFC2MIN_MSB_START, TRFC2MIN_MSB_LEN>(i_target, iv_spd_data);
+    uint8_t tRFC2min_MSB = extract_spd_field< TRFC2MIN_MSB >(iv_target, iv_spd_data);
+    FAPI_INF("MSB Field Bits value: %lu", tRFC2min_MSB);
 
-    constexpr size_t BYTE_INDEX_LSB = 32;
-    uint8_t tRFC2min_LSB = extract_spd_field< BYTE_INDEX_LSB, TRFC2MIN_LSB_START, TRFC2MIN_LSB_LEN>(i_target, iv_spd_data);
+    uint8_t tRFC2min_LSB = extract_spd_field< TRFC2MIN_LSB >(iv_target, iv_spd_data);
+    FAPI_INF("LSB Field Bits value: %lu", tRFC2min_LSB);
 
     // Combining bits to create timing value (in a buffer)
     constexpr size_t MSB_START = 48;
@@ -1982,7 +1848,7 @@ fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_2(const fapi2::Target
     // Chose one of them (byte 33) to for error printout of this decode
     constexpr size_t ERROR_BYTE_INDEX = 33;
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              ERROR_BYTE_INDEX,
@@ -1993,7 +1859,7 @@ fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_2(const fapi2::Target
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Refresh Recovery Delay Time 2 (tRFC2min) in MTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2002,7 +1868,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 4
-/// @param[in] i_target dimm target
 /// @param[out] o_value tRFC4min in MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 34 & Byte 35
@@ -2010,14 +1875,13 @@ fapi_try_exit:
 /// @note Page 40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_4(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_4( int64_t& o_value)
 {
-    constexpr size_t BYTE_INDEX_MSB = 35;
-    uint8_t tRFC4min_MSB = extract_spd_field< BYTE_INDEX_MSB, TRFC4MIN_MSB_START, TRFC4MIN_MSB_LEN>(i_target, iv_spd_data);
+    uint8_t tRFC4min_MSB = extract_spd_field< TRFC4MIN_MSB >(iv_target, iv_spd_data);
+    FAPI_INF("MSB Field Bits value: %lu", tRFC4min_MSB);
 
-    constexpr size_t BYTE_INDEX_LSB = 34;
-    uint8_t tRFC4min_LSB = extract_spd_field< BYTE_INDEX_LSB, TRFC4MIN_LSB_START, TRFC4MIN_LSB_LEN>(i_target, iv_spd_data);
+    uint8_t tRFC4min_LSB = extract_spd_field< TRFC4MIN_LSB >(iv_target, iv_spd_data);
+    FAPI_INF("LSB Field Bits value: %lu", tRFC4min_LSB);
 
     // Combining bits to create timing value (in a buffer)
     constexpr size_t MSB_START = 48;
@@ -2042,7 +1906,7 @@ fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_4(const fapi2::Target
     // Chose one of them (byte 34) for error printout of this decode
     constexpr size_t ERROR_BYTE_INDEX = 34;
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              ERROR_BYTE_INDEX,
@@ -2053,7 +1917,7 @@ fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_4(const fapi2::Target
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Refresh Recovery Delay Time 4 (tRFC4min) in MTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2062,7 +1926,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes SDRAM Minimum Four Activate Window Delay Time
-/// @param[in] i_target dimm target
 /// @param[out] o_value tFAWmin in MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 36 (bits 3~0) & Byte 37 (bits 7~0)
@@ -2070,15 +1933,12 @@ fapi_try_exit:
 /// @note Page 42
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::min_tfaw(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                    int64_t& o_value)
+fapi2::ReturnCode decoder::min_tfaw( int64_t& o_value)
 {
-    constexpr size_t BYTE_INDEX_MSN = 36;
-    uint8_t tFAWmin_MSN = extract_spd_field< BYTE_INDEX_MSN, TFAWMIN_MSN_START, TFAWMIN_MSN_LEN >(i_target, iv_spd_data);
+    uint8_t tFAWmin_MSN = extract_spd_field< TFAWMIN_MSN >(iv_target, iv_spd_data);
     FAPI_INF("MSN Field Bits value: %lu", tFAWmin_MSN);
 
-    constexpr size_t BYTE_INDEX_LSB = 37;
-    uint8_t tFAWmin_LSB = extract_spd_field< BYTE_INDEX_LSB, TFAWMIN_LSB_START, TFAWMIN_LSB_LEN >(i_target, iv_spd_data);
+    uint8_t tFAWmin_LSB = extract_spd_field< TFAWMIN_LSB >(iv_target, iv_spd_data);
     FAPI_INF("LSB Field Bits value: %lu", tFAWmin_LSB);
 
     // Combining bits to create timing value (in a buffer)
@@ -2104,7 +1964,7 @@ fapi2::ReturnCode decoder::min_tfaw(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
     // Chose one of them (byte 37) to for error printout of this decode
     constexpr size_t ERROR_BYTE_INDEX = 37;
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              ERROR_BYTE_INDEX,
@@ -2115,7 +1975,7 @@ fapi2::ReturnCode decoder::min_tfaw(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Four Activate Window Delay Time (tFAWmin) in MTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2124,7 +1984,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Minimum Activate to Activate Delay Time - Different Bank Group
-/// @param[in] i_target dimm target
 /// @param[out] o_value tRRD_Smin MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 38
@@ -2136,14 +1995,13 @@ fapi_try_exit:
 /// integer and the Fine Offset for tRRD_Smin (SPD byte 119)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder::min_trrd_s(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                      int64_t& o_value)
+fapi2::ReturnCode decoder::min_trrd_s( int64_t& o_value)
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 38;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2155,7 +2013,7 @@ fapi2::ReturnCode decoder::min_trrd_s(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
     constexpr int64_t TIMING_LOWER_BOUND = 1; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 255; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -2166,7 +2024,7 @@ fapi2::ReturnCode decoder::min_trrd_s(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Activate to Activate Delay Time - Different Bank Group (tRRD_Smin) in MTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2175,7 +2033,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Minimum Activate to Activate Delay Time - Same Bank Group
-/// @param[in] i_target dimm target
 /// @param[out] o_value tRRD_Lmin MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 39
@@ -2187,14 +2044,13 @@ fapi_try_exit:
 /// integer and the Fine Offset for tRRD_Lmin (SPD byte 118)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder::min_trrd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                      int64_t& o_value)
+fapi2::ReturnCode decoder::min_trrd_l( int64_t& o_value)
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 39;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2206,7 +2062,7 @@ fapi2::ReturnCode decoder::min_trrd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
     constexpr int64_t TIMING_LOWER_BOUND = 1; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 255; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -2217,7 +2073,7 @@ fapi2::ReturnCode decoder::min_trrd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Activate to Activate Delay Time - Same Bank Group (tRRD_Lmin) in MTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2226,7 +2082,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Minimum CAS to CAS Delay Time - Same Bank Group
-/// @param[in] i_target dimm target
 /// @param[out] o_value tCCD_Lmin MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 40
@@ -2238,14 +2093,13 @@ fapi_try_exit:
 /// integer and the Fine Offset for tCCD_Lmin (SPD byte 117)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder::min_tccd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                      int64_t& o_value)
+fapi2::ReturnCode decoder::min_tccd_l( int64_t& o_value)
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 40;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2257,7 +2111,7 @@ fapi2::ReturnCode decoder::min_tccd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
     constexpr int64_t TIMING_LOWER_BOUND = 1; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 255; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -2268,7 +2122,7 @@ fapi2::ReturnCode decoder::min_tccd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum CAS to CAS Delay Time - Same Bank Group (tCCD_Lmin) in MTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2277,7 +2131,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Minimum Write Recovery Time
-/// @param[in] i_target dimm target
 /// @param[out] o_value tWRmin in MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 41 (bits 3~0) & Byte 42 (bits 7~0)
@@ -2285,8 +2138,7 @@ fapi_try_exit:
 /// @note Page 40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::min_write_recovery_time(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::min_write_recovery_time( int64_t& o_value)
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 41 (bits 3~0) & Byte 42 (bits 7~0) were reserved
@@ -2301,7 +2153,6 @@ fapi2::ReturnCode decoder::min_write_recovery_time(const fapi2::Target<TARGET_TY
 
 ///
 /// @brief Decodes Minimum Write to Read Time - Different Bank Group
-/// @param[in] i_target dimm target
 /// @param[out] o_value tWRT_Smin in MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 43 (bits 3~0) & Byte 44 (bits 7~0)
@@ -2309,8 +2160,7 @@ fapi2::ReturnCode decoder::min_write_recovery_time(const fapi2::Target<TARGET_TY
 /// @note Page 40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::min_twtr_s(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                      int64_t& o_value)
+fapi2::ReturnCode decoder::min_twtr_s( int64_t& o_value)
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 43 (bits 3~0) & Byte 44 (bits 7~0) were reserved
@@ -2324,7 +2174,6 @@ fapi2::ReturnCode decoder::min_twtr_s(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
 
 ///
 /// @brief Decodes Minimum Write to Read Time - Same Bank Group
-/// @param[in] i_target dimm target
 /// @param[out] o_value tWRT_Lmin in MTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 43 (bits 7~4) & Byte 45 (bits 7~0)
@@ -2332,8 +2181,7 @@ fapi2::ReturnCode decoder::min_twtr_s(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
 /// @note Page 46
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::min_twtr_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                      int64_t& o_value)
+fapi2::ReturnCode decoder::min_twtr_l( int64_t& o_value)
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 43 (bits 7~4) & Byte 45 (bits 7~0) were reserved
@@ -2348,7 +2196,6 @@ fapi2::ReturnCode decoder::min_twtr_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
 
 ///
 /// @brief Decodes Fine Offset for Minimum CAS to CAS Delay Time - Same Bank Group
-/// @param[in] i_target dimm target
 /// @param[out] o_value tCCD_Lmin offset in FTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 117
@@ -2356,14 +2203,13 @@ fapi2::ReturnCode decoder::min_twtr_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::fine_offset_min_tccd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::fine_offset_min_tccd_l( int64_t& o_value)
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 117;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2376,7 +2222,7 @@ fapi2::ReturnCode decoder::fine_offset_min_tccd_l(const fapi2::Target<TARGET_TYP
     constexpr int64_t TIMING_LOWER_BOUND = -128; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 127; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -2387,7 +2233,7 @@ fapi2::ReturnCode decoder::fine_offset_min_tccd_l(const fapi2::Target<TARGET_TYP
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum RAS to CAS Delay Time (tCCD_Lmin) in FTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2396,7 +2242,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Fine Offset for Minimum Activate to Activate Delay Time - Same Bank Group
-/// @param[in] i_target dimm target
 /// @param[out] o_value tRRD_Lmin offset in FTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 118
@@ -2404,14 +2249,13 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::fine_offset_min_trrd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::fine_offset_min_trrd_l( int64_t& o_value)
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 118;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2424,7 +2268,7 @@ fapi2::ReturnCode decoder::fine_offset_min_trrd_l(const fapi2::Target<TARGET_TYP
     constexpr int64_t TIMING_LOWER_BOUND = -128; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 127; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -2435,7 +2279,7 @@ fapi2::ReturnCode decoder::fine_offset_min_trrd_l(const fapi2::Target<TARGET_TYP
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum Activate to Activate Delay Time (tRRD_Lmin) in FTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2444,7 +2288,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Fine Offset for Minimum Activate to Activate Delay Time - Different Bank Group
-/// @param[in] i_target dimm target
 /// @param[out] o_value tRRD_Smin offset in FTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 119
@@ -2452,14 +2295,13 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::fine_offset_min_trrd_s(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::fine_offset_min_trrd_s( int64_t& o_value)
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 119;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2472,7 +2314,7 @@ fapi2::ReturnCode decoder::fine_offset_min_trrd_s(const fapi2::Target<TARGET_TYP
     constexpr int64_t TIMING_LOWER_BOUND = -128; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 127; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -2483,7 +2325,7 @@ fapi2::ReturnCode decoder::fine_offset_min_trrd_s(const fapi2::Target<TARGET_TYP
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum Activate to Activate Delay Time - Different Bank Group (tRRD_Smin) in FTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2492,7 +2334,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Fine Offset for Minimum Active to Active/Refresh Delay Time
-/// @param[in] i_target dimm target
 /// @param[out] o_value tRCmin offset in FTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 120
@@ -2500,14 +2341,13 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::fine_offset_min_trc(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::fine_offset_min_trc( int64_t& o_value)
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 120;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2520,7 +2360,7 @@ fapi2::ReturnCode decoder::fine_offset_min_trc(const fapi2::Target<TARGET_TYPE_D
     constexpr int64_t TIMING_LOWER_BOUND = -128; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 127; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -2531,7 +2371,7 @@ fapi2::ReturnCode decoder::fine_offset_min_trc(const fapi2::Target<TARGET_TYPE_D
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum Active to Active/Refresh Delay Time (tRCmin) in FTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2540,7 +2380,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Fine Offset for Minimum Row Precharge Delay Time
-/// @param[in] i_target dimm target
 /// @param[out] o_value tRPmin offset in FTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 121
@@ -2548,14 +2387,13 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::fine_offset_min_trp(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::fine_offset_min_trp( int64_t& o_value)
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 121;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2568,7 +2406,7 @@ fapi2::ReturnCode decoder::fine_offset_min_trp(const fapi2::Target<TARGET_TYPE_D
     constexpr int64_t TIMING_LOWER_BOUND = -128; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 127; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -2579,7 +2417,7 @@ fapi2::ReturnCode decoder::fine_offset_min_trp(const fapi2::Target<TARGET_TYPE_D
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum Row Precharge Delay Time (tRPmin) in FTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2587,7 +2425,6 @@ fapi_try_exit:
 }
 ///
 /// @brief Decodes Fine Offset for SDRAM Minimum RAS to CAS Delay Time
-/// @param[in] i_target dimm target
 /// @param[out] o_value tRCDmin offset in FTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 122
@@ -2595,14 +2432,13 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::fine_offset_min_trcd(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::fine_offset_min_trcd( int64_t& o_value)
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 122;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2615,7 +2451,7 @@ fapi2::ReturnCode decoder::fine_offset_min_trcd(const fapi2::Target<TARGET_TYPE_
     constexpr int64_t TIMING_LOWER_BOUND = -128; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 127; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -2626,7 +2462,7 @@ fapi2::ReturnCode decoder::fine_offset_min_trcd(const fapi2::Target<TARGET_TYPE_
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum RAS to CAS Delay Time (tRCDmin) in FTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2635,7 +2471,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Fine Offset for SDRAM Minimum CAS Latency Time
-/// @param[in] i_target dimm target
 /// @param[out] o_value tAAmin offset in FTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 123
@@ -2643,14 +2478,13 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::fine_offset_min_taa(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::fine_offset_min_taa( int64_t& o_value )
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 123;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2663,7 +2497,7 @@ fapi2::ReturnCode decoder::fine_offset_min_taa(const fapi2::Target<fapi2::TARGET
     constexpr int64_t TIMING_LOWER_BOUND = -128; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 127; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -2674,7 +2508,7 @@ fapi2::ReturnCode decoder::fine_offset_min_taa(const fapi2::Target<fapi2::TARGET
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum CAS Latency Time (tAAmin) in FTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2683,7 +2517,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Fine Offset for SDRAM Maximum Cycle Time
-/// @param[in] i_target dimm target
 /// @param[out] o_value tCKmax offset in FTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 124
@@ -2691,14 +2524,13 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::fine_offset_max_tck(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::fine_offset_max_tck( int64_t& o_value )
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 124;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2711,7 +2543,7 @@ fapi2::ReturnCode decoder::fine_offset_max_tck(const fapi2::Target<fapi2::TARGET
     constexpr int64_t TIMING_LOWER_BOUND = -128; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 127; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -2722,7 +2554,7 @@ fapi2::ReturnCode decoder::fine_offset_max_tck(const fapi2::Target<fapi2::TARGET
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Maximum Cycle Time (tCKmax) in FTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2732,7 +2564,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Fine Offset for SDRAM Minimum Cycle Time
-/// @param[in] i_target dimm target
 /// @param[out] o_value tCKmin offset in FTB units
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 125
@@ -2740,14 +2571,13 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::fine_offset_min_tck(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        int64_t& o_value)
+fapi2::ReturnCode decoder::fine_offset_min_tck( int64_t& o_value )
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 125;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2760,7 +2590,7 @@ fapi2::ReturnCode decoder::fine_offset_min_tck(const fapi2::Target<fapi2::TARGET
     constexpr int64_t TIMING_LOWER_BOUND = -128; // from JEDEC
     constexpr int64_t TIMING_UPPER_BOUND = 127; // from JEDEC
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(iv_target,
              (l_timing_val <= TIMING_UPPER_BOUND) &&
              (l_timing_val >= TIMING_LOWER_BOUND),
              BYTE_INDEX,
@@ -2771,7 +2601,7 @@ fapi2::ReturnCode decoder::fine_offset_min_tck(const fapi2::Target<fapi2::TARGET
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum Cycle Time (tCKmin) in FTB units: %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
 fapi_try_exit:
@@ -2781,7 +2611,6 @@ fapi_try_exit:
 
 ///
 /// @brief Decodes Cyclical Redundancy Code (CRC) for Base Configuration Section
-/// @param[in] i_target dimm target
 /// @param[out] o_value crc value from SPD
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 127 & Byte 126
@@ -2789,15 +2618,12 @@ fapi_try_exit:
 /// @note Page 53
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::cyclical_redundancy_code(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint16_t& o_value)
+fapi2::ReturnCode decoder::cyclical_redundancy_code( uint16_t& o_value )
 {
-    constexpr size_t BYTE_INDEX_MSB = 127;
-    uint8_t crc_MSB = extract_spd_field< BYTE_INDEX_MSB, CRC_MSB_START, CRC_MSB_LEN >(i_target, iv_spd_data);
+    uint8_t crc_MSB = extract_spd_field< CRC_MSB >(iv_target, iv_spd_data);
     FAPI_INF("MSB Field Bits value: %lu", crc_MSB);
 
-    constexpr size_t BYTE_INDEX_LSB = 126;
-    uint8_t crc_LSB = extract_spd_field< BYTE_INDEX_LSB, CRC_LSB_START, CRC_LSB_LEN >(i_target, iv_spd_data);
+    uint8_t crc_LSB = extract_spd_field< CRC_LSB >(iv_target, iv_spd_data);
     FAPI_INF("LSB Field Bits value: %lu", crc_LSB);
 
     // Combining bits to create timing value (in a buffer)
@@ -2814,7 +2640,7 @@ fapi2::ReturnCode decoder::cyclical_redundancy_code(const fapi2::Target<fapi2::T
     o_value = l_buffer;
 
     FAPI_INF("%s. Cyclical Redundancy Code (CRC): %d",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
     // Returns "happy" until we can figure out a way to test this - AAM
@@ -2823,7 +2649,6 @@ fapi2::ReturnCode decoder::cyclical_redundancy_code(const fapi2::Target<fapi2::T
 
 ///
 /// @brief Decodes module manufacturer ID code
-/// @param[in] i_target TARGET_TYPE_DIMM
 /// @param[out] o_value module manufacturing id code
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 320 (bit 7~0), 321 (6~0)
@@ -2831,8 +2656,7 @@ fapi2::ReturnCode decoder::cyclical_redundancy_code(const fapi2::Target<fapi2::T
 /// @note DDR4 SPD Document Release 3
 /// @note Page 4.1.2.12 - 54
 ///
-fapi2::ReturnCode decoder::module_manufacturer_id_code(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint16_t& o_value)
+fapi2::ReturnCode decoder::module_manufacturer_id_code( uint16_t& o_value )
 {
 
     constexpr size_t BYTE_INDEX_MSB = 320;
@@ -2853,7 +2677,7 @@ fapi2::ReturnCode decoder::module_manufacturer_id_code(const fapi2::Target<fapi2
     o_value = l_buffer;
 
     FAPI_INF("%s.Module Manufacturer ID Code: %x",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
     // Returns "happy" until we can figure out a way to test this - AAM
@@ -2862,7 +2686,6 @@ fapi2::ReturnCode decoder::module_manufacturer_id_code(const fapi2::Target<fapi2
 
 ///
 /// @brief Decodes Module Manufacturing Location
-/// @param[in] i_target dimm target
 /// @param[out] o_value uint8_t identifier for manufacturing location of memory module
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 322
@@ -2870,21 +2693,20 @@ fapi2::ReturnCode decoder::module_manufacturer_id_code(const fapi2::Target<fapi2
 /// @note Page 55
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::module_manufacturing_location(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::module_manufacturing_location( uint8_t& o_value)
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 322;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
     o_value = iv_spd_data[BYTE_INDEX];
 
     FAPI_INF("%s. Module Manufacturing Location: %x",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -2892,7 +2714,6 @@ fapi2::ReturnCode decoder::module_manufacturing_location(const fapi2::Target<TAR
 
 ///
 /// @brief Decodesmodule manufacturing date
-/// @param[in] i_target TARGET_TYPE_DIMM
 /// @param[out] o_value the 2 byte date of manufacturing in BCD format
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 323-324
@@ -2902,8 +2723,7 @@ fapi2::ReturnCode decoder::module_manufacturing_location(const fapi2::Target<TAR
 /// @note in Binary Coded Decimal (BCD)
 /// @note MSB = year, LSB = week
 ///
-fapi2::ReturnCode decoder::module_manufacturing_date(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint16_t& o_value)
+fapi2::ReturnCode decoder::module_manufacturing_date( uint16_t& o_value )
 {
 
     constexpr size_t BYTE_INDEX_MSB = 323;
@@ -2925,7 +2745,7 @@ fapi2::ReturnCode decoder::module_manufacturing_date(const fapi2::Target<fapi2::
     o_value = l_buffer;
 
     FAPI_INF("%s.Module Manufacturer ID date: %x",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
     // Returns "happy" until we can figure out a way to test this - AAM
@@ -2934,7 +2754,6 @@ fapi2::ReturnCode decoder::module_manufacturing_date(const fapi2::Target<fapi2::
 
 ///
 /// @brief Decodes module's unique serial number
-/// @param[in] i_target TARGET_TYPE_DIMM
 /// @param[out] o_value
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 325-328
@@ -2943,8 +2762,7 @@ fapi2::ReturnCode decoder::module_manufacturing_date(const fapi2::Target<fapi2::
 /// @note Page 4.1.2.12 - 54
 /// @note in Binary Coded Decimal (BCD)
 ///
-fapi2::ReturnCode decoder::module_serial_number(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint32_t& o_value)
+fapi2::ReturnCode decoder::module_serial_number( uint32_t& o_value )
 {
     constexpr size_t BYTE_INDEX_0 = 325;
     uint8_t sn_byte_0 = iv_spd_data[BYTE_INDEX_0];
@@ -2977,7 +2795,7 @@ fapi2::ReturnCode decoder::module_serial_number(const fapi2::Target<fapi2::TARGE
     o_value = l_buffer;
 
     FAPI_INF("%s.Module Serial Number : %x",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
     // Returns "happy" until we can figure out a way to test this - AAM
@@ -2986,7 +2804,6 @@ fapi2::ReturnCode decoder::module_serial_number(const fapi2::Target<fapi2::TARGE
 
 ///
 /// @brief Decodes Module Revision Code
-/// @param[in] i_target dimm target
 /// @param[out] o_value uint8_t identifier for revision code
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 349
@@ -2994,21 +2811,20 @@ fapi2::ReturnCode decoder::module_serial_number(const fapi2::Target<fapi2::TARGE
 /// @note Page 55
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::module_revision_code(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::module_revision_code( uint8_t& o_value)
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 349;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
     o_value = iv_spd_data[BYTE_INDEX];
 
     FAPI_INF("%s. Module Revision Code: %x",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -3016,7 +2832,6 @@ fapi2::ReturnCode decoder::module_revision_code(const fapi2::Target<TARGET_TYPE_
 
 ///
 /// @brief Decodes DRAM Manufacturer ID code
-/// @param[in] i_target TARGET_TYPE_DIMM
 /// @param[out] o_value dram manufacturing id code
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 350 351
@@ -3024,8 +2839,7 @@ fapi2::ReturnCode decoder::module_revision_code(const fapi2::Target<TARGET_TYPE_
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 54
 ///
-fapi2::ReturnCode decoder::dram_manufacturer_id_code(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint16_t& o_value)
+fapi2::ReturnCode decoder::dram_manufacturer_id_code( uint16_t& o_value )
 {
     constexpr size_t BYTE_INDEX_MSB = 350;
     uint8_t mfgid_MSB = iv_spd_data[BYTE_INDEX_MSB];
@@ -3045,7 +2859,7 @@ fapi2::ReturnCode decoder::dram_manufacturer_id_code(const fapi2::Target<fapi2::
     o_value = l_buffer;
 
     FAPI_INF("%s.DRAM Manufacturer ID Code (dram_mfg_id): %x",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
 
     // Returns "happy" until we can figure out a way to test this - AAM
@@ -3054,7 +2868,6 @@ fapi2::ReturnCode decoder::dram_manufacturer_id_code(const fapi2::Target<fapi2::
 
 ///
 /// @brief Decodes DRAM Stepping
-/// @param[in] i_target dimm target
 /// @param[out] o_value uint8_t  DRAM Stepping val
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 353
@@ -3063,46 +2876,42 @@ fapi2::ReturnCode decoder::dram_manufacturer_id_code(const fapi2::Target<fapi2::
 /// @note DDR4 SPD Document Release 3
 /// @note also called die revision level
 ///
-fapi2::ReturnCode decoder::dram_stepping(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+fapi2::ReturnCode decoder::dram_stepping( uint8_t& o_value)
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 352;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%01X.",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
     o_value = iv_spd_data[BYTE_INDEX];
 
     FAPI_INF("%s. DRAM stepping: %x",
-             mss::c_str(i_target),
+             mss::c_str(iv_target),
              o_value);
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
 ///
-/// @brief Returns Logical ranks in Primary SDRAM type
-/// @param[in] i_target dimm target
-/// @param[in] i_target TARGET_TYPE_DIMM
+/// @brief Returns Logicalranks in Primary SDRAM type
 /// @param[out] o_logical_ranks number of logical ranks
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode decoder::prim_sdram_logical_ranks(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_logical_ranks)
+fapi2::ReturnCode decoder::prim_sdram_logical_ranks( uint8_t& o_logical_ranks )
 {
     uint8_t l_signal_loading = 0;
     uint8_t l_ranks_per_dimm = 0;
 
-    FAPI_TRY( prim_sdram_signal_loading(i_target, l_signal_loading) );
-    FAPI_TRY( num_package_ranks_per_dimm(i_target, l_ranks_per_dimm) );
+    FAPI_TRY( prim_sdram_signal_loading(l_signal_loading) );
+    FAPI_TRY( num_package_ranks_per_dimm(l_ranks_per_dimm) );
 
     if(l_signal_loading == spd::SINGLE_LOAD_STACK)
     {
         //  For single-load-stack(3DS) the logical ranks per package ends up being the same as the die count.
         uint8_t l_die_count = 0;
-        FAPI_TRY( prim_sdram_die_count(i_target, l_die_count) );
+        FAPI_TRY( prim_sdram_die_count(l_die_count) );
 
         o_logical_ranks = l_ranks_per_dimm * l_die_count;
     }
@@ -3120,15 +2929,13 @@ fapi_try_exit:
 
 ///
 /// @brief Returns Logical ranks per DIMM
-/// @param[in] i_target dimm target
 /// @param[in] i_pDecoder shared pointer to the SPD decoder
 /// @param[out] o_logical_ranks number of logical ranks
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode decoder::logical_ranks_per_dimm(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_logical_rank_per_dimm)
+fapi2::ReturnCode decoder::logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm )
 {
-    FAPI_TRY( prim_sdram_logical_ranks(i_target, o_logical_rank_per_dimm) );
+    FAPI_TRY( prim_sdram_logical_ranks(o_logical_rank_per_dimm) );
 
 fapi_try_exit:
     return fapi2::current_err;
