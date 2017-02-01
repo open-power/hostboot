@@ -31,5 +31,6 @@ $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PPB_INCLUDES))
 #$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
 lib$(PROCEDURE)_DEPLIBS+=p9_pm_utils
 lib$(PROCEDURE)_DEPLIBS+=p9_pm_get_poundv_bucket
+lib$(PROCEDURE)_DEPLIBS+=p9_pm_get_poundw_bucket
 #lib$(PROCEDURE)_DEPLIBS+=p9_pstate_utils
 $(call BUILD_PROCEDURE)
