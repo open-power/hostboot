@@ -526,7 +526,8 @@ StopReturnCode_t p9_stop_save_cpureg(  void* const i_pImage,
                 &(chipHomer->coreThreadRestore[coreId][threadId].coreArea[0]);
         }
 
-        if( SWIZZLE_4_BYTE(ATTN_OPCODE) == *(uint32_t*)pThreadLocation )
+        if( ( SWIZZLE_4_BYTE(BLR_INST) == *(uint32_t*)pThreadLocation ) ||
+            ( SWIZZLE_4_BYTE(ATTN_OPCODE) == *(uint32_t*) pThreadLocation ) )
         {
             // table for given core id doesn't exit. It needs to be
             // defined.
@@ -864,6 +865,7 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
         uint32_t swizzleAttn = SWIZZLE_4_BYTE(ATTN_OPCODE);
         uint32_t swizzleEntry = SWIZZLE_4_BYTE(SCOM_ENTRY_START);
         uint32_t index = 0;
+        uint32_t swizzleBlr = SWIZZLE_4_BYTE(BLR_INST);
 
         for( index = 0; index < entryLimit; ++index )
         {
@@ -876,8 +878,8 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
             }
 
             if( (( nopInst == entrySwzAddress ) ||
-                 ( swizzleAttn == entrySwzAddress )) &&
-                ( !pNopLocation ) )
+                 ( swizzleAttn == entrySwzAddress ) ||
+                 ( swizzleBlr == entrySwzAddress )) && ( !pNopLocation ) )
             {
                 pNopLocation = &pScomEntry[index];
             }
@@ -962,7 +964,12 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
                 break;
 
             case P9_STOP_SCOM_RESET:
-                memset( pScomEntry, nopInst, SCOM_SIZE_PER_CORE  );
+
+                if( P9_STOP_SECTION_CORE_SCOM ==  i_section )
+                {
+                    memset( pScomEntry, 0x00, SCOM_SIZE_PER_CORE );
+                }
+
                 break;
 
             case P9_STOP_SCOM_OR_APPEND:
