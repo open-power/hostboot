@@ -138,7 +138,7 @@ gen_default_images: cp_hbfiles
     # reserved for exception vectors)
 	dd if=${BOOTLDR_IMG} of=${HBBL_IMG} ibs=8 skip=1536 conv=sync
 
-	# Append Hostboot securerom code to the HBBl section
+	# Append Hostboot securerom code to the HBBL section
 	cat ${HB_SECROM_IMG} >> ${HBBL_IMG}
 
 	# Call script to generate final bin files for default images
