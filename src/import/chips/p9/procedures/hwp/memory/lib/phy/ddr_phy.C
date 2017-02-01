@@ -408,63 +408,33 @@ fapi_try_exit:
 /// @param[in] i_target the MCA target
 /// @param[in] i_rp the rank pair
 /// @param[out] o_dimm fapi2::Target<TARGET_TYPE_DIMM>
-/// @return FAPI2_RC_SUCCESS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok, FAPI2_RC_INVALID_PARAMETER if rank pair mapping problem
 ///
 template<>
 fapi2::ReturnCode rank_pair_primary_to_dimm( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rp,
         fapi2::Target<TARGET_TYPE_DIMM>& o_dimm)
 {
-    fapi2::buffer<uint64_t> l_data;
-    fapi2::buffer<uint64_t> l_rank;
-    uint64_t l_rank_on_dimm;
-
-    const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(i_target);
+    std::vector<uint64_t> l_ranks_in_rp = {NO_RANK};
 
     // Sanity check the rank pair
     FAPI_INF("%s rank pair: %d", mss::c_str(i_target), i_rp);
 
     fapi2::Assert(i_rp < MAX_RANK_PER_DIMM);
 
-    // We need to get the register containing the specification for this rank pair,
-    // and fish out the primary rank for this rank pair
-    switch(i_rp)
+    // Get the rp's primary rank, and figure out which DIMM it's on
+    FAPI_TRY( mss::rank::get_ranks_in_pair(i_target, i_rp, l_ranks_in_rp) );
+
+    // Make sure we have a valid rank
+    if (l_ranks_in_rp[0] == NO_RANK)
     {
-        case 0:
-            FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_RANK_PAIR0_P0, l_data) );
-            l_data.extractToRight<MCA_DDRPHY_PC_RANK_PAIR0_P0_PRI,
-                                  MCA_DDRPHY_PC_RANK_PAIR0_P0_PRI_LEN>(l_rank);
-            break;
+        FAPI_ERR("%s No primary rank in rank pair %d", mss::c_str(i_target), i_rp);
+        return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
 
-        case 1:
-            FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_RANK_PAIR0_P0, l_data) );
-            l_data.extractToRight<MCA_DDRPHY_PC_RANK_PAIR0_P0_PAIR1_PRI,
-                                  MCA_DDRPHY_PC_RANK_PAIR0_P0_PAIR1_PRI_LEN>(l_rank);
-            break;
+    FAPI_TRY( mss::rank::get_dimm_target_from_rank(i_target, l_ranks_in_rp[0], o_dimm) );
 
-        case 2:
-            FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_RANK_PAIR1_P0, l_data) );
-            l_data.extractToRight<MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR2_PRI,
-                                  MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR2_PRI_LEN>(l_rank);
-            break;
-
-        case 3:
-            FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_RANK_PAIR1_P0, l_data) );
-            l_data.extractToRight<MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR3_PRI,
-                                  MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR3_PRI_LEN>(l_rank);
-            break;
-    };
-
-    // Now we need to figure out which DIMM this rank is on. It's either on DIMM0 or DIMM1, and DIMM0
-    // has ranks 0-3 and DIMM1 has ranks 4-7. Return the DIMM associated.
-    l_rank_on_dimm = mss::rank::get_dimm_from_rank(l_rank);
-
-    // Sanity check the DIMM list
-    FAPI_INF("%s rank is on dimm: %d, number of dimms: %d", mss::c_str(i_target), l_rank_on_dimm, l_dimms.size());
-
-    fapi2::Assert(l_rank_on_dimm < l_dimms.size());
-
-    o_dimm = l_dimms[l_rank_on_dimm];
+    FAPI_INF("%s rank pair %d is on dimm: %s", mss::c_str(i_target), i_rp, mss::c_str(o_dimm));
 
 fapi_try_exit:
     return fapi2::current_err;
