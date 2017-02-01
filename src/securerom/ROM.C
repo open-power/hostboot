@@ -139,7 +139,7 @@ ROM_response ROM_verify( ROM_container_raw* container,
 
     // process hw keys
     // test for valid hw keys
-    SHA512_Hash(container->hw_pkey_a, 3*sizeof(ecc_key_t), &digest);
+    SHA512_Hash(container->hw_pkey_a, HW_KEY_COUNT*sizeof(ecc_key_t), &digest);
     if(memcmp(params->hw_key_hash, digest, sizeof(sha2_hash_t)))
     {
         FAILED(HW_KEY_HASH_TEST,"invalid hw keys");
@@ -156,7 +156,8 @@ ROM_response ROM_verify( ROM_container_raw* container,
     hw_data = (ROM_prefix_data_raw*) (prefix->ecid
                                       + prefix->ecid_count*ECID_SIZE);
     SHA512_Hash((uint8_t*)prefix, PREFIX_HEADER_SIZE(prefix), &digest);
-    if(!multi_key_verify(digest, 3, container->hw_pkey_a, hw_data->hw_sig_a))
+    if(!multi_key_verify(digest, HW_KEY_COUNT, container->hw_pkey_a,
+                         hw_data->hw_sig_a))
     {
         FAILED(HW_SIGNATURE_TEST,"invalid hw signature");
     }
@@ -173,7 +174,8 @@ ROM_response ROM_verify( ROM_container_raw* container,
         FAILED(PREFIX_HASH_TEST,"invalid prefix payload hash");
     }
     // test for valid sw key count
-    if (prefix->sw_key_count < 1 || prefix->sw_key_count > 3)
+    if (prefix->sw_key_count < SW_KEY_COUNT_MIN ||
+        prefix->sw_key_count > SW_KEY_COUNT_MAX)
     {
         FAILED(SW_KEY_INVALID_COUNT,"sw key count not between 1-3");
     }
