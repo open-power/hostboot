@@ -404,7 +404,7 @@ static fapi2::ReturnCode master_ranks_per_dimm_setter(const fapi2::Target<TARGET
     uint8_t l_attrs_dimm_ranks_configed[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Get & update MCS attribute
-    FAPI_TRY( i_pDecoder->num_package_ranks_per_dimm(i_target, l_decoder_val),
+    FAPI_TRY( i_pDecoder->num_package_ranks_per_dimm(l_decoder_val),
               "%s. Failed num_package_ranks_per_dimm()", mss::c_str(i_target) );
     FAPI_TRY(eff_num_master_ranks_per_dimm(l_mcs, &l_attrs_master_ranks_per_dimm[0][0]),
              "%s. Failed eff_num_master_ranks_per_dimm()", mss::c_str(i_target) );
