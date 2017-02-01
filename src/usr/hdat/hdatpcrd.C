@@ -47,7 +47,6 @@ extern trace_desc_t *g_trac_hdat;
  */
 vpdData procVpdData[] =
 {
-    { MVPD::VINI, MVPD::RT },
     { MVPD::VINI, MVPD::DR },
     { MVPD::VINI, MVPD::VZ },
     { MVPD::VINI, MVPD::CC },
@@ -63,7 +62,6 @@ vpdData procVpdData[] =
 
 const HdatKeywordInfo l_mvpdKeywords[] =
 {
-    { MVPD::RT, "RT" },
     { MVPD::DR, "DR" },
     { MVPD::VZ, "VZ" },
     { MVPD::CC, "CC" },

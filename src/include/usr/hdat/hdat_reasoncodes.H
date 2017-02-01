@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,6 +103,8 @@ enum HDATModuleId
   MOD_HBRT_LOAD_DATA           = 0x2c,
   MOD_UTIL_FULL_MVPD_READ_FUNC = 0x2d,
   MOD_HDAT_SPSUBSYS_FILL_DATA_PTRS = 0x2e,
+  MOD_UTIL_PVPD_FULL_READ_FUNC = 0x2f,
+  MOD_UTIL_MVPD                = 0x30,
 };
 
 

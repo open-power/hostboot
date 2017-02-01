@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,13 @@
 #include<vpd/spdenums.H>
 #include <devicefw/driverif.H>
 #include <targeting/common/predicates/predicatectm.H>
+#include <../vpd/mvpd.H>
+#include <../vpd/ipvpd.H>
+#include <../vpd/pvpd.H>
+using namespace MVPD;
+using namespace PVPD;
+using namespace IPVPD;
+
 
 /*----------------------------------------------------------------------------*/
 /* Constants                                                                  */
@@ -251,6 +258,22 @@ errlHndl_t hdatGetAsciiKwdForMvpd(
                        uint32_t i_num,size_t theSize[]);
 
 /**
+ * @brief  Get the Full records of passed in vpd type
+ *
+ * @param[in] i_target input target pointer
+ * @param[out]o_kwdSize: keyword size
+ * @param[out]o_kwd: key word array
+ * @param[in] i_fetchVpd: relevant structure to be read to fetch the VPD
+ * @param[in] i_num: number of elements in the structure
+ *
+ * @return errlHndl_t NULL on success
+ *
+ */
+errlHndl_t hdatGetFullRecords( TARGETING::Target * i_target,uint32_t &o_kwdSize,
+           char* &o_kwd,vpdType i_vpdtype,const IpVpdFacade::recordInfo i_fetchVpd[],
+                      uint32_t i_num, size_t theSize[]);
+
+/**
  * @brief  Get the ascii keyword for backplane
  *
  * @param[out]o_kwdSize: keyword size
@@ -267,6 +290,48 @@ errlHndl_t hdatGetAsciiKwdForPvpd(
                        char* &o_kwd,
                        struct vpdData i_fetchVpd[],
                        size_t i_num,size_t theSize[]);
+
+
+/**
+ * @brief  Get the Full MVPD records post adding start/end tag.
+ *         We need to add the tag back, since HB is stripping them off before
+ *         storing the vpd records in pnor cache. 
+ *
+ * @param[in] i_target input target pointer
+ * @param[out]o_kwdSize: keyword size
+ * @param[out]o_kwd: key word array
+ * @param[in] i_fetchVpd: relevant structure to be read to fetch the VPD
+ * @param[in] i_num: number of elements in the structure
+ *
+ * @return errlHndl_t NULL on success
+ *
+ */
+errlHndl_t hdatGetMvpdFullRecord(
+                       TARGETING::Target * i_target,
+                       uint32_t &o_kwdSize,
+                       char* &o_kwd,
+                       const IpVpdFacade::recordInfo i_fetchVpd[],
+                       uint32_t i_num,size_t theSize[]);
+
+/**
+ * @brief  Get the Full PVPD records post adding start/end tag.
+ *         We need to add the tag back, since HB is stripping them off before
+ *         storing the vpd records in pnor cache. 
+ * @param[out]o_kwdSize: keyword size
+ * @param[out]o_kwd: key word array
+ * @param[in] i_fetchVpd: relevant structure to be read to fetch the VPD
+ * @param[in] i_num: number of elements in the structure
+ *
+ * @return errlHndl_t NULL on success
+ *
+ */
+errlHndl_t hdatGetPvpdFullRecord(
+                       TARGETING::Target * i_target,
+                       uint32_t &o_kwdSize,
+                       char* &o_kwd,
+                       const IpVpdFacade::recordInfo i_fetchVpd[],
+                       size_t i_num,size_t theSize[]);
+
 /**
  * @brief  Get the ascii keyword for membuf
  *

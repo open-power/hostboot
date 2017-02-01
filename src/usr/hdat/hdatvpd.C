@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,6 +154,101 @@ iv_kwdSize(0), iv_kwd(NULL)
         delete[] o_fmtKwd;
     }
 
+    if (NULL == o_errlHndl)
+    {
+        iv_fru.hdatSlcaIdx = l_slcaIdx;
+        this->addData(HDAT_VPD_FRU_ID, sizeof(hdatFruId_t));
+        this->addData(HDAT_VPD_OP_STATUS, sizeof(hdatFruOpStatus_t));
+        //Padding the size
+        this->addData(HDAT_VPD_KWD, iv_kwdSize+1);
+        this->align();
+    }
+    HDAT_EXIT();
+}
+
+
+
+/** @brief See the prologue in hdatvpd.H
+ */
+HdatVpd::HdatVpd(errlHndl_t &o_errlHndl,
+                 uint32_t i_resourceId,
+                 TARGETING::Target * i_target,
+                 const char *i_eyeCatcher,
+                 uint32_t i_index,
+                 vpdType i_vpdType,
+                 const IpVpdFacade::recordInfo i_fetchVpd[],
+                 uint32_t i_num)
+: HdatHdif(o_errlHndl, i_eyeCatcher, HDAT_VPD_LAST,i_index,HDAT_NO_CHILD,
+           HDAT_VPD_VERSION),
+iv_kwdSize(0), iv_kwd(NULL)
+{
+    HDAT_ENTER();
+    o_errlHndl = NULL;
+    uint32_t l_slcaIdx = 0;
+    TARGETING::Target * l_target=i_target;
+    i_target->tryGetAttr<TARGETING::ATTR_SLCA_INDEX>(l_slcaIdx);
+
+    //overriding target for BP  vpd
+    if ( FRU_SV == (i_resourceId >> 8 ) )
+    {
+        TARGETING::TargetHandleList l_targList;
+        PredicateCTM predNode(TARGETING::CLASS_ENC, TARGETING::TYPE_NODE);
+        PredicateHwas predFunctional;
+        predFunctional.functional(true);
+        PredicatePostfixExpr nodeCheckExpr;
+        nodeCheckExpr.push(&predNode).push(&predFunctional).And();
+
+        targetService().getAssociated(l_targList, i_target,
+                TargetService::CHILD, TargetService::IMMEDIATE,
+                &nodeCheckExpr);
+        l_target = l_targList[0];
+    }
+
+    //@TODO:RTC 149382(Method to get VPD collected status for Targets)
+    GARD_FunctionalState l_functional = GARD_Functional;
+    GARD_UsedState l_used = GARD_Used;
+
+    if (GARD_Functional == l_functional ||
+        GARD_PartialFunctional == l_functional)
+    {
+        iv_status.hdatFlags =  HDAT_VPD_FRU_FUNCTIONAL;
+    }
+    if (GARD_Used == l_used)
+    {
+        iv_status.hdatFlags |= HDAT_VPD_REDUNDANT_FRU_USED;
+    }
+
+    iv_fru.hdatResourceId = i_resourceId;
+    size_t theSize[i_num];
+    //get the SLCA index and the keyword for the RID
+    o_errlHndl = hdatGetFullRecords(l_target,iv_kwdSize,iv_kwd,i_vpdType,
+                                 i_fetchVpd,i_num,theSize);
+
+    HDAT_DBG("hdatGetAsciiKwd returned kwd size =%d",iv_kwdSize);
+
+    if(strcmp(i_eyeCatcher,"IO KID")==0)
+    {
+        using namespace TARGETING;
+        // Get Target Service, and the system target.
+        TARGETING::TargetService& l_targetService = targetService();
+        TARGETING::Target* l_sysTarget = NULL;
+        (void) l_targetService.getTopLevelTarget(l_sysTarget);
+
+        assert(l_sysTarget != NULL);
+
+        //fetching lx data
+        uint64_t l_LXvalue = l_sysTarget->getAttr<ATTR_ASCII_VPD_LX_KEYWORD>();
+        char *temp_kwd = new char [iv_kwdSize];
+        uint32_t temp_kwdSize = iv_kwdSize;
+        memcpy(temp_kwd, iv_kwd,iv_kwdSize);
+        delete[] iv_kwd;
+        iv_kwdSize +=sizeof(uint64_t);
+        iv_kwd = new char [iv_kwdSize];
+        memcpy(iv_kwd,temp_kwd,temp_kwdSize);
+        memcpy((void *)(iv_kwd+temp_kwdSize),&l_LXvalue,sizeof(uint64_t));
+        theSize[i_num-1] = sizeof(uint64_t);
+        delete[] temp_kwd;
+    }
     if (NULL == o_errlHndl)
     {
         iv_fru.hdatSlcaIdx = l_slcaIdx;

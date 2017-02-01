@@ -46,72 +46,13 @@
 
 namespace HDAT
 {
-/*----------------------------------------------------------------------------*/
-/* Global variables                                                           */
-/*----------------------------------------------------------------------------*/
-
-
-
-/*----------------------------------------------------------------------------*/
-/* Constants                                                                  */
-/*----------------------------------------------------------------------------*/
-
-// Backplane keyword and record details
-static vpdData pvpdData[] =
-{
-    { PVPD::VINI, PVPD::RT },
-    { PVPD::VINI, PVPD::DR },
-    { PVPD::VINI, PVPD::CE },
-    { PVPD::VINI, PVPD::VZ },
-    { PVPD::VINI, PVPD::FN },
-    { PVPD::VINI, PVPD::SN },
-    { PVPD::VINI, PVPD::CC },
-    { PVPD::VINI, PVPD::HE },
-    { PVPD::VINI, PVPD::CT },
-    { PVPD::VINI, PVPD::B3 },
-    { PVPD::VINI, PVPD::B4 },
-    { PVPD::VINI, PVPD::B7 },
-    { PVPD::VINI, PVPD::PF },
-    { PVPD::OPFR, PVPD::RT },
-    { PVPD::OPFR, PVPD::VP },
-    { PVPD::OPFR, PVPD::VS },
-    { PVPD::OPFR, PVPD::DR },
-    { PVPD::OPFR, PVPD::VN },
-    { PVPD::OSYS, PVPD::RT },
-    { PVPD::OSYS, PVPD::MM },
-    { PVPD::OSYS, PVPD::SS },
-};
-const HdatKeywordInfo l_pvpdKeywords[] =
-{
-    { PVPD::RT,  "RT" },
-    { PVPD::DR,  "DR" },
-    { PVPD::CE,  "CE" },
-    { PVPD::VZ,  "VZ" },
-    { PVPD::FN,  "FN" },
-    { PVPD::SN,  "SN" },
-    { PVPD::CC,  "CC" },
-    { PVPD::HE,  "HE" },
-    { PVPD::CT,  "CT" },
-    { PVPD::B3,  "B3" },
-    { PVPD::B4,  "B4" },
-    { PVPD::B7,  "B7" },
-    { PVPD::PF,  "PF" },
-    { PVPD::VP,  "VP" },
-    { PVPD::VS,  "VS" },
-    { PVPD::DR,  "DR" },
-    { PVPD::VN,  "VN" },
-    { PVPD::MM,  "MM" },
-    { PVPD::SS,  "SS" },
-};
-
-
 
 /**
  * @brief See the prologue in hdatbldda.H
  */
 errlHndl_t hdatProcessFru(const hdatMsAddr_t &i_msAddr,
                                  const hdatSpiraDataAreas i_dataArea,
-                                 struct vpdData i_fetchVpd[],
+                                 const IpVpdFacade::recordInfo i_fetchVpd[],
                                  const uint8_t i_size,
                                  vpdType i_vpdtype,
                                  uint32_t &o_count,
@@ -175,6 +116,7 @@ errlHndl_t hdatProcessFru(const hdatMsAddr_t &i_msAddr,
         if (NULL == l_errlHndl)
         {
             uint32_t l_num = i_size/sizeof (i_fetchVpd[0]);
+           l_num -= 1 ;  // The last record is TEST record.which shouldn't be used.
 
             assert((l_targList[l_cnt]->tryGetAttr<TARGETING::ATTR_SLCA_RID>
             (l_hdatRID)));
@@ -187,7 +129,7 @@ errlHndl_t hdatProcessFru(const hdatMsAddr_t &i_msAddr,
                                     l_cnt,
                                     i_vpdtype,
                                     i_fetchVpd,
-                                    l_num,l_pvpdKeywords);
+                                    l_num);
 
 
             if (NULL == l_errlHndl)
@@ -244,7 +186,7 @@ errlHndl_t hdatBldSpecificVpd(hdatSpiraDataAreas i_dataArea,
     HDAT_ENTER();
 
     errlHndl_t l_errlHndl = NULL;
-    struct vpdData *l_data = NULL;
+    const IpVpdFacade::recordInfo *l_data = NULL;
     vpdType l_type = BP;
     uint8_t l_size = 0;
 
@@ -255,8 +197,8 @@ errlHndl_t hdatBldSpecificVpd(hdatSpiraDataAreas i_dataArea,
     {
         case HDAT_BACKPLANE_VPD:
         case HDAT_SYS_VPD:
-        l_data = pvpdData;
-        l_size = sizeof(pvpdData);
+        l_data = pvpdRecords;
+        l_size = sizeof(pvpdRecords);
         l_type = BP;
         break;
 
