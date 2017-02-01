@@ -212,4 +212,54 @@
       <target>DIMM_TARGET</target>
     </deconfigure>
   </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_PRIM_STACK_TYPE</rc>
+    <description>
+        An invalid stack type found for MSS ATTR_EFF_PRIM_STACK_TYPE
+    </description>
+    <ffdc>STACK_TYPE</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_CALCULATED_NUM_SLAVE_RANKS</rc>
+    <description>
+        Slave ranks are calculated to be 0 or greater than 8
+    </description>
+    <ffdc>NUM_SLAVE_RANKS</ffdc>
+    <ffdc>NUM_TOTAL_RANKS</ffdc>
+    <ffdc>NUM_MASTER_RANKS</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_TOTAL_RANKS_FOR_3DS_DIMM</rc>
+    <description>
+        Somehow calculated the total (logical) ranks is greater than or equal to the number of master ranks
+        Even though the DIMM has slave ranks
+    </description>
+    <ffdc>NUM_SLAVE_RANKS</ffdc>
+    <ffdc>NUM_TOTAL_RANKS</ffdc>
+    <ffdc>NUM_MASTER_RANKS</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
 </hwpErrors>
