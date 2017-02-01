@@ -98,6 +98,7 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_dimm->dram_width() );
         FAPI_TRY( l_eff_dimm->dram_density() );
         FAPI_TRY( l_eff_dimm->ranks_per_dimm() );
+        FAPI_TRY( l_eff_dimm->prim_die_count() );
         FAPI_TRY( l_eff_dimm->primary_stack_type() );
         FAPI_TRY( l_eff_dimm->dimm_size() );
         FAPI_TRY( l_eff_dimm->hybrid_memory_type() );
@@ -118,12 +119,12 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_dimm->dimm_rc06_07() );
         FAPI_TRY( l_eff_dimm->dimm_rc08() );
         FAPI_TRY( l_eff_dimm->dimm_rc09() );
-        FAPI_TRY( l_eff_dimm->dimm_rc10() );
-        FAPI_TRY( l_eff_dimm->dimm_rc11() );
-        FAPI_TRY( l_eff_dimm->dimm_rc12() );
-        FAPI_TRY( l_eff_dimm->dimm_rc13() );
-        FAPI_TRY( l_eff_dimm->dimm_rc14() );
-        FAPI_TRY( l_eff_dimm->dimm_rc15() );
+        FAPI_TRY( l_eff_dimm->dimm_rc0a() );
+        FAPI_TRY( l_eff_dimm->dimm_rc0b() );
+        FAPI_TRY( l_eff_dimm->dimm_rc0c() );
+        FAPI_TRY( l_eff_dimm->dimm_rc0d() );
+        FAPI_TRY( l_eff_dimm->dimm_rc0e() );
+        FAPI_TRY( l_eff_dimm->dimm_rc0f() );
         FAPI_TRY( l_eff_dimm->dimm_rc1x() );
         FAPI_TRY( l_eff_dimm->dimm_rc2x() );
         FAPI_TRY( l_eff_dimm->dimm_rc3x() );
