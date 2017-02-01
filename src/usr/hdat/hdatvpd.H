@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,13 @@
 #include <errl/errlentry.H>
 #include <vpd/vpd_if.H>
 //#include "hdatutil.H"
+#include <../vpd/mvpd.H>
+#include <../vpd/ipvpd.H>
+#include <../vpd/pvpd.H>
+using namespace MVPD;
+using namespace PVPD;
+using namespace IPVPD;
+
 
 namespace HDAT
 {
@@ -194,8 +201,45 @@ public:
           vpdType i_vpdType,
           struct vpdData i_fetchVpd[],
           uint32_t i_num, const HdatKeywordInfo i_pvpdKeywords[]);
+  /**
+   * @brief Construct an HdatVpd object.
+   *
+   *       This is the constructor for the HdatVpd object
+   *
+   *       If you are constructing this object on the heap by using new, then
+   *       you must check the pointer returned from new to see if it is null.
+   *       If it is null, new failed to allocate storage and the constructor
+   *       was not called.  If it is not null, then you must check o_errlHndl
+   *       to see if the constructor ran successfully.  If o_errlHndl indicates
+   *       an error was reported by the constructor, new has already allocated
+   *       heap storage and the object must be deleted in order to free the
+   *       heap storage.
+   *
+   * @pre None
+   * @param o_errlHndl output error handle
+   * @param i_resourceId input resource id
+   * @param i_target input Target
+   * @param i_eyeCatcher input the eyecatcher string
+   * @param i_index input object instance
+   * @param i_vpdType input the vpd type to be added
+   * @param i_fetchVpd input the record structure like mVpd or pVpd etc
+   * @param i_num input the number of elements in the i_fetchVpd structure
+   * @param i_Keywords string array
+   *
+   * @post An HdatVpd object has been constructed.  Heap storage has been
+   *       allocated.
+   *
+   */
 
 
+  HdatVpd(errlHndl_t &o_errlHndl,
+          uint32_t i_resourceId,
+          TARGETING::Target * i_target,
+          const char *i_eyeCatcher,
+          uint32_t i_index,
+          vpdType i_vpdType,
+          const IpVpdFacade::recordInfo i_fetchVpd[],
+          uint32_t i_num);
 
   /**
    * @brief HdatVpd object destructor

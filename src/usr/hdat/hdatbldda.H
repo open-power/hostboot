@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,12 @@
 #include "hdatvpd.H"
 #include <errl/errlentry.H>       // ErrlEntry class definition
 #include <hdat/hdat_reasoncodes.H>
+#include <../vpd/mvpd.H>
+#include <../vpd/ipvpd.H>
+#include <../vpd/pvpd.H>
+using namespace MVPD;
+using namespace PVPD;
+using namespace IPVPD;
 
 namespace HDAT
 {
@@ -142,7 +148,7 @@ errlHndl_t hdatBldSpecificVpd(hdatSpiraDataAreas i_dataArea,
  */
 errlHndl_t hdatProcessFru(const hdatMsAddr_t &i_msAddr,
                                 const hdatSpiraDataAreas i_dataArea,
-                                struct vpdData i_fetchVpd[],
+                                const IpVpdFacade::recordInfo i_fetchVpd[],
                                 const uint8_t i_size,
                                 vpdType i_vpdtype,
                                 uint32_t &o_count,

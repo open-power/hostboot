@@ -28,6 +28,8 @@
 #include <stdio.h>
 
 #define UINT16_IN_LITTLE_ENDIAN(x) (((x) >> 8) | ((x) << 8))
+#define HDAT_VPD_RECORD_START_TAG 0x84
+#define HDAT_VPD_RECORD_END_TAG 0x78
 
 using namespace TARGETING;
 namespace HDAT
@@ -497,6 +499,37 @@ errlHndl_t hdatGetAsciiKwd( TARGETING::Target * i_target,uint32_t &o_kwdSize,
 }//end hdatGetAsciiKwd
 
 /******************************************************************************/
+//hdatGetAsciiKwd
+/******************************************************************************/
+
+errlHndl_t hdatGetFullRecords( TARGETING::Target * i_target,uint32_t &o_kwdSize,
+           char* &o_kwd,vpdType i_vpdtype,const IpVpdFacade::recordInfo i_fetchVpd[],
+           uint32_t i_num, size_t theSize[])
+{
+    HDAT_ENTER();
+    errlHndl_t l_err = NULL;
+
+    switch (i_vpdtype)
+    {
+        case PROC:
+             l_err = hdatGetMvpdFullRecord(i_target,o_kwdSize,o_kwd,
+                                            i_fetchVpd,i_num,theSize);
+             HDAT_DBG("got back kwd size=%x",o_kwdSize);
+             break;
+        case BP:
+             l_err = hdatGetPvpdFullRecord(i_target,o_kwdSize,o_kwd,
+                                            i_fetchVpd,i_num,theSize);
+             HDAT_DBG("got back kwd size=%x",o_kwdSize);
+             break;
+        default:
+             HDAT_ERR("No appropriate vpd function to call.");
+             break;
+    }
+    HDAT_EXIT();
+    return l_err;
+}//end hdatGetAsciiKwd
+
+/******************************************************************************/
 //hdatGetAsciiKwdForPvpd
 /******************************************************************************/
 errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
@@ -648,6 +681,153 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
 
 }
 
+
+
+/******************************************************************************/
+//hdatGetPvpdFullRecord
+/******************************************************************************/
+errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
+           uint32_t &o_kwdSize,char* &o_kwd,
+           const IpVpdFacade::recordInfo i_fetchVpd[], size_t i_num, size_t theSize[])
+{
+
+    errlHndl_t l_err = NULL;
+    uint64_t fails = 0x0;
+    VPD::vpdRecord theRecord = 0x0;
+
+
+    o_kwd = NULL;
+    o_kwdSize = 0;
+    memset (theSize,0, sizeof(theSize));
+
+    do
+    {
+        assert(i_target != NULL , "Input target to collect the VPD is NULL");
+        uint8_t *theData = NULL;
+
+        const uint32_t numRecs = i_num;
+
+        for( uint32_t curRec = 0; curRec < numRecs ; curRec++ )
+        {
+            theRecord = i_fetchVpd[curRec].record;
+
+            l_err = deviceRead( i_target,
+                              NULL,
+                              theSize[curRec],
+                              DEVICE_PVPD_ADDRESS( theRecord,
+                                                   IPVPD::FULL_RECORD ) );
+            if( l_err )
+            {
+                fails++;
+                HDAT_DBG("hdatGetPvpdFullRecord::failure reading record size "
+                         "rec: 0x%04x", theRecord );
+                /*@
+                 * @errortype
+                 * @moduleid         HDAT::MOD_UTIL_PVPD_FULL_READ_FUNC
+                 * @reasoncode       HDAT::RC_PVPD_FAIL
+                 * @userdata1        pvpd record
+                 * @devdesc          PVPD read fail
+                 * @custdesc         Firmware encountered an internal error
+                 */
+                hdatBldErrLog(l_err,
+                    MOD_UTIL_PVPD_FULL_READ_FUNC,
+                    RC_PVPD_FAIL,
+                    theRecord,0,0,0,
+                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    HDAT_VERSION1,
+                    true);
+
+                continue;
+            }
+            HDAT_DBG("fetching record size PVPD, size initialised=%x ",theSize[curRec]);
+            o_kwdSize += theSize[curRec];
+        }
+
+        HDAT_DBG("hdatGetPvpdFullRecord:: allocating total Records size %d",
+                  o_kwdSize);
+        uint8_t l_startTag = HDAT_VPD_RECORD_START_TAG ;
+        uint8_t l_endTag = HDAT_VPD_RECORD_END_TAG ;
+        uint32_t l_RecTagSize = 2 * sizeof(uint8_t);  // Size of Tags for each record
+        uint32_t l_wholeTagSize = l_RecTagSize * numRecs;  // Size of tags for all records
+        o_kwd = new char[o_kwdSize + l_wholeTagSize ];
+
+        uint32_t loc = 0;
+        for( uint32_t curRec = 0; curRec < numRecs; curRec++ )
+        {
+            theRecord = i_fetchVpd[curRec].record;
+
+            //this condition is , if in the top loop there is a fail then
+            //theSize[curRec] will be 0.
+            if( theSize[curRec] == 0)
+            {
+                continue;
+            }
+            theData = new uint8_t [theSize[curRec]];
+
+            HDAT_DBG("hdatGetPvpdFullRecord: reading %dth record of size %d",
+                      curRec,theSize[curRec]);
+
+            l_err = deviceRead( i_target,
+                              theData,
+                              theSize[curRec],
+                              DEVICE_PVPD_ADDRESS( theRecord,
+                                                   IPVPD::FULL_RECORD) );
+
+
+            if ( l_err )
+            {
+                fails++;
+                HDAT_DBG("hdatGetPvpdFullRecord: Failure on Record: "
+                "0x%04x, of size: 0x%04x - test %d",
+                theRecord,theSize[curRec],curRec);
+                /*@
+                 * @errortype
+                 * @moduleid         HDAT::MOD_UTIL_PVPD_FULL_READ_FUNC
+                 * @reasoncode       HDAT::RC_PVPD_READ_FAIL
+                 * @userdata1        pvpd record
+                 * @devdesc          PVPD read fail
+                 * @custdesc         Firmware encountered an internal error
+                 */
+                hdatBldErrLog(l_err,
+                    MOD_UTIL_PVPD_FULL_READ_FUNC,
+                    RC_PVPD_READ_FAIL,
+                    theRecord,0,0,0,
+                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    HDAT_VERSION1,
+                    true);
+
+                if ( NULL != theData )
+                {
+                    delete[]  theData;
+                    theData = NULL;
+                }
+                continue;
+            }
+            if ( NULL != theData )
+            {
+                memcpy(reinterpret_cast<void *>(o_kwd + loc), &l_startTag, sizeof(uint8_t));
+                loc += sizeof(uint8_t);
+                memcpy(reinterpret_cast<void *>(o_kwd + loc),theData,
+                       theSize[curRec]);
+                loc += theSize[curRec];
+                memcpy(reinterpret_cast<void *>(o_kwd + loc), &l_endTag, sizeof(uint8_t));
+                loc += sizeof(uint8_t);
+
+                o_kwdSize += l_RecTagSize ; // Add each rec's tag size as well to final size
+                delete[] theData;
+                theData = NULL;
+                HDAT_DBG("hdatGetPvpdFullRecord: copied to main array %d kwd",
+                          curRec);
+            }
+        }
+    }while(0);
+
+    HDAT_DBG("hdatGetPvpdFullRecord: returning keyword size %d and data %s",
+              o_kwdSize,o_kwd);
+    return l_err;
+
+}
+
 /******************************************************************************/
 // hdatGetAsciiKwdForMvpd
 /******************************************************************************/
@@ -784,6 +964,145 @@ errlHndl_t hdatGetAsciiKwdForMvpd(TARGETING::Target * i_target,
     return err;
 }//end hdatGetAsciiKwdForMvpd
 
+
+
+
+/******************************************************************************/
+// hdatGetMvpdFullRecord
+/******************************************************************************/
+
+errlHndl_t hdatGetMvpdFullRecord(TARGETING::Target * i_target,
+           uint32_t &o_kwdSize,char* &o_kwd,
+           const IpVpdFacade::recordInfo i_fetchVpd[], uint32_t i_num,size_t theSize[])
+{
+    HDAT_ENTER();
+    errlHndl_t err = NULL;
+    uint64_t fails = 0x0;
+    uint64_t theRecord = 0x0;
+
+    o_kwd = NULL;
+    o_kwdSize = 0;
+
+
+    do
+    {
+        if(i_target == NULL)
+        {
+            HDAT_ERR("no functional Targets found");
+            break;
+        }
+
+        uint8_t *theData = NULL;
+
+
+        for( uint32_t curRec = 0; curRec < i_num; curRec++ )
+        {
+            theRecord = (uint64_t)i_fetchVpd[curRec].record;
+
+            HDAT_DBG("fetching proc Record size MVPD, size initialised=%x",
+                      theSize[curRec]);
+            err = deviceRead( i_target,
+                              NULL,
+                              theSize[curRec],
+                              DEVICE_MVPD_ADDRESS( theRecord,
+                                                   MVPD::FULL_RECORD ) );
+            HDAT_DBG("fetched proc Record size MVPD, size=%x",theSize[curRec]);
+
+            if( err )
+            {
+                fails++;
+                HDAT_DBG("failure reading Record size "
+                         "rec: 0x%04x",theRecord);
+                /*@
+                 * @errortype
+                 * @moduleid         HDAT::MOD_UTIL_MVPD
+                 * @reasoncode       HDAT::RC_DEV_READ_FAIL
+                 * @devdesc          Device read failed
+                 * @custdesc         Firmware encountered an internal error
+                 */
+                hdatBldErrLog(err,
+                    MOD_UTIL_MVPD,
+                    RC_DEV_READ_FAIL,
+                    theRecord,0,0,0,
+                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    HDAT_VERSION1,
+                    true);
+                continue;
+            }
+            o_kwdSize += theSize[curRec];
+        }
+
+        HDAT_DBG("allocating total Records size %d",
+                  o_kwdSize);
+
+        uint8_t l_startTag = 0x84;
+        uint8_t l_endTag = 0x78;
+        uint32_t l_RecTagSize = 2 * sizeof(uint8_t);
+        uint32_t l_wholeTagSize = l_RecTagSize * i_num;
+        o_kwd = new char[o_kwdSize + l_wholeTagSize ];
+
+        uint32_t loc = 0;
+        for( uint32_t curRec = 0; curRec < i_num; curRec++ )
+        {
+            theRecord = (uint64_t)i_fetchVpd[curRec].record;
+
+            theData = new uint8_t [theSize[curRec]];
+
+            HDAT_DBG("reading %dth Record of size %d",
+                      curRec,theSize[curRec]);
+
+            err = deviceRead( i_target,
+                              theData,
+                              theSize[curRec],
+                              DEVICE_MVPD_ADDRESS( theRecord,
+                                                   MVPD::FULL_RECORD ) );
+
+            HDAT_DBG("read PROC data %s",theData);
+
+            if ( err )
+            {
+                fails++;
+                HDAT_DBG("hdatGetMvpdFullRecord: Failure on Record: "
+                "0x%04x,  of size: 0x%04x - test %d",
+                theRecord,theSize,curRec);
+
+                delete err;
+
+                if ( NULL != theData )
+                {
+                   // free( theData );
+                    delete[] theData;
+                    theData = NULL;
+                }
+                continue;
+            }
+            if ( NULL != theData )
+            {
+                memcpy(reinterpret_cast<void *>(o_kwd + loc), &l_startTag, sizeof(uint8_t));
+                loc += sizeof(uint8_t);
+                memcpy(reinterpret_cast<void *>(o_kwd + loc),theData,
+                       theSize[curRec]);
+                loc += theSize[curRec];
+                memcpy(reinterpret_cast<void *>(o_kwd + loc), &l_endTag, sizeof(uint8_t));
+                loc += sizeof(uint8_t);
+
+                o_kwdSize += l_RecTagSize ; // Add each rec's tag size as well to final size
+
+                delete[] theData;
+                theData = NULL;
+                HDAT_DBG("copied to main array %d kwd",
+                          curRec);
+            }
+        }
+
+    }while(0);
+
+    HDAT_DBG("returning keyword size %d and data %s",
+              o_kwdSize,o_kwd);
+
+    HDAT_EXIT();
+    return err;
+}//end hdatGetMvpdFullRecord
 
 /******************************************************************************/
 // hdatGetAsciiKwdForCvpd

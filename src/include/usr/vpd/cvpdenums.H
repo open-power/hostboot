@@ -131,7 +131,6 @@ namespace CVPD
         pd6         = 0x44, //#6
         pd8         = 0x45, //#8
         pdY         = 0x46, //#Y
-        RT          = 0x47, 
 
         // Last Keyword
         CVPD_LAST_KEYWORD,

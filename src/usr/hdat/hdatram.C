@@ -49,7 +49,6 @@ uint32_t HdatRam::cv_actualCnt;
 
 vpdData cvpdData[] =
 {
-    { CVPD::VINI, CVPD::RT },
     { CVPD::VINI, CVPD::DR },
     { CVPD::VINI, CVPD::FN },
     { CVPD::VINI, CVPD::PN },
