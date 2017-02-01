@@ -107,6 +107,12 @@
        <id>ATTR_CME_INSTRUCTION_TRACE_ENABLE</id>
        <default>0x0</default>
      </attribute>
+      <attribute>
+       <id>ATTR_POUND_W_STATIC_DATA_ENABLE</id>
+       <!-- this setting enables to use #W static data-->
+       <default>0x0</default>
+     </attribute>
+
      <attribute>
          <id>ATTR_IO_OBUS_DCCAL_FLAGS</id>
          <default>0x0</default>

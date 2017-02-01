@@ -163,7 +163,37 @@ typedef struct ResonantClockControl
 
 } ResonantClockingSetup;
 
+// #W data points (version 2)
+typedef struct
+{
+    uint16_t ivdd_tdp_ac_current_10ma;
+    uint16_t ivdd_tdp_dc_current_10ma;
+    uint8_t  vdm_overvold_small_thresholds;
+    uint8_t  vdm_large_extreme_thresholds;
+    uint8_t  vdm_small_frequency_drop;
+    uint8_t  vdm_large_frequency_drop;
+    uint16_t vdm_spare;
+} poundw_entry_t;
 
+typedef struct
+{
+    uint16_t r_package_common;
+    uint16_t r_quad;
+    uint16_t r_core;
+    uint16_t r_quad_header;
+    uint16_t r_core_header;
+} resistance_entry_t;
+
+typedef struct
+{
+    poundw_entry_t poundw_nominal;
+    poundw_entry_t poundw_powersave;
+    poundw_entry_t poundw_turbo;
+    poundw_entry_t poundw_ultraturbo;
+    resistance_entry_t resistance_data;
+    uint64_t reserved1;
+    uint16_t reserved2;
+} PoundW_data;
 /// VDM/Droop Parameter Block
 ///
 typedef struct

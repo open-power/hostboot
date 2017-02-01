@@ -32910,6 +32910,27 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+   <id>POUND_W_STATIC_DATA_ENABLE</id>
+   <description>
+     Enables pstate parameter block code to use the static #W data
+     Consumer: p9_pstate_parameter_block.C ->
+
+     Platform default:  OFF=0
+   </description>
+   <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+   </simpleType>
+   <persistency>non-volatile</persistency>
+   <readable/>
+   <hwpfToHbAttrMap>
+      <id>ATTR_POUND_W_STATIC_DATA_ENABLE</id>
+      <macro>DIRECT</macro>
+   </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>PGPE_HCODE_FUNCTION_ENABLE</id>
     <description>
         Enables the PGPE Hcode to physically perform frequency and voltage

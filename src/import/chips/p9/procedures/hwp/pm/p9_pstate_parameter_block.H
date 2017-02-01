@@ -132,6 +132,7 @@ typedef struct
 #define PDV_BUFFER_SIZE    51
 #define PDV_BUFFER_ALLOC   512
 
+#define POUND_W_VERSION_2_BUCKET_SIZE 60
 //#define PDM_BUFFER_SIZE    105
 #define PDM_BUFFER_SIZE    257      // Value is for version 3 @ 256 + 1 for version number
 #define PDM_BUFFER_ALLOC   513      // Value is for version 2 @ 512 + 1 for version number
@@ -280,7 +281,8 @@ fapi2::ReturnCode
 proc_get_mvpd_data ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                      uint32_t o_attr_mvpd_data[PV_D][PV_W],
                      uint32_t* o_valid_pdv_points,
-                     uint8_t* o_present_chiplets );
+                     uint8_t* o_present_chiplets,
+                     uint8_t& o_poundv_bucketId );
 
 /// -------------------------------------------------------------------
 /// @brief Perform data validity check on #V data
@@ -309,7 +311,18 @@ proc_chk_valid_poundv ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
 fapi2::ReturnCode
 proc_get_mvpd_iddq ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                      IddqTable* io_iddqt);
-
+/// ----------------------------------------------------------------
+/// @brief Get #W data and put into array
+/// @param[in]    i_target          => Chip Target
+/// @param[in]    i_poundv_bucketId => Pound V bucket id
+/// @param[out]   o_vdmpb           => Vdmparamblock data
+/// @return   FAPI2::SUCCESS
+/// ----------------------------------------------------------------
+fapi2::ReturnCode
+proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                     uint8_t       i_poundv_bucketId,
+                     VDMParmBlock* o_vdmpb
+                    );
 /// -----------------------------------------------------------------------
 /// @brief Get needed attributes
 /// @param[in]    i_target          => Chip Target
