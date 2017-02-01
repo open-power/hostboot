@@ -175,6 +175,63 @@ size_t get_dimm_from_rank(const uint64_t i_rank)
 }
 
 ///
+/// @brief Return the DIMM target which posesses this rank on a given port
+/// @param[in] i_target the MCA port target
+/// @param[in] i_rank the rank number
+/// @param[out] o_dimm the DIMM target
+/// @return FAPI2_RC_SUCCESS iff all is ok, FAPI2_RC_INVALID_PARAMETER otherwise
+///
+template<>
+fapi2::ReturnCode get_dimm_target_from_rank(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rank,
+        fapi2::Target<TARGET_TYPE_DIMM>& o_dimm)
+{
+    const size_t l_dimm_idx = get_dimm_from_rank(i_rank);
+    const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(i_target);
+    bool l_got_one = false;
+
+    // Make sure we get a valid DIMM index. If not, this is a programming error.
+    FAPI_ASSERT( (l_dimm_idx < l_dimms.size()),
+                 fapi2::MSS_BAD_DIMM_INDEX_FOR_GIVEN_RANK()
+                 .set_RANK(i_rank)
+                 .set_DIMM_INDEX(l_dimm_idx)
+                 .set_TARGET(i_target),
+                 "Invalid DIMM index (%d) found for provided rank (%d) in get_dimm_target_from_rank: %s",
+                 l_dimm_idx,
+                 i_rank,
+                 mss::c_str(i_target));
+
+    for (const auto& l_dimm : l_dimms)
+    {
+        if (mss::index(l_dimm) == l_dimm_idx)
+        {
+            FAPI_DBG("Found DIMM target for rank %d: %s", i_rank, mss::c_str(l_dimm));
+            o_dimm = l_dimm;
+            l_got_one = true;
+        }
+    }
+
+    if (l_got_one)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Assert if we don't have a DIMM configured that matches the DIMM index (this shouldn't happen)
+    FAPI_ASSERT( false,
+                 fapi2::MSS_NO_DIMM_FOR_GIVEN_DIMM_INDEX()
+                 .set_RANK(i_rank)
+                 .set_DIMM_INDEX(l_dimm_idx)
+                 .set_TARGET(i_target),
+                 "Couldn't find a DIMM to match given rank (%d) and DIMM position (%d): %s",
+                 i_rank,
+                 l_dimm_idx,
+                 mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Return a vector of rank numbers which represent the primary rank pairs for this port
 /// @tparam T the target type
 /// @param[in] i_target  TARGET_TYPE_MCA
@@ -443,8 +500,9 @@ fapi2::ReturnCode get_rank_pairs(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
         if (*rp_iter != NO_RANK)
         {
             o_pairs.push_back(l_index);
-            l_index += 1;
         }
+
+        l_index += 1;
     }
 
 fapi_try_exit:

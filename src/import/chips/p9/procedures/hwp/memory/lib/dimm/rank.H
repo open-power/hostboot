@@ -616,6 +616,20 @@ bool is_rank_on_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, con
 size_t get_dimm_from_rank(const uint64_t i_rank);
 
 ///
+/// @brief Return the DIMM target which posesses this rank on a given port
+/// @tparam T the fapi2::TargetType of the port
+/// @tparam D the fapi2::TargetType of the DIMM
+/// @param[in] i_target the port target
+/// @param[in] i_rank the rank number
+/// @param[out] o_dimm the DIMM target
+/// @return FAPI2_RC_SUCCESS iff all is ok, FAPI2_RC_INVALID_PARAMETER otherwise
+///
+template< fapi2::TargetType T, fapi2::TargetType D >
+fapi2::ReturnCode get_dimm_target_from_rank(const fapi2::Target<T>& i_target,
+        const uint64_t i_rank,
+        fapi2::Target<D>& o_dimm);
+
+///
 /// @brief Given a target, get the rank pair assignments, based on DIMMs
 /// @tparam T the fapi2::TargetType
 /// @param[in] i_target the target (MCA or MBA?)

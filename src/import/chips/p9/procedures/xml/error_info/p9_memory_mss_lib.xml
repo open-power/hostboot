@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -406,6 +406,34 @@
       <target>DIMM_IN_ERROR</target>
       <priority>HIGH</priority>
     </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_BAD_DIMM_INDEX_FOR_GIVEN_RANK</rc>
+    <description>Indicates a fail when attempting to get a DIMM index for a given rank</description>
+    <ffdc>RANK</ffdc>
+    <ffdc>DIMM_INDEX</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_NO_DIMM_FOR_GIVEN_DIMM_INDEX</rc>
+    <description>Indicates a fail when attempting to get a DIMM target for a given DIMM index</description>
+    <ffdc>RANK</ffdc>
+    <ffdc>DIMM_INDEX</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
   </hwpError>
 
 </hwpErrors>
