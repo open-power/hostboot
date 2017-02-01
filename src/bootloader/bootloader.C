@@ -30,6 +30,7 @@
 #include <bootloader/bootloader_trace.H>
 #include <bootloader/hbblreasoncodes.H>
 #include <bootloader/bl_pnorAccess.H>
+#include <bootloader/bootloaderif.H>
 
 #include <lpc_const.H>
 #include <pnor_utils.H>
@@ -58,15 +59,71 @@ namespace Bootloader{
      */
     uint8_t *g_blScratchSpace = NULL;
 
+    // Global Object that will be stored where the SBE HB structure indicates
+    BlToHbData g_blToHbData;
+
+    // Global bool indicating if the secureROM is valid. Toggles verification.
+    bool g_secureRomValid = false;
+
     /**
-     * @brief  Retrieve the internal hardware hash key from secure ROM object.
-     * @param[out] o_hash  Reference to the sha2_hash_t array to copy the
-     *                     hash to.
+     * @brief Set Secureboot Config Data structure so it is accessible via
+     *        Hostboot code
+     *
+     * @param[in] i_hbbSrc  Void pointer to effective address of HBB image
+     *                      inlcuding the header. Must not be NULL
+     *
+     * @return N/A
      */
-    void setHwKeyHash(sha2_hash_t o_hash)
+    void setSecureData(const void * i_pHbbSrc)
     {
-        memcpy(o_hash, reinterpret_cast<void *>(HW_KEYS_HASH_ADDR),
-               sizeof(sha2_hash_t));
+        // Find secure ROM addr
+        // Get starting address of ROM size and code which is the next 8 byte
+        // aligned address after the bootloader end.
+        // [hbbl][pad:8:if-applicable][securerom-size:8][securerom]
+        const void * l_pBootloaderEnd = &bootloader_end_address;
+        uint64_t l_bootloaderSize = 0;
+        memcpy (&l_bootloaderSize, l_pBootloaderEnd, sizeof(l_bootloaderSize));
+        const uint8_t* l_pRomStart = reinterpret_cast<uint8_t *>(
+                                        getHRMOR() + ALIGN_8(l_bootloaderSize));
+
+        // Create BlToHbData
+        // Set Rom Size
+        memcpy (&g_blToHbData.secureRomSize,
+                l_pRomStart,
+                sizeof(g_blToHbData.secureRomSize));
+        l_pRomStart += sizeof(g_blToHbData.secureRomSize);
+
+        // Get Secure ROM info
+        const auto l_pSecRomInfo = reinterpret_cast<const SecureRomInfo*>(
+                                                                   l_pRomStart);
+
+        // Only set rest of BlToHbData if SecureROM is valid
+        if ( secureRomInfoValid(l_pSecRomInfo) )
+        {
+            // Store valid check local to bootloader, as another validation
+            // is required in code outside the bootloader.
+            g_secureRomValid = true;
+
+            g_blToHbData.eyeCatch = BLTOHB_EYECATCHER;
+            g_blToHbData.version = BLTOHB_INIT;
+            g_blToHbData.branchtableOffset = l_pSecRomInfo->branchtableOffset;
+            g_blToHbData.secureRom = l_pRomStart;
+
+            // Set HW key hash pointer (20K - 64 bytes) and size
+            g_blToHbData.hwKeysHash = reinterpret_cast<const void *>
+                                                            (HW_KEYS_HASH_ADDR);
+            g_blToHbData.hwKeysHashSize = SHA512_DIGEST_LENGTH;
+
+            // Set HBB header and size
+            g_blToHbData.hbbHeader = i_pHbbSrc;
+            g_blToHbData.hbbHeaderSize = PAGE_SIZE;
+        }
+
+        // Place structure into proper location for HB to find
+        memcpy(reinterpret_cast<void *>(BLTOHB_COMM_DATA_ADDR |
+                                        IGNORE_HRMOR_MASK),
+               &g_blToHbData,
+               sizeof(BlToHbData));
     }
 
     /**
@@ -92,38 +149,16 @@ namespace Bootloader{
      *
      * @return N/A
      */
-    void verifyContainer(const void * i_pContainer,
-                         const sha2_hash_t* i_hwKeyHash)
+    void verifyContainer(const void * i_pContainer)
     {
 #ifdef CONFIG_SECUREBOOT
         BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_START);
 
         uint64_t l_rc = 0;
 
-        // @TODO RTC:166848 Move find/get secure rom logic out of ROM verify
-        // Find secure ROM addr
-        // Get starting address of ROM size and code which is the next 8 byte
-        // aligned address after the bootloader end.
-        // [hbbl][pad:8:if-applicable][securerom-size:8][securerom]
-        const void* l_pBootloaderEnd = &bootloader_end_address;
-        uint64_t l_bootloaderSize = 0;
-        memcpy (&l_bootloaderSize, l_pBootloaderEnd, sizeof(l_bootloaderSize));
-        uint64_t l_rom_startAddr = getHRMOR() + ALIGN_8(l_bootloaderSize);
-        // Get Rom Size
-        // @TODO RTC:166848 Store size so hb can use
-        uint64_t l_secureRomSize = 0;
-        memcpy (&l_secureRomSize, reinterpret_cast<void*>(l_rom_startAddr),
-                sizeof(l_secureRomSize));
-        l_rom_startAddr += sizeof(l_secureRomSize);
-
-        // Beginning of SecureROM has a info structure
-        // Get Secure ROM info
-        const auto l_pSecRomInfo = reinterpret_cast<SecureRomInfo*>(
-                                                               l_rom_startAddr);
-
         // # @TODO RTC:170136 terminate in this case
         // Ensure SecureRom is actually present
-        if ( !secureRomInfoValid(l_pSecRomInfo) )
+        if ( !g_secureRomValid )
         {
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_NO_EYECATCH);
         }
@@ -136,9 +171,10 @@ namespace Bootloader{
         else
         {
             // Set startAddr to ROM_verify() function at an offset of Secure ROM
-            uint64_t l_rom_verify_startAddr = l_rom_startAddr
-                                              + l_pSecRomInfo->branchtableOffset
-                                              + ROM_VERIFY_FUNCTION_OFFSET;
+            uint64_t l_rom_verify_startAddr =
+                    reinterpret_cast<const uint64_t>(g_blToHbData.secureRom)
+                    + g_blToHbData.branchtableOffset
+                    + ROM_VERIFY_FUNCTION_OFFSET;
 
             // Declare local input struct
             ROM_hw_params l_hw_parms;
@@ -147,9 +183,9 @@ namespace Bootloader{
             // struct elements my_ecid, entry_point and log
             memset(&l_hw_parms, 0, sizeof(ROM_hw_params));
 
-
             // Use current hw hash key
-            memcpy (&l_hw_parms.hw_key_hash, i_hwKeyHash, sizeof(sha2_hash_t));
+            memcpy (&l_hw_parms.hw_key_hash, g_blToHbData.hwKeysHash,
+                    sizeof(sha2_hash_t));
 
             const auto l_container = reinterpret_cast<const ROM_container_raw*>
                                                                  (i_pContainer);
@@ -197,7 +233,6 @@ namespace Bootloader{
         bootloader_trace_index = 0;
         BOOTLOADER_TRACE(BTLDR_TRC_MAIN_START);
 
-        // Set variables needed for getting location of HB base code
         // @TODO RTC:138268 Support multiple sides of PNOR in bootloader
 
         //pnorEnd is the end of flash, which is base of lpc, plus
@@ -270,12 +305,11 @@ namespace Bootloader{
                    reinterpret_cast<uint64_t*>(HBB_RUNNING_ADDR |
                                                IGNORE_HRMOR_MASK);
 
-                // Get HW keys hash
-                sha2_hash_t l_hwKeyHash{0};
-                setHwKeyHash(l_hwKeyHash);
+                // Get Secure Data from SBE HBBL communication area
+                setSecureData(l_src_addr);
 
                 // ROM verification of HBB image
-                verifyContainer(l_src_addr, &l_hwKeyHash);
+                verifyContainer(l_src_addr);
 
                 // Increment past secure header
                 if (isSecureSection(PNOR::HB_BASE_CODE))
