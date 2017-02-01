@@ -988,15 +988,17 @@ namespace HBPM
             l_err = PNOR::getSectionInfo(PNOR::RINGOVD, l_pnorRingOvd);
             if(l_err)
             {
+                delete l_err;
+                l_err = NULL;
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"getRingOvd():Error trying to read RINGOVD "
-                           "from PNOR!");
+                           INFO_MRK"getRingOvd(): RINGOVD section not found, "
+                           "it is optional");
                 break;
             }
             if(l_pnorRingOvd.size == 0)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           INFO_MRK"getRingOvd(): No RINGOVD section in PNOR");
+                           INFO_MRK"getRingOvd(): RINGOVD section is empty in PNOR");
                 break;
             }
 
