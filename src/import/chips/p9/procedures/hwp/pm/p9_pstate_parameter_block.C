@@ -45,6 +45,19 @@
 #include <fapi2.H>
 #include <p9_pstate_parameter_block.H>
 #include "p9_pm_get_poundv_bucket.H"
+#include "p9_pm_get_poundw_bucket.H"
+
+fapi2::vdmData_t g_vpdData = {1,
+                              2,
+{
+    0x29, 0x0C, 0x05, 0xC3, 0x61, 0x36, 0x1, 0x3, 0x0, 0x0,   //Nominal
+    0x28, 0xa8, 0x05, 0x5f, 0x21, 0x36, 0x1, 0x3, 0x0, 0x0,   //PowerSave
+    0x29, 0x70, 0x06, 0x27, 0x71, 0x36, 0x1, 0x3, 0x0, 0x0,   //Turbo
+    0x29, 0xD4, 0x06, 0x8b, 0x51, 0x36, 0x1, 0x3, 0x0, 0x0,   //UltraTurbo
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0, 0x0, 0x0, 0x0,   //Resistance
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0, 0x0, 0x0, 0x0    //Spare
+}
+                             };
 
 // START OF PSTATE PARAMETER BLOCK function
 
@@ -133,11 +146,13 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // get #V data
         // ----------------
         FAPI_IMP("Getting #V Data");
+        uint8_t l_poundv_bucketId = 0;
 
         // clear MVPD array
         memset(attr_mvpd_voltage_control, 0, sizeof(attr_mvpd_voltage_control));
 
-        FAPI_TRY(proc_get_mvpd_data( i_target, attr_mvpd_voltage_control, &valid_pdv_points, &present_chiplets),
+        FAPI_TRY(proc_get_mvpd_data( i_target, attr_mvpd_voltage_control, &valid_pdv_points, &present_chiplets,
+                                     l_poundv_bucketId),
                  "Get MVPD #V data failed");
 
         if (!present_chiplets)
@@ -186,6 +201,9 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         FAPI_INF("Getting VDM Parameters Data");
         FAPI_TRY(proc_get_vdm_parms(i_target, &l_vdmpb));
 
+
+        FAPI_INF("Getting VDM points (#W) Data");
+        FAPI_TRY(proc_get_mvpd_poundw(i_target, l_poundv_bucketId, &l_vdmpb));
         // ----------------
         // get Resonant clocking attributes
         // ----------------
@@ -267,8 +285,6 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // safe_frequency_khz
         l_globalppb.safe_frequency_khz = revle32(attr.attr_pm_safe_frequency_mhz / 1000);
 
-        // nest_frequency_khz
-        l_globalppb.nest_frequency_mhz = revle32(attr.attr_nest_freq_mhz);
 
         // @todo RTC 161279
         l_globalppb.ext_vrm_transition_start_ns = revle32(8000);
@@ -343,10 +359,10 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         l_occppb.wof.tdp_rdp_factor = revle32(attr.attr_tdp_rdp_current_factor);
 
         // frequency_min_khz - Value from Power save operating point after biases
-        l_occppb.frequency_min_khz = revle32(attr_mvpd_voltage_control[POWERSAVE][0] * 1000);
+        l_occppb.frequency_min_khz = revle32(attr_mvpd_voltage_control[VPD_PV_POWERSAVE][0] * 1000);
 
         // frequency_max_khz - Value from Ultra Turbo operating point after biases
-        l_occppb.frequency_max_khz = revle32(attr_mvpd_voltage_control[ULTRA][0] * 1000);
+        l_occppb.frequency_max_khz = revle32(attr_mvpd_voltage_control[VPD_PV_ULTRA][0] * 1000);
 
         // frequency_step_khz
         l_occppb.frequency_step_khz = revle32(l_frequency_step_khz);
@@ -502,7 +518,8 @@ fapi2::ReturnCode
 proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                    uint32_t      o_attr_mvpd_data[PV_D][PV_W],
                    uint32_t*     o_valid_pdv_points,
-                   uint8_t*      o_present_chiplets
+                   uint8_t*      o_present_chiplets,
+                   uint8_t&      o_bucketId
                   )
 {
 
@@ -596,6 +613,8 @@ proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             // on first chiplet put each bucket's data into attr_mvpd_voltage_control
             if (first_chplt)
             {
+                o_bucketId = bucket_id;
+
                 for (i = 0; i <= 4; i++)
                 {
                     for (ii = 0; ii <= 4; ii++)
@@ -638,6 +657,7 @@ proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                     o_attr_mvpd_data[i][2] = chiplet_mvpd_data[i][2];
                     o_attr_mvpd_data[i][3] = chiplet_mvpd_data[i][3];
                     o_attr_mvpd_data[i][4] = chiplet_mvpd_data[i][4];
+                    o_bucketId = bucket_id;
                 }
             }
         } // end for loop
@@ -1034,57 +1054,67 @@ proc_get_extint_bias( uint32_t io_attr_mvpd_data[PV_D][PV_W],
 
 
     // Nominal frequency operating point
-    io_attr_mvpd_data[NOMINAL][0] = (uint32_t) ((( (double)io_attr_mvpd_data[NOMINAL][0]) * freq_bias_nominal));
-    io_attr_mvpd_data[NOMINAL][1] = (uint32_t) ((( (double)io_attr_mvpd_data[NOMINAL][1]) * voltage_ext_vdd_bias_nominal));
-    io_attr_mvpd_data[NOMINAL][3] = (uint32_t) ((( (double)io_attr_mvpd_data[NOMINAL][3]) * voltage_ext_vcs_bias));
+    io_attr_mvpd_data[VPD_PV_NOMINAL][0] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_NOMINAL][0]) *
+                                           freq_bias_nominal));
+    io_attr_mvpd_data[VPD_PV_NOMINAL][1] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_NOMINAL][1]) *
+                                           voltage_ext_vdd_bias_nominal));
+    io_attr_mvpd_data[VPD_PV_NOMINAL][3] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_NOMINAL][3]) *
+                                           voltage_ext_vcs_bias));
 
     // Power Save frequency operating point
-    io_attr_mvpd_data[POWERSAVE][0] = (uint32_t) ((( (double)io_attr_mvpd_data[POWERSAVE][0]) * freq_bias_powersave));
-    io_attr_mvpd_data[POWERSAVE][1] = (uint32_t) ((( (double)io_attr_mvpd_data[POWERSAVE][1]) *
-                                      voltage_ext_vdd_bias_powersave));
-    io_attr_mvpd_data[POWERSAVE][3] = (uint32_t) ((( (double)io_attr_mvpd_data[POWERSAVE][3]) * voltage_ext_vcs_bias));
+    io_attr_mvpd_data[VPD_PV_POWERSAVE][0] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_POWERSAVE][0]) *
+            freq_bias_powersave));
+    io_attr_mvpd_data[VPD_PV_POWERSAVE][1] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_POWERSAVE][1]) *
+            voltage_ext_vdd_bias_powersave));
+    io_attr_mvpd_data[VPD_PV_POWERSAVE][3] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_POWERSAVE][3]) *
+            voltage_ext_vcs_bias));
 
     // Turbo frequency operating point
-    io_attr_mvpd_data[TURBO][0] = (uint32_t) ((( (double)io_attr_mvpd_data[TURBO][0]) * freq_bias_turbo));
-    io_attr_mvpd_data[TURBO][1] = (uint32_t) ((( (double)io_attr_mvpd_data[TURBO][1]) * voltage_ext_vdd_bias_turbo));
-    io_attr_mvpd_data[TURBO][3] = (uint32_t) ((( (double)io_attr_mvpd_data[TURBO][3]) * voltage_ext_vcs_bias));
+    io_attr_mvpd_data[VPD_PV_TURBO][0] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_TURBO][0]) * freq_bias_turbo));
+    io_attr_mvpd_data[VPD_PV_TURBO][1] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_TURBO][1]) *
+                                         voltage_ext_vdd_bias_turbo));
+    io_attr_mvpd_data[VPD_PV_TURBO][3] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_TURBO][3]) *
+                                         voltage_ext_vcs_bias));
 
     // Ultraturbo frequency operating point
-    io_attr_mvpd_data[ULTRA][0] = (uint32_t) ((( (double)io_attr_mvpd_data[ULTRA][0]) * freq_bias_ultraturbo));
-    io_attr_mvpd_data[ULTRA][1] = (uint32_t) ((( (double)io_attr_mvpd_data[ULTRA][1]) * voltage_ext_vdd_bias_ultraturbo));
-    io_attr_mvpd_data[ULTRA][3] = (uint32_t) ((( (double)io_attr_mvpd_data[ULTRA][3]) * voltage_ext_vcs_bias));
+    io_attr_mvpd_data[VPD_PV_ULTRA][0] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_ULTRA][0]) *
+                                         freq_bias_ultraturbo));
+    io_attr_mvpd_data[VPD_PV_ULTRA][1] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_ULTRA][1]) *
+                                         voltage_ext_vdd_bias_ultraturbo));
+    io_attr_mvpd_data[VPD_PV_ULTRA][3] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_ULTRA][3]) *
+                                         voltage_ext_vcs_bias));
 
     // Power bus operating point
     io_attr_mvpd_data[4][1] = (uint32_t) ((( (double)io_attr_mvpd_data[4][1]) * voltage_ext_vdn_bias));
 
     //VPD Biases per operating point
     // Nominal
-    o_vpdbias[NOMINAL].vdd_ext_hp = i_attr->attr_voltage_ext_vdd_bias_nominal;
-    o_vpdbias[NOMINAL].vdd_int_hp = i_attr->attr_voltage_int_vdd_bias_nominal;
-    o_vpdbias[NOMINAL].vdn_ext_hp = i_attr->attr_voltage_ext_vdn_bias;
-    o_vpdbias[NOMINAL].vcs_ext_hp = i_attr->attr_voltage_ext_vcs_bias;
-    o_vpdbias[NOMINAL].frequency_hp = i_attr->attr_freq_bias_nominal;
+    o_vpdbias[VPD_PV_NOMINAL].vdd_ext_hp = i_attr->attr_voltage_ext_vdd_bias_nominal;
+    o_vpdbias[VPD_PV_NOMINAL].vdd_int_hp = i_attr->attr_voltage_int_vdd_bias_nominal;
+    o_vpdbias[VPD_PV_NOMINAL].vdn_ext_hp = i_attr->attr_voltage_ext_vdn_bias;
+    o_vpdbias[VPD_PV_NOMINAL].vcs_ext_hp = i_attr->attr_voltage_ext_vcs_bias;
+    o_vpdbias[VPD_PV_NOMINAL].frequency_hp = i_attr->attr_freq_bias_nominal;
 
     // PowerSave
-    o_vpdbias[POWERSAVE].vdd_ext_hp = i_attr->attr_voltage_ext_vdd_bias_powersave;
-    o_vpdbias[POWERSAVE].vdd_int_hp = i_attr->attr_voltage_int_vdd_bias_powersave;
-    o_vpdbias[POWERSAVE].vdn_ext_hp = i_attr->attr_voltage_ext_vdn_bias;
-    o_vpdbias[POWERSAVE].vcs_ext_hp = i_attr->attr_voltage_ext_vcs_bias;
-    o_vpdbias[POWERSAVE].frequency_hp = i_attr->attr_freq_bias_powersave;
+    o_vpdbias[VPD_PV_POWERSAVE].vdd_ext_hp = i_attr->attr_voltage_ext_vdd_bias_powersave;
+    o_vpdbias[VPD_PV_POWERSAVE].vdd_int_hp = i_attr->attr_voltage_int_vdd_bias_powersave;
+    o_vpdbias[VPD_PV_POWERSAVE].vdn_ext_hp = i_attr->attr_voltage_ext_vdn_bias;
+    o_vpdbias[VPD_PV_POWERSAVE].vcs_ext_hp = i_attr->attr_voltage_ext_vcs_bias;
+    o_vpdbias[VPD_PV_POWERSAVE].frequency_hp = i_attr->attr_freq_bias_powersave;
 
     // Turbo
-    o_vpdbias[TURBO].vdd_ext_hp = i_attr->attr_voltage_ext_vdd_bias_turbo;
-    o_vpdbias[TURBO].vdd_int_hp = i_attr->attr_voltage_int_vdd_bias_turbo;
-    o_vpdbias[TURBO].vdn_ext_hp = i_attr->attr_voltage_ext_vdn_bias;
-    o_vpdbias[TURBO].vcs_ext_hp = i_attr->attr_voltage_ext_vcs_bias;
-    o_vpdbias[TURBO].frequency_hp = i_attr->attr_freq_bias_turbo;
+    o_vpdbias[VPD_PV_TURBO].vdd_ext_hp = i_attr->attr_voltage_ext_vdd_bias_turbo;
+    o_vpdbias[VPD_PV_TURBO].vdd_int_hp = i_attr->attr_voltage_int_vdd_bias_turbo;
+    o_vpdbias[VPD_PV_TURBO].vdn_ext_hp = i_attr->attr_voltage_ext_vdn_bias;
+    o_vpdbias[VPD_PV_TURBO].vcs_ext_hp = i_attr->attr_voltage_ext_vcs_bias;
+    o_vpdbias[VPD_PV_TURBO].frequency_hp = i_attr->attr_freq_bias_turbo;
 
     // UltraTurbo
-    o_vpdbias[ULTRA].vdd_ext_hp = i_attr->attr_voltage_ext_vdd_bias_ultraturbo;
-    o_vpdbias[ULTRA].vdd_int_hp = i_attr->attr_voltage_int_vdd_bias_ultraturbo;
-    o_vpdbias[ULTRA].vdn_ext_hp = i_attr->attr_voltage_ext_vdn_bias;
-    o_vpdbias[ULTRA].vcs_ext_hp = i_attr->attr_voltage_ext_vcs_bias;
-    o_vpdbias[ULTRA].frequency_hp = i_attr->attr_freq_bias_ultraturbo;
+    o_vpdbias[VPD_PV_ULTRA].vdd_ext_hp = i_attr->attr_voltage_ext_vdd_bias_ultraturbo;
+    o_vpdbias[VPD_PV_ULTRA].vdd_int_hp = i_attr->attr_voltage_int_vdd_bias_ultraturbo;
+    o_vpdbias[VPD_PV_ULTRA].vdn_ext_hp = i_attr->attr_voltage_ext_vdn_bias;
+    o_vpdbias[VPD_PV_ULTRA].vcs_ext_hp = i_attr->attr_voltage_ext_vcs_bias;
+    o_vpdbias[VPD_PV_ULTRA].frequency_hp = i_attr->attr_freq_bias_ultraturbo;
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -1523,66 +1553,70 @@ void p9_pstate_compute_PsV_slopes(VpdOperatingPoint i_operating_points[][4],
         //RAW VPD PTS SLOPES
         //
         //convert to a fixed-point number
-        eVidFP[POWERSAVE] = i_operating_points[VPD_PT_SET_RAW][POWERSAVE].vdd_mv << EVID_SLOPE_FP_SHIFT;
-        eVidFP[NOMINAL] = i_operating_points[VPD_PT_SET_RAW][NOMINAL].vdd_mv << EVID_SLOPE_FP_SHIFT;
-        eVidFP[TURBO] = i_operating_points[VPD_PT_SET_RAW][TURBO].vdd_mv << EVID_SLOPE_FP_SHIFT;
-        eVidFP[ULTRA] = i_operating_points[VPD_PT_SET_RAW][ULTRA].vdd_mv << EVID_SLOPE_FP_SHIFT;
+        eVidFP[VPD_PV_POWERSAVE] = i_operating_points[VPD_PT_SET_RAW][VPD_PV_POWERSAVE].vdd_mv << EVID_SLOPE_FP_SHIFT;
+        eVidFP[VPD_PV_NOMINAL] = i_operating_points[VPD_PT_SET_RAW][VPD_PV_NOMINAL].vdd_mv << EVID_SLOPE_FP_SHIFT;
+        eVidFP[VPD_PV_TURBO] = i_operating_points[VPD_PT_SET_RAW][VPD_PV_TURBO].vdd_mv << EVID_SLOPE_FP_SHIFT;
+        eVidFP[VPD_PV_ULTRA] = i_operating_points[VPD_PT_SET_RAW][VPD_PV_ULTRA].vdd_mv << EVID_SLOPE_FP_SHIFT;
 
-        FAPI_INF("eVidFP[POWERSAVE] %u %04x", eVidFP[POWERSAVE], i_operating_points[VPD_PT_SET_RAW][POWERSAVE].vdd_mv);
-        FAPI_INF("eVidFP[NOMINAL] %u %04x", eVidFP[NOMINAL], i_operating_points[VPD_PT_SET_RAW][NOMINAL].vdd_mv);
-        FAPI_INF("eVidFP[TURBO] %u %04x", eVidFP[TURBO], i_operating_points[VPD_PT_SET_RAW][TURBO].vdd_mv);
-        FAPI_INF("eVidFP[ULTRA] %u %04x", eVidFP[ULTRA], i_operating_points[VPD_PT_SET_RAW][ULTRA].vdd_mv);
+        FAPI_INF("eVidFP[VPD_PV_POWERSAVE] %u %04x", eVidFP[VPD_PV_POWERSAVE],
+                 i_operating_points[VPD_PT_SET_RAW][VPD_PV_POWERSAVE].vdd_mv);
+        FAPI_INF("eVidFP[NOMINAL] %u %04x", eVidFP[VPD_PV_NOMINAL], i_operating_points[VPD_PT_SET_RAW][VPD_PV_NOMINAL].vdd_mv);
+        FAPI_INF("eVidFP[TURBO] %u %04x", eVidFP[VPD_PV_TURBO], i_operating_points[VPD_PT_SET_RAW][VPD_PV_TURBO].vdd_mv);
+        FAPI_INF("eVidFP[ULTRA] %u %04x", eVidFP[VPD_PV_ULTRA], i_operating_points[VPD_PT_SET_RAW][VPD_PV_ULTRA].vdd_mv);
 
         // ULTRA TURBO pstate check is not required..because it's pstate will be
         // 0
-        if (!(i_operating_points[VPD_PT_SET_RAW][POWERSAVE].pstate) ||
-            !(i_operating_points[VPD_PT_SET_RAW][NOMINAL].pstate) ||
-            !(i_operating_points[VPD_PT_SET_RAW][TURBO].pstate))
+        if (!(i_operating_points[VPD_PT_SET_RAW][VPD_PV_POWERSAVE].pstate) ||
+            !(i_operating_points[VPD_PT_SET_RAW][VPD_PV_NOMINAL].pstate) ||
+            !(i_operating_points[VPD_PT_SET_RAW][VPD_PV_TURBO].pstate))
         {
             FAPI_ERR("PSTATE value shouldn't be zero for VPD_PT_SET_RAW");
             break;
         }
 
         //Calculate slopes
-        tmp = (uint32_t)(eVidFP[NOMINAL] - eVidFP[POWERSAVE]) /
-              (uint32_t)(-i_operating_points[VPD_PT_SET_RAW][NOMINAL].pstate + i_operating_points[VPD_PT_SET_RAW][POWERSAVE].pstate);
+        tmp = (uint32_t)(eVidFP[VPD_PV_NOMINAL] - eVidFP[VPD_PV_POWERSAVE]) /
+              (uint32_t)(-i_operating_points[VPD_PT_SET_RAW][VPD_PV_NOMINAL].pstate +
+                         i_operating_points[VPD_PT_SET_RAW][VPD_PV_POWERSAVE].pstate);
         o_gppb->PsVSlopes[VPD_SLOPES_RAW][REGION_POWERSAVE_NOMINAL] = revle16((uint16_t)tmp);
         FAPI_INF("PsVSlopes[VPD_SLOPES_RAW][REGION_POWERSAVE_NOMINAL] %X tmp %X",
                  (revle16(o_gppb->PsVSlopes[VPD_SLOPES_RAW][REGION_POWERSAVE_NOMINAL])), (tmp));
 
-        tmp = (uint32_t)(eVidFP[TURBO] - eVidFP[NOMINAL]) /
-              (uint32_t)(-i_operating_points[VPD_PT_SET_RAW][TURBO].pstate + i_operating_points[VPD_PT_SET_RAW][NOMINAL].pstate);
+        tmp = (uint32_t)(eVidFP[VPD_PV_TURBO] - eVidFP[VPD_PV_NOMINAL]) /
+              (uint32_t)(-i_operating_points[VPD_PT_SET_RAW][VPD_PV_TURBO].pstate +
+                         i_operating_points[VPD_PT_SET_RAW][VPD_PV_NOMINAL].pstate);
         o_gppb->PsVSlopes[VPD_SLOPES_RAW][REGION_NOMINAL_TURBO] = revle16((uint16_t)tmp);
         FAPI_INF("PsVSlopes[VPD_SLOPES_RAW][REGION_NOMINAL_TURBO] %X tmp %X",
                  (revle16(o_gppb->PsVSlopes[VPD_SLOPES_RAW][REGION_NOMINAL_TURBO])), (tmp));
 
-        tmp = (uint32_t)(eVidFP[ULTRA] - eVidFP[TURBO]) /
-              (uint32_t)(-i_operating_points[VPD_PT_SET_RAW][ULTRA].pstate + i_operating_points[VPD_PT_SET_RAW][TURBO].pstate);
+        tmp = (uint32_t)(eVidFP[VPD_PV_ULTRA] - eVidFP[VPD_PV_TURBO]) /
+              (uint32_t)(-i_operating_points[VPD_PT_SET_RAW][VPD_PV_ULTRA].pstate +
+                         i_operating_points[VPD_PT_SET_RAW][VPD_PV_TURBO].pstate);
         o_gppb->PsVSlopes[VPD_SLOPES_RAW][REGION_TURBO_ULTRA] = revle16((uint16_t)tmp);
         FAPI_INF("PsVSlopes[VPD_SLOPES_RAW][REGION_TURBO_ULTRA] %X tmp %X",
                  (revle16(o_gppb->PsVSlopes[VPD_SLOPES_RAW][REGION_TURBO_ULTRA])), (tmp));
 
         //Calculate inverted slopes
-        tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_RAW][NOMINAL].pstate +
-                           i_operating_points[VPD_PT_SET_RAW][POWERSAVE].pstate) << EVID_SLOPE_FP_SHIFT)
-               / (uint32_t) (i_operating_points[VPD_PT_SET_RAW][NOMINAL].vdd_mv -
-                             i_operating_points[VPD_PT_SET_RAW][POWERSAVE].vdd_mv);
+        tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_RAW][VPD_PV_NOMINAL].pstate +
+                           i_operating_points[VPD_PT_SET_RAW][VPD_PV_POWERSAVE].pstate) << EVID_SLOPE_FP_SHIFT)
+               / (uint32_t) (i_operating_points[VPD_PT_SET_RAW][VPD_PV_NOMINAL].vdd_mv -
+                             i_operating_points[VPD_PT_SET_RAW][VPD_PV_POWERSAVE].vdd_mv);
         o_gppb->VPsSlopes[VPD_SLOPES_RAW][REGION_POWERSAVE_NOMINAL] = revle16((uint16_t)tmp);
         FAPI_INF("VPsSlopes[VPD_SLOPES_RAW][REGION_POWERSAVE_NOMINAL] %X tmp %X",
                  (revle16(o_gppb->VPsSlopes[VPD_SLOPES_RAW][REGION_POWERSAVE_NOMINAL])), (tmp));
 
-        tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_RAW][TURBO].pstate +
-                           i_operating_points[VPD_PT_SET_RAW][NOMINAL].pstate) << EVID_SLOPE_FP_SHIFT)
-               / (uint32_t) (i_operating_points[VPD_PT_SET_RAW][TURBO].vdd_mv -
-                             i_operating_points[VPD_PT_SET_RAW][NOMINAL].vdd_mv);
+        tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_RAW][VPD_PV_TURBO].pstate +
+                           i_operating_points[VPD_PT_SET_RAW][VPD_PV_NOMINAL].pstate) << EVID_SLOPE_FP_SHIFT)
+               / (uint32_t) (i_operating_points[VPD_PT_SET_RAW][VPD_PV_TURBO].vdd_mv -
+                             i_operating_points[VPD_PT_SET_RAW][VPD_PV_NOMINAL].vdd_mv);
         o_gppb->VPsSlopes[VPD_SLOPES_RAW][REGION_NOMINAL_TURBO] = revle16((uint16_t)tmp);
         FAPI_INF("VPsSlopes[VPD_SLOPES_RAW][REGION_NOMINAL_TURBO] %X tmp %X",
                  (revle16(o_gppb->VPsSlopes[VPD_SLOPES_RAW][REGION_NOMINAL_TURBO])), (tmp));
 
-        tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_RAW][ULTRA].pstate +
-                           i_operating_points[VPD_PT_SET_RAW][TURBO].pstate) << EVID_SLOPE_FP_SHIFT)
-               / (uint32_t) (i_operating_points[VPD_PT_SET_RAW][ULTRA].vdd_mv -
-                             i_operating_points[VPD_PT_SET_RAW][TURBO].vdd_mv);
+        tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_RAW][VPD_PV_ULTRA].pstate +
+                           i_operating_points[VPD_PT_SET_RAW][VPD_PV_TURBO].pstate) << EVID_SLOPE_FP_SHIFT)
+               / (uint32_t) (i_operating_points[VPD_PT_SET_RAW][VPD_PV_ULTRA].vdd_mv -
+                             i_operating_points[VPD_PT_SET_RAW][VPD_PV_TURBO].vdd_mv);
         o_gppb->VPsSlopes[VPD_SLOPES_RAW][REGION_TURBO_ULTRA] = revle16((uint16_t)tmp);
         FAPI_INF("VPsSlopes[VPD_SLOPES_RAW][REGION_TURBO_ULTRA] %X tmp %X",
                  (revle16(o_gppb->VPsSlopes[VPD_SLOPES_RAW][REGION_TURBO_ULTRA])), (tmp));
@@ -1591,21 +1625,21 @@ void p9_pstate_compute_PsV_slopes(VpdOperatingPoint i_operating_points[][4],
         //BIASED VPD PTS SLOPES
         //
         //convert to fixed-point number
-        eVidFP[POWERSAVE] = i_operating_points[VPD_PT_SET_BIASED][POWERSAVE].vdd_mv << EVID_SLOPE_FP_SHIFT;
-        eVidFP[NOMINAL] = i_operating_points[VPD_PT_SET_BIASED][NOMINAL].vdd_mv << EVID_SLOPE_FP_SHIFT;
-        eVidFP[TURBO] = i_operating_points[VPD_PT_SET_BIASED][TURBO].vdd_mv << EVID_SLOPE_FP_SHIFT;
-        eVidFP[ULTRA] = i_operating_points[VPD_PT_SET_BIASED][ULTRA].vdd_mv << EVID_SLOPE_FP_SHIFT;
+        eVidFP[VPD_PV_POWERSAVE] = i_operating_points[VPD_PT_SET_BIASED][VPD_PV_POWERSAVE].vdd_mv << EVID_SLOPE_FP_SHIFT;
+        eVidFP[VPD_PV_NOMINAL] = i_operating_points[VPD_PT_SET_BIASED][VPD_PV_NOMINAL].vdd_mv << EVID_SLOPE_FP_SHIFT;
+        eVidFP[VPD_PV_TURBO] = i_operating_points[VPD_PT_SET_BIASED][VPD_PV_TURBO].vdd_mv << EVID_SLOPE_FP_SHIFT;
+        eVidFP[VPD_PV_ULTRA] = i_operating_points[VPD_PT_SET_BIASED][VPD_PV_ULTRA].vdd_mv << EVID_SLOPE_FP_SHIFT;
 
-        FAPI_INF("eVidFP[POWERSAVE] Biased %u", eVidFP[POWERSAVE]);
-        FAPI_INF("eVidFP[NOMINAL] Biased %u", eVidFP[NOMINAL]);
-        FAPI_INF("eVidFP[TURBO] Biased %u", eVidFP[TURBO]);
-        FAPI_INF("eVidFP[ULTRA] Biased %u", eVidFP[ULTRA]);
+        FAPI_INF("eVidFP[VPD_PV_POWERSAVE] Biased %u", eVidFP[VPD_PV_POWERSAVE]);
+        FAPI_INF("eVidFP[NOMINAL] Biased %u", eVidFP[VPD_PV_NOMINAL]);
+        FAPI_INF("eVidFP[TURBO] Biased %u", eVidFP[VPD_PV_TURBO]);
+        FAPI_INF("eVidFP[ULTRA] Biased %u", eVidFP[VPD_PV_ULTRA]);
 
         // ULTRA TURBO pstate check is not required..because it's pstate will be
         // 0
-        if (!(i_operating_points[VPD_PT_SET_BIASED][POWERSAVE].pstate) ||
-            !(i_operating_points[VPD_PT_SET_BIASED][NOMINAL].pstate) ||
-            !(i_operating_points[VPD_PT_SET_BIASED][TURBO].pstate))
+        if (!(i_operating_points[VPD_PT_SET_BIASED][VPD_PV_POWERSAVE].pstate) ||
+            !(i_operating_points[VPD_PT_SET_BIASED][VPD_PV_NOMINAL].pstate) ||
+            !(i_operating_points[VPD_PT_SET_BIASED][VPD_PV_TURBO].pstate))
         {
             FAPI_ERR("PSTATE value shouldn't be zero for VPD_PT_SET_BIASED");
             break;
@@ -1613,52 +1647,53 @@ void p9_pstate_compute_PsV_slopes(VpdOperatingPoint i_operating_points[][4],
 
         //Calculate slopes
         FAPI_INF(" num %u denom %u %u %u",
-                 (uint32_t)(eVidFP[NOMINAL] - eVidFP[POWERSAVE]),
-                 (uint32_t)(-i_operating_points[VPD_PT_SET_BIASED][NOMINAL].pstate +
-                            i_operating_points[VPD_PT_SET_BIASED][POWERSAVE].pstate),
-                 (uint32_t)(-i_operating_points[VPD_PT_SET_BIASED][NOMINAL].pstate),
-                 (uint32_t)i_operating_points[VPD_PT_SET_BIASED][POWERSAVE].pstate);
-        tmp = (uint32_t)(eVidFP[NOMINAL] - eVidFP[POWERSAVE]) /
-              (uint32_t)(-i_operating_points[VPD_PT_SET_BIASED][NOMINAL].pstate +
-                         i_operating_points[VPD_PT_SET_BIASED][POWERSAVE].pstate);
+                 (uint32_t)(eVidFP[VPD_PV_NOMINAL] - eVidFP[VPD_PV_POWERSAVE]),
+                 (uint32_t)(-i_operating_points[VPD_PT_SET_BIASED][VPD_PV_NOMINAL].pstate +
+                            i_operating_points[VPD_PT_SET_BIASED][VPD_PV_POWERSAVE].pstate),
+                 (uint32_t)(-i_operating_points[VPD_PT_SET_BIASED][VPD_PV_NOMINAL].pstate),
+                 (uint32_t)i_operating_points[VPD_PT_SET_BIASED][VPD_PV_POWERSAVE].pstate);
+        tmp = (uint32_t)(eVidFP[VPD_PV_NOMINAL] - eVidFP[VPD_PV_POWERSAVE]) /
+              (uint32_t)(-i_operating_points[VPD_PT_SET_BIASED][VPD_PV_NOMINAL].pstate +
+                         i_operating_points[VPD_PT_SET_BIASED][VPD_PV_POWERSAVE].pstate);
         o_gppb->PsVSlopes[VPD_SLOPES_BIASED][REGION_POWERSAVE_NOMINAL] = revle16((uint16_t)tmp);
         FAPI_INF("PsVSlopes[VPD_SLOPES_BIASED][REGION_POWERSAVE_NOMINAL] %X tmp %X",
                  (revle16(o_gppb->PsVSlopes[VPD_SLOPES_BIASED][REGION_POWERSAVE_NOMINAL])), (tmp));
 
-        tmp = (uint32_t)(eVidFP[TURBO] - eVidFP[NOMINAL]) /
-              (uint32_t)(-i_operating_points[VPD_PT_SET_BIASED][TURBO].pstate +
-                         i_operating_points[VPD_PT_SET_BIASED][NOMINAL].pstate);
+        tmp = (uint32_t)(eVidFP[VPD_PV_TURBO] - eVidFP[VPD_PV_NOMINAL]) /
+              (uint32_t)(-i_operating_points[VPD_PT_SET_BIASED][VPD_PV_TURBO].pstate +
+                         i_operating_points[VPD_PT_SET_BIASED][VPD_PV_NOMINAL].pstate);
         o_gppb->PsVSlopes[VPD_SLOPES_BIASED][REGION_NOMINAL_TURBO] = revle16((uint16_t)tmp);
         FAPI_INF("PsVSlopes[VPD_SLOPES_BIASED][REGION_NOMINAL_TURBO] %X tmp %X",
                  (revle16(o_gppb->PsVSlopes[VPD_SLOPES_BIASED][REGION_NOMINAL_TURBO])), (tmp));
 
-        tmp = (uint32_t)(eVidFP[ULTRA] - eVidFP[TURBO]) /
-              (uint32_t)(-i_operating_points[VPD_PT_SET_BIASED][ULTRA].pstate + i_operating_points[VPD_PT_SET_BIASED][TURBO].pstate);
+        tmp = (uint32_t)(eVidFP[VPD_PV_ULTRA] - eVidFP[VPD_PV_TURBO]) /
+              (uint32_t)(-i_operating_points[VPD_PT_SET_BIASED][VPD_PV_ULTRA].pstate +
+                         i_operating_points[VPD_PT_SET_BIASED][VPD_PV_TURBO].pstate);
         o_gppb->PsVSlopes[VPD_SLOPES_BIASED][REGION_TURBO_ULTRA] = revle16((uint16_t)tmp);
         FAPI_INF("PsVSlopes[VPD_SLOPES_BIASED][REGION_TURBO_ULTRA] %X tmp %X",
                  (revle16(o_gppb->PsVSlopes[VPD_SLOPES_BIASED][REGION_TURBO_ULTRA])), (tmp));
 
         //Calculate inverted slopes
-        tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_BIASED][NOMINAL].pstate +
-                           i_operating_points[VPD_PT_SET_BIASED][POWERSAVE].pstate) << EVID_SLOPE_FP_SHIFT)
-               / (uint32_t) (i_operating_points[VPD_PT_SET_BIASED][NOMINAL].vdd_mv -
-                             i_operating_points[VPD_PT_SET_BIASED][POWERSAVE].vdd_mv);
+        tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_BIASED][VPD_PV_NOMINAL].pstate +
+                           i_operating_points[VPD_PT_SET_BIASED][VPD_PV_POWERSAVE].pstate) << EVID_SLOPE_FP_SHIFT)
+               / (uint32_t) (i_operating_points[VPD_PT_SET_BIASED][VPD_PV_NOMINAL].vdd_mv -
+                             i_operating_points[VPD_PT_SET_BIASED][VPD_PV_POWERSAVE].vdd_mv);
         o_gppb->VPsSlopes[VPD_SLOPES_BIASED][REGION_POWERSAVE_NOMINAL] = revle16((uint16_t)tmp);
         FAPI_INF ("VPsSlopes[VPD_SLOPES_BIASED][REGION_POWERSAVE_NOMINAL] %X tmp %X",
                   (revle16(o_gppb->VPsSlopes[VPD_SLOPES_BIASED][REGION_POWERSAVE_NOMINAL])), (tmp));
 
-        tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_BIASED][TURBO].pstate +
-                           i_operating_points[VPD_PT_SET_BIASED][NOMINAL].pstate) << EVID_SLOPE_FP_SHIFT)
-               / (uint32_t) (i_operating_points[VPD_PT_SET_BIASED][TURBO].vdd_mv -
-                             i_operating_points[VPD_PT_SET_BIASED][NOMINAL].vdd_mv);
+        tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_BIASED][VPD_PV_TURBO].pstate +
+                           i_operating_points[VPD_PT_SET_BIASED][VPD_PV_NOMINAL].pstate) << EVID_SLOPE_FP_SHIFT)
+               / (uint32_t) (i_operating_points[VPD_PT_SET_BIASED][VPD_PV_TURBO].vdd_mv -
+                             i_operating_points[VPD_PT_SET_BIASED][VPD_PV_NOMINAL].vdd_mv);
         o_gppb->VPsSlopes[VPD_SLOPES_BIASED][REGION_NOMINAL_TURBO] = revle16((uint16_t)tmp);
         FAPI_INF("VPsSlopes[VPD_SLOPES_BIASED][REGION_NOMINAL_TURBO] %X tmp %X",
                  (revle16(o_gppb->VPsSlopes[VPD_SLOPES_BIASED][REGION_NOMINAL_TURBO])), (tmp));
 
-        tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_BIASED][ULTRA].pstate +
-                           i_operating_points[VPD_PT_SET_BIASED][TURBO].pstate) << EVID_SLOPE_FP_SHIFT)
-               / (uint32_t) (i_operating_points[VPD_PT_SET_BIASED][ULTRA].vdd_mv -
-                             i_operating_points[VPD_PT_SET_BIASED][TURBO].vdd_mv);
+        tmp =  (uint32_t)((-i_operating_points[VPD_PT_SET_BIASED][VPD_PV_ULTRA].pstate +
+                           i_operating_points[VPD_PT_SET_BIASED][VPD_PV_TURBO].pstate) << EVID_SLOPE_FP_SHIFT)
+               / (uint32_t) (i_operating_points[VPD_PT_SET_BIASED][VPD_PV_ULTRA].vdd_mv -
+                             i_operating_points[VPD_PT_SET_BIASED][VPD_PV_TURBO].vdd_mv);
         o_gppb->VPsSlopes[VPD_SLOPES_BIASED][REGION_TURBO_ULTRA] = revle16((uint16_t)tmp);
         FAPI_INF("VPsSlopes[VPD_SLOPES_BIASED][REGION_TURBO_ULTRA] %X tmp %X",
                  (revle16(o_gppb->VPsSlopes[VPD_SLOPES_BIASED][REGION_TURBO_ULTRA])), (tmp));
@@ -1862,6 +1897,47 @@ gppb_print(GlobalPstateParmBlock* i_gppb)
         FAPI_INF("%s", l_buffer);
     }
 
+    FAPI_INF( "VDM Param Block ");
+    FAPI_INF("Operating Points:     Overvolt Thr      Small Thr    Large Thr     Extreme Thr  Small Freq Drop   Large Freq Drop");
+
+    for (uint32_t i = 0; i < VPD_PV_POINTS; i++)
+    {
+        sprintf(l_buffer, "                 ");
+        sprintf(l_temp_buffer, " %04X (%4d) ",
+                i_gppb->vdm.overvolt_override[i],
+                (i_gppb->vdm.overvolt_override[i]));
+        strcat(l_buffer, l_temp_buffer);
+
+        sprintf(l_temp_buffer, " %04X (%4d) ",
+                i_gppb->vdm.droop_small_override[i],
+                (i_gppb->vdm.droop_small_override[i]));
+        strcat(l_buffer, l_temp_buffer);
+
+        sprintf(l_temp_buffer, " %04X (%4d) ",
+                i_gppb->vdm.droop_large_override[i],
+                (i_gppb->vdm.droop_large_override[i]));
+        strcat(l_buffer, l_temp_buffer);
+
+        sprintf(l_temp_buffer, " %04X (%4d) ",
+                i_gppb->vdm.droop_extreme_override[i],
+                (i_gppb->vdm.droop_extreme_override[i]));
+        strcat(l_buffer, l_temp_buffer);
+
+        sprintf(l_temp_buffer, " %04X (%4d) ",
+                i_gppb->vdm.fmin_override_khz[i],
+                (i_gppb->vdm.fmin_override_khz[i]));
+        strcat(l_buffer, l_temp_buffer);
+
+        sprintf(l_temp_buffer, " %04X (%4d) ",
+                i_gppb->vdm.fmax_override_khz[i],
+                (i_gppb->vdm.fmax_override_khz[i]));
+        strcat(l_buffer, l_temp_buffer);
+
+        FAPI_INF("%s", l_buffer);
+    }
+
+
+
 
     FAPI_INF("---------------------------------------------------------------------------------------");
 }
@@ -2020,4 +2096,163 @@ int freq2pState (const GlobalPstateParmBlock* gppb,
     }
 
     return rc;
+}
+fapi2::ReturnCode
+proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                     uint8_t       i_poundv_bucketId,
+                     VDMParmBlock* o_vdmpb)
+{
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_EQ>> l_eqChiplets;
+    fapi2::vdmData_t l_vdmBuf;
+    uint8_t    j                = 0;
+    uint8_t    bucket_id        = 0;
+    uint8_t    l_overvolt_small_offset  = 4;
+    uint8_t    l_large_extreme_offset = 5;
+    uint8_t    l_min_freq_offset = 6;
+    uint8_t    l_max_freq_offset = 7;
+    uint8_t    jump_to_next_mode = 0;
+    uint8_t    l_data = 0;
+
+    do
+    {
+        // Below fiels for Nominal, Powersave, Turbo, Ultra Turbo
+        // I-VDD Nominal TDP AC current  2B
+        // I-VDD Nominal TDP DC current 2B
+        // Overvolt Threshold 0.5  Upper nibble of byte
+        // Small Threshold 0.5  Lower nibble of byte
+        // Large Threshold 0.5  Upper nibble of byte
+        // eXtreme Threshold 0.5 Lower nibble of byte
+        // Small Frequency Drop  1B
+        // Large Frequency Drop 1B
+        // -----------------------------------------------------------------
+        l_eqChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EQ>(fapi2::TARGET_STATE_FUNCTIONAL);
+
+        for (j = 0; j < l_eqChiplets.size(); j++)
+        {
+            uint8_t l_chipNum = 0xFF;
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_eqChiplets[j], l_chipNum));
+
+            FAPI_INF("Chip Number => %u", l_chipNum);
+
+            // clear out buffer to known value before calling fapiGetMvpdField
+            memset(&l_vdmBuf, 0, sizeof(l_vdmBuf));
+
+            FAPI_TRY(p9_pm_get_poundw_bucket(l_eqChiplets[j], l_vdmBuf));
+
+            bucket_id = l_vdmBuf.bucketId;
+
+            FAPI_INF("#W chiplet = %u bucket id = %u", l_chipNum, bucket_id);
+
+            //if we match with the bucket id, then we don't need to continue
+            if (i_poundv_bucketId == bucket_id)
+            {
+                break;
+            }
+        }
+
+        uint8_t l_poundw_static_data = 0;
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUND_W_STATIC_DATA_ENABLE,
+                               FAPI_SYSTEM,
+                               l_poundw_static_data),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_POUND_W_STATIC_DATA_ENABLE");
+
+        if (l_poundw_static_data)
+        {
+            FAPI_INF("attribute ATTR_POUND_W_STATIC_DATA_ENABLE is set");
+            memcpy (&l_vdmBuf, &g_vpdData, sizeof (g_vpdData));
+        }
+        else
+        {
+            FAPI_INF("attribute ATTR_POUND_W_STATIC_DATA_ENABLE is NOT set");
+
+        }
+
+        const uint8_t pv_op_order[VPD_PV_POINTS] = VPD_PV_ORDER;
+
+        if (!(o_vdmpb->overvolt_override_enable))
+        {
+            jump_to_next_mode = 0;
+
+            for (uint8_t i = 0; i < (VPD_PV_POINTS); i++)
+            {
+                l_data = l_vdmBuf.vdmData[l_overvolt_small_offset + jump_to_next_mode];
+                jump_to_next_mode += 10;
+                l_data = l_data >> 4;
+                o_vdmpb->overvolt_override[pv_op_order[i]] = l_data;
+            }
+        }
+
+        if (!(o_vdmpb->droop_small_override_enable))
+        {
+            jump_to_next_mode = 0;
+
+            for (uint8_t i = 0; i < (VPD_PV_POINTS); i++)
+            {
+                l_data = l_vdmBuf.vdmData[l_overvolt_small_offset + jump_to_next_mode];
+                jump_to_next_mode += 10;
+                l_data = l_data & 0x0F;
+                o_vdmpb->droop_small_override[pv_op_order[i]] = l_data;
+            }
+        }
+
+        if (!(o_vdmpb->droop_large_override_enable))
+        {
+            jump_to_next_mode = 0;
+
+            for (uint8_t i = 0; i < (VPD_PV_POINTS); i++)
+            {
+                l_data = l_vdmBuf.vdmData[l_large_extreme_offset + jump_to_next_mode];
+                jump_to_next_mode += 10;
+                l_data = l_data >> 4;
+                o_vdmpb->droop_large_override[pv_op_order[i]] = l_data;
+            }
+        }
+
+        if (!(o_vdmpb->droop_extreme_override_enable))
+        {
+            jump_to_next_mode = 0;
+
+            for (uint8_t i = 0; i < (VPD_PV_POINTS); i++)
+            {
+                l_data = l_vdmBuf.vdmData[l_large_extreme_offset + jump_to_next_mode];
+                jump_to_next_mode += 10;
+                l_data = l_data & 0x0F;
+                o_vdmpb->droop_extreme_override[pv_op_order[i]] = l_data;
+            }
+        }
+
+        if (!(o_vdmpb->fmin_override_khz_enable))
+        {
+            jump_to_next_mode = 0;
+
+            for (uint8_t i = 0; i < (VPD_PV_POINTS); i++)
+            {
+                l_data = l_vdmBuf.vdmData[l_min_freq_offset + jump_to_next_mode];
+                jump_to_next_mode += 10;
+                o_vdmpb->fmin_override_khz[pv_op_order[i]] = l_data;
+            }
+        }
+
+        if (!(o_vdmpb->fmax_override_khz_enable))
+        {
+            jump_to_next_mode = 0;
+
+            for (uint8_t i = 0; i < (VPD_PV_POINTS); i++)
+            {
+                l_data = l_vdmBuf.vdmData[l_max_freq_offset + jump_to_next_mode];
+                jump_to_next_mode += 10;
+                o_vdmpb->fmax_override_khz[pv_op_order[i]] = l_data;
+            }
+        }
+
+
+    }
+    while(0);
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+
 }
