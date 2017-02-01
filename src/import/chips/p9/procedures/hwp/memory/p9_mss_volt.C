@@ -96,8 +96,8 @@ extern "C"
                     uint8_t l_dimm_endurant = 0;
 
                     // Read nominal and endurant bits from SPD, 0 = 1.2V is not operable and endurant, 1 = 1.2 is valid
-                    FAPI_TRY( l_it->second->operable_nominal_voltage(l_dimm, l_dimm_nominal));
-                    FAPI_TRY( l_it->second->endurant_nominal_voltage(l_dimm, l_dimm_endurant));
+                    FAPI_TRY( l_it->second->operable_nominal_voltage(l_dimm_nominal) );
+                    FAPI_TRY( l_it->second->endurant_nominal_voltage(l_dimm_endurant) );
 
                     //Check to make sure 1.2 V is both operable and endurant, fail if it is not
                     FAPI_ASSERT ( (l_dimm_nominal == mss::spd::OPERABLE) && (l_dimm_endurant == mss::spd::ENDURANT),
