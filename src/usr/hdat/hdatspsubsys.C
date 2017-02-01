@@ -194,7 +194,7 @@ static errlHndl_t hdatGetPathInfo(
                                 hdatTriggerType = l_uartInfo.interruptTrigger;
 #endif
 
-#ifdef CONFIG_BMC_IPMI
+#if 0 //Temp remove until ready CONFIG_BMC_IPMI
         IPMI::BmcInfo_t l_bmcInfo = IPMI::getBmcInfo();
         
         o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBARofBTDevAdrSpc =
