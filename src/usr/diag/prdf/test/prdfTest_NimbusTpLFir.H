@@ -64,6 +64,17 @@ class NTPLFIR:public CxxTest::TestSuite
             //TP_LFIR_ACT1
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040011, 0xFFFFFFFFFFFFFFFF);
 
+            //XBUS_ERROR_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:XBUS{1}", 0x060F001F,
+                            0x0000004000000000);
+
+            //TP_ERROR_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x010F001F, 0x0000000000000000);
+
+            //OBUS_ERROR_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:OBUS{0}", 0x090F001F,
+                           0x0000004000000000);
+
             PRDS_START_SIM();
 
             if(!(PRDS_END()))
@@ -91,6 +102,17 @@ class NTPLFIR:public CxxTest::TestSuite
 
             //TP_LFIR_ACT1
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040011, 0xFFFFFFFFFFFFFFFF);
+
+            //XBUS_ERROR_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:XBUS{1}", 0x060F001F,
+                            0x0000004000000000);
+
+            //TP_ERROR_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x010F001F, 0x0000000000000000);
+
+            //OBUS_ERROR_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:OBUS{0}", 0x090F001F,
+                           0x0000004000000000);
 
             PRDS_START_SIM();
 

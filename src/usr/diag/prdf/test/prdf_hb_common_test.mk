@@ -84,7 +84,7 @@ TESTS += ${PRD_USR_TEST_PATH}/prdfTest_XBus.H
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ABus.H
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ProcCentFir.H
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Ex.H
-TESTS += ${PRD_USR_TEST_PATH}/prdfTest_NimbusTpLFir.H
+#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_NimbusTpLFir.H
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Mcs.H
 
 
