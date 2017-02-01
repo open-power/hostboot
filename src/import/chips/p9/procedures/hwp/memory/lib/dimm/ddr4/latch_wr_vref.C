@@ -103,7 +103,8 @@ fapi2::ReturnCode latch_wr_vref_commands_by_rank_pair( const fapi2::Target<fapi2
 {
     // Declares variables
     const auto l_mcbist = find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
-    const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
+    // Warning: l_dimm is not a valid Target and will crash Cronus if used before it gets filled in by mss::rank::get_dimm_target_from_rank
+    fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
     mss::ccs::program<fapi2::TARGET_TYPE_MCBIST, fapi2::TARGET_TYPE_MCA> l_program;
     std::vector<uint64_t> l_ranks;
 
@@ -111,16 +112,16 @@ fapi2::ReturnCode latch_wr_vref_commands_by_rank_pair( const fapi2::Target<fapi2
     FAPI_TRY(mss::rank::get_ranks_in_pair( i_target, i_rank_pair, l_ranks));
 
     // Adds in latching commands for all ranks
-    for( const auto& l_rank : l_ranks)
+    for (const auto& l_rank : l_ranks)
     {
         // Skips this rank if no rank is configured
-        if( l_rank == NO_RANK)
+        if (l_rank == NO_RANK)
         {
             continue;
         }
 
-        // Sets up the DIMM target
-        const auto l_dimm = (l_rank < MAX_RANK_PER_DIMM) ? l_dimms[0] : l_dimms[1];
+        // Ensures we get a valid DIMM target / rank combo
+        FAPI_TRY( mss::rank::get_dimm_target_from_rank(i_target, l_rank, l_dimm) );
 
         // Adds the latching commands to the CCS program for this current rank
         FAPI_TRY(setup_latch_wr_vref_commands_by_rank(l_dimm,
