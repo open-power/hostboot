@@ -182,6 +182,8 @@ enum P9_HCD_CLK_CTRL_CONSTANTS
     CLK_REGION_EX1_L2                        = BIT64(9),
     CLK_REGION_EX0_REFR                      = BIT64(12),
     CLK_REGION_EX1_REFR                      = BIT64(13),
+    CLK_REGION_EX0_L3_REFR                   = BIT64(6) | BIT64(12),
+    CLK_REGION_EX1_L3_REFR                   = BIT64(7) | BIT64(13),
     CLK_REGION_EX0_L2_L3_REFR                = BIT64(6) | BIT64(8) | BIT64(12),
     CLK_REGION_EX1_L2_L3_REFR                = BIT64(7) | BIT64(9) | BIT64(13),
     CLK_REGION_ALL_BUT_L3_REFR               = BITS64(4, 2) | BITS64(8, 4) | BIT64(14),
