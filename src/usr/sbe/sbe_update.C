@@ -1733,9 +1733,6 @@ namespace SBE
 
              TARGETING::Target * l_target=i_target;
 
-#if defined(CONFIG_SBE_UPDATE_INDEPENDENT) || \
-    defined(CONFIG_SBE_UPDATE_SIMULTANEOUS)
-
             // Get the Master Proc Chip Target for comparisons later
             TARGETING::Target* masterProcChipTargetHandle = NULL;
             TargetService& tS = targetService();
@@ -1751,7 +1748,7 @@ namespace SBE
                            TARGETING::get_huid(l_target));
 
             }
-#endif
+
             // Read PERV_SB_CS_SCOM 0x00050008
             size_t op_size = sizeof(scomData);
             err = deviceRead( l_target,
