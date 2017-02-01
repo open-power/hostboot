@@ -1629,4 +1629,27 @@
     <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+     <id>ATTR_POUND_W_STATIC_DATA_ENABLE</id>
+     <description>
+
+     Enables pstate parameter block code to use the static #W data
+     Consumer: p9_pstate_parameter_block.C ->
+
+     Platform default:  OFF
+     <!--
+        @todo RTC 169662 at some point in the program, this default may be switched to
+         the opposite setting.  However, coordination needs to occur with all CIs
+         as this will enable functions that may not be modeled across the board.
+     -->
+     </description>
+     <targetType>TARGET_TYPE_SYSTEM</targetType>
+     <valueType>uint8</valueType>
+     <enum>
+        OFF = 0x00, ON = 0x01
+    </enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
