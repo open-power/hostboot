@@ -14353,10 +14353,10 @@ Measured in GB</description>
 <attribute>
     <id>LRDIMM_ADDITIONAL_CNTL_WORDS</id>
     <description>
-      LRDIMM additional RCD control words as set by DIMM SPD:
-      F[3,4]RC10, F[3,4]RC11, F[5,6]RC10, F[5,6]RC11, F[7,8]RC10, F[7,8]RC11, F[9,10]RC10, F[9,10]RC11,
-      F[1]RC8, F[3]RC9, F[3]RC8, F[1]RC11, F[1]RC12, F[1]RC13, F[1]RC14, F[1]RC15.
-      Eff config should set this up
+        LRDIMM additional RCD control words as set by DIMM SPD:
+        F[3,4]RC0A, F[3,4]RC0B, F[5,6]RC0A, F[5,6]RC0B, F[7,8]RC0A, F[7,8]RC0B, F[9,10]RC0A, F[9,10]RC0B,
+        F[1]RC8, F[3]RC9, F[3]RC8, F[1]RC0B, F[1]RC0C, F[1]RC0D, F[1]RC0E, F[1]RC0F.
+        Eff config should set this up
     </description>
     <simpleType>
         <uint64_t>
@@ -17820,6 +17820,7 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<!--HWSV needs to update names so we can remove this-->
 <attribute>
     <id>EFF_DIMM_DDR4_RC10</id>
     <description>RDIMM Operating Speed;  Read from ATTR_MSS_FREQ;
@@ -17843,6 +17844,30 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>EFF_DIMM_DDR4_RC0A</id>
+    <description>RDIMM Operating Speed;  Read from ATTR_MSS_FREQ;
+                 Default value - 00. Values Range from 00 to 09. No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC0A</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
+<!--HWSV needs to update names so we can remove this-->
+<attribute>
     <id>EFF_DIMM_DDR4_RC11</id>
     <description>Operating Voltage VDD and VrefCA Source Control Word; Read from ATTR_MSS_VOLT_VDDR_MILLIVOLTS.
                  Default value - 14. Values Range from 00 to 15 decimal.  No need to calculate; User can override with desired experimental value.
@@ -17865,7 +17890,51 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>EFF_DIMM_DDR4_RC0B</id>
+    <description>Operating Voltage VDD and VrefCA Source Control Word; Read from ATTR_MSS_VOLT_VDDR_MILLIVOLTS.
+                 Default value - 14. Values Range from 00 to 15 decimal.  No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC0B</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!--HWSV needs to update names so we can remove this-->
+<attribute>
     <id>EFF_DIMM_DDR4_RC12</id>
+    <description>F0RC0C - Training Control Word;
+                 Default value - 00. Values Range from 00 to 07 decimal.No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC12</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC0C</id>
     <description>F0RC0C - Training Control Word;
                  Default value - 00. Values Range from 00 to 07 decimal.No need to calculate; User can override with desired experimental value.
                  creator: mss_eff_cnfg
@@ -17881,11 +17950,12 @@ Measured in GB</description>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DIMM_DDR4_RC12</id>
+        <id>ATTR_EFF_DIMM_DDR4_RC0C</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
+<!--HWSV needs to update names so we can remove this-->
 <attribute>
     <id>EFF_DIMM_DDR4_RC13</id>
     <description>F0RC0D - DIMM Configuration Control Word;
@@ -17910,6 +17980,30 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>EFF_DIMM_DDR4_RC0D</id>
+    <description>F0RC0D - DIMM Configuration Control Word;
+                 Default value - 0x0B. Values Range from 00 to 15 decimal.
+                 Dynamically calculated using 4 bits[0:3] Bit 0 - Address Mirroring; Bit 1 - Rdimm(1)/Lrdimm (0) ; Bit 2 - N/A ; Bit 3 - CS Mode (Direct / Quad CS mode etc);
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC0D</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!--HWSV needs to update names so we can remove this-->
+<attribute>
     <id>EFF_DIMM_DDR4_RC14</id>
     <description>F0RC0E - Parity Control Word;  Default value - 00. Check from ATTR_EFF_CA_PARITY and assign; Values Range from 00 to 0F.
                  creator: mss_eff_cnfg
@@ -17931,6 +18025,28 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>EFF_DIMM_DDR4_RC0E</id>
+    <description>F0RC0E - Parity Control Word;  Default value - 00. Check from ATTR_EFF_CA_PARITY and assign; Values Range from 00 to 0F.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC0E</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!--HWSV needs to update names so we can remove this-->
+<attribute>
     <id>EFF_DIMM_DDR4_RC15</id>
     <description>F0RC0F - Command Latency Adder Control Word;
                  Default value - 04. Values Range from 00 to 04. No need to calculate; User can override with desired experimental value.
@@ -17948,6 +18064,28 @@ Measured in GB</description>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DIMM_DDR4_RC15</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC0F</id>
+    <description>F0RC0F - Command Latency Adder Control Word;
+                 Default value - 04. Values Range from 00 to 04. No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC0F</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -32574,11 +32712,10 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint64_t>
-            <default>0,0</default><!-- default to no limitations -->
         </uint64_t>
         <array>2</array>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_MRW_UNSUPPORTED_RANK_CONFIG</id>

@@ -1448,12 +1448,24 @@
     <attribute><id>EFF_DIMM_DDR4_RC06_07</id></attribute>
     <attribute><id>EFF_DIMM_DDR4_RC08</id></attribute>
     <attribute><id>EFF_DIMM_DDR4_RC09</id></attribute>
+    <!--HWSV needs to update names so we can remove this-->
     <attribute><id>EFF_DIMM_DDR4_RC10</id></attribute>
+    <!--HWSV needs to update names so we can remove this-->
     <attribute><id>EFF_DIMM_DDR4_RC11</id></attribute>
+    <!--HWSV needs to update names so we can remove this-->
     <attribute><id>EFF_DIMM_DDR4_RC12</id></attribute>
+    <!--HWSV needs to update names so we can remove this-->
     <attribute><id>EFF_DIMM_DDR4_RC13</id></attribute>
+    <!--HWSV needs to update names so we can remove this-->
     <attribute><id>EFF_DIMM_DDR4_RC14</id></attribute>
+    <!--HWSV needs to update names so we can remove this-->
     <attribute><id>EFF_DIMM_DDR4_RC15</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC0A</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC0B</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC0C</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC0D</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC0E</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC0F</id></attribute>
     <attribute><id>EFF_DIMM_DDR4_RC_1x</id></attribute>
     <attribute><id>EFF_DIMM_DDR4_RC_2x</id></attribute>
     <attribute><id>EFF_DIMM_DDR4_RC_3x</id></attribute>
