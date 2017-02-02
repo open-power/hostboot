@@ -28,5 +28,4 @@
 
 PROCEDURE=p9c_mss_unmask_errors
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
-#lib$(PROCEDURE)_DEPLIBS+=mss
 $(call BUILD_PROCEDURE)

@@ -28,6 +28,5 @@
 
 PROCEDURE=p9c_dimmBadDqBitmapFuncs
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
-#lib$(PROCEDURE)_DEPLIBS+=mss
 $(call BUILD_PROCEDURE)
 

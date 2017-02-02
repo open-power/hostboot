@@ -538,6 +538,7 @@ extern "C"
         return fapi2::current_err;
     }
 
+    ///
     /// @brief FW Team HWP that accesses the Bad DQ Bitmap.
     ///        It accesses the raw data from DIMM SPD and does
     ///        any necessary processing to turn it into a

@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/centaur/procedures/hwp/memory/p9c_mss_ddr_phy_reset.mk $
+# $Source: src/import/chips/centaur/procedures/hwp/memory/wrapper/p9c_mss_volt_wrap.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -23,11 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 
-# Include the macros and things for MSS procedures
--include 01common.mk
-PROCEDURE=p9c_mss_ddr_phy_reset
-OBJS+=p9c_dimmBadDqBitmapFuncs.o
-OBJS+=p9c_mss_unmask_errors.o
-OBJS+=p9c_mss_slew.o
-$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
-$(call BUILD_PROCEDURE)
+WRAPPER=p9c_mss_volt_wrap
+$(WRAPPER)_USELIBS+=p9c_mss_volt
+$(WRAPPER)_DEPLIBS+=cen
+$(call BUILD_WRAPPER)

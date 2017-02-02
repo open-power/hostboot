@@ -35,6 +35,7 @@
 #ifndef DIMMCONSTS_H_
 #define DIMMCONSTS_H_
 
+//TODO:RTC171671 : add namespace to consts
 enum consts : size_t
 {
     MAX_PORTS_PER_MBA = 2,         ///< Maximum number of ports on an MBA
@@ -45,7 +46,7 @@ enum consts : size_t
     NUM_RANK_GROUPS = 4,           ///< Maximum number of rank groups
     MAX_RANKS_PER_PORT = 8,        ///< Maximum number of ranks on a port
     DIMM_DQ_RANK_BITMAP_SIZE = 10, ///< Size in bytes of the Bad DQ bitmap for a rank.
-
+    NUM_MCS_PER_PROC = 8,          ///< Number of MCS instances per proc
     // This is the number of bits in DIMM_DQ_RANK_BITMAP_SIZE.
     DIMM_DQ_NUM_DQS = DIMM_DQ_RANK_BITMAP_SIZE * 8, ///< Number of DQs (data query pins).
 
@@ -80,21 +81,29 @@ enum consts : size_t
 
 enum mrs : size_t
 {
-    MRS0_BA = 0,
-    MRS1_BA = 1,
-    MRS2_BA = 2,
-    MRS3_BA = 3,
-    MRS4_BA = 4,
-    MRS5_BA = 5,
-    MRS6_BA = 6,
-    INVALID = 255,
+    MRS0_BA = 0,   ///< MRS0 Bank Address
+    MRS1_BA = 1,   ///< MRS1 Bank Address
+    MRS2_BA = 2,   ///< MRS2 Bank Address
+    MRS3_BA = 3,   ///< MRS3 Bank Address
+    MRS4_BA = 4,   ///< MRS4 Bank Address
+    MRS5_BA = 5,   ///< MRS5 Bank Address
+    MRS6_BA = 6,   ///< MRS6 Bank Address
+    INVALID = 255, ///< INVALID
+};
+
+enum dimm_types : size_t
+{
+    CDIMM = 0,    ///< Centaur DIMM
+    RDIMM = 1,    ///< Registered Dimm
+    UDIMM = 2,    ///< Unregistered Dimm
+    LRDIMM = 3,   ///< Load Reduced Dimm
 };
 
 enum mss_ccs_status_query_result
 {
     MSS_STAT_QUERY_PASS = 1,
     MSS_STAT_QUERY_IN_PROGRESS = 2,
-    MSS_STAT_QUERY_FAIL = 3
+    MSS_STAT_QUERY_FAIL = 3,
 };
 
 enum mss_ccs_data_pattern
