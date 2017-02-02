@@ -34,27 +34,3 @@
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
 
-### RTC 167283 - Patch begins
-echo "+++ Updating p9n action file for pcie_scom_init"
-echo "+++ SB: " $sb
-echo "+++ BACKING_BUILD: " $BACKING_BUILD
-echo "+++ PROJECT_ROOT: " $PROJECT_ROOT
-
-### Update p9_system.act for pcie_scom_init
-### Use this file in order to be able to checkin immediately, p9n.act is held up by other tracks
-mkdir -p  $sb/simu/data/cec-chip/
-cp $BACKING_BUILD/src/simu/data/cec-chip/p9_system.act $sb/simu/data/cec-chip/
-patch -p0 $sb/simu/data/cec-chip/p9_system.act $PROJECT_ROOT/src/build/citest/etc/patches/p9_system.act_pcie_patch
-
-### Update p9n_10.scomdef for pcie_scom_init
-echo "+++ Adding addresses to p9n_10.scomdef for pcie_scom_init"
-mkdir -p  $sb/engd/scomdef/
-cp $BACKING_BUILD/src/engd/scomdef/p9n_10.scomdef $sb/engd/scomdef/
-patch -p0 $sb/engd/scomdef/p9n_10.scomdef $PROJECT_ROOT/src/build/citest/etc/patches/p9n_10.scomdef_with_pcie_patch
-echo "+++ Building indirect scom action with new p9n_10.scomdef"
-cd $sb/simu/
-mk -a -j32
-#execute_in_sandbox "cd $sb/simu/ && mk -a -j32"
-echo "+++ Done building"
-### RTC 167283 - Patch ends
-

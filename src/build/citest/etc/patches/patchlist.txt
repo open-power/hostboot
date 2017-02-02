@@ -5,9 +5,3 @@ Brief description of the problem or reason for patch
 -Files: list of files
 -Coreq: list of associated changes, e.g. workarounds.presimsetup
 
-Need additional actions for PCIE scom init PMA reset
--RTC: 167283
--CMVC: 1014186
--Files: p9_system.act, p9n_10.scomdef
--Coreq: workarounds.postsimsetup
-
