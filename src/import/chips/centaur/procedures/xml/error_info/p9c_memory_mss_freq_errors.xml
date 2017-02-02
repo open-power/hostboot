@@ -1,0 +1,123 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/centaur/procedures/xml/error_info/p9c_memory_mss_freq_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!-- -->
+<!-- @file p9c_memory_mss_freq_errors.xml -->
+<!-- @brief Error xml for mss freq errors-->
+<!-- -->
+<!-- *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com> -->
+<!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 1 -->
+<!-- *HWP Consumed by: FSP:HB -->
+<!-- -->
+
+<hwpErrors>
+  <hwpError>
+    <rc>RC_CEN_MSS_UNSUPPORTED_SPD_DATA_DDR4</rc>
+    <description>Invalid SPD data returned.</description>
+    <ffdc>MTB_DDR4</ffdc>
+    <ffdc>FTB_DDR4</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+</hwpError>
+  <hwpError>
+    <rc>RC_CEN_MSS_UNSUPPORTED_SPD_DATA_DDR3</rc>
+    <description>Invalid SPD data returned.</description>
+    <ffdc>MTB_DIVIDEND</ffdc>
+    <ffdc>MTB_DIVISOR</ffdc>
+    <ffdc>FTB_DIVIDEND</ffdc>
+    <ffdc>FTB_DIVISOR</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+</hwpError>
+  <hwpError>
+    <rc>RC_CEN_MSS_UNSUPPORTED_SPD_DATA_COMMON</rc>
+    <description>Invalid SPD data returned.</description>
+    <ffdc>MIN_TCK</ffdc>
+    <ffdc>MIN_TAA</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+</hwpError>
+  <hwpError>
+    <rc>RC_CEN_MSS_MODULE_TYPE_MIX</rc>
+    <description>Differing DIMM types in the same configuration.</description>
+    <ffdc>MODULE_TYPE</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+</hwpError>
+  <hwpError>
+    <rc>RC_CEN_MSS_NO_COMMON_SUPPORTED_CL</rc>
+    <description>Current Configuration has no common supported CL Values.</description>
+    <ffdc>CL_SUPPORTED</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+</hwpError>
+  <hwpError>
+    <rc>RC_CEN_MSS_EXCEED_TAA_MAX_NO_CL</rc>
+    <description>Exceeded TAA MAX with Lowest frequency.  No compatable CL.</description>
+    <ffdc>CL_SUPPORTED</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+</hwpError>
+  <hwpError>
+    <rc>RC_CEN_MSS_UNSUPPORTED_FREQ_CALCULATED</rc>
+    <description>The frequency calculated with spd data is not supported by the jedec standards.</description>
+    <ffdc>DIMM_MIN_FREQ</ffdc>
+</hwpError>
+
+
+</hwpErrors>
