@@ -1283,14 +1283,13 @@ Querying them from DDR3 DIMMs will result in an error
 The following attributes can be queried from LRDIMM type DDR4 DIMMs only
 *******************************************************************************
 -->
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_DIMM_MODULE_ATTRIBUTES</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         Indicates number of registers used and number of rows of DRAM's on LRDIMM.
-              Byte 131, Bits 1-0 for # of registers used on LRDIMM.
-                00 - Undefined , 01 - 1 Register , 10,11 -Reserved.
+	Byte 131, Bits 1-0 for # of registers used on LRDIMM. 
+  	 00 - Undefined , 01 - 1 Register , 10,11 -Reserved.
         Byte 131, Bits 3-2 for # of rows of DRAM's on LRDIMM
          00,11- Undefined, 01- 1 Row, 10 - 2 Rows.
     </description>
@@ -1302,8 +1301,8 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <id>ATTR_CEN_SPD_REGISTER_MANF_ID</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
-        Manufacturer of the memory buffer on DIMM module.
-              Located in DDR4 SPD bytes 133(LSB) and 134(MSB).
+        Manufacturer of the memory buffer on DIMM module. 
+	     Located in DDR4 SPD bytes 133(LSB) and 134(MSB).
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -1545,7 +1544,6 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
--->
 <!--
 *******************************************************************************
 The following attributes are DDR3 specific. Regular HWPs should query the DDR
