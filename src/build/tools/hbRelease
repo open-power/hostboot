@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -427,6 +427,7 @@ sub execute_pre_release
     if($release =~ m/fips9/)
     {
         $CMVC_FILES .= "src/hbfw/img/hostboot_bootloader.bin ";
+        $CMVC_FILES .= "src/hbfw/img/hostboot_securerom.bin ";
     }
 
     # CMVC open feature
