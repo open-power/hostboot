@@ -87,6 +87,16 @@ fapi2::ReturnCode p9_mem_startclocks(const
 
     if (!l_sync_mode)
     {
+        uint32_t l_fbc_system_id;
+        uint8_t l_fbc_group_id;
+        uint8_t l_fbc_chip_id;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SYSTEM_ID, i_target_chip, l_fbc_system_id),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_SYSTEM_ID)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_GROUP_ID, i_target_chip, l_fbc_group_id),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_GROUP_ID)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CHIP_ID, i_target_chip, l_fbc_chip_id),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_CHIP_ID)");
+
         for (auto l_trgt_chplt : i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
              (fapi2::TARGET_FILTER_ALL_MC, fapi2::TARGET_STATE_FUNCTIONAL))
         {
@@ -114,6 +124,16 @@ fapi2::ReturnCode p9_mem_startclocks(const
             FAPI_INF("Call p9_sbe_common_configure_chiplet_FIR for MC chiplets");
             FAPI_TRY(p9_sbe_common_configure_chiplet_FIR(l_trgt_chplt));
 
+            FAPI_INF("Reset FBC chiplet configuration");
+            fapi2::buffer<uint64_t> l_cplt_conf0;
+            FAPI_TRY(fapi2::getScom(l_trgt_chplt, PERV_CPLT_CONF0, l_cplt_conf0),
+                     "Error from getScom (PERV_CPLT_CONF0)");
+            l_cplt_conf0.insertFromRight<PERV_1_CPLT_CONF0_TC_UNIT_SYS_ID_DC, PERV_1_CPLT_CONF0_TC_UNIT_SYS_ID_DC_LEN>
+            (l_fbc_system_id)
+            .insertFromRight<PERV_1_CPLT_CONF0_TC_UNIT_GROUP_ID_DC, PERV_1_CPLT_CONF0_TC_UNIT_GROUP_ID_DC_LEN>(l_fbc_group_id)
+            .insertFromRight<PERV_1_CPLT_CONF0_TC_UNIT_CHIP_ID_DC, PERV_1_CPLT_CONF0_TC_UNIT_CHIP_ID_DC_LEN>(l_fbc_chip_id);
+            FAPI_TRY(fapi2::putScom(l_trgt_chplt, PERV_CPLT_CONF0, l_cplt_conf0),
+                     "Error from putScom (PERV_CPLT_CONF0)");
         }
     }
 
