@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,51 +43,53 @@ namespace TRUSTEDBOOT
 
     enum TRUSTEDModuleId
     {
-        MOD_HOST_UPDATE_MASTER_TPM      = 0x00,
-        MOD_TPM_INITIALIZE              = 0x01,
-        MOD_TPM_CMD_STARTUP             = 0x02,
-        MOD_TPM_CMD_GETCAPFWVERSION     = 0x03,
-        MOD_TPM_MARSHALCMDDATA          = 0x04,
-        MOD_TPM_UNMARSHALRESPDATA       = 0x05,
-        MOD_TPM_VERIFYFUNCTIONAL        = 0x06,
-        MOD_TPM_CMD_PCREXTEND           = 0x07,
-        MOD_TPM_CMD_PCRREAD             = 0x08,
-        MOD_TPM_REPLAY_LOG              = 0x09,
-        MOD_TPM_PCREXTEND               = 0x0A,
-        MOD_TPM_TPMDAEMON               = 0x0B,
-        MOD_TPM_SYNCRESPONSE            = 0x0C,
-        MOD_TPM_SEPARATOR               = 0x0D,
+        MOD_HOST_UPDATE_MASTER_TPM       = 0x00,
+        MOD_TPM_INITIALIZE               = 0x01,
+        MOD_TPM_CMD_STARTUP              = 0x02,
+        MOD_TPM_CMD_GETCAPFWVERSION      = 0x03,
+        MOD_TPM_MARSHALCMDDATA           = 0x04,
+        MOD_TPM_UNMARSHALRESPDATA        = 0x05,
+        MOD_TPM_VERIFYFUNCTIONAL         = 0x06,
+        MOD_TPM_CMD_PCREXTEND            = 0x07,
+        MOD_TPM_CMD_PCRREAD              = 0x08,
+        MOD_TPM_REPLAY_LOG               = 0x09,
+        MOD_TPM_PCREXTEND                = 0x0A,
+        MOD_TPM_TPMDAEMON                = 0x0B,
+        MOD_TPM_SYNCRESPONSE             = 0x0C,
+        MOD_TPM_SEPARATOR                = 0x0D,
 
-        MOD_TPMLOGMGR_INITIALIZE        = 0x10,
-        MOD_TPMLOGMGR_ADDEVENT          = 0x11,
-        MOD_TPMLOGMGR_INITIALIZEEXISTLOG = 0x012,
-        MOD_TPMLOGMGR_GETDEVTREEINFO    = 0x13,
+        MOD_TPMLOGMGR_INITIALIZE         = 0x10,
+        MOD_TPMLOGMGR_ADDEVENT           = 0x11,
+        MOD_TPMLOGMGR_INITIALIZEEXISTLOG = 0x12,
+        MOD_TPMLOGMGR_GETDEVTREEINFO     = 0x13,
+        MOD_TPM_MARK_FAILED              = 0x14,
    };
 
     enum TRUSTEDReasonCode
     {
         // Reason codes 0x00 - 0x9F reserved for secure_reasoncodes.H
 
-        RC_TPM_START_FAIL               = SECURE_COMP_ID | 0xA0,
-        RC_TPM_EXISTENCE_FAIL           = SECURE_COMP_ID | 0xA1,
-        RC_TPM_GETCAP_FAIL              = SECURE_COMP_ID | 0xA2,
-        RC_TPM_GETCAP_FW_INVALID_RESP   = SECURE_COMP_ID | 0xA3,
-        RC_TPM_GETCAP2_FAIL             = SECURE_COMP_ID | 0xA4,
-        RC_TPM_GETCAP2_FW_INVALID_RESP  = SECURE_COMP_ID | 0xA5,
-        RC_TPM_MARSHAL_INVALID_CMD      = SECURE_COMP_ID | 0xA6,
-        RC_TPM_MARSHALING_FAIL          = SECURE_COMP_ID | 0xA7,
-        RC_TPM_UNMARSHAL_INVALID_CMD    = SECURE_COMP_ID | 0xA8,
-        RC_TPM_UNMARSHALING_FAIL        = SECURE_COMP_ID | 0xA9,
-        RC_TPMLOGMGR_ADDEVENT_FAIL      = SECURE_COMP_ID | 0xAA,
-        RC_TPMLOGMGR_ADDEVENTMARSH_FAIL = SECURE_COMP_ID | 0xAB,
-        RC_TPMLOGMGR_INIT_FAIL          = SECURE_COMP_ID | 0xAC,
-        RC_TPM_NOFUNCTIONALTPM_FAIL     = SECURE_COMP_ID | 0xAD,
-        RC_TPM_COMMAND_FAIL             = SECURE_COMP_ID | 0xAE,
-        RC_TPM_INVALID_ARGS             = SECURE_COMP_ID | 0xAF,
-        RC_TPMLOGMGR_LOGWALKFAIL        = SECURE_COMP_ID | 0xB0,
-        RC_SENDRECV_FAIL                = SECURE_COMP_ID | 0xB1,
-        RC_SEND_FAIL                    = SECURE_COMP_ID | 0xB2,
-        RC_MSGRESPOND_FAIL              = SECURE_COMP_ID | 0xB3,
+        RC_TPM_START_FAIL                = SECURE_COMP_ID | 0xA0,
+        RC_TPM_EXISTENCE_FAIL            = SECURE_COMP_ID | 0xA1,
+        RC_TPM_GETCAP_FAIL               = SECURE_COMP_ID | 0xA2,
+        RC_TPM_GETCAP_FW_INVALID_RESP    = SECURE_COMP_ID | 0xA3,
+        RC_TPM_GETCAP2_FAIL              = SECURE_COMP_ID | 0xA4,
+        RC_TPM_GETCAP2_FW_INVALID_RESP   = SECURE_COMP_ID | 0xA5,
+        RC_TPM_MARSHAL_INVALID_CMD       = SECURE_COMP_ID | 0xA6,
+        RC_TPM_MARSHALING_FAIL           = SECURE_COMP_ID | 0xA7,
+        RC_TPM_UNMARSHAL_INVALID_CMD     = SECURE_COMP_ID | 0xA8,
+        RC_TPM_UNMARSHALING_FAIL         = SECURE_COMP_ID | 0xA9,
+        RC_TPMLOGMGR_ADDEVENT_FAIL       = SECURE_COMP_ID | 0xAA,
+        RC_TPMLOGMGR_ADDEVENTMARSH_FAIL  = SECURE_COMP_ID | 0xAB,
+        RC_TPMLOGMGR_INIT_FAIL           = SECURE_COMP_ID | 0xAC,
+        RC_TPM_NOFUNCTIONALTPM_FAIL      = SECURE_COMP_ID | 0xAD,
+        RC_TPM_COMMAND_FAIL              = SECURE_COMP_ID | 0xAE,
+        RC_TPM_INVALID_ARGS              = SECURE_COMP_ID | 0xAF,
+        RC_TPMLOGMGR_LOGWALKFAIL         = SECURE_COMP_ID | 0xB0,
+        RC_SENDRECV_FAIL                 = SECURE_COMP_ID | 0xB1,
+        RC_SEND_FAIL                     = SECURE_COMP_ID | 0xB2,
+        RC_MSGRESPOND_FAIL               = SECURE_COMP_ID | 0xB3,
+        RC_UPDATE_SECURITY_CTRL_HWP_FAIL = SECURE_COMP_ID | 0xB4,
     };
 #ifdef __cplusplus
 }

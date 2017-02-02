@@ -54,6 +54,7 @@ namespace ISTEP
         MOD_PM_LOAD_HOST_DATA_TO_SRAM                     = 0x12,
         MOD_VOLTAGE_CONFIG                                = 0x13,
         MOD_PM_VERIFY_OCC_CHKPT                           = 0x14,
+        MOD_UPDATE_REDUNDANT_TPM                          = 0x15,
     };
 
     /**
@@ -90,6 +91,7 @@ namespace ISTEP
         RC_NO_PRESENT_EQS                        = ISTEP_COMP_ID | 0x1A,
         RC_NOMINAL_FREQ_MISMATCH                 = ISTEP_COMP_ID | 0x1B,
         RC_PM_OCC_CHKPT_TIMEOUT                  = ISTEP_COMP_ID | 0x1C,
+        RC_UPDATE_SECURITY_CTRL_HWP_FAIL         = ISTEP_COMP_ID | 0x1D,
     };
 
 };
