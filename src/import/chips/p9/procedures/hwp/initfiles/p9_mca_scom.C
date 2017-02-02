@@ -32,6 +32,7 @@ using namespace fapi2;
 constexpr uint64_t literal_0b0100 = 0b0100;
 constexpr uint64_t literal_0b11100 = 0b11100;
 constexpr uint64_t literal_0b110 = 0b110;
+constexpr uint64_t literal_0b0000000000000000000000000 = 0b0000000000000000000000000;
 constexpr uint64_t literal_0x1 = 0x1;
 constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_1 = 1;
@@ -174,6 +175,12 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             l_scom_buffer.insert<50, 5, 59, uint64_t>(literal_0b11100 );
             l_scom_buffer.insert<37, 3, 61, uint64_t>(literal_0b110 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010824ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5010825ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<4, 25, 39, uint64_t>(literal_0b0000000000000000000000000 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5010825ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5010826ull, l_scom_buffer ));
