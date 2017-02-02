@@ -69,7 +69,7 @@ extern "C"
         {                                               \
             (DATA_SIZE = DATA_SIZE + (RING_ALIGN_BOUNDARY - TEMP_LEN));\
         }                                               \
-    }                                                   \
+    }
 
     /**
      * @brief aligns start of scan ring to 8B boundary.
@@ -1526,6 +1526,7 @@ extern "C"
         uint32_t maxCoreSpecRingLength = 0;
         uint32_t ringLength = 0;
         uint32_t tempSize = 0;
+        uint32_t tempRepairLength = 0;
         uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
 
         do
@@ -1573,10 +1574,11 @@ extern "C"
                         continue;
                     }
 
+                    ALIGN_DWORD(tempRepairLength, tempSize);
+
                     ringLength += tempSize;
                 }
 
-                ALIGN_DWORD(tempSize, ringLength)
                 maxCoreSpecRingLength = ringLength > maxCoreSpecRingLength ? ringLength : maxCoreSpecRingLength;
             }
 
