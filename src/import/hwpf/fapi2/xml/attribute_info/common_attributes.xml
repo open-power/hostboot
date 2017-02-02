@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -28,7 +28,7 @@
     <id>ATTR_FUNCTIONAL</id>
     <targetType>
       TARGET_TYPE_PROC_CHIP,
-      TARGET_TYPE_CORE, TARGET_TYPE_EX, TARGET_TYPE_EQ, 
+      TARGET_TYPE_CORE, TARGET_TYPE_EX, TARGET_TYPE_EQ,
       TARGET_TYPE_MCS, TARGET_TYPE_MCA, TARGET_TYPE_MCBIST, TARGET_TYPE_MI, TARGET_TYPE_DMI,
       TARGET_TYPE_XBUS, TARGET_TYPE_OBUS,
       TARGET_TYPE_NV,
@@ -36,7 +36,8 @@
       TARGET_TYPE_PEC, TARGET_TYPE_PHB, TARGET_TYPE_CAPP,
       TARGET_TYPE_MEMBUF_CHIP,
       TARGET_TYPE_MBA,
-      TARGET_TYPE_DIMM
+      TARGET_TYPE_DIMM,
+      TARGET_TYPE_L4
     </targetType>
     <description>
       1 if the target is functional, else 0.  Set by the platform.
