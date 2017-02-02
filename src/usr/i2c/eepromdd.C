@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,6 +103,10 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        TARGETING::TYPE_NODE,
                        eepromPerformOp );
 
+DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
+                       DeviceFW::EEPROM,
+                       TARGETING::TYPE_MCS,
+                       eepromPerformOp );
 // ------------------------------------------------------------------
 // eepromPerformOp
 // ------------------------------------------------------------------

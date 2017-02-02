@@ -1659,6 +1659,25 @@ sub copyAttribute
     $self->log($dest_target, "Copy Attribute: $attribute=$value");
 }
 
+## copy an attribute between targets
+sub copyAttributeFields
+{
+    my $self = shift;
+    my $source_target = shift;
+    my $dest_target = shift;
+    my $attribute = shift;
+
+    foreach my $f(sort keys
+        %{$self->{data}->{TARGETS}->{$source_target}->{ATTRIBUTES}->{$attribute}->{default}->{field}})
+    {
+            my $field_val = $self->getAttributeField($source_target,
+                $attribute, $f);
+            $self->setAttributeField($dest_target,$attribute,$f,
+                $field_val);
+            $self->log($dest_target, "Copy Attribute Field:$attribute($f)=$field_val");
+    }
+}
+
 ## sets an attribute
 sub setAttribute
 {
