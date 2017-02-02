@@ -89,7 +89,6 @@ firmware notes: none</description>
     <odmVisable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_VOLT_VPP</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -101,7 +100,6 @@ firmware notes: none</description>
     <writeable/>
     <odmVisable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_MSS_FREQ_OVERRIDE</id>
@@ -536,7 +534,6 @@ This is for DDR3</description>
     <array> 2</array>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_WR_VREF_SCHMOO</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -547,7 +544,6 @@ This is for DDR3</description>
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -591,7 +587,6 @@ OHM30_FFE480 = 0x48, OHM30_FFE240 = 0x38, OHM30_FFE160 = 0x28, OHM30_FFE120 = 0x
     <array> 2</array>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_CEN_DRV_IMP_CLK_SCHMOO</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -602,9 +597,7 @@ OHM30_FFE480 = 0x48, OHM30_FFE240 = 0x38, OHM30_FFE160 = 0x28, OHM30_FFE120 = 0x
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_CEN_DRV_IMP_SPCKE_SCHMOO</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -615,9 +608,7 @@ OHM30_FFE480 = 0x48, OHM30_FFE240 = 0x38, OHM30_FFE160 = 0x28, OHM30_FFE120 = 0x
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_CEN_DRV_IMP_CNTL_SCHMOO</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -630,7 +621,6 @@ This is the nominal value</description>
     <array> 2</array>
     <persistRuntime/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_CEN_RCV_IMP_DQ_DQS</id>
@@ -649,7 +639,6 @@ This is the nominal value</description>
     <array> 2</array>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -660,7 +649,6 @@ This is the nominal value</description>
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_CEN_SLEW_RATE_DQ_DQS</id>
@@ -694,7 +682,6 @@ SLEW_MAXV_NS = 7</enum>
     <array> 2</array>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_CEN_SLEW_RATE_CLK_SCHMOO</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -705,9 +692,7 @@ SLEW_MAXV_NS = 7</enum>
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_CEN_SLEW_RATE_SPCKE_SCHMOO</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -718,9 +703,7 @@ SLEW_MAXV_NS = 7</enum>
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_CEN_SLEW_RATE_ADDR_SCHMOO</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -731,9 +714,7 @@ SLEW_MAXV_NS = 7</enum>
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_CEN_SLEW_RATE_CNTL_SCHMOO</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -744,7 +725,6 @@ SLEW_MAXV_NS = 7</enum>
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_RD_VREF</id>
@@ -763,7 +743,6 @@ This is the nominal value</description>
     <array> 2</array>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_CEN_RD_VREF_SCHMOO</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -774,9 +753,7 @@ This is the nominal value</description>
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_SIZE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -791,7 +768,6 @@ firmware notes: none</description>
     <array> 2 2</array>
     <persistRuntime/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_BANKS</id>
@@ -871,7 +847,6 @@ firmware notes: none</description>
     <odmChangeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TRRD_L</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -884,7 +859,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TRP</id>
@@ -899,7 +873,6 @@ firmware notes: none</description>
     <odmChangeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TRAS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -912,7 +885,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TRC</id>
@@ -966,7 +938,6 @@ firmware notes: none</description>
     <odmChangeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TWTR_L</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -979,7 +950,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TRTP</id>
@@ -1285,7 +1255,6 @@ firmware notes: none</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC00</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1302,9 +1271,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC01</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1319,9 +1286,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC02</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1335,9 +1300,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC03</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1351,9 +1314,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC04</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1367,9 +1328,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC05</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1383,9 +1342,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC06_07</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1399,9 +1356,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC08</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1416,9 +1371,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC09</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1432,10 +1385,9 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
+    <id>ATTR_CEN_EFF_DIMM_DDR4_RC10</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>RDIMM Operating Speed;  Read from ATTR_CEN_MSS_FREQ; mss_eff_cnfg will set Default value - 00. Values Range from 00 to 09. No need to calculate; User can override with desired experimental value.
 creator: mss_eff_cnfg
@@ -1461,9 +1413,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC12</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1477,9 +1427,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC13</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1493,9 +1441,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC14</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1509,9 +1455,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC15</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1525,7 +1469,6 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC_1x</id>
@@ -1569,7 +1512,6 @@ firmware notes: none</description>
     <array> 2 2</array>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC_4x</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1583,9 +1525,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC_5x</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1599,9 +1539,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC_6x</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1615,7 +1553,6 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC_7x</id>
@@ -1687,7 +1624,6 @@ firmware notes: none</description>
     <array> 2 2</array>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_RCD_IBT</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1702,9 +1638,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_RCD_MIRROR_MODE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1719,9 +1653,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_MODE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1732,7 +1664,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_ADDR_MODE</id>
@@ -1761,7 +1692,6 @@ firmware notes: none</description>
     <odmChangeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_PARAM_VALID</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1778,9 +1708,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_WR_EYE_MIN_MARGIN</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1790,9 +1718,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_RD_EYE_MIN_MARGIN</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1802,9 +1728,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_DQS_CLK_MIN_MARGIN</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1814,9 +1738,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_RD_GATE_MIN_MARGIN</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1826,9 +1748,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_ADDR_CMD_MIN_MARGIN</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1838,7 +1758,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_MEMCAL_INTERVAL</id>
@@ -1908,7 +1827,6 @@ firmware notes: none</description>
     <array> 2 2</array>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_NUM_PACKAGES_PER_RANK</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1919,9 +1837,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_NUM_DIES_PER_PACKAGE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1932,7 +1848,6 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
@@ -1967,7 +1882,6 @@ firmware notes: none</description>
     <persistRuntime/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_MEM_WATT_TARGET</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1978,9 +1892,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_POWER_SLOPE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1992,9 +1904,7 @@ firmware notes: none</description>
     <array> 2 2</array>
     <persistRuntime/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_POWER_SLOPE2</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2006,9 +1916,7 @@ firmware notes: none</description>
     <array> 2 2</array>
     <persistRuntime/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_POWER_INT</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2020,9 +1928,7 @@ firmware notes: none</description>
     <array> 2 2</array>
     <persistRuntime/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_POWER_INT2</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2034,9 +1940,7 @@ firmware notes: none</description>
     <array> 2 2</array>
     <persistRuntime/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_TOTAL_POWER_SLOPE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2048,9 +1952,7 @@ firmware notes: none</description>
     <array> 2 2</array>
     <persistRuntime/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_TOTAL_POWER_SLOPE2</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2062,9 +1964,7 @@ firmware notes: none</description>
     <array> 2 2</array>
     <persistRuntime/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_TOTAL_POWER_INT</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2076,9 +1976,7 @@ firmware notes: none</description>
     <array> 2 2</array>
     <persistRuntime/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_TOTAL_POWER_INT2</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2090,7 +1988,6 @@ firmware notes: none</description>
     <array> 2 2</array>
     <persistRuntime/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -2160,7 +2057,6 @@ firmware notes: none</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_CHANNEL_PAIR_MAXPOWER</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2171,8 +2067,6 @@ firmware notes: none</description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2183,9 +2077,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2196,9 +2088,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2209,7 +2099,6 @@ firmware notes: none</description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -2233,7 +2122,6 @@ firmware notes: none</description>
     <persistRuntime/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -2242,9 +2130,7 @@ firmware notes: none</description>
     <platInit/>
     <odmVisable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_INTERLEAVE_ENABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -2254,7 +2140,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -2303,7 +2188,6 @@ This attribute will only be alive in the Tuelta system.
     <writeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -2314,7 +2198,6 @@ This attribute will only be alive in the Tuelta system.
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_MSS_CACHE_ENABLE</id>
@@ -2350,7 +2233,6 @@ Note: Cronus and Firmware plus our initfiles do not really support any of the UN
     <odmChangeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_MEM_MC_IN_GROUP</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -2362,8 +2244,6 @@ Note: Cronus and Firmware plus our initfiles do not really support any of the UN
     <array>8</array>
     <persistRuntime/>
 </attribute>
--->
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_MCS_GROUP_32</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -2375,7 +2255,6 @@ Measured in GB</description>
     <odmChangeable/>
     <array>16 16</array>
 </attribute>
--->
 <attribute>
     <id>ATTR_CEN_MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2681,7 +2560,6 @@ firmware notes: none</description>
     <odmChangeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_RTT_PARK</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2696,7 +2574,6 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2 4</array>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_CA_PARITY</id>
@@ -2798,7 +2675,6 @@ Firmware notes: none</description>
     <array> 2 2 4</array>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TCCD_L</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2812,7 +2688,6 @@ Firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -2937,7 +2812,6 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <array> 2</array>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_ALLOW_SINGLE_PORT</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2948,7 +2822,6 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_MSS_DQS_SWIZZLE_TYPE</id>
@@ -2988,7 +2861,6 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <odmChangeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MCBIST_PATTERN</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2998,9 +2870,7 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MCBIST_TEST_TYPE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3010,9 +2880,7 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MCBIST_PRINTING_DISABLE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3022,9 +2890,7 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MCBIST_DATA_ENABLE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3034,9 +2900,7 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MCBIST_USER_RANK</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3046,9 +2910,7 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MCBIST_USER_BANK</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3058,9 +2920,7 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SCHMOO_MULTIPLE_SETUP_CALL</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3070,7 +2930,6 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -3113,7 +2972,6 @@ DRAM Rtt_WR for all ranks, DRAM Rtt_Nom for ranks 0 and 1, DRAM driver impedance
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_LRDIMM_ADDITIONAL_CNTL_WORDS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3127,9 +2985,7 @@ Eff config should set this up</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_LRDIMM_ADDITIONAL_CNTL_WORDS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3143,7 +2999,6 @@ Eff config should set this up</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_LRDIMM_RANK_MULT_MODE</id>
@@ -3177,7 +3032,6 @@ Will be set at an MBA level with one policy to be used</description>
     <odmChangeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MCBIST_RANDOM_SEED_VALUE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3187,9 +3041,7 @@ Will be set at an MBA level with one policy to be used</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MCBIST_RANDOM_SEED_TYPE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3199,7 +3051,6 @@ Will be set at an MBA level with one policy to be used</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -3213,7 +3064,6 @@ Will be set at an MBA level with one policy to be used</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3223,9 +3073,7 @@ Will be set at an MBA level with one policy to be used</description>
     <odmVisable/>
     <persistRuntime/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3235,7 +3083,6 @@ Will be set at an MBA level with one policy to be used</description>
     <odmVisable/>
     <persistRuntime/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_MRW_MEM_THROTTLE_DENOMINATOR</id>
@@ -3257,7 +3104,6 @@ Will be set at an MBA level with one policy to be used</description>
     <odmChangeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_MAX_DRAM_DATABUS_UTIL</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3267,7 +3113,6 @@ Will be set at an MBA level with one policy to be used</description>
     <odmVisable/>
     <persistRuntime/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_MSS_EFF_VPD_VERSION</id>
@@ -3281,7 +3126,6 @@ Will be set at an MBA level with one policy to be used</description>
     <odmChangeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_NEST_CAPABLE_FREQUENCIES</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3294,9 +3138,7 @@ Will be set at an MBA level with one policy to be used</description>
     <odmChangeable/>
     <enum>NONE = 0, 8_0G = 1, 9_6G = 2, 8_0G_OR_9_6G = 3</enum>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_STRICT_MBA_PLUG_RULE_CHECKING</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3307,9 +3149,7 @@ Will be set at an MBA level with one policy to be used</description>
     <platInit/>
     <enum>FALSE = 0, TRUE = 1</enum>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_MCS_GROUP_ALLOW_ONLY_ADJ_PAIR</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3320,9 +3160,7 @@ Will be set at an MBA level with one policy to be used</description>
     <platInit/>
     <enum>FALSE = 0, TRUE = 1</enum>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_ENHANCED_GROUPING_NO_MIRRORING</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3333,7 +3171,6 @@ Will be set at an MBA level with one policy to be used</description>
     <platInit/>
     <enum>FALSE = 0, TRUE = 1</enum>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -3584,7 +3421,6 @@ Will be set at an MBA level with one policy to be used</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_VOLT_OVERRIDE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3594,9 +3430,7 @@ Will be set at an MBA level with one policy to be used</description>
     <platInit/>
     <odmVisable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_VOLT_COMPLIANT_DIMMS</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3606,7 +3440,6 @@ Will be set at an MBA level with one policy to be used</description>
     <platInit/>
     <odmVisable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -3765,7 +3598,6 @@ Will be set at an MBA level with one policy to be used</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_VMEM_REGULATOR_MAX_DIMM_COUNT</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3775,9 +3607,7 @@ Will be set at an MBA level with one policy to be used</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3787,9 +3617,7 @@ Will be set at an MBA level with one policy to be used</description>
     <enum>FALSE = 0, TRUE = 1</enum>
     <odmVisable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3798,9 +3626,7 @@ Will be set at an MBA level with one policy to be used</description>
     <platInit/>
     <odmVisable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3809,8 +3635,6 @@ Will be set at an MBA level with one policy to be used</description>
     <platInit/>
     <odmVisable/>
 </attribute>
--->
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3819,7 +3643,6 @@ Will be set at an MBA level with one policy to be used</description>
     <platInit/>
     <odmVisable/>
 </attribute>
--->
 
 <!--
 <attribute>
