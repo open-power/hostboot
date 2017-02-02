@@ -1049,9 +1049,6 @@ sub processDimms
 
             my $type       = $self->getType($dimm);
 
-            $self->setAttribute($dimm,"FAPI_NAME",
-                    getFapiName($type, $node, $dimm_pos));
-
             $self->setAttribute($dimm, "ORDINAL_ID",$dimm_pos);
             $self->setAttribute($dimm, "POSITION",  $dimm_pos);
             $self->setAttribute($dimm, "VPD_REC_NUM", $dimm_pos);
@@ -1060,18 +1057,26 @@ sub processDimms
             $self->setAttribute($dimm, "MBA_PORT", 0);  #0, each MCA is a port
 
             ## set all FAPI_POS
-            my $DIMM_PER_CHANNEL = 2;
-            my $mcbist_pos = $proc * $self->{UNIT_COUNTS}->
-              {$proc_target}->{MCBIST} +
+            my $MCBIST_PER_CHIP = $self->{UNIT_COUNTS}->
+              {$proc_target}->{MCBIST};
+            my $MCS_PER_CHIP = $self->{UNIT_COUNTS}->
+              {$mcbist_target}->{MCS} * $MCBIST_PER_CHIP;
+            my $MCA_PER_CHIP = $self->{UNIT_COUNTS}->
+              {$mcs_target}->{MCA} * $MCS_PER_CHIP;
+            my $DIMM_PER_MCA = 2;
+
+            my $mcbist_pos = ($proc * $MCBIST_PER_CHIP) +
               $self->getAttribute($mcbist_target,"REL_POS");
-            my $mcs_pos = $mcbist_pos * $self->{UNIT_COUNTS}->
-              {$mcbist_target}->{MCS} +
+            my $mcs_pos = ($proc * $MCS_PER_CHIP) +
               $self->getAttribute($mcs_target,"REL_POS");
-            my $mca_pos = $mcs_pos * $self->{UNIT_COUNTS}->
-              {$mcs_target}->{MCA} +
+            my $mca_pos = ($proc * $MCA_PER_CHIP) +
               $self->getAttribute($mca_target,"REL_POS");
-            my $dimm_pos = $mca_pos * $DIMM_PER_CHANNEL +
-                        $self->getAttribute($dimm,"REL_POS");
+            my $dimm_pos = ($mca_pos * $DIMM_PER_MCA) +
+              $self->getAttribute($dimm,"REL_POS");
+
+
+            $self->setAttribute($dimm,"FAPI_NAME",
+                    getFapiName($type, $node, $dimm_pos));
 
             $self->setAttribute($mcbist_target, "FAPI_POS",  $mcbist_pos);
             $self->setAttribute($mcs_target, "FAPI_POS",  $mcs_pos);
