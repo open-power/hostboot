@@ -38,8 +38,7 @@
 ///
 ///     Check for valid parameters
 ///     if PM_INIT {
-///         Get the delay setting held in platform attributes
-///         Convert these to hardware values
+///         Convert the hardcoded delay to hardware values
 ///         for each EX chiplet {
 ///             Store the VDD delay and VOFF value
 ///             Store the VCS delay and VOFF values
@@ -151,21 +150,6 @@ uint8_t convert_delay_to_value (
 /// \retval FAPI_RC_SUCCESS if something good happens,
 /// \retval RC per p9_pfet_init_errors.xml otherwise
 ///
-/// \attr  ATTR_PM_PFET_POWERUP_DELAY_NS -
-///     Time (in nanoseconds) between PFET controller steps (7 of them)
-///     when turning the PFET ON. Applies to both VDD and VCS rails
-///
-/// \attr  ATTR_PM_PFET_POWERDOWN_DELAY_NS -
-///     Time (in nanoseconds) between PFET controller steps (7 of them)
-///     when turning the PFES OFF.  Applies to both VDD and VCS rails
-///
-/// \attr  ATTR_PM_PFET_VDD_VOFF_SEL -
-///     Value of the stage withing the PFET controller representing OFF
-///     for the VDD rail.  Enum: 0 through 8 inclusive
-///
-/// \attr  ATTR_PM_PFET_VCS_VOFF_SEL -
-///     Value of the stage withing the PFET controller representing OFF
-///     for the VCS rail.  Enum: 0 through 8 inclusive
 
 fapi2::ReturnCode p9_pm_pfet_init(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
@@ -261,31 +245,15 @@ fapi2::ReturnCode pfet_init(
                             l_proc_nest_frequency),
               "Error getting ATTR_FREQ_PB_MHZ");
 
+    // Hardcode delay values.
+    // Note: these used to be attributes but they did not vary per system
+    l_pfet_powerup_delay_ns     = 250;
+    l_pfet_powerdown_delay_ns   = 250;
 
-    /// ----------------------------------------------------------
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_PFET_POWERUP_DELAY_NS,
-                            FAPI_SYSTEM,
-                            l_pfet_powerup_delay_ns),
-              "Error getting ATTR_PFET_POWERUP_DELAY_NS");
-
-    /// ----------------------------------------------------------
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_PFET_POWERDOWN_DELAY_NS,
-                            FAPI_SYSTEM,
-                            l_pfet_powerdown_delay_ns),
-              "Error getting ATTR_PFET_POWERDOWN_DELAY_NS");
-
-    /// ----------------------------------------------------------
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_PFET_VDD_VOFF_SEL,
-                            FAPI_SYSTEM,
-                            l_pfet_vdd_voff_sel),
-              "Error getting ATTR_PFET_VDD_VOFF_SEL");
-
-    /// ----------------------------------------------------------
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_PFET_VCS_VOFF_SEL,
-                            FAPI_SYSTEM,
-                            l_pfet_vcs_voff_sel),
-              "Error getting ATTR_PFET_VCS_VOFF_SEL");
-
+    // Set the "OFF" stage of the 8 step PFET controller.
+    // Note: these used to be attributes but they did not vary per system
+    l_pfet_vdd_voff_sel         = 8;
+    l_pfet_vcs_voff_sel         = 8;
 
     //  ******************************************************************
     //  Calculate Delay values out of PFET Delays
@@ -300,14 +268,12 @@ fapi2::ReturnCode pfet_init(
                                 l_proc_nest_frequency);
 
 
-    FAPI_DBG("PFET Power Up Delay");
-    FAPI_DBG("  ATTR_PM_PFET_POWERUP_DELAY_NS      : %d (0x%X)",
+    FAPI_DBG("PFET Power Up Delay - hardcoded  : %d (0x%X)",
              l_pfet_powerup_delay_ns,
              l_pfet_powerup_delay_ns);
     FAPI_DBG("  pfet_powerup_delay_value           : %X", l_pfet_powerup_delay_value);
 
-    FAPI_DBG("PFET Power Down Delay");
-    FAPI_DBG("  ATTR_PM_PFET_POWERDOWN_DELAY_NS    : %d (0x%X)",
+    FAPI_DBG("PFET Power Down Delay - hardcoded : %d (0x%X)",
              l_pfet_powerdown_delay_ns,
              l_pfet_powerdown_delay_ns);
     FAPI_DBG("  pfet_powerdown_delay_value         : %X", l_pfet_powerdown_delay_value);
