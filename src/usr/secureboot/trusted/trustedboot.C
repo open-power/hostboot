@@ -59,6 +59,9 @@
 #ifdef CONFIG_DRTM
 #include <secureboot/drtm.H>
 #endif
+#include <fapi2.H>
+#include <plat_hwp_invoker.H>
+#include <p9_update_security_ctrl.H>
 
 namespace TRUSTEDBOOT
 {
@@ -812,15 +815,140 @@ void pcrExtendSeparator(TpmTarget & io_target)
 
 void tpmMarkFailed(TpmTarget * io_target)
 {
-
     TRACFCOMP( g_trac_trustedboot,
                ENTER_MRK"tpmMarkFailed() Marking TPM as failed : "
                "tgt=0x%X",
                TARGETING::get_huid(io_target->tpmTarget));
 
     io_target->failed = true;
-    /// @todo RTC:125287 Add fail marker to TPM log and disable TPM access
 
+    #ifdef CONFIG_SECUREBOOT
+    TARGETING::Target* l_tpm = io_target->tpmTarget;
+
+    errlHndl_t l_err = nullptr;
+    TARGETING::Target* l_proc = nullptr;
+
+    do {
+
+    if (!SECUREBOOT::enabled())
+    {
+        break;
+    }
+
+    // for the given tpm target, find the processor target
+    TARGETING::TargetHandleList l_procList;
+    getAllChips(l_procList,TARGETING::TYPE_PROC,false);
+
+    auto l_tpmInfo = l_tpm->getAttr<TARGETING::ATTR_TPM_INFO>();
+
+    for(auto it : l_procList)
+    {
+        auto l_physPath = it->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        if (l_tpmInfo.i2cMasterPath == l_physPath)
+        {
+            // found processor to deconfigure
+            l_proc = it;
+            break;
+        }
+    }
+    if (l_proc == nullptr)
+    {
+        assert(false,"tpmMarkFailed - TPM with non-existent processor indicates"
+            " a bad MRW. TPM tgt=0x%X", TARGETING::get_huid(l_tpm));
+    }
+
+    // set ATTR_SECUREBOOT_PROTECT_DECONFIGURED_TPM for the processor
+    uint8_t l_protectTpm = 1;
+    l_proc->setAttr<TARGETING::ATTR_SECUREBOOT_PROTECT_DECONFIGURED_TPM>(
+        l_protectTpm);
+
+    // do not deconfigure the processor if it already deconfigured
+    TARGETING::PredicateHwas isNonFunctional;
+    isNonFunctional.functional(false);
+    if (isNonFunctional(l_proc))
+    {
+        // Note: at this point l_err is nullptr so
+        // no error log is created on break
+        break;
+    }
+
+    uint64_t l_regValue = 0;
+    l_err = SECUREBOOT::getSecuritySwitch(l_regValue, l_proc);
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_trustedboot,
+            ERR_MRK"tpmMarkFailed - call to getSecuritySwitch failed");
+        break;
+    }
+    // if the SBE lock bit is not set, it means that istep 10.3 hasn't executed
+    // yet, so we will let istep 10.3 call p9_update_security_control HWP
+    // if the SBE lock bit is set, then we will call the HWP here
+    if (!(l_regValue & static_cast<uint64_t>(SECUREBOOT::ProcSecurity::SULBit)))
+    {
+        break;
+    }
+
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapiTarg(l_proc);
+
+    FAPI_INVOKE_HWP(l_err, p9_update_security_ctrl, l_fapiTarg);
+
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_trustedboot,
+            ERR_MRK"tpmMarkFailed - call to p9_update_security_ctrl failed ");
+    }
+
+    } while(0);
+
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_trustedboot,
+            ERR_MRK "Processor tgt=0x%X TPM tgt=0x&X. Deconfiguring processor "
+            "because future security cannot be guaranteed.",
+            TARGETING::get_huid(l_proc),
+            TARGETING::get_huid(l_tpm));
+
+        // save the plid from the error before commiting
+        auto plid = l_err->plid();
+
+        ERRORLOG::ErrlUserDetailsTarget(l_proc).addToLog(l_err);
+
+        // commit this error log first before creating the new one
+        errlCommit(l_err, SECURE_COMP_ID);
+
+       /*@
+        * @errortype
+        * @reasoncode       TRUSTEDBOOT::RC_UPDATE_SECURITY_CTRL_HWP_FAIL
+        * @moduleid         TRUSTEDBOOT::MOD_TPM_MARK_FAILED
+        * @severity         ERRL_SEV_UNRECOVERABLE
+        * @userdata1        Processor Target
+        * @userdata2        TPM Target
+        * @devdesc          Failed to set SEEPROM lock and/or TPM deconfig
+        *                   protection for this processor, so we cannot
+        *                   guarrantee platform secuirty for this processor
+        * @custdesc         Platform security problem detected
+        */
+        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            TRUSTEDBOOT::MOD_TPM_MARK_FAILED,
+            TRUSTEDBOOT::RC_UPDATE_SECURITY_CTRL_HWP_FAIL,
+            TARGETING::get_huid(l_proc),
+            TARGETING::get_huid(l_tpm));
+
+        l_err->addHwCallout(l_proc,
+                            HWAS::SRCI_PRIORITY_LOW,
+                            HWAS::DELAYED_DECONFIG,
+                            HWAS::GARD_NULL);
+
+        l_err->collectTrace(SECURE_COMP_NAME);
+
+        // pass on the plid from the previous error log to the new one
+        l_err->plid(plid);
+
+        ERRORLOG::ErrlUserDetailsTarget(l_proc).addToLog(l_err);
+
+        ERRORLOG::errlCommit(l_err, SECURE_COMP_ID);
+    }
+    #endif
 }
 
 void tpmVerifyFunctionalTpmExists()
