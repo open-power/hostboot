@@ -64,7 +64,7 @@ my $buffer_ffdc_type          = "fapi2::buffer";
 my $variable_buffer_ffdc_type = "fapi2::variable_buffer";
 my $ffdc_type                 = "fapi2::ffdc_t";
 my $mcast_type                = "fapi2::mcast_t";
-my $ffdc_count = 0;
+my $ffdc_count                = 0;
 
 # There are some names used in the XML files which exist in either
 # c++ keywords (case, for example) or macros (DOMAIN). The one's which
@@ -312,8 +312,9 @@ sub addFfdcMethod
             $method_body .= "        fapi2::g_FfdcData.ffdcData[$objectNumber].size =";
             $method_body .= " fapi2::getErrorInfoFfdcSize(i_value);\n";
             $method_body .= "        return *this;\n    };\n\n";
+
             # ffdc_count is used to determine the maximum index written in sbe buffer
-            if( $objectNumber > $ffdc_count)
+            if ( $objectNumber > $ffdc_count )
             {
                 $ffdc_count = $objectNumber;
             }
@@ -383,8 +384,9 @@ sub addFfdcMethod
             $method_body .= "        fapi2::g_FfdcData.ffdcData[$objectNumber].size =";
             $method_body .= " fapi2::getErrorInfoFfdcSize(i_value);\n";
             $method_body .= "        return *this;\n    };\n\n";
+
             # ffdc_count is used to determine the maximum index written in sbe buffer
-            if( $objectNumber > $ffdc_count)
+            if ( $objectNumber > $ffdc_count )
             {
                 $ffdc_count = $objectNumber;
             }
@@ -393,7 +395,7 @@ sub addFfdcMethod
 
     $method .= ( $arg_empty_ffdc eq undef ) ? $method_body : "    {return *this;}\n\n";
     $methods->{$key}{ffdc_count} = $ffdc_count;
-    $methods->{$key}{method} = $method;
+    $methods->{$key}{method}     = $method;
 }
 
 #------------------------------------------------------------------------------
@@ -1480,12 +1482,14 @@ foreach my $argnum ( 0 .. $#ARGV )
         {
             print ECFILE $methods{$key}{method};
             $method_count++;
+
             # count number of indices written in sbe buffer
-            if($methods{$key}{ffdc_count} > $count)
+            if ( $methods{$key}{ffdc_count} > $count )
             {
                 $count = $methods{$key}{ffdc_count};
             }
         }
+
         # Actual count is +1, as indices start from 0
         $count += 1;
         if ( $arg_local_ffdc eq undef )
