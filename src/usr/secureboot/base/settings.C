@@ -100,10 +100,14 @@ namespace SECUREBOOT
             {
                 break;
             }
+
+            // If the "Secure Mode Disable" (SMD) bit is 0b1 in the CBS
+            // Control/Status register, hardware security is deasserted;
+            // otherwise (0b0), hardware security is asserted
             o_state = (l_regValue &
                 static_cast<uint64_t>(ProcCbsControl::JumperStateBit)) ?
-                     SecureJumperState::SECURITY_ASSERTED :
-                     SecureJumperState::SECURITY_DEASSERTED;
+                     SecureJumperState::SECURITY_DEASSERTED :
+                     SecureJumperState::SECURITY_ASSERTED;
 
             SB_INF("getJumperState() state:%i huid:%.8X", o_state,
                                                             get_huid(i_targ));
