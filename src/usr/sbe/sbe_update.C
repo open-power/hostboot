@@ -1187,9 +1187,9 @@ namespace SBE
 
             // setup loop parameters
             coreCount = __builtin_popcount(coreMask);
-            uint32_t min_cores =
+            uint32_t desired_min_cores = ((is_fused_mode()) ? 2 : 1) *
                 sys->getAttr<ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>();
-            min_cores *= (is_fused_mode()) ? 2 : 1; // double minimum for fused
+            uint32_t min_cores = std::min(desired_min_cores, coreCount);
 
             while( coreCount >= min_cores )
             {
@@ -1347,10 +1347,11 @@ namespace SBE
                 TRACFCOMP( g_trac_sbe, ERR_MRK"procCustomizeSbeImg() - "
                            "Failure to successfully complete p9_xip_customize()"
                            ". HUID=0x%X, rc=0x%X, coreCount=%d, coreMask=0x%.8X"
-                           " procIOMask=0x%.8X, maxCores=0x%X, min_cores=0x%X",
+                           " procIOMask=0x%.8X, maxCores=0x%X, min_cores=0x%X, "
+                           "desired_min_cores=0x%X",
                            TARGETING::get_huid(i_target), ERRL_GETRC_SAFE(err),
                            coreCount, coreMask, procIOMask, maxCores,
-                           min_cores);
+                           min_cores, desired_min_cores);
                 /*@
                  * @errortype
                  * @moduleid          SBE_CUSTOMIZE_IMG
