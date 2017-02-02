@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,9 +45,6 @@
 #include "vpd.H"
 #include "pvpd.H"
 #include <initservice/initserviceif.H>
-#ifdef CONFIG_PVPD_READ_FROM_PNOR
-#include "pvpd.H"
-#endif
 
 // ----------------------------------------------
 // Trace definitions
@@ -252,18 +249,9 @@ errlHndl_t directMemoryPresenceDetect(DeviceFW::OperationType i_opType,
 
     dvpd_present = DVPD::dvpdPresent( i_target );
 #if defined(CONFIG_MEMVPD_READ_FROM_HW) && defined(CONFIG_MEMVPD_READ_FROM_PNOR)
-    if( dvpd_present )
-    {
-        // Check if the VPD data in the PNOR matches the SEEPROM
-        l_errl = VPD::ensureCacheIsInSync( i_target );
-        if( l_errl )
-        {
-            TRACFCOMP(g_trac_vpd,ERR_MRK "nodePresenceDetect>"
-                    " Error during ensureCacheIsInSync (DVPD)" );
-            errlCommit( l_errl, FSI_COMP_ID );
-        }
-    }
-    else
+    //skipping cache sync when dvpd is present as it will be taken care by node
+    //vpd
+    if( !dvpd_present )
     {
         TRACFCOMP(g_trac_vpd,
                   ERR_MRK "directMemoryPresenceDetect> failed presence detect");

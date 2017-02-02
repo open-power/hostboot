@@ -372,6 +372,9 @@ void PvpdFacade::getRecordLists(
 #ifdef CONFIG_MEMVPD_READ_FROM_PNOR
     o_altVpdRecords = Singleton<CvpdFacade>::instance().iv_vpdRecords;
     o_altRecSize = Singleton<CvpdFacade>::instance().iv_recSize;
+#elif CONFIG_MEMVPD_READ_FROM_HW
+    o_altVpdRecords = Singleton<DvpdFacade>::instance().iv_vpdRecords;
+    o_altRecSize = Singleton<DvpdFacade>::instance().iv_recSize;
 #else
     o_altVpdRecords = NULL;
     o_altRecSize = 0;

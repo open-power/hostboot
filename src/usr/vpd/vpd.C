@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include "pvpd.H"
 #include "spd.H"
 #include "ipvpd.H"
+#include "dvpd.H"
 #include <map>
 
 // ----------------------------------------------
@@ -579,6 +580,12 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
             io_keywordSN = PVPD::SN;
 #endif
         }
+        else if( i_type == TARGETING::TYPE_MCS )
+        {
+            io_record    = DVPD::VINI;
+            io_keywordPN = DVPD::PN;
+            io_keywordSN = DVPD::SN;
+        }
         else
         {
             TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::getPnAndSnRecordAndKeywords() Unexpected target type, huid=0x%X",TARGETING::get_huid(i_target));
@@ -629,6 +636,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
     {
         l_ipvpd = &(Singleton<PvpdFacade>::instance());
     }
+
     do
     {
         // Get the correct Part and serial numbers
@@ -648,7 +656,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
         bool l_matchPN = false;
         if( ( l_type == TARGETING::TYPE_PROC   ) ||
             ( l_type == TARGETING::TYPE_NODE   ) ||
-            ( l_type == TARGETING::TYPE_MEMBUF ) )
+            ( l_type == TARGETING::TYPE_MEMBUF ))
         {
             l_err = l_ipvpd->cmpPnorToSeeprom( i_target,
                                                l_record,
@@ -705,7 +713,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
             // Load the PNOR data from the SEEPROM
             if( ( l_type == TARGETING::TYPE_PROC ) ||
                 ( l_type == TARGETING::TYPE_NODE ) ||
-                ( l_type == TARGETING::TYPE_MEMBUF ) )
+                ( l_type == TARGETING::TYPE_MEMBUF ))
             {
                 l_err = l_ipvpd->loadPnor( i_target );
             }

@@ -708,6 +708,21 @@ sub processMcs
     my $group        = shift;
     my $proc         = shift;
 
+    #@FIXME RTC:168611 To decouple DVPD from PVPD
+    #parentTarget == MCBIST
+    #parent(MCBIST) = Proc
+    #parent(proc) = module
+    #parent(module) = socket
+    #parent(socket) = motherboard
+    #parent(motherboard) = node
+    my $node = $targetObj->getTargetParent( #node
+                    $targetObj->getTargetParent( #motherboard
+                        $targetObj->getTargetParent #socket
+                            ($targetObj->getTargetParent #module
+                                ($targetObj->getTargetParent($parentTarget)))));
+    my $name = "EEPROM_VPD_PRIMARY_INFO";
+    $targetObj->copyAttributeFields($node, $target, "EEPROM_VPD_PRIMARY_INFO");
+
 #@TODO RTC:163874 -- maybe needed for centaur support
 
 
