@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1533,6 +1533,7 @@ errlHndl_t IpVpdFacade::retrieveRecord( const char * i_recordName,
 
         //byteswap
         l_size = le16toh(l_size);
+        l_size += 2; // include the 2 byte size field in total record
 
         // If the buffer is NULL, return the keyword size in io_buflen
         if( NULL == io_buffer )
