@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -445,7 +445,7 @@ const Target * getParentChip( const Target * i_pChiplet )
     }
     else
     {
-        TARG_ERR("Number of Parent chip is not 1, but %d",l_chipList.size());
+        TARG_ERR("Number of Parent chip is not 1, but %d | huid=%.8X",l_chipList.size(), TARGETING::get_huid(i_pChiplet));
     }
 
     return l_pChip;

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -30,8 +32,8 @@ namespace SCAN
     enum SCANModuleId
     {
         MOD_SCANDD_INVALID   = 0x00, /**< Zero is an invalid module id */
-        MOD_SCANDD_DDOP      = 0x01, /**< scandd.C : ddOp */
-        MOD_SCANDD_DOSCAN    = 0x02, /**< scandd.C : ScanDD::scanDoScan */
+        //deprecated         = 0x01, /**< was MOD_SCANDD_DDOP */
+        MOD_SCANDD_DOPIBSCAN = 0x02, /**< scandd.C : ScanDD::scanDoPibScan */
 
     };
 

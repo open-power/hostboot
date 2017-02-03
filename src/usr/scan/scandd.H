@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,15 +37,19 @@
 // ----------------------------------------------
 #include <errl/errlentry.H>
 #include <sbeio/sbe_psudd.H>
+#include <p9_ring_id.h>
+#include <hw_access_def.H>
 
 namespace SCANDD
 {
 
  const uint32_t HEADER_CHECK_DATA = 0xdeadbeef;
 
-// ------------------------------------------------------------------
-// scanPerformOp
-// ------------------------------------------------------------------
+/**
+ * @brief High-level device driver interface for all scan
+ *     operations
+ * <see deviceOp_t for parms>
+ */
 errlHndl_t scanPerformOp( DeviceFW::OperationType i_opType,
                           TARGETING::Target * i_target,
                           void * io_buffer,
@@ -53,20 +57,37 @@ errlHndl_t scanPerformOp( DeviceFW::OperationType i_opType,
                           int64_t i_accessType,
                           va_list i_args );
 
+/**
+ * @brief Sends Put Ring from Image message to SBE via PSU
+ * @param[in]  i_target  Target chip/unit to scan
+ * @param[in]  i_ring    Ring modifier/id
+ * @param[in]  i_ringlength  Length of ring in bits
+ * @return errlHndl_t  returns non-zero value if there is error.
+*/
+errlHndl_t sbeScanPerformOp( TARGETING::Target * i_target,
+                             RingID i_ringID,
+                             fapi2::RingMode i_ringMode );
 
-/// @brief sends Put Ring from Image message to SBE via scan interface
-/// @param[in] i_target  target includes the target type that is needed
-/// @param[in] va_list i_args contains:  ringID, RingMode, flags
-/// @return errlHndl_t  returns non-zero value if there is error.
-errlHndl_t sbeScanPerformOp( TARGETING::Target * i_target, va_list i_args );
-
-errlHndl_t scanDoScan(    DeviceFW::OperationType i_opType,
+/**
+ * @brief Perform a scan operation using the pib
+ *
+ * @param[in]  i_opType  Read/write
+ * @param[in]  i_target  Target chip to scan
+ * @param[out] o_buffer  Output buffer, allocated by caller
+ * @param[inout] io_buflen In: Size of output buffer in bytes
+ *                       Out: Number of bytes read/written
+ * @param[in]  i_ring    Ring modifier/id
+ * @param[in]  i_ringlength  Length of ring in bits
+ * @param[in]  i_flags   Flags to affect the scan operation
+ * @return Error handle, NULL on success
+ */
+errlHndl_t scanDoPibScan( DeviceFW::OperationType i_opType,
                           TARGETING::Target * i_target,
-                          void * io_buffer,
+                          void* o_buffer,
                           size_t & io_buflen,
                           uint64_t i_ring,
                           uint64_t i_ringlength,
-                          uint64_t i_flag );
+                          uint64_t i_flags );
 
 /// @brief translates HB target types to SBE target type groups
 /// @param[in] i_hbTarget includes the HB target type
