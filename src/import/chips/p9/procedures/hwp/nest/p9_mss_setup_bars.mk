@@ -22,7 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+# Include the macros and things for MSS procedures
+-include 00common.mk
+
 PROCEDURE=p9_mss_setup_bars
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/)
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/lib)
+$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)
