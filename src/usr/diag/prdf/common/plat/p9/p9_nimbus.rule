@@ -1450,21 +1450,21 @@ chip p9_nimbus
     {
         name        "PCI0 Chiplet Checkstop FIR";
         scomaddr    0x0d040000;
-        capture     group default;
+        capture     group PciChipletFir0;
     };
 
     register PCI0_CHIPLET_RE_FIR
     {
         name        "PCI0 Chiplet Recoverable FIR";
         scomaddr    0x0d040001;
-        capture     group default;
+        capture     group PciChipletFir0;
     };
 
     register PCI0_CHIPLET_FIR_MASK
     {
         name        "PCI0 Chiplet FIR MASK";
         scomaddr    0x0d040002;
-        capture     group default;
+        capture     group PciChipletFir0;
     };
 
     ############################################################################
@@ -1475,21 +1475,21 @@ chip p9_nimbus
     {
         name        "PCI1 Chiplet Checkstop FIR";
         scomaddr    0x0e040000;
-        capture     group default;
+        capture     group PciChipletFir1;
     };
 
     register PCI1_CHIPLET_RE_FIR
     {
         name        "PCI1 Chiplet Recoverable FIR";
         scomaddr    0x0e040001;
-        capture     group default;
+        capture     group PciChipletFir1;
     };
 
     register PCI1_CHIPLET_FIR_MASK
     {
         name        "PCI1 Chiplet FIR MASK";
         scomaddr    0x0e040002;
-        capture     group default;
+        capture     group PciChipletFir1;
     };
 
     ############################################################################
@@ -1500,21 +1500,21 @@ chip p9_nimbus
     {
         name        "PCI2 Chiplet Checkstop FIR";
         scomaddr    0x0f040000;
-        capture     group default;
+        capture     group PciChipletFir2;
     };
 
     register PCI2_CHIPLET_RE_FIR
     {
         name        "PCI2 Chiplet Recoverable FIR";
         scomaddr    0x0f040001;
-        capture     group default;
+        capture     group PciChipletFir2;
     };
 
     register PCI2_CHIPLET_FIR_MASK
     {
         name        "PCI2 Chiplet FIR MASK";
         scomaddr    0x0f040002;
-        capture     group default;
+        capture     group PciChipletFir2;
     };
 
 
@@ -1601,17 +1601,17 @@ group gGLOBAL_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
     /** GLOBAL_FIR[13]
      *  Attention from PCI0 chiplet
      */
-    (rGLOBAL_FIR, bit(13)) ? analyze(gPCI0_CHIPLET_FIR);
+    (rGLOBAL_FIR, bit(13)) ? analyzePciChipletFir0;
 
     /** GLOBAL_FIR[14]
      *  Attention from PCI1 chiplet
      */
-    (rGLOBAL_FIR, bit(14)) ? analyze(gPCI1_CHIPLET_FIR);
+    (rGLOBAL_FIR, bit(14)) ? analyzePciChipletFir1;
 
     /** GLOBAL_FIR[15]
      *  Attention from PCI2 chiplet
      */
-    (rGLOBAL_FIR, bit(15)) ? analyze(gPCI2_CHIPLET_FIR);
+    (rGLOBAL_FIR, bit(15)) ? analyzePciChipletFir2;
 
     /** GLOBAL_FIR[16]
      *  Attention from EQ 0 chiplet
@@ -7821,6 +7821,24 @@ group gPCI2_CHIPLET_FIR filter singlebit
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
 .include "p9_nimbus_actions.rule";
+
+actionclass analyzePciChipletFir0
+{
+    capture(PciChipletFir0);
+    analyze(gPCI0_CHIPLET_FIR);
+};
+
+actionclass analyzePciChipletFir1
+{
+    capture(PciChipletFir1);
+    analyze(gPCI1_CHIPLET_FIR);
+};
+
+actionclass analyzePciChipletFir2
+{
+    capture(PciChipletFir2);
+    analyze(gPCI2_CHIPLET_FIR);
+};
 
 actionclass analyzeConnectedEQ0     { analyze(connected(TYPE_EQ,      0)); };
 actionclass analyzeConnectedEQ1     { analyze(connected(TYPE_EQ,      1)); };
