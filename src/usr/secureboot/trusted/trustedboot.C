@@ -48,6 +48,7 @@
 #include <initservice/initserviceif.H>
 #include <ipmi/ipmisensor.H>
 #include <config.h>
+#include <devicefw/driverif.H>
 #include <i2c/tpmddif.H>
 #include "trustedboot.H"
 #include "trustedTypes.H"
@@ -261,6 +262,8 @@ void* host_update_master_tpm( void *io_pArgs )
             systemTpms.tpm[TPM_MASTER_INDEX].available &&
             NULL == systemTpms.tpm[TPM_MASTER_INDEX].logMgr)
         {
+            /// @todo RTC:145689 For DRTM we locate the previous SRTM log and reuse
+            ///  And we must allocate a DRTM log to be used
             systemTpms.tpm[TPM_MASTER_INDEX].logMgr = new TpmLogMgr;
             err = TpmLogMgr_initialize(
                         systemTpms.tpm[TPM_MASTER_INDEX].logMgr);
@@ -413,7 +416,11 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target)
         // For a DRTM we need to reset PCRs 17-22
         if (drtmMpipl)
         {
-            /// @TODO RTC 167667 Implement PCR reset
+            err = tpmDrtmReset(io_target);
+            if (NULL != err)
+            {
+                break;
+            }
         }
 #endif
 
@@ -1240,5 +1247,28 @@ bool isTpmRequired()
     return retVal;
 }
 
+
+#ifdef CONFIG_DRTM
+errlHndl_t tpmDrtmReset(TpmTarget& io_target)
+{
+    errlHndl_t err = nullptr;
+
+    // Send to the TPM
+    size_t len = 0;
+    err = deviceRead(io_target.tpmTarget,
+                     nullptr,
+                     len,
+                     DEVICE_TPM_ADDRESS(TPMDD::TPM_OP_DRTMRESET,
+                                        0,
+                                        TPM_LOCALITY_4));
+
+    if (NULL == err)
+    {
+        /// @todo RTC: 145689 reset the dynamic tpm log
+    }
+
+    return err;
+}
+#endif
 
 } // end TRUSTEDBOOT

@@ -242,6 +242,24 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
                 break;
             }
 
+
+#ifdef CONFIG_DRTM
+        // TPM_OP_DRTMRESET
+        }
+        else if (TPMDD::TPM_OP_DRTMRESET == tpmInfo.operation )
+        {
+
+            assert(locality == TPM_LOCALITY_4,
+                   "DRTMReset only available from locality 4, actual %d",
+                   locality);
+            err = tpmDrtmReset(tpmInfo);
+
+            if ( err )
+            {
+                break;
+            }
+
+#endif
         }
         else
         {
@@ -504,7 +522,7 @@ errlHndl_t tpmPresenceDetect(DeviceFW::OperationType i_opType,
 // ------------------------------------------------------------------
 errlHndl_t tpmRead ( void * o_buffer,
                      size_t i_buflen,
-                     tpm_info_t i_tpmInfo,
+                     const tpm_info_t & i_tpmInfo,
                      bool i_silent)
 {
     errlHndl_t err = NULL;
@@ -741,7 +759,7 @@ errlHndl_t tpmRead ( void * o_buffer,
 // ------------------------------------------------------------------
 errlHndl_t tpmWrite ( void * i_buffer,
                       size_t i_buflen,
-                      tpm_info_t i_tpmInfo )
+                      const tpm_info_t & i_tpmInfo )
 {
     errlHndl_t err = NULL;
     errlHndl_t err_NACK = NULL;
@@ -976,7 +994,7 @@ errlHndl_t tpmWrite ( void * i_buffer,
 errlHndl_t tpmTransmit ( void * io_buffer,
                          size_t & io_buflen,
                          size_t i_commandlen,
-                         tpm_info_t i_tpmInfo )
+                         const tpm_info_t & i_tpmInfo )
 {
     errlHndl_t err = NULL;
     bool isReady = false;
@@ -1056,13 +1074,56 @@ errlHndl_t tpmTransmit ( void * io_buffer,
 
 } // end tpmTransmit
 
+#ifdef CONFIG_DRTM
+// ------------------------------------------------------------------
+// tpmDrtmReset
+// ------------------------------------------------------------------
+errlHndl_t tpmDrtmReset (tpm_info_t i_tpmInfo)
+{
+    errlHndl_t err = nullptr;
+    uint8_t regData = 0;
+
+    TRACDCOMP( g_trac_tpmdd,
+               ENTER_MRK"tpmDrtmReset()" );
+    do
+    {
+        i_tpmInfo.offset = I2C_REG_TPM_HASH;
+
+        regData = TPM_HASH_START;
+        err =  tpmWrite ( &regData,
+                          sizeof(regData),
+                          i_tpmInfo );
+        if (err)
+        {
+            break;
+        }
+
+        regData = TPM_HASH_END;
+        err =  tpmWrite ( &regData,
+                          sizeof(regData),
+                          i_tpmInfo );
+        if (err)
+        {
+            break;
+        }
+
+
+    } while( 0 );
+
+    TRACDCOMP( g_trac_tpmdd,
+               EXIT_MRK"tpmDrtmReset()" );
+    return err;
+
+} // end tpmDrtmReset
+#endif
+
 
 // ------------------------------------------------------------------
 // tpmPrepareAddress
 // ------------------------------------------------------------------
 errlHndl_t tpmPrepareAddress ( void * io_buffer,
                                size_t & o_bufSize,
-                               tpm_info_t i_tpmInfo )
+                               const tpm_info_t & i_tpmInfo )
 {
     errlHndl_t err = NULL;
 
@@ -1540,7 +1601,7 @@ errlHndl_t tpmReadSTSRegValid ( tpm_info_t i_tpmInfo,
 } // end tpmReadSTSRegValid
 
 
-errlHndl_t tpmIsCommandReady( tpm_info_t i_tpmInfo,
+errlHndl_t tpmIsCommandReady( const tpm_info_t & i_tpmInfo,
                               bool & o_isReady)
 {
     tpm_sts_reg_t stsReg;
@@ -1556,7 +1617,7 @@ errlHndl_t tpmIsCommandReady( tpm_info_t i_tpmInfo,
 
 } // end tpmIsCommandReady
 
-errlHndl_t tpmPollForCommandReady( tpm_info_t i_tpmInfo)
+errlHndl_t tpmPollForCommandReady( const tpm_info_t & i_tpmInfo)
 {
     tpm_sts_reg_t stsReg;
     errlHndl_t err = NULL;
@@ -1643,7 +1704,7 @@ errlHndl_t tpmPollForCommandReady( tpm_info_t i_tpmInfo)
 
 } // end tpmPollForCommandReady
 
-errlHndl_t tpmIsExpecting( tpm_info_t i_tpmInfo,
+errlHndl_t tpmIsExpecting( const tpm_info_t & i_tpmInfo,
                            bool & o_isExpecting)
 {
     tpm_sts_reg_t stsReg;
@@ -1659,7 +1720,7 @@ errlHndl_t tpmIsExpecting( tpm_info_t i_tpmInfo,
 
 } // end tpmIsExpecting
 
-errlHndl_t tpmIsDataAvail( tpm_info_t i_tpmInfo,
+errlHndl_t tpmIsDataAvail( const tpm_info_t & i_tpmInfo,
                            bool & o_isDataAvail)
 {
     tpm_sts_reg_t stsReg;
@@ -1675,7 +1736,7 @@ errlHndl_t tpmIsDataAvail( tpm_info_t i_tpmInfo,
 
 } // end tpmIsDataAvail
 
-errlHndl_t tpmPollForDataAvail( tpm_info_t i_tpmInfo)
+errlHndl_t tpmPollForDataAvail( const tpm_info_t & i_tpmInfo)
 {
     tpm_sts_reg_t stsReg;
     errlHndl_t err = NULL;
@@ -1735,7 +1796,7 @@ errlHndl_t tpmPollForDataAvail( tpm_info_t i_tpmInfo)
 
 } // end tpmPollForDataAvail
 
-errlHndl_t tpmReadBurstCount( tpm_info_t i_tpmInfo,
+errlHndl_t tpmReadBurstCount( const tpm_info_t & i_tpmInfo,
                               uint16_t & o_burstCount)
 {
     errlHndl_t err = NULL;
@@ -1767,7 +1828,7 @@ errlHndl_t tpmReadBurstCount( tpm_info_t i_tpmInfo,
 
 
 
-errlHndl_t tpmWriteCommandReady( tpm_info_t i_tpmInfo)
+errlHndl_t tpmWriteCommandReady( const tpm_info_t & i_tpmInfo)
 {
     tpm_sts_reg_t stsReg;
     stsReg.value = 0;
@@ -1780,7 +1841,7 @@ errlHndl_t tpmWriteCommandReady( tpm_info_t i_tpmInfo)
 
 } // end tpmWriteCommandReady
 
-errlHndl_t tpmWriteTpmGo( tpm_info_t i_tpmInfo)
+errlHndl_t tpmWriteTpmGo( const tpm_info_t & i_tpmInfo)
 {
     tpm_sts_reg_t stsReg;
     stsReg.value = 0;
@@ -1793,7 +1854,7 @@ errlHndl_t tpmWriteTpmGo( tpm_info_t i_tpmInfo)
 
 } // end tpmWriteTpmGo
 
-errlHndl_t tpmWriteResponseRetry( tpm_info_t i_tpmInfo)
+errlHndl_t tpmWriteResponseRetry( const tpm_info_t & i_tpmInfo)
 {
     tpm_sts_reg_t stsReg;
     stsReg.value = 0;
@@ -1807,7 +1868,7 @@ errlHndl_t tpmWriteResponseRetry( tpm_info_t i_tpmInfo)
 } // end tpmWriteResponseRetry
 
 
-errlHndl_t tpmWriteFifo( tpm_info_t i_tpmInfo,
+errlHndl_t tpmWriteFifo( const tpm_info_t & i_tpmInfo,
                          void * i_buffer,
                          size_t i_buflen)
 {
@@ -2031,7 +2092,7 @@ errlHndl_t tpmWriteFifo( tpm_info_t i_tpmInfo,
 
 } // end tpmWriteFifo
 
-errlHndl_t tpmReadFifo( tpm_info_t i_tpmInfo,
+errlHndl_t tpmReadFifo( const tpm_info_t & i_tpmInfo,
                         void * o_buffer,
                         size_t & io_buflen)
 {

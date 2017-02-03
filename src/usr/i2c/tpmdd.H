@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,6 +71,7 @@ enum nuvo_20_defs_t
     I2C_REG_BURSTCOUNT = 0x1,
     I2C_REG_BURSTCOUNT_HIGH = 0x2,
     I2C_REG_FAMILYID   = 0x3,
+    I2C_REG_TPM_HASH   = 0x4,
     I2C_REG_WR_FIFO    = 0x20,
     I2C_REG_RD_FIFO    = 0x40,
     I2C_REG_VENDOR     = 0x60,
@@ -80,6 +81,8 @@ enum nuvo_20_defs_t
     TPM_MAXBURSTSIZE   = 0xFFFF,
     TPM_FAMILYID       = 0x04,
     TPM_FAMILYID_MASK  = 0x0C,
+    TPM_HASH_START     = 0x01,
+    TPM_HASH_END       = 0x02,
 };
 
 
@@ -165,7 +168,7 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
  */
 errlHndl_t tpmRead ( void * o_buffer,
                      size_t i_buflen,
-                     tpm_info_t i_tpmInfo,
+                     const tpm_info_t & i_tpmInfo,
                      bool i_silent = false);
 
 /**
@@ -185,7 +188,7 @@ errlHndl_t tpmRead ( void * o_buffer,
  */
 errlHndl_t tpmWrite ( void * i_buffer,
                       size_t i_buflen,
-                      tpm_info_t i_tpmInfo );
+                      const tpm_info_t & i_tpmInfo );
 
 /**
  * @brief This function peforms the sequencing to do a transmit of the
@@ -210,7 +213,21 @@ errlHndl_t tpmWrite ( void * i_buffer,
 errlHndl_t tpmTransmit ( void * io_buffer,
                          size_t & io_buflen,
                          size_t i_commandlen,
-                         tpm_info_t i_tpmInfo );
+                         const tpm_info_t & i_tpmInfo );
+
+#ifdef CONFIG_DRTM
+/**
+ * @brief This function peforms the sequencing to do a reset of the
+ *      dynamic PCRs 17-22
+ *
+ * @param[in] i_tpmInfo Structure of I2C parameters needed to execute
+ *      the command to the I2C device driver.
+ *
+ * @return errlHndl_t nullptr if successful, otherwise a pointer to the
+ *      error log.
+ */
+errlHndl_t tpmDrtmReset (tpm_info_t i_tpmInfo);
+#endif
 
 /**
  * @brief This function prepares the I2C byte address for adding to the
@@ -230,7 +247,7 @@ errlHndl_t tpmTransmit ( void * io_buffer,
  */
 errlHndl_t tpmPrepareAddress ( void * io_buffer,
                                size_t & o_bufSize,
-                               tpm_info_t i_tpmInfo );
+                               const tpm_info_t & i_tpmInfo );
 
 /**
  * @brief This function decides whether or not the target passed into the
@@ -330,7 +347,7 @@ errlHndl_t tpmReadSTSRegValid ( tpm_info_t i_tpmInfo,
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t tpmIsCommandReady( tpm_info_t i_tpmInfo,
+errlHndl_t tpmIsCommandReady( const tpm_info_t & i_tpmInfo,
                               bool & o_isReady);
 
 /**
@@ -342,7 +359,7 @@ errlHndl_t tpmIsCommandReady( tpm_info_t i_tpmInfo,
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t tpmPollForCommandReady( tpm_info_t i_tpmInfo);
+errlHndl_t tpmPollForCommandReady( const tpm_info_t & i_tpmInfo);
 
 /**
  * @brief Check for expecting state in TPM STS Register
@@ -355,7 +372,7 @@ errlHndl_t tpmPollForCommandReady( tpm_info_t i_tpmInfo);
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t tpmIsExpecting( tpm_info_t i_tpmInfo,
+errlHndl_t tpmIsExpecting( const tpm_info_t & i_tpmInfo,
                            bool & o_isExpecting);
 
 /**
@@ -369,7 +386,7 @@ errlHndl_t tpmIsExpecting( tpm_info_t i_tpmInfo,
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t tpmIsDataAvail( tpm_info_t i_tpmInfo,
+errlHndl_t tpmIsDataAvail( const tpm_info_t & i_tpmInfo,
                            bool & o_isDataAvail);
 
 /**
@@ -381,7 +398,7 @@ errlHndl_t tpmIsDataAvail( tpm_info_t i_tpmInfo,
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t tpmPollForDataAvail( tpm_info_t i_tpmInfo);
+errlHndl_t tpmPollForDataAvail( const tpm_info_t & i_tpmInfo);
 
 /**
  * @brief Read the current burst count value
@@ -394,7 +411,7 @@ errlHndl_t tpmPollForDataAvail( tpm_info_t i_tpmInfo);
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t tpmReadBurstCount( tpm_info_t i_tpmInfo,
+errlHndl_t tpmReadBurstCount( const tpm_info_t & i_tpmInfo,
                               uint16_t & o_burstCount);
 
 /**
@@ -406,7 +423,7 @@ errlHndl_t tpmReadBurstCount( tpm_info_t i_tpmInfo,
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t tpmWriteCommandReady( tpm_info_t i_tpmInfo);
+errlHndl_t tpmWriteCommandReady( const tpm_info_t & i_tpmInfo);
 
 /**
  * @brief Write the TpmGo bit in the STS register
@@ -417,7 +434,7 @@ errlHndl_t tpmWriteCommandReady( tpm_info_t i_tpmInfo);
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t tpmWriteTpmGo( tpm_info_t i_tpmInfo);
+errlHndl_t tpmWriteTpmGo( const tpm_info_t & i_tpmInfo);
 
 /**
  * @brief Write the response retry bit in the Tpm STS register
@@ -428,7 +445,7 @@ errlHndl_t tpmWriteTpmGo( tpm_info_t i_tpmInfo);
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t tpmWriteResponseRetry( tpm_info_t i_tpmInfo);
+errlHndl_t tpmWriteResponseRetry( const tpm_info_t & i_tpmInfo);
 
 
 /**
@@ -444,7 +461,7 @@ errlHndl_t tpmWriteResponseRetry( tpm_info_t i_tpmInfo);
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t tpmWriteFifo( tpm_info_t i_tpmInfo,
+errlHndl_t tpmWriteFifo( const tpm_info_t & i_tpmInfo,
                          void * i_buffer,
                          size_t i_buflen);
 
@@ -463,7 +480,7 @@ errlHndl_t tpmWriteFifo( tpm_info_t i_tpmInfo,
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t tpmReadFifo( tpm_info_t i_tpmInfo,
+errlHndl_t tpmReadFifo( const tpm_info_t & i_tpmInfo,
                         void * o_buffer,
                         size_t & io_buflen);
 /**

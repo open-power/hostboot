@@ -150,5 +150,15 @@ bool isTpmRequired();
  */
 void* tpmDaemon(void* unused);
 
+#ifdef CONFIG_DRTM
+/**
+ * @brief Initiate a DRTM PCR reset
+ * @param[in/out] io_target Current TPM target structure
+ * @return errlHndl_t NULL if successful, otherwise a pointer to the
+ *       error log.
+ */
+errlHndl_t tpmDrtmReset(TpmTarget & io_target);
+#endif
+
 } // end TRUSTEDBOOT namespace
 #endif
