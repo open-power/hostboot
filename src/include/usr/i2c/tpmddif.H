@@ -55,6 +55,7 @@ enum tpm_addr_size_t
 enum tpm_locality_t
 {
     TPM_LOCALITY_0 = 0,
+    TPM_LOCALITY_2 = 2,
     TPM_LOCALITY_4 = 4,
 };
 

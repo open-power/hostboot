@@ -6368,6 +6368,7 @@ sub generate_tpm
     $tpmInfo{i2cMasterPath} = "physical:sys-0/node-${node}/proc-${proc}";
     $tpmInfo{port} = "$I2Cdevices[$i]{i2c_port}";
     $tpmInfo{devAddrLocality0} = "0x$I2Cdevices[$i]{i2c_devAddr}";
+    $tpmInfo{devAddrLocality2} = "0xAA"; # Fixed, not in MRW
     $tpmInfo{devAddrLocality4} = "0xA6"; # Fixed, not in MRW
     $tpmInfo{engine} = "$I2Cdevices[$i]{i2c_engine}";
     $tpmInfo{byteAddrOffset} = "0x01"; # Fixed, not in MRW

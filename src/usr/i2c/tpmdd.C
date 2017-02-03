@@ -1184,18 +1184,22 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
 
         // Successful reading of Attribute, so extract the data
         io_tpmInfo.port          = tpmData.port;
-        if (TPM_LOCALITY_0 == i_locality)
+        switch(i_locality)
         {
-            io_tpmInfo.devAddr       = tpmData.devAddrLocality0;
+            case TPM_LOCALITY_0:
+                io_tpmInfo.devAddr = tpmData.devAddrLocality0;
+                break;
+            case TPM_LOCALITY_2:
+                io_tpmInfo.devAddr = tpmData.devAddrLocality2;
+                break;
+            case TPM_LOCALITY_4:
+                io_tpmInfo.devAddr = tpmData.devAddrLocality4;
+                break;
+            default:
+                assert(false, "BUG! Locality %d is not supported.",
+                    i_locality);
         }
-        else if (TPM_LOCALITY_4 == i_locality)
-        {
-            io_tpmInfo.devAddr       = tpmData.devAddrLocality4;
-        }
-        else
-        {
-            assert(false, "Unsupported locality");
-        }
+
         io_tpmInfo.engine        = tpmData.engine;
         io_tpmInfo.i2cMasterPath = tpmData.i2cMasterPath;
         io_tpmInfo.tpmEnabled    = tpmData.tpmEnabled;
