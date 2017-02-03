@@ -1963,12 +1963,20 @@
             <default>0xAE</default>
         </field>
         <field>
+            <name>devAddrLocality2</name>
+            <description>Device address on the I2C bus for Locality 2.
+                         This is a 7-bit value, but then shifted 1
+                         bit left.</description>
+            <type>uint8_t</type>
+            <default>0xAA</default>
+        </field>
+        <field>
             <name>devAddrLocality4</name>
             <description>Device address on the I2C bus for Locality 4.
                          This is a 7-bit value, but then shifted 1
                          bit left.</description>
             <type>uint8_t</type>
-            <default>0xFF</default>
+            <default>0xA6</default>
         </field>
         <field>
             <name>engine</name>
