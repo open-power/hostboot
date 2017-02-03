@@ -22925,6 +22925,26 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>SBE_IS_STARTED</id>
+    <description>
+        If 0, SBE for the processor has not been started.
+        Otherwise, SBE for the processor has been started.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SBE_IS_STARTED</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>PROC_FABRIC_CORE_FLOOR_RATIO</id>
     <description>
       Processor SMP core floor/nest frequency ratio

@@ -1741,7 +1741,9 @@ namespace SBE
             TargetService& tS = targetService();
             err = tS.queryMasterProcChipTargetHandle(
                                                 masterProcChipTargetHandle);
-            if ( i_target != masterProcChipTargetHandle )
+
+            if( (i_target != masterProcChipTargetHandle) &&
+                !(i_target->getAttr<ATTR_SBE_IS_STARTED>()) )
             {
                 l_target=masterProcChipTargetHandle;
                 TRACFCOMP( g_trac_sbe, INFO_MRK"getSbeBootSeeprom() "

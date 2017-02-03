@@ -225,6 +225,9 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         // No error and still functional
         else if(l_cpu_target->getAttr<ATTR_HWAS_STATE>().functional)
         {
+            // Set attribute indicating that SBE is started
+            l_cpu_target->setAttr<ATTR_SBE_IS_STARTED>(1);
+
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "SUCCESS : proc_check_slave_sbe_seeprom_complete"
                       " completed ok for proc 0x%.8X",
