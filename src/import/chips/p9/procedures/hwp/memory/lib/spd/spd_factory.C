@@ -47,7 +47,7 @@
 #include <lib/spd/rdimm/rdimm_raw_cards.H>
 #include <lib/spd/lrdimm/lrdimm_raw_cards.H>
 #include <lib/utils/checker.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 #include <lib/utils/conversions.H>
 #include <lib/utils/find.H>
 
