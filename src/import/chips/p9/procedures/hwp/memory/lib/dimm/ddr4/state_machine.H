@@ -37,7 +37,7 @@
 #define _MSS_STATE_MACHINE_H_
 
 #include <fapi2.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 #include <lib/utils/checker.H>
 
 namespace mss
