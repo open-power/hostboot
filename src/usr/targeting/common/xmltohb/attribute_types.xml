@@ -32574,10 +32574,11 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint64_t>
+            <default>0,0</default><!-- default to no limitations -->
         </uint64_t>
         <array>2</array>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_MRW_UNSUPPORTED_RANK_CONFIG</id>
