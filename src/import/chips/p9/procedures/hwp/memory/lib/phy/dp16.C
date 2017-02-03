@@ -36,6 +36,7 @@
 #include <fapi2.H>
 #include <utility>
 #include <vector>
+#include <map>
 
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
@@ -48,7 +49,7 @@
 #include <lib/dimm/rank.H>
 #include <lib/utils/scom.H>
 #include <lib/utils/pos.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 
 #include <lib/workarounds/dp16_workarounds.H>
 
