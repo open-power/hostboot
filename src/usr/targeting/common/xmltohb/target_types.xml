@@ -1141,6 +1141,7 @@
     <attribute><id>IO_FILTER_BYPASS</id></attribute>
     <attribute><id>DUMP_STOP_INFO_SUPPRESS_ERROR_TRACE</id></attribute>
     <attribute><id>DUMP_STOP_INFO_ENABLE_ERRORLOG</id></attribute>
+    <attribute><id>SBE_IS_STARTED</id></attribute>
 
     <!-- Processor characteristics for HDAT -->
     <attribute>

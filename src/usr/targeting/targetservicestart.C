@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -274,6 +274,10 @@ static void initializeAttributes(TargetService& i_targetService,
             l_i2c_switches.useHostI2C = 1;
             l_i2c_switches.useFsiI2C  = 0;
             l_pMasterProcChip->setAttr<ATTR_I2C_SWITCHES>(l_i2c_switches);
+
+
+            // Master has SBE started
+            l_pMasterProcChip->setAttr<ATTR_SBE_IS_STARTED>(1);
 
 
             l_pTopLevel->setAttr<ATTR_MASTER_MBOX_SCRATCH>(i_masterScratch);
