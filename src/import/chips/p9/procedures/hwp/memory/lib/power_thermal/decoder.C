@@ -42,7 +42,7 @@
 #include <lib/power_thermal/throttle.H>
 #include <lib/power_thermal/decoder.H>
 #include <lib/utils/find.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 #include <lib/utils/count_dimm.H>
 #include <lib/dimm/kind.H>
 
