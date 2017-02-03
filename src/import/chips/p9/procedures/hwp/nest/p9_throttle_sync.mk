@@ -22,7 +22,8 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 PROCEDURE=p9_throttle_sync
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/)
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/lib)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/generic/memory)
 $(call BUILD_PROCEDURE)
