@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -62,6 +62,7 @@ prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/utils/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 prd_incpath += ${ROOTPATH}/src/import/hwpf/fapi2/include
+prd_incpath += ${ROOTPATH}/src/import/generic/memory/
 
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
