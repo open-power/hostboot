@@ -23,6 +23,10 @@
 #
 # IBM_PROLOG_END_TAG
 
+# Include the macros and things for MSS procedures
+-include 00common.mk
+
 PROCEDURE=p9_mss_scominit
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/initfiles)
+$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)
