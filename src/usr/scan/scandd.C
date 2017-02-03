@@ -45,8 +45,7 @@
 #include <errl/errludtarget.H>
 #include <sbeio/sbe_psudd.H>
 #include <targeting/common/util.H>
-#include <p9_ring_id.h>
-#include <hw_access_def.H>
+#include <targeting/common/utilFilter.H>
 #include <devicefw/userif.H>
 
 
@@ -260,14 +259,18 @@ uint8_t getChipletIDForSBE(TARGETING::Target * i_hbTarget)
     return l_chipletID;
 }
 
-/// @brief sends Put Ring from Image message to SBE via scan interface
-/// @param[in] i_target  target includes the target type that is needed
-/// @param[in] va_list i_args contains:  ringID, RingMode, flags
-/// @return errlHndl_t  returns non-zero value if there is error.
-errlHndl_t sbeScanPerformOp(TARGETING::Target * i_target, va_list i_args)
+
+/// @brief Sends Put Ring from Image message to SBE via PSU
+errlHndl_t sbeScanPerformOp( TARGETING::Target * i_target,
+                             RingID i_ringID,
+                             fapi2::RingMode i_ringMode )
 {
+    TRACFCOMP( g_trac_scandd, ENTER_MRK "sbeScanPerformOp(targ=%.8X,id=%d,mode=%.8X)",
+               TARGETING::get_huid(i_target),
+               i_ringID,
+               i_ringMode );
     errlHndl_t l_errl = NULL;
-    TRACFCOMP( g_trac_scandd, ENTER_MRK "sbeScanPerformOp()");
+
 
     SbePsu::psuCommand   l_psuCommand(
     //control flags are hardcoded here, no need to pass them into sbe function
@@ -278,21 +281,11 @@ errlHndl_t sbeScanPerformOp(TARGETING::Target * i_target, va_list i_args)
             SbePsu::SBE_CMD_CONTROL_PUTRING);
     SbePsu::psuResponse  l_psuResponse;
 
-    //Ring ID for this message
-    RingID l_ringID = static_cast<RingID>(va_arg(i_args,uint64_t));
-    //Ring Mode for this message
-    fapi2::RingMode l_ringMode =
-            static_cast<fapi2::RingMode>(va_arg(i_args,uint64_t));
-
-    uint64_t l_flags = va_arg(i_args,uint64_t);
-    TRACDCOMP( g_trac_scandd, INFO_MRK
-    ":: sbeScanPerformOp() does not use Control Flags :%.8X ", l_flags);
-
     l_psuCommand.cd3_PutRing_TargetType =  translateToSBETargetType(i_target);
     l_psuCommand.cd3_PutRing_Reserved1  =  0x00;
     l_psuCommand.cd3_PutRing_ChipletID  =  getChipletIDForSBE(i_target);
-    l_psuCommand.cd3_PutRing_RingID     =  l_ringID;
-    l_psuCommand.cd3_PutRing_RingMode   =  l_ringMode;
+    l_psuCommand.cd3_PutRing_RingID     =  i_ringID;
+    l_psuCommand.cd3_PutRing_RingMode   =  i_ringMode;
 
     TRACDCOMP( g_trac_scandd, INFO_MRK" sbeScanPerformOp()"
             " l_target : %.16llX i_targetType %.16llX",
@@ -317,14 +310,26 @@ errlHndl_t sbeScanPerformOp(TARGETING::Target * i_target, va_list i_args)
                       ":: sbeScanPerformOp() RingMode:%.8X ",
                       l_psuCommand.cd3_PutRing_RingMode );
 
-    /*
-    l_errl = SBEIO::SbePsu::getTheInstance().performPsuChipOp(nullptr,
+    // PSU ops are chip-wide so find the right target
+    TARGETING::Target* l_parentProc = i_target;
+    if( l_parentProc->getAttr<TARGETING::ATTR_TYPE>()
+        != TARGETING::TYPE_PROC )
+    {
+        l_parentProc =
+          const_cast<TARGETING::Target *>(TARGETING::getParentChip(i_target));
+        assert(l_parentProc);
+        assert(l_parentProc->getAttr<TARGETING::ATTR_TYPE>()
+               == TARGETING::TYPE_PROC);
+    }
+
+    // Trigger the putring
+    l_errl = SBEIO::SbePsu::getTheInstance().performPsuChipOp(
+                    l_parentProc,
                     &l_psuCommand,
                     &l_psuResponse,
                     SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                     SbePsu::SBE_DMCONTROL_START_REQ_USED_REGS,
                     SbePsu::SBE_DMCONTROL_START_RSP_USED_REGS);
-                    */
 
     TRACFCOMP( g_trac_scandd, EXIT_MRK "exiting :: sbeScanPerformOp()");
 
@@ -341,179 +346,53 @@ errlHndl_t scanPerformOp( DeviceFW::OperationType i_opType,
                                 int64_t i_accessType,
                                 va_list i_args )
 {
-
     errlHndl_t l_err = NULL;
-    va_list i_args_copy;
-    va_copy(i_args_copy, i_args);
-    uint64_t i_ring = va_arg(i_args,uint64_t);
-    uint64_t i_ringlength = va_arg(i_args,uint64_t);
-    uint64_t i_flag = va_arg(i_args,uint64_t);
+
+    uint64_t i_arg0 = va_arg(i_args,uint64_t);
+    uint64_t i_arg1 = va_arg(i_args,uint64_t);
+    uint64_t i_arg2 = va_arg(i_args,uint64_t);
     uint64_t i_whichFunction = va_arg(i_args,uint64_t);
 
     do
     {
-
         if(i_whichFunction == PUT_RING_FROM_IMAGE_COMMAND)
         {
-            TRACFCOMP( g_trac_scandd,
-                    ENTER_MRK " scanPerformOP 'Put Ring From Image'"
-                    " command is being generated");
-            l_err = sbeScanPerformOp(i_target, i_args_copy);
+            // from devicefw/userif.H
+            // #define DEVICE_SCAN_SBE_ADDRESS( i_ringID, i_ringMode, i_flag )
+            RingID i_ringID = static_cast<RingID>(i_arg0);
+            fapi2::RingMode i_ringMode = static_cast<fapi2::RingMode>(i_arg1);
+            l_err = sbeScanPerformOp( i_target,
+                                      i_ringID,
+                                      i_ringMode );
         }
         else
         {
+            // from devicefw/userif.H
+            // #define DEVICE_SCAN_ADDRESS( i_ring, i_ringlen, i_flag )
+            uint64_t i_ring = i_arg0;
+            uint64_t i_ringlength = i_arg1;
+            uint64_t i_flag = i_arg2;
 
-            // If the ringlength equals 0
-            if( i_ringlength == 0x0 )
-            {
-                TRACFCOMP( g_trac_scandd,
-                        ERR_MRK "SCAN::scanPerformOp> Invalid Ringlength for"
-                        " ring =%d for target =%.8X",
-                        i_ring, TARGETING::get_huid(i_target));
-                /*@
-                 * @errortype
-                 * @moduleid     SCAN::MOD_SCANDD_DDOP
-                 * @reasoncode   SCAN::RC_INVALID_LENGTH
-                 * @userdata1    SCAN Ring Address
-                 * @userdata2    SCAN ring length
-                 * @devdesc      ScanDD::scanPerformOp> Invalid ringlength
-                 * @custdesc    A problem occurred during the IPL
-                 *              of the system.
-                 */
-                l_err = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                        SCAN::MOD_SCANDD_DDOP,
-                        SCAN::RC_INVALID_LENGTH,
-                        i_ring,
-                        i_ringlength,
-                        true/*SW Error*/);
-                //Add this target to the FFDC
-                ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
-                .addToLog(l_err);
-
-                l_err->collectTrace(SCANDD_TRACE_BUF,1024);
-                break;
-            }
-
-            // Check to see if invalid RING.. (0xFFFFFFFF - has been used as a
-            // test ring in fips code so checking for that as well.
-            if ((i_ring == 0x0) || (i_ring == 0xFFFFFFFF))
-            {
-                TRACFCOMP( g_trac_scandd, ERR_MRK "SCAN:scanPerformOp> Invalid ring i_ring=%.8X for target =%.8X", i_ring, TARGETING::get_huid(i_target) );
-                /*@
-                 * @errortype
-                 * @moduleid     SCAN::MOD_SCANDD_DDOP
-                 * @reasoncode   SCAN::RC_INVALID_RING_ADDRESS
-                 * @userdata1    SCAN Ring Address
-                 * @userdata2    TARGET
-                 * @devdesc      ScanDD::scanPerformOp> Invalid Ring Address
-                 * @custdesc    A problem occurred during the IPL
-                 *              of the system.
-                 */
-                l_err = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                        SCAN::MOD_SCANDD_DDOP,
-                        SCAN::RC_INVALID_RING_ADDRESS,
-                        i_ring,
-                        TARGETING::get_huid(i_target),
-                        true/*SW Error*/);
-                //Add this target to the FFDC
-                ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
-                .addToLog(l_err);
-
-                l_err->collectTrace(SCANDD_TRACE_BUF,1024);
-                break;
-            }
-
-            // Check to make sure the buflength is big enough.
-            // ringlength is in bits, io_buflen is in bytes
-            if ((i_ringlength) > io_buflen*8)
-            {
-                TRACFCOMP( g_trac_scandd, ERR_MRK "SCAN::scanPerformOp> IObuffer not big enough=ringlength = %d, iobuflen = %d for target =%.8X", i_ringlength, io_buflen,TARGETING::get_huid(i_target) );
-                /*@
-                 * @errortype
-                 * @moduleid     SCAN::MOD_SCANDD_DDOP
-                 * @reasoncode   SCAN::RC_INVALID_BUF_SIZE
-                 * @userdata1    SCAN IO buffer length
-                 * @userdata2    SCAN ring length
-                 * @devdesc      ScanDD::scanPerformOp> Invalid IObuf length
-                 * @custdesc    A problem occurred during the IPL
-                 *              of the system.
-                 */
-                l_err = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                        SCAN::MOD_SCANDD_DDOP,
-                        SCAN::RC_INVALID_BUF_SIZE,
-                        io_buflen,
-                        i_ringlength,
-                        true/*SW Error*/);
-                //Add this target to the FFDC
-                ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
-                .addToLog(l_err);
-
-                l_err->collectTrace(SCANDD_TRACE_BUF,1024);
-                break;
-            }
-
-            // If a Scan read or Write.. do the scan op.
-            if((DeviceFW::READ == i_opType) || (DeviceFW::WRITE == i_opType))
-            {
-                l_err = scanDoScan( i_opType,
-                        i_target,
-                        io_buffer,
-                        io_buflen,
-                        i_ring,
-                        i_ringlength,
-                        i_flag );
-
-                if(l_err)
-                {
-                    break;
-                }
-
-            }
-            else
-            {
-                TRACFCOMP( g_trac_scandd, ERR_MRK "SCAN::scanPerformOp> Invalid Op Type = %d for target =%.8X", i_opType, TARGETING::get_huid(i_target) );
-                /*@
-                 * @errortype
-                 * @moduleid     SCAN::MOD_SCANDD_DDOP
-                 * @reasoncode   SCAN::RC_INVALID_OPERATION
-                 * @userdata1    SCAN Address
-                 * @userdata2    Operation Type (i_opType)
-                 * @devdesc      ScanDD::scanPerformOp> Invalid operation type
-                 * @custdesc    A problem occurred during the IPL
-                 *              of the system.
-                 */
-                l_err = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                        SCAN::MOD_SCANDD_DDOP,
-                        SCAN::RC_INVALID_OPERATION,
-                        i_ring,
-                        TO_UINT64(i_opType),
-                        true/*SW Error*/);
-                //Add this target to the FFDC
-                ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
-                .addToLog(l_err);
-                l_err->collectTrace(SCANDD_TRACE_BUF,1024);
-                break;
-            }
-
+            l_err = scanDoPibScan( i_opType,
+                                i_target,
+                                io_buffer,
+                                io_buflen,
+                                i_ring,
+                                i_ringlength,
+                                i_flag );
         }//else case
     }while(0);
-
-    va_end(i_args_copy); // this is needed for sbeScanPerformOp function
 
     return l_err;
 }
 
 
 // ------------------------------------------------------------------
-// scanDoScan - execute the scan read or write
+// scanDoPibScan - execute the scan read or write
 // ------------------------------------------------------------------
-errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
+errlHndl_t scanDoPibScan(  DeviceFW::OperationType i_opType,
                           TARGETING::Target * i_target,
-                          void * io_buffer,
+                          void * o_buffer,
                           size_t & io_buflen,
                           uint64_t i_ring,
                           uint64_t i_ringlength,
@@ -530,8 +409,128 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
 
     do
     {
+        TRACFCOMP( g_trac_scandd,"SCAN::scanDoPibScan> Start::: i_ring=%lX, i_ringLength=%d, i_flag=%lX, i_opType=%.8X",i_ring, i_ringlength, i_flag, i_opType);
 
-        TRACFCOMP( g_trac_scandd,"SCAN::scanDoScan> Start::: i_ring=%lX, i_ringLength=%d, i_flag=%lX, i_opType=%.8X",i_ring, i_ringlength, i_flag, i_opType);
+
+        // If the ringlength equals 0
+        if( i_ringlength == 0x0 )
+        {
+            TRACFCOMP( g_trac_scandd,
+                       ERR_MRK "SCAN::scanDoPibScan> Invalid Ringlength for"
+                       " ring =%d for target =%.8X",
+                       i_ring, TARGETING::get_huid(i_target));
+            /*@
+             * @errortype
+             * @moduleid     SCAN::MOD_SCANDD_DOPIBSCAN
+             * @reasoncode   SCAN::RC_INVALID_LENGTH
+             * @userdata1    SCAN Ring Address
+             * @userdata2    SCAN ring length
+             * @devdesc      ScanDD::scanPerformOp> Invalid ringlength
+             * @custdesc    A problem occurred during the IPL
+             *              of the system.
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            SCAN::MOD_SCANDD_DOPIBSCAN,
+                                            SCAN::RC_INVALID_LENGTH,
+                                            i_ring,
+                                            i_ringlength,
+                                            true/*SW Error*/);
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
+              .addToLog(l_err);
+
+            l_err->collectTrace(SCANDD_TRACE_BUF,1024);
+            break;
+        }
+
+        // Check to see if invalid RING.. (0xFFFFFFFF - has been used as a
+        // test ring in fips code so checking for that as well.
+        if ((i_ring == 0x0) || (i_ring == 0xFFFFFFFF))
+        {
+            TRACFCOMP( g_trac_scandd, ERR_MRK "SCAN:scanPerformOp> Invalid ring i_ring=%.8X for target =%.8X", i_ring, TARGETING::get_huid(i_target) );
+            /*@
+             * @errortype
+             * @moduleid     SCAN::MOD_SCANDD_DOPIBSCAN
+             * @reasoncode   SCAN::RC_INVALID_RING_ADDRESS
+             * @userdata1    SCAN Ring Address
+             * @userdata2    TARGET
+             * @devdesc      ScanDD::scanPerformOp> Invalid Ring Address
+             * @custdesc    A problem occurred during the IPL
+             *              of the system.
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            SCAN::MOD_SCANDD_DOPIBSCAN,
+                                            SCAN::RC_INVALID_RING_ADDRESS,
+                                            i_ring,
+                                            TARGETING::get_huid(i_target),
+                                            true/*SW Error*/);
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
+              .addToLog(l_err);
+
+            l_err->collectTrace(SCANDD_TRACE_BUF,1024);
+            break;
+        }
+
+        // Check to make sure the buflength is big enough.
+        // ringlength is in bits, io_buflen is in bytes
+        if ((i_ringlength) > io_buflen*8)
+        {
+            TRACFCOMP( g_trac_scandd, ERR_MRK "SCAN::scanDoPibScan> IObuffer not big enough=ringlength = %d, iobuflen = %d for target =%.8X", i_ringlength, io_buflen,TARGETING::get_huid(i_target) );
+            /*@
+             * @errortype
+             * @moduleid     SCAN::MOD_SCANDD_DOPIBSCAN
+             * @reasoncode   SCAN::RC_INVALID_BUF_SIZE
+             * @userdata1    SCAN IO buffer length
+             * @userdata2    SCAN ring length
+             * @devdesc      ScanDD::scanPerformOp> Invalid IObuf length
+             * @custdesc    A problem occurred during the IPL
+             *              of the system.
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            SCAN::MOD_SCANDD_DOPIBSCAN,
+                                            SCAN::RC_INVALID_BUF_SIZE,
+                                            io_buflen,
+                                            i_ringlength,
+                                            true/*SW Error*/);
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
+              .addToLog(l_err);
+
+            l_err->collectTrace(SCANDD_TRACE_BUF,1024);
+            break;
+        }
+
+        // If a Scan read or Write.. do the scan op.
+        if( !((DeviceFW::READ == i_opType) || (DeviceFW::WRITE == i_opType)) )
+        {
+            TRACFCOMP( g_trac_scandd, ERR_MRK "SCAN::scanDoPibScan> Invalid Op Type = %d for target =%.8X", i_opType, TARGETING::get_huid(i_target) );
+            /*@
+             * @errortype
+             * @moduleid     SCAN::MOD_SCANDD_DOPIBSCAN
+             * @reasoncode   SCAN::RC_INVALID_OPERATION
+             * @userdata1    SCAN Address
+             * @userdata2    Operation Type (i_opType)
+             * @devdesc      ScanDD::scanPerformOp> Invalid operation type
+             * @custdesc    A problem occurred during the IPL
+             *              of the system.
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            SCAN::MOD_SCANDD_DOPIBSCAN,
+                                            SCAN::RC_INVALID_OPERATION,
+                                            i_ring,
+                                            TO_UINT64(i_opType),
+                                            true/*SW Error*/);
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
+              .addToLog(l_err);
+            l_err->collectTrace(SCANDD_TRACE_BUF,1024);
+            break;
+        }
 
         // To get the remaining bits of data
         // If not on a 32bit boundary need to know how many bits to shift.
@@ -588,7 +587,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
         if(l_err)
         {
             TRACFCOMP( g_trac_scandd, ERR_MRK
-                       "SCAN::scanDoScan> SCOM Write to scan select register failed. i_ring=%lX, scanTypeData=%lX,scanTypeAddr=%lX, target =%.8X", i_ring, l_scanTypeData,l_scanTypeAddr, TARGETING::get_huid(i_target) );
+                       "SCAN::scanDoPibScan> SCOM Write to scan select register failed. i_ring=%lX, scanTypeData=%lX,scanTypeAddr=%lX, target =%.8X", i_ring, l_scanTypeData,l_scanTypeAddr, TARGETING::get_huid(i_target) );
             //Add this target to the FFDC
             ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
               .addToLog(l_err);
@@ -639,7 +638,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
 
              if(l_err)
              {
-                 TRACFCOMP( g_trac_scandd, ERR_MRK"SCAN::scanDoScan> ERROR i_ring=%.8X, target=%.8X , scanTypeData=%.8X, l_HeaderDataAddr=%.8X", i_ring, TARGETING::get_huid(i_target), l_buffer[0], l_headerDataAddr);
+                 TRACFCOMP( g_trac_scandd, ERR_MRK"SCAN::scanDoPibScan> ERROR i_ring=%.8X, target=%.8X , scanTypeData=%.8X, l_HeaderDataAddr=%.8X", i_ring, TARGETING::get_huid(i_target), l_buffer[0], l_headerDataAddr);
                  //Add this target to the FFDC
                  ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
                    .addToLog(l_err);
@@ -664,7 +663,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
 
         if(l_err)
         {
-            TRACFCOMP( g_trac_scandd, ERR_MRK"SCAN::scanDoScan> ERROR i_ring=%.8X, target=%.8X , scanTypeData=%.8X, l_HeaderDataAddr=%.8X", i_ring, TARGETING::get_huid(i_target), l_buffer[0], l_headerDataAddr);
+            TRACFCOMP( g_trac_scandd, ERR_MRK"SCAN::scanDoPibScan> ERROR i_ring=%.8X, target=%.8X , scanTypeData=%.8X, l_HeaderDataAddr=%.8X", i_ring, TARGETING::get_huid(i_target), l_buffer[0], l_headerDataAddr);
             //Add this target to the FFDC
             ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
               .addToLog(l_err);
@@ -694,8 +693,8 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
         //     outside of the loop as it needs to be done after the
         //     last bit are read which could be < 32
 
-        // Set the temp buffer to point to the io_buffer passed in
-        uint32_t *temp_buffer = (uint32_t *)io_buffer;
+        // Set the temp buffer to point to the o_buffer passed in
+        uint32_t *temp_buffer = (uint32_t *)o_buffer;
 
         // Need to increment the buffer by 1 to get past word0 which is the
         // header that we wrote to already above.
@@ -704,7 +703,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
         l_wordsInChain--;
 
         //TRACFCOMP( g_trac_scandd,
-        //           "SCAN::scanDoScan> Before Data Loop, i_ringlength = %.8x, i_opType =%.8X, Full words to read=%d
+        //           "SCAN::scanDoPibScan> Before Data Loop, i_ringlength = %.8x, i_opType =%.8X, Full words to read=%d
         //            lastbits =%d,", i_ringlength, i_opType, l_wordsInChain, l_lastDataBits);
 
         // Read all the words in the ring minus 1 because the header is done
@@ -759,7 +758,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
 
             if(l_err)
             {
-                TRACFCOMP( g_trac_scandd,ERR_MRK "SCAN::scanDoScan: Device OP error> i_ring=%.8X, target=%.8X , scanTypeData=%.8X, i_flag=%.8X,", i_ring, TARGETING::get_huid(i_target), l_scanDataAddr, i_flag );
+                TRACFCOMP( g_trac_scandd,ERR_MRK "SCAN::scanDoPibScan: Device OP error> i_ring=%.8X, target=%.8X , scanTypeData=%.8X, i_flag=%.8X,", i_ring, TARGETING::get_huid(i_target), l_scanDataAddr, i_flag );
                 //Add this target to the FFDC
                 ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
                   .addToLog(l_err);
@@ -828,7 +827,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
                 // that we don't drop any bits if we are not on a byte boundary.
                 memcpy(&l_buffer[0], temp_buffer, ((l_lastDataBits-1)/8 + 1));
 
-                // TRACDCOMP( g_trac_scandd,"SCAN::scanDoScan: Last Bits WRITE> scanTypeDataAddr=%.8X, l_lastDataBits=%d, bytes copied %d,",l_scanDataAddr, l_lastDataBits, ((l_lastDataBits-1)/8 + 1));
+                // TRACDCOMP( g_trac_scandd,"SCAN::scanDoPibScan: Last Bits WRITE> scanTypeDataAddr=%.8X, l_lastDataBits=%d, bytes copied %d,",l_scanDataAddr, l_lastDataBits, ((l_lastDataBits-1)/8 + 1));
 
                 TRACDCOMP( g_trac_scandd,"SCAN: <32Bits PUTSCOM %lX = %.8x %.8x",l_scanDataAddr , l_buffer[0], l_buffer[1]);
             }
@@ -842,7 +841,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
 
             if(l_err)
             {
-                TRACFCOMP( g_trac_scandd, ERR_MRK "SCAN::scanDoScan: OP and shift of < 32bits i_ring=%.8X, scanTypeDataAddr=%.8X, l_lastDataBits=%.8X, target=%.8X", i_ring, l_scanDataAddr, l_lastDataBits, TARGETING::get_huid(i_target) );
+                TRACFCOMP( g_trac_scandd, ERR_MRK "SCAN::scanDoPibScan: OP and shift of < 32bits i_ring=%.8X, scanTypeDataAddr=%.8X, l_lastDataBits=%.8X, target=%.8X", i_ring, l_scanDataAddr, l_lastDataBits, TARGETING::get_huid(i_target) );
                 //Add this target to the FFDC
                 ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
                   .addToLog(l_err);
@@ -864,7 +863,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
                 // that we don't drop any bits if we are not on a byte boundary.
                 memcpy(temp_buffer, &l_buffer[0],((l_lastDataBits-1)/8 + 1));
 
-                //TRACDCOMP( g_trac_scandd, "SCAN::scanDoScan: Last Bits READ> scanTypeDataAddr=%.8X, l_lastDataBits=%d, bytes copied = %d",l_scanDataAddr, l_lastDataBits, ((l_lastDataBits-1)/8 + 1));
+                //TRACDCOMP( g_trac_scandd, "SCAN::scanDoPibScan: Last Bits READ> scanTypeDataAddr=%.8X, l_lastDataBits=%d, bytes copied = %d",l_scanDataAddr, l_lastDataBits, ((l_lastDataBits-1)/8 + 1));
 
                 TRACDCOMP( g_trac_scandd,"SCAN: <32bits GETSCOM %lX = %.8x %.8x",l_scanDataAddr , l_buffer[0], l_buffer[1]);
             }
@@ -925,7 +924,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
 
         if(l_err)
         {
-            TRACFCOMP( g_trac_scandd,ERR_MRK "SCAN::scanDoScan> ERROR i_ring=%.8X, HeaderDataAddr=%.8X, i_flag=%.8X, target=%.8X", i_ring, l_headerDataAddr, i_flag, TARGETING::get_huid(i_target)  );
+            TRACFCOMP( g_trac_scandd,ERR_MRK "SCAN::scanDoPibScan> ERROR i_ring=%.8X, HeaderDataAddr=%.8X, i_flag=%.8X, target=%.8X", i_ring, l_headerDataAddr, i_flag, TARGETING::get_huid(i_target)  );
             l_err->collectTrace(SCANDD_TRACE_BUF,1024);
             break;
 
@@ -936,23 +935,23 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
             // If the header data did not match..
             if ((l_buffer[0] != HEADER_CHECK_DATA))
             {
-                TRACFCOMP( g_trac_scandd, "SCAN::scanDoScan> Header Check Failed on %.8X: i_ring=%.8X, i_opType=%.8X, i_flag=%.8X,", TARGETING::get_huid(i_target), i_ring, i_opType, i_flag );
+                TRACFCOMP( g_trac_scandd, "SCAN::scanDoPibScan> Header Check Failed on %.8X: i_ring=%.8X, i_opType=%.8X, i_flag=%.8X,", TARGETING::get_huid(i_target), i_ring, i_opType, i_flag );
                 TRACFCOMP( g_trac_scandd, "%.8X = %.8X_%.8X (expected 0xDEADBEEF)", l_headerDataAddr , l_buffer[0], l_buffer[1] );
 
                 /*@
                  * @errortype
-                 * @moduleid     SCAN::MOD_SCANDD_DOSCAN
+                 * @moduleid     SCAN::MOD_SCANDD_DOPIBSCAN
                  * @reasoncode   SCAN::RC_HEADER_DATA_MISMATCH
                  * @userdata1    SCAN Ring Address
                  * @userdata2    Operation Type (i_opType)
-                 * @devdesc      ScanDD::scanDoScan> Got a data mismatch
+                 * @devdesc      ScanDD::scanDoPibScan> Got a data mismatch
                  *               when reading back the header
                  * @custdesc    A problem occurred during the IPL
                  *              of the system.
                  */
                 l_err = new ERRORLOG::ErrlEntry(
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      SCAN::MOD_SCANDD_DOSCAN,
+                                      SCAN::MOD_SCANDD_DOPIBSCAN,
                                       SCAN::RC_HEADER_DATA_MISMATCH,
                                       i_ring,
                                       TO_UINT64(i_opType) );
