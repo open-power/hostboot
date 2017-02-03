@@ -130,7 +130,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 #else
     uint8_t sdcSaveFlags = SDC_NO_SAVE_FLAGS;
     size_t  sz_uint8    = sizeof(uint8_t);
-    uint8_t sdcBuffer[sdcBufferSize];  //buffer to use for SDC flatten
 #endif
 
     epubProcedureID thisProcedureID;
@@ -141,123 +140,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     ++iv_serviceActionCounter;
 
     uint16_t PRD_Reason_Code = 0;
-
-    //**************************************************************
-    // Initial set up by Attention Type
-    //**************************************************************
-
-    ////////////////////////////////////////////////////////////////
-    // Machine Check ATTN (CHECKSTOP)
-    ////////////////////////////////////////////////////////////////
-    if (i_attnType == MACHINE_CHECK)
-    {
-        #ifdef __HOSTBOOT_MODULE
-
-        // Do nothing. Saved SDCs only supported on FSP.
-
-        #ifdef __HOSTBOOT_RUNTIME
-        PRDF_ERR( PRDF_FUNC "HBRT should NOT have any CS attns!" );
-        #endif
-
-        #else
-
-        // Check for SUE-CS condition flags.
-        if ((!io_sdc.IsUERE() ) &&
-            ( io_sdc.IsSUE()  )   )
-        {
-            //Read current SDC state flags from registry
-            errlHndl_t errorLog = UtilReg::read ( "prdf/RasServices",
-                                                  &sdcSaveFlags, sz_uint8 );
-            if (errorLog)
-            {
-                PRDF_ERR( PRDF_FUNC "Failure in SDC flag Registry read" );
-                PRDF_COMMIT_ERRL(errorLog, ERRL_ACTION_REPORT);
-            }
-            else if (sdcSaveFlags & SDC_SAVE_UE_FLAG) //check if UE log stored
-            {                                         // then use it.
-                bool l_rc = SdcRetrieve(SDC_SAVE_UE_FLAG, sdcBuffer);
-                if (l_rc)
-                {
-                    PRDF_ERR( PRDF_FUNC "Failure in UE SDC Retrieve Function" );
-                }
-                else
-                {
-                    ServiceDataCollector origSdc = io_sdc; // Save original SDC
-                    io_sdc = sdcBuffer;                    // Set the new SDC
-
-                    // Add the original signature to the new SDC's
-                    // multi-signature list.
-                    io_sdc.AddSignatureList( *(origSdc.GetErrorSignature()) );
-
-                    // This is a checkstop attention so some values will need
-                    // to be overridden.
-
-                    io_sdc.setPrimaryAttnType( origSdc.getPrimaryAttnType() );
-
-                    if ( origSdc.Terminate() )
-                        io_sdc.setFlag(ServiceDataCollector::TERMINATE);
-                }
-            }
-            else if (sdcSaveFlags & SDC_SAVE_SUE_FLAG ) //else check if SUE log
-            {                                           // stored then use it.
-                bool l_rc = SdcRetrieve(SDC_SAVE_SUE_FLAG, sdcBuffer);
-                if (l_rc)
-                {
-                    PRDF_ERR( PRDF_FUNC "Failure in SUE SDC Retrieve Function" );
-                }
-                else
-                {
-                    ServiceDataCollector origSdc = io_sdc; // Save original SDC
-                    io_sdc = sdcBuffer;                    // Set the new SDC
-
-                    // Add the original signature to the new SDC's
-                    // multi-signature list.
-                    io_sdc.AddSignatureList( *(origSdc.GetErrorSignature()) );
-
-                    // This is a checkstop attention so some values will need
-                    // to be overridden.
-
-                    io_sdc.setPrimaryAttnType( origSdc.getPrimaryAttnType() );
-
-                    if ( origSdc.Terminate() )
-                        io_sdc.setFlag(ServiceDataCollector::TERMINATE);
-                }
-            }
-        }
-
-        #endif  // if not __HOSTBOOT_HOSTBOOT
-    }
-    ////////////////////////////////////////////////////////////////
-    // Recoverable ATTN or Unit CheckStop
-    ////////////////////////////////////////////////////////////////
-    else if (i_attnType == RECOVERABLE  || i_attnType == UNIT_CS )
-    {
-#ifndef  __HOSTBOOT_MODULE
-        if //Ue-Re RECOVERABLE condition.
-            ((io_sdc.IsUERE()   ) &&
-             (!io_sdc.IsSUE()   ) &&
-             (!io_sdc.IsUsingSavedSdc() ) )  // Don't save File if we are Re-Syncing an SDC
-        {
-            bool l_rc = SdcSave(SDC_SAVE_UE_FLAG, io_sdc);
-            if (l_rc)
-            {
-                PRDF_ERR( PRDF_FUNC "Failure in UE SDC Save Function" );
-            }
-        }
-        else if //Sue-Re RECOVERABLE condition.
-            ((!io_sdc.IsUERE()   ) &&
-             (io_sdc.IsSUE()     ) &&
-             (!io_sdc.IsUsingSavedSdc() ) )  // Don't save File if we are Re-Syncing an SDC
-
-        {
-            bool l_rc = SdcSave(SDC_SAVE_SUE_FLAG, io_sdc);
-            if (l_rc)
-            {
-                PRDF_ERR( PRDF_FUNC "Failure in SUE SDC Save Function" );
-            }
-        }
-#endif  // if not __HOSTBOOT_MODULE
-    }
 
     //**************************************************************
     // Callout loop to set up Reason code and SRC word 9
@@ -434,6 +316,17 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // This needs to be done after setting the SRCs otherwise it will be
     // overridden.
     iv_errl->setSev( errlSev );
+
+    // Add procedure callout for SUE attentions. The intent is to make sure the
+    // customer looks for other service actions before replacing parts for this
+    // attention.
+    if ( io_sdc.IsSUE() )
+    {
+        PRDF_HW_ADD_PROC_CALLOUT(EPUB_PRC_SUE_PREVERROR,
+                                 MRU_HIGH,
+                                 iv_errl,
+                                 errlSev);
+    }
 
     //--------------------------------------------------------------------------
     // Get the global gard policy.
@@ -943,140 +836,6 @@ void ErrDataService::AddCapData( CaptureData & i_cd, errlHndl_t i_errHdl)
 
     delete l_CapDataBuf;
 }
-
-//------------------------------------------------------------------------------
-
-#ifndef __HOSTBOOT_MODULE
-
-bool ErrDataService::SdcSave( sdcSaveFlagsEnum i_saveFlag,
-                              ServiceDataCollector & i_saveSdc )
-{
-    #define PRDF_FUNC "SdcRetrieve() "
-    errlHndl_t errorLog = NULL;
-    bool rc = false;
-    uint8_t sdcSaveFlags = SDC_NO_SAVE_FLAGS;
-    size_t  sz_uint8    = sizeof(uint8_t);
-    const char * UeSdcKeys[]  = {"fstp/P1_Root","prdf/UeSdcDataPath"};
-    const char * SueSdcKeys[] = {"fstp/P1_Root","prdf/SueSdcDataPath"};
-    char  * SdcFilename = NULL;
-    uint32_t l_size = 0;
-
-    do
-    {
-        //Need path to the File
-        if (i_saveFlag == SDC_SAVE_UE_FLAG)
-            errorLog = UtilReg::path(UeSdcKeys,2,NULL,SdcFilename,l_size);
-        else if (i_saveFlag == SDC_SAVE_SUE_FLAG)
-            errorLog = UtilReg::path(SueSdcKeys,2,NULL,SdcFilename,l_size);
-        else
-        {
-            //Should not get here - code error
-            PRDF_ERR( PRDF_FUNC "Failure - incorrect SDC save flag" );
-            rc = true;
-            break;
-        }
-        if (errorLog)
-        {
-            PRDF_ERR( PRDF_FUNC "Failure in getting SDC file path" );
-            PRDF_COMMIT_ERRL(errorLog, ERRL_ACTION_REPORT);
-            rc = true;
-            break;
-        }
-
-        rc = SdcWrite(SdcFilename, i_saveSdc);
-        if (rc)
-        {
-            break;
-        }
-
-          //Read current SDC state flags from registry
-        errorLog = UtilReg::read ("prdf/RasServices", &sdcSaveFlags, sz_uint8);
-        if (errorLog)
-        {
-            PRDF_ERR( PRDF_FUNC "Failure in SDC flag Registry read" );
-            PRDF_COMMIT_ERRL(errorLog, ERRL_ACTION_REPORT);
-            rc = true;
-            break;
-        }
-
-        //Update Sdc registry flag
-        sdcSaveFlags = (sdcSaveFlags | i_saveFlag);
-        errorLog = UtilReg::write ("prdf/RasServices", &sdcSaveFlags, sz_uint8);
-        if (errorLog)
-        {
-            PRDF_ERR( PRDF_FUNC "Failure in SDC flag Registry write" );
-            PRDF_COMMIT_ERRL(errorLog, ERRL_ACTION_REPORT);
-            rc = true;
-            break;
-        }
-
-
-    }
-    while(0);
-
-    if (SdcFilename != NULL)
-    {  //need to free the pathname
-        free(SdcFilename);
-        SdcFilename = NULL;
-    }
-
-    return rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-bool ErrDataService::SdcRetrieve(sdcSaveFlagsEnum i_saveFlag, void * o_buffer)
-{
-    #define PRDF_FUNC "SdcRetrieve() "
-    errlHndl_t errorLog = NULL;
-    bool rc = false;
-    const char * UeSdcKeys[]  = {"fstp/P1_Root","prdf/UeSdcDataPath"};
-    const char * SueSdcKeys[] = {"fstp/P1_Root","prdf/SueSdcDataPath"};
-    char  * SdcFilename = NULL;
-    uint32_t l_size = 0;
-
-    do
-    {
-        //Need path to the File
-        if (i_saveFlag == SDC_SAVE_UE_FLAG)
-            errorLog = UtilReg::path(UeSdcKeys,2,NULL,SdcFilename,l_size);
-        else if (i_saveFlag == SDC_SAVE_SUE_FLAG)
-            errorLog = UtilReg::path(SueSdcKeys,2,NULL,SdcFilename,l_size);
-        else
-        {
-            //Should not get here - code error
-            PRDF_ERR(PRDF_FUNC "Failure - incorrect SDC save flag" );
-            rc = true;
-            break;
-        }
-        if (errorLog)
-        {
-            PRDF_ERR( PRDF_FUNC "Failure in getting SDC file path" );
-            PRDF_COMMIT_ERRL(errorLog, ERRL_ACTION_REPORT);
-            rc = true;
-            break;
-        }
-
-        rc = SdcRead (SdcFilename, o_buffer);
-
-
-    }
-    while(0);
-
-    if (SdcFilename != NULL)
-    {  //need to free the pathname
-        free(SdcFilename);
-        SdcFilename = NULL;
-    }
-
-    return rc;
-
-    #undef PRDF_FUNC
-}
-
-#endif // if not __HOSTBOOT_MODULE
 
 //------------------------------------------------------------------------------
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,8 +48,6 @@ enum sdcSaveFlagsEnum
 {
     SDC_NO_SAVE_FLAGS           = 0x00,
     SDC_ANALYSIS_SAVE_FLAG      = 0x08,
-    SDC_SAVE_UE_FLAG            = 0x02,
-    SDC_SAVE_SUE_FLAG           = 0x01
 };
 
 class ErrDataService
@@ -138,37 +136,6 @@ class ErrDataService
 
     /** @brief Disable assignment. */
     ErrDataService & operator=(const ErrDataService &);
-
-    #ifndef __HOSTBOOT_MODULE
-
-    /**
-     @brief Write the Flattened SDC to a File to save for later use. Will also
-     immediate sync the File to the Redundant FSP. Update Registry
-     value with UE or SUE save status. Note, the Registry is immediately
-     synced to the Redundand FSP automatically.
-     @param[in] sdcSaveFlagsEnum
-     @param[in,out] sdc  (see iipServiceData.h)
-     @return return FALSE if success and TRUE if failure
-     @pre None.
-     @post None.
-     @exception None.
-     @note
-     */
-    bool SdcSave(sdcSaveFlagsEnum i_saveFlag, ServiceDataCollector & i_saveSdc);
-
-    /**
-      @brief Read the Flattened SDC File based on the sdc Save Flag input.
-      @param[in] sdcSaveFlagsEnum
-      @param[in,out] buffer data is output to
-      @return return FALSE if success and TRUE if failure
-      @pre None.
-      @post None.
-      @exception None.
-      @note
-      */
-    bool SdcRetrieve(sdcSaveFlagsEnum i_saveFlag, void * o_buffer);
-
-    #endif // end if not __HOSTBOOT_MODULE
 
     /**
      * @brief Initializes the PFA data.
