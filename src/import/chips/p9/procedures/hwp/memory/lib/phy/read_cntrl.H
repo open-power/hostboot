@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -470,9 +470,9 @@ inline fapi2::ReturnCode reset_vref_config1( const fapi2::Target<T>& i_target )
     FAPI_TRY( mss::eff_dram_al(i_target, l_al) );
     FAPI_TRY( mss::eff_dram_cl(i_target, l_cl) );
 
-    // PHY databook p 506
-    // The recommended setting is (AL + CL + 12).
-    l_data.insertFromRight<TT::CMD_PRECEDE_TIME, TT::CMD_PRECEDE_TIME_LEN>(l_al + l_cl + 12);
+    // Per Ryan King's characterization:
+    // The recommended setting is (AL + CL + 15).
+    l_data.insertFromRight<TT::CMD_PRECEDE_TIME, TT::CMD_PRECEDE_TIME_LEN>(l_al + l_cl + 15);
     l_data.insertFromRight<TT::MPR_PAGE, TT::MPR_PAGE_LEN>(0b0100); // From R. King
 
     // Note: when initial cal is setup, this register will change to accomodate the

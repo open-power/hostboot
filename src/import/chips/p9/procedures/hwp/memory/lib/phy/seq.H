@@ -289,8 +289,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-// TK read, write RD_WR_DATA
-
 ///
 /// @brief Setup odt_wr/rd_config
 /// @tparam T fapi2 Target Type - derived
@@ -302,13 +300,26 @@ template< fapi2::TargetType T, typename TT = seqTraits<T> >
 fapi2::ReturnCode reset_rd_wr_data( const fapi2::Target<T>& i_target )
 {
     // MPR_PATTERN_BIT of 0F0F0F0F pattern
-    static const uint64_t MPR_PATTERN = 0x5555;
+    // MPRLOC vs pattern
+    // MPR0   = 0F0F0F0F - these repeating patterns are for RD CTR, which needs transitions each data beat
+    // MPR1   = 00000000 - these 0 patterns are for RD VREF, which needs a static low level
+    // MPR2   = 00000000 - these 0 patterns are for RD VREF, which needs a static low level
+    // MPR3   = 0F0F0F0F - these repeating patterns are for RD CTR, which needs transitions each data beat
+    // MPR loc is noted above  the data below
+    //                                   0011
+    constexpr uint64_t MPR01_PATTERN = 0x5500;
+    // Per Ryan King: Only MPR page 0 locations 0/1 are required
+    //                2/3 are mirrored for safety but could be changed as needed
+    //                                   2233
+    constexpr uint64_t MPR23_PATTERN = 0x0055;
     fapi2::buffer<uint64_t> l_data;
 
-    l_data.insertFromRight<TT::MPR_PATTERN, TT::MPR_PATTERN_LEN>(MPR_PATTERN);
-
-    FAPI_INF("seq_rd_wr 0x%llx", l_data);
+    l_data.insertFromRight<TT::MPR_PATTERN, TT::MPR_PATTERN_LEN>(MPR01_PATTERN);
+    FAPI_INF("seq_rd_wr0 0x%llx", l_data);
     FAPI_TRY( mss::putScom(i_target, TT::SEQ_RDWR_DATA0, l_data) );
+
+    l_data.insertFromRight<TT::MPR_PATTERN, TT::MPR_PATTERN_LEN>(MPR23_PATTERN);
+    FAPI_INF("seq_rd_wr1 0x%llx", l_data);
     FAPI_TRY( mss::putScom(i_target, TT::SEQ_RDWR_DATA1, l_data) );
 
 fapi_try_exit:

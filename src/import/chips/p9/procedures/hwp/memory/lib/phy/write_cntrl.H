@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -338,8 +338,8 @@ inline fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
         l_data.insertFromRight<TT::FW_WR_RD, TT::FW_WR_RD_LEN>(FW_WR_RD);
     }
 
-    // 63, 0b0, any;       # CUSTOM_INIT_WRITE
-    l_data.clearBit<TT::CUSTOM_INIT_WRITE>();
+    // 63, 0b1, any;       # CUSTOM_INIT_WRITE - set to a 1 to get proper values for RD VREF
+    l_data.setBit<TT::CUSTOM_INIT_WRITE>();
 
     FAPI_DBG("wc_config0 reset 0x%llx (tWLO_tWLOE: %d)", l_data, mss::twlo_twloe(i_target));
     FAPI_TRY( write_config0(i_target, l_data) );
