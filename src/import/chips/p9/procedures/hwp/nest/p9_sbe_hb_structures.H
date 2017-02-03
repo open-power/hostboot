@@ -40,6 +40,16 @@
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
+// Max Pairs
+#define MAX_ROW_COUNT 8
+
+// To keep all the Stashed Keys & Addrs together within this struct
+typedef struct __attribute__((packed))
+{
+    uint8_t  key[MAX_ROW_COUNT];
+    uint64_t addr[MAX_ROW_COUNT];
+}
+keyAddrPair_t;
 
 // Used for version checking as the BootloaderConfigData_t structure changes
 enum SbeBootloaderVersion
@@ -49,6 +59,7 @@ enum SbeBootloaderVersion
     // Later versions use format [release:2][version:2]
     SAB_ADDED = 0x00090002,
     MMIO_BARS_ADDED = 0x00090003,
+    ADDR_STASH_SUPPORT_ADDED = 0x00090004,
 };
 
 union BootloaderSecureSettings
@@ -83,6 +94,7 @@ struct BootloaderConfigData_t
     uint8_t reserved[7];      // bytes 21:27 Reserved space to maintain 64-bit alignment
     uint64_t xscomBAR;        // bytes 28:35 XSCOM MMIO BAR
     uint64_t lpcBAR;          // bytes 36:43 LPC MMIO BAR
+    keyAddrPair_t pair;       // total of 72 Bytes (8+8*8) for Key/Addr Pair
 }; // Note: Want to use '__attribute__((packed))' but compiler won't let us
 
 #endif // _SBE_HB_STRUCTURES_H_
