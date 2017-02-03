@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@
 
 #include <vector>
 #include <fapi2.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 #include <lib/dimm/mrs_load.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <lib/eff_config/timing.H>

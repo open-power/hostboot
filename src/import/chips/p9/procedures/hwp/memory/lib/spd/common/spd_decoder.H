@@ -49,7 +49,7 @@
 #include <lib/spd/common/rcw_settings.H>
 #include <lib/spd/rdimm/rdimm_decoder.H>
 #include <lib/spd/lrdimm/lrdimm_decoder.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 
 namespace mss
 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
 
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 #include <lib/utils/conversions.H>
 #include <lib/eff_config/timing.H>
 #include <lib/ccs/ccs.H>

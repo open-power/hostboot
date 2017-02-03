@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@
 #include <fapi2.H>
 #include <lib/phy/seq.H>
 #include <lib/utils/scom.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 #include <lib/utils/bit_count.H>
 #include <lib/eff_config/timing.H>
 

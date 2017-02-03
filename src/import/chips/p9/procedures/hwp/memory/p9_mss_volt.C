@@ -47,7 +47,7 @@
 #include <lib/spd/spd_factory.H>
 #include <lib/spd/common/spd_decoder.H>
 #include <lib/eff_config/attr_setters.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 #include <lib/utils/pos.H>
 #include <lib/utils/find.H>
 #include <lib/utils/checker.H>

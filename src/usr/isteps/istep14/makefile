@@ -34,6 +34,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/nest
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/

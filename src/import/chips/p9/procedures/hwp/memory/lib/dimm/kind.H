@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include <fapi2.H>
 
 #include <lib/mss_attribute_accessors.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 
 namespace mss
 {

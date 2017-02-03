@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,7 @@
 #include <lib/spd/rdimm/rdimm_decoder.H>
 #include <lib/spd/common/spd_decoder.H>
 #include <lib/utils/checker.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 #include <lib/utils/find.H>
 
 using fapi2::TARGET_TYPE_MCBIST;

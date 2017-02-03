@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,6 @@
 //TK: what is this for? BRS
 
 #include <lib/utils/index.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 
 #endif // _MSS_P9_ATTR_UTILS_H_

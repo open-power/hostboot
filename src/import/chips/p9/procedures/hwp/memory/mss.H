@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@
 #include <lib/shared/mss_kind.H>
 
 #include <lib/utils/index.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 #include <lib/utils/num.H>
 
 #include <lib/utils/pos.H>

@@ -34,7 +34,7 @@
 // *HWP Consumed by: HB:FSP
 
 #include <fapi2.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 #include <lib/dimm/ddr4/state_machine.H>
 
 namespace mss

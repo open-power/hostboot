@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@
 #include <lib/spd/common/spd_decoder.H>
 #include <lib/spd/spd_factory.H>
 #include <lib/freq/cas_latency.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 #include <lib/freq/cycle_time.H>
 #include <lib/utils/find.H>
 #include <lib/utils/count_dimm.H>

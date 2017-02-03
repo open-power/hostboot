@@ -38,7 +38,7 @@
 // mss lib
 #include <lib/spd/common/spd_decoder.H>
 #include <lib/utils/checker.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 #include <lib/utils/conversions.H>
 #include <lib/utils/find.H>
 

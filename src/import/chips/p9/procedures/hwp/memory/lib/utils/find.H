@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,15 +37,13 @@
 #define _MSS_FIND_H
 
 #include <fapi2.H>
-#include <map>
 #include <vector>
 
 #include <lib/utils/pos.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 
 namespace mss
 {
-
 ///
 /// @brief find a set of elements based on a fapi2 target
 /// @tparam M the target type to be returned
