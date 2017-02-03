@@ -43,7 +43,7 @@
 
 #include <lib/shared/mss_const.H>
 #include <lib/utils/scom.H>
-#include <lib/utils/c_str.H>
+#include <c_str.H>
 #include <lib/dimm/kind.H>
 
 namespace mss
