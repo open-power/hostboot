@@ -21121,13 +21121,15 @@ Measured in GB</description>
       Provided by the platform.
       HB_IPL = 0x1,HB_RUNTIME = 0x2,CACHE_CONTAINED = 0x4</description>
   <simpleType>
-    <uint8_t></uint8_t>
+    <uint8_t>
+      <default>0x01</default>
+    </uint8_t>
   </simpleType>
   <hwpfToHbAttrMap>
     <id>ATTR_SYSTEM_IPL_PHASE</id>
     <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
-  <persistency>volatile-zeroed</persistency>
+  <persistency>non-volatile</persistency>
   <readable/>
   <writeable/>
 </attribute>
