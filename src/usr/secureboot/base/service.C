@@ -92,10 +92,12 @@ void* initializeBase(void* unused)
     return l_errl;
 }
 
+#if defined(CONFIG_SECUREBOOT) && !defined(__HOSTBOOT_RUNTIME)
 bool enabled()
 {
     return Singleton<Settings>::instance().getEnabled();
 }
+#endif
 
 errlHndl_t getSecuritySwitch(uint64_t& o_regValue, TARGETING::Target* i_targ)
 {
