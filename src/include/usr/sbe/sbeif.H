@@ -60,21 +60,6 @@ namespace SBE
                              sbe_image_version_t* o_version = NULL);
 
     /**
-     * @brief Gets a pointer to the HBBL image in PNOR
-     *
-     * @param[out] o_imgPtr    Pointer to HBBL Image mapped in PNOR
-     *                         Note: Pointer moved past any header(s)
-     *
-     * @param[out] o_imgSize   Size of the HBBL Image in PNOR
-     *                         Note: Size does not include any header(s)
-     *
-     * @return errlHndl_t      Error log handle on failure.
-     */
-    errlHndl_t findHBBLInPnor(void*& o_imgPtr,
-                              size_t& o_imgSize);
-
-
-    /**
      * @brief Iterates through all the functional processors and updates
      *        the SBE Image in a SEEPROM, if necessary.
      *

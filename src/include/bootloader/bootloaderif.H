@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/securerom.ld $                                            */
+/* $Source: src/include/bootloader/bootloaderif.H $                       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,54 +22,14 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef __BOOT_LOADERIF_H
+#define __BOOT_LOADERIF_H
 
-SECTIONS {
-    .text : {
-        *(.text.securerominfo)
-        *(.text.branchtable)
-        *(.text)
-        *(.text._*)
-        *(.text.*)
-        *(.sfpr)
-    }
+// Max size of HBBL without ECC. Must match PNOR layout for eyeCatch HBBL
+// Must be aligned CACHELINE_SIZE of 128 bytes
+#define MAX_HBBL_SIZE (20 * KILOBYTE)
 
-    .rodata ALIGN(0x8): {
-        *(.rodata)
-        *(.rodata.*)
-        . = ALIGN(8);
-        __toc_start = .;
-        *(.toc)
-        *(.opd)
-        *(.got)
-        *(.plt)
-        *(.data.rel.ro.*)
-    }
+// Size of exception vector reserved space at start of the HBBL section
+#define HBBL_EXCEPTION_VECTOR_SIZE (12 * KILOBYTE)
 
-    .data ALIGN(0x8): {
-        *(.data)
-        *(.data.*)
-        *(.got1)
-        *(.sdata)
-        *(.bss)
-        *(.bss.*)
-    }
-
-    end_load_address = .;
-
-    .rela : {
-        *(.rela.*)
-    }
-
-    .dynsym : { *(.dynsym) }
-    .dynstr : { *(.dynstr) }
-    .hash : { *(.hash) }
-    .gnu.hash : { *(.gnu.hash) }
-    .eh_frame : { *(.eh_frame) }
-
-    /DISCARD/ : {
-        *(.comment)
-        *(.gnu.attributes)
-        *(.dtors)
-        *(.interp)
-    }
-}
+#endif

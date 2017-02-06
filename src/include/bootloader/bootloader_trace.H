@@ -60,18 +60,21 @@ enum BootloaderTraces
     /** Bootloader main removeECC returned */
     BTLDR_TRC_MAIN_REMOVEECC_RTN             = 0x13,
 
-    // @TODO RTC:167740 remove magic number check once fsp/op signs HBB
-    /** Bootloader main verifyBaseImage skip verification - no magic number */
-    BTLDR_TRC_MAIN_VERIFY_HBB_SKIP           = 0x14,
+    /** Bootloader main verifyContainer started */
+    BTLDR_TRC_MAIN_VERIFY_START          = 0x14,
 
-    /** Bootloader main verifyBaseImage started */
-    BTLDR_TRC_MAIN_VERIFY_HBB_START          = 0x15,
-
-    /** Bootloader main verifyBaseImage succeeded */
-    BTLDR_TRC_MAIN_VERIFY_HBB_SUCCESS        = 0x16,
+    /** Bootloader main verifyContainer succeeded */
+    BTLDR_TRC_MAIN_VERIFY_SUCCESS        = 0x15,
 
     /** Bootloader main copy HBB to running location done */
-    BTLDR_TRC_MAIN_COPY_HBB_DONE             = 0x17,
+    BTLDR_TRC_MAIN_COPY_HBB_DONE             = 0x16,
+
+    /** Bootloader main verifyContainer skip verification - no eyecatch */
+    BTLDR_TRC_MAIN_VERIFY_NO_EYECATCH           = 0x17,
+
+    // @TODO RTC:167740 remove magic number check once fsp/op signs HBB
+    /** Bootloader main verifyContainer skip verification - no magic number */
+    BTLDR_TRC_MAIN_VERIFY_NO_MAGIC_NUM          = 0x18,
 
     /** Bootloader handleMMIO started */
     BTLDR_TRC_HANDLEMMIO_START               = 0x20,
@@ -169,8 +172,8 @@ enum BootloaderTraces
     /** Bootloader PNOR Access getHBBSection findTOC no HBB section */
     BTLDR_TRC_PA_GETHBBSECTION_FINDTOC_NOHBB = 0xFA,
 
-    /** Bootloader main verifyBaseImage failed */
-    BTLDR_TRC_MAIN_VERIFY_HBB_FAIL           = 0xFB,
+    /** Bootloader main verifyContainer failed */
+    BTLDR_TRC_MAIN_VERIFY_FAIL               = 0xFB,
 };
 
 #ifndef BOOTLOADER_TRACE

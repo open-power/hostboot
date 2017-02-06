@@ -69,7 +69,6 @@ namespace Bootloader{
                sizeof(sha2_hash_t));
     }
 
-    // @TODO RTC:167740 remove magic number check once fsp/op signs HBB
     /**
      * @brief  Memcmp a vaddr to the known secureboot magic number
      *
@@ -97,24 +96,48 @@ namespace Bootloader{
                          const sha2_hash_t* i_hwKeyHash)
     {
 #ifdef CONFIG_SECUREBOOT
-        // @TODO RTC:167740 remove magic number check once fsp/op signs HBB
-        if (cmpSecurebootMagicNumber(reinterpret_cast<const uint8_t*>
-                                     (i_pContainer)))
+        BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_START);
+
+        uint64_t l_rc = 0;
+
+        // @TODO RTC:166848 Move find/get secure rom logic out of ROM verify
+        // Find secure ROM addr
+        // Get starting address of ROM size and code which is the next 8 byte
+        // aligned address after the bootloader end.
+        // [hbbl][pad:8:if-applicable][securerom-size:8][securerom]
+        const void* l_pBootloaderEnd = &bootloader_end_address;
+        uint64_t l_bootloaderSize = 0;
+        memcpy (&l_bootloaderSize, l_pBootloaderEnd, sizeof(l_bootloaderSize));
+        uint64_t l_rom_startAddr = getHRMOR() + ALIGN_8(l_bootloaderSize);
+        // Get Rom Size
+        // @TODO RTC:166848 Store size so hb can use
+        uint64_t l_secureRomSize = 0;
+        memcpy (&l_secureRomSize, reinterpret_cast<void*>(l_rom_startAddr),
+                sizeof(l_secureRomSize));
+        l_rom_startAddr += sizeof(l_secureRomSize);
+
+        // Beginning of SecureROM has a info structure
+        // Get Secure ROM info
+        const auto l_pSecRomInfo = reinterpret_cast<SecureRomInfo*>(
+                                                               l_rom_startAddr);
+
+        // # @TODO RTC:170136 terminate in this case
+        // Ensure SecureRom is actually present
+        if ( !secureRomInfoValid(l_pSecRomInfo) )
         {
-            BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_HBB_START);
-
-            uint64_t l_rc = 0;
-
-            const void * l_pBootloaderEnd = &bootloader_end_address;
-
-            // Get starting address of ROM code which is the next 8 byte aligned
-            // address after the bootloader end.
-            uint64_t l_size = 0;
-            memcpy (&l_size, l_pBootloaderEnd, sizeof(l_size));
-            uint64_t l_rom_startAddr = getHRMOR() + ALIGN_8(l_size);
-
+            BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_NO_EYECATCH);
+        }
+        // # @TODO RTC:170136 terminate in this case
+        else if ( !cmpSecurebootMagicNumber(reinterpret_cast<const uint8_t*>
+                                            (i_pContainer)))
+        {
+            BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_NO_MAGIC_NUM);
+        }
+        else
+        {
             // Set startAddr to ROM_verify() function at an offset of Secure ROM
             uint64_t l_rom_verify_startAddr = l_rom_startAddr
+                                              + l_pSecRomInfo->branchtableOffset
                                               + ROM_VERIFY_FUNCTION_OFFSET;
 
             // Declare local input struct
@@ -128,18 +151,17 @@ namespace Bootloader{
             // Use current hw hash key
             memcpy (&l_hw_parms.hw_key_hash, i_hwKeyHash, sizeof(sha2_hash_t));
 
-            const ROM_container_raw* l_container =
-                           reinterpret_cast<const ROM_container_raw*>(i_pContainer);
+            const auto l_container = reinterpret_cast<const ROM_container_raw*>
+                                                                 (i_pContainer);
 
             l_rc = call_rom_verify(reinterpret_cast<void*>
                                    (l_rom_verify_startAddr),
                                    l_container,
                                    &l_hw_parms);
-
             if (l_rc != 0)
             {
                 // Verification of Container failed.
-                BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_HBB_FAIL);
+                BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_FAIL);
                 /*@
                  * @errortype
                  * @moduleid     MOD_BOOTLOADER_VERIFY
@@ -156,11 +178,7 @@ namespace Bootloader{
 
             }
 
-            BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_HBB_SUCCESS);
-        }
-        else
-        {
-            BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_HBB_SKIP);
+            BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_SUCCESS);
         }
 #endif
     }
@@ -260,10 +278,11 @@ namespace Bootloader{
                 verifyContainer(l_src_addr, &l_hwKeyHash);
 
                 // Increment past secure header
-#ifdef CONFIG_SECUREBOOT
-                l_src_addr += PAGE_SIZE/sizeof(uint64_t);
-                l_hbbLength -= PAGE_SIZE;
-#endif
+                if (isSecureSection(PNOR::HB_BASE_CODE))
+                {
+                    l_src_addr += PAGE_SIZE/sizeof(uint64_t);
+                    l_hbbLength -= PAGE_SIZE;
+                }
 
                 // Copy HBB image into address where it executes
                 for(uint32_t i = 0;

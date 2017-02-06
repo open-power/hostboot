@@ -91,12 +91,6 @@ namespace SBE
     const uint64_t NONSECURE_VER_EYECATCH = 0x56455253494F4E00; //'VERSION\0'
     const uint32_t SUPPORTED_TOC_VER = 0x00000001;
 
-    // PNOR HBBL Partition constants
-    const uint64_t HBBL_START_ADDRESS  = 0x0000000000003000;
-    const uint64_t HBBL_FUZZY_END_ADDRESS = 0x1400;
-    const size_t   HBBL_MAX_SIZE       = 20*KILOBYTE;         // 20KB
-    const uint64_t HBBL_END_EYECATCHER = 0x4842424C656E6400;  // 'HBBLend\0'
-
     // Cacheline Size
     const uint64_t CACHELINE_SIZE = 128;
 

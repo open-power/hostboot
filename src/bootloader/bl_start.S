@@ -31,7 +31,6 @@
 .set SBE_HB_PNORSIZEMB,   sbe_hb_structures+6  ;// uint16_t
 .set SBE_HB_BLLOADSIZE,   sbe_hb_structures+8  ;// uint64_t
 .set HBBL_BASE_ADDRESS,   base_load_address
-.set HBBL_END_EYECATCHER, 0x4842424C656E6400   ;// 'HBBLend.'
 .set HBBL_END_ADDRESS,    end_load_address
 .set HBBL_system_reset,          0x100
 .set HBBL_machine_check,         0x200
@@ -422,11 +421,6 @@ bootloader_hbbSection:
 .global hbi_ImageId
 hbi_ImageId:
     .space 128
-
-    .balign 16
-.global bootloader_end_eyecatcher
-bootloader_end_eyecatcher:
-    .quad HBBL_END_EYECATCHER
 
 .global bootloader_end_address
 bootloader_end_address:

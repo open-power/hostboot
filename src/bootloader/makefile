@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -29,6 +29,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/lpc/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/pnor/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/lpc/
+
+COMMONFLAGS += -DBOOTLOADER
 
 OBJS += bl_start.o
 OBJS += bootloader.o

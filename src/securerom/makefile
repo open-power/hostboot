@@ -38,12 +38,12 @@ LDFLAGS += -N
 
 ASMFLAGS += -D__ASSEMBLER__
 
-OBJS += branchtable.o
 OBJS += ROM.o
 OBJS += sha512.o
 OBJS += ecverify.o
 OBJS += hw_utils.o
 OBJS += rom_entry.o
+OBJS += secureromasm.o
 
 OPT_LEVEL = -Os
 
