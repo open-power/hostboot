@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -597,7 +597,7 @@ fapi2::ReturnCode getBarData(const mcsPortGroupInfo_t i_portInfo[],
             o_mcsBarData.MCFGPMA_HOLE_valid[ii] = 1;
             o_mcsBarData.MCFGPMA_HOLE_LOWER_addr[ii] = i_portInfo[1].altBaseAddr[ii];
             o_mcsBarData.MCFGPMA_HOLE_UPPER_addr[ii] =
-                i_portInfo[0].altBaseAddr[ii] + i_portInfo[1].altMemSize[ii];
+                i_portInfo[1].altBaseAddr[ii] + i_portInfo[1].altMemSize[ii];
         }
         else
         {
@@ -802,9 +802,10 @@ fapi2::ReturnCode buildMCBarData(
              (l_portInfo[1].numPortsInGroup > 0) )
         {
             // If odd port (port1) has memory and even port (port0) is empty,
-            // program channel id for port0 (because HW looks for id at this
+            // and odd port is in a group of 2 (obviously with a cross-MCS port),
+            // then program channel id for port0 (because HW looks for id at this
             // port), zero out port1's group id
-            if ( (l_portInfo[1].numPortsInGroup > 0) &&
+            if ( (l_portInfo[1].numPortsInGroup == 2) &&
                  (l_portInfo[0].numPortsInGroup == 0) )
             {
                 l_portInfo[0].channelId = l_portInfo[1].channelId;
