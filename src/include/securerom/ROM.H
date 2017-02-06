@@ -29,6 +29,8 @@
 #include <securerom/hw_utils.H>
 #include <securerom/sha512.H>
 #include <securerom/ecverify.H>
+#include <string.h>
+#include <array>
 
 #define CONTAINER_VERSION   1
 #define HEADER_VERSION      1
@@ -130,14 +132,64 @@ extern "C" ROM_response ROM_verify (ROM_container_raw* container,
 
 /************************* END OF ORIGINAL ROM CODE ***************************/
 
-/* Offsets needed to call functions in jump table at start of ROM code.
-   See img/securerom.list.bz2 and search for SHA512_Hash and ROM_verify
+/* Offsets relative to branchtable start to call functions in SecureROM code.
+   See img/securerom.list.bz2 and search for SHA512_Hash and ROM_verify, then
+        subtract the branch table offset
    E.g.
+    0000000000000040 <_SHA512_Hash>:
+    0000000000000050 <_ROM_verify>:
+
+    Search for branchtableoffset
+    0000000000000010 <branchtableoffset>:
+      10    00000010:   00 00 00 00     .long 0x0
+      14    00000014:   00 00 00 28     .long 0x28
+
+    Subtraction (0x28) results in relative offset from branch table start
     0000000000000018 <_SHA512_Hash>:
     0000000000000028 <_ROM_verify>:
+
+   Note: If the SecureRomInfo change size, these will be affected.
+         See src/securerom/secureromasm.S for more info.
 */
 #define SHA512_HASH_FUNCTION_OFFSET 0x18
 #define ROM_VERIFY_FUNCTION_OFFSET 0x28
+
+// Version info at SECUREROM_VERSION_STRUCTURE_OFFSET
+// - [8 bytes] - eyeCatch
+// - [8 bytes] - version
+// - [8 bytes] - branchtable offset
+// - [16 bytes] - reserved
+struct SecureRomInfo
+{
+    uint64_t eyeCatch;
+    uint64_t version;
+    uint64_t branchtableOffset;
+    std::array<uint64_t,2> reserved;
+}__attribute__((packed));
+
+// Expected securerom eye catch
+const uint64_t SECROM_EYECATCHER = 0x23534543524F4D00; // #SECROM\0
+
+// Used for version checking as the SecureRomInfo structure changes
+enum SecureRomInfoVersion
+{
+    // [release:4][version:4]
+    SECUREROM_INFO_ADDED = 0x0000000900000001
+};
+
+/**
+ * @brief Checks if secureROM is valid by checking the eyeCatch and version
+ *
+ * @param[in] SecureRomInfo*    Pointer to SecureRomInfo - Must not be NULL
+ *
+ * @return bool true if valid; false otherwise
+ */
+inline bool secureRomInfoValid (const SecureRomInfo * i_secureRomInfo)
+{
+    // Ensure EyeCatch and Version are valid
+    return (i_secureRomInfo->eyeCatch == SECROM_EYECATCHER) &&
+           (i_secureRomInfo->version >= SECUREROM_INFO_ADDED);
+}
 
 // Need this for the following definition
 #ifdef __cplusplus

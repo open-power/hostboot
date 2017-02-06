@@ -71,6 +71,7 @@
 
 #include <p9_perv_scom_addresses.H>
 #include <initservice/mboxRegs.H>
+#include <bootloader/bootloaderif.H>
 
 
 // ----------------------------------------------
@@ -736,104 +737,6 @@ namespace SBE
 
         return err;
     }
-
-
-/////////////////////////////////////////////////////////////////////
-    errlHndl_t findHBBLInPnor(void*& o_imgPtr,
-                              size_t& o_imgSize)
-    {
-        errlHndl_t err = NULL;
-        PNOR::SectionInfo_t pnorInfo;
-        hbblEndData_t* hbblEndData = NULL;
-        PNOR::SectionId pnorSectionId = PNOR::HB_BOOTLOADER;
-
-        o_imgPtr = NULL;
-        o_imgSize = 0;
-
-        TRACDCOMP( g_trac_sbe,
-                   ENTER_MRK"findHBBLInPnor()" );
-
-        do{
-            // Get SBE PNOR section info from PNOR RP
-            err = getSectionInfo( pnorSectionId,
-                                  pnorInfo );
-
-            if(err)
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"findHBBLInPnor: Error calling "
-                           "getSectionInfo() rc=0x%.4X",
-                           err->reasonCode() );
-                break;
-            }
-
-            TRACUCOMP( g_trac_sbe,
-                       INFO_MRK"findHBBLInPnor: sectionId=0x%X. "
-                       "pnor vaddr = 0x%.16X",
-                       pnorSectionId, pnorInfo.vaddr);
-
-            // Look for HBBL end data on 16-byte boundary start at offset
-            // HBBL_FUZZY_END_ADDRESS
-            // Note: Code takes up at least the first HBBL_FUZZY_END_ADDRESS
-            //       bytes of the HBBL image, so start at that offset to search
-            //       for this data.
-            uint64_t hbblAbsoluteEnd = pnorInfo.vaddr + pnorInfo.size;
-            uint64_t hbblAddr = pnorInfo.vaddr + HBBL_FUZZY_END_ADDRESS;
-            while( hbblAddr < hbblAbsoluteEnd )
-            {
-                hbblEndData = reinterpret_cast<hbblEndData_t*>(hbblAddr);
-
-                if( HBBL_END_EYECATCHER == hbblEndData->eyecatcher )
-                {
-                    TRACUCOMP( g_trac_sbe,
-                               INFO_MRK"findHBBLInPnor: hbblEndData = %p, "
-                               "hbblEndData.address = 0x%.16X",
-                               hbblEndData, hbblEndData->address);
-                    break;
-                }
-
-                hbblAddr += sizeof(hbblEndData_t);
-            }
-
-            if( hbblAddr >= hbblAbsoluteEnd )
-            {
-                //The HBBL partition does not have the HBBL end data
-                TRACFCOMP( g_trac_sbe, ERR_MRK"findHBBLInPnor: HBBL partition "
-                           "does not have the HBBL end data" );
-
-                /*@
-                 * @errortype
-                 * @moduleid     HBBL_FIND_IN_PNOR
-                 * @reasoncode   HBBL_END_DATA_NOT_FOUND
-                 * @userdata1    HBBL PNOR Section Address
-                 * @userdata2    HBBL PNOR Section Size
-                 * @devdesc      HBBL partition did not have end data
-                 * @custdesc     A problem occurred while updating processor
-                 *               boot code.
-                 */
-                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    HBBL_FIND_IN_PNOR,
-                                    HBBL_END_DATA_NOT_FOUND,
-                                    pnorInfo.vaddr,
-                                    pnorInfo.size);
-                err->collectTrace(SBE_COMP_NAME);
-                err->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
-                                          HWAS::SRCI_PRIORITY_HIGH );
-
-                break;
-            }
-
-            o_imgPtr = reinterpret_cast<void*>( pnorInfo.vaddr );
-            o_imgSize = hbblEndData->address - HBBL_START_ADDRESS;
-
-        }while(0);
-
-        TRACDCOMP( g_trac_sbe,
-                   EXIT_MRK"findHBBLInPnor(): o_imgPtr=%p, o_imgSize=0x%X",
-                   o_imgPtr, o_imgSize );
-
-        return err;
-    }
-
 
 /////////////////////////////////////////////////////////////////////
     errlHndl_t appendHbblToSbe(void*     i_section,
@@ -1909,43 +1812,31 @@ namespace SBE
             /*******************************************/
             /*  Get PNOR HBBL Information              */
             /*******************************************/
-            void* hbblPnorPtr = NULL;
-            size_t hbblPnorImageSize = 0;
-            size_t hbblCachelineSize = 0;
 
-            err = findHBBLInPnor(hbblPnorPtr,
-                                 hbblPnorImageSize);
-
+            // Get SBE PNOR section info from PNOR RP
+            PNOR::SectionInfo_t pnorInfo;
+            err = getSectionInfo( PNOR::HB_BOOTLOADER, pnorInfo );
             if(err)
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
-                           "Error getting HBBL Version from PNOR, "
-                           "RC=0x%X, PLID=0x%lX",
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState: Error calling "
+                           "getSectionInfo() rc=0x%.4X",
+                           err->reasonCode() );
                 break;
             }
-            else
-            {
-                TRACFCOMP( g_trac_sbe, "getSbeInfoState() - "
-                           "hbblPnorPtr=%p, hbblPnorImageSize=0x%08X (%d)",
-                           hbblPnorPtr, hbblPnorImageSize, hbblPnorImageSize);
-            }
-
-            hbblCachelineSize = ALIGN_X(hbblPnorImageSize, CACHELINE_SIZE);
-
-            TRACUCOMP( g_trac_sbe, "getSbeInfoState() - HBBL: "
-                       "maxSize=0x%X, actSize=0x%X, cachelineSize=0x%X",
-                       HBBL_MAX_SIZE, hbblPnorImageSize,
-                       hbblCachelineSize);
-
+            const void* hbblPnorPtr = reinterpret_cast<const void*>(
+                                                                pnorInfo.vaddr);
+            // Use max hbbl size and not the PNOR size. The PNOR size can grow
+            // to add a secure header, but the code size limit is still 20K.
+            TRACFCOMP( g_trac_sbe, "getSbeInfoState() - "
+                       "hbblPnorPtr=%p, hbblMaxSize=0x%08X (%d)",
+                       hbblPnorPtr, MAX_HBBL_SIZE, MAX_HBBL_SIZE);
 
             /*******************************************/
             /*  Append HBBL Image from PNOR to SBE     */
             /*  Image from PNOR                        */
             /*******************************************/
             uint32_t sbeHbblImgSize =
-                static_cast<uint32_t>(sbePnorImageSize + hbblCachelineSize);
+                static_cast<uint32_t>(sbePnorImageSize + MAX_HBBL_SIZE);
 
             // copy SBE image from PNOR to memory
             sbeHbblImgPtr = (void*)SBE_HBBL_IMG_VADDR;
@@ -1953,8 +1844,8 @@ namespace SBE
                      sbePnorPtr,
                      sbePnorImageSize);
 
-            err = appendHbblToSbe(hbblPnorPtr,       // HBBL Image to append
-                                  hbblCachelineSize, // Size of HBBL Image
+            err = appendHbblToSbe(const_cast<void*>(hbblPnorPtr), // HBBL Image to append
+                                  MAX_HBBL_SIZE, // Size of HBBL Image
                                   sbeHbblImgPtr,     // SBE, HBBL Image
                                   sbeHbblImgSize);   // Available/used
 

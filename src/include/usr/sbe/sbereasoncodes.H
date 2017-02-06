@@ -60,7 +60,6 @@ enum sbeModuleId
     SBE_READ_SBE_IMAGE                  = 0x0F,
     SBE_WRITE_SBE_IMAGE                 = 0x10,
     SBE_GET_SBE_IMAGE_SIZE              = 0x11,
-    HBBL_FIND_IN_PNOR                   = 0x12,
     SBE_APPEND_HBBL                     = 0x13,
 };
 
@@ -101,7 +100,6 @@ enum sbeReasonCode
     SBE_MASTER_VERSION_DOWNLEVEL        = SBE_COMP_ID | 0x15,
     SBE_IMAGE_GET_SET_SCALAR_FAIL       = SBE_COMP_ID | 0x16,
 
-    HBBL_END_DATA_NOT_FOUND             = SBE_COMP_ID | 0x17,
     ERROR_FROM_XIP_DELETE               = SBE_COMP_ID | 0x18,
     ERROR_FROM_XIP_FIND                 = SBE_COMP_ID | 0x19,
 

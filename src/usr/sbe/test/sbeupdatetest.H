@@ -675,54 +675,6 @@ class SBEUpdateTest: public CxxTest::TestSuite
 
     }
 
-
-    /**
-     * @brief This function will test SBE Update's ability
-     *        to find HBBL images in PNOR
-     */
-
-    void testFindHBBLInPnor ( void )
-    {
-        errlHndl_t err = NULL;
-        uint64_t fails = 0x0;
-        uint64_t total = 0x0;
-
-        void* hbblImgPtr = NULL;
-        size_t hbblImgSize = 0;
-
-        do{
-
-            TRACFCOMP( g_trac_sbe,
-                       ENTER_MRK"testFindHBBLInPnor()" );
-
-            total++;
-            err = findHBBLInPnor(hbblImgPtr,
-                                 hbblImgSize);
-
-            if(err || (hbblImgPtr == NULL) || (hbblImgSize == 0) )
-            {
-                fails++;
-                TRACFCOMP( g_trac_sbe, ERR_MRK"testFindHBBLInPnor() - "
-                           "failure finding HBBL image, hbblImgPtr=%p, "
-                           "hbblImgSize=0x%x",
-                           hbblImgPtr, hbblImgSize );
-                TS_FAIL("testFindHBBLInPnor() -failure finding HBBL image!");
-                errlCommit( err,
-                            SBE_COMP_ID );
-
-            }
-            TRACDBIN(g_trac_sbe, "testFindHBBLInPnor()-Proc PNOR Image",
-                     hbblImgPtr, 0x80);
-
-            TRACFCOMP( g_trac_sbe,
-                       EXIT_MRK"testFindHBBLInPnor - %d/%d fails",
-                       fails, total );
-
-        }while(0);
-
-    }
-
-
     /**
      * @brief This function will run through the functions used to collect
      *        SBE information on a single target, determine if that target

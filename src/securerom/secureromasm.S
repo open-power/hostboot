@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/securerom/branchtable.S $
+# $Source: src/securerom/secureromasm.S $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2017
 # [+] International Business Machines Corp.
 #
 #
@@ -22,14 +22,37 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+.include "kernel/ppcconsts.S"
+
+#****************************************************************************
+#*  SecureROM info - useful info used by HBBL. Must match ROM.H
+#****************************************************************************
+.set SECROM_EYECATCHER, 0x23534543524F4D00   ;// uint64_t '#SECROM.'
+.set SECROM_VERSION, 0x0000000900000001   ;// uint64_t
+
+# Before the SecureRom code starts there is SecureRomInfo see ROM.H
+# - [8 bytes] - eyeCatch
+# - [8 bytes] - version
+# - [8 bytes] - branchtable offset
+# - [16 bytes] - reserved
+.section .text.securerominfo
+
+eyeCatch:
+    .quad SECROM_EYECATCHER
+
+version:
+    .quad SECROM_VERSION
+
+branchtableoffset:
+    .quad .text.branchtable
+
+reserved:
+    .zero 16 ;// 'reserve 16 bytes'
+
 #****************************************************************************
 #*  branch table - a more stable location for software entering rom code
 #****************************************************************************
-
-.include "kernel/ppcconsts.S"
-
-branchtable:
-    .section ".branchtable","ax"
+.section .text.branchtable
 
     .globl _SHA512_Init
 _SHA512_Init:
@@ -66,19 +89,21 @@ _ROM_verify:
 springboard:
     b boingboing
 boingboing:
+    # @TODO RTC:156485 ROM blob will have to change to allow PHyp to use,
+    #       unless PHyp directly uses
     mfspr r2, CFAR ;// get address of springboard
-    addi r2, r2, _SHA512_Init-springboard ;// base address
+    addi r2, r2, .text.securerominfo-springboard ;// base address
     add r0, r0, r2 ;// calculate entry relative
     addi r2, r2, 0x4000 ;//TOC+0x8000  part 1
     addi r2, r2, (__toc_start+0x4000)@l ;//TOC+0x8000  part 2
     mtctr r0
     bctr ;// jump
 
-# could put other assembly ocde routines here to conserver ROM space
+# could put other assembly code routines here to conserve ROM space
 # including the sreset routine
 
-# need to align on securerombase+0x100 !!!
-    .org .branchtable+0x100
+# need to align on branchtablebase+0x100 !!!
+    .org .text.branchtable+0x100
     .globl _rom_sreset
 _rom_sreset:
     li r0, rom_sreset@l

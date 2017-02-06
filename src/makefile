@@ -75,13 +75,13 @@ BOOTLDR_OBJECTS += forceattn_p8.o
 BOOTLDR_OBJECTS += string_utils.o
 BOOTLDR_OBJECTS += rom_entry.o
 
-SECUREROM_OBJECTS += branchtable.o
 SECUREROM_OBJECTS += ROM.o
 SECUREROM_OBJECTS += ecverify.o
 SECUREROM_OBJECTS += hw_utils.o
 SECUREROM_OBJECTS += sha512.o
 SECUREROM_OBJECTS += string_utils.o
 SECUREROM_OBJECTS += rom_entry.o
+SECUREROM_OBJECTS += secureromasm.o
 
 DIRECT_BOOT_OBJECTS += start.o
 DIRECT_BOOT_OBJECTS += kernel.o
