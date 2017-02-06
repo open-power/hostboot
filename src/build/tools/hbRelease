@@ -433,13 +433,14 @@ sub execute_pre_release
     }
 
 
+    my $feature = "";
     if($track eq "")
     {
         # CMVC open feature
         my $open_feature = "Feature -open -component $globals{component}";
         $open_feature .= " -remarks \"Hostboot Release - $level\" -verbose";
         # Get the Feature number from the output, should be the only numbers.
-        my $feature = run_system_command($open_feature);
+        $feature = run_system_command($open_feature);
         $feature =~ s/[^0-9]//g;
 
         # CMVC assign feature
