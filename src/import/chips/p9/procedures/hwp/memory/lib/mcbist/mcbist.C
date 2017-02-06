@@ -437,6 +437,9 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
 
     FAPI_TRY( clear_errors(i_target) );
 
+    // Configures the write/read FIFO bit
+    FAPI_TRY( load_fifo_mode( i_target, i_program) );
+
     // Slam the address generator config
     FAPI_TRY( load_addr_gen(i_target, i_program) );
 
@@ -631,7 +634,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-} // namespace
+} // namespace MCBIST
 
 // Note: outside of the mcbist namespace
 

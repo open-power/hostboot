@@ -48,6 +48,7 @@
 #include <lib/utils/num.H>
 #include <lib/mcbist/patterns.H>
 #include <lib/mcbist/settings.H>
+#include <lib/mc/port.H>
 
 namespace mss
 {
@@ -1020,6 +1021,7 @@ class program
             iv_config(0),
             iv_control(0),
             iv_async(false),
+            iv_fifo_mode(true),
             iv_pattern(PATTERN_0),
             iv_random24_data_seed(RANDOM24_SEEDS_0),
             iv_random24_seed_map(RANDOM24_SEED_MAP_0),
@@ -2023,6 +2025,18 @@ class program
         }
 
         ///
+        /// @brief Enable or disable FIFO mode
+        /// @param[in] i_program the program in question
+        /// @param[in] i_mode mss::ON to enable, programs will run in FIFO vs mainline mode
+        /// @return void
+        ///
+        inline void change_fifo_mode( const bool i_mode )
+        {
+            iv_fifo_mode = i_mode;
+            return;
+        }
+
+        ///
         /// @brief Select the port(s) to be used by the MCBIST
         /// @param[in] i_ports uint64_t representing the ports. Multiple bits set imply broadcast
         /// i_ports is a right-aligned uint64_t, of which only the right-most 4 bits are used. The register
@@ -2185,6 +2199,7 @@ class program
             l_equal &= iv_config == i_rhs.iv_config;
             l_equal &= iv_control == i_rhs.iv_control;
             l_equal &= iv_async == i_rhs.iv_async;
+            l_equal &= iv_fifo_mode == i_rhs.iv_fifo_mode;
             l_equal &= iv_pattern == i_rhs.iv_pattern;
             l_equal &= iv_thresholds == i_rhs.iv_thresholds;
             l_equal &= iv_data_rotate_cnfg == i_rhs.iv_data_rotate_cnfg;
@@ -2243,6 +2258,9 @@ class program
 
         // True iff we want to run in asynchronous mode
         bool                        iv_async;
+
+        // True if we want to run in FIFO mode - defaults to true as this is needed for most MCBIST tests
+        bool                        iv_fifo_mode;
 
         // The pattern for the pattern generator
         uint64_t                    iv_pattern;
@@ -2815,6 +2833,33 @@ template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 inline fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
 {
     return load_random24b_seeds(i_target, i_program.iv_random24_data_seed, i_program.iv_random24_seed_map);
+}
+
+///
+/// @brief Loads the FIFO value if needed
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode load_fifo_mode( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
+{
+    // if the FIFO load is not needed, just exit out
+    if(!i_program.iv_fifo_mode)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Turns on FIFO mode
+    constexpr mss::states FIFO_ON = mss::states::ON;
+
+    FAPI_TRY(mss::configure_wrq(i_target, FIFO_ON));
+    FAPI_TRY(mss::configure_rrq(i_target, FIFO_ON));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///

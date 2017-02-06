@@ -3112,4 +3112,19 @@
         <mssAccessorName>mvpd_fwms</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_MSS_REORDER_QUEUE_SETTING</id>
+        <targetType>TARGET_TYPE_MCBIST</targetType>
+        <description>
+            Contains the settings for write/read reorder queue
+        </description>
+        <default>REORDER</default>
+        <initToZero></initToZero>
+        <writeable/>
+        <enum>REORDER = 0, FIFO = 1</enum>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>reorder_queue_setting</mssAccessorName>
+    </attribute>
+
 </attributes>

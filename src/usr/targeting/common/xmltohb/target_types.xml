@@ -1924,6 +1924,7 @@
     <attribute><id>VDD_ID</id></attribute>
     <attribute><id>AVDD_ID</id></attribute>
 
+    <attribute><id>MSS_REORDER_QUEUE_SETTING</id></attribute>
 </targetType>
 
 <targetType>

@@ -86,6 +86,8 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
         static constexpr uint64_t PHY_PERIODIC_CAL_RELOAD_REG = MCA_DDRPHY_PC_RELOAD_VALUE0_P0;
         static constexpr uint64_t PHY_CAL_TIMER_RELOAD_REG = MCA_DDRPHY_PC_CAL_TIMER_RELOAD_VALUE_P0;
         static constexpr uint64_t PHY_ZCAL_TIMER_RELOAD_REG = MCA_DDRPHY_PC_ZCAL_TIMER_RELOAD_VALUE_P0;
+        static constexpr uint64_t RRQ_REG = MCA_MBA_RRQ0Q;
+        static constexpr uint64_t WRQ_REG = MCA_MBA_WRQ0Q;
 
         static constexpr uint64_t MAGIC_NUMBER_SIM = 765;
         static constexpr uint64_t MAGIC_NUMBER_NOT_SIM = 196605;
@@ -254,6 +256,9 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
             PER_START = MCA_DDRPHY_PC_PER_CAL_CONFIG_P0_START,
             PER_ABORT_ON_ERR_EN = MCA_DDRPHY_PC_PER_CAL_CONFIG_P0_ABORT_ON_ERR_EN,
             PER_DD2_FIX_DIS = MCA_DDRPHY_PC_PER_CAL_CONFIG_P0_DD2_FIX_DIS,
+
+            RRQ_FIFO_MODE = MCA_MBA_RRQ0Q_CFG_RRQ_FIFO_MODE,
+            WRQ_FIFO_MODE = MCA_MBA_WRQ0Q_CFG_WRQ_FIFO_MODE,
         };
 };
 
@@ -629,6 +634,127 @@ fapi2::ReturnCode reset_zqcal_config( const fapi2::Target<T>& i_target )
     // Write the ZQCAL periodic config
     FAPI_INF("zcal periodic config: 0x%016lx", l_phy_zqcal_config);
     FAPI_TRY( mss::putScom(i_target, TT::PHY_ZQCAL_REG, l_phy_zqcal_config) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Configures the write reorder queue for MCBIST operations
+/// @param[in] i_target the target to effect
+/// @param[in] i_state to set the bit too
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+inline fapi2::ReturnCode configure_wrq(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const mss::states i_state)
+{
+    typedef portTraits<fapi2::TARGET_TYPE_MCA> TT;
+
+    fapi2::buffer<uint64_t> l_data;
+
+    // Gets the reg
+    FAPI_TRY(mss::getScom(i_target, TT::WRQ_REG, l_data), "%s failed to getScom from MCA_MBA_WRQ0Q", mss::c_str(i_target));
+
+    // Sets the bit
+    l_data.writeBit<TT::WRQ_FIFO_MODE>(i_state == mss::states::ON);
+
+    // Sets the regs
+    FAPI_TRY(mss::putScom(i_target, TT::WRQ_REG, l_data), "%s failed to putScom to MCA_MBA_WRQ0Q", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Configures the write reorder queue bit
+/// @param[in] i_target the target to effect
+/// @param[in] i_state to set the bit too
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+inline fapi2::ReturnCode configure_wrq(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                       const mss::states i_state)
+{
+    // Loops through all MCA targets, hitting all the registers
+    for( const auto& l_mca : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
+    {
+        FAPI_TRY(configure_wrq(l_mca, i_state));
+    }
+
+    // In case we don't have any MCA's
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Configures the read reorder queue for MCBIST operations
+/// @param[in] i_target the target to effect
+/// @param[in] i_state to set the bit too
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+inline fapi2::ReturnCode configure_rrq(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const mss::states i_state)
+{
+    typedef portTraits<fapi2::TARGET_TYPE_MCA> TT;
+
+    fapi2::buffer<uint64_t> l_data;
+
+    // Gets the reg
+    FAPI_TRY(mss::getScom(i_target, TT::RRQ_REG, l_data), "%s failed to getScom from MCA_MBA_RRQ0Q", mss::c_str(i_target));
+
+    // Sets the bit
+    l_data.writeBit<TT::RRQ_FIFO_MODE>(i_state == mss::states::ON);
+
+    // Sets the regs
+    FAPI_TRY(mss::putScom(i_target, TT::RRQ_REG, l_data), "%s failed to putScom to MCA_MBA_RRQ0Q", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Configures the read reorder queue bit
+/// @param[in] i_target the target to effect
+/// @param[in] i_state to set the bit too
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+inline fapi2::ReturnCode configure_rrq(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                       const mss::states i_state)
+{
+    // Loops through all MCA targets, hitting all the registers
+    for( const auto& l_mca : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
+    {
+        FAPI_TRY(configure_rrq(l_mca, i_state));
+    }
+
+    // In case we don't have any MCA's
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Resets the write/read reorder queue values - needs to be called after MCBIST execution
+/// @tparam T, the fapi2 target type of the target
+/// @param[in] i_target the target to effect
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T>
+fapi2::ReturnCode reset_reorder_queue_settings(const fapi2::Target<T>& i_target)
+{
+    uint8_t l_reorder_queue = 0;
+    FAPI_TRY(reorder_queue_setting(i_target, l_reorder_queue));
+
+    // Changes the reorder queue settings
+    {
+        // Two settings are FIFO and REORDER.  FIFO is a 1 in the registers, while reorder is a 0 state
+        const mss::states l_state = ((l_reorder_queue == fapi2::ENUM_ATTR_MSS_REORDER_QUEUE_SETTING_FIFO) ?
+                                     mss::states::ON : mss::states::OFF);
+        FAPI_TRY(configure_rrq(i_target, l_state), "%s failed to reset read reorder queue settings", mss::c_str(i_target));
+        FAPI_TRY(configure_wrq(i_target, l_state), "%s failed to reset read reorder queue settings", mss::c_str(i_target));
+    }
+
 
 fapi_try_exit:
     return fapi2::current_err;
