@@ -2302,6 +2302,23 @@
     </chipEcFeature>
   </attribute>
 
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_RNG_ADAPTEST_SETTINGS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      The Random number generator has different settings in dd1 and dd2
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
   <!-- ******************************************************************** -->
   <!-- End Memory Section                                                   -->
   <!-- ******************************************************************** -->
