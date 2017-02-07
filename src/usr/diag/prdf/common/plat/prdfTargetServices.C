@@ -1043,67 +1043,49 @@ TargetHandle_t getMasterProc()
 //##
 //##############################################################################
 
-uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
+uint32_t getTargetPosition( TargetHandle_t i_trgt )
 {
     #define PRDF_FUNC "[PlatServices::getTargetPosition] "
 
-    PRDF_ASSERT( nullptr != i_target );
+    PRDF_ASSERT( nullptr != i_trgt );
 
-    uint32_t o_pos = INVALID_POSITION_BOUND;
+    uint32_t o_pos = 0;
 
-    CLASS l_class = getTargetClass( i_target );
+    CLASS l_class = getTargetClass( i_trgt );
+    TYPE  l_type  = getTargetType(  i_trgt );
+
     switch ( l_class )
     {
-        case CLASS_CHIP:
+        case CLASS_CHIP: // chips
         {
-            TYPE l_type = getTargetType( i_target );
             switch ( l_type )
             {
                 case TYPE_PROC:
                 case TYPE_OSC:
                 case TYPE_OSCPCICLK:
                 case TYPE_OSCREFCLK:
-                {
-                    uint16_t tmpPos = 0;
-                    if ( !i_target->tryGetAttr<ATTR_POSITION>(tmpPos) )
-                    {
-                        PRDF_ERR( PRDF_FUNC "Failed to get ATTR_POSITION" );
-                    }
-                    else
-                        o_pos = (uint32_t)tmpPos;
+                    o_pos = i_trgt->getAttr<ATTR_POSITION>();
                     break;
-                }
 
                 case TYPE_MEMBUF:
-                    o_pos = getMemChnl( i_target );
+                    o_pos = getMemChnl( i_trgt );
                     break;
 
                 default:
-                    PRDF_ERR( PRDF_FUNC "Unsupported type: %d", l_type );
+                    PRDF_ERR( PRDF_FUNC "Unsupported type %d for CLASS_CHIP: "
+                              "i_trgt=0x%08x", l_type, getHuid(i_trgt) );
+                    PRDF_ASSERT( false );
             }
             break;
         }
 
-        case CLASS_UNIT:
-        {
-            uint8_t tmpPos = 0;
-            if ( !i_target->tryGetAttr<ATTR_CHIP_UNIT>(tmpPos) )
-            {
-                PRDF_ERR( PRDF_FUNC "Failed to get ATTR_CHIP_UNIT" );
-            }
-            else
-                o_pos = (uint32_t)tmpPos;
+        case CLASS_UNIT: // units of a chip
+            o_pos = i_trgt->getAttr<ATTR_CHIP_UNIT>();
             break;
-        }
 
-        case CLASS_ENC:
-        {
-            if ( !i_target->tryGetAttr<ATTR_ORDINAL_ID>(o_pos) )
-            {
-                PRDF_ERR( PRDF_FUNC "Failed to get ATTR_ORDINAL_ID" );
-            }
+        case CLASS_ENC: // nodes
+            o_pos = i_trgt->getAttr<ATTR_ORDINAL_ID>();
             break;
-        }
 
         case CLASS_SYS: // system
             // The concept of a system position does not exist, however, we want
@@ -1113,21 +1095,18 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
             break;
 
         case CLASS_LOGICAL_CARD: // DIMMs
-            o_pos = i_target->getAttr<ATTR_FAPI_POS>();
+            o_pos = i_trgt->getAttr<ATTR_FAPI_POS>();
             break;
 
         default:
-            PRDF_ERR( PRDF_FUNC "Unsupported class: %d", l_class );
+            PRDF_ERR( PRDF_FUNC "Unsupported class %d: i_trgt=0x%08x",
+                      l_class, getHuid(i_trgt) );
+            PRDF_ASSERT(false);
     }
-
-    if ( INVALID_POSITION_BOUND == o_pos )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed: target=0x%08x", getHuid(i_target) );
-    }
-
-    #undef PRDF_FUNC
 
     return o_pos;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -1158,29 +1137,13 @@ uint32_t getPhbConfig( TARGETING::TargetHandle_t i_proc )
 //##
 //##############################################################################
 
-uint32_t getMemChnl( TARGETING::TargetHandle_t i_memTarget )
+uint32_t getMemChnl( TargetHandle_t i_trgt )
 {
-    #define PRDF_FUNC "[PlatServices::getMemChnl] "
+    PRDF_ASSERT( nullptr != i_trgt );
 
-    PRDF_ASSERT( nullptr != i_memTarget );
+    TargetHandle_t mcsTrgt = getConnectedParent( i_trgt, TYPE_MCS );
 
-    uint32_t o_chnl = INVALID_POSITION_BOUND; // Intentially set to
-                                              // INVALID_POSITION_BOUND for call
-                                              // from getTargetPosition().
-
-    TargetHandle_t mcsTarget = getConnectedParent( i_memTarget, TYPE_MCS );
-
-    o_chnl = getTargetPosition( mcsTarget );
-
-    if ( MAX_MCS_PER_PROC <= o_chnl ) // Real MCS position check.
-    {
-        PRDF_ERR( PRDF_FUNC "Failed: i_memTarget=0x%08x",
-                  getHuid(i_memTarget) );
-    }
-
-    return o_chnl;
-
-    #undef PRDF_FUNC
+    return getTargetPosition( mcsTrgt );
 }
 
 //------------------------------------------------------------------------------
