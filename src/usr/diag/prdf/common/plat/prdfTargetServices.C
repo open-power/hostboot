@@ -454,13 +454,12 @@ struct conn_t
 
 };
 
-int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
-                            TARGETING::TYPE i_connType,
-                            TARGETING::TargetService::ASSOCIATION_TYPE & o_type)
+TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
+                                                    TYPE i_connType )
 {
     #define PRDF_FUNC "[PlatServices::getAssociationType] "
 
-    int32_t o_rc = SUCCESS;
+    PRDF_ASSERT( nullptr != i_target );
 
     static conn_t lookups[] =
     {
@@ -547,35 +546,23 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
 
     };
 
-    do
+    const size_t sz_lookups = sizeof(lookups) / sizeof(conn_t);
+
+    TYPE type = getTargetType(i_target);
+
+    conn_t match = { type, i_connType, TargetService::CHILD_BY_AFFINITY };
+
+    conn_t * it = std::lower_bound( lookups, lookups + sz_lookups, match );
+
+    if ( (it == lookups + sz_lookups) || // off the end
+         (type != it->from) || (i_connType != it->to) ) // not equals
     {
-        if ( NULL == i_target )
-        {
-            PRDF_ERR( PRDF_FUNC "Given target is null" );
-            o_rc = FAIL; break;
-        }
+        PRDF_ERR( PRDF_FUNC "Look-up failed: i_target=0x%08x i_connType=%d",
+                  getHuid(i_target), i_connType );
+        PRDF_ASSERT(false);
+    }
 
-        const size_t sz_lookups = sizeof(lookups) / sizeof(conn_t);
-
-        TYPE type = getTargetType(i_target);
-
-        conn_t match = { type, i_connType, TargetService::CHILD_BY_AFFINITY };
-
-        conn_t * it = std::lower_bound( lookups, lookups + sz_lookups, match );
-
-        if ( (it == lookups + sz_lookups) || // off the end
-             (type != it->from) || (i_connType != it->to) ) // not equals
-        {
-            PRDF_ERR( PRDF_FUNC "Look-up failed: i_target=0x%08x i_connType=%d",
-                      getHuid(i_target), i_connType );
-            o_rc = FAIL; break;
-        }
-
-        o_type = it->type;
-
-    } while (0);
-
-    return o_rc;
+    return it->type;
 
     #undef PRDF_FUNC
 }
@@ -633,11 +620,8 @@ TargetHandleList getConnected( TargetHandle_t i_target, TYPE i_connType )
             break;
         }
 
-        TargetService::ASSOCIATION_TYPE assocType;
-        int32_t l_rc = getAssociationType( i_target, i_connType, assocType );
-        if ( SUCCESS != l_rc ) break;
-
-        o_list = getConnAssoc( i_target, i_connType, assocType );
+        o_list = getConnAssoc( i_target, i_connType,
+                               getAssociationType(i_target, i_connType) );
 
     } while(0);
 
@@ -654,19 +638,18 @@ TargetHandle_t getConnectedParent( TargetHandle_t i_target, TYPE i_connType )
 
     TargetHandle_t o_parent = NULL;
 
+    // Get the association type, must be PARENT_BY_AFFINITY.
+    TargetService::ASSOCIATION_TYPE assocType = getAssociationType( i_target,
+                                                                    i_connType);
+    if ( TargetService::PARENT_BY_AFFINITY != assocType )
+    {
+        PRDF_ERR( PRDF_FUNC "Unsupported parent connection: i_target=0x%08x "
+                  "i_connType=%d", getHuid(i_target), i_connType );
+        PRDF_ASSERT(false);
+    }
+
     do
     {
-        TargetService::ASSOCIATION_TYPE assocType;
-        int32_t l_rc = getAssociationType( i_target, i_connType, assocType );
-        if ( SUCCESS != l_rc ) break;
-
-        if ( TargetService::PARENT_BY_AFFINITY != assocType )
-        {
-            PRDF_ERR( PRDF_FUNC "Unsupported parent connection: i_target=0x%08x "
-                      "i_connType=%d", getHuid(i_target), i_connType );
-            break;
-        }
-
         TargetHandleList list = getConnAssoc( i_target, i_connType, assocType );
         if ( 1 != list.size() ) // Should be one and only one parent
         {
@@ -695,19 +678,18 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
 
     TargetHandle_t o_child = NULL;
 
+    // Get the association type, must be CHILD_BY_AFFINITY.
+    TargetService::ASSOCIATION_TYPE assocType = getAssociationType( i_target,
+                                                                    i_connType);
+    if ( TargetService::CHILD_BY_AFFINITY != assocType )
+    {
+        PRDF_ERR( PRDF_FUNC "Unsupported child connection: i_target=0x%08x "
+                  "i_connType=%d", getHuid(i_target), i_connType );
+        PRDF_ASSERT(false);
+    }
+
     do
     {
-        TargetService::ASSOCIATION_TYPE assocType;
-        int32_t l_rc = getAssociationType( i_target, i_connType, assocType );
-        if ( SUCCESS != l_rc ) break;
-
-        if ( TargetService::CHILD_BY_AFFINITY != assocType )
-        {
-            PRDF_ERR( PRDF_FUNC "Unsupported child connection: i_target=0x%08x "
-                    "i_connType=%d", getHuid(i_target), i_connType );
-            break;
-        }
-
         // Get the list.
         TargetHandleList list = getConnAssoc( i_target, i_connType, assocType );
         if ( list.empty() )
