@@ -571,44 +571,32 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
 TargetHandleList getConnAssoc( TargetHandle_t i_target, TYPE i_connType,
                                TargetService::ASSOCIATION_TYPE i_assocType )
 {
-    #define PRDF_FUNC "[PlatServices::getConnAssoc] "
+    PRDF_ASSERT( nullptr != i_target );
 
     TargetHandleList o_list; // Default empty list
 
-    do
-    {
-        if ( NULL == i_target )
-        {
-            PRDF_ERR( PRDF_FUNC "Given target is null" );
-            break;
-        }
+    // Match any class, specified type, and functional.
+    PredicateCTM predType( CLASS_NA, i_connType );
+    PredicateIsFunctional predFunc;
+    PredicatePostfixExpr predAnd;
+    predAnd.push(&predType).push(&predFunc).And();
 
-        // Match any class, specified type, and functional.
-        PredicateCTM predType( CLASS_NA, i_connType );
-        PredicateIsFunctional predFunc;
-        PredicatePostfixExpr predAnd;
-        predAnd.push(&predType).push(&predFunc).And();
+    targetService().getAssociated( o_list, i_target, i_assocType,
+                                   TargetService::ALL, &predAnd );
 
-        targetService().getAssociated( o_list, i_target, i_assocType,
-                                       TargetService::ALL, &predAnd );
-
-        // Sort by target position.
-        std::sort( o_list.begin(), o_list.end(),
-                   [](TargetHandle_t a, TargetHandle_t b)
-                   { return getTargetPosition(a) < getTargetPosition(b); } );
-
-    } while(0);
+    // Sort by target position.
+    std::sort( o_list.begin(), o_list.end(),
+               [](TargetHandle_t a, TargetHandle_t b)
+               { return getTargetPosition(a) < getTargetPosition(b); } );
 
     return o_list;
-
-    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
 
 TargetHandleList getConnected( TargetHandle_t i_target, TYPE i_connType )
 {
-    PRDF_ASSERT( NULL != i_target );
+    PRDF_ASSERT( nullptr != i_target );
 
     TargetHandleList o_list; // Default empty list
 
@@ -634,7 +622,7 @@ TargetHandle_t getConnectedParent( TargetHandle_t i_target, TYPE i_connType )
 {
     #define PRDF_FUNC "[PlatServices::getConnectedParent] "
 
-    PRDF_ASSERT( NULL != i_target );
+    PRDF_ASSERT( nullptr != i_target );
 
     TargetHandle_t o_parent = NULL;
 
@@ -674,9 +662,9 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
 {
     #define PRDF_FUNC "[PlatServices::getConnectedChild] "
 
-    PRDF_ASSERT( NULL != i_target );
+    PRDF_ASSERT( nullptr != i_target );
 
-    TargetHandle_t o_child = NULL;
+    TargetHandle_t o_child = nullptr;
 
     // Get the association type, must be CHILD_BY_AFFINITY.
     TargetService::ASSOCIATION_TYPE assocType = getAssociationType( i_target,
@@ -1083,6 +1071,8 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
 {
     #define PRDF_FUNC "[PlatServices::getTargetPosition] "
 
+    PRDF_ASSERT( nullptr != i_target );
+
     uint32_t o_pos = INVALID_POSITION_BOUND;
 
     CLASS l_class = getTargetClass( i_target );
@@ -1196,14 +1186,14 @@ uint32_t getMemChnl( TARGETING::TargetHandle_t i_memTarget )
 {
     #define PRDF_FUNC "[PlatServices::getMemChnl] "
 
+    PRDF_ASSERT( nullptr != i_memTarget );
+
     uint32_t o_chnl = INVALID_POSITION_BOUND; // Intentially set to
                                               // INVALID_POSITION_BOUND for call
                                               // from getTargetPosition().
 
     do
     {
-        if ( NULL == i_memTarget ) break;
-
         TargetHandle_t mcsTarget = getConnectedParent( i_memTarget, TYPE_MCS );
         if ( NULL == mcsTarget )
         {
