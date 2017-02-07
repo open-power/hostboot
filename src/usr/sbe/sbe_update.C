@@ -292,15 +292,6 @@ namespace SBE
                 else
                 {
                     sbeState.target_is_master = false;
-
-                    // If running in simics, don't do the update
-                    if ( Util::isSimicsRunning() )
-                    {
-                        // Push this sbeState onto the vector
-                        sbeStates_vector.push_back(sbeState);
-
-                        break;
-                    }
                 }
 
                 //Can only update the SBE once the powerbus is up (secureboot)
