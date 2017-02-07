@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -265,7 +265,6 @@ uint32_t checkEccFirs<TYPE_MCA>( ExtensibleChip * i_chip,
     PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
     ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
-    PRDF_ASSERT( nullptr != mcbChip );
 
     SCAN_COMM_REGISTER_CLASS * mcaeccfir = i_chip->getRegister(  "MCAECCFIR" );
     SCAN_COMM_REGISTER_CLASS * mcbistfir = mcbChip->getRegister( "MCBISTFIR" );
@@ -328,7 +327,6 @@ uint32_t checkEccFirs<TYPE_MBA>( ExtensibleChip * i_chip,
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
     ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
-    PRDF_ASSERT( nullptr != membChip );
 
     const char * reg = (0 == i_chip->getPos()) ? "MBA0_MBSECCFIR"
                                                : "MBA1_MBSECCFIR";

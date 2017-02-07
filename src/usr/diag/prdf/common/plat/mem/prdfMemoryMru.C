@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -293,33 +293,14 @@ void MemoryMru::getCommonVars()
     PRDF_ASSERT( TYPE_MCA == trgtType || TYPE_MBA == trgtType );
 
     TargetHandle_t proc = getConnectedParent( iv_target, TYPE_PROC );
-    if ( NULL == proc )
-    {
-        PRDF_ERR( PRDF_FUNC "Could not find proc attached to target 0x%08x",
-                getHuid(iv_target) );
-        PRDF_ASSERT( false );
-    }
-
     TargetHandle_t node = getConnectedParent( proc, TYPE_NODE );
-    if ( NULL == node )
-    {
-        PRDF_ERR( PRDF_FUNC "Could not find node attached to target 0x%08x",
-                getHuid(proc) );
-        PRDF_ASSERT( false );
-    }
 
     // If our target is an MBA, get the chnlPos from the membuf and the
     // mbaPos from the target
     if ( TYPE_MBA == getTargetType(iv_target) )
     {
-        TargetHandle_t membuf = getConnectedParent( iv_target,
-                TYPE_MEMBUF );
-        if ( NULL == membuf )
-        {
-            PRDF_ERR( PRDF_FUNC "Could not find membuf attached to 0x%08x",
-                    getHuid(iv_target) );
-            PRDF_ASSERT( false );
-        }
+        TargetHandle_t membuf = getConnectedParent( iv_target, TYPE_MEMBUF );
+
         iv_memMruMeld.s.isMca   = 0;
         iv_memMruMeld.s.chnlPos = getTargetPosition( membuf );
         iv_memMruMeld.s.mbaPos  = getTargetPosition( iv_target );
