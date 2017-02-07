@@ -600,18 +600,15 @@ TargetHandleList getConnected( TargetHandle_t i_target, TYPE i_connType )
 
     TargetHandleList o_list; // Default empty list
 
-    do
+    if ( getTargetType(i_target) == i_connType )
     {
-        if ( i_connType == getTargetType(i_target) )
-        {
-            o_list.push_back( i_target );
-            break;
-        }
-
+        o_list.push_back( i_target );
+    }
+    else
+    {
         o_list = getConnAssoc( i_target, i_connType,
                                getAssociationType(i_target, i_connType) );
-
-    } while(0);
+    }
 
     return o_list;
 }
@@ -669,22 +666,15 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
         PRDF_ASSERT(false);
     }
 
-    do
+    // Get the list.
+    TargetHandleList list = getConnAssoc( i_target, i_connType, assocType );
+    if ( !list.empty() )
     {
-        // Get the list.
-        TargetHandleList list = getConnAssoc( i_target, i_connType, assocType );
-        if ( list.empty() )
-        {
-            PRDF_ERR( PRDF_FUNC "The list is empty: i_target=0x%08x "
-                    "i_connType=%d", getHuid(i_target), i_connType );
-            break;
-        }
-
         // There are some special cases where we need something other than to
         // match the unit positions. So check those first.
 
         TargetHandleList::iterator itr = list.end();
-        TYPE     trgtType = getTargetType(    i_target );
+        TYPE     trgtType = getTargetType(     i_target );
         uint32_t trgtPos  = getTargetPosition( i_target );
 
         if ( TYPE_EQ == trgtType && TYPE_EX == i_connType )
@@ -810,8 +800,7 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
         // Get the target if found.
         if ( list.end() != itr )
             o_child = *itr;
-
-    } while(0);
+    }
 
     return o_child;
 
