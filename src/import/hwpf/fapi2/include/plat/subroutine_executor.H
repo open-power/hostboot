@@ -49,7 +49,7 @@
  */
 #define FAPI_PLAT_CALL_SUBROUTINE(RC, FUNC, _args...) \
     { \
-        FAPI_INF("executing FAPI_PLAT_CALL_SUBROUTINE marco"); \
+        FAPI_DBG("executing FAPI_PLAT_CALL_SUBROUTINE macro"); \
         RC = FUNC(_args); \
     }
 
