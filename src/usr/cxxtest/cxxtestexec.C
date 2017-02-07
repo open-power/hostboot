@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -24,6 +26,7 @@
 #include <vfs/vfs.H>
 #include <sys/task.h>
 #include <string.h>
+#include <stdio.h>
 #include <kernel/console.H>
 #include <sys/time.h>
 #include <sys/sync.h>
@@ -65,10 +68,23 @@ TASK_ENTRY_MACRO( cxxinit );
 
 void    cxxinit( errlHndl_t    &io_taskRetErrl )
 {
+    struct cxxtask_t
+    {
+        tid_t tid;
+        const char * module;
+    } cxxtask;
     errlHndl_t  l_errl  =   NULL;
     std::vector<const char *> module_list;
-    std::vector<tid_t> tasks;
+    std::vector<cxxtask_t> tasks;
     tid_t       tidrc           =   0;
+
+    for (uint64_t i = 0; i < CxxTest::CXXTEST_FAIL_LIST_SIZE; i++)
+    {
+        memset(CxxTest::g_FailedTestList[i].failTestFile,
+               0x00,
+               CxxTest::CXXTEST_FILENAME_SIZE);
+        CxxTest::g_FailedTestList[i].failTestData = 0;
+    };
 
     // output a blank line so that it's easier to find the beginning of
     //  CxxTest
@@ -120,28 +136,40 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
         tidrc = task_exec( *i, NULL );
         TRACFCOMP( g_trac_cxxtest, "Launched task: %s tidrc=%d",
                    *i, tidrc );
-        tasks.push_back(tidrc);
+        cxxtask.tid = tidrc;
+        cxxtask.module = *i;
+        tasks.push_back(cxxtask);
     }
 
     TRACFCOMP( g_trac_cxxtest,  "Waiting for all (%d) tasks to finish....",
                CxxTest::g_ModulesStarted );
 
     //  wait for all the launched tasks to finish
-    for (std::vector<tid_t>::iterator t = tasks.begin();
+    for (std::vector<cxxtask_t>::iterator t = tasks.begin();
          t != tasks.end();
          ++t)
     {
         int status = 0;
-        task_wait_tid(*t, &status, NULL);
+        task_wait_tid(t->tid, &status, NULL);
 
         if (status != TASK_STATUS_EXITED_CLEAN)
         {
-            TRACFCOMP( g_trac_cxxtest, "Task %d crashed.", *t );
+            TRACFCOMP( g_trac_cxxtest, "Task %d crashed with status %d.",
+                       t->tid, status );
+            if(CxxTest::g_FailedTests < CxxTest::CXXTEST_FAIL_LIST_SIZE)
+            {
+                CxxTest::CxxTestFailedEntry *l_failedEntry =
+                    &CxxTest::g_FailedTestList[CxxTest::g_FailedTests];
+                sprintf(l_failedEntry->failTestFile,
+                        "%s crashed",
+                        t->module);
+                l_failedEntry->failTestData = t->tid;
+            }
             __sync_add_and_fetch(&CxxTest::g_FailedTests, 1);
         }
         else
         {
-            TRACFCOMP( g_trac_cxxtest, "Task %d finished.", *t );
+            TRACFCOMP( g_trac_cxxtest, "Task %d finished.", t->tid );
         }
     }
 
@@ -158,6 +186,15 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
             CxxTest::g_Warnings    );
     TRACFCOMP( g_trac_cxxtest, "    trace calls:   %d",
             CxxTest::g_TraceCalls  );
+    for (uint64_t i = 0;
+         (i < CxxTest::g_FailedTests) && (i < CxxTest::CXXTEST_FAIL_LIST_SIZE);
+         i++ )
+    {
+        TRACFCOMP( g_trac_cxxtest, "    failed test[%d]: %s (%d)",
+                   i,
+                   CxxTest::g_FailedTestList[i].failTestFile,
+                   CxxTest::g_FailedTestList[i].failTestData);
+    }
 
     //  @todo dump out an informational errorlog??
 
