@@ -164,7 +164,7 @@ fapi2::ReturnCode p9_getecid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
 
     FAPI_TRY(l_fuseString.insert(l_ecid_part1_data64(), 64, 64));
 
-    FAPI_TRY(l_fuseString.insert(l_ecid_part2_data64(), 128, 48));
+    FAPI_TRY(l_fuseString.insert(l_ecid_part2_data64(), 128, 64));
 
     o_fuseString = l_fuseString;
 
