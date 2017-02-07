@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1156,6 +1156,13 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
             }
             break;
         }
+
+        case CLASS_SYS: // system
+            // The concept of a system position does not exist, however, we want
+            // to allow generic code to get the target position for any target.
+            // So we will add this special case.
+            o_pos = 0;
+            break;
 
         case CLASS_LOGICAL_CARD: // DIMMs
             o_pos = i_target->getAttr<ATTR_FAPI_POS>();
