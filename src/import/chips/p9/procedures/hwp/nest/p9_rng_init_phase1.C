@@ -48,42 +48,79 @@
 // Constant definitions
 //------------------------------------------------------------------------------
 
+// DD1 DEFINITIONS
 // RNG Self Test Register 0 constants
 // repetition count match count threshold (3 repeated numbers)
-const uint8_t   NX_RNG_ST0_REPTEST_MATCH_TH                  = 0x01;
+const uint8_t   NX_RNG_ST0_REPTEST_MATCH_TH_DD1                  = 0x01;
 // adaptive proportion sample size (8b wide sample)
-const uint8_t   NX_RNG_ST0_ADAPTEST_SAMPLE_SIZE              = 0x02;
-// adaptive proportion window size (2K size)
-const uint8_t   NX_RNG_ST0_ADAPTEST_WINDOW_SIZE              = 0x02;
+const uint8_t   NX_RNG_ST0_ADAPTEST_SAMPLE_SIZE_DD1              = 0x02;
+// adaptive proportion window size (2K size) ###CHANGED
+const uint8_t   NX_RNG_ST0_ADAPTEST_WINDOW_SIZE_DD1              = 0x02;
 // adaptive proportion RRN RNG0 match threshold (136; Assuming H = 6)
-const uint16_t  NX_RNG_ST0_ADAPTEST_RRN_RNG0_MATCH_TH        = 0x88;
+const uint16_t  NX_RNG_ST0_ADAPTEST_RRN_RNG0_MATCH_TH_DD1        = 0x88;
 // adaptive proportion RRN RNG1 match threshold (136; Assuming H = 6)
-const uint16_t  NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH        = 0x88;
+const uint16_t  NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH_DD1        = 0x88;
 // adaptive proportion CRN RNG0 match threshold (72; Assuming H = 8)
-const uint16_t  NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH        = 0x48;
+const uint16_t  NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH_DD1        = 0x48;
 // adaptive proportion CRN RNG1 match threshold (72; Assuming H = 8)
-const uint16_t  NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH        = 0x48;
+const uint16_t  NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH_DD1        = 0x48;
 
 // RNG Self Test Register 1 constants
 // adaptive proportion soft fail threshold (Setting [0:6] to 0x02)
-const uint8_t NX_RNG_ST1_ADAPTEST_SOFT_FAIL_TH = 0x02;
+const uint8_t NX_RNG_ST1_ADAPTEST_SOFT_FAIL_TH_DD1               = 0x02;
 // adaptive proportion 1bit match threshold min (648; Assuming H = 0.8)
-const uint16_t NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN         = 0x0288;
+const uint16_t NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN_DD1         = 0x0288;
 // adaptive proportion 1bit match threshold max (1400; Assuming H = 0.8)
-const uint16_t NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX         = 0x0578;
+const uint16_t NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX_DD1         = 0x0578;
 
 
 // RNG Self Test Register 3 constants
 // sample rate RRN enable (Use RRNs)
-const bool     NX_RNG_ST3_SAMPTEST_RRN_ENABLE                = true;
+const bool     NX_RNG_ST3_SAMPTEST_RRN_ENABLE_DD1                = true;
 // sample rate window size (64k -1 size)
-const uint8_t  NX_RNG_ST3_SAMPTEST_WINDOW_SIZE               = 0x07;
+const uint8_t  NX_RNG_ST3_SAMPTEST_WINDOW_SIZE_DD1               = 0x07;
 // sample rate match threshold minimum (64k * 0.45 = 29,491)
-const uint16_t NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN              = 0x4ccc;
+const uint16_t NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN_DD1              = 0x4ccc;
 // sample rate match threshold maximum (64k * 0.55 = 36,044)
-const uint16_t NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX              = 0xb332;
+const uint16_t NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_DD1              = 0xb332;
 
-// RNG Status And Control Register constants
+//DD2 DEFINITIONS
+// RNG Self Test Register 0 constants
+// repetition count match count threshold (3 repeated numbers)
+const uint8_t   NX_RNG_ST0_REPTEST_MATCH_TH_DD2                  = 0x01;
+// adaptive proportion sample size (8b wide sample)
+const uint8_t   NX_RNG_ST0_ADAPTEST_SAMPLE_SIZE_DD2              = 0x02;
+// adaptive proportion window size (2K size) ###CHANGED
+const uint8_t   NX_RNG_ST0_ADAPTEST_WINDOW_SIZE_DD2              = 0x01;
+// adaptive proportion RRN RNG0 match threshold (136; Assuming H = 6)
+const uint16_t  NX_RNG_ST0_ADAPTEST_RRN_RNG0_MATCH_TH_DD2        = 0x22;
+// adaptive proportion RRN RNG1 match threshold (136; Assuming H = 6)
+const uint16_t  NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH_DD2        = 0x22;
+// adaptive proportion CRN RNG0 match threshold (72; Assuming H = 8)
+const uint16_t  NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH_DD2        = 0x12;
+// adaptive proportion CRN RNG1 match threshold (72; Assuming H = 8)
+const uint16_t  NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH_DD2        = 0x12;
+
+// RNG Self Test Register 1 constants
+// adaptive proportion soft fail threshold (Setting [0:6] to 0x02)
+const uint8_t NX_RNG_ST1_ADAPTEST_SOFT_FAIL_TH_DD2               = 0x02;
+// adaptive proportion 1bit match threshold min (648; Assuming H = 0.8)
+const uint16_t NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN_DD2         = 0x00A2;
+// adaptive proportion 1bit match threshold max (1400; Assuming H = 0.8)
+const uint16_t NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX_DD2         = 0x015E;
+
+// RNG Self Test Register 3 constants
+// sample rate RRN enable (Use RRNs)
+const bool     NX_RNG_ST3_SAMPTEST_RRN_ENABLE_DD2                = true;
+// sample rate window size (64k -1 size)
+const uint8_t  NX_RNG_ST3_SAMPTEST_WINDOW_SIZE_DD2               = 0x07;
+// sample rate match threshold minimum (64k * 0.45 = 29,491)
+const uint16_t NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN_DD2              = 0x7333;
+// sample rate match threshold maximum (64k * 0.55 = 36,044)
+const uint16_t NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_DD2              = 0x8CCC;
+
+
+// RNG Status And Control Register constants (Applies to both)
 const bool     NX_RNG_CFG_CONDITIONER_MASK_TOGGLE            = false;
 // sample rate test enable
 const bool     NX_RNG_CFG_SAMPLE_RATE_TEST_ENABLE            = true;
@@ -114,6 +151,10 @@ p9_rng_init_phase1(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     fapi2::buffer<uint64_t> l_rng_st2_data;
     fapi2::buffer<uint64_t> l_rng_st3_data;
 
+    uint8_t l_dd1 = 0;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_RNG_ADAPTEST_SETTINGS, i_target, l_dd1) );
+
     // 1. RNG will start running with FIFO write / self tests disabled (enable doesn't gate the osc; it turns off FIFO
     // writes and self test fails); rng_enable = 0.
     // 2. RNG Conditioner Startup Test runs and reports status.
@@ -132,51 +173,96 @@ p9_rng_init_phase1(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 
     // 3. Host boot programs window sizes, pace, self test enables and parameters, read delay parameters.
     // program window sizes, pace, self test enables/parameters, and read delay parameters
-    // configure RNG Self Test Register 0
+    // get values from self test registers
     FAPI_TRY(fapi2::getScom(i_target, PU_NX_RNG_ST0, l_rng_st0_data),
              "Error from getScom (NX RNG Self Test Register 0)");
+    FAPI_TRY(fapi2::getScom(i_target, PU_NX_RNG_ST1, l_rng_st1_data),
+             "Error from getScom (NX RNG Self Test Register 1)");
+    FAPI_TRY(fapi2::getScom(i_target, PU_NX_RNG_ST3, l_rng_st3_data),
+             "Error from getScom (NX RNG Self Test Register 3)");
 
-    l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_REPTEST_MATCH_TH, PU_NX_RNG_ST0_REPTEST_MATCH_TH_LEN>
-    (NX_RNG_ST0_REPTEST_MATCH_TH);
-    l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_SAMPLE_SIZE, PU_NX_RNG_ST0_ADAPTEST_SAMPLE_SIZE_LEN>
-    (NX_RNG_ST0_ADAPTEST_SAMPLE_SIZE);
-    l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_WINDOW_SIZE, PU_NX_RNG_ST0_ADAPTEST_WINDOW_SIZE_LEN>
-    (NX_RNG_ST0_ADAPTEST_WINDOW_SIZE);
-    l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_RRN_RNG0_MATCH_TH, PU_NX_RNG_ST0_ADAPTEST_RRN_RNG0_MATCH_TH_LEN>
-    (NX_RNG_ST0_ADAPTEST_RRN_RNG0_MATCH_TH);
-    l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH, PU_NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH_LEN>
-    (NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH);
-    l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH, PU_NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH_LEN>
-    (NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH);
-    l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH, PU_NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH_LEN>
-    (NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH);
+    if (l_dd1 != 0)
+    {
+        // DD1
+        FAPI_INF("Configuring Self Test Registers for DD1");
+        // configure RNG Self Test Register 0
+        l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_REPTEST_MATCH_TH, PU_NX_RNG_ST0_REPTEST_MATCH_TH_LEN>
+        (NX_RNG_ST0_REPTEST_MATCH_TH_DD1);
+        l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_SAMPLE_SIZE, PU_NX_RNG_ST0_ADAPTEST_SAMPLE_SIZE_LEN>
+        (NX_RNG_ST0_ADAPTEST_SAMPLE_SIZE_DD1);
+        l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_WINDOW_SIZE, PU_NX_RNG_ST0_ADAPTEST_WINDOW_SIZE_LEN>
+        (NX_RNG_ST0_ADAPTEST_WINDOW_SIZE_DD1);
+        l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_RRN_RNG0_MATCH_TH, PU_NX_RNG_ST0_ADAPTEST_RRN_RNG0_MATCH_TH_LEN>
+        (NX_RNG_ST0_ADAPTEST_RRN_RNG0_MATCH_TH_DD1);
+        l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH, PU_NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH_LEN>
+        (NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH_DD1);
+        l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH, PU_NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH_LEN>
+        (NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH_DD1);
+        l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH, PU_NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH_LEN>
+        (NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH_DD1);
+
+        // configure RNG Self Test Register 1
+        l_rng_st1_data.insertFromRight<PU_NX_RNG_ST1_ADAPTEST_SOFT_FAIL_TH, PU_NX_RNG_ST1_ADAPTEST_SOFT_FAIL_TH_LEN>
+        (NX_RNG_ST1_ADAPTEST_SOFT_FAIL_TH_DD1);
+        l_rng_st1_data.insertFromRight<PU_NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN, PU_NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN_LEN>
+        (NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN_DD1);
+        l_rng_st1_data.insertFromRight<PU_NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX, PU_NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX_LEN>
+        (NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX_DD1);
+
+        // configure RNG Self Test Register 3
+        l_rng_st3_data.writeBit<PU_NX_RNG_ST3_SAMPTEST_RRN_ENABLE>
+        (NX_RNG_ST3_SAMPTEST_RRN_ENABLE_DD1);
+        l_rng_st3_data.insertFromRight<PU_NX_RNG_ST3_SAMPTEST_WINDOW_SIZE, PU_NX_RNG_ST3_SAMPTEST_WINDOW_SIZE_LEN>
+        (NX_RNG_ST3_SAMPTEST_WINDOW_SIZE_DD1);
+        l_rng_st3_data.insertFromRight<PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN, PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN_LEN>
+        (NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN_DD1);
+        l_rng_st3_data.insertFromRight<PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX, PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_LEN>
+        (NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_DD1);
+    }
+    else
+    {
+        // DD2
+        FAPI_INF("Configuring Self Test Registers for DD2");
+        // configure RNG Self Test Register 0
+        l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_REPTEST_MATCH_TH, PU_NX_RNG_ST0_REPTEST_MATCH_TH_LEN>
+        (NX_RNG_ST0_REPTEST_MATCH_TH_DD2);
+        l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_SAMPLE_SIZE, PU_NX_RNG_ST0_ADAPTEST_SAMPLE_SIZE_LEN>
+        (NX_RNG_ST0_ADAPTEST_SAMPLE_SIZE_DD2);
+        l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_WINDOW_SIZE, PU_NX_RNG_ST0_ADAPTEST_WINDOW_SIZE_LEN>
+        (NX_RNG_ST0_ADAPTEST_WINDOW_SIZE_DD2);
+        l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_RRN_RNG0_MATCH_TH, PU_NX_RNG_ST0_ADAPTEST_RRN_RNG0_MATCH_TH_LEN>
+        (NX_RNG_ST0_ADAPTEST_RRN_RNG0_MATCH_TH_DD2);
+        l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH, PU_NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH_LEN>
+        (NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH_DD2);
+        l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH, PU_NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH_LEN>
+        (NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH_DD2);
+        l_rng_st0_data.insertFromRight<PU_NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH, PU_NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH_LEN>
+        (NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH_DD2);
+
+        // configure RNG Self Test Register 1
+        l_rng_st1_data.insertFromRight<PU_NX_RNG_ST1_ADAPTEST_SOFT_FAIL_TH, PU_NX_RNG_ST1_ADAPTEST_SOFT_FAIL_TH_LEN>
+        (NX_RNG_ST1_ADAPTEST_SOFT_FAIL_TH_DD2);
+        l_rng_st1_data.insertFromRight<PU_NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN, PU_NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN_LEN>
+        (NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN_DD2);
+        l_rng_st1_data.insertFromRight<PU_NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX, PU_NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX_LEN>
+        (NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX_DD2);
+
+        // configure RNG Self Test Register 3
+        l_rng_st3_data.writeBit<PU_NX_RNG_ST3_SAMPTEST_RRN_ENABLE>
+        (NX_RNG_ST3_SAMPTEST_RRN_ENABLE_DD2);
+        l_rng_st3_data.insertFromRight<PU_NX_RNG_ST3_SAMPTEST_WINDOW_SIZE, PU_NX_RNG_ST3_SAMPTEST_WINDOW_SIZE_LEN>
+        (NX_RNG_ST3_SAMPTEST_WINDOW_SIZE_DD2);
+        l_rng_st3_data.insertFromRight<PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN, PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN_LEN>
+        (NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN_DD2);
+        l_rng_st3_data.insertFromRight<PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX, PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_LEN>
+        (NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_DD2);
+    }
 
     FAPI_TRY(fapi2::putScom(i_target, PU_NX_RNG_ST0, l_rng_st0_data),
              "Error from putScom (NX RNG Self Test Register 0)");
 
-    // configure RNG Self Test Register 1
-    FAPI_TRY(fapi2::getScom(i_target, PU_NX_RNG_ST1, l_rng_st1_data),
-             "Error from getScom (NX RNG Self Test Register 1)");
-    l_rng_st1_data.insertFromRight<PU_NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN, PU_NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN_LEN>
-    (NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN);
-    l_rng_st1_data.insertFromRight<PU_NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX, PU_NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX_LEN>
-    (NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX);
-
     FAPI_TRY(fapi2::putScom(i_target, PU_NX_RNG_ST1, l_rng_st1_data),
              "Error from putScom (NX RNG Self Test Register 1)");
-
-    // write RNG Self Test Register 3
-    FAPI_TRY(fapi2::getScom(i_target, PU_NX_RNG_ST3, l_rng_st3_data),
-             "Error from getScom (NX RNG Self Test Register 3)");
-
-    l_rng_st3_data.writeBit<PU_NX_RNG_ST3_SAMPTEST_RRN_ENABLE>
-    (NX_RNG_ST3_SAMPTEST_RRN_ENABLE);
-    l_rng_st3_data.insertFromRight<PU_NX_RNG_ST3_SAMPTEST_WINDOW_SIZE, PU_NX_RNG_ST3_SAMPTEST_WINDOW_SIZE_LEN>
-    (NX_RNG_ST3_SAMPTEST_WINDOW_SIZE);
-    l_rng_st3_data.insertFromRight<PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN, PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN_LEN>
-    (NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN);
-    l_rng_st3_data.insertFromRight<PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX, PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_LEN>
-    (NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX);
 
     FAPI_TRY(fapi2::putScom(i_target, PU_NX_RNG_ST3, l_rng_st3_data),
              "Error from putScom (NX RNG Self Test Register 3)");
