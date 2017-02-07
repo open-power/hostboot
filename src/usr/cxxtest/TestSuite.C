@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -29,6 +31,7 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <arch/ppc.H>
+#include <string.h>
 
 #include <cxxtest/TestSuite.H>
 
@@ -89,6 +92,14 @@ void doWarn( )
 void doFailTest( )
 {
 
+    TRACDCOMP( g_trac_test,
+            "!!!       > Test Failed " );
+    if(g_FailedTests < CXXTEST_FAIL_LIST_SIZE)
+    {
+        memcpy(g_FailedTestList[g_FailedTests].failTestFile,
+               "---",
+               3);
+    }
     __sync_add_and_fetch( &g_FailedTests, 1 );
 
 }
@@ -108,6 +119,13 @@ void doFailTest( const char *filename, uint32_t linenum )
             "!!!       > Test %s Failed at line %d ",
             filename,
             linenum );
+    if(g_FailedTests < CXXTEST_FAIL_LIST_SIZE)
+    {
+        memcpy(g_FailedTestList[g_FailedTests].failTestFile,
+               filename,
+               CXXTEST_FILENAME_SIZE);
+        g_FailedTestList[g_FailedTests].failTestData = linenum;
+    }
     __sync_add_and_fetch( &g_FailedTests, 1 );
 
 }

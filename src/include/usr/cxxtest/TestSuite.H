@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 
 #include    <trace/interface.H>
 #include    <sys/sync.h>
+#include    <usr/cxxtest/cxxtest_data.H>
 
 extern  trace_desc_t   *g_trac_test;
 
@@ -48,13 +49,14 @@ namespace CxxTest
 /**
  * @note extern declarations - see lib/cxxtest_data.C
  *
- * @see g_TotalTests, g_TraceCalls, g_Warnings, g_FailedTests
+ * @see g_TotalTests, g_TraceCalls, g_Warnings, g_FailedTests, g_FailedTestList
  */
 extern  uint64_t        g_TotalTests;
 extern  uint64_t        g_TraceCalls;
 extern  uint64_t        g_Warnings;
 extern  uint64_t        g_FailedTests;
 extern  barrier_t       g_CxxTestBarrier;
+extern  CxxTestFailedEntry g_FailedTestList[CXXTEST_FAIL_LIST_SIZE];
 
 /**
  * @class   TestSuite
@@ -87,6 +89,7 @@ void doFailAssert(  const char *file,
 void reportTotalTests(  const char *suitename,
                         uint64_t numtests );
 
+extern uint64_t g_ModulesStarted;
 extern uint64_t g_ModulesCompleted;
 
 #define _TS_TRY
@@ -117,15 +120,6 @@ extern uint64_t g_ModulesCompleted;
 #define TS_FAIL(...)    TRACFCOMP( g_trac_test, "!!!TS_FAIL> " __VA_ARGS__);   \
     CxxTest::doFailTest( __FILE__, __LINE__ )
 
-// These are all implemented in the cxxtest_data.C that gets put into the base
-// image.
-extern uint64_t g_TotalTests;
-extern uint64_t g_TraceCalls;
-extern uint64_t g_Warnings;
-extern uint64_t g_FailedTests;
-extern uint64_t g_ModulesStarted;
-extern uint64_t g_ModulesCompleted;
-
 // Statistics structure for passing original pointers to the runtime test suite.
 struct CxxTestStats
 {
@@ -137,6 +131,6 @@ struct CxxTestStats
     uint64_t* modulesCompleted;
 };
 
-}
+} // namespace CxxTest
 
 #endif // __cxxtest__TestSuite_h__

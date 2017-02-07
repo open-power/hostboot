@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -22,6 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <stdint.h>
+#include <usr/cxxtest/cxxtest_data.H>
 /**
  * @brief global vars to keep track of unit tests,
  *
@@ -47,6 +50,10 @@
  *  This variable is also used to allow a code in a binary image
  *  not containing the testcase modules to query the number of failed tests
  *
+ * @var g_FailedTestList -  updated by TS_FAIL macro in the unit test image.
+ *  This variable is also used to allow code in a binary image not containing
+ *  the testcase modules to query a list of failed tests
+ *
  */
 
 namespace CxxTest
@@ -58,6 +65,9 @@ uint64_t        g_Warnings        =     0;
 uint64_t        g_FailedTests     =     0;
 uint64_t        g_ModulesStarted  =     0;
 uint64_t        g_ModulesCompleted=     0;
+
+struct CxxTestFailedEntry g_FailedTestList[CXXTEST_FAIL_LIST_SIZE];
+
 
 }
 
