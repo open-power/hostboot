@@ -624,8 +624,6 @@ TargetHandle_t getConnectedParent( TargetHandle_t i_target, TYPE i_connType )
 
     PRDF_ASSERT( nullptr != i_target );
 
-    TargetHandle_t o_parent = NULL;
-
     // Get the association type, must be PARENT_BY_AFFINITY.
     TargetService::ASSOCIATION_TYPE assocType = getAssociationType( i_target,
                                                                     i_connType);
@@ -636,21 +634,16 @@ TargetHandle_t getConnectedParent( TargetHandle_t i_target, TYPE i_connType )
         PRDF_ASSERT(false);
     }
 
-    do
+    // Get the connected parent, should be one and only one parent
+    TargetHandleList list = getConnAssoc( i_target, i_connType, assocType );
+    if ( 1 != list.size() || nullptr == list[0] )
     {
-        TargetHandleList list = getConnAssoc( i_target, i_connType, assocType );
-        if ( 1 != list.size() ) // Should be one and only one parent
-        {
-            PRDF_ERR( PRDF_FUNC "Could not find parent: i_target=0x%08x "
-                      "i_connType=%d", getHuid(i_target), i_connType );
-            break;
-        }
+        PRDF_ERR( PRDF_FUNC "Could not find parent: i_target=0x%08x "
+                  "i_connType=%d", getHuid(i_target), i_connType );
+        PRDF_ASSERT(false);
+    }
 
-        o_parent = list[0];
-
-    } while(0);
-
-    return o_parent;
+    return list[0];
 
     #undef PRDF_FUNC
 }
@@ -849,16 +842,10 @@ ExtensibleChip * getConnectedParent( ExtensibleChip * i_child,
 {
     PRDF_ASSERT( nullptr != i_child );
 
-    ExtensibleChip * o_parent = nullptr;
-
     TargetHandle_t trgt = getConnectedParent( i_child->getTrgt(),
                                               i_parentType );
-    if ( nullptr != trgt )
-    {
-        o_parent = (ExtensibleChip *)systemPtr->GetChip( trgt );
-    }
 
-    return o_parent;
+    return (ExtensibleChip *)systemPtr->GetChip( trgt );
 }
 
 //------------------------------------------------------------------------------
@@ -1192,18 +1179,9 @@ uint32_t getMemChnl( TARGETING::TargetHandle_t i_memTarget )
                                               // INVALID_POSITION_BOUND for call
                                               // from getTargetPosition().
 
-    do
-    {
-        TargetHandle_t mcsTarget = getConnectedParent( i_memTarget, TYPE_MCS );
-        if ( NULL == mcsTarget )
-        {
-            PRDF_ERR( PRDF_FUNC "getConnectedParent() failed" );
-            break;
-        }
+    TargetHandle_t mcsTarget = getConnectedParent( i_memTarget, TYPE_MCS );
 
-        o_chnl = getTargetPosition( mcsTarget );
-
-    } while (0);
+    o_chnl = getTargetPosition( mcsTarget );
 
     if ( MAX_MCS_PER_PROC <= o_chnl ) // Real MCS position check.
     {
@@ -1597,13 +1575,6 @@ TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
         if(TYPE_MEMBUF == getTargetType(i_pGivenTarget))
         {
             l_target = getConnectedParent(i_pGivenTarget, TYPE_PROC);
-            if(NULL == l_target)
-            {
-                PRDF_ERR(PRDF_FUNC "failed to get proc target "
-                         "connected to membuf 0x%.8X",
-                         getHuid(l_target));
-                break;
-            }
         }
 
         PredicateIsFunctional l_funcFilter;

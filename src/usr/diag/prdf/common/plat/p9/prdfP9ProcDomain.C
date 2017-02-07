@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,13 +146,6 @@ void ProcDomain::SortForXstop()
         TargetHandle_t proc = sysDebug.getTargetWithAttn( TYPE_PROC,
                                                           MACHINE_CHECK);
         node = getConnectedParent( proc, TYPE_NODE);
-        if( NULL == node )
-        {
-            // We should never reach here. Even if we reach here, as this is
-            // XSTOP, we would like to go ahead with analysis to have as much
-            // data as possible. So just print a trace.
-            PRDF_ERR("[ProcDomain::SortForXstop] Node is Null");
-        }
     }
 
     // Get internal setting and external driver list for each chip.

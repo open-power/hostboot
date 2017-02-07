@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,7 +75,6 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
     if ( io_sc.service_data->IsAtThreshold() )
     {
         ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
-        PRDF_ASSERT( nullptr != mcbChip );
 
         McbistDataBundle * mcbdb = getMcbistDataBundle( mcbChip );
 

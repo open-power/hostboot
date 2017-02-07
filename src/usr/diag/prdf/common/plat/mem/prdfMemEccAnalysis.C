@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,7 +64,6 @@ uint32_t __addVcmEvent<TYPE_MCA>( ExtensibleChip * i_chip,
     PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
     ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
-    PRDF_ASSERT( nullptr != mcbChip ); // definitely a bug
 
     McbistDataBundle * mcbdb = getMcbistDataBundle( mcbChip );
 

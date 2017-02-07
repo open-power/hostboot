@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -185,7 +185,6 @@ uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 
     // Get the MCBIST fapi target
     ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
-    PRDF_ASSERT( nullptr != mcbChip );
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbChip->getTrgt() );
 
     // Get the stop conditions.

@@ -309,7 +309,6 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 
     // Get the MCBIST fapi target
     ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
-    PRDF_ASSERT( nullptr != mcbChip );
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbChip->getTrgt() );
 
     // Get the stop conditions.
@@ -397,7 +396,6 @@ uint32_t __startTdScrub_mca( ExtensibleChip * i_mcaChip,
 
     // Get the MCBIST fapi target
     ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
-    PRDF_ASSERT( nullptr != mcbChip );
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbChip->getTrgt() );
 
     do

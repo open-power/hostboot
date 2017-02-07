@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -183,6 +183,7 @@ TARGETING::TargetHandleList getConnected( TARGETING::TargetHandle_t i_target,
  * @param   i_connType  Type of target(s) return in list
  * @note    If the given target is the same type as the given type, the given
  *          target is returned.
+ * @note    This function will assert if no valid parent is found.
  * @return  The requested parent target, NULL if something failed.
  */
 TARGETING::TargetHandle_t getConnectedParent(TARGETING::TargetHandle_t i_target,
@@ -217,6 +218,7 @@ ExtensibleChipList getConnected( ExtensibleChip * i_chip,
  * @param  i_parentType The targeting type of the parent.
  * @note   If the child is the same type as the parent type, the child is
  *         returned.
+ * @note   This function will assert if no valid parent is found.
  * @return The connected parent, nullptr if not found.
  */
 ExtensibleChip * getConnectedParent( ExtensibleChip * i_child,
