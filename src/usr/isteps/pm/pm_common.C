@@ -235,7 +235,7 @@ namespace HBPM
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapiTarg(i_target);
 
-        void *l_buffer0 = (void*)malloc(MAX_SEEPROM_IMAGE_SIZE);
+        void *l_buffer0 = (void*)malloc(HW_IMG_RING_SIZE);
         void *l_buffer1 = (void*)malloc(MAX_RING_BUF_SIZE);
         void *l_buffer2 = (void*)malloc(MAX_RING_BUF_SIZE);
 
@@ -319,7 +319,7 @@ namespace HBPM
                                  ? PHASE_IPL : PHASE_REBUILD,
                              l_imgType,
                              l_buffer0,
-                             MAX_SEEPROM_IMAGE_SIZE,
+                             HW_IMG_RING_SIZE,
                              l_buffer1,
                              MAX_RING_BUF_SIZE,
                              l_buffer2,

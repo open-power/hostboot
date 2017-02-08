@@ -20129,6 +20129,50 @@ Measured in GB</description>
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>WOF_TABLE_DATA</id>
+    <description>
+       WOF data from PNOR which contains WOF header data + VFRT data (vfrt header +
+       data for 8 Vdn, 21Vdd and 6 Quads)
+       Consumed by p9_pstate_parameter_block procedure
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>131072</array>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_WOF_TABLE_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>SYS_VFRT_STATIC_DATA_ENABLE</id>
+     <description>
+     Enables pstate parameter block code to use the static system vfrt data
+     Consumer: p9_pstate_parameter_block.C
+     0 = OFF, 1 = ON
+     Platform default:  OFF
+     <!--
+        @todo RTC 169662 at some point in the program, this default may be switched to
+         the opposite setting.  However, coordination needs to occur with all CIs
+         as this will enable functions that may not be modeled across the board.
+     -->
+     </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYS_VFRT_STATIC_DATA_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
 
 <attribute>
     <id>SYSTEM_RESCLK_STEP_DELAY</id>
