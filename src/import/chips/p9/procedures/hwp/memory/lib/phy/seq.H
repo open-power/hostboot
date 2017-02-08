@@ -301,17 +301,18 @@ fapi2::ReturnCode reset_rd_wr_data( const fapi2::Target<T>& i_target )
 {
     // MPR_PATTERN_BIT of 0F0F0F0F pattern
     // MPRLOC vs pattern
-    // MPR0   = 0F0F0F0F - these repeating patterns are for RD CTR, which needs transitions each data beat
+    // Within a byte, the bits are ordered with beat 0 being on the right and beat 7 being on the left
+    // MPR0   = 0F0F0F0F - these repeating patterns are for RD CTR, which needs transitions each data beat - note AA vs 55 due to bit ordering
     // MPR1   = 00000000 - these 0 patterns are for RD VREF, which needs a static low level
     // MPR2   = 00000000 - these 0 patterns are for RD VREF, which needs a static low level
-    // MPR3   = 0F0F0F0F - these repeating patterns are for RD CTR, which needs transitions each data beat
+    // MPR3   = 0F0F0F0F - these repeating patterns are for RD CTR, which needs transitions each data beat - note AA vs 55 due to bit ordering
     // MPR loc is noted above  the data below
     //                                   0011
-    constexpr uint64_t MPR01_PATTERN = 0x5500;
+    constexpr uint64_t MPR01_PATTERN = 0xAA00;
     // Per Ryan King: Only MPR page 0 locations 0/1 are required
     //                2/3 are mirrored for safety but could be changed as needed
     //                                   2233
-    constexpr uint64_t MPR23_PATTERN = 0x0055;
+    constexpr uint64_t MPR23_PATTERN = 0x00AA;
     fapi2::buffer<uint64_t> l_data;
 
     l_data.insertFromRight<TT::MPR_PATTERN, TT::MPR_PATTERN_LEN>(MPR01_PATTERN);
