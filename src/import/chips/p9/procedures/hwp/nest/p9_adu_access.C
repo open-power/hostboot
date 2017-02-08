@@ -67,6 +67,15 @@ extern "C" {
         // Process input flag
         p9_ADU_oper_flag l_myAduFlag;
         l_myAduFlag.getFlag(i_flags);
+        FAPI_DBG("l_myAduFlag = %lu", l_myAduFlag);
+
+        //If autoinc is set and this is not a DMA operation unset autoinc before passing the flags through
+        if (l_myAduFlag.getOperationType() != p9_ADU_oper_flag::DMA_PARTIAL)
+        {
+            l_myAduFlag.setAutoIncrement(false);
+        }
+
+        FAPI_DBG("l_myAduFlag = %lu", l_myAduFlag);
 
         if( i_lastGranule && l_myAduFlag.getAutoIncrement() )
         {
@@ -100,9 +109,12 @@ extern "C" {
                 l_busyHandling = EXPECTED_BUSY_BIT_CLEAR;
             }
 
-            FAPI_TRY(p9_adu_coherent_status_check(i_target, l_busyHandling, false,
-                                                  l_busyBitStatus),
-                     "Error from p9_adu_coherent_status_check");
+            if (l_myAduFlag.getOperationType() != p9_ADU_oper_flag::CACHE_INHIBIT)
+            {
+                FAPI_TRY(p9_adu_coherent_status_check(i_target, l_busyHandling, false,
+                                                      l_busyBitStatus),
+                         "Error from p9_adu_coherent_status_check");
+            }
 
             //If it's the last read/write
             if (i_lastGranule)
