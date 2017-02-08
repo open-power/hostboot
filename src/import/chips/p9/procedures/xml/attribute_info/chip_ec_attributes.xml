@@ -2304,6 +2304,25 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_ODT_CONFIG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      For Nimbus pre DD2.** we need to swap ODT2 and ODT3 values in the
+      DDRPHY_SEQ_ODT_RD/WR_CONFIG registers due to a PHY erratum.
+      Post DD2.** will have a hardware enabled fix for this (HW389360).
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MSS_BLUE_WATERFALL_ADJUST</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -2354,6 +2373,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+
   <!-- ******************************************************************** -->
   <!-- End Memory Section                                                   -->
   <!-- ******************************************************************** -->
