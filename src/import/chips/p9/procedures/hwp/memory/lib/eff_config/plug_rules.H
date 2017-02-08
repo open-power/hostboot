@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_PLUG_RULES_H_

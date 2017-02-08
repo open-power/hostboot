@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,7 @@
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_TIMING_H_
@@ -42,6 +42,24 @@
 
 namespace mss
 {
+
+///
+/// @brief Enums for ffdc error callout so we know which function had the error
+///
+enum functions
+{
+    TRAS = 0,
+    TFAW_HALF_KB_PAGE_HELPER = 1,
+    TFAW_ONE_KB_PAGE_HELPER = 2,
+    TFAW_TW_KB_PAGE_HELPER = 3,
+    TFAW_SLR_X4_HELPER = 4,
+    TFAW_SLR_X8_HELPER = 5,
+    TRRD_S_SLR = 6,
+    TRRD_L_SLR = 7,
+    TRRD_L_HALF_AND_1KB_PAGE_HELPER = 8,
+    TRRD_S_HALF_AND_1KB_PAGE_HELPER = 9,
+    TRRD_S_2KB_PAGE_HELPER = 10,
+};
 
 enum guard_band : uint16_t
 {
@@ -251,12 +269,14 @@ fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
 
 ///
 /// @brief Calculates Minimum Refresh Recovery Delay Time (different logical rank)
+/// @param[in] i_target a target for attributes
 /// @param[in] i_mode fine refresh rate mode
 /// @param[in] i_density SDRAM density
 /// @param[out] o_trfc_in_ps timing val in ps
 /// @return fapi2::FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode calc_trfc_dlr( const uint8_t i_refresh_mode,
+fapi2::ReturnCode calc_trfc_dlr( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                 const uint8_t i_refresh_mode,
                                  const uint8_t i_density,
                                  uint64_t& o_trfc_in_ps );
 
@@ -440,8 +460,6 @@ inline fapi2::ReturnCode dodt_on( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
     o_dodt = l_cwl + l_al + l_ca_parity_latency - 2;
     FAPI_INF( "dodt_on %s %d", mss::c_str(i_target), o_dodt );
 
-    return fapi2::FAPI2_RC_SUCCESS;
-
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -473,8 +491,6 @@ inline fapi2::ReturnCode max_dodt_on( const fapi2::Target<fapi2::TARGET_TYPE_MCA
 
         o_dodt = std::max(o_dodt, l_odt);
     }
-
-    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -533,6 +549,7 @@ inline fapi2::ReturnCode fw_rd_wr( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
+    FAPI_ERR("Error calculating the delay between a read and write command in memory clock cycles (fw_rd_wr");
     return fapi2::current_err;
 }
 
@@ -549,12 +566,10 @@ constexpr uint64_t trtp()
 
 ///
 /// @brief Return the minimum allowable tRAS in picoseconds
-/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
 /// @param[in] i_target the fapi2 target
 /// @return value in picoseconds
 ///
-template< fapi2::TargetType T >
-inline uint64_t tras(const fapi2::Target<T>& i_target)
+inline uint64_t tras(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
 {
     uint64_t l_freq = 0;
     uint64_t l_tras = 0;
@@ -578,7 +593,14 @@ inline uint64_t tras(const fapi2::Target<T>& i_target)
             break;
 
         default:
-            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_PASSED_IN()
+                         .set_FREQ(l_freq)
+                         .set_FUNCTION(TRAS)
+                         .set_TARGET(i_target),
+                         "%s Invalid frequency %lu",
+                         mss::c_str(i_target),
+                         l_freq);
     }
 
     return l_tras;
@@ -642,7 +664,14 @@ static fapi2::ReturnCode tfaw_half_kb_page_helper(const fapi2::Target<T>& i_targ
             break;
 
         default:
-            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_PASSED_IN()
+                         .set_FREQ(l_freq)
+                         .set_FUNCTION(TFAW_HALF_KB_PAGE_HELPER)
+                         .set_TARGET(i_target),
+                         "%s Invalid frequency %lu",
+                         mss::c_str(i_target),
+                         l_freq);
     }
 
 fapi_try_exit:
@@ -689,7 +718,14 @@ static fapi2::ReturnCode tfaw_1kb_page_helper(const fapi2::Target<T>& i_target,
             break;
 
         default:
-            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_PASSED_IN()
+                         .set_FREQ(l_freq)
+                         .set_FUNCTION(TFAW_ONE_KB_PAGE_HELPER)
+                         .set_TARGET(i_target),
+                         "%s Invalid frequency %lu",
+                         mss::c_str(i_target),
+                         l_freq);
             break;
     }
 
@@ -735,7 +771,14 @@ static fapi2::ReturnCode tfaw_2kb_page_helper(const fapi2::Target<T>& i_target,
             break;
 
         default:
-            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_PASSED_IN()
+                         .set_FREQ(l_freq)
+                         .set_FUNCTION(TFAW_TW_KB_PAGE_HELPER)
+                         .set_TARGET(i_target),
+                         "%s Invalid frequency %lu",
+                         mss::c_str(i_target),
+                         l_freq);
             break;
     }
 
@@ -771,8 +814,13 @@ fapi2::ReturnCode tfaw( const fapi2::Target<T>& i_target,
             break;
 
         default:
-            FAPI_ERR("%s Recieved an invalid page size: %lu", mss::c_str(i_target), i_dram_width);
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_DRAM_WIDTH()
+                         .set_DRAM_WIDTH(i_dram_width)
+                         .set_TARGET(i_target),
+                         "Invalid DRAM width with %d for target %s",
+                         i_dram_width,
+                         mss::c_str(i_target));
             break;
     }
 
@@ -822,13 +870,24 @@ static fapi2::ReturnCode tfaw_slr_x4_helper(const fapi2::Target<T>& i_target,
             break;
 
         case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
-            FAPI_ERR("2666 MT/s is TBD from the DDR3 3DS spec");
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_SPEED_FOR_TSV()
+                         .set_FREQ(l_freq)
+                         .set_TARGET(i_target),
+                         "%s 2666 MT/s is TBD from the DDR4 3DS (TSV) spec",
+                         mss::c_str(i_target));
+
             break;
 
         default:
-            FAPI_ERR( "%s: Invalid frequency received (%d)", c_str(i_target), l_freq );
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_PASSED_IN()
+                         .set_FREQ(l_freq)
+                         .set_FUNCTION(TFAW_SLR_X4_HELPER)
+                         .set_TARGET(i_target),
+                         "%s Invalid frequency %lu",
+                         mss::c_str(i_target),
+                         l_freq);
             break;
     }
 
@@ -876,16 +935,27 @@ static fapi2::ReturnCode tfaw_slr_x8_helper(const fapi2::Target<T>& i_target,
             break;
 
         case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
-            FAPI_ERR("2666 MT/s is TBD from the DDR3 3DS spec");
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_SPEED_FOR_TSV()
+                         .set_FREQ(l_freq)
+                         .set_TARGET(i_target),
+                         "%s 2666 MT/s is TBD from the DDR4 3DS (TSV) spec",
+                         mss::c_str(i_target));
             break;
 
         default:
-            FAPI_ERR( "%s: Invalid frequency received (%d)", c_str(i_target), l_freq );
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_PASSED_IN()
+                         .set_FREQ(l_freq)
+                         .set_FUNCTION(TFAW_SLR_X8_HELPER)
+                         .set_TARGET(i_target),
+                         "%s Invalid frequency %lu",
+                         mss::c_str(i_target),
+                         l_freq);
             break;
     }
 
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -981,16 +1051,29 @@ fapi2::ReturnCode trrd_s_slr(const fapi2::Target<T>& i_target,
             break;
 
         case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
-            FAPI_ERR("2666 MT/s is TBD from the DDR3 3DS spec");
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_SPEED_FOR_TSV()
+                         .set_FREQ(l_freq)
+                         .set_TARGET(i_target),
+                         "%s 2666 MT/s is TBD from the DDR4 3DS (TSV) spec",
+                         mss::c_str(i_target));
             break;
 
         default:
-            FAPI_ERR( "%s: Invalid frequency received (%d)", c_str(i_target), l_freq );
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_PASSED_IN()
+                         .set_FREQ(l_freq)
+                         .set_FUNCTION(TRRD_S_SLR)
+                         .set_TARGET(i_target),
+                         "%s Invalid frequency %lu",
+                         mss::c_str(i_target),
+                         l_freq);
+
+
             break;
     }
 
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -1035,16 +1118,27 @@ fapi2::ReturnCode trrd_l_slr(const fapi2::Target<T>& i_target,
             break;
 
         case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
-            FAPI_ERR("2666 MT/s is TBD from the DDR4 SPD spec");
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_SPEED_FOR_TSV()
+                         .set_FREQ(l_freq)
+                         .set_TARGET(i_target),
+                         "%s 2666 MT/s is TBD from the DDR4 3DS (TSV) spec",
+                         mss::c_str(i_target));
             break;
 
         default:
-            FAPI_ERR( "%s: Invalid frequency received (%d)", c_str(i_target), l_freq );
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_PASSED_IN()
+                         .set_FREQ(l_freq)
+                         .set_FUNCTION(TRRD_L_SLR)
+                         .set_TARGET(i_target),
+                         "%s Invalid frequency %lu",
+                         mss::c_str(i_target),
+                         l_freq);
             break;
     }
 
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -1091,9 +1185,17 @@ static fapi2::ReturnCode trrd_l_half_and_1kb_page_helper(const fapi2::Target<T>&
             break;
 
         default:
-            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_PASSED_IN()
+                         .set_FREQ(l_freq)
+                         .set_FUNCTION(TRRD_L_HALF_AND_1KB_PAGE_HELPER)
+                         .set_TARGET(i_target),
+                         "%s Invalid frequency %lu",
+                         mss::c_str(i_target),
+                         l_freq);
     }
 
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -1162,7 +1264,7 @@ fapi2::ReturnCode trrd_l( const fapi2::Target<T>& i_target,
     {
         case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4:
         case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8:
-            FAPI_TRY( trrd_l_half_and_1kb_page_helper(i_target, o_tRRD_L) );
+            FAPI_TRY( trrd_l_half_and_1kb_page_helper(i_target, o_tRRD_L), "Error calculating trrd l for half and 1kb page" );
             break;
 
         case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X16:
@@ -1170,11 +1272,17 @@ fapi2::ReturnCode trrd_l( const fapi2::Target<T>& i_target,
             break;
 
         default:
-            FAPI_ERR("%s Recieved an invalid page size: %lu", mss::c_str(i_target), i_dram_width);
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_PAGE_SIZE()
+                         .set_DRAM_WIDTH(i_dram_width)
+                         .set_TARGET(i_target),
+                         "%s Recieved an invalid page size: %lu",
+                         mss::c_str(i_target),
+                         i_dram_width);
             break;
     }
 
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -1225,9 +1333,17 @@ static fapi2::ReturnCode trrd_s_half_and_1kb_page_helper(const fapi2::Target<T>&
             break;
 
         default:
-            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_PASSED_IN()
+                         .set_FREQ(l_freq)
+                         .set_FUNCTION(TRRD_S_HALF_AND_1KB_PAGE_HELPER)
+                         .set_TARGET(i_target),
+                         "%s Invalid frequency %lu",
+                         mss::c_str(i_target),
+                         l_freq);
     }
 
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -1269,10 +1385,18 @@ static fapi2::ReturnCode trrd_s_2kb_page_helper(const fapi2::Target<T>& i_target
             break;
 
         default:
-            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_PASSED_IN()
+                         .set_FREQ(l_freq)
+                         .set_FUNCTION(TRRD_S_2KB_PAGE_HELPER)
+                         .set_TARGET(i_target),
+                         "%s Invalid frequency %lu",
+                         mss::c_str(i_target),
+                         l_freq);
             break;
     }
 
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -1295,7 +1419,7 @@ fapi2::ReturnCode trrd_s( const fapi2::Target<T>& i_target,
     {
         case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4:
         case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8:
-            FAPI_TRY( trrd_s_half_and_1kb_page_helper(i_target, o_tRRD_S) );
+            FAPI_TRY( trrd_s_half_and_1kb_page_helper(i_target, o_tRRD_S), "Error calculating trrd_s for half and 1kb page" );
             break;
 
         case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X16:
@@ -1303,11 +1427,17 @@ fapi2::ReturnCode trrd_s( const fapi2::Target<T>& i_target,
             break;
 
         default:
-            FAPI_ERR("%s Recieved an invalid page size: %lu", mss::c_str(i_target), i_dram_width);
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_PAGE_SIZE()
+                         .set_DRAM_WIDTH(i_dram_width)
+                         .set_TARGET(i_target),
+                         "%s Recieved an invalid page size: %lu",
+                         mss::c_str(i_target),
+                         i_dram_width);
             break;
     }
 
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+
 #include <fapi2.H>
 #include <mss.H>
 #include <lib/utils/find.H>
@@ -90,6 +97,8 @@ fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
                               uint64_t& o_timing )
 {
     uint64_t l_multiplier = 0;
+    uint64_t l_quotient = 0;
+    uint64_t l_remainder = 0;
 
     switch(i_temp_refresh_range)
     {
@@ -105,19 +114,25 @@ fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
             // Temperature Refresh Range will be a platform attribute set by the MRW,
             // which they "shouldn't" mess up as long as use "attribute" enums.
             // if someone messes this up we can at least catch it
-            FAPI_ERR( "Incorrect Temperature Ref. Range received: %d ", i_temp_refresh_range);
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_TEMP_REFRESH()
+                         .set_TEMP_REFRESH_RANGE(i_temp_refresh_range),
+                         "Incorrect Temperature Ref. Range received: %d ",
+                         i_temp_refresh_range);
             break;
     }
 
-    const uint64_t l_quotient = TREFI_BASE / ( int64_t(i_mode) * l_multiplier );
-    const uint64_t l_remainder = TREFI_BASE % ( int64_t(i_mode) * l_multiplier );
+    l_quotient = TREFI_BASE / ( int64_t(i_mode) * l_multiplier );
+    l_remainder = TREFI_BASE % ( int64_t(i_mode) * l_multiplier );
     o_timing = l_quotient + (l_remainder == 0 ? 0 : 1);
 
     FAPI_INF( "tREFI: %d, quotient: %d, remainder: %d, tREFI_base: %d",
               o_timing, l_quotient, l_remainder, TREFI_BASE );
 
+    // FAPI_ASSERT doesn't set current error to good
     return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 /// @brief Calculates Minimum Refresh Recovery Delay Time (different logical rank)
@@ -126,7 +141,8 @@ fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
 /// @param[out] o_trfc_in_ps timing val in ps
 /// @return fapi2::FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode calc_trfc_dlr(const uint8_t i_refresh_mode,
+fapi2::ReturnCode calc_trfc_dlr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                const uint8_t i_refresh_mode,
                                 const uint8_t i_density,
                                 uint64_t& o_trfc_in_ps)
 {
@@ -153,18 +169,28 @@ fapi2::ReturnCode calc_trfc_dlr(const uint8_t i_refresh_mode,
             // Fine Refresh Mode will be a platform attribute set by the MRW,
             // which they "shouldn't" mess up as long as use "attribute" enums.
             // if openpower messes this up we can at least catch it
-            FAPI_ERR( "Incorrect Fine Refresh Mode received: %d ", i_refresh_mode);
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FINE_REFRESH()
+                         .set_REFRESH_MODE(i_refresh_mode),
+                         "Incorrect Fine Refresh Mode received: %d ",
+                         i_refresh_mode);
             break;
     }// switch
 
-    if(l_is_val_found)
-    {
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
+    FAPI_ASSERT( l_is_val_found,
+                 fapi2::MSS_FAILED_TO_FIND_TRFC()
+                 .set_SDRAM_DENSITY(i_density)
+                 .set_REFRESH_MODE(i_refresh_mode)
+                 .set_TARGET(i_target),
+                 "%s: Unable to find tRFC (ps) from map with SDRAM density key %d with %d refresh mode",
+                 mss::c_str(i_target),
+                 i_density,
+                 i_refresh_mode);
 
-    FAPI_ERR("Unable to find tRFC (ps) from map with SDRAM density key %d", i_density);
-    return fapi2::FAPI2_RC_FALSE;
+    // Again, FAPI_ASSERT doesn't set current_err to good, only to bad
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 }// mss
