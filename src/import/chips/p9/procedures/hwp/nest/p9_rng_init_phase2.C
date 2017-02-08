@@ -113,6 +113,7 @@ p9_rng_init_phase2(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NX_RNG_BAR_ENABLE, i_target, l_nx_rng_bar_enable),
              "Error from FAPI_ATTR_GET (ATTR_PROC_NX_BAR_ENABLE)");
     FAPI_TRY(p9_fbc_utils_get_chip_base_address(i_target,
+             EFF_FBC_GRP_CHIP_IDS,
              l_base_addr_nm0,
              l_base_addr_nm1,
              l_base_addr_m,
