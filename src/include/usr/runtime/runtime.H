@@ -98,6 +98,13 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId);
 // HOMER*8/OCC_Common/VPD/ATTR/HBRT_Image/Res/Res/Res
 #define HB_RSV_MEM_NUM_PTRS  15
 
+// Range types for HB reserved memory
+#define RANGE_TYPE_PRIMARY          0
+#define RANGE_TYPE_HBRT             1
+#define RANGE_TYPE_VERIFIED_LIDS    2
+#define RANGE_TYPE_TPM_LOG          3
+#define RANGE_TYPE_HOMER_OCC        4
+
 //Note this means the Reserved Mem sub-section is the 6th
 //(0 based) of the MDT section (See HDAT spec)
 #define MDT_RESERVED_HB_MEM_SECTION 5
@@ -163,7 +170,7 @@ void saveActualCount( RUNTIME::SectionId i_id,
  */
 errlHndl_t writeActualCount( RUNTIME::SectionId i_id );
 
-/*
+/**
  * @brief  Retrieve and log FFDC data relevant to a given section of
  *         host data memory
  *
@@ -175,13 +182,13 @@ errlHndl_t writeActualCount( RUNTIME::SectionId i_id );
 void add_host_data_ffdc( SectionId i_section,
                          errlHndl_t& io_errlog );
 
-/*
+/**
  * @brief Set the PAYLOAD_BASE attribute
  * @param[in] i_payloadAddress in MEGABYTES
  */
 void setPayloadBaseAddress(uint64_t i_payloadAddress);
 
-/*
+/**
  * @brief Clear out any cached data and rediscover the location
  *        of the HDAT memory
  */

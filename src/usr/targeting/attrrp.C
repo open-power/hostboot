@@ -303,16 +303,16 @@ namespace TARGETING
                 //attribute information on the initial IPL
                 //Account HRMOR (non 0 base addr)
                 uint64_t    l_attr_data_addr =   cpu_spr_value(CPU_SPR_HRMOR)
-                                                 + MPIPL_ATTR_DATA_ADDR;
+                                                 + VMM_ATTR_DATA_START_OFFSET;
                 l_header = reinterpret_cast<TargetingHeader*>(
                 mm_block_map(reinterpret_cast<void*>(l_attr_data_addr),
-                             MPIPL_ATTR_VMM_SIZE));
+                             VMM_ATTR_DATA_SIZE));
                 if(l_header == 0)
                 {
                     TRACFCOMP(g_trac_targeting,
                               "Failed mapping phys addr: %p for %lx bytes",
                               l_attr_data_addr,
-                              MPIPL_ATTR_VMM_SIZE);
+                              VMM_ATTR_DATA_SIZE);
                     //Error mm_block_map returned invalid ptr
                     /*@
                     *   @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -330,7 +330,7 @@ namespace TARGETING
                                            TARG_PARSE_ATTR_SECT_HEADER,
                                            TARG_RC_MM_BLOCK_FAIL,
                                            l_attr_data_addr,
-                                           MPIPL_ATTR_VMM_SIZE,
+                                           VMM_ATTR_DATA_SIZE,
                                            true);
                     break;
                 }
