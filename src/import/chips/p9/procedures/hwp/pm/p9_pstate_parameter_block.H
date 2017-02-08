@@ -50,6 +50,7 @@ extern "C" {
 // can remove from here if below structure is moved to p9_pstates.h
 #define MAX_ACTIVE_CORES 24
 
+#define HOMER_WOF_TABLE_SIZE 258176
 /// An internal operating point
 ///
 /// Internal operating points include characterization (both the original,
@@ -505,12 +506,23 @@ oppb_print(OCCPstateParmBlock* i_oppb);
 int freq2pState (const GlobalPstateParmBlock* gppb,
                  const uint32_t freq_khz,
                  Pstate* pstate);
+// @brief Pstate VFRT initialization
+// @param[in] i_pBuffer VFRT data coming from HB
+// @param[out] o_vfrt_data Homer VFRT version
+// @param[in] i_reference_freq  Ultra frequency
+void p9_pstate_update_vfrt(uint8_t* i_pBuffer,
+                           HomerVFRTLayout_t* o_vfrt_data,
+                           uint32_t i_reference_freq);
+
+
+
+
 
 /// @typedef p9_pstate_parameter_block_FP_t
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_pstate_parameter_block_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-    PstateSuperStructure*);
+    PstateSuperStructure*, uint8_t*, uint32_t&);
 
 extern "C"
 {
@@ -519,11 +531,14 @@ extern "C"
 /// @brief Populate Pstate super structure from VPD data
 /// @param[in]    i_target          => Chip Target
 /// @param[inout] *io_pss           => pointer to pstate superstructure
+/// @param[out]   *o_buf            => wof table data
+/// @param[inout] &io_size          => wof table data size
 /// @return   FAPI2::SUCCESS
 /// -------------------------------------------------------------------
     fapi2::ReturnCode
     p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                               PstateSuperStructure* io_pss);
+                               PstateSuperStructure* io_pss, uint8_t* o_buf, uint32_t& io_size);
+
 } // extern C
 
 
