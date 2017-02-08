@@ -1782,4 +1782,18 @@ ID for the sensor number returned with the elog. -->
     <hbOnly/>
 </attribute>
 
+<attribute>
+    <id>HB_RSV_MEM_NEXT_SECTION</id>
+    <description>
+        The next HB reserved memory section available to assign
+        a new reserved memory range.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>

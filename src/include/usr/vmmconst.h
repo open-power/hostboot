@@ -131,6 +131,10 @@ enum BlockPriority
 /** Page Size in bits per SLBE  */
 #define SLBE_b 12
 
+/** Hostboot reserved memory */
+#define VMM_HRMOR_OFFSET 128*MEGABYTE
+#define VMM_HB_RSV_MEM_SIZE 256*MEGABYTE
+
 /** Hardwired offsets from HRMOR to HOMER images in real mem */
 /** HOMER starts immediately after our HB memory */
 /**    <n0p0 HRMOR = 128MB> + <memory size = 32MB> = 160MB */
@@ -158,26 +162,34 @@ enum BlockPriority
 
 /** Total Memory required for HOMERs and OCC Common */
 #define VMM_ALL_HOMER_OCC_MEMORY_SIZE \
- (VMM_OCC_COMMON_SIZE+VMM_HOMER_REGION_SIZE)
-
-
-/** Reserved runtime VPD sizes in bytes */
-//  must be 64KB aligned
-#define VMM_MODULE_VPD_SIZE 0x80000
-#define VMM_CENTAUR_VPD_SIZE 0x40000
-#define VMM_DIMM_JEDEC_VPD_SIZE 0x40000
-
-/** Total VPD image size */
-#define VMM_RT_VPD_SIZE (VMM_MODULE_VPD_SIZE + \
-                         VMM_CENTAUR_VPD_SIZE + \
-                         VMM_DIMM_JEDEC_VPD_SIZE)
+ (VMM_OCC_COMMON_SIZE + VMM_HOMER_REGION_SIZE)
 
 /** Memory offset for runtime VPD image */
 // Given value is number of bytes BELOW the top of memory to store
-// the runtime image(s)  Currently below the OCC HOMER IMAGE
+//  the runtime image(s)  Currently below the OCC HOMER IMAGE
 #define VMM_RT_VPD_OFFSET (VMM_RT_VPD_SIZE + \
                            VMM_ALL_HOMER_OCC_MEMORY_SIZE)
 
+/** Memory for VPD */
+#define VMM_VPD_START_OFFSET VMM_OCC_COMMON_END_OFFSET
+#define VMM_MODULE_VPD_SIZE (512*KILOBYTE)          /* must be 64KB aligned */
+#define VMM_CENTAUR_VPD_SIZE (256*KILOBYTE)         /* must be 64KB aligned */
+#define VMM_DIMM_JEDEC_VPD_SIZE (256*KILOBYTE)      /* must be 64KB aligned */
+#define VMM_RT_VPD_SIZE (VMM_MODULE_VPD_SIZE + \
+                         VMM_CENTAUR_VPD_SIZE + \
+                         VMM_DIMM_JEDEC_VPD_SIZE)
+/** End of VPD Area = 201MB */
+
+/** Memory for attribute data */
+#define VMM_ATTR_DATA_START_OFFSET \
+ (VMM_VPD_START_OFFSET + VMM_RT_VPD_SIZE)
+#define VMM_ATTR_DATA_SIZE (1*MEGABYTE)
+/** End of Attr Area = 202MB */
+
+/** Chunk of physical memory used for Dump Source Table */
+#define DUMP_TEST_MEMORY_ADDR \
+ (VMM_ATTR_DATA_START_OFFSET + VMM_ATTR_DATA_SIZE)   /* currently 202MB */
+#define DUMP_TEST_MEMORY_SIZE (4*MEGABYTE)
 
 /** Internode communication area outside of the HB image.
  * Preserved between mpipl.
@@ -214,19 +226,6 @@ enum BlockPriority
 
 /** Block size used in remove pages test */
 #define VMM_SIZE_RMVPAGE_TEST (8 * PAGESIZE)
-
-/** Chunk of physical memory to use for HostServices Attributes */
-#define MPIPL_ATTR_DATA_ADDR   \
-  VMM_OCC_COMMON_END_OFFSET + VMM_OCC_COMMON_SIZE /* currently 200MB */
-#define MPIPL_SYSDATA_SIZE  (4*KILOBYTE)  /* match FSP HDAT code */
-#define MPIPL_NODEDATA_SIZE (256000)      /* match FSP HDAT code */
-#define MPIPL_ATTR_DATA_SIZE   \
-   ALIGN_PAGE((MPIPL_SYSDATA_SIZE+MPIPL_NODEDATA_SIZE))
-#define MPIPL_ATTR_VMM_SIZE (1*MEGABYTE)
-
-/* Chunk of physical memory used for Dump Source Table */
-#define DUMP_TEST_MEMORY_ADDR (MPIPL_ATTR_DATA_ADDR + MPIPL_ATTR_DATA_SIZE)
-#define DUMP_TEST_MEMORY_SIZE  (4*MEGABYTE)
 
 /** Physical memory location of the TCE Table */
 /** - needs to be aligned on 4MB boundary     */

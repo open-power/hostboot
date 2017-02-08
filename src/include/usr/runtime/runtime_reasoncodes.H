@@ -50,6 +50,8 @@ namespace RUNTIME
         MOD_POPULATE_RTDATABYNODE        = 0x14,  /**< populate_hbruntime.C */
         MOD_PM_RT_LOAD_PM_COMPLEX        = 0x15,  /**< rt_pm.C */
         MOD_PM_RT_HCODE_UPDATE           = 0x16,  /**< rt_pm.C */
+        MOD_MAP_PHYS_ADDR                = 0x17,  /**< populate_hbruntime.C */
+        MOD_UNMAP_VIRT_ADDR              = 0x18,  /**< populate_hbruntime.C */
     };
 
     enum RuntimeReasonCode
