@@ -289,6 +289,14 @@ void* call_host_voltage_config( void *io_pArgs )
                     l_turboFreq = l_ceilingFreq;
                 }
 
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Proc %.8X Freq from #V: "
+                          "Powersave = %d Turbo = %d, UltraTurbo = %d",
+                          TARGETING::get_huid(l_proc),
+                          l_voltageData.PSFreq,
+                          l_voltageData.turboFreq,
+                          l_voltageData.uTurboFreq );
+
             } // EQ for-loop
 
             // Don't set the boot voltage ATTR -- instead the
@@ -322,6 +330,18 @@ void* call_host_voltage_config( void *io_pArgs )
 
         // set the frequency system targets
         l_sys->setAttr<ATTR_NOMINAL_FREQ_MHZ>( l_nominalFreq );
+
+        // raise the min freq if there is a system policy for it
+        uint32_t l_dpoPercent = l_sys->getAttr<ATTR_DPO_MIN_FREQ_PERCENT>();
+        uint32_t l_dpoFreq = l_nominalFreq;
+        if( (l_dpoPercent != 0) && (l_dpoPercent < 100) )
+        {
+            l_dpoFreq = (l_nominalFreq*l_dpoPercent)/100;
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Computed floor=%d, DPO=%d (percent=-%d)",
+                      l_floorFreq, l_dpoFreq, l_dpoPercent );
+            l_floorFreq = std::max( l_floorFreq, l_dpoFreq );
+        }
 
         l_sys->setAttr<ATTR_MIN_FREQ_MHZ>( l_floorFreq );
 

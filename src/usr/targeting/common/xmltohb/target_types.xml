@@ -607,6 +607,7 @@
     <attribute><id>PROC_REFCLOCK_RCVR_TERM</id></attribute>
     <attribute><id>PCI_REFCLOCK_RCVR_TERM</id></attribute>
     <attribute><id>MIN_FREQ_MHZ</id></attribute>
+    <attribute><id>DPO_MIN_FREQ_PERCENT</id></attribute>
     <attribute><id>FREQ_PROC_REFCLOCK</id></attribute>
     <attribute><id>FREQ_PROC_REFCLOCK_KHZ</id></attribute>
     <attribute><id>FREQ_MEM_REFCLOCK</id></attribute>

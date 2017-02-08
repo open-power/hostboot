@@ -98,6 +98,10 @@
         <default>0x7D0</default>
     </attribute>
     <attribute>
+        <id>DPO_MIN_FREQ_PERCENT</id>
+        <default>98</default>
+    </attribute>
+    <attribute>
         <id>REQUIRED_SYNCH_MODE</id>
         <default>2</default><!-- NEVER -->
     </attribute>
