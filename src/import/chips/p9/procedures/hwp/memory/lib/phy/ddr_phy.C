@@ -49,6 +49,7 @@
 #include <lib/workarounds/dp16_workarounds.H>
 #include <lib/workarounds/wr_vref_workarounds.H>
 #include <lib/dimm/ddr4/latch_wr_vref.H>
+#include <lib/workarounds/seq_workarounds.H>
 
 #include <lib/utils/bit_count.H>
 #include <lib/utils/find.H>
@@ -766,6 +767,7 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         FAPI_TRY( mss::workarounds::dp16::dqs_polarity(p) );
         FAPI_TRY( mss::workarounds::dp16::rd_dia_config5(p) );
         FAPI_TRY( mss::workarounds::dp16::dqsclk_offset(p) );
+        FAPI_TRY( mss::workarounds::seq::odt_config(p) );
     }
 
 fapi_try_exit:
