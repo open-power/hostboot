@@ -1704,6 +1704,8 @@ void updatePgpeHeader( void* const i_pHomer )
     //PGPE Beacon SRAM address
     pPgpeHdr->g_pgpe_beacon_addr                  =     0;
     pPgpeHdr->g_quad_status_addr                  =     0;
+    pPgpeHdr->g_pgpe_wof_state_address            =     0;
+    pPgpeHdr->g_pgpe_req_active_quad_address      =     0;
     pPgpeHdr->g_wof_table_addr                    =     0;
     pPgpeHdr->g_wof_table_length                  =     0;
 
@@ -1772,6 +1774,8 @@ void updatePpmrHeader( void* const i_pHomer, PpmrHeader_t& io_ppmrHdr )
     FAPI_DBG("PS Table Offset       :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_pstables_offset));
     FAPI_DBG("PS Table Length       :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_pstables_length));
     FAPI_DBG("PSGPE SRAM Size       :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_pgpe_sram_img_size));
+    FAPI_DBG("WOF Table Offset      :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_wof_table_offset));
+    FAPI_DBG("WOF Table End         :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_wof_table_length));
     FAPI_DBG("=========================== PPMR Header ends ==================================" );
 
     updatePgpeHeader( i_pHomer );
@@ -1789,8 +1793,8 @@ void updatePpmrHeader( void* const i_pHomer, PpmrHeader_t& io_ppmrHdr )
  * return   fapi2::Returncode
  */
 fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i_procTgt,
-                                       PpmrHeader_t& io_ppmrHdr,
-                                       ImageType_t i_imgType )
+                                       PpmrHeader_t& io_ppmrHdr, ImageType_t i_imgType,
+                                       void * const i_pBuf1, uint32_t i_sizeBuf1 )
 {
     FAPI_INF("buildParameterBlock entered");
 
@@ -1817,13 +1821,23 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
 
         uint32_t sizeAligned = 0;
         uint32_t sizePStateBlock = 0;
+        uint32_t wofTableSize = i_sizeBuf1;
         PstateSuperStructure pStateSupStruct;
         memset( &pStateSupStruct, 0x00, sizeof(PstateSuperStructure) );
+        memset(i_pBuf1,0x00,i_sizeBuf1);
 
         //Building P-State Parameter block info by calling a HWP
         FAPI_DBG("Generating P-State Parameter Block" );
-        FAPI_EXEC_HWP(retCode, p9_pstate_parameter_block, i_procTgt, &pStateSupStruct);
+        FAPI_EXEC_HWP( retCode, p9_pstate_parameter_block, i_procTgt,
+                       &pStateSupStruct, (uint8_t*)i_pBuf1, wofTableSize );
         FAPI_TRY(retCode);
+
+        //Check if WOF Table is copied properly
+        FAPI_ASSERT( ( wofTableSize <= OCC_WOF_TABLES_SIZE ),
+                     fapi2::PARAM_WOF_TABLE_SIZE_ERR()
+                     .set_ACTUAL_WOF_TABLE_SIZE(wofTableSize)
+                     .set_MAX_SIZE_ALLOCATED(OCC_WOF_TABLES_SIZE),
+                     "Size of WOF Table Exceeds Max Size Allowed" );
 
         //-------------------------- Local P-State Parameter Block ------------------------------
 
@@ -1831,6 +1845,11 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         uint8_t* pLocalPState = &pHomerLayout->cpmrRegion.cmeSramRegion[localPspbStartIndex];
 
         sizePStateBlock = sizeof(LocalPstateParmBlock);
+
+        //Note: Not checking size here. Once entire CME Image layout is complete, there is a
+        //size check at last. WE are safe as long as everthing put together doesn't exceed
+        //maximum SRAM image size allowed(32KB). No need to check size of Local P-State
+        //parameter block individually.
 
         FAPI_DBG("Copying Local P-State Parameter Block into CPMR" );
         memcpy( pLocalPState, &pStateSupStruct.localppb, sizePStateBlock );
@@ -1849,13 +1868,12 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         FAPI_DBG("Copying Global P-State Parameter Block" );
         sizePStateBlock = sizeof(GlobalPstateParmBlock);
 
-        // MAKE ASSERT
-        if (sizePStateBlock > PGPE_PSTATE_OUTPUT_TABLES_SIZE)
-        {
-            FAPI_ERR("GlobalPstateParmBlock exceeds allocation:  size = %X (%d), allocation = %X (%d)",
-                     sizePStateBlock, sizePStateBlock,
-                     PGPE_PSTATE_OUTPUT_TABLES_SIZE, PGPE_PSTATE_OUTPUT_TABLES_SIZE);
-        }
+        FAPI_ASSERT( ( sizePStateBlock <= PGPE_PSTATE_OUTPUT_TABLES_SIZE ),
+                     fapi2::PARAM_BLOCK_SIZE_ERR()
+                     .set_SUPER_STRUCT_SIZE(sizeof(PstateSuperStructure))
+                     .set_MAX_SIZE_ALLOCATED(PGPE_PSTATE_OUTPUT_TABLES_SIZE)
+                     .set_ACTUAL_SIZE( sizePStateBlock ),
+                     "Size of Global Parameter Block Exceeds Max Size Allowed" );
 
         FAPI_DBG("GPPBB pgpeRunningOffset 0x%08x", pgpeRunningOffset );
         memcpy( &pPpmr->pgpeSramImage[pgpeRunningOffset], &pStateSupStruct.globalppb, sizePStateBlock );
@@ -1885,13 +1903,12 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
                  sizePStateBlock, sizePStateBlock,
                  sizeAligned, sizeAligned );
 
-        // MAKE ASSERT
-        if (sizePStateBlock > OCC_PSTATE_PARAM_BLOCK_SIZE)
-        {
-            FAPI_ERR("OCCPstateParmBlock exceeds allocation:  size = %X (%d), allocation = %X (%d)",
-                     sizePStateBlock, sizePStateBlock,
-                     OCC_PSTATE_PARAM_BLOCK_SIZE, OCC_PSTATE_PARAM_BLOCK_SIZE);
-        }
+        FAPI_ASSERT( ( sizePStateBlock <= OCC_PSTATE_PARAM_BLOCK_SIZE ),
+                     fapi2::PARAM_BLOCK_SIZE_ERR()
+                     .set_SUPER_STRUCT_SIZE(sizeof(OCCPstateParmBlock))
+                     .set_MAX_SIZE_ALLOCATED(PGPE_PSTATE_OUTPUT_TABLES_SIZE)
+                     .set_ACTUAL_SIZE( sizePStateBlock ),
+                     "Size of OCC Parameter Block Exceeds Max Size Allowed" );
 
         //  The PPMR offset is from the begining --- which is the ppmrHeader
         io_ppmrHdr.g_ppmr_oppb_offset = pPpmr->occParmBlock - pPpmr->ppmrHeader;
@@ -1902,12 +1919,8 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
 
         //-------------------------- OCC P-State Parameter Block Ends ------------------------------
 
-
-
-        io_ppmrHdr.g_ppmr_lppb_offset        =   CPMR_HOMER_OFFSET + CME_IMAGE_CPMR_OFFSET + localPspbStartIndex;
-        io_ppmrHdr.g_ppmr_lppb_length        =
-            localPStateBlock;   //FIXME RTC 159737 Need to clarify it from booting perspective
-
+        io_ppmrHdr.g_ppmr_lppb_offset  =  CPMR_HOMER_OFFSET + CME_IMAGE_CPMR_OFFSET + localPspbStartIndex;
+        io_ppmrHdr.g_ppmr_lppb_length  =  localPStateBlock;
 
         //------------------------------ OCC P-State Table Allocation ------------------------------
 
@@ -1915,10 +1928,16 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         io_ppmrHdr.g_ppmr_pstables_offset    =   pPpmr->pstateTable - pPpmr->ppmrHeader;;
         io_ppmrHdr.g_ppmr_pstables_length    =   sizeof(GeneratedPstateInfo);
 
-        //------------------------------ OCC P-State Table Allocation Ends -------------------------
+        //------------------------------ Copying WOF Table ----------------------------------------------
 
+        io_ppmrHdr.g_ppmr_wof_table_offset  =   OCC_WOF_TABLES_PPMR_OFFSET;
+        io_ppmrHdr.g_ppmr_wof_table_length  =   OCC_WOF_TABLES_SIZE;
 
-        //------------------------------ Calculating total PGPE Image Size in SRAM ------------------------
+        memcpy( &pPpmr->wofTableSize, i_pBuf1, wofTableSize );
+
+        //------------------------------ Copying WOF Table ----------------------------------------------
+
+        //------------------------------ Calculating total PGPE Image Size in SRAM ----------------------
 
         io_ppmrHdr.g_ppmr_pgpe_sram_img_size =  SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_hcode_length) +
                                                 io_ppmrHdr.g_ppmr_gppb_length;
@@ -1942,6 +1961,8 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         io_ppmrHdr.g_ppmr_pstables_offset    =   SWIZZLE_4_BYTE( io_ppmrHdr.g_ppmr_pstables_offset);
         io_ppmrHdr.g_ppmr_pstables_length    =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_pstables_length);
         io_ppmrHdr.g_ppmr_pgpe_sram_img_size =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_pgpe_sram_img_size);
+        io_ppmrHdr.g_ppmr_wof_table_offset   =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_wof_table_offset);
+        io_ppmrHdr.g_ppmr_wof_table_length   =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_wof_table_length);
     }
     while(0);
 
@@ -3487,7 +3508,7 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                      "Failed to copy PGPE section in HOMER" );
 
         //Update P State parameter block info in HOMER
-        FAPI_TRY( buildParameterBlock( pChipHomer, i_procTgt, l_ppmrHdr, i_imgType ),
+        FAPI_TRY( buildParameterBlock( pChipHomer, i_procTgt, l_ppmrHdr, i_imgType, i_pBuf1, i_sizeBuf1 ),
                   "Failed to add parameter block" );
 
         FAPI_INF("PGPE built");
