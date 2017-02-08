@@ -65,32 +65,49 @@ extern "C"
         bool adu_is_dirty = false;
         bool adu_leave_dirty = i_flags & FLAG_LEAVE_DIRTY;
 
+        // Process input flag
+        p9_ADU_oper_flag l_myAduFlag;
+        l_myAduFlag.getFlag(i_flags);
+
+        //If autoinc is set and this is not a DMA operation unset autoinc before passing the flags through
+        if (l_myAduFlag.getOperationType() != p9_ADU_oper_flag::DMA_PARTIAL)
+        {
+            l_myAduFlag.setAutoIncrement(false);
+        }
+
+        uint32_t l_flags = l_myAduFlag.setFlag();
+
         //check arguments
-        FAPI_TRY(p9_adu_coherent_utils_check_args(i_target, i_address, i_flags),
+        FAPI_TRY(p9_adu_coherent_utils_check_args(i_target, i_address, l_flags),
                  "Error from p9_adu_coherent_utils_check_args");
 
         //ensure fabric is running
         FAPI_TRY(p9_adu_coherent_utils_check_fbc_state(i_target),
                  "Error from p9_adu_coherent_utils_check_fbc_status");
 
-        //reset ADU state machines and status register
-        FAPI_TRY(p9_adu_coherent_utils_reset_adu(i_target), "p9_adu_setup: Error from p9_adu_coherent_utils_reset_adu");
-
         //acquire ADU lock to guarantee exclusive use of the ADU resources
-        lock_pick = i_flags & FLAG_LOCK_PICK;
-        num_attempts = i_flags & FLAG_LOCK_TRIES;
+        //ADU state machine will be reset/cleared by this routine
+        lock_pick = l_flags & FLAG_LOCK_PICK;
+        num_attempts = l_flags & FLAG_LOCK_TRIES;
         FAPI_TRY(p9_adu_coherent_manage_lock(i_target, lock_pick, true, num_attempts),
                  "Error from p9_adu_coherent_manage_lock");
 
-        //figure out how many granules can be requested before setup needs to be run again
-        FAPI_TRY(p9_adu_coherent_utils_get_num_granules(i_address, o_numGranules),
-                 "Error from p9_adu_coherent_utils_get_num_granules");
+        if (l_myAduFlag.getAutoIncrement() == true)
+        {
+            //figure out how many granules can be requested before setup needs to be run again
+            FAPI_TRY(p9_adu_coherent_utils_get_num_granules(i_address, o_numGranules),
+                     "Error from p9_adu_coherent_utils_get_num_granules");
+        }
+        else
+        {
+            o_numGranules = 1;
+        }
 
         //Set dirty since we need to attempt to cleanup/release the lock so the ADU is not in a locked state if operation fails from this point
         adu_is_dirty = true;
 
         //setup the ADU registers for the read/write
-        FAPI_TRY(p9_adu_coherent_setup_adu(i_target, i_address, i_rnw, i_flags),
+        FAPI_TRY(p9_adu_coherent_setup_adu(i_target, i_address, i_rnw, l_flags),
                  "Error from p9_adu_coherent_setup_registers");
 
     fapi_try_exit:
