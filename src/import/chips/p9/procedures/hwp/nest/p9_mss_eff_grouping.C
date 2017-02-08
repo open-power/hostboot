@@ -213,6 +213,7 @@ fapi2::ReturnCode EffGroupingProcAttrs::calcProcBaseAddr(
 
     // Get the Mirror/Non-mirror base addresses
     FAPI_TRY(p9_fbc_utils_get_chip_base_address(i_target,
+             EFF_FBC_GRP_CHIP_IDS,
              iv_memBaseAddr,
              l_memBaseAddr1,
              iv_mirrorBaseAddr,

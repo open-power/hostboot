@@ -3160,6 +3160,7 @@ fapi2::ReturnCode populateNcuRingBarScomReg( void* i_pChipHomer, CONST_FAPI2_PRO
                  "Error from FAPI_ATTR_GET for attribute ATTR_PROC_NX_RNG_BAR_BASE_ADDR_OFFSET");
 
         FAPI_TRY(p9_fbc_utils_get_chip_base_address(i_procTgt,
+                 EFF_FBC_GRP_CHIP_IDS,
                  baseAddressNm0,
                  baseAddressNm1,
                  baseAddressMirror,

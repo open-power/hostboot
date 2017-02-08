@@ -142,14 +142,15 @@ fapi_try_exit:
 
 fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const p9_fbc_utils_addr_mode_t i_addr_mode,
     uint64_t& o_base_address_nm0,
     uint64_t& o_base_address_nm1,
     uint64_t& o_base_address_m,
     uint64_t& o_base_address_mmio)
 {
-    uint32_t l_fabric_system_id;
-    uint8_t l_fabric_group_id;
-    uint8_t l_fabric_chip_id;
+    uint32_t l_fabric_system_id = 0;
+    uint8_t l_fabric_group_id = 0;
+    uint8_t l_fabric_chip_id = 0;
     uint8_t l_mirror_policy;
     fapi2::buffer<uint64_t> l_base_address;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
@@ -157,19 +158,35 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
 
     FAPI_DBG("Start");
 
-    // retreive attributes which statically determine chip's position in memory map
+    // retreive attributes which statically determine chips position in memory map
+    // use effective group/chip ID attributes to program position specific address bits
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SYSTEM_ID, i_target, l_fabric_system_id),
              "Error from FAPI_ATTR_GET (ATTR_FABRIC_SYSTEM_ID)");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_GROUP_ID, i_target, l_fabric_group_id),
-             "Error from FAPI_ATTR_GET (ATTR_FABRIC_GROUP_ID)");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CHIP_ID, i_target, l_fabric_chip_id),
-             "Error from FAPI_ATTR_GET (ATTR_FABRIC_CHIP_ID)");
+
+    if (i_addr_mode == ABS_FBC_GRP_CHIP_IDS)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_GROUP_ID, i_target, l_fabric_group_id),
+                 "Error from FAPI_ATTR_GET (ATTR_FABRIC_GROUP_ID)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CHIP_ID, i_target, l_fabric_chip_id),
+                 "Error from FAPI_ATTR_GET (ATTR_FABRIC_CHIP_ID)");
+    }
+    else
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EFF_FABRIC_GROUP_ID, i_target, l_fabric_group_id),
+                 "Error from FAPI_ATTR_GET (ATTR_EFF_FABRIC_GROUP_ID)");
+
+        if (i_addr_mode == EFF_FBC_GRP_CHIP_IDS)
+        {
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EFF_FABRIC_CHIP_ID, i_target, l_fabric_chip_id),
+                     "Error from FAPI_ATTR_GET (ATTR_EFF_FABRIC_CHIP_ID)");
+        }
+    }
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY, FAPI_SYSTEM, l_mirror_policy),
              "Error from FAPI_ATTR_GET (ATTR_MEM_MIRROR_PLACEMENT_POLICY)");
 
     // apply system ID
-    // occupies one field for large system map, split into three fields for small system map
+    // occupies one field for large system map (three fields for small system map)
     l_base_address.insertFromRight < FABRIC_ADDR_LS_SYSTEM_ID_START_BIT,
                                    (FABRIC_ADDR_LS_SYSTEM_ID_END_BIT - FABRIC_ADDR_LS_SYSTEM_ID_START_BIT + 1) > (l_fabric_system_id);
 

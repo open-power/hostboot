@@ -70,6 +70,7 @@ p9_setup_bars_build_chip_info(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
     FAPI_DBG("Start");
 
     FAPI_TRY(p9_fbc_utils_get_chip_base_address(i_target,
+             EFF_FBC_GRP_CHIP_IDS,
              io_chip_info.base_address_nm[0],
              io_chip_info.base_address_nm[1],
              io_chip_info.base_address_m,

@@ -95,6 +95,7 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
 
     // determine base address of chip MMIO range
     FAPI_TRY(p9_fbc_utils_get_chip_base_address(i_target,
+             EFF_FBC_GRP_CHIP_IDS,
              l_base_addr_nm0,
              l_base_addr_nm1,
              l_base_addr_m,

@@ -55,18 +55,21 @@ enum SbeBootloaderVersion
     // Keep initial version formatted as it was originally
     INIT = 0x901,
     // Later versions use format [release:2][version:2]
-    SAB_ADDED = 0x00090002
+    SAB_ADDED = 0x00090002,
+    MMIO_BARS_ADDED = 0x00090003,
 };
 
 // Structure starts at the bootloader zero address
 struct BootloaderConfigData_t
 {
-    uint32_t version;  // Some kind of version field so we know if there is new data being added
-    uint8_t sbeBootSide;  // 0=SBE side 0, 1=SBE side 1   [ATTR_SBE_BOOT_SIDE]
-    uint8_t pnorBootSide;  // 0=PNOR side A, 1=PNOR side B  [ATTR_PNOR_BOOT_SIDE]
-    uint16_t pnorSizeMB;  // Size of PNOR in MB  [ATTR_PNOR_SIZE]
-    uint64_t blLoadSize;  // Size of Load (Exception vectors and Bootloader)
-    uint8_t secureAccessBit;
+    uint32_t version;         // bytes  4:7  Version field so we know if there is new data being added
+    uint8_t sbeBootSide;      // byte   8    0=SBE side 0, 1=SBE side 1   [ATTR_SBE_BOOT_SIDE]
+    uint8_t pnorBootSide;     // byte   9    0=PNOR side A, 1=PNOR side B  [ATTR_PNOR_BOOT_SIDE]
+    uint16_t pnorSizeMB;      // bytes 10:11 Size of PNOR in MB  [ATTR_PNOR_SIZE]
+    uint64_t blLoadSize;      // bytes 12:19 Size of Load (Exception vectors and Bootloader)
+    uint8_t secureAccessBit;  // byte  20
+    uint64_t xscomBAR;        // bytes 21:28 XSCOM MMIO BAR
+    uint64_t lpcBAR;          // bytes 29:36 LPC MMIO BAR
 };
 
 #endif
