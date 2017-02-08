@@ -948,6 +948,20 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+      <id>ATTR_WOF_TABLE_DATA</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+       WOF data from PNOR which contains WOF header data + VFRT data (vfrt header +
+       data for 8 Vdn, 21Vdd and 6 Quads)
+       Consumed by p9_pstate_parameter_block procedure
+      </description>
+      <valueType>uint8</valueType>
+      <initToZero/>
+      <array>131072</array>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
       <id>ATTR_DUMP_STOP_INFO_SUPPRESS_ERROR_TRACE</id>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       <description>
@@ -1709,6 +1723,29 @@
      <valueType>uint8</valueType>
      <initToZero/>
      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+     <id>ATTR_SYS_VFRT_STATIC_DATA_ENABLE</id>
+     <description>
+
+     Enables pstate parameter block code to use the static system vfrt data
+     Consumer: p9_pstate_parameter_block.C ->
+
+     Platform default:  OFF
+     <!--
+        @todo RTC 169662 at some point in the program, this default may be switched to
+         the opposite setting.  However, coordination needs to occur with all CIs
+         as this will enable functions that may not be modeled across the board.
+     -->
+     </description>
+     <targetType>TARGET_TYPE_SYSTEM</targetType>
+     <valueType>uint8</valueType>
+     <enum>
+        OFF = 0x00, ON = 0x01
+    </enum>
+    <initToZero/>
+    <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>
