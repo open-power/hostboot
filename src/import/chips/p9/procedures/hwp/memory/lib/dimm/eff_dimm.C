@@ -25,7 +25,7 @@
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 #include <math.h>
 
@@ -64,7 +64,7 @@ using fapi2::TARGET_TYPE_MCBIST;
 /// DA[2] QxPAR disabled
 /// DA [1:0] QxC[2:0] (Chip ID)
 ///
-enum rc08_encode : uint64_t
+enum rc08_encode
 {
     CID_START = 6,
     CID_LENGTH = 2,
@@ -115,7 +115,7 @@ enum rc0d_encode : uint8_t
 /// @brief bit encodings for RC0E
 /// From DDR4 Register v1.0
 ///
-enum rc0e_encode : uint64_t
+enum rc0e_encode
 {
     RC0E_PARITY_ENABLE_BIT = 7,
     RC0E_PARITY_ENABLE = 1,
@@ -173,6 +173,16 @@ enum lrdimm_databuffers
 {
     LRDIMM_DB01 = 0b0000,
     LRDIMM_DB02 = 0b0001
+};
+
+///
+/// @brief encoding for MSS_INVALID_FREQ so we can look up functions based on encoding
+///
+enum invalid_freq_function_encoding
+{
+    RC0A = 0x0a,
+    RC3X = 0x30,
+    BC0A = 0x0a,
 };
 
 /////////////////////////
@@ -365,6 +375,16 @@ fapi2::ReturnCode eff_dimm::dram_width()
     FAPI_TRY( iv_pDecoder->device_width(l_decoder_val), "Failed accessing device width from SPD %s", mss::c_str(iv_dimm) );
     FAPI_TRY( eff_dram_width(iv_mcs, &l_mcs_attrs[0][0]), "Failed getting EFF_DRAM_WIDTH" );
 
+    // Enforcing NIMBUS restrictions
+    FAPI_ASSERT( (l_decoder_val == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ||
+                 (l_decoder_val == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4),
+                 fapi2::MSS_INVALID_DRAM_WIDTH()
+                 .set_DRAM_WIDTH(l_decoder_val)
+                 .set_TARGET(iv_dimm),
+                 "Unsupported DRAM width with %d for target %s",
+                 l_decoder_val,
+                 mss::c_str(iv_dimm));
+
     l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_WIDTH, iv_mcs, l_mcs_attrs), "Failed setting ATTR_EFF_DRAM_WIDTH" );
 
@@ -379,7 +399,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::dram_density()
 {
-
     uint8_t l_decoder_val = 0;
     FAPI_TRY( iv_pDecoder->sdram_density(l_decoder_val), "Failed to get dram_density from SPD %s", mss::c_str(iv_dimm) );
 
@@ -480,6 +499,7 @@ fapi2::ReturnCode eff_dimm::primary_stack_type()
             break;
 
         default:
+            // SPD decoder should limit this two just two types, if we get here, there was a coding error
             FAPI_ERR("Error decoding prim_sdram_package_type");
             fapi2::Assert(false);
     };
@@ -503,6 +523,16 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::dimm_size()
 {
+    std::vector<uint32_t> l_dimm_sizes = { fapi2::ENUM_ATTR_EFF_DIMM_SIZE_4GB,
+                                           fapi2::ENUM_ATTR_EFF_DIMM_SIZE_8GB,
+                                           fapi2::ENUM_ATTR_EFF_DIMM_SIZE_16GB,
+                                           fapi2::ENUM_ATTR_EFF_DIMM_SIZE_32GB,
+                                           fapi2::ENUM_ATTR_EFF_DIMM_SIZE_64GB,
+                                           fapi2::ENUM_ATTR_EFF_DIMM_SIZE_128GB,
+                                           fapi2::ENUM_ATTR_EFF_DIMM_SIZE_256GB,
+                                           fapi2::ENUM_ATTR_EFF_DIMM_SIZE_512GB,
+                                         };
+
     // Retrieve values needed to calculate dimm size
     uint8_t l_bus_width = 0;
     uint8_t l_sdram_width = 0;
@@ -515,11 +545,39 @@ fapi2::ReturnCode eff_dimm::dimm_size()
     FAPI_TRY( iv_pDecoder->logical_ranks_per_dimm(l_logical_rank_per_dimm),
               "Failed to get logical ranks from SPD %s", mss::c_str(iv_dimm) );
 
+    // Let's sort the dimm size vector just to be super duper safe
+    std::sort( l_dimm_sizes.begin(), l_dimm_sizes.end() );
     {
+
+        // Double checking to avoid divide by zero errors
+        // If this fails, there was a problem with the check in SPD function
+        FAPI_ASSERT( l_sdram_density != 0,
+                     fapi2::MSS_BAD_SDRAM_DENSITY_DECODER()
+                     .set_DRAM_DENSITY(l_sdram_density)
+                     .set_TARGET(iv_dimm),
+                     "SPD decoder messed up and returned a 0. Should have been caught already %s",
+                     mss::c_str(iv_dimm));
+
         // Calculate dimm size
-        // Formula from SPD Spec
+        // Formula from SPD Spec (seriously, they don't have parenthesis in the spec)
         // Total = SDRAM Capacity / 8 * Primary Bus Width / SDRAM Width * Logical Ranks per DIMM
         const uint32_t l_dimm_size = (l_sdram_density * l_bus_width * l_logical_rank_per_dimm) / (8 * l_sdram_width);
+
+        FAPI_ASSERT( (std::binary_search(l_dimm_sizes.begin(), l_dimm_sizes.end(), l_dimm_size) == true),
+                     fapi2::MSS_INVALID_CALCULATED_DIMM_SIZE()
+                     .set_SDRAM_WIDTH(l_sdram_width)
+                     .set_BUS_WIDTH(l_bus_width)
+                     .set_DRAM_DENSITY(l_sdram_density)
+                     .set_LOGICAL_RANKS(l_logical_rank_per_dimm)
+                     .set_TARGET(iv_dimm),
+                     "Recieved an invalid dimm size (%d) for calculated DIMM_SIZE for target %s"
+                     "(l_sdram_density %d * l_bus_width %d * l_logical_rank_per_dimm %d) / (8 * l_sdram_width %d",
+                     l_dimm_size,
+                     mss::c_str(iv_dimm),
+                     l_sdram_width,
+                     l_bus_width,
+                     l_sdram_density,
+                     l_logical_rank_per_dimm);
 
         // Get & update MCS attribute
         uint32_t l_attrs_dimm_size[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -606,7 +664,6 @@ fapi2::ReturnCode eff_dimm::dram_trefi()
 
     {
         // Calculate refresh cycle time in nCK & set attribute
-
         std::vector<uint16_t> l_mcs_attrs_trefi(PORTS_PER_MCS, 0);
         uint64_t l_trefi_in_nck  = 0;
 
@@ -742,7 +799,7 @@ fapi2::ReturnCode eff_dimm::dram_trfc_dlr()
              l_density, iv_refresh_mode);
 
     // Calculate refresh cycle time in ps
-    FAPI_TRY( calc_trfc_dlr(iv_refresh_mode, l_density, l_trfc_dlr_in_ps), "Failed calc_trfc_dlr()" );
+    FAPI_TRY( calc_trfc_dlr(iv_dimm, iv_refresh_mode, l_density, l_trfc_dlr_in_ps), "Failed calc_trfc_dlr()" );
 
     // Calculate clock period (tCK) from selected freq from mss_freq
     FAPI_TRY( clock_period(iv_dimm, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
@@ -844,6 +901,16 @@ fapi2::ReturnCode eff_dimm::dram_dqs_time()
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_tdqs(iv_mcs, &l_attrs_dqs_time[0]) );
     FAPI_INF("SDRAM width: %d for target %s", l_dram_width, mss::c_str(iv_dimm));
+
+    // Enforcing current NIMBUS standards.
+    FAPI_ASSERT( (l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ||
+                 (l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4),
+                 fapi2::MSS_INVALID_DRAM_WIDTH()
+                 .set_DRAM_WIDTH(l_dram_width)
+                 .set_TARGET(iv_dimm),
+                 "Invalid DRAM width with %d for target %s",
+                 l_dram_width,
+                 mss::c_str(iv_dimm));
 
     // Only possible dram width are x4, x8. If x8, tdqs is available, else not available
     l_attrs_dqs_time[iv_port_index] = (l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ?
@@ -1173,7 +1240,8 @@ fapi2::ReturnCode eff_dimm::dimm_rc08()
                          fapi2::MSS_INVALID_CALCULATED_NUM_SLAVE_RANKS()
                          .set_NUM_SLAVE_RANKS(l_num_slave_ranks)
                          .set_NUM_TOTAL_RANKS(l_total_ranks)
-                         .set_NUM_MASTER_RANKS(l_master_ranks),
+                         .set_NUM_MASTER_RANKS(l_master_ranks)
+                         .set_TARGET(iv_dimm),
                          "For target %s: Invalid total_ranks %d seen with %d master ranks",
                          mss::c_str(iv_dimm),
                          l_total_ranks,
@@ -1191,7 +1259,8 @@ fapi2::ReturnCode eff_dimm::dimm_rc08()
                          fapi2::MSS_INVALID_CALCULATED_NUM_SLAVE_RANKS()
                          .set_NUM_SLAVE_RANKS(l_num_slave_ranks)
                          .set_NUM_TOTAL_RANKS(l_total_ranks)
-                         .set_NUM_MASTER_RANKS(l_master_ranks),
+                         .set_NUM_MASTER_RANKS(l_master_ranks)
+                         .set_TARGET(iv_dimm),
                          "For target %s: Invalid number of slave ranks calculated (%d) from (total_ranks %d / master %d)",
                          mss::c_str(iv_dimm),
                          l_num_slave_ranks,
@@ -1292,8 +1361,12 @@ fapi2::ReturnCode eff_dimm::dimm_rc0a()
             break;
 
         default:
-            FAPI_ERR("Invalid frequency for RC0a encoding received: %d", iv_freq);
-            return fapi2::FAPI2_RC_FALSE;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_RC()
+                         .set_FREQ(iv_freq)
+                         .set_RC_NUM(RC0A)
+                         .set_TARGET(iv_dimm),
+                         "Invalid frequency for rc0a encoding received: %d", iv_freq);
             break;
     }
 
@@ -1521,8 +1594,14 @@ fapi2::ReturnCode eff_dimm::dimm_rc3x()
             break;
 
         default:
-            FAPI_ERR("Invalid frequency for rc_3x encoding received: %d", iv_freq);
-            return fapi2::FAPI2_RC_FALSE;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_RC()
+                         .set_FREQ(iv_freq)
+                         .set_RC_NUM(RC3X)
+                         .set_TARGET(iv_dimm),
+                         "%s: Invalid frequency for RC_3X encoding received: %d",
+                         mss::c_str(iv_dimm),
+                         iv_freq);
             break;
     }
 
@@ -1854,7 +1933,7 @@ fapi2::ReturnCode eff_dimm::dram_cwl()
     FAPI_ASSERT( ((l_preamble == 0) || (l_preamble == 1)),
                  fapi2::MSS_INVALID_VPD_MT_PREAMBLE()
                  .set_VALUE(l_preamble)
-                 .set_DIMM_TARGET(iv_dimm),
+                 .set_MCA_TARGET(iv_mca),
                  "Target %s VPD_MT_PREAMBLE is invalid (not 1 or 0), value is %d",
                  mss::c_str(iv_dimm),
                  l_preamble );
@@ -1863,7 +1942,8 @@ fapi2::ReturnCode eff_dimm::dram_cwl()
     if (l_preamble == 0)
     {
         FAPI_TRY( mss::find_value_from_key( CWL_TABLE_1,
-                                            iv_freq, l_cwl),
+                                            iv_freq,
+                                            l_cwl),
                   "Failed finding CAS Write Latency (cwl), freq: %d, preamble %d",
                   iv_freq,
                   l_preamble);
@@ -1871,7 +1951,8 @@ fapi2::ReturnCode eff_dimm::dram_cwl()
     else
     {
         FAPI_TRY( mss::find_value_from_key( CWL_TABLE_2,
-                                            iv_freq, l_cwl),
+                                            iv_freq,
+                                            l_cwl),
                   "Failed finding CAS Write Latency (cwl), freq: %d, preamble %d",
                   iv_freq,
                   l_preamble);
@@ -2038,8 +2119,7 @@ fapi2::ReturnCode eff_dimm::vref_dq_train_value()
     FAPI_ASSERT(l_train_value <= JEDEC_MAX_TRAIN_VALUE,
                 fapi2::MSS_INVALID_VPD_VREF_DRAM_WR_RANGE()
                 .set_MAX(JEDEC_MAX_TRAIN_VALUE)
-                .set_VALUE(l_train_value)
-                .set_DIMM_TARGET(iv_dimm),
+                .set_VALUE(l_train_value),
                 "%s VPD DRAM VREF value out of range max 0x%02x value 0x%02x", mss::c_str(iv_dimm),
                 JEDEC_MAX_TRAIN_VALUE, l_train_value );
 
@@ -2066,7 +2146,7 @@ fapi_try_exit:
 fapi2::ReturnCode eff_dimm::vref_dq_train_enable()
 {
     // Default mode for train enable should be normal operation mode - 0x00
-
+    static constexpr uint8_t NORMAL_MODE = 0x00;
     uint8_t l_attrs_vref_dq_train_enable[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
     std::vector< uint64_t > l_ranks;
 
@@ -2076,7 +2156,7 @@ fapi2::ReturnCode eff_dimm::vref_dq_train_enable()
 
     for(const auto& l_rank : l_ranks)
     {
-        l_attrs_vref_dq_train_enable[iv_port_index][iv_dimm_index][index(l_rank)] = 0x00;
+        l_attrs_vref_dq_train_enable[iv_port_index][iv_dimm_index][index(l_rank)] = NORMAL_MODE;
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_VREF_DQ_TRAIN_ENABLE, iv_mcs, l_attrs_vref_dq_train_enable),
@@ -2214,7 +2294,6 @@ fapi2::ReturnCode eff_dimm::odt_input_buffer()
     uint8_t l_sim = 0;
     FAPI_TRY( mss::is_simulation(l_sim) );
 
-
     FAPI_TRY( eff_odt_input_buff(iv_mcs, l_attrs_odt_input_buffer.data()) );
 
     // sim vs actual hardware value
@@ -2253,7 +2332,7 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for write_dbi
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
-/// @note DBI is not supported
+/// @note write_dbi is not supported, so set to DISABLED (0)
 ///
 fapi2::ReturnCode eff_dimm::write_dbi()
 {
@@ -2353,7 +2432,7 @@ fapi2::ReturnCode eff_dimm::read_preamble()
     FAPI_ASSERT( ((l_preamble == 0) || (l_preamble == 1)),
                  fapi2::MSS_INVALID_VPD_MT_PREAMBLE()
                  .set_VALUE(l_preamble)
-                 .set_DIMM_TARGET(iv_dimm),
+                 .set_MCA_TARGET(iv_mca),
                  "Target %s VPD_MT_PREAMBLE is invalid (not 1 or 0), value is %d",
                  mss::c_str(iv_dimm),
                  l_preamble );
@@ -2387,7 +2466,7 @@ fapi2::ReturnCode eff_dimm::write_preamble()
     FAPI_ASSERT( ((l_preamble == 0) || (l_preamble == 1)),
                  fapi2::MSS_INVALID_VPD_MT_PREAMBLE()
                  .set_VALUE(l_preamble)
-                 .set_DIMM_TARGET(iv_dimm),
+                 .set_MCA_TARGET(iv_mca),
                  "Target %s VPD_MT_PREAMBLE is invalid (not 1 or 0), value is %d",
                  mss::c_str(iv_dimm),
                  l_preamble );
@@ -3003,7 +3082,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::dram_trrd_s()
 {
-
     std::vector<uint8_t> l_attrs_dram_trrd_s(PORTS_PER_MCS, 0);
     uint64_t l_trrd_s_in_nck = 0;
     uint8_t l_stack_type = 0;
@@ -3052,7 +3130,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::dram_trrd_l()
 {
-
     std::vector<uint8_t> l_attrs_dram_trrd_l(PORTS_PER_MCS, 0);
     uint64_t l_trrd_l_in_nck = 0;
     uint8_t l_stack_type = 0;
@@ -3126,7 +3203,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::dram_tfaw()
 {
-
     std::vector<uint8_t> l_attrs_dram_tfaw(PORTS_PER_MCS, 0);
     uint64_t l_tfaw_in_nck = 0;
     uint8_t l_stack_type = 0;
@@ -3305,7 +3381,16 @@ fapi2::ReturnCode eff_rdimm::dram_rtt_nom()
                           0 : fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_NOM_OHM240 / l_rtt_nom[mss::index(l_rank)];
 
         // Make sure it's a valid mss::index
-        fapi2::Assert( l_rtt_nom_index < RTT_NOM_MAP_SIZE);
+        FAPI_ASSERT( l_rtt_nom_index < RTT_NOM_MAP_SIZE,
+                     fapi2::MSS_INVALID_RTT_NOM_CALCULATIONS()
+                     .set_RANK(l_rank)
+                     .set_RTT_NOM_INDEX(l_rtt_nom_index)
+                     .set_RTT_NOM_FROM_VPD(l_rtt_nom[mss::index(l_rank)]),
+                     "Error calculating RTT_NOM for target %s rank %d, rtt_nom from vpd is %d, index is %d",
+                     mss::c_str(iv_dimm),
+                     l_rank,
+                     l_rtt_nom[mss::index(l_rank)],
+                     l_rtt_nom_index);
 
         // Map from RTT_NOM array to the value in the map
         l_decoder_val = rtt_nom_map[l_rtt_nom_index];
@@ -3384,8 +3469,7 @@ fapi2::ReturnCode eff_rdimm::dram_rtt_wr()
         FAPI_ASSERT( mss::find_value_from_key(l_rtt_wr_map, l_dram_rtt_wr[mss::index(l_rank)], l_encoding),
                      fapi2::MSS_INVALID_RTT_WR()
                      .set_RTT_WR(l_dram_rtt_wr[l_rank])
-                     .set_RANK(mss::index(l_rank))
-                     .set_DIMM_TARGET(iv_dimm),
+                     .set_RANK(mss::index(l_rank)),
                      "unknown RTT_WR 0x%x (%s rank %d), dynamic odt off",
                      l_dram_rtt_wr[mss::index(l_rank)],
                      mss::c_str(iv_dimm),
@@ -3531,7 +3615,7 @@ fapi2::ReturnCode eff_lrdimm::dimm_bc00()
     // Indexed by denominator. So, if RQZ is 240, and you have OHM240, then you're looking
     // for mss::index 1. So this doesn't correspond directly with the table in the JEDEC spec,
     // as that's not in "denominator order."
-    //                                   0  RQZ/1  RQZ/2  RQZ/3  RQZ/4  RQZ/5  RQZ/6  RQZ/7
+    //                                                  0  RQZ/1  RQZ/2  RQZ/3  RQZ/4  RQZ/5  RQZ/6  RQZ/7
     constexpr uint8_t rtt_nom_map[RTT_NOM_MAP_SIZE] = { 0, 0b100, 0b010, 0b110, 0b001, 0b101, 0b011, 0b111 };
 
     // Temp holders to grab attributes to then parse into value for this dimm and rank
@@ -3545,9 +3629,17 @@ fapi2::ReturnCode eff_lrdimm::dimm_bc00()
     l_rtt_nom_index = (l_rtt_nom[l_rank] == 0) ?
                       0 : fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_NOM_OHM240 / l_rtt_nom[l_rank];
 
-    // Make sure it's a valid mss::index
-    //
-    fapi2::Assert( l_rtt_nom_index < RTT_NOM_MAP_SIZE);
+    // Make sure it's a valid index
+    FAPI_ASSERT( l_rtt_nom_index < RTT_NOM_MAP_SIZE,
+                 fapi2::MSS_INVALID_RTT_NOM_CALCULATIONS()
+                 .set_RANK(l_rank)
+                 .set_RTT_NOM_INDEX(l_rtt_nom_index)
+                 .set_RTT_NOM_FROM_VPD(l_rtt_nom[mss::index(l_rank)]),
+                 "Error calculating RTT_NOM for target %s rank %d, rtt_nom from vpd is %d, index is %d",
+                 mss::c_str(iv_dimm),
+                 l_rank,
+                 l_rtt_nom[mss::index(l_rank)],
+                 l_rtt_nom_index);
 
     // Map from RTT_NOM array to the value in the map
     l_decoder_val = rtt_nom_map[l_rtt_nom_index];
@@ -3594,8 +3686,7 @@ fapi2::ReturnCode eff_lrdimm::dimm_bc01()
     FAPI_ASSERT( mss::find_value_from_key(l_rtt_wr_map, l_dram_rtt_wr[l_rank], l_encoding),
                  fapi2::MSS_INVALID_RTT_WR()
                  .set_RTT_WR(l_dram_rtt_wr[l_rank])
-                 .set_RANK(mss::index(l_rank))
-                 .set_DIMM_TARGET(iv_dimm),
+                 .set_RANK(mss::index(l_rank)),
                  "unknown RTT_WR 0x%x (%s rank %d), dynamic odt off",
                  l_dram_rtt_wr[mss::index(l_rank)],
                  mss::c_str(iv_dimm),
@@ -3968,13 +4059,14 @@ fapi2::ReturnCode eff_lrdimm::dimm_bc0a()
     };
 
     uint8_t l_attrs_dimm_bc0a[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-    FAPI_INF(" FREQ is %d enum is %d", iv_freq, fapi2::ENUM_ATTR_MSS_FREQ_MT2400);
-    FAPI_INF("%d", (iv_freq == fapi2::ENUM_ATTR_MSS_FREQ_MT2400));
+
     // Find the correct mapping from freq to encoding
     FAPI_ASSERT( mss::find_value_from_key(l_freq_map, uint64_t(iv_freq), l_encoding),
-                 fapi2::MSS_INVALID_FREQ()
-                 .set_FREQ(iv_freq),
-                 "unknown FREQ %d for %s",
+                 fapi2::MSS_INVALID_FREQ_BC()
+                 .set_FREQ(iv_freq)
+                 .set_BC_NUM(BC0A)
+                 .set_TARGET(iv_dimm),
+                 "unknown FREQ %d for %s in bc0a",
                  iv_freq,
                  mss::c_str(iv_dimm));
 
