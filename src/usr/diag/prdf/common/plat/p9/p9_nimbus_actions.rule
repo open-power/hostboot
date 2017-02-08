@@ -50,3 +50,15 @@ actionclass PcbSlaveInternalParity
     funccall("clearParityError");
 };
 
+/**
+ * Threshold 32/day (field) and 1 (mnfg). Do not predictively callout on
+ * threshold, instead just mask.
+ */
+actionclass pb_cent_hang_recovery_gte
+{
+    capture(PbCentMode);
+    calloutSelfMed;
+    threshold32pday;
+    funccall("ClearServiceCallFlag_mnfgInfo");
+};
+

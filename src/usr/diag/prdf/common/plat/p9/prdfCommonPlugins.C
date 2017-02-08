@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,6 +73,24 @@ PRDF_PLUGIN_DEFINE_NS( p9_capp, CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( p9_phb, CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( p9_mcs, CommonPlugins, ClearServiceCallFlag );
 
+/**
+ * @brief   Clear the service call flag (field and MNFG) so that thresholding
+ *          will still be done, but no visible error log committed.
+ * @param   i_chip PROC
+ * @param   i_sc   Step code data struct
+ * @returns SUCCESS always
+ */
+int32_t ClearServiceCallFlag_mnfgInfo( ExtensibleChip * i_chip,
+                                       STEP_CODE_DATA_STRUCT & i_sc )
+{
+    if ( i_sc.service_data->IsAtThreshold() )
+    {
+        i_sc.service_data->clearServiceCall();
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS(p9_nimbus, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 
 } // namespace CommonPlugins ends
 
