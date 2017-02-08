@@ -187,6 +187,8 @@ HCD_HDR_UINT32(g_ppmr_pstables_offset, 0); // Offset to PState Table
 HCD_HDR_UINT32(g_ppmr_pstables_length, 0); // Length of P State table
 HCD_HDR_UINT32(g_ppmr_pgpe_sram_img_size, 0); // PGPE Actual SRAM Image Size
 HCD_HDR_UINT32(g_ppmr_pgpe_boot_prog_code, 0 );// for debug of PGPE booting
+HCD_HDR_UINT32(g_ppmr_wof_table_offset, 0 );    // Offset to start of WOF Table
+HCD_HDR_UINT32(g_ppmr_wof_table_length, 0 );   // Length of WOF table
 HCD_HDR_PAD(0x200);
 #ifdef __ASSEMBLER__
 .endm
@@ -336,8 +338,10 @@ HCD_HDR_UINT32(g_pgpe_occ_pstables_sram_addr,   0 );        // Offset to start o
 HCD_HDR_UINT32(g_pgpe_occ_pstables_len,         0 );        // Length of OCC P-State table
 HCD_HDR_UINT32(g_pgpe_beacon_addr,              0 );        // SRAM addr where PGPE beacon is located
 HCD_HDR_UINT32(g_quad_status_addr,              0 );
-HCD_HDR_UINT32(g_wof_table_addr,                0 );
-HCD_HDR_UINT32(g_wof_table_length,              0 );
+HCD_HDR_UINT32(g_pgpe_wof_state_address,        0 );        // SRAM address where PGPE WOF State is located
+HCD_HDR_UINT32(g_pgpe_req_active_quad_address,  0 );        // SRAM address where requested quad status is located
+HCD_HDR_UINT32(g_wof_table_addr,                0 );        // SRAM address where WOF Table is Located
+HCD_HDR_UINT32(g_wof_table_length,              0 );        // WOF Table length in bytes
 #ifdef __ASSEMBLER__
 .endm
 #else
@@ -606,6 +610,8 @@ typedef struct
     uint8_t  occParmBlockReserve[OCC_PSTATE_PARAM_BLOCK_REGION_SIZE - sizeof(OCCPstateParmBlock)];
     uint8_t  pstateTable[sizeof(GeneratedPstateInfo)];  // PPMR + 144KB
     uint8_t  pstateTableReserve[PGPE_PSTATE_OUTPUT_TABLES_REGION_SIZE - sizeof(GeneratedPstateInfo)];
+    uint8_t  ppmr_reserved1[WOF_TABLE_RESERVE];
+    uint8_t  wofTableSize[OCC_WOF_TABLES_SIZE]; //WOF Tables located ar PPMR base + 768KB
 } PPMRLayout_t;
 
 /**
