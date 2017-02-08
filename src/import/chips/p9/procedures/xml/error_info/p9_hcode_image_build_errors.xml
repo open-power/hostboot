@@ -197,4 +197,28 @@
     </callout>
   </hwpError>
   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PARAM_BLOCK_SIZE_ERR</rc>
+    <description>hcode image build procedure failed due to size error P-State parameter block super struct</description>
+    <ffdc>SUPER_STRUCT_SIZE</ffdc>
+    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PARAM_WOF_TABLE_SIZE_ERR</rc>
+    <description>hcode image build procedure failed due to WOF Table exceeding permissible size limit</description>
+    <ffdc>ACTUAL_WOF_TABLE_SIZE</ffdc>
+    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+
 </hwpErrors>
