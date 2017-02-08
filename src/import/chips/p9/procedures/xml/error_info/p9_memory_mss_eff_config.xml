@@ -44,12 +44,9 @@
     </description>
     <ffdc>TEMP_REF_RANGE</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -69,6 +66,10 @@
     </description>
     <ffdc>FINE_REF_MODE</ffdc>
     <ffdc>TEMP_REF_MODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -79,11 +80,15 @@
     <ffdc>KEY</ffdc>
     <ffdc>DATA</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <target>TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>DIMM_TARGET</target>
+      <target>TARGET</target>
     </deconfigure>
   </hwpError>
 
@@ -125,12 +130,9 @@
     <ffdc>MAX</ffdc>
     <ffdc>VALUE</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -140,13 +142,14 @@
     </description>
     <ffdc>VALUE</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-  </hwpError>
+    <callout>
+      <target>MCA_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
 
   <hwpError>
     <rc>RC_MSS_INVALID_CAST_CALC_NCK</rc>
@@ -155,11 +158,27 @@
     <ffdc>NCK_NS</ffdc>
     <ffdc>CORRECTION_FACTOR</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_BAD_SDRAM_DENSITY_DECODER</rc>
+    <description>
+      SPD decoder messed up and returned a 0. Should have been caught already
+    </description>
+    <ffdc>DRAM_DENSITY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>DIMM_TARGET</target>
+      <target>TARGET</target>
     </deconfigure>
   </hwpError>
 
@@ -203,12 +222,9 @@
     <ffdc>RTT_WR</ffdc>
     <ffdc>RANK</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -223,6 +239,88 @@
     </callout>
     <deconfigure>
       <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_FREQ_BC</rc>
+    <description>
+        An invalid Freq value has been set in Buffer Control functions
+    </description>
+    <ffdc>FREQ</ffdc>
+    <ffdc>BC_NUM</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_FREQ_RC</rc>
+    <description>
+        An invalid Freq value has been set in raw card functions
+    </description>
+    <ffdc>FREQ</ffdc>
+    <ffdc>RC_NUM</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_FREQ_PASSED_IN</rc>
+    <description>
+        An invalid Freq value has been set
+    </description>
+    <ffdc>FREQ</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>TARGET</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+      <rc>RC_MSS_INVALID_SPEED_FOR_TSV</rc>
+    <description>
+        As of 2/2017 no JEDEC timing values for 2666 3DS dram stack type
+    </description>
+    <ffdc>FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
     </deconfigure>
   </hwpError>
 
@@ -267,29 +365,125 @@
     <ffdc>NUM_TOTAL_RANKS</ffdc>
     <ffdc>NUM_MASTER_RANKS</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>DIMM_TARGET</target>
+      <target>TARGET</target>
     </deconfigure>
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_INVALID_TOTAL_RANKS_FOR_3DS_DIMM</rc>
+    <rc>RC_MSS_INVALID_CALCULATED_DIMM_SIZE</rc>
     <description>
-        Somehow calculated the total (logical) ranks is greater than or equal to the number of master ranks
-        Even though the DIMM has slave ranks
+        Error calculating DIMM size
     </description>
-    <ffdc>NUM_SLAVE_RANKS</ffdc>
-    <ffdc>NUM_TOTAL_RANKS</ffdc>
-    <ffdc>NUM_MASTER_RANKS</ffdc>
+    <ffdc>SDRAM_WIDTH</ffdc>
+    <ffdc>BUS_WIDTH</ffdc>
+    <ffdc>DRAM_DENSITY</ffdc>
+    <ffdc>LOGICAL_RANKS</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <target>TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>DIMM_TARGET</target>
+      <target>TARGET</target>
     </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_TEMP_REFRESH</rc>
+    <description>
+        Incorrect Temperature Ref. Range received
+    </description>
+    <ffdc>TEMP_REFRESH_RANGE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_FINE_REFRESH</rc>
+    <description>
+        Incorrect FINE Refresh Mode received
+    </description>
+    <ffdc>REFRESH_MODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FAILED_TO_FIND_TRFC</rc>
+    <description>
+        Unable to find tRFC (ps) from map with SDRAM density key
+    </description>
+    <ffdc>SDRAM_DENSITY</ffdc>
+    <ffdc>REFRESH_MODE</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+ </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_PAGE_SIZE</rc>
+    <description>
+        Invalid page size
+    </description>
+    <ffdc>DRAM_WIDTH</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+     <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_DRAM_WIDTH</rc>
+    <description>
+        Code only supports x4 and x8 drams at this time
+    </description>
+    <ffdc>DRAM_WIDTH</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_RTT_NOM_CALCULATIONS</rc>
+    <description>
+        Calculated the rtt_nom_index into the VPD attribute incorrectly
+    </description>
+    <ffdc>RANK</ffdc>
+    <ffdc>RTT_NOM_INDEX</ffdc>
+    <ffdc>RTT_NOM_FROM_VPD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>
