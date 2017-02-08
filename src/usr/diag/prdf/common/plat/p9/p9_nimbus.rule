@@ -5109,7 +5109,7 @@ group gPBCENTFIR filter singlebit
     /** PBCENTFIR[9]
      *  pb hang_recovery_gte_level1
      */
-    (rPBCENTFIR, bit(9)) ? threshold_and_mask;
+    (rPBCENTFIR, bit(9)) ? pb_cent_hang_recovery_gte;
 
     /** PBCENTFIR[10]
      *  pb fsp checkstop
