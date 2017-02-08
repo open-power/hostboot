@@ -33,3 +33,12 @@
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
 #pull in new actions in p9_memory.act RTC 171066
+
+
+#pull in new sbe image
+echo "+++ Updating sbe image"
+sbex -t 1023244
+chmod 777 $sb/sbei/sbfw/img/*
+mkdir -p $sb/engd/href/
+cd $sb/engd/href
+mk -a -k
