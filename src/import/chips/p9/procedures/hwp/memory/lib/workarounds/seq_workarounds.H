@@ -22,3 +22,47 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file workarounds/seq_workarounds.H
+/// @brief Workarounds for the SEQ logic blocks
+/// Workarounds are very deivce specific, so there is no attempt to generalize
+/// this code in any way.
+///
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#ifndef _MSS_WORKAROUNDS_SEQ_H_
+#define _MSS_WORKAROUNDS_SEQ_H_
+
+#include <fapi2.H>
+#include <p9_mc_scom_addresses.H>
+#include <mss_attribute_accessors.H>
+
+namespace mss
+{
+
+namespace workarounds
+{
+
+namespace seq
+{
+
+///
+/// @brief ODT Config workaround
+/// For Nimbus DD1, ODT2 and ODT3 bits are swapped in each of the PHY config registers
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note This function is called during the phy scom init procedure, after the initfile is
+/// processed.
+///
+fapi2::ReturnCode odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+} // close namespace seq
+} // close namespace workarounds
+} // close namespace mss
+
+#endif
