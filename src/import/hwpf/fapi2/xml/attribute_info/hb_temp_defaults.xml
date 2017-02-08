@@ -115,7 +115,11 @@
        <!-- this setting enables to use #W static data-->
        <default>0x0</default>
      </attribute>
-
+      <attribute>
+       <id>ATTR_SYS_VFRT_STATIC_DATA_ENABLE</id>
+       <!-- this setting enables to use #W static data-->
+       <default>0x0</default>
+     </attribute>
      <attribute>
          <id>ATTR_IO_OBUS_DCCAL_FLAGS</id>
          <default>0x0</default>
