@@ -353,19 +353,22 @@ push @systemAttr,
     "SYSTEM_RESCLK_STEP_DELAY", $reqPol->{'system_resclk_step_delay'},
     #TODO RTC: 167921 Add MRW parsing code to perl scripts to populate ATTR_NEST_LEAKAGE_PERCENT
     "NEST_LEAKAGE_PERCENT", 60,
-    "TDP_RDP_CURRENT_FACTOR", $reqPol->{'tdp_rdp_current_factor'},
     "PM_SAFE_VOLTAGE_MV", $reqPol->{'pm_safe_voltage_mv'},
     "IVRM_STRENGTH_LOOKUP", $reqPol->{'ivrm_strength_lookup'},
     "IVRM_VIN_MULTIPLIER", $reqPol->{'ivrm_vin_multiplier'},
     "IVRM_VIN_MAX_MV", $reqPol->{'ivrm_vin_max_mv'},
     "IVRM_STEP_DELAY_NS", $reqPol->{'ivrm_step_delay_ns'},
     "IVRM_STABILIZATION_DELAY_NS", $reqPol->{'ivrm_stabilization_delay_ns'},
-    "SYSTEM_RESCLK_ENABLE", $reqPol->{'system_resclk_enable'},
-    "STOP4_DISABLE", $reqPol->{'stop4_disable'},
-    "STOP5_DISABLE", $reqPol->{'stop5_disable'},
-    "STOP8_DISABLE", $reqPol->{'stop8_disable'},
-    "STOP11_DISABLE", $reqPol->{'stop11_disable'},
 ];
+
+if ($reqPol->{'system_resclk_enable'} eq 'ON')
+{
+    push @systemAttr, ['SYSTEM_RESCLK_ENABLE', 1];
+}
+elsif ($reqPol->{'system_resclk_enable'} eq 'OFF')
+{
+    push @systemAttr, ['SYSTEM_RESCLK_ENABLE', 0];
+}
 
 if ($reqPol->{'mss_mrw_refresh_rate_request'} eq 'SINGLE')
 {
@@ -4163,6 +4166,10 @@ sub generate_proc
     print "    <attribute>\n";
     print "        <id>BOOT_FREQ_MHZ</id>\n";
     print "        <default>$reqPol->{'boot-frequency'}->{content}</default>\n";
+    print "    </attribute>\n";
+    print "    <attribute>\n";
+    print "        <id>TDP_RDP_CURRENT_FACTOR</id>\n";
+    print "        <default>$reqPol->{'tdp_rdp_current_factor'}</default>\n";
     print "    </attribute>\n";
 
     print "    <attribute>\n";
