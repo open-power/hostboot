@@ -46,6 +46,9 @@
 
 extern "C"
 {
+
+#define HW_IMG_RING_BUF1_SIZE 307200
+
     typedef  const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > CONST_FAPI2_PROC;
 
     /**
@@ -64,7 +67,7 @@ extern "C"
      */
     enum
     {
-        HW_IMG_RING_SIZE    =  MAX_SEEPROM_IMAGE_SIZE,
+        HW_IMG_RING_SIZE    =  HW_IMG_RING_BUF1_SIZE, //300K to accomodate WOF data
         WORK_BUF_SIZE       =  MAX_RING_BUF_SIZE,
     };
 
