@@ -2554,7 +2554,6 @@
     </description>
     <simpleType>
         <uint32_t>
-<!--TODO RTC:151649 Remove default value when data is pulled from MVPD #V -->
             <default>4800</default>
         </uint32_t>
     </simpleType>
@@ -2565,6 +2564,27 @@
         <id>ATTR_FREQ_CORE_FLOOR_MHZ</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>DPO_MIN_FREQ_PERCENT</id>
+    <description>
+        Defines a negative percentage value that is applied to
+        the ATTR_NOMINAL_FREQ_MHZ determined from MVPD #V.  It
+        is used to explicitly raise the value of MIN_FREQ_MHZ above
+        what is specified by MVPD #V data.  On FSP systems this
+        is sourced from the power_management def file.
+        Value must be between 0 and 100.
+        A value of zero indicates no override.
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -3714,8 +3734,6 @@
     </description>
     <simpleType>
         <uint32_t>
-<!--TODO RTC:151649 Remove default value when data is pulled from MVPD #V -->
-            <default>4800</default>
         </uint32_t>
     </simpleType>
     <persistency>volatile</persistency>
@@ -21297,8 +21315,6 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint32_t>
-<!--TODO RTC:151649 Remove default value when data is pulled from MVPD #V -->
-        <default>4800</default>
     </uint32_t>
   </simpleType>
   <persistency>volatile</persistency>
