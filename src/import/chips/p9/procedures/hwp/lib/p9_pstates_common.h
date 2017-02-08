@@ -267,138 +267,177 @@ typedef struct
 //
 // WOF Voltage, Frequency Ratio Tables
 //
+//VFRT calculation part
+#define SYSTEM_VERSION_FRQUENCY(VFRT)    (1000 + (16.67 * VFRT))
+#define SYSTEM_VFRT_VALUE(FREQ)          ((FREQ - 1000)/16.67)
 
-// VFRT Header
 
-typedef struct
+#define HOMER_VFRT_VALUE(FREQ,BSF)       ((BSF - FREQ)/16.67)
+#define HOMER_VERSION_FREQUENCY(VFRT,BSF) (BSF - (16.67 * VFRT))
+
+
+//VFRT Header fields
+typedef struct __attribute__((__packed__)) VFRTHeaderLayout
 {
-
-    /// Magic Number
-    ///   Set to ASCII  "VT"
+    // VFRT Magic code "VT"
     uint16_t magic_number;
 
-    /// Indicator
-    ///   Space for generation tools to be anything unique necessary to ID this
-    ///    VFRT
-    uint16_t indicator;
+    uint16_t reserved_1;
+    // 0:System type, 1:Homer type (0:3)
+    // if version 1: VFRT size is 12 row(voltage) X 11 column(freq) of size uint8_t
+    // (4:7)
+    // if version 2: VFRT size is 24 row(Voltage) X 5 column (Freq) of size uint8_t
+    uint8_t  type_version;
+    //Reserved
+    uint8_t reserved_2;
+    //Identifies the Vdn assumptions tht went in this VFRT (4:7)
+    uint8_t res_vdnId;
+    //Identifies the Vdd assumptions tht went in this VFRT (0:4)
+    //Identifies the Quad Active assumptions tht went in this VFRT (5:7)
+    uint8_t VddId_QAId;
+} VFRTHeaderLayout_t;// WOF Tables Header
 
-    union
-    {
-        uint8_t value;
-        struct
-        {
-            uint8_t type    : 4;
-            uint8_t version : 4;
-        } fields;
-    } typever;
-
-    uint8_t reserved;
-
-    union
-    {
-        uint16_t value;
-        struct
-        {
-#ifdef _BIG_ENDIAN
-            uint16_t reserved: 4;
-            uint16_t vdn_id  : 4;
-            uint16_t vdd_id  : 4;
-            uint16_t qa_id   : 4;
-#else
-            uint16_t qa_id   : 4;
-            uint16_t vdd_id  : 4;
-            uint16_t vdn_id  : 4;
-            uint16_t reserved: 4;
-#endif // _BIG_ENDIAN
-
-        } fields;
-    } ids;
-
-} VFRTHeader_t;
-
-// WOF Tables Header
-
-typedef struct
+typedef struct __attribute__((__packed__)) WofTablesHeader
 {
 
     /// Magic Number
-    ///   Set to ASCII  "VFRT___x" where x is the version of the VFRT structure
-    uint64_t magic_number;
+    ///   Set to ASCII  "WFTH___x" where x is the version of the VFRT structure
+    uint32_t magic_number;
 
-    /// VFRT Size
+    uint32_t reserved_version; // reserved:24b, version:8b
+
+    /// VFRT Block Size
     ///    Length, in bytes, of a VFRT
-    uint8_t vfrt_size;
+    uint16_t vfrt_block_size;
+
+    /// VFRT block header size
+    uint16_t vfrt_block_header_size;
 
     /// VFRT Data Size
     ///    Length, in bytes, of the data field.
-    uint8_t vfrt_data_size;
-
-    uint8_t reserved;
+    uint16_t vfrt_data_size;
 
     /// Quad Active Size
     ///    Total number of Active Quads
     uint8_t quads_active_size;
 
+    /// Core count
+    uint8_t core_count;
+
     /// Ceff Vdn Start
-    ///    CeffVdn value represented by index 0 (in percent)
-    uint8_t vdn_start;
+    ///    CeffVdn value represented by index 0 (in 0.01%)
+    uint16_t vdn_start;
 
     /// Ceff Vdn Step
-    ///    CeffVdn step value for each CeffVdn index (in percent)
-    uint8_t vdn_step;
+    ///    CeffVdn step value for each CeffVdn index (in 0.01%)
+    uint16_t vdn_step;
 
     /// Ceff Vdn Size
     ///    Number of CeffVdn indexes
-    uint8_t vdn_size;
+    uint16_t vdn_size;
 
     /// Ceff Vdd Start
-    ///    CeffVdd value represented by index 0 (in percent)
-    uint8_t vdd_start;
+    ///    CeffVdd value represented by index 0 (in 0.01%)
+    uint16_t vdd_start;
 
     /// Ceff Vdd Step
-    ///    CeffVdd step value for each CeffVdd index (in percent)
-    uint8_t vdd_step;
+    ///    CeffVdd step value for each CeffVdd index (in 0.01%)
+    uint16_t vdd_step;
 
     /// Ceff Vdd Size
     ///    Number of CeffVdd indexes
-    uint8_t vdd_size;
+    uint16_t vdd_size;
 
     /// Vratio Start
-    ///    Vratio value represented by index 0 (in percent)
-    uint8_t vratio_start;
+    ///    Vratio value represented by index 0 (in 0.01%)
+    uint16_t vratio_start;
 
     /// Vratio Step
-    ///   Vratio step value for each CeffVdd index (in percent)
-    uint8_t vratio_step;
+    ///   Vratio step value for each CeffVdd index (in 0.01%)
+    uint16_t vratio_step;
 
     /// Vratio Size
     ///    Number of Vratio indexes
-    uint8_t vratio_size;
+    uint16_t vratio_size;
 
     /// Fratio Start
-    ///    Fratio value represented by index 0 (in percent)
-    uint8_t fratio_start;
+    ///    Fratio value represented by index 0 (in 0.01%)
+    uint16_t fratio_start;
 
     /// Fratio Step
-    ///   Fratio step value for each CeffVdd index (in percent)
-    uint8_t fratio_step;
+    ///   Fratio step value for each CeffVdd index (in 0.01%)
+    uint16_t fratio_step;
 
     /// Fratio Size
     ///    Number of Fratio indexes
-    uint8_t fratio_size;
+    uint16_t fratio_size;
+
+    /// Future usage
+    uint16_t Vdn_percent[8];
+
+    ///Socket Power (in Watts) for the WOF Tables
+    uint16_t socket_power_w;
+
+    ///Nest Frequency (in MHz) used in building the WOF Tables
+    uint16_t nest_frequency_mhz;
+
+    //Core Sort Power Target Frequency (in MHz) – The #V frequency associated
+    //with the sort power target for this table set. This will be either the
+    //Nominal or
+    //Turbo #V frequency
+    uint16_t sort_power_freq_mhz;
+
+    ///Regulator Design Point Capacity (in Amps)
+    uint16_t rdp_capacity;
+
+    ///Up to 8 ASCII characters to be defined by the Table generation team to
+    //back reference table sources
+    uint64_t wof_table_source_tag;
+
+    ///Up to 16 ASCII characters as a Package designator
+    uint64_t package_name;
+
+    uint8_t reserved[6];
 
 } WofTablesHeader_t;
 
 
-// VDN
 
-// Data is provided in 12ths (eg 12 core pairs on a 24 core chip)
-#define VFRT_VRATIO_SIZE 12
+#define CEF_VDN_INDEX 8
+#define CEF_VDD_INDEX 21
+#define ACTIVE_QUADS 6
 
-// 100%/10% steps
-#define VFRT_FRATIO_SIZE 10
+// Data is provided in 1/24ths granularity with adjustments for integer
+// representation
+#define VFRT_VRATIO_SIZE 24
 
-// Holds a frequency that is 1000MHz + 16.667*VFRT_Circuit_t
+// 5 steps down from 100% is Fratio_step sizes
+#define VFRT_FRATIO_SIZE 5
+
+//System VFRT layout
+typedef struct __attribute__((__packed__)) HomerSysVFRTLayout
+{
+    VFRTHeaderLayout_t vfrtHeader;
+    uint8_t vfrt_data[VFRT_VRATIO_SIZE][VFRT_FRATIO_SIZE];
+} HomerSysVFRTLayout_t;
+
+
+
+//HOMER VFRT Layout
+typedef struct __attribute__((__packed__)) HomerVFRTLayout
+{
+    VFRTHeaderLayout_t vfrtHeader;
+    uint8_t vfrt_data[VFRT_VRATIO_SIZE][VFRT_FRATIO_SIZE];
+    uint8_t padding[128];
+} HomerVFRTLayout_t;
+
+//HOMER WOF layout
+typedef struct __attribute__((__packed__)) HomerWOFLayout
+{
+    WofTablesHeader_t wof_header_data;
+    HomerVFRTLayout_t homer_vfrt_data[CEF_VDN_INDEX][CEF_VDD_INDEX][ACTIVE_QUADS];
+} HomerWOFLayout_t;
+
 typedef uint8_t VFRT_Circuit_t;
 typedef Pstate  VFRT_Hcode_t;
 
