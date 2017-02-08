@@ -235,7 +235,10 @@ fapi_try_exit:
 template< fapi2::TargetType T >
 inline bool chip_ec_feature_mss_training_bad_bits(const fapi2::Target<T>& i_target)
 {
-    // TODO RTC:165862 - need to get the minor EC number and check that in here.
+    // TODO RTC:168964 Enable training bad bits workaround at appropriate EC levels
+    // Running dirty until we know what EC major & minor number we want to add this to.
+
+#ifdef ALWAYS_DO_TRAINING_BAD_BITS_WORKAROUND
     const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
     uint8_t l_value = 0;
     uint8_t l_do_value = 0;
@@ -251,6 +254,9 @@ fapi_try_exit:
              uint64_t(fapi2::current_err), mss::c_str(i_target));
     fapi2::Assert(false);
     return false;
+#else
+    return true;
+#endif
 }
 
 ///
