@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -163,8 +163,9 @@ extern "C"
     const uint32_t ALTD_DATA_ECC_MASK = 0xFFFFull;
 
     // ADU operation delay times for HW/sim
-    const uint32_t PROC_ADU_UTILS_ADU_HW_NS_DELAY = 100000;
-    const uint32_t PROC_ADU_UTILS_ADU_SIM_CYCLE_DELAY = 50000;
+    const uint32_t PROC_ADU_UTILS_ADU_OPER_HW_NS_DELAY = 10000;
+    const uint32_t PROC_ADU_UTILS_ADU_OPER_SIM_CYCLE_DELAY = 50000;
+    const uint32_t PROC_ADU_UTILS_ADU_STATUS_HW_NS_DELAY = 100;
     const uint32_t PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY = 20000;
 
     //---------------------------------------------------------------------------------
@@ -316,16 +317,14 @@ extern "C"
         fapi2::ReturnCode rc;
         fapi2::buffer<uint64_t> altd_cmd_reg_data(0x0);
         fapi2::buffer<uint64_t> altd_addr_reg_data(i_address);
-        fapi2::buffer<uint64_t> altd_data_reg_data(0x0);
         fapi2::buffer<uint64_t> altd_option_reg_data(0x0);
         p9_ADU_oper_flag l_myAduFlag;
         p9_ADU_oper_flag::OperationType_t l_operType;
         p9_ADU_oper_flag::Transaction_size_t l_transSize;
 
-        // Write to the altd_cmd_reg to set the fbc_locked bit
+        //this routine assumes the lock is held by the caller, preserve
+        //this locked state
         altd_cmd_reg_data.setBit<ALTD_CMD_LOCK_BIT>();
-        FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data),
-                 "Error writing the lock bit to ALTD_CMD Register");
 
         //Write the address into altd_addr_reg
         FAPI_DBG("Write PU_ALTD_ADDR_REG 0x%.16llX, Value 0x%.16llX",
@@ -600,31 +599,28 @@ extern "C"
         if (l_accessForceEccReg == true)
         {
             FAPI_TRY(fapi2::getScom(i_target, PU_FORCE_ECC_REG, force_ecc_reg_data), "Error reading the FORCE_ECC Register");
-        }
 
-        //if we want to write the itag bit set it
-        if (l_itagMode == true)
-        {
-            eccIndex++;
-            force_ecc_reg_data.setBit<ALTD_DATA_ITAG_BIT>();
-        }
+            //if we want to write the itag bit set it
+            if (l_itagMode == true)
+            {
+                eccIndex++;
+                force_ecc_reg_data.setBit<ALTD_DATA_ITAG_BIT>();
+            }
 
-        //if we want to write the ecc data get the data
-        if (l_eccMode == true)
-        {
-            force_ecc_reg_data.insertFromRight < ALTD_DATA_TX_ECC_START_BIT,
-                                               (ALTD_DATA_TX_ECC_END_BIT - ALTD_DATA_TX_ECC_START_BIT) + 1 >
-                                               ((uint64_t)i_write_data[eccIndex]);
-        }
+            //if we want to write the ecc data get the data
+            if (l_eccMode == true)
+            {
+                force_ecc_reg_data.insertFromRight < ALTD_DATA_TX_ECC_START_BIT,
+                                                   (ALTD_DATA_TX_ECC_END_BIT - ALTD_DATA_TX_ECC_START_BIT) + 1 >
+                                                   ((uint64_t)i_write_data[eccIndex]);
+            }
 
-        //if we want to overwrite the ecc data
-        if (l_overrideEccMode == true)
-        {
-            force_ecc_reg_data.setBit<ALTD_DATA_TX_ECC_OVERWRITE_BIT>();
-        }
+            //if we want to overwrite the ecc data
+            if (l_overrideEccMode == true)
+            {
+                force_ecc_reg_data.setBit<ALTD_DATA_TX_ECC_OVERWRITE_BIT>();
+            }
 
-        if (l_accessForceEccReg == true)
-        {
             FAPI_TRY(fapi2::putScom(i_target, PU_FORCE_ECC_REG, force_ecc_reg_data), "Error writing to the FORCE_ECC Register");
         }
 
@@ -643,10 +639,30 @@ extern "C"
             FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data), "Error writing to the ALTD_CMD_REG");
         }
 
-        //delay to allow time for the write to go through before we check the status
-        FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_HW_NS_DELAY,
-                              PROC_ADU_UTILS_ADU_SIM_CYCLE_DELAY),
-                 "fapiDelay error");
+        //If this is a ci operation we want to poll the status register for completion
+        if (i_aduOper.getOperationType() == p9_ADU_oper_flag::CACHE_INHIBIT)
+        {
+            bool l_busyBitStatus = true;
+
+            for (uint32_t i = 0; i < 100000; i++)
+            {
+                FAPI_TRY(p9_adu_coherent_status_check(i_target, EXIT_ON_BUSY, false,
+                                                      l_busyBitStatus),
+                         "Error from p9_adu_coherent_status_check");
+
+                //If the data done bit is set (the data transfer is done we can go write the data
+                if (!l_busyBitStatus)
+                {
+                    break;
+                }
+            }
+        }
+        else
+        {
+            //delay to allow time for the write to progress
+            FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_OPER_HW_NS_DELAY,
+                                  PROC_ADU_UTILS_ADU_OPER_SIM_CYCLE_DELAY), "fapiDelay error");
+        }
 
     fapi_try_exit:
         FAPI_DBG("Exiting...");
@@ -691,28 +707,47 @@ extern "C"
             FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data), "Error writing to the ALTD_CMD_REG");
         }
 
-        //delay to allow time for the read to go through before we get the data
-        FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_HW_NS_DELAY,
-                              PROC_ADU_UTILS_ADU_SIM_CYCLE_DELAY),
-                 "fapiDelay error");
+        //If this is a ci operation we want to poll the status register for completion
+        if (i_aduOper.getOperationType() == p9_ADU_oper_flag::CACHE_INHIBIT)
+        {
+            bool l_busyBitStatus = true;
 
+            for (uint32_t i = 0; i < 100000; i++)
+            {
+                FAPI_TRY(p9_adu_coherent_status_check(i_target, EXIT_ON_BUSY, false,
+                                                      l_busyBitStatus),
+                         "Error from p9_adu_coherent_status_check");
+
+                //If the data done bit is set (the data transfer is done we can go read the data
+                if (!l_busyBitStatus)
+                {
+                    break;
+                }
+            }
+        }
+        else
+        {
+            //delay to allow time for the read to progress
+            FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_OPER_HW_NS_DELAY,
+                                  PROC_ADU_UTILS_ADU_OPER_SIM_CYCLE_DELAY), "fapiDelay error");
+        }
 
         //if we want to include the itag and ecc data collect them before the read
         if ( l_itagMode || l_eccMode )
         {
             FAPI_TRY(fapi2::getScom(i_target, PU_FORCE_ECC_REG, force_ecc_reg_data),
                      "Error reading from the FORCE_ECC Register");
-        }
 
-        if (l_itagMode)
-        {
-            eccIndex = 9;
-            o_read_data[8] = force_ecc_reg_data.getBit<ALTD_DATA_ITAG_BIT>();
-        }
+            if (l_itagMode)
+            {
+                eccIndex = 9;
+                o_read_data[8] = force_ecc_reg_data.getBit<ALTD_DATA_ITAG_BIT>();
+            }
 
-        if (l_eccMode)
-        {
-            o_read_data[eccIndex] = (force_ecc_reg_data >> (63 - ALTD_DATA_TX_ECC_END_BIT)) & ALTD_DATA_ECC_MASK;
+            if (l_eccMode)
+            {
+                o_read_data[eccIndex] = (force_ecc_reg_data >> (63 - ALTD_DATA_TX_ECC_END_BIT)) & ALTD_DATA_ECC_MASK;
+            }
         }
 
         //read data from altd_data_reg
@@ -764,11 +799,7 @@ extern "C"
 
         fapi2::buffer<uint64_t> altd_cmd_reg_data(0x0);
 
-        FAPI_TRY(fapi2::getScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data),
-                 "Error reading from ALTD_CMD Register");
-
         //write altd_cmd_reg to clear the fbc_locked bit
-        altd_cmd_reg_data.clearBit<ALTD_CMD_LOCK_BIT>();
         FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data),
                  "Error clearing the fbc_locked bit from the ALTD_CMD Register");
 
@@ -790,6 +821,10 @@ extern "C"
 
         for (int i = 0; i < 10; i++)
         {
+            FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_STATUS_HW_NS_DELAY,
+                                  PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY),
+                     "fapiDelay error");
+
             l_statusError = false;
             // Check the ALTD_STATUS_REG
             FAPI_TRY(fapi2::getScom(i_target, PU_ALTD_STATUS_REG, l_statusReg),
@@ -843,8 +878,6 @@ extern "C"
                   l_statusReg.getBit<ALTD_STATUS_AUTOINC_ERR_BIT>()       ||
                   l_statusReg.getBit<ALTD_STATUS_COMMAND_ERR_BIT>()       ||
                   l_statusReg.getBit<ALTD_STATUS_ADDRESS_ERR_BIT>()       ||
-                  l_statusReg.getBit<ALTD_STATUS_PB_OP_HANG_ERR_BIT>()    ||
-                  l_statusReg.getBit<ALTD_STATUS_PB_DATA_HANG_ERR_BIT>()  ||
                   l_statusReg.getBit<ALTD_STATUS_PBINIT_MISSING_BIT>()    ||
                   l_statusReg.getBit<ALTD_STATUS_ECC_CE_BIT>()            ||
                   l_statusReg.getBit<ALTD_STATUS_ECC_UE_BIT>()            ||
@@ -861,10 +894,6 @@ extern "C"
             {
                 break;
             }
-
-            FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_HW_NS_DELAY,
-                                  PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY),
-                     "fapiDelay error");
         }
 
         // If error, display trace
@@ -930,6 +959,8 @@ extern "C"
         {
             FAPI_DBG("Configuring lock manipulation control data buffer to perform lock acquisition");
             lock_control.setBit(ALTD_CMD_LOCK_BIT);
+            lock_control.setBit<ALTD_CMD_RESET_FSM_BIT>();
+            lock_control.setBit<ALTD_CMD_CLEAR_STATUS_BIT>();
         }
         else
         {
@@ -985,8 +1016,8 @@ extern "C"
             }
 
             // delay to provide time for ADU lock to be released
-            FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_HW_NS_DELAY,
-                                  PROC_ADU_UTILS_ADU_SIM_CYCLE_DELAY),
+            FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_STATUS_HW_NS_DELAY,
+                                  PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY),
                      "fapiDelay error");
 
             // increment attempt count, loop again

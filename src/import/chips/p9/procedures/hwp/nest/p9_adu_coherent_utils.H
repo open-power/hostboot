@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -127,7 +127,7 @@ extern"C"
                 return iv_operType;
             }
 
-            /// @brief Set the Auto Increment option, for CI/DMA operations only.
+            /// @brief Set the Auto Increment option, for DMA operations only.
             ///
             /// @param[in] i_value     True: Enable auto inc; False: Disable
             ///
@@ -135,30 +135,16 @@ extern"C"
             ///
             inline void setAutoIncrement(bool i_value)
             {
-                if ( (iv_operType != CACHE_INHIBIT) &&
-                     (iv_operType != DMA_PARTIAL) )
-                {
-                    FAPI_ERR("WARNING: Set AUTOINC for non CI/DMA operation, Operation type 0x%.8X",
-                             iv_operType);
-                }
-
                 iv_autoInc = i_value;
                 return;
             }
 
-            /// @brief Get the Auto Increment setting, for CI/DMA operations only.
+            /// @brief Get the Auto Increment setting, for DMA operations only.
             ///
             /// @return iv_autoInc.
             ///
             inline const bool getAutoIncrement(void)
             {
-                if ( (iv_operType != CACHE_INHIBIT) &&
-                     (iv_operType != DMA_PARTIAL) )
-                {
-                    FAPI_ERR("WARNING: AUTOINC value is invalid for non CI/DMA operation, Operation type 0x%.8X",
-                             iv_operType);
-                }
-
                 return iv_autoInc;
             }
 

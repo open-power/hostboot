@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,8 @@
 //------------------------------------------------------------------------------
 // Constants
 //------------------------------------------------------------------------------
-const uint32_t P9_HTM_START_MAX_STATUS_POLLS = 100;  // Status time-out
+// Status time-out
+const uint32_t P9_HTM_START_MAX_STATUS_POLLS = 100;
 
 ///
 /// See doxygen in p9_htm_adu_ctrl.H

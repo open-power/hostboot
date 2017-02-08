@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -177,7 +177,7 @@ fapi2::ReturnCode p9_build_smp_adu_check_status(
             l_ffdc_reg_data[i].resize(64 * l_targets_to_collect.size());
         }
 
-//        // extract FFDC data
+        // extract FFDC data
 //        for (std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>*>::iterator t_iter = l_targets_to_collect.begin();
 //             t_iter != l_targets_to_collect.end();
 //             t_iter++)

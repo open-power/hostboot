@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -125,7 +125,7 @@ extern "C"
 // Shift positions
     const uint64_t FLAG_ADU_TTYPE_SHIFT  = 29;
     const uint64_t FLAG_LOCK_TRIES_SHIFT = 16;
-    const uint64_t FLAG_ADU_SIZE_SHIFT  = 20;
+    const uint64_t FLAG_ADU_SIZE_SHIFT   = 20;
 
 } //extern "C"
 
