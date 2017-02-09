@@ -27,6 +27,7 @@
 #include <sys/mmio.h>
 #include <kernel/console.H>
 #include <errno.h>
+#include <kernel/bltohbdatamgr.H>
 
 namespace SECUREBOOT
 {
@@ -39,10 +40,13 @@ namespace SECUREBOOT
     // header
     void Header::loadSecurely()
     {
-        //@TODO  RTC 167581
-        // When RTC 166848 is available, pull in real header
+        const void* const pSecureHeader = g_BlToHbDataManager.getHbbHeader();
 
-        return;
+        // Fatal code bug if called with nullptr pointer
+        assert(pSecureHeader != nullptr,
+            "BUG! In Header::loadSecurely(), expected valid address for base "
+            "image header in secure mode, but got nullptr.");
+        _set(pSecureHeader);
     }
 
     // @TODO RTC 168021 Converge on a single method of reading the secure
@@ -50,16 +54,27 @@ namespace SECUREBOOT
     void Header::setNonSecurely(
         const void* const i_pHeader)
     {
+        // Fatal code bug if called with nullptr pointer
+        assert(i_pHeader != nullptr,"BUG! In Header::setNonSecurely(), "
+            "caller passed a nullptr header address.");
+        _set(i_pHeader);
+    }
+
+    void Header::_set(
+        const void* const i_pHeader)
+    {
         // Fatal code bug if already loaded
-        assert(iv_data == nullptr,"BUG! In setNonSecurely(), "
+        assert(iv_data == nullptr,"BUG! In Header::_set(), "
             "a cached header is already present.");
 
         // Fatal code bug if called with nullptr pointer
-        assert(i_pHeader != nullptr,"BUG! In setNonSecurely(), "
-            "caller passed a nullptr header.");
+        assert(i_pHeader != nullptr,"BUG! In Header::_set(), "
+            "caller passed a nullptr header address.");
 
-        iv_data = calloc(1,PAGESIZE);
-        memcpy(iv_data,i_pHeader,PAGE_SIZE);
+        void* pData = malloc(PAGESIZE);
+        memcpy(pData,i_pHeader,PAGE_SIZE);
+        iv_data = pData;
+        pData = nullptr;
     }
 
     void Header::getHeader(
@@ -69,31 +84,5 @@ namespace SECUREBOOT
         assert(iv_data!=nullptr,"BUG! In getHeader(), "
             "header is not present.");
         o_pHeader = iv_data;
-    }
-
-    void Header::_calcSecureLoadAddr(
-        const void*& o_pCode) const
-    {
-        //@TODO  RTC 167581
-        // When RTC 166848 is available, pull in real header
-
-        // Determine the secure address where the HBB image was loaded by SBE.
-        // Regardless of whether security is enabled or not, HBB always ends up
-        // at the secure load address (which corresponds to the HRMOR).
-        //
-        // Zero is purposefully not mapped into the VMM tables, so we
-        // can't use that for the virtual-to-real translation.  Since
-        // this object is in the base (HBB) image, PA = HRMOR | EA, so we can
-        // use PA - EA to find the HRMOR.
-        const void* hrmor = reinterpret_cast<const void*>(
-            mm_virt_to_phys(
-                const_cast<SECUREBOOT::Header*>(this)) -
-                    reinterpret_cast<uint64_t>(this));
-
-        // HRMOR lookup should never fail
-        assert(   reinterpret_cast<uint64_t>(hrmor)
-               != static_cast<uint64_t>(-EFAULT));
-
-        o_pCode = hrmor;
     }
 }
