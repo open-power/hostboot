@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2004,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -31,15 +33,24 @@
 namespace PRDF
 {
 
-#define PRDF_ASSERT(x) { if(!(x)) { prdfAssert(#x,__FILE__,__LINE__); } }
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
 
-/**
- * @brief PRD implementation of assert().
- * @param i_exp  A boolean expression.
- * @param i_file The file calling assert().
- * @param i_line The line of the file in which assert() is called.
- */
-void prdfAssert( const char * i_exp, const char * i_file, int i_line );
+    // Special case for error log parsing code.
+    #define PRDF_ASSERT(x) (void) 0
+
+#else
+
+    #define PRDF_ASSERT(x) { if(!(x)) { prdfAssert(#x,__FILE__,__LINE__); } }
+
+    /**
+     * @brief PRD implementation of assert().
+     * @param i_exp  A boolean expression.
+     * @param i_file The file calling assert().
+     * @param i_line The line of the file in which assert() is called.
+     */
+    void prdfAssert( const char * i_exp, const char * i_file, int i_line );
+
+#endif
 
 } // end namespace PRDF
 

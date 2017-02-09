@@ -45,6 +45,8 @@
 #include <iipscr.h>
 #include <iipconst.h>
 
+#include <prdfAssert.h>
+
 namespace PRDF
 {
 /*--------------------------------------------------------------------*/

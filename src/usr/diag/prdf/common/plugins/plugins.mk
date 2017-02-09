@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -37,6 +37,7 @@ LIBRARY_OFILES += prdfMemLogParse.o
 #LIBRARY_OFILES += prdfProcLogParse.o TODO RTC 136050
 LIBRARY_OFILES += prdrErrlPluginsSupt.o
 LIBRARY_OFILES += prdfParserUtils.o
+LIBRARY_OFILES += prdfBitString.o
 
 LIBFLAGS = -Efips/lib
 

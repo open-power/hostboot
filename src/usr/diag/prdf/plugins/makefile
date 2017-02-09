@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -23,7 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 
-INCFLAGS += -I. -I.. \
+INCFLAGS += -I. -I..
 
 CFLAGS += -DPRDF_HOSTBOOT_ERRL_PLUGIN
 

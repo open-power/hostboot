@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -86,6 +86,9 @@ SOURCE_PLUGIN_DIRS += ${SRC_USR}/plugins
 # Individual source files to link.
 SOURCE_PLUGIN_FILES += ${SRC_USR}/common/rule/prdf_rule.mk
 SOURCE_PLUGIN_FILES += ${SRC_USR}/common/rule/tables.mk
+SOURCE_PLUGIN_FILES += ${SRC_USR}/common/util/prdfAssert.h
+SOURCE_PLUGIN_FILES += ${SRC_USR}/common/util/prdfBitString.C
+SOURCE_PLUGIN_FILES += ${SRC_USR}/common/util/prdfBitString.H
 SOURCE_PLUGIN_FILES += ${SRC_USR}/common/util/UtilHash.H
 SOURCE_PLUGIN_FILES += ${SRC_USR}/common/plat/mem/prdfMemConst.H
 SOURCE_PLUGIN_FILES += ${SRC_USR}/common/iipconst.h
