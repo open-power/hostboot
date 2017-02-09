@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -106,6 +106,32 @@ class mcTraits<fapi2::TARGET_TYPE_MCA>
             BANK_GROUP0_BIT_MAP_LEN = MCS_PORT02_MCP0XLT2_BANK_GROUP0_BIT_MAP_LEN,
             BANK_GROUP1_BIT_MAP = MCS_PORT02_MCP0XLT2_BANK_GROUP1_BIT_MAP,
             BANK_GROUP1_BIT_MAP_LEN = MCS_PORT02_MCP0XLT2_BANK_GROUP1_BIT_MAP_LEN,
+            RUNTIME_N_SLOT = MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT,
+            RUNTIME_N_SLOT_LEN = MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT_LEN,
+            RUNTIME_N_PORT = MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT,
+            RUNTIME_N_PORT_LEN = MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT_LEN,
+            RUNTIME_M = MCA_MBA_FARB3Q_CFG_NM_M,
+            RUNTIME_M_LEN = MCA_MBA_FARB3Q_CFG_NM_M_LEN,
+            EMERGENCY_N = MCA_MBA_FARB4Q_EMERGENCY_N,
+            EMERGENCY_N_LEN = MCA_MBA_FARB4Q_EMERGENCY_N_LEN,
+            EMERGENCY_M = MCA_MBA_FARB4Q_EMERGENCY_M,
+            EMERGENCY_M_LEN = MCA_MBA_FARB4Q_EMERGENCY_M_LEN,
+            CFG_STR_ENABLE = MCA_MBASTR0Q_CFG_STR_ENABLE,
+
+            MIN_DOMAIN_REDUCTION_ENABLE = MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_ENABLE,
+            MIN_MAX_DOMAINS_ENABLE = MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS_ENABLE,
+            MIN_DOMAIN_REDUCTION_TIME = MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_TIME,
+            MIN_DOMAIN_REDUCTION_TIME_LEN = MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_TIME_LEN,
+            ENTER_STR_TIME_POS = MCA_MBASTR0Q_CFG_ENTER_STR_TIME,
+            ENTER_STR_TIME_LEN = MCA_MBASTR0Q_CFG_ENTER_STR_TIME_LEN,
+            RAS_WEIGHT_LEN = MCA_MBA_FARB3Q_CFG_NM_RAS_WEIGHT_LEN,
+            RAS_WEIGHT_POS = MCA_MBA_FARB3Q_CFG_NM_RAS_WEIGHT,
+            CAS_WEIGHT_LEN = MCA_MBA_FARB3Q_CFG_NM_CAS_WEIGHT_LEN,
+            CAS_WEIGHT_POS = MCA_MBA_FARB3Q_CFG_NM_CAS_WEIGHT,
+            NM_CHANGE_AFTER_SYNC = MCA_MBA_FARB3Q_CFG_NM_CHANGE_AFTER_SYNC,
+            CFG_MIN_MAX_DOMAINS = MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS,
+            CFG_MIN_MAX_DOMAINS_LEN = MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS_LEN,
+
         };
 
 };
@@ -148,6 +174,10 @@ enum
     BANK_GROUP_0_BIT_INDEX = 29,
     BANK_GROUP_1_BIT_INDEX = 30,
     MAX_TRANSLATIONS = 31,
+    PD_AND_STR = fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR,
+    PD_AND_STR_CLK_STOP = fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP,
+    POWER_DOWN = fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_POWER_DOWN,
+    PD_AND_STR_OFF = fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_OFF,
 };
 
 namespace mc

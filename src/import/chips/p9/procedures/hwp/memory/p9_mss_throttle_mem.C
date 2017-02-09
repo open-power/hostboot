@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <fapi2.H>
 #include <p9_mss_throttle_mem.H>
 #include <mss.H>
+#include <lib/mc/mc.H>
 using fapi2::TARGET_TYPE_MCS;
 
 extern "C"
@@ -49,6 +50,7 @@ extern "C"
 ///
     fapi2::ReturnCode p9_mss_throttle_mem( const fapi2::Target<TARGET_TYPE_MCS>& i_target )
     {
+        typedef  mss::mcTraits<fapi2::TARGET_TYPE_MCA> TT;
         FAPI_INF("Start throttle mem");
 
         for (const auto& l_mca : mss::find_targets<fapi2::TARGET_TYPE_MCA> (i_target))
@@ -64,11 +66,10 @@ extern "C"
             fapi2::buffer<uint64_t> l_data;
             FAPI_TRY(mss::getScom(l_mca, MCA_MBA_FARB3Q, l_data));
 
-            l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT, MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT_LEN>(l_runtime_slot);
-            l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT, MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT_LEN>(l_runtime_port);
+            l_data.insertFromRight<TT::RUNTIME_N_SLOT, TT::RUNTIME_N_SLOT_LEN>(l_runtime_slot);
+            l_data.insertFromRight<TT::RUNTIME_N_PORT, TT::RUNTIME_N_PORT_LEN>(l_runtime_port);
 
             FAPI_TRY( mss::putScom(l_mca, MCA_MBA_FARB3Q, l_data) );
-
         }
 
         FAPI_INF("End throttle mem");

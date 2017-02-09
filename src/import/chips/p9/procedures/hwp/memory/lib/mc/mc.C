@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,11 +63,14 @@ enum throttle_enums
     NM_RAS_WEIGHT = 0b000,
     NM_CAS_WEIGHT = 0b001,
 
-    CHANGE_AFTER_SYNC = 0b1,
+    CHANGE_AFTER_SYNC_ON = 0b1,
+    CHANGE_AFTER_SYNC_OFF = 0b0,
 
     MAXALL_MINALL = 0b000,
+
     //wait 16 refresh intervals of idle before powering down all ranks
     MIN_DOMAIN_REDUCTION_TIME = 0x10,
+
     //wait 64 refresh intervals of idle before going into STR on all ranks
     ENTER_STR_TIME = 0x40
 };
@@ -80,21 +83,37 @@ enum throttle_enums
 ///
 fapi2::ReturnCode set_pwr_cntrl_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
+    typedef mss::mcTraits<fapi2::TARGET_TYPE_MCA> TT;
     uint8_t l_pwr_cntrl = 0;
     fapi2::buffer<uint64_t> l_data;
 
     FAPI_TRY(mrw_power_control_requested(l_pwr_cntrl));
     FAPI_TRY(mss::getScom(i_target, MCA_MBARPC0Q, l_data));
 
-    l_data.insertFromRight<MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS, MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS_LEN>(MAXALL_MINALL);
+    l_data.insertFromRight<TT::CFG_MIN_MAX_DOMAINS, TT::CFG_MIN_MAX_DOMAINS_LEN>(MAXALL_MINALL);
 
     //Write data if PWR_CNTRL_REQUESTED includes power down
-    l_data.writeBit<MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_ENABLE>
-    ((l_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR) ||
-     (l_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_POWER_DOWN));
+    switch (l_pwr_cntrl)
+    {
+        case PD_AND_STR:
+        case POWER_DOWN:
+        case PD_AND_STR_CLK_STOP:
+            l_data.setBit<TT::MIN_DOMAIN_REDUCTION_ENABLE>();
+            break;
+
+        case PD_AND_STR_OFF:
+            l_data.clearBit<TT::MIN_DOMAIN_REDUCTION_ENABLE>();
+            break;
+
+        default:
+            // Chief system engineer would reaally have to mess up here since _OFF is 0
+            FAPI_ERR("ATTR_MSS_MRW_POWER_CONTROL_REQUESTED not set correctly in MRW");
+            fapi2::Assert(false);
+            break;
+    }
 
     //Set the MIN_DOMAIN_REDUCTION time
-    l_data.insertFromRight<MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_TIME, MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_TIME_LEN>
+    l_data.insertFromRight<TT::MIN_DOMAIN_REDUCTION_TIME, TT::MIN_DOMAIN_REDUCTION_TIME_LEN>
     (MIN_DOMAIN_REDUCTION_TIME);
 
     FAPI_TRY(mss::putScom(i_target, MCA_MBARPC0Q, l_data) );
@@ -113,6 +132,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode set_str_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
+    typedef mss::mcTraits<fapi2::TARGET_TYPE_MCA> TT;
     uint8_t l_str_enable = 0;
     fapi2::buffer<uint64_t> l_data;
 
@@ -120,11 +140,29 @@ fapi2::ReturnCode set_str_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_tar
     FAPI_TRY(mss::getScom(i_target, MCA_MBASTR0Q, l_data));
 
     //Write bit if STR should be enabled
-    l_data.writeBit<MCA_MBASTR0Q_CFG_STR_ENABLE>
-    ((l_str_enable == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_STR) ||
-     (l_str_enable == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR));
+    switch (l_str_enable)
+    {
+        case PD_AND_STR:
+        case PD_AND_STR_CLK_STOP:
+            l_data.setBit<TT::CFG_STR_ENABLE>();
+            break;
 
-    l_data.insertFromRight<MCA_MBASTR0Q_CFG_ENTER_STR_TIME, MCA_MBASTR0Q_CFG_ENTER_STR_TIME_LEN>(ENTER_STR_TIME);
+        case POWER_DOWN:
+        case PD_AND_STR_OFF:
+            l_data.clearBit<TT::CFG_STR_ENABLE>();
+            break;
+
+        default:
+            // System engineer would reaally have to mess up here since _OFF is 0
+            FAPI_ERR("ATTR_MSS_MRW_POWER_CONTROL_REQUESTED not set correctly in MRW");
+            fapi2::Assert(false);
+            break;
+    }
+
+    // MCA_MBASTR0Q_CFG_DIS_CLK_IN_STR:  Set to 1 for PD_AND_STR_CLK_STOP, otherwise clear the bit
+    l_data.writeBit<MCA_MBASTR0Q_CFG_DIS_CLK_IN_STR>(l_str_enable == PD_AND_STR_CLK_STOP);
+
+    l_data.insertFromRight<TT::ENTER_STR_TIME_POS, TT::ENTER_STR_TIME_LEN>(ENTER_STR_TIME);
 
     FAPI_TRY(mss::putScom(i_target, MCA_MBASTR0Q, l_data) );
 
@@ -140,8 +178,11 @@ fapi_try_exit:
 /// @return fapi2::fapi2_rc_success if ok
 /// @note sets MCA_MBA_FARB3Q
 ///
+
 fapi2::ReturnCode set_nm_support (const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
+    typedef mss::mcTraits<fapi2::TARGET_TYPE_MCA> TT;
+
     uint16_t l_run_slot = 0;
     uint16_t l_run_port = 0;
     uint32_t l_throttle_denominator = 0;
@@ -159,12 +200,15 @@ fapi2::ReturnCode set_nm_support (const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i
              l_throttle_denominator);
     FAPI_TRY(mss::getScom(i_target, MCA_MBA_FARB3Q, l_data));
 
-    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT, MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT_LEN>(l_run_slot);
-    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT, MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT_LEN>(l_run_port);
-    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_M, MCA_MBA_FARB3Q_CFG_NM_M_LEN>(l_throttle_denominator);
-    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_RAS_WEIGHT, MCA_MBA_FARB3Q_CFG_NM_RAS_WEIGHT_LEN>(NM_RAS_WEIGHT);
-    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_CAS_WEIGHT, MCA_MBA_FARB3Q_CFG_NM_CAS_WEIGHT_LEN>(NM_CAS_WEIGHT);
-    l_data.writeBit<MCA_MBA_FARB3Q_CFG_NM_CHANGE_AFTER_SYNC>(CHANGE_AFTER_SYNC);
+    l_data.insertFromRight<TT::RUNTIME_N_SLOT, TT::RUNTIME_N_SLOT_LEN>(l_run_slot);
+    l_data.insertFromRight<TT::RUNTIME_N_PORT, TT::RUNTIME_N_PORT_LEN>(l_run_port);
+    l_data.insertFromRight<TT::RUNTIME_M, TT::RUNTIME_M_LEN>(l_throttle_denominator);
+    l_data.insertFromRight<TT::RAS_WEIGHT_POS, TT::RAS_WEIGHT_LEN>(NM_RAS_WEIGHT);
+    l_data.insertFromRight<TT::CAS_WEIGHT_POS, TT::CAS_WEIGHT_LEN>(NM_CAS_WEIGHT);
+
+    // If set, changes to cfg_nm_n_per_slot, cfg_nm_n_per_port, cfg_nm_m, min_max_domains will only be applied after a pc_sync command is seen
+    // Set to disable permanently due to hardware design bug (HW403028) that won't be changed
+    l_data.writeBit<TT::NM_CHANGE_AFTER_SYNC>(CHANGE_AFTER_SYNC_OFF);
 
     FAPI_TRY(mss::putScom(i_target, MCA_MBA_FARB3Q, l_data) );
 
@@ -179,9 +223,12 @@ fapi_try_exit:
 /// @param[in] i_target the mca target
 /// @return fapi2::fapi2_rc_success if ok
 /// @note sets MCA_MBA_FARB4Q
+/// @note used to set throttle window (N throttles  / M clocks)
 ///
 fapi2::ReturnCode set_safemode_throttles(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
+    typedef mss::mcTraits<fapi2::TARGET_TYPE_MCA> TT;
+
     fapi2::buffer<uint64_t> l_data;
     uint16_t l_throttle_per_slot = 0;
     uint32_t l_throttle_denominator = 0;
@@ -190,8 +237,8 @@ fapi2::ReturnCode set_safemode_throttles(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY(mss::mrw_safemode_mem_throttled_n_commands_per_port(l_throttle_per_slot) );
     FAPI_TRY(mss::getScom(i_target, MCA_MBA_FARB4Q, l_data) );
 
-    l_data.insertFromRight<MCA_MBA_FARB4Q_EMERGENCY_M, MCA_MBA_FARB4Q_EMERGENCY_M_LEN>(l_throttle_denominator);
-    l_data.insertFromRight<MCA_MBA_FARB4Q_EMERGENCY_N, MCA_MBA_FARB4Q_EMERGENCY_N_LEN>(l_throttle_per_slot);
+    l_data.insertFromRight<TT::EMERGENCY_M, TT::EMERGENCY_M_LEN>(l_throttle_denominator);
+    l_data.insertFromRight<TT::EMERGENCY_N, TT::EMERGENCY_N_LEN>(l_throttle_per_slot);
     FAPI_TRY(mss::putScom(i_target, MCA_MBA_FARB4Q, l_data) );
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -210,6 +257,8 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode set_runtime_throttles_to_safe(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
+    typedef mss::mcTraits<fapi2::TARGET_TYPE_MCA> TT;
+
     fapi2::buffer<uint64_t> l_data;
     uint16_t l_throttle_per_port = 0;
     uint32_t l_throttle_denominator = 0;
@@ -219,9 +268,9 @@ fapi2::ReturnCode set_runtime_throttles_to_safe(const fapi2::Target<fapi2::TARGE
     FAPI_TRY(mss::getScom(i_target, MCA_MBA_FARB3Q, l_data) );
 
     //Same value for both throttles
-    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT, MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT_LEN>(l_throttle_per_port);
-    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT, MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT_LEN>(l_throttle_per_port);
-    l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_M, MCA_MBA_FARB3Q_CFG_NM_M_LEN>(l_throttle_denominator);
+    l_data.insertFromRight<TT::RUNTIME_N_SLOT, TT::RUNTIME_N_SLOT_LEN>(l_throttle_per_port);
+    l_data.insertFromRight<TT::RUNTIME_N_PORT, TT::RUNTIME_N_PORT_LEN>(l_throttle_per_port);
+    l_data.insertFromRight<TT::RUNTIME_M, TT::RUNTIME_M_LEN>(l_throttle_denominator);
 
     FAPI_TRY(mss::putScom(i_target, MCA_MBA_FARB3Q, l_data) );
     return fapi2::FAPI2_RC_SUCCESS;
