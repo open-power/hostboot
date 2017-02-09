@@ -616,12 +616,12 @@ group gMCBISTFIR filter singlebit, cs_root_cause
     /** MCBISTFIR[18]
      *  INTERNAL_SCOM_ERROR
      */
-    (rMCBISTFIR, bit(18)) ? threshold_and_mask;
+    (rMCBISTFIR, bit(18)) ? defaultMaskedError;
 
     /** MCBISTFIR[19]
      *  INTERNAL_SCOM_ERROR_CLONE
      */
-    (rMCBISTFIR, bit(19)) ? threshold_and_mask;
+    (rMCBISTFIR, bit(19)) ? defaultMaskedError;
 
 };
 

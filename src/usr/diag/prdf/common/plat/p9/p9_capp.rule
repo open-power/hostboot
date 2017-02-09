@@ -157,7 +157,7 @@ group gCXAFIR filter singlebit, cs_root_cause
     /** CXAFIR[4]
      *  CXA Timer expired recoverable error
      */
-    (rCXAFIR, bit(4)) ? defaultMaskedError;
+    (rCXAFIR, bit(4)) ? level2_th_1; # NIMBUS_10
 
     /** CXAFIR[5]
      *  Recovery sequencer hang detection
@@ -167,12 +167,12 @@ group gCXAFIR filter singlebit, cs_root_cause
     /** CXAFIR[6]
      *  XPT saw UE on PB data
      */
-    (rCXAFIR, bit(6)) ? defaultMaskedError;
+    (rCXAFIR, bit(6)) ? level2_th_1; # NIMBUS_10
 
     /** CXAFIR[7]
      *  XPT saw SUE on PB data
      */
-    (rCXAFIR, bit(7)) ? defaultMaskedError;
+    (rCXAFIR, bit(7)) ? level2_th_1; # NIMBUS_10
 
     /** CXAFIR[8]
      *  Correctable error on Snooper array.
@@ -190,7 +190,7 @@ group gCXAFIR filter singlebit, cs_root_cause
     (rCXAFIR, bit(10)) ? self_th_1;
 
     /** CXAFIR[11]
-     *  Illegal LPC BAR access Masked for DD1
+     *  Illegal LPC BAR access
      */
     (rCXAFIR, bit(11)) ? defaultMaskedError;
 
@@ -202,7 +202,7 @@ group gCXAFIR filter singlebit, cs_root_cause
     /** CXAFIR[13]
      *  Recoverable errors detected in Master
      */
-    (rCXAFIR, bit(13)) ? defaultMaskedError;
+    (rCXAFIR, bit(13)) ? level2_th_1; # NIMBUS_10
 
     /** CXAFIR[14]
      *  spare
@@ -280,19 +280,19 @@ group gCXAFIR filter singlebit, cs_root_cause
     (rCXAFIR, bit(28)) ? defaultMaskedError;
 
     /** CXAFIR[29]
-     *  CXA: PB Addr Error detected by APC
+     *  CXA: PB Addr Error detected by APC on load
      */
     (rCXAFIR, bit(29)) ? level2_th_1;
 
     /** CXAFIR[30]
-     *  CXA PB Addr Err detected by APC
+     *  CXA PB Addr Error detected by APC on store
      */
     (rCXAFIR, bit(30)) ? level2_th_1;
 
     /** CXAFIR[31]
      *  CXA: PPHB0 or PHB1 i linkdown
      */
-    (rCXAFIR, bit(31)) ? defaultMaskedError;
+    (rCXAFIR, bit(31)) ? level2_th_1; # NIMBUS_10
 
     /** CXAFIR[32]
      *  APC ack_dead or ack_ed_dead
@@ -322,7 +322,7 @@ group gCXAFIR filter singlebit, cs_root_cause
     /** CXAFIR[37]
      *  CXA: TLBI Timeout error.
      */
-    (rCXAFIR, bit(37)) ? defaultMaskedError;
+    (rCXAFIR, bit(37)) ? level2_th_1; # NIMBUS_10
 
     /** CXAFIR[38]
      *  CXA: TLBI seq_err.
@@ -362,12 +362,12 @@ group gCXAFIR filter singlebit, cs_root_cause
     /** CXAFIR[45]
      *  Command_queue_UE
      */
-    (rCXAFIR, bit(45)) ? self_th_1;
+    (rCXAFIR, bit(45)) ? self_th_1; # NIMBUS_10
 
     /** CXAFIR[46]
      *  PSL credit timeout error
      */
-    (rCXAFIR, bit(46)) ? defaultMaskedError;
+    (rCXAFIR, bit(46)) ? level2_th_1; # NIMBUS_10
 
     /** CXAFIR[47]
      *  spare

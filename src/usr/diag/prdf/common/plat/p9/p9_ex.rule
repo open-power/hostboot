@@ -246,7 +246,7 @@ rule rL2FIR
     L2FIR & ~L2FIR_MASK & ~L2FIR_ACT0 &  L2FIR_ACT1;
 };
 
-group gL2FIR filter singlebit, secondarybits( 0, 6 ), cs_root_cause
+group gL2FIR filter singlebit, cs_root_cause
 {
     /** L2FIR[0]
      *  L2 cache read CE
@@ -442,7 +442,7 @@ rule rNCUFIR
     NCUFIR & ~NCUFIR_MASK & ~NCUFIR_ACT0 &  NCUFIR_ACT1;
 };
 
-group gNCUFIR filter singlebit, cs_root_cause
+group gNCUFIR filter singlebit, cs_root_cause( 8 )
 {
     /** NCUFIR[0]
      *  NCU store queue control error
@@ -455,7 +455,7 @@ group gNCUFIR filter singlebit, cs_root_cause
     (rNCUFIR, bit(1)) ? level2_M_self_L_th_1;
 
     /** NCUFIR[2]
-     *  TL or  SLBIEG illegal fields from core.
+     *  TL or SLBIEG illegal fields from core.
      */
     (rNCUFIR, bit(2)) ? level2_M_self_L_th_1;
 
@@ -583,7 +583,7 @@ rule rL3FIR
     L3FIR & ~L3FIR_MASK & ~L3FIR_ACT0 &  L3FIR_ACT1;
 };
 
-group gL3FIR filter singlebit, secondarybits( 4, 13 ), cs_root_cause
+group gL3FIR filter singlebit, cs_root_cause
 {
     /** L3FIR[0]
      *  L3_RDDSP_SEGR_LCO_ALL_MEM_UNAVAIL_ERR
@@ -676,7 +676,7 @@ group gL3FIR filter singlebit, secondarybits( 4, 13 ), cs_root_cause
     (rL3FIR, bit(18)) ? defaultMaskedError;
 
     /** L3FIR[19]
-     *  reserved
+     *  Invalid LRU count error
      */
     (rL3FIR, bit(19)) ? defaultMaskedError;
 
