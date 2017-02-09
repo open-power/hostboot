@@ -1,0 +1,265 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/centaur/procedures/xml/error_info/p9c_memory_mss_termination_control_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!-- -->
+<!-- @file memory_mss_termination_control.xml -->
+<!-- @brief Error xml for termination control -->
+<!-- -->
+<!-- *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com> -->
+<!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 1 -->
+<!-- *HWP Consumed by: FSP:HB -->
+<!-- -->
+
+<hwpErrors>
+<hwpError>
+  <rc>RC_CEN_CONFIG_DRV_IMP_INVALID_INPUT</rc>
+  <description>
+    The config_drv_imp utility function received a bad parameter
+  </description>
+  <ffdc>PORT_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_CONFIG_RCV_IMP_INVALID_INPUT</rc>
+  <description>
+    The config_rcv_imp utility function received a bad parameter
+  </description>
+  <ffdc>PORT_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_CONFIG_SLEW_RATE_INVALID_INPUT</rc>
+  <description>
+    The config_slew_rate utility function received a bad parameter
+  </description>
+  <ffdc>PORT_PARAM</ffdc>
+  <ffdc>SLEW_TYPE_PARAM</ffdc>
+  <ffdc>SLEW_IMP_PARAM</ffdc>
+  <ffdc>SLEW_RATE_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_CONFIG_WR_DRAM_VREF_INVALID_INPUT</rc>
+  <description>
+    The config_wr_dram_vref utility function received a bad parameter
+  </description>
+  <ffdc>PORT_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_CONFIG_RD_CEN_VREF_INVALID_INPUT</rc>
+  <description>
+    The config_rd_cen_vref utility function received a bad parameter
+  </description>
+  <ffdc>PORT_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_MSS_SLEW_CAL_INVALID_DRAM_GEN</rc>
+  <description>
+    mss_slew_cal found an invalid DRAM type in ATTR_EFF_DRAM_GEN (not DDR3/4)
+  </description>
+  <ffdc>DRAM_GEN</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_MSS_SLEW_CAL_INVALID_FREQ</rc>
+  <description>
+    mss_slew_cal found a zero frequency in ATTR_MSS_FREQ
+  </description>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<registerFfdc>
+  <id>REG_FFDC_MSS_SLEW_CAL_FAILURE_PORT0</id>
+  <scomRegister>CEN_MBA_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P0_ADR0</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P0_ADR1</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P0_ADR2</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P0_ADR3</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_DP18_IO_TX_CONFIG0_P0_0</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_DP18_IO_TX_CONFIG0_P0_1</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_DP18_IO_TX_CONFIG0_P0_2</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_DP18_IO_TX_CONFIG0_P0_3</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_DP18_IO_TX_CONFIG0_P0_4</scomRegister>
+</registerFfdc>
+
+<registerFfdc>
+  <id>REG_FFDC_MSS_SLEW_CAL_FAILURE_PORT1</id>
+  <scomRegister>CEN_MBA_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P1_ADR0</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P1_ADR1</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P1_ADR2</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P1_ADR3</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_DP18_IO_TX_CONFIG0_P1_0</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_DP18_IO_TX_CONFIG0_P1_1</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_DP18_IO_TX_CONFIG0_P1_2</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_DP18_IO_TX_CONFIG0_P1_3</scomRegister>
+  <scomRegister>CEN_MBA_DDRPHY_DP18_IO_TX_CONFIG0_P1_4</scomRegister>
+</registerFfdc>
+
+<hwpError>
+  <rc>RC_CEN_MSS_SLEW_CAL_TIMEOUT_PORT0</rc>
+  <description>
+      mss_slew_cal found slew calibration timeout on MBA port 0
+  </description>
+  <ffdc>DATA_ADR</ffdc>
+  <ffdc>IMP</ffdc>
+  <ffdc>SLEW</ffdc>
+  <ffdc>STAT_REG</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_SLEW_CAL_FAILURE_PORT0</id>
+    <target>MBA_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MBA</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>MBA_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>MBA_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>MBA_IN_ERROR</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_MSS_SLEW_CAL_TIMEOUT_PORT1</rc>
+  <description>
+      mss_slew_cal found slew calibration timeout on MBA port 1
+  </description>
+  <ffdc>DATA_ADR</ffdc>
+  <ffdc>IMP</ffdc>
+  <ffdc>SLEW</ffdc>
+  <ffdc>STAT_REG</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_SLEW_CAL_FAILURE_PORT1</id>
+    <target>MBA_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MBA</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>MBA_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>MBA_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>MBA_IN_ERROR</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_MSS_SLEW_CAL_ERROR_PORT0</rc>
+  <description>
+      mss_slew_cal found slew calibration error on MBA port 0
+  </description>
+  <ffdc>DATA_ADR</ffdc>
+  <ffdc>IMP</ffdc>
+  <ffdc>SLEW</ffdc>
+  <ffdc>STAT_REG</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_SLEW_CAL_FAILURE_PORT0</id>
+    <target>MBA_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MBA</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>MBA_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>MBA_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>MBA_IN_ERROR</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_MSS_SLEW_CAL_ERROR_PORT1</rc>
+  <description>
+      mss_slew_cal found slew calibration error on MBA port 1
+  </description>
+  <ffdc>DATA_ADR</ffdc>
+  <ffdc>IMP</ffdc>
+  <ffdc>SLEW</ffdc>
+  <ffdc>STAT_REG</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_SLEW_CAL_FAILURE_PORT1</id>
+    <target>MBA_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MBA</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>MBA_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>MBA_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>MBA_IN_ERROR</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_MSS_IMP_INPUT_ERROR</rc>
+  <!-- TODO Remove when all HWPs using it are using their own Error XML file -->
+  <description>Impedance is invalid for driver/receiver type.</description>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+</hwpErrors>
