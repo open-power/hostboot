@@ -39,7 +39,7 @@
     #include <endian.h>
 #endif
 
-#include "p9_stop_section_defines.H"
+#include "p9_hcd_memmap_base.H"
 
 #ifdef __FAPI_2_
     #include <fapi2.H>
@@ -51,6 +51,12 @@ extern "C" {
 namespace stopImageSection
 {
 #endif
+
+enum
+{
+    MAX_SPR_RESTORE_INST = 0x08,
+    SIZE_PER_SPR_RESTORE_INST = ((4 * sizeof(uint8_t)) / sizeof(uint32_t)),
+};
 
 typedef struct
 {
@@ -64,8 +70,8 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t threadArea[THREAD_AREA_SIZE];
-    uint8_t coreArea[CORE_SPR_SECTN_SIZE];
+    uint8_t threadArea[CORE_RESTORE_THREAD_AREA_SIZE];
+    uint8_t coreArea[CORE_RESTORE_CORE_AREA_SIZE];
 } SprRestoreArea_t;
 
 /**
@@ -76,10 +82,10 @@ typedef struct
 typedef struct
 {
     uint8_t occ_host_sgpe_area[ TWO_MB ];  // CPU restore area starts at an offset of 2MB from chip HOMER
-    uint8_t interrruptHandler[INTERRUPT_HANDLER_SIZE];
+    uint8_t interrruptHandler[SELF_RESTORE_INT_SIZE];
     uint8_t threadLauncher[THREAD_LAUNCHER_SIZE];
-    SprRestoreArea_t coreThreadRestore[MAX_CORE_ID_SUPPORTED + 1][MAX_THREAD_ID_SUPPORTED + 1];
-    uint8_t reserve[(ONE_KB * ONE_KB) - SPR_RESTORE_PER_CHIP];
+    SprRestoreArea_t coreThreadRestore[MAX_CORES_PER_CHIP][MAX_THREADS_PER_CORE];
+    uint8_t reserve[(ONE_KB * ONE_KB) - SELF_RESTORE_SIZE_TOTAL];
 } HomerSection_t;
 
 /**
@@ -121,15 +127,15 @@ enum
 
 #define CORE_ID_SCOM_START(io_image,\
                            i_chipletId) \
-((ScomEntry_t*)(((uint8_t*)(io_image))+ CORE_SCOM_SECTN_START +\
+((ScomEntry_t*)(((uint8_t*)(io_image)) + CORE_SCOM_RESTORE_HOMER_OFFSET +\
                 ((i_chipletId - CORE_CHIPLET_ID_MIN) * \
-                 SCOM_SIZE_PER_CORE)));
+                 CORE_SCOM_RESTORE_SIZE_PER_CORE)));
 
 #define CACHE_SECTN_START(io_image,\
                           i_chipletId) \
-((StopCacheSection_t *)(((uint8_t *)(io_image))+CACHE_SCOM_SECTN_START \
-                        + ( i_chipletId - CACHE_CHIPLET_ID_MIN ) * \
-                        SCOM_SIZE_PER_CACHE_CHIPLET ));
+((StopCacheSection_t *)(((uint8_t *)(io_image)) + QUAD_SCOM_RESTORE_HOMER_OFFSET +\
+                        ((i_chipletId - CACHE_CHIPLET_ID_MIN) * \
+                         QUAD_SCOM_RESTORE_SIZE_PER_QUAD)));
 #ifdef __cplusplus
 }  // extern "C"
 

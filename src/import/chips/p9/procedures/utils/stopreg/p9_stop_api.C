@@ -325,7 +325,8 @@ StopReturnCode_t lookUpSprInImage( uint32_t* i_pThreadSectLoc,
                                    void** io_pSprEntryLoc )
 {
     StopReturnCode_t l_rc = STOP_SAVE_FAIL;
-    uint32_t temp = i_isCoreReg ? CORE_SPR_SECTN_SIZE : THREAD_SECTN_SIZE;
+    uint32_t temp = i_isCoreReg ? uint32_t(CORE_RESTORE_CORE_AREA_SIZE) :
+                    uint32_t(CORE_RESTORE_THREAD_AREA_SIZE);
     uint32_t* i_threadSectEnd = i_pThreadSectLoc + temp;
     uint32_t bctr_inst = SWIZZLE_4_BYTE(BLR_INST);
     *io_pSprEntryLoc = NULL;
@@ -967,7 +968,7 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
 
                 if( P9_STOP_SECTION_CORE_SCOM ==  i_section )
                 {
-                    memset( pScomEntry, 0x00, SCOM_SIZE_PER_CORE );
+                    memset( pScomEntry, 0x00, CORE_SCOM_RESTORE_SIZE_PER_CORE );
                 }
 
                 break;

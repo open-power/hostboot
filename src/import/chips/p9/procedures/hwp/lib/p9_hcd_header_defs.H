@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,8 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file p9_occ_sram_defs.H
-/// @brief Constants defining the layout of the OCC SRAM
+/// @file  p9_hcd_header_defs.H
+/// @brief defines header constants based on file types
 ///
 /// This header contains those cpp manifest constants required for processing
 /// the linker scripts used to generate OCC code images.  As these are used
@@ -32,11 +32,12 @@
 /// into a namespace. Prefixing these with the region name is the attempt
 /// to make these globally unique when this header is included in C++ code.
 ///
-//  *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
-//  *HWP FW Owner: Prem Jha <premjha2@in.ibm.com>
-//  *HWP Team: PM
-//  *HWP Level: 2
-//  *HWP Consumed by: PM
+//  *HWP HWP Owner:        David Du   <daviddu@us.ibm.com>
+//  *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
+//  *HWP FW Owner:         Prem Jha <premjha2@in.ibm.com>
+//  *HWP Team:             PM
+//  *HWP Level:            2
+//  *HWP Consumed by:      PM
 //
 
 #ifndef __HCD_HEADER_DEFS_H__
@@ -103,54 +104,49 @@
      .endm
 // *INDENT-ON*
 
-#undef CONST_UINT8_T
-#undef CONST_UINT32_T
-#undef CONST_UINT64_T
-
-#define CONST_UINT8_T(name, expr)  .set name, expr
-#define CONST_UINT16_T(name, expr) .set name, expr
-#define CONST_UINT32_T(name, expr) .set name, expr
-#define CONST_UINT64_T(name, expr) .set name, expr
-
 #define ULL(x) x
+#define HCD_CONST(name, expr)   .set name, expr;
+#define HCD_CONST64(name, expr) .set name, expr;
 
 #define HCD_HDR_UINT64(symbol, value) hcd_header_uint64 symbol value
 #define HCD_HDR_UINT32(symbol, value) hcd_header_uint32 symbol value
 #define HCD_HDR_UINT16(symbol, value) hcd_header_uint16 symbol value
 #define HCD_HDR_UINT8(symbol, value)  hcd_header_uint8  symbol value
 #define HCD_HDR_UINT8_VEC(symbol, number, value)  hcd_header_uint8_vec  symbol number value
-
-#define HCD_HDR_ATTN(symbol, number)  hcd_header_attn   symbol number
+#define HCD_HDR_ATTN(symbol, number)  hcd_header_attn symbol number
 #define HCD_HDR_ATTN_PAD(align)       hcd_header_attn_pad align
 #define HCD_HDR_PAD(align)            hcd_header_pad      align
-#define HCD_MAGIC_NUMBER(symbol, value)  .set symbol, value
 
-#else  // __ASSEMBLER__
+#else // NOT __ASSEMBLER__
 
-#undef CONST_UINT8_T
-#undef CONST_UINT32_T
-#undef CONST_UINT64_T
+#ifdef __LINKERSCRIPT__
 
-#define CONST_UINT8_T(name, expr) static const uint8_t name = expr;
-#define CONST_UINT16_T(name, expr) static const uint16_t name = expr;
-#define CONST_UINT32_T(name, expr) static const uint32_t name = expr;
-#define CONST_UINT64_T(name, expr) static const uint64_t name = expr;
+    #define ULL(x) x
+    #define POUND_DEFINE #define
+    #define HCD_CONST(name, expr)   POUND_DEFINE name expr
+    #define HCD_CONST64(name, expr) POUND_DEFINE name expr
 
-#define ULL(x) x##ull
+#else
 
-#define HCD_HDR_UINT64(symbol, value) uint64_t symbol
-#define HCD_HDR_UINT32(symbol, value) uint32_t symbol
-#define HCD_HDR_UINT16(symbol, value) uint16_t symbol
-#define HCD_HDR_UINT8(symbol, value)  uint8_t  symbol
-#define HCD_HDR_UINT8_VEC(symbol, number, value)  uint8_t symbol[number]
-#define HCD_HDR_ATTN(symbol, number)  uint32_t symbol[number]
-#define HCD_HDR_ATTN_PAD(align)
-#define HCD_HDR_PAD(align)
-#define HCD_MAGIC_NUMBER(symbol, value) static const uint64_t symbol = value
+    #define ULL(x) x##ull
+    #define HCD_CONST(name, expr)   enum { name = expr };
+    #define HCD_CONST64(name, expr) enum { name = expr };
 
+    #define HCD_HDR_UINT64(symbol, value) uint64_t symbol
+    #define HCD_HDR_UINT32(symbol, value) uint32_t symbol
+    #define HCD_HDR_UINT16(symbol, value) uint16_t symbol
+    #define HCD_HDR_UINT8(symbol, value)  uint8_t  symbol
+    #define HCD_HDR_UINT8_VEC(symbol, number, value) uint8_t  symbol[number]
+    #define HCD_HDR_ATTN(symbol, number)  uint32_t symbol[number]
+    #define HCD_HDR_ATTN_PAD(align)
+    #define HCD_HDR_PAD(align)
+
+#endif // __LINKERSCRIPT__
 #endif // __ASSEMBLER__
+
+// Stringification
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-#endif  // __HCD_HEADER_DEFS_H__
+#endif // __HCD_HEADER_DEFS_H__
