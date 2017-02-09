@@ -155,6 +155,10 @@
         <id>SYSTEM_RESCLK_STEP_DELAY</id>
         <default>0x32</default>
     </attribute>
+    <attribute>
+        <id>PROC_FABRIC_X_BUS_WIDTH</id>
+        <default>4_BYTE</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->

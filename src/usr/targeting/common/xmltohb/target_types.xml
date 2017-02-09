@@ -602,7 +602,6 @@
     <attribute><id>ISTEP_PAUSE_CONFIG</id></attribute>
     <attribute><id>FRU_ID</id></attribute>
     <attribute><id>BMC_FRU_ID</id></attribute>
-    <attribute><id>MRW_NEST_CAPABLE_FREQUENCIES_SYS</id></attribute>
     <attribute><id>PROC_REFCLOCK_RCVR_TERM</id></attribute>
     <attribute><id>PCI_REFCLOCK_RCVR_TERM</id></attribute>
     <attribute><id>MIN_FREQ_MHZ</id></attribute>
@@ -621,7 +620,6 @@
     <attribute><id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id></attribute>
     <attribute><id>PROC_EPS_TABLE_TYPE</id></attribute>
     <attribute><id>PROC_FABRIC_PUMP_MODE</id></attribute>
-    <attribute><id>PROC_X_BUS_WIDTH</id></attribute>
     <attribute><id>X_EREPAIR_THRESHOLD_FIELD</id></attribute>
     <attribute><id>A_EREPAIR_THRESHOLD_FIELD</id></attribute>
     <attribute><id>DMI_EREPAIR_THRESHOLD_FIELD</id></attribute>
