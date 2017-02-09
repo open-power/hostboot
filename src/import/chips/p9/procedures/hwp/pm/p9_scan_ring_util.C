@@ -188,7 +188,7 @@ RingBucket::RingBucket( PlatId i_plat, uint8_t* i_pRingStart, RingDebugMode_t i_
             { ex_l3_fure_1,             0,  0 },
         };
 
-        RingProfile l_quadSpecRings[TEMP_MAX_QUAD_SPEC_RINGS * MAX_CACHE_CHIPLET] =
+        RingProfile l_quadSpecRings[TEMP_MAX_QUAD_SPEC_RINGS * MAX_QUADS_PER_CHIP] =
         {
             { eq_repr,              0x10  },
             { ex_l3_repr,           0x10  },
@@ -257,7 +257,7 @@ RingBucket::RingBucket( PlatId i_plat, uint8_t* i_pRingStart, RingDebugMode_t i_
             iv_cmnRingMap[ringIndex] = l_quadCmnRings[ringIndex];
         }
 
-        for( ringIndex = 0; ringIndex < ( EQ::g_eqData.iv_num_instance_rings_scan_addrs * MAX_CACHE_CHIPLET );
+        for( ringIndex = 0; ringIndex < ( EQ::g_eqData.iv_num_instance_rings_scan_addrs * MAX_QUADS_PER_CHIP );
              ringIndex++ )
         {
             iv_instRingMap[ringIndex] = l_quadSpecRings[ringIndex];
