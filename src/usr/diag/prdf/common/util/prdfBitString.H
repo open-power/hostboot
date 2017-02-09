@@ -30,9 +30,7 @@
  *  @brief BitString and BitStringBuffer class declarations
  */
 
-#if !defined(PRDF_TYPES_H)
 #include <prdf_types.h>
-#endif
 
 #if defined(ESW_SIM_COMPILE)
 #define _USE_IOSTREAMS_
@@ -43,8 +41,6 @@
   #include <iomanip>
 #endif
 
-#include <prdfAssert.h>
-
 namespace PRDF
 {
 
@@ -53,15 +49,6 @@ class BitStringBuffer;
 /** This type is used to take advantage of the most efficient memory reference
  *  size for a specific CPU architecture. */
 typedef uint32_t CPU_WORD;
-
-/** Size of a CPU_WORD */
-constexpr uint32_t CPU_WORD_SIZE = sizeof(CPU_WORD);
-
-/** Bit length of a CPU_WORD */
-constexpr uint32_t CPU_WORD_BIT_LEN = CPU_WORD_SIZE * 8;
-
-/** A CPU_WORD with all of the bits set to 1. */
-constexpr CPU_WORD CPU_WORD_MASK = static_cast<CPU_WORD>(-1);
 
 //##############################################################################
 //                             BitString class
@@ -99,6 +86,14 @@ constexpr CPU_WORD CPU_WORD_MASK = static_cast<CPU_WORD>(-1);
  */
 class BitString
 {
+  public: // constants
+
+    /** Bit length of a CPU_WORD */
+    static const uint32_t CPU_WORD_BIT_LEN;
+
+    /** A CPU_WORD with all of the bits set to 1 */
+    static const CPU_WORD CPU_WORD_MASK;
+
   public: // functions
 
     /**

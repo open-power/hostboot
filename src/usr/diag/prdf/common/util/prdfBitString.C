@@ -27,11 +27,9 @@
  *  @brief BitString and BitStringBuffer class Definitions
  */
 
-#define PRDFBITSTRING_CPP
-
 #include <prdfBitString.H>
 
-#undef PRDFBITSTRING_CPP
+#include <prdfAssert.h>
 
 #include <algorithm>
 
@@ -41,6 +39,12 @@ namespace PRDF
 //##############################################################################
 //                             BitString class
 //##############################################################################
+
+const uint32_t BitString::CPU_WORD_BIT_LEN = sizeof(CPU_WORD) * 8;
+
+const CPU_WORD BitString::CPU_WORD_MASK = static_cast<CPU_WORD>(-1);
+
+//------------------------------------------------------------------------------
 
 CPU_WORD BitString::getField( uint32_t i_pos, uint32_t i_len ) const
 {
@@ -465,7 +469,7 @@ void BitStringBuffer::initBuffer()
 std::ostream & operator<<(std::ostream & out,
                           const BitString & bit_string )
 {
-  const uint32_t bit_field_length = CPU_WORD_BIT_LEN;
+  const uint32_t bit_field_length = BitString::CPU_WORD_BIT_LEN;
   out << std::hex;
   for(uint32_t pos = 0; pos < bit_string.getBitLen(); pos += bit_field_length)
   {
