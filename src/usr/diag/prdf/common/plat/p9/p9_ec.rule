@@ -593,7 +593,7 @@ group gCOREFIR filter singlebit, cs_root_cause
     (rCOREFIR, bit(57)) ? self_th_1;
 
     /** COREFIR[58]
-     *  Core chiplet error causing checkstop
+     *  Other Core System Checkstop
      */
     (rCOREFIR, bit(58)) ? self_th_1;
 

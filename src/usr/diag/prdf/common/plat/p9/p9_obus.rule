@@ -690,7 +690,7 @@ group gIOOLFIR filter singlebit, cs_root_cause
     /** IOOLFIR[55]
      *  link1 uncorrectable array error
      */
-    (rIOOLFIR, bit(55)) ? defaultMaskedError;
+    (rIOOLFIR, bit(55)) ? self_th_32perDay;
 
     /** IOOLFIR[56]
      *  link0 training failed

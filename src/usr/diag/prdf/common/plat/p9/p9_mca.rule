@@ -219,7 +219,7 @@ rule rMCACALFIR
     MCACALFIR & ~MCACALFIR_MASK &  MCACALFIR_ACT0 &  MCACALFIR_ACT1;
 };
 
-group gMCACALFIR filter singlebit, cs_root_cause
+group gMCACALFIR filter singlebit, cs_root_cause( 13 )
 {
     /** MCACALFIR[0]
      *  A MBA recoverable error has occurred.
@@ -229,7 +229,7 @@ group gMCACALFIR filter singlebit, cs_root_cause
     /** MCACALFIR[1]
      *  MBA Nonrecoverable Error
      */
-    (rMCACALFIR, bit(1)) ? defaultMaskedError;
+    (rMCACALFIR, bit(1)) ? self_th_1;
 
     /** MCACALFIR[2]
      *  Excessive refreshes to a single rank.
@@ -599,12 +599,12 @@ group gMCAECCFIR filter singlebit, cs_root_cause( 14 )
     /** MCAECCFIR[62]
      *  INTERNAL_SCOM_ERROR
      */
-    (rMCAECCFIR, bit(62)) ? threshold_and_mask;
+    (rMCAECCFIR, bit(62)) ? defaultMaskedError;
 
     /** MCAECCFIR[63]
      *  INTERNAL_SCOM_ERROR_COPY
      */
-    (rMCAECCFIR, bit(63)) ? threshold_and_mask;
+    (rMCAECCFIR, bit(63)) ? defaultMaskedError;
 
 };
 
@@ -635,7 +635,7 @@ group gDDRPHYFIR filter singlebit, cs_root_cause
     /** DDRPHYFIR[56]
      *  DDRPHY Parity errors
      */
-    (rDDRPHYFIR, bit(56)) ? self_th_32perDay;
+    (rDDRPHYFIR, bit(56)) ? defaultMaskedError;
 
     /** DDRPHYFIR[57]
      *  FSM errors
@@ -661,11 +661,6 @@ group gDDRPHYFIR filter singlebit, cs_root_cause
      *  Register PE 1 bit impact
      */
     (rDDRPHYFIR, bit(61)) ? self_th_1;
-
-    /** DDRPHYFIR[62]
-     *  Register PE with no system impact
-     */
-    (rDDRPHYFIR, bit(62)) ? threshold_and_mask;
 
 };
 
