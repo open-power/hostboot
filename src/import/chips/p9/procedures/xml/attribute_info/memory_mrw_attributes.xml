@@ -250,7 +250,7 @@
         Used by OCC when exiting idle power-save mode
     </description>
     <valueType>uint8</valueType>
-    <enum>OFF = 0x00, POWER_DOWN = 0x01, STR = 0x02, PD_AND_STR = 0x03</enum>
+    <enum>OFF = 0x00, POWER_DOWN = 0x01, PD_AND_STR = 0x02, PD_AND_STR_CLK_STOP = 0x03</enum>
     <platInit/>
     <default>OFF</default>
     <initToZero/>
@@ -265,11 +265,10 @@
         Used by OCC when entering idle power-save mode
     </description>
     <valueType>uint8</valueType>
-    <enum>OFF = 0x00, POWER_DOWN = 0x01, STR = 0x02, PD_AND_STR = 0x03</enum>
+    <enum>OFF = 0x00, POWER_DOWN = 0x01, PD_AND_STR = 0x02, PD_AND_STR_CLK_STOP = 0x03</enum>
     <platInit/>
     <default>OFF</default>
     <initToZero/>
-    <!-- little comment to tell us this might change during power/thermal implemetation -->
     <mssAccessorName>mrw_idle_power_control_requested</mssAccessorName>
   </attribute>
 
@@ -285,7 +284,6 @@
     <platInit/>
     <initToZero/>
     <!-- Ineffective for Nimbus -->
-    <!-- little comment to tell us this might change during power/thermal implemetation -->
     <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_adj_enable</mssAccessorName>
   </attribute>
 
@@ -302,7 +300,6 @@
     <mssUnits>cW</mssUnits>
     <initToZero/>
     <!-- Ineffective for Nimbus -->
-    <!-- little comment to tell us this might change during power/thermal implemetation -->
     <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_ddr3</mssAccessorName>
   </attribute>
 
