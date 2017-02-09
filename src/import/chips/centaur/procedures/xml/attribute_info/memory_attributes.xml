@@ -107,7 +107,6 @@ firmware notes: none</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_FREQ_OVERRIDE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -120,8 +119,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
-
 <attribute>
     <id>ATTR_CEN_MSS_FREQ</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -136,7 +133,6 @@ firmware notes: none</description>
     <persistRuntime/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_FREQ_BIAS_PERCENTAGE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -152,7 +148,6 @@ Set by: PLL settings written by Dave Cadigan</description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -219,7 +214,6 @@ firmware notes: none</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_TYPE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -235,7 +229,6 @@ NOTE: Do not use the enum type of CDIMM.  Use the attribute EFF_DIMM_CUSTOM to t
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -269,7 +262,6 @@ firmware notes: none</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_GEN</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -283,7 +275,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -560,7 +551,6 @@ firmware notes: none</description>
 <!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_SPARE</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.   creator: mss_eff_cnfg consumer: various firmware notes: load from spd
 OBSOLETE: Use ATTR_CEN_VPD_DIMM_SPARE
 </description>
@@ -571,9 +561,7 @@ OBSOLETE: Use ATTR_CEN_VPD_DIMM_SPARE
     <odmChangeable/>
     <array> 2 2 4</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_WR_VREF</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -619,7 +607,6 @@ This is for DDR3</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_CEN_DRV_IMP_DQ_DQS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -637,9 +624,7 @@ OHM30_FFE480 = 0x48, OHM30_FFE240 = 0x38, OHM30_FFE160 = 0x28, OHM30_FFE120 = 0x
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -650,7 +635,6 @@ OHM30_FFE480 = 0x48, OHM30_FFE240 = 0x38, OHM30_FFE160 = 0x28, OHM30_FFE120 = 0x
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -725,7 +709,6 @@ This is the nominal value</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_CEN_SLEW_RATE_DQ_DQS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -746,9 +729,7 @@ SLEW_MAXV_NS = 7</enum>
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_CEN_SLEW_RATE_DQ_DQS_SCHMOO</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -759,7 +740,6 @@ SLEW_MAXV_NS = 7</enum>
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -1569,7 +1549,6 @@ firmware notes: none</description>
 
 <!--
 <attribute>
-    <id>ATTR_CEN_EFF_DIMM_DDR4_RC10</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>RDIMM Operating Speed;  Read from ATTR_CEN_MSS_FREQ; mss_eff_cnfg will set Default value - 00. Values Range from 00 to 09. No need to calculate; User can override with desired experimental value.
 creator: mss_eff_cnfg
@@ -1581,9 +1560,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_DDR4_RC11</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2063,7 +2040,6 @@ firmware notes: none</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2074,7 +2050,6 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -2560,7 +2535,6 @@ Measured in GB</description>
     <array>16 16</array>
 </attribute>
 -->
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2572,7 +2546,6 @@ This factors in functionality</description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -3152,7 +3125,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_SLEW_RATE_DATA</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3163,9 +3135,7 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <odmChangeable/>
     <array> 2 4 4</array>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_SLEW_RATE_ADR</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3176,8 +3146,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <odmChangeable/>
     <array> 2 4 4</array>
 </attribute>
--->
-
 <attribute>
     <id>ATTR_CEN_ECID</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3216,7 +3184,6 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <odmChangeable/>
 </attribute>
 -->
-
 <attribute>
     <id>ATTR_CEN_MSS_PSRO</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3225,7 +3192,6 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <writeable/>
     <odmVisable/>
 </attribute>
-
 <attribute>
     <id>ATTR_CEN_MSS_NWELL_MISPLACEMENT</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3235,7 +3201,6 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <writeable/>
     <odmVisable/>
 </attribute>
-
 <attribute>
     <id>ATTR_CEN_MSS_BLUEWATERFALL_BROKEN</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3513,7 +3478,6 @@ Will be set at an MBA level with one policy to be used</description>
     <persistRuntime/>
 </attribute>
 -->
-
 <attribute>
     <id>ATTR_CEN_MSS_INIT_STATE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
