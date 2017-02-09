@@ -337,10 +337,7 @@ void PnorRP::initDaemon()
         // runtime code.
         #ifndef __HOSTBOOT_RUNTIME
         #ifdef CONFIG_SECUREBOOT
-        //TODO: RTC 167581
-        // When RTC 166848 is available, add restrictions back in when
-        // base image header copy availability is detected
-        // if(!SECUREBOOT::enabled())
+        if(!SECUREBOOT::enabled())
         {
             // If compliant bootloader was present, it saved the HBB header
             // to a known location accessible to HBB.  Until that bootloader

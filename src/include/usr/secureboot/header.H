@@ -55,7 +55,7 @@ namespace SECUREBOOT
              */
             ~Header()
             {
-                free(iv_data);
+                free(const_cast<void*>(iv_data));
                 iv_data=NULL;
             }
 
@@ -64,8 +64,9 @@ namespace SECUREBOOT
 
             /**
              *  @brief Extracts base image (HBB) header (ECC removed) from
-             *      HBB secure load address (HRMOR - 4k) to support extending
-             *      HBB measurements to TPM in secure mode.
+             *      security area preserved across the bootloader to HBB
+             *      handoff to support extending HBB measurements to TPM in
+             *      secure mode.
              *
              *  @warning Asserts if header is already cached (code bug)
              */
@@ -82,11 +83,7 @@ namespace SECUREBOOT
              *  @param[in] i_pHeader Pointer to non-secure 4k HBB header
              *      extracted from PNOR.
              *
-             *  @warning Asserts if input pointer is NULL (code bug)
-             *  @warning Asserts if header already cached (code bug)
-             *  @warning Memory violation if buffer data is less than 4k in size
-             *      (code bug)
-             *  @warning Ignores buffer data beyond 4k in size
+             *  @warning Carries all the same warnings as _set
              */
             void setNonSecurely(
                 const void* i_pHeader);
@@ -95,16 +92,20 @@ namespace SECUREBOOT
              *  @brief Return pointer to base image (HBB) header.
              *
              *  @par Detailed Description:
-             *     When SBE first loads Hostboot, if system is in secure mode,
-             *     it copies the HBB code to the HRMOR address (aka the secure
-             *     load address) and puts the HBB header 4k in front of it.  In
-             *     non-secure mode, SBE only loads the HBB code to the HRMOR and
-             *     discards the header, leaving no trace of it in memory.  When
-             *     HBB gets control, if in secure mode, it copies its own header
-             *     from HRMOR-4k and caches it in this object.  Otherwise, if
-             *     not in secure mode, it pulls the header from PNOR and writes
-             *     it into this object.  This API then returns the addresses of
-             *     the cached header.
+             *     During boot, SBE copies the boot loader (HBBL) into the cache
+             *     and hands off control to it.  The boot loader then loads the
+             *     base image (HBB), including its secure header.  After
+             *     verifying HBB, the boot loader copies hostboot to the trusted
+             *     memory location and passes control to HBB, which locates and
+             *     preserves the secure header (among other things) before
+             *     initializing the other non-preserved areas of the cache.  In
+             *     secure mode, HBB then initializes this header object with the
+             *     preserved secure header.
+             *
+             *     In non-secure mode, Hostboot pulls the header from PNOR and
+             *     and writes it into this object.
+             *
+             *     This API then returns the addresses of the cached header.
              *
              *  @param[out] o_pHeader Pointer to HBB header
              *
@@ -116,17 +117,22 @@ namespace SECUREBOOT
         private:
 
             /**
-             *  @brief Returns base (HBB) image secure load address (the address
-             *      where SBE -always- loads hostboot regardless of security
-             *      state)
+             *  @brief Populate the base image (HBB) header (ECC removed)
+             *      to support extending HBB measurements to TPM
              *
-             *  @param[out] o_pCode Base (HBB) image secure load address
+             *  @param[in] i_pHeader Pointer to 4k HBB header
+             *
+             *  @warning Asserts if input pointer is NULL (code bug)
+             *  @warning Asserts if header already cached (code bug)
+             *  @warning Memory violation if buffer data is less than 4k in size
+             *      (code bug)
+             *  @warning Ignores buffer data beyond 4k in size
              */
-            void _calcSecureLoadAddr(
-                const void*& o_pCode) const;
+            void _set(
+                const void* i_pHeader);
 
             // Pointer to copy of the base image's (HBB's) secureboot header
-            void* iv_data;
+            const void* iv_data;
 
             // Don't allow copies / assignments
             Header(const Header& that);

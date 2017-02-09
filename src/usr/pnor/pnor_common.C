@@ -304,21 +304,26 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
             if (   o_TOC[l_secId].version == FFS_VERS_SHA512
                 && !isSecure)
             {
-                // For non-secure sections with a SHA512 header, the
-                // flash address has incremented past the header, so
-                // back up by the header size (accounting for ECC) in order
-                // to extend the header
-                auto addr = o_TOC[l_secId].flashAddr;
-                size_t headerSize =
-                    (o_TOC[l_secId].integrity == FFS_INTEG_ECC_PROTECT) ?
-                    PAGESIZE_PLUS_ECC : PAGESIZE;
-                addr -= headerSize;
-
-                l_errhdl = PNOR::extendHash(addr, headerSize,
-                                            cv_EYECATCHER[l_secId]);
-                if (l_errhdl)
+                // Never extend the base image through this path, it will be
+                // handled elsewhere
+                if(l_secId != PNOR::HB_BASE_CODE)
                 {
-                    break;
+                   // For non-secure sections with a SHA512 header, the
+                   // flash address has incremented past the header, so
+                   // back up by the header size (accounting for ECC) in order
+                   // to extend the header
+                   auto addr = o_TOC[l_secId].flashAddr;
+                   size_t headerSize =
+                       (o_TOC[l_secId].integrity == FFS_INTEG_ECC_PROTECT) ?
+                       PAGESIZE_PLUS_ECC : PAGESIZE;
+                   addr -= headerSize;
+
+                   l_errhdl = PNOR::extendHash(addr, headerSize,
+                                               cv_EYECATCHER[l_secId]);
+                   if (l_errhdl)
+                   {
+                       break;
+                   }
                 }
             }
         }
