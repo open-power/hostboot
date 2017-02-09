@@ -2388,38 +2388,6 @@
     </hwpfToHbAttrMap>
 </attribute>
 
-<enumerationType>
-    <id>PROC_X_BUS_WIDTH</id>
-    <description>Enumeration indicating the PROC_X_BUS_WIDTH</description>
-    <enumerator>
-        <name>W4BYTE</name>
-        <value>1</value>
-    </enumerator>
-    <enumerator>
-        <name>W8BYTE</name>
-        <value>2</value>
-    </enumerator>
-</enumerationType>
-
-<attribute>
-    <id>PROC_X_BUS_WIDTH</id>
-    <description>
-        System attribute.
-        Processor SMP X bus width.
-        Provided by the Machine Readable Workbook.
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <hasStringConversion/>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_X_BUS_WIDTH</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
 <attribute>
     <id>ALL_MCS_IN_INTERLEAVING_GROUP</id>
     <description>
@@ -16393,10 +16361,9 @@ Measured in GB</description>
         0x03 = PD_AND_STR
     </description>
     <simpleType>
-        <enumeration>
-            <id>MSS_MRW_POWER_CONTROL_REQUESTED</id>
+        <uint8_t>
             <default>OFF</default>
-        </enumeration>
+        </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -16444,10 +16411,9 @@ Measured in GB</description>
         0x03 = PD_AND_STR
     </description>
     <simpleType>
-        <enumeration>
-            <id>MSS_MRW_IDLE_POWER_CONTROL_REQUESTED</id>
+        <uint8_t>
             <default>OFF</default>
-        </enumeration>
+        </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -17492,41 +17458,6 @@ Measured in GB</description>
         <id>ATTR_MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
-</attribute>
-
-<enumerationType>
-    <id>MRW_NEST_CAPABLE_FREQUENCIES_SYS</id>
-    <description>Enumeration of MRW_NEST_CAPABLE_FREQUENCIES_SYS</description>
-    <enumerator>
-        <name>UNSUPPORTED_FREQ</name>
-        <value>0</value>
-    </enumerator>
-    <enumerator>
-        <name>2000_MHZ</name>
-        <value>1</value>
-    </enumerator>
-    <enumerator>
-        <name>2400_MHZ</name>
-        <value>2</value>
-    </enumerator>
-    <enumerator>
-        <name>2000_MHZ_OR_2400_MHZ</name>
-        <value>3</value>
-    </enumerator>
-</enumerationType>
-
-<attribute>
-    <id>MRW_NEST_CAPABLE_FREQUENCIES_SYS</id>
-    <description>The NEST frequencies that the system can support.  This is a bit-wise value that represents which of the possible nest frequencies are supported. : 2.0GHz, 2.4GHz, or both. New frequencies should be added in ascending order.
-    </description>
-    <simpleType>
-        <enumeration>
-            <id>MRW_NEST_CAPABLE_FREQUENCIES_SYS</id>
-            <default>UNSUPPORTED_FREQ</default>
-        </enumeration>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
 </attribute>
 
 <attribute>
@@ -19755,9 +19686,9 @@ Measured in GB</description>
       Platform default:   FALSE
     </description>
     <simpleType>
-      <enumeration>
-        <id>SYSTEM_WOF_ENABLED</id>
-      </enumeration>
+      <uint8_t>
+        <default>OFF</default>
+      </uint8_t>
     </simpleType>
     <hwpfToHbAttrMap>
         <id>ATTR_SYSTEM_WOF_ENABLED</id>
@@ -21226,6 +21157,22 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<enumerationType>
+    <id>PROC_FABRIC_A_BUS_WIDTH</id>
+    <description>
+        Enumeration indicating the PROC_FABRIC_A_BUS_WIDTH
+    </description>
+    <!--  Note: Values must match numbers from nest_attributes.xml -->
+    <enumerator>
+        <name>2_BYTE</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>4_BYTE</name>
+        <value>2</value>
+    </enumerator>
+</enumerationType>
+
 <attribute>
   <id>PROC_FABRIC_A_BUS_WIDTH</id>
   <!-- <targetType>TARGET_TYPE_SYSTEM</targetType> -->
@@ -21234,7 +21181,7 @@ Measured in GB</description>
     Provided by the MRW.
     2_BYTE = 0x01, 4_BYTE = 0x02
   </description>
-  <simpleType><uint8_t></uint8_t></simpleType>
+  <simpleType><uint8_t><default>4_BYTE</default></uint8_t></simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
   <hwpfToHbAttrMap>
@@ -21248,6 +21195,7 @@ Measured in GB</description>
     <description>
         Enumeration indicating the PROC_FABRIC_X_BUS_WIDTH
     </description>
+    <!--  Note: Values must match numbers from nest_attributes.xml -->
     <enumerator>
         <name>2_BYTE</name>
         <value>1</value>
@@ -21267,10 +21215,7 @@ Measured in GB</description>
     2_BYTE = 0x01, 4_BYTE = 0x02
   </description>
   <simpleType>
-      <enumeration>
-        <id>PROC_FABRIC_X_BUS_WIDTH</id>
-        <default>4_BYTE</default>
-      </enumeration>
+      <uint8_t><default>4_BYTE</default></uint8_t>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -21324,6 +21269,22 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<enumerationType>
+    <id>PROC_FABRIC_SMP_OPTICS_MODE</id>
+    <description>
+        Enumeration indicating the PROC_FABRIC_SMP_OPTICS_MODE
+    </description>
+    <!--  Note: Values must match numbers from nest_attributes.xml -->
+    <enumerator>
+        <name>OPTICS_IS_X_BUS</name>
+        <value>0x0</value>
+    </enumerator>
+    <enumerator>
+        <name>OPTICS_IS_A_BUS</name>
+        <value>0x1</value>
+    </enumerator>
+</enumerationType>
+
 <attribute>
   <id>PROC_FABRIC_SMP_OPTICS_MODE</id>
   <!-- <targetType>TARGET_TYPE_SYSTEM</targetType> -->
@@ -21336,7 +21297,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint8_t>
-      <default>0</default>
+      <default>OPTICS_IS_X_BUS</default>
     </uint8_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -21346,6 +21307,22 @@ Measured in GB</description>
     <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
 </attribute>
+
+<enumerationType>
+    <id>PROC_FABRIC_CAPI_MODE</id>
+    <description>
+        Enumeration indicating the PROC_FABRIC_CAPI_MODE
+    </description>
+    <!--  Note: Values must match numbers from nest_attributes.xml -->
+    <enumerator>
+        <name>OFF</name>
+        <value>0x0</value>
+    </enumerator>
+    <enumerator>
+        <name>ON</name>
+        <value>0x1</value>
+    </enumerator>
+</enumerationType>
 
 <attribute>
   <id>PROC_FABRIC_CAPI_MODE</id>
@@ -21358,7 +21335,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint8_t>
-      <default>0</default>
+      <default>OFF</default>
     </uint8_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -21368,6 +21345,19 @@ Measured in GB</description>
     <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
 </attribute>
+
+
+<enumerationType>
+    <id>PROC_FABRIC_ADDR_BAR_MODE</id>
+    <description>
+        Enumeration indicating the PROC_FABRIC_ADDR_BAR_MODE
+    </description>
+    <!--  Note: Values must match numbers from nest_attributes.xml -->
+    <enumerator>
+        <name>LARGE_SYSTEM</name>
+        <value>0x0</value>
+    </enumerator>
+</enumerationType>
 
 <attribute>
   <id>PROC_FABRIC_ADDR_BAR_MODE</id>
@@ -21379,7 +21369,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint8_t>
-      <default>0</default>
+      <default>LARGE_SYSTEM</default>
     </uint8_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -29830,11 +29820,7 @@ Measured in GB</description>
         reaction
     p9_hcd_cache procedures to power on VDMs before CME booting
     </description>
-    <simpleType>
-      <enumeration>
-        <id>VDM_ENABLE</id>
-      </enumeration>
-    </simpleType>
+    <simpleType><uint8_t></uint8_t></simpleType>
     <readable/>
     <persistency>non-volatile</persistency>
     <hwpfToHbAttrMap>

@@ -877,7 +877,12 @@ sub writeFapi2PlatAttrMacrosHeaderFileContent {
                             $fapiWriteable = 1;
                         }
 
-                        if(!exists $attribute->{simpleType}->{enumeration})
+                        if(exists $attribute->{simpleType}->{enumeration})
+                        {
+                            die "Do not use enumerations for FAPI types! ".
+                              $attribute->{id}."\n";
+                        }
+                        else
                         {
                             $typeSection .= "    static_assert(sizeof(TARGETING::ATTR_". $attribute->{id}."_type) ==
                                             sizeof(fapi2::". $fapiAttr->{id}."_Type), \"Size of attribute ATTR_". $attribute->{id}."_type is not equal to the size of ".
@@ -4349,8 +4354,8 @@ sub enumNameToValue {
 
         print STDOUT $enumeration;
 
-        fatal("dc99> Could not convert enumerator name \"$enumeratorName\"into "
-            . "enumerator value in \"$enumerationName\". enum="); #dc99
+        fatal("Could not convert enumerator name \"$enumeratorName\"into "
+            . "enumerator value in \"$enumerationName\". enum=");
     }
 
     if($enumeratorValue < 0)

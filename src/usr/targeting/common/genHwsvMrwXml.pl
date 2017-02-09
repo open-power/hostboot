@@ -258,7 +258,10 @@ push @systemAttr,
     "FREQ_X_MHZ", $reqPol->{'proc_x_frequency'}->{content},
     "PROC_EPS_TABLE_TYPE", $reqPol->{'proc_eps_table_type'},
     "PROC_FABRIC_PUMP_MODE", $reqPol->{'proc_fabric_pump_mode'},
-    "PROC_X_BUS_WIDTH", $reqPol->{'proc_x_bus_width'},
+    "PROC_FABRIC_X_BUS_WIDTH", $reqPol->{'proc_fabric_x_bus_width'},
+    "PROC_FABRIC_A_BUS_WIDTH", $reqPol->{'proc_fabric_a_bus_width'},
+    "PROC_FABRIC_SMP_OPTICS_MODE", $reqPol->{'proc_fabric_smp_optics_mode'},
+    "PROC_FABRIC_CAPI_MODE", $reqPol->{'proc_fabric_capi_mode'},
     "X_EREPAIR_THRESHOLD_FIELD", $reqPol->{'x-erepair-threshold-field'},
     "A_EREPAIR_THRESHOLD_FIELD", $reqPol->{'a-erepair-threshold-field'},
     "DMI_EREPAIR_THRESHOLD_FIELD", $reqPol->{'dmi-erepair-threshold-field'},
@@ -3072,24 +3075,6 @@ sub generate_sys
     <!-- correlate HDAT drawer number to Hostboot Instance number -->
     <attribute><id>FABRIC_TO_PHYSICAL_NODE_MAP</id>
         <default>0,255,255,255,255,255,255,255</default>
-    </attribute>
-";
-    }
-
-    # Tuletas can now support multiple nest frequencies
-    if ($sysname =~ /tuleta/)
-    {
-        print "
-    <attribute><id>MRW_NEST_CAPABLE_FREQUENCIES_SYS</id>
-        <default>2000_MHZ_OR_2400_MHZ</default>
-    </attribute>
-";
-    }
-    else
-    {
-        print "
-    <attribute><id>MRW_NEST_CAPABLE_FREQUENCIES_SYS</id>
-        <default>UNSUPPORTED_FREQ</default>
     </attribute>
 ";
     }
