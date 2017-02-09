@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,6 +78,8 @@ class rdimm_decoder_v1_0 : public dimm_module_decoder
             REGS_USED_LEN = 2,
             ROWS_OF_DRAMS_START = 4,
             ROWS_OF_DRAMS_LEN = 2,
+            REGISTER_TYPE_START = 0,
+            REGISTER_TYPE_LEN = 4,
 
             // Byte 132
             HEAT_SPREADER_CHAR_START = 1,
@@ -354,6 +356,17 @@ class rdimm_decoder_v1_1 :  public rdimm_decoder_v1_0
         /// @brief default dtor
         ///
         virtual ~rdimm_decoder_v1_1() = default;
+
+        ///
+        /// @brief Decodes register types
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note SPD Byte 131 (Bits 7~4)
+        /// @note Item JEDEC Standard No. 21-C
+        /// @note DDR4 SPD Document Release 3
+        /// @note Page 4.1.2.12.3 - 63
+        ///
+        virtual fapi2::ReturnCode register_and_buffer_type(uint8_t& o_output) override;
 
         ///
         /// @brief Decodes register output drive strength for CKE signal

@@ -53,6 +53,43 @@ namespace spd
 /////////////////////////
 
 ///
+/// @brief Decodes register type
+/// @param[out] o_output encoding from SPD
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 131 (Bits 7~4)
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 3
+/// @note Page 4.1.2.12.3 - 63
+///
+fapi2::ReturnCode rdimm_decoder_v1_1::register_and_buffer_type(uint8_t& o_output)
+{
+    constexpr size_t BYTE = 131;
+    // Extracting desired bits
+    uint8_t l_field_bits = extract_spd_field<BYTE, REGISTER_TYPE_START, REGISTER_TYPE_LEN>(iv_target, iv_spd_data);
+    FAPI_INF("Field Bits value: %d", l_field_bits);
+
+    // This checks my extracting params returns a value within bound
+    constexpr size_t RESERVED = 2;
+
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
+              (l_field_bits < RESERVED), // extract sanity check
+              BYTE,
+              l_field_bits,
+              "Failed bounds check for Register and Data Buffer Types") );
+
+    // Update output only if check passes
+    o_output = l_field_bits;
+
+    FAPI_INF("%s. Register Types: %d",
+             mss::c_str(iv_target),
+             o_output);
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
 /// @brief Decodes register output drive strength for CKE signal
 /// @param[out] o_output drive strength encoding from SPD
 /// @return FAPI2_RC_SUCCESS if okay
@@ -73,7 +110,7 @@ fapi2::ReturnCode rdimm_decoder_v1_1::cke_signal_output_driver(uint8_t& o_output
     constexpr size_t MAX_VALID_VALUE = 0b11;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
-              l_field_bits <= MAX_VALID_VALUE, // extract sanity check
+              (l_field_bits <= MAX_VALID_VALUE), // extract sanity check
               BYTE,
               l_field_bits,
               "Failed bounds check for Register Output Driver for CKE") );
@@ -109,7 +146,7 @@ fapi2::ReturnCode rdimm_decoder_v1_1::odt_signal_output_driver(uint8_t& o_output
     constexpr size_t MAX_VALID_VALUE = 0b11;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
-              l_field_bits <= MAX_VALID_VALUE, // extract sanity check
+              (l_field_bits <= MAX_VALID_VALUE), // extract sanity check
               BYTE,
               l_field_bits,
               "Failed bounds check for Register Output Driver for ODT") );
@@ -145,7 +182,7 @@ fapi2::ReturnCode rdimm_decoder_v1_1::cs_signal_output_driver(uint8_t& o_output)
     constexpr size_t MAX_VALID_VALUE = 0b11;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
-              l_field_bits <= MAX_VALID_VALUE, // extract sanity check
+              (l_field_bits <= MAX_VALID_VALUE), // extract sanity check
               BYTE,
               l_field_bits,
               "Failed bounds check for Register Output Driver for chip select") );
@@ -181,7 +218,7 @@ fapi2::ReturnCode rdimm_decoder_v1_1::b_side_clk_output_driver(uint8_t& o_output
     constexpr size_t MAX_VALID_VAL = 2;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
-              l_field_bits <= MAX_VALID_VAL, // extract sanity check
+              (l_field_bits <= MAX_VALID_VAL), // extract sanity check
               BYTE,
               l_field_bits,
               "Failed bounds check for Register Output Driver for clock (Y0,Y2)") );
@@ -217,7 +254,7 @@ fapi2::ReturnCode rdimm_decoder_v1_1::a_side_clk_output_driver(uint8_t& o_output
     constexpr size_t MAX_VALID_VAL = 2;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
-              l_field_bits <= MAX_VALID_VAL, // extract sanity check
+              (l_field_bits <= MAX_VALID_VAL), // extract sanity check
               BYTE,
               l_field_bits,
               "Failed bounds check for Register Output Driver for clock (Y1,Y3)") );
