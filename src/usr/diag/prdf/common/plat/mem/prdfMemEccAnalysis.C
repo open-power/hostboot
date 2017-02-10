@@ -49,6 +49,51 @@ namespace MemEcc
 
 //------------------------------------------------------------------------------
 
+template<>
+void calloutMemUe<TYPE_MCA>( ExtensibleChip * i_chip, const MemRank & i_rank,
+                             STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemEcc::calloutMemUe] "
+
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+
+    SCAN_COMM_REGISTER_CLASS * fir  = i_chip->getRegister( "DDRPHYFIR" );
+    int32_t l_rc = fir->Read();
+    if ( SUCCESS != l_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Read() failed on DDRPHYFIR: i_chip=0x%08x",
+                  i_chip->getHuid() );
+    }
+
+    // Check DDRPHYFIR[54:55,57:59] to determine if this UE is a side-effect.
+    if ( SUCCESS == l_rc && (0 != (fir->GetBitFieldJustified(54,6) & 0x37)) )
+    {
+        // Callout the MCA.
+        io_sc.service_data->SetCallout( i_chip->getTrgt() );
+    }
+    else
+    {
+        // Callout the rank anyway.
+        MemoryMru memmru ( i_chip->getTrgt(), i_rank,
+                           MemoryMruData::CALLOUT_RANK );
+        io_sc.service_data->SetCallout( memmru );
+    }
+
+    #undef PRDF_FUNC
+}
+
+template<>
+void calloutMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemRank & i_rank,
+                             STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    MemoryMru memmru ( i_chip->getTrgt(), i_rank, MemoryMruData::CALLOUT_RANK );
+    io_sc.service_data->SetCallout( memmru );
+}
+
+//------------------------------------------------------------------------------
+
 #ifdef __HOSTBOOT_RUNTIME
 
 template<TARGETING::TYPE T>
@@ -258,11 +303,9 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
         D db = static_cast<D>(i_chip->getDataBundle());
         db->iv_ueTable.addEntry( UE_TABLE::FETCH_UE, addr );
 
-        // Callout the rank.
+        // Make the hardware callout.
         MemRank rank = addr.getRank();
-        MemoryMru memmru ( i_chip->getTrgt(), rank,
-                           MemoryMruData::CALLOUT_RANK );
-        io_sc.service_data->SetCallout( memmru );
+        calloutMemUe<T>( i_chip, rank, io_sc );
 
         #ifdef __HOSTBOOT_RUNTIME
 

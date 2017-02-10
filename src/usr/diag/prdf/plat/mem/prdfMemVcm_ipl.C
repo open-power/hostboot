@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
 /** @file prdfMemVcm_ipl.C */
 
 // Platform includes
+#include <prdfMemEccAnalysis.H>
 #include <prdfMemVcm.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfPlatServices.H>
@@ -98,9 +99,7 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                 }
 
                 //Add the rank to the callout list (via MemoryMru)
-                MemoryMru memmru(iv_chip->getTrgt(), iv_rank,
-                        MemoryMruData::CALLOUT_RANK);
-                io_sc.service_data->SetCallout( memmru );
+                MemEcc::calloutMemUe<TYPE_MCA>( iv_chip, iv_rank, io_sc );
 
                 //Make the error log predictive
                 io_sc.service_data->setServiceCall();
@@ -159,9 +158,7 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                 }
 
                 //Add the rank to the callout list (via MemoryMru)
-                MemoryMru memmru(iv_chip->getTrgt(), iv_rank,
-                        MemoryMruData::CALLOUT_RANK);
-                io_sc.service_data->SetCallout( memmru );
+                MemEcc::calloutMemUe<TYPE_MCA>( iv_chip, iv_rank, io_sc );
 
                 //Make the error log predictive
                 io_sc.service_data->setServiceCall();

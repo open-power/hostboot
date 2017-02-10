@@ -414,7 +414,7 @@ group gMCAECCFIR filter singlebit, cs_root_cause( 14 )
     /** MCAECCFIR[17]
      *  Mainline read IUE
      */
-    (rMCAECCFIR, bit(17)) ? defaultMaskedError;
+    (rMCAECCFIR, bit(17)) ? mainline_iue_handling;
 
     /** MCAECCFIR[18]
      *  Mainline read IRCD
@@ -424,7 +424,7 @@ group gMCAECCFIR filter singlebit, cs_root_cause( 14 )
     /** MCAECCFIR[19]
      *  Mainline read IMPE
      */
-    (rMCAECCFIR, bit(19)) ? defaultMaskedError;
+    (rMCAECCFIR, bit(19)) ? mainline_impe_handling;
 
     /** MCAECCFIR[20:27]
      *  Maintenance MPE
@@ -479,7 +479,7 @@ group gMCAECCFIR filter singlebit, cs_root_cause( 14 )
     /** MCAECCFIR[37]
      *  Maintenance IUE
      */
-    (rMCAECCFIR, bit(37)) ? defaultMaskedError;
+    (rMCAECCFIR, bit(37)) ? maintenance_iue_handling;
 
     /** MCAECCFIR[38]
      *  Maintenance IRCD
@@ -489,7 +489,7 @@ group gMCAECCFIR filter singlebit, cs_root_cause( 14 )
     /** MCAECCFIR[39]
      *  Maintenance IMPE
      */
-    (rMCAECCFIR, bit(39)) ? defaultMaskedError;
+    (rMCAECCFIR, bit(39)) ? maintenance_impe_handling;
 
     /** MCAECCFIR[40]
      *  spare
@@ -625,12 +625,12 @@ group gDDRPHYFIR filter singlebit, cs_root_cause
     /** DDRPHYFIR[54]
      *  Non-recoverable FSM error
      */
-    (rDDRPHYFIR, bit(54)) ? defaultMaskedError;
+    (rDDRPHYFIR, bit(54)) ? mca_ue_algorithm_th_5perDay;
 
     /** DDRPHYFIR[55]
      *  Full bus impact Register Parity Error
      */
-    (rDDRPHYFIR, bit(55)) ? defaultMaskedError;
+    (rDDRPHYFIR, bit(55)) ? mca_ue_algorithm_th_1;
 
     /** DDRPHYFIR[56]
      *  DDRPHY Parity errors
@@ -640,17 +640,17 @@ group gDDRPHYFIR filter singlebit, cs_root_cause
     /** DDRPHYFIR[57]
      *  FSM errors
      */
-    (rDDRPHYFIR, bit(57)) ? defaultMaskedError;
+    (rDDRPHYFIR, bit(57)) ? mca_ue_algorithm_th_5perDay;
 
     /** DDRPHYFIR[58]
      *  Register parity error impacting 16 bits
      */
-    (rDDRPHYFIR, bit(58)) ? defaultMaskedError;
+    (rDDRPHYFIR, bit(58)) ? mca_ue_algorithm_th_1;
 
     /** DDRPHYFIR[59]
      *  Register parity error impacting 8 bits
      */
-    (rDDRPHYFIR, bit(59)) ? defaultMaskedError;
+    (rDDRPHYFIR, bit(59)) ? mca_ue_algorithm_th_1;
 
     /** DDRPHYFIR[60]
      *  Register PE 4 bit impact
