@@ -32,6 +32,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory
 EXTRAINCDIR += ${ROOTPATH}/src/import/
 
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory
