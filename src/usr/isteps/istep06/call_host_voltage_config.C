@@ -116,9 +116,6 @@ void* call_host_voltage_config( void *io_pArgs )
     uint32_t l_ceilingFreq = 0;     //ATTR_FREQ_CORE_CEILING_MHZ
     uint32_t l_ultraTurboFreq = 0;  //ATTR_ULTRA_TURBO_FREQ_MHZ
     uint32_t l_turboFreq = 0;       //ATTR_FREQ_CORE_MAX
-    uint32_t l_vddBootVoltage = 0;  //ATTR_VDD_BOOT_VOLTAGE
-    uint32_t l_vdnBootVoltage = 0;  //ATTR_VDN_BOOT_VOLTAGE
-    uint32_t l_vcsBootVoltage = 0;  //ATTR_VCS_BOOT_VOLTAGE
     uint32_t l_nestFreq = 0;        //ATTR_FREQ_PB_MHZ
 
     bool l_firstPass = true;
@@ -234,7 +231,7 @@ void* call_host_voltage_config( void *io_pArgs )
                     continue;
                 }
 
-                // Save the voltage data for future comparison
+                // Save the freq data for future comparison
                 if( l_firstPass )
                 {
                     l_nominalFreq = l_voltageData.nomFreq;
@@ -242,9 +239,6 @@ void* call_host_voltage_config( void *io_pArgs )
                     l_ceilingFreq = l_voltageData.turboFreq;
                     l_ultraTurboFreq = l_voltageData.uTurboFreq;
                     l_turboFreq = l_voltageData.turboFreq;
-                    l_vddBootVoltage = l_voltageData.VddPSVltg;
-                    l_vdnBootVoltage = l_voltageData.VdnPbVltg;
-                    l_vcsBootVoltage = l_voltageData.VcsPSVltg;
                     l_firstPass = false;
                 }
                 else
@@ -297,22 +291,9 @@ void* call_host_voltage_config( void *io_pArgs )
 
             } // EQ for-loop
 
-
-            // set the approprate attributes on the processor
-            l_proc->setAttr<ATTR_VDD_BOOT_VOLTAGE>( l_vddBootVoltage );
-
-            l_proc->setAttr<ATTR_VDN_BOOT_VOLTAGE>( l_vdnBootVoltage );
-
-            l_proc->setAttr<ATTR_VCS_BOOT_VOLTAGE>( l_vcsBootVoltage );
-
-            TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Setting VDD/VDN/VCS boot voltage for proc huid = 0x%x"
-                    " VDD = %d, VDN = %d, VCS = %d",
-                    get_huid(l_proc),
-                    l_vddBootVoltage,
-                    l_vdnBootVoltage,
-                    l_vcsBootVoltage );
-
+            // Don't set the boot voltage ATTR -- instead the
+            // setup_evid will calculate from each chips #V and factor
+            // in loadline/distloss/etc 
 
             // call p9_setup_evid for each processor
             fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
