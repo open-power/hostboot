@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -81,6 +81,12 @@ actionclass threshold32pday
 actionclass threshold5phour
 {
     threshold( field(5 / hour) );
+};
+
+/** Threshold of 5 per day */
+actionclass threshold5pday
+{
+    threshold( field(5 / day) );
 };
 
 ################################################################################

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,6 +79,87 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( p9_mca, PostAnalysis );
+
+//##############################################################################
+//
+//                               DDRPHYFIR
+//
+//##############################################################################
+
+/**
+ * @brief  DDRPHYFIR[54:55,57:59] MCA/UE algorithm
+ * @param  i_chip MCA chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t mcaUeAlgorithm( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[p9_mca::mcaUeAlgorithm] "
+
+    SCAN_COMM_REGISTER_CLASS * fir = nullptr;
+    SCAN_COMM_REGISTER_CLASS * msk = nullptr;
+
+    // If the attention is currently at threshold or if there is a mainline or
+    // maintenance UE on at the same time as the attention:
+    //  - Make the error log predictive.
+    //  - Mask the attention.
+    //  - Do not clear the attention. This will be used during maintenance and
+    //    memory UE analysis to indicate that the MCA should be called out
+    //    instead of the DIMMs. This is unconventional process is needed because
+    //    maintenance UEs are always masked (handled manually in maintenance
+    //    command complete attentions) and memory UEs will get unmasked anytime
+    //    Targeted Diagnostics is complete on that area of memory. So we never
+    //    truly have a way to permanently mask the UEs.
+
+    bool maskDoNotClearAttn = io_sc.service_data->IsAtThreshold();
+
+    if ( !maskDoNotClearAttn )
+    {
+        fir = i_chip->getRegister("MCAECCFIR");
+        if ( SUCCESS != fir->Read() )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MCAECCFIR: i_chip=0x%08x",
+                      i_chip->getHuid() );
+        }
+        else
+        {
+            maskDoNotClearAttn = fir->IsBitSet(14) || fir->IsBitSet(34);
+        }
+    }
+
+    if ( maskDoNotClearAttn )
+    {
+        // Get the active attentions of DDRPHYFIR[54:55,57:59] and mask.
+        fir = i_chip->getRegister("DDRPHYFIR");
+
+        if ( SUCCESS != fir->Read() )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on DDRPHYFIR: i_chip=0x%08x",
+                      i_chip->getHuid() );
+        }
+        else
+        {
+            uint64_t tmp = fir->GetBitFieldJustified(54, 6) & 0x37;
+
+            msk = i_chip->getRegister("DDRPHYFIR_MASK_OR");
+
+            msk->clearAllBits();
+            msk->SetBitFieldJustified( 54, 6, tmp );
+
+            if ( SUCCESS != msk->Write() )
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on DDRPHYFIR_MASK_OR: "
+                          "i_chip=0x%08x", i_chip->getHuid() );
+            }
+        }
+    }
+
+    return maskDoNotClearAttn ? PRD_NO_CLEAR_FIR_BITS : SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( p9_mca, mcaUeAlgorithm );
 
 //##############################################################################
 //

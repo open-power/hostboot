@@ -30,10 +30,23 @@
     ############################################################################
     # P9 MCA target MCAECCFIR
     ############################################################################
+
     register MCAECCFIR_AND
     {
         name        "P9 MCA target MCAECCFIR AND";
         scomaddr    0x07010a01;
+        capture     group never;
+        access      write_only;
+    };
+
+    ############################################################################
+    # P9 MCA target DDRPHYFIR
+    ############################################################################
+
+    register DDRPHYFIR_MASK_OR
+    {
+        name        "P9 MCA target DDRPHYFIR MASK OR";
+        scomaddr    0x07011005;
         capture     group never;
         access      write_only;
     };

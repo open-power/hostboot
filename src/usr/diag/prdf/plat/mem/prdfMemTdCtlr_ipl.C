@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 #include <prdfMemTdCtlr.H>
 
 // Platform includes
+#include <prdfMemEccAnalysis.H>
 #include <prdfMemMark.H>
 #include <prdfMemoryMru.H>
 #include <prdfMemScrubUtils.H>
@@ -137,8 +138,7 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, const MemRank & i_rank,
             io_sc.service_data->setSignature(     huid, PRDFSIG_MaintUE );
 
             // Add the rank to the callout list.
-            MemoryMru mm { trgt, i_rank, MemoryMruData::CALLOUT_RANK };
-            io_sc.service_data->SetCallout( mm );
+            MemEcc::calloutMemUe<T>( i_chip, i_rank, io_sc );
 
             // Make the error log predictive.
             io_sc.service_data->setServiceCall();

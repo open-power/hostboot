@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,17 @@ namespace PRDF
 
 namespace MemEcc
 {
+
+/**
+ * @brief  Will check if the UE is a side-effect attention and make a callout
+ *         appropriately.
+ * @param  i_chip   MCA or MBA.
+ * @param  i_rank   Target rank.
+ * @param  io_sc    The step code data struct.
+ */
+template<TARGETING::TYPE T>
+void calloutMemUe( ExtensibleChip * i_chip, const MemRank & i_rank,
+                   STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
  * @brief  Analyzes a fetch MPE attention.
