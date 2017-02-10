@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,9 +73,23 @@ TRAC_INIT( & g_trac_eepromr, "EEPROMR", KILOBYTE );
 // Defines
 // ----------------------------------------------
 #define MAX_BYTE_ADDR 2
-#define EEPROM_MAX_NACK_RETRIES 2
+#define EEPROM_MAX_RETRIES 2
 // ----------------------------------------------
 
+
+namespace
+{
+
+// ------------------------------------------------------------------
+// errorIsRetryable
+// ------------------------------------------------------------------
+static bool errorIsRetryable(uint16_t reasonCode)
+{
+    return reasonCode == I2C::I2C_NACK_ONLY_FOUND ||
+        reasonCode == I2C::I2C_ARBITRATION_LOST_ONLY_FOUND;
+}
+
+}
 
 namespace EEPROM
 {
@@ -733,17 +748,17 @@ errlHndl_t eepromReadData( TARGETING::Target * i_target,
                            eeprom_addr_t i_i2cInfo )
 {
     errlHndl_t l_err = NULL;
-    errlHndl_t err_NACK = NULL;
+    errlHndl_t err_retryable = NULL;
 
     TRACUCOMP(g_trac_eeprom,
             ENTER_MRK"eepromReadData()");
     do
     {
-        /***********************************************************/
-        /* Attempt read multiple times ONLY on NACK fails         */
-        /***********************************************************/
+        /************************************************************/
+        /* Attempt read multiple times ONLY on retryable fails      */
+        /************************************************************/
         for (uint8_t retry = 0;
-             retry <= EEPROM_MAX_NACK_RETRIES;
+             retry <= EEPROM_MAX_RETRIES;
              retry++)
         {
 
@@ -803,9 +818,9 @@ errlHndl_t eepromReadData( TARGETING::Target * i_target,
                 // break from retry loop
                 break;
             }
-            else if ( l_err->reasonCode() != I2C::I2C_NACK_ONLY_FOUND )
+            else if ( !errorIsRetryable( l_err->reasonCode() ) )
             {
-                // Only retry on NACK failures: break from retry loop
+                // Only retry on errorIsRetryable() failures: break from retry loop
                 TRACFCOMP( g_trac_eeprom, ERR_MRK"eepromReadData(): Non-Nack "
                            "Error: rc=0x%X, tgt=0x%X, No Retry (retry=%d)",
                             l_err->reasonCode(),
@@ -816,43 +831,43 @@ errlHndl_t eepromReadData( TARGETING::Target * i_target,
                 // break from retry loop
                 break;
             }
-            else // Handle NACK error
+            else // Handle retryable error
             {
                 // If op will be attempted again: save log and continue
-                if ( retry < EEPROM_MAX_NACK_RETRIES )
+                if ( retry < EEPROM_MAX_RETRIES )
                 {
-                    // Only save original NACK error
-                    if ( err_NACK == NULL )
+                    // Only save original retryable error
+                    if ( err_retryable == NULL )
                     {
-                        // Save original NACK error
-                        err_NACK = l_err;
+                        // Save original retryable error
+                        err_retryable = l_err;
 
                         TRACFCOMP( g_trac_eeprom, ERR_MRK"eepromReadData(): "
-                                   "NACK Error rc=0x%X, eid=0x%X, tgt=0x%X, "
+                                   "Retryable Error rc=0x%X, eid=0x%X, tgt=0x%X, "
                                    "retry/MAX=%d/%d. Save error and retry",
-                                   err_NACK->reasonCode(),
-                                   err_NACK->eid(),
+                                   err_retryable->reasonCode(),
+                                   err_retryable->eid(),
                                    TARGETING::get_huid(i_target),
-                                   retry, EEPROM_MAX_NACK_RETRIES);
+                                   retry, EEPROM_MAX_RETRIES);
 
-                        err_NACK->collectTrace(EEPROM_COMP_NAME);
+                        err_retryable->collectTrace(EEPROM_COMP_NAME);
                     }
                     else
                     {
-                        // Add data to original NACK error
+                        // Add data to original retryable error
                         TRACFCOMP( g_trac_eeprom, ERR_MRK"eepromReadData(): "
-                                   "Another NACK Error rc=0x%X, eid=0x%X "
+                                   "Another Retryable Error rc=0x%X, eid=0x%X "
                                    "plid=0x%X, tgt=0x%X, retry/MAX=%d/%d. "
                                    "Delete error and retry",
                                    l_err->reasonCode(), l_err->eid(), l_err->plid(),
                                    TARGETING::get_huid(i_target),
-                                   retry, EEPROM_MAX_NACK_RETRIES);
+                                   retry, EEPROM_MAX_RETRIES);
 
                         ERRORLOG::ErrlUserDetailsString(
-                                  "Another NACK ERROR found")
-                                  .addToLog(err_NACK);
+                                  "Another Retryable ERROR found")
+                                  .addToLog(err_retryable);
 
-                        // Delete this new NACK error
+                        // Delete this new retryable error
                         delete l_err;
                         l_err = NULL;
                     }
@@ -867,7 +882,7 @@ errlHndl_t eepromReadData( TARGETING::Target * i_target,
                                "Retries (retry/MAX=%d/%d). Returning Error",
                                l_err->reasonCode(), l_err->eid(),
                                TARGETING::get_huid(i_target),
-                               retry, EEPROM_MAX_NACK_RETRIES);
+                               retry, EEPROM_MAX_RETRIES);
 
                     l_err->collectTrace(EEPROM_COMP_NAME);
 
@@ -878,31 +893,31 @@ errlHndl_t eepromReadData( TARGETING::Target * i_target,
 
         } // end of retry loop
 
-        // Handle saved NACK error, if any
-        if (err_NACK)
+        // Handle saved retryable error, if any
+        if (err_retryable)
         {
             if (l_err)
             {
-                // commit original NACK error with new err PLID
-                err_NACK->plid(l_err->plid());
-                TRACFCOMP(g_trac_eeprom, "eepromReadData(): Committing saved NACK "
+                // commit original retryable error with new err PLID
+                err_retryable->plid(l_err->plid());
+                TRACFCOMP(g_trac_eeprom, "eepromReadData(): Committing saved retryable "
                           "l_err eid=0x%X with plid of returned err: 0x%X",
-                          err_NACK->eid(), err_NACK->plid());
+                          err_retryable->eid(), err_retryable->plid());
 
                 ERRORLOG::ErrlUserDetailsTarget(i_target)
-                                               .addToLog(err_NACK);
+                                               .addToLog(err_retryable);
 
-                errlCommit(err_NACK, EEPROM_COMP_ID);
+                errlCommit(err_retryable, EEPROM_COMP_ID);
             }
             else
             {
-                // Since we eventually succeeded, delete original NACK error
+                // Since we eventually succeeded, delete original retryable error
                 TRACFCOMP(g_trac_eeprom, "eepromReadData(): Op successful, "
-                          "deleting saved NACK err eid=0x%X, plid=0x%X",
-                          err_NACK->eid(), err_NACK->plid());
+                          "deleting saved retryable err eid=0x%X, plid=0x%X",
+                          err_retryable->eid(), err_retryable->plid());
 
-                delete err_NACK;
-                err_NACK = NULL;
+                delete err_retryable;
+                err_retryable = NULL;
             }
         }
 
@@ -1207,14 +1222,14 @@ errlHndl_t eepromWriteData( TARGETING::Target * i_target,
     TRACDCOMP( g_trac_eeprom,
                ENTER_MRK"eepromWriteData()");
     errlHndl_t err = NULL;
-    errlHndl_t err_NACK = NULL;
+    errlHndl_t err_retryable = NULL;
     do
     {
          /***********************************************************/
-         /* Attempt write multiple times ONLY on NACK fails         */
+         /* Attempt write multiple times ONLY on retryable fails    */
          /***********************************************************/
         for (uint8_t retry = 0;
-              retry <= EEPROM_MAX_NACK_RETRIES;
+              retry <= EEPROM_MAX_RETRIES;
               retry++)
          {
              // Do the actual data write
@@ -1237,11 +1252,11 @@ errlHndl_t eepromWriteData( TARGETING::Target * i_target,
                  // break from retry loop
                  break;
              }
-             else if ( err->reasonCode() != I2C::I2C_NACK_ONLY_FOUND )
+             else if ( !errorIsRetryable( err->reasonCode() ) )
              {
-                 // Only retry on NACK failures: break from retry loop
+                 // Only retry on errorIsRetryable() failures: break from retry loop
                  TRACFCOMP(g_trac_eeprom, ERR_MRK"eepromWriteData(): I2C "
-                           "Write Non-NACK fail %d/%d/0x%X, "
+                           "Write Non-Retryable fail %d/%d/0x%X, "
                            "ldl=%d, offset=0x%X, aS=%d, retry=%d",
                            i_i2cInfo.port, i_i2cInfo.engine,
                            i_i2cInfo.devAddr, i_dataLen,
@@ -1252,10 +1267,10 @@ errlHndl_t eepromWriteData( TARGETING::Target * i_target,
                  // break from retry loop
                  break;
              }
-             else // Handle NACK error
+             else // Handle retryable error
              {
                  TRACFCOMP(g_trac_eeprom, ERR_MRK"eepromWriteData(): I2C "
-                           "Write NACK fail %d/%d/0x%X, "
+                           "Write retryable fail %d/%d/0x%X, "
                            "ldl=%d, offset=0x%X, aS=%d, writePageSize = %x",
                            i_i2cInfo.port, i_i2cInfo.engine,
                            i_i2cInfo.devAddr, i_dataLen,
@@ -1263,43 +1278,43 @@ errlHndl_t eepromWriteData( TARGETING::Target * i_target,
                            i_i2cInfo.writePageSize);
 
                  // If op will be attempted again: save error and continue
-                 if ( retry < EEPROM_MAX_NACK_RETRIES )
+                 if ( retry < EEPROM_MAX_RETRIES )
                  {
-                     // Only save original NACK error
-                     if ( err_NACK == NULL )
+                     // Only save original retryable error
+                     if ( err_retryable == NULL )
                      {
-                         // Save original NACK error
-                         err_NACK = err;
+                         // Save original retryable error
+                         err_retryable = err;
 
                          TRACFCOMP( g_trac_eeprom, ERR_MRK"eepromWriteData(): "
                                     "Error rc=0x%X, eid=0x%X plid=0x%X, "
                                     "tgt=0x%X, retry/MAX=%d/%d. Save error "
                                     "and retry",
-                                    err_NACK->reasonCode(),
-                                    err_NACK->eid(),
-                                    err_NACK->plid(),
+                                    err_retryable->reasonCode(),
+                                    err_retryable->eid(),
+                                    err_retryable->plid(),
                                     TARGETING::get_huid(i_target),
-                                    retry, EEPROM_MAX_NACK_RETRIES);
+                                    retry, EEPROM_MAX_RETRIES);
 
-                         err_NACK->collectTrace(EEPROM_COMP_NAME);
+                         err_retryable->collectTrace(EEPROM_COMP_NAME);
                      }
                      else
                      {
-                         // Add data to original NACK error
+                         // Add data to original retryable error
                          TRACFCOMP( g_trac_eeprom, ERR_MRK"eepromWriteData(): "
-                                    "Another NACK Error rc=0x%X, eid=0x%X "
+                                    "Another Retryable Error rc=0x%X, eid=0x%X "
                                     "plid=0x%X, tgt=0x%X, retry/MAX=%d/%d. "
                                     "Delete error and retry",
                                     err->reasonCode(), err->eid(),
                                     err->plid(),
                                     TARGETING::get_huid(i_target),
-                                    retry, EEPROM_MAX_NACK_RETRIES);
+                                    retry, EEPROM_MAX_RETRIES);
 
                          ERRORLOG::ErrlUserDetailsString(
-                                   "Another NACK ERROR found")
-                                   .addToLog(err_NACK);
+                                   "Another retryable ERROR found")
+                                   .addToLog(err_retryable);
 
-                         // Delete this new NACK error
+                         // Delete this new retryable error
                          delete err;
                          err = NULL;
                      }
@@ -1314,7 +1329,7 @@ errlHndl_t eepromWriteData( TARGETING::Target * i_target,
                                 "(retry/MAX=%d/%d). Returning Error",
                                 err->reasonCode(),
                                 TARGETING::get_huid(i_target),
-                                retry, EEPROM_MAX_NACK_RETRIES);
+                                retry, EEPROM_MAX_RETRIES);
 
                      err->collectTrace(EEPROM_COMP_NAME);
 
@@ -1326,32 +1341,32 @@ errlHndl_t eepromWriteData( TARGETING::Target * i_target,
          } // end of retry loop
          /***********************************************************/
 
-         // Handle saved NACK errors, if any
-         if (err_NACK)
+         // Handle saved retryable errors, if any
+         if (err_retryable)
          {
              if (err)
              {
-                 // commit original NACK error with new err PLID
-                 err_NACK->plid(err->plid());
+                 // commit original retryable error with new err PLID
+                 err_retryable->plid(err->plid());
                  TRACFCOMP(g_trac_eeprom, "eepromWriteData(): Committing saved "
-                           "NACK err eid=0x%X with plid of returned err: "
+                           "retryable err eid=0x%X with plid of returned err: "
                            "0x%X",
-                           err_NACK->eid(), err_NACK->plid());
+                           err_retryable->eid(), err_retryable->plid());
 
                  ERRORLOG::ErrlUserDetailsTarget(i_target)
-                                                 .addToLog(err_NACK);
+                                                 .addToLog(err_retryable);
 
-                 errlCommit(err_NACK, EEPROM_COMP_ID);
+                 errlCommit(err_retryable, EEPROM_COMP_ID);
              }
              else
              {
-                 // Since we eventually succeeded, delete original NACK error
+                 // Since we eventually succeeded, delete original retryable error
                  TRACFCOMP(g_trac_eeprom, "eepromWriteData(): Op successful, "
-                           "deleting saved NACK err eid=0x%X, plid=0x%X",
-                           err_NACK->eid(), err_NACK->plid());
+                           "deleting saved retryable err eid=0x%X, plid=0x%X",
+                           err_retryable->eid(), err_retryable->plid());
 
-                 delete err_NACK;
-                 err_NACK = NULL;
+                 delete err_retryable;
+                 err_retryable = NULL;
              }
          }
     }while( 0 );
