@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,13 +91,23 @@
 
 /// VPD #V Operating Points
 #define VPD_PV_POINTS 4
-#define VPD_PV_ORDER_STR {"PowerSave ", "Nominal   ", "Turbo     ", "UltraTurbo"}
+#define VPD_PV_ORDER_STR {"Nominal   ","PowerSave ", "Turbo     ", "UltraTurbo"}
 #define POWERSAVE   1
 #define NOMINAL     0
 #define TURBO       2
 #define ULTRA       3
 #define POWERBUS    4
 #define VPD_PV_ORDER {POWERSAVE, NOMINAL, TURBO, ULTRA}
+
+#define VPD_PV_CORE_FREQ_MHZ    0
+#define VPD_PV_VDD_MV           1
+#define VPD_PV_IDD_100MA        2
+#define VPD_PV_VCS_MV           3
+#define VPD_PV_ICS_100MA        4
+#define VPD_PV_PB_FREQ_MHZ      0
+#define VPD_PV_VDN_MV           1
+#define VPD_PV_IDN_100MA        2
+
 #define VPD_NUM_SLOPES_SET  2
 #define VPD_SLOPES_RAW      0
 #define VPD_SLOPES_BIASED   1
