@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/centaur/procedures/hwp/memory/p9c_mss_get_cen_ecid.mk $
+# $Source: src/import/chips/centaur/procedures/hwp/memory/tests/p9c_mss_ut.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -23,10 +23,22 @@
 #
 # IBM_PROLOG_END_TAG
 
-# Include the macros and things for MSS procedures
 -include 01common.mk
 
-PROCEDURE=p9c_mss_get_cen_ecid
-OBJS+=p9c_mss_get_cen_ecid_decode.o
-$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
-$(call BUILD_PROCEDURE)
+CEN_UT_SOURCE := $(shell find $(ROOTPATH)/chips/centaur/procedures/hwp/memory/tests -name '*.C' -exec basename {} \;)
+
+WRAPPER=p9c_mss_ut
+OBJS += $(patsubst %.C,%.o,$(CEN_UT_SOURCE))
+$(call ADD_EXE_INCDIR,$(WRAPPER),$(CEN_INCLUDES))
+$(call ADD_EXE_INCDIR,$(WRAPPER),$(CEN_CATCH_UNIT_TESTS_INCLUDES))
+
+$(WRAPPER)_DEPLIBS+=cen
+
+# USELIBS to get the header, DEPLIBS to get the so
+#$(WRAPPER)_USELIBS+=p9_getecid
+#$(WRAPPER)_DEPLIBS+=p9_getecid
+
+$(WRAPPER)_COMMONFLAGS+=-fno-var-tracking-assignments
+
+$(WRAPPER)_LDFLAGS+= -Wl,-lrt
+$(call BUILD_WRAPPER)

@@ -24,8 +24,8 @@
 # IBM_PROLOG_END_TAG
 
 # Include the macros and things for MSS procedures
+-include 01common.mk
 
 PROCEDURE=p9c_mss_get_cen_ecid_decode
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
-#lib$(PROCEDURE)_DEPLIBS+=mss
 $(call BUILD_PROCEDURE)

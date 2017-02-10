@@ -25,5 +25,5 @@
 
 WRAPPER=p9c_mss_get_cen_ecid_wrap
 $(WRAPPER)_USELIBS+=p9c_mss_get_cen_ecid
-#$(WRAPPER)_DEPLIBS+=mss
+$(WRAPPER)_DEPLIBS+=cen
 $(call BUILD_WRAPPER)
