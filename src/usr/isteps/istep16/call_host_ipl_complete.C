@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,27 +70,34 @@ void* call_host_ipl_complete (void *io_pArgs)
         TARGETING::targetService().getTopLevelTarget( sys );
         assert(sys != NULL);
 
-        // Set number of pointer pairs for HDAT
+
+        // Set number of pointer pairs for HDAT HB RESERVED MEM
         //@TODO RTC:142908 Support multiple nodes in HBRT
         const uint32_t NUM_NODES = 1;
-        uint32_t  l_numSections = NUM_NODES * HBRT_NUM_PTRS;
-        sys->setAttr<ATTR_HDAT_HBRT_NUM_SECTIONS>(l_numSections);
+        uint32_t  l_numRsvMemSections = NUM_NODES * HB_RSV_MEM_NUM_PTRS;
+        sys->setAttr<ATTR_HDAT_RSV_MEM_NUM_SECTIONS>(l_numRsvMemSections);
+
+
+        // Set number of pointer pairs for HDAT HBRT
+        //@TODO RTC:142908 Support multiple nodes in HBRT
+        uint32_t  l_numHbrtSections = NUM_NODES * HBRT_NUM_PTRS;
+        sys->setAttr<ATTR_HDAT_HBRT_NUM_SECTIONS>(l_numHbrtSections);
 
         uint64_t  l_maxSecSize  = VMM_RT_VPD_SIZE;
 
-        // Set max size of a section for HDAT
+        // Set max size of a HBRT section for HDAT
         TARGETING::ATTR_HDAT_HBRT_SECTION_SIZE_type l_secSize = {0};
         uint64_t *l_p_secSize =
             reinterpret_cast<uint64_t *>(&l_secSize);
 
         uint32_t l_attrArraySize =
             sizeof(ATTR_HDAT_HBRT_SECTION_SIZE_type) / sizeof(l_secSize[0]);
-        assert(l_numSections <= l_attrArraySize);
+        assert(l_numHbrtSections <= l_attrArraySize);
 
         uint64_t  l_attrSize = AttrRP::maxSize();
         l_maxSecSize = (l_attrSize > l_maxSecSize) ? l_attrSize : l_maxSecSize;
 
-        for (uint32_t  l_sect=0; (l_sect < l_numSections); l_sect++)
+        for (uint32_t  l_sect=0; (l_sect < l_numHbrtSections); l_sect++)
         {
             l_p_secSize[l_sect] = l_maxSecSize;
         }

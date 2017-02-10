@@ -90,9 +90,13 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId);
 
 // How many pointers/sections there are in HB runtime data
 #define HBRT_NUM_PTRS        2
-// sections defined by above literal
+// Sections defined by above literal
 #define HBRT_VPD_SECTION     0
 #define HBRT_ATTRIB_SECTION  1
+
+// How many pointers/sections there are in HB reserved memory data
+// HOMER*8/OCC_Common/VPD/ATTR/HBRT_Image/Res/Res/Res
+#define HB_RSV_MEM_NUM_PTRS  15
 
 //Note this means the Reserved Mem sub-section is the 6th
 //(0 based) of the MDT section (See HDAT spec)
