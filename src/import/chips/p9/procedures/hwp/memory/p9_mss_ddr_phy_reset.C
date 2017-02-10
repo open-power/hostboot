@@ -70,11 +70,6 @@ extern "C"
         FAPI_TRY(mss::change_force_mclk_low(i_target, mss::LOW),
                  "force_mclk_low (set high) Failed rc = 0x%08X", uint64_t(fapi2::current_err) );
 
-        // New for Nimbus - perform duty cycle clock distortion calibration
-#ifdef RUN_DCD
-        FAPI_TRY( mss::adr32s::duty_cycle_distortion_calibration(i_target) );
-#endif
-
         // 1. Drive all control signals to the PHY to their inactive state, idle state, or inactive value.
         FAPI_TRY( mss::dp16::reset_sysclk(i_target) );
 
@@ -160,6 +155,10 @@ extern "C"
 
         // Workarounds
         FAPI_TRY( mss::workarounds::dp16::after_phy_reset(i_target) );
+
+        // New for Nimbus - perform duty cycle clock distortion calibration (DCD cal)
+        // Per PHY team's characterization, the DCD cal needs to be run after DLL calibration
+        FAPI_TRY( mss::adr32s::duty_cycle_distortion_calibration(i_target) );
 
         // mss::check::during_phy_reset checks to see if there are any FIR. We do this 'twice' once here
         // (as part of the good-path) and once if we jump to the fapi_try label.
