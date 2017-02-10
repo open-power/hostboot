@@ -208,7 +208,7 @@ errlHndl_t SecureRomManager::initialize()
                                    reinterpret_cast<uint64_t>(iv_securerom),
                                    true /*Add HB Software Callout*/ );
 
-            l_errl->collectTrace(SECURE_COMP_NAME,256);
+            l_errl->collectTrace(SECURE_COMP_NAME,ERROR_TRACE_SIZE);
             break;
 
         }
@@ -216,7 +216,6 @@ errlHndl_t SecureRomManager::initialize()
         /***************************************************************/
         /*  Retrieve HW Hash Keys From The System                      */
         /***************************************************************/
-
         SecureRomManager::getHwKeyHash();
 
         TRACFCOMP(g_trac_secure,INFO_MRK"SecureRomManager::initialize(): SUCCESSFUL:"
@@ -336,7 +335,7 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
             // Callout code to force a rewrite of the contents
             //@todo RTC:93870 - Define new callout for verification fail
 
-            l_errl->collectTrace(SECURE_COMP_NAME,256);
+            l_errl->collectTrace(SECURE_COMP_NAME,ERROR_TRACE_SIZE);
             break;
 
         }

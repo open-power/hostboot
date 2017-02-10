@@ -38,6 +38,11 @@ namespace SECUREBOOT
 
 extern trace_desc_t* g_trac_secure;
 
+// symbolic constant for the trace size
+enum {
+    ERROR_TRACE_SIZE = 256,
+};
+
 }
 
 #define SB_ENTER(args...) \

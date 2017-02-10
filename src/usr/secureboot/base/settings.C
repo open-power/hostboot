@@ -40,11 +40,6 @@ namespace SECUREBOOT
     using namespace TARGETING;
     using namespace ERRORLOG;
 
-    // symbolic constant for the trace size
-    enum {
-        ERROR_TRACE_SIZE = 256,
-    };
-
     void Settings::_init()
     {
         uint64_t l_regValue = 0;
