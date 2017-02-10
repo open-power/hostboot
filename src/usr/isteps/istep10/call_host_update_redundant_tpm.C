@@ -55,6 +55,25 @@ namespace ISTEP_10
 {
 void* call_host_update_redundant_tpm (void *io_pArgs)
 {
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                ENTER_MRK"call_host_update_redundant_tpm");
+
+    errlHndl_t err = nullptr;
+
+    // Before update procedure, trace security settings
+    err = SECUREBOOT::traceSecuritySettings();
+    if (err)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "call_host_update_redundant_tpm: Error back from "
+                   "SECUREBOOT::traceSecuritySettings: rc=0x%X, plid=0x%X",
+                   ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err));
+
+        // Commit log, but continue
+        ERRORLOG::errlCommit( err, SECURE_COMP_ID );
+    }
+
+    // Start of update procedure
     #ifdef CONFIG_SECUREBOOT
     do {
 
@@ -102,8 +121,6 @@ void* call_host_update_redundant_tpm (void *io_pArgs)
             pProc->setAttr<TARGETING::ATTR_SECUREBOOT_PROTECT_DECONFIGURED_TPM
                 >(l_protectTpm);
         }
-
-        errlHndl_t err = nullptr;
 
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapiTarg(pProc);
 
@@ -168,6 +185,9 @@ void* call_host_update_redundant_tpm (void *io_pArgs)
     } while(0);
 
     #endif // CONFIG_SECUREBOOT
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                EXIT_MRK"call_host_update_redundant_tpm");
 
     return nullptr;
 }

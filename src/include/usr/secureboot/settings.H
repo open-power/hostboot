@@ -69,7 +69,8 @@ namespace SECUREBOOT
         SabBit         = 0x0800000000000000ull, // Secure access
         JumperStateBit = 0x0400000000000000ull, // Secure jumper
 
-        StatusRegister = 0x00050001ull,
+        StatusRegister    = 0x00050001ull, // used for SCOM operation
+        StatusRegisterFsi = 0x00002804ull, // used for FSI operation
     };
 
     /** @class Settings

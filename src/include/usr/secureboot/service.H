@@ -64,6 +64,17 @@ namespace SECUREBOOT
      */
     errlHndl_t initializeSecureRomManager(void);
 
+    /**
+     * @brief Trace the Security Settings on each functional processor
+     *
+     *  @param[in] i_doConsoleTrace Optional variable that determines if
+     *                              register values are traced to the CONSOLE.
+     *                              Default is false
+     *
+     *  @return errlHndl_t  nullptr on success, else pointer to error log
+     */
+    errlHndl_t traceSecuritySettings(bool i_doConsoleTrace = false);
+
 
     /** @brief Determines if Secureboot is enabled.
      */

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 #include <isteps/hwpisteperror.H>
 #include <trustedbootif.H>
 #include <initservice/isteps_trace.H>
+#include <secureboot/service.H>
 
 namespace ISTEP_06
 {
@@ -41,16 +42,28 @@ void* call_host_update_master_tpm( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_update_master_tpm entry" );
 
-#ifdef CONFIG_TPMDD
     errlHndl_t l_err = NULL;
+
+#ifdef CONFIG_TPMDD
     // Initialize the master TPM
     l_err = (errlHndl_t)TRUSTEDBOOT::host_update_master_tpm(io_pArgs);
     if (l_err)
     {
         l_stepError.addErrorDetails(l_err);
-        errlCommit( l_err, SECURE_COMP_ID );
+        ERRORLOG::errlCommit( l_err, SECURE_COMP_ID );
     }
 #endif
+
+    l_err = SECUREBOOT::traceSecuritySettings(true);
+    if (l_err)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "call_host_update_master_tpm: Error back from "
+                   "SECUREBOOT::traceSecuritySettings: rc=0x%X, plid=0x%X",
+                   ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
+        l_stepError.addErrorDetails(l_err);
+        ERRORLOG::errlCommit( l_err, SECURE_COMP_ID );
+    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_update_master_tpm exit" );
