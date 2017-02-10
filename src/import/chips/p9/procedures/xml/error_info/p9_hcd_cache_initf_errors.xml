@@ -25,6 +25,12 @@
 
 <hwpErrors>
   <!-- ********************************************************************* -->
-  
+  <hwpError>
+    <rc>RC_P9_HCD_CACHE_INITF_INCORRECT_EQ_SCAN64_VAL</rc>
+    <description>
+        Data mis-match on EQ_SCAN64 
+    </description>
+    <ffdc>EQ_SCAN64_VAL</ffdc>
+  </hwpError>  
   <!-- ********************************************************************* -->
 </hwpErrors>
