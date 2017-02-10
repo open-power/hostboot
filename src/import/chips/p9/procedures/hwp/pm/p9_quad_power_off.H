@@ -48,6 +48,11 @@
 // Constant definitions
 //------------------------------------------------------------------------------
 
+#ifdef __PPE__
+    extern uint64_t G_ring_save[8];
+    extern const uint64_t G_ring_index[10];
+#endif
+
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_quad_power_off_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target);
