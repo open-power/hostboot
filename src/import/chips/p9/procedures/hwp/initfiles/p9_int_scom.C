@@ -75,6 +75,20 @@ fapi2::ReturnCode p9_int_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             FAPI_TRY(fapi2::putScom(TGT0, 0x501300aull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5013021ull, l_scom_buffer ));
+
+            if ((l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_GROUP))
+            {
+                l_scom_buffer.insert<49, 1, 63, uint64_t>(literal_1 );
+            }
+            else if ((l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE))
+            {
+                l_scom_buffer.insert<49, 1, 63, uint64_t>(literal_0 );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5013021ull, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5013022ull, l_scom_buffer ));
 
             l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x0070000072040140 );
