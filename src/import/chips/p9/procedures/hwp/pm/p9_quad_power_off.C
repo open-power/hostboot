@@ -52,6 +52,26 @@
 // Function definitions
 // ----------------------------------------------------------------------
 
+#ifdef __PPE__
+uint64_t G_ring_save[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+
+//    {0,    0},
+//    {5039, 0xE000000000000000}, //3
+//    {5100, 0xC1E061FFED5F0000}, //29
+//    {5664, 0xE000000000000000}, //3
+//    {5725, 0xC1E061FFED5F0000}, //29
+//    {5973, 0xE000000000000000}, //3
+//    {6034, 0xC1E061FFED5F0000}, //29
+//    {6282, 0xE000000000000000}, //3
+//    {6343, 0xC1E061FFED5F0000}, //29
+//    {17871, 0}                  //128
+const uint64_t G_ring_index[10] =
+{
+    0, 5039, 5100, 5664, 5725, 5973, 6034, 6282, 6343, 17871,
+};
+#endif
+
+
 // Procedure p9_quad_power_off entry point, comments in header
 fapi2::ReturnCode p9_quad_power_off(
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target)
@@ -61,11 +81,94 @@ fapi2::ReturnCode p9_quad_power_off(
     constexpr uint32_t MAX_CORE_PER_QUAD = 4;
     fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
     uint32_t l_cnt = 0;
+#ifdef __PPE__
+    uint8_t  l_isMpipl = 0;
+    uint8_t  l_isRingSaveMpipl = 0;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_chip =
+        i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, l_isMpipl), "fapiGetAttribute of ATTR_IS_MPIPL failed!");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_RING_SAVE_MPIPL, l_chip, l_isRingSaveMpipl),
+             "fapiGetAttribute of ATTR_CHIP_EC_FEATURE_RING_SAVE_MPIPL failed");
+#endif
 
     FAPI_INF("p9_quad_power_off: Entering...");
 
     // Print chiplet position
     FAPI_INF("Quad power off chiplet no.%d", i_target.getChipletNumber());
+
+#ifdef __PPE__
+
+    if (l_isMpipl && l_isRingSaveMpipl)
+    {
+        l_data64.setBit<4>();  //SCAN_REGION_PERV - scan clock region perv
+        l_data64.setBit<5>();  //SCAN_REGION_UNIT1 - scan clock region eqpb - pb
+        l_data64.setBit<11>(); //SCAN_REGION_UNIT7 - scan clock region pbieq - pb
+        l_data64.setBit<59>(); //SCAN_TYPE_INEX - scan chain idex (c14 asic)
+
+        FAPI_TRY(fapi2::putScom(i_target,
+                                EQ_SCAN_REGION_TYPE,
+                                l_data64));
+
+        l_data64.flush<0>().set(0xa5a5a5a5a5a5a5a5);
+
+        FAPI_TRY(fapi2::putScom(i_target,
+                                EQ_SCAN64,
+                                l_data64));
+
+        for(uint32_t l_spin = 1; l_spin < 10; l_spin++)
+        {
+            uint64_t l_scandata = ((l_spin == 0) || (l_spin == 9)) ? 0x0 : (l_spin & 0x1) ?
+                                  0xE000000000000000 : 0xC1E061FFED5F0000;
+            l_data64.flush<0>().set((G_ring_index[l_spin] - G_ring_index[l_spin - 1]) << 32);
+
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    EQ_SCAN_LONG_ROTATE,
+                                    l_data64));
+            l_data64.flush<0>();
+
+            do
+            {
+                FAPI_TRY(fapi2::getScom(i_target,
+                                        EQ_CPLT_STAT0,
+                                        l_data64));
+            }
+            while (l_data64.getBit<8>() == 0);
+
+            l_data64.flush<0>();
+
+            if (l_spin == 9)
+            {
+                FAPI_TRY(fapi2::getScom(i_target,
+                                        EQ_SCAN64,
+                                        l_data64));
+
+                if(l_data64 != 0xa5a5a5a5a5a5a5a5)
+                {
+                    FAPI_ASSERT(false,
+                                fapi2::P9_PM_QUAD_POWEROFF_INCORRECT_EQ_SCAN64_VAL()
+                                .set_EQ_SCAN64_VAL(l_data64),
+                                "Incorrect Value from EQ_SCAN64, Expected Value [0xa5a5a5a5a5a5a5a5]");
+                }
+            }
+            else
+            {
+                l_data64.flush<0>();
+                FAPI_TRY(fapi2::getScom(i_target,
+                                        EQ_SCAN64,
+                                        l_data64));
+                G_ring_save[l_spin - 1] = l_scandata & l_data64;
+            }
+        }
+
+        l_data64.flush<0>();
+        FAPI_TRY(fapi2::putScom(i_target,
+                                EQ_SCAN_REGION_TYPE,
+                                l_data64));
+    }
+
+#endif
 
     FAPI_DBG("Disabling bits 20/22/24/26 in EQ_QPPM_QPMMR_CLEAR, to gain access"
              " to PFET controller, otherwise Quad Power off scom will fail");

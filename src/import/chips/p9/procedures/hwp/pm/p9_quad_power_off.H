@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,11 @@
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
+
+#ifdef __PPE__
+    extern uint64_t G_ring_save[8];
+    extern const uint64_t G_ring_index[10];
+#endif
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_quad_power_off_FP_t) (
