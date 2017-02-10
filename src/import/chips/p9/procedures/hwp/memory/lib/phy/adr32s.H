@@ -325,21 +325,6 @@ inline void set_init_io( fapi2::buffer<uint64_t>& o_data, const states i_state )
 }
 
 ///
-/// @brief Helper to iterate over ADR32S 'sides' when performing DCD cal
-/// @param[in] i_target the MCA to iterate for
-/// @param[in] i_reg the register (ADR0 or ADR1's register)
-/// @param[in] i_seed the seed value for the adjuster
-/// @param[in] i_side bool; true if this is side a, false for side b
-/// @param[out] o_value the value of the adjuster when the compare bit changes state
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode dcd_cal_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                  const uint64_t i_reg,
-                                  const uint64_t i_seed,
-                                  const bool i_side,
-                                  uint64_t& o_value );
-
-///
 /// @brief Perform ADR DCD calibration - Nimbus Only
 /// @param[in] i_target the MCBIST (controler) to perform calibration on
 /// @return FAPI2_RC_SUCCESS iff ok
