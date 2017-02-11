@@ -142,6 +142,8 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRRD_S, TGT2, l_TGT2_ATTR_EFF_DRAM_TRRD_S));
         fapi2::ATTR_EFF_DRAM_TRRD_L_Type l_TGT2_ATTR_EFF_DRAM_TRRD_L;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRRD_L, TGT2, l_TGT2_ATTR_EFF_DRAM_TRRD_L));
+        fapi2::ATTR_MSS_REORDER_QUEUE_SETTING_Type l_TGT1_ATTR_MSS_REORDER_QUEUE_SETTING;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_REORDER_QUEUE_SETTING, TGT1, l_TGT1_ATTR_MSS_REORDER_QUEUE_SETTING));
         fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_Type l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, TGT2, l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM));
         uint64_t l_def_SLOT0_DENOMINATOR = ((l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0] ==
@@ -401,8 +403,15 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             FAPI_TRY(fapi2::putScom(TGT0, 0x701090cull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x701090dull, l_scom_buffer ));
+
+            l_scom_buffer.insert<5, 1, 63, uint64_t>(l_TGT1_ATTR_MSS_REORDER_QUEUE_SETTING );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x701090dull, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x701090eull, l_scom_buffer ));
 
+            l_scom_buffer.insert<6, 1, 63, uint64_t>(l_TGT1_ATTR_MSS_REORDER_QUEUE_SETTING );
             l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b011000 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x701090eull, l_scom_buffer));
         }

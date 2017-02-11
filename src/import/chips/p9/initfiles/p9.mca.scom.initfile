@@ -657,6 +657,16 @@ ispy MCP.PORT0.SRQ.PC.MBAREF0Q_CFG_REFR_CHECK_INTERVAL [when=S] {
   ( def_REFRESH_INTERVAL * def_NUM_RANKS * 6 ) / 5;
 }
 
+ispy MCP.PORT0.SRQ.MBA_WRQ0Q_CFG_WRQ_FIFO_MODE [when=S] {
+  spyv;
+  MCBIST.ATTR_MSS_REORDER_QUEUE_SETTING;
+}
+
+ispy MCP.PORT0.SRQ.MBA_RRQ0Q_CFG_RRQ_FIFO_MODE [when=S] {
+  spyv;
+  MCBIST.ATTR_MSS_REORDER_QUEUE_SETTING;
+}
+
 
 
 ####################################################
