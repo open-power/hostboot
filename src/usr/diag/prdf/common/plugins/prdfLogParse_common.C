@@ -447,12 +447,12 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                  parseBadDqBitmap( sigData, sigDataSize, i_parser );
             }
+*/
             else if ( (Util::hashString(TD_CTLR_DATA::START) == sigId) ||
                       (Util::hashString(TD_CTLR_DATA::END)   == sigId) )
             {
                  parseTdCtlrStateData( sigData, sigDataSize, i_parser, sigId );
             }
-*/
 /*TODO: RTC 136050
             else if ( Util::hashString(SLW_FFDC_DATA::title) == sigId )
             {
