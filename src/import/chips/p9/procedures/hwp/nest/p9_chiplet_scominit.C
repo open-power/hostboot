@@ -182,6 +182,26 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
                  "Error from putScom (XBUS_LL0_LL0_LL0_IOEL_FIR_MASK_REG)");
     }
 
+    // set FBC optics config mode attribute
+    l_obus_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_OBUS>();
+
+    for (auto l_iter = l_obus_chiplets.begin();
+         l_iter != l_obus_chiplets.end();
+         l_iter++)
+    {
+        uint8_t l_unit_pos;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, *l_iter, l_unit_pos),
+                 "Error from FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS)");
+        FAPI_INF("Updating index: %d\n", l_unit_pos);
+        FAPI_INF("  before: %d\n", l_fbc_optics_cfg_mode[l_unit_pos]);
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OPTICS_CONFIG_MODE, *l_iter, l_fbc_optics_cfg_mode[l_unit_pos]),
+                 "Error from FAPI_ATTR_GET(ATTR_OPTICS_CONFIG_MODE)");
+        FAPI_INF("  after: %d\n", l_fbc_optics_cfg_mode[l_unit_pos]);
+    }
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE, i_target, l_fbc_optics_cfg_mode),
+             "Error from FAPI_ATTR_SET(ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE)");
+
     // invoke IOO (OBUS FBC IO) SCOM initfiles
     FAPI_DBG("Invoking p9.fbc.ioo_tl.scom.initfile on target %s...", l_procTargetStr);
     FAPI_EXEC_HWP(l_rc, p9_fbc_ioo_tl_scom, i_target);
@@ -192,8 +212,6 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
         fapi2::current_err = l_rc;
         goto fapi_try_exit;
     }
-
-    l_obus_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_OBUS>();
 
     if (l_obus_chiplets.size())
     {
@@ -209,14 +227,8 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
          l_iter != l_obus_chiplets.end();
          l_iter++)
     {
-        uint8_t l_unit_pos;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, *l_iter, l_unit_pos),
-                 "Error from FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS)");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OPTICS_CONFIG_MODE, *l_iter, l_fbc_optics_cfg_mode[l_unit_pos]),
-                 "Error from FAPI_ATTR_GET(ATTR_OPTICS_CONFIG_MODE)");
-
         fapi2::toString(*l_iter, l_chipletTargetStr, sizeof(l_chipletTargetStr));
-        FAPI_DBG("Invoking p9.fbc.ioo_dl.scom.initfile...");
+        FAPI_DBG("Invoking p9.fbc.ioo_dl.scom.initfile on target %s...", l_chipletTargetStr);
         FAPI_EXEC_HWP(l_rc, p9_fbc_ioo_dl_scom, *l_iter);
 
         if (l_rc)
@@ -243,10 +255,6 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
                      "Error from putScom (OBUS_LL0_LL0_LL0_PB_IOOL_FIR_MASK_REG)");
         }
     }
-
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE, i_target, l_fbc_optics_cfg_mode),
-             "Error from FAPI_ATTR_SET(ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE)");
-
 
     // Invoke NX SCOM initfile
     FAPI_DBG("Invoking p9.nx.scom.initfile on target %s...", l_procTargetStr);

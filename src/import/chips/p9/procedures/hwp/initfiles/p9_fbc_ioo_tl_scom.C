@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,13 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                                             || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_1] != literal_0));
         uint64_t l_def_OBUS0_FBC_ENABLED = ((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_3] != literal_0)
                                             || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_0] != literal_0));
+        fapi2::ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_Type l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE, TGT0, l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE));
+        uint64_t l_def_NVLINK_ACTIVE = ((((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_0] ==
+                                           fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_NV)
+                                          || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_1] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_NV))
+                                         || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_2] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_NV))
+                                        || (l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_NV));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5013803ull, l_scom_buffer ));
@@ -96,6 +103,24 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_IOO_SCOM_PB_CFG_IOO67_IS_LOGICAL_PAIR_ON = 0x1;
                 l_scom_buffer.insert<3, 1, 63, uint64_t>(l_PB_IOO_SCOM_PB_CFG_IOO67_IS_LOGICAL_PAIR_ON );
+            }
+
+            if (l_def_NVLINK_ACTIVE)
+            {
+                constexpr auto l_PB_IOO_SCOM_SEL_03_NPU_NOT_PB_ON = 0x1;
+                l_scom_buffer.insert<13, 1, 63, uint64_t>(l_PB_IOO_SCOM_SEL_03_NPU_NOT_PB_ON );
+            }
+
+            if (l_def_NVLINK_ACTIVE)
+            {
+                constexpr auto l_PB_IOO_SCOM_SEL_04_NPU_NOT_PB_ON = 0x1;
+                l_scom_buffer.insert<14, 1, 63, uint64_t>(l_PB_IOO_SCOM_SEL_04_NPU_NOT_PB_ON );
+            }
+
+            if (l_def_NVLINK_ACTIVE)
+            {
+                constexpr auto l_PB_IOO_SCOM_SEL_05_NPU_NOT_PB_ON = 0x1;
+                l_scom_buffer.insert<15, 1, 63, uint64_t>(l_PB_IOO_SCOM_SEL_05_NPU_NOT_PB_ON );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x5013823ull, l_scom_buffer));
