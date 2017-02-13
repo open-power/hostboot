@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -168,17 +168,6 @@ void* call_host_slave_sbe_config(void *io_pArgs)
             }
         }
     } // end of cycling through all processor chips
-
-    // Resolve the side characteristics of the Processor SBE Seeproms
-    errlHndl_t err = SBE::resolveProcessorSbeSeeproms();
-    if ( err )
-    {
-        // Create IStep error log and cross reference error that occurred
-        l_stepError.addErrorDetails( err );
-
-        // Commit Error
-        errlCommit( err, ISTEP_COMP_ID );
-    }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
              "call_host_slave_sbe_config exit" );

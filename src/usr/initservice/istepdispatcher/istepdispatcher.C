@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -583,9 +583,6 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                                     "but no new gard records were commited. Do "
                                     "not increment reboot count.");
                             }
-
-                            // discontinue isteps
-                            iv_stopIpl = true;
 
                             // Request BMC to do power cycle that sends shutdown
                             // and reset the host
@@ -1377,6 +1374,10 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
 #ifdef CONFIG_BMC_IPMI
 void IStepDispatcher::requestReboot()
 {
+    // always stop dispatching isteps before calling for the reboot
+    setStopIpl();
+
+    // send a reboot message to the BMC
     IPMI::initiateReboot();
 }
 #endif
