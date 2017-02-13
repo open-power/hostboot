@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -236,6 +236,47 @@ int32_t CmdCompleteDd1Workaround( ExtensibleChip * i_mcbChip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( p9_mcbist, CmdCompleteDd1Workaround );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  MCBISTFIR[1] - COMMAND_ADDRESS_TIMEOUT.
+ * @param  i_chip An MCBIST chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t commandAddrTimeout( ExtensibleChip * i_chip,
+                            STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[p9_mcbist::commandAddrTimeout] "
+
+    // The current MCBIST command is hung and will not complete. All conditions
+    // that would cause this are contained within the MCAs in which the command
+    // was executed. Restarting the command will likely fail with the same
+    // issue. Callout and gard all MCAs in which the command was executed.
+
+    std::vector<ExtensibleChip *> mcaList;
+
+    if ( SUCCESS != getMcbistMaintPort(i_chip, mcaList) )
+    {
+        PRDF_ERR( PRDF_FUNC "getMcbistMaintPort(0x%08x) failed",
+                  i_chip->getHuid() );
+    }
+    else
+    {
+        for ( auto & mcaChip : mcaList )
+        {
+            io_sc.service_data->SetCallout( mcaChip->getTrgt() );
+        }
+    }
+
+    return SUCCESS; // nothing to return to rule code
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( p9_mcbist, commandAddrTimeout );
+
+//------------------------------------------------------------------------------
 
 } // end namespace p9_mcbist
 

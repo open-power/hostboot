@@ -531,7 +531,7 @@ group gMCBISTFIR filter singlebit, cs_root_cause
     /** MCBISTFIR[1]
      *  COMMAND_ADDRESS_TIMEOUT
      */
-    (rMCBISTFIR, bit(1)) ? defaultMaskedError;
+    (rMCBISTFIR, bit(1)) ? command_addr_timeout;
 
     /** MCBISTFIR[2]
      *  INTERNAL_FSM_ERROR
