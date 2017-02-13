@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -22,15 +22,23 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-/** MCBIST program complete...TBD */
+
+/** MCBIST program complete */
 actionclass mcbist_program_complete
 {
     funccall("McbistCmdComplete");
 };
 
-/** MCBIST program complete workaround...TBD */
+/** MCBIST program complete workaround */
 actionclass mcbist_program_complete_workaround
 {
     funccall("CmdCompleteDd1Workaround");
+};
+
+/** MCBIST Command Address Timeout */
+actionclass command_addr_timeout
+{
+    threshold1;
+    funccall("commandAddrTimeout");
 };
 
