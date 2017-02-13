@@ -41,7 +41,7 @@ actionclass thresholdPll
 # callout/gard the chip at threshold along with PLL scom
 # data captured.
 /** PCB Slave Internal parity error action */
-actionclass PcbSlaveInternalParity
+actionclass pcb_slave_internal_parity
 {
     capture(PllFIRs);
     calloutSelfHigh;

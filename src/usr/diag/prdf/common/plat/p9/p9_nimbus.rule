@@ -2126,7 +2126,7 @@ group gTP_LFIR filter singlebit, cs_root_cause
     /** TP_LFIR[21]
      *  local errors from PORT2 ( error)
      */
-    (rTP_LFIR, bit(21)) ? PcbSlaveInternalParity;
+    (rTP_LFIR, bit(21)) ? pcb_slave_internal_parity;
 
     /** TP_LFIR[22]
      *  FIR error from SBE
