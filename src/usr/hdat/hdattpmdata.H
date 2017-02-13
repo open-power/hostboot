@@ -1,0 +1,191 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hdat/hdattpmdata.H $                                  */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+#ifndef HDATTPMDATA_H
+#define HDATTPMDATA_H
+
+/**
+ * @file hdattpmdata.H
+ *
+ * @brief This file contains the class definition for the TPM data object
+ *        which manages the HDAT TPM section.
+ *
+ */
+
+#include <stdint.h>
+#include <errl/errlentry.H>
+#include <hdat/hdat_reasoncodes.H>
+#include "hdatutil.H"
+#include <hdat/hdat.H>
+
+namespace HDAT
+{
+
+/**
+ * @brief Structure definition for HDAT Tpm Node Related Data header
+ */
+struct hdatTpmData_t
+{
+    hdatHDIF_t hdatHdr;
+    hdatHDIFDataHdr_t hdatSbTpmInfo; // Pointer pair to secure boot TPM info
+    hdatHDIFDataHdr_t hdatPhysInter; // Physical interaction mechanism details
+    uint8_t hdatReserved1[16]; // Padding for alignment and growth/compatibility
+} __attribute__ ((packed));
+
+
+/**
+ * @brief  Structure definition for Secureboot TPM Info Array
+ */
+struct hdatSbTpmInfo_t
+{
+    uint32_t hdatSbTpmArrayOffset;
+    uint32_t hdatSbTpmArrayNumEntries;
+    uint32_t hdatsbTpmArraySize;
+} __attribute__ ((packed));
+
+
+/**
+ *  @brief Structure definition for Secureboot TPM Instance Info
+ */
+struct hdatSbTpmInstInfo_t
+{
+    uint32_t hdatChipId;
+    uint32_t hdatDbobId; // Drawer/Book/Octant/Blade ID
+    uint8_t hdatLocality1Addr;
+    uint8_t hdatLocality2Addr;
+    uint8_t hdatLocality3Addr;
+    uint8_t hdatLocality4Addr;
+    uint8_t hdatFunctionalStatus;
+    uint8_t reserved[3];
+    uint32_t hdatTpmSrtmEventLogOffset;
+    uint32_t hdatTpmSrtmEventLogEntrySize;
+    uint32_t hdatTpmDrtmEventLogOffset;
+    uint32_t hdatTpmDrtmEventLogEntrySize;
+} __attribute__ ((packed));
+
+
+/** Begin Class Description
+ *
+ * @brief  The HdatTpmData class is used to construct the Node TPM Related Data
+ *         hypervisor data area.
+ *
+ * Description: This class defines a specialized object.  It is not intended
+ *              that any component can create an object of this type.
+ *              In particular, the object is built only by the hdat component.
+ *
+ *              The real purpose of the object is to create the Node TPM
+ *              data structure as defined by the PHYP Initialization
+ *              architecture.  This data structure is eventually copied to
+ *              main memory.  The class is not defined to be a general purpose
+ *              interface for building this object by anyone other than the
+ *              hdat process.
+ *
+ * Thread safety:  An HdatTpmData object is not thread safe.  That is, a
+ *                 single object cannot be shared and used concurrently by
+ *                 multiple threads at the same time.  An object can be used by
+ *                 multiple threads if the threads serialize access.  And of
+ *                 course, each thread can use its own object with no concerns
+ *                 about what other threads are doing.
+ *
+ * Signal handler usage: This class is not intended to be used in a signal
+ *                        handler and nothing has been done to try and make
+ *                        it safe to use in a signal handler.
+ *
+ * End Class Description
+ */
+class HdatTpmData
+{
+    public:
+        /**
+         * @brief Construct an HdatTpmData object.
+         *
+         *       This is the constructor for the HdatTpmData object.
+         *
+         *       After creating a new HdatTpmData object via new, you must
+         *       check o_errlHndl to see if the constructor ran successfully.
+         *       If o_errHndl indicates an error was reported by the
+         *       constructor, then new has already allocated heap storage and
+         *       the object must be deleted in order to free the heap storage.
+         *
+         * @pre None
+         *
+         * @post An HdatTpmData object has been constructed.
+         *       Heap storage has been allocated.
+         *
+         * @param[out] o_errlHndl If any errors occur, the HdatTpmData object is
+         *                                      NOT constructed and an error is
+         *                                      returned in this parameter
+         * @param[in] i_msAddr The main memory address that the service
+         *                                      processor subsystem structure
+         *                                      will be DMA'd to.
+         */
+        HdatTpmData(errlHndl_t &o_errlHndl, const HDAT::hdatMsAddr_t &i_msAddr);
+
+
+        /**
+         * @brief HdatTpmData object destructor
+         *
+         *        This is the destructor for an HdatTpmData object.
+         *        Any heap storage allocated for the object is deallocated.
+         *
+         * @pre No preconditions exist
+         *
+         * @post The HdatTpmData object has been destroyed and can
+         *       no longer be used.
+         *
+         */
+        ~HdatTpmData();
+
+         /**
+          * @brief Load TPM Related Data to Mainstore
+          *
+          * @pre None
+          *
+          * @post None
+          *
+          * @param[out] o_size Size of TPM Data structure
+          * @param[out] o_count Number of TPM Data structures
+          *
+          * @retval errlHndl_t nullptr on success, error log on error
+          */
+        errlHndl_t hdatLoadTpmData(uint32_t &o_size,uint32_t &o_count);
+
+        // delete copy/move constructors and operators
+        HdatTpmData(const HdatTpmData& ) = delete;
+        HdatTpmData& operator=(const HdatTpmData& ) = delete;
+        HdatTpmData(HdatTpmData&&) = delete;
+        HdatTpmData& operator=(HdatTpmData&&) = delete;
+
+    private:
+
+        HDAT::hdatMsAddr_t     iv_msAddr;
+
+        hdatTpmData_t *iv_hdatTpmData;
+
+
+}; // end of HdatTpmData class
+
+
+}
+#endif // HDATTPMDATA_H

@@ -91,13 +91,18 @@ const uint16_t HDAT_VERSION3 = 3;
 #define HDAT_INF( _fmt_, _args_...)  \
         TRACFCOMP( g_trac_hdat,DBG_MRK _fmt_, ##_args_ );
 
+#define UINT64_HIGH(u) ((u & 0xFFFFFFFF00000000) >> 32)
+
+#define UINT64_LOW(u) (u & 0x00000000FFFFFFFF)
+
+
 namespace HDAT
 {
 
 extern trace_desc_t* g_trac_hdat;
 
 
-/** @brief Defines the Host I2C device info 
+/** @brief Defines the Host I2C device info
  */
 struct hdatI2cData_t
 {

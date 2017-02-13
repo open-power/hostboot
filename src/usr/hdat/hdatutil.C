@@ -96,6 +96,7 @@ void hdatBldErrLog(errlHndl_t &   io_err,
     }
 }
 
+
 /*******************************************************************************
 *  isFunctional
 *******************************************************************************/
@@ -1710,7 +1711,7 @@ void hdatGetI2cDeviceInfo(TARGETING::Target* i_pTarget,
             l_hostI2cObj.hdatI2cSlavePort    = l_i2cDevEle.slavePort;
             l_hostI2cObj.hdatI2cSlaveDevPurp = l_i2cDevEle.devicePurpose;
             l_hostI2cObj.hdatI2cLinkId       = l_I2cLinkId++;
-            
+
             o_i2cDevEntries.push_back(l_hostI2cObj);
         }
     }

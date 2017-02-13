@@ -47,6 +47,7 @@ OBJS += hdatbldda.o
 OBJS += hdatnodedata.o
 OBJS += hdathostservices.o
 OBJS += hdathbrt.o
+OBJS += hdattpmdata.o
 OBJS += hdatspiraS.o
 OBJS += hdatspiraH.o
 OBJS += hdatipmi.o
