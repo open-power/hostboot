@@ -81,8 +81,8 @@ enum hdatSpiraSDataAreas
   HDAT_SPIRAS_HOSTSR           = 14,   // HOSTSR (Host service data)
   HDAT_SPIRAS_HBRT             = 15,   //HBRT (runtime data)
   HDAT_SPIRAS_IPMI             = 16,   // IPMI Sensor MApping Data
-
-  HDAT_SPIRAS_DA_LAST          = 17
+  HDAT_SPIRAS_TPM_RELATED      = 17,   // Node TPM Related Data
+  HDAT_SPIRAS_DA_LAST          = 18
 };
 
 

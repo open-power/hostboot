@@ -106,6 +106,8 @@ enum HDATModuleId
   MOD_UTIL_PVPD_FULL_READ_FUNC = 0x2f,
   MOD_UTIL_MVPD                = 0x30,
   MOD_HDAT_IPMI_DTOR           = 0x31,
+  MOD_TPMDATA_CONSTRUCTOR      = 0x32,
+  MOD_TPMDATA_DESTRUCTOR       = 0x33,
 };
 
 

@@ -55,6 +55,7 @@
 #include "hdatiohub.H"
 #include "hdathbrt.H"
 #include "hdatipmi.H"
+#include "hdattpmdata.H"
 #include <util/align.H>
 #include <targeting/common/commontargeting.H>
 
@@ -573,7 +574,7 @@ errlHndl_t HdatSpiraS::loadDataArea( const hdat5Tuple_t& i_spirasHostEntry,
                 }
             }
             break;
-           case HDAT_SPIRAS_IPMI:
+            case HDAT_SPIRAS_IPMI:
             {
                 HDAT_DBG("Calling IPMI Sensor Data structure from spiras");
                 l_err = hdatLoadIpmi(l_addrToPass,l_size,l_count);
@@ -587,11 +588,36 @@ errlHndl_t HdatSpiraS::loadDataArea( const hdat5Tuple_t& i_spirasHostEntry,
                 }
             }
             break;
+            case HDAT_SPIRAS_TPM_RELATED:
+            {
+                HDAT_DBG("calling TPM DATA from spiras");
+                HdatTpmData l_tpmData(l_err, l_addrToPass);
+
+                if ( nullptr == l_err)
+                {
+                    l_err = l_tpmData.hdatLoadTpmData(l_size, l_count);
+
+                    if ( nullptr == l_err )
+                    {
+                        HDAT_DBG("returned from TPM DATA, size=0x%x,count=%d",
+                                l_size, l_count);
+                    }
+                    else
+                    {
+                        HDAT_ERR("could not load TPM DATA");
+                    }
+                }
+                else
+                {
+                    HDAT_ERR("could not create TPM DATA object");
+                }
+            }
+            break;
             default:
             {
                 HDAT_ERR("not a valid data area");
             }
-                 break;
+            break;
 
         }
         if (l_err)
