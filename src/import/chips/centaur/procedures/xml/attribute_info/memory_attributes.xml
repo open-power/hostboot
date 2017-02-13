@@ -31,7 +31,7 @@
 <!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
 <!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
-<!-- *HWP Level: 1 -->
+<!-- *HWP Level: 2 -->
 <!-- *HWP Consumed by: FSP:HB -->
 <!-- -->
 
@@ -174,7 +174,6 @@ Set by: PLL settings written by Dave Cadigan</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_RANKS_CONFIGED</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -190,7 +189,6 @@ firmware notes: none</description>
     <array> 2 2</array>
     <persistRuntime/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_NUM_RANKS_PER_DIMM</id>
@@ -506,9 +504,9 @@ firmware notes: none</description>
     <array> 2</array>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_SPARE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.   creator: mss_eff_cnfg consumer: various firmware notes: load from spd
 OBSOLETE: Use ATTR_CEN_VPD_DIMM_SPARE
 </description>
@@ -537,7 +535,6 @@ This is for DDR3</description>
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -635,7 +632,6 @@ This is the nominal value</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_CEN_RCV_IMP_DQ_DQS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -652,7 +648,6 @@ This is the nominal value</description>
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -751,9 +746,8 @@ SLEW_MAXV_NS = 7</enum>
 </attribute>
 -->
 
-<!--
 <attribute>
-    <id>ATTR_CEN_EFF_CEN_RD_VREF</id>
+    <id>ATTR_CEN_EFF_RD_VREF</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>Centaur Read Vref. Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 Creator: VPD(MT) or mss_eff_cnfg_termination
@@ -768,7 +762,6 @@ This is the nominal value</description>
     <odmChangeable/>
     <array> 2</array>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -800,7 +793,6 @@ firmware notes: none</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_BANKS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -813,9 +805,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_ROWS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -828,9 +818,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_COLS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -843,9 +831,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_DENSITY</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -858,9 +844,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TRCD</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -873,9 +857,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TRRD</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -888,7 +870,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -905,7 +886,6 @@ firmware notes: none</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TRP</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -918,7 +898,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -935,7 +914,6 @@ firmware notes: none</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TRC</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -948,9 +926,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TRFI</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -963,9 +939,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TRFC</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -978,9 +952,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TWTR</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -993,7 +965,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -1023,7 +994,6 @@ firmware notes: none</description>
     <odmChangeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_TFAW</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1036,7 +1006,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_BL</id>
@@ -1765,7 +1734,6 @@ firmware notes: none</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_ADDR_MODE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1776,9 +1744,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_TEST_VALID</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1794,7 +1760,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -1875,7 +1840,6 @@ firmware notes: none</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_MEMCAL_INTERVAL</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1886,9 +1850,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_ZQCAL_INTERVAL</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1899,9 +1861,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_EFF_IBM_TYPE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1913,7 +1873,6 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_NUM_DROPS_PER_PORT</id>
@@ -1975,7 +1934,6 @@ firmware notes: none</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1986,9 +1944,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_MEM_THROTTLE_DENOMINATOR</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1999,9 +1955,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2012,7 +1966,6 @@ firmware notes: none</description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -2270,7 +2223,6 @@ firmware notes: none</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -2280,7 +2232,6 @@ firmware notes: none</description>
     <odmVisable/>
     <persistRuntime/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -2319,7 +2270,6 @@ This attribute will only be found in a Tuelta system.
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2329,8 +2279,6 @@ This attribute will only be found in a Tuelta system.
     <odmChangeable/>
     <writeable/>
 </attribute>
--->
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -2343,9 +2291,7 @@ This attribute will only be alive in the Tuelta system.
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2356,7 +2302,6 @@ This attribute will only be alive in the Tuelta system.
     <odmChangeable/>
     <writeable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -2383,7 +2328,6 @@ Note: Cronus and Firmware plus our initfiles do not really support any of the UN
     <odmChangeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_PREFETCH_ENABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -2394,7 +2338,6 @@ Note: Cronus and Firmware plus our initfiles do not really support any of the UN
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_MSS_CLEANER_ENABLE</id>
@@ -3218,7 +3161,6 @@ Will be set at an MBA level with one policy to be used</description>
     <odmChangeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_THROTTLE_CONTROL_RAS_WEIGHT</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3228,9 +3170,7 @@ Will be set at an MBA level with one policy to be used</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_THROTTLE_CONTROL_CAS_WEIGHT</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3240,7 +3180,6 @@ Will be set at an MBA level with one policy to be used</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -3302,7 +3241,6 @@ Will be set at an MBA level with one policy to be used</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_MEM_THROTTLE_DENOMINATOR</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3312,7 +3250,6 @@ Will be set at an MBA level with one policy to be used</description>
     <odmVisable/>
     <persistRuntime/>
 </attribute>
--->
 <attribute>
     <id>ATTR_CEN_MSS_INIT_STATE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3336,7 +3273,6 @@ Will be set at an MBA level with one policy to be used</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_EFF_VPD_VERSION</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -3348,7 +3284,6 @@ Will be set at an MBA level with one policy to be used</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -3689,7 +3624,6 @@ Will be set at an MBA level with one policy to be used</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_POWER_CONTROL_REQUESTED</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3699,7 +3633,6 @@ Will be set at an MBA level with one policy to be used</description>
     <platInit/>
     <odmVisable/>
 </attribute>
--->
 
 <!--
 <attribute>
