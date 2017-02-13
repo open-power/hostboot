@@ -383,30 +383,22 @@ PRDF_PLUGIN_DEFINE_NS( p9_nimbus, Proc, CheckErrorType );
  * @param i_chip P9 chip
  * @returns Failure or Success
  */
-int32_t clearParityError( ExtensibleChip * i_chip)
+int32_t clearParityError( ExtensibleChip * i_chip,
+                          STEP_CODE_DATA_STRUCT & i_sc )
 {
     #define PRDF_FUNC "[Proc::clearParityError] "
     int32_t rc = SUCCESS;
 
-    // Clear Chiplet parity error bits
-    ClearChipletParityError(i_chip, TYPE_PROC);
-    ClearChipletParityError(i_chip, TYPE_XBUS);
-    ClearChipletParityError(i_chip, TYPE_OBUS);
-    ClearChipletParityError(i_chip, TYPE_MCA);
-    ClearChipletParityError(i_chip, TYPE_PEC);
-    ClearChipletParityError(i_chip, TYPE_EQ);
-    ClearChipletParityError(i_chip, TYPE_CORE);
-
-    // Clear TPLFIR[21]
-    SCAN_COMM_REGISTER_CLASS * TP_LFIR_and =
-               i_chip->getRegister("TP_LFIR_AND");
-    TP_LFIR_and->setAllBits();
-    TP_LFIR_and->ClearBit(PLL_UNLOCK);
-    rc = TP_LFIR_and->Write();
-    if (rc != SUCCESS)
+    if ( CHECK_STOP != i_sc.service_data->getPrimaryAttnType() )
     {
-        PRDF_ERR(PRDF_FUNC "TP_LFIR_AND write failed"
-                 "for 0x%08x", i_chip->GetId());
+        // Clear Chiplet parity error bits
+        ClearChipletParityError(i_chip, TYPE_PROC);
+        ClearChipletParityError(i_chip, TYPE_XBUS);
+        ClearChipletParityError(i_chip, TYPE_OBUS);
+        ClearChipletParityError(i_chip, TYPE_MCA);
+        ClearChipletParityError(i_chip, TYPE_PEC);
+        ClearChipletParityError(i_chip, TYPE_EQ);
+        ClearChipletParityError(i_chip, TYPE_CORE);
     }
 
     return rc;
