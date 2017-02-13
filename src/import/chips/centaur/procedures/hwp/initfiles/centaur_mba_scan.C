@@ -31,6 +31,7 @@ using namespace fapi2;
 
 constexpr uint64_t literal_0x0000000000003FFF = 0x0000000000003FFF;
 constexpr uint64_t literal_0xFFFFFF = 0xFFFFFF;
+constexpr uint64_t literal_0b00000000000011 = 0b00000000000011;
 
 fapi2::ReturnCode centaur_mba_scan(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& TGT0)
 {
@@ -71,6 +72,12 @@ fapi2::ReturnCode centaur_mba_scan(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
         fapi2::variable_buffer l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_1(24);
         l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_1.insertFromRight<uint64_t>(literal_0xFFFFFF, 0, 24);
         FAPI_TRY(fapi2::putSpy(TGT0, "TCM.TRA.MBA23TRA.TR.TRACE_TRDATA_CONFIG_1", l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_1));
+        fapi2::variable_buffer l_TCM_TRA_MBA01TRA_TR_TRACE_TRCTRL_CONFIG(14);
+        l_TCM_TRA_MBA01TRA_TR_TRACE_TRCTRL_CONFIG.insertFromRight<uint64_t>(literal_0b00000000000011, 0, 14);
+        FAPI_TRY(fapi2::putSpy(TGT0, "TCM.TRA.MBA01TRA.TR.TRACE_TRCTRL_CONFIG", l_TCM_TRA_MBA01TRA_TR_TRACE_TRCTRL_CONFIG));
+        fapi2::variable_buffer l_TCM_TRA_MBA23TRA_TR_TRACE_TRCTRL_CONFIG(14);
+        l_TCM_TRA_MBA23TRA_TR_TRACE_TRCTRL_CONFIG.insertFromRight<uint64_t>(literal_0b00000000000011, 0, 14);
+        FAPI_TRY(fapi2::putSpy(TGT0, "TCM.TRA.MBA23TRA.TR.TRACE_TRCTRL_CONFIG", l_TCM_TRA_MBA23TRA_TR_TRACE_TRCTRL_CONFIG));
 
     };
 fapi_try_exit:
