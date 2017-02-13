@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -44,7 +44,6 @@ UTILS_PATH  += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${UTILS_PATH}/
 
 OBJS += sbe_update.o
-OBJS += sbe_resolve_sides.o
 
 SUBDIRS += test.d
 

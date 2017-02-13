@@ -83,15 +83,6 @@ namespace SBE
     errlHndl_t updateProcessorSbeSeeproms();
 
     /**
-     * @brief Iterates through all the functional processors and resolves
-     *        the Hostboot Base Addresses (HBB) in each SBE Image and performs
-     *        any necessary operations related to GOLDEN side support.
-     *
-     * @return errlHndl_t    Error log handle on failure.
-     */
-    errlHndl_t resolveProcessorSbeSeeproms();
-
-    /**
      * @brief Determines whether we are on the Golden side or not
      *
      * @param[out] o_isGolden boolean, True if we are on Golden side, False
@@ -115,7 +106,8 @@ namespace SBE
     errlHndl_t getBootMcSyncMode( uint8_t& o_mcSyncMode );
 
     /**
-     * @brief Updates which Seeprom was used to boot the SBE
+     * @brief Sets the target processor to boot from the same side that
+     *        the master processor used
      *
      * @param[in] i_target      Target processor to update
      *

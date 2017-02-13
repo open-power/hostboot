@@ -688,5 +688,12 @@ namespace SBE
     errlHndl_t ringOvd(void *io_imgPtr,
                        uint32_t & io_ovdImgSize);
 
+    /**
+     * @brief Performs any necessary actions and then reboot the system
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t sbeDoReboot( void );
+
 } //end namespace SBE
 #endif

@@ -53,7 +53,6 @@
 #include <sbeio/sbeioif.H>
 #include <sbe/sbereasoncodes.H>
 #include "sbe_update.H"
-#include "sbe_resolve_sides.H"
 
 //  fapi support
 #include    <fapi2.H>
@@ -433,51 +432,12 @@ namespace SBE
                     errlCommit( err, SBE_COMP_ID );
                 }
 
-#ifdef CONFIG_BMC_IPMI
-                err = sbePreRebootIpmiCalls();
+                err = sbeDoReboot();
                 if (err)
                 {
-                    TRACFCOMP( g_trac_sbe,ERR_MRK"sbePreRebootIpmiCalls "
-                               "failed");
+                    TRACFCOMP( g_trac_sbe,ERR_MRK"sbeDoReboot failed");
                     break;
                 }
-#endif
-
-#ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(SBE_COMP_NAME, "System Rebooting To "
-                              "Perform SBE Update\n");
-
-            CONSOLE::flush();
-#endif
-
-#ifndef CONFIG_BMC_IPMI
-                // Sync all attributes to the FSP before doing the Shutdown
-                err = syncAllAttributesToFsp();
-                if( err )
-                {
-                    // Something failed on the sync.  Commit the error here
-                    // and continue with the Re-IPL Request
-                    TRACFCOMP( g_trac_sbe,
-                               ERR_MRK"updateProcessorSbeSeeproms() - Error "
-                               "syncing attributes to FSP, RC=0x%X, PLID=0x%lX",
-                               ERRL_GETRC_SAFE(err),
-                               ERRL_GETPLID_SAFE(err));
-                    errlCommit( err, SBE_COMP_ID );
-                }
-                else
-                {
-                    TRACFCOMP( g_trac_sbe,
-                               INFO_MRK"updateProcessorSbeSeeproms() - Sync "
-                               "Attributes to FSP" );
-                }
-
-                TRACFCOMP( g_trac_sbe,
-                           INFO_MRK"updateProcessorSbeSeeproms(): Calling "
-                           "INITSERVICE::doShutdown() with "
-                           "SBE_UPDATE_REQUEST_REIPL = 0x%X",
-                           SBE_UPDATE_REQUEST_REIPL );
-                INITSERVICE::doShutdown(SBE_UPDATE_REQUEST_REIPL);
-#endif
             }
 
             /************************************************************/
@@ -4746,4 +4706,116 @@ namespace SBE
 
         return l_err;
     }
+
+/////////////////////////////////////////////////////////////////////
+errlHndl_t sbeDoReboot( void )
+{
+    errlHndl_t err = NULL;
+    TRACFCOMP( g_trac_sbe, ENTER_MRK"sbeDoReboot");
+
+    do{
+#ifdef CONFIG_BMC_IPMI
+        uint16_t count = 0;
+        SENSOR::RebootCountSensor l_sensor;
+
+        // Read reboot count sensor
+        err = l_sensor.getRebootCount(count);
+        if ( err )
+        {
+            TRACFCOMP( g_trac_sbe,
+                       ERR_MRK"sbeDoReboot: "
+                       "FAIL Reading Reboot Sensor Count. "
+                       "Committing Error Log rc=0x%.4X eid=0x%.8X "
+                       "plid=0x%.8X, but continuing shutdown",
+                       err->reasonCode(),
+                       err->eid(),
+                       err->plid());
+            err->collectTrace(SBE_COMP_NAME);
+            errlCommit( err, SBE_COMP_ID );
+
+            // No Break - Still do reboot
+        }
+        else
+        {
+            // Increment Reboot Count Sensor
+            count++;
+            TRACFCOMP( g_trac_sbe,
+                       INFO_MRK"sbeDoReboot: "
+                       "Writing Reboot Sensor Count=%d", count);
+
+            err = l_sensor.setRebootCount( count );
+            if ( err )
+            {
+                TRACFCOMP( g_trac_sbe,
+                           ERR_MRK"sbeDoReboot: "
+                           "FAIL Writing Reboot Sensor Count to %d. "
+                           "Committing Error Log rc=0x%.4X eid=0x%.8X "
+                           "plid=0x%.8X, but continuing shutdown",
+                           count,
+                           err->reasonCode(),
+                           err->eid(),
+                           err->plid());
+                err->collectTrace(SBE_COMP_NAME);
+                errlCommit( err, SBE_COMP_ID );
+
+                // No Break - Still send chassis power cycle
+            }
+        }
+
+#else //non-IPMI
+
+        if( INITSERVICE::spBaseServicesEnabled() )
+        {
+            // Sync all attributes to the FSP before doing the Shutdown
+            err = syncAllAttributesToFsp();
+            if( err )
+            {
+                // Something failed on the sync.  Commit the error here
+                // and continue with the Re-IPL Request
+                TRACFCOMP( g_trac_sbe,
+                           ERR_MRK"sbeDoReboot() - Error "
+                           "syncing attributes to FSP, RC=0x%X, PLID=0x%lX",
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
+                errlCommit( err, SBE_COMP_ID );
+            }
+            else
+            {
+                TRACFCOMP( g_trac_sbe,
+                           INFO_MRK"sbeDoReboot() - Sync "
+                           "Attributes to FSP" );
+            }
+        }
+
+#endif
+
+#ifdef CONFIG_CONSOLE
+        CONSOLE::displayf(SBE_COMP_NAME, "System Rebooting To "
+                          "Perform SBE Update\n");
+        CONSOLE::flush();
+#endif
+
+
+#ifdef CONFIG_BMC_IPMI
+        // initate a graceful power cycle
+        TRACFCOMP( g_trac_sbe,"sbeDoReboot: "
+                   "requesting chassis power cycle");
+        INITSERVICE::requestReboot();
+#else //non-IPMI
+        TRACFCOMP( g_trac_sbe,
+                   INFO_MRK"sbeDoReboot(): Calling "
+                   "INITSERVICE::doShutdown() with "
+                   "SBE_UPDATE_REQUEST_REIPL = 0x%X",
+                   SBE_UPDATE_REQUEST_REIPL );
+        // shutdown/TI hostboot
+        INITSERVICE::doShutdown(SBE_UPDATE_REQUEST_REIPL);
+#endif
+
+    }while(0);
+
+    TRACFCOMP( g_trac_sbe, EXIT_MRK"sbeDoReboot");
+
+    return err;
+}
+
 } //end SBE Namespace
