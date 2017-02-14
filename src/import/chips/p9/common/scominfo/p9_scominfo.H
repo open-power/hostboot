@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,12 @@
 extern "C"
 {
 
-    static const uint32_t PPE_MODE = 1;
+    //Modes for scominfo functions
+    static const uint32_t P9N_DD1_SI_MODE = 0x0;
+    static const uint32_t PPE_MODE = 0x1;
+    static const uint32_t P9N_DD2_SI_MODE = 0x2;
+    static const uint32_t P9C_DD1_SI_MODE = 0x4;
+    static const uint32_t P9C_DD2_SI_MODE = 0x8;
 
     typedef enum
     {
@@ -60,7 +65,7 @@ extern "C"
     /// @param[in] i_p9CU Enumeration of the chip unit type
     /// @param[in] i_chipUnitNum Instance number of the chip unit
     /// @param[in] i_scomAddr The input SCOM address associated with the chip unit type
-    /// @param[in] i_mode Used for special purposes, default to 0
+    /// @param[in] i_mode Used for special purposes, default to 0 = p9n dd1, 1 = ppe_mode, 2 = p9n dd2, 4 = p9c dd1, 8 = p9c dd2
     /// @retval uint64_t Actual SCOM address for the chip unit instance passed in
     uint64_t p9_scominfo_createChipUnitScomAddr(const p9ChipUnits_t i_p9CU, const uint8_t i_chipUnitNum,
             const uint64_t i_scomAddr, const uint32_t i_mode = 0);

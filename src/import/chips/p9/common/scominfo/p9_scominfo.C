@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,7 @@ extern "C"
 
         //Used to help generate entries for the SCOMdef documentation,
         //These aren't general PIB addresses
-        if (i_mode == PPE_MODE)
+        if ((i_mode & PPE_MODE) == PPE_MODE)
         {
             switch (i_p9CU)
             {
@@ -149,9 +149,57 @@ extern "C"
                     break;
 
                 case PU_NV_CHIPUNIT:
-                    l_scom.set_sat_id((l_scom.get_sat_id() % 4) + ((i_chipUnitNum / 2) * 4));
-                    l_scom.set_sat_offset( (l_scom.get_sat_offset() % 32) +
-                                           (32 * (i_chipUnitNum % 2)));
+                    if ((i_mode & P9N_DD1_SI_MODE) == P9N_DD1_SI_MODE)
+                    {
+                        l_scom.set_sat_id((l_scom.get_sat_id() % 4) + ((i_chipUnitNum / 2) * 4));
+                        l_scom.set_sat_offset( (l_scom.get_sat_offset() % 32) +
+                                               (32 * (i_chipUnitNum % 2)));
+                    }
+                    else
+                    {
+                        uint64_t l_sa = i_scomAddr;
+
+                        //                       rrrrrrSTIDxxx---
+                        //                       000100       yyy
+                        //       x"4900" & "00" when "00100010", -- stk0, ntl0, 00-07, hyp-only
+                        //       x"0b00" & "11" when "00101001", -- stk0, ntl1, 24-31, user-acc
+                        //                             STID
+                        //       x"5900" & "00" when "01100010", -- stk1, ntl0, 00-07, hyp-only
+                        //       x"1b00" & "11" when "01101001", -- stk1, ntl1, 24-31, user-acc
+                        //                             STID
+                        //       x"6900" & "00" when "10100010", -- stk2, ntl0, 00-07, hyp-only
+                        //       x"2b00" & "11" when "10101001", -- stk2, ntl1, 24-31, user-acc
+
+                        if ((i_chipUnitNum / 2) == 0)
+                        {
+                            l_sa = (l_sa & 0xFFFFFFFFFFFF007FULL) | 0x0000000000001100ULL ;
+                        }
+
+                        if ((i_chipUnitNum / 2) == 1)
+                        {
+                            l_sa = (l_sa & 0xFFFFFFFFFFFF007FULL) | 0x0000000000001300ULL ;
+                        }
+
+                        if ((i_chipUnitNum / 2) == 2)
+                        {
+                            l_sa = (l_sa & 0xFFFFFFFFFFFF007FULL) | 0x0000000000001500ULL ;
+                        }
+
+                        uint64_t l_eo = (l_sa & 0x71) >> 3;
+
+                        if (l_eo > 5 && (i_chipUnitNum % 2 == 0))
+                        {
+                            l_sa -= 0x20ULL; // 0b100 000
+                        }
+
+                        if (l_eo <= 5 && (i_chipUnitNum % 2 == 1))
+                        {
+                            l_sa += 0x20ULL; // 0b100 000
+                        }
+
+                        l_scom.set_addr(l_sa);
+                    }
+
                     break;
 
                 case PU_PEC_CHIPUNIT:
@@ -338,7 +386,7 @@ extern "C"
         uint8_t l_sat_id = l_scom.get_sat_id();
         uint8_t l_sat_offset = l_scom.get_sat_offset();
 
-        if (i_mode == PPE_MODE)
+        if ((i_mode & PPE_MODE) == PPE_MODE)
         {
             if (PPE_EP00_CHIPLET_ID <= l_chiplet_id &&
                 l_chiplet_id <= PPE_EP05_CHIPLET_ID)
@@ -514,18 +562,103 @@ extern "C"
             }
 
             // PU_NV_CHIPUNIT
-            // See npu_misc_regs.vhdl, line 2710,
-            // sc_addr(0 to 6) represents sat_id(0..3) and sat_offset(0..2)
-            // only stkX, ntlX registers are translated to NX target type
-            // nv: 0..5
-            if ((l_chiplet_id == N3_CHIPLET_ID) &&
-                (l_port == UNIT_PORT_ID) &&
-                (((l_ring == N3_NPU_0_RING_ID) && ((l_sat_id % 4) == 3) && l_sat_id <= 11)))
+            if ((i_mode & P9N_DD1_SI_MODE)  == P9N_DD1_SI_MODE)
             {
-                o_chipUnitRelated = true;
-                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_NV_CHIPUNIT,
-                                            (2 * (l_sat_id / 4)) +
-                                            (l_sat_offset / 32)));
+                // See npu_misc_regs.vhdl, line 2710,
+                // sc_addr(0 to 6) represents sat_id(0..3) and sat_offset(0..2)
+                // only stkX, ntlX registers are translated to NX target type
+                // nv: 0..5
+                if ((l_chiplet_id == N3_CHIPLET_ID) &&
+                    (l_port == UNIT_PORT_ID) &&
+                    (((l_ring == N3_NPU_0_RING_ID) && ((l_sat_id % 4) == 3) && l_sat_id <= 11)))
+                {
+                    o_chipUnitRelated = true;
+                    o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_NV_CHIPUNIT,
+                                                (2 * (l_sat_id / 4)) +
+                                                (l_sat_offset / 32)));
+                }
+            }
+            else
+            {
+                //DD2 NV link (and Cumulus until we know better)
+                // See npu_misc_regs.vhdl
+                // sc_addr(0 to 7)  bits 1 to 4 are the sat_id bit 0 is the lsb of the ring
+                //  rings 4 and 5 are used.
+                //                       rrrrrrSTIDxxx---
+                //                       000100
+                //       x"4900" & "00" when "00100010", -- stk0, ntl0, 00-07, hyp-only
+                //       x"4900" & "01" when "00100011", -- stk0, ntl0, 08-15, hyp-only
+                //       x"4900" & "10" when "00100100", -- stk0, ntl0, 16-23, hyp-only
+                //       x"0900" & "11" when "00100101", -- stk0, ntl0, 24-31, user-acc
+                //       x"4b00" & "00" when "00100110", -- stk0, ntl1, 00-07, hyp-only
+                //       x"4b00" & "01" when "00100111", -- stk0, ntl1, 08-15, hyp-only
+                //       x"4b00" & "10" when "00101000", -- stk0, ntl1, 16-23, hyp-only --          addresses 0x140-147
+                //       x"0b00" & "11" when "00101001", -- stk0, ntl1, 24-31, user-acc
+                //                             STID
+                //       x"5900" & "00" when "01100010", -- stk1, ntl0, 00-07, hyp-only
+                //       x"5900" & "01" when "01100011", -- stk1, ntl0, 08-15, hyp-only
+                //       x"5900" & "10" when "01100100", -- stk1, ntl0, 16-23, hyp-only
+                //       x"1900" & "11" when "01100101", -- stk1, ntl0, 24-31, user-acc
+                //       x"5b00" & "00" when "01100110", -- stk1, ntl1, 00-07, hyp-only
+                //       x"5b00" & "01" when "01100111", -- stk1, ntl1, 08-15, hyp-only
+                //       x"5b00" & "10" when "01101000", -- stk1, ntl1, 16-23, hyp-only --          addresses 0x340-347
+                //       x"1b00" & "11" when "01101001", -- stk1, ntl1, 24-31, user-acc
+                //                             STID
+                //       x"6900" & "00" when "10100010", -- stk2, ntl0, 00-07, hyp-only
+                //       x"6900" & "01" when "10100011", -- stk2, ntl0, 08-15, hyp-only
+                //       x"6900" & "10" when "10100100", -- stk2, ntl0, 16-23, hyp-only
+                //       x"2900" & "11" when "10100101", -- stk2, ntl0, 24-31, user-acc
+                //       x"6b00" & "00" when "10100110", -- stk2, ntl1, 00-07, hyp-only
+                //       x"6b00" & "01" when "10100111", -- stk2, ntl1, 08-15, hyp-only
+                //       x"6b00" & "10" when "10101000", -- stk2, ntl1, 16-23, hyp-only --          addresses 0x540-54f
+                //       x"2b00" & "11" when "10101001", -- stk2, ntl1, 24-31, user-acc
+                if ((l_chiplet_id == N3_CHIPLET_ID) &&
+                    (l_port == UNIT_PORT_ID))
+                {
+
+                    //We have to do ugly bit manipulation here anyway.  It is clearer
+                    //just to do it with the raw scom address.
+                    //Combine the ring(6) sat_id(4) and high order 3 bits of sat_offset
+                    //to compare with vhdl values for NV registers
+                    uint64_t npuaddr = (i_scomAddr & 0xFFF8ULL) >> 3;
+
+                    if (0x0222ULL <= npuaddr && npuaddr <= 0x0225ULL)
+                    {
+                        o_chipUnitRelated = true;
+                        o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_NV_CHIPUNIT, 0));
+                    }
+
+                    if (0x0226ULL <= npuaddr && npuaddr <= 0x0229ULL)
+                    {
+                        o_chipUnitRelated = true;
+                        o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_NV_CHIPUNIT, 1));
+                    }
+
+                    if (0x0262ULL <= npuaddr && npuaddr <= 0x0265ULL)
+                    {
+                        o_chipUnitRelated = true;
+                        o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_NV_CHIPUNIT, 2));
+                    }
+
+                    if (0x0266ULL <= npuaddr && npuaddr <= 0x0269ULL)
+                    {
+                        o_chipUnitRelated = true;
+                        o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_NV_CHIPUNIT, 3));
+                    }
+
+                    if (0x02A2ULL <= npuaddr && npuaddr <= 0x02A5ULL)
+                    {
+                        o_chipUnitRelated = true;
+                        o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_NV_CHIPUNIT, 4));
+                    }
+
+                    if (0x02A6ULL <= npuaddr && npuaddr <= 0x02A9ULL)
+                    {
+                        o_chipUnitRelated = true;
+                        o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_NV_CHIPUNIT, 5));
+                    }
+                }
+
             }
 
             // PU_PEC_CHIPUNIT (nest)

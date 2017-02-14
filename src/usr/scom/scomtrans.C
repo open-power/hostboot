@@ -304,6 +304,10 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
         p9ChipUnits_t l_chipUnit = NONE;
         std::vector<p9_chipUnitPairing_t> l_scomPairings;
 
+        //Need to pass the chip/ec level into the translate function
+        uint32_t l_chipLevel = getChipLevel(i_target);
+        l_chip_mode |= l_chipLevel;
+
 
         //Make sure that scom addr is related to a chip unit
         uint32_t isChipUnitScomRC = p9_scominfo_isChipUnitScom(io_addr,
@@ -552,8 +556,10 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
     return l_err;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 bool getChipUnit (TARGETING::TYPE i_type,
-                       p9ChipUnits_t &o_chipUnit)
+                  p9ChipUnits_t &o_chipUnit)
 {
     bool l_isError = false;
     switch(i_type)
@@ -653,6 +659,81 @@ bool getChipUnit (TARGETING::TYPE i_type,
     }
 
     return l_isError;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * @brief Computes the chip/ddlevel value to be passed into translator
+ */
+uint32_t getChipLevel (TARGETING::Target* i_target)
+{
+    TARGETING::Target* l_chip = i_target;
+
+    TARGETING::Target* l_parentChip = const_cast<TARGETING::Target *>
+      (TARGETING::getParentChip(i_target));
+    if( l_parentChip )
+    {
+        l_chip = l_parentChip;
+    }
+
+    TARGETING::ATTR_MODEL_type l_model =
+      l_chip->getAttr<TARGETING::ATTR_MODEL>();
+    TARGETING::ATTR_EC_type l_ec =
+      l_chip->getAttr<TARGETING::ATTR_EC>();
+
+    // convert to scominfo types
+    uint32_t l_chipLevel = 0;
+    switch( l_model )
+    {
+        case(TARGETING::MODEL_NIMBUS):
+            switch(l_ec)
+            {
+                case(0x10):
+                    l_chipLevel = P9N_DD1_SI_MODE;
+                    break;
+                case(0x20):
+                    l_chipLevel = P9N_DD2_SI_MODE;
+                    break;
+
+                case(0x00):
+                    // before ATTR_EC is set, default to newest level
+                    l_chipLevel = P9N_DD2_SI_MODE;
+                    break;
+                default:
+                    TRACFCOMP( g_trac_scom,
+                               "Unsupported Nimbus EC 0x%X", l_ec );
+                    assert(false,"Unsupported Nimbus EC");
+            }
+            break;
+        case(TARGETING::MODEL_CUMULUS):
+            switch(l_ec)
+            {
+                case(0x10):
+                    l_chipLevel = P9C_DD1_SI_MODE;
+                    break;
+                case(0x20):
+                    l_chipLevel = P9C_DD2_SI_MODE;
+                    break;
+
+                case(0x00):
+                    // before ATTR_EC is set, default to newest level
+                    l_chipLevel = P9C_DD2_SI_MODE;
+                    break;
+                default:
+                    TRACFCOMP( g_trac_scom,
+                               "Unsupported Cumulus EC 0x%X", l_ec );
+                    assert(false,"Unsupported Cumulus EC");
+            }
+            break;
+        default:
+            TRACFCOMP( g_trac_scom,
+                       "Unsupported Chip Type %d", l_model );
+            assert(false,"Unsupported Chip Type");
+    }
+
+    return l_chipLevel;
 }
 
 
