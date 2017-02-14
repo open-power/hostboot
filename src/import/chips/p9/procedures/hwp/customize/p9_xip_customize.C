@@ -83,6 +83,7 @@ fapi2::ReturnCode writeMboxRegs (
     MBOX_ATTR_WRITE (ATTR_RISK_LEVEL,               FAPI_SYSTEM,     i_image);
     MBOX_ATTR_WRITE (ATTR_DISABLE_HBBL_VECTORS,     FAPI_SYSTEM,     i_image);
     MBOX_ATTR_WRITE (ATTR_MC_SYNC_MODE,             i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_SECURITY_MODE,            FAPI_SYSTEM,     i_image);
     MBOX_ATTR_SET   (ATTR_PROC_SBE_MASTER_CHIP,     i_proc_target,   i_image);
     MBOX_ATTR_CLEAR (ATTR_PROC_FABRIC_GROUP_ID,     i_proc_target,   i_image);
     MBOX_ATTR_CLEAR (ATTR_PROC_FABRIC_CHIP_ID,      i_proc_target,   i_image);
