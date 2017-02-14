@@ -58,6 +58,7 @@ extern "C"
     const uint32_t FBC_ALTD_PRE_QUIESCE_COUNT_NUM_OF_BITS = 20;
 
     const uint32_t FBC_ALTD_WITH_POST_INIT = 51;
+    const uint32_t FBC_ALTD_HW397129 = 52;
     const uint32_t FBC_ALTD_POST_INIT_COUNT_START_BIT = 54;    // Bits 54:63
     const uint32_t FBC_ALTD_POST_INIT_COUNT_NUM_OF_BITS = 10;
 
@@ -292,6 +293,9 @@ extern "C"
         altd_option_reg_data.insertFromRight<FBC_ALTD_POST_INIT_COUNT_START_BIT,
                                              FBC_ALTD_POST_INIT_COUNT_NUM_OF_BITS>
                                              (INIT_SWITCH_WAIT_COUNT);
+
+        //If DD2 setup workaround for HW397129 to re-enable fastpath for DD2
+        altd_option_reg_data.setBit<FBC_ALTD_HW397129>();
 
         // Write to ADU option reg
         FAPI_DBG("OPTION reg value 0x%016llX", altd_option_reg_data);
