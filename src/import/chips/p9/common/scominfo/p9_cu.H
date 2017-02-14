@@ -41,6 +41,7 @@
 
 extern "C"
 {
+
     /// P9 chip unit type enumeration
     typedef enum
     {
