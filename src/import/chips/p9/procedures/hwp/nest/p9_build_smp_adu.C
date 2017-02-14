@@ -437,8 +437,12 @@ fapi2::ReturnCode p9_build_smp_sequence_adu(p9_build_smp_system& i_smp,
                     goto adu_reset_unlock;
                 }
 
-                // workaround for HW397129
-                if (i_action == SWITCH_AB)
+                // workaround for HW397129 to re-enable fastpath for DD1
+                uint8_t l_hw397129_workaround;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW397129, *(p_iter->second.target), l_hw397129_workaround),
+                         "Error getting the ATTR_CHIP_EC_FEATURE_HW397129");
+
+                if ((i_action == SWITCH_AB) && l_hw397129_workaround)
                 {
                     p9_ADU_oper_flag l_adu_oper_flag_reinit;
                     l_adu_oper_flag_reinit.setOperationType(p9_ADU_oper_flag::PB_INIT_OPER);
