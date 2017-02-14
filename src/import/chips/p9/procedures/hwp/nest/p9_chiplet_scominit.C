@@ -74,7 +74,7 @@ const uint64_t FBC_IOE_DL_FIR_MASK    = 0xFCFC3FFFFFFFE003ULL;
 
 const uint64_t FBC_IOO_DL_FIR_ACTION0 = 0x0000000000000000ULL;
 const uint64_t FBC_IOO_DL_FIR_ACTION1 = 0x0303C0000300FFFCULL;
-const uint64_t FBC_IOO_DL_FIR_MASK    = 0xFCFC3FFFFCFF0003ULL;
+const uint64_t FBC_IOO_DL_FIR_MASK    = 0xFCFC3FFFFCFF000FULL;
 
 //------------------------------------------------------------------------------
 // Function definitions
