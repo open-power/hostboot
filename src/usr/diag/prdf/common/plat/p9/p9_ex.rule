@@ -281,7 +281,7 @@ group gL2FIR filter singlebit, cs_root_cause
     /** L2FIR[6]
      *  L2 directory read CE
      */
-    (rL2FIR, bit(6)) ? self_th_32perDay;
+    (rL2FIR, bit(6)) ? l2_dir_ce;
 
     /** L2FIR[7]
      *  L2 directory read UE
@@ -648,7 +648,7 @@ group gL3FIR filter singlebit, cs_root_cause
     /** L3FIR[13]
      *  L3 DIR read CE
      */
-    (rL3FIR, bit(13)) ? self_th_32perDay;
+    (rL3FIR, bit(13)) ? l3_dir_ce;
 
     /** L3FIR[14]
      *  L3 Dir read UE

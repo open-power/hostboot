@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -35,14 +35,28 @@ actionclass l3_cache_ue
     TBDDefaultCallout;
 };
 
+actionclass l3_dir_ce
+{
+    calloutSelfHigh;
+    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L3_DIR_CES) );
+};
+
 actionclass l2_cache_ce
 {
-    TBDDefaultCallout;
+    calloutSelfHigh;
+    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L2_CACHE_CES) );
+#    funccall("L2CE"); TODO: RTC 152593
 };
 
 actionclass l2_cache_ue
 {
     TBDDefaultCallout;
+};
+
+actionclass l2_dir_ce
+{
+    calloutSelfHigh;
+    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L2_DIR_CES) );
 };
 
 actionclass l2_power_bus_ce
