@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -129,6 +129,19 @@ class LpcDD
     void setLPCBaseAddr(uint64_t * i_baseLPCAddr)
     {
         iv_lpcBaseAddr = reinterpret_cast<uint64_t>(i_baseLPCAddr);
+    };
+
+    /**
+     * @brief Block/unblock all LPC operations
+     * @param[in] i_block  true: block ops, false: allow ops
+     */
+    void lock( bool i_block )
+    {
+        if( i_block ) {
+            mutex_lock(ivp_mutex);
+        } else {
+            mutex_unlock(ivp_mutex);
+        }
     };
 
     /**

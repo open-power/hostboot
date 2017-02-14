@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <errl/errludlogregister.H>
 #include <xscom/piberror.H>
 #include <arch/pirformat.H>
+#include <lpc/lpcif.H>
 
 // Trace definition
 trace_desc_t* g_trac_xscom = NULL;
@@ -701,6 +702,38 @@ void collectXscomFFDC(TARGETING::Target* i_target,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+bool checkForLpcBug( void )
+{
+    //  See HW400314 for description of hardware bug
+    //  The Power Bus Snooper Interface on the ADU is shared by both PIB
+    //  and LPC. Once an error occurred in the Xscom while accessing the
+    //  PIB space, the interface is overriding the data that is sent out
+    //  as all ?F?  for any operation which may be XSCOM to PIB address
+    //  space or to a LPC address Space. Further XSCOM operation are
+    //  locked till the pending error is cleared.  But an XSCOM Status
+    //  pmisc is sent with pib response info (in this case the type of
+    //  the error) and for the next operations i.e. XSCOM to PIB or to
+    //  LPC it sends info value as 1 which indicates ADU has pending
+    //  XSCOM Error. This is indicated in the (48 :50) bits in the address
+    //  sent.
+
+    ProcessorCoreType l_coreType = cpu_core_type();
+    uint8_t l_ddLevel = cpu_dd_level();
+
+    // Bug is only present in Nimbus DD1
+    if( (l_coreType == CORE_POWER9_NIMBUS) && (l_ddLevel == 0x10) )
+    {
+        TRACFCOMP( g_trac_xscom, "Activating LPC mutex workaround" );
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
                           TARGETING::Target* i_target,
                           void* io_buffer,
@@ -737,6 +770,13 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
 
         // Pin this thread to current CPU
         task_affinity_pin();
+
+        // Block the LPC driver from running while an xscom is in progress
+        static bool l_hasLpcBug = checkForLpcBug();
+        if( l_hasLpcBug )
+        {
+            LPC::block_lpc_ops(true);
+        }
 
         // Lock other XSCom in this same thread from running
         l_XSComMutex = mmio_xscom_mutex();
@@ -777,6 +817,12 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
 
         // Unlock
         mutex_unlock(l_XSComMutex);
+
+        // Unblock the LPC driver
+        if( l_hasLpcBug )
+        {
+            LPC::block_lpc_ops(false);
+        }
 
         // Done, un-pin
         task_affinity_unpin();

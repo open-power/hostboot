@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -361,6 +361,19 @@ errlHndl_t create_altmaster_objects( bool i_create,
     } while(0);
 
     return l_err;
+}
+
+
+/**
+ * @brief Block/unblock all LPC operations
+ * @param[in] i_block  true: block ops, false: allow ops
+ *
+ */
+void block_lpc_ops( bool i_block )
+{
+    // Note: this is ignoring the alt-master because the usecase for
+    //  this function is only applicable for DD1
+    Singleton<LpcDD>::instance().lock(i_block);
 }
 
 }; //namespace LPC

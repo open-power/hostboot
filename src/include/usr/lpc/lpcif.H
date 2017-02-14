@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -58,6 +58,13 @@ enum TransType {
  */
 errlHndl_t create_altmaster_objects( bool i_create,
                                      TARGETING::Target* i_proc );
+
+/**
+ * @brief Block/unblock all LPC operations
+ * @param[in] i_block  true: block ops, false: allow ops
+ */
+void block_lpc_ops( bool i_block );
+
 
 };  // namespace LPC
 
