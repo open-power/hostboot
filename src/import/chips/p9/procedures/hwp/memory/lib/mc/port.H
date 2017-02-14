@@ -41,7 +41,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/mss_attribute_accessors.H>
-
+#include <lib/utils/conversions.H>
 #include <lib/shared/mss_const.H>
 #include <lib/utils/scom.H>
 #include <lib/dimm/rank.H>
@@ -575,6 +575,14 @@ fapi2::ReturnCode ddr_resetn( const fapi2::Target<T>& i_target, const bool i_sta
         FAPI_TRY( mss::putScom(i_target, TT::FARB5Q_REG, l_data) );
     }
 
+    // From the DDR4 JEDEC Spec (79-A): Power-up Initialization Sequence
+    // After RESET_n is de-asserted, wait for another 500us before CKE goes active.
+    // Set our delay (for HW and SIM)
+    {
+        constexpr uint64_t DELAY_500US = 5 * mss::DELAY_100US;
+        FAPI_TRY( fapi2::delay(static_cast<uint64_t>(DELAY_500US),
+                               mss::us_to_cycles(i_target, DELAY_500US)) );
+    }
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:

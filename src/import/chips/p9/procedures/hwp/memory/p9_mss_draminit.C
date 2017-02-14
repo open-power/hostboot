@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,11 +48,11 @@ using fapi2::FAPI2_RC_SUCCESS;
 
 extern "C"
 {
-///
-/// @brief Initialize dram
-/// @param[in] i_target, the McBIST of the ports of the dram you're initializing
-/// @return FAPI2_RC_SUCCESS iff ok
-///
+    ///
+    /// @brief Initialize dram
+    /// @param[in] i_target, the McBIST of the ports of the dram you're initializing
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
     fapi2::ReturnCode p9_mss_draminit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
     {
         fapi2::buffer<uint64_t> l_data;
@@ -118,17 +118,23 @@ extern "C"
         for (const auto& p : l_mca)
         {
             FAPI_TRY( mss::draminit_entry_invariant(p) );
-            FAPI_TRY( mss::ddr_resetn(p, mss::HIGH) );
 
             // Begin driving mem clks, and wait 10ns (we'll do this outside the loop)
+            // From the RCD Spec, before the DRST_n (resetn) input is pulled HIGH the
+            // clock input signal must be stable.
             FAPI_TRY( mss::drive_mem_clks(p, PCLK_INITIAL_VALUE, NCLK_INITIAL_VALUE) );
+
+            // After RESET_n is de-asserted, wait for another 500us until CKE becomes active.
+            // During this time, the DRAM will start internal initialization; this will be done
+            // independently of external clocks.
+            FAPI_TRY( mss::ddr_resetn(p, mss::HIGH) );
         }
 
         // From the DDR4 JEDEC Spec (79-A): Power-up Initialization Sequence
-        // Lets find our max delay in ns
         {
             // Clocks (CK_t,CK_c) need to be started and stable for 10ns or 5tCK
             // (whichever is greater) before CKE goes active.
+            // Doing this once here than twice in drive_mem_clks
             constexpr uint64_t DELAY_5TCK = 5;
             const uint64_t l_delay_in_ns = std::max( static_cast<uint64_t>(mss::DELAY_10NS),
                                            mss::cycles_to_ns(i_target, DELAY_5TCK) );
