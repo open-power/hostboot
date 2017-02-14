@@ -527,9 +527,12 @@ int get_ring_from_sbe_image( void*           i_ringSection,     // Ring section 
                         }
                         else
                         {
-                            MY_ERR(" SBE ring instance ID %d is invalid, Valid ID is from %d  to %d  \n",
-                                   io_instanceId, (ring_id_list_instance + 0)->instanceIdMin,
-                                   (ring_id_list_instance + 0)->instanceIdMax);
+                            if (i_dbgl > 0)
+                            {
+                                MY_INF(" SBE ring instance ID %d is invalid, Valid ID is from %d  to %d  \n",
+                                       io_instanceId, (ring_id_list_instance + 0)->instanceIdMin,
+                                       (ring_id_list_instance + 0)->instanceIdMax);
+                            }
 
                             return TOR_INVALID_INSTANCE_ID;
                         }
@@ -824,9 +827,13 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
                     }
                     else
                     {
-                        MY_INF("SGPE ring instance ID %d is invalid, Valid ID is from %d  to %d \n",
-                               io_instanceId, (ring_id_list_instance + 0)->instanceIdMin,
-                               (ring_id_list_instance + 0)->instanceIdMax);
+                        if (i_dbgl > 0)
+                        {
+                            MY_INF("SGPE ring instance ID %d is invalid, Valid ID is from %d  to %d \n",
+                                   io_instanceId, (ring_id_list_instance + 0)->instanceIdMin,
+                                   (ring_id_list_instance + 0)->instanceIdMax);
+                        }
+
                         return TOR_INVALID_INSTANCE_ID;
                     }
                 }
@@ -1119,9 +1126,13 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
                         }
                         else
                         {
-                            MY_INF(" CME ring instance ID %d is invalid, Valid ID is from %d  to %d \n",
-                                   io_instanceId, (ring_id_list_instance + 0)->instanceIdMin,
-                                   (ring_id_list_instance + 0)->instanceIdMax);
+                            if (i_dbgl > 0)
+                            {
+                                MY_INF(" CME ring instance ID %d is invalid, Valid ID is from %d  to %d \n",
+                                       io_instanceId, (ring_id_list_instance + 0)->instanceIdMin,
+                                       (ring_id_list_instance + 0)->instanceIdMax);
+                            }
+
                             return TOR_INVALID_INSTANCE_ID;
                         }
                     }
