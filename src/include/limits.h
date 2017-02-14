@@ -31,4 +31,6 @@
 #define PAGESIZE  (4*KILOBYTE)  /**< 4 KB */
 #define PAGE_SIZE PAGESIZE
 
+#define INT_MAX   __INT_MAX__
+
 #endif
