@@ -886,6 +886,7 @@ extern "C"
 
         pQpmrHdr->magic_number                  =   SWIZZLE_8_BYTE(QPMR_MAGIC_NUMBER);
         pSgpeHdr->g_sgpe_magic_number           =   SWIZZLE_8_BYTE(SGPE_MAGIC_NUMBER);
+        pSgpeHdr->g_sgpe_scom_mem_offset        =   SWIZZLE_4_BYTE(QPMR_HOMER_OFFSET + QUAD_SCOM_RESTORE_QPMR_OFFSET );
 
         FAPI_INF("==============================QPMR==================================");
         char magicWord[16] = {0};
@@ -905,6 +906,8 @@ extern "C"
         FAPI_DBG("  Cmn Ring Ovrd Length    : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadCommonOvrdLength) );
         FAPI_DBG("  Quad Spec Ring Offset   : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadSpecRingOffset) );
         FAPI_DBG("  Quad Spec Ring Length   : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadSpecRingLength) );
+        FAPI_INF("  Quad SCOM Offset        : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadScomOffset) );
+        FAPI_INF("  Quad SCOM Length        : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadScomLength) );
         FAPI_DBG("==============================QPMR Ends==============================");
 
         FAPI_DBG("===========================SGPE Image Hdr=============================");
@@ -1050,9 +1053,8 @@ extern "C"
             o_qpmrHdr.bootLoaderLength    = SWIZZLE_4_BYTE(o_qpmrHdr.bootLoaderLength);
             o_qpmrHdr.sgpeImgOffset       = SWIZZLE_4_BYTE(o_qpmrHdr.sgpeImgOffset);
 
-
-            //FIXME Need to confirm it
-            o_qpmrHdr.quadScomOffset  = SWIZZLE_4_BYTE(QUAD_SCOM_RESTORE_QPMR_OFFSET);
+            o_qpmrHdr.quadScomOffset  =   SWIZZLE_4_BYTE(QUAD_SCOM_RESTORE_QPMR_OFFSET);
+            o_qpmrHdr.quadScomLength  =   SWIZZLE_4_BYTE(QUAD_SCOM_RESTORE_SIZE_TOTAL);
 
             sgpeHeader_t* pImgHdr = (sgpeHeader_t*)& i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
             pImgHdr->g_sgpe_ivpr_address                =   OCC_SRAM_SGPE_BASE_ADDR;
