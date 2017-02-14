@@ -89,6 +89,15 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
 bool getChipUnit (TARGETING::TYPE i_type,
                        p9ChipUnits_t &o_chipUnit);
 
+/**
+ * @brief Computes the chip/ddlevel value to be passed into translator
+ *
+ * @param[in]      i_target      SCom target is passed in
+ * @return         uint32_t      Chip/ddlevel mode value for target,
+ *                               see p9_scominfo.H for values
+ */
+uint32_t getChipLevel (TARGETING::Target* i_target);
+
 
 
 }; // End namespace
