@@ -203,7 +203,7 @@ fapi2::ReturnCode throttleSync(
             // this MCS as master
             if (l_mcSide[l_sideNum].masterMcsFound == false)
             {
-                FAPI_INF("Mark MCS %u as master for MC side %",
+                FAPI_INF("Mark MCS %u as master for MC side %u",
                          l_pos, l_sideNum);
                 l_mcSide[l_sideNum].masterMcsFound = true;
                 l_mcSide[l_sideNum].masterMcs = l_mcs;
