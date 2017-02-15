@@ -723,7 +723,7 @@ group gL3FIR filter singlebit, cs_root_cause
     /** L3FIR[28]
      *  L3 LRU array parity error
      */
-    (rL3FIR, bit(28)) ? self_th_1;
+    (rL3FIR, bit(28)) ? l3_lru_parity_error;
 
     /** L3FIR[29]
      *  L3 cache congruence cache deleted

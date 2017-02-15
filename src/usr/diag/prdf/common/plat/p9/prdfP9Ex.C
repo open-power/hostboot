@@ -169,6 +169,44 @@ int32_t PostAnalysis( ExtensibleChip * i_exChip,
 PRDF_PLUGIN_DEFINE( p9_ex, PostAnalysis );
 
 /**
+ * @brief  For L2/L3 Cache CEs, L3 Directory CEs, and L3 LRU Parity Errors.
+ * @param  i_chip EX chip.
+ * @param  io_sc  Step code data struct.
+ * @return SUCCESS always
+ */
+int32_t cacheCeWorkaround( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & io_sc )
+{
+    // WORKAROUND: Nimbus DD1.x only.
+    if ( TARGETING::MODEL_NIMBUS == getChipModel(i_chip->getTrgt()) &&
+         0x20                    >  getChipLevel(i_chip->getTrgt()) )
+    {
+        // If we are unable to issue any more line deletes, mask the attention
+        // and do not make the error log predictive.
+        if ( io_sc.service_data->IsAtThreshold() )
+            io_sc.service_data->clearServiceCall();
+    }
+    // END WORKAROUND
+
+    return SUCCESS;
+
+} PRDF_PLUGIN_DEFINE( p9_ex, cacheCeWorkaround );
+
+/**
+ * @brief  L2FIR[0] - CE detected on L3 cache read
+ * @param  i_chip EX chip.
+ * @param  io_sc  Step code data struct.
+ * @return SUCCESS always
+ */
+int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    // TODO: RTC 152593 add line delete support
+
+    return SUCCESS;
+
+} PRDF_PLUGIN_DEFINE( p9_ex, L2CE );
+
+/**
  * @brief Handle an L3 CE
  * @param i_chip Ex chip.
  * @param i_stepcode Step Code data struct
