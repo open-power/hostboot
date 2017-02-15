@@ -841,9 +841,12 @@
       This is matched to pbax_groupid of the PMISC Address phase.
 
       Provided by the Machine Readable Workbook.
+      
+      Platform default:  Nimbus systems = 0     
     </description>
     <valueType>uint8</valueType>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -855,9 +858,12 @@
       pbax_type=unicast.
 
       Provided by the Machine Readable Workbook.
+      
+      Platform default:  Nimbus systems - set so value in ATTR_FABRIC_GROUP_ID 
     </description>
     <valueType>uint8</valueType>
     <platInit/>
+    <initToZero/>  <!-- This here strictly to allocate the attribute in Cronus -->
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -869,10 +875,12 @@
     bit in this vector at the decoded bit location is a 1, then this receive
     engine will participate in the broadcast operation.
 
-    Provided by the Machine Readable Workbook.
+    Override attribute.  Platform value of 0 indiates the OCC firmware will 
+    perform this function.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
+    <initToZero/> 
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -914,6 +922,23 @@
       being altered.
 
       NOTE: you may need to handle correcting endiannessif you are using this
+      attribute.
+      </description>
+      <valueType>uint8</valueType>
+      <initToZero/>
+      <array>61</array>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_POUNDW_BUCKET_DATA</id>
+      <targetType>TARGET_TYPE_EQ</targetType>
+      <description>
+      Power Management data for Quad targets. Stored as an array of bytes.
+      The data is read directly from VPD and stored in this attribute without
+      being altered.
+
+      NOTE: you may need to handle correcting endianness if you are using this
       attribute.
       </description>
       <valueType>uint8</valueType>
