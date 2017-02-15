@@ -78,6 +78,10 @@ enum sbeioReasonCode
     // SBE FFDC Parser error codes
     SBEIO_FFDC_PARSER_BUFF_OVERFLOW    = SBEIO_COMP_ID | 0x1A,
 
+    // Note - HWSV keys off of this to trigger a reconfig
+    //   loop to recover the SBE
+    //termination_rc
+    SBEIO_DEAD_SBE                     = SBEIO_COMP_ID | 0x1B,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
