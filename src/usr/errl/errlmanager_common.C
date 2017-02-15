@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -622,13 +622,12 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
         if(!i_sendSels)
         {
             const char* l_prev_boot = "Error from a previous boot";
-            ERRORLOG::ErrlUserDetailsString(l_prev_boot).addToLog(io_err);
+            // Create a raw user-defined section.  It does a copy of the
+            // string constant, then once added to io_err, io_err owns mem
+            ErrlUD* l_ffdcSection = new ErrlUD(l_prev_boot, strlen(l_prev_boot),
+                                         ERRL_COMP_ID, 1, ERRL_UDT_STRING );
             io_err->iv_SectionVector.insert(io_err->iv_SectionVector.begin(),
-                    1,io_err->iv_SectionVector.back());
-            if(io_err->iv_SectionVector.size()!=0)
-            {
-                io_err->iv_SectionVector.pop_back();
-            }
+                                            l_ffdcSection);
         }
 
         // flatten into buffer, truncate to max eSEL size
