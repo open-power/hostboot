@@ -518,6 +518,20 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             present = false;
         }
 
+        // if TYPE_MCS
+        // Need to handle "special" -- DVPD cache relies on this
+        // being called for pnor cache management, however this causes
+        // spurious MCS's to be marked present/functional when they are
+        // trully tied to processor PG.  So remove from list since
+        // the DVPD present detect hook has been called
+        // TODO RTC 169572 -- Fix correctly by reworking DVPD
+        if (pTarget->getAttr<ATTR_TYPE>() == TYPE_MCS)
+        {
+            // erase this target, and 'increment' to next
+            pTarget_it = io_targets.erase(pTarget_it);
+            continue;
+        }
+
         if (present == true)
         {
             HWAS_DBG( "pTarget %.8X - detected present",
