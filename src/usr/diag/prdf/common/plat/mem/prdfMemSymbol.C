@@ -24,7 +24,12 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <prdfMemSymbol.H>
+
+// Framework includes
+#include <prdfExtensibleChip.H>
 #include <prdfTrace.H>
+
+// Parser includes
 #include <prdfParserUtils.H>
 
 using namespace TARGETING;
@@ -144,6 +149,126 @@ uint8_t MemSymbol::getDramPins() const
                          : isX4 ? MCA_SYMBOLS_PER_NIBBLE : MCA_SYMBOLS_PER_BYTE;
 
     return iv_pins << (((spd - 1) - (iv_symbol % spd)) * dps);
+}
+
+//------------------------------------------------------------------------------
+//                       Symbol Accessor Functions
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t getMemReadSymbol<TYPE_MCA>( ExtensibleChip * i_chip,
+                                     const MemRank & i_rank,
+                                     MemSymbol & o_symbol, bool i_isTce )
+{
+    #define PRDF_FUNC "[getMemReadSymbol<TYPE_MBA>] "
+
+    // Check parameters
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Get the NCE/TCE galois and mask from hardware.
+        ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
+
+        uint8_t port      = i_chip->getPos() % MAX_MCA_PER_MCBIST; // 0,1,2,3
+        uint8_t mcsRelMcb = port / MAX_MCA_PER_MCS;                // 0,1
+        uint8_t mcaRelMcs = port % MAX_MCA_PER_MCS;                // 0,1
+
+        const char * reg_str = (0 == mcsRelMcb) ? "MBSEVR0" : "MBSEVR1";
+
+        SCAN_COMM_REGISTER_CLASS * reg = mcbChip->getRegister(reg_str);
+        o_rc = reg->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s: mcbChip=0x%08x", reg_str,
+                      mcbChip->getHuid() );
+            break;
+        }
+
+        uint32_t bitPos = (mcaRelMcs * 32) + (i_isTce ? 16 : 0);
+
+        uint8_t galois = reg->GetBitFieldJustified( bitPos,     8 );
+        uint8_t mask   = reg->GetBitFieldJustified( bitPos + 8, 8 );
+
+        // Get the NCE/TCE symbol.
+        o_symbol = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank, galois,
+                                          mask );
+        if ( !o_symbol.isValid() )
+        {
+            PRDF_ERR( PRDF_FUNC "fromGalois(0x%08x,m%ds%d,0x%02x,0x%02x) "
+                      "failed", i_chip->getHuid(), i_rank.getMaster(),
+                      i_rank.getSlave(), galois, mask );
+            o_rc = FAIL;
+            break;
+        }
+
+        // TODO: RTC 157888 Check if the symbol is on a spare DRAM.
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t getMemReadSymbol<TYPE_MBA>( ExtensibleChip * i_chip,
+                                     const MemRank & i_rank,
+                                     MemSymbol & o_symbol, bool i_isTce )
+{
+    #define PRDF_FUNC "[getMemReadSymbol<TYPE_MBA>] "
+
+    // Check parameters
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+    PRDF_ASSERT( !i_isTce ); // TCEs do not exist on Centaur
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Get the NCE galois and mask from hardware.
+        ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
+
+        const char * reg_str = (0 == i_chip->getPos()) ? "MBA0_MBSEVR"
+                                                       : "MBA1_MBSEVR";
+
+        SCAN_COMM_REGISTER_CLASS * reg = membChip->getRegister(reg_str);
+        o_rc = reg->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s: membChip=0x%08x", reg_str,
+                      membChip->getHuid() );
+            break;
+        }
+
+        uint8_t galois = reg->GetBitFieldJustified( 40, 8 );
+        uint8_t mask   = reg->GetBitFieldJustified( 32, 8 );
+
+        // Get the NCE symbol.
+        o_symbol = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank, galois,
+                                          mask );
+        if ( !o_symbol.isValid() )
+        {
+            PRDF_ERR( PRDF_FUNC "fromGalois(0x%08x,m%ds%d,0x%02x,0x%02x) "
+                      "failed", i_chip->getHuid(), i_rank.getMaster(),
+                      i_rank.getSlave(), galois, mask );
+            o_rc = FAIL;
+            break;
+        }
+
+        // TODO: RTC 157888 Check if the symbol is on a spare DRAM.
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
