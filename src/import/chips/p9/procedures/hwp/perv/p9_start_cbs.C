@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,6 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
 {
     fapi2::buffer<uint32_t> l_read_reg ;
     bool l_read_vdn_pgood_status = false;
-    bool l_sbe_start_value = false;
     bool l_fsi2pib_status = false;
     fapi2::buffer<uint32_t> l_data32;
     fapi2::buffer<uint32_t> l_data32_cbs_cs;
@@ -73,16 +72,18 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SB_MSG_FSI, l_data32));
 
 
-    l_sbe_start_value = !i_sbe_start;
-
     FAPI_DBG("Configuring Prevent SBE start option");
-    FAPI_IMP("SBE start value : %d", l_sbe_start_value);
     //Setting CBS_CS register value
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
                                     l_data32_cbs_cs));
-    l_data32_cbs_cs.writeBit<PERV_CBS_CS_OPTION_PREVENT_SBE_START>(l_sbe_start_value);
+    l_data32_cbs_cs.setBit<PERV_CBS_CS_OPTION_PREVENT_SBE_START>();
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
                                     l_data32_cbs_cs));
+
+    FAPI_DBG("Setting up hreset to 0");
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SB_CS_FSI, l_data32));
+    l_data32.clearBit<PERV_SB_CS_START_RESTART_VECTOR0>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SB_CS_FSI, l_data32));
 
     FAPI_DBG("check for VDN_PGOOD");
     //Getting PERV_CBS_ENVSTAT register value
@@ -144,6 +145,24 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 .set_LOOP_COUNT(l_timeout)
                 .set_HW_DELAY(P9_CBS_IDLE_HW_NS_DELAY),
                 "ERROR: CBS HAS NOT REACHED IDLE STATE VALUE 0x002 ");
+
+
+    FAPI_DBG("Setting up Pibreset");
+    l_data32.flush<1>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_FSI2PIB_SET_PIB_RESET_FSI,
+                                    l_data32));
+
+    if ( i_sbe_start )
+    {
+        FAPI_DBG("Setting up hreset");
+        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SB_CS_FSI, l_data32));
+        l_data32.clearBit<PERV_SB_CS_START_RESTART_VECTOR0>();
+        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SB_CS_FSI, l_data32));
+        l_data32.setBit<PERV_SB_CS_START_RESTART_VECTOR0>();
+        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SB_CS_FSI, l_data32));
+        l_data32.clearBit<PERV_SB_CS_START_RESTART_VECTOR0>();
+        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SB_CS_FSI, l_data32));
+    }
 
     FAPI_DBG("check for VDD status");
     //Getting FSI2PIB_STATUS register value
