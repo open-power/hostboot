@@ -41,6 +41,8 @@
 namespace PRDF
 {
 
+class ExtensibleChip;
+
 /**
  * @brief Container for a memory symbol.
  */
@@ -171,6 +173,23 @@ class MemSymbol
     bool iv_isDramSpared = false; ///< TRUE if symbol resides on DRAM spare.
     bool iv_isEccSpared  = false; ///< TRUE if symbol resides on ECC spare.
 };
+
+//------------------------------------------------------------------------------
+//                       Symbol Accessor Functions
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  Reads the memory NCE/TCE vector trap register from hardware.
+ * @param  i_chip   MCA or MBA.
+ * @param  i_rank   The rank this symbol is on.
+ * @param  o_symbol The returned symbol.
+ * @param  i_isTce  Only applies to MCA. True if the TCE symbol is wanted. False
+ *                  if the NCE symbol is wanted (default).
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t getMemReadSymbol( ExtensibleChip * i_chip, const MemRank & i_rank,
+                           MemSymbol & o_symbol, bool i_isTce = false );
 
 } // end namespace PRDF
 
