@@ -181,48 +181,32 @@ chip p9_ec
  ##############################################################################
 
 ################################################################################
-# EC Chiplet FIR
+# Summary for EC
 ################################################################################
 
-rule rEC_CHIPLET_FIR
+# We prefer to use the EC chiplet FIRs, however, COREFIR recoverable errors will
+# not report through the chiplet FIRs due to a bug in Nimbus DD1.0. Instead, we
+# will bypass the chiplet FIRS completely and use the summary construct.
+
+rule rEC
 {
   CHECK_STOP:
-     EC_CHIPLET_CS_FIR       & ~EC_CHIPLET_FIR_MASK & `1fffffffffffffff`;
+    summary( 0, rEC_LFIR ) |
+    summary( 1, rCOREFIR );
+
   RECOVERABLE:
-    (EC_CHIPLET_RE_FIR >> 2) & ~EC_CHIPLET_FIR_MASK & `1fffffffffffffff`;
-};
+    summary( 0, rEC_LFIR ) |
+    summary( 1, rCOREFIR );
 
-group gEC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
-{
-    /** EC_CHIPLET_FIR[3]
-     *  Attention from EC_LFIR
-     */
-    (rEC_CHIPLET_FIR, bit(3)) ? analyze(gEC_LFIR);
-
-    /** EC_CHIPLET_FIR[4]
-     *  Attention from COREFIR
-     */
-    (rEC_CHIPLET_FIR, bit(4)) ? analyze(gCOREFIR);
-
-};
-
-################################################################################
-# EC Chiplet Unit Checkstop FIR
-################################################################################
-
-rule rEC_CHIPLET_UCS_FIR
-{
   UNIT_CS:
-    EC_CHIPLET_UCS_FIR & ~EC_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+    summary( 1, rCOREFIR );
+
 };
 
-group gEC_CHIPLET_UCS_FIR attntype UNIT_CS filter singlebit
+group gEC attntype CHECK_STOP, RECOVERABLE, UNIT_CS filter singlebit
 {
-    /** EC_CHIPLET_UCS_FIR[1]
-     *  Attention from COREFIR
-     */
-    (rEC_CHIPLET_UCS_FIR, bit(1)) ? analyze(gCOREFIR);
-
+    (rEC, bit(0)) ? analyze(gEC_LFIR);
+    (rEC, bit(1)) ? analyze(gCOREFIR);
 };
 
 ################################################################################
