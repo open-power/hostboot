@@ -149,7 +149,7 @@ extern "C"
                     break;
 
                 case PU_NV_CHIPUNIT:
-                    if ((i_mode & P9N_DD1_SI_MODE) == P9N_DD1_SI_MODE)
+                    if (i_mode == P9N_DD1_SI_MODE)
                     {
                         l_scom.set_sat_id((l_scom.get_sat_id() % 4) + ((i_chipUnitNum / 2) * 4));
                         l_scom.set_sat_offset( (l_scom.get_sat_offset() % 32) +
@@ -562,7 +562,7 @@ extern "C"
             }
 
             // PU_NV_CHIPUNIT
-            if ((i_mode & P9N_DD1_SI_MODE)  == P9N_DD1_SI_MODE)
+            if (i_mode == P9N_DD1_SI_MODE)
             {
                 // See npu_misc_regs.vhdl, line 2710,
                 // sc_addr(0 to 6) represents sat_id(0..3) and sat_offset(0..2)
