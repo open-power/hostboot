@@ -28,7 +28,7 @@
 
 /**
  * @file sbe_fifodd.H
- * @brief SBE service provider declariation
+ * @brief SBE service provider declaration
  */
 
 #include <stdint.h>
@@ -37,6 +37,7 @@
 
 #include <errl/errlentry.H>
 #include <util/singleton.H>
+#include <error_info_defs.H>
 
 namespace SBEIO
 {
@@ -173,10 +174,8 @@ class SbeFifo
         struct fifoPutScomResponse
         {
             statusHeader status;
-            uint32_t     pcbpibStatus;    // only present on errors
-            // ffdc will go here on errors
+            struct       fapi2::ffdc_struct ffdc;  // ffdc data
             uint32_t     status_distance; // distance to status
-            uint32_t     EOT;             // dummy EOT word to ignore
             fifoPutScomResponse() {}
         } PACKED;
 
@@ -190,50 +189,10 @@ class SbeFifo
         {
             uint64_t     data;          // Data (0..31) + (32..63)
             statusHeader status;
-            uint32_t     pcbpibStatus;    // only present on errors
-            // ffdc will go here on errors
+            struct       fapi2::ffdc_struct ffdc;  // ffdc data
             uint32_t     status_distance; // distance to status
-            uint32_t     EOT;             // dummy EOT word to ignore
             fifoGetScomResponse() {}
         } PACKED;
-
-        /**
-         * @brief enums for primary SBE response
-         *
-        */
-        enum sbePrimResponse
-        {
-            FIFO_PRI_OPERATION_SUCCESSFUL        = 0x00,
-            FIFO_PRI_INVALID_COMMAND             = 0x01,
-            FIFO_PRI_INVALID_DATA                = 0x02,
-            FIFO_PRI_SEQUENCE_ERROR              = 0x03,
-            FIFO_PRI_INTERNAL_ERROR              = 0x04,
-            FIFO_PRI_GENERIC_EXECUTION_FAILURE   = 0xFE,
-        };
-
-        /**
-         * @brief enums for secondary SBE response
-         *
-        */
-        enum sbeSecondaryResponse
-        {
-            FIFO_SEC_OPERATION_SUCCESSFUL              = 0x00,
-            FIFO_SEC_COMMAND_CLASS_NOT_SUPPORTED       = 0x01,
-            FIFO_SEC_COMMAND_NOT_SUPPORTED             = 0x02,
-            FIFO_SEC_INVALID_ADDRESS_PASSED            = 0x03,
-            FIFO_SEC_INVALID_TARGET_TYPE_PASSED        = 0x04,
-            FIFO_SEC_INVALID_TARGET_ID_PASSED          = 0x05,
-            FIFO_SEC_SPECIFIED_TARGET_NOT_PRESENT      = 0x06,
-            FIFO_SEC_SPECIFIED_TARGET_NOT_FUNCTIONAL   = 0x07,
-            FIFO_SEC_COMMAND_NOT_ALLOWED_IN_THIS_STATE = 0x08,
-            FIFO_SEC_FUNCTIONALITY_NOT_SUPPORTED       = 0x09,
-            FIFO_SEC_GENERIC_FAILURE_IN_EXECUTION      = 0x0A,
-            FIFO_SEC_BACKLISTED_ACCESS                 = 0x0B,
-            FIFO_SEC_OS_FAILURE                        = 0x0C,
-            FIFO_SEC_FIFO_ACCESS_FAILURE               = 0x0D,
-            FIFO_SEC_INSUFFICIENT_DATA_PASSED          = 0x0E,
-            FIFO_SEC_EXCESS_DATA_PASSED                = 0x0F,
-        };
 
         /**
          * @Brief perform SBE FIFO chip-op
