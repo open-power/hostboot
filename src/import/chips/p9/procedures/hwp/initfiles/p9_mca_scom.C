@@ -35,6 +35,7 @@ constexpr uint64_t literal_0b110 = 0b110;
 constexpr uint64_t literal_0b0000000000000000000000000 = 0b0000000000000000000000000;
 constexpr uint64_t literal_0x1 = 0x1;
 constexpr uint64_t literal_4 = 4;
+constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_17 = 17;
 constexpr uint64_t literal_0 = 0;
@@ -52,7 +53,6 @@ constexpr uint64_t literal_13 = 13;
 constexpr uint64_t literal_14 = 14;
 constexpr uint64_t literal_5 = 5;
 constexpr uint64_t literal_15 = 15;
-constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_16 = 16;
 constexpr uint64_t literal_7 = 7;
 constexpr uint64_t literal_18 = 18;
@@ -82,10 +82,13 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
     {
         fapi2::ATTR_PROC_EPS_READ_CYCLES_T0_Type l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T0, TGT3, l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0));
+        uint64_t l_def_MC_EPSILON_CFG_T0 = ((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0 + literal_6) / literal_4);
         fapi2::ATTR_PROC_EPS_READ_CYCLES_T1_Type l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T1;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T1, TGT3, l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T1));
+        uint64_t l_def_MC_EPSILON_CFG_T1 = ((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T1 + literal_6) / literal_4);
         fapi2::ATTR_PROC_EPS_READ_CYCLES_T2_Type l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T2;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2, TGT3, l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T2));
+        uint64_t l_def_MC_EPSILON_CFG_T2 = ((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T2 + literal_6) / literal_4);
         fapi2::ATTR_IS_SIMULATION_Type l_TGT3_ATTR_IS_SIMULATION;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT3, l_TGT3_ATTR_IS_SIMULATION));
         uint64_t l_def_IS_SIM = (l_TGT3_ATTR_IS_SIMULATION == literal_1);
@@ -188,11 +191,11 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             FAPI_TRY(fapi2::getScom( TGT0, 0x5010826ull, l_scom_buffer ));
 
             l_scom_buffer.insert<0, 8, 56, uint64_t>(literal_0x1 );
-            l_scom_buffer.insert<8, 8, 56, uint64_t>((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0 / literal_4) );
-            l_scom_buffer.insert<16, 8, 56, uint64_t>((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T1 / literal_4) );
-            l_scom_buffer.insert<32, 8, 56, uint64_t>((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T2 / literal_4) );
-            l_scom_buffer.insert<24, 8, 56, uint64_t>((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T1 / literal_4) );
-            l_scom_buffer.insert<40, 8, 56, uint64_t>((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T2 / literal_4) );
+            l_scom_buffer.insert<8, 8, 56, uint64_t>(l_def_MC_EPSILON_CFG_T0 );
+            l_scom_buffer.insert<16, 8, 56, uint64_t>(l_def_MC_EPSILON_CFG_T1 );
+            l_scom_buffer.insert<32, 8, 56, uint64_t>(l_def_MC_EPSILON_CFG_T2 );
+            l_scom_buffer.insert<24, 8, 56, uint64_t>(l_def_MC_EPSILON_CFG_T1 );
+            l_scom_buffer.insert<40, 8, 56, uint64_t>(l_def_MC_EPSILON_CFG_T2 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010826ull, l_scom_buffer));
         }
         {

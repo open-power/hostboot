@@ -130,6 +130,26 @@ define def_SLOT0_DRAM_STACK_HEIGHT = (   MCS.ATTR_EFF_NUM_RANKS_PER_DIMM[def_POR
 define def_SLOT1_DRAM_STACK_HEIGHT = (   MCS.ATTR_EFF_NUM_RANKS_PER_DIMM[def_PORT_INDEX][1]
                                          / def_SLOT1_DENOMINATOR );
 
+# Epsilon Related
+#    There is a 4 window variance of actual wait for each setting x
+#       (Because implemented with a 4 cycle free running timebase)
+#       The Window: 4x-3 <= Actual wait <= 4x
+#    The attribute ATTR_PROC_EPS_READ_CYCLES_T# represents min wait required
+#    Entire window of possible actual waits must be > required wait
+#       Working this out in a table
+#          EPS NEEDED | SETTING | RESULTANT WAIT
+#              5      |    2    |   5 -  8      
+#              6      |    3    |   9 - 12      
+#              7      |    3    |   9 - 12      
+#              8      |    3    |   9 - 12      
+#              9      |    3    |   9 - 12      
+#             10      |    4    |  13 - 16      
+#       Resulting formula: setting = ( required + 6 ) / 4
+
+define def_MC_EPSILON_CFG_T0 = ( SYS.ATTR_PROC_EPS_READ_CYCLES_T0 + 6 ) / 4;
+define def_MC_EPSILON_CFG_T1 = ( SYS.ATTR_PROC_EPS_READ_CYCLES_T1 + 6 ) / 4;
+define def_MC_EPSILON_CFG_T2 = ( SYS.ATTR_PROC_EPS_READ_CYCLES_T2 + 6 ) / 4;
+
 #--******************************************************************************
 #-- Dial Assignments
 #--******************************************************************************
@@ -667,6 +687,42 @@ ispy MCP.PORT0.SRQ.MBA_RRQ0Q_CFG_RRQ_FIFO_MODE [when=S] {
   MCBIST.ATTR_MSS_REORDER_QUEUE_SETTING;
 }
 
+# Epsilon Settings per Power Bus Spreadsheet
+
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_JITTER_EPSILON [when=S] {
+  spyv;
+  0x1;
+}
+
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_LOCAL_NODE_EPSILON [when=S] {
+  spyv;
+  # tier 0
+  def_MC_EPSILON_CFG_T0;
+}
+
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_NEAR_NODAL_EPSILON [when=S] {
+  spyv;
+  # tier 1
+  def_MC_EPSILON_CFG_T1;
+}
+
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_REMOTE_NODAL_EPSILON [when=S] {
+  spyv;
+  # tier 2
+  def_MC_EPSILON_CFG_T2;
+}
+
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_GROUP_EPSILON [when=S] {
+  spyv;
+  # tier 1
+  def_MC_EPSILON_CFG_T1;
+}
+
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_VECTOR_GROUP_EPSILON [when=S] {
+  spyv;
+  # tier 2
+  def_MC_EPSILON_CFG_T2;
+}
 
 
 ####################################################
@@ -678,38 +734,6 @@ ispy MCP.PORT0.SRQ.MBA_RRQ0Q_CFG_RRQ_FIFO_MODE [when=S] {
 espy  MCP.PORT0.SRQ.MBA_FARB0Q_CFG_OE_ALWAYS_ON [when=S]{
   spyv;
   ON;
-}
-
-# Epsilon Settings per Power Bus Spreadsheet
-
-ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_JITTER_EPSILON [when=S] {
-  spyv;
-  0x1;
-}
-
-ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_LOCAL_NODE_EPSILON [when=S] {
-  spyv;
-  SYS.ATTR_PROC_EPS_READ_CYCLES_T0 / 4;
-}
-
-ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_NEAR_NODAL_EPSILON [when=S] {
-  spyv;
-  SYS.ATTR_PROC_EPS_READ_CYCLES_T1 / 4;
-}
-
-ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_REMOTE_NODAL_EPSILON [when=S] {
-  spyv;
-  SYS.ATTR_PROC_EPS_READ_CYCLES_T2 / 4;
-}
-
-ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_GROUP_EPSILON [when=S] {
-  spyv;
-  SYS.ATTR_PROC_EPS_READ_CYCLES_T1 / 4;
-}
-
-ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_VECTOR_GROUP_EPSILON [when=S] {
-  spyv;
-  SYS.ATTR_PROC_EPS_READ_CYCLES_T2 / 4;
 }
 
 # HW366164 - SRQ Fullness Control
