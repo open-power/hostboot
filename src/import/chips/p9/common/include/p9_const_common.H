@@ -78,6 +78,10 @@ struct has_fixfld
     static const uint8_t value = 255;
 };
 
+const uint32_t OB0_CHIPLET_ID = 9;
+const uint32_t OB1_CHIPLET_ID = 10;
+const uint32_t OB2_CHIPLET_ID = 11;
+const uint32_t OB3_CHIPLET_ID = 12;
 
 #define FIXREG8(name, expr, unit, meth, newexpr) template<> struct has_fixup<uint8_t,unit,meth,expr> { static const uint8_t value = newexpr; };
 #define FIXREG32(name, expr, unit, meth, newexpr) template<> struct has_fixup<uint32_t,unit,meth,expr> { static const uint32_t value = newexpr; };
