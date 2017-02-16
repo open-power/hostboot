@@ -129,6 +129,9 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
         // of an index, like master rank. This allows us to do that.
         static const std::pair<uint64_t, uint64_t> address_pairs[];
 
+        // Subtest types that need to be run in FIFO mode
+        static const std::vector< mss::mcbist::op_type > FIFO_MODE_REQUIRED_OP_TYPES;
+
         enum
         {
             // Subtest control bits. These are the same in all '16 bit subtest' field
@@ -428,6 +431,25 @@ class subtest_t
         subtest_t( const uint16_t i_data = 0 ):
             iv_mcbmr(i_data)
         {}
+
+        ///
+        /// @brief Checks if the op type requires FIFO mode to be on
+        /// @return bool fifo_mode_requried - true if FIFO mode is required to be forced on
+        ///
+        inline bool fifo_mode_required() const
+        {
+            // Gets the op type for this subtest
+            uint64_t l_value_to_find = 0;
+            iv_mcbmr.extractToRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(l_value_to_find);
+
+            // Finds if this op type is in the vector that stores the OP types that require FIFO mode to be run
+            const auto l_op_type_it = std::find(TT::FIFO_MODE_REQUIRED_OP_TYPES.begin(), TT::FIFO_MODE_REQUIRED_OP_TYPES.end(),
+                                                l_value_to_find);
+
+            // If the op type is required (aka was found), it will be less than end
+            // std::find returns the ending iterator if it was not found, so this will return false in that case
+            return l_op_type_it != TT::FIFO_MODE_REQUIRED_OP_TYPES.end();
+        }
 
         ///
         /// @brief Convert to a 16 bit int
@@ -1021,7 +1043,6 @@ class program
             iv_config(0),
             iv_control(0),
             iv_async(false),
-            iv_fifo_mode(true),
             iv_pattern(PATTERN_0),
             iv_random24_data_seed(RANDOM24_SEEDS_0),
             iv_random24_seed_map(RANDOM24_SEED_MAP_0),
@@ -2025,18 +2046,6 @@ class program
         }
 
         ///
-        /// @brief Enable or disable FIFO mode
-        /// @param[in] i_program the program in question
-        /// @param[in] i_mode mss::ON to enable, programs will run in FIFO vs mainline mode
-        /// @return void
-        ///
-        inline void change_fifo_mode( const bool i_mode )
-        {
-            iv_fifo_mode = i_mode;
-            return;
-        }
-
-        ///
         /// @brief Select the port(s) to be used by the MCBIST
         /// @param[in] i_ports uint64_t representing the ports. Multiple bits set imply broadcast
         /// i_ports is a right-aligned uint64_t, of which only the right-most 4 bits are used. The register
@@ -2199,7 +2208,6 @@ class program
             l_equal &= iv_config == i_rhs.iv_config;
             l_equal &= iv_control == i_rhs.iv_control;
             l_equal &= iv_async == i_rhs.iv_async;
-            l_equal &= iv_fifo_mode == i_rhs.iv_fifo_mode;
             l_equal &= iv_pattern == i_rhs.iv_pattern;
             l_equal &= iv_thresholds == i_rhs.iv_thresholds;
             l_equal &= iv_data_rotate_cnfg == i_rhs.iv_data_rotate_cnfg;
@@ -2258,9 +2266,6 @@ class program
 
         // True iff we want to run in asynchronous mode
         bool                        iv_async;
-
-        // True if we want to run in FIFO mode - defaults to true as this is needed for most MCBIST tests
-        bool                        iv_fifo_mode;
 
         // The pattern for the pattern generator
         uint64_t                    iv_pattern;
@@ -2846,8 +2851,16 @@ inline fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target,
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 inline fapi2::ReturnCode load_fifo_mode( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
 {
-    // if the FIFO load is not needed, just exit out
-    if(!i_program.iv_fifo_mode)
+
+    // Checks if FIFO mode is required by checking all subtests
+    const auto l_subtest_it = std::find_if(i_program.iv_subtests.begin(),
+                                           i_program.iv_subtests.end(), []( const mss::mcbist::subtest_t<T>& i_rhs) -> bool
+    {
+        return i_rhs.fifo_mode_required();
+    });
+
+    // if the FIFO load is not needed (no subtest requiring it was found), just exit out
+    if(l_subtest_it == i_program.iv_subtests.end())
     {
         return fapi2::FAPI2_RC_SUCCESS;
     }
