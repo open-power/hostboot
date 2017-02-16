@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 #include <prdfExtensibleChip.H>
 
 // Platform includes
+#include <prdfMemCeTable.H>
 #include <prdfMemUeTable.H>
 
 namespace PRDF
@@ -45,7 +46,7 @@ class McaDataBundle : public DataBundle
      * @param i_chip An MCA chip.
      */
     explicit McaDataBundle( ExtensibleChip * i_chip ) :
-        iv_ueTable()
+        iv_ceTable(i_chip), iv_ueTable(i_chip)
     {}
 
     /** @brief Destructor */
@@ -59,6 +60,7 @@ class McaDataBundle : public DataBundle
 
   public: // instance variables
 
+    MemCeTable iv_ceTable; ///< CE table for FFDC
     MemUeTable iv_ueTable; ///< UE table for FFDC
 };
 

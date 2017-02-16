@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,8 +53,11 @@ void addEccData<TYPE_MCA>( ExtensibleChip * i_chip,
     CaptureData & cd = io_sc.service_data->GetCaptureData();
     McaDataBundle * db = getMcaDataBundle( i_chip );
 
+    // Add CE table to capture data.
+    db->iv_ceTable.addCapData( cd );
+
     // Add UE table to capture data.
-    db->iv_ueTable.addCapData( i_chip, cd );
+    db->iv_ueTable.addCapData( cd );
 }
 
 template<>

@@ -77,6 +77,14 @@ class MemCeTable
   public: // functions
 
     /**
+     * @brief Constructor.
+     * @param i_chip MCA or MBA associated with this data.
+     */
+    explicit MemCeTable( ExtensibleChip * i_chip ) :
+        iv_chip( i_chip )
+    {}
+
+    /**
      * @brief  Will attempt to add a new entry to the table.
      *
      * If an entry already exists, the entry's count is incremented. Otherwise,
@@ -115,10 +123,9 @@ class MemCeTable
 
     /**
      * @brief Gathers all table data to be stored in capture data.
-     * @param i_chip An MCA or MBA chip.
      * @param io_cd  Capture data struct.
      */
-    void addCapData( ExtensibleChip * i_chip, CaptureData & io_cd );
+    void addCapData( CaptureData & io_cd );
 
   private: // structs, typedefs
 
@@ -166,6 +173,8 @@ class MemCeTable
     typedef std::list<TableData> CeTable;
 
   private: // instance variables
+
+    ExtensibleChip * iv_chip; ///< MCA or MBA associated with this data.
 
     /** A storage container for memory fetch CE errors. */
     CeTable iv_table;

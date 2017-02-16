@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,6 +61,14 @@ class MemUeTable
   public: // functions
 
     /**
+     * @brief Constructor.
+     * @param i_chip MCA or MBA associated with this data.
+     */
+    explicit MemUeTable( ExtensibleChip * i_chip ) :
+        iv_chip( i_chip )
+    {}
+
+    /**
      * @brief Will attempt to add a new entry to the table.
      * @note  If an entry already exists, the entry's count is incremented and
      *        moved to the end of the queue.
@@ -71,10 +79,9 @@ class MemUeTable
 
     /**
      * @brief Gathers all table data to be stored in capture data.
-     * @param i_chip An MCA or MBA chip.
      * @param io_cd  Capture data struct.
      */
-    void addCapData( ExtensibleChip * i_chip, CaptureData & io_cd );
+    void addCapData( CaptureData & io_cd );
 
   private: // structs, typedefs
 
@@ -107,6 +114,8 @@ class MemUeTable
     typedef std::list<UeTableData> UeTable;
 
   private: // instance variables
+
+    ExtensibleChip * iv_chip; ///< MCA or MBA associated with this data.
 
     /** A FIFO that stores the latest memory UE addresses and their types. This
      *  is not a pure FIFO, because if a new entry matches an existing entry,
