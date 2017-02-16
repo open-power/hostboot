@@ -1075,6 +1075,74 @@ fapi2::ReturnCode writeMCBarData(
     return fapi2::current_err;
 }
 
+
+///
+/// @brief Unmask FIR before opening BARs
+///
+/// @param[in] i_mcBarDataPair Target pair <target, data>
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode unmaskMCFIR(
+    const std::vector<std::pair<fapi2::Target<T>, mcsBarData_t>>& i_mcBarDataPair);
+
+template<> // TARGET_TYPE_MCS
+fapi2::ReturnCode unmaskMCFIR(
+    const std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCS>, mcsBarData_t>>& i_mcBarDataPair)
+{
+    FAPI_DBG("Entering");
+    fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_mcfiraction;
+    fapi2::buffer<uint64_t> l_mcfirmask_and;
+
+    // Setup MC Fault Isolation Action1 register buffer
+    l_mcfiraction.setBit<MCS_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR>();
+
+    // Setup FIR bits in MC Fault Isolation Mask Register buffer
+    l_mcfirmask_and.flush<1>();
+    l_mcfirmask_and.clearBit<MCS_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR>();
+    l_mcfirmask_and.clearBit<MCS_MCFIR_MC_INTERNAL_NONRECOVERABLE_ERROR>();
+    l_mcfirmask_and.clearBit<MCS_MCFIR_POWERBUS_PROTOCOL_ERROR>();
+    l_mcfirmask_and.clearBit<MCS_MCFIR_MULTIPLE_BAR>();
+    l_mcfirmask_and.clearBit<MCS_MCFIR_INVALID_ADDRESS>();
+    l_mcfirmask_and.clearBit<MCS_MCFIR_COMMAND_LIST_TIMEOUT>();
+
+    for (auto l_pair : i_mcBarDataPair)
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MCS> l_target = l_pair.first;
+        char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+        fapi2::toString(l_target, l_targetStr, sizeof(l_targetStr));
+        FAPI_INF("Unmask FIR for MCS target: %s", l_targetStr);
+
+        // Write MC FIR action1
+        FAPI_TRY(fapi2::putScom(l_target, MCS_MCFIRACT1, l_mcfiraction),
+                 "Error from putScom (MCS_MCFIRACT1)");
+
+        // Write mask
+        FAPI_TRY(fapi2::putScom(l_target, MCS_MCFIRMASK_AND, l_mcfirmask_and),
+                 "Error from putScom (MCS_MCFIRMASK_AND)");
+
+    } // Data pair loop
+
+fapi_try_exit:
+    FAPI_DBG("Exit");
+    return fapi2::current_err;
+}
+
+template<> // TARGET_TYPE_MI
+fapi2::ReturnCode unmaskMCFIR(
+    const std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MI>, mcsBarData_t>>& i_mcBarDataPair)
+{
+    FAPI_DBG("Entering");
+    fapi2::ReturnCode l_rc;
+
+    // Add code for MI
+
+    FAPI_DBG("Exit");
+    return fapi2::current_err;
+}
+
 ///
 /// @brief p9_mss_setup_bars procedure entry point
 /// See doxygen in p9_mss_setup_bars.H
@@ -1137,6 +1205,11 @@ fapi2::ReturnCode p9_mss_setup_bars(
         // Build MC BAR data based on Group data info
         FAPI_TRY(buildMCBarData(l_mcsChiplets, l_groupData, l_mcsBarDataPair),
                  "buildMCBarData() returns error, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+
+        // Unmask MC FIRs
+        FAPI_TRY(unmaskMCFIR(l_mcsBarDataPair),
+                 "unmaskMCFIR() returns error, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
         // Write data to MCS

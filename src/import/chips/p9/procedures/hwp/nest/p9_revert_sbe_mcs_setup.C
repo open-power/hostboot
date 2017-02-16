@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -134,7 +134,11 @@ revert_mcs_hb_dcbz_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_t
         FAPI_TRY(fapi2::putScom(i_target, MCS_MCMODE1_ARR[i_mcs], l_mcmode1),
                  "Error from putScom (MCS%d_MCMODE1)", i_mcs);
 
-        // MCFIRMASK -- don't remask FIR (per Joe, Marc)
+        // Re-mask MCFIR. We want to ensure all MCSs are masked
+        // until the BARs are opened later during IPL.
+        l_mcfirmask.flush<1>();
+        FAPI_TRY(fapi2::putScom(i_target, MCS_MCFIRMASK, l_mcfirmask),
+                 "Error from putScom (MCS_MCFIRMASK)");
     }
 
 fapi_try_exit:
