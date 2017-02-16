@@ -67,6 +67,8 @@ static const uint64_t g_control_reg_map[] =
     0x8080808000000000, // b1111
 };
 
+static const uint64_t g_poll_for_running = 10;
+
 //--------------------------------------------------------------------------
 // Function definitions
 //--------------------------------------------------------------------------
@@ -112,10 +114,15 @@ static inline fapi2::ReturnCode threads_running(
     bool& o_ok)
 {
     // Running is defined as not in maint mode and not quiesced.
+    uint64_t l_trys = g_poll_for_running;
     uint64_t l_state = 0;
-    FAPI_TRY(p9_thread_control_query(i_target, i_threads, o_rasStatusReg, l_state),
-             "threads_running(): p9_thread_control_query() returns an error.");
-    o_ok = (l_state & THREAD_STATE_RUNNING);
+
+    for (o_ok = false; !o_ok && l_trys > 0; l_trys--)
+    {
+        FAPI_TRY(p9_thread_control_query(i_target, i_threads, o_rasStatusReg, l_state),
+                 "threads_running(): p9_thread_control_query() returns an error.");
+        o_ok = (l_state & THREAD_STATE_RUNNING);
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
