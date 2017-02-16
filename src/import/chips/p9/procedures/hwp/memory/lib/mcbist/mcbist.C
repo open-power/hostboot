@@ -53,6 +53,18 @@ const std::pair<uint64_t, uint64_t> mcbistTraits<fapi2::TARGET_TYPE_MCBIST>::add
     { START_ADDRESS_3, END_ADDRESS_3 },
 };
 
+const std::vector< mss::mcbist::op_type > mcbistTraits<fapi2::TARGET_TYPE_MCBIST>::FIFO_MODE_REQUIRED_OP_TYPES =
+{
+    mss::mcbist::op_type::WRITE            ,
+    mss::mcbist::op_type::READ             ,
+    mss::mcbist::op_type::READ_WRITE       ,
+    mss::mcbist::op_type::WRITE_READ       ,
+    mss::mcbist::op_type::READ_WRITE_READ  ,
+    mss::mcbist::op_type::READ_WRITE_WRITE ,
+    mss::mcbist::op_type::RAND_SEQ         ,
+    mss::mcbist::op_type::READ_READ_WRITE  ,
+};
+
 namespace mcbist
 {
 
