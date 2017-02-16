@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,8 @@
 #include <plat_attr_override_sync.H>
 #include <vpd/spdenums.H>
 #include <p9_pm_get_poundv_bucket_attr.H>
+// TODO RTC:162011 after new .H file is mirrored
+//#include <p9_pm_get_poundw_bucket_attr.H>
 #include <errl/errlmanager.H>
 
 #include <targeting/common/targetservice.H>
@@ -441,7 +443,7 @@ ReturnCode platGetFusedCoreMode(uint8_t & o_isFused)
     return fapi2::ReturnCode();
 }
 
-// ******************************************************************************
+//******************************************************************************
 // fapi2::platAttrSvc::platGetPoundVBucketData function
 //******************************************************************************
 ReturnCode platGetPoundVBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
@@ -470,6 +472,35 @@ ReturnCode platGetPoundVBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     return rc;
 }
 
+//******************************************************************************
+// fapi2::platAttrSvc::platGetPoundWBucketData function
+//******************************************************************************
+ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                             uint8_t * o_poundWData)
+{
+    fapi2::ReturnCode rc;
+
+    // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+    // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+    // to enable a streamlined dump of the attributes, all plat code must use
+    // the generic TARGET_TYPE_ALL -- so convert back to the correct type
+    // manually
+    TARGETING::Target * l_pTarget = NULL;
+    errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+    if (l_errl)
+    {
+        FAPI_ERR("getTargetingAttr: Error from getTargetingTarget");
+        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        fapi2::Target<TARGET_TYPE_EQ> l_fapiTarget( l_pTarget);
+// TODO RTC:162011 after new .C file is mirrored
+//        rc = p9_pm_get_poundw_bucket_attr(l_fapiTarget,o_poundWData);
+    }
+
+    return rc;
+}
 
 
 

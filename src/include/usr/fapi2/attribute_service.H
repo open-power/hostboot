@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -219,6 +219,23 @@ ReturnCode platGetFusedCoreMode(uint8_t & o_isFused);
 ReturnCode platGetPoundVBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                                   uint8_t * o_poundVData);
 
+///
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+/// ATTR_POUNDW_BUCKET_DATA. It should not be called directly
+///
+///
+/// @param[in]  i_fapiTarget     FAPI2 Target reference
+///                                Don't need to check the type here, get macro
+///                                does it for us, thus use the all type to
+///                                allow streamlined dump of ATTR
+/// @param[out] o_pos            Output pound w bucket data
+/// @return ReturnCode           Always FAPI2_RC_SUCCESS, this cannot fail
+///                              if a toplevel target cannot be found then
+///                              an assert triggers in the platform call
+///
+ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                  uint8_t * o_poundWData);
+
 // -----------------------------------------------------------------------------
 // End TODO: End to be supported functions
 // -----------------------------------------------------------------------------
@@ -291,5 +308,13 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platGetPoundVBucketData(TARGET,VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to route ATTR_POUNDW_BUCKET_DATA access to the correct HB function
+//------------------------------------------------------------------------------
+#define ATTR_POUNDW_BUCKET_DATA_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetPoundWBucketData(TARGET,VAL)
 
 #endif // ATTRIBUTESERVICE_H_

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,6 +68,7 @@ mvpdTestData mvpdData[] =
     { MVPD::CRP0, MVPD::ED },
     { MVPD::CRP0, MVPD::TE },
     { MVPD::CRP0, MVPD::DD },
+    { MVPD::CRP0, MVPD::pdW },
     { MVPD::CP00, MVPD::VD },
     { MVPD::CP00, MVPD::PG },
     //    { MVPD::CP00, MVPD::PK }, // no PK in test data

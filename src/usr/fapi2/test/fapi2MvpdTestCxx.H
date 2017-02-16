@@ -42,6 +42,8 @@
 #include <fapi2.H>
 #include <devicefw/userif.H>
 #include <p9_pm_get_poundv_bucket.H>
+// TODO RTC:162011 after new .H file is mirrored
+//#include <p9_pm_get_poundw_bucket.H>
 #include <utilFilter.H>
 #include <vpd/mvpdenums.H>
 
@@ -404,6 +406,106 @@ public:
       FAPI_INF("MvpdGetPoundVBucket:: Test Complete. %d/%d fails",  numFails , numTests);
       FAPI_INF("MvpdGetPoundVBucket Test exit... ");
   }
+
+  void testMvpdGetPoundWBucket(void)
+  {
+      int numTests = 0;
+      int numFails = 0;
+      fapi2::ReturnCode   l_rc;
+      FAPI_INF("MvpdGetPoundWBucket Test entry... ");
+
+      // Create a vector of TARGETING::Target pointers
+      TARGETING::TargetHandleList l_chipletList;
+
+      // Get a list of all of the EQ chips
+      TARGETING::getChipletResources(l_chipletList,
+                                    TARGETING::TYPE_EQ,
+                                    TARGETING::UTIL_FILTER_PRESENT);
+// TODO RTC:162011 after new .H file is mirrored
+//      fapi2::vdmData_t vdmData;
+
+      for(const auto & eqChiplet : l_chipletList )
+      {
+          fapi2::Target<TARGET_TYPE_EQ>  l_fapi_eq_target(eqChiplet);
+#if 0 // TODO RTC:162011 after new files are mirrored
+          numTests++;
+          l_rc = p9_pm_get_poundw_bucket(l_fapi_eq_target, vdmData);
+          if(l_rc)
+          {
+              numFails++;
+              TS_FAIL("Error: Error occurred while trying to read voltage "
+                      "data from mvpd");
+              continue;
+          }
+
+          //Set up a char array to hold the bucket data from an attr read
+          fapi2::ATTR_POUNDW_BUCKET_DATA_Type l_bucketAttr;
+
+          //Perform an ATTR_GET for POUNDW_BUCKET data on the EQ target
+          FAPI_ATTR_GET(fapi2::ATTR_POUNDW_BUCKET_DATA,
+                                l_fapi_eq_target,
+                                l_bucketAttr);
+
+          uint32_t l_huid = TARGETING::get_huid(l_fapi_eq_target);
+          uint32_t l_pos = eqChiplet->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+          //PROC0EQ1 has an override set in nimbus's standalone xml,
+          //this branch checks it
+          if(l_pos == 1)
+          {
+              numTests++;
+              if(vdmData.bucketId != 2)
+              {
+                  numFails++;
+                  TS_FAIL("Error:p9_pm_get_poundw_bucket with EQ with HUID = "
+                          "0x%X should have returned bucket ID 2, not %d",
+                          l_huid,
+                          vdmData.bucketId);
+              }
+
+              numTests++;
+              if(*l_bucketAttr != 2)
+              {
+                  numFails++;
+                  TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDW_BUCKET_DATA "
+                          "EQ with HUID = 0x%X should have bucket ID 1, not %d",
+                          l_huid,
+                          vdmData.bucketId);
+              }
+
+              continue;
+          }
+
+          numTests++;
+          if(vdmData.bucketId != 1)
+          {
+              numFails++;
+              TS_FAIL("Error:p9_pm_get_poundw_bucket with EQ with HUID = "
+                      "0x%X should have returned bucket ID 1, not %d",
+                      l_huid,
+                      vdmData.bucketId);
+              continue;
+          }
+
+          numTests++;
+          if(*l_bucketAttr != 1)
+          {
+              numFails++;
+              TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_DATA "
+                      "EQ with HUID = 0x%X should have bucket ID 1, not %d",
+                      l_huid,
+                      vdmData.bucketId);
+          }
+
+          FAPI_INF("Bucket for HUID: 0x%X is = %d", l_huid, vdmData.bucketId);
+#endif
+      }
+
+      FAPI_INF("MvpdGetPoundWBucket:: Test Complete. %d/%d fails",
+               numFails,
+               numTests);
+      FAPI_INF("MvpdGetPoundWBucket Test exit... ");
+  } //testMvpdGetPoundWBucket
 };
 
 #endif
