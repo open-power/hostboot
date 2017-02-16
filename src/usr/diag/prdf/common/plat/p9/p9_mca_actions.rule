@@ -50,11 +50,11 @@ actionclass verify_chip_mark_5 { funccall("AnalyzeFetchMpe_5"); };
 actionclass verify_chip_mark_6 { funccall("AnalyzeFetchMpe_6"); };
 actionclass verify_chip_mark_7 { funccall("AnalyzeFetchMpe_7"); };
 
-/** Mainline CE UE handling...TBD */
-actionclass mainline_ce_ue_handling
-{
-    TBDDefaultCallout;
-};
+/** Mainline NCE handling */
+actionclass mainline_nce_handling { funccall("AnalyzeFetchNce"); };
+
+/** Mainline TCE handling */
+actionclass mainline_tce_handling { funccall("AnalyzeFetchTce"); };
 
 /** Mainline UE handling */
 actionclass mainline_ue_handling

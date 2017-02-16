@@ -197,6 +197,38 @@ PLUGIN_FETCH_MPE_ERROR( 7 )
 //------------------------------------------------------------------------------
 
 /**
+ * @brief  MCAECCFIR[8] - Mainline NCE.
+ * @param  i_chip MCA chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeFetchNce( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc )
+{
+    MemEcc::analyzeFetchNce<TYPE_MCA, McaDataBundle *>( i_chip, io_sc );
+    return SUCCESS; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchNce );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  MCAECCFIR[9] - Mainline TCE.
+ * @param  i_chip MCA chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeFetchTce( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc )
+{
+    MemEcc::analyzeFetchTce<TYPE_MCA, McaDataBundle *>( i_chip, io_sc );
+    return SUCCESS; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchTce );
+
+//------------------------------------------------------------------------------
+
+/**
  * @brief  MCAECCFIR[14] - Mainline UE.
  * @param  i_chip MCA chip.
  * @param  io_sc  The step code data struct.
@@ -209,6 +241,8 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_chip,
     return SUCCESS; // nothing to return to rule code
 }
 PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchUe );
+
+//------------------------------------------------------------------------------
 
 } // end namespace p9_mca
 
