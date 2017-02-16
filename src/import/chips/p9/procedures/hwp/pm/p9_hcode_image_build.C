@@ -1879,7 +1879,7 @@ extern "C"
                                    i_chipState,
                                    i_ringData,
                                    i_debugMode,
-                                   l_ringVariant,
+                                   BASE,           // VPD rings are always BASE
                                    i_imgType,
                                    cmeRings,
                                    ringLength );
@@ -2188,7 +2188,7 @@ extern "C"
                                     i_chipState,
                                     i_ringData,
                                     i_debugMode,
-                                    l_ringVariant,
+                                    BASE,           // VPD rings are always BASE
                                     io_qpmrHdr,
                                     i_imgType,
                                     sgpeRings );
