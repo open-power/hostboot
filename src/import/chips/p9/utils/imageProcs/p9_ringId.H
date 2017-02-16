@@ -193,6 +193,7 @@ enum RINGTYPE
 };
 
 }; //end of RS4 namespace
+
 enum CHIPLET_TYPE
 {
     PERV_TYPE,
@@ -200,15 +201,15 @@ enum CHIPLET_TYPE
     N1_TYPE,
     N2_TYPE,
     N3_TYPE,
+    XB_TYPE,
     MC_TYPE,
-    PCI0_TYPE,
-    PCI1_TYPE,
-    PCI2_TYPE,
     OB0_TYPE,
     OB1_TYPE,
     OB2_TYPE,
     OB3_TYPE,
-    XB_TYPE,
+    PCI0_TYPE,
+    PCI1_TYPE,
+    PCI2_TYPE,
     EQ_TYPE,
     EC_TYPE,
 };
