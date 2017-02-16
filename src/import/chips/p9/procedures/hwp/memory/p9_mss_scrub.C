@@ -43,6 +43,7 @@
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/sim.H>
 #include <lib/utils/count_dimm.H>
+#include <lib/fir/memdiags_fir.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -115,6 +116,19 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     FAPI_ASSERT( l_poll_results == true,
                  fapi2::MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT().set_TARGET(i_target),
                  "p9_mss_scrub (init) timedout %s", mss::c_str(i_target) );
+
+    // Unmask firs after memdiags and turn off FIFO mode
+    FAPI_TRY ( mss::unmask::after_memdiags( i_target ) );
+    FAPI_TRY ( mss::reset_reorder_queue_settings(i_target) );
+
+    // Start background scrub
+    FAPI_TRY ( memdiags::background_scrub( i_target,
+                                           mss::mcbist::stop_conditions(),
+                                           mss::mcbist::speed::BG_SCRUB,
+                                           mss::mcbist::address() ) );
+
+    // Unmask firs after background scrub is started
+    FAPI_TRY ( mss::unmask::after_background_scrub( i_target ) );
 
 fapi_try_exit:
     return fapi2::current_err;
