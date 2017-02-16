@@ -3228,6 +3228,14 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                     continue;
                 }
 
+                // Never touch engine 0 for Host -- the SBE owns
+                // it
+                if ( ( engine == 0 ) &&
+                     (io_args.switches.useHostI2C == 1) )
+                {
+                    continue;
+                }
+
                 // Look for any device on this engine based on speed_array
                 bool skip = true;
                 for ( size_t j = 0; j < I2C_BUS_ATTR_MAX_PORT; j++ )
