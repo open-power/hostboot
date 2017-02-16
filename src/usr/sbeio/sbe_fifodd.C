@@ -42,7 +42,7 @@
 #include <initservice/initserviceif.H>
 #include <kernel/pagemgr.H>
 #include <fapi2.H>
-#include <error_info_defs.H>
+#include <sbeio/sbe_sp_intf.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -464,8 +464,8 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
         uint32_t * l_pStatusTmp = l_pReceived - l_last; //do word ptr math
         statusHeader * l_pStatusHeader = (statusHeader *)l_pStatusTmp;
         if ((FIFO_STATUS_MAGIC != l_pStatusHeader->magic) ||
-            (FIFO_PRI_OPERATION_SUCCESSFUL != l_pStatusHeader->primaryStatus) ||
-            (FIFO_SEC_OPERATION_SUCCESSFUL != l_pStatusHeader->secondaryStatus))
+            (SBE_PRI_OPERATION_SUCCESSFUL != l_pStatusHeader->primaryStatus) ||
+            (SBE_SEC_OPERATION_SUCCESSFUL != l_pStatusHeader->secondaryStatus))
         {
             SBE_TRACF(ERR_MRK "readResponse: failing downstream status "
                       " cmd=0x%08x magic=0x%08x prim=0x%08x secondary=0x%08x",
