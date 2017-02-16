@@ -87,6 +87,11 @@
         <id>ATTR_PERF_24x7_INVOCATION_TIME_MS</id>
         <default>0x1</default>
       </attribute>
+       <attribute>
+        <id>ATTR_PGPE_HCODE_FUNCTION_ENABLE</id>
+        <!-- this setting enables the OCC Immediate Resp Mode Only -->
+        <default>0x0</default>
+      </attribute>
      <attribute>
          <id>ATTR_IO_OBUS_DCCAL_FLAGS</id>
          <default>0x0</default>
