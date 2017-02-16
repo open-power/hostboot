@@ -69,7 +69,7 @@ void MemUeTable::addEntry( UE_TABLE::Type i_type, const MemAddr & i_addr )
 
 //------------------------------------------------------------------------------
 
-void MemUeTable::addCapData( ExtensibleChip * i_chip, CaptureData & io_cd )
+void MemUeTable::addCapData( CaptureData & io_cd )
 {
     static const size_t sz_word = sizeof(CPU_WORD);
 
@@ -117,7 +117,7 @@ void MemUeTable::addCapData( ExtensibleChip * i_chip, CaptureData & io_cd )
 
         // Add data to capture data.
         BitString bs ( sz_actData*8, (CPU_WORD *) &data );
-        io_cd.Add( i_chip->getTrgt(), Util::hashString("MEM_UE_TABLE"), bs );
+        io_cd.Add( iv_chip->getTrgt(), Util::hashString("MEM_UE_TABLE"), bs );
     }
 }
 

@@ -174,7 +174,7 @@ void MemCeTable::getMnfgCounts( const MemRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-void MemCeTable::addCapData( ExtensibleChip * i_chip, CaptureData & io_cd )
+void MemCeTable::addCapData( CaptureData & io_cd )
 {
     static const size_t sz_word = sizeof(CPU_WORD);
 
@@ -191,16 +191,16 @@ void MemCeTable::addCapData( ExtensibleChip * i_chip, CaptureData & io_cd )
     uint8_t isMba  = 0;
     uint8_t mbaPos = 0;
     uint8_t rcType = CEN_SYMBOL::WIRING_INVALID;
-    if ( TYPE_MBA == i_chip->getType() )
+    if ( TYPE_MBA == iv_chip->getType() )
     {
         isMba  = 1;
-        mbaPos = getTargetPosition( i_chip->getTrgt() );
+        mbaPos = getTargetPosition( iv_chip->getTrgt() );
 
         /* TODO: RTC 157888
-        if ( SUCCESS != getMemBufRawCardType(i_chip->getTrgt(), rcType) )
+        if ( SUCCESS != getMemBufRawCardType(iv_chip->getTrgt(), rcType) )
         {
             PRDF_ERR( "[MemCeTable::addCapData] getMemBufRawCardType(0x%08x) "
-                      "failed", i_chip->getHuid() );
+                      "failed", iv_chip->getHuid() );
             rcType = CEN_SYMBOL::WIRING_INVALID; // Just in case.
         }
         */
@@ -257,7 +257,7 @@ void MemCeTable::addCapData( ExtensibleChip * i_chip, CaptureData & io_cd )
 
         // Add data to capture data.
         BitString bs ( sz_actData*8, (CPU_WORD *) &data );
-        io_cd.Add( i_chip->getTrgt(), Util::hashString("MEM_CE_TABLE"), bs );
+        io_cd.Add( iv_chip->getTrgt(), Util::hashString("MEM_CE_TABLE"), bs );
     }
 }
 
