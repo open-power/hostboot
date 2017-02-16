@@ -137,6 +137,13 @@ errlHndl_t IntrRp::resetIntpForMpipl()
                 PSIHB_SW_INTERFACES_t * this_psihb_ptr = (*targ_itr)->psiHbBaseAddr;
                 this_psihb_ptr->icr = PSI_BRIDGE_INTP_STATUS_CTL_RESET;
                 resetIntUnit(*targ_itr);
+                //Turn off VPC error when in LSI mode
+                err = disableVPCPullErr(*targ_itr);
+                if (err)
+                {
+                    TRACFCOMP(g_trac_intr, "Error masking VPC Pull Lsi Err");
+                    break;
+                }
             }
         }
 
@@ -147,6 +154,14 @@ errlHndl_t IntrRp::resetIntpForMpipl()
 
         //Reset XIVE Interrupt unit
         resetIntUnit(iv_masterHdlr);
+
+        //Turn off VPC error when in LSI mode
+        err = disableVPCPullErr(iv_masterHdlr);
+        if (err)
+        {
+            TRACFCOMP(g_trac_intr, "Error masking VPC Pull Lsi Err");
+            break;
+        }
 
         //Clear out the mask list because pq state buffer gets cleared after
         //resetting the XIVE Interrupt unit
@@ -232,6 +247,8 @@ errlHndl_t IntrRp::_init()
             }
         }
 
+
+
         //Disable Incoming PSI Interrupts
         TRACDCOMP(g_trac_intr, "IntrRp::_init() Disabling PSI Interrupts");
         uint64_t l_disablePsiIntr = PSI_BRIDGE_INTP_STATUS_CTL_DISABLE_PSI;
@@ -248,23 +265,55 @@ errlHndl_t IntrRp::_init()
             break;
         }
 
-        TRACFCOMP(g_trac_intr, "IntrRp::_init() Masking Interrupts");
-        //Mask off all interrupt sources - these will be enabled as SW entities
-        // register for specific interrupts via the appropriate message queue
-        l_err = maskAllInterruptSources();
-        if (l_err)
+        // Check if we need to run the MPIPL path
+        if(is_mpipl)
         {
-            TRACFCOMP(g_trac_intr, "IntrRp::_init() Error masking all interrupt sources.");
-            break;
-        }
+            // In MPIPL we enable Interrupt before masking sources -- while the
+            // system is in this state interupts can get stuck, need to let any
+            // interrupts have time to present themselves before we mask things
+            TRACFCOMP(g_trac_intr, "IntrRp::_init() Enabling PSIHB Interrupts");
+            //Enable PSIHB Interrupts
+            l_err = enableInterrupts(l_procIntrHdlr);
 
-        TRACFCOMP(g_trac_intr, "IntrRp::_init() Enabling PSIHB Interrupts");
-        //Enable PSIHB Interrupts
-        l_err = enableInterrupts(l_procIntrHdlr);
-        if (l_err)
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_intr, "IntrRp::_init() Error enabling Interrupts");
+                break;
+            }
+
+
+            TRACFCOMP(g_trac_intr, "IntrRp::_init() Masking Interrupts");
+            //Mask off all interrupt sources - these will be enabled as SW entities
+            // register for specific interrupts via the appropriate message queue
+            l_err = maskAllInterruptSources();
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_intr, "IntrRp::_init() Error masking all interrupt sources.");
+                break;
+            }
+
+            enableLsiInterrupts();
+        }
+        else
         {
-            TRACFCOMP(g_trac_intr, "IntrRp::_init() Error enabling Interrupts");
-            break;
+            TRACFCOMP(g_trac_intr, "IntrRp::_init() Masking Interrupts");
+            //Mask off all interrupt sources - these will be enabled as SW entities
+            // register for specific interrupts via the appropriate message queue
+            l_err = maskAllInterruptSources();
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_intr, "IntrRp::_init() Error masking all interrupt sources.");
+                break;
+            }
+
+            TRACFCOMP(g_trac_intr, "IntrRp::_init() Enabling PSIHB Interrupts");
+            //Enable PSIHB Interrupts
+            l_err = enableInterrupts(l_procIntrHdlr);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_intr, "IntrRp::_init() Error enabling Interrupts");
+                break;
+            }
         }
 
         // Create the kernel msg queue for external interrupts
@@ -292,6 +341,27 @@ errlHndl_t IntrRp::_init()
 
     return l_err;
 }
+
+void IntrRp::enableLsiInterrupts()
+{
+    TRACDCOMP(g_trac_intr, "IntrRp:: enableLsiInterrupts() enter");
+    //The XIVE HW is expecting these MMIO accesses to come from the
+    // core/thread they were setup (master core, thread 0)
+    // These functions will ensure this code executes there
+    task_affinity_pin();
+    task_affinity_migrate_to_master();
+    uint64_t * l_lsiEoi = iv_masterHdlr->xiveIcBarAddr;
+    l_lsiEoi += XIVE_IC_LSI_EOI_OFFSET;
+    l_lsiEoi += (0xC00 / sizeof(uint64_t));
+
+    volatile uint64_t l_eoiRead = *l_lsiEoi;
+    TRACFCOMP(g_trac_intr, "IntrRp:: enableLsiInterrupts() read 0x%lx from pointer %p", l_eoiRead, l_lsiEoi);
+    //MMIO Complete, rest of code can run on any thread
+    task_affinity_unpin();
+    TRACDCOMP(g_trac_intr, "IntrRp:: enableLsiInterrupts() exit");
+}
+
+
 
 void IntrRp::acknowledgeInterrupt()
 {
@@ -444,14 +514,6 @@ errlHndl_t IntrRp::resetIntUnit(intr_hdlr_t* i_proc)
                     break;
                 }
             }
-        }
-
-        //Enable VPC Pull Err regardles of XIVE HW Reset settings
-        l_err = enableVPCPullErr(procTarget);
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_intr, "IntrRp::resetIntUnit() Error re-enabling VPC Pull Err");
-            break;
         }
 
     } while (0);
@@ -1773,6 +1835,13 @@ void IntrRp::shutDown(uint64_t i_status)
             PSIHB_SW_INTERFACES_t * this_psihb_ptr = (*targ_itr)->psiHbBaseAddr;
             this_psihb_ptr->icr = PSI_BRIDGE_INTP_STATUS_CTL_RESET;
             resetIntUnit(*targ_itr);
+            //Enable VPC Pull Err regardles of XIVE HW Reset settings
+            l_err = enableVPCPullErr((*targ_itr)->proc);
+            if (l_err)
+            {
+                delete l_err;
+                TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error re-enabling VPC Pull Err");
+            }
             //Disable common interrupt BARs
             l_err = setCommonInterruptBARs(*targ_itr, false);
 
@@ -1791,6 +1860,14 @@ void IntrRp::shutDown(uint64_t i_status)
 
     //Reset XIVE Interrupt unit
     resetIntUnit(iv_masterHdlr);
+
+    //Enable VPC Pull Err regardles of XIVE HW Reset settings
+    l_err = enableVPCPullErr(iv_masterHdlr->proc);
+    if (l_err)
+    {
+        delete l_err;
+        TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error re-enabling VPC Pull Err");
+    }
 
     //Disable common interrupt BARs for master proc
     l_err = setCommonInterruptBARs(iv_masterHdlr, false);
@@ -3154,7 +3231,7 @@ errlHndl_t IntrRp::setPsiHbEsbBAR(intr_hdlr_t *i_proc,
 
         uint64_t l_barValue = l_baseBarValue;
         TRACFCOMP(g_trac_intr,"INTR: Target %p. "
-                              "PSI BRIDGE ESB BAR value: 0x%016lx",
+                              "PSI BRIDGE ESB BASE BAR value: 0x%016lx",
                   l_target,l_barValue);
 
         uint64_t size = sizeof(l_barValue);

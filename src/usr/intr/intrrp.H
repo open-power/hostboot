@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -414,6 +414,12 @@ namespace INTR
         private:        //functions
 
             errlHndl_t _init();
+
+            /**
+             * Do a read from LSI ESB EOI page to enable presentation of LSI
+             * interrupt to Hostboot
+             */
+            void enableLsiInterrupts();
 
             /**
              * Message handler
