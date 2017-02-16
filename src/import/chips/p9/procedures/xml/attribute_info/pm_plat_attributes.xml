@@ -1541,4 +1541,31 @@
      <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+     <id>ATTR_PGPE_HCODE_FUNCTION_ENABLE</id>
+     <description>
+     Enables the PGPE Hcode to physically perform frequency and voltage operations
+     based on constructed parameters (eg #V VPD, system parameters, biases, WPF
+     VFRTs. etc).  If OFF, the PGPE provides an immedicate good response to all
+     Pstate/WOF IPC operations from the OCC for firmware integration testing purposes.
+
+     Consumer: p9_hcode_image_build.c ->
+                  PGPE Header field
+
+     Platform default:  OFF
+     <!--
+        @todo RTC 169662 at some point in the program, this default may be switched to
+         the opposite setting.  However, coordination needs to occur with all CIs
+         as this will enable functions that may not be modeled across the board.
+     -->
+     </description>
+     <targetType>TARGET_TYPE_SYSTEM</targetType>
+     <valueType>uint8</valueType>
+     <enum>
+        OFF = 0x00, ON = 0x01
+    </enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
