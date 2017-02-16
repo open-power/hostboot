@@ -259,6 +259,50 @@ uint32_t analyzeFetchMpe<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T, typename D>
+uint32_t analyzeFetchNce( ExtensibleChip * i_chip,
+                          STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemEcc::analyzeFetchNce] "
+
+    PRDF_ASSERT( T == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+// To resolve template linker errors.
+template
+uint32_t analyzeFetchNce<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
+                                                STEP_CODE_DATA_STRUCT & io_sc );
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T, typename D>
+uint32_t analyzeFetchTce( ExtensibleChip * i_chip,
+                          STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemEcc::analyzeFetchTce] "
+
+    PRDF_ASSERT( T == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+// To resolve template linker errors.
+template
+uint32_t analyzeFetchTce<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
+                                                STEP_CODE_DATA_STRUCT & io_sc );
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T, typename D>
 uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
                          STEP_CODE_DATA_STRUCT & io_sc )
 {

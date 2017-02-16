@@ -369,12 +369,12 @@ group gMCAECCFIR filter singlebit, cs_root_cause( 14 )
     /** MCAECCFIR[8]
      *  Mainline read NCE
      */
-    (rMCAECCFIR, bit(8)) ? mainline_ce_ue_handling;
+    (rMCAECCFIR, bit(8)) ? mainline_nce_handling;
 
     /** MCAECCFIR[9]
      *  Mainline read TCE
      */
-    (rMCAECCFIR, bit(9)) ? mainline_ce_ue_handling;
+    (rMCAECCFIR, bit(9)) ? mainline_tce_handling;
 
     /** MCAECCFIR[10]
      *  Mainline read SCE
