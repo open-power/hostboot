@@ -321,21 +321,6 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_PROC_FABRIC_ADDR_BAR_MODE</id>
-  <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>
-    Processor memory map configuration.
-    0 = default = large system address map
-    Provided by the MRW.
-  </description>
-  <valueType>uint8</valueType>
-  <enum>
-    LARGE_SYSTEM = 0x0
-  </enum>
-  <platInit/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
   <id>ATTR_PROC_FABRIC_SYSTEM_ID</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
