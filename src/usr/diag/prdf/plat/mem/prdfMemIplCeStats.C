@@ -175,45 +175,13 @@ int32_t MemIplCeStats<T>::collectStats( const MemRank & i_stopRank )
 //------------------------------------------------------------------------------
 
 template<TYPE T>
-int32_t MemIplCeStats<T>::analyzeStats( bool & o_callOutsMade )
+bool MemIplCeStats<T>::analyzeStats()
 {
-    #define PRDF_FUNC "MemIplCeStats::analyzeStats "
-    int32_t o_rc = SUCCESS;
+    bool tmp1 = calloutCePerDram();
+    bool tmp2 = calloutCePerRank();
+    bool tmp3 = calloutCePerDs();
 
-    o_callOutsMade = false;
-
-    do
-    {
-        TargetHandle_t trgt = iv_chip->getTrgt();
-
-        o_rc = calloutCePerDram( o_callOutsMade );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC " calloutCePerDram() failed. trgt:0X%08X",
-                      getHuid( trgt ) );
-            break;
-        }
-
-        o_rc = calloutCePerRank( o_callOutsMade );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "calloutCePerRank() failed. trgt:0X%08X",
-                      getHuid( trgt ) );
-            break;
-        }
-
-        o_rc = calloutCePerDs( o_callOutsMade );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC " calloutCePerDs() failed. trgt:0X%08X",
-                      getHuid( trgt ) );
-            break;
-        }
-
-    } while (0);
-
-    return o_rc;
-    #undef PRDF_FUNC
+    return ( tmp1 || tmp2 || tmp3 );
 }
 
 //------------------------------------------------------------------------------
@@ -281,10 +249,9 @@ int32_t MemIplCeStats<T>::calloutHardCes( const MemRank & i_stopRank )
 //------------------------------------------------------------------------------
 
 template<TYPE T>
-int32_t MemIplCeStats<T>::calloutCePerDram( bool & o_callOutsMade )
+bool MemIplCeStats<T>::calloutCePerDram()
 {
-    #define PRDF_FUNC "[MemIplCeStats::calloutCePerDram] "
-    int32_t o_rc = SUCCESS;
+    bool o_callOutsMade = false;
 
     TargetHandle_t trgt = iv_chip->getTrgt();
 
@@ -301,16 +268,8 @@ int32_t MemIplCeStats<T>::calloutCePerDram( bool & o_callOutsMade )
             continue;
 
         // Get the CEs per DRAM threshold.
-        uint16_t dramTh = 1, junk0, junk1;
-
-        o_rc = getMnfgMemCeTh<T>( iv_chip, dramIter->first.rank, dramTh,
-                                  junk0, junk1 );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMnfgMemCeTh() failed. trgt:0x%08X",
-                      getHuid( trgt ) );
-            break;
-        }
+        uint32_t dramTh = 1, junk0, junk1;
+        getMnfgMemCeTh<T>( iv_chip, dramIter->first.rank, dramTh, junk0, junk1);
 
         // Now, check if a threshold has been reached. If not, continue to the
         // next entry in iv_dsMap.
@@ -353,17 +312,16 @@ int32_t MemIplCeStats<T>::calloutCePerDram( bool & o_callOutsMade )
             }
         }
     }
-    return o_rc;
-    #undef PRDF_FUNC
+
+    return o_callOutsMade;
 }
 
 //------------------------------------------------------------------------------
 
 template<TYPE T>
-int32_t MemIplCeStats<T>::calloutCePerRank( bool & o_callOutsMade )
+bool MemIplCeStats<T>::calloutCePerRank()
 {
-    #define PRDF_FUNC "[MemIplCeStats::calloutCePerRank] "
-    int32_t o_rc = SUCCESS;
+    bool o_callOutsMade = false;
 
     TargetHandle_t trgt = iv_chip->getTrgt();
 
@@ -380,15 +338,8 @@ int32_t MemIplCeStats<T>::calloutCePerRank( bool & o_callOutsMade )
             continue;
 
         // Get the CEs per rank threshold.
-        uint16_t junk0, rankTh, junk1;
-        o_rc = getMnfgMemCeTh<T>( iv_chip, rankIter->first.rank, junk0,
-                                  rankTh, junk1 );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMnfgMemCeTh() failed. trgt:0x%08X",
-                      getHuid( trgt ) );
-            break;
-        }
+        uint32_t junk0, rankTh, junk1;
+        getMnfgMemCeTh<T>( iv_chip, rankIter->first.rank, junk0, rankTh, junk1);
 
         // Now, check if a threshold has been reached. If not, continue to the
         // next entry in iv_rankMap.
@@ -430,17 +381,17 @@ int32_t MemIplCeStats<T>::calloutCePerRank( bool & o_callOutsMade )
             }
         }
     }
-    return o_rc;
-    #undef PRDF_FUNC
+
+    return o_callOutsMade;
 }
 
 //------------------------------------------------------------------------------
 
 template<TYPE T>
-int32_t MemIplCeStats<T>::calloutCePerDs( bool & o_callOutsMade )
+bool MemIplCeStats<T>::calloutCePerDs()
 {
-    #define PRDF_FUNC "[MemIplCeStats::calloutCePerDs] "
-    int32_t o_rc = SUCCESS;
+    bool o_callOutsMade = false;
+
     TargetHandle_t trgt = iv_chip->getTrgt();
 
     for ( typename CePerHalfDsMap::iterator dsIter = iv_dsMap.begin();
@@ -456,15 +407,8 @@ int32_t MemIplCeStats<T>::calloutCePerDs( bool & o_callOutsMade )
             continue;
 
         // Get the CEs per dimm select threshold.
-        uint16_t junk0, junk1, dsTh;
-        o_rc = getMnfgMemCeTh<T>( iv_chip, dsIter->first.rank, junk0,
-                                  junk1, dsTh );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMnfgMemCeTh() failed. trgt:0x%08X",
-                      getHuid( trgt ) );
-            break;
-        }
+        uint32_t junk0, junk1, dsTh;
+        getMnfgMemCeTh<T>( iv_chip, dsIter->first.rank, junk0, junk1, dsTh );
 
         // Now, check if a threshold has been reached. If not, continue to the
         // next entry in iv_dsMap.
@@ -506,8 +450,8 @@ int32_t MemIplCeStats<T>::calloutCePerDs( bool & o_callOutsMade )
             }
         }
     }
-    return o_rc;
-    #undef PRDF_FUNC
+
+    return o_callOutsMade;
 }
 
 //------------------------------------------------------------------------------

@@ -91,38 +91,28 @@ ThresholdResolution::ThresholdPolicy getRceThreshold()
 //------------------------------------------------------------------------------
 
 template <TYPE T>
-int32_t getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
-                        uint16_t & o_cePerDram, uint16_t & o_cePerHalfRank,
-                        uint16_t & o_cePerDimm )
+void getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
+                     uint32_t & o_cePerDram, uint32_t & o_cePerRank,
+                     uint32_t & o_cePerDimm )
 {
-    #define PRDF_FUNC "[getMnfgMemCeTh] "
+    // Get base threshold ( 2GB ).
+    uint8_t baseTh = getMnfgCeTh();
 
-    int32_t o_rc = SUCCESS;
-
-    do
+    // A base threhold of 0 indicates there should be no thresholding.
+    if ( 0 == baseTh )
     {
-        // Get base threshold ( 2GB ).
-        uint8_t baseTh = getMnfgCeTh();
-
-        // A base threhold of 0 indicates there should be no thresholding.
-        if ( 0 == baseTh )
-        {
-            o_cePerDram = o_cePerHalfRank = o_cePerDimm =
-                                    MfgThreshold::INFINITE_LIMIT_THR;
-            break;
-        }
-
+        o_cePerDram = o_cePerRank = o_cePerDimm =
+            MfgThreshold::INFINITE_LIMIT_THR;
+    }
+    else
+    {
         // Get DRAM size
         uint8_t size = MemUtils::getDramSize<T>( i_chip, i_rank.getDimmSlct() );
 
         // Get number of ranks per DIMM select.
-        uint8_t rankCount = getNumRanksPerDimm<T>(
-                                i_chip->getTrgt(), i_rank.getDimmSlct() );
-        if ( 0 == rankCount )
-        {
-            PRDF_ERR( PRDF_FUNC "PlatServices::getNumRanksPerDimm() failed" );
-            o_rc = FAIL; break;
-        }
+        uint8_t rankCount = getNumRanksPerDimm<T>( i_chip->getTrgt(),
+                                                   i_rank.getDimmSlct() );
+        PRDF_ASSERT( 0 != rankCount ); // Code bug.
 
         // Get number of allowed CEs.
         uint8_t baseAllowed = baseTh - 1;
@@ -139,63 +129,51 @@ int32_t getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
         // Calculate CEs per DIMM.
         o_cePerDimm = ((computeBase * (2 + rankCount)) + 8) / 16;
 
-        // Calculate CEs per half-rank.
+        // Calculate CEs per rank per DIMM.
         // Same as perDimm where rankCount is 1;
-        o_cePerHalfRank = ((computeBase * (2 + 1)) + 8) / 16;
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
+        o_cePerRank = ((computeBase * (2 + 1)) + 8) / 16;
+    }
 }
 
 // need these templates to avoid linker errors
-template int32_t getMnfgMemCeTh<TYPE_MCA>( ExtensibleChip * i_chip,
-                    const MemRank & i_rank, uint16_t & o_cePerDram,
-                    uint16_t & o_cePerHalfRank, uint16_t & o_cePerDimm );
+template
+void getMnfgMemCeTh<TYPE_MCA>( ExtensibleChip * i_chip, const MemRank & i_rank,
+                               uint32_t & o_cePerDram, uint32_t & o_cePerRank,
+                               uint32_t & o_cePerDimm );
 
-template int32_t getMnfgMemCeTh<TYPE_MBA>( ExtensibleChip * i_chip,
-                    const MemRank & i_rank, uint16_t & o_cePerDram,
-                    uint16_t & o_cePerHalfRank, uint16_t & o_cePerDimm );
-
+template
+void getMnfgMemCeTh<TYPE_MBA>( ExtensibleChip * i_chip, const MemRank & i_rank,
+                               uint32_t & o_cePerDram, uint32_t & o_cePerRank,
+                               uint32_t & o_cePerDimm );
 
 //------------------------------------------------------------------------------
+
 template <TYPE T>
-int32_t getScrubCeThreshold( ExtensibleChip * i_chip, const MemRank & i_rank,
-                             uint16_t & o_thr )
+uint32_t getScrubCeThreshold( ExtensibleChip * i_chip, const MemRank & i_rank )
 {
-    #define PRDF_FUNC "[getScrubCeThreshold] "
-
-    int32_t o_rc = SUCCESS;
-
-    o_thr = MBA_SCRUB_CE_NON_MNFG_TH;
+    uint32_t o_thr = MBA_SCRUB_CE_NON_MNFG_TH;
 
     if ( mfgMode() )
     {
-        uint16_t junk1 = 0;
-        uint16_t junk2 = 0;
+        uint32_t junk1 = 0, junk2 = 0;
 
-        o_rc = getMnfgMemCeTh<T>( i_chip, i_rank, o_thr, junk1, junk2 );
-        if ( SUCCESS != o_rc )
-            PRDF_ERR( PRDF_FUNC "getMnfgMemCeTh() failed" );
+        getMnfgMemCeTh<T>( i_chip, i_rank, o_thr, junk1, junk2 );
 
         // getMnfgMemCeTh() returns the number of CEs allowed. Will need to add
         // one to get the real threshold.
         o_thr++;
     }
 
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return o_thr;
 }
 
 // need these templates to avoid linker errors
-template int32_t getScrubCeThreshold<TYPE_MCA>( ExtensibleChip * i_chip,
-                    const MemRank & i_rank, uint16_t & o_thr );
-template int32_t getScrubCeThreshold<TYPE_MBA>( ExtensibleChip * i_chip,
-                    const MemRank & i_rank, uint16_t & o_thr );
-
+template
+uint32_t getScrubCeThreshold<TYPE_MCA>( ExtensibleChip * i_chip,
+                                        const MemRank & i_rank );
+template
+uint32_t getScrubCeThreshold<TYPE_MBA>( ExtensibleChip * i_chip,
+                                        const MemRank & i_rank );
 
 } // end namespace PRDF
 

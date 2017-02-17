@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,32 +83,7 @@ int32_t analyzeIplCEStats( TargetHandle_t i_mba, bool &o_calloutMade )
     ExtensibleChip * mbaChip = (ExtensibleChip *)systemPtr->GetChip( i_mba );
     CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
 
-    o_rc = mbadb->getIplCeStats()->analyzeStats( o_calloutMade );
-
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( "[" PRDF_FUNC "] analyzeStats() failed");
-
-        // Get user data
-        uint64_t ud12 = PRDF_GET_UINT64_FROM_UINT32( getHuid(i_mba),      0 );
-        uint64_t ud34 = PRDF_GET_UINT64_FROM_UINT32( PRDFSIG_MnfgIplFail, 0 );
-
-        // Create error log
-        errlHndl_t errl = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_PREDICTIVE, // severity
-                                PRDF_MNFG_IPL_CE_ANALYSIS,     // module ID
-                                PRDF_DETECTED_FAIL_SOFTWARE,   // reason code
-                                ud12, ud34 );                  // user data 1-4
-
-        // Add 2nd level support
-        errl->addProcedureCallout( EPUB_PRC_LVL_SUPP, SRCI_PRIORITY_HIGH );
-
-        // Add traces
-        errl->collectTrace( PRDF_COMP_NAME, 512 );
-
-        // Commit the error log
-        ERRORLOG::errlCommit( errl, PRDF_COMP_ID );
-    }
+    o_calloutMade = mbadb->getIplCeStats()->analyzeStats();
 */
 
     PRDF_EXIT( PRDF_FUNC "(0x%08x), o_calloutMade:%u",

@@ -90,11 +90,9 @@ class MemIplCeStats
     /**
      * @brief  Analyzes the maintenance statistics that were gathered, making
      *         the appropriate callouts.
-     * @param  o_callOutsDone TRUE if PRD made a hardware callout, FALSE
-     *         otherwise.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     * @return TRUE if PRD made a hardware callout, FALSE otherwise.
      */
-    int32_t analyzeStats ( bool & o_callOutsDone );
+    bool analyzeStats();
 
     /** @brief  Calls out all symbols with hard CEs.
      *  @param  i_stopRank The rank the maintenance command stopped on.
@@ -176,23 +174,20 @@ class MemIplCeStats
   private: // functions
 
     /** @brief  Calls out all symbols on a dram that has exceeded threshold.
-     *  @param  o_callOutsMade TRUE if a callout was made, FALSE othewise.
-     *  @return Non-SUCCESS if an internal function fails, SUCCESS othewise.
+     *  @return TRUE if a callout was made, FALSE othewise.
      */
-    int32_t calloutCePerDram( bool & o_callOutsMade );
+    bool calloutCePerDram();
 
     /** @brief  Calls out all symbols on a rank that has exceeded threshold.
-     *  @param  o_callOutsMade TRUE if a callout was made, FALSE othewise.
-     *  @return Non-SUCCESS if an internal function fails, SUCCESS othewise.
+     *  @return TRUE if a callout was made, FALSE othewise.
      */
-    int32_t calloutCePerRank( bool & o_callOutsMade );
+    bool calloutCePerRank();
 
     /** @brief  Calls out all symbols on a dimm select that has exceeded
      *          threshold.
-     *  @param  o_callOutsMade TRUE if a callout was made, FALSE othewise.
-     *  @return Non-SUCCESS if an internal function fails, SUCCESS othewise.
+     *  @return TRUE if a callout was made, FALSE othewise.
      */
-    int32_t calloutCePerDs( bool & o_callOutsMade );
+    bool calloutCePerDs();
 
     /**
      * @brief Add MemoryMru callout to error log and commit it.

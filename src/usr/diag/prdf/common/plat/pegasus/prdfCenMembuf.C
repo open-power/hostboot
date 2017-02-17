@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -517,14 +517,8 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
             if ( mfgMode() )
             {
                 // Get the MNFG CE thresholds.
-                uint16_t dramTh, hrTh, dimmTh;
-                l_rc = getMnfgMemCeTh( mbaChip, rank, dramTh, hrTh, dimmTh );
-                if ( SUCCESS != l_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "getMnfgMemCeTh() failed: rank=m%ds%d",
-                              rank.getMaster(), rank.getSlave() );
-                    break;
-                }
+                uint32_t dramTh, hrTh, dimmTh;
+                getMnfgMemCeTh( mbaChip, rank, dramTh, hrTh, dimmTh );
 
                 // Get counts from CE table.
                 uint32_t dramCount, hrCount, dimmCount;

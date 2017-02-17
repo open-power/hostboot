@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -643,13 +643,7 @@ int32_t CenMbaTdCtlrCommon::setRtEteThresholds()
             break;
         }
 
-        uint16_t softIntCe = 0;
-        o_rc = getScrubCeThreshold( iv_mbaChip, iv_rank, softIntCe );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getScrubCeThreshold() failed." );
-            break;
-        }
+        uint32_t softIntCe = getScrubCeThreshold( iv_mbaChip, iv_rank );
 
         // Only care about retry CEs if there are a lot of them. So the
         // threshold will be high in the field. However, in MNFG the retry CEs
