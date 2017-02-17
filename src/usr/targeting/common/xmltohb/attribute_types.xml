@@ -20364,12 +20364,12 @@ Measured in GB</description>
     <description>
       Control execution of updateProcessorSbeSeeproms()
 
-      if OFF, enable SBE update of processor SEEPROM
-      if ON, disable SBE update of processor SEEPROM
+      if 0, enable SBE update of processor SEEPROM
+      if 1, disable SBE update of processor SEEPROM
 
       Consumer:  sbe_update.C
 
-      Default:  OFF
+      Default:  0
     </description>
     <simpleType>
         <uint8_t>
@@ -20379,7 +20379,7 @@ Measured in GB</description>
         <id>ATTR_SBE_UPDATE_DISABLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
 
