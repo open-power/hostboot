@@ -617,19 +617,6 @@ extern "C"
 
         FAPI_DBG("STOP_11_to_8          :   %s", attrVal ? "TRUE" : "FALSE" );
 
-        //Handling SGPE specific flag
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE,
-                               FAPI_SYSTEM,
-                               attrVal),
-                 "Error from FAPI_ATTR_GET for attribute ATTR_PROC_FABRIC_ADDR_BAR_MODE");
-
-        //Attribute set to 0x01 for SMALL_SYSTEM
-        if( attrVal )
-        {
-            sgpeFlag |= SGPE_PROC_FAB_ADDR_BAR_MODE_POS;
-        }
-
-        FAPI_DBG("SMALL_SYSTEM          :   %s", attrVal ? "TRUE" : "FALSE" );
         //Updating flag field in CME/SGPE Image header
         pCmeHdr->g_cme_mode_flags       =   SWIZZLE_4_BYTE(cmeFlag);
         pSgpeHdr->g_sgpe_reserve_flags  =   SWIZZLE_4_BYTE(sgpeFlag);
