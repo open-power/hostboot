@@ -42,17 +42,16 @@ class ExtensibleChip;
  * @brief  Returns number of allowed CEs for MNFG IPLs.
  * @pre    Must check if in manufacturing mode before calling this function.
  * @post   Must callout if the count is greater than the returned values.
- * @param  i_chip          MCA or MBA chip.
- * @param  i_rank          The rank for which the threshold is needed.
- * @param  o_cePerDram     CEs allowed per DRAM.
- * @param  o_cePerHalfRank CEs allowed per logical DIMM rank.
- * @param  o_cePerDimm     CEs allowed per logical DIMM.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ * @param  i_chip      MCA or MBA chip.
+ * @param  i_rank      The rank for which the threshold is needed.
+ * @param  o_cePerDram CEs allowed per DRAM.
+ * @param  o_cePerRank CEs allowed per rank per logical DIMM.
+ * @param  o_cePerDimm CEs allowed per logical DIMM.
  */
 template <TARGETING::TYPE T>
-int32_t getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
-                        uint16_t & o_cePerDram, uint16_t & o_cePerHalfRank,
-                        uint16_t & o_cePerDimm );
+void getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
+                     uint32_t & o_cePerDram, uint32_t & o_cePerRank,
+                     uint32_t & o_cePerDimm );
 
 /**
  * @brief  Returns RCE threshold policy.
@@ -61,14 +60,12 @@ ThresholdResolution::ThresholdPolicy getRceThreshold();
 
 /**
  * @brief  Returns scrub soft/intermittent CEs threshold during runtime.
- * @param  i_chip    MCA or MBA chip.
- * @param  i_rank    The rank for which the threshold is needed.
- * @param  o_thr     Scrub soft/intermittent CE threshold.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ * @param  i_chip MCA or MBA chip.
+ * @param  i_rank The rank for which the threshold is needed.
+ * @return The Scrub soft/intermittent CE threshold.
  */
 template <TARGETING::TYPE T>
-int32_t getScrubCeThreshold( ExtensibleChip * i_chip, const MemRank & i_rank,
-                             uint16_t & o_thr );
+uint32_t getScrubCeThreshold( ExtensibleChip * i_chip, const MemRank & i_rank );
 
 } // end namespace PRDF
 

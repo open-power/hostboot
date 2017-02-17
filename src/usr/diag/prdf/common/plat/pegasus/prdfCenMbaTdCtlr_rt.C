@@ -2589,12 +2589,7 @@ int32_t CenMbaTdCtlr::getTpsCeThr( uint16_t & o_thr )
         }
         else
         {
-            o_rc = getScrubCeThreshold( iv_mbaChip, iv_rank, o_thr );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "getScrubCeThreshold() failed." );
-                break;
-            }
+            o_thr = getScrubCeThreshold( iv_mbaChip, iv_rank );
         }
 
     } while( 0 );
