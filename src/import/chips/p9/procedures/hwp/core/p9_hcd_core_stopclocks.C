@@ -220,6 +220,10 @@ p9_hcd_core_stopclocks(
     FAPI_DBG("Assert skew sense to skew adjust fence via NET_CTRL0[22]");
     FAPI_TRY(putScom(i_target, C_NET_CTRL0_WOR, MASK_SET(22)));
 
+    FAPI_DBG("Drop ABIST_SRAM_MODE_DC to support ABIST Recovery via BIST[1]");
+    FAPI_TRY(getScom(i_target, C_BIST, l_data64));
+    FAPI_TRY(putScom(i_target, C_BIST, DATA_UNSET(1)));
+
     FAPI_DBG("Assert vital fence via CPLT_CTRL1[3]");
     FAPI_TRY(putScom(i_target, C_CPLT_CTRL1_OR, MASK_SET(3)));
 
