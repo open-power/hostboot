@@ -46,6 +46,8 @@ prd_obj += prdfMemMark.o
 prd_obj += prdfMemSymbol.o
 prd_obj += prdfMemoryMru.o
 prd_obj += prdfMemUeTable.o
+prd_obj += prdfMemUtils.o
+prd_obj += prdfMemThresholds.o
 
 # rule plugin related
 prd_rule_plugin += prdfP9Mca_common.o
