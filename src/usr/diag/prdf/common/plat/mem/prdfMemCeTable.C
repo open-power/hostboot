@@ -31,6 +31,9 @@
 #include <iipServiceDataCollector.h>
 #include <UtilHash.H>
 
+// Platform includes
+#include <prdfMemThresholds.H>
+
 using namespace TARGETING;
 
 namespace PRDF
@@ -98,6 +101,42 @@ uint32_t MemCeTable<T>::addEntry( const MemAddr & i_addr,
     // removing any entries, if the table is full. This is to catch the corner
     // case where the oldest entry is on the same rank as the new entry.
 
+    // Check MNFG thresholds, if needed.
+    if ( mfgMode() )
+    {
+        // Get the MNFG CE thresholds.
+        uint32_t dramTh, rankTh, dimmTh;
+        getMnfgMemCeTh<T>( iv_chip, thisRank, dramTh, rankTh, dimmTh );
+
+        // Get MNFG counts from CE table.
+        uint32_t dramCount = 0, rankCount = 0, dimmCount = 0;
+        for ( auto & entry : iv_table )
+        {
+            if ( i_symbol.getPortSlct() != entry.portSlct ) continue;
+
+            MemRank itRank = entry.addr.getRank();
+
+            if ( thisRank.getDimmSlct() == itRank.getDimmSlct() )
+            {
+                dimmCount++;
+
+                if ( thisRank == itRank )
+                {
+                    rankCount++;
+
+                    if ( i_symbol.getDram() == entry.dram )
+                        dramCount++;
+                }
+            }
+        }
+
+        // Check thresholds. Note that the thresholds are the number allowed.
+        // So we have to compare if the counts have exceeded the thresholds.
+        if ( dramTh < dramCount ) o_rc |= MNFG_TH_DRAM;
+        if ( rankTh < rankCount ) o_rc |= MNFG_TH_RANK;
+        if ( dimmTh < dimmCount ) o_rc |= MNFG_TH_DIMM;
+    }
+
     // If the table is full, remove the oldest inactive entry
     if ( MAX_ENTRIES < iv_table.size() )
     {
@@ -137,42 +176,6 @@ void MemCeTable<T>::deactivateRank( const MemRank & i_rank )
     {
         if ( entry.addr.getRank() == i_rank )
             entry.active = false;
-    }
-}
-
-//------------------------------------------------------------------------------
-
-template <TARGETING::TYPE T>
-void MemCeTable<T>::getMnfgCounts( const MemRank & i_rank,
-                                   const MemSymbol & i_symbol,
-                                   uint32_t & o_dramCount,
-                                   uint32_t & o_rankCount,
-                                   uint32_t & o_dimmCount )
-{
-    o_dramCount = 0; o_rankCount = 0; o_dimmCount = 0;
-
-    const uint32_t dram = i_symbol.getDram();
-    const uint32_t ps   = i_symbol.getPortSlct();
-    const uint32_t ds   = i_rank.getDimmSlct();
-
-    for ( auto & entry : iv_table )
-    {
-        if ( ps != entry.portSlct ) continue;
-
-        MemRank itRank = entry.addr.getRank();
-
-        if ( ds == itRank.getDimmSlct() )
-        {
-            o_dimmCount++;
-
-            if ( i_rank == itRank )
-            {
-                o_rankCount++;
-
-                if ( dram == entry.dram )
-                    o_dramCount++;
-            }
-        }
     }
 }
 
