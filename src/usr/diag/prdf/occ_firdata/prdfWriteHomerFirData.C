@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 
 #include <fsi/fsiif.H>
 #include <pnor/pnorif.H>
+#include <targeting/common/targetservice.H>
 
 using namespace TARGETING;
 
@@ -522,6 +523,15 @@ errlHndl_t getPnorInfo( HOMER_Data_t & o_data )
 
         PNOR::PnorInfo_t pnorInfo;
         PNOR::getPnorInfo( pnorInfo );
+
+        // Saving the flash workarounds in an attribute for when we
+        // call getPnorInfo() in the runtime code.
+        // Using sys target
+        Target* sys = NULL;
+        targetService().getTopLevelTarget( sys );
+        assert(sys != NULL);
+
+        sys->setAttr<ATTR_PNOR_FLASH_WORKAROUNDS>(pnorInfo.norWorkarounds);
 
         o_data.pnorInfo.pnorOffset      = sectionInfo.flashAddr;
         o_data.pnorInfo.pnorSize        = sectionInfo.size;
