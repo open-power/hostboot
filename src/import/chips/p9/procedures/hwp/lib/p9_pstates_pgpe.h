@@ -241,6 +241,8 @@ typedef struct
     /// Precalculated Voltage-Pstates Slopes
     uint16_t VPsSlopes[VPD_NUM_SLOPES_SET][VPD_NUM_SLOPES_REGION];
 
+    /// All operating points
+    VpdOperatingPoint operating_points_set[NUM_VPD_PTS_SET][VPD_PV_POINTS];
 
     // @todo DPLL Droop Settings.  These need communication to SGPE for STOP
 
