@@ -40,8 +40,6 @@ prd_incpath += ${PRD_SRC_PATH}/plat/mem
 # plat/mem/ (non-rule plugin related)
 prd_obj += prdfMemScrubUtils.o
 prd_obj += prdfMemTdCtlr.o
-prd_obj += prdfMemUtils.o
-prd_obj += prdfMemThresholds.o
 
 # plat/mem/ (rule plugin related)
 prd_rule_plugin += prdfP9Mca.o
