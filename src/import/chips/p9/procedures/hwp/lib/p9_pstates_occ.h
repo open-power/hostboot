@@ -185,6 +185,8 @@ typedef struct
     // Minimum Pstate;  Maximum is always 0.
     uint32_t pstate_min;    // Comes from PowerSave #V point after biases
 
+    /// Nest frequency in Mhz. This is used by FIT interrupt
+    uint32_t nest_frequency_mhz;
 } __attribute__((aligned(128))) OCCPstateParmBlock;
 
 #ifdef __cplusplus
