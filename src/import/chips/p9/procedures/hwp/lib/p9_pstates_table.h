@@ -122,15 +122,6 @@ typedef struct
     /// Note: if all bias attributes are 0, this content will be the same
     /// as the raw_pstates content.
     PstateTable biased_pstates[MAX_PSTATE_TABLE_ENTRIES];
-
-    ///VPD Operating points generated after applying biases
-    VpdOperatingPoint operating_points_biased[VPD_PV_POINTS];
-
-    ///VPD Operating points generated after applying system parameters
-    VpdOperatingPoint operating_points_sysp[VPD_PV_POINTS];
-
-    ///VPD Operating points generated after applying system parameters and biases
-    VpdOperatingPoint operating_points_biased_sysp[VPD_PV_POINTS];
 } GeneratedPstateInfo;
 
 
