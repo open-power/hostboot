@@ -89,39 +89,24 @@ void calloutMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 #ifdef __HOSTBOOT_MODULE
 
-template<>
-uint32_t addVcmEvent<TYPE_MCA>( ExtensibleChip * i_chip,
-                                const MemRank & i_rank,
-                                const MemMark & i_mark,
-                                STEP_CODE_DATA_STRUCT & io_sc )
+template<TARGETING::TYPE T, typename D>
+uint32_t addVcmEvent( ExtensibleChip * i_chip, const MemRank & i_rank,
+                      const MemMark & i_mark, STEP_CODE_DATA_STRUCT & io_sc )
 {
-    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+    PRDF_ASSERT( T == i_chip->getType() );
 
-    ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
+    D db = static_cast<D>(i_chip->getDataBundle());
 
-    McbistDataBundle * mcbdb = getMcbistDataBundle( mcbChip );
+    TdEntry * entry = new VcmEvent<T>( i_chip, i_rank, i_mark );
 
-    TdEntry * entry = new VcmEvent<TYPE_MCA>( i_chip, i_rank, i_mark );
-
-    return mcbdb->getTdCtlr()->handleTdEvent( io_sc, entry );
+    return db->getTdCtlr()->handleTdEvent( io_sc, entry );
 }
 
-/* TODO: RTC 144083
-template<>
-uint32_t addVcmEvent<TYPE_MBA>( ExtensibleChip * i_chip,
-                                const MemRank & i_rank,
-                                const MemMark & i_mark,
-                                STEP_CODE_DATA_STRUCT & io_sc )
-{
-    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
-
-    CenMbaDataBundle * mbadb = getMbaDataBundle( i_chip );
-
-    TdEntry * entry = new VcmEvent<TYPE_MBA>( i_chip, i_rank, i_mark );
-
-    return mbadb->getTdCtlr()->handleTdEvent( io_sc, entry );
-}
-*/
+template
+uint32_t addVcmEvent<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
+                                                 const MemRank & i_rank,
+                                                 const MemMark & i_mark,
+                                                 STEP_CODE_DATA_STRUCT & io_sc);
 
 #endif
 
@@ -129,39 +114,24 @@ uint32_t addVcmEvent<TYPE_MBA>( ExtensibleChip * i_chip,
 
 #ifdef __HOSTBOOT_MODULE
 
-
-template<>
-uint32_t addTpsEvent<TYPE_MCA>( ExtensibleChip * i_chip,
-                                const MemRank & i_rank,
-                                STEP_CODE_DATA_STRUCT & io_sc, bool i_banTps )
+template<TARGETING::TYPE T, typename D>
+uint32_t addTpsEvent( ExtensibleChip * i_chip, const MemRank & i_rank,
+                      STEP_CODE_DATA_STRUCT & io_sc, bool i_banTps )
 {
-    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+    PRDF_ASSERT( T == i_chip->getType() );
 
-    ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
-    PRDF_ASSERT( nullptr != mcbChip ); // definitely a bug
+    D db = static_cast<D>(i_chip->getDataBundle());
 
-    McbistDataBundle * mcbdb = getMcbistDataBundle( mcbChip );
+    TdEntry * entry = new TpsEvent<T>( i_chip, i_rank, i_banTps );
 
-    TdEntry * entry = new TpsEvent<TYPE_MCA>( i_chip, i_rank, i_banTps );
-
-    return mcbdb->getTdCtlr()->handleTdEvent( io_sc, entry );
+    return db->getTdCtlr()->handleTdEvent( io_sc, entry );
 }
 
-/* TODO: RTC 144083
-template<>
-uint32_t addTpsEvent<TYPE_MBA>( ExtensibleChip * i_chip,
-                                const MemRank & i_rank,
-                                STEP_CODE_DATA_STRUCT & io_sc, bool i_banTps )
-{
-    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
-
-    CenMbaDataBundle * mbadb = getMbaDataBundle( i_chip );
-
-    TdEntry * entry = new TpsEvent<TYPE_MBA>( i_chip, i_rank, i_banTps );
-
-    return mbadb->getTdCtlr()->handleTdEvent( io_sc, entry );
-}
-*/
+template
+uint32_t addTpsEvent<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
+                                                 const MemRank & i_rank,
+                                                 STEP_CODE_DATA_STRUCT & io_sc,
+                                                 bool i_banTps );
 
 #endif
 
@@ -229,7 +199,7 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
         io_sc.service_data->SetCallout( mm );
 
         // Add a VCM request to the TD queue.
-        o_rc = addVcmEvent<T>( i_chip, i_rank, chipMark, io_sc );
+        o_rc = addVcmEvent<T,D>( i_chip, i_rank, chipMark, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "addVcmEvent() failed: i_chip=0x%08x "
@@ -341,7 +311,7 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
 
         // Add a TPS request to the TD queue and ban any further TPS requests
         // for this rank.
-        o_rc = addTpsEvent<T>( i_chip, rank, io_sc, true );
+        o_rc = addTpsEvent<T,D>( i_chip, rank, io_sc, true );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "addTpsEvent() failed: i_chip=0x%08x "
