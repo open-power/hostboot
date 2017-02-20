@@ -671,6 +671,7 @@ fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYP
                                       uint8_t& o_rd_preamble,
                                       uint8_t& o_wr_preamble,
                                       uint8_t& o_ppr,
+                                      uint8_t& o_soft_ppr,
                                       fapi2::buffer<uint8_t>& o_cs_cmd_latency_buffer);
 
 ///
@@ -920,6 +921,7 @@ struct mrs04_data
     uint8_t iv_rd_preamble;
     uint8_t iv_wr_preamble;
     uint8_t iv_ppr;
+    uint8_t iv_soft_ppr;
 };
 
 ///
