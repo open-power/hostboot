@@ -31,6 +31,7 @@
 #include <prdfMemMark.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMemTps.H>
+#include <prdfP9McaDataBundle.H>
 #include <prdfP9McaExtraSig.H>
 #include <prdfPlatServices.H>
 
@@ -140,8 +141,8 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                 io_sc.service_data->SetCallout( memmru );
 
                 //Add a VCM procedure to the queue
-                MemEcc::addVcmEvent<TYPE_MCA>( iv_chip, iv_rank, chipMark,
-                                               io_sc );
+                MemEcc::addVcmEvent<TYPE_MCA, McaDataBundle *>(iv_chip, iv_rank,
+                                                               chipMark, io_sc);
 
                 //Abort this procedure
                 o_done = true;

@@ -32,6 +32,11 @@
 // Platform includes
 #include <prdfMemCeTable.H>
 #include <prdfMemUeTable.H>
+#include <prdfPlatServices.H>
+
+#ifdef __HOSTBOOT_MODULE
+  #include <prdfP9McbistDataBundle.H>
+#endif
 
 namespace PRDF
 {
@@ -46,17 +51,36 @@ class McaDataBundle : public DataBundle
      * @param i_chip An MCA chip.
      */
     explicit McaDataBundle( ExtensibleChip * i_chip ) :
-        iv_ceTable(i_chip), iv_ueTable(i_chip)
+        iv_chip(i_chip), iv_ceTable(i_chip), iv_ueTable(i_chip)
     {}
 
     /** @brief Destructor */
     ~McaDataBundle() = default;
+
+    #ifdef __HOSTBOOT_MODULE
+
+    /** @return Wrapper to get Targeted Diagnostics controller from MCBIST. */
+    MemTdCtlr<TARGETING::TYPE_MCBIST> * getTdCtlr()
+    {
+        using namespace TARGETING;
+        using namespace PlatServices;
+
+        ExtensibleChip * mcbChip = getConnectedParent( iv_chip, TYPE_MCBIST );
+        McbistDataBundle * mcbdb = getMcbistDataBundle( mcbChip );
+        return mcbdb->getTdCtlr();
+    }
+
+    #endif
 
   private: // functions
 
     // Don't allow copy or assignment.
     McaDataBundle( const McaDataBundle & ) = delete;
     const McaDataBundle & operator=( const McaDataBundle & ) = delete;
+
+  private: // instance variables
+
+    ExtensibleChip * iv_chip; // This MCA.
 
   public: // instance variables
 
