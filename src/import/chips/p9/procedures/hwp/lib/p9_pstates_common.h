@@ -120,8 +120,8 @@
 #define VPD_SLOPES_RAW      0
 #define VPD_SLOPES_BIASED   1
 #define VPD_NUM_SLOPES_REGION       3
-#define REGION_POWERSAVE_NOMINAL    1
-#define REGION_NOMINAL_TURBO        0
+#define REGION_POWERSAVE_NOMINAL    0
+#define REGION_NOMINAL_TURBO        1
 #define REGION_TURBO_ULTRA          2
 
 // Different points considered for calculating slopes
@@ -130,6 +130,8 @@
 #define VPD_PT_SET_SYSP             1
 #define VPD_PT_SET_BIASED           2
 #define VPD_PT_SET_BIASED_SYSP      3
+#define VPD_PT_SET_ORDER {VPD_PT_SET_RAW, VPD_PT_SET_SYSP, VPD_PT_SET_BIASED, VPD_PT_SET_BIASED_SYSP}
+#define VPD_PT_SET_ORDER_STR {"Raw          ", "SysParam       ","Biased        ", "Biased/SysParam"}
 
 #define EVID_SLOPE_FP_SHIFT         13
 
