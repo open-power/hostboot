@@ -53,11 +53,11 @@ const uint8_t NUM_EPSILON_READ_TIERS = 3;
 const uint8_t NUM_EPSILON_WRITE_TIERS = 2;
 
 // LE epsilon (2 chips per-group)
-const uint32_t EPSILON_R_T0_LE[] = {    4,    5,    5,    5,    6,    8 };
-const uint32_t EPSILON_R_T1_LE[] = {    4,    5,    5,    5,    6,    8 };
-const uint32_t EPSILON_R_T2_LE[] = {   47,   48,   49,   51,   54,   68 };
+const uint32_t EPSILON_R_T0_LE[] = {    7,    7,    7,    7,    8,    8 };
+const uint32_t EPSILON_R_T1_LE[] = {    7,    7,    7,    7,    8,    8 };
+const uint32_t EPSILON_R_T2_LE[] = {   61,   62,   63,   65,   68,   82 };
 const uint32_t EPSILON_W_T0_LE[] = {    0,    0,    0,    0,    0,    0 };
-const uint32_t EPSILON_W_T1_LE[] = {    0,    0,    0,    0,    0,    0 };
+const uint32_t EPSILON_W_T1_LE[] = {    9,    9,    7,    5,    1,    0 };
 
 // TODO: These values need to be updated whenever HE system info is available.
 // HE epsilon (4 chips per-group)
