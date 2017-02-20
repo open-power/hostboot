@@ -485,8 +485,6 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for dimm size
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
-/// @warn Dependent on the following attributes already set:
-/// @warn eff_dram_density, eff_sdram_width, eff_ranks_per_dimm
 ///
 fapi2::ReturnCode eff_dimm::dimm_size()
 {
@@ -505,9 +503,8 @@ fapi2::ReturnCode eff_dimm::dimm_size()
     {
         // Calculate dimm size
         // Formula from SPD Spec
-        // Total = SDRAM Capacity 8 * Primary Bus Width SDRAM Width * Logical Ranks per DIMM
-        uint32_t l_dimm_size = 0;
-        l_dimm_size = (l_sdram_density * l_bus_width * l_logical_rank_per_dimm) / (8 * l_sdram_width);
+        // Total = SDRAM Capacity / 8 * Primary Bus Width / SDRAM Width * Logical Ranks per DIMM
+        const uint32_t l_dimm_size = (l_sdram_density * l_bus_width * l_logical_rank_per_dimm) / (8 * l_sdram_width);
 
         // Get & update MCS attribute
         uint32_t l_attrs_dimm_size[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -2279,8 +2276,6 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for Post Package Repair
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
-/// @note write_dbi is not supported, so set to DISABLED (0)
-/// @note no logic for DBI
 ///
 fapi2::ReturnCode eff_dimm::post_package_repair()
 {

@@ -64,8 +64,12 @@ mrs04_data::mrs04_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
     iv_rd_pre_train_mode(fapi2::ENUM_ATTR_EFF_RD_PREAMBLE_TRAIN_DISABLE),
     iv_rd_preamble(fapi2::ENUM_ATTR_EFF_RD_PREAMBLE_TRAIN_DISABLE),
     iv_wr_preamble(fapi2::ENUM_ATTR_EFF_RD_PREAMBLE_1NCLK),
-    iv_ppr(fapi2::ENUM_ATTR_EFF_DRAM_PPR_NOT_SUPPORTED)
+    iv_ppr(fapi2::ENUM_ATTR_EFF_DRAM_PPR_NOT_SUPPORTED),
+    iv_soft_ppr(fapi2::ENUM_ATTR_EFF_DRAM_SOFT_PPR_NOT_SUPPORTED)
 {
+    // From DDR4 Spec: 3.3 RESET and Initialization Procedure
+    // PPR and soft PPR must be disabled during initialization
+    // so we don't call the attribute accessor for them
     FAPI_TRY( mss::eff_max_powerdown_mode(i_target, iv_max_pd_mode) );
     FAPI_TRY( mss::mrw_temp_refresh_range(iv_temp_refresh_range) );
     FAPI_TRY( mss::mrw_temp_refresh_mode(iv_temp_ref_mode) );
@@ -75,14 +79,13 @@ mrs04_data::mrs04_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
     FAPI_TRY( mss::eff_rd_preamble_train(i_target, iv_rd_pre_train_mode) );
     FAPI_TRY( mss::eff_rd_preamble(i_target, iv_rd_preamble) );
     FAPI_TRY( mss::eff_wr_preamble(i_target, iv_wr_preamble) );
-    FAPI_TRY( mss::eff_dram_ppr(i_target, iv_ppr) );
 
     FAPI_INF("MR4 attributes: MAX_PD: 0x%x, TEMP_REFRESH_RANGE: 0x%x, TEMP_REF_MODE: 0x%x "
              "VREF_MON: 0x%x, CSL: 0x%x, REF_ABORT: 0x%x, RD_PTM: 0x%x, RD_PRE: 0x%x, "
-             "WR_PRE: 0x%x, PPR: 0x%x",
+             "WR_PRE: 0x%x, PPR: 0x%x, SOFT PPR: 0x%x",
              iv_max_pd_mode, iv_temp_refresh_range, iv_temp_ref_mode, iv_vref_mon,
              iv_cs_cmd_latency, iv_ref_abort,
-             iv_rd_pre_train_mode, iv_rd_preamble, iv_wr_preamble, iv_ppr);
+             iv_rd_pre_train_mode, iv_rd_preamble, iv_wr_preamble, iv_ppr, iv_soft_ppr);
 
     //Let's make sure the temp_refresh_mode attribute is valid, even though it's mrw, gotta double check spec
     o_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -150,6 +153,7 @@ fapi2::ReturnCode mrs04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     io_inst.arr0.writeBit<A2>(i_data.iv_temp_refresh_range);
     io_inst.arr0.writeBit<A3>(i_data.iv_temp_ref_mode);
     io_inst.arr0.writeBit<A4>(i_data.iv_vref_mon);
+    io_inst.arr0.writeBit<A5>(i_data.iv_soft_ppr);
 
     mss::swizzle<A6, CS_CMD_LATENCY_LENGTH, CS_CMD_LATENCY_START>(l_cs_cmd_latency_buffer, io_inst.arr0);
     io_inst.arr0.writeBit<A9>(i_data.iv_ref_abort);
@@ -193,12 +197,14 @@ fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIS
                                       uint8_t& o_rd_preamble,
                                       uint8_t& o_wr_preamble,
                                       uint8_t& o_ppr,
+                                      uint8_t& o_soft_ppr,
                                       fapi2::buffer<uint8_t>& o_cs_cmd_latency_buffer)
 {
     o_max_pd_mode = i_inst.arr0.getBit<A1>();
     o_temp_refresh_range = i_inst.arr0.getBit<A2>();
     o_temp_ref_mode = i_inst.arr0.getBit<A3>();
     o_vref_mon = i_inst.arr0.getBit<A4>();
+    o_soft_ppr = i_inst.arr0.getBit<A5>();
 
     o_cs_cmd_latency_buffer = 0;
     mss::swizzle<5, 3, A8>(i_inst.arr0, o_cs_cmd_latency_buffer);
@@ -238,12 +244,13 @@ fapi2::ReturnCode mrs04_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_i
     uint8_t l_rd_preamble = 0;
     uint8_t l_wr_preamble = 0;
     uint8_t l_ppr = 0;
+    uint8_t l_soft_ppr = 0;
 
     fapi2::buffer<uint8_t> l_cs_cmd_latency_buffer;
 
     return mrs04_decode_helper(i_inst, i_rank, l_max_pd_mode, l_temp_refresh_range, l_temp_ref_mode,
                                l_vref_mon, l_ref_abort, l_rd_pre_train_mode, l_rd_preamble,
-                               l_wr_preamble, l_ppr, l_cs_cmd_latency_buffer);
+                               l_wr_preamble, l_ppr, l_soft_ppr, l_cs_cmd_latency_buffer);
 }
 
 fapi2::ReturnCode (*mrs04_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
