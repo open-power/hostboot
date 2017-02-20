@@ -38,11 +38,16 @@ PRDR_ERROR_SIGNATURE(MaintINTER_CTE, 0xffff0015, "", "Maintenance INTER CTE");
 PRDR_ERROR_SIGNATURE(VcmVerified,    0xffff0020, "", "VCM: verified");
 PRDR_ERROR_SIGNATURE(VcmFalseAlarm,  0xffff0021, "", "VCM: false alarm");
 
-
 PRDR_ERROR_SIGNATURE(MnfgIplHardCE,  0xffff0051, "", "MNFG IPL hard CE");
 PRDR_ERROR_SIGNATURE(MnfgIplDramCTE, 0xffff0052, "", "MNFG IPL DRAM CTE");
 PRDR_ERROR_SIGNATURE(MnfgIplRankCTE, 0xffff0053, "", "MNFG IPL rank CTE");
 PRDR_ERROR_SIGNATURE(MnfgIplDsCTE,   0xffff0054, "", "MNFG IPL DIMM CTE");
+
+PRDR_ERROR_SIGNATURE(MnfgDramCte,   0xffff0070, "", "MNFG per DRAM CTE");
+PRDR_ERROR_SIGNATURE(MnfgRankCte,   0xffff0071, "", "MNFG per rank CTE");
+PRDR_ERROR_SIGNATURE(MnfgDimmCte,   0xffff0072, "", "MNFG per DIMM CTE");
+PRDR_ERROR_SIGNATURE(MnfgTableFull, 0xffff0073, "", "MNFG CE table full");
+PRDR_ERROR_SIGNATURE(MnfgEntryCte,  0xffff0074, "", "MNFG CE table entry CTE");
 
 #endif // __prdfP9McaExtraSig_H
 
