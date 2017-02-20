@@ -86,6 +86,14 @@ class RtPnor
        */
         errlHndl_t clearSection(PNOR::SectionId i_section);
 
+        /**
+         * @brief Retrieve some information about the PNOR/SFC hardware
+         *        In runtime, some of this information is from attributes.
+         *
+         * @param[out] o_pnorInfo Information about PNOR.
+         */
+        errlHndl_t getPnorInfo( PNOR::PnorInfo_t& o_pnorInfo );
+
     protected:
        /**
         * @brief Constructor

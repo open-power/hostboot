@@ -87,6 +87,26 @@ errlHndl_t PNOR::clearSection(PNOR::SectionId i_section)
     return Singleton<RtPnor>::instance().clearSection(i_section);
 }
 
+void PNOR::getPnorInfo( PnorInfo_t& o_pnorInfo )
+{
+    o_pnorInfo.mmioOffset = LPC_SFC_MMIO_OFFSET | LPC_FW_SPACE;
+
+    //Using sys target
+    TARGETING::Target* sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    assert(sys != NULL);
+
+    o_pnorInfo.norWorkarounds = sys->getAttr<
+            TARGETING::ATTR_PNOR_FLASH_WORKAROUNDS>();
+
+#ifdef CONFIG_PNOR_IS_32MB
+    o_pnorInfo.flashSize = 32*MEGABYTE;
+#else
+    o_pnorInfo.flashSize = 64*MEGABYTE;
+#endif
+
+}
+
 /****************Public Methods***************************/
 /**
  * STATIC
@@ -321,12 +341,12 @@ RtPnor::RtPnor()
     {
         errlCommit(l_err, PNOR_COMP_ID);
     }
+
 }
 
 /*************************/
 RtPnor::~RtPnor()
 {
-
 }
 
 /*******************Private Methods*********************/
@@ -831,4 +851,5 @@ errlHndl_t RtPnor::clearSection(PNOR::SectionId i_section)
 
     return l_errl;
 }
+
 

@@ -48,6 +48,7 @@
     <attribute><id>ORDINAL_ID</id></attribute>
     <attribute><id>FAPI_POS</id></attribute>
     <attribute><id>FAPI_NAME</id></attribute>
+    <attribute><id>PNOR_FLASH_WORKAROUNDS</id></attribute>
 </targetType>
 
 <targetType>
