@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -908,6 +908,7 @@ errlHndl_t platform_adjust_vddr_post_dram_init()
 ////////////////////////////////////////////////////////////////////////////////
 errlHndl_t platform_set_nest_voltages()
 {
+    TRACFCOMP(g_trac_volt, "platform_set_nest_voltages>" );
     errlHndl_t l_err = nullptr;
 
     TARGETING::TargetHandleList l_procList;
@@ -970,12 +971,14 @@ errlHndl_t platform_set_nest_voltages()
 
     } // Processor Loop
 
+    TRACFCOMP(g_trac_volt,
+              "%d requests before removing dupes", l_requests.size());
 
     //Remove duplicate records and requests with invalid voltages
     removeExtraRequests( l_requests,
                          l_requestType,
                          l_procList.size() );
-    TRACDCOMP(g_trac_volt,
+    TRACFCOMP(g_trac_volt,
             "platform_set_nest_voltages - Sending %d requests", l_requests.size());
 
 
@@ -985,7 +988,7 @@ errlHndl_t platform_set_nest_voltages()
     size_t l_requestsSize = l_requests.size();
     for( size_t i = 0; i < l_requestsSize ; i++ )
     {
-        TRACDCOMP(g_trac_volt,
+        TRACFCOMP(g_trac_volt,
                   "Rail data: domain = 0x%x, domainId = %d, mV = %d",
                   l_requests.at(i).domain,
                   l_requests.at(i).domainId,
@@ -1004,6 +1007,7 @@ errlHndl_t platform_set_nest_voltages()
     }
 
 
+    TRACFCOMP(g_trac_volt, "<platform_set_nest_voltages" );
     return l_err;
 }
 
