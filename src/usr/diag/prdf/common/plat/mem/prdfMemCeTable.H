@@ -62,6 +62,9 @@ class MemCeTable
         ENTRY_TH_REACHED = 0x01, ///< The entry threshold has been reached.
         RANK_TH_REACHED  = 0x02, ///< The rank threshold has been reached.
         TABLE_FULL       = 0x04, ///< The table is full of active entries.
+        MNFG_TH_DRAM     = 0x08, ///< MNFG DRAM threshold reached.
+        MNFG_TH_RANK     = 0x10, ///< MNFG rank threshold reached.
+        MNFG_TH_DIMM     = 0x20, ///< MNFG DIMM threshold reached.
     };
 
   private: // constants, enums
@@ -110,19 +113,6 @@ class MemCeTable
      * @param i_rank The target rank.
      */
     void deactivateRank( const MemRank & i_rank );
-
-    /**
-     * @brief Iterates the entire table and returns the number of unique entries
-     *        that exist for the target DRAM, half-rank, logical DIMM.
-     * @param i_rank      The failing rank.
-     * @param i_symbol    The failing symbol.
-     * @param o_dramCount The entry count for the target dram.
-     * @param o_rankCount The entry count for the target rank per logical DIMM.
-     * @param o_dimmCount The entry count for the target logical DIMM.
-     */
-    void getMnfgCounts( const MemRank & i_rank, const MemSymbol & i_symbol,
-                        uint32_t & o_dramCount, uint32_t & o_rankCount,
-                        uint32_t & o_dimmCount );
 
     /**
      * @brief Gathers all table data to be stored in capture data.
