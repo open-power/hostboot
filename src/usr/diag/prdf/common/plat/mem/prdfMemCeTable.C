@@ -41,8 +41,9 @@ using namespace CE_TABLE;
 
 //------------------------------------------------------------------------------
 
-uint32_t MemCeTable::addEntry( const MemAddr & i_addr,
-                               const MemSymbol & i_symbol, bool i_isHard )
+template <TARGETING::TYPE T>
+uint32_t MemCeTable<T>::addEntry( const MemAddr & i_addr,
+                                  const MemSymbol & i_symbol, bool i_isHard )
 {
     uint32_t o_rc = NO_TH_REACHED;
 
@@ -52,7 +53,8 @@ uint32_t MemCeTable::addEntry( const MemAddr & i_addr,
 
     // First, check if the entry already exists. If so, increment its count and
     // move it to the end of the queue.
-    CeTable::iterator it = std::find( iv_table.begin(), iv_table.end(), data );
+    typename CeTable::iterator it = std::find( iv_table.begin(), iv_table.end(),
+                                               data );
     if ( iv_table.end() != it )
     {
         // Update the count only if the entry is active. Otherwise, use the
@@ -83,9 +85,9 @@ uint32_t MemCeTable::addEntry( const MemAddr & i_addr,
     // threshold if needed.
     MemRank thisRank = data.addr.getRank();
     uint32_t rankCount = 0;
-    for ( CeTable::iterator it = iv_table.begin(); it != iv_table.end(); it++ )
+    for ( auto & entry : iv_table )
     {
-        if ( it->active && (it->addr.getRank() == thisRank) )
+        if ( entry.active && (entry.addr.getRank() == thisRank) )
             rankCount++;
     }
 
@@ -99,7 +101,7 @@ uint32_t MemCeTable::addEntry( const MemAddr & i_addr,
     // If the table is full, remove the oldest inactive entry
     if ( MAX_ENTRIES < iv_table.size() )
     {
-        for ( CeTable::iterator it = iv_table.begin();
+        for ( typename CeTable::iterator it = iv_table.begin();
               it != iv_table.end(); it++ )
         {
             if ( !it->active )
@@ -125,25 +127,27 @@ uint32_t MemCeTable::addEntry( const MemAddr & i_addr,
 
 //------------------------------------------------------------------------------
 
-void MemCeTable::deactivateRank( const MemRank & i_rank )
+template <TARGETING::TYPE T>
+void MemCeTable<T>::deactivateRank( const MemRank & i_rank )
 {
     // NOTE: We don't want to reset the count here because it will be used for
     //       FFDC. Instead the count will be reset in addEntry() if the entry is
     //       not active.
-    for ( CeTable::iterator it = iv_table.begin(); it != iv_table.end(); it++ )
+    for ( auto & entry : iv_table )
     {
-        if ( it->addr.getRank() == i_rank )
-            it->active = false;
+        if ( entry.addr.getRank() == i_rank )
+            entry.active = false;
     }
 }
 
 //------------------------------------------------------------------------------
 
-void MemCeTable::getMnfgCounts( const MemRank & i_rank,
-                                const MemSymbol & i_symbol,
-                                uint32_t & o_dramCount,
-                                uint32_t & o_rankCount,
-                                uint32_t & o_dimmCount )
+template <TARGETING::TYPE T>
+void MemCeTable<T>::getMnfgCounts( const MemRank & i_rank,
+                                   const MemSymbol & i_symbol,
+                                   uint32_t & o_dramCount,
+                                   uint32_t & o_rankCount,
+                                   uint32_t & o_dimmCount )
 {
     o_dramCount = 0; o_rankCount = 0; o_dimmCount = 0;
 
@@ -151,11 +155,11 @@ void MemCeTable::getMnfgCounts( const MemRank & i_rank,
     const uint32_t ps   = i_symbol.getPortSlct();
     const uint32_t ds   = i_rank.getDimmSlct();
 
-    for ( CeTable::iterator it = iv_table.begin(); it != iv_table.end(); it++ )
+    for ( auto & entry : iv_table )
     {
-        if ( ps != it->portSlct ) continue;
+        if ( ps != entry.portSlct ) continue;
 
-        MemRank itRank = it->addr.getRank();
+        MemRank itRank = entry.addr.getRank();
 
         if ( ds == itRank.getDimmSlct() )
         {
@@ -165,7 +169,7 @@ void MemCeTable::getMnfgCounts( const MemRank & i_rank,
             {
                 o_rankCount++;
 
-                if ( dram == it->dram )
+                if ( dram == entry.dram )
                     o_dramCount++;
             }
         }
@@ -174,7 +178,8 @@ void MemCeTable::getMnfgCounts( const MemRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-void MemCeTable::addCapData( CaptureData & io_cd )
+template <TARGETING::TYPE T>
+void MemCeTable<T>::addCapData( CaptureData & io_cd )
 {
     static const size_t sz_word = sizeof(CPU_WORD);
 
@@ -214,13 +219,13 @@ void MemCeTable::addCapData( CaptureData & io_cd )
     sz_actData += METADATA_SIZE;
 
     // Fill in the entry info.
-    for ( CeTable::iterator it = iv_table.begin(); it != iv_table.end(); it++ )
+    for ( auto & entry : iv_table )
     {
-        uint32_t mrnk = it->addr.getRank().getMaster(); //  3-bit
-        uint32_t srnk = it->addr.getRank().getSlave();  //  3-bit
-        uint32_t bnk  = it->addr.getBank();             //  5-bit (MCA)
-        uint32_t row  = it->addr.getRow();              // 18-bit
-        uint32_t col  = it->addr.getCol();              //  9-bit (MBA)
+        uint32_t mrnk = entry.addr.getRank().getMaster(); //  3-bit
+        uint32_t srnk = entry.addr.getRank().getSlave();  //  3-bit
+        uint32_t bnk  = entry.addr.getBank();             //  5-bit (MCA)
+        uint32_t row  = entry.addr.getRow();              // 18-bit
+        uint32_t col  = entry.addr.getCol();              //  9-bit (MBA)
 
         uint8_t row0_1   = (row & 0x30000) >> 16;
         uint8_t row2_9   = (row & 0x0ff00) >>  8;
@@ -229,16 +234,17 @@ void MemCeTable::addCapData( CaptureData & io_cd )
         uint8_t col0     = (col & 0x100) >> 8;
         uint8_t col1_8   =  col & 0x0ff;
 
-        uint8_t active = it->active ? 1 : 0;
-        uint8_t isHard = it->isHard ? 1 : 0;
-        uint8_t isSp   = it->isDramSpared ? 1 : 0;
-        uint8_t isEcc  = it->isEccSpared  ? 1 : 0;
+        uint8_t active = entry.active ? 1 : 0;
+        uint8_t isHard = entry.isHard ? 1 : 0;
+        uint8_t isSp   = entry.isDramSpared ? 1 : 0;
+        uint8_t isEcc  = entry.isEccSpared  ? 1 : 0;
 
-        data[sz_actData  ] = it->count;
+        data[sz_actData  ] = entry.count;
         data[sz_actData+1] = // 5 bits spare here.
-                             (isSp << 2) | (isEcc << 1) | it->portSlct;
-        data[sz_actData+2] = (isHard << 7) | (active << 6) | (it->dram & 0x3f);
-        data[sz_actData+3] = it->dramPins;
+                             (isSp << 2) | (isEcc << 1) | entry.portSlct;
+        data[sz_actData+2] = (isHard << 7) | (active << 6) |
+                             (entry.dram & 0x3f);
+        data[sz_actData+3] = entry.dramPins;
         data[sz_actData+4] = (mrnk << 5) | (srnk << 2) | row0_1;
         data[sz_actData+5] = row2_9;
         data[sz_actData+6] = row10_17;
@@ -260,6 +266,14 @@ void MemCeTable::addCapData( CaptureData & io_cd )
         io_cd.Add( iv_chip->getTrgt(), Util::hashString("MEM_CE_TABLE"), bs );
     }
 }
+
+//------------------------------------------------------------------------------
+
+// Avoid linker errors with the template.
+template class MemCeTable<TYPE_MCA>;
+template class MemCeTable<TYPE_MBA>;
+
+//------------------------------------------------------------------------------
 
 } // end namespace PRDF
 
