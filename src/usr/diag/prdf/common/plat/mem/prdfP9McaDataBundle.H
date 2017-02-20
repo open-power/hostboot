@@ -60,8 +60,8 @@ class McaDataBundle : public DataBundle
 
   public: // instance variables
 
-    MemCeTable iv_ceTable; ///< CE table for FFDC
-    MemUeTable iv_ueTable; ///< UE table for FFDC
+    MemCeTable<TARGETING::TYPE_MCA> iv_ceTable; ///< CE table for FFDC
+    MemUeTable iv_ueTable;                      ///< UE table for FFDC
 };
 
 /**

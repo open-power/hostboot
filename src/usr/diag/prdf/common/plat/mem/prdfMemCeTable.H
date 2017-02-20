@@ -49,6 +49,7 @@ namespace PRDF
  * @note  Will be used to determine when to do a TPS procedure for Targeted
  *        Diagnostics at runtime. Will be used for FFDC only during Hostboot.
  */
+template <TARGETING::TYPE T>
 class MemCeTable
 {
 
@@ -82,7 +83,9 @@ class MemCeTable
      */
     explicit MemCeTable( ExtensibleChip * i_chip ) :
         iv_chip( i_chip )
-    {}
+    {
+        PRDF_ASSERT( T == iv_chip->getType() );
+    }
 
     /**
      * @brief  Will attempt to add a new entry to the table.
