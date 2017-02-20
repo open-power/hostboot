@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,6 +95,8 @@ void* call_host_set_voltages(void *io_pArgs)
                 errlCommit( l_err, HWPF_COMP_ID );
                 l_noError = false;
             }
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Done with p9_setup_evid" );
         } // Processor Loop
 
         if( l_noError )
