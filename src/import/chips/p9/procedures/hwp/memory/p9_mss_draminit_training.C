@@ -192,12 +192,8 @@ extern "C"
                 // bits for a cal failure. We'll return the proper ReturnCode so all we need to do is FAPI_TRY.
                 FAPI_TRY( mss::ccs::execute(i_target, l_program, p) );
 
-                // Modifies the training steps, based upon workarounds - only do this if we've run coarse_rd or coarse_wr
-                if (l_cal_steps_enabled.getBit<mss::cal_steps::COARSE_RD>() ||
-                    l_cal_steps_enabled.getBit<mss::cal_steps::COARSE_WR>())
-                {
-                    FAPI_TRY( mss::workarounds::dp16::modify_calibration_results( p ) );
-                }
+                // Conducts workarounds after training if needed
+                FAPI_TRY( mss::workarounds::dp16::post_training_workarounds( p, l_cal_steps_enabled ) );
 
                 // If we're aborting on error we can just FAPI_TRY. If we're not, we don't want to exit if there's
                 // an error but we want to log the error and keep on keeping on.

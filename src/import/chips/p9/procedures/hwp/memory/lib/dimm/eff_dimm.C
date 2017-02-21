@@ -4327,6 +4327,53 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Determines and sets the cal_step_enable values
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::cal_step_enable()
+{
+    // Gets the MCS target to use
+    const auto& l_mcs = mss::find_target<TARGET_TYPE_MCS>(iv_dimm);
 
+    // These constexpr values are taken from the defiitions in ATTR_MSS_CAL_STEP_ENABLE
+    // RD/WR VREF correspond to 0x0400 and 0x0100 respectively.
+    constexpr uint64_t ONLY_1D = 0xFAC0;
+    constexpr uint64_t RD_VREF_WR_VREF_1D = 0xFFC0;
+    const uint16_t l_cal_step_value = (mss::chip_ec_feature_skip_hw_vref_cal(l_mcs) ? ONLY_1D : RD_VREF_WR_VREF_1D);
+
+    FAPI_DBG("%s %s running HW VREF cal. cal_step value: 0x%0x VREF", mss::c_str(l_mcs),
+             mss::chip_ec_feature_skip_hw_vref_cal(l_mcs) ? "not" : "", l_cal_step_value);
+
+    // Sets up the vector
+    std::vector<uint16_t> l_cal_step(PORTS_PER_MCS, l_cal_step_value);
+
+    // Sets the values
+    return FAPI_ATTR_SET(fapi2::ATTR_MSS_CAL_STEP_ENABLE, l_mcs, UINT16_VECTOR_TO_1D_ARRAY(l_cal_step, PORTS_PER_MCS));
+}
+
+///
+/// @brief Determines and sets the vref_enable_bit settings
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::vref_enable_bit()
+{
+    // Gets the MCS target to use
+    const auto& l_mcs = mss::find_target<TARGET_TYPE_MCS>(iv_dimm);
+
+    // This enables which bits should be run for RD VREF, all 1's indicates that all bits should be run
+    constexpr uint64_t DISABLE = 0x0000;
+    constexpr uint64_t ENABLE = 0xFFFF;
+    const uint16_t l_vref_enable_value = (mss::chip_ec_feature_skip_hw_vref_cal(l_mcs) ? DISABLE : ENABLE);
+
+    FAPI_DBG("%s %s running HW VREF cal. VREF enable value: 0x%0x", mss::c_str(l_mcs),
+             mss::chip_ec_feature_skip_hw_vref_cal(l_mcs) ? "not" : "", l_vref_enable_value);
+
+    // Sets up the vector
+    std::vector<uint16_t> l_vref_enable(PORTS_PER_MCS, l_vref_enable_value);
+
+    // Sets the values
+    return FAPI_ATTR_SET(fapi2::ATTR_MSS_VREF_CAL_ENABLE, l_mcs, UINT16_VECTOR_TO_1D_ARRAY(l_vref_enable, PORTS_PER_MCS));
+}
 
 }//mss

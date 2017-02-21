@@ -32817,6 +32817,45 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>SKIP_HW_VREF_CAL</id>
+    <description>
+        
+      In sub DD1.02 Nimbus the HW VREF calibrations should not be run
+    
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SKIP_HW_VREF_CAL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SKIP_RD_VREF_VREFSENSE_OVERRIDE</id>
+    <description>
+        
+      In sub DD1.03 Nimbus the HW VREF calibrations should not be run
+    
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SKIP_RD_VREF_VREFSENSE_OVERRIDE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
 
 <attribute>
     <id>DO_MSS_VREF_DAC</id>

@@ -96,6 +96,107 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Modifies the VREF sense bit based upon the passed in value
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_state the state to set bit 62 to
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note this is a helper function to reduce repeated code in cleanup and workaround functions below
+///
+fapi2::ReturnCode modify_vref_sense(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const mss::states i_state )
+{
+    // Runs the cleanup here
+    static const std::vector<uint64_t> l_addrs =
+    {
+        MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0,
+        MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_1,
+        MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_2,
+        MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_3,
+        MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_4,
+    };
+
+    // Note: this bit does not exist in our scom def, so constexpr'ing it here
+    constexpr uint64_t VREFSENSE_BIT = 62;
+
+    for(const auto& l_reg : l_addrs)
+    {
+        fapi2::buffer<uint64_t> l_data;
+
+        // Gets the data
+        FAPI_TRY(mss::getScom(i_target, l_reg, l_data));
+
+        // Modifies the data
+        l_data.writeBit<VREFSENSE_BIT>(i_state);
+
+        // Writes the data
+        FAPI_TRY(mss::putScom(i_target, l_reg, l_data));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Workarounds for after training
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note This function is called after training - it will only be run after coarse wr/rd
+///
+fapi2::ReturnCode rd_vref_vref_sense_cleanup( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    // If the workaround does not need to be run, return success
+    if(mss::chip_ec_feature_skip_rd_vref_vrefsense_override(i_target))
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Per Ryan King, this needs to be set to OFF for mainline mode
+    return modify_vref_sense(i_target, mss::states::OFF);
+}
+
+///
+/// @brief Sets up the VREF sense values before training
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note This function is called before training
+///
+fapi2::ReturnCode rd_vref_vref_sense_setup( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    // If the workaround does not need to be run, return success
+    if(mss::chip_ec_feature_skip_rd_vref_vrefsense_override(i_target))
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Per Ryan King, this needs to be set to ON to run training
+    return modify_vref_sense(i_target, mss::states::ON);
+}
+
+///
+/// @brief Workarounds for after training
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_cal_steps_enable the enabled cal steps
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note This function is called after training - it will only be run after coarse wr/rd
+///
+fapi2::ReturnCode post_training_workarounds( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const fapi2::buffer<uint16_t>& i_cal_steps_enabled )
+{
+    // Only runs on the last cal steps (coarse wr/rd)
+    if (i_cal_steps_enabled.getBit<mss::cal_steps::COARSE_RD>() ||
+        i_cal_steps_enabled.getBit<mss::cal_steps::COARSE_WR>())
+    {
+        FAPI_TRY( mss::workarounds::dp16::modify_calibration_results( i_target ) );
+        FAPI_TRY( mss::workarounds::dp16::rd_vref_vref_sense_cleanup( i_target ) );
+    }
+
+    // Returns success, as we might not have run these workarounds, depending upon cal step enable
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief DP16 Read Diagnostic Configuration 5 work around
 /// Not in the Model 67 spydef, so we scom them. Should be removed when they are
 /// added to the spydef.

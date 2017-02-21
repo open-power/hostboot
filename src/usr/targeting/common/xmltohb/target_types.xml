@@ -243,13 +243,15 @@
     <attribute><id>PM_SPIVID_MAJORITY_VOTE_ENABLE</id></attribute>
     <attribute><id>PM_SPIVID_MAX_RETRIES</id></attribute>
     <attribute><id>PROC_DPLL_DIVIDER</id></attribute>
-     <!-- End pm_hwp_attributes.xml -->
-     <!-- Begin poreve_memory_attributes.xml -->
-     <attribute><id>SBE_SEEPROM_I2C_ADDRESS_BYTES</id></attribute>
-     <attribute><id>SBE_SEEPROM_I2C_DEVICE_ADDRESS</id></attribute>
-     <attribute><id>SBE_SEEPROM_I2C_PORT</id></attribute>
-     <attribute><id>PNOR_I2C_ADDRESS_BYTES</id></attribute>
-     <!-- End Supporting poreve_memory_attributes.xml -->
+    <!-- End pm_hwp_attributes.xml -->
+    <attribute><id>SKIP_HW_VREF_CAL</id></attribute>
+    <attribute><id>SKIP_RD_VREF_VREFSENSE_OVERRIDE</id></attribute>
+    <!-- Begin poreve_memory_attributes.xml -->
+    <attribute><id>SBE_SEEPROM_I2C_ADDRESS_BYTES</id></attribute>
+    <attribute><id>SBE_SEEPROM_I2C_DEVICE_ADDRESS</id></attribute>
+    <attribute><id>SBE_SEEPROM_I2C_PORT</id></attribute>
+    <attribute><id>PNOR_I2C_ADDRESS_BYTES</id></attribute>
+    <!-- End Supporting poreve_memory_attributes.xml -->
 <!-- TODO RTC 82688. This next attribute moves to hostboot only
      with this story  -->
     <attribute><id>PROC_SECURITY_SETUP_VECTOR</id></attribute>

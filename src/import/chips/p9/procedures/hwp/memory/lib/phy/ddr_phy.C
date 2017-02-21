@@ -911,6 +911,9 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
              mss::c_str(i_target), uint16_t(l_cal_config), uint16_t(i_cal_steps_enabled));
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0, l_cal_config) );
 
+    // Setsup the workarounds
+    FAPI_TRY(mss::workarounds::dp16::rd_vref_vref_sense_setup(i_target));
+
 fapi_try_exit:
     return fapi2::current_err;
 }
