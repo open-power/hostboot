@@ -118,6 +118,8 @@ static fapi2::ReturnCode setup_memory_work_around_attributes(
         uint8_t l_value = 1;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_WR_VREF, i_target, l_value) );
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_VREF_DAC, i_target, l_value) );
+        // The value for this is SKIP - we want to skip in sub DD1.02 HW
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_SKIP_HW_VREF_CAL,  i_target, l_value) );
     }
 
     // Workarounds for modules which are before 1.03 (memory part 2)
@@ -129,6 +131,8 @@ static fapi2::ReturnCode setup_memory_work_around_attributes(
         uint8_t l_value = 1;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_TRAINING_BAD_BITS, i_target, l_value) );
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_BLUE_WATERFALL_ADJUST, i_target, l_value) );
+        // The value for this is SKIP - we want to skip in sub DD1.03 HW
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_SKIP_RD_VREF_VREFSENSE_OVERRIDE,  i_target, l_value) );
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
