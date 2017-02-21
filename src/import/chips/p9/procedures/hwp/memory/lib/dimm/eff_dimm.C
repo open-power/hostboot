@@ -205,13 +205,11 @@ static uint64_t ibt_helper(const uint8_t i_ibt)
 
 ///
 /// @brief factory to make an eff_config DIMM object based on dimm kind (type, gen, and revision number)
-/// @param[in] i_target dimm target
 /// @param[in] i_pDecoder the spd::decoder for the dimm target
 /// @param[out] o_fact_obj a shared pointer of the eff_dimm type
 ///
-fapi2::ReturnCode eff_dimm::eff_dimm_factory (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const std::shared_ptr<spd::decoder>& i_pDecoder,
-        std::shared_ptr<eff_dimm>& o_fact_obj)
+fapi2::ReturnCode eff_dimm::eff_dimm_factory ( const std::shared_ptr<spd::decoder>& i_pDecoder,
+        std::shared_ptr<eff_dimm>& o_fact_obj )
 {
     uint8_t l_type = 0;
     uint8_t l_gen = 0;
@@ -219,13 +217,15 @@ fapi2::ReturnCode eff_dimm::eff_dimm_factory (const fapi2::Target<fapi2::TARGET_
     kind_t l_dimm_kind = DEFAULT_KIND;
 
     fapi2::ReturnCode l_rc;
+    const auto& l_dimm = i_pDecoder->iv_target;
 
     // Now time to get the three attributes to tell which dimm we're working with.
     // Dram_gen and dimm_type are set in the SPD factory and we'll call the SPD decoder to get the reg and buff type
-    FAPI_TRY( eff_dram_gen(i_target, l_gen), "Failed accessing the ATTR_MSS_EFF_DRAM_GEN" );
-    FAPI_TRY( eff_dimm_type(i_target, l_type), "Failed accessing the ATTR_MSS_EFF_DIMM_TYPE" );
+    FAPI_TRY( eff_dram_gen(l_dimm, l_gen), "Failed eff_dram_gen() accessor for %s", l_dimm );
+    FAPI_TRY( eff_dimm_type(l_dimm, l_type), "Failed eff_dimm_type() accessor for %s",
+              l_dimm );
     FAPI_TRY( i_pDecoder->iv_module_decoder->register_and_buffer_type(l_buffer_type),
-              "Failed decoding register and buffer type" );
+              "Failed decoding register and buffer type from SPD for %s", l_dimm );
 
     l_dimm_kind = mss::dimm_kind(l_type, l_gen);
 
@@ -235,7 +235,7 @@ fapi2::ReturnCode eff_dimm::eff_dimm_factory (const fapi2::Target<fapi2::TARGET_
             switch (l_buffer_type)
             {
                 case LRDIMM_DB01:
-                    o_fact_obj = std::make_shared<eff_lrdimm_db01> (i_target, i_pDecoder, l_rc );
+                    o_fact_obj = std::make_shared<eff_lrdimm_db01>( i_pDecoder, l_rc );
 
                     // Assert that l_rc is good and o_fact_object isn't null
                     FAPI_ASSERT( ((l_rc == fapi2::FAPI2_RC_SUCCESS) && (o_fact_obj != nullptr)),
@@ -243,14 +243,14 @@ fapi2::ReturnCode eff_dimm::eff_dimm_factory (const fapi2::Target<fapi2::TARGET_
                                  set_DIMM_TYPE(l_type).
                                  set_DRAM_GEN(l_gen).
                                  set_REG_AND_BUFF_TYPE(l_buffer_type).
-                                 set_DIMM_TARGET(i_target),
+                                 set_DIMM_TARGET(l_dimm),
                                  "Failure creating an eff_dimm object for an LRDIMM DB01 for target %s buff_type %d",
-                                 mss::c_str(i_target),
+                                 mss::c_str(l_dimm),
                                  l_buffer_type);
                     break;
 
                 case LRDIMM_DB02:
-                    o_fact_obj = std::make_shared<eff_lrdimm_db02> (i_target, i_pDecoder, l_rc);
+                    o_fact_obj = std::make_shared<eff_lrdimm_db02>( i_pDecoder, l_rc );
 
                     // Assert that l_rc is good and o_fact_object isn't null
                     FAPI_ASSERT( ((l_rc == fapi2::FAPI2_RC_SUCCESS) && (o_fact_obj != nullptr)),
@@ -258,9 +258,9 @@ fapi2::ReturnCode eff_dimm::eff_dimm_factory (const fapi2::Target<fapi2::TARGET_
                                  set_DIMM_TYPE(l_type).
                                  set_DRAM_GEN(l_gen).
                                  set_REG_AND_BUFF_TYPE(l_buffer_type).
-                                 set_DIMM_TARGET(i_target),
+                                 set_DIMM_TARGET(l_dimm),
                                  "Failure creating an eff_dimm object for an LRDIMM DB02 for target %s buff_type %d",
-                                 mss::c_str(i_target),
+                                 mss::c_str(l_dimm),
                                  l_buffer_type);
                     break;
 
@@ -268,42 +268,42 @@ fapi2::ReturnCode eff_dimm::eff_dimm_factory (const fapi2::Target<fapi2::TARGET_
                     FAPI_ASSERT(false,
                                 fapi2::MSS_INVALID_LRDIMM_DB().
                                 set_DATA_BUFFER_GEN(l_buffer_type).
-                                set_DIMM_TARGET(i_target),
+                                set_DIMM_TARGET(l_dimm),
                                 "Error when creating a LRDIMM dimm object due to invalid databuffer type (%d) for target %s",
                                 l_buffer_type,
-                                mss::c_str(i_target));
+                                mss::c_str(l_dimm));
                     return fapi2::FAPI2_RC_INVALID_PARAMETER;
             }
 
             break;
 
         case KIND_RDIMM_DDR4:
-            o_fact_obj = std::make_shared<eff_rdimm> (i_target, i_pDecoder, l_rc);
+            o_fact_obj = std::make_shared<eff_rdimm>( i_pDecoder, l_rc );
             // Assert that l_rc is good and o_fact_object isn't null
             FAPI_ASSERT( ((l_rc == fapi2::FAPI2_RC_SUCCESS) && (o_fact_obj != nullptr)),
                          fapi2::MSS_ERROR_CREATING_EFF_CONFIG_DIMM_OBJECT().
                          set_DIMM_TYPE(l_type).
                          set_DRAM_GEN(l_gen).
                          set_REG_AND_BUFF_TYPE(l_buffer_type).
-                         set_DIMM_TARGET(i_target),
+                         set_DIMM_TARGET(l_dimm),
                          "Failure creating an eff_dimm object for an RDIMM for target %s register type %d",
-                         mss::c_str(i_target),
+                         mss::c_str(l_dimm),
                          l_buffer_type);
             break;
 
         default:
-            FAPI_ERR("Wrong kind of DIMM plugged in (not DDR4 LRDIMM or RDIMM for target %s", mss::c_str(i_target));
+            FAPI_ERR("Wrong kind of DIMM plugged in (not DDR4 LRDIMM or RDIMM for target %s", mss::c_str(l_dimm));
             FAPI_ASSERT(false,
                         fapi2::MSS_UNSUPPORTED_DIMM_KIND().
                         set_DIMM_KIND(l_dimm_kind).
                         set_DIMM_TYPE(l_type).
                         set_DRAM_GEN(l_gen).
-                        set_DIMM_TARGET(i_target),
+                        set_DIMM_TARGET(l_dimm),
                         "Invalid dimm target when passed into eff_config: kind %d, type %d, gen %d for target %s",
                         l_dimm_kind,
                         l_type,
                         l_gen,
-                        mss::c_str(i_target));
+                        mss::c_str(l_dimm));
     }
 
 fapi_try_exit:
@@ -672,16 +672,10 @@ fapi2::ReturnCode eff_dimm::dram_trfc()
     // Calculate trfc (in ps)
     {
         constexpr int64_t l_trfc_ftb = 0;
-        int64_t l_ftb = 0;
-        int64_t l_mtb = 0;
-
-        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb) );
-
         FAPI_INF( "medium timebase (ps): %ld, fine timebase (ps): %ld, tRFC (MTB): %ld, tRFC(FTB): %ld",
-                  l_mtb, l_ftb, l_trfc_mtb, l_trfc_ftb );
+                  iv_mtb, iv_ftb, l_trfc_mtb, l_trfc_ftb );
 
-        l_trfc_in_ps = spd::calc_timing_from_timebase(l_trfc_mtb, l_mtb, l_trfc_ftb, l_ftb);
+        l_trfc_in_ps = spd::calc_timing_from_timebase(l_trfc_mtb, iv_mtb, l_trfc_ftb, iv_ftb);
     }
 
     {
@@ -863,26 +857,19 @@ fapi2::ReturnCode eff_dimm::dram_tccd_l()
     // It is safe to read this from SPD because the correct nck
     // value will be calulated based on our dimm speed.
 
-    // TODO: RTC 163150 Clean up eff_config timing boilerplate
     {
-        int64_t l_ftb = 0;
-        int64_t l_mtb = 0;
         int64_t l_tccd_mtb = 0;
         int64_t l_tccd_ftb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb),
-                  "Failed medium_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb),
-                  "Failed fine_timebase() for %s", mss::c_str(iv_dimm) );
         FAPI_TRY( iv_pDecoder->min_tccd_l(l_tccd_mtb),
                   "Failed min_tccd_l() for %s", mss::c_str(iv_dimm) );
         FAPI_TRY( iv_pDecoder->fine_offset_min_tccd_l(l_tccd_ftb),
                   "Failed fine_offset_min_tccd_l() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tCCD_L (MTB): %ld, tCCD_L(FTB): %ld",
-                 l_mtb, l_ftb, l_tccd_mtb, l_tccd_ftb );
+                 iv_mtb, iv_ftb, l_tccd_mtb, l_tccd_ftb );
 
-        l_tccd_in_ps = spd::calc_timing_from_timebase(l_tccd_mtb, l_mtb, l_tccd_ftb, l_ftb);
+        l_tccd_in_ps = spd::calc_timing_from_timebase(l_tccd_mtb, iv_mtb, l_tccd_ftb, iv_ftb);
     }
 
     {
@@ -1729,21 +1716,15 @@ fapi2::ReturnCode eff_dimm::dram_twr()
     {
         constexpr int64_t l_twr_ftb = 0;
         int64_t l_twr_mtb = 0;
-        int64_t l_ftb = 0;
-        int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb),
-                  "Failed medium_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb),
-                  "Failed fine_timebase() for %s", mss::c_str(iv_dimm) );
         FAPI_TRY( iv_pDecoder->min_write_recovery_time(l_twr_mtb),
                   "Failed min_write_recovery_time() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tWR (MTB): %ld, tWR(FTB): %ld",
-                 l_mtb, l_ftb, l_twr_mtb, l_twr_ftb);
+                 iv_mtb, iv_ftb, l_twr_mtb, l_twr_ftb);
 
         // Calculate twr (in ps)
-        l_twr_in_ps = spd::calc_timing_from_timebase(l_twr_mtb, l_mtb, l_twr_ftb, l_ftb);
+        l_twr_in_ps = spd::calc_timing_from_timebase(l_twr_mtb, iv_mtb, l_twr_ftb, iv_ftb);
     }
 
     {
@@ -2759,22 +2740,16 @@ fapi2::ReturnCode eff_dimm::dram_trp()
     {
         int64_t l_trp_mtb = 0;
         int64_t l_trp_ftb = 0;
-        int64_t l_ftb = 0;
-        int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb),
-                  "Failed medium_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb),
-                  "Failed fine_timebase() for %s", mss::c_str(iv_dimm) );
         FAPI_TRY( iv_pDecoder->min_row_precharge_delay_time(l_trp_mtb),
                   "Failed min_row_precharge_delay_time() for %s", mss::c_str(iv_dimm) );
         FAPI_TRY( iv_pDecoder->fine_offset_min_trp(l_trp_ftb),
                   "Failed fine_offset_min_trp() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tRP (MTB): %ld, tRP(FTB): %ld",
-                 l_mtb, l_ftb, l_trp_mtb, l_trp_ftb);
+                 iv_mtb, iv_ftb, l_trp_mtb, l_trp_ftb);
 
-        l_trp_in_ps = spd::calc_timing_from_timebase(l_trp_mtb, l_mtb, l_trp_ftb, l_ftb);
+        l_trp_in_ps = spd::calc_timing_from_timebase(l_trp_mtb, iv_mtb, l_trp_ftb, iv_ftb);
     }
 
     // SPD spec gives us the minimum... compute our worstcase (maximum) from JEDEC
@@ -2826,22 +2801,16 @@ fapi2::ReturnCode eff_dimm::dram_trcd()
     {
         int64_t l_trcd_mtb = 0;
         int64_t l_trcd_ftb = 0;
-        int64_t l_ftb = 0;
-        int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb),
-                  "Failed medium_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb),
-                  "Failed fine_timebase() for %s", mss::c_str(iv_dimm) );
         FAPI_TRY( iv_pDecoder->min_ras_to_cas_delay_time(l_trcd_mtb),
                   "Failed min_ras_to_cas_delay_time() for %s", mss::c_str(iv_dimm) );
         FAPI_TRY( iv_pDecoder->fine_offset_min_trcd(l_trcd_ftb),
                   "Failed fine_offset_min_trcd() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("medium timebase MTB (ps): %ld, fine timebase FTB (ps): %ld, tRCD (MTB): %ld, tRCD (FTB): %ld",
-                 l_mtb, l_ftb, l_trcd_mtb, l_trcd_ftb);
+                 iv_mtb, iv_ftb, l_trcd_mtb, l_trcd_ftb);
 
-        l_trcd_in_ps = spd::calc_timing_from_timebase(l_trcd_mtb, l_mtb, l_trcd_ftb, l_ftb);
+        l_trcd_in_ps = spd::calc_timing_from_timebase(l_trcd_mtb, iv_mtb, l_trcd_ftb, iv_ftb);
     }
 
     {
@@ -2881,22 +2850,16 @@ fapi2::ReturnCode eff_dimm::dram_trc()
     {
         int64_t l_trc_mtb = 0;
         int64_t l_trc_ftb = 0;
-        int64_t l_ftb = 0;
-        int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb),
-                  "Failed medium_timebase() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb),
-                  "Failed fine_timebase() for %s", mss::c_str(iv_dimm) );
         FAPI_TRY( iv_pDecoder->min_active_to_active_refresh_delay_time(l_trc_mtb),
                   "Failed min_active_to_active_refresh_delay_time() for %s", mss::c_str(iv_dimm) );
         FAPI_TRY( iv_pDecoder->fine_offset_min_trc(l_trc_ftb),
                   "Failed fine_offset_min_trc() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("medium timebase MTB (ps): %ld, fine timebase FTB (ps): %ld, tRCmin (MTB): %ld, tRCmin(FTB): %ld",
-                 l_mtb, l_ftb, l_trc_mtb, l_trc_ftb);
+                 iv_mtb, iv_ftb, l_trc_mtb, l_trc_ftb);
 
-        l_trc_in_ps = spd::calc_timing_from_timebase(l_trc_mtb, l_mtb, l_trc_ftb, l_ftb);
+        l_trc_in_ps = spd::calc_timing_from_timebase(l_trc_mtb, iv_mtb, l_trc_ftb, iv_ftb);
     }
 
     {
@@ -2937,17 +2900,13 @@ fapi2::ReturnCode eff_dimm::dram_twtr_l()
     {
         constexpr int64_t l_twtr_l_ftb = 0;
         int64_t l_twtr_l_mtb = 0;
-        int64_t l_ftb = 0;
-        int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb) );
         FAPI_TRY( iv_pDecoder->min_twtr_l(l_twtr_l_mtb) );
 
         FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tWTR_S (MTB): %ld, tWTR_S (FTB): %ld",
-                 l_mtb, l_ftb, l_twtr_l_mtb, l_twtr_l_ftb );
+                 iv_mtb, iv_ftb, l_twtr_l_mtb, l_twtr_l_ftb );
 
-        l_twtr_l_in_ps = spd::calc_timing_from_timebase(l_twtr_l_mtb, l_mtb, l_twtr_l_ftb, l_ftb);
+        l_twtr_l_in_ps = spd::calc_timing_from_timebase(l_twtr_l_mtb, iv_mtb, l_twtr_l_ftb, iv_ftb);
     }
 
 
@@ -2988,17 +2947,13 @@ fapi2::ReturnCode eff_dimm::dram_twtr_s()
     {
         constexpr int64_t l_twtr_s_ftb = 0;
         int64_t l_twtr_s_mtb = 0;
-        int64_t l_ftb = 0;
-        int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(l_ftb) );
         FAPI_TRY( iv_pDecoder->min_twtr_s(l_twtr_s_mtb) );
 
         FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tWTR_S (MTB): %ld, tWTR_S (FTB): %ld",
-                 l_mtb, l_ftb, l_twtr_s_mtb, l_twtr_s_ftb );
+                 iv_mtb, iv_ftb, l_twtr_s_mtb, l_twtr_s_ftb );
 
-        l_twtr_s_in_ps = spd::calc_timing_from_timebase(l_twtr_s_mtb, l_mtb, l_twtr_s_ftb, l_ftb);
+        l_twtr_s_in_ps = spd::calc_timing_from_timebase(l_twtr_s_mtb, iv_mtb, l_twtr_s_ftb, iv_ftb);
     }
 
     {
@@ -3094,8 +3049,8 @@ fapi2::ReturnCode eff_dimm::dram_trrd_l()
 
     // From the SPD Spec:
     // At some frequencies, a minimum number of clocks may be required resulting
-    // in a larger tRRD_Smin value than indicated in the SPD.
-    // tRRD_S (3DS) is speed bin independent.
+    // in a larger tRRD_Lmin value than indicated in the SPD.
+    // tRRD_L (3DS) is speed bin independent.
     // So we won't read this from SPD and choose the correct value based on mss_freq
 
     if( l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS)

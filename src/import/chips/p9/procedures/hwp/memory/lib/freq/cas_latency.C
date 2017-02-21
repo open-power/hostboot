@@ -65,59 +65,46 @@ namespace mss
 /// @brief      Class constructor that retrieves required SPD data held by internal state
 /// @param[in]  i_target the controller target
 /// @param[in]  i_caches decoder caches
+/// @param[out] o_rc returns FAPI2_RC_SUCCESS if constructor initialzed successfully
 ///
 cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-                         const std::map<uint32_t, std::shared_ptr<spd::decoder> >& i_caches,
-                         fapi2::ReturnCode& o_rc):
+                         const std::vector< std::shared_ptr<spd::decoder> >& i_caches,
+                         fapi2::ReturnCode& o_rc ):
     iv_dimm_list_empty(false),
     iv_target(i_target),
     iv_largest_taamin(0),
     iv_proposed_tck(0),
     iv_common_cl(UINT64_MAX) // Masks out supported CLs
 {
-    const auto l_dimm_list = find_targets<TARGET_TYPE_DIMM>(iv_target);
 
-    if(l_dimm_list.empty())
+    if( i_caches.empty() )
     {
-        FAPI_INF("cas latency ctor seeing no DIMM on %s", mss::c_str(iv_target));
+        FAPI_INF("cas latency ctor seeing no SPD caches for %s", mss::c_str(i_target) );
         iv_dimm_list_empty = true;
         return;
     }
 
-    for ( const auto& l_dimm : l_dimm_list )
+    for ( const auto& l_cache : i_caches )
     {
-        const auto l_dimm_pos = pos(l_dimm);
+        // Retrive timing values from the SPD
+        uint64_t l_taa_min_in_ps = 0;
+        uint64_t l_tckmax_in_ps = 0;
+        uint64_t l_tck_min_in_ps = 0;
 
-        // Find decoder factory for this dimm position
-        // Can't be const auto because HB needs to implement
-        // something - AAM
-        auto l_it = i_caches.find(l_dimm_pos);
-        FAPI_TRY( check::spd::invalid_cache(l_dimm,
-                                            l_it != i_caches.end(),
-                                            l_dimm_pos),
-                  "%s. Failed to get valid cache", mss::c_str(iv_target) );
+        FAPI_TRY( get_taamin(l_cache, l_taa_min_in_ps),
+                  "%s. Failed to get tAAmin", mss::c_str(iv_target) );
+        FAPI_TRY( get_tckmax(l_cache, l_tckmax_in_ps),
+                  "%s. Failed to get tCKmax", mss::c_str(iv_target) );
+        FAPI_TRY( get_tckmin(l_cache, l_tck_min_in_ps),
+                  "%s. Failed to get tCKmin", mss::c_str(iv_target) );
 
-        {
-            // Retrive timing values from the SPD
-            uint64_t l_taa_min_in_ps = 0;
-            uint64_t l_tckmax_in_ps = 0;
-            uint64_t l_tck_min_in_ps = 0;
+        // Determine largest tAAmin value
+        iv_largest_taamin = std::max(iv_largest_taamin, l_taa_min_in_ps);
 
-            FAPI_TRY( get_taamin(l_it->second, l_taa_min_in_ps),
-                      "%s. Failed to get tAAmin", mss::c_str(iv_target) );
-            FAPI_TRY( get_tckmax(l_it->second, l_tckmax_in_ps),
-                      "%s. Failed to get tCKmax", mss::c_str(iv_target) );
-            FAPI_TRY( get_tckmin(l_it->second, l_tck_min_in_ps),
-                      "%s. Failed to get tCKmin", mss::c_str(iv_target) );
-
-            // Determine largest tAAmin value
-            iv_largest_taamin = std::max(iv_largest_taamin, l_taa_min_in_ps);
-
-            // Determine a proposed tCK value that is greater than or equal tCKmin
-            // But less than tCKmax
-            iv_proposed_tck = std::max(iv_proposed_tck, l_tck_min_in_ps);
-            iv_proposed_tck = std::min(iv_proposed_tck, l_tckmax_in_ps);
-        }
+        // Determine a proposed tCK value that is greater than or equal tCKmin
+        // But less than tCKmax
+        iv_proposed_tck = std::max(iv_proposed_tck, l_tck_min_in_ps);
+        iv_proposed_tck = std::min(iv_proposed_tck, l_tckmax_in_ps);
 
         // Collecting stack type
         // If I have at least one 3DS DIMM connected I have
@@ -125,7 +112,7 @@ cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         if( iv_is_3ds != loading::IS_3DS)
         {
             uint8_t l_stack_type = 0;
-            FAPI_TRY( l_it->second->prim_sdram_signal_loading(l_stack_type) );
+            FAPI_TRY( l_cache->prim_sdram_signal_loading(l_stack_type) );
 
             // Is there a more algorithmic efficient approach? - AAM
             iv_is_3ds = (l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS) ?
@@ -135,13 +122,13 @@ cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         {
             // Retrieve dimm supported cas latencies from SPD
             uint64_t l_dimm_supported_cl = 0;
-            FAPI_TRY( l_it->second->supported_cas_latencies(l_dimm_supported_cl),
+            FAPI_TRY( l_cache->supported_cas_latencies(l_dimm_supported_cl),
                       "%s. Failed to get supported CAS latency", mss::c_str(iv_target) );
 
             // Bitwise ANDING the bitmap from all modules creates a bitmap w/a common CL
             iv_common_cl &= l_dimm_supported_cl;
         }
-    }// dimm
+    }// caches
 
     // Limit tCK from the max supported dimm speed in the system
     // So that this is taken into account when calculating CL

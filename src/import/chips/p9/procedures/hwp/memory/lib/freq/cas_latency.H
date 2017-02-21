@@ -85,7 +85,7 @@ class cas_latency
         /// @param[out] o_rc returns FAPI2_RC_SUCCESS if constructor initialzed successfully
         ///
         cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target_mcs,
-                    const std::map<uint32_t, std::shared_ptr<spd::decoder> >& i_caches,
+                    const std::vector< std::shared_ptr<spd::decoder> >& i_caches,
                     fapi2::ReturnCode& o_rc);
 
         /// @brief      Constructor that allows the user to set desired data in lieu of SPD

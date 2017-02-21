@@ -97,14 +97,14 @@ extern "C"
             const auto l_index = mss::index(l_mcs);
 
             // Get cached decoder
-            std::map<uint32_t, std::shared_ptr<mss::spd::decoder> > l_factory_caches;
+            std::vector< std::shared_ptr<mss::spd::decoder> > l_factory_caches;
             FAPI_TRY( mss::spd::populate_decoder_caches(l_mcs, l_factory_caches),
                       "%s. Failed to populate decoder cache", mss::c_str(i_target) );
 
             {
                 // instantiation of class that calculates CL algorithm
                 fapi2::ReturnCode l_rc;
-                mss::cas_latency l_cas_latency(l_mcs, l_factory_caches, l_rc);
+                mss::cas_latency l_cas_latency( l_mcs, l_factory_caches, l_rc );
                 FAPI_TRY( l_rc, "%s. Failed to initialize cas_latency ctor", mss::c_str(i_target) );
 
                 if(l_cas_latency.iv_dimm_list_empty)
@@ -117,7 +117,7 @@ extern "C"
                 {
                     // We set this to a non-0 so we avoid divide-by-zero errors in the conversions which
                     // go from clocks to time (and vice versa.) We have other bugs if there was really
-                    // no mt/s determined and there really is a DIMM installed, so this is ok.
+                    // no MT/s determined and there really is a DIMM installed, so this is ok.
                     // We pick the maximum frequency supported by the system as the default.
                     l_min_dimm_freq[l_index] = fapi2::ENUM_ATTR_MSS_FREQ_MT2666;
 

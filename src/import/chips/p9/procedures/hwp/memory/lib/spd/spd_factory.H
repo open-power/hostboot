@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,13 +150,13 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
 ///
 /// @brief       Creates factory object & SPD data caches
 /// @param[in]   i_target the fapi2 target
-/// @param[out]  o_factory_caches map of factory objects with a dimm position key
-/// @param[in]   i_pDecoder optional input decoder to insert custom decoder, defaulted to nullptr
+/// @param[out]  o_factory_caches vector of factory objects
+/// @param[in]   i_pDecoder optional input decoder to insert custom decoder (nullptr default)
 /// @return      FAPI2_RC_SUCCESS if okay
 ///
 template<fapi2::TargetType T>
 fapi2::ReturnCode populate_decoder_caches(const fapi2::Target<T>& i_target,
-        std::map< uint32_t, std::shared_ptr<decoder> >& o_factory_caches,
+        std::vector< std::shared_ptr<decoder> >& o_factory_caches,
         const std::shared_ptr<decoder>& i_pDecoder = nullptr);
 
 

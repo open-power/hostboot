@@ -176,7 +176,6 @@ inline uint8_t extract_spd_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i
 class decoder
 {
     protected:
-        const fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;
 
         enum
         {
@@ -480,6 +479,7 @@ class decoder
         virtual fapi2::ReturnCode prim_sdram_logical_ranks( uint8_t& o_logical_ranks );
 
     public:
+        const fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;
         std::shared_ptr<dimm_module_decoder> iv_module_decoder;
         std::vector<uint8_t> iv_spd_data;
         rcw_settings iv_raw_card;

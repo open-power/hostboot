@@ -47,11 +47,13 @@ namespace mss
 class eff_dimm
 {
     protected:
-        const fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_dimm;
+        fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_dimm;
         fapi2::Target<fapi2::TARGET_TYPE_MCA> iv_mca;
         fapi2::Target<fapi2::TARGET_TYPE_MCS> iv_mcs;
-        uint64_t iv_port_index;
-        uint64_t iv_dimm_index;
+        size_t iv_port_index;
+        size_t iv_dimm_index;
+        int64_t iv_ftb; // fine timebase
+        int64_t iv_mtb; // medium timebase
 
     public:
         uint64_t iv_freq;
@@ -70,32 +72,33 @@ class eff_dimm
 
         ///
         /// @brief constructor for the base eff_dimm class
-        /// @param[in] i_target the dimm target
         /// @param[in] i_pDecoder the SPD decoder
         /// @param[out] o_rc fapi2::ReturnCode
         /// @note also sets class variables for parent MCA/ MCS and for freqs
         ///
-        eff_dimm (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                  const std::shared_ptr<spd::decoder>& i_pDecoder,
-                  fapi2::ReturnCode& o_rc) :
-            iv_dimm (i_target),
+        eff_dimm( const std::shared_ptr<spd::decoder>& i_pDecoder,
+                  fapi2::ReturnCode& o_rc ):
             iv_pDecoder(i_pDecoder)
         {
-            FAPI_DBG("Constructing EFF_DIMM Object");
+            FAPI_DBG("Constructing eff_dimm object");
+            iv_dimm = iv_pDecoder->iv_target;
             iv_mca = find_target<fapi2::TARGET_TYPE_MCA>(iv_dimm);
             iv_mcs = find_target<fapi2::TARGET_TYPE_MCS>(iv_dimm);
             iv_port_index = mss::index(iv_mca);
             iv_dimm_index = mss::index(iv_dimm);
 
-            FAPI_TRY( clock_period(i_target, iv_tCK_in_ps), "Failed to calculate clock period (tCK)" );
+            FAPI_TRY( iv_pDecoder->medium_timebase(iv_mtb) );
+            FAPI_TRY( iv_pDecoder->fine_timebase(iv_ftb) );
+
+            FAPI_TRY( clock_period(iv_dimm, iv_tCK_in_ps), "Failed to calculate clock period (tCK)" );
 
             FAPI_TRY( mss::mrw_temp_refresh_range(iv_temp_refresh_range), "Failed mrw_temp_refresh_range()" );
             FAPI_TRY( mss::mrw_fine_refresh_mode(iv_refresh_mode), "Failed mrw_fine_refresh_mode()" );
 
-            FAPI_TRY( mss::freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), iv_freq));
+            FAPI_TRY( mss::freq(find_target<fapi2::TARGET_TYPE_MCBIST>(iv_dimm), iv_freq));
 
-            FAPI_INF("Calculated clock period - tCK (ps): %d for %s", iv_tCK_in_ps, mss::c_str(i_target));
-            FAPI_INF("Calculated frequency (ps): %d for %s", iv_freq, mss::c_str(i_target));
+            FAPI_INF("Calculated clock period - tCK (ps): %d for %s", iv_tCK_in_ps, mss::c_str(iv_dimm));
+            FAPI_INF("Calculated frequency (ps): %d for %s", iv_freq, mss::c_str(iv_dimm));
 
         fapi_try_exit:
             o_rc = fapi2::current_err;
@@ -111,12 +114,10 @@ class eff_dimm
 
         ///
         /// @brief factory to make an eff_config DIMM object based on dimm kind (type, gen, and revision number)
-        /// @param[in] i_target the dimm target
         /// @param[in] i_pDecoder the SPD decoder
         /// @param[out] o_fact_obj a shared pointer of the eff_dimm type
         ///
-        static fapi2::ReturnCode eff_dimm_factory (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                const std::shared_ptr<spd::decoder>& i_pDecoder,
+        static fapi2::ReturnCode eff_dimm_factory ( const std::shared_ptr<spd::decoder>& i_pDecoder,
                 std::shared_ptr<eff_dimm>& o_fact_obj);
 
         ///
@@ -824,16 +825,14 @@ class eff_lrdimm : public eff_dimm
     public:
         ///
         /// @brief constructor for the eff_lrdimm class
-        /// @param[in] i_target the dimm target
         /// @param[in] i_pDecoder the SPD decoder
         /// @param[out] o_rc fapi2::ReturnCode
         /// @note also sets class variables for parent MCA/ MCS and for freqs
         /// @note calls eff_dimm ctor
         ///
-        eff_lrdimm (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                    const std::shared_ptr<spd::decoder>& i_pDecoder,
-                    fapi2::ReturnCode& o_rc):
-            eff_dimm (i_target, i_pDecoder, o_rc)
+        eff_lrdimm( const std::shared_ptr<spd::decoder>& i_pDecoder,
+                    fapi2::ReturnCode& o_rc ):
+            eff_dimm ( i_pDecoder, o_rc )
         {
             FAPI_DBG("Constructing LRDIMM");
         }
@@ -964,23 +963,22 @@ class eff_lrdimm_db01 : public eff_lrdimm
     protected:
     public:
         //Delete default
-        eff_lrdimm_db01 () = delete;
+        eff_lrdimm_db01() = delete;
 
         ///
         /// @brief constructor for the eff_lrdimm_db01 (LRDIMM DataBuffer 1) class
-        /// @param[in] i_target the dimm target
         /// @param[in] i_pDecoder the SPD decoder
         /// @param[out] o_rc fapi2::ReturnCode
         /// @note also sets class variables for parent MCA/ MCS and for freqs
         /// @note calls eff_dimm ctor
         ///
-        eff_lrdimm_db01 (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                         const std::shared_ptr<spd::decoder>& i_pDecoder,
-                         fapi2::ReturnCode& o_rc) :
-            eff_lrdimm(i_target, i_pDecoder, o_rc)
+        eff_lrdimm_db01( const std::shared_ptr<spd::decoder>& i_pDecoder,
+                         fapi2::ReturnCode& o_rc ) :
+            eff_lrdimm( i_pDecoder, o_rc )
         {
             FAPI_DBG("Constructing LRDIMM_DB01");
         }
+
         ///
         /// @brief default destructor
         ///
@@ -1025,16 +1023,14 @@ class eff_lrdimm_db02 : public eff_lrdimm
 
         ///
         /// @brief constructor for the eff_lrdimm_db02 (LRDIMM DataBuffer 2) class
-        /// @param[in] i_target the dimm target
         /// @param[in] i_pDecoder the SPD decoder
         /// @param[out] o_rc fapi2::ReturnCode
         /// @note also sets class variables for parent MCA/ MCS and for freqs
         /// @note calls eff_dimm ctor
         ///
-        eff_lrdimm_db02 (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                         const std::shared_ptr<spd::decoder>& i_pDecoder,
-                         fapi2::ReturnCode& o_rc) :
-            eff_lrdimm(i_target, i_pDecoder, o_rc)
+        eff_lrdimm_db02( const std::shared_ptr<spd::decoder>& i_pDecoder,
+                         fapi2::ReturnCode& o_rc ) :
+            eff_lrdimm( i_pDecoder, o_rc )
         {
             FAPI_DBG("Constructing LRDIMM_DB02");
         }
@@ -1080,16 +1076,14 @@ class eff_rdimm : public eff_dimm
 
         ///
         /// @brief constructor for the eff_rdimm_db01 (LRDIMM DataBuffer 1) class
-        /// @param[in] i_target the dimm target
         /// @param[in] i_pDecoder the SPD decoder
         /// @param[out] o_rc fapi2::ReturnCode
         /// @note also sets class variables for parent MCA/ MCS and for freqs
         /// @note calls eff_dimm ctor
         ///
-        eff_rdimm (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                   const std::shared_ptr<spd::decoder>& i_pDecoder,
-                   fapi2::ReturnCode& o_rc) :
-            eff_dimm(i_target, i_pDecoder, o_rc)
+        eff_rdimm( const std::shared_ptr<spd::decoder>& i_pDecoder,
+                   fapi2::ReturnCode& o_rc ) :
+            eff_dimm( i_pDecoder, o_rc )
         {
             FAPI_DBG("Constructing RDIMM");
         }
