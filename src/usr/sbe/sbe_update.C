@@ -299,6 +299,24 @@ namespace SBE
                     }
                 }
 
+                //Can only update the SBE once the powerbus is up (secureboot)
+                //Use the scom switch Xscom capability flag as a proxy for
+                //powerbus access.  If we can't access via powerbus, then skip
+                TARGETING::ScomSwitches scomSetting =
+                      sbeState.target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+
+                if(!(scomSetting.useXscom))
+                {
+                    //Xscom is not viable on this chip, thus powerbus isn't
+                    //up to chip -- skip it
+                    TRACFCOMP( g_trac_sbe,
+                               INFO_MRK"updateProcessorSbeSeeproms(): "
+                               "Power bus not established to chip 0x%X,"
+                               " not performing update",
+                               TARGETING::get_huid(sbeState.target));
+                    continue;
+                }
+
                 err = getSbeInfoState(sbeState);
 
                 if (err)
