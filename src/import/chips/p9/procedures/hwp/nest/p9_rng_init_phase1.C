@@ -134,6 +134,8 @@ const bool     NX_RNG_CFG_ADAPTEST_ENABLE                    = true;
 const uint8_t  NX_RNG_CFG_ST2_RESET_PERIOD                   = 0x07;
 // pace rate (2000)
 const uint16_t NX_RNG_CFG_PACE_RATE                          = 0x07d0;
+// pace rate (300) for HW403701
+const uint16_t NX_RNG_CFG_PACE_RATE_HW403701                 = 0x012c;
 
 
 //------------------------------------------------------------------------------
@@ -152,8 +154,10 @@ p9_rng_init_phase1(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     fapi2::buffer<uint64_t> l_rng_st3_data;
 
     uint8_t l_dd1 = 0;
+    uint8_t l_HW403701 = 0;
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_RNG_ADAPTEST_SETTINGS, i_target, l_dd1) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW403701, i_target, l_HW403701) );
 
     // 1. RNG will start running with FIFO write / self tests disabled (enable doesn't gate the osc; it turns off FIFO
     // writes and self test fails); rng_enable = 0.
@@ -268,7 +272,6 @@ p9_rng_init_phase1(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
              "Error from putScom (NX RNG Self Test Register 3)");
 
     // 4. If RNG is not broken then host boot sets rng_enable =1.
-
     // update RNG Status and Control Register to engage initialization test
     FAPI_TRY(fapi2::getScom(i_target, PU_NX_RNG_CFG, l_rng_cfg_data),
              "Error from getScom (NX RNG Status and Control Register)");
@@ -286,8 +289,17 @@ p9_rng_init_phase1(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     (NX_RNG_CFG_ADAPTEST_ENABLE);
     l_rng_cfg_data.insertFromRight<PU_NX_RNG_CFG_ST2_RESET_PERIOD, PU_NX_RNG_CFG_ST2_RESET_PERIOD_LEN>
     (NX_RNG_CFG_ST2_RESET_PERIOD);
-    l_rng_cfg_data.insertFromRight<PU_NX_RNG_CFG_PACE_RATE, PU_NX_RNG_CFG_PACE_RATE_LEN>
-    (NX_RNG_CFG_PACE_RATE);
+
+    if(l_HW403701 != 0)
+    {
+        l_rng_cfg_data.insertFromRight<PU_NX_RNG_CFG_PACE_RATE, PU_NX_RNG_CFG_PACE_RATE_LEN>
+        (NX_RNG_CFG_PACE_RATE_HW403701);
+    }
+    else
+    {
+        l_rng_cfg_data.insertFromRight<PU_NX_RNG_CFG_PACE_RATE, PU_NX_RNG_CFG_PACE_RATE_LEN>
+        (NX_RNG_CFG_PACE_RATE);
+    }
 
     FAPI_TRY(fapi2::putScom(i_target, PU_NX_RNG_CFG, l_rng_cfg_data),
              "Error from putScom (NX RNG Status and Control Register)");
