@@ -93,8 +93,7 @@ typedef enum RingBlockType
     GET_SINGLE_RING      = 0x00,
     GET_DD_LEVEL_RINGS   = 0x01,
     GET_PPE_LEVEL_RINGS  = 0x02,
-    GET_CPLT_LEVEL_RINGS = 0x03,
-    PUT_SINGLE_RING      = 0x04
+    PUT_SINGLE_RING      = 0x03
 } RingBlockType_t;
 
 typedef enum RingType
@@ -111,44 +110,6 @@ typedef enum PpeType
     SGPE          = 0x02,
     NUM_PPE_TYPES = 0x03
 } PpeType_t;
-
-typedef enum SbeTorId
-{
-    PERV_CPLT = 0,
-    N0_CPLT =   1,
-    N1_CPLT =   2,
-    N2_CPLT =   3,
-    N3_CPLT =   4,
-    XB_CPLT =   5,
-    MC_CPLT =   6,
-    OB0_CPLT =  7,
-    OB1_CPLT =  8,
-    OB2_CPLT =  9,
-    OB3_CPLT =  10,
-    PCI0_CPLT = 11,
-    PCI1_CPLT = 12,
-    PCI2_CPLT = 13,
-    EQ_CPLT   = 14,
-    EC_CPLT   = 15,
-    SBE_NOOF_CHIPLETS =   16
-} SbeTorId_t;
-
-typedef enum CmeTorId
-{
-    CME0_CPLT    = 0,
-    CME1_CPLT    = 1,
-    CME2_CPLT    = 2,
-    CME3_CPLT    = 3,
-    CME4_CPLT    = 4,
-    CME5_CPLT    = 5,
-    CME6_CPLT    = 6,
-    CME7_CPLT    = 7,
-    CME8_CPLT    = 8,
-    CME9_CPLT    = 9,
-    CME10_CPLT   = 10,
-    CME11_CPLT   = 11,
-    CME_NOOF_CHIPLETS = 12
-} CmeTorId_t;
 
 typedef enum TorOffsetSize
 {

@@ -212,7 +212,10 @@ enum CHIPLET_TYPE
     PCI2_TYPE,
     EQ_TYPE,
     EC_TYPE,
+    SBE_NOOF_CHIPLETS
 };
+
+#define CME_NOOF_CHIPLETS  12
 
 struct CHIPLET_DATA
 {
