@@ -774,7 +774,7 @@ fapi_try_exit:
 ///
 /// @brief       Creates factory object & SPD data caches
 /// @param[in]   i_target controller target
-/// @param[out]  o_factory_caches map of factory objects with a dimm position key
+/// @param[out]  o_factory_caches vector of factory objects
 /// @param[in]   i_pDecoder custom decoder to populate cache (ignored for this specialization)
 /// @return      FAPI2_RC_SUCCESS if okay
 /// @note        This specialization is suited for creating a cache with platform
@@ -782,7 +782,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_MCS>& i_target,
-        std::map<uint32_t, std::shared_ptr<decoder> >& o_factory_caches,
+        std::vector< std::shared_ptr<decoder> >& o_factory_caches,
         const std::shared_ptr<decoder>& i_pDecoder)
 {
     // Input decoder for this version of populating cache would get overriden
@@ -807,8 +807,8 @@ fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_MCS>&
             FAPI_TRY( factory(l_dimm, l_spd, l_pDecoder),
                       "%s. Failed SPD factory, could not instantiate decoder object", mss::c_str(i_target) );
 
-            // Populate spd caches maps based on dimm pos
-            o_factory_caches.emplace( std::make_pair( pos(l_dimm), l_pDecoder ) );
+            // Populate spd caches
+            o_factory_caches.push_back( l_pDecoder );
         }
 
         // Populate some of the DIMM attributes early. This allows the following code to make
@@ -825,7 +825,7 @@ fapi_try_exit:
 ///
 /// @brief       Creates factory object & SPD data caches
 /// @param[in]   i_target the dimm target
-/// @param[out]  o_factory_caches map of factory objects with a dimm position key
+/// @param[out]  o_factory_caches vector of factory objects
 /// @param[in]   i_pDecoder custom decoder to populate cache (nullptr default)
 /// @return      FAPI2_RC_SUCCESS if okay
 /// @note        This specialization is suited for creating a cache with custom
@@ -833,7 +833,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::map<uint32_t, std::shared_ptr<decoder> >& o_factory_caches,
+        std::vector< std::shared_ptr<decoder> >& o_factory_caches,
         const std::shared_ptr<decoder>& i_pDecoder)
 {
     if(i_pDecoder == nullptr)
@@ -845,7 +845,7 @@ fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_DIMM>
 
     // Custom decoder provided (usually done for testing)
     // Populate custom spd caches maps one dimm at a time
-    o_factory_caches.emplace( std::make_pair( pos(i_target), i_pDecoder ) );
+    o_factory_caches.push_back( i_pDecoder );
 
     // Populate some of the DIMM attributes early. This allows the following code to make
     // decisions based on DIMM information. Expressly done after the factory has decided on the SPD version
