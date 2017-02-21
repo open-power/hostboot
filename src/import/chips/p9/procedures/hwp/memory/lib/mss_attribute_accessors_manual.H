@@ -285,6 +285,37 @@ fapi_try_exit:
 }
 
 ///
+/// @brief ATTR_CHIP_EC_FEATURE_MSS_ENABLE_HW_VREF_CAL getter
+/// @tparam T the fapi2 target type of the target
+/// @param[in] const ref to the target
+/// @return bool true iff feature is enabled
+///
+template< fapi2::TargetType T >
+inline bool chip_ec_feature_skip_hw_vref_cal(const fapi2::Target<T>& i_target)
+{
+    const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
+    uint8_t l_chip_check = 0;
+    uint8_t l_skip_check = 0;
+    uint8_t is_sim = 0;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_MSS_CHECK_DISABLE_HW_VREF_CAL, l_chip, l_chip_check) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_SKIP_HW_VREF_CAL, l_chip, l_skip_check) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), is_sim) );
+
+    FAPI_DBG("Values of the attributes for HW VREF cal skip chip: %d skip: %d", l_chip_check, l_skip_check);
+
+    // Chip check is required   && we're in the HW sub-revision where the skip is required - then set a skip value
+    // Skips if we are in sim mode - VREF cal takes too long for simulation
+    return is_sim || ((l_chip_check != 0) && (l_skip_check != 0));
+
+fapi_try_exit:
+    FAPI_ERR("failed accessing ATTR_SKIP_HW_VREF_CAL or ATTR_CHIP_EC_FEATURE_MSS_CHECK_DISABLE_HW_VREF_CAL: 0x%lx (target: %s)",
+             uint64_t(fapi2::current_err), mss::c_str(i_target));
+    fapi2::Assert(false);
+    return false;
+}
+
+///
 /// @brief ATTR_CHIP_EC_FEATURE_MSS_ODT_CONFIG getter
 /// @tparam T the fapi2 target type of the target
 /// @param[in] const ref to the target
@@ -302,6 +333,37 @@ inline bool chip_ec_feature_mss_odt_config(const fapi2::Target<T>& i_target)
 
 fapi_try_exit:
     FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_ODT_CONFIG: 0x%lx (target: %s)",
+             uint64_t(fapi2::current_err), mss::c_str(i_target));
+    fapi2::Assert(false);
+    return false;
+}
+
+///
+/// @brief ATTR_SKIP_RD_VREF_VREFSENSE_OVERRIDE getter
+/// @tparam T the fapi2 target type of the target
+/// @param[in] const ref to the target
+/// @return bool true iff feature is enabled
+///
+template< fapi2::TargetType T >
+inline bool chip_ec_feature_skip_rd_vref_vrefsense_override(const fapi2::Target<T>& i_target)
+{
+    const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
+    uint8_t l_chip_check = 0;
+    uint8_t l_skip_check = 0;
+    uint8_t is_sim = 0;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_MSS_CHECK_DIABLE_RD_VREF_CAL_VREFSENSE, l_chip, l_chip_check) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_SKIP_RD_VREF_VREFSENSE_OVERRIDE, l_chip, l_skip_check) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), is_sim) );
+
+    FAPI_DBG("Values of the attributes VREFSENSE chip: %d skip: %d", l_chip_check, l_skip_check);
+
+    // Chip check is required   && we're in the HW sub-revision where the skip is required - then set a skip value
+    // Skips if we are in sim mode - VREF cal takes too long for simulation
+    return is_sim || ((l_chip_check != 0) && (l_skip_check != 0));
+
+fapi_try_exit:
+    FAPI_ERR("failed accessing ATTR_SKIP_RD_VREF_VREFSENSE_OVERRIDE or ATTR_CHIP_EC_FEATURE_MSS_CHECK_DIABLE_RD_VREF_CAL_VREFSENSE: 0x%lx (target: %s)",
              uint64_t(fapi2::current_err), mss::c_str(i_target));
     fapi2::Assert(false);
     return false;
