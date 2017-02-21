@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -150,7 +150,7 @@ function run_fsp_ci {
     while true;
     do
         ((retries--))
-        OUTPUT="$(fsp-CI-jenkins -r $FIPS_RELEASE -t $FEATURE --force)";
+        OUTPUT="$(fsp-CI-jenkins -r $FIPS_RELEASE -t $FEATURE --test_on_hardware=1 --force)";
 
         # Check if fsp-CI-jenkins failed to start
         if [ $? -eq 0 ]; then
