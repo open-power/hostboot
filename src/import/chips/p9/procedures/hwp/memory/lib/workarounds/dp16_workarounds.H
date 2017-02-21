@@ -252,6 +252,33 @@ fapi2::ReturnCode fix_blue_waterfall_gate( const fapi2::Target<fapi2::TARGET_TYP
 ///
 fapi2::ReturnCode modify_calibration_results( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
+///
+/// @brief Cleans up the VREF sense values after training
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note This function is called after training - it will only be run after coarse wr/rd
+///
+fapi2::ReturnCode rd_vref_vref_sense_cleanup( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+///
+/// @brief Sets up the VREF sense values before training
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note This function is called before training
+///
+fapi2::ReturnCode rd_vref_vref_sense_setup( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+
+///
+/// @brief Workarounds for after training
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_cal_steps_enabled the enabled cal steps
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note This function is called after training - it will only be run after coarse wr/rd
+///
+fapi2::ReturnCode post_training_workarounds( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const fapi2::buffer<uint16_t>& i_cal_steps_enabled );
+
 namespace wr_vref
 {
 
