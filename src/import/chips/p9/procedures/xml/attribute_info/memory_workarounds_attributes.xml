@@ -44,6 +44,30 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_SKIP_HW_VREF_CAL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      In sub DD1.02 Nimbus the HW VREF calibrations should not be run
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>RUN = 0, SKIP = 1</enum>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_SKIP_RD_VREF_VREFSENSE_OVERRIDE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      In sub DD1.03 Nimbus the HW VREF calibrations should not be run
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>RUN = 0, SKIP = 1</enum>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>ATTR_DO_MSS_VREF_DAC</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
