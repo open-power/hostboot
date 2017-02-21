@@ -36,7 +36,7 @@
 #include <p9_mss_eff_config.H>
 
 // std
-#include <map>
+#include <vector>
 
 // fapi2
 #include <fapi2.H>
@@ -51,6 +51,7 @@
 #include <lib/utils/find.H>
 #include <lib/dimm/eff_dimm.H>
 #include <lib/eff_config/plug_rules.H>
+
 ///
 /// @brief Configure the attributes for each controller
 /// @param[in] i_target the controller (e.g., MCS)
@@ -61,7 +62,7 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
                                      const bool i_decode_spd_only )
 {
     fapi2::ReturnCode l_rc;
-    std::map<uint32_t, std::shared_ptr<mss::spd::decoder> > l_factory_caches;
+    std::vector< std::shared_ptr<mss::spd::decoder> > l_factory_caches;
     // Caches
     FAPI_TRY( mss::spd::populate_decoder_caches(i_target, l_factory_caches) );
 
@@ -77,22 +78,11 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
                   "Unable to decode VPD for %s", mss::c_str(i_target) );
     }
 
-    for( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
+    for( const auto& l_cache : l_factory_caches )
     {
         std::shared_ptr<mss::eff_dimm> l_eff_dimm;
 
-        const auto l_dimm_pos = mss::pos(l_dimm);
-
-        // TODO RTC:152390 Create function to do map checking on cached values
-        // Find decoder factory for this dimm position
-        auto l_it = l_factory_caches.find(l_dimm_pos);
-
-        FAPI_TRY( mss::check::spd::invalid_cache(l_dimm,
-                  l_it != l_factory_caches.end(),
-                  l_dimm_pos),
-                  "Failed to get valid cache (main decoder)");
-
-        FAPI_TRY( mss::eff_dimm::eff_dimm_factory( l_dimm, l_it->second, l_eff_dimm));
+        FAPI_TRY( mss::eff_dimm::eff_dimm_factory( l_cache, l_eff_dimm));
 
         FAPI_TRY( l_eff_dimm->dram_mfg_id() );
         FAPI_TRY( l_eff_dimm->dram_width() );
