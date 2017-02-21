@@ -1184,6 +1184,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_L3_SRAM_RELAXED_SETTINGS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Nimbus DD1 only: SRAM relaced settings 
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW369979</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -1293,6 +1310,23 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       DD1 only: HW396393 rare TM fail condition.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_L2_DUMMY_PULSE_POK_BITS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      DD1 only: CAY_L2C_A102_MAC dummy pulse pok bits
     </description>
     <chipEcFeature>
       <chip>
