@@ -763,10 +763,11 @@ sub iterateOverChiplets
     }
     else
     {
+        my @phb_array = ();
+        my @non_connected_phb_array = ();
         foreach my $child (@{ $self->getTargetChildren($target) })
         {
-            # For PEC childern, we need to remove any targets that are not
-            # connected. If no PHB connections are found, do not set attributes
+            # For PEC children, we need to remove duplicate PHB targets
             if ($tgt_type eq "PEC")
             {
                 my $pec_num = $self->getAttribute($target, "CHIP_UNIT");
@@ -780,10 +781,62 @@ sub iterateOverChiplets
                     my $phb_num = $self->getAttribute($phb, "CHIP_UNIT");
                     foreach my $pcibus (@{ $self->getTargetChildren($phb) })
                     {
-                        if ($self->getNumConnections($pcibus) > 0)
+                        # We need to ensure that all PHB's get added to the
+                        # MRW, but PHB's with busses connected take priority
+                        # and we cannot have duplicate PHB targets in the MRW.
+
+                        # We processes every PHB pci bus config starting with
+                        # the config with the fewest PHB's. For PEC2 we start
+                        # with PHB3_x16. If a bus is not connected to that PHB
+                        # we add it to the phb_array anyway so the target will
+                        # be populated in the HB MRW. As we processes the later
+                        # PHB configs under PEC2 we may find that PHB3 has a
+                        # bus connected to it. Since the bus config takes
+                        # priority over the target that was already added to
+                        # the phb_array, we just overwrite that phb_array entry
+                        # with the PHB that has a bus connected.
+
+                        if (($self->getNumConnections($pcibus) > 0) &&
+                                (@phb_array[$phb_num] eq ""))
                         {
-                            $self->setCommonAttrForChiplet
-                                ($phb, $sys, $node, $proc);
+                            # This PHB does have a bus connection and the slot
+                            # is empty. We must add it to the PHB array
+                            @phb_array[$phb_num] = $phb;
+                        }
+                        elsif (($self->getNumConnections($pcibus) == 0) &&
+                                   (@phb_array[$phb_num] eq ""))
+                        {
+                            # This PHB does NOT have a bus connection. It's
+                            # slot is still empty, so we must add it to the
+                            # array so every PHB has a target in the MRW.
+                            @phb_array[$phb_num] = $phb;
+
+                            # Also add it to the non_connected_phb_array so we
+                            # can examine later it if needs to be overriden.
+                            @non_connected_phb_array[$phb_num] = $phb;
+                        }
+                        elsif (($self->getNumConnections($pcibus) > 0) &&
+                                   (@phb_array[$phb_num] ne ""))
+                        {
+                             # This PHB has a connection, but the slot has
+                             # already been filled by another PHB. We need to
+                             # check if it was a non connected PHB
+                             if(@non_connected_phb_array[$phb_num] ne "")
+                             {
+                                 # The previous connection in the PHB elecment
+                                 # is not connected to a bus. We should
+                                 # override it
+                                 @phb_array[$phb_num] = $phb;
+                             }
+                             else
+                             {
+                                 # This is our "bug" scenerio. We have found a
+                                 # connection, but that PHB element is already
+                                 # filled in the array. We need to kill the
+                                 # program.
+                                 printf("Found a duplicate connection for PEC %s PHB %s.\n",$pec_num,$phb_num);
+                                 die "Duplicate PHB bus connection found\n";
+                             }
                         }
                     }
                 }
@@ -802,6 +855,21 @@ sub iterateOverChiplets
                     $self->setCommonAttrForChiplet($child, $sys, $node, $proc);
                     $self->iterateOverChiplets($child, $sys, $node, $proc);
                 }
+            }
+        }
+        my $size = @phb_array;
+        # For every entry in the PHB array, if there is a PHB in its slot
+        # we add that PHB target to the MRW.
+
+        # We process PEC's individually, so we need to make sure the PHB slot
+        # has a PHB in it. eg: phb_array[0] will be empty for when processing
+        # PEC1 and 2 as there is no PHB0 configured for those PECs.
+        for (my $i = 0; $i < $size; $i++)
+        {
+            if (@phb_array[$i] ne "")
+            {
+                $self->setCommonAttrForChiplet
+                    (@phb_array[$i], $sys, $node, $proc);
             }
         }
     }
