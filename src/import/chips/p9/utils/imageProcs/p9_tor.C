@@ -594,6 +594,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring sectio
     {
         spge_offset = 0;
         i_ddLevelOffset = 0;
+        temp = be32toh(spge_offset);
     }
 
     GenRingIdList* ring_id_list_common = NULL;
@@ -887,6 +888,7 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
     {
         cme_offset = 0;
         i_ddLevelOffset = 0;
+        temp = be32toh(cme_offset);
     }
 
     GenRingIdList* ring_id_list_common = NULL;
