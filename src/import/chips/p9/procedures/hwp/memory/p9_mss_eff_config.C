@@ -196,17 +196,13 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_dimm->dram_rtt_wr  () );
         FAPI_TRY( l_eff_dimm->dram_rtt_park() );
 
+        // Sets up the calibration steps
+        FAPI_TRY( l_eff_dimm->cal_step_enable() );
+        FAPI_TRY( l_eff_dimm->vref_enable_bit() );
+
         //Let's do some checking
         FAPI_TRY( mss::check::temp_refresh_mode());
     }// dimm
-
-    // TODO RTC:160060 Clean up hard coded values at bottom of eff_config
-    // Don't set these attributes if we only want to set VPD attributes
-    // This will be cleaner once we resolve attributes below
-    {
-        uint16_t l_cal_step[mss::PORTS_PER_MCS] = {0xFAC0, 0xFAC0};
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_CAL_STEP_ENABLE, i_target, l_cal_step) );
-    }
 
     // Check plug rules. We check the MCS, and this will iterate down to children as needed.
     FAPI_TRY( mss::plug_rule::enforce_plug_rules(i_target) );
