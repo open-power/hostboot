@@ -34,6 +34,7 @@
 #include <prdfMemMark.H>
 #include <prdfMemoryMru.H>
 #include <prdfMemScrubUtils.H>
+#include <prdfMemUtils.H>
 #include <prdfMemVcm.H>
 #include <prdfP9McaExtraSig.H>
 #include <UtilHash.H> // for Util::hashString
@@ -192,11 +193,28 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, const MemRank & i_rank,
         {
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintHARD_CTE );
 
-            // TODO RTC 169935
-            // - Query the per-symbol counters for the hard CE symbol (there
-            //   should be only one).
-            // - Add the symbol to the callout list (via MemoryMru).
-            // - Add a TPS procedure to the queue.
+            // Query the per-symbol counters for the hard CE symbol.
+            MemUtils::MaintSymbols symData; MemSymbol junk;
+            o_rc = MemUtils::collectCeStats<T>( i_chip, i_rank, symData, junk );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats(0x%08x,m%ds%d) "
+                          "failed", i_chip->GetId(), i_rank.getMaster(),
+                          i_rank.getSlave() );
+                break;
+            }
+
+            // The command will have finished at the end of the rank so there
+            // may be more than one symbol. Add all to the callout list.
+            for ( auto & s : symData )
+            {
+                MemoryMru memmru ( trgt, i_rank, s.symbol );
+                io_sc.service_data->SetCallout( memmru );
+            }
+
+            // Add a TPS procedure to the queue.
+            TdEntry * e = new TpsEvent<T>{ i_chip, i_rank };
+            io_queue.push( e );
         }
         else // Nothing found.
         {
