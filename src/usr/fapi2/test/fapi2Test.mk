@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -45,6 +45,7 @@ OBJS += p9_hwtests.o
 OBJS += rcSupport.o
 OBJS += fapi2TestUtils.o
 OBJS += getVpdTest.o
+OBJS += p9_pm_get_poundv_bucket.o
 
 TESTS += ${ROOTPATH}/src/usr/fapi2/test/*Test.H
 TESTS += ${ROOTPATH}/src/usr/fapi2/test/*TestCxx.H

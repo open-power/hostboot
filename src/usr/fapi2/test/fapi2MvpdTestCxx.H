@@ -321,7 +321,6 @@ public:
 
   void testMvpdGetPoundVBucket(void)
   {
-      return; //@fixme-168957:enable test after fixing symbol issue
       int numTests = 0;
       int numFails = 0;
       fapi2::ReturnCode   l_rc;
