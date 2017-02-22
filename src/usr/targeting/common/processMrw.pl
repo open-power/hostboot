@@ -179,8 +179,6 @@ sub processSystem
 
     $targetObj->setAttribute($target, "XSCOM_BASE_ADDRESS", $base);
 
-    #TODO RTC: 167921 Remove this line once the attribute is in the MRW
-    $targetObj->setAttribute($target, "NEST_LEAKAGE_PERCENT", 60);
 }
 
 sub processIpmiSensors {
