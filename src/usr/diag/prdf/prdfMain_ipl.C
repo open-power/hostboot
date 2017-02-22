@@ -33,13 +33,17 @@
 
 #include <prdfMain.H>
 
-//#include <prdfCenMbaDataBundle.H> TODO RTC 159628
-#include <prdfExtensibleChip.H>
-#include <prdfErrlUtil.H>
-#include <prdfPlatServices.H>
-//#include <prdfMbaDomain.H> TODO RTC 159628
-#include <prdfP9McbistDomain.H>
+// Framework includes
 #include <iipSystem.h>
+#include <prdfErrlUtil.H>
+#include <prdfExtensibleChip.H>
+
+// Platform includes
+//#include <prdfCenMbaDataBundle.H> TODO RTC 166802
+//#include <prdfMbaDomain.H> TODO RTC 155857
+#include <prdfPlatServices.H>
+#include <prdfP9McaDataBundle.H>
+#include <prdfP9McbistDomain.H>
 
 // Custom compile configs
 #include <config.h>
@@ -66,30 +70,47 @@ extern errlHndl_t noLock_refresh();
 // External functions - declared in prdfMain.H
 //------------------------------------------------------------------------------
 
-int32_t analyzeIplCEStats( TargetHandle_t i_mba, bool &o_calloutMade )
+int32_t analyzeIplCEStats( TargetHandle_t i_trgt, bool &o_calloutMade )
 {
     #define PRDF_FUNC "PRDF::analyzeIplCEStats"
 
-    int32_t o_rc = SUCCESS;
+    PRDF_ENTER( PRDF_FUNC "(0x%08x)", getHuid(i_trgt) );
 
-    PRDF_ENTER( PRDF_FUNC "(0x%08x)", getHuid(i_mba) );
-
-/* TODO RTC 159628
-    // will unlock when going out of scope
-    PRDF_SYSTEM_SCOPELOCK;
+    PRDF_SYSTEM_SCOPELOCK; // will unlock when going out of scope
 
     o_calloutMade = false;
 
-    ExtensibleChip * mbaChip = (ExtensibleChip *)systemPtr->GetChip( i_mba );
-    CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
+    ExtensibleChip * chip = (ExtensibleChip *)systemPtr->GetChip( i_trgt );
+    TYPE             type = getTargetType( i_trgt );
 
-    o_calloutMade = mbadb->getIplCeStats()->analyzeStats();
-*/
+    if ( TYPE_MCBIST == type )
+    {
+        // Analyze the CE stats for each MCA.
+        ExtensibleChipList list = getConnected( chip, TYPE_MCA );
+        for ( auto & mcaChip : list )
+        {
+            McaDataBundle * db = getMcaDataBundle( mcaChip );
+            if ( db->getIplCeStats()->analyzeStats() ) o_calloutMade = true;
+        }
+    }
+    else if ( TYPE_MBA == type )
+    {
+        /* TODO: RTC 166802
+        // Analyze the CE stats for the MBA.
+        CenMbaDataBundle * db = getMbaDataBundle( chip );
+        o_calloutMade = db->getIplCeStats()->analyzeStats();
+        */
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "Unsupported target type %d", type );
+        PRDF_ASSERT( false ); // code bug
+    }
 
     PRDF_EXIT( PRDF_FUNC "(0x%08x), o_calloutMade:%u",
-               getHuid(i_mba), o_calloutMade );
+               getHuid(i_trgt), o_calloutMade );
 
-    return o_rc;
+    return SUCCESS;
 
     #undef PRDF_FUNC
 }
