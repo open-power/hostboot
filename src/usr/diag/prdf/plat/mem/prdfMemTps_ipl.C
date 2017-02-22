@@ -51,8 +51,8 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
     #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::nextStep] "
 
     uint32_t o_rc = SUCCESS;
-    o_done = true;
-    MemIplCeStats<TYPE_MCA> ceStats( iv_chip );
+
+    o_done = false;
 
     do
     {
@@ -77,11 +77,13 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
         else
         {
             //collect the CE statistics for later analysis use
-            o_rc = ceStats.collectStats( iv_rank );
+            McaDataBundle * db = getMcaDataBundle( iv_chip );
+            o_rc = db->getIplCeStats()->collectStats( iv_rank );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "Call to 'ceStats.collectStats' failed "
-                          "on chip: 0x%08x", iv_chip->getHuid() );
+                PRDF_ERR( PRDF_FUNC "collectStats(m%ds%d) failed on 0x%08x",
+                          iv_rank.getMaster(), iv_rank.getSlave(),
+                          iv_chip->getHuid() );
                 break;
             }
 
@@ -111,10 +113,8 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                                                       PRDFSIG_MaintIUE );
                 }
 
-                //Add the rank to the callout list
-                MemoryMru memmru(iv_chip->getTrgt(), iv_rank,
-                        MemoryMruData::CALLOUT_RANK);
-                io_sc.service_data->SetCallout( memmru );
+                //Add the rank to the callout list (via MemoryMru)
+                MemEcc::calloutMemUe<TYPE_MCA>( iv_chip, iv_rank, io_sc );
 
                 //Make the error log predictive
                 io_sc.service_data->setServiceCall();
