@@ -174,7 +174,12 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
 
                 // If there is a symbol mark on the same DRAM as the newly
                 // verified chip mark, remove the symbol mark.
-                // TODO: RTC 164705
+                o_rc = MarkStore::balance<TYPE_MCA>( iv_chip, iv_rank );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "MarkStore::balance(0x%08x, %d) failed",
+                              iv_chip->getHuid(), iv_rank.getMaster() );
+                }
 
                 // Set entire chip in DRAM Repairs VPD.
                 // TODO: RTC 169939

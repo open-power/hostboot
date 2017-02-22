@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,6 +146,46 @@ uint32_t writeSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank,
  */
 template<TARGETING::TYPE T>
 uint32_t clearSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank );
+
+/**
+ * @brief  If a rank contains a symbol mark that is on the same DRAM as the chip
+ *         mark, the symbol mark is removed. This is done to free up available
+ *         repairs.
+ * @param  i_chip MBA or MCA chip.
+ * @param  i_rank Target rank.
+ * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t balance( ExtensibleChip * i_chip, const MemRank & i_rank )
+{
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Get the chip mark.
+        MemMark chipMark;
+        o_rc = readChipMark<T>( i_chip, i_rank, chipMark );
+        if ( SUCCESS != o_rc ) break;
+        if ( !chipMark.isValid() ) break; // nothing to do.
+
+        // Get the symbol mark.
+        MemMark symMark;
+        o_rc = readSymbolMark<T>( i_chip, i_rank, symMark );
+        if ( SUCCESS != o_rc ) break;
+        if ( !symMark.isValid() ) break; // nothing to do.
+
+        // If both the chip and symbol mark are on the same DRAM, clear the
+        // symbol mark.
+        if ( chipMark.getSymbol().getDram() == symMark.getSymbol().getDram() )
+        {
+            o_rc = clearSymbolMark<T>( i_chip, i_rank );
+            if ( SUCCESS != o_rc ) break;
+        }
+
+    } while (0);
+
+    return o_rc;
+}
 
 } // end namespace MarkStore
 
