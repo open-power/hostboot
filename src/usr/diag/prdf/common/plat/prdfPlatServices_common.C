@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -735,33 +735,32 @@ int32_t getDimmSpareConfig( TargetHandle_t i_mba, CenRank i_rank,
 */
 
 //------------------------------------------------------------------------------
-
-/* TODO RTC
-errlHndl_t  getFapiDimmDqAttr( TargetHandle_t i_target,
-                               uint8_t *io_dqMapPtr )
+void getDimmDqAttr( TargetHandle_t i_target,
+                    uint8_t (&o_dqMapPtr)[DQS_PER_DIMM] )
 {
-    uint8_t (&l_wiringData)[DIMM_DQ_NUM_DQS] =
-            *(reinterpret_cast<uint8_t(*)[DIMM_DQ_NUM_DQS]>(io_dqMapPtr));
+    #define PRDF_FUNC "[PlatServices::getDimmDqAttr] "
 
-    // We have a DIMM target to get the DQ map for
-    // (need FAPI target from normal HWSV target)
-    fapi::Target  l_fapiDimm = getFapiTarget(i_target);
+    PRDF_ASSERT( TYPE_MCA == getTargetType(i_target) );
 
-    // Read the attribute
-    // (suppose to return a 1:1 mapping for Centaur DIMMs)
-    fapi::ReturnCode l_fapiRc;
-    l_fapiRc = FAPI_ATTR_GET(ATTR_CEN_DQ_TO_DIMM_CONN_DQ,
-                             &l_fapiDimm, l_wiringData );
+    TargetHandle_t mcs = getConnectedParent( i_target, TYPE_MCS );
 
-    errlHndl_t  l_fapiElog = fapi::fapiRcToErrl(l_fapiRc);
+    uint32_t mcaRelMcs = getTargetPosition( i_target ) % MAX_MCA_PER_MCS;
+    uint8_t  tmpData[MAX_MCA_PER_MCS][DQS_PER_DIMM];
 
-    return(l_fapiElog);
-} // end function getFapiDimmDqAttr
-*/
+    if ( !mcs->tryGetAttr<ATTR_MSS_VPD_DQ_MAP>(tmpData) )
+    {
+        PRDF_ERR( PRDF_FUNC "Failed to get ATTR_MSS_VPD_DQ_MAP" );
+        PRDF_ASSERT( false );
+    }
+
+    memcpy( &o_dqMapPtr[0], &tmpData[mcaRelMcs][0], DQS_PER_DIMM );
+
+    #undef PRDF_FUNC
+} // end function getDimmDqAttr
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC
+/* TODO RTC 169956
 int32_t getMemBufRawCardType( TargetHandle_t i_mba,
                               WiringType & o_cardType )
 {

@@ -27,6 +27,7 @@
 
 // Framework includes
 #include <iipCaptureData.h>
+#include <prdfErrlUtil.H>
 
 // Platform includes
 #include <prdfPlatServices.H>
@@ -96,6 +97,91 @@ void addEccData<TYPE_MBA>( ExtensibleChip * i_chip,
     // Add DRAM repairs data from VPD.
     captureDramRepairsVpd( i_chip->getTrgt(), cd );
 */
+}
+
+//------------------------------------------------------------------------------
+
+void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
+{
+    #define PRDF_FUNC "[addExtMemMruData] "
+
+    MemoryMruData::ExtendedData extMemMru ( i_memMru.toUint32() );
+
+    do
+    {
+        int32_t l_rc = SUCCESS;
+
+        TargetHandle_t trgt = i_memMru.getTrgt();
+
+        // Get the DRAM width.
+        extMemMru.isX4Dram = isDramWidthX4( trgt ) ? 1 : 0;
+
+        // Get the DIMM type.
+        bool isBufDimm = false;
+        l_rc = isMembufOnDimm( trgt, isBufDimm );
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "isMembufOnDimm() failed. Trgt:0x%08x",
+                      getHuid(trgt) );
+            break;
+        }
+        extMemMru.isBufDimm = isBufDimm ? 1 : 0;
+
+        if ( isBufDimm )
+        {
+            // TODO RTC 169956
+            //// Get the raw card type (Centaur DIMMs only).
+            //CEN_SYMBOL::WiringType cardType = CEN_SYMBOL::WIRING_INVALID;
+            //l_rc = getMemBufRawCardType( trgt, cardType );
+            //if ( SUCCESS != l_rc )
+            //{
+            //    PRDF_ERR( PRDF_FUNC "getMemBufRawCardType() failed. MBA:0x%08x",
+            //              getHuid(trgt) );
+            //    break;
+            //}
+            //extMemMru.cardType = cardType;
+        }
+        else
+        {
+            // Get the 80-byte DQ map (ISDIMMs only). This is only needed if the
+            // MemoryMru contains a single DIMM callout with a valid symbol.
+            if ( i_memMru.getSymbol().isValid() )
+            {
+                TargetHandleList partList = i_memMru.getCalloutList();
+                if ( 1 != partList.size() ||
+                     TYPE_DIMM != getTargetType(partList[0]) )
+                {
+                    PRDF_ERR( PRDF_FUNC "Symbol is valid but callout is not a "
+                              "single DIMM." );
+                    break;
+                }
+                getDimmDqAttr( trgt, extMemMru.dqMapping );
+            }
+        }
+
+        // If we reach this point, nothing failed and the data is valid.
+        extMemMru.isValid = 1;
+
+    }while(0);
+
+    size_t sz_buf = sizeof(extMemMru);
+    BitStringBuffer bsb( sz_buf*8 );
+    uint32_t curPos = 0;
+
+    bsb.setFieldJustify( curPos, 32, extMemMru.mmMeld.u  ); curPos+=32;
+    bsb.setFieldJustify( curPos,  8, extMemMru.cardType  ); curPos+= 8;
+    bsb.setFieldJustify( curPos,  1, extMemMru.isBufDimm ); curPos+= 1;
+    bsb.setFieldJustify( curPos,  1, extMemMru.isX4Dram  ); curPos+= 1;
+    bsb.setFieldJustify( curPos,  1, extMemMru.isValid   ); curPos+= 1;
+
+    BitString bs( sizeof(extMemMru.dqMapping)*8,
+                  (CPU_WORD *)extMemMru.dqMapping );
+    bsb.setString( bs, 0, bs.getBitLen(), curPos );
+
+    // Add the extended MemoryMru to the error log.
+    PRDF_ADD_FFDC( io_errl, bsb.getBufAddr(), sz_buf, ErrlVer1, ErrlMruData );
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------

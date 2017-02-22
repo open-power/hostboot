@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,6 @@
 #include "common/plat/pegasus/prdfCenSymbol.H"
 #include "common/plat/pegasus/prdfMemoryMru.H"
 #include "framework/service/prdfPlatServices.H"
-#include "plat/pegasus/prdfPlatCalloutUtil.H"
 
 using namespace HWAS;
 using namespace std;
@@ -188,11 +187,17 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
                 {
                     if ( !it->isValid() ) continue;
 
-                    CalloutUtil::calloutMemoryMru( errl,
-                                                   MemoryMru(i_mba, rank, *it),
-                                                   SRCI_PRIORITY_HIGH,
-                                                   HWAS::DELAYED_DECONFIG,
-                                                   HWAS::GARD_Predictive );
+                    // Add all parts to the error log.
+                    TargetHandleList partList = i_memmru.getCalloutList();
+                    for ( auto &part : partList )
+                    {
+                        errl->addHwCallout( part, SRCI_PRIORITY_HIGH,
+                                            HWAS::DELAYED_DECONFIG,
+                                            HWAS::GARD_Predictive );
+                    }
+
+                    // Add the MemoryMru to the capture data.
+                    MemCaptureData::addExtMemMruData( i_memmru, errl );
                 }
 
                 o_calloutMade = true;

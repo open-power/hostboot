@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -359,7 +359,7 @@ int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
  *                      the raw card type currently is not supported.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136126
+/* TODO RTC 169956
 int32_t getMemBufRawCardType( TARGETING::TargetHandle_t i_mbaTarget,
                               CEN_SYMBOL::WiringType & o_wiringType );
 */
@@ -370,10 +370,8 @@ int32_t getMemBufRawCardType( TARGETING::TargetHandle_t i_mbaTarget,
  * @param   io_dqMapPtr   Pointer to area to receive DIMM DQ map (80 bytes)
  * @return  Non-Null if error log occurs
  */
-/* TODO RTC 136126
-errlHndl_t  getFapiDimmDqAttr( TARGETING::TargetHandle_t i_target,
-                               uint8_t *io_dqMapPtr );
-*/
+void getDimmDqAttr( TARGETING::TargetHandle_t i_target,
+                    uint8_t (&io_dqMapPtr)[DQS_PER_DIMM] );
 
 //##############################################################################
 //##                    Maintenance Command class wrapper

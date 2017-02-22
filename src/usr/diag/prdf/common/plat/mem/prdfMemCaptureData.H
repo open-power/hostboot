@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,11 +37,19 @@ namespace MemCaptureData
 
 /**
  * @brief Adds memory ECC FFDC to an SDC.
- * @param i_mbaChip MCBIST, MCA, or MBA.
- * @param io_sc     Step code data struct.
+ * @param i_chip MCBIST, MCA, or MBA.
+ * @param io_sc  Step code data struct.
  */
 template<TARGETING::TYPE T>
 void addEccData( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
+
+/**
+ * @brief Adds a new user data section to the error log containing a MemoryMru
+ *        plus extended data for extra FFDC.
+ * @param i_memMru The memory mru
+ * @param io_errl  Target error log.
+ */
+void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl );
 
 } // end namespace MemCaptureData
 
