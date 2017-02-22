@@ -48,14 +48,10 @@
 // Constant definitions
 //------------------------------------------------------------------------------
 
-#ifdef __PPE__
-    extern uint64_t G_ring_save[8];
-    extern const uint64_t G_ring_index[10];
-#endif
-
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_quad_power_off_FP_t) (
-    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target);
+    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
+    uint64_t* o_ring_save_data);
 
 extern "C"
 {
@@ -66,12 +62,15 @@ extern "C"
     /**
      ** @brief Power off the EQ including the functional cores associatated with it.
      **
-     ** @param[in] i_target    Targe type EQ
+     ** @param[in]  i_target         Targe type EQ
+     ** @param[out] o_ring_save_data The ring data that tells the PB how to find the
+     **                              EQ will need to be saved away for when we p-on
      **
      ** @return FAPI2_RC_SUCCESS if success, error otherwise
      **/
     fapi2::ReturnCode p9_quad_power_off (
-        const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
+        uint64_t* o_ring_save_data);
 
 } // extern "C"
 
