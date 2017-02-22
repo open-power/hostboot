@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -30,6 +30,7 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
@@ -40,6 +41,7 @@ include $(PROCEDURES_PATH)/hwp/pm/p9_cpu_special_wakeup_eq.mk
 include $(PROCEDURES_PATH)/hwp/pm/p9_cpu_special_wakeup_ex.mk
 include $(PROCEDURES_PATH)/hwp/pm/p9_cpu_special_wakeup_core.mk
 include $(PROCEDURES_PATH)/hwp/pm/p9_cpu_special_wakeup_lib.mk
+include $(PROCEDURES_PATH)/hwp/pm/p9_block_wakeup_intr.mk
 include ${ROOTPATH}/config.mk
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/

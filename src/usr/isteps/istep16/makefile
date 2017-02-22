@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -45,7 +45,6 @@ OBJS += call_host_ipl_complete.o
 
 
 include ${ROOTPATH}/procedure.rules.mk
-include  ${PROCEDURES_PATH}/hwp/pm/p9_block_wakeup_intr.mk
 include  ${PROCEDURES_PATH}/hwp/pm/p9_dump_stop_info.mk
 include  ${PROCEDURES_PATH}/hwp/perv/p9_switch_cfsim.mk
 include  ${PROCEDURES_PATH}/hwp/perv/p9_switch_rec_attn.mk

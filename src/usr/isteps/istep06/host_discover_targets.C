@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -48,6 +48,16 @@
 #include <console/consoleif.H>
 #include <ipmi/ipmifruinv.H>
 #include <ipmi/ipmisensor.H>
+
+#include <fapi2/plat_hwp_invoker.H>
+#include <fapi2/target.H>
+
+#include <p9_query_core_access_state.H>
+#include <p9_query_cache_access_state.H>
+#include <p9_hcd_core_stopclocks.H>
+#include <p9_hcd_cache_stopclocks.H>
+#include <p9_hcd_common.H>
+#include <p9_quad_power_off.H>
 
 #ifdef CONFIG_PRINT_SYSTEM_INFO
 #include <stdio.h>
@@ -151,6 +161,170 @@ void print_system_info(void)
 }
 #endif
 
+//loop through slave quads, make sure clocks are stopped (core and cache) and power them down
+errlHndl_t powerDownSlaveQuads()
+{
+    TARGETING::Target* l_sys_target = nullptr;
+    TARGETING::targetService().getTopLevelTarget(l_sys_target);
+    errlHndl_t l_err = NULL;
+    bool l_isMasterEq = false;
+    TARGETING::TargetHandleList l_eqTargetList;
+    getAllChiplets(l_eqTargetList, TARGETING::TYPE_EQ, true);
+
+    //Need to know who master is so we can skip them
+    uint8_t l_masterCoreId = TARGETING::getMasterCore()->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+    //Loop through EQs
+    for(const auto & l_eq_target : l_eqTargetList)
+    {
+        l_isMasterEq = false;
+        fapi2::Target <fapi2::TARGET_TYPE_EQ> l_fapi_eq_target (l_eq_target);
+        TARGETING::TargetHandleList l_coreTargetList;
+        TARGETING::getChildChiplets( l_coreTargetList,
+                                     l_eq_target,
+                                     TARGETING::TYPE_CORE,
+                                     true);
+        //Check if either of the cores is master (probably could just check the first)
+        for(const auto & l_core_target : l_coreTargetList)
+        {
+            if(l_core_target->getAttr<TARGETING::ATTR_CHIP_UNIT>() == l_masterCoreId)
+            {
+                l_isMasterEq = true;
+                break;
+            }
+        }
+
+        //If this is the master quad, we have already power cycled so we dont need this
+        if(l_isMasterEq)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Found master, jumping to next EQ");
+            continue;
+        }
+
+        //Stop Clocks on all the cores
+        for(const auto & l_core_target : l_coreTargetList)
+        {
+            fapi2::Target <fapi2::TARGET_TYPE_CORE> l_fapi_core_target (l_core_target);
+            bool l_isScomable = false;
+            bool l_isScanable = false;
+            //Check if the core target has clocks running
+            FAPI_INVOKE_HWP(l_err,
+                            p9_query_core_access_state,
+                            l_fapi_core_target,
+                            l_isScomable,
+                            l_isScanable);
+            if(l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Error reading core state for core %d", l_core_target->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                //Break out of core for-loop
+                break;
+            }
+
+            //If clocks are running (IE is scommable) then stop them
+            if(l_isScomable)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Stopping core %d", l_core_target->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                FAPI_INVOKE_HWP(l_err,
+                                p9_hcd_core_stopclocks,
+                                l_fapi_core_target);
+                if(l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "Error stopping clocks on core %d", l_core_target->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                    //Break out of core for-loop
+                    break;
+                }
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Core %d is not scommable according to query", l_core_target->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+            }
+        }
+
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "An error occurred while attempting to stop clocks on the core, skipping attempt to stop cache and returning error");
+            //Break out of EQ for-loop
+            break;
+        }
+
+
+        do
+        {
+            bool l_l2IsScomable = false;
+            bool l_l2IsScanable = false;
+            bool l_l3IsScomable = false;
+            bool l_l3IsScanable = false;
+
+            //Same thing with cache, need to check if any clocks are running
+            FAPI_INVOKE_HWP(l_err,
+                            p9_query_cache_access_state,
+                            l_fapi_eq_target,
+                            l_l2IsScomable,
+                            l_l2IsScanable,
+                            l_l3IsScomable,
+                            l_l3IsScanable);
+
+            if(l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                            "Error checking cache access state for EQ %d", l_eq_target->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                //Break from do-while
+                break;
+            }
+
+            //If the l3 is scommable then the clocks are running and we need to stop them
+            if(l_l3IsScomable)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Stopping even ex for eq %d", l_eq_target->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                //Stop clocks on both EXs
+                FAPI_INVOKE_HWP(l_err,
+                                p9_hcd_cache_stopclocks,
+                                l_fapi_eq_target,
+                                p9hcd::CLK_REGION_ALL_BUT_EX_DPLL,
+                                p9hcd::BOTH_EX);
+                if(l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                            "Error stopping clocks on EVEN EX of EQ %d", l_eq_target->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                    //Break from do-while
+                    break;
+                }
+            }
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "Powering down EQ %d", l_eq_target->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+            //Power down slave quad
+            FAPI_INVOKE_HWP(l_err,
+                            p9_quad_power_off,
+                            l_fapi_eq_target);
+            if(l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Error powering off EQ %d", l_eq_target->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                //Break from do-while
+                break;
+            }
+        }while(0);
+
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Error detected while attempting to power off EQ 0x%x" , l_eq_target->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+            //Break out of EQ for loop
+            break;
+        }
+    }//end EQ for-loop
+
+    return l_err;
+}
+
 void* host_discover_targets( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -170,6 +344,9 @@ void* host_discover_targets( void *io_pArgs )
                   "host_discover_targets: MPIPL mode, targeting"
                   "information has already been loaded from memory"
                   "when the targeting service started");
+
+        //Need to power down the slave quads
+        l_err = powerDownSlaveQuads();
 
     }
     else
