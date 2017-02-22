@@ -47,10 +47,12 @@
 // Includes
 // ----------------------------------------------------------------------
 #include <p9_quad_power_off.H>
+#include <p9_block_wakeup_intr.H>
 
 // ----------------------------------------------------------------------
 // Function definitions
 // ----------------------------------------------------------------------
+
 
 #ifdef __PPE__
 uint64_t G_ring_save[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -196,6 +198,12 @@ fapi2::ReturnCode p9_quad_power_off(
     FAPI_EXEC_HWP(rc, p9_pm_pfet_control_eq, i_target,
                   PM_PFET_TYPE_C::BOTH, PM_PFET_TYPE_C::OFF);
     FAPI_TRY(rc);
+
+    //Enable regular wakeup for each core after the quad has been powered off
+    for (const auto& l_core : i_target.getChildren<fapi2::TARGET_TYPE_CORE>())
+    {
+        FAPI_EXEC_HWP(rc, p9_block_wakeup_intr, l_core, p9pmblockwkup::CLEAR);
+    }
 
 fapi_try_exit:
     FAPI_INF("p9_quad_power_off: ...Exiting");
