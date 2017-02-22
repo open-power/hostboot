@@ -63,8 +63,8 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = startVcmPhase1<TYPE_MCA>( iv_chip, iv_rank );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "Call to 'startVcmPhase1 failed on chip: "
-                          "0x%08x", iv_chip->getHuid() );
+                PRDF_ERR( PRDF_FUNC "startVcmPhase1(0x%08x, %d) failed",
+                          iv_chip->getHuid(), iv_rank.getMaster() );
                 break;
             }
             iv_phase = TD_PHASE_1;
@@ -77,8 +77,8 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = checkEccFirs<TYPE_MCA>( iv_chip, eccAttns );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "Call to 'checkEccFirs' failed on chip: "
-                          "0x%08x", iv_chip->getHuid() );
+                PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x) failed",
+                          iv_chip->getHuid() );
                 break;
             }
 
@@ -172,9 +172,12 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                 io_sc.service_data->setSignature( iv_chip->getHuid(),
                                                   PRDFSIG_VcmVerified );
 
-                //Update the DRAM repairs VPD to indicate the entire DRAM is bad
-                //TODO ?????? - updating VPD not yet supported
+                // If there is a symbol mark on the same DRAM as the newly
+                // verified chip mark, remove the symbol mark.
+                // TODO: RTC 164705
 
+                // Set entire chip in DRAM Repairs VPD.
+                // TODO: RTC 169939
             }
             //else - verification failed
             else

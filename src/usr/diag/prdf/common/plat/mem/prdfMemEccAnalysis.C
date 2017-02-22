@@ -82,6 +82,15 @@ void calloutMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemRank & i_rank,
 {
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
+    // TODO: RTC 169933 During Memory Diagnostics we'll want to call the
+    //       mssIplUeIsolation() HWP so that we can isolate to a single DIMM if
+    //       possible. This may be a difficult task to do at this point in the
+    //       code because it will run a maintenance command on the Centaur,
+    //       which may require some cleanup of the previous command. Since there
+    //       are no plans to support IS DIMMs attached to a Centaur in P9, we
+    //       may be able to get rid of this requirement because the FRU will be
+    //       the same regardless if one or two logical DIMMs are called out.
+
     MemoryMru memmru ( i_chip->getTrgt(), i_rank, MemoryMruData::CALLOUT_RANK );
     io_sc.service_data->SetCallout( memmru );
 }

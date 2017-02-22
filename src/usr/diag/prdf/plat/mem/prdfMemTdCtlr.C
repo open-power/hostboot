@@ -62,8 +62,6 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
             break;
         }
 
-        collectStateCaptureData( io_sc, TD_CTLR_DATA::START );
-
         #else // IPL only
 
         PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
@@ -77,6 +75,8 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         #endif
+
+        collectStateCaptureData( io_sc, TD_CTLR_DATA::START );
 
         if ( nullptr == iv_curProcedure )
         {

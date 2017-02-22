@@ -38,6 +38,10 @@
   #include <prdfP9McbistDataBundle.H>
 #endif
 
+#if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+  #include <prdfMemIplCeStats.H>
+#endif
+
 namespace PRDF
 {
 
@@ -72,6 +76,21 @@ class McaDataBundle : public DataBundle
 
     #endif
 
+    #if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+
+    /** @return The IPL CE statistics object. */
+    MemIplCeStats<TARGETING::TYPE_MCA> * getIplCeStats()
+    {
+        if ( nullptr == iv_iplCeStats )
+        {
+            iv_iplCeStats = new MemIplCeStats<TARGETING::TYPE_MCA>( iv_chip );
+        }
+
+        return iv_iplCeStats;
+    }
+
+    #endif
+
   private: // functions
 
     // Don't allow copy or assignment.
@@ -81,6 +100,13 @@ class McaDataBundle : public DataBundle
   private: // instance variables
 
     ExtensibleChip * iv_chip; // This MCA.
+
+    #if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+
+    /** MNFG IPL CE statistics. */
+    MemIplCeStats<TARGETING::TYPE_MCA> * iv_iplCeStats = nullptr;
+
+    #endif
 
   public: // instance variables
 

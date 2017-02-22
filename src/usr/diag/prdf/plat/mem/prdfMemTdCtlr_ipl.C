@@ -188,11 +188,11 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, const MemRank & i_rank,
             io_queue.push( e );
         }
         else if ( isMfgCeCheckingEnabled() &&
-                (0 != (eccAttns & MAINT_HARD_NCE_ETE)) )
+                  (0 != (eccAttns & MAINT_HARD_NCE_ETE)) )
         {
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintHARD_CTE );
 
-            // TODO RTC 136128
+            // TODO RTC 169935
             // - Query the per-symbol counters for the hard CE symbol (there
             //   should be only one).
             // - Add the symbol to the callout list (via MemoryMru).

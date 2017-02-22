@@ -33,11 +33,11 @@
 
 #include <prdfMain.H>
 
-//#include <prdfCenMbaDataBundle.H> TODO RTC 136128
+//#include <prdfCenMbaDataBundle.H> TODO RTC 159628
 #include <prdfExtensibleChip.H>
 #include <prdfErrlUtil.H>
 #include <prdfPlatServices.H>
-//#include <prdfMbaDomain.H> TODO RTC 136128
+//#include <prdfMbaDomain.H> TODO RTC 159628
 #include <prdfP9McbistDomain.H>
 #include <iipSystem.h>
 
@@ -74,7 +74,7 @@ int32_t analyzeIplCEStats( TargetHandle_t i_mba, bool &o_calloutMade )
 
     PRDF_ENTER( PRDF_FUNC "(0x%08x)", getHuid(i_mba) );
 
-/* TODO RTC 136128
+/* TODO RTC 159628
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;
 
