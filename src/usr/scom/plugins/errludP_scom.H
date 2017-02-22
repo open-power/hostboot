@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,17 +73,30 @@ namespace SCOM
                                ErrlUsrParser & i_parser,
                                void * i_pBuffer,
                                const uint32_t i_buflen) const
-                               {
-                                   char* l_databuf = static_cast<char*>(i_pBuffer);
-                                   i_parser.PrintHeading("SCOM PIB ERR");
+            {
+                char* l_databuf = static_cast<char*>(i_pBuffer);
+                i_parser.PrintHeading("SCOM PIB ERR");
 
-                                   //***** Memory Layout *****
-                                   // 1 bytes  : Pib Error
+                //***** Memory Layout *****
+                // 1 bytes  : Pib Error
 
-                                   i_parser.PrintNumber("Pib Err","%.2lX",
-                                                        TO_UINT8(l_databuf));
-
-                               }
+                const char* l_decodeStr = "Unknown";
+                uint8_t l_piberr = TO_UINT8(l_databuf);
+                switch(l_piberr)
+                {
+                    case(0): l_decodeStr = "None"; break;
+                    case(1): l_decodeStr = "Resource Occupied"; break;
+                    case(2): l_decodeStr = "Chiplet Offline"; break;
+                    case(3): l_decodeStr = "Partial Good"; break;
+                    case(4): l_decodeStr = "Invalid Address"; break;
+                    case(5): l_decodeStr = "Clock Error"; break;
+                    case(6): l_decodeStr = "Parity Error"; break;
+                    case(7): l_decodeStr = "Timeout"; break;
+                }
+                char l_outputStr[30];
+                sprintf( l_outputStr, "%d (%s)", l_piberr, l_decodeStr );
+                i_parser.PrintString("Pib Err", l_outputStr );
+            }
 
             // Disabled
             UdParserPib(const UdParserPib&) = delete;
