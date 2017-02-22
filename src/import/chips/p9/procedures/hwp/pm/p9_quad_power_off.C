@@ -49,13 +49,10 @@
 #include <p9_quad_power_off.H>
 #include <p9_block_wakeup_intr.H>
 
+
 // ----------------------------------------------------------------------
 // Function definitions
 // ----------------------------------------------------------------------
-
-
-#ifdef __PPE__
-uint64_t G_ring_save[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 //    {0,    0},
 //    {5039, 0xE000000000000000}, //3
@@ -67,40 +64,38 @@ uint64_t G_ring_save[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 //    {6282, 0xE000000000000000}, //3
 //    {6343, 0xC1E061FFED5F0000}, //29
 //    {17871, 0}                  //128
-const uint64_t G_ring_index[10] =
+
+static const uint64_t RING_INDEX[10] =
 {
     0, 5039, 5100, 5664, 5725, 5973, 6034, 6282, 6343, 17871,
 };
-#endif
-
 
 // Procedure p9_quad_power_off entry point, comments in header
 fapi2::ReturnCode p9_quad_power_off(
-    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
+    uint64_t* o_ring_save_data)
 {
     fapi2::buffer<uint64_t> l_data64;
     constexpr uint64_t l_rawData = 0x1100000000000000ULL; // Bit 3 & 7 are set to be manipulated
     constexpr uint32_t MAX_CORE_PER_QUAD = 4;
     fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
     uint32_t l_cnt = 0;
-#ifdef __PPE__
-    uint8_t  l_isMpipl = 0;
-    uint8_t  l_isRingSaveMpipl = 0;
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_chip =
         i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, l_isMpipl), "fapiGetAttribute of ATTR_IS_MPIPL failed!");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_RING_SAVE_MPIPL, l_chip, l_isRingSaveMpipl),
-             "fapiGetAttribute of ATTR_CHIP_EC_FEATURE_RING_SAVE_MPIPL failed");
-#endif
+    uint8_t  l_isMpipl = 0;
+    uint8_t  l_isRingSaveMpipl = 0;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     FAPI_INF("p9_quad_power_off: Entering...");
 
     // Print chiplet position
     FAPI_INF("Quad power off chiplet no.%d", i_target.getChipletNumber());
 
-#ifdef __PPE__
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, l_isMpipl), "fapiGetAttribute of ATTR_IS_MPIPL failed!");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_RING_SAVE_MPIPL, l_chip, l_isRingSaveMpipl),
+             "fapiGetAttribute of ATTR_CHIP_EC_FEATURE_RING_SAVE_MPIPL failed");
+
 
     if (l_isMpipl && l_isRingSaveMpipl)
     {
@@ -123,7 +118,7 @@ fapi2::ReturnCode p9_quad_power_off(
         {
             uint64_t l_scandata = ((l_spin == 0) || (l_spin == 9)) ? 0x0 : (l_spin & 0x1) ?
                                   0xE000000000000000 : 0xC1E061FFED5F0000;
-            l_data64.flush<0>().set((G_ring_index[l_spin] - G_ring_index[l_spin - 1]) << 32);
+            l_data64.flush<0>().set((RING_INDEX[l_spin] - RING_INDEX[l_spin - 1]) << 32);
 
             FAPI_TRY(fapi2::putScom(i_target,
                                     EQ_SCAN_LONG_ROTATE,
@@ -160,7 +155,7 @@ fapi2::ReturnCode p9_quad_power_off(
                 FAPI_TRY(fapi2::getScom(i_target,
                                         EQ_SCAN64,
                                         l_data64));
-                G_ring_save[l_spin - 1] = l_scandata & l_data64;
+                o_ring_save_data[l_spin - 1] = l_scandata & l_data64;
             }
         }
 
@@ -170,7 +165,6 @@ fapi2::ReturnCode p9_quad_power_off(
                                 l_data64));
     }
 
-#endif
 
     FAPI_DBG("Disabling bits 20/22/24/26 in EQ_QPPM_QPMMR_CLEAR, to gain access"
              " to PFET controller, otherwise Quad Power off scom will fail");
