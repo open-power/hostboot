@@ -92,11 +92,11 @@ p9_query_cache_access_state(
 
     if (l_execution_platform == 0x02)
     {
-        l_stop_state_reg =  C_PPM_SSHFSP;
+        l_stop_state_reg =  EQ_PPM_SSHFSP;
     }
     else
     {
-        l_stop_state_reg = C_PPM_SSHHYP;
+        l_stop_state_reg = EQ_PPM_SSHHYP;
     }
 
     FAPI_TRY(fapi2::getScom(i_target, l_stop_state_reg, l_qsshsrc), "Error reading data from QPPM SSHSRC");
