@@ -52,6 +52,7 @@
 //#include <prdfProcLogParse.H> TODO: RTC 136050
 #include <prdfParserEnums.H>
 #include <prdfMemoryMruData.H>
+#include <prdfBitString.H>
 
 #include <hwas/common/hwasCallout.H>
 
@@ -764,20 +765,22 @@ bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
     }
     else
     {
-        uint8_t * buf = (uint8_t *)i_buffer;
+
+        BitString bs( (i_buflen*8), (CPU_WORD*)i_buffer );
+        uint32_t curPos = 0;
 
         MemoryMruData::ExtendedData extMemMru;
 
-        extMemMru.mmMeld.u = buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3];
+        extMemMru.mmMeld.u  = bs.getFieldJustify( curPos, 32 ); curPos+=32;
+        extMemMru.cardType  = bs.getFieldJustify( curPos,  8 ); curPos+= 8;
+        extMemMru.isBufDimm = bs.getFieldJustify( curPos,  1 ); curPos+= 1;
+        extMemMru.isX4Dram  = bs.getFieldJustify( curPos,  1 ); curPos+= 1;
+        extMemMru.isValid   = bs.getFieldJustify( curPos,  1 ); curPos+= 1;
 
-        extMemMru.cardType  =  buf[4];
-
-        extMemMru.isBufDimm = (buf[5] >> 7) & 0x1;
-        extMemMru.isX4Dram  = (buf[5] >> 6) & 0x1;
-        extMemMru.isValid   = (buf[5] >> 5) & 0x1;
-
-        memcpy( &extMemMru.dqMapping[0], &buf[8],
-                sizeof(extMemMru.dqMapping) );
+        for ( uint32_t i = 0; i < sizeof(extMemMru.dqMapping); i++ )
+        {
+            extMemMru.dqMapping[i] = bs.getFieldJustify( curPos+(i*8), 8 );
+        }
 
         char heading[72];
         snprintf( heading, 72, "Extended MemoryMru (0x%08x)",

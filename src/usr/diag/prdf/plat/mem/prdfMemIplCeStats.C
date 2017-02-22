@@ -36,14 +36,14 @@
 #include <prdfPfa5Data.h>
 #include <prdf_service_codes.H>
 
-// Pegasus includes
+// Mem includes
 #include <prdfP9McaExtraSig.H>
 #include <prdfMemIplCeStats.H>
 #include <prdfParserUtils.H>
 #include <prdfMemThresholds.H>
 #include <prdfMemUtils.H>
 #include <prdfMemoryMru.H>
-//#include <prdfPlatCalloutUtil.H>
+#include <prdfMemCaptureData.H>
 
 using namespace TARGETING;
 
@@ -460,12 +460,16 @@ template<TYPE T>
 void MemIplCeStats<T>::addMruAndCommitErrl( const MemoryMru & i_memmru,
                                    errlHndl_t i_errl )
 {
-    // Add MemoryMru callouts and FFDC
-    //TODO RTC 168770
-    //CalloutUtil::calloutMemoryMru( i_errl, i_memmru,
-    //                               SRCI_PRIORITY_HIGH,
-    //                               HWAS::DELAYED_DECONFIG,
-    //                               HWAS::GARD_Predictive );
+    // Add all parts to the error log.
+    TargetHandleList partList = i_memmru.getCalloutList();
+    for ( auto &it : partList )
+    {
+        i_errl->addHwCallout( it, SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG,
+                              HWAS::GARD_Predictive );
+    }
+
+    // Add the MemoryMru to the capture data.
+    MemCaptureData::addExtMemMruData( i_memmru, i_errl );
 
     // Add traces
     i_errl->collectTrace( PRDF_COMP_NAME, 512 );
