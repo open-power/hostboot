@@ -421,6 +421,7 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
 
     // retry counter.
     uint32_t l_retryCtr = 0;
+    uint32_t l_retryTraceCtr = 128;
 
     errlHndl_t l_err = NULL;
 
@@ -449,8 +450,8 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
 
         l_retryCtr++;
 
-        // If the retry counter is a multiple of 128
-        if (l_retryCtr % 128 == 0)
+        // If the retry counter is a multiple of 128,256,512,etc.
+        if (l_retryCtr % l_retryTraceCtr*2 == 0)
         {
             // print a trace message.. for debug purposes
             // incase we are stuck in a retry loop.
@@ -633,7 +634,7 @@ void collectXscomFFDC(TARGETING::Target* i_target,
     size_t io_buflen = XSCOM_BUFFER_SIZE;
     uint64_t* l_virtAddr = 0;
 
-    // xscom registers that need to be set.
+    // xscom registers that need to be read.
     XscomAddrType_t XscomAddr[4] = {
         {0x00090018, CurThreadCpu}, //XSCOM_RCVED_STAT_REG
         {0x00090012, TargetCpu}, //XSCOM_LOG_REG
