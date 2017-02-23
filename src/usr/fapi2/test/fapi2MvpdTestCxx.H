@@ -42,8 +42,7 @@
 #include <fapi2.H>
 #include <devicefw/userif.H>
 #include <p9_pm_get_poundv_bucket.H>
-// TODO RTC:162011 after new .H file is mirrored
-//#include <p9_pm_get_poundw_bucket.H>
+#include <p9_pm_get_poundw_bucket.H>
 #include <utilFilter.H>
 #include <vpd/mvpdenums.H>
 
@@ -420,13 +419,11 @@ public:
       TARGETING::getChipletResources(l_chipletList,
                                     TARGETING::TYPE_EQ,
                                     TARGETING::UTIL_FILTER_PRESENT);
-// TODO RTC:162011 after new .H file is mirrored
-//      fapi2::vdmData_t vdmData;
+      fapi2::vdmData_t vdmData;
 
       for(const auto & eqChiplet : l_chipletList )
       {
           fapi2::Target<TARGET_TYPE_EQ>  l_fapi_eq_target(eqChiplet);
-#if 0 // TODO RTC:162011 after new files are mirrored
           numTests++;
           l_rc = p9_pm_get_poundw_bucket(l_fapi_eq_target, vdmData);
           if(l_rc)
@@ -497,7 +494,6 @@ public:
           }
 
           FAPI_INF("Bucket for HUID: 0x%X is = %d", l_huid, vdmData.bucketId);
-#endif
       }
 
       FAPI_INF("MvpdGetPoundWBucket:: Test Complete. %d/%d fails",

@@ -53,8 +53,7 @@
 #include <plat_attr_override_sync.H>
 #include <vpd/spdenums.H>
 #include <p9_pm_get_poundv_bucket_attr.H>
-// TODO RTC:162011 after new .H file is mirrored
-//#include <p9_pm_get_poundw_bucket_attr.H>
+#include <p9_pm_get_poundw_bucket_attr.H>
 #include <errl/errlmanager.H>
 
 #include <targeting/common/targetservice.H>
@@ -495,8 +494,7 @@ ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     else
     {
         fapi2::Target<TARGET_TYPE_EQ> l_fapiTarget( l_pTarget);
-// TODO RTC:162011 after new .C file is mirrored
-//        rc = p9_pm_get_poundw_bucket_attr(l_fapiTarget,o_poundWData);
+        rc = p9_pm_get_poundw_bucket_attr(l_fapiTarget,o_poundWData);
     }
 
     return rc;
