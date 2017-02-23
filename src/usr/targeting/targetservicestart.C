@@ -313,6 +313,10 @@ static void initializeAttributes(TargetService& i_targetService,
             {
                 l_pTopLevel->setAttr<ATTR_ISTEP_MODE>(1);
             }
+            else
+            {
+                l_pTopLevel->setAttr<ATTR_ISTEP_MODE>(0);
+            }
 
             //Set the RISK_LEVEL ATTR based off of master Scratch regs
             INITSERVICE::SPLESS::MboxScratch5_t l_scratch5;
