@@ -48,7 +48,8 @@
 #include "p9_update_security_ctrl.H"
 
 
-fapi2::ReturnCode p9_update_security_ctrl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
+fapi2::ReturnCode p9_update_security_ctrl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+        bool i_force_security)
 {
     FAPI_INF("p9_update_security_ctrl : Entering ...");
 
@@ -66,7 +67,7 @@ fapi2::ReturnCode p9_update_security_ctrl(const fapi2::Target<fapi2::TARGET_TYPE
 
     l_in_secure_mode = l_data64.getBit<PU_SECURITY_SWITCH_REGISTER_SECURE_ACCESS>();
 
-    if (l_in_secure_mode == 1) //Chip in Secure mode
+    if ((l_in_secure_mode == 1) || (i_force_security)) //Chip in Secure mode  or override with i_force_security parameter
     {
         //Set bit 4 to set SUL
         l_data64.setBit<PU_SECURITY_SWITCH_REGISTER_SEEPROM_UPDATE_LOCK>();
