@@ -2826,11 +2826,7 @@ extern "C"
                                    attrValT0 ),
                      "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T0");
 
-            if( 0 == attrValT0 )
-            {
-                attrValT0 = 0x01;
-            }
-
+            attrValT0 = attrValT0 / 8 + 1;
             epsilonValBuf.insert<0, 12, 20, uint32_t>( attrValT0 );
 
             //----------------------------- Tier1(T1)--------------------------------------
@@ -2840,11 +2836,7 @@ extern "C"
                                    attrValT1 ),
                      "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T1");
 
-            if( 0 == attrValT1 )
-            {
-                attrValT1 = 0x01;
-            }
-
+            attrValT1 = attrValT1 / 8 + 1;
             epsilonValBuf.insert<12, 12, 20, uint32_t>( attrValT1 );
 
             //----------------------------- Tier2(T2)--------------------------------------
@@ -2854,11 +2846,7 @@ extern "C"
                                    attrValT2 ),
                      "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T2");
 
-            if( 0 == attrValT2 )
-            {
-                attrValT2 = 0x01;
-            }
-
+            attrValT2 = attrValT2 / 8 + 1;
             epsilonValBuf.insert<24, 12, 20, uint32_t>( attrValT2 );
 
             epsilonValBuf.extract<0, 64>(l_epsilonScomVal);
@@ -2908,11 +2896,7 @@ extern "C"
                                    attrValT1 ),
                      "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_WRITE_CYCLES_T1");
 
-            if( 0 == attrValT1 )
-            {
-                attrValT1 = 0x01;
-            }
-
+            attrValT1 = attrValT1 / 8 + 1;
             epsilonValBuf.insert< 0, 12, 20, uint32_t >(attrValT1);
 
             //----------------------------- Tier2(T2)--------------------------------------
@@ -2922,17 +2906,15 @@ extern "C"
                                    attrValT2 ),
                      "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_WRITE_CYCLES_T2");
 
-            if( 0 == attrValT2 )
-            {
-                //setting 23 and bit 27 to assert corresponding bits in EX_L2_WR_EPS_REG
-                uint64_t attrValWr = 0x0000011000000000ll;
-                epsilonValBuf.insert< 12, 16, 12, uint64_t>(attrValWr);
-            }
-            else
-            {
-                epsilonValBuf.insert< 12, 12, 20, uint32_t >(attrValT2);
-            }
+            attrValT2 = attrValT2 / 8 + 1;
+            epsilonValBuf.insert< 12, 12, 20, uint32_t >(attrValT2);
 
+            // p9.l2.scom.inifile:
+            // EPS_DIVIDER_MODE          = 0001
+            // EPS_MODE_SEL              = 0
+            // EPS_CNT_USE_L2_DIVIDER_EN = 0
+            // L2_EPS_STEP_MODE          = 0000
+            epsilonValBuf.setBit<27>();
             epsilonValBuf.extract<0, 64>(l_epsilonScomVal);
 
             //----------------------- Updating SCOM Registers using STOP API --------------------
@@ -3019,11 +3001,7 @@ extern "C"
                                    attrValT0 ),
                      "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T0");
 
-            if( 0 == attrValT0 )
-            {
-                attrValT0 = 0x01;
-            }
-
+            attrValT0 = attrValT0 / 8 + 1;
             epsilonValBuf.insert<0, 12, 20, uint32_t>( attrValT0 );
 
             //----------------------------- Tier1(T1)--------------------------------------
@@ -3033,11 +3011,7 @@ extern "C"
                                    attrValT1 ),
                      "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T1");
 
-            if( 0 == attrValT1 )
-            {
-                attrValT1 = 0x01;
-            }
-
+            attrValT1 = attrValT1 / 8 + 1;
             epsilonValBuf.insert<12, 12, 20, uint32_t>( attrValT1 );
 
             //----------------------------- Tier2(T2)--------------------------------------
@@ -3047,11 +3021,7 @@ extern "C"
                                    attrValT2 ),
                      "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T2");
 
-            if( 0 == attrValT2 )
-            {
-                attrValT2 = 0x01;
-            }
-
+            attrValT2 = attrValT2 / 8 + 1;
             epsilonValBuf.insert<24, 12, 20, uint32_t>( attrValT2 );
 
             epsilonValBuf.extract<0, 64>(l_epsilonScomVal);
@@ -3108,11 +3078,7 @@ extern "C"
                                    attrValT1 ),
                      "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_WRITE_CYCLES_T1");
 
-            if( 0 == attrValT1 )
-            {
-                attrValT1 = 0x01;
-            }
-
+            attrValT1 = attrValT1 / 8 + 1;
             epsilonValBuf.insert< 0, 12, 20, uint32_t >(attrValT1);
 
             //----------------------------- Tier2(T2)--------------------------------------
@@ -3122,18 +3088,14 @@ extern "C"
                                    attrValT2 ),
                      "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_WRITE_CYCLES_T2");
 
-            if( 0 == attrValT2 )
-            {
-                uint64_t attrValEpsWr = 0;
-                //setting 23 and bit 33 to assert corresponding bit in EX_L3_L3_WR_EPSILON_CFG_REG
-                attrValEpsWr = 0x0000010040000000ll;
-                epsilonValBuf.insert< 12, 32, 12, uint64_t >(attrValEpsWr);
-            }
-            else
-            {
-                epsilonValBuf.insert< 12, 12, 20, uint32_t >(attrValT2);
-            }
+            attrValT2 = attrValT2 / 8 + 1;
+            epsilonValBuf.insert< 12, 12, 20, uint32_t >(attrValT2);
 
+            // p9.l3.scom.initfile:
+            // L3_EPS_STEP_MODE          = 0000
+            // L3_EPS_DIVIDER_MODE       = 0001
+            // EPS_CNT_USE_L3_DIVIDER_EN = 0
+            epsilonValBuf.setBit<33>();
             epsilonValBuf.extract<0, 64>(l_epsilonScomVal);
 
             //----------------------- Updating SCOM Registers using STOP API --------------------
