@@ -28,17 +28,25 @@
 #include "hdatutil.H"
 #include <sys/mm.h>
 #include <sys/mmio.h>
+#include <sys/internode.h>
 #include <vpd/mvpdenums.H>
 #include <pnor/pnorif.H>
 #include <util/align.H>
+#include <algorithm>
 
 #include <devicefw/userif.H>
 #include <targeting/common/util.H>
+#include <targeting/common/target.H>
+#include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
+#include <targeting/common/entitypath.H>
 
 namespace HDAT
 {
 
 extern trace_desc_t *g_trac_hdat;
+
+const uint8_t g_hdatTpmDataEyeCatch[] = {'T', 'P', 'M', 'R', 'E', 'L'};
 
 HdatTpmData::HdatTpmData(errlHndl_t &o_errlHndl,
                          const HDAT::hdatMsAddr_t &i_msAddr):
@@ -135,11 +143,87 @@ HdatTpmData::~HdatTpmData()
     }
 }
 
-errlHndl_t HdatTpmData::hdatLoadTpmData(uint32_t &o_size,uint32_t &o_count)
+errlHndl_t HdatTpmData::hdatLoadTpmData(uint32_t &o_size, uint32_t &o_count)
 {
     errlHndl_t l_errl = nullptr;
 
+    o_size = 0;
+    o_count = 0;
+
+    // TODO RTC 167290 - In order to support multiple nodes, this calculation
+    // needs to be #nodes * [ the entire 18.x set of structures ] and the
+    // initialization needs to be done on each instance. The reported size
+    // (in variable o_size) needs to be the size of a single instance and the
+    // reported count (via o_count) needs to be the number of nodes. For now,
+    // we assume one node.
+
+    // account for the size of the TPM data header
+    o_size += sizeof(hdatTpmData_t);
+
+    // account for the size of the TPM Info array header
+    o_size += sizeof(hdatSbTpmInfo_t);
+
+    // account for each element of the TPM Info array
+    o_size += ((sizeof(hdatSbTpmInstInfo_t) +
+                TPM_SRTM_EVENT_LOG_MAX +
+                TPM_DRTM_EVENT_LOG_MAX)
+                * hdatCalcMaxTpmsPerNode());
+
+    // account for User physical interaction mechanism info struct
+    // and Host I2C device information pointers
+    o_size += (sizeof(hdatPhysInterMechInfo_t) + sizeof(hdatI2cDevInfoPtrs_t) *
+        NUM_I2C_PHYS_PRESENCE_DEVICES);
+
+    // Align size value to match actual allocated size, because we also want to
+    // zero the padded part, and thus simplify multinode support going forward.
+    o_size = ALIGN_X(o_size, HDAT_HDIF_ALIGN);
+
+    // zero all of it
+    memset(iv_hdatTpmData,0,o_size);
+
+    // We add the first two fields for a reference to aid in debugging,
+    // but the rest will be populated in FSP/OpenPower common code. Any
+    // work here would just be duplicated later during the runtime istep.
+
+    // add the format magic number
+    iv_hdatTpmData->hdatHdr.hdatStructId = HDAT::HDAT_HDIF_STRUCT_ID;
+
+    // add the eyecatcher
+    memcpy(iv_hdatTpmData->hdatHdr.hdatStructName,
+           g_hdatTpmDataEyeCatch,
+           sizeof(g_hdatTpmDataEyeCatch));
+
+    // account for this one instance of Node TPM Related Data
+    ++o_count;
+
     return l_errl;
+}
+
+uint16_t hdatCalcMaxTpmsPerNode()
+{
+    size_t l_maxTpms = 0;
+
+    // calculate max # of TPMs per node
+
+    // look for class ENC type NODE and class chip TPM to find TPMs
+    TARGETING::TargetHandleList l_nodeEncList;
+
+    getEncResources(l_nodeEncList, TARGETING::TYPE_NODE,
+        TARGETING::UTIL_FILTER_ALL);
+
+    // loop thru the nodes and check number of TPMs
+    std::for_each(l_nodeEncList.begin(), l_nodeEncList.end(),
+    [&l_maxTpms](const TARGETING::Target* const i_pNode)
+    {
+        // for this Node, get a list of tpms
+        TARGETING::TargetHandleList l_tpmChipList;
+
+        getChildAffinityTargets ( l_tpmChipList, i_pNode,
+                        TARGETING::CLASS_CHIP, TARGETING::TYPE_TPM, false );
+
+        l_maxTpms = std::max(l_maxTpms, l_tpmChipList.size());
+    } );
+    return l_maxTpms;
 }
 
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,25 +129,28 @@ struct hdatFruId_t
 /*----------------------------------------------------------------------------*/
 /* Constants                                                                  */
 /*----------------------------------------------------------------------------*/
-const int32_t HDAT_SUCCESS = 0;
-const int32_t HDAT_FAILURE = -1;
+extern const int32_t HDAT_SUCCESS;
+extern const int32_t HDAT_FAILURE;
 
 /** @brief No children for a data structure*/
-const uint32_t HDAT_NO_CHILD = 0;
+extern const uint32_t HDAT_NO_CHILD;
 
 /** @brief Structure id for an HDIF structure*/
-const uint16_t HDAT_HDIF_STRUCT_ID = 0xD1F0;
+extern const uint16_t HDAT_HDIF_STRUCT_ID;
 
 /** @brief FFDC Version to classify data in error log */
-const uint8_t HDAT_VERSION1 = 1;
+extern const uint8_t HDAT_VERSION1;
 
 /** @brief FFDC Sub Version to classify data in error log */
-const uint8_t HDAT_PCIA_FFDC_SUBSEC = 1;
-const uint8_t HDAT_NACA_FFDC_SUBSEC1 = 2;
-const uint8_t HDAT_NACA_FFDC_SUBSEC2 = 3;
+extern const uint8_t HDAT_PCIA_FFDC_SUBSEC;
+extern const uint8_t HDAT_NACA_FFDC_SUBSEC1;
+extern const uint8_t HDAT_NACA_FFDC_SUBSEC2;
 
-const uint32_t HDAT_REAL_ADDRESS_MASK = 0x80000000;
-const uint64_t HDAT_REAL_ADDRESS_MASK64 = 0x8000000000000000ull;
+extern const uint32_t HDAT_REAL_ADDRESS_MASK;
+extern const uint64_t HDAT_REAL_ADDRESS_MASK64;
+
+/** @brief Align value for HDAT instances */
+extern const uint8_t HDAT_HDIF_ALIGN;
 
 // (this goes up to 8 threads on P8)
 #define HDAT_MAX_THREADS_SUPPORTED           8
