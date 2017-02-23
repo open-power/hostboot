@@ -5276,7 +5276,7 @@ sub generate_xbus
         }
     }
 
-    #TODO RTC:167400 Use MRW values once they are available
+    #Just going to hardcode this forever on ZZ
     if($xbus == 2)
     {
         $tx_swap = sprintf("0x%X", 0x80);
