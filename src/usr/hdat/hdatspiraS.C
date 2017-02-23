@@ -646,8 +646,8 @@ errlHndl_t HdatSpiraS::loadDataArea( const hdat5Tuple_t& i_spirasHostEntry,
             l_spirasEntry.hdatAllocCnt   = l_count;
             l_spirasEntry.hdatActualCnt  = l_count;
 
-            uint32_t l_rem = l_size % 128;
-            uint32_t l_pad = l_rem ? (128 - l_rem) : 0;
+            uint32_t l_rem = l_size % HDAT_HDIF_ALIGN;
+            uint32_t l_pad = l_rem ? (HDAT_HDIF_ALIGN - l_rem) : 0;
 
             l_spirasEntry.hdatAllocSize  = l_size + l_pad;
             l_spirasEntry.hdatActualSize = l_size;

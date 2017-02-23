@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,6 @@
 #include "hdathdif.H"
 #include "hdatutil.H"
 
-
 namespace HDAT
 {
 
@@ -52,6 +51,29 @@ extern trace_desc_t * g_hdatTraceDesc;
 const uint32_t HDAT_BOUNDARY = 16; // Pad structures to a 16 byte boundary
 const char HDAT_PAD[15] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0',
                            '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
+
+const int32_t HDAT_SUCCESS = 0;
+const int32_t HDAT_FAILURE = -1;
+
+/** @brief No children for a data structure*/
+const uint32_t HDAT_NO_CHILD = 0;
+
+/** @brief Structure id for an HDIF structure*/
+const uint16_t HDAT_HDIF_STRUCT_ID = 0xD1F0;
+
+/** @brief FFDC Version to classify data in error log */
+const uint8_t HDAT_VERSION1 = 1;
+
+/** @brief FFDC Sub Version to classify data in error log */
+const uint8_t HDAT_PCIA_FFDC_SUBSEC = 1;
+const uint8_t HDAT_NACA_FFDC_SUBSEC1 = 2;
+const uint8_t HDAT_NACA_FFDC_SUBSEC2 = 3;
+
+const uint32_t HDAT_REAL_ADDRESS_MASK = 0x80000000;
+const uint64_t HDAT_REAL_ADDRESS_MASK64 = 0x8000000000000000ull;
+
+/** @brief Align value for HDAT instances */
+const uint8_t HDAT_HDIF_ALIGN = 128;
 
 
 /** @brief See the prologue in hdathdif.H

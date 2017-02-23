@@ -38,12 +38,19 @@
 #include <hdat/hdat_reasoncodes.H>
 #include "hdatutil.H"
 #include <hdat/hdat.H>
+#include <sys/misc.h>
+
+#define TPM_SRTM_EVENT_LOG_MAX (64 * KILOBYTE)
+
+#define TPM_DRTM_EVENT_LOG_MAX (64 * KILOBYTE)
+
+#define NUM_I2C_PHYS_PRESENCE_DEVICES 2
 
 namespace HDAT
 {
 
 /**
- * @brief Structure definition for HDAT Tpm Node Related Data header
+ * @brief Structure definition for HDAT Tpm Node Data Header
  */
 struct hdatTpmData_t
 {
@@ -61,7 +68,7 @@ struct hdatSbTpmInfo_t
 {
     uint32_t hdatSbTpmArrayOffset;
     uint32_t hdatSbTpmArrayNumEntries;
-    uint32_t hdatsbTpmArraySize;
+    uint32_t hdatSbTpmArraySize;
 } __attribute__ ((packed));
 
 
@@ -82,6 +89,28 @@ struct hdatSbTpmInstInfo_t
     uint32_t hdatTpmSrtmEventLogEntrySize;
     uint32_t hdatTpmDrtmEventLogOffset;
     uint32_t hdatTpmDrtmEventLogEntrySize;
+} __attribute__ ((packed));
+
+
+/**
+ * @brief  Structure definition for HDAT physical interaction mechanism info
+ */
+struct hdatPhysInterMechInfo_t
+{
+    uint32_t hdatOffsetI2cDevInfoPtrs;
+    uint32_t hdatNumEntries;
+    uint32_t hdatSizeOfI2cDevInfoPtrs;
+} __attribute__ ((packed));
+
+
+/**
+ * @brief  Structure definition for HDAT Host I2c Device Information pointers
+ */
+struct hdatI2cDevInfoPtrs_t
+{
+    uint32_t hdatChipId;
+    uint32_t hdatDbobId; // Drawer/Book/Octant/Blade ID
+    uint32_t hdatHostI2cLinkId;
 } __attribute__ ((packed));
 
 
@@ -186,6 +215,16 @@ class HdatTpmData
 
 }; // end of HdatTpmData class
 
+/**
+ * @brief Calculate the maximum number of TPMs per node for this system.
+ *
+ * @pre None
+ *
+ * @post None
+ *
+ * @retval uint16_t Returns the maximum number of TPMs per node for this system
+ */
+uint16_t hdatCalcMaxTpmsPerNode();
 
 }
 #endif // HDATTPMDATA_H
