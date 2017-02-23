@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/secureboot/base/securerom.C $                         */
+/* $Source: src/usr/secureboot/base/securerommgr.C $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -34,7 +34,7 @@
 #include <errl/errlmanager.H>
 #include "../common/securetrace.H"
 
-#include "securerom.H"
+#include "securerommgr.H"
 #include <secureboot/settings.H>
 
 // Quick change for unit testing
@@ -56,9 +56,9 @@ namespace SECUREBOOT
  * @brief Initialize Secure Rom by loading it into memory and
  *        retrieving Hash Keys
  */
-errlHndl_t initializeSecureROM(void)
+errlHndl_t initializeSecureRomManager(void)
 {
-    return Singleton<SecureROM>::instance().initialize();
+    return Singleton<SecureRomManager>::instance().initialize();
 }
 
 
@@ -73,7 +73,7 @@ errlHndl_t verifyContainer(void * i_container, const sha2_hash_t* i_hwKeyHash)
     TRACUCOMP(g_trac_secure, "verifyContainer(): i_container=%p, size=0x%x",
               i_container, i_size);
 
-    return Singleton<SecureROM>::instance().verifyContainer(i_container,
+    return Singleton<SecureRomManager>::instance().verifyContainer(i_container,
                                                             i_hwKeyHash);
 }
 
@@ -83,7 +83,8 @@ errlHndl_t verifyContainer(void * i_container, const sha2_hash_t* i_hwKeyHash)
  */
 errlHndl_t hashBlob(const void * i_blob, size_t i_size, SHA512_t io_buf)
 {
-    return Singleton<SecureROM>::instance().hashBlob(i_blob, i_size, io_buf);
+    return Singleton<SecureRomManager>::instance().hashBlob(i_blob, i_size,
+                                                            io_buf);
 }
 
 /**
@@ -92,7 +93,8 @@ errlHndl_t hashBlob(const void * i_blob, size_t i_size, SHA512_t io_buf)
  */
 errlHndl_t hashConcatBlobs(const blobPair_t &i_blobs, SHA512_t o_buf)
 {
-    return Singleton<SecureROM>::instance().hashConcatBlobs(i_blobs, o_buf);
+    return Singleton<SecureRomManager>::instance().hashConcatBlobs(i_blobs,
+                                                                   o_buf);
 }
 
 /*
@@ -100,7 +102,7 @@ errlHndl_t hashConcatBlobs(const blobPair_t &i_blobs, SHA512_t o_buf)
  */
 void getHwKeyHash(sha2_hash_t o_hash)
 {
-    return Singleton<SecureROM>::instance().getHwKeyHash(o_hash);
+    return Singleton<SecureRomManager>::instance().getHwKeyHash(o_hash);
 }
 
 }; //end SECUREBOOT namespace
@@ -116,9 +118,9 @@ using namespace SECUREBOOT;
  * @brief Initialize Secure Rom by loading it into memory and
  *        getting Hash Keys
  */
-errlHndl_t SecureROM::initialize()
+errlHndl_t SecureRomManager::initialize()
 {
-    TRACDCOMP(g_trac_secure,ENTER_MRK"SecureROM::initialize()");
+    TRACDCOMP(g_trac_secure,ENTER_MRK"SecureRomManager::initialize()");
 
     errlHndl_t l_errl = NULL;
 #if (0)
@@ -131,7 +133,7 @@ errlHndl_t SecureROM::initialize()
         if (iv_device_ptr != NULL)
         {
             // The Secure ROM has already been initialized
-            TRACUCOMP(g_trac_secure,"SecureROM::initialize(): Already "
+            TRACUCOMP(g_trac_secure,"SecureRomManager::initialize(): Already "
                       "Loaded: iv_device_ptr=%p", iv_device_ptr);
 
             // Can skip the rest of this function
@@ -154,14 +156,14 @@ errlHndl_t SecureROM::initialize()
 
         if (l_errl != NULL)
         {
-            TRACFCOMP(g_trac_secure,ERR_MRK"SecureROM::initialize():"
+            TRACFCOMP(g_trac_secure,ERR_MRK"SecureRomManager::initialize():"
             " Fail SCOM Read of tbrom_reg_addr (0x%x)", tbrom_reg_addr);
 
             break;
         }
 
 
-        TRACUCOMP(g_trac_secure,INFO_MRK"SecureROM::initialize(): "
+        TRACUCOMP(g_trac_secure,INFO_MRK"SecureRomManager::initialize(): "
                   "tbrom_reg_data = 0x%016llx", tbrom_reg_data);
 
 
@@ -176,7 +178,7 @@ errlHndl_t SecureROM::initialize()
 
         if (l_rom_virtAddr == NULL)
         {
-            TRACFCOMP(g_trac_secure,ERR_MRK"SecureROM::initialize():"
+            TRACFCOMP(g_trac_secure,ERR_MRK"SecureRomManager::initialize():"
             " mmio_dev_map failed: l_rom_virtAddr=%p, l_rom_baseAddr=%p",
             l_rom_virtAddr, l_rom_baseAddr);
 
@@ -234,7 +236,7 @@ errlHndl_t SecureROM::initialize()
 
         if (l_rc != 0)
         {
-            TRACFCOMP(g_trac_secure,EXIT_MRK"SecureROM::initialize():"
+            TRACFCOMP(g_trac_secure,EXIT_MRK"SecureRomManager::initialize():"
             " Fail from mm_set_permission(EXECUTABLE): l_rc=0x%x, ptr=%p, "
             "size=0x%x, access=0x%x", l_rc, iv_device_ptr,
             SECUREROM_MEMORY_SIZE, l_access_type);
@@ -266,13 +268,13 @@ errlHndl_t SecureROM::initialize()
         /*  Retrieve HW Hash Keys From The System                      */
         /***************************************************************/
 
-        // @todo RTC:RTC:34080 - Support for SecureROM::getHwKeyHash()
-        l_errl = SecureROM::getHwKeyHash();
+        // @todo RTC:RTC:34080 - Support for SecureRomManager::getHwKeyHash()
+        l_errl = SecureRomManager::getHwKeyHash();
 
         if (l_errl != NULL)
         {
-            TRACFCOMP(g_trac_secure,ERR_MRK"SecureROM::initialize():"
-            " SecureROM::getHwKeyHash() returned an error");
+            TRACFCOMP(g_trac_secure,ERR_MRK"SecureRomManager::initialize():"
+            " SecureRomManager::getHwKeyHash() returned an error");
 
             l_errl->collectTrace(SECURE_COMP_NAME,256);
             break;
@@ -286,7 +288,7 @@ errlHndl_t SecureROM::initialize()
         // If we've made it this far without an error, than Secure ROM
         //  is properly initialized and pages shouldn't be de-allocated
         l_cleanup = false;
-        TRACFCOMP(g_trac_secure,INFO_MRK"SecureROM::initialize(): SUCCESSFUL:"
+        TRACFCOMP(g_trac_secure,INFO_MRK"SecureRomManager::initialize(): SUCCESSFUL:"
         " iv_device_ptr=%p", iv_device_ptr);
 
 
@@ -295,10 +297,10 @@ errlHndl_t SecureROM::initialize()
     // Check to see if we should free pages
     if (l_cleanup == true)
     {
-        SecureROM::_cleanup();
+        SecureRomManager::_cleanup();
     }
 
-    TRACDCOMP(g_trac_secure,EXIT_MRK"SecureROM::initialize() - %s",
+    TRACDCOMP(g_trac_secure,EXIT_MRK"SecureRomManager::initialize() - %s",
               ((NULL == l_errl) ? "No Error" : "With Error") );
 #endif
     return l_errl;
@@ -309,12 +311,12 @@ errlHndl_t SecureROM::initialize()
 /**
  * @brief Verify Container against system hash keys
  */
-errlHndl_t SecureROM::verifyContainer(void * i_container,
+errlHndl_t SecureRomManager::verifyContainer(void * i_container,
 // TODO securebootp9 - this is dummy parameter added to aid in p9 port
 // need to replace the method below with up-to-date version
                                       const sha2_hash_t* i_hwKeyHash)
 {
-    TRACDCOMP(g_trac_secure,ENTER_MRK"SecureROM::verifyContainer(): "
+    TRACDCOMP(g_trac_secure,ENTER_MRK"SecureRomManager::verifyContainer(): "
               "i_container=%p", i_container);
 
 
@@ -338,8 +340,6 @@ errlHndl_t SecureROM::verifyContainer(void * i_container,
 
         // Now set hw_key_hash, which is of type sha2_hash_t, to iv_key_hash
         memcpy (&l_hw_parms.hw_key_hash, &iv_key_hash, sizeof(sha2_hash_t));
-        TRACFBIN(g_trac_secure,"SecureROM::verifyContainer(): hw_key_hash",
-                 l_hw_parms.hw_key_hash, sizeof(sha2_hash_t));
 
         /*******************************************************************/
         /* Call ROM_verify() function via an assembly call                 */
@@ -350,7 +350,7 @@ errlHndl_t SecureROM::verifyContainer(void * i_container,
                                                  iv_device_ptr)
                                                + ROM_VERIFY_FUNCTION_OFFSET;
 
-        TRACUCOMP(g_trac_secure,"SecureROM::verifyContainer(): "
+        TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
                   " Calling ROM_verify() via call_rom_verify: l_rc=0x%x, "
                   "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
                   l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
@@ -358,15 +358,6 @@ errlHndl_t SecureROM::verifyContainer(void * i_container,
 
 
         ROM_container_raw* l_container = reinterpret_cast<ROM_container_raw*>(i_container);
-        TRACFCOMP(g_trac_secure,"magic_number 0x%X", l_container->magic_number);
-        TRACFCOMP(g_trac_secure,"version 0x%X", l_container->version);
-        TRACFCOMP(g_trac_secure,"container_size 0x%X", l_container->container_size);
-        TRACFCOMP(g_trac_secure,"target_hrmor 0x%X", l_container->target_hrmor);
-        TRACFCOMP(g_trac_secure,"stack_pointer 0x%X", l_container->stack_pointer);
-        TRACFBIN(g_trac_secure,"hw_pkey_a", l_container->hw_pkey_a, SHA512_DIGEST_LENGTH);
-        TRACFBIN(g_trac_secure,"hw_pkey_b", l_container->hw_pkey_b, SHA512_DIGEST_LENGTH);
-        TRACFBIN(g_trac_secure,"hw_pkey_c", l_container->hw_pkey_c, SHA512_DIGEST_LENGTH);
-        TRACFCOMP(g_trac_secure,"prefix 0x%X", l_container->prefix);
 
         l_rc = call_rom_verify(reinterpret_cast<void*>
                                (l_rom_verify_startAddr),
@@ -374,7 +365,7 @@ errlHndl_t SecureROM::verifyContainer(void * i_container,
                                &l_hw_parms);
 
 
-        TRACUCOMP(g_trac_secure,"SecureROM::verifyContainer(): "
+        TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
                   "Back from ROM_verify() via call_rom_verify: l_rc=0x%x, "
                   "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
                    l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
@@ -384,7 +375,7 @@ errlHndl_t SecureROM::verifyContainer(void * i_container,
 
         if (l_rc != 0)
         {
-            TRACFCOMP(g_trac_secure,ERR_MRK"SecureROM::verifyContainer():"
+            TRACFCOMP(g_trac_secure,ERR_MRK"SecureRomManager::verifyContainer():"
             " ROM_verify() FAIL: l_rc=0x%x, l_hw_parms.log=0x%x "
             "addr=%p (iv_d_p=%p)", l_rc, l_hw_parms.log,
             l_rom_verify_startAddr, iv_device_ptr);
@@ -416,7 +407,7 @@ errlHndl_t SecureROM::verifyContainer(void * i_container,
     }while(0);
 
 
-    TRACDCOMP(g_trac_secure,EXIT_MRK"SecureROM::verifyContainer() - %s",
+    TRACDCOMP(g_trac_secure,EXIT_MRK"SecureRomManager::verifyContainer() - %s",
              ((NULL == l_errl) ? "No Error" : "With Error") );
 
     return l_errl;
@@ -426,10 +417,10 @@ errlHndl_t SecureROM::verifyContainer(void * i_container,
 /**
  * @brief Hash Blob
  */
-errlHndl_t SecureROM::hashBlob(const void * i_blob, size_t i_size, SHA512_t io_buf) const
+errlHndl_t SecureRomManager::hashBlob(const void * i_blob, size_t i_size, SHA512_t io_buf) const
 {
 
-    TRACDCOMP(g_trac_secure,INFO_MRK"SecureROM::hashBlob() NOT "
+    TRACDCOMP(g_trac_secure,INFO_MRK"SecureRomManager::hashBlob() NOT "
               "supported, but not returning error log");
 
     errlHndl_t  l_errl      =   NULL;
@@ -452,7 +443,7 @@ errlHndl_t SecureROM::hashBlob(const void * i_blob, size_t i_size, SHA512_t io_b
                         i_size,
                         reinterpret_cast<sha2_hash_t*>(io_buf));
 
-        TRACUCOMP(g_trac_secure,"SecureROM::hashBlob(): "
+        TRACUCOMP(g_trac_secure,"SecureRomManager::hashBlob(): "
                   "call_rom_SHA512: blob=%p size=0x%X addr=%p (iv_d_p=%p)",
                    i_blob, i_size, l_rom_SHA512_startAddr,
                    iv_device_ptr);
@@ -460,7 +451,7 @@ errlHndl_t SecureROM::hashBlob(const void * i_blob, size_t i_size, SHA512_t io_b
     }while(0);
 
 
-    TRACDCOMP(g_trac_secure,EXIT_MRK"SecureROM::hashBlob()");
+    TRACDCOMP(g_trac_secure,EXIT_MRK"SecureRomManager::hashBlob()");
 
     return l_errl;
 }
@@ -468,14 +459,14 @@ errlHndl_t SecureROM::hashBlob(const void * i_blob, size_t i_size, SHA512_t io_b
 /**
  * @brief Hash concatenation of N Blobs
  */
-errlHndl_t SecureROM::hashConcatBlobs(const blobPair_t &i_blobs,
+errlHndl_t SecureRomManager::hashConcatBlobs(const blobPair_t &i_blobs,
                                       SHA512_t o_buf) const
 {
     errlHndl_t pError = nullptr;
     std::vector<uint8_t> concatBuf;
     for (const auto &it : i_blobs)
     {
-        assert(it.first != nullptr, "BUG! In SecureROM::hashConcatBlobs(), "
+        assert(it.first != nullptr, "BUG! In SecureRomManager::hashConcatBlobs(), "
             "User passed in nullptr blob pointer");
         const uint8_t* const blob =  static_cast<const uint8_t*>(it.first);
         const auto blobSize = it.second;
@@ -495,10 +486,10 @@ errlHndl_t SecureROM::hashConcatBlobs(const blobPair_t &i_blobs,
 /**
  * @brief  Constructor
  */
-SecureROM::SecureROM()
+SecureRomManager::SecureRomManager()
 :iv_device_ptr(NULL)
 {
-    TRACDCOMP(g_trac_secure, "SecureROM::SecureROM()>");
+    TRACDCOMP(g_trac_secure, "SecureRomManager::SecureRomManager()>");
 
     // Clear out iv_key_hash, which is of type sha2_hash_t
     memset(&iv_key_hash, 0, sizeof(sha2_hash_t) );
@@ -508,9 +499,9 @@ SecureROM::SecureROM()
 /**
  * @brief  Destructor
  */
-SecureROM::~SecureROM() { SecureROM::_cleanup(); };
+SecureRomManager::~SecureRomManager() { SecureRomManager::_cleanup(); };
 
-void SecureROM::_cleanup()
+void SecureRomManager::_cleanup()
 {
     // deallocate pages
     if ( iv_device_ptr != NULL )
@@ -526,7 +517,7 @@ void SecureROM::_cleanup()
 
         if (l_rc != 0)
         {
-            TRACFCOMP(g_trac_secure,ERR_MRK"SecureROM:::_cleanup():"
+            TRACFCOMP(g_trac_secure,ERR_MRK"SecureRomManager:::_cleanup():"
             " Fail from mm_set_permission(WRITABLE): l_rc=0x%x, ptr=%p, "
             "size=0x%x, pages=%d, access=0x%x", l_rc, iv_device_ptr,
             SECUREROM_MEMORY_SIZE, SECUREROM_NUM_PAGES, l_access_type);
@@ -564,7 +555,7 @@ void SecureROM::_cleanup()
             free(iv_device_ptr);
 
             TRACDCOMP(g_trac_secure,INFO_MRK
-                      "SecureROM::_cleanup(): pages set to "
+                      "SecureRomManager::_cleanup(): pages set to "
                       "WRITABLE (rc=0x%x) and free called", l_rc);
 
 
@@ -579,12 +570,12 @@ void SecureROM::_cleanup()
 /**
  * @brief Retrieves HW keys' hash from the system
  */
-errlHndl_t SecureROM::getHwKeyHash()
+errlHndl_t SecureRomManager::getHwKeyHash()
 {
 
     errlHndl_t  l_errl      =   NULL;
 
-    TRACFCOMP(g_trac_secure,INFO_MRK"SecureROM::getHwKeyHash() NOT supported");
+    TRACFCOMP(g_trac_secure,INFO_MRK"SecureRomManager::getHwKeyHash() NOT supported");
 
     // @todo RTC:34080 - Add support for getting HW keys' hash from System
 
@@ -594,7 +585,7 @@ errlHndl_t SecureROM::getHwKeyHash()
 /**
  * @brief  Retrieve the internal hardware keys' hash from secure ROM object.
  */
-void SecureROM::getHwKeyHash(sha2_hash_t o_hash)
+void SecureRomManager::getHwKeyHash(sha2_hash_t o_hash)
 {
     memcpy(o_hash, iv_key_hash, sizeof(sha2_hash_t));
 }
@@ -602,9 +593,9 @@ void SecureROM::getHwKeyHash(sha2_hash_t o_hash)
 /**
  * @brief Static instance function for testcase only
  */
-SecureROM& SecureROM::getInstance()
+SecureRomManager& SecureRomManager::getInstance()
 {
-    return Singleton<SecureROM>::instance();
+    return Singleton<SecureRomManager>::instance();
 }
 
 

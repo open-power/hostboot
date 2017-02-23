@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/secureboot/base/test/secureromtest.H $                */
+/* $Source: src/usr/secureboot/base/test/securerommgrtest.H $             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -35,7 +35,7 @@
 #include <secureboot/service.H>
 #include <secureboot/secure_reasoncodes.H>
 
-#include "../securerom.H"
+#include "../securerommgr.H"
 
 #include "../../common/securetrace.H"
 
@@ -79,7 +79,7 @@ const uint64_t hw_key_hash[] =
 /*  End of UTILITY FUNCTIONS                                          */
 /**********************************************************************/
 
-class SecureROMTest : public CxxTest::TestSuite
+class SecureRomManagerTest : public CxxTest::TestSuite
 {
   public:
 
@@ -88,7 +88,7 @@ class SecureROMTest : public CxxTest::TestSuite
      */
     void test_verify(void)
     {
-        TRACFCOMP(g_trac_secure,ENTER_MRK"SecureROMTest::test_verify>");
+        TRACFCOMP(g_trac_secure,ENTER_MRK"SecureRomManagerTest::test_verify>");
 
         errlHndl_t  l_errl  =   NULL;
 
@@ -108,23 +108,23 @@ class SecureROMTest : public CxxTest::TestSuite
 
         if (l_errl)
         {
-            TS_FAIL("SecureROMTest::test_verify: loadSignedFile() Failed");
+            TS_FAIL("SecureRomManagerTest::test_verify: loadSignedFile() Failed");
             errlCommit(l_errl, SECURE_COMP_ID);
             return;
         }
 
-        TRACUCOMP(g_trac_secure, "SecureROMTest::test_verify: "
+        TRACUCOMP(g_trac_secure, "SecureRomManagerTest::test_verify: "
                   "signedFile info: addr = %p, size=0x%x",
                   signedFile_pageAddr, signedFile_size);
 
-        SecureROM l_sRom;
+        SecureRomManager l_sRom;
 
-        // Call initializeSecureROM()
+        // Call initializeSecureRomManager()
         l_errl = l_sRom.initialize();
 
         if (l_errl)
         {
-            TS_FAIL("SecureROMTest::test_verify: initializeSecureROM() Failed");
+            TS_FAIL("SecureRomManagerTest::test_verify: initializeSecureRomManager() Failed");
             errlCommit(l_errl, SECURE_COMP_ID);
             return;
         }
@@ -143,7 +143,7 @@ class SecureROMTest : public CxxTest::TestSuite
 
         if (l_errl)
         {
-            TS_FAIL("SecureROMTest::test_verify: verifyContainer() Failed");
+            TS_FAIL("SecureRomManagerTest::test_verify: verifyContainer() Failed");
             errlCommit(l_errl, SECURE_COMP_ID);
             return;
         }
@@ -156,7 +156,7 @@ class SecureROMTest : public CxxTest::TestSuite
             unloadSignedFile( signedFile_pageAddr, signedFile_size);
         }
 
-        TRACFCOMP(g_trac_secure,EXIT_MRK"SecureROMTest::test_verify");
+        TRACFCOMP(g_trac_secure,EXIT_MRK"SecureRomManagerTest::test_verify");
     };
 };
 

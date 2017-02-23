@@ -62,7 +62,7 @@ namespace SECUREBOOT
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t initializeSecureROM(void);
+    errlHndl_t initializeSecureRomManager(void);
 
 
     /** @brief Determines if Secureboot is enabled.

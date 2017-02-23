@@ -30,7 +30,7 @@
 #include <securerom/ROM.H>
 
 // Forward Declaration
-class SecureROMTest;
+class SecureRomManagerTest;
 
 namespace SECUREBOOT
 {
@@ -234,7 +234,7 @@ class ContainerHeader
         void safeMemCpyAndInc(void* i_dest, const uint8_t* &io_hdr,
                               const size_t i_size);
 
-        friend class ::SecureROMTest;
+        friend class ::SecureRomManagerTest;
 };
 
 }; //end of SECUREBOOT namespace
