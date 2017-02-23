@@ -220,9 +220,9 @@ uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
         }
 
         // Start the super fast read command.
-        fapi2::ReturnCode fapi_rc = memdiags::sf_read( fapiTrgt, stopCond,
-                                                       saddr );
-        errlHndl_t errl = fapi2::rcToErrl( fapi_rc );
+        errlHndl_t errl;
+        FAPI_INVOKE_HWP( errl, memdiags::sf_read, fapiTrgt, stopCond, saddr );
+
         if ( nullptr != errl )
         {
             PRDF_ERR( PRDF_FUNC "memdiags::sf_read(0x%08x,%d) failed",

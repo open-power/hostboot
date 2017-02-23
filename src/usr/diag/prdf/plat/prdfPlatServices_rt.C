@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,9 +129,9 @@ uint32_t stopBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip )
 
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( i_chip->getTrgt() );
 
-    fapi2::ReturnCode fapi_rc = memdiags::stop( fapiTrgt );
+    errlHndl_t errl;
+    FAPI_INVOKE_HWP( errl, memdiags::stop, fapiTrgt );
 
-    errlHndl_t errl = fapi2::rcToErrl( fapi_rc );
     if ( nullptr != errl )
     {
         PRDF_ERR( PRDF_FUNC "memdiags::stop(0x%08x) failed", i_chip->getHuid());
