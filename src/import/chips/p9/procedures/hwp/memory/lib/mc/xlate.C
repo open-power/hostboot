@@ -70,6 +70,19 @@ static const std::vector<xlate_setup> xlate_map =
         xlate_dimm_1R1T4Gbx4
     },
 
+    // 1R 8Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM16,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_8GB),
+        xlate_dimm_1R1T8Gbx8
+    },
+
     // 1R 8Gbx4 DDR4 RDIMM
     {
         dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
@@ -81,6 +94,19 @@ static const std::vector<xlate_setup> xlate_map =
         fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
         fapi2::ENUM_ATTR_EFF_DIMM_SIZE_16GB),
         xlate_dimm_1R1T8Gbx4
+    },
+
+    // 1R 16Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_16GB),
+        xlate_dimm_1R1T16Gbx8
     },
 
     // 1R 16Gbx4 DDR4 RDIMM
@@ -109,6 +135,19 @@ static const std::vector<xlate_setup> xlate_map =
         xlate_dimm_2R2T4Gbx4
     },
 
+    // 2R 8Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM16,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_16GB),
+        xlate_dimm_2R2T8Gbx8
+    },
+
     // 2R 8Gbx4 DDR4 RDIMM
     {
         dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
@@ -120,6 +159,19 @@ static const std::vector<xlate_setup> xlate_map =
         fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
         fapi2::ENUM_ATTR_EFF_DIMM_SIZE_32GB),
         xlate_dimm_2R2T8Gbx4
+    },
+
+    // 2R 16Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_32GB),
+        xlate_dimm_2R2T16Gbx8
     },
 
     // 2R 16Gbx4 DDR4 RDIMM
@@ -148,6 +200,19 @@ static const std::vector<xlate_setup> xlate_map =
         xlate_dimm_4R4T4Gbx4
     },
 
+    // 4R 8Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM16,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_32GB),
+        xlate_dimm_4R4T8Gbx8
+    },
+
     // 4R 8Gbx4 DDR4 RDIMM
     {
         dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
@@ -159,6 +224,19 @@ static const std::vector<xlate_setup> xlate_map =
         fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
         fapi2::ENUM_ATTR_EFF_DIMM_SIZE_64GB),
         xlate_dimm_4R4T8Gbx4
+    },
+
+    // 4R 16Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_64GB),
+        xlate_dimm_4R4T16Gbx8
     },
 
     // 4R 16Gbx4 DDR4 RDIMM
@@ -193,6 +271,19 @@ static const std::vector<xlate_setup> xlate_map =
         xlate_dimm_1R2T4Gbx4
     },
 
+    // 1R 2H 3DS 8Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM16,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_16GB),
+        xlate_dimm_1R2T8Gbx8
+    },
+
     // 1R 2H 3DS 8Gbx4 DDR4 RDIMM
     {
         dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
@@ -204,6 +295,19 @@ static const std::vector<xlate_setup> xlate_map =
         fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
         fapi2::ENUM_ATTR_EFF_DIMM_SIZE_32GB),
         xlate_dimm_1R2T8Gbx4
+    },
+
+    // 1R 2H 3DS 16Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_32GB),
+        xlate_dimm_1R2T16Gbx8
     },
 
     // 1R 2H 3DS 16Gbx4 DDR4 RDIMM
@@ -232,6 +336,19 @@ static const std::vector<xlate_setup> xlate_map =
         xlate_dimm_1R4T4Gbx4
     },
 
+    // 1R 4H 3DS 8Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM16,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_32GB),
+        xlate_dimm_1R4T8Gbx8
+    },
+
     // 1R 4H 3DS 8Gbx4 DDR4 RDIMM
     {
         dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
@@ -243,6 +360,19 @@ static const std::vector<xlate_setup> xlate_map =
         fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
         fapi2::ENUM_ATTR_EFF_DIMM_SIZE_64GB),
         xlate_dimm_1R4T8Gbx4
+    },
+
+    // 1R 4H 3DS 16Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_64GB),
+        xlate_dimm_1R4T16Gbx8
     },
 
     // 1R 4H 3DS 16Gbx4 DDR4 RDIMM
@@ -271,6 +401,19 @@ static const std::vector<xlate_setup> xlate_map =
         xlate_dimm_1R8T4Gbx4
     },
 
+    // 1R 8H 3DS 8Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM16,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_64GB),
+        xlate_dimm_1R8T8Gbx8
+    },
+
     // 1R 8H 3DS 8Gbx4 DDR4 RDIMM
     {
         dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
@@ -282,6 +425,19 @@ static const std::vector<xlate_setup> xlate_map =
         fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
         fapi2::ENUM_ATTR_EFF_DIMM_SIZE_128GB),
         xlate_dimm_1R8T8Gbx4
+    },
+
+    // 1R 8H 3DS 16Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_128GB),
+        xlate_dimm_1R8T16Gbx8
     },
 
     // 1R 8H 3DS 16Gbx4 DDR4 RDIMM
@@ -311,6 +467,19 @@ static const std::vector<xlate_setup> xlate_map =
         xlate_dimm_2R4T4Gbx4
     },
 
+    // 2R 2H 3DS 8Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM16,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_32GB),
+        xlate_dimm_2R4T8Gbx8
+    },
+
     // 2R 2H 3DS 8Gbx4 DDR4 RDIMM
     {
         dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
@@ -322,6 +491,19 @@ static const std::vector<xlate_setup> xlate_map =
         fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
         fapi2::ENUM_ATTR_EFF_DIMM_SIZE_64GB),
         xlate_dimm_2R4T8Gbx4
+    },
+
+    // 2R 2H 3DS 16Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_64GB),
+        xlate_dimm_2R4T16Gbx8
     },
 
     // 2R 2H 3DS 16Gbx4 DDR4 RDIMM
@@ -351,6 +533,19 @@ static const std::vector<xlate_setup> xlate_map =
         xlate_dimm_2R8T4Gbx4
     },
 
+    // 2R 4H 3DS 8Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM16,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_64GB),
+        xlate_dimm_2R8T8Gbx8
+    },
+
     // 2R 4H 3DS 8Gbx4 DDR4 RDIMM
     {
         dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
@@ -362,6 +557,19 @@ static const std::vector<xlate_setup> xlate_map =
         fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
         fapi2::ENUM_ATTR_EFF_DIMM_SIZE_128GB),
         xlate_dimm_2R8T8Gbx4
+    },
+
+    // 2R 4H 3DS 16Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_128GB),
+        xlate_dimm_2R8T16Gbx8
     },
 
     // 2R 4H 3DS 16Gbx4 DDR4 RDIMM
@@ -391,6 +599,19 @@ static const std::vector<xlate_setup> xlate_map =
         xlate_dimm_2R16T4Gbx4
     },
 
+    // 2R 8H 3DS 8Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_16R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM16,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_128GB),
+        xlate_dimm_2R16T8Gbx8
+    },
+
     // 2R 8H 3DS 8Gbx4 DDR4 RDIMM
     {
         dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
@@ -402,6 +623,19 @@ static const std::vector<xlate_setup> xlate_map =
         fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
         fapi2::ENUM_ATTR_EFF_DIMM_SIZE_256GB),
         xlate_dimm_2R16T8Gbx4
+    },
+
+    // 2R 8H 3DS 16Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_16R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_256GB),
+        xlate_dimm_2R16T16Gbx8
     },
 
     // 2R 8H 3DS 16Gbx4 DDR4 RDIMM
@@ -470,7 +704,7 @@ static const std::vector<xlate_setup> xlate_map =
     {
         dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
-        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
         fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
         fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM,
@@ -553,16 +787,16 @@ static void column_and_16bank_helper(fapi2::buffer<uint64_t>& io_xlate1, fapi2::
     // around with the settings. Mappings taken directly from the Nimbus Workbook. The magic numbers
     // aren't; they're settings as defined in the scomdef
 
-    constexpr uint64_t COL4_MAP(0b01101);
-    constexpr uint64_t COL5_MAP(0b01100);
-    constexpr uint64_t COL6_MAP(0b01011);
-    constexpr uint64_t COL7_MAP(0b01010);
-    constexpr uint64_t COL8_MAP(0b01001);
-    constexpr uint64_t COL9_MAP(0b00111);
-    constexpr uint64_t BANK0_MAP(0b01110);
-    constexpr uint64_t BANK1_MAP(0b10000);
-    constexpr uint64_t BG0_MAP(0b10001);
-    constexpr uint64_t BG1_MAP(0b10010);
+    constexpr uint64_t COL4_MAP(PORT_ADDRESS_27);
+    constexpr uint64_t COL5_MAP(PORT_ADDRESS_26);
+    constexpr uint64_t COL6_MAP(PORT_ADDRESS_25);
+    constexpr uint64_t COL7_MAP(PORT_ADDRESS_24);
+    constexpr uint64_t COL8_MAP(PORT_ADDRESS_23);
+    constexpr uint64_t COL9_MAP(PORT_ADDRESS_7);
+    constexpr uint64_t BANK0_MAP(PORT_ADDRESS_28);
+    constexpr uint64_t BANK1_MAP(PORT_ADDRESS_30);
+    constexpr uint64_t BG0_MAP(PORT_ADDRESS_31);
+    constexpr uint64_t BG1_MAP(PORT_ADDRESS_32);
 
     io_xlate1.insertFromRight<MCS_PORT02_MCP0XLT1_COL4_BIT_MAP,
                               MCS_PORT02_MCP0XLT1_COL4_BIT_MAP_LEN>(COL4_MAP);
@@ -637,7 +871,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -652,9 +886,9 @@ fapi2::ReturnCode xlate_dimm_2R2T4Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t M1_MAP(0b01111);
-    constexpr uint64_t R15_MAP(0b00110);
-    constexpr uint64_t DBIT_MAP(0b00101);
+    constexpr uint64_t M1_MAP(PORT_ADDRESS_29);
+    constexpr uint64_t R15_MAP(PORT_ADDRESS_6);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_5);
 
     // Set the proper bit if there is a DIMM in this slot. If there wasn't, we wouldn't see
     // this DIMM in the vector, so this is always safe.
@@ -679,11 +913,10 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -698,8 +931,8 @@ fapi2::ReturnCode xlate_dimm_2R2T8Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R16_MAP(0b00101);
-    constexpr uint64_t DBIT_MAP(0b00100);
+    constexpr uint64_t R16_MAP(PORT_ADDRESS_5);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_4);
 
     // We're basically a 2R 4Gbx4 with an extra row. So lets setup like we're one of those,
     // add row 16 and shift the D bit as needed.
@@ -720,7 +953,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -735,8 +968,8 @@ fapi2::ReturnCode xlate_dimm_2R2T16Gbx4( const dimm::kind& i_kind,
         fapi2::buffer<uint64_t>& io_xlate1,
         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R17_MAP(0b00100);
-    constexpr uint64_t DBIT_MAP(0b00011);
+    constexpr uint64_t R17_MAP(PORT_ADDRESS_4);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_3);
 
     // We're basically a 2R 8Gbx4 with an extra row. So lets setup like we're one of those,
     // add row 16 and shift the D bit as needed.
@@ -757,7 +990,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -772,13 +1005,12 @@ fapi2::ReturnCode xlate_dimm_2R4T4Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t M1_MAP(0b00110);
+    constexpr uint64_t M1_MAP(PORT_ADDRESS_6);
 
     // We're just like a 1R 4H 4Gbx4 so lets start there and modify for the slave ranks.
     FAPI_TRY( xlate_dimm_1R4T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
 
-    clear_xlate_srank<S1>(i_offset, io_xlate0, io_xlate1);
-
+    FAPI_TRY( clear_xlate_srank<S1>(i_offset, io_xlate0, io_xlate1) );
     FAPI_TRY( set_xlate_mrank<M1>(M1_MAP, i_offset, io_xlate0) );
 
 fapi_try_exit:
@@ -788,7 +1020,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -803,8 +1035,8 @@ fapi2::ReturnCode xlate_dimm_2R4T8Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R16_MAP(0b00100);
-    constexpr uint64_t DBIT_MAP(0b00011);
+    constexpr uint64_t R16_MAP(PORT_ADDRESS_4);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_3);
 
     // We're just like a 2R 2H 4Gbx4 so lets start there and modify for the slave ranks.
     FAPI_TRY( xlate_dimm_2R4T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -821,7 +1053,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -836,8 +1068,8 @@ fapi2::ReturnCode xlate_dimm_2R4T16Gbx4( const dimm::kind& i_kind,
         fapi2::buffer<uint64_t>& io_xlate1,
         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R17_MAP(0b00011);
-    constexpr uint64_t DBIT_MAP(0b00010);
+    constexpr uint64_t R17_MAP(PORT_ADDRESS_3);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_2);
 
     // We're just like a 2R 2H 8Gbx4 so lets start there and modify for the slave ranks.
     FAPI_TRY( xlate_dimm_2R4T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -854,7 +1086,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -869,13 +1101,12 @@ fapi2::ReturnCode xlate_dimm_2R8T4Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t M1_MAP(0b00101);
+    constexpr uint64_t M1_MAP(PORT_ADDRESS_5);
 
     // We're just like a 1R 8H 4Gbx4 so lets start there and modify for the slave ranks.
     FAPI_TRY( xlate_dimm_1R8T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
 
-    clear_xlate_srank<S0>(i_offset, io_xlate0, io_xlate1);
-
+    FAPI_TRY( clear_xlate_srank<S0>(i_offset, io_xlate0, io_xlate1) );
     FAPI_TRY( set_xlate_mrank<M1>(M1_MAP, i_offset, io_xlate0) );
 
 fapi_try_exit:
@@ -885,7 +1116,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -900,8 +1131,8 @@ fapi2::ReturnCode xlate_dimm_2R8T8Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R16_MAP(0b00011);
-    constexpr uint64_t DBIT_MAP(0b00010);
+    constexpr uint64_t R16_MAP(PORT_ADDRESS_3);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_2);
 
     // We're just like a 2R 4H 3DS 4Gbx4 so lets start there and modify
     FAPI_TRY( xlate_dimm_2R8T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -918,7 +1149,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -933,8 +1164,8 @@ fapi2::ReturnCode xlate_dimm_2R8T16Gbx4( const dimm::kind& i_kind,
         fapi2::buffer<uint64_t>& io_xlate1,
         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R17_MAP(0b00010);
-    constexpr uint64_t DBIT_MAP(0b0001);
+    constexpr uint64_t R17_MAP(PORT_ADDRESS_2);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_1);
 
     // We're just like a 2R 2H 3DS 8Gbx4 so lets start there and modify
     FAPI_TRY( xlate_dimm_2R4T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -951,7 +1182,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -966,9 +1197,9 @@ fapi2::ReturnCode xlate_dimm_2R16T4Gbx4( const dimm::kind& i_kind,
         fapi2::buffer<uint64_t>& io_xlate1,
         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t M1_MAP(0b00100);
-    constexpr uint64_t R15_MAP(0b00011);
-    constexpr uint64_t DBIT_MAP(0b00010);
+    constexpr uint64_t M1_MAP(PORT_ADDRESS_4);
+    constexpr uint64_t R15_MAP(PORT_ADDRESS_3);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_2);
 
     // We're just like a 1R 8H 4Gbx4 so lets start there
     FAPI_TRY( xlate_dimm_1R8T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -988,7 +1219,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1003,8 +1234,8 @@ fapi2::ReturnCode xlate_dimm_2R16T8Gbx4( const dimm::kind& i_kind,
         fapi2::buffer<uint64_t>& io_xlate1,
         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R16_MAP(0b00010);
-    constexpr uint64_t DBIT_MAP(0b00001);
+    constexpr uint64_t R16_MAP(PORT_ADDRESS_2);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_1);
 
     // We're just like a 2R 8H 3DS 4Gbx4 DDR4 RDIMM
     FAPI_TRY( xlate_dimm_2R16T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -1021,7 +1252,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1036,8 +1267,8 @@ fapi2::ReturnCode xlate_dimm_2R16T16Gbx4( const dimm::kind& i_kind,
         fapi2::buffer<uint64_t>& io_xlate1,
         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R17_MAP(0b00001);
-    constexpr uint64_t DBIT_MAP(0b0000);
+    constexpr uint64_t R17_MAP(PORT_ADDRESS_1);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_0);
 
     // We're just like a 2R 8H 3DS 8Gbx4 DDR4 RDIMM
     FAPI_TRY( xlate_dimm_2R16T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -1055,7 +1286,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1070,7 +1301,7 @@ fapi2::ReturnCode xlate_dimm_1R1T4Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    bool l_all_slots_1R = all_slots_1R_helper(i_kind.iv_target);
+    const bool l_all_slots_1R = all_slots_1R_helper(i_kind.iv_target);
 
     // Set the proper bit if there is a DIMM in this slot. If there wasn't, we wouldn't see
     // this DIMM in the vector, so this is always safe.
@@ -1079,8 +1310,8 @@ fapi2::ReturnCode xlate_dimm_1R1T4Gbx4( const dimm::kind& i_kind,
     // If we have all the slots filled in with 1R SDP DIMM, we build a very differnt mapping.
     if (l_all_slots_1R)
     {
-        constexpr uint64_t R15_MAP(0b00110);
-        constexpr uint64_t DBIT_MAP(0b01111);
+        constexpr uint64_t R15_MAP(PORT_ADDRESS_6);
+        constexpr uint64_t DBIT_MAP(PORT_ADDRESS_29);
 
         // Tell the MC which of the row bits are valid, and map the DIMM selector
         // We're a 16 row DIMM, so ROW15 is valid.
@@ -1100,17 +1331,17 @@ fapi2::ReturnCode xlate_dimm_1R1T4Gbx4( const dimm::kind& i_kind,
 
     // Tell the MC which of the row bits are valid, and map the DIMM selector
     {
-        constexpr uint64_t COL4_MAP(0b01110);
-        constexpr uint64_t COL5_MAP(0b01101);
-        constexpr uint64_t COL6_MAP(0b01100);
-        constexpr uint64_t COL7_MAP(0b01011);
-        constexpr uint64_t COL8_MAP(0b01010);
-        constexpr uint64_t COL9_MAP(0b01001);
-        constexpr uint64_t BANK0_MAP(0b01111);
-        constexpr uint64_t BANK1_MAP(0b10000);
-        constexpr uint64_t BG0_MAP(0b10001);
-        constexpr uint64_t BG1_MAP(0b10010);
-        constexpr uint64_t R15_MAP(0b00111);
+        constexpr uint64_t COL4_MAP(PORT_ADDRESS_28);
+        constexpr uint64_t COL5_MAP(PORT_ADDRESS_27);
+        constexpr uint64_t COL6_MAP(PORT_ADDRESS_26);
+        constexpr uint64_t COL7_MAP(PORT_ADDRESS_25);
+        constexpr uint64_t COL8_MAP(PORT_ADDRESS_24);
+        constexpr uint64_t COL9_MAP(PORT_ADDRESS_23);
+        constexpr uint64_t BANK0_MAP(PORT_ADDRESS_29);
+        constexpr uint64_t BANK1_MAP(PORT_ADDRESS_30);
+        constexpr uint64_t BG0_MAP(PORT_ADDRESS_31);
+        constexpr uint64_t BG1_MAP(PORT_ADDRESS_32);
+        constexpr uint64_t R15_MAP(PORT_ADDRESS_7);
 
         // We're a 16 row DIMM, so ROW15 is valid.
         FAPI_TRY( set_xlate_row<ROW15>(R15_MAP, i_offset, io_xlate0) );
@@ -1157,7 +1388,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1172,8 +1403,8 @@ fapi2::ReturnCode xlate_dimm_1R1T8Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R16_MAP_ALL_1R(0b00101);
-    constexpr uint64_t R16_MAP_NOT_ALL_1R(0b00110);
+    constexpr uint64_t R16_MAP_ALL_1R(PORT_ADDRESS_5);
+    constexpr uint64_t R16_MAP_NOT_ALL_1R(PORT_ADDRESS_6);
     const auto R16_MAP = all_slots_1R_helper(i_kind.iv_target) ? R16_MAP_ALL_1R : R16_MAP_NOT_ALL_1R;
 
     // We're more or less a 1R 4Gbx4 with an extra row. So lets setup like that and add our row in.
@@ -1194,7 +1425,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1209,8 +1440,8 @@ fapi2::ReturnCode xlate_dimm_1R1T16Gbx4( const dimm::kind& i_kind,
         fapi2::buffer<uint64_t>& io_xlate1,
         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R17_MAP_ALL_1R(0b00100);
-    constexpr uint64_t R17_MAP_NOT_ALL_1R(0b00101);
+    constexpr uint64_t R17_MAP_ALL_1R(PORT_ADDRESS_4);
+    constexpr uint64_t R17_MAP_NOT_ALL_1R(PORT_ADDRESS_5);
     const auto R17_MAP = all_slots_1R_helper(i_kind.iv_target) ? R17_MAP_ALL_1R : R17_MAP_NOT_ALL_1R;
 
     // We're more or less a 1R 8Gbx4 with an extra row. So lets setup like that and add our row in.
@@ -1231,7 +1462,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1246,13 +1477,12 @@ fapi2::ReturnCode xlate_dimm_1R2T4Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t S2_MAP(0b01111);
+    constexpr uint64_t S2_MAP(PORT_ADDRESS_29);
 
     // We're just like a 2R 4Gbx4 so lets start there and modify for the slave ranks.
     FAPI_TRY( xlate_dimm_2R2T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
 
-    clear_xlate_mrank<M1>(i_offset, io_xlate0);
-
+    FAPI_TRY( clear_xlate_mrank<M1>(i_offset, io_xlate0) );
     FAPI_TRY( set_xlate_srank<S2>(S2_MAP, i_offset, io_xlate0, io_xlate1) );
 
 fapi_try_exit:
@@ -1263,7 +1493,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1278,8 +1508,8 @@ fapi2::ReturnCode xlate_dimm_1R2T8Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R16_MAP(0b00101);
-    constexpr uint64_t DBIT_MAP(0b00100);
+    constexpr uint64_t R16_MAP(PORT_ADDRESS_5);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_4);
 
     // We're just like a 1R 2H 4Gbx4 so lets start there
     FAPI_TRY( xlate_dimm_1R2T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -1296,7 +1526,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1311,8 +1541,8 @@ fapi2::ReturnCode xlate_dimm_1R2T16Gbx4( const dimm::kind& i_kind,
         fapi2::buffer<uint64_t>& io_xlate1,
         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R17_MAP(0b00100);
-    constexpr uint64_t DBIT_MAP(0b00011);
+    constexpr uint64_t R17_MAP(PORT_ADDRESS_4);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_3);
 
     // We're just like a 1R 2H 8Gbx4 so lets start there
     FAPI_TRY( xlate_dimm_1R2T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -1329,7 +1559,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1344,9 +1574,9 @@ fapi2::ReturnCode xlate_dimm_1R4T4Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t S1_MAP(0b00110);
-    constexpr uint64_t R15_MAP(0b00101);
-    constexpr uint64_t DBIT_MAP(0b00100);
+    constexpr uint64_t S1_MAP(PORT_ADDRESS_6);
+    constexpr uint64_t R15_MAP(PORT_ADDRESS_5);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_4);
 
     // We're just like a 1R 2H 4Gbx4 so lets start there and modify for the slave ranks.
     FAPI_TRY( xlate_dimm_1R2T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -1366,7 +1596,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1381,8 +1611,8 @@ fapi2::ReturnCode xlate_dimm_1R4T8Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R16_MAP(0b00100);
-    constexpr uint64_t DBIT_MAP(0b00011);
+    constexpr uint64_t R16_MAP(PORT_ADDRESS_4);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_3);
 
     // We're just like a 1R 4H 4Gbx4 so lets start there and modify
     FAPI_TRY( xlate_dimm_1R4T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -1399,7 +1629,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1414,8 +1644,8 @@ fapi2::ReturnCode xlate_dimm_1R4T16Gbx4( const dimm::kind& i_kind,
         fapi2::buffer<uint64_t>& io_xlate1,
         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R17_MAP(0b00011);
-    constexpr uint64_t DBIT_MAP(0b00010);
+    constexpr uint64_t R17_MAP(PORT_ADDRESS_3);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_2);
 
     // We're just like a 1R 4H 8Gbx4 so lets start there and modify
     FAPI_TRY( xlate_dimm_1R4T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -1432,7 +1662,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1447,9 +1677,9 @@ fapi2::ReturnCode xlate_dimm_1R8T4Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t S0_MAP(0b00101);
-    constexpr uint64_t R15_MAP(0b00100);
-    constexpr uint64_t DBIT_MAP(0b00011);
+    constexpr uint64_t S0_MAP(PORT_ADDRESS_5);
+    constexpr uint64_t R15_MAP(PORT_ADDRESS_4);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_3);
 
     // We're just like a 1R 4H 4Gbx4 so lets start there and modify for the slave ranks.
     FAPI_TRY( xlate_dimm_1R4T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -1467,7 +1697,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1482,8 +1712,8 @@ fapi2::ReturnCode xlate_dimm_1R8T8Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R16_MAP(0b00011);
-    constexpr uint64_t DBIT_MAP(0b00010);
+    constexpr uint64_t R16_MAP(PORT_ADDRESS_3);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_2);
 
     // We're just like a 1R 8H 4Gbx4 so lets start there and modify for the slave ranks.
     FAPI_TRY( xlate_dimm_1R8T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -1500,7 +1730,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1515,8 +1745,8 @@ fapi2::ReturnCode xlate_dimm_1R8T16Gbx4( const dimm::kind& i_kind,
         fapi2::buffer<uint64_t>& io_xlate1,
         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R17_MAP(0b00010);
-    constexpr uint64_t DBIT_MAP(0b00001);
+    constexpr uint64_t R17_MAP(PORT_ADDRESS_2);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_1);
 
     // We're just like a 1R 8H 8Gbx4 so lets start there and modify for the slave ranks.
     FAPI_TRY( xlate_dimm_1R8T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -1533,7 +1763,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1548,16 +1778,15 @@ fapi2::ReturnCode xlate_dimm_4R4T4Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R15_MAP(0b00101);
-    constexpr uint64_t M0_MAP(0b00110);
-    constexpr uint64_t DBIT_MAP(0b00100);
+    constexpr uint64_t R15_MAP(PORT_ADDRESS_5);
+    constexpr uint64_t M0_MAP(PORT_ADDRESS_6);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_4);
 
     // We're just like a 2R 4Gbx4 except we have a valid M0 and a different DIMM bit.
     FAPI_TRY( xlate_dimm_2R2T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
 
     // Our R15 is still valid, but slide it over to make room for the M0 bit
-    io_xlate0.insertFromRight<MCS_PORT02_MCP0XLT0_R15_BIT_MAP, MCS_PORT02_MCP0XLT0_R15_BIT_MAP_LEN>(R15_MAP);
-
+    FAPI_TRY( set_xlate_row<ROW15>(R15_MAP, i_offset, io_xlate0) );
     FAPI_TRY( set_xlate_mrank<M0>(M0_MAP, i_offset, io_xlate0) );
 
     FAPI_TRY( d_bit_helper(i_kind.iv_target, i_largest, i_offset, DBIT_MAP, io_xlate0) );
@@ -1569,7 +1798,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1584,8 +1813,8 @@ fapi2::ReturnCode xlate_dimm_4R4T8Gbx4( const dimm::kind& i_kind,
                                         fapi2::buffer<uint64_t>& io_xlate1,
                                         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R16_MAP(0b00100);
-    constexpr uint64_t DBIT_MAP(0b00011);
+    constexpr uint64_t R16_MAP(PORT_ADDRESS_4);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_3);
 
     // We're just like a 4R 4Gbx4 except we have an extra row
     FAPI_TRY( xlate_dimm_4R4T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -1602,7 +1831,7 @@ fapi_try_exit:
 ///
 /// @brief Perform initializations of the MC translation
 /// @param[in] i_kind the DIMM to map
-/// @param[in] i_offset the offset; whether the DIMM ins slot 0 or slot 1
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
 /// @param[in] i_largest whether or not we're the largest DIMM on the port.
 /// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
 /// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
@@ -1617,8 +1846,8 @@ fapi2::ReturnCode xlate_dimm_4R4T16Gbx4( const dimm::kind& i_kind,
         fapi2::buffer<uint64_t>& io_xlate1,
         fapi2::buffer<uint64_t>& io_xlate2 )
 {
-    constexpr uint64_t R17_MAP(0b00011);
-    constexpr uint64_t DBIT_MAP(0b00010);
+    constexpr uint64_t R17_MAP(PORT_ADDRESS_3);
+    constexpr uint64_t DBIT_MAP(PORT_ADDRESS_2);
 
     // We're just like a 4R 8Gbx4 except we have an extra row
     FAPI_TRY( xlate_dimm_4R4T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
@@ -1677,7 +1906,7 @@ fapi2::ReturnCode setup_xlate_map_helper( std::vector<dimm::kind>& io_dimm_kinds
         // Our slot (0, 1) is the same as our general index.
         const uint64_t l_slot = mss::index(k.iv_target);
 
-        // Our slot offset tells us which 16 bit secption in the xlt register to use for this DIMM
+        // Our slot offset tells us which 16 bit section in the xlt register to use for this DIMM
         // We'll either use the left most bits (slot 0) or move 16 bits to the right for slot 1.
         const uint64_t l_slot_offset = l_slot * 16;
 
@@ -1712,13 +1941,14 @@ fapi2::ReturnCode setup_xlate_map_helper( std::vector<dimm::kind>& io_dimm_kinds
                      set_DIMM_TYPE(k.iv_dimm_type).
                      set_ROWS(k.iv_rows).
                      set_SIZE(k.iv_size),
-                     "no address translation funtion for DIMM %s %dMR (%d total ranks) %dGbx%d (%dGB) in slot %d",
+                     "no address translation funtion for DIMM %s %dMR (%d total ranks) %dGbx%d (%dGB) %d rows in slot %d",
                      mss::c_str(k.iv_target),
                      k.iv_master_ranks,
                      k.iv_total_ranks,
                      k.iv_dram_density,
                      k.iv_dram_width,
                      k.iv_size,
+                     k.iv_rows,
                      l_slot );
 
         // If we did find it ...
@@ -1771,6 +2001,456 @@ fapi2::ReturnCode setup_xlate_map(const fapi2::Target<TARGET_TYPE_MCA>& i_target
     FAPI_TRY( mss::putScom(i_target, MCA_MBA_MCP0XLT0, l_xlate0)  );
     FAPI_TRY( mss::putScom(i_target, MCA_MBA_MCP0XLT1, l_xlate1) );
     FAPI_TRY( mss::putScom(i_target, MCA_MBA_MCP0XLT2, l_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 1R 8Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_1R1T8Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 1R 4Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_1R1T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 1R 16Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_1R1T16Gbx8( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 1R 8Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_1R1T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 1R 2H 3DS 8Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_1R2T8Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 1R 2H 3DS 4Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_1R2T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 1R 2H 3DS 16Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_1R2T16Gbx8( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 1R 2H 3DS 8Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_1R2T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 1R 4H 3DS 8Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_1R4T8Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 1R 4H 3DS 4Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_1R4T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 1R 4H 3DS 16Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_1R4T16Gbx8( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 1R 4H 3DS 8Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_1R4T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 1R 8H 3DS 8Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_1R8T8Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 1R 8H 3DS 4Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_1R8T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 1R 8H 3DS 16Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_1R8T16Gbx8( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 1R 8H 3DS 8Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_1R8T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 2R 8Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_2R2T8Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 2R 4Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_2R2T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 2R16Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_2R2T16Gbx8( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 2R 8Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_2R2T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 2R 2H 8Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_2R4T8Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 2R 2H 4Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_2R4T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 2R 2H 16Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_2R4T16Gbx8( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 2R 2H 8Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_2R4T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 2R 4H 8Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_2R8T8Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 2R 4H 4Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_2R8T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 2R 4H 16Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_2R8T16Gbx8( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 2R 4H 8Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_2R8T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 2R 8H 8Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_2R16T8Gbx8( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 2R 8H 4Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_2R16T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 2R 8H 16Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_2R16T16Gbx8( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 2R 8H 8Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_2R16T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 4R 4Gbx4 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_4R4T8Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 4R 4Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_4R4T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 4R 16Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_4R4T16Gbx8( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // We're just like a 4R 8Gbx4 according to port address translation tables
+    FAPI_TRY( xlate_dimm_4R4T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
 
 fapi_try_exit:
     return fapi2::current_err;
