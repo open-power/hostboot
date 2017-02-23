@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/secureboot/base/securerom.H $                         */
+/* $Source: src/usr/secureboot/base/securerommgr.H $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -29,10 +29,10 @@
 #include <errl/errlentry.H>
 #include <securerom/ROM.H>
 
-/** @class SecureROM
- *  @brief Class for loading and interacting with SecureROM in memory
+/** @class SecureRomManager
+ *  @brief Class for loading and interacting with SecureRomManager in memory
  */
-class SecureROM
+class SecureRomManager
 {
     public:
 
@@ -99,12 +99,12 @@ class SecureROM
         /**
          * @brief Constructor
          */
-        SecureROM();
+        SecureRomManager();
 
         /**
          * @brief Destructor
          */
-        ~SecureROM();
+        ~SecureRomManager();
 
     private:
 
@@ -137,7 +137,7 @@ class SecureROM
         /**
          * @brief Static instance function for testcase only
          */
-        static SecureROM& getInstance();
+        static SecureRomManager& getInstance();
 
 
         /**
@@ -151,10 +151,10 @@ class SecureROM
          ********************************************/
 
         // let my testcase poke around
-        friend class SecureROMTest;
+        friend class SecureRomManagerTest;
 
 
-}; // end of SecureROM class
+}; // end of SecureRomManager class
 
 
 
