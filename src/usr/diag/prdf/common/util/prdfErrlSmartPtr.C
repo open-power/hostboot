@@ -40,8 +40,7 @@ void ErrlSmartPtr::add_src()
     if (iv_errl)
     {
         PRDF_ADD_SW_ERR( iv_errl, 0, PRDF_ERRLSMARTPTR, __LINE__ );
-        PRDF_ADD_PROCEDURE_CALLOUT( iv_errl, HWAS::SRCI_PRIORITY_MED,
-                                    HWAS::EPUB_PRC_SP_CODE );
+        PRDF_ADD_PROCEDURE_CALLOUT( iv_errl, MRU_MED, HWAS::EPUB_PRC_SP_CODE );
     }
 }
 
