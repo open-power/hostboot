@@ -910,7 +910,7 @@ namespace SBE
 
                 // Call p9_xip_delete_section to delete existing HBBL image
                 // from SBE image
-                void *l_imageBuf = malloc(io_image_size);
+                void *l_imageBuf =malloc(io_image_size);
                 xip_rc = p9_xip_delete_section(
                                  i_image,
                                  l_imageBuf,
@@ -1149,13 +1149,12 @@ namespace SBE
                 procIOMask = coreMask;
 
                 uint32_t l_ringSectionBufSize = MAX_SEEPROM_IMAGE_SIZE;
-                void* l_ringSectionBuf = malloc(l_ringSectionBufSize);
                 FAPI_INVOKE_HWP( err,
                                  p9_xip_customize,
                                  l_fapiTarg,
                                  io_imgPtr, //image in/out
                                  tmpImgSize,
-                                 l_ringSectionBuf,
+                                 (void*)RING_SEC_VADDR,
                                  l_ringSectionBufSize,
                                  SYSPHASE_HB_SBE,
                                  MODEBUILD_IPL,
@@ -1164,7 +1163,6 @@ namespace SBE
                                  (void*)RING_BUF2_VADDR,
                                  (uint32_t)MAX_RING_BUF_SIZE,
                                  procIOMask ); // Bits(8:31) = EC00:EC23
-                free(l_ringSectionBuf);
 
                 // Check for no error and use of input cores
                 if ( (NULL == err) && (procIOMask == coreMask))
@@ -1986,7 +1984,7 @@ namespace SBE
                 static_cast<uint32_t>(sbePnorImageSize + hbblCachelineSize);
 
             // copy SBE image from PNOR to memory
-            sbeHbblImgPtr = malloc(sbeHbblImgSize);
+            sbeHbblImgPtr = (void*)SBE_HBBL_IMG_VADDR;
             memcpy ( sbeHbblImgPtr,
                      sbePnorPtr,
                      sbePnorImageSize);
@@ -2127,8 +2125,6 @@ namespace SBE
                        io_sbeState.alt_seeprom_side);
 
         }while(0);
-
-        free(sbeHbblImgPtr);
 
         return err;
 
