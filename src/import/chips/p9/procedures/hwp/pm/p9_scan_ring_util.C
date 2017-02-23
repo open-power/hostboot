@@ -325,6 +325,7 @@ RingBucket::RingBucket( PlatId i_plat, uint8_t* i_pRingStart, RingDebugMode_t i_
             { ec_gptr, 0, 0 },
             { ec_time, 0, 0 },
             { ec_mode, 0, 0 },
+            { ec_abst, 0, 0 },
         };
 
         RingProfile l_coreSpecRings[TEMP_MAX_CORE_SPEC_RINGS * MAX_CORES_PER_CHIP] =
@@ -371,6 +372,7 @@ RingBucket::RingBucket( PlatId i_plat, uint8_t* i_pRingStart, RingDebugMode_t i_
         iv_ringName[ ec_time ]      =   (char*)"ec_time        ";
         iv_ringName[ ec_mode ]      =   (char*)"ec_mode        ";
         iv_ringName[ ec_repr ]      =   (char*)"ec_repr        ";
+        iv_ringName[ ec_abst ]      =   (char*)"ec_abst        ";
     }
 }
 

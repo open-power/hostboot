@@ -396,6 +396,8 @@ typedef struct
     uint16_t    ecGptrRing;
     uint16_t    ecTimeRing;
     uint16_t    ecModeRing;
+    uint16_t    ecabstRing;
+    uint8_t     reserved[6];
 } CoreCmnRingsList_t;
 
 typedef struct
