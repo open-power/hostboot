@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -100,7 +100,7 @@
 
 /** SBE Update process is at 3GB, uses 512KB */
 #define VMM_VADDR_SBE_UPDATE (3 * GIGABYTE)
-#define VMM_SBE_UPDATE_SIZE (512 * KILOBYTE)
+#define VMM_SBE_UPDATE_SIZE (900 * KILOBYTE)
 #define VMM_VADDR_SBE_UPDATE_END (VMM_VADDR_SBE_UPDATE + VMM_SBE_UPDATE_SIZE)
 
 /** Attribute Resource Provider */

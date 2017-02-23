@@ -135,16 +135,26 @@ namespace SBE
     /******************************************/
     /*  Enums                                 */
     /******************************************/
+    // SBE VADDR Layout
+    // 000K - 256K  = Dest for Customized SBE image
+    //
+    // 256K - 316K  = Ring buf1
+    // 316K - 376K  = Ring buf2
+    // 376K - 632K  = Ring Section buf
+    // ---- ALT use 256K-632K for SBE ECC image
+    // 632K - 888K  = SBE + HBBL image
     enum {
         FIXED_SEEPROM_WORK_SPACE = 256 * 1024,
         SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE,
         RING_BUF1_VADDR = FIXED_SEEPROM_WORK_SPACE + SBE_IMG_VADDR,
         RING_BUF2_VADDR = RING_BUF1_VADDR + MAX_RING_BUF_SIZE,
+        RING_SEC_VADDR  = RING_BUF2_VADDR + MAX_RING_BUF_SIZE,
         //NOTE: recycling the same memory space for different
         //steps in the process.
-        SBE_ECC_IMG_VADDR = VMM_VADDR_SBE_UPDATE + (VMM_SBE_UPDATE_SIZE / 2),
+        SBE_ECC_IMG_VADDR = RING_BUF1_VADDR,
         SBE_ECC_IMG_MAX_SIZE = (MAX_SEEPROM_IMAGE_SIZE * 9 / 8) +
                                (3 * SBE_SEEPROM_ECC_PAD),
+        SBE_HBBL_IMG_VADDR = RING_SEC_VADDR + FIXED_SEEPROM_WORK_SPACE,
     };
 
     // Used for MVPD function
