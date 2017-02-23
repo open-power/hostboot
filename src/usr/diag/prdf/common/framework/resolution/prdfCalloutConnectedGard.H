@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -110,7 +110,7 @@ class CalloutConnectedGard : public Resolution
 
     TARGETING::TYPE iv_targetType;
     uint32_t iv_idx;
-    PRDF::PRDpriority iv_priority;
+    PRDpriority iv_priority;
     Resolution * iv_altResolution;
     TARGETING::TYPE iv_peerConnType;
     GARD_POLICY iv_gardState; ///< gard policy associated with resolution

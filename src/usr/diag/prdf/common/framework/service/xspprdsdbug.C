@@ -177,7 +177,7 @@ uint32_t SYSTEM_DEBUG_CLASS::Reinitialize(const AttnList & i_attnList)
                               0,                          // user data word 3
                               0 );                        // user data word 4
 
-            PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, HWAS::SRCI_PRIORITY_MED,
+            PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, MRU_MED,
                                         HWAS::EPUB_PRC_SP_CODE );
             l_rc = PRD_ATTN_DATA_ACCESS_FAILED;
 

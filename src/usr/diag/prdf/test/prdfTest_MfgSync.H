@@ -72,7 +72,7 @@ class PrdfTest_MfgSync: public CxxTest::TestSuite
 
         l_pfaData.mruList[0].callout  = 0;
         l_pfaData.mruList[0].type     = PRDcalloutData::TYPE_TARGET;
-        l_pfaData.mruList[0].priority = HWAS::SRCI_PRIORITY_LOW;
+        l_pfaData.mruList[0].priority = MRU_LOW;
 
         // Test 1: Test with mailbox status disabled
         getSimMfgSync().setMailBoxStatus(false);
@@ -109,7 +109,7 @@ class PrdfTest_MfgSync: public CxxTest::TestSuite
         {
             l_pfaData.mruList[i].callout  = 0;
             l_pfaData.mruList[i].type     = PRDcalloutData::TYPE_TARGET;
-            l_pfaData.mruList[i].priority = HWAS::SRCI_PRIORITY_LOW;
+            l_pfaData.mruList[i].priority = MRU_LOW;
         }
 
         l_err = getSimMfgSync().syncMfgTraceToFsp(&l_errSig, l_pfaData);
