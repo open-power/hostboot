@@ -44,6 +44,8 @@
 #include "p9_perv_scom_addresses_fld.H"
 #include "p9_quad_scom_addresses_fld.H"
 #include "p9_sbe_common.H"
+#include "p9_sbe_chiplet_reset.H"  //For MCGR_CNFG_SETTING_GROUP
+
 
 enum P9_MEM_STARTCLOCKS_Private_Constants
 {
@@ -76,6 +78,7 @@ fapi2::ReturnCode p9_mem_startclocks(const
 {
     uint8_t l_sync_mode = 0;
     fapi2::buffer<uint64_t> l_pg_vector;
+    fapi2::buffer<uint64_t> l_scom;
     fapi2::buffer<uint64_t> l_clock_regions;
     FAPI_DBG("Entering ...");
 
@@ -134,6 +137,31 @@ fapi2::ReturnCode p9_mem_startclocks(const
             .insertFromRight<PERV_1_CPLT_CONF0_TC_UNIT_CHIP_ID_DC, PERV_1_CPLT_CONF0_TC_UNIT_CHIP_ID_DC_LEN>(l_fbc_chip_id);
             FAPI_TRY(fapi2::putScom(l_trgt_chplt, PERV_CPLT_CONF0, l_cplt_conf0),
                      "Error from putScom (PERV_CPLT_CONF0)");
+
+            FAPI_INF("Add to Multicast Group");
+            //Setting MULTICAST_GROUP_1 register value
+            //Avoid setting if the register is already set -- if so, don't set
+            //this prevents the multicast group from being corrupted, and allows
+            //repeated calls to this function
+            FAPI_TRY(fapi2::getScom(l_trgt_chplt, PERV_MULTICAST_GROUP_1, l_scom));
+
+            if(l_scom == p9SbeChipletReset::MCGR_CNFG_SETTING_EMPTY)
+            {
+                FAPI_TRY(fapi2::putScom(l_trgt_chplt, PERV_MULTICAST_GROUP_1,
+                                        p9SbeChipletReset::MCGR_CNFG_SETTING_GROUP0));
+            }
+
+            //Setting MULTICAST_GROUP_2 register value
+            //Avoid setting if the register is already set -- if so, don't set
+            //this prevents the multicast group from being corrupted, and allows
+            //repeated calls to this function
+            FAPI_TRY(fapi2::getScom(l_trgt_chplt, PERV_MULTICAST_GROUP_2, l_scom));
+
+            if(l_scom == p9SbeChipletReset::MCGR_CNFG_SETTING_EMPTY)
+            {
+                FAPI_TRY(fapi2::putScom(l_trgt_chplt, PERV_MULTICAST_GROUP_2,
+                                        p9SbeChipletReset::MCGR_CNFG_SETTING_GROUP2));
+            }
         }
     }
 
