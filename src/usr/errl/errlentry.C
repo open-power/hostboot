@@ -202,9 +202,9 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     iv_skipShowingLog(true)
 {
     #ifdef CONFIG_ERRL_ENTRY_TRACE
-    TRACDCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16X %.16X", plid(), i_reasonCode, i_modId, i_user1, i_user2 );
-    #else
     TRACFCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16X %.16X", plid(), i_reasonCode, i_modId, i_user1, i_user2 );
+    #else
+    TRACDCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16X %.16X", plid(), i_reasonCode, i_modId, i_user1, i_user2 );
     #endif
     // Collect the Backtrace and add it to the error log
     iv_pBackTrace = new ErrlUserDetailsBackTrace();
