@@ -505,9 +505,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 else
                 {
                     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
-                    fapi2::ReturnCode fapirc = memdiags::stop(fapiMcbist);
-
-                    err = fapi2::rcToErrl(fapirc);
+                    FAPI_INVOKE_HWP( err, memdiags::stop, fapiMcbist );
 
                     if ( nullptr != err )
                     {
@@ -934,8 +932,6 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
     do
     {
-        fapi2::ReturnCode fapirc;
-
         // new command...use the full range
         //target type is MBA
         if (TYPE_MBA == trgtType)
@@ -1078,8 +1074,8 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
             {
                 case START_RANDOM_PATTERN:
 
-                    fapirc = memdiags::sf_init(fapiMcbist,
-                            mss::mcbist::PATTERN_RANDOM);
+                    FAPI_INVOKE_HWP( err, memdiags::sf_init, fapiMcbist,
+                                     mss::mcbist::PATTERN_RANDOM );
                     MDIA_FAST("sm: random init %p on: %x", fapiMcbist,
                             get_huid(target));
                     break;
@@ -1098,7 +1094,8 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                         stopCond.set_pause_on_nce_hard(mss::ON);
                     }
 
-                    fapirc = memdiags::sf_read(fapiMcbist, stopCond);
+                    FAPI_INVOKE_HWP( err, memdiags::sf_read, fapiMcbist,
+                                     stopCond );
                     MDIA_FAST("sm: scrub %p on: %x", fapiMcbist,
                             get_huid(target));
                     break;
@@ -1112,7 +1109,8 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 case START_PATTERN_6:
                 case START_PATTERN_7:
 
-                    fapirc = memdiags::sf_init(fapiMcbist, workItem);
+                    FAPI_INVOKE_HWP( err, memdiags::sf_init, fapiMcbist,
+                                     workItem );
                     MDIA_FAST("sm: init %p on: %x", fapiMcbist,
                             get_huid(target));
                     break;
@@ -1122,7 +1120,6 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                              workItem, get_huid(target));
                     break;
             }
-            err = fapi2::rcToErrl(fapirc);
             if( nullptr != err )
             {
                 MDIA_FAST("sm: Running Maint Cmd failed");
@@ -1340,8 +1337,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 MDIA_FAST("sm: stopping command: %p", target);
 
                 fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
-                fapi2::ReturnCode fapirc = memdiags::stop(fapiMcbist);
-                err = fapi2::rcToErrl(fapirc);
+                FAPI_INVOKE_HWP( err, memdiags::stop, fapiMcbist );
 
                 if(nullptr != err)
                 {
