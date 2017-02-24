@@ -159,11 +159,9 @@ fapi2::ReturnCode p9_pm_reset(
     //  Reset the PSTATE GPE (Bring it to HALT)
     //  ************************************************************************
     FAPI_DBG("Executing p9_pm_pstate_gpe_init to reset PGPE");
-    /* TODO: RTC 157096 - Enable once the procedure is available
     FAPI_EXEC_HWP(l_rc, p9_pm_pstate_gpe_init, i_target, p9pm::PM_RESET);
-    FAPI_TRY(l_rc, "ERROR: Failed to reset PGPE");
+    FAPI_TRY(l_rc, "ERROR: Failed to reset the PGPE");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After reset of PGPE"));
-    */
 
     //  ************************************************************************
     //  Reset the STOP GPE (Bring it to HALT)
