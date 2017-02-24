@@ -434,12 +434,6 @@ fapi2::ReturnCode find_value_from_key( const std::pair<T, OT> (&i_array)[N],
                                        OT& o_value)
 {
     // TK Use sort and binary search for larger arrays
-    if (i_array == nullptr)
-    {
-        FAPI_ERR("nullptr passed to the find_value_from_key function");
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
-    }
-
     for (size_t i = 0; i < N; i++)
     {
         if (i_array[i].first == i_key)
