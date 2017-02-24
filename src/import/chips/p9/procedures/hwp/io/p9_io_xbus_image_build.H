@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/io/p9_io_obus_image_build.H $ */
+/* $Source: src/import/chips/p9/procedures/hwp/io/p9_io_xbus_image_build.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,11 +22,11 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __IO_IOO_HCODE_IMG_BUILD_H_
-#define __IO_IOO_HCODE_IMG_BUILD_H_
+#ifndef __IO_IOF_HCODE_IMG_BUILD_H_
+#define __IO_IOF_HCODE_IMG_BUILD_H_
 ///
 /// @file   p9_io_obus_image_build.H
-/// @brief  Implements HWP that builds the Hcode image in IO Obus PPE Sram.
+/// @brief  Implements HWP that builds the Hcode image in IO Xbus PPE Sram.
 ///----------------------------------------------------------------------------
 /// *HWP HWP Owner        : Chris Steffen <cwsteffen@us.ibm.com>
 /// *HWP HPW Backup Owner : Gary Peterson <garyp@us.ibm.com>
@@ -43,17 +43,17 @@
 #include <fapi2.H>
 
 
-typedef  const fapi2::Target<fapi2::TARGET_TYPE_OBUS> CONST_OBUS;
+typedef  const fapi2::Target<fapi2::TARGET_TYPE_XBUS> CONST_XBUS;
 
-typedef fapi2::ReturnCode (*p9_io_obus_image_build_FP_t)(CONST_OBUS&, void* const);
+typedef fapi2::ReturnCode (*p9_io_obus_image_build_FP_t)(CONST_XBUS&, void* const);
 
 extern "C"
 {
     /**
-    * @brief   builds a STOP image using a refrence image as input.
-    * @param   i_tgt     fapi2 target for obus chip unit.
-    * @param   i_pimage  points to memory mapped refrence image in PNOR.
+    * @brief   Pulls out I/O PPE Xbus Section from Hw Image
+    * @param   iTgt       fapi2 target for xbus chip unit.
+    * @param   iImagePtr  points to memory mapped refrence image in PNOR.
     */
-    fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iImagePtr);
+    fapi2::ReturnCode p9_io_xbus_image_build(CONST_XBUS& iTgt, void* const iImagePtr);
 } // extern C
 #endif //__IO_IOO_HCODE_IMG_BUILD_H_

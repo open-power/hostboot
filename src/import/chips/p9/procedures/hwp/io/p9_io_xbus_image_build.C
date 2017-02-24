@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/io/p9_io_obus_image_build.C $ */
+/* $Source: src/import/chips/p9/procedures/hwp/io/p9_io_xbus_image_build.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,25 +23,25 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file   p9_io_obus_image_build.C
-/// @brief  Implements HWP that builds the Hcode image in IO Obus PPE Sram.
+/// @file   p9_io_xbus_image_build.C
+/// @brief  Implements HWP that builds the Hcode image in IO Xbus PPE Sram.
 ///----------------------------------------------------------------------------
 /// *HWP HWP Owner        : Chris Steffen <cwsteffen@us.ibm.com>
 /// *HWP HPW Backup Owner : Gary Peterson <garyp@us.ibm.com>
 /// *HWP FW Owner         : Jamie Knight <rjknight@us.ibm.com>
 /// *HWP Team             : IO
-/// *HWP Level            : 1
+/// *HWP Level            : 2
 /// *HWP Consumed by      : FSP:HB
 ///----------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------
 // Includes
 //--------------------------------------------------------------------------
-#include <p9_io_obus_image_build.H>
+#include <p9_io_xbus_image_build.H>
 #include "p9_xip_image.h"
 
 //---------------------------------------------------------------------------
-fapi2::ReturnCode extractPpeImg(void* const iImagePtr, uint8_t*& oObusImgPtr, uint32_t& oSize)
+fapi2::ReturnCode extractPpeImg(void* const iImagePtr, uint8_t*& oPpeImgPtr, uint32_t& oSize)
 {
     FAPI_IMP("Entering getObusImageFromHwImage.");
     P9XipSection ppeSection;
@@ -57,13 +57,13 @@ fapi2::ReturnCode extractPpeImg(void* const iImagePtr, uint8_t*& oObusImgPtr, ui
     FAPI_TRY(p9_xip_get_section(iImagePtr, P9_XIP_SECTION_HW_IOPPE, &ppeSection));
 
     // Point to the I/O PPE Section in the HW/XIP Image
-    oObusImgPtr = ppeSection.iv_offset + (uint8_t*)(iImagePtr);
+    oPpeImgPtr = ppeSection.iv_offset + (uint8_t*)(iImagePtr);
 
     // From the I/O Section, lets pull the IOO Nvlink Image.
-    FAPI_TRY(p9_xip_get_section(oObusImgPtr, P9_XIP_SECTION_IOPPE_IOO_NV, &ppeSection));
+    FAPI_TRY(p9_xip_get_section(oPpeImgPtr, P9_XIP_SECTION_IOPPE_IOF, &ppeSection));
 
     // Point to the IOO PPE Image of the I/O PPE Section
-    oObusImgPtr = ppeSection.iv_offset + (uint8_t*)(oObusImgPtr);
+    oPpeImgPtr = ppeSection.iv_offset + (uint8_t*)(oPpeImgPtr);
 
     // Set the Size of the IOO Image
     oSize = ppeSection.iv_size;
@@ -74,7 +74,7 @@ fapi_try_exit:
 }
 
 //---------------------------------------------------------------------------
-fapi2::ReturnCode scomWrite(CONST_OBUS& iTgt, const uint64_t iAddr, const uint64_t iData)
+fapi2::ReturnCode scomWrite(CONST_XBUS& iTgt, const uint64_t iAddr, const uint64_t iData)
 {
     fapi2::buffer<uint64_t> data64(iData);
     // Xscom -- Scom from core in Hostboot mode
@@ -83,9 +83,9 @@ fapi2::ReturnCode scomWrite(CONST_OBUS& iTgt, const uint64_t iAddr, const uint64
 
 
 //---------------------------------------------------------------------------
-fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iHwImagePtr)
+fapi2::ReturnCode p9_io_xbus_image_build(CONST_XBUS& iTgt, void* const iHwImagePtr)
 {
-    FAPI_IMP("Entering p9_io_obus_image_build.");
+    FAPI_IMP("Entering p9_io_xbus_image_build.");
 
     const uint64_t SRAM_BASE_ADDR   = 0xFFFF000000000000ull;
     const uint64_t AUTOINC_EN       = 0x8000000000000000ull;
@@ -93,17 +93,17 @@ fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iHwImageP
     const uint64_t HARD_RESET       = 0x6000000000000000ull; // xcr cmd=110
     const uint64_t RESUME_FROM_HALT = 0x2000000000000000ull; // xcr cmd=010
     // PPE Address
-    const uint64_t BASE_ADDR    = 0x0000000006010C00ull;
+    const uint64_t BASE_ADDR    = 0x0000000006010840ull;
     const uint64_t MEM_ARB_CSAR = 0x000000000000000Dull | BASE_ADDR; // Sram Address Reg
     const uint64_t MEM_ARB_SCR  = 0x000000000000000Aull | BASE_ADDR; // Sram Source Control Reg
     const uint64_t MEM_ARB_CSDR = 0x000000000000000Eull | BASE_ADDR; // Sram Data Reg
     const uint64_t XCR_NONE     = 0x0000000000000010ull | BASE_ADDR; // External Control Reg
 
     uint64_t data      = 0;
-    uint8_t* pObusImg = NULL;
+    uint8_t* pPpeImg = NULL;
     uint32_t imgSize   = 0;
 
-    FAPI_TRY(extractPpeImg(iHwImagePtr, pObusImg, imgSize), "Extract PPE Image Failed.");
+    FAPI_TRY(extractPpeImg(iHwImagePtr, pPpeImg, imgSize), "Extract PPE Image Failed.");
 
     // PPE Reset
     FAPI_TRY(scomWrite(iTgt, XCR_NONE, HARD_RESET), "Hard Reset Failed.");
@@ -116,14 +116,14 @@ fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iHwImageP
 
     for(uint32_t i = 0; i < imgSize; i += 8)
     {
-        data = (((uint64_t) * (pObusImg + i + 0) << 56) & 0xFF00000000000000ull) |
-               (((uint64_t) * (pObusImg + i + 1) << 48) & 0x00FF000000000000ull) |
-               (((uint64_t) * (pObusImg + i + 2) << 40) & 0x0000FF0000000000ull) |
-               (((uint64_t) * (pObusImg + i + 3) << 32) & 0x000000FF00000000ull) |
-               (((uint64_t) * (pObusImg + i + 4) << 24) & 0x00000000FF000000ull) |
-               (((uint64_t) * (pObusImg + i + 5) << 16) & 0x0000000000FF0000ull) |
-               (((uint64_t) * (pObusImg + i + 6) <<  8) & 0x000000000000FF00ull) |
-               (((uint64_t) * (pObusImg + i + 7) <<  0) & 0x00000000000000FFull);
+        data = (((uint64_t) * (pPpeImg + i + 0) << 56) & 0xFF00000000000000ull) |
+               (((uint64_t) * (pPpeImg + i + 1) << 48) & 0x00FF000000000000ull) |
+               (((uint64_t) * (pPpeImg + i + 2) << 40) & 0x0000FF0000000000ull) |
+               (((uint64_t) * (pPpeImg + i + 3) << 32) & 0x000000FF00000000ull) |
+               (((uint64_t) * (pPpeImg + i + 4) << 24) & 0x00000000FF000000ull) |
+               (((uint64_t) * (pPpeImg + i + 5) << 16) & 0x0000000000FF0000ull) |
+               (((uint64_t) * (pPpeImg + i + 6) <<  8) & 0x000000000000FF00ull) |
+               (((uint64_t) * (pPpeImg + i + 7) <<  0) & 0x00000000000000FFull);
 
         // Write Data, as the address will be autoincremented.
         FAPI_TRY(scomWrite(iTgt, MEM_ARB_CSDR, data), "Data Write Failed.");
@@ -139,6 +139,6 @@ fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iHwImageP
     FAPI_TRY(scomWrite(iTgt, XCR_NONE, RESUME_FROM_HALT), "Resume From Halt Failed.");
 
 fapi_try_exit:
-    FAPI_IMP("Exit p9_io_obus_image_build.");
+    FAPI_IMP("Exit p9_io_xbus_image_build.");
     return fapi2::current_err;
 }

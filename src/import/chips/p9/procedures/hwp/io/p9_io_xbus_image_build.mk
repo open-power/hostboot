@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p9/procedures/hwp/io/p9_io_obus_image_build.mk $
+# $Source: src/import/chips/p9/procedures/hwp/io/p9_io_xbus_image_build.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,7 +22,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE=p9_io_obus_image_build
+PROCEDURE=p9_io_xbus_image_build
 lib$(PROCEDURE)_DEPLIBS+=p9_xip_image
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/xip)
 $(call BUILD_PROCEDURE)
