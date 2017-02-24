@@ -144,7 +144,16 @@ void* call_host_runtime_setup (void *io_pArgs)
             if ( l_err )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "Failed hbSecurebotData setup" );
+                            "Failed hbSecurebootData setup" );
+                break;
+            }
+
+            // API call to populate the TPM Info fields
+            l_err = RUNTIME::populate_hbTpmInfo();
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "Failed hbTpmInfo setup" );
                 break;
             }
 

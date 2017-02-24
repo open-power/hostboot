@@ -100,7 +100,9 @@ enum hdatSpiraLegacyDataAreas
     SPIRAL_PCRD             = 22,   // PCRD (Chip related data area)
     SPIRAL_HSVC_DATA        = 23,   // Host Services Data
     SPIRAL_HBRT_DATA        = 24,   // Hostboot Runtime Data
-    SPIRAL_LAST             = 24
+    SPIRAL_IPMI_DATA        = 25,   // IPMI Data
+    SPIRAL_TPM_DATA         = 26,   // TPM Node Related Data
+    SPIRAL_LAST             = 26
 };
 
 /** @enum hdatSpiraHDataAreas
@@ -141,7 +143,9 @@ enum hdatSpiraSDataAreas
     SPIRAS_PCRD             = 13,   // PCRD (Chip related data area)
     SPIRAS_HSVC_DATA        = 14,   // Host Services Data
     SPIRAS_HBRT_DATA        = 15,   // Hostboot Runtime Data
-    SPIRAS_LAST             = 15
+    SPIRAS_IPMI_DATA        = 16,   // IPMI Data
+    SPIRAS_TPM_DATA         = 17,   // Node TPM Related Data
+    SPIRAS_LAST             = 17
 };
 
 

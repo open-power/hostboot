@@ -34,11 +34,9 @@
 using namespace TARGETING;
 namespace HDAT
 {
-trace_desc_t *g_trac_hdat = NULL;
-TRAC_INIT(&g_trac_hdat,HDAT_COMP_NAME,4096);
+extern trace_desc_t *g_trac_hdat;
 
-
-/*******************************************************************************
+/*****************************************************************************n
 *  hdatBldErrLog
 *******************************************************************************/
 void hdatBldErrLog(errlHndl_t &   io_err,

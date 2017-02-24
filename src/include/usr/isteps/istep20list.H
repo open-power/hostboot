@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,6 +91,7 @@ const DepModInfo  g_istep20Dependancies = {
     {
         DEP_LIB(libistep20.so),
         DEP_LIB(libxz.so),
+        DEP_LIB(libruntime.so),
         NULL
     }
 };

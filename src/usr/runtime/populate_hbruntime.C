@@ -38,6 +38,7 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/entitypath.H>
+#include <targeting/common/commontargeting.H>
 #include <runtime/runtime_reasoncodes.H>
 #include <runtime/runtime.H>
 #include "hdatstructs.H"
@@ -54,6 +55,8 @@
 #include <secureboot/trustedbootif.H>
 #include <secureboot/service.H>
 #include <config.h>
+#include "../hdat/hdattpmdata.H"
+#include "../secureboot/trusted/tpmLogMgr.H"
 
 
 namespace RUNTIME
@@ -63,6 +66,8 @@ mutex_t g_rhbMutex = MUTEX_INITIALIZER;
 
 // used for populating the TPM required bit in HDAT
 const uint16_t TPM_REQUIRED_BIT = 0x8000; //leftmost bit of uint16_t set to 1
+
+const uint8_t BITS_PER_BYTE = 8;
 
 trace_desc_t *g_trac_runtime = nullptr;
 TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
@@ -810,40 +815,14 @@ errlHndl_t populate_hbSecurebootData ( void )
 
     // populate TPM config bits in hdat
     bool tpmRequired = false;
-    #ifdef CONFIG_TRUSTEDBOOT
+    #ifdef CONFIG_TPMDD
         tpmRequired = TRUSTEDBOOT::isTpmRequired();
     #endif
 
     l_sysParmsPtr->hdatTpmConfBits = tpmRequired? TPM_REQUIRED_BIT: 0;
 
-    // find max # of TPMs per drawer and populate hdat with it
-
-    // look for class ENC type NODE and class chip TPM to find TPMs
-    TARGETING::TargetHandleList l_nodeEncList;
-
-    getEncResources(l_nodeEncList, TYPE_NODE, UTIL_FILTER_ALL);
-
-    uint16_t l_maxTpms = 0;
-
-    // loop thru the nodes and check number of TPMs
-    for (TargetHandleList::const_iterator
-        l_node_iter = l_nodeEncList.begin();
-        l_node_iter != l_nodeEncList.end();
-        ++l_node_iter)
-    {
-        // for this Node, get a list of tpms
-        TARGETING::TargetHandleList l_tpmChipList;
-
-        getChildAffinityTargets ( l_tpmChipList, *l_node_iter,
-                        TARGETING::CLASS_CHIP, TYPE_TPM, false );
-
-        size_t l_numTpms = l_tpmChipList.size();
-
-        if (l_numTpms > l_maxTpms)
-        {
-            l_maxTpms = static_cast<uint16_t>(l_numTpms);
-        }
-    }
+    // get max # of TPMs per drawer and populate hdat with it
+    auto l_maxTpms = HDAT::hdatTpmDataCalcMaxSize();
 
     l_sysParmsPtr->hdatTpmDrawer = l_maxTpms;
     TRACFCOMP(g_trac_runtime,"Max TPMs = 0x%04X", l_maxTpms);
@@ -860,7 +839,300 @@ errlHndl_t populate_hbSecurebootData ( void )
     } while(0);
 
     return (l_elog);
-} // end populate_hbRuntiome
+} // end populate_hbRuntime
+
+errlHndl_t populate_TpmInfoByNode()
+{
+    errlHndl_t l_elog = nullptr;
+
+    do {
+
+    uint64_t l_baseAddr = 0;
+    uint64_t l_dataSizeMax = 0;
+    const uint64_t l_instance = 0; // pass 0 since there is only one record
+
+    // TODO RTC 167290 - We will need to pass the appropriate instance value
+    // when we implement multinode support
+
+    l_elog = RUNTIME::get_host_data_section(RUNTIME::NODE_TPM_RELATED,
+                                                l_instance,
+                                                l_baseAddr,
+                                                l_dataSizeMax);
+    if(l_elog)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
+            "get_host_data_section() failed for Node TPM-related Data section");
+        break;
+    }
+
+    // obtain the node target, used later to populate fields
+    TARGETING::Target* mproc = nullptr;
+    l_elog = TARGETING::targetService().queryMasterProcChipTargetHandle(mproc);
+    if(l_elog)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
+            "could not obtain the master processor from targeting");
+        break;
+    }
+    auto targetType = TARGETING::TYPE_NODE;
+    const TARGETING::Target* l_node = getParent(mproc, targetType);
+    assert(l_node != nullptr, "Bug! getParent on master proc returned null.");
+
+    // this will additively keep track of the next available offset
+    // as we fill the section
+    uint32_t l_currOffset = 0;
+
+    auto const l_hdatTpmData
+                    = reinterpret_cast<HDAT::hdatTpmData_t*>(l_baseAddr);
+
+    // make sure we have enough room
+    auto const l_tpmDataCalculatedMax = HDAT::hdatTpmDataCalcMaxSize();
+    assert(l_dataSizeMax >= l_tpmDataCalculatedMax,
+        "Bug! The TPM data hdat section doesn't have enough space");
+
+    // check that hdat structure format and eye catch were filled out
+    assert(l_hdatTpmData->hdatHdr.hdatStructId == HDAT::HDAT_HDIF_STRUCT_ID,
+        "Bug! The TPM data hdat struct format value doesn't match");
+
+    auto l_eyeCatchLen = strlen(HDAT::g_hdatTpmDataEyeCatch);
+    assert(memcmp(l_hdatTpmData->hdatHdr.hdatStructName,
+                  HDAT::g_hdatTpmDataEyeCatch,
+                  l_eyeCatchLen)==0,
+        "Bug! The TPM data hdat struct name eye catcher doesn't match");
+
+    l_hdatTpmData->hdatHdr.hdatInstance = HDAT::TpmDataInstance;
+    l_hdatTpmData->hdatHdr.hdatVersion = HDAT::TpmDataVersion;
+    l_hdatTpmData->hdatHdr.hdatHdrSize = HDAT::TpmDataHdrSize;
+    l_hdatTpmData->hdatHdr.hdatDataPtrOffset = HDAT::TpmDataPtrOffset;
+    l_hdatTpmData->hdatHdr.hdatDataPtrCnt = HDAT::TpmDataPtrCnt;
+    l_hdatTpmData->hdatHdr.hdatChildStrCnt = HDAT::TpmDataChildStrCnt;
+    l_hdatTpmData->hdatHdr.hdatChildStrOffset = HDAT::TpmDataChildStrOffset;
+
+    TRACFCOMP(g_trac_runtime,"populate_TpmInfoByNode: "
+        "HDAT TPM Data successfully read. Struct Format:0x%X",
+        l_hdatTpmData->hdatHdr.hdatStructId);
+    TRACFBIN(g_trac_runtime, "populate_TpmINfoByNode - EyeCatch: ",
+         l_hdatTpmData->hdatHdr.hdatStructName, l_eyeCatchLen);
+
+    // go past the end of the first struct to get to the next one
+    l_currOffset += sizeof(*l_hdatTpmData);
+
+    // populate first part of pointer pair for secure boot TPM info
+    l_hdatTpmData->hdatSbTpmInfo.hdatOffset = l_currOffset;
+
+    // the second part of the pointer pair for secure boot TPM info will be
+    // populated using the following start offset
+    auto l_sbTpmInfoStart = l_currOffset;
+
+    auto const l_hdatSbTpmInfo = reinterpret_cast<HDAT::hdatSbTpmInfo_t*>
+                                                    (l_baseAddr + l_currOffset);
+
+    std::list<TRUSTEDBOOT::TpmTarget> l_tpmList;
+    #ifdef CONFIG_TPMDD
+         TRUSTEDBOOT::getTPMs(l_tpmList);
+    #endif
+
+    TARGETING::TargetHandleList l_procList;
+
+    getAllChips(l_procList,TARGETING::TYPE_PROC,false);
+
+    auto const l_numTpms = l_tpmList.size();
+
+    // fill in the values for the Secure Boot TPM Info Array Header
+    l_hdatSbTpmInfo->hdatSbTpmArrayOffset = sizeof(*l_hdatSbTpmInfo);
+    l_hdatSbTpmInfo->hdatSbTpmArrayNumEntries = l_numTpms;
+    l_hdatSbTpmInfo->hdatSbTpmArrayEntrySize = sizeof(HDAT::hdatSbTpmInstInfo_t);
+
+    // advance current offset to after the Secure Boot TPM info array header
+    l_currOffset += sizeof(*l_hdatSbTpmInfo);
+
+    // fill in the values for each Secure Boot TPM Instance Info in the array
+    for (auto itpm : l_tpmList)
+    {
+        auto l_tpmInstInfo = reinterpret_cast<HDAT::hdatSbTpmInstInfo_t*>
+                                                    (l_baseAddr + l_currOffset);
+        auto l_tpmInfo = itpm.tpmTarget->getAttr<TARGETING::ATTR_TPM_INFO>();
+
+        TARGETING::PredicateAttrVal<TARGETING::ATTR_PHYS_PATH>
+                                      hasSameI2cMaster(l_tpmInfo.i2cMasterPath);
+
+        auto itr = std::find_if(l_procList.begin(),l_procList.end(),
+        [&hasSameI2cMaster](const TARGETING::TargetHandle_t & t)
+        {
+            return hasSameI2cMaster(t);
+        });
+
+        assert(itr != l_procList.end(), "Bug! TPM must have a processor.");
+        auto l_proc = *itr;
+
+        l_tpmInstInfo->hdatChipId = l_proc->getAttr<TARGETING::ATTR_CHIP_ID>();
+
+        l_tpmInstInfo->hdatDbobId = l_node->getAttr<
+                                                 TARGETING::ATTR_ORDINAL_ID>();
+
+        l_tpmInstInfo->hdatLocality1Addr = l_tpmInfo.devAddrLocality1;
+        l_tpmInstInfo->hdatLocality2Addr = l_tpmInfo.devAddrLocality2;
+        l_tpmInstInfo->hdatLocality3Addr = l_tpmInfo.devAddrLocality3;
+        l_tpmInstInfo->hdatLocality4Addr = l_tpmInfo.devAddrLocality4;
+
+        uint8_t functional = !itpm.failed;
+        // TODO RTC 168781 Replace above with something like below
+        // itpm.tpmTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional;
+
+        uint8_t present = itpm.available;
+        // TODO RTC 168781 Replace above with something like below
+        // itpm.tpmTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().present;
+
+        if (functional && present)
+        {
+            // present and functional
+            l_tpmInstInfo->hdatFunctionalStatus = HDAT::TpmPresentAndFunctional;
+        }
+        else if (present)
+        {
+            // present and not functional
+            l_tpmInstInfo->hdatFunctionalStatus = HDAT::TpmPresentNonFunctional;
+        }
+        else
+        {
+            // not present
+            l_tpmInstInfo->hdatFunctionalStatus = HDAT::TpmNonPresent;
+        }
+
+        // advance the current offset to account for this tpm instance info
+        l_currOffset += sizeof(*l_tpmInstInfo);
+
+        // use the current offset for the beginning of the SRTM event log
+        l_tpmInstInfo->hdatTpmSrtmEventLogOffset = sizeof(*l_tpmInstInfo);
+
+        #ifdef CONFIG_TPMDD
+        // copy the contents of the SRTM event log into HDAT picking the
+        // min of log size and log max (to make sure log size never goes
+        // over the max
+        memcpy(reinterpret_cast<void*>(l_baseAddr + l_currOffset),
+            TpmLogMgr_getLogStartPtr(itpm.logMgr),
+            itpm.logMgr->logSize < TPM_SRTM_EVENT_LOG_MAX ?
+            itpm.logMgr->logSize : TPM_SRTM_EVENT_LOG_MAX);
+
+        // set the size value for the data that was copied
+        l_tpmInstInfo->hdatTpmSrtmEventLogEntrySize = itpm.logMgr->logSize;
+        #else
+        l_tpmInstInfo->hdatTpmSrtmEventLogEntrySize = 0;
+        #endif
+
+        // advance the current offset to account for the SRTM event log
+        l_currOffset += TPM_SRTM_EVENT_LOG_MAX;
+
+        // set the DRTM offset to zero as it is not yet supported
+        l_tpmInstInfo->hdatTpmDrtmEventLogOffset = 0;
+
+        // set the DRTM event log size to zero as it is not yet supported
+        l_tpmInstInfo->hdatTpmDrtmEventLogEntrySize = 0;
+
+        // Note: We don't advance the current offset, because the size of the
+        // DRTM event log is zero
+    }
+
+    // populate second part of pointer pair for secure boot TPM info
+    l_hdatTpmData->hdatSbTpmInfo.hdatSize = l_currOffset - l_sbTpmInfoStart;
+
+    // the current offset now corresponds to the physical interaction mechanism
+    // info array header
+    auto l_physInter = reinterpret_cast<HDAT::hdatPhysInterMechInfo_t*>
+                                                    (l_baseAddr + l_currOffset);
+
+    // populate the first part of pointer pair from earlier to point here
+    l_hdatTpmData->hdatPhysInter.hdatOffset = l_currOffset;
+
+    // the following will be used to calculate the second part of pointer pair
+    auto l_physInterStart = l_currOffset;
+
+    // set up the physical interaction mechanism info header
+    l_physInter->hdatOffsetI2cDevInfoPtrs = sizeof(*l_physInter);
+    l_physInter->hdatNumEntries = 0;
+    l_physInter->hdatSizeOfI2cDevInfoPtrs = sizeof(HDAT::hdatI2cDevInfoPtrs_t);
+
+    // advance the current offset to account for the physical interaction
+    // mechanism info struct
+    l_currOffset =+ sizeof(*l_physInter);
+
+    // populate the second part of the pointer pair from earlier
+    l_hdatTpmData->hdatPhysInter.hdatSize = l_currOffset - l_physInterStart;
+
+    // set the total structure length to the current offset
+    l_hdatTpmData->hdatHdr.hdatSize = l_currOffset;
+
+    } while (0);
+
+    return (l_elog);
+}
+
+errlHndl_t populate_hbTpmInfo()
+{
+    errlHndl_t l_elog = nullptr;
+
+    do {
+        // TODO RTC 171851 Remove FSP restriction when FSP code provides
+        // Node TPM Related Data
+
+        // Skip populating HDAT TPM Node Related Data on FSP systems
+        if (INITSERVICE::spBaseServicesEnabled())
+        {
+            break;
+        }
+
+        TRACFCOMP(g_trac_runtime, "Running populate_hbTpmInfo");
+
+        TARGETING::Target* sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys != nullptr,
+            "populate_hbTpmInfo: Bug! Could not obtain top level target");
+
+        // This attribute is only set on a multi-node system.
+        // We will use it below to detect a multi-node scenario
+        auto hb_images = sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+
+        // if single node system
+        if (!hb_images)
+        {
+            l_elog = populate_TpmInfoByNode();
+            if(l_elog != nullptr)
+            {
+                TRACFCOMP( g_trac_runtime, "populate_hbTpmInfo: "
+                    "populate_RtDataByNode failed" );
+            }
+            break;
+        }
+
+        // start the 1 in the mask at leftmost position
+        decltype(hb_images) l_mask = 0x1 << (sizeof(hb_images)*BITS_PER_BYTE-1);
+
+        // start at node 0
+        uint32_t l_node = 0;
+
+        // while the one in the mask hasn't shifted out
+        while (l_mask)
+        {
+            // if this node is present
+            if(l_mask & hb_images)
+            {
+                TRACFCOMP( g_trac_runtime, "populate_hbTpmInfo: "
+                    "MsgToNode %d for HBRT TPM Info",
+                           l_node );
+                // @TODO RTC 167290
+                // Need to send message to the current node
+                // When node receives a message it should call
+                // populate_TpmInfoByNode()
+            }
+            l_mask >>= 1; // shift to the right for the next node
+            l_node++; // go to the next node
+        }
+
+    } while(0);
+
+    return (l_elog);
+} // end populate_hbTpmInfo
+
 
 
 errlHndl_t populate_hbRuntimeData( void )
