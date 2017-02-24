@@ -23,7 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_io_obus_image_build
-OBUS_BUILD_UTIL=$(ROOTPATH)/chips/p9/xip/
-$(PROCEDURE)_DEPLIBS+=p9_xip_image
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(OBUS_BUILD_UTIL)) 
+lib$(PROCEDURE)_DEPLIBS+=p9_xip_image
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/xip)
 $(call BUILD_PROCEDURE)
