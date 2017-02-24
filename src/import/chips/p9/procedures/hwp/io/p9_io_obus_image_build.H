@@ -32,7 +32,7 @@
 /// *HWP HPW Backup Owner : Gary Peterson <garyp@us.ibm.com>
 /// *HWP FW Owner         : Jamie Knight <rjknight@us.ibm.com>
 /// *HWP Team             : IO
-/// *HWP Level            : 1
+/// *HWP Level            : 2
 /// *HWP Consumed by      : FSP:HB
 ///----------------------------------------------------------------------------
 
@@ -43,20 +43,17 @@
 #include <fapi2.H>
 
 
-typedef fapi2::ReturnCode ( *p9_io_obus_image_build_FP_t )
-( const fapi2::Target < fapi2::TARGET_TYPE_OBUS >,
-  void* const );
+typedef  const fapi2::Target<fapi2::TARGET_TYPE_OBUS> CONST_OBUS;
+
+typedef fapi2::ReturnCode (*p9_io_obus_image_build_FP_t)(CONST_OBUS&, void* const);
 
 extern "C"
 {
-
     /**
     * @brief   builds a STOP image using a refrence image as input.
     * @param   i_tgt     fapi2 target for obus chip unit.
     * @param   i_pimage  points to memory mapped refrence image in PNOR.
     */
-    fapi2::ReturnCode p9_io_obus_image_build(
-        const fapi2::Target < fapi2::TARGET_TYPE_OBUS > i_target,
-        void* const                                     i_pimage );
+    fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iImagePtr);
 } // extern C
 #endif //__IO_IOO_HCODE_IMG_BUILD_H_
