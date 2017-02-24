@@ -75,9 +75,27 @@ errlHndl_t populate_hbRuntimeData( void );
  *     values acquired via the secureboot module from a verified source, and
  *     so, henceforth are available to the host at runtime.
  *
- * @return errlHndl_t NULL on Success
+ * @return errlHndl_t nullptr on Success else pointer to error log
  */
 errlHndl_t populate_hbSecurebootData( void );
+
+/**
+ * @brief Populate TPM Info in mainstore
+ *
+ * @description Populates the Secure Boot TPM Instance Info section of HDAT
+ *     with trusted information acquired via secure methods, and overwrites
+ *     any untrusted information that was already there.
+ *
+ * @return errlHndl_t nullptr on Success else pointer to error log
+ */
+errlHndl_t populate_hbTpmInfo( void );
+
+/**
+ * @brief Fills in Tpm Info in HDAT for current node
+ *
+ * @return errlHndl_t nullptr on success else pointer to error log
+ */
+errlHndl_t populate_TpmInfoByNode();
 
 /**
  * @brief Fills in HBRT for given NODE
@@ -127,6 +145,8 @@ enum SectionId
     NACA,                 //< NACA
     HBRT,                 //< Hostboot Runtime
     HBRT_DATA,            //< Hostboot Runtime  Data
+    IPMI_DATA,            //< IPMI Sensor Mapping Data
+    NODE_TPM_RELATED,     //< Node TPM Related Data
     RESERVED_MEM,         //< Hostboot's Reserved Mainstore Memory
     LAST_SECTION = RESERVED_MEM   //< Placeholder for arrays
 };

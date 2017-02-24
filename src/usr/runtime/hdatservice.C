@@ -819,6 +819,34 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             o_dataAddr = internal_data_ptrs[0].hdatOffset + base_addr;
             o_dataSize = internal_data_ptrs[0].hdatSize;
         }
+        else if( RUNTIME::NODE_TPM_RELATED == i_section )
+        {
+            // Find the right tuple and verify it makes sense
+            hdat5Tuple_t* tuple = nullptr;
+            if( iv_spiraS )
+            {
+                tuple = &(iv_spiraS->hdatDataArea[SPIRAS_TPM_DATA]);
+            }
+            else if( unlikely(iv_spiraL != nullptr) )
+            {
+                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_TPM_DATA]);
+            }
+            TRACUCOMP( g_trac_runtime, "NODE_TPM_DATA tuple=%p", tuple );
+
+            errhdl = check_tuple( i_section, tuple );
+            if( errhdl ) { break; }
+
+            uint64_t base_addr = 0;
+            errhdl = getSpiraTupleVA(tuple, base_addr);
+            if( errhdl ) { break; }
+
+            TRACUCOMP( g_trac_runtime, "tpm_data=%p", base_addr );
+
+            // set the base address and size for the section
+            record_size = tuple->hdatAllocSize;
+            o_dataSize = record_size;
+            o_dataAddr = base_addr + i_instance * o_dataSize;
+        }
         // MS DUMP Source Table - MDST
         else if( RUNTIME::MS_DUMP_SRC_TBL == i_section )
         {

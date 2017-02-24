@@ -32,6 +32,8 @@
 ROOTPATH = ../../..
 MODULE = runtime
 
+VPATH += ${ROOTPATH}/src/usr/hdat
+
 #@TODO RTC:132750
 #OBJS += populate_attributes.o
 OBJS += populate_hbruntime.o
@@ -39,7 +41,10 @@ OBJS += hdatservice.o
 OBJS += fakepayload.o
 OBJS += errlud_hdat.o
 OBJS += customize_attrs_for_payload.o
+OBJS += hdatcommonutil.o
 
 SUBDIRS += test.d
+
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hdat
 
 include ${ROOTPATH}/config.mk

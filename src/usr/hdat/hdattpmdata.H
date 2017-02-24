@@ -50,6 +50,28 @@ namespace HDAT
 {
 
 /**
+ * @brief Enumeration definition for known defaults to TPM data fields
+ */
+enum {
+    TpmDataInstance = 0,
+    TpmDataVersion = 0x10,
+    TpmDataHdrSize = 0x20,
+    TpmDataPtrOffset = 0x20,
+    TpmDataPtrCnt = 1,
+    TpmDataChildStrCnt = 0,
+    TpmDataChildStrOffset = 0,
+};
+
+/**
+ * @brief Enumeration definition for the TPM states of existence
+ */
+enum TpmState {
+    TpmPresentAndFunctional = 0x1,
+    TpmPresentNonFunctional = 0x2,
+    TpmNonPresent = 0x3,
+};
+
+/**
  * @brief Structure definition for HDAT Tpm Node Data Header
  */
 struct hdatTpmData_t
@@ -68,7 +90,7 @@ struct hdatSbTpmInfo_t
 {
     uint32_t hdatSbTpmArrayOffset;
     uint32_t hdatSbTpmArrayNumEntries;
-    uint32_t hdatSbTpmArraySize;
+    uint32_t hdatSbTpmArrayEntrySize;
 } __attribute__ ((packed));
 
 
@@ -91,9 +113,8 @@ struct hdatSbTpmInstInfo_t
     uint32_t hdatTpmDrtmEventLogEntrySize;
 } __attribute__ ((packed));
 
-
 /**
- * @brief  Structure definition for HDAT physical interaction mechanism info
+ * @brief Structure definition for HDAT physical interaction mechanism info
  */
 struct hdatPhysInterMechInfo_t
 {
@@ -102,9 +123,8 @@ struct hdatPhysInterMechInfo_t
     uint32_t hdatSizeOfI2cDevInfoPtrs;
 } __attribute__ ((packed));
 
-
 /**
- * @brief  Structure definition for HDAT Host I2c Device Information pointers
+ * @brief  Structure definition for HDAT Host I2C Device Info pointers
  */
 struct hdatI2cDevInfoPtrs_t
 {
@@ -113,6 +133,7 @@ struct hdatI2cDevInfoPtrs_t
     uint32_t hdatHostI2cLinkId;
 } __attribute__ ((packed));
 
+extern const char g_hdatTpmDataEyeCatch[];
 
 /** Begin Class Description
  *
@@ -225,6 +246,17 @@ class HdatTpmData
  * @retval uint16_t Returns the maximum number of TPMs per node for this system
  */
 uint16_t hdatCalcMaxTpmsPerNode();
+
+/**
+ * @brief Calculate the maximum size of the HDAT TPM data section
+ *
+ * @pre None
+ *
+ * @post None
+ *
+ * @retval uint32_t Maximum size of the HDAT TPM data section
+ */
+uint32_t hdatTpmDataCalcMaxSize();
 
 }
 #endif // HDATTPMDATA_H
