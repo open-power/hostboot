@@ -76,26 +76,40 @@ target_type 2 TARGET_TYPE_PROC_CHIP;
 ##########################
 
 # If cache scope prediciton logic is active, must disable fp_m bit, so fp ops will go fetch 128 bytes (for potential mdi update)
-espy  MC01.PBI01.SCOMFIR.MCMODE1_DISABLE_FP_M_BIT [when=S] {
+espy MC01.PBI01.SCOMFIR.MCMODE1_DISABLE_FP_M_BIT [when=S] {
   spyv;
   ON;
 }
 
 # HW376110
-ispy  MC01.PBI01.SCOMFIR.MCPERF1_MERGE_CAPACITY_LIMIT [when=S && ATTR_CHIP_EC_FEATURE_HW376110] {
+ispy MC01.PBI01.SCOMFIR.MCPERF1_MERGE_CAPACITY_LIMIT [when=S && ATTR_CHIP_EC_FEATURE_HW376110] {
   spyv;
   0b0111;
 }
 
 # Turns off SRQ pf drop
-ispy  MC01.PBI01.SCOMFIR.MCPERF1_ENABLE_PF_DROP_SRQ [when=S] {
+ispy MC01.PBI01.SCOMFIR.MCPERF1_ENABLE_PF_DROP_SRQ [when=S] {
   spyv;
   0;
 }
 
 # HW400075 Always set MDI to 1 for ttypes cp_me and cp_m
-ispy  MC01.PBI01.SCOMFIR.MCMODE2_DISABLE_MDI0 [when=S && ATTR_CHIP_EC_FEATURE_HW40075] {
+ispy MC01.PBI01.SCOMFIR.MCMODE2_DISABLE_MDI0 [when=S && ATTR_CHIP_EC_FEATURE_HW400075] {
   spyv,              expr;
   0b0001100000000,   (TGT1.ATTR_RISK_LEVEL == 0);
 }
 
+# HW398139 Enable commandlist prefetch drop for better arbitration
+# Prefetch drop references an internal counter (6 by default - this is max value) to determine
+# when a prefetch gets dropped. DROP_CNT_THRESH determines the rate the counter decrements (in units
+# of 4 nest clocks) -- here, 8 * 4 nclks = 32 nclks, 32 nclks * 6 counts => takes 192 nest clocks
+# to drop a prefetch. This dial may need to be tuned for performance.
+espy MC01.PBI01.SCOMFIR.MCPERF1_ENABLE_PF_DROP_CMDLIST [when=S && ATTR_CHIP_EC_FEATURE_HW398139] {
+  spyv;
+  ON;
+}
+
+ispy MC01.PBI01.SCOMFIR.MCPERF1_PF_DROP_CNT_THRESH [when=S && ATTR_CHIP_EC_FEATURE_HW398139] {
+  spyv;
+  8;
+}
