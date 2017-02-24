@@ -614,12 +614,20 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
              *               data to receive
              */
 
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                SBEIO_FIFO,
+                                SBEIO_FIFO_DOWNSTREAM_TIMEOUT,
+                                MAX_UP_FIFO_TIMEOUT_NS,
+                                0);
+
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
+
             errl->addHwCallout(  i_target,
                                  HWAS::SRCI_PRIORITY_HIGH,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
+
             errl->collectTrace(SBEIO_COMP_NAME);
             break;
         }
