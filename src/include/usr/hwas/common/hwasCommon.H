@@ -163,9 +163,19 @@ const uint32_t VPD_CP00_PG_XBUS_INDEX       = 6;
 // Nimbus doesn't physically have PBIOX0 and IOX0.  IOX0 is
 // taken care of by xbus links, need to handle PBIOX0 as part of
 // the full chiplet good, so full good is E40D instead of E44D
+// Currently, there are two versions of the MVPD PG keyword:
+// 0xE44D == XBUS0 bad
+// 0xE45D and 0xE55D == XBUS 0,2 bad
+// Spec indicates that both iox (second nibble) and pbiox
+// (third nibble) are bad for sforza and monza type modules.
+// We support generically the following cases:
+// 0xE50D --> xbus chiplet good
+// 0xE40D --> xbus chiplet good
+// and rely solely on the pbiox as the Xbus target indicator
+// (0x0040, 0x0020, 0x0010) for all types of chips.
 const uint32_t VPD_CP00_PG_XBUS_GOOD_NIMBUS = 0xE40D;
 const uint32_t VPD_CP00_PG_XBUS_GOOD_CUMULUS= 0xE00D;
-const uint32_t VPD_CP00_PG_XBUS_PG_MASK     = 0x0070;
+const uint32_t VPD_CP00_PG_XBUS_PG_MASK     = 0x00170;
 const uint32_t VPD_CP00_PG_XBUS_IOX[3] = {0x0040, 0x0020, 0x0010};
 
 const uint32_t VPD_CP00_PG_MCxx_INDEX[4]    = {7, 7, 8, 8}; // by MCS
