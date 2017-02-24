@@ -57,6 +57,7 @@
 #include <p9_pm_occ_sram_init.H>
 #include <p9_pm_ocb_init.H>
 #include <p9_pm_pss_init.H>
+#include <p9_pm_pstate_gpe_init.H>
 
 typedef fapi2::ReturnCode (*p9_pm_reset_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
