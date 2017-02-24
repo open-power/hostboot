@@ -48,6 +48,7 @@
 #include <p9_pm_pba_init.H>
 #include <p9_pm_firinit.H>
 #include <p9_pm_stop_gpe_init.H>
+#include <p9_pm_pstate_gpe_init.H>
 #include <p9_pm_occ_control.H>
 #include <p9_pm_reset.H>
 
