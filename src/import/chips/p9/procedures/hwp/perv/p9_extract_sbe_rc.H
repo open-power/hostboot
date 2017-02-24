@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,26 +46,31 @@ namespace P9_EXTRACT_SBE_RC
 {
 enum RETURN_ACTION
 {
-    RESTART_SBE       = 1, // Trigger external HRESET to reset SBE
-    RESTART_CBS       = 2, // Trigger Warm ipl where we don't switch off VSB just toggle start_cbs from FSP
-    REIPL_BKP_SEEPROM = 3, // Run IPL by selecting backup seeprom
-    RE_IPL            = 4, // Reload/update of SEEPROM required or deconfig the chip
-    NO_RECOVERY_ACTION = 5 // No recovery action possible to correct this error, Replace the chip with new one
+    RESTART_SBE        = 1, // Trigger external HRESET to reset SBE
+    RESTART_CBS        = 2, // Trigger Warm ipl where we don't switch off VSB just toggle start_cbs from FSP
+    REIPL_BKP_SEEPROM  = 3, // Run IPL by selecting backup seeprom
+    RE_IPL             = 4, // Reload/update of SEEPROM required or deconfig the chip
+    NO_RECOVERY_ACTION = 5, // No recovery action possible to correct this error, Replace the chip with new one
+    PPE_RUNNING        = 6  // Return action when PPE is in Running state
 };
 };
 
 typedef fapi2::ReturnCode (*p9_extract_sbe_rc_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-        P9_EXTRACT_SBE_RC::RETURN_ACTION&);
+        P9_EXTRACT_SBE_RC::RETURN_ACTION&, bool, bool);
 
 /// @brief called on all chips(master and slaves) to look for any correctable errors on the SBE, OTPROM, PIBMEM & SEEPROM, the soft_error flag tells the procedure not to generate error if no HW issue.
 ///
 /// @param[in]     i_target_chiplet   Reference to TARGET_TYPE_PROC_CHIP target
 /// @param[out]    o_return_action    Returns the action to be taken on an error
+/// @param[in]     i_set_sdb          To program the chip to set SDB
+/// @param[in]     i_unsecure_mode    To get debug info in a unsecure mode
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 extern "C"
 {
     fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
-                                        P9_EXTRACT_SBE_RC::RETURN_ACTION& o_return_action);
+                                        P9_EXTRACT_SBE_RC::RETURN_ACTION& o_return_action,
+                                        bool i_set_sdb = false,
+                                        bool i_unsecure_mode = false);
 }
 
 #endif
