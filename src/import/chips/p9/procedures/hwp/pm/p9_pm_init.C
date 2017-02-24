@@ -196,12 +196,11 @@ fapi2::ReturnCode pm_init(
     //  ************************************************************************
     //  Initialize the PSTATE GPE Engine
     //  ************************************************************************
-    /* TODO: RTC 157096: Enable pstate GPE initialization in PM_INIT phase
     FAPI_DBG("Executing p9_pm_pstate_gpe_init to initialize PGPE");
     FAPI_EXEC_HWP(l_rc, p9_pm_pstate_gpe_init, i_target, p9pm::PM_INIT);
     FAPI_TRY(l_rc, "ERROR: Failed to initialize PGPE");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After PGPE initialization"));
-    */
+
     // ************************************************************************
     // Switch off OCC initiated special wakeup on EX to allowSTOP functionality
     // ************************************************************************
