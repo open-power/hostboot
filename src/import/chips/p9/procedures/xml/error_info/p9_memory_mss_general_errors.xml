@@ -68,4 +68,20 @@
     </deconfigure>
     </hwpError>
 
+   <hwpError>
+    <rc>RC_MSS_INVALID_DRAM_WIDTH</rc>
+    <description>
+      An invalid/unsupported DRAM width was received.  This is possibly due
+      to SPD decoding errors or incorrect setting of ATTR_EFF_DRAM_WIDTH attribute.
+    </description>
+    <ffdc>DRAM_WIDTH</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    </hwpError>
+
 </hwpErrors>
