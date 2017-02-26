@@ -559,15 +559,15 @@ fapi_try_exit:
 namespace dp16
 {
 
-typedef   std::pair< uint64_t, uint64_t >  register_data_pair;
-typedef std::vector< register_data_pair >  register_data_vector;
+typedef std::pair< uint64_t, uint64_t > register_data_pair;
+typedef std::vector< register_data_pair > register_data_vector;
 
 // Why the tables you ask? Because these bits need to be controlled
 // depending on phy, packaging, board swizzling and it's just eaiser
 // to see the bits like this than in a more compact algorithmic arrangement.
 
 // Systems without Spare Bytes (or with deconfigured spares)
-static const register_data_vector  data_bit_enable_no_spare[] =
+static const register_data_vector data_bit_enable_no_spare[] =
 {
     // DHPY01
     {
@@ -594,11 +594,98 @@ static const register_data_vector wrclk_enable_no_spare_x4[] =
         {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_2, 0x8640},
         {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_3, 0x8640},
         {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_4, 0x8400},
+    }
+};
+
+static const register_data_vector wrclk_enable_no_spare_x8[] =
+{
+    // Port 0 settings
+    {
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_0, 0x0CC0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_1, 0xC0C0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_2, 0x0CC0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_3, 0x0F00},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_4, 0x0C00},
+    },
+
+    // Port 1 settings
+    {
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_0, 0xC0C0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_1, 0x0F00},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_2, 0x0CC0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_3, 0xC300},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_4, 0x0C00},
+    },
+
+    // Port 2 settings
+    {
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_0, 0xC300},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_1, 0xC0C0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_2, 0xC0C0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_3, 0x0F00},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_4, 0x0C00},
+    },
+
+    // Port 3 settings
+    {
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_0, 0x0F00},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_1, 0x0F00},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_2, 0xC300},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_3, 0xC300},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_4, 0xC000},
+    },
+
+    // Port 4 settings
+    // This is flipped w/the settings from the rosetta stone
+    // due to the port 4 & 6 view from the PHY
+    {
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_0, 0x0CC0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_1, 0xC0C0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_2, 0x0F00},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_3, 0x0F00},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_4, 0xC000},
+    },
+
+    // Port 5 settings
+    // This is flipped w/the settings from the rosetta stone
+    // due to the port 5 & 7 view from the PHY
+    {
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_0, 0xC300},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_1, 0x0CC0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_2, 0x0CC0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_3, 0xC300},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_4, 0xC000},
+    },
+
+    // Port 6 settings
+    // This is flipped w/the settings from the rosetta stone
+    // due to the port 4 & 6 view from the PHY
+    {
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_0, 0x0CC0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_1, 0x0CC0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_2, 0x0CC0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_3, 0xC0C0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_4, 0x0C00},
+    },
+
+    // Port 7 settings
+    // This is flipped w/the settings from the rosetta stone
+    // due to the port 5 & 7 view from the PHY
+    {
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_0, 0x0CC0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_1, 0xC0C0},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_2, 0x0F00},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_3, 0xC300},
+        {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_4, 0xC000},
     },
 };
 
+// Some compile constants to define expected sizes
+constexpr size_t CLK_ENABLE_X4_SIZE = 1;
+constexpr size_t CLK_ENABLE_X8_SIZE = 8;
+
 // Rank Pair will be added to the register address before writing
-static const register_data_vector  rdclk_enable_no_spare_x4[] =
+static const register_data_vector rdclk_enable_no_spare_x4[] =
 {
     {
         {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0, 0x8640},
@@ -606,6 +693,89 @@ static const register_data_vector  rdclk_enable_no_spare_x4[] =
         {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_2, 0x8640},
         {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_3, 0x8640},
         {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_4, 0x8400},
+    },
+};
+
+static const register_data_vector rdclk_enable_no_spare_x8[] =
+{
+    // Port 0 settings
+    {
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0, 0x0CC0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_1, 0xC0C0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_2, 0x0CC0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_3, 0x0F00},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_4, 0x0C00},
+    },
+
+    // Port 1 settings
+    {
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0, 0xC0C0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_1, 0x0F00},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_2, 0x0CC0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_3, 0xC300},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_4, 0x0C00},
+    },
+
+    // Port 2 settings
+    {
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0, 0xC300},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_1, 0xC0C0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_2, 0xC0C0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_3, 0x0F00},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_4, 0x0C00},
+    },
+
+    // Port 3 settings
+    {
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0, 0x0F00},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_1, 0x0F00},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_2, 0xC300},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_3, 0xC300},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_4, 0xC000},
+    },
+
+    // Port 4 settings
+    // This is flipped w/the settings from the rosetta stone
+    // due to the port 4 & 6 view from the PHY
+    {
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0, 0x0CC0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_1, 0xC0C0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_2, 0x0F00},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_3, 0x0F00},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_4, 0xC000},
+    },
+
+    // Port 5 settings
+    // This is flipped w/the settings from the rosetta stone
+    // due to the port 5 & 7 view from the PHY
+    {
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0, 0xC300},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_1, 0x0CC0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_2, 0x0CC0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_3, 0xC300},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_4, 0xC000},
+    },
+
+    // Port 6 settings
+    // This is flipped w/the settings from the rosetta stone
+    // due to the port 4 & 6 view from the PHY
+    {
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0, 0x0CC0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_1, 0x0CC0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_2, 0x0CC0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_3, 0xC0C0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_4, 0x0C00},
+    },
+
+    // Port 7 settings
+    // This is flipped w/the settings from the rosetta stone
+    // due to the port 5 & 7 view from the PHY
+    {
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0, 0x0CC0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_1, 0xC0C0},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_2, 0x0F00},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_3, 0xC300},
+        {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_4, 0xC000},
     },
 };
 
@@ -639,7 +809,7 @@ static const register_data_vector wrclk_enable_spare_x4[] =
     },
 };
 
-static const register_data_vector  rdclk_enable_spare_x4[] =
+static const register_data_vector rdclk_enable_spare_x4[] =
 {
     {
         {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0, 0x8640},
@@ -680,28 +850,101 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper function to select rdclk/wrclk enable settings
+/// @tparam N size of x4 register_data_vectors
+/// @tparam M size of x8 register_data_vectors
+/// @param[in] i_target a port target
+/// @param[in] i_clk_enable_data_x4 array of register_data_vectors
+/// @param[in] i_clk_enable_data_x8 array of register_data_vectors
+/// @param[out] o_reg_data rdclk settings
+/// @return FAPI2_RC_SUCCES iff ok
+///
+template < size_t N, size_t M >
+static fapi2::ReturnCode clock_enable_helper( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+        const register_data_vector (&i_clk_enable_data_x4)[N],
+        const register_data_vector (&i_clk_enable_data_x8)[M],
+        register_data_vector& o_reg_data )
+{
+
+    // Compile-time checks to assure we don't seg fault
+    static_assert( (N == CLK_ENABLE_X4_SIZE) &&
+                   (M == CLK_ENABLE_X8_SIZE),
+                   "Expected register_data_vector size for x4 is 1,"
+                   " register_data_vector size for x8 is 8");
+
+    // Retrieving DRAM width accessor to determine our device width
+    // to set appropriate settings for x8 and x4 cases
+    uint8_t l_dram_width[mss::MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY( mss::eff_dram_width(i_target, &l_dram_width[0]) );
+
+    // I am iterating over functional DIMMs to skip empty DIMM slots
+    // I'm looking for the 1st instance of whether to use x4 or x8 settings
+    // This should be fine since 2 DIMMs w/the same width use the same settings
+    // and DIMM mixing isn't allowed and would error out due to our plug_rules
+    // before getting here in eff_config
+    for( const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
+    {
+        const auto l_sdram_width = l_dram_width[mss::index(d)];
+
+        switch(l_sdram_width)
+        {
+            case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8:
+                // Settings for x8 mappings were created for all 8 ports and DP instances
+                // under a proc since they vary. So are indexing with mss::pos versus mss::index
+                o_reg_data = i_clk_enable_data_x8[mss::pos(i_target)];
+                return fapi2::FAPI2_RC_SUCCESS;
+                break;
+
+            case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4:
+                // Settings for x4 mapping are the same for all 8 ports and DP instances
+                // so we only use one setting, only the first index is defined
+                o_reg_data = i_clk_enable_data_x4[0];
+                return fapi2::FAPI2_RC_SUCCESS;
+                break;
+
+            default:
+                FAPI_ASSERT( false,
+                             fapi2::MSS_INVALID_DRAM_WIDTH().
+                             set_DRAM_WIDTH(l_sdram_width).
+                             set_TARGET(d),
+                             "Received in valid DRAM width: x%d for %s. "
+                             "Expected x8 or x4 configuration.",
+                             l_sdram_width, mss::c_str(d) );
+                break;
+        }// switch
+    }// dimm
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Reset the read clock enable registers
 /// @param[in] i_target
-/// @param[in] l_rank_pairs
+/// @param[in] i_rank_pairs
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 fapi2::ReturnCode reset_read_clock_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-        const std::vector< uint64_t >& l_rank_pairs )
+        const std::vector< uint64_t >& i_rank_pairs )
 {
-    // Just slam something in here for now - we know the 'RIT DIMM' is x4, lets assume no cross-coupling for now
-    bool l_using_spares = false;
-    auto l_reg_data = l_using_spares ? rdclk_enable_spare_x4[0] : rdclk_enable_no_spare_x4[0];
+    register_data_vector l_reg_data;
+    FAPI_TRY( clock_enable_helper(i_target, rdclk_enable_no_spare_x4, rdclk_enable_no_spare_x8, l_reg_data),
+              "Failed clock_enable_helper() on %s", mss::c_str(i_target) );
 
-    for (const auto& rp : l_rank_pairs)
+    for (const auto& rp : i_rank_pairs)
     {
         for (const auto& rdp : l_reg_data)
         {
             // Grab the register and add the rank pair in
+            constexpr size_t RP_ADDR_START = 22;
+            constexpr size_t RP_ADDR_LEN = 2;
+
             fapi2::buffer<uint64_t> l_address(rdp.first);
-            l_address.insertFromRight<22, 2>(rp);
+            l_address.insertFromRight<RP_ADDR_START, RP_ADDR_LEN>(rp);
 
             fapi2::buffer<uint64_t> l_data;
-            l_data.insertFromRight<MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0_01_QUAD0_CLK16, 16>(rdp.second);
+            constexpr size_t QUAD_LEN = 16;
+            l_data.insertFromRight<MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0_01_QUAD0_CLK16, QUAD_LEN>(rdp.second);
 
             FAPI_INF( "Setting up RDCLK RP%d 0x%llx (0x%llx) %s", rp, l_address, l_data, mss::c_str(i_target) );
             FAPI_TRY( mss::putScom(i_target, l_address, l_data) );
@@ -715,26 +958,30 @@ fapi_try_exit:
 ///
 /// @brief Resets the write clock enable registers
 /// @param[in] i_target
-/// @param[in] l_rank_pairs
+/// @param[in] i_rank_pairs
 /// @return FAPI2_RC_SUCCESs iff ok
 ///
 fapi2::ReturnCode reset_write_clock_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-        const std::vector< uint64_t >& l_rank_pairs )
+        const std::vector< uint64_t >& i_rank_pairs )
 {
-    // Just slam something in here for now - we know the 'RIT DIMM' is x4, lets assume no cross-coupling for now
-    bool l_using_spares = false;
-    auto l_reg_data = l_using_spares ? wrclk_enable_spare_x4[0] : wrclk_enable_no_spare_x4[0];
+    register_data_vector l_reg_data;
+    FAPI_TRY( clock_enable_helper(i_target, wrclk_enable_no_spare_x4, wrclk_enable_no_spare_x8, l_reg_data),
+              "Failed clock_enable_helper() on %s", mss::c_str(i_target) );
 
-    for (const auto& rp : l_rank_pairs)
+    for (const auto& rp : i_rank_pairs)
     {
         for (const auto& rdp : l_reg_data)
         {
             // Grab the register and add the rank pair in
+            constexpr size_t RP_ADDR_START = 22;
+            constexpr size_t RP_ADDR_LEN = 2;
+
             fapi2::buffer<uint64_t> l_address(rdp.first);
-            l_address.insertFromRight<22, 2>(rp);
+            l_address.insertFromRight<RP_ADDR_START, RP_ADDR_LEN>(rp);
 
             fapi2::buffer<uint64_t> l_data;
-            l_data.insertFromRight<MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_0_01_QUAD0_CLK16, 16>(rdp.second);
+            constexpr size_t QUAD_LEN = 16;
+            l_data.insertFromRight<MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_0_01_QUAD0_CLK16, QUAD_LEN>(rdp.second);
 
             FAPI_INF( "Setting up WRCLK RP%d 0x%llx (0x%llx) %s", rp, l_address, l_data, mss::c_str(i_target) );
             FAPI_TRY( mss::putScom(i_target, l_address, l_data) );
@@ -748,11 +995,11 @@ fapi_try_exit:
 ///
 /// @brief Reset the training delay configuration
 /// @param[in] i_target the port target
-/// @param[in] l_rank_pairs vector of rank pairs
+/// @param[in] i_rank_pairs vector of rank pairs
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 fapi2::ReturnCode reset_delay_values( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-                                      const std::vector< uint64_t >& l_rank_pairs )
+                                      const std::vector< uint64_t >& i_rank_pairs )
 {
     std::vector<uint64_t> l_addrs(
     {
@@ -773,7 +1020,7 @@ fapi2::ReturnCode reset_delay_values( const fapi2::Target<TARGET_TYPE_MCA>& i_ta
     FAPI_TRY( mss::wc::write_config2(i_target, l_data) );
 #endif
 
-    for (const auto& rp : l_rank_pairs)
+    for (const auto& rp : i_rank_pairs)
     {
         for (const auto& a : l_addrs)
         {
