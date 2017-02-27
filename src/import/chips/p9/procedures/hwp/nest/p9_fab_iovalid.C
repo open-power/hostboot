@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -385,6 +385,10 @@ p9_fab_iovalid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                      l_x_agg_link_delay[l_link_id]),
                                  "Error from p9_fab_iovalid_get_link_delays (X, optical)");
                     }
+
+                    FAPI_TRY(p9_fab_iovalid_link_validate(i_target,
+                                                          P9_FBC_XBUS_LINK_CTL_ARR[l_link_id]),
+                             "Error from p9_fab_iovalid_link_validate (X)");
                 }
             }
         }
@@ -416,6 +420,10 @@ p9_fab_iovalid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                  P9_FBC_ABUS_LINK_CTL_ARR[l_a_rem_link_id[l_link_id]],
                                  l_a_agg_link_delay[l_link_id]),
                              "Error from p9_fab_iovalid_get_link_delays (A)");
+
+                    FAPI_TRY(p9_fab_iovalid_link_validate(i_target,
+                                                          P9_FBC_ABUS_LINK_CTL_ARR[l_link_id]),
+                             "Error from p9_fab_iovalid_link_validate (A)");
                 }
             }
         }
