@@ -89,15 +89,23 @@
 // @todo Determine what is needed here (eg Attribute mapping) and if any constants
 // are warrented
 
-/// VPD #V Operating Points
+/// VPD #V Data from keyword (eg VPD order)
 #define VPD_PV_POINTS 4
+#define VPD_PV_POWERSAVE   1
+#define VPD_PV_NOMINAL     0
+#define VPD_PV_TURBO       2
+#define VPD_PV_ULTRA       3
+#define VPD_PV_ORDER {VPD_PV_POWERSAVE, VPD_PV_NOMINAL, VPD_PV_TURBO, VPD_PV_ULTRA}
 #define VPD_PV_ORDER_STR {"Nominal   ","PowerSave ", "Turbo     ", "UltraTurbo"}
-#define POWERSAVE   1
-#define NOMINAL     0
+
+/// VPD #V Operating Points (eg Natureal order)
+#define POWERSAVE   0
+#define NOMINAL     1
 #define TURBO       2
 #define ULTRA       3
 #define POWERBUS    4
-#define VPD_PV_ORDER {POWERSAVE, NOMINAL, TURBO, ULTRA}
+#define PV_OP_ORDER {POWERSAVE, NOMINAL, TURBO, ULTRA}
+#define PV_OP_ORDER_STR {"PowerSave ", "Nominal   ","Turbo     ", "UltraTurbo"}
 
 #define VPD_PV_CORE_FREQ_MHZ    0
 #define VPD_PV_VDD_MV           1
