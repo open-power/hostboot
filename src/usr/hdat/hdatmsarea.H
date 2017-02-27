@@ -42,6 +42,7 @@
 #include "hdathdif.H"            // HdatHdif base class definition
 #include "hdatram.H"             // HdatRam class definition
 #include <errl/errlentry.H>      // ErrlEntry class
+#include "hdatutil.H"
 
 namespace HDAT
 {
@@ -157,16 +158,6 @@ struct hdatMsAreaEcLvl_t
     uint32_t hdatChipManfId;  // 0x0000 Memory interface chip manufacturing id
     uint32_t hdatChipEcLvl;   // 0x0004 Memory interface chip EC level
 }  __attribute__ ((packed));
-
-/** @brief Structure definition for the host I2C devices header
- */
-struct hdatMsAreaHI2cData_t
-{
-    uint32_t hdatMsaI2cMasterInfo;   // 0x0000 Host I2C device info
-    uint32_t hdatMsaI2cSlaveDevType; // 0x0004 Host I2C slave device type
-    uint32_t hdatMsaI2cPurpose;      // 0x0008 Host I2C purpose
-}  __attribute__ ((packed));
-
 
 /*----------------------------------------------------------------------------*/
 /* Constants                                                                  */
@@ -480,7 +471,7 @@ public:
     * @retval void         
     */
    void setMsaI2cInfo (
-       std::vector<hdatMsAreaHI2cData_t>& i_I2cDevEntries );
+       std::vector<hdatI2cData_t>& i_I2cDevEntries );
 
   /**
    * @brief This routine returns the length of all RAM objects associated

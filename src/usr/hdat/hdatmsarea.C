@@ -382,23 +382,23 @@ errlHndl_t HdatMsArea::addEcEntry(uint32_t i_manfId,
 /** @brief See the prologue in hdatmsarea.H
  */ 
 void HdatMsArea::setMsaI2cInfo(
-    std::vector<hdatMsAreaHI2cData_t> &i_I2cDevEntries )
+    std::vector<hdatI2cData_t> &i_I2cDevEntries )
 {
     HDAT_ENTER();
     iv_msaI2cHdr.hdatOffset = 0x0010;      // this is just header of 4 words. arrays start at 0x0010
     iv_msaI2cHdr.hdatArrayCnt = i_I2cDevEntries.size();
-    iv_msaI2cHdr.hdatAllocSize = sizeof(hdatMsAreaHI2cData_t);
-    iv_msaI2cHdr.hdatActSize = sizeof(hdatMsAreaHI2cData_t);
+    iv_msaI2cHdr.hdatAllocSize = sizeof(hdatI2cData_t);
+    iv_msaI2cHdr.hdatActSize = sizeof(hdatI2cData_t);
     iv_msaHostI2cCnt = i_I2cDevEntries.size();
     iv_msaHostI2cSize = sizeof(hdatHDIFDataArray_t) +
-        (sizeof(hdatMsAreaHI2cData_t) * iv_msaHostI2cCnt);
+        (sizeof(hdatI2cData_t) * iv_msaHostI2cCnt);
     HDAT_INF("iv_msaHostI2cCnt=%d, iv_msaHostI2cSize=%d",
         iv_msaHostI2cCnt, iv_msaHostI2cSize);
     if ( i_I2cDevEntries.size() != 0 )
     {
-        iv_msaI2cDataPtr = new uint8_t[sizeof(hdatMsAreaHI2cData_t) * iv_msaHostI2cCnt];
+        iv_msaI2cDataPtr = new uint8_t[sizeof(hdatI2cData_t) * iv_msaHostI2cCnt];
         memcpy(iv_msaI2cDataPtr , i_I2cDevEntries.begin() ,
-                    (sizeof(hdatMsAreaHI2cData_t) * iv_msaHostI2cCnt));  
+                    (sizeof(hdatI2cData_t) * iv_msaHostI2cCnt));  
 
     }
     else

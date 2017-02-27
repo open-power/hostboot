@@ -112,17 +112,6 @@ struct hdatPcrdChipTod_t
                                           //        control register
 } __attribute__ ((packed));
 
-
-/** @brief Defines the Host I2C device info in the PCRD
- */
-struct hdatPcrdHI2cData_t
-{
-    uint32_t hdatPcrdI2cMasterInfo;   // 0x0000 Host I2C device info
-    uint32_t hdatPcrdI2cSlaveDevType; // 0x0004 Host I2C slave device type
-    uint32_t hdatPcrdI2cPurpose;      // 0x0008 Host I2C purpose
-}__attribute__ ((packed));
-
-
 /* @brief defines PNOR structure in PCRD */
 struct hdatPcrdPnor_t
 {
