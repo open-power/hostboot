@@ -27,10 +27,10 @@
 /// @file ddr_phy.H
 /// @brief Subroutines to manipulate the phy, or used during phy procedures
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_DDR_PHY_H_
@@ -72,12 +72,6 @@ fapi2::ReturnCode enable_zctl( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i
 ///
 fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
         const mss::states i_state);
-///
-/// @brief Unset the PLL and check to see that the PLL's have started
-/// @param[in] i_target the mcbist target
-/// @return FAPI2_RC_SUCCES iff ok
-///
-fapi2::ReturnCode deassert_pll_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 ///
 /// @brief Change the continuous update mode of the PR CNTL registers
@@ -370,18 +364,20 @@ fapi2::ReturnCode restore_mainline_terminations( const fapi2::Target<fapi2::TARG
 /// @brief Perform the DLL calibration
 /// @tparam T the target type of the MCBIST
 /// @param[in] i_target the target associated with this DLL cal
+/// @param[out] o_run_workaround whether we need to run workarounds
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
-fapi2::ReturnCode dll_calibration( const fapi2::Target<T>& i_target );
+fapi2::ReturnCode dll_calibration( const fapi2::Target<T>& i_target, bool& o_run_workaround );
 
 ///
 /// @brief Perform the DLL calibration
 /// @param[in] i_target the target associated with this DLL cal
+/// @param[out] o_run_workaround whether we need to run workarounds
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target, bool& o_run_workaround );
 
 ///
 /// @brief Flush the output drivers
