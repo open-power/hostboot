@@ -27,10 +27,10 @@
 /// @file adr.C
 /// @brief Subroutines for the PHY ADR registers
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -168,17 +168,14 @@ fapi2::ReturnCode reset_imp_clk( const fapi2::Target<TARGET_TYPE_MCA>& i_target 
     FAPI_TRY(mss::vpd_mt_mc_drv_imp_clk(i_target, l_attr_value));
 
     //checks the attr value
-    if(l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CLK_OHM30 &&
-       l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CLK_OHM40 )
-    {
-        FAPI_ASSERT(false,
-                    fapi2::MSS_INVALID_VPD_MT_MC_DRV_IMP_CLK()
-                    .set_VALUE(l_attr_value)
-                    .set_MCA_TARGET(i_target),
-                    "%s value is not valid: %u",
-                    c_str(i_target),
-                    l_attr_value);
-    }
+    FAPI_ASSERT( l_attr_value == fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CLK_OHM30 ||
+                 l_attr_value == fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CLK_OHM40,
+                 fapi2::MSS_INVALID_VPD_MT_MC_DRV_IMP_CLK()
+                 .set_VALUE(l_attr_value)
+                 .set_MCS_TARGET( mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target) ),
+                 "%s value is not valid: %u",
+                 c_str(i_target),
+                 l_attr_value);
 
     //loops and sets the value in each register
     //Note: does RMW as other functions set the other lanes
@@ -228,17 +225,14 @@ fapi2::ReturnCode reset_imp_cmd_addr( const fapi2::Target<TARGET_TYPE_MCA>& i_ta
     FAPI_TRY(mss::vpd_mt_mc_drv_imp_cmd_addr(i_target, l_attr_value));
 
     //checks the attr value
-    if(l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR_OHM30 &&
-       l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR_OHM40 )
-    {
-        FAPI_ASSERT(false,
-                    fapi2::MSS_INVALID_VPD_MT_MC_DRV_IMP_CMD_ADDR()
-                    .set_VALUE(l_attr_value)
-                    .set_MCA_TARGET(i_target),
-                    "%s value is not valid: %u",
-                    c_str(i_target),
-                    l_attr_value);
-    }
+    FAPI_ASSERT( l_attr_value == fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR_OHM30 ||
+                 l_attr_value == fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR_OHM40,
+                 fapi2::MSS_INVALID_VPD_MT_MC_DRV_IMP_CMD_ADDR()
+                 .set_VALUE(l_attr_value)
+                 .set_MCS_TARGET( mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target) ),
+                 "%s value is not valid: %u",
+                 c_str(i_target),
+                 l_attr_value);
 
     //loops and sets the value in each register
     //Note: does RMW as other functions set the other lanes
@@ -288,17 +282,14 @@ fapi2::ReturnCode reset_imp_cntl( const fapi2::Target<TARGET_TYPE_MCA>& i_target
     FAPI_TRY(mss::vpd_mt_mc_drv_imp_cntl(i_target, l_attr_value));
 
     //checks the attr value
-    if(l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CNTL_OHM30 &&
-       l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CNTL_OHM40 )
-    {
-        FAPI_ASSERT(false,
-                    fapi2::MSS_INVALID_VPD_MT_MC_DRV_IMP_CNTL()
-                    .set_VALUE(l_attr_value)
-                    .set_MCA_TARGET(i_target),
-                    "%s value is not valid: %u",
-                    c_str(i_target),
-                    l_attr_value);
-    }
+    FAPI_ASSERT( l_attr_value == fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CNTL_OHM30 ||
+                 l_attr_value == fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CNTL_OHM40,
+                 fapi2::MSS_INVALID_VPD_MT_MC_DRV_IMP_CNTL()
+                 .set_VALUE(l_attr_value)
+                 .set_MCS_TARGET( mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target) ),
+                 "%s value is not valid: %u",
+                 c_str(i_target),
+                 l_attr_value);
 
     //loops and sets the value in each register
     //Note: does RMW as other functions set the other lanes
@@ -325,7 +316,6 @@ fapi2::ReturnCode reset_imp_cntl( const fapi2::Target<TARGET_TYPE_MCA>& i_target
         FAPI_TRY(mss::putScom(i_target,
                               l_reg_info.first,
                               l_value));
-
     }
 
 fapi_try_exit:
@@ -348,17 +338,14 @@ fapi2::ReturnCode reset_imp_cscid( const fapi2::Target<TARGET_TYPE_MCA>& i_targe
     FAPI_TRY(mss::vpd_mt_mc_drv_imp_cscid(i_target, l_attr_value));
 
     //checks the attr value
-    if(l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CSCID_OHM30 &&
-       l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CSCID_OHM40 )
-    {
-        FAPI_ASSERT(false,
-                    fapi2::MSS_INVALID_VPD_MT_MC_DRV_IMP_CSCID()
-                    .set_VALUE(l_attr_value)
-                    .set_MCA_TARGET(i_target),
-                    "%s value is not valid: %u",
-                    c_str(i_target),
-                    l_attr_value);
-    }
+    FAPI_ASSERT( l_attr_value == fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CSCID_OHM30 ||
+                 l_attr_value == fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CSCID_OHM40,
+                 fapi2::MSS_INVALID_VPD_MT_MC_DRV_IMP_CSCID()
+                 .set_VALUE(l_attr_value)
+                 .set_MCS_TARGET( mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target) ),
+                 "%s value is not valid: %u",
+                 c_str(i_target),
+                 l_attr_value);
 
     //loops and sets the value in each register
     //Note: does RMW as other functions set the other lanes
