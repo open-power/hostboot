@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,15 @@
 // Constant definitions
 //-----------------------------------------------------------------------------------
 
+// Used for version checking as the BootloaderConfigData_t structure changes
+enum SbeBootloaderVersion
+{
+    // Keep initial version formatted as it was originally
+    INIT = 0x901,
+    // Later versions use format [release:2][version:2]
+    SAB_ADDED = 0x00090002
+};
+
 // Structure starts at the bootloader zero address
 struct BootloaderConfigData_t
 {
@@ -57,6 +66,7 @@ struct BootloaderConfigData_t
     uint8_t pnorBootSide;  // 0=PNOR side A, 1=PNOR side B  [ATTR_PNOR_BOOT_SIDE]
     uint16_t pnorSizeMB;  // Size of PNOR in MB  [ATTR_PNOR_SIZE]
     uint64_t blLoadSize;  // Size of Load (Exception vectors and Bootloader)
+    uint8_t secureAccessBit;
 };
 
 #endif
