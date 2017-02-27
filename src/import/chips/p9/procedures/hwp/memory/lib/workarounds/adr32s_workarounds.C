@@ -187,7 +187,7 @@ fapi2::ReturnCode setup_dll_control_regs( const fapi2::Target<fapi2::TARGET_TYPE
     // do the error check
     FAPI_ASSERT( l_done,
                  fapi2::MSS_DLL_UPDATE_BIT_STUCK()
-                 .set_TARGET(i_target)
+                 .set_MCA_TARGET(i_target)
                  .set_REGISTER(i_reg),
                  "Failed to setup DLL control reg for %s 0x%016lx", mss::c_str(i_target), i_reg );
 
