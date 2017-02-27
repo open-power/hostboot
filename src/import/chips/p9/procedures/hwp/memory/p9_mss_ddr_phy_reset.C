@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <stdint.h>
@@ -59,7 +59,6 @@ extern "C"
 ///
     fapi2::ReturnCode p9_mss_ddr_phy_reset(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target)
     {
-
         // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
         // attributes for the PHY, etc.
         if (mss::count_dimm(i_target) == 0)
@@ -112,12 +111,13 @@ extern "C"
         // complete. One of the 3 bits will be asserted for ADR and DP16.
         {
             FAPI_INF( "starting DLL calibration %s", mss::c_str(i_target) );
-            fapi2::ReturnCode l_rc = mss::dll_calibration(i_target);
+            bool l_run_workaround = false;
+            fapi2::ReturnCode l_rc = mss::dll_calibration(i_target, l_run_workaround);
 
             // Only run DLL workaround if we fail DLL cal
             // Note: there is no EC workaround for this workaround
             // The designer team informed me that there is no hardware fix in plan for this type of fail as of DD2 - SPG
-            if( l_rc != fapi2::FAPI2_RC_SUCCESS )
+            if( l_run_workaround )
             {
                 FAPI_INF( "%s Applying DLL workaround", mss::c_str(i_target) );
                 l_rc = mss::workarounds::dll::fix_bad_voltage_settings(i_target);
@@ -203,5 +203,4 @@ extern "C"
         return fapi2::current_err;
 
     }
-
 }
