@@ -53,6 +53,10 @@
 #include <sbeio/sbeioif.H>
 #include <sbe/sbereasoncodes.H>
 #include "sbe_update.H"
+#ifdef CONFIG_BMC_IPMI
+#include <ipmi/ipmisensor.H>
+#endif
+#include <initservice/istepdispatcherif.H>
 
 //  fapi support
 #include    <fapi2.H>
