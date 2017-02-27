@@ -27,10 +27,10 @@
 /// @file dp16.C
 /// @brief Static data and subroutines to control the DP16 logic blocks
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob L Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -639,7 +639,7 @@ fapi2::ReturnCode rd_vref_bitfield_helper( const fapi2::Target<T>& i_target,
                      .set_VALUE(i_vref)
                      .set_VREF_MAX(l_max)
                      .set_VREF_MIN(l_min)
-                     .set_TARGET(i_target),
+                     .set_MCS_TARGET(mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target)),
                      "Target %s VPD_MT_VREF_MC_RD percentage out of bounds (%d - %d): %d",
                      c_str(i_target),
                      l_max,
@@ -1425,7 +1425,7 @@ fapi2::ReturnCode reset_ctle_cntl( const fapi2::Target<TARGET_TYPE_MCA>& i_targe
     FAPI_TRY( mss::vpd_mt_mc_dq_ctle_cap(i_target, l_ctle_cap) );
     FAPI_TRY( mss::vpd_mt_mc_dq_ctle_res(i_target, l_ctle_res) );
 
-    FAPI_INF("seeing ctle attributes cap: 0x%016lx res: 0x%016lx", l_ctle_cap, l_ctle_res);
+    FAPI_INF("%s seeing ctle attributes cap: 0x%016lx res: 0x%016lx", mss::c_str(i_target), l_ctle_cap, l_ctle_res);
 
     // For the capacitance CTLE attributes, they're laid out in the uint64_t as such. The resitance
     // attributes are the same, but 3 bits long. Notice that DP Block X Nibble 0 is DQ0:3,
@@ -1601,7 +1601,7 @@ fapi2::ReturnCode reset_rd_vref( const fapi2::Target<TARGET_TYPE_MCA>& i_target 
                 l_reg_data.insertFromRight<TT::RD_VREF_BYTE0_NIB1, TT::RD_VREF_BYTE0_NIB1_LEN>(l_vref_bitfield);
             }
 
-            FAPI_INF("blasting VREF settings from VPD to dp16 RD_VREF registers");
+            FAPI_INF("%s blasting VREF settings from VPD to dp16 RD_VREF registers", mss::c_str(i_target));
 
             FAPI_TRY( mss::scom_blastah(i_target, RD_VREF_CNTRL_REG, l_data) );
         }
@@ -1695,7 +1695,7 @@ fapi2::ReturnCode get_dq_dqs_drv_imp_field_value( const fapi2::Target<TARGET_TYP
                             fapi2::MSS_INVALID_VPD_VALUE_MC_DRV_IMP_DQ_DQS()
                             .set_VALUE(l_vpd_value[dp])
                             .set_DP(dp)
-                            .set_MCA_TARGET(i_target),
+                            .set_MCS_TARGET(mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target)),
                             "%s DQ_DQS %s impedance value is not valid: %u for DP[%u]",
                             c_str(i_target),
                             "driver",
@@ -1829,7 +1829,7 @@ fapi2::ReturnCode get_dq_dqs_rcv_imp_field_value( const fapi2::Target<TARGET_TYP
                             fapi2::MSS_INVALID_VPD_VALUE_MC_RCV_IMP_DQ_DQS()
                             .set_VALUE(l_vpd_value[dp])
                             .set_DP(dp)
-                            .set_MCA_TARGET(i_target),
+                            .set_MCS_TARGET(mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target)),
                             "%s DQ_DQS %s impedance value is not valid: %u for DP[%u]",
                             c_str(i_target),
                             "receiver",
