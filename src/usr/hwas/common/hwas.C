@@ -2510,13 +2510,9 @@ errlHndl_t markDisabledMcas()
             // fill the Lx data buffer with zeros
             memset(lxData, 0x00, VPD_CRP0_LX_HDR_DATA_LENGTH);
 
-#ifdef __HOSTBOOT_MODULE
-            //@TODO RTC:167294 Need to remove conditional after
-            //                 additional implementation
             //Read Lx keyword for associated proc and MCA
             l_errl = platReadLx(l_mca,
                                 lxData);
-#endif
 
             if (l_errl)
             {
