@@ -27,7 +27,7 @@
 /// @file mrs02.C
 /// @brief Run and manage the DDR4 MRS02 loading
 ///
-// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
