@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -27,7 +27,7 @@
 <!-- @file memory_mss_termination_control.xml -->
 <!-- @brief Error xml for termination control -->
 <!-- -->
-<!-- *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com> -->
+<!-- *HWP HWP Owner: Jacob L Harvey <jlharvey@us.ibm.com> -->
 <!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
 <!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
@@ -158,7 +158,7 @@
     <priority>HIGH</priority>
   </callout>
   <deconfigure>
-    <target>TARGETIN_ERROR</target>
+    <target>TARGET_IN_ERROR</target>
   </deconfigure>
   <gard>
     <target>TARGET_IN_ERROR</target>

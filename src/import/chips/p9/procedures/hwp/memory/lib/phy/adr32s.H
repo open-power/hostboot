@@ -27,7 +27,7 @@
 /// @file adr32s.H
 /// @brief Subroutines for the PHY ADR32S registers
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
@@ -180,7 +180,7 @@ inline fapi2::ReturnCode read_dcd_cntl( const fapi2::Target<T>& i_target, fapi2:
 {
     static_assert( I < TT::ADR32S_COUNT, "adr32s instance out of range");
     FAPI_TRY( mss::getScom(i_target, TT::DUTY_CYCLE_DISTORTION_REG[I], o_data) );
-    FAPI_INF("dcd_cntl adrs32%d: 0x%016lx", I, o_data);
+    FAPI_INF("%s dcd_cntl adrs32%d: 0x%016lx", mss::c_str(i_target), I, o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -207,7 +207,7 @@ inline fapi2::ReturnCode write_dcd_cntl( const fapi2::Target<T>& i_target, const
         fapi2::Assert(false);
     }
 
-    FAPI_INF("dcd_cntl adr32s%d: 0x%016lx", I, i_data);
+    FAPI_INF("%s dcd_cntl adr32s%d: 0x%016lx", mss::c_str(i_target), I, i_data);
     FAPI_TRY( mss::putScom(i_target, TT::DUTY_CYCLE_DISTORTION_REG[I], i_data) );
 fapi_try_exit:
     return fapi2::current_err;
@@ -231,7 +231,7 @@ inline fapi2::ReturnCode reset_dcd_cntl( const fapi2::Target<T>& i_target )
 
     for (const auto r : TT::DUTY_CYCLE_DISTORTION_REG)
     {
-        FAPI_INF("reset dcd_cntl 0x%016lx: 0x%016lx", r, l_data);
+        FAPI_INF("%s reset dcd_cntl 0x%016lx: 0x%016lx", mss::c_str(i_target), r, l_data);
         FAPI_TRY( mss::putScom(i_target, r, l_data) );
     }
 
@@ -269,7 +269,7 @@ inline fapi2::ReturnCode read_output_driver( const fapi2::Target<T>& i_target, f
 {
     static_assert( I < TT::ADR32S_COUNT, "adr32s instance out of range");
     FAPI_TRY( mss::getScom(i_target, TT::OUTPUT_DRIVER_REG[I], o_data) );
-    FAPI_INF("output_driver adrs32%d: 0x%016lx", I, o_data);
+    FAPI_INF("%s output_driver adrs32%d: 0x%016lx", mss::c_str(i_target), I, o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -287,7 +287,7 @@ template< uint64_t I, fapi2::TargetType T, typename TT = adr32sTraits<T> >
 inline fapi2::ReturnCode write_output_driver( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     static_assert( I < TT::ADR32S_COUNT, "adr32s instance out of range");
-    FAPI_INF("output_driver adr32s%d: 0x%016lx", I, i_data);
+    FAPI_INF("%s output_driver adr32s%d: 0x%016lx", mss::c_str(i_target), I, i_data);
     FAPI_TRY( mss::putScom(i_target, TT::OUTPUT_DRIVER_REG[I], i_data) );
 fapi_try_exit:
     return fapi2::current_err;
@@ -344,7 +344,7 @@ inline fapi2::ReturnCode read_tsys_adr( const fapi2::Target<T>& i_target, fapi2:
 {
     static_assert( I < TT::ADR32S_COUNT, "adr32s instance out of range");
     FAPI_TRY( mss::getScom(i_target, TT::PR_STATIC_OFFSET_REG[I], o_data) );
-    FAPI_INF("tsys_adr adrs32%d: 0x%016lx", I, o_data);
+    FAPI_INF("%s tsys_adr adrs32%d: 0x%016lx", mss::c_str(i_target), I, o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -362,7 +362,7 @@ template< uint64_t I, fapi2::TargetType T, typename TT = adr32sTraits<T> >
 inline fapi2::ReturnCode write_tsys_adr( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     static_assert( I < TT::ADR32S_COUNT, "adr32s instance out of range");
-    FAPI_INF("tsys_adr adr32s%d: 0x%016lx", I, i_data);
+    FAPI_INF("%s tsys_adr adr32s%d: 0x%016lx", mss::c_str(i_target), I, i_data);
     FAPI_TRY( mss::putScom(i_target, TT::PR_STATIC_OFFSET_REG[I], i_data) );
 fapi_try_exit:
     return fapi2::current_err;
@@ -387,14 +387,13 @@ inline fapi2::ReturnCode reset_tsys_adr( const fapi2::Target<T>& i_target )
     for (const auto r : TT::PR_STATIC_OFFSET_REG)
     {
         // TODO RTC:160358 Suspect duplicated scoms in ddr initfile
-        FAPI_INF("reset tsys_adr 0x%016lx: 0x%016lx", r, l_data);
+        FAPI_INF("%s reset tsys_adr 0x%016lx: 0x%016lx", mss::c_str(i_target), r, l_data);
         FAPI_TRY( mss::putScom(i_target, r, l_data) );
     }
 
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 } // close namespace adr32s
 

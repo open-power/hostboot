@@ -115,6 +115,7 @@ enum times
     DELAY_10NS              = 10 ,      ///< general purpose 10  ns delay for HW mode
     DELAY_100NS             = 100,      ///< general purpose 100 ns delay for HW mode
     DELAY_1US               = 1000,     ///< general purpose 1 usec delay for HW mode
+    DELAY_10US              = 10000,    ///< general purpose 1 usec delay for HW mode
     DELAY_100US             = 100000,   ///< general purpose 100 usec delay for HW mode
     DELAY_1MS               = 1000000,  ///< general purpose 1 ms delay for HW mode
 
@@ -166,6 +167,23 @@ enum states
     NO_CHIP_SELECT_ACTIVE = 0xFF,
 };
 
+///
+/// @brief function ID codes for FFDC functions
+/// @note If we get a fail in HB, we can trace back to the function that failed
+///
+enum ffdc_functions
+{
+    // Following are used in rank.H
+    RANK_PAIR_TO_PHY = 0,
+    RANK_PAIR_FROM_PHY = 1,
+    SET_RANKS_IN_PAIR = 2,
+    GET_RANKS_IN_PAIR = 3,
+    GET_RANK_FIELD = 4,
+    GET_PAIR_VALID = 5,
+    SET_RANK_FIELD = 6,
+    RD_CTR_WORKAROUND_READ_DATA = 7,
+    OVERRIDE_ODT_WR_CONFIG = 8,
+};
 // Static consts describing the bits used in the cal_step_enable attribute
 // These are bit positions. 0 is the left most bit.
 enum cal_steps : uint64_t

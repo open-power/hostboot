@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -264,17 +264,17 @@ fapi2::ReturnCode sw_cal_side_helper( const fapi2::Target<TARGET_TYPE_MCA>& i_ta
 
     FAPI_ASSERT( l_current_adjust != l_overrun,
                  fapi2::MSS_DUTY_CLOCK_DISTORTION_CAL_FAILED()
-                 .set_TARGET(i_target)
+                 .set_MCA_TARGET(i_target)
                  .set_CURRENT_ADJUST(l_current_adjust)
                  .set_SIDE(i_side)
                  .set_REGISTER(i_reg)
                  .set_REGISTER_VALUE(l_read),
-                 "Failed DCD for %s 0x%016lx", mss::c_str(i_target), i_reg );
+                 "%s Failed DCD for %s 0x%016lx", mss::c_str(i_target), mss::c_str(i_target), i_reg );
 
     // If we're here, we were done and there were no errors. So we can return back the current adjust value
     // as the output/result of our operation
     o_value = l_current_adjust;
-    FAPI_INF("side: %d final adjust value: 0x%x (0x%x)", i_side, o_value, l_current_adjust);
+    FAPI_INF("%s side: %d final adjust value: 0x%x (0x%x)", mss::c_str(i_target), i_side, o_value, l_current_adjust);
 
     return FAPI2_RC_SUCCESS;
 
@@ -325,8 +325,11 @@ fapi2::ReturnCode sw_cal_per_register( const fapi2::Target<TARGET_TYPE_MCA>& i_t
     FAPI_TRY(compute_dcd_value(l_a_rc, l_a_side_value, l_b_rc, l_b_side_value, io_seed));
 
     FAPI_INF("%s calibrated value for both sides for reg 0x%016lx cal value: 0x%02x, a_side 0x%02x b_side: 0x%02x",
-             mss::c_str(i_target), i_reg, io_seed,
-             l_a_side_value, l_b_side_value);
+             mss::c_str(i_target),
+             i_reg,
+             io_seed,
+             l_a_side_value,
+             l_b_side_value);
 
     // Stores the final calibrated values in the register with a RMW
     FAPI_TRY( mss::getScom(i_target, i_reg, l_buff) );
@@ -367,9 +370,13 @@ fapi2::ReturnCode compute_dcd_value(fapi2::ReturnCode& io_a_side_rc,
        (io_b_side_rc != FAPI2_RC_SUCCESS))
     {
         // Log a-side and b-side RC's leave the seed as it is
+        // Currently not logging a-side b-side issue due to bad hardware?
+        // We can still run even if we fail DCD cal fail
+        // Recovered flag will make it informational. Deconfigs won't happen and the customer won't see
+        // But we will ;)
         FAPI_ERR("Recovered from DCD calibration fail - both side A and side B failed, using prior calibrated value");
-        fapi2::logError(io_a_side_rc);
-        fapi2::logError(io_b_side_rc);
+        fapi2::logError(io_a_side_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        fapi2::logError(io_b_side_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
         return FAPI2_RC_SUCCESS;
     }
 
@@ -377,7 +384,7 @@ fapi2::ReturnCode compute_dcd_value(fapi2::ReturnCode& io_a_side_rc,
     if(io_b_side_rc != FAPI2_RC_SUCCESS)
     {
         FAPI_ERR("Recovered from DCD calibration fail - side B failed, using side-A's value");
-        fapi2::logError(io_b_side_rc);
+        fapi2::logError(io_b_side_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
         o_value = i_a_side_val;
         return FAPI2_RC_SUCCESS;
     }
@@ -386,7 +393,7 @@ fapi2::ReturnCode compute_dcd_value(fapi2::ReturnCode& io_a_side_rc,
     if(io_a_side_rc != FAPI2_RC_SUCCESS)
     {
         FAPI_ERR("Recovered from DCD calibration fail - side A failed, using side-B's value");
-        fapi2::logError(io_a_side_rc);
+        fapi2::logError(io_a_side_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
         o_value = i_b_side_val;
         return FAPI2_RC_SUCCESS;
     }
@@ -427,7 +434,7 @@ void log_reg_results( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
         // Set current error, and log it
         FAPI_ASSERT(false,
                     fapi2::MSS_HARDWARE_DUTY_CLOCK_DISTORTION_CAL_FAILED()
-                    .set_TARGET(i_target)
+                    .set_MCA_TARGET(i_target)
                     .set_REGISTER(i_reg),
                     "DCD hardware calibration failed on %s. register 0x%016lx. Attempting software recovery",
                     mss::c_str(i_target), i_reg);
@@ -499,7 +506,7 @@ fapi2::ReturnCode poll_for_done_and_log_reg( const fapi2::Target<TARGET_TYPE_MCA
     // If the polling didn't finish, exit out with an error
     FAPI_ASSERT( l_poll_finished,
                  fapi2::MSS_HARDWARE_DUTY_CLOCK_DISTORTION_CAL_TIMEOUT()
-                 .set_TARGET(i_target)
+                 .set_MCA_TARGET(i_target)
                  .set_REGISTER(i_reg),
                  "Timed out in hardware DCD for %s 0x%016lx", mss::c_str(i_target), i_reg );
 

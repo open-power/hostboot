@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -98,7 +98,7 @@ fapi2::ReturnCode duty_cycle_distortion_calibration( const fapi2::Target<fapi2::
 
     if (l_mca.size() == 0)
     {
-        FAPI_INF("No MCA, skipping duty cycle distortion calibration");
+        FAPI_INF("%s No MCA, skipping duty cycle distortion calibration", mss::c_str(i_target) );
         return FAPI2_RC_SUCCESS;
     }
 
@@ -113,13 +113,14 @@ fapi2::ReturnCode duty_cycle_distortion_calibration( const fapi2::Target<fapi2::
     if(mss::chip_ec_nimbus_lt_2_0(i_target))
     {
         // Runs the DD1 calibration
-        FAPI_TRY(mss::workarounds::adr32s::duty_cycle_distortion_calibration(i_target));
+        FAPI_TRY(mss::workarounds::adr32s::duty_cycle_distortion_calibration(i_target), "%s Failed dcd calibration",
+                 mss::c_str(i_target) );
     }
 
     else
     {
         // Runs the DD2 calibration algorithm
-        FAPI_TRY(mss::dcd::execute_hw_calibration(i_target));
+        FAPI_TRY(mss::dcd::execute_hw_calibration(i_target), "%s Failed dcd execute hw calibration", mss::c_str(i_target) );
     }
 
 fapi_try_exit:

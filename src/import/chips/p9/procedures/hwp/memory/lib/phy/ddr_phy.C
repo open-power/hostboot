@@ -27,8 +27,8 @@
 /// @file ddr_phy.C
 /// @brief Subroutines to manipulate the phy, or used during phy procedures
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
@@ -58,6 +58,7 @@
 #include <generic/memory/lib/utils/scom.H>
 #include <lib/utils/count_dimm.H>
 #include <lib/dimm/rank.H>
+#include <lib/shared/mss_const.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_PROC_CHIP;
@@ -73,7 +74,7 @@ namespace mss
 ///
 /// @brief Clears all training related errors - specialization for MCA
 /// @param[in] i_target the port in question
-/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
 template< >
 fapi2::ReturnCode clear_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
@@ -104,8 +105,8 @@ fapi_try_exit:
 
 ///
 /// @brief Clears all training related errors - specialization for MCBIST
-/// @param[in] i_target the port in question
-/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+/// @param[in] i_target MCBIST target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
 template< >
 fapi2::ReturnCode clear_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
@@ -487,9 +488,9 @@ fapi2::ReturnCode rank_pair_primary_to_dimm( const fapi2::Target<TARGET_TYPE_MCA
     FAPI_TRY( mss::rank::get_ranks_in_pair(i_target, i_rp, l_ranks_in_rp) );
 
     // Make sure we have a valid rank
-    FAPI_ASSERT( l_ranks_in_rp[0] != NO_RANK,
-                 fapi2::MSS_NO_PRIMARY_RANK_FOUND_RP()
-                 .set_RANK_PAIR(i_rp)
+    FAPI_ASSERT( (l_ranks_in_rp.size() != 0) && (l_ranks_in_rp[0] != NO_RANK),
+                 fapi2::MSS_NO_PRIMARY_RANK_IN_RANK_PAIR()
+                 .set_RP(i_rp)
                  .set_MCA_TARGET(i_target),
                  "%s No primary rank in rank pair %d",
                  mss::c_str(i_target),
@@ -870,6 +871,7 @@ fapi2::ReturnCode setup_read_vref_config1( const fapi2::Target<fapi2::TARGET_TYP
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 ///
 /// @brief Setup all the cal config register
 /// @param[in] i_target the MCA target associated with this cal setup
@@ -1437,6 +1439,15 @@ fapi2::ReturnCode override_odt_wr_config( const fapi2::Target<fapi2::TARGET_TYPE
 
     const uint64_t l_dimm_count = count_dimm(i_target);
 
+    FAPI_ASSERT( i_rank < MAX_MRANK_PER_PORT,
+                 fapi2::MSS_INVALID_RANK()
+                 .set_RANK(i_rank)
+                 .set_MCA_TARGET(i_target)
+                 .set_FUNCTION(OVERRIDE_ODT_WR_CONFIG),
+                 "%s had invalid rank (0x%016lx) passed into override_odt_wr_config",
+                 mss::c_str(i_target),
+                 i_rank );
+
     // read the attributes
     FAPI_TRY( mss::vpd_mt_odt_wr(i_target, &(l_odt_wr[0][0])) );
 
@@ -1479,9 +1490,13 @@ fapi2::ReturnCode setup_wr_level_terminations( const fapi2::Target<fapi2::TARGET
                  fapi2::MSS_NO_RANKS_IN_RANK_PAIR()
                  .set_TARGET(i_target)
                  .set_RANK_PAIR(i_rp),
-                 "No ranks configured in MCA %s, rank pair %d", mss::c_str(i_target), i_rp );
+                 "No ranks configured in MCA %s, rank pair %d",
+                 mss::c_str(i_target),
+                 i_rp );
 
-    FAPI_INF("%s Setting up terminations for WR_LEVEL, MRANK %d", mss::c_str(i_target), l_ranks[0]);
+    FAPI_INF("%s Setting up terminations for WR_LEVEL, MRANK %d",
+             mss::c_str(i_target),
+             l_ranks[0]);
 
     // Get DIMM target
     FAPI_TRY( mss::rank::get_dimm_target_from_rank(i_target, l_ranks[0], l_dimm) );
@@ -1568,11 +1583,14 @@ fapi_try_exit:
 ///
 /// @brief Start the DLL calibration, monitor for fails.
 /// @param[in] i_target the target associated with this DLL cal
+/// @param[out] o_run_workaround boolean whether we need to run workarounds
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                   bool& o_run_workaround )
 {
+    o_run_workaround = false;
     uint8_t l_sim = 0;
     fapi2::buffer<uint64_t> l_status;
     constexpr uint64_t l_dll_status_reg = pcTraits<TARGET_TYPE_MCA>::PC_DLL_ZCAL_CAL_STATUS_REG;
@@ -1659,16 +1677,10 @@ fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
         fapi2::buffer<uint64_t> l_read;
         FAPI_TRY( mss::getScom(p, l_dll_status_reg, l_read) );
 
-        if( mss::pc::get_dll_cal_status(l_read) != mss::YES )
-        {
-            // For all Nimbus parts parts we want to run DLL workaround so
-            // Instead of using FAPI_ASSERT and logging FFDC we will
-            // return a "bad" ReturnCode to trigger a workaround that
-            // will be run after DLL Calibration for all failing DLLs.
-            // FFDC will be collected there if it doesn't pass.
-            return fapi2::FAPI2_RC_FALSE;
-
-        }// endif
+        // For all Nimbus parts we want to run DLL workaround so
+        // Instead of using FAPI_ASSERT or returning an error
+        // We'll use a bool to tell if we need to run the workaround
+        o_run_workaround = (mss::pc::get_dll_cal_status(l_read) != mss::YES);
 
     }// mca
 

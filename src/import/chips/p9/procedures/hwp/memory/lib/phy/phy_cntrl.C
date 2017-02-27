@@ -27,10 +27,10 @@
 /// @file phy_cntrl.C
 /// @brief Subroutines for the PHY PC registers
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -38,7 +38,6 @@
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/index.H>
-
 #include <lib/mss_attribute_accessors.H>
 
 using fapi2::TARGET_TYPE_MCA;
@@ -122,9 +121,11 @@ fapi2::ReturnCode reset_config1(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
 {
     typedef pcTraits<TARGET_TYPE_MCA> TT;
 
+    constexpr uint64_t NUM_DIMM_TYPES = 4;
+    constexpr uint64_t NUM_DIMM_GEN = 3;
     // Static table of PHY config values for MEMORY_TYPE.
     // [EMPTY, RDIMM, CDIMM, or LRDIMM][EMPTY, DDR3 or DDR4]
-    constexpr uint64_t memory_type[4][3] =
+    constexpr uint64_t memory_type[NUM_DIMM_TYPES][NUM_DIMM_GEN] =
     {
         { 0, 0,     0     },  // Empty, never really used.
         { 0, 0b001, 0b101 },  // RDIMM
@@ -149,8 +150,23 @@ fapi2::ReturnCode reset_config1(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     // There's no way to configure the PHY for more than one value. However, we don't know if there's
     // a DIMM in one slot, the other or double drop. So we do a little gyration here to make sure
     // we have one of the two values (and assume effective config caught a bad config)
+    // For both attributes, 0 == empty
     l_type_index = l_dimm_type[0] | l_dimm_type[1];
     l_gen_index = l_dram_gen[0] | l_dram_gen[1];
+
+    // These two checks should never be called, but better safe than seg fault
+    FAPI_ASSERT( l_type_index < NUM_DIMM_TYPES,
+                 fapi2::MSS_INVALID_DIMM_TYPE()
+                 .set_DIMM_TYPE(l_type_index)
+                 .set_TARGET(i_target),
+                 "Invalid DIMM configuration or DIMM type on %s",
+                 mss::c_str(i_target));
+    FAPI_ASSERT( l_gen_index < NUM_DIMM_GEN,
+                 fapi2::MSS_PLUG_RULES_INVALID_DRAM_GEN()
+                 .set_DRAM_GEN(l_gen_index)
+                 .set_DIMM_TARGET(i_target),
+                 "Invalid DIMM configuration or DRAM gen on %s",
+                 mss::c_str(i_target));
 
     // FOR NIMBUS PHY (as the protocol choice above is) BRS
     FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_CONFIG1_P0, l_data) );

@@ -70,20 +70,6 @@ enum
 };
 
 ///
-/// @brief set of enums used for ffdc return codes
-///
-enum rank_functions
-{
-    RANK_PAIR_TO_PHY = 0,
-    RANK_PAIR_FROM_PHY = 1,
-    SET_RANKS_IN_PAIR = 2,
-    GET_RANKS_IN_PAIR = 3,
-    GET_RANK_FIELD = 4,
-    GET_PAIR_VALID = 5,
-    SET_RANK_FIELD = 6,
-    RD_CTR_WORKAROUND_READ_DATA = 7,
-};
-///
 /// @class rankPairTraits
 /// @brief a collection of traits associated with rank pairs
 /// @tparam T fapi2::TargetType representing the PHY
@@ -1193,6 +1179,8 @@ template< uint64_t RP, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> 
 fapi2::ReturnCode get_ranks_in_pair( const fapi2::Target<T>& i_target,
                                      std::vector<uint64_t>& o_ranks )
 {
+    static_assert(RP < MAX_RANK_PER_DIMM, "Passed in Rank Pair is too high");
+
     o_ranks.clear();
 
     // Read the rank pair register(s)
@@ -1338,12 +1326,12 @@ inline fapi2::ReturnCode get_ranks_in_pair( const fapi2::Target<T>& i_target,
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_RANK_PAIR()
                          .set_RANK_PAIR(i_rp)
-                         .set_MCA_TARGET(i_target)
-                         .set_FUNCTION(GET_RANKS_IN_PAIR),
-                         "%s Invalid rank pair (%d) in get_ranks_in_pair",
+                         .set_FUNCTION(GET_RANKS_IN_PAIR)
+                         .set_MCA_TARGET(i_target),
+                         "%s Invalid number of rankpairs entered. num: %lu max: %lu",
                          mss::c_str(i_target),
-                         i_rp);
-
+                         i_rp,
+                         MAX_PRIMARY_RANKS_PER_PORT);
             break;
     }
 

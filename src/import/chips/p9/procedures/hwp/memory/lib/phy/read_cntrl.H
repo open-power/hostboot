@@ -27,10 +27,10 @@
 /// @file read_cntrl.H
 /// @brief Subroutines for the PHY read control registers
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_READ_CNTRL_H_
@@ -117,7 +117,6 @@ class rcTraits<fapi2::TARGET_TYPE_MCA>
             RDVREF_CALIBRATION_ENABLE = MCA_DDRPHY_RC_RDVREF_CONFIG1_P0_CALIBRATION_ENABLE,
             SKIP_RDCENTERING = MCA_DDRPHY_RC_RDVREF_CONFIG1_P0_SKIP_RDCENTERING,
         };
-
 };
 
 namespace rc
@@ -134,7 +133,7 @@ inline fapi2::ReturnCode read_vref_config0( const fapi2::Target<T>& i_target, fa
 {
     FAPI_TRY( mss::getScom(i_target, TT::RC_VREF_CONFIG0_REG, o_data), "%s failed to read rc_vref_config0 register",
               mss::c_str(i_target) );
-    FAPI_DBG("rc_vref_config0: 0x%016llx", o_data);
+    FAPI_DBG("%s rc_vref_config0: 0x%016llx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -149,7 +148,7 @@ template< fapi2::TargetType T, typename TT = rcTraits<T> >
 inline fapi2::ReturnCode write_vref_config0( const fapi2::Target<T>& i_target,
         const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_DBG("rc_vref_config0: 0x%016llx", i_data);
+    FAPI_DBG("%s rc_vref_config0: 0x%016llx", mss::c_str(i_target), i_data);
     FAPI_TRY( mss::putScom(i_target, TT::RC_VREF_CONFIG0_REG, i_data), "%s failed to write rc_vref_config0 register",
               mss::c_str(i_target) );
 fapi_try_exit:
@@ -167,7 +166,7 @@ inline fapi2::ReturnCode read_vref_config1( const fapi2::Target<T>& i_target, fa
 {
     FAPI_TRY( mss::getScom(i_target, TT::RC_VREF_CONFIG1_REG, o_data), "%s failed to read rc_vref_config1 register",
               mss::c_str(i_target) );
-    FAPI_DBG("rc_vref_config1: 0x%016llx", o_data);
+    FAPI_DBG("%s rc_vref_config1: 0x%016llx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -182,13 +181,12 @@ template< fapi2::TargetType T, typename TT = rcTraits<T> >
 inline fapi2::ReturnCode write_vref_config1( const fapi2::Target<T>& i_target,
         const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_DBG("rc_vref_config1: 0x%016llx", i_data);
+    FAPI_DBG("%s rc_vref_config1: 0x%016llx", mss::c_str(i_target), i_data);
     FAPI_TRY( mss::putScom(i_target, TT::RC_VREF_CONFIG1_REG, i_data), "%s failed to write rc_vref_config1 register",
               mss::c_str(i_target) );
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Read RC_CONFIG0
@@ -201,7 +199,7 @@ inline fapi2::ReturnCode read_config0( const fapi2::Target<T>& i_target, fapi2::
 {
     FAPI_TRY( mss::getScom(i_target, TT::RC_CONFIG0_REG, o_data), "%s failed to read rc_config0 register",
               mss::c_str(i_target) );
-    FAPI_DBG("rc_config0: 0x%016llx", o_data);
+    FAPI_DBG("%s rc_config0: 0x%016llx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -215,7 +213,7 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = rcTraits<T> >
 inline fapi2::ReturnCode write_config0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_DBG("rc_config0: 0x%016llx", i_data);
+    FAPI_DBG("%s rc_config0: 0x%016llx", mss::c_str(i_target), i_data);
     FAPI_TRY( mss::putScom(i_target, TT::RC_CONFIG0_REG, i_data), "%s failed to write rc_config0 register",
               mss::c_str(i_target) );
 fapi_try_exit:
@@ -234,7 +232,7 @@ inline fapi2::ReturnCode read_config1( const fapi2::Target<T>& i_target, fapi2::
 {
     FAPI_TRY( mss::getScom(i_target, TT::RC_CONFIG1_REG, o_data), "%s failed to read rc_config1 register",
               mss::c_str(i_target) );
-    FAPI_DBG("rc_config1: 0x%016llx", o_data);
+    FAPI_DBG("%s rc_config1: 0x%016llx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -248,7 +246,7 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = rcTraits<T> >
 inline fapi2::ReturnCode write_config1( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_DBG("rc_config1: 0x%016llx", i_data);
+    FAPI_DBG("%s rc_config1: 0x%016llx", mss::c_str(i_target), i_data);
     FAPI_TRY( mss::putScom(i_target, TT::RC_CONFIG1_REG, i_data), "%s failed to write rc_config1 register",
               mss::c_str(i_target) );
 fapi_try_exit:
@@ -266,7 +264,7 @@ inline fapi2::ReturnCode read_config2( const fapi2::Target<T>& i_target, fapi2::
 {
     FAPI_TRY( mss::getScom(i_target, TT::RC_CONFIG2_REG, o_data), "%s failed to read rc_config2 register",
               mss::c_str(i_target) );
-    FAPI_DBG("rc_config2: 0x%016llx", o_data);
+    FAPI_DBG("%s rc_config2: 0x%016llx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -280,7 +278,7 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = rcTraits<T> >
 inline fapi2::ReturnCode write_config2( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_DBG("rc_config2: 0x%016llx", i_data);
+    FAPI_DBG("%s rc_config2: 0x%016llx", mss::c_str(i_target), i_data);
     FAPI_TRY( mss::putScom(i_target, TT::RC_CONFIG2_REG, i_data), "%s failed to write rc_config2 register",
               mss::c_str(i_target) );
 fapi_try_exit:
@@ -298,7 +296,7 @@ inline fapi2::ReturnCode read_config3( const fapi2::Target<T>& i_target, fapi2::
 {
     FAPI_TRY( mss::getScom(i_target, TT::RC_CONFIG3_REG, o_data), "%s failed to read rc_config3 register",
               mss::c_str(i_target) );
-    FAPI_DBG("rc_config3: 0x%016llx", o_data);
+    FAPI_DBG("%s rc_config3: 0x%016llx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -312,7 +310,7 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = rcTraits<T> >
 inline fapi2::ReturnCode write_config3( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_DBG("rc_config3: 0x%016llx", i_data);
+    FAPI_DBG("%s rc_config3: 0x%016llx", mss::c_str(i_target), i_data);
     FAPI_TRY( mss::putScom(i_target, TT::RC_CONFIG3_REG, i_data), "%s failed to write rc_config3 register",
               mss::c_str(i_target) );
 fapi_try_exit:
@@ -504,7 +502,7 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = rcTraits<T> >
 inline fapi2::ReturnCode write_error_status0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_DBG("rc_error_status0: 0x%016llx", i_data);
+    FAPI_DBG("%s rc_error_status0: 0x%016llx", mss::c_str(i_target), i_data);
     FAPI_TRY( mss::putScom(i_target, TT::RC_ERROR_STATUS0_REG, i_data), "%s failed to write rc_error_status0 register",
               mss::c_str(i_target) );
 fapi_try_exit:
@@ -524,7 +522,7 @@ inline fapi2::ReturnCode read_error_status0( const fapi2::Target<T>& i_target, f
 {
     FAPI_TRY( mss::getScom(i_target, TT::RC_ERROR_STATUS0_REG, o_data), "%s failed to read rc_error_status0 register",
               mss::c_str(i_target) );
-    FAPI_DBG("rc_error_status0: 0x%016llx", o_data);
+    FAPI_DBG("%s rc_error_status0: 0x%016llx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }

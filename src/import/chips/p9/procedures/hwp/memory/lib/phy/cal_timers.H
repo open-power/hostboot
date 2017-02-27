@@ -27,10 +27,10 @@
 /// @file cal_timers.H
 /// @brief Subroutines to calculate the duration of training operations
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_CAL_TIMERS_H_
@@ -61,8 +61,11 @@ uint64_t wr_lvl_cycles(const fapi2::Target<T>& i_target )
 
     const uint64_t l_wr_lvl_cycles = (80 + TWLO_TWLOE) * WR_LVL_NUM_VALID_SAMPLES * (384 / (WR_LVL_BIG_STEP + 1) +
                                      (2 * (WR_LVL_BIG_STEP + 1)) / (WR_LVL_SMALL_STEP + 1)) + 20;
-    FAPI_DBG("wr_lvl_cycles: %llu(%lluns) (%llu, %llu, %llu, %llu)", l_wr_lvl_cycles, mss::cycles_to_ns(i_target,
-             l_wr_lvl_cycles),
+    FAPI_DBG("%s wr_lvl_cycles: %llu(%lluns) (%llu, %llu, %llu, %llu)",
+             mss::c_str(i_target),
+             l_wr_lvl_cycles,
+             mss::cycles_to_ns(i_target,
+                               l_wr_lvl_cycles),
              TWLO_TWLOE, WR_LVL_NUM_VALID_SAMPLES, WR_LVL_BIG_STEP, WR_LVL_SMALL_STEP);
 
     return l_wr_lvl_cycles;
@@ -80,7 +83,8 @@ uint64_t dqs_align_cycles(const fapi2::Target<T>& i_target )
     // This step runs for approximately 6 x 600 x 4 DRAM clocks per rank pair.
     const uint64_t l_dqs_align_cycles = 6 * 600 * 4;
 
-    FAPI_DBG("dqs_align_cycles: %llu(%lluns)", l_dqs_align_cycles, mss::cycles_to_ns(i_target, l_dqs_align_cycles));
+    FAPI_DBG("%s dqs_align_cycles: %llu(%lluns)", mss::c_str(i_target), l_dqs_align_cycles, mss::cycles_to_ns(i_target,
+             l_dqs_align_cycles));
     return l_dqs_align_cycles;
 }
 
@@ -96,7 +100,7 @@ uint64_t rdclk_align_cycles(const fapi2::Target<T>& i_target )
     // This step runs for approximately 24 x ((1024/COARSE_CAL_STEP_SIZE + 4 x COARSE_CAL_STEP_SIZE) x 4 + 32) DRAM
     // clocks per rank pair
     const uint64_t l_rdclk_align_cycles = 24 * ((1024 / COARSE_CAL_STEP_SIZE + 4 * COARSE_CAL_STEP_SIZE) * 4 + 32);
-    FAPI_DBG("rdclk_align_cycles: %llu(%lluns) (%llu)", l_rdclk_align_cycles,
+    FAPI_DBG("%s rdclk_align_cycles: %llu(%lluns) (%llu)", mss::c_str(i_target), l_rdclk_align_cycles,
              mss::cycles_to_ns(i_target, l_rdclk_align_cycles), COARSE_CAL_STEP_SIZE);
     return l_rdclk_align_cycles;
 }
@@ -114,8 +118,12 @@ uint64_t read_ctr_cycles(const fapi2::Target<T>& i_target )
     // 4 x CONSEQ_PASS)) x 24 DRAM clocks per rank pair.
 
     const uint64_t l_read_ctr_cycles = 6 * (512 / COARSE_CAL_STEP_SIZE + 4 * (COARSE_CAL_STEP_SIZE + 4 * CONSEQ_PASS)) * 24;
-    FAPI_DBG("read_ctr_cycles %llu(%lluns) (%llu, %llu)", l_read_ctr_cycles, mss::cycles_to_ns(i_target, l_read_ctr_cycles),
-             COARSE_CAL_STEP_SIZE, CONSEQ_PASS);
+    FAPI_DBG("%s read_ctr_cycles %llu(%lluns) (%llu, %llu)",
+             mss::c_str(i_target),
+             l_read_ctr_cycles,
+             mss::cycles_to_ns(i_target, l_read_ctr_cycles),
+             COARSE_CAL_STEP_SIZE,
+             CONSEQ_PASS);
     return l_read_ctr_cycles;
 }
 
@@ -141,9 +149,15 @@ fapi2::ReturnCode write_ctr_cycles(const fapi2::Target<T>& i_target, uint64_t& o
                        (1024 / (WR_LVL_SMALL_STEP + 1) + 128 / (WR_LVL_BIG_STEP + 1)) + 2 *
                        (WR_LVL_BIG_STEP + 1) / (WR_LVL_SMALL_STEP + 1)) * 24;
 
-    FAPI_DBG("write_ctr_cycles: %lu(%luns) (%u, %u, %u, %u, %u)",
-             o_cycles, mss::cycles_to_ns(i_target, o_cycles),
-             WR_LVL_NUM_VALID_SAMPLES, WR_CNTR_FW_WR_RD, l_fw_rd_wr, WR_LVL_BIG_STEP, WR_LVL_SMALL_STEP);
+    FAPI_DBG("%s write_ctr_cycles: %lu(%luns) (%u, %u, %u, %u, %u)",
+             mss::c_str(i_target),
+             o_cycles,
+             mss::cycles_to_ns(i_target, o_cycles),
+             WR_LVL_NUM_VALID_SAMPLES,
+             WR_CNTR_FW_WR_RD,
+             l_fw_rd_wr,
+             WR_LVL_BIG_STEP,
+             WR_LVL_SMALL_STEP);
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -163,7 +177,10 @@ uint64_t coarse_wr_cycles(const fapi2::Target<T>& i_target )
     // The run length given here is the maximum run length for this calibration algorithm.
     // This step runs for approximately 40 DRAM clocks per rank pair.
     static const uint64_t l_coarse_wr_cycles = 40;
-    FAPI_DBG("coarse_wr_cycles: %llu(%lluns)", l_coarse_wr_cycles, mss::cycles_to_ns(i_target, l_coarse_wr_cycles));
+    FAPI_DBG("%s coarse_wr_cycles: %llu(%lluns)",
+             mss::c_str(i_target),
+             l_coarse_wr_cycles,
+             mss::cycles_to_ns(i_target, l_coarse_wr_cycles));
     return l_coarse_wr_cycles;
 }
 
@@ -179,7 +196,10 @@ uint64_t coarse_rd_cycles(const fapi2::Target<T>& i_target )
     // The run length given here is the maximum run length for this calibration algorithm.
     // This step runs for approximately 32 DRAM clocks per rank pair.
     static const uint64_t l_coarse_rd_cycles = 32;
-    FAPI_DBG("coarse_rd_cycles: %llu(%lluns)", l_coarse_rd_cycles, mss::cycles_to_ns(i_target, l_coarse_rd_cycles));
+    FAPI_DBG("%s coarse_rd_cycles: %llu(%lluns)",
+             mss::c_str(i_target),
+             l_coarse_rd_cycles,
+             mss::cycles_to_ns(i_target, l_coarse_rd_cycles));
     return l_coarse_rd_cycles;
 }
 
@@ -187,13 +207,13 @@ uint64_t coarse_rd_cycles(const fapi2::Target<T>& i_target )
 /// @brief Configure the polling intervals with the proper timeings based on the cal steps enabled
 /// @tparam T the fapi2::TargetType of the port
 /// @param[in] i_target the port target
-/// @param[in] i_poll the poll_parameters to update
+/// @param[in,out] io_poll the poll_parameters to update
 /// @param[in] i_cal_steps_enabled a fapi2::buffer<uint8_t> representing the cal steps enabled
 /// @return FAPI2_RC_SUCCESS iff everything is OK
 ///
 template<fapi2::TargetType T>
 inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
-        poll_parameters& i_poll,
+        poll_parameters& io_poll,
         const fapi2::buffer<uint32_t>& i_cal_steps_enabled)
 {
     // This should equal half of the minimum poll count of the quickest cal segment when in sim
@@ -206,9 +226,11 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     uint8_t cal_abort_on_error = 0;
     uint16_t l_vref_cal_enable = 0;
 
-    FAPI_TRY( mss::write_ctr_cycles(i_target, l_write_cntr_cycles) );
-    FAPI_TRY( mss::cal_abort_on_error(cal_abort_on_error) );
-    FAPI_TRY( mss::rdvref_cal_enable(i_target, l_vref_cal_enable) );
+    FAPI_TRY( mss::write_ctr_cycles(i_target, l_write_cntr_cycles), "%s Failed calling write_ctr_cycles",
+              mss::c_str(i_target) );
+    FAPI_TRY( mss::cal_abort_on_error(cal_abort_on_error), "%s Failed calling cal_abort_on_errorp", mss::c_str(i_target) );
+    FAPI_TRY( mss::rdvref_cal_enable(i_target, l_vref_cal_enable), "%s Failed calling rdvref_cal_enable",
+              mss::c_str(i_target) );
 
     // First, calculate the total number of cycles this cal should take if everything
     // runs to completion
@@ -231,37 +253,43 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     // when training starts - makes it simpler to get an AET for, say, write leveling. So
     // this is here to allow the simple removal of the initial delay for those situations.
 #ifdef THRASH_CCS_IP_IN_SIM
-    i_poll.iv_initial_delay = mss::cycles_to_ns(i_target, 1);
-    i_poll.iv_initial_sim_delay = mss::cycles_to_simcycles(1);
+    io_poll.iv_initial_delay = mss::cycles_to_ns(i_target, 1);
+    io_poll.iv_initial_sim_delay = mss::cycles_to_simcycles(1);
 #else
     // We don't want to wait too long for the initial check, just some hueristics here
-    i_poll.iv_initial_delay = mss::cycles_to_ns(i_target, l_total_cycles / 8);
-    i_poll.iv_initial_sim_delay = mss::cycles_to_simcycles(l_total_cycles / 8);
+    io_poll.iv_initial_delay = mss::cycles_to_ns(i_target, l_total_cycles / 8);
+    io_poll.iv_initial_sim_delay = mss::cycles_to_simcycles(l_total_cycles / 8);
 #endif
 
     // Delay 10us between polls, and setup the poll count so
     // iv_initial_delay + (iv_delay * iv_poll_count) == l_total_cycles + some fudge;
-    i_poll.iv_delay = 10 * DELAY_1US;
-    i_poll.iv_sim_delay = mss::cycles_to_simcycles(mss::ns_to_cycles(i_target, i_poll.iv_delay));
+    io_poll.iv_delay = DELAY_10US;
+    io_poll.iv_sim_delay = mss::cycles_to_simcycles(mss::ns_to_cycles(i_target, io_poll.iv_delay));
 
     // Round up to the cycles left after the initial delay
     l_ns_left = std::max(int64_t(0), (int64_t(mss::cycles_to_ns(i_target,
-                                      l_total_cycles)) - int64_t(i_poll.iv_initial_delay)));
-    i_poll.iv_poll_count = l_ns_left / i_poll.iv_delay;
-    i_poll.iv_poll_count += l_ns_left % i_poll.iv_delay ? 0 : 1;
+                                      l_total_cycles)) - int64_t(io_poll.iv_initial_delay)));
+    io_poll.iv_poll_count = l_ns_left / io_poll.iv_delay;
+    io_poll.iv_poll_count += l_ns_left % io_poll.iv_delay ? 0 : 1;
 
     // Make the minimum poll count 2, as that's the value of the quickest cal step in sim
-    i_poll.iv_poll_count = (i_poll.iv_poll_count < MINIMUM_POLL_COUNT) ? MINIMUM_POLL_COUNT : i_poll.iv_poll_count;
+    io_poll.iv_poll_count = (io_poll.iv_poll_count < MINIMUM_POLL_COUNT) ? MINIMUM_POLL_COUNT : io_poll.iv_poll_count;
 
     // Fudge some for sim irregularities. This will increase time to a complete timeout but won't
     // really effect valid training unless these cycles are needed. So this isn't a bad thing ...
     // AKA watchdog timer
     // HB is failing, bump it out 4x for the polling
-    i_poll.iv_poll_count *= 4;
+    io_poll.iv_poll_count *= 4;
 
-    FAPI_INF("cal abort on error? %s. tc: %luc, id: %luns(%lusc), d: %lu(%lusc), pc: %lu",
-             (cal_abort_on_error ? "yup" : "nope"), l_total_cycles, i_poll.iv_initial_delay,
-             i_poll.iv_initial_sim_delay, i_poll.iv_delay, i_poll.iv_sim_delay, i_poll.iv_poll_count);
+    FAPI_INF("%s cal abort on error? %s. tc: %luc, id: %luns(%lusc), d: %lu(%lusc), pc: %lu",
+             mss::c_str(i_target),
+             (cal_abort_on_error ? "yup" : "nope"),
+             l_total_cycles,
+             io_poll.iv_initial_delay,
+             io_poll.iv_initial_sim_delay,
+             io_poll.iv_delay,
+             io_poll.iv_sim_delay,
+             io_poll.iv_poll_count);
 
     return fapi2::FAPI2_RC_SUCCESS;
 

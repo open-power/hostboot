@@ -27,10 +27,10 @@
 /// @file adr.H
 /// @brief Subroutines for the PHY ADR registers
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_ADR_H_
@@ -223,7 +223,7 @@ inline fapi2::ReturnCode read_imp_clk( const fapi2::Target<T>& i_target,
 
     //one register per CLK
     FAPI_TRY( mss::getScom(i_target, TT::IO_TX_FET_SLICE_CLK_REG[I].first, o_data) );
-    FAPI_INF("imp_clk lane<%d>: 0x%016lx", I, o_data);
+    FAPI_INF("%s imp_clk lane<%d>: 0x%016lx", mss::c_str(i_target), I, o_data);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -245,7 +245,7 @@ inline fapi2::ReturnCode write_imp_clk( const fapi2::Target<T>& i_target,
     static_assert( I < TT::NUM_CLK_LANES, "lane instance out of range");
 
     //one register per CLK
-    FAPI_INF("imp_clk lane<%d>: 0x%016lx", I, i_data);
+    FAPI_INF("%s imp_clk lane<%d>: 0x%016lx", mss::c_str(i_target), I, i_data);
     FAPI_TRY( mss::putScom(i_target, TT::IO_TX_FET_SLICE_CLK_REG[I].first, i_data) );
 
 fapi_try_exit:
@@ -278,7 +278,7 @@ inline fapi2::ReturnCode read_imp_cmd_addr( const fapi2::Target<T>& i_target,
 
     //one register per CMD/ADDR lane
     FAPI_TRY( mss::getScom(i_target, TT::IO_TX_FET_SLICE_CMD_ADDR_REG[I].first, o_data) );
-    FAPI_INF("imp_cmd_addr lane<%d>: 0x%016lx", I, o_data);
+    FAPI_INF("%s imp_cmd_addr lane<%d>: 0x%016lx", mss::c_str(i_target), I, o_data);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -300,7 +300,7 @@ inline fapi2::ReturnCode write_imp_cmd_addr( const fapi2::Target<T>& i_target,
     static_assert( I < TT::NUM_CMD_ADDR_LANES, "lane instance out of range");
 
     //one register per CMD/ADDR lane
-    FAPI_INF("imp_cmd_addr lane<%d>: 0x%016lx", I, i_data);
+    FAPI_INF("%s imp_cmd_addr lane<%d>: 0x%016lx", mss::c_str(i_target), I, i_data);
     FAPI_TRY( mss::putScom(i_target, TT::IO_TX_FET_SLICE_CMD_ADDR_REG[I].first, i_data) );
 
 fapi_try_exit:
@@ -333,7 +333,7 @@ inline fapi2::ReturnCode read_imp_cntl( const fapi2::Target<T>& i_target,
 
     //one register per CNTL
     FAPI_TRY( mss::getScom(i_target, TT::IO_TX_FET_SLICE_CNTL_REG[I].first, o_data) );
-    FAPI_INF("imp_cntl lane<%d>: 0x%016lx", I, o_data);
+    FAPI_INF("%s imp_cntl lane<%d>: 0x%016lx", mss::c_str(i_target), I, o_data);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -355,7 +355,7 @@ inline fapi2::ReturnCode write_imp_cntl( const fapi2::Target<T>& i_target,
     static_assert( I < TT::NUM_CNTL_LANES, "lane instance out of range");
 
     //one register per CNTL
-    FAPI_INF("imp_cntl lane<%d>: 0x%016lx", I, i_data);
+    FAPI_INF("%s imp_cntl lane<%d>: 0x%016lx", mss::c_str(i_target), I, i_data);
     FAPI_TRY( mss::putScom(i_target, TT::IO_TX_FET_SLICE_CNTL_REG[I].first, i_data) );
 
 fapi_try_exit:
@@ -388,7 +388,7 @@ inline fapi2::ReturnCode read_imp_cscid( const fapi2::Target<T>& i_target,
 
     //one register per CS/CID
     FAPI_TRY( mss::getScom(i_target, TT::IO_TX_FET_SLICE_CSCID_REG[I].first, o_data) );
-    FAPI_INF("imp_cscid lane<%d>: 0x%016lx", I, o_data);
+    FAPI_INF("%s imp_cscid lane<%d>: 0x%016lx", mss::c_str(i_target), I, o_data);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -410,7 +410,7 @@ inline fapi2::ReturnCode write_imp_cscid( const fapi2::Target<T>& i_target,
     static_assert( I < TT::NUM_CSCID_LANES, "lane instance out of range");
 
     //one register per CS/CID
-    FAPI_INF("imp_cscid lane<%d>: 0x%016lx", I, i_data);
+    FAPI_INF("%s imp_cscid lane<%d>: 0x%016lx", mss::c_str(i_target), I, i_data);
     FAPI_TRY( mss::putScom(i_target, TT::IO_TX_FET_SLICE_CSCID_REG[I].first, i_data) );
 
 fapi_try_exit:
