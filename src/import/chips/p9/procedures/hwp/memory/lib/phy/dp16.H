@@ -27,10 +27,10 @@
 /// @file dp16.H
 /// @brief Subroutines to control the DP16 logic blocks
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_DP16_H_
