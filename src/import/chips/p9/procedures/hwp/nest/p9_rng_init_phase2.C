@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -142,27 +142,27 @@ p9_rng_init_phase2(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
         {
             FAPI_DBG("Skipping setup of NX RNG Failed Interrupt Address Register");
         }
-
-        // set NX RNG enable
-        l_rng_cfg_data.setBit<PU_NX_RNG_CFG_ENABLE>();
-        FAPI_TRY(fapi2::putScom(i_target, PU_NX_RNG_CFG, l_rng_cfg_data),
-                 "Error from putScom (NX RNG Status and Control Register)");
-
-        // 8. Host boot sets the NX “sticky bit” that asserts tc_nx_block_rng_scom_wr. If tc_nx_block_rng_scom_wr =
-        // 1 writes to RNG SCOM register addresses 32 - 38 and 40 are blocked. An attempted write sets Power-
-        // Bus Interface FIR Data Register[Write to RNG SCOM reg detected when writes disabled].
-
-        // set NX sticky bit to block future RNG SCOM writes (tc_nx_block_rng_scom_wr)
-        FAPI_TRY(fapi2::getScom(i_target, PU_SECURITY_SWITCH_REGISTER_SCOM, l_security_switch_data),
-                 "Error from getScom (Security Switch Register");
-        l_security_switch_data.setBit<PU_SECURITY_SWITCH_REGISTER_NX_RAND_NUM_GEN_LOCK>();
-        FAPI_TRY(fapi2::putScom(i_target, PU_SECURITY_SWITCH_REGISTER_SCOM, l_security_switch_data),
-                 "Error from putScom (Security Switch Register");
     }
     else
     {
-        FAPI_DBG("Skipping NX RNG BAR programming, RNG function is not enabled!");
+        FAPI_DBG("Skipping NX RNG BAR programming!");
     }
+
+    // set NX RNG enable
+    l_rng_cfg_data.setBit<PU_NX_RNG_CFG_ENABLE>();
+    FAPI_TRY(fapi2::putScom(i_target, PU_NX_RNG_CFG, l_rng_cfg_data),
+             "Error from putScom (NX RNG Status and Control Register)");
+
+    // 8. Host boot sets the NX “sticky bit” that asserts tc_nx_block_rng_scom_wr. If tc_nx_block_rng_scom_wr =
+    // 1 writes to RNG SCOM register addresses 32 - 38 and 40 are blocked. An attempted write sets Power-
+    // Bus Interface FIR Data Register[Write to RNG SCOM reg detected when writes disabled].
+
+    // set NX sticky bit to block future RNG SCOM writes (tc_nx_block_rng_scom_wr)
+    FAPI_TRY(fapi2::getScom(i_target, PU_SECURITY_SWITCH_REGISTER_SCOM, l_security_switch_data),
+             "Error from getScom (Security Switch Register");
+    l_security_switch_data.setBit<PU_SECURITY_SWITCH_REGISTER_NX_RAND_NUM_GEN_LOCK>();
+    FAPI_TRY(fapi2::putScom(i_target, PU_SECURITY_SWITCH_REGISTER_SCOM, l_security_switch_data),
+             "Error from putScom (Security Switch Register");
 
 fapi_try_exit:
     FAPI_INF("End");
