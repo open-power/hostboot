@@ -546,8 +546,7 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
 
     o_kwd = NULL;
     o_kwdSize = 0;
-    //size_t theSize[i_num];
-    memset (theSize,0, sizeof(theSize));
+    memset (theSize,0, sizeof(size_t) * i_num);
 
     do
     {
@@ -698,7 +697,7 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
 
     o_kwd = NULL;
     o_kwdSize = 0;
-    memset (theSize,0, sizeof(theSize));
+    memset (theSize,0, sizeof(size_t) * i_num);
 
     do
     {
