@@ -55,45 +55,6 @@ namespace HDAT
 #define HDAT_MS_AREA(_i_idx_)  *((HdatMsArea **)((char *)iv_msAreaPtrs + \
 _i_idx_ * sizeof(HdatMsArea *)))
 
-/*******************************************************************************
- * hdatGetMsaDeviceInfo
- *
- * @brief Routine returns the Host I2C device entries
- *
- * @pre None
- *
- * @post None
- *
- * @param[in] i_pMembufTarget
- *       The membuf target handle
- * @param[out] o_i2cDevEntries
- *       The host i2c dev entries
- *
- * @return void
- *
-*******************************************************************************/
-void hdatGetMsaDeviceInfo(TARGETING::Target* i_pMembufTarget,
-    std::vector<hdatMsAreaHI2cData_t>&o_i2cDevEntries)
-{
-    HDAT_ENTER();
-    //TODO : RTC Story 165230
-    //Need to populate the data once ready
-    //std::vector<hdatDeviceInfo_t> o_deviceInfo;
-    //getDeviceInfo( TARGETING::Target* i_membufTarget,
-    //               std::vector<hdatDeviceInfo_t>& o_deviceInfo );
-
-    hdatMsAreaHI2cData_t l_hostI2cObj;
-    memset(&l_hostI2cObj, 0x00, sizeof(l_hostI2cObj));
-
-    //Hard coded values
-    l_hostI2cObj.hdatMsaI2cMasterInfo = 1;
-    l_hostI2cObj.hdatMsaI2cSlaveDevType = 1;
-    l_hostI2cObj.hdatMsaI2cPurpose = 1;
-    o_i2cDevEntries.push_back(l_hostI2cObj);
-
-    HDAT_EXIT();
-}
-
 /** @brief See the prologue in hdatmsvpd.H
  */
 HdatMsVpd::HdatMsVpd(errlHndl_t &o_errlHndl,
@@ -691,7 +652,7 @@ errlHndl_t HdatMsVpd::addEcEntry(uint16_t i_msAreaId,
 /** @brief See the prologue in hdatmsvpd.H
  */
 void HdatMsVpd::setMsaI2cInfo(uint16_t i_msAreaId,
-    std::vector<hdatMsAreaHI2cData_t>& i_I2cDevEntries)
+    std::vector<hdatI2cData_t>& i_I2cDevEntries)
 {
     HdatMsArea *l_obj;
 
@@ -1405,10 +1366,9 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                  l_pMcsTarget->getAttr<TARGETING::ATTR_HUID>());
                             break;
                         }
-
-                        // TODO RTC Story 165230
+                        
                         // Need to get i2c Master data correctly
-                        std::vector<hdatMsAreaHI2cData_t> l_i2cDevEntries;
+                        std::vector<hdatI2cData_t> l_i2cDevEntries;
 
                         TARGETING::PredicateCTM l_membufPredicate(
                             TARGETING::CLASS_CHIP, TARGETING::TYPE_MEMBUF);
@@ -1432,7 +1392,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                 l_membufList[0];
                             if (l_pMembufTarget != NULL)
                             {
-                                hdatGetMsaDeviceInfo(l_pMembufTarget,
+                                hdatGetI2cDeviceInfo(l_pMembufTarget,
                                                      l_i2cDevEntries);
                             }
                         }

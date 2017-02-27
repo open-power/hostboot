@@ -55,9 +55,11 @@
 #include <../vpd/mvpd.H>
 #include <../vpd/ipvpd.H>
 #include <../vpd/pvpd.H>
+#include <i2c/i2cif.H>
 using namespace MVPD;
 using namespace PVPD;
 using namespace IPVPD;
+using namespace I2C;
 
 
 /*----------------------------------------------------------------------------*/
@@ -93,6 +95,23 @@ namespace HDAT
 {
 
 extern trace_desc_t* g_trac_hdat;
+
+
+/** @brief Defines the Host I2C device info 
+ */
+struct hdatI2cData_t
+{
+    uint8_t  hdatI2cEngine;
+    uint8_t  hdatI2cMasterPort;
+    uint16_t hdatI2cBusSpeed;
+    uint8_t  hdatI2cSlaveDevType;
+    uint8_t  hdatI2cSlaveDevAddr;
+    uint8_t  hdatI2cSlavePort;
+    uint8_t  hdatReserved1;
+    uint32_t hdatI2cSlaveDevPurp;
+    uint32_t hdatI2cLinkId;
+
+}__attribute__ ((packed));
 
 
 /**
@@ -455,6 +474,27 @@ errlHndl_t hdatformatAsciiKwd(const struct vpdData i_fetchVpd[],
 errlHndl_t hdatGetFullEepromVpd ( TARGETING::Target * i_target,
                            size_t &io_dataSize,
                            char* &o_data);
+
+/*******************************************************************************
+ * hdatGetI2cDeviceInfo
+ *
+ * @brief Routine returns the Host I2C device entries
+ *
+ * @pre None
+ *
+ * @post None
+ *
+ * @param[in] i_pTarget
+ *       The i2c master target handle
+ * @param[out] o_i2cDevEntries
+ *       The host i2c dev entries
+ *
+ * @return void
+ *
+*******************************************************************************/
+void hdatGetI2cDeviceInfo(TARGETING::Target* i_pTarget,
+    std::vector<hdatI2cData_t>&o_i2cDevEntries);
+
 
 };// end namespace
 

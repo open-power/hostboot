@@ -1665,5 +1665,59 @@ errlHndl_t hdatGetFullEepromVpd(TARGETING::Target * i_target,
     return(err);
 }
 
+/*******************************************************************************
+ * hdatGetI2cDeviceInfo
+ *
+ * @brief Routine returns the Host I2C device entries
+ *
+ * @pre None
+ *
+ * @post None
+ *
+ * @param[in] i_pTarget
+ *       The i2c master target handle
+ * @param[out] o_i2cDevEntries
+ *       The host i2c dev entries
+ *
+ * @return void
+ *
+*******************************************************************************/
+void hdatGetI2cDeviceInfo(TARGETING::Target* i_pTarget,
+    std::vector<hdatI2cData_t>&o_i2cDevEntries)
+{
+    HDAT_ENTER();
+    std::vector<DeviceInfo_t> o_deviceInfo;
+    getDeviceInfo( i_pTarget, o_deviceInfo);
+    uint32_t l_I2cLinkId = 0;
+
+    if(!o_deviceInfo.size())
+    {
+        HDAT_INF(" No i2c connections found for i2c master : 0x08X",
+                i_pTarget->getAttr<ATTR_HUID>());
+    }
+    else
+    {
+        for ( auto &l_i2cDevEle : o_deviceInfo )
+        {
+            hdatI2cData_t l_hostI2cObj;
+            memset(&l_hostI2cObj, 0x00, sizeof(hdatI2cData_t));
+
+            l_hostI2cObj.hdatI2cEngine       = l_i2cDevEle.engine;
+            l_hostI2cObj.hdatI2cMasterPort   = l_i2cDevEle.masterPort;
+            l_hostI2cObj.hdatI2cBusSpeed     = l_i2cDevEle.busFreqKhz;
+            l_hostI2cObj.hdatI2cSlaveDevType = l_i2cDevEle.deviceType;
+            l_hostI2cObj.hdatI2cSlaveDevAddr = l_i2cDevEle.addr;
+            l_hostI2cObj.hdatI2cSlavePort    = l_i2cDevEle.slavePort;
+            l_hostI2cObj.hdatI2cSlaveDevPurp = l_i2cDevEle.devicePurpose;
+            l_hostI2cObj.hdatI2cLinkId       = l_I2cLinkId++;
+            
+            o_i2cDevEntries.push_back(l_hostI2cObj);
+        }
+    }
+
+    HDAT_EXIT();
+}
+
+
 
 } //namespace HDAT

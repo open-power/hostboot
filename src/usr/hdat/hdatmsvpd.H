@@ -683,7 +683,7 @@ class HdatMsVpd : public HdatHdif
          * @param i_I2cDevEntries- input parameter - host I2c device info
          */
         void setMsaI2cInfo(uint16_t i_msAreaId,
-            std::vector<hdatMsAreaHI2cData_t>& i_I2cDevEntries);
+            std::vector<hdatI2cData_t>& i_I2cDevEntries);
 
         /**
          * @brief Add a RAM area FRU.
