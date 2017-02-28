@@ -51,6 +51,7 @@
 #include <fsi/fsiif.H>
 #include <arch/ppc.H>
 #include <arch/pirformat.H>
+#include <arch/pvrformat.H>
 #include <config.h>
 #include <p9_misc_scom_addresses.H>
 
@@ -397,11 +398,13 @@ errlHndl_t IntrRp::resetIntUnit(intr_hdlr_t* i_proc)
     TARGETING::Target* procTarget = i_proc->proc;
 
     do {
-
-        //TODO RTC 160361 - Replace attribute with EC check. Anything greater
-        //  DD20 should do the HW-based reset
-        uint8_t l_doHwReset =
-            iv_masterHdlr->proc->getAttr<TARGETING::ATTR_XIVE_HW_RESET>();
+        //Anything greater than DD10 should do the HW-based reset
+        bool l_doHwReset = true;
+        uint32_t l_pvr = mmio_pvr_read() & 0xFFFFFFFF;
+        if( (l_pvr & PVR_t::CHIP_DD_MASK) == PVR_t::IS_NIMBUS_DD1 )
+        {
+            l_doHwReset = false;
+        }
 
         if (l_doHwReset)
         {

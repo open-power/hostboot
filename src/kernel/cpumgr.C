@@ -46,6 +46,7 @@
 #include <kernel/kernel_reasoncodes.H>
 #include <kernel/cpuid.H>
 #include <kernel/doorbell.H>
+#include <arch/pvrformat.H>
 
 cpu_t** CpuManager::cv_cpus[KERNEL_MAX_SUPPORTED_NODES];
 bool CpuManager::cv_shutdown_requested = false;
@@ -472,6 +473,9 @@ size_t CpuManager::getThreadCount()
 
         case CORE_UNKNOWN:
         default:
+            PVR_t l_pvr( getPVR() );
+            printk("cputype=%d, pvr=%.8X\n",
+                   CpuID::getCpuType(), l_pvr.word);
             kassert(false);
             break;
     }
