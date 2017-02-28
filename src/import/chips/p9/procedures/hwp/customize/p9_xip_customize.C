@@ -93,7 +93,7 @@ fapi2::ReturnCode writeMboxRegs (
     MBOX_ATTR_WRITE (ATTR_NEST_MEM_X_O_PCI_BYPASS,  i_proc_target,   i_image);
     MBOX_ATTR_WRITE (ATTR_SYSTEM_IPL_PHASE,         FAPI_SYSTEM,     i_image);
     MBOX_ATTR_WRITE (ATTR_SYS_FORCE_ALL_CORES,      FAPI_SYSTEM,     i_image);
-    MBOX_ATTR_WRITE (ATTR_RISK_LEVEL,               FAPI_SYSTEM,     i_image);
+    MBOX_ATTR_CLEAR (ATTR_RISK_LEVEL,               FAPI_SYSTEM,     i_image);
     MBOX_ATTR_WRITE (ATTR_DISABLE_HBBL_VECTORS,     FAPI_SYSTEM,     i_image);
     MBOX_ATTR_WRITE (ATTR_MC_SYNC_MODE,             i_proc_target,   i_image);
     MBOX_ATTR_WRITE (ATTR_SECURITY_MODE,            FAPI_SYSTEM,     i_image);
