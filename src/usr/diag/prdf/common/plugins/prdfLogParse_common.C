@@ -661,12 +661,12 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                 tmpStr = "Unknown Priority";
                 switch ( pfa.mruList[i].priority )
                 {
-                    case SRCI_PRIORITY_LOW:  tmpStr = "LOW";   break;
-                    case SRCI_PRIORITY_MEDC: tmpStr = "MED_C"; break;
-                    case SRCI_PRIORITY_MEDB: tmpStr = "MED_B"; break;
-                    case SRCI_PRIORITY_MEDA: tmpStr = "MED_A"; break;
-                    case SRCI_PRIORITY_MED:  tmpStr = "MED";   break;
-                    case SRCI_PRIORITY_HIGH: tmpStr = "HIGH";  break;
+                    case HWAS::SRCI_PRIORITY_LOW:  tmpStr = "LOW";   break;
+                    case HWAS::SRCI_PRIORITY_MEDC: tmpStr = "MED_C"; break;
+                    case HWAS::SRCI_PRIORITY_MEDB: tmpStr = "MED_B"; break;
+                    case HWAS::SRCI_PRIORITY_MEDA: tmpStr = "MED_A"; break;
+                    case HWAS::SRCI_PRIORITY_MED:  tmpStr = "MED";   break;
+                    case HWAS::SRCI_PRIORITY_HIGH: tmpStr = "HIGH";  break;
                 }
                 snprintf( header, 25, " #%d %s", i+1, tmpStr );
 

@@ -169,8 +169,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
         if ( PRDcalloutData::TYPE_SYMFRU == thiscallout.getType() )
         {
-            if ( (EPUB_PRC_SP_CODE   == thiscallout.flatten()) ||
-                 (EPUB_PRC_PHYP_CODE == thiscallout.flatten()) )
+            if ( (HWAS::EPUB_PRC_SP_CODE   == thiscallout.flatten()) ||
+                 (HWAS::EPUB_PRC_PHYP_CODE == thiscallout.flatten()) )
             {
                 SW = true;
 
@@ -184,7 +184,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                     SW_High = true;
                 }
             }
-            else if ( EPUB_PRC_LVL_SUPP == thiscallout.flatten())
+            else if ( HWAS::EPUB_PRC_LVL_SUPP == thiscallout.flatten())
             {
                 SecondLevel = true;
 
@@ -322,7 +322,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // attention.
     if ( io_sdc.IsSUE() )
     {
-        PRDF_HW_ADD_PROC_CALLOUT(EPUB_PRC_SUE_PREVERROR,
+        PRDF_HW_ADD_PROC_CALLOUT(HWAS::EPUB_PRC_SUE_PREVERROR,
                                  MRU_HIGH,
                                  iv_errl,
                                  errlSev);
@@ -515,9 +515,9 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             if (HW == false && SW == true && SecondLevel == false)
             {
                 PRDF_DTRAC( PRDF_FUNC "thisProcedureID= %x, thispriority=%x, "
-                            "errlSev=%x", EPUB_PRC_LVL_SUPP, MRU_LOW, errlSev );
+                            "errlSev=%x", HWAS::EPUB_PRC_LVL_SUPP, MRU_LOW, errlSev );
 
-                PRDF_HW_ADD_PROC_CALLOUT(EPUB_PRC_LVL_SUPP,
+                PRDF_HW_ADD_PROC_CALLOUT(HWAS::EPUB_PRC_LVL_SUPP,
                                          MRU_LOW,
                                          iv_errl,
                                          errlSev);

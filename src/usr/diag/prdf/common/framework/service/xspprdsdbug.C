@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -177,8 +177,8 @@ uint32_t SYSTEM_DEBUG_CLASS::Reinitialize(const AttnList & i_attnList)
                               0,                          // user data word 3
                               0 );                        // user data word 4
 
-            PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, SRCI_PRIORITY_MED,
-                                        EPUB_PRC_SP_CODE );
+            PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, HWAS::SRCI_PRIORITY_MED,
+                                        HWAS::EPUB_PRC_SP_CODE );
             l_rc = PRD_ATTN_DATA_ACCESS_FAILED;
 
             break;

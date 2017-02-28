@@ -100,7 +100,7 @@ void commitSoftError( uint32_t i_reasonCode, TargetHandle_t i_mba,
     if ( i_analysisErrors )
     {
         errlHndl_t errl = createErrl( i_reasonCode, i_mba, i_signature );
-        errl->addProcedureCallout( EPUB_PRC_LVL_SUPP, SRCI_PRIORITY_HIGH );
+        errl->addProcedureCallout( HWAS::EPUB_PRC_LVL_SUPP, HWAS::SRCI_PRIORITY_HIGH );
         commitErrl( errl, i_mba );
     }
 }
@@ -191,7 +191,8 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
                     TargetHandleList partList = i_memmru.getCalloutList();
                     for ( auto &part : partList )
                     {
-                        errl->addHwCallout( part, SRCI_PRIORITY_HIGH,
+                        errl->addHwCallout( part,
+                                            HWAS::SRCI_PRIORITY_HIGH,
                                             HWAS::DELAYED_DECONFIG,
                                             HWAS::GARD_Predictive );
                     }
@@ -264,7 +265,7 @@ bool processBadDimms( TargetHandle_t i_mba, uint8_t i_badDimmMask )
             }
 
             o_calloutMade = true;
-            errl->addHwCallout( *i, SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG,
+            errl->addHwCallout( *i, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG,
                                 HWAS::GARD_Predictive );
         }
     }

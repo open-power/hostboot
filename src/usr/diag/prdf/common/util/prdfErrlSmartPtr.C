@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,8 +40,8 @@ void ErrlSmartPtr::add_src()
     if (iv_errl)
     {
         PRDF_ADD_SW_ERR( iv_errl, 0, PRDF_ERRLSMARTPTR, __LINE__ );
-        PRDF_ADD_PROCEDURE_CALLOUT( iv_errl, SRCI_PRIORITY_MED,
-                                    EPUB_PRC_SP_CODE );
+        PRDF_ADD_PROCEDURE_CALLOUT( iv_errl, HWAS::SRCI_PRIORITY_MED,
+                                    HWAS::EPUB_PRC_SP_CODE );
     }
 }
 

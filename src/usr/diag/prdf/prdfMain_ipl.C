@@ -201,7 +201,8 @@ errlHndl_t startScrub()
                             ud12, ud34 );                     // user data 1-4
 
         // Add 2nd level support
-        o_errl->addProcedureCallout( EPUB_PRC_LVL_SUPP, SRCI_PRIORITY_HIGH );
+        o_errl->addProcedureCallout( HWAS::EPUB_PRC_LVL_SUPP,
+                                     HWAS::SRCI_PRIORITY_HIGH );
 
         // Add traces
         o_errl->collectTrace( PRDF_COMP_NAME, 512 );

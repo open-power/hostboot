@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -324,14 +324,14 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
     if(g_prd_errlHndl != NULL)
     {
         PRDF_INF("PRDTRACE: PrdMain: g_prd_errlHndl != NULL");
-        PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, SRCI_PRIORITY_MED,
-                                    EPUB_PRC_SP_CODE );
+        PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, HWAS::SRCI_PRIORITY_MED,
+                                    HWAS::EPUB_PRC_SP_CODE );
         // This is a precautionary step. There is a possibilty that if
         // severity for g_prd_errlHndl is Predictve and there is only
         // EPUB_PRC_SP_CODE callout than it will be changed to tracing event.
         // So adding EPUB_PRC_LVL_SUPP to avoid this.
-        PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, SRCI_PRIORITY_LOW,
-                                    EPUB_PRC_LVL_SUPP );
+        PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, HWAS::SRCI_PRIORITY_LOW,
+                                    HWAS::EPUB_PRC_LVL_SUPP );
 
         // This forces any previous errls to be committed
         g_prd_errlHndl = NULL;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,8 @@
  * This file contains the Processor Runtime Diagnostics error logging
  * related declarations specific to hostboot.
  */
+
+#include <errlentry.H>
 
 #include <prdfEnums.H>
 #include <prdfRasServices.H>
