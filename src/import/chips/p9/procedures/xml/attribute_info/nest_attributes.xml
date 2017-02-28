@@ -34,6 +34,13 @@
     Provided by the MRW.
   </description>
   <valueType>uint32</valueType>
+  <enum>
+    1600 = 1600,
+    1866 = 1866,
+    2000 = 2000,
+    2133 = 2133,
+    2400 = 2400
+  </enum>
   <writeable/>
   <platInit/>
 </attribute>
