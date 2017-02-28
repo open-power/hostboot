@@ -38,6 +38,7 @@
 
 #include <fapi2.H>
 #include <lib/mss_attribute_accessors.H>
+#include <lib/ccs/ccs.H>
 
 namespace mss
 {
@@ -149,55 +150,203 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                     const uint64_t i_rank,
                                     const fapi2::buffer<uint16_t> i_cal_steps_enabled);
 
-// TODO RTC: 157753 tparams P and R can be pulled from an MCA trait once we have it
 ///
-/// @brief Setup odt_wr/rd_config
+/// @brief Execute a set of PHY cal steps
+/// @tparam T, the target type of the MCA/MBA
+/// @param[in] i_target the target associated with this cal
+/// @param[in] i_rp one of the currently configured rank pairs
+/// @param[in] i_cal_steps_enabled fapi2::buffer<uint16_t> representing the cal steps to enable
+/// @param[in] i_abort_on_error CAL_ABORT_ON_ERROR override
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+/// @note This is a helper function. Library users are required to call setup_and_execute_cal
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode execute_cal_steps_helper( const fapi2::Target<T>& i_target,
+        const uint64_t i_rp,
+        const fapi2::buffer<uint16_t> i_cal_steps_enabled,
+        const uint8_t i_abort_on_error);
+
+///
+/// @brief Perform necessary termination setup and execute a set of PHY cal steps
+/// @tparam T, the target type of the MCA/MBA
+/// @param[in] i_target the target associated with this cal
+/// @param[in] i_rp one of the currently configured rank pairs
+/// @param[in] i_cal_steps_enabled fapi2::buffer<uint16_t> representing the cal steps to enable
+/// @param[in] i_abort_on_error CAL_ABORT_ON_ERROR override
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<T>& i_target,
+        const uint64_t i_rp,
+        const fapi2::buffer<uint16_t> i_cal_steps_enabled,
+        const uint8_t i_abort_on_error);
+
+// TODO RTC:167929 Can ODT VPD processing be shared between RD and WR?
+// TODO RTC:157753 tparams P and R can be pulled from an MCA trait once we have it
+///
+/// @brief Setup odt_rd_config
 /// @tparam T the target type of the MCA/MBA
 /// @tparam P the maximum DIMM per T
 /// @tparam R the maximum rank per DIMM on T
 /// @param[in] i_target the target
 /// @param[in] i_dimm_count the number of DIMM presently on the target
 /// @param[in] i_odt_rd the RD ODT values from VPD
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T, uint64_t P, uint64_t R >
+fapi2::ReturnCode reset_odt_rd_config_helper( const fapi2::Target<T>& i_target,
+        const uint64_t i_dimm_count,
+        const uint8_t i_odt_rd[P][R] );
+
+// TODO RTC:167929 Can ODT VPD processing be shared between RD and WR?
+// TODO RTC:157753 tparams P and R can be pulled from an MCA trait once we have it
+///
+/// @brief Setup odt_wr_config
+/// @tparam T the target type of the MCA/MBA
+/// @tparam P the maximum DIMM per T
+/// @tparam R the maximum rank per DIMM on T
+/// @param[in] i_target the target
+/// @param[in] i_dimm_count the number of DIMM presently on the target
 /// @param[in] i_odt_wr the WR ODT values from VPD
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T, uint64_t P, uint64_t R >
-fapi2::ReturnCode reset_odt_config_helper( const fapi2::Target<T>& i_target,
+fapi2::ReturnCode reset_odt_wr_config_helper( const fapi2::Target<T>& i_target,
         const uint64_t i_dimm_count,
-        const uint8_t i_odt_rd[P][R],
         const uint8_t i_odt_wr[P][R] );
 
 ///
-/// @brief Setup odt_wr/rd_config
+/// @brief Setup odt_rd_config
 /// @param[in] i_target the MCA target
 /// @param[in] i_dimm_count the number of DIMM presently on the target
 /// @param[in] i_odt_rd the RD ODT values from VPD
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode reset_odt_rd_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+    const uint64_t i_dimm_count,
+    const uint8_t i_odt_rd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM]);
+
+///
+/// @brief Setup odt_wr_config
+/// @param[in] i_target the MCA target
+/// @param[in] i_dimm_count the number of DIMM presently on the target
 /// @param[in] i_odt_wr the WR ODT values from VPD
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-fapi2::ReturnCode reset_odt_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
+fapi2::ReturnCode reset_odt_wr_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
     const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
     const uint64_t i_dimm_count,
-    const uint8_t i_odt_rd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM],
     const uint8_t i_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM]);
 
 ///
-/// @brief Setup odt_wr/rd_config, reads attributes
+/// @brief Setup odt_rd_config, reads attributes
 /// @tparam T the target type of the MCA/MBA
 /// @param[in] i_target the target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
-fapi2::ReturnCode reset_odt_config( const fapi2::Target<T>& i_target );
+fapi2::ReturnCode reset_odt_rd_config( const fapi2::Target<T>& i_target );
 
 ///
-/// @brief Setup odt_wr/rd_config, reads attributes
+/// @brief Setup odt_rd_config, reads attributes
 /// @param[in] i_target the MCA target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+fapi2::ReturnCode reset_odt_rd_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+///
+/// @brief Setup odt_wr_config, reads attributes
+/// @tparam T the target type of the MCA/MBA
+/// @param[in] i_target the target associated with this cal setup
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode reset_odt_wr_config( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Setup odt_wr_config, reads attributes
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode reset_odt_wr_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+///
+/// @brief Override odt_wr_config to enabled for a given rank
+/// @tparam T the target type of the MCA/MBA
+/// @param[in] i_target the target associated with this cal setup
+/// @param[in] i_rank the rank to override
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode override_odt_wr_config( const fapi2::Target<T>& i_target,
+        const uint64_t& i_rank);
+
+///
+/// @brief Override odt_wr_config to enabled for a given rank
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @param[in] i_rank the rank to override
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode override_odt_wr_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t& i_rank);
+
+///
+/// @brief Setup terminations for WR_LEVEL cal for a given RP
+/// @tparam T the target type of the MCA/MBA
+/// @tparam CT TargetType of the CCS instruction
+/// @param[in] i_target the target associated with this cal setup
+/// @param[in] i_rp selected rank pair
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T, fapi2::TargetType CT >
+fapi2::ReturnCode setup_wr_level_terminations( const fapi2::Target<T>& i_target,
+        const uint64_t i_rp,
+        std::vector< ccs::instruction_t<CT> >& io_inst);
+
+///
+/// @brief Setup terminations for WR_LEVEL cal for a given RP
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @param[in] i_rp selected rank pair
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode setup_wr_level_terminations( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+
+///
+/// @brief Restore terminations after WR_LEVEL cal for a given RP
+/// @tparam T the target type of the MCA/MBA
+/// @tparam CT TargetType of the CCS instruction
+/// @param[in] i_target the target associated with this cal setup
+/// @param[in] i_rp selected rank pair
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T, fapi2::TargetType CT >
+fapi2::ReturnCode restore_mainline_terminations( const fapi2::Target<T>& i_target,
+        const uint64_t i_rp,
+        std::vector< ccs::instruction_t<CT> >& io_inst);
+
+///
+/// @brief Restore terminations after WR_LEVEL cal for a given RP
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @param[in] i_rp selected rank pair
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode restore_mainline_terminations( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
 
 ///
 /// @brief Perform the DLL calibration
