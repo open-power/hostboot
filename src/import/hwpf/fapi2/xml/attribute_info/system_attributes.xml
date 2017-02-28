@@ -56,7 +56,7 @@
     <valueType>uint64</valueType>
     <enum>
         MNFG_NO_FLAG                        = 0x0000000000000000,
-        MNFG_DISABLE_DRAM_REPAIRS           = 0x0000000000000080,
+        MNFG_DISABLE_DRAM_REPAIRS           = 0x0000000000000080
 <!--
         MNFG_THRESHOLDS                     = 0x0000000000000001,
         MNFG_AVP_ENABLE                     = 0x0000000000000002,
