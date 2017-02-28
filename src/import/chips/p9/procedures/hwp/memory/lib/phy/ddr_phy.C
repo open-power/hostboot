@@ -875,10 +875,10 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
         FAPI_TRY(mss::scom_blastah(i_target,  mss::dp16Traits<fapi2::TARGET_TYPE_MCA>::WR_VREF_CONFIG0_REG, l_vref_config));
     }
 
-    // Latches in the WR VREF values
     // loops through all RP's running workarounds and latching the VREF's as need be
     for(const auto& l_rp : i_rank_pairs)
     {
+        // Latches in the WR VREF values
         // Overrides will be set by mss::workarounds::wr_vref::execute.
         // If the execute code is skipped, then it will read from the attributes
         uint8_t l_vrefdq_train_range_override = mss::ddr4::USE_DEFAULT_WR_VREF_SETTINGS;
@@ -934,19 +934,155 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
 }
 
 ///
-/// @brief Setup odt_wr/rd_config
-/// @param[in] i_target the MCA target
-/// @param[in] i_dimm_count the number of DIMM presently on the target
-/// @param[in] i_odt_rd the RD ODT values from VPD
-/// @param[in] i_odt_wr the WR ODT values from VPD
+/// @brief Execute a set of PHY cal steps
+/// Specializaton for TARGET_TYPE_MCA
+/// @param[in] i_target the target associated with this cal
+/// @param[in] i_rp one of the currently configured rank pairs
+/// @param[in] i_cal_steps_enabled fapi2::buffer<uint16_t> representing the cal steps to enable
+/// @param[in] i_abort_on_error CAL_ABORT_ON_ERROR override
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+/// @note This is a helper function. Library users are required to call setup_and_execute_cal
+///
+template<>
+fapi2::ReturnCode execute_cal_steps_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const fapi2::buffer<uint16_t> i_cal_steps_enabled,
+        const uint8_t i_abort_on_error)
+{
+    const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
+    auto l_cal_inst = mss::ccs::initial_cal_command<TARGET_TYPE_MCBIST>(i_rp);
+
+    mss::ccs::program<TARGET_TYPE_MCBIST, TARGET_TYPE_MCA> l_program;
+
+    // Sanity check due to WR_LEVEL termination requirement
+    if ((i_cal_steps_enabled.getBit<mss::cal_steps::WR_LEVEL>()) &&
+        (mss::bit_count(static_cast<uint64_t>(i_cal_steps_enabled)) != 1))
+    {
+        FAPI_ERR("WR_LEVEL cal step requires special terminations, so must be run separately from other cal steps");
+        fapi2::Assert(false);
+    }
+
+    FAPI_DBG("executing training CCS instruction: 0x%llx, 0x%llx", l_cal_inst.arr0, l_cal_inst.arr1);
+
+    // Delays in the CCS instruction ARR1 for training are supposed to be 0xFFFF,
+    // and we're supposed to poll for the done or timeout bit. But we don't want
+    // to wait 0xFFFF cycles before we start polling - that's too long. So we put
+    // in a best-guess of how long to wait. This, in a perfect world, would be the
+    // time it takes one rank to train one training algorithm times the number of
+    // ranks we're going to train. We fail-safe as worst-case we simply poll the
+    // register too much - so we can tune this as we learn more.
+    l_program.iv_poll.iv_initial_sim_delay = 200;
+    l_program.iv_poll.iv_poll_count = 0xFFFF;
+    l_program.iv_instructions.push_back(l_cal_inst);
+
+    // We need to figure out how long to wait before we start polling. Each cal step has an expected
+    // duration, so for each cal step which was enabled, we update the CCS program.
+    FAPI_TRY( mss::cal_timer_setup(i_target, l_program.iv_poll, i_cal_steps_enabled) );
+    FAPI_TRY( mss::setup_cal_config(i_target, i_rp, i_cal_steps_enabled) );
+
+    // In the event of an init cal hang, CCS_STATQ(2) will assert and CCS_STATQ(3:5) = “001” to indicate a
+    // timeout. Otherwise, if calibration completes, FW should inspect DDRPHY_FIR_REG bits (50) and (58)
+    // for signs of a calibration error. If either bit is on, then the DDRPHY_PC_INIT_CAL_ERROR register
+    // should be polled to determine which calibration step failed.
+
+    // If we got a cal timeout, or another CCS error just leave now. If we got success, check the error
+    // bits for a cal failure. We'll return the proper ReturnCode so all we need to do is FAPI_TRY.
+    FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform necessary termination setup and execute a set of PHY cal steps
+/// Specializaton for TARGET_TYPE_MCA
+/// @param[in] i_target the target associated with this cal
+/// @param[in] i_rp one of the currently configured rank pairs
+/// @param[in] i_cal_steps_enabled fapi2::buffer<uint16_t> representing the cal steps to enable
+/// @param[in] i_abort_on_error CAL_ABORT_ON_ERROR override
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-fapi2::ReturnCode reset_odt_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
+fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const fapi2::buffer<uint16_t> i_cal_steps_enabled,
+        const uint8_t i_abort_on_error)
+{
+    const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
+
+    // We run the cal steps in three chunks: pre-write-leveling, write-leveling, post-wirte-leveling.
+    // This is because write-leveling requires a special set of termination values.
+
+    // Run cal steps before WR_LEVEL if selected
+    if (i_cal_steps_enabled.getBit<mss::cal_steps::EXT_ZQCAL>())
+    {
+        FAPI_DBG("%s Running EXT_ZQCAL step on RP%d", mss::c_str(i_target), i_rp);
+        fapi2::buffer<uint16_t> l_steps_to_execute;
+        l_steps_to_execute.setBit<mss::cal_steps::EXT_ZQCAL>();
+        FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
+    }
+
+    // Run WR_LEVEL step (with overridden termination values) if selected
+    if (i_cal_steps_enabled.getBit<mss::cal_steps::WR_LEVEL>())
+    {
+        mss::ccs::program<TARGET_TYPE_MCBIST, TARGET_TYPE_MCA> l_program;
+        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> > l_rtt_inst;
+
+        FAPI_DBG("%s Running WR_LEVEL step on RP%d", mss::c_str(i_target), i_rp);
+        fapi2::buffer<uint16_t> l_steps_to_execute;
+        l_steps_to_execute.setBit<mss::cal_steps::WR_LEVEL>();
+
+        // Setup WR_LEVEL specific terminations
+        // JEDEC spec requires disabling RTT_WR during WR_LEVEL, and enabling equivalent terminations
+        FAPI_TRY( setup_wr_level_terminations(i_target, i_rp, l_rtt_inst) );
+
+        if (!l_rtt_inst.empty())
+        {
+            l_program.iv_instructions.insert(l_program.iv_instructions.end(), l_rtt_inst.begin(), l_rtt_inst.end() );
+            FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target) );
+            l_program.iv_instructions.clear();
+        }
+
+        // Execute WR_LEVEL
+        FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
+
+        // Restore normal terminations
+        l_rtt_inst.clear();
+        FAPI_TRY( restore_mainline_terminations(i_target, i_rp, l_rtt_inst) );
+
+        if (!l_rtt_inst.empty())
+        {
+            l_program.iv_instructions.insert(l_program.iv_instructions.end(), l_rtt_inst.begin(), l_rtt_inst.end() );
+            FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target) );
+        }
+    }
+
+    // Run cal steps after WR_LEVEL if any are selected
+    if (i_cal_steps_enabled.getBit<mss::cal_steps::DQS_ALIGN, mss::cal_steps::STEPS_AFTER_WR_LEVEL>())
+    {
+        FAPI_DBG("%s Running remaining cal steps on RP%d", mss::c_str(i_target), i_rp);
+        fapi2::buffer<uint16_t> l_steps_to_execute = i_cal_steps_enabled;
+        l_steps_to_execute.clearBit<mss::cal_steps::EXT_ZQCAL>().clearBit<mss::cal_steps::WR_LEVEL>();
+        FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+// TODO RTC:167929 Can ODT VPD processing be shared between RD and WR?
+///
+/// @brief Setup odt_rd_config
+/// @param[in] i_target the MCA target
+/// @param[in] i_dimm_count the number of DIMM presently on the target
+/// @param[in] i_odt_rd the RD ODT values from VPD
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode reset_odt_rd_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
     const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
     const uint64_t i_dimm_count,
-    const uint8_t i_odt_rd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM],
-    const uint8_t i_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM])
+    const uint8_t i_odt_rd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM])
 {
     // The fields in the ODT VPD are 8 bits wide, but we only use the left-most 2 bits
     // of each nibble. The encoding for each rank in the VPD is
@@ -959,9 +1095,6 @@ fapi2::ReturnCode reset_odt_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_P
     // Nimbus PHY is more or less hard-wired for 2 DIMM/port 4R/DIMM
     // So there's not much point in looping over DIMM or ranks.
 
-    //
-    // ODT Read
-    //
     {
         // DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG0_P0
         // 48:55, ATTR_VPD_ODT_RD[0][0][0]; # when Read of Rank0
@@ -1017,11 +1150,34 @@ fapi2::ReturnCode reset_odt_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_P
         FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0, l_data) );
     }
 
-    // TODO RTC:167929 Can ODT VPD processing be shared between RD and WR?
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-    //
-    // ODT Write
-    //
+///
+/// @brief Setup odt_wr_config
+/// @param[in] i_target the MCA target
+/// @param[in] i_dimm_count the number of DIMM presently on the target
+/// @param[in] i_odt_wr the WR ODT values from VPD
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode reset_odt_wr_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+    const uint64_t i_dimm_count,
+    const uint8_t i_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM])
+{
+    // The fields in the ODT VPD are 8 bits wide, but we only use the left-most 2 bits
+    // of each nibble. The encoding for each rank in the VPD is
+    // [Dimm0 ODT0][Dimm0 ODT1][N/A][N/A][Dimm1 ODT0][Dimm1 ODT1][N/A][N/A]
+
+    constexpr uint64_t BIT_FIELD0_START = 0;
+    constexpr uint64_t BIT_FIELD1_START = 4;
+    constexpr uint64_t BIT_FIELD_LENGTH = 2;
+
+    // Nimbus PHY is more or less hard-wired for 2 DIMM/port 4R/DIMM
+    // So there's not much point in looping over DIMM or ranks.
+
     {
         // DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG0_P0
         // 48:55, ATTR_VPD_ODT_WR[0][0][0]; # when Read of Rank0
@@ -1080,23 +1236,185 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Setup odt_wr/rd_config, reads attributes
+/// @brief Setup odt_rd_config, reads attributes
 /// @param[in] i_target the MCA target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode reset_odt_rd_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     uint8_t l_odt_rd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
-    uint8_t l_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
 
-    uint64_t l_dimm_count = count_dimm(i_target);
+    const uint64_t l_dimm_count = count_dimm(i_target);
 
     FAPI_TRY( mss::vpd_mt_odt_rd(i_target, &(l_odt_rd[0][0])) );
+
+    return reset_odt_rd_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
+               i_target, l_dimm_count, l_odt_rd);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup odt_wr_config, reads attributes
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode reset_odt_wr_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    uint8_t l_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+
+    const uint64_t l_dimm_count = count_dimm(i_target);
+
     FAPI_TRY( mss::vpd_mt_odt_wr(i_target, &(l_odt_wr[0][0])) );
 
-    return reset_odt_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
-               i_target, l_dimm_count, l_odt_rd, l_odt_wr);
+    return reset_odt_wr_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
+               i_target, l_dimm_count, l_odt_wr);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Override odt_wr_config to enabled for a given rank
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @param[in] i_rank the rank to override
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode override_odt_wr_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t& i_rank)
+{
+    uint8_t l_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {0};
+    fapi2::buffer<uint8_t> l_odt_wr_buf;
+
+    const uint64_t l_dimm_count = count_dimm(i_target);
+
+    // read the attributes
+    FAPI_TRY( mss::vpd_mt_odt_wr(i_target, &(l_odt_wr[0][0])) );
+
+    // set the ODTs for the rank selected
+    // The ODT encoding is (for mranks only)
+    // [R0 ODT][R1 ODT][N/A][N/A][R4 ODT][R5 ODT][N/A][N/A]
+    // For WR_LEVEL we only want to set the ODT bit for the selected mrank
+    l_odt_wr_buf = l_odt_wr[mss::rank::get_dimm_from_rank(i_rank)][mss::index(i_rank)];
+    FAPI_TRY( l_odt_wr_buf.setBit(i_rank) );
+    l_odt_wr[mss::rank::get_dimm_from_rank(i_rank)][mss::index(i_rank)] = l_odt_wr_buf;
+
+    return reset_odt_wr_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
+               i_target, l_dimm_count, l_odt_wr);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup terminations for WR_LEVEL cal for a given RP
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @param[in] i_rp selected rank pair
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode setup_wr_level_terminations( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+{
+    // Danger: Make sure this DIMM target doesn't get used/accessed until it is populated
+    // by get_dimm_target_from_rank below!
+    fapi2::Target<TARGET_TYPE_DIMM> l_dimm;
+    std::vector<uint64_t> l_ranks;
+    uint8_t l_rtt_wr_value[MAX_RANK_PER_DIMM] = {0};
+
+    // mrank will be l_ranks[0] from get_ranks_in_pair
+    FAPI_TRY( mss::rank::get_ranks_in_pair(i_target, i_rp, l_ranks) );
+    FAPI_ASSERT( !l_ranks.empty(),
+                 fapi2::MSS_NO_RANKS_IN_RANK_PAIR()
+                 .set_TARGET(i_target)
+                 .set_RANK_PAIR(i_rp),
+                 "No ranks configured in MCA %s, rank pair %d", mss::c_str(i_target), i_rp );
+
+    FAPI_INF("%s Setting up terminations for WR_LEVEL, MRANK %d", mss::c_str(i_target), l_ranks[0]);
+
+    // Get DIMM target
+    FAPI_TRY( mss::rank::get_dimm_target_from_rank(i_target, l_ranks[0], l_dimm) );
+
+    // Get RTT_WR value
+    FAPI_TRY( mss::eff_dram_rtt_wr(l_dimm, &(l_rtt_wr_value[0])) );
+
+    // If RTT_WR is not enabled for pair's mrank, we're done
+    if (l_rtt_wr_value[mss::index(l_ranks[0])] == RTT_WR_DYNAMIC_ODT_OFF)
+    {
+        FAPI_INF("%s RTT_WR not set for MRANK %d, no termination adjustment necessary", mss::c_str(i_target), l_ranks[0]);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Disable RTT_WR for the pair's mrank
+    FAPI_TRY( mss::ddr4::rtt_wr_disable(l_dimm, l_ranks[0], io_inst) );
+
+    // Write the RTT_WR value into RTT_NOM
+    FAPI_TRY( mss::ddr4::rtt_nom_override(l_dimm, l_ranks[0], io_inst) );
+
+    // Set ODT so we get RTT_NOM for writes
+    FAPI_TRY( override_odt_wr_config(i_target, l_ranks[0]) );
+    FAPI_TRY( mss::workarounds::seq::odt_config(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Restore normal terminations after WR_LEVEL cal for a given RP
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @param[in] i_rp selected rank pair
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode restore_mainline_terminations( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+{
+    // Danger: Make sure this DIMM target doesn't get used/accessed until it is populated
+    // by get_dimm_target_from_rank below!
+    fapi2::Target<TARGET_TYPE_DIMM> l_dimm;
+    std::vector<uint64_t> l_ranks;
+    uint8_t l_rtt_wr_value[MAX_RANK_PER_DIMM] = {0};
+
+    // mrank will be l_ranks[0] from get_ranks_in_pair
+    FAPI_TRY( mss::rank::get_ranks_in_pair(i_target, i_rp, l_ranks) );
+    FAPI_ASSERT( !l_ranks.empty(),
+                 fapi2::MSS_NO_RANKS_IN_RANK_PAIR()
+                 .set_TARGET(i_target)
+                 .set_RANK_PAIR(i_rp),
+                 "No ranks configured in MCA %s, rank pair %d", mss::c_str(i_target), i_rp );
+
+    FAPI_INF("%s Restoring terminations after WR_LEVEL, MRANK %d", mss::c_str(i_target), l_ranks[0]);
+
+    // Get DIMM target
+    FAPI_TRY( mss::rank::get_dimm_target_from_rank(i_target, l_ranks[0], l_dimm) );
+
+    // Get RTT_WR value
+    FAPI_TRY( mss::eff_dram_rtt_wr(l_dimm, &(l_rtt_wr_value[0])) );
+
+    // If RTT_WR is not enabled for pair's mrank, we're done
+    if (l_rtt_wr_value[mss::index(l_ranks[0])] == RTT_WR_DYNAMIC_ODT_OFF)
+    {
+        FAPI_INF("%s RTT_WR not set for MRANK %d, no termination adjustment necessary", mss::c_str(i_target), l_ranks[0]);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Restore RTT_WR for the pair's mrank
+    FAPI_TRY( mss::ddr4::rtt_wr_restore(l_dimm, l_ranks[0], io_inst) );
+
+    // Restore RTT_NOM
+    FAPI_TRY( mss::ddr4::rtt_nom_restore(l_dimm, l_ranks[0], io_inst) );
+
+    // Restore ODT
+    FAPI_TRY( reset_odt_wr_config(i_target) );
+    FAPI_TRY( mss::workarounds::seq::odt_config(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
