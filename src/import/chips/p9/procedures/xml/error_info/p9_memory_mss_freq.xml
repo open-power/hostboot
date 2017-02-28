@@ -28,16 +28,13 @@
 <!-- @brief Error xml for mss_freq -->
 <!-- -->
 <!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
-<!-- *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com> -->
+<!-- *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
 <!-- *HWP Level: 3 -->
 <!-- *HWP Consumed by: HB:FSP -->
 <!-- -->
 
-<!-- //TK - This needs to be cleaned up after mss_freq is refactored - AAM -->
-
 <hwpErrors>
-
   <hwpError>
     <rc>RC_MSS_BAD_CL_CAST</rc>
     <description>
@@ -49,7 +46,10 @@
         <priority>HIGH</priority>
     </callout>
     <callout>
-      <target>MCA_TARGET</target>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
       <priority>MEDIUM</priority>
     </callout>
   </hwpError>
@@ -66,40 +66,124 @@
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
+    <gard>
+        <target>DIMM_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_REACHED_HIGHEST_TCK</rc>
+    <rc>RC_MSS_INVALID_CALCULATED_TCK</rc>
     <description>
-      No valid tCK exists that would produce a CAS latency that is common among all dimms.
+        Invalid value clock period (less than equal 0).
+        Should be code bug and error comparing MRW and VPD SUPPRTED_FREQS
+        Caused by bad MRW values for MSS_MRW_SUPPORTED_FREQ
     </description>
-    <ffdc>TCK</ffdc>
+    <ffdc>TAAMIN</ffdc>
+    <ffdc>PROPOSED_TCK</ffdc>
+    <ffdc>IS_3DS</ffdc>
+    <ffdc>FREQUENCY</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
     <rc>RC_MSS_NO_COMMON_SUPPORTED_CL</rc>
-    <description>Current Configuration has no common supported CL values.</description>
+    <description>
+        Current Configuration has no common supported CL values.
+        Caused by bad SPD on one of the plugged DIMMS
+        or DIMM configuration is not supported
+    </description>
     <ffdc>CL_SUPPORTED</ffdc>
     <callout>
-      <target>MCS_TARGET</target>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>MCS_TARGET</target>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
     </deconfigure>
+    <gard>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </gard>
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_EXCEED_TAA_MAX_NO_CL</rc>
-    <description>Exceeded TAA MAX with Lowest frequency.  No compatable CL.</description>
-    <ffdc>CL</ffdc>
+    <rc>RC_MSS_FAILED_TO_FIND_SUPPORTED_CL</rc>
+    <description>
+        Desired frequency from MRW is not supported by the DIMMS installed
+        Checked via comparing Cas Latencies supported by DIMM and by CL calculated from MRW FREQ
+    </description>
+    <ffdc>DESIRED_CAS_LATENCY</ffdc>
+    <ffdc>COMMON_CLS</ffdc>
+    <ffdc>TAA</ffdc>
+    <ffdc>TCK</ffdc>
+    <ffdc>MSS_MRW_FREQ_0</ffdc>
+    <ffdc>MSS_MRW_FREQ_1</ffdc>
+    <ffdc>MSS_MRW_FREQ_2</ffdc>
+    <ffdc>MSS_MRW_FREQ_3</ffdc>
+    <ffdc>MSS_MAX_FREQ_0</ffdc>
+    <ffdc>MSS_MAX_FREQ_1</ffdc>
+    <ffdc>MSS_MAX_FREQ_2</ffdc>
+    <ffdc>MSS_MAX_FREQ_3</ffdc>
+    <ffdc>MSS_MAX_FREQ_4</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
-      <target>DIMM_TARGET</target>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
     </deconfigure>
+    <gard>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_CL_EXCEEDS_TAA_MAX</rc>
+    <description>
+        Calculated Cas Latency exceeds JEDEC value for TAA Max
+        desired (and DIMM supported) cas_latency * proposed tck from mss freq attributes > jedec taa_max
+        Probably due to MRW/ VPD freqs being too high
+    </description>
+    <ffdc>CAS_LATENCY</ffdc>
+    <ffdc>TCK</ffdc>
+    <ffdc>TAA_MAX</ffdc>
+    <ffdc>COMPARE</ffdc>
+    <ffdc>IS_3DS</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -111,7 +195,14 @@
     <ffdc>MSS_FREQ</ffdc>
     <ffdc>NEST_FREQ</ffdc>
     <callout>
-      <target>MCS_TARGET</target>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <childTargets>
+        <parent>MCS_TARGET</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
@@ -122,6 +213,24 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_BAD_FREQ_CALCULATED</rc>
+    <description>
+        No frequency found for mbist. Either bad mrw attribute or no DIMMS installed?
+        Should be a code bug if we get here
+    </description>
+    <ffdc>MSS_FREQ</ffdc>
+    <ffdc>SUPPORTED_FREQ_0</ffdc>
+    <ffdc>SUPPORTED_FREQ_1</ffdc>
+    <ffdc>SUPPORTED_FREQ_2</ffdc>
+    <ffdc>SUPPORTED_FREQ_3</ffdc>
+    <ffdc>MCBIST_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
   <!-- Cronus only error when we can't match DIMM speeds to sync mode -->
   <hwpError>
     <rc>RC_MSS_FAILED_SYNC_MODE</rc>
@@ -129,53 +238,127 @@
       DIMM speeds are different and sync mode is required
     </description>
     <ffdc>NEST_FREQ</ffdc>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_UNSUPPORTED_FREQ_CALCULATED</rc>
-    <description>The frequency calculated with spd data is not supported by the jedec standards.</description>
-    <ffdc>DIMM_MIN_FREQ</ffdc>
-  </hwpError>
-
-  <!-- TK - I don't think this belongs in this file - AAM -->
-  <hwpError>
-    <rc>RC_MSS_UNSUPPORTED_DEV_TYPE</rc>
-    <description>Device type is not DDR4.</description>
-    <ffdc>DEV_TYPE</ffdc>
+    <ffdc>MEM_FREQ</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_VPD_FREQ_MAX_FREQ_EMPTY_SET</rc>
+    <rc>RC_MSS_EMPTY_MCBIST_VECTOR_PASSED</rc>
     <description>
-      When considering the frequencies in the VPD and the max supported
-      frequencies based on DIMM config, there are no applicable frequencies
-      remaining
+       Empty MCBIST target vector found when constructing dimm speed mapping
     </description>
-    <ffdc>MSS_VPD_FREQ_0</ffdc>
-    <ffdc>MSS_VPD_FREQ_1</ffdc>
-    <ffdc>MSS_VPD_FREQ_2</ffdc>
-    <ffdc>MSS_VPD_FREQ_3</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_ERROR_FINDING_DIMM_SPEED_MAP</rc>
+    <description>
+       Empty MCBIST target vector found when constructing dimm speed mapping
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_ALL_MCBIST_HAVE_0_FREQ</rc>
+    <description>
+       All MCBIST have 0 MSS_FREQ, but there are dimms still configured?
+    </description>
+    <ffdc>VECTOR_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MRW_FREQ_SIZE_CHANGED</rc>
+    <description>
+        Size of MSS_MRW_FREQS value in VPD has changed and code hasn't been updated
+    </description>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>SUPPOSED_SIZE</ffdc>
+    <ffdc>MCA_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_ERROR_CALCULATING_CAS_LATENCY_VECTOR</rc>
+    <description>
+        Code error setting the cas_latency.
+        Number of cas_latencies per MCS does not equal functional ports found
+    </description>
+    <ffdc>NUM_PORTS_FUNCTIONAL</ffdc>
+    <ffdc>NUM_CAS_LATENCIES_FOUND</ffdc>
+    <ffdc>MCS_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+
+  <hwpError>
+    <rc>RC_MSS_MAX_FREQ_ATTR_SIZE_CHANGED</rc>
+    <description>
+        Number of entries for MSS_MRW_MAX_FREQ attribute from VPD has changed without updating the code
+        Asserted because direct accesses to array
+    </description>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>SUPPOSED_SIZE</ffdc>
+    <ffdc>MCA_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MRW_FREQ_MAX_FREQ_EMPTY_SET</rc>
+    <description>
+      When considering the frequencies in the MRW and the max supported
+      frequencies based on DIMM config (MAX_ALLOWED_DIMM_FREQ), there are no applicable frequencies
+      remaining
+      If sync mode required, frequencies have to match a nest frequency
+    </description>
+    <ffdc>MSS_MRW_FREQ_0</ffdc>
+    <ffdc>MSS_MRW_FREQ_1</ffdc>
+    <ffdc>MSS_MRW_FREQ_2</ffdc>
+    <ffdc>MSS_MRW_FREQ_3</ffdc>
     <ffdc>MSS_MAX_FREQ_0</ffdc>
     <ffdc>MSS_MAX_FREQ_1</ffdc>
     <ffdc>MSS_MAX_FREQ_2</ffdc>
     <ffdc>MSS_MAX_FREQ_3</ffdc>
     <ffdc>MSS_MAX_FREQ_4</ffdc>
+    <ffdc>MSS_NEST_FREQ_0</ffdc>
+    <ffdc>MSS_NEST_FREQ_1</ffdc>
+    <ffdc>MSS_NEST_FREQ_2</ffdc>
+    <ffdc>MSS_NEST_FREQ_3</ffdc>
+    <ffdc>MSS_NEST_FREQ_4</ffdc>
     <ffdc>REQUIRED_SYNC_MODE</ffdc>
     <ffdc>MAX_FREQ_FROM_DIMM</ffdc>
     <callout>
-      <target>MCS_TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>MCS_TARGET</target>
-    </deconfigure>
+     <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -183,12 +366,16 @@
     <description>There seem to be too many dimms on the port</description>
     <ffdc>DIMM_COUNT</ffdc>
     <callout>
-      <target>MCA_TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>MCA_TARGET</target>
-    </deconfigure>
+    <callout>
+        <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets>
+        <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -202,6 +389,9 @@
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
+    <gard>
+        <target>DIMM_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
@@ -209,5 +399,30 @@
     <description>Error calculating the index into max_freq array</description>
     <ffdc>INDEX</ffdc>
     <ffdc>NUM_MAX_FREQS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_SELECTED_FREQ_NOT_SUPPORTED</rc>
+    <description>Selected freq based on calculations from the DIMM and VPD is not supported</description>
+    <ffdc>SUPPORTED_FREQ_0</ffdc>
+    <ffdc>SUPPORTED_FREQ_1</ffdc>
+    <ffdc>SUPPORTED_FREQ_2</ffdc>
+    <ffdc>SUPPORTED_FREQ_3</ffdc>
+    <ffdc>FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+     <callout>
+        <childTargets>
+          <parent>TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets>
+        <priority>MEDIUM</priority>
+     </callout>
   </hwpError>
 </hwpErrors>
