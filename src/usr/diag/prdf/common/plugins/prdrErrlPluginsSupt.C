@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2005,2014              */
+/* Contributors Listed Below - COPYRIGHT 2005,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -26,12 +28,13 @@
 namespace PRDF
 {
 
-#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN)
 namespace HOSTBOOT
-#else
-namespace FSP
-#endif
 {
+#elif defined(PRDF_FSP_ERRL_PLUGIN)
+namespace FSP
+{
+#endif
 PrdrRegIdTable & GetRegisterIdTable()
 {
     static PrdrRegIdTable l_idTable = PrdrRegIdTable();
@@ -44,5 +47,7 @@ PrdrErrSigTable & GetErrorSigTable()
     return l_sigTable;
 }
 
-} // namespace FSP/HOSTBBOT
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
+} // end namespace FSP/HOSTBOOT
+#endif
 } // end namespace PRDF

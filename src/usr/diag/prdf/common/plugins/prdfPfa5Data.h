@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,12 +36,10 @@
 
 namespace PRDF
 {
-#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN)
 namespace HOSTBOOT
 {
-#endif
-
-#ifdef PRDF_FSP_ERRL_PLUGIN
+#elif defined(PRDF_FSP_ERRL_PLUGIN)
 namespace FSP
 {
 #endif
@@ -302,12 +300,8 @@ struct CaptureDataClass
   uint8_t CaptureData[CaptureDataSize]; // MAKMAK Can this be variable size?
 };
 
-#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
-} // end namespace HOSTBOOT
-#endif
-
-#ifdef PRDF_FSP_ERRL_PLUGIN
-} // end namespace FSP
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
+} // end namespace FSP/HOSTBOOT
 #endif
 } // end namespace PRDF
 

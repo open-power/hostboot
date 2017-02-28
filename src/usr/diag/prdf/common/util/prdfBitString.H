@@ -43,6 +43,14 @@
 
 namespace PRDF
 {
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN)
+namespace HOSTBOOT
+{
+#elif defined(PRDF_FSP_ERRL_PLUGIN)
+namespace FSP
+{
+#endif
+
 
 class BitStringBuffer;
 
@@ -453,6 +461,9 @@ std::ostream & operator<<( std::ostream & out,
 
 #endif
 
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
+} // end namespace FSP/HOSTBOOT
+#endif
 } // end namespace PRDF
 
 #endif

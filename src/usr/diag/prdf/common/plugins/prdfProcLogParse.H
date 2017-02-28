@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,12 +36,13 @@ class ErrlUsrParser;
 
 namespace PRDF
 {
-#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN)
 namespace HOSTBOOT
-#else
-namespace FSP
-#endif
 {
+#elif defined(PRDF_FSP_ERRL_PLUGIN)
+namespace FSP
+{
+#endif
 
 /**
  * @brief Parses the SLW FFDC data section.
@@ -73,7 +74,9 @@ bool parseL2LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
 bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
                       ErrlUsrParser & i_parser );
 
-} // namespace FSP/HOSTBBOT
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
+} // end namespace FSP/HOSTBOOT
+#endif
 } // end namespace PRDF
 
 #endif // __prdfProcLogParse_H

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,12 +37,13 @@ class ErrlUsrParser;
 
 namespace PRDF
 {
-#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN)
 namespace HOSTBOOT
-#else
-namespace FSP
-#endif
 {
+#elif defined(PRDF_FSP_ERRL_PLUGIN)
+namespace FSP
+{
+#endif
 
 /**
  * @brief Parses MemoryMru data.
@@ -132,7 +133,9 @@ bool parseBadDqBitmap( uint8_t * i_buffer, uint32_t i_buflen,
 bool parseTdCtlrStateData( uint8_t * i_buffer, uint32_t i_buflen,
                            ErrlUsrParser & i_parser, uint32_t i_sigId );
 
-} // namespace FSP/HOSTBBOT
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
+} // end namespace FSP/HOSTBOOT
+#endif
 } // end namespace PRDF
 
 #endif // __prdfMemLogParse_H
