@@ -178,7 +178,7 @@ ${PRDR_CMP_FLEX_o_PATH}: ${PRDR_CMP_FLEX_C_PATH} ${PRDR_CMP_YACC_H_PATH}
 
 ${PRDR_CMP_o_PATH}: ${PRDR_CMP_C} | ${OBJ_RULE_DIR}
 	${PRD_OUT_MAKE}
-	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -c $(USERDEFINES) $< \
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -c $(USERDEFINES) -DPARSER $< \
 		-I ${SRC_USR_DIR}/common/rule \
 		-I ${SRC_USR_DIR}/common \
 		-I ${SRC_USR_DIR}/common/plugins \
@@ -186,6 +186,7 @@ ${PRDR_CMP_o_PATH}: ${PRDR_CMP_C} | ${OBJ_RULE_DIR}
 		-I ${GENDIR} -I ${OBJ_RULE_DIR} \
 		-I ${SRC_USR_DIR}/common/framework/resolution \
 		-I ${SRC_USR_DIR}/common/framework/service \
+		-I $(ROOTPATH)/src/include/usr \
 		-o $@
 
 ${PRDR_CMP_PATH}: ${PRDR_CMP_YACC_o_PATH} ${PRDR_CMP_FLEX_o_PATH} \

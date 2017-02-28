@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,14 +76,14 @@ namespace PRDF
 
 PRDF_SYM_CALLOUT_MAP_BEGIN
 
-PRDF_SYM_CALLOUT_ALIAS( AllProcessors,              EPUB_PRC_ALL_PROCS         )
-PRDF_SYM_CALLOUT_ALIAS( SP_CODE,                    EPUB_PRC_SP_CODE           )
-PRDF_SYM_CALLOUT_ALIAS( SystemSW_Code_ENUM,         EPUB_PRC_PHYP_CODE         )
-PRDF_SYM_CALLOUT_ALIAS( NextLevelSupport_ENUM,      EPUB_PRC_LVL_SUPP          )
-PRDF_SYM_CALLOUT_ALIAS( PassiveFabric_OffNode_ENUM, EPUB_PRC_PROC_AB_BUS       )
-PRDF_SYM_CALLOUT_ALIAS( ErrorCausedByMemUE_ENUM,    EPUB_PRC_MEMORY_UE         )
-PRDF_SYM_CALLOUT_ALIAS( TODProcInterface_Enum,      EPUB_PRC_TOD_CLOCK_ERR     )
-PRDF_SYM_CALLOUT_ALIAS( CoolingSystemError_ENUM,    EPUB_PRC_COOLING_SYSTEM_ERR)
+PRDF_SYM_CALLOUT_ALIAS( AllProcessors,              HWAS::EPUB_PRC_ALL_PROCS         )
+PRDF_SYM_CALLOUT_ALIAS( SP_CODE,                    HWAS::EPUB_PRC_SP_CODE           )
+PRDF_SYM_CALLOUT_ALIAS( SystemSW_Code_ENUM,         HWAS::EPUB_PRC_PHYP_CODE         )
+PRDF_SYM_CALLOUT_ALIAS( NextLevelSupport_ENUM,      HWAS::EPUB_PRC_LVL_SUPP          )
+PRDF_SYM_CALLOUT_ALIAS( PassiveFabric_OffNode_ENUM, HWAS::EPUB_PRC_PROC_AB_BUS       )
+PRDF_SYM_CALLOUT_ALIAS( ErrorCausedByMemUE_ENUM,    HWAS::EPUB_PRC_MEMORY_UE         )
+PRDF_SYM_CALLOUT_ALIAS( TODProcInterface_Enum,      HWAS::EPUB_PRC_TOD_CLOCK_ERR     )
+PRDF_SYM_CALLOUT_ALIAS( CoolingSystemError_ENUM,    HWAS::EPUB_PRC_COOLING_SYSTEM_ERR)
 
 PRDF_SYM_CALLOUT_MAP_END
 
@@ -131,12 +131,12 @@ PRDF_SYM_CALLOUT_MAP_END
 
 PRDF_CALLOUT_PRIORITY_MAP_BEGIN
 
-PRDF_CALLOUT_PRIORITY_ALIAS( MRU_HIGH, SRCI_PRIORITY_HIGH )
-PRDF_CALLOUT_PRIORITY_ALIAS( MRU_MED,  SRCI_PRIORITY_MED  )
-PRDF_CALLOUT_PRIORITY_ALIAS( MRU_MEDA, SRCI_PRIORITY_MEDA )
-PRDF_CALLOUT_PRIORITY_ALIAS( MRU_MEDB, SRCI_PRIORITY_MEDB )
-PRDF_CALLOUT_PRIORITY_ALIAS( MRU_MEDC, SRCI_PRIORITY_MEDC )
-PRDF_CALLOUT_PRIORITY_ALIAS( MRU_LOW,  SRCI_PRIORITY_LOW  )
+PRDF_CALLOUT_PRIORITY_ALIAS( MRU_HIGH, HWAS::SRCI_PRIORITY_HIGH )
+PRDF_CALLOUT_PRIORITY_ALIAS( MRU_MED,  HWAS::SRCI_PRIORITY_MED  )
+PRDF_CALLOUT_PRIORITY_ALIAS( MRU_MEDA, HWAS::SRCI_PRIORITY_MEDA )
+PRDF_CALLOUT_PRIORITY_ALIAS( MRU_MEDB, HWAS::SRCI_PRIORITY_MEDB )
+PRDF_CALLOUT_PRIORITY_ALIAS( MRU_MEDC, HWAS::SRCI_PRIORITY_MEDC )
+PRDF_CALLOUT_PRIORITY_ALIAS( MRU_LOW,  HWAS::SRCI_PRIORITY_LOW  )
 
 PRDF_CALLOUT_PRIORITY_MAP_END
 

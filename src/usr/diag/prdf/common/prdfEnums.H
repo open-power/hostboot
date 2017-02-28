@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,11 @@
 
 /** @file prdfEnums.H */
 
+// Don't want to include hwasCommon.H because it includes much more than we
+// need, which forces us to resolve a bunch of include paths that are not
+// necessary.
+#include <hwas/common/hwasCallout.H>
+
 namespace PRDF
 {
 
@@ -44,64 +49,11 @@ enum MFG_THRES_SYNC_MSG_TYPE
 
 #ifdef  __HOSTBOOT_MODULE
 
-    #ifndef __PRD_RULE_COMPILE
-
-    #include <errl/errlmanager.H> // Must be included before including
-                                  // hwasCallout.H, otherwise the compile will
-                                  // fail.
-    #include <hwas/common/hwasCallout.H>
-
-    // FIXME RTC 137911: remove these mapping once the enums are made common
-    #define EPUB_PRC_ALL_PROCS      HWAS::EPUB_PRC_ALL_PROCS
-    #define EPUB_PRC_SP_CODE        HWAS::EPUB_PRC_SP_CODE
-    #define EPUB_PRC_PHYP_CODE      HWAS::EPUB_PRC_PHYP_CODE
-    #define EPUB_PRC_LVL_SUPP       HWAS::EPUB_PRC_LVL_SUPP
-    #define EPUB_PRC_MEMBUS_ERROR   HWAS::EPUB_PRC_MEMBUS_ERROR
-    #define EPUB_PRC_PROC_XYZ_BUS   HWAS::EPUB_PRC_PROC_XYZ_BUS
-    #define EPUB_PRC_PROC_AB_BUS    HWAS::EPUB_PRC_PROC_AB_BUS
-    #define EPUB_PRC_MEMORY_UE      HWAS::EPUB_PRC_MEMORY_UE
-    #define EPUB_PRC_TOD_CLOCK_ERR  HWAS::EPUB_PRC_TOD_CLOCK_ERR
-    #define EPUB_PRC_COOLING_SYSTEM_ERR  HWAS::EPUB_PRC_COOLING_SYSTEM_ERR
-
-    // FIXME: remove these mapping once the enums are made common
-    #define SRCI_PRIORITY_HIGH  HWAS::SRCI_PRIORITY_HIGH
-    #define SRCI_PRIORITY_MED   HWAS::SRCI_PRIORITY_MED
-    #define SRCI_PRIORITY_MEDA  HWAS::SRCI_PRIORITY_MEDA
-    #define SRCI_PRIORITY_MEDB  HWAS::SRCI_PRIORITY_MEDB
-    #define SRCI_PRIORITY_MEDC  HWAS::SRCI_PRIORITY_MEDC
-    #define SRCI_PRIORITY_LOW   HWAS::SRCI_PRIORITY_LOW
-
-    #endif
-
-
-
     // FIXME: Currently hostboot errl does not support these enums. Stubbing
     //        them out for now.
 
     enum
     {
-        #ifdef __PRD_RULE_COMPILE
-        //FIXME RTC 137911: these enum values have to match with
-        //what are defined in include/usr/hwas/common/hwasCallout.H
-        EPUB_PRC_SP_CODE        = 0x04,
-        EPUB_PRC_PHYP_CODE      = 0x05,
-        EPUB_PRC_ALL_PROCS      = 0x08,
-        EPUB_PRC_LVL_SUPP       = 0x10,
-        EPUB_PRC_PROC_AB_BUS    = 0x30,
-        EPUB_PRC_PROC_XYZ_BUS   = 0x31,
-        EPUB_PRC_MEMBUS_ERROR   = 0x34,
-        EPUB_PRC_MEMORY_UE      = 0x4F,
-        EPUB_PRC_TOD_CLOCK_ERR  = 0x56,
-        EPUB_PRC_COOLING_SYSTEM_ERR  = 0x5C,
-
-        SRCI_PRIORITY_LOW   = 1,
-        SRCI_PRIORITY_MEDC  = 2,
-        SRCI_PRIORITY_MEDB  = 3,
-        SRCI_PRIORITY_MEDA  = 4,
-        SRCI_PRIORITY_MED   = 5,
-        SRCI_PRIORITY_HIGH  = 6,
-        #endif
-
         // ERRL Action Flag
         ERRL_ACTION_SA = 0,
         ERRL_ACTION_REPORT,
@@ -130,11 +82,6 @@ enum MFG_THRES_SYNC_MSG_TYPE
             HWSV_DECONFIG_DEFER
         };
     };
-
-#else // if not __HOSTBOOT_MODULE
-
-    #include <epub_service_codes.H> // for EPUB_PRC_*
-    #include <srci.H>               // for SRCI_PRIORITY_*
 
 #endif // __HOSTBOOT_MODULE
 
