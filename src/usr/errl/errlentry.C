@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -549,9 +549,19 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
                 "addHwCallout(\"MASTER_PROC_SENTINEL\" 0x%x 0x%x 0x%x)",
                 i_target, i_priority, i_deconfigState, i_gardErrorType);
         #endif
+
+        //need to override deconfig value to avoid possible deadlocks
+        // in pnor
+        HWAS::DeconfigEnum l_deconfigState = i_deconfigState;
+        if( i_deconfigState == HWAS::DELAYED_DECONFIG )
+        {
+            TRACFCOMP( g_trac_errl, "addHwCallout> Forcing delayed deconfig to standard deconfig on sentinel" );
+            l_deconfigState = HWAS::DECONFIG;
+        }
+
         ErrlUserDetailsCallout(
                 &HWAS::TARGET_IS_SENTINEL, sizeof(HWAS::TARGET_IS_SENTINEL),
-                i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
+                i_priority, l_deconfigState, i_gardErrorType).addToLog(this);
     }
     else
     {   // we got a non MASTER_SENTINEL target, therefore the targeting
