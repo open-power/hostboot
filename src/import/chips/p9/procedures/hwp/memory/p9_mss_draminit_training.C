@@ -101,23 +101,6 @@ extern "C"
             // Keep track of the last error seen by a rank pair
             fapi2::ReturnCode l_rank_pair_error = fapi2::FAPI2_RC_SUCCESS;
 
-
-            mss::ccs::program<TARGET_TYPE_MCBIST, TARGET_TYPE_MCA> l_program;
-
-            // Setup a series of register probes which we'll see during the polling loop
-            // Leaving these probes in here as we need them from time to time, but they
-            // take up a lot of sim time, so we like to remove them simply
-
-            // Delays in the CCS instruction ARR1 for training are supposed to be 0xFFFF,
-            // and we're supposed to poll for the done or timeout bit. But we don't want
-            // to wait 0xFFFF cycles before we start polling - that's too long. So we put
-            // in a best-guess of how long to wait. This, in a perfect world, would be the
-            // time it takes one rank to train one training algorithm times the number of
-            // ranks we're going to train. We fail-safe as worst-case we simply poll the
-            // register too much - so we can tune this as we learn more.
-            l_program.iv_poll.iv_initial_sim_delay = 200;
-            l_program.iv_poll.iv_poll_count = 0xFFFF;
-
             // Returned from set_rank_pairs, it tells us how many rank pairs
             // we configured on this port.
             std::vector<uint64_t> l_pairs;
@@ -167,7 +150,6 @@ extern "C"
             // THE PROCESSING OF THE ERRORS. (it's hard to figure out which DIMM failed, too) BRS.
             for (const auto& rp : l_pairs)
             {
-                auto l_inst = mss::ccs::initial_cal_command<TARGET_TYPE_MCBIST>(rp);
                 uint8_t cal_abort_on_error = i_abort_on_error;
 
                 if (i_abort_on_error == CAL_ABORT_SENTINAL)
@@ -175,22 +157,8 @@ extern "C"
                     FAPI_TRY( mss::cal_abort_on_error(cal_abort_on_error) );
                 }
 
-                FAPI_DBG("executing training CCS instruction: 0x%llx, 0x%llx", l_inst.arr0, l_inst.arr1);
-                l_program.iv_instructions.push_back(l_inst);
-
-                // We need to figure out how long to wait before we start polling. Each cal step has an expected
-                // duration, so for each cal step which was enabled, we update the CCS program.
-                FAPI_TRY( mss::cal_timer_setup(p, l_program.iv_poll, l_cal_steps_enabled) );
-                FAPI_TRY( mss::setup_cal_config(p, rp, l_cal_steps_enabled) );
-
-                // In the event of an init cal hang, CCS_STATQ(2) will assert and CCS_STATQ(3:5) = “001” to indicate a
-                // timeout. Otherwise, if calibration completes, FW should inspect DDRPHY_FIR_REG bits (50) and (58)
-                // for signs of a calibration error. If either bit is on, then the DDRPHY_PC_INIT_CAL_ERROR register
-                // should be polled to determine which calibration step failed.
-
-                // If we got a cal timeout, or another CCS error just leave now. If we got success, check the error
-                // bits for a cal failure. We'll return the proper ReturnCode so all we need to do is FAPI_TRY.
-                FAPI_TRY( mss::ccs::execute(i_target, l_program, p) );
+                // Execute selected cal steps
+                FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, i_abort_on_error) );
 
                 // Conducts workarounds after training if needed
                 FAPI_TRY( mss::workarounds::dp16::post_training_workarounds( p, l_cal_steps_enabled ) );
