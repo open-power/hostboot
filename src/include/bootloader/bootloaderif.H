@@ -50,7 +50,8 @@ const uint64_t BLTOHB_EYECATCHER = 0x23626C746F686200; // #BLTOHB\0
 enum BlToHbDataVersion
 {
     // [release:4][version:4]
-    BLTOHB_INIT = 0x0000000900000001
+    BLTOHB_INIT = 0x0000000900000001,
+    BLTOHB_SAB  = 0x0000000900000002
 };
 
 
@@ -69,7 +70,7 @@ struct BlToHbData
                    branchtableOffset(0), secureRom(nullptr),
                    secureRomSize(0), hwKeysHash(nullptr),
                    hwKeysHashSize(0), hbbHeader(nullptr),
-                   hbbHeaderSize(0) {}
+                   hbbHeaderSize(0), secureAccessBit(false) {}
 
     // Simple way to tell if data is valid
     uint64_t eyeCatch;
@@ -89,6 +90,8 @@ struct BlToHbData
     const void* hbbHeader;
     // size of Hostboot base header
     size_t hbbHeaderSize;
+    // Secure Access Bit
+    bool secureAccessBit;
 } __attribute__((packed));
 
 /**

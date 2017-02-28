@@ -52,17 +52,23 @@ void BlToHbDataManager::validAssert() const
 
 void BlToHbDataManager::print() const
 {
+    printkd("\nBlToHbData (all addr HRMOR relative):\n");
+
+    if(iv_data.version >= Bootloader::BLTOHB_SAB)
+    {
+        printkd("-- secureAccessBit = 0x%X\n", iv_data.secureAccessBit);
+    }
     if(iv_dataValid)
     {
-        printkd("\nBlToHbData (all addr HRMOR relative):\n");
         printkd("-- eyeCatch = 0x%lX (%s)\n", iv_data.eyeCatch,
                                     reinterpret_cast<char*>(&iv_data.eyeCatch));
         printkd("-- version = 0x%lX\n", iv_data.version);
         printkd("-- branchtableOffset = 0x%lX\n", iv_data.branchtableOffset);
         printkd("-- SecureRom Addr = 0x%lX Size = 0x%lX\n", getSecureRomAddr(),
                iv_data.secureRomSize);
-        printkd("-- HW keys' Hash Addr = 0x%lX Size = 0x%lX\n", getHwKeysHashAddr(),
-               iv_data.hwKeysHashSize);
+        printkd("-- HW keys' Hash Addr = 0x%lX Size = 0x%lX\n",
+                getHwKeysHashAddr(),
+                iv_data.hwKeysHashSize);
         printkd("-- HBB header Addr = 0x%lX Size = 0x%lX\n", getHbbHeaderAddr(),
                iv_data.hbbHeaderSize);
         printkd("-- Reserved Size = 0x%lX\n", iv_preservedSize);
@@ -115,6 +121,12 @@ void BlToHbDataManager::initValid (const Bootloader::BlToHbData& i_data)
     iv_data.hwKeysHashSize = i_data.hwKeysHashSize;
     iv_data.hbbHeader = i_data.hbbHeader;
     iv_data.hbbHeaderSize = i_data.hbbHeaderSize;
+
+    // Ensure Bootloader to HB structure has the SAB member
+    if(iv_data.version >= Bootloader::BLTOHB_SAB)
+    {
+        iv_data.secureAccessBit = i_data.secureAccessBit;
+    }
 
     // Size of data that needs to be preserved and pinned.
     iv_preservedSize = ALIGN_PAGE(iv_data.secureRomSize +
@@ -197,6 +209,12 @@ const size_t BlToHbDataManager::getHbbHeaderSize() const
 {
     validAssert();
     return iv_data.hbbHeaderSize;
+}
+
+const bool BlToHbDataManager::getSecureAccessBit() const
+{
+    validAssert();
+    return iv_data.secureAccessBit;
 }
 
 const size_t BlToHbDataManager::getPreservedSize() const

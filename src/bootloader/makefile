@@ -32,6 +32,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/lpc/
 
 COMMONFLAGS += -DBOOTLOADER
 
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
+
 OBJS += bl_start.o
 OBJS += bootloader.o
 OBJS += bl_pnorAccess.o

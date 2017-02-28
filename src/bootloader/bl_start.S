@@ -30,6 +30,7 @@
 .set SBE_HB_PNORBOOTSIDE, sbe_hb_structures+5  ;// uint8_t
 .set SBE_HB_PNORSIZEMB,   sbe_hb_structures+6  ;// uint16_t
 .set SBE_HB_BLLOADSIZE,   sbe_hb_structures+8  ;// uint64_t
+.set SBE_HB_SECUREACCESSBIT, sbe_hb_structures+16  ;// uint8_t
 .set HBBL_BASE_ADDRESS,   base_load_address
 .set HBBL_END_ADDRESS,    end_load_address
 .set HBBL_system_reset,          0x100
@@ -224,8 +225,8 @@ _main:
 
     ;// Do dcbz from end of Bootloader load to end of HBB ECC working space
 _dcbz_after_bl:
-    lis r5, SBE_HB_BLLOADSIZE@h
-    ori r5, r5, SBE_HB_BLLOADSIZE@l
+    lis r5, SBE_HB_SECUREACCESSBIT@h
+    ori r5, r5, SBE_HB_SECUREACCESSBIT@l
     ld r5, 0(r5)       ;// get ending EA from SBE HB structure
     lis r6, 0
     addis r6, r6, 32   ;// 2M (32 * 0x10000)

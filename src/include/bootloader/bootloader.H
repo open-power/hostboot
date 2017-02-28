@@ -183,6 +183,10 @@ namespace Bootloader{
 #define HBB_HRMOR               (getHRMOR() - ( 2*MEGABYTE))
 #define HBB_RUNNING_ADDR        (getHRMOR() - ( 2*MEGABYTE))
 
+    /** Location of SBE HB communication area
+        Defined in SBE code and bootloader.ld */
+#define SBE_HB_COMM_ADDR        (getHRMOR() + 0x4)
+
     enum
     {
         /** Offset for starting running copy of HBB */
