@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,37 +27,45 @@
  */
 
 #include <kernel/cpuid.H>
+#include <arch/pvrformat.H>
 
 namespace CpuID
 {
     ProcessorCoreType getCpuType()
     {
-        uint64_t l_pvr = getPVR();
+        PVR_t l_pvr( getPVR() );
 
-        // Layout of the PVR is (32-bit):
-        //     2 nibbles reserved.
-        //     2 nibbles chip type.
-        //     1 nibble technology.
-        //     1 nibble major DD.
-        //     1 nibble reserved.
-        //     1 nibble minor DD.
-
-        switch(l_pvr & 0xFFFF0000)
+        switch(l_pvr.chipFamily)
         {
-            case 0x004B0000:
+            case PVR_t::P8_MURANO:
                 return CORE_POWER8_MURANO;
 
-            case 0x004C0000:
+            case PVR_t::P8_NAPLES:
                 return CORE_POWER8_NAPLES;
 
-            case 0x004D0000:
+            case PVR_t::P8_VENICE:
                 return CORE_POWER8_VENICE;
 
-            case 0x004E0000:
-                return CORE_POWER9_NIMBUS;
+            case PVR_t::P9_ALL:
+            {
+                // Nimbus DD1.0 has a different PVR format
+                if( (l_pvr.word & PVR_t::CHIP_DD_MASK) == PVR_t::IS_NIMBUS_DD1)
+                {
+                    return CORE_POWER9_NIMBUS;
+                }
 
-            case 0x004F0000:
-                return CORE_POWER9_CUMULUS;
+                switch(l_pvr.chipType)
+                {
+                    case PVR_t::NIMBUS_CHIP:
+                        return CORE_POWER9_NIMBUS;
+
+                    case PVR_t::CUMULUS_CHIP:
+                        return CORE_POWER9_CUMULUS;
+
+                    default:
+                        return CORE_UNKNOWN;
+                }
+            }
 
             default:
                 return CORE_UNKNOWN;
@@ -66,8 +74,8 @@ namespace CpuID
 
     uint8_t getCpuDD()
     {
-        uint64_t l_pvr = getPVR();
-        return ((l_pvr & 0x0F00) >> 4) | (l_pvr & 0x000F);
+        PVR_t l_pvr( getPVR() );
+        return l_pvr.getDDLevel();
     }
 };
 
