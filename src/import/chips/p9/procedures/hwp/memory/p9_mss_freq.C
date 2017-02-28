@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 //----------------------------------------------------------------------
@@ -48,8 +48,8 @@
 #include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
 #include <lib/spd/spd_factory.H>
 #include <lib/freq/cas_latency.H>
+#include <lib/freq/sync.H>
 #include <generic/memory/lib/utils/c_str.H>
-#include <lib/freq/cycle_time.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/index.H>
@@ -97,7 +97,7 @@ extern "C"
 
             std::vector< uint64_t > l_desired_cas_latency(mss::PORTS_PER_MCS,  0 );
 
-            for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(l_mcbist))
+            for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(l_mcs) )
             {
                 const auto l_index = mss::index(l_mca);
 
@@ -105,19 +105,19 @@ extern "C"
                 std::vector< std::shared_ptr<mss::spd::decoder> > l_factory_caches;
 
                 FAPI_TRY( mss::spd::populate_decoder_caches(l_mca, l_factory_caches),
-                          "%s. Failed to populate decoder cache", mss::c_str(i_target) );
+                          "%s. Failed to populate decoder cache", mss::c_str(l_mca) );
 
                 {
                     // instantiation of class that calculates CL algorithm
                     fapi2::ReturnCode l_rc;
                     mss::cas_latency l_cas_latency( l_mca, l_factory_caches, l_rc );
-                    FAPI_TRY( l_rc, "%s. Failed to initialize cas_latency ctor", mss::c_str(i_target) );
+                    FAPI_TRY( l_rc, "%s. Failed to initialize cas_latency ctor", mss::c_str(l_mca) );
 
                     if(l_cas_latency.iv_dimm_list_empty)
                     {
                         // Cannot fail out for an empty DIMM configuration, so default values are set
                         FAPI_INF("%s. DIMM list is empty! Setting default values for CAS latency and DIMM speed.",
-                                 mss::c_str(i_target) );
+                                 mss::c_str(l_mca) );
                     }
                     else
                     {
@@ -134,11 +134,11 @@ extern "C"
                                                         l_tCKmin) );
 
                         FAPI_INF("%s. Result from CL algorithm, CL (nck): %d, tCK (ps): %d",
-                                 mss::c_str(i_target), l_desired_cas_latency[l_index], l_tCKmin);
+                                 mss::c_str(l_mca), l_desired_cas_latency[l_index], l_tCKmin);
 
                         // Find dimm transfer speed from selected tCK
                         FAPI_TRY( mss::ps_to_freq(l_tCKmin, l_min_dimm_freq[l_mcs_index][l_index]),
-                                  "%s. Failed ps_to_freq()", mss::c_str(i_target) );
+                                  "%s. Failed ps_to_freq()", mss::c_str(l_mca) );
 
                         FAPI_INF("DIMM speed from selected tCK (ps): %d for %s",
                                  l_min_dimm_freq[l_mcs_index][l_index],
@@ -148,7 +148,7 @@ extern "C"
                                  "Failed select_supported_freq() for %s", mss::c_str(l_mca));
 
                         FAPI_INF("%s. Selected DIMM speed from supported speeds: %d",
-                                 mss::c_str(i_target), l_min_dimm_freq[l_mcs_index][l_index]);
+                                 mss::c_str(l_mca), l_min_dimm_freq[l_mcs_index][l_index]);
 
                     }// end else
 
