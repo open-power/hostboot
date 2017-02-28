@@ -116,13 +116,17 @@ extern "C"
         {
             // Convert from uint64_t to uint32_t for attribute macros
             uint32_t l_pb_freq_value = l_selected_nest_freq;
+
             const auto& l_proc_chip = mss::find_target<TARGET_TYPE_PROC_CHIP>(l_mcbist);
+
+            FAPI_INF("%s: Setting ATTR_MC_SYNC_MODE to %d", mss::c_str(l_mcbist), l_mc_in_sync);
 
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MC_SYNC_MODE, l_proc_chip, l_mc_in_sync),
                       "Failed to set ATTR_MC_SYNC_MODE" );
 
             if (l_mc_in_sync == fapi2::ENUM_ATTR_MC_SYNC_MODE_IN_SYNC)
             {
+                FAPI_INF("%s: Setting ATTR_FREQ_PB_MHZ to %d", mss::c_str(l_mcbist), l_pb_freq_value);
                 FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_FREQ_PB_MHZ, fapi2::Target<TARGET_TYPE_SYSTEM>(), l_pb_freq_value),
                           "Failed to set ATTR_FREQ_PB_MHZ" );
             }

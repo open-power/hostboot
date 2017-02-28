@@ -69,6 +69,10 @@ enum sizes
     MAX_DRAMS_X8 = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For x8's there are 9 DRAM for 72 bits
     MAX_DRAMS_X4 = MAX_DQ_BITS / BITS_PER_BYTE, ///< For x4's there are 18 DRAM for 72 bits
 
+    NUM_MRW_FREQS = 4,             ///< Used for ATTR_MSS_MRW_SUPPORTED_FREQ
+    NUM_MAX_FREQS = 5,             ///< Used for ATTR_MAX_ALLOWED_DIMM_FREQ
+
+
     MARK_STORE_COUNT = 8,          ///< Elements in a VPD mark/store array
     BAD_DQ_BYTE_COUNT = 10,        ///< Elements in a BAD_DQ_BITMAP attribute array
 
@@ -225,7 +229,6 @@ enum dimm_select
     // Maybe a better name for disabling all
     DIMM_NONE        = 0b00,
 };
-
 
 namespace mcbist
 {

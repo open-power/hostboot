@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef MSS_FREQ_H_
@@ -38,7 +38,6 @@
 
 #include <fapi2.H>
 #include <lib/freq/cas_latency.H>
-#include <lib/freq/cycle_time.H>
 #include <lib/shared/mss_const.H>
 #include <lib/utils/conversions.H>
 
@@ -52,13 +51,22 @@ namespace mss
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
 inline fapi2::ReturnCode set_CL_attr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-                                     std::vector< uint64_t >& i_cas_latency)
+                                     const std::vector< uint64_t >& i_cas_latency)
 {
     // I wish I could do the reinterpret cast or set the pointer to the vector :(
     // But no can do, manual copy pasta
-    uint8_t l_temp [mss::PORTS_PER_MCS] = {};
+    uint8_t l_temp [mss::PORTS_PER_MCS] = {0};
+    const auto l_functional_ports = find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
 
-    for( const auto& p : find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
+    FAPI_ASSERT( l_functional_ports.size() == i_cas_latency.size(),
+                 fapi2::MSS_ERROR_CALCULATING_CAS_LATENCY_VECTOR()
+                 .set_NUM_PORTS_FUNCTIONAL(l_functional_ports.size())
+                 .set_NUM_CAS_LATENCIES_FOUND(i_cas_latency.size())
+                 .set_MCS_TARGET(i_target),
+                 "%s Error calculating cas latencies. Found %d CLs for %d functional ports. Numbers should equal",
+                 mss::c_str(i_target), i_cas_latency.size(), l_functional_ports.size() );
+
+    for( const auto& p : l_functional_ports )
     {
         // Local variable instead of calling it three times. Hopefully compiler can optimize this better
         const auto l_index = mss::index(p);
@@ -75,7 +83,7 @@ inline fapi2::ReturnCode set_CL_attr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>
                      .set_CL(i_cas_latency[l_index])
                      .set_MCA_TARGET(p),
                      "%s bad cast for cas latency from %d to %d",
-                     mss::c_str(i_target),
+                     mss::c_str(p),
                      i_cas_latency[l_index],
                      l_temp[l_index]);
         FAPI_INF( "Final Chosen CL: %d for %s", l_temp[l_index], mss::c_str(p));
@@ -105,6 +113,15 @@ inline fapi2::ReturnCode set_freq_attrs(const fapi2::Target<fapi2::TARGET_TYPE_M
     // we shouldn't as the caller should have been dealing with no DIMM before we got here.
     uint64_t l_final_freq = UINT64_MAX;
 
+    // DDR4 speed NIMBUS supports
+    std::vector<uint64_t> l_supported = { 0,
+                                          fapi2::ENUM_ATTR_MSS_FREQ_MT1866,
+                                          fapi2::ENUM_ATTR_MSS_FREQ_MT2133,
+                                          fapi2::ENUM_ATTR_MSS_FREQ_MT2400,
+                                          fapi2::ENUM_ATTR_MSS_FREQ_MT2666,
+                                        };
+    std::sort( l_supported.begin(), l_supported.end() );
+
     for (const auto l_vec : i_dimm_freq)
     {
         for (const auto l_freq : l_vec)
@@ -118,6 +135,20 @@ inline fapi2::ReturnCode set_freq_attrs(const fapi2::Target<fapi2::TARGET_TYPE_M
 
     // If we saw all 0's, write a 0.
     l_final_freq = l_final_freq == UINT64_MAX ? 0 : l_final_freq;
+
+    // Shouldn't be getting 0 here. There have to be DIMMs installed for this code to be executed
+    // The code would have errored out before if a frequency wasn't found.:w
+    FAPI_ASSERT( std::binary_search(l_supported.begin(), l_supported.end(), l_final_freq) == true,
+                 fapi2::MSS_BAD_FREQ_CALCULATED()
+                 .set_MSS_FREQ(l_final_freq)
+                 .set_MCBIST_TARGET(i_target)
+                 .set_SUPPORTED_FREQ_0(fapi2::ENUM_ATTR_MSS_FREQ_MT1866)
+                 .set_SUPPORTED_FREQ_1(fapi2::ENUM_ATTR_MSS_FREQ_MT2133)
+                 .set_SUPPORTED_FREQ_2(fapi2::ENUM_ATTR_MSS_FREQ_MT2400)
+                 .set_SUPPORTED_FREQ_3(fapi2::ENUM_ATTR_MSS_FREQ_MT2666),
+                 "%s: Calculated FREQ (%d) isn't supported",
+                 mss::c_str(i_target),
+                 l_final_freq);
 
     FAPI_INF( "Final Chosen Frequency: %d (%s)", l_final_freq, mss::c_str(i_target) );
 

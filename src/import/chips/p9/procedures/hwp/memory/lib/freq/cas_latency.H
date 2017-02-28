@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_CAS_LATENCY_H_
@@ -88,19 +88,19 @@ class cas_latency
                     const std::vector< std::shared_ptr<spd::decoder> >& i_caches,
                     fapi2::ReturnCode& o_rc);
 
+        ///
         /// @brief      Constructor that allows the user to set desired data in lieu of SPD
         /// @param[in]  i_target the controller target
         /// @param[in]  i_taa_min largest tAAmin we want to set in picoseconds
         /// @param[in]  i_tck_min proposed tCKmin in picoseconds
         /// @param[in]  i_common_cl_mask common CAS latency mask we want to use (bitmap)
-        /// @param[in]  i_is_3ds loading::IS_3DS if this is for 3DS,
-        ///             loading::NOT_3DS otherwise (default)
+        /// @param[in]  i_is_3ds loading::IS_3DS if this is for 3DS, loading::NOT_3DS otherwise
         ///
         cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                     const uint64_t i_taa_min,
                     const uint64_t i_tck_min,
                     const uint64_t i_common_cl_mask,
-                    const loading i_is_3ds = loading::NOT_3DS);
+                    const loading i_is_3ds);
 
         ///
         /// @brief Default destructor
@@ -218,7 +218,6 @@ class cas_latency
         ///
         inline fapi2::ReturnCode is_cl_supported_in_common(const std::vector<uint64_t>& i_common_cls,
                 const uint64_t i_cas_latency) const;
-
 
         ///
         /// @brief      Checks that CAS latency doesn't exceed largest CAS latency time
