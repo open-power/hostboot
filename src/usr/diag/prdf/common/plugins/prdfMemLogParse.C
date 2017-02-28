@@ -43,12 +43,13 @@
 namespace PRDF
 {
 
-#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN)
 namespace HOSTBOOT
-#else
-namespace FSP
-#endif
 {
+#elif defined(PRDF_FSP_ERRL_PLUGIN)
+namespace FSP
+{
+#endif
 
 using namespace PARSER;
 using namespace PARSERUTILS;
@@ -3500,6 +3501,8 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
-} // namespace FSP/HOSTBBOT
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
+} // end namespace FSP/HOSTBOOT
+#endif
 } // end namespace PRDF
 

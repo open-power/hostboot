@@ -28,12 +28,10 @@
 namespace PRDF
 {
 
-#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN)
 namespace HOSTBOOT
 {
-#endif
-
-#ifdef PRDF_FSP_ERRL_PLUGIN
+#elif defined(PRDF_FSP_ERRL_PLUGIN)
 namespace FSP
 {
 #endif
@@ -213,12 +211,8 @@ uint8_t symbol2Byte<TARGETING::TYPE_MCA>( uint8_t i_symbol )
 
 } // namespace PARSERUTILS
 
-#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
-} // end namespace HOSTBOOT
-#endif
-
-#ifdef PRDF_FSP_ERRL_PLUGIN
-} // end namespace FSP
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
+} // end namespace FSP/HOSTBOOT
 #endif
 
 } // End of namespace PRDF

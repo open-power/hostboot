@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,12 +38,10 @@
 namespace PRDF
 {
 
-#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN)
 namespace HOSTBOOT
 {
-#endif
-
-#ifdef PRDF_FSP_ERRL_PLUGIN
+#elif defined(PRDF_FSP_ERRL_PLUGIN)
 namespace FSP
 {
 #endif
@@ -105,12 +103,8 @@ uint8_t symbol2Byte( uint8_t i_symbol );
 
 } // namespace PARSERUTILS
 
-#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
-} // end namespace HOSTBOOT
-#endif
-
-#ifdef PRDF_FSP_ERRL_PLUGIN
-} // end namespace FSP
+#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
+} // end namespace FSP/HOSTBOOT
 #endif
 
 } // End of namespace PRDF
