@@ -52,7 +52,9 @@ enum P9_START_CBS_Private_Constants
     CBS_IDLE_VALUE = 0x002, // Read the value of CBS_CS_INTERNAL_STATE_VECTOR
     P9_CBS_IDLE_HW_NS_DELAY = 640000, // unit is nano seconds [min : 64k x (1/100MHz) = 64k x 10(-8) = 640 us
     //                       max : 64k x (1/50MHz) = 128k x 10(-8) = 1280 us]
-    P9_CBS_IDLE_SIM_CYCLE_DELAY = 7500000 // unit is sim cycles,to match the poll count change( 250000 * 30 )
+    P9_CBS_IDLE_SIM_CYCLE_DELAY = 7500000, // unit is sim cycles,to match the poll count change( 250000 * 30 )
+    P9_PIBRESET_HW_NS_DELAY = 4000,  // 256 pibclocks
+    P9_PIBRESET_SIM_CYCLE_DELAY = 256000
 };
 
 fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
@@ -65,7 +67,11 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     fapi2::buffer<uint32_t> l_data32;
     fapi2::buffer<uint32_t> l_data32_cbs_cs;
     int l_timeout = 0;
+    fapi2::buffer<uint8_t> l_read_attr;
     FAPI_INF("p9_start_cbs: Entering ...");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW402019_PIBRESET_DELAY,
+                           i_target_chip, l_read_attr));
 
     FAPI_DBG("Clearing  Selfboot message register before every boot ");
     // buffer is init value is 0
@@ -146,11 +152,15 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 .set_HW_DELAY(P9_CBS_IDLE_HW_NS_DELAY),
                 "ERROR: CBS HAS NOT REACHED IDLE STATE VALUE 0x002 ");
 
-
-    FAPI_DBG("Setting up Pibreset");
-    l_data32.flush<1>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_FSI2PIB_SET_PIB_RESET_FSI,
-                                    l_data32));
+    if ( l_read_attr )
+    {
+        FAPI_DBG("Setting up Pibreset");
+        l_data32.flush<1>();
+        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_FSI2PIB_SET_PIB_RESET_FSI,
+                                        l_data32));
+        FAPI_DBG("waiting for pibreset to complete");
+        fapi2::delay(P9_PIBRESET_HW_NS_DELAY, P9_PIBRESET_SIM_CYCLE_DELAY);
+    }
 
     if ( i_sbe_start )
     {
