@@ -1858,6 +1858,7 @@
     <attribute><id>MSS_DIMM_THERMAL_LIMIT</id></attribute>
     <attribute><id>MSS_VREF_CAL_ENABLE</id></attribute>
     <attribute><id>MSS_MRW_UNSUPPORTED_RANK_CONFIG</id></attribute>
+    <attribute><id>MSS_RTT_NOM_OVERRIDE_DISABLE</id></attribute>
     <attribute><id>EFF_DRAM_RTT_NOM</id></attribute>
     <attribute><id>EFF_DRAM_RTT_WR</id></attribute>
     <attribute><id>EFF_DRAM_RTT_PARK</id></attribute>
