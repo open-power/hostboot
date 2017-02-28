@@ -33136,6 +33136,25 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>MSS_RTT_NOM_OVERRIDE_DISABLE</id>
+    <description>
+      Set equal to 1 to disable setting of RTT_NOM to use RTT_WR values
+      during WR_LEVEL calibration.
+    </description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MSS_RTT_NOM_OVERRIDE_DISABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>EFF_DRAM_RTT_WR</id>
     <description>
         RTT_WR value read to be programmed into MRS02

@@ -3144,4 +3144,20 @@
         <mssAccessorName>eff_rank_group_override</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_MSS_RTT_NOM_OVERRIDE_DISABLE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Set equal to 1 to disable setting of RTT_NOM to use RTT_WR values
+          during WR_LEVEL calibration.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <enum>NO = 0, YES = 1</enum>
+        <mssUnits> bool </mssUnits>
+        <array> 2 2 </array>
+        <mssAccessorName>rtt_nom_override_disable</mssAccessorName>
+    </attribute>
+
 </attributes>

@@ -153,6 +153,7 @@ enum cal_steps
     WRITE_CTR_2D_VREF = 7,
     COARSE_WR         = 8,
     COARSE_RD         = 9,
+    STEPS_AFTER_WR_LEVEL = 8,   // represents the number of bits in cal_step_enable after the WR_LEVEL bit
 };
 
 // Static consts for DDR4 voltages used in p9_mss_volt
