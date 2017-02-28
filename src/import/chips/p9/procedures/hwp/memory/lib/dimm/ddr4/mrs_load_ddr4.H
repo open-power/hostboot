@@ -74,6 +74,29 @@ enum address_bits
     BG1 = 15,
 };
 
+// RTT_WR settings in MR2 from JEDEC DDR4 spec
+enum rtt_wr_settings
+{
+    RTT_WR_DYNAMIC_ODT_OFF = 0b000,
+    RTT_WR_RZQ_OVER_2 = 0b001,
+    RTT_WR_RZQ_OVER_1 = 0b010,
+    RTT_WR_HIZ = 0b011,
+    RTT_WR_RZQ_OVER_3 = 0b100,
+};
+
+// RTT_NOM settings in MR1 from JEDEC DDR4 spec
+enum rtt_nom_settings
+{
+    RTT_NOM_DISABLE = 0b000,
+    RTT_NOM_RZQ_OVER_4 = 0b001,
+    RTT_NOM_RZQ_OVER_2 = 0b010,
+    RTT_NOM_RZQ_OVER_6 = 0b011,
+    RTT_NOM_RZQ_OVER_1 = 0b100,
+    RTT_NOM_RZQ_OVER_5 = 0b101,
+    RTT_NOM_RZQ_OVER_3 = 0b110,
+    RTT_NOM_RZQ_OVER_7 = 0b111,
+};
+
 ///
 /// @brief Mirror (front to back) the ADR bits of a CCS instruction - implementation
 /// @tparam T typename of the ccs::instruction_t
@@ -1001,7 +1024,7 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targ
                             std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
 
 ///
-/// @brief  Set MPR Mode
+/// @brief Set MPR Mode
 /// @param[in] i_target a DIMM target
 /// @param[in] i_mode setting for MPR mode
 /// @param[in,out] io_data data we are modifying MPR mode to
@@ -1021,6 +1044,62 @@ inline fapi2::ReturnCode set_dram_mpr_mode(const fapi2::Target<fapi2::TARGET_TYP
 
     // Update field if input check passes
     io_data.iv_mpr_mode = i_mode;
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Set RTT_NOM values in an mrs01_data object
+/// @param[in] i_target a DIMM target
+/// @param[in] i_value settings for RTT_NOM
+/// @param[in,out] io_data data we are modifying RTT_NOM to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+inline fapi2::ReturnCode set_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_value[MAX_RANK_PER_DIMM],
+        mrs01_data& io_data)
+{
+    constexpr uint64_t MAX_RTT_NOM = RTT_NOM_RZQ_OVER_7;
+
+    for (size_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
+    {
+        if(i_value[l_rank] > MAX_RTT_NOM)
+        {
+            FAPI_ERR("Invalid RTT_NOM value recieved: %d. Max encoding allowed: %d.", i_value[l_rank], MAX_RTT_NOM);
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+        }
+
+        // Update field if input check passes
+        io_data.iv_rtt_nom[l_rank] = i_value[l_rank];
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Set RTT_WR values in an mrs02_data object
+/// @param[in] i_target a DIMM target
+/// @param[in] i_value settings for RTT_WR
+/// @param[in,out] io_data data we are modifying RTT_WR to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+inline fapi2::ReturnCode set_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_value[MAX_RANK_PER_DIMM],
+        mrs02_data& io_data)
+{
+    constexpr uint64_t MAX_RTT_WR = RTT_WR_RZQ_OVER_3;
+
+    for (size_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
+    {
+        if(i_value[l_rank] > MAX_RTT_WR)
+        {
+            FAPI_ERR("Invalid RTT_WR value recieved: %d. Max encoding allowed: %d.", i_value[l_rank], MAX_RTT_WR);
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+        }
+
+        // Update field if input check passes
+        io_data.iv_dram_rtt_wr[l_rank] = i_value[l_rank];
+    }
 
     return fapi2::FAPI2_RC_SUCCESS;
 }
@@ -1152,6 +1231,74 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Makes CCS instruction to set RTT_NOM value
+/// @tparam T TargetType of the CCS instruction
+/// @param[in] i_target a DIMM target
+/// @param[in] i_value values to set to RTT_NOM
+/// @param[in] i_rank DIMM rank
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode rtt_nom_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                               const uint8_t i_value[MAX_RANK_PER_DIMM],
+                               const uint64_t i_rank,
+                               std::vector< ccs::instruction_t<T> >& io_inst )
+{
+    // tMRD (clock cycles) must be satisfied after an MRS command
+    constexpr uint64_t l_delay = mss::tmrd();
+
+    mrs01_data l_data(i_target, fapi2::current_err);
+    FAPI_TRY(fapi2::current_err, "%s. Failed to initialize mrs01_data for rtt_nom_load", mss::c_str(i_target) );
+
+    FAPI_TRY( set_dram_rtt_nom(i_target, i_value, l_data),
+              "%s. Failed set_dram_rtt_nom()",
+              mss::c_str(i_target));
+
+    // Make MRS CCS inst
+    FAPI_TRY( mrs_engine(i_target, l_data, i_rank, l_delay, io_inst),
+              "Failed to send MRS01 on %s, rank: %d",
+              mss::c_str(i_target), i_rank);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Makes CCS instruction to set RTT_WR value
+/// @tparam T TargetType of the CCS instruction
+/// @param[in] i_target a DIMM target
+/// @param[in] i_value values to set to RTT_WR
+/// @param[in] i_rank DIMM rank
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode rtt_wr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                              const uint8_t i_value[MAX_RANK_PER_DIMM],
+                              const uint64_t i_rank,
+                              std::vector< ccs::instruction_t<T> >& io_inst )
+{
+    // tMRD (clock cycles) must be satisfied after an MRS command
+    constexpr uint64_t l_delay = mss::tmrd();
+
+    mrs02_data l_data(i_target, fapi2::current_err);
+    FAPI_TRY(fapi2::current_err, "%s. Failed to initialize mrs02_data for rtt_wr_load", mss::c_str(i_target) );
+
+    FAPI_TRY( set_dram_rtt_wr(i_target, i_value, l_data),
+              "%s. Failed set_dram_rtt_wr()",
+              mss::c_str(i_target));
+
+    // Make MRS CCS inst
+    FAPI_TRY( mrs_engine(i_target, l_data, i_rank, l_delay, io_inst),
+              "Failed to send MRS02 on %s, rank: %d",
+              mss::c_str(i_target), i_rank);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Makes CCS instruction for an MPR read
 /// @tparam T TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
@@ -1233,6 +1380,75 @@ fapi2::ReturnCode precharge_all( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Maps RTT_WR setting to equivalent RTT_NOM setting
+/// @tparam T TargetType of the DIMM
+/// @param[in] i_target a DIMM target
+/// @param[in] i_rtt_wr an RTT_WR setting
+/// @param[out] o_rtt_nom equivalent RTT_NOM setting
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode rtt_wr_to_rtt_nom_helper(const fapi2::Target<T>& i_target,
+        const uint8_t i_rtt_wr,
+        uint8_t& o_rtt_nom);
+
+///
+/// @brief Executes CCS instructions to set RTT_WR value into RTT_NOM
+/// @tparam T TargetType of the DIMM
+/// @tparam CT TargetType of the CCS instruction
+/// @param[in] i_target a DIMM target
+/// @param[in] i_rank selected rank
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, fapi2::TargetType CT >
+fapi2::ReturnCode rtt_nom_override(const fapi2::Target<T>& i_target,
+                                   const uint64_t i_rank,
+                                   std::vector< ccs::instruction_t<CT> >& io_inst);
+
+///
+/// @brief Executes CCS instructions to disable RTT_WR
+/// @tparam T TargetType of the DIMM
+/// @tparam CT TargetType of the CCS instruction
+/// @param[in] i_target a DIMM target
+/// @param[in] i_rank selected rank
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, fapi2::TargetType CT >
+fapi2::ReturnCode rtt_wr_disable(const fapi2::Target<T>& i_target,
+                                 const uint64_t i_rank,
+                                 std::vector< ccs::instruction_t<CT> >& io_inst);
+
+///
+/// @brief Executes CCS instructions to restore original value to RTT_NOM
+/// @tparam T TargetType of the DIMM
+/// @tparam CT TargetType of the CCS instruction
+/// @param[in] i_target a DIMM target
+/// @param[in] i_rank selected rank
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, fapi2::TargetType CT >
+fapi2::ReturnCode rtt_nom_restore(const fapi2::Target<T>& i_target,
+                                  const uint64_t i_rank,
+                                  std::vector< ccs::instruction_t<CT> >& io_inst);
+
+///
+/// @brief Executes CCS instructions to restore original value to RTT_WR
+/// @tparam T TargetType of the DIMM
+/// @tparam CT TargetType of the CCS instruction
+/// @param[in] i_target a DIMM target
+/// @param[in] i_rank selected rank
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, fapi2::TargetType CT >
+fapi2::ReturnCode rtt_wr_restore(const fapi2::Target<T>& i_target,
+                                 const uint64_t i_rank,
+                                 std::vector< ccs::instruction_t<CT> >& io_inst);
 
 } // ddr4
 } // mss
