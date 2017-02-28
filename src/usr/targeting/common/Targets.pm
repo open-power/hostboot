@@ -276,7 +276,6 @@ sub printAttribute
     $filter{MRW_MEM_MIRRORING_ENABLE_DEFAULT}                       = 1;
     $filter{MRW_MEM_POWER_CONTROL_USAGE}                            = 1;
     $filter{MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM}         = 1;
-    $filter{MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4}    = 1;
     $filter{MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE}     = 1;
     $filter{MSS_VOLT_VDDR_OFFSET_DISABLE}                           = 1;
     $filter{OCC_LOAD_TIMEOUT}                                       = 1;
