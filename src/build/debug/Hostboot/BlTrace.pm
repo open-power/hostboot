@@ -38,8 +38,9 @@ my %traceText = (
     "15" => "Main verify succeeded",
     "16" => "Main copy HBB to running location done",
     "17" => "Main verify skip verification - no eyecatch ",
-    # @TODO RTC:167740 remove magic number check once fsp/op signs HBB
+    # @TODO RTC:167740 TI on failed magic # check once signing is widespread
     "18" => "Main verify skip verification - no magic number ",
+    "19" => "Main verify skip verification - SAB unset ",
     "20" => "HandleMMIO started",
     "21" => "HandleMMIO started using BYTESIZE",
     "24" => "HandleMMIO started using WORDSIZE",

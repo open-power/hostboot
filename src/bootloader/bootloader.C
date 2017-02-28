@@ -45,6 +45,7 @@
 #include <securerom/ROM.H>
 #include <config.h>
 #include <secureboot/secure_reasoncodes.H>
+#include <p9_sbe_hb_structures.H>
 
 extern uint64_t kernel_other_thread_spinlock;
 extern PNOR::SectionData_t bootloader_hbbSection;
@@ -76,6 +77,16 @@ namespace Bootloader{
      */
     void setSecureData(const void * i_pHbbSrc)
     {
+        // Read SBE HB shared data.
+        const auto l_blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
+                                                              SBE_HB_COMM_ADDR);
+        // Set secure Access Bit
+        // Ensure SBE to Bootloader structure has the SAB member
+        if (l_blConfigData->version >= SAB_ADDED)
+        {
+            g_blToHbData.secureAccessBit = l_blConfigData->secureAccessBit;
+        }
+
         // Find secure ROM addr
         // Get starting address of ROM size and code which is the next 8 byte
         // aligned address after the bootloader end.
@@ -105,7 +116,7 @@ namespace Bootloader{
             g_secureRomValid = true;
 
             g_blToHbData.eyeCatch = BLTOHB_EYECATCHER;
-            g_blToHbData.version = BLTOHB_INIT;
+            g_blToHbData.version = BLTOHB_SAB;
             g_blToHbData.branchtableOffset = l_pSecRomInfo->branchtableOffset;
             g_blToHbData.secureRom = l_pRomStart;
 
@@ -156,9 +167,14 @@ namespace Bootloader{
 
         uint64_t l_rc = 0;
 
+        // Check if Secure Access Bit is set
+        if (!g_blToHbData.secureAccessBit)
+        {
+            BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_SAB_UNSET);
+        }
         // # @TODO RTC:170136 terminate in this case
         // Ensure SecureRom is actually present
-        if ( !g_secureRomValid )
+        else if ( !g_secureRomValid )
         {
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_NO_EYECATCH);
         }

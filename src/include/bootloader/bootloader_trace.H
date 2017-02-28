@@ -72,9 +72,11 @@ enum BootloaderTraces
     /** Bootloader main verifyContainer skip verification - no eyecatch */
     BTLDR_TRC_MAIN_VERIFY_NO_EYECATCH           = 0x17,
 
-    // @TODO RTC:167740 remove magic number check once fsp/op signs HBB
     /** Bootloader main verifyContainer skip verification - no magic number */
     BTLDR_TRC_MAIN_VERIFY_NO_MAGIC_NUM          = 0x18,
+
+    /** Bootloader main verifyContainer skip verification - SAB unset */
+    BTLDR_TRC_MAIN_VERIFY_SAB_UNSET          = 0x19,
 
     /** Bootloader handleMMIO started */
     BTLDR_TRC_HANDLEMMIO_START               = 0x20,

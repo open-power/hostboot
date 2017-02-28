@@ -144,6 +144,13 @@ class BlToHbDataManager
         const size_t getHbbHeaderSize() const;
 
         /*
+         * @brief Returns internal secure access bit
+         *
+         * @return bool     secure access bit
+         */
+        const bool getSecureAccessBit() const;
+
+        /*
          * @brief Returns internal preserved size
          *
          * @return size_t     preserved size
