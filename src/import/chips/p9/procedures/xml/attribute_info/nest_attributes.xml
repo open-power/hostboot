@@ -712,7 +712,7 @@
   <description>Define context for current phase of system IPL.
   </description>
   <valueType>uint8</valueType>
-  <enum>HB_IPL = 0x1,HB_RUNTIME = 0x2,CACHE_CONTAINED = 0x4, CHIP_CONTAINED = 0x8</enum>
+  <enum>HB_IPL = 0x1,HB_RUNTIME = 0x2,CACHE_CONTAINED = 0x4,CHIP_CONTAINED = 0x8,NONHB_IPL = 0x10</enum>
   <persistRuntime/>
   <platInit/>
   <!-- TODO: Story 155081
