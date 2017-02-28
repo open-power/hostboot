@@ -2002,6 +2002,8 @@ void grouping_2groupsOf2_cross_MCS(const EffGroupingMemInfo& i_memInfo,
             FAPI_INF("   Group: Ports %u and %u; Group: ports %u and %u",
                      l_twoGroupOf2[0][0], l_twoGroupOf2[0][1],
                      l_twoGroupOf2[1][0], l_twoGroupOf2[1][1]);
+            // Break out of mcs2 loop
+            break;
         }
     }
 
