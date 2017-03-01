@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include <prdrCommon.H>
 #include <prdrToken.H>
 #include <UtilHash.H>
-#include <prdfEnums.H>
+#include <prdfCalloutMap.H> // for enums
 
 using namespace PRDR_COMPILER;
 
@@ -404,12 +404,6 @@ uint32_t prdrCaptureTypeMap(const std::string & i_arg)
 
 } // end namespace PRDR_COMPILER
 
-#include <prdfCalloutMap.H> // for enums
-#undef __prdfCalloutMap_H
-#define PRDF_RULE_COMPILER_ENUMS
-#include <prdfCalloutMap.H> // for string-to-enum arrays
-#undef PRDF_RULE_COMPILER_ENUMS
-
 namespace PRDR_COMPILER
 {
 
@@ -427,36 +421,11 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         if (l_initialized)
             break;
 
-        // Initialize Callout priorities.
-        for (CalloutPriority_t * i = calloutPriorityArray; NULL != i->str; i++)
-        {
-            g_ActionArgMap[i->str] = i->val;
-        }
-
-        // Initialize target types.
-        g_ActionArgMap["TYPE_PROC"]     = TARGETING::TYPE_PROC;
-        g_ActionArgMap["TYPE_EQ"]       = TARGETING::TYPE_EQ;
-        g_ActionArgMap["TYPE_EX"]       = TARGETING::TYPE_EX;
-        g_ActionArgMap["TYPE_CORE"]     = TARGETING::TYPE_CORE;
-        g_ActionArgMap["TYPE_CAPP"]     = TARGETING::TYPE_CAPP;
-        g_ActionArgMap["TYPE_PEC"]      = TARGETING::TYPE_PEC;
-        g_ActionArgMap["TYPE_PHB"]      = TARGETING::TYPE_PHB;
-        g_ActionArgMap["TYPE_OBUS"]     = TARGETING::TYPE_OBUS;
-        g_ActionArgMap["TYPE_XBUS"]     = TARGETING::TYPE_XBUS;
-        g_ActionArgMap["TYPE_MCBIST"]   = TARGETING::TYPE_MCBIST;
-        g_ActionArgMap["TYPE_MCS"]      = TARGETING::TYPE_MCS;
-        g_ActionArgMap["TYPE_MCA"]      = TARGETING::TYPE_MCA;
-        g_ActionArgMap["TYPE_MEMBUF"]   = TARGETING::TYPE_MEMBUF;
-        g_ActionArgMap["TYPE_L4"]       = TARGETING::TYPE_L4;
-        g_ActionArgMap["TYPE_MBA"]      = TARGETING::TYPE_MBA;
-        g_ActionArgMap["TYPE_DIMM"]     = TARGETING::TYPE_DIMM;
-        g_ActionArgMap["TYPE_NA"]       = TARGETING::TYPE_NA;
-
-        // Initialize symbolic callouts.
-        for ( SymCallout_t * i = symCalloutArray; NULL != i->str; i++ )
-        {
-            g_ActionArgMap[i->str] = i->val;
-        }
+        // Include procedure callouts, callout priorities, and target types.
+        #define PRDF_RULE_COMPILER_ENUMS
+        #undef __prdfCalloutMap_H
+        #include <prdfCalloutMap.H> // for string-to-enum map
+        #undef PRDF_RULE_COMPILER_ENUMS
 
         // Initialize SDC Flags.
         // FIXME: RTC 119976

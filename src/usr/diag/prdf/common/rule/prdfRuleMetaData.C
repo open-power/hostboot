@@ -941,42 +941,42 @@ Resolution * RuleMetaData::createResolution( Prdr::Expr * i_action,
             {
                 case Prdr::CALLOUT_GARD_CHIP: // connected callout with gard
                     l_rc = &i_data.cv_reslFactory.getConnCalloutGardResol(
-                                (TARGETING::TYPE)       i_action->cv_value[2].i,
-                                                        i_action->cv_value[3].i,
-                                (CalloutPriorityEnum)   i_action->cv_value[1].i,
+                                (TARGETING::TYPE) i_action->cv_value[2].i,
+                                                  i_action->cv_value[3].i,
+                                (PRDpriority)     i_action->cv_value[1].i,
                                 ( NULL == i_action->cv_value[4].p ? NULL :
                                     ( this->createResolution(
                                         i_action->cv_value[4].p, i_data ) ) ),
-                                        TARGETING::TYPE_NA,
-                                        (GARD_POLICY) i_action->cv_value[6].i );
+                                TARGETING::TYPE_NA,
+                                (GARD_POLICY)     i_action->cv_value[6].i );
                     break;
 
                 // connected callout and gard with connection type
                 case Prdr::CALLOUT_GARD_PEER:
                     l_rc = &i_data.cv_reslFactory.getConnCalloutGardResol(
-                                (TARGETING::TYPE)       i_action->cv_value[2].i,
-                                                        i_action->cv_value[3].i,
-                                (CalloutPriorityEnum)   i_action->cv_value[1].i,
+                                (TARGETING::TYPE) i_action->cv_value[2].i,
+                                                  i_action->cv_value[3].i,
+                                (PRDpriority)     i_action->cv_value[1].i,
                                 ( NULL == i_action->cv_value[4].p ? NULL :
                                     ( this->createResolution(
                                         i_action->cv_value[4].p, i_data ) ) ),
-                                (TARGETING::TYPE)      i_action->cv_value[5].i,
-                                (GARD_POLICY) i_action->cv_value[6].i );
+                                (TARGETING::TYPE) i_action->cv_value[5].i,
+                                (GARD_POLICY)     i_action->cv_value[6].i );
 
                     break;
 
                 case Prdr::CALLOUT_PROC: // Procedure callout
                     l_rc = &i_data.cv_reslFactory.getCalloutGardResol(
                                 (SymbolicFru) i_action->cv_value[2].i,
-                                (CalloutPriorityEnum) i_action->cv_value[1].i,
+                                (PRDpriority) i_action->cv_value[1].i,
                                 (GARD_POLICY) i_action->cv_value[6].i );
                     break;
 
                 case Prdr::CALLOUT_GARD_SELF: // self callout with gard option
                 default:
                     l_rc = &i_data.cv_reslFactory.getCalloutGardResol(
-                                NULL ,
-                                (CalloutPriorityEnum) i_action->cv_value[1].i,
+                                NULL,
+                                (PRDpriority) i_action->cv_value[1].i,
                                 (GARD_POLICY) i_action->cv_value[6].i );
                     break;
 

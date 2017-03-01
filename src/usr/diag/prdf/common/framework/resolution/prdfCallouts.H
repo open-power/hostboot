@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 // Includes
 //------------------------------------------------------------------------------
 
-#include <prdfCalloutMap.H>
+#include <prdfCalloutMap.H> // for enums
 #include <prdfCalloutsData.H>
 #include <prdfEnums.H>
 #include <prdfMemoryMru.H>
@@ -40,8 +40,6 @@ namespace PRDF
 {
 
 //------------------------------------------------------------------------------
-
-typedef CalloutPriorityEnum PRDpriority;
 
 /**
  * @brief Wrapper class for PRD callouts (TargetHandle_t, MemoryMru, and
