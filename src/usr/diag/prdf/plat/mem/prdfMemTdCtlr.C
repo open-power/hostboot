@@ -138,7 +138,7 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
                                           PRDFSIG_CmdComplete_ERROR );
 
         // Something definitely failed, so callout 2nd level support.
-        io_sc.service_data->SetCallout( NextLevelSupport_ENUM, MRU_HIGH );
+        io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_HIGH );
         io_sc.service_data->setServiceCall();
 
         #ifndef __HOSTBOOT_RUNTIME // IPL only

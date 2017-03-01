@@ -85,7 +85,7 @@ void prdfAssert( const char * i_exp, const char * i_file, int i_line )
                      0,                           // user data word 3
                      PRD_ASSERT);                 // user data word 4
 
-    PRDF_ADD_PROCEDURE_CALLOUT(errl, MRU_MED, HWAS::EPUB_PRC_SP_CODE);
+    PRDF_ADD_PROCEDURE_CALLOUT(errl, MRU_MED, SP_CODE);
     PRDF_SET_RC(errl, PRD_ASSERT);
     PRDF_COLLECT_TRACE(errl, 256);
     PRDF_SET_TERM_STATE( errl );

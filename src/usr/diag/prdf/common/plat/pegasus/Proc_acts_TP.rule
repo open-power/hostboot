@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -1314,7 +1314,7 @@ actionclass analyzePibError
 /** Callout the cooling system error procedure */
 actionclass coolingSystemError
 {
-    callout(procedure(CoolingSystemError_ENUM), MRU_MED);
+    callout(procedure(COOLING_SYSTEM_ERR), MRU_MED);
     threshold1;
 };
 

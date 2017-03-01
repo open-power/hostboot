@@ -100,7 +100,7 @@ void commitSoftError( uint32_t i_reasonCode, TargetHandle_t i_mba,
     if ( i_analysisErrors )
     {
         errlHndl_t errl = createErrl( i_reasonCode, i_mba, i_signature );
-        errl->addProcedureCallout( HWAS::EPUB_PRC_LVL_SUPP, MRU_HIGH);
+        errl->addProcedureCallout( LEVEL2_SUPPORT, MRU_HIGH);
         commitErrl( errl, i_mba );
     }
 }

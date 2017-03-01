@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@ namespace CalloutUtil
 
 void defaultError( STEP_CODE_DATA_STRUCT & i_sc )
 {
-    i_sc.service_data->SetCallout( NextLevelSupport_ENUM, MRU_MED, NO_GARD );
+    i_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_MED, NO_GARD );
     i_sc.service_data->SetCallout( SP_CODE, MRU_MED, NO_GARD );
     i_sc.service_data->setServiceCall();
 }

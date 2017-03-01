@@ -169,8 +169,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
         if ( PRDcalloutData::TYPE_SYMFRU == thiscallout.getType() )
         {
-            if ( (HWAS::EPUB_PRC_SP_CODE   == thiscallout.flatten()) ||
-                 (HWAS::EPUB_PRC_PHYP_CODE == thiscallout.flatten()) )
+            if ( (SP_CODE     == thiscallout.flatten()) ||
+                 (SYS_SW_CODE == thiscallout.flatten()) )
             {
                 SW = true;
 
@@ -184,7 +184,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                     SW_High = true;
                 }
             }
-            else if ( HWAS::EPUB_PRC_LVL_SUPP == thiscallout.flatten())
+            else if ( LEVEL2_SUPPORT == thiscallout.flatten())
             {
                 SecondLevel = true;
 
@@ -322,10 +322,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // attention.
     if ( io_sdc.IsSUE() )
     {
-        PRDF_HW_ADD_PROC_CALLOUT(HWAS::EPUB_PRC_SUE_PREVERROR,
-                                 MRU_HIGH,
-                                 iv_errl,
-                                 errlSev);
+        PRDF_HW_ADD_PROC_CALLOUT( SUE_PREV_ERR, MRU_HIGH, iv_errl, errlSev );
     }
 
     //--------------------------------------------------------------------------
@@ -510,17 +507,16 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                                      iv_errl,
                                      errlSev);
 
-            // Use the flags set earlier to determine if the callout is just Software (SP code or Phyp Code).
-            // Add a Second Level Support procedure callout Low, for this case.
+            // Use the flags set earlier to determine if the callout is just
+            // Software (SP code or Phyp Code). Add a Second Level Support
+            // procedure callout Low, for this case.
             if (HW == false && SW == true && SecondLevel == false)
             {
                 PRDF_DTRAC( PRDF_FUNC "thisProcedureID= %x, thispriority=%x, "
-                            "errlSev=%x", HWAS::EPUB_PRC_LVL_SUPP, MRU_LOW, errlSev );
+                            "errlSev=%x", LEVEL2_SUPPORT, MRU_LOW, errlSev );
 
-                PRDF_HW_ADD_PROC_CALLOUT(HWAS::EPUB_PRC_LVL_SUPP,
-                                         MRU_LOW,
-                                         iv_errl,
-                                         errlSev);
+                PRDF_HW_ADD_PROC_CALLOUT( LEVEL2_SUPPORT, MRU_LOW, iv_errl,
+                                          errlSev );
 
                 SecondLevel = true;
             }
