@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,18 +22,21 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 /**
-   @file call_p9_rng_init_phase2.C
+ * @file call_p9_rng_init_phase2.C
  *
- *  Support file for IStep: nest_chiplets
- *   Nest Chiplets
+ *  Support file for IStep: core_activate
+ *   Core Activate
  *
  *  HWP_IGNORE_VERSION_CHECK
  *
  */
+
 /******************************************************************************/
 // Includes
 /******************************************************************************/
+
 #include    <stdint.h>
 
 #include    <trace/interface.H>
@@ -58,7 +61,7 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_rng_init_phase2.H>
 
-namespace   ISTEP_08
+namespace   ISTEP_16
 {
 
 using   namespace   ISTEP;
@@ -67,7 +70,7 @@ using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 
 //******************************************************************************
-// wrapper function to call proc_chiplet_enable_ridi
+// wrapper function to call p9_rng_init_phase2
 //******************************************************************************
 void* call_p9_rng_init_phase2( void *io_pArgs )
 {
