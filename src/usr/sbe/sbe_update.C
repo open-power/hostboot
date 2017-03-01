@@ -1821,6 +1821,7 @@ namespace SBE
             }
             const void* hbblPnorPtr = reinterpret_cast<const void*>(
                                                                 pnorInfo.vaddr);
+
             // Use max hbbl size and not the PNOR size. The PNOR size can grow
             // to add a secure header, but the code size limit is still 20K.
             TRACFCOMP( g_trac_sbe, "getSbeInfoState() - "
@@ -3623,6 +3624,16 @@ namespace SBE
                 break;
             }
 
+            // Load the Bootloader PNOR section into secure memory
+#ifdef CONFIG_SECUREBOOT
+            err = loadSecureSection(PNOR::HB_BOOTLOADER);
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK,"createSbeImageVmmSpace() - Error from loadSecureSection(PNOR::HB_BOOTLOADER)");
+                break;
+            }
+#endif
+
         }while(0);
 
         TRACDCOMP( g_trac_sbe,
@@ -3708,6 +3719,16 @@ namespace SBE
             }
 
             PNOR::flush( PNOR::SBE_IPL );
+
+            // Unload the Bootloader PNOR section from secure memory
+#ifdef CONFIG_SECUREBOOT
+            err = unloadSecureSection(PNOR::HB_BOOTLOADER);
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK,"cleanupSbeImageVmmSpace() - Error from unloadSecureSection(PNOR::HB_BOOTLOADER)");
+                break;
+            }
+#endif
 
         }while(0);
 

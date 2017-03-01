@@ -215,17 +215,20 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Bootloader (22.5K)</description>
+        <description>Hostboot Bootloader (28K)</description>
         <eyeCatch>HBBL</eyeCatch>
         <physicalOffset>0x2ABB000</physicalOffset>
-        <physicalRegionSize>0x6000</physicalRegionSize>
+        <!-- Physical Size includes Header rounded to ECC valid size -->
+        <!-- Max size of actual HBBL content is 20K and 22.5K with ECC -->
+        <physicalRegionSize>0x7000</physicalRegionSize>
         <side>sideless</side>
+        <sha512Version/>
         <ecc/>
     </section>
     <section>
         <description>Global Data (36K)</description>
         <eyeCatch>GLOBAL</eyeCatch>
-        <physicalOffset>0x2AC1000</physicalOffset>
+        <physicalOffset>0x2AC2000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -233,7 +236,7 @@ Layout Description
     <section>
         <description>Ref Image Ring Overrides (20K)</description>
         <eyeCatch>RINGOVD</eyeCatch>
-        <physicalOffset>0x2ACA000</physicalOffset>
+        <physicalOffset>0x2ACB000</physicalOffset>
         <physicalRegionSize>0x5000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -241,7 +244,7 @@ Layout Description
     <section>
         <description>SecureBoot Key Transition Partition (16K)</description>
         <eyeCatch>SBKT</eyeCatch>
-        <physicalOffset>0x2ACF000</physicalOffset>
+        <physicalOffset>0x2AD0000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -249,7 +252,7 @@ Layout Description
   <section>
         <description>OCC Lid (1.125M)</description>
         <eyeCatch>OCC</eyeCatch>
-        <physicalOffset>0x2AD3000</physicalOffset>
+        <physicalOffset>0x2AD4000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -259,7 +262,7 @@ Layout Description
         <!-- We need 266KB per module sort, going to support
              10 sorts by default, plus ECC  -->
         <eyeCatch>WOFDATA</eyeCatch>
-        <physicalOffset>0x2BF3000</physicalOffset>
+        <physicalOffset>0x2BF4000</physicalOffset>
         <physicalRegionSize>0x300000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
