@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -123,11 +123,8 @@ namespace   INITSERVICE
         },
         {
                 ISTEPNAME(16,03,"p9_rng_init_phase2"),
-                // @todo RTC:137389 - removed for P9 bringup
-                //ISTEP_16::call_host_activate_master,
-                //{ START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEP_16::call_p9_rng_init_phase2,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 // Hostboot PRD should no longer be called after this step.
