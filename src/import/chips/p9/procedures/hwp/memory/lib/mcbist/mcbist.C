@@ -507,6 +507,37 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Get a list of ports involved in the program
+/// Specialization for program<fapi2::TARGET_TYPE_MCBIST>
+/// @param[in] i_target the target for this program
+/// @return vector of port targets
+///
+template<>
+template<>
+std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCA>>
+        program<fapi2::TARGET_TYPE_MCBIST>::get_port_list<fapi2::TARGET_TYPE_MCA>( const
+                fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+{
+    typedef mss::mcbistTraits<TARGET_TYPE_MCBIST> TT;
+
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCA>> l_list;
+
+    fapi2::buffer<uint64_t> l_ports_selected;
+    // extract port sel to left of l_ports_selected so port relatve pos maps to bit number
+    iv_control.extract<TT::PORT_SEL, TT::PORT_SEL_LEN>(l_ports_selected);
+
+    for (const auto& p : find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
+    {
+        if (l_ports_selected.getBit(mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(p)))
+        {
+            l_list.push_back(p);
+        }
+    }
+
+    return l_list;
+}
+
+///
 /// @brief Read entries from MCBIST Read Modify Write (RMW) array
 /// Specialization for fapi2::TARGET_TYPE_MCA
 /// @param[in] i_target the target to effect

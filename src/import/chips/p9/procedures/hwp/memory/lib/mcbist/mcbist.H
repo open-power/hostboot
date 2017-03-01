@@ -1766,6 +1766,15 @@ class program
         }
 
         ///
+        /// @brief Get a list of ports involved in the program
+        /// @tparam P fapi2 target type of port
+        /// @param[in] i_target the target for this program
+        /// @return vector of port targets
+        ///
+        template< fapi2::TargetType P >
+        std::vector<fapi2::Target<P>> get_port_list( const fapi2::Target<T>& i_target );
+
+        ///
         /// @brief Change MCBIST Stop-on-error conditions (end boundaries)
         /// @param[in] i_end the end boundary
         /// @note By default the MCBIST is programmed to always stop after an errored address. This API
