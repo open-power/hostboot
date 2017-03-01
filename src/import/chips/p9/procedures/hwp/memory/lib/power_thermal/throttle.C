@@ -175,7 +175,7 @@ fapi2::ReturnCode throttle::power_regulator_throttles ()
               "Failed to calculate the max and idle power for port %s",
               mss::c_str(iv_target));
 
-    FAPI_INF("POWER throttles: %s max port power is %f", l_port_power_calc_max);
+    FAPI_INF("POWER throttles: %s max port power is %f", mss::c_str(iv_target), l_port_power_calc_max);
 
     //Calculate the power curve slope and intercept using the port's min and max power values
     FAPI_TRY(calc_power_curve(l_port_power_calc_idle,
