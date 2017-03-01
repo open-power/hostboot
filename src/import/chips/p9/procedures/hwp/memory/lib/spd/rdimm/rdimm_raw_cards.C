@@ -56,7 +56,6 @@ rcw_settings rdimm_rc_c1( 0x00, // RC00
                           0x00, // RC09
                           0x0E, // RC0B
                           0x00, // RC0C
-                          0x0D, // RC0E
                           0x00, // RC0F
                           0x00, // RC1X
                           0x00, // RC2X
@@ -79,7 +78,6 @@ rcw_settings rdimm_rc_c2( 0x00, // RC00
                           0x00, // RC09
                           0x0E, // RC0B
                           0x00, // RC0C
-                          0x0D, // RC0E
                           0x00, // RC0F
                           0x00, // RC1X
                           0x00, // RC2X
@@ -101,7 +99,6 @@ rcw_settings  rdimm_rc_a1( 0x00, // RC00
                            0x00, // RC09
                            0x0E, // RC0B
                            0x00, // RC0C
-                           0x0D, // RC0E
                            0x00, // RC0F
                            0x00, // RC1X
                            0x00, // RC2X
@@ -124,7 +121,6 @@ rcw_settings rdimm_rc_b1( 0x00, // RC00
                           0x00, // RC09 //Should be set in eff_config for CKE power DOWN modep:q
                           0x0E, // RC0B
                           0x00, // RC0C
-                          0x0D, // RC0E
                           0x00, // RC0F
                           0x00, // RC1X
                           0x00, // RC2X
@@ -146,7 +142,6 @@ rcw_settings rdimm_rc_b2( 0x00, // RC00
                           0x00, // RC09
                           0x0E, // RC0B
                           0x00, // RC0C
-                          0x0D, // RC0E
                           0x00, // RC0F
                           0x00, // RC1X
                           0x00, // RC2X
@@ -168,7 +163,6 @@ rcw_settings rdimm_rc_custom ( 0x00, // RC00
                                0x00, // RC09
                                0x0E, // RC0B
                                0x00, // RC0C
-                               0x0D, // RC0E
                                0x00, // RC0F
                                0x00, // RC1X
                                0x00, // RC2X
@@ -190,7 +184,6 @@ rcw_settings rdimm_rc_vbu( 0x00, // RC00
                            0x00, // RC09
                            0x0E, // RC0B
                            0x00, // RC0C
-                           0x00, // RC0E
                            0x00, // RC0F
                            0x00, // RC1X
                            0x00, // RC2X

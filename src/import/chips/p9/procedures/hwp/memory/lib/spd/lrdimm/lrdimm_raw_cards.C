@@ -57,7 +57,6 @@ rcw_settings lrdimm_rc_b0( 0x00, // RC00
                            0x00, // RC09
                            0x0E, // RC0B
                            0x00, // RC0C
-                           0x00, // RC0E
                            0x00, // RC0F
                            0x00, // RC1X
                            0x00, // RC2X
