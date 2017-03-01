@@ -695,7 +695,7 @@ void CenMbaTdCtlrCommon::badPathErrorHandling( STEP_CODE_DATA_STRUCT & io_sc )
     io_sc.service_data->setServiceCall();
 
     // There may have been a code bug, callout 2nd level support.
-    io_sc.service_data->SetCallout( NextLevelSupport_ENUM, MRU_HIGH );
+    io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_HIGH );
 
     // Callout the rank if no other callouts have been made (besides 2nd
     // Level Support). Note that iv_mark is not always guaranteed to be

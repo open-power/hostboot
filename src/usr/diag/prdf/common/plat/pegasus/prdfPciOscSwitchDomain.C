@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -305,8 +305,7 @@ void PciOscSwitchDomain::addHwCalloutAndSignature( STEP_CODE_DATA_STRUCT & i_sc,
         if( 0 == listSize )
         {
             PRDF_ERR( PRDF_FUNC "PCI Osc Switch Over: Analysis failed");
-            i_sc.service_data->SetCallout( NextLevelSupport_ENUM,
-                                           MRU_MED, NO_GARD );
+            i_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_MED, NO_GARD );
             signature = PRDFSIG_PCI_OSC_ANL_FAILED;
             break;
         }
@@ -331,8 +330,7 @@ void PciOscSwitchDomain::addHwCalloutAndSignature( STEP_CODE_DATA_STRUCT & i_sc,
             {
                 PRDF_ERR( PRDF_FUNC "Multiple pci Osc failures detected");
                 signature = PRDFSIG_PCI_MULTIPLE_OSC_FO;
-                i_sc.service_data->SetCallout( NextLevelSupport_ENUM,
-                                               MRU_MED, NO_GARD );
+                i_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_MED, NO_GARD);
             }
 
             i_sc.service_data->SetCallout( it->pciOscCard, MRU_HIGH );

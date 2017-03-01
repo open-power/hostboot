@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -912,8 +912,7 @@ int32_t calloutPhb( ExtensibleChip * i_procChip, STEP_CODE_DATA_STRUCT & io_sc,
 
     // If no PHBs called out, callout 2nd level support.
     if ( (SUCCESS != l_rc) || (0 == io_sc.service_data->getMruListSize()) )
-        io_sc.service_data->SetCallout( NextLevelSupport_ENUM,
-                                        MRU_MED, NO_GARD );
+        io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_MED, NO_GARD );
 
     return SUCCESS; // Intentionally returns SUCCESS so rule code does not get
                     // confused by undefined error code.

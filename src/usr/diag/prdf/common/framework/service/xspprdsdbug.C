@@ -177,8 +177,7 @@ uint32_t SYSTEM_DEBUG_CLASS::Reinitialize(const AttnList & i_attnList)
                               0,                          // user data word 3
                               0 );                        // user data word 4
 
-            PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, MRU_MED,
-                                        HWAS::EPUB_PRC_SP_CODE );
+            PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, MRU_MED, SP_CODE );
             l_rc = PRD_ATTN_DATA_ACCESS_FAILED;
 
             break;
@@ -330,7 +329,7 @@ void SYSTEM_DEBUG_CLASS::CalloutThoseAtAttention(
         capture.Add(PlatServices::getSystemTarget(),0,cbs);
     }
 
-    sdc->SetCallout(NextLevelSupport_ENUM, MRU_HIGH);
+    sdc->SetCallout(LEVEL2_SUPPORT, MRU_HIGH);
 }
 
 // -------------------------------------------------------------------

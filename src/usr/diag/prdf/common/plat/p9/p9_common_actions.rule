@@ -126,10 +126,10 @@ actionclass calloutSelfLow  { callout(MRU_LOW);  };
 
 # 2nd Level Support
 actionclass callout2ndLvlMed
-{ callout(procedure(NextLevelSupport_ENUM), MRU_MED); };
+{ callout(procedure(LEVEL2_SUPPORT), MRU_MED); };
 
 actionclass callout2ndLvlLow
-{ callout(procedure(NextLevelSupport_ENUM), MRU_LOW); };
+{ callout(procedure(LEVEL2_SUPPORT), MRU_LOW); };
 
 /** Callout self with  medium priority but don't gard it */
 actionclass calloutSelfMedNoGard

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -521,7 +521,7 @@ group gIoaFir filter singlebit,
 /** Callout the ABUS 0 interface */
 actionclass calloutAbus0Interface
 {
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
+    callout(procedure(FAB_BUS_OFF_NODE), MRU_MED);
     callout(connected(TYPE_ABUS, 0), MRU_MEDA);
     callout(connected_peer(TYPE_ABUS, 0), MRU_MEDA);
     funccall("calloutInterface_abus0");
@@ -530,7 +530,7 @@ actionclass calloutAbus0Interface
 /** Callout the ABUS 1 interface */
 actionclass calloutAbus1Interface
 {
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
+    callout(procedure(FAB_BUS_OFF_NODE), MRU_MED);
     callout(connected(TYPE_ABUS, 1), MRU_MEDA);
     callout(connected_peer(TYPE_ABUS, 1), MRU_MEDA);
     funccall("calloutInterface_abus1");
@@ -539,7 +539,7 @@ actionclass calloutAbus1Interface
 /** Callout the ABUS 2 interface */
 actionclass calloutAbus2Interface
 {
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
+    callout(procedure(FAB_BUS_OFF_NODE), MRU_MED);
     callout(connected(TYPE_ABUS, 2), MRU_MEDA);
     callout(connected_peer(TYPE_ABUS, 2), MRU_MEDA);
     funccall("calloutInterface_abus2");

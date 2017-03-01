@@ -1155,7 +1155,7 @@ int32_t internalTimeout( ExtensibleChip * i_mbChip,
             else
             {
                 // Make the callout of the external timeout error.
-                i_sc.service_data->SetCallout( NextLevelSupport_ENUM,
+                i_sc.service_data->SetCallout( LEVEL2_SUPPORT,
                                                MRU_MED, NO_GARD );
             }
         }

@@ -279,13 +279,13 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     {
         PRDF_ERR( PRDF_FUNC "Unexpected PCI osc failover detected" );
         mskErrType |= PCI_OSC_FAILOVER;
-        serviceData.service_data->SetCallout( NextLevelSupport_ENUM, MRU_LOW );
+        serviceData.service_data->SetCallout( LEVEL2_SUPPORT, MRU_LOW );
     }
     if (sysRefFoList.size() > 0)
     {
         PRDF_ERR( PRDF_FUNC "Unexpected Sys osc failover detected" );
         mskErrType |= SYS_OSC_FAILOVER;
-        serviceData.service_data->SetCallout( NextLevelSupport_ENUM, MRU_LOW );
+        serviceData.service_data->SetCallout( LEVEL2_SUPPORT, MRU_LOW );
     }
 
     if (serviceData.service_data->IsAtThreshold())

@@ -220,7 +220,7 @@ int32_t CmdCompleteDd1Workaround( ExtensibleChip * i_mcbChip,
         io_sc.service_data->SetErrorSig( PRDFSIG_CmdComplete_ERROR );
 
         // Something definitely failed, so callout 2nd level support.
-        io_sc.service_data->SetCallout( NextLevelSupport_ENUM, MRU_HIGH );
+        io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_HIGH );
         io_sc.service_data->setServiceCall();
 
         // Tell MDIA to skip further analysis on this target.
