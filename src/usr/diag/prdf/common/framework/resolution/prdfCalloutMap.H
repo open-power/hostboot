@@ -32,7 +32,7 @@
 
 //------------------------------------------------------------------------------
 
-#ifndef PRDF_SIM_ENUMS // needed to compile prdfsimEnumMap.C
+#if !defined(PRDF_RULE_COMPILER_ENUMS) && !defined(PRDF_SIM_ENUMS)
 namespace PRDF
 {
 #endif
@@ -44,21 +44,27 @@ namespace PRDF
     // Used only in the rule compiler. Sets up a map between string keywords in
     // the rule code to the enum name.
 
-    #define PRDF_SYM_CALLOUT_MAP_BEGIN \
-        struct SymCallout_t { const char * str; SymbolicFru val; }; \
-        SymCallout_t symCalloutArray[] = \
-        {
+    #define PRDF_SYM_CALLOUT_MAP_BEGIN
 
     #define PRDF_SYM_CALLOUT_ALIAS(name1, name2) \
-            { #name1 , name1 },
+        g_ActionArgMap[ #name1 ] = name2;
 
-    #define PRDF_SYM_CALLOUT_MAP_END \
-            { NULL , (SymbolicFru) 0 } \
-        };
+    #define PRDF_SYM_CALLOUT_MAP_END
+
 
 #elif defined PRDF_SIM_ENUMS
 
-    // included from prdfsimEnumMap.C, nothing for now
+    #define PRDF_SYM_CALLOUT_MAP_BEGIN \
+        { \
+        ENUMNAMES * l_calloutEnum = new ENUMNAMES(); \
+        ivEnumTypes["calloutNames"] = l_calloutEnum; \
+        std::string s;
+
+    #define PRDF_SYM_CALLOUT_ALIAS(n1,n2) \
+        s = #n1; ToUpper(s); ivEnumValue[s] = n2; (*l_calloutEnum)[n2] = s;
+
+    #define PRDF_SYM_CALLOUT_MAP_END \
+        }
 
 #else
 
@@ -98,27 +104,31 @@ PRDF_SYM_CALLOUT_MAP_END
     // Used only in the rule compiler. Sets up a map between string keywords in
     // the rule code to the enum name.
 
-    #define PRDF_CALLOUT_PRIORITY_MAP_BEGIN \
-        struct CalloutPriority_t \
-        { const char * str; CalloutPriorityEnum val; }; \
-        CalloutPriority_t calloutPriorityArray[] = \
-        {
+    #define PRDF_CALLOUT_PRIORITY_MAP_BEGIN
 
     #define PRDF_CALLOUT_PRIORITY_ALIAS(name1, name2) \
-            { #name1 , name1 },
+        g_ActionArgMap[ #name1 ] = name2;
 
-    #define PRDF_CALLOUT_PRIORITY_MAP_END \
-            { NULL , (CalloutPriorityEnum) 0 } \
-        };
+    #define PRDF_CALLOUT_PRIORITY_MAP_END
 
 #elif defined PRDF_SIM_ENUMS
 
-    // included from prdfsimEnumMap.C, nothing for now
+    #define PRDF_CALLOUT_PRIORITY_MAP_BEGIN \
+        { \
+        ENUMNAMES * l_priorityEnum = new ENUMNAMES(); \
+        ivEnumTypes["priorityNames"] = l_priorityEnum; \
+        std::string s;
+
+    #define PRDF_CALLOUT_PRIORITY_ALIAS(n1,n2) \
+        s = #n1; ToUpper(s); ivEnumValue[s] = n2; (*l_priorityEnum)[n2] = s;
+
+    #define PRDF_CALLOUT_PRIORITY_MAP_END \
+        }
 
 #else
 
     #define PRDF_CALLOUT_PRIORITY_MAP_BEGIN \
-        enum CalloutPriorityEnum \
+        enum PRDpriority \
         {
 
     #define PRDF_CALLOUT_PRIORITY_ALIAS(n1,n2) \
@@ -146,7 +156,51 @@ PRDF_CALLOUT_PRIORITY_MAP_END
 
 //------------------------------------------------------------------------------
 
-#ifndef PRDF_SIM_ENUMS
+#ifdef PRDF_RULE_COMPILER_ENUMS
+
+    #define PRDF_TARGET_TYPE_ALIAS(n1, n2) \
+        g_ActionArgMap[ #n1 ] = n2;
+
+#elif defined PRDF_SIM_ENUMS
+
+    #define PRDF_TARGET_TYPE_ALIAS(n1, n2) \
+        ivEnumValue[ #n1 ] = n2;
+
+#else
+
+    #define PRDF_TARGET_TYPE_ALIAS(n1, n2)
+
+#endif
+
+PRDF_TARGET_TYPE_ALIAS( TYPE_SYS,       TARGETING::TYPE_SYS       )
+PRDF_TARGET_TYPE_ALIAS( TYPE_NODE,      TARGETING::TYPE_NODE      )
+PRDF_TARGET_TYPE_ALIAS( TYPE_PROC,      TARGETING::TYPE_PROC      )
+PRDF_TARGET_TYPE_ALIAS( TYPE_EQ,        TARGETING::TYPE_EQ        )
+PRDF_TARGET_TYPE_ALIAS( TYPE_EX,        TARGETING::TYPE_EX        )
+PRDF_TARGET_TYPE_ALIAS( TYPE_CORE,      TARGETING::TYPE_CORE      )
+PRDF_TARGET_TYPE_ALIAS( TYPE_CAPP,      TARGETING::TYPE_CAPP      )
+PRDF_TARGET_TYPE_ALIAS( TYPE_PEC,       TARGETING::TYPE_PEC       )
+PRDF_TARGET_TYPE_ALIAS( TYPE_PHB,       TARGETING::TYPE_PHB       )
+PRDF_TARGET_TYPE_ALIAS( TYPE_OBUS,      TARGETING::TYPE_OBUS      )
+PRDF_TARGET_TYPE_ALIAS( TYPE_XBUS,      TARGETING::TYPE_XBUS      )
+PRDF_TARGET_TYPE_ALIAS( TYPE_NX,        TARGETING::TYPE_NX        )
+PRDF_TARGET_TYPE_ALIAS( TYPE_OCC,       TARGETING::TYPE_OCC       )
+PRDF_TARGET_TYPE_ALIAS( TYPE_PSI,       TARGETING::TYPE_PSI       )
+PRDF_TARGET_TYPE_ALIAS( TYPE_MCBIST,    TARGETING::TYPE_MCBIST    )
+PRDF_TARGET_TYPE_ALIAS( TYPE_MCS,       TARGETING::TYPE_MCS       )
+PRDF_TARGET_TYPE_ALIAS( TYPE_MCA,       TARGETING::TYPE_MCA       )
+PRDF_TARGET_TYPE_ALIAS( TYPE_MEMBUF,    TARGETING::TYPE_MEMBUF    )
+PRDF_TARGET_TYPE_ALIAS( TYPE_L4,        TARGETING::TYPE_L4        )
+PRDF_TARGET_TYPE_ALIAS( TYPE_MBA,       TARGETING::TYPE_MBA       )
+PRDF_TARGET_TYPE_ALIAS( TYPE_DIMM,      TARGETING::TYPE_DIMM      )
+PRDF_TARGET_TYPE_ALIAS( TYPE_OSCREFCLK, TARGETING::TYPE_OSCREFCLK )
+PRDF_TARGET_TYPE_ALIAS( TYPE_NA,        TARGETING::TYPE_NA        )
+
+#undef PRDF_TARGET_TYPE_ALIAS
+
+//------------------------------------------------------------------------------
+
+#if !defined(PRDF_RULE_COMPILER_ENUMS) && !defined(PRDF_SIM_ENUMS)
 } // end namespace PRDF
 #endif
 
