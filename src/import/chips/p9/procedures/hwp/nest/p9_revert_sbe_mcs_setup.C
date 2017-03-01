@@ -137,8 +137,8 @@ revert_mcs_hb_dcbz_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_t
         // Re-mask MCFIR. We want to ensure all MCSs are masked
         // until the BARs are opened later during IPL.
         l_mcfirmask.flush<1>();
-        FAPI_TRY(fapi2::putScom(i_target, MCS_MCFIRMASK, l_mcfirmask),
-                 "Error from putScom (MCS_MCFIRMASK)");
+        FAPI_TRY(fapi2::putScom(i_target, MCS_MCFIRMASK_OR_ARR[i_mcs], l_mcfirmask),
+                 "Error from putScom (MCS%d_MCFIRMASK_OR)", i_mcs);
     }
 
 fapi_try_exit:
