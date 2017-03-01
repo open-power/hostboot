@@ -56,7 +56,6 @@ using fapi2::TARGET_TYPE_DIMM;
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCBIST;
-
 ///
 /// @brief bit encodings for Frequencies RC08
 /// @note valid frequency values for Nimbus systems
@@ -110,6 +109,22 @@ enum rc0d_encode : uint8_t
     DIRECT_CS_MODE = 0, ///< Direct DualCS mode: Register uses two DCS_n inputes
     LRDIMM = 0,
     RDIMM = 1,
+};
+
+///
+/// @brief bit encodings for RC0E
+/// From DDR4 Register v1.0
+///
+enum rc0e_encode : uint64_t
+{
+    RC0E_PARITY_ENABLE_BIT = 7,
+    RC0E_PARITY_ENABLE = 1,
+
+    RC0E_ALERT_N_ASSERT_BIT = 5,
+    RC0E_ALERT_N_ASERT_PULSE = 1,
+
+    RC0E_ALERT_N_REENABLE_BIT = 4,
+    RC0E_ALERT_N_REENABLE_TRUE = 1,
 };
 
 ///
@@ -1393,11 +1408,22 @@ fapi2::ReturnCode eff_dimm::dimm_rc0e()
 {
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc0e[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    uint8_t l_sim = 0;
+    fapi2::buffer<uint8_t> l_rc0e;
+
+    FAPI_TRY( mss::is_simulation (l_sim) );
     FAPI_TRY( eff_dimm_ddr4_rc0e(iv_mcs, &l_attrs_dimm_rc0e[0][0]) );
 
-    // Update MCS attribute
-    l_attrs_dimm_rc0e[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc0e;
+    // Values are the same for all DIMMs
+    // Moved to eff_config instead of raw card data because it's cleaner here
+    if (!l_sim)
+    {
+        l_rc0e.writeBit<RC0E_PARITY_ENABLE_BIT>(RC0E_PARITY_ENABLE);
+        l_rc0e.writeBit<RC0E_ALERT_N_ASSERT_BIT>(RC0E_ALERT_N_ASERT_PULSE);
+        l_rc0e.writeBit<RC0E_ALERT_N_REENABLE_BIT>(RC0E_ALERT_N_REENABLE_TRUE);
+    }
 
+    l_attrs_dimm_rc0e[iv_port_index][iv_dimm_index] = l_rc0e;
     FAPI_INF( "%s: RC0E setting: 0x%0x", mss::c_str(iv_dimm), l_attrs_dimm_rc0e[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC0E, iv_mcs, l_attrs_dimm_rc0e) );
 
@@ -2100,7 +2126,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::ca_parity_latency()
 {
-    // TODO: RTC 159554 Update RAS related attributes
     std::vector<uint8_t> l_attrs_ca_parity_latency(PORTS_PER_MCS, 0);
 
     FAPI_TRY( eff_ca_parity_latency(iv_mcs, l_attrs_ca_parity_latency.data()) );
@@ -2119,7 +2144,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::crc_error_clear()
 {
-    // TODO: RTC 159554 Update RAS related attributes
     std::vector<uint8_t> l_attrs_crc_error_clear(PORTS_PER_MCS, 0);
 
     FAPI_TRY( eff_crc_error_clear(iv_mcs, l_attrs_crc_error_clear.data()) );
@@ -2140,7 +2164,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::ca_parity_error_status()
 {
-    // TODO: RTC 159554 Update RAS related attributes
     std::vector<uint8_t> l_attrs_ca_parity_error_status(PORTS_PER_MCS, 0);
 
     FAPI_TRY( eff_ca_parity_error_status(iv_mcs, l_attrs_ca_parity_error_status.data()) );
@@ -2161,7 +2184,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::ca_parity()
 {
-    // TODO: RTC 159554 Update RAS related attributes
     std::vector<uint8_t> l_attrs_ca_parity(PORTS_PER_MCS, 0);
 
     FAPI_TRY( eff_ca_parity(iv_mcs, l_attrs_ca_parity.data()) );
@@ -2189,14 +2211,14 @@ fapi2::ReturnCode eff_dimm::odt_input_buffer()
     // Targets
 
     // keep simulation to values we know work
-    uint8_t is_sim = 0;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), is_sim) );
+    uint8_t l_sim = 0;
+    FAPI_TRY( mss::is_simulation(l_sim) );
 
 
     FAPI_TRY( eff_odt_input_buff(iv_mcs, l_attrs_odt_input_buffer.data()) );
 
     // sim vs actual hardware value
-    l_attrs_odt_input_buffer[iv_port_index] = is_sim ? SIM_VALUE : fapi2::ENUM_ATTR_EFF_ODT_INPUT_BUFF_ACTIVATED;
+    l_attrs_odt_input_buffer[iv_port_index] = l_sim ? SIM_VALUE : fapi2::ENUM_ATTR_EFF_ODT_INPUT_BUFF_ACTIVATED;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_ODT_INPUT_BUFF,
                             iv_mcs,
@@ -2498,13 +2520,13 @@ fapi2::ReturnCode eff_dimm::crc_wr_latency()
     std::vector<uint8_t> l_attrs_crc_wr_latency(PORTS_PER_MCS, 0);
 
     // keep simulation to values we know work
-    uint8_t is_sim = 0;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), is_sim) );
+    uint8_t l_sim = 0;
+    FAPI_TRY( mss::is_simulation(l_sim) );
 
     FAPI_TRY( eff_crc_wr_latency(iv_mcs, l_attrs_crc_wr_latency.data()) );
 
     // keep simulation to values we know work
-    if(is_sim)
+    if(l_sim)
     {
         l_attrs_crc_wr_latency[iv_port_index] = 0x05;
     }
@@ -2650,7 +2672,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::write_crc()
 {
-    // TODO: RTC 159554 Update RAS related attributes
     std::vector<uint8_t> l_attrs_write_crc(PORTS_PER_MCS, 0);
 
     uint8_t l_mrw = 0;
