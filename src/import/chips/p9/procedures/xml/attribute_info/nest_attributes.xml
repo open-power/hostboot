@@ -324,7 +324,8 @@
   <id>ATTR_PROC_FABRIC_SYSTEM_ID</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    Logical fabric system ID associated with this chip.Provided by the MRW.
+    Logical fabric system ID associated with this chip.
+    Provided by the MRW.
   </description>
   <valueType>uint32</valueType>
   <platInit/>
@@ -335,7 +336,25 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
     Logical fabric group ID associated with this chip.
+    Directly drives programming of pervasive group ID registers (PIR).
+    Compared with ATTR_PROC_EFF_FABRIC_GROUP_ID to configure FBC XOR masking.
     Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <!-- TODO: Story 155081
+       Not supposed to be writeable, PPE needs to resolve this issue in
+       p9_sbe_attr_setup.C -->
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_EFF_FABRIC_GROUP_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Effective fabric group ID associated with this chip.
+    Directly drives programming of chip memory map layout.
+    Compared with ATTR_PROC_FABRIC_GROUP_ID to configure FBC XOR masking.
   </description>
   <valueType>uint8</valueType>
   <platInit/>
@@ -350,7 +369,25 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
     Logical fabric chip ID associated with this chip.
+    Directly drives programming of pervasive chip ID registers (PIR).
+    Compared with ATTR_PROC_EFF_FABRIC_CHIP_ID to configure FBC XOR masking.
     Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <!-- TODO: Story 155081
+       Not supposed to be writeable, PPE needs to resolve this issue in
+       p9_sbe_attr_setup.C -->
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_EFF_FABRIC_CHIP_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Effective fabric chip ID associated with this chip.
+    Directly drives programming of chip memory map layout.
+    Compared with ATTR_PROC_FABRIC_CHIP_ID to configure FBC XOR masking.
   </description>
   <valueType>uint8</valueType>
   <platInit/>
