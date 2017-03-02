@@ -56,6 +56,7 @@
 #include <p9_obus_scom_addresses.H>
 #include <p9_obus_scom_addresses_fld.H>
 #include <p9_misc_scom_addresses.H>
+#include <p9_perv_scom_addresses.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -78,6 +79,20 @@ const uint64_t FBC_IOO_DL_FIR_MASK    = 0xFCFC3FFFFCFF000CULL;
 
 // link 0,1 internal errors are a simulation artifact in dd1 so they need to be masked
 const uint64_t FBC_IOO_DL_FIR_MASK_SIM_DD1 = 0xFCFC3FFFFCFF000FULL;
+
+static const uint8_t NV0_POS = 0x0;
+static const uint8_t NV1_POS = 0x1;
+static const uint8_t NV2_POS = 0x2;
+static const uint8_t NV3_POS = 0x3;
+static const uint8_t NV4_POS = 0x4;
+static const uint8_t NV5_POS = 0x5;
+
+static const uint8_t PERV_OB_CPLT_CONF1_NVA_IOVALID = 0x6;
+static const uint8_t PERV_OB_CPLT_CONF1_NVB_IOVALID = 0x7;
+static const uint8_t PERV_OB_CPLT_CONF1_NVC_IOVALID = 0x8;
+
+static const uint8_t NV_OB0_MASK = 0x1;
+static const uint8_t NV_OB3_MASK = 0x2;
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -92,7 +107,11 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_OBUS>> l_obus_chiplets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>> l_mcs_targets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_CAPP>> l_capp_targets;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_NV>> l_nv_targets;
+    fapi2::buffer<uint64_t> l_ob0data(0x0);
+    fapi2::buffer<uint64_t> l_ob3data(0x0);
     uint8_t l_dd1 = 0;
+    uint8_t l_ndl_iovalid = 0;
     uint8_t l_is_simulation = 0;
 
     fapi2::ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_Type l_fbc_optics_cfg_mode = { fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_SMP };
@@ -100,11 +119,82 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
 
     // Get attribute to check if it is dd1 or dd2
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_P9N_DD1_SPY_NAMES, i_target, l_dd1));
+    // Get attribute to check if NDL IOValids need set (dd2+)
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_P9_NDL_IOVALID, i_target, l_ndl_iovalid));
     // Get simulation indicator attribute
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, l_is_simulation));
 
     // Get proc target string
     fapi2::toString(i_target, l_procTargetStr, sizeof(l_procTargetStr));
+
+
+    if (l_ndl_iovalid)
+    {
+
+        l_nv_targets = i_target.getChildren<fapi2::TARGET_TYPE_NV>();
+
+        for (auto l_nv_target : l_nv_targets)
+        {
+            fapi2::toString(l_nv_target, l_chipletTargetStr, sizeof(l_chipletTargetStr));
+            FAPI_DBG("Setting NDL IOValid for %s...", l_chipletTargetStr);
+
+            uint8_t l_unit_pos;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_nv_target, l_unit_pos),
+                     "Error from FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS)");
+
+            //Mapping from John Irish (jdirish@us.ibm.com)
+            //OBus   Register bit       NV instance   NV pos
+            //OB0    NV0 io_valid(A)    STK0.NTL0..   0
+            //OB0    NV1 io_valid(B)    STK0.NTL1..   1
+            //OB0    NV2 io_valid(C)    STK1.NTL0..   2
+            //OB3    NV2 io_valid(C)    STK1.NTL1..   3
+            //OB3    NV1 io_valid(B)    STK2.NTL0..   4
+            //OB3    NV0 io_valid(A)    STK2.NTL1..   5
+            switch (l_unit_pos)
+            {
+                case NV0_POS:
+                    l_ob0data.setBit<PERV_OB_CPLT_CONF1_NVA_IOVALID>();
+                    break;
+
+                case NV1_POS:
+                    l_ob0data.setBit<PERV_OB_CPLT_CONF1_NVB_IOVALID>();
+                    break;
+
+                case NV2_POS:
+                    l_ob0data.setBit<PERV_OB_CPLT_CONF1_NVC_IOVALID>();
+                    break;
+
+                case NV3_POS:
+                    l_ob3data.setBit<PERV_OB_CPLT_CONF1_NVC_IOVALID>();
+                    break;
+
+                case NV4_POS:
+                    l_ob3data.setBit<PERV_OB_CPLT_CONF1_NVB_IOVALID>();
+                    break;
+
+                case NV5_POS:
+                    l_ob3data.setBit<PERV_OB_CPLT_CONF1_NVA_IOVALID>();
+                    break;
+
+                default:
+                    FAPI_ASSERT(false, fapi2::P9_CHIPLET_SCOMINIT_UNSUPPORTED_NV_POS_ERR().set_TARGET(l_nv_target),
+                                "ERROR; Unsupported NV position.");
+
+            }
+
+        }
+
+        if (l_ob0data != 0)
+        {
+            FAPI_TRY(putScom(i_target, PERV_OB0_CPLT_CONF1_OR, l_ob0data));
+        }
+
+        if (l_ob3data != 0)
+        {
+            FAPI_TRY(putScom(i_target, PERV_OB3_CPLT_CONF1_OR, l_ob3data));
+        }
+
+    }
 
     l_mcs_targets = i_target.getChildren<fapi2::TARGET_TYPE_MCS>();
 
