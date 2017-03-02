@@ -534,6 +534,18 @@ sub processProcessor
         "0");
     $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useXscom", "0");
 
+    ## default effective fabric ids to match regular fabric ids
+    ##  the value will be adjusted based on presence detection later
+    $targetObj->setAttribute($target,
+                             "PROC_EFF_FABRIC_GROUP_ID",
+                             $targetObj->getAttribute($target,
+                                                      "FABRIC_GROUP_ID"));
+    $targetObj->setAttribute($target,
+                             "PROC_EFF_FABRIC_CHIP_ID",
+                             $targetObj->getAttribute($target,
+                                                      "FABRIC_CHIP_ID"));
+
+
     processMembufVpdAssociation($targetObj,$target);
     setupBars($targetObj,$target);
 }

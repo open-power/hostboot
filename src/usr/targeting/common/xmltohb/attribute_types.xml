@@ -2458,6 +2458,27 @@
 </attribute>
 
 <attribute>
+    <id>PROC_EFF_FABRIC_GROUP_ID</id>
+    <description>
+    Effective fabric group ID associated with this chip.
+    Directly drives programming of chip memory map layout.
+    Compared with ATTR_PROC_FABRIC_GROUP_ID to configure FBC XOR masking.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_EFF_FABRIC_GROUP_ID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>FABRIC_CHIP_ID</id>
     <description>
         Chip attribute.
@@ -2475,6 +2496,27 @@
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_FABRIC_CHIP_ID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_EFF_FABRIC_CHIP_ID</id>
+    <description>
+    Effective fabric chip ID associated with this chip.
+    Directly drives programming of chip memory map layout.
+    Compared with ATTR_PROC_FABRIC_CHIP_ID to configure FBC XOR masking.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_EFF_FABRIC_CHIP_ID</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

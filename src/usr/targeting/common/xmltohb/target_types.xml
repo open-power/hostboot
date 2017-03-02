@@ -132,7 +132,9 @@
     </attribute>
     <attribute><id>FABRIC_NODE_ID</id></attribute><!-- DEPRECATED -->
     <attribute><id>FABRIC_GROUP_ID</id></attribute>
+    <attribute><id>PROC_EFF_FABRIC_GROUP_ID</id></attribute>
     <attribute><id>FABRIC_CHIP_ID</id></attribute>
+    <attribute><id>PROC_EFF_FABRIC_CHIP_ID</id></attribute>
     <attribute>
         <!-- Processor chips have an SBE -->
         <id>CHIP_HAS_SBE</id>
