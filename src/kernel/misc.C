@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -286,7 +286,8 @@ namespace KernelMisc
         // Clear LPCR values that wakes up from winkle.  LPCR[49, 50, 51]
         // Otherwise, there may be an interrupt pending or something that
         // prevents us from fully entering winkle.
-        setLPCR(getLPCR() & (~0x0000000000007000));
+        // Turn on LPCR[17] to enable Hypervisor External Interrupts
+        setLPCR((getLPCR() & (~0x0000000000007000)) | 0x0000400000000000) ;
 
         // Deactivate CPU from kernel.
         cpu->winkled = true;
@@ -387,7 +388,8 @@ namespace KernelMisc
         // Clear LPCR values that wakes up from winkle.  LPCR[49, 50, 51]
         // Otherwise, there may be an interrupt pending or something that
         // prevents us from fully entering winkle.
-        setLPCR(getLPCR() & (~0x0000000000007000));
+        // Turn on LPCR[17] to enable Hypervisor External Interrupts
+        setLPCR((getLPCR() & (~0x0000000000007000)) | 0x0000400000000000) ;
 
         // Deactivate CPU from kernel.
         cpu->winkled = true;
