@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,16 @@ void operator delete[](void* p)
 {
     return free(p);
 };
+
+void operator delete(void* p, size_t)
+{
+    return free(p);
+}
+
+void operator delete[](void* p, size_t)
+{
+    return free(p);
+}
 #endif // bl_builtins_C
 
 extern "C" int __cxa_guard_acquire(volatile uint64_t* gv)
