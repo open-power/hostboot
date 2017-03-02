@@ -3672,7 +3672,15 @@ sub generate_proc
         <default>$lognode</default>
     </attribute>
     <attribute>
+        <id>PROC_EFF_FABRIC_GROUP_ID</id>
+        <default>$lognode</default>
+    </attribute>
+    <attribute>
         <id>FABRIC_CHIP_ID</id>
+        <default>$logid</default>
+    </attribute>
+    <attribute>
+        <id>PROC_EFF_FABRIC_CHIP_ID</id>
         <default>$logid</default>
     </attribute>
     <attribute>
