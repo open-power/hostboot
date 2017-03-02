@@ -32,6 +32,8 @@
 #include "uart.H"
 #include "daemon.H"
 
+extern char hbi_ImageId[];
+
 namespace CONSOLE
 {
     extern msg_q_t g_msgq;
@@ -69,6 +71,13 @@ namespace CONSOLE
             Uart::g_device = new Uart();
             Uart::g_device->initialize();
         }
+
+        // Display a banner denoting the hostboot version
+        char banner[256];
+        snprintf(greeting, sizeof(greeting),
+                 "\n\n--== Welcome to Hostboot %s ==--\n\n",
+                 hbi_ImageId);
+        _display(banner);
 
         while(1)
         {
