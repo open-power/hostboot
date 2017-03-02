@@ -5,9 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
-/* [+] International Business Machines Corp.                              */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -31,6 +31,8 @@
 #include <initservice/initserviceif.H>
 #include "uart.H"
 #include "daemon.H"
+
+extern char hbi_ImageId[];
 
 namespace CONSOLE
 {
@@ -69,6 +71,13 @@ namespace CONSOLE
             Uart::g_device = new Uart();
             Uart::g_device->initialize();
         }
+
+        // Display a banner denoting the hostboot version
+        char banner[256];
+        snprintf(banner, sizeof(banner),
+                 "\n\n--== Welcome to Hostboot %s ==--\n\n",
+                 hbi_ImageId);
+        _display(banner);
 
         while(1)
         {
