@@ -274,6 +274,8 @@ enum SLAVE_CONFIG_DEFS
 /// Scom addresses missing from p9_quad_scom_addresses.H
 #define PU_OCB_OCI_QSSR_CLEAR            PU_OCB_OCI_QSSR_SCOM1
 #define PU_OCB_OCI_QSSR_OR               PU_OCB_OCI_QSSR_SCOM2
+#define EQ_PPM_PFCS_WCLEAR               EQ_PPM_PFCS_SCOM1
+#define EQ_PPM_PFCS_WOR                  EQ_PPM_PFCS_SCOM2
 #define EQ_QPPM_QCCR_WCLEAR              EQ_QPPM_QCCR_SCOM1
 #define EQ_QPPM_QCCR_WOR                 EQ_QPPM_QCCR_SCOM2
 #define EX_0_CME_SCOM_SICR_CLEAR         EX_0_CME_SCOM_SICR_SCOM1
