@@ -2738,4 +2738,60 @@
   <!-- ******************************************************************** -->
   <!-- End Memory Section                                                   -->
   <!-- ******************************************************************** -->
+
+    <!-- ******************************************************************** -->
+    <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DD1_ANALOG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      DD1 update : Scan init VDM and IVRM latch workarounds. True if:
+      Nimbus EC less than 20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DD1_DPLL_SETTINGS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      DD1 update : Scan init DPL Jump Values (SCOMMABLE in DD2). True if:
+      Nimbus EC less than 20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_POSTDD1N_DPLL_SETTINGS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Post DD1 update : Used for new DD2 settings such as ..._EXTERNAL_JUMP_VALUES latch is new for DD2. True if:
+      Nimbus EC greater than or equal to 20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
 </attributes>
+
