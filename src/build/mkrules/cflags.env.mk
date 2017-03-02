@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -38,13 +38,22 @@ CFLAGS += -DPLAT_NO_THREAD_LOCAL_STORAGE
 CFLAGS += -D__FAPI
 endif
 
+try = $(shell set -e; if ($(1)) >/dev/null 2>&1; \
+        then echo "$(2)"; \
+        else echo "$(3)"; fi )
+
+try-cflag = $(call try,$(1) $(2) -x c -c /dev/null -o /dev/null,$(2))
+test_cflag = $(call try,$(1) $(2) -x c -c /dev/null -o /dev/null,1,0)
+
 COMMONFLAGS += $(OPT_LEVEL) -nostdlib
 CFLAGS += $(COMMONFLAGS) -mcpu=power7 -nostdinc -g -mno-vsx -mno-altivec\
-          -Wall -Werror -mtraceback=no -pipe -mabi=elfv1 \
+          -Wall -mtraceback=no -pipe -mabi=elfv1 \
+          $(call try-cflag,$(CC),-Wno-error=sizeof-array-argument) \
+          $(call try-cflag,$(CC),-Wno-error=unused-function) \
 	  -ffunction-sections -fdata-sections -ffreestanding -mbig-endian
 ASMFLAGS += $(COMMONFLAGS) -mcpu=power7 -mbig-endian -ffreestanding -mabi=elfv1
 CXXFLAGS += $(CFLAGS) -nostdinc++ -fno-rtti -fno-exceptions -Wall \
-	    -fuse-cxa-atexit -std=gnu++14
+	    -fuse-cxa-atexit -std=gnu++14 -fpermissive
 LDFLAGS += --nostdlib --sort-common -EB $(COMMONFLAGS)
 
 INCFLAGS = $(addprefix -I, $(INCDIR) )
