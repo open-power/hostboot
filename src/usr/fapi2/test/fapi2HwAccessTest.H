@@ -171,6 +171,7 @@ void test_fapi2HwAccess()
 
 #ifndef __HOSTBOOT_RUNTIME
 
+#if 0 //@fixme-RTC:170587
         //this test should not be run at runtime
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_platPutRingWRingID_pass);
@@ -182,6 +183,8 @@ void test_fapi2HwAccess()
             delete l_errl; // delete unexpected error log so we dont get
                            // a false negative on the next case
         }
+#endif
+
 #endif
 
         numTests++;

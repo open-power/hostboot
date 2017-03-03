@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2016
+# Contributors Listed Below - COPYRIGHT 2014,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -66,18 +66,20 @@ fi
 # Add Hostboot files to simics sandbox.
 populate-sandbox || exit -1
 
+#@fixme - Temp disable, RTC:170635
 # Start errl parser building.
-build-errl-parsers > errl-parsers.log 2>&1 &
-ERRLPARSERS_PID=$!
+#build-errl-parsers > errl-parsers.log 2>&1 &
+#ERRLPARSERS_PID=$!
 
 # Start CxxTest Simics execution.
 cxxtest-start.sh || exit -1
 
+#@fixme - Temp disable, RTC:170635
 # Check errl parser completion.
-wait $ERRLPARSERS_PID
-if [ $? -ne 0 ]; then
-    echo "----Error parsers failed."
-    cat errl-parsers.log
-    exit -1
-fi
+#wait $ERRLPARSERS_PID
+#if [ $? -ne 0 ]; then
+#    echo "----Error parsers failed."
+#    cat errl-parsers.log
+#    exit -1
+#fi
 
