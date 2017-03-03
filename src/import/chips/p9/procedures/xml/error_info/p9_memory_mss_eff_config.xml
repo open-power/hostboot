@@ -88,6 +88,36 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_VPD_MT_LOAD_FAIL</rc>
+    <description>
+      Loading of VPD MT keyword failed. Could be due to an invalid port configuration.
+    </description>
+    <ffdc>MCA_TARGET</ffdc>
+    <callout>
+      <target>MCA_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MCA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_VPD_MR_LOAD_FAIL</rc>
+    <description>
+      Loading of VPD MR keyword failed. Could be due to an invalid port configuration.
+    </description>
+    <ffdc>MCA_TARGET</ffdc>
+    <callout>
+      <target>MCA_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MCA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_INVALID_VPD_VREF_DRAM_WR_RANGE</rc>
     <description>
       Value in the VPD for VREF dram WR range is outside of the JEDEC spec's range.

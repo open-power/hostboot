@@ -4268,32 +4268,50 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
                 fapi2::Assert(false);
             }
 
-            FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, &(l_mt_blob[0])),
-                      "Failed to retrieve MT VPD");
+            // Log any error code from getVPD separately in case the error code is meaningful
+            fapi2::ReturnCode l_rc = fapi2::getVPD(i_target, l_vpd_info, &(l_mt_blob[0]));
+
+            if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                fapi2::logError(l_rc);
+                FAPI_ASSERT( false,
+                             fapi2::MSS_VPD_MT_LOAD_FAIL()
+                             .set_MCA_TARGET(p),
+                             "%s Failed to retrieve MT VPD", mss::c_str(p));
+            }
+        }
+
+        // Only get the MR blob if we have a freq. It's possible for Cronus to give us an MCS which
+        // is connected to a controller which has 0 DIMM installed. In this case, we won't have
+        // a frequency, and thus we'd fail getting the VPD. So we initiaized the VPD to 0's and if
+        // there's no freq, we us a 0 filled VPD.
+        if (l_vpd_info.iv_freq_mhz != 0)
+        {
+            l_vpd_info.iv_vpd_type = fapi2::MemVpdData::MR;
+
+            // Check the max for giggles. Programming bug so we should assert.
+            FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, nullptr),
+                      "Failed to retrieve MR size from VPD");
+
+            if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
+            {
+                FAPI_ERR("VPD MR keyword is too big for our array");
+                fapi2::Assert(false);
+            }
+
+            // Log any error code from getVPD separately in case the error code is meaningful
+            fapi2::ReturnCode l_rc = fapi2::getVPD(i_target, l_vpd_info, &(l_mr_blob[0]));
+
+            if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                fapi2::logError(l_rc);
+                FAPI_ASSERT( false,
+                             fapi2::MSS_VPD_MR_LOAD_FAIL()
+                             .set_MCA_TARGET(p),
+                             "%s Failed to retrieve MR VPD", mss::c_str(p));
+            }
         }
     }// mca
-
-    // Only get the MR blob if we have a freq. It's possible for Cronus to give us an MCS which
-    // is connected to a controller which has 0 DIMM installed. In this case, we won't have
-    // a frequency, and thus we'd fail getting the VPD. So we initiaized the VPD to 0's and if
-    // there's no freq, we us a 0 filled VPD.
-    if (l_vpd_info.iv_freq_mhz != 0)
-    {
-        l_vpd_info.iv_vpd_type = fapi2::MemVpdData::MR;
-
-        // Check the max for giggles. Programming bug so we should assert.
-        FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, nullptr),
-                  "Failed to retrieve MR size from VPD");
-
-        if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
-        {
-            FAPI_ERR("VPD MR keyword is too big for our array");
-            fapi2::Assert(false);
-        }
-
-        FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, &(l_mr_blob[0])),
-                  "Failed to retrieve MR VPD");
-    }
 
     // Get CKE data
     l_vpd_info.iv_vpd_type = fapi2::MemVpdData::CK;
