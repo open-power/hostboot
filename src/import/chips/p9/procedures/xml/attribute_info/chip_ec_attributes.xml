@@ -1946,7 +1946,7 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Nimbus DD1;  set to 0b000
-      Numbus DD2+; set to 0b110 
+      Numbus DD2+; set to 0b110
     </description>
     <chipEcFeature>
       <chip>
@@ -2045,7 +2045,7 @@
     <id>ATTR_CHIP_EC_FEATURE_HW409069</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Nimbus DD2+: HW409069 load_larx protection not activated because of dtag_data_resp 
+      Nimbus DD2+: HW409069 load_larx protection not activated because of dtag_data_resp
       in hot lock load loop pvp test
     </description>
     <chipEcFeature>
@@ -2497,8 +2497,41 @@
       </chip>
     </chipEcFeature>
   </attribute>
-
-
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SKEWADJ_P9NDD1_INIT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Inits for skewAdj in P9 ndd1. These are different from the default inits used starting in NDD2.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DCADJ_P9NDD1_INIT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Inits for dutyCycleAdj in P9 ndd1. These are different from the default inits used starting in NDD2.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW397129</id>>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -3150,4 +3183,3 @@
     </chipEcFeature>
   </attribute>
 </attributes>
-
