@@ -28,6 +28,18 @@
 ###############################################################################
 
     ############################################################################
+    # P9 MCA target MCACALFIR
+    ############################################################################
+
+    register MCACALFIR_MASK_OR
+    {
+        name        "P9 MCA target MCACALFIR MASK OR";
+        scomaddr    0x07010905;
+        capture     group never;
+        access      write_only;
+    };
+
+    ############################################################################
     # P9 MCA target MCAECCFIR
     ############################################################################
 
@@ -35,6 +47,14 @@
     {
         name        "P9 MCA target MCAECCFIR AND";
         scomaddr    0x07010a01;
+        capture     group never;
+        access      write_only;
+    };
+
+    register MCAECCFIR_MASK_OR
+    {
+        name        "P9 MCA target MCAECCFIR MASK OR";
+        scomaddr    0x07010a05;
         capture     group never;
         access      write_only;
     };
@@ -54,6 +74,7 @@
     ############################################################################
     # P9 Hardware Mark Stores
     ############################################################################
+
     register HW_MS0
     {
         name        "P9 Hardware Mark Store rank 0";
@@ -113,6 +134,7 @@
     ############################################################################
     # P9 Firmware Mark Stores
     ############################################################################
+
     register FW_MS0
     {
         name        "P9 Firmware Mark Store 0";
@@ -186,3 +208,4 @@
         scomaddr    0x070F001E;
         capture     group PllFIRs;
     };
+

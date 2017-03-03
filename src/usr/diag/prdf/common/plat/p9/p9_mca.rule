@@ -219,7 +219,7 @@ rule rMCACALFIR
     MCACALFIR & ~MCACALFIR_MASK &  MCACALFIR_ACT0 &  MCACALFIR_ACT1;
 };
 
-group gMCACALFIR filter singlebit, cs_root_cause( 13 )
+group gMCACALFIR filter priority( 13 ), cs_root_cause( 13 )
 {
     /** MCACALFIR[0]
      *  A MBA recoverable error has occurred.
@@ -289,7 +289,7 @@ group gMCACALFIR filter singlebit, cs_root_cause( 13 )
     /** MCACALFIR[13]
      *  Persistent RCD error, port failed
      */
-    (rMCACALFIR, bit(13)) ? all_dimm_H_self_L_th_1;
+    (rMCACALFIR, bit(13)) ? mem_port_failure;
 
     /** MCACALFIR[14]
      *  RCD during periodic cal
