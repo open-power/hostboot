@@ -31,15 +31,6 @@ actionclass all_dimm_H_th_1
     threshold1;
 };
 
-/** Callout all connected DIMMs HIGH and self LOW on first occurence. */
-actionclass all_dimm_H_self_L_th_1
-{
-    callout(connected(TYPE_DIMM,0), MRU_HIGH);
-    callout(connected(TYPE_DIMM,1), MRU_HIGH);
-    calloutSelfLow;
-    threshold1;
-};
-
 /** Verify Chip Mark */
 actionclass verify_chip_mark_0 { funccall("AnalyzeFetchMpe_0"); };
 actionclass verify_chip_mark_1 { funccall("AnalyzeFetchMpe_1"); };
@@ -64,6 +55,16 @@ actionclass mainline_ue_handling
                                       # when background scrubbing resumes after
                                       # targeted diagnostics is complete.
     funccall("AnalyzeFetchUe");
+};
+
+/** Memory Port Failure */
+actionclass mem_port_failure
+{
+    callout(connected(TYPE_DIMM,0), MRU_HIGH); # DIMM 0 HIGH
+    callout(connected(TYPE_DIMM,1), MRU_HIGH); # DIMM 1 HIGH
+    calloutSelfLow;                            # Self LOW
+    threshold1;                                # Threshold 1
+    funccall("MemPortFailure");                # Mask off the entire port
 };
 
 /** Handle RCD parity error. */
