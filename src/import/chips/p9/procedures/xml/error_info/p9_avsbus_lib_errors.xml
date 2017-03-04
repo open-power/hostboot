@@ -52,5 +52,67 @@
     A timeout occured writing an idle from to an AVSBus interface
     </description>    
   </hwpError>
+
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_AVSBUS_ZERO_RESP_ERROR</rc>
+    <description>
+    AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.
+    </description>    
+    <ffdc>TARGET</ffdc>
+    <ffdc>BUS</ffdc>
+    <ffdc>BRIDGE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_AVSBUS_NO_RESP_ERROR</rc>
+    <description>
+    AVS command failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.
+    </description>    
+    <ffdc>TARGET</ffdc>
+    <ffdc>BUS</ffdc>
+    <ffdc>BRIDGE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_AVSBUS_MASTER_BAD_CRC_ERROR</rc>
+    <description>
+    AVS command failed. Bad CRC detected by P9 on AVSBus Slave Segement.
+    </description>    
+    <ffdc>TARGET</ffdc>
+    <ffdc>BUS</ffdc>
+    <ffdc>BRIDGE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_AVSBUS_SLAVE_BAD_CRC_ERROR</rc>
+    <description>
+    AVS command failed failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.
+    </description>    
+    <ffdc>TARGET</ffdc>
+    <ffdc>BUS</ffdc>
+    <ffdc>BRIDGE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_AVSBUS_UNAVAILABLE_RESOURCE_ERROR</rc>
+    <description>
+    AVS command failed. Valid data sent but no action is taken due to unavailable resource.
+    </description>    
+    <ffdc>TARGET</ffdc>
+    <ffdc>BUS</ffdc>
+    <ffdc>BRIDGE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_AVSBUS_INVALID_DATA_ERROR</rc>
+    <description>
+    AVS command failed. Unknown resource, invalid data, incorrect data or incorrect action.
+    </description>    
+    <ffdc>TARGET</ffdc>
+    <ffdc>BUS</ffdc>
+    <ffdc>BRIDGE</ffdc>
+  </hwpError>
+
   <!-- ******************************************************************** -->
 </hwpErrors>
