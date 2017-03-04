@@ -333,6 +333,8 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
     fapi2::buffer<uint64_t> l_data64;
     fapi2::buffer<uint8_t> l_data8;
     uint8_t l_count = 0;
+    uint8_t l_goodResponse = 0;
+    uint8_t l_throwAssert = 0;
 
     // Read attribute -
     FAPI_TRY(avsInitAttributes(i_target, &attrs, i_action));
@@ -348,9 +350,10 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
                                           attrs.vdn_bus_num, BRIDGE_NUMBER),
                  "Initializing avsBus VDN, bridge %d", BRIDGE_NUMBER);
 
-        while (l_count < AVSBUS_VOLTAGE_WRITE_RETRY_COUNT)
-        {
+        l_count = 0;
 
+        do
+        {
             FAPI_INF("Sending an Idle frame before Voltage writes");
 
             // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
@@ -367,31 +370,20 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
                      attrs.vdd_bus_num,
                      BRIDGE_NUMBER);
 
-            l_data64.flush<0>();
-            l_data8.flush<0>();
-
-            FAPI_TRY(getScom(i_target,
-                             p9avslib::OCB_O2SRD[attrs.vdd_bus_num][BRIDGE_NUMBER], l_data64));
-
-            l_data64.extract(l_data8, 0, 1);
-
-            if (l_data8 == 0)
-            {
-                break;
-            }
+            // Throw an assertion if we don't get a good response.
+            l_throwAssert =  l_count >= AVSBUS_VOLTAGE_WRITE_RETRY_COUNT;
+            FAPI_TRY(avsValidateResponse(i_target,  attrs.vdd_bus_num, BRIDGE_NUMBER, l_throwAssert, l_goodResponse));
 
             l_count++;
         }
+        while (l_goodResponse == 0);
 
-        if (l_count >= AVSBUS_VOLTAGE_WRITE_RETRY_COUNT)
-        {
-            FAPI_ASSERT(false, fapi2::PM_VDD_EVID_WRITEVOLTAGE_TIMEOUT().set_TARGET(i_target),
-                        "ERROR; Voltage write to VDD rail failed due to bad CRC,unknown command or unavailable resource");
-        }
+
+
 
         l_count = 0;
 
-        while (l_count < AVSBUS_VOLTAGE_WRITE_RETRY_COUNT)
+        do
         {
 
             // VDN bus
@@ -407,27 +399,14 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
                      attrs.vdn_bus_num,
                      BRIDGE_NUMBER);
 
-            l_data64.flush<0>();
-            l_data8.flush<0>();
 
-            FAPI_TRY(getScom(i_target,
-                             p9avslib::OCB_O2SRD[attrs.vdn_bus_num][BRIDGE_NUMBER], l_data64));
-
-            l_data64.extract(l_data8, 0, 1);
-
-            if (l_data8 == 0)
-            {
-                break;
-            }
-
+            // Throw an assertion if we don't get a good response.
+            l_throwAssert =  l_count >= AVSBUS_VOLTAGE_WRITE_RETRY_COUNT;
+            FAPI_TRY(avsValidateResponse(i_target,  attrs.vdn_bus_num, BRIDGE_NUMBER, l_throwAssert, l_goodResponse));
             l_count++;
         }
+        while (l_goodResponse == 0);
 
-        if (l_count >= AVSBUS_VOLTAGE_WRITE_RETRY_COUNT)
-        {
-            FAPI_ASSERT(false, fapi2::PM_VDN_EVID_WRITEVOLTAGE_TIMEOUT().set_TARGET(i_target),
-                        "ERROR; Voltage write to VDN rail failed due to bad CRC,unknown command or unavailable resource");
-        }
 
         // Set Boot VCS Voltage
         if(attrs.vcs_bus_num == 0xFF)
@@ -441,11 +420,12 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
 
             l_count = 0;
 
-            while (l_count < AVSBUS_VOLTAGE_WRITE_RETRY_COUNT)
+            do
             {
-
+                // VCS bus
                 FAPI_TRY(avsIdleFrame(i_target, attrs.vcs_bus_num, BRIDGE_NUMBER));
 
+                // Set Boot VCS voltage
                 FAPI_TRY(avsVoltageWrite(i_target,
                                          attrs.vcs_bus_num,
                                          BRIDGE_NUMBER,
@@ -455,27 +435,14 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
                          attrs.vcs_bus_num,
                          BRIDGE_NUMBER);
 
-                l_data64.flush<0>();
-                l_data8.flush<0>();
-
-                FAPI_TRY(getScom(i_target,
-                                 p9avslib::OCB_O2SRD[attrs.vcs_bus_num][BRIDGE_NUMBER], l_data64));
-
-                l_data64.extract(l_data8, 0, 1);
-
-                if (l_data8 == 0)
-                {
-                    break;
-                }
+                // Throw an assertion if we don't get a good response.
+                l_throwAssert =  l_count >= AVSBUS_VOLTAGE_WRITE_RETRY_COUNT;
+                FAPI_TRY(avsValidateResponse(i_target,  attrs.vcs_bus_num, BRIDGE_NUMBER, l_throwAssert, l_goodResponse));
 
                 l_count++;
             }
+            while (l_goodResponse == 0);
 
-            if (l_count >= AVSBUS_VOLTAGE_WRITE_RETRY_COUNT)
-            {
-                FAPI_ASSERT(false, fapi2::PM_VCS_EVID_WRITEVOLTAGE_TIMEOUT().set_TARGET(i_target),
-                            "ERROR; Voltage write to VCS rail failed due to bad CRC/unknown command or unavailable resource");
-            }
         }
     }
 

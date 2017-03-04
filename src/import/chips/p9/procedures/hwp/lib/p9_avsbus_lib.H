@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,8 @@
 #define __P9_AVSBUS_LIB_H__
 
 #include <fapi2.H>
+
+
 
 namespace p9avslib
 {
@@ -263,5 +265,17 @@ avsIdleFrame(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
              const uint8_t i_avsBusNum,
              const uint8_t i_o2sBridgeNum);
 
+///@brief Validate the AVSBUS slave response
+///@param[i]  i_target       Chip target
+///@param[i] i_avsBusNum    AVSBus Number (0 or 1)
+///@param[i] i_o2sBridgeNum O2S Bridge Number (0 or 1)
+///@param[i] i_throwAssert   Should this routine throw an assert
+///@param[o] o_goodResponse  Was the response valid
+fapi2::ReturnCode
+avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                    const uint8_t i_avsBusNum,
+                    const uint8_t i_o2sBridgeNum,
+                    const uint8_t i_throwAssert,
+                    uint8_t& o_goodResponse);
 
 #endif  // __P9_AVSBUS_LIB_H__
