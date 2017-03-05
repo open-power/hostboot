@@ -655,7 +655,7 @@ extern "C"
      * @param   i_pChipHomer    points to HOMER image.
      * @return  fapi2 return code.
      */
-    fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer )
+    fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PROC& i_procTgt )
     {
         uint8_t attrVal = 0;
         uint32_t cmeFlag = 0;
@@ -666,7 +666,6 @@ extern "C"
         cmeHeader_t* pCmeHdr = (cmeHeader_t*) & i_pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
         sgpeHeader_t* pSgpeHdr = (sgpeHeader_t*)& i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
         PgpeHeader_t* pPgpeHdr = (PgpeHeader_t*)& i_pChipHomer->ppmrRegion.pgpeSramImage[PGPE_INT_VECTOR_SIZE];
-
         //Handling flags common to CME and SGPE
 
         FAPI_DBG(" ==================== CME/SGPE Flags =================");
@@ -720,7 +719,19 @@ extern "C"
             sgpeFlag |= SGPE_STOP_11_TO_8_BIT_POS;
         }
 
-        FAPI_DBG("STOP_11_to_8          :   %s", attrVal ? "TRUE" : "FALSE" );
+        FAPI_DBG("STOP_11_to_8                  :   %s", attrVal ? "TRUE" : "FALSE" );
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_INSTRUCTION_TRACE_ENABLE,
+                               i_procTgt,
+                               attrVal),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_CME_INSTRUCTION_TRACE_ENABLE");
+
+        if( attrVal )
+        {
+            sgpeFlag |= SGPE_CME_INSTRUCTION_TRACE_BIT_POS;
+        }
+
+        FAPI_DBG("CME Instruction Trace Enabled :   %s", attrVal ? "TRUE" : "FALSE" );
 
         // Set PGPE Header Flags from Attributes
         FAPI_DBG(" -------------------- PGPE Flags -----------------");
@@ -3450,7 +3461,7 @@ extern "C"
                       "Final SRAM Image Size Check Failed" );
 
             //Update CME/SGPE Flags in respective image header.
-            FAPI_TRY( updateImageFlags( pChipHomer ),
+            FAPI_TRY( updateImageFlags( pChipHomer, i_procTgt ),
                       "updateImageFlags Failed" );
 
             //Set the Fabric IDs

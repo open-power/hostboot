@@ -841,8 +841,8 @@
       This is matched to pbax_groupid of the PMISC Address phase.
 
       Provided by the Machine Readable Workbook.
-      
-      Platform default:  Nimbus systems = 0     
+
+      Platform default:  Nimbus systems = 0
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -858,8 +858,8 @@
       pbax_type=unicast.
 
       Provided by the Machine Readable Workbook.
-      
-      Platform default:  Nimbus systems - set so value in ATTR_FABRIC_GROUP_ID 
+
+      Platform default:  Nimbus systems - set so value in ATTR_FABRIC_GROUP_ID
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -875,12 +875,12 @@
     bit in this vector at the decoded bit location is a 1, then this receive
     engine will participate in the broadcast operation.
 
-    Override attribute.  Platform value of 0 indiates the OCC firmware will 
+    Override attribute.  Platform value of 0 indiates the OCC firmware will
     perform this function.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <initToZero/> 
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1564,6 +1564,27 @@
      <targetType>TARGET_TYPE_SYSTEM</targetType>
      <valueType>uint8</valueType>
      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+     <id>ATTR_CME_INSTRUCTION_TRACE_ENABLE</id>
+     <description>
+     Enables the SGPE Hcode to enable the CME instruction traces into the L3
+     Trace array for debug.  Note:  all configured CMEs will be put into this
+     mode if this attribute is ON.
+
+     Consumer: p9_hcode_image_build.c ->
+                  SGPE Header field
+
+     Platform default:  OFF
+     </description>
+     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+     <valueType>uint8</valueType>
+     <enum>
+        OFF = 0x00, ON = 0x01
+    </enum>
+    <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
