@@ -45,6 +45,9 @@
 
 #include <hbotcompid.H>
 
+#include <occ/occ_common.H>
+#include <occ/occAccess.H>
+
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -198,6 +201,33 @@ void* call_host_runtime_setup (void *io_pArgs)
             }
 #endif
         }
+
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+        if(TARGETING::is_phyp_load() )
+        {
+            //Explicity clearing the SRAM flag before starting Payload.
+            //This tells the OCC bootloader where to pull the OCC image from
+            //0: mainstore, 1: SRAM. We want to use mainstore after this point
+
+            //Get master proc
+            TargetService & tS = targetService();
+            TARGETING::Target* masterproc = NULL;
+            tS.masterProcChipTargetHandle( masterproc );
+
+            //Clear (up to and including the IPL flag)
+            const uint32_t l_SramAddrApp = HBOCC::OCC_SRAM_ADDRESS;
+            ecmdDataBufferBase l_occAppData((HBOCC::OCC_OFFSET_IPL_FLAG + 6)
+                                                * 8 /* bits */);
+            l_err = HBOCC::writeSRAM(masterproc, l_SramAddrApp, l_occAppData);
+            if(l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                "Error in writeSRAM of 0");
+                break;
+            }
+        }
+#endif
+
 
 #if 0 //@TODO-RTC:164022-Support max pstate without OCC
 #ifdef CONFIG_SET_NOMINAL_PSTATE
