@@ -32425,6 +32425,31 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>CME_INSTRUCTION_TRACE_ENABLE</id>
+    <description>
+     Enables the SGPE Hcode to enable the CME instruction traces into the L3
+     Trace array for debug.  Note:  all configured CMEs will be put into this
+     mode if this attribute is ON.
+
+     Consumer: p9_hcode_image_build.c ->
+                  SGPE Header field
+
+     Platform default:  OFF
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CME_INSTRUCTION_TRACE_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>CP_REFCLOCK_RCVR_TERM</id>
     <description>
         Defines system specific value of processor refclock receiver termination
@@ -32995,9 +33020,9 @@ Measured in GB</description>
 <attribute>
     <id>SKIP_HW_VREF_CAL</id>
     <description>
-        
+
       In sub DD1.02 Nimbus the HW VREF calibrations should not be run
-    
+
     </description>
     <simpleType>
         <uint8_t>
@@ -33015,9 +33040,9 @@ Measured in GB</description>
 <attribute>
     <id>SKIP_RD_VREF_VREFSENSE_OVERRIDE</id>
     <description>
-        
+
       In sub DD1.03 Nimbus the HW VREF calibrations should not be run
-    
+
     </description>
     <simpleType>
         <uint8_t>
@@ -33155,13 +33180,13 @@ Measured in GB</description>
 <attribute>
     <id>EFF_RANK_GROUP_OVERRIDE</id>
     <description>
-        
+
           Override PHY RANK_PAIR settings. First uint16 value is for RANK_PAIR0
           register value, and second is for RANK_PAIR1. Note that DIMM1 ranks in
           a dual-drop config will be converted from Centaur canonical number
           (4,5) to correct PHY settings (2,3). Set this attribute to zero
           to use default settings.
-        
+
     </description>
     <simpleType>
         <uint16_t>
