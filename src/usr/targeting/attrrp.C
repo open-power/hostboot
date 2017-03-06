@@ -43,9 +43,12 @@
 #include <targeting/common/targreasoncodes.H>
 #include <targeting/attrrp.H>
 #include <targeting/common/trace.H>
+#include <targeting/common/attributeTank.H>
 #include <initservice/initserviceif.H>
 #include <util/align.H>
 #include <sys/misc.h>
+#include <fapi2/plat_attr_override_sync.H>
+#include <targeting/attrPlatOverride.H>
 
 using namespace INITSERVICE;
 using namespace ERRORLOG;
@@ -651,6 +654,13 @@ namespace TARGETING
     } // end maxSize
 
 
+    errlHndl_t AttrRP::saveOverrides( uint8_t* i_dest, size_t& io_size )
+    {
+        // Call save on singleton instance.
+        return Singleton<AttrRP>::instance()._saveOverrides(i_dest,io_size);
+    }
+
+
     void* AttrRP::_save(uint64_t& io_addr)
     {
         TRACDCOMP(g_trac_targeting, "AttrRP::save: top @ 0x%lx", io_addr);
@@ -687,4 +697,146 @@ namespace TARGETING
         return region;
     }
 
+
+    errlHndl_t AttrRP::_saveOverrides( uint8_t* i_dest, size_t& io_size )
+    {
+        TRACFCOMP( g_trac_targeting, ENTER_MRK"AttrRP::_saveOverrides: i_dest=%p, io_size=%d", i_dest, io_size );
+        errlHndl_t l_err = nullptr;
+
+        do
+        {
+            size_t l_maxSize = io_size;
+            io_size = 0;
+
+            // Save the fapi and temp overrides
+            //   Note: no need to look at PERM because those were added to
+            //         the base targeting model
+
+            size_t l_tankSize = l_maxSize;
+            uint8_t* l_dest = i_dest;
+
+            // FAPI
+            l_err = saveOverrideTank( l_dest,
+                       l_tankSize,
+                       &fapi2::theAttrOverrideSync().iv_overrideTank,
+                       AttributeTank::TANK_LAYER_FAPI );
+            if( l_err )
+            {
+                break;
+            }
+            l_maxSize -= l_tankSize;
+            io_size += l_tankSize;
+
+            // TARGETING
+            l_tankSize = l_maxSize;
+            l_dest = i_dest + io_size;
+            l_err = saveOverrideTank( l_dest,
+                                      l_tankSize,
+                                      &Target::theTargOverrideAttrTank(),
+                                      AttributeTank::TANK_LAYER_TARG );
+            if( l_err )
+            {
+                break;
+            }
+            l_maxSize -= l_tankSize;
+            io_size += l_tankSize;
+        } while(0);
+
+        TRACFCOMP( g_trac_targeting, EXIT_MRK"AttrRP::_saveOverrides: io_size=%d, l_err=%.8X", io_size, ERRL_GETRC_SAFE(l_err) );
+        return l_err;
+    }
+
+    errlHndl_t AttrRP::saveOverrideTank( uint8_t* i_dest,
+                                         size_t& io_size,
+                                         AttributeTank* i_tank,
+                                         AttributeTank::TankLayer i_layer )
+    {
+        TRACFCOMP( g_trac_targeting, ENTER_MRK"AttrRP::saveOverrideTank: i_dest=%p, io_size=%d, i_layer=%d", i_dest, io_size, i_layer );
+        errlHndl_t l_err = nullptr;
+        size_t l_maxSize = io_size;
+        io_size = 0;
+
+        // List of chunks we're going to save away
+        std::vector<AttributeTank::AttributeSerializedChunk> l_chunks;
+        i_tank->serializeAttributes(
+                       TARGETING::AttributeTank::ALLOC_TYPE_MALLOC,
+                       PAGESIZE, l_chunks );
+
+        // Copy each chunk until we run out of space
+        for( auto l_chunk : l_chunks )
+        {
+            // total size of data plus header for this chunk
+            uint32_t l_chunkSize = l_chunk.iv_size;
+            l_chunkSize += sizeof(AttrOverrideSection);
+            // don't want to double-count the data payload...
+            l_chunkSize -= sizeof(AttrOverrideSection::iv_chunk);
+
+            // look for overflow, but only create 1 error
+            if( (l_err == nullptr)
+                && (io_size + l_chunkSize > l_maxSize) )
+            {
+                TRACFCOMP( g_trac_targeting, ERR_MRK"Size of chunk is too big" );
+                /*@
+                 *   @errortype
+                 *   @moduleid          TARG_MOD_SAVE_OVERRIDE_TANK
+                 *   @reasoncode        TARG_SPACE_OVERRUN
+                 *   @userdata1[00:31]  Maximum Available size
+                 *   @userdata1[32:63]  Required size
+                 *   @userdata2[00:31]  Chunk Size
+                 *   @userdata2[32:63]  Previous Size
+                 *
+                 *   @devdesc   Size of override data exceeds available
+                 *              buffer space
+                 *
+                 *   @custdesc  Internal firmware error applying
+                 *              custom configuration settings
+                 */
+                l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                      TARG_CREATE_VMM_SECTIONS,
+                                      TARG_RC_MM_PERM_FAIL,
+                                      TWO_UINT32_TO_UINT64(l_maxSize,
+                                            io_size + l_chunkSize),
+                                      TWO_UINT32_TO_UINT64(l_chunkSize,
+                                                           io_size),
+                                      true /*SW Error */);
+                //deliberately not breaking out here so that we can
+                // compute the required size and free the memory in
+                // one place
+            }
+
+            if( l_err == nullptr )
+            {
+                // fill in the header
+                AttrOverrideSection* l_header =
+                  reinterpret_cast<AttrOverrideSection*>(i_dest+io_size);
+                l_header->iv_layer = i_layer;
+                l_header->iv_size = l_chunk.iv_size;
+
+                // add the data
+                memcpy( l_header->iv_chunk,
+                        l_chunk.iv_pAttributes,
+                        l_chunk.iv_size );
+            }
+
+            io_size += l_chunkSize;
+
+            // freeing data that was allocated by serializeAttributes()
+            free( l_chunk.iv_pAttributes );
+            l_chunk.iv_pAttributes = NULL;
+        }
+
+        // add a terminator at the end since the size might get lost
+        //  but only if we found some overrides
+        if( (io_size > 0)
+            && (io_size + sizeof(AttributeTank::TankLayer) < l_maxSize) )
+        {
+            AttrOverrideSection* l_term =
+              reinterpret_cast<AttrOverrideSection*>(i_dest+io_size);
+            l_term->iv_layer = AttributeTank::TANK_LAYER_TERM;
+            io_size += sizeof(AttributeTank::TankLayer);
+        }
+
+        TRACFCOMP( g_trac_targeting, ENTER_MRK"AttrRP::saveOverrideTank: io_size=%d", io_size );
+        return l_err;
+    }
 };

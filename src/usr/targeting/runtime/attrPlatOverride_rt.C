@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,37 +89,59 @@ int apply_attr_override(uint8_t* i_data,
 
 void applyTempOverrides()
 {
-    // With FSP, we can not access PNOR, just return
-    if(INITSERVICE::spBaseServicesEnabled())
+    TRACFCOMP(g_trac_targeting, ENTER_MRK"applyTempOverrides");
+    errlHndl_t l_err = NULL;
+
+    // Get a pointer to the reserved memory where HB
+    //  saved the overrides during boot
+    uint64_t l_overAddr = 0;
+    uint8_t* l_overPtr = nullptr;
+    if( g_hostInterfaces != NULL &&
+        g_hostInterfaces->get_reserved_mem )
     {
+        l_overAddr = g_hostInterfaces
+          ->get_reserved_mem("ibm,hbrt-targetoverride-image",0);
+        if( l_overAddr != 0 )
+        {
+            TRACFCOMP(g_trac_targeting, "Overrides found at %.16X", l_overAddr );
+            l_overPtr = reinterpret_cast<uint8_t*>(l_overAddr);
+        }
+        else
+        {
+            // grab the data we stashed at the end of the targeting data
+            l_overAddr = g_hostInterfaces
+              ->get_reserved_mem("ibm,hbrt-target-image",0);
+            if( l_overAddr != 0 )
+            {
+                l_overAddr += (1*MEGABYTE - 64*KILOBYTE);
+                TRACFCOMP(g_trac_targeting, "NULL from get_reserved_mem, using stashed value at %.llX instead", l_overAddr );
+                l_overPtr = reinterpret_cast<uint8_t*>(l_overAddr);
+            }
+        }
+    }
+
+    // Having no overrides is a normal thing
+    if( l_overPtr == nullptr )
+    {
+        TRACFCOMP(g_trac_targeting, "No Overrides found" );
+        TRACFCOMP(g_trac_targeting, EXIT_MRK"applyTempOverrides");
         return;
     }
 
-    TRACFCOMP(g_trac_targeting, ENTER_MRK"applyTempOverrides");
-    errlHndl_t l_err = NULL;
+    // Use a faux PNOR Section that is associated
+    //  with the data in mainstore
     PNOR::SectionInfo_t l_info;
-    // Get temporary attribute overrides from pnor
-    l_err = PNOR::getSectionInfo(PNOR::ATTR_TMP, l_info);
+    l_info.vaddr = l_overAddr;
+    l_info.size = 64*KILOBYTE; //@fixme-RTC:171863-use real size
+    l_info.id = PNOR::ATTR_TMP;
+    l_info.name = "HBRT Overrides";
 
-    // Attr override sections are optional so just delete error
+    TRACFCOMP(g_trac_targeting," HBRT: processing overrides from boot");
+    l_err = TARGETING::getAttrOverrides(l_info);
     if (l_err)
     {
-        TRACFCOMP(g_trac_targeting," HBRT: error getting ATTR_TMP pnor "
-                  "section. Not applying temp attributes.");
-        delete l_err;
-        l_err = NULL;
-    }
-    else
-    {
-        TRACFCOMP(g_trac_targeting," HBRT: processing temporary "
-                  "overrides");
-        l_err = TARGETING::getAttrOverrides(l_info);
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_targeting," HBRT: Failed applyTempOverrides:"
-                      " getting temporary overrides");
-            errlCommit( l_err, TARG_COMP_ID );
-        }
+        TRACFCOMP(g_trac_targeting," HBRT: Failed applying overrides");
+        errlCommit( l_err, TARG_COMP_ID );
     }
 
     TRACFCOMP(g_trac_targeting, EXIT_MRK"applyTempOverrides");

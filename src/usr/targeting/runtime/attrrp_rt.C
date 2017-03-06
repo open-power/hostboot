@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,12 +38,15 @@ namespace TARGETING
 {
     void AttrRP::startup(errlHndl_t& io_taskRetErrl, bool isMpipl)
     {
+        TRACFCOMP(g_trac_targeting, "AttrRP::startup");
         errlHndl_t l_errl = NULL;
 
         do
         {
-            TargetingHeader* l_header = reinterpret_cast<TargetingHeader*>(
-                g_hostInterfaces->get_reserved_mem("ibm,hbrt-target-image",0));
+            TargetingHeader* l_header =
+              reinterpret_cast<TargetingHeader*>(
+                g_hostInterfaces->
+                  get_reserved_mem(HBRT_RSVD_MEM__ATTRIBUTES,0));
 
             if ((NULL == l_header) ||
                 (l_header->eyeCatcher != PNOR_TARG_EYE_CATCHER))

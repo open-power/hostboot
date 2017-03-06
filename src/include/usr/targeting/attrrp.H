@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <targeting/adapters/types.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/attrsync.H>
+#include <targeting/common/attributeTank.H>
 
 namespace TARGETING
 {
@@ -161,12 +162,9 @@ class AttrRP
         /**
          *  @brief Copies all present attribute sections to memory.
          *
-         *  The copy will grow down from the input address.
-         *
          *  @param[in,out] i_addr
-         *      Physical address at the top of the desired region to
-         *      place.  After function will be the address at the bottom of
-         *      the region.
+         *      Physical address at the bottom of the desired region to
+         *      place.
          *
          *  @return Virtual address to the region.
          */
@@ -181,6 +179,21 @@ class AttrRP
          *  @return Size of all attribute sections
          */
         static uint64_t  maxSize( );
+
+        /**
+         *  @brief Copies all present attribute override tanks to memory.
+         *
+         *  @param[in] i_dest
+         *      Physical address to copy override data into
+         *  @param[in,out] io_size
+         *      in: Maximum size of allocated space in bytes
+         *      out: Actual number of bytes used (zero means no overrides)
+         *
+         *  @return Error log
+         */
+        static errlHndl_t saveOverrides( uint8_t* i_dest,
+                                         size_t& io_size );
+
 #endif
 
     protected:
@@ -314,6 +327,26 @@ class AttrRP
 
         /** Internal implementation of save function. */
         void* _save(uint64_t&);
+
+        /** Internal implementation of saveOverrides function. */
+        errlHndl_t _saveOverrides( uint8_t* i_dest,
+                                   size_t& io_size );
+
+        /**
+         * @brief Serialize and copy a single override tank out to memory
+         *
+         * @param[in]  i_dest  Starting address to copy data into
+         * @param[inout] io_size  Input: Size of i_dest buffer
+         *                        Output: Size of serialized data
+         * @param[in]  i_tank  Override tank to serialize out
+         * @param[in]  i_layer  Type of tank being worked on
+         *
+         * @return Error log
+         */
+        errlHndl_t saveOverrideTank( uint8_t* i_dest,
+                                     size_t& io_size,
+                                     AttributeTank* i_tank,
+                                     AttributeTank::TankLayer i_layer );
 
         /**
          *  @brief Starts the attribute provider's message processor

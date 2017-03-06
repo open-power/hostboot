@@ -577,6 +577,18 @@
     <attribute><id>SCRATCH_UINT32_ARRAY_2</id></attribute>
     <attribute><id>SCRATCH_UINT64_ARRAY_1</id></attribute>
     <attribute><id>SCRATCH_UINT64_ARRAY_2</id></attribute>
+    <attribute><id>SCRATCH_INT8_1</id></attribute>
+    <attribute><id>SCRATCH_INT8_2</id></attribute>
+    <attribute><id>SCRATCH_INT32_1</id></attribute>
+    <attribute><id>SCRATCH_INT32_2</id></attribute>
+    <attribute><id>SCRATCH_INT64_1</id></attribute>
+    <attribute><id>SCRATCH_INT64_2</id></attribute>
+    <attribute><id>SCRATCH_INT8_ARRAY_1</id></attribute>
+    <attribute><id>SCRATCH_INT8_ARRAY_2</id></attribute>
+    <attribute><id>SCRATCH_INT32_ARRAY_1</id></attribute>
+    <attribute><id>SCRATCH_INT32_ARRAY_2</id></attribute>
+    <attribute><id>SCRATCH_INT64_ARRAY_1</id></attribute>
+    <attribute><id>SCRATCH_INT64_ARRAY_2</id></attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0</default>

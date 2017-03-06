@@ -333,6 +333,7 @@ struct hdatMsVpdRhbAddrRange_t
     uint64_t hdatRhbAddrRngEndAddr;    // 0x000C Range ending
     uint32_t hdatRhbLabelSize;         // 0x0014 Label size
     uint8_t  hdatRhbLabelString[64];   // 0x0018 Label string Ptr
+    uint8_t  reserved[8];              // 0x0058 Reserved
 }  __attribute__ ((packed));
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,14 @@
 
 namespace TARGETING
 {
+
+const std::pair<AttributeTank::TankLayer, PNOR::SectionId>
+    tankLayerToPnor[AttributeTank::TANK_LAYER_LAST] =
+    {
+        std::make_pair(AttributeTank::TANK_LAYER_FAPI, PNOR::ATTR_TMP),
+        std::make_pair(AttributeTank::TANK_LAYER_TARG, PNOR::ATTR_TMP),
+        std::make_pair(AttributeTank::TANK_LAYER_PERM, PNOR::ATTR_PERM)
+    };
 
 errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                       AttributeTank* io_tanks[AttributeTank::TANK_LAYER_LAST])
@@ -63,6 +71,7 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
 
     do
     {
+        TRACFCOMP( g_trac_targeting, "Section id=%d, size=%d", i_sectionInfo.id, i_sectionInfo.size );
 
         uint32_t l_index = 0;
         // Deserialize each section
