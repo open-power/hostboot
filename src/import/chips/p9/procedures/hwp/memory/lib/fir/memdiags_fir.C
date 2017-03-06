@@ -61,6 +61,10 @@ template<>
 fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
     fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> dsm0_buffer;
+    uint64_t rd_tag_delay = 0;
+    uint64_t wr_done_delay = 0;
+    uint64_t mnfg_flag = 0;
 
     for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
     {
@@ -70,14 +74,26 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
         fir::reg<MCA_MBACALFIRQ> l_cal_fir_reg(p, l_rc);
         FAPI_TRY(l_rc, "unable to create fir::reg for %d", MCA_MBACALFIRQ);
 
+        // Read out the wr_done and rd_tag delays and find min
+        // and set the RCD Protect Time to this value
+        FAPI_TRY (mss::read_dsm0q_register(p, dsm0_buffer) );
+        mss::get_wrdone_delay(dsm0_buffer, wr_done_delay);
+        mss::get_rdtag_delay(dsm0_buffer, rd_tag_delay);
+        const auto rcd_protect_time = std::min(wr_done_delay, rd_tag_delay);
+        FAPI_TRY (mss::change_rcd_protect_time(p, rcd_protect_time) );
+
         l_ecc64_fir_reg.checkstop<MCA_FIR_MAINLINE_AUE>()
         .recoverable_error<MCA_FIR_MAINLINE_UE>()
         .checkstop<MCA_FIR_MAINLINE_IAUE>()
         .recoverable_error<MCA_FIR_MAINLINE_IUE>();
 
-        // TODO RTC:165157 check for manufacturing flags and don't unmask this if
-        // thresholds policy is enabled.
-        l_ecc64_fir_reg.recoverable_error<MCA_FIR_MAINTENANCE_IUE>();
+        // If MNFG FLAG Threshhold is enabled skip IUE unflagging
+        FAPI_TRY (mss::mnfg_flags(mnfg_flag) );
+
+        if (mnfg_flag != fapi2::ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS)
+        {
+            l_ecc64_fir_reg.recoverable_error<MCA_FIR_MAINTENANCE_IUE>();
+        }
 
         l_cal_fir_reg.recoverable_error<MCA_MBACALFIRQ_PORT_FAIL>();
 
