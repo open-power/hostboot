@@ -43,6 +43,7 @@
     </description>
     <ffdc>NUM_MBAS</ffdc>
     <ffdc>MEMBUF</ffdc>
+    <ffdc>TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -56,6 +57,7 @@
     </description>
     <ffdc>NUM_L4S</ffdc>
     <ffdc>MEMBUF</ffdc>
+    <ffdc>TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
