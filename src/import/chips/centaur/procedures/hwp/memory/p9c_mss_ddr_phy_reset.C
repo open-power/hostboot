@@ -41,7 +41,7 @@
 #include <p9c_mss_unmask_errors.H>
 #include <p9c_mss_slew.H>
 #include <p9c_dimmBadDqBitmapFuncs.H>
-#include <c_str.H>
+#include <generic/memory/lib/utils/c_str.H>
 #include <dimmConsts.H>
 
 enum phy

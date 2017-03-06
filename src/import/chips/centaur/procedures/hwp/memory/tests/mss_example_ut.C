@@ -37,7 +37,7 @@
 #include <fapi2.H>
 #include <catch.hpp>
 #include <target_fixture.H>
-#include <c_str.H>
+#include <generic/memory/lib/utils/c_str.H>
 
 using fapi2::TARGET_TYPE_MEMBUF_CHIP;
 using fapi2::TARGET_TYPE_MBA;

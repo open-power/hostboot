@@ -37,7 +37,7 @@
 #include <p9c_dimmBadDqBitmapFuncs.H>
 #include <p9c_dimmBadDqBitmapAccessHwp.H>
 #include <string.h>
-#include <c_str.H>
+#include <generic/memory/lib/utils/c_str.H>
 
 
 extern "C"

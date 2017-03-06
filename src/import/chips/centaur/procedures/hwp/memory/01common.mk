@@ -23,7 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 CEN_INCLUDES := $(GENPATH)
-CEN_INCLUDES += $(ROOTPATH)/generic/memory
+CEN_INCLUDES += $(ROOTPATH)
 CEN_INCLUDES += $(ROOTPATH)/chips/centaur/common/include
 CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory
 CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib

@@ -28,7 +28,6 @@
 #
 
 # Add common and generated parts to object list.
-
 MSS_PATH := $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib
 
 MSS_SOURCE := $(shell find $(MSS_PATH) -name '*.C' -exec basename {} \;)
@@ -40,11 +39,10 @@ MSS_SOURCE_DIRS := $(shell find $(MSS_PATH) -type d)
 define MSS_MODULE_INCLUDES
 $(foreach dir, $(MSS_SOURCE_DIRS), $(call ADD_MODULE_SRCDIR,$(1),$(dir)))
 $(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH)/chips/centaur/procedures/hwp/memory)
-$(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH)/generic/memory)
 $(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PATH)/include)
 $(call ADD_MODULE_INCDIR,$(1),$(GENPATH))
-$(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PATH)/include)
 $(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PLAT_INCLUDE))
+$(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH))
 endef
 MODULE = cen
 OBJS += $(MSS_MODULE_OBJS)
