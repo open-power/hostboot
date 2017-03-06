@@ -62,7 +62,7 @@ prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/utils/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 prd_incpath += ${ROOTPATH}/src/import/hwpf/fapi2/include
-prd_incpath += ${ROOTPATH}/src/import/generic/memory/
+prd_incpath += ${ROOTPATH}/src/import/
 
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
@@ -157,6 +157,7 @@ prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/eff_confi
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/utils/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/workarounds/
+prd_obj_no_sim += pos.o
 
 prd_obj_no_sim += mcbist.o
 prd_obj_no_sim += mcbist_workarounds.o
