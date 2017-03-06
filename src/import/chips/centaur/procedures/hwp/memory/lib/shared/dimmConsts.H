@@ -110,6 +110,7 @@ constexpr bool MSS_CCS_STOP = 1;
 constexpr uint8_t l_ISDIMM_dqmax = 71;
 constexpr uint8_t l_CDIMM_dqmax = 79;
 constexpr uint8_t CCS_MAX_INSTRUCTION_NUM = 32;
+
 enum sim_cycles : size_t
 {
     DELAY_100NS = 100,                ///< 100 ns delay for HW mode (2000 sim cycles if simclk = 20ghz)
@@ -117,8 +118,10 @@ enum sim_cycles : size_t
     DELAY_100US = 100000,             ///< 100 usec delay for HW mode (2000000 sim cycles if simclk = 20ghz)
     DELAY_500US = 500000,             ///< 500 usec delay for HW mode
     DELAY_500SIMCYCLES = 500,         ///< 500 sim cycle delay
+    DELAY_1MS   = 1000000,            ///< 1ms delay
     DELAY_2000SIMCYCLES = 2000,       ///< 2000 sim cycle delay for sim mode (100 ns if simclk = 20Ghz)
     DELAY_20000SIMCYCLES = 20000,     ///< 20000 sim cycle delay for sim mode (1 usec if simclk = 20Ghz)
+    DELAY_200000SIMCYCLES = 200000,   ///< 200000 sim cycle delay for sim mode
     DELAY_2000000SIMCYCLES = 2000000, ///< 2000000 sim cycle delay for sim mode  (100 usec if simclk = 20Ghz)
     DELAY_10000000SIMCYCLES = 10000000, ///< 10000000 sim cycle delay for sim mode
 };

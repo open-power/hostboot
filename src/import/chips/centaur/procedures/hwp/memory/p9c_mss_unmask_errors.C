@@ -1545,7 +1545,6 @@ fapi2::ReturnCode mss_unmask_maint_errors(const fapi2::Target<fapi2::TARGET_TYPE
 
         //************************************************
 
-
         //*************************
         //*************************
         // MBSPA
@@ -1558,14 +1557,94 @@ fapi2::ReturnCode mss_unmask_maint_errors(const fapi2::Target<fapi2::TARGET_TYPE
                                 CEN_MBA_MBSPAMSKQ,
                                 l_mbaspa_mask));
 
+        // 0    Command_Complete
+        if (l_mbspa_0_fixed_for_dd2)
+        {
+            l_mbaspa_mask.clearBit<0>();         // DD2: unmask (fixed)
+        }
+        else
+        {
+            l_mbaspa_mask.setBit<0>();           // DD1: masked (broken)
+        }
 
-        //(Action0, Action1, Mask)
-        //
-        // (0,0,0) = checkstop
-        // (0,1,0) = recoverable error
-        // (1,0,0) = report unused
-        // (1,1,0) = machine check
-        // (x,x,1) = error is masked
+        // 1    Hard_CE_ETE_Attn                             mask (forever)
+        // NOTE: FW wants to mask these and rely instead on detecting the
+        // cmd complete attention, then checking these manually to see if
+        // they cause the cmd to stop
+        // NOTE: Hards counted during super fast read, but can't be called
+        // true hard CEs since super fast read doesn't write back and read again.
+        l_mbaspa_mask.setBit<1>();
+        // 2    Soft_CE_ETE_Attn                             mask (forever)
+        // NOTE: FW wants to mask these and rely instead on detecting the
+        // cmd complete attention, then checking these manually to see if
+        // they cause the cmd to stop
+        // NOTE: Softs not counted during super fast read.
+        l_mbaspa_mask.setBit<2>();
+
+        // 3    Intermittent_ETE_Attn                        mask (forever)
+        // NOTE: FW wants to mask these and rely instead on detecting the
+        // cmd complete attention, then checking these manually to see if
+        // they cause the cmd to stop
+        // NOTE: Intermittents not counted during super fast read.
+        l_mbaspa_mask.setBit<3>();
+
+        // 4    RCE_ETE_Attn                                 mask (forever)
+        // NOTE: FW wants to mask these and rely instead on detecting the
+        // cmd complete attention, then checking these manually to see if
+        // they cause the cmd to stop
+        // NOTE: RCEs not counted during super fast read.
+        l_mbaspa_mask.setBit<4>();
+
+        // 5    Emergency_Throttle_Attn                      masked (forever)
+        l_mbaspa_mask.setBit<5>();
+
+        // 6    Firmware_Attn0                               masked (forever)
+        l_mbaspa_mask.setBit<6>();
+
+        // 7    Firmware_Attn1                               masked (forever)
+        l_mbaspa_mask.setBit<7>();
+
+        // 8    wat_debug_attn
+        if (l_mbspa_0_fixed_for_dd2)
+        {
+            l_mbaspa_mask.setBit<8>();           // DD2: masked (workaround for mbspa 0 not needed)
+        }
+        else
+        {
+            l_mbaspa_mask.clearBit<8>();         // DD1: unmasked (workaround for mbspa 0 needed)
+        }
+
+        // 9    Spare_Attn1                                  masked (forever)
+        l_mbaspa_mask.setBit<9>();
+
+        // 10   MCBIST_Done                                  masked (forever)
+        l_mbaspa_mask.setBit<10>();
+
+        // 11:63 RESERVED     not implemented, so won't touch these
+
+
+        // Write mask
+        FAPI_TRY(fapi2::putScom(l_mbaChiplets[i],
+                                CEN_MBA_MBSPAMSKQ,
+                                l_mbaspa_mask));
+
+        // DEBUG: read them all back to verify
+        FAPI_TRY(fapi2::getScom(l_mbaChiplets[i],
+                                CEN_MBA_MBSPAMSKQ,
+                                l_mbaspa_mask));
+
+        //*************************
+        //*************************
+        // MBECCFIR
+        //*************************
+        //*************************
+
+        // Read mask
+        FAPI_TRY(fapi2::getScom(i_target,
+                                l_mbeccfir_mask_address[l_mbaPosition],
+                                l_mbeccfir_mask));
+
+
 
         l_mbeccfir_action0.flush<0>();
         l_mbeccfir_action1.flush<0>();
@@ -1590,6 +1669,7 @@ fapi2::ReturnCode mss_unmask_maint_errors(const fapi2::Target<fapi2::TARGET_TYPE
         // 17   Memory RCE                  recoverable         mask (until mainline traffic)
         l_mbeccfir_action0.clearBit<17>();
         l_mbeccfir_action1.setBit<17>();
+
         l_mbeccfir_mask_or.setBit<17>();
 
         // 18   Memory SUE                  recoverable         mask (forever)
