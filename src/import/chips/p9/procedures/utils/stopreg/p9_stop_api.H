@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,7 @@ typedef enum
     P9_STOP_SPR_HRMOR  =    313,   // core register
     P9_STOP_SPR_LPCR   =    318,   // thread register
     P9_STOP_SPR_HMEER  =    337,   // core register
+    P9_STOP_SPR_LDBAR  =    850,
     P9_STOP_SPR_PSSCR  =    855,   // thread register
     P9_STOP_SPR_PMCR   =    884,   // core register
     P9_STOP_SPR_HID    =   1008,   // core register
