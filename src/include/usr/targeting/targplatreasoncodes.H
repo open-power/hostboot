@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -54,6 +56,7 @@ enum PlatTargetingModuleId
     TARG_MOD_QUERY_MASTER_PROC_CHIP               = 0x80,
     TARG_MOD_SET_MASTER_NODE                      = 0x81,
     TARG_MOD_ATTRRP_RT                            = 0x82,
+    TARG_MOD_SAVE_OVERRIDE_TANK                   = 0x83,
 };
 
 /**
@@ -66,6 +69,7 @@ enum PlatTargetingReasonCode
 {
     TARG_RC_INVALID_NODE        = TARG_COMP_ID | 0x80,
     TARG_RC_TARGET_NOT_FOUND    = TARG_COMP_ID | 0x81,
+    TARG_SPACE_OVERRUN          = TARG_COMP_ID | 0x82,
 };
 
 } // End TARGETING namespace

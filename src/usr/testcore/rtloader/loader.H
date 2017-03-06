@@ -42,6 +42,8 @@
 #include <devicefw/userif.H>
 #include <pnor/ecc.H>
 #include <ipmi/ipmiif.H>
+#include <targeting/common/attributeTank.H>
+
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 2*KILOBYTE);
 
@@ -331,10 +333,12 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         static uint64_t rt_get_reserved_mem(const char* i_region,
                                             uint32_t i_instance)
         {
-            if (0 == strcmp(i_region, "ibm,hbrt-vpd-image"))
+            if (0 == strcmp(i_region, HBRT_RSVD_MEM__VPD_CACHE))
                 return rt_get_vpd();
-            else if (0 == strcmp(i_region, "ibm,hbrt-target-image"))
+            else if (0 == strcmp(i_region, HBRT_RSVD_MEM__ATTRIBUTES))
                 return rt_get_targ();
+            else if (0 == strcmp(i_region, HBRT_RSVD_MEM__OVERRIDES))
+                return rt_get_targ_override();
             else
                 return 0;
         }
@@ -543,6 +547,49 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return cv_targ_addr;
         }
 
+        static uint64_t rt_get_targ_override()
+        {
+            using namespace TARGETING;
+            if (cv_targ_over_addr != 0)
+            {
+                return cv_targ_over_addr;
+            }
+
+            // add an override to use in a later test
+            AttributeTank* l_tank =
+              &Target::theTargOverrideAttrTank();
+            ATTR_SCRATCH_INT32_1_type l_val = -99;
+            l_tank->setAttribute(ATTR_SCRATCH_INT32_1,
+                                 TYPE_SYS,
+                                 AttributeTank::ATTR_POS_NA,
+                                 AttributeTank::ATTR_UNIT_POS_NA,
+                                 AttributeTank::ATTR_NODE_NA,
+                                 0, sizeof(l_val), &l_val);
+
+            // copy overrides into local buffer
+            size_t l_actualSize = 64*KILOBYTE;
+            uint8_t* l_overrideData =
+              reinterpret_cast<uint8_t*>(malloc(l_actualSize));
+            errlHndl_t l_elog = TARGETING::AttrRP::saveOverrides(
+                                             l_overrideData,
+                                             l_actualSize );
+            if(l_elog)
+            {
+                TRACFCOMP( g_trac_hbrt, ERR_MRK" Attribute Overrides exceed allocated space" );
+                errlCommit( l_elog, CXXTEST_COMP_ID );
+            }
+            else if( l_actualSize == 0 )
+            {
+                TRACFCOMP( g_trac_hbrt, INFO_MRK" No Attribute Overrides Present" );
+            }
+            else
+            {
+                cv_targ_over_addr = reinterpret_cast<uint64_t>(l_overrideData);
+            }
+
+            return cv_targ_over_addr;
+        }
+
         static int rt_ipmi_msg(uint8_t netfn, uint8_t cmd,
                     void *tx_buf, size_t tx_size,
                     void *rx_buf, size_t *rx_size)
@@ -574,6 +621,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         static uint64_t cv_vpd_phys_addr;
         static uint64_t cv_targ_addr;
         static uint64_t cv_targ_phys_addr;
+        static uint64_t cv_targ_over_addr;
 };
 
 
@@ -583,6 +631,7 @@ uint64_t RuntimeLoaderTest::cv_vpd_addr = 0;
 uint64_t RuntimeLoaderTest::cv_vpd_phys_addr = 0;
 uint64_t RuntimeLoaderTest::cv_targ_addr = 0;
 uint64_t RuntimeLoaderTest::cv_targ_phys_addr = 0;
+uint64_t RuntimeLoaderTest::cv_targ_over_addr = 0;
 
 
 

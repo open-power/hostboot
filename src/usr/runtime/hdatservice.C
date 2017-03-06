@@ -1243,7 +1243,7 @@ errlHndl_t hdatService::updateHostDataSectionActual( SectionId i_section,
         else if( !((TARGETING::PAYLOAD_KIND_PHYP == payload_kind ) ||
                    (TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind )))
         {
-            TRACFCOMP( g_trac_runtime, "get_host_data_section> There is no host data for PAYLOAD_KIND=%d", payload_kind );
+            TRACFCOMP( g_trac_runtime, "updateHostDataSectionActual> There is no host data for PAYLOAD_KIND=%d", payload_kind );
             /*@
              * @errortype
              * @moduleid     RUNTIME::MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL
@@ -1294,7 +1294,7 @@ errlHndl_t hdatService::updateHostDataSectionActual( SectionId i_section,
         // Not sure how we could get here...
         else
         {
-            TRACFCOMP( g_trac_runtime, "get_host_data_section> Unknown section %d", i_section );
+            TRACFCOMP( g_trac_runtime, "updateHostDataSectionActual> Unknown section %d", i_section );
             /*@
              * @errortype
              * @moduleid     RUNTIME::MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL

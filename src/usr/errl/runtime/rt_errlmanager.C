@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,7 +83,14 @@ ErrlManager::ErrlManager() :
 
     // determine starting PLID value
     TARGETING::Target * sys = NULL;
-    TARGETING::targetService().getTopLevelTarget( sys );
+    if( TARGETING::targetService().isInitialized() )
+    {
+        TARGETING::targetService().getTopLevelTarget( sys );
+    }
+    else
+    {
+        TRACFCOMP( g_trac_errl, "Error log being created before TARGETING is ready..." );
+    }
     if(sys)
     {
         iv_currLogId = sys->getAttr<TARGETING::ATTR_HOSTSVC_PLID>();

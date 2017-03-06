@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,8 @@ namespace TARGETING
 {
     errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                       AttributeTank* io_tanks[AttributeTank::TANK_LAYER_LAST]);
+
+    class AttrRP;
 }
 
 namespace RT_TARG
@@ -105,6 +107,8 @@ public:
 
     friend int RT_TARG::apply_attr_override(uint8_t* i_data,
                                             size_t i_size );
+
+    friend class TARGETING::AttrRP;
 
     /**
      * @brief Maximum size of a direct attribute override

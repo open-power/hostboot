@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,6 +119,35 @@ class TargetingTestSuite : public CxxTest::TestSuite
             }
         }
 
+        // Verify HBRT is picking up the overrides from the IPL
+        //  Note: must be before testApplyAttrOverrides, because that
+        //        test clears out all of the overrides
+        void testIplOverrides()
+        {
+            using namespace TARGETING;
+            TRACFCOMP(g_trac_targeting,"testIplOverrides");
+
+            //See rt_get_targ_override() for setup details about setting
+            // SYSTEM:ATTR_SCRATCH_INT32_1 = -99
+
+            TargetService& l_targetService = targetService();
+            TARGETING::Target* l_pTarget = NULL;
+            (void) l_targetService.getTopLevelTarget(l_pTarget);
+            if (l_pTarget == NULL)
+            {
+                TS_FAIL("Top level target handle is NULL");
+            }
+            else
+            {
+                ATTR_SCRATCH_INT32_1_type l_val =
+                  l_pTarget->getAttr<TARGETING::ATTR_SCRATCH_INT32_1>();
+                if( l_val != -99 )
+                {
+                    TS_FAIL("testIplOverrides> SCRATCH_INT32_1=%d, expected %d", l_val, -99 );
+                }
+            }
+        }
+
         void testApplyAttrOverrides()
         {
             using namespace TARGETING;
@@ -218,8 +247,18 @@ class TargetingTestSuite : public CxxTest::TestSuite
                        l_attrNewVal,l_attrOverrideVal);
                     break;
                 }
-                TRACFCOMP(g_trac_targeting,"testApplyAttrOverrides SUCCESS");
 
+                // verify that any previous overrides are not still there
+                ATTR_SCRATCH_INT32_1_type l_val =
+                  l_pTarget->getAttr<TARGETING::ATTR_SCRATCH_INT32_1>();
+                if( l_val == -99 )
+                {
+                    TS_FAIL("testApplyAttrOverrides> SCRATCH_INT32_1=%d, expected %d", -99, 0 );
+                    break;
+                }
+
+                TRACFCOMP(g_trac_targeting,"testApplyAttrOverrides SUCCESS");
             } while (0);
         }
+
 };

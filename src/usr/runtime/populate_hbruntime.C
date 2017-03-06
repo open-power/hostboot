@@ -59,6 +59,8 @@
 #include "../hdat/hdattpmdata.H"
 #include "../secureboot/trusted/tpmLogMgr.H"
 #include "../secureboot/trusted/trustedboot.H"
+#include <targeting/common/attributeTank.H>
+#include <runtime/interface.h>
 #include <targeting/attrPlatOverride.H>
 
 
@@ -179,6 +181,51 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId)
             TRACFCOMP( g_trac_runtime,
                 "populate_RtDataByNode fail getHostDataSection ATTRIB data" );
             break;
+        }
+
+        //@fixme-RTC:169478-Remove this workaround once HDAT+PHYP is ready
+        //  Add the override data into the back-end of the allocated
+        //  attribute data to handle the case where the RHB pointers
+        //  are not yet being used
+        {
+            size_t l_attrOverMaxSize = 64*KILOBYTE;
+
+            // Stick the overrides at Attributes+1MB-64KB
+            uint8_t* l_overridePtr =
+              reinterpret_cast<uint8_t*>( l_hbrtDataAddr
+                                          + 1*MEGABYTE
+                                          - l_attrOverMaxSize );
+
+            // copy overrides into local buffer
+            uint8_t* l_overrideData =
+              reinterpret_cast<uint8_t*>(malloc(l_attrOverMaxSize));
+            size_t l_actualSize = l_attrOverMaxSize;
+            l_elog = TARGETING::AttrRP::saveOverrides( l_overrideData,
+                                                       l_actualSize );
+            if( l_elog )
+            {
+                TRACFCOMP( g_trac_runtime, "workaround is busted!!!" );
+                break;
+            }
+            else if( l_actualSize > 0 )
+            {
+                memcpy( reinterpret_cast<uint8_t*>(l_hbrtDataAddr
+                                                   +1*MEGABYTE
+                                                   -l_attrOverMaxSize),
+                        l_overrideData,
+                        l_actualSize );
+                TRACFCOMP( g_trac_runtime, "Copied %d bytes of overrides into HDAT", l_actualSize );
+            }
+            else
+            {
+                TRACFCOMP( g_trac_runtime, "No overrides" );
+                // add a terminator at the end so that the processing
+                //  code in HBRT is happy
+                TARGETING::AttrOverrideSection* l_term =
+                  reinterpret_cast<TARGETING::AttrOverrideSection*>
+                  (l_overridePtr);
+                l_term->iv_layer = TARGETING::AttributeTank::TANK_LAYER_TERM;
+            }
         }
 
         // Load ATTRIBUTE data into HDAT
@@ -419,6 +466,7 @@ void traceHbRsvMemRange(hdatMsVpdRhbAddrRange_t* & i_rngPtr )
  */
 errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 {
+    TRACFCOMP( g_trac_runtime, ENTER_MRK"populate_HbRsvMem> i_nodeId=%d", i_nodeId );
     errlHndl_t l_elog = nullptr;
 
     do {
@@ -436,7 +484,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             // First phyp entry is for the entire 256M HB space
             uint64_t l_hbAddr = cpu_spr_value(CPU_SPR_HRMOR)
                                                 - VMM_HRMOR_OFFSET;
-            l_label = "ibm,hb-rsv-mem";
+            l_label = HBRT_RSVD_MEM__PRIMARY;
             l_labelSize = strlen(l_label) + 1;
 
             // Get a pointer to the next available HDAT HB Rsv Mem entry
@@ -514,12 +562,13 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             // -----...--------------
             // -----HOMER_0----------
             // -----VPD--------------
-            // -----ATTR Data--------
-            // -----HBRT Image-------
+            // -----ATTR Data------------
+            // -----ATTR Override Data---
+            // -----HBRT Image-----------
 
             // First opal entries are for the HOMERs
             uint64_t l_homerAddr = l_topMemAddr;
-            l_label = "ibm,homer-image";
+            l_label = HBRT_RSVD_MEM__HOMER;
             l_labelSize = strlen(l_label) + 1;
 
             // Loop through all functional Procs
@@ -565,14 +614,14 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
 
 #ifdef CONFIG_START_OCC_DURING_BOOT
+            ///////////////////////////////////////////////////
             // OCC Common entry
             TARGETING::Target * l_sys = nullptr;
             TARGETING::targetService().getTopLevelTarget( l_sys );
             assert(l_sys != nullptr);
             uint64_t l_occCommonAddr = l_sys->getAttr
                 <TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
-
-            l_label = "ibm,occ-common-area";
+            l_label = HBRT_RSVD_MEM__OCC_COMMON;
             l_labelSize = strlen(l_label) + 1;
 
             // Get a pointer to the next available HDAT HB Rsv Mem entry
@@ -601,10 +650,24 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 #endif
         }
 
+        // Establish a couple variables to keep track of where the
+        //  next section lands as we deal with the less statically
+        //  sized areas.  These values must always remain 64KB
+        //  aligned
+        uint64_t l_prevDataAddr = 0;
+        uint64_t l_prevDataSize = 0;
 
+        //====================
+        // Note that for PHYP we build up starting at the end of the
+        //  previously allocated HOMER/OCC areas, for OPAL we build
+        //  downwards from the top of memory where the HOMER/OCC
+        //  areas were placed
+
+
+        ///////////////////////////////////////////////////
         // VPD entry
         uint64_t l_vpdAddr = 0x0;
-        l_label = "ibm,hbrt-vpd-image";
+        l_label = HBRT_RSVD_MEM__VPD_CACHE;
         l_labelSize = strlen(l_label) + 1;
 
         if(TARGETING::is_phyp_load())
@@ -641,6 +704,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         memcpy( l_rngPtr->hdatRhbLabelString,
                 l_label,
                 l_labelSize );
+        l_prevDataAddr = l_vpdAddr;
+        l_prevDataSize = VMM_RT_VPD_SIZE;
 
         traceHbRsvMemRange(l_rngPtr);
 
@@ -666,21 +731,23 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         }
 
 
+        ///////////////////////////////////////////////////
         // ATTR Data entry
         uint64_t l_attrDataAddr = 0x0;
-        l_label = "ibm,hbrt-target-image";
+        l_label = HBRT_RSVD_MEM__ATTRIBUTES;
         l_labelSize = strlen(l_label) + 1;
         uint64_t l_attrSize = TARGETING::AttrRP::maxSize();
 
+        // Minimum 64K size for Opal
+        size_t l_attrSizeAligned = ALIGN_X( l_attrSize, 64*KILOBYTE );
+
         if(TARGETING::is_phyp_load())
         {
-            l_attrDataAddr = l_vpdAddr + VMM_RT_VPD_SIZE;
-            l_attrDataAddr = ALIGN_X(l_attrDataAddr,64*KILOBYTE);
+            l_attrDataAddr = l_prevDataAddr + l_prevDataSize;
         }
         else if(TARGETING::is_sapphire_load())
         {
-            l_attrDataAddr = l_vpdAddr - l_attrSize;
-            l_attrDataAddr = ALIGN_DOWN_X(l_attrDataAddr,64*KILOBYTE);
+            l_attrDataAddr = l_prevDataAddr - l_attrSizeAligned;
         }
 
         // Get a pointer to the next available HDAT HB Rsv Mem entry
@@ -697,8 +764,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         l_rngPtr->hdatRhbRngId = i_nodeId;
         l_rngPtr->hdatRhbAddrRngStrAddr =
                 l_attrDataAddr | VmmManager::FORCE_PHYS_ADDR;
-        // Minimum 64K size for Opal
-        size_t l_attrSizeAligned = ALIGN_X( l_attrSize, 64*KILOBYTE );
         l_rngPtr->hdatRhbAddrRngEndAddr =
                 (l_attrDataAddr | VmmManager::FORCE_PHYS_ADDR)
                     + l_attrSizeAligned - 1 ;
@@ -706,6 +771,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         memcpy( l_rngPtr->hdatRhbLabelString,
                 l_label,
                 l_labelSize );
+        l_prevDataAddr = l_attrDataAddr;
+        l_prevDataSize = l_attrSizeAligned;
 
         traceHbRsvMemRange(l_rngPtr);
 
@@ -725,12 +792,118 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         }
 
 
+        ///////////////////////////////////////////////////
+        // ATTR Overrides entry
+        uint64_t l_attrOverDataAddr = 0x0;
+        l_label = HBRT_RSVD_MEM__OVERRIDES;
+        l_labelSize = strlen(l_label) + 1;
+
+        // default to the minimum space we have to allocate anyway
+        size_t l_attrOverMaxSize = 64*KILOBYTE;
+        //@fixme-RTC:171863-fill in real size
+
+        // copy overrides into local buffer
+        uint8_t* l_overrideData =
+          reinterpret_cast<uint8_t*>(malloc(l_attrOverMaxSize));
+        size_t l_actualSize = l_attrOverMaxSize;
+        l_elog = TARGETING::AttrRP::saveOverrides( l_overrideData,
+                                                   l_actualSize );
+        if( l_elog )
+        {
+            // check if the issue was a lack of space (unlikely)
+            if( unlikely( l_actualSize > 0 ) )
+            {
+                TRACFCOMP( g_trac_runtime, "Expanding override section to %d", l_actualSize );
+                free(l_overrideData);
+                l_overrideData =
+                  reinterpret_cast<uint8_t*>(malloc(l_actualSize));
+                l_elog = TARGETING::AttrRP::saveOverrides( l_overrideData,
+                                                           l_actualSize );
+            }
+
+            // overrides are not critical so just commit this
+            //  and keep going without any
+            if( l_elog )
+            {
+                TRACFCOMP( g_trac_runtime, "Errors applying overrides, just skipping" );
+                errlCommit( l_elog, RUNTIME_COMP_ID );
+                l_elog = NULL;
+                l_actualSize = 0;
+            }
+        }
+
+        // only add a section if there are actually overrides
+        if( l_actualSize > 0 )
+        {
+            // Minimum 64K size for Opal
+            size_t l_actualSizeAligned = ALIGN_X( l_actualSize, 64*KILOBYTE );
+
+            // phyp/opal build in reverse...
+            if(TARGETING::is_phyp_load())
+            {
+                l_attrOverDataAddr = l_prevDataAddr + l_prevDataSize;
+            }
+            else if(TARGETING::is_sapphire_load())
+            {
+                l_attrOverDataAddr = l_prevDataAddr - l_actualSizeAligned;
+            }
+
+            // Get a pointer to the next available HDAT HB Rsv Mem entry
+            l_rngPtr = nullptr;
+            l_elog = getNextRhbAddrRange(l_rngPtr);
+            if(l_elog)
+            {
+                break;
+            }
+
+            // Fill in the entry
+            l_rngPtr->hdatRhbRngType =
+              static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
+            l_rngPtr->hdatRhbRngId = i_nodeId;
+            l_rngPtr->hdatRhbAddrRngStrAddr =
+              l_attrOverDataAddr | VmmManager::FORCE_PHYS_ADDR;
+            l_rngPtr->hdatRhbAddrRngEndAddr =
+              (l_attrOverDataAddr | VmmManager::FORCE_PHYS_ADDR)
+              + l_actualSizeAligned - 1 ;
+            l_rngPtr->hdatRhbLabelSize = l_labelSize;
+            memcpy( l_rngPtr->hdatRhbLabelString,
+                    l_label,
+                    l_labelSize );
+            l_prevDataAddr = l_attrOverDataAddr;
+            l_prevDataSize = l_actualSizeAligned;
+
+            traceHbRsvMemRange(l_rngPtr);
+
+            // Load the attribute data into memory
+            l_elog = mapPhysAddr(l_attrOverDataAddr,
+                                 ALIGN_PAGE(l_actualSize),
+                                 l_vAddr);
+            if(l_elog)
+            {
+                break;
+            }
+
+            memcpy( reinterpret_cast<void*>(l_vAddr),
+                    l_overrideData,
+                    l_actualSize );
+            free(l_overrideData);
+
+            l_elog = unmapVirtAddr(l_vAddr);
+            if(l_elog)
+            {
+                break;
+            }
+        }
+
+
+        ///////////////////////////////////////////////////
         // HBRT image entry
+        //   Only needed for OPAL on OP, data comes from a LID in other cases
         if(TARGETING::is_sapphire_load() &&
                 (!INITSERVICE::spBaseServicesEnabled()))
         {
             uint64_t l_hbrtImageAddr = 0x0;
-            l_label = "ibm,hbrt-code-image";
+            l_label = HBRT_RSVD_MEM__CODE;
             l_labelSize = strlen(l_label) + 1;
 
             PNOR::SectionInfo_t l_pnorInfo;
@@ -759,7 +932,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                                 (l_relocateCount+1)*sizeof(uint64_t);
 
             // Set the image address, align down 64K for Opal
-            l_hbrtImageAddr = ALIGN_PAGE_DOWN(l_attrDataAddr - l_imageSize);
+            l_hbrtImageAddr = ALIGN_PAGE_DOWN(l_prevDataAddr);
+            l_hbrtImageAddr = ALIGN_PAGE_DOWN(l_hbrtImageAddr - l_imageSize);
             l_hbrtImageAddr = ALIGN_DOWN_X(l_hbrtImageAddr,64*KILOBYTE);
 
             // Get a pointer to the next available HDAT HB Rsv Mem entry
@@ -808,7 +982,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
     } while(0);
 
-    return(l_elog);
+    TRACFCOMP( g_trac_runtime, EXIT_MRK"populate_HbRsvMem> l_elog=%.8X", ERRL_GETRC_SAFE(l_elog) );
+   return(l_elog);
 } // end populate_HbRsvMem
 
 

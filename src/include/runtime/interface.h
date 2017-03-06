@@ -116,6 +116,18 @@ enum MemoryError_t
 #define HBRT_CORE_TYPE          0x40000000 //!< CORE chip id type
 #define HBRT_CHIPID_TYPE_MASK   0xFF000000 //!< TYPE field
 
+/**
+ *  Reserved memory labels - used by get_reserved_mem
+ */
+#define HBRT_RSVD_MEM__CODE               "ibm,hbrt-code-image"
+#define HBRT_RSVD_MEM__ATTRIBUTES         "ibm,hbrt-target-image"
+#define HBRT_RSVD_MEM__VPD_CACHE          "ibm,hbrt-vpd-image"
+#define HBRT_RSVD_MEM__OVERRIDES          "ibm,hbrt-targetoverride-image"
+#define HBRT_RSVD_MEM__PRIMARY            "ibm,hb-rsv-mem"
+#define HBRT_RSVD_MEM__HOMER              "ibm,homer-image"
+#define HBRT_RSVD_MEM__OCC_COMMON         "ibm,occ-common-area"
+
+
 /** @typedef hostInterfaces_t
  *  @brief Interfaces provided by the underlying environment (ex. Sapphire).
  *

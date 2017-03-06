@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,13 +52,8 @@ struct AttrOverrideSection
  *        enums and make it obvious which layers map to what PNOR section.
  *        Currrently the pair is only used in a test case to keep it in order
  */
-const std::pair<AttributeTank::TankLayer, PNOR::SectionId>
-    tankLayerToPnor[AttributeTank::TANK_LAYER_LAST] =
-    {
-        std::make_pair(AttributeTank::TANK_LAYER_FAPI, PNOR::ATTR_TMP),
-        std::make_pair(AttributeTank::TANK_LAYER_TARG, PNOR::ATTR_TMP),
-        std::make_pair(AttributeTank::TANK_LAYER_PERM, PNOR::ATTR_PERM)
-    };
+extern const std::pair<AttributeTank::TankLayer, PNOR::SectionId>
+    tankLayerToPnor[AttributeTank::TANK_LAYER_LAST];
 
 /**
  * @brief This function gets any Attribute Overrides in PNOR
