@@ -228,8 +228,12 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
             CAL3Q_ALL_PERIODIC_LENGTH_LEN = MCA_MBA_CAL3Q_CFG_ALL_PERIODIC_LENGTH_LEN,
             CAL3Q_FREEZE_ON_PARITY_ERROR_DIS = MCA_MBA_CAL3Q_CFG_FREEZE_ON_PARITY_ERROR_DIS,
 
-            DSM0Q_CFG_RDTAG_DLY = MCA_MBA_DSM0Q_CFG_RDTAG_DLY,
-            DSM0Q_CFG_RDTAG_DLY_LEN = MCA_MBA_DSM0Q_CFG_RDTAG_DLY_LEN,
+            DSM0Q_RDTAG_DLY = MCA_MBA_DSM0Q_CFG_RDTAG_DLY,
+            DSM0Q_RDTAG_DLY_LEN = MCA_MBA_DSM0Q_CFG_RDTAG_DLY_LEN,
+            DSM0Q_WRDONE_DLY = MCA_MBA_DSM0Q_CFG_WRDONE_DLY,
+            DSM0Q_WRDONE_DLY_LEN = MCA_MBA_DSM0Q_CFG_WRDONE_DLY_LEN,
+            FARB0Q_RCD_PROTECTION_TIME = MCA_MBA_FARB0Q_CFG_RCD_PROTECTION_TIME,
+            FARB0Q_RCD_PROTECTION_TIME_LEN = MCA_MBA_FARB0Q_CFG_RCD_PROTECTION_TIME_LEN,
 
             PER_ZCAL_ENA_RANK = MCA_DDRPHY_PC_PER_ZCAL_CONFIG_P0_ENA_RANK,
             PER_ZCAL_ENA_RANK_LEN = MCA_DDRPHY_PC_PER_ZCAL_CONFIG_P0_ENA_RANK_LEN,
@@ -264,26 +268,128 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
 };
 
 ///
-/// @brief Read the rdtag delay value
+/// @brief Read the data state machine register
 /// @tparam T the fapi2 target type of the target
 /// @tparam TT the class traits for the port
 /// @param[in] i_target the target
-/// @param[out] o_delay RDTAG_DLY value (in cycles)
+/// @param[out] o_delay the buffer to write the register data into
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< fapi2::TargetType T, typename TT = portTraits<T> >
-fapi2::ReturnCode read_rdtag_delay( const fapi2::Target<T>& i_target, uint64_t& o_delay )
+fapi2::ReturnCode read_dsm0q_register( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_delay )
 {
+    FAPI_TRY( mss::getScom(i_target, TT::DSM0Q_REG, o_delay) );
 
-    fapi2::buffer<uint64_t> l_data;
-    FAPI_TRY( mss::getScom(i_target, TT::DSM0Q_REG, l_data) );
-    l_data.template extractToRight<TT::DSM0Q_CFG_RDTAG_DLY, TT::DSM0Q_CFG_RDTAG_DLY_LEN>(o_delay);
-
-    FAPI_INF( "RDTAG_DLY %d for %s", uint64_t(o_delay), mss::c_str(i_target) );
+    FAPI_INF( "Data State machine register is %d for %s", uint64_t(o_delay), mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Write to dsm0q register
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_delay the buffer that holds the register data to write
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<T> >
+fapi2::ReturnCode write_dsm0q_register( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t> i_delay )
+{
+    FAPI_INF( "Change Data State machine register to %d for %s",  i_delay, mss::c_str(i_target) );
+
+    FAPI_TRY( mss::putScom(i_target, TT::DSM0Q_REG, i_delay) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Get the wrdone delay value from DSM0Q
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_data the data buffer containing the DSM0Q register
+/// @param[out] o_delay WRDONE_DLY value (in cycles)
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<T> >
+void get_wrdone_delay( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_delay )
+{
+    i_data.template extractToRight<TT::DSM0Q_WRDONE_DLY, TT::DSM0Q_WRDONE_DLY_LEN>(o_delay);
+
+    FAPI_INF( "WRDONE_DLY: %d ", uint64_t(o_delay) );
+}
+
+///
+/// @brief Sets wrdone delay in buffer
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_delay WRDONE_DLY value (in cycles) to set
+/// @param[in,out] io_data the target data buffer
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<T> >
+void set_wrdone_delay( const uint64_t i_delay, fapi2::buffer<uint64_t>& io_data )
+{
+    FAPI_INF( "Set WRDONE_DLY to %d ",  i_delay);
+
+    io_data.template insertFromRight<TT::DSM0Q_WRDONE_DLY, TT::DSM0Q_WRDONE_DLY_LEN>(i_delay);
+}
+
+///
+/// @brief Change the wrdone delay value
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_delay WRDONE_DLY value (in cycles) to set
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<T> >
+fapi2::ReturnCode change_wrdone_delay( const fapi2::Target<T>& i_target, const uint64_t i_delay )
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_DBG( "Change WRDONE_DLY to %d for %s",  i_delay, mss::c_str(i_target) );
+
+    FAPI_TRY( read_dsm0q_register(i_target, l_data) );
+    set_wrdone_delay(i_delay, l_data);
+    FAPI_TRY( write_dsm0q_register(i_target, l_data) );
+
+    FAPI_INF( "DSM0Q_REG 0x%016lx for %s", uint64_t(l_data), mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Get the rdtag delay value
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_data the data buffer containing the DSM0Q register
+/// @param[out] o_delay RDTAG_DLY value (in cycles)
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<T> >
+void get_rdtag_delay( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_delay )
+{
+    i_data.template extractToRight<TT::DSM0Q_RDTAG_DLY, TT::DSM0Q_RDTAG_DLY_LEN>(o_delay);
+
+    FAPI_INF( "RDTAG_DLY: %d ", uint64_t(o_delay) );
+}
+
+///
+/// @brief Sets rdtag delay in buffer
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_delay RDTAG_DLY value (in cycles) to set
+/// @param[in,out] io_data the target data buffer
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<T> >
+void set_rdtag_delay( const uint64_t i_delay, fapi2::buffer<uint64_t>& io_data )
+{
+    FAPI_DBG( "Set RDTAG_DLY to %d ",  i_delay);
+
+    io_data.template insertFromRight<TT::DSM0Q_RDTAG_DLY, TT::DSM0Q_RDTAG_DLY_LEN>(i_delay);
+}
+
 
 ///
 /// @brief Change the rdtag delay value
@@ -296,27 +402,109 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = portTraits<T> >
 fapi2::ReturnCode change_rdtag_delay( const fapi2::Target<T>& i_target, const uint64_t i_delay )
 {
-    // RDTAG is only 6 bits in length, input could be bigger
-    // so we just let the user know of an invalid input.
-    // This is a programming error so we assert out.
-    // 6 bits - 0b0011 1111 (right aligned)
-    constexpr uint64_t MAX_DELAY = 0x3F;
-
-    if( i_delay > MAX_DELAY )
-    {
-        FAPI_ERR("Invalid delay received: %d, largest possible: %d", i_delay, MAX_DELAY);
-        fapi2::Assert(false);
-    }
-
     fapi2::buffer<uint64_t> l_data;
 
     FAPI_DBG( "Change RDTAG_DLY to %d for %s",  i_delay, mss::c_str(i_target) );
 
-    FAPI_TRY( mss::getScom(i_target, TT::DSM0Q_REG, l_data) );
-    l_data.insertFromRight<TT::DSM0Q_CFG_RDTAG_DLY, TT::DSM0Q_CFG_RDTAG_DLY_LEN>(i_delay);
-    FAPI_TRY( mss::putScom(i_target, TT::DSM0Q_REG, l_data) );
+    FAPI_TRY( read_dsm0q_register(i_target, l_data) );
+    set_rdtag_delay(i_delay, l_data);
+    FAPI_TRY( write_dsm0q_register(i_target, l_data) );
 
     FAPI_INF( "DSM0Q_REG 0x%016lx for %s", uint64_t(l_data), mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read to FARB0Q register
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[out] o_time the buffer to read the register data into
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<T> >
+fapi2::ReturnCode read_farb0q_register( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_time )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::FARB0Q_REG, o_time) );
+
+    FAPI_INF( "FARB0Q is %d for %s", uint64_t(o_time), mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write to FARB0Q register
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_delay the buffer containing the data to be written
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<T> >
+fapi2::ReturnCode write_farb0q_register( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t> i_time )
+{
+    FAPI_INF( "Change FARB0Q_REG to 0x%016lx for %s", uint64_t(i_time), mss::c_str(i_target) );
+
+    FAPI_TRY( mss::putScom(i_target, TT::FARB0Q_REG, i_time) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Get the RCD Protect Time value
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_data the data buffer containing the FARB0Q register
+/// @param[out] o_time RCD_PROTECT_TIME value (in cycles)
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<T> >
+void get_rcd_protect_time( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_time )
+{
+    i_data.template extractToRight<TT::FARB0Q_RCD_PROTECTION_TIME, TT::FARB0Q_RCD_PROTECTION_TIME_LEN>(o_time);
+
+    FAPI_INF( "RCD_PROTECT_TIME: %d", uint64_t(o_time) );
+}
+
+
+///
+/// @brief Sets RCD Protect Time in buffer
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_delay RCD Protect Time value (in cycles) to set
+/// @param[in,out] io_data the target data buffer
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<T> >
+void set_rcd_protect_time( const uint64_t i_time, fapi2::buffer<uint64_t>& io_data )
+{
+    FAPI_DBG( "Set RCD_PROTECT_TIME to %d ",  i_time);
+
+    io_data.template insertFromRight<TT::FARB0Q_RCD_PROTECTION_TIME, TT::FARB0Q_RCD_PROTECTION_TIME_LEN>(i_time);
+}
+
+///
+/// @brief Change the RCD Protect Time value
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_time RCD Protect Time value (in cycles) to set
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<T> >
+fapi2::ReturnCode change_rcd_protect_time( const fapi2::Target<T>& i_target, const uint64_t i_time )
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY( read_farb0q_register(i_target, l_data) );
+
+    set_rcd_protect_time(i_time, l_data);
+
+    FAPI_TRY( write_farb0q_register(i_target, l_data) );
+
+    FAPI_INF( "RCD_PROTECT_TIME %d for %s", uint64_t(i_time), mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
