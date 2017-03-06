@@ -103,3 +103,4 @@ include ${HWP_IMAGEPROCS_PATH}/p9_scan_compression.mk
 include ${NEST_UTIL_PATH}/p9_fbc_utils.mk
 include ${HWP_PM_PATH}/p9_pstate_parameter_block.mk
 include ${HWP_PM_PATH}/p9_pm_get_poundv_bucket.mk
+include ${HWP_PM_PATH}/p9_pm_pstate_gpe_init.mk
