@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,17 +76,6 @@ namespace HBPM
         PHYSICAL_ADDR_MASK = 0x7FFFFFFFFFFFFFFF,
         VER_EYECATCH       = 0x56455253494F4E00, //'VERSION\0'
     };
-
-    /**
-     * @brief Build new Pstate Parameter Block for PGPE and CME
-     *
-     * @param[in] i_target:       Target processor
-     * @param[in] i_homer:        Virtual address of current proc's HOMER
-     *
-     * @return errlHndl_t  Error log Pstate Parameter Block build failed
-     */
-    errlHndl_t pstateParameterBuild( TARGETING::Target* i_target,
-                                     void* i_homer);
 
     /**
      * @brief Sets up OCC Host data in Homer

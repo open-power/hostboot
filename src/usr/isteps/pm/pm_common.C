@@ -152,49 +152,6 @@ namespace HBPM
     } // convertHomerPhysToVirt
 
     /**
-     * @brief Build new Pstate Parameter Block for PGPE and CME
-     */
-    errlHndl_t pstateParameterBuild( TARGETING::Target* i_target,
-                                     void* i_homer)
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   ENTER_MRK"pstateParameterBuild(HOMER:%p)",
-                   i_homer);
-
-        errlHndl_t l_errl = nullptr;
-
-        // cast OUR type of target to a FAPI type of target.
-        // figure out homer offsets
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-            l_fapiTarg(i_target);
-
-        do
-        {
-            // p9_pstate_parameter_build.C
-/*            FAPI_INVOKE_HWP( l_errl,
-                             p9_pstate_parameter_build,
-                             l_fapiTarg,
-                             i_homer ); @TODO RTC:153885 */
-
-            if (l_errl)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"pstateParameterBuild: "
-                           "p9_pstate_parameter_build failed!" );
-                l_errl->collectTrace("ISTEPS_TRACE",256);
-
-                break;
-            }
-
-        } while(0);
-
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   EXIT_MRK"pstateParameterBuild: RC=0x%X, PLID=0x%lX",
-                   ERRL_GETRC_SAFE(l_errl), ERRL_GETPLID_SAFE(l_errl) );
-        return l_errl;
-    } // pstateParameterBuild
-
-    /**
      * @brief Sets up OCC Host data in Homer
      */
     errlHndl_t loadHostDataToHomer( TARGETING::Target* i_proc,
@@ -731,19 +688,6 @@ namespace HBPM
                            "loading Host Data Area failed! "
                            "HUID=0x08X OCC_Host_Data_Virt=0x%08X",
                            get_huid(i_target), l_occDataVaddr );
-                break;
-            }
-
-            // @TODO RTC:153885 verify parameters on call
-            l_errl = pstateParameterBuild(i_target,
-                                          l_homerVAddr);
-            if(l_errl)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"loadPMComplex: "
-                           "pstateParameterBuild failed! "
-                           "HUID=0x08X OCC_Virt=0x%08X",
-                           get_huid(i_target), l_occImgVaddr );
                 break;
             }
 
