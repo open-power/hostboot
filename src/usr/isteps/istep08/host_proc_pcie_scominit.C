@@ -356,6 +356,20 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
            LANE_WIDTH_NC},
            0x00,PHB1_MASK|PHB2_MASK,
            PHB_X8_X8_MAC_MAP},
+
+         {{LANE_WIDTH_8X,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_NC},
+           0x00,PHB1_MASK,
+           PHB_X8_X8_MAC_MAP},
+
+         {{LANE_WIDTH_NC,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_8X,
+           LANE_WIDTH_NC},
+           0x00,PHB2_MASK,
+           PHB_X8_X8_MAC_MAP},
         };
 
     const laneConfigRow pec2_laneConfigTable[] =
