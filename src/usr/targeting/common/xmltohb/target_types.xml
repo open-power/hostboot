@@ -2170,6 +2170,9 @@
     <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!-- GARD -->
+    </attribute>
 </targetType>
 
 <targetType>
