@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,13 @@ bool isInMdiaMode();
  */
 int32_t mdiaSendEventMsg( TARGETING::TargetHandle_t i_trgt,
                           MDIA::MaintCommandEventType i_eventType );
+
+/**
+ * @brief  Initiates a reconfig loop due to an RCD parity error.
+ * @return True if the number of allowed reconfig loops has been exceeded.
+ *         False otherwise.
+ */
+bool rcdParityErrorReconfigLoop();
 
 /**
  * @brief  Invokes the restore DRAM repairs hardware procedure.

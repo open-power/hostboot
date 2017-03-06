@@ -107,6 +107,36 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_trgt,
 
 //------------------------------------------------------------------------------
 
+bool rcdParityErrorReconfigLoop()
+{
+    TargetHandle_t top = getSystemTarget();
+
+    // Check the current reconfig count.
+    uint8_t allowed = top->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOPS_ALLOWED>();
+    uint8_t count   = top->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>();
+
+    if ( count <= allowed )
+    {
+        // Set the RCD parity error flag in the reconfig loop attribute. This
+        // will trigger a reconfig loop at the end of the current istep.
+        ATTR_RECONFIGURE_LOOP_type attr = top->getAttr<ATTR_RECONFIGURE_LOOP>();
+        if ( 0 == (attr & RECONFIGURE_LOOP_RCD_PARITY_ERROR) )
+        {
+            attr |= RECONFIGURE_LOOP_RCD_PARITY_ERROR;
+            top->setAttr<ATTR_RECONFIGURE_LOOP>(attr);
+        }
+
+        // Increment the count.
+        top->setAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>(++count);
+
+        return false;
+    }
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
 /* TODO RTC 136126
 int32_t mssRestoreDramRepairs( TargetHandle_t i_mbaTarget,
                                uint8_t & o_repairedRankMask,

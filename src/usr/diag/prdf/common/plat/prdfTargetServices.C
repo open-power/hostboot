@@ -933,13 +933,10 @@ TargetHandle_t getConnectedPeerProc( TargetHandle_t i_procTarget,
 
 TARGETING::TargetHandle_t getSystemTarget()
 {
-    TargetHandle_t sysTarget = NULL;
+    TargetHandle_t sysTarget = nullptr;
     targetService().getTopLevelTarget( sysTarget );
 
-    if ( NULL == sysTarget )
-    {
-        PRDF_ERR( "[getSystemTarget] Failed" );
-    }
+    PRDF_ASSERT( nullptr != sysTarget );
 
     return sysTarget;
 }
