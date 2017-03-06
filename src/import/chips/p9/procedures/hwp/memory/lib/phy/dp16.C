@@ -48,8 +48,8 @@
 #include <lib/utils/bit_count.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/scom.H>
-#include <lib/utils/pos.H>
-#include <c_str.H>
+#include <generic/memory/lib/utils/pos.H>
+#include <generic/memory/lib/utils/c_str.H>
 
 #include <lib/workarounds/dp16_workarounds.H>
 

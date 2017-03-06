@@ -36,7 +36,7 @@
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
 
-#include <c_str.H>
+#include <generic/memory/lib/utils/c_str.H>
 #include <lib/utils/conversions.H>
 #include <lib/eff_config/timing.H>
 #include <lib/ccs/ccs.H>

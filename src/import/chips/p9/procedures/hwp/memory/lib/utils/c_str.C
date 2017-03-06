@@ -35,7 +35,7 @@
 
 #include <fapi2.H>
 #include <lib/mss_attribute_accessors.H>
-#include <c_str.H>
+#include <generic/memory/lib/utils/c_str.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;

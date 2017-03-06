@@ -65,7 +65,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
-EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/
 
 #------------------------------------------------------------------------------
 # objects

@@ -36,7 +36,7 @@
 #include <fapi2.H>
 #include <lib/phy/apb.H>
 #include <lib/utils/scom.H>
-#include <c_str.H>
+#include <generic/memory/lib/utils/c_str.H>
 #include <lib/utils/index.H>
 
 namespace mss

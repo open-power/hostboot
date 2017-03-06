@@ -38,7 +38,7 @@
 
 #include <vector>
 #include <fapi2.H>
-#include <c_str.H>
+#include <generic/memory/lib/utils/c_str.H>
 #include <lib/shared/mss_const.H>
 #include <lib/dimm/bcw_load_ddr4.H>
 #include <lib/phy/dp16.H>

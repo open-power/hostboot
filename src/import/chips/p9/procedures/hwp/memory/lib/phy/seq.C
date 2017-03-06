@@ -36,7 +36,7 @@
 #include <fapi2.H>
 #include <lib/phy/seq.H>
 #include <lib/utils/scom.H>
-#include <c_str.H>
+#include <generic/memory/lib/utils/c_str.H>
 #include <lib/utils/bit_count.H>
 #include <lib/eff_config/timing.H>
 

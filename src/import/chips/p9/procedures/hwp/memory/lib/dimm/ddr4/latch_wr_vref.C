@@ -35,7 +35,7 @@
 
 #include <vector>
 #include <fapi2.H>
-#include <c_str.H>
+#include <generic/memory/lib/utils/c_str.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <lib/dimm/ddr4/latch_wr_vref.H>
 #include <lib/dimm/rank.H>

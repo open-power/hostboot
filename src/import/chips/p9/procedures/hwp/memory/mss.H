@@ -46,10 +46,10 @@
 #include <lib/shared/mss_kind.H>
 
 #include <lib/utils/index.H>
-#include <c_str.H>
+#include <generic/memory/lib/utils/c_str.H>
 #include <lib/utils/num.H>
 
-#include <lib/utils/pos.H>
+#include <generic/memory/lib/utils/pos.H>
 #include <lib/utils/swizzle.H>
 #include <lib/utils/conversions.H>
 #include <lib/utils/find.H>

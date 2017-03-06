@@ -40,7 +40,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <lib/utils/scom.H>
-#include <lib/utils/pos.H>
+#include <generic/memory/lib/utils/pos.H>
 #include <lib/workarounds/dp16_workarounds.H>
 #include <lib/phy/dp16.H>
 #include <lib/dimm/rank.H>

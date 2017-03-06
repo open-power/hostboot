@@ -39,8 +39,8 @@
 #include <fapi2.H>
 #include <vector>
 
-#include <lib/utils/pos.H>
-#include <c_str.H>
+#include <generic/memory/lib/utils/pos.H>
+#include <generic/memory/lib/utils/c_str.H>
 
 namespace mss
 {

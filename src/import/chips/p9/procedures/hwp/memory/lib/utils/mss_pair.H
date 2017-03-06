@@ -39,7 +39,7 @@
 
 #include <fapi2.H>
 #include <lib/utils/find.H>
-#include <c_str.H>
+#include <generic/memory/lib/utils/c_str.H>
 
 namespace mss
 {

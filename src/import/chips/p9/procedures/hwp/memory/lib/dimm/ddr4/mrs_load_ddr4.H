@@ -38,7 +38,7 @@
 
 #include <vector>
 #include <fapi2.H>
-#include <c_str.H>
+#include <generic/memory/lib/utils/c_str.H>
 #include <lib/dimm/mrs_load.H>
 #include <lib/eff_config/timing.H>
 

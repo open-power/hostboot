@@ -45,7 +45,7 @@
 #include <lib/shared/mss_const.H>
 #include <lib/utils/scom.H>
 #include <lib/dimm/rank.H>
-#include <c_str.H>
+#include <generic/memory/lib/utils/c_str.H>
 #include <lib/mcbist/address.H>
 
 namespace mss

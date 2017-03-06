@@ -25,5 +25,5 @@
 
 PROCEDURE=p9_throttle_sync
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/)
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/generic/memory)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH))
 $(call BUILD_PROCEDURE)

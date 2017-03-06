@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@
 
 #include <fapi2.H>
 
-#include <lib/utils/pos.H>
+#include <generic/memory/lib/utils/pos.H>
 #include <lib/shared/mss_const.H>
 
 namespace mss

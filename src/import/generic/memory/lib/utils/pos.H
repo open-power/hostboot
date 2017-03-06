@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/utils/pos.H $   */
+/* $Source: src/import/generic/memory/lib/utils/pos.H $                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -37,10 +37,6 @@
 #define _MSS_POS_H_
 
 #include <fapi2.H>
-#include <lib/shared/mss_const.H>
-
-namespace mss
-{
 
 ///
 /// @brief Trait classes for the mss::pos functions
@@ -53,6 +49,17 @@ class posTraits
         // uint8_t and some attr_pos, uint32_t. We don't really care
         // but the type checking in the macros sure does ...
         typedef uint8_t pos_type;
+
+        enum
+        {
+            MC_PER_MODULE = 2,
+            MCS_PER_MC = 2,
+            PORTS_PER_MCBIST = 4,
+            PORTS_PER_MCS = 2,
+            DIMMS_PER_PORT = 2,
+            DIMMS_PER_MCS = PORTS_PER_MCS * DIMMS_PER_PORT,
+            MCS_PER_PROC = MC_PER_MODULE * MCS_PER_MC,
+        };
 };
 
 ///
@@ -63,6 +70,17 @@ class posTraits<fapi2::TARGET_TYPE_DIMM>
 {
     public:
         typedef uint32_t pos_type;
+
+        enum
+        {
+            MC_PER_MODULE = 2,
+            MCS_PER_MC = 2,
+            PORTS_PER_MCBIST = 4,
+            PORTS_PER_MCS = 2,
+            DIMMS_PER_PORT = 2,
+            DIMMS_PER_MCS = PORTS_PER_MCS * DIMMS_PER_PORT,
+            MCS_PER_PROC = MC_PER_MODULE * MCS_PER_MC,
+        };
 };
 
 ///
@@ -73,7 +91,17 @@ class posTraits<fapi2::TARGET_TYPE_PROC_CHIP>
 {
     public:
         typedef uint32_t pos_type;
+
+        enum
+        {
+            MC_PER_MODULE = 2,
+            MCS_PER_MC = 2,
+            MCS_PER_PROC = MC_PER_MODULE * MCS_PER_MC,
+        };
 };
+
+namespace mss
+{
 
 ///
 /// @brief Return a target's position from a fapi2 target
@@ -82,7 +110,7 @@ class posTraits<fapi2::TARGET_TYPE_PROC_CHIP>
 /// @return The position relative to the chip
 ///
 template< fapi2::TargetType T, typename TT = posTraits<T> >
-inline typename TT::pos_type pos(const fapi2::Target<T>& i_target)
+typename TT::pos_type pos(const fapi2::Target<T>& i_target)
 {
     typename TT::pos_type l_pos = 0;
 
@@ -108,8 +136,8 @@ fapi_try_exit:
 /// @return The position relative to the chip
 ///
 template<>
-inline posTraits<fapi2::TARGET_TYPE_PROC_CHIP>::pos_type pos(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+inline posTraits<fapi2::TARGET_TYPE_PROC_CHIP>::pos_type
+pos(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     posTraits<fapi2::TARGET_TYPE_PROC_CHIP>::pos_type l_pos = 0;
 
@@ -134,35 +162,8 @@ fapi_try_exit:
 /// @return The position relative to the chip
 ///
 template<>
-inline posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type pos(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
-{
-    // Proc 0 is DIMM 0-15, proc 2 is 64-79 - 64 is the stride between processors
-    constexpr uint64_t DIMM_STRIDE_PER_PROC = 64;
-    constexpr uint64_t TOTAL_DIMM = MC_PER_MODULE * MCS_PER_MC * PORTS_PER_MCS * MAX_DIMM_PER_PORT;
-
-    posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type l_pos = 0;
-
-    // Using fapi2 rather than mss::find as this is pretty low level stuff.
-    const auto l_proc_pos =
-        mss::template pos(i_target.getParent<fapi2::TARGET_TYPE_MCA>().getParent<fapi2::TARGET_TYPE_PROC_CHIP>());
-
-    if (FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_target, l_pos) != fapi2::FAPI2_RC_SUCCESS)
-    {
-        goto fapi_try_exit;
-    }
-
-    // To get the FAPI_POS to the equivilent of ATTR_POS, we need to normalize the fapi_pos value
-    // to the processor (stride across which ever processor we're on) and then add in the delta
-    // per processor as ATTR_POS isn't processor relative (delta is the total dimm on a processor)
-    return ((l_pos - (l_proc_pos * DIMM_STRIDE_PER_PROC)) % TOTAL_DIMM) + (TOTAL_DIMM * l_proc_pos);
-
-fapi_try_exit:
-    // If we can't get our position, we're in other trouble
-    FAPI_ERR("can't get our fapi position");
-    fapi2::Assert(false);
-    return 0;
-
-}
+posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type
+pos(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
 ///
 /// @brief Return a target's relative position from a fapi2 target
@@ -183,7 +184,8 @@ template<>
 inline posTraits<fapi2::TARGET_TYPE_MCA>::pos_type
 relative_pos<fapi2::TARGET_TYPE_MCBIST>(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
-    return pos(i_target) % PORTS_PER_MCBIST;
+    typedef posTraits<fapi2::TARGET_TYPE_MCA> TT;
+    return pos(i_target) % TT::PORTS_PER_MCBIST;
 }
 
 ///
@@ -195,8 +197,8 @@ template<>
 inline posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type
 relative_pos<fapi2::TARGET_TYPE_MCS>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
 {
-    constexpr uint64_t MAX_DIMM_PER_MCS = PORTS_PER_MCS * MAX_DIMM_PER_PORT;
-    return pos(i_target) % MAX_DIMM_PER_MCS;
+    typedef posTraits<fapi2::TARGET_TYPE_DIMM> TT;
+    return pos(i_target) % TT::DIMMS_PER_MCS;
 }
 
 ///
@@ -208,8 +210,8 @@ template<>
 inline posTraits<fapi2::TARGET_TYPE_MCS>::pos_type
 relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
 {
-    constexpr uint64_t MCS_PER_PROC = MC_PER_MODULE * MCS_PER_MC;
-    return pos(i_target) % MCS_PER_PROC;
+    typedef posTraits<fapi2::TARGET_TYPE_MCS> TT;
+    return pos(i_target) % TT::MCS_PER_PROC;
 }
 
 ///
@@ -221,10 +223,9 @@ template<>
 inline posTraits<fapi2::TARGET_TYPE_MCA>::pos_type
 relative_pos<fapi2::TARGET_TYPE_MCS>(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
-    return pos(i_target) % PORTS_PER_MCS;
+    typedef posTraits<fapi2::TARGET_TYPE_MCA> TT;
+    return pos(i_target) % TT::PORTS_PER_MCS;
 }
-
-
 
 ///
 /// @brief Return a target's fapi position from a fapi2 target
