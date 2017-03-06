@@ -692,13 +692,16 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     ERR_MRK "computeProcPcieConfigAttrs> "
                     "Code bug! PEC PCIE IOP configuration not found. "
-                    "Continuing with no PHBs active. "
-                    "IOP0 Lane set 0: Lane mask = 0x%04X "
-                    "IOP0 Lane set 1: Lane mask = 0x%04X "
-                    "IOP0 Lane set 2: Lane mask = 0x%04X ",
+                    "Continuing with no PHBs active on PEC 0x%08X. "
+                    "Lane set 0: Lane mask = 0x%04X "
+                    "Lane set 1: Lane mask = 0x%04X "
+                    "Lane set 2: Lane mask = 0x%04X "
+                    "Lane set 3: Lane mask = 0x%04X ",
+                    l_pecID,
                     effectiveLaneMask[0],
                     effectiveLaneMask[1],
-                    effectiveLaneMask[2]);
+                    effectiveLaneMask[2],
+                    effectiveLaneMask[3]);
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "PEC chip target number 0x%08X, HUID = 0x%08X.",
                     l_pecID, l_pec->getAttr<TARGETING::ATTR_HUID>());
@@ -713,9 +716,10 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
                  * @userdata1[32:63] Target PEC HUID
                  * @userdata2[0:15]  PEC lane set 0 lane mask
                  * @userdata2[16:31] PEC lane set 1 lane mask
-                 * @userdata2[32:63] PEC lane set 2 lane mask
+                 * @userdata2[32:47] PEC lane set 2 lane mask
+                 * @userdata2[48:63] PEC lane set 3 lane mask
                  * @devdesc          No valid PCIE IOP configuration found.  All
-                 *                   PHBs on the processor will be disabled.
+                 *                   PHBs on this PEC will be disabled.
                  * @custdesc         A problem isolated to firmware or firmware
                  *                   customization occurred during the IPL of
                  *                   the system.
@@ -731,7 +735,9 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
                         TWO_UINT16_TO_UINT32(
                         effectiveLaneMask[0],
                         effectiveLaneMask[1]),
-                        effectiveLaneMask[2]),
+                        TWO_UINT16_TO_UINT32(
+                        effectiveLaneMask[2],
+                        effectiveLaneMask[3])),
                     true);
                 ERRORLOG::ErrlUserDetailsTarget(i_pProcChipTarget)
                     .addToLog(pError);
