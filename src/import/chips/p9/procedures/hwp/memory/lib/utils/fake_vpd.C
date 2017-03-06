@@ -35,7 +35,7 @@
 #include <mss.H>
 #include <lib/utils/fake_vpd.H>
 #include <lib/shared/mss_const.H>
-#include <lib/utils/pos.H>
+#include <generic/memory/lib/utils/pos.H>
 
 #ifndef DOXYGEN
 
