@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,7 +57,7 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
 
     Globals globals;
 
-    TargetHandle_t top = 0;
+    TargetHandle_t top = nullptr;
     targetService().getTopLevelTarget(top);
 
     if(top)
@@ -116,6 +116,23 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
     // ensure threads and pools are shutdown when finished
 
     doStepCleanup(globals);
+
+    if ( nullptr != top &&
+         0 != top->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>() )
+    {
+        // Reset the RCD parity error reconfig loop counter if this step
+        // completes without an RCD parity error. Note that PRD will only set
+        // the RCD parity error flag if there is an RCD parity error and the
+        // total count of reconfig loops is under threshold. At threshold, a
+        // part will be deconfigured, forcing a reconfig, but the RCD parity
+        // error flag will not be set to ensure this code is activated and the
+        // count it reset.
+        ATTR_RECONFIGURE_LOOP_type attr = top->getAttr<ATTR_RECONFIGURE_LOOP>();
+        if ( 0 == (attr & RECONFIGURE_LOOP_RCD_PARITY_ERROR) )
+        {
+            top->setAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>(0);
+        }
+    }
 
     if (nullptr != err)
     {

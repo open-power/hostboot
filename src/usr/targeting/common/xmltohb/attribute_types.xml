@@ -15421,6 +15421,13 @@ Measured in GB</description>
         <name>BAD_DQ_BIT_SET</name>
         <value>0x02</value>
     </enumerator>
+    <enumerator>
+        <description>
+            An RCD parity error has been detected
+        </description>
+        <name>RCD_PARITY_ERROR</name>
+        <value>0x04</value>
+    </enumerator>
 </enumerationType>
 
 <attribute>
@@ -17476,6 +17483,35 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+</attribute>
+
+<attribute>
+    <id>RCD_PARITY_RECONFIG_LOOPS_ALLOWED</id>
+    <description>
+        The number of reconfig loops allowed due to RCD parity errors when
+        recovery is disabled.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>RCD_PARITY_RECONFIG_LOOP_COUNT</id>
+    <description>
+        The number of reconfig loops issued due to RCD parity errors when
+        recovery is disabled.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
 </attribute>
 
 <!-- === end manufacturing threshold attributes for PRD === -->
