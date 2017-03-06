@@ -28,8 +28,10 @@
 #include <map>
 #include <vector>
 #include <trace/interface.H>
+#include <sys/misc.h>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errludtarget.H>
 #include <targeting/attrsync.H>
 #include <targeting/namedtarget.H>
 #include <targeting/common/utilFilter.H>
@@ -52,6 +54,7 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <fapi2/target.H>
 
+#include <p9_cpu_special_wakeup.H>
 #include <p9_query_core_access_state.H>
 #include <p9_query_cache_access_state.H>
 #include <p9_hcd_core_stopclocks.H>
@@ -166,12 +169,70 @@ void print_system_info(void)
 }
 #endif
 
-//loop through slave quads, make sure clocks are stopped (core and cache) and power them down
+/**
+*  @brief  Walk through the cores and ensure special wakeup is disabled
+*          from all srcs.
+*
+*  @param[in/out] ISTEP_ERROR::IStepError
+*                 Pass in the istep error so we can add errors to it
+*
+*  @return     bool
+*              True if no errors were found
+*              False if at least 1 error was found
+*/
+bool deassertSpecialWakeupOnCores(ISTEP_ERROR::IStepError & io_istepError)
+{
+    errlHndl_t l_err = nullptr;
+    bool l_success = true;
+    // First disable special wakeup of all types for all cores
+    TARGETING::TargetHandleList l_coreTargetList;
+    TARGETING::getAllChiplets(l_coreTargetList, TARGETING::TYPE_CORE, true);
+
+    for(const auto & l_core : l_coreTargetList)
+    {
+        for(uint8_t l_src = 0; l_src < p9specialWakeup::SPW_ALL; l_src++)
+        {
+            FAPI_INVOKE_HWP(l_err, p9_cpu_special_wakeup_core, l_core,
+                            p9specialWakeup::SPCWKUP_DISABLE,
+                            p9specialWakeup::PROC_SPCWKUP_ENTITY(l_src));
+            if ( l_err )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR : returned from p9_cpu_special_wakeup_core for core 0x%x for src 0x%x", TARGETING::get_huid(l_core), l_src  );
+                l_success = false;
+                break;
+            }
+            else
+            {
+                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "disabled special wakeup for core 0x%x for src 0x%x", TARGETING::get_huid(l_core), l_src  );
+            }
+        }
+        if(l_err)
+        {
+            // capture the target data in the elog
+            ERRORLOG::ErrlUserDetailsTarget(l_core).addToLog( l_err );
+            // add the err to the istep error
+            io_istepError.addErrorDetails(l_err);
+            //commit the error log (this will delete the err)
+            errlCommit(l_err, ISTEP_COMP_ID);
+        }
+    }
+
+    return l_success;
+}
+
+/**
+*  @brief  loop through slave quads, make sure clocks are stopped
+*          (core and cache) and power them down
+*
+*  @return     errlHndl_t
+*/
 errlHndl_t powerDownSlaveQuads()
 {
     TARGETING::Target* l_sys_target = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_sys_target);
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     bool l_isMasterEq = false;
     TARGETING::TargetHandleList l_eqTargetList;
     getAllChiplets(l_eqTargetList, TARGETING::TYPE_EQ, true);
@@ -335,11 +396,11 @@ void* host_discover_targets( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "host_discover_targets entry" );
 
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     ISTEP_ERROR::IStepError l_stepError;
 
     // Check whether we're in MPIPL mode
-    TARGETING::Target* l_pTopLevel = NULL;
+    TARGETING::Target* l_pTopLevel = nullptr;
     TARGETING::targetService().getTopLevelTarget( l_pTopLevel );
     assert(l_pTopLevel, "host_discover_targets: no TopLevelTarget");
 
@@ -350,9 +411,12 @@ void* host_discover_targets( void *io_pArgs )
                   "information has already been loaded from memory"
                   "when the targeting service started");
 
-        //Need to power down the slave quads
-        l_err = powerDownSlaveQuads();
-
+        //Make sure that all special wakeups are disabled
+        if(deassertSpecialWakeupOnCores(l_stepError))
+        {
+            //Need to power down the slave quads
+            l_err = powerDownSlaveQuads();
+        }
     }
     else
     {
@@ -366,7 +430,7 @@ void* host_discover_targets( void *io_pArgs )
     // Now that all targets have completed presence detect and vpd access,
     // invalidate PNOR::CENTAUR_VPD sections where all the targets sharing a
     // VPD_REC_NUM are invalid.
-    if (NULL == l_err) //discoverTargets worked
+    if (nullptr == l_err) //discoverTargets worked
     {
         l_err = VPD::validateSharedPnorCache();
     }
