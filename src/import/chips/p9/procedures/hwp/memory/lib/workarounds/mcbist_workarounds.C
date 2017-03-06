@@ -41,7 +41,7 @@
 
 #include <lib/mss_attribute_accessors.H>
 #include <lib/utils/scom.H>
-#include <lib/utils/pos.H>
+#include <generic/memory/lib/utils/pos.H>
 #include <lib/dimm/kind.H>
 #include <lib/workarounds/mcbist_workarounds.H>
 #include <lib/mcbist/mcbist.H>
