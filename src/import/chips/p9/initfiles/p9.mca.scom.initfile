@@ -357,12 +357,12 @@ ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RODT_END_DLY [when=S] {
 
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_WODT_START_DLY [when=S] {
   spyv;
-   1;
+   0;
 }
 
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_WODT_END_DLY [when=S] {
   spyv;
-   6;
+   5;
 }
 
 #  FARB0 SCOM REGISTER   #

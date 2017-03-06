@@ -345,8 +345,8 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
                 l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_16 );
             }
 
-            l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_1 );
-            l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_6 );
+            l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0 );
+            l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_5 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x701090aull, l_scom_buffer));
         }
         {
