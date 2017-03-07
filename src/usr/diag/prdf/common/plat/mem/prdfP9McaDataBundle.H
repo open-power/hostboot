@@ -28,6 +28,7 @@
 
 // Framework includes
 #include <prdfExtensibleChip.H>
+#include <prdfThresholdUtils.H>
 
 // Platform includes
 #include <prdfMemCeTable.H>
@@ -35,6 +36,7 @@
 #include <prdfPlatServices.H>
 
 #ifdef __HOSTBOOT_MODULE
+  #include <prdfMemThresholds.H>
   #include <prdfP9McbistDataBundle.H>
 #endif
 
@@ -112,6 +114,16 @@ class McaDataBundle : public DataBundle
 
     MemCeTable<TARGETING::TYPE_MCA> iv_ceTable; ///< CE table for FFDC
     MemUeTable iv_ueTable;                      ///< UE table for FFDC
+
+    #ifdef __HOSTBOOT_MODULE
+
+    /** Threshold table for RCD parity errors. */
+    TimeBasedThreshold iv_rcdParityTh = TimeBasedThreshold( getRcdParityTh() );
+
+    /** Threshold table for IUEs. */
+    TimeBasedThreshold iv_iueTh = TimeBasedThreshold( getIueTh() );
+
+    #endif
 };
 
 /**
