@@ -1054,12 +1054,12 @@ fapi2::ReturnCode reset_sysclk( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     } );
 
     fapi2::buffer<uint64_t> l_data;
-    uint8_t is_sim = 0;
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+    uint8_t l_sim = 0;
+    FAPI_TRY( mss::is_simulation( l_sim) );
 
     l_data.setBit<MCA_DDRPHY_DP16_SYSCLK_PR0_P0_0_01_ENABLE>();
 
-    if (is_sim)
+    if (l_sim)
     {
         l_data.setBit<MCA_DDRPHY_DP16_SYSCLK_PR0_P0_0_01_ROT_OVERRIDE_EN>();
     }
@@ -1470,17 +1470,17 @@ fapi2::ReturnCode reset_rd_vref( const fapi2::Target<TARGET_TYPE_MCA>& i_target 
 
     std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> > > l_data;
     uint64_t l_vref_bitfield = 0;
-    uint8_t is_sim = 0;
+    uint8_t l_sim = 0;
     uint32_t l_vref = 0;
 
     FAPI_TRY( mss::vpd_mt_vref_mc_rd(i_target, l_vref) );
 
     FAPI_TRY( rd_vref_bitfield_helper(i_target, l_vref, l_vref_bitfield) );
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+    FAPI_TRY( mss::is_simulation( l_sim) );
 
     // Leave the values as-is if we're on VBU or Awan, since we know that works. Use the real value for unit test and HW
-    if (!is_sim)
+    if (!l_sim)
     {
         // Setup the rd vref from VPD
         {
