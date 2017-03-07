@@ -86,7 +86,9 @@ int main(int argc, char ** argv)
     }
 
     std::ofstream l_htmlFile((std::string(argv[1]) + ".html").c_str());
+    std::ofstream l_htmlDummy(std::string("/dev/null").c_str());
     std::ofstream l_errFile((std::string(argv[1]) + ".err.C").c_str());
+    std::ofstream l_dispFile((std::string(argv[1]) + ".disp.C").c_str());
     std::ofstream l_regFile((std::string(argv[1]) + ".reg.C").c_str());
 
 #ifndef __HOSTBOOT_MODULE
@@ -112,6 +114,9 @@ int main(int argc, char ** argv)
     // setup error signature file.
     l_errFile << "#include <prdrErrlPluginsSupt.H>" << std::endl;
     l_errFile << "PRDR_ERROR_SIGNATURE_TABLE_START ";
+
+    l_dispFile << "#include <prdrErrlDisplaySupt.H>" << std::endl;
+    l_dispFile << "PRDR_ERROR_SIGNATURE_TABLE_START ";
 
     // setup register id file.
     l_regFile << "#include <prdrErrlPluginsSupt.H>" << std::endl;
@@ -163,6 +168,11 @@ int main(int argc, char ** argv)
               << std::hex << g_currentChip->cv_signatureOffset
               << " )" << std::endl;
 
+    // set error register HOM_TYPE
+    l_dispFile << "( 0x" << std::hex << g_currentChip->cv_targetType << ", 0x"
+              << std::hex << g_currentChip->cv_signatureOffset
+              << " )" << std::endl;
+
     // output bit groups
     uint32_t l_pos = 0;
     l_size = htons((uint16_t)g_groups.size());
@@ -187,6 +197,7 @@ int main(int argc, char ** argv)
     {
         (*i).second->output(l_prfFile);
         (*i).second->generateDoxygen(l_htmlFile, (*i).first, l_errFile);
+        (*i).second->generateDoxygen(l_htmlDummy, (*i).first, l_dispFile);
     }
 
     // output action classes.
@@ -218,6 +229,7 @@ int main(int argc, char ** argv)
 
     // Add chip's extra signatures.
     l_errFile << "//---- Extra Signatures ----" << std::endl;
+    l_dispFile << "//---- Extra Signatures ----" << std::endl;
     for (std::list<ExtraSignature>::iterator i
             = g_currentChip->cv_sigExtras.begin();
             i != g_currentChip->cv_sigExtras.end();
@@ -227,10 +239,18 @@ int main(int argc, char ** argv)
             << std::setfill('0') << std::setw(8) << std::hex
             << i->iv_sig << ", " << *(i->iv_sname) << ", "
             << *(i->iv_desc) << ")" << std::endl;
+
+        l_dispFile << "\tPRDR_ERROR_SIGNATURE ( 0x"
+            << std::setfill('0') << std::setw(8) << std::hex
+            << i->iv_sig << ", " << *(i->iv_sname) << ", "
+            << *(i->iv_desc) << ")" << std::endl;
     }
 
     l_errFile << "PRDR_ERROR_SIGNATURE_TABLE_END" << std::endl;
     l_errFile.close();
+
+    l_dispFile << "PRDR_ERROR_SIGNATURE_TABLE_END" << std::endl;
+    l_dispFile.close();
 
     l_regFile << "PRDR_REGISTER_ID_TABLE_END" << std::endl;
     l_regFile.close();

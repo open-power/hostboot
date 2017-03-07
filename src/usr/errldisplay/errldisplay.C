@@ -65,12 +65,27 @@
 #include <console/consoleif.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/iterators/targetiterator.H>
+#include <targeting/common/target.H>
 
 #ifdef CONFIG_CONSOLE_OUTPUT_FFDCDISPLAY
 //Generated hearder files for HWP parsing
 #include <hbfwErrDisplayPlatHwpErr.H>
 #include <hbfwErrDisplayPlatHwpFFDC.H>
+#include <prdrErrlDisplaySupt.H>
+
+namespace PRDF
+{
+namespace HOSTBOOT
+{
+PrdrErrSigTable & GetErrorSigTable()
+{
+    static PrdrErrSigTable l_sigTable = PrdrErrSigTable();
+    return l_sigTable;
+}
+}
+}
 #endif
+
 
 namespace ERRORLOGDISPLAY
 {
@@ -97,10 +112,9 @@ static const ErrLogDisplay::errLogInfo unknownErrorInfo = {
     "<none>",    // Description
     "unknown",   // Module Name
     "unknown",   // Reason
-    "unknown",   // User Data 1 string
-    "unknown"    // User Data 2 string
+    "",          // User Data 1 string
+    ""           // User Data 2 string
 };
-
 
 ErrLogDisplay& errLogDisplay()
 {
@@ -183,6 +197,50 @@ void displayCalloutTarget (uint8_t * epRaw, size_t& o_size)
     CONSOLE::displayf(NULL, "  Target                   : %s", ep_str);
     free(tmp_str);
 }
+
+void ErrLogDisplay::displayPrdf (uint64_t i_ud1, uint64_t i_ud2)
+{
+    //PRD stores the HUID of the callout in top word of ud1
+    // and the signature in the top word of ud2
+    uint32_t l_huid = i_ud1 >> 32;
+    uint32_t l_sig = i_ud2 >> 32;
+
+    CONSOLE::displayf(NULL, "  PRD Signature            : 0x%X 0x%X",
+                      l_huid, l_sig);
+
+#ifdef CONFIG_CONSOLE_OUTPUT_FFDCDISPLAY
+    //Find the Target from the HUID
+    TARGETING::Target* l_pTopLevel = NULL;
+    TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+    TARGETING::Target * l_target = l_pTopLevel->getTargetFromHuid(l_huid);
+
+    if(l_target)
+    {
+        TARGETING::TYPE l_targetType =
+          l_target->getAttr<TARGETING::ATTR_TYPE>();
+
+        const char * l_nameStr =
+           PRDF::HOSTBOOT::GetErrorSigTable()[l_targetType][l_sig].first;
+        const char * l_descStr =
+           PRDF::HOSTBOOT::GetErrorSigTable()[l_targetType][l_sig].second;
+
+        TARGETING::ATTR_FAPI_NAME_type l_fapiStr = {0};
+        l_target->tryGetAttr<TARGETING::ATTR_FAPI_NAME>(l_fapiStr);
+
+        if(l_nameStr)
+        {
+            CONSOLE::displayf(NULL, "  Signature Description    : %s (%s) %s",
+                              l_fapiStr, l_nameStr, l_descStr);
+        }
+        else
+        {
+            CONSOLE::displayf(NULL, "  Signature Description    : %s UNKNOWN",
+                              l_fapiStr);
+        }
+    }
+#endif
+}
+
 
 void ErrLogDisplay::displayCallout (void *data, size_t size)
 {
@@ -504,16 +562,26 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
         CONSOLE::displayf(NULL, "Error reported by %s (0x%04X) PLID 0x%08X",
                          findComponentName( i_committerComp ),
                          i_committerComp, i_err->plid() );
-        CONSOLE::displayf(NULL, "  %s", info->descriptString);
-        CONSOLE::displayf(NULL, "  ModuleId   0x%02x %s",
+
+        //PRD doesn't follow the rest of the HB conventions
+        // Handle them special
+        if(i_committerComp == PRDF_COMP_ID)
+        {
+            displayPrdf(i_err->getUserData1(), i_err->getUserData2());
+        }
+        else
+        {
+            CONSOLE::displayf(NULL, "  %s", info->descriptString);
+            CONSOLE::displayf(NULL, "  ModuleId   0x%02x %s",
                           i_err->moduleId(), info->moduleName);
-        CONSOLE::displayf(NULL, "  ReasonCode 0x%04x %s",
+            CONSOLE::displayf(NULL, "  ReasonCode 0x%04x %s",
                           i_err->reasonCode(), info->reasonString);
+        }
+
         CONSOLE::displayf(NULL, "  UserData1  %s : 0x%016lx",
                           info->userData1String, i_err->getUserData1());
         CONSOLE::displayf(NULL, "  UserData2  %s : 0x%016lx",
                           info->userData2String, i_err->getUserData2());
-
 
         // Loop through and print interesting  user data sections.
         for ( size_t i = 0; i < i_err->iv_SectionVector.size(); ++i )

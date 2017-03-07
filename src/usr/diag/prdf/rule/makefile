@@ -73,6 +73,7 @@ PRDR_CMP_FLEX_C_PATH = ${OBJ_RULE_DIR}/${PRDR_CMP_FLEX_C}
 
 PRF_IMG_PATHS    = $(addprefix ${IMGDIR}/,       ${prd_rule_prf_targets})
 ERR_PLUGIN_PATHS = $(addprefix ${OBJ_PLUG_DIR}/, ${prd_rule_err_targets})
+ERR_DISPLAY_PATHS= $(addprefix ${OBJ_PLUG_DIR}/, ${prd_rule_disp_targets})
 REG_PLUGIN_PATHS = $(addprefix ${OBJ_PLUG_DIR}/, ${prd_rule_reg_targets})
 
 #-------------------------------------------------------------------------------
@@ -105,6 +106,7 @@ LINK_PLUGIN_FILES += $(addprefix ${OBJ_PLUG_DIR}/,$(notdir ${SOURCE_PLUGIN_FILES
 
 CODE_PASS_BODY += ${PRF_IMG_PATHS}
 CODE_PASS_BODY += ${ERR_PLUGIN_PATHS}
+CODE_PASS_BODY += ${ERR_DISPLAY_PATHS}
 CODE_PASS_BODY += ${REG_PLUGIN_PATHS}
 CODE_PASS_BODY += ${LINK_PLUGIN_FILES}
 
@@ -117,10 +119,12 @@ CLEAN_TARGETS += ${PRDR_CMP_FLEX_o_PATH}
 CLEAN_TARGETS += ${PRDR_CMP_FLEX_C_PATH}
 CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${prd_rule_prf_targets})
 CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${prd_rule_err_targets})
+CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${prd_rule_disp_targets})
 CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${prd_rule_reg_targets})
 CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${prd_rule_html_targets})
 CLEAN_TARGETS += ${PRF_IMG_PATHS}
 CLEAN_TARGETS += ${ERR_PLUGIN_PATHS}
+CLEAN_TARGETS += ${ERR_DISPLAY_PATHS}
 CLEAN_TARGETS += ${REG_PLUGIN_PATHS}
 CLEAN_TARGETS += ${LINK_PLUGIN_FILES}
 
@@ -211,6 +215,7 @@ PRDRPP_SEARCHDIRS = -I../common/plat/p9 \
 
 ${OBJ_RULE_DIR}/%.prf \
 ${OBJ_RULE_DIR}/%.prf.err.C \
+${OBJ_RULE_DIR}/%.prf.disp.C \
 ${OBJ_RULE_DIR}/%.prf.reg.C : %.rule ${PRDR_CMP_PATH}
 	${PRD_OUT_MAKE}
 	$(C1)cat $< | ${SRC_USR_DIR}/common/rule/prdrpp \
@@ -226,6 +231,7 @@ ${PRF_IMG_PATHS}: ${IMGDIR}/% : ${OBJ_RULE_DIR}/%
 
 # Link all .prf.err.C and .prf.reg.C files from OBJ_RULE_DIR to OBJ_PLUG_DIR
 ${ERR_PLUGIN_PATHS} \
+${ERR_DISPLAY_PATHS} \
 ${REG_PLUGIN_PATHS}: ${OBJ_PLUG_DIR}/% : ${OBJ_RULE_DIR}/% | ${OBJ_PLUG_DIR}
 	${PRD_OUT_LINK}
 	$(C1)ln -sf ${OBJ_RULE_LINK_DIR}/$(notdir $^) $@

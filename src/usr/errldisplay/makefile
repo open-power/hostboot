@@ -30,11 +30,18 @@ MODULE = errldisplay
 OBJS += errldisplay.o
 OBJS += errldisplaydata.o
 
+#PRDF Error Sigs
+include ${ROOTPATH}/src/usr/diag/prdf/common/rule/tables.mk
+OBJS += $(if $(CONFIG_CONSOLE_OUTPUT_FFDCDISPLAY),$(prd_rule_disp_targets))
+
 include ${ROOTPATH}/config.mk
 
 # To find errldisplaydata.C - it is generated
 # by ../errl/parser/genErrlParsers.pl
-vpath %.C ${GENDIR}
+vpath %.C ${GENDIR} ${GENDIR}/plugins/prdf/
+vpath %.C ${GENDIR} ${GENDIR}/plugins/prdf/rule
 
 #To find hbfwErrDisplayPlatHwpErr add extra include paths
 EXTRAINCDIR += ${GENDIR}/plugins
+EXTRAINCDIR += ${GENDIR}/plugins/prdf/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/prdf/plugins/
