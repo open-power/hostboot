@@ -276,6 +276,11 @@ errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
              * @devdesc      Timeout waiting for upstream FIFO to have
              *               room to write
              */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 SBEIO_FIFO,
+                                 SBEIO_FIFO_UPSTREAM_TIMEOUT,
+                                 MAX_UP_FIFO_TIMEOUT_NS,
+                                 0);
 
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
