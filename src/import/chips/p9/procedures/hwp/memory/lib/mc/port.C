@@ -85,8 +85,8 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
 
     FAPI_INF("Enable periodic cal");
 
-    uint8_t is_sim = 0;
-    FAPI_TRY( mss::is_simulation(is_sim) );
+    uint8_t l_sim = 0;
+    FAPI_TRY( mss::is_simulation(l_sim) );
 
     // Even if we're in sim, do these so that we do the attribute work (even though the values aren't used.)
     FAPI_TRY( mss::eff_memcal_interval(i_target, l_memcal_interval) );
@@ -140,7 +140,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
             fapi2::buffer<uint64_t> l_data;
 
             // Don't enable zcal in sim as we don't enable it in the PHY
-            l_data.writeBit<TT::CAL0Q_CAL_INTERVAL_TMR0_ENABLE>(is_sim ? 0 : 1);
+            l_data.writeBit<TT::CAL0Q_CAL_INTERVAL_TMR0_ENABLE>(l_sim ? 0 : 1);
 
             l_data.insertFromRight<TT::CAL0Q_TIME_BASE_TMR0, TT::CAL0Q_TIME_BASE_TMR0_LEN>(0b01);
             l_data.insertFromRight<TT::CAL0Q_INTERVAL_COUNTER_TMR0, TT::CAL0Q_INTERVAL_COUNTER_TMR0_LEN>(0b010000000);
@@ -162,7 +162,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
         FAPI_TRY( reset_zqcal_config(i_target) );
 
         // No ZQCAL in sim
-        l_periodic_cal_config.writeBit<TT::PER_ENA_ZCAL>(is_sim ? 0 : 1);
+        l_periodic_cal_config.writeBit<TT::PER_ENA_ZCAL>(l_sim ? 0 : 1);
 
         // Write the ZQCAL timer reload register
         // # DPHY01_DDRPHY_PC_ZCAL_TIMER_RELOAD_VALUE_P0   0x00A   0x8000c0090301143f
@@ -180,7 +180,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
             // have the story above opened to investigate
             fapi2::buffer<uint64_t> l_zcal_timer_reload;
             l_zcal_timer_reload.insertFromRight<TT::ZCAL_TIMER_RELOAD_VALUE, TT::ZCAL_TIMER_RELOAD_VALUE_LEN>(
-                is_sim ? (l_zqcal_interval / TT::MAGIC_NUMBER_SIM) + 1 : (l_zqcal_interval / TT::MAGIC_NUMBER_NOT_SIM) + 1);
+                l_sim ? (l_zqcal_interval / TT::MAGIC_NUMBER_SIM) + 1 : (l_zqcal_interval / TT::MAGIC_NUMBER_NOT_SIM) + 1);
             FAPI_INF("zcal timer reload: 0x%016lx", l_zcal_timer_reload);
             FAPI_TRY( mss::putScom(i_target, TT::PHY_ZCAL_TIMER_RELOAD_REG, l_zcal_timer_reload) );
         }
@@ -251,7 +251,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
         // scom 0x800(0,1)c0080301143f {   # _P[0:1]
         // bits    ,       scom_data,       expr;       # must be >= 2...
         // #       0:47    ,       0x000000000000,       any                                             ;# reserved
-        // #       48:63   ,       0x0000, (def_is_sim)                    ;# match dials
+        // #       48:63   ,       0x0000, (def_l_sim)                    ;# match dials
         //         48:63   ,       ((ATTR_EFF_MEMCAL_INTERVAL/196605)+1), (def_FAST_SIM_PC==0)    ;# FAST_SIM_PER_CNTR=0
         //         48:63   ,       ((ATTR_EFF_MEMCAL_INTERVAL/765)+1),    (def_FAST_SIM_PC==1)    ;# FAST_SIM_PER_CNTR=1
         // #       48:63   ,       0x01D1,       any                                             ;       # 464 = 114ms @ 1600MHz
@@ -263,7 +263,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
         }
 
         // If we're in sim, enable the fast-sim mode
-        l_periodic_cal_config.writeBit<TT::PER_FAST_SIM_CNTR>(is_sim);
+        l_periodic_cal_config.writeBit<TT::PER_FAST_SIM_CNTR>(l_sim);
 
         l_periodic_cal_config.writeBit<TT::PER_ENA_SYSCLK_ALIGN>( l_per_memcal_mode_options.getBit<BIT_SYSCLK_ALIGN>() );
 
@@ -292,7 +292,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
             // have the story above opened to investigate
             fapi2::buffer<uint64_t> l_cal_timer_reload;
             l_cal_timer_reload.insertFromRight<TT::PC_CAL_TIMER_RELOAD_VALUE, TT::PC_CAL_TIMER_RELOAD_VALUE_LEN>(
-                is_sim ? (l_memcal_interval / TT::MAGIC_NUMBER_SIM) + 1 : (l_memcal_interval / TT::MAGIC_NUMBER_NOT_SIM) + 1);
+                l_sim ? (l_memcal_interval / TT::MAGIC_NUMBER_SIM) + 1 : (l_memcal_interval / TT::MAGIC_NUMBER_NOT_SIM) + 1);
             FAPI_INF("phy cal timer reload: 0x%016lx", l_cal_timer_reload);
             FAPI_TRY( mss::putScom(i_target, TT::PHY_CAL_TIMER_RELOAD_REG, l_cal_timer_reload ) );
         }
