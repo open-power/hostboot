@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,7 +66,7 @@ fapi2::ReturnCode reset_delay( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
 {
     typedef adrTraits<TARGET_TYPE_MCA> TT;
 
-    uint8_t is_sim = 0;
+    uint8_t l_sim = 0;
 
     // A nice table representing the swizzles we need to swizzle. Make sure to keep these in pairs, using a nullptr
     // to represent the even/odd half which doesn't get a setting. ADR delays come in lane pairs in each register.
@@ -105,10 +105,10 @@ fapi2::ReturnCode reset_delay( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
         };
     // *INDENT-ON*
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+    FAPI_TRY( mss::is_simulation( l_sim) );
 
     // Nothing to do here if we're running on a sim; no adjustment to the ADR delay makes sense
-    if (is_sim)
+    if (l_sim)
     {
         return fapi2::FAPI2_RC_SUCCESS;
     }

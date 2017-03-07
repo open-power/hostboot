@@ -107,7 +107,7 @@ class operation
             iv_subtest(i_subtest),
             iv_const(i_const)
         {
-            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), iv_is_sim) );
+            FAPI_TRY( mss::is_simulation (iv_l_sim) );
             return;
 
         fapi_try_exit:
@@ -178,7 +178,7 @@ class operation
         mss::mcbist::subtest_t<T> iv_subtest;
         constraints               iv_const;
         mss::mcbist::program<T>   iv_program;
-        uint8_t                   iv_is_sim;
+        uint8_t                   iv_l_sim;
 };
 
 ///
