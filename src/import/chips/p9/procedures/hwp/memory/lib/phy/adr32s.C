@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -212,12 +212,12 @@ fapi2::ReturnCode duty_cycle_distortion_calibration( const fapi2::Target<fapi2::
 
     const auto l_mca = mss::find_targets<TARGET_TYPE_MCA>(i_target);
     fapi2::buffer<uint64_t> l_read;
-    uint8_t is_sim = 0;
+    uint8_t l_sim = 0;
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+    FAPI_TRY( mss::is_simulation( l_sim) );
 
     // Nothing works here in cycle sim ...
-    if (is_sim)
+    if (l_sim)
     {
         return FAPI2_RC_SUCCESS;
     }

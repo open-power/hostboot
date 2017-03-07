@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,7 @@
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
-
+#include <mss.H>
 #include <lib/utils/fake_vpd.H>
 #include <lib/shared/mss_const.H>
 #include <lib/utils/pos.H>
@@ -242,13 +242,13 @@ fapi2::ReturnCode getVPD(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
 
                 if (o_blob != nullptr)
                 {
-                    uint8_t is_sim = 0;
-                    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), is_sim) );
+                    uint8_t l_sim = 0;
+                    FAPI_TRY( is_simulation(l_sim) );
 
                     // If we're in sim, we return the DQ map of the VBU (raw) DQ map - 1-1 more or less
                     // Ifwe're not in sim, we return the DQ map which corresponds with our MCS relative
                     // postion.
-                    const uint8_t* blob = is_sim ? raw_dq : zz_dq[mss::relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(i_target)];
+                    const uint8_t* blob = l_sim ? raw_dq : zz_dq[mss::relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(i_target)];
                     memcpy(o_blob, blob, io_vpd_info.iv_size);
                 }
             }

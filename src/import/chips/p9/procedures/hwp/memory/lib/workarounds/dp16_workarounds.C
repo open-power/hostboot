@@ -265,8 +265,8 @@ fapi2::ReturnCode after_phy_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
 {
     typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
 
-    uint8_t is_sim = 0;
-    FAPI_TRY( mss::is_simulation(is_sim) );
+    uint8_t l_sim = 0;
+    FAPI_TRY( mss::is_simulation(l_sim) );
 
     // This is a collection or workarounds called after phy reset is called. Each individual workaround
     // below does its own checking for applicable feature/ec levels.
@@ -276,7 +276,7 @@ fapi2::ReturnCode after_phy_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
         std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>> > l_vref_cntl;
 
         // Fix up vref dac
-        if (!is_sim)
+        if (!l_sim)
         {
             FAPI_TRY( mss::scom_suckah(p, TT::RD_VREF_CNTRL_REG, l_vref_cntl) );
             std::for_each(l_vref_cntl.begin(), l_vref_cntl.end(),
