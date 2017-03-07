@@ -68,8 +68,8 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        uint8_t is_sim = false;
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+        uint8_t l_sim = false;
+        FAPI_TRY( mss::is_simulation( l_sim) );
 
         // Read the bad_dq_bitmap attribute and place corresponding symbol and chip marks
         for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(i_target))
@@ -125,7 +125,7 @@ extern "C"
 
         // If we're in the sim, we want to poll for the FIR bit. I don't think this ever really happens
         // unless we're expressly testing this API.
-        if (is_sim)
+        if (l_sim)
         {
             // Poll for the fir bit. We expect this to be set ...
             fapi2::buffer<uint64_t> l_status;
