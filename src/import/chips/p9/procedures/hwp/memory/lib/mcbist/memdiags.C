@@ -180,7 +180,7 @@ fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::single_port_init()
 
     // The address should have the port and DIMM noted in it. All we need to do is calculate the
     // remainder of the address
-    if (iv_is_sim)
+    if (iv_l_sim)
     {
         iv_const.iv_start_address.get_sim_end_address(iv_const.iv_end_address);
     }
@@ -221,7 +221,7 @@ fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::multi_port_addr()
     // we don't run too many cycles. Also, if there are intermediate ports the end addresses of those ports
     // need to be limited as well - they override the end address of a complete port (which is otherwise the
     // largest address.)
-    if (iv_is_sim)
+    if (iv_l_sim)
     {
         iv_const.iv_start_address.get_sim_end_address(l_end_of_start_port);
         mss::mcbist::address().get_sim_end_address(l_end_of_complete_port);
@@ -379,7 +379,7 @@ continuous_scrub_operation<TARGET_TYPE_MCBIST>::continuous_scrub_operation(
     // We leverage the MCBIST's ability to skip invalid addresses, and just setup
     // If we're running in the simulator, we want to only touch the addresses which training touched
     // *INDENT-OFF*
-    iv_is_sim ?
+    iv_l_sim ?
         l_generic_start_address.get_sim_end_address(l_generic_end_address) :
         l_generic_start_address.get_range<mss::mcbist::address::DIMM>(l_generic_end_address);
     // *INDENT-ON*
@@ -436,7 +436,7 @@ continuous_scrub_operation<TARGET_TYPE_MCBIST>::continuous_scrub_operation(
         // We don't need to account for the simulator here as the caller can do that when they setup the
         // start address.
         // *INDENT-OFF*
-        iv_is_sim ?
+        iv_l_sim ?
             iv_const.iv_start_address.get_sim_end_address(iv_const.iv_end_address) :
             iv_const.iv_start_address.get_range<mss::mcbist::address::DIMM>(iv_const.iv_end_address);
         // *INDENT-ON*
@@ -504,10 +504,10 @@ fapi2::ReturnCode sf_init( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
 {
     FAPI_INF("superfast init start");
 
-    uint8_t is_sim = false;
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+    uint8_t l_sim = false;
+    FAPI_TRY( mss::is_simulation( l_sim) );
 
-    if (is_sim)
+    if (l_sim)
     {
         // Use some sort of pattern in sim in case the verification folks need to look for something
         // TK. Need a verification pattern. This is a not-good pattern for verification ... We don't really
