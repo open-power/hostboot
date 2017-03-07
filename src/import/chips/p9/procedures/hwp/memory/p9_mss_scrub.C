@@ -67,7 +67,7 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     }
 
     // If we're running in the simulator, we want to only touch the addresses which training touched
-    uint8_t is_sim = 0;
+    uint8_t l_sim = 0;
     bool l_poll_results = false;
     fapi2::buffer<uint64_t> l_status;
 
@@ -84,9 +84,9 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     FAPI_TRY( mss::eff_memory_size(i_target, l_memory_size) );
     l_poll_parameters.iv_initial_delay = mss::calculate_initial_delay(i_target, (l_memory_size * mss::BYTES_PER_GB));
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+    FAPI_TRY( mss::is_simulation( l_sim) );
 
-    if (is_sim)
+    if (l_sim)
     {
         // Use some sort of pattern in sim in case the verification folks need to look for something
         // TK. Need a verification pattern. This is a not-good pattern for verification ... We don't really
