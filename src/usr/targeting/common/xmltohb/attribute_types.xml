@@ -17129,7 +17129,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
-<!-- === Manufacturing threshold Attributes of PRD === -->
+<!-- === start manufacturing threshold attributes for PRD === -->
 
 <attribute>
     <id>MNFG_TH_P8EX_L2_CACHE_CES</id>
@@ -17385,6 +17385,37 @@ Measured in GB</description>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
+
+<attribute>
+    <id>MNFG_TH_RCD_PARITY_ERRORS</id>
+    <description>
+        The maximum number of RCD parity errors allowed in manufacturing after
+        recovery is enabled.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MNFG_TH_MEMORY_IUES</id>
+    <description>
+        The maximum number of memory intermittent UEs allowed in manufacturing.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<!-- === end manufacturing threshold attributes for PRD === -->
 
 <attribute>
     <id>RESOURCE_IS_CRITICAL</id>
