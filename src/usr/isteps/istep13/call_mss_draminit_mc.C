@@ -105,30 +105,6 @@ void* call_mss_draminit_mc (void *io_pArgs)
     } // End; memBuf loop
 
 
-    //TODO RTC:167292 Remove this workaround that is clearing this scom register
-    uint64_t l_data64 = 0x0;
-    size_t l_size = sizeof(uint64_t);
-    // Get all MCAs
-    TARGETING::TargetHandleList l_mcaTargetList;
-    getAllChiplets(l_mcaTargetList, TYPE_MCA);
-
-    //Clear out the MBA_FARB3Q reg(0x7010916) on all MCAs
-    for (const auto & l_mca_target : l_mcaTargetList)
-    {
-        l_err = deviceOp( DeviceFW::WRITE,
-                          l_mca_target,
-                          &l_data64,
-                          l_size,
-                          DEVICE_SCOM_ADDRESS(0x7010916));
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "Failed clearing MBA_FARB3Q register on MCA %d",
-                      l_mca_target->getAttr<TARGETING::ATTR_CHIPLET_ID>());
-            errlCommit(l_err, HWPF_COMP_ID);
-        }
-    }
-
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc exit" );
 
     return l_stepError.getErrorHandle();
