@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <util/lockfree/stack.H>
 #include <builtins.h>
+#include <kernel/types.h>
 
 extern "C"
 void kernel_execute_decrementer();
@@ -53,6 +54,11 @@ class HeapManager
     public:
         enum
         {
+            CHUNK_HEADER_PLUS_RESERVED = 9, //!< 8 Bytes header + 1 byte valid
+        };
+
+        enum
+        {
             BUCKETS             = 12,   //!< number of buckets
             MIN_BUCKET_SIZE     = 16,   //!< Smallest bucket size
             FIB_START_INCR      = 16,   //!< Seed for the Fibonacci series
@@ -69,7 +75,10 @@ class HeapManager
             BUCKET_SIZE10       = BUCKET_SIZE9 + BUCKET_SIZE8,
             BUCKET_SIZE11       = BUCKET_SIZE10 + BUCKET_SIZE9,
 
-            MAX_SMALL_ALLOC_SIZE      = BUCKET_SIZE11 - 8,// last bucket size-8
+            // last bucket size, 8 byte chunk header + 1 byte for consistency
+            // checking
+            MAX_SMALL_ALLOC_SIZE      = BUCKET_SIZE11 - CHUNK_HEADER_PLUS_RESERVED,
+
         };
 
         friend class CpuManager;
@@ -136,9 +145,11 @@ class HeapManager
         {
             struct
             {
-                char    free:8;         //!< Is chunk free
-                char    coalesce:8;     //!< Is chunk being coalesced
-                uint64_t bucket:48;     //!< Which bucket this chunk belongs to
+                uint8_t     free;       //!< F=free, A=allocated
+                uint8_t     coalesce;   //!< C=chunk being coalesced
+                uint16_t    size;       //!< size of the data area
+                tid_t       allocator;  //!< task_id of allocating thread
+                uint16_t    bucket;     //!< Which bucket this chunk belongs to
             } PACKED;
 
             chunk_t* next;      //!< Next chunk (for unallocated chunks only)
