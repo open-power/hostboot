@@ -14736,6 +14736,27 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>DD1_SLOW_PCI_REF_CLOCK</id>
+    <description>
+        Valid only for Nimbus DD1
+        If set (=1), run the PCI Ref clock at 94MHz in order to enable
+          experimental GEN4 support.
+        If not set (=0), run the PCI Ref clock at 100MHz
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DD1_SLOW_PCI_REF_CLOCK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>MEMB_DMI_REFCLOCK_RCVR_TERM</id>
     <description>
         Defines system specific value of DMI refclock receiver termination (FSI GP4 bits 8:9)
