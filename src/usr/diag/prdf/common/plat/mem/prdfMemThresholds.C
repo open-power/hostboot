@@ -43,11 +43,13 @@ namespace PRDF
 
 using namespace PlatServices;
 
-// Non MNFG RCE threshold
-static uint32_t MBA_RCE_NON_MNFG_TH = 8;
-
-// Non MNFG Scrub soft/intermittent CE threshold
-static uint32_t MBA_SCRUB_CE_NON_MNFG_TH = 80;
+enum DefaultThresholds
+{
+    MCA_RCD_PARITY_NON_MNFG_TH = 32, ///< Non-MNFG RCD parity error TH
+    MCA_IUE_NON_MNFG_TH        = 8,  ///< Non-MNFG IUE TH
+    MBA_RCE_NON_MNFG_TH        = 8,  ///< Non-MNFG RCE TH
+    MBA_SCRUB_CE_NON_MNFG_TH   = 80, ///< Non-MNFG Scrub soft/inter CE TH
+};
 
 //------------------------------------------------------------------------------
 
@@ -69,6 +71,46 @@ uint8_t getMnfgCeTh()
     #endif
 
 }
+
+//------------------------------------------------------------------------------
+
+#ifdef __HOSTBOOT_MODULE
+
+ThresholdResolution::ThresholdPolicy getRcdParityTh()
+{
+    uint32_t th = MCA_RCD_PARITY_NON_MNFG_TH;
+
+    if ( mfgMode() )
+    {
+        th = MfgThresholdMgr::getInstance()->
+                                   getThreshold(ATTR_MNFG_TH_RCD_PARITY_ERRORS);
+    }
+
+    return ThresholdResolution::ThresholdPolicy( th,
+                                                 ThresholdResolution::ONE_DAY );
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef __HOSTBOOT_MODULE
+
+ThresholdResolution::ThresholdPolicy getIueTh()
+{
+    uint32_t th = MCA_IUE_NON_MNFG_TH;
+
+    if ( mfgMode() )
+    {
+        th = MfgThresholdMgr::getInstance()->
+                                         getThreshold(ATTR_MNFG_TH_MEMORY_IUES);
+    }
+
+    return ThresholdResolution::ThresholdPolicy( th,
+                                                 ThresholdResolution::ONE_DAY );
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 
