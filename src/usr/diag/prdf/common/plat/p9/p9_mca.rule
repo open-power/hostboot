@@ -219,7 +219,7 @@ rule rMCACALFIR
     MCACALFIR & ~MCACALFIR_MASK &  MCACALFIR_ACT0 &  MCACALFIR_ACT1;
 };
 
-group gMCACALFIR filter priority( 13 ), cs_root_cause( 13 )
+group gMCACALFIR filter priority( 13 ), cs_root_cause( 4, 13, 14 )
 {
     /** MCACALFIR[0]
      *  A MBA recoverable error has occurred.
@@ -294,7 +294,7 @@ group gMCACALFIR filter priority( 13 ), cs_root_cause( 13 )
     /** MCACALFIR[14]
      *  RCD during periodic cal
      */
-    (rMCACALFIR, bit(14)) ? threshold_and_mask;
+    (rMCACALFIR, bit(14)) ? rcd_parity_error;
 
     /** MCACALFIR[15]
      *  scom error
