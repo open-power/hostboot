@@ -169,6 +169,11 @@ private:
      * @brief Displays a HWPF error log user details
      */
     static void displayHwpf (void *data, size_t size, uint8_t i_type);
+
+    /**
+     * @brief Displays a PRDF error log user details
+     */
+    static void displayPrdf (uint64_t i_ud1, uint64_t i_ud2);
 };
 
 } // End namespace

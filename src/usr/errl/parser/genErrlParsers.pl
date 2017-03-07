@@ -153,13 +153,10 @@ while (my $line = <COMP_ID_FILE>)
 
         # Strip off any leading zeroes from the component value
         $compValue =~ s/^0//g;
-        # Do not add PRDF component ID
-        if ($compId ne "PRDF_COMP_ID")
-        {
-            $compIdToValueHash{$compId} = $compValue;
-            # Need the integer value for compId sorting purposes
-            $compIdToHexValueHash{$compId} = hex $compValue;
-        }
+
+        $compIdToValueHash{$compId} = $compValue;
+        # Need the integer value for compId sorting purposes
+        $compIdToHexValueHash{$compId} = hex $compValue;
     }
 }
 

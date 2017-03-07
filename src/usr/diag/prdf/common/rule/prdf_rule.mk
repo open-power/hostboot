@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -39,6 +39,7 @@ PRDR_RULE_TABLES += p9_mca.prf
 
 prd_rule_prf_targets  = ${PRDR_RULE_TABLES}
 prd_rule_err_targets  = ${PRDR_RULE_TABLES:.prf=.prf.err.C}
+prd_rule_disp_targets = ${PRDR_RULE_TABLES:.prf=.prf.disp.C}
 prd_rule_reg_targets  = ${PRDR_RULE_TABLES:.prf=.prf.reg.C}
 prd_rule_html_targets = ${PRDR_RULE_TABLES:.prf=.prf.html}
 

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2016
+# Contributors Listed Below - COPYRIGHT 2010,2017
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -68,5 +68,9 @@ SUBDIRS += htmgt.d
 SUBDIRS += diag.d
 SUBDIRS += xz.d
 SUBDIRS += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),hdat.d,)
+
+#errldisplay relies on some generated files from PRD.
+#Enforce that it goes after
+_BUILD/SUBDIR/CODE/errldisplay: _BUILD/SUBDIR/CODE/diag
 
 include ${ROOTPATH}/config.mk
