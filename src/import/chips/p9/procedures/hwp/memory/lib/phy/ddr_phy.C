@@ -105,11 +105,11 @@ fapi2::ReturnCode enable_zctl( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
     fapi2::buffer<uint64_t> l_data;
     constexpr uint64_t l_zcal_reset_reg = pcTraits<TARGET_TYPE_MCA>::PC_RESETS_REG;
     constexpr uint64_t l_zcal_status_reg = pcTraits<TARGET_TYPE_MCA>::PC_DLL_ZCAL_CAL_STATUS_REG;
-    uint8_t is_sim = 0;
+    uint8_t l_sim = 0;
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+    FAPI_TRY( mss::is_simulation( l_sim) );
 
-    if (is_sim)
+    if (l_sim)
     {
         return fapi2::FAPI2_RC_SUCCESS;
     }
@@ -167,7 +167,7 @@ fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<TARGET_TYPE_MCBIST>
     // de-assert RESETN, etc
 
     fapi2::buffer<uint64_t> l_data;
-    uint8_t is_sim = 0;
+    uint8_t l_sim = 0;
 
     // We want to force the memory clocks low for all ports, including the magic port if it's not
     // otherwise functional. We don't want to re-enable memory clocks for the magic port if it's
@@ -176,11 +176,11 @@ fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<TARGET_TYPE_MCBIST>
                    mss::find_targets<TARGET_TYPE_MCA>(i_target);
     FAPI_INF("force mclk %s for all ports", (i_state == mss::LOW ? "low" : "high") );
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+    FAPI_TRY( mss::is_simulation( l_sim) );
 
     // On cycle sim for some reason clearing force_mclk_low makes the DIMM interface go tri-state.
     // On real hardware this should release the memory clocks
-    if (is_sim && (i_state == mss::LOW))
+    if (l_sim && (i_state == mss::LOW))
     {
         return fapi2::FAPI2_RC_SUCCESS;
     }
@@ -214,7 +214,7 @@ fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<TAR
     constexpr uint64_t SIM_OVERRIDE = 0x8080;
     constexpr uint64_t PHASE_CNTL_EN = 0x8020;
 
-    uint8_t is_sim = 0;
+    uint8_t l_sim = 0;
 
     fapi2::buffer<uint64_t> l_update( i_state == mss::ON ? CONTINUOUS_UPDATE : PHASE_CNTL_EN );
     const auto l_mca = find_targets<TARGET_TYPE_MCA>(i_target);
@@ -237,9 +237,9 @@ fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<TAR
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+    FAPI_TRY( mss::is_simulation( l_sim) );
 
-    if (is_sim)
+    if (l_sim)
     {
         // Per Bialas, we don't want to do true alignment in the cycle sim as we have
         // a chance of being off one-tick (which is detrimental.) Per his recomendations,
@@ -292,7 +292,7 @@ fapi_try_exit:
 fapi2::ReturnCode check_bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
 {
     fapi2::buffer<uint64_t> l_read;
-    uint8_t is_sim = 0;
+    uint8_t l_sim = 0;
 
     // On each port there are 5 DP16's which have lock registers.
     static const std::vector<uint64_t> l_addresses =
@@ -304,10 +304,10 @@ fapi2::ReturnCode check_bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_M
         MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_4,
     };
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+    FAPI_TRY( mss::is_simulation( l_sim) );
 
     // There's nothing going on in sim ...
-    if (is_sim)
+    if (l_sim)
     {
         return fapi2::FAPI2_RC_SUCCESS;
     }
@@ -787,12 +787,12 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                     fapi2::buffer<uint16_t> i_cal_steps_enabled)
 {
     fapi2::buffer<uint64_t> l_cal_config;
-    uint8_t is_sim = 0;
+    uint8_t l_sim = 0;
     uint8_t cal_abort_on_error = 0;
     uint16_t l_vref_cal_enable = 0;
 
     FAPI_TRY( mss::cal_abort_on_error(cal_abort_on_error) );
-    FAPI_TRY( mss::is_simulation(is_sim) );
+    FAPI_TRY( mss::is_simulation(l_sim) );
     FAPI_TRY( mss::vref_cal_enable(i_target, l_vref_cal_enable) );
 
     // This is the buffer which will be written to CAL_CONFIG0. It starts
@@ -828,7 +828,7 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
             i_cal_steps_enabled.getBit<COARSE_RD>());
 
         // Always turn on initial pattern write in h/w, never for sim (makes the DIMM behavioral lose it's mind)
-        if (!is_sim)
+        if (!l_sim)
         {
             l_cal_config.setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_INITIAL_PAT_WR>();
         }
@@ -1110,15 +1110,15 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
 {
-    uint8_t is_sim = 0;
+    uint8_t l_sim = 0;
     fapi2::buffer<uint64_t> l_status;
     constexpr uint64_t l_dll_status_reg = pcTraits<TARGET_TYPE_MCA>::PC_DLL_ZCAL_CAL_STATUS_REG;
     const auto& l_mca = mss::find_targets<TARGET_TYPE_MCA>(i_target);
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+    FAPI_TRY( mss::is_simulation( l_sim) );
 
     // Nothing works here in cycle sim ...
-    if (is_sim)
+    if (l_sim)
     {
         return FAPI2_RC_SUCCESS;
     }
