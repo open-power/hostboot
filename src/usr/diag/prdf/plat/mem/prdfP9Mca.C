@@ -29,6 +29,7 @@
 #include <prdfPluginMap.H>
 
 // Platform includes
+#include <prdfP9McaDataBundle.H>
 #include <prdfP9McbistDataBundle.H>
 #include <prdfPlatServices.H>
 #ifdef __HOSTBOOT_RUNTIME
@@ -63,16 +64,14 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
 {
     #define PRDF_FUNC "[p9_mca::RcdParityError] "
 
-    // The callouts have already been made in the rule code. All we need to do
-    // now is start TPS on all slave ranks behind the MCA. This can only be done
-    // at runtime because it is too complicated to handle during Memory
-    // Diagnostics and we don't have time to complete the procedures at any
-    // other point during the IPL. The DIMMs will be deconfigured during the IPL
-    // anyways. So not really much benefit except for extra FFDC.
+    // The callouts have already been made in the rule code. All other actions
+    // documented below.
 
     #ifdef __HOSTBOOT_RUNTIME // TPS only supported at runtime.
 
-    if ( io_sc.service_data->IsAtThreshold() )
+    // Recovery is always enabled during runtime. Start TPS on all slave ranks
+    // behind the MCA if the recovery threshold is reached.
+    if ( getMcaDataBundle(i_mcaChip)->iv_rcdParityTh.inc(io_sc) )
     {
         ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
 
@@ -94,6 +93,38 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
                 continue; // Try the other ranks.
             }
         }
+    }
+
+    #else // IPL
+
+    SCAN_COMM_REGISTER_CLASS * farb0 = i_mcaChip->getRegister("FARB0");
+    if ( SUCCESS != farb0->Read() )
+    {
+        PRDF_ERR( PRDF_FUNC "Read() failed on MCAECCFIR: i_mcaChip=0x%08x",
+                  i_mcaChip->getHuid() );
+
+        // Ensure the reg is zero so that we will use the recovery threshold and
+        // guarantee we don't try to do a reconfig.
+        farb0->clearAllBits();
+    }
+
+    if ( farb0->IsBitSet(54) )
+    {
+        // Recovery is disabled. Issue a reconfig loop. Make the error log
+        // predictive if threshold is reached.
+        if ( rcdParityErrorReconfigLoop() )
+            io_sc.service_data->setServiceCall();
+    }
+    else
+    {
+        // Make the error log predictive if the recovery threshold is reached.
+        // Don't bother with TPS on all ranks because it is too complicated to
+        // handle during Memory Diagnostics and we don't have time to complete
+        // the procedures at any other point during the IPL. The DIMMs will be
+        // deconfigured during the IPL anyways. So not really much benefit
+        // except for extra FFDC.
+        if ( getMcaDataBundle(i_mcaChip)->iv_rcdParityTh.inc(io_sc) )
+            io_sc.service_data->setServiceCall();
     }
 
     #endif
