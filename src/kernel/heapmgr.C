@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,6 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <limits.h>
+#include <sys/task.h>
 #include <kernel/heapmgr.H>
 #include <util/singleton.H>
 #include <kernel/console.H>
@@ -102,7 +103,8 @@ void HeapManager::coalesce( void )
 
 void* HeapManager::_allocate(size_t i_sz)
 {
-    size_t which_bucket = bucketIndex(i_sz+8);
+    // 8 bytes book keeping, 1 byte validation
+    size_t which_bucket = bucketIndex(i_sz + CHUNK_HEADER_PLUS_RESERVED);
 
     chunk_t* chunk = reinterpret_cast<chunk_t*>(NULL);
     chunk = pop_bucket(which_bucket);
@@ -122,11 +124,21 @@ void* HeapManager::_allocate(size_t i_sz)
         // test_pages();
 #endif
         crit_assert(chunk->free == 'F');
-        chunk->free = '\0';
+
+        // Use the size of this chunk get to the end.
+        size_t size = bucketByteSize(chunk->bucket);
+
+        // set the last byte of the chunk to 'V' => valid
+        *(reinterpret_cast<uint8_t*>(chunk) + size - 1 ) = 'V';
+
+        // mark chunk as allocated
+        chunk->free = 'A';
+        chunk->size = i_sz;
+        chunk->allocator = task_gettid();
+
         return &chunk->next;
     }
 }
-
 
 void* HeapManager::_realloc(void* i_ptr, size_t i_sz)
 {
@@ -134,10 +146,13 @@ void* HeapManager::_realloc(void* i_ptr, size_t i_sz)
     if(new_ptr) return new_ptr;
 
     new_ptr = i_ptr;
-    chunk_t* chunk = reinterpret_cast<chunk_t*>(((size_t*)i_ptr)-1);
-    size_t asize = bucketByteSize(chunk->bucket)-8;
+    chunk_t* chunk = reinterpret_cast<chunk_t*>(((uint64_t*)i_ptr)-1);
+
+    // take into account the 8 byte header and valid byte
+    size_t asize = bucketByteSize(chunk->bucket) - CHUNK_HEADER_PLUS_RESERVED;
     if(asize < i_sz)
     {
+        // fyi.. MAX_SMALL_ALLOCATION_SIZE = BUCKET11 - 9 bytes
         new_ptr = (i_sz > MAX_SMALL_ALLOC_SIZE) ?
             _allocateBig(i_sz) : _allocate(i_sz);
         memcpy(new_ptr, i_ptr, asize);
@@ -195,12 +210,25 @@ void HeapManager::_free(void * i_ptr)
 
     if(!_freeBig(i_ptr))
     {
-        chunk_t* chunk = reinterpret_cast<chunk_t*>(((size_t*)i_ptr)-1);
+        chunk_t* chunk = reinterpret_cast<chunk_t*>(((uint64_t*)i_ptr)-1);
+
 #ifdef HOSTBOOT_DEBUG
         __sync_sub_and_fetch(&g_smallheap_count,1);
         __sync_sub_and_fetch(&g_smallheap_allocated,bucketByteSize(chunk->bucket));
 #endif
         crit_assert(chunk->free != 'F');
+
+        // Use the size of this chunk to find next chunk.
+        size_t size = bucketByteSize(chunk->bucket);
+
+        // make sure the next block is still valid
+        if( *(reinterpret_cast<uint8_t*>(chunk) + size - 1 ) != 'V')
+        {
+            MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
+            // force a storage exception
+            task_crash();
+        }
+
         push_bucket(chunk, chunk->bucket);
     }
 }
@@ -243,7 +271,9 @@ HeapManager::chunk_t* HeapManager::pop_bucket(size_t i_bucket)
 void HeapManager::push_bucket(chunk_t* i_chunk, size_t i_bucket)
 {
     if (i_bucket >= BUCKETS) return;
-    i_chunk->free = 'F';
+    i_chunk->free  = 'F';
+    i_chunk->size  = 0;
+    i_chunk->allocator = 0;
     first_chunk[i_bucket].push(i_chunk);
 }
 
@@ -365,7 +395,7 @@ void HeapManager::_coalesce()
                 // Use the size of this chunk to find next chunk.
                 size_t size = bucketByteSize(chunk->bucket);
                 chunk_t* buddy = reinterpret_cast<chunk_t*>(
-                        reinterpret_cast<size_t>(chunk) + size);
+                        reinterpret_cast<uint64_t>(chunk) + size);
 
                 // The two chunks have to be on the same page in order to
                 // be considered for merge.
