@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -40,6 +42,19 @@ bool isSimicsRunning()
     static bool simics = isSimics();
     return simics;
 }
+
+static bool g_isTargetingLoaded = false;
+
+bool isTargetingLoaded()
+{
+    return g_isTargetingLoaded;
+}
+
+void setIsTargetingLoaded()
+{
+    g_isTargetingLoaded = true;
+}
+
 
 };
 
