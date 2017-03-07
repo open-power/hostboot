@@ -56,6 +56,7 @@
 #include <devicefw/userif.H>
 #include <config.h>
 #include <initservice/initserviceif.H>
+#include <util/misc.H>
 
 #ifdef CONFIG_DRTM
 #include <secureboot/drtm.H>
@@ -177,6 +178,9 @@ static void initTargeting(errlHndl_t& io_pError)
         // call ErrlManager function - tell him that TARG is ready!
         ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::TARG);
 #endif
+
+        // set global that TARG is ready
+        Util::setIsTargetingLoaded();
     }
 
     TARG_EXIT();

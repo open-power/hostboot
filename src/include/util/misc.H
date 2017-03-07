@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -34,6 +36,25 @@ namespace Util
      * @return bool         true if running in simics; otherwise false
      */
     bool isSimicsRunning( void );
+
+    /**
+     * @brief Determines if Targeting code has been loaded
+     *
+     * @param[in] void
+     *
+     * @return bool   true if Targeting is loaded; otherwise false
+     */
+    bool isTargetingLoaded( void );
+
+    /**
+     * @brief Sets global that Targeting code has been loaded
+     *        NOTE: this should only be called once by targeting
+     *
+     * @param[in] void
+     *
+     * @return N/A
+     */
+    void setIsTargetingLoaded( void );
 };
 
 #endif
