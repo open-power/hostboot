@@ -321,8 +321,8 @@ template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = wcTraits<T
 inline fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_data;
-    uint8_t l_is_sim = 0;
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_sim) );
+    uint8_t l_l_sim = 0;
+    FAPI_TRY( mss::is_simulation(l_l_sim) );
 
     // This is a simplification - in sim we don't have DQS wire delays so we don't acccount for them BRS
     l_data.insertFromRight<TT::TWLO_TWLOE, TT::TWLO_TWLOE_LEN>(mss::twlo_twloe(i_target));
@@ -331,10 +331,10 @@ inline fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
     l_data.setBit<TT::WL_ONE_DQS_PULSE>();
 
     // FW_WR_RD [same formula as RD_WR? max(tWTR+11,AL+tRTP+3), ATTR_EFF_DRAM_AL(0,1,2)]
-    // 57:62, 0b000000, (def_is_sim);   # is this max?
+    // 57:62, 0b000000, (def_l_sim);   # is this max?
     // 57:62, 0b100000, any;   # dd0 = 17 clocks, now 32 from SWyatt
     {
-        const uint64_t FW_WR_RD = l_is_sim ? 0b000000 : 0b100000;
+        const uint64_t FW_WR_RD = l_l_sim ? 0b000000 : 0b100000;
         l_data.insertFromRight<TT::FW_WR_RD, TT::FW_WR_RD_LEN>(FW_WR_RD);
     }
 
@@ -410,15 +410,15 @@ template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = wcTraits<T
 inline fapi2::ReturnCode reset_config3( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_data;
-    uint8_t l_is_sim = 0;
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_sim) );
+    uint8_t l_l_sim = 0;
+    FAPI_TRY( mss::is_simulation(l_l_sim) );
 
     // MCA_DDRPHY_WC_CONFIG3_P0_MRS_CMD_DQ_ON is 0's
 
-    // 55:60, 0b000000, (def_is_sim); # MRS_CMD_DQ_OFF        !!
+    // 55:60, 0b000000, (def_l_sim); # MRS_CMD_DQ_OFF        !!
     // 55:60, 0b111111, any   ;       # MRS_CMD_DQ_OFF        !!
     {
-        const uint64_t CMD_DQ_OFF = l_is_sim ? 0b000000 : 0b111111;
+        const uint64_t CMD_DQ_OFF = l_l_sim ? 0b000000 : 0b111111;
         l_data.insertFromRight<TT::MRS_CMD_DQ_OFF, TT::MRS_CMD_DQ_OFF_LEN>(CMD_DQ_OFF);
     }
 
