@@ -27,8 +27,8 @@
 #****************************************************************************
 #*  SecureROM info - useful info used by HBBL. Must match ROM.H
 #****************************************************************************
-.set SECROM_EYECATCHER, 0x23534543524F4D00   ;// uint64_t '#SECROM.'
-.set SECROM_VERSION, 0x0000000900000001   ;// uint64_t
+.set SECROM_EYECATCHER, 0x23534543524F4D00   # uint64_t '#SECROM.'
+.set SECROM_VERSION, 0x0000000900000001   # uint64_t
 
 # Before the SecureRom code starts there is SecureRomInfo see ROM.H
 # - [8 bytes] - eyeCatch
@@ -47,7 +47,7 @@ branchtableoffset:
     .quad .text.branchtable
 
 reserved:
-    .zero 16 ;// 'reserve 16 bytes'
+    .zero 16 # 'reserve 16 bytes'
 
 #****************************************************************************
 #*  branch table - a more stable location for software entering rom code
@@ -57,47 +57,73 @@ reserved:
     .globl _SHA512_Init
 _SHA512_Init:
     li r0, .L.SHA512_Init@l
-    b springboard
+    b remove_sha512_init_offset
 
     .globl _SHA512_Update
 _SHA512_Update:
     li r0, .L.SHA512_Update@l
-    b springboard
+    b remove_sha512_update_offset
 
     .globl _SHA512_Final
 _SHA512_Final:
     li r0, .L.SHA512_Final@l
-    b springboard
+    b remove_sha512_final_offset
 
     .globl _SHA512_Hash
 _SHA512_Hash:
     li r0, .L.SHA512_Hash@l
-    b springboard
+    b remove_sha512_hash_offset
 
     .globl _ec_verify
 _ec_verify:
     li r0, .L.ec_verify@l
-    b springboard
+    b remove_ec_verify_offset
 
     .globl _ROM_verify
 _ROM_verify:
     li r0, .L.ROM_verify@l
+    b remove_rom_verify_offset
+
+# Helper Functions to load the negative offset into r10.
+#
+# In an effort to not move anything around in the branchtable nor change any of
+# the parameters in the Hostboot C code, we have these helper functions to
+# provide springboard with the offest to subtract to find the base secureROM
+# address.
+remove_sha512_init_offset:
+    li r10, -_SHA512_Init
     b springboard
 
-#define CFAR 28
+remove_sha512_update_offset:
+    li r10, -_SHA512_Update
+    b springboard
+
+remove_sha512_final_offset:
+    li r10, -_SHA512_Final
+    b springboard
+
+remove_sha512_hash_offset:
+    li r10, -_SHA512_Hash
+    b springboard
+
+remove_ec_verify_offset:
+    li r10, -_ec_verify
+    b springboard
+
+remove_rom_verify_offset:
+    li r10, -_ROM_verify
+    b springboard
 
 springboard:
     b boingboing
 boingboing:
-    # @TODO RTC:156485 ROM blob will have to change to allow PHyp to use,
-    #       unless PHyp directly uses
-    mfspr r2, CFAR ;// get address of springboard
-    addi r2, r2, .text.securerominfo-springboard ;// base address
-    add r0, r0, r2 ;// calculate entry relative
-    addi r2, r2, 0x4000 ;//TOC+0x8000  part 1
-    addi r2, r2, (__toc_start+0x4000)@l ;//TOC+0x8000  part 2
+    mfctr r2
+    add r2, r2, r10 # get secureROM base address
+    add r0, r0, r2 # calculate entry relative
+    addi r2, r2, 0x4000 #TOC+0x8000  part 1
+    addi r2, r2, (__toc_start+0x4000)@l #TOC+0x8000  part 2
     mtctr r0
-    bctr ;// jump
+    bctr # jump
 
 # could put other assembly code routines here to conserve ROM space
 # including the sreset routine
