@@ -364,7 +364,7 @@ inline fapi2::ReturnCode reset_config2( const fapi2::Target<T>& i_target )
     fapi2::buffer<uint64_t> l_data;
 
     // Bogus Centaur SIM number from init file - use 8 per Bialas 2/16
-    // ---48:52, 0b00000, (def_is_sim); # CONSEQ_PASS  sim value---
+    // ---48:52, 0b00000, (def_l_sim); # CONSEQ_PASS  sim value---
     // 48:52, 0b01000, (def_is_bl8); # CONSEQ_PASS  8 from SWyatt
     // 48:52, 0b01111, any;          # CONSEQ_PASS  16 min for BL4, or OTF
 
