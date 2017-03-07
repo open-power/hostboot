@@ -30153,7 +30153,7 @@ Measured in GB</description>
         </uint8_t>
     </simpleType>
     <readable/>
-<!-- TODO RTC:162011 VPD -->
+<!-- TODO RTC:170773 VPD -->
     <persistency>volatile-zeroed</persistency>
     <hwpfToHbAttrMap>
       <id>ATTR_DPLL_DYNAMIC_FMAX_ENABLE</id>
@@ -30174,7 +30174,7 @@ Measured in GB</description>
         </uint8_t>
     </simpleType>
     <readable/>
-<!-- TODO RTC:162011 VPD -->
+<!-- TODO RTC:170773 VPD -->
     <persistency>volatile-zeroed</persistency>
     <hwpfToHbAttrMap>
       <id>ATTR_DPLL_DYNAMIC_FMIN_ENABLE</id>
@@ -30197,7 +30197,7 @@ Measured in GB</description>
         </uint8_t>
     </simpleType>
     <readable/>
-<!-- TODO RTC:162011 VPD -->
+<!-- TODO RTC:170773 VPD -->
     <persistency>volatile-zeroed</persistency>
     <hwpfToHbAttrMap>
       <id>ATTR_DPLL_DROOP_PROTECT_ENABLE</id>
@@ -30219,7 +30219,7 @@ Measured in GB</description>
         </uint8_t>
     </simpleType>
     <readable/>
-<!-- TODO RTC:162011 VPD -->
+<!-- TODO RTC:170773 VPD -->
     <persistency>volatile-zeroed</persistency>
     <hwpfToHbAttrMap>
       <id>ATTR_DPLL_VDM_RESPONSE</id>
