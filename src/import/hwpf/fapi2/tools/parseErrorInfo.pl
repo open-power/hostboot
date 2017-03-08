@@ -64,6 +64,7 @@ my $buffer_ffdc_type          = "fapi2::buffer";
 my $variable_buffer_ffdc_type = "fapi2::variable_buffer";
 my $ffdc_type                 = "fapi2::ffdc_t";
 my $mcast_type                = "fapi2::mcast_t";
+my $ffdc_count = 0;
 
 # There are some names used in the XML files which exist in either
 # c++ keywords (case, for example) or macros (DOMAIN). The one's which
@@ -310,8 +311,12 @@ sub addFfdcMethod
             $method_body .= "    {\n        fapi2::g_FfdcData.ffdcData[$objectNumber].data= convertType(i_value);\n";
             $method_body .= "        fapi2::g_FfdcData.ffdcData[$objectNumber].size =";
             $method_body .= " fapi2::getErrorInfoFfdcSize(i_value);\n";
-            $method_body .= "        fapi2::g_FfdcData.ffdcLength += sizeof(sbeFfdc_t);\n";
             $method_body .= "        return *this;\n    };\n\n";
+            # ffdc_count is used to determine the maximum index written in sbe buffer
+            if( $objectNumber > $ffdc_count)
+            {
+                $ffdc_count = $objectNumber;
+            }
         }
 
     }
@@ -377,12 +382,17 @@ sub addFfdcMethod
             $method_body .= "    {\n        fapi2::g_FfdcData.ffdcData[$objectNumber].data= convertType(i_value);\n";
             $method_body .= "        fapi2::g_FfdcData.ffdcData[$objectNumber].size =";
             $method_body .= " fapi2::getErrorInfoFfdcSize(i_value);\n";
-            $method_body .= "        fapi2::g_FfdcData.ffdcLength += sizeof(sbeFfdc_t);\n";
             $method_body .= "        return *this;\n    };\n\n";
+            # ffdc_count is used to determine the maximum index written in sbe buffer
+            if( $objectNumber > $ffdc_count)
+            {
+                $ffdc_count = $objectNumber;
+            }
         }
     }
 
     $method .= ( $arg_empty_ffdc eq undef ) ? $method_body : "    {return *this;}\n\n";
+    $methods->{$key}{ffdc_count} = $ffdc_count;
     $methods->{$key}{method} = $method;
 }
 
@@ -1430,22 +1440,23 @@ foreach my $argnum ( 0 .. $#ARGV )
 
         # Constructor. This traces the description. If this is too much, we can
         # remove it.
+        my $constructor = '';
         if ( $arg_empty_ffdc eq undef )
         {
             if ( $arg_local_ffdc eq undef )
             {
-                print ECFILE
+                $constructor .=
                     "    $class_name(fapi2::errlSeverity_t i_sev = fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE, fapi2::ReturnCode& i_rc = fapi2::current_err):\n";
-                print ECFILE "        iv_rc(i_rc),\n";
-                print ECFILE "        iv_sev(i_sev)\n";
-                print ECFILE "        { FAPI_ERR(\"$err->{description}\"); }\n\n";
+                $constructor .= "        iv_rc(i_rc),\n";
+                $constructor .= "        iv_sev(i_sev)\n";
+                $constructor .= "        { FAPI_ERR(\"$err->{description}\"); }\n\n";
             }
             else
             {
-                print ECFILE "    $class_name()\n";
-                print ECFILE
+                $constructor .= "    $class_name()\n";
+                $constructor .=
                     "    {\n        fapi2::current_err = RC_$class_name;\n        FAPI_ERR(\"$err->{description}\");\n";
-                print ECFILE "        fapi2::g_FfdcData.fapiRc = RC_$class_name;\n    }\n\n";
+                $constructor .= "        fapi2::g_FfdcData.fapiRc = RC_$class_name;\n";
             }
         }
         else
@@ -1463,11 +1474,20 @@ foreach my $argnum ( 0 .. $#ARGV )
         my $method_count = 0;
 
         # Methods
+        $ffdc_count = 0;
+        my $count = 0;
         foreach my $key ( keys %methods )
         {
             print ECFILE $methods{$key}{method};
             $method_count++;
+            # count number of indices written in sbe buffer
+            if($methods{$key}{ffdc_count} > $count)
+            {
+                $count = $methods{$key}{ffdc_count};
+            }
         }
+        # Actual count is +1, as indices start from 0
+        $count += 1;
         if ( $arg_local_ffdc eq undef )
         {
             # add a method to adjust the severity if desired
@@ -1543,11 +1563,13 @@ foreach my $argnum ( 0 .. $#ARGV )
         }
         else
         {
+            $constructor .= "        fapi2::g_FfdcData.ffdcLength = $count * sizeof(sbeFfdc_t);\n    }\n\n";
             print ECFILE "    void execute()\n";
             print ECFILE "    {\n";
             print ECFILE "$executeStr\n";
             print ECFILE "    }\n";
         }
+        print ECFILE $constructor;
 
         print ECFILE "};\n\n";
 
