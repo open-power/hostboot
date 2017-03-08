@@ -436,7 +436,7 @@ namespace HBPM
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    ENTER_MRK"loadOCCSetup"
-                   "(OccP:0x%08X, OccV:0x%08X, CommonP:0x%08X)",
+                   "(OccP:0x%0lX, OccV:0x%0lX, CommonP:0x%0lX)",
                    i_occImgPaddr, i_occImgVaddr, i_commonPhysAddr );
 
         errlHndl_t l_errl = nullptr;
@@ -458,7 +458,7 @@ namespace HBPM
             // BAR0 is the Entire HOMER (start of HOMER contains OCC base Image)
             // Bar size is in MB
             TRACUCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       INFO_MRK"loadOCCSetup: OCC Address: 0x%.8X, size=0x%.8X",
+                       INFO_MRK"loadOCCSetup: OCC Address: 0x%0lX, size=0x%.8X",
                        i_occImgPaddr,
                        HOMER_INSTANCE_SIZE_IN_MB);
 
@@ -489,7 +489,7 @@ namespace HBPM
 
             TRACUCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        INFO_MRK"loadOCCSetup: "
-                       "OCC Common Addr: 0x%.8X,size=0x%.8X",
+                       "OCC Common Addr: 0x%0lX,size=0x%.8X",
                        i_commonPhysAddr,
                        OCC_HOST_AREA_SIZE_IN_MB);
 
@@ -531,7 +531,7 @@ namespace HBPM
                                    loadPmMode i_mode)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   ENTER_MRK"loadOCCImageToHomer(OccP:0x%08X, OccV:0x%08X)",
+                   ENTER_MRK"loadOCCImageToHomer(OccP:0x%0lX, OccV:0x%0lX)",
                    i_occImgPaddr, i_occImgVaddr);
 
         errlHndl_t l_errl = nullptr;
@@ -627,7 +627,7 @@ namespace HBPM
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"loadPMComplex: "
                            "convertHomerPhysToVirt failed! "
-                           "HOMER_Phys=0x%08X", i_homerPhysAddr );
+                           "HOMER_Phys=0x%0lX", i_homerPhysAddr );
                 break;
             }
 
@@ -653,8 +653,8 @@ namespace HBPM
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"loadPMComplex: "
                            "loadOCCSetup failed! "
-                           "HUID=0x%08X OCC_Phys=0x%08X "
-                           "OCC_Virt=0x%08X Common_Phys=0x%08X",
+                           "HUID=0x%08X OCC_Phys=0x%0lX "
+                           "OCC_Virt=0x%0lX Common_Phys=0x%0lX",
                            get_huid(i_target), l_occImgPaddr,
                            l_occImgVaddr, i_commonPhysAddr );
                 break;
@@ -669,8 +669,8 @@ namespace HBPM
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"loadPMComplex: "
                            "loading OCC failed! "
-                           "HUID=0x08X OCC_Phys=0x%08X "
-                           "OCC_Virt=0x%08X Mode=%s",
+                           "HUID=0x%08X OCC_Phys=0x%0lX "
+                           "OCC_Virt=0x%0lX Mode=%s",
                            get_huid(i_target), l_occImgPaddr, l_occImgVaddr,
                            (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
                 break;
@@ -686,7 +686,7 @@ namespace HBPM
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"loadPMComplex: "
                            "loading Host Data Area failed! "
-                           "HUID=0x08X OCC_Host_Data_Virt=0x%08X",
+                           "HUID=0x%08X OCC_Host_Data_Virt=0x%0lX",
                            get_huid(i_target), l_occDataVaddr );
                 break;
             }
@@ -699,7 +699,7 @@ namespace HBPM
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"loadPMComplex: "
                            "loadHcode failed! "
-                           "HUID=0x08X HOMER_Virt=0x%08X Mode=%s",
+                           "HUID=0x%08X HOMER_Virt=0x%0lX Mode=%s",
                            get_huid(i_target), l_occImgVaddr,
                            (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
                 break;
@@ -743,7 +743,7 @@ namespace HBPM
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"startPMComplex: "
                            "p9_pm_init(PM_INIT) failed! "
-                           "HUID=0x08X", get_huid(i_target) );
+                           "HUID=0x%08X", get_huid(i_target) );
                 l_errl->collectTrace("ISTEPS_TRACE",256);
 
                 break;
@@ -787,7 +787,7 @@ namespace HBPM
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"resetPMComplex: "
                            "p9_pm_init(PM_RESET) failed! "
-                           "HUID=0x08X", get_huid(i_target) );
+                           "HUID=0x%08X", get_huid(i_target) );
                 l_errl->collectTrace("ISTEPS_TRACE",256);
 
                 break;
@@ -953,7 +953,7 @@ namespace HBPM
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "verifyOccChkptAll: Timeout waiting for OCC checkpoint "
-                    "HUID 0x%X Checkpoint 0x%08X",
+                    "HUID 0x%X Checkpoint 0x%0lX",
                      get_huid(l_procChip), l_checkpoint);
 
                 /*@
