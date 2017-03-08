@@ -3452,7 +3452,7 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
 
         uint8_t queueCount = bs.getFieldJustify( curPos, 4 ); curPos+=4;
 
-        if ( bs.getBitLen() <= (curPos+(queueCount*10)) )
+        if ( bs.getBitLen() < (curPos+(queueCount*10)) )
         {
             o_rc = false;
             break;
