@@ -361,7 +361,7 @@ push @systemAttr,
     "IVRM_VIN_MAX_MV", $reqPol->{'ivrm_vin_max_mv'},
     "IVRM_STEP_DELAY_NS", $reqPol->{'ivrm_step_delay_ns'},
     "IVRM_STABILIZATION_DELAY_NS", $reqPol->{'ivrm_stabilization_delay_ns'},
-    "SBE_UPDATE_DISABLE", 1,
+    "SBE_UPDATE_DISABLE", 0,
 ];
 
 if ($reqPol->{'system_resclk_enable'} eq 'ON')
