@@ -482,6 +482,37 @@
     <writeable/>
     <hbOnly/>
 </attribute>
+
+<attribute>
+    <id>SBE_FFDC_ADDR</id>
+    <description>
+        Physical address where SBE FFDC is placed in mainstore.
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>SBE_COMM_ADDR</id>
+    <description>
+        Physical address where SBE Communications are placed in mainstore.
+        This area is used for SBE message passing and may contain an SBE
+        command or the response to it from HBRT.
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
 <attribute>
     <id>OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C</id>
     <description>
