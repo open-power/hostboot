@@ -276,13 +276,14 @@
     <description>
        HW367017 P9N DD1
        Collision with scrubber correcting a CE and a castout operation, resulting in cache corruption
+       Scrubbing off for DD2 as well, HW405443
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>LESS_THAN</test>
+          <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
