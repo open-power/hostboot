@@ -676,6 +676,21 @@ typedef struct runtimeInterfaces
         const void*  i_pHwKeyHash,
               size_t i_hwKeyHashSize);
 
+    /**
+     *  @brief SBE message passing
+     *
+     *  @details  This is a blocking call that will pass an SBE message
+     *            with a pass-through command through HBRT to code that
+     *            will process the command and provide a response.
+     *
+     *  @param[in] i_procChipId Chip ID of the processor whose SBE is passing
+     *                          the message and sent the interrupt
+     *
+     *  @returns  0 on success, or return code if the command failed
+     *  @platform FSP, OpenPOWER
+     */
+    int (*sbe_message_passing)(uint32_t i_procChipId);
+
     // Reserve some space for future growth.
     // do NOT ever change this number, even if you add functions.
     //

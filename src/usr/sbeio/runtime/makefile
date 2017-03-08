@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/sbeio/makefile $
+# $Source: src/usr/sbeio/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2017
 # [+] International Business Machines Corp.
 #
 #
@@ -22,26 +22,18 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
 
-MODULE = sbeio
+HOSTBOOT_RUNTIME = 1
 
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
+ROOTPATH = ../../../..
+VPATH += ../
 
-OBJS += sbe_psudd.o
-OBJS += sbe_coreStateControl.o
-OBJS += sbe_psuQuiesce.o
-OBJS += sbe_systemConfig.o
-OBJS += sbe_fifodd.o
-OBJS += sbe_scomAccess.o
-OBJS += sbe_scomAccessdd.o
-OBJS += sbe_ffdc_parser.o
+MODULE = sbeio_rt
 
-SUBDIRS += test.d
-SUBDIRS += runtime.d
+## Objects unique to HBRT
+OBJS += rt_sbeio.o
+
+## Objects common to HBRT and HB IPL
+#include ../sbeio.mk
 
 include ${ROOTPATH}/config.mk
