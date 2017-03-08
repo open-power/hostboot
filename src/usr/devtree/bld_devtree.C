@@ -1643,12 +1643,26 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
 
     dtOffset_t rootNode = i_dt->findNode("/");
 
+    TARGETING::Target* sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(sys);
+
     //Common settings
     /* Define supported power states -- options:
                          nap, deep-sleep, fast-sleep, rvwinkle*/
-    const char* pmode_compatStrs[] = {"nap", "fast-sleep", "rvwinkle", NULL};
-    i_dt->addPropertyStrings(rootNode, "ibm,enabled-idle-states",
-                             pmode_compatStrs);
+    uint8_t l_sleepEnable = sys->getAttr<TARGETING::ATTR_PM_SLEEP_ENABLE>();
+    if( l_sleepEnable )
+    {
+        const char* pmode_compatStrs[] = { "nap", "fast-sleep",
+                                           "rvwinkle", NULL };
+        i_dt->addPropertyStrings(rootNode, "ibm,enabled-idle-states",
+                                 pmode_compatStrs);
+    }
+    else
+    {
+        const char* pmode_compatStrs[] = { "nap", "rvwinkle", NULL };
+        i_dt->addPropertyStrings(rootNode, "ibm,enabled-idle-states",
+                                 pmode_compatStrs);
+    }
 
     // Nothing to do for small trees currently.
     if (!i_smallTree)
@@ -1659,8 +1673,6 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
         //===== compatible =====
         /* Fetch the MRW-defined compatible model from attributes */
         ATTR_OPAL_MODEL_type l_model = {0};
-        TARGETING::Target* sys = NULL;
-        TARGETING::targetService().getTopLevelTarget(sys);
         sys->tryGetAttr<TARGETING::ATTR_OPAL_MODEL>(l_model);
 
         /* Add compatibility value */

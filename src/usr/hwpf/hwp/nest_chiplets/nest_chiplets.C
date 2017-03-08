@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -677,11 +677,19 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
         // initfile can be run correctly
         if(is_sapphire_load())
         {
-            TARGETING::Target* l_sys = NULL;
-            TARGETING::targetService().getTopLevelTarget(l_sys);
-            assert( l_sys != NULL );
-            uint8_t l_sleepEnable = 1;
-            l_sys->setAttr<TARGETING::ATTR_PM_SLEEP_ENABLE>(l_sleepEnable);
+            // Naples is treating sleep as nap
+            TARGETING::Target* l_masterProc = NULL;
+            TARGETING::targetService()
+              .masterProcChipTargetHandle(l_masterProc);
+            if( l_masterProc->getAttr<TARGETING::ATTR_MODEL>()
+                != TARGETING::MODEL_NAPLES )
+            {
+                TARGETING::Target* l_sys = NULL;
+                TARGETING::targetService().getTopLevelTarget(l_sys);
+                assert( l_sys != NULL );
+                uint8_t l_sleepEnable = 1;
+                l_sys->setAttr<TARGETING::ATTR_PM_SLEEP_ENABLE>(l_sleepEnable);
+            }
         }
 
         // ----------------------------------------------
