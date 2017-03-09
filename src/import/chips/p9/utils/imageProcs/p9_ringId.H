@@ -778,10 +778,24 @@ enum RingOffset
     eq_ana_bndy_bucket_23  = 41,
     eq_ana_bndy_bucket_24  = 42,
     eq_ana_bndy_bucket_25  = 43,
-    eq_ana_bndy_l3dcc_bucket_26  = 44,
+    eq_ana_bndy_bucket_l3dcc  = 44,
     eq_ana_mode     = 45,
-    ex_l2_fure_1    = 46,
-    ex_l3_fure_1    = 47,
+    eq_ana_bndy_bucket_26 = 46,
+    eq_ana_bndy_bucket_27 = 47,
+    eq_ana_bndy_bucket_28 = 48,
+    eq_ana_bndy_bucket_29 = 49,
+    eq_ana_bndy_bucket_30 = 50,
+    eq_ana_bndy_bucket_31 = 51,
+    eq_ana_bndy_bucket_32 = 52,
+    eq_ana_bndy_bucket_33 = 53,
+    eq_ana_bndy_bucket_34 = 54,
+    eq_ana_bndy_bucket_35 = 55,
+    eq_ana_bndy_bucket_36 = 56,
+    eq_ana_bndy_bucket_37 = 57,
+    eq_ana_bndy_bucket_38 = 58,
+    eq_ana_bndy_bucket_39 = 59,
+    eq_ana_bndy_bucket_40 = 60,
+    eq_ana_bndy_bucket_41 = 61,
 
     // Instance Rings
     eq_repr         = (0 | INSTANCE_RING_MARK),
@@ -794,7 +808,7 @@ enum RingOffset
 static const CHIPLET_DATA g_eqData =
 {
     16, // Quad Chiplet ID range is 16 - 21. The base ID is 16.
-    48, // 48 common rings for Quad chiplet.
+    62, // 62 common rings for Quad chiplet.
     5,  // 5 instance specific rings for each EQ chiplet
     9   // 9 different rings since 2 per EX ring and 1 per EQ
 };
@@ -1071,7 +1085,7 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EQ::eq_ana_bndy_bucket_23          , "eq_ana_bndy_bucket_23"       , EQ_TYPE    }, // 215
     { EQ::eq_ana_bndy_bucket_24          , "eq_ana_bndy_bucket_24"       , EQ_TYPE    }, // 216
     { EQ::eq_ana_bndy_bucket_25          , "eq_ana_bndy_bucket_25"       , EQ_TYPE    }, // 217
-    { EQ::eq_ana_bndy_l3dcc_bucket_26    , "eq_ana_bndy_l3dcc_bucket_26" , EQ_TYPE    }, // 218
+    { EQ::eq_ana_bndy_bucket_l3dcc       , "eq_ana_bndy_bucket_l3dcc"    , EQ_TYPE    }, // 218
     { EQ::eq_ana_mode                    , "eq_ana_mode"                 , EQ_TYPE    }, // 219
     { EQ::eq_repr                        , "eq_repr"                     , EQ_TYPE    }, // 220
     { EQ::ex_l3_repr                     , "ex_l3_repr"                  , EQ_TYPE    }, // 221
@@ -1082,10 +1096,25 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EC::ec_time                        , "ec_time"                     , EC_TYPE    }, // 226
     { EC::ec_mode                        , "ec_mode"                     , EC_TYPE    }, // 227
     { EC::ec_repr                        , "ec_repr"                     , EC_TYPE    }, // 228
-    { EQ::ex_l2_fure_1                   , "ex_l2_fure_1"                , EQ_TYPE    }, // 229
-    { EQ::ex_l3_fure_1                   , "ex_l3_fure_1"                , EQ_TYPE    }, // 230
+    { INVALID_RING                       , "invalid"                     , EQ_TYPE    }, // 229
+    { INVALID_RING                       , "invalid"                     , EQ_TYPE    }, // 230
     { EC::ec_abst                        , "ec_abst"                     , EC_TYPE    }, // 231
-
+    { EQ::eq_ana_bndy_bucket_26          , "eq_ana_bndy_bucket_26"       , EQ_TYPE    }, // 232
+    { EQ::eq_ana_bndy_bucket_27          , "eq_ana_bndy_bucket_27"       , EQ_TYPE    }, // 233
+    { EQ::eq_ana_bndy_bucket_28          , "eq_ana_bndy_bucket_28"       , EQ_TYPE    }, // 234
+    { EQ::eq_ana_bndy_bucket_29          , "eq_ana_bndy_bucket_29"       , EQ_TYPE    }, // 235
+    { EQ::eq_ana_bndy_bucket_30          , "eq_ana_bndy_bucket_30"       , EQ_TYPE    }, // 236
+    { EQ::eq_ana_bndy_bucket_31          , "eq_ana_bndy_bucket_31"       , EQ_TYPE    }, // 237
+    { EQ::eq_ana_bndy_bucket_32          , "eq_ana_bndy_bucket_32"       , EQ_TYPE    }, // 238
+    { EQ::eq_ana_bndy_bucket_33          , "eq_ana_bndy_bucket_33"       , EQ_TYPE    }, // 239
+    { EQ::eq_ana_bndy_bucket_34          , "eq_ana_bndy_bucket_34"       , EQ_TYPE    }, // 240
+    { EQ::eq_ana_bndy_bucket_35          , "eq_ana_bndy_bucket_35"       , EQ_TYPE    }, // 241
+    { EQ::eq_ana_bndy_bucket_36          , "eq_ana_bndy_bucket_36"       , EQ_TYPE    }, // 242
+    { EQ::eq_ana_bndy_bucket_37          , "eq_ana_bndy_bucket_37"       , EQ_TYPE    }, // 243
+    { EQ::eq_ana_bndy_bucket_38          , "eq_ana_bndy_bucket_38"       , EQ_TYPE    }, // 244
+    { EQ::eq_ana_bndy_bucket_39          , "eq_ana_bndy_bucket_39"       , EQ_TYPE    }, // 245
+    { EQ::eq_ana_bndy_bucket_40          , "eq_ana_bndy_bucket_40"       , EQ_TYPE    }, // 246
+    { EQ::eq_ana_bndy_bucket_41          , "eq_ana_bndy_bucket_41"       , EQ_TYPE    }, // 247
 };
 #endif
 #ifdef __PPE__
@@ -1309,7 +1338,7 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EQ::eq_ana_bndy_bucket_23          , EQ_TYPE    }, // 215
     { EQ::eq_ana_bndy_bucket_24          , EQ_TYPE    }, // 216
     { EQ::eq_ana_bndy_bucket_25          , EQ_TYPE    }, // 217
-    { EQ::eq_ana_bndy_l3dcc_bucket_26    , EQ_TYPE    }, // 218
+    { EQ::eq_ana_bndy_bucket_l3dcc       , EQ_TYPE    }, // 218
     { EQ::eq_ana_mode                    , EQ_TYPE    }, // 219
     { EQ::eq_repr                        , EQ_TYPE    }, // 220
     { EQ::ex_l3_repr                     , EQ_TYPE    }, // 221
@@ -1320,9 +1349,25 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EC::ec_time                        , EC_TYPE    }, // 226
     { EC::ec_mode                        , EC_TYPE    }, // 227
     { EC::ec_repr                        , EC_TYPE    }, // 228
-    { EQ::ex_l2_fure_1                   , EQ_TYPE    }, // 229
-    { EQ::ex_l3_fure_1                   , EQ_TYPE    }, // 230
+    { INVALID_RING                       , EQ_TYPE    }, // 229
+    { INVALID_RING                       , EQ_TYPE    }, // 230
     { EC::ec_abst                        , EC_TYPE    }, // 231
+    { EQ::eq_ana_bndy_bucket_26          , EQ_TYPE    }, // 232
+    { EQ::eq_ana_bndy_bucket_27          , EQ_TYPE    }, // 233
+    { EQ::eq_ana_bndy_bucket_28          , EQ_TYPE    }, // 234
+    { EQ::eq_ana_bndy_bucket_29          , EQ_TYPE    }, // 235
+    { EQ::eq_ana_bndy_bucket_30          , EQ_TYPE    }, // 236
+    { EQ::eq_ana_bndy_bucket_31          , EQ_TYPE    }, // 237
+    { EQ::eq_ana_bndy_bucket_32          , EQ_TYPE    }, // 238
+    { EQ::eq_ana_bndy_bucket_33          , EQ_TYPE    }, // 239
+    { EQ::eq_ana_bndy_bucket_34          , EQ_TYPE    }, // 240
+    { EQ::eq_ana_bndy_bucket_35          , EQ_TYPE    }, // 241
+    { EQ::eq_ana_bndy_bucket_36          , EQ_TYPE    }, // 242
+    { EQ::eq_ana_bndy_bucket_37          , EQ_TYPE    }, // 243
+    { EQ::eq_ana_bndy_bucket_38          , EQ_TYPE    }, // 244
+    { EQ::eq_ana_bndy_bucket_39          , EQ_TYPE    }, // 245
+    { EQ::eq_ana_bndy_bucket_40          , EQ_TYPE    }, // 246
+    { EQ::eq_ana_bndy_bucket_41          , EQ_TYPE    }, // 247
 };
 #endif
 

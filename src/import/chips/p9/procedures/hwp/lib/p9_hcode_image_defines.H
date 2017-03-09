@@ -488,10 +488,24 @@ typedef struct
     uint16_t    eqAnaBndyRingBucket23;
     uint16_t    eqAnaBndyRingBucket24;
     uint16_t    eqAnaBndyRingBucket25;
-    uint16_t    eqAnaBndyRingl3dccBucket26;
+    uint16_t    eqAnaBndyRingl3dccBucket;
     uint16_t    eqAnaModeRing;
-    uint16_t    ex_l2_fure_1;
-    uint16_t    ex_l3_fure_1;
+    uint16_t    eqAnaBndyRingBucket26;
+    uint16_t    eqAnaBndyRingBucket27;
+    uint16_t    eqAnaBndyRingBucket28;
+    uint16_t    eqAnaBndyRingBucket29;
+    uint16_t    eqAnaBndyRingBucket30;
+    uint16_t    eqAnaBndyRingBucket31;
+    uint16_t    eqAnaBndyRingBucket32;
+    uint16_t    eqAnaBndyRingBucket33;
+    uint16_t    eqAnaBndyRingBucket34;
+    uint16_t    eqAnaBndyRingBucket35;
+    uint16_t    eqAnaBndyRingBucket36;
+    uint16_t    eqAnaBndyRingBucket37;
+    uint16_t    eqAnaBndyRingBucket38;
+    uint16_t    eqAnaBndyRingBucket39;
+    uint16_t    eqAnaBndyRingBucket40;
+    uint16_t    eqAnaBndyRingBucket41;
 } QuadCmnRingsList_t;
 
 typedef struct
