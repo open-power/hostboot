@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -168,14 +168,12 @@ namespace HTMGT
                                                              cmdDataLen);
                                 break;
 
-                            /* @TODO Uncomment once OCC support is there
-                             * AVSBus Support RTC: 137620
                             case OCC_CFGDATA_AVSBUS_CONFIG:
                                 getAVSBusConfigMessageData( occ->getTarget(),
                                                             cmdData,
                                                             cmdDataLen );
                                 break;
-                            */
+
                             default:
                                 TMGT_ERR("sendOccConfigData: Unsupported"
                                          " format type 0x%02X",
@@ -238,7 +236,7 @@ enum occCfgDataVersion
 {
     OCC_CFGDATA_FREQ_POINT_VERSION    = 0x20,
     OCC_CFGDATA_APSS_VERSION          = 0x20,
-    OCC_CFGDATA_MEM_CONFIG_VERSION    = 0x20,
+    OCC_CFGDATA_MEM_CONFIG_VERSION    = 0x21,
     OCC_CFGDATA_PCAP_CONFIG_VERSION   = 0x20,
     OCC_CFGDATA_SYS_CONFIG_VERSION    = 0x20,
     OCC_CFGDATA_MEM_THROTTLE_VERSION  = 0x20,
@@ -259,34 +257,35 @@ void writeMemConfigData( uint8_t *& o_data,
                          uint64_t & io_index )
 {
 
-    // Hardware Sensor ID
-    uint32_t l_sensor = UTIL::getSensorNumber( i_target,
-                                               i_sensorState );
+    //Byte 0-3 Hardware Sensor ID
+    uint32_t l_sensor = UTIL::getSensorNumber( i_target,i_sensorState );
     size_t l_dataSize = sizeof(l_sensor);
-
     memcpy(&o_data[io_index],
            reinterpret_cast<uint8_t*>(&l_sensor),
            l_dataSize);
     io_index += l_dataSize;
 
-    // Temperature Sensor ID
-    l_sensor = UTIL::getSensorNumber( i_target,
-                                      i_sensorTemp );
+    //Byte 4-7 Temperature Sensor ID
+    l_sensor = UTIL::getSensorNumber( i_target,i_sensorTemp );
     memcpy(&o_data[io_index],
            reinterpret_cast<uint8_t*>(&l_sensor),
            l_dataSize);
     io_index += l_dataSize;
 
-    // Centaur #
+    //Byte 8  Nimbus     indicator
+    //        Cumulus     (Centaur #)
     o_data[io_index++] = i_centPos;
 
-    // DIMM # (0xFF if i_target is centaur)
+    //Byte 9  Nimbus     PIB I2C Master Engine
+    //        Cumulus    (DIMM #)
     o_data[io_index++] = i_dimmPos;
 
-    // DIMM i2c port (0 or 1) - Reserved for Cumulus
+    //Byte 10 Nimbus    DIMM I2C Port(0,1)
+    //        Cumulus   Reserved for Cumulus
     o_data[io_index++] = i_i2cPort;
 
-    // DIMM Temp i2c address - Reserved for Cumulus
+    //Byte 11 Nimbus    DIMM Temp i2c address
+    //        Cumulus   Reserved for Cumulus
     o_data[io_index++] = i_i2cDevAddr;
 
 }
@@ -302,15 +301,37 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
 
     o_data[index++] = OCC_CFGDATA_MEM_CONFIG;
     o_data[index++] = OCC_CFGDATA_MEM_CONFIG_VERSION;
+
+
+    //System reference needed for these ATTR.
+    Target* sys = nullptr;
+    targetService().getTopLevelTarget(sys);
+
+
+    if( is_sapphire_load() )//if OPAL then no "Power Control Default" support.
+    {
+        //Byte 3:   Memory Power Control Default.
+        o_data[index++] = 0xFF;
+
+        //Byte 4:   Idle Power Memory Power Control.
+        o_data[index++] = 0xFF;
+    }
+    else                    //else read in attr.
+    {
+        //Byte 3:   Memory Power Control Default.
+        o_data[index++] = sys->getAttr<ATTR_MSS_MRW_POWER_CONTROL_REQUESTED>();
+
+        //Byte 4:   Idle Power Memory Power Control.
+        o_data[index++] =
+                    sys->getAttr<ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED>();
+    }
+
+
+
+
+    //Byte 5:   Number of data sets.
     size_t numSetsOffset = index++; //Will fill in numSets at the end
 
-    //Next, the following format repeats per set of data
-    //Bytes 0-3:    Reserved
-    //Bytes 4-5     hardware sensor ID
-    //Bytes 6-7:    temperature sensor ID
-    //Byte 8:       Centaur position 0-7
-    //Byte 9:       DIMM position 0-7
-    //Bytes 10-11:  Reserved
 
     if (i_monitoringEnabled)
     {
@@ -320,7 +341,6 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
         uint8_t centPos = 0;
         uint8_t dimmPos = 0;
         uint8_t numSets = 0;
-
 
 
         ConstTargetHandle_t proc = getParentChip(i_occ);
@@ -390,46 +410,12 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
                                         0,      //Reserved for CUMULUS
                                         0,      //"  "
                                         index );
-
                     }
                 }
             }
         }
         else if( l_procModel == MODEL_NIMBUS )
         {
-            //TODO Sending hard coded data for now until
-            //ATTR_TEMP_I2C_CONFIG is populated
-
-            //TEMP push in 00dd0002 dddd0002 ff 03 00 34 Data. !!!!
-            o_data[index++] = 0x00; //Hardware Sensor ID
-            o_data[index++] = 0xdd;
-            o_data[index++] = 0x00;
-            o_data[index++] = 0x02;
-            o_data[index++] = 0xdd; //Temperature Sensor ID
-            o_data[index++] = 0xdd;
-            o_data[index++] = 0x00;
-            o_data[index++] = 0x02;
-            o_data[index++] = 0xff; //Nimbus
-            o_data[index++] = 0x03; //Nimbus PIB I2C Master Engine
-            o_data[index++] = 0x01; //Nimbus DIMM I2C port
-            o_data[index++] = 0x34; //Nimbus DIMM Temperature I2C Address
-            ++numSets ;
-            //TEMP push in 00dd0000 dddd0000 ff 03 00 30 Data. !!!!
-            o_data[index++] = 0x00; //Hardware Sensor ID
-            o_data[index++] = 0xdd;
-            o_data[index++] = 0x00;
-            o_data[index++] = 0x00;
-            o_data[index++] = 0xdd; //Temperature Sensor ID
-            o_data[index++] = 0xdd;
-            o_data[index++] = 0x00;
-            o_data[index++] = 0x00;
-            o_data[index++] = 0xff; //Nimbus
-            o_data[index++] = 0x03; //Nimbus PIB I2C Master Engine
-            o_data[index++] = 0x01; //Nimbus DIMM I2C port
-            o_data[index++] = 0x30; //Nimbus DIMM Temperature I2C Address
-            ++numSets ;
-
-/*
             // DIMMs are wired directly to the proc in Nimbus
             dimms.clear();
             getChildAffinityTargets( dimms,
@@ -442,40 +428,34 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
                 numSets++;
 
                 // Get PIB I2C Master engine for this dimm
-                ATTR_TEMP_I2C_CONFIG_type tempI2cCfgData =
-                    dimm->getAttr<ATTR_TEMP_I2C_CONFIG>();
-
-
-                uint8_t pibI2cMasterEngine = 0x03;
+                ATTR_TEMP_SENSOR_I2C_CONFIG_type tempI2cCfgData =
+                    dimm->getAttr<ATTR_TEMP_SENSOR_I2C_CONFIG>();
 
                 // Fill in the DIMM entry
                 writeMemConfigData( o_data,
                                 dimm,
-                                SENSOR_NAME_DIMM_STATE,
-                                SENSOR_NAME_DIMM_TEMP,
-                                0xFF, // No centaurs in Nimbus
-                                tempI2cCfgData.engine,
-                                tempI2cCfgData.port,
-                                tempI2cCfgData.devAddr,
+                                SENSOR_NAME_DIMM_STATE,//Bytes 0-3:HW sensor ID
+                                SENSOR_NAME_DIMM_TEMP, //Bytes 4-7:TMP sensor ID
+                                0xFF,                  //Bytes 8:MEM Nimbus,
+                                tempI2cCfgData.engine, //Byte 9: DIMM Info byte1
+                                tempI2cCfgData.port,   //Byte 10:DIMM Info byte2
+                                tempI2cCfgData.devAddr,//Byte 11:DIMM Info byte3
                                 index );
-
-
             }
-*/
-        }
+        }//End MODEL_NIMBUS
 
         TMGT_INF("getMemConfigMessageData: returning %d"
                  " sets of data for OCC 0x%X",
                  numSets, i_occ->getAttr<ATTR_HUID>());
 
         o_data[numSetsOffset] = numSets;
-    }
+    }//END i_monitoringEnabled
     else
     {
         TMGT_INF("getMemConfigMessageData: Mem monitoring is disabled");
 
-        //A zero in byte 2 (numSets) means monitoring is disabled
-        o_data[2] = 0;
+        //A zero in byte 5 (numSets) means monitoring is disabled
+        o_data[numSetsOffset] = 0;
     }
 
     o_size = index;
@@ -499,7 +479,10 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
 
     o_data[index++] = OCC_CFGDATA_MEM_THROTTLE;
     o_data[index++] = OCC_CFGDATA_MEM_THROTTLE_VERSION;
-    index++; //Will fill in numSets at the end
+
+    //Byte 3:   Number of memory throttling data sets.
+    size_t numSetsOffset = index++; //Will fill in numSets at the end
+
 
     getChildAffinityTargets(centaurs, proc, CLASS_CHIP, TYPE_MEMBUF);
 
@@ -548,7 +531,7 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
         o_data[index++] = 0x5F;
         o_data[index++] = 0x01; // Max mem pwr at Nominal
         o_data[index++] = 0x30;
-        o_data[index++] = 0x00; // reserved - must be non-zero until OCC code updated
+        o_data[index++] = 0x00; // reserved
         o_data[index++] = 0x00;
         o_data[index++] = 0x00;
         o_data[index++] = 0x00;
@@ -562,7 +545,7 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
              " sets of data for OCC 0x%X",
              numSets, i_occ->getAttr<ATTR_HUID>());
 
-    o_data[2] = numSets;
+    o_data[numSetsOffset] = numSets;
 
     o_size = index;
 
@@ -659,7 +642,7 @@ uint16_t getMaxPowerCap(Target *i_sys)
 void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
 {
     uint64_t index = 0;
-    uint16_t pcap = 0;
+
     Target* sys = nullptr;
     targetService().getTopLevelTarget(sys);
 
@@ -670,17 +653,28 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     o_data[index++] = OCC_CFGDATA_PCAP_CONFIG_VERSION;
 
 
+    // Minimum HARD Power Cap
+    ATTR_OPEN_POWER_MIN_POWER_CAP_WATTS_type pcap =
+        sys->getAttr<ATTR_OPEN_POWER_MIN_POWER_CAP_WATTS>();
+
+
+    // Minimum SOFT Power Cap
+    ATTR_OPEN_POWER_SOFT_MIN_PCAP_WATTS_type soft_pcap;
+     //if attr does not exists.
+    if ( ! sys->tryGetAttr
+            <ATTR_OPEN_POWER_SOFT_MIN_PCAP_WATTS>(soft_pcap))
+    {
+        soft_pcap = pcap;
+    }
+
+
     // Minimum Soft Power Cap
-    // Note: BMC does not currently support soft power capping.
-    //       Sending hard power cap instead
-    pcap = sys->getAttr<ATTR_OPEN_POWER_MIN_POWER_CAP_WATTS>();
-    TMGT_INF("getPowerCapMessageData: minimum soft power cap =%dW",
-             pcap);
+    TMGT_INF("getPowerCapMessageData: minimum soft power cap =%dW",soft_pcap);
+    memcpy(&o_data[index], &soft_pcap, 2);
+    index += 2;
 
     // Minimum Hard Power Cap
-    pcap = sys->getAttr<ATTR_OPEN_POWER_MIN_POWER_CAP_WATTS>();
-    TMGT_INF("getPowerCapMessageData: minimum hard power cap = %dW",
-             pcap);
+    TMGT_INF("getPowerCapMessageData: minimum hard power cap = %dW",pcap);
     memcpy(&o_data[index], &pcap, 2);
     index += 2;
 
@@ -796,11 +790,23 @@ void getThermalControlMessageData(uint8_t* o_data,
 
 
     // Processor Core Weight
-    o_data[index++] = 14;
+    ATTR_OPEN_POWER_PROC_WEIGHT_type l_proc_weight;
+    if ( ! l_sys->tryGetAttr          //if attr does not exists.
+           <ATTR_OPEN_POWER_PROC_WEIGHT>(l_proc_weight))
+    {
+        l_proc_weight = 10; //Default 1.0 weight.
+    }
+    o_data[index++] = l_proc_weight;
+
 
     // Processor Quad Weight
-    // TODO: Writing 10 for now
-    o_data[index++] = 10;
+    ATTR_OPEN_POWER_QUAD_WEIGHT_type l_quad_weight;
+    if ( ! l_sys->tryGetAttr          //if attr does not exists.
+           <ATTR_OPEN_POWER_QUAD_WEIGHT>(l_quad_weight))
+    {
+        l_quad_weight = 10; //Default 1.0 weight.
+    }
+    o_data[index++] = l_quad_weight;
 
 
     // data sets following (proc, Centaur(Cumulus only), DIMM), and
@@ -815,9 +821,8 @@ void getThermalControlMessageData(uint8_t* o_data,
     o_data[index++] = CFGDATA_FRU_TYPE_PROC;
     o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_PROC_DVFS_TEMP_DEG_C>();
     o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_PROC_ERROR_TEMP_DEG_C>();
-    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_PROC_DVFS_TEMP_DEG_C>();
-    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_PROC_ERROR_TEMP_DEG_C>();
-
+    o_data[index++] = 0xFF;     //PM_DVFS  not defined.
+    o_data[index++] = 0xFF;     //PM_ERROR not defined.
     o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_PROC_READ_TIMEOUT_SEC>();
     l_numSets++;
 
@@ -826,22 +831,24 @@ void getThermalControlMessageData(uint8_t* o_data,
     {
         // Centaur
         o_data[index++] = CFGDATA_FRU_TYPE_MEMBUF;
-        o_data[index++] = l_sys->
-                            getAttr<ATTR_OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C>();
-        o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C>();
-        o_data[index++] = l_sys->
-                            getAttr<ATTR_OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C>();
-        o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C>();
-        o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC>();
+        o_data[index++] =
+                l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C>();
+        o_data[index++] =
+                l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C>();
+        o_data[index++] = 0xFF;     //PM_DVFS  not defined.
+        o_data[index++] = 0xFF;     //PM_ERROR not defined.
+        o_data[index++] =
+                l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC>();
         l_numSets++;
     }
 
     // Dimm
     o_data[index++] = CFGDATA_FRU_TYPE_DIMM;
-    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C>();
+    o_data[index++] =
+                l_sys->getAttr<ATTR_OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C>();
     o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_ERROR_TEMP_DEG_C>();
-    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C>();
-    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_ERROR_TEMP_DEG_C>();
+    o_data[index++] = 0xFF;     //PM_DVFS  not defined.
+    o_data[index++] = 0xFF;     //PM_ERROR not defined.
     o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_READ_TIMEOUT_SEC>();
     l_numSets++;
 
@@ -856,29 +863,21 @@ void getAVSBusConfigMessageData( const TargetHandle_t i_occ,
                                  uint8_t * o_data,
                                  uint64_t & o_size )
 {
-    uint8_t l_vddBusNum = 0;
-    uint8_t l_vddRail   = 0;
-    uint8_t l_vdnBusNum = 0;
-    uint8_t l_vdnRail   = 0;
     uint64_t index      = 0;
 
     assert( o_data != nullptr );
 
     // Get the parent processor
     ConstTargetHandle_t l_proc = getParentChip( i_occ );
-
-    l_vddBusNum = l_proc->getAttr<ATTR_VDD_AVSBUS_BUSNUM>();
-    l_vddRail   = l_proc->getAttr<ATTR_VDD_AVSBUS_RAIL>();
-    l_vdnBusNum = l_proc->getAttr<ATTR_VDN_AVSBUS_BUSNUM>();
-    l_vdnRail   = l_proc->getAttr<ATTR_VDN_AVSBUS_RAIL>();
+    assert( l_proc != nullptr );
 
     // Populate the data
     o_data[index++] = OCC_CFGDATA_AVSBUS_CONFIG;
     o_data[index++] = OCC_CFGDATA_AVSBUS_CONFIG_VERSION;
-    o_data[index++] = l_vddBusNum;
-    o_data[index++] = l_vddRail;
-    o_data[index++] = l_vdnBusNum;
-    o_data[index++] = l_vdnRail;
+    o_data[index++] = l_proc->getAttr<ATTR_VDD_AVSBUS_BUSNUM>();
+    o_data[index++] = l_proc->getAttr<ATTR_VDD_AVSBUS_RAIL>();
+    o_data[index++] = l_proc->getAttr<ATTR_VDN_AVSBUS_BUSNUM>();
+    o_data[index++] = l_proc->getAttr<ATTR_VDN_AVSBUS_RAIL>();
 
     o_size = index;
 }

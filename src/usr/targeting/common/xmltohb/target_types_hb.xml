@@ -57,6 +57,8 @@
     <attribute><id>OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C</id></attribute>
     <attribute><id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id></attribute>
     <attribute><id>OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C</id></attribute>
+    <attribute><id>OPEN_POWER_PROC_WEIGHT</id></attribute>
+    <attribute><id>OPEN_POWER_QUAD_WEIGHT</id></attribute>
     <attribute><id>OPEN_POWER_PROC_DVFS_TEMP_DEG_C</id></attribute>
     <attribute><id>OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C</id></attribute>
     <attribute><id>OPEN_POWER_N_BULK_POWER_LIMIT_WATTS</id></attribute>
@@ -68,6 +70,7 @@
     <attribute><id>OPEN_POWER_PROC_READ_TIMEOUT_SEC</id></attribute>
     <attribute><id>OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR</id></attribute>
     <attribute><id>OPEN_POWER_MIN_POWER_CAP_WATTS</id></attribute>
+    <attribute><id>OPEN_POWER_SOFT_MIN_PCAP_WATTS</id></attribute>
     <attribute><id>OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id></attribute>
     <attribute><id>OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS</id></attribute>
     <attribute><id>OPEN_POWER_TURBO_MODE_SUPPORTED</id></attribute>
