@@ -420,10 +420,11 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     { "ec_gptr"            , 0x01, 0x20, 0x20, EKB_RING    , 0x20037002},
     { "ec_time"            , 0x02, 0x20, 0x20, VPD_RING    , 0x20037007},
     { "ec_mode"            , 0x03, 0x20, 0x20, EKB_RING    , 0x20037001},
+    { "ec_abst"            , 0x04, 0x20, 0x20, EKB_RING    , 0x20037005},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
-    { "ec_repr"            , 0x04, 0x20, 0x37, VPD_RING    , 0x20037006},
+    { "ec_repr"            , 0x05, 0x20, 0x37, VPD_RING    , 0x20037006},
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, CC, RL };
 };
