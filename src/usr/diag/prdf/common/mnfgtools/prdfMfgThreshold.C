@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,10 +28,12 @@
 #include <prdfTrace.H>
 #include <prdfTargetServices.H>
 
+using namespace TARGETING;
+
 namespace PRDF
 {
 
-using namespace TARGETING;
+using namespace PlatServices;
 
 uint8_t MfgThreshold::getThreshold(uint32_t i_thrName)
 {
@@ -56,15 +58,6 @@ void MfgThreshold::setup()
     #define PRDF_FUNC "[MfgThreshold::setup] "
     do
     {
-        // Get top level target
-        TargetHandle_t l_sysTarget = NULL;
-        l_sysTarget = PlatServices::getSystemTarget();
-        if(NULL == l_sysTarget)
-        {
-            PRDF_ERR(PRDF_FUNC "No System target!");
-            break;
-        }
-
         // Set the thresholds
         #ifdef __PRDF_PRDFMFGTHRESHOLDS_H
         #undef __PRDF_PRDFMFGTHRESHOLDS_H
@@ -78,10 +71,9 @@ void MfgThreshold::setup()
 
         #define PRDF_MFGTHRESHOLD_TABLE_BEGIN
         #define PRDF_MFGTHRESHOLD_TABLE_END
-        #define PRDF_MFGTHRESHOLD_ENTRY(a,b)                 \
-        {                                                    \
-            uint8_t l_threshold = l_sysTarget->getAttr<a>(); \
-            this->setThreshold(a, l_threshold);              \
+        #define PRDF_MFGTHRESHOLD_ENTRY(a,b)                        \
+        {                                                           \
+            this->setThreshold(a, getSystemTarget()->getAttr<a>()); \
         }
         #include <prdfMfgThresholdAttrs.H>
 

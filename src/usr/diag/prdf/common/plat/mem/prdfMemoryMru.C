@@ -52,12 +52,6 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
     // Get target using node, proc, membuf and position
     TargetHandle_t system = getSystemTarget();
 
-    if ( NULL == system )
-    {
-        PRDF_ERR( PRDF_FUNC "Could not find system target" );
-        PRDF_ASSERT( false );
-    }
-
     TargetHandle_t node = getConnectedChild( system, TYPE_NODE,
             iv_memMruMeld.s.nodePos );
     if ( NULL == node )
