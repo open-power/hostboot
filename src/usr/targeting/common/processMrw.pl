@@ -482,6 +482,13 @@ sub processProcessor
         elsif ($child_type eq "MCBIST")
         {
             processMcbist($targetObj, $child, $target);
+
+            # TODO RTC:170860 - Eventually the dimm connector will
+            #   contain this information and this can be removed
+             my $socket_pos =  $targetObj->getAttribute($socket_target,
+                "POSITION");
+            $targetObj->setAttribute($child, "VDDR_ID", $socket_pos);
+
         }
         elsif ($child_type eq "OCC")
         {
