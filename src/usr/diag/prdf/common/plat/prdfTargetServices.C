@@ -70,15 +70,7 @@ namespace PlatServices
 // local utility function.
 ATTR_PAYLOAD_KIND_type getPayloadType()
 {
-    ATTR_PAYLOAD_KIND_type payload = PAYLOAD_KIND_UNKNOWN;
-
-    TargetHandle_t sysTrgt = getSystemTarget();
-    if ( NULL != sysTrgt )
-    {
-        payload = sysTrgt->getAttr<ATTR_PAYLOAD_KIND>();
-    }
-
-    return payload;
+    return getSystemTarget()->getAttr<ATTR_PAYLOAD_KIND>();
 }
 
 //------------------------------------------------------------------------------
@@ -115,10 +107,7 @@ bool isHyprRunning()
     #else
 
     TargetHandle_t sysTrgt = getSystemTarget();
-    if ( NULL != sysTrgt )
-    {
-        rc = (PAYLOAD_STATE_RUNNING == sysTrgt->getAttr<ATTR_PAYLOAD_STATE>());
-    }
+    rc = (PAYLOAD_STATE_RUNNING == sysTrgt->getAttr<ATTR_PAYLOAD_STATE>());
 
     #endif
 
@@ -127,16 +116,9 @@ bool isHyprRunning()
 
 bool hasRedundantClocks()
 {
-    bool l_hasRedundantClks = false;
-    TargetHandle_t l_pTarget = getSystemTarget();
-
-    if(l_pTarget && l_pTarget->getAttr<ATTR_REDUNDANT_CLOCKS>())
-    {
-        l_hasRedundantClks = true;
-    }
-
-    return l_hasRedundantClks;
+    return ( 0 != getSystemTarget()->getAttr<ATTR_REDUNDANT_CLOCKS>() );
 }
+
 //##############################################################################
 //##
 //##                 Target Manipulation Utility Functions
