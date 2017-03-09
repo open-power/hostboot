@@ -324,6 +324,10 @@ enum RingID
     ex_l2_fure_1 = 229,
     ex_l3_fure_1 = 230,
 
+    // Core Chiplet Rings
+    // ABIST engine mode
+    ec_abst = 231,
+
     //***************************
     // Rings needed for SBE - End
     //***************************
