@@ -518,6 +518,34 @@
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
+
+<attribute>
+    <id>OPEN_POWER_PROC_WEIGHT</id>
+    <description>
+        Weight factor (in 1/10ths) for each core DTS to calculate a core
+        temperature.
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+<attribute>
+    <id>OPEN_POWER_QUAD_WEIGHT</id>
+    <description>
+        Weight factor (in 1/10ths) for each quad (cache) DTS to calculate a core
+        temperature.
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+
+
 <attribute>
     <id>OPEN_POWER_PROC_DVFS_TEMP_DEG_C</id>
     <description>
@@ -634,6 +662,18 @@
     <id>OPEN_POWER_MIN_POWER_CAP_WATTS</id>
     <description>
         Minimum hard power cap in Watts
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>OPEN_POWER_SOFT_MIN_PCAP_WATTS</id>
+    <description>
+        Minimum soft power cap in Watts
     </description>
     <simpleType>
         <uint64_t></uint64_t>
