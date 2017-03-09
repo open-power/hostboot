@@ -779,6 +779,7 @@ enum RingOffset
     eq_ana_mode     = 45,
     ex_l2_fure_1    = 46,
     ex_l3_fure_1    = 47,
+
     // Instance Rings
     eq_repr         = (0 | INSTANCE_RING_MARK),
     ex_l3_repr      = (1 | INSTANCE_RING_MARK),
@@ -812,6 +813,7 @@ enum RingOffset
     ec_gptr = 1,
     ec_time = 2,
     ec_mode = 3,
+    ec_abst = 4,
     // Instance Rings
     ec_repr = (0 | INSTANCE_RING_MARK)
 };
@@ -819,7 +821,7 @@ enum RingOffset
 static const CHIPLET_DATA g_ecData =
 {
     32, // Core Chiplet ID range is 32-55. The base ID is 32.
-    4,  // 4 common rings for Core chiplet
+    5,  // 5 common rings for Core chiplet
     1,  // 1 instance specific ring for each Core chiplet
     1
 };
@@ -1079,6 +1081,8 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EC::ec_repr                        , "ec_repr"                     , EC_TYPE    }, // 228
     { EQ::ex_l2_fure_1                   , "ex_l2_fure_1"                , EQ_TYPE    }, // 229
     { EQ::ex_l3_fure_1                   , "ex_l3_fure_1"                , EQ_TYPE    }, // 230
+    { EC::ec_abst                        , "ec_abst"                     , EC_TYPE    }, // 231
+
 };
 #endif
 #ifdef __PPE__
@@ -1315,6 +1319,7 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EC::ec_repr                        , EC_TYPE    }, // 228
     { EQ::ex_l2_fure_1                   , EQ_TYPE    }, // 229
     { EQ::ex_l3_fure_1                   , EQ_TYPE    }, // 230
+    { EC::ec_abst                        , EC_TYPE    }, // 231
 };
 #endif
 
