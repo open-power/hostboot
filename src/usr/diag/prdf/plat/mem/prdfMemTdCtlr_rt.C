@@ -132,13 +132,20 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 
     do
     {
+        PRDF_TRAC( PRDF_FUNC "Resuming background scrub. "
+                   "Calling startBgScrub<T>(0x%08x, m%ds%d)",
+                   nextRank.getChip()->getHuid(),
+                   nextRank.getRank().getMaster(),
+                   nextRank.getRank().getSlave() );
+
         // Restart background scrubbing on the next rank.
         o_rc = startBgScrub<T>( nextRank.getChip(), nextRank.getRank() );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "startBgScrub<T>(0x%08x,%d) failed",
+            PRDF_ERR( PRDF_FUNC "startBgScrub<T>(0x%08x,m%ds%d) failed",
                       nextRank.getChip()->getHuid(),
-                      nextRank.getRank().getMaster() );
+                      nextRank.getRank().getMaster(),
+                      nextRank.getRank().getSlave() );
             break;
         }
 
