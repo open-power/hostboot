@@ -299,7 +299,7 @@ enum RingID
     eq_ana_bndy_bucket_23 = 215,
     eq_ana_bndy_bucket_24 = 216,
     eq_ana_bndy_bucket_25 = 217,
-    eq_ana_bndy_l3dcc_bucket_26 = 218,
+    eq_ana_bndy_bucket_l3dcc = 218,
     eq_ana_mode = 219,
 
     // Quad Chiplet Rings
@@ -320,13 +320,29 @@ enum RingID
     // EC0 - EC23 instance specific Ring
     ec_repr = 228,
 
-    // Additional rings
-    ex_l2_fure_1 = 229,
-    ex_l3_fure_1 = 230,
+    // Values 229-230 unused
 
     // Core Chiplet Rings
     // ABIST engine mode
     ec_abst = 231,
+
+    // Additional rings for Nimbus DD2
+    eq_ana_bndy_bucket_26 = 232,
+    eq_ana_bndy_bucket_27 = 233,
+    eq_ana_bndy_bucket_28 = 234,
+    eq_ana_bndy_bucket_29 = 235,
+    eq_ana_bndy_bucket_30 = 236,
+    eq_ana_bndy_bucket_31 = 237,
+    eq_ana_bndy_bucket_32 = 238,
+    eq_ana_bndy_bucket_33 = 239,
+    eq_ana_bndy_bucket_34 = 240,
+    eq_ana_bndy_bucket_35 = 241,
+    eq_ana_bndy_bucket_36 = 242,
+    eq_ana_bndy_bucket_37 = 243,
+    eq_ana_bndy_bucket_38 = 244,
+    eq_ana_bndy_bucket_39 = 245,
+    eq_ana_bndy_bucket_40 = 246,
+    eq_ana_bndy_bucket_41 = 247,
 
     //***************************
     // Rings needed for SBE - End
