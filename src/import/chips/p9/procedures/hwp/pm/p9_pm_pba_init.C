@@ -735,13 +735,13 @@ pba_slave_setup_runtime_phase(
     FAPI_TRY(fapi2::putScom(i_target, PU_PBASLVCTL0_SCOM, l_data64),
              "Failed to set Slave 0 control register");
 
-    FAPI_INF("Initialize PBA Slave 1 for GPE1 (OCC firmware) use ...");
+    FAPI_INF("Initialize PBA Slave 1 for PPC405 booting use ...");
     // Slave 1 (GPE 1).  This is a read/write slave.  Write gathering is
     // allowed, but with the shortest possible timeout.
     ps.value = 0;
     ps.fields.enable = 1;
-    ps.fields.mid_match_value = OCI_MASTER_ID_GPE1;
-    ps.fields.mid_care_mask = OCI_MASTER_ID_MASK_ALL;
+    ps.fields.mid_match_value = OCI_MASTER_ID_ICU & OCI_MASTER_ID_DCU;
+    ps.fields.mid_care_mask   = OCI_MASTER_ID_ICU & OCI_MASTER_ID_DCU;
     ps.fields.read_ttype = PBA_READ_TTYPE_CL_RD_NC;
     ps.fields.read_prefetch_ctl = PBA_READ_PREFETCH_NONE;
     ps.fields.write_ttype = PBA_WRITE_TTYPE_DMA_PR_WR;
