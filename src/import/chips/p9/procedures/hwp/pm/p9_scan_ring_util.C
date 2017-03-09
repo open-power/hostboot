@@ -182,10 +182,24 @@ RingBucket::RingBucket( PlatId i_plat, uint8_t* i_pRingStart, RingDebugMode_t i_
             { eq_ana_bndy_bucket_23,    0,  0 },
             { eq_ana_bndy_bucket_24,    0,  0 },
             { eq_ana_bndy_bucket_25,    0,  0 },
-            { eq_ana_bndy_l3dcc_bucket_26, 0, 0 },
+            { eq_ana_bndy_bucket_l3dcc, 0,  0 },
             { eq_ana_mode,              0,  0 },
-            { ex_l2_fure_1,             0,  0 },
-            { ex_l3_fure_1,             0,  0 },
+            { eq_ana_bndy_bucket_26,    0,  0 },
+            { eq_ana_bndy_bucket_27,    0,  0 },
+            { eq_ana_bndy_bucket_28,    0,  0 },
+            { eq_ana_bndy_bucket_29,    0,  0 },
+            { eq_ana_bndy_bucket_30,    0,  0 },
+            { eq_ana_bndy_bucket_31,    0,  0 },
+            { eq_ana_bndy_bucket_32,    0,  0 },
+            { eq_ana_bndy_bucket_33,    0,  0 },
+            { eq_ana_bndy_bucket_34,    0,  0 },
+            { eq_ana_bndy_bucket_35,    0,  0 },
+            { eq_ana_bndy_bucket_36,    0,  0 },
+            { eq_ana_bndy_bucket_37,    0,  0 },
+            { eq_ana_bndy_bucket_38,    0,  0 },
+            { eq_ana_bndy_bucket_39,    0,  0 },
+            { eq_ana_bndy_bucket_40,    0,  0 },
+            { eq_ana_bndy_bucket_41,    0,  0 },
         };
 
         RingProfile l_quadSpecRings[TEMP_MAX_QUAD_SPEC_RINGS * MAX_QUADS_PER_CHIP] =
@@ -307,10 +321,24 @@ RingBucket::RingBucket( PlatId i_plat, uint8_t* i_pRingStart, RingDebugMode_t i_
         iv_ringName[ eq_ana_bndy_bucket_23 ]    =   (char*)"eq_ana_bndy_bucket_23";
         iv_ringName[ eq_ana_bndy_bucket_24 ]    =   (char*)"eq_ana_bndy_bucket_24";
         iv_ringName[ eq_ana_bndy_bucket_25 ]    =   (char*)"eq_ana_bndy_bucket_25";
-        iv_ringName[ eq_ana_bndy_l3dcc_bucket_26 ]      =   (char*)"eq_ana_bndy_l3dcc_bucket_26";
+        iv_ringName[ eq_ana_bndy_bucket_l3dcc ] =   (char*)"eq_ana_bndy_bucket_l3dcc";
         iv_ringName[ eq_ana_mode ]              =   (char*)"eq_ana_mode          ";
-        iv_ringName[ ex_l2_fure_1 ]             =   (char*)"ex_l2_fure_1         ";
-        iv_ringName[ ex_l3_fure_1 ]             =   (char*)"ex_l3_fure_1         ";
+        iv_ringName[ eq_ana_bndy_bucket_26 ]    =   (char*)"eq_ana_bndy_bucket_26";
+        iv_ringName[ eq_ana_bndy_bucket_27 ]    =   (char*)"eq_ana_bndy_bucket_27";
+        iv_ringName[ eq_ana_bndy_bucket_28 ]    =   (char*)"eq_ana_bndy_bucket_28";
+        iv_ringName[ eq_ana_bndy_bucket_29 ]    =   (char*)"eq_ana_bndy_bucket_29";
+        iv_ringName[ eq_ana_bndy_bucket_30 ]    =   (char*)"eq_ana_bndy_bucket_30";
+        iv_ringName[ eq_ana_bndy_bucket_31 ]    =   (char*)"eq_ana_bndy_bucket_31";
+        iv_ringName[ eq_ana_bndy_bucket_32 ]    =   (char*)"eq_ana_bndy_bucket_32";
+        iv_ringName[ eq_ana_bndy_bucket_33 ]    =   (char*)"eq_ana_bndy_bucket_33";
+        iv_ringName[ eq_ana_bndy_bucket_34 ]    =   (char*)"eq_ana_bndy_bucket_34";
+        iv_ringName[ eq_ana_bndy_bucket_35 ]    =   (char*)"eq_ana_bndy_bucket_35";
+        iv_ringName[ eq_ana_bndy_bucket_36 ]    =   (char*)"eq_ana_bndy_bucket_36";
+        iv_ringName[ eq_ana_bndy_bucket_37 ]    =   (char*)"eq_ana_bndy_bucket_37";
+        iv_ringName[ eq_ana_bndy_bucket_38 ]    =   (char*)"eq_ana_bndy_bucket_38";
+        iv_ringName[ eq_ana_bndy_bucket_39 ]    =   (char*)"eq_ana_bndy_bucket_39";
+        iv_ringName[ eq_ana_bndy_bucket_40 ]    =   (char*)"eq_ana_bndy_bucket_40";
+        iv_ringName[ eq_ana_bndy_bucket_41 ]    =   (char*)"eq_ana_bndy_bucket_41";
         iv_ringName[ eq_repr ]                  =   (char*)"eq_repr              ";
         iv_ringName[ ex_l3_repr ]               =   (char*)"ex_l3_repr           ";
         iv_ringName[ ex_l2_repr ]               =   (char*)"ex_l2_repr           ";
