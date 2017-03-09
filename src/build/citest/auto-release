@@ -71,6 +71,10 @@ function build {
         exit -1
     fi
 
+    ### @todo RTC:171143
+    ### Sleep for 5 minutes to allow time for CMVC req's to take effect
+    echo "Waiting for fspCI requirements to take effect. 5 minutes..."
+    sleep 5m
 }
 
 function fsp-ci-wait {
