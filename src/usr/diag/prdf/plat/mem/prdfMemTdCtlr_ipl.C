@@ -78,6 +78,9 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
     {
         if ( nextRank <= iv_stoppedRank ) // The command made it to the end.
         {
+            PRDF_TRAC( PRDF_FUNC "The TD command made it to the end of "
+                       "memory on chip: 0x%08x", iv_chip->getHuid() );
+
             // Clear all of the counters and maintenance ECC attentions. This
             // must be done before telling MDIA the command is done. Otherwise,
             // we may run into a race condition where MDIA may start the next
@@ -102,13 +105,20 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
         }
         else // There is memory left to test.
         {
+            PRDF_TRAC( PRDF_FUNC "There is still memory left to test. "
+                       "Calling startSfRead<T>(0x%08x, m%ds%d)",
+                       nextRank.getChip()->getHuid(),
+                       nextRank.getRank().getMaster(),
+                       nextRank.getRank().getSlave() );
+
             // Start a super fast command to the end of memory.
             o_rc = startSfRead<T>( nextRank.getChip(), nextRank.getRank() );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "startSfRead<T>(0x%08x,%d) failed",
+                PRDF_ERR( PRDF_FUNC "startSfRead<T>(0x%08x,m%ds%d) failed",
                           nextRank.getChip()->getHuid(),
-                          nextRank.getRank().getMaster() );
+                          nextRank.getRank().getMaster(),
+                          nextRank.getRank().getSlave() );
                 break;
             }
         }

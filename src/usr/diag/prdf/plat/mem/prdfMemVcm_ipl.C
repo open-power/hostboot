@@ -60,6 +60,7 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
         if ( TD_PHASE_0 == iv_phase )
         {
             //start VCM phase 1
+            PRDF_TRAC( PRDF_FUNC "Starting VCM Phase 1" );
             o_rc = startVcmPhase1<TYPE_MCA>( iv_chip, iv_rank );
             if ( SUCCESS != o_rc )
             {
@@ -85,6 +86,7 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
             //if there was a UE or IUE
             if ( (eccAttns & MAINT_UE) || (eccAttns & MAINT_IUE) )
             {
+                PRDF_TRAC( PRDF_FUNC "UE Detected. Aborting this procedure." );
                 //UE
                 if ( eccAttns & MAINT_UE )
                 {
@@ -111,6 +113,7 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
             else
             {
                 //Start VCM phase 2
+                PRDF_TRAC( PRDF_FUNC "Starting VCM Phase 2" );
                 o_rc = startVcmPhase2<TYPE_MCA>( iv_chip, iv_rank );
                 if ( SUCCESS != o_rc )
                 {
@@ -168,6 +171,8 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
             //else if there was a MCE
             else if ( eccAttns & MAINT_MCE )
             {
+                PRDF_TRAC( PRDF_FUNC "Chip mark verified" );
+
                 //The chip mark is verified
                 io_sc.service_data->setSignature( iv_chip->getHuid(),
                                                   PRDFSIG_VcmVerified );
@@ -187,6 +192,8 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
             //else - verification failed
             else
             {
+                PRDF_TRAC( PRDF_FUNC "Chip mark false alarm" );
+
                 io_sc.service_data->setSignature( iv_chip->getHuid(),
                                                   PRDFSIG_VcmFalseAlarm );
 

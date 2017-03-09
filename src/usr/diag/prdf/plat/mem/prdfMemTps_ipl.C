@@ -63,6 +63,7 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
         if ( TD_PHASE_0 == iv_phase )
         {
             //start TPS phase 1
+            PRDF_TRAC( PRDF_FUNC "Starting TPS Phase 1" );
             o_rc = startTpsPhase1<TYPE_MCA>( iv_chip, iv_rank );
             if ( SUCCESS != o_rc )
             {
@@ -100,6 +101,7 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
             //if there was a UE or IUE
             if ( (eccAttns & MAINT_UE) || (eccAttns & MAINT_IUE) )
             {
+                PRDF_TRAC( PRDF_FUNC "UE Detected. Aborting this procedure." );
                 //UE
                 if ( eccAttns & MAINT_UE )
                 {
@@ -158,6 +160,7 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                 if ( TD_PHASE_1 == iv_phase )
                 {
                     //Start TPS phase 2
+                    PRDF_TRAC( PRDF_FUNC "Starting TPS Phase 2" );
                     o_rc = startTpsPhase2<TYPE_MCA>( iv_chip, iv_rank );
                     if ( SUCCESS != o_rc )
                     {
