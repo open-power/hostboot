@@ -43,6 +43,7 @@
     <rc>RC_MSS_INVALID_TIMING_VALUE</rc>
     <description>Invalid value calculated for timing value based on MTB and FTB from SPD.</description>
     <ffdc>VALUE</ffdc>
+    <ffdc>FUNCTION</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
