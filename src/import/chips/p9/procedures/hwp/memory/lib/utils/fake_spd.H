@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,8 @@ enum class spd_type
     VBU_16GB_2RX4_2400_DDR4_RDIMM,
     MICRON_8GB_1Rx8_2400_DDR4_RDIMM,
     MICRON_32GB_2RX4_2400_DDR4_LRDIMM,
-    SAMSUNG_64GB_2S2RX4_2400_DDR4_RDIMM_3DS
+    SAMSUNG_64GB_2S2RX4_2400_DDR4_RDIMM_3DS,
+    CUSTOM_16GB_2RX8,
 };
 
 ///

@@ -57,6 +57,16 @@ using fapi2::TARGET_TYPE_MCA;
 namespace mss
 {
 
+///
+/// @brief encoding for MSS_INVALID_TIMING so we can look up functions based on encoding
+///
+enum invalid_timing_function_encoding
+{
+    TAAMIN = 10,
+    TCKMIN = 11,
+    TCKMAX = 12,
+};
+
 /////////////////////////
 // Member method implementation
 /////////////////////////
@@ -277,6 +287,7 @@ fapi2::ReturnCode cas_latency::get_taamin( const std::shared_ptr<mss::spd::decod
     FAPI_ASSERT(o_value > 0,
                 fapi2::MSS_INVALID_TIMING_VALUE().
                 set_VALUE(o_value).
+                set_FUNCTION(TAAMIN).
                 set_DIMM_TARGET(iv_target),
                 "%s. tAAmin invalid (<= 0) : %d",
                 mss::c_str(iv_target),
@@ -325,6 +336,7 @@ fapi2::ReturnCode cas_latency::get_tckmin( const std::shared_ptr<mss::spd::decod
     FAPI_ASSERT(o_value > 0,
                 fapi2::MSS_INVALID_TIMING_VALUE().
                 set_VALUE(o_value).
+                set_FUNCTION(TCKMIN).
                 set_DIMM_TARGET(iv_target),
                 "%s. tCKmin invalid (<= 0) : %d",
                 mss::c_str(iv_target),
@@ -372,6 +384,7 @@ fapi2::ReturnCode cas_latency::get_tckmax( const std::shared_ptr<mss::spd::decod
     FAPI_ASSERT(o_value > 0,
                 fapi2::MSS_INVALID_TIMING_VALUE().
                 set_VALUE(o_value).
+                set_FUNCTION(TCKMAX).
                 set_DIMM_TARGET(iv_target),
                 "%s. tCKmax invalid (<= 0) : %d",
                 mss::c_str(iv_target),

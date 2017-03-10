@@ -185,6 +185,15 @@ enum invalid_freq_function_encoding
     BC0A = 0x0a,
 };
 
+///
+/// @brief encoding for MSS_INVALID_TIMING so we can look up functions based on encoding
+///
+enum invalid_timing_function_encoding
+{
+    TRRD_S = 0,
+    TRRD_L = 1,
+    TFAW = 2,
+};
 /////////////////////////
 // Non-member function implementations
 /////////////////////////
@@ -741,8 +750,8 @@ fapi2::ReturnCode eff_dimm::dram_trfc()
     // Calculate trfc (in ps)
     {
         constexpr int64_t l_trfc_ftb = 0;
-        FAPI_INF( "medium timebase (ps): %ld, fine timebase (ps): %ld, tRFC (MTB): %ld, tRFC(FTB): %ld",
-                  iv_mtb, iv_ftb, l_trfc_mtb, l_trfc_ftb );
+        FAPI_INF( "%s medium timebase (ps): %ld, fine timebase (ps): %ld, tRFC (MTB): %ld, tRFC(FTB): %ld",
+                  mss::c_str(iv_dimm), iv_mtb, iv_ftb, l_trfc_mtb, l_trfc_ftb );
 
         l_trfc_in_ps = spd::calc_timing_from_timebase(l_trfc_mtb, iv_mtb, l_trfc_ftb, iv_ftb);
     }
@@ -945,8 +954,8 @@ fapi2::ReturnCode eff_dimm::dram_tccd_l()
         FAPI_TRY( iv_pDecoder->fine_offset_min_tccd_l(l_tccd_ftb),
                   "Failed fine_offset_min_tccd_l() for %s", mss::c_str(iv_dimm) );
 
-        FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tCCD_L (MTB): %ld, tCCD_L(FTB): %ld",
-                 iv_mtb, iv_ftb, l_tccd_mtb, l_tccd_ftb );
+        FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tCCD_L (MTB): %ld, tCCD_L(FTB): %ld",
+                 mss::c_str(iv_dimm), iv_mtb, iv_ftb, l_tccd_mtb, l_tccd_ftb );
 
         l_tccd_in_ps = spd::calc_timing_from_timebase(l_tccd_mtb, iv_mtb, l_tccd_ftb, iv_ftb);
     }
@@ -1822,8 +1831,8 @@ fapi2::ReturnCode eff_dimm::dram_twr()
         FAPI_TRY( iv_pDecoder->min_write_recovery_time(l_twr_mtb),
                   "Failed min_write_recovery_time() for %s", mss::c_str(iv_dimm) );
 
-        FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tWR (MTB): %ld, tWR(FTB): %ld",
-                 iv_mtb, iv_ftb, l_twr_mtb, l_twr_ftb);
+        FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tWR (MTB): %ld, tWR(FTB): %ld",
+                 mss::c_str(iv_dimm), iv_mtb, iv_ftb, l_twr_mtb, l_twr_ftb);
 
         // Calculate twr (in ps)
         l_twr_in_ps = spd::calc_timing_from_timebase(l_twr_mtb, iv_mtb, l_twr_ftb, iv_ftb);
@@ -1837,7 +1846,7 @@ fapi2::ReturnCode eff_dimm::dram_twr()
         FAPI_TRY( spd::calc_nck(l_twr_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR,  l_twr_in_nck),
                   "Error in calculating l_twr_in_nck for target %s, with value of l_twr_in_ps: %d", mss::c_str(iv_dimm), l_twr_in_ps);
 
-        FAPI_INF( "tCK (ps): %d, tWR (ps): %d, tWR (nck): %d  for target: %s",
+        FAPI_INF( "tCK (ps): %d, tWR (ps): %d, tWR (nck): %d for target: %s",
                   iv_tCK_in_ps, l_twr_in_ps, l_twr_in_nck, mss::c_str(iv_dimm) );
 
         // Get & update MCS attribute
@@ -2841,8 +2850,8 @@ fapi2::ReturnCode eff_dimm::dram_trp()
         FAPI_TRY( iv_pDecoder->fine_offset_min_trp(l_trp_ftb),
                   "Failed fine_offset_min_trp() for %s", mss::c_str(iv_dimm) );
 
-        FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tRP (MTB): %ld, tRP(FTB): %ld",
-                 iv_mtb, iv_ftb, l_trp_mtb, l_trp_ftb);
+        FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tRP (MTB): %ld, tRP(FTB): %ld",
+                 mss::c_str(iv_dimm), iv_mtb, iv_ftb, l_trp_mtb, l_trp_ftb);
 
         l_trp_in_ps = spd::calc_timing_from_timebase(l_trp_mtb, iv_mtb, l_trp_ftb, iv_ftb);
     }
@@ -2862,7 +2871,7 @@ fapi2::ReturnCode eff_dimm::dram_trp()
         FAPI_TRY( spd::calc_nck(l_trp_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trp_in_nck),
                   "Error in calculating dram_tRP nck for target %s, with value of l_trp_in_ps: %d", mss::c_str(iv_dimm), l_trp_in_ps);
 
-        FAPI_INF( "tCK (ps): %d, tRP (ps): %d, tRP (nck): %d  for target: %s",
+        FAPI_INF( "tCK (ps): %d, tRP (ps): %d, tRP (nck): %d for target: %s",
                   iv_tCK_in_ps, l_trp_in_ps, l_trp_in_nck, mss::c_str(iv_dimm) );
 
         // Get & update MCS attribute
@@ -2902,8 +2911,8 @@ fapi2::ReturnCode eff_dimm::dram_trcd()
         FAPI_TRY( iv_pDecoder->fine_offset_min_trcd(l_trcd_ftb),
                   "Failed fine_offset_min_trcd() for %s", mss::c_str(iv_dimm) );
 
-        FAPI_INF("medium timebase MTB (ps): %ld, fine timebase FTB (ps): %ld, tRCD (MTB): %ld, tRCD (FTB): %ld",
-                 iv_mtb, iv_ftb, l_trcd_mtb, l_trcd_ftb);
+        FAPI_INF("%s medium timebase MTB (ps): %ld, fine timebase FTB (ps): %ld, tRCD (MTB): %ld, tRCD (FTB): %ld",
+                 mss::c_str(iv_dimm), iv_mtb, iv_ftb, l_trcd_mtb, l_trcd_ftb);
 
         l_trcd_in_ps = spd::calc_timing_from_timebase(l_trcd_mtb, iv_mtb, l_trcd_ftb, iv_ftb);
     }
@@ -2916,7 +2925,7 @@ fapi2::ReturnCode eff_dimm::dram_trcd()
         FAPI_TRY( spd::calc_nck(l_trcd_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trcd_in_nck),
                   "Error in calculating trcd for target %s, with value of l_trcd_in_ps: %d", mss::c_str(iv_dimm), l_trcd_in_ps);
 
-        FAPI_INF("tCK (ps): %d, tRCD (ps): %d, tRCD (nck): %d  for target: %s",
+        FAPI_INF("tCK (ps): %d, tRCD (ps): %d, tRCD (nck): %d for target: %s",
                  iv_tCK_in_ps, l_trcd_in_ps, l_trcd_in_nck, mss::c_str(iv_dimm));
 
         // Get & update MCS attribute
@@ -2951,8 +2960,8 @@ fapi2::ReturnCode eff_dimm::dram_trc()
         FAPI_TRY( iv_pDecoder->fine_offset_min_trc(l_trc_ftb),
                   "Failed fine_offset_min_trc() for %s", mss::c_str(iv_dimm) );
 
-        FAPI_INF("medium timebase MTB (ps): %ld, fine timebase FTB (ps): %ld, tRCmin (MTB): %ld, tRCmin(FTB): %ld",
-                 iv_mtb, iv_ftb, l_trc_mtb, l_trc_ftb);
+        FAPI_INF("%s medium timebase MTB (ps): %ld, fine timebase FTB (ps): %ld, tRCmin (MTB): %ld, tRCmin(FTB): %ld",
+                 mss::c_str(iv_dimm), iv_mtb, iv_ftb, l_trc_mtb, l_trc_ftb);
 
         l_trc_in_ps = spd::calc_timing_from_timebase(l_trc_mtb, iv_mtb, l_trc_ftb, iv_ftb);
     }
@@ -2966,7 +2975,7 @@ fapi2::ReturnCode eff_dimm::dram_trc()
                   "Error in calculating trc for target %s, with value of l_trc_in_ps: %d",
                   mss::c_str(iv_dimm), l_trc_in_ps );
 
-        FAPI_INF( "tCK (ps): %d, tRC (ps): %d, tRC (nck): %d  for target: %s",
+        FAPI_INF( "tCK (ps): %d, tRC (ps): %d, tRC (nck): %d for target: %s",
                   iv_tCK_in_ps, l_trc_in_ps, l_trc_in_nck, mss::c_str(iv_dimm) );
 
         // Get & update MCS attribute
@@ -2998,8 +3007,8 @@ fapi2::ReturnCode eff_dimm::dram_twtr_l()
 
         FAPI_TRY( iv_pDecoder->min_twtr_l(l_twtr_l_mtb) );
 
-        FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tWTR_S (MTB): %ld, tWTR_S (FTB): %ld",
-                 iv_mtb, iv_ftb, l_twtr_l_mtb, l_twtr_l_ftb );
+        FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tWTR_S (MTB): %ld, tWTR_S (FTB): %ld",
+                 mss::c_str(iv_dimm), iv_mtb, iv_ftb, l_twtr_l_mtb, l_twtr_l_ftb );
 
         l_twtr_l_in_ps = spd::calc_timing_from_timebase(l_twtr_l_mtb, iv_mtb, l_twtr_l_ftb, iv_ftb);
     }
@@ -3013,7 +3022,7 @@ fapi2::ReturnCode eff_dimm::dram_twtr_l()
         FAPI_TRY( spd::calc_nck(l_twtr_l_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_twtr_l_in_nck),
                   "Error in calculating tWTR_L for target %s, with value of l_twtr_in_ps: %d", mss::c_str(iv_dimm), l_twtr_l_in_ps );
 
-        FAPI_INF( "tCK (ps): %d,  tWTR_L (ps): %d, tWTR_L (nck): %d  for target: %s",
+        FAPI_INF( "tCK (ps): %d,  tWTR_L (ps): %d, tWTR_L (nck): %d for target: %s",
                   iv_tCK_in_ps, l_twtr_l_in_ps, l_twtr_l_in_nck, mss::c_str(iv_dimm) );
 
         // Get & update MCS attribute
@@ -3045,8 +3054,8 @@ fapi2::ReturnCode eff_dimm::dram_twtr_s()
 
         FAPI_TRY( iv_pDecoder->min_twtr_s(l_twtr_s_mtb) );
 
-        FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tWTR_S (MTB): %ld, tWTR_S (FTB): %ld",
-                 iv_mtb, iv_ftb, l_twtr_s_mtb, l_twtr_s_ftb );
+        FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tWTR_S (MTB): %ld, tWTR_S (FTB): %ld",
+                 mss::c_str(iv_dimm), iv_mtb, iv_ftb, l_twtr_s_mtb, l_twtr_s_ftb );
 
         l_twtr_s_in_ps = spd::calc_timing_from_timebase(l_twtr_s_mtb, iv_mtb, l_twtr_s_ftb, iv_ftb);
     }
@@ -3059,7 +3068,7 @@ fapi2::ReturnCode eff_dimm::dram_twtr_s()
         FAPI_TRY( spd::calc_nck(l_twtr_s_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_twtr_s_in_nck),
                   "Error in calculating tWTR_S for target %s, with value of l_twtr_in_ps: %d", mss::c_str(iv_dimm), l_twtr_s_in_ps);
 
-        FAPI_INF("tCK (ps): %d, tWTR_S (ps): %d, tWTR_S (nck): %d  for target: %s",
+        FAPI_INF("tCK (ps): %d, tWTR_S (ps): %d, tWTR_S (nck): %d for target: %s",
                  iv_tCK_in_ps, l_twtr_s_in_ps, l_twtr_s_in_nck, mss::c_str(iv_dimm) );
 
         // Get & update MCS attribute
@@ -3084,30 +3093,62 @@ fapi2::ReturnCode eff_dimm::dram_trrd_s()
 {
     std::vector<uint8_t> l_attrs_dram_trrd_s(PORTS_PER_MCS, 0);
     uint64_t l_trrd_s_in_nck = 0;
-    uint8_t l_stack_type = 0;
+    int64_t l_trrd_s_in_ps = 0;
+    uint64_t l_jedec_trrd = 0;
     uint8_t l_dram_width = 0;
 
-    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(l_stack_type) );
+    // Calculate tRRD_S
+    {
+        int64_t l_trrd_s_mtb = 0;
+        int64_t l_trrd_s_ftb = 0;
+
+        FAPI_TRY( iv_pDecoder->min_trrd_s(l_trrd_s_mtb),
+                  "Failed min_trrd_s() for %s", mss::c_str(iv_dimm) );
+
+        FAPI_TRY( iv_pDecoder->fine_offset_min_trrd_s(l_trrd_s_ftb),
+                  "Failed fine_offset_min_trrd_s() for %s", mss::c_str(iv_dimm) );
+
+        FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, trrd_s (MTB): %ld",
+                 mss::c_str(iv_dimm), iv_mtb, iv_ftb, l_trrd_s_mtb);
+
+        l_trrd_s_in_ps = spd::calc_timing_from_timebase(l_trrd_s_mtb, iv_mtb, l_trrd_s_ftb, iv_ftb);
+
+        FAPI_ASSERT( l_trrd_s_in_ps >= 0,
+                     fapi2::MSS_INVALID_TIMING_VALUE()
+                     .set_VALUE(l_trrd_s_in_ps)
+                     .set_DIMM_TARGET(iv_dimm)
+                     .set_FUNCTION(TRRD_S),
+                     "%s Error calculating tRRD_S (%d). Less than or equal to 0",
+                     mss::c_str(iv_dimm),
+                     l_trrd_s_in_ps);
+
+        FAPI_DBG("TRRD_S in ps is %d", l_trrd_s_in_ps);
+
+        FAPI_TRY( spd::calc_nck(l_trrd_s_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trrd_s_in_nck),
+                  "Error in calculating l_tFAW for target %s, with value of l_trrd_s_in_ps: %d",
+                  mss::c_str(iv_dimm),
+                  l_trrd_s_in_nck);
+    }
+
     FAPI_TRY( iv_pDecoder->device_width(l_dram_width),
-              "Failed to access device_width()");
+              "Failed device_width()");
 
-    // From the SPD Spec:
-    // At some frequencies, a minimum number of clocks may be required resulting
-    // in a larger tRRD_Smin value than indicated in the SPD.
-    // tRRD_S (3DS) is speed bin independent.
-    // So we won't read this from SPD and choose the correct value based on mss_freq
+    FAPI_TRY( trrd_s( iv_dimm, l_dram_width, l_jedec_trrd) );
 
-    if( l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS)
+    // Taking the worst case between the required minimum JEDEC value and the proposed value from SPD
+    if (l_jedec_trrd != l_trrd_s_in_nck)
     {
-        FAPI_TRY( trrd_s_slr(iv_dimm, l_trrd_s_in_nck) );
-    }
-    else
-    {
-        // Non-3DS
-        FAPI_TRY( mss::trrd_s(iv_dimm, l_dram_width, l_trrd_s_in_nck) );
+        FAPI_INF("%s TRRD_S from JEDEC (%d) and from SPD (%d) don't match. Choosing worst case. dram width %d, freq %d",
+                 mss::c_str(iv_dimm),
+                 l_jedec_trrd,
+                 l_trrd_s_in_nck,
+                 l_dram_width,
+                 iv_freq);
+
+        l_trrd_s_in_nck = std::max( l_jedec_trrd, l_trrd_s_in_nck);
     }
 
-    FAPI_INF("SDRAM width: %d, tRRD_S (nck): %d for target: %s",
+    FAPI_INF("SDRAM width: %d, tFAW (nck): %d for target: %s",
              l_dram_width, l_trrd_s_in_nck, mss::c_str(iv_dimm));
 
     // Get & update MCS attribute
@@ -3132,36 +3173,69 @@ fapi2::ReturnCode eff_dimm::dram_trrd_l()
 {
     std::vector<uint8_t> l_attrs_dram_trrd_l(PORTS_PER_MCS, 0);
     uint64_t l_trrd_l_in_nck = 0;
-    uint8_t l_stack_type = 0;
+    int64_t l_trrd_l_in_ps = 0;
     uint8_t l_dram_width = 0;
+    uint64_t l_jedec_trrd = 0;
+    // Calculate tRRD_L
+    {
+        int64_t l_trrd_l_mtb = 0;
+        int64_t l_trrd_l_ftb = 0;
 
-    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(l_stack_type),
-              "Failed prim_sdram_signal_loading()" );
+        FAPI_TRY( iv_pDecoder->min_trrd_l(l_trrd_l_mtb),
+                  "Failed min_trrd_l() for %s", mss::c_str(iv_dimm) );
+
+        FAPI_TRY( iv_pDecoder->fine_offset_min_trrd_l(l_trrd_l_ftb),
+                  "Failed fine_offset_min_trrd_l() for %s", mss::c_str(iv_dimm) );
+
+        FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, trrd_l (MTB): %ld",
+                 mss::c_str(iv_dimm), iv_mtb, iv_ftb, l_trrd_l_mtb);
+
+        l_trrd_l_in_ps = spd::calc_timing_from_timebase(l_trrd_l_mtb, iv_mtb, l_trrd_l_ftb, iv_ftb);
+
+        FAPI_ASSERT( l_trrd_l_in_ps >= 0,
+                     fapi2::MSS_INVALID_TIMING_VALUE()
+                     .set_VALUE(l_trrd_l_in_ps)
+                     .set_DIMM_TARGET(iv_dimm)
+                     .set_FUNCTION(TRRD_L),
+                     "%s Error calculating tRRD_L (%d). Less than or equal to 0",
+                     mss::c_str(iv_dimm),
+                     l_trrd_l_in_ps);
+
+
+        FAPI_DBG("TRRD_L in ps is %d", l_trrd_l_in_ps);
+
+        FAPI_TRY( spd::calc_nck(l_trrd_l_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trrd_l_in_nck),
+                  "Error in calculating l_tFAW for target %s, with value of l_trrd_l_in_ps: %d",
+                  mss::c_str(iv_dimm),
+                  l_trrd_l_in_nck);
+    }
+
     FAPI_TRY( iv_pDecoder->device_width(l_dram_width),
-              "Failed to access device_width()");
+              "Failed device_width()");
 
-    // From the SPD Spec:
-    // At some frequencies, a minimum number of clocks may be required resulting
-    // in a larger tRRD_Lmin value than indicated in the SPD.
-    // tRRD_L (3DS) is speed bin independent.
-    // So we won't read this from SPD and choose the correct value based on mss_freq
+    FAPI_TRY( trrd_l( iv_dimm, l_dram_width, l_jedec_trrd) );
 
-    if( l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS)
+    // Taking the worst case between the required minimum JEDEC value and the proposed value from SPD
+    if (l_jedec_trrd != l_trrd_l_in_nck)
     {
-        FAPI_TRY( trrd_l_slr(iv_dimm, l_trrd_l_in_nck) );
-    }
-    else
-    {
-        FAPI_TRY( mss::trrd_l(iv_dimm, l_dram_width, l_trrd_l_in_nck), "Failed trrd_l()" );
+        FAPI_INF("%s TRRD_L from JEDEC (%d) and from SPD (%d) don't match. Choosing worst case. dram width %d, freq %d",
+                 mss::c_str(iv_dimm),
+                 l_jedec_trrd,
+                 l_trrd_l_in_nck,
+                 l_dram_width,
+                 iv_freq);
+
+        l_trrd_l_in_nck = std::max( l_jedec_trrd, l_trrd_l_in_nck);
     }
 
-    FAPI_INF("SDRAM width: %d, tRRD_L (nck): %d for target: %s",
+    FAPI_INF("SDRAM width: %d, tFAW (nck): %d for target: %s",
              l_dram_width, l_trrd_l_in_nck, mss::c_str(iv_dimm));
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_trrd_l(iv_mcs, l_attrs_dram_trrd_l.data()) );
 
     l_attrs_dram_trrd_l[iv_port_index] = l_trrd_l_in_nck;
+
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRRD_L,
                             iv_mcs,
                             UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trrd_l, PORTS_PER_MCS)),
@@ -3181,7 +3255,7 @@ fapi2::ReturnCode eff_dimm::dram_trrd_dlr()
     std::vector<uint8_t> l_attrs_dram_trrd_dlr(PORTS_PER_MCS, 0);
     constexpr uint64_t l_trrd_dlr_in_nck = trrd_dlr();
 
-    FAPI_INF("tRRD_dlr (nck): %d  for target: %s", l_trrd_dlr_in_nck, mss::c_str(iv_dimm));
+    FAPI_INF("tRRD_dlr (nck): %d for target: %s", l_trrd_dlr_in_nck, mss::c_str(iv_dimm));
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_trrd_dlr(iv_mcs, l_attrs_dram_trrd_dlr.data()) );
@@ -3205,24 +3279,59 @@ fapi2::ReturnCode eff_dimm::dram_tfaw()
 {
     std::vector<uint8_t> l_attrs_dram_tfaw(PORTS_PER_MCS, 0);
     uint64_t l_tfaw_in_nck = 0;
-    uint8_t l_stack_type = 0;
+    uint64_t l_jedec_tfaw_in_nck = 0;
+    int64_t l_tfaw_in_ps = 0;
     uint8_t l_dram_width = 0;
+    int64_t l_tfaw_ftb = 0;
 
-    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(l_stack_type),
-              "Failed prim_sdram_signal_loading()");
+    // Calculate tFAW
+    {
+        int64_t l_tfaw_mtb = 0;
+
+        FAPI_TRY( iv_pDecoder->min_tfaw(l_tfaw_mtb),
+                  "Failed min_tfaw() for %s", mss::c_str(iv_dimm) );
+
+        FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tfaw (MTB): %ld",
+                 mss::c_str(iv_dimm), iv_mtb, iv_ftb, l_tfaw_mtb);
+
+        l_tfaw_in_ps = spd::calc_timing_from_timebase(l_tfaw_mtb, iv_mtb, l_tfaw_ftb, iv_ftb);
+
+        FAPI_ASSERT( l_tfaw_in_ps >= 0,
+                     fapi2::MSS_INVALID_TIMING_VALUE()
+                     .set_VALUE(l_tfaw_in_ps)
+                     .set_DIMM_TARGET(iv_dimm)
+                     .set_FUNCTION(TFAW),
+                     "%s Error calculating tFAW (%d). Less than or equal to 0",
+                     mss::c_str(iv_dimm),
+                     l_tfaw_in_ps);
+
+        FAPI_DBG("%s TFAW in ps is %d", mss::c_str(iv_dimm), l_tfaw_in_ps);
+
+        FAPI_TRY( spd::calc_nck(l_tfaw_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_tfaw_in_nck),
+                  "Error in calculating l_tFAW for target %s, with value of l_tfaw_in_ps: %d",
+                  mss::c_str(iv_dimm),
+                  l_tfaw_in_nck);
+    }
+
     FAPI_TRY( iv_pDecoder->device_width(l_dram_width),
               "Failed device_width()");
 
-    if( l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS)
+    FAPI_TRY( mss::tfaw(iv_dimm, l_dram_width, l_jedec_tfaw_in_nck), "Failed tfaw()" );
+
+    // Taking the worst case between the required minimum JEDEC value and the proposed value from SPD
+    if (l_jedec_tfaw_in_nck != l_tfaw_in_nck)
     {
-        FAPI_TRY( tfaw_slr(iv_dimm, l_dram_width, l_tfaw_in_nck), "Failed tfaw_slr()");
-    }
-    else
-    {
-        FAPI_TRY( mss::tfaw(iv_dimm, l_dram_width, l_tfaw_in_nck), "Failed tfaw()" );
+        FAPI_INF("%s TFAW from JEDEC (%d) and from SPD (%d) don't match. Choosing worst case. dram width %d, freq %d",
+                 mss::c_str(iv_dimm),
+                 l_jedec_tfaw_in_nck,
+                 l_tfaw_in_nck,
+                 l_dram_width,
+                 iv_freq);
+
+        l_tfaw_in_nck = std::max(l_jedec_tfaw_in_nck, l_tfaw_in_nck);
     }
 
-    FAPI_INF("SDRAM width: %d, tFAW (nck): %d  for target: %s",
+    FAPI_INF("SDRAM width: %d, tFAW (nck): %d for target: %s",
              l_dram_width, l_tfaw_in_nck, mss::c_str(iv_dimm));
 
     // Get & update MCS attribute
@@ -3249,7 +3358,7 @@ fapi2::ReturnCode eff_dimm::dram_tfaw_dlr()
     std::vector<uint8_t> l_attrs_dram_tfaw_dlr(PORTS_PER_MCS, 0);
     constexpr uint64_t l_tfaw_dlr_in_nck = tfaw_dlr();
 
-    FAPI_INF("tFAW_dlr (nck): %d  for target: %s", l_tfaw_dlr_in_nck, mss::c_str(iv_dimm));
+    FAPI_INF("tFAW_dlr (nck): %d for target: %s", l_tfaw_dlr_in_nck, mss::c_str(iv_dimm));
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_tfaw_dlr(iv_mcs, l_attrs_dram_tfaw_dlr.data()) );
@@ -3293,7 +3402,7 @@ fapi2::ReturnCode eff_dimm::dram_tras()
               "Error in calculating tras_l for target %s, with value of l_twtr_in_ps: %d",
               mss::c_str(iv_dimm), l_tras_in_ps);
 
-    FAPI_INF("tCK (ps): %d, tRAS (ps): %d, tRAS (nck): %d  for target: %s",
+    FAPI_INF("tCK (ps): %d, tRAS (ps): %d, tRAS (nck): %d for target: %s",
              iv_tCK_in_ps, l_tras_in_ps, l_tras_in_nck, mss::c_str(iv_dimm));
 
     // Get & update MCS attribute
