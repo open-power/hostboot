@@ -460,10 +460,10 @@ else
 
 # Note - if below attribute is specified with im-id, it will not get
 #  set into the output
-if( exists $reqPol->{'mss_interleave_enable'} )
+if( exists $reqPol->{'mss_mrw_interleave_enable'} )
 {
     push @systemAttr, ['MSS_INTERLEAVE_ENABLE',
-      $reqPol->{'mss_interleave_enable'}];
+      $reqPol->{'mss_mrw_interleave_enable'}];
 }
 
 
