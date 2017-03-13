@@ -491,7 +491,8 @@ fapi2::ReturnCode pba_slave_reset(
             FAPI_ASSERT(false, fapi2::P9_PMPROC_PBA_SLAVE_RESET_TIMEOUT()
                         .set_POLLCOUNT(l_pollCount)
                         .set_SLAVENUM(sl)
-                        .set_PBASLVREG(l_BUFFCONT),
+                        .set_PBASLVREG(l_BUFFCONT)
+                        .set_CHIP(i_target),
                         "PBA Slave Reset Timout");
         }
 
@@ -503,7 +504,8 @@ fapi2::ReturnCode pba_slave_reset(
             FAPI_ASSERT(false, fapi2::P9_PMPROC_PBA_SLAVE_BUSY_AFTER_RESET()
                         .set_POLLCOUNT(l_pollCount)
                         .set_SLAVENUM(sl)
-                        .set_PBASLVREG( l_BUFFCONT),
+                        .set_PBASLVREG( l_BUFFCONT)
+                        .set_CHIP(i_target),
                         "Slave 0x%x still busy after reset", sl);
         }
     }
@@ -851,7 +853,8 @@ fapi2::ReturnCode pba_bc_stop(
     {
         FAPI_ASSERT(false, fapi2::P9_PROCPM_PBA_BCDE_STOP_TIMEOUT()
                     .set_POLLCOUNT( p9pba::MAX_PBA_BC_STOP_POLLS)
-                    .set_POLLVALUE(p9pba::MAX_PBA_BC_STOP_POLLS),
+                    .set_POLLVALUE(p9pba::MAX_PBA_BC_STOP_POLLS)
+                    .set_CHIP(i_target),
                     "PBA BCDE Stop Timeout");
     }
 
@@ -860,7 +863,8 @@ fapi2::ReturnCode pba_bc_stop(
     {
         FAPI_ASSERT(false, fapi2::P9_PROCPM_PBA_BCUE_STOP_TIMEOUT()
                     .set_POLLCOUNT( p9pba::MAX_PBA_BC_STOP_POLLS)
-                    .set_POLLVALUE( p9pba::MAX_PBA_BC_STOP_POLLS),
+                    .set_POLLVALUE( p9pba::MAX_PBA_BC_STOP_POLLS)
+                    .set_CHIP(i_target),
                     "PBA BCUE Stop Timeout");
     }
 
