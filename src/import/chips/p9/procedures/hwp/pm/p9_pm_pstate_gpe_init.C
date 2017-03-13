@@ -132,7 +132,8 @@ fapi2::ReturnCode pstate_gpe_init(
     FAPI_ASSERT(!((l_xsr.getBit<p9hcd::HALTED_STATE>() == 1) &&
                   ((l_xsr_halt_condition == p9hcd::DEBUG_HALT ||
                     l_xsr_halt_condition == p9hcd::DBCR_HALT)   )),
-                fapi2::PSTATE_GPE_INIT_DEBUG_HALT(),
+                fapi2::PSTATE_GPE_INIT_DEBUG_HALT()
+                .set_CHIP(i_target),
                 "Pstate GPE Debug Halt detected");
 
     // @todo 146665 Need to collect PGPE state. Operations to PPEs should
@@ -142,7 +143,8 @@ fapi2::ReturnCode pstate_gpe_init(
     FAPI_ASSERT((l_timeout_counter != 0 &&
                  l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>() == 1 &&
                  l_xsr.getBit<p9hcd::HALTED_STATE>() != 1),
-                fapi2::PSTATE_GPE_INIT_TIMEOUT(),
+                fapi2::PSTATE_GPE_INIT_TIMEOUT()
+                .set_CHIP(i_target),
                 "Pstate GPE Init timeout");
 
     if(( 1 == l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>() ))
@@ -200,7 +202,8 @@ fapi2::ReturnCode pstate_gpe_reset(
 
     // When PGPE fails to halt, then assert ot
     FAPI_ASSERT((l_timeout_in_MS != 0),
-                fapi2::PSTATE_GPE_RESET_TIMEOUT(),
+                fapi2::PSTATE_GPE_RESET_TIMEOUT()
+                .set_CHIP(i_target),
                 "PSTATE GPE Init timeout");
 
     FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_data64));
@@ -240,7 +243,7 @@ fapi2::ReturnCode p9_pm_pstate_gpe_init(
 
         FAPI_ASSERT(fapi2::current_err == fapi2::FAPI2_RC_SUCCESS,
                     fapi2::PSTATE_GPE_PBA_INIT_FAILED()
-                    .set_TARGET(i_target)
+                    .set_CHIP(i_target)
                     .set_MODE(p9pm::PM_INIT),
                     "PBA setup failed");
     }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -318,7 +318,8 @@ fapi2::ReturnCode pm_pss_reset(
 
         // ADC error
         FAPI_ASSERT(l_data64.getBit<7>() != 1,
-                    fapi2::PM_PSS_ADC_ERROR(),
+                    fapi2::PM_PSS_ADC_ERROR()
+                    .set_CHIP(i_target),
                     "Error while sending the frames from ADC to APSS device");
 
         FAPI_DBG("Delay before next poll");
@@ -359,7 +360,8 @@ fapi2::ReturnCode pm_pss_reset(
 
         // P2S error
         FAPI_ASSERT(l_data64.getBit<7>() != 1,
-                    fapi2::PM_PSS_P2S_ERROR(),
+                    fapi2::PM_PSS_P2S_ERROR()
+                    .set_CHIP(i_target),
                     "Error while sending the frames from P2S to APSS device");
 
         FAPI_DBG("Delay before next poll");

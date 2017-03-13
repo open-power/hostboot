@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -25,34 +25,11 @@
 <!-- Error definitions for p9_pm_pss_init procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
-  <registerFfdc>
-    <id>REG_FFDC_PM_PSS_REGISTERS</id>
-    <scomRegister>PU_SPIPSS_ADC_CTRL_REG1</scomRegister>
-    <scomRegister>PU_SPIPSS_ADC_CTRL_REG2</scomRegister>
-    <scomRegister>PU_SPIPSS_ADC_STATUS_REG</scomRegister>
-    <scomRegister>PU_SPIPSS_ADC_CMD_REG</scomRegister>
-    <scomRegister>PU_SPIPSS_ADC_RESET_REGISTER</scomRegister>
-    <scomRegister>PU_SPIPSS_ADC_WDATA_REG</scomRegister>
-    <scomRegister>PU_SPIPSS_ADC_RDATA_REG0</scomRegister>
-    <scomRegister>PU_SPIPSS_ADC_RDATA_REG1</scomRegister>
-    <scomRegister>PU_SPIPSS_ADC_RDATA_REG2</scomRegister>
-    <scomRegister>PU_SPIPSS_ADC_RDATA_REG3</scomRegister>
-    <scomRegister>PU_SPIPSS_100NS_REG</scomRegister>
-    <scomRegister>PU_SPIPSS_P2S_CTRL_REG0</scomRegister>
-    <scomRegister>PU_SPIPSS_P2S_CTRL_REG1</scomRegister>
-    <scomRegister>PU_SPIPSS_P2S_CTRL_REG2</scomRegister>
-    <scomRegister>PU_SPIPSS_P2S_STATUS_REG</scomRegister>
-    <scomRegister>PU_SPIPSS_P2S_COMMAND_REG</scomRegister>
-    <scomRegister>PU_SPIPSS_P2S_RESET_REGISTER</scomRegister>
-    <scomRegister>PU_SPIPSS_P2S_WDATA_REG</scomRegister>
-    <scomRegister>PU_SPIPSS_P2S_RDATA_REG</scomRegister>
-  </registerFfdc>
-  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PM_PSS_ADC_ERROR</rc>
     <description>SPIADC error bit asserted waiting for operation to complete.</description>
     <collectRegisterFfdc>
-      <id>REG_FFDC_PM_PSS_REGISTERS</id>
+      <id>PSS_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
@@ -66,7 +43,7 @@
     <rc>RC_PM_PSS_P2S_ERROR</rc>
     <description>SPIP2S error bit asserted waiting for operation to complete.</description>
     <collectRegisterFfdc>
-      <id>REG_FFDC_PM_PSS_REGISTERS</id>
+      <id>PSS_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>

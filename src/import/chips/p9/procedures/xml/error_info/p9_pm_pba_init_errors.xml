@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -24,35 +24,6 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for p9_pm_pba_init procedure -->
 <hwpErrors>
-  <registerFfdc>
-    <id>REG_FFDC_PROC_PBA_REGISTERS</id>
-    <scomRegister>PU_PBAMODE_OCI</scomRegister>
-    <scomRegister>PU_PBACFG</scomRegister>
-    <scomRegister>PU_PBASLVCTL0_OCI</scomRegister>
-    <scomRegister>PU_PBASLVCTL1_OCI</scomRegister>
-    <scomRegister>PU_PBASLVCTL2_OCI</scomRegister>
-    <scomRegister>PU_PBASLVCTL3_OCI</scomRegister>
-    <scomRegister>PU_PBAFIR</scomRegister>
-    <scomRegister>PU_PBAERRRPT0</scomRegister>
-    <scomRegister>PU_PBAERRRPT1</scomRegister>
-    <scomRegister>PU_PBAERRRPT2</scomRegister>
-    <scomRegister>PU_BCDE_CTL_OCI</scomRegister>
-    <scomRegister>PU_BCDE_SET_OCI</scomRegister>
-    <scomRegister>PU_BCDE_STAT_OCI</scomRegister>
-    <scomRegister>PU_BCDE_PBADR_OCI</scomRegister>
-    <scomRegister>PU_BCDE_OCIBAR_OCI</scomRegister>
-    <scomRegister>PU_BCUE_CTL_OCI</scomRegister>
-    <scomRegister>PU_BCUE_SET_OCI</scomRegister>
-    <scomRegister>PU_BCUE_STAT_OCI</scomRegister>
-    <scomRegister>PU_BCUE_PBADR_OCI</scomRegister>
-    <scomRegister>PU_BCUE_OCIBAR_OCI</scomRegister>
-    <scomRegister>PU_PBAXSHBR0_OCI</scomRegister>
-    <scomRegister>PU_PBAXSHCS0_OCI</scomRegister>
-    <scomRegister>PU_PBAXSHBR1_OCI</scomRegister>
-    <scomRegister>PU_PBAXSHCS1_OCI</scomRegister>
-    <scomRegister>PU_PBAXCFG_OCI</scomRegister>
-    <scomRegister>PU_PBASLVRST_OCI</scomRegister>
-  </registerFfdc>
   <!-- *********************************************************************-->
   <hwpError>
     <rc>RC_P9_PMPROC_PBA_INIT_INCORRECT_MODE</rc>
@@ -73,7 +44,7 @@
     <ffdc>SLAVENUM</ffdc>
     <ffdc>PBASLVREG</ffdc>
     <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_PBA_REGISTERS</id>
+      <id>PBA_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
@@ -91,7 +62,7 @@
     <ffdc>SLAVENUM</ffdc>
     <ffdc>PBASLVREG</ffdc>
     <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_PBA_REGISTERS</id>
+      <id>PBA_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
@@ -109,7 +80,7 @@
     <ffdc>POLLCOUNT</ffdc>
     <ffdc>POLLVALUE</ffdc>
     <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_PBA_REGISTERS</id>
+      <id>PBA_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
@@ -127,7 +98,7 @@
     <ffdc>POLLCOUNT</ffdc>
     <ffdc>POLLVALUE</ffdc>
     <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_PBA_REGISTERS</id>
+      <id>PBA_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -27,7 +27,6 @@
 <hwpErrors>
   <!-- *********************************************************************** -->
   <registerFfdc>
-    <!--TODO: RTC 163970: Add the register GPE[n] XISIB to FFDC -->
     <id>CME_FFDC_REGISTERS</id>
     <scomRegister>EX_PPE_XIRAMDBG</scomRegister>
     <scomRegister>EX_CME_LCL_EISR_SCOM</scomRegister>
@@ -59,6 +58,7 @@
     <scomRegister>EX_CME_SCOM_LFIRMASK</scomRegister>
     <scomRegister>EX_CME_SCOM_SRTCH0_SCOM</scomRegister>
     <scomRegister>EX_CME_SCOM_SRTCH1_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_XISIB</scomRegister>
   </registerFfdc>
   <!-- *********************************************************************** -->
   <registerFfdc>
@@ -100,4 +100,78 @@
     <scomRegister>PU_GPE1_MIB_XIDCAC_SCOM</scomRegister>
   </registerFfdc>
   <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>PGPE_FFDC_REGISTERS</id>
+    <scomRegister>PU_OCB_OCI_OCCS2_SCOM</scomRegister>
+    <scomRegister>PU_GPE2_GPEXIXSR_SCOM</scomRegister>
+    <scomRegister>PU_GPE2_GPEXIIAR_SCOM</scomRegister>
+    <scomRegister>PU_GPE2_GPEXIIR_SCOM</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>PBA_FFDC_REGISTERS</id>
+    <scomRegister>PU_PBAXCFG_SCOM</scomRegister>
+    <scomRegister>PU_BCUE_STAT_SCOM</scomRegister>
+    <scomRegister>PU_BCUE_PBADR_SCOM</scomRegister>
+    <scomRegister>PU_BCUE_OCIBAR_SCOM</scomRegister>
+    <scomRegister>PU_BCDE_PBADR_SCOM</scomRegister>
+    <scomRegister>PU_BCDE_OCIBAR_SCOM</scomRegister>
+    <scomRegister>PU_BCDE_STAT_SCOM</scomRegister>
+    <scomRegister>PU_PBASLVCTL0_SCOM</scomRegister>
+    <scomRegister>PU_PBASLVCTL1_SCOM</scomRegister>
+    <scomRegister>PU_PBASLVCTL2_SCOM</scomRegister>
+    <scomRegister>PU_PBASLVCTL3_SCOM</scomRegister>
+    <scomRegister>PU_PBASLVRST_SCOM</scomRegister>
+    <scomRegister>PU_PBAMODE_SCOM</scomRegister>
+    <scomRegister>PU_PBAFIR</scomRegister>
+    <scomRegister>PU_PBAFIRACT0</scomRegister>
+    <scomRegister>PU_PBAFIRACT1</scomRegister>
+    <scomRegister>PU_PBAFIRMASK</scomRegister>
+    <scomRegister>PU_PBACFG</scomRegister>
+    <scomRegister>PU_PBAERRRPT0</scomRegister>
+    <scomRegister>PU_PBAERRRPT1</scomRegister>
+    <scomRegister>PU_PBAERRRPT2</scomRegister>
+    <scomRegister>PU_PBARBUFVAL0</scomRegister>
+    <scomRegister>PU_PBARBUFVAL1</scomRegister>
+    <scomRegister>PU_PBARBUFVAL2</scomRegister>
+    <scomRegister>PU_PBARBUFVAL3</scomRegister>
+    <scomRegister>PU_PBARBUFVAL4</scomRegister>
+    <scomRegister>PU_PBARBUFVAL5</scomRegister>
+    <scomRegister>PU_PBARBUFVAL1</scomRegister>
+    <scomRegister>PU_PBARBUFVAL2</scomRegister>
+    <scomRegister>PU_PBARBUFVAL3</scomRegister>
+    <scomRegister>PU_PBARBUFVAL4</scomRegister>
+    <scomRegister>PU_PBARBUFVAL5</scomRegister>
+    <scomRegister>PU_PBABAR0</scomRegister>
+    <scomRegister>PU_PBABAR1</scomRegister>
+    <scomRegister>PU_PBABAR2</scomRegister>
+    <scomRegister>PU_PBABAR3</scomRegister>
+    <scomRegister>PU_PBABARMSK0</scomRegister>
+    <scomRegister>PU_PBABARMSK1</scomRegister>
+    <scomRegister>PU_PBABARMSK2</scomRegister>
+    <scomRegister>PU_PBABARMSK3</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>PSS_FFDC_REGISTERS</id>
+    <scomRegister>PU_SPIPSS_ADC_CTRL_REG1</scomRegister>
+    <scomRegister>PU_SPIPSS_ADC_CTRL_REG2</scomRegister>
+    <scomRegister>PU_SPIPSS_ADC_STATUS_REG</scomRegister>
+    <scomRegister>PU_SPIPSS_ADC_CMD_REG</scomRegister>
+    <scomRegister>PU_SPIPSS_ADC_RESET_REGISTER</scomRegister>
+    <scomRegister>PU_SPIPSS_ADC_WDATA_REG</scomRegister>
+    <scomRegister>PU_SPIPSS_ADC_RDATA_REG0</scomRegister>
+    <scomRegister>PU_SPIPSS_ADC_RDATA_REG1</scomRegister>
+    <scomRegister>PU_SPIPSS_ADC_RDATA_REG2</scomRegister>
+    <scomRegister>PU_SPIPSS_ADC_RDATA_REG3</scomRegister>
+    <scomRegister>PU_SPIPSS_100NS_REG</scomRegister>
+    <scomRegister>PU_SPIPSS_P2S_CTRL_REG0</scomRegister>
+    <scomRegister>PU_SPIPSS_P2S_CTRL_REG1</scomRegister>
+    <scomRegister>PU_SPIPSS_P2S_CTRL_REG2</scomRegister>
+    <scomRegister>PU_SPIPSS_P2S_STATUS_REG</scomRegister>
+    <scomRegister>PU_SPIPSS_P2S_COMMAND_REG</scomRegister>
+    <scomRegister>PU_SPIPSS_P2S_RESET_REGISTER</scomRegister>
+    <scomRegister>PU_SPIPSS_P2S_WDATA_REG</scomRegister>
+    <scomRegister>PU_SPIPSS_P2S_RDATA_REG</scomRegister>
+  </registerFfdc>
 </hwpErrors>
