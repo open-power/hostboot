@@ -39,7 +39,7 @@
 #include <fapi2.H>
 #include <mss.H>
 #include <lib/freq/sync.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/utils/assert_noexit.H>
 
 using fapi2::TARGET_TYPE_DIMM;
