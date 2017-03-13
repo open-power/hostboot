@@ -26,14 +26,6 @@
 <!-- Error definitions for p9_pm_pstate_gpe_init procedure -->
 <hwpErrors>
   <!-- ******************************************************************** -->
-  <registerFfdc>
-    <id>ERROR_STATUS_OF_PGPE</id>
-    <scomRegister>PU_OCB_OCI_OCCS2_SCOM</scomRegister>
-    <scomRegister>PU_GPE2_GPEXIXSR_SCOM</scomRegister>
-    <scomRegister>PU_GPE2_GPEXIIAR_SCOM</scomRegister>
-    <scomRegister>PU_GPE2_GPEXIIR_SCOM</scomRegister>
-  </registerFfdc>
-  <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PSTATE_GPE_BAD_MODE</rc>
     <description>Unknown mode passed to p9_pm_pstate_gpe_init.
@@ -51,10 +43,14 @@
     SCRATCH2.
     </description>
     <collectRegisterFfdc>
-      <id>ERROR_STATUS_OF_PGPE</id>
+      <id>PGPE_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -67,14 +63,18 @@
     assert in a development debug environment.
     </description>
     <collectRegisterFfdc>
-      <id>ERROR_STATUS_OF_PGPE</id>
+      <id>PGPE_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
-    </callout>
+    </callout>	
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -82,7 +82,7 @@
     <description> Pstate GPE init timed out while waiting for HALT status in XSR register.
     </description>
     <collectRegisterFfdc>
-      <id>ERROR_STATUS_OF_PGPE</id>
+      <id>PGPE_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
@@ -91,7 +91,7 @@
       <priority>LOW</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
+      <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -100,7 +100,6 @@
     <rc>RC_PSTATE_GPE_PBA_INIT_FAILED</rc>
     <description> Pstate GPE called to p9_pm_pba_init failed.
     </description>
-    <!-- @todo RTC 168127 Create a PBA collectRegister Ffdc element to call -->
     <ffdc>TARGET</ffdc>
     <ffdc>MODE</ffdc>
     <callout>
@@ -108,9 +107,14 @@
       <priority>LOW</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
+      <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
+    <collectRegisterFfdc>
+      <id>PBA_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
