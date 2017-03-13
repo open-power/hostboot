@@ -926,12 +926,6 @@ sub processPec
     ## to configure iop/phb's
 
     ## Get config children
-    my @lane_swap;
-    $lane_swap[0][0] = 0;
-    $lane_swap[1][0] = 0;
-    $lane_swap[2][0] = 0;
-    $lane_swap[3][0] = 0;
-
     my @lane_mask;
     $lane_mask[0][0] = "0x0000";
     $lane_mask[1][0] = "0x0000";
@@ -955,30 +949,6 @@ sub processPec
     my %cfg_check;
     my @equalization;
 
-    # TODO RTC:167304
-    #my $wiring_table = $targetObj->getAttribute
-    #                   ($target,"PCIE_LANE_SWAP_TABLE");
-    #$wiring_table=~s/\s+//g;
-    #$wiring_table=~s/\t+//g;
-    #$wiring_table=~s/\n+//g;
-
-    #my @t = split(/,/,$wiring_table);
-    #my %iop_swap;
-
-    #iop_swap{iop}{clk swap}{clk group reversal}
-    #$iop_swap{0}{0}{'00'}=$t[0];
-    #$iop_swap{0}{0}{'10'}=$t[1];
-    #$iop_swap{0}{0}{'01'}=$t[2];
-    #$iop_swap{0}{0}{'11'}=$t[3];
-    #$iop_swap{0}{1}{'00'}=$t[4];
-    #$iop_swap{0}{1}{'10'}=$t[5];
-    #$iop_swap{0}{1}{'01'}=$t[6];
-    #$iop_swap{0}{1}{'11'}=$t[7];
-    #$iop_swap{0}{2}{'00'}=$t[8];
-    #$iop_swap{0}{2}{'10'}=$t[9];
-    #$iop_swap{0}{2}{'01'}=$t[10];
-    #$iop_swap{0}{2}{'11'}=$t[11];
-
     my @lane_eq;
     my $NUM_PHBS=6;
     for (my $p=0;$p<$NUM_PHBS;$p++)
@@ -988,8 +958,15 @@ sub processPec
            $equalization[$p][$lane] = "0x00,0x00";
         }
     }
+
+    my $pec_iop_swap = 0;
+    my $bitshift_const = 0;
+    my $pec_num = $targetObj->getAttribute
+                      ($target, "CHIP_UNIT");
+
     foreach my $pec_config_child (@{ $targetObj->getTargetChildren($target) })
     {
+        my $phb_counter = 0;
         foreach my $phb_child (@{ $targetObj->getTargetChildren
                                                   ($pec_config_child) })
         {
@@ -1000,7 +977,7 @@ sub processPec
                                                       ($phb_config_child);
                 if ($num_connections > 0)
                 {
-                    # We have a PHB conncetion
+                    # We have a PHB connection
                     # We need to create the PEC attributes
                     my $iop_num = $targetObj->getAttribute
                                       ($phb_config_child, "IOP_NUM");
@@ -1020,9 +997,64 @@ sub processPec
                         $is_slot[$lane_group][0] = 1;
                     }
 
-                    $lane_swap[$lane_group][0] =
-                        $targetObj->getBusAttribute
-                            ($phb_config_child, 0, "PCIE_SWAP_CLKS");
+                    # Set up Lane Swap attribute
+                    # Get attribute that says if lane swap is set up for this
+                    # bus. Taken as a 1 or 0 (on or off)
+                    # Lane Reversal = swapped lanes
+                    my $lane_swap = $targetObj->getBusAttribute
+                            ($phb_config_child, 0, "LANE_REVERSAL");
+
+                    # Lane swap comes out as "00" or "01" - so add 0 so it
+                    # converts to an integer to evaluate.
+                    my $lane_swap_int = $lane_swap + 0;
+
+                    # The PROC_PCIE_IOP_SWAP attribute is PEC specific. The
+                    # right most bit represents the highest numbered PHB in
+                    # the PEC. e.g. for PEC2, bit 7 represents PHB5 while bit
+                    # 5 represents PHB3. A value of 5 (00000101) represents
+                    # both PHB3 and 5 having swap set.
+
+                    # Because of the ordering of how we process PHB's and the
+                    # different number of PHB's in each PEC we have to bitshift
+                    # by a different number for each PHB in each PEC.
+                    if ($lane_swap_int)
+                    {
+                        if ($pec_num eq 0)
+                        {
+                            # This number is not simply the PEC unit number,
+                            # but the number of PHB's in each PEC.
+                            $bitshift_const = 0;
+                        }
+                        elsif ($pec_num eq 1)
+                        {
+                            $bitshift_const = 1;
+                        }
+                        elsif ($pec_num eq 2)
+                        {
+                            $bitshift_const = 2;
+                        }
+                        else
+                        {
+                            die "Invalid PEC Chip unit number for target $target";
+                        }
+
+                        # The bitshift number is the absoulte value of the phb
+                        # counter subtracted from the bitshift_const for this
+                        # pec. For PHB 3, this abs(0-2), giving a bitshift of 2
+                        # and filling in the correct bit in IOP_SWAP (5).
+                        my $bitshift = abs($phb_counter - $bitshift_const);
+
+                        $pec_iop_swap |= 1 << $bitshift;
+                    }
+
+                    # Set the lane swap for the PEC. If we find more swaps as
+                    # we process the other PCI busses then we will overwrite
+                    # the overall swap value with the newly computed one.
+                    $targetObj->setAttribute($target,
+                        "PEC_PCIE_IOP_SWAP_NON_BIFURCATED", $pec_iop_swap);
+                    $targetObj->setAttribute($target,
+                        "PROC_PCIE_IOP_SWAP", $pec_iop_swap);
+
                     $lane_mask[$lane_group][0] =
                         $targetObj->getAttribute
                             ($phb_config_child, "PCIE_LANE_MASK");
@@ -1130,6 +1162,9 @@ sub processPec
 
                 } # Found connection
             } # PHB bus loop
+
+            $phb_counter = $phb_counter + 1;
+
         } # PHB loop
     } # PEC config loop
 }
