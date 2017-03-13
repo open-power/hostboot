@@ -45,6 +45,7 @@
 #include <util/misc.H>
 
 #include "../common/securetrace.H"
+#include "../common/errlud_secure.H"
 
 // Quick change for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -187,7 +188,16 @@ void handleSecurebootFailure(errlHndl_t &io_err, bool i_waitForShutdown)
 
     // Add security register values
     addSecurityRegistersToErrlog(io_err);
-    io_err->collectTrace(SECURE_COMP_NAME,ERROR_TRACE_SIZE);
+
+    // Add HW Keys' Hash to trace and the error log
+    SHA512_t hash = {0};
+    getHwKeyHash(hash);
+
+    SB_INF_BIN("HwKeyHash", &hash, sizeof(hash));
+
+    UdSystemHwKeyHash( hash ).addToLog(io_err);
+
+    io_err->collectTrace(SECURE_COMP_NAME,MAX_ERROR_TRACE_SIZE);
 
     errlCommit(io_err, SECURE_COMP_ID);
 
