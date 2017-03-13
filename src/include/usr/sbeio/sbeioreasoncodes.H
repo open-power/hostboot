@@ -93,6 +93,7 @@ enum sbeioReasonCode
     SBEIO_RT_MSG_SIZE_TOO_LARGE        = SBEIO_COMP_ID | 0x34,
     SBEIO_RT_DATA_OFFSET_TOO_SMALL     = SBEIO_COMP_ID | 0x35,
     SBEIO_RT_DATA_TOO_LARGE            = SBEIO_COMP_ID | 0x36,
+    SBEIO_RT_RSP_FIELD_ALTERED         = SBEIO_COMP_ID | 0x37,
     SBEIO_RT_NO_SBE_COMM_BUFFER        = SBEIO_COMP_ID | 0x38,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
