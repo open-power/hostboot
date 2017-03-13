@@ -44,7 +44,7 @@
 // mss lib
 #include <lib/power_thermal/throttle.H>
 #include <lib/utils/index.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/utils/conversions.H>
 #include <lib/power_thermal/throttle.H>
 #include <lib/mss_attribute_accessors.H>
