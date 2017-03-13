@@ -37,7 +37,7 @@
 
 #include <cstdint>
 #include <fapi2.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/utils/conversions.H>
 
 namespace mss
