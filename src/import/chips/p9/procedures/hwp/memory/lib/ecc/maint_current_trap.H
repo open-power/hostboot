@@ -39,7 +39,7 @@
 #include <fapi2.H>
 #include <lib/mcbist/address.H>
 #include <generic/memory/lib/utils/scom.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/ecc/ecc_traits.H>
 
 namespace mss

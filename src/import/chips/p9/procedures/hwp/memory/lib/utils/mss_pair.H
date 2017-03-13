@@ -38,7 +38,7 @@
 #define _MSS_PAIR_CONST_H_
 
 #include <fapi2.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/c_str.H>
 
 namespace mss

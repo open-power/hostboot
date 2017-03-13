@@ -43,7 +43,7 @@
 //------------------------------------------------------------------------------
 #include <p9_throttle_sync.H>
 #include <fapi2.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 
 ///----------------------------------------------------------------------------
 /// Constant definitions

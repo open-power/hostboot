@@ -46,9 +46,8 @@
 #include <lib/spd/spd_factory.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <lib/utils/checker.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/shared/mss_kind.H>
-#include <lib/utils/find.H>
 #include <lib/dimm/eff_dimm.H>
 #include <lib/eff_config/plug_rules.H>
 

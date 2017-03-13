@@ -41,7 +41,7 @@
 #include <lib/fir/fir.H>
 #include <lib/fir/check.H>
 #include <lib/utils/assert_noexit.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;

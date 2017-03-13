@@ -47,7 +47,7 @@
 #include <lib/freq/sync.H>
 #include <lib/utils/conversions.H>
 #include <lib/eff_config/timing.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/utils/checker.H>
 
 using fapi2::TARGET_TYPE_DIMM;

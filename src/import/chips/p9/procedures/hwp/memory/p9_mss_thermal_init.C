@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,7 @@
 
 #include <fapi2.H>
 #include <lib/mc/mc.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <p9_mss_thermal_init.H>
 
 using fapi2::TARGET_TYPE_MCS;

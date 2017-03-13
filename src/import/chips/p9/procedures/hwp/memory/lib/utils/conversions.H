@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,7 @@
 #include <fapi2.H>
 #include <lib/mss_attribute_accessors.H>
 #include <lib/shared/mss_const.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 
 ///
 /// @brief Dereferences pointer of the vector's underlying data

@@ -39,7 +39,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 #include <p9_mss_draminit_mc.H>
 #include <lib/fir/unmask.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/utils/count_dimm.H>
 
 using fapi2::TARGET_TYPE_MCBIST;

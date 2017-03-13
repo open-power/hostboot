@@ -43,7 +43,7 @@
 #include <lib/mc/mc.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <lib/dimm/kind.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;

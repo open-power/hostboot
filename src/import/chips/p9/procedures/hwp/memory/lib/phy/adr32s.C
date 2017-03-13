@@ -36,7 +36,7 @@
 #include <fapi2.H>
 #include <lib/phy/adr32s.H>
 #include <lib/workarounds/adr32s_workarounds.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_SYSTEM;

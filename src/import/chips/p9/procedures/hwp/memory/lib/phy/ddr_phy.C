@@ -52,7 +52,7 @@
 #include <lib/workarounds/seq_workarounds.H>
 
 #include <lib/utils/bit_count.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/utils/dump_regs.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <lib/utils/count_dimm.H>

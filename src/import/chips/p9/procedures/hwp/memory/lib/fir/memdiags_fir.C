@@ -38,7 +38,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <generic/memory/lib/utils/scom.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/fir/fir.H>
 #include <lib/fir/memdiags_fir.H>
 #include <lib/mc/port.H>

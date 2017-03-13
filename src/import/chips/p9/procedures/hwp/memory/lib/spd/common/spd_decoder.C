@@ -45,7 +45,7 @@
 #include <lib/spd/common/rcw_settings.H>
 #include <lib/utils/checker.H>
 #include <generic/memory/lib/utils/c_str.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;

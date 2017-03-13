@@ -50,7 +50,7 @@
 #include <lib/freq/cas_latency.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/freq/cycle_time.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/utils/count_dimm.H>
 #include <lib/utils/index.H>
 #include <lib/shared/mss_const.H>
