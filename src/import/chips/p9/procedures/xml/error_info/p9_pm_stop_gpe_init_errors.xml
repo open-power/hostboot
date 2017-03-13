@@ -57,16 +57,29 @@
     <rc>RC_STOP_GPE_PFETS_FAILED</rc>
     <description> Stop GPE called to p9_pm_pfet_init failed.
     </description>
-    <ffdc>TARGET</ffdc>
     <ffdc>MODE</ffdc>
+    <collectRegisterFfdc>
+      <id>SGPE_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_STOP_GPE_PBA_INIT_FAILED</rc>
     <description> Stop GPE called to p9_pm_pba_init failed.
     </description>
-    <ffdc>TARGET</ffdc>
     <ffdc>MODE</ffdc>
+    <collectRegisterFfdc>
+      <id>PBA_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>SGPE_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
