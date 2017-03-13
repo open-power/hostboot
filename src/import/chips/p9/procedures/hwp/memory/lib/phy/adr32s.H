@@ -42,7 +42,7 @@
 #include <lib/mss_attribute_accessors.H>
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/scom.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 
 namespace mss
 {
