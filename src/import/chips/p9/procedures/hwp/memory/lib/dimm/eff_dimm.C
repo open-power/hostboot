@@ -43,7 +43,7 @@
 #include <lib/eff_config/timing.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/conversions.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/dimm/eff_dimm.H>
 #include <lib/dimm/mrs_load.H>
 #include <lib/shared/mss_kind.H>
