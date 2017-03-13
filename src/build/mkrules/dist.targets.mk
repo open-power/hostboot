@@ -270,6 +270,8 @@ fsp.tar_CONTENTS = \
         $(call ROOTPATH_WILDCARD,obj/genfiles/plugins/prdf/*)) \
     $(addsuffix :plugins/,\
         $(call ROOTPATH_WILDCARD,src/usr/*/plugins/*)) \
+    $(addsuffix :plugins/,\
+        $(call ROOTPATH_WILDCARD,src/usr/secureboot/common/plugins/*)) \
     src/build/debug/fsp-memdump.sh:src/build/debug/ \
     obj/genfiles/hbfw_term_rc.H \
     obj/genfiles/srcListing \

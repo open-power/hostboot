@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/secureboot/secure_reasoncodes.H $             */
+/* $Source: src/usr/secureboot/common/plugins/secureUdParserFactory.H $   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,51 +22,34 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __SECUREBOOT_REASONCODES_H
-#define __SECUREBOOT_REASONCODES_H
+#if !defined(_SECUREUDPARSERFACTORY_H)
+#define _SECUREUDPARSERFACTORY_H
 
-#include <hbotcompid.H>
+#include "errludparserfactory.H"
+#include "errludP_secure.H"
 
 namespace SECUREBOOT
 {
-    enum SECUREModuleId
+    class UserDetailsParserFactory
+        : public ERRORLOG::ErrlUserDetailsParserFactory
     {
-        MOD_SECURE_INVALID              = 0x00,
-        MOD_SECURE_BLINDPURGE           = 0x01,
-        MOD_SECURE_ROM_INIT             = 0x02,
-        MOD_SECURE_ROM_VERIFY           = 0x03,
-        MOD_SECURE_ROM_CLEANUP          = 0x04,
-        MOD_SECURE_ROM_SHA512           = 0x05,
-        MOD_SECURE_READ_REG             = 0x06,
-        MOD_SECURE_WRITE_REG            = 0x07,
-   };
+        public:
+            UserDetailsParserFactory()
+            {
+                registerParser<SECUREBOOT::UdParserSystemHwKeyHash>
+                  (SECURE_UDT_SYSTEM_HW_KEY_HASH);
 
-    enum SECUREReasonCode
-    {
-        RC_PURGEOP_PENDING              = SECURE_COMP_ID | 0x01,
-        RC_PURGEOP_FAIL_COMPLETE        = SECURE_COMP_ID | 0x02,
-        RC_DEV_MAP_FAIL                 = SECURE_COMP_ID | 0x03,
-        RC_PAGE_ALLOC_FAIL              = SECURE_COMP_ID | 0x04,
-        RC_SET_PERMISSION_FAIL_EXE      = SECURE_COMP_ID | 0x05,
-        RC_SET_PERMISSION_FAIL_WRITE    = SECURE_COMP_ID | 0x06,
-        RC_ROM_VERIFY                   = SECURE_COMP_ID | 0x07,
-        RC_ROM_SHA512                   = SECURE_COMP_ID | 0x08,
-        RC_SECURE_BAD_TARGET            = SECURE_COMP_ID | 0x09,
+                registerParser<SECUREBOOT::UdParserTargetHwKeyHash>
+                  (SECURE_UDT_TARGET_HW_KEY_HASH);
+            }
 
-        // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
+        private:
+
+            UserDetailsParserFactory(const UserDetailsParserFactory &);
+            UserDetailsParserFactory & operator=
+                (const UserDetailsParserFactory &);
     };
-
-    enum UserDetailsTypes
-    {
-        // Version(s)
-        SECURE_UDT_VERSION_1          = 0x1,
-
-        // Formats/User Detail Sections
-        SECURE_UDT_NO_FORMAT          = 0x0,
-        SECURE_UDT_SYSTEM_HW_KEY_HASH = 0x1,
-        SECURE_UDT_TARGET_HW_KEY_HASH = 0x2,
-    };
-
-}
+};
 
 #endif
+

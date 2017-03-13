@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -24,3 +24,5 @@
 # IBM_PROLOG_END_TAG
 
 SECUREBOOT_COMMON_OBJS += securetrace.o
+SECUREBOOT_COMMON_OBJS += errlud_secure.o
+

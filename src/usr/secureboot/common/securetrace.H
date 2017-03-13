@@ -38,9 +38,10 @@ namespace SECUREBOOT
 
 extern trace_desc_t* g_trac_secure;
 
-// symbolic constant for the trace size
+// symbolic constants for the trace size
 enum {
-    ERROR_TRACE_SIZE = 256,
+    ERROR_TRACE_SIZE     = 256, // normal
+    MAX_ERROR_TRACE_SIZE = 512, // max
 };
 
 }
