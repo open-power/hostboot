@@ -48,7 +48,7 @@
 #include <lib/eff_config/attr_setters.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/pos.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/utils/checker.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
