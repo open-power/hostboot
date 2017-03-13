@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,8 @@
 #include <occ/occ_common.H>
 #include <errl/errludlogregister.H>
 #include <buffer.H>
+
+#include <isteps/pm/pm_common_ext.H>
 
 namespace HTMGT
 {
@@ -553,11 +555,11 @@ namespace HTMGT
             }
 
             // Reset all OCCs
-            TMGT_INF("_buildOccs: Calling HBOCC::stopAllOCCs");
-            err2 = HBOCC::stopAllOCCs();
+            TMGT_INF("_buildOccs: Calling HBPM::resetPMAll");
+            err2 = HBPM::resetPMAll();
             if (nullptr != err2)
             {
-                TMGT_ERR("_buildOccs: stopAllOCCs failed with rc 0x%04X",
+                TMGT_ERR("_buildOccs: HBPM::resetPMAll failed with rc 0x%04X",
                          err2->reasonCode());
                 err2->collectTrace("HTMGT");
                 ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
@@ -865,8 +867,8 @@ namespace HTMGT
                 while(retryCount)
                 {
                     // Reset all OCCs
-                    TMGT_INF("_resetOccs: Calling HBOCC::stopAllOCCs");
-                    err = HBOCC::stopAllOCCs();
+                    TMGT_INF("_resetOccs: Calling HBPM::resetPMAll");
+                    err = HBPM::resetPMAll();
                     if(!err)
                     {
                         break;
@@ -875,7 +877,7 @@ namespace HTMGT
 
                     if (int_flags_set(FLAG_HALT_ON_RESET_FAIL))
                     {
-                        TMGT_ERR("_resetOCCs: stopAllOCCs failed with 0x%04X "
+                        TMGT_ERR("_resetOCCs: resetPMAll failed with 0x%04X "
                                  "and HALT_ON_RESET_FAIL is set.  Resets will "
                                  "be disabled", err->reasonCode());
                         set_int_flags(get_int_flags() | FLAG_RESET_DISABLED);
@@ -889,7 +891,7 @@ namespace HTMGT
                     }
                     else
                     {
-                        TMGT_ERR("_resetOCCs: stopAllOCCs failed. "
+                        TMGT_ERR("_resetOCCs: HBPM::resetPMAll failed. "
                                  "Leaving OCCs in reset state");
                         // pass err handle back
                         err->collectTrace("HTMGT");
@@ -900,15 +902,20 @@ namespace HTMGT
                 {
                     for( const auto & occ : iv_occArray )
                     {
-                        // After OCCs have been reset, clear flags
+                        // After OCC has been reset, clear flag
                         occ->postResetClear();
                     }
 
-                    TMGT_INF("_resetOccs: Calling HBOCC::activateOCCs");
-                    err = HBOCC::activateOCCs();
+                    //get parent proc chip.
+                    TARGETING::Target* l_proc_target = NULL;
+
+                    //Reload OCC on this processor chip.
+                    TMGT_INF("_resetOccs: Calling loadAndStartPMAll");
+                    err = HBPM::loadAndStartPMAll(HBPM::PM_RELOAD,
+                                                  l_proc_target);
                     if(err)
                     {
-                        TMGT_ERR("_resetOCCs: activateOCCs failed. ");
+                        TMGT_ERR("_resetOCCs: loadAndStartPMAll failed. ");
                         err->collectTrace("HTMGT");
                     }
                 }
@@ -1449,6 +1456,3 @@ namespace HTMGT
     }
 
 } // end namespace
-
-
-

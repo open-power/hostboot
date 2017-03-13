@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@
 #include <sys/time.h>
 #include <targeting/common/attributeTank.H>
 
+#include <isteps/pm/pm_common_ext.H>
 namespace HTMGT
 {
 
@@ -216,8 +217,8 @@ namespace HTMGT
             TMGT_INF("processOccStartStatus: Skipping start of OCCS due to "
                      "internal flags 0x%08X", get_int_flags());
             // Reset all OCCs
-            TMGT_INF("processOccStartStatus: Calling HBOCC::stopAllOCCs");
-            l_err = HBOCC::stopAllOCCs();
+            TMGT_INF("processOccStartStatus: Calling HBPM::resetPMAll()");
+            l_err = HBPM::resetPMAll();
             if(l_err)
             {
                 l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
