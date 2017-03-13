@@ -168,8 +168,8 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
 
         FAPI_ASSERT(fapi2::current_err == fapi2::FAPI2_RC_SUCCESS,
                     fapi2::STOP_GPE_PFETS_FAILED()
-                    .set_TARGET(i_target)
-                    .set_MODE(i_mode),
+                    .set_MODE(i_mode)
+                    .set_CHIP(i_target),
                     "PFET setup failed");
 
 
@@ -178,7 +178,7 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
 
         FAPI_ASSERT(fapi2::current_err == fapi2::FAPI2_RC_SUCCESS,
                     fapi2::STOP_GPE_PBA_INIT_FAILED()
-                    .set_TARGET(i_target)
+                    .set_CHIP(i_target)
                     .set_MODE(p9pm::PM_RESET),
                     "PBA setup failed");
 
