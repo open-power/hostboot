@@ -460,7 +460,7 @@ static errlHndl_t hdatGetPortInfo(HDAT::hdatHDIFDataArray_t &o_portArrayHdr,
 
     o_portArrayHdr.hdatOffset    = sizeof(HDAT::hdatHDIFDataArray_t);
     o_portArrayHdr.hdatAllocSize = sizeof(hdatPortCodes_t);
-    o_portArrayHdr.hdatActSize   = sizeof(o_ports);
+    o_portArrayHdr.hdatActSize   = sizeof(hdatPortCodes_t);
     o_portArrayHdr.hdatArrayCnt  = 0;
 
     TARGETING::PredicateCTM l_nodePredicate(TARGETING::CLASS_ENC,
@@ -680,6 +680,9 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR(" Error in getting attribute PAYLOAD_IN_MIRROR_MEM");
     }
+
+    this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |= 
+          l_pSysTarget->getAttr<ATTR_RISK_LEVEL>() ? HDAT_RISK_LEVEL_ELEVATED : 0 ;
 
     this->iv_hdatIPLParams->iv_sysParms.hdatMemoryScrubbing = 0;
 

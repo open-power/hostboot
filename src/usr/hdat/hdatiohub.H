@@ -53,9 +53,13 @@ namespace HDAT
 #define HDAT_PHB_LANES  96
 #define NUM_BYTES_PER_LANE 2
 #define NUM_LANES_PER_PHB 16
-
+#define HDAT_PROC_EC_DD1 0x10
+#define HDAT_PCIE_MAX_SPEED_GEN1 1
+#define HDAT_PCIE_MAX_SPEED_GEN2 2
+#define HDAT_PCIE_MAX_SPEED_GEN3 3
+#define HDAT_PCIE_MAX_SPEED_GEN4 4
 const uint16_t HDAT_VPD_VERSION = 0x0020;
-const uint16_t HDAT_IO_VERSION = 0x6A;
+const uint16_t HDAT_IO_VERSION = 0x7B;
 
 const uint32_t HDAT_MAX_IO_CHIPS = 10;
 
@@ -96,8 +100,8 @@ struct hdatHubEntry_t
   uint8_t      hdatReserved3;       // 0x000F Reserved
   uint8_t      hdatFab0PresDetect;  // 0x0010 I/O hub chip fabric 0
                                     // presence detect bits
-  uint8_t      hdatReserved4;       // 0x0011 Reserved
-  uint16_t     hdatModuleId;          // 0x0012 Module type Identification
+  uint8_t      hdatMaxPCIeLinkSpeed;// 0x0011 Max PCIe Link Training Speed
+  uint16_t     hdatModuleId;        // 0x0012 Module type Identification
   uint32_t     hdatEcLvl;           // 0x0014 EC level
   uint32_t     hdatReserved5;       // 0x0018 Affinity domain 2
   uint32_t     hdatReserved6;       // 0x001C Affinity Domain 3
@@ -112,7 +116,7 @@ struct hdatHubEntry_t
   uint32_t     hdatMRID;            // 0x0038 MRU ID of Chip
   uint32_t     hdatMemMapVersion;   // 0x003C Memory Map Version
   uint16_t     hdatLaneEqPHBGen3[HDAT_PHB_LANES]; // 0x0040 from PHB0 to PHB5
-  uint16_t     hdatLaneEqPHBGen4[HDAT_PHB_LANES];  //0x0100 Gen4 PHB for PHB 0-5
+  uint16_t     hdatLaneEqPHBGen4[HDAT_PHB_LANES]; // 0x0100 Gen4 PHB for PHB 0-5
 
 
 
