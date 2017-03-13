@@ -50,6 +50,32 @@ namespace SPLESS
         SCRATCH_8 =   0x7,
     };
 
+    // Mailbox Scratch Register 1
+    union MboxScratch1_t
+    {
+        uint32_t data32;
+        struct
+        {
+            // bit=1 means part is NOT functional
+            uint32_t eqGard          :8;   //0:7
+            uint32_t ecGard          :24;  //8:31
+        } PACKED;
+        // NOTE: Used for debug tool communication during Hostboot IPL
+    };
+
+    // Mailbox Scratch Register 2
+    union MboxScratch2_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t i2cRefClockDiv  :16;  //00:15
+            uint32_t ndlMeshCtl      :4;   //16:19
+            uint32_t reserved        :12;  //20:31
+        } PACKED;
+        // NOTE: Used for debug tool communication during Hostboot IPL
+    };
+
     // Mailbox Scratch Register 3
     union MboxScratch3_t
     {
@@ -60,9 +86,9 @@ namespace SPLESS
             uint32_t goToRuntime     :1;   //1
             uint32_t isMpipl         :1;   //2
             uint32_t fspAttached     :1;   //3
-            uint32_t sbeFFDC         :1;   //4
+            uint32_t reserved1       :1;   //4
             uint32_t sbeInternalFFDC :1;   //5
-            uint32_t reserved        :26;  //6:31
+            uint32_t reserved2       :26;  //6:31
         } PACKED;
     };
 
@@ -78,9 +104,12 @@ namespace SPLESS
             uint32_t ioFilterBypass      :1;    //18
             uint32_t dpllBypass          :1;    //19
             uint32_t nestMemXoPcieBypass :1;    //20
-            uint32_t reserved            :3;    //21:23
+            uint32_t obusHalfSpeed       :1;    //21
+            uint32_t reserved            :2;    //22:23
             uint32_t nestPllBucket       :8;    //24:31
         } PACKED;
+        // NOTE: Used for debug tooling (SPLessCmd) during Hostboot IPL
+        // NOTE: Used for sbe comm during runtime
     };
 
     // Mailbox Scratch Register 5
@@ -94,8 +123,24 @@ namespace SPLESS
             uint32_t riskLevel           :1;    //2
             uint32_t noBLVectors         :1;    //3
             uint32_t mcSyncMode          :1;    //4
-            uint32_t reserved            :7;    //5:11
+            uint32_t slowPci             :1;    //5
+            uint32_t reserved            :6;    //6:11
             uint32_t clockPllMux         :20;   //12:31
+        } PACKED;
+    };
+
+    // Mailbox Scratch Register 6
+    union MboxScratch6_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t reserved1           :23;   //0:22
+            uint32_t groupPumpMode       :1;    //23
+            uint32_t isSlave             :1;    //24
+            uint32_t reserved2           :1;    //25
+            uint32_t groupId             :3;    //26:28
+            uint32_t chipId              :3;    //29:31
         } PACKED;
     };
 
