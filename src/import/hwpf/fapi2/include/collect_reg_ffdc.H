@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -606,8 +606,8 @@ void collectRegFfdc(const fapi2::ffdc_t i_target,
     // object of the FFDC class
     o_errorInfoFfdc.push_back(std::shared_ptr<fapi2::ErrorInfoFfdc>(new ErrorInfoFfdc(i_ffdcId, l_pBuf, l_ffdcSize)));
 
-    FAPI_INF("collectRegFfdc. SCOM address count: 0x%lx", l_scomAddresses.size());
-    FAPI_INF("collectRegFfdc. CFAM address count: 0x%lx", l_cfamAddresses.size());
+    FAPI_INF("collectRegFfdc. SCOM address count:  %d", (uint32_t)(l_scomAddresses.size()));
+    FAPI_INF("collectRegFfdc. CFAM address count:  %d", (uint32_t)(l_cfamAddresses.size()));
 
     FAPI_INF("collectRegFfdc() - exit");
 }
