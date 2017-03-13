@@ -46,7 +46,7 @@
 #include <lib/fir/fir.H>
 #include <lib/workarounds/adr32s_workarounds.H>
 #include <lib/phy/ddr_phy.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_SYSTEM;
