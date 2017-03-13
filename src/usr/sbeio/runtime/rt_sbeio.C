@@ -331,6 +331,17 @@ namespace RT_SBEIO
                       l_command,
                       i_request.sbeHdr.seqId);
 
+            // Check data offset
+            if(o_response.cmdHdr.dataOffset > sizeof(cmdHeader_t))
+            {
+                TRACFCOMP(g_trac_sbeio, "process_sbe_msg: process command "
+                          "adjusting response data offset");
+
+                // Change offset to show response payload is being put
+                // immediately after command header
+                o_response.cmdHdr.dataOffset = sizeof(cmdHeader_t);
+            }
+
             // Call function to process command
             errl = g_processCmdMap[l_command](i_proc,
                                               i_request.cmdHdr.dataSize,
@@ -406,6 +417,77 @@ namespace RT_SBEIO
      }
 
     //------------------------------------------------------------------------
+
+    /**
+     *  @brief SBE message passing check pass-through command response
+     *
+     *  @details  This is a call that will check a pass-through command
+     *            response that was written to the SBE Communication buffer
+     *            against certain fields from the local copy of the command.
+     *
+     *  @param[in]  i_proc        HB processor target
+     *  @param[in]  i_sbeMessage  Pass-through command response in sbe-comm
+     *  @param[in]  i_request     Copied pass-through command request
+     *
+     *  @returns  0 on success, or return code if the command failed
+     */
+    int process_sbe_msg_check_response(TargetHandle_t i_proc,
+                                       sbeMessage_t& i_sbeMessage,
+                                       sbeMessage_t& i_request)
+    {
+        errlHndl_t errl = nullptr;
+        int rc = 0;
+
+        if((i_sbeMessage.sbeHdr.version != i_request.sbeHdr.version) ||
+           (i_sbeMessage.sbeHdr.seqId != i_request.sbeHdr.seqId) ||
+           (i_sbeMessage.cmdHdr.version != i_request.cmdHdr.version) ||
+           (i_sbeMessage.cmdHdr.command != i_request.cmdHdr.command))
+        {
+            TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: check "
+                      "response, response field was altered");
+
+            rc = -301;
+
+            /*@
+             * @errortype
+             * @moduleid     SBEIO::SBEIO_RUNTIME
+             * @reasoncode   SBEIO::SBEIO_RT_RSP_FIELD_ALTERED
+             * @userdata1[0:31]   Processor HUID
+             * @userdata1[32:63]  Request Command
+             * @userdata2    Sequence ID
+             *
+             * @devdesc      SBEIO RT Check Pass-through command response field
+             *                was altered.
+             * @custdesc     Firmware error communicating with boot device
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 SBEIO::SBEIO_RUNTIME,
+                                 SBEIO::SBEIO_RT_RSP_FIELD_ALTERED,
+                                 TWO_UINT32_TO_UINT64(
+                                     get_huid(i_proc),
+                                     i_request.cmdHdr.command),
+                                 i_request.sbeHdr.seqId);
+
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_request),
+                           sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
+                           0,                 // Version
+                           ERRL_UDT_NOFORMAT, // parser ignores data
+                           false );           // merge
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_sbeMessage),
+                           sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
+                           0,                 // Version
+                           ERRL_UDT_NOFORMAT, // parser ignores data
+                           false );           // merge
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
+            errl->collectTrace(SBEIO_COMP_NAME);
+            errlCommit(errl, SBE_COMP_ID);
+        }
+
+        return rc;
+    }
 
     //------------------------------------------------------------------------
 
@@ -502,8 +584,15 @@ namespace RT_SBEIO
                 break;
             }
 
-            /* TODO RTC 170762 process SBE message write response */
-            TRACFCOMP(g_trac_sbeio, "process_sbe_msg: write response");
+            // Process SBE message check response
+            TRACFCOMP(g_trac_sbeio, "process_sbe_msg: check response");
+            rc = process_sbe_msg_check_response(l_proc,
+                                                *l_sbeMessage,
+                                                l_request);
+            if(rc != 0)
+            {
+                break;
+            }
 
             /* TODO RTC 170763 assert CFAM register ??? */
             TRACFCOMP(g_trac_sbeio, "process_sbe_msg: assert CFAM register");
