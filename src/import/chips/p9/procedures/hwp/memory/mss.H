@@ -52,7 +52,7 @@
 #include <generic/memory/lib/utils/pos.H>
 #include <lib/utils/swizzle.H>
 #include <lib/utils/conversions.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/utils/poll.H>
 #include <lib/utils/checker.H>
 #include <lib/utils/dump_regs.H>
