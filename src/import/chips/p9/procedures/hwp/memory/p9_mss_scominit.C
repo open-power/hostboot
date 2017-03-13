@@ -39,7 +39,7 @@
 #include <p9_mcbist_scom.H>
 #include <p9_ddrphy_scom.H>
 #include <lib/utils/count_dimm.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/phy/ddr_phy.H>
 #include <lib/mc/mc.H>
 #include <lib/fir/unmask.H>
