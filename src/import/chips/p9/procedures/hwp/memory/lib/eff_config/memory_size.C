@@ -39,7 +39,7 @@
 #include <lib/shared/mss_const.H>
 #include <lib/eff_config/memory_size.H>
 
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 
 namespace mss
 {
