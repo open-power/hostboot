@@ -58,8 +58,223 @@ namespace RT_SBEIO
 
     //------------------------------------------------------------------------
 
+    /**
+     *  @brief SBE message passing read pass-through command
+     *
+     *  @details  This is a call that will read a pass-through command
+     *            from the SBE Communication buffer and copy it to a
+     *            local buffer so its information is preserved during
+     *            processing of the command and creation of the response
+     *            in the same SBE Communication buffer.
+     *
+     *  @param[in]  i_proc        HB processor target
+     *  @param[in]  i_sbeMessage  Pass-through command request in sbe-comm
+     *  @param[out] o_request     Copied pass-through command request
+     *
+     *  @returns  0 on success, or return code if the command failed
+     */
+    int process_sbe_msg_read_command(TargetHandle_t i_proc,
+                                     sbeMessage_t& i_sbeMessage,
+                                     sbeMessage_t& o_request)
+    {
+        errlHndl_t errl = nullptr;
+        int rc = 0;
+
+        if((!ENUM_SBEHDRVER_CHECK(i_sbeMessage.sbeHdr.version)) ||
+           (!ENUM_CMDHDRVER_CHECK(i_sbeMessage.cmdHdr.version)))
+        {
+           TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: read "
+                      "command SBE Header version 0x%08x %s, Command Header "
+                      "version 0x%08x %s",
+                      i_sbeMessage.sbeHdr.version,
+                      (ENUM_SBEHDRVER_CHECK(i_sbeMessage.sbeHdr.version))
+                          ? "valid" : "invalid",
+                      i_sbeMessage.cmdHdr.version,
+                      (ENUM_CMDHDRVER_CHECK(i_sbeMessage.cmdHdr.version))
+                          ? "valid" : "invalid");
+
+            rc = -101;
+
+            /*@
+             * @errortype
+             * @moduleid     SBEIO::SBEIO_RUNTIME
+             * @reasoncode   SBEIO::SBEIO_RT_INVALID_VERSION
+             * @userdata1[0:31]   SBE Header version
+             * @userdata1[32:63]  Command Header version
+             * @userdata2    Processor HUID
+             *
+             * @devdesc      SBEIO RT Read Pass-through command invalid version.
+             * @custdesc     Firmware error communicating with boot device
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 SBEIO::SBEIO_RUNTIME,
+                                 SBEIO::SBEIO_RT_INVALID_VERSION,
+                                 TWO_UINT32_TO_UINT64(
+                                     i_sbeMessage.sbeHdr.version,
+                                     i_sbeMessage.cmdHdr.version),
+                                 get_huid(i_proc));
+
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_sbeMessage),
+                           sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
+                           0,                 // Version
+                           ERRL_UDT_NOFORMAT, // parser ignores data
+                           false );           // merge
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
+            errl->collectTrace(SBEIO_COMP_NAME);
+            errlCommit(errl, SBE_COMP_ID);
+        }
+        else if(i_sbeMessage.sbeHdr.msgSize > SBE_MSG_SIZE)
+        {
+            TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: read "
+                      "command message size too large 0x%08x",
+                      i_sbeMessage.sbeHdr.msgSize);
+
+            rc = -102;
+
+            /*@
+             * @errortype
+             * @moduleid     SBEIO::SBEIO_RUNTIME
+             * @reasoncode   SBEIO::SBEIO_RT_MSG_SIZE_TOO_LARGE
+             * @userdata1[0:31]   Processor HUID
+             * @userdata1[32:63]  Message Size
+             * @userdata2    Reserved
+             *
+             * @devdesc      SBEIO RT Read Pass-through command message size
+             *                is too large.
+             * @custdesc     Firmware error communicating with boot device
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 SBEIO::SBEIO_RUNTIME,
+                                 SBEIO::SBEIO_RT_MSG_SIZE_TOO_LARGE,
+                                 TWO_UINT32_TO_UINT64(
+                                     get_huid(i_proc),
+                                     i_sbeMessage.sbeHdr.msgSize),
+                                 0);
+
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_sbeMessage),
+                           sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
+                           0,                 // Version
+                           ERRL_UDT_NOFORMAT, // parser ignores data
+                           false );           // merge
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
+            errl->collectTrace(SBEIO_COMP_NAME);
+            errlCommit(errl, SBE_COMP_ID);
+        }
+        else if(i_sbeMessage.cmdHdr.dataOffset < sizeof(cmdHeader_t))
+        {
+            TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: read "
+                      "command data offset too small 0x%08x",
+                      i_sbeMessage.cmdHdr.dataOffset);
+
+            rc = -103;
+
+            /*@
+             * @errortype
+             * @moduleid     SBEIO::SBEIO_RUNTIME
+             * @reasoncode   SBEIO::SBEIO_RT_DATA_OFFSET_TOO_SMALL
+             * @userdata1[0:31]   Processor HUID
+             * @userdata1[32:63]  Data Offset
+             * @userdata2    Reserved
+             *
+             * @devdesc      SBEIO RT Read Pass-through command data offset
+             *                is too small.
+             * @custdesc     Firmware error communicating with boot device
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 SBEIO::SBEIO_RUNTIME,
+                                 SBEIO::SBEIO_RT_DATA_OFFSET_TOO_SMALL,
+                                 TWO_UINT32_TO_UINT64(
+                                     get_huid(i_proc),
+                                     i_sbeMessage.cmdHdr.dataOffset),
+                                 0);
+
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_sbeMessage),
+                           sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
+                           0,                 // Version
+                           ERRL_UDT_NOFORMAT, // parser ignores data
+                           false );           // merge
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
+            errl->collectTrace(SBEIO_COMP_NAME);
+            errlCommit(errl, SBE_COMP_ID);
+        }
+        else if(i_sbeMessage.cmdHdr.dataOffset + i_sbeMessage.cmdHdr.dataSize >
+                i_sbeMessage.sbeHdr.msgSize - sizeof(sbeHeader_t))
+        {
+            TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: read "
+                      "command, data offset 0x%08x and data size 0x%08x "
+                      "larger than msg size 0x%08x minus SBE hdr size 0x%08x",
+                      i_sbeMessage.cmdHdr.dataOffset,
+                      i_sbeMessage.cmdHdr.dataSize,
+                      i_sbeMessage.sbeHdr.msgSize,
+                      sizeof(sbeHeader_t));
+
+            rc = -104;
+
+            /*@
+             * @errortype
+             * @moduleid     SBEIO::SBEIO_RUNTIME
+             * @reasoncode   SBEIO::SBEIO_RT_DATA_TOO_LARGE
+             * @userdata1[0:31]   Processor HUID
+             * @userdata1[32:63]  Data Offset
+             * @userdata2[0:31]   Message Size
+             * @userdata2[32:63]  Data Size
+             *
+             * @devdesc      SBEIO RT Read Pass-through command data offset
+             *                is too large.
+             * @custdesc     Firmware error communicating with boot device
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 SBEIO::SBEIO_RUNTIME,
+                                 SBEIO::SBEIO_RT_DATA_TOO_LARGE,
+                                 TWO_UINT32_TO_UINT64(
+                                     get_huid(i_proc),
+                                     i_sbeMessage.cmdHdr.dataOffset),
+                                 TWO_UINT32_TO_UINT64(
+                                     i_sbeMessage.sbeHdr.msgSize,
+                                     i_sbeMessage.cmdHdr.dataSize));
+
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_sbeMessage),
+                           sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
+                           0,                 // Version
+                           ERRL_UDT_NOFORMAT, // parser ignores data
+                           false );           // merge
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
+            errl->collectTrace(SBEIO_COMP_NAME);
+            errlCommit(errl, SBE_COMP_ID);
+        }
+        else
+        {
+            // Copy command from SBE Communication area
+            memcpy(reinterpret_cast<void*>(&o_request),
+                   reinterpret_cast<void*>(&i_sbeMessage),
+                   i_sbeMessage.sbeHdr.msgSize);
+        }
+
+        return rc;
+    }
+
     //------------------------------------------------------------------------
 
+    /**
+     *  @brief SBE message passing call pass-through command processor
+     *
+     *  @details  This is a call that will call the appropriate command
+     *            processor for a pass-through command.
+     *
+     *  @param[in]  i_proc      HB processor target
+     *  @param[in]  i_request   Pass-through command request
+     *  @param[out] o_response  Pass-through command response
+     *
+     *  @returns  0 on success, or return code if the command failed
+     */
     int process_sbe_msg_cmd_processor(TargetHandle_t i_proc,
                                       sbeMessage_t& i_request,
                                       sbeMessage_t& o_response)
@@ -267,8 +482,15 @@ namespace RT_SBEIO
             sbeMessage_t *l_sbeMessage =
                 reinterpret_cast<sbeMessage_t*>(l_sbeCommAddr);
 
-            /* TODO RTC 170760 process SBE message read command */
+            // Process SBE message read command
             TRACFCOMP(g_trac_sbeio, "process_sbe_msg: read command");
+            rc = process_sbe_msg_read_command(l_proc,
+                                              *l_sbeMessage,
+                                              l_request);
+            if (rc != 0)
+            {
+                break;
+            }
 
             // Call appropriate command processor
             TRACFCOMP(g_trac_sbeio, "process_sbe_msg: call command processor");
