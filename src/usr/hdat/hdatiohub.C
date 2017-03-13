@@ -247,6 +247,8 @@ uint8_t * HdatIoHubFru::setIOHub(uint8_t * io_virt_addr,
     {
         l_hdatHubEntry->hdatIoHubId =
                                   this->iv_hubArray[l_cnt].hdatIoHubId;
+        l_hdatHubEntry->hdatMaxPCIeLinkSpeed = 
+                                  this->iv_hubArray[l_cnt].hdatMaxPCIeLinkSpeed;
         l_hdatHubEntry->hdatModuleId =
                                   this->iv_hubArray[l_cnt].hdatModuleId;
         l_hdatHubEntry->hdatEcLvl =
@@ -733,6 +735,32 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             else
             {
                 HDAT_ERR("Chip is not in Nimbus,Cumulus");
+            }
+
+            TARGETING::Target *l_pSysTarget = NULL;
+            (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
+
+            if(l_pSysTarget == NULL)
+            {
+                HDAT_ERR("Error in getting Top Level Target");
+                assert(l_pSysTarget != NULL);
+            }
+
+            // DD1 workaround for Nimbus
+            if((l_procEcLevel & HDAT_PROC_EC_DD1) && (l_model == TARGETING::MODEL_NIMBUS))
+            {
+                if(l_pSysTarget->getAttr<ATTR_DD1_SLOW_PCI_REF_CLOCK>())
+                {
+                    l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN4;
+                }
+                else
+                {
+                    l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN2;
+                }
+            }
+            else
+            {
+                l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN4;
             }
 
             l_hub->hdatEcLvl = l_procEcLevel;
