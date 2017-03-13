@@ -31,7 +31,7 @@
 
 #include <fapi2.H>
 #include <mss.H>
-#include <lib/utils/find.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/eff_config/timing.H>
 
 namespace mss
