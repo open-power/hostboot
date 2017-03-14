@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/sbeio/runtime/makefile $
+# $Source: src/usr/sbeio/runtime/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
@@ -25,14 +25,12 @@
 
 HOSTBOOT_RUNTIME = 1
 
-ROOTPATH = ../../../..
-VPATH += ../
+ROOTPATH = ../../../../..
 
-MODULE = sbeio_rt
+MODULE = testsbeio_rt
 
-## Objects unique to HBRT
-OBJS += rt_sbeio.o
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 
-SUBDIRS += test.d
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

@@ -243,7 +243,7 @@ namespace RT_SBEIO
              * @reasoncode   SBEIO::SBEIO_RT_DATA_OFFSET_TOO_SMALL
              * @userdata1[0:31]   Processor HUID
              * @userdata1[32:63]  Data Offset
-             * @userdata2    Reserved
+             * @userdata2    Minimum Data Offset
              *
              * @devdesc      SBEIO RT Read Pass-through command data offset
              *                is too small.
@@ -255,7 +255,7 @@ namespace RT_SBEIO
                                  TWO_UINT32_TO_UINT64(
                                      get_huid(i_proc),
                                      i_sbeMessage.cmdHdr.dataOffset),
-                                 0);
+                                 sizeof(cmdHeader_t));
 
             errl->addFFDC( SBE_COMP_ID,
                            &(i_sbeMessage),
@@ -424,7 +424,7 @@ namespace RT_SBEIO
                                           HWAS::SRCI_PRIORITY_HIGH);
                 errl->collectTrace(SBEIO_COMP_NAME);
             }
-            else             if(o_response.cmdHdr.dataSize > SBE_MSG_MAX_DATA)
+            else if(o_response.cmdHdr.dataSize > SBE_MSG_MAX_DATA)
             {
                 TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: process "
                           "command, response data size 0x%08x too large",

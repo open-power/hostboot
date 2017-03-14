@@ -1042,6 +1042,13 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
         traceHbRsvMemRange(l_rngPtr);
 
+        // Loop through all functional Procs
+        for (const auto & l_procChip: l_procChips)
+        {
+            l_procChip->setAttr<TARGETING::ATTR_SBE_COMM_ADDR>(l_sbeCommAddr);
+
+        }
+
 
         // SBE FFDC entry
         uint64_t l_sbeffdcAddr = 0x0;
