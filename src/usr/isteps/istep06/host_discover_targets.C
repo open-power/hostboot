@@ -236,6 +236,9 @@ errlHndl_t powerDownSlaveQuads()
     bool l_isMasterEq = false;
     TARGETING::TargetHandleList l_eqTargetList;
     getAllChiplets(l_eqTargetList, TARGETING::TYPE_EQ, true);
+    uint64_t EX_0_CME_SCOM_SICR_SCOM1 = 0x1001203E;
+    uint64_t CME_SCOM_SICR_PM_EXIT_C0_MASK = 0x0800000000000000;
+    size_t   MASK_SIZE = sizeof(CME_SCOM_SICR_PM_EXIT_C0_MASK);
 
     //Need to know who master is so we can skip them
     uint8_t l_masterCoreId = TARGETING::getMasterCore()->getAttr<TARGETING::ATTR_CHIP_UNIT>();
@@ -263,6 +266,23 @@ errlHndl_t powerDownSlaveQuads()
         //If this is the master quad, we have already power cycled so we dont need this
         if(l_isMasterEq)
         {
+            //TODO RTC:171340 Need to clear PM_EXIT bit in EX_0_CME_SCOM_SICR_SCOM1 reg for MPIPL
+            //deassert pm exit flag on master core (both ex targs to be safe)
+            TARGETING::TargetHandleList l_exChildren;
+            TARGETING::getChildChiplets( l_exChildren,
+                                         l_eq_target,
+                                         TARGETING::TYPE_EX,
+                                         true);
+
+            for(const auto & l_ex_child : l_exChildren)
+            {
+                // Clear bit 4 of CME_SCOM_SICR which sets PM_EXIT
+                l_err = deviceWrite(l_ex_child,
+                                    &CME_SCOM_SICR_PM_EXIT_C0_MASK,
+                                    MASK_SIZE,
+                                    DEVICE_SCOM_ADDRESS(EX_0_CME_SCOM_SICR_SCOM1)); //0x1001203E
+            }
+            //continue to next EQ
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "Found master, jumping to next EQ");
             continue;
