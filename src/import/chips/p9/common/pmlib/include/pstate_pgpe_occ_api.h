@@ -61,10 +61,11 @@ enum MESSAGE_ID_IPI2HI
 //
 #define PGPE_RC_SUCCESS                         0x01
 #define PGPE_WOF_RC_NOT_ENABLED                 0x10
-#define PGPE_RC_PSTATES_DISABLED                0x11
+#define PGPE_RC_PSTATES_NOT_STARTED             0x11
 #define PGPE_RC_REQ_PSTATE_ALREADY_STARTED      0x12
-#define PGPE_RC_REQ_PSTATE_ALREADY_SUSPENDED    0x13
+#define PGPE_RC_REQ_PSTATE_ALREADY_STOPPED      0x13
 #define PGPE_RC_OCC_NOT_PMCR_OWNER              0x14
+#define PGPE_RC_PM_COMPLEX_SUSPEND_SAFE_MODE    0x15
 // Active quad mismatch with requested active quads.  PGPE did not switch
 // to using the new VFRT.  The original VFRT is still being used.
 #define PGPE_WOF_RC_VFRT_QUAD_MISMATCH  0x20
