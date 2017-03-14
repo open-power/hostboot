@@ -325,6 +325,18 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                     "SUCCESS : proc_getecid"
                     " completed ok");
 
+          // Update HDAT_EC to account for anything lower than the minor EC
+          auto l_miniEC = l_cpu_target->getAttr<TARGETING::ATTR_MINI_EC>();
+          if( l_miniEC != 0 )
+          {
+              auto l_hdatEC = l_cpu_target->getAttr<TARGETING::ATTR_HDAT_EC>();
+              auto l_EC = l_cpu_target->getAttr<TARGETING::ATTR_EC>();
+              auto l_newHdatEC = l_EC + l_miniEC;
+              TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                         "MINI_EC=%d, HDAT_EC changing from %d->%d",
+                         l_miniEC, l_hdatEC, l_newHdatEC );
+              l_cpu_target->setAttr<TARGETING::ATTR_HDAT_EC>(l_newHdatEC);
+          }
       }
     }  // end of going through all processors
 
