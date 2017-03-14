@@ -41,7 +41,7 @@
 #include <lib/mss_attribute_accessors.H>
 
 #include <lib/utils/scom.H>
-#include <lib/utils/pos.H>
+#include <generic/memory/lib/utils/pos.H>
 #include <lib/utils/conversions.H>
 #include <lib/fir/fir.H>
 #include <lib/workarounds/adr32s_workarounds.H>
