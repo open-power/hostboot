@@ -33,20 +33,3 @@
 #mkdir -p $sb/simu/data/cec-chip/
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
-
-#Need a newer HW image due to some co-reqs, pull in hw022817a.910
-sbex -t 1018118
-cd $sb/engd/href/
-mk -a -k
-
-### RTC 170736 - Patch begins
-echo "+++ Updating p9n.act file for p9_fab_iovalid_link_validate"
-echo "+++ SB: " $sb
-echo "+++ BACKING_BUILD: " $BACKING_BUILD
-echo "+++ PROJECT_ROOT: " $PROJECT_ROOT
-
-mkdir -p  $sb/simu/data/cec-chip/
-cp $BACKING_BUILD/src/simu/data/cec-chip/p9n.act $sb/simu/data/cec-chip/
-patch -p0 $sb/simu/data/cec-chip/p9n.act $PROJECT_ROOT/src/build/citest/etc/patches/p9n.act_fab_io_patch
-### RTC 170736 - Patch ends
-
