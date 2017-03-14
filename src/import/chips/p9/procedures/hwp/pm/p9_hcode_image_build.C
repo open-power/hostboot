@@ -1477,6 +1477,12 @@ extern "C"
                      (uintptr_t)(i_ringData.iv_pWorkBuf2), i_ringData.iv_sizeWorkBuf2);
             FAPI_DBG("---------------=== Buffer Specs Ends --------------------");
 
+            FAPI_DBG("--------------- Buffer Initializaiton to 0 --------------------");
+            //Init all temp buffers before using.
+            memset( (uint8_t*) i_ringData.iv_pRingBuffer,  0x00, i_ringData.iv_ringBufSize );
+            memset( (uint8_t*) i_ringData.iv_pWorkBuf1, 0x00, i_ringData.iv_sizeWorkBuf1 );
+            memset( (uint8_t*) i_ringData.iv_pWorkBuf2, 0x00, i_ringData.iv_sizeWorkBuf2 );
+
             uint32_t l_bootMask = ENABLE_ALL_CORE;
             fapi2::ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
 
@@ -1588,9 +1594,12 @@ extern "C"
 
                 sgpeOvrdRings.setRingOffset(pOvrdRingPayload, sgpeOvrdRings.getCommonRingId( ringIndex ));
                 sgpeOvrdRings.setRingSize( sgpeOvrdRings.getCommonRingId( ringIndex ), tempBufSize );
-                sgpeOvrdRings.extractRing( i_ringData.iv_pWorkBuf1, tempBufSize, sgpeOvrdRings.getCommonRingId( ringIndex ) );
+                sgpeOvrdRings.extractRing( i_ringData.iv_pWorkBuf2, tempBufSize, sgpeOvrdRings.getCommonRingId( ringIndex ) );
 
                 pOvrdRingPayload = pOvrdRingPayload + tempBufSize;
+
+                //cleaning up what we wrote in temp buffer last time
+                memset( i_ringData.iv_pWorkBuf2, 0x00, tempBufSize );
             }
 
             if( overrideNotFound )
@@ -1780,6 +1789,7 @@ extern "C"
             uint32_t sizeAligned = 0;
             uint32_t sizePStateBlock = 0;
             PstateSuperStructure pStateSupStruct;
+            memset( &pStateSupStruct, 0x00, sizeof(PstateSuperStructure) );
 
             //Building P-State Parameter block info by calling a HWP
             FAPI_DBG("Generating P-State Parameter Block" );
@@ -1992,6 +2002,9 @@ extern "C"
                 io_cmeRings.extractRing( i_ringData.iv_pWorkBuf1, ringSize, io_cmeRings.getCommonRingId( ringIndex ) );
 
                 pRingPayload = pRingPayload + ringSize;
+
+                //cleaning up what we wrote in temp buffer last time.
+                memset( i_ringData.iv_pWorkBuf1, 0x00, ringSize );
             }
 
             ringSize = (pRingPayload - pRingStart);
@@ -2158,6 +2171,9 @@ extern "C"
 
                     pRingPayload = pRingPayload + tempSize;
                     io_cmeRings.setRingSize( io_cmeRings.getInstRingId(0), tempSize, ((MAX_CORES_PER_EX * exId) + coreId) );
+
+                    //cleaning up what we wrote in temp buffer last time.
+                    memset( i_ringData.iv_pWorkBuf1, 0x00, tempSize );
                 }
             }
 
@@ -2240,9 +2256,12 @@ extern "C"
 
                 cmeOvrdRings.setRingOffset(pOverrideRingPayload, cmeOvrdRings.getCommonRingId( ringIndex ));
                 cmeOvrdRings.setRingSize( cmeOvrdRings.getCommonRingId( ringIndex ), tempBufSize );
-                cmeOvrdRings.extractRing( i_ringData.iv_pWorkBuf1, tempBufSize, cmeOvrdRings.getCommonRingId( ringIndex ) );
+                cmeOvrdRings.extractRing( i_ringData.iv_pWorkBuf2, tempBufSize, cmeOvrdRings.getCommonRingId( ringIndex ) );
 
                 pOverrideRingPayload = pOverrideRingPayload + tempBufSize;
+
+                //cleaning up what we wrote in temp bufffer last time.
+                memset( i_ringData.iv_pWorkBuf2, 0x00, tempBufSize );
             }
 
             if( overrideNotFound )
@@ -2489,6 +2508,9 @@ extern "C"
                 io_sgpeRings.extractRing( i_ringData.iv_pWorkBuf1, tempBufSize, io_sgpeRings.getCommonRingId( ringIndex ) );
                 pCmnRingPayload = pCmnRingPayload + tempBufSize;
 
+                //cleaning up what we wrote in temp buffer last time.
+                memset( i_ringData.iv_pWorkBuf1, 0x00, tempBufSize );
+
             }//for common rings
 
             tempLength = pCmnRingPayload - pRingStart;
@@ -2595,6 +2617,9 @@ extern "C"
                     io_sgpeRings.setRingSize( io_sgpeRings.getInstRingId( ringIndex ), tempBufSize, chipletId );
                     instRingPayLoad = instRingPayLoad + tempBufSize;
                     io_sgpeRings.extractRing( i_ringData.iv_pWorkBuf1, tempBufSize, io_sgpeRings.getInstRingId( ringIndex ) );
+
+                    //cleaning up what we wrote in temp buffer last time.
+                    memset( i_ringData.iv_pWorkBuf1, 0x00, tempBufSize );
 
                 }//for quad spec rings
 
