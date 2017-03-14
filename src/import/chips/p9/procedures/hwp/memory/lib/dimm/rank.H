@@ -40,7 +40,7 @@
 #include <lib/mss_attribute_accessors.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
-#include <lib/utils/scom.H>
+#include <generic/memory/lib/utils/scom.H>
 #include <lib/utils/num.H>
 #include <lib/utils/count_dimm.H>
 
