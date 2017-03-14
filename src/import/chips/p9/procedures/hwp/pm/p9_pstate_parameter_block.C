@@ -115,6 +115,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         // Local IDDQ table variable
         IddqTable l_iddqt;
+        memset( & l_iddqt, 0x00, sizeof(IddqTable));
 
         // Frequency step variable
         double l_frequency_step_khz;
