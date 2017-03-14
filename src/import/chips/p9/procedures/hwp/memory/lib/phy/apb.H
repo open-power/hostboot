@@ -39,7 +39,7 @@
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
-#include <lib/utils/scom.H>
+#include <generic/memory/lib/utils/scom.H>
 
 namespace mss
 {
