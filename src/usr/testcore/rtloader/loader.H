@@ -354,6 +354,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 return rt_get_targ();
             else if (0 == strcmp(i_region, HBRT_RSVD_MEM__OVERRIDES))
                 return rt_get_targ_override();
+            else if (0 == strcmp(i_region, HBRT_RSVD_MEM__SBE_COMM))
+                return rt_get_comm(i_instance);
             else
                 return 0;
         }
@@ -545,6 +547,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
         }
 
+        //--------------------------------------------------------------------
         static uint64_t rt_get_targ()
         {
             if (cv_targ_addr != 0)
@@ -562,6 +565,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return cv_targ_addr;
         }
 
+        //--------------------------------------------------------------------
         static uint64_t rt_get_targ_override()
         {
             using namespace TARGETING;
@@ -605,6 +609,59 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return cv_targ_over_addr;
         }
 
+        //--------------------------------------------------------------------
+        static uint64_t rt_get_comm(uint32_t i_instance)
+        {
+            if (cv_comm_addr != 0)
+            {
+                TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_get_comm: "
+                          "stored cv_comm_addr:%lld",
+                          cv_comm_addr);
+                return cv_comm_addr;
+            }
+
+            TARGETING::TargetHandleList procChips;
+            getAllChips(procChips, TARGETING::TYPE_PROC, true);
+            for (const auto & l_procChip: procChips)
+            {
+                uint64_t l_instance =
+                    l_procChip->getAttr<TARGETING::ATTR_POSITION>();
+                if(l_instance == i_instance)
+                {
+                    cv_comm_addr =
+                        l_procChip->getAttr<TARGETING::ATTR_SBE_COMM_ADDR>();
+                    if (cv_comm_addr != 0)
+                    {
+                        TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_get_comm: "
+                                  "retrieved attribute cv_comm_addr:%lld",
+                                  cv_comm_addr);
+                        return cv_comm_addr;
+                    }
+                }
+            }
+
+            cv_comm_phys_addr = TARGETING::get_top_mem_addr();
+
+            assert (cv_comm_phys_addr != 0,
+                    "bld_devtree: Top of memory was 0!");
+
+            cv_comm_phys_addr -= (VMM_RT_VPD_OFFSET + 64*KILOBYTE);
+
+            uint8_t *comm_ptr = reinterpret_cast<uint8_t *>(cv_comm_phys_addr);
+
+            void *cptr = mm_block_map(comm_ptr, PAGESIZE);
+
+            assert(cptr != NULL,"rt_get_comm. Could not map SBE Comm memory");
+
+            cv_comm_addr = reinterpret_cast<uint64_t>(cptr);
+
+            TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_get_comm: "
+                      "calculated cv_comm_addr:%lld",
+                      cv_comm_addr);
+            return cv_comm_addr;
+        }
+
+        //--------------------------------------------------------------------
         static int rt_ipmi_msg(uint8_t netfn, uint8_t cmd,
                     void *tx_buf, size_t tx_size,
                     void *rx_buf, size_t *rx_size)
@@ -637,6 +694,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         static uint64_t cv_targ_addr;
         static uint64_t cv_targ_phys_addr;
         static uint64_t cv_targ_over_addr;
+        static uint64_t cv_comm_addr;
+        static uint64_t cv_comm_phys_addr;
 };
 
 
@@ -647,6 +706,8 @@ uint64_t RuntimeLoaderTest::cv_vpd_phys_addr = 0;
 uint64_t RuntimeLoaderTest::cv_targ_addr = 0;
 uint64_t RuntimeLoaderTest::cv_targ_phys_addr = 0;
 uint64_t RuntimeLoaderTest::cv_targ_over_addr = 0;
+uint64_t RuntimeLoaderTest::cv_comm_addr = 0;
+uint64_t RuntimeLoaderTest::cv_comm_phys_addr = 0;
 
 
 
