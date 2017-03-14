@@ -173,12 +173,27 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
     errlHndl_t l_err = NULL;
 
     do {
-        // In HOSTBOOT_RUNTIME we always defer indirect scoms to Sapphire.
-#ifndef __HOSTBOOT_RUNTIME
+        // Do we need to do the indirect logic or not?
+        bool l_runIndirectLogic = true;
+
         // If the indirect scom bit is 0, then doing a regular scom
         if( (i_addr & 0x8000000000000000) == 0)
         {
+            l_runIndirectLogic = false;
+        }
+
+        // In HOSTBOOT_RUNTIME we always defer indirect scoms to
+        //   Sapphire, but PHYP wants us to do it ourselves
+#ifdef __HOSTBOOT_RUNTIME
+        if( TARGETING::is_sapphire_load() )
+        {
+            l_runIndirectLogic = false;
+        }
 #endif // __HOSTBOOT_RUNTIME
+
+        // Not indirect (or skipping that) so just do regular scom
+        if( l_runIndirectLogic == false )
+        {
             l_err = doScomOp(i_opType,
                              i_target,
                              io_buffer,
@@ -187,8 +202,11 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                              i_addr);
             //all done
             break;
-#ifndef __HOSTBOOT_RUNTIME
         }
+
+        //----------------------------------------------
+        //---  Below here is the indirect scom logic ---
+
         uint64_t l_io_buffer = 0;
         uint64_t temp_scomAddr = 0;
         uint8_t form = 0;
@@ -263,7 +281,6 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
             break;
         }
 
-#endif // __HOSTBOOT_RUNTIME
     } while(0);
 
     return l_err;
