@@ -3445,24 +3445,27 @@ fapi2::ReturnCode eff_rdimm::dram_rtt_wr()
 {
     std::vector< uint64_t > l_ranks;
     uint8_t l_encoding = 0;
+    uint8_t l_dram_rtt_wr[MAX_RANK_PER_DIMM] = {};
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
 
+    // RTT_WR mapping
+    static const std::vector< std::pair<uint8_t, uint8_t> > l_rtt_wr_map =
+    {
+        { fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_DISABLE, 0b000 },
+        { fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_HIGHZ,   0b011 },
+        { fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM80,   0b100 },
+        { fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM120,  0b001 },
+        { fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM240,  0b010 }
+    };
+
+    // Retrieve current MCS level attribute
     FAPI_TRY( eff_dram_rtt_wr(iv_mcs, &l_mcs_attrs[0][0][0]) );
 
     // Get RTT_WR from VPD
-    uint8_t l_dram_rtt_wr[MAX_RANK_PER_DIMM];
     FAPI_TRY( mss::vpd_mt_dram_rtt_wr(iv_dimm, &(l_dram_rtt_wr[0])) );
 
     // Calculate the value for each rank and store in attribute
     FAPI_TRY(mss::rank::ranks(iv_dimm, l_ranks));
-    static const std::vector< std::pair<uint8_t, uint8_t> > l_rtt_wr_map =
-    {
-        {fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_DISABLE, 0b000},
-        {fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_HIGHZ, 0b011},
-        {fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM80, 0b100},
-        {fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM120, 0b001},
-        {fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM240, 0b010}
-    };
 
     for (const auto& l_rank : l_ranks)
     {
