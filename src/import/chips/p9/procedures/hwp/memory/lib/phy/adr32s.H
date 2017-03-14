@@ -41,7 +41,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/mss_attribute_accessors.H>
 #include <lib/shared/mss_const.H>
-#include <lib/utils/scom.H>
+#include <generic/memory/lib/utils/scom.H>
 #include <lib/utils/find.H>
 
 namespace mss
