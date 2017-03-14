@@ -42,7 +42,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <lib/shared/mss_const.H>
-#include <lib/utils/scom.H>
+#include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/dimm/kind.H>
 

@@ -37,7 +37,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 
-#include <lib/utils/scom.H>
+#include <generic/memory/lib/utils/scom.H>
 #include <lib/fir/fir.H>
 #include <lib/fir/unmask.H>
 #include <lib/workarounds/mcbist_workarounds.H>

@@ -38,7 +38,7 @@
 
 #include <fapi2.H>
 
-#include <lib/utils/scom.H>
+#include <generic/memory/lib/utils/scom.H>
 #include <lib/shared/mss_const.H>
 #include <lib/utils/conversions.H>
 

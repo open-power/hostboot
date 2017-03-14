@@ -42,7 +42,7 @@
 
 #include <lib/mc/mc.H>
 #include <lib/mc/xlate.H>
-#include <lib/utils/scom.H>
+#include <generic/memory/lib/utils/scom.H>
 #include <lib/utils/find.H>
 #include <lib/dimm/kind.H>
 

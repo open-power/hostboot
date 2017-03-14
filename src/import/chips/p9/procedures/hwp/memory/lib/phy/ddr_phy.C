@@ -54,7 +54,7 @@
 #include <lib/utils/bit_count.H>
 #include <lib/utils/find.H>
 #include <lib/utils/dump_regs.H>
-#include <lib/utils/scom.H>
+#include <generic/memory/lib/utils/scom.H>
 #include <lib/utils/count_dimm.H>
 
 using fapi2::TARGET_TYPE_MCBIST;

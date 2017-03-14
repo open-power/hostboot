@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <lib/shared/mss_const.H>
-#include <lib/utils/scom.H>
+#include <generic/memory/lib/utils/scom.H>
 
 namespace mss
 {

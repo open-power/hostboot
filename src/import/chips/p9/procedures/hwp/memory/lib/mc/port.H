@@ -43,7 +43,7 @@
 #include <lib/mss_attribute_accessors.H>
 #include <lib/utils/conversions.H>
 #include <lib/shared/mss_const.H>
-#include <lib/utils/scom.H>
+#include <generic/memory/lib/utils/scom.H>
 #include <lib/dimm/rank.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/mcbist/address.H>
