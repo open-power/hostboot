@@ -41,7 +41,7 @@
 #include <lib/mss_attribute_accessors.H>
 
 #include <lib/mc/mc.H>
-#include <lib/utils/scom.H>
+#include <generic/memory/lib/utils/scom.H>
 #include <lib/dimm/kind.H>
 #include <lib/utils/find.H>
 
