@@ -40,7 +40,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <mss_attribute_accessors_manual.H>
-#include <lib/utils/scom.H>
+#include <generic/memory/lib/utils/scom.H>
 
 namespace mss
 {
