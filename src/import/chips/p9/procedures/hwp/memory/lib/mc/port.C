@@ -36,7 +36,7 @@
 #include <fapi2.H>
 #include <lib/mc/port.H>
 #include <lib/shared/mss_const.H>
-#include <lib/utils/scom.H>
+#include <generic/memory/lib/utils/scom.H>
 #include <lib/ecc/ecc.H>
 
 namespace mss
