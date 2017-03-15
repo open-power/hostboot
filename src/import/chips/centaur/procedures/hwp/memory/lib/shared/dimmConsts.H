@@ -67,6 +67,15 @@ enum consts : size_t
     MAX_CLK = 8,
     MAX_DATA_DISABLE = 5,
 
+    LANES_PER_BLOCK = 16,
+    BITS_PER_BYTE = 8,
+    MAX_BLOCKS_PER_RANK = 5,
+    MAX_NIBBLES_PER_BYTE = 2,
+    MAX_BYTES_PER_BLOCK = 2,
+
+    DP18_INSTANCES = 5,
+    BITS_PER_REG = 16,
+    BITS_PER_PORT = (LANES_PER_BLOCK * DP18_INSTANCES),
 };
 
 enum mrs : size_t
@@ -107,6 +116,7 @@ enum sim_cycles : size_t
     DELAY_1US = 1000,                 ///< 1 usec delay for HW mode (20000 sim cycles if simclk = 20ghz)
     DELAY_100US = 100000,             ///< 100 usec delay for HW mode (2000000 sim cycles if simclk = 20ghz)
     DELAY_500US = 500000,             ///< 500 usec delay for HW mode
+    DELAY_500SIMCYCLES = 500,         ///< 500 sim cycle delay
     DELAY_2000SIMCYCLES = 2000,       ///< 2000 sim cycle delay for sim mode (100 ns if simclk = 20Ghz)
     DELAY_20000SIMCYCLES = 20000,     ///< 20000 sim cycle delay for sim mode (1 usec if simclk = 20Ghz)
     DELAY_2000000SIMCYCLES = 2000000, ///< 2000000 sim cycle delay for sim mode  (100 usec if simclk = 20Ghz)
