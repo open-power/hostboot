@@ -311,6 +311,8 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // Compute VPD points
         p9_pstate_compute_vpd_pts(l_operating_points, &l_globalppb);
 
+        memcpy(l_globalppb.operating_points_set, l_operating_points, sizeof(l_operating_points));
+
         // Calculate pre-calculated slopes
         p9_pstate_compute_PsV_slopes(l_operating_points, &l_globalppb);
 
@@ -338,6 +340,9 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         // Resonant Clock Grid Management Setup
         l_localppb.resclk = l_resclk_setup;
+
+        l_localppb.dpll_pstate0_value = revle32((revle32(l_localppb.operating_points[ULTRA].frequency_mhz) * 1000 / revle32(
+                l_globalppb.frequency_step_khz)));
 
         // -----------------------------------------------
         // OCC parameter block
