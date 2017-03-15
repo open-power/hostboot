@@ -69,17 +69,22 @@ namespace ISTEP_06
 
 #ifdef CONFIG_PRINT_SYSTEM_INFO
 
-//Loop through list of targets and print out HUID and other key attributes if the target has it
+//Loop through list of targets and print out HUID and other key attributes if
+//the target has it
 void print_target_list(TARGETING::TargetHandleList i_targetList)
 {
 
-
-
     for(auto & l_targ : i_targetList)
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "%s", l_targ->getAttr<TARGETING::ATTR_PHYS_PATH>().toString());
+        char * l_targetString =
+            l_targ->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
 
-        //Every target has a HUID so it is safe to assume this will return okay from getAttr
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "%s", l_targetString);
+
+        free(l_targetString);
+
+        //Every target has a HUID so it is safe to assume this will return okay
+        //from getAttr
         uint32_t l_huid =  get_huid(l_targ );
 
         //if output says DEAD then the attribute is not defined
@@ -89,8 +94,8 @@ void print_target_list(TARGETING::TargetHandleList i_targetList)
         uint32_t l_fapi_pos = 0xDEAD;
         uint32_t l_chip_unit = 0xDEAD;
 
-        //The rest of these attributes may or may not exist on the target, so only add them to the
-        //string if the attribute exists
+        //The rest of these attributes may or may not exist on the target, so
+        //only add them to the string if the attribute exists
         TARGETING::AttributeTraits<TARGETING::ATTR_HWAS_STATE>::Type hwasState;
         if(l_targ->tryGetAttr<TARGETING::ATTR_HWAS_STATE>(hwasState))
         {
