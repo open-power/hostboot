@@ -179,49 +179,53 @@ enum RingID
     ob0_gptr = 119,
     ob0_time = 120,
     ob0_pll_gptr = 121,
-    ob0_pll_bndy  = 122,
-    ob0_pll_func = 123,
+    ob0_pll_bndy = 122,
+    ob0_pll_bndy_bucket_1 = 123,
+    ob0_pll_bndy_bucket_2 = 124,
+    ob0_pll_bndy_bucket_3 = 125,
 
     // OB Chiplet Rings
     // OB0, OB1, OB2 and OB3 instance specific Ring
-    ob0_repr = 124,
-    // values 125-126 unused
+    ob0_repr = 126,
 
     ob1_fure = 127,
     ob1_gptr = 128,
     ob1_time = 129,
     ob1_pll_gptr = 130,
     ob1_pll_bndy  = 131,
-    ob1_pll_func = 132,
+    ob1_pll_bndy_bucket_1 = 132,
+    ob1_pll_bndy_bucket_2 = 133,
+    ob1_pll_bndy_bucket_3 = 134,
 
     // OB Chiplet Rings
     // OB0, OB1, OB2 and OB3 instance specific Ring
-    ob1_repr = 133,
-    // values 134-135 unused
+    ob1_repr = 135,
 
     ob2_fure = 136,
     ob2_gptr = 137,
     ob2_time = 138,
     ob2_pll_gptr = 139,
     ob2_pll_bndy  = 140,
-    ob2_pll_func = 141,
+    ob2_pll_bndy_bucket_1 = 141,
+    ob2_pll_bndy_bucket_2 = 142,
+    ob2_pll_bndy_bucket_3 = 143,
 
     // OB Chiplet Rings
     // OB0, OB1, OB2 and OB3 instance specific Ring
-    ob2_repr = 142,
-    // values 143-144 unused
+    ob2_repr = 144,
 
     ob3_fure = 145,
     ob3_gptr = 146,
     ob3_time = 147,
     ob3_pll_gptr = 148,
     ob3_pll_bndy  = 149,
-    ob3_pll_func = 150,
+    ob3_pll_bndy_bucket_1 = 150,
+    ob3_pll_bndy_bucket_2 = 151,
+    ob3_pll_bndy_bucket_3 = 152,
 
     // OB Chiplet Rings
     // OB0, OB1, OB2 and OB3 instance specific Ring
-    ob3_repr = 151,
-    // values 152-153 unused
+    ob3_repr = 153,
 
     // PCI Chiplet Rings
     // PCI0 Common Rings
