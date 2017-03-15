@@ -39,33 +39,24 @@
 #include <list>
 #include <pnor/pnorif.H>
 #include <secureboot/containerheader.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
 
 namespace TRUSTEDBOOT
 {
     struct _TpmLogMgr;
 
-    /// Enumerations to select TPM
-    typedef enum
+    // Hostboot code just maps the TpmTarget type, which shared APIs use, as a
+    // targeting target
+    typedef TARGETING::Target TpmTarget;
+
+    /**
+     *  @brief Enum used for the getTPMs API to specify scope of TPMs to return
+     */
+    enum class TPM_FILTER : uint8_t
     {
-        TPM_PRIMARY   = 0,
-        TPM_BACKUP    = 1,
-        LAST_CHIP_TYPE,
-        FIRST_CHIP_TYPE = TPM_PRIMARY
-    } TPM_role;
-
-
-    /// Track system TPM status
-    struct TpmTarget
-    {
-        TARGETING::Target*      tpmTarget;      ///< TPM target ptr
-        TPM_role                role;           ///< Pri vs Backup
-        uint8_t                 initAttempted:1;///< Has TPM init been run
-        uint8_t                 available:1;    ///< Is TPM physically in system
-        uint8_t                 failed:1;       ///< Is TPM currently failed
-        struct _TpmLogMgr*      logMgr;         ///< Event log manager for TPM
-        mutex_t                 tpmMutex;       ///< TPM Mutex
-
-        TpmTarget();
+        ALL_FUNCTIONAL,     ///< Return only functional (and present) TPMs
+        ALL_IN_BLUEPRINT,   ///< Return any TPM in the blueprint
     };
 
     /// TPM PCR designations
@@ -128,39 +119,58 @@ namespace TRUSTEDBOOT
     errlHndl_t pcrExtendSeparator(bool i_sendAsync = true);
 
     /**
-     * @brief Return a set of information related to every unique
-     *        functional TPM in the system
+     *  @brief Returns list of TPMs in the system meeting the specified critera
      *
-     * @param[out] o_info - list of TPM Information
+     *  @param[out] o_tpmList Vector of TPM targeting target handles meeting the
+     *      criteria specified by the i_filter parameter (functional targets or
+     *      blueprint targets).  By default, returns functional targets.
      *
+     *  @param[in] i_filter Filter specifying scope of TPMs to return.
+     *
+     *  @warning Silently clears caller supplied vector before populating it
      */
-    void getTPMs( std::list<TpmTarget>& o_info );
+    void getTPMs(
+        TARGETING::TargetHandleList& o_tpmList,
+        TPM_FILTER i_filter = TPM_FILTER::ALL_FUNCTIONAL);
 
     /**
-     * @brief Retrieve TPM log device tree information
-     * @param[in] i_target TPM target information
-     * @param[in/out] io_logAddr TPM Log Address
-     * @param[out] o_allocationSize Total memory allocated for log
-     * @param[out] o_xscomAddr Chip Xscom Address
-     * @param[out] o_i2cMasterOffset I2c Master Offset
-     * @return errlHndl_t NULL if successful, otherwise a pointer to the
+     *  @brief Retrieve TPM log device tree information
+     *
+     *  @param[in] i_pTpm TPM targeting target handle.  Function will assert if
+     *      value is nullptr or is not of TPM type.
+     *
+     *  @param[in/out] io_logAddr TPM Log Address
+     *
+     *  @param[out] o_allocationSize Total memory allocated for log
+     *
+     *  @param[out] o_xscomAddr Chip Xscom Address
+     *
+     *  @param[out] o_i2cMasterOffset I2c Master Offset
+     *
+     *  @return errlHndl_t NULL if successful, otherwise a pointer to the
      *      error log.
      */
-    errlHndl_t getTpmLogDevtreeInfo(TpmTarget & i_target,
-                                    uint64_t & io_logAddr,
-                                    size_t & o_allocationSize,
-                                    uint64_t & o_xscomAddr,
-                                    uint32_t & o_i2cMasterOffset);
+    errlHndl_t getTpmLogDevtreeInfo(
+        const TpmTarget* i_pTpm,
+              uint64_t&  io_logAddr,
+              size_t&    o_allocationSize,
+              uint64_t&  o_xscomAddr,
+              uint32_t&  o_i2cMasterOffset);
 
     /**
-     * @brief Store devtree node information for the TPM
-     * @param[in] i_target TPM target information
-     * @param[in] i_xscomAddr Chip Xscom Address
-     * @param[in] i_i2cMasterOffset i2c Master Offset
+     *  @brief Store devtree node information for the TPM
+     *
+     *  @param[in] i_pTpm TPM targeting target handle.  Function will assert if
+     *      value is nullptr or is not of TPM type.
+     *
+     *  @param[in] i_xscomAddr Chip Xscom Address
+     *
+     *  @param[in] i_i2cMasterOffset i2c Master Offset
      */
-    void setTpmDevtreeInfo(TpmTarget & i_target,
-                           uint64_t i_xscomAddr,
-                           uint32_t i_i2cMasterOffset);
+    void setTpmDevtreeInfo(
+        const TpmTarget* i_pTpm,
+              uint64_t   i_xscomAddr,
+              uint32_t   i_i2cMasterOffset);
 
     /**
      * @brief Is trustedboot enabled and functional
@@ -193,6 +203,31 @@ namespace TRUSTEDBOOT
      *  @retval !NULL Failed to extend Hostboot base image to TPM
      *                                     */
     errlHndl_t extendBaseImage();
+
+    /**
+     *  @brief Return the primary TPM, if any
+     *
+     *  @param[out] o_pPrimaryTpm TPM targeting target handle of the primary
+     *      TPM, or nullptr if none.
+     */
+    void getPrimaryTpm(TARGETING::Target*& o_pPrimaryTpm);
+
+    /**
+     *  @brief Return the backup TPM, if any
+     *
+     *  @param[out] o_pBackupTpm TPM targeting target handle of the backup
+     *      TPM, or nullptr if none.
+     */
+    void getBackupTpm(TARGETING::Target*& o_pBackupTpm);
+
+    /**
+     *  @brief Returns whether system requires a functional TPM to boot or not
+     *
+     *  @return bool Whether system requires a functional TPM to boot or not.
+     *  @retval true Functional TPM is required to boot
+     *  @retval false Functional TPM is not required to boot
+     */
+    bool isTpmRequired();
 
 } // end TRUSTEDBOOT namespace
 

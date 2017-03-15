@@ -58,18 +58,16 @@ namespace TRUSTEDBOOT
 const size_t DEFAULT_BIN_TRACE_SIZE = 128;
 
 /// Common static values
-enum
+enum TRUSTED_BOOT_LIMITS
 {
-    MAX_SYSTEM_TPMS = 2,
-    TPM_MASTER_INDEX = 0,     ///< Index into tpm array for master chip
-    TPM_BACKUP_INDEX = 1,     ///< Index for backup TPM
+    MAX_TPMS_PER_NODE = 2,
 };
 
-/// Class object to store system TPM information
-class SystemTpms
+/// Class object to store trusted boot system data
+class SystemData
 {
 public:
-    SystemTpms():
+    SystemData():
         msgQ(msg_q_create()),
         failedTpmsPosted(false)
     { }
@@ -78,15 +76,16 @@ public:
 
     msg_q_t   msgQ;        ///< TrustedBootRp message queue
     bool failedTpmsPosted; ///< Have we already posted
-    TpmTarget tpm[MAX_SYSTEM_TPMS];
 };
 
 
 /**
- * @brief Initialize the targeted TPM
- * @param[in/out] io_target Current TPM target structure
-*/
-void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target);
+ *  @brief Initialize the targeted TPM
+ *
+ *  @param[in] i_pTpm TPM targeting target handle indicating TPM to initialize.
+ *      Function will assert if value is nullptr or is not of TPM type
+ */
+void tpmInitialize(TRUSTEDBOOT::TpmTarget* i_pTpm);
 
 /**
  * @brief Verify a functional TPM still exists in the system
@@ -99,32 +98,38 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target);
 void tpmVerifyFunctionalTpmExists();
 
 /**
- * @brief Replay the entries that exist in the log into the TPM as needed
- * @param[in/out] io_target Current TPM target structure
+ *  @brief Replay the entries that exist in the log into the TPM as needed
+ *
+ *  @param[in] i_pTpm TPM targeting target handle indicating TPM to replay log.
+ *      Function will assert if value is nullptr or is not of TPM type
  */
-void tpmReplayLog(TRUSTEDBOOT::TpmTarget & io_target);
+void tpmReplayLog(TRUSTEDBOOT::TpmTarget* i_pTpm);
 
 /**
- * @brief Send config entries to tpm
+ *  @brief Send config entries to TPM
  *
- * @param[in/out] io_target Current TPM target structure
+ *  @param[in] i_pTpm TPM targeting target handle indicating TPM to send config
+ *      entries to. Function will assert if value is nullptr or is not of TPM
+ *      type.
  *
- * @return errlHndl_t NULL if successful, otherwise a pointer to the
- *       error log.
+ *  @return errlHndl_t nullptr if successful, otherwise pointer to error log
  */
-errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target);
+errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* i_pTpm);
 
 
 /**
- * @brief Extend a measurement into a TPM and log
- * @param[in/out] io_target Current TPM target structure
- * @param[in] i_pcr PCR to write to
- * @param[in] i_algId Algorithm to extend
- * @param[in] i_digest Digest value to write to PCR
- * @param[in] i_digestSize Byte size of i_digest data
- * @param[in] i_logMsg Null terminated log message
+ *  @brief Extend a measurement into a TPM and log
+ *
+ *  @param[in] i_pTpm TPM targeting target handle referring to TPM to log a
+ *      measurement to.  Function will assert if value is nullptr or is not of
+ *      TPM type.
+ *  @param[in] i_pcr PCR to write to
+ *  @param[in] i_algId Algorithm to extend
+ *  @param[in] i_digest Digest value to write to PCR
+ *  @param[in] i_digestSize Byte size of i_digest data
+ *  @param[in] i_logMsg Null terminated log message
  */
-void pcrExtendSingleTpm(TpmTarget & io_target,
+void pcrExtendSingleTpm(TpmTarget* i_pTpm,
                         TPM_Pcr i_pcr,
                         TPM_Alg_Id i_algId,
                         const uint8_t* i_digest,
@@ -132,18 +137,13 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
                         const char* i_logMsg);
 
 /**
- * @brief Extend a separator into a TPM and log
- * @param[in/out] io_target Current TPM target structure
+ *  @brief Extend a separator into a TPM and log
+ *
+ *  @param[in] i_pTpm TPM targeting target handle referring to TPM to log a
+ *      extend a separator to.  Function will assert if value is nullptr or is
+ *      not of TPM type.
  */
-void pcrExtendSeparator(TpmTarget & io_target);
-
-/**
- * @brief Is the TPM_REQUIRED flag set such that the
- *         system should not boot without a functional TPM
- * @retval true TPM is required to boot
- * @retval false TPM is not required, failures should be logged
- */
-bool isTpmRequired();
+void pcrExtendSeparator(TpmTarget* i_pTpm);
 
 /** Thread start routine for the TPM Daemon
  * @param[in] void*, unused
@@ -152,13 +152,55 @@ void* tpmDaemon(void* unused);
 
 #ifdef CONFIG_DRTM
 /**
- * @brief Initiate a DRTM PCR reset
- * @param[in/out] io_target Current TPM target structure
- * @return errlHndl_t NULL if successful, otherwise a pointer to the
+ *  @brief Initiate a DRTM PCR reset on the given TPM
+ *
+ *  @param[in] i_pTpm TPM targeting target handle referring to TPM to DRTM
+ *      reset. Function will assert if value is nullptr or is
+ *      not of TPM type.
+ *
+ *  @return errlHndl_t nullptr if successful, otherwise a pointer to the
  *       error log.
  */
-errlHndl_t tpmDrtmReset(TpmTarget & io_target);
+errlHndl_t tpmDrtmReset(TpmTarget* i_pTpm);
 #endif
+
+/**
+ *  @brief Returns a pointer to the TPM's log manger
+ *
+ *  @param[in] i_pTpm TPM targeting target handle.  Function asserts if value is
+ *      nullptr or does not refer to a TPM targeting target.
+ *
+ *  @return _TpmLogMgr* Pointer to TPM's log manager, or nullptr if log manager
+ *      is not configured.
+ */
+_TpmLogMgr* getTpmLogMgr(
+    const TpmTarget* i_pTpm);
+
+/**
+ *  @brief Sets a TPM's log manger
+ *
+ *  @param[in] i_pTpm TPM targeting target handle.  Function asserts if value is
+ *      nullptr or does not refer to a TPM targeting target.
+ *
+ *  @param[in] i_pTpmLogMg Pointer to TPM log manager, or nullptr to remove log
+ *      manager.
+ */
+void setTpmLogMgr(
+          TpmTarget*  i_pTpm,
+    const _TpmLogMgr* i_pTpmLogMgr);
+
+/**
+ *  @brief Returns TPM with matching role
+ *
+ *  @param[in] i_tpmRole Role of the TPM to search for
+ *
+ *  @param[out] o_pTpm TPM targeting target handle of the TPM with the matching
+ *      role, or nullptr if none found
+ */
+void getTpmWithRoleOf(
+    TARGETING::TPM_ROLE i_tpmRole,
+    TARGETING::Target*& o_pTpm);
+
 
 } // end TRUSTEDBOOT namespace
 #endif

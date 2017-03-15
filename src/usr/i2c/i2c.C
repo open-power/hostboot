@@ -3813,8 +3813,8 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
 #ifdef CONFIG_TPMDD
     TPMDD::tpm_info_t tpmInfo;
     errlHndl_t l_err = NULL;
-    std::list<TRUSTEDBOOT::TpmTarget> l_tpmTarget;
-    TRUSTEDBOOT::getTPMs(l_tpmTarget);
+    TARGETING::TargetHandleList tpmList;
+    TRUSTEDBOOT::getTPMs(tpmList);
 #endif
 
     for( std::list<I2C::MasterInfo_t>::iterator i2cm = l_i2cInfo.begin();
@@ -3872,32 +3872,28 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
         } //end of eeprom iter
 
 #ifdef CONFIG_TPMDD
-        std::list<TRUSTEDBOOT::TpmTarget>::iterator l_tpm = l_tpmTarget.begin();
-        while( l_tpm != l_tpmTarget.end() )
+        for(auto pTpm : tpmList)
         {
             DeviceInfo_t l_currentDI;
             TPMDD::tpm_locality_t locality = TPMDD::TPM_LOCALITY_0;
 
             // Lookup i2c info for the TPM
-            l_err = TPMDD::tpmReadAttributes(l_tpm->tpmTarget,
+            l_err = TPMDD::tpmReadAttributes(pTpm,
                                              tpmInfo, locality);
             if( NULL != l_err )
             {
                 // Unable to get info, so we skip
                 delete l_err;
-                l_tpm = l_tpmTarget.erase(l_tpm);
                 continue;
             }
             // ignore the devices that aren't on the current target
             if( tpmInfo.i2cTarget != i_i2cMaster )
             {
-                l_tpm = l_tpmTarget.erase(l_tpm);
                 continue;
             }
             // skip the devices that are on a different engine
             else if( tpmInfo.engine != i2cm->engine )
             {
-                ++l_tpm;
                 continue;
             }
 
@@ -3912,8 +3908,6 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
             l_currentDI.devicePurpose = TARGETING::HDAT_I2C_DEVICE_PURPOSE_TPM;
 
             o_deviceInfo.push_back(l_currentDI);
-
-            l_tpm = l_tpmTarget.erase(l_tpm);
 
         } //end of tpm iter
 #endif

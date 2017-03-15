@@ -55,10 +55,9 @@
 // ----------------------------------------------
 // Trace definitions
 // ----------------------------------------------
-#ifdef CONFIG_TPMDD
+
 trace_desc_t* g_trac_trustedboot = nullptr;
 TRAC_INIT( & g_trac_trustedboot, "TRBOOT", KILOBYTE );
-#endif
 
 namespace TRUSTEDBOOT
 {
@@ -67,19 +66,54 @@ namespace TRUSTEDBOOT
 // Const string to append to PCR extension messages
 const char* const FW_KEY_HASH_EXT = " FW KEY HASH";
 
-/// Global object to store TPM status
-SystemTpms systemTpms;
-
-TpmTarget::TpmTarget()
-{
-    memset(this, 0, sizeof(TpmTarget));
-    available = true; // Default to available until we know better
-    mutex_init(&tpmMutex);
-
-}
+/// Global object to store system trusted boot data
+SystemData systemData;
 
 #endif
 
+void getTPMs(
+          TARGETING::TargetHandleList& o_tpmList,
+    const TPM_FILTER                   i_filter)
+{
+    TRACUCOMP(g_trac_trustedboot,ENTER_MRK "getTPMs(): i_filter=%d",
+        i_filter);
+
+    o_tpmList.clear();
+
+    TARGETING::getAllChips(
+        o_tpmList,
+        TARGETING::TYPE_TPM,
+        (i_filter == TPM_FILTER::ALL_IN_BLUEPRINT) ? false : true);
+
+    TRACUCOMP(g_trac_trustedboot,EXIT_MRK "getTPMs(): Found %d TPMs",
+        o_tpmList.size());
+}
+
+_TpmLogMgr* getTpmLogMgr(
+    const TpmTarget* const i_pTpm)
+{
+    assert(i_pTpm != nullptr,"getTpmLogMgr: BUG! i_pTpm was nullptr");
+    assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "getTpmLogMgr: BUG! Expected target to be of TPM type, but "
+           "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
+    return reinterpret_cast<_TpmLogMgr*>(
+        i_pTpm->getAttr<TARGETING::ATTR_HB_TPM_LOG_MGR_PTR>());
+}
+
+void setTpmLogMgr(
+          TpmTarget*  const i_pTpm,
+    const _TpmLogMgr* const i_pTpmLogMgr)
+{
+    assert(i_pTpm != nullptr,"setTpmLogMgr: BUG! i_pTpm was nullptr");
+    assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "setTpmLogMgr: BUG! Expected target to be of TPM type, but "
+           "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
+    auto pLogMgrPtr =
+        reinterpret_cast<TARGETING::ATTR_HB_TPM_LOG_MGR_PTR_type>(
+            i_pTpmLogMgr);
+    i_pTpm->setAttr<
+        TARGETING::ATTR_HB_TPM_LOG_MGR_PTR>(pLogMgrPtr);
+}
 
 errlHndl_t pcrExtendSeparator(bool i_sendAsync)
 {
@@ -97,7 +131,7 @@ errlHndl_t pcrExtendSeparator(bool i_sendAsync)
     assert(msg !=NULL, "BUG! Message is NULL");
     if (!i_sendAsync)
     {
-        int rc = msg_sendrecv(systemTpms.msgQ, msg->iv_msg);
+        int rc = msg_sendrecv(systemData.msgQ, msg->iv_msg);
         if (0 == rc)
         {
             err = msg->iv_errl;
@@ -127,7 +161,7 @@ errlHndl_t pcrExtendSeparator(bool i_sendAsync)
     }
     else
     {
-        int rc = msg_send(systemTpms.msgQ, msg->iv_msg);
+        int rc = msg_send(systemData.msgQ, msg->iv_msg);
         if (rc)
         {
             /*@
@@ -204,7 +238,7 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
 
     if (!i_sendAsync)
     {
-        int rc = msg_sendrecv(systemTpms.msgQ, msg->iv_msg);
+        int rc = msg_sendrecv(systemData.msgQ, msg->iv_msg);
         if (0 == rc)
         {
             err = msg->iv_errl;
@@ -234,7 +268,7 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
     }
     else
     {
-        int rc = msg_send(systemTpms.msgQ, msg->iv_msg);
+        int rc = msg_send(systemData.msgQ, msg->iv_msg);
         if (rc)
         {
             /*@

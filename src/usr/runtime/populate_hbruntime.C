@@ -57,6 +57,7 @@
 #include <config.h>
 #include "../hdat/hdattpmdata.H"
 #include "../secureboot/trusted/tpmLogMgr.H"
+#include "../secureboot/trusted/trustedboot.H"
 
 
 namespace RUNTIME
@@ -927,16 +928,14 @@ errlHndl_t populate_TpmInfoByNode()
     auto const l_hdatSbTpmInfo = reinterpret_cast<HDAT::hdatSbTpmInfo_t*>
                                                     (l_baseAddr + l_currOffset);
 
-    std::list<TRUSTEDBOOT::TpmTarget> l_tpmList;
-    #ifdef CONFIG_TPMDD
-         TRUSTEDBOOT::getTPMs(l_tpmList);
-    #endif
+    TARGETING::TargetHandleList tpmList;
+    TRUSTEDBOOT::getTPMs(tpmList);
 
     TARGETING::TargetHandleList l_procList;
 
     getAllChips(l_procList,TARGETING::TYPE_PROC,false);
 
-    auto const l_numTpms = l_tpmList.size();
+    auto const l_numTpms = tpmList.size();
 
     // fill in the values for the Secure Boot TPM Info Array Header
     l_hdatSbTpmInfo->hdatSbTpmArrayOffset = sizeof(*l_hdatSbTpmInfo);
@@ -947,11 +946,11 @@ errlHndl_t populate_TpmInfoByNode()
     l_currOffset += sizeof(*l_hdatSbTpmInfo);
 
     // fill in the values for each Secure Boot TPM Instance Info in the array
-    for (auto itpm : l_tpmList)
+    for (auto pTpm : tpmList)
     {
         auto l_tpmInstInfo = reinterpret_cast<HDAT::hdatSbTpmInstInfo_t*>
                                                     (l_baseAddr + l_currOffset);
-        auto l_tpmInfo = itpm.tpmTarget->getAttr<TARGETING::ATTR_TPM_INFO>();
+        auto l_tpmInfo = pTpm->getAttr<TARGETING::ATTR_TPM_INFO>();
 
         TARGETING::PredicateAttrVal<TARGETING::ATTR_PHYS_PATH>
                                       hasSameI2cMaster(l_tpmInfo.i2cMasterPath);
@@ -975,20 +974,14 @@ errlHndl_t populate_TpmInfoByNode()
         l_tpmInstInfo->hdatLocality3Addr = l_tpmInfo.devAddrLocality3;
         l_tpmInstInfo->hdatLocality4Addr = l_tpmInfo.devAddrLocality4;
 
-        uint8_t functional = !itpm.failed;
-        // TODO RTC 168781 Replace above with something like below
-        // itpm.tpmTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional;
+        auto hwasState = pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
 
-        uint8_t present = itpm.available;
-        // TODO RTC 168781 Replace above with something like below
-        // itpm.tpmTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().present;
-
-        if (functional && present)
+        if (hwasState.functional && hwasState.present)
         {
             // present and functional
             l_tpmInstInfo->hdatFunctionalStatus = HDAT::TpmPresentAndFunctional;
         }
-        else if (present)
+        else if (hwasState.present)
         {
             // present and not functional
             l_tpmInstInfo->hdatFunctionalStatus = HDAT::TpmPresentNonFunctional;
@@ -1005,20 +998,37 @@ errlHndl_t populate_TpmInfoByNode()
         // use the current offset for the beginning of the SRTM event log
         l_tpmInstInfo->hdatTpmSrtmEventLogOffset = sizeof(*l_tpmInstInfo);
 
-        #ifdef CONFIG_TPMDD
         // copy the contents of the SRTM event log into HDAT picking the
         // min of log size and log max (to make sure log size never goes
-        // over the max
-        memcpy(reinterpret_cast<void*>(l_baseAddr + l_currOffset),
-            TpmLogMgr_getLogStartPtr(itpm.logMgr),
-            itpm.logMgr->logSize < TPM_SRTM_EVENT_LOG_MAX ?
-            itpm.logMgr->logSize : TPM_SRTM_EVENT_LOG_MAX);
+        // over the max)
+        auto * const pLogMgr = TRUSTEDBOOT::getTpmLogMgr(pTpm);
+        size_t logSize = 0;
+        if(pLogMgr != nullptr)
+        {
+            #ifdef CONFIG_TPMDD
+            auto const * const pLogStart =
+                TRUSTEDBOOT::TpmLogMgr_getLogStartPtr(pLogMgr);
+            assert(pLogStart != nullptr,"populate_TpmInfoByNode: BUG! An "
+                "allocated log manager's log start pointer should never be "
+                "nullptr");
+
+            logSize = (pLogMgr->logSize < TPM_SRTM_EVENT_LOG_MAX) ?
+                pLogMgr->logSize : TPM_SRTM_EVENT_LOG_MAX;
+
+            memcpy(reinterpret_cast<void*>(l_baseAddr + l_currOffset),
+                pLogStart,
+                logSize);
+            #endif
+        }
+        else
+        {
+            TRACFCOMP( g_trac_runtime, INFO_MRK "populate_TpmInfoByNode: "
+                "No static log available to propagate for TPM with HUID of "
+                "0x%08X",TARGETING::get_huid(pTpm));
+        }
 
         // set the size value for the data that was copied
-        l_tpmInstInfo->hdatTpmSrtmEventLogEntrySize = itpm.logMgr->logSize;
-        #else
-        l_tpmInstInfo->hdatTpmSrtmEventLogEntrySize = 0;
-        #endif
+        l_tpmInstInfo->hdatTpmSrtmEventLogEntrySize = logSize;
 
         // advance the current offset to account for the SRTM event log
         l_currOffset += TPM_SRTM_EVENT_LOG_MAX;
