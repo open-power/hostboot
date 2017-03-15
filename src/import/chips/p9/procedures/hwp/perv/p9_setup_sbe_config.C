@@ -41,6 +41,7 @@
 
 #include <p9_perv_scom_addresses.H>
 #include <p9_perv_scom_addresses_fld.H>
+#include <p9_const_common.H>
 
 enum P9_SETUP_SBE_CONFIG_Private_Constants
 {
@@ -161,28 +162,28 @@ fapi2::ReturnCode p9_setup_sbe_config(const
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OPTICS_CONFIG_MODE, targ, l_optics_cfg_mode),
                      "Error from FAPI_ATTR_GET(ATTR_OPTICS_CONFIG_MODE)");
 
-            if (l_chipletID == 9)
+            if (l_chipletID == OB0_CHIPLET_ID)
             {
                 l_read_scratch_reg.writeBit<ATTR_OPTICS_CONFIG_MODE_OBUS0_BIT>(((l_optics_cfg_mode ==
                         fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP)
                         || (l_optics_cfg_mode == fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_CAPI)) ? (1) : (0));
             }
 
-            if (l_chipletID == 10)
+            if (l_chipletID == OB1_CHIPLET_ID)
             {
                 l_read_scratch_reg.writeBit<ATTR_OPTICS_CONFIG_MODE_OBUS1_BIT>(((l_optics_cfg_mode ==
                         fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP)
                         || (l_optics_cfg_mode == fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_CAPI)) ? (1) : (0));
             }
 
-            if (l_chipletID == 11)
+            if (l_chipletID == OB2_CHIPLET_ID)
             {
                 l_read_scratch_reg.writeBit<ATTR_OPTICS_CONFIG_MODE_OBUS2_BIT>(((l_optics_cfg_mode ==
                         fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP)
                         || (l_optics_cfg_mode == fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_CAPI)) ? (1) : (0));
             }
 
-            if (l_chipletID == 12)
+            if (l_chipletID == OB3_CHIPLET_ID)
             {
                 l_read_scratch_reg.writeBit<ATTR_OPTICS_CONFIG_MODE_OBUS3_BIT>(((l_optics_cfg_mode ==
                         fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP)
