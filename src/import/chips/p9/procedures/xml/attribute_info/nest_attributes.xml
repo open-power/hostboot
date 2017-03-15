@@ -46,22 +46,36 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_FREQ_O_MHZ</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    The frequency of a processor's Obus mesh clocks, in MHz.
+    Provided by the MRW.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+  <writeable/>
+  <array>4</array>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_FREQ_A_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
-    The frequency of a processor's A link clocks, in MHz.
+    The frequency of a processor's Abus, in MHz.
     This is the same for all chips in the system.
     Provided by the MRW.
   </description>
   <valueType>uint32</valueType>
   <platInit/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_FREQ_X_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
-    The frequency of a processor's X link clocks, in MHz.
+    The frequency of a processor's Xbus mesh clocks, in MHz.
     This is the same for all chips in the system.
     Provided by the MRW.
   </description>

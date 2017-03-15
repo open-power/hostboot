@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,4 +63,17 @@ const uint32_t MEM_PLL_FREQ_LIST[MEM_PLL_FREQ_BUCKETS] =
     2400,
     2666,
     2666
+};
+
+// constant definining number of OBUS PLL frequency options ('buckets')
+// to be built into unsigned HW image
+const uint8_t OBUS_PLL_FREQ_BUCKETS = 3;
+
+// OBUS PLL frequency in MHz
+// index is bucket number
+const uint32_t OBUS_PLL_FREQ_LIST[OBUS_PLL_FREQ_BUCKETS] =
+{
+    1611,
+    1250,
+    1200
 };

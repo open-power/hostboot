@@ -58,6 +58,14 @@ enum P9_SETUP_SBE_CONFIG_Private_Constants
     ATTR_OPTICS_CONFIG_MODE_OBUS1_BIT  = 17,
     ATTR_OPTICS_CONFIG_MODE_OBUS2_BIT  = 18,
     ATTR_OPTICS_CONFIG_MODE_OBUS3_BIT  = 19,
+    ATTR_OB0_PLL_BUCKET_STARTBIT       = 24,
+    ATTR_OB0_PLL_BUCKET_LENGTH         = 2,
+    ATTR_OB1_PLL_BUCKET_STARTBIT       = 26,
+    ATTR_OB1_PLL_BUCKET_LENGTH         = 2,
+    ATTR_OB2_PLL_BUCKET_STARTBIT       = 28,
+    ATTR_OB2_PLL_BUCKET_LENGTH         = 2,
+    ATTR_OB3_PLL_BUCKET_STARTBIT       = 30,
+    ATTR_OB3_PLL_BUCKET_LENGTH         = 2,
 
     // Scratch_reg_3
     ATTR_BOOT_FLAGS_STARTBIT           = 0,
@@ -66,14 +74,14 @@ enum P9_SETUP_SBE_CONFIG_Private_Constants
     // Scratch_reg_4
     ATTR_BOOT_FREQ_MULT_STARTBIT       = 0,
     ATTR_BOOT_FREQ_MULT_LENGTH         = 16,
-    ATTR_NEST_PLL_BUCKET_STARTBIT      = 24,
-    ATTR_NEST_PLL_BUCKET_LENGTH        = 8,
     ATTR_CP_FILTER_BYPASS_BIT          = 16,
     ATTR_SS_FILTER_BYPASS_BIT          = 17,
     ATTR_IO_FILTER_BYPASS_BIT          = 18,
     ATTR_DPLL_BYPASS_BIT               = 19,
     ATTR_NEST_MEM_X_O_PCI_BYPASS_BIT   = 20,
     ATTR_OBUS_RATIO_VALUE_BIT          = 21,
+    ATTR_NEST_PLL_BUCKET_STARTBIT      = 29,
+    ATTR_NEST_PLL_BUCKET_LENGTH        = 3,
 
     // Scratch_reg_5
     ATTR_PLL_MUX_STARTBIT              = 12,
@@ -147,6 +155,10 @@ fapi2::ReturnCode p9_setup_sbe_config(const
     }
     //set_scratch2_reg
     {
+        uint8_t l_ob0_pll_bucket;
+        uint8_t l_ob1_pll_bucket;
+        uint8_t l_ob2_pll_bucket;
+        uint8_t l_ob3_pll_bucket;
 
         FAPI_DBG("Reading Scratch_reg2");
         //Getting SCRATCH_REGISTER_2 register value
@@ -194,6 +206,17 @@ fapi2::ReturnCode p9_setup_sbe_config(const
                         || (l_optics_cfg_mode == fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_CAPI)) ? (1) : (0));
             }
         }
+
+        FAPI_DBG("Reading OB PLL buckets");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OB0_PLL_BUCKET, i_target_chip, l_ob0_pll_bucket));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OB1_PLL_BUCKET, i_target_chip, l_ob1_pll_bucket));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OB2_PLL_BUCKET, i_target_chip, l_ob2_pll_bucket));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OB3_PLL_BUCKET, i_target_chip, l_ob3_pll_bucket));
+
+        l_read_scratch_reg.insertFromRight<ATTR_OB0_PLL_BUCKET_STARTBIT, ATTR_OB0_PLL_BUCKET_LENGTH>(l_ob0_pll_bucket);
+        l_read_scratch_reg.insertFromRight<ATTR_OB1_PLL_BUCKET_STARTBIT, ATTR_OB1_PLL_BUCKET_LENGTH>(l_ob1_pll_bucket);
+        l_read_scratch_reg.insertFromRight<ATTR_OB2_PLL_BUCKET_STARTBIT, ATTR_OB2_PLL_BUCKET_LENGTH>(l_ob2_pll_bucket);
+        l_read_scratch_reg.insertFromRight<ATTR_OB3_PLL_BUCKET_STARTBIT, ATTR_OB3_PLL_BUCKET_LENGTH>(l_ob3_pll_bucket);
 
         FAPI_DBG("Setting up value of Scratch_reg2");
         //Setting SCRATCH_REGISTER_2 register value
@@ -254,7 +277,7 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NEST_PLL_BUCKET, FAPI_SYSTEM, l_read_1));
 
         l_read_scratch_reg.insertFromRight< ATTR_BOOT_FREQ_MULT_STARTBIT, ATTR_BOOT_FREQ_MULT_LENGTH >(l_read_4);
-        l_read_scratch_reg.insertFromRight< ATTR_NEST_PLL_BUCKET_STARTBIT, ATTR_NEST_PLL_BUCKET_LENGTH >(l_read_1);
+        l_read_scratch_reg.insertFromRight< ATTR_NEST_PLL_BUCKET_STARTBIT, ATTR_NEST_PLL_BUCKET_LENGTH >(l_read_1 & 0x7);
 
         l_read_scratch_reg.writeBit<ATTR_CP_FILTER_BYPASS_BIT>(l_cp_filter_bypass & 0x1);
         l_read_scratch_reg.writeBit<ATTR_SS_FILTER_BYPASS_BIT>(l_ss_filter_bypass & 0x1);

@@ -2701,10 +2701,100 @@
     </uint32_t></simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/><!-- Only because SBE needs it -->
     <hwpfToHbAttrMap>
         <id>ATTR_FREQ_A_MHZ</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_O_MHZ</id>
+    <description>
+    The frequency of a processor's Obus mesh clocks, in MHz.
+    Provided by the MRW.
+    </description>
+    <simpleType>
+       <uint32_t>
+       <default>1611</default>
+       </uint32_t>
+      <array>4</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/><!-- Only because SBE needs it -->
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_O_MHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>OB0_PLL_BUCKET</id>
+  <description>
+      Select OBUS0 pll setting from one of the supported frequencies
+  </description>
+  <simpleType>
+      <uint8_t><default>1</default></uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <writeable/><!-- Only because SBE needs it -->
+  <hwpfToHbAttrMap>
+    <id>ATTR_OB0_PLL_BUCKET</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>OB1_PLL_BUCKET</id>
+  <description>
+      Select OBUS1 pll setting from one of the supported frequencies
+  </description>
+  <simpleType>
+      <uint8_t><default>1</default></uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <writeable/><!-- Only because SBE needs it -->
+  <hwpfToHbAttrMap>
+    <id>ATTR_OB1_PLL_BUCKET</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>OB2_PLL_BUCKET</id>
+  <description>
+      Select OBUS2 pll setting from one of the supported frequencies
+  </description>
+  <simpleType>
+      <uint8_t><default>1</default></uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <writeable/><!-- Only because SBE needs it -->
+  <hwpfToHbAttrMap>
+    <id>ATTR_OB2_PLL_BUCKET</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>OB3_PLL_BUCKET</id>
+  <description>
+      Select OBUS3 pll setting from one of the supported frequencies
+  </description>
+  <simpleType>
+      <uint8_t><default>1</default></uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <writeable/><!-- Only because SBE needs it -->
+  <hwpfToHbAttrMap>
+    <id>ATTR_OB3_PLL_BUCKET</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>

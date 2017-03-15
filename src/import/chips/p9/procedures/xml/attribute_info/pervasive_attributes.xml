@@ -141,6 +141,46 @@
 </attribute>
 
 <attribute>
+  <id>ATTR_OB0_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Select OBUS0 pll setting from one of the supported frequencies</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_OB1_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Select OBUS1 pll setting from one of the supported frequencies</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_OB2_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Select OBUS2 pll setting from one of the supported frequencies</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_OB3_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Select OBUS3 pll setting from one of the supported frequencies</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
   <id>ATTR_BOOT_FREQ_MULT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>EQ boot frequency multiplier
