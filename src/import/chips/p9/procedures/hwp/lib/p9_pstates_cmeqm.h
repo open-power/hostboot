@@ -209,16 +209,16 @@ typedef struct
     uint8_t  droop_large_override_enable;
     uint8_t  droop_extreme_override_enable;
     uint8_t  overvolt_override_enable;
-    uint16_t fmin_override_khz_enable;
-    uint16_t fmax_override_khz_enable;
+    uint8_t fmin_override_khz_enable;
+    uint8_t fmax_override_khz_enable;
 
     // The respecitve *_enable above indicate which index values are valid
     uint8_t  droop_small_override[VPD_PV_POINTS];
     uint8_t  droop_large_override[VPD_PV_POINTS];
     uint8_t  droop_extreme_override[VPD_PV_POINTS];
     uint8_t  overvolt_override[VPD_PV_POINTS];
-    uint16_t fmin_override_khz[VPD_PV_POINTS];
-    uint16_t fmax_override_khz[VPD_PV_POINTS];
+    uint8_t fmin_override_khz[VPD_PV_POINTS];
+    uint8_t fmax_override_khz[VPD_PV_POINTS];
 
     /// Pad structure to 8-byte alignment
     /// @todo pad once fully structure is complete.
@@ -326,6 +326,9 @@ typedef struct
 
     /// VDM Data
     VDMParmBlock vdm;
+
+    /// DPLL pstate 0 value
+    uint32_t dpll_pstate0_value;
 
 } LocalPstateParmBlock;
 
