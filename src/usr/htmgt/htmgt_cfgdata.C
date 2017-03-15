@@ -794,7 +794,11 @@ void getThermalControlMessageData(uint8_t* o_data,
     if ( ! l_sys->tryGetAttr          //if attr does not exists.
            <ATTR_OPEN_POWER_PROC_WEIGHT>(l_proc_weight))
     {
-        l_proc_weight = 10; //Default 1.0 weight.
+        l_proc_weight = OCC_PROC_QUAD_DEFAULT_WEIGHT;
+    }
+    if(l_proc_weight == 0x0)
+    {
+        l_proc_weight = OCC_PROC_QUAD_DEFAULT_WEIGHT;
     }
     o_data[index++] = l_proc_weight;
 
@@ -804,7 +808,11 @@ void getThermalControlMessageData(uint8_t* o_data,
     if ( ! l_sys->tryGetAttr          //if attr does not exists.
            <ATTR_OPEN_POWER_QUAD_WEIGHT>(l_quad_weight))
     {
-        l_quad_weight = 10; //Default 1.0 weight.
+        l_quad_weight = OCC_PROC_QUAD_DEFAULT_WEIGHT;
+    }
+    if(l_quad_weight == 0x0)
+    {
+        l_quad_weight = OCC_PROC_QUAD_DEFAULT_WEIGHT;
     }
     o_data[index++] = l_quad_weight;
 
@@ -819,11 +827,20 @@ void getThermalControlMessageData(uint8_t* o_data,
 
     // Processor
     o_data[index++] = CFGDATA_FRU_TYPE_PROC;
-    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_PROC_DVFS_TEMP_DEG_C>();
-    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_PROC_ERROR_TEMP_DEG_C>();
-    o_data[index++] = 0xFF;     //PM_DVFS  not defined.
-    o_data[index++] = 0xFF;     //PM_ERROR not defined.
-    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_PROC_READ_TIMEOUT_SEC>();
+    uint8_t l_DVFS_temp =l_sys->getAttr<ATTR_OPEN_POWER_PROC_DVFS_TEMP_DEG_C>();
+    uint8_t l_ERR_temp =l_sys->getAttr<ATTR_OPEN_POWER_PROC_ERROR_TEMP_DEG_C>();
+    uint8_t l_timeout = l_sys->getAttr<ATTR_OPEN_POWER_PROC_READ_TIMEOUT_SEC>();
+    if(l_DVFS_temp == 0x0)
+    {
+        l_DVFS_temp = OCC_PROC_DEFAULT_DVFS_TEMP;
+        l_ERR_temp  = OCC_PROC_DEFAULT_ERR_TEMP;
+        l_timeout   = OCC_PROC_DEFAULT_TIMEOUT;
+    }
+    o_data[index++] = l_DVFS_temp;
+    o_data[index++] = l_ERR_temp;
+    o_data[index++] = OCC_NOT_DEFINED;     //PM_DVFS
+    o_data[index++] = OCC_NOT_DEFINED;     //PM_ERROR
+    o_data[index++] = l_timeout;
     l_numSets++;
 
     // If Nimbus, skip non-existent Centaurs
@@ -835,8 +852,8 @@ void getThermalControlMessageData(uint8_t* o_data,
                 l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C>();
         o_data[index++] =
                 l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C>();
-        o_data[index++] = 0xFF;     //PM_DVFS  not defined.
-        o_data[index++] = 0xFF;     //PM_ERROR not defined.
+        o_data[index++] = OCC_NOT_DEFINED;     //PM_DVFS
+        o_data[index++] = OCC_NOT_DEFINED;     //PM_ERROR
         o_data[index++] =
                 l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC>();
         l_numSets++;
@@ -844,12 +861,20 @@ void getThermalControlMessageData(uint8_t* o_data,
 
     // Dimm
     o_data[index++] = CFGDATA_FRU_TYPE_DIMM;
-    o_data[index++] =
-                l_sys->getAttr<ATTR_OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C>();
-    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_ERROR_TEMP_DEG_C>();
-    o_data[index++] = 0xFF;     //PM_DVFS  not defined.
-    o_data[index++] = 0xFF;     //PM_ERROR not defined.
-    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_READ_TIMEOUT_SEC>();
+    l_DVFS_temp =l_sys->getAttr<ATTR_OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C>();
+    l_ERR_temp =l_sys->getAttr<ATTR_OPEN_POWER_DIMM_ERROR_TEMP_DEG_C>();
+    l_timeout = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_READ_TIMEOUT_SEC>();
+    if(l_DVFS_temp == 0x0)
+    {
+        l_DVFS_temp = OCC_DIMM_DEFAULT_DVFS_TEMP;
+        l_ERR_temp  = OCC_DIMM_DEFAULT_ERR_TEMP;
+        l_timeout   = OCC_DIMM_DEFAULT_TIMEOUT;
+    }
+    o_data[index++] = l_DVFS_temp;
+    o_data[index++] = l_ERR_temp;
+    o_data[index++] = OCC_NOT_DEFINED;     //PM_DVFS
+    o_data[index++] = OCC_NOT_DEFINED;     //PM_ERROR
+    o_data[index++] = l_timeout;
     l_numSets++;
 
     o_data[l_numSetsOffset] = l_numSets;
@@ -874,11 +899,14 @@ void getAVSBusConfigMessageData( const TargetHandle_t i_occ,
     // Populate the data
     o_data[index++] = OCC_CFGDATA_AVSBUS_CONFIG;
     o_data[index++] = OCC_CFGDATA_AVSBUS_CONFIG_VERSION;
-    o_data[index++] = l_proc->getAttr<ATTR_VDD_AVSBUS_BUSNUM>();
-    o_data[index++] = l_proc->getAttr<ATTR_VDD_AVSBUS_RAIL>();
-    o_data[index++] = l_proc->getAttr<ATTR_VDN_AVSBUS_BUSNUM>();
-    o_data[index++] = l_proc->getAttr<ATTR_VDN_AVSBUS_RAIL>();
-
+    o_data[index++] = l_proc->getAttr<ATTR_VDD_AVSBUS_BUSNUM>();//Vdd Bus
+    o_data[index++] = l_proc->getAttr<ATTR_VDD_AVSBUS_RAIL>();  //Vdd Rail Sel
+    o_data[index++] = 0xFF;                                     //reserved
+    o_data[index++] = 0xFF;                                     //reserved
+    o_data[index++] = l_proc->getAttr<ATTR_VDN_AVSBUS_BUSNUM>();//Vdn Bus
+    o_data[index++] = l_proc->getAttr<ATTR_VDN_AVSBUS_RAIL>();  //Vdn Rail sel
+    o_data[index++] = 0xFF;                                     //reserved
+    o_data[index++] = 0xFF;                                     //reserved
     o_size = index;
 }
 

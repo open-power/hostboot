@@ -65,6 +65,7 @@ namespace HTMGT
         }
         TMGT_INF("processOccStartStatus(Start Success=%c, failedOcc=0x%08X)",
                  i_startCompleted?'y':'n', l_huid);
+
         if (false == int_flags_set(FLAG_HOLD_OCCS_IN_RESET))
         {
             if (i_startCompleted)
@@ -207,6 +208,9 @@ namespace HTMGT
                 else
                 {
                     // retry worked - commit original error as informational
+                    TMGT_INF("processOccStartStatus: OCC failed to go active "
+                             "with 0x%04X, but recovery was successful",
+                             l_err->reasonCode());
                     l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
                 }

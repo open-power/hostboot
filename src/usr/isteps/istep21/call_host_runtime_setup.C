@@ -32,6 +32,7 @@
 #include <initservice/initserviceif.H>
 #include <initservice/istepdispatcherif.H>
 #include <vfs/vfs.H>
+#include <htmgt/htmgt.H>
 #include <runtime/runtime.H>
 #include <devtree/devtreeif.H>
 #include <runtime/customize_attrs_for_payload.H>
