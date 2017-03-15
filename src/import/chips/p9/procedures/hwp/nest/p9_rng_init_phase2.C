@@ -72,22 +72,34 @@ p9_rng_init_phase2(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     uint64_t  l_base_addr_nm1;
     uint64_t  l_base_addr_m;
     uint64_t  l_base_addr_mmio;
+    uint8_t   l_HW403701;
 
     // 5. RNG is allowed to run for M cycles (M = enough time to complete init; recommend 1 second of time).
     //    NOTE: accomplished by delay in execution time between phase1/phase2 HWPs
-    // 6. Host boot checks RNG fail bits again and if a fail is detected then RNG is declared broken
-
     // get the self test hard fail status in RNG CFG register
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW403701, i_target, l_HW403701),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW403701)");
+
     FAPI_TRY(fapi2::getScom(i_target, PU_NX_RNG_CFG, l_rng_cfg_data),
              "Error from getScom (NX RNG Status and Control Register)");
 
-    // exit if failure is reported in self test hard fail status field
-    l_rng_cfg_data.extractToRight<PU_NX_RNG_CFG_FAIL_REG, PU_NX_RNG_CFG_FAIL_REG_LEN>(l_rng_cfg_self_test_hard_fail_status);
-    FAPI_ASSERT(!l_rng_cfg_self_test_hard_fail_status,
-                fapi2::P9_RNG_INIT_SELF_TEST_FAILED_ERR().
-                set_TARGET(i_target).
-                set_SELF_TEST_HARD_FAIL_STATUS(l_rng_cfg_self_test_hard_fail_status),
-                "Self test hard fail status indicates failure");
+    if (!l_HW403701)
+    {
+        // 6. Host boot checks RNG fail bits again and if a fail is detected then RNG is declared broken
+
+        FAPI_DBG("Checking RNG fail status...");
+        // exit if failure is reported in self test hard fail status field
+        l_rng_cfg_data.extractToRight<PU_NX_RNG_CFG_FAIL_REG, PU_NX_RNG_CFG_FAIL_REG_LEN>(l_rng_cfg_self_test_hard_fail_status);
+        FAPI_ASSERT(!l_rng_cfg_self_test_hard_fail_status,
+                    fapi2::P9_RNG_INIT_SELF_TEST_FAILED_ERR().
+                    set_TARGET(i_target).
+                    set_SELF_TEST_HARD_FAIL_STATUS(l_rng_cfg_self_test_hard_fail_status),
+                    "Self test hard fail status indicates failure");
+    }
+    else
+    {
+        FAPI_DBG("Skipping check of RNG fail status...");
+    }
 
     // 7. Host boot maps RNG BARs (see Section 5.31 RNG BAR on page 185).
     // • NX RNG BAR (not mapped/enabled if RNG is broken)
