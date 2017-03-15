@@ -31,6 +31,14 @@
 
 namespace HTMGT
 {
+    const uint8_t  OCC_PROC_QUAD_DEFAULT_WEIGHT = 10;  //Default 1.0 weight.
+    const uint8_t  OCC_PROC_DEFAULT_DVFS_TEMP = 0x55;//default from DEF file PM
+    const uint8_t  OCC_PROC_DEFAULT_ERR_TEMP  = 0x5F;
+    const uint8_t  OCC_PROC_DEFAULT_TIMEOUT   = 0x05;
+    const uint8_t  OCC_DIMM_DEFAULT_DVFS_TEMP = 0x45;//default from DEF file PM
+    const uint8_t  OCC_DIMM_DEFAULT_ERR_TEMP  = 0x56;
+    const uint8_t  OCC_DIMM_DEFAULT_TIMEOUT   = 0x1E;
+    const uint8_t  OCC_NOT_DEFINED   = 0xFF;
 
     /** OCC configuration data message formats */
     enum occCfgDataFormat

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,7 @@ namespace HTMGT
         uint8_t   errorId;
         uint32_t  errorAddress;
         uint16_t  errorLength;
-        uint16_t  reserved2;
+        uint16_t  reserved[2];
         uint8_t   codeLevel[16];
         uint8_t   sensor[6];
         uint8_t   numBlocks;

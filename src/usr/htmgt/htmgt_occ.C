@@ -41,7 +41,7 @@
 #include <occ/occ.H>
 #include <occ/occ_common.H>
 #include <errl/errludlogregister.H>
-#include <buffer.H>
+#include <fapi2.H>
 
 #include <isteps/pm/pm_common_ext.H>
 
@@ -1016,24 +1016,25 @@ namespace HTMGT
                 {
                     nanosleep(0, NS_BETWEEN_READ);
 
+                    TARGETING::ConstTargetHandle_t procTarget =
+                        TARGETING::getParentChip(occ->getTarget() );
+
                     // Read SRAM response buffer to check for OCC checkpoint
                      errlHndl_t l_err = nullptr;
-                    const uint16_t l_length = 8;
-
-                    fapi2::buffer<uint64_t> l_buffer;
-                    l_err = HBOCC::readSRAM(occ->getTarget(),
+                    const uint16_t l_length = 8;  //Note: number of bytes
+                    uint8_t l_sram_data[l_length] = { 0x0 };
+                    l_err = HBOCC::readSRAM(procTarget,
                                             OCC_RSP_SRAM_ADDR,
-                                            l_buffer.pointer(),
+                                            (uint64_t*)(&(l_sram_data)),
                                             l_length);
 
                     if (nullptr == l_err)
                     {
                         // Pull status from response (byte 2)
-                        uint8_t status = 0;
-                        l_buffer.extractToRight<16, 8>(status);
+                        uint8_t status = l_sram_data[2];
+
                         // Pull checkpoint from response (byte 6-7)
-                        uint16_t checkpoint = 0;
-                        l_buffer.extractToRight<48,16>(checkpoint);
+                        uint16_t checkpoint= l_sram_data[6]<<8 | l_sram_data[7];
 
                         if (checkpoint != lastCheckpoint)
                         {
@@ -1051,14 +1052,12 @@ namespace HTMGT
                             occReady = true;
                             break;
                         }
-                        if( ( ( checkpoint & OCC_INIT_FAILURE ) ==
-                                             OCC_INIT_FAILURE ) ||
-                              ( status != OCC_RC_OCC_INIT_CHECKPOINT ) )
+                        if( ((checkpoint & OCC_INIT_FAILURE ) ==
+                                        OCC_INIT_FAILURE ) ||
+                            ( status == OCC_RC_INIT_FAILURE ) )
                         {
-
-                            TMGT_ERR("_waitForOccCheckpoint: Final checkpoint "
-                                    "not reached byt OCC%d stopped "
-                                    "(0x%02X, 0x%04X)",
+                            TMGT_ERR("_waitForOccCheckpoint: OCC%d failed "
+                                    "during initialization (0x%02X, 0x%04X)",
                                     occ->getInstance(),
                                     status,
                                     checkpoint );
