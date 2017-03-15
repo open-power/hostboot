@@ -2858,7 +2858,6 @@ Firmware notes: none</description>
     <odmChangeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_CAL_STEP_ENABLE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2877,9 +2876,7 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_DRAMINIT_RESET_DISABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -2891,7 +2888,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
 
 <!--
 <attribute>
