@@ -533,7 +533,9 @@ enum RingOffset
     ob0_time      = 2,
     ob0_pll_gptr  = 3,
     ob0_pll_bndy  = 4,
-    ob0_pll_func  = 5,
+    ob0_pll_bndy_bucket_1  = 4,
+    ob0_pll_bndy_bucket_2  = 5,
+    ob0_pll_bndy_bucket_3  = 6,
     // Instance Rings
     ob0_repr      = (0 | INSTANCE_RING_MARK)
 };
@@ -541,7 +543,7 @@ enum RingOffset
 static const CHIPLET_DATA g_ob0Data =
 {
     9,  // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
-    6,  // 6 common rings for OB Chiplet
+    7,  // 7 common rings for OB Chiplet
     1,  // 1 instance specific rings for each OB chiplet
     1
 };
@@ -563,7 +565,9 @@ enum RingOffset
     ob1_time      = 2,
     ob1_pll_gptr  = 3,
     ob1_pll_bndy  = 4,
-    ob1_pll_func  = 5,
+    ob1_pll_bndy_bucket_1  = 4,
+    ob1_pll_bndy_bucket_2  = 5,
+    ob1_pll_bndy_bucket_3  = 6,
     // Instance Rings
     ob1_repr      = (0 | INSTANCE_RING_MARK)
 };
@@ -571,7 +575,7 @@ enum RingOffset
 static const CHIPLET_DATA g_ob1Data =
 {
     10, // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
-    6,  // 6 common rings for OB Chiplet
+    7,  // 7 common rings for OB Chiplet
     1,  // 1 instance specific rings for each OB chiplet
     1
 };
@@ -594,7 +598,9 @@ enum RingOffset
     ob2_time      = 2,
     ob2_pll_gptr  = 3,
     ob2_pll_bndy  = 4,
-    ob2_pll_func  = 5,
+    ob2_pll_bndy_bucket_1  = 4,
+    ob2_pll_bndy_bucket_2  = 5,
+    ob2_pll_bndy_bucket_3  = 6,
     // Instance Rings
     ob2_repr      = (0 | INSTANCE_RING_MARK)
 };
@@ -602,7 +608,7 @@ enum RingOffset
 static const CHIPLET_DATA g_ob2Data =
 {
     11, // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
-    6,  // 6 common rings for OB Chiplet
+    7,  // 7 common rings for OB Chiplet
     1,  // 1 instance specific rings for each OB chiplet
     1
 };
@@ -624,7 +630,9 @@ enum RingOffset
     ob3_time      = 2,
     ob3_pll_gptr  = 3,
     ob3_pll_bndy  = 4,
-    ob3_pll_func  = 5,
+    ob3_pll_bndy_bucket_1  = 4,
+    ob3_pll_bndy_bucket_2  = 5,
+    ob3_pll_bndy_bucket_3  = 6,
     // Instance Rings
     ob3_repr      = (0 | INSTANCE_RING_MARK)
 };
@@ -632,7 +640,7 @@ enum RingOffset
 static const CHIPLET_DATA g_ob3Data =
 {
     12, // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
-    6,  // 10 common rings for OB Chiplet
+    7,  // 7 common rings for OB Chiplet
     1,  // 1 instance specific rings for each OB chiplet
     1
 };
@@ -999,37 +1007,37 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { OB0::ob0_time                      , "ob0_time"                    , OB0_TYPE   }, // 120
     { OB0::ob0_pll_gptr                  , "ob0_pll_gptr"                , OB0_TYPE   }, // 121
     { OB0::ob0_pll_bndy                  , "ob0_pll_bndy"                , OB0_TYPE   }, // 122
-    { OB0::ob0_pll_func                  , "ob0_pll_func"                , OB0_TYPE   }, // 123
-    { OB0::ob0_repr                      , "ob0_repr"                    , OB0_TYPE   }, // 124
-    { INVALID_RING                       , "invalid"                     , OB0_TYPE   }, // 125
-    { INVALID_RING                       , "invalid"                     , OB0_TYPE   }, // 126
+    { OB0::ob0_pll_bndy_bucket_1         , "ob0_pll_bndy_bucket_1"       , OB0_TYPE   }, // 123
+    { OB0::ob0_pll_bndy_bucket_2         , "ob0_pll_bndy_bucket_2"       , OB0_TYPE   }, // 124
+    { OB0::ob0_pll_bndy_bucket_3         , "ob0_pll_bndy_bucket_3"       , OB0_TYPE   }, // 125
+    { OB0::ob0_repr                      , "ob0_repr"                    , OB0_TYPE   }, // 126
     { OB1::ob1_fure                      , "ob1_fure"                    , OB1_TYPE   }, // 127
     { OB1::ob1_gptr                      , "ob1_gptr"                    , OB1_TYPE   }, // 128
     { OB1::ob1_time                      , "ob1_time"                    , OB1_TYPE   }, // 129
     { OB1::ob1_pll_gptr                  , "ob1_pll_gptr"                , OB1_TYPE   }, // 130
     { OB1::ob1_pll_bndy                  , "ob1_pll_bndy"                , OB1_TYPE   }, // 131
-    { OB1::ob1_pll_func                  , "ob1_pll_func"                , OB1_TYPE   }, // 132
-    { OB1::ob1_repr                      , "ob1_repr"                    , OB1_TYPE   }, // 133
-    { INVALID_RING                       , "invalid"                     , OB1_TYPE   }, // 134
-    { INVALID_RING                       , "invalid"                     , OB1_TYPE   }, // 135
+    { OB1::ob1_pll_bndy_bucket_1         , "ob1_pll_bndy_bucket_1"       , OB1_TYPE   }, // 132
+    { OB1::ob1_pll_bndy_bucket_2         , "ob1_pll_bndy_bucket_2"       , OB1_TYPE   }, // 133
+    { OB1::ob1_pll_bndy_bucket_3         , "ob1_pll_bndy_bucket_3"       , OB1_TYPE   }, // 134
+    { OB1::ob1_repr                      , "ob1_repr"                    , OB1_TYPE   }, // 135
     { OB2::ob2_fure                      , "ob2_fure"                    , OB2_TYPE   }, // 136
     { OB2::ob2_gptr                      , "ob2_gptr"                    , OB2_TYPE   }, // 137
     { OB2::ob2_time                      , "ob2_time"                    , OB2_TYPE   }, // 138
     { OB2::ob2_pll_gptr                  , "ob2_pll_gptr"                , OB2_TYPE   }, // 139
     { OB2::ob2_pll_bndy                  , "ob2_pll_bndy"                , OB2_TYPE   }, // 140
-    { OB2::ob2_pll_func                  , "ob2_pll_func"                , OB2_TYPE   }, // 141
-    { OB2::ob2_repr                      , "ob2_repr"                    , OB2_TYPE   }, // 142
-    { INVALID_RING                       , "invalid"                     , OB2_TYPE   }, // 143
-    { INVALID_RING                       , "invalid"                     , OB2_TYPE   }, // 144
+    { OB2::ob2_pll_bndy_bucket_1         , "ob2_pll_bndy_bucket_1"       , OB2_TYPE   }, // 141
+    { OB2::ob2_pll_bndy_bucket_2         , "ob2_pll_bndy_bucket_2"       , OB2_TYPE   }, // 142
+    { OB2::ob2_pll_bndy_bucket_3         , "ob2_pll_bndy_bucket_3"       , OB2_TYPE   }, // 143
+    { OB2::ob2_repr                      , "ob2_repr"                    , OB2_TYPE   }, // 144
     { OB3::ob3_fure                      , "ob3_fure"                    , OB3_TYPE   }, // 145
     { OB3::ob3_gptr                      , "ob3_gptr"                    , OB3_TYPE   }, // 146
     { OB3::ob3_time                      , "ob3_time"                    , OB3_TYPE   }, // 147
     { OB3::ob3_pll_gptr                  , "ob3_pll_gptr"                , OB3_TYPE   }, // 148
     { OB3::ob3_pll_bndy                  , "ob3_pll_bndy"                , OB3_TYPE   }, // 149
-    { OB3::ob3_pll_func                  , "ob3_pll_func"                , OB3_TYPE   }, // 150
-    { OB3::ob3_repr                      , "ob3_repr"                    , OB3_TYPE   }, // 151
-    { INVALID_RING                       , "invalid"                     , OB3_TYPE   }, // 152
-    { INVALID_RING                       , "invalid"                     , OB3_TYPE   }, // 153
+    { OB3::ob3_pll_bndy_bucket_1         , "ob3_pll_bndy_bucket_1"       , OB3_TYPE   }, // 150
+    { OB3::ob3_pll_bndy_bucket_2         , "ob3_pll_bndy_bucket_2"       , OB3_TYPE   }, // 151
+    { OB3::ob3_pll_bndy_bucket_3         , "ob3_pll_bndy_bucket_3"       , OB3_TYPE   }, // 152
+    { OB3::ob3_repr                      , "ob3_repr"                    , OB3_TYPE   }, // 153
     { PCI0::pci0_fure                    , "pci0_fure"                   , PCI0_TYPE  }, // 154
     { PCI0::pci0_gptr                    , "pci0_gptr"                   , PCI0_TYPE  }, // 155
     { PCI0::pci0_time                    , "pci0_time"                   , PCI0_TYPE  }, // 156
@@ -1257,37 +1265,37 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { OB0::ob0_time                      , OB0_TYPE   }, // 120
     { OB0::ob0_pll_gptr                  , OB0_TYPE   }, // 121
     { OB0::ob0_pll_bndy                  , OB0_TYPE   }, // 122
-    { OB0::ob0_pll_func                  , OB0_TYPE   }, // 123
-    { OB0::ob0_repr                      , OB0_TYPE   }, // 124
-    { INVALID_RING                       , OB0_TYPE   }, // 125
-    { INVALID_RING                       , OB0_TYPE   }, // 126
+    { OB0::ob0_pll_bndy_bucket_1         , OB0_TYPE   }, // 123
+    { OB0::ob0_pll_bndy_bucket_2         , OB0_TYPE   }, // 124
+    { OB0::ob0_pll_bndy_bucket_3         , OB0_TYPE   }, // 125
+    { OB0::ob0_repr                      , OB0_TYPE   }, // 126
     { OB1::ob1_fure                      , OB1_TYPE   }, // 127
     { OB1::ob1_gptr                      , OB1_TYPE   }, // 128
     { OB1::ob1_time                      , OB1_TYPE   }, // 129
     { OB1::ob1_pll_gptr                  , OB1_TYPE   }, // 130
     { OB1::ob1_pll_bndy                  , OB1_TYPE   }, // 131
-    { OB1::ob1_pll_func                  , OB1_TYPE   }, // 132
-    { OB1::ob1_repr                      , OB1_TYPE   }, // 133
-    { INVALID_RING                       , OB1_TYPE   }, // 134
-    { INVALID_RING                       , OB1_TYPE   }, // 135
+    { OB1::ob1_pll_bndy_bucket_1         , OB1_TYPE   }, // 132
+    { OB1::ob1_pll_bndy_bucket_2         , OB1_TYPE   }, // 133
+    { OB1::ob1_pll_bndy_bucket_3         , OB1_TYPE   }, // 134
+    { OB1::ob1_repr                      , OB1_TYPE   }, // 135
     { OB2::ob2_fure                      , OB2_TYPE   }, // 136
     { OB2::ob2_gptr                      , OB2_TYPE   }, // 137
     { OB2::ob2_time                      , OB2_TYPE   }, // 138
     { OB2::ob2_pll_gptr                  , OB2_TYPE   }, // 139
     { OB2::ob2_pll_bndy                  , OB2_TYPE   }, // 140
-    { OB2::ob2_pll_func                  , OB2_TYPE   }, // 141
-    { OB2::ob2_repr                      , OB2_TYPE   }, // 142
-    { INVALID_RING                       , OB2_TYPE   }, // 143
-    { INVALID_RING                       , OB2_TYPE   }, // 144
+    { OB2::ob2_pll_bndy_bucket_1         , OB2_TYPE   }, // 141
+    { OB2::ob2_pll_bndy_bucket_2         , OB2_TYPE   }, // 142
+    { OB2::ob2_pll_bndy_bucket_3         , OB2_TYPE   }, // 143
+    { OB2::ob2_repr                      , OB2_TYPE   }, // 144
     { OB3::ob3_fure                      , OB3_TYPE   }, // 145
     { OB3::ob3_gptr                      , OB3_TYPE   }, // 146
     { OB3::ob3_time                      , OB3_TYPE   }, // 147
     { OB3::ob3_pll_gptr                  , OB3_TYPE   }, // 148
     { OB3::ob3_pll_bndy                  , OB3_TYPE   }, // 149
-    { OB3::ob3_pll_func                  , OB3_TYPE   }, // 150
-    { OB3::ob3_repr                      , OB3_TYPE   }, // 151
-    { INVALID_RING                       , OB3_TYPE   }, // 152
-    { INVALID_RING                       , OB3_TYPE   }, // 153
+    { OB3::ob3_pll_bndy_bucket_1         , OB3_TYPE   }, // 150
+    { OB3::ob3_pll_bndy_bucket_2         , OB3_TYPE   }, // 151
+    { OB3::ob3_pll_bndy_bucket_3         , OB3_TYPE   }, // 152
+    { OB3::ob3_repr                      , OB3_TYPE   }, // 153
     { PCI0::pci0_fure                    , PCI0_TYPE  }, // 154
     { PCI0::pci0_gptr                    , PCI0_TYPE  }, // 155
     { PCI0::pci0_time                    , PCI0_TYPE  }, // 156
