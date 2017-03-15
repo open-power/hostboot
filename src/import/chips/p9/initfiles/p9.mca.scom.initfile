@@ -328,31 +328,15 @@ ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_WRDONE_DLY [when=S] {
 }
 
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RODT_START_DLY [when=S] {
-  spyv, expr;
-   4,                                (def_MEM_TYPE_1866_13==1);
-   5,                                (def_MEM_TYPE_1866_14==1);
-   6,                                (def_MEM_TYPE_2133_15==1);
-   7,                                (def_MEM_TYPE_2133_16==1);
-   7,                                (def_MEM_TYPE_2400_16==1);
-   8,                                (def_MEM_TYPE_2400_17==1);
-   9,                                (def_MEM_TYPE_2400_18==1);
-   9,                                (def_MEM_TYPE_2666_18==1);
-  10,                                (def_MEM_TYPE_2666_19==1);
-  11,                                (def_MEM_TYPE_2666_20==1);
+  spyv;
+  # CL - CWL
+  MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] - MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX];
 }
 
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RODT_END_DLY [when=S] {
-  spyv, expr;
-   9,                                (def_MEM_TYPE_1866_13==1);
-  10,                                (def_MEM_TYPE_1866_14==1);
-  11,                                (def_MEM_TYPE_2133_15==1);
-  12,                                (def_MEM_TYPE_2133_16==1);
-  12,                                (def_MEM_TYPE_2400_16==1);
-  13,                                (def_MEM_TYPE_2400_17==1);
-  14,                                (def_MEM_TYPE_2400_18==1);
-  14,                                (def_MEM_TYPE_2666_18==1);
-  15,                                (def_MEM_TYPE_2666_19==1);
-  16,                                (def_MEM_TYPE_2666_20==1);
+  spyv;
+  # CL - CWL + BL/2 + 1
+  MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] - MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX] + 5;
 }
 
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_WODT_START_DLY [when=S] {
