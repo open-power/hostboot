@@ -222,16 +222,17 @@ namespace OB0
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
 {
-    {"ob0_fure"            , 0x00, 0x09, 0x09, EKB_RING    , 0x0903700F},
-    {"ob0_gptr"            , 0x01, 0x09, 0x09, EKB_RING    , 0x09037002},
-    {"ob0_time"            , 0x02, 0x09, 0x09, VPD_RING    , 0x09037007},
-    {"ob0_pll_gptr"        , 0x03, 0x09, 0x09, EKB_RING    , 0x09030012},
-    {"ob0_pll_bndy"        , 0x04, 0x09, 0x09, EKB_RING    , 0x09030018},
-    {"ob0_pll_func"        , 0x05, 0x09, 0x09, EKB_RING    , 0x09030010},
+    {"ob0_fure"              , 0x00, 0x09, 0x09, EKB_RING    , 0x0903700F},
+    {"ob0_gptr"              , 0x01, 0x09, 0x09, EKB_RING    , 0x09037002},
+    {"ob0_time"              , 0x02, 0x09, 0x09, VPD_RING    , 0x09037007},
+    {"ob0_pll_gptr"          , 0x03, 0x09, 0x09, EKB_RING    , 0x09030012},
+    {"ob0_pll_bndy_bucket_1" , 0x04, 0x09, 0x09, EKB_RING    , 0x09030018},
+    {"ob0_pll_bndy_bucket_2" , 0x05, 0x09, 0x09, EKB_RING    , 0x09030018},
+    {"ob0_pll_bndy_bucket_3" , 0x06, 0x09, 0x09, EKB_RING    , 0x09030018},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
-    {"ob0_repr"            , 0x0a, 0x09, 0x09, VPD_RING    , 0x09037006},
+    {"ob0_repr"              , 0x0a, 0x09, 0x09, VPD_RING    , 0x09037006},
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
 };
@@ -241,16 +242,17 @@ namespace OB1
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
 {
-    {"ob1_fure"            , 0x00, 0x0a, 0x0a, EKB_RING    , 0x0A03700F},
-    {"ob1_gptr"            , 0x01, 0x0a, 0x0a, EKB_RING    , 0x0A037002},
-    {"ob1_time"            , 0x02, 0x0a, 0x0a, VPD_RING    , 0x0A037007},
-    {"ob1_pll_gptr"        , 0x03, 0x0a, 0x0a, EKB_RING    , 0x0A030012},
-    {"ob1_pll_bndy"        , 0x04, 0x0a, 0x0a, EKB_RING    , 0x0A030018},
-    {"ob1_pll_func"        , 0x05, 0x0a, 0x0a, EKB_RING    , 0x0A030010},
+    {"ob1_fure"              , 0x00, 0x0a, 0x0a, EKB_RING    , 0x0A03700F},
+    {"ob1_gptr"              , 0x01, 0x0a, 0x0a, EKB_RING    , 0x0A037002},
+    {"ob1_time"              , 0x02, 0x0a, 0x0a, VPD_RING    , 0x0A037007},
+    {"ob1_pll_gptr"          , 0x03, 0x0a, 0x0a, EKB_RING    , 0x0A030012},
+    {"ob1_pll_bndy_bucket_1" , 0x04, 0x0a, 0x0a, EKB_RING    , 0x0A030018},
+    {"ob1_pll_bndy_bucket_2" , 0x05, 0x0a, 0x0a, EKB_RING    , 0x0A030018},
+    {"ob1_pll_bndy_bucket_3" , 0x06, 0x0a, 0x0a, EKB_RING    , 0x0A030018},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
-    {"ob1_repr"            , 0x0a, 0x0a, 0x0a, VPD_RING    , 0x0A037006},
+    {"ob1_repr"              , 0x0a, 0x0a, 0x0a, VPD_RING    , 0x0A037006},
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
 };
@@ -260,16 +262,17 @@ namespace OB2
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
 {
-    {"ob2_fure"            , 0x00, 0x0b, 0x0b, EKB_RING    , 0x0B03700F},
-    {"ob2_gptr"            , 0x01, 0x0b, 0x0b, EKB_RING    , 0x0B037002},
-    {"ob2_time"            , 0x02, 0x0b, 0x0b, VPD_RING    , 0x0B037007},
-    {"ob2_pll_gptr"        , 0x03, 0x0b, 0x0b, EKB_RING    , 0x0B030012},
-    {"ob2_pll_bndy"        , 0x04, 0x0b, 0x0b, EKB_RING    , 0x0B030018},
-    {"ob2_pll_func"        , 0x05, 0x0b, 0x0b, EKB_RING    , 0x0B030010},
+    {"ob2_fure"              , 0x00, 0x0b, 0x0b, EKB_RING    , 0x0B03700F},
+    {"ob2_gptr"              , 0x01, 0x0b, 0x0b, EKB_RING    , 0x0B037002},
+    {"ob2_time"              , 0x02, 0x0b, 0x0b, VPD_RING    , 0x0B037007},
+    {"ob2_pll_gptr"          , 0x03, 0x0b, 0x0b, EKB_RING    , 0x0B030012},
+    {"ob2_pll_bndy_bucket_1" , 0x04, 0x0b, 0x0b, EKB_RING    , 0x0B030018},
+    {"ob2_pll_bndy_bucket_2" , 0x05, 0x0b, 0x0b, EKB_RING    , 0x0B030018},
+    {"ob2_pll_bndy_bucket_3" , 0x06, 0x0b, 0x0b, EKB_RING    , 0x0B030018},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
-    {"ob2_repr"            , 0x0a, 0x0b, 0x0b, VPD_RING    , 0x0B037006},
+    {"ob2_repr"              , 0x0a, 0x0b, 0x0b, VPD_RING    , 0x0B037006},
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
 };
@@ -279,16 +282,17 @@ namespace OB3
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
 {
-    {"ob3_fure"            , 0x00, 0x0c, 0x0c, EKB_RING    , 0x0C03700F},
-    {"ob3_gptr"            , 0x01, 0x0c, 0x0c, EKB_RING    , 0x0C037002},
-    {"ob3_time"            , 0x02, 0x0c, 0x0c, VPD_RING    , 0x0C037007},
-    {"ob3_pll_gptr"        , 0x03, 0x0c, 0x0c, EKB_RING    , 0x0C030012},
-    {"ob3_pll_bndy"        , 0x04, 0x0c, 0x0c, EKB_RING    , 0x0C030018},
-    {"ob3_pll_func"        , 0x05, 0x0c, 0x0c, EKB_RING    , 0x0C030010},
+    {"ob3_fure"              , 0x00, 0x0c, 0x0c, EKB_RING    , 0x0C03700F},
+    {"ob3_gptr"              , 0x01, 0x0c, 0x0c, EKB_RING    , 0x0C037002},
+    {"ob3_time"              , 0x02, 0x0c, 0x0c, VPD_RING    , 0x0C037007},
+    {"ob3_pll_gptr"          , 0x03, 0x0c, 0x0c, EKB_RING    , 0x0C030012},
+    {"ob3_pll_bndy_bucket_1" , 0x04, 0x0c, 0x0c, EKB_RING    , 0x0C030018},
+    {"ob3_pll_bndy_bucket_2" , 0x05, 0x0c, 0x0c, EKB_RING    , 0x0C030018},
+    {"ob3_pll_bndy_bucket_3" , 0x06, 0x0c, 0x0c, EKB_RING    , 0x0C030018},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
-    {"ob3_repr"            , 0x0a, 0x0c, 0x0c, VPD_RING    , 0x0C037006},
+    {"ob3_repr"              , 0x0a, 0x0c, 0x0c, VPD_RING    , 0x0C037006},
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
 };
