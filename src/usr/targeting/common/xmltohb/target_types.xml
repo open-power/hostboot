@@ -1100,6 +1100,11 @@
     <attribute><id>MC_SYNC_MODE</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
     <attribute><id>OBUS_RATIO_VALUE</id></attribute>
+    <attribute><id>OB0_PLL_BUCKET</id></attribute>
+    <attribute><id>OB1_PLL_BUCKET</id></attribute>
+    <attribute><id>OB2_PLL_BUCKET</id></attribute>
+    <attribute><id>OB3_PLL_BUCKET</id></attribute>
+    <attribute><id>FREQ_O_MHZ</id></attribute>
     <attribute><id>FUNCTIONAL_EQ_EC_VALID</id></attribute>
     <attribute><id>FW_MODE_FLAGS_VALID</id></attribute>
     <attribute><id>ISTEP_MODE</id></attribute>
