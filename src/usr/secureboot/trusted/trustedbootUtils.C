@@ -64,7 +64,7 @@ errlHndl_t tpmTransmit(TpmTarget * io_target,
     do
     {
         // Send to the TPM
-        err = deviceRead(io_target->tpmTarget,
+        err = deviceRead(io_target,
                          io_buffer,
                          i_bufsize,
                          DEVICE_TPM_ADDRESS(TPMDD::TPM_OP_TRANSMIT,

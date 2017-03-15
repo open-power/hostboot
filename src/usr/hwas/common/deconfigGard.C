@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,10 @@
 
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
+#endif
+
+#ifdef CONFIG_TPMDD
+#include <../../usr/secureboot/trusted/trustedbootUtils.H>
 #endif
 
 
@@ -2052,6 +2056,15 @@ void DeconfigGard::_doDeconfigureActions(Target & i_target)
 {
  // Placeholder for any necessary deconfigure actions
 
+#ifdef CONFIG_TPMDD
+    if(   i_target.getAttr<TARGETING::ATTR_TYPE>()
+       == TARGETING::TYPE_TPM)
+    {
+        HWAS_INF("_doDeconfigureActions: Deconfiguring TPM 0x%08X",
+            get_huid(&i_target));
+        (void)TRUSTEDBOOT::tpmMarkFailed(&i_target);
+    }
+#endif
 
 #ifdef CONFIG_BMC_IPMI
     // set the BMC status for this target

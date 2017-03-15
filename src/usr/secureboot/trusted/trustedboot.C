@@ -63,99 +63,139 @@
 #include <fapi2.H>
 #include <plat_hwp_invoker.H>
 #include <p9_update_security_ctrl.H>
+#include <targeting/common/commontargeting.H>
+#include <algorithm>
 
 namespace TRUSTEDBOOT
 {
 
-extern SystemTpms systemTpms;
+extern SystemData systemData;
 
-void getTPMs( std::list<TpmTarget>& o_info )
+errlHndl_t getTpmLogDevtreeInfo(
+    const TpmTarget* const i_pTpm,
+          uint64_t &       io_logAddr,
+          size_t &         o_allocationSize,
+          uint64_t &       o_xscomAddr,
+          uint32_t &       o_i2cMasterOffset)
 {
-    TRACUCOMP(g_trac_trustedboot,ENTER_MRK"getTPMs()");
+    assert(i_pTpm != nullptr,"getTpmLogDevtreeInfo: BUG! i_pTpm was nullptr");
+    assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "getTpmLogDevtreeInfo: BUG! Expected target to be of TPM type, but "
+           "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
 
-    for (size_t idx = 0; idx < MAX_SYSTEM_TPMS; idx ++)
-    {
-        if (systemTpms.tpm[idx].available && !systemTpms.tpm[idx].failed)
-        {
-
-            o_info.push_back(systemTpms.tpm[idx]);
-        }
-    }
-
-    TRACUCOMP(g_trac_trustedboot,EXIT_MRK"getTPMs() : Size:%d", o_info.size());
-
-}
-
-errlHndl_t getTpmLogDevtreeInfo(TpmTarget & i_target,
-                                uint64_t & io_logAddr,
-                                size_t & o_allocationSize,
-                                uint64_t & o_xscomAddr,
-                                uint32_t & o_i2cMasterOffset)
-{
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
+    auto * const pTpmLogMgr = getTpmLogMgr(i_pTpm);
     TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"getTpmLogDevtreeInfo() tgt=0x%X Addr:%lX %lX",
-               TARGETING::get_huid(i_target.tpmTarget),
-               io_logAddr ,(uint64_t)(i_target.logMgr));
+               ENTER_MRK"getTpmLogDevtreeInfo() tgt=0x%08X Addr:0x%016lX "
+               "0x%016lX",
+               TARGETING::get_huid(i_pTpm),
+               io_logAddr ,reinterpret_cast<uint64_t>(pTpmLogMgr));
 
     o_allocationSize = 0;
 
-    if (NULL != i_target.logMgr &&
-        i_target.available)
+    auto hwasState = i_pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
+
+    if (nullptr != pTpmLogMgr &&
+        hwasState.present)
     {
-        err = TpmLogMgr_getDevtreeInfo(i_target.logMgr,
+        err = TpmLogMgr_getDevtreeInfo(pTpmLogMgr,
                                        io_logAddr,
                                        o_allocationSize,
                                        o_xscomAddr,
                                        o_i2cMasterOffset);
     }
     TRACUCOMP( g_trac_trustedboot,
-               EXIT_MRK"getTpmLogDevtreeInfo() Addr:%lX",io_logAddr);
+               EXIT_MRK"getTpmLogDevtreeInfo() Addr:0x%016lX",io_logAddr);
     return err;
 }
 
-void setTpmDevtreeInfo(TpmTarget & i_target,
-                       uint64_t i_xscomAddr,
-                       uint32_t i_i2cMasterOffset)
+void setTpmDevtreeInfo(
+    const TpmTarget* const i_pTpm,
+    const uint64_t         i_xscomAddr,
+    const uint32_t         i_i2cMasterOffset)
 {
+    assert(i_pTpm != nullptr,"setTpmLogDevtreeInfo: BUG! i_pTpm was nullptr");
+    assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "setTpmLogDevtreeInfo: BUG! Expected target to be of TPM type, but "
+           "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
+
     TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"setTpmLogDevtreeOffset() tgt=0x%X "
-               "Xscom:%lX Master:%X",
-               TARGETING::get_huid(i_target.tpmTarget),
+               ENTER_MRK"setTpmLogDevtreeOffset() tgt=0x%08X "
+               "Xscom:0x%016lX Master:0x%08X",
+               TARGETING::get_huid(i_pTpm),
                i_xscomAddr, i_i2cMasterOffset);
 
-    if (NULL != i_target.logMgr)
+    auto * const pTpmLogMgr = getTpmLogMgr(i_pTpm);
+    if (nullptr != pTpmLogMgr)
     {
-        TpmLogMgr_setTpmDevtreeInfo(i_target.logMgr,
+        TpmLogMgr_setTpmDevtreeInfo(pTpmLogMgr,
                                     i_xscomAddr, i_i2cMasterOffset);
     }
 }
 
+void getTpmWithRoleOf(
+    TARGETING::TPM_ROLE const i_tpmRole,
+    TARGETING::Target*&       o_pTpm)
+{
+    o_pTpm = nullptr;
+    TARGETING::TargetHandleList tpmList;
+    getTPMs(tpmList,TPM_FILTER::ALL_IN_BLUEPRINT);
+
+    TARGETING::PredicateAttrVal<TARGETING::ATTR_TPM_ROLE>
+        hasMatchingTpmRole(i_tpmRole);
+    auto itr = std::find_if(tpmList.begin(),tpmList.end(),
+        [&hasMatchingTpmRole](const TARGETING::Target* const i_pTpm)
+        {
+            return hasMatchingTpmRole(i_pTpm);
+        });
+    if(itr!=tpmList.end())
+    {
+        o_pTpm=*itr;
+    }
+}
+
+void getPrimaryTpm(TARGETING::Target*& o_pPrimaryTpm)
+{
+    getTpmWithRoleOf(TARGETING::TPM_ROLE_TPM_PRIMARY,
+        o_pPrimaryTpm);
+}
+
+void getBackupTpm(TARGETING::Target*& o_pBackupTpm)
+{
+    getTpmWithRoleOf(TARGETING::TPM_ROLE_TPM_BACKUP,
+        o_pBackupTpm);
+}
+
 bool enabled()
 {
-    bool ret = false;
+    bool enabled = false;
 #ifdef CONFIG_TPMDD
-    bool foundFunctional = false;
+    TARGETING::TargetHandleList tpmList;
+    getTPMs(tpmList,TPM_FILTER::ALL_IN_BLUEPRINT);
 
-    for (size_t idx = 0; idx < MAX_SYSTEM_TPMS; idx ++)
-    {
-        if ((!systemTpms.tpm[idx].failed &&
-             systemTpms.tpm[idx].available) ||
-            !systemTpms.tpm[idx].initAttempted)
+    TARGETING::PredicateHwas presentAndFunctional;
+    presentAndFunctional.present(true);
+    presentAndFunctional.functional(true);
+
+    TARGETING::PredicateAttrVal<TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>
+        initialized(true);
+
+    auto itr = std::find_if(tpmList.begin(),tpmList.end(),
+        [&presentAndFunctional,&initialized](
+            const TARGETING::Target* const i_pTpm)
         {
-            foundFunctional = true;
-            break;
-        }
-    }
-    // If we have a functional TPM we are enabled
-    ret = foundFunctional;
+            return (   presentAndFunctional(i_pTpm)
+                    || !initialized(i_pTpm));
+        });
+
+    enabled = (itr!=tpmList.end()) ? true : false;
 #endif
-    return ret;
+    return enabled;
 }
 
 void* host_update_master_tpm( void *io_pArgs )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     bool unlock = false;
 
     TRACDCOMP( g_trac_trustedboot,
@@ -163,161 +203,168 @@ void* host_update_master_tpm( void *io_pArgs )
     TRACUCOMP( g_trac_trustedboot,
                ENTER_MRK"host_update_master_tpm()");
 
+    // Get all TPMs to setup our array
+    TARGETING::TargetHandleList tpmList;
+    getTPMs(tpmList,TPM_FILTER::ALL_IN_BLUEPRINT);
+
+    // Currently we only support a MAX of two TPMS per node
+    assert(tpmList.size() <= MAX_TPMS_PER_NODE, "Too many TPMs found");
+
     do
     {
+        if (tpmList.empty())
+        {
+            TRACFCOMP( g_trac_trustedboot,
+                       "No TPM Targets found");
+            break;
+        }
 
         TARGETING::TargetService& tS = TARGETING::targetService();
 
-        TARGETING::Target* procTarget = NULL;
+        TARGETING::Target* procTarget = nullptr;
         err = tS.queryMasterProcChipTargetHandle( procTarget );
-
-        if (NULL != err)
+        if (nullptr != err)
         {
             break;
         }
 
-        // Now get all TPM's to setup our array
-        TARGETING::TargetHandleList tpmList;
-        TARGETING::getAllChips(tpmList,
-                               TARGETING::TYPE_TPM,
-                               true); // ONLY FUNCTIONAL
-
-        // Currently we only support a MAX of two TPMS
-        assert(tpmList.size() <= 2, "Too many TPMs found");
-
-        mutex_lock( &(systemTpms.tpm[TPM_MASTER_INDEX].tpmMutex) );
-        mutex_lock( &(systemTpms.tpm[TPM_BACKUP_INDEX].tpmMutex) );
+        for(auto tpm : tpmList)
+        {
+            mutex_lock(tpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
+        }
         unlock = true;
 
-        systemTpms.tpm[TPM_MASTER_INDEX].role = TPM_PRIMARY;
-        systemTpms.tpm[TPM_BACKUP_INDEX].role = TPM_BACKUP;
-
-        if (0 == tpmList.size())
+        // Loop through the TPMs and figure out if they are attached
+        //  to the master or alternate master processor
+        TPMDD::tpm_info_t tpmData;
+        for (auto tpm : tpmList)
         {
-            TRACFCOMP( g_trac_trustedboot,
-                       "No TPM Targets found");
-            systemTpms.tpm[TPM_MASTER_INDEX].initAttempted = true;
-            systemTpms.tpm[TPM_MASTER_INDEX].available = false;
-            systemTpms.tpm[TPM_BACKUP_INDEX].initAttempted = true;
-            systemTpms.tpm[TPM_BACKUP_INDEX].available = false;
-        }
-        else
-        {
-            // Loop through the TPMs and figure out if they are attached
-            //  to the master or alternate processor
-            TPMDD::tpm_info_t tpmData;
-            size_t tpmIdx = TPM_MASTER_INDEX;
-            for (size_t tpmNum = 0; tpmNum < tpmList.size(); tpmNum++)
+            memset(&tpmData, 0, sizeof(tpmData));
+            errlHndl_t readErr = tpmReadAttributes(tpm,
+                                                   tpmData,
+                                                   TPM_LOCALITY_0);
+            if (nullptr != readErr)
             {
-                memset(&tpmData, 0, sizeof(tpmData));
-                errlHndl_t readErr = tpmReadAttributes(tpmList[tpmNum],
-                                                       tpmData,
-                                                       TPM_LOCALITY_0);
-                if (NULL != readErr)
-                {
-                    // We are just looking for configured TPMs here
-                    //  so we ignore any errors
-                    delete readErr;
-                    readErr = NULL;
-                }
-                else
-                {
-                    // Is the i2c master of this TPM also the master proc?
-                    tpmIdx = (tpmData.i2cTarget == procTarget) ?
-                        TPM_MASTER_INDEX : TPM_BACKUP_INDEX;
-
-                    if (NULL != systemTpms.tpm[tpmIdx].tpmTarget)
-                    {
-                        TRACFCOMP( g_trac_trustedboot,
-                                   "Duplicate TPM target found %d",tpmIdx);
-                    }
-                    else
-                    {
-                        systemTpms.tpm[tpmIdx].tpmTarget = tpmList[tpmNum];
-                        systemTpms.tpm[tpmIdx].available = true;
-                    }
-                }
-
+                // We are just looking for configured TPMs here
+                //  so we ignore any errors
+                delete readErr;
+                readErr = nullptr;
+            }
+            else
+            {
+                // If TPM connected to acting master processor, it is
+                // primary; otherwise it is backup
+                TARGETING::TPM_ROLE tpmRole =
+                    (tpmData.i2cTarget == procTarget) ?
+                          TARGETING::TPM_ROLE_TPM_PRIMARY
+                        : TARGETING::TPM_ROLE_TPM_BACKUP;
+                tpm->setAttr<TARGETING::ATTR_TPM_ROLE>(tpmRole);
             }
         }
 
-        if (!systemTpms.tpm[TPM_MASTER_INDEX].failed &&
-            systemTpms.tpm[TPM_MASTER_INDEX].available &&
-            NULL != systemTpms.tpm[TPM_MASTER_INDEX].tpmTarget &&
-            TPMDD::tpmPresence(systemTpms.tpm[TPM_MASTER_INDEX].tpmTarget))
+        // Initialize primary TPM
+        TARGETING::Target* pPrimaryTpm = nullptr;
+        (void)getPrimaryTpm(pPrimaryTpm);
+        if(pPrimaryTpm)
         {
-            // Initialize the TPM, this will mark it as non-functional on fail
-            tpmInitialize(systemTpms.tpm[TPM_MASTER_INDEX]);
-
-        }
-        else
-        {
-            // Master TPM doesn't exist in the system
-            systemTpms.tpm[TPM_MASTER_INDEX].initAttempted = true;
-            systemTpms.tpm[TPM_MASTER_INDEX].available = false;
-        }
-
-        // Allocate the TPM log if it hasn't been already
-        if (!systemTpms.tpm[TPM_MASTER_INDEX].failed &&
-            systemTpms.tpm[TPM_MASTER_INDEX].available &&
-            NULL == systemTpms.tpm[TPM_MASTER_INDEX].logMgr)
-        {
-            /// @todo RTC:145689 For DRTM we locate the previous SRTM log and reuse
-            ///  And we must allocate a DRTM log to be used
-            systemTpms.tpm[TPM_MASTER_INDEX].logMgr = new TpmLogMgr;
-            err = TpmLogMgr_initialize(
-                        systemTpms.tpm[TPM_MASTER_INDEX].logMgr);
-            if (NULL != err)
+            auto hwasState = pPrimaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
+            if(   hwasState.present
+               && hwasState.functional)
             {
-                systemTpms.tpm[TPM_MASTER_INDEX].initAttempted = true;
-                systemTpms.tpm[TPM_MASTER_INDEX].failed = true;
-                break;
+                // API call will set TPM init attempted appropriately
+                tpmInitialize(pPrimaryTpm);
+            }
+            else
+            {
+                pPrimaryTpm->setAttr<
+                    TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>(true);
+            }
+
+            // Allocate TPM log if it hasn't been already
+            auto pTpmLogMgr = getTpmLogMgr(pPrimaryTpm);
+            // Need to grab state again, as it could have changed
+            hwasState = pPrimaryTpm->getAttr<
+                TARGETING::ATTR_HWAS_STATE>();
+            if(   hwasState.present
+               && hwasState.functional
+               && nullptr == pTpmLogMgr)
+            {
+                // @todo RTC:145689 For DRTM we locate the previous SRTM log
+                // and reuse.  We must also allocate a DRTM log to be used
+                pTpmLogMgr = new TpmLogMgr;
+                setTpmLogMgr(pPrimaryTpm,pTpmLogMgr);
+                err = TpmLogMgr_initialize(pTpmLogMgr);
+                if (nullptr != err)
+                {
+                    hwasState = pPrimaryTpm->getAttr<
+                        TARGETING::ATTR_HWAS_STATE>();
+                    hwasState.functional = false;
+                    pPrimaryTpm->setAttr<TARGETING::ATTR_HWAS_STATE>(
+                        hwasState);
+                    break;
+                }
             }
         }
 
-        if (systemTpms.tpm[TPM_MASTER_INDEX].failed ||
-            !systemTpms.tpm[TPM_MASTER_INDEX].available)
+        bool primaryTpmAvail = (pPrimaryTpm != nullptr);
+        if(primaryTpmAvail)
         {
+            auto primaryHwasState = pPrimaryTpm->getAttr<
+                TARGETING::ATTR_HWAS_STATE>();
+            if (!primaryHwasState.functional ||
+                !primaryHwasState.present)
+            {
+                primaryTpmAvail = false;
+            }
+        }
 
+        if(!primaryTpmAvail)
+        {
             /// @todo RTC:134913 Switch to backup chip if backup TPM avail
 
-            // Master TPM not available
+            // Primary TPM not available
             TRACFCOMP( g_trac_trustedboot,
-                       "Master TPM Existence Fail");
-
+                       "Primary TPM Existence Fail");
         }
 
-        // Lastly we will check on the backup TPM and see if it is enabled
-        //  in the attributes at least
-        if (NULL == systemTpms.tpm[TPM_BACKUP_INDEX].tpmTarget)
+        TARGETING::Target* pBackupTpm = nullptr;
+        getBackupTpm(pBackupTpm);
+        if(pBackupTpm == nullptr)
         {
             TRACUCOMP( g_trac_trustedboot,
                        "host_update_master_tpm() "
-                       "Marking backup TPM unavailable "
-                       "due to attribute fail");
-            systemTpms.tpm[TPM_BACKUP_INDEX].available = false;
-            systemTpms.tpm[TPM_BACKUP_INDEX].initAttempted = true;
+                       "Backup TPM unavailable "
+                       "since it's not in the system blueprint.");
         }
         else
         {
             TPMDD::tpm_info_t tpmInfo;
             memset(&tpmInfo, 0, sizeof(tpmInfo));
             errlHndl_t tmpErr = TPMDD::tpmReadAttributes(
-                                 systemTpms.tpm[TPM_BACKUP_INDEX].tpmTarget,
+                                 pBackupTpm,
                                  tpmInfo,
                                  TPM_LOCALITY_0);
-            if (NULL != tmpErr || !tpmInfo.tpmEnabled)
+            if (nullptr != tmpErr || !tpmInfo.tpmEnabled)
             {
                 TRACUCOMP( g_trac_trustedboot,
                            "host_update_master_tpm() "
                            "Marking backup TPM unavailable");
-                systemTpms.tpm[TPM_BACKUP_INDEX].available = false;
-                systemTpms.tpm[TPM_BACKUP_INDEX].initAttempted = true;
-                if (NULL != tmpErr)
+
+                auto backupHwasState = pBackupTpm->getAttr<
+                    TARGETING::ATTR_HWAS_STATE>();
+                backupHwasState.present = false;
+                backupHwasState.functional = false;
+                pBackupTpm->setAttr<
+                    TARGETING::ATTR_HWAS_STATE>(backupHwasState);
+
+
+                pBackupTpm->setAttr<TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>(
+                    true);
+                if (nullptr != tmpErr)
                 {
                     // Ignore attribute read failure
                     delete tmpErr;
-                    tmpErr = NULL;
+                    tmpErr = nullptr;
                 }
             }
         }
@@ -326,64 +373,96 @@ void* host_update_master_tpm( void *io_pArgs )
 
     if( unlock )
     {
-        mutex_unlock(&(systemTpms.tpm[TPM_MASTER_INDEX].tpmMutex));
-        mutex_unlock(&(systemTpms.tpm[TPM_BACKUP_INDEX].tpmMutex));
+        for(auto tpm : tpmList)
+        {
+            mutex_unlock(tpm->getHbMutexAttr<
+                TARGETING::ATTR_HB_TPM_MUTEX>());
+        }
+        unlock = false;
     }
 
     // Make sure we are in a state
     //  where we have a functional TPM
     TRUSTEDBOOT::tpmVerifyFunctionalTpmExists();
 
-    if (NULL == err)
+    if (nullptr == err)
     {
         // Start the task to start to handle the message queue/extends
-        task_create(&TRUSTEDBOOT::tpmDaemon, NULL);
+        task_create(&TRUSTEDBOOT::tpmDaemon, nullptr);
     }
 
-    if (NULL == err)
+    TARGETING::Target* pPrimaryTpm = nullptr;
+    (void)getPrimaryTpm(pPrimaryTpm);
+
+    if (nullptr == err)
     {
         // Log config entries to TPM - needs to be after mutex_unlock
-        err = tpmLogConfigEntries(systemTpms.tpm[TPM_MASTER_INDEX]);
+        if(pPrimaryTpm)
+        {
+            err = tpmLogConfigEntries(pPrimaryTpm);
+        }
     }
 
-    TRACUCOMP( g_trac_trustedboot,
-               EXIT_MRK"host_update_master_tpm() - "
-               "Master A:%d F:%d I:%d",
-               systemTpms.tpm[TPM_MASTER_INDEX].available,
-               systemTpms.tpm[TPM_MASTER_INDEX].failed,
-               systemTpms.tpm[TPM_MASTER_INDEX].initAttempted);
-    TRACUCOMP( g_trac_trustedboot,
-               EXIT_MRK"host_update_master_tpm() - "
-               "Backup A:%d F:%d I:%d",
-               systemTpms.tpm[TPM_BACKUP_INDEX].available,
-               systemTpms.tpm[TPM_BACKUP_INDEX].failed,
-               systemTpms.tpm[TPM_BACKUP_INDEX].initAttempted);
+    if(pPrimaryTpm)
+    {
+        TRACUCOMP( g_trac_trustedboot,
+                   "host_update_master_tpm() - "
+                   "Primary TPM Present:%d Functional:%d Init Attempted:%d",
+                   pPrimaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().
+                       present,
+                   pPrimaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().
+                       functional,
+                   pPrimaryTpm->getAttr<
+                       TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>());
+    }
+
+    TARGETING::Target* pBackupTpm = nullptr;
+    (void)getBackupTpm(pBackupTpm);
+    if(pBackupTpm)
+    {
+        TRACUCOMP( g_trac_trustedboot,
+                   "host_update_master_tpm() - "
+                   "Backup TPM Present:%d Functional:%d Init Attempted:%d",
+                   pBackupTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().
+                       present,
+                   pBackupTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().
+                       functional,
+                   pBackupTpm->getAttr<
+                       TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>());
+    }
 
     TRACDCOMP( g_trac_trustedboot,
                EXIT_MRK"host_update_master_tpm() - %s",
-               ((NULL == err) ? "No Error" : "With Error") );
+               ((nullptr == err) ? "No Error" : "With Error") );
     return err;
 }
 
-
-void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target)
+void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
 {
-    errlHndl_t err = NULL;
+    assert(i_pTpm != nullptr,"tpmInitialize: BUG! i_pTpm was nullptr");
+    assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "tpmInitialize: BUG! Expected target to be of TPM type, but "
+           "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
+
+    errlHndl_t err = nullptr;
 
     TRACDCOMP( g_trac_trustedboot,
                ENTER_MRK"tpmInitialize()" );
     TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"tpmInitialize() tgt=0x%X",
-               TARGETING::get_huid(io_target.tpmTarget));
+               ENTER_MRK"tpmInitialize() tgt=0x%08X",
+               TARGETING::get_huid(i_pTpm));
 
     do
     {
-
         // TPM Initialization sequence
+        i_pTpm->setAttr<TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>(true);
+        auto hwasState = i_pTpm->getAttr<
+            TARGETING::ATTR_HWAS_STATE>();
+        hwasState.functional = true;
+        i_pTpm->setAttr<
+            TARGETING::ATTR_HWAS_STATE>(hwasState);
 
-        io_target.initAttempted = true;
-        io_target.failed = false;
-
+        // read + write
         bool sendStartup = true;
 
 #ifdef CONFIG_DRTM
@@ -398,16 +477,16 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target)
         if (sendStartup)
         {
             // TPM_STARTUP
-            err = tpmCmdStartup(&io_target);
-            if (NULL != err)
+            err = tpmCmdStartup(i_pTpm);
+            if (nullptr != err)
             {
                 break;
             }
         }
 
         // TPM_GETCAPABILITY to read FW Version
-        err = tpmCmdGetCapFwVersion(&io_target);
-        if (NULL != err)
+        err = tpmCmdGetCapFwVersion(i_pTpm);
+        if (nullptr != err)
         {
             break;
         }
@@ -416,8 +495,8 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target)
         // For a DRTM we need to reset PCRs 17-22
         if (drtmMpipl)
         {
-            err = tpmDrtmReset(io_target);
-            if (NULL != err)
+            err = tpmDrtmReset(i_pTpm);
+            if (nullptr != err)
             {
                 break;
             }
@@ -428,9 +507,9 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target)
 
 
     // If the TPM failed we will mark it not functional
-    if (NULL != err)
+    if (nullptr != err)
     {
-        tpmMarkFailed(&io_target);
+        tpmMarkFailed(i_pTpm);
         // Log this failure
         errlCommit(err, SECURE_COMP_ID);
     }
@@ -439,22 +518,28 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target)
                EXIT_MRK"tpmInitialize()");
 }
 
-void tpmReplayLog(TRUSTEDBOOT::TpmTarget & io_target)
+void tpmReplayLog(TRUSTEDBOOT::TpmTarget* const i_pTpm)
 {
+    assert(i_pTpm != nullptr,"tpmReplayLog: BUG! i_pTpm was nullptr");
+    assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "tpmReplayLog: BUG! Expected target to be of TPM type, but "
+           "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
+
     TRACUCOMP(g_trac_trustedboot, ENTER_MRK"tpmReplayLog()");
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     bool unMarshalError = false;
 
 
     // Create EVENT2 structure to be populated by getNextEvent()
-    TCG_PCR_EVENT2 l_eventLog;
+    TCG_PCR_EVENT2 l_eventLog = {0};
     // Move past header event to get a pointer to the first event
-    // If there are no events besides the header, l_eventHndl = NULL
-    const uint8_t* l_eventHndl = TpmLogMgr_getFirstEvent(io_target.logMgr);
-    while ( l_eventHndl != NULL )
+    // If there are no events besides the header, l_eventHndl = nullptr
+    auto * const pTpmLogMgr = getTpmLogMgr(i_pTpm);
+    const uint8_t* l_eventHndl = TpmLogMgr_getFirstEvent(pTpmLogMgr);
+    while ( l_eventHndl != nullptr )
     {
         // Get next event
-        l_eventHndl = TpmLogMgr_getNextEvent(io_target.logMgr,
+        l_eventHndl = TpmLogMgr_getNextEvent(pTpmLogMgr,
                                              l_eventHndl, &l_eventLog,
                                              &unMarshalError);
         if (unMarshalError)
@@ -489,7 +574,7 @@ void tpmReplayLog(TRUSTEDBOOT::TpmTarget & io_target)
 
                 TPM_Alg_Id l_algId = (TPM_Alg_Id)l_eventLog.digests.digests[i]
                                                                 .algorithmId;
-                err = tpmCmdPcrExtend(&io_target,
+                err = tpmCmdPcrExtend(i_pTpm,
                             (TPM_Pcr)l_eventLog.pcrIndex,
                             l_algId,
                             reinterpret_cast<uint8_t*>
@@ -509,18 +594,23 @@ void tpmReplayLog(TRUSTEDBOOT::TpmTarget & io_target)
     // If the TPM failed we will mark it not functional and commit errl
     if (err)
     {
-        tpmMarkFailed(&io_target);
+        tpmMarkFailed(i_pTpm);
         errlCommit(err, SECURE_COMP_ID);
         delete err;
-        err = NULL;
+        err = nullptr;
     }
 }
 
-errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target)
+errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
 {
+    assert(i_pTpm != nullptr,"tpmLogConfigEntries: BUG! i_pTpm was nullptr");
+    assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "tpmLogConfigEntries: BUG! Expected target to be of TPM type, but "
+           "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
+
     TRACUCOMP(g_trac_trustedboot, ENTER_MRK"tpmLogConfigEntries()");
 
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     do
     {
@@ -536,7 +626,7 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target)
         {
             break;
         }
-        TRACFCOMP(g_trac_trustedboot, "security switch value = 0x%X",
+        TRACFCOMP(g_trac_trustedboot, "security switch value = 0x%016lX",
                                 l_securitySwitchValue);
         // Extend to TPM - PCR_1
         memcpy(l_digest, &l_securitySwitchValue, sizeof(l_securitySwitchValue));
@@ -558,7 +648,7 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target)
         //     1 nibble reserved.
         //     1 nibble minor D
         uint32_t l_pvr = mmio_pvr_read() & 0xFFFFFFFF;
-        TRACDCOMP(g_trac_trustedboot, "PVR of chip = 0x%X", l_pvr);
+        TRACDCOMP(g_trac_trustedboot, "PVR of chip = 0x%08X", l_pvr);
         // Extend to TPM - PCR_1
         memcpy(l_digest, &l_pvr, sizeof(l_pvr));
         l_err = pcrExtend(PCR_1, l_digest, sizeof(l_pvr),"PVR of Chip");
@@ -569,8 +659,9 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target)
         memset(l_digest, 0, sizeof(uint64_t));
 
         // Figure out which node we are running on
-        TARGETING::Target* l_masterProc = NULL;
+        TARGETING::Target* l_masterProc = nullptr;
         TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);
+
         TARGETING::EntityPath l_entityPath =
                         l_masterProc->getAttr<TARGETING::ATTR_PHYS_PATH>();
         const TARGETING::EntityPath::PathElement l_pathElement =
@@ -618,14 +709,19 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target)
     return l_err;
 }
 
-void pcrExtendSingleTpm(TpmTarget & io_target,
+void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
                         const TPM_Pcr i_pcr,
                         TPM_Alg_Id i_algId,
                         const uint8_t* i_digest,
                         size_t  i_digestSize,
                         const char* i_logMsg)
 {
-    errlHndl_t err = NULL;
+    assert(i_pTpm != nullptr,"pcrExtendSingleTpm: BUG! i_pTpm was nullptr");
+    assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "pcrExtendSingleTpm: BUG! Expected target to be of TPM type, but "
+           "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
+
+    errlHndl_t err = nullptr;
     TCG_PCR_EVENT2 eventLog;
     bool unlock = false;
 
@@ -652,12 +748,14 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
     memset(&eventLog, 0, sizeof(eventLog));
     do
     {
-        mutex_lock( &io_target.tpmMutex );
+        mutex_lock( i_pTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>() ) ;
         unlock = true;
 
+        auto hwasState = i_pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
+
         // Log the event
-        if (io_target.available &&
-             !io_target.failed)
+        if (hwasState.present &&
+             hwasState.functional)
         {
             // Fill in TCG_PCR_EVENT2 and add to log
             eventLog = TpmLogMgr_genLogEventPcrExtend(pcr,
@@ -668,8 +766,9 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
                                                       i_logMsg);
             if(useStaticLog)
             {
-                err = TpmLogMgr_addEvent(io_target.logMgr,&eventLog);
-                if (NULL != err)
+                auto * const pTpmLogMgr = getTpmLogMgr(i_pTpm);
+                err = TpmLogMgr_addEvent(pTpmLogMgr,&eventLog);
+                if (nullptr != err)
                 {
                     break;
                 }
@@ -681,7 +780,7 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
 
             // Perform the requested extension and also force into the
             // SHA1 bank
-            err = tpmCmdPcrExtend2Hash(&io_target,
+            err = tpmCmdPcrExtend2Hash(i_pTpm,
                                        pcr,
                                        i_algId,
                                        i_digest,
@@ -692,10 +791,10 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
         }
     } while ( 0 );
 
-    if (NULL != err)
+    if (nullptr != err)
     {
         // We failed to extend to this TPM we can no longer use it
-        tpmMarkFailed(&io_target);
+        tpmMarkFailed(i_pTpm);
 
         // Log this failure
         errlCommit(err, SECURE_COMP_ID);
@@ -703,15 +802,20 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
 
     if (unlock)
     {
-        mutex_unlock(&io_target.tpmMutex);
+        mutex_unlock( i_pTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>() ) ;
     }
     return;
 }
 
-void pcrExtendSeparator(TpmTarget & io_target)
+void pcrExtendSeparator(TpmTarget* const i_pTpm)
 {
-    errlHndl_t err = NULL;
-    TCG_PCR_EVENT2 eventLog;
+    assert(i_pTpm != nullptr,"pcrExtendSeparator: BUG! i_pTpm was nullptr");
+    assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "pcrExtendSeparator: BUG! Expected target to be of TPM type, but "
+           "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
+
+    errlHndl_t err = nullptr;
+    TCG_PCR_EVENT2 eventLog = {0};
     bool unlock = false;
 
     // Separators are always the same values
@@ -732,7 +836,7 @@ void pcrExtendSeparator(TpmTarget & io_target)
     memset(&eventLog, 0, sizeof(eventLog));
     do
     {
-        mutex_lock( &io_target.tpmMutex );
+        mutex_lock( i_pTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>() ) ;
         unlock = true;
 
         std::vector<TPM_Pcr> pcrs =
@@ -757,9 +861,12 @@ void pcrExtendSeparator(TpmTarget & io_target)
 
         for (const auto &pcr : pcrs)
         {
+            auto hwasState = i_pTpm->getAttr<
+                TARGETING::ATTR_HWAS_STATE>();
+
             // Log the separator
-            if (io_target.available &&
-                !io_target.failed)
+            if (hwasState.present &&
+                hwasState.functional)
             {
                 // Fill in TCG_PCR_EVENT2 and add to log
                 eventLog = TpmLogMgr_genLogEventPcrExtend(pcr,
@@ -773,8 +880,9 @@ void pcrExtendSeparator(TpmTarget & io_target)
 
                 if(useStaticLog)
                 {
-                    err = TpmLogMgr_addEvent(io_target.logMgr,&eventLog);
-                    if (NULL != err)
+                    auto * const pTpmLogMgr = getTpmLogMgr(i_pTpm);
+                    err = TpmLogMgr_addEvent(pTpmLogMgr,&eventLog);
+                    if (nullptr != err)
                     {
                         break;
                     }
@@ -786,7 +894,7 @@ void pcrExtendSeparator(TpmTarget & io_target)
                 // allowed to go to the dynamic log
 
                 // Perform the requested extension
-                err = tpmCmdPcrExtend2Hash(&io_target,
+                err = tpmCmdPcrExtend2Hash(i_pTpm,
                                            pcr,
                                            TPM_ALG_SHA1,
                                            sha1_digest,
@@ -794,7 +902,7 @@ void pcrExtendSeparator(TpmTarget & io_target)
                                            TPM_ALG_SHA256,
                                            sha256_digest,
                                            sizeof(sha256_digest));
-                if (NULL != err)
+                if (nullptr != err)
                 {
                     break;
                 }
@@ -804,10 +912,10 @@ void pcrExtendSeparator(TpmTarget & io_target)
 
     } while ( 0 );
 
-    if (NULL != err)
+    if (nullptr != err)
     {
         // We failed to extend to this TPM we can no longer use it
-        tpmMarkFailed(&io_target);
+        tpmMarkFailed(i_pTpm);
 
         // Log this failure
         errlCommit(err, SECURE_COMP_ID);
@@ -815,22 +923,31 @@ void pcrExtendSeparator(TpmTarget & io_target)
 
     if (unlock)
     {
-        mutex_unlock(&io_target.tpmMutex);
+        mutex_unlock( i_pTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>() ) ;
     }
     return;
 }
 
-void tpmMarkFailed(TpmTarget * io_target)
+void tpmMarkFailed(TpmTarget* const i_pTpm)
 {
+    assert(i_pTpm != nullptr,"tpmMarkFailed: BUG! i_pTpm was nullptr");
+    assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "tpmMarkFailed: BUG! Expected target to be of TPM type, but "
+           "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
+
     TRACFCOMP( g_trac_trustedboot,
                ENTER_MRK"tpmMarkFailed() Marking TPM as failed : "
-               "tgt=0x%X",
-               TARGETING::get_huid(io_target->tpmTarget));
+               "tgt=0x%08X",
+               TARGETING::get_huid(i_pTpm));
 
-    io_target->failed = true;
+    auto hwasState = i_pTpm->getAttr<
+        TARGETING::ATTR_HWAS_STATE>();
+    hwasState.functional = false;
+    i_pTpm->setAttr<
+        TARGETING::ATTR_HWAS_STATE>(hwasState);
 
     #ifdef CONFIG_SECUREBOOT
-    TARGETING::Target* l_tpm = io_target->tpmTarget;
+    TARGETING::Target* l_tpm = i_pTpm;
 
     errlHndl_t l_err = nullptr;
     TARGETING::Target* l_proc = nullptr;
@@ -861,7 +978,7 @@ void tpmMarkFailed(TpmTarget * io_target)
     if (l_proc == nullptr)
     {
         assert(false,"tpmMarkFailed - TPM with non-existent processor indicates"
-            " a bad MRW. TPM tgt=0x%X", TARGETING::get_huid(l_tpm));
+            " a bad MRW. TPM tgt=0x%08X", TARGETING::get_huid(l_tpm));
     }
 
     // set ATTR_SECUREBOOT_PROTECT_DECONFIGURED_TPM for the processor
@@ -910,8 +1027,8 @@ void tpmMarkFailed(TpmTarget * io_target)
     if (l_err)
     {
         TRACFCOMP(g_trac_trustedboot,
-            ERR_MRK "Processor tgt=0x%X TPM tgt=0x&X. Deconfiguring processor "
-            "because future security cannot be guaranteed.",
+            ERR_MRK "Processor tgt=0x%08X TPM tgt=0x%08X. Deconfiguring "
+            "processor because future security cannot be guaranteed.",
             TARGETING::get_huid(l_proc),
             TARGETING::get_huid(l_tpm));
 
@@ -960,23 +1077,12 @@ void tpmMarkFailed(TpmTarget * io_target)
 
 void tpmVerifyFunctionalTpmExists()
 {
-    errlHndl_t err = NULL;
-    bool foundFunctional = false;
+    errlHndl_t err = nullptr;
+    bool foundFunctional = enabled();
 
-    for (size_t idx = 0; idx < MAX_SYSTEM_TPMS; idx ++)
+    if (!foundFunctional && !systemData.failedTpmsPosted)
     {
-        if ((!systemTpms.tpm[idx].failed &&
-             systemTpms.tpm[idx].available) ||
-            !systemTpms.tpm[idx].initAttempted)
-        {
-            foundFunctional = true;
-            break;
-        }
-    }
-
-    if (!foundFunctional && !systemTpms.failedTpmsPosted)
-    {
-        systemTpms.failedTpmsPosted = true;
+        systemData.failedTpmsPosted = true;
         TRACFCOMP( g_trac_trustedboot,
                    "NO FUNCTIONAL TPM FOUND");
 
@@ -1043,7 +1149,7 @@ void tpmVerifyFunctionalTpmExists()
 void* tpmDaemon(void* unused)
 {
     bool shutdownPending = false;
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     // Mark as an independent daemon so if it crashes we terminate
     task_detach();
@@ -1053,17 +1159,17 @@ void* tpmDaemon(void* unused)
     // Register shutdown events with init service.
     //      Done at the "end" of shutdown processing.
     // This will flush any other messages (PCR extends) and terminate task
-    INITSERVICE::registerShutdownEvent(systemTpms.msgQ,
+    INITSERVICE::registerShutdownEvent(systemData.msgQ,
                                        TRUSTEDBOOT::MSG_TYPE_SHUTDOWN);
 
-    Message* tb_msg = NULL;
+    Message* tb_msg = nullptr;
     while (true)
     {
-        msg_t* msg = msg_wait(systemTpms.msgQ);
+        msg_t* msg = msg_wait(systemData.msgQ);
 
         const MessageType type =
             static_cast<MessageType>(msg->type);
-        tb_msg = NULL;
+        tb_msg = nullptr;
 
         TRACUCOMP( g_trac_trustedboot, "TpmDaemon Handle CmdType %d",
                    type);
@@ -1075,7 +1181,7 @@ void* tpmDaemon(void* unused)
                   shutdownPending = true;
 
                   // Un-register message queue from the shutdown
-                  INITSERVICE::unregisterShutdownEvent(systemTpms.msgQ);
+                  INITSERVICE::unregisterShutdownEvent(systemData.msgQ);
 
               }
               break;
@@ -1088,16 +1194,17 @@ void* tpmDaemon(void* unused)
                       (tb_msg->iv_data);
 
                   assert(tb_msg->iv_len == sizeof(TRUSTEDBOOT::PcrExtendMsgData)
-                         && msgData != NULL, "Invalid PCRExtend Message");
+                         && msgData != nullptr, "Invalid PCRExtend Message");
 
-                  for (size_t idx = 0;
-                       idx < TRUSTEDBOOT::MAX_SYSTEM_TPMS; idx++)
+                  TARGETING::TargetHandleList tpmList;
+                  getTPMs(tpmList);
+                  for (auto tpm : tpmList)
                   {
                       // Add the event to this TPM,
                       // if an error occurs the TPM will
                       //  be marked as failed and the error log committed
                       TRUSTEDBOOT::pcrExtendSingleTpm(
-                                   TRUSTEDBOOT::systemTpms.tpm[idx],
+                                   tpm,
                                    msgData->mPcrIndex,
                                    msgData->mAlgId,
                                    msgData->mDigest,
@@ -1114,14 +1221,15 @@ void* tpmDaemon(void* unused)
               {
                   tb_msg = static_cast<TRUSTEDBOOT::Message*>(msg->extra_data);
 
-                  for (size_t idx = 0;
-                       idx < TRUSTEDBOOT::MAX_SYSTEM_TPMS; idx++)
+                  TARGETING::TargetHandleList tpmList;
+                  getTPMs(tpmList);
+                  for (auto tpm : tpmList)
                   {
                       // Add the separator to this TPM,
                       // if an error occurs the TPM will
                       //  be marked as failed and the error log committed
                       TRUSTEDBOOT::pcrExtendSeparator(
-                                   TRUSTEDBOOT::systemTpms.tpm[idx]);
+                                   tpm);
                   }
 
                   // Lastly make sure we are in a state
@@ -1136,14 +1244,14 @@ void* tpmDaemon(void* unused)
         };
 
         // Reply back, if we have a tb_msg do that way
-        if (NULL != tb_msg)
+        if (nullptr != tb_msg)
         {
-            tb_msg->response(systemTpms.msgQ);
+            tb_msg->response(systemData.msgQ);
         }
         else
         {
             // use the HB message type to respond
-            int rc = msg_respond(systemTpms.msgQ, msg);
+            int rc = msg_respond(systemData.msgQ, msg);
             if (rc)
             {
                 TRACFCOMP( g_trac_trustedboot,
@@ -1179,17 +1287,17 @@ void* tpmDaemon(void* unused)
     }
 
     TRACUCOMP( g_trac_trustedboot, EXIT_MRK "TpmDaemon Thread Terminate");
-    return NULL;
+    return nullptr;
 }
 
 bool isTpmRequired()
 {
 
     bool retVal = false;
-    TARGETING::Target* pTopLevel = NULL;
+    TARGETING::Target* pTopLevel = nullptr;
 
     (void)TARGETING::targetService().getTopLevelTarget(pTopLevel);
-    assert(pTopLevel != NULL, "Unable to get top level target");
+    assert(pTopLevel != nullptr, "Unable to get top level target");
 
     TARGETING::ATTR_TPM_REQUIRED_type tpmRequired =
         pTopLevel->getAttr<TARGETING::ATTR_TPM_REQUIRED>();
@@ -1208,7 +1316,7 @@ bool isTpmRequired()
             SENSOR::SensorBase tpmRequired(TARGETING::SENSOR_NAME_TPM_REQUIRED,
                                            pTopLevel);
             errlHndl_t err = tpmRequired.readSensorData(tpmRequiredData);
-            if (NULL == err)
+            if (nullptr == err)
             {
                 // 0x02 == Asserted bit (TPM is required)
                 if ((tpmRequiredData.event_status &
@@ -1225,7 +1333,7 @@ bool isTpmRequired()
                            "Unable to read Tpm Required Sensor : rc = 0x%04X",
                            err->reasonCode());
                 delete err;
-                err = NULL;
+                err = nullptr;
                 retVal = true;
             }
         }
@@ -1249,20 +1357,25 @@ bool isTpmRequired()
 
 
 #ifdef CONFIG_DRTM
-errlHndl_t tpmDrtmReset(TpmTarget& io_target)
+errlHndl_t tpmDrtmReset(TpmTarget* const i_pTpm)
 {
+    assert(i_pTpm != nullptr,"tpmDrtmReset: BUG! i_pTpm was nullptr");
+    assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "tpmDrtmReset: BUG! Expected target to be of TPM type, but "
+           "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
+
     errlHndl_t err = nullptr;
 
     // Send to the TPM
     size_t len = 0;
-    err = deviceRead(io_target.tpmTarget,
+    err = deviceRead(i_pTpm,
                      nullptr,
                      len,
                      DEVICE_TPM_ADDRESS(TPMDD::TPM_OP_DRTMRESET,
                                         0,
                                         TPM_LOCALITY_4));
 
-    if (NULL == err)
+    if (nullptr == err)
     {
         /// @todo RTC: 145689 reset the dynamic tpm log
     }

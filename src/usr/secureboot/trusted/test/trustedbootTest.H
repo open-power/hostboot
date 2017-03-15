@@ -53,6 +53,11 @@ class TrustedBootTest: public CxxTest::TestSuite
 {
     public:
 
+    enum TEST_PARAM : size_t
+    {
+        EXTEND_PCR_TESTS = 5,
+    };
+
     /**
      * @brief Helper to run failing marshal tests
      */
@@ -64,14 +69,14 @@ class TrustedBootTest: public CxxTest::TestSuite
                                int64_t & io_num_ops,
                                int64_t & io_fails)
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
 
         err = tpmMarshalCommandData(i_cmd,
                                     o_outbuf,
                                     i_bufsize,
                                     &o_cmdSize);
         io_num_ops++;
-        if (NULL == err)
+        if (nullptr == err)
         {
             io_fails++;
             TS_FAIL( "runTpmMarshalFailTest(%s) - Error not detected",
@@ -80,7 +85,7 @@ class TrustedBootTest: public CxxTest::TestSuite
         else
         {
             delete err;
-            err = NULL;
+            err = nullptr;
         }
 
     }
@@ -96,7 +101,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                            int64_t & io_fails,
                            size_t i_expSize)
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         TRUSTEDBOOT::TPM2_BaseIn* baseCmd =
             reinterpret_cast<TRUSTEDBOOT::TPM2_BaseIn*>(o_outbuf);
 
@@ -109,14 +114,14 @@ class TrustedBootTest: public CxxTest::TestSuite
                                         i_bufsize,
                                         &o_cmdSize);
             io_num_ops++;
-            if (NULL != err)
+            if (nullptr != err)
             {
                 io_fails++;
                 TS_FAIL( "runTpmMarshalTest(%s) - Error detected", i_testName);
                 errlCommit( err,
                             TPMDD_COMP_ID );
                 delete err;
-                err = NULL;
+                err = nullptr;
                 break;
             }
             io_num_ops++;
@@ -138,7 +143,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                                         i_expSize-1,
                                         &o_cmdSize);
             io_num_ops++;
-            if (NULL == err)
+            if (nullptr == err)
             {
                 io_fails++;
                 TS_FAIL( "runTpmMarshalTest(%s) - Size-1 error not detected",
@@ -148,7 +153,7 @@ class TrustedBootTest: public CxxTest::TestSuite
             else
             {
                 delete err;
-                err = NULL;
+                err = nullptr;
             }
 
             err = tpmMarshalCommandData(i_cmd,
@@ -156,7 +161,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                                         i_expSize/2,
                                         &o_cmdSize);
             io_num_ops++;
-            if (NULL == err)
+            if (nullptr == err)
             {
                 io_fails++;
                 TS_FAIL( "runTpmMarshalTest(%s) - Size/2 error not detected",
@@ -166,7 +171,7 @@ class TrustedBootTest: public CxxTest::TestSuite
             else
             {
                 delete err;
-                err = NULL;
+                err = nullptr;
             }
 
             err = tpmMarshalCommandData(i_cmd,
@@ -174,7 +179,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                                         i_expSize/3,
                                         &o_cmdSize);
             io_num_ops++;
-            if (NULL == err)
+            if (nullptr == err)
             {
                 io_fails++;
                 TS_FAIL( "runTpmMarshalTest(%s) - Size/3 error not detected",
@@ -184,7 +189,7 @@ class TrustedBootTest: public CxxTest::TestSuite
             else
             {
                 delete err;
-                err = NULL;
+                err = nullptr;
             }
 
         } while( 0 );
@@ -203,7 +208,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                                  int64_t & io_num_ops,
                                  int64_t & io_fails)
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
 
         err = tpmUnmarshalResponseData(i_commandCode,
                                        i_respBuf,
@@ -211,7 +216,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                                        o_outBuf,
                                        i_outBufSize);
         io_num_ops++;
-        if (NULL == err)
+        if (nullptr == err)
         {
             io_fails++;
             TS_FAIL( "runTpmUnmarshalFailTest(%s) - Error not detected",
@@ -220,7 +225,7 @@ class TrustedBootTest: public CxxTest::TestSuite
         else
         {
             delete err;
-            err = NULL;
+            err = nullptr;
         }
 
     }
@@ -236,7 +241,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                              int64_t & io_num_ops,
                              int64_t & io_fails)
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
 
         do
         {
@@ -248,7 +253,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                                            o_outBuf,
                                            i_outBufSize);
             io_num_ops++;
-            if (NULL != err)
+            if (nullptr != err)
             {
                 io_fails++;
                 TS_FAIL( "runTpmUnmarshalTest(%s) - Error detected",
@@ -256,7 +261,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                 errlCommit( err,
                             TPMDD_COMP_ID );
                 delete err;
-                err = NULL;
+                err = nullptr;
                 break;
             }
 
@@ -267,7 +272,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                                            o_outBuf,
                                            i_outBufSize);
             io_num_ops++;
-            if (NULL == err)
+            if (nullptr == err)
             {
                 io_fails++;
                 TS_FAIL( "runTpmUnmarshalTest(%s) - "
@@ -278,7 +283,7 @@ class TrustedBootTest: public CxxTest::TestSuite
             else
             {
                 delete err;
-                err = NULL;
+                err = nullptr;
             }
 
             // If the response output buffer is more then just the base we
@@ -291,7 +296,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                                                o_outBuf,
                                                i_outBufSize);
                 io_num_ops++;
-                if (NULL == err)
+                if (nullptr == err)
                 {
                     io_fails++;
                     TS_FAIL( "runTpmUnmarshalTest(%s) - "
@@ -302,7 +307,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                 else
                 {
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
             }
 
@@ -312,7 +317,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                                            o_outBuf,
                                            4);
             io_num_ops++;
-            if (NULL == err)
+            if (nullptr == err)
             {
                 io_fails++;
                 TS_FAIL( "runTpmUnmarshalTest(%s) - "
@@ -323,7 +328,7 @@ class TrustedBootTest: public CxxTest::TestSuite
             else
             {
                 delete err;
-                err = NULL;
+                err = nullptr;
             }
 
             if (i_outBufSize > sizeof(TPM2_BaseOut))
@@ -334,7 +339,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                                                o_outBuf,
                                                sizeof(TPM2_BaseOut));
                 io_num_ops++;
-                if (NULL == err)
+                if (nullptr == err)
                 {
                     io_fails++;
                     TS_FAIL( "runTpmUnmarshalTest(%s) - "
@@ -345,7 +350,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                 else
                 {
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
             }
 
@@ -690,109 +695,121 @@ class TrustedBootTest: public CxxTest::TestSuite
     }
 
     /**
-     * @brief Retrieve a node target to test with
+     * @brief Retrieve present/functional primary TPM target to test with
      */
-    TRUSTEDBOOT::TpmTarget getTestTarget()
+    TRUSTEDBOOT::TpmTarget* getPrimaryTestTarget()
     {
-        TRUSTEDBOOT::TpmTarget target;
-        TPMDD::tpm_info_t tpmInfo;
-
-        target.available = true;
-        target.initAttempted = true;
-        target.failed = false;
-
-        TARGETING::TargetHandleList tpmList;
-        TARGETING::getAllChips(tpmList,
-                               TARGETING::TYPE_TPM,
-                               false);
-        if (tpmList.size() > 0)
+        TRUSTEDBOOT::TpmTarget* pTpm = nullptr;
+        decltype(pTpm) pTpmToReturn = nullptr;
+        getPrimaryTpm(pTpm);
+        if (pTpm)
         {
-            target.tpmTarget = tpmList[0];
-
             TRACFCOMP( g_trac_trustedboot,
-                       "getTestTarget tpm tgt=0x%X",
-                       TARGETING::get_huid(target.tpmTarget));
+                       "getPrimaryTestTarget: TPM HUID=0x%08X",
+                       TARGETING::get_huid(pTpm));
 
             // Let's see if the requested chip is functional
-            target.role = TPM_PRIMARY;
-            errlHndl_t err = tpmReadAttributes (target.tpmTarget,
+            TPMDD::tpm_info_t tpmInfo;
+            memset(&tpmInfo,0x00,sizeof(tpmInfo));
+            errlHndl_t err = tpmReadAttributes (pTpm,
                                                 tpmInfo,
                                                 TPM_LOCALITY_0);
-
-            if (NULL != err)
+            if (nullptr != err)
             {
-                target.failed = true;
                 delete err;
+                err=nullptr;
             }
             else if (!tpmInfo.tpmEnabled)
             {
-                TRACFCOMP(g_trac_trustedboot, "getTestTarget - "
-                          "Chip %d not enabled",
-                          target.role);
-                target.failed = true;
+                TRACFCOMP(g_trac_trustedboot, "getPrimaryTestTarget: "
+                          "Primary TPM with HUID of 0x%08X and role of %d not "
+                          "enabled",
+                          TARGETING::get_huid(pTpm),
+                          pTpm->getAttr<TARGETING::ATTR_TPM_ROLE>());
             }
             else
             {
-                TRACFCOMP(g_trac_trustedboot, "getTestTarget - "
-                          "Chip %d enabled",
-                          target.role);
+                auto hwasState = pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
+                if(!hwasState.present ||
+                   !hwasState.functional)
+                {
+                    TRACFCOMP(g_trac_trustedboot, "getPrimaryTestTarget: "
+                        "Primary TPM with HUID of 0x%08X and role of %d not "
+                        "both present and functional",
+                        TARGETING::get_huid(pTpm),
+                        pTpm->getAttr<TARGETING::ATTR_TPM_ROLE>());
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_trustedboot, "getPrimaryTestTarget: "
+                              "TPM with HUID of 0x%08X and role of %d enabled",
+                              TARGETING::get_huid(pTpm),
+                              pTpm->getAttr<TARGETING::ATTR_TPM_ROLE>());
+                    pTpmToReturn = pTpm;
+                }
             }
         }
 
-        return target;
+        return pTpmToReturn;
     }
-
-
 
     /**
      * @brief TPM Extend PCR
      */
     void testExtendPCR ( void )
     {
-        int64_t fails = 0, num_ops = 0;
-        uint8_t digest[TPM_ALG_SHA256_SIZE];
-        TpmLogMgr logMgr;
-
         TRACFCOMP( g_trac_trustedboot,
-                   "testExtendPCR - Start" );
-        TpmTarget target = getTestTarget();
-        // Assign our log manager
-        target.logMgr = &logMgr;
+                   ENTER_MRK "testExtendPCR" );
+
+        size_t fails = 0;
+        size_t num_ops = 0;
+        uint8_t digest[TPM_ALG_SHA256_SIZE]={0};
+        TpmLogMgr logMgr;
+        TpmLogMgr* pSavedTpmLogMgr = nullptr;
+        bool saved = false;
+        TpmTarget* pTpm = getPrimaryTestTarget();
 
         do
         {
-
-            if (target.failed)
+            if (!pTpm)
             {
-                TS_FAIL( "testExtendPCR - Master TPM not functional" );
+                TS_FAIL( "testExtendPCR: Primary TPM is not present and "
+                    "functional" );
                 break;
             }
 
+            // Cache and replace our log manager
+            pSavedTpmLogMgr = getTpmLogMgr(pTpm);
+            saved = true;
+            setTpmLogMgr(pTpm,&logMgr);
             TpmLogMgr_initialize(&logMgr);
 
-            for (size_t idx = 0; idx < sizeof(digest); idx++)
+            for (size_t idx = 0; idx < sizeof(digest); ++idx)
             {
                 digest[idx] = idx+1;
             }
 
-            for (size_t i = 0; i < 5; i ++) {
+            for (size_t i = 0; i < EXTEND_PCR_TESTS; ++i) {
 
                 num_ops++;
-                pcrExtendSingleTpm(target,
+                pcrExtendSingleTpm(pTpm,
                                    PCR_DEBUG,
                                    TPM_ALG_SHA256,
                                    digest,
                                    TPM_ALG_SHA256_SIZE,
-                                   "testExtendPCR - test 1");
-                if( target.failed )
+                                   "testExtendPCR: test");
+
+                auto hwasState = pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
+                if(!hwasState.functional)
                 {
                     fails++;
-                    TS_FAIL( "testExtendPCR - Extend Error detected" );
+                    TS_FAIL( "testExtendPCR: Extend Error detected for "
+                        "iteration %d",i);
                     break;
                 }
                 else
                 {
-                    TRACUCOMP(g_trac_trustedboot, "testExtendPCR - "
+                    TRACUCOMP(g_trac_trustedboot, "testExtendPCR: "
                               "Extend returned as expected.");
                 }
             }
@@ -800,10 +817,15 @@ class TrustedBootTest: public CxxTest::TestSuite
 
 
         } while( 0 );
-        TRACFCOMP( g_trac_trustedboot,
-                   "testExtendPCR - End: %d/%d fails",
-                   fails, num_ops );
 
+        if(saved)
+        {
+            setTpmLogMgr(pTpm,pSavedTpmLogMgr);
+        }
+
+        TRACFCOMP( g_trac_trustedboot,
+                   EXIT_MRK "testExtendPCR: %d/%d fails",
+                   fails, num_ops );
     }
 
     /**
@@ -811,63 +833,57 @@ class TrustedBootTest: public CxxTest::TestSuite
      */
     void testReadPCR ( void )
     {
-        int64_t fails = 0, num_ops = 0;
-        uint8_t digest[TPM_ALG_SHA256_SIZE];
-        errlHndl_t err = NULL;
-
         TRACFCOMP( g_trac_trustedboot,
-                   "testReadPCR - Start" );
-        TpmTarget target = getTestTarget();
+                   ENTER_MRK "testReadPCR" );
+
+        size_t fails = 0;
+        size_t num_ops = 0;
+        errlHndl_t err = nullptr;
+        TpmTarget* pTpm = getPrimaryTestTarget();
 
         do
         {
-
-            if (target.failed)
+            if (pTpm == nullptr)
             {
-                TS_FAIL( "testReadPCR - Master TPM not functional" );
+                TS_FAIL( "testReadPCR: Primary TPM is not present and "
+                    "functional" );
                 break;
             }
 
+            uint8_t digest[TPM_ALG_SHA256_SIZE]={0};
             memset(digest, 0, sizeof(digest));
 
             num_ops++;
-            err = tpmCmdPcrRead(&target,
+            err = tpmCmdPcrRead(pTpm,
                                 PCR_DEBUG,
                                 TPM_ALG_SHA256,
                                 digest,
                                 sizeof(digest));
-            if( NULL != err )
+            if( nullptr != err )
             {
                 fails++;
-                TS_FAIL( "testReadPCR - Error detected" );
+                TS_FAIL( "testReadPCR: Error detected" );
                 errlCommit( err,
                             SECURE_COMP_ID );
                 delete err;
-                err = NULL;
+                err = nullptr;
                 break;
             }
             else
             {
-                TRACUCOMP(g_trac_trustedboot, "testReadPCR - "
+                TRACUCOMP(g_trac_trustedboot, "testReadPCR: "
                           "Read returned as expected.");
                 TRACUBIN(g_trac_trustedboot, "PCR Contents",
                          digest, sizeof(digest));
             }
 
 
-
         } while( 0 );
+
         TRACFCOMP( g_trac_trustedboot,
-                   "testReadPCR - End: %d/%d fails",
+                   EXIT_MRK "testReadPCR: %d/%d fails",
                    fails, num_ops );
-
-        if (NULL != target.logMgr)
-        {
-            delete target.logMgr;
-        }
     }
-
-
 };
 
 #endif

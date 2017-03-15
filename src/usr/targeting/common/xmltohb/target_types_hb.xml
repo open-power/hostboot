@@ -287,4 +287,20 @@
     <attribute><id>IPMI_SENSORS</id></attribute>
 </targetTypeExtension>
 
+<targetTypeExtension>
+    <id>chip-tpm-cectpm</id>
+    <attribute>
+        <id>HB_TPM_LOG_MGR_PTR</id>
+    </attribute>
+    <attribute>
+        <id>HB_TPM_MUTEX</id>
+    </attribute>
+    <attribute>
+        <id>TPM_ROLE</id>
+    </attribute>
+    <attribute>
+        <id>HB_TPM_INIT_ATTEMPTED</id>
+    </attribute>
+</targetTypeExtension>
+
 </attributes>

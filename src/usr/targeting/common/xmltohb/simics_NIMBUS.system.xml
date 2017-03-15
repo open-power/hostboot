@@ -283,6 +283,10 @@
             </field>
         </default>
     </attribute>
+    <attribute>
+        <id>TPM_ROLE</id>
+        <default>TPM_PRIMARY</default>
+    </attribute>
 </targetInstance>
 
 <!-- Nimbus n0p0 processor chip -->

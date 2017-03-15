@@ -1867,4 +1867,81 @@ ID for the sensor number returned with the elog. -->
     <writeable/>
 </attribute>
 
+<!-- TPM Attributes -->
+
+<attribute>
+    <id>HB_TPM_INIT_ATTEMPTED</id>
+    <description>
+        Whether TPM initialization was attempted or not
+            0x00 (false) = Did not attempt to initialize TPM
+            0x01 (true)  = Attempted to initialize TPM
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<enumerationType>
+    <id>TPM_ROLE</id>
+    <description>
+        Enumeration of possible roles a TPM can play within a node.  A TPM has
+        the primary role if it's connected to the acting master processor,
+        otherwise it has the backup role.
+    </description>
+    <enumerator>
+        <name>TPM_PRIMARY</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>TPM_BACKUP</name>
+        <value>1</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>TPM_ROLE</id>
+    <description>
+        Whether the TPM is primary or backup within its parent node.  It is
+        dynamically computed during the boot.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>HB_TPM_MUTEX</id>
+    <description>Mutex to guard TPM access</description>
+    <simpleType>
+        <hbmutex>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>HB_TPM_LOG_MGR_PTR</id>
+    <description>Pointer to TPM log manager</description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
 </attributes>

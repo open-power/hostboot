@@ -236,8 +236,8 @@ void add_i2c_info( const TARGETING::Target* i_targ,
     TPMDD::tpm_info_t tpmInfo;
     errlHndl_t err = NULL;
     //find all TPMs
-    std::list<TRUSTEDBOOT::TpmTarget> l_tpmTarget;
-    TRUSTEDBOOT::getTPMs(l_tpmTarget);
+    TARGETING::TargetHandleList tpmList;
+    TRUSTEDBOOT::getTPMs(tpmList);
 #endif
 
     //add any other i2c devices here as needed, e.g. TPM, etc
@@ -481,31 +481,26 @@ void add_i2c_info( const TARGETING::Target* i_targ,
 
 
 #ifdef CONFIG_TPMDD
-        std::list<TRUSTEDBOOT::TpmTarget>::iterator tpm = l_tpmTarget.begin();
-        while( tpm != l_tpmTarget.end() )
+        for(auto pTpm : tpmList)
         {
-
             // Lookup i2c info for the TPM
-            err = TPMDD::tpmReadAttributes(tpm->tpmTarget, tpmInfo,
+            err = TPMDD::tpmReadAttributes(pTpm, tpmInfo,
                                            TPMDD::TPM_LOCALITY_0);
             if (NULL != err)
             {
                 // Unable to get info we skip this guy
                 delete err;
-                tpm = l_tpmTarget.erase(tpm);
                 continue;
             }
 
             // ignore the devices that aren't on the current target
             if( tpmInfo.i2cTarget != i_targ )
             {
-                tpm = l_tpmTarget.erase(tpm);
                 continue;
             }
             // skip the devices that are on a different engine
             else if( tpmInfo.engine != i2cm->engine )
             {
-                ++tpm;
                 continue;
             }
 
@@ -561,12 +556,12 @@ void add_i2c_info( const TARGETING::Target* i_targ,
             i_dt->addPropertyCell32(l_tpmNode, "reg",
                                     tpmInfo.devAddr >> 1);
             char l_label[30];
-            switch (tpm->role)
+            switch (pTpm->getAttr<TARGETING::ATTR_TPM_ROLE>())
             {
-              case TRUSTEDBOOT::TPM_PRIMARY:
+              case TARGETING::TPM_ROLE_TPM_PRIMARY:
                 sprintf( l_label, "tpm" );
                 break;
-              case TRUSTEDBOOT::TPM_BACKUP:
+              case TARGETING::TPM_ROLE_TPM_BACKUP:
                 sprintf( l_label, "tpm-backup" );
                 break;
               default:
@@ -581,12 +576,9 @@ void add_i2c_info( const TARGETING::Target* i_targ,
 
             // Placeholders for the tpm log which will be filled in later
             // We store info away so we can look up this devtree node later
-            TRUSTEDBOOT::setTpmDevtreeInfo(*tpm, i_xscomAddr, i2cm->scomAddr);
+            TRUSTEDBOOT::setTpmDevtreeInfo(pTpm, i_xscomAddr, i2cm->scomAddr);
             i_dt->addPropertyCell32(l_tpmNode, "linux,sml-size", 0);
             i_dt->addPropertyCell64(l_tpmNode, "linux,sml-base", 0);
-
-            // now remove the device we added so we don't add it again
-            tpm = l_tpmTarget.erase(tpm);
         } // end TPM iter
 #endif
 
@@ -1271,9 +1263,9 @@ void load_tpmlog(devTree * i_dt, uint64_t& io_address)
         errlHndl_t l_errl = NULL;
 
         // TPM log
-        std::list<TRUSTEDBOOT::TpmTarget> l_tpmTarget;
-        TRUSTEDBOOT::getTPMs(l_tpmTarget);
-        std::list<TRUSTEDBOOT::TpmTarget>::iterator l_tpm = l_tpmTarget.begin();
+        TARGETING::TargetHandleList tpmList;
+        TRUSTEDBOOT::getTPMs(tpmList);
+
         size_t l_allocatedSize = 0;
         uint32_t* l_propAllocSize = NULL;
         uint64_t* l_propAddr = NULL;
@@ -1285,10 +1277,10 @@ void load_tpmlog(devTree * i_dt, uint64_t& io_address)
         char     l_nodePath[100];
         dtOffset_t l_tpmNode;
 
-        while( l_tpm != l_tpmTarget.end() )
+        for(auto pTpm : tpmList)
         {
 
-            l_errl = TRUSTEDBOOT::getTpmLogDevtreeInfo(*l_tpm,
+            l_errl = TRUSTEDBOOT::getTpmLogDevtreeInfo(pTpm,
                                                        io_address,
                                                        l_allocatedSize,
                                                        l_scomAddr,
@@ -1297,18 +1289,16 @@ void load_tpmlog(devTree * i_dt, uint64_t& io_address)
             if (l_errl)
             {
                 errlCommit(l_errl, DEVTREE_COMP_ID);
-                ++ l_tpm;
                 continue;
             }
 
             // We need to build the devtree path to find this TPM node
             // Lookup i2c info for the TPM
-            l_errl = TPMDD::tpmReadAttributes(l_tpm->tpmTarget, l_tpmInfo,
+            l_errl = TPMDD::tpmReadAttributes(pTpm, l_tpmInfo,
                                               TPMDD::TPM_LOCALITY_0);
             if (l_errl)
             {
                 errlCommit(l_errl, DEVTREE_COMP_ID);
-                ++ l_tpm;
                 continue;
             }
 
@@ -1334,15 +1324,12 @@ void load_tpmlog(devTree * i_dt, uint64_t& io_address)
             {
                 TRACFCOMP(g_trac_devtree,ERR_MRK" Unable to find "
                           "sml TPM properties");
-                ++ l_tpm;
                 continue;
             }
 
             // Store the values in the devtree nodes
             *l_propAllocSize = l_allocatedSize;
             *l_propAddr = io_address;
-
-            ++l_tpm;
         }
 #endif
 

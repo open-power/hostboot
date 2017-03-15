@@ -79,10 +79,11 @@ errlHndl_t tpmCreateErrorLog(const uint8_t i_modId,
                              const uint64_t i_user2);
 
 /**
- * @brief Mark the TPM as non-functional and take required steps
- * @param[in/out] io_target Current TPM target structure
+ *  @brief Mark the TPM as non-functional and take required steps
+ *
+ *  @param[in] i_pTpm Handle to TPM target
  */
-void tpmMarkFailed(TpmTarget * io_target);
+void tpmMarkFailed(TpmTarget * i_pTpm);
 
 #ifdef __cplusplus
 } // end TRUSTEDBOOT namespace
