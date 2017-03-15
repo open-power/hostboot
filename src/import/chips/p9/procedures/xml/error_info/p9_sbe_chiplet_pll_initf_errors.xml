@@ -33,4 +33,15 @@
     <ffdc>UNIT_POS</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_SBE_CHIPLET_PLL_INITF_UNSUPPORTED_OBUS_BUCKET</rc>
+    <description>Unsupported OBUS PLL bucket select</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>OB0_BUCKET_INDEX</ffdc>
+    <ffdc>OB1_BUCKET_INDEX</ffdc>
+    <ffdc>OB2_BUCKET_INDEX</ffdc>
+    <ffdc>OB3_BUCKET_INDEX</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
