@@ -271,7 +271,7 @@ RingBucket::RingBucket( PlatId i_plat, uint8_t* i_pRingStart, RingDebugMode_t i_
             iv_cmnRingMap[ringIndex] = l_quadCmnRings[ringIndex];
         }
 
-        for( ringIndex = 0; ringIndex < ( EQ::g_eqData.iv_num_instance_rings_scan_addrs * MAX_QUADS_PER_CHIP );
+        for( ringIndex = 0; ringIndex < ( EQ::g_chipletData.iv_num_instance_rings_scan_addrs * MAX_QUADS_PER_CHIP );
              ringIndex++ )
         {
             iv_instRingMap[ringIndex] = l_quadSpecRings[ringIndex];
@@ -643,12 +643,12 @@ void RingBucket::dumpRings( )
         if( iv_plat == PLAT_CME )
         {
             FAPI_INF("---------------------------------CME Rings---------------------------------------");
-            chipletNo = EC::g_ecData.iv_num_instance_rings_scan_addrs;
+            chipletNo = EC::g_chipletData.iv_num_instance_rings_scan_addrs;
         }
         else if( iv_plat == PLAT_SGPE )
         {
             FAPI_INF("---------------------------------SGPE Rings--------------------------------------");
-            chipletNo = EQ::g_eqData.iv_num_instance_rings_scan_addrs;
+            chipletNo = EQ::g_chipletData.iv_num_instance_rings_scan_addrs;
         }
         else
         {
