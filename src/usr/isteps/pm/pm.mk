@@ -33,6 +33,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/pmlib/include/registers/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 
 HWP_PM_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
@@ -44,9 +45,9 @@ EXTRAINCDIR += ${HWP_ACC_PATH}
 HWP_XIP_PATH += ${ROOTPATH}/src/import/chips/p9/xip
 EXTRAINCDIR += ${HWP_XIP_PATH}
 HWP_IMAGEPROCS_PATH += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+HWP_CEN_IMAGEPROCS_PATH += ${ROOTPATH}/src/import/chips/centaur/utils/imageProcs/
 HWP_STOPUTIL_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
 EXTRAINCDIR += ${HWP_STOPUTIL_PATH}
-EXTRAINCDIR += ${HWP_IMAGEPROCS_PATH}
 NEST_UTIL_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
 EXTRAINCDIR += ${NEST_UTIL_PATH}
 
@@ -66,7 +67,7 @@ OBJS += occCheckstop.o
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${HWP_PM_PATH} ${HWP_CUST_PATH} ${HWP_ACC_PATH}
 VPATH += ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH}
-VPATH += ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH} ${HWP_STOPUTIL_PATH}
+VPATH += ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH} ${HWP_CEN_IMAGEPROCS_PATH} ${HWP_STOPUTIL_PATH}
 VPATH += ${NEST_UTIL_PATH}
 
 # TODO RTC: 164237
@@ -105,6 +106,7 @@ include ${HWP_IMAGEPROCS_PATH}/p9_dd_container.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_tor.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_ring_identification.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_ringId.mk
+include ${HWP_CEN_IMAGEPROCS_PATH}/cen_ringId.mk
 include ${HWP_STOPUTIL_PATH}/p9_stop_util.mk
 include ${HWP_STOPUTIL_PATH}/p9_stop_api.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_scan_compression.mk

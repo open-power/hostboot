@@ -126,7 +126,7 @@ enum RingType
     ALLRING = 2
 };
 
-struct CHIPLET_DATA
+typedef struct
 {
     // This is the chiplet-ID of the first instance of the Chiplet
     uint8_t iv_base_chiplet_number;
@@ -140,7 +140,10 @@ struct CHIPLET_DATA
     // The no.of instance rings for the Chiplet (w/different ringId values
     // AND different scanAddress values)
     uint8_t iv_num_instance_rings_scan_addrs;
-};
+
+    // The no.of ring variants
+    uint8_t iv_num_ring_variants;
+} ChipletData_t;
 
 // This is used to Set (Mark) the left-most bit
 #define  INSTANCE_RING_MARK  (uint8_t)0x80
@@ -154,14 +157,14 @@ struct CHIPLET_DATA
 // This structure is needed for mapping a RingID to it's corresponding name.
 // The names will be used by the build scripts when generating the TOR.
 #ifndef __PPE__
-struct ringProperties_t
+struct RingProperties_t
 {
     uint8_t       iv_torOffSet;
     char          iv_name[50];
     ChipletType_t iv_type;
 };
 #else
-struct ringProperties_t
+struct RingProperties_t
 {
     uint8_t       iv_torOffSet;
     ChipletType_t iv_type;

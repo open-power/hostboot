@@ -465,14 +465,14 @@ const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, CC, RL };
 
 using namespace P9_RID;
 
-ChipletType_t P9_RID::p9_ringid_get_chiplet(RingId_t i_ringId)
+ChipletType_t P9_RID::ringid_get_chiplet(RingId_t i_ringId)
 {
     return RING_PROPERTIES[i_ringId].iv_type;
 }
 
-void P9_RID::p9_ringid_get_chiplet_properties(
+void P9_RID::ringid_get_chiplet_properties(
     ChipletType_t      i_chiplet,
-    CHIPLET_DATA**     o_cpltData,
+    ChipletData_t**    o_cpltData,
     GenRingIdList**    o_ringComm,
     GenRingIdList**    o_ringInst,
     RingVariantOrder** o_varOrder,
@@ -481,131 +481,131 @@ void P9_RID::p9_ringid_get_chiplet_properties(
     switch (i_chiplet)
     {
         case PERV_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &PERV::g_pervData;
+            *o_cpltData = (ChipletData_t*)   &PERV::g_chipletData;
             *o_ringComm = (GenRingIdList*)    PERV::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    PERV::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) PERV::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(PERV::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case N0_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &N0::g_n0Data;
+            *o_cpltData = (ChipletData_t*)   &N0::g_chipletData;
             *o_ringComm = (GenRingIdList*)    N0::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    N0::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) N0::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(N0::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case N1_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &N1::g_n1Data;
+            *o_cpltData = (ChipletData_t*)   &N1::g_chipletData;
             *o_ringComm = (GenRingIdList*)    N1::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    N1::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) N1::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(N1::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case N2_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &N2::g_n2Data;
+            *o_cpltData = (ChipletData_t*)   &N2::g_chipletData;
             *o_ringComm = (GenRingIdList*)    N2::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    N2::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) N2::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(N2::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case N3_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &N3::g_n3Data;
+            *o_cpltData = (ChipletData_t*)   &N3::g_chipletData;
             *o_ringComm = (GenRingIdList*)    N3::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    N3::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) N3::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(N3::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case XB_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &XB::g_xbData;
+            *o_cpltData = (ChipletData_t*)   &XB::g_chipletData;
             *o_ringComm = (GenRingIdList*)    XB::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    XB::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) XB::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(XB::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case MC_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &MC::g_mcData;
+            *o_cpltData = (ChipletData_t*)   &MC::g_chipletData;
             *o_ringComm = (GenRingIdList*)    MC::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    MC::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) MC::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(MC::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case OB0_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &OB0::g_ob0Data;
+            *o_cpltData = (ChipletData_t*)   &OB0::g_chipletData;
             *o_ringComm = (GenRingIdList*)    OB0::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    OB0::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) OB0::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(OB0::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case OB1_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &OB1::g_ob1Data;
+            *o_cpltData = (ChipletData_t*)   &OB1::g_chipletData;
             *o_ringComm = (GenRingIdList*)    OB1::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    OB1::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) OB1::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(OB1::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case OB2_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &OB2::g_ob2Data;
+            *o_cpltData = (ChipletData_t*)   &OB2::g_chipletData;
             *o_ringComm = (GenRingIdList*)    OB2::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    OB2::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) OB2::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(OB2::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case OB3_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &OB3::g_ob3Data;
+            *o_cpltData = (ChipletData_t*)   &OB3::g_chipletData;
             *o_ringComm = (GenRingIdList*)    OB3::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    OB3::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) OB3::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(OB3::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case PCI0_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &PCI0::g_pci0Data;
+            *o_cpltData = (ChipletData_t*)   &PCI0::g_chipletData;
             *o_ringComm = (GenRingIdList*)    PCI0::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    PCI0::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) PCI0::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(PCI0::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case PCI1_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &PCI1::g_pci1Data;
+            *o_cpltData = (ChipletData_t*)   &PCI1::g_chipletData;
             *o_ringComm = (GenRingIdList*)    PCI1::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    PCI1::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) PCI1::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(PCI1::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case PCI2_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &PCI2::g_pci2Data;
+            *o_cpltData = (ChipletData_t*)   &PCI2::g_chipletData;
             *o_ringComm = (GenRingIdList*)    PCI2::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    PCI2::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) PCI2::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(PCI2::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case EQ_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &EQ::g_eqData;
+            *o_cpltData = (ChipletData_t*)   &EQ::g_chipletData;
             *o_ringComm = (GenRingIdList*)    EQ::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    EQ::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) EQ::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(EQ::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         case EC_TYPE :
-            *o_cpltData = (CHIPLET_DATA*)   &EC::g_ecData;
+            *o_cpltData = (ChipletData_t*)   &EC::g_chipletData;
             *o_ringComm = (GenRingIdList*)    EC::RING_ID_LIST_COMMON;
             *o_ringInst = (GenRingIdList*)    EC::RING_ID_LIST_INSTANCE;
             *o_varOrder = (RingVariantOrder*) EC::RING_VARIANT_ORDER;
-            *o_varNumb  = sizeof(EC::RingVariants) / sizeof(uint16_t);
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
             break;
 
         default :
@@ -613,21 +613,21 @@ void P9_RID::p9_ringid_get_chiplet_properties(
             *o_ringComm = NULL;
             *o_ringInst = NULL;
             *o_varOrder = NULL;
-            *o_varNumb  = 0;
+            *o_varNumb = 0;
             break;
     }
 }
 
-GenRingIdList* P9_RID::p9_ringid_get_ring_properties(RingId_t i_ringId)
+GenRingIdList* P9_RID::ringid_get_ring_properties(RingId_t i_ringId)
 {
-    CHIPLET_DATA*     l_cpltData;
+    ChipletData_t*    l_cpltData;
     GenRingIdList*    l_ringList[2];    // 0: common, 1: instance
     RingVariantOrder* l_varOrder;
     uint8_t           l_varNumb;
     int               i, j, n;
 
-    P9_RID::p9_ringid_get_chiplet_properties(
-        P9_RID::p9_ringid_get_chiplet(i_ringId),
+    P9_RID::ringid_get_chiplet_properties(
+        P9_RID::ringid_get_chiplet(i_ringId),
         &l_cpltData, &l_ringList[0], &l_ringList[1], &l_varOrder, &l_varNumb);
 
     if (!l_ringList[0])

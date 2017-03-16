@@ -42,12 +42,6 @@ namespace CEN
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const RingVariantOrder RING_VARIANT_ORDER[];
 
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -156,19 +150,19 @@ enum RingOffset
     // ** none **
 };
 
-static const CHIPLET_DATA g_cenData =
+static const ChipletData_t g_chipletData =
 {
     0x01,         // Centaur chiplet ID
     NUM_RING_IDS, // Num of common rings for Centaur chiplet
     0,            // Num of instance rings for Centaur chiplet
-    0
+    0,
+    2,            // Num of ring variants: BASE, RL
 };
-
 }; // namespace CEN
 
 #ifndef __PPE__
 
-static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
+static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 {
     { CEN::tcm_perv_cmsk, "tcm_perv_cmsk", CEN_TYPE },
     { CEN::tcm_perv_lbst, "tcm_perv_lbst", CEN_TYPE },
@@ -275,7 +269,7 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 
 #else
 
-static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
+static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 {
     { CEN::tcm_perv_cmsk, CEN_TYPE },
     { CEN::tcm_perv_lbst, CEN_TYPE },
@@ -381,5 +375,29 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 };
 
 #endif // __PPE__
+
+
+
+// returns our own chiplet enum value for this ringId
+ChipletType_t
+ringid_get_chiplet(
+    RingId_t i_ringId);
+
+// returns data structures defined for chiplet type
+// as determined by ringId
+void
+ringid_get_chiplet_properties(
+    ChipletType_t      i_chiplet,
+    ChipletData_t**    o_cpltData,
+    GenRingIdList**    o_ringComm,
+    GenRingIdList**    o_ringInst,
+    RingVariantOrder** o_varOrder,
+    uint8_t*           o_varNumb);
+
+// returns properties of a ring as determined by ringId
+GenRingIdList*
+ringid_get_ring_properties(
+    RingId_t i_ringId);
+
 
 #endif // _CEN_RINGID_H_

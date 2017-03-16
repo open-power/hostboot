@@ -23,6 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+#include <string.h>
+#include <common_ringId.H>
+
 namespace CEN_RID
 {
 
@@ -140,4 +143,75 @@ const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
 
 }; // namespace CEN
 
-}; // namespace CENTAUR
+}; // namespace CEN_RID
+
+
+using namespace CEN_RID;
+
+ChipletType_t CEN_RID::ringid_get_chiplet(RingId_t i_ringId)
+{
+    return RING_PROPERTIES[i_ringId].iv_type;
+}
+
+void CEN_RID::ringid_get_chiplet_properties(
+    ChipletType_t      i_chiplet,
+    ChipletData_t**    o_cpltData,
+    GenRingIdList**    o_ringComm,
+    GenRingIdList**    o_ringInst,
+    RingVariantOrder** o_varOrder,
+    uint8_t*           o_varNumb)
+{
+    switch (i_chiplet)
+    {
+        case CEN_TYPE :
+            *o_cpltData = (ChipletData_t*)   &CEN::g_chipletData;
+            *o_ringComm = (GenRingIdList*)    CEN::RING_ID_LIST_COMMON;
+            *o_ringInst = NULL;
+            *o_varOrder = (RingVariantOrder*) CEN::RING_VARIANT_ORDER;
+            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
+            break;
+
+        default :
+            *o_cpltData = NULL;
+            *o_ringComm = NULL;
+            *o_ringInst = NULL;
+            *o_varOrder = NULL;
+            *o_varNumb = 0;
+            break;
+    }
+}
+
+GenRingIdList* CEN_RID::ringid_get_ring_properties(RingId_t i_ringId)
+{
+    ChipletData_t*    l_cpltData;
+    GenRingIdList*    l_ringList[2];    // 0: common, 1: instance
+    RingVariantOrder* l_varOrder;
+    uint8_t           l_varNumb;
+    int               i, j, n;
+
+    CEN_RID::ringid_get_chiplet_properties(
+        CEN_RID::ringid_get_chiplet(i_ringId),
+        &l_cpltData, &l_ringList[0], &l_ringList[1], &l_varOrder, &l_varNumb);
+
+    if (!l_ringList[0])
+    {
+        return NULL;
+    }
+
+    for (j = 0; j < 2; j++)     // 0: common, 1: instance
+    {
+        n = (j ? l_cpltData->iv_num_instance_rings
+             : l_cpltData->iv_num_common_rings);
+
+        for (i = 0; i < n; i++)
+        {
+            if (!strcmp(l_ringList[j][i].ringName,
+                        RING_PROPERTIES[i_ringId].iv_name))
+            {
+                return &(l_ringList[j][i]);
+            }
+        }
+    }
+
+    return NULL;
+}
