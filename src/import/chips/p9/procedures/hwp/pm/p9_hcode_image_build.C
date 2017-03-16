@@ -3237,7 +3237,7 @@ fapi2::ReturnCode layoutInstRingsForSgpe( Homerlayout_t*     i_pHomer,
             uint32_t tempBufSize = 0;
             uint32_t tempLength = 0;
 
-            for( uint32_t ringIndex = 0; ringIndex < EQ::g_eqData.iv_num_instance_rings_scan_addrs;
+            for( uint32_t ringIndex = 0; ringIndex < EQ::g_chipletData.iv_num_instance_rings_scan_addrs;
                  ringIndex++ )
             {
                 tempBufSize = i_ringData.iv_sizeWorkBuf1;
