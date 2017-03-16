@@ -15635,7 +15635,7 @@ Measured in GB</description>
 <attribute>
     <id>REDUNDANT_CLOCKS</id>
     <description>
-        1 = System has redundant clock oscillators
+        1 = System has redundant clock oscillators
         0 = System does not have redundant clock oscillators
         From the Machine Readable Workbook
     </description>
