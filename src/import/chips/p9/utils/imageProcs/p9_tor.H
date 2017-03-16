@@ -98,7 +98,6 @@ typedef enum TorOffsetSize
 
 #define TOR_SUCCESS                           0
 #define TOR_RING_FOUND                        0
-#define TOR_RING_BLOCKS_FOUND                 0
 #define TOR_RING_NOT_FOUND                    1
 #define TOR_AMBIGUOUS_API_PARMS               2
 #define TOR_SECTION_NOT_FOUND                 3
