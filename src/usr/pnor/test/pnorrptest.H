@@ -818,7 +818,7 @@ class PnorRpTest : public CxxTest::TestSuite
         errlHndl_t pError=NULL;
         do {
 
-        if (!PNOR::isSecureSection(PNOR::SBE_IPL))
+        if (!PNOR::isEnforcedSecureSection(PNOR::SBE_IPL))
         {
             break;
         }

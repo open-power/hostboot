@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -112,36 +112,7 @@ errlHndl_t loadSecureSection(SectionId i_section);
  */
 errlHndl_t unloadSecureSection(SectionId i_section);
 
-/**
- * @brief  Memcmp a vaddr to the known secureboot magic number
- *
- * @param[in]   i_vaddr: vaddr of secureboot header to check for magic number
- *                       Note: must point to a buffer of size >= 4 bytes
- *
- * @return  bool - True if the magic number and starting bytes of the vaddr
- *                 match. False otherwise.
- */
-bool cmpSecurebootMagicNumber(const uint8_t* i_vaddr);
-
-/**
- * @brief  Returns true if a PNOR section has the secureboot container
- *         header magic number at the beginning. This is mainly used to
- *         ignore unwanted PNOR sections like secureboot key transition.
- *         It indicates the section has valid content to be securely
- *         loaded, otherwise the section content will not be loaded.
- *         If a section does not have the header but needs to be loaded,
- *         it will fail ROM verify later on anyhow.
- *         Note: Does not work with HBB section and will assert if attempted
- *
- * @param[in]   i_section: PNOR section to check first bytes of.
- * @param[out]  o_valid:  true if section has the correct magic number at
- *                        the beginning
- *
- * @return  errlHndl_t - NULL if success, errlHndl_t otherwise.
- *                               */
-errlHndl_t hasSecurebootMagicNumber(SectionId i_section, bool &o_valid);
 #endif // CONFIG_SECUREBOOT
-
 
 /**
  * @brief Determines whether the given section is inhibited by secure boot
@@ -205,6 +176,20 @@ errlHndl_t validateAltMaster( void );
  * @param[out] o_pnorInfo Information about PNOR
  */
 void getPnorInfo( PnorInfo_t& o_pnorInfo );
+
+/**
+ * @brief  Check if PNOR section appears to be secure and sets the
+ *         internal TOC of PnorRp accordingly.
+ *         Note: The setting of the flag is based on the Secureboot policy.
+ *
+ * @param[in] i_secId Section ID or index in the TOC to modify
+ * @param[in] io_TOC  Pointer to internal array of section data that
+ *                    represents the TOC of pnor flash
+ *                    Asserts if nullptr
+ *
+ * @return errlHndl_t  Error log if request was invalid
+ */
+errlHndl_t setSecure(const uint32_t i_secId, SectionData_t* io_TOC);
 
 } // PNOR
 

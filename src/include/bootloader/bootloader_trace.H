@@ -142,7 +142,10 @@ enum BootloaderTraces
     BTLDR_TRC_UTILS_PARSE_INVALID_SECTION    = 0xE7,
 
     /** Bootloader Utils SectionIdToString PNOR section id out of range*/
-    BTLDR_TRC_UTILS_PARSE_PNOR_SECID_OUT_OF_RANGE    = 0xE8,
+    BTLDR_TRC_UTILS_PNOR_SECID_OUT_OF_RANGE    = 0xE8,
+
+    /** Bootloader Utils cmpSecurebootMagicNumber requested address to compare is a nullptr*/
+    BTLDR_TRC_UTILS_CMP_MAGIC_NUM_NULLPTR    = 0xE9,
 
     /** Bootloader main getHBBSection returned error */
     BTLDR_TRC_MAIN_GETHBBSECTION_FAIL        = 0xF0,

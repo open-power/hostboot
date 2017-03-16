@@ -235,12 +235,15 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
 
         ffs_entry* l_err_entry = NULL;
 
-        PNOR::parseEntries(l_ffs_hdr, l_errCode, o_TOC, l_err_entry);
-
-        if(l_errCode != NO_ERROR)
+        l_errhdl = PNOR::parseEntries(l_ffs_hdr, l_errCode, o_TOC, l_err_entry);
+        if (l_errhdl)
         {
-            TRACFCOMP(g_trac_pnor, "PNOR::parseTOC parseEntries"
-                            " parse entries returned an error");
+            TRACFCOMP(g_trac_pnor, "PNOR::parseTOC parseEntries returned an error log");
+            break;
+        }
+        else if(l_errCode != NO_ERROR)
+        {
+            TRACFCOMP(g_trac_pnor, "PNOR::parseTOC parseEntries returned an error code");
             o_TOC = NULL;
             /* @errortype
             * @moduleid PNOR::MOD_PNORRP_READTOC
@@ -295,9 +298,7 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
 
             // @TODO RTC 168021 Remove legacy extensions when all
             // secure sections are supported
-            auto isSecure = PNOR::isSecureSection(l_secId);
-            if (   o_TOC[l_secId].version == FFS_VERS_SHA512
-                && !isSecure)
+            if (PNOR::hasNonSecureHeader(o_TOC[l_secId]))
             {
                 // Never extend the base image through this path, it will be
                 // handled elsewhere
@@ -385,3 +386,44 @@ bool PNOR::isInhibitedSection(const uint32_t i_section)
 #endif
 }
 
+errlHndl_t PNOR::setSecure(const uint32_t i_secId,
+                           PNOR::SectionData_t* io_TOC)
+{
+    errlHndl_t l_errhdl = nullptr;
+
+    assert(io_TOC != nullptr, "PNOR::setSecure received a NULL toc to modify");
+
+    do {
+
+    // Set secure field based on enforced policy
+    io_TOC[i_secId].secure = PNOR::isEnforcedSecureSection(i_secId);
+
+#ifndef __HOSTBOOT_RUNTIME
+#ifdef CONFIG_SECUREBOOT_BEST_EFFORT
+    if (io_TOC[i_secId].secure)
+    {
+        // Apply best effort policy by checking if the section appears to have a
+        // secure header
+        size_t l_size = sizeof(ROM_MAGIC_NUMBER);
+        auto l_buf = new uint8_t[l_size]();
+        auto l_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+        // Read first 8 bytes of section data from the PNOR DD
+        // Note: Do not need to worry about ECC as the 9th byte is the first
+        //       ECC byte.
+        l_errhdl = DeviceFW::deviceRead(l_target, l_buf, l_size,
+                                DEVICE_PNOR_ADDRESS(0,io_TOC[i_secId].flashAddr));
+        if (l_errhdl)
+        {
+            break;
+        }
+
+        // Check if first 8 bytes match the Secureboot Magic Number
+        io_TOC[i_secId].secure &= PNOR::cmpSecurebootMagicNumber(l_buf);
+    }
+#endif
+#endif
+
+    } while (0);
+
+    return l_errhdl;
+}

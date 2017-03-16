@@ -527,11 +527,13 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
             o_info.name = SectionIdToString(id);
 
 #ifdef CONFIG_SECUREBOOT
+            o_info.secure = iv_TOC[id].secure;
             o_info.secureProtectedPayloadSize = 0; // for non secure sections
                                                    // the protected payload size
                                                    // defaults to zero
-            // handle secure sections in SPnorRP's address space
-            if (PNOR::isSecureSection(o_info.id))
+            // If a secure section and has a secure header handle secure
+            // sections in SPnorRP's address space
+            if (o_info.secure)
             {
                 uint8_t* l_vaddr = reinterpret_cast<uint8_t*>(iv_TOC[id].virtAddr);
                 // By adding VMM_VADDR_SPNOR_DELTA twice we can translate a pnor
@@ -563,17 +565,17 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                     memcpy(&l_badMagicHeader, l_vaddr, sizeof(ROM_MAGIC_NUMBER));
                     TRACFCOMP( g_trac_pnor, ERR_MRK"PnorRP::getSectionInfo: magic number not valid to parse container for section = %s magic number = 0x%X",
                                o_info.name, l_badMagicHeader);
-                /*@
-                 * @errortype
-                 * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid     PNOR::MOD_PNORRP_GETSECTIONINFO
-                 * @reasoncode   PNOR::RC_BAD_SECURE_MAGIC_NUM
-                 * @userdata1    Requested Section
-                 * @userdata2    Bad magic number
-                 * @devdesc      PNOR section does not have the known secureboot magic number
-                 * @custdesc     Corrupted flash image or firmware error during system boot
-                 */
-                l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    /*@
+                     * @errortype
+                     * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                     * @moduleid     PNOR::MOD_PNORRP_GETSECTIONINFO
+                     * @reasoncode   PNOR::RC_BAD_SECURE_MAGIC_NUM
+                     * @userdata1    Requested Section
+                     * @userdata2    Bad magic number
+                     * @devdesc      PNOR section does not have the known secureboot magic number
+                     * @custdesc     Corrupted flash image or firmware error during system boot
+                     */
+                    l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                        PNOR::MOD_PNORRP_GETSECTIONINFO,
                                                        PNOR::RC_BAD_SECURE_MAGIC_NUM,
                                                        TO_UINT64(i_section),

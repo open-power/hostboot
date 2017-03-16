@@ -51,8 +51,15 @@ extern trace_desc_t* g_trac_pnor;
 
 #include "common/ffs_hb.H"
 #include <util/align.H>
+#include <config.h>
+#include <securerom/ROM.H>
 
-/*
+#ifndef BOOTLOADER
+// Includes needed when hostboot uses this file
+#include <pnor/pnorif.H>
+#endif
+
+/**
  * @brief calculates the checksum on data(ffs header/entry) and will return
  *    0 if the checksums match
  */
@@ -145,21 +152,21 @@ void PNOR::checkHeader (ffs_hdr* i_ffs_hdr,
     if(i_ffs_hdr->magic != FFS_MAGIC)
     {
         PNOR_UTIL_TRACE_W_BRK(BTLDR_TRC_UTILS_CHECKHEADER_MAGIC,
-                               "E>PNOR::parseTOC: Invalid magic"
+                               "E>PNOR::checkHeader: Invalid magic"
                 " number in FFS header: 0x%.4X",i_ffs_hdr->magic);
         io_errCode |= INVALID_MAGIC;
     }
     if(i_ffs_hdr->version != SUPPORTED_FFS_VERSION)
     {
         PNOR_UTIL_TRACE_W_BRK(BTLDR_TRC_UTILS_CHECKHEADER_VERSION,
-          "E>PNOR::parseTOC:Unsupported FFS"
+          "E>PNOR::checkHeader:Unsupported FFS"
                 " Header version: 0x%.4X", i_ffs_hdr->version);
         io_errCode |= UNSUPPORTED_FFS;
     }
     if(i_ffs_hdr->entry_size != sizeof(ffs_entry))
     {
         PNOR_UTIL_TRACE_W_BRK(BTLDR_TRC_UTILS_CHECKHEADER_ENTRYSIZE,
-                               "E>PNOR::parseTOC: Unexpected"
+                               "E>PNOR::checkHeader: Unexpected"
                 " entry_size(0x%.8x) in FFS header: 0x%.4X",
                 i_ffs_hdr->entry_size);
         io_errCode |= INVALID_ENTRY_SIZE;
@@ -167,14 +174,14 @@ void PNOR::checkHeader (ffs_hdr* i_ffs_hdr,
     if(i_ffs_hdr->entry_count == 0)
     {
         PNOR_UTIL_TRACE_W_BRK(BTLDR_TRC_UTILS_CHECKHEADER_ENTRYCNT,
-                               "E>PNOR::parseTOC:"
+                               "E>PNOR::checkHeader:"
                                 " FFS Header pointer to entries is NULL.");
         io_errCode |= NO_ENTRIES;
     }
     if(i_ffs_hdr->block_size != PAGESIZE)
     {
         PNOR_UTIL_TRACE_W_BRK(BTLDR_TRC_UTILS_CHECKHEADER_BLOCKSIZE,
-                              "E>PNOR::parseTOC:  Unsupported"
+                              "E>PNOR::checkHeader:  Unsupported"
                               " Block Size(0x%.4X). PNOR Blocks must be 4k",
                               i_ffs_hdr->block_size);
         io_errCode |= INVALID_BLOCK_SIZE;
@@ -182,7 +189,7 @@ void PNOR::checkHeader (ffs_hdr* i_ffs_hdr,
     if(i_ffs_hdr->block_count == 0)
     {
         PNOR_UTIL_TRACE_W_BRK(BTLDR_TRC_UTILS_CHECKHEADER_BLOCKCNT,
-                              "E>PNOR::parseTOC:  Unsupported"
+                              "E>PNOR::checkHeader:  Unsupported"
                 " Block COunt(0x%.4X). Device cannot be zero"
                 " blocks in length.",i_ffs_hdr->block_count);
         io_errCode |= INVALID_BLOCK_COUNT;
@@ -193,7 +200,7 @@ void PNOR::checkHeader (ffs_hdr* i_ffs_hdr,
         ((i_ffs_hdr->block_size*i_ffs_hdr->size)-sizeof(ffs_hdr)))
     {
         PNOR_UTIL_TRACE_W_BRK(BTLDR_TRC_UTILS_CHECKHEADER_HDRSIZE,
-                              "E>PNOR::parseTOC:  FFS Entries"
+                              "E>PNOR::checkHeader:  FFS Entries"
                         " (0x%.16X) go past end of FFS Table.",spaceUsed);
         io_errCode |= INVALID_HEADER_SIZE;
 
@@ -229,11 +236,20 @@ void PNOR::getSectionEnum (ffs_entry* i_entry,
   *         During the iteration we are checking that the entries are valid
   *        and we set the sectionData_t for each section in the TOC.
   */
-void PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
-                         uint32_t& io_errCode,
-                         SectionData_t * io_TOC,
-                         ffs_entry*& o_err_entry)
+#ifdef BOOTLOADER
+void
+#else
+errlHndl_t
+#endif
+PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
+                    uint32_t& io_errCode,
+                    PNOR::SectionData_t * io_TOC,
+                    ffs_entry*& o_err_entry)
 {
+#ifndef BOOTLOADER
+    errlHndl_t l_errhdl = nullptr;
+#endif
+
     //Walk through all the entries in the table and parse the data.
     for(uint32_t i=0; i<i_ffs_hdr->entry_count; i++)
     {
@@ -244,7 +260,7 @@ void PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
         if( PNOR::pnor_ffs_checksum(cur_entry, FFS_ENTRY_SIZE) != 0)
         {
             PNOR_UTIL_TRACE_W_BRK(BTLDR_TRC_UTILS_PARSE_CHECKSUM_ERROR,
-                                   "E>PNOR::parseTOC:  "
+                                   "E>PNOR::parseEntries:  "
                                    "Check sum error while parseing entry ",
                                    "%d in TOC", i);
             io_errCode |= ENTRY_ERR;
@@ -260,7 +276,7 @@ void PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
         if(secId == PNOR::INVALID_SECTION)
         {
             PNOR_UTIL_TRACE(BTLDR_TRC_UTILS_PARSE_INVALID_SECTION,
-                            "PNOR::parseTOC: "
+                            "PNOR::parseEntries: "
                             "Unsupported section found while parsing entry ",
                             "%d in TOC \n Entry name is \"%s\"", i,
                             cur_entry->name);
@@ -289,7 +305,7 @@ void PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
                 (i_ffs_hdr->block_count*PAGESIZE))
         {
             PNOR_UTIL_TRACE_W_BRK(BTLDR_TRC_UTILS_PARSE_EXCEEDS_FLASH,
-                                  "E>PNOR::parseTOC:  "
+                                  "E>PNOR::parseEntries:  "
                                    "Exceeded flash while parsing entry ",
                                    "%d in TOC \n Entry name is \"%s\"", i,
                                     cur_entry->name);
@@ -306,8 +322,18 @@ void PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
                                 ((io_TOC[secId].size * 8 ) / 9);
         }
 
-        if (io_TOC[secId].version == FFS_VERS_SHA512
-            && !PNOR::isSecureSection(secId))
+#ifdef BOOTLOADER
+        io_TOC[secId].secure = PNOR::isEnforcedSecureSection(secId);
+#else
+        // Check if PNOR section has a secureHeader or not.
+        l_errhdl = PNOR::setSecure(secId, io_TOC);
+        if (l_errhdl)
+        {
+            break;
+        }
+#endif
+
+        if (PNOR::hasNonSecureHeader(io_TOC[secId]))
         {
               //increment flash addr for sha header
             if (io_TOC[secId].integrity == FFS_INTEG_ECC_PROTECT)
@@ -323,27 +349,28 @@ void PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
             // adjust the size to reflect that
             io_TOC[secId].size -= PAGESIZE;
         }
-
     } // For TOC Entries
+
+#ifndef BOOTLOADER
+    return l_errhdl;
+#endif
+
 }
 
-bool PNOR::isSecureSection(const uint32_t i_section)
+bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
 {
 #ifdef CONFIG_SECUREBOOT
     #ifdef BOOTLOADER
         return i_section == HB_BASE_CODE;
-    // TODO securebootp9 uncomment these sections as they become ready for
-    // inclusion in p9. Remove this comment after the last one.
     #else
-    //    return i_section == HB_EXT_CODE ||
-    //           i_section == HB_DATA ||
-    //           i_section == SBE_IPL ||
-    //           i_section == CENTAUR_SBE ||
-    //           i_section == PAYLOAD ||
-    //           i_section == SBKT ||
-    //           i_section == OCC ||
-    //           i_section == HB_RUNTIME;
-        return false;
+        return i_section == HB_EXT_CODE ||
+               i_section == HB_DATA ||
+               i_section == SBE_IPL ||
+               i_section == CENTAUR_SBE ||
+               i_section == PAYLOAD ||
+               i_section == SBKT ||
+               i_section == OCC ||
+               i_section == HB_RUNTIME;
     #endif
 #else
     return false;
@@ -403,7 +430,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
 #ifdef BOOTLOADER
     if(i_secIdIndex >= (PNOR::NUM_SECTIONS))
     {
-        PNOR_UTIL_TRACE(BTLDR_TRC_UTILS_PARSE_PNOR_SECID_OUT_OF_RANGE);
+        PNOR_UTIL_TRACE(BTLDR_TRC_UTILS_PNOR_SECID_OUT_OF_RANGE);
         /*@
          * @errortype
          * @moduleid     Bootloader::MOD_BOOTLOADER_PNOR_SECID_TO_STR
@@ -427,3 +454,33 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
     return SectionIdToStringArr[i_secIdIndex];
 }
 
+bool PNOR::cmpSecurebootMagicNumber(const uint8_t* i_vaddr)
+{
+    // Bootloader does not support asserts
+#ifdef BOOTLOADER
+    if(i_vaddr == nullptr)
+    {
+        PNOR_UTIL_TRACE(BTLDR_TRC_UTILS_CMP_MAGIC_NUM_NULLPTR);
+        /*@
+         * @errortype
+         * @moduleid     Bootloader::MOD_BOOTLOADER_PNOR_CMP_MAGIC_NUM
+         * @reasoncode   Bootloader::RC_PNOR_NULLPTR
+         * @devdesc      Requested address to compare is a nullptr
+         * @custdesc     A problem occurred while running processor
+         *               boot code.
+         */
+        bl_terminate(Bootloader::MOD_BOOTLOADER_PNOR_CMP_MAGIC_NUM,
+                     Bootloader::RC_PNOR_NULLPTR);
+    }
+#else
+    assert(i_vaddr != nullptr, "cmpSecurebootMagicNumber requested address to compare is a nullptr ");
+#endif
+
+    return memcmp(&ROM_MAGIC_NUMBER, i_vaddr, sizeof(ROM_MAGIC_NUMBER))==0;
+}
+
+bool PNOR::hasNonSecureHeader(const PNOR::SectionData_t& i_secInfo)
+{
+    return i_secInfo.version == FFS_VERS_SHA512 &&
+           !i_secInfo.secure;
+}

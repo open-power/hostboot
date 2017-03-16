@@ -2,7 +2,15 @@
 config SECUREBOOT
     default y
     help
-        Enable secure boot
+        Enable and enforce secure boot
+
+# @TODO RTC:155374 Remove this in the future
+config SECUREBOOT_BEST_EFFORT
+    default y if SECUREBOOT
+    depends on SECUREBOOT
+    help
+        Enable Best effort Secureboot. Should only be used for
+        phasing in new secureboot functionality.
 
 config DRTM #TODO RTC: 170487 Disable for relevant platforms
     default y if (SECUREBOOT && TPMDD)
