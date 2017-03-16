@@ -175,13 +175,6 @@ extern const RingVariantOrder RING_VARIANT_ORDER[];
 
 namespace PERV
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -210,24 +203,18 @@ enum RingOffset
     occ_repr      = (1 | INSTANCE_RING_MARK),
 };
 
-static const CHIPLET_DATA g_pervData =
+static const ChipletData_t g_chipletData =
 {
     1,  // Pervasive Chiplet ID is 1
     15, // 15 common rings for pervasive chiplet
     2,  // 2 instance specific rings for pervasive chiplet
-    2
+    2,
+    2,  // 2 ring variants: BASE, RL
 };
 }; // end of namespace PERV
 
 namespace N0
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -246,24 +233,18 @@ enum RingOffset
     n0_cxa0_repr = (2 | INSTANCE_RING_MARK)
 };
 
-static const CHIPLET_DATA g_n0Data =
+static const ChipletData_t g_chipletData =
 {
-    2, // N0 Chiplet ID is 2.
-    9, // 9 common rings for N0 Chiplet
-    3, // 3 instance specific rings for N0 chiplet
-    3
+    2,  // N0 Chiplet ID is 2.
+    9,  // 9 common rings for N0 Chiplet
+    3,  // 3 instance specific rings for N0 chiplet
+    3,
+    2,  // 2 ring variants: BASE, RL
 };
 };
 
 namespace N1
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -286,24 +267,18 @@ enum RingOffset
     n1_mcs23_repr = (3 | INSTANCE_RING_MARK),
 };
 
-static const CHIPLET_DATA g_n1Data =
+static const ChipletData_t g_chipletData =
 {
     3,  // N1 Chiplet ID is 3.
     12, // 12 common rings for N1 Chiplet
     4,  // 4 instance specific rings for N1 chiplet
-    4
+    4,
+    2,  // 2 ring variants: BASE, RL
 };
 };
 
 namespace N2
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -322,24 +297,18 @@ enum RingOffset
     n2_psi_repr  = (2 | INSTANCE_RING_MARK)
 };
 
-static const CHIPLET_DATA g_n2Data =
+static const ChipletData_t g_chipletData =
 {
     4, // N2 Chiplet ID is 4.
     9, // 9 common rings for N2 Chiplet
     3, // 3 instance specific rings for N2 chiplet
-    3
+    3,
+    2,  // 2 ring variants: BASE, RL
 };
 };
 
 namespace N3
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -359,24 +328,18 @@ enum RingOffset
     n3_np_repr = (2 | INSTANCE_RING_MARK),
 };
 
-static const CHIPLET_DATA g_n3Data =
+static const ChipletData_t g_chipletData =
 {
     5, // N3 Chiplet ID is 5
     10,// 10 common rings for N3 Chiplet
     3, // 3 instance specific rings for N3 chiplet
-    3
+    3,
+    2,  // 2 ring variants: BASE, RL
 };
 };
 
 namespace XB
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -402,24 +365,18 @@ enum RingOffset
     xb_io2_repr  = (3 | INSTANCE_RING_MARK)
 };
 
-static const CHIPLET_DATA g_xbData =
+static const ChipletData_t g_chipletData =
 {
     6,  // X-Bus Chiplet ID is 6
     15, // 15 common rings for X-Bus Chiplet
     4,  // 4 instance specific rings for XB chiplet
-    4
+    4,
+    2,  // 2 ring variants: BASE, RL
 };
 }; // end of namespace XB
 
 namespace MC
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -446,24 +403,18 @@ enum RingOffset
     mc_iom23_repr = (2 | INSTANCE_RING_MARK)
 };
 
-static const CHIPLET_DATA g_mcData =
+static const ChipletData_t g_chipletData =
 {
     7,  // MC Chiplet ID range is 7 - 8. The base ID is 7.
     16, // 16 common rings for MC Chiplet
     3,  // 3 instance specific rings for each MC instance
-    3
+    3,
+    2,  // 2 ring variants: BASE, RL
 };
 }; // end of namespace MC
 
 namespace OB0
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -479,24 +430,18 @@ enum RingOffset
     ob0_repr      = (0 | INSTANCE_RING_MARK)
 };
 
-static const CHIPLET_DATA g_ob0Data =
+static const ChipletData_t g_chipletData =
 {
     9,  // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
     7,  // 7 common rings for OB Chiplet
     1,  // 1 instance specific rings for each OB chiplet
-    1
+    1,
+    2,  // 2 ring variants: BASE, RL
 };
 }; // end of namespace OB0
 
 namespace OB1
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -512,25 +457,19 @@ enum RingOffset
     ob1_repr      = (0 | INSTANCE_RING_MARK)
 };
 
-static const CHIPLET_DATA g_ob1Data =
+static const ChipletData_t g_chipletData =
 {
     10, // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
     7,  // 7 common rings for OB Chiplet
     1,  // 1 instance specific rings for each OB chiplet
-    1
+    1,
+    2,  // 2 ring variants: BASE, RL
 };
 }; // end of namespace OB1
 
 
 namespace OB2
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -546,24 +485,18 @@ enum RingOffset
     ob2_repr      = (0 | INSTANCE_RING_MARK)
 };
 
-static const CHIPLET_DATA g_ob2Data =
+static const ChipletData_t g_chipletData =
 {
     11, // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
     7,  // 7 common rings for OB Chiplet
     1,  // 1 instance specific rings for each OB chiplet
-    1
+    1,
+    2,  // 2 ring variants: BASE, RL
 };
 }; // end of namespace OB2
 
 namespace OB3
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -579,23 +512,18 @@ enum RingOffset
     ob3_repr      = (0 | INSTANCE_RING_MARK)
 };
 
-static const CHIPLET_DATA g_ob3Data =
+static const ChipletData_t g_chipletData =
 {
     12, // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
     7,  // 7 common rings for OB Chiplet
     1,  // 1 instance specific rings for each OB chiplet
-    1
+    1,
+    2,  // 2 ring variants: BASE, RL
 };
 }; // end of namespace OB2
+
 namespace PCI0
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -608,24 +536,18 @@ enum RingOffset
     pci0_repr = (0 | INSTANCE_RING_MARK)
 };
 
-static const CHIPLET_DATA g_pci0Data =
+static const ChipletData_t g_chipletData =
 {
     13, // PCI0 Chiplet Chiplet ID is 13
     5,  // 5 common rings for PCI0 chiplet
     1,  // 1 instance specific rings for PCI0 chiplet
-    1
+    1,
+    2,  // 2 ring variants: BASE, RL
 };
 };
 
 namespace PCI1
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -638,24 +560,18 @@ enum RingOffset
     pci1_repr = (0 | INSTANCE_RING_MARK)
 };
 
-static const CHIPLET_DATA g_pci1Data =
+static const ChipletData_t g_chipletData =
 {
     14, // PCI1 Chiplet Chiplet ID is 14
     5,  // 5 common rings for PCI1 chiplet
     1,  // 1 instance specific rings for PCI1 chiplet
-    1
+    1,
+    2,  // 2 ring variants: BASE, RL
 };
 };
 
 namespace PCI2
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -668,26 +584,18 @@ enum RingOffset
     pci2_repr = (0 | INSTANCE_RING_MARK)
 };
 
-static const CHIPLET_DATA g_pci2Data =
+static const ChipletData_t g_chipletData =
 {
     15, // PCI2 Chiplet Chiplet ID is 15
     5,  // 5 common rings for PCI2 chiplet
     1,  // 1 instance specific rings for PCI2 chiplet
-    1
+    1,
+    2,  // 2 ring variants: BASE, RL
 };
-
 };
 
 namespace EQ
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_cacheContained;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -767,25 +675,18 @@ enum RingOffset
     ex_l3_refr_time = (4 | INSTANCE_RING_MARK)
 };
 
-static const CHIPLET_DATA g_eqData =
+static const ChipletData_t g_chipletData =
 {
     16, // Quad Chiplet ID range is 16 - 21. The base ID is 16.
     66, // 66 common rings for Quad chiplet.
     5,  // 5 instance specific rings for each EQ chiplet
-    9   // 9 different rings since 2 per EX ring and 1 per EQ
+    9,  // 9 different rings since 2 per EX ring and 1 per EQ
+    3,  // 3 ring variants: BASE, CC, RL
 };
 }; // end of namespace EQ
 
 namespace EC
 {
-// FIXME: this struct is nonsense - no one uses these fields (we only need the variant number)
-struct RingVariants
-{
-    uint16_t iv_base;
-    uint16_t iv_cacheContained;
-    uint16_t iv_riskLevel;
-};
-
 enum RingOffset
 {
     // Common Rings
@@ -799,19 +700,20 @@ enum RingOffset
     ec_repr = (0 | INSTANCE_RING_MARK)
 };
 
-static const CHIPLET_DATA g_ecData =
+static const ChipletData_t g_chipletData =
 {
     32, // Core Chiplet ID range is 32-55. The base ID is 32.
     6,  // 6 common rings for Core chiplet
     1,  // 1 instance specific ring for each Core chiplet
-    1
+    1,
+    3,  // 3 ring variants: BASE, CC, RL
 };
 }; // end of namespace EC
 
 
 #ifndef __PPE__
 
-static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
+static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 {
     { PERV::perv_fure                    , "perv_fure"                   , PERV_TYPE  }, // 0
     { PERV::perv_gptr                    , "perv_gptr"                   , PERV_TYPE  }, // 1
@@ -1070,7 +972,7 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 #endif
 
 #ifdef __PPE__
-static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
+static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 {
     { PERV::perv_fure                    , PERV_TYPE  }, // 0
     { PERV::perv_gptr                    , PERV_TYPE  }, // 1
@@ -1328,25 +1230,27 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 };
 #endif
 
-// returns our own chiplet enum value for this ringId
+
+// Returns our own chiplet enum value for this ringId
 ChipletType_t
-p9_ringid_get_chiplet(
+ringid_get_chiplet(
     RingId_t i_ringId);
 
-// returns data structures defined for chiplet type
+// Returns data structures defined for chiplet type
 // as determined by ringId
 void
-p9_ringid_get_chiplet_properties(
+ringid_get_chiplet_properties(
     ChipletType_t      i_chiplet,
-    CHIPLET_DATA**     o_cpltData,
+    ChipletData_t**    o_cpltData,
     GenRingIdList**    o_ringComm,
     GenRingIdList**    o_ringInst,
     RingVariantOrder** o_varOrder,
     uint8_t*           o_varNumb);
 
-// returns properties of a ring as determined by ringId
+// Returns properties of a ring as determined by ringId
 GenRingIdList*
-p9_ringid_get_ring_properties(
+ringid_get_ring_properties(
     RingId_t i_ringId);
+
 
 #endif
