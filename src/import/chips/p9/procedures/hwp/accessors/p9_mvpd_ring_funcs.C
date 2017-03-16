@@ -534,7 +534,7 @@ extern "C"
                be64toh(l_pScanDataOld->iv_scanSelect) & l_evenOddMask ) )
         {
             // look up ring in p9_ringId and retrieve scanAddr
-            GenRingIdList* l_ringProp = p9_ringid_get_ring_properties(i_ringId);
+            GenRingIdList* l_ringProp = ringid_get_ring_properties(i_ringId);
 
             FAPI_ASSERT(l_ringProp,
                         fapi2::MVPD_RINGID_DATA_NOT_FOUND().
