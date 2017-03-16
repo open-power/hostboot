@@ -222,8 +222,16 @@
                 <value>0xAE</value>
             </field>
             <field>
+                <id>devAddrLocality1</id>
+                <value>0xA8</value>
+            </field>
+            <field>
                 <id>devAddrLocality2</id>
                 <value>0xAA</value>
+            </field>
+            <field>
+                <id>devAddrLocality3</id>
+                <value>0xA4</value>
             </field>
             <field>
                 <id>devAddrLocality4</id>

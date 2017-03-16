@@ -1995,12 +1995,28 @@
             <default>0xAE</default>
         </field>
         <field>
+            <name>devAddrLocality1</name>
+            <description>Device address on the I2C bus for Locality 1.
+                         This is a 7-bit value, but then shifted 1
+                         bit left.</description>
+            <type>uint8_t</type>
+            <default>0xA8</default>
+        </field>
+        <field>
             <name>devAddrLocality2</name>
             <description>Device address on the I2C bus for Locality 2.
                          This is a 7-bit value, but then shifted 1
                          bit left.</description>
             <type>uint8_t</type>
             <default>0xAA</default>
+        </field>
+        <field>
+            <name>devAddrLocality3</name>
+            <description>Device address on the I2C bus for Locality 3.
+                         This is a 7-bit value, but then shifted 1
+                         bit left.</description>
+            <type>uint8_t</type>
+            <default>0xA4</default>
         </field>
         <field>
             <name>devAddrLocality4</name>
