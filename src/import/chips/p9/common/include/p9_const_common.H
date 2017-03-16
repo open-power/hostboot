@@ -78,11 +78,24 @@ struct has_fixfld
     static const uint8_t value = 255;
 };
 
+const uint32_t N0_CHIPLET_ID = 2;
+const uint32_t N1_CHIPLET_ID = 3;
+const uint32_t N2_CHIPLET_ID = 4;
+const uint32_t N3_CHIPLET_ID = 5;
+const uint32_t XB_CHIPLET_ID = 6;
+const uint32_t MC01_CHIPLET_ID = 7;
+const uint32_t MC23_CHIPLET_ID = 8;
 const uint32_t OB0_CHIPLET_ID = 9;
 const uint32_t OB1_CHIPLET_ID = 10;
 const uint32_t OB2_CHIPLET_ID = 11;
 const uint32_t OB3_CHIPLET_ID = 12;
-
+const uint32_t PCI0_CHIPLET_ID = 13;
+const uint32_t PCI1_CHIPLET_ID = 14;
+const uint32_t PCI2_CHIPLET_ID = 15;
+const uint32_t EC0_CHIPLET_ID = 0x20;
+const uint32_t EC23_CHIPLET_ID = 0x37;
+const uint32_t EQ0_CHIPLET_ID = 0x10;
+const uint32_t EQ5_CHIPLET_ID = 0x15;
 #define FIXREG8(name, expr, unit, meth, newexpr) template<> struct has_fixup<uint8_t,unit,meth,expr> { static const uint8_t value = newexpr; };
 #define FIXREG32(name, expr, unit, meth, newexpr) template<> struct has_fixup<uint32_t,unit,meth,expr> { static const uint32_t value = newexpr; };
 #define FIXREG64(name, expr, unit, meth, newexpr) template<> struct has_fixup<uint64_t,unit,meth,expr> { static const uint64_t value = newexpr; };
