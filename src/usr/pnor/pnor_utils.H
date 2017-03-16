@@ -31,6 +31,10 @@
 #include "ffs.h"
 #include <config.h>
 
+#ifndef BOOTLOADER
+#include <errl/errlentry.H>
+#endif
+
 /** @file pnor_utils.H
  *  @brief Provides the utility functions used by different PNOR
  *         classes.
@@ -104,22 +108,6 @@ enum
     LPC_FW_SPACE = 0xF0000000,
 };
 
-
-
-/**
-  * Internal information to deal with the sections of PNOR
-  */
-struct SectionData_t {
-    PNOR::SectionId id;  /**< Identifier for this section */
-    uint64_t virtAddr;  /**< Virtual address for the start of the section */
-    uint32_t flashAddr;  /**< Address in flash */
-    uint32_t size;/**< Actual size of content in bytes (not including ECC)*/
-    uint8_t chip;  /**< Chip Select */
-    uint8_t version; /**< Version Checking */
-    uint16_t integrity; /**< Data Integrity */
-    uint8_t misc; /**< Misc Flags */
-} PACKED;
-
 /**
   * @brief Creates a 4-byte Cyclic Redundancy Check (CRC) on the data
   *        provided. The last iteration of the for-loop includes the ffs
@@ -162,8 +150,8 @@ void initializeSections(SectionData_t io_toc[NUM_SECTIONS]);
   *                         casted as an ffs_hdr
   */
 void checkForNullBuffer(uint8_t* i_tocBuffer,
-                           uint32_t& o_errCode,
-                          ffs_hdr*& );
+                        uint32_t& o_errCode,
+                        ffs_hdr*& );
 
 
 /**
@@ -213,21 +201,30 @@ void getSectionEnum (ffs_entry* i_entry,
   *
   * @param[out]  o_err_entry      Pass out bad entry so user can know which
   *                               entry has errors
-  *
+  * if BOOTLOADER
+  * @return N/A
+  * else
+  * @return     errlHndl_t        error log if error, nullptr otherwise
 */
-void parseEntries (ffs_hdr* i_ffs_hdr,
-                    uint32_t& io_errCode,
-                    SectionData_t* io_TOC,
-                    ffs_entry*& o_err_entry);
+#ifdef BOOTLOADER
+void
+#else
+errlHndl_t
+#endif
+parseEntries (ffs_hdr* i_ffs_hdr,
+              uint32_t& io_errCode,
+              SectionData_t * io_TOC,
+              ffs_entry*& o_err_entry);
 
 /**
  * @brief Determines whether the given section is secured by secure boot
+ *        This checks against a hardcoded list of what must be secure.
  *
  * @param[in] i_section PNOR section to test.
  *
  * @return bool True if secure section, false otherwise.
  */
-bool isSecureSection(const uint32_t i_section);
+bool isEnforcedSecureSection(const uint32_t i_section);
 
 /**
   * @brief Returns string representation of a PNOR SectionId.
@@ -242,6 +239,28 @@ bool isSecureSection(const uint32_t i_section);
   *
 */
 const char * SectionIdToString( uint32_t i_secIdIndex );
+
+/**
+ * @brief  Memcmp a vaddr to the known secureboot magic number
+ *
+ * @param[in]   i_vaddr: vaddr of secureboot header to check for magic number
+ *                       Note: must point to a buffer of size >= 4 bytes
+ *                       Nullptr asserts or terminates bootloader
+ *
+ * @return  bool - True if the magic number and starting bytes of the vaddr
+ *                 match. False otherwise.
+ */
+bool cmpSecurebootMagicNumber(const uint8_t* i_vaddr);
+
+/**
+ * @brief Determines if a section has a Header and that it is not a Secure Header
+ *
+ * @param[out] i_secInfo  PNOR information of section
+ *
+ * @return True if it appears to not have a secure header
+ *         False otherwise
+ */
+bool hasNonSecureHeader(const PNOR::SectionData_t& i_secInfo);
 
 }  // End namespace PNOR
 

@@ -137,19 +137,6 @@ namespace Bootloader{
                sizeof(BlToHbData));
     }
 
-    /**
-     * @brief  Memcmp a vaddr to the known secureboot magic number
-     *
-     * @param[in]   i_vaddr: vaddr of secureboot header to check for magic number
-     *                       Note: must point to a buffer of size >= 4 bytes
-     *
-     * @return  bool - True if the magic number and starting bytes of the vaddr
-     *                 match. False otherwise.
-     */
-    bool cmpSecurebootMagicNumber(const uint8_t* i_vaddr)
-    {
-        return memcmp(&ROM_MAGIC_NUMBER, i_vaddr, sizeof(ROM_MAGIC_NUMBER))==0;
-    }
 
     /**
      * @brief Verify Container against system hash keys
@@ -179,8 +166,8 @@ namespace Bootloader{
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_NO_EYECATCH);
         }
         // # @TODO RTC:170136 terminate in this case
-        else if ( !cmpSecurebootMagicNumber(reinterpret_cast<const uint8_t*>
-                                            (i_pContainer)))
+        else if ( !PNOR::cmpSecurebootMagicNumber(
+                    reinterpret_cast<const uint8_t*>(i_pContainer)))
         {
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_NO_MAGIC_NUM);
         }
@@ -328,7 +315,7 @@ namespace Bootloader{
                 verifyContainer(l_src_addr);
 
                 // Increment past secure header
-                if (isSecureSection(PNOR::HB_BASE_CODE))
+                if (isEnforcedSecureSection(PNOR::HB_BASE_CODE))
                 {
                     l_src_addr += PAGE_SIZE/sizeof(uint64_t);
                     l_hbbLength -= PAGE_SIZE;

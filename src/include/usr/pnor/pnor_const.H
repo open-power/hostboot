@@ -81,7 +81,7 @@ enum SectionId
     // Size and layout of this structure must be maintained for debug framework.
 struct SectionInfo_t
 {
-    SectionInfo_t(): id(INVALID_SECTION) {}
+    SectionInfo_t(): id(INVALID_SECTION), secure(false) {}
     SectionId id;       /**< Identifier for this section */
     const char* name;   /**< Name of the section */
     uint64_t vaddr;     /**< Virtual address of the start of the section */
@@ -92,12 +92,29 @@ struct SectionInfo_t
     bool sha512perEC;   /**< Version Checking perEC */
     bool readOnly;      /**< Section is read only */
     bool reprovision;   /**< Erase this section during a reprovision */
+    bool secure;        /**< Indicates if a section is secure */
 #ifdef CONFIG_SECUREBOOT
     size_t secureProtectedPayloadSize; /**< Cache the secure payload size so
                                             that the secure container only
                                             needs to be parsed once */
 #endif
 };
+
+/**
+  * Internal information to deal with the sections of PNOR
+  */
+struct SectionData_t {
+    SectionData_t(): secure(false) {}
+    PNOR::SectionId id;  /**< Identifier for this section */
+    uint64_t virtAddr;  /**< Virtual address for the start of the section */
+    uint32_t flashAddr;  /**< Address in flash */
+    uint32_t size;/**< Actual size of content in bytes (not including ECC)*/
+    uint8_t chip;  /**< Chip Select */
+    uint8_t version; /**< Version Checking */
+    uint16_t integrity; /**< Data Integrity */
+    uint8_t misc; /**< Misc Flags */
+    uint8_t secure; /**< Indicates if a section is secure */
+} PACKED;
 
 /**
  * PNOR Sides

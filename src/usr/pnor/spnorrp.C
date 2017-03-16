@@ -278,8 +278,25 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
 
             break;
         }
+
         TRACDCOMP(g_trac_pnor,"SPnorRP::verifySections getSectionInfo"
                 " succeeded for sec = %s", l_info.name);
+
+        if (!l_info.secure)
+        {
+#ifdef CONFIG_SECUREBOOT_BEST_EFFORT
+            TRACFCOMP(g_trac_pnor,"PNOR::loadSecureSection> called on unsecured section - Best effort policy skipping");
+            break;
+#else
+            TRACFCOMP(g_trac_pnor,ERR_MRK"PNOR::loadSecureSection> called on "
+                "unsecured section");
+
+            // TODO securebootp9 revisit this assert code and replace with error log
+            // code if it is deemed that this assert could happen in the field
+            assert(false,"PNOR::loadSection> section %i is not a secure section",
+                                                                    i_id);
+#endif
+        }
 
         l_info.vaddr -= PAGESIZE; // back up a page to expose the secure header
         l_info.size += PAGESIZE; // add a page to size to account for the header
@@ -682,34 +699,6 @@ errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
     // Send message to secure provider to load the section
     errlHndl_t err = NULL;
 
-    if (!isSecureSection(i_section))
-    {
-        TRACFCOMP(g_trac_pnor,ERR_MRK"PNOR::loadSecureSection> called on "
-            "unsecured section");
-        // TODO securebootp9 remove below temporary code after all of the
-        // sections in the below if condition have been fully ported and added
-        // to isSecureSection.
-        // start temporary code
-        if (i_section == PNOR::HB_EXT_CODE ||
-            i_section == PNOR::HB_DATA ||
-            i_section == PNOR::SBE_IPL ||
-            i_section == PNOR::CENTAUR_SBE ||
-            i_section == PNOR::PAYLOAD ||
-            i_section == PNOR::OCC ||
-            i_section == PNOR::HB_RUNTIME)
-        {
-            // For now, ignore the attempt to load this section securely.
-            // Returning from the middle of a function is excusable because
-            // it keeps the temp code in one place, making it easier to remove.
-            return NULL;
-        }
-        // end temporary code
-        // TODO securebootp9 revisit this assert code and replace with error log
-        // code if it is deemed that this assert could happen in the field
-        assert(false,"PNOR::loadSection> section %i is not a secure section",
-                                                                    i_section);
-    }
-
     msg_q_t spnorQ = msg_q_resolve(SPNORRP_MSG_Q);
 
     assert(spnorQ != NULL);
@@ -918,45 +907,3 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
 
     return l_errl;
 }
-
-bool PNOR::cmpSecurebootMagicNumber(const uint8_t* i_vaddr)
-{
-    return memcmp(&ROM_MAGIC_NUMBER, i_vaddr, sizeof(ROM_MAGIC_NUMBER)) == 0;
-}
-
-errlHndl_t PNOR::hasSecurebootMagicNumber(const SectionId i_section,
-                                          bool &o_valid)
-{
-    errlHndl_t l_errl = NULL;
-    SectionInfo_t l_info;
-
-    // Force to false
-    o_valid = false;
-
-    // This will not work for HBB
-    assert(i_section != HB_BASE_CODE, "hasSecurebootMagicNumber() does not work for HBB section");
-
-    bool isSecure = PNOR::isSecureSection(i_section);
-    do {
-        l_errl = getSectionInfo(i_section, l_info);
-        if (l_errl)
-        {
-            TRACFCOMP(g_trac_pnor, ERR_MRK"PNOR::hasSecurebootMagicNumber(): - getSectionInfo failed");
-            break;
-        }
-
-        // Use PNOR vaddr
-        if(isSecure)
-        {
-            // back up a page to expose the secure header
-            l_info.vaddr = l_info.vaddr - VMM_VADDR_SPNOR_DELTA
-                                        - VMM_VADDR_SPNOR_DELTA
-                                        - PAGESIZE;
-        }
-        o_valid = cmpSecurebootMagicNumber(reinterpret_cast<uint8_t*>
-                                           (l_info.vaddr));
-    }while(0);
-
-    return l_errl;
-}
-

@@ -48,7 +48,8 @@ namespace Bootloader
         MOD_PNORACC_READTOC              = 0x03, /**< bl_pnorAccess.C : read TOC */
         MOD_PNORACC_GETHBBSECT           = 0x04, /**< bl_pnorAccess.C : get HBB sect */
         MOD_BOOTLOADER_VERIFY            = 0x05, /**< bootloader.C : verifyContainer */
-        MOD_BOOTLOADER_PNOR_SECID_TO_STR = 0x06 /**< pnor_utils.C : SectionIdToString */
+        MOD_BOOTLOADER_PNOR_SECID_TO_STR = 0x06, /**< pnor_utils.C : SectionIdToString */
+        MOD_BOOTLOADER_PNOR_CMP_MAGIC_NUM = 0x07 /**< pnor_utils.C : cmpSecurebootMagicNumber */
 
     };
 
@@ -73,6 +74,7 @@ namespace Bootloader
         RC_PARSE_ENTRIES_ERR       = HBBL_COMP_ID | 0x0B, /**< Parse Entries Error */
         RC_NO_HBB_IN_TOC           = HBBL_COMP_ID | 0x0C, /**< No HBB Sect in TOC */
         RC_PNOR_SECID_OUT_OF_RANGE = HBBL_COMP_ID | 0x0D, /**< Requested PNOR SecId DNE in string array */
+        RC_PNOR_NULLPTR            = HBBL_COMP_ID | 0x0E, /**< Requested address to compare is a nullptr */
     };
 
 };  // end Bootloader
