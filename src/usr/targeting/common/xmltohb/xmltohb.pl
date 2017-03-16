@@ -526,7 +526,7 @@ sub validateAttributes {
     $elements{"virtual"}     = { required => 0, isscalar => 0};
     $elements{"tempAttribute"} = { required => 0, isscalar => 0};
     $elements{"serverwizReadonly"} = { required => 0, isscalar => 0};
-    $elements{"serverwizHide"} = { required => 0, isscalar => 0};
+    $elements{"serverwizShow"} = { required => 0, isscalar => 1};
 
     foreach my $attribute (@{$attributes->{attribute}})
     {
