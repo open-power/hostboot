@@ -3846,7 +3846,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
             l_currentDI.masterPort = l_eep->port;
             l_currentDI.addr = l_eep->devAddr;
             l_currentDI.slavePort = 0xFF;
-            l_currentDI.busFreqKhz = (l_eep->busFreq) * 1000;
+            l_currentDI.busFreqKhz = (l_eep->busFreq) / 1000;
             l_currentDI.deviceType = TARGETING::HDAT_I2C_DEVICE_TYPE_SEEPROM;
             switch(l_eep->device)
             {
@@ -3906,7 +3906,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
             l_currentDI.masterPort = tpmInfo.port;
             l_currentDI.addr = tpmInfo.devAddr;
             l_currentDI.slavePort = 0xFF;
-            l_currentDI.busFreqKhz = (tpmInfo.busFreq) * 1000;
+            l_currentDI.busFreqKhz = (tpmInfo.busFreq) / 1000;
             l_currentDI.deviceType =
                     TARGETING::HDAT_I2C_DEVICE_TYPE_NUVOTON_TPM;
             l_currentDI.devicePurpose = TARGETING::HDAT_I2C_DEVICE_PURPOSE_TPM;
@@ -3979,7 +3979,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
             l_currentDevice.masterPort = l_i2cMasterPort[l_idx];
             l_currentDevice.addr = l_i2cAddr[l_idx];
             l_currentDevice.slavePort = l_i2cSlavePort[l_idx];
-            l_currentDevice.busFreqKhz = l_i2cBusFreq[l_idx] * 1000;
+            l_currentDevice.busFreqKhz = l_i2cBusFreq[l_idx] / 1000;
             l_currentDevice.deviceType = l_i2cDevType[l_idx];
             l_currentDevice.devicePurpose = l_i2cDevPurpose[l_idx];
 
