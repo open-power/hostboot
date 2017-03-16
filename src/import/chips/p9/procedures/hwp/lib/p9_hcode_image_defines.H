@@ -64,8 +64,8 @@ namespace p9_hcodeImageBuild
  * @brief returns maximum quad common rings that enter HOMER.
  */
 
-#define MAX_HOMER_QUAD_CMN_RINGS       (uint32_t)(EQ::g_eqData.iv_num_common_rings - 4)
-#define MAX_HOMER_CORE_CMN_RINGS       (uint32_t)(EC::g_ecData.iv_num_common_rings - 2)
+#define MAX_HOMER_QUAD_CMN_RINGS       (uint32_t)(EQ::g_chipletData.iv_num_common_rings - 4)
+#define MAX_HOMER_CORE_CMN_RINGS       (uint32_t)(EC::g_chipletData.iv_num_common_rings - 2)
 
 /**
  * @brief models QPMR header in HOMER
