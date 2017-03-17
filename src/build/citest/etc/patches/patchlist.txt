@@ -5,8 +5,3 @@ Brief description of the problem or reason for patch
 -Files: list of files
 -Coreq: list of associated changes, e.g. workarounds.presimsetup
 
-Need additional actions for FAB IOVALID validation
--RTC: 170736
--CMVC: 	1018466
--Files: p9n.act
--Coreq: workarounds.postsimsetup
