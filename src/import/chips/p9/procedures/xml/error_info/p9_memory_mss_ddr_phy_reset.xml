@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -472,7 +472,7 @@
 <hwpError>
   <rc>RC_MSS_DUTY_CLOCK_DISTORTION_CAL_FAILED</rc>
   <description>
-    The ADR duty clock distortion calibration algorithm failed
+    The duty clock distortion calibration algorithm failed
   </description>
   <ffdc>CURRENT_ADJUST</ffdc>
   <ffdc>SIDE</ffdc>

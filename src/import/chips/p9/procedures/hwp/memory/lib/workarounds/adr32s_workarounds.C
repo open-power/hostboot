@@ -306,9 +306,9 @@ fapi_try_exit:
 
 ///
 /// @brief Sets the value to write out to the DCD register in question
-/// @param[in] i_a_side_rc - a side's return code - cannot be const due to the fapi logging function modifying the RC
+/// @param[in,out] i_a_side_rc - a side's return code - cannot be const due to the fapi logging function modifying the RC
 /// @param[in] i_a_side_val - a side's value
-/// @param[in] i_b_side_rc - b side's return code - cannot be const due to the fapi logging function modifying the RC
+/// @param[in,out] i_b_side_rc - b side's return code - cannot be const due to the fapi logging function modifying the RC
 /// @param[in] i_b_side_val - b side's value
 /// @param[out] o_value - value to use for the DCD register
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -318,35 +318,35 @@ fapi_try_exit:
 /// 3) Use b if a failed
 /// 4) Average if a and b both passed
 ///
-fapi2::ReturnCode compute_dcd_value(fapi2::ReturnCode& i_a_side_rc,
+fapi2::ReturnCode compute_dcd_value(fapi2::ReturnCode& io_a_side_rc,
                                     const uint64_t i_a_side_val,
-                                    fapi2::ReturnCode& i_b_side_rc,
+                                    fapi2::ReturnCode& io_b_side_rc,
                                     const uint64_t i_b_side_val,
                                     uint64_t& o_value)
 {
     // 1) return a failing RC if a and b side failed
-    if(i_a_side_rc != FAPI2_RC_SUCCESS && i_b_side_rc != FAPI2_RC_SUCCESS)
+    if(io_a_side_rc != FAPI2_RC_SUCCESS && io_b_side_rc != FAPI2_RC_SUCCESS)
     {
         // Log a-side, return b-side (chose this at random, but we want to exit)
         FAPI_ERR("Both side A and side B failed, exiting with errors");
-        fapi2::logError(i_a_side_rc);
-        return i_b_side_rc;
+        fapi2::logError(io_a_side_rc);
+        return io_b_side_rc;
     }
 
     // 2) b failed, use a
-    if(i_b_side_rc != FAPI2_RC_SUCCESS)
+    if(io_b_side_rc != FAPI2_RC_SUCCESS)
     {
-        fapi2::logError(i_b_side_rc);
+        fapi2::logError(io_b_side_rc);
         FAPI_INF("Side B failed, using side-A's value");
         o_value = i_a_side_val;
         return FAPI2_RC_SUCCESS;
     }
 
     // 3) a failed, use b
-    if(i_a_side_rc != FAPI2_RC_SUCCESS)
+    if(io_a_side_rc != FAPI2_RC_SUCCESS)
     {
         FAPI_INF("Side A failed, using side-B's value");
-        fapi2::logError(i_a_side_rc);
+        fapi2::logError(io_a_side_rc);
         o_value = i_b_side_val;
         return FAPI2_RC_SUCCESS;
     }
@@ -386,12 +386,15 @@ fapi2::ReturnCode duty_cycle_distortion_calibration( const fapi2::Target<fapi2::
 
             auto l_a_rc = dcd_cal_helper(p, r, l_seed, true, l_a_side_value);
 
+            // Updates the seed value to avoid underflow issues
+            l_seed = l_a_side_value == 0 ? l_seed : l_a_side_value - 1;
+
             // We want to seed the other side (and each subsequent port) with the
             // value found in the pervious iteration as that will likely reduce the number
             // of iterations to find the transition. We back up one so that if we're on
             // a transition, we don't 'bounce' from a 1 to a 0. This will give us a good
             // transition if the a-side value is really to be the b-side value too.
-            auto l_b_rc = dcd_cal_helper(p, r, l_a_side_value - 1, false, l_b_side_value);
+            auto l_b_rc = dcd_cal_helper(p, r, l_seed, false, l_b_side_value);
 
             // The final value is the average of the a-side and b-side values.
             FAPI_TRY(compute_dcd_value(l_a_rc, l_a_side_value, l_b_rc, l_b_side_value, l_seed));
