@@ -91,17 +91,14 @@ namespace SBE
     errlHndl_t getBootMcSyncMode( uint8_t& o_mcSyncMode );
 
     /**
-     * @brief Sets the target processor to boot from the same side that
-     *        the master processor used
+     * @brief Sets the target processor to boot SBE from the side that is
+     *        indicated by the SBE MVPD
      *
      * @param[in] i_target      Target processor to update
      *
-     * @param[in] i_masterProc  Master processor target
-     *
      * @return errlHndl_t       Error log handle on failure.
      */
-    errlHndl_t updateSbeBootSeeprom(TARGETING::Target* i_target,
-                                    TARGETING::Target* i_masterProc);
+    errlHndl_t updateSbeBootSeeprom(TARGETING::Target* i_target);
 
 } //end namespace SBE
 

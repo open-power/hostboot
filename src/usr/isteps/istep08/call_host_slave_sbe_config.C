@@ -147,8 +147,7 @@ void* call_host_slave_sbe_config(void *io_pArgs)
                 errlCommit( l_errl, ISTEP_COMP_ID );
             }
 
-            l_errl = SBE::updateSbeBootSeeprom(l_cpu_target,
-                                               l_pMasterProcTarget);
+            l_errl = SBE::updateSbeBootSeeprom(l_cpu_target);
 
             if( l_errl )
             {
