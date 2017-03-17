@@ -341,7 +341,8 @@ sub verifyCommitMsg
 
         # Identify if this is a tagged line or a non-tagged line and store
         # away.
-        if ($line =~ m/^\s*[A-Za-z0-9\-_]+:[^:]/)
+        if ( ($line =~ m/^\s*[A-Za-z0-9\-_]+:[^:]/)
+              && !($line =~ m/http/) )
         {
             # We allow lines that look like tags in the topic like...
             # "FOO: Adding support for BAR."
