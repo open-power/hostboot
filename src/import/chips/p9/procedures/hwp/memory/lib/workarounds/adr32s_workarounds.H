@@ -145,9 +145,9 @@ fapi2::ReturnCode duty_cycle_distortion_calibration( const fapi2::Target<fapi2::
 
 ///
 /// @brief Sets the value to write out to the DCD register in question
-/// @param[in] i_a_side_rc - a side's return code - cannot be const due to the fapi logging function modifying the RC
+/// @param[in,out] i_a_side_rc - a side's return code - cannot be const due to the fapi logging function modifying the RC
 /// @param[in] i_a_side_val - a side's value
-/// @param[in] i_b_side_rc - b side's return code - cannot be const due to the fapi logging function modifying the RC
+/// @param[in,out] i_b_side_rc - b side's return code - cannot be const due to the fapi logging function modifying the RC
 /// @param[in] i_b_side_val - b side's value
 /// @param[out] o_value - value to use for the DCD register
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -157,9 +157,9 @@ fapi2::ReturnCode duty_cycle_distortion_calibration( const fapi2::Target<fapi2::
 /// 3) Use b if a failed
 /// 4) Average if a and b both passed
 ///
-fapi2::ReturnCode compute_dcd_value(fapi2::ReturnCode& i_a_side_rc,
+fapi2::ReturnCode compute_dcd_value(fapi2::ReturnCode& io_a_side_rc,
                                     const uint64_t i_a_side_val,
-                                    fapi2::ReturnCode& i_b_side_rc,
+                                    fapi2::ReturnCode& io_b_side_rc,
                                     const uint64_t i_b_side_val,
                                     uint64_t& o_value);
 } // close namespace adr32s
