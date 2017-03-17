@@ -1531,6 +1531,7 @@ namespace SBE
 
         errlHndl_t err = NULL;
         uint64_t scomData = 0x0;
+        TARGETING::Target* masterProcChipTargetHandle = NULL;
 
         o_bootSide = SBE_SEEPROM_INVALID;
 
@@ -1539,7 +1540,6 @@ namespace SBE
              TARGETING::Target * l_target=i_target;
 
             // Get the Master Proc Chip Target for comparisons later
-            TARGETING::Target* masterProcChipTargetHandle = NULL;
             TargetService& tS = targetService();
             err = tS.queryMasterProcChipTargetHandle(
                                                 masterProcChipTargetHandle);
@@ -1587,21 +1587,21 @@ namespace SBE
 
         TRACFCOMP( g_trac_sbe,
                    EXIT_MRK"getSbeBootSeeprom(): o_bootSide=0x%X (reg=0x%X, "
-                   "tgt=0x%X)",
-                   o_bootSide, scomData, TARGETING::get_huid(i_target) );
+                   "tgt=0x%X, %s)",
+                   o_bootSide, scomData, TARGETING::get_huid(i_target),
+                   (i_target != masterProcChipTargetHandle) ? "slave" :
+                   "master");
 
         return err;
     }
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t updateSbeBootSeeprom(TARGETING::Target* i_target,
-                                    TARGETING::Target* i_masterProc)
+    errlHndl_t updateSbeBootSeeprom(TARGETING::Target* i_target)
     {
         TRACFCOMP( g_trac_sbe, ENTER_MRK"updateSbeBootSeeprom()" );
 
         errlHndl_t err = NULL;
         fapi2::ReturnCode l_fapi_rc;
-        sbeSeepromSide_t l_masterBootSide = SBE_SEEPROM_INVALID;
         fapi2::buffer<uint32_t> l_read_reg;
         const uint32_t l_sbeBootSelectMask = SBE_BOOT_SELECT_MASK >> 32;
 
@@ -1609,15 +1609,16 @@ namespace SBE
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiTarg(i_target);
 
         do{
-            // Grab the SBE boot side for the master proc
-            err = getSbeBootSeeprom(i_masterProc,
-                                    l_masterBootSide);
-
+            // Read version from MVPD for target proc
+            mvpdSbKeyword_t l_mvpdSbKeyword;
+            err =  getSetMVPDVersion(i_target,
+                                     MVPDOP_READ,
+                                     l_mvpdSbKeyword);
 
             if( err )
             {
                 TRACFCOMP( g_trac_sbe,
-                           ERR_MRK"updateSbeBootSeeprom(): getSbeBootSeeprom, "
+                           ERR_MRK"updateSbeBootSeeprom(): getSetMVPDVersion, "
                            "RC=0x%X, PLID=0x%lX",
                            ERRL_GETRC_SAFE(err),
                            ERRL_GETPLID_SAFE(err));
@@ -1646,10 +1647,16 @@ namespace SBE
                 break;
             }
 
-            // Master boot side is 0
-            if(SBE_SEEPROM0 == l_masterBootSide)
+            // Determine Boot Side from flags in MVPD
+            bool l_bootSide0 = (isIplFromReIplRequest())
+                ? (REIPL_SEEPROM_0_VALUE ==
+                    (l_mvpdSbKeyword.flags & REIPL_SEEPROM_MASK))
+                : (SEEPROM_0_PERMANENT_VALUE ==
+                    (l_mvpdSbKeyword.flags & PERMANENT_FLAG_MASK));
+
+            if(l_bootSide0)
             {
-                // Clear bit for side 1
+                // Set Boot Side 0 by clearing bit for side 1
                 l_read_reg &= ~l_sbeBootSelectMask;
 
                 TRACFCOMP( g_trac_sbe,
@@ -1658,10 +1665,9 @@ namespace SBE
                            l_read_reg,
                            TARGETING::get_huid(i_target) );
             }
-            // Master boot side is 1
-            else if(SBE_SEEPROM1 == l_masterBootSide)
+            else
             {
-                // Set bit for side 1
+                // Set Boot Side 1 by setting bit for side 1
                 l_read_reg |= l_sbeBootSelectMask;
 
                 TRACFCOMP( g_trac_sbe,
@@ -3802,7 +3808,7 @@ namespace SBE
                     // IPL is due to SBE Update Request
                     o_reIplRequest = true;
                     TRACFCOMP(g_trac_sbe, INFO_MRK"isIplFromReIplRequest(): "
-                              "MBOX retuned that it was our IPL request: "
+                              "MBOX returned that it was our IPL request: "
                               "o_reIplRequest=%d (d0=0x%X, d1=0x%X)",
                               o_reIplRequest, msg->data[0], msg->data[1]);
                 }
