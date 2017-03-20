@@ -26,8 +26,10 @@
 #include <config.h>
 #include <hwas/common/hwasCallout.H>
 #include <errl/errlreasoncodes.H>
+#ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisel.H>
 #include <ipmi/ipmisensor.H>
+#endif
 #include <errl/errlentry.H>
 #include <sys/mm.h>
 #include <pnor/pnorif.H>

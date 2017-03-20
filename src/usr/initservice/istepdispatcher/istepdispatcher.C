@@ -64,13 +64,15 @@
 #include <console/consoleif.H>
 #include <isteps/hwpisteperror.H>
 #include <pnor/pnorif.H>
+#ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer
 #include <ipmi/ipmipowerstate.H>    //IPMI System ACPI Power State
 #include <ipmi/ipmichassiscontrol.H>
-#include <config.h>
 #include <ipmi/ipmisensor.H>
 #include <ipmi/ipmiif.H>
+#endif
 
+#include <config.h>
 #include <initservice/bootconfigif.H>
 #include <trace/trace.H>
 #include <util/utilmbox_scratch.H>
@@ -248,8 +250,11 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
         // Get tracelite setting from top level target attributes
         TARGETING::Target* l_pSys = NULL;
         TARGETING::targetService().getTopLevelTarget(l_pSys);
+
+#ifdef CONFIG_INCLUDE_XML_OPENPOWER
         uint8_t l_tlEnabled = l_pSys->getAttr<TARGETING::ATTR_OP_TRACE_LITE>();
         TRACE::setTraceLite(l_tlEnabled);
+#endif
 
         if(iv_mailboxEnabled)
         {

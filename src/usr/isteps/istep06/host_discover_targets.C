@@ -48,9 +48,10 @@
 #include <hwas/hwasPlat.H>
 #include <vpd/vpd_if.H>
 #include <console/consoleif.H>
+#ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmifruinv.H>
 #include <ipmi/ipmisensor.H>
-
+#endif
 #include <fapi2/plat_hwp_invoker.H>
 #include <fapi2/target.H>
 

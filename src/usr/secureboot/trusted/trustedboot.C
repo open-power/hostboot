@@ -46,7 +46,9 @@
 #include <sys/mmio.h>
 #include <sys/task.h>
 #include <initservice/initserviceif.H>
+#ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
+#endif
 #include <config.h>
 #include <devicefw/driverif.H>
 #include <i2c/tpmddif.H>

@@ -605,6 +605,7 @@ void ErrlEntry::checkHiddenLogsEnable( )
 ///////////////////////////////////////////////////////////////////////////////
 // Called by addHwCallout to get the part and serial numbers from the current
 // target so that it can be appended to the error log
+#ifdef CONFIG_BMC_IPMI
     void ErrlEntry::addPartAndSerialNumbersToErrLog
 (const TARGETING::Target * i_target)
 {
@@ -668,7 +669,7 @@ void ErrlEntry::checkHiddenLogsEnable( )
 
     TRACDCOMP(g_trac_errl, EXIT_MRK"ErrlEntry::addPartAndSerialNumbersToErrLog()");
 }
-
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // for use by ErrlManager
@@ -724,7 +725,9 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
                                                       this);
                     if(!l_err)
                     {
+#ifdef CONFIG_BMC_IPMI
                         addPartAndSerialNumbersToErrLog( l_target );
+#endif
                     }
                     else
                     {
