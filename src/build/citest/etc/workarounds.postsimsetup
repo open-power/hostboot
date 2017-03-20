@@ -27,15 +27,24 @@
 ## Workarounds that are run after start_simics is executed for the first time
 ##    to setup the sandbox
 ##
-
 ### Example applying a patch to cec-chip files
 #echo "+++ Updating something wonderful in a simics file"
 #mkdir -p $sb/simu/data/cec-chip/
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
-
 #pull in new actions in p9_memory.act RTC 171066
 echo "+++ Updating p9n_memory.act file for p9_mss_ddr_phy_reset"
 sbex -t 1019444
 
+#pull in href makefile fix
+echo "+++ Updating href makefile"
+sbex -t 1020522
+
+#pull in new sbe image
+echo "+++ Updating sbe image"
+sbex -t 1020384
+chmod 777 $sb/sbei/sbfw/img/*
+mkdir -p $sb/engd/href/
+cd $sb/engd/href
+mk -a -k
 

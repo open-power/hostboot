@@ -100,6 +100,7 @@ fapi2::ReturnCode writeMboxRegs (
     MBOX_ATTR_SET   (ATTR_PROC_SBE_MASTER_CHIP,     i_proc_target,   i_image);
     MBOX_ATTR_CLEAR (ATTR_PROC_FABRIC_GROUP_ID,     i_proc_target,   i_image);
     MBOX_ATTR_CLEAR (ATTR_PROC_FABRIC_CHIP_ID,      i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_DD1_SLOW_PCI_REF_CLOCK,   FAPI_SYSTEM,     i_image);
 
 fapi_try_exit:
     FAPI_DBG("writeMboxRegs Exiting...");
