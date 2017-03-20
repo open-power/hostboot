@@ -225,8 +225,8 @@ _main:
 
     ;// Do dcbz from end of Bootloader load to end of HBB ECC working space
 _dcbz_after_bl:
-    lis r5, SBE_HB_SECUREACCESSBIT@h
-    ori r5, r5, SBE_HB_SECUREACCESSBIT@l
+    lis r5, SBE_HB_BLLOADSIZE@h
+    ori r5, r5, SBE_HB_BLLOADSIZE@l
     ld r5, 0(r5)       ;// get ending EA from SBE HB structure
     lis r6, 0
     addis r6, r6, 32   ;// 2M (32 * 0x10000)
