@@ -64,6 +64,7 @@ extern "C"
         PU_PPE_CHIPUNIT,     ///< PPE
         PU_SBE_CHIPUNIT,     ///< SBE
         PU_CAPP_CHIPUNIT,    ///< CAPP
+        PU_MC_CHIPUNIT,    ///< mc
         NONE,                ///< None/Invalid
     } p9ChipUnits_t;
 
