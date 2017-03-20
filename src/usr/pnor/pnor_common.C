@@ -46,11 +46,6 @@ TRAC_INIT(&g_trac_pnor, PNOR_COMP_NAME, 4*KILOBYTE, TRACE::BUFFER_SLOW); //4K
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
-/**
- * Eyecatcher strings for PNOR TOC entries
- */
-extern const char* cv_EYECATCHER[];
-
 
 /*
  * @brief determine the physical offset of the ffs entry
@@ -319,7 +314,7 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
                    addr -= headerSize;
 
                    l_errhdl = PNOR::extendHash(addr, headerSize,
-                                               cv_EYECATCHER[l_secId]);
+                                               PNOR::SectionIdToString(l_secId));
                    if (l_errhdl)
                    {
                        break;
@@ -333,7 +328,7 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
         tmpId ++ )
         {
             TRACFCOMP(g_trac_pnor, "%s:    size=0x%.8X  flash=0x%.8X ",
-                  cv_EYECATCHER[tmpId], o_TOC[tmpId].size,
+                  PNOR::SectionIdToString(tmpId), o_TOC[tmpId].size,
                   o_TOC[tmpId].flashAddr);
         }
 

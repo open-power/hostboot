@@ -34,13 +34,16 @@
 #include "pnor_utils.H"
 #include <pnor/pnor_const.H>
 
-#if  !defined(__BOOT_LOADER_H)
+#ifndef BOOTLOADER
 #include <errl/errlmanager.H>
+#include <assert.h>
 extern trace_desc_t* g_trac_pnor;
 #define PNOR_UTIL_TRACE(arg0, args...) TRACFCOMP(g_trac_pnor, args)
 #define PNOR_UTIL_TRACE_W_BRK(arg0, args...) TRACFCOMP(g_trac_pnor, args)
 #else
 #include <bootloader/bootloader_trace.H>
+#include <bootloader/bootloader.H>
+#include <bootloader/hbblreasoncodes.H>
 #define PNOR_UTIL_TRACE(arg0, args...) BOOTLOADER_TRACE(arg0)
 #define PNOR_UTIL_TRACE_W_BRK(arg0, args...) BOOTLOADER_TRACE_W_BRK(arg0)
 #endif
@@ -49,42 +52,7 @@ extern trace_desc_t* g_trac_pnor;
 #include "common/ffs_hb.H"
 #include <util/align.H>
 
-/**
- * Eyecatcher strings for PNOR TOC entries
- */
-const char* cv_EYECATCHER[] = {
-    "part",      /**< PNOR::TOC              : Table of Contents */
-    "HBI",       /**< PNOR::HB_EXT_CODE      : Hostboot Extended Image */
-    "GLOBAL",    /**< PNOR::GLOBAL_DATA      : Global Data */
-    "HBB",       /**< PNOR::HB_BASE_CODE     : Hostboot Base Image */
-    "SBEC",      /**< PNOR::CENTAUR_SBE      : Centaur Self-Boot Engine image */
-    "SBE",       /**< PNOR::SBE_IPL          : Self-Boot Enginer IPL image */
-    "HCODE",     /**< PNOR::HCODE            : HCODE Reference image */
-    "PAYLOAD",   /**< PNOR::PAYLOAD          : HAL/OPAL */
-    "HBRT",      /**< PNOR::HB_RUNTIME       : Hostboot Runtime(for Sapphire)*/
-    "HBD",       /**< PNOR::HB_DATA          : Hostboot Data */
-    "GUARD",     /**< PNOR::GUARD_DATA       : Hostboot Data */
-    "HBEL",      /**< PNOR::HB_ERRLOGS       : Hostboot Error log Repository */
-    "DJVPD",     /**< PNOR::DIMM_JEDEC_VPD   : Dimm JEDEC VPD */
-    "MVPD",      /**< PNOR::MODULE_VPD       : Module VPD */
-    "CVPD",      /**< PNOR::CENTAUR_VPD      : Centaur VPD */
-    "NVRAM",     /**< PNOR::NVRAM            : OPAL Storage */
-    "OCC",       /**< PNOR::OCC              : OCC LID */
-    "FIRDATA",   /**< PNOR::FIRDATA          : FIRs for checkstop analysis */
-    "ATTR_TMP",  /**< PNOR::ATTR_TMP         : Temporary Attribute Overrides */
-    "ATTR_PERM", /**< PNOR::ATTR_PERM        : Permanent Attribute Overrides */
-    "CAPP",      /**< PNOR::CAPP             : CAPP LID */
-    "VERSION",   /**< PNOR::VERSION          : PNOR Version string */
-    "HBBL",      /**<PNOR::HB_BOOTLOADER     : Hostboot Bootloader image */
-    "TEST",      /**< PNOR::TEST             : Test space for PNOR*/
-    "TESTRO",    /**< PNOR::TESTRO           : ReadOnly Test space for PNOR */
-    "BACKUP_PART", /**PNOR::BACKUP_PART      : Backup of PART*/
-    "POWERVM",   /**< PNOR::POWERVM          : Power VM data */
-    "RINGOVD",   /**< PNOR::RINGOVD          : Ring overrides */
-    "WOFDATA",   /**< PNOR::WOFDATA          : VFRT data tables for WOF */
-};
-
-/**
+/*
  * @brief calculates the checksum on data(ffs header/entry) and will return
  *    0 if the checksums match
  */
@@ -248,7 +216,7 @@ void PNOR::getSectionEnum (ffs_entry* i_entry,
     for(uint32_t eyeIndex=PNOR::TOC;eyeIndex<PNOR::NUM_SECTIONS;
                       eyeIndex++)
     {
-        if(strcmp(cv_EYECATCHER[eyeIndex],i_entry->name) == 0)
+        if(strcmp(PNOR::SectionIdToString(eyeIndex),i_entry->name) == 0)
         {
             *o_secId = eyeIndex;
             break;
@@ -380,5 +348,82 @@ bool PNOR::isSecureSection(const uint32_t i_section)
 #else
     return false;
 #endif
+}
+
+const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
+{
+    /**
+     * Eyecatcher strings for PNOR TOC entries
+     * Use an array vs switch statement for O(1) lookup
+     * Not using std::array so we can check the actual size filled in vs N
+     *   in std:array<const char*, N>.
+     */
+    static const char* SectionIdToStringArr[] =
+    {
+        "part",        /**< PNOR::TOC            : Table of Contents */
+        "HBI",         /**< PNOR::HB_EXT_CODE    : Hostboot Extended Image */
+        "GLOBAL",      /**< PNOR::GLOBAL_DATA    : Global Data */
+        "HBB",         /**< PNOR::HB_BASE_CODE   : Hostboot Base Image */
+        "SBEC",        /**< PNOR::CENTAUR_SBE    : Centaur Self-Boot Engine image */
+        "SBE",         /**< PNOR::SBE_IPL        : Self-Boot Enginer IPL image */
+        "HCODE",       /**< PNOR::HCODE          : HCODE Reference image */
+        "PAYLOAD",     /**< PNOR::PAYLOAD        : HAL/OPAL */
+        "HBRT",        /**< PNOR::HB_RUNTIME     : Hostboot Runtime(for Sapphire)*/
+        "HBD",         /**< PNOR::HB_DATA        : Hostboot Data */
+        "GUARD",       /**< PNOR::GUARD_DATA     : Hostboot Data */
+        "HBEL",        /**< PNOR::HB_ERRLOGS     : Hostboot Error log Repository */
+        "DJVPD",       /**< PNOR::DIMM_JEDEC_VPD : Dimm JEDEC VPD */
+        "MVPD",        /**< PNOR::MODULE_VPD     : Module VPD */
+        "CVPD",        /**< PNOR::CENTAUR_VPD    : Centaur VPD */
+        "NVRAM",       /**< PNOR::NVRAM          : OPAL Storage */
+        "OCC",         /**< PNOR::OCC            : OCC LID */
+        "FIRDATA",     /**< PNOR::FIRDATA        : FIRs for checkstop analysis */
+        "ATTR_TMP",    /**< PNOR::ATTR_TMP       : Temporary Attribute Overrides */
+        "ATTR_PERM",   /**< PNOR::ATTR_PERM      : Permanent Attribute Overrides */
+        "CAPP",        /**< PNOR::CAPP           : CAPP LID */
+        "VERSION",     /**< PNOR::VERSION        : PNOR Version string */
+        "HBBL",        /**<PNOR::HB_BOOTLOADER   : Hostboot Bootloader image */
+        "TEST",        /**< PNOR::TEST           : Test space for PNOR*/
+        "TESTRO",      /**< PNOR::TESTRO         : ReadOnly Test space for PNOR */
+        "BACKUP_PART", /**PNOR::BACKUP_PART      : Backup of PART*/
+        "POWERVM",     /**< PNOR::POWERVM        : Power VM data */
+        "RINGOVD",     /**< PNOR::RINGOVD        : Ring overrides */
+        "WOFDATA",     /**< PNOR::WOFDATA        : VFRT data tables for WOF */
+        "SBKT",        /**< PNOR::SBKT           : SecureBoot Key Transition */
+    };
+
+    // Get actual number of entries of array.
+    const size_t numEntries = sizeof(SectionIdToStringArr)/sizeof(char*);
+
+    // Assert that the number of entries equals PNOR::NUM_SECTIONS
+    static_assert (numEntries == (PNOR::NUM_SECTIONS),
+               "Mismatch between number of SectionIds and correlating strings");
+
+    // Bootloader does not support asserts
+#ifdef BOOTLOADER
+    if(i_secIdIndex >= (PNOR::NUM_SECTIONS))
+    {
+        PNOR_UTIL_TRACE(BTLDR_TRC_UTILS_PARSE_PNOR_SECID_OUT_OF_RANGE);
+        /*@
+         * @errortype
+         * @moduleid     Bootloader::MOD_BOOTLOADER_PNOR_SECID_TO_STR
+         * @reasoncode   Bootloader::RC_PNOR_SECID_OUT_OF_RANGE
+         * @userdata1    Section ID requested
+         * @userdata2    Max index of Section id to string array
+         * @devdesc      No String associated with PNOR section ID
+         * @custdesc     A problem occurred while running processor
+         *               boot code.
+         */
+        bl_terminate(Bootloader::MOD_BOOTLOADER_PNOR_SECID_TO_STR,
+                     Bootloader::RC_PNOR_SECID_OUT_OF_RANGE,
+                     i_secIdIndex,
+                     numEntries);
+    }
+#else
+    // Assert if accessing index out of array.
+    assert(i_secIdIndex < (PNOR::NUM_SECTIONS), "SectionIdToString PNOR section id out of range");
+#endif
+
+    return SectionIdToStringArr[i_secIdIndex];
 }
 

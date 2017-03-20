@@ -65,6 +65,7 @@ my %traceText = (
     "E5" => "Utils checkHeader block count invalid",
     "E6" => "Utils checkHeader header size invalid",
     "E7" => "Utils parseEntries invalid section",
+    "E8" => "Utils SectionIdToString PNOR section id out of range",
     "F0" => "Main getHBBSection returned",
     "F1" => "Main removeECC returned error",
     "F2" => "PNOR Access readTOC checkForNullBuffer null buffer",

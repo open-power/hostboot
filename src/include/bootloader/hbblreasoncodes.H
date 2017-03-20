@@ -42,12 +42,13 @@ namespace Bootloader
 */
     enum hbblModuleId
     {
-        MOD_BOOTLOADER_INVALID   = 0x00, /**< Zero is an invalid module id */
-        MOD_BOOTLOADER_TERMINATE = 0x01, /**< bl_terminate.C : save SRC */
-        MOD_BOOTLOADER_MAIN      = 0x02, /**< bootloader.C : main */
-        MOD_PNORACC_READTOC      = 0x03, /**< bl_pnorAccess.C : read TOC */
-        MOD_PNORACC_GETHBBSECT   = 0x04, /**< bl_pnorAccess.C : get HBB sect */
-        MOD_BOOTLOADER_VERIFY    = 0x05, /**< bootloader.C : verifyContainer */
+        MOD_BOOTLOADER_INVALID           = 0x00, /**< Zero is an invalid module id */
+        MOD_BOOTLOADER_TERMINATE         = 0x01, /**< bl_terminate.C : save SRC */
+        MOD_BOOTLOADER_MAIN              = 0x02, /**< bootloader.C : main */
+        MOD_PNORACC_READTOC              = 0x03, /**< bl_pnorAccess.C : read TOC */
+        MOD_PNORACC_GETHBBSECT           = 0x04, /**< bl_pnorAccess.C : get HBB sect */
+        MOD_BOOTLOADER_VERIFY            = 0x05, /**< bootloader.C : verifyContainer */
+        MOD_BOOTLOADER_PNOR_SECID_TO_STR = 0x06 /**< pnor_utils.C : SectionIdToString */
 
     };
 
@@ -59,18 +60,19 @@ namespace Bootloader
  */
     enum hbblReasonCode
     {
-        RC_ASSERT            = HBBL_COMP_ID | 0x01, /**< Assert */
-        RC_SHUTDOWN          = HBBL_COMP_ID | 0x02, /**< Shutdown */
-        RC_STD_EXCEPTION     = HBBL_COMP_ID | 0x03, /**< Standard Exception */
-        RC_STD_EX_W_DSISR    = HBBL_COMP_ID | 0x04, /**< Std Except w/ DSISR */
-        RC_STD_EX_W_SRR1     = HBBL_COMP_ID | 0x05, /**< Std Except w/ SRR1 */
-        RC_HYPE_EXCEPTION    = HBBL_COMP_ID | 0x06, /**< Hypervisor Exception */
-        RC_REMOVE_ECC_FAIL   = HBBL_COMP_ID | 0x07, /**< Remove ECC Failed */
-        RC_CHK_NULL_BUFFER   = HBBL_COMP_ID | 0x08, /**< Check for NULL Buffr */
-        RC_HDR_CHECKSUM_ERR  = HBBL_COMP_ID | 0x09, /**< Hdr Checksum Error */
-        RC_CHECK_HEADER_ERR  = HBBL_COMP_ID | 0x0A, /**< Check Header Error */
-        RC_PARSE_ENTRIES_ERR = HBBL_COMP_ID | 0x0B, /**< Parse Entries Error */
-        RC_NO_HBB_IN_TOC     = HBBL_COMP_ID | 0x0C, /**< No HBB Sect in TOC */
+        RC_ASSERT                  = HBBL_COMP_ID | 0x01, /**< Assert */
+        RC_SHUTDOWN                = HBBL_COMP_ID | 0x02, /**< Shutdown */
+        RC_STD_EXCEPTION           = HBBL_COMP_ID | 0x03, /**< Standard Exception */
+        RC_STD_EX_W_DSISR          = HBBL_COMP_ID | 0x04, /**< Std Except w/ DSISR */
+        RC_STD_EX_W_SRR1           = HBBL_COMP_ID | 0x05, /**< Std Except w/ SRR1 */
+        RC_HYPE_EXCEPTION          = HBBL_COMP_ID | 0x06, /**< Hypervisor Exception */
+        RC_REMOVE_ECC_FAIL         = HBBL_COMP_ID | 0x07, /**< Remove ECC Failed */
+        RC_CHK_NULL_BUFFER         = HBBL_COMP_ID | 0x08, /**< Check for NULL Buffr */
+        RC_HDR_CHECKSUM_ERR        = HBBL_COMP_ID | 0x09, /**< Hdr Checksum Error */
+        RC_CHECK_HEADER_ERR        = HBBL_COMP_ID | 0x0A, /**< Check Header Error */
+        RC_PARSE_ENTRIES_ERR       = HBBL_COMP_ID | 0x0B, /**< Parse Entries Error */
+        RC_NO_HBB_IN_TOC           = HBBL_COMP_ID | 0x0C, /**< No HBB Sect in TOC */
+        RC_PNOR_SECID_OUT_OF_RANGE = HBBL_COMP_ID | 0x0D, /**< Requested PNOR SecId DNE in string array */
     };
 
 };  // end Bootloader

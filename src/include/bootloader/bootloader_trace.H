@@ -141,6 +141,9 @@ enum BootloaderTraces
     /** Bootloader Utils parseEntries invalid section */
     BTLDR_TRC_UTILS_PARSE_INVALID_SECTION    = 0xE7,
 
+    /** Bootloader Utils SectionIdToString PNOR section id out of range*/
+    BTLDR_TRC_UTILS_PARSE_PNOR_SECID_OUT_OF_RANGE    = 0xE8,
+
     /** Bootloader main getHBBSection returned error */
     BTLDR_TRC_MAIN_GETHBBSECTION_FAIL        = 0xF0,
 

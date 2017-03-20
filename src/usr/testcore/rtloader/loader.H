@@ -42,10 +42,10 @@
 #include <devicefw/userif.H>
 #include <pnor/ecc.H>
 #include <ipmi/ipmiif.H>
+#include <pnor_utils.H>
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 2*KILOBYTE);
 
-extern const char* cv_EYECATCHER[];
 
 class RuntimeLoaderTest : public CxxTest::TestSuite
 {
@@ -347,7 +347,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             for (size_t i=PNOR::FIRST_SECTION; i<=PNOR::NUM_SECTIONS;
                     ++i)
             {
-                if (0 == strcmp(cv_EYECATCHER[i], i_partitionName))
+                if (0 == strcmp(PNOR::SectionIdToString(i), i_partitionName))
                 {
                     l_id = (PNOR::SectionId)i;
                     break;

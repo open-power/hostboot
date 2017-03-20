@@ -76,6 +76,8 @@ while( $ARGV = shift )
 my $compIdFile = $base."/src/include/usr/hbotcompid.H";
 my $compPath = $base."/src/usr";
 my $compIncPath = $base."/src/include/usr";
+my $compBlPath = $base."/src/bootloader";
+my $compBlIncPath = $base."/src/include/bootloader";
 my $genFilesPath = $base."/obj/genfiles";
 my $hbfwTermRcFile = $genFilesPath."/hbfw_term_rc.H";
 my $srcFileName = $genFilesPath."/srcListing";
@@ -91,9 +93,12 @@ my @reasonCodeFiles;
 my @filesToParse;
 my @pluginDirsToParse;
 getReasonCodeFiles($compIncPath);
+getReasonCodeFiles($compBlIncPath);
 getFilesToParse($compPath);
 getFilesToParse($compIncPath);
 getFilesToParse($genFilesPath);
+getFilesToParse($compBlPath);
+getFilesToParse($compBlIncPath);
 getPluginDirsToParse($compPath);
 
 #Add kernel/lib files for TI SRC descriptions

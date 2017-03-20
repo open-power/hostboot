@@ -66,10 +66,6 @@ extern trace_desc_t* g_trac_pnor;
 
 using namespace PNOR;
 
-/**
- * Eyecatcher strings for PNOR TOC entries
- */
-extern const char* cv_EYECATCHER[];
 
 /**
  * @brief   set up _start() task entry procedure for PNOR daemon
@@ -528,7 +524,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
 
             // copy my data into the external format
             o_info.id = iv_TOC[id].id;
-            o_info.name = cv_EYECATCHER[id];
+            o_info.name = SectionIdToString(id);
 
 #ifdef CONFIG_SECUREBOOT
             o_info.secureProtectedPayloadSize = 0; // for non secure sections
@@ -1737,7 +1733,7 @@ errlHndl_t PnorRP::setVirtAddrs(void)
             if (rc)
             {
                 TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC: Failed to set block permissions to WRITABLE for section %s.",
-                          cv_EYECATCHER[i]);
+                          SectionIdToString(i));
                 /*@
                 * @errortype
                 * @moduleid PNOR::MOD_PNORRP_READTOC
@@ -1770,7 +1766,7 @@ errlHndl_t PnorRP::setVirtAddrs(void)
             if (rc)
             {
                 TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC: Failed to set block permissions to WRITABLE/WRITE_TRACKED for section %s.",
-                          cv_EYECATCHER[i]);
+                          SectionIdToString(i));
                 /*@
                 * @errortype
                 * @moduleid PNOR::MOD_PNORRP_READTOC

@@ -43,8 +43,8 @@ void kernel_std_exception()
 
     /*@
      * @errortype
-     * @moduleid     MOD_BOOTLOADER_TERMINATE
-     * @reasoncode   RC_STD_EXCEPTION
+     * @moduleid     Bootloader::MOD_BOOTLOADER_TERMINATE
+     * @reasoncode   Bootloader::RC_STD_EXCEPTION
      * @userdata1[0:15]   TI_WITH_SRC
      * @userdata1[16:31]  TI_BOOTLOADER
      * @userdata1[32:63]  Exception vector address
@@ -69,8 +69,8 @@ void kernel_std_exception_w_dsisr()
 
     /*@
      * @errortype
-     * @moduleid     MOD_BOOTLOADER_TERMINATE
-     * @reasoncode   RC_STD_EX_W_DSISR
+     * @moduleid     Bootloader::MOD_BOOTLOADER_TERMINATE
+     * @reasoncode   Bootloader::RC_STD_EX_W_DSISR
      * @userdata1[0:15]   TI_WITH_SRC
      * @userdata1[16:31]  TI_BOOTLOADER
      * @userdata1[32:63]  Exception vector address
@@ -97,8 +97,8 @@ void kernel_std_exception_w_srr1()
 
     /*@
      * @errortype
-     * @moduleid     MOD_BOOTLOADER_TERMINATE
-     * @reasoncode   RC_STD_EX_W_SRR1
+     * @moduleid     Bootloader::MOD_BOOTLOADER_TERMINATE
+     * @reasoncode   Bootloader::RC_STD_EX_W_SRR1
      * @userdata1[0:15]   TI_WITH_SRC
      * @userdata1[16:31]  TI_BOOTLOADER
      * @userdata1[32:63]  Exception vector address
@@ -124,8 +124,8 @@ void kernel_hype_exception()
 
     /*@
      * @errortype
-     * @moduleid     MOD_BOOTLOADER_TERMINATE
-     * @reasoncode   RC_HYPE_EXCEPTION
+     * @moduleid     Bootloader::MOD_BOOTLOADER_TERMINATE
+     * @reasoncode   Bootloader::RC_HYPE_EXCEPTION
      * @userdata1[0:15]   TI_WITH_SRC
      * @userdata1[16:31]  TI_BOOTLOADER
      * @userdata1[32:63]  Exception vector address

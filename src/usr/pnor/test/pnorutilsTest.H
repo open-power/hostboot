@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
  *
  *  @brief unit tests for pnor utils
 */
-extern const char* cv_EYECATCHER[];
+
 extern trace_desc_t* g_trac_pnor;
 class pnorutilsTest : public CxxTest::TestSuite
 {

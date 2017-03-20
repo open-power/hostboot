@@ -43,11 +43,6 @@
 extern trace_desc_t* g_trac_pnor;
 
 /**
- * Eyecatcher strings for PNOR TOC entries
- */
-extern const char* cv_EYECATCHER[];
-
-/**
  * @brief   set up _start() task entry procedure for PNOR daemon
  */
 TASK_ENTRY_MACRO( RtPnor::init );
@@ -214,7 +209,7 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
         }
         //return the data in the struct
         o_info.id           = i_section;
-        o_info.name         = cv_EYECATCHER[i_section];
+        o_info.name         = SectionIdToString(i_section);
         o_info.vaddr        = (uint64_t)l_pWorking;
         o_info.flashAddr    = iv_TOC[i_section].flashAddr;
         o_info.size         = l_sizeBytes;
@@ -365,7 +360,7 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
     do
     {
 
-        const char* l_partitionName  = cv_EYECATCHER[i_section];
+        const char* l_partitionName  = SectionIdToString(i_section);
         void*  l_dataToRead          = o_data;
         size_t l_readSize            = i_size;
         size_t l_readSizePlusECC     = (i_size * 9)/8;
@@ -581,7 +576,7 @@ errlHndl_t RtPnor::writeToDevice( uint64_t i_procId,
             l_offset    = (i_offset * 9)/8;
         }
 
-        const char* l_partitionName = cv_EYECATCHER[i_section];
+        const char* l_partitionName = SectionIdToString(i_section);
         if (g_hostInterfaces && g_hostInterfaces->pnor_write)
         {
             //make call into opal to write the data
