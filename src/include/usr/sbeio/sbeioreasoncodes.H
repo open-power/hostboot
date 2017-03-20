@@ -47,6 +47,7 @@ enum sbeioModuleId
     SBEIO_FIFO                          = 0x02,
     SBEIO_FFDC_PARSER                   = 0x03,
     SBEIO_FIFO_CONTINUE_MPIPL           = 0x04,
+    SBEIO_RUNTIME                       = 0x05,
 };
 
 /**
@@ -83,6 +84,12 @@ enum sbeioReasonCode
     //   loop to recover the SBE
     //termination_rc
     SBEIO_DEAD_SBE                     = SBEIO_COMP_ID | 0x1B,
+
+    // SBEIO Runtime error codes
+    SBEIO_RT_INVALID_COMMAND           = SBEIO_COMP_ID | 0x30,
+    SBEIO_RT_FUNCTION_NOT_SET          = SBEIO_COMP_ID | 0x31,
+    SBEIO_RT_RSP_DATA_TOO_LARGE        = SBEIO_COMP_ID | 0x32,
+    SBEIO_RT_NO_SBE_COMM_BUFFER        = SBEIO_COMP_ID | 0x38,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
