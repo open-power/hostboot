@@ -46,6 +46,7 @@ extern "C"
     {
         p9_scom_addr l_scom(i_scomAddr);
         uint8_t l_ring = l_scom.get_ring();
+        uint8_t l_chiplet_id = l_scom.get_chiplet_id();
 
         //Used to help generate entries for the SCOMdef documentation,
         //These aren't general PIB addresses
@@ -144,6 +145,111 @@ extern "C"
                         uint8_t i_mcs_sat_offset = (0x2F & l_scom.get_sat_offset());
                         i_mcs_sat_offset |= ((i_chipUnitNum % 2) << 4);
                         l_scom.set_sat_offset(i_mcs_sat_offset);
+                    }
+
+                    break;
+
+                case PU_MC_CHIPUNIT:
+                    l_scom.set_chiplet_id(MC01_CHIPLET_ID + i_chipUnitNum);
+                    break;
+
+                case PU_MI_CHIPUNIT:
+                    //-------------------------------------------
+                    // MI
+                    //-------------------------------------------
+                    //          Chiplet   Ring   Satid   Off
+                    //MCS0           05     02       0   !SCOM3
+                    //MCS1           05     02       2   !SCOM3
+                    //MCS2           03     02       0   !SCOM3
+                    //MCS3           03     02       2   !SCOM3
+                    l_scom.set_chiplet_id(N3_CHIPLET_ID - (2 * (i_chipUnitNum / 2)));
+                    l_scom.set_sat_id(2 * (i_chipUnitNum % 2));
+                    break;
+
+                case PU_DMI_CHIPUNIT:
+                    if (((l_chiplet_id == N3_CHIPLET_ID) || (l_chiplet_id == N1_CHIPLET_ID)))
+                    {
+                        //SCOM3   (See mc_clscom_rlm.fig <= 0xB vs mc_scomfir_rlm.fig > 0xB)
+                        //DMI0           05     02       0   0x2X (X <= 0xB)
+                        //DMI1           05     02       0   0x3X (X <= 0xB)
+                        //DMI2           05     02       2   0x2X (X <= 0xB)
+                        //DMI3           05     02       2   0x3X (X <= 0xB)
+                        //DMI4           03     02       0   0x2X (X <= 0xB)
+                        //DMI5           03     02       0   0x3X (X <= 0xB)
+                        //DMI6           03     02       2   0x2X (X <= 0xB)
+                        //DMI7           03     02       2   0x3X (X <= 0xB)
+                        l_scom.set_chiplet_id(N3_CHIPLET_ID - (2 * (i_chipUnitNum / 4)));
+                        l_scom.set_sat_id(2 * ((i_chipUnitNum / 2) % 2));
+                        uint8_t l_sat_offset = l_scom.get_sat_offset();
+                        l_sat_offset = (l_sat_offset & 0xF) + ((2 + (i_chipUnitNum % 2)) << 4);
+                        l_scom.set_sat_offset(l_sat_offset);
+                    }
+
+                    if (((l_chiplet_id == MC01_CHIPLET_ID) || (l_chiplet_id == MC23_CHIPLET_ID)))
+                    {
+                        //-------------------------------------------
+                        // DMI
+                        //-------------------------------------------
+                        //SCOM1,2
+                        //DMI0           07     02       0
+                        //DMI1           07     02       1
+                        //DMI2           07     02       2
+                        //DMI3           07     02       3
+                        //DMI4           08     02       0
+                        //DMI5           08     02       1
+                        //DMI6           08     02       2
+                        //DMI7           08     02       3
+                        if (l_ring == P9C_MC_CHAN_RING_ID)
+                        {
+                            l_scom.set_chiplet_id(MC01_CHIPLET_ID + (i_chipUnitNum / 4));
+                            l_scom.set_sat_id(i_chipUnitNum % 4);
+                        }
+
+                        //SCOM4
+                        //DMI0           07     08     0xD   0x0X
+                        //DMI1           07     08     0xD   0x1X
+                        //DMI2           07     08     0xD   0x2X
+                        //DMI3           07     08     0xD   0x3X
+                        //DMI4           08     08     0xD   0x0X
+                        //DMI5           08     08     0xD   0x1X
+                        //DMI6           08     08     0xD   0x2X
+                        //DMI7           08     08     0xD   0x3X
+                        if (l_ring == P9C_MC_BIST_RING_ID)
+                        {
+                            l_scom.set_chiplet_id(MC01_CHIPLET_ID + (i_chipUnitNum / 4));
+                            uint8_t l_sat_offset = l_scom.get_sat_offset();
+                            l_sat_offset = (l_sat_offset & 0xF) + ((i_chipUnitNum % 2) << 4);
+                            l_scom.set_sat_offset(l_sat_offset);
+                        }
+
+                        //-------------------------------------------
+                        // DMI IO
+                        //-------------------------------------------
+                        //          Chiplet   Ring   Satid    Off    RXTXGrp
+                        //DMI0           07     04       0   0x3F       0x00
+                        //DMI1           07     04       0   0x3F       0x01
+                        //DMI2           07     04       0   0x3F       0x02
+                        //DMI3           07     04       0   0x3F       0x03
+                        //DMI4           08     04       0   0x3F       0x00
+                        //DMI5           08     04       0   0x3F       0x01
+                        //DMI6           08     04       0   0x3F       0x02
+                        //DMI7           08     04       0   0x3F       0x03
+
+                        //DMI0           07     04       0   0x3F       0x20
+                        //DMI1           07     04       0   0x3F       0x21
+                        //DMI2           07     04       0   0x3F       0x22
+                        //DMI3           07     04       0   0x3F       0x23
+                        //DMI4           08     04       0   0x3F       0x20
+                        //DMI5           08     04       0   0x3F       0x21
+                        //DMI6           08     04       0   0x3F       0x22
+                        //DMI7           08     04       0   0x3F       0x23
+                        if (l_ring == P9C_MC_IO_RING_ID)
+                        {
+                            l_scom.set_chiplet_id(MC01_CHIPLET_ID + (i_chipUnitNum / 4));
+                            uint8_t l_rxtx_grp = l_scom.get_rxtx_group_id();
+                            l_scom.set_rxtx_group_id((l_rxtx_grp & 0xF0) + (i_chipUnitNum % 4));
+                        }
+
                     }
 
                     break;
@@ -489,76 +595,245 @@ extern "C"
                                             (l_chiplet_id / 2) - 1));
             }
 
-            // PU_MCS_CHIPUNIT (nest)
-            // mcs: 0..3
-            if (((l_chiplet_id == N3_CHIPLET_ID) || (l_chiplet_id == N1_CHIPLET_ID)) &&
-                (l_port == UNIT_PORT_ID) &&
-                (l_ring == N3_MC01_0_RING_ID) &&
-                ((l_sat_id == MC_DIR_SAT_ID_PBI_01) || (l_sat_id == MC_DIR_SAT_ID_PBI_23)) &&
-                (((0x2F & l_sat_offset) < MC_MCS_MCA_OFFSET_MCP0XLT0 || MC_MCS_MCA_OFFSET_MCPERF3 < (0x2F & l_sat_offset))))
+            //==== NIMBUS ====
+            if (i_mode == P9N_DD1_SI_MODE || i_mode == P9N_DD2_SI_MODE)
             {
-                o_chipUnitRelated = true;
-                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MCS_CHIPUNIT,
-                                            ((l_chiplet_id == N3_CHIPLET_ID) ? (0) : (2)) +
-                                            (l_sat_id / 2)));
-            }
+                // PU_MCS_CHIPUNIT (nest)
+                // mcs: 0..3
+                if (((l_chiplet_id == N3_CHIPLET_ID) || (l_chiplet_id == N1_CHIPLET_ID)) &&
+                    (l_port == UNIT_PORT_ID) &&
+                    (l_ring == N3_MC01_0_RING_ID) &&
+                    ((l_sat_id == MC_DIR_SAT_ID_PBI_01) || (l_sat_id == MC_DIR_SAT_ID_PBI_23)) &&
+                    (((0x2F & l_sat_offset) < MC_MCS_MCA_OFFSET_MCP0XLT0 || MC_MCS_MCA_OFFSET_MCPERF3 < (0x2F & l_sat_offset))))
+                {
+                    o_chipUnitRelated = true;
+                    o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MCS_CHIPUNIT,
+                                                ((l_chiplet_id == N3_CHIPLET_ID) ? (0) : (2)) +
+                                                (l_sat_id / 2)));
+                }
 
-            // PU_MCBIST_CHIPUNIT (mc)
-            // mcbist: 0..1
-            if (((l_chiplet_id == MC01_CHIPLET_ID) || (l_chiplet_id == MC23_CHIPLET_ID)) &&
-                (((l_port == UNIT_PORT_ID) &&
-                  (((l_ring == MC_MC01_1_RING_ID) &&
-                    ((l_sat_id & 0xC) == MC_DIR_SAT_ID_MCBIST)) || //MCBIST has 2 bit sat_id
-                   ((l_ring == MC_PERV_RING_ID) || //Translate MC perv regs with MCBIST
-                    (l_ring == XB_PSCM_RING_ID) ||
-                    (l_ring == MC_MCTRA_0_RING_ID)) )) || //Translate TRA regs with MCBIST
-                 (l_port != UNIT_PORT_ID)) )   //Translate MC perv regs with MCBIST
-            {
-                o_chipUnitRelated = true;
-                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MCBIST_CHIPUNIT,
-                                            l_chiplet_id - MC01_CHIPLET_ID));
-            }
+                // PU_MCBIST_CHIPUNIT (mc)
+                // mcbist: 0..1
+                if (((l_chiplet_id == MC01_CHIPLET_ID) || (l_chiplet_id == MC23_CHIPLET_ID)) &&
+                    (((l_port == UNIT_PORT_ID) &&
+                      (((l_ring == MC_MC01_1_RING_ID) &&
+                        ((l_sat_id & 0xC) == MC_DIR_SAT_ID_MCBIST)) || //MCBIST has 2 bit sat_id
+                       ((l_ring == MC_PERV_RING_ID) || //Translate MC perv regs with MCBIST
+                        (l_ring == XB_PSCM_RING_ID) ||
+                        (l_ring == MC_MCTRA_0_RING_ID)) )) || //Translate TRA regs with MCBIST
+                     (l_port != UNIT_PORT_ID)) )   //Translate MC perv regs with MCBIST
+                {
+                    o_chipUnitRelated = true;
+                    o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MCBIST_CHIPUNIT,
+                                                l_chiplet_id - MC01_CHIPLET_ID));
+                }
 
-            // PU_MCA_CHIPUNIT (mc)
-            // mca: 0..7
-            // These regisers are in the mcs chiplet but are logically mca targetted
-            if (((l_chiplet_id == N3_CHIPLET_ID) || (l_chiplet_id == N1_CHIPLET_ID)) &&
-                (l_port == UNIT_PORT_ID) &&
-                (l_ring == N3_MC01_0_RING_ID) &&
-                ((l_sat_id == MC_DIR_SAT_ID_PBI_01) || (l_sat_id == MC_DIR_SAT_ID_PBI_23)) &&
-                (((0x2F & l_sat_offset) >= MC_MCS_MCA_OFFSET_MCP0XLT0 && MC_MCS_MCA_OFFSET_MCPERF3 >= (0x2F & l_sat_offset))))
-            {
-                o_chipUnitRelated = true;
-                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MCA_CHIPUNIT,
-                                            ((((l_chiplet_id == N3_CHIPLET_ID) ? (0) : (2)) +
-                                              (l_sat_id / 2)) * 2) +
-                                            ((l_sat_offset & 0x10) >> 4) ));
-            }
+                // PU_MCA_CHIPUNIT (mc)
+                // mca: 0..7
+                // These regisers are in the mcs chiplet but are logically mca targetted
+                if (((l_chiplet_id == N3_CHIPLET_ID) || (l_chiplet_id == N1_CHIPLET_ID)) &&
+                    (l_port == UNIT_PORT_ID) &&
+                    (l_ring == N3_MC01_0_RING_ID) &&
+                    ((l_sat_id == MC_DIR_SAT_ID_PBI_01) || (l_sat_id == MC_DIR_SAT_ID_PBI_23)) &&
+                    (((0x2F & l_sat_offset) >= MC_MCS_MCA_OFFSET_MCP0XLT0 && MC_MCS_MCA_OFFSET_MCPERF3 >= (0x2F & l_sat_offset))))
+                {
+                    o_chipUnitRelated = true;
+                    o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MCA_CHIPUNIT,
+                                                ((((l_chiplet_id == N3_CHIPLET_ID) ? (0) : (2)) +
+                                                  (l_sat_id / 2)) * 2) +
+                                                ((l_sat_offset & 0x10) >> 4) ));
+                }
 
-            // PU_MCA_CHIPUNIT (mc)
-            // mca: 0..7
-            if (((l_chiplet_id == MC01_CHIPLET_ID) || (l_chiplet_id == MC23_CHIPLET_ID)) &&
-                (l_port == UNIT_PORT_ID) &&
-                (l_ring == MC_MC01_0_RING_ID) &&
-                ((l_sat_id >= MC_DIR_SAT_ID_SRQ_0) && (l_sat_id <= MC_DIR_SAT_ID_ECC64_3)))
-            {
-                o_chipUnitRelated = true;
-                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MCA_CHIPUNIT,
-                                            (4 * (l_chiplet_id - MC01_CHIPLET_ID)) +
-                                            (l_sat_id % 4)));
-            }
+                // PU_MCA_CHIPUNIT (mc)
+                // mca: 0..7
+                if (((l_chiplet_id == MC01_CHIPLET_ID) || (l_chiplet_id == MC23_CHIPLET_ID)) &&
+                    (l_port == UNIT_PORT_ID) &&
+                    (l_ring == MC_MC01_0_RING_ID) &&
+                    ((l_sat_id >= MC_DIR_SAT_ID_SRQ_0) && (l_sat_id <= MC_DIR_SAT_ID_ECC64_3)))
+                {
+                    o_chipUnitRelated = true;
+                    o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MCA_CHIPUNIT,
+                                                (4 * (l_chiplet_id - MC01_CHIPLET_ID)) +
+                                                (l_sat_id % 4)));
+                }
 
-            // PU_MCA_CHIPUNIT (iomc)
-            // mca: 0..7
-            if (((l_chiplet_id == MC01_CHIPLET_ID) || (l_chiplet_id == MC23_CHIPLET_ID)) &&
-                (l_port == UNIT_PORT_ID) &&
-                ((l_ring >= MC_IOM01_0_RING_ID) && (l_ring <= MC_IOM23_1_RING_ID)) &&
-                (l_sat_id == MC_IND_SAT_ID))
+                // PU_MCA_CHIPUNIT (iomc)
+                // mca: 0..7
+                if (((l_chiplet_id == MC01_CHIPLET_ID) || (l_chiplet_id == MC23_CHIPLET_ID)) &&
+                    (l_port == UNIT_PORT_ID) &&
+                    ((l_ring >= MC_IOM01_0_RING_ID) && (l_ring <= MC_IOM23_1_RING_ID)) &&
+                    (l_sat_id == MC_IND_SAT_ID))
+                {
+                    o_chipUnitRelated = true;
+                    o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MCA_CHIPUNIT,
+                                                (4 * (l_chiplet_id - MC01_CHIPLET_ID)) +
+                                                (l_ring - MC_IOM01_0_RING_ID)));
+                }
+            }
+            else
             {
-                o_chipUnitRelated = true;
-                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MCA_CHIPUNIT,
-                                            (4 * (l_chiplet_id - MC01_CHIPLET_ID)) +
-                                            (l_ring - MC_IOM01_0_RING_ID)));
+                //==== CUMULUS =====
+                // Figtree references: mc_top_baseaddr.fig, e9_uchip_offset.fig
+                //-------------------------------------------
+                // MC
+                //-------------------------------------------
+                // MC            07     08     0xC(!0xD)
+                // MC            08     08     0xC(!0xD)
+                //Probably any other chipelt 07/08 registers that don't fall into the DMI target range
+                if (((l_chiplet_id == MC01_CHIPLET_ID) || (l_chiplet_id == MC23_CHIPLET_ID)) &&
+                    ( ( (l_port == UNIT_PORT_ID) &&
+                        (
+                            ( (l_ring == P9C_MC_BIST_RING_ID) &&
+                              (l_sat_id != P9C_SAT_ID_CHAN_MCBIST)
+                            ) ||
+                            ( (l_ring == MC_PERV_RING_ID) || //Translate MC perv regs with MC
+                              (l_ring == XB_PSCM_RING_ID) ||
+                              (l_ring == MC_MCTRA_0_RING_ID)
+                            ) ||
+                            ( (l_ring == P9C_MC_IO_RING_ID) &&
+                              (l_sat_id == MC_IND_SAT_ID) &&
+                              (l_sat_offset != P9C_MC_OFFSET_IND)
+                            )
+                        )
+                      ) || //Translate TRA regs with MCBIST
+                      (l_port != UNIT_PORT_ID)
+                    ) )   //Translate MC perv regs with MCBIST
+                {
+
+                    o_chipUnitRelated = true;
+                    o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MC_CHIPUNIT,
+                                                l_chiplet_id - MC01_CHIPLET_ID));
+
+                }
+
+                if (((l_chiplet_id == N3_CHIPLET_ID) || (l_chiplet_id == N1_CHIPLET_ID)) &&
+                    (l_port == UNIT_PORT_ID) &&
+                    (l_ring == N3_MC01_0_RING_ID) &&
+                    (l_sat_id == P9C_N3_MCS01_SAT_ID || l_sat_id == P9C_N3_MCS23_SAT_ID))
+                {
+                    //-------------------------------------------
+                    // DMI
+                    //-------------------------------------------
+                    //SCOM3   (See mc_clscom_rlm.fig <= 0xB vs mc_scomfir_rlm.fig > 0xB)
+                    //DMI0           05     02       0   0x2X (X <= 0xB)
+                    //DMI1           05     02       0   0x3X (X <= 0xB)
+                    //DMI2           05     02       2   0x2X (X <= 0xB)
+                    //DMI3           05     02       2   0x3X (X <= 0xB)
+                    //DMI4           03     02       0   0x2X (X <= 0xB)
+                    //DMI5           03     02       0   0x3X (X <= 0xB)
+                    //DMI6           03     02       2   0x2X (X <= 0xB)
+                    //DMI7           03     02       2   0x3X (X <= 0xB)
+                    if ((0x20 <= l_sat_offset && l_sat_offset <= 0x2B) ||
+                        (0x30 <= l_sat_offset && l_sat_offset <= 0x3B))
+                    {
+                        uint8_t l_off_nib0 = (l_sat_offset >> 4);
+                        o_chipUnitRelated = true;
+                        o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_DMI_CHIPUNIT,
+                                                    ((l_chiplet_id == N3_CHIPLET_ID) ? (0) : (4)) +
+                                                    (l_off_nib0 - 2) + l_sat_id));
+
+                    }
+                    //-------------------------------------------
+                    // MI
+                    //-------------------------------------------
+                    //          Chiplet   Ring   Satid   Off
+                    //MCS0           05     02       0   !SCOM3
+                    //MCS1           05     02       2   !SCOM3
+                    //MCS2           03     02       0   !SCOM3
+                    //MCS3           03     02       2   !SCOM3
+                    else
+                    {
+                        o_chipUnitRelated = true;
+                        o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MI_CHIPUNIT,
+                                                    (l_sat_id / 2) +
+                                                    ((l_chiplet_id == N3_CHIPLET_ID) ? (0) : (2))));
+                    }
+
+                }
+
+                if (((l_chiplet_id == MC01_CHIPLET_ID) || (l_chiplet_id == MC23_CHIPLET_ID)) &&
+                    (l_port == UNIT_PORT_ID))
+                {
+                    //-------------------------------------------
+                    // DMI
+                    //-------------------------------------------
+                    //SCOM1,2
+                    //DMI0           07     02       0
+                    //DMI1           07     02       1
+                    //DMI2           07     02       2
+                    //DMI3           07     02       3
+                    //DMI4           08     02       0
+                    //DMI5           08     02       1
+                    //DMI6           08     02       2
+                    //DMI7           08     02       3
+                    if (l_ring == P9C_MC_CHAN_RING_ID)
+                    {
+                        o_chipUnitRelated = true;
+                        o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_DMI_CHIPUNIT,
+                                                    ((l_chiplet_id == MC01_CHIPLET_ID ? (0) : (4))) +
+                                                    l_sat_id));
+
+                    }
+
+                    //SCOM4
+                    //DMI0           07     08     0xD   0x0X
+                    //DMI1           07     08     0xD   0x1X
+                    //DMI2           07     08     0xD   0x2X
+                    //DMI3           07     08     0xD   0x3X
+                    //DMI4           08     08     0xD   0x0X
+                    //DMI5           08     08     0xD   0x1X
+                    //DMI6           08     08     0xD   0x2X
+                    //DMI7           08     08     0xD   0x3X
+                    if (l_ring == P9C_MC_BIST_RING_ID && l_sat_id == P9C_SAT_ID_CHAN_MCBIST)
+                    {
+                        uint8_t l_off_nib0 = (l_sat_offset >> 4);
+                        o_chipUnitRelated = true;
+                        o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_DMI_CHIPUNIT,
+                                                    ((l_chiplet_id == MC01_CHIPLET_ID ? (0) : (4))) +
+                                                    l_off_nib0));
+
+                    }
+
+                    //-------------------------------------------
+                    // DMI IO
+                    //-------------------------------------------
+                    //          Chiplet   Ring   Satid    Off    RXTXGrp
+                    //DMI0           07     04       0   0x3F       0x00
+                    //DMI1           07     04       0   0x3F       0x01
+                    //DMI2           07     04       0   0x3F       0x02
+                    //DMI3           07     04       0   0x3F       0x03
+                    //DMI4           08     04       0   0x3F       0x00
+                    //DMI5           08     04       0   0x3F       0x01
+                    //DMI6           08     04       0   0x3F       0x02
+                    //DMI7           08     04       0   0x3F       0x03
+
+                    //DMI0           07     04       0   0x3F       0x20
+                    //DMI1           07     04       0   0x3F       0x21
+                    //DMI2           07     04       0   0x3F       0x22
+                    //DMI3           07     04       0   0x3F       0x23
+                    //DMI4           08     04       0   0x3F       0x20
+                    //DMI5           08     04       0   0x3F       0x21
+                    //DMI6           08     04       0   0x3F       0x22
+                    //DMI7           08     04       0   0x3F       0x23
+                    if (l_ring == P9C_MC_IO_RING_ID && l_sat_id == MC_IND_SAT_ID &&
+                        l_sat_offset == P9C_MC_OFFSET_IND )
+                    {
+                        uint32_t l_rxtx_grp = l_scom.get_rxtx_group_id();
+
+                        if (l_rxtx_grp >= 0x20)
+                        {
+                            l_rxtx_grp -= 0x20;
+                        }
+
+                        o_chipUnitRelated = true;
+                        o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_DMI_CHIPUNIT,
+                                                    ((l_chiplet_id == MC01_CHIPLET_ID ? (0) : (4))) +
+                                                    l_rxtx_grp));
+
+                    }
+
+                }
+
             }
 
             // PU_NV_CHIPUNIT

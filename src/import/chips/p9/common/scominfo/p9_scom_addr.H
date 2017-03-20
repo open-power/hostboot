@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -210,6 +210,14 @@ extern "C"
         N3_PB_5_RING_ID = 0xe,      ///< PB_5
     } p9_n3_ring_id_t;
 
+
+    /// P9 N3 satellite ids
+    typedef enum
+    {
+        P9C_N3_MCS01_SAT_ID = 0,
+        P9C_N3_MCS23_SAT_ID = 2
+    } p9_n3_sat_id_t;
+
     /// P9 XBUS chiplet SCOM ring ID enumeration
     /// source: tpc_p9_xb_top.vhdl
     typedef enum
@@ -262,7 +270,7 @@ extern "C"
         MC_DIR_SAT_ID_ECC64_0 = 0x8,
         MC_DIR_SAT_ID_ECC64_1 = 0x9,
         MC_DIR_SAT_ID_ECC64_2 = 0xa,
-        MC_DIR_SAT_ID_ECC64_3 = 0xb,
+        MC_DIR_SAT_ID_ECC64_3 = 0xb
     } p9_mc_dir0_sat_id_t;
 
     //These are for registers that reside in the MCS chiplet, but
@@ -288,13 +296,24 @@ extern "C"
 
     typedef enum
     {
-        MC_DIR_SAT_ID_MCBIST = 0xC
+        MC_IND_SAT_ID = 0x0,
+        MC_DIR_SAT_ID_MCBIST = 0xC,
+        P9C_SAT_ID_CHAN_MCBIST = 0xD
     } p9_mc_dir1_sat_id_t;
+
+
+    /// Cumulus mc rings
+    typedef enum
+    {
+        P9C_MC_CHAN_RING_ID = 0x2,
+        P9C_MC_IO_RING_ID   = 0x4,
+        P9C_MC_BIST_RING_ID = 0x8
+    } p9c_mc_ring_id_t;
 
     typedef enum
     {
-        MC_IND_SAT_ID = 0x0
-    } p9_mc_ind_sat_id_t;
+        P9C_MC_OFFSET_IND = 0x3F
+    } p9c_mc_sat_offset_t;
 
     /// P9 OB chiplet SCOM ring ID enumeration
     /// source: tpc_p9_ob_top.vhdl
@@ -367,7 +386,6 @@ extern "C"
     {
         PPE_PB_SAT_ID = 0x0,
     } p9_n3_ppe_sat_id;
-
 
 //        8             7             6             5             4             3          2         1
 //
@@ -519,6 +537,22 @@ extern "C"
                 iv_addr &= 0xFFFFFFFFFFFFFFC0ULL;
                 iv_addr |= (i_sat_offset & 0x3F);
                 return;
+            }
+
+            /// @brief Extract the RX or TX Group ID of an indirect scom address
+            /// @retval uint8_t Satellite register offset field value
+            inline uint8_t get_rxtx_group_id()
+            {
+                return (iv_addr >> 37) & 0x3F;
+            }
+
+            /// @brief Modify SCOM address, update the RX or TX Group ID
+            /// @param[in] i_grp_id Group id to set
+            /// @retval none
+            inline void set_rxtx_group_id(uint8_t i_grp_id)
+            {
+                iv_addr &= 0xFFFFF81FFFFFFFFFULL;
+                iv_addr |= (i_grp_id & 0x3FULL) << 37;
             }
 
             /// @brief Determine if SCOM address is valid/well-formed
