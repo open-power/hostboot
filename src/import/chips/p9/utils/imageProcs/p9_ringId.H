@@ -737,6 +737,7 @@ enum RingOffset
     eq_fure         = 0,
     eq_gptr         = 1,
     eq_time         = 2,
+    eq_inex         = 3,
     eq_mode         = 3,
     ex_l3_fure      = 4,
     ex_l3_gptr      = 5,
@@ -797,6 +798,10 @@ enum RingOffset
     eq_ana_bndy_bucket_39 = 59,
     eq_ana_bndy_bucket_40 = 60,
     eq_ana_bndy_bucket_41 = 61,
+    eq_inex_bucket_1      = 62,
+    eq_inex_bucket_2      = 63,
+    eq_inex_bucket_3      = 64,
+    eq_inex_bucket_4      = 65,
 
     // Instance Rings
     eq_repr         = (0 | INSTANCE_RING_MARK),
@@ -809,7 +814,7 @@ enum RingOffset
 static const CHIPLET_DATA g_eqData =
 {
     16, // Quad Chiplet ID range is 16 - 21. The base ID is 16.
-    62, // 62 common rings for Quad chiplet.
+    66, // 66 common rings for Quad chiplet.
     5,  // 5 instance specific rings for each EQ chiplet
     9   // 9 different rings since 2 per EX ring and 1 per EQ
 };
@@ -1043,7 +1048,7 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EQ::eq_fure                        , "eq_fure"                     , EQ_TYPE    }, // 172
     { EQ::eq_gptr                        , "eq_gptr"                     , EQ_TYPE    }, // 173
     { EQ::eq_time                        , "eq_time"                     , EQ_TYPE    }, // 174
-    { EQ::eq_mode                        , "eq_mode"                     , EQ_TYPE    }, // 175
+    { EQ::eq_inex                        , "eq_inex"                     , EQ_TYPE    }, // 175
     { EQ::ex_l3_fure                     , "ex_l3_fure"                  , EQ_TYPE    }, // 176
     { EQ::ex_l3_gptr                     , "ex_l3_gptr"                  , EQ_TYPE    }, // 177
     { EQ::ex_l3_time                     , "ex_l3_time"                  , EQ_TYPE    }, // 178
@@ -1116,6 +1121,10 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EQ::eq_ana_bndy_bucket_39          , "eq_ana_bndy_bucket_39"       , EQ_TYPE    }, // 245
     { EQ::eq_ana_bndy_bucket_40          , "eq_ana_bndy_bucket_40"       , EQ_TYPE    }, // 246
     { EQ::eq_ana_bndy_bucket_41          , "eq_ana_bndy_bucket_41"       , EQ_TYPE    }, // 247
+    { EQ::eq_inex_bucket_1               , "eq_inex_bucket_1"            , EQ_TYPE    }, // 248
+    { EQ::eq_inex_bucket_2               , "eq_inex_bucket_2"            , EQ_TYPE    }, // 249
+    { EQ::eq_inex_bucket_3               , "eq_inex_bucket_3"            , EQ_TYPE    }, // 250
+    { EQ::eq_inex_bucket_4               , "eq_inex_bucket_4"            , EQ_TYPE    }  // 251
 };
 #endif
 #ifdef __PPE__
@@ -1296,7 +1305,7 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EQ::eq_fure                        , EQ_TYPE    }, // 172
     { EQ::eq_gptr                        , EQ_TYPE    }, // 173
     { EQ::eq_time                        , EQ_TYPE    }, // 174
-    { EQ::eq_mode                        , EQ_TYPE    }, // 175
+    { EQ::eq_inex                        , EQ_TYPE    }, // 175
     { EQ::ex_l3_fure                     , EQ_TYPE    }, // 176
     { EQ::ex_l3_gptr                     , EQ_TYPE    }, // 177
     { EQ::ex_l3_time                     , EQ_TYPE    }, // 178
@@ -1369,6 +1378,10 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EQ::eq_ana_bndy_bucket_39          , EQ_TYPE    }, // 245
     { EQ::eq_ana_bndy_bucket_40          , EQ_TYPE    }, // 246
     { EQ::eq_ana_bndy_bucket_41          , EQ_TYPE    }, // 247
+    { EQ::eq_inex_bucket_1               , EQ_TYPE    }, // 248
+    { EQ::eq_inex_bucket_2               , EQ_TYPE    }, // 249
+    { EQ::eq_inex_bucket_3               , EQ_TYPE    }, // 250
+    { EQ::eq_inex_bucket_4               , EQ_TYPE    }  // 251
 };
 #endif
 

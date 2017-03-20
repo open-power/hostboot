@@ -354,7 +354,7 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"eq_fure"                    , 0x00, 0x10, 0x10, EKB_RING    , 0x1003608F},
     {"eq_gptr"                    , 0x01, 0x10, 0x10, EKB_RING    , 0x10036082},
     {"eq_time"                    , 0x02, 0x10, 0x10, VPD_RING    , 0x10036087},
-    {"eq_mode"                    , 0x03, 0x10, 0x10, EKB_RING    , 0x10036081},
+    {"eq_inex"                    , 0x03, 0x10, 0x10, EKB_RING    , 0x1003608B},
     {"ex_l3_fure"                 , 0x04, 0x10, 0x10, EKB_RING    , 0x1003100F},
     {"ex_l3_gptr"                 , 0x05, 0x10, 0x10, EKB_RING    , 0x10031002},
     {"ex_l3_time"                 , 0x06, 0x10, 0x10, VPD_RING    , 0x10031007},
@@ -413,14 +413,18 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"eq_ana_bndy_bucket_39"      , 0x3b, 0x10, 0x10, EKB_FSM_RING, 0x10030108},
     {"eq_ana_bndy_bucket_40"      , 0x3c, 0x10, 0x10, EKB_FSM_RING, 0x10030108},
     {"eq_ana_bndy_bucket_41"      , 0x3d, 0x10, 0x10, EKB_FSM_RING, 0x10030108},
+    {"eq_inex_bucket_1"           , 0x3e, 0x10, 0x10, EKB_RING    , 0x1003608B},
+    {"eq_inex_bucket_2"           , 0x3f, 0x10, 0x10, EKB_RING    , 0x1003608B},
+    {"eq_inex_bucket_3"           , 0x40, 0x10, 0x10, EKB_RING    , 0x1003608B},
+    {"eq_inex_bucket_4"           , 0x41, 0x10, 0x10, EKB_RING    , 0x1003608B},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
-    {"eq_repr"                    , 0x3e, 0x10, 0x1b, VPD_RING    , 0x10036086},
-    {"ex_l3_repr"                 , 0x3f, 0x10, 0x1b, VPD_RING    , 0x10031006},
-    {"ex_l2_repr"                 , 0x40, 0x10, 0x1b, VPD_RING    , 0x10030406},
-    {"ex_l3_refr_repr"            , 0x41, 0x10, 0x1b, VPD_RING    , 0x10030046},
-    {"ex_l3_refr_time"            , 0x42, 0x10, 0x1b, VPD_RING    , 0x10030047},
+    {"eq_repr"                    , 0x42, 0x10, 0x1b, VPD_RING    , 0x10036086},
+    {"ex_l3_repr"                 , 0x43, 0x10, 0x1b, VPD_RING    , 0x10031006},
+    {"ex_l2_repr"                 , 0x44, 0x10, 0x1b, VPD_RING    , 0x10030406},
+    {"ex_l3_refr_repr"            , 0x45, 0x10, 0x1b, VPD_RING    , 0x10030046},
+    {"ex_l3_refr_time"            , 0x46, 0x10, 0x1b, VPD_RING    , 0x10030047},
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, CC, RL };
 };
