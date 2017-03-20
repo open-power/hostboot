@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2017
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -74,3 +76,9 @@ $(IMGDIR)/lib$(MODULE).so : $(OBJECTS) $(ROOTPATH)/src/module.ld $(MODULE_INIT)
 		   $(OBJECTS) $(MODULE_INIT) \
 	           -T $(ROOTPATH)/src/module.ld -o $@
 endif
+
+try = $(shell set -e; if ($(1)) >/dev/null 2>&1; \
+        then echo "$(2)"; \
+        else echo "$(3)"; fi )
+
+try-cflag = $(call try,$(1) $(2) -x c -c /dev/null -o /dev/null,$(2))
