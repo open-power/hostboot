@@ -71,7 +71,6 @@ COPY_FILES = \
     obj/genfiles/targAttrInfo.csv:vpo \
     obj/genfiles/target_types_merged.xml:openpower \
     obj/genfiles/fapiattrs.xml:openpower \
-    obj/genfiles/attributeOverride:tools,openpower \
     src/usr/targeting/attroverride/README.attr_override:tools,openpower \
     src/build/hwpf/prcd_compile.tcl:tools \
     src/build/buildpnor/buildSbePart.pl:openpower \
@@ -95,6 +94,12 @@ COPY_FILES = \
     src/usr/targeting/common/xmltohb/bios.xsd:openpower \
     src/usr/targeting/common/xmltohb/bios_metadata_petitboot.xslt:openpower \
     $(foreach file, $(call ROOTPATH_WILDCARD,releaseNotes.html), $(file):fsp)\
+
+ifeq ($(call try-cflag,$(CCACHE) $(HOST_PREFIX)g++,-std=gnu++11),-std=gnu++11)
+COPY_FILES += obj/genfiles/attributeOverride:tools,openpower
+else
+COPY_FILES += obj/genfiles/attributeOverride:tools
+endif
 
 include ${ROOTPATH}/config.mk
 COPY_FILES += $(if $(CONFIG_INCLUDE_XML_OPPOWERVM),src/usr/targeting/common/xmltohb/target_types_oppowervm.xml:openpower) \

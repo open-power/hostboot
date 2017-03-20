@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2016
+# Contributors Listed Below - COPYRIGHT 2014,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -49,8 +49,14 @@ include $(ROOTPATH)/config.mk
 vpath %.C $(GENDIR)
 vpath %.H $(GENDIR)
 
+ifeq ($(call try-cflag,$(CCACHE) $(HOST_PREFIX)g++,-std=gnu++11),-std=gnu++11)
 $(OUT_FILE): $(C_FILES) $(H_FILES)
 	$(C2) "    CC         $(notdir $@)"
 	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -std=gnu++11 -O3 -g -o $(OUT_FILE)\
 			$(foreach dir,$(INC_DIRS), -I $(dir)) -iquote.\
 			$(foreach file,$^,$(if $(findstring .H,$(file)),,$(file)))
+else
+$(OUT_FILE): $(C_FILES) $(H_FILES)
+	$(C2) "    GEN-NULL   $(notdir $@)"
+	@(echo '#!/bin/sh'; echo 'exit -1';) > $(OUT_FILE)
+endif
