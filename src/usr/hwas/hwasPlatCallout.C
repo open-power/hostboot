@@ -34,8 +34,9 @@
 #include <hwas/common/deconfigGard.H>
 #include <hwas/hwasPlat.H>
 #include <initservice/initserviceif.H>
+#ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
-
+#endif
 namespace HWAS
 {
 

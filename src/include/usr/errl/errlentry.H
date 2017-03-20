@@ -726,6 +726,7 @@ private:
      */
     void addHbBuildId();
 
+#ifdef CONFIG_BMC_IPMI
     /**
      * @brief called by addHwCallout to retrieve the serial and part number
      * from the current target. If the current target does not contain
@@ -735,6 +736,7 @@ private:
      * @param[in]       i_target        The target to get the numbers for
      */
     void addPartAndSerialNumbersToErrLog(const TARGETING::Target * i_target);
+#endif
 
     /**
      * @brief set iv_skipShowingLogs
