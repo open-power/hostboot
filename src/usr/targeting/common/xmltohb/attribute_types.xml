@@ -17199,7 +17199,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
-<!-- === start manufacturing threshold attributes for PRD === -->
+<!-- === start configurable threshold attributes for PRD === -->
 
 <attribute>
     <id>MNFG_TH_P8EX_L2_CACHE_CES</id>
@@ -17459,12 +17459,13 @@ Measured in GB</description>
 <attribute>
     <id>MNFG_TH_RCD_PARITY_ERRORS</id>
     <description>
-        The maximum number of RCD parity errors allowed in manufacturing after
-        recovery is enabled.
+      With MNFG thresholds enabled, PRD will make a predictive callout when an
+      RCD parity error (recovery enabled) attention count is equal to this
+      value. A value of 0 defaults to the max threshold of 0xff.
     </description>
     <simpleType>
       <uint8_t>
-        <default>0</default>
+        <default>1</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -17474,22 +17475,31 @@ Measured in GB</description>
 <attribute>
     <id>MNFG_TH_MEMORY_IUES</id>
     <description>
-        The maximum number of memory intermittent UEs allowed in manufacturing.
+      With MNFG thresholds enabled, PRD will make a predictive callout when a
+      memory intermittent UE attention count is equal to this value. A value of
+      0 defaults to the max threshold of 0xff.
     </description>
     <simpleType>
       <uint8_t>
-        <default>0</default>
+        <default>1</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
 
+<!-- === end configurable threshold attributes for PRD === -->
+
+<!-- === start RCD parity error reconfig loop attributes for PRD/MDIA === -->
+
 <attribute>
     <id>RCD_PARITY_RECONFIG_LOOPS_ALLOWED</id>
     <description>
-        The number of reconfig loops allowed due to RCD parity errors when
-        recovery is disabled.
+      The number of reconfig loops allowed due to RCD parity errors when
+      recovery is disabled. PRD will make a predictive callout and stop issuing
+      reconfigs due to RCD parity errors when RCD_PARITY_RECONFIG_LOOP_COUNT is
+      greater than this value. A value of 0 indicates that no reconfig loops are
+      allowed due to RCD parity errors.
     </description>
     <simpleType>
       <uint8_t>
@@ -17503,18 +17513,22 @@ Measured in GB</description>
 <attribute>
     <id>RCD_PARITY_RECONFIG_LOOP_COUNT</id>
     <description>
-        The number of reconfig loops issued due to RCD parity errors when
-        recovery is disabled.
+      PRD will increment this count and issue a reconfig loop each time an RCD
+      parity error (recovery disabled) is detected during Memory Diagnostics.
+      This value will be cleared at the end of Memory Diagnostics if it is able
+      to complete without the need to issue a reconfig loop.
     </description>
     <simpleType>
-        <uint8_t></uint8_t>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
 </attribute>
 
-<!-- === end manufacturing threshold attributes for PRD === -->
+<!-- === end RCD parity error reconfig loop attributes for PRD/MDIA === -->
 
 <attribute>
     <id>RESOURCE_IS_CRITICAL</id>
