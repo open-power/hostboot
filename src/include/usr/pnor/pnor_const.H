@@ -67,6 +67,7 @@ enum SectionId
     POWERVM,        /**< Power VM data */
     RINGOVD,        /**< Ring override data */
     WOFDATA,        /**< VFRT data tables for WOF */
+    SBKT,           /**< SecureBoot Key Transition */
     NUM_SECTIONS,   /**< Number of defined sections */
 
     FIRST_SECTION = TOC,  /**< First section (for looping) */

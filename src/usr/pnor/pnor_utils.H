@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -228,6 +228,20 @@ void parseEntries (ffs_hdr* i_ffs_hdr,
  * @return bool True if secure section, false otherwise.
  */
 bool isSecureSection(const uint32_t i_section);
+
+/**
+  * @brief Returns string representation of a PNOR SectionId.
+  *        If id requested is out of range of known string array
+  *          - Hostboot asserts
+  *          - Bootloader terminates
+  *
+  * @param[in] i_secIdIndex     PNOR section id which also represents the index
+  *                             into the string array.
+  *
+  * @return  const char*  - String associated with Section ID
+  *
+*/
+const char * SectionIdToString( uint32_t i_secIdIndex );
 
 }  // End namespace PNOR
 

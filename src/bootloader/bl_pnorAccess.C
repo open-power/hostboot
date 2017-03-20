@@ -33,8 +33,6 @@
 #define BOOTLOADER_TRACE_W_BRK(args) TRACFCOMP(g_trac_pnor,"##args")
 #endif
 
-
-extern const char* cv_EYECATCHER[];
 /**
 * @brief Takes in a buffer containing a ToC, as well as a base address
          Returns out a boolean whether or not this toc was valid
@@ -66,8 +64,8 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
             // Set TI information but caller decides to TI or not
             /*@
              * @errortype
-             * @moduleid     MOD_PNORACC_READTOC
-             * @reasoncode   RC_CHK_NULL_BUFFER
+             * @moduleid     Bootloader::MOD_PNORACC_READTOC
+             * @reasoncode   Bootloader::RC_CHK_NULL_BUFFER
              * @userdata1[0:15]   TI_WITH_SRC
              * @userdata1[16:31]  TI_BOOTLOADER
              * @userdata1[32:63]  Failing address = 0
@@ -103,8 +101,8 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
             // Set TI information but caller decides to TI or not
             /*@
              * @errortype
-             * @moduleid     MOD_PNORACC_READTOC
-             * @reasoncode   RC_HDR_CHECKSUM_ERR
+             * @moduleid     Bootloader::MOD_PNORACC_READTOC
+             * @reasoncode   Bootloader::RC_HDR_CHECKSUM_ERR
              * @userdata1[0:15]   TI_WITH_SRC
              * @userdata1[16:31]  TI_BOOTLOADER
              * @userdata1[32:63]  Failing address = 0
@@ -133,8 +131,8 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
             // Set TI information but caller decides to TI or not
             /*@
              * @errortype
-             * @moduleid     MOD_PNORACC_READTOC
-             * @reasoncode   RC_CHECK_HEADER_ERR
+             * @moduleid     Bootloader::MOD_PNORACC_READTOC
+             * @reasoncode   Bootloader::RC_CHECK_HEADER_ERR
              * @userdata1[0:15]   TI_WITH_SRC
              * @userdata1[16:31]  TI_BOOTLOADER
              * @userdata1[32:63]  Failing address = 0
@@ -168,8 +166,8 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
             // Set TI information but caller decides to TI or not
             /*@
              * @errortype
-             * @moduleid     MOD_PNORACC_READTOC
-             * @reasoncode   RC_PARSE_ENTRIES_ERR
+             * @moduleid     Bootloader::MOD_PNORACC_READTOC
+             * @reasoncode   Bootloader::RC_PARSE_ENTRIES_ERR
              * @userdata1[0:15]   TI_WITH_SRC
              * @userdata1[16:31]  TI_BOOTLOADER
              * @userdata1[32:63]  Failing address = 0
@@ -277,8 +275,8 @@ void bl_pnorAccess::getHBBSection(uint64_t i_pnorEnd,
             BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_GETHBBSECTION_FINDTOC_NOHBB);
             /*@
              * @errortype
-             * @moduleid     MOD_PNORACC_GETHBBSECT
-             * @reasoncode   RC_NO_HBB_IN_TOC
+             * @moduleid     Bootloader::MOD_PNORACC_GETHBBSECT
+             * @reasoncode   Bootloader::RC_NO_HBB_IN_TOC
              * @userdata1[0:15]   TI_WITH_SRC
              * @userdata1[16:31]  TI_BOOTLOADER
              * @userdata1[32:63]  Failing address = 0

@@ -216,7 +216,7 @@ namespace Bootloader{
                 BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_FAIL);
                 /*@
                  * @errortype
-                 * @moduleid     MOD_BOOTLOADER_VERIFY
+                 * @moduleid     Bootloader::MOD_BOOTLOADER_VERIFY
                  * @reasoncode   SECUREBOOT::RC_ROM_VERIFY
                  * @userdata1    ROM return code
                  * @userdata2    ROM_hw_params log
@@ -351,8 +351,8 @@ namespace Bootloader{
                 BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_MAIN_REMOVEECC_FAIL);
                 /*@
                  * @errortype
-                 * @moduleid     MOD_BOOTLOADER_MAIN
-                 * @reasoncode   RC_REMOVE_ECC_FAIL
+                 * @moduleid     Bootloader::MOD_BOOTLOADER_MAIN
+                 * @reasoncode   Bootloader::RC_REMOVE_ECC_FAIL
                  * @userdata1[0:15]   TI_WITH_SRC
                  * @userdata1[16:31]  TI_BOOTLOADER
                  * @userdata1[32:63]  Failing address = 0
