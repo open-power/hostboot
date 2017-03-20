@@ -256,7 +256,8 @@ enum RingID
     eq_fure = 172,
     eq_gptr = 173,
     eq_time = 174,
-    eq_mode = 175,
+    eq_inex = 175,
+    eq_mode = 175,  // FIXME will be removed once Hcode image Build changes are in place
     ex_l3_fure = 176,
     ex_l3_gptr = 177,
     ex_l3_time = 178,
@@ -344,6 +345,11 @@ enum RingID
     eq_ana_bndy_bucket_40 = 246,
     eq_ana_bndy_bucket_41 = 247,
 
+    //EQ Inex ring bucket
+    eq_inex_bucket_1      = 248,
+    eq_inex_bucket_2      = 249,
+    eq_inex_bucket_3      = 250,
+    eq_inex_bucket_4      = 251,
     //***************************
     // Rings needed for SBE - End
     //***************************
