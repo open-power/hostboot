@@ -418,7 +418,7 @@ typedef struct __attribute__((__packed__)) WofTablesHeader
 typedef struct __attribute__((__packed__)) HomerSysVFRTLayout
 {
     VFRTHeaderLayout_t vfrtHeader;
-    uint8_t vfrt_data[VFRT_VRATIO_SIZE][VFRT_FRATIO_SIZE];
+    uint8_t vfrt_data[VFRT_FRATIO_SIZE][VFRT_VRATIO_SIZE];
 } HomerSysVFRTLayout_t;
 
 
@@ -427,7 +427,7 @@ typedef struct __attribute__((__packed__)) HomerSysVFRTLayout
 typedef struct __attribute__((__packed__)) HomerVFRTLayout
 {
     VFRTHeaderLayout_t vfrtHeader;
-    uint8_t vfrt_data[VFRT_VRATIO_SIZE][VFRT_FRATIO_SIZE];
+    uint8_t vfrt_data[VFRT_FRATIO_SIZE][VFRT_VRATIO_SIZE];
     uint8_t padding[128];
 } HomerVFRTLayout_t;
 
