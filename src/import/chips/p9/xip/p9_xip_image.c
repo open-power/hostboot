@@ -3084,8 +3084,6 @@ p9_xip_translate_header(P9XipHeader* o_dest, const P9XipHeader* i_src)
     memcpy(o_dest->iv_buildTag, i_src->iv_buildTag,
            sizeof(i_src->iv_buildTag));
 
-    o_dest->iv_reserved32 = 0;
-
     o_dest->iv_headerVersion = i_src->iv_headerVersion;
     o_dest->iv_normalized = i_src->iv_normalized;
     o_dest->iv_tocSorted = i_src->iv_tocSorted;
