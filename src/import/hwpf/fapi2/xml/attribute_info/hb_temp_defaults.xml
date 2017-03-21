@@ -181,7 +181,53 @@
         <id>ATTR_CME_CHTM_TRACE_MEMORY_CONFIG</id>
         <default>0x00</default>
     </attribute>
+    <attribute>
+        <id>ATTR_EXTERNAL_VRM_STEPSIZE</id>
+        <default>0x00</default>
+    </attribute>
 
+    <attribute>
+        <id>ATTR_EXTERNAL_VRM_TRANSITION_START_NS</id>
+        <default>0x00</default>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EXTERNAL_VRM_TRANSITION_RATE_INC_UV_PER_US</id>
+        <default>0x00</default>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US</id>
+        <default>0x00</default>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS</id>
+        <default>0x00</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_VDM_ENABLE</id>
+        <default>0x00</default>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_SYSTEM_WOF_ENABLED</id>
+        <default>0x00</default>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_WOF_ENABLE_FRATIO</id>
+        <default>0x00</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_WOF_ENABLE_VRATIO</id>
+        <default>0x00</default>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_WOF_VRATIO_SELECT</id>
+        <default>0x00</default>
+    </attribute>
 
 <!-- =====================================================================
      End of temporary definitions
