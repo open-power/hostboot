@@ -174,10 +174,10 @@ void test_fapi2HwAccess()
 #if 0 //@fixme-RTC:170587
         //this test should not be run at runtime
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_platPutRingWRingID_pass);
+        FAPI_INVOKE_HWP(l_errl, p9_platPutRingWRingId_t_pass);
         if(l_errl)
         {
-            TS_FAIL("Error from p9_platPutRingWRingID_pass !!");
+            TS_FAIL("Error from p9_platPutRingWRingId_t_pass !!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
             delete l_errl; // delete unexpected error log so we dont get

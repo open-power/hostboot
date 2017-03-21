@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,6 @@
 #include <target.H>
 #include <hw_access_def.H>
 #include <plat_hw_access.H>
-#include <p9_ringId.H>
 
 namespace fapi2
 {
@@ -159,7 +158,7 @@ inline ReturnCode modifyCfamRegister(const Target<K, V>& i_target,
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 template< TargetType K, typename V >
 ReturnCode putRing(const Target<K, V>& i_target,
-                   const RingID i_ringID,
+                   const RingId_t i_ringID,
                    const RingMode i_ringMode = RING_MODE_HEADER_CHECK);
 
 // variable_buffer isn't supported on PPE

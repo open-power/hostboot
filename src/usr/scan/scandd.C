@@ -262,7 +262,7 @@ uint8_t getChipletIDForSBE(TARGETING::Target * i_hbTarget)
 
 /// @brief Sends Put Ring from Image message to SBE via PSU
 errlHndl_t sbeScanPerformOp( TARGETING::Target * i_target,
-                             RingID i_ringID,
+                             RingId_t i_ringID,
                              fapi2::RingMode i_ringMode )
 {
     TRACFCOMP( g_trac_scandd, ENTER_MRK "sbeScanPerformOp(targ=%.8X,id=%d,mode=%.8X)",
@@ -359,7 +359,7 @@ errlHndl_t scanPerformOp( DeviceFW::OperationType i_opType,
         {
             // from devicefw/userif.H
             // #define DEVICE_SCAN_SBE_ADDRESS( i_ringID, i_ringMode, i_flag )
-            RingID i_ringID = static_cast<RingID>(i_arg0);
+            RingId_t i_ringID = static_cast<RingId_t>(i_arg0);
             fapi2::RingMode i_ringMode = static_cast<fapi2::RingMode>(i_arg1);
             l_err = sbeScanPerformOp( i_target,
                                       i_ringID,

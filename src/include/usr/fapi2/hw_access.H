@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -240,7 +240,7 @@ inline ReturnCode putRing(const Target<K>& i_target,
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 template< TargetType K >
 inline ReturnCode putRing(const Target<K>& i_target,
-                          const RingID i_ringID,
+                          const RingId_t i_ringID,
                           const RingMode i_ringMode = RING_MODE_HEADER_CHECK)
 {
     FAPI_DBG("Entering putRing with RingID ...");
