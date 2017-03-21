@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -175,7 +175,7 @@ ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
 /// @param[in] i_ringMode Ring operation mode.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
-                       const RingID i_ringID,
+                       const RingId_t i_ringID,
                        const RingMode i_ringMode);
 
 //--------------------------------------------------------------------------

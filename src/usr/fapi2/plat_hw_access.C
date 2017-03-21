@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -912,12 +912,12 @@ ReturnCode platModifyRing(const Target<TARGET_TYPE_ALL>& i_target,
     return l_rc;
 }
 
-/// @brief passing a 'Put Ring from Image' message to SBE with RingID
+/// @brief passing a 'Put Ring from Image' message to SBE with RingId_t
 ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
-        const RingID i_ringID,
+        const RingId_t i_ringID,
         const RingMode i_ringMode = RING_MODE_HEADER_CHECK)
 {
-    FAPI_DBG("Entering: platPutRing() with RingID");
+    FAPI_DBG("Entering: platPutRing() with RingId_t");
     ReturnCode l_rc  = FAPI2_RC_SUCCESS;
     errlHndl_t l_err = NULL;
 
@@ -925,8 +925,8 @@ ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
     //       trace in common fapi2_hw_access.H
     bool l_traceit = platIsScanTraceEnabled();
 
-    //convert const ringID to ringID
-    RingID l_ringID = reinterpret_cast<RingID>(i_ringID);
+    //convert const RingId_t to RingId_t
+    RingId_t l_ringID = reinterpret_cast<RingId_t>(i_ringID);
 
     // Extract the component pointer
     TARGETING::Target* l_target =
@@ -961,12 +961,12 @@ ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
 
     if (l_traceit)
     {
-         FAPI_SCAN("TRACE : PUTRING w RingID     :  %s : %.16llX",
+         FAPI_SCAN("TRACE : PUTRING w RingId_t    :  %s : %.16llX",
                 l_targName,
                 static_cast<uint64_t>(l_ringID));
     }
 
-    FAPI_DBG(EXIT_MRK "platPutRing() with RingID");
+    FAPI_DBG(EXIT_MRK "platPutRing() with RingId_t");
     return l_rc;
 }
 

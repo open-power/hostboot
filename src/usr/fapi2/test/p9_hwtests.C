@@ -296,10 +296,10 @@ fapi2::ReturnCode p9_ringtest_modring_pass(
 
 }
 
-fapi2::ReturnCode p9_platPutRingWRingID_pass()
+fapi2::ReturnCode p9_platPutRingWRingId_t_pass()
 {
     //every test is displayed this way via FAPI_INF
-    FAPI_INF("Entering p9_platPutRingWRingID_pass ...");
+    FAPI_INF("Entering p9_platPutRingWRingId_t_pass ...");
     // get the master proc
     TARGETING::Target * l_procTest;
     TARGETING::targetService().masterProcChipTargetHandle( l_procTest);
@@ -312,7 +312,7 @@ fapi2::ReturnCode p9_platPutRingWRingID_pass()
 
     if(l_status!= fapi2::FAPI2_RC_SUCCESS)
     {
-        TS_FAIL("p9_platPutRingWRingID_pass>> proc test - failed");
+        TS_FAIL("p9_platPutRingWRingId_t_pass>> proc test - failed");
     }
 
     return l_status;

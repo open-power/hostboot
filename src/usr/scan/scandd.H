@@ -65,7 +65,7 @@ errlHndl_t scanPerformOp( DeviceFW::OperationType i_opType,
  * @return errlHndl_t  returns non-zero value if there is error.
 */
 errlHndl_t sbeScanPerformOp( TARGETING::Target * i_target,
-                             RingID i_ringID,
+                             RingId_t i_ringID,
                              fapi2::RingMode i_ringMode );
 
 /**
