@@ -23,5 +23,4 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_tod_save_config
-lib$(PROCEDURE)_DEPLIBS+=p9_tod_utils
 $(call BUILD_PROCEDURE)
