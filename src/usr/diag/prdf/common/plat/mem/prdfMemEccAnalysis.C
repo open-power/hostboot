@@ -257,6 +257,7 @@ uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
     // Add data to the CE table.
     D db = static_cast<D>(i_chip->getDataBundle());
     uint32_t ceTableRc = db->iv_ceTable.addEntry( i_addr, i_symbol );
+    bool doTps = false;
 
     // Check MNFG thresholds, if needed.
     if ( mfgMode() )
@@ -265,16 +266,19 @@ uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
         {
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MnfgDramCte );
             io_sc.service_data->setServiceCall();
+            doTps = true;
         }
         else if ( 0 != (MemCeTable<T>::MNFG_TH_RANK & ceTableRc) )
         {
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MnfgRankCte );
             io_sc.service_data->setServiceCall();
+            doTps = true;
         }
         else if ( 0 != (MemCeTable<T>::MNFG_TH_DIMM & ceTableRc) )
         {
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MnfgDimmCte );
             io_sc.service_data->setServiceCall();
+            doTps = true;
         }
         else if ( 0 != (MemCeTable<T>::TABLE_FULL & ceTableRc) )
         {
@@ -289,6 +293,7 @@ uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
             io_sc.service_data->SetCallout( all_mm, MRU_MEDA );
             io_sc.service_data->SetCallout( trgt,   MRU_MEDA );
             io_sc.service_data->setServiceCall();
+            doTps = true;
         }
         else if ( 0 != (MemCeTable<T>::ENTRY_TH_REACHED & ceTableRc) )
         {
@@ -298,14 +303,23 @@ uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
             // has been met. This is a potential flooding issue. So make
             // the DIMM callout predictive.
             io_sc.service_data->setServiceCall();
+            doTps = true;
         }
     }
-
-    #ifdef __HOSTBOOT_RUNTIME
+    else // field thresholds
+    {
+        // It is possible that the MNFG thresholds are higher than the field
+        // thresholds because of the scaling due to DRAM side. Therefore, we
+        // cannot simply trigger TPS on any threshold. The field and MNFG
+        // thresholds must be handled separately.
+        doTps = ( 0 != (MemCeTable<T>::FIELD_TH_ALL & ceTableRc) );
+    }
 
     // Initiate a TPS procedure, if needed.
-    if ( MemCeTable<T>::NO_TH_REACHED != ceTableRc )
+    if ( doTps )
     {
+        #ifdef __HOSTBOOT_RUNTIME
+
         // If a MNFG threshold has been reached (predictive callout), we
         // will still try to start TPS just in case MNFG disables the
         // termination policy.
@@ -316,9 +330,9 @@ uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
             PRDF_ERR( PRDF_FUNC "addTpsEvent(0x%08x, m%ds%d) failed",
                       i_chip->getHuid(), rank.getMaster(), rank.getSlave() );
         }
-    }
 
-    #endif
+        #endif
+    }
 
     return o_rc;
 
