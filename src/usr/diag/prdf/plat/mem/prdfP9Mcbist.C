@@ -34,9 +34,13 @@
 #include <prdfPluginMap.H>
 
 // Platform includes
+#include <prdfMemEccAnalysis.H>
 #include <prdfPlatServices.H>
 #include <prdfP9McbistDataBundle.H>
 #include <prdfP9McbistExtraSig.H>
+#include <prdfMemScrubUtils.H>
+
+using namespace TARGETING;
 
 namespace PRDF
 {
@@ -77,6 +81,47 @@ int32_t PostAnalysis( ExtensibleChip * i_mcbChip,
                       STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[p9_mcbist::PostAnalysis] "
+
+
+    #ifdef __HOSTBOOT_RUNTIME
+
+    // Maintenance IUEs in mnfg mode do not use MCAECCFIR[37], instead we stop
+    // background scrub on RCE ETEs with a threshold of 1 and the IUE is handled
+    // via command complete attention. Similar to our normal IUE handling, we
+    // want to trigger a port fail after the error log has been committed. See
+    // the comments in PostAnalysis in prdfP9Mca.C for a full explanation of why
+    // we trigger the port fail here
+
+    // if in mnfg mode
+    if ( mfgMode() )
+    {
+        ExtensibleChipList mcaList = getConnected( i_mcbChip, TYPE_MCA );
+        // loop through all MCAs
+        for ( auto & mca : mcaList )
+        {
+            uint32_t l_rc = SUCCESS;
+            uint32_t eccAttns;
+            l_rc = checkEccFirs<TYPE_MCA>( mca, eccAttns );
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "checkEccFirs<T>(0x%08x) failed",
+                          mca->getHuid() );
+                break;
+            }
+
+            // if there's an IUE and we've reached threshold trigger a port fail
+            if ( eccAttns & MAINT_IUE )
+            {
+                if ( SUCCESS != MemEcc::iuePortFail(mca, io_sc) )
+                {
+                    PRDF_ERR( PRDF_FUNC "iuePortFail failed: i_mcbChip="
+                              "0x%08x", i_mcbChip->getHuid() );
+                }
+            }
+        }
+    }
+
+    #endif // __HOSTBOOT_RUNTIME
 
     return SUCCESS; // Always return SUCCESS for this plugin.
 
@@ -136,14 +181,14 @@ int32_t CmdCompleteDd1Workaround( ExtensibleChip * i_mcbChip,
 
     #ifndef __HOSTBOOT_RUNTIME
 
-    TARGETING::TargetHandle_t mcbTrgt = i_mcbChip->getTrgt();
+    TargetHandle_t mcbTrgt = i_mcbChip->getTrgt();
 
     // This workaround should only be seen during super fast MCBIST commands,
     // which are only run during Memory Diagnostics. Also, the workaround only
     // applies to P9 Nimbus DD1.0.
     PRDF_ASSERT( isInMdiaMode() );
-    PRDF_ASSERT( (TARGETING::MODEL_NIMBUS == getChipModel(mcbTrgt)) &&
-                 (0x10                    == getChipLevel(mcbTrgt)) );
+    PRDF_ASSERT( (MODEL_NIMBUS == getChipModel(mcbTrgt)) &&
+                 (0x10         == getChipLevel(mcbTrgt)) );
 
     int32_t l_rc = SUCCESS; // For local rc handling.
 

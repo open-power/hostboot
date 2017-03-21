@@ -61,25 +61,6 @@ int32_t Initialize( ExtensibleChip * i_chip )
 }
 PRDF_PLUGIN_DEFINE( p9_mca, Initialize );
 
-/**
- * @brief  Plugin function called after analysis is complete but before PRD
- *         exits.
- * @param  i_chip An MCA chip.
- * @param  io_sc  The step code data struct.
- * @note   This is especially useful for any analysis that still needs to be
- *         done after the framework clears the FIR bits that were at attention.
- * @return SUCCESS.
- */
-int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[p9_mca::PostAnalysis] "
-
-    return SUCCESS; // Always return SUCCESS for this plugin.
-
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE( p9_mca, PostAnalysis );
-
 //##############################################################################
 //
 //                               DDRPHYFIR
@@ -163,46 +144,6 @@ PRDF_PLUGIN_DEFINE( p9_mca, mcaUeAlgorithm );
 
 //##############################################################################
 //
-//                               MCACALFIR
-//
-//##############################################################################
-
-/**
- * @brief  MCACALFIR[13] - Persistent RCD error, port failed.
- * @param  i_chip MCA chip.
- * @param  io_sc  The step code data struct.
- * @return SUCCESS
- */
-int32_t MemPortFailure( ExtensibleChip * i_chip,
-                        STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[p9_mca::MemPortFailure] "
-
-    if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
-    {
-        // The port is dead mask off the entire port.
-
-        SCAN_COMM_REGISTER_CLASS * c = i_chip->getRegister("MCACALFIR_MASK_OR");
-        SCAN_COMM_REGISTER_CLASS * d = i_chip->getRegister("DDRPHYFIR_MASK_OR");
-        SCAN_COMM_REGISTER_CLASS * e = i_chip->getRegister("MCAECCFIR_MASK_OR");
-
-        c->setAllBits(); d->setAllBits(); e->setAllBits();
-
-        if ( SUCCESS != (c->Write() | d->Write() | e->Write()) )
-        {
-            PRDF_ERR( PRDF_FUNC "Write() failed: i_chip=0x%08x",
-                      i_chip->getHuid() );
-        }
-    }
-
-    return SUCCESS; // nothing to return to rule code
-
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE( p9_mca, MemPortFailure );
-
-//##############################################################################
-//
 //                               MCAECCFIR
 //
 //##############################################################################
@@ -281,6 +222,38 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_chip,
     return SUCCESS; // nothing to return to rule code
 }
 PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchUe );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  MCAECCFIR[17] - Mainline read IUE.
+ * @param  i_chip MCA chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeMainlineIue( ExtensibleChip * i_chip,
+                                 STEP_CODE_DATA_STRUCT & io_sc )
+{
+    MemEcc::analyzeMainlineIue<TYPE_MCA, McaDataBundle *>( i_chip, io_sc );
+    return SUCCESS; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeMainlineIue );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  MCAECCFIR[37] - Maint IUE.
+ * @param  i_chip MCA chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeMaintIue( ExtensibleChip * i_chip,
+                              STEP_CODE_DATA_STRUCT & io_sc )
+{
+    MemEcc::analyzeMaintIue<TYPE_MCA, McaDataBundle *>( i_chip, io_sc );
+    return SUCCESS; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeMaintIue );
 
 //------------------------------------------------------------------------------
 

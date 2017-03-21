@@ -29,6 +29,7 @@
 #include <prdfPluginMap.H>
 
 // Platform includes
+#include <prdfMemEccAnalysis.H>
 #include <prdfP9McaDataBundle.H>
 #include <prdfP9McbistDataBundle.H>
 #include <prdfPlatServices.H>
@@ -46,6 +47,48 @@ using namespace PlatServices;
 
 namespace p9_mca
 {
+
+//##############################################################################
+//
+//                             Special plugins
+//
+//##############################################################################
+
+/**
+ * @brief  Plugin function called after analysis is complete but before PRD
+ *         exits.
+ * @param  i_chip An MCA chip.
+ * @param  io_sc  The step code data struct.
+ * @note   This is especially useful for any analysis that still needs to be
+ *         done after the framework clears the FIR bits that were at attention.
+ * @return SUCCESS.
+ */
+int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[p9_mca::PostAnalysis] "
+
+    #ifdef __HOSTBOOT_RUNTIME
+
+
+    // If the IUE threshold in our data bundle has been reached, we trigger
+    // a port fail. Once we trigger the port fail, the system may crash
+    // right away. Since PRD is running in the hypervisor, it is possible we
+    // may not get the error log. To better our chances, we trigger the port
+    // fail here after the error log has been committed.
+    if ( SUCCESS != MemEcc::iuePortFail(i_chip, io_sc) )
+    {
+        PRDF_ERR( PRDF_FUNC "iuePortFail failed: i_chip=0x%08x",
+                  i_chip->getHuid() );
+    }
+
+    #endif // __HOSTBOOT_RUNTIME
+
+    return SUCCESS; // Always return SUCCESS for this plugin.
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( p9_mca, PostAnalysis );
+
 
 //##############################################################################
 //
@@ -134,6 +177,37 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( p9_mca, RcdParityError );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  MCACALFIR[13] - Persistent RCD error, port failed.
+ * @param  i_chip MCA chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t MemPortFailure( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[p9_mca::MemPortFailure] "
+
+    if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
+    {
+        // The port is dead mask off the entire port.
+        uint32_t l_rc = MemEcc::maskMemPort( i_chip );
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "MemEcc::maskMemPort failed: i_chip=0x%08x",
+                      i_chip->getHuid() );
+        }
+
+    }
+
+    return SUCCESS; // nothing to return to rule code
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( p9_mca, MemPortFailure );
 
 } // end namespace p9_mca
 
