@@ -41,6 +41,7 @@ OBJS += sbe_fifodd.o
 OBJS += sbe_scomAccess.o
 OBJS += sbe_scomAccessdd.o
 OBJS += sbe_ffdc_parser.o
+OBJS += sbe_setFFDCAddr.o
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d

@@ -99,6 +99,7 @@ class SbePsu
         //BYTE 7 options
         enum psuGenericMessageCommands
         {
+            SBE_PSU_SET_FFDC_ADDRESS         = 0x04,
             SBE_PSU_GENERIC_MSG_QUIESCE      = 0x05,
             SBE_CMD_CONTROL_SYSTEM_CONFIG    = 0x06
         };
@@ -182,6 +183,25 @@ class SbePsu
         {
             SBE_QUIESCE_REQ_USED_REGS     = 0x01,
             SBE_QUIESCE_RSP_USED_REGS     = 0x01,
+        };
+
+        /**
+        * @brief non reserved word enums
+        *
+        * Shows which of the request and response msg registers are
+        * not reserved. Reserved registers do not need to be written
+        * or read.
+        *
+        * This is a 4 bit field:
+        * 0x1 - Reg 0 is non-reserved (read or write this reg)
+        * 0x2 - Reg 1 is non-reserved (read or write this reg)
+        * 0x4 - Reg 2 is non-reserved (read or write this reg)
+        * 0x8 - Reg 3 is non-reserved (read or write this reg)
+        */
+        enum psuSetFFDCAddrNonReservedMsgs
+        {
+            SBE_SET_FFDC_ADDR_REQ_USED_REGS     = 0x0F,
+            SBE_SET_FFDC_ADDR_RSP_USED_REGS     = 0x01,
         };
 
         /**
@@ -282,6 +302,19 @@ class SbePsu
                 uint64_t cd4_PsuQuiesce_MbxReg1reserved;
                 uint64_t cd4_PsuQuiesce_MbxReg2reserved;
                 uint64_t cd4_PsuQuiesce_MbxReg3reserved;
+            } PACKED;
+
+            struct //setFFDCAddress
+            {
+                uint16_t cd7_setFFDCAddr_Reserved;
+                uint16_t cd7_setFFDCAddr_ControlFlags;
+                uint16_t cd7_setFFDCAddr_SeqID;
+                uint8_t  cd7_setFFDCAddr_CommandClass;
+                uint8_t  cd7_setFFDCAddr_Command;
+                uint32_t cd7_setFFDCAddr_FFDCSize; // mbxReg1 / dataWord2
+                uint32_t cd7_setFFDCAddr_CommSize; // mbxReg1 / dataWord3
+                uint64_t cd7_setFFDCAddr_FFDCAddr; // mbxReg2
+                uint64_t cd7_setFFDCAddr_CommAddr; // mbxReg3
             } PACKED;
 
 
@@ -438,6 +471,16 @@ class SbePsu
              SBE_TARGET_TYPE_TOTAL          ,
              SBE_TARGET_TYPE_UNKNOWN  = 0xFF
         };
+
+        /**
+         * @brief get SBE FFDC buffer size
+         *
+         * @return const size_t Size of SBE FFDC buffer.
+         */
+        const size_t getSbeFFDCBufferSize(void)
+        {
+            return (ffdcPackageSize * PAGESIZE);
+        }
 
         /**
          * @brief perform SBE PSU chip-op
