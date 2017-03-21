@@ -244,6 +244,9 @@ typedef struct
     /// All operating points
     VpdOperatingPoint operating_points_set[NUM_VPD_PTS_SET][VPD_PV_POINTS];
 
+    //DPLL pstate 0 value
+    uint32_t dpll_pstate0_value;
+
     // @todo DPLL Droop Settings.  These need communication to SGPE for STOP
 
 } GlobalPstateParmBlock;
