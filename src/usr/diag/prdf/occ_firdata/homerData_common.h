@@ -38,26 +38,22 @@
  *  in the event of a system checkstop. The data will be stored in the following
  *  format:
  *
- *  - HOMER_Data_t struct - This has all of the information characterizing what
- *          hardware is configured and how many addresses are in each register
- *          list. See the struct definition below.
+ *  - HOMER_Data_t struct - This contains PNOR information, IPL state, number of
+ *      configured chips, and number of register addresses per target type per
+ *      register type.
  *
- *  - Rgister address lists - These lists vary in size depending on the number
- *          of register addresses needed in each list. The list counts are
- *          stored in HOMER_Data_t::counts. All lists for each target type will
- *          be stored in the following order:
- *              - PROC lists
- *              - EX lists
- *              - MCS lists
- *              - MEMB lists
- *              - MBA lists
- *          Each target type will have a set of lists that will be stored in the
- *          following order:
- *              - Global FIRs               32-bit addresses
- *              - FIRs                      32-bit addresses
- *              - Registers                 32-bit addresses
- *              - Indirect-SCOM FIRs        64-bit addresses
- *              - Indirect-SCOM registers   64-bit addresses
+ *  - For each configured chip, the following format will be used:
+ *      - HOMER_Chip_t struct - containing FSI base address, chip type, and chip
+ *        position.
+ *      - Immediately following will be a chip struct that is specific to the
+ *        chip type stored in the preceding struct. These vary in size and
+ *        structure depending on the chip type.
+ *
+ *  - Register address lists - These lists vary in size depending on the number
+ *      of register addresses needed in each list. The list counts are stored in
+ *      HOMER_Data_t::regCounts. Order of the lists must match the array indexes
+ *      HOMER_Data_t::regCounts, which are specified in TrgtType_t and
+ *      RegType_t.
  *
  *  Note that FIRs and indirect-SCOM FIRs characterize a set of registers to
  *  capture. In addition to capturing the FIR (or ID FIR), the OCC will need to
@@ -77,7 +73,8 @@
 
 typedef enum
 {
-    HOMER_FIR1 = 0x46495231, /** FIR data version 1 ("FIR1" in ascii) */
+    HOMER_FIR1 = 0x46495231, /** FIR data version 1 ("FIR1" in ascii) P8 */
+    HOMER_FIR2 = 0x46495232, /** FIR data version 1 ("FIR2" in ascii) P9 */
 
 } HOMER_Version_t;
 
@@ -97,45 +94,13 @@ typedef struct __attribute__((packed))
 {
     uint32_t header; /** Magic number to indicate valid data and version */
 
-    uint16_t iplState :  1; /** See enum IplState_t */
-    uint16_t reserved : 15;
+    uint8_t chipCount; /** Number of configured chips per node */
 
-    uint8_t masterProc; /** The position of the master PROC */
-
-    /** Bitwise mask to indicate which PROCs are configured (max 8). The mask
-     *  bit position is consistant with PROC ATTR_POSITION attribute. */
-    uint8_t procMask;
-
-    /** Bitwise masks to indicate which EXs are configured (16 per PROC). The
-     *  array index is the associated PROC position. The mask bit position is
-     *  consistant with the EX's ATTR_CHIP_UNIT attribute. */
-    uint16_t exMasks[MAX_PROC_PER_NODE];
-
-    /** Bitwise masks to indicate which MCSs are configured (8 per PROC). The
-     *  array index is the associated PROC position. The mask bit position is
-     *  consistant with the MCS's ATTR_CHIP_UNIT attribute. */
-    uint8_t mcsMasks[MAX_PROC_PER_NODE];
-
-    /** Bitwise masks to indicate which MEMBs are configured (8 per PROC). The
-     *  array index is the associated PROC position. The mask bit position is
-     *  consistant with the ATTR_CHIP_UNIT attribute of the connected MCS. */
-    uint8_t membMasks[MAX_PROC_PER_NODE];
-
-    /** Bitwise masks to indicate which MBAs are configured (16 per PROC). The
-     *  array index is the associated PROC position. The mask bit position is
-     *  calculated as:
-     *    (MEMB position * MAX_MBA_PER_MEMB) + MBA's ATTR_CHIP_UNIT attribute
-     */
-    uint16_t mbaMasks[MAX_PROC_PER_NODE];
+    uint8_t iplState : 1; /** See IplState_t. */
+    uint8_t reserved : 7;
 
     /** Contains number of registers per type for each target type. */
-    uint8_t counts[MAX_TRGTS][MAX_REGS];
-
-    /** FSI base address for each PROC chip. */
-    uint32_t procFsiBaseAddr[MAX_PROC_PER_NODE];
-
-    /** FSI base address for each MEMB chip. */
-    uint32_t membFsiBaseAddr[MAX_PROC_PER_NODE][MAX_MEMB_PER_PROC];
+    uint8_t regCounts[TRGT_MAX][REG_MAX];
 
     /** Information regarding the PNOR location and size. */
     HOMER_PnorInfo_t pnorInfo;
@@ -145,29 +110,143 @@ typedef struct __attribute__((packed))
 /** @return An initialized HOMER_Data_t struct. */
 static inline HOMER_Data_t HOMER_getData()
 {
-    HOMER_PnorInfo_t p;
-    HOMER_Data_t d;
+    HOMER_Data_t d; memset( &d, 0x00, sizeof(d) ); /* init to zero */
 
-    p.pnorOffset     = 0;
-    p.pnorSize       = 0;
-    p.mmioOffset     = 0;
-    p.norWorkarounds = 0;
-
-    d.header     = HOMER_FIR1;
-    d.reserved   = 0;
-    d.masterProc = 0;
-    d.procMask   = 0;
-    d.pnorInfo   = p;
-
-    memset( d.exMasks,         0x00, sizeof(d.exMasks)         );
-    memset( d.mcsMasks,        0x00, sizeof(d.mcsMasks)        );
-    memset( d.membMasks,       0x00, sizeof(d.membMasks)       );
-    memset( d.mbaMasks,        0x00, sizeof(d.mbaMasks)        );
-    memset( d.counts,          0x00, sizeof(d.counts)          );
-    memset( d.procFsiBaseAddr, 0xff, sizeof(d.procFsiBaseAddr) );
-    memset( d.membFsiBaseAddr, 0xff, sizeof(d.membFsiBaseAddr) );
+    d.header = HOMER_FIR2;
 
     return d;
 }
+
+/*----------------------------------------------------------------------------*/
+
+/** Supported chip types. */
+typedef enum
+{
+    HOMER_CHIP_NIMBUS,  /** P9 Nimbus processor chip */
+    HOMER_CHIP_CUMULUS, /** P9 Cumulus processor chip */
+    HOMER_CHIP_CENTAUR, /** Centaur memory buffer chip */
+
+} HOMER_ChipType_t;
+
+/** Information for each configured chip. */
+typedef struct __attribute__((packed))
+{
+    uint32_t fsiBaseAddr;   /** FSI base address for the chip. */
+
+    uint16_t chipType :  4; /** Chip type (see HOMER_ChipType_t) */
+    uint16_t chipPos  :  6; /** Chip position relative to the node. */
+    uint16_t reserved :  6;
+
+} HOMER_Chip_t;
+
+/** @return An initialized HOMER_Chip_t struct. */
+static inline HOMER_Chip_t HOMER_getChip( HOMER_ChipType_t i_type )
+{
+    HOMER_Chip_t c; memset( &c, 0x00, sizeof(c) ); /* init to zero */
+
+    c.fsiBaseAddr = 0xffffffff;
+    c.chipType    = i_type;
+
+    return c;
+}
+
+/*----------------------------------------------------------------------------*/
+
+/** Information specific to a P9 Nimbus processor chip. */
+typedef struct __attribute__((packed))
+{
+    uint32_t isMaster   :  1; /** 1 if this is the master PROC, 0 otherwise */
+    uint32_t xbusMask   :  3; /** Mask of configured XBUS units (0-2) */
+    uint32_t obusMask   :  4; /** Mask of configured OBUS units (0-3) */
+    uint32_t ecMask     : 24; /** Mask of configured EC units (0-23) */
+
+    uint32_t eqMask     :  6; /** Mask of configured EQ units (0-5) */
+    uint32_t exMask     : 12; /** Mask of configured EX units (0-11) */
+    uint32_t mcbistMask :  2; /** Mask of configured MCBIST units (0-1) */
+    uint32_t mcsMask    :  4; /** Mask of configured MCS units (0-3) */
+    uint32_t mcaMask    :  8; /** Mask of configured MCA units (0-7) */
+
+    uint16_t cappMask   :  2; /** Mask of configured CAPP units (0-1) */
+    uint16_t pecMask    :  3; /** Mask of configured PEC units (0-2) */
+    uint16_t phbMask    :  6; /** Mask of configured PHB units (0-5) */
+    uint16_t reserved   :  5;
+
+} HOMER_ChipNimbus_t;
+
+/** @return An initialized HOMER_ChipNimbus_t struct. */
+static inline HOMER_ChipNimbus_t HOMER_initChipNimbus()
+{
+    HOMER_ChipNimbus_t c; memset( &c, 0x00, sizeof(c) ); /* init to zero */
+
+    return c;
+}
+
+/*----------------------------------------------------------------------------*/
+
+/** Information specific to a P9 Cumulus processor chip. */
+typedef struct __attribute__((packed))
+{
+    uint32_t isMaster :  1; /** 1 if this is the master PROC, 0 otherwise */
+    uint32_t xbusMask :  3; /** Mask of configured XBUS units (0-2) */
+    uint32_t obusMask :  4; /** Mask of configured OBUS units (0-3) */
+    uint32_t ecMask   : 24; /** Mask of configured EC units (0-23) */
+
+    uint32_t eqMask   :  6; /** Mask of configured EQ units (0-5) */
+    uint32_t exMask   : 12; /** Mask of configured EX units (0-11) */
+    uint32_t mcMask   :  2; /** Mask of configured MC units (0-1) */
+    uint32_t miMask   :  4; /** Mask of configured MI units (0-3) */
+    uint32_t dmiMask  :  8; /** Mask of configured DMI units (0-7) */
+
+    uint16_t cappMask :  2; /** Mask of configured CAPP units (0-1) */
+    uint16_t pecMask  :  3; /** Mask of configured PEC units (0-2) */
+    uint16_t phbMask  :  6; /** Mask of configured PHB units (0-5) */
+    uint16_t reserved :  5;
+
+} HOMER_ChipCumulus_t;
+
+/** @return An initialized HOMER_ChipCumulus_t struct. */
+static inline HOMER_ChipCumulus_t HOMER_initChipCumulus()
+{
+    HOMER_ChipCumulus_t c; memset( &c, 0x00, sizeof(c) ); /* init to zero */
+
+    return c;
+}
+
+/*----------------------------------------------------------------------------*/
+
+/** Information specific to a Centaur memory buffer chip. */
+typedef struct __attribute__((packed))
+{
+    uint8_t mbaMask  : 2; /** Mask of configured MBA units (0-1) */
+    uint8_t reserved : 6;
+
+} HOMER_ChipCentaur_t;
+
+/** @return An initialized HOMER_ChipCentaur_t struct. */
+static inline HOMER_ChipCentaur_t HOMER_initChipCentaur()
+{
+    HOMER_ChipCentaur_t c; memset( &c, 0x00, sizeof(c) ); /* init to zero */
+
+    return c;
+}
+
+/** @brief Chip information inserted into HOMER data section after header
+ *
+ *         There is basically an array of these after the initial HOMER
+ *         section (HOMER_Data_t).  The register info then follows.
+ */
+typedef struct __attribute__((packed))
+{
+    HOMER_Chip_t  hChipType;
+
+    union
+    {
+        HOMER_ChipNimbus_t   hChipN;
+        HOMER_ChipCumulus_t  hChipC;
+        HOMER_ChipCentaur_t  hChipM;
+    };
+
+} HOMER_ChipInfo_t;
+
 
 #endif /* __homerData_common_h */

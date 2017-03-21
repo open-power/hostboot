@@ -151,6 +151,17 @@ chip p9_phb
         capture     req nonzero("ETUFIR");
     };
 
+    ############################################################################
+    # P9 PHB target CERR Report Hold Reg
+    ############################################################################
+
+    register PBAIB_CERR
+    {
+        name        "P9 PHB target PBAIB CERR Report Reg";
+        scomaddr    0x0d01084b;
+        capture     group default;
+    };
+
 
 # Include registers not defined by the xml
 .include "p9_phb_regs.rule";

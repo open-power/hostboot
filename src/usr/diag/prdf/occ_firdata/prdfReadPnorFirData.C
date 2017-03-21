@@ -86,13 +86,24 @@ TargetHandle_t getTargetHandle( PNOR_Trgt_t * i_pTrgt )
     {
         // Get the target type.
         TYPE type = TYPE_LAST_IN_RANGE;
-        switch ( i_pTrgt->type )
+        switch ( i_pTrgt->trgtType )
         {
-            case PROC:  type = TYPE_PROC;   break;
-            case EX:    type = TYPE_EX;     break;
-            case MCS:   type = TYPE_MCS;    break;
-            case MEMB:  type = TYPE_MEMBUF; break;
-            case MBA:   type = TYPE_MBA;    break;
+            // TODO RTC 173614: story for CUMULUS for mc mi dmi  types
+            case TRGT_PROC:   type = TYPE_PROC;   break;
+            case TRGT_XBUS:   type = TYPE_XBUS ;  break;
+            case TRGT_OBUS:   type = TYPE_OBUS ;  break;
+            case TRGT_EC:     type = TYPE_CORE ;  break;
+            case TRGT_EQ:     type = TYPE_EQ ;    break;
+            case TRGT_EX:     type = TYPE_EX;     break;
+            case TRGT_MCBIST: type = TYPE_MCBIST; break;
+            case TRGT_MCS:    type = TYPE_MCS;    break;
+            case TRGT_MCA:    type = TYPE_MCA ;   break;
+            case TRGT_CAPP:   type = TYPE_CAPP;   break;
+            case TRGT_PEC:    type = TYPE_PEC;    break;
+            case TRGT_PHB:    type = TYPE_PHB;    break;
+
+            case TRGT_MEMBUF:  type = TYPE_MEMBUF; break;
+            case TRGT_MBA:     type = TYPE_MBA;    break;
         }
         if ( TYPE_LAST_IN_RANGE == type ) break;
 
@@ -102,36 +113,49 @@ TargetHandle_t getTargetHandle( PNOR_Trgt_t * i_pTrgt )
         for ( TargetHandleList::iterator i = procList.begin();
               i != procList.end(); ++i )
         {
-            if ( i_pTrgt->procPos == getTargetPosition(*i) )
+            if ( i_pTrgt->chipPos == getTargetPosition(*i) )
             {
                 procTrgt = *i;
                 break;
             }
         }
+
         if ( NULL == procTrgt ) break;
 
         if ( TYPE_PROC == type )
         {
             o_trgt = procTrgt; // nothing more to do.
         }
-        else if ( TYPE_EX == type || TYPE_MCS == type || TYPE_MEMBUF == type )
+        else if ( TYPE_MEMBUF == type )
         {
-            // Get the connected child
-            o_trgt = getConnectedChild( procTrgt, type, i_pTrgt->unitPos );
+            // Get the Centaur target
+            TargetHandleList  membList = getFunctionalTargetList( TYPE_MEMBUF );
+
+            for ( TargetHandleList::iterator l_mb = membList.begin();
+                  l_mb != membList.end(); ++l_mb )
+            {
+                if ( i_pTrgt->chipPos == getTargetPosition(*l_mb) )
+                {
+                    o_trgt = *l_mb;
+                    break;
+                }
+            }
         }
         else if ( TYPE_MBA == type )
         {
-            uint32_t membPos = i_pTrgt->unitPos / MAX_MBA_PER_MEMBUF;
-            uint32_t mbaPos  = i_pTrgt->unitPos % MAX_MBA_PER_MEMBUF;
-
             // Get the connected MEMBUF
             TargetHandle_t membTrgt = getConnectedChild( procTrgt, TYPE_MEMBUF,
-                                                         membPos );
+                                                         i_pTrgt->chipPos );
             if ( NULL != membTrgt )
             {
                 // Get the connected MBA
-                o_trgt = getConnectedChild( membTrgt, type, mbaPos );
+                o_trgt = getConnectedChild( membTrgt, type, i_pTrgt->unitPos );
             }
+        }
+        else
+        {
+            // Get the connected child
+            o_trgt = getConnectedChild( procTrgt, type, i_pTrgt->unitPos );
         }
 
     } while (0);
@@ -195,7 +219,7 @@ errlHndl_t readPnorFirData( bool & o_validData, PnorTrgtMap & o_trgtMap,
         if ( full ) break;
 
         // Check the header for valid data.
-        if ( PNOR_FIR1 != data->header )
+        if ( PNOR_FIR2 != data->header )
         {
             break; // nothing to analyze
         }
