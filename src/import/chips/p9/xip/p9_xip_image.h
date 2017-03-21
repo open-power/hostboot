@@ -396,10 +396,7 @@ typedef struct
     uint32_t iv_buildTime;
 
     /// Build tag, generated when releasing this image to fw
-    char iv_buildTag[16];
-
-    /// Reserved for future expansion
-    uint32_t iv_reserved32;
+    char iv_buildTag[20];
 
     //////////////////////////////////////////////////////////////////////
     // Other Information - 1-byte aligned; 8 entries
