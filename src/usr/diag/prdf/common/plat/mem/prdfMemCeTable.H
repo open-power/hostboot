@@ -65,6 +65,9 @@ class MemCeTable
         MNFG_TH_DRAM     = 0x08, ///< MNFG DRAM threshold reached.
         MNFG_TH_RANK     = 0x10, ///< MNFG rank threshold reached.
         MNFG_TH_DIMM     = 0x20, ///< MNFG DIMM threshold reached.
+
+        FIELD_TH_ALL     = ENTRY_TH_REACHED | RANK_TH_REACHED | TABLE_FULL,
+        MNFG_TH_ALL      = MNFG_TH_DRAM     | MNFG_TH_RANK    | MNFG_TH_DIMM,
     };
 
   private: // constants, enums
