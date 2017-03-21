@@ -668,6 +668,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     uint32_t     sgpeFlag  = 0;
     uint16_t     qmFlags   = 0;
     pgpe_flags_t pgpeFlags;
+    pgpeFlags.value = 0;
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     cmeHeader_t* pCmeHdr = (cmeHeader_t*) & i_pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
@@ -784,6 +785,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     if( attrVal )
     {
         qmFlags |= CME_QM_FLAG_RESCLK_ENABLE;
+        pgpeFlags.fields.resclk_enable = 1;
     }
 
     FAPI_DBG("Resonant Clock Enable  :   %s", attrVal ? "TRUE" : "FALSE" );
@@ -796,9 +798,25 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     if( attrVal )
     {
         qmFlags |= CME_QM_FLAG_SYS_IVRM_ENABLE;
+        pgpeFlags.fields.ivrm_enable = 1;
     }
 
     FAPI_DBG("System IVRM Enable   :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_ENABLE,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_VDM_ENABLE" );
+
+    if( attrVal )
+    {
+        qmFlags |= CME_QM_FLAG_SYS_VDM_ENABLE;
+        pgpeFlags.fields.vdm_enable = 1;
+    }
+
+    FAPI_DBG("System VDM Enable   :   %s", attrVal ? "TRUE" : "FALSE" );
+
+
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_ENABLED,
                            FAPI_SYSTEM,
@@ -808,13 +826,13 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     if( attrVal )
     {
         qmFlags |= CME_QM_FLAG_SYS_WOF_ENABLE;
+        pgpeFlags.fields.wof_enable = 1;
     }
 
     FAPI_DBG("System WOF Enable   :   %s", attrVal ? "TRUE" : "FALSE" );
 
     // Set PGPE Header Flags from Attributes
     FAPI_DBG(" -------------------- PGPE Flags -----------------");
-    pgpeFlags.value = 0;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PGPE_HCODE_FUNCTION_ENABLE,
                            FAPI_SYSTEM,
                            attrVal),
@@ -827,6 +845,44 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     }
 
     FAPI_DBG("PGPE Hcode Mode        :   %s", attrVal ? "PSTATES Enabled" : "OCC IPC Immediate Response Mode" );
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLE_FRATIO,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_WOF_ENABLE_FRATIO" );
+
+    if( attrVal )
+    {
+        pgpeFlags.fields.enable_fratio = 1;
+    }
+
+    FAPI_DBG("System FRATIO ENABLE   :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLE_VRATIO,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_WOF_ENABLE_VRATIO" );
+
+    if( attrVal )
+    {
+        pgpeFlags.fields.enable_vratio = 1;
+    }
+
+    FAPI_DBG("System VRATIO ENABLE   :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_VRATIO_SELECT,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_WOF_VRATIO_SELECT" );
+
+    if( attrVal )
+    {
+        pgpeFlags.fields.vratio_modifier = 1;
+    }
+
+    FAPI_DBG("System VRATIO SELECT:   %s", attrVal ? "TRUE" : "FALSE" );
+
+
 
     // Updating flag fields in the headers
     pCmeHdr->g_cme_mode_flags       =   SWIZZLE_4_BYTE(cmeFlag);
