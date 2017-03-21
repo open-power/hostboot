@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -27,11 +27,12 @@
 <!-- @file memory_mss_draminit_training.xml -->
 <!-- @brief Error xml for draminit_training -->
 <!-- -->
-<!-- *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com> -->
-<!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
+
+<!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com> -->
 <!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
-<!-- *HWP Level: 1 -->
+<!-- *HWP Level: 3 -->
 <!-- *HWP Consumed by: HB:FSP -->
 <!-- -->
 
@@ -491,6 +492,128 @@
   <gard>
     <target>TARGET_IN_ERROR</target>
   </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_NO_DIMM_FOR_MAPPING</rc>
+  <description>
+    Tried to map rank pairs on a port without any DIMMS
+  </description>
+  <ffdc>FUNCTION</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <target>MCA_TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>MCA_TARGET</target>
+  </deconfigure>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_INVALID_RANK_VECTOR_PASSED_IN</rc>
+  <description>
+     Invalid vector of ranks passed in
+  </description>
+  <ffdc>FUNCTION</ffdc>
+  <ffdc>RANK_SIZE</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <childTargets>
+        <parent>MCA_TARGET</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+    </childTargets>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+     <childTargets>
+        <parent>MCA_TARGET</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+    </childTargets>
+  </deconfigure>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_INVALID_RANK</rc>
+  <description>
+     Invalid rank passed into function
+  </description>
+  <ffdc>FUNCTION</ffdc>
+  <ffdc>RANK</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <childTargets>
+        <parent>MCA_TARGET</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+    </childTargets>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+     <childTargets>
+        <parent>MCA_TARGET</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+    </childTargets>
+  </deconfigure>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_INVALID_RANK_PAIR</rc>
+  <description>
+    Invalid rank pair passed into function
+  </description>
+  <ffdc>RANK_PAIR</ffdc>
+  <ffdc>FUNCTION</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <childTargets>
+        <parent>MCA_TARGET</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+    </childTargets>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+     <childTargets>
+        <parent>MCA_TARGET</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+    </childTargets>
+  </deconfigure>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_NO_PRIMARY_RANK_FOUND_RP</rc>
+  <description>
+    No primary rank in rank pair
+  </description>
+  <ffdc>RANK_PAIR</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <childTargets>
+        <parent>MCA_TARGET</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+    </childTargets>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+     <childTargets>
+        <parent>MCA_TARGET</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+    </childTargets>
+  </deconfigure>
 </hwpError>
 
 <hwpError>

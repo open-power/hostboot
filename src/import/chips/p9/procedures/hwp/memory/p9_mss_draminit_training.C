@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -94,7 +94,7 @@ extern "C"
         }
 
         // Clean out any previous calibration results, set bad-bits and configure the ranks.
-        FAPI_DBG("MCA's on this McBIST: %d", mss::find_targets<TARGET_TYPE_MCA>(i_target).size());
+        FAPI_DBG("%s MCA's on this McBIST: %d", mss::c_str(i_target), mss::find_targets<TARGET_TYPE_MCA>(i_target).size());
 
         for( const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
         {

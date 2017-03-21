@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_CCS_H_
@@ -50,18 +50,19 @@ constexpr uint64_t CKE_HIGH = 0b1111;
 
 // I have a dream that the CCS engine code can be shared among controllers. So, I drive the
 // engine from a set of traits. This might be folly. Allow me to dream. BRS
-
+///
+/// @class ccsTraits
+/// @brief Nimbus CCS Engine traits
+///
 template< fapi2::TargetType T >
 class ccsTraits;
 
-// Centaur CCS Engine traits
 template<>
 class ccsTraits<fapi2::TARGET_TYPE_MEMBUF_CHIP>
 {
     public:
 };
 
-// Nimbus CCS Engine traits
 template<>
 class ccsTraits<fapi2::TARGET_TYPE_MCBIST>
 {
@@ -187,7 +188,13 @@ enum
     STAT_HUNG = 0x0ull,
 };
 
-// A ccs instruction is data (array 0) and some control information (array 1)
+
+///
+/// @class instruction_t
+/// @brief Class for ccs instructions
+/// @tparam T fapi2::TargetType representing the target of the CCS instructions
+/// @note A ccs instruction is data (array 0) and some control information (array 1)cc
+///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 class instruction_t
 {

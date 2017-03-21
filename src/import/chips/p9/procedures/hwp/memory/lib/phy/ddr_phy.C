@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <vector>
@@ -84,7 +84,7 @@ fapi2::ReturnCode change_resetn( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targ
         FAPI_INF("Change reset to %s PHY: %s", (i_state == HIGH ? "high" : "low"), mss::c_str(p));
 
         FAPI_TRY( mss::getScom(p, MCA_MBA_CAL0Q, l_data) );
-        i_state == HIGH ? l_data.setBit<MCA_MBA_CAL0Q_RESET_RECOVER>() : l_data.clearBit<MCA_MBA_CAL0Q_RESET_RECOVER>();
+        l_data.writeBit<MCA_MBA_CAL0Q_RESET_RECOVER>(i_state == HIGH);
         FAPI_TRY( mss::putScom(p, MCA_MBA_CAL0Q, l_data) );
     }
 
@@ -107,7 +107,7 @@ fapi2::ReturnCode enable_zctl( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
     constexpr uint64_t l_zcal_status_reg = pcTraits<TARGET_TYPE_MCA>::PC_DLL_ZCAL_CAL_STATUS_REG;
     uint8_t l_sim = 0;
 
-    FAPI_TRY( mss::is_simulation( l_sim) );
+    FAPI_TRY( mss::is_simulation(l_sim) );
 
     if (l_sim)
     {
@@ -304,7 +304,7 @@ fapi2::ReturnCode check_bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_M
         MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_4,
     };
 
-    FAPI_TRY( mss::is_simulation( l_sim) );
+    FAPI_TRY( mss::is_simulation(l_sim) );
 
     // There's nothing going on in sim ...
     if (l_sim)
@@ -323,7 +323,8 @@ fapi2::ReturnCode check_bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_M
         FAPI_INF("checking %s MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0 0x%016x",
                  mss::c_str(p), MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0);
 
-        FAPI_ASSERT(
+        FAPI_ASSERT
+        (
             mss::poll(p, MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0, poll_parameters(),
                       [&l_read](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
         {
@@ -340,7 +341,8 @@ fapi2::ReturnCode check_bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_M
         FAPI_INF("checking %s MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S1 0x%016x",
                  mss::c_str(p), MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S1);
 
-        FAPI_ASSERT(
+        FAPI_ASSERT
+        (
             mss::poll(p, MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S1, poll_parameters(),
                       [&l_read](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
         {
@@ -364,7 +366,8 @@ fapi2::ReturnCode check_bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_M
             FAPI_INF("checking %s MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_0_01_BB_LOCK0 0x%016x",
                      mss::c_str(p), l_read);
 
-            FAPI_ASSERT(
+            FAPI_ASSERT
+            (
                 mss::poll(p, r, poll_parameters(),
                           [&l_read](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
             {
@@ -372,7 +375,6 @@ fapi2::ReturnCode check_bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_M
                 l_read = stat_reg;
                 return stat_reg.getBit<MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_0_01_BB_LOCK0>() == mss::ON;
             }),
-
             fapi2::MSS_DP16_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p).set_ROTATOR(0),
             "DP16 failed bb lock. rotator %d register 0x%016lx 0x%016lx", 0, r, l_read
             );
@@ -384,7 +386,8 @@ fapi2::ReturnCode check_bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_M
             if (r != MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_4)
             {
 
-                FAPI_ASSERT(
+                FAPI_ASSERT
+                (
                     mss::poll(p, r, poll_parameters(),
                               [&l_read](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
                 {
@@ -392,7 +395,6 @@ fapi2::ReturnCode check_bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_M
                     l_read = stat_reg;
                     return stat_reg.getBit<MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_0_01_BB_LOCK1>() == mss::ON;
                 }),
-
                 fapi2::MSS_DP16_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p).set_ROTATOR(1),
                 "DP16 failed bb lock. rotator %d register 0x%016lx 0x%016lx", 1, r, l_read
                 );
@@ -421,17 +423,26 @@ fapi2::ReturnCode rank_pair_primary_to_dimm( const fapi2::Target<TARGET_TYPE_MCA
     // Sanity check the rank pair
     FAPI_INF("%s rank pair: %d", mss::c_str(i_target), i_rp);
 
-    fapi2::Assert(i_rp < MAX_RANK_PER_DIMM);
+    FAPI_ASSERT( i_rp < MAX_RANK_PER_DIMM,
+                 fapi2::MSS_INVALID_RANK_PAIR()
+                 .set_RANK_PAIR(i_rp)
+                 .set_MCA_TARGET(i_target)
+                 .set_FUNCTION(GET_RANKS_IN_PAIR),
+                 "%s Invalid rank pair (%d) in get_ranks_in_pair",
+                 mss::c_str(i_target),
+                 i_rp);
 
     // Get the rp's primary rank, and figure out which DIMM it's on
     FAPI_TRY( mss::rank::get_ranks_in_pair(i_target, i_rp, l_ranks_in_rp) );
 
     // Make sure we have a valid rank
-    if (l_ranks_in_rp[0] == NO_RANK)
-    {
-        FAPI_ERR("%s No primary rank in rank pair %d", mss::c_str(i_target), i_rp);
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
-    }
+    FAPI_ASSERT( l_ranks_in_rp[0] != NO_RANK,
+                 fapi2::MSS_NO_PRIMARY_RANK_FOUND_RP()
+                 .set_RANK_PAIR(i_rp)
+                 .set_MCA_TARGET(i_target),
+                 "%s No primary rank in rank pair %d",
+                 mss::c_str(i_target),
+                 i_rp);
 
     FAPI_TRY( mss::rank::get_dimm_target_from_rank(i_target, l_ranks_in_rp[0], o_dimm) );
 
@@ -860,7 +871,6 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
 
     // Configures WR VREF config register to run 1D (write centering only) or 2D (write centering + VREF) calibration
     {
-
         std::vector<fapi2::buffer<uint64_t>> l_vref_config;
         FAPI_TRY( mss::scom_suckah(i_target, mss::dp16Traits<fapi2::TARGET_TYPE_MCA>::WR_VREF_CONFIG0_REG, l_vref_config) );
 
@@ -893,10 +903,10 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                   l_vrefdq_train_value_override) );
 
         // Latches the VREF's
-        FAPI_TRY( mss::ddr4::latch_wr_vref_commands_by_rank_pair( i_target,
+        FAPI_TRY( mss::ddr4::latch_wr_vref_commands_by_rank_pair(i_target,
                   l_rp,
                   l_vrefdq_train_range_override,
-                  l_vrefdq_train_value_override ) );
+                  l_vrefdq_train_value_override) );
     }
 
     // Note: This rank encoding isn't used if the cal is initiated from the CCS engine
