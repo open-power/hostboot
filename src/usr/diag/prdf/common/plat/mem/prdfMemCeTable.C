@@ -184,6 +184,8 @@ void MemCeTable<T>::deactivateRank( const MemRank & i_rank )
 template <TARGETING::TYPE T>
 void MemCeTable<T>::addCapData( CaptureData & io_cd )
 {
+    if ( iv_table.empty() ) return; // Table is empty. Do nothing.
+
     static const size_t sz_word = sizeof(CPU_WORD);
 
     // Get the maximum capture data size and adjust the size for endianness.
