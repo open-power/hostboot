@@ -33,29 +33,79 @@
 #include <stdint.h>
 
 /** Target types for all supported targets. */
+/** NOTE: These are used to build the register list in HOMER data      */
+/**       and also to create the exiting chiplet masks. Hence,         */
+/**       the numbers assigned here have to match the sequence         */
+/**       of chiplets in HOMER_ChipNimbus_t, HOMER_ChipCumulus_t, etc. */
 typedef enum
 {
     /* NOTE: These will be used as array indexes. */
-    FIRST_TRGT = 0,
-    PROC       = FIRST_TRGT,
-    EX,
-    MCS,
-    MEMB,
-    MBA,
-    MAX_TRGTS,
+    TRGT_FIRST = 0,
+
+    /** Common Nimbus/Cumulus types */
+    TRGT_PROC = TRGT_FIRST,
+    TRGT_CAPP,
+    TRGT_XBUS,
+    TRGT_OBUS,
+    TRGT_PEC,
+    TRGT_PHB,
+    TRGT_EQ,
+    TRGT_EX,
+    TRGT_EC,
+
+    /* Nimbus only */
+    TRGT_MCBIST,
+    TRGT_MCS,
+    TRGT_MCA,
+
+    /* Cumulus only */
+    /* NOTE: Nimbus and Cumulus cannot be used at the same time. So we can have
+     *       These array indexes overlap to save space. */
+    TRGT_MC = TRGT_MCBIST,
+    TRGT_MI,
+    TRGT_DMI,
+
+    /* Centaur only */
+    TRGT_MEMBUF,
+    TRGT_MBA,
+
+    /* EC level handling -- special case for NIMBUS */
+    TRGT_PROC_NIMBUS_10,
+    TRGT_PROC_NIMBUS_20,
+
+    TRGT_MAX,
 
 } TrgtType_t;
 
 /** Boundary/position ranges for each target type. */
 typedef enum
 {
-    MAX_PROC_PER_NODE = 8,
-    MAX_EX_PER_PROC   = 16,
-    MAX_MCS_PER_PROC  = 8,
-    MAX_MEMB_PER_PROC = MAX_MCS_PER_PROC,
-    MAX_MEMB_PER_NODE = MAX_MEMB_PER_PROC * MAX_PROC_PER_NODE,
-    MAX_MBA_PER_MEMB  = 2,
-    MAX_MBA_PER_PROC  = MAX_MEMB_PER_PROC * MAX_MBA_PER_MEMB,
+    /* Common Nimbus/Cumulus */
+    MAX_PROC_PER_NODE   =  8,
+    MAX_CAPP_PER_PROC   =  2,
+    MAX_XBUS_PER_PROC   =  3, /* Nimbus 1 and 2, Cumulus 0, 1, and 2 */
+    MAX_OBUS_PER_PROC   =  4, /* Nimbus 0 and 3, Cumulus 0, 1, 2, and 3 */
+    MAX_PEC_PER_PROC    =  3,
+    MAX_PHB_PER_PROC    =  6,
+    MAX_EQ_PER_PROC     =  6,
+    MAX_EX_PER_PROC     = 12,
+    MAX_EC_PER_PROC     = 24,
+
+    /** Nimbus only */
+    MAX_MCBIST_PER_PROC =  2,
+    MAX_MCS_PER_PROC    =  4,
+    MAX_MCA_PER_PROC    =  8,
+
+    /** Cumulus only */
+    MAX_MC_PER_PROC     =  2,
+    MAX_MI_PER_PROC     =  4,
+    MAX_DMI_PER_PROC    =  8,
+
+    /** Centaur only */
+    MAX_MEMBUF_PER_PROC =  8,
+    MAX_MEMBUF_PER_NODE =  MAX_MEMBUF_PER_PROC * MAX_PROC_PER_NODE,
+    MAX_MBA_PER_MEMBUF  =  2,
+    MAX_MBA_PER_PROC    =  MAX_MEMBUF_PER_PROC * MAX_MBA_PER_MEMBUF,
 
 } TrgtPos_t;
 
@@ -63,13 +113,15 @@ typedef enum
 typedef enum
 {
     /* NOTE: These will be used as array indexes. */
-    FIRST_REG = 0,
-    GLBL      = FIRST_REG,
-    FIR,
-    REG,
-    IDFIR,
-    IDREG,
-    MAX_REGS,
+    REG_FIRST = 0,
+
+    REG_GLBL = REG_FIRST, /* 32-bit addresses, 64-bit value */
+    REG_FIR,              /* 32-bit addresses, 64-bit value */
+    REG_REG,              /* 32-bit addresses, 64-bit value */
+    REG_IDFIR,            /* 64-bit addresses, 32-bit value */
+    REG_IDREG,            /* 64-bit addresses, 32-bit value */
+
+    REG_MAX,
 
 } RegType_t;
 

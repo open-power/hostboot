@@ -1560,6 +1560,212 @@ chip p9_nimbus
         capture     group PciChipletFir2;
     };
 
+    ############################################################################
+    # P9 PROC target  HDCT additions (open power chkstop analysis)
+    ############################################################################
+
+    register OCC_ERROR_REPORT_REG
+    {
+        name        "OCC ERROR REPORT REG";
+        scomaddr    0x0101080a;
+        capture     group default;
+    };
+
+    register PB_ERROR_REPORT
+    {
+        name        "PB ERROR REPORT REG";
+        scomaddr    0x020110a1;
+        capture     group default;
+    };
+
+    register PB_PTY_ERROR_REPORT
+    {
+        name        "PB PTY ERROR REPORT REG";
+        scomaddr    0x020110a2;
+        capture     group default;
+    };
+
+    register DMA_CERR_0
+    {
+        name        "DMA CERR 0";
+        scomaddr    0x02011057;
+        capture     group default;
+    };
+
+    register DMA_CERR_1
+    {
+        name        "DMA CERR 1";
+        scomaddr    0x02011058;
+        capture     group default;
+    };
+
+    register PB_CENT_CR_ERROR
+    {
+        name        "PB CENT CR ERROR";
+        scomaddr    0x05011c2c;
+        capture     group default;
+    };
+
+    register PBA_ERR_REPORT_0
+    {
+        name        "PBA ERROR REPORT 0";
+        scomaddr    0x0501284c;
+        capture     group default;
+    };
+
+    register PBA_ERR_REPORT_1
+    {
+        name        "PBA ERROR REPORT 1";
+        scomaddr    0x0501284d;
+        capture     group default;
+    };
+
+    register PBA_ERR_REPORT_2
+    {
+        name        "PBA ERROR REPORT 2";
+        scomaddr    0x0501284e;
+        capture     group default;
+    };
+
+    register PB_PTY_ERR_REPORT
+    {
+        name        "PB PTY ERROR REPORT";
+        scomaddr    0x05012C22;
+        capture     group default;
+    };
+
+    register TOD_SLAVE_PATH_CTRL
+    {
+        name        "TOD SLAVE PATH CTRL";
+        scomaddr    0x00040005;
+        capture     group default;
+    };
+
+    register TOD_INTERNAL_PATH_CTRL
+    {
+        name        "TOD INTERNAL PATH CTRL";
+        scomaddr    0x00040006;
+        capture     group default;
+    };
+
+    register TOD_CONFIG_CTRL
+    {
+        name        "TOD Prim Sec Config Control";
+        scomaddr    0x00040007;
+        capture     group default;
+    };
+
+    register TOD_PSS_MSS_STATUS
+    {
+        name        "TOD PSS MSS Status Reg";
+        scomaddr    0x00040008;
+        capture     group default;
+    };
+
+    register TOD_MASTER_PATH_STATUS
+    {
+        name        "TOD Master Path Status Reg";
+        scomaddr    0x00040009;
+        capture     group default;
+    };
+
+    register TOD_MASTER_PATH0_STEP_STEERING
+    {
+        name        "TOD Master Path0 Step Steering";
+        scomaddr    0x0004000E;
+        capture     group default;
+    };
+
+    register TOD_MASTER_PATH1_STEP_STEERING
+    {
+        name        "TOD Master Path1 Step Steering";
+        scomaddr    0x0004000F;
+        capture     group default;
+    };
+
+    register TOD_TRACE_DATASET_1
+    {
+        name        "TOD Trace Dataset 1";
+        scomaddr    0x0004001D;
+        capture     group default;
+    };
+
+    register TOD_TRACE_DATASET_2
+    {
+        name        "TOD Trace Dataset 2";
+        scomaddr    0x0004001E;
+        capture     group default;
+    };
+
+    register TOD_TRACE_DATASET_3
+    {
+        name        "TOD Trace Dataset 3";
+        scomaddr    0x0004001F;
+        capture     group default;
+    };
+
+    register OSC_ERROR_HOLD
+    {
+        name        "OSC ERROR HOLD";
+        scomaddr    0x01020019;
+        capture     group default;
+    };
+
+    register OSC_ERROR_MASK
+    {
+        name        "OSC ERROR MASK";
+        scomaddr    0x0102001A;
+        capture     group default;
+    };
+
+    register OSC_ERROR_MODE
+    {
+        name        "OSC ERROR MODE";
+        scomaddr    0x0102001B;
+        capture     group default;
+    };
+
+    register TOD_FSM_REGISTER
+    {
+        name        "TOD FSM Register";
+        scomaddr    0x00040024;
+        capture     group default;
+    };
+
+    register TOD_TX_TTYPE_CTRL_REG
+    {
+        name        "TOD TX TType Ctrl reg";
+        scomaddr    0x00040027;
+        capture     group default;
+    };
+
+    register TOD_RX_TTYPE_CTRL_REG
+    {
+        name        "TOD RX TType Ctrl reg";
+        scomaddr    0x00040029;
+        capture     group default;
+    };
+
+    register TOD_ERROR_INTERRUPTS
+    {
+        name        "TOD Error and Interrupts";
+        scomaddr    0x00040030;
+        capture     group default;
+    };
+
+    register TOD_CERR_REPORT
+    {
+        name        "TOD CERR Report";
+        scomaddr    0x00040032;
+        capture     group default;
+    };
+
+    register TOD_ROUTE_ERRORS_TO_CORE
+    {
+        name        "TOD Route Errors to Core";
+        scomaddr    0x00040033;
+        capture     group default;
+    };
 
 # Include registers not defined by the xml
 .include "p9_nimbus_regs.rule";

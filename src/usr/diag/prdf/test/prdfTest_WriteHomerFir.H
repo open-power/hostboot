@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,9 +53,13 @@ namespace PRDF
 {
 // these functions from prdfWriteHomerFirData.C are needed for the
 // fakeWriteHomerFirData() function
-errlHndl_t getHwConfig( HOMER_Data_t & o_data, const HwInitialized_t i_curHw );
+errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> &io_chipInfVector,
+                        const HwInitialized_t i_curHw );
+
 errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
-                      const HwInitialized_t i_curHw, HOMER_Data_t & o_data );
+                      const HwInitialized_t i_curHw,
+                      std::vector<HOMER_ChipInfo_t> &i_chipVector,
+                      HOMER_Data_t  &io_homerData );
 };
 
 class WriteHomerFir: public CxxTest::TestSuite
@@ -90,7 +94,8 @@ private:
             fakeGetPnorInfo( data );
 
             // Get the hardware configuration
-            errl = getHwConfig( data, i_curHw );
+            std::vector<HOMER_ChipInfo_t> l_chipInfVector;
+            errl = getHwConfig( l_chipInfVector, i_curHw );
             if ( NULL != errl )
             {
                 TS_FAIL("getHwConfig() failed");
@@ -98,7 +103,9 @@ private:
             }
 
             // Write the HOMER data
-            errl = writeData( i_hBuf, i_hBufSize, i_curHw, data );
+            errl = writeData( i_hBuf, i_hBufSize, i_curHw,
+                              l_chipInfVector, data );
+
             if ( NULL != errl )
             {
                 TS_FAIL("writeData() failed");
@@ -118,41 +125,108 @@ private:
 //------------------------------------------------------------------------------
 
     // check if data exists in HOMER when it should not
-    void checkHomerData(HOMER_Data_t d, const PRDF::HwInitialized_t i_curHw)
+    void checkHomerData(HOMER_Data_t *d, const PRDF::HwInitialized_t i_curHw)
     {
         using namespace PRDF;
 
         if (MASTER_PROC_CORE == i_curHw || ALL_PROC_MASTER_CORE == i_curHw)
         {
-            // check if mcs, membuf, or mba data is available
-            for (uint32_t i = 0; i < PRDF::MAX_PROC_PER_NODE; i++)
+            // Should have at least one processor chip
+            if (0 == d->chipCount)
             {
-                // mcs
-                if (d.mcsMasks[i] != 0)
-                {
-                    TS_FAIL("ERROR: MCS should not be available. "
-                            "(MCS: 0x%02x)", d.mcsMasks[i]);
-                    break;
-                }
+                TS_FAIL("ERROR: ChipCount is zero in HOMER data");
+            } // end if no chips
+            else
+            {
+                uint8_t  *l_bytePtr = (reinterpret_cast<uint8_t *>(d)) +
+                                       sizeof(HOMER_Data_t);
+                HOMER_Chip_t  *l_chipPtr = NULL;
 
-                // membuf
-                if (d.membMasks[i] != 0)
+                // Have a chip or more to look thru
+                for ( uint32_t  l_chipNum=0;
+                      (l_chipNum < d->chipCount); l_chipNum++ )
                 {
-                    TS_FAIL("ERROR: MEMBUF should not be available. "
-                            "(MEMBUF: 0x%02x)", d.membMasks[i]);
-                    break;
-                }
+                    l_chipPtr = reinterpret_cast<HOMER_Chip_t *>(l_bytePtr);
+                    l_bytePtr += sizeof(HOMER_Chip_t);
 
-                // mba
-                if (d.mbaMasks[i] != 0)
-                {
-                    TS_FAIL("ERROR: MBA should not be available. "
-                            "(MBA: 0x%02x)", d.mbaMasks[i]);
-                    break;
-                }
-            }
-        }
-    }
+                    /* 'Existing chiplet area' can vary in size  */
+                    if (HOMER_CHIP_NIMBUS == l_chipPtr->chipType)
+                    {
+                        HOMER_ChipNimbus_t *l_nimPtr =
+                              reinterpret_cast<HOMER_ChipNimbus_t *>(l_bytePtr);
+
+                        // MCBIST
+                        if (l_nimPtr->mcbistMask != 0)
+                        {
+                            TS_FAIL("ERROR: MCBIST should not be available. "
+                                    "(MCBIST: 0x%x)", l_nimPtr->mcbistMask);
+                            break;
+                        }
+
+                        // MCS
+                        if (l_nimPtr->mcsMask != 0)
+                        {
+                            TS_FAIL("ERROR: MCS should not be available. "
+                                    "(MCS: 0x%x)", l_nimPtr->mcsMask);
+                            break;
+                        }
+
+                        // MCA
+                        if (l_nimPtr->mcaMask != 0)
+                        {
+                            TS_FAIL("ERROR: MCA should not be available. "
+                                    "(MCA: 0x%x)", l_nimPtr->mcaMask);
+                            break;
+                        }
+
+                        // prepare for next chip (if any)
+                        l_bytePtr += sizeof(HOMER_ChipNimbus_t);
+                    }
+                    else if (HOMER_CHIP_CUMULUS == l_chipPtr->chipType)
+                    {
+                        HOMER_ChipCumulus_t *l_cumPtr =
+                             reinterpret_cast<HOMER_ChipCumulus_t *>(l_bytePtr);
+
+                        // MC
+                        if (l_cumPtr->mcMask != 0)
+                        {
+                            TS_FAIL("ERROR: MC should not be available. "
+                                    "(MC: 0x%x)", l_cumPtr->mcMask);
+                            break;
+                        }
+
+                        // MCS
+                        if (l_cumPtr->miMask != 0)
+                        {
+                            TS_FAIL("ERROR: MI should not be available. "
+                                    "(MI: 0x%x)", l_cumPtr->miMask);
+                            break;
+                        }
+
+                        // MCA
+                        if (l_cumPtr->dmiMask != 0)
+                        {
+                            TS_FAIL("ERROR: DMI should not be available. "
+                                    "(DMI: 0x%x)", l_cumPtr->dmiMask);
+                            break;
+                        }
+
+                        // prepare for next chip (if any)
+                        l_bytePtr += sizeof(HOMER_ChipCumulus_t);
+                    }
+                    else if (HOMER_CHIP_CENTAUR == l_chipPtr->chipType)
+                    {
+                        TS_FAIL("ERROR: MEMBUF should not be available ");
+                        break;
+                    }
+
+                } // end for loop thru chips
+
+            } // end else we have a chip or 2
+
+        } // end if proc related
+
+    } // end function checkHomerData
 
 //------------------------------------------------------------------------------
 
@@ -183,7 +257,7 @@ public:
         }
 
         HOMER_Data_t * d = reinterpret_cast<HOMER_Data_t *>(hBuf);
-        checkHomerData(*d, MASTER_PROC_CORE);
+        checkHomerData(d, MASTER_PROC_CORE);
 
         TS_TRACE("- Write Homer Test 1 - Master Proc Core - End-");
     }
@@ -205,7 +279,7 @@ public:
         }
 
         HOMER_Data_t * d = reinterpret_cast<HOMER_Data_t *>(hBuf);
-        checkHomerData(*d, ALL_PROC_MASTER_CORE);
+        checkHomerData(d, ALL_PROC_MASTER_CORE);
 
         TS_TRACE("- Write Homer Test 2 - All Proc Master Core - End-");
 
@@ -228,7 +302,7 @@ public:
         }
 
         HOMER_Data_t * d = reinterpret_cast<HOMER_Data_t *>(hBuf);
-        checkHomerData(*d, ALL_PROC_MEM_MASTER_CORE);
+        checkHomerData(d, ALL_PROC_MEM_MASTER_CORE);
 
         TS_TRACE("- Write Homer Test 3 - All Proc Mem Master Core - End-");
 
@@ -251,7 +325,7 @@ public:
         }
 
         HOMER_Data_t * d = reinterpret_cast<HOMER_Data_t *>(hBuf);
-        checkHomerData(*d, ALL_HARDWARE);
+        checkHomerData(d, ALL_HARDWARE);
 
         TS_TRACE("- Write Homer Test 4 - All Hardware - End-");
 

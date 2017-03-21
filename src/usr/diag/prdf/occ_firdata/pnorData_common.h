@@ -31,6 +31,7 @@
  *        because OCC strictly uses C. */
 
 #include <firDataConst_common.h>
+#include <string.h>
 
 /** This file is used to define the format of the register data captured by the
  *  OCC and stored in PNOR. The data will be stored in the following format:
@@ -53,12 +54,9 @@
  *      - Each target type may have associated global registers. If none exist,
  *        simply capture all registers for that type. However, if they do exist
  *        and the values of ALL the global registers are zero, skip capturing
- *        the associated targets using the following rules:
- *          - For a PROC, skip this PROC and all associated EXs, and MCSs.
- *          - For an EX,  skip this EX.
- *          - For an MCS, skip this MCS.
- *          - For a MEMB, skip this MEMB and all associated MBAs.
- *          - For an MBA, skip this MBA.
+ *        the associated registers of the target and any subsequent targets on
+ *        the affinity path. Example,
+ *          - For a MCBIST, skip this MCBIST and all associated MCSs, and MCAs.
  *      - If for some reason we run out of space in the PNOR, do not SCOM any
  *        more registers, set the 'full' bit in the PNOR_Data_t struct, and
  *        write all data successfully captured to PNOR.
@@ -66,7 +64,8 @@
 
 typedef enum
 {
-    PNOR_FIR1 = 0x46495231, /** FIR data version 1 ("FIR1" in ascii) */
+    PNOR_FIR1 = 0x46495231, /** FIR data version 1 ("FIR1" in ascii) P8 */
+    PNOR_FIR2 = 0x46495232, /** FIR data version 2 ("FIR2" in ascii) P9 */
 
 } PNOR_Version_t;
 
@@ -75,21 +74,19 @@ typedef struct __attribute__((packed))
 {
     uint32_t header; /** Magic number to indicate valid data and version */
 
-    uint32_t trgts    :  8; /** Number of targets with register data */
-    uint32_t full     :  1; /** 1 if PNOR data is full and data may be missing*/
-    uint32_t iplState :  1; /** See enum IplState_t */
-    uint32_t reserved : 22;
+    uint16_t trgts    : 12; /** Number of targets with register data */
+    uint16_t full     :  1; /** 1 if PNOR data is full and data incomplete */
+    uint16_t iplState :  1; /** See enum IplState_t */
+    uint16_t reserved :  2;
 
 } PNOR_Data_t;
 
 /** @return An initialized PNOR_Data_t struct. */
 static inline PNOR_Data_t PNOR_getData()
 {
-    PNOR_Data_t d;
-    d.header   = PNOR_FIR1;
-    d.trgts    = 0;
-    d.full     = 0;
-    d.reserved = 0;
+    PNOR_Data_t d; memset( &d, 0x00, sizeof(d) ); /* init to zero */
+
+    d.header = PNOR_FIR2;
 
     return d;
 };
@@ -99,37 +96,37 @@ typedef enum
 {
     PNOR_Trgt_MAX_REGS_PER_TRGT    = 511, /* Currently expect 266 on the PROC */
     PNOR_Trgt_MAX_ID_REGS_PER_TRGT =  15, /* Currently expect 9 on the MBA */
-    PNOR_Trgt_MAX_SCOM_ERRORS      = 511, /* Should be plenty */
+    PNOR_Trgt_MAX_SCOM_ERRORS      = 255, /* Should be plenty */
 
 } PNOR_Trgt_RegLimits_t;
 
 /** Information for each target with SCOM data. */
 typedef struct __attribute__((packed))
 {
-    uint32_t type     : 3; /** Target type. See enum TrgtType_t */
-    uint32_t procPos  : 3; /** The processor position (0-7) */
-    uint32_t unitPos  : 4; /** Unit position relative to the processor (0-15) */
+    uint32_t chipPos  : 6; /** Parent chip position relative to the node */
+    uint32_t unitPos  : 5; /** Unit position relative to the parent chip */
     uint32_t regs     : 9; /** Number of normal registers */
     uint32_t idRegs   : 4; /** Number of indirect-SCOM registers */
-    uint32_t scomErrs : 9; /** Number of SCOM errors detected */
+    uint32_t scomErrs : 8; /** Number of SCOM errors detected */
+
+    uint8_t trgtType  : 6; /** Target type. See enum TrgtType_t */
+    uint8_t reserved  : 2;
 
 } PNOR_Trgt_t;
 
-/** @param  i_type        Target type. See enum TrgtType_t.
- *  @param  i_procPos     The processor position.
- *  @param  i_procUnitPos Unit position relative to the processor.
+/** @param  i_trgtType Target type. See enum TrgtType_t.
+ *  @param  i_chipPos  Parent chip position relative to the node.
+ *  @param  i_unitPos  Unit position relative to the parent chip.
  *  @return An initialized PNOR_Data_t struct.
  */
-static inline PNOR_Trgt_t PNOR_getTrgt( uint32_t i_type, uint32_t i_procPos,
-                                        uint32_t i_procUnitPos )
+static inline PNOR_Trgt_t PNOR_getTrgt( uint32_t i_trgtType, uint32_t i_chipPos,
+                                        uint32_t i_unitPos )
 {
-    PNOR_Trgt_t t;
-    t.type     = i_type;
-    t.procPos  = i_procPos;
-    t.unitPos  = i_procUnitPos;
-    t.regs     = 0;
-    t.idRegs   = 0;
-    t.scomErrs = 0;
+    PNOR_Trgt_t t; memset( &t, 0x00, sizeof(t) ); /* init to zero */
+
+    t.trgtType = i_trgtType;
+    t.chipPos  = i_chipPos;
+    t.unitPos  = i_unitPos;
 
     return t;
 };

@@ -230,6 +230,22 @@ chip p9_obus
         capture     req nonzero("OBPPEFIR");
     };
 
+    ############################################################################
+    # P9 OBUS target  HDCT additions (open power chkstop analysis)
+    ############################################################################
+    register PBOLL_LINK0_ERRSTAT
+    {
+        name        "P9 OBUS target PB OLL Link0 ErrStatus";
+        scomaddr    0x09010816;
+        capture     group default;
+    };
+
+    register PBOLL_LINK1_ERRSTAT
+    {
+        name        "P9 OBUS target PB OLL Link1 ErrStatus";
+        scomaddr    0x09010817;
+        capture     group default;
+    };
 
 # Include registers not defined by the xml
 .include "p9_obus_regs.rule";

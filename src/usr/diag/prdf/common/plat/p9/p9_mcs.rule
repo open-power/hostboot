@@ -79,6 +79,58 @@ chip p9_mcs
         capture     req nonzero("MCFIR");
     };
 
+    ############################################################################
+    # P9 MCS target HDCT additions (open power chkstop analysis)
+    ############################################################################
+    register MC_ERR_REPORT2
+    {
+        name        "P9 MCS target MC ERR REPORT2";
+        scomaddr    0x0501081a;
+        capture     group default;
+    };
+
+    register MC_ERR_REPORT0
+    {
+        name        "P9 MCS target MC ERR REPORT0";
+        scomaddr    0x0501081e;
+        capture     group default;
+    };
+
+    register MC_ERR_REPORT1
+    {
+        name        "P9 MCS target MC ERR REPORT1";
+        scomaddr    0x0501081f;
+        capture     group default;
+    };
+
+    register MEMCFG_REG
+    {
+        name        "P9 MCS target MEMCFG REG";
+        scomaddr    0x0501080a;
+        capture     group default;
+    };
+
+    register MCFGPA
+    {
+        name        "P9 MCS target MCFGPA";
+        scomaddr    0x0501080b;
+        capture     group default;
+    };
+
+    register MCFGPM
+    {
+        name        "P9 MCS target MCFGPM";
+        scomaddr    0x0501080c;
+        capture     group default;
+    };
+
+    register MCFGPMA
+    {
+        name        "P9 MCS target MCFGPMA";
+        scomaddr    0x0501080d;
+        capture     group default;
+    };
+
 
 # Include registers not defined by the xml
 .include "p9_mcs_regs.rule";

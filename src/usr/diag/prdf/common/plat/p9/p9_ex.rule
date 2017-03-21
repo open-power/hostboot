@@ -190,6 +190,74 @@ chip p9_ex
     };
 
 
+    ############################################################################
+    # P9 EX target ERROR REPORTING REGS
+    ############################################################################
+
+    register ERR_REPORT_REG0
+    {
+        name        "P9 EX target ERR REPORT REG0";
+        scomaddr    0x10010812;
+        capture     group default;
+    };
+
+    register ERR_REPORT_REG1
+    {
+        name        "P9 EX target ERR REPORT REG1";
+        scomaddr    0x10010813;
+        capture     group default;
+    };
+
+    register NCU_ERROR_REPORT_REG
+    {
+        name        "P9 EX target NCU ERROR REPORT REG";
+        scomaddr    0x1001100e;
+        capture     group default;
+    };
+
+    register L3_PRD_PURGE_REG
+    {
+        name        "P9 EX target L3 PRD PURGE REG";
+        scomaddr    0x1001180e;
+        capture     group default;
+    };
+
+    register L3_ERR_REPORT0
+    {
+        name        "P9 EX target L3 ERR REPORT 0";
+        scomaddr    0x10011810;
+        capture     group default;
+    };
+
+    register L3_ERR_REPORT1
+    {
+        name        "P9 EX target L3 ERR REPORT 1";
+        scomaddr    0x10011817;
+        capture     group default;
+    };
+
+    register L3_EDRAM_ERRSTAT_REG0
+    {
+        name        "P9 EX target L3 EDRAM ERRSTAT REG 0";
+        scomaddr    0x10011819;
+        capture     group default;
+    };
+
+    register L3_EDRAM_ERRSTAT_REG1
+    {
+        name        "P9 EX target L3 EDRAM ERRSTAT REG 1";
+        scomaddr    0x1001181a;
+        capture     group default;
+    };
+
+    register L3_EDRAM_BANK_FAIL
+    {
+        name        "P9 EX target L3 EDRAM BANK FAIL";
+        scomaddr    0x1001181b;
+        capture     group default;
+    };
+
+
 # Include registers not defined by the xml
 .include "p9_ex_regs.rule";
 
