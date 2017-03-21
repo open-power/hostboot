@@ -49,7 +49,6 @@ OBJS += TodTopologyManager.o
 include ${ROOTPATH}/procedure.rules.mk
 include ${PROCEDURES_PATH}/p9_tod_init.mk
 include ${PROCEDURES_PATH}/p9_tod_setup.mk
-include ${PROCEDURES_PATH}/p9_tod_utils.mk
 include ${PROCEDURES_PATH}/p9_tod_save_config.mk
 include ${ROOTPATH}/config.mk
 

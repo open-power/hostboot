@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,6 +77,27 @@ extern "C" {
     fapi2::ReturnCode p9_tod_move_tod_to_tb(const tod_topology_node* i_tod_node,
                                             const uint8_t i_thread_num,
                                             fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* i_failingTodProc = NULL);
+
+
+    /// @brief Gets the value in the TFMR register
+    /// @param[in] i_target       => P9 chip target
+    /// @param[in] i_thread_num   => The thread number we want to run on
+    /// @param[out] o_tfmr_val    => Value that is in the TFMR register
+    /// @return FAPI_RC_SUCCESS if TFMR read is successful else FAPI or ECMD error is sent through
+    fapi2::ReturnCode p9_tod_utils_get_tfmr_reg(
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+        const uint8_t i_thread_num,
+        fapi2::buffer<uint64_t>& o_tfmr_val);
+
+    /// @brief Sets the value in the TFMR register
+    /// @param[in] i_target => P9 chip target
+    /// @param[in] i_thread_num => The thread number we want to run on
+    /// @param[in] i_tfmr_val => Value that will be put in the TFMR register
+    /// @return FAPI_RC_SUCCESS if TFMR write is successful else FAPI or ECMD error is sent through
+    fapi2::ReturnCode p9_tod_utils_set_tfmr_reg(
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+        const uint8_t i_thread_num,
+        fapi2::buffer<uint64_t>& i_tfmr_val);
 
 } //extern "C"
 
