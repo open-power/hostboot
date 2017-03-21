@@ -475,6 +475,14 @@ sub execute_pre_release
 
     #Complete Fix Records
     run_system_command("Fix -complete -feature $feature -release $release -component esw_hbfw -verbose");
+
+    #Get ClearQuest ID
+    my $response = run_system_command("Feature -view $feature");
+    my ($cq_id) = $response =~ /CQID\s+(.*)/;
+    print $cq_id if $debug;
+
+    #Print out Debug information
+    print_debug_info($level, $feature, $cq_id, $released);
 }
 
 sub execute_post_release
@@ -507,7 +515,7 @@ sub execute_post_release
     run_system_command("git fetch gerrit refs/tags/$level");
     run_system_command("git checkout FETCH_HEAD");
     publish_cq($level, $cq_id, $released);
-
+    print_debug_info($level, $feature, $cq_id, $released);
 }
 
 sub execute_gerrit_commit
@@ -1769,6 +1777,54 @@ sub publish_cq
             bq_add_releasenote($cq, $changeid, $level, $track, $commitMessage);
         }
     }
+}
+
+#
+# Sub print_debug_info
+# @brief This subroutine prints out some important information at the
+#        end of Phase 2 of the Automatic Release process.
+#
+
+sub print_debug_info
+{
+    my ($level, $feature, $cq_id, $released) = @_;
+
+
+    print "\n\nHostboot Release debugging information.....\n";
+    print "\nHostboot Official Release Notes\n";
+
+    print "Level $level Included commits:\n";
+
+    my $commits = git_commit_history($level,$released);
+    foreach my $commit (@{$commits})
+    {
+        my $cq = cq_workitem_num($commit);
+        my $rtc = rtc_workitem_num($commit);
+        my $changenum = "";
+        my $subject = git_get_subject($commit);
+
+        # Find if the commit has a CQ # or an RTC #.
+        if ($cq ne "")
+        {
+            $changenum = "$cq  ";
+        }
+        elsif ($rtc ne "")
+        {
+            $changenum = "$rtc    ";
+        }
+        else
+        {
+            $changenum = "--------- ";
+        }
+
+        print "$changenum$subject\n";
+    }
+
+    print "\nThe Bestquest track number is $cq_id\n";
+    print "And the Bestquest link is http://w3.rchland.ibm.com/projects/bestquest/?defect=$cq_id&table=requirement\n\n";
+    print "The release feature number is $feature\n";
+    print "This release this is based on is $released\n";
+
 }
 
 # sub gerrit_ssh_command
