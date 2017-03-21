@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -269,6 +269,23 @@ uint32_t getMemMaintAddr<TYPE_MCBIST>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
+template<>
+uint32_t getMemMaintAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr & o_addr )
+{
+    #define PRDF_FUNC "[getMemMaintAddr<TYPE_MCA>] "
+
+    // Check parameters
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+
+    ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
+
+    return getMemMaintAddr<TYPE_MCBIST>( mcbChip, o_addr );
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
 template<>
 uint32_t getMemMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr & o_addr )
 {

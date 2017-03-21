@@ -77,9 +77,24 @@ actionclass rcd_parity_error
     funccall("RcdParityError");                # Run TPS on TH for all MCA ranks
 };
 
-actionclass mainline_iue_handling     { TBDDefaultCallout; }; # TODO RTC 165383
+/** Handle Mainline IUEs */
+actionclass mainline_iue_handling
+{
+    SUEGenerationPoint;
+    # Thresholding done in the plugin
+    funccall("AnalyzeMainlineIue");
+};
+
 actionclass mainline_impe_handling    { TBDDefaultCallout; }; # TODO RTC 165384
-actionclass maintenance_iue_handling  { TBDDefaultCallout; }; # TODO RTC 165383
+
+/**  Handle Maintenance IUEs */
+actionclass maintenance_iue_handling
+{
+    SUEGenerationPoint;
+    # Thresholding done in the plugin
+    funccall("AnalyzeMaintIue");
+};
+
 actionclass maintenance_impe_handling { TBDDefaultCallout; }; # TODO RTC 165384
 
 /** MCA/UE algroithm, threshold 5 per day */

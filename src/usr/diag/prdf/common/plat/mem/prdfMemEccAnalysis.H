@@ -99,7 +99,47 @@ template<TARGETING::TYPE T, typename D>
 uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
                          STEP_CODE_DATA_STRUCT & io_sc );
 
+/**
+ * @brief  Analyzes a fetch mainline IUE attention.
+ * @param  i_chip   MCA or MBA.
+ * @param  io_sc    The step code data struct.
+ * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T, typename D>
+uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & io_sc );
+
+
+/**
+ * @brief  Analyzes a fetch maint IUE attention.
+ * @param  i_chip   MCA or MBA.
+ * @param  io_sc    The step code data struct.
+ * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T, typename D>
+uint32_t analyzeMaintIue( ExtensibleChip * i_chip,
+                          STEP_CODE_DATA_STRUCT & io_sc );
+
+#ifdef __HOSTBOOT_RUNTIME
+
+/**
+ * @brief  Will trigger a port fail if the number of IUEs is over threshold
+ * @param  i_chip   MCA chip
+ * @param  io_sc    The step code data struct.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise
+ */
+uint32_t iuePortFail(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc);
+
+#endif // __HOSTBOOT_RUNTIME
+
 #ifdef __HOSTBOOT_MODULE
+
+/**
+ * @brief  Will mask off the entire mem port
+ * @param  i_chip   MCA chip
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise
+ */
+uint32_t maskMemPort( ExtensibleChip * i_chip );
 
 template<TARGETING::TYPE T, typename D>
 uint32_t addVcmEvent( ExtensibleChip * i_chip, const MemRank & i_rank,
