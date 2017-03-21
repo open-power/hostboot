@@ -265,4 +265,154 @@ extern "C"
         return fapi2::current_err;
     }
 
+    fapi2::ReturnCode p9_tod_utils_get_tfmr_reg(
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+        const uint8_t i_thread_num,
+        fapi2::buffer<uint64_t>& o_tfmr_val)
+    {
+        // mark HWP entry
+        FAPI_DBG("Entering ...\n");
+
+        fapi2::buffer<uint64_t> data;
+        fapi2::buffer<uint64_t> data2;
+
+        //Setting SPR_MODE to thread number
+        data.flush<0>().setBit<SPR_MODE_REG_MODE_SPRC_WR_EN>().setBit<SPR_MODE_REG_MODE_SPRC0_SEL>();
+        data2.flush<0>();
+
+        switch(i_thread_num)
+        {
+            case(0):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T0_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T0, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            case(1):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T1_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T1, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            case(2):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T2_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T2, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            case(3):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T3_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T3, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            case(4):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T4_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T4, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            case(5):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T5_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T5, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            case(6):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T6_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T6, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            case(7):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T7_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T7, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            default:
+                FAPI_ASSERT(true, fapi2::P9_INVALID_THREAD_NUM().set_TARGET(i_target).set_THREADNUMBER(i_thread_num),
+                            "Thread number error ");
+        }
+
+        FAPI_TRY(fapi2::putScom(i_target, C_SPR_MODE, data), "Error writing to EX_PERV_SPR_MODE");
+
+        FAPI_TRY(fapi2::putScom(i_target, C_SCOMC, data2), "Error writing to EX_PERV_L0_SCOM_SPRC");
+
+        //Reading SPRD for the thread's TMFR
+        FAPI_TRY(fapi2::getScom(i_target, 0x20010A81, o_tfmr_val), "Error getting EX_PERV_SPRD_L0");
+    fapi_try_exit:
+        FAPI_DBG("Exiting...");
+        return fapi2::current_err;
+    }
+
+    fapi2::ReturnCode p9_tod_utils_set_tfmr_reg(
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+        const uint8_t i_thread_num,
+        fapi2::buffer<uint64_t>& i_tfmr_val)
+    {
+        // mark HWP entry
+        FAPI_DBG("Entering ...\n");
+
+        fapi2::buffer<uint64_t> data;
+        fapi2::buffer<uint64_t> data2;
+
+        //Setting SPR_MODE to thread number
+        //Setting SPRC to thread's TMFR
+        data.flush<0>().setBit<SPR_MODE_REG_MODE_SPRC_WR_EN>().setBit<SPR_MODE_REG_MODE_SPRC0_SEL>();
+        data2.flush<0>();
+
+        switch(i_thread_num)
+        {
+            case(0):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T0_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T0, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            case(1):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T1_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T1, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            case(2):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T2_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T2, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            case(3):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T3_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T3, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            case(4):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T4_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T4, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            case(5):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T5_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T5, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            case(6):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T6_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T6, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            case(7):
+                data.setBit<SPR_MODE_REG_MODE_SPRC_T7_SEL>();
+                data2.insertFromRight(SPRC_REG_SEL_TFMR_T7, SPRC_REG_SEL, SPRC_REG_SEL_LEN);
+                break;
+
+            default:
+                FAPI_ASSERT(true, fapi2::P9_INVALID_THREAD_NUM().set_TARGET(i_target).set_THREADNUMBER(i_thread_num),
+                            "Thread number error ");
+                break;
+        }
+
+        FAPI_TRY(fapi2::putScom(i_target, C_SPR_MODE, data), "Error doing putscom to EX_PERV_SPR_MODE");
+
+        FAPI_TRY(fapi2::putScom(i_target, C_SCOMC, data2), "Error doing putscom to EX_PERV_L0_SCOM_SPRC");
+
+        //Writing SPRD to set the thread's TMFR
+        FAPI_TRY(fapi2::putScom(i_target, 0x20010A81, i_tfmr_val), "Error doing putscom to EX_PERV_SPRD_L0");
+
+    fapi_try_exit:
+        FAPI_DBG("Exiting...");
+        return fapi2::current_err;
+    }
+
+
 } // extern "C"
