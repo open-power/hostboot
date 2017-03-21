@@ -151,7 +151,6 @@
       <childTargets>
           <parent>MCA_TARGET</parent>
           <childType>TARGET_TYPE_DIMM</childType>
-          <childNumber>EX_NUMBER_IN_ERROR</childNumber>
       </childTargets>
       <priority>MEDIUM</priority>
     </callout>
@@ -159,7 +158,6 @@
        <childTargets>
           <parent>MCA_TARGET</parent>
           <childType>TARGET_TYPE_DIMM</childType>
-          <childNumber>EX_NUMBER_IN_ERROR</childNumber>
       </childTargets>
     </deconfigure>
  </hwpError>
