@@ -274,13 +274,15 @@
     0 = default = SMP
     1 = CAPI 2.0
     2 = NV 2.0
+    3 = OPENCAPI
     Provided by the MRW.
   </description>
   <valueType>uint8</valueType>
   <enum>
     SMP = 0x0,
     CAPI = 0x1,
-    NV = 0x2
+    NV = 0x2,
+    OCAPI = 0x3
   </enum>
   <platInit/>
 </attribute>
