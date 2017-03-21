@@ -149,9 +149,17 @@ typedef union pgpe_flags
         uint16_t  dpll_droop_protect_enable     : 1;
         uint16_t  reserved7                     : 1;
         uint16_t  occ_ipc_immed_response        : 1;
-        uint16_t  reserved_9_15                 : 7;
+        uint16_t  wof_ipc_immed_response        : 1;
+        uint16_t  enable_fratio                 : 1;
+        uint16_t  enable_vratio                 : 1;
+        uint16_t  vratio_modifier               : 1;
+        uint16_t  reserved_13_15                : 7;
 #else
-        uint16_t  reserved_9_15                 : 7;
+        uint16_t  reserved_13_15                : 7;
+        uint16_t  vratio_modifier               : 1;
+        uint16_t  enable_vratio                 : 1;
+        uint16_t  enable_fratio                 : 1;
+        uint16_t  wof_ipc_immed_response        : 1;
         uint16_t  occ_ipc_immed_response        : 1;
         uint16_t  reserved7                     : 1;
         uint16_t  dpll_droop_protect_enable     : 1;
