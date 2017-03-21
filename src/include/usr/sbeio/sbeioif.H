@@ -144,6 +144,26 @@ namespace SBEIO
      */
     errlHndl_t sendFifoReset(TARGETING::Target * i_target);
 
+    /**
+    * @brief Set the FFDC address for the SBE so it is aware of the FFDC buffer
+    *        and its size and it is aware of the SBE Communication buffer and
+    *        its size
+    *
+    * @param[in] i_sbeffdcSize uint32 Size of SBE FFDC buffer
+    * @param[in] i_sbeCommSize uint32 Size of SBE Communication buffer
+    * @param[in] i_sbeffdcAddr uint64 Physical mainstore address of FFDC buffer
+    * @param[in] i_sbeCommAddr uint64 Physical mainstore address of Comm buffer
+    * @param[in] i_procChip The proc to which you would like to send the info
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t sendSetFFDCAddr(const uint32_t i_sbeffdcSize,
+                               const uint32_t i_sbeCommSize,
+                               const uint64_t i_sbeffdcAddr,
+                               const uint64_t i_sbeCommAddr,
+                               TARGETING::Target * i_procChip);
+
 } //end namespace SBEIO
 
 #endif /* _SBEIOIF_H */

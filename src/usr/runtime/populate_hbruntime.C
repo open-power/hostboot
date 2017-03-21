@@ -62,6 +62,9 @@
 #include <targeting/common/attributeTank.H>
 #include <runtime/interface.h>
 #include <targeting/attrPlatOverride.H>
+#include <sbeio/sbeioif.H>
+#include <sbeio/sbe_psudd.H>
+#include <sbeio/runtime/sbe_msg_passing.H>
 
 
 namespace RUNTIME
@@ -88,8 +91,8 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId)
     TRACFCOMP( g_trac_runtime, ENTER_MRK"populate_RtDataByNode" );
     errlHndl_t  l_elog = nullptr;
     const char* l_stringLabels[] =
-                     { "ibm,hbrt-vpd-image" ,
-                       "ibm,hbrt-target-image" };
+                     { HBRT_RSVD_MEM__VPD_CACHE ,
+                       HBRT_RSVD_MEM__ATTRIBUTES };
 
     // OPAL not supported
     if(TARGETING::is_sapphire_load())
@@ -479,6 +482,12 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         hdatMsVpdRhbAddrRange_t* l_rngPtr;
         uint64_t l_vAddr = 0x0;
 
+        // Get list of processor chips
+        TARGETING::TargetHandleList l_procChips;
+        getAllChips( l_procChips,
+                     TARGETING::TYPE_PROC,
+                     true);
+
         if(TARGETING::is_phyp_load())
         {
             // First phyp entry is for the entire 256M HB space
@@ -565,6 +574,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             // -----ATTR Data------------
             // -----ATTR Override Data---
             // -----HBRT Image-----------
+            // -----SBE Comm---------
+            // -----SBE FFDC---------
 
             // First opal entries are for the HOMERs
             uint64_t l_homerAddr = l_topMemAddr;
@@ -572,10 +583,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             l_labelSize = strlen(l_label) + 1;
 
             // Loop through all functional Procs
-            TARGETING::TargetHandleList l_procChips;
-            getAllChips( l_procChips,
-                         TARGETING::TYPE_PROC );
-
             for (const auto & l_procChip: l_procChips)
             {
                 l_homerAddr = l_procChip->getAttr
@@ -959,6 +966,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             memcpy( l_rngPtr->hdatRhbLabelString,
                     l_label,
                     l_labelSize );
+            l_prevDataAddr = l_hbrtImageAddr;
+            l_prevDataSize = l_attrSizeAligned;
 
             traceHbRsvMemRange(l_rngPtr);
 
@@ -980,6 +989,115 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             }
         }
 
+
+        // SBE Communications buffer entry
+        uint64_t l_sbeCommAddr = 0x0;
+        l_label = HBRT_RSVD_MEM__SBE_COMM;
+        l_labelSize = strlen(l_label) + 1;
+        uint64_t l_sbeCommSize = SBE_MSG::SBE_COMM_BUFFER_SIZE;
+
+        // Minimum 64K size for Opal
+        size_t l_sbeCommSizeAligned = ALIGN_X( l_sbeCommSize, 64*KILOBYTE );
+
+        if(TARGETING::is_phyp_load())
+        {
+            l_sbeCommAddr = l_prevDataAddr + l_prevDataSize;
+        }
+        else if(TARGETING::is_sapphire_load())
+        {
+            l_sbeCommAddr = l_prevDataAddr - l_sbeCommSizeAligned;
+        }
+
+        // Get a pointer to the next available HDAT HB Rsv Mem entry
+        l_rngPtr = nullptr;
+        l_elog = getNextRhbAddrRange(l_rngPtr);
+        if(l_elog)
+        {
+            break;
+        }
+
+        // Fill in the entry
+        l_rngPtr->hdatRhbRngType =
+                static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
+        l_rngPtr->hdatRhbRngId = i_nodeId;
+        l_rngPtr->hdatRhbAddrRngStrAddr =
+                l_sbeCommAddr | VmmManager::FORCE_PHYS_ADDR;
+        l_rngPtr->hdatRhbAddrRngEndAddr =
+                (l_sbeCommAddr | VmmManager::FORCE_PHYS_ADDR)
+                    + l_sbeCommSizeAligned - 1 ;
+        l_rngPtr->hdatRhbLabelSize = l_labelSize;
+        memcpy( l_rngPtr->hdatRhbLabelString,
+                l_label,
+                l_labelSize );
+        l_prevDataAddr = l_sbeCommAddr;
+        l_prevDataSize = l_sbeCommSizeAligned;
+
+        traceHbRsvMemRange(l_rngPtr);
+
+
+        // SBE FFDC entry
+        uint64_t l_sbeffdcAddr = 0x0;
+        l_label = HBRT_RSVD_MEM__SBE_FFDC;
+        l_labelSize = strlen(l_label) + 1;
+        uint64_t l_sbeffdcSize =
+            SBEIO::SbePsu::getTheInstance().getSbeFFDCBufferSize();
+
+        // Minimum 64K size for Opal
+        size_t l_sbeffdcSizeAligned = ALIGN_X( l_sbeffdcSize, 64*KILOBYTE );
+
+        if(TARGETING::is_phyp_load())
+        {
+            l_sbeffdcAddr = l_prevDataAddr + l_prevDataSize;
+        }
+        else if(TARGETING::is_sapphire_load())
+        {
+            l_sbeffdcAddr = l_prevDataAddr - l_sbeffdcSizeAligned;
+        }
+
+        // Get a pointer to the next available HDAT HB Rsv Mem entry
+        l_rngPtr = nullptr;
+        l_elog = getNextRhbAddrRange(l_rngPtr);
+        if(l_elog)
+        {
+            break;
+        }
+
+        // Fill in the entry
+        l_rngPtr->hdatRhbRngType =
+                static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
+        l_rngPtr->hdatRhbRngId = i_nodeId;
+        l_rngPtr->hdatRhbAddrRngStrAddr =
+                l_sbeffdcAddr | VmmManager::FORCE_PHYS_ADDR;
+        l_rngPtr->hdatRhbAddrRngEndAddr =
+                (l_sbeffdcAddr | VmmManager::FORCE_PHYS_ADDR)
+                    + l_sbeffdcSizeAligned - 1 ;
+        l_rngPtr->hdatRhbLabelSize = l_labelSize;
+        memcpy( l_rngPtr->hdatRhbLabelString,
+                l_label,
+                l_labelSize );
+        l_prevDataAddr = l_sbeffdcAddr;
+        l_prevDataSize = l_sbeffdcSizeAligned;
+
+        traceHbRsvMemRange(l_rngPtr);
+
+        // Send Set FFDC Address for each functional proc
+        for (const auto & l_procChip: l_procChips)
+        {
+            // Call sendSetFFDCAddr, tell SBE where to write FFDC and messages
+            l_elog = SBEIO::sendSetFFDCAddr(l_sbeffdcSize,
+                                            l_sbeCommSize,
+                                            l_sbeffdcAddr,
+                                            l_sbeCommAddr,
+                                            l_procChip);
+
+            if(l_elog)
+            {
+                TRACFCOMP( g_trac_runtime,
+                           "populate_HbRsvMem: sendSetFFDCAddr failed");
+
+                break;
+            }
+        }
     } while(0);
 
     TRACFCOMP( g_trac_runtime, EXIT_MRK"populate_HbRsvMem> l_elog=%.8X", ERRL_GETRC_SAFE(l_elog) );
@@ -1372,7 +1490,6 @@ errlHndl_t populate_hbTpmInfo()
 
     return (l_elog);
 } // end populate_hbTpmInfo
-
 
 
 errlHndl_t populate_hbRuntimeData( void )
