@@ -130,6 +130,7 @@
         <id>FSI_GP_REG_SCOM_ACCESS</id>
         <default>1</default>
     </attribute>
+    <attribute><id>FABRIC_NODE_ID</id></attribute><!-- DEPRECATED -->
     <attribute><id>FABRIC_GROUP_ID</id></attribute>
     <attribute><id>PROC_EFF_FABRIC_GROUP_ID</id></attribute>
     <attribute><id>FABRIC_CHIP_ID</id></attribute>
@@ -647,6 +648,10 @@
     <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id></attribute>
     <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id></attribute>
     <attribute><id>MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id></attribute>
+    <attribute><id>EXTERNAL_VRM_TRANSITION_START_NS</id></attribute>
+    <attribute><id>EXTERNAL_VRM_TRANSITION_RATE_INC_UV_PER_US</id></attribute>
+    <attribute><id>EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US</id></attribute>
+    <attribute><id>EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS</id></attribute>
     <attribute><id>EXTERNAL_VRM_STEPSIZE</id></attribute>
     <attribute><id>EXTERNAL_VRM_STEPDELAY</id></attribute>
     <attribute><id>PM_SPIVID_FREQUENCY</id></attribute>
@@ -896,6 +901,9 @@
     <attribute><id>DPLL_VDM_RESPONSE</id></attribute>
     <attribute><id>MSS_VMEM_REGULATOR_MAX_DIMM_COUNT</id></attribute>
     <attribute><id>SYSTEM_WOF_ENABLED</id></attribute>
+    <attribute><id>WOF_VRATIO_SELECT</id></attribute>
+    <attribute><id>WOF_ENABLE_VRATIO</id></attribute>
+    <attribute><id>WOF_ENABLE_FRATIO</id></attribute>
     <attribute><id>WOF_POWER_LIMIT</id></attribute>
     <attribute><id>SYS_VFRT_STATIC_DATA_ENABLE</id></attribute>
     <attribute><id>WOF_TABLE_LID_NUMBER</id></attribute>

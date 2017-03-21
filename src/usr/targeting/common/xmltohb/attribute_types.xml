@@ -2468,6 +2468,26 @@
 </attribute>
 
 <attribute>
+    <id>FABRIC_NODE_ID</id>
+    <description>
+        DEPRECATED!!!!
+        Chip attribute.
+        Logical fabric node the chip belongs to.
+        Provided by the Machine Readable Workbook.
+        Can vary across drawers.
+    </description>
+    <simpleType><uint8_t>
+        <default>0</default>
+    </uint8_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FABRIC_NODE_ID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>FABRIC_GROUP_ID</id>
     <description>
         Chip attribute.
@@ -5526,7 +5546,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
       Provided by the Machine Readable Workbook after system characterization.
     </description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -5535,6 +5555,109 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+<attribute>
+    <id>EXTERNAL_VRM_TRANSITION_START_NS</id>
+    <description>
+    Delay (binary in nanoseconds) from the time the VRM receives the write
+    voltage command until the voltage actually moves.   This value is used for
+    both increasing and decreasing transitions as part of the overall voltage
+    transition time calculation.
+    Firmware provides a default value of 8000ns (eg 8us)) if this attribute is
+    zero.  Note: the smallest possible delay is limited to 1ns.
+
+    Consumer: p9_pstate_parameter_block ->
+                        Pstate Parameter Block (PSPB) for PGPE
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EXTERNAL_VRM_TRANSITION_START_NS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
+    <id>EXTERNAL_VRM_TRANSITION_RATE_INC_UV_PER_US</id>
+    <description>
+    Transition rate (binary in microVolts per microsecond) of the VRM for an
+    increasing voltage transition.   This is used as part of the overall voltage
+    transition time calculation
+    Firmware provides a default value of 10000 uV/us (eg 10mV/us) if this
+    attribute is zero.  Note: the fastest possible rate is limited to 1uV/us.
+
+    Consumer: p9_pstate_parameter_block ->
+                        Pstate Parameter Block (PSPB) for PGPE
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EXTERNAL_VRM_TRANSITION_RATE_INC_UV_PER_US</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US</id>
+    <description>
+    Transition rate (binary in microVolts per microsecond) of the VRM for an
+    decreasing voltage transition.   This is used as part of the overall voltage
+    transition time calculation
+    Firmware provides a default value of 10000 uV/us (eg 10mV/us) if this
+    attribute is zero. Note: the fastest possible rate is limited to 1uV/us.
+
+    Consumer: p9_pstate_parameter_block ->
+                        Pstate Parameter Block (PSPB) for PGPE
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS</id>
+    <description>
+    Time (binary in nanoseconds) to allow the voltage rail to stabilize before
+    considering the transition to be fully complete.  This value is used for
+    both increasing and decreasing transitions as part of the overall voltage
+    transition time calculation.
+    Firmware provides a default value of 5000ns (5us) if this attribute is zero.
+    Note: the smallest delay is limited to 1ns.
+
+    Consumer: p9_pstate_parameter_block ->
+                        Pstate Parameter Block (PSPB) for PGPE
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 
 <attribute>
     <id>EXTERNAL_VRM_STEPDELAY</id>
@@ -20147,6 +20270,130 @@ Measured in GB</description>
     </enumerator>
 </enumerationType>
 
+<attribute>
+    <id>WOF_ENABLE_FRATIO</id>
+    <description>
+    If wof_enabled, defines the Frequency Ratio calculation performed.
+    (THIS IS NOT SUPPORTED IN P9 GA1!).
+
+    Producer: MRWB
+
+    Consumers: p9_hcode_image_build.C
+
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>FIXED</default>
+      </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_WOF_ENABLE_FRATIO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<enumerationType>
+    <id>WOF_ENABLE_FRATIO</id>
+    <description>Enumeration for Work Load Optimized Frequency ratio</description>
+    <enumerator>
+        <name>FIXED</name>
+        <value>0x00</value>
+    </enumerator>
+    <enumerator>
+        <name>STEPPED</name>
+        <value>0x01</value>
+    </enumerator>
+</enumerationType>
+
+
+<attribute>
+    <id>WOF_ENABLE_VRATIO</id>
+    <description>
+    If wof_enabled, defines the Voltage Ratio calculation performed.
+    THIS IS NOT SUPPORTED AT PRESENT. GA1 SUPPORT IS TBD).
+
+    Producer: MRWB
+
+    Consumers: p9_hcode_image_build.C
+
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>FIXED</default>
+      </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_WOF_ENABLE_VRATIO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<enumerationType>
+    <id>WOF_ENABLE_VRATIO</id>
+    <description>Enumeration for Work Load Optimized Frequency ratio</description>
+    <enumerator>
+        <name>FIXED</name>
+        <value>0x00</value>
+    </enumerator>
+    <enumerator>
+        <name>STEPPED</name>
+        <value>0x01</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>WOF_VRATIO_SELECT</id>
+    <description>
+    If wof_enabled AND ATTR_WOF_ENABLE_VRATIO = CALCULATED, this attribute
+    selects the Vratio calculation type.
+    ACTIVE_CORES: Vratio is the number of active cores to the
+    number of good cores
+    FULL: Vratio is Vaverage to Vclip(Fclip) where Vclip(Fclip) is
+    the normal interpolated regulator voltage (including load line uplife @ RDP
+    current) derated with presently measured Idd current (from the AVSBus) and
+    the loadline.
+
+
+    Producer: MRWB
+
+    Consumers: p9_hcode_image_build.C
+
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>ACTIVE_CORES</default>
+      </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_WOF_VRATIO_SELECT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<enumerationType>
+    <id>WOF_VRATIO_SELECT</id>
+    <description>Enumeration for Work Load Optimized Frequency ratio</description>
+    <enumerator>
+        <name>ACTIVE_CORES</name>
+        <value>0x00</value>
+    </enumerator>
+    <enumerator>
+        <name>FULL</name>
+        <value>0x01</value>
+    </enumerator>
+</enumerationType>
+
+
+
 <enumerationType>
     <id>WOF_POWER_LIMIT</id>
     <description>Enumeration to select WOF Power Limit</description>
@@ -20174,10 +20421,6 @@ Measured in GB</description>
         <default>0</default>
       </uint8_t>
     </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_WOF_POWER_LIMIT</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
@@ -20216,9 +20459,7 @@ Measured in GB</description>
      -->
      </description>
     <simpleType>
-        <uint8_t>
-          <default>0</default>
-        </uint8_t>
+        <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
