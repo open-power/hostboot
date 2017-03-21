@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_RANK_H_
@@ -43,6 +43,7 @@
 #include <generic/memory/lib/utils/scom.H>
 #include <lib/utils/num.H>
 #include <lib/utils/count_dimm.H>
+#include <lib/shared/mss_const.H>
 
 namespace mss
 {
@@ -68,6 +69,19 @@ enum
 
 };
 
+///
+/// @brief set of enums used for ffdc return codes
+///
+enum rank_functions
+{
+    RANK_PAIR_TO_PHY = 0,
+    RANK_PAIR_FROM_PHY = 1,
+    SET_RANKS_IN_PAIR = 2,
+    GET_RANKS_IN_PAIR = 3,
+    GET_RANK_FIELD = 4,
+    GET_PAIR_VALID = 5,
+    SET_RANK_FIELD = 6,
+};
 ///
 /// @class rankPairTraits
 /// @brief a collection of traits associated with rank pairs
@@ -429,28 +443,41 @@ inline uint64_t map_rank_ordinal_from_phy( const fapi2::Target<fapi2::TARGET_TYP
 ///
 /// @brief Convert rank indexes in a rank_pair reg value from MC perspective to PHY perspective
 /// @tparam T fapi2 Target Type the type of the MC target
+/// @param[in] i_target the fapi2 target of the MCA
 /// @param[in] i_count the number of DIMM to be considered
 /// @param[in] i_rp_reg value of RANK_PAIR register
 /// @param[in, out] io_data the register value with mapped rank indexes
+/// @return FAPI2_RC_SUCCESS iff all is ok
 ///
 template< fapi2::TargetType T >
-inline void map_rank_pair_to_phy( const size_t i_count,
-                                  const fapi2::buffer<uint64_t>& i_rp_reg_value,
-                                  fapi2::buffer<uint64_t>& io_data );
+inline fapi2::ReturnCode map_rank_pair_to_phy( const fapi2::Target<T>& i_target,
+        const size_t i_count,
+        const fapi2::buffer<uint64_t>& i_rp_reg_value,
+        fapi2::buffer<uint64_t>& io_data );
+
 
 ///
 /// @brief Convert rank indexes in a rank_pair reg value from MC perspective to PHY perspective
-/// Specialization for TARGET_TYPE_MCA
+/// @param[in] i_target the fapi2 target of the MCA
 /// @param[in] i_count the number of DIMM to be considered
 /// @param[in] i_rp_reg value of RANK_PAIR register
 /// @param[in, out] io_data the register value with mapped rank indexes
+/// @return FAPI2_RC_SUCCESS iff all is ok
 ///
 template<>
-inline void map_rank_pair_to_phy<fapi2::TARGET_TYPE_MCA>( const size_t i_count,
+inline fapi2::ReturnCode map_rank_pair_to_phy( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const size_t i_count,
         const fapi2::buffer<uint64_t>& i_rp_reg_value,
         fapi2::buffer<uint64_t>& io_data )
 {
     uint64_t l_rank = 0;
+
+    FAPI_ASSERT(i_count != 0,
+                fapi2::MSS_NO_DIMM_FOR_MAPPING()
+                .set_MCA_TARGET(i_target)
+                .set_FUNCTION(RANK_PAIR_TO_PHY),
+                "%s Tried to map rank pairs on a port without any DIMMs",
+                mss::c_str(i_target));
 
     // copy over so we get the valid bits
     io_data = i_rp_reg_value;
@@ -474,6 +501,10 @@ inline void map_rank_pair_to_phy<fapi2::TARGET_TYPE_MCA>( const size_t i_count,
         l_rank = map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>(i_count, l_rank);
         io_data.insertFromRight<ODD_SECONDARY_RANK, RANK_LEN>(l_rank);
     }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -481,12 +512,13 @@ inline void map_rank_pair_to_phy<fapi2::TARGET_TYPE_MCA>( const size_t i_count,
 /// @param[in] i_target the fapi2 target of the MCA
 /// @param[in] i_rp_reg value of RANK_PAIR register
 /// @param[in, out] io_data the register value with mapped rank indexes
+/// @return FAPI2_RC_SUCCESS iff all is ok
 ///
-inline void map_rank_pair_to_phy( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                  const fapi2::buffer<uint64_t>& i_rp_reg_value,
-                                  fapi2::buffer<uint64_t>& io_data )
+inline fapi2::ReturnCode map_rank_pair_to_phy( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const fapi2::buffer<uint64_t>& i_rp_reg_value,
+        fapi2::buffer<uint64_t>& io_data )
 {
-    map_rank_pair_to_phy<fapi2::TARGET_TYPE_MCA>(count_dimm(i_target), i_rp_reg_value, io_data);
+    return map_rank_pair_to_phy(i_target, count_dimm(i_target), i_rp_reg_value, io_data);
 }
 
 ///
@@ -494,40 +526,54 @@ inline void map_rank_pair_to_phy( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i
 /// @param[in] i_target the fapi2 target of the MCA
 /// @param[in] i_rp_reg value of RANK_PAIR register
 /// @param[in, out] io_data the register value with mapped rank indexes
+/// @return FAPI2_RC_SUCCESS iff all is ok
 ///
-inline void map_rank_pair_to_phy( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-                                  const fapi2::buffer<uint64_t>& i_rp_reg_value,
-                                  fapi2::buffer<uint64_t>& io_data )
+inline fapi2::ReturnCode map_rank_pair_to_phy( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        const fapi2::buffer<uint64_t>& i_rp_reg_value,
+        fapi2::buffer<uint64_t>& io_data )
 {
     // NOOP for Centaur
     io_data = i_rp_reg_value;
+    return fapi2::FAPI2_RC_SUCCESS;
 }
 
 ///
 /// @brief Convert rank indexes in a rank_pair reg value from PHY perspective to MC perspective
 /// @tparam T fapi2 Target Type the type of the MC target
+/// @param[in] i_target the fapi2 target of the MCA
 /// @param[in] i_count the number of DIMM to be considered
 /// @param[in] i_rp_reg value of RANK_PAIR register
 /// @param[in, out] io_data the register value with mapped rank indexes
+/// @return FAPI2_RC_SUCCESS iff all is ok
 ///
 template< fapi2::TargetType T >
-inline void map_rank_pair_from_phy( const size_t i_count,
-                                    const fapi2::buffer<uint64_t>& i_rp_reg_value,
-                                    fapi2::buffer<uint64_t>& io_data );
+inline fapi2::ReturnCode map_rank_pair_from_phy( const fapi2::Target<T>& i_target,
+        const size_t i_count,
+        const fapi2::buffer<uint64_t>& i_rp_reg_value,
+        fapi2::buffer<uint64_t>& io_data );
 
 ///
 /// @brief Convert rank indexes in a rank_pair reg value from PHY perspective to MC perspective
 /// Specialization for TARGET_TYPE_MCA
+/// @param[in] i_target the fapi2 target of the MCA
 /// @param[in] i_count the number of DIMM to be considered
 /// @param[in] i_rp_reg value of RANK_PAIR register
 /// @param[in, out] io_data the register value with mapped rank indexes
+/// @return FAPI2_RC_SUCCESS iff all is ok
 ///
 template<>
-inline void map_rank_pair_from_phy<fapi2::TARGET_TYPE_MCA>( const size_t i_count,
+inline fapi2::ReturnCode map_rank_pair_from_phy( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const size_t i_count,
         const fapi2::buffer<uint64_t>& i_rp_reg_value,
         fapi2::buffer<uint64_t>& io_data )
 {
     uint64_t l_rank = 0;
+
+    FAPI_ASSERT(i_count != 0,
+                fapi2::MSS_NO_DIMM_FOR_MAPPING()
+                .set_FUNCTION(RANK_PAIR_FROM_PHY)
+                .set_MCA_TARGET(i_target),
+                "Tried to map rank pairs on a port without any DIMMs");
 
     // copy over so we get the valid bits
     io_data = i_rp_reg_value;
@@ -551,6 +597,10 @@ inline void map_rank_pair_from_phy<fapi2::TARGET_TYPE_MCA>( const size_t i_count
         l_rank = map_rank_ordinal_from_phy<fapi2::TARGET_TYPE_MCA>(i_count, l_rank);
         io_data.insertFromRight<ODD_SECONDARY_RANK, RANK_LEN>(l_rank);
     }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -558,12 +608,13 @@ inline void map_rank_pair_from_phy<fapi2::TARGET_TYPE_MCA>( const size_t i_count
 /// @param[in] i_target the fapi2 target of the MCA
 /// @param[in] i_rp_reg value of RANK_PAIR register
 /// @param[in, out] io_data the register value with mapped rank indexes
+/// @return FAPI2_RC_SUCCESS iff all is ok
 ///
-inline void map_rank_pair_from_phy( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                    const fapi2::buffer<uint64_t>& i_rp_reg_value,
-                                    fapi2::buffer<uint64_t>& io_data )
+inline fapi2::ReturnCode map_rank_pair_from_phy( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const fapi2::buffer<uint64_t>& i_rp_reg_value,
+        fapi2::buffer<uint64_t>& io_data )
 {
-    map_rank_pair_from_phy<fapi2::TARGET_TYPE_MCA>(count_dimm(i_target), i_rp_reg_value, io_data);
+    return map_rank_pair_from_phy(i_target, count_dimm(i_target), i_rp_reg_value, io_data);
 }
 
 ///
@@ -571,13 +622,15 @@ inline void map_rank_pair_from_phy( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
 /// @param[in] i_target the fapi2 target of the MCA
 /// @param[in] i_rp_reg value of RANK_PAIR register
 /// @param[in, out] io_data the register value with mapped rank indexes
+/// @return FAPI2_RC_SUCCESS iff all is ok
 ///
-inline void map_rank_pair_from_phy( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-                                    const fapi2::buffer<uint64_t>& i_rp_reg_value,
-                                    fapi2::buffer<uint64_t>& io_data )
+inline fapi2::ReturnCode map_rank_pair_from_phy( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        const fapi2::buffer<uint64_t>& i_rp_reg_value,
+        fapi2::buffer<uint64_t>& io_data )
 {
     // NOOP for Centaur
     io_data = i_rp_reg_value;
+    return fapi2::FAPI2_RC_SUCCESS;
 }
 
 ///
@@ -688,7 +741,7 @@ inline fapi2::ReturnCode read_rank_pair_reg( const fapi2::Target<T>& i_target, f
     static_assert((N < TT::NUM_RANK_PAIR_REGS), "Rank pair register index failed range check");
     FAPI_TRY( mss::getScom(i_target, TT::RANK_PAIR_REGS[N], l_buf) );
     FAPI_INF("read_rank_pair_reg: 0x%016lx", l_buf);
-    map_rank_pair_from_phy(i_target, l_buf, o_data);
+    FAPI_TRY( map_rank_pair_from_phy(i_target, l_buf, o_data) );
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -708,7 +761,7 @@ inline fapi2::ReturnCode write_rank_pair_reg( const fapi2::Target<T>& i_target, 
 {
     fapi2::buffer<uint64_t> l_buf;
     static_assert((N < TT::NUM_RANK_PAIR_REGS), "Rank pair register index failed range check");
-    map_rank_pair_to_phy(i_target, i_data, l_buf);
+    FAPI_TRY( map_rank_pair_to_phy(i_target, i_data, l_buf) );
     FAPI_TRY( mss::putScom(i_target, TT::RANK_PAIR_REGS[N], l_buf) );
     FAPI_INF("write_rank_pair_reg: 0x%016lx", l_buf);
 fapi_try_exit:
@@ -787,7 +840,7 @@ fapi_try_exit:
 /// @brief set_rank_field
 /// @tparam RP rank pair (group) index
 /// @tparam R rank index in pair (PRIMARY, SECONDARY, etc)
-/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam T fapi2 Target Type
 /// @tparam TT traits type defaults to rankPairTraits<T, RP>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value rank number
@@ -808,8 +861,9 @@ inline void set_rank_field( fapi2::buffer<uint64_t>& io_data, const uint64_t i_v
 ///
 /// @brief set_rank_field
 /// @tparam RP rank pair (group) index
-/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam T fapi2 Target Type
 /// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in] i_target the fapi2 target of the mc
 /// @param[in, out] io_data the register value
 /// @param[i] i_rank rank index in pair (PRIMARY, SECONDARY, etc)
 /// @param[in] i_value rank number
@@ -817,8 +871,9 @@ inline void set_rank_field( fapi2::buffer<uint64_t>& io_data, const uint64_t i_v
 /// @note When configured for a protocol that only supports a single rank system, the rankpair 0 primary
 ///       rank must be set to 0
 ///
-template< uint64_t RP, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = rankPairTraits<T, RP> >
-inline fapi2::ReturnCode set_rank_field( fapi2::buffer<uint64_t>& io_data,
+template< uint64_t RP, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> >
+inline fapi2::ReturnCode set_rank_field( const fapi2::Target<T>& i_target,
+        fapi2::buffer<uint64_t>& io_data,
         const uint64_t i_rank,
         const uint64_t i_value )
 {
@@ -841,15 +896,25 @@ inline fapi2::ReturnCode set_rank_field( fapi2::buffer<uint64_t>& io_data,
             return fapi2::FAPI2_RC_SUCCESS;
 
         default:
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_RANK()
+                         .set_RANK(i_rank)
+                         .set_MCA_TARGET(i_target)
+                         .set_FUNCTION(SET_RANK_FIELD),
+                         "%s Invalid rank (%d) in set_rank_field",
+                         mss::c_str(i_target),
+                         i_rank);
     }
-}
 
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
 ///
 /// @brief get_rank_field
 /// @tparam RP rank pair (group) index
 /// @tparam R rank index in pair (PRIMARY, SECONDARY, etc)
-/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam T fapi2 Target Type
 /// @tparam TT traits type defaults to rankPairTraits<T, RP>
 /// @param[in] i_data the register value
 /// @param[out] o_value rank number
@@ -866,15 +931,17 @@ inline void get_rank_field( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_v
 ///
 /// @brief get_rank_field
 /// @tparam RP rank pair (group) index
-/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam T fapi2 Target Type
 /// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the register value
 /// @param[i] i_rank rank index in pair (PRIMARY, SECONDARY, etc)
 /// @param[out] o_value rank number
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< uint64_t RP, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = rankPairTraits<T, RP> >
-inline fapi2::ReturnCode get_rank_field( fapi2::buffer<uint64_t>& i_data,
+template< uint64_t RP, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> >
+inline fapi2::ReturnCode get_rank_field( const fapi2::Target<T>& i_target,
+        fapi2::buffer<uint64_t>& i_data,
         const uint64_t i_rank,
         uint64_t& o_value )
 {
@@ -897,8 +964,19 @@ inline fapi2::ReturnCode get_rank_field( fapi2::buffer<uint64_t>& i_data,
             return fapi2::FAPI2_RC_SUCCESS;
 
         default:
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_RANK()
+                         .set_RANK(i_rank)
+                         .set_MCA_TARGET(i_target)
+                         .set_FUNCTION(GET_RANK_FIELD),
+                         "%s Invalid rank (%d) in get_ranks_in_pair",
+                         mss::c_str(i_target),
+                         i_rank);
     }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -923,16 +1001,17 @@ inline void set_pair_valid( fapi2::buffer<uint64_t>& io_data, const mss::states 
 ///
 /// @brief set_pair_valid
 /// @tparam RP rank pair (group) index
-/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam T fapi2 Target
 /// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in] i_target the fapi2 target of the mc
 /// @param[in, out] io_data the register value
 /// @param[in] i_rank rank index in pair (PRIMARY, SECONDARY, etc)
 /// @param[in] i_state mss::YES or mss::NO - desired state
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 /// @note Indicates value in the RANK_PAIR field is valid
 ///
-template< uint64_t RP, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = rankPairTraits<T, RP> >
-inline fapi2::ReturnCode set_pair_valid( fapi2::buffer<uint64_t>& io_data,
+template< uint64_t RP, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> >
+inline fapi2::ReturnCode set_pair_valid( const fapi2::Target<T>& i_target,
+        fapi2::buffer<uint64_t>& io_data,
         const uint64_t i_rank,
         const mss::states i_state )
 {
@@ -955,8 +1034,20 @@ inline fapi2::ReturnCode set_pair_valid( fapi2::buffer<uint64_t>& io_data,
             return fapi2::FAPI2_RC_SUCCESS;
 
         default:
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_RANK()
+                         .set_RANK(i_rank)
+                         .set_MCA_TARGET(i_target)
+                         .set_FUNCTION(GET_RANKS_IN_PAIR),
+                         "%s Invalid rank (%d) in get_ranks_in_pair",
+                         mss::c_str(i_target),
+                         i_rank);
+
     }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -981,16 +1072,18 @@ inline void get_pair_valid( const fapi2::buffer<uint64_t>& i_data, mss::states& 
 ///
 /// @brief get_pair_valid
 /// @tparam RP rank pair (group) index
-/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam T fapi2 Target Type
 /// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the register value
 /// @param[in] i_rank rank index in pair (PRIMARY, SECONDARY, etc)
 /// @param[out] o_state mss::YES or mss::NO - representing the state of the field
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 /// @note Indicates value in the RANK_PAIR field is valid
 ///
-template< uint64_t RP, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = rankPairTraits<T, RP> >
-inline fapi2::ReturnCode get_pair_valid( fapi2::buffer<uint64_t>& i_data,
+template< uint64_t RP, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> >
+inline fapi2::ReturnCode get_pair_valid( const fapi2::Target<T> i_target,
+        fapi2::buffer<uint64_t>& i_data,
         const uint64_t i_rank,
         mss::states& o_state )
 {
@@ -1013,8 +1106,19 @@ inline fapi2::ReturnCode get_pair_valid( fapi2::buffer<uint64_t>& i_data,
             return fapi2::FAPI2_RC_SUCCESS;
 
         default:
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_RANK()
+                         .set_RANK(i_rank)
+                         .set_MCA_TARGET(i_target)
+                         .set_FUNCTION(GET_PAIR_VALID),
+                         "%s Invalid rank (%d) passed into get get_pair_valid",
+                         mss::c_str(i_target),
+                         i_rank);
     }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -1031,17 +1135,18 @@ template< uint64_t RP, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> 
 fapi2::ReturnCode set_ranks_in_pair( const fapi2::Target<T>& i_target,
                                      const std::vector<uint64_t> i_ranks )
 {
-    // make sure i_ranks has all four ranks
-    if (i_ranks.size() != TT::NUM_RANKS_IN_PAIR)
-    {
-        FAPI_ERR("rank vector incorrect size");
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
-    }
-
     // Read the rank pair register(s)
     fapi2::buffer<uint64_t> l_reg;
     std::vector<fapi2::buffer<uint64_t>> l_data;
     uint64_t l_ordinal = 0;
+
+    FAPI_ASSERT( i_ranks.size() == TT::NUM_RANKS_IN_PAIR,
+                 fapi2::MSS_INVALID_RANK_VECTOR_PASSED_IN()
+                 .set_RANK_SIZE(i_ranks.size())
+                 .set_MCA_TARGET(i_target)
+                 .set_FUNCTION(SET_RANKS_IN_PAIR),
+                 "%s Invalid vector of ranks passed in ",
+                 mss::c_str(i_target));
 
     // Use the reg API here so we get the PHY to MC rank conversion
     FAPI_TRY( (mss::rank::read_rank_pair_reg< RP, 0 >(i_target, l_reg)) );
@@ -1054,11 +1159,11 @@ fapi2::ReturnCode set_ranks_in_pair( const fapi2::Target<T>& i_target,
     {
         if (l_rank == NO_RANK)
         {
-            FAPI_TRY( set_pair_valid<RP>(l_data.at(TT::RANK_PAIR_FIELD_MAP[l_ordinal]), l_ordinal, mss::NO) );
+            FAPI_TRY( set_pair_valid<RP>(i_target, l_data.at(TT::RANK_PAIR_FIELD_MAP[l_ordinal]), l_ordinal, mss::NO) );
         }
         else
         {
-            FAPI_TRY( set_rank_field<RP>(l_data.at(TT::RANK_PAIR_FIELD_MAP[l_ordinal]), l_ordinal, l_rank) );
+            FAPI_TRY( set_rank_field<RP>(i_target, l_data.at(TT::RANK_PAIR_FIELD_MAP[l_ordinal]), l_ordinal, l_rank) );
         }
 
         ++l_ordinal;
@@ -1069,7 +1174,6 @@ fapi2::ReturnCode set_ranks_in_pair( const fapi2::Target<T>& i_target,
     FAPI_TRY( (mss::rank::write_rank_pair_reg< RP, 1 >(i_target, l_data[1])) );
 
     return fapi2::FAPI2_RC_SUCCESS;
-
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -1103,9 +1207,20 @@ fapi2::ReturnCode get_ranks_in_pair( const fapi2::Target<T>& i_target,
     // Get data
     for (uint64_t l_ordinal = 0; l_ordinal < TT::NUM_RANKS_IN_PAIR; ++l_ordinal)
     {
+        // Check to make sure rank is vlaid
+        FAPI_ASSERT( l_ordinal < MAX_RANK_PER_DIMM,
+                     fapi2::MSS_INVALID_RANK()
+                     .set_RANK(l_ordinal)
+                     .set_MCA_TARGET(i_target)
+                     .set_FUNCTION(GET_RANKS_IN_PAIR),
+                     "%s Invalid rank (%d) in set_ranks_in_pair",
+                     mss::c_str(i_target),
+                     l_ordinal);
+
+
         mss::states l_state = mss::NO;
 
-        FAPI_TRY( get_pair_valid<RP>(l_data.at(TT::RANK_PAIR_FIELD_MAP[l_ordinal]), l_ordinal, l_state) );
+        FAPI_TRY( get_pair_valid<RP>(i_target, l_data.at(TT::RANK_PAIR_FIELD_MAP[l_ordinal]), l_ordinal, l_state) );
 
         if (l_state == mss::NO)
         {
@@ -1114,12 +1229,10 @@ fapi2::ReturnCode get_ranks_in_pair( const fapi2::Target<T>& i_target,
         else
         {
             uint64_t l_rank = 0;
-            FAPI_TRY( get_rank_field<RP>(l_data.at(TT::RANK_PAIR_FIELD_MAP[l_ordinal]), l_ordinal, l_rank) );
+            FAPI_TRY( get_rank_field<RP>(i_target, l_data.at(TT::RANK_PAIR_FIELD_MAP[l_ordinal]), l_ordinal, l_rank) );
             o_ranks.push_back(l_rank);
         }
     }
-
-    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1184,7 +1297,6 @@ fapi2::ReturnCode is_mirrored( const fapi2::Target<T>& i_target,
         o_mirrored = true;
     }
 
-    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -1222,11 +1334,19 @@ inline fapi2::ReturnCode get_ranks_in_pair( const fapi2::Target<T>& i_target,
 
         // Error case
         default:
-            FAPI_ERR("Invalid number of rankpairs entered. num: %lu max: %lu", i_rp, MAX_PRIMARY_RANKS_PER_PORT);
-            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER);
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_RANK_PAIR()
+                         .set_RANK_PAIR(i_rp)
+                         .set_MCA_TARGET(i_target)
+                         .set_FUNCTION(GET_RANKS_IN_PAIR),
+                         "%s Invalid rank pair (%d) in get_ranks_in_pair",
+                         mss::c_str(i_target),
+                         i_rp);
+
             break;
     }
 
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }
