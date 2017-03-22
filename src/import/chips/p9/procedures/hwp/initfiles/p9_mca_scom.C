@@ -711,10 +711,13 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             FAPI_TRY(fapi2::putScom(TGT0, 0x7010935ull, l_scom_buffer));
         }
         {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x7010a0aull, l_scom_buffer ));
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                FAPI_TRY(fapi2::getScom( TGT0, 0x7010a0aull, l_scom_buffer ));
 
-            l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0b0 );
-            FAPI_TRY(fapi2::putScom(TGT0, 0x7010a0aull, l_scom_buffer));
+                l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0b0 );
+                FAPI_TRY(fapi2::putScom(TGT0, 0x7010a0aull, l_scom_buffer));
+            }
         }
 
     };

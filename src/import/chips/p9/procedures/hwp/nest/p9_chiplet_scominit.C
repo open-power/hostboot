@@ -79,6 +79,7 @@ const uint64_t FBC_IOO_DL_FIR_MASK    = 0xFCFC3FFFFCFF000CULL;
 
 // link 0,1 internal errors are a simulation artifact in dd1 so they need to be masked
 const uint64_t FBC_IOO_DL_FIR_MASK_SIM_DD1 = 0xFCFC3FFFFCFF000FULL;
+const uint64_t OBUS_3_LL3_FIR_MASK_SIM_DD1 = 0x300000000000000FULL;
 
 static const uint8_t NV0_POS = 0x0;
 static const uint8_t NV1_POS = 0x1;
@@ -318,15 +319,6 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
          l_iter++)
     {
         fapi2::toString(*l_iter, l_chipletTargetStr, sizeof(l_chipletTargetStr));
-        FAPI_DBG("Invoking p9.fbc.ioo_dl.scom.initfile on target %s...", l_chipletTargetStr);
-        FAPI_EXEC_HWP(l_rc, p9_fbc_ioo_dl_scom, *l_iter);
-
-        if (l_rc)
-        {
-            FAPI_ERR("Error from p9_fbc_ioo_dl_scom");
-            fapi2::current_err = l_rc;
-            goto fapi_try_exit;
-        }
 
         // configure action registers & unmask
         FAPI_TRY(fapi2::putScom(*l_iter, OBUS_LL0_PB_IOOL_FIR_ACTION0_REG, FBC_IOO_DL_FIR_ACTION0),
@@ -344,6 +336,17 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             FAPI_TRY(fapi2::putScom(*l_iter, OBUS_LL0_LL0_LL0_PB_IOOL_FIR_MASK_REG, FBC_IOO_DL_FIR_MASK),
                      "Error from putScom (OBUS_LL0_LL0_LL0_PB_IOOL_FIR_MASK_REG)");
         }
+
+        FAPI_DBG("Invoking p9.fbc.ioo_dl.scom.initfile on target %s...", l_chipletTargetStr);
+        FAPI_EXEC_HWP(l_rc, p9_fbc_ioo_dl_scom, *l_iter, i_target);
+
+        if (l_rc)
+        {
+            FAPI_ERR("Error from p9_fbc_ioo_dl_scom");
+            fapi2::current_err = l_rc;
+            goto fapi_try_exit;
+        }
+
     }
 
     // Invoke NX SCOM initfile

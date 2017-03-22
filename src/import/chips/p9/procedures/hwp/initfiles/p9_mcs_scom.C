@@ -50,8 +50,13 @@ fapi2::ReturnCode p9_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0,
 
             l_scom_buffer.insert<46, 4, 60, uint64_t>(literal_0b0111 );
             l_scom_buffer.insert<62, 1, 63, uint64_t>(literal_0 );
-            constexpr auto l_MC01_PBI01_SCOMFIR_MCPERF1_ENABLE_PF_DROP_CMDLIST_ON = 0x1;
-            l_scom_buffer.insert<61, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCPERF1_ENABLE_PF_DROP_CMDLIST_ON );
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCPERF1_ENABLE_PF_DROP_CMDLIST_ON = 0x1;
+                l_scom_buffer.insert<61, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCPERF1_ENABLE_PF_DROP_CMDLIST_ON );
+            }
+
             l_scom_buffer.insert<32, 7, 57, uint64_t>(literal_8 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010810ull, l_scom_buffer));
         }

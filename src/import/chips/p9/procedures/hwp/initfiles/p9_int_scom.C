@@ -119,11 +119,14 @@ fapi2::ReturnCode p9_int_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             FAPI_TRY(fapi2::putScom(TGT0, 0x5013124ull, l_scom_buffer));
         }
         {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x5013126ull, l_scom_buffer ));
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                FAPI_TRY(fapi2::getScom( TGT0, 0x5013126ull, l_scom_buffer ));
 
-            constexpr auto l_INT_INT_PC_INT_PC_AIB_TX_ORDER_RELAXED_WR_ORDERING_OFF = 0x0;
-            l_scom_buffer.insert<14, 1, 63, uint64_t>(l_INT_INT_PC_INT_PC_AIB_TX_ORDER_RELAXED_WR_ORDERING_OFF );
-            FAPI_TRY(fapi2::putScom(TGT0, 0x5013126ull, l_scom_buffer));
+                constexpr auto l_INT_INT_PC_INT_PC_AIB_TX_ORDER_RELAXED_WR_ORDERING_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 63, uint64_t>(l_INT_INT_PC_INT_PC_AIB_TX_ORDER_RELAXED_WR_ORDERING_OFF );
+                FAPI_TRY(fapi2::putScom(TGT0, 0x5013126ull, l_scom_buffer));
+            }
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5013140ull, l_scom_buffer ));
@@ -164,8 +167,12 @@ fapi2::ReturnCode p9_int_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x501322dull, l_scom_buffer ));
 
-            constexpr auto l_INT_INT_VC_INT_VC_AIB_TX_ORDERING_TAG_2_RELAXED_WR_ORDERING_DMA_OFF = 0x0;
-            l_scom_buffer.insert<22, 1, 63, uint64_t>(l_INT_INT_VC_INT_VC_AIB_TX_ORDERING_TAG_2_RELAXED_WR_ORDERING_DMA_OFF );
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                constexpr auto l_INT_INT_VC_INT_VC_AIB_TX_ORDERING_TAG_2_RELAXED_WR_ORDERING_DMA_OFF = 0x0;
+                l_scom_buffer.insert<22, 1, 63, uint64_t>(l_INT_INT_VC_INT_VC_AIB_TX_ORDERING_TAG_2_RELAXED_WR_ORDERING_DMA_OFF );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x501322dull, l_scom_buffer));
         }
         {
