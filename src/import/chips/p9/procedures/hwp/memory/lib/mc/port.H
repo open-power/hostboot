@@ -580,9 +580,13 @@ fapi2::ReturnCode ddr_resetn( const fapi2::Target<T>& i_target, const bool i_sta
     // Set our delay (for HW and SIM)
     {
         constexpr uint64_t DELAY_500US = 5 * mss::DELAY_100US;
-        FAPI_TRY( fapi2::delay(static_cast<uint64_t>(DELAY_500US),
-                               mss::us_to_cycles(i_target, DELAY_500US)) );
+
+        // Setting sim cycles for 500 us is too long for VBU,
+        // so we set it to the smallest possible value that passes sim
+        FAPI_TRY( fapi2::delay(DELAY_500US,
+                               mss::us_to_cycles(i_target, mss::DELAY_1NS)) );
     }
+
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
