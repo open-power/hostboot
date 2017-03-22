@@ -502,6 +502,9 @@ sub execute_post_release
     die "Missing level" if ($level eq "");
     die "Missing released" if ($released eq "");
 
+    #Check for HW image coreq and prereq
+    hw_req_check($level, $released);
+
     #Integrate the track
     run_system_command("Track -integrate -feature $feature -release $release -verbose");
 
@@ -2636,6 +2639,30 @@ sub execute_cmvc_reqs
                 my $output = `echo "y" | $cmd`;
                 print $output
             }
+        }
+    }
+}
+
+# sub hw_req_check
+#
+# Check for Hw-Image requirements, and fail so that a manual
+# check can be run for the specific commit and added as a CMVC
+# requirement.
+#
+sub hw_req_check
+{
+    my $level = shift;
+    my $released = shift;
+
+    my $commits = git_commit_history($level, $released);
+
+    foreach my $commit (@{$commits})
+    {
+        if (($commit =~ m/HW-Image-Coreq:\s*([a-z]+)/i) ||
+            ($commit =~ m/HW-Image-Prereq:\s*([0-9]+)/i))
+        {
+            print "HW Image Req was found:\n$commit\n";
+            die "HW-Image-Coreq/Prereq detected.\n";
         }
     }
 }
