@@ -4,19 +4,26 @@
 
 ($hb_masterproc).proc_fsi2host_mbox->responder_enable=1
 
-# Preload VPD in PNOR
-# Pass processor chip type. All proc chip types should be the same.
+# Default value is to preload VPD into PNOR image
+if not defined hb_skip_vpd_preload {$hb_skip_vpd_preload = 0}
+
+# Preload VPD in PNOR unless told not to
+if ($hb_skip_vpd_preload == 0) {
+
+    # Pass processor chip type. All proc chip types should be the same.
     if (get-object-list p9_proc) {
         $procChipType=(get-object-list p9_proc)[0]->chip_type
         python "os.environ['HB_PROC_CHIP_TYPE'] = \""+$procChipType+"\""
     }
     try {
+        echo "Preload VPD into PNOR"
+
         run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
             ($hb_pnor).sfc_master_mem.load-file ./sysmvpd.dat.ecc 0x229000
             ($hb_pnor).sfc_master_mem.load-file ./sysspd.dat.ecc 0x1E1000
             ($hb_pnor).sfc_master_mem.load-file ./sysmemvpd.dat.ecc 0x2B9000
     } except { echo "ERROR: Failed to preload VPD into PNOR." }
-
+}
 
 # Loop through every processor chip
 foreach $cc in (get-object-list p9_proc) {
