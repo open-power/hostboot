@@ -62,7 +62,7 @@ extern "C"
     {
         FAPI_INF("Start p9_mss_bulk_pwr_throttles for %s type throttling",
                  (( i_throttle_type == THERMAL) ? "THERMAL" : "POWER"));
-        fapi2::ReturnCode l_rc;
+
 
         for ( const auto& l_mcs : i_targets)
         {
@@ -72,6 +72,8 @@ extern "C"
 
             for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(l_mcs))
             {
+                fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
                 //Don't run if there are no dimms on the port
                 if (mss::count_dimm(l_mca) == 0)
                 {
@@ -110,12 +112,12 @@ extern "C"
         //Set all of the throttles to the lowest value per port for performance reasons
         FAPI_TRY(mss::power_thermal::equalize_throttles(i_targets));
         FAPI_INF("End bulk_pwr_throttles");
-        return l_rc;
+        return fapi2::current_err;
 
     fapi_try_exit:
         FAPI_ERR("Error calculating bulk_pwr_throttles using %s throttling",
                  ((i_throttle_type == POWER) ? "power" : "thermal"));
-        return l_rc;
+        return fapi2::current_err;
     }
 } //extern C
 
