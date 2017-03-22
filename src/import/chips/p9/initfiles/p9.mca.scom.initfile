@@ -3,18 +3,8 @@
 #  http://ausxgsatm2.austin.ibm.com/gsa/home/j/m/jmcgill/web/public/p8/initfiles/mba_def.initfile
 
 #--******************************************************************************
-#-- ISSUES TO RESOVLE
+#-- IMPORTANT SUPPORT NOTES AS OF 3/28/2017
 #--******************************************************************************
-#
-#--******************************************************************************
-#-- IMPORTANT SUPPORT NOTES AS OF 4/21/2016
-#--******************************************************************************
-# Currently only supports DIMMS where CL=TRCD=TRP (ie 16-16-16)
-#      Steve Powell says he's seen DIMMs that don't match
-#      What needs to be done to support other DIMMs
-#           Replace def_MEM_TYPE_1866_13_13_13 variables with freq+CL variables
-#                Because TRCD and TRP don't really matter for the equations that this variable is being used for
-#                So we should rewrite these equations in terms of just freq+CL
 # Here we assume WL = ATTR_EFF_DRAM_CWL (which is true if no Additive Latency / Posted CAS).
 #      So no support for Posted CAS / Additive latency
 # Only supports Burst Length 8 (CODE AND LOGIC STATEMENT)
@@ -31,31 +21,29 @@
 
 
 #--******************************************************************************
-#-- REFERENCES FOR FILE
+#-- REFERENCES FOR FILE (note: exact paths may move)
 #--******************************************************************************
-# Files used to check what target type attributes are
-#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb2/ekb/chips/p9/procedures/xml/attribute_info/memory_mcs_attributes.xml
-#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb2/ekb/chips/p9/procedures/xml/attribute_info/memory_spd_attributes.xml
-#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb2/ekb/chips/p9/procedures/xml/attribute_info/memory_mr_attributes.xml
+# Files used to check what target type attributes are 
+#      ekb/chips/p9/procedures/xml/attribute_info/*.xml
 #      Example:
 #           <id>ATTR_EFF_NUM_RANKS_PER_DIMM</id>
 #           <targetType>TARGET_TYPE_MCS</targetType>
 # File used to see if attribute is 1D or 2D array
-#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/output/gen/attribute_ids.H
+#      ekb/output/gen/attribute_ids.H
 #      Example:
 #           typedef uint8_t ATTR_EFF_DIMM_TYPE_Type[2][2];
 # File for finding correct spydef name
 #      1st find the spydef file this ekb build is looking at by finding SPYDEF_FILE_LOCATION in file below
-#           /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/tools/ifCompiler/scan_procedures.mk
+#           ekb/tools/ifCompiler/scan_procedures.mk
 #      2nd open *.spydef in that dir and search for spy names
 #           /afs/awd/projects/eclipz/lab/p9/vbu_models/n10_e9067_tp058_ec163uXXa_soa_sq_u190_01/edc/*.spydef
 #      (File comes from actually building a vbu file and looking at the spydef)
 #      Example:
 #           idial MCP.PORT1.SRQ.PC.MBAREF0Q_CFG_TRFC {
 # Wrapper file calling this
-#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/chips/p9/procedures/hwp/memory/p9_mss_scominit.C
+#      ekb/chips/p9/procedures/hwp/memory/p9_mss_scominit.C
 # Output file generated
-#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/chips/p9/procedures/hwp/initfiles/p9_mca_scom.C
+#      ekb/chips/p9/procedures/hwp/initfiles/p9_mca_scom.C
 #
 # COMMON DEBUG
 #      -debug5.16.i6.d
@@ -670,6 +658,14 @@ ispy MCP.PORT0.SRQ.MBA_WRQ0Q_CFG_WRQ_FIFO_MODE [when=S] {
 ispy MCP.PORT0.SRQ.MBA_RRQ0Q_CFG_RRQ_FIFO_MODE [when=S] {
   spyv;
   MCBIST.ATTR_MSS_REORDER_QUEUE_SETTING;
+}
+
+ispy MCP.PORT0.SRQ.MBA_FARB0Q_CFG_2N_ADDR [when=S] {
+  spyv, expr;
+  0b1,                      (SYS.ATTR_MSS_MRW_DRAM_2N_MODE==0x02); # force 2n
+  0b0,                      (SYS.ATTR_MSS_MRW_DRAM_2N_MODE==0x01); # force 1n
+  0b1,                      (SYS.ATTR_MSS_MRW_DRAM_2N_MODE==0x00) && (MCS.ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET==0x02); # use auto vpd val -> auto vpd val = 2n
+  0b0,                      (SYS.ATTR_MSS_MRW_DRAM_2N_MODE==0x00) && (MCS.ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET==0x01); # use auto vpd val -> auto vpd val = 1n
 }
 
 # Epsilon Settings per Power Bus Spreadsheet

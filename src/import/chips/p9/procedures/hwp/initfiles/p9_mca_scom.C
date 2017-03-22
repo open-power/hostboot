@@ -54,6 +54,11 @@ constexpr uint64_t literal_267 = 267;
 constexpr uint64_t literal_1866 = 1866;
 constexpr uint64_t literal_11 = 11;
 constexpr uint64_t literal_0b011000 = 0b011000;
+constexpr uint64_t literal_0x02 = 0x02;
+constexpr uint64_t literal_0b1 = 0b1;
+constexpr uint64_t literal_0x01 = 0x01;
+constexpr uint64_t literal_0b0 = 0b0;
+constexpr uint64_t literal_0x00 = 0x00;
 constexpr uint64_t literal_0b000 = 0b000;
 constexpr uint64_t literal_0b100 = 0b100;
 constexpr uint64_t literal_0b010 = 0b010;
@@ -68,7 +73,6 @@ constexpr uint64_t literal_14 = 14;
 constexpr uint64_t literal_597 = 597;
 constexpr uint64_t literal_768 = 768;
 constexpr uint64_t literal_939 = 939;
-constexpr uint64_t literal_0b0 = 0b0;
 
 fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
                               const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT2,
@@ -136,6 +140,10 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRRD_L, TGT2, l_TGT2_ATTR_EFF_DRAM_TRRD_L));
         fapi2::ATTR_MSS_REORDER_QUEUE_SETTING_Type l_TGT1_ATTR_MSS_REORDER_QUEUE_SETTING;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_REORDER_QUEUE_SETTING, TGT1, l_TGT1_ATTR_MSS_REORDER_QUEUE_SETTING));
+        fapi2::ATTR_MSS_MRW_DRAM_2N_MODE_Type l_TGT3_ATTR_MSS_MRW_DRAM_2N_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DRAM_2N_MODE, TGT3, l_TGT3_ATTR_MSS_MRW_DRAM_2N_MODE));
+        fapi2::ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET_Type l_TGT2_ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET, TGT2, l_TGT2_ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET));
         fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_Type l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, TGT2, l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM));
         uint64_t l_def_SLOT0_DENOMINATOR = ((l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0] ==
@@ -333,6 +341,26 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
 
             constexpr auto l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_PARITY_AFTER_CMD_ON = 0x1;
             l_scom_buffer.insert<38, 1, 63, uint64_t>(l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_PARITY_AFTER_CMD_ON );
+
+            if ((l_TGT3_ATTR_MSS_MRW_DRAM_2N_MODE == literal_0x02))
+            {
+                l_scom_buffer.insert<17, 1, 63, uint64_t>(literal_0b1 );
+            }
+            else if ((l_TGT3_ATTR_MSS_MRW_DRAM_2N_MODE == literal_0x01))
+            {
+                l_scom_buffer.insert<17, 1, 63, uint64_t>(literal_0b0 );
+            }
+            else if (((l_TGT3_ATTR_MSS_MRW_DRAM_2N_MODE == literal_0x00)
+                      && (l_TGT2_ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET == literal_0x02)))
+            {
+                l_scom_buffer.insert<17, 1, 63, uint64_t>(literal_0b1 );
+            }
+            else if (((l_TGT3_ATTR_MSS_MRW_DRAM_2N_MODE == literal_0x00)
+                      && (l_TGT2_ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET == literal_0x01)))
+            {
+                l_scom_buffer.insert<17, 1, 63, uint64_t>(literal_0b0 );
+            }
+
             constexpr auto l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_OE_ALWAYS_ON_ON = 0x1;
             l_scom_buffer.insert<55, 1, 63, uint64_t>(l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_OE_ALWAYS_ON_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x7010913ull, l_scom_buffer));
