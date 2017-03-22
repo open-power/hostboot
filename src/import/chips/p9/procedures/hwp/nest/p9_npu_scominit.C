@@ -41,6 +41,10 @@
 #include <p9_misc_scom_addresses.H>
 #include <p9_misc_scom_addresses_fld.H>
 
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+const uint64_t NOTP9NDD1_NPU_SM2_XTS_ATRMISS =  0x501164AULL;
 
 ///
 /// p9_npu_scominit HWP entry point (Defined in .H file)
@@ -52,6 +56,10 @@ fapi2::ReturnCode p9_npu_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     auto l_nv_targets = i_target.getChildren<fapi2::TARGET_TYPE_NV>();
     fapi2::buffer<uint64_t> l_atrmiss = 0;
+    uint8_t l_dd1 = 0;
+
+    // Get attribute to check if it is dd1 or dd2
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_P9N_DD1_SPY_NAMES, i_target, l_dd1));
 
     FAPI_DBG("Entering ...");
 
@@ -69,8 +77,18 @@ fapi2::ReturnCode p9_npu_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
 
         l_atrmiss.setBit<PU_NPU_SM2_XTS_ATRMISS_FLAG_MAP>()
         .setBit<PU_NPU_SM2_XTS_ATRMISS_ENA>();
-        FAPI_TRY(fapi2::putScomUnderMask(i_target, PU_NPU_SM2_XTS_ATRMISS, l_atrmiss, l_atrmiss),
-                 "Error from putScomUnderMask (PU_NPU_SM2_XTS_ATRMISS)");
+
+        if (l_dd1)
+        {
+            FAPI_TRY(fapi2::putScomUnderMask(i_target, PU_NPU_SM2_XTS_ATRMISS, l_atrmiss, l_atrmiss),
+                     "Error from putScomUnderMask (PU_NPU_SM2_XTS_ATRMISS)");
+        }
+        else
+        {
+            FAPI_TRY(fapi2::putScomUnderMask(i_target, NOTP9NDD1_NPU_SM2_XTS_ATRMISS, l_atrmiss, l_atrmiss),
+                     "Error from putScomUnderMask (PU_NPU_SM2_XTS_ATRMISS)");
+        }
+
 
         FAPI_DBG("Invoking p9_nv_ref_clk_enable...");
         FAPI_EXEC_HWP(l_rc, p9_nv_ref_clk_enable, i_target);
