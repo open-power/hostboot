@@ -163,6 +163,22 @@
         <id>PROC_FABRIC_X_BUS_WIDTH</id>
         <default>4_BYTE</default>
     </attribute>
+    <attribute>
+        <id>MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
+        <id>MSS_MRW_PWR_SLOPE</id>
+        <default>0xFFFFF80003CE03FA</default>
+    </attribute>
+    <attribute>
+        <id>MSS_MRW_PWR_INTERCEPT</id>
+        <default>0xFFFFF80002CC0395</default>
+    </attribute>
+    <attribute>
+        <id>MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
+        <default>0xFFFFF800000006AE</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->
