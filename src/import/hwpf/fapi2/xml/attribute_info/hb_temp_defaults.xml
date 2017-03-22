@@ -153,6 +153,10 @@
         <id>ATTR_PROC_EFF_FABRIC_CHIP_ID</id>
         <default>0x0</default>
      </attribute>
+     <attribute>
+        <id>ATTR_DD1_SLOW_PCI_REF_CLOCK</id>
+        <default>0x01</default>
+     </attribute>
     <attribute>
         <id>ATTR_SYSTEM_DISABLE_QUEUED_SCAN</id>
         <default>0x00</default>
