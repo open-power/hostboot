@@ -72,7 +72,7 @@ fapi2::ReturnCode p9_sys_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE
              l_iter++)
         {
             FAPI_DBG("Invoking p9.fbc.ioo_dl.scom.initfile...");
-            FAPI_EXEC_HWP(l_rc, p9_fbc_ioo_dl_scom, *l_iter);
+            FAPI_EXEC_HWP(l_rc, p9_fbc_ioo_dl_scom, *l_iter, i_target);
 
             if (l_rc)
             {
