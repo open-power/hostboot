@@ -292,8 +292,9 @@ errlHndl_t getNextRhbAddrRange(hdatMsVpdRhbAddrRange_t* & o_rngPtr)
         o_rngPtr =
             reinterpret_cast<hdatMsVpdRhbAddrRange_t *>(l_rsvMemDataAddr);
 
+        l_nextSection++;
         l_sys->setAttr
-            <TARGETING::ATTR_HB_RSV_MEM_NEXT_SECTION>(l_nextSection++);
+            <TARGETING::ATTR_HB_RSV_MEM_NEXT_SECTION>(l_nextSection);
 
     } while(0);
 
