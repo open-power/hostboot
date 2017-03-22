@@ -2529,6 +2529,23 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW406577</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Noise window disabled in DD1 because continually reocurring intermittent UE's can cause us to hang on refreshes.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MSS_CHECK_DISABLE_HW_VREF_CAL</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
