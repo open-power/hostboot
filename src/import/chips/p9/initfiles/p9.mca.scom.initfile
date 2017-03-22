@@ -34,9 +34,9 @@
 #-- REFERENCES FOR FILE
 #--******************************************************************************
 # Files used to check what target type attributes are
-#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/chips/p9/procedures/xml/attribute_info/memory_mcs_attributes.xml
-#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/chips/p9/procedures/xml/attribute_info/memory_spd_attributes.xml
-#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/chips/p9/procedures/xml/attribute_info/memory_mr_attributes.xml
+#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb2/ekb/chips/p9/procedures/xml/attribute_info/memory_mcs_attributes.xml
+#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb2/ekb/chips/p9/procedures/xml/attribute_info/memory_spd_attributes.xml
+#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb2/ekb/chips/p9/procedures/xml/attribute_info/memory_mr_attributes.xml
 #      Example:
 #           <id>ATTR_EFF_NUM_RANKS_PER_DIMM</id>
 #           <targetType>TARGET_TYPE_MCS</targetType>
@@ -753,4 +753,10 @@ ispy  MCP.PORT0.SRQ.MBA_RRQ0Q_CFG_RDBUFF_CAPACITY_LIMIT [when=S && ATTR_CHIP_EC_
 ispy MC01.PORT0.ATCL.CL.CLSCOM.MCAMOC_WRTO_AMO_COLLISION_RULES [when=S && ATTR_CHIP_EC_FEATURE_HW401780] {
   spyv;
   0b0000000000000000000000000;
+}
+
+# Noise Window DIsable (HW406577)
+ispy MCP.PORT0.ECC64.SCOM.MBSECCQ_ENABLE_UE_NOISE_WINDOW [when=S && ATTR_CHIP_EC_FEATURE_HW406577] {
+  spyv;
+  0b0;
 }
