@@ -108,10 +108,21 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5012c52ull, l_scom_buffer ));
 
-            constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0x70;
-            l_scom_buffer.insert<20, 1, 57, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
-            l_scom_buffer.insert<24, 1, 62, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
-            l_scom_buffer.insert<26, 1, 63, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0x70;
+                l_scom_buffer.insert<20, 1, 57, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+                l_scom_buffer.insert<24, 1, 62, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+                l_scom_buffer.insert<26, 1, 63, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+            }
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0xe00;
+                l_scom_buffer.insert<20, 1, 52, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+                l_scom_buffer.insert<24, 1, 57, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+                l_scom_buffer.insert<26, 1, 58, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+            }
+
             l_scom_buffer.insert<30, 1, 59, uint64_t>(literal_0b11111 );
             l_scom_buffer.insert<60, 4, 60, uint64_t>(literal_0b11111 );
             l_scom_buffer.insert<0, 12, 52, uint64_t>(literal_0x00E );
@@ -120,23 +131,52 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5012c53ull, l_scom_buffer ));
 
-            constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0x70;
-            l_scom_buffer.insert<2, 2, 60, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0x70;
+                l_scom_buffer.insert<2, 2, 60, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+            }
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0xe00;
+                l_scom_buffer.insert<2, 2, 55, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+            }
+
             l_scom_buffer.insert<32, 16, 48, uint64_t>(literal_0x0258 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5012c53ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5012c54ull, l_scom_buffer ));
 
-            constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0x70;
-            l_scom_buffer.insert<16, 1, 58, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0x70;
+                l_scom_buffer.insert<16, 1, 58, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+            }
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0xe00;
+                l_scom_buffer.insert<16, 1, 53, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+                l_scom_buffer.insert<58, 2, 59, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x5012c54ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5012c55ull, l_scom_buffer ));
 
-            constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0x70;
-            l_scom_buffer.insert<16, 1, 59, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0x70;
+                l_scom_buffer.insert<16, 1, 59, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+            }
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0xe00;
+                l_scom_buffer.insert<16, 1, 54, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+                l_scom_buffer.insert<58, 2, 61, uint64_t>(l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV );
+            }
+
             constexpr auto l_NMMU_MM_CFG_NMMU_CTL_TLB_HASH_PID_DIS_ON = 0x1;
             l_scom_buffer.insert<21, 1, 63, uint64_t>(l_NMMU_MM_CFG_NMMU_CTL_TLB_HASH_PID_DIS_ON );
             constexpr auto l_NMMU_MM_CFG_NMMU_CTL_TLB_ISS543B_FIX_EN_ON = 0x1;
