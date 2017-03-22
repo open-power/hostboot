@@ -136,6 +136,24 @@
  </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_DD1_SLOW_PCI_REF_CLOCK</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    MRW control to permit Normal (100 MHz) or Slow (94 MHz) operation
+    of PCIE reference clock.  On Nimbus DD1 HW, Slow operation is required
+    to achieve Gen4 operation.
+    Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    NORMAL = 0x00,
+    SLOW = 0x01
+  </enum>
+  <platInit/>
+  <writeable/>
+ </attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_ASYNC_SAFE_MODE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
