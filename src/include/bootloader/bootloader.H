@@ -39,19 +39,99 @@
 #include <kernel/terminate.H>
 #include <kernel/hbterminatetypes.H>
 #include <bootloader/bootloaderif.H>
+#include <bootloader/bootloader_trace.H>
+#include <bootloader/hbblreasoncodes.H>
 
 extern "C" void task_end_stub();
 extern "C" void enterHBB(uint64_t i_hbb_hrmor, uint64_t i_hbb_offset);
 
-#define assert(expr) \
-{\
-    if (unlikely(!(expr)))\
-    {\
-        task_end_stub();\
-    }\
+#define printk(format...)
+
+/**
+ * @brief Handle setting up to terminate Bootloader
+ *
+ * @param[in] i_moduleID    ID for module where terminate is occurring
+ * @param[in] i_reasoncode  Reason code for why terminating
+ * @param[in] i_word7       Data for SRC word 7 / @userdata2[0:31]
+ *                             (optional, default is 0)
+ * @param[in] i_word8       Data for SRC word 8 / @userdata2[32:63]
+ *                             (optional, default is 0)
+ * @param[in] i_executeTI   Flag for calling terminateExecuteTI
+ *                             (optional, default is true)
+ * @param[in] i_failAddr    Address associated with termination
+ *                             (SRC word 6 / @userdata1[32:63],
+ *                              optional, default is 0)
+ */
+inline void bl_terminate(uint8_t  i_moduleID,
+                         uint16_t i_reasoncode,
+                         uint32_t i_word7 = 0,
+                         uint32_t i_word8 = 0,
+                         bool     i_executeTI = true,
+                         uint64_t i_failAddr = 0)
+{
+    termWriteSRC(TI_BOOTLOADER,
+                 i_reasoncode,
+                 i_failAddr);
+
+    termModifySRC(i_moduleID,
+                  i_word7,
+                  i_word8);
+
+    if(i_executeTI)
+    {
+        terminateExecuteTI();
+    }
 }
 
-#define printk(format...)
+/**
+ * @brief Macro to assert using bl_terminate
+ *
+ * Calls bl_terminate with default module id and reason code for assert
+ */
+#define __ASSERT() \
+{\
+    bl_terminate(Bootloader::MOD_BOOTLOADER_ASSERT,Bootloader::RC_ASSERT);\
+}
+
+/**
+ * @brief Macro to assert with custom trace
+ *
+ * Calls Bootloader trace and assert macro
+ */
+#define __ASSERT_W_TRACE(trace) \
+{ \
+    BOOTLOADER_TRACE(trace);\
+    __ASSERT();\
+}
+
+/**
+ * @brief Macro to assert using bl_terminate with custom trace and reason code.
+ *
+ * Calls Bootloader trace and provides a custom reason code to bl_terminate
+ */
+#define __ASSERT_W_TRACE_RC(trace,rc) \
+{ \
+    BOOTLOADER_TRACE(trace);\
+    bl_terminate(Bootloader::MOD_BOOTLOADER_ASSERT, rc);\
+}
+
+
+// Macro tricks to determine which assert macro to call
+#define GET_MACRO(_1,_2,_3,FUNC,...) FUNC
+
+/**
+ * @brief Standard assert macro.
+ *
+ * Verifies condition, uses GET_MACRO to determine which assert macro to call.
+ * Supports asserting via bl_terminate with custom trace and/or reason code
+ */
+#define assert(expr, ...) \
+{\
+    if(unlikely(!(expr))) \
+    {\
+        GET_MACRO(0, ##__VA_ARGS__, __ASSERT_W_TRACE_RC, __ASSERT_W_TRACE, __ASSERT)(__VA_ARGS__) \
+    }\
+}
 
 namespace Bootloader{
     /**
@@ -107,42 +187,6 @@ namespace Bootloader{
                            uint64_t i_destAddr,
                            uint32_t i_size,
                            MMIOLoadStoreSizes i_ld_st_size);
-
-    /**
-     * @brief Handle setting up to terminate Bootloader
-     *
-     * @param[in] i_moduleID    ID for module where terminate is occurring
-     * @param[in] i_reasoncode  Reason code for why terminating
-     * @param[in] i_word7       Data for SRC word 7 / @userdata2[0:31]
-     *                             (optional, default is 0)
-     * @param[in] i_word8       Data for SRC word 8 / @userdata2[32:63]
-     *                             (optional, default is 0)
-     * @param[in] i_executeTI   Flag for calling terminateExecuteTI
-     *                             (optional, default is true)
-     * @param[in] i_failAddr    Address associated with termination
-     *                             (SRC word 6 / @userdata1[32:63],
-     *                              optional, default is 0)
-     */
-    inline void bl_terminate(uint8_t  i_moduleID,
-                             uint16_t i_reasoncode,
-                             uint32_t i_word7 = 0,
-                             uint32_t i_word8 = 0,
-                             bool     i_executeTI = true,
-                             uint64_t i_failAddr = 0)
-    {
-        termWriteSRC(TI_BOOTLOADER,
-                     i_reasoncode,
-                     i_failAddr);
-
-        termModifySRC(i_moduleID,
-                      i_word7,
-                      i_word8);
-
-        if(i_executeTI)
-        {
-            terminateExecuteTI();
-        }
-    }
 
     /** @enum HbbLengths
      *  @brief List of HBB lengths.

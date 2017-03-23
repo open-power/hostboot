@@ -426,55 +426,30 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
     static_assert (numEntries == (PNOR::NUM_SECTIONS),
                "Mismatch between number of SectionIds and correlating strings");
 
-    // Bootloader does not support asserts
-#ifdef BOOTLOADER
-    if(i_secIdIndex >= (PNOR::NUM_SECTIONS))
-    {
-        PNOR_UTIL_TRACE(BTLDR_TRC_UTILS_PNOR_SECID_OUT_OF_RANGE);
-        /*@
-         * @errortype
-         * @moduleid     Bootloader::MOD_BOOTLOADER_PNOR_SECID_TO_STR
-         * @reasoncode   Bootloader::RC_PNOR_SECID_OUT_OF_RANGE
-         * @userdata1    Section ID requested
-         * @userdata2    Max index of Section id to string array
-         * @devdesc      No String associated with PNOR section ID
-         * @custdesc     A problem occurred while running processor
-         *               boot code.
-         */
-        bl_terminate(Bootloader::MOD_BOOTLOADER_PNOR_SECID_TO_STR,
-                     Bootloader::RC_PNOR_SECID_OUT_OF_RANGE,
-                     i_secIdIndex,
-                     numEntries);
-    }
-#else
     // Assert if accessing index out of array.
-    assert(i_secIdIndex < (PNOR::NUM_SECTIONS), "SectionIdToString PNOR section id out of range");
+    assert(i_secIdIndex < (PNOR::NUM_SECTIONS),
+#ifdef BOOTLOADER
+           BTLDR_TRC_UTILS_PNOR_SECID_OUT_OF_RANGE,
+           Bootloader::RC_PNOR_SECID_OUT_OF_RANGE
+#else
+           "SectionIdToString PNOR section id out of range"
 #endif
+    );
 
     return SectionIdToStringArr[i_secIdIndex];
 }
 
 bool PNOR::cmpSecurebootMagicNumber(const uint8_t* i_vaddr)
 {
-    // Bootloader does not support asserts
+    // Assert if accessing index out of array.
+    assert(i_vaddr != nullptr,
 #ifdef BOOTLOADER
-    if(i_vaddr == nullptr)
-    {
-        PNOR_UTIL_TRACE(BTLDR_TRC_UTILS_CMP_MAGIC_NUM_NULLPTR);
-        /*@
-         * @errortype
-         * @moduleid     Bootloader::MOD_BOOTLOADER_PNOR_CMP_MAGIC_NUM
-         * @reasoncode   Bootloader::RC_PNOR_NULLPTR
-         * @devdesc      Requested address to compare is a nullptr
-         * @custdesc     A problem occurred while running processor
-         *               boot code.
-         */
-        bl_terminate(Bootloader::MOD_BOOTLOADER_PNOR_CMP_MAGIC_NUM,
-                     Bootloader::RC_PNOR_NULLPTR);
-    }
+           BTLDR_TRC_UTILS_CMP_MAGIC_NUM_NULLPTR,
+           Bootloader::RC_PNOR_NULLPTR
 #else
-    assert(i_vaddr != nullptr, "cmpSecurebootMagicNumber requested address to compare is a nullptr ");
+           "cmpSecurebootMagicNumber requested address to compare is a nullptr"
 #endif
+    );
 
     return memcmp(&ROM_MAGIC_NUMBER, i_vaddr, sizeof(ROM_MAGIC_NUMBER))==0;
 }
