@@ -38,6 +38,7 @@ namespace IPMI
         MOD_IPMIDCMI            = 0x04, // IPMI::sensor
         MOD_IPMIRT              = 0x05, // rt IPMI::send/IPMI::sendrecv
         MOD_IPMISRV_POSTEVENT   = 0x06, // IpmiRP::postEvent
+        MOD_IPMIFRU_INV         = 0x07, // IPMI:fruInventory
     };
 
     enum IPMIReasonCode
@@ -55,6 +56,7 @@ namespace IPMI
         RC_SENSOR_READING_NOT_AVAIL     = IPMI_COMP_ID | 0x0b,
         RC_GET_SENSOR_TYPE_CMD_FAILED   = IPMI_COMP_ID | 0x0c,
         RC_SENSOR_NOT_FOUND             = IPMI_COMP_ID | 0x0d,
+        RC_INVALID_VPD_DATA             = IPMI_COMP_ID | 0x0e,
     };
 };
 
