@@ -38,8 +38,8 @@
 #include <lib/utils/fake_vpd.H>
 #include <lib/mss_vpd_decoder.H>
 #include <lib/spd/spd_factory.H>
-#include <lib/spd/common/spd_decoder.H>
-#include <lib/spd/common/rcw_settings.H>
+#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
+#include <generic/memory/lib/spd/common/rcw_settings.H>
 #include <lib/eff_config/timing.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/conversions.H>
@@ -47,7 +47,7 @@
 #include <lib/dimm/eff_dimm.H>
 #include <lib/dimm/mrs_load.H>
 #include <lib/shared/mss_kind.H>
-#include <lib/spd/common/dimm_module_decoder.H>
+#include <generic/memory/lib/spd/common/dimm_module_decoder.H>
 
 namespace mss
 {
@@ -717,19 +717,19 @@ fapi2::ReturnCode eff_dimm::dram_trfc()
     switch(iv_refresh_mode)
     {
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL:
-            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_1(l_trfc_mtb),
+            FAPI_TRY( iv_pDecoder->min_trfc1(l_trfc_mtb),
                       "Failed to decode SPD for tRFC1" );
             break;
 
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_2X:
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_2X:
-            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_2(l_trfc_mtb),
+            FAPI_TRY( iv_pDecoder->min_trfc2(l_trfc_mtb),
                       "Failed to decode SPD for tRFC2" );
             break;
 
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_4X:
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_4X:
-            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_4(l_trfc_mtb),
+            FAPI_TRY( iv_pDecoder->min_trfc4(l_trfc_mtb),
                       "Failed to decode SPD for tRFC4" );
             break;
 
@@ -1828,8 +1828,8 @@ fapi2::ReturnCode eff_dimm::dram_twr()
         constexpr int64_t l_twr_ftb = 0;
         int64_t l_twr_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->min_write_recovery_time(l_twr_mtb),
-                  "Failed min_write_recovery_time() for %s", mss::c_str(iv_dimm) );
+        FAPI_TRY( iv_pDecoder->min_twr(l_twr_mtb),
+                  "Failed min_twr() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tWR (MTB): %ld, tWR(FTB): %ld",
                  mss::c_str(iv_dimm), iv_mtb, iv_ftb, l_twr_mtb, l_twr_ftb);
@@ -2845,8 +2845,9 @@ fapi2::ReturnCode eff_dimm::dram_trp()
         int64_t l_trp_mtb = 0;
         int64_t l_trp_ftb = 0;
 
-        FAPI_TRY( iv_pDecoder->min_row_precharge_delay_time(l_trp_mtb),
-                  "Failed min_row_precharge_delay_time() for %s", mss::c_str(iv_dimm) );
+        FAPI_TRY( iv_pDecoder->min_trp(l_trp_mtb),
+                  "Failed min_trp() for %s", mss::c_str(iv_dimm) );
+
         FAPI_TRY( iv_pDecoder->fine_offset_min_trp(l_trp_ftb),
                   "Failed fine_offset_min_trp() for %s", mss::c_str(iv_dimm) );
 
@@ -2906,8 +2907,9 @@ fapi2::ReturnCode eff_dimm::dram_trcd()
         int64_t l_trcd_mtb = 0;
         int64_t l_trcd_ftb = 0;
 
-        FAPI_TRY( iv_pDecoder->min_ras_to_cas_delay_time(l_trcd_mtb),
-                  "Failed min_ras_to_cas_delay_time() for %s", mss::c_str(iv_dimm) );
+        FAPI_TRY( iv_pDecoder->min_trcd(l_trcd_mtb),
+                  "Failed min_trcd() for %s", mss::c_str(iv_dimm) );
+
         FAPI_TRY( iv_pDecoder->fine_offset_min_trcd(l_trcd_ftb),
                   "Failed fine_offset_min_trcd() for %s", mss::c_str(iv_dimm) );
 
@@ -2955,8 +2957,9 @@ fapi2::ReturnCode eff_dimm::dram_trc()
         int64_t l_trc_mtb = 0;
         int64_t l_trc_ftb = 0;
 
-        FAPI_TRY( iv_pDecoder->min_active_to_active_refresh_delay_time(l_trc_mtb),
-                  "Failed min_active_to_active_refresh_delay_time() for %s", mss::c_str(iv_dimm) );
+        FAPI_TRY( iv_pDecoder->min_trc(l_trc_mtb),
+                  "Failed min_trc() for %s", mss::c_str(iv_dimm) );
+
         FAPI_TRY( iv_pDecoder->fine_offset_min_trc(l_trc_ftb),
                   "Failed fine_offset_min_trc() for %s", mss::c_str(iv_dimm) );
 
