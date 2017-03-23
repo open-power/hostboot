@@ -34,7 +34,7 @@
 
 #include <fapi2.H>
 #include <lib/shared/mss_kind.H>
-#include <lib/spd/common/spd_decoder.H>
+#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
 #include <lib/eff_config/timing.H>
 namespace mss
 {
