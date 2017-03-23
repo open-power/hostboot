@@ -173,7 +173,7 @@ public:
                 break;
             }
 
-            if (l_err->srcType() != HBT_ERR_INFO)
+            if (l_err->srcType() != ERRORLOG::SRC_ERR_INFO)
             {
                 TS_FAIL("testErrl1: createErrlLog() returns incorrect SRC type!");
                 break;
@@ -231,7 +231,7 @@ public:
         l_err->setSev(ERRORLOG::ERRL_SEV_UNKNOWN);
         l_err->setEventType(ERRORLOG::ERRL_ETYPE_CAPACITY_UPGRADE);
         l_err->setSubSys(ERRORLOG::EPUB_UNKNOWN);
-        l_err->setSrcType(HBT_ERR_INFO);
+        l_err->setSrcType(ERRORLOG::SRC_ERR_INFO);
         l_err->setTermState(ERRORLOG::TERM_STATE_NO_FLAGS);
 
         if (l_err->sev() != ERRORLOG::ERRL_SEV_UNKNOWN)
@@ -246,7 +246,7 @@ public:
         {
             TS_FAIL("testErrl2: setSubSys() fails!");
         }
-        else if (l_err->srcType() != HBT_ERR_INFO)
+        else if (l_err->srcType() != ERRORLOG::SRC_ERR_INFO)
         {
             TS_FAIL("testErrl2: setSrcType() fails!");
         }
