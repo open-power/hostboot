@@ -168,6 +168,7 @@ namespace CVPD
         { pd6, "#6" },
         { pd8, "#8" },
         { pdY, "#Y" },
+        { MB,  "MB" },
 
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!

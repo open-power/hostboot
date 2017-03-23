@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <pnor/pnorif.H>
-
+#include <ipmi/ipmi_reasoncodes.H>
 extern trace_desc_t * g_trac_ipmi;
 
 /**
@@ -377,6 +377,131 @@ void IpmiFruInv::setAreaSize(std::vector<uint8_t> &io_data, uint8_t i_offset)
 
     return;
 }
+
+// Function to compute the correct data for the Mfg date/time section.
+// IPMI expects the time to be in seconds from 01/01/1996.
+errlHndl_t IpmiFruInv::formatMfgData(std::vector<uint8_t> i_mfgDateData,
+                                   uint32_t& o_mfgDate)
+{
+    errlHndl_t l_errl = NULL;
+
+    // MB keyword size is 8 hex bytes, throw an error if it is smaller so we
+    // don't do an invalid access.
+    if (i_mfgDateData.size() != 8)
+    {
+        /*@
+         *  @errortype
+         *  @moduleid       IPMI::MOD_IPMIFRU_INV
+         *  @reasoncode     IPMI::RC_INVALID_VPD_DATA
+         *  @userdata1      Size of vpd data
+         *
+         *  @devdesc        VPD data is invalid size
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                          IPMI::MOD_IPMIFRU_INV,
+                                          IPMI::RC_INVALID_VPD_DATA,
+                                          i_mfgDateData.size());
+
+        TARGETING::Target* nodeTarget = NULL;
+        TARGETING::PredicateCTM nodeFilter(TARGETING::CLASS_ENC,
+                                           TARGETING::TYPE_NODE);
+        TARGETING::TargetRangeFilter nodeItr(
+            TARGETING::targetService().begin(),
+            TARGETING::targetService().end(),
+            &nodeFilter);
+
+        nodeTarget = *nodeItr;
+
+        // Callout out node since that is where the VPD lives
+        l_errl->addHwCallout(nodeTarget,
+                             HWAS::SRCI_PRIORITY_HIGH,
+                             HWAS::NO_DECONFIG,
+                             HWAS::GARD_NULL );
+
+    }
+    else
+    {
+        // Convert Centuries / Years / months / day / hour / minute / second
+        // into a uint64 representing number of minute since 1/1/96
+
+        // The vpd data is expected to be in this format VVCCYYmmDDHHMMSS
+        uint8_t century = i_mfgDateData.at(1);
+        uint8_t year = i_mfgDateData.at(2);
+        uint8_t month = i_mfgDateData.at(3);
+        uint8_t day = i_mfgDateData.at(4);
+        uint8_t hour = i_mfgDateData.at(5);
+        uint8_t minute = i_mfgDateData.at(6);
+
+        // Subtract year
+        uint8_t numOfYears = (century*100 + year) - 1996;
+        // Subtract month
+        uint8_t numOfMonths = month - 1;
+        // Subtract day
+        uint8_t numOfDays = day - 1;
+
+        // Convert into minutes
+
+        // TODO: RTC 172125
+        // At some point we should take into account leap year and specific
+        // days in a month.
+        o_mfgDate = ((((numOfYears*365)*24)*60) +
+            (((numOfMonths*30.42)*24)*60) + ((numOfDays*24)*60) +
+                (hour*60) + minute);
+
+    }
+
+    return l_errl;
+}
+
+// Function to set the data for the Mfg date/time section.
+void IpmiFruInv::setMfgData(std::vector<uint8_t> &io_data,
+                                std::vector<uint8_t> &mfgDateData)
+{
+    errlHndl_t l_errl = NULL;
+    uint32_t mfgDate = 0;
+
+    // Pass mfgDateData vector to format function to get the minute integer
+    l_errl = formatMfgData(mfgDateData, mfgDate);
+    if (l_errl)
+    {
+        // MFG date isn't entierly necessary. Let's just delete and
+        // continue.
+        TRACFCOMP(g_trac_ipmi,"backplaneIpmiFruInv::buildBoardInfoArea - "
+            "Error from formatMfgData. Using default MFG Date/Time.");
+         io_data.push_back(0);
+         io_data.push_back(0);
+         io_data.push_back(0);
+         delete l_errl;
+    }
+    else
+    {
+        if(((mfgDate & 0xFF000000) >> 24) != 0)
+        {
+            // If there is data in these bits, we have exceeded the
+            // maximum time we can display (IPMI only takes in 3 bytes
+            // of hex, FFFFFF)
+            TRACFCOMP(g_trac_ipmi,"backplaneIpmiFruInv::buildBoardInfoArea "
+                "- Exeeded maximum allowed build date to display. Using "
+                "default MFG Date/Time.");
+            io_data.push_back(0);
+            io_data.push_back(0);
+            io_data.push_back(0);
+        }
+        else
+        {
+            // Convert mfgDate to hex
+            uint8_t l_leastSig = (mfgDate & 0x000000FF);
+            uint8_t l_middleSig = (mfgDate & 0x0000FF00) >> 8;
+            uint8_t l_mostSig = (mfgDate & 0x00FF0000) >> 16;
+
+            // Push data into io_data - least significant byte first
+            io_data.push_back(l_leastSig);
+            io_data.push_back(l_middleSig);
+            io_data.push_back(l_mostSig);
+        }
+    }
+}
+
 
 //##############################################################################
 isdimmIpmiFruInv::isdimmIpmiFruInv( TARGETING::TargetHandle_t i_target )
@@ -752,11 +877,14 @@ errlHndl_t backplaneIpmiFruInv::buildBoardInfoArea(
         //Set formatting data that goes at the beginning of the record
         preFormatProcessing(io_data, true);
 
-        //Set MFG Date/Time - Blank
-        io_data.push_back(0);
-        io_data.push_back(0);
-        io_data.push_back(0);
+        // Set Mfg Build date
+        // Grab VPD data into seperate data vector
+        std::vector<uint8_t> mfgDateData;
+        l_errl = addVpdData(mfgDateData, PVPD::OPFR, PVPD::MB, false, false);
+        if (l_errl) { break; }
 
+        // Pass that to the function that sets the Build date
+        setMfgData(io_data, mfgDateData);
 
         //Set Vendor Name - ascii formatted data
         l_errl = addVpdData(io_data, PVPD::OPFR, PVPD::VN, true);
@@ -1075,10 +1203,14 @@ errlHndl_t membufIpmiFruInv::buildBoardInfoArea(
         //Set formatting data that goes at the beginning of the record
         preFormatProcessing(io_data, true);
 
-        //Set MFG Date/Time - Blank
-        io_data.push_back(0);
-        io_data.push_back(0);
-        io_data.push_back(0);
+        // Set Mfg Build date
+        // Grab VPD data into seperate data vector
+        std::vector<uint8_t> mfgDateData;
+        l_errl = addVpdData(mfgDateData, PVPD::OPFR, PVPD::MB, false, false);
+        if (l_errl) { break; }
+
+        // Pass that to the function that sets the Build date
+        setMfgData(io_data, mfgDateData);
 
         uint8_t l_fru_id = 0xFF;
         // if the centaur_ecid_fru_id is not valid then the centaur is on a
