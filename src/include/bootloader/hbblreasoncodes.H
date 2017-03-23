@@ -48,9 +48,7 @@ namespace Bootloader
         MOD_PNORACC_READTOC              = 0x03, /**< bl_pnorAccess.C : read TOC */
         MOD_PNORACC_GETHBBSECT           = 0x04, /**< bl_pnorAccess.C : get HBB sect */
         MOD_BOOTLOADER_VERIFY            = 0x05, /**< bootloader.C : verifyContainer */
-        MOD_BOOTLOADER_PNOR_SECID_TO_STR = 0x06, /**< pnor_utils.C : SectionIdToString */
-        MOD_BOOTLOADER_PNOR_CMP_MAGIC_NUM = 0x07 /**< pnor_utils.C : cmpSecurebootMagicNumber */
-
+        MOD_BOOTLOADER_ASSERT            = 0x06, /**< bootloader.H assert */
     };
 
 /**
