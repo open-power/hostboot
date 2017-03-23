@@ -44,7 +44,7 @@
 #include <fapi2.H>
 
 // mss lib
-#include <lib/spd/common/spd_decoder.H>
+#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
 
 namespace mss
 {
