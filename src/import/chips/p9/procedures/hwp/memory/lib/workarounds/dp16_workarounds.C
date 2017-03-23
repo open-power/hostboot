@@ -351,11 +351,11 @@ fapi2::ReturnCode fix_blue_waterfall_gate( const fapi2::Target<fapi2::TARGET_TYP
     };
 
     // Gets the number of primary ranks to loop through
-    std::vector<uint64_t> l_primary_ranks;
-    FAPI_TRY(mss::rank::primary_ranks(i_target, l_primary_ranks));
+    std::vector<uint64_t> l_rank_pairs;
+    FAPI_TRY(mss::rank::get_rank_pairs(i_target, l_rank_pairs));
 
     // Loops through all configured rank pairs
-    for(uint64_t l_rp = 0; l_rp < l_primary_ranks.size(); ++l_rp)
+    for(const auto& l_rp : l_rank_pairs)
     {
         // Loops through all DP16s
         for(const auto& l_reg : l_dp16_registers[l_rp])
