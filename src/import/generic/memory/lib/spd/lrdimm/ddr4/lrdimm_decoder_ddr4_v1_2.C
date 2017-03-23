@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/spd/lrdimm/lrdimm_decoder_v1_2.C $ */
+/* $Source: src/import/generic/memory/lib/spd/lrdimm/ddr4/lrdimm_decoder_ddr4_v1_2.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -40,9 +40,9 @@
 #include <fapi2.H>
 
 // mss lib
-#include <lib/spd/lrdimm/lrdimm_decoder.H>
-#include <lib/spd/common/spd_decoder.H>
-#include <lib/utils/checker.H>
+#include <generic/memory/lib/spd/lrdimm/ddr4/lrdimm_decoder_ddr4.H>
+#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
+#include <generic/memory/lib/spd/spd_checker.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 

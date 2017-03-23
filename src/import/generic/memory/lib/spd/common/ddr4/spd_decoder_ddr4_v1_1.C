@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/spd/common/spd_decoder_v1_1.C $ */
+/* $Source: src/import/generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4_v1_1.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -36,10 +36,9 @@
 #include <fapi2.H>
 
 // mss lib
-#include <lib/spd/common/spd_decoder.H>
-#include <lib/utils/checker.H>
+#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
+#include <generic/memory/lib/spd/spd_checker.H>
 #include <generic/memory/lib/utils/c_str.H>
-#include <lib/utils/conversions.H>
 #include <generic/memory/lib/utils/find.H>
 
 using fapi2::TARGET_TYPE_MCA;
@@ -609,7 +608,7 @@ fapi_try_exit:
 /// @note Page 40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::min_write_recovery_time( int64_t& o_value )
+fapi2::ReturnCode decoder_v1_1::min_twr( int64_t& o_value )
 {
     uint8_t tWRmin_MSN = extract_spd_field< TWRMIN_MSN >(iv_target, iv_spd_data);
     FAPI_INF("MSN Field Bits value: %lu", tWRmin_MSN);

@@ -31,9 +31,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
-EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory
-EXTRAINCDIR += ${ROOTPATH}/src/import/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib
@@ -49,12 +47,12 @@ MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/mcbist/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/phy/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/power_thermal/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/spd/
-MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/spd/common/
-MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/spd/lrdimm/
-MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/spd/rdimm/
-MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/termination/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/utils/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/workarounds/
+MSS_LIB += ${ROOTPATH}/src/import/
+MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/lrdimm/ddr4/
+MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/rdimm/ddr4/
+MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/common/ddr4/
 
 EXTRAINCDIR += ${MSS_LIB}
 
@@ -63,6 +61,10 @@ EXTRAINCDIR += ${MSS_LIB}
 MSS_PATH := $(PROCEDURES_PATH)/hwp/memory/lib
 MSS_SOURCE := $(shell find $(MSS_PATH) -name '*.C' -exec basename {} \;)
 MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_SOURCE))
+
+MSS_PATH_GENERIC_MEMORY := ${ROOTPATH}/src/import/generic/memory/lib
+MSS_GENERIC_MEMORY_SOURCE := $(shell find $(MSS_PATH_GENERIC_MEMORY) -name '*.C' -exec basename {} \;)
+MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_GENERIC_MEMORY_SOURCE))
 
 MODULE = isteps_mss
 OBJS += $(MSS_MODULE_OBJS)

@@ -42,11 +42,13 @@
 
 // mss lib
 #include <lib/spd/spd_factory.H>
-#include <lib/spd/common/spd_decoder.H>
-#include <lib/spd/common/rcw_settings.H>
-#include <lib/spd/rdimm/rdimm_raw_cards.H>
-#include <lib/spd/lrdimm/lrdimm_raw_cards.H>
-#include <lib/utils/checker.H>
+#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
+#include <generic/memory/lib/spd/rdimm/ddr4/rdimm_decoder_ddr4.H>
+#include <generic/memory/lib/spd/lrdimm/ddr4/lrdimm_decoder_ddr4.H>
+#include <generic/memory/lib/spd/common/rcw_settings.H>
+#include <generic/memory/lib/spd/rdimm/ddr4/rdimm_raw_cards.H>
+#include <generic/memory/lib/spd/lrdimm/ddr4/lrdimm_raw_cards.H>
+#include <generic/memory/lib/spd/spd_checker.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/utils/conversions.H>
 #include <generic/memory/lib/utils/find.H>

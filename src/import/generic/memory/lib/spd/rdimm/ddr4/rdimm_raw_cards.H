@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/spd/lrdimm/lrdimm_raw_cards.C $ */
+/* $Source: src/import/generic/memory/lib/spd/rdimm/ddr4/rdimm_raw_cards.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -24,61 +24,63 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file raw_cards.C
-/// @brief LRDIMM raw card data structure
-/// Contains RCW settings per raw card rev
+/// @file raw_cards.H
+/// @brief Raw card data structure
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
-// *HWP Consumed by: FSP:HB
+// *HWP Consumed by: HB:FSP
 
-// std lib
-#include <vector>
+#ifndef _MSS_RDIMM_RAW_CARDS_H_
+#define _MSS_RDIMM_RAW_CARDS_H_
 
-// fapi2
 #include <fapi2.H>
-
-// mss lib
-#include <lib/spd/lrdimm/lrdimm_raw_cards.H>
+#include <cstdint>
+#include <vector>
+#include <generic/memory/lib/spd/common/rcw_settings.H>
 
 namespace mss
 {
-
-///
-/// @brief raw card B0 settings
-///
-// TODO RTC:160116 Fill in valid RCD data for LRDIMM
-rcw_settings lrdimm_rc_b0( 0x00, // RC00
-                           0x00, // RC01 (C might be the right answer)
-                           0x00, // RC02
-                           0x1F, // RC06_7
-                           0x00, // RC09
-                           0x0E, // RC0B
-                           0x00, // RC0C
-                           0x00, // RC0F
-                           0x00, // RC1X
-                           0x00, // RC2X
-                           0x00, // RC4X
-                           0x00, // RC5X
-                           0x00, // RC6C
-                           0x00, // RC8X
-                           0x00, // RC9X
-                           0x00, // RCAx
-                           0x07);// RCBX
-
-namespace lrdimm
+namespace rdimm
 {
 
-// TODO - RTC:160121 Catch all for adding raw card data for DIMMs
-const std::vector< std::pair< uint8_t , rcw_settings> > RAW_CARDS =
+// In the order of the vector below which needs to be sorted by enum value
+enum raw_card_rev : uint8_t
 {
-    // I expect this to grow as Warren M. expects us to have
-    // settings for every raw card that JEDEC puts out.  Openpower
-    // can't break due to a missing raw card...
-    {raw_card_rev::B0, lrdimm_rc_b0},
+    A1 = 0x20,
+    B1 = 0x21,
+
+    // RDIMM power-on
+    C1 = 0x22,
+
+    // TK - Change VBU value to a no-op value or a value that will never be reached -JLH
+    VBU = 0x23,
+
+    B2 = 0x41,
+    C2 = 0x42,
+
+    // Default settings used for DIMMs that do not use a JEDEC raw card reference
+    CUSTOM = 0xFF,
 };
 
-}// lrdimm
+// Raw cards can share the same raw card # between RDIMM and LRDIMMs so
+// we track them independently. Since all of these don't come from SPD for DDR4,
+// we have to set some RCWs (we want limit these and derive as many as possible)
+extern const std::vector< std::pair< uint8_t, rcw_settings> > RAW_CARDS;
+
+}// rdimm
+
+// Exposed so we can test them.
+extern rcw_settings rdimm_rc_c1;
+extern rcw_settings rdimm_rc_c2;
+extern rcw_settings rdimm_rc_a1;
+extern rcw_settings rdimm_rc_b1;
+extern rcw_settings rdimm_rc_b2;
+extern rcw_settings rdimm_rc_custom;
+extern rcw_settings rdimm_rc_vbu;
+
 }// mss
+
+#endif //_MSS_RDIMM_RAW_CARDS_H_

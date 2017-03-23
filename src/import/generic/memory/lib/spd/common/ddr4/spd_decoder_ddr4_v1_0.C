@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/spd/common/spd_decoder.C $ */
+/* $Source: src/import/generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4_v1_0.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,10 +40,10 @@
 #include <fapi2.H>
 
 // mss lib
-#include <lib/spd/common/spd_decoder.H>
-#include <lib/spd/rdimm/rdimm_decoder.H>
-#include <lib/spd/common/rcw_settings.H>
-#include <lib/utils/checker.H>
+#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
+#include <generic/memory/lib/spd/rdimm/ddr4/rdimm_decoder_ddr4.H>
+#include <generic/memory/lib/spd/common/rcw_settings.H>
+#include <generic/memory/lib/spd/spd_checker.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 
@@ -71,10 +71,7 @@ decoder::decoder(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                  const std::vector<uint8_t>& i_spd_data,
                  const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
                  const rcw_settings& i_raw_card)
-    : iv_target(i_target),
-      iv_module_decoder(i_module_decoder),
-      iv_spd_data(i_spd_data),
-      iv_raw_card(i_raw_card)
+    : base_decoder(i_target, i_spd_data, i_module_decoder, i_raw_card)
 {}
 
 ///
@@ -1332,7 +1329,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tCKmin (SPD byte 125)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder::min_cycle_time( int64_t& o_value )
+fapi2::ReturnCode decoder::min_tck( int64_t& o_value )
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 18;
@@ -1379,7 +1376,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tCKmax (SPD byte 124)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder::max_cycle_time( int64_t& o_value )
+fapi2::ReturnCode decoder::max_tck( int64_t& o_value )
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 19;
@@ -1500,7 +1497,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tAAmin (SPD byte 123)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder::min_cas_latency_time( int64_t& o_value )
+fapi2::ReturnCode decoder::min_taa( int64_t& o_value )
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 24;
@@ -1547,7 +1544,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tRCDmin (SPD byte 122)
 /// used for correction to get the actual value
 ///
-fapi2::ReturnCode decoder::min_ras_to_cas_delay_time( int64_t& o_value )
+fapi2::ReturnCode decoder::min_trcd( int64_t& o_value )
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 25;
@@ -1594,7 +1591,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tRPmin (SPD byte 121)
 /// used for correction to get the actual value
 ///
-fapi2::ReturnCode decoder::min_row_precharge_delay_time( int64_t& o_value )
+fapi2::ReturnCode decoder::min_trp( int64_t& o_value )
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 26;
@@ -1638,7 +1635,7 @@ fapi_try_exit:
 /// @note Page 38
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::min_active_to_precharge_delay_time( int64_t& o_value)
+fapi2::ReturnCode decoder::min_tras( int64_t& o_value)
 {
     uint8_t tRASmin_MSN = extract_spd_field< TRASMIN_MSN >(iv_target, iv_spd_data);
     FAPI_INF("MSN Field Bits value: %lu", tRASmin_MSN);
@@ -1701,7 +1698,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tRCmin (SPD byte 120)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder::min_active_to_active_refresh_delay_time( int64_t& o_value)
+fapi2::ReturnCode decoder::min_trc( int64_t& o_value)
 {
     uint8_t tRCmin_MSN = extract_spd_field< TRCMIN_MSN >(iv_target, iv_spd_data);
     FAPI_INF("MSN Field Bits value: %lu", tRCmin_MSN);
@@ -1759,7 +1756,7 @@ fapi_try_exit:
 /// @note Page 39-40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_1( int64_t& o_value)
+fapi2::ReturnCode decoder::min_trfc1( int64_t& o_value)
 {
     uint8_t tRFC1min_MSB = extract_spd_field< TRFC1MIN_MSB >(iv_target, iv_spd_data);
     FAPI_INF("MSB Field Bits value: %lu", tRFC1min_MSB);
@@ -1817,7 +1814,7 @@ fapi_try_exit:
 /// @note Page 40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_2( int64_t& o_value)
+fapi2::ReturnCode decoder::min_trfc2( int64_t& o_value)
 {
     uint8_t tRFC2min_MSB = extract_spd_field< TRFC2MIN_MSB >(iv_target, iv_spd_data);
     FAPI_INF("MSB Field Bits value: %lu", tRFC2min_MSB);
@@ -1875,7 +1872,7 @@ fapi_try_exit:
 /// @note Page 40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::min_refresh_recovery_delay_time_4( int64_t& o_value)
+fapi2::ReturnCode decoder::min_trfc4( int64_t& o_value)
 {
     uint8_t tRFC4min_MSB = extract_spd_field< TRFC4MIN_MSB >(iv_target, iv_spd_data);
     FAPI_INF("MSB Field Bits value: %lu", tRFC4min_MSB);
@@ -2138,7 +2135,7 @@ fapi_try_exit:
 /// @note Page 40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::min_write_recovery_time( int64_t& o_value)
+fapi2::ReturnCode decoder::min_twr( int64_t& o_value)
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 41 (bits 3~0) & Byte 42 (bits 7~0) were reserved

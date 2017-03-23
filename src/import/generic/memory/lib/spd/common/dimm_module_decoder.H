@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/spd/common/dimm_module_decoder.H $ */
+/* $Source: src/import/generic/memory/lib/spd/common/dimm_module_decoder.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -68,8 +68,6 @@ class dimm_module_decoder
         /// @brief Decodes module nominal height max
         /// @param[out] o_output height range encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 128 (Bits 4~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode max_module_nominal_height(uint8_t& o_output)
         {
@@ -81,8 +79,6 @@ class dimm_module_decoder
         /// @brief Decodes raw card extension
         /// @param[out] o_output height range encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 128 (Bits 7~5)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode raw_card_extension(uint8_t& o_output)
         {
@@ -94,8 +90,6 @@ class dimm_module_decoder
         /// @brief Decodes front module maximum thickness max
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 129 (Bits 3~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode front_module_max_thickness(uint8_t& o_output)
         {
@@ -107,8 +101,6 @@ class dimm_module_decoder
         /// @brief Decodes back module maximum thickness max
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 129 (Bits 7~4)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode back_module_max_thickness(uint8_t& o_output)
         {
@@ -120,8 +112,6 @@ class dimm_module_decoder
         /// @brief Decodes number of registers used on RDIMM
         /// @param[out] o_output  encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 131 (Bits 1~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode num_registers_used(uint8_t& o_output)
         {
@@ -133,8 +123,6 @@ class dimm_module_decoder
         /// @brief Decodes number of rows of DRAMs on RDIMM
         /// @param[out] o_output  encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 131 (Bits 3~2)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode num_rows_of_drams(uint8_t& o_output)
         {
@@ -146,8 +134,6 @@ class dimm_module_decoder
         /// @brief Decodes register and buffer type for LRDIMMs
         /// @param[out] o_output  encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 131 (Bits 7~4)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode register_and_buffer_type(uint8_t& o_output)
         {
@@ -159,8 +145,6 @@ class dimm_module_decoder
         /// @brief Decodes heat spreader thermal characteristics
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCEawSS if okay
-        /// @note SPD Byte 132 (Bits 6~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode heat_spreader_thermal_char(uint8_t& o_output)
         {
@@ -173,8 +157,6 @@ class dimm_module_decoder
         /// @brief Decodes heat spreader solution
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 132 (Bit 7)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode heat_spreader_solution(uint8_t& o_output)
         {
@@ -186,8 +168,6 @@ class dimm_module_decoder
         /// @brief Decodes number of continuation codes
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 133 (Bits 6~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode num_continuation_codes(uint8_t& o_output)
         {
@@ -199,8 +179,6 @@ class dimm_module_decoder
         /// @brief Decodes register manufacturer ID code
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 134 (Bits 7~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode reg_manufacturer_id_code(uint8_t& o_output)
         {
@@ -212,8 +190,6 @@ class dimm_module_decoder
         /// @brief Decodes register revision number
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 135 (Bits 7~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode register_rev_num(uint8_t& o_output)
         {
@@ -225,8 +201,6 @@ class dimm_module_decoder
         /// @brief Decodes address mapping from register to dram
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 136 (Bit 0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode register_to_dram_addr_mapping(uint8_t& o_output)
         {
@@ -238,8 +212,6 @@ class dimm_module_decoder
         /// @brief Decodes register output drive strength for CKE signal
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 137 (Bits 1~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode cke_signal_output_driver(uint8_t& o_output)
         {
@@ -251,8 +223,6 @@ class dimm_module_decoder
         /// @brief Decodes register output drive strength for ODT signal
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 137 (Bits 3~2)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode odt_signal_output_driver(uint8_t& o_output)
         {
@@ -264,8 +234,6 @@ class dimm_module_decoder
         /// @brief Decodes register output drive strength for command/address (CA) signal
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 137 (Bits 5~4)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode ca_signal_output_driver(uint8_t& o_output)
         {
@@ -274,11 +242,9 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes register output drive strength for chip select (CS) signal
+        /// @brief Decodes register output drive strength for control signal (CS) signal
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 137 (Bits 6~7)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode cs_signal_output_driver(uint8_t& o_output)
         {
@@ -290,8 +256,6 @@ class dimm_module_decoder
         /// @brief Decodes register output drive strength for clock (B side)
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 138 (Bits 1~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode b_side_clk_output_driver(uint8_t& o_output)
         {
@@ -303,8 +267,6 @@ class dimm_module_decoder
         /// @brief Decodes register output drive strength for clock (A side)
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 138 (Bits 3~2)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode a_side_clk_output_driver(uint8_t& o_output)
         {
@@ -316,8 +278,6 @@ class dimm_module_decoder
         /// @brief Decodes register output drive strength for data buffer control (BCOM, BODT, BKCE)
         /// @param[out] o_output encoded drive strength
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 138 (Bit 4)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode bcom_bcke_bodt_drive_strength(uint8_t& o_output)
         {
@@ -330,8 +290,6 @@ class dimm_module_decoder
         /// @brief Decodes register output drive strength for data buffer control (BCK)
         /// @param[out] o_output encoded drive strength
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 138 (Bit 5)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode bck_output_drive_strength(uint8_t& o_output)
         {
@@ -343,8 +301,6 @@ class dimm_module_decoder
         /// @brief Decodes RCD output slew rate control
         /// @param[out] o_output encoded drive strength
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 138 (Bit 6)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode slew_rate_control(uint8_t& o_output)
         {
@@ -356,8 +312,6 @@ class dimm_module_decoder
         /// @brief Decodes data buffer revision number
         /// @param[out] o_output revision number
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 139 (Bits 7~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode data_buffer_rev(uint8_t& o_output)
         {
@@ -369,8 +323,6 @@ class dimm_module_decoder
         /// @brief Decodes DRAM VrefDQ for Package Rank 0
         /// @param[out] o_output encoding of MR6 A5:A0 in JESD790-4 spec
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 140 (Bits 5~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode dram_vref_dq_rank0(uint8_t& o_output)
         {
@@ -382,8 +334,6 @@ class dimm_module_decoder
         /// @brief Decodes DRAM VrefDQ for Package Rank 1
         /// @param[out] o_output encoding of MR6 A5:A0 in JESD790-4 spec
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 141 (Bits 5~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode dram_vref_dq_rank1(uint8_t& o_output)
         {
@@ -395,8 +345,6 @@ class dimm_module_decoder
         /// @brief Decodes DRAM VrefDQ for Package Rank 2
         /// @param[out] o_output encoding of MR6 A5:A0 in JESD790-4 spec
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 142 (Bits 5~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode dram_vref_dq_rank2(uint8_t& o_output)
         {
@@ -408,8 +356,6 @@ class dimm_module_decoder
         /// @brief Decodes DRAM VrefDQ for Package Rank 3
         /// @param[out] o_output encoding of MR6 A5:A0 in JESD790-4 spec
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 143 (Bits 5~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode dram_vref_dq_rank3(uint8_t& o_output)
         {
@@ -421,8 +367,6 @@ class dimm_module_decoder
         /// @brief Decodes data buffer VrefDQ for DRAM interface
         /// @param[out] o_output encoding of F5BC6x in DDR4DB01 spec
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 144 (Bits 5~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode data_buffer_vref_dq(uint8_t& o_output)
         {
@@ -436,8 +380,6 @@ class dimm_module_decoder
         /// @param[in] i_dimm_speed the dimm speed in MT/s
         /// @param[out] o_output encoding of F5BC6x in
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 145 - 147 (Bits 6~4)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode data_buffer_mdq_drive_strength(const uint64_t i_dimm_speed, uint8_t& o_output)
         {
@@ -451,8 +393,6 @@ class dimm_module_decoder
         /// @param[in] i_dimm_speed the dimm speed in MT/s
         /// @param[out] o_output encoding of F5BC6x in
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 145 - 147 (Bits 2~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode data_buffer_mdq_rtt(const uint64_t i_dimm_speed, uint8_t& o_output)
         {
@@ -466,8 +406,6 @@ class dimm_module_decoder
         /// @param[in] i_dimm_speed the dimm speed in MT/s
         /// @param[out] o_output DRAM drive strength (in ohms)
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 148 (Bits 5~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode dram_drive_strength(const uint64_t i_dimm_speed, uint8_t& o_output)
         {
@@ -481,8 +419,6 @@ class dimm_module_decoder
         /// @param[in] i_dimm_speed the dimm speed in MT/s
         /// @param[out] o_output ODT termination strength (in ohms)
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 149 - 151 (Bits 2~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode dram_rtt_nom(const uint64_t i_dimm_speed, uint8_t& o_output)
         {
@@ -496,8 +432,6 @@ class dimm_module_decoder
         /// @param[in] i_dimm_speed the dimm speed in MT/s
         /// @param[out] o_output ODT termination strength (in ohms)
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 149 - 151 (Bits 5~3)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode dram_rtt_wr(const uint64_t i_dimm_speed, uint8_t& o_output)
         {
@@ -511,8 +445,6 @@ class dimm_module_decoder
         /// @param[in] i_dimm_speed the dimm speed in MT/s
         /// @param[out] o_output ODT termination strength (in ohms)
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 152 - 154 (Bits 2~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode dram_rtt_park_ranks0_1(const uint64_t i_dimm_speed, uint8_t& o_output)
         {
@@ -526,8 +458,6 @@ class dimm_module_decoder
         /// @param[in] i_dimm_speed the dimm speed in MT/s
         /// @param[out] o_output ODT termination strength (in ohms)
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 152 - 154 (Bits 5~3)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode dram_rtt_park_ranks2_3(const uint64_t i_dimm_speed, uint8_t& o_output)
         {
@@ -539,8 +469,6 @@ class dimm_module_decoder
         /// @brief Decodes VrefDQ range for DRAM interface range
         /// @param[out] o_output spd encoding
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 155 (Bits 3~0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode dram_vref_dq_range(uint8_t& o_output)
         {
@@ -552,8 +480,6 @@ class dimm_module_decoder
         /// @brief Decodes data buffer VrefDQ range for DRAM interface range
         /// @param[out] o_output spd encoding
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 155 (Bit 4)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode data_buffer_vref_dq_range(uint8_t& o_output)
         {
@@ -565,8 +491,6 @@ class dimm_module_decoder
         /// @brief Decodes data buffer gain adjustment
         /// @param[out] o_output spd encoding
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 156 (Bit 0)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode data_buffer_gain_adjustment(uint8_t& o_output)
         {
@@ -578,8 +502,6 @@ class dimm_module_decoder
         /// @brief Decodes data buffer Decision Feedback Equalization (DFE)
         /// @param[out] o_output spd encoding
         /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 156 (Bit 1)
-        /// @note Item JEDEC Standard No. 21-C
         ///
         virtual fapi2::ReturnCode data_buffer_dfe(uint8_t& o_output)
         {
@@ -590,6 +512,7 @@ class dimm_module_decoder
 
 ///
 /// @brief data structure for byte fields
+/// @note holds byte index, start bit and length of decoded field
 ///
 struct field_t
 {

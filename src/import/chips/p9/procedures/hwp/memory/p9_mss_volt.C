@@ -44,7 +44,7 @@
 
 // mss lib
 #include <lib/spd/spd_factory.H>
-#include <lib/spd/common/spd_decoder.H>
+#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
 #include <lib/eff_config/attr_setters.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/pos.H>

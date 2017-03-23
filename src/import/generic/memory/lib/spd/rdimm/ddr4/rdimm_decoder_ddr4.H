@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/spd/rdimm/rdimm_decoder.H $ */
+/* $Source: src/import/generic/memory/lib/spd/rdimm/ddr4/rdimm_decoder_ddr4.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -37,7 +37,7 @@
 #define _MSS_RDIMM_DECODER_H_
 
 #include <fapi2.H>
-#include <lib/spd/common/dimm_module_decoder.H>
+#include <generic/memory/lib/spd/common/dimm_module_decoder.H>
 
 namespace mss
 {
@@ -294,7 +294,7 @@ class rdimm_decoder_v1_0 : public dimm_module_decoder
         virtual fapi2::ReturnCode ca_signal_output_driver(uint8_t& o_output) override;
 
         ///
-        /// @brief Decodes register output drive strength for chip select (CS) signal
+        /// @brief Decodes register output drive strength for control signal (CS) signal
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         /// @note SPD Byte 137 (bit 6~7)
@@ -391,7 +391,7 @@ class rdimm_decoder_v1_1 :  public rdimm_decoder_v1_0
         virtual fapi2::ReturnCode odt_signal_output_driver(uint8_t& o_output) override;
 
         ///
-        /// @brief Decodes register output drive strength for chip select (CS) signal
+        /// @brief Decodes register output drive strength for control signal (CS) signal
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         /// @note SPD Byte 137 (bit 6~7)

@@ -41,7 +41,7 @@
 #include <fapi2.H>
 
 // mss lib
-#include <lib/spd/common/spd_decoder.H>
+#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
 #include <lib/freq/cas_latency.H>
 #include <lib/freq/cycle_time.H>
 #include <lib/freq/sync.H>
@@ -272,8 +272,8 @@ fapi2::ReturnCode cas_latency::get_taamin( const std::shared_ptr<mss::spd::decod
               "%s. Failed medium_timebase()", mss::c_str(iv_target) );
     FAPI_TRY( i_pDecoder->fine_timebase(l_fine_timebase),
               "%s. Failed fine_timebase()", mss::c_str(iv_target) );
-    FAPI_TRY( i_pDecoder->min_cas_latency_time(l_timing_mtb),
-              "%s. Failed min_cas_latency_time()", mss::c_str(iv_target) );
+    FAPI_TRY( i_pDecoder->min_taa(l_timing_mtb),
+              "%s. Failed min_taa()", mss::c_str(iv_target) );
     FAPI_TRY( i_pDecoder->fine_offset_min_taa(l_timing_ftb),
               "%s. Failed fine_offset_min_taa()", mss::c_str(iv_target) );
 
@@ -321,8 +321,8 @@ fapi2::ReturnCode cas_latency::get_tckmin( const std::shared_ptr<mss::spd::decod
               "%s. Failed medium_timebase()", mss::c_str(iv_target) );
     FAPI_TRY( i_pDecoder->fine_timebase(l_fine_timebase),
               "%s. Failed fine_timebase()", mss::c_str(iv_target) );
-    FAPI_TRY( i_pDecoder->min_cycle_time(l_timing_mtb),
-              "%s. Failed min_cycle_time()", mss::c_str(iv_target) );
+    FAPI_TRY( i_pDecoder->min_tck(l_timing_mtb),
+              "%s. Failed min_tck()", mss::c_str(iv_target) );
     FAPI_TRY( i_pDecoder->fine_offset_min_tck(l_timing_ftb),
               "%s. Failed fine_offset_min_tck()", mss::c_str(iv_target) );
 
@@ -369,8 +369,8 @@ fapi2::ReturnCode cas_latency::get_tckmax( const std::shared_ptr<mss::spd::decod
               "%s. Failed medium_timebase()", mss::c_str(iv_target) );
     FAPI_TRY( i_pDecoder->fine_timebase(l_fine_timebase),
               "%s. Failed fine_timebase()", mss::c_str(iv_target) );
-    FAPI_TRY( i_pDecoder->max_cycle_time(l_timing_mtb),
-              "%s. Failed max_cycle_time()", mss::c_str(iv_target) );
+    FAPI_TRY( i_pDecoder->max_tck(l_timing_mtb),
+              "%s. Failed max_tck()", mss::c_str(iv_target) );
     FAPI_TRY( i_pDecoder->fine_offset_max_tck(l_timing_ftb),
               "%s. Failed fine_offset_max_tck()", mss::c_str(iv_target) );
 
