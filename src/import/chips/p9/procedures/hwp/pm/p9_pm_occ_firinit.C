@@ -250,8 +250,8 @@ fapi2::ReturnCode pm_occ_fir_init(
              "ERROR: Failed to mask bit");
     FAPI_TRY(l_occFir.mask(OCC_FW1),
              "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.setMalfAlert(CME_ERR_NOTIFY),
-             "ERROR: Failed to set Malf alert");
+    FAPI_TRY(l_occFir.mask(CME_ERR_NOTIFY),
+             "ERROR: Failed to mask bit");
     FAPI_TRY(l_occFir.setRecvAttn(STOP_RCV_NOTIFY_PRD),
              "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setMalfAlert(OCC_HB_NOTIFY),
@@ -260,18 +260,18 @@ fapi2::ReturnCode pm_occ_fir_init(
              "ERROR: Failed to mask bit");
     FAPI_TRY(l_occFir.mask(GPE1_WD_TIMEOUT),
              "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.setMalfAlert(GPE2_WD_TIMEOUT),
-             "ERROR: Failed to set Malf alert");
+    FAPI_TRY(l_occFir.mask(GPE2_WD_TIMEOUT),
+             "ERROR: Failed to mask bit");
     FAPI_TRY(l_occFir.mask(GPE3_WD_TIMEOUT),
              "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.setRecvAttn(GPE0_ERR),
-             "ERROR: Failed to set recoverable attention");
-    FAPI_TRY(l_occFir.setRecvAttn(GPE1_ERR),
-             "ERROR: Failed to set recoverable attention");
-    FAPI_TRY(l_occFir.setRecvIntr(GPE2_ERR),
-             "ERROR: Failed to set recovery on interrupt");
-    FAPI_TRY(l_occFir.setMalfAlert(GPE3_ERR),
-             "ERROR: Failed to set Malf alert");
+    FAPI_TRY(l_occFir.mask(GPE0_ERR),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_occFir.mask(GPE1_ERR),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_occFir.mask(GPE2_ERR),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_occFir.mask(GPE3_ERR),
+             "ERROR: Failed to mask bit");
     FAPI_TRY(l_occFir.mask(OCB_ERR),
              "ERROR: Failed to mask bit");
     FAPI_TRY(l_occFir.setRecvAttn(SRT_UE),
