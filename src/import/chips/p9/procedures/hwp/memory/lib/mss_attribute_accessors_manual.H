@@ -270,12 +270,10 @@ inline bool chip_ec_feature_blue_waterfall_adjust(const fapi2::Target<T>& i_targ
 {
     const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
     uint8_t l_value = 0;
-    uint8_t l_do_value = 0;
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_MSS_BLUE_WATERFALL_ADJUST, l_chip, l_value) );
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DO_BLUE_WATERFALL_ADJUST, l_chip, l_do_value) );
 
-    return (l_value != 0) && (l_do_value == fapi2::ENUM_ATTR_DO_BLUE_WATERFALL_ADJUST_YES);
+    return (l_value != 0);
 
 fapi_try_exit:
     FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_BLUE_WATERFALL_ADJUST or ATTR_DO_BLUE_WATERFALL_ADJUST: 0x%lx (target: %s)",

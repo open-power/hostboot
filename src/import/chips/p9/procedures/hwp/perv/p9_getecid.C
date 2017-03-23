@@ -154,7 +154,6 @@ static fapi2::ReturnCode setup_memory_work_around_attributes(
         // All these attributes have 1 as their 'YES' enum value
         uint8_t l_value = 1;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_MSS_TRAINING_BAD_BITS, i_target, l_value) );
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DO_BLUE_WATERFALL_ADJUST, i_target, l_value) );
         // The value for this is SKIP - we want to skip in sub DD1.03 HW
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_SKIP_RD_VREF_VREFSENSE_OVERRIDE,  i_target, l_value) );
     }
