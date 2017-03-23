@@ -42,7 +42,7 @@
 #include <fapi2.H>
 
 // mss lib
-#include <lib/spd/common/spd_decoder.H>
+#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
 #include <lib/spd/spd_factory.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <lib/utils/checker.H>
