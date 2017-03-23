@@ -33,6 +33,7 @@ $(call ADD_EXE_INCDIR,$(WRAPPER),$(MSS_INCLUDES))
 $(call ADD_EXE_INCDIR,$(WRAPPER),$(CATCH_UNIT_TESTS_INCLUDES))
 
 $(WRAPPER)_DEPLIBS+=mss
+$(WRAPPER)_DEPLIBS+=mss_generic
 $(WRAPPER)_DEPLIBS+=p9_mss_ddr_phy_reset
 $(WRAPPER)_DEPLIBS+=p9_mss_draminit
 $(WRAPPER)_DEPLIBS+=p9_mss_draminit_training
