@@ -249,6 +249,7 @@
         <name>OBUS</name>
         <value>40</value>
     </enumerator>
+    <!-- @TODO RTC:173529-Remove once NV is not used anywhere and leave a gap-->
     <enumerator>
         <name>NV</name>
         <value>41</value>
@@ -349,14 +350,18 @@
         <name>FANCTLR</name>
         <value>65</value>
     </enumerator>
+    <enumerator>
+        <name>OBUS_BRICK</name>
+        <value>66</value>
+    </enumerator>
     <!-- add any new types here, and increment TEST_FAIL and LAST_IN_RANGE -->
     <enumerator>
         <name>TEST_FAIL</name>
-        <value>66</value>
+        <value>67</value>
     </enumerator>
     <enumerator>
         <name>LAST_IN_RANGE</name>
-        <value>67</value>
+        <value>68</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>
@@ -21926,9 +21931,27 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<enumerationType>
+    <id>OPTICS_CONFIG_MODE</id>
+    <description>
+        Enumeration indicating the OPTICS_CONFIG_MODE
+    </description>
+    <enumerator>
+        <name>SMP</name>
+        <value>0x0</value>
+    </enumerator>
+    <enumerator>
+        <name>CAPILINK</name>
+        <value>0x1</value>
+    </enumerator>
+    <enumerator>
+        <name>NVLINK</name>
+        <value>0x2</value>
+    </enumerator>
+</enumerationType>
+
 <attribute>
   <id>OPTICS_CONFIG_MODE</id>
-  <!-- <targetType>TARGET_TYPE_OBUS</targetType> -->
   <description>
     Per-link optics configuration
     0 = SMP (default)
@@ -21937,13 +21960,35 @@ Measured in GB</description>
     Provided by the MRW.
   </description>
   <simpleType>
-    <uint8_t>
-    </uint8_t>
+      <uint8_t>
+          <default>SMP</default>
+      </uint8_t>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_OPTICS_CONFIG_MODE</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>OBUS_BRICK_LANE_MASK</id>
+  <description>
+      Lane mask for which 8 lanes belong to this brick
+      This is a right justified 24-bit value. Only 8 of the
+      24 bits will be set representing the lanes belonging to
+      the associated brick.
+      Provided by the MRW.
+  </description>
+  <simpleType>
+    <uint32_t>
+    </uint32_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_OBUS_BRICK_LANE_MASK</id>
     <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
 </attribute>

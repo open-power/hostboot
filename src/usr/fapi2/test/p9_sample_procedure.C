@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -258,17 +258,17 @@ fapi_try_exit:
 
 }
 
-fapi2::ReturnCode p9_sample_procedure_nv(
-               fapi2::Target<fapi2::TARGET_TYPE_NV>& i_target,
+fapi2::ReturnCode p9_sample_procedure_obrick(
+               fapi2::Target<fapi2::TARGET_TYPE_OBUS_BRICK>& i_target,
                                          uint8_t expectedValue)
 {
     uint8_t l_attr_scratch = 0;
     FAPI_ERR("Entering ...");
-    FAPI_ERR("Set Scratch Attr on NV Target");
+    FAPI_ERR("Set Scratch Attr on OBUS BRICK Target");
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SCRATCH_UINT8_1, i_target,
                         expectedValue));
 
-    FAPI_ERR("Get Scratch Attr on NV Target");
+    FAPI_ERR("Get Scratch Attr on OBUS BRICK Target");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SCRATCH_UINT8_1, i_target,
                         l_attr_scratch));
     FAPI_ERR("Read scratch value : %d , expected it to be %d", l_attr_scratch, expectedValue);

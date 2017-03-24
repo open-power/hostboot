@@ -961,18 +961,18 @@ public:
     // remove OBUS3 target
     epath.removeLast();
 
-    //add NV0 target
-    epath.addLast(TARGETING::TYPE_NV,0);
+    //add OBUS_BRICK0 target
+    epath.addLast(TARGETING::TYPE_OBUS_BRICK,0);
     scom_targets[myNV0] = TARGETING::targetService().toTarget(epath);
 
-    // remove NV0 target
+    // remove OBUS_BRICK0 target
     epath.removeLast();
 
-    // add NV1 target.
-    epath.addLast(TARGETING::TYPE_NV,1);
+    // add OBUS_BRICK1 target.
+    epath.addLast(TARGETING::TYPE_OBUS_BRICK,1);
     scom_targets[myNV1] = TARGETING::targetService().toTarget(epath);
 
-    // remove NV1 target
+    // remove OBUS_BRICK1 target
     epath.removeLast();
 
     //add PPE0 target

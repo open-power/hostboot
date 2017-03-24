@@ -304,12 +304,12 @@ void test_fapi2GetChildren()
                  { return i_perv.getChildren<fapi2::TARGET_TYPE_CAPP>(
                    TARGET_STATE_PRESENT).size(); } },
 
-            // NV pervasive has 1 NV children
-            {PERV_NV_CHILDREN,
+            // OBUS pervasive has 3 OBUS BRICK children
+            {PERV_OBUS_BRICK_CHILDREN,
              [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (i_unit == NV_RANGE); },
+                  { return ((i_unit >= OBUS_LOW) && (i_unit <= OBUS_HIGH)); },
              [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_NV>(
+                 { return i_perv.getChildren<fapi2::TARGET_TYPE_OBUS_BRICK>(
                    TARGET_STATE_PRESENT).size(); } },
 
             // MCBIST/MCS/MCA pervasive has 1 MCBIST child

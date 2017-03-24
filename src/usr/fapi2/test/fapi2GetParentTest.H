@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,8 +138,8 @@ void test_fapi2GetParent()
                 targeting_targets[MY_XBUS]);
         Target<fapi2::TARGET_TYPE_OBUS> fapi2_obusTarget(
                 targeting_targets[MY_OBUS]);
-        Target<fapi2::TARGET_TYPE_NV> fapi2_nvTarget(
-                targeting_targets[MY_NV]);
+        Target<fapi2::TARGET_TYPE_OBUS_BRICK> fapi2_oBrickTarget(
+                targeting_targets[MY_OBUS_BRICK]);
         Target<fapi2::TARGET_TYPE_PPE> fapi2_ppeTarget(
                 targeting_targets[MY_PPE]);
         Target<fapi2::TARGET_TYPE_PERV> fapi2_pervTarget(
@@ -742,31 +742,31 @@ void test_fapi2GetParent()
            numFails++;
         }
 
-        //Check NV's parents
+        //Check OBUS BRICK's parents
         l_tempTargetingParent =
             static_cast<TARGETING::Target*>(
-                fapi2_nvTarget.getParent<TARGET_TYPE_PROC_CHIP>());
+                fapi2_oBrickTarget.getParent<TARGET_TYPE_PROC_CHIP>());
         numTests++;
         if(TARGETING::get_huid(l_nimbusProc) !=
            TARGETING::get_huid(l_tempTargetingParent))
         {
             uint8_t l_instance = 0;
-            targeting_targets[MY_NV]->
+            targeting_targets[MY_OBUS_BRICK]->
             tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
             /*@
             * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
             * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_NV_NO_PROC_FOUND
+            * @reasoncode         fapi2::RC_OBRICK_NO_PROC_FOUND
             * @userdata1[0:31]    Expected Parent HUID
             * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of NV
+            * @userdata2[0:31]    Instance of OBUS BRICK
             * @userdata2[32:63]   fapi2 Type of expected parent
             * @devdesc            Could not find the parent PROC of this
-            *                     NV target
+            *                     OBUS BRICK target
             */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_NV_NO_PROC_FOUND,
+                                          fapi2::RC_OBRICK_NO_PROC_FOUND,
                                           TWO_UINT32_TO_UINT64(
                                           TO_UINT32(
                                           TARGETING::get_huid(
@@ -779,7 +779,7 @@ void test_fapi2GetParent()
                                           TO_UINT32(TARGET_TYPE_PROC_CHIP)),
                                           true/*SW Error*/);
             errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find NV's PROC parent!");
+            TS_FAIL( "fapi2TargetTest::Unable to find OBUS BRICK's PROC parent!");
             numFails++;
         }
 
@@ -987,9 +987,10 @@ void test_fapi2GetParent()
             {targeting_targets[MY_OBUS],
              [](TARGETING::Target* i_pTarget)
                  {return getPervasiveParent<TARGET_TYPE_OBUS>(i_pTarget); }},
-            {targeting_targets[MY_NV],
+            {targeting_targets[MY_OBUS_BRICK],
              [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_NV>(i_pTarget); }},
+                 {return
+                     getPervasiveParent<TARGET_TYPE_OBUS_BRICK>(i_pTarget);}},
             {targeting_targets[MY_CAPP],
              [](TARGETING::Target* i_pTarget)
                  {return getPervasiveParent<TARGET_TYPE_CAPP>(i_pTarget); }},

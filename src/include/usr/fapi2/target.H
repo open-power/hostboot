@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -217,8 +217,8 @@ inline TARGETING::TYPE convertFapi2TypeToTargeting(fapi2::TargetType i_T)
         case fapi2::TARGET_TYPE_OBUS:
             o_targetingType = TARGETING::TYPE_OBUS;
             break;
-        case fapi2::TARGET_TYPE_NV:
-            o_targetingType = TARGETING::TYPE_NV;
+        case fapi2::TARGET_TYPE_OBUS_BRICK:
+            o_targetingType = TARGETING::TYPE_OBUS_BRICK;
             break;
         case fapi2::TARGET_TYPE_SBE:
             o_targetingType = TARGETING::TYPE_SBE;
@@ -314,8 +314,8 @@ inline fapi2::TargetType  convertTargetingTypeToFapi2(TARGETING::TYPE i_T)
         case TARGETING::TYPE_OBUS:
             o_targetingType = fapi2::TARGET_TYPE_OBUS;
             break;
-        case TARGETING::TYPE_NV:
-            o_targetingType = fapi2::TARGET_TYPE_NV;
+        case TARGETING::TYPE_OBUS_BRICK:
+            o_targetingType = fapi2::TARGET_TYPE_OBUS_BRICK;
             break;
         case TARGETING::TYPE_SBE:
             o_targetingType = fapi2::TARGET_TYPE_SBE;
@@ -368,7 +368,7 @@ inline Target<T, V> Target<K, V>::getParent(void) const
             fapi2::TARGET_TYPE_CAPP |
             fapi2::TARGET_TYPE_DMI |
             fapi2::TARGET_TYPE_OBUS |
-            fapi2::TARGET_TYPE_NV |
+            fapi2::TARGET_TYPE_OBUS_BRICK |
             fapi2::TARGET_TYPE_SBE |
             fapi2::TARGET_TYPE_PPE |
             fapi2::TARGET_TYPE_PERV |
@@ -384,7 +384,7 @@ inline Target<T, V> Target<K, V>::getParent(void) const
             fapi2::TARGET_TYPE_XBUS |
             fapi2::TARGET_TYPE_OBUS |
             fapi2::TARGET_TYPE_CAPP |
-            fapi2::TARGET_TYPE_NV |
+            fapi2::TARGET_TYPE_OBUS_BRICK |
             fapi2::TARGET_TYPE_MCBIST |
             fapi2::TARGET_TYPE_MCS |
             fapi2::TARGET_TYPE_MCA |
@@ -559,13 +559,15 @@ inline Target<T, V> Target<K, V>::getParent(void) const
                     (T != fapi2::TARGET_TYPE_PROC_CHIP)),
                   "improper parent of fapi2::TARGET_TYPE_OBUS");
 
-    // valid parents for NV
-    // NV -> PERV
-    // NV -> PROC
-    static_assert(!((K == fapi2::TARGET_TYPE_NV) &&
+    // valid parents for OBUS_BRICK
+    // OBUS_BRICK -> PERV
+    // OBUS_BRICK -> OBUS
+    // OBUS_BRICK -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_OBUS_BRICK) &&
                     (T != fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_OBUS) &&
                     (T != fapi2::TARGET_TYPE_PROC_CHIP)),
-                  "improper parent of fapi2::TARGET_TYPE_NV");
+                  "improper parent of fapi2::TARGET_TYPE_OBUS_BRICK");
 
     // valid parents for CAPP
     // CAPP -> PERV
@@ -666,7 +668,7 @@ FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", T, i_state);
                     (T != fapi2::TARGET_TYPE_XBUS) &&
                     (T != fapi2::TARGET_TYPE_OBUS) &&
                     (T != fapi2::TARGET_TYPE_CAPP) &&
-                    (T != fapi2::TARGET_TYPE_NV) &&
+                    (T != fapi2::TARGET_TYPE_OBUS_BRICK) &&
                     (T != fapi2::TARGET_TYPE_MCBIST) &&
                     (T != fapi2::TARGET_TYPE_MCS) &&
                     (T != fapi2::TARGET_TYPE_MCA) &&
@@ -762,8 +764,8 @@ FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", T, i_state);
                   "fapi2::TARGET_TYPE_CAPP has no children");
     static_assert((K != fapi2::TARGET_TYPE_OBUS),
                   "fapi2::TARGET_TYPE_OBUS has no children");
-    static_assert((K != fapi2::TARGET_TYPE_NV),
-                  "fapi2::TARGET_TYPE_NV has no children");
+    static_assert((K != fapi2::TARGET_TYPE_OBUS_BRICK),
+                  "fapi2::TARGET_TYPE_OBUS_BRICK has no children");
     static_assert((K != fapi2::TARGET_TYPE_SBE),
                   "fapi2::TARGET_TYPE_SBE has no children");
     static_assert((K != fapi2::TARGET_TYPE_PPE),

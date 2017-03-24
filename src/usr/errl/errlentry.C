@@ -62,7 +62,6 @@ extern char hbi_ImageId;
 using namespace ERRORLOG;
 using namespace HWAS;
 
-
 namespace ERRORLOG
 {
 

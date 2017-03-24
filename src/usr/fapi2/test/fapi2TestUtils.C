@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,18 +36,16 @@
 
 //This is subject to change, try to keep updated
 #define NUM_EQS          6
-#define NUM_EXS          12
-#define NUM_CORES        24
-#define NUM_L2S          12
-#define NUM_L3S          12
-#define NUM_MCS          4
-#define NUM_MCAS         8
+#define NUM_EXS          2
+#define NUM_CORES        2
+#define NUM_MCS          2
+#define NUM_MCAS         2
 #define NUM_MCBISTS      2
 #define NUM_PECS         3
 #define NUM_PHBS         6
 #define NUM_XBUS         2
 #define NUM_OBUS         2
-#define NUM_NV           2
+#define NUM_OBUS_BRICK   3
 #define NUM_PPES         21
 #define NUM_PERVS        55
 #define NUM_CAPPS        2
@@ -206,6 +204,7 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
         }
     }
 
+
     //Setup OBUSs
     i_pMasterProcChip->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(l_epath);
     for(int i = 0; i < NUM_OBUS; i+=3)
@@ -215,6 +214,21 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
         {
             o_targetList[MY_OBUS] =
               TARGETING::targetService().toTarget(l_epath);
+
+            for (int j = 0; j < NUM_OBUS_BRICK; j++)
+            {
+                l_epath.addLast(TARGETING::TYPE_OBUS_BRICK, j);
+                if (TARGETING::targetService().toTarget(l_epath) != NULL)
+                {
+                    o_targetList[MY_OBUS_BRICK] =
+                        TARGETING::targetService().toTarget(l_epath);
+                    break;
+                }
+                else
+                {
+                    l_epath.removeLast();
+                }
+            }
             break;
         }
         else
@@ -223,22 +237,6 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
         }
     }
 
-    //Setup NV
-    i_pMasterProcChip->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(l_epath);
-    for(int i = 0; i < NUM_NV; i++)
-    {
-        l_epath.addLast(TARGETING::TYPE_NV, i);
-        if(TARGETING::targetService().toTarget(l_epath) != NULL)
-        {
-            o_targetList[MY_NV] =
-              TARGETING::targetService().toTarget(l_epath);
-            break;
-        }
-        else
-        {
-            l_epath.removeLast();
-        }
-    }
 
     //Setup PPEs
     i_pMasterProcChip->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(l_epath);

@@ -510,7 +510,7 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                      (l_element.type == TYPE_CAPP) ||
                      (l_element.type == TYPE_DMI) ||
                      (l_element.type == TYPE_OBUS) ||
-                     (l_element.type == TYPE_NV) ||
+                     (l_element.type == TYPE_OBUS_BRICK) ||
                      (l_element.type == TYPE_SBE) ||
                      (l_element.type == TYPE_PPE) ||
                      (l_element.type == TYPE_PERV) ||

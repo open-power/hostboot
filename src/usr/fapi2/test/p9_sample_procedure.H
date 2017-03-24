@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,8 +89,8 @@ fapi2::ReturnCode p9_sample_procedure_obus(
                fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_target,
                 uint8_t expectedValue);
 
-fapi2::ReturnCode p9_sample_procedure_nv(
-               fapi2::Target<fapi2::TARGET_TYPE_NV>& i_target,
+fapi2::ReturnCode p9_sample_procedure_obrick(
+               fapi2::Target<fapi2::TARGET_TYPE_OBUS_BRICK>& i_target,
                 uint8_t expectedValue);
 
 fapi2::ReturnCode p9_sample_procedure_sbe(

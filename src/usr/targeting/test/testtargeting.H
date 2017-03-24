@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -368,10 +368,10 @@ class TargetingTestSuite : public CxxTest::TestSuite
 
         TargetHandleList l_targs;
 
-        getAllChiplets( l_targs, TYPE_NV);
+        getAllChiplets( l_targs, TYPE_OBUS_BRICK);
         if(l_targs.size() == 0)
         {
-            TS_FAIL("TYPE_NV target incorrectly returned zero size");
+            TS_FAIL("TYPE_OBUS_BRICK target incorrectly returned zero size");
         }
         else
         {

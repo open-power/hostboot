@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -134,8 +134,8 @@ void test_fapi2Hwp()
                 targeting_targets[MY_XBUS]);
         fapi2::Target<fapi2::TARGET_TYPE_OBUS> fapi2_obusTarget(
                 targeting_targets[MY_OBUS]);
-        fapi2::Target<fapi2::TARGET_TYPE_NV> fapi2_nvTarget(
-                targeting_targets[MY_NV]);
+        fapi2::Target<fapi2::TARGET_TYPE_OBUS_BRICK> fapi2_oBrickTarget(
+                targeting_targets[MY_OBUS_BRICK]);
         fapi2::Target<fapi2::TARGET_TYPE_PPE> fapi2_ppeTarget(targeting_targets[MY_PPE]);
         fapi2::Target<fapi2::TARGET_TYPE_PERV> fapi2_pervTarget(
                 targeting_targets[MY_PERV]);
@@ -247,13 +247,13 @@ void test_fapi2Hwp()
           TS_FAIL("Error occured in p9_sample_procedure_obus !!");
         }
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_nv, fapi2_nvTarget, scratchWriteValue);
+        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_obrick, fapi2_oBrickTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
           delete l_errl;
           l_errl = NULL;
           numFails++;
-          TS_FAIL("Error occured in p9_sample_procedure_nv !!");
+          TS_FAIL("Error occured in p9_sample_procedure_obrick !!");
         }
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_ppe, fapi2_ppeTarget, scratchWriteValue);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,8 +150,8 @@ void directOverride()
             case fapi2::TARGET_TYPE_OBUS:
                 l_targetType = TARGETING::TYPE_OBUS;
                 break;
-            case fapi2::TARGET_TYPE_NV:
-                l_targetType = TARGETING::TYPE_NV;
+            case fapi2::TARGET_TYPE_OBUS_BRICK:
+                l_targetType = TARGETING::TYPE_OBUS_BRICK;
                 break;
             case fapi2::TARGET_TYPE_SBE:
                 l_targetType = TARGETING::TYPE_SBE;
