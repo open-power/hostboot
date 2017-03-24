@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -179,7 +179,7 @@ namespace HBOCC
             size_t l_startOffset = 0; // offset to start of the section
 
             // offset to length of the section
-            size_t l_offsetToLength = OCC_OFFSET_LENGTH; 
+            size_t l_offsetToLength = OCC_OFFSET_LENGTH;
 
             // Get length of OCC bootloader
             uint32_t *ptrToLength = (uint32_t *)(l_occLid + l_offsetToLength);
@@ -298,9 +298,7 @@ namespace HBOCC
         {
             config_data->firMaster = IS_FIR_MASTER;
 
-            // TODO: RTC 124683 The ability to write the HOMER data
-            //        is currently not available at runtime.
-#ifndef __HOSTBOOT_RUNTIME
+#if !defined(__HOSTBOOT_RUNTIME) || defined(CONFIG_HBRT_PRD)
             l_errl = PRDF::writeHomerFirData( config_data->firdataConfig,
                                           sizeof(config_data->firdataConfig) );
 #endif
