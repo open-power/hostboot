@@ -41,6 +41,9 @@ my $debug          = 0;
 my $report         = 0;
 my $sdr_file       = "";
 
+# TODO RTC:170860 - Remove this after dimm connector defines VDDR_ID
+my $num_voltage_rails_per_proc = 1;
+
 GetOptions(
     "f"   => \$force,             # numeric
     "x=s" => \$serverwiz_file,    # string
@@ -179,6 +182,12 @@ sub processSystem
 
     $targetObj->setAttribute($target, "XSCOM_BASE_ADDRESS", $base);
 
+    # TODO RTC:170860 - Remove this after dimm connector defines VDDR_ID
+    my $system_name = $targetObj->getAttribute($target,"SYSTEM_NAME");
+    if ($system_name =~ /ZAIUS/i)
+    {
+        $num_voltage_rails_per_proc = 2;
+    }
 }
 
 sub processIpmiSensors {
@@ -485,10 +494,18 @@ sub processProcessor
 
             # TODO RTC:170860 - Eventually the dimm connector will
             #   contain this information and this can be removed
-             my $socket_pos =  $targetObj->getAttribute($socket_target,
-                "POSITION");
-            $targetObj->setAttribute($child, "VDDR_ID", $socket_pos);
-
+            my $socket_pos =  $targetObj->getAttribute($socket_target,
+                                  "POSITION");
+            if ($num_voltage_rails_per_proc > 1)
+            {
+                my $mcbist_pos = $targetObj->getAttribute($child, "CHIP_UNIT");
+                $targetObj->setAttribute($child, "VDDR_ID",
+                         $socket_pos*$num_voltage_rails_per_proc + $mcbist_pos);
+            }
+            else
+            {
+                $targetObj->setAttribute($child, "VDDR_ID", $socket_pos);
+            }
         }
         elsif ($child_type eq "OCC")
         {
