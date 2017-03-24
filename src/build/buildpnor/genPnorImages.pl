@@ -509,9 +509,10 @@ sub manipulateImages
                              #|| ($eyeCatch eq "CAPP")
                              #|| ($eyeCatch eq "BOOTKERNEL");
 
-        my $isSpecialSecure =    ($eyeCatch eq "HBB");
-                              #|| ($eyeCatch eq "HBI")
-                              #|| ($eyeCatch eq "HBD");
+        my $isSpecialSecure =    ($eyeCatch eq "HBB")
+                              || ($eyeCatch eq "HBD");
+                             #|| ($eyeCatch eq "HBBL")
+                             #|| ($eyeCatch eq "HBI")
 
         my $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{DEFAULT}{flags};
         my $secureboot_hdr =  $sb_hdrs{DEFAULT}{file};

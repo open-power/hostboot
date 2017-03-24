@@ -236,21 +236,18 @@ NIMBUS_HCODE_FINAL_IMG = ${NIMBUS}.HCODE.bin
 NIMBUS_SBE_FINAL_IMG = ${NIMBUS}.SBE.bin
 NIMBUS_OCC_FINAL_IMG = ${NIMBUS}.OCC.bin
 SBEC_FINAL_IMG = SBEC.bin
-TEMP_IMG = temp.bin
 
 # Decide which PNOR to build
 .if(${FAKEPNOR} == "")
     # Paramemters passed into GEN_PNOR_IMAGE_SCRIPT.
-    #@TODO securebootp9 - Put `HBD=${${NIMBUS_HBD_IMG}:P},` back into genPnorImage parameters
-    GEN_NIMBUS_BIN_FILES = ${NIMBUS}:SBE=${${NIMBUS_SBE_IMG}:P},HCODE=${${NIMBUS_HCODE_IMG}:P},OCC=${${NIMBUS_OCC_IMG}:P}
+    GEN_NIMBUS_BIN_FILES = ${NIMBUS}:SBE=${${NIMBUS_SBE_IMG}:P},HCODE=${${NIMBUS_HCODE_IMG}:P},OCC=${${NIMBUS_OCC_IMG}:P},HBD=${${NIMBUS_HBD_IMG}:P}
     #@TODO RTC:163810 - Put SBEC back "--systemBinFile  SBEC=${${SBEC_IMG}:P}"
     SYSTEM_SPECIFIC_PARAMS = ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot} \
                              --pnorLayout ${DEFAULT_PNOR_LAYOUT} ${CORRUPT_PARAMS} \
                              --systemBinFiles ${GEN_NIMBUS_BIN_FILES} --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
 .else
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
-    #@TODO securebootp9 - Put `HBD=${${NIMBUS_VPO_HBD_IMG}:P}` back into genPnorImage parameters
-    GEN_NIMBUS_BIN_FILES = ${NIMBUS}:HCODE=${${NIMBUS_HCODE_IMG}:P}
+    GEN_NIMBUS_BIN_FILES = ${NIMBUS}:HCODE=${${NIMBUS_HCODE_IMG}:P},HBD=${${NIMBUS_VPO_HBD_IMG}:P}
     #@TODO RTC:163810 - Put SBEC back "--systemBinFile  SBEC=${${SBEC_IMG}:P}"
     SYSTEM_SPECIFIC_PARAMS = --pnorLayout ${DEFAULT_PNOR_LAYOUT} \
                              --systemBinFiles ${GEN_NIMBUS_BIN_FILES}
@@ -259,15 +256,11 @@ TEMP_IMG = temp.bin
 gen_system_specific_images: build_sbe_partitions
 	# Call script to generate final bin file for system specific images
 	${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS}
-	#@TODO securebootp9 - Remove all dd/ecc commands and add HBD back into genPnorImage
-	# HBD partition
-	dd if=${${NIMBUS_HBD_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync
-	ecc --inject ${TEMP_IMG} --output ${NIMBUS_HBD_FINAL_IMG} --p8
+
 	#for NIMBUS fake pnor skip version header
 	.if(${FAKEPNOR} != "")
 	dd if=${${NIMBUS_VPO_HBD_IMG}:P} of=${NIMBUS_HBD_FINAL_IMG} ibs=4k skip=1 conv=sync
 	.endif
-	rm -f ${TEMP_IMG}
 
 HOSTBOOT_DEFAULT_SECTIONS = HBBL=${HBBL_FINAL_IMG},HBB=${HBB_FINAL_IMG},HBI=${HBI_FINAL_IMG},HBRT=${HBRT_FINAL_IMG},TEST=${TEST_FINAL_IMG},TESTRO=${TESTRO_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},GUARD=${GUARD_FINAL_IMG},GLOBAL=${GLOBAL_FINAL_IMG},PAYLOAD=${PAYLOAD_FINAL_IMG},CVPD=${CVPD_FINAL_IMG},MVPD=${MVPD_FINAL_IMG},DJVPD=${DJVPD_FINAL_IMG},RINGOVD=${RINGOVD_FINAL_IMG},SBKT=${SBKT_FINAL_IMG},WOFDATA=${WOFDATA_FINAL_IMG}
 #@TODO RTC:163810 - Put SBEC back "SBEC=${SBEC_FINAL_IMG},"
