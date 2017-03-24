@@ -74,6 +74,9 @@ prd_obj += prdfMain.o
 # framework
 prd_obj += prdfDumpResolution.o
 
+# occ_firdata/
+prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfWriteHomerFirData.o)
+
 # plat/
 prd_obj += prdfPlatServices.o
 prd_obj += prdfRasServices.o
@@ -96,7 +99,6 @@ prd_obj += prdfMfgSync.o
 # occ_firdata/
 prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfPnorFirDataReader.o)
 prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfReadPnorFirData.o)
-prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfWriteHomerFirData.o)
 
 # plat/
 prd_obj += prdfPlatServices_ipl.o
