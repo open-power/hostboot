@@ -686,6 +686,7 @@
     <attribute><id>MNFG_TH_CEN_L4_CACHE_CES</id></attribute>
     <attribute><id>MNFG_TH_RCD_PARITY_ERRORS</id></attribute>
     <attribute><id>MNFG_TH_MEMORY_IUES</id></attribute>
+    <attribute><id>MNFG_TH_MEMORY_IMPES</id></attribute>
     <attribute><id>RCD_PARITY_RECONFIG_LOOPS_ALLOWED</id></attribute>
     <attribute><id>RCD_PARITY_RECONFIG_LOOP_COUNT</id></attribute>
     <attribute><id>OPT_MEMMAP_GROUP_POLICY</id></attribute>

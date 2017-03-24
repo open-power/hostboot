@@ -17489,6 +17489,22 @@ Measured in GB</description>
     <readable/>
 </attribute>
 
+<attribute>
+    <id>MNFG_TH_MEMORY_IMPES</id>
+    <description>
+      With MNFG thresholds enabled, PRD will make a predictive callout when a
+      memory intermittent MPE attention count is equal to this value. A value of
+      0 defaults to the max threshold of 0xff.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 <!-- === end configurable threshold attributes for PRD === -->
 
 <!-- === start RCD parity error reconfig loop attributes for PRD/MDIA === -->
