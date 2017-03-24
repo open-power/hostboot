@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,18 +66,18 @@
 
 typedef enum
 {
-    PNOR_FIR1 = 0x46495231, ///< FIR data version 1 ("FIR1" in ascii)
+    PNOR_FIR1 = 0x46495231, /** FIR data version 1 ("FIR1" in ascii) */
 
 } PNOR_Version_t;
 
 /** PNOR data header information. */
 typedef struct __attribute__((packed))
 {
-    uint32_t header; ///< Magic number to indicate valid data and version
+    uint32_t header; /** Magic number to indicate valid data and version */
 
-    uint32_t trgts    :  8; ///< Number of targets with register data
-    uint32_t full     :  1; ///< 1 if PNOR data is full and data may be missing
-    uint32_t iplState :  1; ///< Uses enum Homer_iplRuntime_t
+    uint32_t trgts    :  8; /** Number of targets with register data */
+    uint32_t full     :  1; /** 1 if PNOR data is full and data may be missing*/
+    uint32_t iplState :  1; /** See enum IplState_t */
     uint32_t reserved : 22;
 
 } PNOR_Data_t;
@@ -97,21 +97,21 @@ static inline PNOR_Data_t PNOR_getData()
 /** These values will match the corresponding bit fields in PNOR_Trgt_t. */
 typedef enum
 {
-    PNOR_Trgt_MAX_REGS_PER_TRGT    = 511, // Currently expect 266 on the PROC
-    PNOR_Trgt_MAX_ID_REGS_PER_TRGT =  15, // Currently expect 9 on the MBA
-    PNOR_Trgt_MAX_SCOM_ERRORS      = 511, // Should be plenty
+    PNOR_Trgt_MAX_REGS_PER_TRGT    = 511, /* Currently expect 266 on the PROC */
+    PNOR_Trgt_MAX_ID_REGS_PER_TRGT =  15, /* Currently expect 9 on the MBA */
+    PNOR_Trgt_MAX_SCOM_ERRORS      = 511, /* Should be plenty */
 
 } PNOR_Trgt_RegLimits_t;
 
 /** Information for each target with SCOM data. */
 typedef struct __attribute__((packed))
 {
-    uint32_t type     : 3; ///< Target type. See enum TrgtType_t
-    uint32_t procPos  : 3; ///< The processor position (0-7)
-    uint32_t unitPos  : 4; ///< Unit position relative to the processor (0-15)
-    uint32_t regs     : 9; ///< Number of normal registers
-    uint32_t idRegs   : 4; ///< Number of indirect-SCOM registers
-    uint32_t scomErrs : 9; ///< Number of SCOM errors detected
+    uint32_t type     : 3; /** Target type. See enum TrgtType_t */
+    uint32_t procPos  : 3; /** The processor position (0-7) */
+    uint32_t unitPos  : 4; /** Unit position relative to the processor (0-15) */
+    uint32_t regs     : 9; /** Number of normal registers */
+    uint32_t idRegs   : 4; /** Number of indirect-SCOM registers */
+    uint32_t scomErrs : 9; /** Number of SCOM errors detected */
 
 } PNOR_Trgt_t;
 
@@ -137,16 +137,16 @@ static inline PNOR_Trgt_t PNOR_getTrgt( uint32_t i_type, uint32_t i_procPos,
 /** Information for a normal register. */
 typedef struct __attribute__((packed))
 {
-    uint32_t addr;  ///< 32-bit address
-    uint64_t val;   ///< 64-bit value
+    uint32_t addr;  /** 32-bit address */
+    uint64_t val;   /** 64-bit value */
 
 } PNOR_Reg_t;
 
 /** Information for an indirect-SCOM register. */
 typedef struct __attribute__((packed))
 {
-    uint64_t addr;  ///< 64-bit address
-    uint32_t val;   ///< 32-bit value
+    uint64_t addr;  /** 64-bit address */
+    uint32_t val;   /** 32-bit value */
 
 } PNOR_IdReg_t;
 

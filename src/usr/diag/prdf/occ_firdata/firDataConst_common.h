@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,7 @@
 /** Target types for all supported targets. */
 typedef enum
 {
-    // NOTE: These will be used as array indexes.
+    /* NOTE: These will be used as array indexes. */
     FIRST_TRGT = 0,
     PROC       = FIRST_TRGT,
     EX,
@@ -62,7 +62,7 @@ typedef enum
 /** All register types. */
 typedef enum
 {
-    // NOTE: These will be used as array indexes.
+    /* NOTE: These will be used as array indexes. */
     FIRST_REG = 0,
     GLBL      = FIRST_REG,
     FIR,
@@ -73,11 +73,12 @@ typedef enum
 
 } RegType_t;
 
-/** IPL or Runtime flag in HOMER data */
+/** Indicates the state of the machine when the checkstop occurred. */
 typedef enum
 {
-    HOMER_RUNTIME_STATE = 0,
-    HOMER_IPL_STATE     = 1
-} Homer_IplRuntime_t;
+    FIRDATA_STATE_RUNTIME = 0,
+    FIRDATA_STATE_IPL     = 1,
 
-#endif // __firDataConst_common_h
+} IplState_t;
+
+#endif /* __firDataConst_common_h */

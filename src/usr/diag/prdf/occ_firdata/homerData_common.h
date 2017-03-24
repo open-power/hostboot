@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,17 +77,17 @@
 
 typedef enum
 {
-    HOMER_FIR1 = 0x46495231, ///< FIR data version 1 ("FIR1" in ascii)
+    HOMER_FIR1 = 0x46495231, /** FIR data version 1 ("FIR1" in ascii) */
 
 } HOMER_Version_t;
 
 /** PNOR information contained within the HOMER data. */
 typedef struct __attribute__((packed))
 {
-    uint32_t pnorOffset;     ///< Physical offset of FIRDATA in PNOR
-    uint32_t pnorSize;       ///< Maximum size of FIRDATA (includes ECC)
-    uint32_t mmioOffset;     ///< Address of MMIO access
-    uint32_t norWorkarounds; ///< NOR flash vendor
+    uint32_t pnorOffset;     /** Physical offset of FIRDATA in PNOR */
+    uint32_t pnorSize;       /** Maximum size of FIRDATA (includes ECC) */
+    uint32_t mmioOffset;     /** Address of MMIO access */
+    uint32_t norWorkarounds; /** NOR flash vendor */
 
 } HOMER_PnorInfo_t;
 
@@ -95,12 +95,12 @@ typedef struct __attribute__((packed))
  *  register counts. */
 typedef struct __attribute__((packed))
 {
-    uint32_t header; ///< Magic number to indicate valid data and version
+    uint32_t header; /** Magic number to indicate valid data and version */
 
-    uint16_t iplState :  1;  // Uses enum Homer_iplRuntime_t
+    uint16_t iplState :  1; /** See enum IplState_t */
     uint16_t reserved : 15;
 
-    uint8_t masterProc; ///< The position of the master PROC
+    uint8_t masterProc; /** The position of the master PROC */
 
     /** Bitwise mask to indicate which PROCs are configured (max 8). The mask
      *  bit position is consistant with PROC ATTR_POSITION attribute. */
@@ -170,4 +170,4 @@ static inline HOMER_Data_t HOMER_getData()
     return d;
 }
 
-#endif // __homerData_common_h
+#endif /* __homerData_common_h */
