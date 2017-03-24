@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,54 +104,58 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
         FAPI_INF("Complete testVerifyiPhbChipletNum");
     }
 
-    void testVerifyNvChipletNum()
+    void testVerifyObusBrickChipletNum()
     {
         uint8_t  l_chiplet_id = 0;
         uint8_t  l_exp_chiplet_id = 0;
+        uint8_t  l_chip_unit = 0;
 
-        FAPI_INF ("Start testVerifyNvChipletNum");
+        FAPI_INF ("Start testVerifyObusBrickChipletNum");
         do
         {
-            // find the all NV units
+            // find the all OBUS Brick units
             TARGETING::Target * pSys;
             TARGETING::targetService().getTopLevelTarget(pSys);
-            TARGETING::PredicateCTM predNv(TARGETING::CLASS_UNIT,
-                    TARGETING::TYPE_NV);
+            TARGETING::PredicateCTM predObusBrick(TARGETING::CLASS_UNIT,
+                    TARGETING::TYPE_OBUS_BRICK);
 
             TARGETING::TargetHandleList l_TargetList;
             TARGETING::targetService().getAssociated( l_TargetList, pSys,
                     TARGETING::TargetService::CHILD,
                     TARGETING::TargetService::ALL,
-                    &predNv);
+                    &predObusBrick);
 
             if (l_TargetList.empty())
             {
-                TS_FAIL("testVerifyNvChipletNum: empty l_TargetList");
+                TS_FAIL("testVerifyObusBrickChipletNum: empty l_TargetList");
                 break;
             }
 
-            // Iterate through all NV chiplets
+            // Iterate through all OBUS BRICK chiplets
             for (auto & l_Target : l_TargetList)
             {
                 // map Targeting Type to fapi2 Type
-                Target<fapi2::TARGET_TYPE_NV> fapi2_Target( l_Target);
+                Target<fapi2::TARGET_TYPE_OBUS_BRICK> fapi2_Target( l_Target);
                 l_chiplet_id = fapi2_Target.getChipletNumber();
 
-                FAPI_DBG("testVerifyNvChipletNum HUID: %.8X, ChipletId: %.8X",
+                FAPI_DBG("testVerifyObusBrickChipletNum HUID: %.8X, ChipletId: %.8X",
                     TARGETING::get_huid(l_Target), l_chiplet_id);
 
-                // NV 0,1 maps to pervasive id 0x05
-                l_exp_chiplet_id = START_NV_CHIPLET_NUM;
+                //OBUS Brick's chiplet id should be same as its parent
+                auto l_parent = static_cast<TARGETING::Target*>
+                        (fapi2_Target.getParent<TARGET_TYPE_OBUS>());
+                l_chip_unit = l_parent->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                l_exp_chiplet_id = l_chip_unit + START_OBUS_BRICK_CHIPLET_NUM;
 
                 if (l_chiplet_id != l_exp_chiplet_id)
                 {
-                    TS_FAIL("testVerifyNvChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
+                    TS_FAIL("testVerifyObusBrickChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
                          l_exp_chiplet_id, l_chiplet_id);
                     break;
                 }
             }
         } while(0);
-        FAPI_INF("Complete testVerifyNvChipletNum");
+        FAPI_INF("Complete testVerifyObusBrickChipletNum");
     }
 
     void testVerifyPecChipletNum()
@@ -789,7 +793,7 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
             testVerifyCappChipletNum();
 
-            testVerifyNvChipletNum();
+            testVerifyObusBrickChipletNum();
 
             testVerifyPecChipletNum();
 

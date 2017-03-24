@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -120,7 +120,7 @@ TargStrToType CHIP_UNIT_TYPE_TARG_STR_TO_TYPE [] =
     {"xbus"     , fapi2::TARGET_TYPE_XBUS       , TARGETING::TYPE_XBUS},
     {"abus"     , fapi2::TARGET_TYPE_ABUS       , TARGETING::TYPE_ABUS},
     {"obus"     , fapi2::TARGET_TYPE_OBUS       , TARGETING::TYPE_OBUS},
-    {"nv"       , fapi2::TARGET_TYPE_NV         , TARGETING::TYPE_NV},
+    {"obrick"   , fapi2::TARGET_TYPE_OBUS_BRICK , TARGETING::TYPE_OBUS_BRICK},
     {"sbe"      , fapi2::TARGET_TYPE_SBE        , TARGETING::TYPE_SBE},
     {"ppe"      , fapi2::TARGET_TYPE_PPE        , TARGETING::TYPE_PPE},
     {"perv"     , fapi2::TARGET_TYPE_PERV       , TARGETING::TYPE_PERV},

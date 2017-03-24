@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,21 +47,21 @@
 #define SIMULATED_GOOD_CORES 4
 
 // non-core and non-cache chiplet ids
-#define START_PERV_CHIPLET_NUM    0x01
+#define START_PERV_CHIPLET_NUM        0x01
 // CAPI Unit(0,1 => 0x02, 0x04)
-#define START_CAPP_CHIPLET_NUM    0x02
-// NV (0, 1 => 0x05)
-#define START_NV_CHIPLET_NUM      0x05
+#define START_CAPP_CHIPLET_NUM        0x02
+// OBUS BRICK ({0-2}, {9,11} => 0x09, 0xC)
+#define START_OBUS_BRICK_CHIPLET_NUM  0x09
 // XBUS (0, 1 => 0x6)
-#define START_XBUS_CHIPLET_NUM    0x06
+#define START_XBUS_CHIPLET_NUM        0x06
 // MCBIST (0, 1 => 0x07, 0x08)
-#define START_MCBIST_CHIPLET_NUM  0x07
+#define START_MCBIST_CHIPLET_NUM      0x07
 // OBUS (0, 3 => 0x09, 0x0C)
-#define START_OBUS_CHIPLET_NUM    0x09
+#define START_OBUS_CHIPLET_NUM        0x09
 // PEC (0, 1, 2 => 0x0D, 0x0E, 0x0F)
-#define START_PEC_0_CHIPLET_NUM   0x0D
-#define START_PEC_1_CHIPLET_NUM   0x0E
-#define START_PEC_2_CHIPLET_NUM   0x0F
+#define START_PEC_0_CHIPLET_NUM       0x0D
+#define START_PEC_1_CHIPLET_NUM       0x0E
+#define START_PEC_2_CHIPLET_NUM       0x0F
 
 // All Cache Chiplets
 #define START_EQ_CHIPLET_NUM      0x10
@@ -87,7 +87,7 @@ enum{
     MY_PHB,
     MY_XBUS,
     MY_OBUS,
-    MY_NV,
+    MY_OBUS_BRICK,
     MY_PPE,
     MY_PERV,
     MY_CAPP,
@@ -99,19 +99,19 @@ enum{
  *  @brief Number of children of given type that applicable pervasive has
  */
 enum PERVASIVE_CHILDREN {
-    PERV_EQ_CHILDREN       = 1,
-    PERV_CORE_CHILDREN     = 1,
-    PERV_XBUS_CHILDREN     = 2,
-    PERV_OBUS_CHILDREN     = 1,
-    PERV_CAPP_CHILDREN     = 1,
-    PERV_NV_CHILDREN       = 2,
-    PERV_MCBIST_CHILDREN   = 1,
-    PERV_MCS_CHILDREN      = 2,
-    PERV_MCA_CHILDREN      = 4,
-    PERV_PEC_CHILDREN      = 1,
-    PERV_PEC0_PHB_CHILDREN = 1,
-    PERV_PEC1_PHB_CHILDREN = 2,
-    PERV_PEC2_PHB_CHILDREN = 3,
+    PERV_EQ_CHILDREN           = 1,
+    PERV_CORE_CHILDREN         = 1,
+    PERV_XBUS_CHILDREN         = 2,
+    PERV_OBUS_CHILDREN         = 1,
+    PERV_CAPP_CHILDREN         = 1,
+    PERV_OBUS_BRICK_CHILDREN   = 3,
+    PERV_MCBIST_CHILDREN       = 1,
+    PERV_MCS_CHILDREN          = 2,
+    PERV_MCA_CHILDREN          = 4,
+    PERV_PEC_CHILDREN          = 1,
+    PERV_PEC0_PHB_CHILDREN     = 1,
+    PERV_PEC1_PHB_CHILDREN     = 2,
+    PERV_PEC2_PHB_CHILDREN     = 3,
 };
 
 /**
@@ -132,7 +132,6 @@ enum PERVASIVE_RANGE {
     OBUS_HIGH         = 12,
     CAPP0_RANGE       = 2,
     CAPP1_RANGE       = 4,
-    NV_RANGE          = 5,
     MC_LOW            = 7,
     MC_HIGH           = 8,
     PEC_LOW           = 13,

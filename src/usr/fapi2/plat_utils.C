@@ -308,9 +308,9 @@ void xlateTargetType(const fapi2::TargetType i_targetType,
         o_class = TARGETING::CLASS_UNIT;
         o_type = TARGETING::TYPE_OBUS;
         break;
-    case fapi2::TARGET_TYPE_NV:
+    case fapi2::TARGET_TYPE_OBUS_BRICK:
         o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_NV;
+        o_type = TARGETING::TYPE_OBUS_BRICK;
         break;
     case fapi2::TARGET_TYPE_SBE:
         o_class = TARGETING::CLASS_UNIT;
@@ -361,7 +361,7 @@ bool isPhysParentChild(const TargetType i_parentType,
                              TARGET_TYPE_CAPP   |
                              TARGET_TYPE_DMI    |
                              TARGET_TYPE_OBUS   |
-                             TARGET_TYPE_NV     |
+                             TARGET_TYPE_OBUS_BRICK     |
                              TARGET_TYPE_SBE    |
                              TARGET_TYPE_PPE    |
                              TARGET_TYPE_PERV   |

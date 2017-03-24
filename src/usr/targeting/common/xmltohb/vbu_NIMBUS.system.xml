@@ -42,7 +42,7 @@
      *     PEC 2 has 3 PHBs
      * Each Nimbus has 1 XBUS chiplet
      * Each Nimbus has 2 OBUS (OB0 and OB3)
-     * Each Nimbus has 2 NV
+     *     Each OBUS has 3 OBUS_BRICK
      * Each Nimbus has 21 PPE units (including the SBE):
      *    1 SBE, 1 Powerbus/Fabric PPE, 4 GPEs, 12 CMEs, and 3 IO PPEs.     *
      * Each chiplet existing in a Nimbus has 1 equivalent PERV unit
@@ -3140,21 +3140,21 @@
     </attribute>
 </targetInstance>
 
-<!-- Nimbus n0p0 NV units -->
+<!-- Nimbus n0p0 obus-brick units -->
 <targetInstance>
-    <id>sys0node0proc0nv0</id>
-    <type>unit-nv-nimbus</type>
+    <id>sys0node0proc0obus0obus-brick0</id>
+    <type>unit-obus-brick-power9</type>
     <attribute><id>HUID</id><default>0x00290000</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>NA</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/nv-0</default>
+        <default>physical:sys-0/node-0/proc-0/obus-0/obus_brick-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/nv-0</default>
+        <default>affinity:sys-0/node-0/proc-0/obus-0/obus_brick-0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3166,28 +3166,28 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x05</default>
+        <default>0x09</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-5</default>
+        <default>physical:sys-0/node-0/proc-0/perv-9</default>
     </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0nv1</id>
-    <type>unit-nv-nimbus</type>
+    <id>sys0node0proc0obus0obus-brick1</id>
+    <type>unit-obus-brick-power9</type>
     <attribute><id>HUID</id><default>0x00290001</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>NA</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/nv-1</default>
+        <default>physical:sys-0/node-0/proc-0/obus-0/obus_brick-1</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/nv-1</default>
+        <default>affinity:sys-0/node-0/proc-0/obus-0/obus_brick-1</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3199,11 +3199,143 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x05</default>
+        <default>0x09</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-5</default>
+        <default>physical:sys-0/node-0/proc-0/perv-9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0obus0obus-brick2</id>
+    <type>unit-obus-brick-power9</type>
+    <attribute><id>HUID</id><default>0x00290002</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/obus-0/obus_brick-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/obus-0/obus_brick-2</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x09</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0obus3obus-brick9</id>
+    <type>unit-obus-brick-power9</type>
+    <attribute><id>HUID</id><default>0x00290009</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/obus-3/obus_brick-9</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/obus-3/obus_brick-9</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0C</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0obus3obus-brick10</id>
+    <type>unit-obus-brick-power9</type>
+    <attribute><id>HUID</id><default>0x0029000A</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/obus-3/obus_brick-10</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/obus-3/obus_brick-10</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0C</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0obus3obus-brick11</id>
+    <type>unit-obus-brick-power9</type>
+    <attribute><id>HUID</id><default>0x0029000B</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/obus-3/obus_brick-11</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/obus-3/obus_brick-11</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0C</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-12</default>
     </attribute>
 </targetInstance>
 
@@ -8336,70 +8468,202 @@
     </attribute>
 </targetInstance>
 
-<!-- Nimbus n0p1 NV units -->
+<!-- Nimbus n0p1 obus-brick units -->
 <targetInstance>
-    <id>sys0node0proc1nv0</id>
-    <type>unit-nv-nimbus</type>
-    <attribute><id>HUID</id><default>0x00290002</default></attribute>
+    <id>sys0node0proc1obus0obus-brick0</id>
+    <type>unit-obus-brick-power9</type>
+    <attribute><id>HUID</id><default>0x0029000C</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>NA</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/nv-0</default>
+        <default>physical:sys-0/node-0/proc-1/obus-0/obus_brick-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/nv-0</default>
+        <default>affinity:sys-0/node-0/proc-1/obus-0/obus_brick-0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>2</default>
+        <default>12</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>0</default>
+        <default>12</default>
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x05</default>
+        <default>0x09</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-1/perv-5</default>
+        <default>physical:sys-0/node-0/proc-1/perv-9</default>
     </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc1nv1</id>
-    <type>unit-nv-nimbus</type>
-    <attribute><id>HUID</id><default>0x00290003</default></attribute>
+    <id>sys0node0proc1obus0obus-brick1</id>
+    <type>unit-obus-brick-power9</type>
+    <attribute><id>HUID</id><default>0x0029000D</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>NA</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/nv-1</default>
+        <default>physical:sys-0/node-0/proc-1/obus-0/obus_brick-1</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/nv-1</default>
+        <default>affinity:sys-0/node-0/proc-1/obus-0/obus_brick-1</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>3</default>
+        <default>13</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>1</default>
+        <default>13</default>
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x05</default>
+        <default>0x09</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-1/perv-5</default>
+        <default>physical:sys-0/node-0/proc-1/perv-9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1obus0obus-brick2</id>
+    <type>unit-obus-brick-power9</type>
+    <attribute><id>HUID</id><default>0x0029000E</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/obus-0/obus_brick-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/obus-0/obus_brick-2</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x09</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-1/perv-9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1obus3obus-brick9</id>
+    <type>unit-obus-brick-power9</type>
+    <attribute><id>HUID</id><default>0x0029000F</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/obus-3/obus_brick-9</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/obus-3/obus_brick-9</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0C</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-1/perv-12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1obus3obus-brick10</id>
+    <type>unit-obus-brick-power9</type>
+    <attribute><id>HUID</id><default>0x00290010</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/obus-3/obus_brick-10</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/obus-3/obus_brick-10</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0C</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-1/perv-12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1obus3obus-brick11</id>
+    <type>unit-obus-brick-power9</type>
+    <attribute><id>HUID</id><default>0x00290011</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/obus-3/obus_brick-11</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/obus-3/obus_brick-11</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0C</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-1/perv-12</default>
     </attribute>
 </targetInstance>
 

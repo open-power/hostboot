@@ -41,32 +41,31 @@ use constant
     PERVASIVE_PARENT_MCA_OFFSET => 7,
     PERVASIVE_PARENT_PEC_OFFSET => 13,
     PERVASIVE_PARENT_PHB_OFFSET => 13,
-    PERVASIVE_PARENT_NV_OFFSET => 5,
 
     NUM_PROCS_PER_GROUP => 4,
 };
 
 my %maxInstance = (
-    "PROC"  => 8,
-    "CORE"  => 24,
-    "EX"    => 12,
-    "EQ"    => 6,
-    "ABUS"  => 3,
-    "XBUS"  => 3,
-    "OBUS"  => 4,
-    "MCBIST"=> 2,
-    "MCS"   => 4,
-    "MCA"   => 8,
-    "PHB"   => 6, #PHB is same as PCIE
-    "PEC"   => 3, #PEC is same as PBCQ
-    "MBA"   => 2,
-    "PPE"   => 51, #Only 21, but they are sparsely populated
-    "PERV"  => 56, #Only 42, but they are sparsely populated
-    "CAPP"  => 2,
-    "SBE"   => 1,
-    "NV"    => 6, #FW only for GARD purposes
-    "MI"    => 4,
-    "OCC"   => 1,
+    "PROC"          => 8,
+    "CORE"          => 24,
+    "EX"            => 12,
+    "EQ"            => 6,
+    "ABUS"          => 3,
+    "XBUS"          => 3,
+    "OBUS"          => 4,
+    "MCBIST"        => 2,
+    "MCS"           => 4,
+    "MCA"           => 8,
+    "PHB"           => 6, #PHB is same as PCIE
+    "PEC"           => 3, #PEC is same as PBCQ
+    "MBA"           => 2,
+    "PPE"           => 51, #Only 21, but they are sparsely populated
+    "PERV"          => 56, #Only 42, but they are sparsely populated
+    "CAPP"          => 2,
+    "SBE"           => 1,
+    "OBUS_BRICK"    => 12,
+    "MI"            => 4,
+    "OCC"           => 1,
 );
 sub new
 {
@@ -803,6 +802,10 @@ sub setCommonAttrForChiplet
     {
         $unit_pos = $pos%2;
     }
+    elsif ($tgt_type eq "OBUS_BRICK")
+    {
+        $unit_pos = $pos%3;
+    }
 
     my $parent_affinity = $self->getAttribute(
                           $self->getTargetParent($target),"AFFINITY_PATH");
@@ -950,9 +953,12 @@ sub getPervasiveForUnit
             $unitToPervasive{"PHB$phb"} =
                 PERVASIVE_PARENT_PHB_OFFSET + ($phb>0) + ($phb>2);
         }
-        for my $nv (0..$maxInstance{"NV"}-1)
+        my $offset = 0;
+        for my $obrick (0..$maxInstance{"OBUS_BRICK"}-1)
         {
-            $unitToPervasive{"NV$nv"} = PERVASIVE_PARENT_NV_OFFSET;
+            $offset += (($obrick%3 == 0) && ($obrick != 0)) ? 1 : 0;
+            $unitToPervasive{"OBUS_BRICK$obrick"}
+                = PERVASIVE_PARENT_OBUS_OFFSET + $offset;
         }
     }
 

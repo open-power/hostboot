@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,10 +129,10 @@ class Fapi2IsFunctional : public CxxTest::TestSuite
                     targetList[MY_OBUS]);
             fapiTargetList[MY_OBUS] = fapi2_obusTarget;
 
-            // NV
-            Target<fapi2::TARGET_TYPE_NV> fapi2_nvTarget(
-                    targetList[MY_NV]);
-            fapiTargetList[MY_NV] = fapi2_nvTarget;
+            // OBUS_BRICK
+            Target<fapi2::TARGET_TYPE_OBUS_BRICK> fapi2_oBrickTarget(
+                    targetList[MY_OBUS_BRICK]);
+            fapiTargetList[MY_OBUS_BRICK] = fapi2_oBrickTarget;
 
             // PPE
             Target<fapi2::TARGET_TYPE_PPE> fapi2_ppeTarget(

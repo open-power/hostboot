@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -61,7 +61,7 @@ use constant TARGET_TYPE_MI => 0x00004000;
 use constant TARGET_TYPE_CAPP => 0x00008000;
 use constant TARGET_TYPE_DMI => 0x00010000;
 use constant TARGET_TYPE_OBUS => 0x00020000;
-use constant TARGET_TYPE_NV => 0x00040000;
+use constant TARGET_TYPE_OBUS_BRICK => 0x00040000;
 use constant TARGET_TYPE_SBE => 0x00080000;
 use constant TARGET_TYPE_PPE => 0x00100000;
 use constant TARGET_TYPE_PERV => 0x00200000;
@@ -649,10 +649,10 @@ sub main
                 $targType = TARGET_TYPE_PHB;
                 $targ =~ s/^.*pu.phb//;
             }
-            elsif ($targ =~ /pu.nvbus/)
+            elsif ($targ =~ /pu.obrick/)
             {
-                $targType = TARGET_TYPE_NV;
-                $targ =~ s/^.*pu.nvbus//;
+                $targType = TARGET_TYPE_OBUS_BRICK;
+                $targ =~ s/^.*pu.obrick//;
             }
             elsif ($targ =~ /pu.ppe/)
             {

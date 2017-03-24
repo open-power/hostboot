@@ -1411,7 +1411,7 @@ public:
 
                         break;
 
-                    case TYPE_NV:
+                    case TYPE_OBUS_BRICK:
                         TS_INFO( "testHWASisDescFunctional: "
                                   "NV is not functional");
                         pgData[VPD_CP00_PG_N3_INDEX] |=
