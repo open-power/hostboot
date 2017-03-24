@@ -234,10 +234,14 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/pnorLayoutFSP.xml \
     $(if $(FAKEPNOR), src/build/buildpnor/pnorLayoutFake.xml, ) \
     $(if $(FAKEPNOR), img/vbu_NIMBUS_targeting.bin, ) \
+    $(if $(FAKEPNOR), img/vbu_NIMBUS_targeting.bin.protected, ) \
+    $(if $(FAKEPNOR), img/vbu_NIMBUS_targeting.bin.unprotected, ) \
     $(if $(FAKEPNOR), img/vpo_sysmvpd.dat, ) \
     $(if $(FAKEPNOR), img/vpo_djvpd.dat, ) \
     $(if $(FAKEPNOR), img/dvpd.dat, ) \
     img/simics_NIMBUS_targeting.bin \
+    img/simics_NIMBUS_targeting.bin.protected \
+    img/simics_NIMBUS_targeting.bin.unprotected \
     obj/genfiles/fapiattrs.xml \
     obj/genfiles/hb_plat_attr_srvc.H \
     src/import/hwpf/fapi2/xml/attribute_info/hb_temp_defaults.xml \

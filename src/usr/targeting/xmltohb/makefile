@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -119,6 +119,11 @@ VMM_CONSTS_FILE = \
 
 GENFILES = ${XMLTOHB_TARGETS}
 
+XMLTOHB_SYSTEM_BINARIES += \
+	$(if $(CONFIG_SECUREBOOT),simics_NIMBUS_targeting.bin.protected)
+XMLTOHB_SYSTEM_BINARIES += \
+	$(if $(CONFIG_SECUREBOOT),simics_NIMBUS_targeting.bin.unprotected)
+
 #debug :
 #	@echo COMMON_TARGETING_PATH_PREFIX = ${COMMON_TARGETING_PATH_PREFIX}
 #	@echo COMMON_TARGETING_REL_PATH = ${COMMON_TARGETING_REL_PATH}
@@ -229,12 +234,13 @@ ${GENDIR}/%.hb.xml: %.system.xml ${GENDIR}/${XMLTOHB_GENERIC_XML} %.mrw.xml
 	${COMMON_TARGETING_REL_PATH}/${XMLTOHB_MERGE_SCRIPT} $^ > $@
 
 # create the binary files
-${GENDIR}/%_targeting.bin: ${XMLTOHB_COMPILER_SCRIPT} ${GENDIR}/%.hb.xml \
+${GENDIR}/%_targeting.bin \
+${GENDIR}/%_targeting.bin.protected \
+${GENDIR}/%_targeting.bin.unprotected: \
+        ${XMLTOHB_COMPILER_SCRIPT} ${GENDIR}/%.hb.xml \
         ${GENDIR}/${XMLTOHB_FAPI_XML} ${VMM_CONSTS_FILE}
 	$< $(addprefix --hb-xml-file=,${GENDIR}/$*.hb.xml) \
         $(addprefix --fapi-attributes-xml-file=,${GENDIR}/${XMLTOHB_FAPI_XML}) \
          --src-output-dir=none --img-output-dir=$(dir $@) \
-         --img-output-file=$(notdir $@) \
-         --vmm-consts-file=$(VMM_CONSTS_FILE) --noshort-enums \
-         --version-page
-
+         --img-output-file=$*_targeting.bin \
+         --vmm-consts-file=$(VMM_CONSTS_FILE) --noshort-enums
