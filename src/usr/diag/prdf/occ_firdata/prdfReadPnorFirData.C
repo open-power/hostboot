@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -203,7 +203,7 @@ errlHndl_t readPnorFirData( bool & o_validData, PnorTrgtMap & o_trgtMap,
         // Gather FFDC from header data.
         o_ffdc.trgts = data->trgts;
         o_ffdc.full  = (0 == data->full) ? false : true;
-        o_ffdc.iplStateActive = (HOMER_IPL_STATE == data->iplState)
+        o_ffdc.iplStateActive = (FIRDATA_STATE_IPL == data->iplState)
                                 ? true:false;
 
         // Iterate each target and get the register data.

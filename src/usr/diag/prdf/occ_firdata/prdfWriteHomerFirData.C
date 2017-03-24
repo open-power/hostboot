@@ -811,7 +811,7 @@ errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize,
 
         // Set flag indicating if IPL or runtime situation.
         data.iplState = (ALL_HARDWARE == i_curHw)
-                          ? HOMER_RUNTIME_STATE : HOMER_IPL_STATE;
+                          ? FIRDATA_STATE_RUNTIME : FIRDATA_STATE_IPL;
 
         // Get the PNOR information
         errl = getPnorInfo( data );
