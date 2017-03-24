@@ -49,6 +49,7 @@
 #include <sys/misc.h>
 #include <fapi2/plat_attr_override_sync.H>
 #include <targeting/attrPlatOverride.H>
+#include <config.h>
 
 using namespace INITSERVICE;
 using namespace ERRORLOG;
@@ -286,12 +287,25 @@ namespace TARGETING
 
         do
         {
+            #ifdef CONFIG_SECUREBOOT
+            // Securely load HB_DATA section
+            l_errl = PNOR::loadSecureSection(PNOR::HB_DATA);
+            if (l_errl)
+            {
+                break;
+            }
+            #endif
+
             // Locate attribute section in PNOR.
             PNOR::SectionInfo_t l_pnorSectionInfo;
             TargetingHeader* l_header = nullptr;
             l_errl = PNOR::getSectionInfo(PNOR::HB_DATA,
                                           l_pnorSectionInfo);
-            if (l_errl) break;
+            if(l_errl)
+            {
+                break;
+            }
+
             if(!iv_isMpipl)
             {
                 // Find attribute section header.
