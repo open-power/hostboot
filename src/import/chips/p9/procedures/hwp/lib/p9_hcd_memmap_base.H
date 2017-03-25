@@ -399,7 +399,6 @@ HCD_CONST(CPMR_DEBUG_REGION_OFFSET,             CPMR_TRACE_REGION_OFFSET + CPMR_
 HCD_CONST(CPMR_DEBUG_REGION_SIZE,               (64 * ONE_KB)) // 192K + 64K = 256K
 
 
-
 //---------------------------------------------------------------------------------------
 
 /// PPMR Header
