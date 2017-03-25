@@ -235,6 +235,7 @@ HCD_HDR_UINT32(g_sgpe_aux_offset, 0);
 HCD_HDR_UINT32(g_sgpe_aux_length, 0);
 HCD_HDR_UINT32(g_sgpe_aux_control, 0);
 HCD_HDR_UINT32(g_sgpe_reserve4, 0);
+HCD_HDR_UINT64(g_sgpe_chtm_mem_cfg, 0);
 HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #ifdef __ASSEMBLER__
 .endm
