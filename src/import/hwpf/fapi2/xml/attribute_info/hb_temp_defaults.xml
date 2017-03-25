@@ -169,6 +169,16 @@
         <default>0x01</default>
     </attribute>
 
+    <attribute>
+        <id>ATTR_CME_CHTM_TRACE_ENABLE</id>
+        <default>0x00</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_CME_CHTM_TRACE_MEMORY_CONFIG</id>
+        <default>0x00</default>
+    </attribute>
+
+
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->

@@ -1330,7 +1330,8 @@
     <attribute><id>DO_MSS_TRAINING_BAD_BITS</id></attribute>
     <!-- END memory workaround for DD1.02 -->
     <attribute><id>DO_BLUE_WATERFALL_ADJUST</id></attribute>
-
+    <attribute><id>CME_CHTM_TRACE_ENABLE</id></attribute>
+    <attribute><id>CME_CHTM_TRACE_MEMORY_CONFIG</id></attribute>
 </targetType><!-- chip-processor-power9 -->
 
 <!-- chip-processor-nimbus -->

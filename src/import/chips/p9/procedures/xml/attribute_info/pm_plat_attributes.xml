@@ -1604,6 +1604,44 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+     <id>ATTR_CME_CHTM_TRACE_ENABLE</id>
+     <description>
+     Enables the SGPE Hcode to enable the CME instruction traces into the CHTM
+     for debug.  Note:  all configured CMEs will be put into this
+     mode if this attribute is ON.
+
+     Consumer: p9_hcode_image_build.c ->
+                  SGPE Header field
+
+     Platform default:  OFF
+     </description>
+     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+     <valueType>uint8</valueType>
+     <enum>
+        OFF = 0x00, ON = 0x01
+    </enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+     <id>ATTR_CME_CHTM_TRACE_MEMORY_CONFIG</id>
+     <description>
+     CHTM Trace Memory Configuration value goes directly into CHTM_MEM register.
+     User is responsible to put correct data for each bit field of the register.
+
+     Consumer: p9_hcode_image_build.c ->
+                  SGPE Header field
+
+     Platform default:  0
+     </description>
+     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+     <valueType>uint64</valueType>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
      <id>ATTR_PGPE_HCODE_FUNCTION_ENABLE</id>
      <description>
      Enables the PGPE Hcode to physically perform frequency and voltage operations
