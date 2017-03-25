@@ -658,9 +658,10 @@ uint32_t copySectionToHomer( uint8_t* i_destPtr, uint8_t* i_srcPtr, uint8_t i_se
  */
 fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PROC& i_procTgt )
 {
-    uint8_t attrVal = 0;
-    uint32_t cmeFlag = 0;
-    uint32_t sgpeFlag = 0;
+    uint8_t      attrVal   = 0;
+    uint64_t     chtmVal   = 0;
+    uint32_t     cmeFlag   = 0;
+    uint32_t     sgpeFlag  = 0;
     pgpe_flags_t pgpeFlags;
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
@@ -729,10 +730,34 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     if( attrVal )
     {
-        sgpeFlag |= SGPE_CME_INSTRUCTION_TRACE_BIT_POS;
+        sgpeFlag |= SGPE_ENABLE_CME_TRACE_ARRAY_BIT_POS;
     }
 
     FAPI_DBG("CME Instruction Trace Enabled :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_CHTM_TRACE_ENABLE,
+                           i_procTgt,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_CME_CHTM_TRACE_ENABLE");
+
+    if( attrVal )
+    {
+        sgpeFlag |= SGPE_ENABLE_CHTM_TRACE_CME_BIT_POS;
+    }
+
+    FAPI_DBG("CME CHTM Trace Enabled :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_CHTM_TRACE_MEMORY_CONFIG,
+                           i_procTgt,
+                           chtmVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_CME_CHTM_TRACE_MEMORY_CONFIG" );
+
+    if( chtmVal )
+    {
+        pSgpeHdr->g_sgpe_chtm_mem_cfg = SWIZZLE_8_BYTE(chtmVal);
+    }
+
+    FAPI_DBG("CME CHTM Memory Config :   %016llx", chtmVal);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_DISABLE_QUEUED_SCAN,
                            FAPI_SYSTEM,
@@ -741,7 +766,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     if( attrVal )
     {
-        cmeFlag |= CME_QUEUED_SCAN_DISABLE;
+        cmeFlag |= CME_QUEUED_SCAN_DISABLE_BIT_POS;
     }
 
     FAPI_DBG("QUEUED_SCAN_DISABLE   :   %s", attrVal ? "TRUE" : "FALSE" );
@@ -769,6 +794,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     FAPI_INF("CME Flag Value        : 0x%08x", SWIZZLE_4_BYTE(pCmeHdr->g_cme_mode_flags));
     FAPI_INF("SGPE Flag Value       : 0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_reserve_flags));
+    FAPI_INF("SGPE Chtm Config      : 0x%016llx", SWIZZLE_8_BYTE(pSgpeHdr->g_sgpe_chtm_mem_cfg));
     FAPI_INF("PGPE Flag Value       : 0x%08x", SWIZZLE_2_BYTE(pPgpeHdr->g_pgpe_flags));
     FAPI_DBG(" -------------------- CME/SGPE Flags Ends ---------------==");
 
