@@ -1504,7 +1504,7 @@ fapi2::ReturnCode reset_rd_vref( const fapi2::Target<TARGET_TYPE_MCA>& i_target 
         // Turn on the rd vref calibration. We leverage an attribute to control this.
         {
             uint16_t l_vref_cal_enable = 0;
-            FAPI_TRY( mss::vref_cal_enable(i_target, l_vref_cal_enable) );
+            FAPI_TRY( mss::rdvref_cal_enable(i_target, l_vref_cal_enable) );
             FAPI_TRY( mss::scom_blastah(i_target, TT::RD_VREF_CAL_ENABLE_REG, l_vref_cal_enable) );
         }
     }

@@ -708,10 +708,10 @@ class eff_dimm
         fapi2::ReturnCode cal_step_enable();
 
         ///
-        /// @brief Determines and sets the vref_enable_bit settings
+        /// @brief Determines and sets the rdvref_enable_bit settings
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        fapi2::ReturnCode vref_enable_bit();
+        fapi2::ReturnCode rdvref_enable_bit();
 
         ///
         /// @brief Sets the RTT_NOM value from SPD

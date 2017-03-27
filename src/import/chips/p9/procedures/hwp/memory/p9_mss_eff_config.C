@@ -197,7 +197,7 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
         // Sets up the calibration steps
         FAPI_TRY( l_eff_dimm->cal_step_enable() );
-        FAPI_TRY( l_eff_dimm->vref_enable_bit() );
+        FAPI_TRY( l_eff_dimm->rdvref_enable_bit() );
 
         //Let's do some checking
         FAPI_TRY( mss::check::temp_refresh_mode());

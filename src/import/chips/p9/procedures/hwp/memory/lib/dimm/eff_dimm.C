@@ -4594,10 +4594,10 @@ fapi2::ReturnCode eff_dimm::cal_step_enable()
 }
 
 ///
-/// @brief Determines and sets the vref_enable_bit settings
+/// @brief Determines and sets the rdvref_enable_bit settings
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_dimm::vref_enable_bit()
+fapi2::ReturnCode eff_dimm::rdvref_enable_bit()
 {
     // Gets the MCS target to use
     const auto& l_mcs = mss::find_target<TARGET_TYPE_MCS>(iv_dimm);
@@ -4614,7 +4614,7 @@ fapi2::ReturnCode eff_dimm::vref_enable_bit()
     std::vector<uint16_t> l_vref_enable(PORTS_PER_MCS, l_vref_enable_value);
 
     // Sets the values
-    return FAPI_ATTR_SET(fapi2::ATTR_MSS_VREF_CAL_ENABLE, l_mcs, UINT16_VECTOR_TO_1D_ARRAY(l_vref_enable, PORTS_PER_MCS));
+    return FAPI_ATTR_SET(fapi2::ATTR_MSS_RDVREF_CAL_ENABLE, l_mcs, UINT16_VECTOR_TO_1D_ARRAY(l_vref_enable, PORTS_PER_MCS));
 }
 
 }//mss

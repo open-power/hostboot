@@ -204,7 +204,7 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
 
     FAPI_TRY( mss::write_ctr_cycles(i_target, l_write_cntr_cycles) );
     FAPI_TRY( mss::cal_abort_on_error(cal_abort_on_error) );
-    FAPI_TRY( mss::vref_cal_enable(i_target, l_vref_cal_enable) );
+    FAPI_TRY( mss::rdvref_cal_enable(i_target, l_vref_cal_enable) );
 
     // First, calculate the total number of cycles this cal should take if everything
     // runs to completion
@@ -216,7 +216,7 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     l_total_cycles += i_cal_steps_enabled.getBit<COARSE_WR>()   ? coarse_wr_cycles(i_target)   : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<COARSE_RD>()   ? coarse_rd_cycles(i_target)   : 0;
     l_total_cycles +=
-        ((l_vref_cal_enable != 0) && i_cal_steps_enabled.getBit<READ_CTR>()) ? rc::vref_guess_time(i_target) : 0;
+        ((l_vref_cal_enable != 0) && i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>()) ? rc::vref_guess_time(i_target) : 0;
 
     // Now we have to decide if we're going to abort on an error or keep going. If we keep going,
     // then we want our initial delay to be the expected time to completion - we don't have much
