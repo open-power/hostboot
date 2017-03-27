@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -55,7 +55,7 @@ namespace fapi
         MOD_ATTR_GET_TARGETING_TARGET              = 0x0D,
         MOD_ATTR_GET_TARGET_NAME                   = 0x0E,
         MOD_MVPD_ACCESS                            = 0x0F,
-        MOD_EXIT_CACHE_CONTAINED                   = 0x10,
+        // empty
         MOD_GET_CACHE_DECONFIG                     = 0x11,
         MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL     = 0x12,
         MOD_MBVPD_ACCESS                           = 0x13,
@@ -115,7 +115,7 @@ namespace fapi
         RC_UNEXPECTED_TARGET_TYPE     = HWPF_COMP_ID | 0x1C,
         RC_INVALID_RECORD             = HWPF_COMP_ID | 0x1D,
         RC_INVALID_KEYWORD            = HWPF_COMP_ID | 0x1E,
-        RC_MM_EXTEND_FAILED           = HWPF_COMP_ID | 0x1F,
+        // empty
         RC_INCORRECT_KEWORD_SIZE      = HWPF_COMP_ID | 0x20,
         RC_NO_SINGLE_MCS              = HWPF_COMP_ID | 0x21,
         RC_NO_SINGLE_MEMBUFF          = HWPF_COMP_ID | 0x22,
@@ -130,7 +130,7 @@ namespace fapi
         RC_HOST_TIMER_THREAD_FAIL     = HWPF_COMP_ID | 0x2B,
         RC_NULL_POINTER               = HWPF_COMP_ID | 0x2C,
         RC_RT_WAKEUP_FAILED           = HWPF_COMP_ID | 0x2D,
-        RC_NO_MIRRORED_MEMORY         = HWPF_COMP_ID | 0x2E,
+        // empty
         RC_VDDR_INVALID_VOLTAGE       = HWPF_COMP_ID | 0x2F,
         RC_TIMEOUT_EN_VDDR            = HWPF_COMP_ID | 0x30,
         RC_TARGET_UNSUPPORTED         = HWPF_COMP_ID | 0x31,
