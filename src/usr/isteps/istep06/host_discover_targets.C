@@ -28,8 +28,10 @@
 #include <map>
 #include <vector>
 #include <trace/interface.H>
+#include <sys/misc.h>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errludtarget.H>
 #include <targeting/attrsync.H>
 #include <targeting/namedtarget.H>
 #include <targeting/common/utilFilter.H>
@@ -52,6 +54,7 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <fapi2/target.H>
 
+#include <p9_cpu_special_wakeup.H>
 #include <p9_query_core_access_state.H>
 #include <p9_query_cache_access_state.H>
 #include <p9_hcd_core_stopclocks.H>
@@ -72,17 +75,22 @@ namespace ISTEP_06
 
 #ifdef CONFIG_PRINT_SYSTEM_INFO
 
-//Loop through list of targets and print out HUID and other key attributes if the target has it
+//Loop through list of targets and print out HUID and other key attributes if
+//the target has it
 void print_target_list(TARGETING::TargetHandleList i_targetList)
 {
 
-
-
     for(auto & l_targ : i_targetList)
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "%s", l_targ->getAttr<TARGETING::ATTR_PHYS_PATH>().toString());
+        char * l_targetString =
+        l_targ->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
 
-        //Every target has a HUID so it is safe to assume this will return okay from getAttr
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "%s", l_targetString);
+
+        free(l_targetString);
+
+        //Every target has a HUID so it is safe to assume this will return okay
+        //from getAttr
         uint32_t l_huid =  get_huid(l_targ );
 
         //if output says DEAD then the attribute is not defined
@@ -92,8 +100,8 @@ void print_target_list(TARGETING::TargetHandleList i_targetList)
         uint32_t l_fapi_pos = 0xDEAD;
         uint32_t l_chip_unit = 0xDEAD;
 
-        //The rest of these attributes may or may not exist on the target, so only add them to the
-        //string if the attribute exists
+        //The rest of these attributes may or may not exist on the target, so
+        //only add them to the string if the attribute exists
         TARGETING::AttributeTraits<TARGETING::ATTR_HWAS_STATE>::Type hwasState;
         if(l_targ->tryGetAttr<TARGETING::ATTR_HWAS_STATE>(hwasState))
         {
@@ -164,7 +172,65 @@ void print_system_info(void)
 }
 #endif
 
-//loop through slave quads, make sure clocks are stopped (core and cache) and power them down
+/**
+*  @brief  Walk through the cores and ensure special wakeup is disabled
+*          from all srcs.
+*
+*  @param[in/out] ISTEP_ERROR::IStepError
+*                 Pass in the istep error so we can add errors to it
+*
+*  @return     bool
+*              True if no errors were found
+*              False if at least 1 error was found
+*/
+bool deassertSpecialWakeupOnCores(ISTEP_ERROR::IStepError & io_istepError)
+{
+    errlHndl_t l_err = nullptr;
+    bool l_success = true;
+    // First disable special wakeup of all types for all cores
+    TARGETING::TargetHandleList l_coreTargetList;
+    TARGETING::getAllChiplets(l_coreTargetList, TARGETING::TYPE_CORE, true);
+
+    for(const auto & l_core : l_coreTargetList)
+    {
+        for(uint8_t l_src = 0; l_src < p9specialWakeup::SPW_ALL; l_src++)
+        {
+            FAPI_INVOKE_HWP(l_err, p9_cpu_special_wakeup_core, l_core,
+                            p9specialWakeup::SPCWKUP_DISABLE,
+                            p9specialWakeup::PROC_SPCWKUP_ENTITY(l_src));
+                            if ( l_err )
+                            {
+                                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                          "ERROR : returned from p9_cpu_special_wakeup_core for core 0x%x for src 0x%x", TARGETING::get_huid(l_core), l_src  );
+                                          l_success = false;
+                                          break;
+                            }
+                            else
+                            {
+                                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                          "disabled special wakeup for core 0x%x for src 0x%x", TARGETING::get_huid(l_core), l_src  );
+                            }
+        }
+        if(l_err)
+        {
+            // capture the target data in the elog
+            ERRORLOG::ErrlUserDetailsTarget(l_core).addToLog( l_err );
+            // add the err to the istep error
+            io_istepError.addErrorDetails(l_err);
+            //commit the error log (this will delete the err)
+            errlCommit(l_err, ISTEP_COMP_ID);
+        }
+    }
+
+    return l_success;
+}
+
+/**
+*  @brief  loop through slave quads, make sure clocks are stopped
+*          (core and cache) and power them down
+*
+*  @return     errlHndl_t
+*/
 errlHndl_t powerDownSlaveQuads()
 {
     TARGETING::Target* l_sys_target = nullptr;
@@ -180,6 +246,9 @@ errlHndl_t powerDownSlaveQuads()
     uint32_t l_ringStashAddr;
     TARGETING::TargetHandleList l_eqTargetList;
     getAllChiplets(l_eqTargetList, TARGETING::TYPE_EQ, true);
+    uint64_t EX_0_CME_SCOM_SICR_SCOM1 = 0x1001203E;
+    uint64_t CME_SCOM_SICR_PM_EXIT_C0_MASK = 0x0800000000000000;
+    size_t   MASK_SIZE = sizeof(CME_SCOM_SICR_PM_EXIT_C0_MASK);
 
 
     //Need to know who master is so we can skip them
@@ -210,6 +279,23 @@ errlHndl_t powerDownSlaveQuads()
         //If this is the master quad, we have already power cycled so we dont need this
         if(l_isMasterEq)
         {
+            //TODO RTC:171340 Need to clear PM_EXIT bit in EX_0_CME_SCOM_SICR_SCOM1 reg for MPIPL
+            //deassert pm exit flag on master core (both ex targs to be safe)
+            TARGETING::TargetHandleList l_exChildren;
+            TARGETING::getChildChiplets( l_exChildren,
+                                         l_eq_target,
+                                         TARGETING::TYPE_EX,
+                                         true);
+
+            for(const auto & l_ex_child : l_exChildren)
+            {
+                // Clear bit 4 of CME_SCOM_SICR which sets PM_EXIT
+                l_err = deviceWrite(l_ex_child,
+                                    &CME_SCOM_SICR_PM_EXIT_C0_MASK,
+                                    MASK_SIZE,
+                                    DEVICE_SCOM_ADDRESS(EX_0_CME_SCOM_SICR_SCOM1)); //0x1001203E
+            }
+            //continue to next EQ
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "Found master, jumping to next EQ");
             continue;
@@ -370,11 +456,11 @@ void* host_discover_targets( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "host_discover_targets entry" );
 
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     ISTEP_ERROR::IStepError l_stepError;
 
     // Check whether we're in MPIPL mode
-    TARGETING::Target* l_pTopLevel = NULL;
+    TARGETING::Target* l_pTopLevel = nullptr;
     TARGETING::targetService().getTopLevelTarget( l_pTopLevel );
     assert(l_pTopLevel, "host_discover_targets: no TopLevelTarget");
 
@@ -385,8 +471,12 @@ void* host_discover_targets( void *io_pArgs )
                   "information has already been loaded from memory"
                   "when the targeting service started");
 
-        //Need to power down the slave quads
-        l_err = powerDownSlaveQuads();
+        //Make sure that all special wakeups are disabled
+        if(deassertSpecialWakeupOnCores(l_stepError))
+        {
+            //Need to power down the slave quads
+            l_err = powerDownSlaveQuads();
+        }
 
     }
     else
@@ -401,7 +491,7 @@ void* host_discover_targets( void *io_pArgs )
     // Now that all targets have completed presence detect and vpd access,
     // invalidate PNOR::CENTAUR_VPD sections where all the targets sharing a
     // VPD_REC_NUM are invalid.
-    if (NULL == l_err) //discoverTargets worked
+    if (nullptr == l_err) //discoverTargets worked
     {
         l_err = VPD::validateSharedPnorCache();
     }
