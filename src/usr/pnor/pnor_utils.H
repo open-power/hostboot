@@ -227,32 +227,6 @@ parseEntries (ffs_hdr* i_ffs_hdr,
 bool isEnforcedSecureSection(const uint32_t i_section);
 
 /**
-  * @brief Returns string representation of a PNOR SectionId.
-  *        If id requested is out of range of known string array
-  *          - Hostboot asserts
-  *          - Bootloader terminates
-  *
-  * @param[in] i_secIdIndex     PNOR section id which also represents the index
-  *                             into the string array.
-  *
-  * @return  const char*  - String associated with Section ID
-  *
-*/
-const char * SectionIdToString( uint32_t i_secIdIndex );
-
-/**
- * @brief  Memcmp a vaddr to the known secureboot magic number
- *
- * @param[in]   i_vaddr: vaddr of secureboot header to check for magic number
- *                       Note: must point to a buffer of size >= 4 bytes
- *                       Nullptr asserts or terminates bootloader
- *
- * @return  bool - True if the magic number and starting bytes of the vaddr
- *                 match. False otherwise.
- */
-bool cmpSecurebootMagicNumber(const uint8_t* i_vaddr);
-
-/**
  * @brief Determines if a section has a Header and that it is not a Secure Header
  *
  * @param[out] i_secInfo  PNOR information of section

@@ -50,7 +50,6 @@
 #include "../trustedbootCmds.H"
 #include "../trustedbootUtils.H"
 #include "trustedbootMsg.H"
-#include <pnor_utils.H>
 
 // ----------------------------------------------
 // Trace definitions

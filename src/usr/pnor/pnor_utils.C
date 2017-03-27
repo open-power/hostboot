@@ -54,10 +54,7 @@ extern trace_desc_t* g_trac_pnor;
 #include <config.h>
 #include <securerom/ROM.H>
 
-#ifndef BOOTLOADER
-// Includes needed when hostboot uses this file
 #include <pnor/pnorif.H>
-#endif
 
 /**
  * @brief calculates the checksum on data(ffs header/entry) and will return

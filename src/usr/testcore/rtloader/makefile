@@ -24,8 +24,6 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 
-EXTRAINCDIR += ${ROOTPATH}/src/usr/pnor/
-
 MODULE = testrtloader
 TESTS = *.H
 
