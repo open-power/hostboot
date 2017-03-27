@@ -72,7 +72,8 @@
 #include <p9_perv_scom_addresses.H>
 #include <initservice/mboxRegs.H>
 #include <bootloader/bootloaderif.H>
-
+#include <secureboot/service.H>
+#include <assert.h>
 
 // ----------------------------------------------
 // Trace definitions
@@ -270,7 +271,6 @@ namespace SBE
 
             for(uint32_t i=0; i<procList.size(); i++)
             {
-
                 /*********************************************/
                 /*  Collect SBE Information for this Target  */
                 /*********************************************/
@@ -706,7 +706,6 @@ namespace SBE
                 o_imgPtr = reinterpret_cast<void*>
                                 (reinterpret_cast<char*>(hdr_Ptr)+0x1000);
             }
-
 
             if(NULL != o_version)
             {
@@ -1810,7 +1809,7 @@ namespace SBE
             /*  Get PNOR HBBL Information              */
             /*******************************************/
 
-            // Get SBE PNOR section info from PNOR RP
+            // Get HBBL PNOR section info from PNOR RP
             PNOR::SectionInfo_t pnorInfo;
             err = getSectionInfo( PNOR::HB_BOOTLOADER, pnorInfo );
             if(err)
@@ -1827,6 +1826,7 @@ namespace SBE
             TRACFCOMP( g_trac_sbe, "getSbeInfoState() - "
                        "hbblPnorPtr=%p, hbblMaxSize=0x%08X (%d)",
                        hbblPnorPtr, MAX_HBBL_SIZE, MAX_HBBL_SIZE);
+
 
             /*******************************************/
             /*  Append HBBL Image from PNOR to SBE     */
@@ -4709,5 +4709,277 @@ errlHndl_t sbeDoReboot( void )
 
     return err;
 }
+
+/////////////////////////////////////////////////////////////////////
+errlHndl_t getHwKeyHashFromSbeSeeprom(
+                           TARGETING::Target* const i_target,
+                           const EEPROM::eeprom_chip_types_t i_seeprom,
+                           SHA512_t o_hash)
+{
+    errlHndl_t err = nullptr;
+    TRACFCOMP( g_trac_sbe, ENTER_MRK"getHwKeyHashFromSbeSeeprom: "
+               "i_target=0x%X, i_seeprom=%d",
+               get_huid(i_target), i_seeprom);
+
+    // Check Input Parameters
+    assert(i_target != nullptr,"getHwKeyHashFromSbeSeeprom i_target can't be NULL");
+    assert(i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC, "getHwKeyHashFromSbeSeeprom i_target must be TYPE_PROC");
+    assert(((i_seeprom == EEPROM::SBE_PRIMARY) || (i_seeprom == EEPROM::SBE_BACKUP)), "getHwKeyHashFromSbeSeeprom i_seeprom=%d is invalid", i_seeprom);
+
+    // Code Assumptions
+    static_assert((sizeof(P9XipHeader) % 8) == 0, "getHwKeyHashFromSbeSeeprom(): sizeof(P9XipHeader) is not 8-byte-aligned");
+    static_assert((sizeof(P9XipHeader().iv_magic) % 8) == 0, "getHwKeyHashFromSbeSeeprom(): sizeof(P9XipHeader().iv_magic) is not 8-byte-aligned");
+    static_assert((sizeof(SHA512_t) % 8) == 0, "getHwKeyHashFromSbeSeeprom(): sizeof(SHA512_t) is not 8-byte-aligned");
+
+    // Local variables used to capture ECC FFDC
+    PNOR::ECC::eccStatus eccStatus = PNOR::ECC::CLEAN;
+    size_t seeprom_offset = 0;
+    size_t remove_ECC_size = 0;
+
+    // Create buffers for read operations and removing ECC
+    const size_t max_buffer_size = PNOR::ECC::sizeWithEcc(
+         (std::max(sizeof(P9XipHeader), sizeof(SHA512_t))));
+
+    uint8_t tmp_data[max_buffer_size] = {0};
+    uint8_t tmp_data_ECC[max_buffer_size] = {0};
+
+    do{
+        // Calculate amount of data to read
+        size_t size = PNOR::ECC::sizeWithEcc(sizeof(P9XipHeader));
+        size_t expected_size = size;
+
+        // P9XipHeader is at the start of the SBE Image
+        seeprom_offset = 0;
+
+        //Read SBE Versions
+        err = deviceRead( i_target,
+                          tmp_data_ECC,
+                          size,
+                          DEVICE_EEPROM_ADDRESS(i_seeprom,
+                                                seeprom_offset));
+        if(err)
+        {
+            TRACFCOMP( g_trac_sbe, ERR_MRK"getHwKeyHashFromSbeSeeprom() "
+                       "Error getting SBE Data from Tgt=0x%X SEEPROM (0x%X), "
+                       "RC=0x%X, PLID=0x%X",
+                       get_huid(i_target),
+                       EEPROM::SBE_BACKUP,
+                       ERRL_GETRC_SAFE(err),
+                       ERRL_GETPLID_SAFE(err));
+
+            err->collectTrace(SBE_COMP_NAME);
+
+            break;
+        }
+        assert(size==expected_size, "getHwKeyHashFromSbeSeeprom: size 0x%X returned form reading P9XipHeader does not equal expected_size=0x%X", size, expected_size);
+
+        remove_ECC_size = sizeof(P9XipHeader);
+        eccStatus = removeECC( tmp_data_ECC,
+                               tmp_data,
+                               remove_ECC_size,
+                               seeprom_offset,
+                               SBE_SEEPROM_SIZE);
+
+        if ( eccStatus == PNOR::ECC::UNCORRECTABLE )
+        {
+            TRACFCOMP( g_trac_sbe, "getHwKeyHashFromSbeSeeprom(): "
+                       "Uncorrectable eccStatus from reading P9XipHeader: %d",
+                       eccStatus);
+
+            // Break here - error log will be created after do-while loop
+            break;
+        }
+
+        TRACDBIN( g_trac_sbe,
+                  "getHwKeyHashFromSbeSeeprom: P9XipHeader with ECC",
+                  tmp_data_ECC,
+                  PNOR::ECC::sizeWithEcc(sizeof(P9XipHeader().iv_magic) ) );
+
+        TRACDBIN( g_trac_sbe,
+                  "getHwKeyHashFromSbeSeeprom: P9XipHeader no ECC",
+                  tmp_data,
+                  sizeof(P9XipHeader().iv_magic) ) ;
+
+        // After reading out P9XipHeader, call p9_xip_find to find HBBL image
+        // in SBE Image
+        P9XipSection l_xipSection = {0};
+
+        // Call p9_xip_find to find HBBL image in SBE image
+        auto l_sectionId = P9_XIP_SECTION_SBE_HBBL;
+
+        int xip_rc = p9_xip_get_section( tmp_data, l_sectionId, &l_xipSection );
+
+        TRACUCOMP( g_trac_sbe, "getHwKeyHashFromSbeSeeprom: xip_rc=%d: "
+                   "Section iv_offset=0x%X, iv_size=0x%X, iv_alignment=0x%X",
+                   xip_rc, l_xipSection.iv_offset, l_xipSection.iv_size,
+                   l_xipSection.iv_alignment);
+
+        // Check the return code
+        if( ( xip_rc != 0 ) ||
+            ( l_xipSection.iv_offset == 0 ) ||
+            ( l_xipSection.iv_size == 0 ) )
+        {
+            TRACFCOMP( g_trac_sbe, "getHwKeyHashFromSbeSeeprom: Error from "
+                       "p9_xip_get_section: xip_rc=%d: Section iv_offset=0x%X, "
+                       "iv_size=0x%X, iv_alignment=0x%X",
+                       xip_rc, l_xipSection.iv_offset, l_xipSection.iv_size,
+                       l_xipSection.iv_alignment);
+
+            /*@
+             * @errortype
+             * @moduleid         SBE_GET_HW_KEY_HASH
+             * @reasoncode       ERROR_FROM_XIP_FIND
+             * @userdata1[0:31]  Target HUID
+             * @userdata1[32:63] Seeprom Side
+             * @userdata2[0:15]  Offset of HBBL Section in Seeprom Image
+             * @userdata2[16:31] Size of HBBL Section in Seeprom Image
+             * @userdata2[32:63] Return Code from p9_xip_get_section
+             * @devdesc          Error Associated with Target's SBE Seeprom
+             * @custdesc         A problem occurred with processor seeprom
+             */
+            err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                SBE_GET_HW_KEY_HASH,
+                                ERROR_FROM_XIP_FIND,
+                                TWO_UINT32_TO_UINT64(
+                                  TARGETING::get_huid(i_target),
+                                  i_seeprom),
+                                TWO_UINT16_ONE_UINT32_TO_UINT64(
+                                  l_xipSection.iv_offset,
+                                  l_xipSection.iv_size,
+                                  xip_rc));
+
+            err->addPartCallout(i_target,
+                                HWAS::SBE_SEEPROM_PART_TYPE,
+                                HWAS::SRCI_PRIORITY_HIGH,
+                                HWAS::NO_DECONFIG,
+                                HWAS::GARD_NULL );
+
+            ErrlUserDetailsTarget(i_target,"Target").addToLog(err);
+
+            err->collectTrace(SBE_COMP_NAME);
+
+            break;
+        }
+
+
+        // Math to convert Image offset to Seeprom(with ECC) Offset
+        // -- Raw Image Offset -- HW Key Hash is at end of HBBL section
+        seeprom_offset = setECCSize(l_xipSection.iv_offset +
+                                    HBBL_HW_KEY_HASH_LOCATION);
+
+        // Clear buffers and set size to SHA512_t+ECC
+        memset( tmp_data_ECC, 0, max_buffer_size );
+        memset( tmp_data, 0, max_buffer_size );
+        size = PNOR::ECC::sizeWithEcc(sizeof(SHA512_t));
+        expected_size = size;
+
+        TRACUCOMP( g_trac_sbe, "getHwKeyHashFromSbeSeeprom: seeprom_offset "
+                   "= 0x%X, size = 0x%X",
+                   seeprom_offset, size);
+
+        //Read SBE Versions
+        err = deviceRead( i_target,
+                          tmp_data_ECC,
+                          size,
+                          DEVICE_EEPROM_ADDRESS(
+                                            i_seeprom,
+                                            seeprom_offset));
+        if(err)
+        {
+            TRACFCOMP( g_trac_sbe, ERR_MRK"getHwKeyHashFromSbeSeeprom() "
+                       "Error getting HKH from SEEPROM (0x%X), "
+                       "RC=0x%X, PLID=0x%X",
+                       EEPROM::SBE_BACKUP,
+                       ERRL_GETRC_SAFE(err),
+                       ERRL_GETPLID_SAFE(err));
+
+            err->collectTrace(SBE_COMP_NAME);
+
+            break;
+        }
+        assert(size==expected_size, "getHwKeyHashFromSbeSeeprom: size 0x%X returned form reading HW Key Hash does not equal expected_size=0x%X", size, expected_size);
+
+        remove_ECC_size = sizeof(SHA512_t);
+        eccStatus = removeECC( tmp_data_ECC,
+                               tmp_data,
+                               remove_ECC_size,
+                               seeprom_offset,
+                               SBE_SEEPROM_SIZE);
+
+        if ( eccStatus == PNOR::ECC::UNCORRECTABLE )
+        {
+            TRACFCOMP( g_trac_sbe, "getHwKeyHashFromSbeSeeprom(): "
+                       "Uncorrectable eccStatus from reading HW Key Hash: %d",
+                       eccStatus);
+
+            // Break here - error log will be created after do-while loop
+            break;
+        }
+
+        TRACDBIN( g_trac_sbe,
+                  "getHwKeyHashFromSbeSeeprom: ECC",
+                  tmp_data_ECC,
+                  expected_size ) ;
+
+        TRACDBIN( g_trac_sbe,
+                  "getHwKeyHashFromSbeSeeprom: no ECC",
+                  tmp_data,
+                  sizeof(SHA512_t) ) ;
+
+        // If we made it here, HW Key Hash was found successfully
+        TRACUCOMP( g_trac_sbe, INFO_MRK"getHwKeyHashFromSbeSeeprom(): hash "
+                   "found successfully - setting o_hash");
+        memcpy(o_hash, tmp_data, sizeof(SHA512_t));
+
+    }while(0);
+
+    // Create error log here for ECC fails
+    if ( (eccStatus == PNOR::ECC::UNCORRECTABLE)
+         && ( err == nullptr ) )
+    {
+        // Trace above; create error log here
+
+        /*@
+         * @errortype
+         * @moduleid         SBE_GET_HW_KEY_HASH
+         * @reasoncode       SBE_ECC_FAIL
+         * @userdata1[0:31]  Target HUID
+         * @userdata1[32:63] Seeprom Side
+         * @userdata2[0:15]  ECC Status
+         * @userdata2[16:31] No-ECC Data Size
+         * @userdata2[32:63] Offset into Seeprom Data Came From
+         * @devdesc          Error Associated with Updating this Target
+         * @custdesc         A problem occurred with processor seeprom
+         */
+        err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                            SBE_GET_HW_KEY_HASH,
+                            SBE_ECC_FAIL,
+                            TWO_UINT32_TO_UINT64(
+                              TARGETING::get_huid(i_target),
+                              i_seeprom),
+                            TWO_UINT16_ONE_UINT32_TO_UINT64(
+                              eccStatus,
+                              remove_ECC_size,
+                              seeprom_offset));
+
+        err->addPartCallout(i_target,
+                            HWAS::SBE_SEEPROM_PART_TYPE,
+                            HWAS::SRCI_PRIORITY_HIGH,
+                            HWAS::NO_DECONFIG,
+                            HWAS::GARD_NULL );
+
+        ErrlUserDetailsTarget(i_target,"Target").addToLog(err);
+
+        err->collectTrace(SBE_COMP_NAME);
+    }
+
+
+    TRACFCOMP( g_trac_sbe, EXIT_MRK"getHwKeyHashFromSbeSeeprom: "
+               "err rc=0x%X, plid=0x%X",
+               ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err));
+
+    return err;
+}
+
 
 } //end SBE Namespace

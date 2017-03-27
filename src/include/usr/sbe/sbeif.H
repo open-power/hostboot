@@ -27,6 +27,8 @@
 
 #include <errl/errlentry.H>
 #include <pnor/pnorif.H>
+#include <secureboot/service.H>
+#include <i2c/eepromif.H>
 
 namespace SBE
 {
@@ -35,7 +37,6 @@ namespace SBE
     const size_t   SBE_IMAGE_VERSION_SIZE = 64; // 64 bytes
 
     typedef uint8_t sbe_image_version_t[SBE_IMAGE_VERSION_SIZE];
-
 
     /**
      * @brief Gets a pointer to the proper SBE image in PNOR
@@ -99,6 +100,25 @@ namespace SBE
      * @return errlHndl_t       Error log handle on failure.
      */
     errlHndl_t updateSbeBootSeeprom(TARGETING::Target* i_target);
+
+    /**
+     * @brief Retrieves the HW Key Hash from the Bootloader (HBBL) Section
+     *        of the SBE Image located on a SBE Seeprom
+     *
+     * @param[in] i_target    Target Processor of the SBE SEEPPROM.
+     *                        Assert if nullptr.
+     *
+     * @param[in] i_seeprom   Specific SEEPROM on the processor to read the
+     *                        HW Key Hash from.
+     *                        Assert if neither SBE_PRIMARY nor SBE_BACKUP.
+     *
+     * @param[out] o_hash     HW Key Hash returned from the Processor SEEPROM
+     *
+     * @return errlHndl_t     Error log handle on failure; otherwise nullptr
+     */
+    errlHndl_t getHwKeyHashFromSbeSeeprom(TARGETING::Target* i_target,
+                                          EEPROM::eeprom_chip_types_t i_seeprom,
+                                          SHA512_t o_hash);
 
 } //end namespace SBE
 

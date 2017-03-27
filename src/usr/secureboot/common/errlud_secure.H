@@ -96,7 +96,7 @@ class UdTargetHwKeyHash : public ERRORLOG::ErrlUserDetails
      *  @param i_hash         Target HW Keys Hash represented by SHA512
      */
     UdTargetHwKeyHash(const TARGETING::Target * i_target,
-                      const uint8_t i_buflen,
+                      const uint8_t i_side,
                       const SHA512_t i_hash);
 
     /**

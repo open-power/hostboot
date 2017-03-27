@@ -41,6 +41,7 @@
 #include <config.h>
 #include <sbe/sbeif.H>
 #include "../sbe_update.H"
+#include <secureboot/service.H>
 
 
 extern trace_desc_t* g_trac_sbe;
@@ -830,6 +831,36 @@ class SBEUpdateTest: public CxxTest::TestSuite
                 break;
             }
 
+            total++;
+            SHA512_t hash = {0};
+            err = getHwKeyHashFromSbeSeeprom(sbeState.target,
+                                             EEPROM::SBE_BACKUP,
+                                             hash);
+
+            if(err)
+            {
+                fails++;
+                TS_FAIL("testSbeUpdateTarget() - getHwKeyHashFromSbeSeeprom() failed.");
+                break;
+            }
+
+            // Make sure that the HW Key Hash returned is the system hash
+            SHA512_t sys_hash = {0};
+            SECUREBOOT::getHwKeyHash(sys_hash);
+            if ( memcmp(hash, sys_hash, sizeof(SHA512_t)) != 0 )
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"testSbeUpdateTarget(): "
+                           "HW Key Hashes do not match!");
+                fails++;
+                TS_FAIL("testSbeUpdateTarget() - getHwKeyHashFromSbeSeeprom() did not return system hash");
+
+                TRACFBIN( g_trac_sbe, "testSbeUpdateTarget() hash",
+                          hash, sizeof(SHA512_t));
+                TRACFBIN( g_trac_sbe, "testSbeUpdateTarget() sys_hash",
+                          sys_hash, sizeof(SHA512_t));
+
+                break;
+            }
 
         }while(0);
 
