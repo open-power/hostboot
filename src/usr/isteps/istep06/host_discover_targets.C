@@ -248,7 +248,10 @@ errlHndl_t powerDownSlaveQuads()
     getAllChiplets(l_eqTargetList, TARGETING::TYPE_EQ, true);
     uint64_t EX_0_CME_SCOM_SICR_SCOM1 = 0x1001203E;
     uint64_t CME_SCOM_SICR_PM_EXIT_C0_MASK = 0x0800000000000000;
+    uint64_t CPPM_CORE_POWMAN_MODE_REG = 0x200F0108;
+    uint64_t SET_WKUP_SELECT_MASK = 0x0004000000000000;
     size_t   MASK_SIZE = sizeof(CME_SCOM_SICR_PM_EXIT_C0_MASK);
+
 
 
     //Need to know who master is so we can skip them
@@ -279,7 +282,6 @@ errlHndl_t powerDownSlaveQuads()
         //If this is the master quad, we have already power cycled so we dont need this
         if(l_isMasterEq)
         {
-            //TODO RTC:171340 Need to clear PM_EXIT bit in EX_0_CME_SCOM_SICR_SCOM1 reg for MPIPL
             //deassert pm exit flag on master core (both ex targs to be safe)
             TARGETING::TargetHandleList l_exChildren;
             TARGETING::getChildChiplets( l_exChildren,
@@ -287,6 +289,7 @@ errlHndl_t powerDownSlaveQuads()
                                          TARGETING::TYPE_EX,
                                          true);
 
+            //TODO 171763 Core state setup for MPIPL should be done in a HWP
             for(const auto & l_ex_child : l_exChildren)
             {
                 // Clear bit 4 of CME_SCOM_SICR which sets PM_EXIT
@@ -294,11 +297,63 @@ errlHndl_t powerDownSlaveQuads()
                                     &CME_SCOM_SICR_PM_EXIT_C0_MASK,
                                     MASK_SIZE,
                                     DEVICE_SCOM_ADDRESS(EX_0_CME_SCOM_SICR_SCOM1)); //0x1001203E
+                if(l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "Error clearing bit 4 of CME_SCOM_SICR on ex %d", l_ex_child->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                    break;
+                }
             }
-            //continue to next EQ
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "Found master, jumping to next EQ");
-            continue;
+
+            if(l_err)
+            {
+                //If there is an error break out of the EQ loop, something is wrong
+                break;
+            }
+
+            //TODO 171763 Core state setup for MPIPL should be done in a HWP
+            //Note this logic assumes FUSED_CORE mode and will need to be changed
+            // to account for OPAL and other non-fused cases.
+            //Check if the master quad has all 4 cores
+            if(l_coreTargetList.size() == 4)
+            {
+                //Set WKUP_SELECT bit on non-master cores that are on
+                // the master quad
+                l_err = deviceWrite(l_coreTargetList[2],
+                                    &SET_WKUP_SELECT_MASK,
+                                    MASK_SIZE,
+                                    DEVICE_SCOM_ADDRESS(CPPM_CORE_POWMAN_MODE_REG));
+                if(l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "Error setting WKUP_SELECT bit of CPPM_CORE_REG on core %d", l_coreTargetList[2]->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                    break;
+                }
+
+                l_err = deviceWrite(l_coreTargetList[3],
+                                    &SET_WKUP_SELECT_MASK,
+                                    MASK_SIZE,
+                                    DEVICE_SCOM_ADDRESS(CPPM_CORE_POWMAN_MODE_REG));
+                if(l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "Error setting WKUP_SELECT bit of CPPM_CORE_REG on core %d", l_coreTargetList[3]->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                    break;
+                }
+            }
+
+            if(l_err)
+            {
+                //If there is an error break out of the EQ loop, something is wrong
+                break;
+            }
+            else
+            {
+                //continue to next EQ
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Found and prepped master, jumping to next EQ");
+                continue;
+            }
         }
 
         //Stop Clocks on all the cores
@@ -434,7 +489,30 @@ errlHndl_t powerDownSlaveQuads()
 
             for(int x = 0; x < NUM_ENTRIES_IN_RING_DATA; x++)
             {
-                FAPI_DBG("Wrote %lx to OCC SRAM addr: 0x%lx", l_ringData[x], l_ringStashAddr + (x * 8));
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Wrote %lx to OCC SRAM addr: 0x%lx", l_ringData[x], l_ringStashAddr + (x * 8));
+            }
+
+            //TODO 171763 Core state setup for MPIPL should be done in a HWP
+            //set WKUP_SELECT bit for all slave cores
+            for(const auto & l_core_target : l_coreTargetList)
+            {
+                l_err = deviceWrite(l_core_target,
+                                    &SET_WKUP_SELECT_MASK,
+                                    MASK_SIZE,
+                                    DEVICE_SCOM_ADDRESS(CPPM_CORE_POWMAN_MODE_REG));
+                if(l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "Error setting WKUP_SELECT bit of CPPM_CORE_REG on core %d", l_core_target->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                    break;
+                }
+            }
+
+            if(l_err)
+            {
+                //Dont try to power down anymore EQs if we get a scom fail
+                break;
             }
 
         }while(0);
