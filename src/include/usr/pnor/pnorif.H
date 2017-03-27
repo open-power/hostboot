@@ -191,6 +191,32 @@ void getPnorInfo( PnorInfo_t& o_pnorInfo );
  */
 errlHndl_t setSecure(const uint32_t i_secId, SectionData_t* io_TOC);
 
+/**
+  * @brief Returns string representation of a PNOR SectionId.
+  *        If id requested is out of range of known string array
+  *          - Hostboot asserts
+  *          - Bootloader terminates
+  *
+  * @param[in] i_secIdIndex     PNOR section id which also represents the index
+  *                             into the string array.
+  *
+  * @return  const char*  - String associated with Section ID
+  *
+*/
+const char * SectionIdToString( uint32_t i_secIdIndex );
+
+/**
+ * @brief  Memcmp a vaddr to the known secureboot magic number
+ *
+ * @param[in]   i_vaddr: vaddr of secureboot header to check for magic number
+ *                       Note: must point to a buffer of size >= 4 bytes
+ *                       Nullptr asserts or terminates bootloader
+ *
+ * @return  bool - True if the magic number and starting bytes of the vaddr
+ *                 match. False otherwise.
+ */
+bool cmpSecurebootMagicNumber(const uint8_t* i_vaddr);
+
 } // PNOR
 
 #endif

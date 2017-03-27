@@ -47,7 +47,5 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/secureboot/trusted/base
 VPATH += ${ROOTPATH}/src/usr/secureboot/trusted/base
 VPATH += ${ROOTPATH}/src/securerom
 
-EXTRAINCDIR += ${ROOTPATH}/src/usr/pnor/
-
 CFLAGS += -iquote ../
 include ${ROOTPATH}/config.mk

@@ -47,6 +47,8 @@
 #include <secureboot/secure_reasoncodes.H>
 #include <p9_sbe_hb_structures.H>
 
+#include <pnor/pnorif.H>
+
 extern uint64_t kernel_other_thread_spinlock;
 extern PNOR::SectionData_t bootloader_hbbSection;
 extern char bootloader_end_address;

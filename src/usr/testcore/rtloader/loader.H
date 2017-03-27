@@ -42,7 +42,6 @@
 #include <devicefw/userif.H>
 #include <pnor/ecc.H>
 #include <ipmi/ipmiif.H>
-#include <pnor_utils.H>
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 2*KILOBYTE);
 
