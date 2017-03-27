@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,7 @@ namespace HWAS
         RC_RESOURCE_RECOVERED                   = HWAS_COMP_ID | 0x0A,
         RC_SYSAVAIL_MISSING_CRITICAL_RESOURCE   = HWAS_COMP_ID | 0x0B,
         RC_SYSAVAIL_NO_MCAS_FUNC                = HWAS_COMP_ID | 0x0C,
+        RC_SYSAVAIL_NO_MEMORY_FUNC_MASTER       = HWAS_COMP_ID | 0x0D,
     };
 };
 

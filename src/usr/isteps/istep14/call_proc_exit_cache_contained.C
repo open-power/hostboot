@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -179,8 +179,8 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
 
                 /*@
                  *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-                 *  @moduleid       fapi::MOD_EXIT_CACHE_CONTAINED,
-                 *  @reasoncode     fapi::RC_NO_MIRRORED_MEMORY,
+                 *  @moduleid       ISTEP::MOD_EXIT_CACHE_CONTAINED
+                 *  @reasoncode     ISTEP::RC_NO_MIRRORED_MEMORY
                  *  @userdata1      Mirrored Memory Address
                  *  @userdata2      0
                  *
@@ -191,8 +191,8 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                 l_errl = new ERRORLOG::ErrlEntry
                     (
                      ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                     fapi::MOD_EXIT_CACHE_CONTAINED,
-                     fapi::RC_NO_MIRRORED_MEMORY,
+                     ISTEP::MOD_EXIT_CACHE_CONTAINED,
+                     ISTEP::RC_NO_MIRRORED_MEMORY,
                      l_mirrorBaseAddr,
                      0,
                      true); // callout firmware
@@ -219,25 +219,55 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
             l_sys->setAttr<ATTR_PAYLOAD_BASE>(payloadBase);
         }
 
-        for (const auto & l_procChip: l_procList)
+        // Make sure we actually have memory before we try to use it
+        uint64_t l_bottom = get_bottom_mem_addr();
+        uint64_t l_top = get_top_mem_addr();
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Memory range : %.llX-%.llX", l_bottom, l_top );
+        if( (l_top == 0) || (l_top == l_bottom) )
         {
-            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                l_fapi_cpu_target(l_procChip);
-            // call p9_proc_exit_cache_contained.C HWP
-            FAPI_INVOKE_HWP( l_errl,
-                            p9_exit_cache_contained,
-                            l_procChip);
-
-            if(l_errl)
+            /*@
+             *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+             *  @moduleid       ISTEP::MOD_EXIT_CACHE_CONTAINED
+             *  @reasoncode     ISTEP::RC_NO_FUNCTIONAL_MEMORY
+             *  @userdata1      Bottom of memory
+             *  @userdata2      Top of memory
+             *
+             *  @devdesc        There is no functional memory
+             */
+            l_errl = new ERRORLOG::ErrlEntry
+              (
+               ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+               ISTEP::MOD_EXIT_CACHE_CONTAINED,
+               ISTEP::RC_NO_FUNCTIONAL_MEMORY,
+               l_bottom,
+               l_top);
+            // We should never get here so there is some kind of bug
+            l_errl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_HIGH );
+            // Also should look at the deconfigured memory
+            l_errl->addProcedureCallout( HWAS::EPUB_PRC_FIND_DECONFIGURED_PART,
+                                         HWAS::SRCI_PRIORITY_MED );
+        }
+        else
+        {
+            for (const auto & l_procChip: l_procList)
             {
-                ErrlUserDetailsTarget(l_procChip).addToLog(l_errl);
-                l_stepError.addErrorDetails( l_errl );
-                errlCommit( l_errl, HWPF_COMP_ID );
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_exit_cache_contained:: failed on proc with HUID : %d",TARGETING::get_huid(l_procChip)  );
+                const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                  l_fapi_cpu_target(l_procChip);
+                // call p9_proc_exit_cache_contained.C HWP
+                FAPI_INVOKE_HWP( l_errl,
+                                 p9_exit_cache_contained,
+                                 l_procChip);
+
+                if(l_errl)
+                {
+                    ErrlUserDetailsTarget(l_procChip).addToLog(l_errl);
+                    l_stepError.addErrorDetails( l_errl );
+                    errlCommit( l_errl, HWPF_COMP_ID );
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_exit_cache_contained:: failed on proc with HUID : %d", TARGETING::get_huid(l_procChip)  );
+                }
             }
         }
-
-
 
         // no errors so extend Virtual Memory Map
         if(!l_errl)
@@ -311,8 +341,8 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
             {
                 /*@
                  * @errortype
-                 * @moduleid     fapi::MOD_EXIT_CACHE_CONTAINED
-                 * @reasoncode   fapi::RC_MM_EXTEND_FAILED
+                 * @moduleid     ISTEP::MOD_EXIT_CACHE_CONTAINED
+                 * @reasoncode   ISTEP::RC_MM_EXTEND_FAILED
                  * @userdata1    rc from mm_extend
                  * @userdata2    <UNUSED>
                  *
@@ -321,8 +351,8 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                  */
                 l_errl = new ERRORLOG::ErrlEntry
                     (ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                     fapi::MOD_EXIT_CACHE_CONTAINED,
-                     fapi::RC_MM_EXTEND_FAILED,
+                     ISTEP::MOD_EXIT_CACHE_CONTAINED,
+                     ISTEP::RC_MM_EXTEND_FAILED,
                      rc,
                      0);
 
