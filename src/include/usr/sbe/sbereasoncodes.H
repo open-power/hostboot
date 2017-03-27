@@ -61,6 +61,7 @@ enum sbeModuleId
     SBE_WRITE_SBE_IMAGE                 = 0x10,
     SBE_GET_SBE_IMAGE_SIZE              = 0x11,
     SBE_APPEND_HBBL                     = 0x13,
+    SBE_GET_HW_KEY_HASH                 = 0x14,
 };
 
 /**

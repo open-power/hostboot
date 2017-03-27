@@ -33,6 +33,9 @@ namespace Bootloader{
 // Must be aligned CACHELINE_SIZE of 128 bytes
 #define MAX_HBBL_SIZE (20 * KILOBYTE)
 
+// Location of the HW Key Hash located at the end of the HBBL without ECC
+#define HBBL_HW_KEY_HASH_LOCATION  (MAX_HBBL_SIZE - sizeof(SHA512_t))
+
 // Size of exception vector reserved space at start of the HBBL section
 #define HBBL_EXCEPTION_VECTOR_SIZE (12 * KILOBYTE)
 

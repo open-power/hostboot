@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -24,6 +26,10 @@
 #define __PNOR_ECC_H
 
 #include <stdint.h>
+
+#ifdef __HOSTBOOT_MODULE
+#include <assert.h>
+#endif
 
 /** @file ecc.H
  *  @brief Interfaces for the P8 8-byte ECC algorithm.
@@ -77,6 +83,23 @@ namespace ECC
      */
     eccStatus removeECC(uint8_t* io_src,
                         uint8_t* o_dst, size_t i_dstSz);
+
+#ifdef __HOSTBOOT_MODULE
+    /** Given the size of Data, return the size of Data+ECC
+     *
+     *  @param[in] i_sizeWithoutEcc Size in bytes of data without ECC
+     *
+     *  @note i_sizeWithoutEcc must be a multiple of 8 bytes or will assert
+     *
+     * @return size of data with ECC
+     */
+    inline size_t sizeWithEcc(const size_t i_sizeWithoutEcc)
+    {
+        bool noRemainder = (i_sizeWithoutEcc % 8) == 0 ? true : false;
+        assert (noRemainder, "PNOR::ECC::sizeWithEcc: input needs to be multiple of 8 bytes");
+        return (i_sizeWithoutEcc * 9) / 8;
+    }
+#endif
 
 }
 }
