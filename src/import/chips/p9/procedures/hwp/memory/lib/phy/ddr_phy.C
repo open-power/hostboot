@@ -800,23 +800,15 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
     fapi2::buffer<uint64_t> l_cal_config;
     uint8_t l_sim = 0;
     uint8_t cal_abort_on_error = 0;
-    uint16_t l_vref_cal_enable = 0;
+
 
     FAPI_TRY( mss::cal_abort_on_error(cal_abort_on_error) );
     FAPI_TRY( mss::is_simulation(l_sim) );
-    FAPI_TRY( mss::vref_cal_enable(i_target, l_vref_cal_enable) );
 
     // This is the buffer which will be written to CAL_CONFIG0. It starts
     // life assuming no cal sequences, no rank pairs - but we set the abort-on-error
     // bit ahead of time.
     l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ABORT_ON_ERROR>(cal_abort_on_error);
-
-    // Check the write centering bits - if write centering is defined, don't run 2D. Vice versa.
-    if (i_cal_steps_enabled.getBit<WRITE_CTR>() && i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>())
-    {
-        FAPI_INF("Both 1D and 2D write centering were defined - only performing 2D");
-        i_cal_steps_enabled.clearBit<WRITE_CTR>();
-    }
 
     // Sadly, the bits in the register don't align directly with the bits in the attribute.
     // So, arrange the bits accordingly and write the config register.
@@ -846,9 +838,17 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
     }
 
     // Blast the VREF config with the proper setting for these cal bits if there were any enable bits set
-    if (l_vref_cal_enable != 0)
+    // TK let's remove the EC check sometime in the future. Added here to double check lab team on attribute overrides
+    if (i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>() && (!mss::chip_ec_feature_skip_hw_vref_cal(i_target)))
     {
+        uint16_t l_vref_cal_enable = 0;
+
         fapi2::buffer<uint64_t> l_data;
+        typedef rcTraits<fapi2::TARGET_TYPE_MCA> TT;
+
+        // Blast the VREF_CAL_ENABLE to the registers that control which dp16's to use for rdvref
+        FAPI_TRY( mss::rdvref_cal_enable(i_target, l_vref_cal_enable) );
+        FAPI_TRY( mss::scom_blastah(i_target, dp16Traits<TARGET_TYPE_MCA>::RD_VREF_CAL_ENABLE_REG, l_vref_cal_enable) );
 
         // The two bits we care about are the calibration enable and skip read centering
         // bits in rc_vref_config1. We always run RDVREF config, but sometimes skip
@@ -856,33 +856,33 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
         FAPI_TRY( mss::rc::read_vref_config1(i_target, l_data) );
 
         FAPI_INF("enabling read VREF cal, read centering is %s", i_cal_steps_enabled.getBit<READ_CTR>() ? "yup" : "nope");
-        l_data.setBit<MCA_DDRPHY_RC_RDVREF_CONFIG1_P0_CALIBRATION_ENABLE>();
 
-        if ((i_cal_steps_enabled.getBit<READ_CTR>() == mss::LOW) &&
-            (i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>() == mss::LOW))
+        l_data.setBit<TT::RDVREF_CALIBRATION_ENABLE>();
+
+        // Check to see if READ_CENTERING is disabled, if so, set the bit
+        if (!i_cal_steps_enabled.getBit<READ_CTR>())
         {
-
             FAPI_INF("skipping read centering");
-            l_data.clearBit<MCA_DDRPHY_RC_RDVREF_CONFIG1_P0_SKIP_RDCENTERING>();
+            l_data.setBit<TT::SKIP_RDCENTERING>();
         }
 
         FAPI_TRY( mss::rc::write_vref_config1(i_target, l_data) );
     }
 
-    // Configures WR VREF config register to run 1D (write centering only) or 2D (write centering + VREF) calibration
     {
-        std::vector<fapi2::buffer<uint64_t>> l_vref_config;
-        FAPI_TRY( mss::scom_suckah(i_target, mss::dp16Traits<fapi2::TARGET_TYPE_MCA>::WR_VREF_CONFIG0_REG, l_vref_config) );
+        typedef mss::dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+        std::vector<fapi2::buffer<uint64_t>> l_wr_vref_config;
+        FAPI_TRY( mss::scom_suckah(i_target, TT::WR_VREF_CONFIG0_REG, l_wr_vref_config) );
 
         // Loops and sets or clears the 2D VREF bit on all DPs
-        // Note: 2D VREF needs to be a 0 in the reg if it is to be enabled, hence the not in the write bit function
-        for(auto& l_data : l_vref_config)
+        for(auto& l_data : l_wr_vref_config)
         {
-            l_data.writeBit<MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_1D_CHICKEN_SWITCH>
-            (!i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>());
+            // 0: Run only the VREF (2D) write centering algorithm
+            // 1: Run only the 1D
+            l_data.writeBit<TT::WR_VREF_CONFIG0_1D_ONLY_SWITCH>(!i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>());
         }
 
-        FAPI_TRY(mss::scom_blastah(i_target,  mss::dp16Traits<fapi2::TARGET_TYPE_MCA>::WR_VREF_CONFIG0_REG, l_vref_config));
+        FAPI_TRY(mss::scom_blastah(i_target, TT::WR_VREF_CONFIG0_REG, l_wr_vref_config));
     }
 
     // loops through all RP's running workarounds and latching the VREF's as need be
