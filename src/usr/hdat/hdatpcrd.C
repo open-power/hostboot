@@ -76,6 +76,9 @@ const HdatKeywordInfo l_mvpdKeywords[] =
 
 };
 
+//Max number of I2c devices for any given proc
+#define HDAT_PCRD_MAX_I2C_DEV  64
+
 /*******************************************************************************
  * hdatSetPcrdHdrs
  *
@@ -142,7 +145,8 @@ HdatPcrd::HdatPcrd(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr)
 {
     // Allocate the CHIP INFO section also
     iv_numPcrdEntries = HDAT_NUM_P7_PCRD_ENTRIES;
-    iv_spPcrdEntrySize = sizeof(hdatSpPcrd_t) + HDAT_FULL_MVPD_SIZE;
+    iv_spPcrdEntrySize = sizeof(hdatSpPcrd_t) + HDAT_FULL_MVPD_SIZE +
+           sizeof(hdatHDIFDataArray_t) + (sizeof(hdatI2cData_t) * HDAT_PCRD_MAX_I2C_DEV);
 
     // Allocate space for each CHIP -- will use max amount to start
     uint64_t l_base_addr = ((uint64_t) i_msAddr.hi << 32) | i_msAddr.lo;
@@ -493,9 +497,10 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                     hdatSize;
                 this->iv_spPcrd->hdatPcrdIntData
                     [HDAT_PCRD_DA_HOST_I2C].hdatSize = l_pcrdHI2cTotalSize;
-                this->iv_spPcrd->hdatHdr.hdatSize += l_pcrdHI2cTotalSize;
+                this->iv_spPcrd->hdatHdr.hdatSize +=
+                sizeof(hdatHDIFDataArray_t) + (sizeof(hdatI2cData_t) * HDAT_PCRD_MAX_I2C_DEV);
 
-              
+                
                 uint8_t* l_temp = reinterpret_cast<uint8_t *>
                                                  (l_hostI2cFullPcrdHdrPtr);
 
@@ -503,13 +508,14 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                 l_pnor = reinterpret_cast<hdatPcrdPnor_t *>(l_temp);
             }
 
-            if ( l_pProcTarget == l_pMasterProc )
-            {
-                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_PNOR].hdatOffset =
-                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].hdatOffset
-                   + 
-                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].hdatSize;
 
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_PNOR].hdatOffset =
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].hdatOffset
+                   +
+            sizeof(hdatHDIFDataArray_t) + (sizeof(hdatI2cData_t) * HDAT_PCRD_MAX_I2C_DEV);
+
+            if(l_pProcTarget == l_pMasterProc)
+            {
                 hdatMsAddr_t l_hardCodedAddr = {0x00000000, 0x00000000};
 
                 HDAT_DBG("adding pnor data to the master processor");
@@ -544,15 +550,15 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
             }
             else
             {
-                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_PNOR].hdatOffset = 
-                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].hdatOffset
-                   +
-                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].hdatSize;
 
                 this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_PNOR].hdatSize
                                                              = 0;
                 HDAT_DBG("not a master proc, pnor data is not added");
             }
+            
+            // Add pnor struct size to whole pcrd size, since all pcrd
+            // structs should be of same size
+            this->iv_spPcrd->hdatHdr.hdatSize += sizeof(hdatPcrdPnor_t);
 
             if( NULL != l_errl)
             {
