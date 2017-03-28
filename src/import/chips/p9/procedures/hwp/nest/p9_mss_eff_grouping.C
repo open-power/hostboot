@@ -64,6 +64,9 @@ const uint8_t MCPORTID_5 = 0x5;
 const uint8_t MCPORTID_6 = 0x6;
 const uint8_t MCPORTID_7 = 0x7;
 
+// Max queues per port (MCPERF0 16:21)
+const uint8_t MAX_HTM_QUEUE_PER_PORT = 16;
+
 // -----------------------
 // Group allow definitions
 // -----------------------
@@ -298,7 +301,6 @@ fapi2::ReturnCode EffGroupingProcAttrs::getAttrs(
     FAPI_INF("  ATTR_PROC_MEM_BASE 0x%.16llX", iv_memBaseAddr);
     FAPI_INF("  ATTR_PROC_MIRROR_BASE 0x%.16llX", iv_mirrorBaseAddr);
 
-
 fapi_try_exit:
     FAPI_DBG("Exiting EffGroupingProcAttrs::getAttrs");
     return fapi2::current_err;
@@ -343,6 +345,7 @@ fapi2::ReturnCode EffGroupingMcaAttrs::getAttrs(
     fapi2::ReturnCode l_rc;
 
     // Get the amount of memory behind this MCA target
+    // Note: DIMM must be enabled to be accounted for.
     FAPI_TRY(mss::eff_memory_size(i_target, iv_dimmSize),
              "Error returned from eff_memory_size, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
@@ -668,6 +671,7 @@ struct EffGroupingBaseSizeData
         memset(iv_mirror_sizes, 0, sizeof(iv_mirror_sizes));
         memset(iv_mirror_sizes_ack, 0, sizeof(iv_mirror_sizes_ack));
         memset(iv_chtm_bar_bases, 0, sizeof(iv_chtm_bar_bases));
+        memset(iv_numHtmQueues, 0, sizeof(iv_numHtmQueues));
     }
 
     ///
@@ -682,6 +686,39 @@ struct EffGroupingBaseSizeData
     ///
     void setBaseSizeData(const EffGroupingSysAttrs& i_sysAttrs,
                          const EffGroupingData& i_groupData);
+
+    ///
+    /// @brief Figure out which memory region (index) an address belongs to.
+    ///
+    /// @param[in]  i_addr         Given address
+    /// @param[in]  i_sysAttrs     System attribute settings
+    /// @param[out] o_accMemSize   Accumulated memory size to cover address
+    ///
+    /// @return Memory region index where i_addr belongs to.
+    ///
+    uint8_t getMemoryRegionIndex(const uint64_t i_addr,
+                                 const EffGroupingSysAttrs& i_sysAttrs,
+                                 uint64_t& o_accMemSize);
+
+    ///
+    /// @brief Calculate then assign the number of HTM queues for each
+    ///        channel.  This is done for performance purpose when dumping
+    ///        out HTM traces.
+    ///
+    /// @param[in] i_groupData      Effective grouping data info
+    /// @param[in] i_startHtmIndex  Start HTM group index
+    /// @param[in] i_endHtmIndex    End HTM group index
+    ///
+    /// @return void
+    ///
+    void calcHtmQueues(const EffGroupingData& i_groupData,
+                       const uint64_t i_startHtmIndex,
+                       const uint64_t i_endHtmIndex);
+
+    // Calculate # of HTM queues to be reserved
+    // To improve trace performance, we need to reserve HTM queues on
+    // the channels that serve HTM trace space.
+    // The # of queues will be 16 (maximum) divided by the # of ports
 
     ///
     /// @brief Setting HTM and OCC base address based on HTM/OCC bar size
@@ -729,6 +766,9 @@ struct EffGroupingBaseSizeData
     uint64_t iv_occ_sandbox_base = 0;
     uint64_t iv_nhtm_bar_base = 0;
     uint64_t iv_chtm_bar_bases[NUM_OF_CHTM_REGIONS];
+
+    // Num of HTM queues to be reserved for each port
+    uint8_t iv_numHtmQueues[NUM_MC_PORTS_PER_PROC];
 };
 
 // See description in struct definition
@@ -755,16 +795,21 @@ void EffGroupingBaseSizeData::setBaseSizeData(
         iv_memory_sizes_ack[ii] <<= 30;
 
         FAPI_DBG("Non-mirror, Group %d:", ii);
-        FAPI_DBG("    i_groupData.iv_data[%d][BASE_ADDR] = 0x%.16llX",
+        FAPI_DBG("    i_groupData.iv_data[%d][BASE_ADDR] = %d",
                  ii,  i_groupData.iv_data[ii][BASE_ADDR]);
         FAPI_DBG("    i_groupData.iv_data[%d][PORT_SIZE] = %d",
                  ii,  i_groupData.iv_data[ii][PORT_SIZE]);
         FAPI_DBG("    i_groupData.iv_data[%d][PORTS_IN_GROUP] = %d",
                  ii,  i_groupData.iv_data[ii][PORTS_IN_GROUP]);
-        FAPI_DBG("    iv_mem_bases[%d] = 0x%.16llX", ii, iv_mem_bases[ii]);
-        FAPI_DBG("    iv_mem_bases_ack[%d] = 0x%.16llX", ii, iv_mem_bases_ack[ii]);
-        FAPI_DBG("    iv_memory_sizes[%d] = %.16lld bytes", ii, iv_memory_sizes[ii]);
-        FAPI_DBG("    iv_memory_sizes_ack[%d] = %.16lld bytes", ii, iv_memory_sizes_ack[ii]);
+
+        FAPI_DBG("    iv_mem_bases[%d] = 0x%.16llX (%d GB)",
+                 ii, iv_mem_bases[ii], iv_mem_bases[ii] >> 30);
+        FAPI_DBG("    iv_mem_bases_ack[%d] = 0x%.16llX (%d GB)",
+                 ii, iv_mem_bases_ack[ii], iv_mem_bases_ack[ii] >> 30);
+        FAPI_DBG("    iv_memory_sizes[%d] = %.16lld bytes (%d GB)",
+                 ii, iv_memory_sizes[ii], iv_memory_sizes[ii] >> 30);
+        FAPI_DBG("    iv_memory_sizes_ack[%d] = %.16lld bytes (%d GB)",
+                 ii, iv_memory_sizes_ack[ii], iv_memory_sizes_ack[ii] >> 30);
     }
 
     // Process mirrored ranges
@@ -794,20 +839,131 @@ void EffGroupingBaseSizeData::setBaseSizeData(
             iv_mirror_sizes_ack[ii] <<= 30;
 
             FAPI_DBG("Mirror: %d", ii);
-            FAPI_DBG("    i_groupData.iv_data[%d][BASE_ADDR] = 0x%.16llX",
-                     l_index,  i_groupData.iv_data[l_index][BASE_ADDR]);
+
+            FAPI_DBG("    i_groupData.iv_data[%d][BASE_ADDR] = 0x%.16llX (%d GB)",
+                     l_index,  i_groupData.iv_data[l_index][BASE_ADDR],
+                     i_groupData.iv_data[l_index][BASE_ADDR] >> 30);
             FAPI_DBG("    i_groupData.iv_data[%d][PORTS_IN_GROUP] = %d",
-                     ii,  i_groupData.iv_data[ii][PORTS_IN_GROUP]);
+                     l_index,  i_groupData.iv_data[l_index][PORTS_IN_GROUP]);
             FAPI_DBG("    i_groupData.iv_data[%d][PORT_SIZE] = %d",
-                     ii, i_groupData.iv_data[ii][PORT_SIZE]);
-            FAPI_DBG("    iv_mirror_bases[%d] = 0x%.16llX", ii, iv_mirror_bases[ii]);
-            FAPI_DBG("    iv_mirror_bases_ack[%d] = 0x%.16llX", ii, iv_mirror_bases_ack[ii]);
-            FAPI_DBG("    iv_mirror_sizes[%d] = %.16lld bytes", ii, iv_mirror_sizes[ii]);
-            FAPI_DBG("    iv_mirror_sizes_ack[%d] = %.16lld bytes", ii, iv_mirror_sizes_ack[ii]);
+                     l_index, i_groupData.iv_data[l_index][PORT_SIZE]);
+
+            FAPI_DBG("    iv_mirror_bases[%d] = 0x%.16llX (%d GB)",
+                     ii, iv_mirror_bases[ii], iv_mirror_bases[ii] >> 30);
+            FAPI_DBG("    iv_mirror_bases_ack[%d] = 0x%.16llX (%d GB)",
+                     ii, iv_mirror_bases_ack[ii], iv_mirror_bases_ack[ii] >> 30);
+            FAPI_DBG("    iv_mirror_sizes[%d] = %.16lld bytes (%d GB)",
+                     ii, iv_mirror_sizes[ii], iv_mirror_sizes[ii] >> 30);
+            FAPI_DBG("    iv_mirror_sizes_ack[%d] = %.16lld bytes (%d GB)",
+                     ii, iv_mirror_sizes_ack[ii], iv_mirror_sizes_ack[ii] >> 30);
         }
     }
 
     FAPI_DBG("Exiting");
+    return;
+}
+
+// See description in struct definition
+uint8_t EffGroupingBaseSizeData::getMemoryRegionIndex(
+    const uint64_t i_addr,
+    const EffGroupingSysAttrs& i_sysAttrs,
+    uint64_t& o_accMemSize)
+{
+    uint8_t l_index = 0xFF;
+    uint8_t l_numRegions = 0;
+    uint64_t* l_memSizePtr = NULL;
+    uint64_t l_startBaseAddr = 0;
+
+    FAPI_DBG("Entering EffGroupingBaseSizeData::getMemoryRegionIndex: "
+             "i_addr = %.16lld bytes (%d GB)",  i_addr,  i_addr >> 30);
+
+    // Point to non-mirror or mirror memory data
+    l_memSizePtr = &iv_memory_sizes[0];
+    l_numRegions = NUM_NON_MIRROR_REGIONS;
+    l_startBaseAddr = iv_mem_bases[0];
+
+    if (i_sysAttrs.iv_selectiveMode ==
+        fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)
+    {
+        l_memSizePtr = &iv_mirror_sizes[0] ;
+        l_numRegions = NUM_MIRROR_REGIONS;
+        l_startBaseAddr = iv_mirror_bases[0];
+    }
+
+    FAPI_DBG(" Start base addr: %.16lld (%d GB), Num regions %d",
+             l_startBaseAddr, l_startBaseAddr >> 30, l_numRegions);
+
+    o_accMemSize = 0;
+
+    for (uint8_t ii = 0; ii < l_numRegions; ii++)
+    {
+        // If mem available in region, add them up
+        if ( (*l_memSizePtr) > 0 )
+        {
+            o_accMemSize += (*l_memSizePtr);
+
+            FAPI_DBG("ii = %d, o_accMemSize = %.16lld (%d GB)",
+                     ii, o_accMemSize, o_accMemSize >> 30);
+
+            if ( (l_startBaseAddr + o_accMemSize) >= i_addr )
+            {
+                l_index = ii;
+                break;
+            }
+        }
+
+        // Passed last region (no more memory). This is the case where
+        // ALT_MEM exists, just return highest region index that contains memory.
+        else
+        {
+            l_index = ii - 1;
+            break;
+        }
+
+        // Point to next region
+        l_memSizePtr++;
+    }
+
+    FAPI_INF("Exiting - Index = %d, , o_accAddrValue = %.16lld (%d GB)",
+             l_index,  o_accMemSize, o_accMemSize >> 30);
+
+    return l_index;
+}
+
+// See description in struct definition
+void EffGroupingBaseSizeData::calcHtmQueues(const EffGroupingData& i_groupData,
+        const uint64_t i_startHtmIndex,
+        const uint64_t i_endHtmIndex)
+{
+    // To improve trace performance, we need to reserve HTM queues on
+    // the channels that serve HTM trace space.
+
+    // Number of ports from HTM start -> HTM end
+    uint8_t l_totalPorts = 0;
+
+    for (uint8_t ii = i_startHtmIndex; ii <= i_endHtmIndex; ii++)
+    {
+        l_totalPorts += i_groupData.iv_data[ii][PORTS_IN_GROUP];
+    }
+
+    // Spread the queues evenly to all the ports that serve HTM
+    // Each will have max queues (16) divided by the # of ports
+    uint8_t l_numQueues =  MAX_HTM_QUEUE_PER_PORT / l_totalPorts;
+
+    FAPI_DBG("l_totalPorts = %d, l_numQueues %d", l_totalPorts, l_numQueues);
+
+    // Set the queues to the port array
+    for (uint8_t ii = i_startHtmIndex; ii <= i_endHtmIndex; ii++)
+    {
+        // Ports in group loop
+        for (uint8_t l_memberIdx = 0;
+             l_memberIdx < i_groupData.iv_data[ii][PORTS_IN_GROUP]; l_memberIdx++)
+        {
+            uint8_t jj = i_groupData.iv_data[ii][MEMBER_IDX(0) + l_memberIdx];
+            iv_numHtmQueues[jj] = l_numQueues;
+        }
+    }
+
     return;
 }
 
@@ -821,12 +977,22 @@ fapi2::ReturnCode EffGroupingBaseSizeData::set_HTM_OCC_base_addr(
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
 
+    // Hold mem bases & sizes for mirror/non-mirror
+    uint8_t l_numRegions = 0;
+    uint64_t l_mem_bases[NUM_NON_MIRROR_REGIONS];
+    uint64_t l_mem_sizes[NUM_NON_MIRROR_REGIONS];
     uint64_t l_totalSize = 0;
     uint8_t l_memHole = 0;
+    uint8_t l_index = 0;
+    uint64_t l_accMemSize = 0;
+    uint64_t l_memSizeAfterHtmOcc = 0;
+    bool l_firstEnabledChtm = false;
+    uint8_t l_prevEnabledChtm = 0;
+    uint8_t l_start_htm_index = 0;
+    uint8_t l_end_htm_index = 0;
 
-    // Calculate total HTM size
+    // Calculate OCC/HTM requested space
     uint64_t l_nhtmSize = i_procAttrs.iv_nhtmBarSize;
-
     uint64_t l_chtmSize = 0;
 
     for (uint8_t ii = 0; ii < NUM_OF_CHTM_REGIONS; ii++)
@@ -837,243 +1003,178 @@ fapi2::ReturnCode EffGroupingBaseSizeData::set_HTM_OCC_base_addr(
     uint64_t l_htmOccSize = l_nhtmSize + l_chtmSize +
                             i_procAttrs.iv_occSandboxSize;
 
-    // No HTM/OCC size desired, get out with FAPI2_RC_SUCCESS (by default).
+    FAPI_INF("Selective Mode %d", i_sysAttrs.iv_selectiveMode);
+    FAPI_INF("l_nhtmSize %.16lld bytes (%d GB), l_chtmSize %.16lld bytes (%d GB) ",
+             l_nhtmSize,  l_nhtmSize >> 30, l_chtmSize, l_chtmSize >> 30);
+    FAPI_INF("OccSize %.16lld bytes (%d GB)",
+             i_procAttrs.iv_occSandboxSize, i_procAttrs.iv_occSandboxSize >> 30);
+
+    // No HTM/OCC space requested, exit
     if (l_htmOccSize == 0)
     {
         FAPI_INF("set_HTM_OCC_base_addr: No HTM/OCC memory requested.");
         return l_rc;
     }
 
-    // MEM_MIRROR_PLACEMENT_POLICY_NORMAL
+    // Setup mem base and size working array depending on mirror setting
     if (i_sysAttrs.iv_selectiveMode ==
-        fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)
+        fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)   // Normal
     {
-        for (uint8_t ii = 0; ii < NUM_NON_MIRROR_REGIONS; ii++)
-        {
-            l_totalSize += iv_memory_sizes[ii];
+        l_numRegions = NUM_NON_MIRROR_REGIONS;
+        memcpy(l_mem_bases, iv_mem_bases, sizeof(iv_mem_bases));
+        memcpy(l_mem_sizes, iv_memory_sizes,  sizeof(iv_memory_sizes));
+    }
+    else // Flipped
+    {
+        l_numRegions = NUM_MIRROR_REGIONS;
+        memcpy(l_mem_bases, iv_mirror_bases, sizeof(iv_mirror_bases));
+        memcpy(l_mem_sizes, iv_mirror_sizes, sizeof(iv_mirror_sizes));
+    }
 
-            for (uint8_t jj = 0; jj < NUM_OF_ALT_MEM_REGIONS; jj++)
+    // Calculate total available memory
+    for (uint8_t ii = 0; ii < l_numRegions; ii++)
+    {
+        l_totalSize += l_mem_sizes[ii];
+
+        for (uint8_t jj = 0; jj < NUM_OF_ALT_MEM_REGIONS; jj++)
+        {
+            if (i_groupData.iv_data[ii][ALT_VALID(jj)])
             {
-                if (i_groupData.iv_data[ii][ALT_VALID(jj)])
-                {
-                    l_memHole++;
-                }
+                l_memHole++;
             }
         }
+    }
 
-        // If total memory is not enough for requested HTM & OCC, error
-        FAPI_ASSERT(l_totalSize >= l_htmOccSize,
-                    fapi2::MSS_EFF_GROUPING_NO_SPACE_FOR_HTM_OCC_BAR()
-                    .set_TOTAL_SIZE(l_totalSize)
+    FAPI_INF("Total memory size = %.16lld bytes (%d GB) , l_memHole %d",
+             l_totalSize, l_totalSize >> 30, l_memHole);
+
+    // Error if total memory is not enough for requested HTM & OCC
+    FAPI_ASSERT(l_totalSize >= l_htmOccSize,
+                fapi2::MSS_EFF_GROUPING_NO_SPACE_FOR_HTM_OCC_BAR()
+                .set_TOTAL_SIZE(l_totalSize)
+                .set_NHTM_TOTAL_BAR_SIZE(l_nhtmSize)
+                .set_CHTM_TOTAL_BAR_SIZE(l_chtmSize)
+                .set_OCC_SANDBOX_BAR_SIZE(i_procAttrs.iv_occSandboxSize)
+                .set_MIRROR_PLACEMENT_POLICY(i_sysAttrs.iv_selectiveMode),
+                "EffGroupingBaseSizeData::set_HTM_OCC_base_addr: Required memory "
+                "space for the HTM and OCC SANDBOX BARS is not available. "
+                "Placement policy %u, TotalSize 0x%.16llX, HtmOccSize 0x%.16llX",
+                i_sysAttrs.iv_selectiveMode, l_totalSize, l_htmOccSize);
+
+    // Calculate which memory region the HTM & OCC memory starts
+    l_memSizeAfterHtmOcc = l_totalSize - l_htmOccSize;
+    FAPI_DBG("Memsize available after HTM/OCC: %.16lld (%d GB)",
+             l_memSizeAfterHtmOcc, l_memSizeAfterHtmOcc >> 30);
+
+    l_index = getMemoryRegionIndex(l_memSizeAfterHtmOcc + l_mem_bases[0],
+                                   i_sysAttrs,
+                                   l_accMemSize);
+
+    // Adjusted memory size for region where OCC/HTM starts
+    l_mem_sizes[l_index] = l_mem_sizes[l_index] -
+                           (l_accMemSize - l_memSizeAfterHtmOcc);
+
+    FAPI_DBG("Adjusted memsize at index - l_mem_sizes[%d] = %.16lld (%d GB)",
+             l_index,  l_mem_sizes[l_index], l_mem_sizes[l_index] >> 30);
+
+    if (l_memHole)
+    {
+        FAPI_ASSERT(l_mem_sizes[l_index] >= l_htmOccSize,
+                    fapi2::MSS_EFF_GROUPING_HTM_OCC_BAR_NOT_POSSIBLE()
+                    .set_AJUSTED_SIZE(l_mem_sizes[l_index])
                     .set_NHTM_TOTAL_BAR_SIZE(l_nhtmSize)
                     .set_CHTM_TOTAL_BAR_SIZE(l_chtmSize)
                     .set_OCC_SANDBOX_BAR_SIZE(i_procAttrs.iv_occSandboxSize)
                     .set_MIRROR_PLACEMENT_POLICY(i_sysAttrs.iv_selectiveMode),
-                    "EffGroupingBaseSizeData::set_HTM_OCC_base_addr: Required memory "
-                    "space for the HTM and OCC SANDBOX BARS is not available. "
-                    "Policy NORMAL, TotalSize 0x%.16llX, HtmOccSize 0x%.16llX",
-                    l_totalSize, l_htmOccSize);
-
-
-        uint64_t l_non_mirroring_size = l_totalSize - l_htmOccSize;
-        uint64_t l_temp_size = 0;
-        uint8_t l_index = 0;
-
-        for (uint8_t ii = 0; ii < NUM_NON_MIRROR_REGIONS; ii++)
-        {
-            l_temp_size += iv_memory_sizes[ii];
-
-            if (l_temp_size >= l_non_mirroring_size)
-            {
-                l_index = ii;
-                break;
-            }
-        }
-
-        if (l_memHole)
-        {
-            FAPI_ASSERT(iv_memory_sizes[l_index] >= l_htmOccSize,
-                        fapi2::MSS_EFF_GROUPING_HTM_OCC_BAR_NOT_POSSIBLE()
-                        .set_TOTAL_SIZE(l_totalSize)
-                        .set_NHTM_TOTAL_BAR_SIZE(l_nhtmSize)
-                        .set_CHTM_TOTAL_BAR_SIZE(l_chtmSize)
-                        .set_OCC_SANDBOX_BAR_SIZE(i_procAttrs.iv_occSandboxSize)
-                        .set_MIRROR_PLACEMENT_POLICY(i_sysAttrs.iv_selectiveMode),
-                        "EffGroupingBaseSizeData::set_HTM_OCC_base_addr: Memory HTM/OCC "
-                        "BAR not possible, Policy NORMAL, MemorySizes[%d] 0x%.16llX, "
-                        "HtmOccSize 0x%.16llX",
-                        l_index, iv_memory_sizes[l_index], l_htmOccSize);
-        }
-        else
-        {
-            for (uint8_t ii = l_index + 1; ii < NUM_NON_MIRROR_REGIONS; ii++)
-            {
-                if (iv_memory_sizes[ii])
-                {
-                    iv_memory_sizes[ii] = 0;
-                }
-            }
-        }
-
-        iv_memory_sizes[l_index] = iv_memory_sizes[l_index] -
-                                   (l_temp_size - l_non_mirroring_size);
-
-        // Setting HTM & OCC Base addresses
-        if ( (l_nhtmSize + l_chtmSize) < i_procAttrs.iv_occSandboxSize)
-        {
-            iv_occ_sandbox_base = iv_mem_bases[l_index] + iv_memory_sizes[l_index];
-            iv_nhtm_bar_base = iv_occ_sandbox_base + i_procAttrs.iv_occSandboxSize;
-            iv_chtm_bar_bases[0] = iv_nhtm_bar_base + i_procAttrs.iv_nhtmBarSize;
-
-            for (uint8_t ii = 1; ii < NUM_OF_CHTM_REGIONS; ii++)
-            {
-                iv_chtm_bar_bases[ii] = iv_chtm_bar_bases[ii - 1] +
-                                        i_procAttrs.iv_chtmBarSizes[ii - 1];
-            }
-        }
-        else
-        {
-            iv_nhtm_bar_base = iv_mem_bases[l_index] + iv_memory_sizes[l_index];
-            iv_chtm_bar_bases[0] = iv_nhtm_bar_base + i_procAttrs.iv_nhtmBarSize;
-
-            for (uint8_t ii = 1; ii < NUM_OF_CHTM_REGIONS; ii++)
-            {
-                iv_chtm_bar_bases[ii] = iv_chtm_bar_bases[ii - 1] +
-                                        i_procAttrs.iv_chtmBarSizes[ii - 1];
-            }
-
-            iv_occ_sandbox_base = iv_chtm_bar_bases[23] + i_procAttrs.iv_chtmBarSizes[23];
-        }
-
-        FAPI_INF("EffGroupingBaseSizeData::set_HTM_OCC_base_addr: NORMAL");
-        FAPI_INF("  Total memory 0x%.16llX, Required HtmOccSize 0x%.16llX",
-                 l_totalSize, l_htmOccSize);
-        FAPI_INF("  Index: %d, iv_mem_bases 0x%.16llX, iv_memory_sizes 0x%.16llX",
-                 l_index, iv_mem_bases[l_index], iv_memory_sizes[l_index]);
-        FAPI_INF("NHTM_BASE 0x%.16llX", iv_nhtm_bar_base);
-
-        for (uint8_t ii = 0; ii < NUM_OF_CHTM_REGIONS; ii++)
-        {
-            FAPI_INF("CHTM_BASE[%u] 0x%.16llX", ii, iv_chtm_bar_bases[ii]);
-        }
-
-        FAPI_INF("OCC_BASE 0x%.16llX", iv_occ_sandbox_base);
+                    "EffGroupingBaseSizeData::set_HTM_OCC_base_addr: Memory HTM/OCC "
+                    "BAR not possible, Placement policy %u, "
+                    "MemorySizes[%d] 0x%.16llX, HtmOccSize 0x%.16llX",
+                    i_sysAttrs.iv_selectiveMode, l_index, l_mem_sizes[l_index],
+                    l_htmOccSize);
     }
-    // MEM_MIRROR_PLACEMENT_POLICY_FLIPPED
-    else if (i_sysAttrs.iv_selectiveMode ==
-             fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)
+
+    // Setting NHTM & OCC base addresses
+    if ( (l_nhtmSize + l_chtmSize) < i_procAttrs.iv_occSandboxSize)
     {
-        for (uint8_t ii = 0; ii < NUM_MIRROR_REGIONS ; ii++)
-        {
-            l_totalSize += iv_mirror_sizes[ii];
-
-            for (uint8_t jj = 0; jj < NUM_OF_ALT_MEM_REGIONS; jj++)
-            {
-                if (i_groupData.iv_data[ii][ALT_VALID(jj)])
-                {
-                    l_memHole++;
-                }
-            }
-        }
-
-        // Check available total memory, if not enough for requested HTM & OCC
-        // size, error out
-        FAPI_ASSERT(l_totalSize >= l_htmOccSize,
-                    fapi2::MSS_EFF_GROUPING_NO_SPACE_FOR_HTM_OCC_BAR()
-                    .set_TOTAL_SIZE(l_totalSize)
-                    .set_NHTM_TOTAL_BAR_SIZE(l_nhtmSize)
-                    .set_CHTM_TOTAL_BAR_SIZE(l_chtmSize)
-                    .set_OCC_SANDBOX_BAR_SIZE(i_procAttrs.iv_occSandboxSize)
-                    .set_MIRROR_PLACEMENT_POLICY(i_sysAttrs.iv_selectiveMode),
-                    "EffGroupingBaseSizeData::set_HTM_OCC_base_addr: Required memory "
-                    "space for the HTM and OCC SANDBOX BARS is not available. "
-                    "Policy FLIPPED, TotalSize 0x%.16llX, HtmOccSize 0x%.16llX",
-                    l_totalSize, l_htmOccSize);
-
-        uint64_t l_mirroring_size = l_totalSize - l_htmOccSize;
-        uint64_t l_temp_size = 0;
-        uint8_t l_index = 0;
-
-        for (uint8_t ii = 0; ii < NUM_MIRROR_REGIONS; ii++)
-        {
-            l_temp_size += iv_mirror_sizes[ii];
-
-            if (l_temp_size >= l_mirroring_size)
-            {
-                l_index = ii;
-                break;
-            }
-        }
-
-        if (l_memHole)
-        {
-            FAPI_ASSERT(iv_mirror_sizes[l_index] >= l_htmOccSize,
-                        fapi2::MSS_EFF_GROUPING_HTM_OCC_BAR_NOT_POSSIBLE()
-                        .set_TOTAL_SIZE(l_totalSize)
-                        .set_NHTM_TOTAL_BAR_SIZE(l_nhtmSize)
-                        .set_CHTM_TOTAL_BAR_SIZE(l_chtmSize)
-                        .set_OCC_SANDBOX_BAR_SIZE(i_procAttrs.iv_occSandboxSize)
-                        .set_MIRROR_PLACEMENT_POLICY(i_sysAttrs.iv_selectiveMode),
-                        "EffGroupingBaseSizeData::set_HTM_OCC_base_addr Memory HTM/OCC "
-                        "BAR not possible, Policy FLIPPED, MemorySizes[%d] 0x%.16llX, "
-                        "HtmOccSize 0x%.16llX",
-                        l_index, iv_mirror_sizes[l_index], l_htmOccSize);
-        }
-        else
-        {
-            for (uint8_t ii = l_index + 1; ii < NUM_MIRROR_REGIONS; ii++)
-            {
-                if (iv_mirror_sizes[ii])
-                {
-                    iv_mirror_sizes[ii] = 0;
-                }
-            }
-        }
-
-        iv_mirror_sizes[l_index] = iv_mirror_sizes[l_index] -
-                                   (l_temp_size - l_mirroring_size);
-
-        if ( (l_nhtmSize + l_chtmSize) < i_procAttrs.iv_occSandboxSize)
-        {
-            iv_occ_sandbox_base = iv_mirror_bases[l_index] + iv_mirror_sizes[l_index];
-            iv_nhtm_bar_base = iv_occ_sandbox_base + i_procAttrs.iv_occSandboxSize;
-            iv_chtm_bar_bases[0] = iv_nhtm_bar_base + i_procAttrs.iv_nhtmBarSize;
-
-            for (uint8_t ii = 1; ii < NUM_OF_CHTM_REGIONS; ii++)
-            {
-                iv_chtm_bar_bases[ii] = iv_chtm_bar_bases[ii - 1] +
-                                        i_procAttrs.iv_chtmBarSizes[ii - 1];
-            }
-        }
-        else
-        {
-            iv_nhtm_bar_base = iv_mirror_bases[l_index] + iv_mirror_sizes[l_index];
-            iv_chtm_bar_bases[0] = iv_nhtm_bar_base + i_procAttrs.iv_nhtmBarSize;
-
-            for (uint8_t ii = 1; ii < NUM_OF_CHTM_REGIONS; ii++)
-            {
-                iv_chtm_bar_bases[ii] = iv_chtm_bar_bases[ii - 1] +
-                                        i_procAttrs.iv_chtmBarSizes[ii - 1];
-            }
-
-            iv_occ_sandbox_base = iv_chtm_bar_bases[23] + i_procAttrs.iv_chtmBarSizes[23];
-        }
-
-        FAPI_INF("EffGroupingBaseSizeData::set_HTM_OCC_base_addr: FLIPPED");
-        FAPI_INF("  Total memory 0x%.16llX, Required HtmOccSize 0x%16llX",
-                 l_totalSize, l_htmOccSize);
-        FAPI_INF("  Index: %d, iv_mirror_bases 0x%.16llX, "
-                 "iv_mirror_sizes 0x%.16llX",
-                 l_index, iv_mirror_bases[l_index], iv_mirror_sizes[l_index]);
-        FAPI_INF("NHTM_BASE 0x%.16llX", iv_nhtm_bar_base);
-
-        for (uint8_t ii = 0; ii < NUM_OF_CHTM_REGIONS; ii++)
-        {
-            FAPI_INF("CHTM_BASE[%u] 0x%.16llX", ii, iv_chtm_bar_bases[ii]);
-        }
-
-        FAPI_INF("OCC_BASE 0x%.16llX", iv_occ_sandbox_base);
+        iv_occ_sandbox_base = l_mem_bases[l_index] + l_mem_sizes[l_index];
+        iv_nhtm_bar_base = iv_occ_sandbox_base + i_procAttrs.iv_occSandboxSize;
     }
+    else
+    {
+        iv_nhtm_bar_base = l_mem_bases[l_index] + l_mem_sizes[l_index];
+        iv_occ_sandbox_base = iv_nhtm_bar_base + l_nhtmSize + l_chtmSize;
+    }
+
+    // Setting CHTM base addresses
+    for (uint8_t ii = 0; ii < NUM_OF_CHTM_REGIONS; ii++)
+    {
+        if (i_procAttrs.iv_chtmBarSizes[ii] != 0)
+        {
+            if (l_firstEnabledChtm == false)
+            {
+                iv_chtm_bar_bases[ii] = iv_nhtm_bar_base +
+                                        i_procAttrs.iv_nhtmBarSize;
+                l_firstEnabledChtm = true;
+            }
+            else
+            {
+                iv_chtm_bar_bases[ii] = iv_chtm_bar_bases[l_prevEnabledChtm] +
+                                        i_procAttrs.iv_chtmBarSizes[l_prevEnabledChtm];
+            }
+
+            l_prevEnabledChtm = ii;
+        }
+    }
+
+    // Calculate num of HTM queues to reserve for each channel
+    if ( (l_nhtmSize + l_chtmSize) > 0 )
+    {
+        l_start_htm_index = getMemoryRegionIndex(iv_nhtm_bar_base,
+                            i_sysAttrs,
+                            l_accMemSize);
+        l_end_htm_index = getMemoryRegionIndex(iv_nhtm_bar_base + l_nhtmSize,
+                                               i_sysAttrs,
+                                               l_accMemSize);
+
+        FAPI_INF("Start HTM index: %d, End HTM index = %d",
+                 l_start_htm_index, l_end_htm_index);
+
+        calcHtmQueues(i_groupData, l_start_htm_index, l_end_htm_index);
+    }
+
+    // Zero out memory size of regions used by OCC/HTM
+    for (uint8_t ii = l_index + 1; ii < l_numRegions; ii++)
+    {
+        l_mem_sizes[ii] = 0;
+    }
+
+    // Update mem sizes with working array values
+    if (l_numRegions == NUM_NON_MIRROR_REGIONS)
+    {
+        memcpy(iv_memory_sizes, l_mem_sizes, sizeof(iv_memory_sizes));
+    }
+    else
+    {
+        memcpy(iv_mirror_sizes, l_mem_sizes, sizeof(iv_mirror_sizes));
+    }
+
+    // Result traces
+    FAPI_INF("EffGroupingBaseSizeData::set_HTM_OCC_base_addr");
+    FAPI_INF("  Placement policy %u, total mem %.16lld (%d GB), HtmOccSize %.16lld (%d GB)",
+             i_sysAttrs.iv_selectiveMode, l_totalSize, l_totalSize >> 30,
+             l_htmOccSize, l_htmOccSize >> 30);
+    FAPI_INF("  Index: %d, iv_mem_bases 0x%.16llX, iv_memory_sizes 0x%.16llX",
+             l_index, l_mem_bases[l_index], l_mem_sizes[l_index]);
+
+    FAPI_INF("NHTM_BASE  %.16lld (%d GB)", iv_nhtm_bar_base, iv_nhtm_bar_base >> 30);
+
+    for (uint8_t ii = 0; ii < NUM_OF_CHTM_REGIONS; ii++)
+    {
+        FAPI_INF("CHTM_BASE[%u] = %.16lld (%d GB)", ii, iv_chtm_bar_bases[ii],
+                 iv_chtm_bar_bases[ii] >> 30);
+    }
+
+    FAPI_INF("OCC_BASE  %.16lld (%d GB)", iv_occ_sandbox_base, iv_occ_sandbox_base >> 30);
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
@@ -1168,53 +1269,74 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setBaseSizeAttr(
                  (uint64_t)fapi2::current_err);
     }
 
+    // Set ATTR_HTM_QUEUES
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_HTM_QUEUES, i_target, iv_numHtmQueues),
+             "Error setting ATTR_HTM_QUEUES, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
     //----------------------------------------------------------------------
     //  Display attribute values
     //----------------------------------------------------------------------
 
     for (uint8_t ii = 0; ii < NUM_NON_MIRROR_REGIONS; ii++)
     {
-        FAPI_INF("ATTR_PROC_MEM_BASES    [%u]: 0x%.16llX", ii, iv_mem_bases[ii]);
-        FAPI_INF("ATTR_PROC_MEM_BASES_ACK[%u]: 0x%.16llX", ii, iv_mem_bases_ack[ii]);
-        FAPI_INF("ATTR_PROC_MEM_SIZES    [%u]: 0x%.16llX", ii, iv_memory_sizes[ii]);
-        FAPI_INF("ATTR_PROC_MEM_SIZES_ACK[%u]: 0x%.16llX", ii, iv_memory_sizes_ack[ii]);
+        FAPI_INF("ATTR_PROC_MEM_BASES    [%u]: 0x%.16llX (%d GB)",
+                 ii, iv_mem_bases[ii],  iv_mem_bases[ii] >> 30);
+        FAPI_INF("ATTR_PROC_MEM_BASES_ACK[%u]: 0x%.16llX (%d GB)",
+                 ii, iv_mem_bases_ack[ii], iv_mem_bases_ack[ii] >> 30);
+        FAPI_INF("ATTR_PROC_MEM_SIZES    [%u]: 0x%.16llX (%d GB)",
+                 ii, iv_memory_sizes[ii], iv_memory_sizes[ii] >> 30);
+        FAPI_INF("ATTR_PROC_MEM_SIZES_ACK[%u]: 0x%.16llX (%d GB)",
+                 ii, iv_memory_sizes_ack[ii], iv_memory_sizes_ack[ii] >> 30);
     }
 
-    FAPI_INF("ATTR_PROC_NHTM_BAR_BASE_ADDR : 0x%.16llX", iv_nhtm_bar_base);
+    FAPI_INF("ATTR_PROC_NHTM_BAR_BASE_ADDR : 0x%.16llX (%d GB)",
+             iv_nhtm_bar_base, iv_nhtm_bar_base >> 30);
 
     for (uint8_t ii = 0; ii < NUM_OF_CHTM_REGIONS; ii++)
     {
-        FAPI_INF("ATTR_PROC_CHTM_BAR_BASE_ADDR[%u] : 0x%.16llX", ii, iv_chtm_bar_bases[ii]);
+        FAPI_INF("ATTR_PROC_CHTM_BAR_BASE_ADDR[%u] : 0x%.16llX (%d GB)",
+                 ii, iv_chtm_bar_bases[ii], iv_chtm_bar_bases[ii] >> 30);
     }
 
-    FAPI_INF("ATTR_PROC_OCC_SANDBOX_BASE_ADDR: 0x%.16llX", iv_occ_sandbox_base);
+    FAPI_INF("ATTR_PROC_OCC_SANDBOX_BASE_ADDR: 0x%.16llX (%d GB)",
+             iv_occ_sandbox_base, iv_occ_sandbox_base >> 30);
 
     // Display mirror mode attribute values
     if (i_sysAttrs.iv_hwMirrorEnabled)
     {
         for (uint8_t ii = 0; ii < NUM_MIRROR_REGIONS; ii++)
         {
-            FAPI_INF("ATTR_PROC_MIRROR_BASES[%u]: 0x%.16llX",
-                     ii, iv_mirror_bases[ii]);
+            FAPI_INF("ATTR_PROC_MIRROR_BASES[%u]: 0x%.16llX (%d GB)",
+                     ii, iv_mirror_bases[ii], iv_mirror_bases[ii] >> 30);
         }
 
         for (uint8_t ii = 0; ii < NUM_MIRROR_REGIONS; ii++)
         {
             FAPI_INF("ATTR_PROC_MIRROR_BASES_ACK[%u] "
-                     "0x%.16llX", ii, iv_mirror_bases_ack[ii]);
+                     "0x%.16llX (%d GB)",
+                     ii, iv_mirror_bases_ack[ii], iv_mirror_bases_ack[ii] >> 30);
         }
 
         for (uint8_t ii = 0; ii < NUM_MIRROR_REGIONS; ii++)
         {
-            FAPI_INF("ATTR_PROC_MIRROR_SIZES[%u]: 0x%.16llX",
-                     ii, iv_mirror_sizes[ii]);
+            FAPI_INF("ATTR_PROC_MIRROR_SIZES[%u]: 0x%.16llX (%d GB)",
+                     ii, iv_mirror_sizes[ii], iv_mirror_sizes[ii] >> 30);
         }
 
         for (uint8_t ii = 0; ii < NUM_MIRROR_REGIONS; ii++)
         {
-            FAPI_INF("ATTR_PROC_MIRROR_SIZES_ACK[%u]: 0x%.16llX",
-                     ii, iv_mirror_sizes_ack[ii]);
+            FAPI_INF("ATTR_PROC_MIRROR_SIZES_ACK[%u]: 0x%.16llX (%d GB)",
+                     ii, iv_mirror_sizes_ack[ii], iv_mirror_sizes_ack[ii] >> 30);
         }
+    }
+
+    // Display ATTR_HTM_QUEUES
+    FAPI_INF("Num of HTM queues:");
+
+    for (uint8_t ii = 0; ii < NUM_MC_PORTS_PER_PROC; ii++)
+    {
+        FAPI_INF("ATTR_HTM_QUEUES[%u]: %d", ii, iv_numHtmQueues[ii]);
     }
 
     // Display ATTR_MSS_MCS_GROUP_32 as debug trace
@@ -2641,13 +2763,13 @@ void grouping_traceData(const EffGroupingSysAttrs& i_sysAttrs,
         FAPI_INF("    MC port size %d GB", i_groupData.iv_data[ii][PORT_SIZE]);
         FAPI_INF("    Num of ports %d", i_groupData.iv_data[ii][PORTS_IN_GROUP]);
         FAPI_INF("    Group size  %d GB", i_groupData.iv_data[ii][GROUP_SIZE]);
-        FAPI_INF("    Base addr 0x%08x", i_groupData.iv_data[ii][BASE_ADDR]);
+        FAPI_INF("    Base addr %.16lld", i_groupData.iv_data[ii][BASE_ADDR]);
 
         for (uint8_t jj = 0; jj < NUM_OF_ALT_MEM_REGIONS; jj++)
         {
             FAPI_INF("    ALT-BAR(%d) valid %d ", jj, i_groupData.iv_data[ii][ALT_VALID(jj)]);
             FAPI_INF("    ALT-BAR(%d) size %d ", jj, i_groupData.iv_data[ii][ALT_SIZE(jj)]);
-            FAPI_INF("    ALT-BAR(%d) base addr 0x%08X", jj, i_groupData.iv_data[ii][ALT_BASE_ADDR(jj)]);
+            FAPI_INF("    ALT-BAR(%d) base addr %u", jj, i_groupData.iv_data[ii][ALT_BASE_ADDR(jj)]);
         }
 
         // Display MC in groups
