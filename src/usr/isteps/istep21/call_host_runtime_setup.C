@@ -90,18 +90,39 @@ void* call_host_runtime_setup (void *io_pArgs)
             l_systemFabricConfigurationMap |= (0x8000000000000000 >> l_bitPos);
         }
 
-        l_err = SBEIO::sendSystemConfig(l_systemFabricConfigurationMap);
-        if ( l_err )
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Setting sending systemConfig to all Procs...");
+
+        for(auto l_proc : l_procChips)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "sendSystemConfig ERROR : Returning errorlog, reason=0x%x",
-                    l_err->reasonCode() );
-                    break;
+            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "calling sendSystemConfig on proc 0x%x",
+                       l_proc->getAttr<TARGETING::ATTR_POSITION>());
+            l_err = SBEIO::sendSystemConfig(l_systemFabricConfigurationMap,
+                                            l_proc);
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "sendSystemConfig ERROR : Error sending sbe chip-op to proc 0x%.8X. Returning errorlog, reason=0x%x",
+                            TARGETING::get_huid(l_proc),
+                            l_err->reasonCode() );
+                break;
+            }
+            else
+            {
+                TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "sendSystemConfig SUCCESS"  );
+            }
+        }
+
+        if(l_err)
+        {
+            break;
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "sendSystemConfig SUCCESS"  );
+                       "Successfully sent all system configs to procs via SBE chip op !!");
         }
 
 

@@ -55,11 +55,13 @@ namespace SBEIO
     *                           bit 0  = proc 0 group 0
     *                           bit 8  = proc 0 group 1
     *                           bit 12 = proc 4 group 1
+    * @param[in] i_procChip     Proc you would like to send the config to
     *
     * @return errlHndl_t Error log handle on failure.
     *
     */
-    errlHndl_t sendSystemConfig(const uint64_t i_systemConfig );
+    errlHndl_t sendSystemConfig(const uint64_t i_systemConfig,
+                                TARGETING::Target * i_procChip);
 
     /**
      * @brief Sends a PSU chipOp to quiesce the SBE

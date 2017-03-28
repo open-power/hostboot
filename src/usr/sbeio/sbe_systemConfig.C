@@ -53,20 +53,20 @@ namespace SBEIO
     * @param[in] i_systemConfig uint64 where each bit represents a proc in that position
     *        Bit position ATTR_PROC_FABRIC_CHIP_ID + (8 * ATTR_PROC_FABRIC_GROUP_ID) = 1
     *        if that proc is present and functional.
+    * @param[in] i_procChip The proc you would like to send the system config to
     *
     * @return errlHndl_t Error log handle on failure.
     *
     */
 
-    errlHndl_t sendSystemConfig(const uint64_t i_systemConfig )
+    errlHndl_t sendSystemConfig(const uint64_t i_systemConfig,
+                                TARGETING::Target * i_procChip)
     {
         errlHndl_t errl = NULL;
 
-        SBE_TRACD(ENTER_MRK "sending system configuration from HB -> SBE  i_systemConfig=0x%x",i_systemConfig);
-
-        // Find master proc for target of PSU command
-        TARGETING::Target * l_master = nullptr;
-        (void)TARGETING::targetService().masterProcChipTargetHandle(l_master);
+        SBE_TRACD(ENTER_MRK "sending system configuration from HB -> SBE  i_systemConfig=0x%x on Proc 0x%x",
+                  i_systemConfig,
+                  i_procChip->getAttr<TARGETING::ATTR_POSITION>());
 
         SbePsu::psuCommand   l_psuCommand(
                                   SbePsu::SBE_REQUIRE_RESPONSE,  //control flags
@@ -77,7 +77,7 @@ namespace SBEIO
         // set up PSU command message
         l_psuCommand.cd2_SetSystemConfig_SystemFabricIdMap = i_systemConfig;
 
-        errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(l_master,
+        errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(i_procChip,
                                 &l_psuCommand,
                                 &l_psuResponse,
                                 SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
