@@ -2510,7 +2510,77 @@
       </chip>
     </chipEcFeature>
   </attribute>
-
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_P9N_NX_DD1</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Returns true if dd1.
+      Less than Nimbus ec 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW403701</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Nimbus DD1: Reduce rng pace from 2000->300 to work around grant unfairness
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW406130</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Nimbus DD1: Reduce number of active DMA read requests down from 16->8
+        to work around erat access count bug
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW401552</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Nimbus DD1: Workaround clockgating bug with APC machines missing deassert
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW403585</id>>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -2545,7 +2615,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
-
+  <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_NDD1_ABIST_PARALLEL</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -3026,58 +3096,6 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       The Random number generator has different settings in dd1 and dd2
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>LESS_THAN</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW403701</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Nimbus DD1: Reduce rng pace from 2000->300 to work around grant unfairness
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>LESS_THAN</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW406130</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-        Nimbus DD1: Reduce number of active DMA read requests down from 16->8
-        to work around erat access count bug
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>LESS_THAN</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW401552</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-        Nimbus DD1: Workaround clockgating bug with APC machines missing deassert
     </description>
     <chipEcFeature>
       <chip>
