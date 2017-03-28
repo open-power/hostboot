@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file rdimm_decoder.H
+/// @file rdimm_decoder_ddr4.H
 /// @brief RDIMM module SPD decoder declarations
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
@@ -33,8 +33,8 @@
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
 
-#ifndef _MSS_RDIMM_DECODER_H_
-#define _MSS_RDIMM_DECODER_H_
+#ifndef _MSS_RDIMM_DECODER_DDR4_H_
+#define _MSS_RDIMM_DECODER_DDR4_H_
 
 #include <fapi2.H>
 #include <generic/memory/lib/spd/common/dimm_module_decoder.H>
@@ -43,12 +43,16 @@ namespace mss
 {
 namespace spd
 {
+namespace ddr4
+{
+namespace rdimm
+{
 
 ///
 /// @class decoder
 /// @brief RDIMM module SPD DRAM decoder for rev 1.0
 ///
-class rdimm_decoder_v1_0 : public dimm_module_decoder
+class decoder_v1_0 : public dimm_module_decoder
 {
     protected:
         enum
@@ -122,22 +126,47 @@ class rdimm_decoder_v1_0 : public dimm_module_decoder
         };
 
     public:
+
+        // First field - SPD byte
+        // Second field - start bit
+        // Third field - bit length
+        static constexpr field_t MODULE_NOMINAL_HEIGHT{128, MODULE_NOM_HEIGHT_START, MODULE_NOM_HEIGHT_LEN};
+        static constexpr field_t RAW_CARD_EXTENSION{128, RAW_CARD_EXT_START, RAW_CARD_EXT_LEN};
+        static constexpr field_t FRONT_MODULE_THICKNESS{129, FRONT_MODULE_THICKNESS_START, FRONT_MODULE_THICKNESS_LEN};
+        static constexpr field_t BACK_MODULE_THICKNESS{129, BACK_MODULE_THICKNESS_START, BACK_MODULE_THICKNESS_LEN};
+        static constexpr field_t REF_RAW_CARD{130, REF_RAW_CARD_START, REF_RAW_CARD_LEN};
+        static constexpr field_t REF_RAW_CARD_REV{130, REF_RAW_CARD_REV_START, REF_RAW_CARD_REV_LEN};
+        static constexpr field_t REF_RAW_CARD_EXT{130, REF_RAW_CARD_EXT_START, REF_RAW_CARD_EXT_LEN};
+        static constexpr field_t NUM_REGS_USED{131, REGS_USED_START, REGS_USED_LEN};
+        static constexpr field_t ROWS_OF_DRAMS{131, ROWS_OF_DRAMS_START, ROWS_OF_DRAMS_LEN};
+        static constexpr field_t REGISTER_TYPE{131, REGISTER_TYPE_START, REGISTER_TYPE_LEN};
+        static constexpr field_t HEAT_SPREADER_CHAR{132, HEAT_SPREADER_CHAR_START, HEAT_SPREADER_CHAR_LEN};
+        static constexpr field_t HEAT_SPREADER_SOL{132, HEAT_SPREADER_SOL_START, HEAT_SPREADER_SOL_LEN};
+        static constexpr field_t CONTINUATION_CODES{133, CONTINUATION_CODES_START, CONTINUATION_CODES_LEN};
+        static constexpr field_t ADDR_MAPPING{136, ADDR_MAPPING_START, ADDR_MAPPING_LEN};
+        static constexpr field_t CKE_DRIVER{137, CKE_DRIVER_START, CKE_DRIVER_LEN};
+        static constexpr field_t ODT_DRIVER{137, ODT_DRIVER_START, ODT_DRIVER_LEN};
+        static constexpr field_t CA_DRIVER{137, CA_DRIVER_START, CA_DRIVER_LEN};
+        static constexpr field_t CS_DRIVER{137, CS_DRIVER_START, CS_DRIVER_LEN};
+        static constexpr field_t YO_Y2_DRIVER{138, YO_Y2_DRIVER_START, YO_Y2_DRIVER_LEN};
+        static constexpr field_t Y1_Y3_DRIVER{138, Y1_Y3_DRIVER_START, Y1_Y3_DRIVER_LEN};
+
         // deleted default ctor
-        rdimm_decoder_v1_0() = delete;
+        decoder_v1_0() = delete;
 
         ///
         /// @brief ctor
         /// @param[in] i_target dimm target
         /// @param[in] i_spd_data vector DIMM SPD data
         ///
-        rdimm_decoder_v1_0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                           const std::vector<uint8_t>& i_spd_data): iv_target(i_target), iv_spd_data(i_spd_data)
+        decoder_v1_0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const std::vector<uint8_t>& i_spd_data): iv_target(i_target), iv_spd_data(i_spd_data)
         {}
 
         ///
         /// @brief default dtor
         ///
-        virtual ~rdimm_decoder_v1_0() = default;
+        virtual ~decoder_v1_0() = default;
 
         ///
         /// @brief Decodes module nominal height max, in mm
@@ -330,32 +359,33 @@ class rdimm_decoder_v1_0 : public dimm_module_decoder
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;
         const std::vector<uint8_t> iv_spd_data;
 
-};// rdimm_decoder_v1_0
+};// decoder_v1_0
 
 ///
 /// @class decoder
 /// @brief RDIMM module SPD DRAM decoder for rev 1.1
 ///
-class rdimm_decoder_v1_1 :  public rdimm_decoder_v1_0
+class decoder_v1_1 :  public decoder_v1_0
 {
     public:
 
         // deleted default ctor
-        rdimm_decoder_v1_1() = delete;
+        decoder_v1_1() = delete;
 
         ///
         /// @brief ctor
         /// @param[in] i_target dimm target
         /// @param[in] i_spd_data vector DIMM SPD data
         ///
-        rdimm_decoder_v1_1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                           const std::vector<uint8_t>& i_spd_data): rdimm_decoder_v1_0(i_target, i_spd_data)
+        decoder_v1_1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const std::vector<uint8_t>& i_spd_data):
+            decoder_v1_0(i_target, i_spd_data)
         {}
 
         ///
         /// @brief default dtor
         ///
-        virtual ~rdimm_decoder_v1_1() = default;
+        virtual ~decoder_v1_1() = default;
 
         ///
         /// @brief Decodes register types
@@ -423,9 +453,11 @@ class rdimm_decoder_v1_1 :  public rdimm_decoder_v1_0
         ///
         virtual fapi2::ReturnCode a_side_clk_output_driver(uint8_t& o_output) override;
 
-};//rdimm_decoder_v1_1
+};//decoder_v1_1
 
+}// rdimm
+}// ddr4
 }// spd
 }// mss
 
-#endif //_MSS_RDIMM_DECODER_H_
+#endif //_MSS_RDIMM_DECODER_DDR4_H_

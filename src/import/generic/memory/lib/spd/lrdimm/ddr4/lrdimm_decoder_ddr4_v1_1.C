@@ -54,6 +54,8 @@ namespace mss
 {
 namespace spd
 {
+namespace ddr4
+{
 namespace lrdimm
 {
 
@@ -269,5 +271,6 @@ fapi_try_exit:
 }
 
 }// lrdimm
+}// ddr4
 }// spd
 }// mss

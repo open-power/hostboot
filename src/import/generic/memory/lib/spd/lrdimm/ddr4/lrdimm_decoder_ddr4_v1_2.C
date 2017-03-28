@@ -54,8 +54,11 @@ namespace mss
 {
 namespace spd
 {
+namespace ddr4
+{
 namespace lrdimm
 {
+
 ///
 /// @brief Decodes register output drive strength for data buffer control (BCOM, BODT, BKCE)
 /// @param[out] o_output encoded drive strength
@@ -302,5 +305,6 @@ fapi_try_exit:
 }
 
 }// lrdimm
+}// ddr4
 }// spd
 }// mss

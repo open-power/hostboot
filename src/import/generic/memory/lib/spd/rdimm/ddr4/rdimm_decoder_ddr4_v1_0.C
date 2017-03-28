@@ -55,6 +55,10 @@ namespace mss
 {
 namespace spd
 {
+namespace ddr4
+{
+namespace rdimm
+{
 
 /////////////////////////
 // Member Method implementation
@@ -70,20 +74,17 @@ namespace spd
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 48
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::max_module_nominal_height(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::max_module_nominal_height(uint8_t& o_output)
 {
-    constexpr size_t BYTE_INDEX = 128;
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, MODULE_NOM_HEIGHT_START, MODULE_NOM_HEIGHT_LEN>(iv_target,
-                           iv_spd_data);
-
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field<MODULE_NOMINAL_HEIGHT>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VALUE = 0b11111;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits <= MAX_VALID_VALUE,
-              BYTE_INDEX,
+              MODULE_NOMINAL_HEIGHT.iv_byte,
               l_field_bits,
               "Failed bound check for module nominal height max") );
 
@@ -106,21 +107,18 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 48
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::front_module_max_thickness(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::front_module_max_thickness(uint8_t& o_output)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 129;
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, FRONT_MODULE_THICKNESS_START, FRONT_MODULE_THICKNESS_LEN>
-                           (iv_target, iv_spd_data);
-
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field<FRONT_MODULE_THICKNESS>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VALUE = 0b1111;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits <= MAX_VALID_VALUE,
-              BYTE_INDEX,
+              FRONT_MODULE_THICKNESS.iv_byte,
               l_field_bits,
               "Failed bound check for front module max thickness") );
 
@@ -144,20 +142,18 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 48
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::back_module_max_thickness(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::back_module_max_thickness(uint8_t& o_output)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 129;
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, BACK_MODULE_THICKNESS_START, BACK_MODULE_THICKNESS_LEN>(iv_target,
-                           iv_spd_data);
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field<BACK_MODULE_THICKNESS>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VALUE = 0b1111;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits <= MAX_VALID_VALUE,
-              BYTE_INDEX,
+              BACK_MODULE_THICKNESS.iv_byte,
               l_field_bits,
               "Failed bound check for back module max thickness") );
 
@@ -181,20 +177,18 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 50
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::num_registers_used(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::num_registers_used(uint8_t& o_output)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 131;
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, REGS_USED_START, REGS_USED_LEN>(iv_target, iv_spd_data);
-
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field<NUM_REGS_USED>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VALUE = 0b11;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits <= MAX_VALID_VALUE,
-              BYTE_INDEX,
+              NUM_REGS_USED.iv_byte,
               l_field_bits,
               "Failed bound check for number of registers used on RDIMM ") );
 
@@ -218,20 +212,18 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 50
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::num_rows_of_drams(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::num_rows_of_drams(uint8_t& o_output)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 131;
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, ROWS_OF_DRAMS_START, ROWS_OF_DRAMS_LEN>(iv_target, iv_spd_data);
-
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field<ROWS_OF_DRAMS>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VALUE = 0b11;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits <= MAX_VALID_VALUE,
-              BYTE_INDEX,
+              ROWS_OF_DRAMS.iv_byte,
               l_field_bits,
               "Failed bound check for number of rows of DRAMs on RDIMM ") );
 
@@ -255,20 +247,18 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 51
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::heat_spreader_thermal_char(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::heat_spreader_thermal_char(uint8_t& o_output)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 132;
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, HEAT_SPREADER_CHAR_START, HEAT_SPREADER_CHAR_LEN>(iv_target,
-                           iv_spd_data);
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field<HEAT_SPREADER_CHAR>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VALUE = 1;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits <= MAX_VALID_VALUE,
-              BYTE_INDEX,
+              HEAT_SPREADER_CHAR.iv_byte,
               l_field_bits,
               "Failed bound check for heat spreader thermal characteristics") );
 
@@ -291,21 +281,18 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 51
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::heat_spreader_solution(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::heat_spreader_solution(uint8_t& o_output)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 132;
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, HEAT_SPREADER_SOL_START, HEAT_SPREADER_SOL_LEN>(iv_target,
-                           iv_spd_data);
-
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field<HEAT_SPREADER_SOL>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VALUE = 1;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits <= MAX_VALID_VALUE,
-              BYTE_INDEX,
+              HEAT_SPREADER_SOL.iv_byte,
               l_field_bits,
               "Failed bound check for heat spreader solution") );
 
@@ -329,21 +316,18 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 51
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::num_continuation_codes(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::num_continuation_codes(uint8_t& o_output)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 133;
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, CONTINUATION_CODES_START, CONTINUATION_CODES_LEN>(iv_target,
-                           iv_spd_data);
-
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field<CONTINUATION_CODES>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VALUE = 10; // JEP106AS
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits <= MAX_VALID_VALUE,
-              BYTE_INDEX,
+              CONTINUATION_CODES.iv_byte,
               l_field_bits,
               "Failed bound check for number of continuation codes") );
 
@@ -367,7 +351,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 51
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::reg_manufacturer_id_code(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::reg_manufacturer_id_code(uint8_t& o_output)
 {
     constexpr size_t BYTE_INDEX = 134;
     uint8_t l_raw_byte = iv_spd_data[BYTE_INDEX];
@@ -396,7 +380,7 @@ fapi2::ReturnCode rdimm_decoder_v1_0::reg_manufacturer_id_code(uint8_t& o_output
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 51
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::register_rev_num(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::register_rev_num(uint8_t& o_output)
 {
     constexpr size_t BYTE_INDEX = 135;
     uint8_t l_raw_byte = iv_spd_data[BYTE_INDEX];
@@ -425,20 +409,18 @@ fapi2::ReturnCode rdimm_decoder_v1_0::register_rev_num(uint8_t& o_output)
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 52
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::register_to_dram_addr_mapping(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::register_to_dram_addr_mapping(uint8_t& o_output)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 136;
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, ADDR_MAPPING_START, ADDR_MAPPING_LEN>(iv_target, iv_spd_data);
-
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field<ADDR_MAPPING>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t RESERVED = 0b11;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits < RESERVED, // extract sanity check
-              BYTE_INDEX,
+              ADDR_MAPPING.iv_byte,
               l_field_bits,
               "Failed bound check for to register to dram addr mapping") );
 
@@ -461,20 +443,18 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 53
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::cke_signal_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::cke_signal_output_driver(uint8_t& o_output)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 137;
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, CKE_DRIVER_START, CKE_DRIVER_LEN>(iv_target, iv_spd_data);
-
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field<CKE_DRIVER>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t RESERVED = 2;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits < RESERVED, // extract sanity check
-              BYTE_INDEX,
+              CKE_DRIVER.iv_byte,
               l_field_bits,
               "Failed bounds check for Register Output Driver for CKE") );
 
@@ -497,20 +477,18 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 53
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::odt_signal_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::odt_signal_output_driver(uint8_t& o_output)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 137;
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, ODT_DRIVER_START, ODT_DRIVER_LEN>(iv_target, iv_spd_data);
-
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field<ODT_DRIVER>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t RESERVED = 2;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits < RESERVED, // extract sanity check
-              BYTE_INDEX,
+              ODT_DRIVER.iv_byte,
               l_field_bits,
               "Failed bounds check for Register Output Driver for ODT") );
 
@@ -533,20 +511,18 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 53
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::ca_signal_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::ca_signal_output_driver(uint8_t& o_output)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 137;
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, CA_DRIVER_START, CA_DRIVER_LEN>(iv_target, iv_spd_data);
-
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field<CA_DRIVER>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t INVALID_VAL = 3;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits < INVALID_VAL, // extract sanity check
-              BYTE_INDEX,
+              CA_DRIVER.iv_byte,
               l_field_bits,
               "Failed bounds check for Register Output Driver for CA") );
 
@@ -569,20 +545,18 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 53
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::cs_signal_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::cs_signal_output_driver(uint8_t& o_output)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 137;
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, CS_DRIVER_START, CS_DRIVER_LEN>(iv_target, iv_spd_data);
-
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field<CS_DRIVER>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t RESERVED = 2;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits < RESERVED, // extract sanity check
-              BYTE_INDEX,
+              CS_DRIVER.iv_byte,
               l_field_bits,
               "Failed bounds check for Register Output Driver for CS") );
 
@@ -605,18 +579,18 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 53
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::b_side_clk_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::b_side_clk_output_driver(uint8_t& o_output)
 {
     // Extracting desired bits
-    constexpr size_t BYTE_INDEX = 138;
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, YO_Y2_DRIVER_START, YO_Y2_DRIVER_LEN>(iv_target, iv_spd_data);
+    const uint8_t l_field_bits = extract_spd_field<YO_Y2_DRIVER>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t RESERVED = 2;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits < RESERVED, // extract sanity check
-              BYTE_INDEX,
+              YO_Y2_DRIVER.iv_byte,
               l_field_bits,
               "Failed bounds check for Register Output Driver for clock (Y0,Y2)") );
 
@@ -639,22 +613,18 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 53
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::a_side_clk_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::a_side_clk_output_driver(uint8_t& o_output)
 {
-    // Trace in the front assists w/ debug
-    constexpr size_t BYTE_INDEX = 138;
-
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field<BYTE_INDEX, Y1_Y3_DRIVER_START, Y1_Y3_DRIVER_LEN>(iv_target, iv_spd_data);
-
-    FAPI_INF("Field_Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field<Y1_Y3_DRIVER>(iv_target, iv_spd_data);
+    FAPI_DBG("Field_Bits value: %d", l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t RESERVED = 2;
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
               l_field_bits < RESERVED,
-              BYTE_INDEX,
+              Y1_Y3_DRIVER.iv_byte,
               l_field_bits,
               "Failed bounds check for Register Output Driver for clock (Y1,Y3)") );
 
@@ -668,5 +638,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-}//spd namespace
-}// mss namespace
+}// rdimm
+}// ddr4
+}// spd
+}// mss

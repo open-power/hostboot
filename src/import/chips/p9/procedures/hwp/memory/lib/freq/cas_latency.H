@@ -61,7 +61,7 @@ enum class loading : size_t
 };
 
 ///
-/// @class decoder
+/// @class cas_latency
 /// @brief CAS latency class that encapsulates JEDEC calculation algorithm
 ///
 class cas_latency

@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file lrdimm_decoder.H
+/// @file lrdimm_decoder_ddr4.H
 /// @brief LRDIMM module SPD decoder declarations
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
@@ -34,8 +34,8 @@
 // *HWP Consumed by: HB:FSP
 
 
-#ifndef _MSS_LRDIMM_DECODER_H_
-#define _MSS_LRDIMM_DECODER_H_
+#ifndef _MSS_LRDIMM_DECODER_DDR4_H_
+#define _MSS_LRDIMM_DECODER_DDR4_H_
 
 #include <fapi2.H>
 #include <vector>
@@ -44,6 +44,8 @@
 namespace mss
 {
 namespace spd
+{
+namespace ddr4
 {
 namespace lrdimm
 {
@@ -57,6 +59,11 @@ class decoder_v1_0 : public dimm_module_decoder
 
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;
 
+    public:
+
+        // First field - SPD byte
+        // Second field - start bit
+        // Third field - bit length
         constexpr static field_t MODULE_NOMINAL_HEIGHT{128, 3, 5};
         constexpr static field_t RAW_CARD_EXTENSION{128, 0, 3};
 
@@ -97,7 +104,6 @@ class decoder_v1_0 : public dimm_module_decoder
         constexpr static field_t DATA_BUFFER_GAIN_ADJUST{156, 7, 1};
         constexpr static field_t DATA_BUFFER_DFE{156, 6, 1};
 
-    public:
         // Allows injection of errors for testing
         // TK - Consider API change to use setter/getters
         // for this instance variable, RDIMM decoder
@@ -664,7 +670,9 @@ class decoder_v1_2 : public  decoder_v1_1
 };
 
 }// lrdimm
+}// ddr4
 }// spd
 }// mss
 
-#endif //_MSS_LRDIMM_DECODER_H_
+
+#endif //_MSS_LRDIMM_DECODER_DDR4_H_

@@ -63,6 +63,20 @@ namespace mss
 namespace spd
 {
 
+enum factory_byte_extract
+{
+    // Byte 1
+    ENCODING_LEVEL_START = 0,  ///< SPD encoding level start bit
+    ENCODING_LEVEL_LEN = 4,    ///< SPD encoding level bit length
+
+    ADDITIONS_LEVEL_START = 4, ///< SPD additions level start bit
+    ADDITIONS_LEVEL_LEN = 4,   ///< SPD additions level bit length
+
+    // Byte 3
+    BASE_MODULE_START = 4,     ///< SPD base module start bit
+    BASE_MODULE_LEN = 4,       ///< SPD base module bit length
+};
+
 ///
 /// @brief       Decodes SPD Revision encoding level
 /// @param[in]   i_target dimm target
@@ -78,29 +92,19 @@ fapi2::ReturnCode rev_encoding_level(const fapi2::Target<TARGET_TYPE_DIMM>& i_ta
                                      const std::vector<uint8_t>& i_spd_data,
                                      uint8_t& o_value)
 {
-    // Buffer used for bit manipulation
     constexpr size_t BYTE_INDEX = 1;
-    uint8_t l_raw_byte = i_spd_data[BYTE_INDEX];
-
-    // Trace in the front assists w/ debug
-    FAPI_INF("%s. SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
-             BYTE_INDEX,
-             l_raw_byte);
+    constexpr field_t ENCODING_LEVEL{BYTE_INDEX, ENCODING_LEVEL_START, ENCODING_LEVEL_LEN};
 
     // Extracting desired bits
-    uint8_t l_field_bits = 0;
-    fapi2::buffer<uint8_t> l_buffer(l_raw_byte);
-    l_buffer.extractToRight<ENCODING_LEVEL_START, ENCODING_LEVEL_LEN>(l_field_bits);
-
-    FAPI_INF("%s. Field Bits value: %d", mss::c_str(i_target), l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field(i_target, ENCODING_LEVEL, i_spd_data);
+    FAPI_DBG("%s. Field Bits value: %d", mss::c_str(i_target), l_field_bits);
 
     // Check that value is valid
     constexpr size_t UNDEFINED = 0xF; // per JEDEC spec this value is undefined
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
               (l_field_bits != UNDEFINED),
-              BYTE_INDEX,
-              l_raw_byte,
+              ENCODING_LEVEL.iv_byte,
+              l_field_bits,
               "Failed check on SPD rev encoding level") );
 
     // Update output only after check passes
@@ -130,30 +134,20 @@ fapi2::ReturnCode rev_additions_level(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
                                       const std::vector<uint8_t>& i_spd_data,
                                       uint8_t& o_value)
 {
-    // Buffer used for bit manipulation
     constexpr size_t BYTE_INDEX = 1;
-    uint8_t l_raw_byte = i_spd_data[BYTE_INDEX];
-
-    // Trace in the front assists w/ debug
-    FAPI_INF("%s. SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
-             BYTE_INDEX,
-             l_raw_byte);
+    constexpr field_t ADDITIONS_LEVEL{BYTE_INDEX, ADDITIONS_LEVEL_START, ADDITIONS_LEVEL_LEN};
 
     // Extracting desired bits
-    fapi2::buffer<uint8_t> l_buffer(l_raw_byte);
-    uint8_t l_field_bits = 0;
-    l_buffer.extractToRight<ADDITIONS_LEVEL_START, ADDITIONS_LEVEL_LEN>(l_field_bits);
-
-    FAPI_INF("%s. Field Bits value: %d", mss::c_str(i_target), l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field(i_target, ADDITIONS_LEVEL, i_spd_data);
+    FAPI_DBG("%s. Field Bits value: %d", mss::c_str(i_target), l_field_bits);
 
     // Check that value is valid
     constexpr size_t UNDEFINED = 0xF; // per JEDEC spec this value is undefined
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
               (l_field_bits != UNDEFINED),
-              BYTE_INDEX,
-              l_raw_byte,
+              ADDITIONS_LEVEL.iv_byte,
+              l_field_bits,
               "Failed check on SPD rev encoding level") );
 
     // Update output only after check passes
@@ -199,29 +193,19 @@ fapi2::ReturnCode base_module_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
         // All others reserved or not supported
     };
 
-    // Buffer used for bit manipulation
     constexpr size_t BYTE_INDEX = 3;
-    uint8_t l_raw_byte  = i_spd_data[BYTE_INDEX];
-
-    // Trace in the front assists w/ debug
-    FAPI_INF("%s SPD data at Byte %d: 0x%llX",
-             c_str(i_target),
-             BYTE_INDEX,
-             l_raw_byte);
+    constexpr field_t BASE_MODULE{BYTE_INDEX, BASE_MODULE_START, BASE_MODULE_LEN};
 
     // Extracting desired bits
-    fapi2::buffer<uint8_t> l_spd_buffer(l_raw_byte);
-    uint8_t l_field_bits = 0;
-    l_spd_buffer.extractToRight<BASE_MODULE_START, BASE_MODULE_LEN>(l_field_bits);
-
-    FAPI_INF("%s. Field Bits value: %d", mss::c_str(i_target), l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field(i_target, BASE_MODULE, i_spd_data);
+    FAPI_DBG("%s. Field Bits value: %d", mss::c_str(i_target), l_field_bits);
 
     // Check that value is valid
-    bool l_is_val_found = find_value_from_key(BASE_MODULE_TYPE_MAP, l_field_bits, o_value);
+    const bool l_is_val_found = find_value_from_key(BASE_MODULE_TYPE_MAP, l_field_bits, o_value);
 
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
               l_is_val_found,
-              BYTE_INDEX,
+              BASE_MODULE.iv_byte,
               l_field_bits,
               "Failed check on Base Module Type") );
 
@@ -264,7 +248,7 @@ fapi2::ReturnCode dram_device_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
     };
 
     constexpr size_t BYTE_INDEX = 2;
-    uint8_t l_raw_byte = i_spd_data[BYTE_INDEX];
+    const uint8_t l_raw_byte = i_spd_data[BYTE_INDEX];
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
@@ -273,7 +257,7 @@ fapi2::ReturnCode dram_device_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
              l_raw_byte);
 
     // Find map value
-    bool l_is_val_found = mss::find_value_from_key(DRAM_GEN_MAP, l_raw_byte, o_value);
+    const bool l_is_val_found = mss::find_value_from_key(DRAM_GEN_MAP, l_raw_byte, o_value);
 
     FAPI_TRY( mss::check::spd:: fail_for_invalid_value(i_target,
               l_is_val_found,
@@ -438,7 +422,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief       Helper function to return LRDIMM decoder
+/// @brief       Helper function to return RDIMM decoder
 /// @param[in]   i_target dimm target
 /// @param[in]   i_encoding_rev encoding revision
 /// @param[in]   i_additions_rev additions revision
@@ -475,16 +459,16 @@ static fapi2::ReturnCode rdimm_rev_helper(const fapi2::Target<TARGET_TYPE_DIMM>&
                 case 0:
                     // Life starts out at base revision level
                     FAPI_INF( "%s. Creating decoder for RDIMM SPD revision 1.0", mss::c_str(i_target) );
-                    l_module_decoder = std::make_shared<rdimm_decoder_v1_0>(i_target, i_spd_data);
-                    o_fact_obj = std::make_shared<decoder>( i_target, i_spd_data, l_module_decoder, i_raw_card );
+                    l_module_decoder = std::make_shared<ddr4::rdimm::decoder_v1_0>(i_target, i_spd_data);
+                    o_fact_obj = std::make_shared<ddr4::decoder_v1_0>( i_target, i_spd_data, l_module_decoder, i_raw_card );
                     break;
 
                 case 1:
                     // Rev 1.1
                     // Changes to both the general section & rdimm section occured
                     FAPI_INF( "%s. Creating decoder for RDIMM SPD revision 1.1", mss::c_str(i_target) );
-                    l_module_decoder = std::make_shared<rdimm_decoder_v1_1>(i_target, i_spd_data);
-                    o_fact_obj = std::make_shared<decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
+                    l_module_decoder = std::make_shared<ddr4::rdimm::decoder_v1_1>(i_target, i_spd_data);
+                    o_fact_obj = std::make_shared<ddr4::decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
                     break;
 
                 default:
@@ -498,8 +482,8 @@ static fapi2::ReturnCode rdimm_rev_helper(const fapi2::Target<TARGET_TYPE_DIMM>&
                              "for SPD RDIMM revision %d.%d",
                              mss::c_str(i_target), HIGHEST_ENCODING_LEVEL, HIGHEST_ADDITIONS_LEVEL );
 
-                    l_module_decoder = std::make_shared<rdimm_decoder_v1_1>(i_target, i_spd_data);
-                    o_fact_obj = std::make_shared<decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
+                    l_module_decoder = std::make_shared<ddr4::rdimm::decoder_v1_1>(i_target, i_spd_data);
+                    o_fact_obj = std::make_shared<ddr4::decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
                     break;
 
             }//end additions
@@ -563,7 +547,7 @@ static fapi2::ReturnCode lrdimm_rev_helper(const fapi2::Target<TARGET_TYPE_DIMM>
                 case 0:
                     // Life starts out at base revision level
                     FAPI_INF( "%s. Creating decoder for LRDIMM SPD revision 1.0", mss::c_str(i_target) );
-                    l_module_decoder = std::make_shared<lrdimm::decoder_v1_0>(i_target, i_spd_data);
+                    l_module_decoder = std::make_shared<ddr4::lrdimm::decoder_v1_0>(i_target, i_spd_data);
                     o_fact_obj = std::make_shared<decoder>( i_target, i_spd_data, l_module_decoder, i_raw_card );
                     break;
 
@@ -571,8 +555,8 @@ static fapi2::ReturnCode lrdimm_rev_helper(const fapi2::Target<TARGET_TYPE_DIMM>
                     // Rev 1.1
                     // Changes to both the general section & lrdimm section occured
                     FAPI_INF( "%s. Creating decoder for LRDIMM SPD revision 1.1", mss::c_str(i_target) );
-                    l_module_decoder = std::make_shared<lrdimm::decoder_v1_1>(i_target, i_spd_data);
-                    o_fact_obj = std::make_shared<decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
+                    l_module_decoder = std::make_shared<ddr4::lrdimm::decoder_v1_1>(i_target, i_spd_data);
+                    o_fact_obj = std::make_shared<ddr4::decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
                     break;
 
                 case 2:
@@ -580,8 +564,8 @@ static fapi2::ReturnCode lrdimm_rev_helper(const fapi2::Target<TARGET_TYPE_DIMM>
                     // Changes lrdimm section occured
                     // General section remained the same
                     FAPI_INF( "%s. Creating decoder for LRDIMM SPD revision 1.2", mss::c_str(i_target) );
-                    l_module_decoder = std::make_shared<lrdimm::decoder_v1_2>(i_target, i_spd_data);
-                    o_fact_obj = std::make_shared<decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
+                    l_module_decoder = std::make_shared<ddr4::lrdimm::decoder_v1_2>(i_target, i_spd_data);
+                    o_fact_obj = std::make_shared<ddr4::decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
                     break;
 
                 default:
@@ -595,8 +579,8 @@ static fapi2::ReturnCode lrdimm_rev_helper(const fapi2::Target<TARGET_TYPE_DIMM>
                              "for SPD LRDIMM revision %d.%d",
                              mss::c_str(i_target), HIGHEST_ENCODING_LEVEL, HIGHEST_ADDITIONS_LEVEL );
 
-                    l_module_decoder = std::make_shared<lrdimm::decoder_v1_2>(i_target, i_spd_data);
-                    o_fact_obj = std::make_shared<decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
+                    l_module_decoder = std::make_shared<ddr4::lrdimm::decoder_v1_2>(i_target, i_spd_data);
+                    o_fact_obj = std::make_shared<ddr4::decoder_v1_1>( i_target, i_spd_data, l_module_decoder, i_raw_card );
                     break;
 
             }//end additions

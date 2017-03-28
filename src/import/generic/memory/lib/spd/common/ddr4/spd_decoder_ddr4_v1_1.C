@@ -49,6 +49,8 @@ namespace mss
 {
 namespace spd
 {
+namespace ddr4
+{
 
 /////////////////////////
 // Member method definitions
@@ -65,7 +67,7 @@ decoder_v1_1::decoder_v1_1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targe
                            const std::vector<uint8_t>& i_spd_data,
                            const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
                            const rcw_settings& i_raw_card)
-    : decoder(i_target, i_spd_data, i_module_decoder, i_raw_card)
+    : decoder_v1_0(i_target, i_spd_data, i_module_decoder, i_raw_card)
 {}
 
 ///
@@ -846,5 +848,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-}//spd
+}// ddr4
+}// spd
 }// mss
