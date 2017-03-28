@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,9 @@
 #include <p9_htm_def.H>
 #include <p9_htm_start.H>
 #include <p9_htm_reset.H>
+#include <p9_mss_eff_grouping.H>
+#include <p9_mc_scom_addresses.H>
+#include <p9_mc_scom_addresses_fld.H>
 
 ///----------------------------------------------------------------------------
 /// Constants
@@ -1295,6 +1298,107 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Write HTM Queue reservation values to MCPERF0 regs
+///
+/// @param[in]  i_portTargets     Vector of reference of port targets (MCA/DMI)
+/// @param[in]  i_numOfHtmQueues  HTM queue reservation values
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode write_MCPERF0(
+    const std::vector< fapi2::Target<T> >& i_portTargets,
+    const uint8_t i_numOfHtmQueues[])
+
+{
+    FAPI_DBG("Entering");
+    fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_scomData(0);
+
+    for (auto l_port : i_portTargets)
+    {
+        uint8_t l_unitPos = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_port, l_unitPos),
+                 "Error getting ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+
+        // Queue reservation exists
+        if (i_numOfHtmQueues[l_unitPos] > 0)
+        {
+            FAPI_TRY(fapi2::getScom(l_port, MCS_PORT02_MCPERF0, l_scomData),
+                     "setup_HTM_queues: getScom returns error: Addr "
+                     "0x%016llX, l_rc 0x%.8X", MCS_PORT02_MCPERF0,
+                     (uint64_t)fapi2::current_err);
+
+            // HTM RESERVE (bits 16:21)
+            l_scomData.insertFromRight<MCS_PORT02_MCPERF0_NUM_HTM_RSVD,
+                                       MCS_PORT02_MCPERF0_NUM_HTM_RSVD_LEN>(
+                                           i_numOfHtmQueues[l_unitPos]);
+
+            // Write to reg
+            FAPI_INF("Write MCS_PORT02_MCPERF0 reg 0x%.16llX, Value 0x%.16llX",
+                     MCS_PORT02_MCPERF0, l_scomData);
+            FAPI_TRY(fapi2::putScom(l_port, MCS_PORT02_MCPERF0, l_scomData),
+                     "Error writing to MCS_PORT02_MCPERF0 reg");
+
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup the HTM queue reservation for each channel
+///
+/// @param[in]  i_target    Reference to processor chip target
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode setup_HTM_queues(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Entering");
+    fapi2::ReturnCode l_rc;
+    uint8_t l_numHtmQueues[NUM_MC_PORTS_PER_PROC];
+
+    // Get the functional MCA chiplets, should be none for Cumulus
+    auto l_mcaChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCA>();
+    // Get functional DMI chiplets, , should be none for Nimbus
+    auto l_dmiChiplets = i_target.getChildren<fapi2::TARGET_TYPE_DMI>();
+
+    // Get ATTR_HTM_QUEUES
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTM_QUEUES, i_target, l_numHtmQueues),
+             "Error getting ATTR_HTM_QUEUES, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_INF("Num of HTM queues:");
+
+    for (uint8_t ii = 0; ii < NUM_MC_PORTS_PER_PROC; ii++)
+    {
+        FAPI_INF("ATTR_HTM_QUEUES[%u]: %d", ii, l_numHtmQueues[ii]);
+    }
+
+    if (l_mcaChiplets.size() > 0)
+    {
+        FAPI_TRY(write_MCPERF0(l_mcaChiplets, l_numHtmQueues),
+                 "write_MCPERF0 returns error - MCA, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+    }
+    else
+    {
+        FAPI_TRY(write_MCPERF0(l_dmiChiplets, l_numHtmQueues),
+                 "write_MCPERF0 returns error - DMI, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting");
+    return fapi2::current_err;
+}
+
 extern "C" {
 
 ///
@@ -1414,6 +1518,13 @@ extern "C" {
         // Perform reset/start only if certain trace is enabled.
         if (l_htmEnabled == true)
         {
+            // ----------------------------------------------
+            // Reserve HTM queues
+            // ----------------------------------------------
+            FAPI_TRY(setup_HTM_queues(i_target),
+                     "setup_HTM_queues returns an error, l_rc 0x%.8X",
+                     (uint64_t)fapi2::current_err);
+
             // ----------------------------------------------
             // Reset HTMs
             // ----------------------------------------------

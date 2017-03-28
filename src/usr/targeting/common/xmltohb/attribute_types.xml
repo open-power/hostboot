@@ -33999,6 +33999,29 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>HTM_QUEUES</id>
+    <description> The number of HTM queues to be reserved for each port in order
+                  to improve HTM trace performance.
+                  This number is calculated in memory grouping process when the
+                  HTM trace spaces are determined.
+                  Set by p9_mss_eff_grouping.
+                  Used by p9_htm_setup.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>8</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_HTM_QUEUES</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>CME_CHTM_TRACE_ENABLE</id>
     <description>
      Enables the SGPE Hcode to enable the CME instruction traces into the CHTM

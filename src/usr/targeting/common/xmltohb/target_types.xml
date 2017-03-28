@@ -1185,6 +1185,7 @@
     <attribute><id>DUMP_STOP_INFO_SUPPRESS_ERROR_TRACE</id></attribute>
     <attribute><id>DUMP_STOP_INFO_ENABLE_ERRORLOG</id></attribute>
     <attribute><id>SBE_IS_STARTED</id></attribute>
+    <attribute><id>HTM_QUEUES</id></attribute>
 
     <!-- Processor characteristics for HDAT -->
     <attribute>
