@@ -46,8 +46,13 @@ enum consts : size_t
     NUM_RANK_GROUPS = 4,           ///< Maximum number of rank groups
     MAX_RANKS_PER_PORT = 8,        ///< Maximum number of ranks on a port
     DIMM_DQ_RANK_BITMAP_SIZE = 10, ///< Size in bytes of the Bad DQ bitmap for a rank.
+
+    BITS_PER_BYTE = 8,
+    BITS_PER_NIBBLE = 4,
+    MAX_NIBBLES_PER_BYTE = 2,
+
     // This is the number of bits in DIMM_DQ_RANK_BITMAP_SIZE.
-    DIMM_DQ_NUM_DQS = DIMM_DQ_RANK_BITMAP_SIZE * 8, ///< Number of DQs (data query pins).
+    DIMM_DQ_NUM_DQS = DIMM_DQ_RANK_BITMAP_SIZE * BITS_PER_BYTE, ///< Number of DQs (data query pins).
 
     // This must be big enough to contain the bitmap for each rank
     // (MAX_RANKS_PER_DIMM * DIMM_DQ_RANK_BITMAP_SIZE), plus the header
@@ -58,8 +63,9 @@ enum consts : size_t
     DIMM_TO_C4_DQ_ENTRIES = 80,     ///< Number of entries in the DQ attribute
     DIMM_TO_C4_DQS_ENTRIES = 20,    ///< Number of entries in the DQS attribute
 
-    ISDIMM_MAX_DQ_72 = 72,          ///< Number of DQ pins on an ISDIMM
-    ISDIMM_MAX_DQS_18 = 18,         ///< Number of DQS pins on an ISDIMM
+    ISDIMM_MAX_DQ_72 = 72,          ///< Number of DQ pins on ISDIMM
+    ISDIMM_MAX_DQS_18 = 18,         ///< Number of DQS pins on ISDIMM
+    CDIMM_MAX_DQ_80 = 80,
 
     MAX_ADDR = 19,
     MAX_CMD = 3,
@@ -68,14 +74,41 @@ enum consts : size_t
     MAX_DATA_DISABLE = 5,
 
     LANES_PER_BLOCK = 16,
-    BITS_PER_BYTE = 8,
     MAX_BLOCKS_PER_RANK = 5,
-    MAX_NIBBLES_PER_BYTE = 2,
     MAX_BYTES_PER_BLOCK = 2,
+    MAX_BYTES_PER_RANK = MAX_BYTES_PER_BLOCK * MAX_BLOCKS_PER_RANK,
+    LANES_PER_PORT = LANES_PER_BLOCK * MAX_BLOCKS_PER_RANK,
 
     DP18_INSTANCES = 5,
     BITS_PER_REG = 16,
     BITS_PER_PORT = (LANES_PER_BLOCK * DP18_INSTANCES),
+
+};
+
+enum ohm : size_t
+{
+    OHM15 = 15,                ///< 15 OHMs
+    OHM20 = 20,                ///< 20 OHMs
+    OHM24 = 24,                ///< 24 OHMs
+    OHM30 = 30,                ///< 30 OHMs
+    OHM34 = 34,                ///< 34 OHMs
+    OHM40 = 40,                ///< 40 OHMs
+};
+
+enum slew : size_t
+{
+    SLEW_3V_NS = 3,            ///< 3V/ns slew
+    SLEW_4V_NS = 4,            ///< 4V/ns slew
+    SLEW_5V_NS = 5,            ///< 5V/ns slew
+    SLEW_6V_NS = 6,            ///< 6V/ns slew
+    SLEW_MAXV_NS = 7,          ///< 7V/ns slew
+
+    SLEW_TYPE_DATA = 0,        ///< Data line slew enum
+    SLEW_TYPE_ADR_ADDR = 1,    ///< Address line slew enum
+    SLEW_TYPE_ADR_CNTL = 2,    ///< Control line slew enum
+    SLEW_TYPE_ADR_CLK = 3,     ///< Clock line slew enum
+    SLEW_TYPE_ADR_SPCKE = 4,   ///< Spare CKE line slew enum
+    MAX_NUM_SLEW_TYPES = 5    ///< Max slew types
 };
 
 enum mrs : size_t
@@ -100,17 +133,17 @@ enum dimm_types : size_t
 
 enum mss_ccs_status_query_result
 {
-    MSS_STAT_QUERY_PASS = 1,
-    MSS_STAT_QUERY_IN_PROGRESS = 2,
-    MSS_STAT_QUERY_FAIL = 3,
+    MSS_STAT_QUERY_PASS = 1,          ///<  CCS Pass Enum
+    MSS_STAT_QUERY_IN_PROGRESS = 2,   ///<  CCS In Progress Enum
+    MSS_STAT_QUERY_FAIL = 3           ///<  CCS Fail Enum
 };
 
 enum mss_ccs_data_pattern
 {
-    MSS_CCS_DATA_PATTERN_00 = 1,
-    MSS_CCS_DATA_PATTERN_0F = 2,
-    MSS_CCS_DATA_PATTERN_F0 = 3,
-    MSS_CCS_DATA_PATTERN_FF = 4
+    MSS_CCS_DATA_PATTERN_00 = 1,   ///< 00 Pattern Enum
+    MSS_CCS_DATA_PATTERN_0F = 2,   ///< 0F Pattern Enum
+    MSS_CCS_DATA_PATTERN_F0 = 3,   ///< F0 Pattern Enum
+    MSS_CCS_DATA_PATTERN_FF = 4    ///< FF Pattern Enum
 };
 
 constexpr bool MSS_CCS_START = 0;

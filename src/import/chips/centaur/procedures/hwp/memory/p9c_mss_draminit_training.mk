@@ -33,5 +33,4 @@ OBJS+=p9c_mss_ddr4_funcs.o
 OBJS+=p9c_mss_access_delay_reg.o
 OBJS+=p9c_mss_unmask_errors.o
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
-#lib$(PROCEDURE)_DEPLIBS+=mss
 $(call BUILD_PROCEDURE)

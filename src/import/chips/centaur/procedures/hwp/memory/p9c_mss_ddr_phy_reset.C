@@ -39,7 +39,7 @@
 #include <cen_gen_scom_addresses_fld.H>
 #include <p9c_mss_ddr_phy_reset.H>
 #include <p9c_mss_unmask_errors.H>
-#include <p9c_mss_slew.H>
+#include <p9c_mss_termination_control.H>
 #include <p9c_dimmBadDqBitmapFuncs.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <dimmConsts.H>

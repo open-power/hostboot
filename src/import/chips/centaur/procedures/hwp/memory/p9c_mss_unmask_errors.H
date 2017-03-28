@@ -29,7 +29,7 @@
 /// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 2
-/// *HWP Consumed by: Memtools
+/// *HWP Consumed by: HB:CI
 //
 //
 

@@ -2857,7 +2857,7 @@ extern "C" {
     {
         // disable0=dq bits, disable1=dqs(+,-)
         // wrclk_en=dqs follows quad, same as disable0
-        const uint64_t l_disable_reg[MAX_PORTS_PER_MBA][MAX_RANKS_PER_DIMM][DP18_INSTANCES] =
+        const uint64_t l_disable_reg[MAX_PORTS_PER_MBA][MAX_RANKS_PER_DIMM][MAX_BLOCKS_PER_RANK] =
         {
             /* port 0 */
             {
@@ -2950,15 +2950,15 @@ extern "C" {
         // 0x800000050301143f    from disable1 register
         const uint64_t l_wrclk_en_addr_mask   = 0xFFFFFF07FFFFFFFFull;
         fapi2::buffer<uint64_t> l_data_buffer;
-        fapi2::variable_buffer l_db_reg(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_rank0(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_rank1(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_rank2(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_rank3(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_rank4(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_rank5(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_rank6(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_rank7(BITS_PER_PORT);
+        fapi2::variable_buffer l_db_reg(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_rank0(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_rank1(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_rank2(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_rank3(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_rank4(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_rank5(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_rank6(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_rank7(LANES_PER_PORT);
         fapi2::buffer<uint64_t> l_put_mask;
         uint8_t l_prg[MAX_RANKS_PER_DIMM][MAX_PORTS_PER_MBA] = {0};      // primary rank group values
         fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_target_centaur;
@@ -3414,7 +3414,7 @@ extern "C" {
                                         const uint8_t i_training_success)
     {
         // Registers to Flash.
-        const uint64_t l_disable_reg[MAX_PORTS_PER_MBA][MAX_RANKS_PER_DIMM][DP18_INSTANCES] =
+        const uint64_t l_disable_reg[MAX_PORTS_PER_MBA][MAX_RANKS_PER_DIMM][MAX_BLOCKS_PER_RANK] =
         {
             /* port 0 */
             {
@@ -3498,8 +3498,8 @@ extern "C" {
         };
 
         fapi2::buffer<uint64_t> l_data_buffer;
-        fapi2::variable_buffer l_db_reg(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_vpd(BITS_PER_PORT);
+        fapi2::variable_buffer l_db_reg(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_vpd(LANES_PER_PORT);
         uint8_t l_prg[MAX_RANKS_PER_DIMM][MAX_PORTS_PER_MBA] = {0};      // primary rank group values
         uint8_t l_dram_width = 0;
         uint8_t l_dimm = 0;
@@ -3528,14 +3528,14 @@ extern "C" {
         uint8_t l_port = 0;
         uint8_t l_prank = 0;
         //Storing all the errors across rank/eff dimm
-        fapi2::variable_buffer l_db_reg_dimm0_rank0(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_dimm0_rank1(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_dimm0_rank2(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_dimm0_rank3(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_dimm1_rank0(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_dimm1_rank1(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_dimm1_rank2(BITS_PER_PORT);
-        fapi2::variable_buffer l_db_reg_dimm1_rank3(BITS_PER_PORT);
+        fapi2::variable_buffer l_db_reg_dimm0_rank0(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_dimm0_rank1(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_dimm0_rank2(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_dimm0_rank3(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_dimm1_rank0(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_dimm1_rank1(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_dimm1_rank2(LANES_PER_PORT);
+        fapi2::variable_buffer l_db_reg_dimm1_rank3(LANES_PER_PORT);
 
         FAPI_INF("Running (get)registers->flash");
 
@@ -3661,7 +3661,7 @@ extern "C" {
                 for ( uint8_t i = 0; i < DP18_INSTANCES; ++i ) // dp18 [0:4]
                 {
                     // clear bits 48:63
-                    FAPI_TRY(l_data_buffer.clearBit(48, BITS_PER_REG));
+                    FAPI_TRY(l_data_buffer.clearBit(48, LANES_PER_BLOCK));
 
                     FAPI_TRY(fapi2::getScom(i_mba_target, l_disable_reg[l_port][l_prank][i],
                                             l_data_buffer));

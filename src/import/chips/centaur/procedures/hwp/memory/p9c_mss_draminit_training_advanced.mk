@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/centaur/procedures/hwp/memory/p9c_mss_ddr_phy_reset.mk $
+# $Source: src/import/chips/centaur/procedures/hwp/memory/p9c_mss_draminit_training_advanced.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -25,9 +25,15 @@
 
 # Include the macros and things for MSS procedures
 -include 01common.mk
-PROCEDURE=p9c_mss_ddr_phy_reset
-OBJS+=p9c_dimmBadDqBitmapFuncs.o
-OBJS+=p9c_mss_unmask_errors.o
-OBJS+=p9c_mss_termination_control.o
+PROCEDURE=p9c_mss_draminit_training_advanced
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+OBJS+=p9c_mss_mcbist.o
+OBJS+=p9c_mss_mcbist_common.o
+OBJS+=p9c_mss_mcbist_address.o
+OBJS+=p9c_dimmBadDqBitmapFuncs.o
+OBJS+=p9c_mss_termination_control.o
+OBJS+=p9c_mss_generic_shmoo.o
+OBJS+=p9c_mss_mrs6_DDR4.o
+OBJS+=p9c_mss_access_delay_reg.o
+OBJS+=p9c_mss_funcs.o
 $(call BUILD_PROCEDURE)

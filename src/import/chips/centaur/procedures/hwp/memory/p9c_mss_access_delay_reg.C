@@ -179,18 +179,18 @@ extern "C" {
         {
             if(l_dimmtype == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES)
             {
-                FAPI_ASSERT(i_input_index_u8 <= l_CDIMM_dqmax,
+                FAPI_ASSERT(i_input_index_u8 < CDIMM_MAX_DQ_80,
                             fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
                             "CDIMM_DQ: Wrong input index specified (%d, max %d)" ,
-                            i_input_index_u8, l_CDIMM_dqmax);
+                            i_input_index_u8, CDIMM_MAX_DQ_80);
                 l_type = CDIMM_DQ;
             }
             else
             {
-                FAPI_ASSERT(i_input_index_u8 <= l_ISDIMM_dqmax,
+                FAPI_ASSERT(i_input_index_u8 < ISDIMM_MAX_DQ_72,
                             fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
                             "ISDIMM_DQ: Wrong input index specified (%d, max %d)",
-                            i_input_index_u8, l_ISDIMM_dqmax);
+                            i_input_index_u8, ISDIMM_MAX_DQ_72);
                 l_type = ISDIMM_DQ;
             }
 
@@ -218,10 +218,10 @@ extern "C" {
 
         else if(i_input_type_e == RAW_CDIMM_WR_DQ || i_input_type_e == RAW_CDIMM_RD_DQ)
         {
-            FAPI_ASSERT(i_input_index_u8 <= l_CDIMM_dqmax,
+            FAPI_ASSERT(i_input_index_u8 <= CDIMM_MAX_DQ_80,
                         fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
                         "CDIMM_DQ: Wrong input index specified (%d, max %d)" ,
-                        i_input_index_u8, l_CDIMM_dqmax);
+                        i_input_index_u8, CDIMM_MAX_DQ_80);
             l_type = CDIMM_DQ;
 
             FAPI_TRY(rosetta_map(i_target_mba, i_port_u8, l_type, i_input_index_u8, i_verbose, l_val));
@@ -3461,20 +3461,20 @@ extern "C" {
 
             if(l_dimmtype == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES)
             {
-                FAPI_ASSERT(i_input_index_u8 <= l_CDIMM_dqmax,
+                FAPI_ASSERT(i_input_index_u8 < CDIMM_MAX_DQ_80,
                             fapi2::CEN_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT(),
                             "CDIMM_DQ: Wrong input index specified (%d, max %d)" ,
-                            i_input_index_u8, l_CDIMM_dqmax);
+                            i_input_index_u8, CDIMM_MAX_DQ_80);
 
                 l_type = CDIMM_DQ;
             }
             else
             {
 
-                FAPI_ASSERT(i_input_index_u8 <= l_ISDIMM_dqmax,
+                FAPI_ASSERT(i_input_index_u8 < ISDIMM_MAX_DQ_72,
                             fapi2::CEN_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT(),
                             "ISDIMM_DQ: Wrong input index specified (%d, max %d)",
-                            i_input_index_u8, l_ISDIMM_dqmax);
+                            i_input_index_u8, ISDIMM_MAX_DQ_72);
 
                 l_type = ISDIMM_DQ;
             }
