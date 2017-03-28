@@ -57,6 +57,9 @@
 #include <ipmi/ipmisensor.H>
 #endif
 #include <initservice/istepdispatcherif.H>
+#ifdef CONFIG_SECUREBOOT
+#include <secureboot/containerheader.H>
+#endif
 
 //  fapi support
 #include    <fapi2.H>
@@ -74,6 +77,7 @@
 #include <bootloader/bootloaderif.H>
 #include <secureboot/service.H>
 #include <assert.h>
+#include <securerom/sha512.H>
 
 // ----------------------------------------------
 // Trace definitions
@@ -92,6 +96,11 @@ static bool g_mbox_query_done   = false;
 static bool g_mbox_query_result = false;
 static bool g_istep_mode        = false;
 static bool g_update_both_sides = false;
+
+// ----------------------------------------
+// Global Variables HW Keys Hash Transition
+static bool    g_do_hw_keys_hash_transition = false;
+static SHA512_t g_hw_keys_hash_transition_data = {0};
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -268,6 +277,20 @@ namespace SBE
                  err = NULL;
             }
 
+            // Check if a key transition is needed
+            err = secureKeyTransition();
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"updateProcessorSbeSeeproms() - failed secureKeyTransition");
+                break;
+            }
+            // Print new hw keys' hash if a key transition is required.
+            if(g_do_hw_keys_hash_transition)
+            {
+                TRACFBIN(g_trac_sbe, "updateProcessorSbeSeeproms(): Key transition new hw key hash",
+                         g_hw_keys_hash_transition_data,
+                         sizeof(g_hw_keys_hash_transition_data));
+            }
 
             for(uint32_t i=0; i<procList.size(); i++)
             {
@@ -5002,5 +5025,62 @@ errlHndl_t getHwKeyHashFromSbeSeeprom(
     return err;
 }
 
+errlHndl_t secureKeyTransition()
+{
+    errlHndl_t l_errl = nullptr;
+
+#ifdef CONFIG_SECUREBOOT
+    do {
+    bool l_loaded = false;
+    PNOR::SectionInfo_t l_secInfo;
+
+    // Get SBKT PNOR section info from PNOR RP
+    l_errl = getSectionInfo(PNOR::SBKT, l_secInfo);
+    // SBKT section is optional so just delete error and no-op
+    if (l_errl)
+    {
+        TRACFCOMP( g_trac_sbe, ERR_MRK"secureKeyTransition() - getSectionInfo() optional PNOR::SBKT DNE");
+        delete l_errl;
+        l_errl = nullptr;
+        break;
+    }
+
+    // if it has a secure header, we do need to load and verify the container
+    if(l_secInfo.secure)
+    {
+        // Verify and Load SBKT section and nested container.
+        l_errl = loadSecureSection(PNOR::SBKT);
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_sbe, ERR_MRK,"secureKeyTransition() - Error from loadSecureSection(PNOR::SBKT)");
+            break;
+        }
+        l_loaded = true;
+
+        // Get new verified HW key hash
+        const void* l_pVaddr = reinterpret_cast<void*>(l_secInfo.vaddr);
+        SECUREBOOT::ContainerHeader l_nestedConHdr(l_pVaddr);
+        // Get pointer to first element of hwKeyHash from header.
+        const uint8_t* l_hwKeyHash = l_nestedConHdr.hwKeyHash()[0];
+        // Update global variable with hw keys hash to transition to.
+        memcpy(g_hw_keys_hash_transition_data, l_hwKeyHash,
+               sizeof(g_hw_keys_hash_transition_data));
+        // Indicate a key transition is required
+        g_do_hw_keys_hash_transition = true;
+    }
+    if(l_loaded)
+    {
+        l_errl = unloadSecureSection(PNOR::SBKT);
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_sbe, ERR_MRK,"secureKeyTransition() - Error from unloadSecureSection(PNOR::SBKT)");
+            break;
+        }
+    }
+    } while(0);
+#endif
+
+    return l_errl;
+}
 
 } //end SBE Namespace
