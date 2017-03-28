@@ -49,7 +49,6 @@
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_ZMODE_PORT</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -60,7 +59,6 @@
     <writeable/>
     <odmVisable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_ADDRESS_MIRRORING</id>
@@ -143,7 +141,6 @@ Set by: PLL settings written by Dave Cadigan</description>
     <persistRuntime/>
 </attribute>
 
-<!--
 <attribute>
 <id>ATTR_CEN_MSS_VREF_CAL_CNTL</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -157,7 +154,6 @@ Set by: PLL settings written by Dave Cadigan</description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -3644,7 +3640,6 @@ Will be set at an MBA level with one policy to be used</description>
     <odmVisable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_WR_VREF_CHECK_VREF_STEP_SIZE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3654,7 +3649,6 @@ Will be set at an MBA level with one policy to be used</description>
     <odmVisable/>
     <persistRuntime/>
 </attribute>
--->
 
 <!--
 <attribute>
