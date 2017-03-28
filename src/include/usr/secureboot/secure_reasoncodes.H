@@ -39,6 +39,7 @@ namespace SECUREBOOT
         MOD_SECURE_ROM_SHA512           = 0x05,
         MOD_SECURE_READ_REG             = 0x06,
         MOD_SECURE_WRITE_REG            = 0x07,
+        MOD_SECURE_SETTINGS_INIT        = 0x08,
    };
 
     enum SECUREReasonCode
@@ -52,6 +53,7 @@ namespace SECUREBOOT
         RC_ROM_VERIFY                   = SECURE_COMP_ID | 0x07,
         RC_ROM_SHA512                   = SECURE_COMP_ID | 0x08,
         RC_SECURE_BAD_TARGET            = SECURE_COMP_ID | 0x09,
+        RC_SECURE_BOOT_DISABLED         = SECURE_COMP_ID | 0x0A,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };
