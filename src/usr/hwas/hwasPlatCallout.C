@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +81,10 @@ errlHndl_t platHandleHWCallout(
     if (hwasPLDDetection())
     {
         HWAS_INF("hwasPLDDetection return true - skipping callouts");
+    }
+    else if ((io_errl->sev()) == (ERRORLOG::ERRL_SEV_INFORMATIONAL))
+    {
+        HWAS_INF("Error log is informational - skipping callouts");
     }
     else
     {
@@ -182,78 +186,86 @@ errlHndl_t platHandleClockCallout(
 
     errlHndl_t pError = NULL;
 
+    if ((io_errl->sev()) == (ERRORLOG::ERRL_SEV_INFORMATIONAL))
+    {
+        HWAS_INF("Error log is informational - skipping clock callouts");
+    }
+    else
+    {
 #ifdef CONFIG_BMC_IPMI
 
-    // If BMC is present and IPMI is configured system has a simple clock
-    // topology, so need to update the BMC fault sensor for the clock if there
-    // is a deconfig since Hostboot is the only party able to handle clock
-    // fails.
-    // For now, all clock sensors reside on the node target
-    if(i_deconfigState == HWAS::DECONFIG)
-    {
-        TARGETING::TargetHandleList parentList;
-
-        (void)getParentAffinityTargets (
-            parentList,
-            i_pTarget, TARGETING::CLASS_ENC, TARGETING::TYPE_NODE,
-            false);
-
-        assert(parentList.size() == 1, "Bug! Query returned multiple or no "
-            "(actual = %d) parents",
-            parentList.size());
-
-        TARGETING::TargetHandle_t pTarget = parentList[0];
-
-        // Get associated target
-        TARGETING::ENTITY_ID associatedType = TARGETING::ENTITY_ID_NA;
-        switch(i_clockType)
+        // If BMC is present and IPMI is configured system has a simple clock
+        // topology, so need to update the BMC fault sensor for the clock if
+        // there is a deconfig since Hostboot is the only party able to handle
+        // clock fails.
+        // For now, all clock sensors reside on the node target
+        if(i_deconfigState == HWAS::DECONFIG)
         {
-            case TODCLK_TYPE:
-                associatedType = TARGETING::ENTITY_ID_TOD_CLOCK;
-                break;
-            case MEMCLK_TYPE:
-            case OSCREFCLK_TYPE:
-                associatedType = TARGETING::ENTITY_ID_REF_CLOCK;
-                break;
-            case OSCPCICLK_TYPE:
-                associatedType = TARGETING::ENTITY_ID_PCI_CLOCK;
-                break;
-            default:
-                assert(0,"Bug! Caller supplied illegal clock type.  "
-                    "i_clockType = 0x%X",
-                    i_clockType);
-        }
+            TARGETING::TargetHandleList parentList;
 
-        SENSOR::FaultSensor faultSensor(pTarget,associatedType);
+            (void)getParentAffinityTargets (
+                parentList,
+                i_pTarget, TARGETING::CLASS_ENC, TARGETING::TYPE_NODE,
+                false);
 
-        pError = faultSensor.setStatus(
-            SENSOR::FaultSensor::FAULT_STATE_ASSERTED);
-        if(pError)
-        {
-            HWAS_ERR("Failed setting fault sensor status for clock type 0x%X "
-                "and HUID 0x%X",
-                i_clockType, TARGETING::get_huid(pTarget));
-            pError->collectTrace(HWAS_COMP_NAME, 512);
-            errlCommit(pError, HWAS_COMP_ID);
+            assert(parentList.size() == 1, "Bug! Query returned multiple or no "
+                "(actual = %d) parents",
+                parentList.size());
+
+            TARGETING::TargetHandle_t pTarget = parentList[0];
+
+            // Get associated target
+            TARGETING::ENTITY_ID associatedType = TARGETING::ENTITY_ID_NA;
+            switch(i_clockType)
+            {
+                case TODCLK_TYPE:
+                    associatedType = TARGETING::ENTITY_ID_TOD_CLOCK;
+                    break;
+                case MEMCLK_TYPE:
+                case OSCREFCLK_TYPE:
+                    associatedType = TARGETING::ENTITY_ID_REF_CLOCK;
+                    break;
+                case OSCPCICLK_TYPE:
+                    associatedType = TARGETING::ENTITY_ID_PCI_CLOCK;
+                    break;
+                default:
+                    assert(0,"Bug! Caller supplied illegal clock type.  "
+                        "i_clockType = 0x%X",
+                        i_clockType);
+            }
+
+            SENSOR::FaultSensor faultSensor(pTarget,associatedType);
+
+            pError = faultSensor.setStatus(
+                SENSOR::FaultSensor::FAULT_STATE_ASSERTED);
+            if(pError)
+            {
+                HWAS_ERR("Failed setting fault sensor status for clock type "
+                    "0x%X and HUID 0x%X",
+                    i_clockType, TARGETING::get_huid(pTarget));
+                pError->collectTrace(HWAS_COMP_NAME, 512);
+                errlCommit(pError, HWAS_COMP_ID);
+            }
         }
-    }
 
 #endif
 
 #ifdef CONFIG_CLOCK_DECONFIGS_FATAL
 
-    // If clock deconfigs are considered fatal, and deconfig requested, then
-    // call doShutdown
-    if(i_deconfigState == HWAS::DECONFIG)
-    {
-        HWAS_INF(
-            "Clock deconfiguration considered fatal, requesting "
-            "shutdown.  See PLID = 0x%X for details.",
-            io_errl->plid());
-        INITSERVICE::doShutdown(io_errl->plid(), true);
-    }
+        // If clock deconfigs are considered fatal, and deconfig requested, then
+        // call doShutdown
+        if(i_deconfigState == HWAS::DECONFIG)
+        {
+            HWAS_INF(
+                "Clock deconfiguration considered fatal, requesting "
+                "shutdown.  See PLID = 0x%X for details.",
+                io_errl->plid());
+            INITSERVICE::doShutdown(io_errl->plid(), true);
+        }
 
 #endif
+
+    }
 
     return pError;
 }

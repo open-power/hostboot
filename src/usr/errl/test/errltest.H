@@ -933,7 +933,147 @@ public:
         while(0);
 #endif
     }
+        /**
+     *  @brief Test No Gard on Informational error logs
+     */
+    void testdeconfigNoGardInformational()
+    {
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
+        do
+        {
+            // find a ex unit that we can play with
+            TARGETING::Target * pSys;
+            TARGETING::targetService().getTopLevelTarget(pSys);
 
+            TARGETING::PredicateCTM predEx(TARGETING::CLASS_UNIT, TARGETING::TYPE_EX);
+            TARGETING::PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            TARGETING::PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predEx).push(&predFunctional).And();
+            TARGETING::TargetHandleList pExList;
+            TARGETING::targetService().getAssociated( pExList, pSys,
+                TARGETING::TargetService::CHILD, TARGETING::TargetService::ALL, &checkExpr );
+
+            if (pExList.empty())
+            {
+                TS_FAIL("testdeconfigNoGardInformational: empty pExList");
+                break;
+            }
+
+            errlHndl_t errl = NULL;
+            HWAS::DeconfigGard::DeconfigureRecords_t l_deconfigRecords;
+            HWAS::DeconfigGard::GardRecords_t l_gardRecords;
+            HWAS::DeconfigGard::DeconfigureRecords_t l_deconfigRecordsAfter;
+            HWAS::DeconfigGard::GardRecords_t l_gardRecordsAfter;
+
+            // make sure there aren't any existing deconfigure or gard records
+            errl = HWAS::theDeconfigGard()._getDeconfigureRecords(NULL,
+                    l_deconfigRecords);
+            if (errl)
+            {
+                TS_FAIL("testdeconfigNoGardInformational: Error from "
+                    "_getDeconfigureRecords");
+                errlCommit(errl,HWAS_COMP_ID);
+                break;
+            }
+            if (l_deconfigRecords.size() != 0)
+            {
+                TS_INFO("testdeconfigNoGardInformational: %d existing "
+                    "Deconfigure Records, skipping test",
+                    l_deconfigRecords.size());
+                break;
+            }
+
+            errl = HWAS::theDeconfigGard().getGardRecords(
+                    NULL, l_gardRecords);
+            if (errl)
+            {
+                TS_FAIL("testdeconfigNoGardInformational: Error from "
+                    "getGardRecords");
+                errlCommit(errl,HWAS_COMP_ID);
+                break;
+            }
+            if (l_gardRecords.size() != 0)
+            {
+                TS_INFO("testdeconfigNoGardInformational: %d existing "
+                    "GARD Records, skipping test", l_gardRecords.size());
+                break;
+            }
+
+            errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE);
+
+
+            // Part callout using deconfig/GARD parameters
+            errl->addHwCallout(
+                pExList[0],
+                HWAS::SRCI_PRIORITY_LOW,
+                HWAS::DECONFIG,
+                HWAS::GARD_Fatal);
+
+            errlCommit(errl, CXXTEST_COMP_ID);
+
+            // Flush out errorlogs so we make sure deconfigs/gards are logged
+            // before we check for them
+            ERRORLOG::ErrlManager::callFlushErrorLogs();
+
+            // Check gard and deconfigs - should be none.
+            errlHndl_t gard_errl = NULL;
+
+            gard_errl = HWAS::theDeconfigGard()._getDeconfigureRecords(NULL,
+                        l_deconfigRecordsAfter);
+
+            if (gard_errl)
+            {
+                TS_FAIL("testdeconfigNoGardInformational: Error from "
+                    "_getDeconfigureRecords - post deconfigs");
+                errlCommit(errl,HWAS_COMP_ID);
+                break;
+            }
+            if (l_deconfigRecordsAfter.size() != l_deconfigRecords.size())
+            {
+                TS_INFO("testdeconfigNoGardInformational: %d "
+                    "Deconfigure Records, expecting none. TEST FAILED",
+                    l_deconfigRecordsAfter.size());
+                TS_FAIL("testdeconfigNoGardInformational: Deconfig records "
+                    "present, expecting none.");
+                break;
+            }
+
+            gard_errl = HWAS::theDeconfigGard().getGardRecords(
+                    NULL, l_gardRecordsAfter);
+
+            if (gard_errl)
+            {
+                TS_FAIL("testdeconfigNoGardInformational: Error from "
+                    "getGardRecords - post deconfigs");
+                errlCommit(errl,HWAS_COMP_ID);
+                break;
+            }
+            if (l_gardRecords.size() != l_gardRecordsAfter.size())
+            {
+                TS_INFO("testdeconfigNoGardInformational: %d GARD Records "
+                    "present, expecting none. TEST FAILED",
+                    l_gardRecordsAfter.size());
+                TS_FAIL("testdeconfigNoGardInformational: GARD records "
+                    "present, expecting none.");
+                break;
+            }
+        }while(0);
+#endif
+    }
 };
 }
 
