@@ -60,122 +60,33 @@ namespace spd
 
 enum sdram_package_type : uint8_t
 {
-    // Signal loading
-    MONOLITHIC = 0,
-    NON_MONOLITHIC = 1,
-
     // Package Type
-    UNSPECIFIED = MONOLITHIC,
-    MULTI_LOAD_STACK = 1,
-    SINGLE_LOAD_STACK = 2,
+    MONOLITHIC = 0,           ///< Monolithic DRAM device
+    NON_MONOLITHIC = 1,       ///< Non-Monolithic DRAM device (3DS, Dual/Quad Die, etc)
+
+    // Signal loading
+    UNSPECIFIED = MONOLITHIC, ///< Not specified
+    MULTI_LOAD_STACK = 1,     ///< Multi laod stack
+    SINGLE_LOAD_STACK = 2,    ///< Single load stack (3DS)
 };
 
 enum nominal_voltage : uint8_t
 {
-    NOT_OPERABLE = 0,
-    OPERABLE = 1,
+    NOT_OPERABLE = 0, ///< Not operable at 1.2V
+    OPERABLE = 1,     ///< Operable at 1.2V
 
-    NOT_ENDURANT = 0,
-    ENDURANT = 1
+    NOT_ENDURANT = 0, ///< Not endurant at 1.2V
+    ENDURANT = 1      ///< Endurant at 1.2 V
 };
 
-enum factory_byte_extract
+namespace ddr4
 {
-    // Byte 1
-    ENCODING_LEVEL_START = 0,
-    ENCODING_LEVEL_LEN = 4,
-
-    ADDITIONS_LEVEL_START = 4,
-    ADDITIONS_LEVEL_LEN = 4,
-
-    // Byte 3
-    BASE_MODULE_START = 4,
-    BASE_MODULE_LEN = 4,
-};
-
-///
-/// @brief Helper function to extract byte information
-/// @tparam I Byte index
-/// @tparam S Start bit
-/// @tparam L Bit length
-/// @param[in] i_target the dimm target
-/// @param[in] i_spd_data the SPD data
-/// @return extracted byte (right aligned)
-///
-template<size_t I, uint8_t S, uint8_t L>
-inline uint8_t extract_spd_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                 const std::vector<uint8_t>& i_spd_data)
-{
-    //TODO - RTC:159477
-    FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
-             I,
-             i_spd_data[I]);
-
-    fapi2::buffer<uint8_t> l_buffer(i_spd_data[I]);
-
-    // Extracting desired bits
-    uint8_t l_field_bits = 0;
-    l_buffer.extractToRight<S, L>(l_field_bits);
-
-    return l_field_bits;
-}
-
-///
-/// @brief Helper function to extract byte information
-/// @tparam F the SPD field to extract
-/// @param[in] i_target the dimm target
-/// @param[in] i_spd_data the SPD data
-/// @return extracted byte (right aligned)
-///
-template< const field_t& F >
-inline uint8_t extract_spd_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                 const std::vector<uint8_t>& i_spd_data)
-{
-    FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
-             F.iv_byte,
-             i_spd_data[F.iv_byte]);
-
-    fapi2::buffer<uint8_t> l_buffer(i_spd_data[F.iv_byte]);
-
-    // Extracting desired bits
-    uint8_t l_field_bits = 0;
-    l_buffer.extractToRight<F.iv_start, F.iv_length>(l_field_bits);
-
-    return l_field_bits;
-}
-
-///
-/// @brief Helper function to extract byte information
-/// @param[in] i_target the dimm target
-/// @param[in] i_field the SPD field
-/// @param[in] i_spd_data the SPD data
-/// @return extracted byte (right aligned)
-///
-inline uint8_t extract_spd_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                 const field_t& i_field,
-                                 const std::vector<uint8_t>& i_spd_data)
-{
-    FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
-             i_field.iv_byte,
-             i_spd_data[i_field.iv_byte]);
-
-    fapi2::buffer<uint8_t> l_buffer(i_spd_data[i_field.iv_byte]);
-
-    // Extracting desired bits
-    uint8_t l_field_bits = 0;
-    l_buffer.extractToRight( l_field_bits, i_field.iv_start, i_field.iv_length );
-
-    return l_field_bits;
-}
 
 ///
 /// @class decoder
 /// @brief Base SPD DRAM decoder
 ///
-class decoder : public base_decoder
+class decoder_v1_0 : public decoder
 {
     protected:
         enum
@@ -417,6 +328,15 @@ class decoder : public base_decoder
 
         };
 
+        ///
+        /// @brief Helper function that turns Logical ranks in Primary SDRAM type
+        /// @param[out] o_logical_ranks number of logical ranks
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode prim_sdram_logical_ranks( uint8_t& o_logical_ranks );
+
+    public:
+
         // First field is byte index
         // Second field is the decoding start bit
         // Third field is the decoding bit length
@@ -472,17 +392,8 @@ class decoder : public base_decoder
         static constexpr field_t CRC_MSB{127, CRC_MSB_START, CRC_MSB_LEN};
         static constexpr field_t CRC_LSB{126, CRC_LSB_START, CRC_LSB_LEN};
 
-        ///
-        /// @brief Helper function that turns Logical ranks in Primary SDRAM type
-        /// @param[out] o_logical_ranks number of logical ranks
-        /// @return fapi2::FAPI2_RC_SUCCESS if okay
-        ///
-        virtual fapi2::ReturnCode prim_sdram_logical_ranks( uint8_t& o_logical_ranks );
-
-    public:
-
         // Default constructor deleted
-        decoder() = delete;
+        decoder_v1_0() = delete;
 
         ///
         /// @brief ctor
@@ -491,15 +402,15 @@ class decoder : public base_decoder
         /// @param[in] i_module_decoder shared_ptr to dimm module decoder
         /// @param[in] i_raw_card raw pointer to rcd data
         ///
-        decoder(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                const std::vector<uint8_t>& i_spd_data,
-                const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
-                const rcw_settings& i_raw_card);
+        decoder_v1_0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const std::vector<uint8_t>& i_spd_data,
+                     const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
+                     const rcw_settings& i_raw_card);
 
         ///
         /// @brief Default dtor
         ///
-        virtual ~decoder() = default;
+        virtual ~decoder_v1_0() = default;
 
         /////////////////////////
         // Member Methods
@@ -1268,7 +1179,7 @@ class decoder : public base_decoder
 /// @class decoder_v1_1
 /// @brief Base SPD DRAM decoder, 1st addition to general section
 ///
-class decoder_v1_1 : public decoder
+class decoder_v1_1 : public decoder_v1_0
 {
     protected:
 
@@ -1464,6 +1375,7 @@ class decoder_v1_1 : public decoder
 
 };// spd_decoder_v1_1
 
+}// ddr4
 }// spd
 }// mss
 
