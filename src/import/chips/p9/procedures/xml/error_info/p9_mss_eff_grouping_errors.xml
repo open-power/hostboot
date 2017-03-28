@@ -100,7 +100,7 @@
     <description>
         HTM and OCC Sandbox bars are not possible.
     </description>
-    <ffdc>TOTAL_SIZE</ffdc>
+    <ffdc>AJUSTED_SIZE</ffdc>
     <ffdc>NHTM_TOTAL_BAR_SIZE</ffdc>
     <ffdc>CHTM_TOTAL_BAR_SIZE</ffdc>
     <ffdc>OCC_SANDBOX_BAR_SIZE</ffdc>
