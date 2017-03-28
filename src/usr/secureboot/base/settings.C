@@ -31,6 +31,9 @@
 #include <targeting/common/target.H>
 #include <initservice/initserviceif.H>
 #include <secureboot/settings.H>
+#include <config.h>
+#include <errl/errludlogregister.H>
+#include <console/consoleif.H>
 
 // SECUREBOOT : General driver traces
 #include "../common/securetrace.H"
@@ -65,6 +68,77 @@ namespace SECUREBOOT
                             static_cast<uint64_t>(ProcSecurity::SabBit)));
 
         SB_INF("getEnabled() state:%i",iv_enabled);
+
+        // send informational log if secure boot is disabled
+        #ifdef CONFIG_SECUREBOOT
+        if (!iv_enabled)
+        {
+            #ifdef CONFIG_CONSOLE
+            CONSOLE::displayf(SECURE_COMP_NAME, "Booting in non-secure mode.");
+            #endif
+            /*@
+             * @errortype
+             * @reasoncode       SECUREBOOT::RC_SECURE_BOOT_DISABLED
+             * @moduleid         SECUREBOOT::MOD_SECURE_SETTINGS_INIT
+             * @severity         ERRL_SEV_INFORMATIONAL
+             * @userdata1        Security switch register value
+             * @devdesc          Secureboot has been disabled.
+             * @custdesc         Platform security informational message
+             */
+            auto err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                SECUREBOOT::MOD_SECURE_SETTINGS_INIT,
+                SECUREBOOT::RC_SECURE_BOOT_DISABLED,
+                l_regValue,
+                0,
+                false);
+
+            err->collectTrace(SECURE_COMP_NAME);
+
+            // we can't call getAllSecurityRegisters from here because it
+            // will deadlock when it circles back to getSecuritySwitch - the
+            // call to retreive the singleton for Settings class will hang.
+            // So, we just log the security switch and cbs control registers
+            ERRORLOG::ErrlUserDetailsLogRegister l_logReg(
+                MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                &l_regValue,
+                sizeof(l_regValue),
+                DEVICE_SCOM_ADDRESS(
+                    static_cast<uint64_t>(ProcSecurity::SwitchRegister)
+                ));
+            l_logReg.addToLog(err);
+
+            uint64_t l_cbsReg = 0;
+            auto l_cbsErrl = getProcCbsControlRegister(
+                l_cbsReg,
+                MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
+
+            if (l_cbsErrl)
+            {
+                // link the CBS control register erorr plid to the original err
+                err->plid(l_cbsErrl->plid());
+
+                // commit the CBS control register error
+                ERRORLOG::errlCommit(l_cbsErrl, SECURE_COMP_ID);
+
+                // we're already in the error path so we just keep going
+                // without the register
+            }
+            else
+            {
+                ERRORLOG::ErrlUserDetailsLogRegister l_logCbsReg(
+                    MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                    &l_cbsReg,
+                    sizeof(l_cbsReg),
+                    DEVICE_SCOM_ADDRESS(
+                        static_cast<uint64_t>(ProcCbsControl::StatusRegister)
+                    ));
+                l_logCbsReg.addToLog(err);
+            }
+
+            ERRORLOG::errlCommit(err, SECURE_COMP_ID);
+        }
+        #endif
     }
 
     bool Settings::getEnabled() const
@@ -73,7 +147,7 @@ namespace SECUREBOOT
     }
 
     errlHndl_t Settings::getJumperState(SecureJumperState& o_state,
-                                        Target* i_targ) const
+                                        Target* i_pProc) const
     {
         uint64_t l_regValue = 0;
         o_state = SecureJumperState::SECURITY_DEASSERTED;
@@ -82,14 +156,10 @@ namespace SECUREBOOT
 
         do
         {
-            // the supplied target input parameter is validated in one place
-            // inside the readSecurityRegister function
-            l_errl = readSecurityRegister(i_targ,
-                    static_cast<uint64_t>(ProcCbsControl::StatusRegister),
-                    l_regValue);
+            l_errl = getProcCbsControlRegister(l_regValue, i_pProc);
 
             SB_DBG("getJumperState() err:%i reg:%.16llX huid:%.8X",
-                !!l_errl, l_regValue, get_huid(i_targ));
+                !!l_errl, l_regValue, get_huid(i_pProc));
 
             if (l_errl)
             {
@@ -105,21 +175,31 @@ namespace SECUREBOOT
                      SecureJumperState::SECURITY_ASSERTED;
 
             SB_INF("getJumperState() state:%i huid:%.8X", o_state,
-                                                            get_huid(i_targ));
+                                                            get_huid(i_pProc));
 
         } while(0);
 
         return l_errl;
     }
 
-    errlHndl_t Settings::getSecuritySwitch(uint64_t& o_regValue,
-                                           Target* i_targ) const
+    errlHndl_t Settings::getProcCbsControlRegister(uint64_t& o_regValue,
+                                                   Target* i_pProc) const
     {
-        auto l_errl = readSecurityRegister(i_targ,
+        // the supplied target input parameter is validated in one place
+        // inside the readSecurityRegister function
+        return readSecurityRegister(i_pProc,
+                    static_cast<uint64_t>(ProcCbsControl::StatusRegister),
+                    o_regValue);
+    }
+
+    errlHndl_t Settings::getSecuritySwitch(uint64_t& o_regValue,
+                                           Target* i_pProc) const
+    {
+        auto l_errl = readSecurityRegister(i_pProc,
                     static_cast<uint64_t>(ProcSecurity::SwitchRegister),
                     o_regValue);
         SB_INF("getSecuritySwitch() err:%i reg:%.16llX huid:%.8X",
-            !!l_errl, o_regValue, get_huid(i_targ));
+            !!l_errl, o_regValue, get_huid(i_pProc));
 
         return l_errl;
     }
@@ -259,7 +339,7 @@ namespace SECUREBOOT
         return pError;
     }
 
-    errlHndl_t Settings::readSecurityRegister(Target* i_targ,
+    errlHndl_t Settings::readSecurityRegister(Target* i_pProc,
                                             const uint64_t i_scomAddress,
                                             uint64_t& o_regValue) const
     {
@@ -271,8 +351,8 @@ namespace SECUREBOOT
 
         // make sure we are not passed a null target pointer or the wrong
         // target type (must be a processor target) or the sentinel
-        if ( i_targ != MASTER_PROCESSOR_CHIP_TARGET_SENTINEL &&
-            (i_targ == nullptr || i_targ->getAttr<ATTR_TYPE>() != TYPE_PROC)
+        if ( i_pProc != MASTER_PROCESSOR_CHIP_TARGET_SENTINEL &&
+            (i_pProc == nullptr || i_pProc->getAttr<ATTR_TYPE>() != TYPE_PROC)
            )
         {
             /*@
@@ -289,15 +369,22 @@ namespace SECUREBOOT
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                          SECUREBOOT::MOD_SECURE_READ_REG,
                                          SECUREBOOT::RC_SECURE_BAD_TARGET,
-                                         reinterpret_cast<uint64_t>(i_targ),
-                                         TO_UINT64(get_huid(i_targ)),
+                                         reinterpret_cast<uint64_t>(i_pProc),
+                                         TO_UINT64(get_huid(i_pProc)),
                                          true /* Add HB Software Callout */ );
             l_errl->collectTrace(SECURE_COMP_NAME, ERROR_TRACE_SIZE);
             break;
         }
 
+        // Make sure the processor is SCOMable
+        if (i_pProc != MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+        {
+            assert(i_pProc->getAttr<ATTR_SCOM_SWITCHES>().useXscom,
+                "Bug! Processor security register read too early.");
+        }
+
         // Read security switch setting from processor.
-        l_errl = deviceRead(i_targ,
+        l_errl = deviceRead(i_pProc,
                             &o_regValue, size,
                             DEVICE_SCOM_ADDRESS(i_scomAddress));
 

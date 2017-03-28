@@ -54,7 +54,7 @@
 #include <initservice/initserviceif.H>
 #include <attributeenums.H>
 #include "errlentry_consts.H"
-
+#include <util/misc.H>
 
 // Hostboot Image ID string
 extern char hbi_ImageId;
@@ -707,7 +707,7 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 
     // Check to make sure targeting is initialized. If so, collect part and
     // serial numbers
-    if( TARGETING::targetService().isInitialized() )
+    if(Util::isTargetingLoaded() && TARGETING::targetService().isInitialized())
     {
         // If this error was a hardware callout, add the serial and part numbers
         // to the log. FSP provides this data so if there is no FSP, get them here.

@@ -73,6 +73,16 @@ namespace SECUREBOOT
         StatusRegisterFsi = 0x00002804ull, // used for FSI operation
     };
 
+    inline bool operator|(const ProcCbsControl i_cbs, const uint64_t i_value)
+    {
+        return (static_cast<uint64_t>(i_cbs) | i_value);
+    }
+
+    inline bool operator&(const ProcCbsControl i_cbs, const uint64_t i_value)
+    {
+        return (static_cast<uint64_t>(i_cbs) & i_value);
+    }
+
     /** @class Settings
      *
      *  @brief Caches and parses the hardware settings for Secureboot.
@@ -90,7 +100,14 @@ namespace SECUREBOOT
              *         in Secureboot's service.H for documentation
              */
             errlHndl_t getSecuritySwitch(uint64_t& o_regValue,
-                TARGETING::Target* i_targ
+                TARGETING::Target* i_pProc
+                    = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) const;
+
+            /** @brief Get Processor CBS Control regeister value. See wrapper
+             *         in Secureboot's service.H for documentation
+             */
+            errlHndl_t getProcCbsControlRegister(uint64_t& o_regValue,
+                TARGETING::Target* i_pProc
                     = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) const;
 
             /**
@@ -115,7 +132,7 @@ namespace SECUREBOOT
              *      for documenation.
              */
             errlHndl_t getJumperState(SecureJumperState& o_state,
-                TARGETING::Target* i_targ
+                TARGETING::Target* i_pProc
                     = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) const;
 
         private:
@@ -127,7 +144,7 @@ namespace SECUREBOOT
              *          Reads a register at a given scom address and
              *          provides its result via the supplied register
              *          value reference. Returns an error if unsuccesful.
-             *  @param  [in] i_targ The target processor to obtain the
+             *  @param  [in] i_pProc The target processor to obtain the
              *          jumper state from. Must not be null.
              *  @param  [in] i_scomAddress A uint64_t corresponding to
              *          desired scomAddress to read.
@@ -139,7 +156,7 @@ namespace SECUREBOOT
              *          successful.
              *  @retval null if successful otherwise pointer to error log
              */
-            errlHndl_t readSecurityRegister(TARGETING::Target* i_targ,
+            errlHndl_t readSecurityRegister(TARGETING::Target* i_pProc,
                                            const uint64_t i_scomAddress,
                                             uint64_t& o_regValue) const;
 

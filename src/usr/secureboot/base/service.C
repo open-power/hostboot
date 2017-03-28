@@ -85,20 +85,6 @@ struct SecureRegisterValues
  */
 errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs);
 
-/**
- *  @brief Adds the values of the Security Registers of the processors in the
- *         system to an existing error log
- *
- *  @param[in/out] io_err  Error Log that the values of the security registers
- *                         will be added to
- *                         NOTE:  The state of the system/processors (ie, SCOM
- *                         vs FSI) determines which registers can be included
- *
- *  @return N/A
- */
-void addSecurityRegistersToErrlog(errlHndl_t & io_err);
-
-
 void* initializeBase(void* unused)
 {
     errlHndl_t l_errl = NULL;
@@ -140,14 +126,23 @@ bool enabled()
 }
 #endif
 
-errlHndl_t getSecuritySwitch(uint64_t& o_regValue, TARGETING::Target* i_targ)
+errlHndl_t getSecuritySwitch(uint64_t& o_regValue, TARGETING::Target* i_pProc)
 {
-    return Singleton<Settings>::instance().getSecuritySwitch(o_regValue,i_targ);
+    return Singleton<Settings>::instance().getSecuritySwitch(o_regValue,
+                                                                       i_pProc);
 }
 
-errlHndl_t getJumperState(SecureJumperState& o_state, TARGETING::Target* i_targ)
+errlHndl_t getProcCbsControlRegister(uint64_t& o_regValue,
+    TARGETING::Target* i_pProc)
 {
-    return Singleton<Settings>::instance().getJumperState(o_state, i_targ);
+    return Singleton<Settings>::instance().getProcCbsControlRegister(o_regValue,
+        i_pProc);
+}
+
+errlHndl_t getJumperState(SecureJumperState& o_state,
+                                                    TARGETING::Target* i_pProc)
+{
+    return Singleton<Settings>::instance().getJumperState(o_state, i_pProc);
 }
 
 errlHndl_t clearSecuritySwitchBits(

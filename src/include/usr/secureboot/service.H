@@ -98,14 +98,31 @@ namespace SECUREBOOT
      *      call was successful. If not successful this value is set to
      *      zero. Check the return value for a non null error log to
      *      determine if the call was unsuccessful.
-     *  @param[in] i_targ The target processor to obtain the jumper
+     *  @param[in] i_pProc The target processor to obtain the jumper
      *      state from. Must not be null. Optional parameter that
      *      defaults to master processor.
      *  @return errlHndl_t indicating whether the query was successful.
      *  @retval null if successful otherwise pointer to error log
      */
     errlHndl_t getSecuritySwitch(uint64_t& o_regValue,
-            TARGETING::Target* i_targ
+            TARGETING::Target* i_pProc
+                = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
+
+    /** @brief Get Processor CBS Control register value
+     *  @par Detailed Description:
+     *      Returns the state of the Processor CBS Control register as
+     *      reported by the given processor (via the supplied target
+     *      pointer).
+     *  @param[out] o_regValue The value read from the register if the
+     *      call was successful. If not successful this value is set to
+     *      zero. Check the return value for a non null error log to
+     *      determine if the call was unsuccessful.
+     *  @param[in] i_pProc The target processor to obtain the jumper
+     *      state from. Must not be null. Optional parameter that
+     *      defaults to the master processor sentinel.
+     */
+    errlHndl_t getProcCbsControlRegister(uint64_t& o_regValue,
+            TARGETING::Target* i_pProc
                 = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
 
     /**
@@ -171,7 +188,7 @@ namespace SECUREBOOT
      *      HW can be overridden by some functions.  Use the getEnabled()
      *      API to determine whether security is actually enabled.
      *      Deasserted means the jumper is configured to disble HW security.
-     *  @param[in] i_targ The target processor to obtain the jumper
+     *  @param[in] i_pProc The target processor to obtain the jumper
      *      state from. Must not be null. Optional parameter that
      *      defaults to master processor.
      *
@@ -179,7 +196,7 @@ namespace SECUREBOOT
      *  @retval null if successful otherwise pointer to error log.
      */
     errlHndl_t getJumperState(SecureJumperState& o_state,
-                TARGETING::Target* i_targ
+                TARGETING::Target* i_pProc
                     = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
 
     /**
@@ -239,6 +256,20 @@ namespace SECUREBOOT
      */
     void handleSecurebootFailure(
         errlHndl_t &io_err, bool i_waitForShutdown = true);
+
+    /**
+     *  @brief Adds the values of the Security Registers of the processors in
+     *         the system to an existing error log
+     *
+     *  @param[in/out] io_err  Error Log that the values of the security
+     *                         registers will be added to. Must not be nullptr.
+     *                         NOTE:  The state of the system/processors
+     *                         (ie, SCOM vs FSI) determines which registers can
+     *                         be included.
+     *
+     *  @return N/A
+     */
+    void addSecurityRegistersToErrlog(errlHndl_t & io_err);
 
 }
 
