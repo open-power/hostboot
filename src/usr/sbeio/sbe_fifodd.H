@@ -92,6 +92,33 @@ class SbeFifo
         };
 
         /**
+        * @brief enums for FIFO MPIPL Messages
+        */
+        enum fifoMpiplMessage
+        {
+            SBE_FIFO_CMD_ENTER_MPIPL         = 0x01,
+            SBE_FIFO_CMD_CONTINUE_MPIPL      = 0x02,
+            SBE_FIFO_CMD_STOP_CLOCKS         = 0x03,
+        };
+
+        /**
+        * @brief Struct for FIFO Continue MPIPL request
+        *
+        */
+        struct fifoContinueMpiplRequest
+        {
+            uint32_t wordCnt;
+            uint16_t reserved;
+            uint8_t  commandClass;
+            uint8_t  command;
+            fifoContinueMpiplRequest() :
+            wordCnt(2),
+            reserved(0)
+            {
+            }
+        } PACKED;
+
+        /**
          * @brief Struct for FIFO Get SCOM request
          *
          */
@@ -192,6 +219,20 @@ class SbeFifo
             struct       fapi2::ffdc_struct ffdc;  // ffdc data
             uint32_t     status_distance; // distance to status
             fifoGetScomResponse() {}
+        } PACKED;
+
+        /**
+        * @brief Struct for FIFO Continue MPIPL response
+        *
+        * The actual number of returned words varies based on whether there was
+        * an error.
+        */
+        struct fifoContinueMpiplResponse
+        {
+            statusHeader status;
+            struct       fapi2::ffdc_struct ffdc;  // ffdc data
+            uint32_t     status_distance; // distance to status
+            fifoContinueMpiplResponse() {}
         } PACKED;
 
         /**
