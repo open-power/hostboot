@@ -49,10 +49,60 @@ namespace spd
 {
 
 ///
+/// @brief Helper function to extract byte information
+/// @tparam F the SPD field to extract
+/// @param[in] i_target the dimm target
+/// @param[in] i_spd_data the SPD data
+/// @return extracted byte (right aligned)
+///
+template< const field_t& F >
+inline uint8_t extract_spd_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                 const std::vector<uint8_t>& i_spd_data)
+{
+    FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
+             mss::c_str(i_target),
+             F.iv_byte,
+             i_spd_data[F.iv_byte]);
+
+    fapi2::buffer<uint8_t> l_buffer(i_spd_data[F.iv_byte]);
+
+    // Extracting desired bits
+    uint8_t l_field_bits = 0;
+    l_buffer.extractToRight<F.iv_start, F.iv_length>(l_field_bits);
+
+    return l_field_bits;
+}
+
+///
+/// @brief Helper function to extract byte information
+/// @param[in] i_target the dimm target
+/// @param[in] i_field the SPD field
+/// @param[in] i_spd_data the SPD data
+/// @return extracted byte (right aligned)
+///
+inline uint8_t extract_spd_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                 const field_t& i_field,
+                                 const std::vector<uint8_t>& i_spd_data)
+{
+    FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
+             mss::c_str(i_target),
+             i_field.iv_byte,
+             i_spd_data[i_field.iv_byte]);
+
+    fapi2::buffer<uint8_t> l_buffer(i_spd_data[i_field.iv_byte]);
+
+    // Extracting desired bits
+    uint8_t l_field_bits = 0;
+    l_buffer.extractToRight( l_field_bits, i_field.iv_start, i_field.iv_length );
+
+    return l_field_bits;
+}
+
+///
 /// @class decoder
 /// @brief Base SPD DRAM decoder
 ///
-class base_decoder
+class decoder
 {
     protected:
 
@@ -84,8 +134,10 @@ class base_decoder
         std::vector<uint8_t> iv_spd_data;
         rcw_settings iv_raw_card;
 
-        // Default constructor deleted
-        base_decoder() = delete;
+        ///
+        /// @brief default ctor
+        ///
+        decoder() = default;
 
         ///
         /// @brief ctor
@@ -94,10 +146,10 @@ class base_decoder
         /// @param[in] i_module_decoder shared_ptr to dimm module decoder
         /// @param[in] i_raw_card raw pointer to rcd data
         ///
-        base_decoder(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                     const std::vector<uint8_t>& i_spd_data,
-                     const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
-                     const rcw_settings& i_raw_card)
+        decoder(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                const std::vector<uint8_t>& i_spd_data,
+                const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
+                const rcw_settings& i_raw_card)
             : iv_target(i_target),
               iv_module_decoder(i_module_decoder),
               iv_spd_data(i_spd_data),
@@ -107,7 +159,7 @@ class base_decoder
         ///
         /// @brief Default dtor
         ///
-        virtual ~base_decoder() = default;
+        virtual ~decoder() = default;
 
         /////////////////////////
         // Member Methods
