@@ -1244,5 +1244,22 @@
   <initToZero/>
 </attribute>
 <!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_HTM_QUEUES</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The number of HTM queues to be reserved for each port in order
+                to improve HTM trace performance.
+                This number is calculated in memory grouping process when the
+                HTM trace spaces are determined.
+                Set by p9_mss_eff_grouping.
+                Used by p9_htm_setup.
+  </description>
+  <valueType>uint8</valueType>
+  <array>8</array>
+  <writeable/>
+  <persistRuntime/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
 
 </attributes>
