@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -447,6 +447,23 @@ const char* EntityPath::pathElementTypeAsString(
             return "ETH";
         case TYPE_PANEL:
             return "PANEL";
+        case TYPE_BMC:
+            return "BMC";
+        case TYPE_FLASH:
+            return "FLASH";
+        case TYPE_SEEPROM:
+            return "SEEPROM";
+        case TYPE_TMP:
+            return "TMP";
+        case TYPE_GPIO_EXPANDER:
+            return "GPIO_EXPANDER";
+        case TYPE_POWER_SEQUENCER:
+            return "POWER_SEQUENCER";
+        case TYPE_RTC:
+            return "RTC";
+        case TYPE_FANCTLR:
+            return "FANCTLR";
+
 //        case TYPE_FSI_LINK:
 //            return "FSI-link";
 //        case TYPE_CFAM:

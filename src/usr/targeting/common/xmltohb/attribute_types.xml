@@ -313,14 +313,46 @@
         <name>PANEL</name>
         <value>57</value>
     </enumerator>
-    <!-- add any new types here, and increment TEST_FAIL and LAST_IN_RANGE -->
-    <enumerator>
-        <name>TEST_FAIL</name>
+   <enumerator>
+        <name>BMC</name>
         <value>58</value>
     </enumerator>
     <enumerator>
-        <name>LAST_IN_RANGE</name>
+        <name>FLASH</name>
         <value>59</value>
+    </enumerator>
+    <enumerator>
+        <name>SEEPROM</name>
+        <value>60</value>
+    </enumerator>
+    <enumerator>
+        <name>TMP</name>
+        <value>61</value>
+    </enumerator>
+    <enumerator>
+        <name>GPIO_EXPANDER</name>
+        <value>62</value>
+    </enumerator>
+    <enumerator>
+        <name>POWER_SEQUENCER</name>
+        <value>63</value>
+    </enumerator>
+    <enumerator>
+        <name>RTC</name>
+        <value>64</value>
+    </enumerator>
+    <enumerator>
+        <name>FANCTLR</name>
+        <value>65</value>
+    </enumerator>
+    <!-- add any new types here, and increment TEST_FAIL and LAST_IN_RANGE -->
+    <enumerator>
+        <name>TEST_FAIL</name>
+        <value>66</value>
+    </enumerator>
+    <enumerator>
+        <name>LAST_IN_RANGE</name>
+        <value>67</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>
@@ -13740,6 +13772,7 @@ Measured in GB</description>
     <simpleType><uint32_t><default>0</default></uint32_t></simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <global/>
 </attribute>
 
 <attribute>
