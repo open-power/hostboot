@@ -52,6 +52,8 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec));
         fapi2::ATTR_CHIP_EC_FEATURE_HW403701_Type l_TGT0_ATTR_CHIP_EC_FEATURE_HW403701;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW403701, TGT0, l_TGT0_ATTR_CHIP_EC_FEATURE_HW403701));
+        fapi2::ATTR_PROC_FABRIC_PUMP_MODE_Type l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x2011041ull, l_scom_buffer ));
@@ -71,18 +73,23 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x2011042ull, l_scom_buffer ));
 
-            constexpr auto l_NX_DMA_EFTCOMP_MAX_INRD_MAX_13_INRD = 0xd;
-            l_scom_buffer.insert<33, 4, 60, uint64_t>(l_NX_DMA_EFTCOMP_MAX_INRD_MAX_13_INRD );
-            constexpr auto l_NX_DMA_EFTDECOMP_MAX_INRD_MAX_7_INRD = 0x7;
-            l_scom_buffer.insert<37, 4, 60, uint64_t>(l_NX_DMA_EFTDECOMP_MAX_INRD_MAX_7_INRD );
-            constexpr auto l_NX_DMA_GZIPCOMP_MAX_INRD_MAX_13_INRD = 0xd;
-            l_scom_buffer.insert<8, 4, 60, uint64_t>(l_NX_DMA_GZIPCOMP_MAX_INRD_MAX_13_INRD );
-            constexpr auto l_NX_DMA_GZIPDECOMP_MAX_INRD_MAX_7_INRD = 0x7;
-            l_scom_buffer.insert<12, 4, 60, uint64_t>(l_NX_DMA_GZIPDECOMP_MAX_INRD_MAX_7_INRD );
+            constexpr auto l_NX_DMA_EFTCOMP_MAX_INRD_MAX_15_INRD = 0xf;
+            l_scom_buffer.insert<33, 4, 60, uint64_t>(l_NX_DMA_EFTCOMP_MAX_INRD_MAX_15_INRD );
+            constexpr auto l_NX_DMA_EFTDECOMP_MAX_INRD_MAX_15_INRD = 0xf;
+            l_scom_buffer.insert<37, 4, 60, uint64_t>(l_NX_DMA_EFTDECOMP_MAX_INRD_MAX_15_INRD );
+            constexpr auto l_NX_DMA_GZIPCOMP_MAX_INRD_MAX_15_INRD = 0xf;
+            l_scom_buffer.insert<8, 4, 60, uint64_t>(l_NX_DMA_GZIPCOMP_MAX_INRD_MAX_15_INRD );
+            constexpr auto l_NX_DMA_GZIPDECOMP_MAX_INRD_MAX_15_INRD = 0xf;
+            l_scom_buffer.insert<12, 4, 60, uint64_t>(l_NX_DMA_GZIPDECOMP_MAX_INRD_MAX_15_INRD );
             constexpr auto l_NX_DMA_SYM_MAX_INRD_MAX_3_INRD = 0x3;
             l_scom_buffer.insert<25, 4, 60, uint64_t>(l_NX_DMA_SYM_MAX_INRD_MAX_3_INRD );
-            constexpr auto l_NX_DMA_SYM_CPB_CHECK_DISABLE_ON = 0x1;
-            l_scom_buffer.insert<48, 1, 63, uint64_t>(l_NX_DMA_SYM_CPB_CHECK_DISABLE_ON );
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                constexpr auto l_NX_DMA_SYM_CPB_CHECK_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<48, 1, 63, uint64_t>(l_NX_DMA_SYM_CPB_CHECK_DISABLE_ON );
+            }
+
             constexpr auto l_NX_DMA_EFT_COMP_PREFETCH_ENABLE_ON = 0x1;
             l_scom_buffer.insert<23, 1, 63, uint64_t>(l_NX_DMA_EFT_COMP_PREFETCH_ENABLE_ON );
             constexpr auto l_NX_DMA_EFT_DECOMP_PREFETCH_ENABLE_ON = 0x1;
@@ -252,20 +259,20 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
                 l_scom_buffer.insert<31, 1, 63, uint64_t>(literal_0b1 );
             }
 
-            if (l_TGT0_ATTR_CHIP_EC_FEATURE_HW403701)
+            if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW403701 == literal_1))
             {
                 l_scom_buffer.insert<32, 1, 63, uint64_t>(literal_0b1 );
             }
-            else if (literal_1)
+            else if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW403701 != literal_1))
             {
                 l_scom_buffer.insert<32, 1, 63, uint64_t>(literal_0b0 );
             }
 
-            if (l_TGT0_ATTR_CHIP_EC_FEATURE_HW403701)
+            if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW403701 == literal_1))
             {
                 l_scom_buffer.insert<33, 1, 63, uint64_t>(literal_0b1 );
             }
-            else if (literal_1)
+            else if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW403701 != literal_1))
             {
                 l_scom_buffer.insert<33, 1, 63, uint64_t>(literal_0b0 );
             }
@@ -451,6 +458,17 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x2011095ull, l_scom_buffer ));
 
+            if ((l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_GROUP))
+            {
+                constexpr auto l_NX_PBI_CQ_WRAP_NXCQ_SCOM_SKIP_G_ON = 0x1;
+                l_scom_buffer.insert<24, 1, 63, uint64_t>(l_NX_PBI_CQ_WRAP_NXCQ_SCOM_SKIP_G_ON );
+            }
+            else if ((l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE))
+            {
+                constexpr auto l_NX_PBI_CQ_WRAP_NXCQ_SCOM_SKIP_G_OFF = 0x0;
+                l_scom_buffer.insert<24, 1, 63, uint64_t>(l_NX_PBI_CQ_WRAP_NXCQ_SCOM_SKIP_G_OFF );
+            }
+
             constexpr auto l_NX_PBI_CQ_WRAP_NXCQ_SCOM_RD_GO_M_QOS_ON = 0x1;
             l_scom_buffer.insert<22, 1, 63, uint64_t>(l_NX_PBI_CQ_WRAP_NXCQ_SCOM_RD_GO_M_QOS_ON );
             constexpr auto l_NX_PBI_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_OFF = 0x0;
@@ -498,6 +516,8 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
             FAPI_TRY(fapi2::getScom( TGT0, 0x20110d6ull, l_scom_buffer ));
 
             l_scom_buffer.insert<9, 3, 61, uint64_t>(literal_2 );
+            constexpr auto l_NX_PBI_DISABLE_PROMOTE_ON = 0x1;
+            l_scom_buffer.insert<6, 1, 63, uint64_t>(l_NX_PBI_DISABLE_PROMOTE_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x20110d6ull, l_scom_buffer));
         }
         {
