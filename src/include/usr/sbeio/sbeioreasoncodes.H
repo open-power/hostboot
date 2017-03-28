@@ -46,6 +46,7 @@ enum sbeioModuleId
     SBEIO_PSU                           = 0x01,
     SBEIO_FIFO                          = 0x02,
     SBEIO_FFDC_PARSER                   = 0x03,
+    SBEIO_FIFO_CONTINUE_MPIPL           = 0x04,
 };
 
 /**
