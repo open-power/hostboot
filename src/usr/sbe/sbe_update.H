@@ -689,5 +689,14 @@ namespace SBE
      */
     errlHndl_t sbeDoReboot( void );
 
+    /**
+     * @brief Checks if a secure key transition is needed and if so verifies
+     *        the key transition container is valid. Then gets the new hw keys'
+     *        hash and sets the global hash transition data variables.
+     *
+     * @return errlHndl_t    Error log handle on failure. NULL on success
+     */
+    errlHndl_t secureKeyTransition();
+
 } //end namespace SBE
 #endif

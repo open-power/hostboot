@@ -503,7 +503,7 @@ sub manipulateImages
         # Sections that have secureboot support. Secureboot still must be
         # enabled for secureboot actions on these partitions to occur.
         # @TODO securebootp9 re-enable with SBE/SBEC/PAYLOAD secureboot ports
-        my $isNormalSecure =  0; #($eyeCatch eq "SBKT")
+        my $isNormalSecure =  0;
                              #|| ($eyeCatch eq "HBRT");
                              #|| ($eyeCatch eq "SBE")
                              #|| ($eyeCatch eq "SBEC")

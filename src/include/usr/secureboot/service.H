@@ -30,15 +30,11 @@
 #include <secureboot/settings.H>
 #include <utility>
 #include <cstdint>
+#include <securerom/sha512.H>
 
-typedef uint8_t SHA512_t[64];
+typedef uint8_t SHA512_t[SHA512_DIGEST_LENGTH];
 
 typedef std::vector< std::pair<void*,size_t> > blobPair_t;
-
-/* From sha512.h:  */
-#define SHA512_DIGEST_LENGTH 64
-typedef uint8_t __attribute__((aligned(8))) sha2_hash_t[ \
-                SHA512_DIGEST_LENGTH / sizeof(uint8_t) ];
 
 // TODO securebootp9 added for spnorrp.C - service.H needs many more updates
 // in order to match the p8 version

@@ -376,7 +376,6 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
                 failedVerify = true;
                 break;
             }
-
             l_errhdl = miscSectionVerification(l_tempAddr, i_id);
             if (l_errhdl)
             {
@@ -711,7 +710,8 @@ errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
     msg->data[0] = static_cast<uint64_t>(i_section);
     int rc = msg_sendrecv(spnorQ, msg);
 
-    TRACFCOMP(g_trac_pnor, "loadSecureSection i_section = %i",i_section);
+    TRACFCOMP(g_trac_pnor, "loadSecureSection i_section = %i (%s)",
+              i_section,PNOR::SectionIdToString(i_section));
 
     // TODO securebootp9 - Need to be able to receive an error from the
     // message handler. Also, message handler should police whether the request
@@ -772,26 +772,28 @@ errlHndl_t SPnorRP::miscSectionVerification(const uint8_t *i_vaddr,
     errlHndl_t l_errl = NULL;
     assert(i_vaddr != NULL);
 
-    TRACFCOMP(g_trac_pnor, "SPnorRP::miscSectionVerification section=%d", i_secId);
+    TRACFCOMP(g_trac_pnor, "SPnorRP::miscSectionVerification section=%d (%s)",
+              i_secId,PNOR::SectionIdToString(i_secId));
 
-// TODO securebootp9 - remove the following #if 0 and address issues
-#if 0
     // Do any additional verification needed for a specific PNOR section
     switch (i_secId) {
+        // TODO securebootp9 - remove the following #if 0 and address issues
+        #if 0
         case HB_EXT_CODE:
             // Compare HBB and HBI versions. Pass the vaddr of HBI's hash page
             // table by skipping past the container header.
             l_errl = baseExtVersCheck((i_vaddr + PAGESIZE));
             break;
+        #endif
         case SBKT:
-            // Ensure the outer container of the SBKT partition has a valid key
-            // transition container
+            // Ensure the nested container of the SBKT partition has a valid key
+            // transition container and that the outer containers' key
+            // transition bit is set
             l_errl = keyTransitionCheck((i_vaddr));
             break;
         default:
             break;
     }
-#endif
     return l_errl;
 }
 
