@@ -259,17 +259,6 @@ fapi2::ReturnCode stop_gpe_init(
     FAPI_INF("   Writing IVPR with 0x%16llX", l_ivpr);
     FAPI_TRY(putScom(i_target, PU_GPE3_GPEIVPR_SCOM, l_ivpr));
 
-    //Read-modify-write on Slave Config register
-    for (auto l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>())
-    {
-        l_slave_cfg.flush<0>();
-        FAPI_TRY(getScom(l_core_target, EX_SLAVE_CONFIG_REG, l_slave_cfg));
-        l_slave_cfg.clearBit<p9hcd::CFG_PM_DISABLE>();
-        l_slave_cfg.clearBit<p9hcd::CFG_PM_MUX_DISABLE>();
-        FAPI_TRY(putScom(l_core_target, EX_SLAVE_CONFIG_REG, l_slave_cfg));
-    }
-
-
     // Program XCR to ACTIVATE SGPE
     // @todo 146665 Operations to PPEs should use a p9ppe namespace when created
     l_xcr.flush<0>().insertFromRight(p9hcd::HARD_RESET, 1 , 3);
