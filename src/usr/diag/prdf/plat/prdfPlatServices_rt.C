@@ -211,7 +211,7 @@ uint32_t stopBgScrub<TYPE_MBA>( ExtensibleChip * i_chip )
     uint32_t rc = SUCCESS;
 
     PRDF_ERR( PRDF_FUNC "function not implemented yet" );
-/* TODO RTC 136126
+/* TODO RTC 157888
     // It is safe to create a dummy command object because runtime commands do
     // not store anything for cleanupCmd() and the stopCmd() function is generic
     // for all command types. Also, since we are only stopping the command, all

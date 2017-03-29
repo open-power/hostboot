@@ -37,7 +37,7 @@
 #include <prdfErrlUtil.H>
 #include <prdfTrace.H>
 
-//#include <prdfCenDqBitmap.H> TODO RTC 136126
+//#include <prdfCenDqBitmap.H> TODO RTC 164707
 #include <prdfMemScrubUtils.H>
 
 #include <diag/mdia/mdia.H>
@@ -137,7 +137,7 @@ bool rcdParityErrorReconfigLoop()
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 164707
 int32_t mssRestoreDramRepairs( TargetHandle_t i_mbaTarget,
                                uint8_t & o_repairedRankMask,
                                uint8_t & o_badDimmMask )
@@ -165,7 +165,7 @@ int32_t mssRestoreDramRepairs( TargetHandle_t i_mbaTarget,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t mssIplUeIsolation( TargetHandle_t i_mba, const CenRank & i_rank,
                            CenDqBitmap & o_bitmap )
 {
@@ -306,7 +306,7 @@ uint32_t startSfRead<TYPE_MBA>( ExtensibleChip * i_mbaChip,
         }
 
         // Start the background scrub command.
-        PRDF_ERR( PRDF_FUNC "function not implemented yet" ); // TODO RTC 136126
+        PRDF_ERR( PRDF_FUNC "function not implemented yet" ); // TODO RTC 157888
 
     } while (0);
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,7 @@ namespace PRDF
 
 //------------------------------------------------------------------------------
 
-// TODO: RTC 136126 Actual implementation of this procedure will be done later.
+// TODO: RTC 171914 Actual implementation of this procedure will be done later.
 template<>
 uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                                        bool & o_done )
