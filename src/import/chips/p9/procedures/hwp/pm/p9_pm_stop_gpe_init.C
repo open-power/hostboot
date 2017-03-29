@@ -182,6 +182,28 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
                     .set_MODE(p9pm::PM_RESET),
                     "PBA setup failed");
 
+        // Initialize DPLL Mode and Slew Rate (Done once for runtime STOPs)
+        // Hostboot Master is done in istep4 hwp prior to this
+        uint8_t                 l_quad_number = 0;
+        fapi2::buffer<uint64_t> l_data64      = 0;
+
+        auto l_functional_quad_vector =
+            i_target.getChildren<fapi2::TARGET_TYPE_EQ>
+            (fapi2::TARGET_STATE_FUNCTIONAL);
+
+        for(auto l_chplt_trgt : l_functional_quad_vector)
+        {
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                   l_chplt_trgt,
+                                   l_quad_number),
+                     "ERROR: Failed to get the position of the QUAD:0x%08X",
+                     l_chplt_trgt);
+            FAPI_DBG("QUAD number = %d", l_quad_number);
+            l_data64.flush<0>().setBit<2>().insertFromRight<6, 10>(0x01);
+            FAPI_TRY(putScom(l_chplt_trgt, EQ_QPPM_DPLL_CTRL_OR, l_data64),
+                     "ERROR: Failed to assert DPLL in mode 1 and set slew rate to 1");
+        }
+
         // Boot the STOP GPE
         FAPI_TRY(stop_gpe_init(i_target), "ERROR: failed to initialize Stop GPE");
 
