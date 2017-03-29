@@ -85,8 +85,6 @@ actionclass mainline_iue_handling
     funccall("AnalyzeMainlineIue");
 };
 
-actionclass mainline_impe_handling    { TBDDefaultCallout; }; # TODO RTC 165384
-
 /**  Handle Maintenance IUEs */
 actionclass maintenance_iue_handling
 {
@@ -95,7 +93,7 @@ actionclass maintenance_iue_handling
     funccall("AnalyzeMaintIue");
 };
 
-actionclass maintenance_impe_handling { TBDDefaultCallout; }; # TODO RTC 165384
+actionclass impe_handling { funccall("AnalyzeImpe"); };
 
 /** MCA/UE algroithm, threshold 5 per day */
 actionclass mca_ue_algorithm_th_5perDay

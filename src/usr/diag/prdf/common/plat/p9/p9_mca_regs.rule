@@ -220,3 +220,10 @@
         capture  group default;
     };
 
+    register MSR
+    {
+        name        "P9 Mark Shadow Register";
+        scomaddr    0x07010A0C;
+        capture     group default;
+    };
+

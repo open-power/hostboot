@@ -123,6 +123,12 @@ class McaDataBundle : public DataBundle
     /** Threshold table for IUEs. Threshold per DIMM */
     std::map<uint8_t, TimeBasedThreshold> iv_iueTh;
 
+    /** Threshold table for IMPEs. Threshold per rank */
+    std::map<MemRank, TimeBasedThreshold> iv_impeThMap;
+
+    /** Map to keep track of which DRAMs on which ranks have reported IMPEs */
+    std::map<MemRank, std::vector<uint8_t>> iv_impeDramMap;
+
     #endif
 };
 

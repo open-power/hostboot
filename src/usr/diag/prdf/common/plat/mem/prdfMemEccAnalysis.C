@@ -832,6 +832,113 @@ uint32_t analyzeMaintIue<TYPE_MCA, McaDataBundle*>(ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
+template<TARGETING::TYPE T, typename D>
+uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+
+    #define PRDF_FUNC "[MemEcc::analyzeImpe] "
+
+    PRDF_ASSERT( T == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    #ifdef __HOSTBOOT_MODULE
+
+    do
+    {
+        // get data bundle from chip
+        D db = static_cast<D>( i_chip->getDataBundle() );
+
+        // get the mark shadow register
+        SCAN_COMM_REGISTER_CLASS * msr = i_chip->getRegister("MSR");
+
+        o_rc = msr->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MSR: i_chip=0x%08x",
+                    i_chip->getHuid() );
+            break;
+        }
+
+        TargetHandle_t trgt = i_chip->getTrgt();
+
+        // get galois field code - bits 8:15 of MSR
+        uint8_t galois = msr->GetBitFieldJustified( 8, 8 );
+
+        // get rank - bits 16:18 of MSR
+        uint8_t mrnk = msr->GetBitFieldJustified( 16, 3 );
+        MemRank rank( mrnk );
+
+        // get symbol and DRAM
+        MemSymbol symbol = MemSymbol::fromGalois( trgt, rank, galois );
+        uint8_t dram = symbol.getDram();
+
+        // Add the DIMM to the callout list
+        MemoryMru memmru( trgt, rank, MemoryMruData::CALLOUT_RANK );
+        io_sc.service_data->SetCallout( memmru );
+
+        // if at any point there is more than one dram reporting an IMPE on a
+        // rank within the timebase of the threshold we make the error log
+        // predictive
+
+        // clear our vector of drams if the threshold time has elapsed
+        if ( db->iv_impeThMap[rank].timeElapsed(io_sc) )
+        {
+            db->iv_impeDramMap[rank].clear();
+        }
+
+        // if this DRAM hasn't already reported an IMPE on this rank
+        if ( std::find( db->iv_impeDramMap[rank].begin(),
+                        db->iv_impeDramMap[rank].end(), dram ) ==
+             db->iv_impeDramMap[rank].end() )
+        {
+            // if there is another DRAM reporting an IMPE on this rank as well
+            if ( 0 != db->iv_impeDramMap[rank].size() )
+            {
+                // Make the error log predictive
+                io_sc.service_data->setServiceCall();
+            }
+
+            // add the DRAM to the map
+            db->iv_impeDramMap[rank].push_back( dram );
+        }
+
+        // Initialize threshold if it doesn't exist yet
+        if ( 0 == db->iv_impeThMap.count(rank) )
+        {
+            db->iv_impeThMap[rank] = TimeBasedThreshold( getImpeTh() );
+        }
+
+        // increment count for the given rank - check if at threshold
+        if ( db->iv_impeThMap[rank].inc(io_sc) )
+        {
+            // place a chip mark on the failing DRAM
+            MemMark chipMark( trgt, rank, galois );
+            o_rc = MarkStore::writeChipMark<T>( i_chip, rank, chipMark );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "MarkStore::writeChipMark(0x%08x,m%ds%d) "
+                          "failed", i_chip->getHuid(), rank.getMaster(),
+                          rank.getSlave() );
+                break;
+            }
+        }
+
+    }while(0);
+
+    #endif
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template
+uint32_t analyzeImpe<TYPE_MCA, McaDataBundle*>( ExtensibleChip * i_chip,
+                                                STEP_CODE_DATA_STRUCT & io_sc );
+
+//------------------------------------------------------------------------------
+
 } // end namespace MemEcc
 
 } // end namespace PRDF

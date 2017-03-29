@@ -257,6 +257,21 @@ PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeMaintIue );
 
 //------------------------------------------------------------------------------
 
+/**
+ * @brief  MCAECCFIR[19,39] - Mainline and Maint IMPE
+ * @param  i_chip MCA chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    MemEcc::analyzeImpe<TYPE_MCA, McaDataBundle *>( i_chip, io_sc );
+    return SUCCESS; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeImpe );
+
+//------------------------------------------------------------------------------
+
 } // end namespace p9_mca
 
 } // end namespace PRDF
