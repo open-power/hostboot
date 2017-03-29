@@ -1577,7 +1577,9 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt,
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
 
-    for (size_t proc = 0; (!errhdl) && (proc < l_procTargetList.size()); proc++)
+    // We iterate from last to first since adding each proc is equivalent to
+    // a push_front() operation on the devtree and we want proc0 first.
+    for (ssize_t proc = l_procTargetList.size() - 1; (!errhdl) && (proc >= 0); proc--)
     {
         const TARGETING::Target * l_pProc = l_procTargetList[proc];
 
@@ -1601,7 +1603,7 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt,
 
         TARGETING::TargetHandleList l_corelist;
         getChildChiplets( l_corelist, l_pProc, TYPE_CORE );
-        for (size_t core = 0; core < l_corelist.size(); core++)
+        for (ssize_t core = l_corelist.size() - 1; core >= 0; core--)
         {
             const TARGETING::Target * l_core = l_corelist[core];
             if(l_core->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
