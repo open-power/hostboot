@@ -202,6 +202,19 @@ relative_pos<fapi2::TARGET_TYPE_MCS>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 }
 
 ///
+/// @brief Return a DIMM's relative position from an MCS
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to chiplet R
+///
+template<>
+inline posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type
+relative_pos<fapi2::TARGET_TYPE_MCA>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+{
+    typedef posTraits<fapi2::TARGET_TYPE_DIMM> TT;
+    return pos(i_target) % TT::DIMMS_PER_PORT;
+}
+
+///
 /// @brief Return an MCS's relative position from a processor
 /// @param[in] i_target a target representing the target in question
 /// @return The position relative to chiplet R
