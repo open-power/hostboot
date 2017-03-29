@@ -120,6 +120,15 @@ template<TARGETING::TYPE T, typename D>
 uint32_t analyzeMaintIue( ExtensibleChip * i_chip,
                           STEP_CODE_DATA_STRUCT & io_sc );
 
+/**
+ * @brief  Analyzes a maint or mainline IMPE attention.
+ * @param  i_chip   MCA or MBA.
+ * @param  io_sc    The step code data struct.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T, typename D>
+uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
+
 #ifdef __HOSTBOOT_RUNTIME
 
 /**

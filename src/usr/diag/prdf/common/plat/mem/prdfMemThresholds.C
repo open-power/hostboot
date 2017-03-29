@@ -46,6 +46,7 @@ using namespace PlatServices;
 enum DefaultThresholds
 {
     MCA_RCD_PARITY_NON_MNFG_TH = 32, ///< Non-MNFG RCD parity error TH
+    MCA_IMPE_NON_MNFG_TH       = 32, ///< Non-MNFG IMPE TH
     MCA_IUE_NON_MNFG_TH        = 8,  ///< Non-MNFG IUE TH
     MBA_RCE_NON_MNFG_TH        = 8,  ///< Non-MNFG RCE TH
     MBA_SCRUB_CE_NON_MNFG_TH   = 80, ///< Non-MNFG Scrub soft/inter CE TH
@@ -104,6 +105,26 @@ ThresholdResolution::ThresholdPolicy getIueTh()
     {
         th = MfgThresholdMgr::getInstance()->
                                          getThreshold(ATTR_MNFG_TH_MEMORY_IUES);
+    }
+
+    return ThresholdResolution::ThresholdPolicy( th,
+                                                 ThresholdResolution::ONE_DAY );
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef __HOSTBOOT_MODULE
+
+ThresholdResolution::ThresholdPolicy getImpeTh()
+{
+    uint32_t th = MCA_IMPE_NON_MNFG_TH;
+
+    if ( mfgMode() )
+    {
+        th = MfgThresholdMgr::getInstance()->
+                           getThreshold( ATTR_MNFG_TH_MEMORY_IMPES );
     }
 
     return ThresholdResolution::ThresholdPolicy( th,

@@ -65,6 +65,11 @@ ThresholdResolution::ThresholdPolicy getRcdParityTh();
  */
 ThresholdResolution::ThresholdPolicy getIueTh();
 
+/**
+ * @brief Returns IMPE threshold policy.
+ */
+ThresholdResolution::ThresholdPolicy getImpeTh();
+
 #endif
 
 /**

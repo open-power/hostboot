@@ -424,7 +424,7 @@ group gMCAECCFIR filter singlebit, cs_root_cause( 14, 17, 37 )
     /** MCAECCFIR[19]
      *  Mainline read IMPE
      */
-    (rMCAECCFIR, bit(19)) ? mainline_impe_handling;
+    (rMCAECCFIR, bit(19)) ? impe_handling;
 
     /** MCAECCFIR[20:27]
      *  Maintenance MPE
@@ -489,7 +489,7 @@ group gMCAECCFIR filter singlebit, cs_root_cause( 14, 17, 37 )
     /** MCAECCFIR[39]
      *  Maintenance IMPE
      */
-    (rMCAECCFIR, bit(39)) ? maintenance_impe_handling;
+    (rMCAECCFIR, bit(39)) ? impe_handling;
 
     /** MCAECCFIR[40]
      *  spare
