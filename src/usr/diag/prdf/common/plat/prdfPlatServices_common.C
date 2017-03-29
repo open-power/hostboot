@@ -39,11 +39,11 @@
 #include <prdfTrace.H>
 #include <prdfErrlUtil.H>
 
-//#include <prdfCenAddress.H> TODO RTC 136126
-//#include <prdfCenDqBitmap.H> TODO RTC 136126
-//#include <prdfCenMarkstore.H> TODO RTC 136126
+//#include <prdfCenAddress.H> TODO RTC 157888
+//#include <prdfCenDqBitmap.H> TODO RTC 157888
+//#include <prdfCenMarkstore.H> TODO RTC 157888
 
-//#include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap() TODO RTC 136126
+//#include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap() TODO RTC 164707
 
 //#include <io_read_erepair.H> TODO RTC 136120
 //#include <io_power_down_lanes.H> TODO RTC 136120
@@ -269,7 +269,7 @@ int32_t erepairFirIsolation(TargetHandle_t i_rxBusTgt)
 //##                        Memory specific functions
 //##############################################################################
 
-/* TODO RTC 136126
+/* TODO RTC 157888
 // Helper function for the for several other memory functions.
 int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_mrank,
                          ecmdDataBufferBase & o_startAddr,
@@ -343,7 +343,7 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_mrank,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 164707
 int32_t getBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
                         CenDqBitmap & o_bitmap, bool i_allowNoDimm )
 {
@@ -391,7 +391,7 @@ int32_t getBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 164707
 int32_t setBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
                         const CenDqBitmap & i_bitmap )
 {
@@ -429,7 +429,7 @@ int32_t setBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t mssGetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
                          CenMark & o_mark )
 {
@@ -495,7 +495,7 @@ int32_t mssGetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
                          CenMark & io_mark, bool & o_writeBlocked,
                          bool i_allowWriteBlocked )
@@ -554,7 +554,7 @@ int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t mssGetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
                         CenSymbol & o_port0Spare, CenSymbol & o_port1Spare,
                         CenSymbol & o_eccSpare )
@@ -588,7 +588,7 @@ int32_t mssGetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t mssSetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
                         const CenSymbol & i_symbol, bool i_x4EccSpare )
 {
@@ -616,7 +616,7 @@ int32_t mssSetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t getMemAddrRange( TargetHandle_t i_mba, CenAddr & o_startAddr,
                          CenAddr & o_endAddr )
 {
@@ -642,7 +642,7 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, CenAddr & o_startAddr,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t getMemAddrRange( TargetHandle_t i_mba, const CenRank & i_rank,
                          CenAddr & o_startAddr, CenAddr & o_endAddr,
                          bool i_slaveOnly )
@@ -916,7 +916,7 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
 //##                    Maintenance Command class wrapper
 //##############################################################################
 
-/* TODO RTC 136126
+/* TODO RTC 157888
 mss_MaintCmdWrapper::mss_MaintCmdWrapper( mss_MaintCmd * i_maintCmd ) :
     iv_cmd(i_maintCmd)
 {}

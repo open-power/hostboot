@@ -37,7 +37,6 @@
 #include <prdfCallouts.H>
 #include <prdfMemoryMru.H>
 #include <prdfPlatServices.H>
-//#include <prdfCenMbaCaptureData.H> TODO: RTC 136126
 
 // For compression routines
 #define PRDF_COMPRESSBUFFER_COMPRESS_FUNCTIONS

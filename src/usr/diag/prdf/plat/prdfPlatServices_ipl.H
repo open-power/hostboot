@@ -77,7 +77,7 @@ bool rcdParityErrorReconfigLoop();
  * @param  o_badDimm An encoded bitmask of bad DIMMs.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136126
+/* TODO RTC 164707
 int32_t mssRestoreDramRepairs( TARGETING::TargetHandle_t i_mbaTarget,
                                uint8_t & o_repairedRankMask,
                                uint8_t & o_badDimmMask );
@@ -91,7 +91,7 @@ int32_t mssRestoreDramRepairs( TARGETING::TargetHandle_t i_mbaTarget,
  * @param  o_bitmap DQ bitmap container.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t mssIplUeIsolation( TARGETING::TargetHandle_t i_mba,
                            const CenRank & i_rank,
                            CenDqBitmap & o_bitmap );

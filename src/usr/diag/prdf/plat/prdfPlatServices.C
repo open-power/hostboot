@@ -310,7 +310,12 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbChip->getTrgt() );
 
     // Get the stop conditions.
+    // NOTE: If HBRT_PRD is not configured, we want to use the defaults so that
+    //       background scrubbing never stops.
     mss::mcbist::stop_conditions stopCond;
+
+    #ifdef CONFIG_HBRT_PRD
+
     stopCond.set_thresh_nce_int(1)
             .set_thresh_nce_soft(1)
             .set_thresh_nce_hard(1)
@@ -320,6 +325,8 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 
     // In MNFG mode, stop on RCE_ETE to get an accurate callout for IUEs.
     if ( mfgMode() ) stopCond.set_thresh_rce(1);
+
+    #endif
 
     // Get the scrub speed.
     mss::mcbist::speed scrubSpeed = enableFastBgScrub() ? mss::mcbist::LUDICROUS
@@ -535,7 +542,7 @@ uint32_t startBgScrub<TYPE_MBA>( ExtensibleChip * i_mbaChip,
         }
 
         // Start the background scrub command.
-        PRDF_ERR( PRDF_FUNC "function not implemented yet" ); // TODO RTC 136126
+        PRDF_ERR( PRDF_FUNC "function not implemented yet" ); // TODO RTC 157888
 
     } while (0);
 
@@ -550,7 +557,7 @@ template<>
 uint32_t startVcmPhase1<TYPE_MBA>( ExtensibleChip * i_mbaChip,
                                    const MemRank & i_rank )
 {
-    PRDF_ERR( "function not implemented yet" ); // TODO RTC 136126
+    PRDF_ERR( "function not implemented yet" ); // TODO RTC 157888
     return SUCCESS;
 }
 
@@ -560,7 +567,7 @@ template<>
 uint32_t startVcmPhase2<TYPE_MBA>( ExtensibleChip * i_mbaChip,
                                    const MemRank & i_rank )
 {
-    PRDF_ERR( "function not implemented yet" ); // TODO RTC 136126
+    PRDF_ERR( "function not implemented yet" ); // TODO RTC 157888
     return SUCCESS;
 }
 
@@ -570,7 +577,7 @@ template<>
 uint32_t startTpsPhase1<TYPE_MBA>( ExtensibleChip * i_mbaChip,
                                    const MemRank & i_rank )
 {
-    PRDF_ERR( "function not implemented yet" ); // TODO RTC 136126
+    PRDF_ERR( "function not implemented yet" ); // TODO RTC 157888
     return SUCCESS;
 }
 
@@ -580,7 +587,7 @@ template<>
 uint32_t startTpsPhase2<TYPE_MBA>( ExtensibleChip * i_mbaChip,
                                    const MemRank & i_rank )
 {
-    PRDF_ERR( "function not implemented yet" ); // TODO RTC 136126
+    PRDF_ERR( "function not implemented yet" ); // TODO RTC 157888
     return SUCCESS;
 }
 

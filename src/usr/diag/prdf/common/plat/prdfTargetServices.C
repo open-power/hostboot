@@ -44,7 +44,6 @@
 
 // External includes
 #include <algorithm>
-//#include <fapi.H> TODO RTC 136126
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 

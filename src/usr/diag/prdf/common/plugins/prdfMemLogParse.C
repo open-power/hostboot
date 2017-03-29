@@ -2774,7 +2774,7 @@ uint8_t dqSiteIdx2DramSiteIdx( uint8_t i_dqSiteIdx, bool i_isX4Dram )
 // Helper functions
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 164707
 // Displays symbol value. If symbol is not valid, will display '--' in output.
 void getDramRepairSymbolStr( uint8_t i_value, char * o_str, uint32_t i_strSize )
 {
@@ -3176,7 +3176,7 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 157888
 bool parseMemRceTable( uint8_t  * i_buffer, uint32_t i_buflen,
                        ErrlUsrParser & i_parser )
 {
@@ -3224,7 +3224,7 @@ bool parseMemRceTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 164707
 bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
                            ErrlUsrParser & i_parser )
 {
@@ -3294,7 +3294,7 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 164707
 bool parseDramRepairsVpd( uint8_t * i_buffer, uint32_t i_buflen,
                           ErrlUsrParser & i_parser )
 {
@@ -3320,7 +3320,7 @@ bool parseDramRepairsVpd( uint8_t * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136126
+/* TODO RTC 164707
 bool parseBadDqBitmap( uint8_t  * i_buffer, uint32_t i_buflen,
                        ErrlUsrParser & i_parser )
 {

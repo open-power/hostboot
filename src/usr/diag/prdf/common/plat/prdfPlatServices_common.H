@@ -43,7 +43,7 @@
 #include <prdfTimer.H>
 #include <prdfParserEnums.H>
 
-//#include <dimmConsts.H>         // for DIMM_DQ_RANK_BITMAP_SIZE TODO RTC 136126
+//#include <dimmConsts.H>         // for DIMM_DQ_RANK_BITMAP_SIZE TODO RTC 164707
 
 #include <plat_hwp_invoker.H>
 
@@ -213,7 +213,7 @@ int32_t erepairFirIsolation(TARGETING::TargetHandle_t i_rxBusTgt);
  *                       possible ranks. Default is FALSE.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136126
+/* TODO RTC 164707
 int32_t getBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
                         CenDqBitmap & o_bitmap, bool i_allowNoDimm = false );
 */
@@ -226,7 +226,7 @@ int32_t getBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
  * @note   This is a no-op if DRAM Repairs are disabled in manufacturing.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136126
+/* TODO RTC 164707
 int32_t setBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
                         const CenDqBitmap & i_bitmap );
 */
@@ -238,7 +238,7 @@ int32_t setBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
  * @param  o_mark The returned mark.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t mssGetMarkStore( TARGETING::TargetHandle_t i_mba,
                          const CenRank & i_rank, CenMark & o_mark );
 */
@@ -263,7 +263,7 @@ int32_t mssGetMarkStore( TARGETING::TargetHandle_t i_mba,
  *         time, so do a RMW operation to avoid overwritting a previous mark.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t mssSetMarkStore( TARGETING::TargetHandle_t i_mba,
                          const CenRank & i_rank, CenMark & io_mark,
                          bool & o_writeBlocked,
@@ -279,7 +279,7 @@ int32_t mssSetMarkStore( TARGETING::TargetHandle_t i_mba,
  * @param  o_eccSpare   A symbol associated with the ECC spare (x4 mode only).
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
                         CenSymbol & o_port0Spare, CenSymbol & o_port1Spare,
                         CenSymbol & o_eccSpare );
@@ -294,7 +294,7 @@ int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
  * @note   The procedure will be able to derive the port from the given symbol.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
                         const CenSymbol & i_symbol, bool i_x4EccSpare );
 */
@@ -306,7 +306,7 @@ int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
  * @param  o_endAddr   The return end address.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba, CenAddr & o_startAddr,
                          CenAddr & o_endAddr );
 */
@@ -321,7 +321,7 @@ int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba, CenAddr & o_startAddr,
  * @param  i_slaveOnly true = slave rank only, false = master rank (default).
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba,
                          const CenRank & i_rank, CenAddr & o_startAddr,
                          CenAddr & o_endAddr, bool i_slaveOnly = false );
@@ -347,7 +347,7 @@ TARGETING::TargetHandle_t getMasterCore( TARGETING::TargetHandle_t i_procTgt );
  *          spare can be on High nibble or low nibble. This function will
  *          populate spare config information in o_spareConfig.
  */
-/* TODO RTC 136126
+/* TODO RTC 157888
 int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
                             uint8_t i_ps, uint8_t & o_spareConfig );
 */
@@ -377,7 +377,7 @@ void getDimmDqAttr( TARGETING::TargetHandle_t i_target,
 //##                    Maintenance Command class wrapper
 //##############################################################################
 
-// TODO: RTC 136126
+// TODO: RTC 157888
 ///**
 // * @brief This is a wrapper class for underlying maintenance class object
 // *
@@ -473,7 +473,7 @@ void getDimmDqAttr( TARGETING::TargetHandle_t i_target,
  *         that contains i_rank, but the target address range can be modified
  *         with i_flags and/or i_sAddrOverride.
  */
-/* TODO RTC 136126
+/* TODO RTC 157888
 mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                             TARGETING::TargetHandle_t i_mba,
                             const CenRank & i_rank, uint32_t i_stopCond,
@@ -490,7 +490,7 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
  * @note   This function allocates memory on heap for mss_MaintCmdWrapper
  *         object. It is the caller's responsibilty to delete this object.
  */
-/* TODO RTC 136126
+/* TODO RTC 157888
 mss_MaintCmdWrapper * createIncAddrMssCmd( TARGETING::TargetHandle_t i_mba );
 */
 

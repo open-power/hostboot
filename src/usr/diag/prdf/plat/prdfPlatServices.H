@@ -35,7 +35,7 @@
  */
 
 #include <lib/mcbist/memdiags.H> ///< MCBIST command interfaces
-//#include <utility_procedures/mss_maint_cmds.H> TODO: RTC 136126
+//#include <utility_procedures/mss_maint_cmds.H> TODO: RTC 157888
 
 // This must be included after all Hostboot specific includes. This will take
 // care of cases where a file must be included in the common code, but the

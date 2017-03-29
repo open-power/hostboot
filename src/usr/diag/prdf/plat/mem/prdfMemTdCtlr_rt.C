@@ -77,6 +77,10 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
             break;
         }
 
+        // Since we had to manually stop the maintenance command, refresh all
+        // relevant registers that may have changed since the initial capture.
+        // TODO: RTC 166837
+
         // Move onto the next step in the state machine.
         o_rc = nextStep( io_sc );
         if ( SUCCESS != o_rc )
@@ -107,7 +111,7 @@ uint32_t MemTdCtlr<T>::initialize()
         if ( iv_initialized ) break; // nothing to do
 
         // Add any unverified chip marks to the TD queue
-        // TODO: RTC 136126
+        // TODO: RTC 171866
 
         // At this point, the TD controller is initialized.
         iv_initialized = true;
@@ -139,6 +143,8 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
                    nextRank.getRank().getSlave() );
 
         // Restart background scrubbing on the next rank.
+        // TODO: RTC 171875 Need mechanism to resume on next address (via HWP)
+        //       if no targeted diagnostics have been run.
         o_rc = startBgScrub<T>( nextRank.getChip(), nextRank.getRank() );
         if ( SUCCESS != o_rc )
         {
@@ -168,7 +174,7 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::checkEcc( bool & o_errorsFound,
 
     o_errorsFound = false;
 
-    /* TODO: RTC 136126
+    /* TODO: RTC 171915
     MemRank rank = iv_stoppedRank.getRank();
 
     do
@@ -220,7 +226,7 @@ uint32_t MemTdCtlr<TYPE_MBA>::checkEcc( bool & o_errorsFound,
 
     o_errorsFound = false;
 
-    /* TODO: RTC 136126
+    /* TODO: RTC 171915
     MemRank rank = iv_stoppedRank.getRank();
 
     o_rc = __checkEcc<TYPE_MBA>( iv_chip, rank, iv_queue, io_sc,
