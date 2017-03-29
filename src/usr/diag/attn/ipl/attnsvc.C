@@ -36,6 +36,7 @@
 #include "common/attnproc.H"
 #include "common/attnmem.H"
 #include "common/attntarget.H"
+#include "arch/pirformat.H"
 
 // Custom compile configs
 #include <config.h>
@@ -161,29 +162,35 @@ void Service::processIntrQMsgPreAck(const msg_t & i_msg)
 
     TargetHandle_t proc = NULL;
 
-    // 32 bits:    22 unused,  3:node, 3:chip,
-    //  1:interProcInterrupt,  3:InterruptSourceNumber
-    INTR::XISR_t xisr;
+    // ---------------------------
+    // P8 used the XISR structure
+    // P9 uses the PIR structure
+    // ---------------------------
+    // PIR structure is
+    // 17 bits unused, 4 bits group, 3 bits chipId, 1 unused,
+    // 5/4 CoreID(norm/fused), 2/3 ThreadId(norm/fused)
+    PIR_t  l_pir;
+    l_pir.word = i_msg.data[1];
 
-    xisr.u32 = i_msg.data[1];
 
     TargetHandleList procs;
     getTargetService().getAllChips(procs, TYPE_PROC);
 
-
     TargetHandleList::iterator it = procs.begin();
 
-    // resolve the xisr to a proc target
-
+    // resolve the PIR to a proc target
     while(it != procs.end())
     {
-        uint64_t node = 0, chip = 0;
+        uint64_t group = 0, chip = 0;
 
-        getTargetService().getAttribute(ATTR_FABRIC_GROUP_ID, *it, node);
-        getTargetService().getAttribute(ATTR_FABRIC_CHIP_ID, *it, chip);
+        getTargetService().getAttribute(ATTR_FABRIC_GROUP_ID, *it, group);
+        getTargetService().getAttribute(ATTR_FABRIC_CHIP_ID, *it,  chip);
 
-        if(node == xisr.node
-                && chip == xisr.chip)
+        // for debug, but you have to compile it in
+        ATTN_TRACE("IntrQMsgPreAck: Group:%X Chip:%X  PirG:%X PirC:%X PirW:%X",
+                    group, chip, l_pir.groupId, l_pir.chipId, l_pir.word  );
+
+        if ((group == l_pir.groupId) && (chip == l_pir.chipId))
         {
             proc = *it;
             break;
