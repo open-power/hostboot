@@ -155,6 +155,47 @@ uint32_t stopBgScrub<TYPE_MCA>( ExtensibleChip * i_chip )
     return stopBgScrub<TYPE_MCBIST>( getConnectedParent(i_chip, TYPE_MCBIST) );
 }
 
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t resumeBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip )
+{
+    #define PRDF_FUNC "[PlatServices::resumeBgScrub<TYPE_MCBIST>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
+
+    uint32_t rc = SUCCESS;
+
+    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( i_chip->getTrgt() );
+
+    errlHndl_t errl;
+    FAPI_INVOKE_HWP( errl, memdiags::continue_cmd, fapiTrgt );
+
+    if ( nullptr != errl )
+    {
+        PRDF_ERR( PRDF_FUNC "memdiags::continue_cmd(0x%08x) failed",
+                  i_chip->getHuid() );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        rc = FAIL;
+    }
+
+    return rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t resumeBgScrub<TYPE_MCA>( ExtensibleChip * i_chip )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+
+    return resumeBgScrub<TYPE_MCBIST>(getConnectedParent(i_chip, TYPE_MCBIST));
+}
+
 //##############################################################################
 //##                   Centaur Maintenance Command wrappers
 //##############################################################################
@@ -188,6 +229,29 @@ uint32_t stopBgScrub<TYPE_MBA>( ExtensibleChip * i_chip )
         rc = FAIL;
     }
 */
+
+    return rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t resumeBgScrub<TYPE_MBA>( ExtensibleChip * i_chip )
+{
+    #define PRDF_FUNC "[PlatServices::resumeBgScrub<TYPE_MBA>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    uint32_t rc = SUCCESS;
+
+    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+
+    /* TODO: RTC 157888 - Not entirely sure how to do this. Will require a inc
+     *       command followed by a start command. May need the stop conditions
+     *       for the start command. */
 
     return rc;
 
