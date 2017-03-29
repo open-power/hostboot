@@ -727,7 +727,9 @@ namespace SBE
                 // Advance PNOR pointer 4k to move it past header page to the
                 // start of the non-customized SBE image
                 o_imgPtr = reinterpret_cast<void*>
-                                (reinterpret_cast<char*>(hdr_Ptr)+0x1000);
+                                (reinterpret_cast<char*>(hdr_Ptr)+PAGE_SIZE);
+                // Do not include header in size
+                o_imgSize -= PAGE_SIZE;
             }
 
             if(NULL != o_version)
@@ -3646,6 +3648,17 @@ namespace SBE
                 break;
             }
 
+            // Load PNOR sections into secure memory
+#ifdef CONFIG_SECUREBOOT
+            err = loadSecureSection(PNOR::SBE_IPL);
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"createSbeImageVmmSpace() - Error from loadSecureSection(PNOR::SBE_IPL)");
+                break;
+            }
+
+#endif
+
         }while(0);
 
         TRACDCOMP( g_trac_sbe,
@@ -3730,7 +3743,25 @@ namespace SBE
                 break;
             }
 
+#ifndef CONFIG_SECUREBOOT
+            // @TODO RTC 157475
+            // UnloadSecureSection is not fully implemented so we do not attempt
+            // to pull the SBE partition back in after the initial time.
+            // NOTE: PNOR::flush(PNOR::HB_BOOTLOADER) is another thing that
+            //       could be flushed. It's only 20K, but it would be 5 pages
+            //       freed up.
             PNOR::flush( PNOR::SBE_IPL );
+#endif
+
+            // Unload PNOR sections from secure memory
+#ifdef CONFIG_SECUREBOOT
+            err = unloadSecureSection(PNOR::SBE_IPL);
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"cleanupSbeImageVmmSpace() - Error from unloadSecureSection(PNOR::SBE_IPL)");
+                break;
+            }
+#endif
 
         }while(0);
 
@@ -5031,7 +5062,7 @@ errlHndl_t secureKeyTransition()
         l_errl = loadSecureSection(PNOR::SBKT);
         if (l_errl)
         {
-            TRACFCOMP( g_trac_sbe, ERR_MRK,"secureKeyTransition() - Error from loadSecureSection(PNOR::SBKT)");
+            TRACFCOMP( g_trac_sbe, ERR_MRK"secureKeyTransition() - Error from loadSecureSection(PNOR::SBKT)");
             break;
         }
         l_loaded = true;
@@ -5052,7 +5083,7 @@ errlHndl_t secureKeyTransition()
         l_errl = unloadSecureSection(PNOR::SBKT);
         if (l_errl)
         {
-            TRACFCOMP( g_trac_sbe, ERR_MRK,"secureKeyTransition() - Error from unloadSecureSection(PNOR::SBKT)");
+            TRACFCOMP( g_trac_sbe, ERR_MRK"secureKeyTransition() - Error from unloadSecureSection(PNOR::SBKT)");
             break;
         }
     }

@@ -685,7 +685,6 @@ class SBEUpdateTest: public CxxTest::TestSuite
     {
 
         errlHndl_t err = NULL;
-        errlHndl_t err_cleanup = NULL;
 
         uint64_t fails = 0x0;
         uint64_t total = 0x0;
@@ -710,16 +709,6 @@ class SBEUpdateTest: public CxxTest::TestSuite
                        ENTER_MRK"testSbeUpdateTarget()" );
 
             uint8_t local_ec = theTarget->getAttr<TARGETING::ATTR_EC>();
-
-            total++;
-            err = createSbeImageVmmSpace();
-            if(err)
-            {
-                fails++;
-                TS_FAIL("testSbeUpdateTarget() - Call to createSbeImageVmmSpace() failed");
-                break;
-            }
-
 
             /****************************************************/
             /* Get SBE Info State                               */
@@ -863,16 +852,6 @@ class SBEUpdateTest: public CxxTest::TestSuite
             }
 
         }while(0);
-
-        err_cleanup = cleanupSbeImageVmmSpace();
-        if(err_cleanup)
-        {
-            total++;
-            fails++;
-            TS_FAIL("testSbeUpdateTarget() -Call to cleanupSbeImageVmmSpace() failed.");
-            errlCommit( err_cleanup, SBE_COMP_ID );
-
-        }
 
         TRACFCOMP( g_trac_sbe,
                    EXIT_MRK"testSbeUpdateTarget() - %d/%d fails",
@@ -1235,17 +1214,20 @@ class SBEUpdateTest: public CxxTest::TestSuite
      */
     SBEUpdateTest() : CxxTest::TestSuite()
     {
-        errlHndl_t err = NULL;
-        uint64_t fails = 0x0;
-        uint64_t total = 0x0;
+        errlHndl_t err = nullptr;
         bool sbe_loaded = false;
 
         err = loadSbeModule(sbe_loaded);
         if(err)
         {
-            total++;
-            fails++;
             TS_FAIL("SBEUpdateTest() - Constuctor: failed to load modules");
+            errlCommit( err, SBE_COMP_ID );
+        }
+
+        err = createSbeImageVmmSpace();
+        if(err)
+        {
+            TS_FAIL("SBEUpdateTest() - Constructor: Call to createSbeImageVmmSpace() failed");
             errlCommit( err, SBE_COMP_ID );
         }
 
@@ -1257,16 +1239,19 @@ class SBEUpdateTest: public CxxTest::TestSuite
      */
     ~SBEUpdateTest()
     {
-        errlHndl_t err = NULL;
-        uint64_t fails = 0x0;
-        uint64_t total = 0x0;
+        errlHndl_t err = nullptr;
+
+        err = cleanupSbeImageVmmSpace();
+        if(err)
+        {
+            TS_FAIL("~SBEUpdateTest() - Destructor: Call to cleanupSbeImageVmmSpace() failed.");
+            errlCommit( err, SBE_COMP_ID );
+        }
 
         err = unloadSbeModule();
         if(err)
         {
-            total++;
-            fails++;
-            TS_FAIL("~SBEUpdateTest() - Destuctor: failed to load modules");
+            TS_FAIL("~SBEUpdateTest() - Destructor: failed to load modules");
             errlCommit( err, SBE_COMP_ID );
         }
 

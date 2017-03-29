@@ -500,9 +500,8 @@ sub manipulateImages
         # Sections that have secureboot support. Secureboot still must be
         # enabled for secureboot actions on these partitions to occur.
         # @TODO securebootp9 re-enable with SBE/SBEC/PAYLOAD secureboot ports
-        my $isNormalSecure =  0;
+        my $isNormalSecure =  ($eyeCatch eq "SBE");
                              #|| ($eyeCatch eq "HBRT");
-                             #|| ($eyeCatch eq "SBE")
                              #|| ($eyeCatch eq "SBEC")
                              #|| ($eyeCatch eq "PAYLOAD")
                              #|| ($eyeCatch eq "OCC")
@@ -698,10 +697,7 @@ sub manipulateImages
                     run_command("cat $bin_file >> $tempImages{HDR_PHASE}");
                 }
             }
-            # @TODO securebootp9 re-enable with SBE/SBEC secureboot ports
-            elsif(0) #$secureboot
-                     #&&  (   ($sectionHash{$layoutKey}{sha512perEC} eq "yes")
-                     #  || ($isNormalSecure)))
+            elsif ($secureboot && $isNormalSecure)
             {
                 $callerHwHdrFields{configure} = 1;
                 if($openSigningTool)
