@@ -807,7 +807,7 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     TRACFCOMP( g_trac_devtree, "Chip %X PHB Active mask %X",
                i_chipid, l_phbActive);
 
-    for(uint32_t l_phb =0; l_phb < MAX_PHBs; l_phb++)
+    for(int32_t l_phb =MAX_PHBs-1; l_phb >= 0; l_phb--)
     {
         if(!(l_phbActive & (PHB0_MASK>>l_phb)))
         {
