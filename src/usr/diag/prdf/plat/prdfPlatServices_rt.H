@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,25 @@ void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr );
  */
 template<TARGETING::TYPE T>
 uint32_t stopBgScrub( ExtensibleChip * i_chip );
+
+/**
+ * @brief  Resumes background scrubbing after it has paused on error.
+ *
+ * There are use cases where we want background scrubbing to pause on error in
+ * order to collect FFDC (specifically address information), in which case we
+ * will not start a Targeted Diagnostics procedure. Instead, this command will
+ * resume the background scrubbing procedure already set up in hardware,
+ * starting on the next configured address.
+ *
+ * @note This function should only be called after pausing background scrubbing
+ *       due to an error. It should not be called after executing a Targeted
+ *       Diagnotics procedure.
+ *
+ * @param  i_chip MCBIST, MCA, or MBA chip.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t resumeBgScrub( ExtensibleChip * i_chip );
 
 } // end namespace PlatServices
 
