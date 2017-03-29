@@ -276,7 +276,7 @@ inline bool chip_ec_feature_blue_waterfall_adjust(const fapi2::Target<T>& i_targ
     return (l_value != 0);
 
 fapi_try_exit:
-    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_BLUE_WATERFALL_ADJUST or ATTR_DO_BLUE_WATERFALL_ADJUST: 0x%lx (target: %s)",
+    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_BLUE_WATERFALL_ADJUST: 0x%lx (target: %s)",
              uint64_t(fapi2::current_err), mss::c_str(i_target));
     fapi2::Assert(false);
     return false;
