@@ -469,10 +469,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
             // Opal HB reserved memory data
             // -----TOP_OF_MEM-------
-            // -----HOMER_0----------
-            // -----...--------------
-            // -----HOMER_N----------
             // -----OCC Common-------
+            // -----HOMER_N----------
+            // -----...--------------
+            // -----HOMER_0----------
             // -----VPD--------------
             // -----ATTR Data--------
             // -----HBRT Image-------
@@ -489,7 +489,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
             for (const auto & l_procChip: l_procChips)
             {
-                l_homerAddr -= VMM_HOMER_INSTANCE_SIZE;
+                l_homerAddr = l_procChip->getAttr
+                    <TARGETING::ATTR_HOMER_PHYS_ADDR>();
 
                 // Get a pointer to the next available HDAT HB Rsv Mem entry
                 l_rngPtr = nullptr;
@@ -525,8 +526,12 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
 #ifdef CONFIG_START_OCC_DURING_BOOT
             // OCC Common entry
-            uint64_t l_occCommonAddr = l_topMemAddr
-                    - VMM_ALL_HOMER_OCC_MEMORY_SIZE;
+            TARGETING::Target * l_sys = nullptr;
+            TARGETING::targetService().getTopLevelTarget( l_sys );
+            assert(l_sys != nullptr);
+            uint64_t l_occCommonAddr = l_sys->getAttr
+                <TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
+
             l_label = "ibm,occ-common-area";
             l_labelSize = strlen(l_label) + 1;
 

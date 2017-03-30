@@ -383,6 +383,15 @@ void* host_build_stop_image (void *io_pArgs)
                    P9_MAX_PROCS,
                    l_pVirtMemBase  );
 
+        //Since we have the HOMER location defined, set the
+        // OCC common attribute to be used later by pm code
+        TARGETING::Target* l_sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(l_sys);
+        assert( l_sys != NULL );
+        l_sys->setAttr<TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>
+            (reinterpret_cast<uint64_t>(l_pRealMemBase)
+                + VMM_HOMER_REGION_SIZE);
+
         //  Continue, build hcode images
         //
         //Load the reference image from PNOR
