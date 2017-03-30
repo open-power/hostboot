@@ -313,7 +313,8 @@ fapi_try_exit:
 /// @param[out] o_value - value to use for the DCD register
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note Due to DCD algorithm fails due to bad HW, the algorithm is going to do the following
-/// 1) Return failing RC's if a and b both failed
+/// Per the PHY team, we do not want to fail out existing HW for the DCD calibration fails
+/// 1) Use prior calibrated value if a/b fail - return success
 /// 2) Use a if b failed
 /// 3) Use b if a failed
 /// 4) Average if a and b both passed
@@ -328,16 +329,17 @@ fapi2::ReturnCode compute_dcd_value(fapi2::ReturnCode& io_a_side_rc,
     if(io_a_side_rc != FAPI2_RC_SUCCESS && io_b_side_rc != FAPI2_RC_SUCCESS)
     {
         // Log a-side, return b-side (chose this at random, but we want to exit)
-        FAPI_ERR("Both side A and side B failed, exiting with errors");
+        FAPI_ERR("Recovered from DCD calibration fail - both side A and side B failed, using prior calibrated value");
         fapi2::logError(io_a_side_rc);
-        return io_b_side_rc;
+        fapi2::logError(io_b_side_rc);
+        return FAPI2_RC_SUCCESS;
     }
 
     // 2) b failed, use a
     if(io_b_side_rc != FAPI2_RC_SUCCESS)
     {
+        FAPI_ERR("Recovered from DCD calibration fail - side B failed, using side-A's value");
         fapi2::logError(io_b_side_rc);
-        FAPI_INF("Side B failed, using side-A's value");
         o_value = i_a_side_val;
         return FAPI2_RC_SUCCESS;
     }
@@ -345,14 +347,14 @@ fapi2::ReturnCode compute_dcd_value(fapi2::ReturnCode& io_a_side_rc,
     // 3) a failed, use b
     if(io_a_side_rc != FAPI2_RC_SUCCESS)
     {
-        FAPI_INF("Side A failed, using side-B's value");
+        FAPI_ERR("Recovered from DCD calibration fail - side A failed, using side-B's value");
         fapi2::logError(io_a_side_rc);
         o_value = i_b_side_val;
         return FAPI2_RC_SUCCESS;
     }
 
     // 4) average a and b as both passed
-    FAPI_INF("Both sides A/B passed - averaging");
+    FAPI_DBG("Both sides A/B passed - averaging");
     o_value = (i_a_side_val + i_b_side_val) / 2;
     return FAPI2_RC_SUCCESS;
 }
