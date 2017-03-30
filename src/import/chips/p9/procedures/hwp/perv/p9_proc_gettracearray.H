@@ -104,6 +104,39 @@ extern "C"
         }
     }
 
+    /**
+     * @brief Determine whether a trace entry is a start marker
+     * @param[in] i_buffer a buffer containing the trace entry
+     * @param[in] i_offset the bit offset of the entry inside the buffer, defaults to 0 if omitted
+     * @return FAPI2_RC_SUCCESS  if the entry _is_ a start marker
+     *         FAPI2_RC_FALSE    if the entry is _not_ a start marker
+     *         FAPI2_RC_OVERFLOW if the buffer did not contain enough bits
+     */
+    static inline fapi2::ReturnCodes p9_tracearray_is_trace_start_marker(
+        const fapi2::variable_buffer i_buffer, uint32_t i_offset = 0)
+    {
+        uint32_t l_magic = 0;
+        uint64_t l_zeros = 0;
+        fapi2::ReturnCodes l_rc;
+
+        l_rc = i_buffer.extract(l_magic, i_offset, 32);
+
+        if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+        {
+            return l_rc;
+        }
+
+        l_rc = i_buffer.extract(l_zeros, i_offset + 32, 64);
+
+        if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+        {
+            return l_rc;
+        }
+
+        return (l_magic == 0xBA55A1E0 && l_zeros == 0) ?
+               fapi2::FAPI2_RC_SUCCESS : fapi2::FAPI2_RC_FALSE;
+    }
+
 //------------------------------------------------------------------------------
 // Function prototype
 //------------------------------------------------------------------------------

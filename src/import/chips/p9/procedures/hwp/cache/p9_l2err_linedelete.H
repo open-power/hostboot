@@ -59,7 +59,8 @@
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode
 (*p9_l2err_linedelete_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_EX>&,
-                             const p9_l2err_extract_err_data& );
+                             const p9_l2err_extract_err_data&,
+                             const uint64_t p9_l2err_linedelete_TryBusyCounts);
 
 extern "C"
 {
@@ -67,7 +68,8 @@ extern "C"
 
 
     fapi2::ReturnCode p9_l2err_linedelete(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-                                          const p9_l2err_extract_err_data& i_err_data);
+                                          const p9_l2err_extract_err_data& i_err_data,
+                                          const uint64_t p9_l2err_linedelete_TryBusyCounts);
 
 } // extern "C"
 

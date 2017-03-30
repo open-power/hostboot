@@ -205,6 +205,17 @@ extern "C"
         {
             trace_index--;
 
+            if (p9_tracearray_is_trace_start_marker(trace_array[trace_index]) == fapi2::FAPI2_RC_SUCCESS)
+            {
+
+                FAPI_DBG("Head found at trace index %i, no error is found!", trace_index);
+                FAPI_DBG("%2X: 0x%016llX%016llX", trace_index, trace_array[trace_index].get<uint64_t>( 0 ),
+                         trace_array[trace_index].get<uint64_t>( 1 ));
+                error_found = false;
+                ce_ue = true;
+                break;
+            }
+
             //Only look at data entries (ie ignore compression entries for now)
             if( !trace_array[trace_index].isBitClear( 88, 7 ) )
             {
