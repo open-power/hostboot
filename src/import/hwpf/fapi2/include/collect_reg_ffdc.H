@@ -170,7 +170,8 @@ const fapi2::TargetType TARGET_TYPE_PROC_CHIPLETS = fapi2::TARGET_TYPE_EX |
         fapi2::TARGET_TYPE_PPE |
         fapi2::TARGET_TYPE_PERV |
         fapi2::TARGET_TYPE_PEC |
-        fapi2::TARGET_TYPE_PHB;
+        fapi2::TARGET_TYPE_PHB |
+        fapi2::TARGET_TYPE_MC;
 
 const fapi2::TargetType TARGET_TYPE_SCOM_TARGET = fapi2::TARGET_TYPE_PROC_CHIP |
         fapi2::TARGET_TYPE_MEMBUF_CHIP |
@@ -192,7 +193,8 @@ const fapi2::TargetType TARGET_TYPE_SCOM_TARGET = fapi2::TARGET_TYPE_PROC_CHIP |
         fapi2::TARGET_TYPE_PPE |
         fapi2::TARGET_TYPE_PERV |
         fapi2::TARGET_TYPE_PEC |
-        fapi2::TARGET_TYPE_PHB;
+        fapi2::TARGET_TYPE_PHB |
+        fapi2::TARGET_TYPE_MC;
 
 
 
