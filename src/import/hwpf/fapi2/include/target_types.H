@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,7 @@ enum TargetType
     TARGET_TYPE_PERV          = 0x00200000, ///< Pervasive type
     TARGET_TYPE_PEC           = 0x00400000, ///< PEC type
     TARGET_TYPE_PHB           = 0x00800000, ///< PHB type
+    TARGET_TYPE_MC            = 0x01000000, ///< MC type
 
     TARGET_TYPE_ALL           = 0xFFFFFFFF, ///< Any/All types
 
@@ -99,7 +100,8 @@ enum TargetType
                                 TARGET_TYPE_PPE    |
                                 TARGET_TYPE_PERV   |
                                 TARGET_TYPE_PEC    |
-                                TARGET_TYPE_PHB,
+                                TARGET_TYPE_PHB    |
+                                TARGET_TYPE_MC,
 
     // Mappings to target types found in the error xml files
     TARGET_TYPE_EX_CHIPLET    = TARGET_TYPE_EX,
