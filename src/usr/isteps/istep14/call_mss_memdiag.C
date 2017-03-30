@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,15 +31,57 @@
 #include <diag/mdia/mdia.H>
 #include <targeting/common/targetservice.H>
 
+#include <plat_hwp_invoker.H>     // for FAPI_INVOKE_HWP
+#include <lib/fir/memdiags_fir.H> // for mss::unmask::after_memdiags
+#include <lib/mc/port.H>          // for mss::reset_reorder_queue_settings
+
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
+using   namespace   TARGETING;
 
 namespace ISTEP_14
 {
+
+// Helper function to run Memory Diagnostics on a list of targets.
+errlHndl_t __runMemDiags( TargetHandleList i_trgtList )
+{
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+        errl = ATTN::startService();
+        if ( nullptr != errl )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "ATTN::startService() failed" );
+            break;
+        }
+
+        errl = MDIA::runStep( i_trgtList );
+        if ( nullptr != errl )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "MDIA::runStep() failed" );
+            break;
+        }
+
+        errl = ATTN::stopService();
+        if ( nullptr != errl )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "ATTN::stopService() failed" );
+            break;
+        }
+
+    } while (0);
+
+    return errl;
+}
+
 void* call_mss_memdiag (void* io_pArgs)
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t errl = nullptr;
 
     IStepError l_stepError;
 
@@ -52,64 +94,72 @@ void* call_mss_memdiag (void* io_pArgs)
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
     // @TODO-RTC: 155065
     // update firdata inputs for OCC
-    l_errl = HBOCC::loadHostDataToSRAM(masterproc,
+    errl = HBOCC::loadHostDataToSRAM(masterproc,
                                         PRDF::ALL_PROC_MEM_MASTER_CORE);
-    assert(l_errl==NULL,
+    assert(nullptr == errl,
            "Error returned from call to HBOCC::loadHostDataToSRAM");
 #endif
 
-    TARGETING::TargetHandleList l_targetList;
-    TARGETING::TYPE targetType;
-
-    // we need to check the model of the master proc
-    // if it is Cumulus then we will use TYPE_MBA for targetType
-    // else it is Nimbus so then we will use TYPE_MCBIST for targetType
-    if ( TARGETING::MODEL_CUMULUS ==
-         masterproc->getAttr<TARGETING::ATTR_MODEL>() )
-    {
-        targetType = TARGETING::TYPE_MBA;
-    }
-    else
-    {
-        targetType = TARGETING::TYPE_MCBIST;
-    }
-
-    getAllChiplets(l_targetList, targetType);
-
     do
     {
-        l_errl = ATTN::startService();
-        if( NULL != l_errl )
+        // Actions vary by processor type.
+        ATTR_MODEL_type procType = masterproc->getAttr<ATTR_MODEL>();
+
+        if ( MODEL_NIMBUS == procType )
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ATTN startService failed");
-            break;
+            TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MCBIST );
+
+            // Start Memory Diagnostics.
+            errl = __runMemDiags( trgtList );
+            if ( nullptr != errl ) break;
+
+            for ( auto & tt : trgtList )
+            {
+                fapi2::Target<fapi2::TARGET_TYPE_MCBIST> ft ( tt );
+
+                // Unmask mainline FIRs.
+                FAPI_INVOKE_HWP( errl, mss::unmask::after_memdiags, ft );
+                if ( nullptr != errl )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "mss::unmask::after_memdiags(0x%08x) failed",
+                               get_huid(tt) );
+                    break;
+                }
+
+                // Turn off FIFO mode to improve performance.
+                FAPI_INVOKE_HWP( errl, mss::reset_reorder_queue_settings, ft );
+                if ( nullptr != errl )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "mss::reset_reorder_queue_settings(0x%08x) "
+                               "failed", get_huid(tt) );
+                    break;
+                }
+            }
+            if ( nullptr != errl ) break;
+        }
+        else if ( MODEL_CUMULUS == procType )
+        {
+            TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MBA );
+
+            // Start Memory Diagnostics
+            errl = __runMemDiags( trgtList );
+            if ( nullptr != errl ) break;
+
+            // No need to unmask or turn off FIFO. That is already contained
+            // within the other Centaur HWPs.
         }
 
-        l_errl = MDIA::runStep(l_targetList);
-        if( NULL != l_errl )
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "MDIA subStep failed");
-            break;
-        }
+    } while (0);
 
-        l_errl = ATTN::stopService();
-        if( NULL != l_errl )
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ATTN stopService failed");
-            break;
-        }
-
-    }while( 0 );
-
-    if( NULL != l_errl )
+    if ( nullptr != errl )
     {
         // Create IStep error log and cross reference to error that occurred
-        l_stepError.addErrorDetails(l_errl);
+        l_stepError.addErrorDetails(errl);
 
         // Commit Error
-        errlCommit(l_errl, HWPF_COMP_ID);
+        errlCommit(errl, HWPF_COMP_ID);
     }
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
