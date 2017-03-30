@@ -43,6 +43,8 @@
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
+const uint32_t BUSY_POLL_DELAY_IN_NS = 10000000; // 10ms
+const uint32_t BUSY_POLL_DELAY_IN_CYCLES = 20000000; // 10ms, assumming 2GHz
 
 extern "C"
 {
@@ -55,14 +57,20 @@ extern "C"
 // HWP entry point
 //------------------------------------------------------------------------------
     fapi2::ReturnCode p9_l2err_linedelete(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-                                          const p9_l2err_extract_err_data& i_err_data)
+                                          const p9_l2err_extract_err_data& i_err_data,
+                                          const uint64_t p9_l2err_linedelete_TryBusyCounts)
     {
+
 
 
         uint8_t                 member = 0;
         uint8_t                 bank = 0;
         uint16_t                cgc = 0;
+        uint64_t                busy_reg_counter = 0;
         fapi2::buffer<uint64_t> l_l2_l2cerrs_prd_purge_cmd_reg;
+
+        bool                    reg_busy = 0;
+        bool                    prd_purge_busy = 1;
 
         // mark function entry
         FAPI_DBG("Entering p9_l2err_linedelete...");
@@ -87,6 +95,7 @@ extern "C"
         //   |29:30 | Don't care         |
         //   +------+--------------------+
 
+
         member = i_err_data.member;
         bank = i_err_data.bank;
         cgc = i_err_data.address;
@@ -98,17 +107,101 @@ extern "C"
         // bits 17:19 is the member
         // bits 20:27 is the cgc address
         // bit 28 is the bank
-        FAPI_TRY(fapi2::getScom(i_target, EX_PRD_PURGE_CMD_REG, l_l2_l2cerrs_prd_purge_cmd_reg),
-                 "Error from getScom (l_l2_l2cerrs_prd_purge_cmd_reg)");
-        FAPI_DBG("l_l2_l2cerrs_prd_purge_cmd_reg_data: %#lx", l_l2_l2cerrs_prd_purge_cmd_reg);
 
-        l_l2_l2cerrs_prd_purge_cmd_reg.insertFromRight<EX_PRD_PURGE_CMD_REG_MEM, EX_PRD_PURGE_CMD_REG_MEM_LEN>(member);
-        l_l2_l2cerrs_prd_purge_cmd_reg.insertFromRight<EX_PRD_PURGE_CMD_REG_CGC, EX_PRD_PURGE_CMD_REG_CGC_LEN>(cgc);
-        l_l2_l2cerrs_prd_purge_cmd_reg.insertFromRight<EX_PRD_PURGE_CMD_REG_BANK, 1>(bank);
 
-        FAPI_DBG("l_l2_l2cerrs_prd_purge_cmd_reg_data: %#lx", l_l2_l2cerrs_prd_purge_cmd_reg);
-        FAPI_TRY(fapi2::putScom(i_target, EX_PRD_PURGE_CMD_REG, l_l2_l2cerrs_prd_purge_cmd_reg),
-                 "Error from putScom (l_l2_l2cerrs_prd_purge_cmd_reg)");
+        FAPI_DBG("p9_l2err_linedelete_TryBusyCounts: %ld", p9_l2err_linedelete_TryBusyCounts);
+
+        // wait reg_busy bit for a max counter time which is defined by user
+        do
+        {
+            FAPI_TRY(fapi2::getScom(i_target, EX_PRD_PURGE_CMD_REG, l_l2_l2cerrs_prd_purge_cmd_reg),
+                     "Error from getScom (l_l2_l2cerrs_prd_purge_cmd_reg)");
+            FAPI_DBG("l_l2_l2cerrs_prd_purge_cmd_reg_data: %#lx", l_l2_l2cerrs_prd_purge_cmd_reg);
+
+            // get the reg_busy bit from scom register
+            l_l2_l2cerrs_prd_purge_cmd_reg.extractToRight<EX_PRD_PURGE_CMD_REG_BUSY, 1>(reg_busy);
+
+            if (reg_busy == 0)
+            {
+                prd_purge_busy = 0;
+                break;
+            }
+            else
+            {
+                busy_reg_counter = busy_reg_counter + 1;
+                FAPI_DBG("reg_busy = %u, wait for 10ms and try again, remaining cout: %u!",
+                         reg_busy, busy_reg_counter);
+                // Delay for 10ms
+                fapi2::delay(BUSY_POLL_DELAY_IN_NS, BUSY_POLL_DELAY_IN_CYCLES);
+            }
+        }
+        while (busy_reg_counter < p9_l2err_linedelete_TryBusyCounts);
+
+
+        // if the reg_busy is still 1 during the counter time
+        // error occurs
+        FAPI_ASSERT(!prd_purge_busy,
+                    fapi2::P9_L2ERR_LINE_DELETE_REG_BUSY().
+                    set_TARGET(i_target),
+                    "Error: PRD_PURGE_CMD_REG_BUSY indicats the ie completion bit was not set yet.");
+
+        FAPI_DBG("reg_busy = %u", reg_busy);
+
+
+        // if reg_busy is 0
+        // write trigger, type, cgc address and bank into PRD Purge Engine Command Register
+        if (reg_busy == 0)
+        {
+
+            l_l2_l2cerrs_prd_purge_cmd_reg.insertFromRight<EX_PRD_PURGE_CMD_REG_MEM, EX_PRD_PURGE_CMD_REG_MEM_LEN>(member);
+            l_l2_l2cerrs_prd_purge_cmd_reg.insertFromRight<EX_PRD_PURGE_CMD_REG_CGC, EX_PRD_PURGE_CMD_REG_CGC_LEN>(cgc);
+            l_l2_l2cerrs_prd_purge_cmd_reg.insertFromRight<EX_PRD_PURGE_CMD_REG_BANK, 1>(bank);
+
+            l_l2_l2cerrs_prd_purge_cmd_reg.insertFromRight<EX_PRD_PURGE_CMD_REG_TRIGGER, 1>(1);
+            l_l2_l2cerrs_prd_purge_cmd_reg.insertFromRight<EX_PRD_PURGE_CMD_REG_TYPE, EX_PRD_PURGE_CMD_REG_TYPE_LEN>(0x2);
+
+            FAPI_DBG("l_l2_l2cerrs_prd_purge_cmd_reg_data: %#lx", l_l2_l2cerrs_prd_purge_cmd_reg);
+            FAPI_TRY(fapi2::putScom(i_target, EX_PRD_PURGE_CMD_REG, l_l2_l2cerrs_prd_purge_cmd_reg),
+                     "Error from putScom (l_l2_l2cerrs_prd_purge_cmd_reg)");
+
+            // poll the busy bit again to ensure the purge completed
+            do
+            {
+                FAPI_TRY(fapi2::getScom(i_target, EX_PRD_PURGE_CMD_REG, l_l2_l2cerrs_prd_purge_cmd_reg),
+                         "Error from getScom (l_l2_l2cerrs_prd_purge_cmd_reg)");
+                FAPI_DBG("l_l2_l2cerrs_prd_purge_cmd_reg_data: %#lx", l_l2_l2cerrs_prd_purge_cmd_reg);
+
+                // get the reg_busy bit from scom register
+                l_l2_l2cerrs_prd_purge_cmd_reg.extractToRight<EX_PRD_PURGE_CMD_REG_BUSY, 1>(reg_busy);
+
+                if (reg_busy == 0)
+                {
+                    prd_purge_busy = 0;
+                    break;
+                }
+                else
+                {
+                    busy_reg_counter = busy_reg_counter + 1;
+                    FAPI_DBG("reg_busy = %u, wait for 10ms and try again, remaining cout: %u!",
+                             reg_busy, busy_reg_counter);
+                    // Delay for 10ms
+                    fapi2::delay(BUSY_POLL_DELAY_IN_NS, BUSY_POLL_DELAY_IN_CYCLES);
+                }
+            }
+            while (busy_reg_counter < p9_l2err_linedelete_TryBusyCounts);
+
+            // if the reg_busy is still 1 during the counter time
+            // error occurs
+            FAPI_ASSERT(!prd_purge_busy,
+                        fapi2::P9_L2ERR_LINE_DELETE_REG_BUSY().
+                        set_TARGET(i_target),
+                        "Error: PRD_PURGE_CMD_REG_BUSY indicats the ie completion bit was not set yet, the PRD Purge Engine Command Register written failed.");
+
+            FAPI_DBG("Writing PRD Purge Engine Command Register busy bit status, reg_busy = %u", reg_busy);
+            //poll the busy bit completed
+
+
+        }
 
         // mark HWP exit
     fapi_try_exit:
