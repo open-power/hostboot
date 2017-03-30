@@ -107,5 +107,14 @@
 	<ffdc>TARGET</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
+    <hwpError>
+    <rc>RC_P9_L2ERR_LINE_DELETE_REG_BUSY</rc>
+    <description>
+      Procedure: p9_l2err_linedelete
+      Error while try to update PRD Purge Engine Command Register
+    </description>
+	<ffdc>TARGET</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
 
