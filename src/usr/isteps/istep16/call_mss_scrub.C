@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,12 +31,14 @@
 #include    <util/misc.H>
 #include    <diag/prdf/prdfMain.H>
 
+#include <plat_hwp_invoker.H>     // for FAPI_INVOKE_HWP
+#include <lib/fir/memdiags_fir.H> // for mss::unmask::after_background_scrub
 
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
-
+using   namespace   TARGETING;
 
 namespace ISTEP_16
 {
@@ -46,24 +48,60 @@ void* call_mss_scrub (void *io_pArgs)
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scrub entry" );
 
-    // There are performance issues and some functional deficiencies
-    //  that make runtime scrub problematic, so turning it off
-    if( Util::isSimicsRunning() )
+    errlHndl_t errl = nullptr;
+
+    do
     {
-        TRACFCOMP(  ISTEPS_TRACE::g_trac_isteps_trace, "Skipping runtime scrub in Simics" );
-        return NULL;
-    }
+        if ( Util::isSimicsRunning() )
+        {
+            // There are performance issues and some functional deficiencies
+            // that make background scrub problematic in SIMICs.
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Skipping background "
+                       "scrub in SIMICs" );
+        }
+        else
+        {
+            // Start background scrubbing.
+            errl = PRDF::startScrub();
+            if ( nullptr != errl )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "PRDF::startScrub() failed" );
+                break;
+            }
+        }
 
-    errlHndl_t l_errl = PRDF::startScrub();
+        // Nimbus chips require us to unmask some additional FIR bits. Note that
+        // this is not needed on Cumulus based systems because this is already
+        // contained within the other Centaur HWPs.
+        TargetHandle_t masterProc = nullptr;
+        targetService().masterProcChipTargetHandle(masterProc);
+        if ( MODEL_NIMBUS == masterProc->getAttr<ATTR_MODEL>() )
+        {
+            TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MCBIST );
 
-    if ( NULL != l_errl )
+            for ( auto & tt : trgtList )
+            {
+                fapi2::Target<fapi2::TARGET_TYPE_MCBIST> ft ( tt );
+
+                FAPI_INVOKE_HWP( errl, mss::unmask::after_background_scrub, ft);
+                if ( nullptr != errl )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "mss::unmask::after_background_scrub(0x%08x) "
+                               "failed", get_huid(tt) );
+                    break;
+                }
+            }
+            if ( nullptr != errl ) break;
+        }
+
+    } while (0);
+
+    if ( nullptr != errl )
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Error returned from call to PRDF::startScrub" );
-
-        l_stepError.addErrorDetails( l_errl );
-
-        errlCommit( l_errl, HWPF_COMP_ID );
+        l_stepError.addErrorDetails( errl );
+        errlCommit( errl, HWPF_COMP_ID );
     }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scrub exit" );
