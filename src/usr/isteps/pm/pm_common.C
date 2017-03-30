@@ -810,6 +810,10 @@ namespace HBPM
     {
         errlHndl_t l_errl = nullptr;
 
+        TARGETING::Target * l_sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget( l_sys );
+        assert(l_sys != nullptr);
+
         TargetHandleList l_procChips;
         getAllChips(l_procChips, TYPE_PROC, true);
 
@@ -824,9 +828,10 @@ namespace HBPM
         for (const auto & l_procChip: l_procChips)
         {
             // This attr was set during istep15 HCODE build
-            l_homerPhysAddr =
-                    l_procChip->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
-            l_commonPhysAddr = l_homerPhysAddr + VMM_HOMER_REGION_SIZE;
+            l_homerPhysAddr = l_procChip->
+                    getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
+            l_commonPhysAddr = l_sys->
+                    getAttr<TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
 
             l_errl = loadPMComplex(l_procChip,
                                    l_homerPhysAddr,
