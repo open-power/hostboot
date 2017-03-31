@@ -289,7 +289,7 @@ errlHndl_t HdatMsVpd::addRHBAddrRange(uint32_t i_dbob_id, hdatMsAddr_t &i_start,
         <char*>(iv_RHBaddrRangeArray) + (iv_RHBaddrRngArrayHdr.hdatArrayCnt *
         sizeof(hdatMsVpdRhbAddrRange_t)));
 
-        l_addr->hdatRhbRngType        = 0x0;
+        l_addr->hdatRhbRngType        = HDAT::RHB_TYPE_INVALID;
         l_addr->hdatRhbRngId          = i_dbob_id;
         l_addr->hdatRhbAddrRngStrAddr = i_start;
         l_addr->hdatRhbAddrRngEndAddr = i_end;

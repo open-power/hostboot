@@ -67,10 +67,6 @@ const uint32_t HDAT_RHB_MAX_RANGE_ENTRIES = 15;
  */
 const uint16_t HDAT_MS_VPD_VERSION = 0x24;
 
-/** @brief Other constants
- */
-const uint16_t HDAT_MS_RHB_LABEL_LEN = 64; //Reserved HB length
-
 /** @enum hdatDataPtrs
  * Constants for the internal data pointers that are added to the base class
  */
@@ -176,19 +172,26 @@ struct hdatMsVpdUEAddrRange_t
     hdatMsAddr_t hdatUEAddr; // 0x0000 UE area starting address
 }  __attribute__ ((packed));
 
-/** @brief In Reserved Hostboot Memory iaddress range array element information-
+/** @brief In Reserved Hostboot Memory iaddress range array element information
  */
 struct hdatMsVpdRhbAddrRange_t
 {
-    uint32_t hdatRhbRngType:8;                        // 0x0000 Range type
-    uint32_t hdatRhbRngId:24;                         // 0x0001 Range ID
-    hdatMsAddr_t hdatRhbAddrRngStrAddr;               // 0x0004 Range starting
-                                                      //        address
-    hdatMsAddr_t hdatRhbAddrRngEndAddr;               // 0x000C Range ending
-                                                      //        address+1
-    uint32_t hdatRhbLabelSize;                        // 0x0014 Label size
-    uint8_t hdatRhbLabelString[HDAT_MS_RHB_LABEL_LEN];// 0x0019 Label string Ptr
+    uint32_t hdatRhbRngType:8;                    // 0x0000 Range type
+    uint32_t hdatRhbRngId:24;                     // 0x0001 Range ID
+    hdatMsAddr_t hdatRhbAddrRngStrAddr;           // 0x0004 Range starting
+                                                  //        address
+    hdatMsAddr_t hdatRhbAddrRngEndAddr;           // 0x000C Range ending
+                                                  //        address+1
+    uint32_t hdatRhbLabelSize;                    // 0x0014 Label size
+    uint8_t hdatRhbLabelString[64];               // 0x0018 Label string Ptr
+    uint8_t reserved[8];                          // 0x0058 Reserved
 }  __attribute__ ((packed));
+
+/** @brief Reserved HB length
+ */
+const uint16_t HDAT_MS_RHB_LABEL_LEN =
+   sizeof(hdatMsVpdRhbAddrRange_t::hdatRhbLabelString);
+
 
 
 struct hdatMsVpd_t
@@ -200,6 +203,7 @@ struct hdatMsVpd_t
     hdatMsVpdUEAddrRange_t  hdatUEAddrRange;
     hdatMsVpdRhbAddrRange_t hdatRhbAddrRange;
 }__attribute__ ((packed));
+
 /*----------------------------------------------------------------------------*/
 /* Constants                                                                  */
 /*----------------------------------------------------------------------------*/

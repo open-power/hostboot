@@ -54,10 +54,12 @@
 #include <util/align.H>
 #include <secureboot/trustedbootif.H>
 #include <secureboot/service.H>
+#include <hdat/hdat.H>
 #include <config.h>
 #include "../hdat/hdattpmdata.H"
 #include "../secureboot/trusted/tpmLogMgr.H"
 #include "../secureboot/trusted/trustedboot.H"
+#include <targeting/attrPlatOverride.H>
 
 
 namespace RUNTIME
@@ -81,6 +83,7 @@ TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
  */
 errlHndl_t populate_RtDataByNode(uint64_t iNodeId)
 {
+    TRACFCOMP( g_trac_runtime, ENTER_MRK"populate_RtDataByNode" );
     errlHndl_t  l_elog = nullptr;
     const char* l_stringLabels[] =
                      { "ibm,hbrt-vpd-image" ,
@@ -253,6 +256,7 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId)
 
     } while(0);
 
+    TRACFCOMP( g_trac_runtime, EXIT_MRK"populate_RtDataByNode" );
     return(l_elog);
 } // end populate_RtDataByNode
 
@@ -445,7 +449,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
             // Fill in the entry
             l_rngPtr->hdatRhbRngType =
-                    static_cast<uint8_t>(RANGE_TYPE_PRIMARY);
+                    static_cast<uint8_t>(HDAT::RHB_TYPE_PRIMARY);
             l_rngPtr->hdatRhbRngId = i_nodeId;
             l_rngPtr->hdatRhbAddrRngStrAddr =
                     l_hbAddr | VmmManager::FORCE_PHYS_ADDR;
@@ -458,6 +462,24 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                     l_labelSize );
 
             traceHbRsvMemRange(l_rngPtr);
+
+            //@fixme-RTC:169478-Remove this workaround once HDAT is ready
+            // Check to see if HDAT has the space we need allocated
+            //   by looking for a 3rd instance
+            uint64_t l_rsvMemDataAddr = 0;
+            uint64_t l_rsvMemDataSizeMax = 0;
+            l_elog = RUNTIME::get_host_data_section( RUNTIME::RESERVED_MEM,
+                                                     3,
+                                                     l_rsvMemDataAddr,
+                                                     l_rsvMemDataSizeMax );
+            if(l_elog != nullptr)
+            {
+                TRACFCOMP( g_trac_runtime, "populate_HbRsvMem> HDAT doesn't have RHB allocated, fall back to using old HBRT data" );
+                delete l_elog;
+                l_elog = nullptr;
+                break;
+            }
+            //end workaround
         }
 
         else if(TARGETING::is_sapphire_load())
@@ -502,7 +524,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
                 // Fill in the entry
                 l_rngPtr->hdatRhbRngType =
-                        static_cast<uint8_t>(RANGE_TYPE_HOMER_OCC);
+                        static_cast<uint8_t>(HDAT::RHB_TYPE_HOMER_OCC);
                 l_rngPtr->hdatRhbRngId =
                         l_procChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>();
                 l_rngPtr->hdatRhbAddrRngStrAddr =
@@ -545,7 +567,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
             // Fill in the entry
             l_rngPtr->hdatRhbRngType =
-                    static_cast<uint8_t>(RANGE_TYPE_HOMER_OCC);
+                    static_cast<uint8_t>(HDAT::RHB_TYPE_HOMER_OCC);
             l_rngPtr->hdatRhbRngId = i_nodeId;
             l_rngPtr->hdatRhbAddrRngStrAddr =
                     l_occCommonAddr | VmmManager::FORCE_PHYS_ADDR;
@@ -589,7 +611,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
         // Fill in the entry
         l_rngPtr->hdatRhbRngType =
-                static_cast<uint8_t>(RANGE_TYPE_HBRT);
+                static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
         l_rngPtr->hdatRhbRngId = i_nodeId;
         l_rngPtr->hdatRhbAddrRngStrAddr =
                 l_vpdAddr | VmmManager::FORCE_PHYS_ADDR;
@@ -652,7 +674,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
         // Fill in the entry
         l_rngPtr->hdatRhbRngType =
-                static_cast<uint8_t>(RANGE_TYPE_HBRT);
+                static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
         l_rngPtr->hdatRhbRngId = i_nodeId;
         l_rngPtr->hdatRhbAddrRngStrAddr =
                 l_attrDataAddr | VmmManager::FORCE_PHYS_ADDR;
@@ -729,7 +751,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
             // Fill in the entry
             l_rngPtr->hdatRhbRngType =
-                    static_cast<uint8_t>(RANGE_TYPE_HBRT);
+                    static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
             l_rngPtr->hdatRhbRngId = i_nodeId;
             l_rngPtr->hdatRhbAddrRngStrAddr =
                     l_hbrtImageAddr | VmmManager::FORCE_PHYS_ADDR;
@@ -1187,14 +1209,19 @@ errlHndl_t populate_hbRuntimeData( void )
         // needs to be setup by a hb routine that snoops for multiple nodes.
         if (0 == hb_images)  //Single-node
         {
-            // Single node system, call inline and pass in our node number
-            l_elog = populate_RtDataByNode(nodeid);
-            if(l_elog != nullptr)
+            //@fixme-RTC:169478-Remove once all code has switched
+            if( TARGETING::is_phyp_load() )
             {
-                TRACFCOMP( g_trac_runtime, "populate_RtDataByNode failed" );
+                // Single node system, call inline and pass in our node number
+                l_elog = populate_RtDataByNode(0);
+                if(l_elog != nullptr)
+                {
+                    TRACFCOMP( g_trac_runtime, "populate_RtDataByNode failed" );
+                    break;
+                }
             }
-            // RTC 169478 - enable for PHYP when supported in FSP
-            if(TARGETING::is_sapphire_load())
+
+            if(!TARGETING::is_no_load())
             {
                 l_elog = populate_HbRsvMem(nodeid);
                 if(l_elog != nullptr)

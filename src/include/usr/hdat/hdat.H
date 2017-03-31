@@ -201,6 +201,19 @@ struct hdatSpira_t
     hdat5Tuple_t         hdatDataArea[24];
 }__attribute__ ((packed));
 
+/** @enum List of possible Range Types for Reserved Hostboot Memory (RHB)
+ */
+enum hdatMsVpdRhbAddrRangeType
+{
+    RHB_TYPE_PRIMARY         = 0,
+    RHB_TYPE_HBRT            = 1,
+    RHB_TYPE_VERIFIED_LIDS   = 2,
+    RHB_TYPE_TPM_LOG         = 3,
+    RHB_TYPE_HOMER_OCC       = 4,
+
+    RHB_TYPE_INVALID         = 0xFF
+};
+
 /* vpd constants
  *      Defining vpd constants
  */
