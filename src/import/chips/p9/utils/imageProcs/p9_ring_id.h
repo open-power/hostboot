@@ -257,7 +257,6 @@ enum RingID
     eq_gptr = 173,
     eq_time = 174,
     eq_inex = 175,
-    eq_mode = 175,  // FIXME will be removed once Hcode image Build changes are in place
     ex_l3_fure = 176,
     ex_l3_gptr = 177,
     ex_l3_time = 178,
