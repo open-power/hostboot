@@ -231,7 +231,6 @@ errlHndl_t LoadChip(UtilStream & i_stream, Chip & o_chip)
             o_chip.cv_groupSize = new uint16_t[o_chip.cv_groupCount];
             o_chip.cv_groupFlags = new uint8_t[o_chip.cv_groupCount];
             o_chip.cv_groupPriorityBits = new Expr * [o_chip.cv_groupCount];
-            o_chip.cv_groupSecondaryBits = new Expr * [o_chip.cv_groupCount];
             o_chip.cv_groupCsRootCauseBits = new Expr * [o_chip.cv_groupCount];
             for (uint32_t i = 0; i < o_chip.cv_groupCount; i++)
             {
@@ -248,17 +247,6 @@ errlHndl_t LoadChip(UtilStream & i_stream, Chip & o_chip)
                 else
                 {
                     o_chip.cv_groupPriorityBits[i] = nullptr;
-                }
-
-                //check if secondary filter has been specified
-                if( PRDR_GROUP_FILTER_SECONDARY & o_chip.cv_groupFlags[i] )
-                {
-                    o_chip.cv_groupSecondaryBits[i] = new Expr();
-                    ReadExpr(i_stream, *o_chip.cv_groupSecondaryBits[i]);
-                }
-                else
-                {
-                    o_chip.cv_groupSecondaryBits[i] = nullptr;
                 }
 
                 //check if cs_root_cause filter has been specified

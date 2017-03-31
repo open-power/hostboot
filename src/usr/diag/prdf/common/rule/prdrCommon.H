@@ -86,8 +86,6 @@ namespace Prdr
         PRDR_GROUP_FILTER_SINGLE_BIT         = 0x1,
             /** Priority Bit Filter */
         PRDR_GROUP_FILTER_PRIORITY           = 0x2,
-            /** Secondary Bit Filter */
-        PRDR_GROUP_FILTER_SECONDARY          = 0x4,
             /** CS Root Cause Filter */
         PRDR_GROUP_FILTER_CS_ROOT_CAUSE      = 0x8,
             /** CS Root Cause Null Filter */

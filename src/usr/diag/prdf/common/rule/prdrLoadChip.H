@@ -201,7 +201,6 @@ namespace Prdr
             uint16_t *      cv_groupSize;
             uint8_t *       cv_groupFlags;
             Expr **         cv_groupPriorityBits;
-            Expr **         cv_groupSecondaryBits;
             Expr **         cv_groupCsRootCauseBits;
             Expr **         cv_groups;
             uint16_t        cv_actionCount;
@@ -212,7 +211,6 @@ namespace Prdr
                          cv_ruleCount(0), cv_rules(NULL),
                          cv_groupCount(0), cv_groupSize(NULL),
                          cv_groupFlags(NULL), cv_groupPriorityBits(NULL),
-                         cv_groupSecondaryBits(NULL),
                          cv_groupCsRootCauseBits(NULL), cv_groups(NULL),
                          cv_actionCount(0), cv_actionSize(NULL),
                          cv_actions(NULL)
@@ -228,9 +226,6 @@ namespace Prdr
                     if (NULL != cv_groupPriorityBits[i])
                         delete cv_groupPriorityBits[i];
 
-                    if ( NULL != cv_groupSecondaryBits[i] )
-                        delete cv_groupSecondaryBits[i];
-
                     if ( NULL != cv_groupCsRootCauseBits[i] )
                         delete cv_groupCsRootCauseBits[i];
 
@@ -241,8 +236,6 @@ namespace Prdr
                 if (NULL != cv_groupSize) delete[] cv_groupSize;
                 if (NULL != cv_groupFlags) delete[] cv_groupFlags;
                 if (NULL != cv_groupPriorityBits) delete[] cv_groupPriorityBits;
-                if ( NULL != cv_groupSecondaryBits )
-                    delete[] cv_groupSecondaryBits;
                 if ( NULL != cv_groupCsRootCauseBits )
                     delete[] cv_groupCsRootCauseBits;
                 for (int i = 0; i < cv_actionCount; i++)

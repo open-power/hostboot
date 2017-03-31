@@ -149,7 +149,6 @@ day         { return PRDR_TIME_DAY; }
 filter      { return PRDR_FILTER; }
 singlebit   { return PRDR_FILTER_SINGLE_BIT; }
 priority    { return PRDR_FILTER_PRIORITY; }
-secondarybits   { return PRDR_FILTER_SECONDARY; }
 cs_root_cause   { return PRDR_FILTER_CS_ROOT_CAUSE; }
 
 "\<\<"      { return PRDR_OP_LEFTSHIFT; }
