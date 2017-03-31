@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,7 +71,7 @@ fapi2::ReturnCode p9_xip_section_append(
     fapi2::current_err = fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA;
 
     rc = p9_xip_append(i_image, i_section_id, i_section, i_section_size,
-                       io_image_size, &unused_param);
+                       io_image_size, &unused_param, 0);
     FAPI_ASSERT((rc == 0),
                 fapi2::XIP_SECTION_APPEND_APPEND_RC().
                 set_APPEND_RC(rc).

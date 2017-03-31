@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/xip/p9_xip_image.c $                      */
+/* $Source: src/import/chips/p9/xip/p9_xip_image.C $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -48,7 +48,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "p9_xip_image.h"
-
 
 ////////////////////////////////////////////////////////////////////////////
 // Local Functions
@@ -391,9 +390,9 @@ xipTranslateSection(P9XipSection* o_dest, const P9XipSection* i_src)
     o_dest->iv_offset = htobe32(i_src->iv_offset);
     o_dest->iv_size = htobe32(i_src->iv_size);
     o_dest->iv_alignment = i_src->iv_alignment;
+    o_dest->iv_ddSupport = i_src->iv_ddSupport;
     o_dest->iv_reserved8[0] = 0;
     o_dest->iv_reserved8[1] = 0;
-    o_dest->iv_reserved8[2] = 0;
 #else
 
     if (o_dest != i_src)
@@ -2005,6 +2004,7 @@ p9_xip_image_size(void* io_image, uint32_t* o_size)
 }
 
 
+#ifdef __PPE__
 int
 p9_xip_get_section(const void* i_image,
                    const int i_sectionId,
@@ -2022,6 +2022,33 @@ p9_xip_get_section(const void* i_image,
 
     return rc;
 }
+
+#else
+
+int
+p9_xip_get_section(const void* i_image,
+                   const int i_sectionId,
+                   P9XipSection* o_hostSection,
+                   const uint8_t i_ddLevel)
+{
+    int rc;
+    P9XipSection* imageSection;
+
+    if (i_ddLevel !=  P9_XIP_UNDEFINED_DDLEVEL)
+    {
+        return P9_XIP_NO_DDLEVEL_SUPPORT;
+    }
+
+    rc = xipGetSectionPointer(i_image, i_sectionId, &imageSection);
+
+    if (!rc)
+    {
+        xipTranslateSection(o_hostSection, imageSection);
+    }
+
+    return rc;
+}
+#endif
 
 
 // If the 'big' TOC is not present, search the mini-TOCs that only index the
@@ -2638,7 +2665,8 @@ p9_xip_delete_section(void* io_image,
                                     (void*)(((uint8_t*)o_imageBuf) + section.iv_offset),
                                     (const uint32_t)section.iv_size,
                                     (const uint32_t)imageSize,
-                                    NULL );
+                                    NULL,
+                                    section.iv_ddSupport );
 
                 if (rc)
                 {
@@ -2749,7 +2777,8 @@ p9_xip_append(void* io_image,
               const void* i_data,
               const uint32_t i_size,
               const uint32_t i_allocation,
-              uint32_t* o_sectionOffset)
+              uint32_t* o_sectionOffset,
+              uint8_t i_ddSupport)
 {
     P9XipSection section, initialSection;
     int rc, final, restoreOnError;
@@ -2799,7 +2828,6 @@ p9_xip_append(void* io_image,
             }
 
             section.iv_offset = xipImageSize(io_image);
-
         }
         else
         {
@@ -2867,6 +2895,8 @@ p9_xip_append(void* io_image,
         }
 
         section.iv_size += i_size;
+
+        section.iv_ddSupport = i_ddSupport;
 
         if (xipPutSection(io_image, i_sectionId, &section) != 0)
         {
@@ -3156,3 +3186,26 @@ p9_xip_map_toc(void* io_image,
 
     return rc;
 }
+
+
+#ifndef __PPE__
+//
+// Inform caller if specified sectionId has DD support
+//
+int p9_xip_dd_section_support(const void* i_image,
+                              const int i_sectionId,
+                              bool& o_bDdSupport)
+{
+    int rc;
+    P9XipSection section;
+
+    rc = p9_xip_get_section(i_image, i_sectionId, &section);
+
+    if (!rc)
+    {
+        o_bDdSupport = (bool)section.iv_ddSupport;
+    }
+
+    return rc;
+}
+#endif
