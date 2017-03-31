@@ -116,13 +116,6 @@ errlHndl_t populate_RtDataByNode(uint64_t iNodeId);
 // HOMER*8/OCC_Common/VPD/ATTR/HBRT_Image/Res/Res/Res
 #define HB_RSV_MEM_NUM_PTRS  15
 
-// Range types for HB reserved memory
-#define RANGE_TYPE_PRIMARY          0
-#define RANGE_TYPE_HBRT             1
-#define RANGE_TYPE_VERIFIED_LIDS    2
-#define RANGE_TYPE_TPM_LOG          3
-#define RANGE_TYPE_HOMER_OCC        4
-
 //Note this means the Reserved Mem sub-section is the 6th
 //(0 based) of the MDT section (See HDAT spec)
 #define MDT_RESERVED_HB_MEM_SECTION 5

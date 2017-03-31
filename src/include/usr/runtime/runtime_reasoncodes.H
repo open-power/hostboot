@@ -88,6 +88,7 @@ namespace RUNTIME
         RC_PM_RT_UNKNOWN_MODE        = RUNTIME_COMP_ID | 0x1D,
         RC_PM_RT_INTERFACE_ERR       = RUNTIME_COMP_ID | 0x1E,
         RC_PM_RT_HCODE_UPDATE_ERR    = RUNTIME_COMP_ID | 0x1F,
+        RC_INVALID_RHB_INSTANCE      = RUNTIME_COMP_ID | 0x20,
     };
 
     enum UserDetailsTypes

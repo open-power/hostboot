@@ -709,8 +709,29 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             hdatMsReservedMemArrayHeader_t* reservedMemArrayHeader =
                 reinterpret_cast<hdatMsReservedMemArrayHeader_t *>(resvMemHdatAddr);
 
-            assert(i_instance < reservedMemArrayHeader->arrayEntryCount,
-                     "Instance entered exceeds max reserved mem entry count");
+            if( i_instance >= reservedMemArrayHeader->arrayEntryCount )
+            {
+                TRACFCOMP( g_trac_runtime, "Instance %d exceeds max reserved mem entry count %d", i_instance, reservedMemArrayHeader->arrayEntryCount );
+                /*@
+                 * @errortype
+                 * @moduleid     RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION
+                 * @reasoncode   RUNTIME::RC_INVALID_RHB_INSTANCE
+                 * @userdata1    Requested instance
+                 * @userdata2    Entry count
+                 * @devdesc      Invalid instance requested for Reserved
+                 *               Hostboot Memory section
+                 * @custdesc     Firmware error during boot
+                 */
+                errhdl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION,
+                                RUNTIME::RC_INVALID_RHB_INSTANCE,
+                                i_instance,
+                                reservedMemArrayHeader->arrayEntryCount,
+                                true /*Add HB Software Callout*/);
+                errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
+                break;
+            }
 
             o_dataAddr = reinterpret_cast<uint64_t>(
                 resvMemHdatAddr + reservedMemArrayHeader->offsetToArray + (i_instance * sizeof(hdatMsVpdRhbAddrRange_t)));
