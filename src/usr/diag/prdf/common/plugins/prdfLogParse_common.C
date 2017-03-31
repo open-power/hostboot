@@ -155,10 +155,6 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
     uint16_t l_chip    = i_chipId & 0xffff;
     uint16_t l_chiplet = l_chip;
 
-    static const uint8_t MAX_EX_PER_PROC    = 16;
-    static const uint8_t MAX_MCS_PER_PROC   =  8;
-    static const uint8_t MAX_MBA_PER_MEMBUF =  2;
-
     switch ( o_targetType )
     {
         case TYPE_PROC:
