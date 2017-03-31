@@ -238,6 +238,9 @@ typedef enum {
 /// gaurantee that the something will be able to complete any 8-byte load/store.
 #define P9_XIP_FINAL_ALIGNMENT 8
 
+/// Local undefined DD level value.
+#define P9_XIP_UNDEFINED_DDLEVEL (uint8_t)0xff
+
 
 ////////////////////////////////////////////////////////////////////////////
 // C Definitions
@@ -306,8 +309,12 @@ typedef struct
     /// address. Alignment specifications are required to be a power-of-2.
     uint8_t iv_alignment;
 
+    /// Indicate if section has DD-level support. This value must be set 
+    /// to either 1 for true or 0 for false (default).
+    uint8_t iv_ddSupport;
+
     /// Reserved structure alignment padding; Pad to 12 bytes
-    uint8_t iv_reserved8[3];
+    uint8_t iv_reserved8[2];
 
 } P9XipSection;
 
@@ -683,13 +690,21 @@ p9_xip_image_size(void* i_image, uint32_t* o_size);
 /// \param[out] o_hostSection Updated to contain the section table entry
 /// translated to host byte order.
 ///
+/// \param[in] i_ddLevel Specified the DD level of the sub-section within
+/// the XIP section to be extracted.
+///
 /// \retval 0 Success
 ///
 /// \retval non-0 See \ref p9_xip_image_errors
 int
 p9_xip_get_section(const void* i_image,
                    const int i_sectionId,
+#ifdef __PPE__
                    P9XipSection* o_hostSection);
+#else
+                   P9XipSection* o_hostSection,
+                   uint8_t i_ddLevel=P9_XIP_UNDEFINED_DDLEVEL);
+#endif
 
 
 /// Endian translation of a P9XipHeader object
@@ -1150,6 +1165,9 @@ p9_xip_duplicate_section(const void* i_image,
 /// byte of the appended data within the indicated section. This return value
 /// is invalid in the event of a non-0 return code.
 ///
+/// \param[in] i_ddSupport Specifies if the section contains ddLevel sub-
+/// sections (=1) or if it does not have ddLevel support (=0).
+///
 /// This API copies data from \a i_data to the end of the indicated \a
 /// i_section.  The section \a i_section must either be empty, or must be the
 /// final (highest address) section in the image.  If the section is initially
@@ -1200,7 +1218,8 @@ p9_xip_append(void* io_image,
               const void* i_data,
               const uint32_t i_size,
               const uint32_t i_allocation,
-              uint32_t* o_sectionOffset);
+              uint32_t* o_sectionOffset,
+              uint8_t i_ddSupport);
 
 
 /// Convert a P9-XIP section offset to a relocatable IMAGE address
@@ -1348,6 +1367,27 @@ p9_xip_get_toc(void* i_image,
                char** o_strings);
 
 
+/// Inform caller if specified sectionId has DD support
+///
+/// \param[in] i_image A pointer to a P9-XIP image in host memory.
+///
+/// \param[in] i_sectionId Identifies the section to be queried.  See \ref
+/// p9_xip_sections.
+///
+/// \param[out] o_bDdSupport Updated to contain true or false whether
+/// sectionId has DD support or not.
+///
+/// \retval 0 Success
+///
+/// \retval non-0 See \ref p9_xip_image_errors
+#ifndef __PPE__
+int
+p9_xip_dd_section_support(const void* i_image,
+                          const int i_sectionId,
+                          bool& o_bDdSupport);
+#endif
+
+
 /// \brief Decode a TOC entry from dump file
 ///
 ///\param[in] - i_image - seeprom image
@@ -1458,6 +1498,12 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
 /// .rings seciton for specific dd level is larger than the allowable size
 #define P9_XIP_SBE_DD_SIZE_ERR 19
 
+/// Specified section has no ddLevel support
+#define P9_XIP_NO_DDLEVEL_SUPPORT 20
+
+/// Specified ddLevel was not found in section
+#define P9_XIP_DDLEVEL_NOT_FOUND 21
+
 /// Applications can expand this macro to declare an array of string forms of
 /// the error codes if desired.
 #define P9_XIP_ERROR_STRINGS(var)    \
@@ -1482,6 +1528,8 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
         "P9_XIP_NULL_BUFFER",        \
         "P9_XIP_CANT_RESTORE_IMAGE", \
         "P9_XIP_SBE_DD_SIZE_ERR",    \
+        "P9_XIP_NO_DDLEVEL_SUPPORT", \
+        "P9_XIP_DDLEVEL_NOT_FOUND",  \
     }
 
 /// Applications can use this macro to safely index the array of error
