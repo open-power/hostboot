@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,6 +137,16 @@ enum MaintEccAttns
  */
 template<TARGETING::TYPE T>
 uint32_t checkEccFirs( ExtensibleChip * i_chip, uint32_t & o_eccAttns );
+
+/**
+ * @brief  Checks if the command currently configured in hardware is background
+ *         scrubbing.
+ * @param  i_chip      MCBIST, MCA, or MBA.
+ * @param  o_isBgScrub TRUE if background scrub is configured, FALSE otherwise.
+ * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t isBgScrubConfig( ExtensibleChip * i_chip, bool & o_isBgScrub );
 
 } //end namespace PRDF
 

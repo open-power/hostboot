@@ -28,6 +28,7 @@
 // Platform includes
 #include <prdfMemAddress.H>
 #include <prdfMemCaptureData.H>
+#include <prdfMemScrubUtils.H>
 #include <prdfP9McbistExtraSig.H>
 #include <prdfParserEnums.H>
 
@@ -100,6 +101,30 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
                           iv_chip->getHuid() );
                 break;
             }
+
+            #ifdef __HOSTBOOT_RUNTIME
+
+            // If the queue is still empty then it is possible that background
+            // scrubbing only stopped for FFDC. In that case, simply resume the
+            // command instead of starting a new one.
+            if ( iv_queue.empty() )
+            {
+                // It is possible to get here if we were running a TD procedure
+                // and the PRD service is reset. Therefore, we much check if
+                // background scrubbing was actually configured.
+                bool isBgScrub;
+                o_rc = isBgScrubConfig<T>( iv_chip, isBgScrub );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "isBgScrubConfig(0x%08x) failed",
+                              iv_chip->getHuid() );
+                    break;
+                }
+
+                if ( isBgScrub ) iv_resumeBgScrub = true;
+            }
+
+            #endif
 
             // If the command completed successfully with no error, the error
             // log will not have any useful information. Therefore, do not

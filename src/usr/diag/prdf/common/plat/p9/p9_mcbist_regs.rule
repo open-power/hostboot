@@ -203,6 +203,13 @@
     # P9 MCBIST command registers
     ###########################################################################
 
+    register MBSTR
+    {
+        name        "P9 MCBIST Memory Scrub/Read Error Threshold Register";
+        scomaddr    0x07012357;
+        capture     group default;
+    };
+
     register MCBAGRA
     {
         name        "P9 MCBIST Address Generator Configuration Register";

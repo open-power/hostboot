@@ -132,19 +132,35 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 
     uint32_t o_rc = SUCCESS;
 
-    TdRankListEntry nextRank = iv_rankList.getNext( iv_stoppedRank );
-
-    do
+    if ( iv_resumeBgScrub )
     {
-        PRDF_TRAC( PRDF_FUNC "Resuming background scrub. "
-                   "Calling startBgScrub<T>(0x%08x, m%ds%d)",
+        // Background scrubbing paused for FFDC collection only. Resume the
+        // current command.
+
+        iv_resumeBgScrub = false;
+
+        PRDF_TRAC( PRDF_FUNC "Calling resumeBgScrub<T>(0x%08x)",
+                   iv_chip->getHuid() );
+
+        o_rc = resumeBgScrub<T>( iv_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "resumeBgScrub<T>(0x%08x) failed",
+                      iv_chip->getHuid() );
+        }
+    }
+    else
+    {
+        // A TD procedure has completed. Restart background scrubbing on the
+        // next rank.
+
+        TdRankListEntry nextRank = iv_rankList.getNext( iv_stoppedRank );
+
+        PRDF_TRAC( PRDF_FUNC "Calling startBgScrub<T>(0x%08x, m%ds%d)",
                    nextRank.getChip()->getHuid(),
                    nextRank.getRank().getMaster(),
                    nextRank.getRank().getSlave() );
 
-        // Restart background scrubbing on the next rank.
-        // TODO: RTC 171875 Need mechanism to resume on next address (via HWP)
-        //       if no targeted diagnostics have been run.
         o_rc = startBgScrub<T>( nextRank.getChip(), nextRank.getRank() );
         if ( SUCCESS != o_rc )
         {
@@ -152,10 +168,8 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
                       nextRank.getChip()->getHuid(),
                       nextRank.getRank().getMaster(),
                       nextRank.getRank().getSlave() );
-            break;
         }
-
-    } while (0);
+    }
 
     return o_rc;
 

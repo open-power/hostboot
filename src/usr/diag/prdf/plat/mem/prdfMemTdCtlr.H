@@ -243,6 +243,11 @@ class MemTdCtlr
     /** True if the TD controller has been initialized. False otherwise. */
     bool iv_initialized = false;
 
+    /** True if background scrubbing should be resumed after pausing on error.
+     *  False if a TD procedure had been executed and background scrubbing needs
+     *  to be restarted with a new command. */
+    bool iv_resumeBgScrub = false;
+
     #else // IPL only
 
     /** Combined with iv_stoppedRank. Indicates if the non-TD command that
