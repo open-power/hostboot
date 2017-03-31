@@ -105,7 +105,7 @@ struct hdatSysParms_t
     uint16_t hdatSysSecuritySetting;   // System Security Settings
     uint16_t hdatTpmConfBits;          // TPM Configuration Bits
     uint16_t hdatTpmDrawer;            // TPMs/Drawer
-    uint16_t hdatReserved6;            // Reserved
+    uint16_t hdatHwKeyHashSize;        // Size of HW Keys' Hash
     uint8_t  hdatHwKeyHashValue[64];   // Hardware Keys Hash Value
     char     hdatSystemFamily[64];     // System Family/Vendor Name
     char     hdatSystemType[64];       // System Type/Vendor Type

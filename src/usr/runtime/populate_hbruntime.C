@@ -833,7 +833,12 @@ errlHndl_t populate_hbSecurebootData ( void )
     l_sysParmsPtr->hdatTpmDrawer = l_maxTpms;
     TRACFCOMP(g_trac_runtime,"Max TPMs = 0x%04X", l_maxTpms);
 
-    // populate hw key hash in hdat
+    // Populate HW Keys' Hash size + value in HDAT
+    l_sysParmsPtr->hdatHwKeyHashSize =
+        sizeof(l_sysParmsPtr->hdatHwKeyHashValue);
+    TRACFCOMP(g_trac_runtime,"HW Keys' Hash Size = %d",
+        l_sysParmsPtr->hdatHwKeyHashSize);
+
     #ifdef CONFIG_SECUREBOOT
     auto hash = l_sysParmsPtr->hdatHwKeyHashValue;
     SECUREBOOT::getHwKeyHash(hash);
