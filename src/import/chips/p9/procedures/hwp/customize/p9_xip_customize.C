@@ -1833,7 +1833,8 @@ ReturnCode p9_xip_customize (
                                   io_ringSectionBuf,
                                   (const uint32_t)io_ringSectionBufSize,
                                   (const uint32_t)l_maxImageSize,
-                                  &l_sectionOffset );
+                                  &l_sectionOffset,
+                                  0 );
 
             FAPI_ASSERT( l_rc == 0,
                          fapi2::XIPC_XIP_API_MISC_ERROR().
