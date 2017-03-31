@@ -59,8 +59,12 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
         //phase 0
         if ( TD_PHASE_0 == iv_phase )
         {
-            //start VCM phase 1
+            // Start VCM phase 1
+            io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
+                                                  PRDFSIG_StartVcmPhase1 );
+
             PRDF_TRAC( PRDF_FUNC "Starting VCM Phase 1" );
+
             o_rc = startVcmPhase1<TYPE_MCA>( iv_chip, iv_rank );
             if ( SUCCESS != o_rc )
             {
@@ -68,6 +72,7 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                           iv_chip->getHuid(), iv_rank.getMaster() );
                 break;
             }
+
             iv_phase = TD_PHASE_1;
         }
         //phase 1
@@ -112,15 +117,20 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
             }
             else
             {
-                //Start VCM phase 2
+                // Start VCM phase 2
+                io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
+                                                      PRDFSIG_StartVcmPhase2 );
+
                 PRDF_TRAC( PRDF_FUNC "Starting VCM Phase 2" );
+
                 o_rc = startVcmPhase2<TYPE_MCA>( iv_chip, iv_rank );
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC "Call to 'startVcmPhase2 failed on "
-                              "chip: 0x%08x", iv_chip->getHuid() );
+                    PRDF_ERR( PRDF_FUNC "startVcmPhase2(0x%08x, %d) failed",
+                              iv_chip->getHuid(), iv_rank.getMaster() );
                     break;
                 }
+
                 iv_phase = TD_PHASE_2;
             }
         }
