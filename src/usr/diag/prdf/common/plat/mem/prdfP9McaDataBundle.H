@@ -120,8 +120,8 @@ class McaDataBundle : public DataBundle
     /** Threshold table for RCD parity errors. */
     TimeBasedThreshold iv_rcdParityTh = TimeBasedThreshold( getRcdParityTh() );
 
-    /** Threshold table for IUEs. */
-    TimeBasedThreshold iv_iueTh = TimeBasedThreshold( getIueTh() );
+    /** Threshold table for IUEs. Threshold per DIMM */
+    std::map<uint8_t, TimeBasedThreshold> iv_iueTh;
 
     #endif
 };
