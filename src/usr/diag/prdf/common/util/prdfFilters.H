@@ -364,47 +364,6 @@ class FilterLink: public FilterClass
 inline FilterLink::FilterLink(FilterClass & f1, FilterClass & f2)
 : xFilter1(f1), xFilter2(f2) {}
 
-class SecondaryBitsFilter: public FilterClass
-{
-
-  public:
-
-    /**
-     * @brief   constructor
-     * @param   i_bitList  list of bits identified as secondary in a FIR.
-     * @note    This filter maintains a list of bits which it
-     *          considers it as secondary. PRDF analysis is broken in to two
-     *          steps. The first pass is known as primary pass and second pass
-     *          is known as secondary pass. In first pass, secondary filter
-     *          gets activiated but in secondary pass it remains inactive.
-     *          In primary pass, filter ignores all the secondary bits for
-     *          analysis. If primary bits are on, due to action of
-     *          secondary filter, primary pass ends up with return code 0xdd02.
-     *          Inorder to make sure there are really no bits on, secondary
-     *          pass is launched. In this pass, secondary filter doesn't
-     *          operate so analysis continues as usual. Intention of this
-     *          pass is to identify and analyze secondary error bits which were
-     *          ignored during primary pass due to action of this filter.
-     */
-    SecondaryBitsFilter( const std::vector<uint8_t> & i_bitList )
-    {
-        iv_secBitList = i_bitList;
-    }
-
-    /**
-     * @brief  clears all the bits identified as secondary in the given BitKey.
-     * @param  i_bitList  bitkey on which seondary filter need to act.
-     * @param  io_sdc      reference to STEP_CODE_DATA struct.
-     * @return true if bit key is modified false otherwise.
-     */
-    virtual bool Apply( BitKey & io_bitList, STEP_CODE_DATA_STRUCT & io_sdc );
-
-  private: // data
-
-    std::vector<uint8_t> iv_secBitList; // list of bit pos marked as secondary
-
-};
-
 class CsRootCauseFilter: public FilterClass
 {
     public:

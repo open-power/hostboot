@@ -46,7 +46,6 @@ class Group
     public:
         std::list<Expr *> cv_rules;
         Expr * cv_priorityList;
-        Expr * cv_secondaryList;
         Expr * cv_csRootCauseList;
 
         char cv_op;
@@ -55,14 +54,12 @@ class Group
 
         Group() :
             cv_priorityList(NULL),
-            cv_secondaryList(NULL),
             cv_csRootCauseList(NULL),
             cv_op(Prdr::GROUP),
             cv_flags(0),
             cv_doxcomment() {};
         Group(char o) :
             cv_priorityList(NULL),
-            cv_secondaryList(NULL),
             cv_csRootCauseList(NULL),
             cv_op(o),
             cv_flags(0),
@@ -81,12 +78,6 @@ class Group
             // Set Priority list.
             if (NULL != i_l->cv_priorityList)
                 i_r->cv_priorityList = i_l->cv_priorityList;
-
-            // Set Secondary bit list.
-            if ( NULL != i_l->cv_secondaryList )
-            {
-                i_r->cv_secondaryList = i_l->cv_secondaryList;
-            }
 
             // Set CS root cause bit list
             if ( NULL != i_l->cv_csRootCauseList )
@@ -204,10 +195,6 @@ class Group
                     {
                         cv_priorityList->output( i_file );
                     }
-                    if ( Prdr::PRDR_GROUP_FILTER_SECONDARY & cv_flags )
-                    {
-                        cv_secondaryList->output( i_file );
-                    }
                     if ( Prdr::PRDR_GROUP_FILTER_CS_ROOT_CAUSE & cv_flags)
                     {
                         if ( NULL != cv_csRootCauseList )
@@ -263,21 +250,6 @@ class Group_Filter_Priority : public Group_Filter
 
     private:
         Expr * iv_list;
-};
-
-class Group_Filter_Secondary : public Group_Filter
-{
-    public:
-    Group_Filter_Secondary( Expr * i_list ) : iv_secList( i_list ) {};
-
-    void AddFilter( Group * i_group )
-    {
-        i_group->cv_flags |= Prdr::PRDR_GROUP_FILTER_SECONDARY;
-        i_group->cv_secondaryList = iv_secList;
-    };
-
-    private:
-    Expr * iv_secList;
 };
 
 class Group_Filter_CS_Root_Cause : public Group_Filter

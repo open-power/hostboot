@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -270,7 +270,7 @@ int32_t ResolutionMap::LookUp( ResolutionList & o_list,
             // function, one bit set or  multiple bit set make little
             // difference. In both cases, it has to do same set of actions.
             // We need to treat case 0 separately. It is because we want to
-            // know the outcome of action of secondary filter. If secondary
+            // know the outcome of action of csRootCause filter. If csRootCause
             // filter yields 0xdd02, we know we need to launch one more pass
             // with filter turned off.
         case 0:

@@ -160,7 +160,6 @@ using namespace PRDR_COMPILER;
 
 %token PRDR_FILTER_SINGLE_BIT
 %token PRDR_FILTER_PRIORITY
-%token PRDR_FILTER_SECONDARY
 %token PRDR_FILTER_CS_ROOT_CAUSE
 
     /* Terminal tokens for Doxygen-style comments */
@@ -598,13 +597,6 @@ grpfilt_item: PRDR_FILTER_PRIORITY '(' bitandlist ')'
     {
         $$ = new std::list<Group_Filter *>;
         $$->push_back(new Group_Filter_Priority($3));
-    }
-;
-
-grpfilt_item: PRDR_FILTER_SECONDARY '(' bitandlist ')'
-    {
-        $$ = new std::list<Group_Filter *>;
-        $$->push_back(new Group_Filter_Secondary($3));
     }
 ;
 

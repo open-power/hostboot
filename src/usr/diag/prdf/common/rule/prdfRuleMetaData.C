@@ -1047,29 +1047,6 @@ void RuleMetaData::createGroup(Group * i_group,
 
     // Do flags. ---
 
-    // For idea of secondary bit filter to work, it must be the first filter
-    // applicable on register data. To manage this, first of all, we must push
-    // secondary filter to group.
-    // We are supporting the concept of cascaded filter where one filter works
-    // after other in harmony. When secondary filter acts, it shall make
-    // all the secondary bits( which are ON ) as "DON'T CARE" during  primary
-    // pass. So, the intent is to filter out secondary bits or in other words
-    // analyze only primary bits in primary pass.
-
-    if ( i_data.cv_loadChip->cv_groupFlags[i_groupId] &
-            Prdr::PRDR_GROUP_FILTER_SECONDARY )
-    {
-        // Add secondary filter to find out if any secondary bit
-        // is on.
-        std::vector<uint8_t> l_bits;
-        CreateBitString::execute(l_bits,
-                i_data.cv_loadChip->cv_groupSecondaryBits[i_groupId]);
-
-        FilterClass * l_filter = new SecondaryBitsFilter( l_bits );
-        i_group->AddFilter( l_filter, true );
-
-    }
-
     std::vector<uint8_t> l_bits;
     CreateBitString::execute(l_bits,
             i_data.cv_loadChip->cv_groupCsRootCauseBits[i_groupId]);

@@ -184,48 +184,6 @@ bool FilterLink::Undo( BitKey & bit_list )
 
 //------------------------------------------------------------------------------
 
-bool SecondaryBitsFilter::Apply( BitKey & io_bitList,
-                                 STEP_CODE_DATA_STRUCT & io_sdc )
-{
-    #define PRDF_FUNC  "[SecondaryBitsFilter::Apply] "
-    bool l_modified = false;
-    do
-    {
-        // This filter should only be applied on the primary passs.
-        if ( !io_sdc.service_data->isPrimaryPass() ) break;
-
-        // This filter should only be applied if the primary attention type is
-        // CHECK_STOP.
-        if ( CHECK_STOP != io_sdc.service_data->getPrimaryAttnType() ) break;
-
-        // This filter should only be applied if the the secondary attention
-        // type is RECOVERABLE.
-        if ( RECOVERABLE != io_sdc.service_data->getSecondaryAttnType()) break;
-
-        //if there is no secondary bit position to flip or if no bit is set in
-        //bit key then let us skip this apply.
-        if( ( 0 == iv_secBitList.size() ) || ( 0 == io_bitList.size()) ) break;
-
-        BitKey l_key ( iv_secBitList );
-        io_bitList.removeBits( l_key );
-        l_modified = true;
-
-        if( 0 == io_bitList.size() )
-        {
-            // So, we have no primary bits on. We have one or more secondary bit
-            // on.
-            io_sdc.service_data->setSecondaryErrFlag();
-        }
-
-    }while(0);
-
-    return l_modified;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
 bool CsRootCauseFilter::Apply( BitKey & io_bitList,
                                STEP_CODE_DATA_STRUCT & io_sdc )
 {
