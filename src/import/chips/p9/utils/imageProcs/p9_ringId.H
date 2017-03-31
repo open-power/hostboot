@@ -738,7 +738,6 @@ enum RingOffset
     eq_gptr         = 1,
     eq_time         = 2,
     eq_inex         = 3,
-    eq_mode         = 3,
     ex_l3_fure      = 4,
     ex_l3_gptr      = 5,
     ex_l3_time      = 6,
