@@ -62,17 +62,22 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
         //phase 0
         if ( TD_PHASE_0 == iv_phase )
         {
-            //start TPS phase 1
+            // Start TPS phase 1
+            io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
+                                                  PRDFSIG_StartTpsPhase1 );
+
             PRDF_TRAC( PRDF_FUNC "Starting TPS Phase 1" );
+
             o_rc = startTpsPhase1<TYPE_MCA>( iv_chip, iv_rank );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "Call to 'startTpsPhase1 failed on chip: "
-                          "0x%08x", iv_chip->getHuid() );
+                PRDF_ERR( PRDF_FUNC "startTpsPhase1(0x%08x,m%ds%d) failed",
+                          iv_chip->getHuid(), iv_rank.getMaster(),
+                          iv_rank.getSlave() );
                 break;
             }
-            iv_phase = TD_PHASE_1;
 
+            iv_phase = TD_PHASE_1;
         }
         //phase 1/2
         else
@@ -159,15 +164,21 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                 //phase 1
                 if ( TD_PHASE_1 == iv_phase )
                 {
-                    //Start TPS phase 2
+                    // Start TPS phase 2
+                    io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
+                                                      PRDFSIG_StartTpsPhase2 );
+
                     PRDF_TRAC( PRDF_FUNC "Starting TPS Phase 2" );
+
                     o_rc = startTpsPhase2<TYPE_MCA>( iv_chip, iv_rank );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "Call to 'startTpsPhase2 failed on "
-                                "chip: 0x%08x", iv_chip->getHuid() );
+                        PRDF_ERR( PRDF_FUNC "startTpsPhase2(0x%08x,m%ds%d) "
+                                  "failed", iv_chip->getHuid(),
+                                  iv_rank.getMaster(), iv_rank.getSlave() );
                         break;
                     }
+
                     iv_phase = TD_PHASE_2;
                 }
                 //phase 2

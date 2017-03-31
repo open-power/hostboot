@@ -28,6 +28,14 @@
 
 #include <prdrSignatures.H>
 
+PRDR_ERROR_SIGNATURE(StartVcmPhase1, 0xffff0000, "", "VCM: Starting phase 1");
+PRDR_ERROR_SIGNATURE(StartVcmPhase2, 0xffff0001, "", "VCM: Starting phase 2");
+PRDR_ERROR_SIGNATURE(StartDsdPhase1, 0xffff0002, "", "DSD: Starting phase 1");
+PRDR_ERROR_SIGNATURE(StartDsdPhase2, 0xffff0003, "", "DSD: Starting phase 2");
+PRDR_ERROR_SIGNATURE(StartTpsPhase1, 0xffff0004, "", "TPS: Starting phase 1");
+PRDR_ERROR_SIGNATURE(StartTpsPhase2, 0xffff0005, "", "TPS: Starting phase 2");
+PRDR_ERROR_SIGNATURE(EndTpsPhase2,   0xffff0006, "", "TPS: Phase 2 completed");
+
 PRDR_ERROR_SIGNATURE(MaintUE,        0xffff0010, "", "Maintenance UE");
 PRDR_ERROR_SIGNATURE(MaintIUE,       0xffff0011, "", "Maintenance IUE");
 PRDR_ERROR_SIGNATURE(MaintMPE,       0xffff0012, "", "Maintenance MPE");
