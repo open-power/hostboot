@@ -776,7 +776,7 @@ void HdatIplParms::hdatGetSystemParamters()
         HDAT_ERR("Error in getting SYSTEM_BRAND_NAME");
     }
 
-    // The next 4 fields are set to their final values in a common handler
+    // The next 5 fields are set to their final values in a common handler
     // in istep 21.1, to avoid trust issues when HDAT is initially populated
     // by a service processor
     this->iv_hdatIPLParams->iv_sysParms.hdatSysSecuritySetting = 0;
@@ -784,8 +784,9 @@ void HdatIplParms::hdatGetSystemParamters()
     this->iv_hdatIPLParams->iv_sysParms.hdatTpmConfBits = 0;
 
     this->iv_hdatIPLParams->iv_sysParms.hdatTpmDrawer = 0;
-
-    memset(this->iv_hdatIPLParams->iv_sysParms.hdatHwKeyHashValue, 0x00, 64);
+    this->iv_hdatIPLParams->iv_sysParms.hdatHwKeyHashSize = 0;
+    memset(this->iv_hdatIPLParams->iv_sysParms.hdatHwKeyHashValue, 0x00,
+        sizeof(this->iv_hdatIPLParams->iv_sysParms.hdatHwKeyHashValue));
     memset(this->iv_hdatIPLParams->iv_sysParms.hdatSystemFamily, 0x00, 64);
 
     TARGETING::ATTR_SYSTEM_FAMILY_type l_systemFamily = {0};
