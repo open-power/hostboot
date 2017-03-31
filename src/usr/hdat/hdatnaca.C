@@ -232,7 +232,7 @@ void *  call_hdat_steps( void *io_pArgs )
     }while(0);
 
     HDAT_EXIT();
-    return NULL;
+    return l_errlHndl;
 }
 
 } //namespace HDAT

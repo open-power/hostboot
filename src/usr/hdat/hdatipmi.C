@@ -94,7 +94,7 @@ HdatIpmi::HdatIpmi(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr):
 
         for(; l_targFilter; ++l_targFilter)
         {
-#ifdef CONFIG_BMC_IPMI
+#if 0
             // Create a new array entry and push it to FRU/LED sensor vector
             hdatIPMIFRUSensorMapEntry_t l_fruEntry;
             uint8_t l_sensorType = 0;
