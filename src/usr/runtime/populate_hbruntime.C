@@ -517,6 +517,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             }
 
 
+#ifdef CONFIG_START_OCC_DURING_BOOT
             // OCC Common entry
             uint64_t l_occCommonAddr = l_topMemAddr
                     - VMM_ALL_HOMER_OCC_MEMORY_SIZE;
@@ -546,6 +547,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                     l_labelSize );
 
             traceHbRsvMemRange(l_rngPtr);
+#endif
         }
 
 
