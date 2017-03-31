@@ -76,12 +76,13 @@ uint32_t iuePortFail(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
 
     uint32_t o_rc = SUCCESS;
 
-    do
-    {
-        McaDataBundle * db = getMcaDataBundle( i_chip );
+    McaDataBundle * db = getMcaDataBundle( i_chip );
 
+    // Loop through all our thresholds
+    for ( auto & th : db->iv_iueTh )
+    {
         // If threshold reached
-        if ( db->iv_iueTh.thReached(io_sc) )
+        if ( th.second.thReached(io_sc) )
         {
             // trigger a port fail
             // set FARB0[59] - MBA_FARB0Q_CFG_INJECT_PARITY_ERR_CONSTANT and
@@ -92,8 +93,8 @@ uint32_t iuePortFail(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "Read() FARB0 failed: i_chip=0x%08x",
-                            i_chip->getHuid() );
-                break;
+                        i_chip->getHuid() );
+                continue;
             }
 
             farb0->SetBit(59);
@@ -104,14 +105,18 @@ uint32_t iuePortFail(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
             {
                 PRDF_ERR( PRDF_FUNC "Write() FARB0 failed: i_chip=0x%08x",
                         i_chip->getHuid() );
-                break;
+                continue;
             }
 
-            // reset threshold to prevent issuing multiple port failures on the
-            // same port
-            db->iv_iueTh.reset();
+            // reset thresholds to prevent issuing multiple port failures on
+            // the same port
+            for ( auto & resetTh : db->iv_iueTh )
+            {
+                resetTh.second.reset();
+            }
+            break;
         }
-    }while(0);
+    }
 
     return o_rc;
 
@@ -665,8 +670,16 @@ uint32_t __analyzeIue( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
         MemoryMru memmru(trgt, rank, MemoryMruData::CALLOUT_RANK);
         io_sc.service_data->SetCallout( memmru );
 
+        uint8_t ds = rank.getDimmSlct();
+
+        // Initialize threshold if it doesn't exist yet
+        if ( 0 == db->iv_iueTh.count(ds) )
+        {
+            db->iv_iueTh[ds] = TimeBasedThreshold( getIueTh() );
+        }
+
         // increment the threshold - check if at threshold
-        if ( db->iv_iueTh.inc(io_sc) )
+        if ( db->iv_iueTh[ds].inc(io_sc) )
         {
             // Make the error log predictive
             io_sc.service_data->setServiceCall();
