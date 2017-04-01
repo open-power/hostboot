@@ -96,8 +96,7 @@ uint32_t hdatTpmDataCalcMaxSize()
 
     // account for User physical interaction mechanism info struct
     // and Host I2C device information pointers
-    l_size += (sizeof(hdatPhysInterMechInfo_t) + sizeof(hdatI2cDevInfoPtrs_t) *
-        NUM_I2C_PHYS_PRESENCE_DEVICES);
+    l_size += sizeof(hdatPhysInterMechInfo_t);
 
     // Align size value to match actual allocated size, because we also want to
     // zero the padded part, and thus simplify multinode support going forward.
