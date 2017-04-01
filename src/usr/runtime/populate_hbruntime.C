@@ -1048,9 +1048,9 @@ errlHndl_t populate_TpmInfoByNode()
     auto l_physInterStart = l_currOffset;
 
     // set up the physical interaction mechanism info header
-    l_physInter->hdatOffsetI2cDevInfoPtrs = sizeof(*l_physInter);
-    l_physInter->hdatNumEntries = 0;
-    l_physInter->hdatSizeOfI2cDevInfoPtrs = sizeof(HDAT::hdatI2cDevInfoPtrs_t);
+    // @TODO RTC 170638: Calculate the real IDs
+    l_physInter->i2cLinkIdWindowOpen = HDAT::I2C_LINK_ID::NOT_APPLICABLE;
+    l_physInter->i2cLinkIdPhysicalPresence = HDAT::I2C_LINK_ID::NOT_APPLICABLE;
 
     // advance the current offset to account for the physical interaction
     // mechanism info struct

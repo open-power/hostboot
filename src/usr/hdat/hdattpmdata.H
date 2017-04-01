@@ -113,24 +113,32 @@ struct hdatSbTpmInstInfo_t
     uint32_t hdatTpmDrtmEventLogEntrySize;
 } __attribute__ ((packed));
 
+
+/**
+ *  @brief Type used to specify I2C link IDs
+ */
+typedef uint32_t i2cLinkId_t;
+
+/**
+ *  @brief Special/sentinel i2cLinkId_t values
+ */
+enum I2C_LINK_ID : i2cLinkId_t
+{
+    NOT_APPLICABLE = 0xFFFFFFFF,
+};
+
 /**
  * @brief Structure definition for HDAT physical interaction mechanism info
  */
 struct hdatPhysInterMechInfo_t
 {
-    uint32_t hdatOffsetI2cDevInfoPtrs;
-    uint32_t hdatNumEntries;
-    uint32_t hdatSizeOfI2cDevInfoPtrs;
-} __attribute__ ((packed));
+    // ID of I2C device in the PCRD that supports the "window open" function
+    i2cLinkId_t i2cLinkIdWindowOpen;
 
-/**
- * @brief  Structure definition for HDAT Host I2C Device Info pointers
- */
-struct hdatI2cDevInfoPtrs_t
-{
-    uint32_t hdatChipId;
-    uint32_t hdatDbobId; // Drawer/Book/Octant/Blade ID
-    uint32_t hdatHostI2cLinkId;
+    // ID of I2C device in the PCRD that supports the "physical presence"
+    // function
+    i2cLinkId_t i2cLinkIdPhysicalPresence;
+
 } __attribute__ ((packed));
 
 extern const char g_hdatTpmDataEyeCatch[];
