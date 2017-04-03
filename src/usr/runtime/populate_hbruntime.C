@@ -615,6 +615,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         l_rngPtr->hdatRhbRngId = i_nodeId;
         l_rngPtr->hdatRhbAddrRngStrAddr =
                 l_vpdAddr | VmmManager::FORCE_PHYS_ADDR;
+        // Note: VMM_RT_VPD_SIZE is already 64KB aligned
         l_rngPtr->hdatRhbAddrRngEndAddr =
                 (l_vpdAddr | VmmManager::FORCE_PHYS_ADDR)
                     + VMM_RT_VPD_SIZE - 1 ;
@@ -678,9 +679,11 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         l_rngPtr->hdatRhbRngId = i_nodeId;
         l_rngPtr->hdatRhbAddrRngStrAddr =
                 l_attrDataAddr | VmmManager::FORCE_PHYS_ADDR;
+        // Minimum 64K size for Opal
+        size_t l_attrSizeAligned = ALIGN_X( l_attrSize, 64*KILOBYTE );
         l_rngPtr->hdatRhbAddrRngEndAddr =
                 (l_attrDataAddr | VmmManager::FORCE_PHYS_ADDR)
-                    + l_attrSize - 1 ;
+                    + l_attrSizeAligned - 1 ;
         l_rngPtr->hdatRhbLabelSize = l_labelSize;
         memcpy( l_rngPtr->hdatRhbLabelString,
                 l_label,
@@ -755,9 +758,11 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             l_rngPtr->hdatRhbRngId = i_nodeId;
             l_rngPtr->hdatRhbAddrRngStrAddr =
                     l_hbrtImageAddr | VmmManager::FORCE_PHYS_ADDR;
+            // Minimum 64K size for Opal
+            size_t l_attrSizeAligned = ALIGN_X( l_imageSize, 64*KILOBYTE );
             l_rngPtr->hdatRhbAddrRngEndAddr =
                     (l_hbrtImageAddr | VmmManager::FORCE_PHYS_ADDR)
-                        + l_imageSize - 1 ;
+                        + l_attrSizeAligned - 1 ;
             l_rngPtr->hdatRhbLabelSize = l_labelSize;
             memcpy( l_rngPtr->hdatRhbLabelString,
                     l_label,
