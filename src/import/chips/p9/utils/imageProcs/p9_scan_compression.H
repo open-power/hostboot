@@ -61,7 +61,7 @@
 /// 3     - An 8-bit type field distinguishing different scan data types
 /// (0 for non-CMSK, 1 for CMSK).
 ///
-/// 4:5   - The 16-bit size of the uncompressed scan data with
+/// 4:5   - The 16-bit size of the compressed scan data with
 /// this header in \e bytes. This is not the exact length of actual scan data
 /// in bits, but the number of bytes used by the RS4 encoding to store those
 /// compressed scan bits.
@@ -244,6 +244,38 @@ rs4_decompress(uint8_t** o_data_str,
 int
 rs4_redundant(const CompressedScanData* i_data, int* o_redundant);
 
+
+/// Check for CMSK ring in RS4
+///
+/// \param[in] i_rs4 A pointer to the RS4 CompressedScanData [header + data]
+///
+/// \returns 1 if CMSK ring found, 0 otherwise
+int rs4_is_cmsk(CompressedScanData* i_rs4);
+
+
+/// Embed CMSK ring into an RS4 ring
+///
+/// \param[inout] io_rs4 A pointer to the CompressedScanData [header + data]
+///
+/// \param[in] i_rs4_cmsk A pointer to the cmsk CompressedScanData header + data to be embedded
+///
+/// \returns See \ref scan_compression_codes
+int rs4_embed_cmsk(CompressedScanData** io_rs4,
+                   CompressedScanData* i_rs4_cmsk);
+
+
+/// Extract Stump & CMSK rings from an RS4 ring
+///
+/// \param[in] i_rs4 A pointer to the CompressedScanData [header + data]
+///
+/// \param[inout] i_rs4_stump A pointer to the Stump CompressedScanData [header + data]
+///
+/// \param[inout] i_rs4_cmsk A pointer to the Cmsk CompressedScanData [header + data]
+///
+/// \returns See \ref scan_compression_codes
+int rs4_extract_cmsk(CompressedScanData* i_rs4,
+                     CompressedScanData** io_rs4_stump,
+                     CompressedScanData** io_rs4_cmsk);
 
 #endif  // __ASSEMBLER__
 
