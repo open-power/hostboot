@@ -40,6 +40,8 @@ enum RingClass
 {
     EKB_RING,
     EKB_FSM_RING,
+    EKB_STUMPED_RING,
+    EKB_CMSK_RING,
     VPD_RING,
     NUM_RING_CLASSES
 };
@@ -837,6 +839,7 @@ enum RingOffset
     ec_time = 2,
     ec_mode = 3,
     ec_abst = 4,
+    ec_cmsk = 5,
     // Instance Rings
     ec_repr = (0 | INSTANCE_RING_MARK)
 };
@@ -844,7 +847,7 @@ enum RingOffset
 static const CHIPLET_DATA g_ecData =
 {
     32, // Core Chiplet ID range is 32-55. The base ID is 32.
-    5,  // 5 common rings for Core chiplet
+    6,  // 6 common rings for Core chiplet
     1,  // 1 instance specific ring for each Core chiplet
     1
 };
@@ -1124,7 +1127,8 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EQ::eq_inex_bucket_1               , "eq_inex_bucket_1"            , EQ_TYPE    }, // 248
     { EQ::eq_inex_bucket_2               , "eq_inex_bucket_2"            , EQ_TYPE    }, // 249
     { EQ::eq_inex_bucket_3               , "eq_inex_bucket_3"            , EQ_TYPE    }, // 250
-    { EQ::eq_inex_bucket_4               , "eq_inex_bucket_4"            , EQ_TYPE    }  // 251
+    { EQ::eq_inex_bucket_4               , "eq_inex_bucket_4"            , EQ_TYPE    }, // 251
+    { EC::ec_cmsk                        , "ec_cmsk"                     , EC_TYPE    }, // 252
 };
 #endif
 #ifdef __PPE__
@@ -1381,7 +1385,8 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EQ::eq_inex_bucket_1               , EQ_TYPE    }, // 248
     { EQ::eq_inex_bucket_2               , EQ_TYPE    }, // 249
     { EQ::eq_inex_bucket_3               , EQ_TYPE    }, // 250
-    { EQ::eq_inex_bucket_4               , EQ_TYPE    }  // 251
+    { EQ::eq_inex_bucket_4               , EQ_TYPE    }, // 251
+    { EC::ec_cmsk                        , EC_TYPE    }, // 252
 };
 #endif
 
