@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,9 +27,9 @@
 ///
 ///------------------------------------------------------------------------------
 // *HWP HWP Owner   : Greg Still <stillgsg@us.ibm.com>
-// *HWP FW Owner    : Bilicon Patil <bilpatil@in.ibm.com>
+// *HWP FW Owner    : Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team        : PM
-// *HWP Level       : 2
+// *HWP Level       : 3
 // *HWP Consumed by : SBE
 //------------------------------------------------------------------------------
 
@@ -50,7 +50,10 @@ typedef fapi2::ReturnCode (*p9_sbe_check_master_stop15_FP_t)(const
 /// @return     FAPI2_RC_SUCCESS if success
 /// @return     STOP15_PENDING  STOP 15 not reached, but no error
 ///             HW state (still in progress)
-/// @return     Others indicate hardware failur
+/// @return     Others indicate hardware failure
+/// @note       On timeout or other FW controlled errors, related to but
+///             outside scope of this HWP, please use p9_collect_deadman_ffdc
+///             to generate the appropriate RC with FFDC
 ///
 extern "C"
 {

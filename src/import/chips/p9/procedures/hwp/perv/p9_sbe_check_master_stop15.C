@@ -27,9 +27,9 @@
 /// @brief Check if the targeted core (master) is fully in STOP15
 ///
 // *HWP HWP Owner   : Greg Still <stillgsg@us.ibm.com>
-// *HWP FW Owner    : Bilicon Patil <bilpatil@in.ibm.com>
+// *HWP FW Owner    : Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team        : PM
-// *HWP Level       : 2
+// *HWP Level       : 3
 // *HWP Consumed by : SBE
 ///
 /// High-level procedure flow:
@@ -115,9 +115,12 @@ fapi2::ReturnCode p9_sbe_check_master_stop15(
         (l_stop_gated ==  p9ssh::SSH_GATED &&
          l_stop_transition != p9ssh::SSH_COMPLETE))
     {
-        FAPI_ASSERT(false,
-                    fapi2::CHECK_MASTER_STOP15_PENDING(),
-                    "STOP 15 is still pending")
+        /*
+         * Don't use FAPI_ASSERT() here as this is a "try again" return code
+         * used inside a polling loop. We don't want to spam logs with something
+         * that's not an error really.
+         */
+        return fapi2::RC_CHECK_MASTER_STOP15_PENDING;
     }
 
     if (l_stop_gated == p9ssh::SSH_GATED &&
