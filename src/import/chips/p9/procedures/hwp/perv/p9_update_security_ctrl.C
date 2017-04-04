@@ -69,6 +69,10 @@ fapi2::ReturnCode p9_update_security_ctrl(const fapi2::Target<fapi2::TARGET_TYPE
 
     if ((l_in_secure_mode == 1) || (i_force_security)) //Chip in Secure mode  or override with i_force_security parameter
     {
+        //SECURITY_SWITCH_REGISTER is SET only register - hence clearing '0' before setting specific bits
+        //To Avoid the issue of a read modified write
+        l_data64.flush<0>();
+
         //Set bit 4 to set SUL
         l_data64.setBit<PU_SECURITY_SWITCH_REGISTER_SEEPROM_UPDATE_LOCK>();
 
