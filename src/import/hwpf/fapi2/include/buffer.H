@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -263,6 +263,7 @@ class buffer
         /// @brief Write a bit in buffer to a given value
         /// @tparam B Bit in buffer to write
         /// @tparam C the count of bits to write, defaults to 1
+        /// @param[in] i_value the value to write
         /// @return buffer& Useful for method chaining
         /// @note Asserting that all the parameters are known at
         /// compile time so this can be templated only. If that is not
@@ -278,6 +279,24 @@ class buffer
             return *this;
         }
 
+        ///
+        /// @brief Write a bit in buffer to a given value
+        /// @param[in] i_value the value to write
+        /// @param[in] i_bit the bit number to set.
+        /// @param[in] i_count the count of bits to set, defaults to 1
+        /// @return FAPI2_RC_SUCCESS if OK
+        ///
+        inline fapi2::ReturnCodes writeBit(const bool i_value,
+                                           const bits_type& i_bit,
+                                           const bits_type& i_count = 1)
+        {
+            if(i_value == 0)
+            {
+                return clearBit(i_bit, i_count);
+            }
+
+            return setBit(i_bit, i_count);
+        }
 
         ///
         /// @brief Invert bit
@@ -315,14 +334,21 @@ class buffer
         /// @brief Get the value of a bit in the buffer
         /// @param[in] i_bit the bit number to set.
         /// @param[in] i_count the count of bits to set, defaults to 1
-        /// @return true if *any* bit is on, false if *every* bit is off
+        /// @return true if *any* bit is on,
+        /// false if *every* bit is off or if invalid input received
         /// @note 0 is left-most
         ///
         inline bool getBit(const bits_type& i_bit,
-                           const bits_type& i_count = 1)
+                           const bits_type& i_count = 1) const
         {
             buffer<T> l_temp;
-            l_temp.setBit(i_bit, i_count);
+
+            if(l_temp.setBit(i_bit, i_count) != fapi2::FAPI2_RC_SUCCESS)
+            {
+                FAPI_ERR("input out-of-bounds! (bit + count - 1) > %d", TT::bits_per_unit());
+                return false;
+            }
+
             return l_temp & iv_data;
         }
 
