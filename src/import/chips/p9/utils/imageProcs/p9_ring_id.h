@@ -349,6 +349,10 @@ enum RingID
     eq_inex_bucket_2      = 249,
     eq_inex_bucket_3      = 250,
     eq_inex_bucket_4      = 251,
+
+    // CMSK ring
+    ec_cmsk = 252,
+
     //***************************
     // Rings needed for SBE - End
     //***************************
