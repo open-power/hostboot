@@ -435,11 +435,12 @@ namespace EC
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
 {
-    { "ec_func"            , 0x00, 0x20, 0x20, EKB_RING    , 0x2003700F},
-    { "ec_gptr"            , 0x01, 0x20, 0x20, EKB_RING    , 0x20037002},
-    { "ec_time"            , 0x02, 0x20, 0x20, VPD_RING    , 0x20037007},
-    { "ec_mode"            , 0x03, 0x20, 0x20, EKB_RING    , 0x20037001},
-    { "ec_abst"            , 0x04, 0x20, 0x20, EKB_RING    , 0x20037005},
+    { "ec_func"            , 0x00, 0x20, 0x20, EKB_STUMPED_RING , 0x2003700F},
+    { "ec_gptr"            , 0x01, 0x20, 0x20, EKB_RING         , 0x20037002},
+    { "ec_time"            , 0x02, 0x20, 0x20, VPD_RING         , 0x20037007},
+    { "ec_mode"            , 0x03, 0x20, 0x20, EKB_RING         , 0x20037001},
+    { "ec_abst"            , 0x04, 0x20, 0x20, EKB_RING         , 0x20037005},
+    { "ec_cmsk"            , 0xFF, 0xFF, 0xFF, EKB_CMSK_RING    , 0x2003700A},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {

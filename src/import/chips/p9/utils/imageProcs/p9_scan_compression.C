@@ -902,8 +902,92 @@ rs4_redundant(const CompressedScanData* i_data, int* o_redundant)
     return SCAN_COMPRESSION_OK;
 }
 
+// Check for RS4 contains CMSK ring
+int
+rs4_is_cmsk(CompressedScanData* i_rs4)
+{
+    return(i_rs4->iv_type == RS4_SCAN_DATA_TYPE_CMSK);
+}
 
 
+// Embed CMSK ring container into RS4 container:
+// |------RS4 Header------|
+// |-----CMSK Header------|
+// |-----CMSK RS4 Data----|
+// |-------RS4 Data-------|
+int
+rs4_embed_cmsk(CompressedScanData** io_rs4, CompressedScanData* i_rs4_cmsk)
+{
+    char* embedded_addr = (char*)(*io_rs4 + 1);
+    size_t embedded_size = be16toh(i_rs4_cmsk->iv_size);
+    size_t total_size   = be16toh((*io_rs4)->iv_size) + embedded_size;
+
+    // Enlarge RS4 container to accomodate cmsk ring
+    *io_rs4 = (CompressedScanData*)realloc(*io_rs4, total_size);
+
+    if (!*io_rs4)
+    {
+        return BUG(SCAN_COMPRESSION_NO_MEMORY);
+    }
+
+    // Make space for cmsk ring
+    memmove(embedded_addr + embedded_size,
+            embedded_addr,
+            be16toh((*io_rs4)->iv_size) - sizeof(CompressedScanData));
+
+    // Copy cmsk ring into rs4
+    memcpy(embedded_addr,
+           i_rs4_cmsk,
+           embedded_size);
+
+    // Update header fields
+    (*io_rs4)->iv_size = htobe16(total_size);
+    (*io_rs4)->iv_type = RS4_SCAN_DATA_TYPE_CMSK;
+
+    return SCAN_COMPRESSION_OK;
+}
 
 
+// Extract Stump & Cmsk ring containers
+int
+rs4_extract_cmsk(CompressedScanData* i_rs4,
+                 CompressedScanData** io_rs4_stump,
+                 CompressedScanData** io_rs4_cmsk)
+{
+    CompressedScanData* embedded_addr = (CompressedScanData*)(i_rs4 + 1);
+
+    // Get size of Stump and Cmsk rings
+    size_t embedded_size = be16toh(embedded_addr->iv_size);
+    size_t stump_size    = be16toh(i_rs4->iv_size) - embedded_size;
+
+    // Allocate memory for Stump and Cmsk rings
+    *io_rs4_stump = (CompressedScanData*)malloc(stump_size);
+    *io_rs4_cmsk  = (CompressedScanData*)malloc(embedded_size);
+
+    if (!*io_rs4_stump || !*io_rs4_cmsk)
+    {
+        return BUG(SCAN_COMPRESSION_NO_MEMORY);
+    }
+
+    // Copy Cmsk ring - (header+data)
+    memcpy(*io_rs4_cmsk,
+           embedded_addr,
+           embedded_size);
+
+    // Copy Stump ring - header
+    memcpy(*io_rs4_stump,
+           i_rs4,
+           sizeof(CompressedScanData));
+
+    // Copy Stump ring - data
+    memcpy(((CompressedScanData*)(*io_rs4_stump) + 1),
+           (uint8_t*)embedded_addr + embedded_size,
+           stump_size - sizeof(CompressedScanData));
+
+    // Update header fields - stump
+    (*io_rs4_stump)->iv_size = htobe16(stump_size);
+    (*io_rs4_stump)->iv_type = RS4_SCAN_DATA_TYPE_NON_CMSK;
+
+    return SCAN_COMPRESSION_OK;
+}
 
