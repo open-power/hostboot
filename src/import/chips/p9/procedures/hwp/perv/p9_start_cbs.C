@@ -31,7 +31,7 @@
 // *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
 // *HWP FW Owner        : sunil kumar <skumar8j@in.ibm.com>
 // *HWP Team            : Perv
-// *HWP Level           : 2
+// *HWP Level           : 3
 // *HWP Consumed by     : SE:HB
 //------------------------------------------------------------------------------
 
@@ -148,7 +148,7 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 .set_MASTER_CHIP(i_target_chip)
                 .set_CBS_CS_READ(l_data32_cbs_cs)
                 .set_CBS_CS_IDLE_VALUE(CBS_IDLE_VALUE)
-                .set_LOOP_COUNT(l_timeout)
+                .set_LOOP_COUNT(P9_CFAM_CBS_POLL_COUNT)
                 .set_HW_DELAY(P9_CBS_IDLE_HW_NS_DELAY),
                 "ERROR: CBS HAS NOT REACHED IDLE STATE VALUE 0x002 ");
 
