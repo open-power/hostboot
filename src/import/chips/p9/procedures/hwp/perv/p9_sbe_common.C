@@ -31,7 +31,7 @@
 // *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
 // *HWP FW Owner        : sunil kumar <skumar8j@in.ibm.com>
 // *HWP Team            : Perv
-// *HWP Level           : 2
+// *HWP Level           : 3
 // *HWP Consumed by     : SBE
 //------------------------------------------------------------------------------
 
@@ -266,9 +266,12 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
             l_sl_clkregion_status &= l_regions;
 
             FAPI_ASSERT(l_sl_clkregion_status == l_regions,
-                        fapi2::NEST_SL_ERR()
+                        fapi2::THOLD_ERR()
                         .set_TARGET_CHIPLET(i_target)
-                        .set_READ_CLK_SL(l_sl_clock_status),
+                        .set_CLOCK_CMD(i_clock_cmd)
+                        .set_CLOCK_TYPE(PERV_CLOCK_STAT_SL)
+                        .set_REGIONS(i_regions)
+                        .set_READ_CLK(l_sl_clock_status),
                         "Clock running for sl type not matching with expected values");
         }
 
@@ -280,9 +283,12 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
             l_sl_clkregion_status &= l_regions;
 
             FAPI_ASSERT(l_sl_clkregion_status == l_regions,
-                        fapi2::NEST_SL_ERR()
+                        fapi2::THOLD_ERR()
                         .set_TARGET_CHIPLET(i_target)
-                        .set_READ_CLK_SL(l_sl_clock_status),
+                        .set_CLOCK_CMD(i_clock_cmd)
+                        .set_CLOCK_TYPE(PERV_CLOCK_STAT_SL)
+                        .set_REGIONS(i_regions)
+                        .set_READ_CLK(l_sl_clock_status),
                         "Clock running for sl type not matching with expected values");
         }
     }
@@ -304,9 +310,12 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
             l_nsl_clkregion_status &= l_regions;
 
             FAPI_ASSERT(l_nsl_clkregion_status == l_regions,
-                        fapi2::NEST_NSL_ERR()
+                        fapi2::THOLD_ERR()
                         .set_TARGET_CHIPLET(i_target)
-                        .set_READ_CLK_NSL(l_nsl_clock_status),
+                        .set_CLOCK_CMD(i_clock_cmd)
+                        .set_CLOCK_TYPE(PERV_CLOCK_STAT_NSL)
+                        .set_REGIONS(i_regions)
+                        .set_READ_CLK(l_nsl_clock_status),
                         "Clock running for nsl type not matching with expected values");
         }
 
@@ -318,9 +327,12 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
             l_nsl_clkregion_status &= l_regions;
 
             FAPI_ASSERT(l_nsl_clkregion_status == l_regions,
-                        fapi2::NEST_NSL_ERR()
+                        fapi2::THOLD_ERR()
                         .set_TARGET_CHIPLET(i_target)
-                        .set_READ_CLK_NSL(l_nsl_clock_status),
+                        .set_CLOCK_CMD(i_clock_cmd)
+                        .set_CLOCK_TYPE(PERV_CLOCK_STAT_NSL)
+                        .set_REGIONS(i_regions)
+                        .set_READ_CLK(l_nsl_clock_status),
                         "Clock running for nsl type not matching with expected values");
         }
     }
@@ -342,9 +354,12 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
             l_ary_clkregion_status &= l_regions;
 
             FAPI_ASSERT(l_ary_clkregion_status == l_regions,
-                        fapi2::NEST_ARY_ERR()
+                        fapi2::THOLD_ERR()
                         .set_TARGET_CHIPLET(i_target)
-                        .set_READ_CLK_ARY(l_ary_clock_status),
+                        .set_CLOCK_CMD(i_clock_cmd)
+                        .set_CLOCK_TYPE(PERV_CLOCK_STAT_ARY)
+                        .set_REGIONS(i_regions)
+                        .set_READ_CLK(l_ary_clock_status),
                         "Clock running for ary type not matching with expected values");
         }
 
@@ -356,9 +371,12 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
             l_ary_clkregion_status &= l_regions;
 
             FAPI_ASSERT(l_ary_clkregion_status == l_regions,
-                        fapi2::NEST_ARY_ERR()
+                        fapi2::THOLD_ERR()
                         .set_TARGET_CHIPLET(i_target)
-                        .set_READ_CLK_ARY(l_ary_clock_status),
+                        .set_CLOCK_CMD(i_clock_cmd)
+                        .set_CLOCK_TYPE(PERV_CLOCK_STAT_ARY)
+                        .set_REGIONS(i_regions)
+                        .set_READ_CLK(l_ary_clock_status),
                         "Clock running for ary type not matching with expected values");
         }
     }
@@ -547,9 +565,12 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
                  l_exp_sl_clock_status, l_sl_clock_status);
 
         FAPI_ASSERT(l_sl_clock_status == l_exp_sl_clock_status,
-                    fapi2::SL_ERR()
+                    fapi2::THOLD_ERR()
                     .set_TARGET_CHIPLET(i_target)
-                    .set_READ_CLK_SL(l_sl_clock_status),
+                    .set_CLOCK_CMD(i_clock_cmd)
+                    .set_CLOCK_TYPE(PERV_CLOCK_STAT_SL)
+                    .set_REGIONS(i_regions)
+                    .set_READ_CLK(l_sl_clock_status),
                     "CLOCK RUNNING STATUS FOR SL TYPE NOT MATCHING WITH EXPECTED VALUES");
 
         FAPI_DBG("Check for clocks running NSL");
@@ -560,9 +581,12 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
                  l_exp_nsl_clock_status, l_nsl_clock_status);
 
         FAPI_ASSERT(l_nsl_clock_status == l_exp_nsl_clock_status,
-                    fapi2::NSL_ERR()
+                    fapi2::THOLD_ERR()
                     .set_TARGET_CHIPLET(i_target)
-                    .set_READ_CLK_NSL(l_nsl_clock_status),
+                    .set_CLOCK_CMD(i_clock_cmd)
+                    .set_CLOCK_TYPE(PERV_CLOCK_STAT_NSL)
+                    .set_REGIONS(i_regions)
+                    .set_READ_CLK(l_nsl_clock_status),
                     "CLOCK RUNNING STATUS IS NOT MATCHING WITH EXPECTED VALUE FOR NSL TYPE");
 
         FAPI_DBG("Check for clocks running ARY");
@@ -573,9 +597,12 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
                  l_exp_ary_clock_status, l_ary_clock_status);
 
         FAPI_ASSERT(l_ary_clock_status == l_exp_ary_clock_status,
-                    fapi2::ARY_ERR()
+                    fapi2::THOLD_ERR()
                     .set_TARGET_CHIPLET(i_target)
-                    .set_READ_CLK_ARY(l_ary_clock_status),
+                    .set_CLOCK_CMD(i_clock_cmd)
+                    .set_CLOCK_TYPE(PERV_CLOCK_STAT_ARY)
+                    .set_REGIONS(i_regions)
+                    .set_READ_CLK(l_ary_clock_status),
                     "CLOCK RUNNING STATUS IS NOT MATCHING WITH EXPECTED VALUE FOR ARRAY TYPE");
     }
 
