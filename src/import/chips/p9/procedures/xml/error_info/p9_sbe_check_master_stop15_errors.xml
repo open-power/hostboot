@@ -25,7 +25,6 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_CHECK_MASTER_STOP15_PENDING</rc>
     <description>
       Procedure: p9_sbe_check_master_stop15
@@ -34,29 +33,30 @@
       caller (SBE control loop) to determine whether to continue polling for a
       completed transition.
 
-       Note: STOP 11 and STOP 15 are equivalent for POWER9.
+      Note: STOP 11 and STOP 15 are equivalent for POWER9.
     </description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
-    <rc>RC_CHECK_MASTER_STOP15_INVALID_REQUEST_LEVEL</rc>
-    <description>
-      Procedure: p9_sbe_check_master_stop15
-      Indicates the requested stop level was invalid..
-    </description>
-    <ffdc>REQUESTED_LEVEL</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
     <rc>RC_CHECK_MASTER_STOP15_INVALID_STATE</rc>
     <description>
       Procedure: p9_sbe_check_master_stop15
       Indicates the targeted core is no longer pending entering a STOP state
       but the achieved level is not appropriate.
     </description>
+    <ffdc>CORE_TARGET</ffdc>
     <ffdc>STOP_HISTORY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>LVL_SUPPORT</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CORE_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -67,6 +67,7 @@
       but the achieved level is not appropriate, or the deadman loop timed out.
     </description>
     <ffdc>SBE_CHK_MASTER_STOP15_RC</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
     <ffdc>PU_OCB_OCI_OCCFLG__PU_OCB_OCI_CCSR</ffdc>
     <ffdc>PU_OCB_OCI_QCSR__PU_OCB_OCI_QSSR</ffdc>
     <ffdc>EQ_PPM_SSHSRC__EX_CME_SCOM_LFIR</ffdc>
@@ -82,6 +83,13 @@
     <ffdc>CME_IR__EDR</ffdc>
     <ffdc>CME_LR__SPRG0</ffdc>
     <ffdc>CME_SRR0__SRR1</ffdc>
+    <callout>
+      <procedure>LVL_SUPPORT</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CORE_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
