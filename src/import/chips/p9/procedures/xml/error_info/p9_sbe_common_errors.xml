@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -179,6 +179,13 @@
         <scomRegister>PU_PPE_XIRAMGA</scomRegister>
         <scomRegister>PU_PPE_XIRAMRA</scomRegister>
         <scomRegister>PU_PPE_XIXCR</scomRegister>
+     </registerFfdc>
+     <registerFfdc>
+        <id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id>
+        <scomRegister>PU_MIB_XISIB</scomRegister>
+        <scomRegister>PU_MIB_XIMEM</scomRegister>
+        <scomRegister>PU_MIB_XISGB</scomRegister>
+        <scomRegister>PU_MIB_XIICAC</scomRegister>
      </registerFfdc>
    <!-- ******************************************************************** -->
     <hwpError>
@@ -568,5 +575,5 @@
       </collectRegisterFfdc>
       <ffdc>READ_CLK_SL</ffdc>
     </hwpError>
-   <!-- ******************************************************************** -->    
+   <!-- ******************************************************************** -->
 </hwpErrors>

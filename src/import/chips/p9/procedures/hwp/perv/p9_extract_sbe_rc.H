@@ -31,7 +31,7 @@
 // *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
 // *HWP FW Owner        : Sunil Kumar <skumar8j@in.ibm.com>
 // *HWP Team            : Perv
-// *HWP Level           : 2
+// *HWP Level           : 3
 // *HWP Consumed by     : FSP:HB
 //------------------------------------------------------------------------------
 
@@ -49,9 +49,8 @@ enum RETURN_ACTION
     RESTART_SBE        = 1, // Trigger external HRESET to reset SBE
     RESTART_CBS        = 2, // Trigger Warm ipl where we don't switch off VSB just toggle start_cbs from FSP
     REIPL_BKP_SEEPROM  = 3, // Run IPL by selecting backup seeprom
-    RE_IPL             = 4, // Reload/update of SEEPROM required or deconfig the chip
+    REIPL_UPD_SEEPROM  = 4, // Reload/update of SEEPROM required or deconfig the chip
     NO_RECOVERY_ACTION = 5, // No recovery action possible to correct this error
-    PPE_RUNNING        = 6  // Return action when PPE is in Running state
 };
 };
 

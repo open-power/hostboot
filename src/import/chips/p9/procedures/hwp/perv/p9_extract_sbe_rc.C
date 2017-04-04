@@ -70,7 +70,7 @@
 // *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
 // *HWP FW Owner        : Sunil Kumar <skumar8j@in.ibm.com>
 // *HWP Team            : Perv
-// *HWP Level           : 2
+// *HWP Level           : 3
 // *HWP Consumed by     : FSP:HB
 //------------------------------------------------------------------------------
 
@@ -151,9 +151,11 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
     }
     else
     {
-        FAPI_INF("p9_extract_sbe_rc : PPE is in RUNNING state");
+        FAPI_INF("p9_extract_sbe_rc : PPE is in RUNNING state, likely infinite loop, recommending restart");
         l_ppe_halt_state  = false;
-        o_return_action = P9_EXTRACT_SBE_RC::PPE_RUNNING;
+        o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
+        FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_RUNNING()
+                    .set_TARGET_CHIP(i_target_chip));
     }
 
     if(l_ppe_halt_state)
@@ -169,7 +171,8 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         {
             case 0x0 :
                 o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
-                FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_NEVER_STARTED(),
+                FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_NEVER_STARTED()
+                            .set_TARGET_CHIP(i_target_chip),
                             "ERROR:Halt Condition is all Zero, SBE engine was probably never started");
                 break;
 
@@ -279,8 +282,9 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             }
 
             o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
-            FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_PROGRAM_INTERRUPT(), "ERROR:Program interrupt promoted for Address=%08lX",
-                        l_data32_edr);
+            FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_PROGRAM_INTERRUPT()
+                        .set_TARGET_CHIP(i_target_chip),
+                        "ERROR:Program interrupt promoted for Address=%08lX", l_data32_edr);
         }
         else
         {
@@ -345,7 +349,9 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         else
         {
             o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
-            FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED(), "ERROR:Address %08lX is out of range", l_data32_iar);
+            FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED()
+                        .set_TARGET_CHIP(i_target_chip),
+                        "ERROR:Address %08lX is out of range", l_data32_iar);
         }
 
         // ------- LEVEL 3 ------ //
@@ -402,7 +408,9 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 //--  FAPI Asserts section for OTPROM --//
                 o_return_action = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
                 FAPI_ASSERT(l_data64.getBit<PU_STATUS_REGISTER_UNCORR_ERROR>() != 1,
-                            fapi2::EXTRACT_SBE_RC_OTPROM_UNCORRECTED_ERROR(), "ERROR:Uncorrectable error detected in OTPROM memory read");
+                            fapi2::EXTRACT_SBE_RC_OTP_ECC_ERR_INSECURE_MODE()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "ERROR:Uncorrectable error detected in OTPROM memory read");
             }
 
             // Map the OTPROM address to the known error at that location
@@ -411,18 +419,23 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
             if(otprom_addr == MAGIC_NUMBER_MISMATCH_LOCATION)
             {
-                o_return_action = P9_EXTRACT_SBE_RC::RE_IPL;
-                FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_MAGIC_NUMBER_MISMATCH(), "ERROR:SEEPROM magic number didn't match");
+                o_return_action = P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+                FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_MAGIC_NUMBER_MISMATCH()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "ERROR:SEEPROM magic number didn't match");
             }
             else if(otprom_addr == OTPROM_IMAGE_END_LOCATION)
             {
-                o_return_action = P9_EXTRACT_SBE_RC::RE_IPL;
-                FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_BRANCH_TO_SEEPROM_FAIL(), "ERROR:Branch to SEEPROM didn't happen");
+                o_return_action = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+                FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_BRANCH_TO_SEEPROM_FAIL()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "ERROR:Branch to SEEPROM didn't happen");
             }
             else
             {
-                o_return_action = P9_EXTRACT_SBE_RC::RE_IPL;
-                FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_UNEXPECTED_OTPROM_HALT(),
+                o_return_action = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+                FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_UNEXPECTED_OTPROM_HALT()
+                            .set_TARGET_CHIP(i_target_chip),
                             "ERROR:Halted in OTPROM at address %08lX, but not at an expected halt location", otprom_addr);
             }
         }
@@ -511,11 +524,14 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             //--  FAPI Asserts section for PIBMEM --//
             o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
             FAPI_ASSERT(l_data64.getBit<PU_PIBMEM_STATUS_REG_ECC_UNCORRECTED_ERROR_PIB>() != 1,
-                        fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_UNCORRECTED_ERROR_PIB(), "ERROR:Uncorrectable error occurred while PIB memory read");
+                        fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR_INSECURE_MODE()
+                        .set_TARGET_CHIP(i_target_chip),
+                        "ERROR:Uncorrectable error occurred while PIB memory read");
 
             o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
             FAPI_ASSERT(l_data64.getBit<PU_PIBMEM_STATUS_REG_ECC_UNCORRECTED_ERROR_FACES>() != 1,
-                        fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_UNCORRECTED_ERROR_FACES(),
+                        fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR_INSECURE_MODE()
+                        .set_TARGET_CHIP(i_target_chip),
                         "ERROR:Uncorrectable error occurred while fast access interface read");
         }
 
@@ -533,8 +549,9 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
                 if(i2c_speed < 0x0003)
                 {
-                    o_return_action = P9_EXTRACT_SBE_RC::RE_IPL;
-                    FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_FI2CM_BIT_RATE_ERR(),
+                    o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
+                    FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_FI2CM_BIT_RATE_ERR()
+                                .set_TARGET_CHIP(i_target_chip),
                                 "ERROR:Speed on the I2C bit rate divisor is less than min speed value (0x0003), I2C Speed read is %04lX", i2c_speed);
                 }
             }
@@ -634,12 +651,15 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                              l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_BACK_END_ACCESS_ERROR_0>() != 1  ||
                              l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_ARBITRATION_LOST_ERROR_0>() != 1 ||
                              l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_NACK_RECEIVED_ERROR_0>() != 1    ||
-                             l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_STOP_ERROR_0>() != 1), fapi2::EXTRACT_SBE_RC_FI2C_ERROR(),
+                             l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_STOP_ERROR_0>() != 1),
+                            fapi2::EXTRACT_SBE_RC_FI2C_ERROR()
+                            .set_TARGET_CHIP(i_target_chip),
                             "FI2C I2C Error detected");
 
-                o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+                o_return_action = P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
                 FAPI_ASSERT(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_ECC_UNCORRECTED_ERROR_0>() != 1,
-                            fapi2::EXTRACT_SBE_RC_UNRECOVERABLE_ECC_SEEPROM(),
+                            fapi2::EXTRACT_SBE_RC_FI2C_ECC_ERR_INSECURE_MODE()
+                            .set_TARGET_CHIP(i_target_chip),
                             "ERROR:There are 2 bit flips in read data which cannot be corrected");
             }
             else
@@ -686,14 +706,18 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             if(otprom_data_range)
             {
                 o_return_action = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
-                FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_OTP_PARITY_ERR(),
+                FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_OTP_ECC_ERR(),
                             "Parity/ECC error detected in OTPROM memory, Check if OTPROM programmed correctly by dumping content");
 
                 o_return_action = P9_EXTRACT_SBE_RC::RESTART_CBS;
-                FAPI_ASSERT((!(sib_rsp_info == 0x7)), fapi2::EXTRACT_SBE_RC_PIB_TIMEOUT(), "PIB Timeout error detected");
+                FAPI_ASSERT((!(sib_rsp_info == 0x7)), fapi2::EXTRACT_SBE_RC_OTP_TIMEOUT()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "PIB Timeout error detected during access to OTPROM");
 
                 o_return_action = P9_EXTRACT_SBE_RC::RESTART_CBS;
-                FAPI_ASSERT((!(sib_rsp_info != 0x0)), fapi2::EXTRACT_SBE_RC_SCOM_ERR(), "Scom error detected");
+                FAPI_ASSERT((!(sib_rsp_info != 0x0)), fapi2::EXTRACT_SBE_RC_OTP_PIB_ERR()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "Scom error detected");
             }
 
             if(pibmem_data_range)
@@ -707,31 +731,45 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_data64_mib_mem_info.extractToRight(l_data32, PU_MIB_XIMEM_MEM_ERROR, PU_MIB_XIMEM_MEM_ERROR_LEN);
                 mem_error = l_data32;
 
-                o_return_action = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+                o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
                 FAPI_ASSERT((!(mem_error == 0x6)), fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR(),
                             "ECC error detected during pibmem access, Run PIBMEM REPAIR test..");
 
                 o_return_action = P9_EXTRACT_SBE_RC::RESTART_CBS;
-                FAPI_ASSERT((!(mem_error != 0x0)), fapi2::EXTRACT_SBE_RC_PIBMEM_ERR(), "Error detected during pibmem access");
+                FAPI_ASSERT((!(mem_error != 0x0)), fapi2::EXTRACT_SBE_RC_PIBMEM_PIB_ERR()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "Error detected during pibmem access");
             }
 
             if(seeprom_data_range)
             {
                 o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
-                FAPI_ASSERT((!(sib_rsp_info == 0x7)), fapi2::EXTRACT_SBE_RC_FI2C_TIMEOUT(), "FI2C Timeout error detected");
+                FAPI_ASSERT((!(sib_rsp_info == 0x7)), fapi2::EXTRACT_SBE_RC_FI2C_TIMEOUT()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "FI2C Timeout error detected");
+
+                o_return_action = P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+                FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_FI2C_ECC_ERR()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "FI2C SEEPROM uncorrectable ECC error detected");
 
                 o_return_action = P9_EXTRACT_SBE_RC::RESTART_CBS;
-                FAPI_ASSERT((!(sib_rsp_info == 0x4)), fapi2::EXTRACT_SBE_RC_FI2C_SPRM_CFG_ERR(), "FI2C SEEPROM config error detected");
+                FAPI_ASSERT((!(sib_rsp_info == 0x4)), fapi2::EXTRACT_SBE_RC_FI2C_SPRM_CFG_ERR()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "FI2C SEEPROM config error detected");
 
                 o_return_action = P9_EXTRACT_SBE_RC::RESTART_CBS;
-                FAPI_ASSERT((!(sib_rsp_info != 0x0)), fapi2::EXTRACT_SBE_RC_FI2C_PIB_ERR(), "FI2C PIB error detected");
+                FAPI_ASSERT((!(sib_rsp_info != 0x0)), fapi2::EXTRACT_SBE_RC_FI2C_PIB_ERR()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "FI2C PIB error detected");
             }
         }
 
         //Unknown
         FAPI_ERR("Halted due to unknown error at IAR location %08lX", l_data32_iar);
-        o_return_action = P9_EXTRACT_SBE_RC::RE_IPL;
-        FAPI_SET_HWP_ERROR(fapi2::current_err, RC_EXTRACT_SBE_RC_UNKNOWN_ERROR)
+        o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+        FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_UNKNOWN_ERROR()
+                    .set_TARGET_CHIP(i_target_chip));
     }
 
     FAPI_INF("p9_extract_sbe_rc : Exiting ...");
