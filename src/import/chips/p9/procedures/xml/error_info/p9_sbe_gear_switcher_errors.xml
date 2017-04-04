@@ -31,7 +31,43 @@
   <hwpError>
     <sbeError/>
     <rc>RC_BUS_STATUS_BUSY_0</rc>
-    <description>Status busy check</description>
+    <description>I2C stop sequence did not complete within timeout after switching SBE to PLL speed</description>
+    <collectRegisterFfdc>
+      <id>ROOT_CTRL_REGISTERS</id>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>PERV_CTRL_REGISTERS</id>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>I2C_REGISTERS</id>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <ffdc>TARGET_CHIP</ffdc>
+    <ffdc>STATUS_REGISTER_B</ffdc>
+    <ffdc>LOOP_COUNT</ffdc>
+    <ffdc>BACKUP_SEEPROM_ATTR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>SBE_SEEPROM_PART</hwid>
+        <refTarget>TARGET_CHIP</refTarget>
+      </hw>
+      <priority>MEDIUM</priority>
+    </callout>
+    <!--
+        not deconfiguring or garding anything here;
+        HWSV will have special handling for the SBE_SEEPROM_PART callout
+        that will first attempt to boot from the backup SEEPROM and gard
+        the chip if that fails.
+    -->
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
