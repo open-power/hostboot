@@ -29,9 +29,8 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
     <hwpError>
-      <sbeError/>
       <rc>RC_CBS_NOT_IN_IDLE_STATE</rc>
-      <description>CBS is not in IDLE state</description>
+      <description>CBS did not complete (did not arrive in IDLE state) within timeout</description>
       <collectFfdc>p9_pib2pcb_mux_seq, MASTER_CHIP_TARGET</collectFfdc>
       <collectRegisterFfdc>
         <id>ROOT_CTRL_REGISTERS_CFAM</id>
@@ -57,12 +56,21 @@
       <ffdc>CBS_CS_IDLE_VALUE</ffdc>
       <ffdc>LOOP_COUNT</ffdc>
       <ffdc>HW_DELAY</ffdc>
+      <callout>
+        <target>MASTER_CHIP</target>
+        <priority>HIGH</priority>
+      </callout>
+      <deconfigure>
+        <target>MASTER_CHIP</target>
+      </deconfigure>
+      <gard>
+        <target>MASTER_CHIP</target>
+      </gard>
     </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
-      <sbeError/>
       <rc>RC_VDN_PGOOD_NOT_SET</rc>
-      <description>VDN_PGOOD not set to 1</description>
+      <description>Nest power (VDN) Power Good indication not set</description>
       <collectFfdc>p9_pib2pcb_mux_seq, MASTER_CHIP</collectFfdc>
       <collectRegisterFfdc>
         <id>ROOT_CTRL_REGISTERS_CFAM</id>
@@ -85,12 +93,29 @@
         <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       </collectRegisterFfdc>
       <ffdc>CBS_ENVSTAT_READ</ffdc>
+      <callout>
+        <!-- Call out the processor VRM -->
+        <hw>
+          <hwid>SPIVID_SLAVE_PART</hwid>
+          <refTarget>MASTER_CHIP</refTarget>
+        </hw>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <target>MASTER_CHIP</target>
+        <priority>MEDIUM</priority>
+      </callout>
+      <deconfigure>
+        <target>MASTER_CHIP</target>
+      </deconfigure>
+      <gard>
+        <target>MASTER_CHIP</target>
+      </gard>
     </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
-      <sbeError/>
       <rc>RC_VDD_NEST_OBSERVE_NOT_SET</rc>
-      <description>VDD bit not set</description>
+      <description>Nest power (VDN) observe bit not set</description>
       <collectFfdc>p9_pib2pcb_mux_seq, MASTER_CHIP</collectFfdc>
       <collectRegisterFfdc>
         <id>ROOT_CTRL_REGISTERS_CFAM</id>
@@ -113,6 +138,24 @@
         <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       </collectRegisterFfdc>
       <ffdc>FSI2PIB_STATUS_READ</ffdc>
+      <callout>
+        <hw>
+          <!-- Call out the processor VRM -->
+          <hwid>SPIVID_SLAVE_PART</hwid>
+          <refTarget>MASTER_CHIP</refTarget>
+        </hw>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <target>MASTER_CHIP</target>
+        <priority>MEDIUM</priority>
+      </callout>
+      <deconfigure>
+        <target>MASTER_CHIP</target>
+      </deconfigure>
+      <gard>
+        <target>MASTER_CHIP</target>
+      </gard>
     </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
