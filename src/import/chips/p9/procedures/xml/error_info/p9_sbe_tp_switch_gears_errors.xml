@@ -34,22 +34,41 @@
       <rc>RC_I2C_BUS_STATUS_BUSY</rc>
       <description>I2C seeprom port is not responding</description>
       <collectRegisterFfdc>
-	   <id>ROOT_CTRL_REGISTERS</id>
-	   <target>MASTER_CHIP</target>
-	   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+           <id>ROOT_CTRL_REGISTERS</id>
+           <target>MASTER_CHIP</target>
+           <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       </collectRegisterFfdc>
       <collectRegisterFfdc>
-	   <id>PERV_CTRL_REGISTERS</id>
-	   <target>MASTER_CHIP</target>
-	   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+           <id>PERV_CTRL_REGISTERS</id>
+           <target>MASTER_CHIP</target>
+           <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       </collectRegisterFfdc>
       <collectRegisterFfdc>
-	   <id>I2C_REGISTERS</id>
-	   <target>MASTER_CHIP</target>
-	   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+           <id>I2C_REGISTERS</id>
+           <target>MASTER_CHIP</target>
+           <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       </collectRegisterFfdc>
+      <ffdc>MASTER_CHIP</ffdc>
       <ffdc>STATUS_REGISTER_B</ffdc>
       <ffdc>LOOP_COUNT</ffdc>
+      <ffdc>BACKUP_SEEPROM_ATTR</ffdc>
+      <callout>
+        <hw>
+          <hwid>SBE_SEEPROM_PART</hwid>
+          <refTarget>MASTER_CHIP</refTarget>
+        </hw>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <target>MASTER_CHIP</target>
+        <priority>MEDIUM</priority>
+      </callout>
+      <!--
+          not deconfiguring or garding anything here;
+          HWSV will have special handling for the SBE_SEEPROM_PART callout
+          that will first attempt to boot from the backup SEEPROM and gard
+          the chip if that fails.
+      -->
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -59,23 +78,41 @@
          read with Fused number in OTPROM
       </description>
       <collectRegisterFfdc>
-	   <id>ROOT_CTRL_REGISTERS</id>
-	   <target>MASTER_CHIP</target>
-	   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+           <id>ROOT_CTRL_REGISTERS</id>
+           <target>MASTER_CHIP</target>
+           <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       </collectRegisterFfdc>
       <collectRegisterFfdc>
-	   <id>PERV_CTRL_REGISTERS</id>
-	   <target>MASTER_CHIP</target>
-	   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+           <id>PERV_CTRL_REGISTERS</id>
+           <target>MASTER_CHIP</target>
+           <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       </collectRegisterFfdc>
       <collectRegisterFfdc>
-	   <id>I2C_REGISTERS</id>
-	   <target>MASTER_CHIP</target>
-	   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+           <id>I2C_REGISTERS</id>
+           <target>MASTER_CHIP</target>
+           <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       </collectRegisterFfdc>
+      <ffdc>MASTER_CHIP</ffdc>
       <ffdc>DATA0TO7_REGISTER_B</ffdc>
       <ffdc>MAGIC_NUMBER_VALUE</ffdc>
       <ffdc>BACKUP_SEEPROM_ATTR</ffdc>
+      <callout>
+        <hw>
+          <hwid>SBE_SEEPROM_PART</hwid>
+          <refTarget>MASTER_CHIP</refTarget>
+        </hw>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <target>MASTER_CHIP</target>
+        <priority>MEDIUM</priority>
+      </callout>
+      <!--
+          not deconfiguring or garding anything here;
+          HWSV will have special handling for the SBE_SEEPROM_PART callout
+          that will first attempt to boot from the backup SEEPROM and gard
+          the chip if that fails.
+      -->
    </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
