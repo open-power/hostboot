@@ -359,7 +359,9 @@ errlHndl_t PNOR::extendHash(uint64_t i_addr, size_t i_size, const char* i_name)
 
         SHA512_t l_hash = {0};
         SECUREBOOT::hashBlob(l_buf, i_size, l_hash);
-        l_errhdl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_0, l_hash,
+        l_errhdl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_0,
+                                          TRUSTEDBOOT::EV_S_CRTM_CONTENTS,
+                                          l_hash,
                                           sizeof(SHA512_t), i_name);
         delete[] l_buf;
 

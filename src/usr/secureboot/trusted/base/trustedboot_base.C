@@ -190,6 +190,7 @@ errlHndl_t pcrExtendSeparator(bool i_sendAsync)
 }
 
 errlHndl_t pcrExtend(TPM_Pcr i_pcr,
+                     EventTypes i_eventType,
                      const uint8_t* i_digest,
                      size_t  i_digestSize,
                      const char* i_logMsg,
@@ -209,7 +210,7 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
     memset(msgData, 0, sizeof(PcrExtendMsgData));
     msgData->mPcrIndex = i_pcr;
     msgData->mAlgId = TPM_ALG_SHA256;
-    msgData->mEventType = EV_ACTION;
+    msgData->mEventType = i_eventType;
     msgData->mDigestSize = (i_digestSize < sizeof(msgData->mDigest) ?
                             i_digestSize : sizeof(msgData->mDigest));
 
@@ -329,10 +330,12 @@ errlHndl_t extendPnorSectionHash(
     strcat(swKeyMsg,FW_KEY_HASH_EXT);
 
     TPM_Pcr pnorHashPcr = PCR_0;
+    EventTypes swKeyHashEventType = TRUSTEDBOOT::EV_PLATFORM_CONFIG_FLAGS;
     // PAYLOAD is the only section that needs its hash extended to PCR_4
     if (i_sec == PNOR::PAYLOAD)
     {
         pnorHashPcr = PCR_4;
+        swKeyHashEventType = TRUSTEDBOOT::EV_COMPACT_HASH;
     }
     // Extend swKeyHash to the next PCR after the hash extension PCR.
     const TPM_Pcr swKeyHashPcr = static_cast<TPM_Pcr>(pnorHashPcr + 1);
@@ -340,7 +343,10 @@ errlHndl_t extendPnorSectionHash(
     if (SECUREBOOT::enabled())
     {
         // If secureboot is enabled, use protected hash in header
+        /// @todo RTC 172332 Update log type based on what is being extended
+        /// EV_POST_CODE or EV_S_CRTM_CONTENTS or EV_COMPACT_HASH
         pError = TRUSTEDBOOT::pcrExtend(pnorHashPcr,
+              TRUSTEDBOOT::EV_POST_CODE,
               reinterpret_cast<const uint8_t*>(i_conHdr.payloadTextHash()),
               sizeof(SHA512_t),
               sectionInfo.name);
@@ -354,6 +360,7 @@ errlHndl_t extendPnorSectionHash(
 
         // Extend SW public key hash
         pError = TRUSTEDBOOT::pcrExtend(swKeyHashPcr,
+                    swKeyHashEventType,
                     reinterpret_cast<const uint8_t*>(i_conHdr.swKeyHash()),
                     sizeof(SHA512_t),
                     swKeyMsg);
@@ -368,10 +375,13 @@ errlHndl_t extendPnorSectionHash(
     else
     {
         // If secureboot is not enabled, measure protected section
+        /// @todo RTC 172332 Update log type based on what is being extended
+        /// EV_POST_CODE or EV_S_CRTM_CONTENTS or EV_COMPACT_HASH
         SHA512_t hash = {0};
         SECUREBOOT::hashBlob(i_vaddr, protectedSize, hash);
-        pError = TRUSTEDBOOT::pcrExtend(pnorHashPcr, hash,
-                                        sizeof(SHA512_t),
+        pError = TRUSTEDBOOT::pcrExtend(pnorHashPcr,
+                                        TRUSTEDBOOT::EV_POST_CODE,
+                                        hash, sizeof(SHA512_t),
                                         sectionInfo.name);
         if (pError)
         {

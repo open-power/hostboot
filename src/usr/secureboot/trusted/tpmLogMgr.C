@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -458,6 +458,7 @@ namespace TRUSTEDBOOT
     }
 
     TCG_PCR_EVENT2 TpmLogMgr_genLogEventPcrExtend(TPM_Pcr i_pcr,
+                                                  EventTypes i_eventType,
                                                   TPM_Alg_Id i_algId_1,
                                                   const uint8_t* i_digest_1,
                                                   size_t i_digestSize_1,
@@ -478,7 +479,7 @@ namespace TRUSTEDBOOT
 
         memset(&eventLog, 0, sizeof(eventLog));
         eventLog.pcrIndex = i_pcr;
-        eventLog.eventType = EV_ACTION;
+        eventLog.eventType = i_eventType;
 
         // Update digest information
         eventLog.digests.count = 1;

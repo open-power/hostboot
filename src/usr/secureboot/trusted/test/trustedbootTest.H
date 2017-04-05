@@ -794,6 +794,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                 num_ops++;
                 pcrExtendSingleTpm(pTpm,
                                    PCR_DEBUG,
+                                   EV_POST_CODE,
                                    TPM_ALG_SHA256,
                                    digest,
                                    TPM_ALG_SHA256_SIZE,
