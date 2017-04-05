@@ -198,18 +198,18 @@ bool deassertSpecialWakeupOnCores(ISTEP_ERROR::IStepError & io_istepError)
             FAPI_INVOKE_HWP(l_err, p9_cpu_special_wakeup_core, l_core,
                             p9specialWakeup::SPCWKUP_DISABLE,
                             p9specialWakeup::PROC_SPCWKUP_ENTITY(l_src));
-                            if ( l_err )
-                            {
-                                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                                          "ERROR : returned from p9_cpu_special_wakeup_core for core 0x%x for src 0x%x", TARGETING::get_huid(l_core), l_src  );
-                                          l_success = false;
-                                          break;
-                            }
-                            else
-                            {
-                                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                                          "disabled special wakeup for core 0x%x for src 0x%x", TARGETING::get_huid(l_core), l_src  );
-                            }
+            if ( l_err )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                            "ERROR : returned from p9_cpu_special_wakeup_core for core 0x%x for src 0x%x", TARGETING::get_huid(l_core), l_src  );
+                            l_success = false;
+                            break;
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                            "disabled special wakeup for core 0x%x for src 0x%x", TARGETING::get_huid(l_core), l_src  );
+            }
         }
         if(l_err)
         {
@@ -264,18 +264,25 @@ errlHndl_t powerDownSlaveQuads()
         fapi2::Target <fapi2::TARGET_TYPE_EQ> l_fapi_eq_target (l_eq_target);
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_chip =
             l_fapi_eq_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+        TARGETING::ATTR_PROC_SBE_MASTER_CHIP_type l_is_master_chip;
+        FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, l_chip, l_is_master_chip);
+
         TARGETING::TargetHandleList l_coreTargetList;
         TARGETING::getChildChiplets( l_coreTargetList,
                                      l_eq_target,
                                      TARGETING::TYPE_CORE,
                                      true);
         //Check if either of the cores is master (probably could just check the first)
-        for(const auto & l_core_target : l_coreTargetList)
+        if (l_is_master_chip == 1)
         {
-            if(l_core_target->getAttr<TARGETING::ATTR_CHIP_UNIT>() == l_masterCoreId)
+            for(const auto & l_core_target : l_coreTargetList)
             {
-                l_isMasterEq = true;
-                break;
+                if(l_core_target->getAttr<TARGETING::ATTR_CHIP_UNIT>() == l_masterCoreId)
+                {
+                    l_isMasterEq = true;
+                    break;
+                }
             }
         }
 
