@@ -44,6 +44,7 @@ HWP_XIP_PATH += ${ROOTPATH}/src/import/chips/p9/xip
 EXTRAINCDIR += ${HWP_XIP_PATH}/
 UTILS_PATH  += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 CEN_UTILS_PATH  += ${ROOTPATH}/src/import/chips/centaur/utils/imageProcs
+COMMON_UTILS_PATH += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 
 OBJS += sbe_update.o
 
@@ -51,7 +52,7 @@ SUBDIRS += test.d
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${HWP_CUSTOMIZE_PATH} ${HWP_ACCESSORS_PATH} ${HWP_XIP_PATH}
-VPATH += ${UTILS_PATH} ${CEN_UTILS_PATH}
+VPATH += ${UTILS_PATH} ${CEN_UTILS_PATH} ${COMMON_UTILS_PATH}
 
 include ${ROOTPATH}/procedure.rules.mk
 
@@ -64,6 +65,7 @@ include ${HWP_XIP_PATH}/p9_xip_image.mk
 include ${UTILS_PATH}/p9_ring_identification.mk
 include ${UTILS_PATH}/p9_ringId.mk
 include ${CEN_UTILS_PATH}/cen_ringId.mk
+include ${COMMON_UTILS_PATH}/common_ringId.mk
 include ${UTILS_PATH}/p9_scan_compression.mk
 include ${UTILS_PATH}/p9_tor.mk
 
