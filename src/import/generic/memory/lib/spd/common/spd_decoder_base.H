@@ -111,7 +111,7 @@ class decoder
         /// @param[out] o_logical_ranks number of logical ranks
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode prim_sdram_logical_ranks( uint8_t& o_logical_ranks )
+        virtual fapi2::ReturnCode prim_sdram_logical_ranks( uint8_t& o_logical_ranks ) const
         {
             o_logical_ranks = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -122,7 +122,7 @@ class decoder
         /// @param[out] o_logical_ranks number of logical ranks
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode sec_sdram_logical_ranks( uint8_t& o_logical_ranks )
+        virtual fapi2::ReturnCode sec_sdram_logical_ranks( uint8_t& o_logical_ranks ) const
         {
             o_logical_ranks = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -170,7 +170,7 @@ class decoder
         /// @param[out] o_value number of SPD bytes used
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode number_of_used_bytes( uint16_t& o_value )
+        virtual fapi2::ReturnCode number_of_used_bytes( uint16_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -181,7 +181,7 @@ class decoder
         /// @param[out] o_value number of total SPD bytes
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode number_of_total_bytes( uint16_t& o_value )
+        virtual fapi2::ReturnCode number_of_total_bytes( uint16_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -192,7 +192,7 @@ class decoder
         /// @param[out] o_value hybrid media decoding
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode hybrid_media( uint8_t& o_value )
+        virtual fapi2::ReturnCode hybrid_media( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -203,7 +203,7 @@ class decoder
         /// @param[out] o_value hybrid decoding
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode hybrid( uint8_t& o_value )
+        virtual fapi2::ReturnCode hybrid( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -214,7 +214,7 @@ class decoder
         /// @param[out] o_value SDRAM density in GBs
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode sdram_density( uint8_t& o_value )
+        virtual fapi2::ReturnCode sdram_density( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -225,7 +225,7 @@ class decoder
         /// @param[out] o_value Number of SDRAM bank bits
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode bank_bits( uint8_t& o_value )
+        virtual fapi2::ReturnCode bank_bits( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -236,7 +236,7 @@ class decoder
         /// @param[out] o_value Number of SDRAM bank groups bits
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode bank_group_bits( uint8_t& o_value )
+        virtual fapi2::ReturnCode bank_group_bits( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -247,7 +247,7 @@ class decoder
         /// @param[out] o_value Number of SDRAM bank bits
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode column_address_bits( uint8_t& o_value )
+        virtual fapi2::ReturnCode column_address_bits( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -258,7 +258,7 @@ class decoder
         /// @param[out] o_value Number of SDRAM bank bits
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode row_address_bits( uint8_t& o_value )
+        virtual fapi2::ReturnCode row_address_bits( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -269,7 +269,7 @@ class decoder
         /// @param[out] o_value Number of SDRAM bank bits
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode prim_sdram_signal_loading( uint8_t& o_value )
+        virtual fapi2::ReturnCode prim_sdram_signal_loading( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -280,7 +280,7 @@ class decoder
         /// @param[out] o_value Number of SDRAM bank bits
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual  fapi2::ReturnCode prim_sdram_die_count( uint8_t& o_value )
+        virtual  fapi2::ReturnCode prim_sdram_die_count( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -290,7 +290,7 @@ class decoder
         /// @brief Decodes Primary SDRAM package type
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode prim_sdram_package_type( uint8_t& o_value )
+        virtual fapi2::ReturnCode prim_sdram_package_type( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -300,7 +300,7 @@ class decoder
         /// @brief Decode SDRAM Maximum activate count
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode maximum_activate_count( uint32_t& o_value )
+        virtual fapi2::ReturnCode maximum_activate_count( uint32_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -310,7 +310,7 @@ class decoder
         /// @brief Decode SDRAM Maximum activate window (multiplier), tREFI uknown at this point
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode maximum_activate_window_multiplier( uint32_t& o_value )
+        virtual fapi2::ReturnCode maximum_activate_window_multiplier( uint32_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -320,7 +320,7 @@ class decoder
         /// @brief Decode Post package repair (PPR)
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode post_package_repair( uint8_t& o_value )
+        virtual fapi2::ReturnCode post_package_repair( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -330,7 +330,7 @@ class decoder
         /// @brief Decode Soft post package repair (soft PPR)
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode soft_post_package_repair( uint8_t& o_value )
+        virtual fapi2::ReturnCode soft_post_package_repair( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -340,7 +340,7 @@ class decoder
         /// @brief Decodes Secondary SDRAM signal loading
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode sec_sdram_signal_loading( uint8_t& o_value )
+        virtual fapi2::ReturnCode sec_sdram_signal_loading( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -350,7 +350,7 @@ class decoder
         /// @brief Decodes Secondary DRAM Density Ratio
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode sec_dram_density_ratio( uint8_t& o_value )
+        virtual fapi2::ReturnCode sec_dram_density_ratio( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -360,7 +360,7 @@ class decoder
         /// @brief Decodes Secondary SDRAM die count
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode sec_sdram_die_count( uint8_t& o_value )
+        virtual fapi2::ReturnCode sec_sdram_die_count( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -370,7 +370,7 @@ class decoder
         /// @brief Decodes Secondary SDRAM package type
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode sec_sdram_package_type( uint8_t& o_value )
+        virtual fapi2::ReturnCode sec_sdram_package_type( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -381,7 +381,7 @@ class decoder
         /// @param[out] o_value enum representing if 1.2V is operable
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode operable_nominal_voltage( uint8_t& o_value )
+        virtual fapi2::ReturnCode operable_nominal_voltage( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -392,7 +392,7 @@ class decoder
         /// @param[out] o_value enum representing if 1.2V is endurant
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode endurant_nominal_voltage( uint8_t& o_value )
+        virtual fapi2::ReturnCode endurant_nominal_voltage( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -402,7 +402,7 @@ class decoder
         /// @param[out] o_value device width in bits
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode device_width( uint8_t& o_value )
+        virtual fapi2::ReturnCode device_width( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -413,7 +413,7 @@ class decoder
         /// @param[out] o_value number of package ranks per DIMM
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode num_package_ranks_per_dimm( uint8_t& o_value )
+        virtual fapi2::ReturnCode num_package_ranks_per_dimm( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -424,7 +424,7 @@ class decoder
         /// @param[out] o_value rank mix value from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode rank_mix( uint8_t& o_value )
+        virtual fapi2::ReturnCode rank_mix( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -435,7 +435,7 @@ class decoder
         /// @param[out] o_value primary bus width in bits
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode prim_bus_width( uint8_t& o_value )
+        virtual fapi2::ReturnCode prim_bus_width( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -446,7 +446,7 @@ class decoder
         /// @param[out] o_value bus width extension in bits
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode bus_width_extension( uint8_t& o_value )
+        virtual fapi2::ReturnCode bus_width_extension( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -457,7 +457,7 @@ class decoder
         /// @param[out] o_value thermal sensor value from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode thermal_sensor( uint8_t& o_value )
+        virtual fapi2::ReturnCode thermal_sensor( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -468,7 +468,7 @@ class decoder
         /// @param[out] o_value extended base module type value from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode extended_base_module_type( uint8_t& o_value )
+        virtual fapi2::ReturnCode extended_base_module_type( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -479,7 +479,7 @@ class decoder
         /// @param[out] o_value fine_timebase from SPD in picoseconds
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode fine_timebase( int64_t& o_value )
+        virtual fapi2::ReturnCode fine_timebase( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -490,7 +490,7 @@ class decoder
         /// @param[out] o_value fine_timebase from SPD in picoseconds
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode medium_timebase( int64_t& o_value )
+        virtual fapi2::ReturnCode medium_timebase( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -502,7 +502,7 @@ class decoder
         /// @param[out] o_value tCKmin in MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_tck( int64_t& o_value )
+        virtual fapi2::ReturnCode min_tck( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -513,7 +513,7 @@ class decoder
         /// @param[out] o_value tCKmax in MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode max_tck( int64_t& o_value )
+        virtual fapi2::ReturnCode max_tck( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -524,7 +524,7 @@ class decoder
         /// @param[out] o_value bitmap of supported CAS latencies
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode supported_cas_latencies( uint64_t& o_value )
+        virtual fapi2::ReturnCode supported_cas_latencies( uint64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -535,7 +535,7 @@ class decoder
         /// @param[out] o_value tAAmin in MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_taa( int64_t& o_value )
+        virtual fapi2::ReturnCode min_taa( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -546,7 +546,7 @@ class decoder
         /// @param[out] o_value tRCDmin in MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_trcd( int64_t& o_value )
+        virtual fapi2::ReturnCode min_trcd( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -557,7 +557,7 @@ class decoder
         /// @param[out] o_value tRPmin in MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_trp( int64_t& o_value )
+        virtual fapi2::ReturnCode min_trp( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -568,7 +568,7 @@ class decoder
         /// @param[out] o_value tRASmin in MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_tras( int64_t& o_value )
+        virtual fapi2::ReturnCode min_tras( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -579,7 +579,7 @@ class decoder
         /// @param[out] o_value tRCmin in MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_trc( int64_t& o_value )
+        virtual fapi2::ReturnCode min_trc( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -590,7 +590,7 @@ class decoder
         /// @param[out] o_value tRFC1min in MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_trfc1( int64_t& o_value )
+        virtual fapi2::ReturnCode min_trfc1( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -601,7 +601,7 @@ class decoder
         /// @param[out] o_value tRFC2min in MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_trfc2( int64_t& o_value )
+        virtual fapi2::ReturnCode min_trfc2( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -612,7 +612,7 @@ class decoder
         /// @param[out] o_value tRFC4min in MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_trfc4( int64_t& o_value )
+        virtual fapi2::ReturnCode min_trfc4( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -623,7 +623,7 @@ class decoder
         /// @param[out] o_value tFAWmin in MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_tfaw( int64_t& o_value )
+        virtual fapi2::ReturnCode min_tfaw( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -634,7 +634,7 @@ class decoder
         /// @param[out] o_value tRRD_Smin MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_trrd_s( int64_t& o_value )
+        virtual fapi2::ReturnCode min_trrd_s( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -645,7 +645,7 @@ class decoder
         /// @param[out] o_value tRRD_Lmin MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_trrd_l( int64_t& o_value )
+        virtual fapi2::ReturnCode min_trrd_l( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -656,7 +656,7 @@ class decoder
         /// @param[out] o_value tCCD_Lmin MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_tccd_l( int64_t& o_value )
+        virtual fapi2::ReturnCode min_tccd_l( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -667,7 +667,7 @@ class decoder
         /// @param[out] o_value tWRmin in MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_twr( int64_t& o_value )
+        virtual fapi2::ReturnCode min_twr( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -678,7 +678,7 @@ class decoder
         /// @param[out] o_value tWRT_Smin in MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_twtr_s( int64_t& o_value )
+        virtual fapi2::ReturnCode min_twtr_s( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -689,7 +689,7 @@ class decoder
         /// @param[out] o_value tWRT_Lmin in MTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode min_twtr_l( int64_t& o_value )
+        virtual fapi2::ReturnCode min_twtr_l( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -700,7 +700,7 @@ class decoder
         /// @param[out] o_value tCCD_Lmin offset in FTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode fine_offset_min_tccd_l( int64_t& o_value )
+        virtual fapi2::ReturnCode fine_offset_min_tccd_l( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -711,7 +711,7 @@ class decoder
         /// @param[out] o_value tRRD_Lmin offset in FTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trrd_l( int64_t& o_value )
+        virtual fapi2::ReturnCode fine_offset_min_trrd_l( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -722,7 +722,7 @@ class decoder
         /// @param[out] o_value tRRD_Smin offset in FTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trrd_s( int64_t& o_value )
+        virtual fapi2::ReturnCode fine_offset_min_trrd_s( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -733,7 +733,7 @@ class decoder
         /// @param[out] o_value tRCmin offset in FTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trc( int64_t& o_value )
+        virtual fapi2::ReturnCode fine_offset_min_trc( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -744,7 +744,7 @@ class decoder
         /// @param[out] o_value tRPmin offset in FTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trp( int64_t& o_value )
+        virtual fapi2::ReturnCode fine_offset_min_trp( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -755,7 +755,7 @@ class decoder
         /// @param[out] o_value tRCDmin offset in FTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trcd( int64_t& o_value )
+        virtual fapi2::ReturnCode fine_offset_min_trcd( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -766,7 +766,7 @@ class decoder
         /// @param[out] o_value tAAmin offset in FTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode fine_offset_min_taa( int64_t& o_value )
+        virtual fapi2::ReturnCode fine_offset_min_taa( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -777,7 +777,7 @@ class decoder
         /// @param[out] o_value tCKmax offset in FTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode fine_offset_max_tck( int64_t& o_value )
+        virtual fapi2::ReturnCode fine_offset_max_tck( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -788,7 +788,7 @@ class decoder
         /// @param[out] o_value tCKmin offset in FTB units
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode fine_offset_min_tck( int64_t& o_value )
+        virtual fapi2::ReturnCode fine_offset_min_tck( int64_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -799,7 +799,7 @@ class decoder
         /// @param[out] o_value crc value from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode cyclical_redundancy_code( uint16_t& o_value )
+        virtual fapi2::ReturnCode cyclical_redundancy_code( uint16_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -810,7 +810,7 @@ class decoder
         /// @param[out] o_output module manufacturing id code
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode module_manufacturer_id_code( uint16_t& o_value )
+        virtual fapi2::ReturnCode module_manufacturer_id_code( uint16_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -821,7 +821,7 @@ class decoder
         /// @param[out] o_value uint8_t identifier for manufacturing location of memory module
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode module_manufacturing_location( uint8_t& o_value )
+        virtual fapi2::ReturnCode module_manufacturing_location( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -831,7 +831,7 @@ class decoder
         /// @brief Decodesmodule manufacturing date
         /// @param[out] o_value the 2 byte date of manufacturing in BCD format
         /// @return FAPI2_RC_SUCCESS if okay
-        virtual fapi2::ReturnCode module_manufacturing_date( uint16_t& o_value )
+        virtual fapi2::ReturnCode module_manufacturing_date( uint16_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -842,7 +842,7 @@ class decoder
         /// @param[out] o_value module's serial number
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode module_serial_number( uint32_t& o_value )
+        virtual fapi2::ReturnCode module_serial_number( uint32_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -853,7 +853,7 @@ class decoder
         /// @param[out] o_value uint8_t identifier for revision code
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode module_revision_code( uint8_t& o_value )
+        virtual fapi2::ReturnCode module_revision_code( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -864,7 +864,7 @@ class decoder
         /// @param[out] o_value dram manufacturing id code
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode dram_manufacturer_id_code( uint16_t& o_value )
+        virtual fapi2::ReturnCode dram_manufacturer_id_code( uint16_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -875,7 +875,7 @@ class decoder
         /// @param[out] o_value uint8_t DRAM Stepping val
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode dram_stepping( uint8_t& o_value )
+        virtual fapi2::ReturnCode dram_stepping( uint8_t& o_value ) const
         {
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -886,7 +886,7 @@ class decoder
         /// @param[out] o_logical_ranks number of logical ranks
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm )
+        virtual fapi2::ReturnCode logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm ) const
         {
             o_logical_rank_per_dimm = 0;
             return fapi2::FAPI2_RC_SUCCESS;

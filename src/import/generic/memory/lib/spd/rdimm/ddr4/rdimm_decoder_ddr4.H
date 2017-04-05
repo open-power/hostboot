@@ -177,7 +177,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 48
         ///
-        virtual fapi2::ReturnCode max_module_nominal_height(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode max_module_nominal_height(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes front module maximum thickness max, in mm
@@ -188,7 +188,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 48
         ///
-        virtual fapi2::ReturnCode front_module_max_thickness(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode front_module_max_thickness(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes back module maximum thickness max, in mm
@@ -199,7 +199,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 48
         ///
-        virtual fapi2::ReturnCode back_module_max_thickness(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode back_module_max_thickness(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes number of registers used on RDIMM
@@ -210,7 +210,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 50
         ///
-        virtual fapi2::ReturnCode num_registers_used(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode num_registers_used(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes number of rows of DRAMs on RDIMM
@@ -221,7 +221,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 50
         ///
-        virtual fapi2::ReturnCode num_rows_of_drams(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode num_rows_of_drams(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes heat spreader thermal characteristics
@@ -232,7 +232,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 51
         ///
-        virtual fapi2::ReturnCode heat_spreader_thermal_char(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode heat_spreader_thermal_char(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes heat spreader solution
@@ -243,7 +243,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 51
         ///
-        virtual fapi2::ReturnCode heat_spreader_solution(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode heat_spreader_solution(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes number of continuation codes
@@ -254,7 +254,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 51
         ///
-        virtual fapi2::ReturnCode num_continuation_codes(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode num_continuation_codes(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes register manufacturer ID code
@@ -265,7 +265,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 51
         ///
-        virtual fapi2::ReturnCode reg_manufacturer_id_code(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode reg_manufacturer_id_code(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes register revision number
@@ -276,7 +276,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 51
         ///
-        virtual fapi2::ReturnCode register_rev_num(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode register_rev_num(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes address mapping from register to dram
@@ -287,7 +287,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 52
         ///
-        virtual fapi2::ReturnCode register_to_dram_addr_mapping(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode register_to_dram_addr_mapping(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes register output drive strength for CKE signal
@@ -298,7 +298,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 53
         ///
-        virtual fapi2::ReturnCode cke_signal_output_driver(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode cke_signal_output_driver(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes register output drive strength for ODT signal
@@ -309,7 +309,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 53
         ///
-        virtual fapi2::ReturnCode odt_signal_output_driver(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode odt_signal_output_driver(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes register output drive strength for command/address (CA) signal
@@ -320,7 +320,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 53
         ///
-        virtual fapi2::ReturnCode ca_signal_output_driver(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode ca_signal_output_driver(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes register output drive strength for control signal (CS) signal
@@ -331,7 +331,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 53
         ///
-        virtual fapi2::ReturnCode cs_signal_output_driver(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode cs_signal_output_driver(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes register output drive strength for clock (B side)
@@ -342,7 +342,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 53
         ///
-        virtual fapi2::ReturnCode b_side_clk_output_driver(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode b_side_clk_output_driver(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes register output drive strength for clock (A side)
@@ -353,7 +353,7 @@ class decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 53
         ///
-        virtual fapi2::ReturnCode a_side_clk_output_driver(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode a_side_clk_output_driver(uint8_t& o_output) const override;
 
     protected:
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;
@@ -396,7 +396,7 @@ class decoder_v1_1 :  public decoder_v1_0
         /// @note DDR4 SPD Document Release 3
         /// @note Page 4.1.2.12.3 - 63
         ///
-        virtual fapi2::ReturnCode register_and_buffer_type(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode register_and_buffer_type(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes register output drive strength for CKE signal
@@ -407,7 +407,7 @@ class decoder_v1_1 :  public decoder_v1_0
         /// @note Page 76
         /// @note DDR4 SPD Document Release 4
         ///
-        virtual fapi2::ReturnCode cke_signal_output_driver(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode cke_signal_output_driver(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes register output drive strength for ODT signal
@@ -418,7 +418,7 @@ class decoder_v1_1 :  public decoder_v1_0
         /// @note Page 76
         /// @note DDR4 SPD Document Release 4
         ///
-        virtual fapi2::ReturnCode odt_signal_output_driver(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode odt_signal_output_driver(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes register output drive strength for control signal (CS) signal
@@ -429,7 +429,7 @@ class decoder_v1_1 :  public decoder_v1_0
         /// @note Page 76
         /// @note DDR4 SPD Document Release 4
         ///
-        virtual fapi2::ReturnCode cs_signal_output_driver(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode cs_signal_output_driver(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes register output drive strength for clock (B side)
@@ -440,7 +440,7 @@ class decoder_v1_1 :  public decoder_v1_0
         /// @note Page 76
         /// @note DDR4 SPD Document Release 4
         ///
-        virtual fapi2::ReturnCode b_side_clk_output_driver(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode b_side_clk_output_driver(uint8_t& o_output) const override;
 
         ///
         /// @brief Decodes register output drive strength for clock (A side)
@@ -451,7 +451,7 @@ class decoder_v1_1 :  public decoder_v1_0
         /// @note Page 76
         /// @note DDR4 SPD Document Release 4
         ///
-        virtual fapi2::ReturnCode a_side_clk_output_driver(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode a_side_clk_output_driver(uint8_t& o_output) const override;
 
 };//decoder_v1_1
 

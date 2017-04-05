@@ -68,7 +68,7 @@ namespace lrdimm
 /// @note DDR4 SPD Document Release 4
 /// @note Page 4.1.2.12.3 - 76
 ///
-fapi2::ReturnCode decoder_v1_2::bcom_bcke_bodt_drive_strength(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_2::bcom_bcke_bodt_drive_strength(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< BCOM_BODT_BCKE_DRIVE_STRENGTH >(iv_target, iv_spd_data);
@@ -103,7 +103,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 4
 /// @note Page 4.1.2.12.3 - 76
 ///
-fapi2::ReturnCode decoder_v1_2::bck_output_drive_strength(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_2::bck_output_drive_strength(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< BCK_DRIVE_STRENGTH >(iv_target, iv_spd_data);
@@ -138,7 +138,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 4
 /// @note Page 4.1.2.L-4 - 76
 ///
-fapi2::ReturnCode decoder_v1_2::slew_rate_control(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_2::slew_rate_control(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< RCD_SLEW_CNTRL >(iv_target, iv_spd_data);
@@ -173,7 +173,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 4
 /// @note Page 4.1.2.L-4 - 76
 ///
-fapi2::ReturnCode decoder_v1_2::dram_vref_dq_range(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_2::dram_vref_dq_range(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< DRAM_VREF_DQ_RANGE >(iv_target, iv_spd_data);
@@ -208,7 +208,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 4
 /// @note Page 4.1.2.L-4 - 76
 ///
-fapi2::ReturnCode decoder_v1_2::data_buffer_vref_dq_range(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_2::data_buffer_vref_dq_range(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< DATA_BUFFER_VREF_DQ >(iv_target, iv_spd_data);
@@ -243,7 +243,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 4
 /// @note Page 4.1.2.L-4 - 77
 ///
-fapi2::ReturnCode decoder_v1_2::data_buffer_gain_adjustment(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_2::data_buffer_gain_adjustment(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< DATA_BUFFER_GAIN_ADJUST >(iv_target, iv_spd_data);
@@ -278,7 +278,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 4
 /// @note Page 4.1.2.L-4 - 77
 ///
-fapi2::ReturnCode decoder_v1_2::data_buffer_dfe(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_2::data_buffer_dfe(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< DATA_BUFFER_DFE >(iv_target, iv_spd_data);

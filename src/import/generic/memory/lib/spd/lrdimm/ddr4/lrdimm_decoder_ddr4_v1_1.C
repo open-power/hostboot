@@ -68,7 +68,7 @@ namespace lrdimm
 /// @note DDR4 SPD Document Release 3
 /// @note Page 4.1.2.12.3 - 63
 ///
-fapi2::ReturnCode decoder_v1_1::register_and_buffer_type(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_1::register_and_buffer_type(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< REGISTER_TYPE >(iv_target, iv_spd_data);
@@ -104,7 +104,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 3
 /// @note Page 4.1.2.12.3 - 65
 ///
-fapi2::ReturnCode decoder_v1_1::cke_signal_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_1::cke_signal_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< CKE_DRIVE_STRENGTH >(iv_target, iv_spd_data);
@@ -139,7 +139,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 3
 /// @note Page 4.1.2.12.3 - 65
 ///
-fapi2::ReturnCode decoder_v1_1::odt_signal_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_1::odt_signal_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< ODT_DRIVE_STRENGTH >(iv_target, iv_spd_data);
@@ -174,7 +174,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 3
 /// @note Page 4.1.2.12.3 - 65
 ///
-fapi2::ReturnCode decoder_v1_1::cs_signal_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_1::cs_signal_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< CS_DRIVE_STRENGTH >(iv_target, iv_spd_data);
@@ -209,7 +209,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 3
 /// @note Page 4.1.2.12.3 - 66
 ///
-fapi2::ReturnCode decoder_v1_1::b_side_clk_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_1::b_side_clk_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< B_SIDE_DRIVE_STRENGTH >(iv_target, iv_spd_data);
@@ -244,7 +244,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 3
 /// @note Page 4.1.2.12.3 - 66
 ///
-fapi2::ReturnCode decoder_v1_1::a_side_clk_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_1::a_side_clk_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< A_SIDE_DRIVE_STRENGTH >(iv_target, iv_spd_data);

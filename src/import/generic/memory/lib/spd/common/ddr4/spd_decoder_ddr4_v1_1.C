@@ -79,7 +79,7 @@ decoder_v1_1::decoder_v1_1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targe
 /// @note Page 18
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::sdram_density( uint8_t& o_value )
+fapi2::ReturnCode decoder_v1_1::sdram_density( uint8_t& o_value ) const
 {
     // =========================================================
     // Byte 4 maps
@@ -132,7 +132,7 @@ fapi_try_exit:
 /// @note Page 17
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::hybrid_media( uint8_t& o_value )
+fapi2::ReturnCode decoder_v1_1::hybrid_media( uint8_t& o_value ) const
 {
     // =========================================================
     // Byte 3 maps
@@ -178,7 +178,7 @@ fapi_try_exit:
 /// @note Page 17
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::hybrid( uint8_t& o_value )
+fapi2::ReturnCode decoder_v1_1::hybrid( uint8_t& o_value ) const
 {
     // =========================================================
     // Byte 3 maps
@@ -224,7 +224,7 @@ fapi_try_exit:
 /// @note Page 22
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::sec_sdram_signal_loading( uint8_t& o_value )
+fapi2::ReturnCode decoder_v1_1::sec_sdram_signal_loading( uint8_t& o_value ) const
 {
     // =========================================================
     // Byte 10 maps
@@ -271,7 +271,7 @@ fapi_try_exit:
 /// @note Page 21
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::soft_post_package_repair( uint8_t& o_value )
+fapi2::ReturnCode decoder_v1_1::soft_post_package_repair( uint8_t& o_value ) const
 {
     // =========================================================
     // Byte 9 maps
@@ -317,7 +317,7 @@ fapi_try_exit:
 /// @note Page 22
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::sec_dram_density_ratio( uint8_t& o_value )
+fapi2::ReturnCode decoder_v1_1::sec_dram_density_ratio( uint8_t& o_value ) const
 {
     // Extracting desired bits
     const uint8_t l_field_bits = extract_spd_field< SEC_DENSITY_RATIO >(iv_target, iv_spd_data);
@@ -350,7 +350,7 @@ fapi_try_exit:
 /// @note Page 22
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::sec_sdram_die_count( uint8_t& o_value )
+fapi2::ReturnCode decoder_v1_1::sec_sdram_die_count( uint8_t& o_value ) const
 {
     // =========================================================
     // Byte 10 maps
@@ -403,7 +403,7 @@ fapi_try_exit:
 /// @note Page 22
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::sec_sdram_package_type( uint8_t& o_value )
+fapi2::ReturnCode decoder_v1_1::sec_sdram_package_type( uint8_t& o_value ) const
 {
     // =========================================================
     // Byte 10 maps
@@ -450,7 +450,7 @@ fapi_try_exit:
 /// @note Page 23
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::num_package_ranks_per_dimm( uint8_t& o_value )
+fapi2::ReturnCode decoder_v1_1::num_package_ranks_per_dimm( uint8_t& o_value ) const
 {
     // =========================================================
     // Byte 12 maps
@@ -502,7 +502,7 @@ fapi_try_exit:
 /// @note Page 23
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::rank_mix( uint8_t& o_value )
+fapi2::ReturnCode decoder_v1_1::rank_mix( uint8_t& o_value ) const
 {
     // Extracting desired bits
     const uint8_t l_field_bits = extract_spd_field< RANK_MIX >(iv_target, iv_spd_data);
@@ -537,7 +537,7 @@ fapi_try_exit:
 /// @note Page 33-34
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::supported_cas_latencies( uint64_t& o_value )
+fapi2::ReturnCode decoder_v1_1::supported_cas_latencies( uint64_t& o_value ) const
 {
     // Trace print in the front assists w/ debug
     constexpr size_t FIRST_BYTE = 20;
@@ -610,7 +610,7 @@ fapi_try_exit:
 /// @note Page 40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::min_twr( int64_t& o_value )
+fapi2::ReturnCode decoder_v1_1::min_twr( int64_t& o_value ) const
 {
     uint8_t tWRmin_MSN = extract_spd_field< TWRMIN_MSN >(iv_target, iv_spd_data);
     FAPI_INF("MSN Field Bits value: %lu", tWRmin_MSN);
@@ -671,7 +671,7 @@ fapi_try_exit:
 /// @note Page 40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::min_twtr_s( int64_t& o_value )
+fapi2::ReturnCode decoder_v1_1::min_twtr_s( int64_t& o_value ) const
 {
     uint8_t tWTR_Smin_MSN = extract_spd_field< TWTRMIN_S_MSN >(iv_target, iv_spd_data);
     FAPI_INF("MSN Field Bits value: %lu", tWTR_Smin_MSN);
@@ -732,7 +732,7 @@ fapi_try_exit:
 /// @note Page 46
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_1::min_twtr_l( int64_t& o_value )
+fapi2::ReturnCode decoder_v1_1::min_twtr_l( int64_t& o_value ) const
 {
     // Extracting desired bits
     uint8_t tWTR_Lmin_MSN = extract_spd_field< TWTRMIN_L_MSN >(iv_target, iv_spd_data);
@@ -789,7 +789,7 @@ fapi_try_exit:
 /// @param[out] o_logical_ranks number of logical ranks
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode decoder_v1_1::sec_sdram_logical_ranks( uint8_t& o_logical_ranks )
+fapi2::ReturnCode decoder_v1_1::sec_sdram_logical_ranks( uint8_t& o_logical_ranks ) const
 {
     uint8_t l_signal_loading = 0;
     uint8_t l_ranks_per_dimm = 0;
@@ -822,7 +822,7 @@ fapi_try_exit:
 /// @param[out] o_logical_ranks number of logical ranks
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode decoder_v1_1::logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm )
+fapi2::ReturnCode decoder_v1_1::logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm ) const
 {
     uint8_t l_rank_mix = 0;
 

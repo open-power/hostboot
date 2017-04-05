@@ -211,7 +211,7 @@ static fapi2::ReturnCode rtt_park_byte_finder(const uint64_t i_dimm_speed, size_
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 55
 ///
-fapi2::ReturnCode decoder_v1_0::max_module_nominal_height(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::max_module_nominal_height(uint8_t& o_output) const
 {
     uint8_t l_field_bits = extract_spd_field< MODULE_NOMINAL_HEIGHT >(iv_target, iv_spd_data);
     FAPI_INF("Field Bits value: %d", l_field_bits);
@@ -245,7 +245,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 55
 ///
-fapi2::ReturnCode decoder_v1_0::raw_card_extension(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::raw_card_extension(uint8_t& o_output) const
 {
     uint8_t l_field_bits = extract_spd_field< RAW_CARD_EXTENSION >(iv_target, iv_spd_data);
     FAPI_INF("Field Bits value: %d", l_field_bits);
@@ -279,7 +279,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 55
 ///
-fapi2::ReturnCode decoder_v1_0::front_module_max_thickness(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::front_module_max_thickness(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< FRONT_MODULE_THICKNESS >(iv_target, iv_spd_data);
@@ -316,7 +316,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 55
 ///
-fapi2::ReturnCode decoder_v1_0::back_module_max_thickness(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::back_module_max_thickness(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< BACK_MODULE_THICKNESS >(iv_target, iv_spd_data);
@@ -352,7 +352,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 57
 ///
-fapi2::ReturnCode decoder_v1_0::num_registers_used(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::num_registers_used(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< NUM_REGISTERS_USED >(iv_target, iv_spd_data);
@@ -387,7 +387,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 57
 ///
-fapi2::ReturnCode decoder_v1_0::num_rows_of_drams(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::num_rows_of_drams(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< NUM_ROWS_OF_DRAMS >(iv_target, iv_spd_data);
@@ -423,7 +423,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 58
 ///
-fapi2::ReturnCode decoder_v1_0::heat_spreader_solution(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::heat_spreader_solution(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< HEAT_SPREADER_SOLUTION >(iv_target, iv_spd_data);
@@ -458,7 +458,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 58
 ///
-fapi2::ReturnCode decoder_v1_0::num_continuation_codes(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::num_continuation_codes(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< CONTINUATION_CODES >(iv_target, iv_spd_data);
@@ -493,7 +493,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 58
 ///
-fapi2::ReturnCode decoder_v1_0::reg_manufacturer_id_code(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::reg_manufacturer_id_code(uint8_t& o_output) const
 {
     constexpr size_t BYTE_INDEX = 134;
     uint8_t l_raw_byte = iv_spd_data[BYTE_INDEX];
@@ -523,7 +523,7 @@ fapi2::ReturnCode decoder_v1_0::reg_manufacturer_id_code(uint8_t& o_output)
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 58
 ///
-fapi2::ReturnCode decoder_v1_0::register_rev_num(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::register_rev_num(uint8_t& o_output) const
 {
     constexpr size_t BYTE_INDEX = 135;
     uint8_t l_raw_byte = iv_spd_data[BYTE_INDEX];
@@ -553,7 +553,7 @@ fapi2::ReturnCode decoder_v1_0::register_rev_num(uint8_t& o_output)
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 59
 ///
-fapi2::ReturnCode decoder_v1_0::register_to_dram_addr_mapping(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::register_to_dram_addr_mapping(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< ADDR_MAPPING >(iv_target, iv_spd_data);
@@ -588,7 +588,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 60
 ///
-fapi2::ReturnCode decoder_v1_0::cke_signal_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::cke_signal_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< CKE_DRIVE_STRENGTH >(iv_target, iv_spd_data);
@@ -623,7 +623,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 60
 ///
-fapi2::ReturnCode decoder_v1_0::odt_signal_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::odt_signal_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< ODT_DRIVE_STRENGTH >(iv_target, iv_spd_data);
@@ -658,7 +658,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 60
 ///
-fapi2::ReturnCode decoder_v1_0::ca_signal_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::ca_signal_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< CA_DRIVE_STRENGTH >(iv_target, iv_spd_data);
@@ -693,7 +693,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 60
 ///
-fapi2::ReturnCode decoder_v1_0::cs_signal_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::cs_signal_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< CS_DRIVE_STRENGTH >(iv_target, iv_spd_data);
@@ -728,7 +728,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 60
 ///
-fapi2::ReturnCode decoder_v1_0::b_side_clk_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::b_side_clk_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< B_SIDE_DRIVE_STRENGTH >(iv_target, iv_spd_data);
@@ -763,7 +763,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 60
 ///
-fapi2::ReturnCode decoder_v1_0::a_side_clk_output_driver(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::a_side_clk_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< A_SIDE_DRIVE_STRENGTH >(iv_target, iv_spd_data);
@@ -798,7 +798,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 60
 ///
-fapi2::ReturnCode decoder_v1_0::data_buffer_rev(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::data_buffer_rev(uint8_t& o_output) const
 {
     // Extracting desired bits
     constexpr size_t BYTE_INDEX = 139;
@@ -840,7 +840,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 61
 ///
-fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank0(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank0(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< VREF_DQ_RANK0 >(iv_target, iv_spd_data);
@@ -875,7 +875,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 61
 ///
-fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank1(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank1(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< VREF_DQ_RANK1 >(iv_target, iv_spd_data);
@@ -910,7 +910,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 61
 ///
-fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank2(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank2(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< VREF_DQ_RANK2  >(iv_target, iv_spd_data);
@@ -945,7 +945,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 4
 /// @note Page 4.1.2.12.2 - 61
 ///
-fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank3(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank3(uint8_t& o_output) const
 {
     // Extracting desired bits
     uint8_t l_field_bits = extract_spd_field< VREF_DQ_RANK3 >(iv_target, iv_spd_data);
@@ -980,7 +980,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 61
 ///
-fapi2::ReturnCode decoder_v1_0::data_buffer_vref_dq(uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::data_buffer_vref_dq(uint8_t& o_output) const
 {
     constexpr size_t BYTE_INDEX = 144;
     uint8_t l_raw_data = iv_spd_data[BYTE_INDEX];
@@ -1022,7 +1022,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 62
 ///
-fapi2::ReturnCode decoder_v1_0::data_buffer_mdq_drive_strength(const uint64_t i_dimm_speed, uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::data_buffer_mdq_drive_strength(const uint64_t i_dimm_speed, uint8_t& o_output) const
 {
     uint8_t l_byte = 0;
     uint8_t l_field_bits = 0;
@@ -1087,7 +1087,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 62
 ///
-fapi2::ReturnCode decoder_v1_0::data_buffer_mdq_rtt(const uint64_t i_dimm_speed, uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::data_buffer_mdq_rtt(const uint64_t i_dimm_speed, uint8_t& o_output) const
 {
     uint8_t l_byte = 0;
     uint8_t l_field_bits = 0;
@@ -1133,7 +1133,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 63
 ///
-fapi2::ReturnCode decoder_v1_0::dram_drive_strength(const uint64_t i_dimm_speed, uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::dram_drive_strength(const uint64_t i_dimm_speed, uint8_t& o_output) const
 {
     size_t l_start = 0;
     FAPI_TRY( drive_strength_start_bit_finder(i_dimm_speed, l_start) );
@@ -1178,7 +1178,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - (64 - 65)
 ///
-fapi2::ReturnCode decoder_v1_0::dram_rtt_nom(const uint64_t i_dimm_speed, uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::dram_rtt_nom(const uint64_t i_dimm_speed, uint8_t& o_output) const
 {
     size_t l_byte = 0;
     FAPI_TRY( rtt_wr_and_nom_byte_finder(i_dimm_speed, l_byte) );
@@ -1223,7 +1223,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - (64 - 65)
 ///
-fapi2::ReturnCode decoder_v1_0::dram_rtt_wr(const uint64_t i_dimm_speed, uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::dram_rtt_wr(const uint64_t i_dimm_speed, uint8_t& o_output) const
 {
     size_t l_byte = 0;
     FAPI_TRY( rtt_wr_and_nom_byte_finder(i_dimm_speed, l_byte) );
@@ -1285,7 +1285,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 65
 ///
-fapi2::ReturnCode decoder_v1_0::dram_rtt_park_ranks0_1(const uint64_t i_dimm_speed, uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::dram_rtt_park_ranks0_1(const uint64_t i_dimm_speed, uint8_t& o_output) const
 {
     size_t l_byte = 0;
     FAPI_TRY( rtt_park_byte_finder(i_dimm_speed, l_byte) );
@@ -1330,7 +1330,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12.2 - 65
 ///
-fapi2::ReturnCode decoder_v1_0::dram_rtt_park_ranks2_3(const uint64_t i_dimm_speed, uint8_t& o_output)
+fapi2::ReturnCode decoder_v1_0::dram_rtt_park_ranks2_3(const uint64_t i_dimm_speed, uint8_t& o_output) const
 {
     size_t l_byte = 0;
     FAPI_TRY( rtt_park_byte_finder(i_dimm_speed, l_byte) );

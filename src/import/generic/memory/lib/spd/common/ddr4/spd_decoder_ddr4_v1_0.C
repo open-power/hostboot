@@ -85,7 +85,7 @@ decoder_v1_0::decoder_v1_0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targe
 /// @note Page 14
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::number_of_used_bytes( uint16_t& o_value )
+fapi2::ReturnCode decoder_v1_0::number_of_used_bytes( uint16_t& o_value ) const
 {
     // =========================================================
     // Byte 0 maps
@@ -133,7 +133,7 @@ fapi_try_exit:
 /// @note Page 14
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::number_of_total_bytes( uint16_t& o_value )
+fapi2::ReturnCode decoder_v1_0::number_of_total_bytes( uint16_t& o_value ) const
 {
 
     // =========================================================
@@ -180,7 +180,7 @@ fapi_try_exit:
 /// @note Page 17
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::hybrid_media( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::hybrid_media( uint8_t& o_value) const
 {
     // For General Section rev 1.0 of the SPD,
     // Decodes SPD Byte 3 (bits 4~6) were reserved
@@ -200,7 +200,7 @@ fapi2::ReturnCode decoder_v1_0::hybrid_media( uint8_t& o_value)
 /// @note Page 17
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::hybrid( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::hybrid( uint8_t& o_value) const
 {
     // For General Section rev 1.0 of the SPD,
     // Decodes SPD Byte 3 (bit 7) were reserved
@@ -219,7 +219,7 @@ fapi2::ReturnCode decoder_v1_0::hybrid( uint8_t& o_value)
 /// @note Page 18
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::sdram_density( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::sdram_density( uint8_t& o_value) const
 {
     // =========================================================
     // Byte 4 maps
@@ -269,7 +269,7 @@ fapi_try_exit:
 /// @note Page 18
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::bank_bits( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::bank_bits( uint8_t& o_value) const
 
 {
     // =========================================================
@@ -316,7 +316,7 @@ fapi_try_exit:
 /// @note Page 18
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::bank_group_bits( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::bank_group_bits( uint8_t& o_value) const
 {
     // =========================================================
     // Byte 4 maps
@@ -363,7 +363,7 @@ fapi_try_exit:
 /// @note Page 18
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::column_address_bits( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::column_address_bits( uint8_t& o_value) const
 {
     // =========================================================
     // Byte 5 maps
@@ -411,7 +411,7 @@ fapi_try_exit:
 /// @note Page 18
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::row_address_bits( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::row_address_bits( uint8_t& o_value) const
 {
     // =========================================================
     // Byte 5 maps
@@ -463,7 +463,7 @@ fapi_try_exit:
 /// @note Page 19
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::prim_sdram_signal_loading( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::prim_sdram_signal_loading( uint8_t& o_value) const
 {
     // =========================================================
     // Byte 6 maps
@@ -510,7 +510,7 @@ fapi_try_exit:
 /// @note Page 19
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::prim_sdram_die_count( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::prim_sdram_die_count( uint8_t& o_value) const
 {
     // =========================================================
     // Byte 6 maps
@@ -562,7 +562,7 @@ fapi_try_exit:
 /// @note Page 19
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::prim_sdram_package_type( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::prim_sdram_package_type( uint8_t& o_value) const
 {
     // =========================================================
     // Byte 6 maps
@@ -609,7 +609,7 @@ fapi_try_exit:
 /// @note Page 20
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::maximum_activate_count( uint32_t& o_value )
+fapi2::ReturnCode decoder_v1_0::maximum_activate_count( uint32_t& o_value ) const
 {
     // =========================================================
     // Byte 7 maps
@@ -661,7 +661,7 @@ fapi_try_exit:
 /// @note Page 20
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::maximum_activate_window_multiplier( uint32_t& o_value )
+fapi2::ReturnCode decoder_v1_0::maximum_activate_window_multiplier( uint32_t& o_value ) const
 {
     // =========================================================
     // Byte 7 maps
@@ -709,7 +709,7 @@ fapi_try_exit:
 /// @note Page 21
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::post_package_repair( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::post_package_repair( uint8_t& o_value) const
 {
     // =========================================================
     // Byte 9 maps
@@ -755,7 +755,7 @@ fapi_try_exit:
 /// @note Page 22
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::sec_sdram_signal_loading( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::sec_sdram_signal_loading( uint8_t& o_value) const
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 10 (bits 1~0) were reserved
@@ -775,7 +775,7 @@ fapi2::ReturnCode decoder_v1_0::sec_sdram_signal_loading( uint8_t& o_value)
 /// @note Page 21
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::soft_post_package_repair( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::soft_post_package_repair( uint8_t& o_value) const
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 9 (bit 5) was reserved
@@ -794,7 +794,7 @@ fapi2::ReturnCode decoder_v1_0::soft_post_package_repair( uint8_t& o_value)
 /// @note Page 22
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::sec_dram_density_ratio( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::sec_dram_density_ratio( uint8_t& o_value) const
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 10 (bits 3~2) were reserved
@@ -814,7 +814,7 @@ fapi2::ReturnCode decoder_v1_0::sec_dram_density_ratio( uint8_t& o_value)
 /// @note Page 22
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::sec_sdram_die_count( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::sec_sdram_die_count( uint8_t& o_value) const
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 10 (bits 6~4) were reserved
@@ -834,7 +834,7 @@ fapi2::ReturnCode decoder_v1_0::sec_sdram_die_count( uint8_t& o_value)
 /// @note Page 22
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::sec_sdram_package_type( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::sec_sdram_package_type( uint8_t& o_value) const
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 10 (bit 7) was reserved
@@ -854,7 +854,7 @@ fapi2::ReturnCode decoder_v1_0::sec_sdram_package_type( uint8_t& o_value)
 /// @note Page 23
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::operable_nominal_voltage( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::operable_nominal_voltage( uint8_t& o_value) const
 {
     // =========================================================
     // Byte 11 maps
@@ -900,7 +900,7 @@ fapi_try_exit:
 /// @note Page 23
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::endurant_nominal_voltage( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::endurant_nominal_voltage( uint8_t& o_value) const
 {
     // =========================================================
     // Byte 11 maps
@@ -947,7 +947,7 @@ fapi_try_exit:
 /// @note Page 23
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::device_width( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::device_width( uint8_t& o_value) const
 {
     // =========================================================
     // Byte 12 maps
@@ -997,7 +997,7 @@ fapi_try_exit:
 /// @note Page 23
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::num_package_ranks_per_dimm( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::num_package_ranks_per_dimm( uint8_t& o_value) const
 {
     // =========================================================
     // Byte 12 maps
@@ -1046,7 +1046,7 @@ fapi_try_exit:
 /// @note Page 23
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::rank_mix( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::rank_mix( uint8_t& o_value) const
 {
     // For General Section rev 1.0 of the SPD,
     // Decodes SPD Byte 3 (bits 4~6) were reserved
@@ -1066,7 +1066,7 @@ fapi2::ReturnCode decoder_v1_0::rank_mix( uint8_t& o_value)
 /// @note Page 27
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::prim_bus_width( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::prim_bus_width( uint8_t& o_value) const
 {
     // =========================================================
     // Byte 13 maps
@@ -1115,7 +1115,7 @@ fapi_try_exit:
 /// @note Page 28
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::bus_width_extension( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::bus_width_extension( uint8_t& o_value) const
 {
     // =========================================================
     // Byte 13 maps
@@ -1162,7 +1162,7 @@ fapi_try_exit:
 /// @note Page 28
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::thermal_sensor( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::thermal_sensor( uint8_t& o_value) const
 {
     // Extracting desired bits
     const uint8_t l_field_bits = extract_spd_field< THERM_SENSOR >(iv_target, iv_spd_data);
@@ -1196,7 +1196,7 @@ fapi_try_exit:
 /// @note Page 28
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::extended_base_module_type( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::extended_base_module_type( uint8_t& o_value) const
 {
     // Extracting desired bits
     const uint8_t l_field_bits = extract_spd_field< EXTENDED_MODULE_TYPE >(iv_target, iv_spd_data);
@@ -1232,7 +1232,7 @@ fapi_try_exit:
 /// @note Page 29
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::fine_timebase( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::fine_timebase( int64_t& o_value) const
 {
     // =========================================================
     // Byte 17 maps
@@ -1279,7 +1279,7 @@ fapi_try_exit:
 /// @note Page 29
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::medium_timebase( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::medium_timebase( int64_t& o_value) const
 {
     // =========================================================
     // Byte 17 maps
@@ -1331,7 +1331,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tCKmin (SPD byte 125)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder_v1_0::min_tck( int64_t& o_value )
+fapi2::ReturnCode decoder_v1_0::min_tck( int64_t& o_value ) const
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 18;
@@ -1378,7 +1378,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tCKmax (SPD byte 124)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder_v1_0::max_tck( int64_t& o_value )
+fapi2::ReturnCode decoder_v1_0::max_tck( int64_t& o_value ) const
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 19;
@@ -1422,7 +1422,7 @@ fapi_try_exit:
 /// @note Page 33-34
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::supported_cas_latencies( uint64_t& o_value )
+fapi2::ReturnCode decoder_v1_0::supported_cas_latencies( uint64_t& o_value ) const
 {
     // Trace print in the front assists w/ debug
     constexpr size_t FIRST_BYTE = 20;
@@ -1499,7 +1499,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tAAmin (SPD byte 123)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder_v1_0::min_taa( int64_t& o_value )
+fapi2::ReturnCode decoder_v1_0::min_taa( int64_t& o_value ) const
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 24;
@@ -1546,7 +1546,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tRCDmin (SPD byte 122)
 /// used for correction to get the actual value
 ///
-fapi2::ReturnCode decoder_v1_0::min_trcd( int64_t& o_value )
+fapi2::ReturnCode decoder_v1_0::min_trcd( int64_t& o_value ) const
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 25;
@@ -1593,7 +1593,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tRPmin (SPD byte 121)
 /// used for correction to get the actual value
 ///
-fapi2::ReturnCode decoder_v1_0::min_trp( int64_t& o_value )
+fapi2::ReturnCode decoder_v1_0::min_trp( int64_t& o_value ) const
 {
     // Explicit conversion
     constexpr size_t BYTE_INDEX = 26;
@@ -1637,7 +1637,7 @@ fapi_try_exit:
 /// @note Page 38
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::min_tras( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::min_tras( int64_t& o_value) const
 {
     uint8_t tRASmin_MSN = extract_spd_field< TRASMIN_MSN >(iv_target, iv_spd_data);
     FAPI_INF("MSN Field Bits value: %lu", tRASmin_MSN);
@@ -1700,7 +1700,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tRCmin (SPD byte 120)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder_v1_0::min_trc( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::min_trc( int64_t& o_value) const
 {
     uint8_t tRCmin_MSN = extract_spd_field< TRCMIN_MSN >(iv_target, iv_spd_data);
     FAPI_INF("MSN Field Bits value: %lu", tRCmin_MSN);
@@ -1758,7 +1758,7 @@ fapi_try_exit:
 /// @note Page 39-40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::min_trfc1( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::min_trfc1( int64_t& o_value) const
 {
     uint8_t tRFC1min_MSB = extract_spd_field< TRFC1MIN_MSB >(iv_target, iv_spd_data);
     FAPI_INF("MSB Field Bits value: %lu", tRFC1min_MSB);
@@ -1816,7 +1816,7 @@ fapi_try_exit:
 /// @note Page 40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::min_trfc2( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::min_trfc2( int64_t& o_value) const
 {
     uint8_t tRFC2min_MSB = extract_spd_field< TRFC2MIN_MSB >(iv_target, iv_spd_data);
     FAPI_INF("MSB Field Bits value: %lu", tRFC2min_MSB);
@@ -1874,7 +1874,7 @@ fapi_try_exit:
 /// @note Page 40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::min_trfc4( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::min_trfc4( int64_t& o_value) const
 {
     uint8_t tRFC4min_MSB = extract_spd_field< TRFC4MIN_MSB >(iv_target, iv_spd_data);
     FAPI_INF("MSB Field Bits value: %lu", tRFC4min_MSB);
@@ -1932,7 +1932,7 @@ fapi_try_exit:
 /// @note Page 42
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::min_tfaw( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::min_tfaw( int64_t& o_value) const
 {
     uint8_t tFAWmin_MSN = extract_spd_field< TFAWMIN_MSN >(iv_target, iv_spd_data);
     FAPI_INF("MSN Field Bits value: %lu", tFAWmin_MSN);
@@ -1994,7 +1994,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tRRD_Smin (SPD byte 119)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder_v1_0::min_trrd_s( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::min_trrd_s( int64_t& o_value) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 38;
@@ -2043,7 +2043,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tRRD_Lmin (SPD byte 118)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder_v1_0::min_trrd_l( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::min_trrd_l( int64_t& o_value) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 39;
@@ -2092,7 +2092,7 @@ fapi_try_exit:
 /// integer and the Fine Offset for tCCD_Lmin (SPD byte 117)
 /// used for correction to get the actual value.
 ///
-fapi2::ReturnCode decoder_v1_0::min_tccd_l( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::min_tccd_l( int64_t& o_value) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 40;
@@ -2137,7 +2137,7 @@ fapi_try_exit:
 /// @note Page 40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::min_twr( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::min_twr( int64_t& o_value) const
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 41 (bits 3~0) & Byte 42 (bits 7~0) were reserved
@@ -2159,7 +2159,7 @@ fapi2::ReturnCode decoder_v1_0::min_twr( int64_t& o_value)
 /// @note Page 40
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::min_twtr_s( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::min_twtr_s( int64_t& o_value) const
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 43 (bits 3~0) & Byte 44 (bits 7~0) were reserved
@@ -2180,7 +2180,7 @@ fapi2::ReturnCode decoder_v1_0::min_twtr_s( int64_t& o_value)
 /// @note Page 46
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::min_twtr_l( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::min_twtr_l( int64_t& o_value) const
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 43 (bits 7~4) & Byte 45 (bits 7~0) were reserved
@@ -2202,7 +2202,7 @@ fapi2::ReturnCode decoder_v1_0::min_twtr_l( int64_t& o_value)
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::fine_offset_min_tccd_l( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::fine_offset_min_tccd_l( int64_t& o_value) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 117;
@@ -2248,7 +2248,7 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::fine_offset_min_trrd_l( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::fine_offset_min_trrd_l( int64_t& o_value) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 118;
@@ -2294,7 +2294,7 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::fine_offset_min_trrd_s( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::fine_offset_min_trrd_s( int64_t& o_value) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 119;
@@ -2340,7 +2340,7 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::fine_offset_min_trc( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::fine_offset_min_trc( int64_t& o_value) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 120;
@@ -2386,7 +2386,7 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::fine_offset_min_trp( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::fine_offset_min_trp( int64_t& o_value) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 121;
@@ -2431,7 +2431,7 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::fine_offset_min_trcd( int64_t& o_value)
+fapi2::ReturnCode decoder_v1_0::fine_offset_min_trcd( int64_t& o_value) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 122;
@@ -2477,7 +2477,7 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::fine_offset_min_taa( int64_t& o_value )
+fapi2::ReturnCode decoder_v1_0::fine_offset_min_taa( int64_t& o_value ) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 123;
@@ -2523,7 +2523,7 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::fine_offset_max_tck( int64_t& o_value )
+fapi2::ReturnCode decoder_v1_0::fine_offset_max_tck( int64_t& o_value ) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 124;
@@ -2570,7 +2570,7 @@ fapi_try_exit:
 /// @note Page 52
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::fine_offset_min_tck( int64_t& o_value )
+fapi2::ReturnCode decoder_v1_0::fine_offset_min_tck( int64_t& o_value ) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 125;
@@ -2617,7 +2617,7 @@ fapi_try_exit:
 /// @note Page 53
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::cyclical_redundancy_code( uint16_t& o_value )
+fapi2::ReturnCode decoder_v1_0::cyclical_redundancy_code( uint16_t& o_value ) const
 {
     uint8_t crc_MSB = extract_spd_field< CRC_MSB >(iv_target, iv_spd_data);
     FAPI_INF("MSB Field Bits value: %lu", crc_MSB);
@@ -2655,7 +2655,7 @@ fapi2::ReturnCode decoder_v1_0::cyclical_redundancy_code( uint16_t& o_value )
 /// @note DDR4 SPD Document Release 3
 /// @note Page 4.1.2.12 - 54
 ///
-fapi2::ReturnCode decoder_v1_0::module_manufacturer_id_code( uint16_t& o_value )
+fapi2::ReturnCode decoder_v1_0::module_manufacturer_id_code( uint16_t& o_value ) const
 {
 
     constexpr size_t BYTE_INDEX_MSB = 320;
@@ -2692,7 +2692,7 @@ fapi2::ReturnCode decoder_v1_0::module_manufacturer_id_code( uint16_t& o_value )
 /// @note Page 55
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::module_manufacturing_location( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::module_manufacturing_location( uint8_t& o_value) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 322;
@@ -2722,7 +2722,7 @@ fapi2::ReturnCode decoder_v1_0::module_manufacturing_location( uint8_t& o_value)
 /// @note in Binary Coded Decimal (BCD)
 /// @note MSB = year, LSB = week
 ///
-fapi2::ReturnCode decoder_v1_0::module_manufacturing_date( uint16_t& o_value )
+fapi2::ReturnCode decoder_v1_0::module_manufacturing_date( uint16_t& o_value ) const
 {
 
     constexpr size_t BYTE_INDEX_MSB = 323;
@@ -2761,7 +2761,7 @@ fapi2::ReturnCode decoder_v1_0::module_manufacturing_date( uint16_t& o_value )
 /// @note Page 4.1.2.12 - 54
 /// @note in Binary Coded Decimal (BCD)
 ///
-fapi2::ReturnCode decoder_v1_0::module_serial_number( uint32_t& o_value )
+fapi2::ReturnCode decoder_v1_0::module_serial_number( uint32_t& o_value ) const
 {
     constexpr size_t BYTE_INDEX_0 = 325;
     uint8_t sn_byte_0 = iv_spd_data[BYTE_INDEX_0];
@@ -2810,7 +2810,7 @@ fapi2::ReturnCode decoder_v1_0::module_serial_number( uint32_t& o_value )
 /// @note Page 55
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::module_revision_code( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::module_revision_code( uint8_t& o_value) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 349;
@@ -2838,7 +2838,7 @@ fapi2::ReturnCode decoder_v1_0::module_revision_code( uint8_t& o_value)
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 54
 ///
-fapi2::ReturnCode decoder_v1_0::dram_manufacturer_id_code( uint16_t& o_value )
+fapi2::ReturnCode decoder_v1_0::dram_manufacturer_id_code( uint16_t& o_value ) const
 {
     constexpr size_t BYTE_INDEX_MSB = 350;
     uint8_t mfgid_MSB = iv_spd_data[BYTE_INDEX_MSB];
@@ -2875,7 +2875,7 @@ fapi2::ReturnCode decoder_v1_0::dram_manufacturer_id_code( uint16_t& o_value )
 /// @note DDR4 SPD Document Release 3
 /// @note also called die revision level
 ///
-fapi2::ReturnCode decoder_v1_0::dram_stepping( uint8_t& o_value)
+fapi2::ReturnCode decoder_v1_0::dram_stepping( uint8_t& o_value) const
 {
     // Trace in the front assists w/ debug
     constexpr size_t BYTE_INDEX = 352;
@@ -2898,7 +2898,7 @@ fapi2::ReturnCode decoder_v1_0::dram_stepping( uint8_t& o_value)
 /// @param[out] o_logical_ranks number of logical ranks
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode decoder_v1_0::prim_sdram_logical_ranks( uint8_t& o_logical_ranks )
+fapi2::ReturnCode decoder_v1_0::prim_sdram_logical_ranks( uint8_t& o_logical_ranks ) const
 {
     uint8_t l_signal_loading = 0;
     uint8_t l_ranks_per_dimm = 0;
@@ -2932,7 +2932,7 @@ fapi_try_exit:
 /// @param[out] o_logical_ranks number of logical ranks
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode decoder_v1_0::logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm )
+fapi2::ReturnCode decoder_v1_0::logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm ) const
 {
     FAPI_TRY( prim_sdram_logical_ranks(o_logical_rank_per_dimm) );
 
