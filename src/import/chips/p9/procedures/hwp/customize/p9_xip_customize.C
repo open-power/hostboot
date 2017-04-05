@@ -906,7 +906,6 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                    i_ringBufSize2,  // Max size.
                    i_ring.ringId,
                    l_PpeType,
-                   ALLRING, // No-care
                    BASE,            // All VPD rings are Base ringVariant
                    l_chipletTorId,  // Chiplet instance TOR Index
                    i_vpdRing );     // The VPD RS4 ring container
@@ -2471,9 +2470,7 @@ ReturnCode p9_xip_customize (
             l_rc = tor_get_block_of_rings( l_hwRingsSection,
                                            attrDdLevel,
                                            l_PpeType,
-                                           ALLRING,
-                                           BASE,
-                                           0,
+                                           NOT_VALID,
                                            &io_ringSectionBuf,
                                            io_ringSectionBufSize );
 
