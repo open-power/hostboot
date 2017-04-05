@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,14 +76,6 @@ namespace TRUSTEDBOOT
 
         PCR_SELECT_MAX = (IMPLEMENTATION_PCR+7)/8, ///< PCR selection octet max
     };
-
-    typedef enum
-    {
-        EV_NO_ACTION    = 0x3,     ///< Event field contains info
-        EV_SEPARATOR    = 0x4,     ///< Used to indicate an error
-        EV_ACTION       = 0x5,     ///< Must extend a PCR
-        EV_INVALID                 ///< Used for error checking
-    } EventTypes;
 
     /**
      * @brief Get the digest size of the selected hash algorithm

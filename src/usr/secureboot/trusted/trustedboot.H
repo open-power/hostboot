@@ -131,6 +131,7 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* i_pTpm);
  */
 void pcrExtendSingleTpm(TpmTarget* i_pTpm,
                         TPM_Pcr i_pcr,
+                        const EventTypes i_eventType,
                         TPM_Alg_Id i_algId,
                         const uint8_t* i_digest,
                         size_t  i_digestSize,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -206,6 +206,7 @@ namespace TRUSTEDBOOT
      * @brief Get a TCG_PCR_EVENT2 populated with required data
      *
      * @param[in] i_pcr PCR to write to
+     * @param[in] i_eventType Log event type to use
      * @param[in] i_algId_1 Algorithm to use
      * @param[in] i_digest_1 Digest value to write to PCR
      * @param[in] i_digestSize_1 Byte size of i_digest array
@@ -217,6 +218,7 @@ namespace TRUSTEDBOOT
      * @return TCG_PCR_EVENT2   PCR event log
      */
     TCG_PCR_EVENT2 TpmLogMgr_genLogEventPcrExtend(TPM_Pcr i_pcr,
+                                                  EventTypes i_eventType,
                                                   TPM_Alg_Id i_algId_1,
                                                   const uint8_t* i_digest_1,
                                                   size_t i_digestSize_1,

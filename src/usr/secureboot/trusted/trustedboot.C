@@ -630,7 +630,8 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
                                 l_securitySwitchValue);
         // Extend to TPM - PCR_1
         memcpy(l_digest, &l_securitySwitchValue, sizeof(l_securitySwitchValue));
-        l_err = pcrExtend(PCR_1, l_digest, sizeof(l_securitySwitchValue),
+        l_err = pcrExtend(PCR_1, EV_PLATFORM_CONFIG_FLAGS,
+                          l_digest, sizeof(l_securitySwitchValue),
                           "Security Switches");
         if (l_err)
         {
@@ -651,7 +652,8 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         TRACDCOMP(g_trac_trustedboot, "PVR of chip = 0x%08X", l_pvr);
         // Extend to TPM - PCR_1
         memcpy(l_digest, &l_pvr, sizeof(l_pvr));
-        l_err = pcrExtend(PCR_1, l_digest, sizeof(l_pvr),"PVR of Chip");
+        l_err = pcrExtend(PCR_1, EV_PLATFORM_CONFIG_FLAGS,
+                          l_digest, sizeof(l_pvr),"PVR of Chip");
         if (l_err)
         {
             break;
@@ -672,7 +674,10 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         const TPM_Pcr l_pcrs[] = {PCR_1,PCR_4,PCR_5,PCR_6};
         for (size_t i = 0; i < (sizeof(l_pcrs)/sizeof(TPM_Pcr)) ; ++i)
         {
-            l_err = pcrExtend(l_pcrs[i], l_digest, sizeof(l_nodeid),"Node id");
+            l_err = pcrExtend(l_pcrs[i],
+                              (l_pcrs[i] == PCR_1 ?
+                               EV_PLATFORM_CONFIG_FLAGS : EV_COMPACT_HASH),
+                              l_digest, sizeof(l_nodeid),"Node id");
             if (l_err)
             {
                 break;
@@ -687,7 +692,8 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         memset(l_digest, 0, sizeof(uint64_t));
         bool l_tpmRequired = isTpmRequired();
         l_digest[0] = static_cast<uint8_t>(l_tpmRequired);
-        l_err = pcrExtend(PCR_1, l_digest, sizeof(l_tpmRequired),
+        l_err = pcrExtend(PCR_1, EV_PLATFORM_CONFIG_FLAGS,
+                          l_digest, sizeof(l_tpmRequired),
                           "Tpm Required");
         if (l_err)
         {
@@ -697,7 +703,8 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         // HW Key Hash
         sha2_hash_t l_hw_key_hash;
         SECUREBOOT::getHwKeyHash(l_hw_key_hash);
-        l_err = pcrExtend(PCR_1, l_hw_key_hash,
+        l_err = pcrExtend(PCR_1, EV_PLATFORM_CONFIG_FLAGS,
+                          l_hw_key_hash,
                           sizeof(sha2_hash_t),"HW KEY HASH");
         if (l_err)
         {
@@ -711,6 +718,7 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
 
 void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
                         const TPM_Pcr i_pcr,
+                        const EventTypes i_eventType,
                         TPM_Alg_Id i_algId,
                         const uint8_t* i_digest,
                         size_t  i_digestSize,
@@ -758,7 +766,7 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
              hwasState.functional)
         {
             // Fill in TCG_PCR_EVENT2 and add to log
-            eventLog = TpmLogMgr_genLogEventPcrExtend(pcr,
+            eventLog = TpmLogMgr_genLogEventPcrExtend(pcr, i_eventType,
                                                       i_algId, i_digest,
                                                       i_digestSize,
                                                       TPM_ALG_SHA1, i_digest,
@@ -870,6 +878,7 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
             {
                 // Fill in TCG_PCR_EVENT2 and add to log
                 eventLog = TpmLogMgr_genLogEventPcrExtend(pcr,
+                                                          EV_SEPARATOR,
                                                           TPM_ALG_SHA1,
                                                           sha1_digest,
                                                           sizeof(sha1_digest),
@@ -1206,6 +1215,7 @@ void* tpmDaemon(void* unused)
                       TRUSTEDBOOT::pcrExtendSingleTpm(
                                    tpm,
                                    msgData->mPcrIndex,
+                                   msgData->mEventType,
                                    msgData->mAlgId,
                                    msgData->mDigest,
                                    msgData->mDigestSize,

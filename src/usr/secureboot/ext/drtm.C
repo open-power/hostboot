@@ -408,8 +408,10 @@ errlHndl_t validateDrtmPayload()
             // Extend (arbitrary) measurement to PCR17
             SHA512_t hash = {0};
             memcpy(hash,DRTM_RIT_PAYLOAD,sizeof(DRTM_RIT_PAYLOAD));
-            pError = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_DRTM_17, hash,
-                                          sizeof(SHA512_t),DRTM_RIT_LOG_TEXT);
+            pError = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_DRTM_17,
+                                            TRUSTEDBOOT::EV_COMPACT_HASH,
+                                            hash,
+                                            sizeof(SHA512_t),DRTM_RIT_LOG_TEXT);
             if(pError)
             {
                 SB_ERR("validateDrtmPayload: Failed in pcrExtend() for PCR 17");
