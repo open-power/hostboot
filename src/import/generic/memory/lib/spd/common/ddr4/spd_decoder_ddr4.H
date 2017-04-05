@@ -333,7 +333,7 @@ class decoder_v1_0 : public decoder
         /// @param[out] o_logical_ranks number of logical ranks
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode prim_sdram_logical_ranks( uint8_t& o_logical_ranks );
+        virtual fapi2::ReturnCode prim_sdram_logical_ranks( uint8_t& o_logical_ranks ) const;
 
     public:
 
@@ -425,7 +425,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 14
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode number_of_used_bytes( uint16_t& o_value ) override;
+        virtual fapi2::ReturnCode number_of_used_bytes( uint16_t& o_value ) const override;
 
         ///
         /// @brief Decodes total number of SPD bytes
@@ -436,7 +436,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 14
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode number_of_total_bytes( uint16_t& o_value ) override;
+        virtual fapi2::ReturnCode number_of_total_bytes( uint16_t& o_value ) const override;
 
         ///
         /// @brief Decodes hybrid media field from SPD
@@ -447,7 +447,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 17
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode hybrid_media( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode hybrid_media( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes hybrid field from SPD
@@ -458,7 +458,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 17
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode hybrid( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode hybrid( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes SDRAM density from SPD
@@ -469,7 +469,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 18
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sdram_density( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode sdram_density( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes number of SDRAM banks bits from SPD
@@ -480,7 +480,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 18
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode bank_bits( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode bank_bits( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes number of SDRAM bank groups bits from SPD
@@ -491,7 +491,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 18
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode bank_group_bits( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode bank_group_bits( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes number of SDRAM column address bits
@@ -501,7 +501,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 18
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode column_address_bits( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode column_address_bits( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes number of SDRAM row address bits
@@ -511,7 +511,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 18
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode row_address_bits( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode row_address_bits( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes Primary SDRAM signal loading
@@ -521,7 +521,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 19
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode prim_sdram_signal_loading( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode prim_sdram_signal_loading( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes Primary SDRAM die count
@@ -531,7 +531,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 19
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual  fapi2::ReturnCode prim_sdram_die_count( uint8_t& o_value ) override;
+        virtual  fapi2::ReturnCode prim_sdram_die_count( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes Primary SDRAM package type
@@ -541,7 +541,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 19
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode prim_sdram_package_type( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode prim_sdram_package_type( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decode SDRAM Maximum activate count
@@ -551,7 +551,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 20
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode maximum_activate_count( uint32_t& o_value ) override;
+        virtual fapi2::ReturnCode maximum_activate_count( uint32_t& o_value ) const override;
 
         ///
         /// @brief Decode SDRAM Maximum activate window (multiplier), tREFI uknown at this point
@@ -561,7 +561,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 20
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode maximum_activate_window_multiplier( uint32_t& o_value ) override;
+        virtual fapi2::ReturnCode maximum_activate_window_multiplier( uint32_t& o_value ) const override;
 
         ///
         /// @brief Decode Post package repair (PPR)
@@ -571,7 +571,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 21
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode post_package_repair( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode post_package_repair( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decode Soft post package repair (soft PPR)
@@ -581,7 +581,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 21
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode soft_post_package_repair( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode soft_post_package_repair( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes Secondary SDRAM signal loading
@@ -591,7 +591,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 22
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_sdram_signal_loading( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode sec_sdram_signal_loading( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes Secondary DRAM Density Ratio
@@ -601,7 +601,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 22
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_dram_density_ratio( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode sec_dram_density_ratio( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes Secondary SDRAM die count
@@ -611,7 +611,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 22
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_sdram_die_count( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode sec_sdram_die_count( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes Secondary SDRAM package type
@@ -621,7 +621,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 22
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_sdram_package_type( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode sec_sdram_package_type( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decode Module Nominal Voltage, VDD
@@ -632,7 +632,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 23
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode operable_nominal_voltage( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode operable_nominal_voltage( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decode Module Nominal Voltage, VDD
@@ -643,7 +643,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 23
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode endurant_nominal_voltage( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode endurant_nominal_voltage( uint8_t& o_value ) const override;
         ///
         /// @brief Decodes SDRAM device width
         /// @param[out] o_value device width in bits
@@ -653,7 +653,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 23
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode device_width( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode device_width( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes number of package ranks per DIMM
@@ -664,7 +664,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 23
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode num_package_ranks_per_dimm( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode num_package_ranks_per_dimm( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes Rank Mix
@@ -675,7 +675,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 23
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode rank_mix( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode rank_mix( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes primary bus width
@@ -686,7 +686,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 27
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode prim_bus_width( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode prim_bus_width( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes bus width extension
@@ -697,7 +697,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 27
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode bus_width_extension( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode bus_width_extension( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decode Module Thermal Sensor
@@ -708,7 +708,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 28
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode thermal_sensor( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode thermal_sensor( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decode Extended Base Module Type
@@ -719,7 +719,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 28
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode extended_base_module_type( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode extended_base_module_type( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decode Fine Timebase
@@ -730,7 +730,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 29
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_timebase( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode fine_timebase( int64_t& o_value ) const override;
 
         ///
         /// @brief Decode Medium Timebase
@@ -741,7 +741,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 29
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode medium_timebase( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode medium_timebase( int64_t& o_value ) const override;
 
         ///
         ///
@@ -757,7 +757,7 @@ class decoder_v1_0 : public decoder
         /// integer and the Fine Offset for tCKmin (SPD byte 125)
         /// used for correction to get the actual value.
         ///
-        virtual fapi2::ReturnCode min_tck( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_tck( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes SDRAM Maximum Cycle Time in MTB
@@ -772,7 +772,7 @@ class decoder_v1_0 : public decoder
         /// integer and the Fine Offset for tCKmax (SPD byte 124)
         /// used for correction to get the actual value.
         ///
-        virtual fapi2::ReturnCode max_tck( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode max_tck( int64_t& o_value ) const override;
 
         ///
         /// @brief Decode CAS Latencies Supported
@@ -783,7 +783,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 33-34
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode supported_cas_latencies( uint64_t& o_value ) override;
+        virtual fapi2::ReturnCode supported_cas_latencies( uint64_t& o_value ) const override;
 
         ///
         /// @brief Decodes SDRAM Minimum CAS Latency Time in MTB
@@ -798,7 +798,7 @@ class decoder_v1_0 : public decoder
         /// integer and the Fine Offset for tAAmin (SPD byte 123)
         /// used for correction to get the actual value.
         ///
-        virtual fapi2::ReturnCode min_taa( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_taa( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes SDRAM Minimum RAS to CAS Delay Time in MTB
@@ -813,7 +813,7 @@ class decoder_v1_0 : public decoder
         /// integer and the Fine Offset for tRCDmin (SPD byte 122)
         /// used for correction to get the actual value
         ///
-        virtual fapi2::ReturnCode min_trcd( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_trcd( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes SDRAM Minimum Row Precharge Delay Time in MTB
@@ -828,7 +828,7 @@ class decoder_v1_0 : public decoder
         /// integer and the Fine Offset for tRPmin (SPD byte 121)
         /// used for correction to get the actual value
         ///
-        virtual fapi2::ReturnCode min_trp( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_trp( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes SDRAM Minimum Active to Precharge Delay Time in MTB
@@ -839,7 +839,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 38
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_tras( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_tras( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes SDRAM Minimum Active to Active/Refresh Delay Time in MTB
@@ -854,7 +854,7 @@ class decoder_v1_0 : public decoder
         /// integer and the Fine Offset for tRCmin (SPD byte 120)
         /// used for correction to get the actual value.
         ///
-        virtual fapi2::ReturnCode min_trc( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_trc( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 1
@@ -865,7 +865,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 39-40
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_trfc1( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_trfc1( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 2
@@ -876,7 +876,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 40
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_trfc2( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_trfc2( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 4
@@ -887,7 +887,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 40
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_trfc4( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_trfc4( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes SDRAM Minimum Four Activate Window Delay Time
@@ -898,7 +898,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 42
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_tfaw( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_tfaw( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Minimum Activate to Activate Delay Time - Different Bank Group
@@ -913,7 +913,7 @@ class decoder_v1_0 : public decoder
         /// integer and the Fine Offset for tRRD_Smin (SPD byte 119)
         /// used for correction to get the actual value.
         ///
-        virtual fapi2::ReturnCode min_trrd_s( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_trrd_s( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Minimum Activate to Activate Delay Time - Same Bank Group
@@ -928,7 +928,7 @@ class decoder_v1_0 : public decoder
         /// integer and the Fine Offset for tRRD_Lmin (SPD byte 118)
         /// used for correction to get the actual value.
         ///
-        virtual fapi2::ReturnCode min_trrd_l( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_trrd_l( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Minimum CAS to CAS Delay Time - Same Bank Group
@@ -943,7 +943,7 @@ class decoder_v1_0 : public decoder
         /// integer and the Fine Offset for tCCD_Lmin (SPD byte 117)
         /// used for correction to get the actual value.
         ///
-        virtual fapi2::ReturnCode min_tccd_l( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_tccd_l( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Minimum Write Recovery Time
@@ -954,7 +954,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 40
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_twr( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_twr( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Minimum Write to Read Time - Different Bank Group
@@ -965,7 +965,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 40
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_twtr_s( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_twtr_s( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Minimum Write to Read Time - Same Bank Group
@@ -976,7 +976,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 46
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_twtr_l( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_twtr_l( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Fine Offset for Minimum CAS to CAS Delay Time - Same Bank Group
@@ -987,7 +987,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 52
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_min_tccd_l( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode fine_offset_min_tccd_l( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Fine Offset for Minimum Activate to Activate Delay Time - Same Bank Group
@@ -998,7 +998,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 52
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trrd_l( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode fine_offset_min_trrd_l( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Fine Offset for Minimum Activate to Activate Delay Time - Different Bank Group
@@ -1009,7 +1009,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 52
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trrd_s( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode fine_offset_min_trrd_s( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Fine Offset for Minimum Active to Active/Refresh Delay Time
@@ -1020,7 +1020,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 52
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trc( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode fine_offset_min_trc( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Fine Offset for Minimum Row Precharge Delay Time
@@ -1031,7 +1031,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 52
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trp( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode fine_offset_min_trp( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Fine Offset for SDRAM Minimum RAS to CAS Delay Time
@@ -1042,7 +1042,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 52
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trcd( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode fine_offset_min_trcd( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Fine Offset for SDRAM Minimum CAS Latency Time
@@ -1053,7 +1053,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 52
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_min_taa( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode fine_offset_min_taa( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Fine Offset for SDRAM Maximum Cycle Time
@@ -1064,7 +1064,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 52
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_max_tck( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode fine_offset_max_tck( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Fine Offset for SDRAM Minimum Cycle Time
@@ -1075,7 +1075,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 52
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_min_tck( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode fine_offset_min_tck( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Cyclical Redundancy Code (CRC) for Base Configuration Section
@@ -1086,7 +1086,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 53
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode cyclical_redundancy_code( uint16_t& o_value ) override;
+        virtual fapi2::ReturnCode cyclical_redundancy_code( uint16_t& o_value ) const override;
 
         ///
         /// @brief Decodes module manufacturer ID code
@@ -1097,7 +1097,7 @@ class decoder_v1_0 : public decoder
         /// @note DDR4 SPD Document Release 3
         /// @note Page 4.1.2.12 - 54
         ///
-        virtual fapi2::ReturnCode module_manufacturer_id_code( uint16_t& o_value ) override;
+        virtual fapi2::ReturnCode module_manufacturer_id_code( uint16_t& o_value ) const override;
 
         ///
         /// @brief Decodes Module Manufacturing Location
@@ -1108,7 +1108,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 55
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode module_manufacturing_location( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode module_manufacturing_location( uint8_t& o_value ) const override;
         ///
         /// @brief Decodesmodule manufacturing date
         /// @param[out] o_output the 2 byte date of manufacturing in BCD format
@@ -1120,7 +1120,7 @@ class decoder_v1_0 : public decoder
         /// @note in Binary Coded Decimal (BCD)
         /// @note MSB = year, LSB = week
         ///
-        virtual fapi2::ReturnCode module_manufacturing_date( uint16_t& o_output ) override;
+        virtual fapi2::ReturnCode module_manufacturing_date( uint16_t& o_output ) const override;
 
         ///
         /// @brief Decodes module's unique serial number
@@ -1131,7 +1131,7 @@ class decoder_v1_0 : public decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 54
         ///
-        virtual fapi2::ReturnCode module_serial_number( uint32_t& o_output ) override;
+        virtual fapi2::ReturnCode module_serial_number( uint32_t& o_output ) const override;
 
         ///
         /// @brief Decodes Module Revision Code
@@ -1142,7 +1142,7 @@ class decoder_v1_0 : public decoder
         /// @note Page 55
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode module_revision_code( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode module_revision_code( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes DRAM Manufacturer ID code
@@ -1153,7 +1153,7 @@ class decoder_v1_0 : public decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 54
         ///
-        virtual fapi2::ReturnCode dram_manufacturer_id_code( uint16_t& o_output ) override;
+        virtual fapi2::ReturnCode dram_manufacturer_id_code( uint16_t& o_output ) const override;
         ///
         /// @brief Decodes DRAM Stepping
         /// @param[out] o_value uint8_t DRAM Stepping val
@@ -1164,14 +1164,14 @@ class decoder_v1_0 : public decoder
         /// @note DDR4 SPD Document Release 3
         /// @note also called die revision level
         ///
-        virtual fapi2::ReturnCode dram_stepping( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode dram_stepping( uint8_t& o_value ) const override;
 
         ///
         /// @brief Returns Logical ranks per DIMM
         /// @param[out] o_logical_ranks number of logical ranks
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm ) override;
+        virtual fapi2::ReturnCode logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm ) const override;
 
 };// decoder
 
@@ -1188,7 +1188,7 @@ class decoder_v1_1 : public decoder_v1_0
         /// @param[out] o_logical_ranks number of logical ranks
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode sec_sdram_logical_ranks( uint8_t& o_logical_ranks );
+        virtual fapi2::ReturnCode sec_sdram_logical_ranks( uint8_t& o_logical_ranks ) const;
 
     public:
         ///
@@ -1226,7 +1226,7 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 17
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode hybrid_media( uint8_t& o_value) override;
+        virtual fapi2::ReturnCode hybrid_media( uint8_t& o_value) const override;
 
         ///
         /// @brief Decodes hybrid field from SPD
@@ -1237,7 +1237,7 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 17
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode hybrid( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode hybrid( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes SDRAM density from SPD
@@ -1248,7 +1248,7 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 18
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sdram_density( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode sdram_density( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decode Soft post package repair (soft PPR)
@@ -1258,7 +1258,7 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 21
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode soft_post_package_repair( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode soft_post_package_repair( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes Secondary SDRAM signal loading
@@ -1268,7 +1268,7 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 22
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_sdram_signal_loading( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode sec_sdram_signal_loading( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes Secondary DRAM Density Ratio
@@ -1278,7 +1278,7 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 22
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_dram_density_ratio( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode sec_dram_density_ratio( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes Secondary SDRAM die count
@@ -1288,7 +1288,7 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 22
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_sdram_die_count( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode sec_sdram_die_count( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes Secondary SDRAM package type
@@ -1298,7 +1298,7 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 22
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_sdram_package_type( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode sec_sdram_package_type( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes number of package ranks per DIMM
@@ -1309,7 +1309,7 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 23
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode num_package_ranks_per_dimm( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode num_package_ranks_per_dimm( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes Rank Mix
@@ -1320,7 +1320,7 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 23
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode rank_mix( uint8_t& o_value ) override;
+        virtual fapi2::ReturnCode rank_mix( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decode CAS Latencies Supported
@@ -1331,7 +1331,7 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 33-34
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode supported_cas_latencies( uint64_t& o_value) override;
+        virtual fapi2::ReturnCode supported_cas_latencies( uint64_t& o_value) const override;
 
         ///
         /// @brief Decodes Minimum Write Recovery Time
@@ -1342,7 +1342,7 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 40
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_twr( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_twr( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Minimum Write to Read Time - Different Bank Group
@@ -1353,7 +1353,7 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 40
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_twtr_s( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_twtr_s( int64_t& o_value ) const override;
 
         ///
         /// @brief Decodes Minimum Write to Read Time - Same Bank Group
@@ -1364,14 +1364,14 @@ class decoder_v1_1 : public decoder_v1_0
         /// @note Page 46
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_twtr_l( int64_t& o_value ) override;
+        virtual fapi2::ReturnCode min_twtr_l( int64_t& o_value ) const override;
 
         ///
         /// @brief Returns Logical ranks per DIMM
         /// @param[out] o_logical_ranks number of logical ranks
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm ) override;
+        virtual fapi2::ReturnCode logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm ) const override;
 
 };// spd_decoder_v1_1
 
