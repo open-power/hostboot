@@ -31,7 +31,7 @@
 /// *HWP HWP Owner   : Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
 /// *HWP Team        : Nest
-/// *HWP Level       : 1
+/// *HWP Level       : 3
 /// *HWP Consumed by : HB
 /// ----------------------------------------------------------------------------
 
@@ -332,7 +332,19 @@ fapi2::ReturnCode validateGroupData(
                 {
                     l_mcsSizeGroupData += i_groupData[l_group][PORT_SIZE];
                     // Increase # of times this PORT_ID is found
-                    l_portFound[i_groupData[l_group][MEMBER_IDX(0) + l_memberIdx]]++;
+                    uint8_t l_portNum = i_groupData[l_group][MEMBER_IDX(0) + l_memberIdx];
+                    l_portFound[l_portNum]++;
+
+                    // Assert if a PORT_ID is found more than once in any group
+                    FAPI_ASSERT(l_portFound[l_portNum] <= 1,
+                                fapi2::MSS_SETUP_BARS_MULTIPLE_GROUP_ERR()
+                                .set_MCS_TARGET(l_mcs)
+                                .set_MCS_POS(l_unitPos)
+                                .set_PORT_ID(l_portNum)
+                                .set_COUNTER(l_portFound[l_portNum]),
+                                "Error: PORT_ID %u is grouped multiple times. "
+                                "MCS pos %d, Port %d, Counter %u", l_mcsId, l_portNum,
+                                l_portFound[l_portNum]);
                 }
 
             } // Port loop
@@ -343,7 +355,8 @@ fapi2::ReturnCode validateGroupData(
         // with the amount gets from Memory interface.
         FAPI_ASSERT(l_mcsSizeGroupData == l_mcsSize,
                     fapi2::MSS_SETUP_BARS_MCS_MEMSIZE_DISCREPENCY()
-                    .set_TARGET(l_mcs)
+                    .set_MCS_TARGET(l_mcs)
+                    .set_MCS_POS(l_unitPos)
                     .set_MEMSIZE_GROUP_DATA(l_mcsSizeGroupData)
                     .set_MEMSIZE_REPORTED(l_mcsSize),
                     "Error: MCS %u memory discrepancy: Group data size %u, "
@@ -351,17 +364,6 @@ fapi2::ReturnCode validateGroupData(
                     l_unitPos, l_mcsSizeGroupData, l_mcsSize);
 
     } // MCS loop
-
-    // Assert if a PORT_ID is found more than once in any group
-    for (uint8_t ii = 0; ii < NUM_MC_PORTS_PER_PROC; ii++)
-    {
-        FAPI_ASSERT(l_portFound[ii] <= 1,
-                    fapi2::MSS_SETUP_BARS_MULTIPLE_GROUP_ERR()
-                    .set_PORT_ID(ii)
-                    .set_COUNTER(l_portFound[ii]),
-                    "Error: PORT_ID %u is grouped multiple times.  Counter %u",
-                    ii, l_portFound[ii]);
-    }
 
 fapi_try_exit:
     FAPI_DBG("Exit");
@@ -386,12 +388,14 @@ fapi2::ReturnCode validateGroupData(
 /// @brief Look up table to determine the MCFGP/MCFGPM group size
 ///        encoded value (bits 13:23).
 ///
-/// @param[in]   i_groupSize    Group size (in GB)
-/// @param[out]  o_value        Encoded value
+/// @param[in]  i_mcsTarget    MCS target
+/// @param[in]  i_groupSize    Group size (in GB)
+/// @param[out] o_value        Encoded value
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode getGroupSizeEncodedValue(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_mcsTarget,
     const uint32_t i_groupSize,
     uint32_t& o_value)
 {
@@ -412,12 +416,21 @@ fapi2::ReturnCode getGroupSizeEncodedValue(
         }
     }
 
-    // Assert if can't find Group size in the table
-    FAPI_ASSERT( l_sizeFound == true,
-                 fapi2::MSS_SETUP_BARS_INVALID_GROUP_SIZE()
-                 .set_GROUP_SIZE(i_groupSize),
-                 "Error: Can't locate Group size value in GROUP_SIZE_TABLE. "
-                 "GroupSize u% GB.", i_groupSize );
+    if (l_sizeFound == false)
+    {
+        uint8_t l_unitPos = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_mcsTarget, l_unitPos),
+                 "Error getting ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+        // Assert if can't find Group size in the table
+        FAPI_ASSERT( false,
+                     fapi2::MSS_SETUP_BARS_INVALID_GROUP_SIZE()
+                     .set_MCS_TARGET(i_mcsTarget)
+                     .set_MCS_POS(l_unitPos)
+                     .set_GROUP_SIZE(i_groupSize),
+                     "Error: Can't locate Group size value in GROUP_SIZE_TABLE. "
+                     "MCS pos: %d, GroupSize u% GB.", l_unitPos, i_groupSize );
+    }
 
 fapi_try_exit:
     FAPI_DBG("Exit");
@@ -428,12 +441,14 @@ fapi_try_exit:
 /// @brief Calculate the BAR data for each MCS based on group info
 ///        of port0/1
 ///
+/// @param[in]  i_mcsTarget    MCS target
 /// @param[in]  i_portInfo     The port group info
 /// @param[in]  o_mcsBarData   MCS BAR data
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode getBarData(const mcsPortGroupInfo_t i_portInfo[],
+fapi2::ReturnCode getBarData(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_mcsTarget,
+                             const mcsPortGroupInfo_t i_portInfo[],
                              mcsBarData_t& o_mcsBarData)
 {
     FAPI_DBG("Entering");
@@ -480,17 +495,27 @@ fapi2::ReturnCode getBarData(const mcsPortGroupInfo_t i_portInfo[],
     }
 
     // Assert if ports 0/1 don't match any entry in table
-    FAPI_ASSERT(o_mcsBarData.MCFGP_chan_per_group != NO_CHANNEL_PER_GROUP,
-                fapi2::MSS_SETUP_BARS_INVALID_PORTS_CONFIG()
-                .set_PORT_0_PORTS_IN_GROUP(i_portInfo[0].numPortsInGroup)
-                .set_PORT_0_GROUP(i_portInfo[0].myGroup)
-                .set_PORT_1_PORTS_IN_GROUP(i_portInfo[1].numPortsInGroup)
-                .set_PORT_1_GROUP(i_portInfo[1].myGroup),
-                "Error: ports 0/1 config doesn't match any entry in Channel/group table. "
-                "Port_0: group %u, ports in group %u, Port_1: group %u, ports in group %u",
-                i_portInfo[0].myGroup, i_portInfo[0].numPortsInGroup,
-                i_portInfo[1].myGroup, i_portInfo[1].numPortsInGroup);
-
+    if ( (o_mcsBarData.MCFGP_chan_per_group == NO_CHANNEL_PER_GROUP) )
+    {
+        uint8_t l_unitPos = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_mcsTarget, l_unitPos),
+                 "Error getting ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+        FAPI_ASSERT(false,
+                    fapi2::MSS_SETUP_BARS_INVALID_PORTS_CONFIG()
+                    .set_MCS_TARGET(i_mcsTarget)
+                    .set_MCS_POS(l_unitPos)
+                    .set_PORT_0_PORTS_IN_GROUP(i_portInfo[0].numPortsInGroup)
+                    .set_PORT_0_GROUP(i_portInfo[0].myGroup)
+                    .set_PORT_1_PORTS_IN_GROUP(i_portInfo[1].numPortsInGroup)
+                    .set_PORT_1_GROUP(i_portInfo[1].myGroup),
+                    "Error: ports 0/1 config doesn't match any entry in Channel/group table. "
+                    "MCS pos %d, "
+                    "Port_0: group %u, ports in group %u, Port_1: group %u, ports in group %u",
+                    l_unitPos,
+                    i_portInfo[0].myGroup, i_portInfo[0].numPortsInGroup,
+                    i_portInfo[1].myGroup, i_portInfo[1].numPortsInGroup);
+    }
 
     // MCFGP valid (MCFGP bit 0)
     if ( i_portInfo[0].numPortsInGroup == 0)
@@ -549,7 +574,8 @@ fapi2::ReturnCode getBarData(const mcsPortGroupInfo_t i_portInfo[],
     if (o_mcsBarData.MCS_MCFGP_VALID == true)
     {
         // MCFGP Group size
-        FAPI_TRY(getGroupSizeEncodedValue(i_portInfo[0].groupSize,
+        FAPI_TRY(getGroupSizeEncodedValue(i_mcsTarget,
+                                          i_portInfo[0].groupSize,
                                           o_mcsBarData.MCFGP_group_size),
                  "getGroupSizeEncodedValue() returns error, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
@@ -562,7 +588,8 @@ fapi2::ReturnCode getBarData(const mcsPortGroupInfo_t i_portInfo[],
     if (o_mcsBarData.MCS_MCFGPM_VALID == true)
     {
         // MCFGPM Group size
-        FAPI_TRY(getGroupSizeEncodedValue(i_portInfo[1].groupSize,
+        FAPI_TRY(getGroupSizeEncodedValue(i_mcsTarget,
+                                          i_portInfo[1].groupSize,
                                           o_mcsBarData.MCFGPM_group_size),
                  "getGroupSizeEncodedValue() returns error, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
@@ -816,7 +843,7 @@ fapi2::ReturnCode buildMCBarData(
             displayMCPortInfoData(l_mcs, l_portInfo);
 
             // ---- Build MCFGP/MCFGM data based on port group info ----
-            FAPI_TRY(getBarData(l_portInfo, l_mcsBarData),
+            FAPI_TRY(getBarData(l_mcs, l_portInfo, l_mcsBarData),
                      "getBarData() returns error, l_rc 0x%.8X",
                      (uint64_t)fapi2::current_err);
 
