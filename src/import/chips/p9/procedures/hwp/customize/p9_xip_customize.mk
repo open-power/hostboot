@@ -29,6 +29,7 @@ lib$(PROCEDURE)_DEPLIBS+=p9_scan_compression
 lib$(PROCEDURE)_DEPLIBS+=p9_get_mvpd_ring
 lib$(PROCEDURE)_DEPLIBS+=p9_mvpd_ring_funcs
 lib$(PROCEDURE)_DEPLIBS+=p9_tor
+lib$(PROCEDURE)_DEPLIBS+=common_ringId
 lib$(PROCEDURE)_DEPLIBS+=p9_ringId
 lib$(PROCEDURE)_DEPLIBS+=cen_ringId
 lib$(PROCEDURE)_DEPLIBS+=p9_dd_container
