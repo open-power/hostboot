@@ -37,6 +37,7 @@
     #include <p9_ring_id.h>
 #endif
 
+
 enum CHIPLET_TYPE
 {
     PERV_TYPE,
@@ -58,8 +59,8 @@ enum CHIPLET_TYPE
     SBE_NOOF_CHIPLETS
 };
 
-#define SGPE_NOOF_CHIPLETS  1
-#define CME_NOOF_CHIPLETS   1
+const ChipletType_t CME_NOOF_CHIPLETS = 1;
+const ChipletType_t SGPE_NOOF_CHIPLETS = 1;
 
 namespace PERV
 {
@@ -1233,8 +1234,7 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 
 // Returns our own chiplet enum value for this ringId
 ChipletType_t
-ringid_get_chiplet(
-    RingId_t i_ringId);
+ringid_get_chiplet(RingId_t i_ringId);
 
 // Returns data structures defined for chiplet type
 // as determined by ringId
@@ -1249,8 +1249,7 @@ ringid_get_chiplet_properties(
 
 // Returns properties of a ring as determined by ringId
 GenRingIdList*
-ringid_get_ring_properties(
-    RingId_t i_ringId);
+ringid_get_ring_list(RingId_t i_ringId);
 
 
 #endif
