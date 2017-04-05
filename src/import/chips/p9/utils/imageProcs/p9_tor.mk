@@ -23,6 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_tor
+lib$(PROCEDURE)_DEPLIBS += common_ringId
 lib$(PROCEDURE)_DEPLIBS += p9_ringId
 lib$(PROCEDURE)_DEPLIBS += cen_ringId
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/centaur/utils/imageProcs)
