@@ -53,14 +53,13 @@ const uint32_t  MAX_HBBL_SIZE           = 20 * 1024;     // Max hbbl section siz
 const uint32_t  MAX_NOOF_DD_LEVELS_IN_IMAGE = 20;
 
 //@FIXME: CMO: Aren't these defined somewhere else?
-#define NUM_OF_CORES    24
-#define NUM_OF_CMES     12
-#define NUM_OF_QUADS     6
-#define CORES_PER_QUAD  (NUM_OF_CORES/NUM_OF_QUADS)
+#define NUM_OF_CORES     (uint8_t)24
+#define NUM_OF_CMES      (uint8_t)12
+#define NUM_OF_QUADS     (uint8_t) 6
+#define CORES_PER_QUAD   (NUM_OF_CORES/NUM_OF_QUADS)
 
-#define INFRASTRUCT_RC_SUCCESS                     0
-#define INFRASTRUCT_RC_CODE_BUG                    1
-#define INFRASTRUCT_RC_INVALID_IMAGE_SECTION_TYPE  2
+#define INSTANCE_ID_MIN        (uint8_t)0x01
+#define INSTANCE_ID_MAX        (uint8_t)0x37
 
 enum SYSPHASE
 {
