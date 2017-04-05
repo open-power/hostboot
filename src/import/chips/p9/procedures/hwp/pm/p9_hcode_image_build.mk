@@ -38,6 +38,7 @@ lib$(PROCEDURE)_DEPLIBS += p9_scan_ring_util
 lib$(PROCEDURE)_DEPLIBS += p9_xip_image
 lib$(PROCEDURE)_DEPLIBS += p9_tor
 lib$(PROCEDURE)_DEPLIBS += p9_ring_identification
+lib$(PROCEDURE)_DEPLIBS += common_ringId
 lib$(PROCEDURE)_DEPLIBS += p9_ringId
 lib$(PROCEDURE)_DEPLIBS += cen_ringId
 lib$(PROCEDURE)_DEPLIBS += p9_stop_util
