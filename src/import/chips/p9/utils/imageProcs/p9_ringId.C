@@ -618,7 +618,7 @@ void P9_RID::ringid_get_chiplet_properties(
     }
 }
 
-GenRingIdList* P9_RID::ringid_get_ring_properties(RingId_t i_ringId)
+GenRingIdList* P9_RID::ringid_get_ring_list(RingId_t i_ringId)
 {
     ChipletData_t*    l_cpltData;
     GenRingIdList*    l_ringList[2];    // 0: common, 1: instance

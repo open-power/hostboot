@@ -29,8 +29,12 @@
 #include <stdint.h>
 #include <stddef.h>
 
+
+////////////////////////////////////////////////////////////////////////////////
+// Declare assumptions - Begin
 //
-// Various data typedefs for enums. Serves following purposes:
+
+// Various data type defs for enums. Serves following purposes:
 // - Reduces space since enum defaults to an int type.
 // - Enables using these types without the scope operator for
 //   those enums that are namespaced, e.g. RingID.
@@ -43,11 +47,91 @@ typedef uint8_t   PpeType_t;        // Type for PpeType
 typedef uint8_t   ChipType_t;       // Type for ChipType enum
 typedef uint8_t   RingType_t;       // Type for RingType enum
 typedef uint8_t   RingVariant_t;    // Type for RingVariant enum
+typedef uint32_t  TorCpltOffset_t;  // Type for offset value to chiplet's CMN or INST section
 
-#define  INVALID_RING_ID  (RingId_t)0xffff
-#define  INVALID_RING_TYPE  (RingType_t)0xff
-#define  INVALID_CHIP_TYPE  (ChipType_t)0xff
-#define  INVALID_CHIPLET_TYPE  (ChipletType_t)0xff
+#define  UNDEFINED_RING_ID      (RingId_t)0xffff
+#define  INVALID_RING_TYPE      (RingType_t)0xff
+#define  INVALID_CHIPLET_TYPE   (ChipletType_t)0xff
+#define  UNDEFINED_CHIP_TYPE    (ChipType_t)0xff
+#define  MAX_TOR_RING_OFFSET    (uint16_t)(256*256-1) // Max val of uint16
+#define  MAX_RING_NAME_LENGTH   (uint8_t)50
+#define  UNDEFINED_DD_LEVEL     (uint8_t)0xff
+
+//
+// Declare assumptions - End
+///////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////////////////////////////
+// TOR layout definitions - Begin
+//
+
+//
+// TOR header field (appears in top of every HW, SBE, CEN, OVRD, etc ring section)
+//
+typedef struct
+{
+    uint32_t   magic;
+    uint8_t    version;
+    ChipType_t chipType;    // Value from ChipType enum
+    uint8_t    ddLevel;     // =0xff if MAGIC_HW, >0 all other MAGICs
+    uint8_t    numDdLevels; // >0 if MAGIC_HW, =1 all other MAGICs
+    uint32_t   size;        // Size of the TOR ringSection.
+} TorHeader_t;
+
+//
+// Subsequent TOR fields (listed in order they appear in TOR ringSections)
+//
+typedef struct
+{
+    uint32_t offset;
+    uint32_t size;
+    uint8_t  ddLevel;
+    uint8_t  reserved[3];
+} TorDdBlock_t;
+
+typedef struct
+{
+    uint32_t offset;
+    uint32_t size;
+} TorPpeBlock_t;
+
+typedef struct
+{
+    TorCpltOffset_t cmnOffset;
+    TorCpltOffset_t instOffset;
+} TorCpltBlock_t;
+
+typedef uint16_t TorRingOffset_t;  // Offset value to actual ring
+
+//
+// TOR layout definitions - End
+///////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Key TOR constants - Begin
+//
+
+#define  TOR_VERSION  4
+
+// TOR Magic values for top-level TOR ringSection and sub-ringSections
+enum TorMagicNum
+{
+    TOR_MAGIC       = (uint32_t)0x544F52  ,   // "TOR"
+    TOR_MAGIC_HW    = (uint32_t)0x544F5248,   // "TORH"
+    TOR_MAGIC_SBE   = (uint32_t)0x544F5242,   // "TORB"
+    TOR_MAGIC_SGPE  = (uint32_t)0x544F5247,   // "TORG"
+    TOR_MAGIC_CME   = (uint32_t)0x544F524D,   // "TORM"
+    TOR_MAGIC_OVRD  = (uint32_t)0x544F5252,   // "TORR"
+    TOR_MAGIC_OVLY  = (uint32_t)0x544F524C,   // "TORL"
+    TOR_MAGIC_CEN   = (uint32_t)0x544F524E,   // "TORN"
+};
+
+//
+// Key TOR constants - End
+///////////////////////////////////////////////////////////////////////////////
+
 
 //
 // Chip types and List to represent p9n, p9c, cen (centaur)
@@ -102,16 +186,31 @@ typedef struct
     uint32_t     scanScomAddress;
 } GenRingIdList;
 
+// PPE types supported. Note that this enum also reflects the
+//   order with which they appear in the HW image's .rings section.
+enum PpeType
+{
+    PT_SBE           = 0x00,
+    PT_CME           = 0x01,
+    PT_SGPE          = 0x02,
+    NUM_PPE_TYPES = 0x03
+};
+
+// Do  NOT  make changes to the values or order of this enum. Some user
+// codes, like xip_tool, make assumptions about range and order.
 enum RingVariant
 {
     BASE     = 0x00,
     CC       = 0x01,
     RL       = 0x02,
-    OVERRIDE = 0x03,   //@FIXME We should remove this. Its own image now.
+    OVERRIDE = 0x03,
     OVERLAY  = 0x04,   //@FIXME Not supported.
     NUM_RING_VARIANTS = 0x05,
     NOT_VALID = 0xff
 };
+
+extern const char* ppeTypeName[];
+extern const char* ringVariantName[];
 
 typedef struct
 {
@@ -156,20 +255,68 @@ typedef struct
 
 // This structure is needed for mapping a RingID to it's corresponding name.
 // The names will be used by the build scripts when generating the TOR.
+typedef struct
+{
+    uint8_t       iv_torOffSet;
 #ifndef __PPE__
-struct RingProperties_t
-{
-    uint8_t       iv_torOffSet;
     char          iv_name[50];
-    ChipletType_t iv_type;
-};
-#else
-struct RingProperties_t
-{
-    uint8_t       iv_torOffSet;
-    ChipletType_t iv_type;
-};
 #endif
+    ChipletType_t iv_type;
+} RingProperties_t;
+
+
+//
+// Universal infrastructure error codes
+//
+#define INFRASTRUCT_RC_SUCCESS                0
+#define INFRASTRUCT_RC_FAILURE                1
+#define INFRASTRUCT_RC_CODE_BUG               2
+#define INFRASTRUCT_RC_USER_ERROR             3
+#define INFRASTRUCT_RC_NOOF_CODES             5 // Do not use as RC code
+//
+// TOR specific error codes
+//
+#define TOR_SUCCESS                           INFRASTRUCT_RC_SUCCESS
+#define TOR_FAILURE                           INFRASTRUCT_RC_FAILURE
+#define TOR_CODE_BUG                          INFRASTRUCT_RC_CODE_BUG
+#define TOR_USER_ERROR                        INFRASTRUCT_RC_USER_ERROR
+#define TOR_INVALID_MAGIC_NUMBER              INFRASTRUCT_RC_NOOF_CODES + 1
+#define TOR_INVALID_CHIPTYPE                  INFRASTRUCT_RC_NOOF_CODES + 3
+#define TOR_INVALID_CHIPLET                   INFRASTRUCT_RC_NOOF_CODES + 4
+#define TOR_INVALID_VARIANT                   INFRASTRUCT_RC_NOOF_CODES + 5
+#define TOR_INVALID_RING_ID                   INFRASTRUCT_RC_NOOF_CODES + 6
+#define TOR_INVALID_INSTANCE_ID               INFRASTRUCT_RC_NOOF_CODES + 7
+#define TOR_INVALID_RING_BLOCK_TYPE           INFRASTRUCT_RC_NOOF_CODES + 8
+#define TOR_UNSUPPORTED_RING_SECTION          INFRASTRUCT_RC_NOOF_CODES + 9
+#define TOR_RING_NOT_FOUND                    INFRASTRUCT_RC_NOOF_CODES + 10
+#define TOR_AMBIGUOUS_API_PARMS               INFRASTRUCT_RC_NOOF_CODES + 11
+#define TOR_SECTION_NOT_FOUND                 INFRASTRUCT_RC_NOOF_CODES + 12
+#define TOR_DD_LEVEL_NOT_FOUND                INFRASTRUCT_RC_NOOF_CODES + 13
+#define TOR_OP_BUFFER_INVALID                 INFRASTRUCT_RC_NOOF_CODES + 14
+#define TOR_OP_BUFFER_SIZE_EXCEEDED           INFRASTRUCT_RC_NOOF_CODES + 15
+#define TOR_IMAGE_DOES_NOT_SUPPORT_CME        INFRASTRUCT_RC_NOOF_CODES + 16
+#define TOR_IMAGE_DOES_NOT_SUPPORT_SGPE       INFRASTRUCT_RC_NOOF_CODES + 17
+#define TOR_IMAGE_DOES_NOT_SUPPORT_DD_LEVEL   INFRASTRUCT_RC_NOOF_CODES + 18
+#define TOR_IMAGE_DOES_NOT_SUPPORT_PPE_LEVEL  INFRASTRUCT_RC_NOOF_CODES + 19
+#define TOR_RING_AVAILABLE_IN_RINGSECTION     INFRASTRUCT_RC_NOOF_CODES + 20
+#define TOR_BUFFER_TOO_SMALL                  INFRASTRUCT_RC_NOOF_CODES + 21
+#define TOR_TOO_MANY_DD_LEVELS                INFRASTRUCT_RC_NOOF_CODES + 22
+#define TOR_OFFSET_TOO_BIG                    INFRASTRUCT_RC_NOOF_CODES + 23
+
+
+int ringid_get_noof_chiplets( ChipType_t  i_chipType,
+                              uint32_t    i_torMagic,
+                              uint8_t*    o_numChiplets );
+
+int ringid_get_properties( ChipType_t         i_chipType,
+                           uint32_t           i_torMagic,
+                           ChipletType_t      i_chiplet,
+                           ChipletData_t**    o_chipletData,
+                           GenRingIdList**    o_ringIdListCommon,
+                           GenRingIdList**    o_ringIdListInstance,
+                           RingVariantOrder** o_ringVariantOrder,
+                           RingProperties_t** o_ringProps,
+                           uint8_t*           o_numVariants );
 
 #endif  // _COMMON_RINGID_H_
 

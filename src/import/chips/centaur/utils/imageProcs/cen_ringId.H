@@ -380,8 +380,7 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 
 // returns our own chiplet enum value for this ringId
 ChipletType_t
-ringid_get_chiplet(
-    RingId_t i_ringId);
+ringid_get_chiplet(RingId_t i_ringId);
 
 // returns data structures defined for chiplet type
 // as determined by ringId
@@ -396,8 +395,7 @@ ringid_get_chiplet_properties(
 
 // returns properties of a ring as determined by ringId
 GenRingIdList*
-ringid_get_ring_properties(
-    RingId_t i_ringId);
+ringid_get_ring_list(RingId_t i_ringId);
 
 
 #endif // _CEN_RINGID_H_

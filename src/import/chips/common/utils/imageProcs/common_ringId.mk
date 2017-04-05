@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p9/procedures/hwp/customize/p9_xip_customize.mk $
+# $Source: src/import/chips/common/utils/imageProcs/common_ringId.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2017
 # [+] International Business Machines Corp.
 #
 #
@@ -22,18 +22,8 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE = p9_xip_customize
-lib$(PROCEDURE)_DEPLIBS+=p9_xip_image
-lib$(PROCEDURE)_DEPLIBS+=p9_ring_identification
-lib$(PROCEDURE)_DEPLIBS+=p9_scan_compression
-lib$(PROCEDURE)_DEPLIBS+=p9_get_mvpd_ring
-lib$(PROCEDURE)_DEPLIBS+=p9_mvpd_ring_funcs
-lib$(PROCEDURE)_DEPLIBS+=p9_tor
-lib$(PROCEDURE)_DEPLIBS+=common_ringId
-lib$(PROCEDURE)_DEPLIBS+=p9_ringId
-lib$(PROCEDURE)_DEPLIBS+=cen_ringId
-lib$(PROCEDURE)_DEPLIBS+=p9_dd_container
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/xip)
+PROCEDURE=common_ringId
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/utils/imageProcs)
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/accessors/)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/centaur/utils/imageProcs)
 $(call BUILD_PROCEDURE)
+
