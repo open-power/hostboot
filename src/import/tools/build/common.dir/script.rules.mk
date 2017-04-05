@@ -42,6 +42,7 @@
 #    Input:
 #       * Optional input to delay the running of BUILD_GENERATED macro to a
 #       later phase  EXE or MODULE.
+#
 BUILD_GENERATED = $(eval $(call __BUILD_GENERATED,$1))
 
 # Order of operations:
@@ -73,7 +74,7 @@ $(call __CLEAN_TARGET,$$($(GENERATED)_PATH)/.$(GENERATED).built)
 $(foreach target,$(TARGETS),\
 	$(call CLEAN_TARGET,$$($(GENERATED)_PATH)/$(target)))
 
-$(or $1,GEN)_TARGETS += $$($(GENERATED)_PATH)/.$(GENERATED).built
+$(or $(strip $1),GEN)_TARGETS += $$($(GENERATED)_PATH)/.$(GENERATED).built
 
 GENERATED:=
 COMMAND:=
