@@ -69,7 +69,7 @@ class dimm_module_decoder
         /// @param[out] o_output height range encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode max_module_nominal_height(uint8_t& o_output)
+        virtual fapi2::ReturnCode max_module_nominal_height(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -80,7 +80,7 @@ class dimm_module_decoder
         /// @param[out] o_output height range encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode raw_card_extension(uint8_t& o_output)
+        virtual fapi2::ReturnCode raw_card_extension(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -91,7 +91,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode front_module_max_thickness(uint8_t& o_output)
+        virtual fapi2::ReturnCode front_module_max_thickness(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -102,7 +102,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode back_module_max_thickness(uint8_t& o_output)
+        virtual fapi2::ReturnCode back_module_max_thickness(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -113,7 +113,7 @@ class dimm_module_decoder
         /// @param[out] o_output  encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode num_registers_used(uint8_t& o_output)
+        virtual fapi2::ReturnCode num_registers_used(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -124,7 +124,7 @@ class dimm_module_decoder
         /// @param[out] o_output  encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode num_rows_of_drams(uint8_t& o_output)
+        virtual fapi2::ReturnCode num_rows_of_drams(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -135,7 +135,7 @@ class dimm_module_decoder
         /// @param[out] o_output  encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode register_and_buffer_type(uint8_t& o_output)
+        virtual fapi2::ReturnCode register_and_buffer_type(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -146,7 +146,7 @@ class dimm_module_decoder
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCEawSS if okay
         ///
-        virtual fapi2::ReturnCode heat_spreader_thermal_char(uint8_t& o_output)
+        virtual fapi2::ReturnCode heat_spreader_thermal_char(uint8_t& o_output) const
         {
             // Undefined must be coded as 0x00
             o_output = 0;
@@ -158,7 +158,7 @@ class dimm_module_decoder
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode heat_spreader_solution(uint8_t& o_output)
+        virtual fapi2::ReturnCode heat_spreader_solution(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -169,7 +169,7 @@ class dimm_module_decoder
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode num_continuation_codes(uint8_t& o_output)
+        virtual fapi2::ReturnCode num_continuation_codes(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -180,7 +180,7 @@ class dimm_module_decoder
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode reg_manufacturer_id_code(uint8_t& o_output)
+        virtual fapi2::ReturnCode reg_manufacturer_id_code(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -191,7 +191,7 @@ class dimm_module_decoder
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode register_rev_num(uint8_t& o_output)
+        virtual fapi2::ReturnCode register_rev_num(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -202,7 +202,7 @@ class dimm_module_decoder
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode register_to_dram_addr_mapping(uint8_t& o_output)
+        virtual fapi2::ReturnCode register_to_dram_addr_mapping(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -213,7 +213,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode cke_signal_output_driver(uint8_t& o_output)
+        virtual fapi2::ReturnCode cke_signal_output_driver(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -224,7 +224,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode odt_signal_output_driver(uint8_t& o_output)
+        virtual fapi2::ReturnCode odt_signal_output_driver(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -235,7 +235,7 @@ class dimm_module_decoder
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode ca_signal_output_driver(uint8_t& o_output)
+        virtual fapi2::ReturnCode ca_signal_output_driver(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -246,7 +246,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode cs_signal_output_driver(uint8_t& o_output)
+        virtual fapi2::ReturnCode cs_signal_output_driver(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -257,7 +257,7 @@ class dimm_module_decoder
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode b_side_clk_output_driver(uint8_t& o_output)
+        virtual fapi2::ReturnCode b_side_clk_output_driver(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -268,7 +268,7 @@ class dimm_module_decoder
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode a_side_clk_output_driver(uint8_t& o_output)
+        virtual fapi2::ReturnCode a_side_clk_output_driver(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -279,7 +279,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoded drive strength
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode bcom_bcke_bodt_drive_strength(uint8_t& o_output)
+        virtual fapi2::ReturnCode bcom_bcke_bodt_drive_strength(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -291,7 +291,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoded drive strength
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode bck_output_drive_strength(uint8_t& o_output)
+        virtual fapi2::ReturnCode bck_output_drive_strength(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -302,7 +302,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoded drive strength
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode slew_rate_control(uint8_t& o_output)
+        virtual fapi2::ReturnCode slew_rate_control(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -313,7 +313,7 @@ class dimm_module_decoder
         /// @param[out] o_output revision number
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode data_buffer_rev(uint8_t& o_output)
+        virtual fapi2::ReturnCode data_buffer_rev(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -324,7 +324,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoding of MR6 A5:A0 in JESD790-4 spec
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode dram_vref_dq_rank0(uint8_t& o_output)
+        virtual fapi2::ReturnCode dram_vref_dq_rank0(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -335,7 +335,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoding of MR6 A5:A0 in JESD790-4 spec
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode dram_vref_dq_rank1(uint8_t& o_output)
+        virtual fapi2::ReturnCode dram_vref_dq_rank1(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -346,7 +346,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoding of MR6 A5:A0 in JESD790-4 spec
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode dram_vref_dq_rank2(uint8_t& o_output)
+        virtual fapi2::ReturnCode dram_vref_dq_rank2(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -357,7 +357,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoding of MR6 A5:A0 in JESD790-4 spec
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode dram_vref_dq_rank3(uint8_t& o_output)
+        virtual fapi2::ReturnCode dram_vref_dq_rank3(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -368,7 +368,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoding of F5BC6x in DDR4DB01 spec
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode data_buffer_vref_dq(uint8_t& o_output)
+        virtual fapi2::ReturnCode data_buffer_vref_dq(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -381,7 +381,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoding of F5BC6x in
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode data_buffer_mdq_drive_strength(const uint64_t i_dimm_speed, uint8_t& o_output)
+        virtual fapi2::ReturnCode data_buffer_mdq_drive_strength(const uint64_t i_dimm_speed, uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -394,7 +394,7 @@ class dimm_module_decoder
         /// @param[out] o_output encoding of F5BC6x in
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode data_buffer_mdq_rtt(const uint64_t i_dimm_speed, uint8_t& o_output)
+        virtual fapi2::ReturnCode data_buffer_mdq_rtt(const uint64_t i_dimm_speed, uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -407,7 +407,7 @@ class dimm_module_decoder
         /// @param[out] o_output DRAM drive strength (in ohms)
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode dram_drive_strength(const uint64_t i_dimm_speed, uint8_t& o_output)
+        virtual fapi2::ReturnCode dram_drive_strength(const uint64_t i_dimm_speed, uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -420,7 +420,7 @@ class dimm_module_decoder
         /// @param[out] o_output ODT termination strength (in ohms)
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode dram_rtt_nom(const uint64_t i_dimm_speed, uint8_t& o_output)
+        virtual fapi2::ReturnCode dram_rtt_nom(const uint64_t i_dimm_speed, uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -433,7 +433,7 @@ class dimm_module_decoder
         /// @param[out] o_output ODT termination strength (in ohms)
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode dram_rtt_wr(const uint64_t i_dimm_speed, uint8_t& o_output)
+        virtual fapi2::ReturnCode dram_rtt_wr(const uint64_t i_dimm_speed, uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -446,7 +446,7 @@ class dimm_module_decoder
         /// @param[out] o_output ODT termination strength (in ohms)
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode dram_rtt_park_ranks0_1(const uint64_t i_dimm_speed, uint8_t& o_output)
+        virtual fapi2::ReturnCode dram_rtt_park_ranks0_1(const uint64_t i_dimm_speed, uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -459,7 +459,7 @@ class dimm_module_decoder
         /// @param[out] o_output ODT termination strength (in ohms)
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode dram_rtt_park_ranks2_3(const uint64_t i_dimm_speed, uint8_t& o_output)
+        virtual fapi2::ReturnCode dram_rtt_park_ranks2_3(const uint64_t i_dimm_speed, uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -470,7 +470,7 @@ class dimm_module_decoder
         /// @param[out] o_output spd encoding
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode dram_vref_dq_range(uint8_t& o_output)
+        virtual fapi2::ReturnCode dram_vref_dq_range(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -481,7 +481,7 @@ class dimm_module_decoder
         /// @param[out] o_output spd encoding
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode data_buffer_vref_dq_range(uint8_t& o_output)
+        virtual fapi2::ReturnCode data_buffer_vref_dq_range(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -492,7 +492,7 @@ class dimm_module_decoder
         /// @param[out] o_output spd encoding
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode data_buffer_gain_adjustment(uint8_t& o_output)
+        virtual fapi2::ReturnCode data_buffer_gain_adjustment(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -503,7 +503,7 @@ class dimm_module_decoder
         /// @param[out] o_output spd encoding
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode data_buffer_dfe(uint8_t& o_output)
+        virtual fapi2::ReturnCode data_buffer_dfe(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
