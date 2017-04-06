@@ -202,7 +202,9 @@ extern "C"
                         if (l_ring == P9C_MC_CHAN_RING_ID)
                         {
                             l_scom.set_chiplet_id(MC01_CHIPLET_ID + (i_chipUnitNum / 4));
-                            l_scom.set_sat_id(i_chipUnitNum % 4);
+                            uint8_t l_msat = l_scom.get_sat_id();
+                            l_msat = l_msat & 0xC;
+                            l_scom.set_sat_id(l_msat + i_chipUnitNum % 4);
                         }
 
                         //SCOM4
@@ -771,7 +773,7 @@ extern "C"
                         o_chipUnitRelated = true;
                         o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_DMI_CHIPUNIT,
                                                     ((l_chiplet_id == MC01_CHIPLET_ID ? (0) : (4))) +
-                                                    l_sat_id));
+                                                    (0x3 & l_sat_id)));
 
                     }
 
