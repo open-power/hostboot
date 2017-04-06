@@ -41,10 +41,10 @@
 ///  - Update the "permanent" multicast groups  reflect any additional
 ///        deconfiguration by Hostboot.
 ///     - MC group 0 (using MC register #1) - All good chiplets (deal with EC
-//          and EQ chiplets)
+///          and EQ chiplets)
 ///     - MC group 1 (using EC MC register @2)  - All good cores (EC only)
 ///  - Use the functional state to find all good cores
-///  -ÅWrite the good core and quad mask into OCC CCSR and QCSR respectively
+///  -¬ÅWrite the good core and quad mask into OCC CCSR and QCSR respectively
 ///         These become the "master record " of the enabled cores/quad in
 ///         the system for runtime
 /// @endverbatim
@@ -134,6 +134,7 @@ fapi2::ReturnCode p9_update_ec_eq_state(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     fapi2::buffer<uint64_t> l_data64 = 0;
+    uint8_t l_is_master_chip = 0;
 
     FAPI_IMP("> p9_update_ec_eq_state");
 
@@ -143,13 +144,10 @@ fapi2::ReturnCode p9_update_ec_eq_state(
     FAPI_TRY(update_eq_config(i_target),
              "Error update_cache_config detected");
 
+    //Check PROC_SBE_MASTER attr to see if this is master proc
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, i_target, l_is_master_chip))
 
-    //If this is NOT the master processor then need to set
-    //the default value the OCC Quad Status Status Register
-    //As the SBE doesn't do this on the slave chips
-    FAPI_TRY(fapi2::getScom(i_target, PU_OCB_OCI_QSSR_SCOM, l_data64));
-
-    if(l_data64() == 0x0)
+    if(l_is_master_chip == 0x0)
     {
         l_data64.setBit<0, 12>();       // L2 Stopped
         l_data64.setBit<14, 6>();      // Quad Stopped
