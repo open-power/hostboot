@@ -297,7 +297,7 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
 {
     errlHndl_t l_err = NULL;
 
-    enum { MAX_INDSCOM_TIMEOUT_NS = 100000 }; //=.1ms
+    enum { MAX_INDSCOM_TIMEOUT_NS = 10000000 }; //=10ms
 
     mutex_t* l_mutex = NULL;
     bool need_unlock = false;
