@@ -134,6 +134,7 @@ DIRECT_BOOT_OBJECTS += stdlib.o
 DIRECT_BOOT_OBJECTS += assert.o
 DIRECT_BOOT_OBJECTS += workitem.o
 DIRECT_BOOT_OBJECTS += bltohbdatamgr.o
+DIRECT_BOOT_OBJECTS += errno.o
 
 BASE_MODULES += trace
 BASE_MODULES += errl

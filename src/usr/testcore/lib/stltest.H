@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,6 +93,12 @@ class STLTest : public CxxTest::TestSuite
             {
                 TS_FAIL("map::operator[] returned wrong value %d",
                         mymap[v5].value());
+            }
+
+            if (v5.value() != mymap.at(v5).value())   // map::at value
+            {
+                TS_FAIL("map::at() returned wrong value %d",
+                        mymap.at(v5).value());
             }
 
             // test map::insert(v), map::insert(h,v), lower_bound()
@@ -483,6 +489,18 @@ class STLTest : public CxxTest::TestSuite
             std::list< std::list<int> > l = { {},{1},{1,2,3} };
             std::array<int, 5> a1 { {1,2,3,4,5} };
             std::array<int, 5> a2 = {1,2,3,4,5};
+            std::map<int, int> m = {
+                {1, 100},
+                {2, 100},
+                {3, 100},
+                {4, 100},
+            };
+
+            if (m.size() != 4)
+            {
+                 TS_FAIL("testInitListCompile(): std::map has an incorrect size after list initialization");
+            }
+
             // Compiler warns that std::arrays are unused, so compare their
             // sizes
             if (a1.size() != a2.size())

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,8 @@
 #include <utility>
 #include <util/traits/remove_const.H>
 #include <algorithm>
+#include <initializer_list>
+#include <assert.h>
 
 
 #ifndef __UTIL_SPLAYTREE_NS
@@ -65,6 +67,7 @@ namespace Util
             typedef ptrdiff_t   difference_type;
             typedef T*          pointer;
             typedef T&          reference;
+            typedef const T&    const_reference;
 
             // Allow Map and other GenericIterators to be friends.
             template <typename S, typename Itr2>
@@ -111,8 +114,14 @@ namespace Util
                 return t;
             }
 
-            /** Dereference Operator */
+            /** Dereference Operators */
             reference operator*()
+            {
+                return reinterpret_cast<__UTIL_SPLAYTREE_NS::Node<T>*>(
+                            const_cast<__UTIL_SPLAYTREE_NS::Node<const void*>*>(
+                                (Itr::getNode())))->data_T();
+            }
+            const_reference operator*() const
             {
                 return reinterpret_cast<__UTIL_SPLAYTREE_NS::Node<T>*>(
                             const_cast<__UTIL_SPLAYTREE_NS::Node<const void*>*>(
@@ -332,6 +341,20 @@ namespace Util
                     return (result.first)->second;
                 }
 
+                T& at(const key_type& k)
+                {
+                    auto result = lower_bound(k);
+                    crit_assert(result != end());
+                    return (*result).second;
+                }
+
+                const T& at(const key_type& k) const
+                {
+                    const auto result = lower_bound(k);
+                    crit_assert(result != end());
+                    return (*result).second;
+                }
+
                 template <class... Args>
                 std::pair <iterator,bool> emplace ( Args&&... args )
                 {
@@ -362,6 +385,11 @@ namespace Util
 
                     return make_pair(iterator(_TreeItr(&iv_tree, n)), rc);
 
+                }
+
+                void insert(std::initializer_list<value_type> list)
+                {
+                     insert(list.begin(), list.end());
                 }
 
                 iterator insert(iterator hint, const value_type& x)

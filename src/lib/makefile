@@ -49,6 +49,7 @@ OBJS += crc32.o
 OBJS += utilmisc.o
 
 OBJS += tls.o
+OBJS += errno.o
 
 ifdef HOSTBOOT_MEMORY_LEAKS
 COMMONFLAGS += -DHOSTBOOT_MEMORY_LEAKS=1
