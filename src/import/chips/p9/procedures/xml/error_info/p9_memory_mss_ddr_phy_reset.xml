@@ -482,9 +482,6 @@
     <target>TARGET</target>
     <priority>HIGH</priority>
   </callout>
-  <deconfigure>
-    <target>TARGET</target>
-  </deconfigure>
 </hwpError>
 
 <hwpError>
