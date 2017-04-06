@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -177,8 +177,10 @@ int MessageHandler::recvMessage(msg_t* i_msg)
         else if (UNHANDLED_RC == rc)
         {
             // Unsuccessful, unhandled response.  Kill task.
-            printk("Unhandled msg rc %d for key %p on task %d @ %p\n",
-                   msg_rc, key, deferred_task->tid, deferred_task->context.nip);
+            // Print the errorno string if we have mapped it in errno.h
+            printk("Unhandled msg rc %d (%s) for key %p on task %d @ %p\n",
+                    msg_rc, ErrnoToString(msg_rc), key, deferred_task->tid,
+                    deferred_task->context.nip);
             endTaskList.insert(deferred_task);
         }
         else if (CONTINUE_DEFER == rc)

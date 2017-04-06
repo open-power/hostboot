@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/errno.h $                                         */
+/* $Source: src/lib/errno.C $                                             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,37 +22,39 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef _ERRNO_H
-#define _ERRNO_H
+#include <errno.h>
 
-#include <map>
+const char * ErrnoToString( int i_errno )
+{
+    //  Map of errnos to string.
+    //  Kept within function for deferred malloc and more error handling
+    //      Otherwise the map is malloc'd before memory is initialized
+    //  Note: All keys and values are preceded with a '-', this is because the
+    //        the errno's will be set to 2's complement when there's an error.
+    static const std::map<int, const char*> ErrnoToStringMap =
+    {
+        { -ENOENT     , "-ENOENT"},
+        { -EIO        , "-EIO"},
+        { -ENXIO      , "-ENXIO"},
+        { -ENOEXEC    , "-ENOEXEC"},
+        { -EBADF      , "-EBADF"},
+        { -EAGAIN     , "-EAGAIN"},
+        { -EACCES     , "-EACCES"},
+        { -EFAULT     , "-EFAULT"},
+        { -EINVAL     , "-EINVAL"},
+        { -ENFILE     , "-ENFILE"},
+        { -EDEADLK    , "-EDEADLK"},
+        { -ETIME      , "-ETIME"},
+        { -EALREADY   , "-EALREADY"},
+        { -EWOULDBLOCK, "-EWOULDBLOCK"},
+    };
 
-#define ENOENT           2      // No such file or directory
-#define	EIO              5      // I/O error
-#define ENXIO            6      // No such device or address
-#define ENOEXEC          8      // Exec format error
-#define EBADF            9      // Bad file descriptor
-#define EAGAIN          11      // Try again
-#define EACCES          13      // Permission denied
-#define	EFAULT          14      // Bad address
-#define EINVAL          22      // Invalid argument
-#define ENFILE          23      // Too many open files in system
-#define EDEADLK         35      // Operation would cause deadlock.
-#define ETIME           62      // Time expired.
-#define EALREADY        114     // Operation already in progress
-
-#define EWOULDBLOCK     EAGAIN  // operation would block
-
-/**
-  * @brief Returns string representation of an errno.
-  *
-  * @param[in] i_errno     errno to get string for.
-  *
-  * @return  const char*  - If found, String associated with errno
-  *                         else, "UNKNOWN" string
-  *
-*/
-const char * ErrnoToString( int i_errno );
-
-
-#endif
+    if (ErrnoToStringMap.count(i_errno) > 0)
+    {
+        return ErrnoToStringMap.at(i_errno);
+    }
+    else
+    {
+        return "UNKNOWN";
+    }
+}

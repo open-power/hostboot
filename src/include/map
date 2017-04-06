@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -35,6 +37,7 @@
 #include <functional>
 
 #include <util/impl/stlmap.H>
+#include <initializer_list>
 
 #ifndef __UTIL_STLMAP_NS
 #define __UTIL_STLMAP_NS ::Util::__Util_StlMap_Impl
@@ -45,11 +48,11 @@ namespace std
 
     /**
      * STL map template class.
-     * 
+     *
      * @note  value_comp not supported.
      *
      * This class inherits from Util::__Util_StlMap_Impl::Map, which hides all
-     * of the implementation details of the map.  Most of the functions here 
+     * of the implementation details of the map.  Most of the functions here
      * are simply a redirection to the Util::...::Map version.
      */
     template <typename Key, typename T, typename Compare = std::less<Key> >
@@ -92,19 +95,34 @@ namespace std
              * Copies all of the elements from [first, last) into the map.
              */
             template <typename InputIterator> __attribute__ ((always_inline))
-                map( InputIterator first, InputIterator last, 
+                map( InputIterator first, InputIterator last,
                      const key_compare& c = Compare())
                     : submap(c)
-                { 
+                {
                     this->insert(first, last);
                 }
 
             /**
              * Copy Constructor
              * @param i_x Source map
-             */ 
+             */
             __attribute__ ((always_inline))
             map (const map<Key,T,Compare>& i_x) : submap(i_x) {}
+
+            /**
+             * Initializer list constructor"
+             * @param[in] init_list Initializer list
+             * @param[in]  key_compare  A comparison functor.
+             * @returns  None.
+             * @post     map is created with init_list items
+             */
+             __attribute__ ((always_inline))
+             map ( std::initializer_list<value_type> init_list,
+                   const key_compare& c = Compare())
+                 : submap(c)
+             {
+                insert(init_list);
+             }
 
             /**
              * Destructor
@@ -129,7 +147,7 @@ namespace std
              * @return iterator
              */
             __attribute__ ((always_inline))
-            iterator begin() 
+            iterator begin()
                     { return submap::begin(); }
 
             /**
@@ -193,7 +211,7 @@ namespace std
              * @return true if container is empty otherwise false
              */
             __attribute__ ((always_inline))
-            bool empty() const 
+            bool empty() const
                     { return submap::empty(); }
 
             /**
@@ -201,7 +219,7 @@ namespace std
              * @return number of elements in the container
              */
             __attribute__ ((always_inline))
-            size_type size() const 
+            size_type size() const
                     { return submap::size(); }
 
             /**
@@ -209,7 +227,7 @@ namespace std
              * @return theoretical maximum size based on cpu word size
              */
             __attribute__ ((always_inline))
-            size_type max_size() const 
+            size_type max_size() const
                     { return UINT64_MAX/sizeof(T); }
 
             /**
@@ -218,20 +236,50 @@ namespace std
              * @return a reference to the element whos key is x
              */
             __attribute__ ((always_inline))
-            T& operator[] (const key_type& k) 
+            T& operator[] (const key_type& k)
                     { return submap::operator[](k); }
+
+            /**
+             * Access a mutable reference to an element in the container
+             * @param[in] k - key to map. Asserts if key does not exist
+             * @return a reference to the element whose key is k
+             */
+            __attribute__ ((always_inline))
+            T& at( const key_type& k)
+            {
+                return submap::at(k);
+            }
+
+            /**
+             * Get an immutable reference to an element in the container
+             * @param[in] k key, if it does not exist the it will assert
+             * @return a const reference to the element whose key is k
+             */
+            __attribute__ ((always_inline))
+            const T& at( const key_type& k) const
+            {
+                return submap::at(k);
+            }
 
             /**
              * Insert element
              * @param[in] x map key/value pair
-             * @return std::pair.first is iterator pointing to new or existing 
-             *         element, std::pair.second is true if new element 
+             * @return std::pair.first is iterator pointing to new or existing
+             *         element, std::pair.second is true if new element
              *         inserted, false if already existing.
              *
              * @note won't add element if it's key already exists in the map
              */
-            pair<iterator,bool> insert (const value_type& x ) 
+            pair<iterator,bool> insert (const value_type& x )
                     { return submap::insert(x); }
+
+            /**
+             * Insert element
+             *  @param  list  A std::initializer_list<value_type> of pairs to be
+             *                inserted.
+             */
+            void insert(std::initializer_list<value_type> list)
+                    { return submap::insert(list); }
 
             /**
              * Insert element
@@ -239,7 +287,7 @@ namespace std
              *                 the element
              * @param[in] x map key/value to insert (copy in)
              *
-             * @return an iterator pointing to either the new or existing 
+             * @return an iterator pointing to either the new or existing
              *         element
              * @note A good hint makes this very efficient.  A bad hint slows
              *       it down. An element will never be inserted out of order.
@@ -249,7 +297,7 @@ namespace std
                     { return submap::insert(hint, x); }
 
             /**
-             * Insert a range of new elements 
+             * Insert a range of new elements
              *
              * (optimized function for iterator)
              *
@@ -261,7 +309,7 @@ namespace std
                     { return submap::insert(first, last); }
 
             /**
-             * Insert a range of new elements 
+             * Insert a range of new elements
              *
              * (optimized function for const_iterator)
              *
@@ -309,7 +357,7 @@ namespace std
              * @param last iterator of element to remove + 1
              */
             __attribute__ ((always_inline))
-            void erase (iterator first, iterator last) 
+            void erase (iterator first, iterator last)
                     { submap::erase(first,last); }
 
             /**
@@ -318,7 +366,7 @@ namespace std
              */
             __attribute__ ((always_inline))
             void swap(map<Key,T, Compare>& mp)
-                    { submap::swap(mp); }                
+                    { submap::swap(mp); }
 
             /**
              * clear the map
@@ -326,10 +374,10 @@ namespace std
             __attribute__ ((always_inline))
             void clear()
                     { submap::clear();; }
-            
+
             //Observers
             /**
-             * Returns the key comparison object from which the map was 
+             * Returns the key comparison object from which the map was
              * constructed
              * @return Compare
              */
@@ -357,7 +405,7 @@ namespace std
              * @return const_iterator to element or end() if not found
              */
             __attribute__ ((always_inline))
-            const_iterator find( const key_type& k) const 
+            const_iterator find( const key_type& k) const
                     { return submap::find(k); }
 
             /**
@@ -421,7 +469,7 @@ namespace std
             /**
              * Const verstion of equal_range - see equal_range above
              */
-            pair<const_iterator, const_iterator> 
+            pair<const_iterator, const_iterator>
                 equal_range( const key_type& k) const
                     { return submap::equal_range(k); }
     };
