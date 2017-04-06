@@ -1852,6 +1852,58 @@ namespace SBE
                        "hbblPnorPtr=%p, hbblMaxSize=0x%08X (%d)",
                        hbblPnorPtr, MAX_HBBL_SIZE, MAX_HBBL_SIZE);
 
+            /*******************************************/
+            /*  Update the HW Key Hash in the HBBL     */
+            /*******************************************/
+            if ( !g_do_hw_keys_hash_transition )
+            {
+                // Use the HW Key Hash that the system used to boot
+                SHA512_t sys_hash = {0};
+                SECUREBOOT::getHwKeyHash(sys_hash);
+
+                // Create an 'all-zero' hash for comparison
+                SHA512_t tmp_hash = {0};
+
+                // Look for 'all-zero' system hash
+                if ( memcmp(sys_hash, tmp_hash, sizeof(SHA512_t)) == 0 )
+                {
+                    // System hash is all zeros, so use HW Key Hash in HBBL
+                    // section from PNOR
+                    TRACFCOMP( g_trac_sbe, "getSbeInfoState() - Using HW Key "
+                               "Hash from HBBL section of PNOR: 0x%8X",
+                               sha512_to_u32(
+                                   reinterpret_cast<uint8_t*>(
+                                       reinterpret_cast<uint64_t>(hbblPnorPtr) +
+                                       HBBL_HW_KEY_HASH_LOCATION)));
+
+                }
+                else
+                {
+                    // Use non-zero system hash
+                    TRACFCOMP( g_trac_sbe, "getSbeInfoState() - Using System "
+                               "HW Key Hash: 0x%8X",
+                               sha512_to_u32(sys_hash));
+
+                    memcpy (reinterpret_cast<void*>(
+                                reinterpret_cast<uint64_t>(hbblPnorPtr) +
+                                HBBL_HW_KEY_HASH_LOCATION),
+                            sys_hash,
+                            sizeof(SHA512_t));
+                }
+            }
+            else
+            {
+                // Use the Secureboot Transition HW Key Hash found earlier
+                TRACFCOMP( g_trac_sbe, "getSbeInfoState() - Using Secureboot "
+                           "Transition HW Key Hash: 0x%08X",
+                           sha512_to_u32(g_hw_keys_hash_transition_data));
+
+                memcpy (reinterpret_cast<void*>(
+                            reinterpret_cast<uint64_t>(hbblPnorPtr) +
+                            HBBL_HW_KEY_HASH_LOCATION),
+                        g_hw_keys_hash_transition_data,
+                        sizeof(SHA512_t));
+            }
 
             /*******************************************/
             /*  Append HBBL Image from PNOR to SBE     */

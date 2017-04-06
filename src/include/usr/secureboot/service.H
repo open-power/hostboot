@@ -34,6 +34,14 @@
 
 typedef uint8_t SHA512_t[SHA512_DIGEST_LENGTH];
 
+/*
+ * @brief Used to capture the first 4 bytes of the hash for tracing purposes
+ */
+inline uint32_t sha512_to_u32(SHA512_t i_hash)
+{
+   return *(reinterpret_cast<uint32_t*>(reinterpret_cast<char*>(i_hash)));
+};
+
 typedef std::vector< std::pair<void*,size_t> > blobPair_t;
 
 // TODO securebootp9 added for spnorrp.C - service.H needs many more updates
