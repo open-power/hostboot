@@ -49,16 +49,16 @@ namespace stopImageSection
  */
 typedef enum
 {
-    P9_STOP_SPR_DAWR   =    180,   // thread register
-    P9_STOP_SPR_HSPRG0 =    304,   // thread register
-    P9_STOP_SPR_HRMOR  =    313,   // core register
-    P9_STOP_SPR_LPCR   =    318,   // thread register
-    P9_STOP_SPR_HMEER  =    337,   // core register
-    P9_STOP_SPR_LDBAR  =    850,
-    P9_STOP_SPR_PSSCR  =    855,   // thread register
-    P9_STOP_SPR_PMCR   =    884,   // core register
-    P9_STOP_SPR_HID    =   1008,   // core register
-    P9_STOP_SPR_MSR    =   2000,   // thread register
+    P9_STOP_SPR_DAWR    =    180,   // thread register
+    P9_STOP_SPR_HSPRG0  =    304,   // thread register
+    P9_STOP_SPR_HRMOR   =    313,   // core register
+    P9_STOP_SPR_LPCR    =    318,   // thread register
+    P9_STOP_SPR_HMEER   =    337,   // core register
+    P9_STOP_SPR_LDBAR   =    850,   // thread register
+    P9_STOP_SPR_PSSCR   =    855,   // thread register
+    P9_STOP_SPR_PMCR    =    884,   // core register
+    P9_STOP_SPR_HID     =   1008,   // core register
+    P9_STOP_SPR_MSR     =   2000,   // thread register
 } CpuReg_t;
 
 /**
