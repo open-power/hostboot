@@ -31891,11 +31891,12 @@ Measured in GB</description>
 
     </description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint16_t></uint16_t>
         <array>8</array>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_SYSTEM_RESCLK_FREQ_REGIONS</id>
         <macro>DIRECT</macro>
@@ -31919,8 +31920,9 @@ Measured in GB</description>
         <uint8_t></uint8_t>
         <array>8</array>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_SYSTEM_RESCLK_FREQ_REGION_INDEX</id>
         <macro>DIRECT</macro>
@@ -31940,8 +31942,9 @@ Measured in GB</description>
         <uint16_t></uint16_t>
         <array>64</array>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_SYSTEM_RESCLK_VALUE</id>
         <macro>DIRECT</macro>
@@ -31977,8 +31980,9 @@ Measured in GB</description>
         <uint8_t></uint8_t>
         <array>4</array>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_SYSTEM_RESCLK_L3_VALUE</id>
         <macro>DIRECT</macro>
@@ -32001,8 +32005,9 @@ Measured in GB</description>
     <simpleType>
         <uint16_t></uint16_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV</id>
         <macro>DIRECT</macro>
