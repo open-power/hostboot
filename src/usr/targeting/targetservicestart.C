@@ -274,6 +274,8 @@ static void initializeAttributes(TargetService& i_targetService,
 
     Target* l_pTopLevel = NULL;
 
+    TargetHandleList l_chips;
+
     i_targetService.getTopLevelTarget(l_pTopLevel);
     if(l_pTopLevel)
     {
@@ -331,6 +333,28 @@ static void initializeAttributes(TargetService& i_targetService,
         if(i_isMpipl)
         {
             l_pTopLevel->setAttr<ATTR_IS_MPIPL_HB>(1);
+
+            //Clear out some attributes that could have stale data
+            l_pTopLevel->setAttr<ATTR_HB_RSV_MEM_NEXT_SECTION>(0);
+            l_pTopLevel->setAttr<ATTR_ATTN_CHK_ALL_PROCS>(1);
+
+            TARGETING::PredicateCTM l_chipFilter(CLASS_CHIP, TYPE_PROC);
+            TARGETING::PredicateIsFunctional l_functional;
+            TARGETING::PredicatePostfixExpr l_functionalChips;
+            l_functionalChips.push(&l_chipFilter).push(&l_functional).And();
+
+            i_targetService.getAssociated( l_chips,
+                                        l_pTopLevel,
+                                        TargetService::CHILD_BY_AFFINITY,
+                                        TARGETING::TargetService::ALL,
+                                        &l_functionalChips);
+
+            for (auto & l_chip : l_chips)
+            {
+                l_chip->setAttr<ATTR_XSCOM_VIRTUAL_ADDR>(0);
+                l_chip->setAttr<ATTR_HOMER_VIRT_ADDR>(0);
+                //TODO RTC:172534 Need to clear volatile attributes during MPIPL for cumulus
+            }
         }
         else
         {
