@@ -429,12 +429,14 @@ proc_get_vdm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 /// @brief Get resonant clocking parameters from attributes
 /// @param[in]    i_target          => Chip Target
 /// @param[out]   o_resclk_setup    => Resonant clocking setup
+/// @param[in]    i_gppb            => The Global Pstate Parameter Block
 /// @return   FAPI2::SUCCESS
 /// ----------------------------------------------------------------
 
 fapi2::ReturnCode
 proc_res_clock_setup ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                       ResonantClockingSetup* o_resclk_setup);
+                       ResonantClockingSetup* o_resclk_setup,
+                       const GlobalPstateParmBlock* i_gppb);
 
 /// ----------------------------------------------------------------
 /// @brief Get IVRM parameters from attributes
@@ -447,6 +449,13 @@ fapi2::ReturnCode
 proc_get_ivrm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                       IvrmParmBlock* o_ivrmpb);
 
+/// -------------------------------------------------------------------
+/// @brief Set Resonant Clocking "array"/"table" attributes using p9_resclk_defines.h
+/// @param[in]    i_target          => Chip Target
+/// @return   FAPI2::SUCCESS
+/// -------------------------------------------------------------------
+fapi2::ReturnCode
+proc_set_resclk_table_attrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 //
 // p9_pstate_compute_vpd_pts
@@ -515,7 +524,6 @@ extern "C"
     fapi2::ReturnCode
     p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                PstateSuperStructure* io_pss);
-
 } // extern C
 
 
