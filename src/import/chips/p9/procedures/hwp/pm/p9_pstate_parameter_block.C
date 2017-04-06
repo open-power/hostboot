@@ -46,6 +46,7 @@
 #include <p9_pstate_parameter_block.H>
 #include "p9_pm_get_poundv_bucket.H"
 #include "p9_pm_get_poundw_bucket.H"
+#include "p9_resclk_defines.H"
 
 fapi2::vdmData_t g_vpdData = {1,
                               2,
@@ -78,6 +79,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
     do
     {
+        FAPI_TRY(proc_set_resclk_table_attrs(i_target), "proc_set_resclk_table_attrs failed");
         // -----------------------------------------------------------
         // Clear the PstateSuperStructure and install the magic number
         //----------------------------------------------------------
@@ -205,11 +207,6 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         FAPI_INF("Getting VDM points (#W) Data");
         FAPI_TRY(proc_get_mvpd_poundw(i_target, l_poundv_bucketId, &l_vdmpb));
-        // ----------------
-        // get Resonant clocking attributes
-        // ----------------
-        FAPI_INF("Getting Resonant Clocking Parameters Data");
-        FAPI_TRY(proc_res_clock_setup(i_target, &l_resclk_setup));
 
         // ----------------
         // get IVRM Parameters data
@@ -304,9 +301,6 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // IvrmParmBlock
         l_globalppb.ivrm = l_ivrmpb;
 
-        // Resonant Clock Grid Management Setup
-        l_globalppb.resclk = l_resclk_setup;
-
         VpdOperatingPoint l_operating_points[NUM_VPD_PTS_SET][VPD_PV_POINTS];
         // Compute VPD points
         p9_pstate_compute_vpd_pts(l_operating_points, &l_globalppb);
@@ -315,8 +309,6 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         // Calculate pre-calculated slopes
         p9_pstate_compute_PsV_slopes(l_operating_points, &l_globalppb);
-
-        gppb_print(&(l_globalppb));
 
         // -----------------------------------------------
         // Local parameter block
@@ -338,8 +330,6 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // VDMParmBlock
         l_localppb.vdm = l_vdmpb;
 
-        // Resonant Clock Grid Management Setup
-        l_localppb.resclk = l_resclk_setup;
 
         l_localppb.dpll_pstate0_value = revle32((revle32(l_localppb.operating_points[ULTRA].frequency_mhz) * 1000 / revle32(
                 l_globalppb.frequency_step_khz)));
@@ -387,8 +377,17 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         // pstate_max
 
-        oppb_print(&(l_occppb));
+        // ----------------
+        // get Resonant clocking attributes
+        // ----------------
+        FAPI_INF("Getting Resonant Clocking Parameters Data");
+        FAPI_TRY(proc_res_clock_setup(i_target, &l_resclk_setup, &l_globalppb));
+        // Resonant Clock Grid Management Setup
+        l_localppb.resclk = l_resclk_setup;
+        l_globalppb.resclk = l_resclk_setup;
 
+        gppb_print(&(l_globalppb));
+        oppb_print(&(l_occppb));
         // -----------------------------------------------
         // Populate Global,local and OCC parameter blocks into Pstate super structure
         // -----------------------------------------------
@@ -1366,25 +1365,72 @@ fapi_try_exit:
 
 fapi2::ReturnCode
 proc_res_clock_setup ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                       ResonantClockingSetup* o_resclk_setup)
+                       ResonantClockingSetup* o_resclk_setup,
+                       const GlobalPstateParmBlock* i_gppb)
 {
     FAPI_INF(">> proc_res_clock_setup");
+    uint8_t l_resclk_freq_index[RESCLK_FREQ_REGIONS];
+    uint16_t l_step_delay_ns;
+    uint16_t l_l3_threshold_mv;
     uint16_t l_steparray[RESCLK_STEPS];
+    uint16_t l_resclk_freq_regions[RESCLK_FREQ_REGIONS];
+    uint32_t l_ultra_turbo_freq_khz = revle32(i_gppb->reference_frequency_khz);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_STEP_DELAY, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_resclk_setup->step_delay_ns));
+                           l_step_delay_ns));
+    o_resclk_setup->step_delay_ns = revle16(l_step_delay_ns);
 
+    // Resonant Clocking Frequency and Index arrays
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGIONS, i_target,
-                           o_resclk_setup->resclk_freq));
-
+                           l_resclk_freq_regions));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGION_INDEX, i_target,
-                           o_resclk_setup->resclk_index));
+                           l_resclk_freq_index));
+
+    // Convert frequencies to pstates
+    for (uint8_t i = 0; i < RESCLK_FREQ_REGIONS; ++i)
+    {
+        Pstate pstate;
+        // Frequencies are given in MHz, convert to KHz
+        uint32_t freq_khz = static_cast<uint32_t>(l_resclk_freq_regions[i]) * 1000;
+        uint8_t idx = l_resclk_freq_index[i];
+
+        // Frequencies need to be capped at Ultra-Turbo, frequencies less-than
+        // the Minimum can be ignored (because this table is walked from
+        // end-begin, and the frequencies are stored in ascending order,
+        // the "walk" will never pass the minimum frequency).
+        if (freq_khz > l_ultra_turbo_freq_khz)
+        {
+            freq_khz = l_ultra_turbo_freq_khz;
+
+            // Need to walk the table backwards to find the index for this frequency
+            for (uint8_t j = i; j >= 0; --j)
+            {
+                if (freq_khz >= (l_resclk_freq_regions[j] * 1000))
+                {
+                    idx = l_resclk_freq_index[j];
+                    break;
+                }
+            }
+        }
+
+        int rc = freq2pState(i_gppb, freq_khz, &pstate);
+
+        if (!rc)
+        {
+            FAPI_ERR("freq2pState Pstate out-of-bounds!");
+            break;
+        }
+
+        o_resclk_setup->resclk_freq[i] = pstate;
+        o_resclk_setup->resclk_index[i] = idx;
+    }
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VALUE, i_target,
                            o_resclk_setup->l3_steparray));
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV, i_target,
-                           o_resclk_setup->l3_threshold_mv));
+                           l_l3_threshold_mv));
+    o_resclk_setup->l3_threshold_mv = revle16(l_l3_threshold_mv);
 
     // Resonant Clocking Step array
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_VALUE, i_target,
@@ -1392,7 +1438,7 @@ proc_res_clock_setup ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
 
     for (uint8_t i = 0; i < RESCLK_STEPS; i++)
     {
-        o_resclk_setup->steparray[i].value = l_steparray[i];
+        o_resclk_setup->steparray[i].value = revle16(l_steparray[i]);
     }
 
 fapi_try_exit:
@@ -1942,8 +1988,15 @@ gppb_print(GlobalPstateParmBlock* i_gppb)
         FAPI_INF("%s", l_buffer);
     }
 
+    // Resonant Clocking
+    FAPI_DBG("Resonant Clocking Setup:");
+    FAPI_DBG("Pstates ResClk Index");
 
-
+    for (uint8_t i = 0; i < RESCLK_FREQ_REGIONS; ++i)
+    {
+        FAPI_DBG("    %03d           %02d", i_gppb->resclk.resclk_freq[i],
+                 i_gppb->resclk.resclk_index[i]);
+    }
 
     FAPI_INF("---------------------------------------------------------------------------------------");
 }
@@ -2261,4 +2314,92 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 fapi_try_exit:
     return fapi2::current_err;
 
+}
+
+
+fapi2::ReturnCode
+proc_set_resclk_table_attrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    uint8_t l_resclk_freq_index[RESCLK_FREQ_REGIONS];
+    uint8_t l_l3_steparray[RESCLK_L3_STEPS];
+    uint16_t l_resclk_freq_regions[RESCLK_FREQ_REGIONS];
+    uint16_t l_resclk_value[RESCLK_STEPS];
+    uint16_t l_l3_threshold_mv;
+
+    // Perform some basic sanity checks on the header datastructures (since
+    // the header values are provided by another team)
+    if (p9_resclk_defines::RESCLK_INDEX_VEC.size() != RESCLK_FREQ_REGIONS)
+    {
+        FAPI_ERR("p9_resclk_defines.h RESCLK_INDEX_VEC.size()=%d != p9_pstates.h RESCLK_FREQ_REGIONS=%d",
+                 p9_resclk_defines::RESCLK_INDEX_VEC.size(), RESCLK_FREQ_REGIONS);
+    }
+    else if (p9_resclk_defines::RESCLK_TABLE_VEC.size() != RESCLK_STEPS)
+    {
+        FAPI_ERR("p9_resclk_defines.h RESCLK_TABLE_VEC.size()=%d != p9_pstates.h RESCLK_STEPS=%d",
+                 p9_resclk_defines::RESCLK_TABLE_VEC.size(), RESCLK_STEPS);
+    }
+    else if (p9_resclk_defines::L3CLK_TABLE_VEC.size() != RESCLK_L3_STEPS)
+    {
+        FAPI_ERR("p9_resclk_defines.h L3CLK_TABLE_VEC.size()=%d != p9_pstates.h RESCLK_L3_STEPS=%d",
+                 p9_resclk_defines::L3CLK_TABLE_VEC.size(), RESCLK_L3_STEPS);
+    }
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VALUE, i_target,
+                           l_l3_steparray));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGIONS, i_target,
+                           l_resclk_freq_regions));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGION_INDEX, i_target,
+                           l_resclk_freq_index));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_VALUE, i_target,
+                           l_resclk_value));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV, i_target,
+                           l_l3_threshold_mv));
+
+    for (uint8_t i = 0; i < RESCLK_FREQ_REGIONS; ++i)
+    {
+        if (l_resclk_freq_regions[i] == 0)
+        {
+            l_resclk_freq_regions[i] = p9_resclk_defines::RESCLK_INDEX_VEC.at(i).freq;
+        }
+
+        if (l_resclk_freq_index[i] == 0)
+        {
+            l_resclk_freq_index[i] = p9_resclk_defines::RESCLK_INDEX_VEC.at(i).idx;
+        }
+    }
+
+    for (uint8_t i = 0; i < RESCLK_STEPS; ++i)
+    {
+        if (l_resclk_value[i] == 0)
+        {
+            l_resclk_value[i] = p9_resclk_defines::RESCLK_TABLE_VEC.at(i);
+        }
+    }
+
+    for (uint8_t i = 0; i < RESCLK_L3_STEPS; ++i)
+    {
+        if (l_l3_steparray[i] == 0)
+        {
+            l_l3_steparray[i] = p9_resclk_defines::L3CLK_TABLE_VEC.at(i);
+        }
+    }
+
+    if(l_l3_threshold_mv == 0)
+    {
+        l_l3_threshold_mv = p9_resclk_defines::L3_VOLTAGE_THRESHOLD_MV;
+    }
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_L3_VALUE, i_target,
+                           l_l3_steparray));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGIONS, i_target,
+                           l_resclk_freq_regions));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGION_INDEX, i_target,
+                           l_resclk_freq_index));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_VALUE, i_target,
+                           l_resclk_value));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV, i_target,
+                           l_l3_threshold_mv));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }

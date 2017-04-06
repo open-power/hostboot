@@ -1440,10 +1440,10 @@
 
     Consumers: p9_pstate_parameter_block
     </description>
-    <valueType>uint8</valueType>
+    <valueType>uint16</valueType>
     <array>8</array>
-    <platInit/>
     <initToZero/>
+    <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1462,8 +1462,8 @@
     </description>
     <valueType>uint8</valueType>
     <array>8</array>
-    <platInit/>
     <initToZero/>
+    <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1478,8 +1478,8 @@
     </description>
     <valueType>uint16</valueType>
     <array>64</array>
-    <platInit/>
     <initToZero/>
+    <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1510,8 +1510,8 @@
     </description>
     <valueType>uint8</valueType>
     <array>4</array>
-    <platInit/>
     <initToZero/>
+    <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1529,8 +1529,8 @@
     Consumers: p9_pstate_parameter_block
     </description>
     <valueType>uint16</valueType>
-    <platInit/>
     <initToZero/>
+    <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
