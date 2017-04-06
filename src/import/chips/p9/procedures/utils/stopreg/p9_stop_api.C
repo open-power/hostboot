@@ -59,6 +59,7 @@ const StopSprReg_t g_sprRegister[] =
     { P9_STOP_SPR_HRMOR,     false },
     { P9_STOP_SPR_LPCR,      true  },
     { P9_STOP_SPR_HMEER,     false },
+    { P9_STOP_SPR_LDBAR,     true  },
     { P9_STOP_SPR_PSSCR,     true  },
     { P9_STOP_SPR_PMCR,      false },
     { P9_STOP_SPR_HID,       false },
