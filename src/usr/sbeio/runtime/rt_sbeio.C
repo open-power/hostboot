@@ -29,11 +29,11 @@
 #include <sys/misc.h>
 #include <sbeio/runtime/sbe_msg_passing.H>
 #include <sbeio/sbeioreasoncodes.H>
-#include <util/singleton.H>
 #include <errno.h>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errlreasoncodes.H>
+#include <devicefw/userif.H>
 
 //  targeting support
 #include    <targeting/common/target.H>
@@ -56,6 +56,80 @@ namespace RT_SBEIO
     // Map of process command functions for the pass-through commands
     ProcessCmdMap_t g_processCmdMap;
 
+    // Constants for setting bits in SCOM_ADDR_5003B
+    const uint32_t SCOM_ADDR_5003B = 0x0005003B; // CFAM Reg 0x283B
+    const uint32_t SBE_MESSAGE_PROCESSING_IN_PROGRESS = 0x40000000;
+    const uint32_t SBE_MESSAGE_PROCESSING_COMPLETE = 0x80000000;
+
+    //------------------------------------------------------------------------
+
+    /**
+     *  @brief SBE message set bit(s) in CFAM register
+     *
+     *  @details  This is a call that will set bit(s) in CFAM register 0x283B
+     *            or SCOM_ADDR_5003B.
+     *
+     *  @param[in]  i_proc        HB processor target
+     *  @param[in]  i_set_mask    CFAM register mask
+     *
+     *  @returns  errlHndl_t  NULL on success
+     */
+    errlHndl_t process_sbe_msg_set_cfam(TargetHandle_t i_proc,
+                                        const uint32_t i_set_mask)
+    {
+        errlHndl_t errl = nullptr;
+
+        uint32_t l_read_reg = 0;
+        size_t l_size = sizeof(uint64_t);
+
+        do{
+            // Read SCOM_ADDR_5003B for target proc
+            errl = deviceRead(i_proc,
+                              &l_read_reg,
+                              l_size,
+                              DEVICE_SCOM_ADDRESS(SCOM_ADDR_5003B));
+
+            if(errl)
+            {
+                TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: read CFAM "
+                          "failed for target 0x%llX SCOM addr 0x%llX",
+                          get_huid(i_proc),
+                          SCOM_ADDR_5003B);
+
+                errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH);
+                errl->collectTrace(SBEIO_COMP_NAME);
+
+                break;
+            }
+
+            // Set bit(s) in CFAM reg SCOM_ADDR_5003B based on mask
+            l_read_reg |= i_set_mask;
+
+            // Write SCOM_ADDR_5003B for target proc
+            errl = deviceWrite(i_proc,
+                               &l_read_reg,
+                               l_size,
+                               DEVICE_SCOM_ADDRESS(SCOM_ADDR_5003B));
+
+            if(errl)
+            {
+                TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: write CFAM "
+                          "failed for target 0x%llX SCOM addr 0x%llX",
+                          get_huid(i_proc),
+                          SCOM_ADDR_5003B);
+
+                errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH);
+                errl->collectTrace(SBEIO_COMP_NAME);
+
+                break;
+            }
+        }while(0);
+
+        return errl;
+     }
+
     //------------------------------------------------------------------------
 
     /**
@@ -71,14 +145,13 @@ namespace RT_SBEIO
      *  @param[in]  i_sbeMessage  Pass-through command request in sbe-comm
      *  @param[out] o_request     Copied pass-through command request
      *
-     *  @returns  0 on success, or return code if the command failed
+     *  @returns  errlHndl_t  NULL on success
      */
-    int process_sbe_msg_read_command(TargetHandle_t i_proc,
-                                     sbeMessage_t& i_sbeMessage,
-                                     sbeMessage_t& o_request)
+    errlHndl_t process_sbe_msg_read_command(TargetHandle_t i_proc,
+                                            sbeMessage_t& i_sbeMessage,
+                                            sbeMessage_t& o_request)
     {
         errlHndl_t errl = nullptr;
-        int rc = 0;
 
         if((!ENUM_SBEHDRVER_CHECK(i_sbeMessage.sbeHdr.version)) ||
            (!ENUM_CMDHDRVER_CHECK(i_sbeMessage.cmdHdr.version)))
@@ -92,8 +165,6 @@ namespace RT_SBEIO
                       i_sbeMessage.cmdHdr.version,
                       (ENUM_CMDHDRVER_CHECK(i_sbeMessage.cmdHdr.version))
                           ? "valid" : "invalid");
-
-            rc = -101;
 
             /*@
              * @errortype
@@ -123,15 +194,12 @@ namespace RT_SBEIO
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
-            errlCommit(errl, SBE_COMP_ID);
         }
         else if(i_sbeMessage.sbeHdr.msgSize > SBE_MSG_SIZE)
         {
             TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: read "
                       "command message size too large 0x%08x",
                       i_sbeMessage.sbeHdr.msgSize);
-
-            rc = -102;
 
             /*@
              * @errortype
@@ -162,15 +230,12 @@ namespace RT_SBEIO
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
-            errlCommit(errl, SBE_COMP_ID);
         }
         else if(i_sbeMessage.cmdHdr.dataOffset < sizeof(cmdHeader_t))
         {
             TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: read "
                       "command data offset too small 0x%08x",
                       i_sbeMessage.cmdHdr.dataOffset);
-
-            rc = -103;
 
             /*@
              * @errortype
@@ -201,7 +266,6 @@ namespace RT_SBEIO
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
-            errlCommit(errl, SBE_COMP_ID);
         }
         else if(i_sbeMessage.cmdHdr.dataOffset + i_sbeMessage.cmdHdr.dataSize >
                 i_sbeMessage.sbeHdr.msgSize - sizeof(sbeHeader_t))
@@ -213,8 +277,6 @@ namespace RT_SBEIO
                       i_sbeMessage.cmdHdr.dataSize,
                       i_sbeMessage.sbeHdr.msgSize,
                       sizeof(sbeHeader_t));
-
-            rc = -104;
 
             /*@
              * @errortype
@@ -248,7 +310,6 @@ namespace RT_SBEIO
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
-            errlCommit(errl, SBE_COMP_ID);
         }
         else
         {
@@ -258,7 +319,7 @@ namespace RT_SBEIO
                    i_sbeMessage.sbeHdr.msgSize);
         }
 
-        return rc;
+        return errl;
     }
 
     //------------------------------------------------------------------------
@@ -273,14 +334,14 @@ namespace RT_SBEIO
      *  @param[in]  i_request   Pass-through command request
      *  @param[out] o_response  Pass-through command response
      *
-     *  @returns  0 on success, or return code if the command failed
+     *  @returns  errlHndl_t  NULL on success
      */
-    int process_sbe_msg_cmd_processor(TargetHandle_t i_proc,
-                                      sbeMessage_t& i_request,
-                                      sbeMessage_t& o_response)
+    errlHndl_t process_sbe_msg_cmd_processor(TargetHandle_t i_proc,
+                                             sbeMessage_t& i_request,
+                                             sbeMessage_t& o_response)
     {
         errlHndl_t errl = nullptr;
-        int rc = 0;
+
         uint32_t l_command = i_request.cmdHdr.command;
 
         if(g_processCmdMap.find(l_command) == g_processCmdMap.end())
@@ -288,8 +349,6 @@ namespace RT_SBEIO
             TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: process "
                       "command, function pointer not found for command 0x%08x",
                       l_command);
-
-            rc = -201;
 
             /*@
              * @errortype
@@ -321,7 +380,6 @@ namespace RT_SBEIO
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
-            errlCommit(errl, SBE_COMP_ID);
         }
         else
         {
@@ -350,13 +408,27 @@ namespace RT_SBEIO
                                               &o_response.cmdHdr.dataSize,
                                               o_response.data);
 
-            if(o_response.cmdHdr.dataSize > SBE_MSG_MAX_DATA)
+            if(errl)
+            {
+                TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: process "
+                          "command returned error log",
+                          o_response.cmdHdr.dataSize);
+
+                errl->addFFDC( SBE_COMP_ID,
+                               &(i_request),
+                               sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
+                               0,                 // Version
+                               ERRL_UDT_NOFORMAT, // parser ignores data
+                               false );           // merge
+                errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH);
+                errl->collectTrace(SBEIO_COMP_NAME);
+            }
+            else             if(o_response.cmdHdr.dataSize > SBE_MSG_MAX_DATA)
             {
                 TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: process "
                           "command, response data size 0x%08x too large",
                           o_response.cmdHdr.dataSize);
-
-                rc = -202;
 
                 /*@
                  * @errortype
@@ -391,7 +463,6 @@ namespace RT_SBEIO
                 errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                           HWAS::SRCI_PRIORITY_HIGH);
                 errl->collectTrace(SBEIO_COMP_NAME);
-                errlCommit(errl, SBE_COMP_ID);
 
                 // Calculate message size for response using max data
                 o_response.sbeHdr.msgSize = sizeof(sbeHeader_t) +
@@ -413,8 +484,8 @@ namespace RT_SBEIO
                       o_response.cmdHdr.status);
         }
 
-        return rc;
-     }
+        return errl;
+    }
 
     //------------------------------------------------------------------------
 
@@ -429,14 +500,13 @@ namespace RT_SBEIO
      *  @param[in]  i_sbeMessage  Pass-through command response in sbe-comm
      *  @param[in]  i_request     Copied pass-through command request
      *
-     *  @returns  0 on success, or return code if the command failed
+     *  @returns  errlHndl_t  NULL on success
      */
-    int process_sbe_msg_check_response(TargetHandle_t i_proc,
-                                       sbeMessage_t& i_sbeMessage,
-                                       sbeMessage_t& i_request)
+    errlHndl_t process_sbe_msg_check_response(TargetHandle_t i_proc,
+                                              sbeMessage_t& i_sbeMessage,
+                                              sbeMessage_t& i_request)
     {
         errlHndl_t errl = nullptr;
-        int rc = 0;
 
         if((i_sbeMessage.sbeHdr.version != i_request.sbeHdr.version) ||
            (i_sbeMessage.sbeHdr.seqId != i_request.sbeHdr.seqId) ||
@@ -445,8 +515,6 @@ namespace RT_SBEIO
         {
             TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: check "
                       "response, response field was altered");
-
-            rc = -301;
 
             /*@
              * @errortype
@@ -483,10 +551,9 @@ namespace RT_SBEIO
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
-            errlCommit(errl, SBE_COMP_ID);
         }
 
-        return rc;
+        return errl;
     }
 
     //------------------------------------------------------------------------
@@ -507,19 +574,20 @@ namespace RT_SBEIO
             errl = RT_TARG::getHbTarget(i_procChipId, l_proc);
             if(errl)
             {
-                rc = errl->reasonCode();
-                if (0 == rc)
-                {
-                    // If there was a failure, be sure to return non-zero status
-                    rc = -1;
-                }
-
                 TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: getHbTarget "
                          "returned rc=0x%04X for procChipId: %llx",
                           rc, i_procChipId);
 
-                errlCommit (errl, SBE_COMP_ID);
+                break;
+            }
 
+            // Set CFAM register - processing in progress
+            TRACFCOMP(g_trac_sbeio, "process_sbe_msg: set CFAM register - "
+                                    "processing in progress");
+            errl = process_sbe_msg_set_cfam(l_proc,
+                                            SBE_MESSAGE_PROCESSING_IN_PROGRESS);
+            if(errl)
+            {
                 break;
             }
 
@@ -532,8 +600,6 @@ namespace RT_SBEIO
             {
                 TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: getAttr "
                           "did not get SBE Communication buffer address");
-
-                rc = -2;
 
                 /*@
                  * @errortype
@@ -555,7 +621,6 @@ namespace RT_SBEIO
                 errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                           HWAS::SRCI_PRIORITY_HIGH);
                 errl->collectTrace(SBEIO_COMP_NAME);
-                errlCommit(errl, SBE_COMP_ID);
 
                 break;
             }
@@ -566,44 +631,58 @@ namespace RT_SBEIO
 
             // Process SBE message read command
             TRACFCOMP(g_trac_sbeio, "process_sbe_msg: read command");
-            rc = process_sbe_msg_read_command(l_proc,
-                                              *l_sbeMessage,
-                                              l_request);
-            if (rc != 0)
+            errl = process_sbe_msg_read_command(l_proc,
+                                                *l_sbeMessage,
+                                                l_request);
+            if (errl)
             {
                 break;
             }
 
             // Call appropriate command processor
             TRACFCOMP(g_trac_sbeio, "process_sbe_msg: call command processor");
-            rc = process_sbe_msg_cmd_processor(l_proc,
-                                               l_request,
-                                               *l_sbeMessage);
-            if(rc != 0)
+            errl = process_sbe_msg_cmd_processor(l_proc,
+                                                 l_request,
+                                                 *l_sbeMessage);
+            if(errl)
             {
                 break;
             }
 
             // Process SBE message check response
             TRACFCOMP(g_trac_sbeio, "process_sbe_msg: check response");
-            rc = process_sbe_msg_check_response(l_proc,
-                                                *l_sbeMessage,
-                                                l_request);
-            if(rc != 0)
+            errl = process_sbe_msg_check_response(l_proc,
+                                                  *l_sbeMessage,
+                                                  l_request);
+            if(errl)
             {
                 break;
             }
 
-            /* TODO RTC 170763 assert CFAM register ??? */
-            TRACFCOMP(g_trac_sbeio, "process_sbe_msg: assert CFAM register");
+            // Set CFAM register - processing complete
+            TRACFCOMP(g_trac_sbeio, "process_sbe_msg: set CFAM register - "
+                                    "processing complete");
+            errl = process_sbe_msg_set_cfam(l_proc,
+                                            SBE_MESSAGE_PROCESSING_COMPLETE);
+            if(errl)
+            {
+                break;
+            }
         } while(0);
+
+        if(errl)
+        {
+            rc = errl->reasonCode();
+            if (0 == rc)
+            {
+                // If there was a failure, be sure to return non-zero status
+                rc = -1;
+            }
+            errlCommit (errl, SBE_COMP_ID);
+        }
 
         return rc;
     }
-
-    //------------------------------------------------------------------------
-
-    //------------------------------------------------------------------------
 
     //------------------------------------------------------------------------
 

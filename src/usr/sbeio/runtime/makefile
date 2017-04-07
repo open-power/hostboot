@@ -33,7 +33,4 @@ MODULE = sbeio_rt
 ## Objects unique to HBRT
 OBJS += rt_sbeio.o
 
-## Objects common to HBRT and HB IPL
-#include ../sbeio.mk
-
 include ${ROOTPATH}/config.mk
