@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -28,6 +28,8 @@
 
 #include <limits.h>
 #include <config.h>
+#include <pnor/pnor_const.H>
+
 namespace PNOR { class UdPnorDDParms; }
 class SfcDD;
 
@@ -94,16 +96,6 @@ class PnorDD
      */
     uint32_t getNorSize( void );
 
-
-    // Enumeration values must match those in debug framework.
-    enum PnorMode_t {
-        MODEL_UNKNOWN,   /**< Invalid */
-        MODEL_MEMCPY,    /**< No LPC logic, just do memcpy into cache area */
-        MODEL_LPC_MEM,   /**< Break into 32-bit LPC ops but use fake-PNOR */
-        MODEL_REAL_CMD,  /**< Code for real HW using Command based reads */
-        MODEL_REAL_MMIO, /**< Code for real hardware using MMIO reads */
-    };
-
     /**
      * @brief Constructor
      *
@@ -111,7 +103,6 @@ class PnorDD
      *       NOTE: i_target can only be used after targeting is loaded
      */
     PnorDD( TARGETING::Target* i_target = NULL );
-
 
     /**
      * @brief Destructor

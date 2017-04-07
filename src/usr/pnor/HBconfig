@@ -1,24 +1,36 @@
+config PNORDD_IS_SFC
+    default y
+    depends on !PNORDD_IS_BMCMBOX
+    help
+        The Serial Flash Controller is based on the SFC backends
+
+config PNORDD_IS_BMCMBOX
+    default n
+    depends on !PNORDD_IS_SFC
+    help
+        The Serial Flash Controller is using the MBOX BMC protocol
+
 config SFC_IS_IBM_DPSS
     default n
-    depends on !SFC_IS_AST2400 && !SFC_IS_FAKE && !SFC_IS_AST2500
+    depends on !SFC_IS_AST2400 && !SFC_IS_FAKE && !SFC_IS_AST2500 && PNORDD_IS_SFC
     help
         The Serial Flash Controller is the IBM DPSS FPGA.
 
 config SFC_IS_AST2400
     default y if !SFC_IS_AST2500
-    depends on !SFC_IS_IBM_DPSS && !SFC_IS_FAKE && !SFC_IS_AST2500
+    depends on !SFC_IS_IBM_DPSS && !SFC_IS_FAKE && !SFC_IS_AST2500 && PNORDD_IS_SFC
     help
         The Serial Flash Controller is the AST2400 BMC.
 
 config SFC_IS_AST2500
     default n
-    depends on !SFC_IS_IBM_DPSS && !SFC_IS_FAKE && !SFC_IS_AST2400
+    depends on !SFC_IS_IBM_DPSS && !SFC_IS_FAKE && !SFC_IS_AST2400 && PNORDD_IS_SFC
     help
         The Serial Flash Controller is the AST2500 BMC.
 
 config SFC_IS_FAKE
     default n
-    depends on !SFC_IS_IBM_DPSS && !SFC_IS_AST2400 && !SFC_IS_AST2500
+    depends on !SFC_IS_IBM_DPSS && !SFC_IS_AST2400 && !SFC_IS_AST2500 && PNORDD_IS_SFC
     help
         The Serial Flash Controller is emulated using memory.
 

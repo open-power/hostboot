@@ -44,7 +44,6 @@ enum TransType {
     TRANS_LAST //Invalid, used for looping and tests
 };
 
-
 /**
  * @brief Create/delete software objects to support non-master access
  *

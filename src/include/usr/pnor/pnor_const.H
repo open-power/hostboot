@@ -75,6 +75,14 @@ enum SectionId
     INVALID_SECTION = NUM_SECTIONS,
 };
 
+enum PnorMode_t {
+    MODEL_UNKNOWN,   /**< Invalid */
+    MODEL_MEMCPY,    /**< No LPC logic, just do memcpy into cache area */
+    MODEL_LPC_MEM,   /**< Break into 32-bit LPC ops but use fake-PNOR */
+    MODEL_REAL_CMD,  /**< Code for real HW using Command based reads */
+    MODEL_REAL_MMIO, /**< Code for real hardware using MMIO reads */
+};
+
 /**
  * Information about a section of PNOR
  */
