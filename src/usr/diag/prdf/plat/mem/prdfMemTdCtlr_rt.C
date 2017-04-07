@@ -29,9 +29,8 @@
 
 #include <prdfMemTdCtlr.H>
 
-// Framework includes
-
 // Platform includes
+#include <prdfMemScrubUtils.H>
 #include <prdfPlatServices.H>
 
 using namespace TARGETING;
@@ -192,84 +191,47 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-template <>
-uint32_t MemTdCtlr<TYPE_MCBIST>::checkEcc( bool & o_errorsFound,
-                                           STEP_CODE_DATA_STRUCT & io_sc )
+template <TARGETING::TYPE T>
+uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
+                     const MemRank & i_rank, bool & o_errorsFound,
+                     STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[MemTdCtlr<TYPE_MCBIST>::checkEcc] "
+    #define PRDF_FUNC "[__checkEcc] "
 
     uint32_t o_rc = SUCCESS;
 
     o_errorsFound = false;
-
-    /* TODO: RTC 171915
-    MemRank rank = iv_stoppedRank.getRank();
 
     do
     {
-        // Get all ports in which the command was run.
-        std::vector<ExtensibleChip *> portList;
-        o_rc = getMcbistMaintPort( iv_chip, portList );
+        // Check for ECC errors.
+        uint32_t eccAttns = 0;
+        o_rc = checkEccFirs<T>( i_chip, eccAttns );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getMcbistMaintPort(0x%08x) failed",
-                      iv_chip->getHuid() );
+            PRDF_ERR( PRDF_FUNC "checkEccFirs<T>(0x%08x) failed",
+                      i_chip->getHuid() );
             break;
         }
 
-        // Check each MCA for ECC errors.
-        for ( auto & mcaChip : portList )
-        {
-            bool errorsFound;
-            uint32_t l_rc = __checkEcc<TYPE_MCA>( mcaChip, rank, iv_queue,
-                                                  io_sc, errorsFound );
-            if ( SUCCESS != l_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "__checkEcc<TYPE_MCA>(0x%08x,%d) failed",
-                          mcaChip->getHuid(), rank.getMaster() );
-                o_rc |= l_rc; continue; // Try the other MCAs.
-            }
-
-            if ( errorsFound ) o_errorsFound = true;
-        }
-        if ( SUCCESS != o_rc ) break;
+        // TODO RTC 171915
 
     } while (0);
-    */
 
     return o_rc;
 
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
+template
+uint32_t __checkEcc<TYPE_MCA>( ExtensibleChip * i_chip, TdQueue & io_queue,
+                               const MemRank & i_rank, bool & o_errorsFound,
+                               STEP_CODE_DATA_STRUCT & io_sc );
 
-template <>
-uint32_t MemTdCtlr<TYPE_MBA>::checkEcc( bool & o_errorsFound,
-                                        STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[MemTdCtlr<TYPE_MBA>::checkEcc] "
-
-    uint32_t o_rc = SUCCESS;
-
-    o_errorsFound = false;
-
-    /* TODO: RTC 171915
-    MemRank rank = iv_stoppedRank.getRank();
-
-    o_rc = __checkEcc<TYPE_MBA>( iv_chip, rank, iv_queue, io_sc,
-                                 o_errorsFound );
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "__checkEcc<TYPE_MBA>(0x%08x,%d) failed",
-                  iv_chip->getHuid(), rank.getMaster() );
-    }
-    */
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
+template
+uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
+                               const MemRank & i_rank, bool & o_errorsFound,
+                               STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
