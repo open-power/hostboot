@@ -156,7 +156,7 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t MemTdCtlr<TYPE_MCBIST>::initStoppedRank()
+uint32_t MemTdCtlr<TYPE_MCBIST>::initStoppedRank( const MemAddr & i_addr )
 {
     #define PRDF_FUNC "[initStoppedRank] "
 
@@ -177,18 +177,8 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::initStoppedRank()
             break;
         }
 
-        // Get the rank in which the command stopped.
-        MemAddr addr;
-        o_rc = getMemMaintAddr<TYPE_MCBIST>( iv_chip, addr );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemMaintAddr<TYPE_MCBIST>(0x%08x) failed",
-                      iv_chip->getHuid() );
-            break;
-        }
-
         ExtensibleChip * mcaChip = portList.front();
-        MemRank          rank    = addr.getRank();
+        MemRank          rank    = i_addr.getRank();
 
         // ############################ SIMICs only ############################
         // We have found it to be increasingly difficult to simulate the MCBMCAT
@@ -228,32 +218,12 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::initStoppedRank()
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t MemTdCtlr<TYPE_MBA>::initStoppedRank()
+uint32_t MemTdCtlr<TYPE_MBA>::initStoppedRank( const MemAddr & i_addr )
 {
-    #define PRDF_FUNC "[initStoppedRank] "
+    // Update iv_stoppedRank.
+    iv_stoppedRank = TdRankListEntry( iv_chip, i_addr.getRank() );
 
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Get the rank in which the command stopped.
-        MemAddr addr;
-        o_rc = getMemMaintAddr<TYPE_MBA>( iv_chip, addr );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemMaintAddr<TYPE_MBA>(0x%08x) failed",
-                      iv_chip->getHuid() );
-            break;
-        }
-
-        // Update iv_stoppedRank.
-        iv_stoppedRank = TdRankListEntry( iv_chip, addr.getRank() );
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -267,13 +237,14 @@ uint32_t MemTdCtlr<TYPE_MBA>::initStoppedRank()
 // to create a public function.
 template<TARGETING::TYPE T>
 uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
-                     const MemRank & i_rank, bool & o_errorsFound,
+                     const MemAddr & i_addr, bool & o_errorsFound,
                      STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t MemTdCtlr<TYPE_MCBIST>::checkEcc( bool & o_errorsFound,
+uint32_t MemTdCtlr<TYPE_MCBIST>::checkEcc( const MemAddr & i_addr,
+                                           bool & o_errorsFound,
                                            STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemTdCtlr<TYPE_MCBIST>::checkEcc] "
@@ -281,8 +252,6 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::checkEcc( bool & o_errorsFound,
     uint32_t o_rc = SUCCESS;
 
     o_errorsFound = false;
-
-    MemRank rank = iv_stoppedRank.getRank();
 
     do
     {
@@ -300,12 +269,12 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::checkEcc( bool & o_errorsFound,
         for ( auto & mcaChip : portList )
         {
             bool errorsFound;
-            uint32_t l_rc = __checkEcc<TYPE_MCA>( mcaChip, iv_queue, rank,
+            uint32_t l_rc = __checkEcc<TYPE_MCA>( mcaChip, iv_queue, i_addr,
                                                   errorsFound, io_sc );
             if ( SUCCESS != l_rc )
             {
-                PRDF_ERR( PRDF_FUNC "__checkEcc<TYPE_MCA>(0x%08x,%d) failed",
-                          mcaChip->getHuid(), rank.getMaster() );
+                PRDF_ERR( PRDF_FUNC "__checkEcc<TYPE_MCA>(0x%08x) failed",
+                          mcaChip->getHuid() );
                 o_rc |= l_rc; continue; // Try the other MCAs.
             }
 
@@ -323,11 +292,12 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::checkEcc( bool & o_errorsFound,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t MemTdCtlr<TYPE_MBA>::checkEcc( bool & o_errorsFound,
+uint32_t MemTdCtlr<TYPE_MBA>::checkEcc( const MemAddr & i_addr,
+                                        bool & o_errorsFound,
                                         STEP_CODE_DATA_STRUCT & io_sc )
 {
-    return __checkEcc<TYPE_MBA>( iv_chip, iv_queue, iv_stoppedRank.getRank(),
-                                 o_errorsFound, io_sc );
+    return __checkEcc<TYPE_MBA>( iv_chip, iv_queue, i_addr, o_errorsFound,
+                                 io_sc );
 }
 
 //------------------------------------------------------------------------------
@@ -342,9 +312,19 @@ uint32_t MemTdCtlr<T>::analyzeCmdComplete( bool & o_errorsFound,
 
     do
     {
+        // First, get the address in which the command stopped.
+        MemAddr addr;
+        o_rc = getMemMaintAddr<T>( iv_chip, addr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemMaintAddr<T>(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
+
         // First, keep track of where the command stopped. Must be done
         // before calling checkEcc().
-        o_rc = initStoppedRank();
+        o_rc = initStoppedRank( addr );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "initStoppedRank() failed" );
@@ -352,7 +332,7 @@ uint32_t MemTdCtlr<T>::analyzeCmdComplete( bool & o_errorsFound,
         }
 
         // Then, check for ECC errors, if they exist.
-        o_rc = checkEcc( o_errorsFound, io_sc );
+        o_rc = checkEcc( addr, o_errorsFound, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "checkEcc(0x%08x) failed",

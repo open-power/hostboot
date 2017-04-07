@@ -193,7 +193,7 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 
 template <TARGETING::TYPE T>
 uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
-                     const MemRank & i_rank, bool & o_errorsFound,
+                     const MemAddr & i_addr, bool & o_errorsFound,
                      STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[__checkEcc] "
@@ -225,12 +225,12 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 
 template
 uint32_t __checkEcc<TYPE_MCA>( ExtensibleChip * i_chip, TdQueue & io_queue,
-                               const MemRank & i_rank, bool & o_errorsFound,
+                               const MemAddr & i_addr, bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
 
 template
 uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
-                               const MemRank & i_rank, bool & o_errorsFound,
+                               const MemAddr & i_addr, bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------

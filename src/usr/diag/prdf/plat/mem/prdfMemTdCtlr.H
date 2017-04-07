@@ -172,20 +172,23 @@ class MemTdCtlr
      *         non-TD command to initialize iv_stoppedRank and iv_broadcastMode,
      *         which are used to indicate where the command should resume after
      *         targeted diagnostics is compete.
+     * @param  i_addr Address in which the command stopped.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t initStoppedRank();
+    uint32_t initStoppedRank( const MemAddr & i_addr );
 
     /**
      * @brief  This is called when handling a command complete attention for a
      *         non-TD command to check for ECC errors. This must be called after
      *         initStoppedRank() to ensure iv_stoppedRank is initialized.
+     * @param  i_addr        Address in which the command stopped.
      * @param  o_errorsFound True if errors where found and handled. False
      *                       otherwise.
      * @param  io_sc         The step code data struct.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t checkEcc( bool & o_errorsFound, STEP_CODE_DATA_STRUCT & io_sc );
+    uint32_t checkEcc( const MemAddr & i_addr, bool & o_errorsFound,
+                       STEP_CODE_DATA_STRUCT & io_sc );
 
     /**
      * @brief  This is called when handling a command complete attention for a

@@ -134,7 +134,7 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 
 template <TARGETING::TYPE T>
 uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
-                     const MemRank & i_rank, bool & o_errorsFound,
+                     const MemAddr & i_addr, bool & o_errorsFound,
                      STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[__checkEcc] "
@@ -145,6 +145,8 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 
     TargetHandle_t trgt = i_chip->getTrgt();
     HUID           huid = i_chip->getHuid();
+
+    MemRank rank = i_addr.getRank();
 
     do
     {
@@ -166,7 +168,7 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             io_sc.service_data->setSignature(     huid, PRDFSIG_MaintUE );
 
             // Add the rank to the callout list.
-            MemEcc::calloutMemUe<T>( i_chip, i_rank, io_sc );
+            MemEcc::calloutMemUe<T>( i_chip, rank, io_sc );
 
             // Make the error log predictive.
             io_sc.service_data->setServiceCall();
@@ -177,11 +179,11 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 
             // Read the chip mark from markstore.
             MemMark chipMark;
-            o_rc = MarkStore::readChipMark<T>( i_chip, i_rank, chipMark );
+            o_rc = MarkStore::readChipMark<T>( i_chip, rank, chipMark );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,%d) failed",
-                          huid, i_rank.getMaster() );
+                          huid, rank.getMaster() );
                 break;
             }
 
@@ -191,11 +193,11 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             PRDF_ASSERT( chipMark.isValid() );
 
             // Add the mark to the callout list.
-            MemoryMru mm { trgt, i_rank, chipMark.getSymbol() };
+            MemoryMru mm { trgt, rank, chipMark.getSymbol() };
             io_sc.service_data->SetCallout( mm );
 
             // Add a new VCM procedure to the queue.
-            TdEntry * e = new VcmEvent<T>{ i_chip, i_rank, chipMark };
+            TdEntry * e = new VcmEvent<T>{ i_chip, rank, chipMark };
             io_queue.push( e );
         }
         else if ( isMfgCeCheckingEnabled() &&
@@ -205,12 +207,12 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 
             // Query the per-symbol counters for the hard CE symbol.
             MemUtils::MaintSymbols symData; MemSymbol junk;
-            o_rc = MemUtils::collectCeStats<T>( i_chip, i_rank, symData, junk );
+            o_rc = MemUtils::collectCeStats<T>( i_chip, rank, symData, junk );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats(0x%08x,m%ds%d) "
-                          "failed", i_chip->GetId(), i_rank.getMaster(),
-                          i_rank.getSlave() );
+                          "failed", i_chip->GetId(), rank.getMaster(),
+                          rank.getSlave() );
                 break;
             }
 
@@ -218,12 +220,12 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             // may be more than one symbol. Add all to the callout list.
             for ( auto & s : symData )
             {
-                MemoryMru memmru ( trgt, i_rank, s.symbol );
+                MemoryMru memmru ( trgt, rank, s.symbol );
                 io_sc.service_data->SetCallout( memmru );
             }
 
             // Add a TPS procedure to the queue.
-            TdEntry * e = new TpsEvent<T>{ i_chip, i_rank };
+            TdEntry * e = new TpsEvent<T>{ i_chip, rank };
             io_queue.push( e );
         }
         else // Nothing found.
@@ -240,12 +242,12 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 
 template
 uint32_t __checkEcc<TYPE_MCA>( ExtensibleChip * i_chip, TdQueue & io_queue,
-                               const MemRank & i_rank, bool & o_errorsFound,
+                               const MemAddr & i_addr, bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
 
 template
 uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
-                               const MemRank & i_rank, bool & o_errorsFound,
+                               const MemAddr & i_addr, bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
