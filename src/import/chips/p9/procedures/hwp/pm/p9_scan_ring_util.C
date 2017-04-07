@@ -141,7 +141,7 @@ RingBucket::RingBucket( PlatId i_plat, uint8_t* i_pRingStart, RingDebugMode_t i_
             { eq_fure,                  0,  0 },
             { eq_gptr,                  0,  0 },
             { eq_time,                  0,  0 },
-            { eq_mode,                  0,  0 },
+            { eq_inex_bucket_1,         0,  0 },
             { ex_l3_fure,               0,  0 },
             { ex_l3_gptr,               0,  0 },
             { ex_l3_time,               0,  0 },
@@ -266,7 +266,7 @@ RingBucket::RingBucket( PlatId i_plat, uint8_t* i_pRingStart, RingDebugMode_t i_
 
         };
 
-        for( ringIndex = 0; ringIndex < EQ::g_eqData.iv_num_common_rings; ringIndex++ )
+        for( ringIndex = 0; ringIndex < MAX_HOMER_QUAD_CMN_RINGS; ringIndex++ )
         {
             iv_cmnRingMap[ringIndex] = l_quadCmnRings[ringIndex];
         }
@@ -280,7 +280,9 @@ RingBucket::RingBucket( PlatId i_plat, uint8_t* i_pRingStart, RingDebugMode_t i_
         iv_ringName[ eq_fure ]                  =   (char*)"eq_fure             ";
         iv_ringName[ eq_gptr ]                  =   (char*)"eq_gptr             ";
         iv_ringName[ eq_time ]                  =   (char*)"eq_time             ";
-        iv_ringName[ eq_mode ]                  =   (char*)"eq_mode             ";
+        //eq_inex_bucket_1 is just a place holder. Actual ring bucket to be placed
+        //gets decided at the time of HOMER build.
+        iv_ringName[ eq_inex_bucket_1 ]         =   (char*)"eq_inex             ";
         iv_ringName[ ex_l3_fure ]               =   (char*)"ex_l3_fure          ";
         iv_ringName[ ex_l3_gptr ]               =   (char*)"ex_l3_gptr          ";
         iv_ringName[ ex_l3_time ]               =   (char*)"ex_l3_time          ";
