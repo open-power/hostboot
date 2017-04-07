@@ -300,6 +300,7 @@ static void initializeAttributes(TargetService& i_targetService,
             l_i2c_switches.useFsiI2C  = 0;
             l_pMasterProcChip->setAttr<ATTR_I2C_SWITCHES>(l_i2c_switches);
 
+            l_pMasterProcChip->setAttr<ATTR_PROC_SBE_MASTER_CHIP>(1);
 
             // Master has SBE started
             l_pMasterProcChip->setAttr<ATTR_SBE_IS_STARTED>(1);
