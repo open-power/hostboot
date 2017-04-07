@@ -188,6 +188,18 @@ class MemTdCtlr
     uint32_t checkEcc( bool & o_errorsFound, STEP_CODE_DATA_STRUCT & io_sc );
 
     /**
+     * @brief  This is called when handling a command complete attention for a
+     *         non-TD command to initialize iv_stoppedRank and iv_broadcastMode
+     *         then check for any ECC errors.
+     * @param  o_errorsFound True if errors where found and handled. False
+     *                       otherwise.
+     * @param  io_sc         The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t analyzeCmdComplete( bool & o_errorsFound,
+                                 STEP_CODE_DATA_STRUCT & io_sc );
+
+    /**
      * @brief Adds the TD controller state to the  capture data.
      * @param io_sc      The step code data struct.
      * @param i_startEnd Description tag for the capture data. Used to
