@@ -23,6 +23,13 @@
 #
 # IBM_PROLOG_END_TAG
 
+/** MCBIST capture MCA registers when isolating to MCBIST */
+actionclass analyzeMcbistfir
+{
+    funccall("CaptureMcaRegisters");
+    analyze(gMCBISTFIR);
+};
+
 /** MCBIST program complete */
 actionclass mcbist_program_complete
 {

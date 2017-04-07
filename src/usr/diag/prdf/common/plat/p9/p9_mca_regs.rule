@@ -80,6 +80,7 @@
         name        "P9 Hardware Mark Store rank 0";
         scomaddr    0x07010A10;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register HW_MS1
@@ -87,6 +88,7 @@
         name        "P9 Hardware Mark Store rank 1";
         scomaddr    0x07010A11;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register HW_MS2
@@ -94,6 +96,7 @@
         name        "P9 Hardware Mark Store rank 2";
         scomaddr    0x07010A12;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register HW_MS3
@@ -101,6 +104,7 @@
         name        "P9 Hardware Mark Store rank 3";
         scomaddr    0x07010A13;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register HW_MS4
@@ -108,6 +112,7 @@
         name        "P9 Hardware Mark Store rank 4";
         scomaddr    0x07010A14;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register HW_MS5
@@ -115,6 +120,7 @@
         name        "P9 Hardware Mark Store rank 5";
         scomaddr    0x07010A15;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register HW_MS6
@@ -122,6 +128,7 @@
         name        "P9 Hardware Mark Store rank 6";
         scomaddr    0x07010A16;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register HW_MS7
@@ -129,6 +136,7 @@
         name        "P9 Hardware Mark Store rank 7";
         scomaddr    0x07010A17;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     ############################################################################
@@ -140,6 +148,7 @@
         name        "P9 Firmware Mark Store 0";
         scomaddr    0x07010A18;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register FW_MS1
@@ -147,6 +156,7 @@
         name        "P9 Firmware Mark Store 1";
         scomaddr    0x07010A19;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register FW_MS2
@@ -154,6 +164,7 @@
         name        "P9 Firmware Mark Store 2";
         scomaddr    0x07010A1A;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register FW_MS3
@@ -161,6 +172,7 @@
         name        "P9 Firmware Mark Store 3";
         scomaddr    0x07010A1B;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register FW_MS4
@@ -168,6 +180,7 @@
         name        "P9 Firmware Mark Store 4";
         scomaddr    0x07010A1C;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register FW_MS5
@@ -175,6 +188,7 @@
         name        "P9 Firmware Mark Store 5";
         scomaddr    0x07010A1D;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register FW_MS6
@@ -182,6 +196,7 @@
         name        "P9 Firmware Mark Store 6";
         scomaddr    0x07010A1E;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register FW_MS7
@@ -189,6 +204,7 @@
         name        "P9 Firmware Mark Store 7";
         scomaddr    0x07010A1F;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     ############################################################################
@@ -218,6 +234,7 @@
         name     "MCP.PORT0.SRQ.MBA_FARB0Q";
         scomaddr 0x07010913;
         capture  group default;
+        capture  group McbistCapture;
     };
 
     register MSR
@@ -225,5 +242,6 @@
         name        "P9 Mark Shadow Register";
         scomaddr    0x07010A0C;
         capture     group default;
+        capture     group McbistCapture;
     };
 

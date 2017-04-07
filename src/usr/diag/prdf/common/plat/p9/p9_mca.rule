@@ -56,6 +56,7 @@ chip p9_mca
         reset       (&, 0x07010901);
         mask        (|, 0x07010905);
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register MCACALFIR_MASK
@@ -63,6 +64,7 @@ chip p9_mca
         name        "P9 MCA target MCACALFIR MASK";
         scomaddr    0x07010903;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register MCACALFIR_ACT0
@@ -71,6 +73,7 @@ chip p9_mca
         scomaddr    0x07010906;
         capture     group default;
         capture     req nonzero("MCACALFIR");
+        capture     group McbistCapture;
     };
 
     register MCACALFIR_ACT1
@@ -79,6 +82,7 @@ chip p9_mca
         scomaddr    0x07010907;
         capture     group default;
         capture     req nonzero("MCACALFIR");
+        capture     group McbistCapture;
     };
 
     ############################################################################
@@ -92,6 +96,7 @@ chip p9_mca
         reset       (&, 0x07010a01);
         mask        (|, 0x07010a05);
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register MCAECCFIR_MASK
@@ -99,6 +104,7 @@ chip p9_mca
         name        "P9 MCA target MCAECCFIR MASK";
         scomaddr    0x07010a03;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register MCAECCFIR_ACT0
@@ -107,6 +113,7 @@ chip p9_mca
         scomaddr    0x07010a06;
         capture     group default;
         capture     req nonzero("MCAECCFIR");
+        capture     group McbistCapture;
     };
 
     register MCAECCFIR_ACT1
@@ -115,6 +122,7 @@ chip p9_mca
         scomaddr    0x07010a07;
         capture     group default;
         capture     req nonzero("MCAECCFIR");
+        capture     group McbistCapture;
     };
 
     ############################################################################
@@ -128,6 +136,7 @@ chip p9_mca
         reset       (&, 0x07011001);
         mask        (|, 0x07011005);
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register DDRPHYFIR_MASK
@@ -135,6 +144,7 @@ chip p9_mca
         name        "P9 MCA target DDRPHYFIR MASK";
         scomaddr    0x07011003;
         capture     group default;
+        capture     group McbistCapture;
     };
 
     register DDRPHYFIR_ACT0
@@ -143,6 +153,7 @@ chip p9_mca
         scomaddr    0x07011006;
         capture     group default;
         capture     req nonzero("DDRPHYFIR");
+        capture     group McbistCapture;
     };
 
     register DDRPHYFIR_ACT1
@@ -151,6 +162,7 @@ chip p9_mca
         scomaddr    0x07011007;
         capture     group default;
         capture     req nonzero("DDRPHYFIR");
+        capture     group McbistCapture;
     };
 
 
