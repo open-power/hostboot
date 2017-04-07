@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -40,7 +40,11 @@
 #include <devicefw/userif.H>
 #include <kernel/console.H>
 #include <sys/time.h>
+#ifdef CONFIG_PNORDD_IS_SFC
 #include "../pnordd.H"
+#else
+#include "../pnor_mboxdd.H"
+#endif
 #include "../pnorrp.H"
 #include <list>
 #include <targeting/common/attributes.H>

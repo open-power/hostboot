@@ -37,7 +37,6 @@
 #include <sys/mm.h>
 #include <errno.h>
 #include <initservice/initserviceif.H>
-#include "pnordd.H"
 #include "ffs.h"   //Common header file with BuildingBlock.
 #include "common/ffs_hb.H"//Hostboot definition of user data in ffs_entry struct
 #include <pnor/ecc.H>
