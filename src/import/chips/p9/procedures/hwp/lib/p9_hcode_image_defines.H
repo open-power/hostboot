@@ -55,9 +55,17 @@
 #ifndef __PPE_PLAT
 namespace p9_hcodeImageBuild
 {
+#include <p9_ringId.H>
 #endif //__PPE_PLAT
 #endif //__cplusplus
 #endif //__ASSEMBLER__
+
+//FIXME to make future addition simple, need a better solution
+/**
+ * @brief returns maximum quad common rings that enter HOMER.
+ */
+
+#define MAX_HOMER_QUAD_CMN_RINGS       (uint32_t)(EQ::g_eqData.iv_num_common_rings - 4)
 
 /**
  * @brief models QPMR header in HOMER
@@ -393,6 +401,7 @@ enum ImgBldRetCode_t
     SGPE_SRAM_IMG_SIZE_ERR      =   32,
     PGPE_SRAM_IMG_SIZE_ERR      =   33,
     BUILD_FAIL_PGPE_PPMR        =   34,
+    BUILD_FAIL_RING_SEL_EQ_INEX =   35,
 };
 
 /**
@@ -454,7 +463,7 @@ typedef struct
     uint16_t    eqFureRing;
     uint16_t    eqGptrRing;
     uint16_t    eqTimeRing;
-    uint16_t    eqModeRing;
+    uint16_t    eqInexRing;
     uint16_t    exL3FureRing;
     uint16_t    exL3GptrRing;
     uint16_t    exL3TimeRing;
