@@ -83,6 +83,13 @@ const uint64_t MCS_MCMODE1_ARR[NUM_MCS_TARGETS] =
     MCS_2_MCMODE1,
     MCS_3_MCMODE1
 };
+const uint64_t MCS_MCPERF1_ARR[NUM_MCS_TARGETS] =
+{
+    MCS_0_MCPERF1,
+    MCS_1_MCPERF1,
+    MCS_2_MCPERF1,
+    MCS_3_MCPERF1
+};
 const uint64_t MCS_MCFIRMASK_OR_ARR[NUM_MCS_TARGETS] =
 {
     MCS_0_MCFIRMASK_OR,
@@ -106,6 +113,7 @@ revert_mcs_hb_dcbz_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_t
     fapi2::buffer<uint64_t> l_cplt_ctrl1;
     fapi2::buffer<uint64_t> l_mcfgp;
     fapi2::buffer<uint64_t> l_mcmode1;
+    fapi2::buffer<uint64_t> l_mcperf1;
     fapi2::buffer<uint64_t> l_mcfirmask;
 
     FAPI_TRY(fapi2::getScom(i_target, MCS_CPLT_CTRL1_ARR[i_mcs], l_cplt_ctrl1),
@@ -125,20 +133,30 @@ revert_mcs_hb_dcbz_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_t
         FAPI_TRY(fapi2::putScom(i_target, MCS_MCFGP_ARR[i_mcs], l_mcfgp),
                  "Error from putScom (MCS%d_MCFGP)", i_mcs);
 
-        // MCMODE1 -- enable speculation
+        // MCMODE1 -- enable speculation, cmd bypass, fp command bypass
         FAPI_TRY(fapi2::getScom(i_target, MCS_MCMODE1_ARR[i_mcs], l_mcmode1),
                  "Error from getScom (MCS%d_MCMODE1)", i_mcs);
         l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_ALL_SPEC_OPS>();
         l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_SPEC_OP,
                            MCS_MCMODE1_DISABLE_SPEC_OP_LEN>();
+        l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_COMMAND_BYPASS,
+                           MCS_MCMODE1_DISABLE_COMMAND_BYPASS_LEN>();
+        l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_FP_COMMAND_BYPASS>();
         FAPI_TRY(fapi2::putScom(i_target, MCS_MCMODE1_ARR[i_mcs], l_mcmode1),
                  "Error from putScom (MCS%d_MCMODE1)", i_mcs);
+
+        // MCS_MCPERF1 -- enable fast path
+        FAPI_TRY(fapi2::getScom(i_target, MCS_MCPERF1_ARR[i_mcs], l_mcperf1),
+                 "Error from getScom (MCS%d_MCPERF1)", i_mcs);
+        l_mcperf1.clearBit<MCS_MCPERF1_DISABLE_FASTPATH>();
+        FAPI_TRY(fapi2::putScom(i_target, MCS_MCPERF1, l_mcperf1),
+                 "Error from putScom (MCS%d_MCPERF1)", i_mcs);
 
         // Re-mask MCFIR. We want to ensure all MCSs are masked
         // until the BARs are opened later during IPL.
         l_mcfirmask.flush<1>();
         FAPI_TRY(fapi2::putScom(i_target, MCS_MCFIRMASK_OR_ARR[i_mcs], l_mcfirmask),
-                 "Error from putScom (MCS%d_MCFIRMASK_OR)", i_mcs);
+                 "Error from putScom (MCS % d_MCFIRMASK_OR)", i_mcs);
     }
 
 fapi_try_exit:
@@ -178,6 +196,7 @@ p9_revert_sbe_mcs_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
 
     if (l_ipl_phase == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_CHIP_CONTAINED)
     {
+
         FAPI_INF("Leaving MC BAR configured for chip contained execution");
         goto fapi_try_exit;
     }
