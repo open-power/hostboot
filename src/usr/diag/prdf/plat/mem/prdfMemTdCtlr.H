@@ -169,16 +169,6 @@ class MemTdCtlr
 
     /**
      * @brief  This is called when handling a command complete attention for a
-     *         non-TD command to initialize iv_stoppedRank and iv_broadcastMode,
-     *         which are used to indicate where the command should resume after
-     *         targeted diagnostics is compete.
-     * @param  i_addr Address in which the command stopped.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    uint32_t initStoppedRank( const MemAddr & i_addr );
-
-    /**
-     * @brief  This is called when handling a command complete attention for a
      *         non-TD command to initialize iv_stoppedRank and iv_broadcastMode
      *         then check for any ECC errors.
      * @param  o_errorsFound True if errors where found and handled. False
