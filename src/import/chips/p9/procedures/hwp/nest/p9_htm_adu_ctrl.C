@@ -78,16 +78,7 @@ fapi2::ReturnCode aduNHTMControl(
     if (l_rc)
     {
         FAPI_ERR("Error from p9_adu_coherent_manage_lock (acquire all)");
-
-        if (l_adu_is_dirty)
-        {
-            goto adu_reset_unlock;
-        }
-        else
-        {
-            fapi2::current_err = l_rc;
-            goto fapi_try_exit;
-        }
+        goto fapi_try_exit;
     }
 
     // NOTE: lock is now held, if an operation fails from this point
@@ -129,7 +120,7 @@ fapi2::ReturnCode aduNHTMControl(
         if (l_rc)
         {
             FAPI_ERR("p9_adu_coherent_status_check() returns error");
-            break;
+            goto adu_reset_unlock;
         }
 
         if (l_busy_bit_status == true)
@@ -174,13 +165,11 @@ adu_reset_unlock:
     // attempt to reset all ADUs and free locks (propogate rc of original fail)
     if (l_rc && l_adu_is_dirty)
     {
-        // save original error for return
-        fapi2::current_err = l_rc;
         FAPI_INF("Attempting to reset/free lock on all ADUs");
         // Unlock ADUs
         // ignore return codes
-        l_rc = p9_adu_coherent_utils_reset_adu(i_target);
-        l_rc = p9_adu_coherent_manage_lock(i_target,
+        (void) p9_adu_coherent_utils_reset_adu(i_target);
+        (void) p9_adu_coherent_manage_lock(i_target,
                                            false, // No lock pick
                                            false, // Lock release
                                            1);    // Attempt 1 time
@@ -188,5 +177,5 @@ adu_reset_unlock:
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
-    return fapi2::current_err;
+    return l_rc;
 }

@@ -484,12 +484,6 @@ extern "C"
             // Set AXTYPE = Address only
             altd_cmd_reg_data.setBit<ALTD_CMD_ADDRESS_ONLY_BIT>();
 
-            // Set OVERWRITE_PBINIT
-            altd_cmd_reg_data.setBit<ALTD_CMD_OVERWRITE_PBINIT_BIT>();
-
-            // Set TM_QUIESCE
-            altd_cmd_reg_data.setBit<ALTD_CMD_WITH_TM_QUIESCE_BIT>();
-
             // ---------------------------------------------------
             // PB specific: TTYPE & TSIZE
             // ---------------------------------------------------
@@ -501,6 +495,8 @@ extern "C"
                 // Set TTYPE
                 altd_cmd_reg_data.insertFromRight<ALTD_CMD_TTYPE_START_BIT,
                                                   ALTD_CMD_TTYPE_NUM_BITS>(ALTD_CMD_TTYPE_PB_OPER);
+                // Set TM_QUIESCE
+                altd_cmd_reg_data.setBit<ALTD_CMD_WITH_TM_QUIESCE_BIT>();
 
                 if (l_operType == p9_ADU_oper_flag::PB_DIS_OPER)
                 {
@@ -510,6 +506,9 @@ extern "C"
                 }
                 else
                 {
+                    // Set OVERWRITE_PBINIT
+                    altd_cmd_reg_data.setBit<ALTD_CMD_OVERWRITE_PBINIT_BIT>();
+
                     // Set up quiesce
                     altd_option_reg_data.setBit<FBC_ALTD_WITH_PRE_QUIESCE>();
                     altd_option_reg_data.insertFromRight<FBC_ALTD_PRE_QUIESCE_COUNT_START_BIT,
@@ -538,8 +537,13 @@ extern "C"
                 // Set TSIZE
                 if ( l_transSize == p9_ADU_oper_flag::TSIZE_1 )
                 {
+                    // Set TM_QUIESCE
+                    altd_cmd_reg_data.setBit<ALTD_CMD_WITH_TM_QUIESCE_BIT>();
+
                     altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
                                                       ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_PMISC_TSIZE_1);
+                    // Set quiesce and init around a switch operation in option reg
+                    FAPI_TRY(setQuiesceInit(i_target), "setQuiesceInit() returns error");
                 }
                 else if ( l_transSize == p9_ADU_oper_flag::TSIZE_2 )
                 {
@@ -547,8 +551,6 @@ extern "C"
                                                       ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_PMISC_TSIZE_2);
                 }
 
-                // Set quiesce and init around a switch operation in option reg
-                FAPI_TRY(setQuiesceInit(i_target), "setQuiesceInit() returns error");
             }
         }
 
