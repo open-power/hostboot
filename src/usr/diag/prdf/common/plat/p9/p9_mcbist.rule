@@ -257,7 +257,7 @@ group gMC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
     /** MC_CHIPLET_FIR[12]
      *  Attention from MCBISTFIR
      */
-    (rMC_CHIPLET_FIR, bit(12)) ? analyze(gMCBISTFIR);
+    (rMC_CHIPLET_FIR, bit(12)) ? analyzeMcbistfir;
 
     /** MC_CHIPLET_FIR[13]
      *  Attention from DDRPHYFIR 1
@@ -336,7 +336,7 @@ group gMC_CHIPLET_UCS_FIR attntype UNIT_CS filter singlebit
     /** MC_CHIPLET_UCS_FIR[9]
      *  Attention from MCBISTFIR
      */
-    (rMC_CHIPLET_UCS_FIR, bit(9)) ? analyze(gMCBISTFIR);
+    (rMC_CHIPLET_UCS_FIR, bit(9)) ? analyzeMcbistfir;
 
 };
 
@@ -395,7 +395,7 @@ group gMC_CHIPLET_HA_FIR attntype HOST_ATTN filter singlebit
     /** MC_CHIPLET_HA_FIR[9]
      *  Attention from MCBISTFIR
      */
-    (rMC_CHIPLET_HA_FIR, bit(9)) ? analyze(gMCBISTFIR);
+    (rMC_CHIPLET_HA_FIR, bit(9)) ? analyzeMcbistfir;
 
 };
 
