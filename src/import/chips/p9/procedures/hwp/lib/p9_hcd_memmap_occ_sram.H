@@ -96,6 +96,12 @@ HCD_CONST(OCC_SRAM_PGPE_HCODE_LENGTH_ADDR,
 HCD_CONST(OCC_SRAM_PGPE_IMAGE_LENGTH_ADDR,
           (OCC_SRAM_PGPE_PPMR_HEADER_ADDR + PPMR_PGPE_SRAM_IMAGE_SIZE_BYTE))
 
+// Misc constants used in PGPE boot loader and boot copier.
+HCD_CONST(PGPE_BOOT_COPY_SUCCESS,   0x42432d53 ) // ASCII code for BC-S
+HCD_CONST(PGPE_BOOT_COPIER_FAIL,    0x42432d46 ) // ASCII code for BC-F
+HCD_CONST(PGPE_BOOT_LOADER_SUCCESS, 0x424c2d53 ) // ASCII code for BL-S
+HCD_CONST(PGPE_BOOT_LOADER_FAIL,    0x424c2d46 ) // ASCII code for BL-F
+
 //--------------------------------------------------------------------------------------
 
 // Misc constants used in SGPE boot loader and boot copier.
