@@ -155,79 +155,6 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t MemTdCtlr<TYPE_MCBIST>::initStoppedRank( const MemAddr & i_addr )
-{
-    #define PRDF_FUNC "[initStoppedRank] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Get all ports in which the command was run. In broadcast mode, the
-        // rank configuration for all ports will be the same. In non-broadcast
-        // mode, there will only be one MCA in the list. Therefore, we can
-        // simply use the first MCA in the list for all configs.
-        std::vector<ExtensibleChip *> portList;
-        o_rc = getMcbistMaintPort( iv_chip, portList );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMcbistMaintPort(0x%08x) failed",
-                      iv_chip->getHuid() );
-            break;
-        }
-
-        ExtensibleChip * mcaChip = portList.front();
-        MemRank          rank    = i_addr.getRank();
-
-        // ############################ SIMICs only ############################
-        // We have found it to be increasingly difficult to simulate the MCBMCAT
-        // register in SIMICs. We tried copying the address in the MCBEA
-        // registers, but the HWP code will input the last possible address to
-        // the MCBEA registers, but it is likely that this address is not a
-        // configured address. MCBIST commands are tolerant of this, where MBA
-        // maintenance commands are not. Also, there are multiple possible
-        // subtests for MCBIST commands. So it is difficult to determine which
-        // subtest will be the last configured address. To maintain sanity, we
-        // will simply short-circuit the code and ensure we always get the last
-        // configured rank.
-        if ( Util::isSimicsRunning() )
-        {
-            std::vector<MemRank> list;
-            getSlaveRanks<TYPE_MCA>( mcaChip->getTrgt(), list );
-            PRDF_ASSERT( !list.empty() ); // func target with no config ranks
-
-            rank = list.back(); // Get the last configured rank.
-        }
-        // #####################################################################
-
-        // Update iv_stoppedRank.
-        iv_stoppedRank = TdRankListEntry ( mcaChip, rank );
-        #ifndef __HOSTBOOT_RUNTIME
-        // Update iv_broadcastMode.
-        iv_broadcastMode = ( 1 < portList.size() );
-        #endif
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t MemTdCtlr<TYPE_MBA>::initStoppedRank( const MemAddr & i_addr )
-{
-    // Update iv_stoppedRank.
-    iv_stoppedRank = TdRankListEntry( iv_chip, i_addr.getRank() );
-
-    return SUCCESS;
-}
-
-//------------------------------------------------------------------------------
-
 // This is a forward reference to a function that is locally defined in
 // prdfMemTdCtlr_ipl.C and prdfMemTdCtlr_rt.C. The reason for this is that the
 // MemTdCtlr template is only created for the MCBIST and MBA targets, not the
@@ -245,6 +172,10 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 template<TARGETING::TYPE T>
 uint32_t __analyzeCmdComplete( ExtensibleChip * i_chip,
                                TdQueue & io_queue,
+                               TdRankListEntry & o_stoppedRank,
+                               #ifndef __HOSTBOOT_RUNTIME
+                               bool & o_broadcastMode,
+                               #endif
                                const MemAddr & i_addr,
                                bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
@@ -252,6 +183,10 @@ uint32_t __analyzeCmdComplete( ExtensibleChip * i_chip,
 template<>
 uint32_t __analyzeCmdComplete<TYPE_MCBIST>( ExtensibleChip * i_chip,
                                             TdQueue & io_queue,
+                                            TdRankListEntry & o_stoppedRank,
+                                            #ifndef __HOSTBOOT_RUNTIME
+                                            bool & o_broadcastMode,
+                                            #endif
                                             const MemAddr & i_addr,
                                             bool & o_errorsFound,
                                             STEP_CODE_DATA_STRUCT & io_sc )
@@ -273,6 +208,41 @@ uint32_t __analyzeCmdComplete<TYPE_MCBIST>( ExtensibleChip * i_chip,
                       i_chip->getHuid() );
             break;
         }
+
+        // In broadcast mode, the rank configuration for all ports will be the
+        // same. In non-broadcast mode, there will only be one MCA in the list.
+        // Therefore, we can simply use the first MCA in the list for all
+        // configs.
+        ExtensibleChip * stopChip = portList.front();
+        MemRank          stopRank = i_addr.getRank();
+
+        // ############################ SIMICs only ############################
+        // We have found it to be increasingly difficult to simulate the MCBMCAT
+        // register in SIMICs. We tried copying the address in the MCBEA
+        // registers, but the HWP code will input the last possible address to
+        // the MCBEA registers, but it is likely that this address is not a
+        // configured address. MCBIST commands are tolerant of this, where MBA
+        // maintenance commands are not. Also, there are multiple possible
+        // subtests for MCBIST commands. So it is difficult to determine which
+        // subtest will be the last configured address. To maintain sanity, we
+        // will simply short-circuit the code and ensure we always get the last
+        // configured rank.
+        if ( Util::isSimicsRunning() )
+        {
+            std::vector<MemRank> list;
+            getSlaveRanks<TYPE_MCA>( stopChip->getTrgt(), list );
+            PRDF_ASSERT( !list.empty() ); // func target with no config ranks
+
+            stopRank = list.back(); // Get the last configured rank.
+        }
+        // #####################################################################
+
+        // Update iv_stoppedRank.
+        o_stoppedRank = TdRankListEntry ( stopChip, stopRank );
+        #ifndef __HOSTBOOT_RUNTIME
+        // Update iv_broadcastMode.
+        o_broadcastMode = ( 1 < portList.size() );
+        #endif
 
         // Check each MCA for ECC errors.
         for ( auto & mcaChip : portList )
@@ -301,10 +271,17 @@ uint32_t __analyzeCmdComplete<TYPE_MCBIST>( ExtensibleChip * i_chip,
 template<>
 uint32_t __analyzeCmdComplete<TYPE_MBA>( ExtensibleChip * i_chip,
                                          TdQueue & io_queue,
+                                         TdRankListEntry & o_stoppedRank,
+                                         #ifndef __HOSTBOOT_RUNTIME
+                                         bool & o_broadcastMode,
+                                         #endif
                                          const MemAddr & i_addr,
                                          bool & o_errorsFound,
                                          STEP_CODE_DATA_STRUCT & io_sc )
 {
+    // Update iv_stoppedRank.
+    o_stoppedRank = TdRankListEntry( i_chip, i_addr.getRank() );
+
     // Check the MBA for ECC errors.
     return __checkEcc<TYPE_MBA>(i_chip, io_queue, i_addr, o_errorsFound, io_sc);
 }
@@ -331,18 +308,12 @@ uint32_t MemTdCtlr<T>::analyzeCmdComplete( bool & o_errorsFound,
             break;
         }
 
-        // First, keep track of where the command stopped. Must be done
-        // before calling checkEcc().
-        o_rc = initStoppedRank( addr );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "initStoppedRank() failed" );
-            break;
-        }
-
         // Then, check for ECC errors, if they exist.
-        o_rc = __analyzeCmdComplete<T>( iv_chip, iv_queue, addr, o_errorsFound,
-                                        io_sc );
+        o_rc = __analyzeCmdComplete<T>( iv_chip, iv_queue, iv_stoppedRank,
+                                        #ifndef __HOSTBOOT_RUNTIME
+                                        iv_broadcastMode,
+                                        #endif
+                                        addr, o_errorsFound, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "__analyzeCmdComplete<T>(0x%08x) failed",
