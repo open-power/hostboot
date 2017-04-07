@@ -242,12 +242,21 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 
 //------------------------------------------------------------------------------
 
+template<TARGETING::TYPE T>
+uint32_t __analyzeCmdComplete( ExtensibleChip * i_chip,
+                               TdQueue & io_queue,
+                               const MemAddr & i_addr,
+                               bool & o_errorsFound,
+                               STEP_CODE_DATA_STRUCT & io_sc );
+
 template<>
-uint32_t MemTdCtlr<TYPE_MCBIST>::checkEcc( const MemAddr & i_addr,
-                                           bool & o_errorsFound,
-                                           STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t __analyzeCmdComplete<TYPE_MCBIST>( ExtensibleChip * i_chip,
+                                            TdQueue & io_queue,
+                                            const MemAddr & i_addr,
+                                            bool & o_errorsFound,
+                                            STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[MemTdCtlr<TYPE_MCBIST>::checkEcc] "
+    #define PRDF_FUNC "[__analyzeCmdComplete] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -257,11 +266,11 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::checkEcc( const MemAddr & i_addr,
     {
         // Get all ports in which the command was run.
         std::vector<ExtensibleChip *> portList;
-        o_rc = getMcbistMaintPort( iv_chip, portList );
+        o_rc = getMcbistMaintPort( i_chip, portList );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMcbistMaintPort(0x%08x) failed",
-                      iv_chip->getHuid() );
+                      i_chip->getHuid() );
             break;
         }
 
@@ -269,7 +278,7 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::checkEcc( const MemAddr & i_addr,
         for ( auto & mcaChip : portList )
         {
             bool errorsFound;
-            uint32_t l_rc = __checkEcc<TYPE_MCA>( mcaChip, iv_queue, i_addr,
+            uint32_t l_rc = __checkEcc<TYPE_MCA>( mcaChip, io_queue, i_addr,
                                                   errorsFound, io_sc );
             if ( SUCCESS != l_rc )
             {
@@ -289,15 +298,15 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::checkEcc( const MemAddr & i_addr,
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
-
 template<>
-uint32_t MemTdCtlr<TYPE_MBA>::checkEcc( const MemAddr & i_addr,
-                                        bool & o_errorsFound,
-                                        STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t __analyzeCmdComplete<TYPE_MBA>( ExtensibleChip * i_chip,
+                                         TdQueue & io_queue,
+                                         const MemAddr & i_addr,
+                                         bool & o_errorsFound,
+                                         STEP_CODE_DATA_STRUCT & io_sc )
 {
-    return __checkEcc<TYPE_MBA>( iv_chip, iv_queue, i_addr, o_errorsFound,
-                                 io_sc );
+    // Check the MBA for ECC errors.
+    return __checkEcc<TYPE_MBA>(i_chip, io_queue, i_addr, o_errorsFound, io_sc);
 }
 
 //------------------------------------------------------------------------------
@@ -332,10 +341,11 @@ uint32_t MemTdCtlr<T>::analyzeCmdComplete( bool & o_errorsFound,
         }
 
         // Then, check for ECC errors, if they exist.
-        o_rc = checkEcc( addr, o_errorsFound, io_sc );
+        o_rc = __analyzeCmdComplete<T>( iv_chip, iv_queue, addr, o_errorsFound,
+                                        io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "checkEcc(0x%08x) failed",
+            PRDF_ERR( PRDF_FUNC "__analyzeCmdComplete<T>(0x%08x) failed",
                       iv_chip->getHuid() );
             break;
         }
