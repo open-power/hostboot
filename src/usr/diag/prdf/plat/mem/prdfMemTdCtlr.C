@@ -83,48 +83,15 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
         {
             // There are no TD procedures currently in progress.
 
-            // First, keep track of where the command stopped. Must be done
-            // before calling checkEcc().
-            o_rc = initStoppedRank();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "initStoppedRank() failed" );
-                break;
-            }
-
-            // Then, check for ECC errors, if they exist.
+            // Check for ECC errors, if they exist.
             bool errorsFound = false;
-            o_rc = checkEcc( errorsFound, io_sc );
+            o_rc = analyzeCmdComplete( errorsFound, io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "checkEcc(0x%08x) failed",
+                PRDF_ERR( PRDF_FUNC "analyzeCmdComplete(0x%08x) failed",
                           iv_chip->getHuid() );
                 break;
             }
-
-            #ifdef __HOSTBOOT_RUNTIME
-
-            // If the queue is still empty then it is possible that background
-            // scrubbing only stopped for FFDC. In that case, simply resume the
-            // command instead of starting a new one.
-            if ( iv_queue.empty() )
-            {
-                // It is possible to get here if we were running a TD procedure
-                // and the PRD service is reset. Therefore, we much check if
-                // background scrubbing was actually configured.
-                bool isBgScrub;
-                o_rc = isBgScrubConfig<T>( iv_chip, isBgScrub );
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "isBgScrubConfig(0x%08x) failed",
-                              iv_chip->getHuid() );
-                    break;
-                }
-
-                if ( isBgScrub ) iv_resumeBgScrub = true;
-            }
-
-            #endif
 
             // If the command completed successfully with no error, the error
             // log will not have any useful information. Therefore, do not
@@ -281,6 +248,67 @@ uint32_t MemTdCtlr<TYPE_MBA>::initStoppedRank()
 
         // Update iv_stoppedRank.
         iv_stoppedRank = TdRankListEntry( iv_chip, addr.getRank() );
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+uint32_t MemTdCtlr<T>::analyzeCmdComplete( bool & o_errorsFound,
+                                           STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemTdCtlr::analyzeCmdComplete] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // First, keep track of where the command stopped. Must be done
+        // before calling checkEcc().
+        o_rc = initStoppedRank();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "initStoppedRank() failed" );
+            break;
+        }
+
+        // Then, check for ECC errors, if they exist.
+        o_rc = checkEcc( o_errorsFound, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "checkEcc(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        #ifdef __HOSTBOOT_RUNTIME
+
+        // If the queue is still empty then it is possible that background
+        // scrubbing only stopped for FFDC. In that case, simply resume the
+        // command instead of starting a new one.
+        if ( iv_queue.empty() )
+        {
+            // It is possible to get here if we were running a TD procedure
+            // and the PRD service is reset. Therefore, we must check if
+            // background scrubbing was actually configured.
+            bool isBgScrub;
+            o_rc = isBgScrubConfig<T>( iv_chip, isBgScrub );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "isBgScrubConfig(0x%08x) failed",
+                          iv_chip->getHuid() );
+                break;
+            }
+
+            if ( isBgScrub ) iv_resumeBgScrub = true;
+        }
+
+        #endif
 
     } while (0);
 

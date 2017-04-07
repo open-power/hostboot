@@ -81,6 +81,20 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
         // relevant registers that may have changed since the initial capture.
         // TODO: RTC 166837
 
+        // It is possible that background scrub could have found an ECC error
+        // before we had a chance to stop the command. Therefore, we need to
+        // call analyzeCmdComplete() first so that any ECC errors found can be
+        // handled. Also, analyzeCmdComplete() will initialize the variables
+        // needed so we know where to restart background scrubbing.
+        bool junk = false;
+        o_rc = analyzeCmdComplete( junk, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "analyzeCmdComplete(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
+
         // Move onto the next step in the state machine.
         o_rc = nextStep( io_sc );
         if ( SUCCESS != o_rc )
