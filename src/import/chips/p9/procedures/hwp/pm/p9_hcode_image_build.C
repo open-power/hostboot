@@ -50,7 +50,6 @@
 #include "p9_stop_api.H"
 #include <p9_infrastruct_help.H>
 #include <p9_xip_customize.H>
-#include <p9_ringId.H>
 #include <p9_quad_scom_addresses.H>
 #include <p9_fbc_utils.H>
 #include "p9_pstate_parameter_block.H"
@@ -126,6 +125,11 @@ enum
     CME_SRAM_IMAGE              =   P9_XIP_SECTIONS + 1,
     SGPE_SRAM_IMAGE             =   P9_XIP_SECTIONS + 2,
     PGPE_SRAM_IMAGE             =   P9_XIP_SECTIONS + 3,
+    EQ_INEX_INDEX               =   3, //Using position of erstwhile eq_mode
+    EQ_INEX_BUCKET_1            =   0,
+    EQ_INEX_BUCKET_2            =   1,
+    EQ_INEX_BUCKET_3            =   2,
+    EQ_INEX_BUCKET_4            =   3,
 };
 
 /**
@@ -1628,7 +1632,7 @@ uint32_t layoutSgpeScanOverride( Homerlayout_t*   i_pHomer,
         uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
         FAPI_DBG("TOR Version :  0x%02x", P9_TOR::tor_version() );
 
-        for( uint32_t ringIndex = 0; ringIndex < EQ::g_eqData.iv_num_common_rings;
+        for( uint32_t ringIndex = 0; ringIndex < MAX_HOMER_QUAD_CMN_RINGS;
              ringIndex++ )
         {
             tempBufSize = i_ringData.iv_sizeWorkBuf1;
@@ -2518,6 +2522,115 @@ uint32_t layoutRingsForCME( Homerlayout_t*   i_pHomer,
 //------------------------------------------------------------------------------
 
 /**
+ * @brief   selects the bucked id for EQ_INEX ring.
+ * @param   o_buckedId bucket Id selected for eq_inex ring.
+ * @return  fapi2 return code.
+ */
+fapi2::ReturnCode getSelectEqInexBucketAttr( uint32_t& o_buckedId )
+{
+    FAPI_DBG( "> getSelectEqInexBucketAttr");
+    uint8_t l_fabAsyncSafeMode;
+    uint8_t l_fabCoreFloorRatio;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ASYNC_SAFE_MODE,
+                           FAPI_SYSTEM,
+                           l_fabAsyncSafeMode),
+             "Error from FAPI_ATTR_GET for ATTR_PROC_FABRIC_ASYNC_SAFE_MODE");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CORE_FLOOR_RATIO,
+                           FAPI_SYSTEM,
+                           l_fabCoreFloorRatio),
+             "Error from FAPI_ATTR_GET for ATTR_PROC_FABRIC_CORE_FLOOR_RATIO");
+
+
+    if( fapi2::ENUM_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE_SAFE_MODE == l_fabAsyncSafeMode )
+    {
+        o_buckedId = EQ_INEX_BUCKET_1;
+    }
+    else if( fapi2::ENUM_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE_PERFORMANCE_MODE == l_fabAsyncSafeMode )
+    {
+        switch( l_fabCoreFloorRatio )
+        {
+            case fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_2_8:
+                o_buckedId  =  EQ_INEX_BUCKET_2;
+                break;
+
+            case fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_4_8:
+                o_buckedId  =  EQ_INEX_BUCKET_3;
+                break;
+
+            case fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_8_8:
+                o_buckedId  =  EQ_INEX_BUCKET_4;
+                break;
+
+            default:
+                o_buckedId  =  EQ_INEX_BUCKET_1;
+                break;
+        }
+    }
+
+    FAPI_DBG( "Safe Mode 0x%08x Fab Core Floor Ratio 0x%08x",
+              l_fabAsyncSafeMode, l_fabCoreFloorRatio );
+
+    FAPI_DBG( "< getSelectEqInexBucketAttr");
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief   returns ringId based on bucket no. selcected for eq_inex ring.
+ * @param   o_eqInexBucketId ring id for the selected bucket.
+ * @return  IMG_BUILD_SUCCESS if success, error code otherwise.
+ */
+
+uint32_t resolveEqInexBucket( RingID& o_eqInexBucketId )
+{
+    uint32_t rc = IMG_BUILD_SUCCESS;
+    fapi2::ReturnCode fapiRc ;
+    uint32_t bucketId = 0;
+
+    do
+    {
+        fapiRc = getSelectEqInexBucketAttr( bucketId );
+
+        if( fapiRc )
+        {
+            rc = BUILD_FAIL_RING_SEL_EQ_INEX;
+            break;
+        }
+
+        switch( bucketId )
+        {
+            case EQ_INEX_BUCKET_1:
+                o_eqInexBucketId = eq_inex_bucket_1;
+                break;
+
+            case EQ_INEX_BUCKET_2:
+                o_eqInexBucketId = eq_inex_bucket_2;
+                break;
+
+            case EQ_INEX_BUCKET_3:
+                o_eqInexBucketId = eq_inex_bucket_3;
+                break;
+
+            case EQ_INEX_BUCKET_4:
+                o_eqInexBucketId = eq_inex_bucket_4;
+                break;
+        }
+
+        FAPI_DBG("Selected Bucket %x Ring Id %x",
+                 bucketId + 1, (uint32_t)o_eqInexBucketId );
+    }
+    while(0);
+
+    return rc;
+}
+
+//------------------------------------------------------------------------------
+
+/**
  * @brief   creates a scan ring layout for quad common rings in HOMER.
  * @param   i_pHOMER        points to HOMER image.
  * @param   i_chipState     functional state of all cores within P9 chip
@@ -2547,6 +2660,7 @@ uint32_t layoutCmnRingsForSgpe( Homerlayout_t*     i_pHomer,
     uint16_t* pCmnRingIndex     =   (uint16_t*)&i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[sgpeHcodeSize];
     uint8_t* pRingStart         =   &i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[sgpeHcodeSize];
     uint32_t ringIndex          =   0;
+    RingID torRingId;
     uint32_t tempLength         =   0;
     uint32_t tempBufSize        =   i_ringData.iv_sizeWorkBuf1;
     uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
@@ -2562,15 +2676,30 @@ uint32_t layoutCmnRingsForSgpe( Homerlayout_t*     i_pHomer,
             break;
         }
 
+        RingID eqInexBucketId;
+
+        rc = resolveEqInexBucket( eqInexBucketId );
+
+        if( rc )
+        {
+            break;
+        }
+
         //get core common rings
-        for( ; ringIndex < EQ::g_eqData.iv_num_common_rings; ringIndex++ )
+        for( ; ringIndex < MAX_HOMER_QUAD_CMN_RINGS; ringIndex++ )
         {
             tempBufSize = i_ringData.iv_sizeWorkBuf1;
+
+            //For eq_inex, request selected ring bucket else query
+            //the ring that needs to be at this position in the layout.
+
+            torRingId = (EQ_INEX_INDEX  == ringIndex) ? eqInexBucketId :
+                        io_sgpeRings.getCommonRingId( ringIndex );
 
             rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
                                       P9_XIP_MAGIC_SGPE,
                                       i_chipState.getChipLevel(),
-                                      io_sgpeRings.getCommonRingId( ringIndex ),
+                                      torRingId,
                                       P9_TOR::SGPE,
                                       i_ringVariant,
                                       CACHE0_CHIPLET_ID,
