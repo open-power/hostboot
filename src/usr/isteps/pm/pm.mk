@@ -95,6 +95,7 @@ include ${HWP_CUST_PATH}/p9_xip_customize.mk
 include ${HWP_ACC_PATH}/p9_get_mvpd_ring.mk
 include ${HWP_ACC_PATH}/p9_mvpd_ring_funcs.mk
 include ${HWP_XIP_PATH}/p9_xip_image.mk
+include ${HWP_IMAGEPROCS_PATH}/p9_dd_container.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_tor.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_ring_identification.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_ringId.mk
