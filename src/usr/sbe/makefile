@@ -53,6 +53,7 @@ VPATH += ${UTILS_PATH}
 
 include ${ROOTPATH}/procedure.rules.mk
 
+include ${UTILS_PATH}/p9_dd_container.mk
 include ${HWP_CUSTOMIZE_PATH}/p9_xip_customize.mk
 include ${HWP_CUSTOMIZE_PATH}/p9_xip_section_append.mk
 include ${HWP_ACCESSORS_PATH}/p9_get_mvpd_ring.mk
