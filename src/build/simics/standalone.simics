@@ -56,3 +56,4 @@ echo "Enable the SBE"
 # Set the Nest PLL Bucket ID to 3 in the 4th byte of Mbox Scratch Reg 4
 ($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x5003B "00000003_00000000" 64
 ($hb_masterproc).proc_chip.invoke parallel_store FSIMBOX 0x01 "80000000" 32
+($hb_masterproc).proc_chip.invoke parallel_store FSIMBOX 0x08 "00080000" 32
