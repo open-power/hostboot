@@ -312,32 +312,19 @@ errlHndl_t powerDownSlaveQuads()
             }
 
             //TODO 171763 Core state setup for MPIPL should be done in a HWP
-            //Note this logic assumes FUSED_CORE mode and will need to be changed
-            // to account for OPAL and other non-fused cases.
-            //Check if the master quad has all 4 cores
-            if(l_coreTargetList.size() == 4)
+            //Set WKUP_SELECT bit on slave cores
+            for(uint8_t x = 1; x < (l_coreTargetList.size()) ; x++)
             {
                 //Set WKUP_SELECT bit on non-master cores that are on
                 // the master quad
-                l_err = deviceWrite(l_coreTargetList[2],
+                l_err = deviceWrite(l_coreTargetList[x],
                                     &SET_WKUP_SELECT_MASK,
                                     MASK_SIZE,
                                     DEVICE_SCOM_ADDRESS(CPPM_CORE_POWMAN_MODE_REG));
                 if(l_err)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "Error setting WKUP_SELECT bit of CPPM_CORE_REG on core %d", l_coreTargetList[2]->getAttr<TARGETING::ATTR_CHIP_UNIT>());
-                    break;
-                }
-
-                l_err = deviceWrite(l_coreTargetList[3],
-                                    &SET_WKUP_SELECT_MASK,
-                                    MASK_SIZE,
-                                    DEVICE_SCOM_ADDRESS(CPPM_CORE_POWMAN_MODE_REG));
-                if(l_err)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "Error setting WKUP_SELECT bit of CPPM_CORE_REG on core %d", l_coreTargetList[3]->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                              "Error setting WKUP_SELECT bit of CPPM_CORE_REG on core %d", l_coreTargetList[x]->getAttr<TARGETING::ATTR_CHIP_UNIT>());
                     break;
                 }
             }
