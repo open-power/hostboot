@@ -341,7 +341,14 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
     // is discovered, the PEC config value is  pulled from the matching row and
     // set in the attributes.
     const laneConfigRow pec0_laneConfigTable[] =
-        {{{LANE_WIDTH_16X,
+        {{{LANE_WIDTH_NC,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_NC},
+           0x00,PHB_MASK_NA,
+           PHB_X16_MAC_MAP},
+
+         {{LANE_WIDTH_16X,
            LANE_WIDTH_NC,
            LANE_WIDTH_NC,
            LANE_WIDTH_NC},
@@ -350,7 +357,14 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
         };
 
     const laneConfigRow pec1_laneConfigTable[] =
-        {{{LANE_WIDTH_8X,
+        {{{LANE_WIDTH_NC,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_NC},
+           0x00,PHB_MASK_NA,
+           PHB_X8_X8_MAC_MAP},
+
+         {{LANE_WIDTH_8X,
            LANE_WIDTH_NC,
            LANE_WIDTH_8X,
            LANE_WIDTH_NC},
@@ -373,7 +387,14 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
         };
 
     const laneConfigRow pec2_laneConfigTable[] =
-        {{{LANE_WIDTH_16X,
+        {{{LANE_WIDTH_NC,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_NC,
+           LANE_WIDTH_NC},
+           0x00,PHB_MASK_NA,
+           PHB_X16_MAC_MAP},
+
+         {{LANE_WIDTH_16X,
            LANE_WIDTH_NC,
            LANE_WIDTH_NC,
            LANE_WIDTH_NC},
@@ -682,10 +703,22 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
                 refEnable = 0x1;
                 macCntl = laneConfigItr->phb_to_pcieMAC;
                 pecPhbActiveMask = laneConfigItr->phbActive;
+
+                // If we find a valid config, and the PHB_MASK is still NA
+                // that means all PHB's on this PEC will be disabled. Lets
+                // trace something out just so someone knows.
+                if(pecPhbActiveMask == PHB_MASK_NA)
+                {
+                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Valid "
+                     "configuration found for PEC 0x%08X, but no PHBs behind "
+                     "it wil be functional", l_pecID);
+                }
+
                 // Disable applicable PHBs
                 pecPhbActiveMask &= (~disabledPhbs);
                 // Add the PEC phb mask to the overall Proc PHB mask
                 procPhbActiveMask |= pecPhbActiveMask;
+
             }
             else
             {
