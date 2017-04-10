@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -35,6 +37,7 @@ namespace VFS
         VFS_WATCHER                 = 0x03,
         VFS_MODULE_LOAD_MONITOR     = 0x04,
         VFS_MODULE_EXEC_MONITOR     = 0x05,
+        VFS_VERIFY_PAGE             = 0x06,
     };
 
     enum VfsReasonCode
@@ -46,6 +49,7 @@ namespace VFS
         VFS_MODULE_DOES_NOT_EXIST = VFS_COMP_ID | 0x05,
         VFS_INVALID_DATA_MODULE   = VFS_COMP_ID | 0x06,
         VFS_TASK_CRASHED          = VFS_COMP_ID | 0x07,
+        VFS_PAGE_VERIFY_FAILED    = VFS_COMP_ID | 0x08,
     };
 };
 

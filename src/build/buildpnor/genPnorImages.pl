@@ -541,7 +541,7 @@ sub manipulateImages
         # Sections that have secureboot support. Secureboot still must be
         # enabled for secureboot actions on these partitions to occur.
         # @TODO securebootp9 re-enable with SBE/SBEC/PAYLOAD secureboot ports
-        my $isNormalSecure ||= ($eyeCatch eq "HBBL");
+        my $isNormalSecure = ($eyeCatch eq "HBBL");
         $isNormalSecure ||= ($eyeCatch eq "SBE");
         $isNormalSecure ||= ($eyeCatch eq "HBRT");
         #$isNormalSecure ||= ($eyeCatch eq "SBEC");
@@ -552,7 +552,7 @@ sub manipulateImages
 
         my $isSpecialSecure = ($eyeCatch eq "HBB");
         $isSpecialSecure ||= ($eyeCatch eq "HBD");
-        #$isSpecialSecure ||= ($eyeCatch eq "HBI");
+        $isSpecialSecure ||= ($eyeCatch eq "HBI");
 
         # Used to indicate security is supported in firmware
         my $secureSupported = $isNormalSecure || $isSpecialSecure;
@@ -620,8 +620,7 @@ sub manipulateImages
                 if ($secureboot && $secureSupported)
                 {
                     $callerHwHdrFields{configure} = 1;
-                    # @TODO securebootp9 re-enable hash page table with vfs page table port
-                    if (0) #exists $hashPageTablePartitions{$eyeCatch})
+                    if (exists $hashPageTablePartitions{$eyeCatch})
                     {
                         if ($eyeCatch eq "HBI")
                         {
@@ -635,8 +634,7 @@ sub manipulateImages
                         }
                     }
                     # Add hash page table
-                    # @TODO securebootp9 re-enable hash page table with vfs page table port
-                    if (0) #$tempImages{hashPageTable} ne "" && -e $tempImages{hashPageTable})
+                    if ($tempImages{hashPageTable} ne "" && -e $tempImages{hashPageTable})
                     {
                         trace(1,"Adding hash page table for $eyeCatch");
                         my $hashPageTableSize = -s $tempImages{hashPageTable};

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,8 +31,11 @@
 #include <sys/msg.h>
 #include <vector>
 #include <sys/sync.h>
+#include <secureboot/service.H>
 
+// Forward declarations
 struct msg_t;
+class SecureRomManagerTest;
 
 namespace VFS
 {
@@ -90,7 +93,9 @@ namespace VFS
             /**
              * Ctor
              */
-            VfsRp() : iv_msgQ(NULL), iv_msg(NULL), iv_pnor_vaddr(0)
+            VfsRp() : iv_msgQ(NULL), iv_msg(NULL), iv_pnor_vaddr(0),
+                      iv_hashPageTableOffset(0),iv_hashPageTableSize(0),
+                      iv_protectedPayloadSize(0),iv_hbExtSecure(0)
             {
                 mutex_init(&iv_mutex);
             }
@@ -121,7 +126,7 @@ namespace VFS
             /**
              * Call _start on module. Montior for crash
              * @param[in] i_msg the message
-             * @note Does not return. 
+             * @note Does not return.
              */
             static void* execMonitored(void * i_msg);
 
@@ -179,16 +184,91 @@ namespace VFS
              */
             void _vfsWatcher();
 
+             /**
+             * Verify page using secure hash page table
+             *
+             * @param[in] i_vaddr address to verify
+             * @param[in] i_baseOffset base offset within a PNOR section
+             *                         [Default 0 when called within VfsRP.
+             *                          Fill for test cases]
+             * @param[in] i_hashPageTableOffset hash page table offset based on
+             *                          iv_pnor_vaddr
+             *                         [Default 0 when called within VfsRP to
+             *                          get internal hpt offset. Otherwise
+             *                          filled in by test cases]
+             *
+             * @return errlog - error log to pass along shutdown path.
+             */
+            errlHndl_t verify_page(uint64_t i_vaddr,
+                                   uint64_t i_baseOffset = 0,
+                                   uint64_t i_hashPageTableOffset = 0) const;
+
+            /**
+             * @brief  Determines the hash page table index associated with a
+             *         vaddr. The hash page table has n-pages + 1 entries.
+             *
+             * @param[in] i_vaddr  Vaddr the caller is accessing,
+             * @param[in] i_baseOffset base offset within a PNOR section
+             *                         [Optional - Used by test cases]
+             *
+             * @return index of the hash page table
+             */
+            inline size_t getHashPageTableIndex (uint64_t i_vaddr,
+                                                uint64_t i_baseOffset = 0) const
+            {
+                assert(i_baseOffset <= i_vaddr);
+                return ( (i_vaddr - i_baseOffset) / PAGE_SIZE) + 1;
+            }
+
+            /**
+             * @brief  Returns a hash page table entry
+             *
+             * @param[in] i_pageTableVaddr  Vaddr the caller is accessing
+             * @param[in] i_baseOffset base offset within a PNOR section
+             *                         [Optional - Used by test cases]
+             * @param[in] i_hashPageTableOffset hash page table offset.
+             *                         [Default to 0 when called within VfsRP]
+             *                          Filled in by test cases]
+             *
+             * @return single entry of hash page table
+             */
+            inline PAGE_TABLE_ENTRY_t* getHashPageTableEntry(uint64_t i_vaddr,
+                                    uint64_t i_baseOffset = 0,
+                                    uint64_t i_hashPageTableOffset = 0) const
+            {
+                size_t l_index = getHashPageTableIndex(i_vaddr, i_baseOffset);
+                size_t l_offset = l_index * HASH_PAGE_TABLE_ENTRY_SIZE;
+
+                // Decide whether to use the internal or passed in value for
+                // hash page table offset.
+                size_t l_hashPageTableOffset = (i_hashPageTableOffset == 0) ?
+                                iv_hashPageTableOffset :
+                                iv_pnor_vaddr + i_hashPageTableOffset;
+                return reinterpret_cast<PAGE_TABLE_ENTRY_t*>
+                                            (l_hashPageTableOffset+l_offset);
+            }
+
         private: // data
 
             msg_q_t iv_msgQ;         //!< message queue
             msg_t*  iv_msg;          //!< Current message being handled
-            uint64_t iv_pnor_vaddr;  //!< virtual address of ext image in PFNOR
+            uint64_t iv_pnor_vaddr;  //!< virtual address of ext image in PNOR
+            uint64_t iv_hashPageTableOffset; //!< virtual address of hashPageTable of ext image
+            uint64_t iv_hashPageTableSize; //!< size of hashPageTable of ext image
+            uint64_t iv_protectedPayloadSize; //!< size of entire protected payload of ext img
+                                              //!< Includes Hash page table and VFS module table
+            bool     iv_hbExtSecure; //!< cache result if hostboot extended image is secure
 
             typedef std::vector<VfsSystemModule *> ModuleList_t;
 
             mutex_t iv_mutex;       //!< lock for iv_loaded
             ModuleList_t iv_loaded; //!< Loaded modules
+
+            friend class ::SecureRomManagerTest;
+            /**
+             * @brief Static instance function
+             */
+            static VfsRp& getInstance();
     };
 
 }; // VFS namepsace
