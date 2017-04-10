@@ -20,3 +20,4 @@ test_signed_container
 secureboot_signed_container
 *.protected
 *.unprotected
+secureboot_hash_page_table_container

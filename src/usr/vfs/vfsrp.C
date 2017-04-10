@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,10 @@
 #include <util/align.H>
 #include <errl/errludstring.H>
 #include <errl/errlmanager.H>
+#include <secureboot/service.H>
+#include <secureboot/containerheader.H>
+#include <kernel/console.H>
+#include <config.h>
 
 using namespace VFS;
 
@@ -136,54 +140,89 @@ errlHndl_t VfsRp::_init()
 {
     errlHndl_t err = NULL;
     size_t rc = 0;
+
+    do {
+
     iv_msgQ = msg_q_create();
     rc = msg_q_register(iv_msgQ, VFS_ROOT_MSG_VFS);
+    assert(rc == 0,"Msg Queue Registration failed in VFS");
+
+#ifdef CONFIG_SECUREBOOT
+    err = loadSecureSection(PNOR::HB_EXT_CODE);
+    if(err)
+    {
+        break;
+    }
+#endif
 
     // Discover PNOR virtual address of extended image
     PNOR::SectionInfo_t l_pnor_info;
-
     err = PNOR::getSectionInfo(PNOR::HB_EXT_CODE, l_pnor_info);
-    if(!err)
+    if(err)
     {
-        iv_pnor_vaddr = l_pnor_info.vaddr;
-
-        rc = mm_alloc_block
-            (iv_msgQ,
-             (void *)VFS_EXTENDED_MODULE_VADDR,
-             ALIGN_PAGE(l_pnor_info.size)
-            );
-        if(rc == 0)
-        {
-            // Note: permissions are set elsewhere
-
-            // Start msg_handler task watcher
-            //  NOTE: This would be a weak consistancy issues if
-            //  task_create were not a system call.
-            task_create(VfsRp::vfsWatcher, NULL);
-        }
-        else
-        {
-            /*@ errorlog tag
-             * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
-             * @moduleid        VFS_MODULE_ID
-             * @reasoncode      VFS_ALLOC_VMEM_FAILED
-             * @userdata1       returncode from mm_alloc_block()
-             * @userdata2       Size of memory to allocate
-             *
-             * @devdesc         Could not allocate virtual memory.
-             *
-             */
-            err = new ERRORLOG::ErrlEntry
-                (
-                 ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
-                 VFS::VFS_MODULE_ID,                     //  moduleid
-                 VFS::VFS_ALLOC_VMEM_FAILED,             //  reason Code
-                 rc,                                     //  user1 = rc
-                 l_pnor_info.size,                       //  user2 = size
-                 true /*Add HB Software Callout*/
-                );
-        }
+        break;
     }
+
+    iv_pnor_vaddr = l_pnor_info.vaddr;
+    iv_hbExtSecure = l_pnor_info.secure;
+#ifdef CONFIG_SECUREBOOT
+    // Assume if HBI is signed it also has a hash page table.
+    if (iv_hbExtSecure)
+    {
+        // store the hash page table offset for reference
+        iv_hashPageTableOffset = iv_pnor_vaddr;
+
+        // Extract total protected payload size from header
+        iv_protectedPayloadSize = l_pnor_info.secureProtectedPayloadSize;
+
+        // calculate the hash page table size
+        iv_hashPageTableSize = iv_protectedPayloadSize - VFS_MODULE_TABLE_SIZE;
+        TRACFCOMP(g_trac_vfs, "VfsRp::_init HB_EXT total payload_text_size = 0x%X, hash page table size = 0x%X",
+                  l_pnor_info.secureProtectedPayloadSize,
+                  iv_hashPageTableSize);
+        // skip the hash page table
+        iv_pnor_vaddr += iv_hashPageTableSize;
+    }
+#endif
+
+    rc = mm_alloc_block
+        (iv_msgQ,
+         (void *)VFS_EXTENDED_MODULE_VADDR,
+         ALIGN_PAGE(l_pnor_info.size)
+        );
+    if(rc == 0)
+    {
+        // Note: permissions are set elsewhere
+
+        // Start msg_handler task watcher
+        //  NOTE: This would be a weak consistancy issues if
+        //  task_create were not a system call.
+        task_create(VfsRp::vfsWatcher, NULL);
+    }
+    else
+    {
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        VFS_MODULE_ID
+         * @reasoncode      VFS_ALLOC_VMEM_FAILED
+         * @userdata1       returncode from mm_alloc_block()
+         * @userdata2       Size of memory to allocate
+         *
+         * @devdesc         Could not allocate virtual memory.
+         *
+         */
+        err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
+             VFS::VFS_MODULE_ID,                     //  moduleid
+             VFS::VFS_ALLOC_VMEM_FAILED,             //  reason Code
+             rc,                                     //  user1 = rc
+             l_pnor_info.size,                       //  user2 = size
+             true /*Add HB Software Callout*/
+            );
+        break;
+    }
+    } while (0);
 
     return err;
 }
@@ -308,15 +347,30 @@ void VfsRp::msgHandler()
                     iv_msg = msg; // save message in case task crashes
                     uint64_t vaddr = msg->data[0]; //page aligned
                     uint64_t paddr = msg->data[1]; //page aligned
-
-                    vaddr -= VFS_EXTENDED_MODULE_VADDR;
-                    memcpy((void *)paddr, (void *)(iv_pnor_vaddr+vaddr),
-                           PAGE_SIZE);
-
-                    mm_icache_invalidate((void*)paddr,PAGE_SIZE/8);
-
+                    // Get relative virtual address within VFS space
+                    vaddr-=VFS_EXTENDED_MODULE_VADDR;
+                    do
+                    {
+#ifdef CONFIG_SECUREBOOT
+                        if (SECUREBOOT::enabled() && iv_hbExtSecure)
+                        {
+                            errlHndl_t l_errl = verify_page(vaddr);
+                            // Failed to pass secureboot verification
+                            if(l_errl)
+                            {
+                                SECUREBOOT::handleSecurebootFailure(
+                                    l_errl,false);
+                                msg->data[1] = -EACCES;
+                                break;
+                            }
+                        }
+#endif
+                        memcpy((void *)paddr, (void *)(iv_pnor_vaddr+vaddr),
+                               PAGE_SIZE);
+                        mm_icache_invalidate((void*)paddr,PAGE_SIZE/8);
+                        msg->data[1] = 0;
+                    } while(0);
                 }
-                msg->data[1] = 0;
                 msg_respond(iv_msgQ, msg);
                 break;
 
@@ -704,6 +758,76 @@ void VfsRp::get_test_modules(std::vector<const char *> & o_list) const
 }
 
 
+errlHndl_t VfsRp::verify_page(uint64_t i_vaddr, uint64_t i_baseOffset,
+                              uint64_t i_hashPageTableOffset) const
+{
+    errlHndl_t l_errl = nullptr;
+    uint64_t l_pnorVaddr = iv_pnor_vaddr + i_vaddr;
+
+    // Get current hash page table entry
+    TRACDCOMP(g_trac_vfs, "VfsRp::verify_page Current Page vaddr = 0x%llX, index = %d, bin file offset = 0x%llX",
+             i_vaddr,
+             getHashPageTableIndex(i_vaddr,i_baseOffset),
+             i_vaddr+PAGE_SIZE+iv_protectedPayloadSize);
+    PAGE_TABLE_ENTRY_t* l_pageTableEntry = getHashPageTableEntry(i_vaddr,
+                                                        i_baseOffset,
+                                                        i_hashPageTableOffset);
+
+    // Get previous hash page table entry
+    uint64_t l_prevPage = i_vaddr - PAGE_SIZE;
+    TRACDCOMP(g_trac_vfs, "VfsRp::verify_page Prev Page vaddr = 0x%llX, index = %d, bin file offset = 0x%llX",
+             l_prevPage,
+             getHashPageTableIndex(l_prevPage,i_baseOffset),
+             l_prevPage+PAGE_SIZE+iv_protectedPayloadSize);
+    PAGE_TABLE_ENTRY_t* l_prevPageTableEntry = getHashPageTableEntry(
+                                                        l_prevPage,
+                                                        i_baseOffset,
+                                                        i_hashPageTableOffset);
+
+    // Concatenate previous page table entry with current page data
+    std::vector< std::pair<void*,size_t> > l_blobs;
+    l_blobs.push_back(std::make_pair<void*,size_t>(l_prevPageTableEntry,
+                                                   HASH_PAGE_TABLE_ENTRY_SIZE));
+    l_blobs.push_back(std::make_pair<void*,size_t>(
+                                        reinterpret_cast<void*>(l_pnorVaddr),
+                                        PAGE_SIZE));
+    SHA512_t l_curPageHash = {0};
+    SECUREBOOT::hashConcatBlobs(l_blobs, l_curPageHash);
+
+    // Compare existing hash page table entry with the derived one.
+    if (memcmp(l_pageTableEntry,l_curPageHash,HASH_PAGE_TABLE_ENTRY_SIZE) != 0)
+    {
+        TRACFCOMP(g_trac_vfs, "ERROR:>VfsRp::verify_page secureboot verify fail on vaddr 0x%llX, offset into HBI 0x%llX",
+                              i_vaddr,
+                              i_vaddr+PAGE_SIZE+iv_protectedPayloadSize);
+        /*@
+         * @severity        ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        VFS_VERIFY_PAGE
+         * @reasoncode      VFS_PAGE_VERIFY_FAILED
+         * @userdata1       Kernel RC
+         * @userdata2       virtual address accessed
+         *
+         * @devdesc         Secureboot page verify failure.
+         * @custdesc        Corrupted flash image or firmware error during system boot
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                         VFS_VERIFY_PAGE,
+                                         VFS_PAGE_VERIFY_FAILED,
+                                         TO_UINT64(EACCES),
+                                         i_vaddr,
+                                         true);
+        l_errl->collectTrace(VFS_COMP_NAME);
+        l_errl->collectTrace(PNOR_COMP_NAME);
+    }
+
+    return l_errl;
+}
+
+VfsRp& VfsRp::getInstance()
+{
+    return Singleton<VfsRp>::instance();
+}
+
 // -- External interface ------------------------------------------------------
 
 errlHndl_t VFS::module_load_unload(const char * i_module, VfsMessages i_msgtype)
@@ -812,5 +936,3 @@ bool VFS::module_is_loaded(const char * i_name)
 {
     return Singleton<VfsRp>::instance().is_module_loaded(i_name);
 }
-
-

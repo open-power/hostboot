@@ -40,6 +40,11 @@
 
 #include "../../common/securetrace.H"
 
+#include <secureboot/containerheader.H>
+#include "../../../vfs/vfsrp.H"
+#include <sys/vfs.h>
+#include <kernel/console.H>
+
 // Quick change for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
@@ -76,6 +81,23 @@ const sha2_hash_t hw_key_hash =
     0xfb,0x70,0x85,0x35,0x1d,0x01,0xd6,0xd1
 };
 
+
+// secureboot_signed_container payload text size
+size_t payload_text_size = 0x200;
+
+// secureboot_signed_container payload text hash
+const SHA512_t payload_text_hash =
+{
+    0xff,0xc3,0x93,0xb7,0x71,0xc4,0x09,0xd4,
+    0x4d,0x8f,0xef,0xfa,0xcf,0xeb,0x7a,0x09,
+    0x11,0x7c,0x75,0x3f,0x62,0x27,0x34,0x70,
+    0xc2,0x93,0x24,0x04,0xea,0xd1,0x51,0xd5,
+    0xba,0xe5,0x2e,0xbd,0x49,0x30,0x10,0x61,
+    0xee,0x53,0x7b,0x7f,0xd9,0x64,0xac,0x84,
+    0x97,0x21,0x64,0xa3,0x09,0x6c,0x87,0xc4,
+    0x65,0x3e,0x8e,0xcb,0xfe,0x8f,0x4a,0xc5
+};
+
 /**********************************************************************/
 /*  End of UTILITY FUNCTIONS                                          */
 /**********************************************************************/
@@ -91,7 +113,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
     {
         TRACUCOMP(g_trac_secure,ENTER_MRK"SecureRomManagerTest::test_verify>");
 
-        errlHndl_t  l_errl  =   NULL;
+        errlHndl_t  l_errl  =   nullptr;
 
         /*******************************************************************/
         /* Load "secureboot_signed_container" from PNOR to use for verification  */
@@ -99,7 +121,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
 
         // Signed file variables
         const char * signedFile_name =   "secureboot_signed_container";
-        void *  signedFile_pageAddr  =   NULL;
+        void *  signedFile_pageAddr  =   nullptr;
         size_t  signedFile_size      =   0;
         uint64_t signedFile_vaddr    =   0;
 
@@ -134,7 +156,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         /*******************************************************************/
         /* Unload "secureboot_signed_container" from memory                */
         /*******************************************************************/
-        if ( signedFile_pageAddr != NULL   )
+        if ( signedFile_pageAddr != nullptr   )
         {
             unloadSignedFile( signedFile_pageAddr, signedFile_size);
         }
@@ -177,6 +199,204 @@ class SecureRomManagerTest : public CxxTest::TestSuite
 
         TRACUCOMP(g_trac_secure,EXIT_MRK"SecureRomManagerTest::test_sha512");
     }
+
+    /**
+     * @brief Secure ROM Test - Parse a Signed Container and check if the values
+     *                     match what's expected for secureboot_signed_container
+     */
+    void test_parse_container_header(void)
+    {
+        TRACFCOMP(g_trac_secure,ENTER_MRK"SecureRomManagerTest::test_parse_container_header>");
+
+        errlHndl_t  l_errl  =   nullptr;
+
+        /*******************************************************************/
+        /* Load "secureboot_signed_container" from PNOR to use for verification  */
+        /*******************************************************************/
+
+        // Signed file variables
+        const char * signedFile_name =   "secureboot_signed_container";
+        void *  signedFile_pageAddr  =   nullptr;
+        size_t  signedFile_size      =   0;
+        uint64_t signedFile_vaddr    =   0;
+
+        do{
+
+        // Call utility function
+        l_errl = loadSignedFile( signedFile_name,
+                                 signedFile_pageAddr,
+                                 signedFile_size,
+                                 signedFile_vaddr);
+
+        if (l_errl)
+        {
+            TS_FAIL("SecureRomManagerTest::test_parse_container_header: loadSignedFile() Failed");
+            errlCommit(l_errl, SECURE_COMP_ID);
+            break;
+        }
+
+        TRACUCOMP(g_trac_secure, "SecureRomManagerTest::test_parse_container_header: "
+                  "signedFile info: addr = %p, size=0x%x",
+                  signedFile_pageAddr, signedFile_size);
+
+        /*******************************************************************/
+        /* Parse Secure Container Header                                   */
+        /*******************************************************************/
+        SECUREBOOT::ContainerHeader l_conHdr(signedFile_pageAddr);
+
+        // Check if container header seems valid
+        if (!l_conHdr.iv_isValid)
+        {
+            TS_FAIL("SecureRomManagerTest::test_parse_container_header: Header is not valid");
+            break;
+        }
+        // Check a few of the values that are parsed out.
+        if(l_conHdr.payloadTextSize() != payload_text_size)
+        {
+            TS_FAIL("SecureRomManagerTest::test_parse_container_header: Incorrect payload text size");
+            break;
+        }
+
+        if (memcmp(l_conHdr.payloadTextHash(), payload_text_hash,
+                   sizeof(SHA512_t) != 0))
+        {
+            TS_FAIL("SecureRomManagerTest::test_parse_container_header: Incorrect payload text hash");
+            break;
+        }
+
+        } while(0);
+        /*******************************************************************/
+        /* Unload "secureboot_signed_container" from memory                */
+        /*******************************************************************/
+        if ( signedFile_pageAddr != nullptr   )
+        {
+            unloadSignedFile( signedFile_pageAddr, signedFile_size);
+        }
+
+        TRACFCOMP(g_trac_secure,EXIT_MRK"SecureRomManagerTest::test_parse_container_header");
+    }
+
+    /**
+     * @brief Secure ROM Test - Verification of pages via a hash page table at
+     *                          the beginning of a payload text section.
+     */
+    void test_hash_page_table_verify(void)
+    {
+        TRACFCOMP(g_trac_secure,ENTER_MRK"SecureRomManagerTest::test_hash_page_table_verify>");
+
+        errlHndl_t  l_errl  =   nullptr;
+        // secureboot_hash_page_table_container has 5 pages of data
+        const uint64_t TEST_PAGE_NUM = 2;
+
+        // Signed file variables
+        const char * signedFile_name =   "secureboot_hash_page_table_container";
+        void *  signedFile_pageAddr  =   nullptr;
+        size_t  signedFile_size      =   0;
+        uint64_t signedFile_vaddr    =   0;
+
+        uint8_t* l_originPage = new uint8_t[PAGESIZE]();
+
+        do{
+
+        // Call utility function
+        l_errl = loadSignedFile( signedFile_name,
+                                 signedFile_pageAddr,
+                                 signedFile_size,
+                                 signedFile_vaddr);
+
+        if (l_errl)
+        {
+            TS_FAIL("SecureRomManagerTest::test_hash_page_table_verify: loadSignedFile() Failed");
+            errlCommit(l_errl, SECURE_COMP_ID);
+            break;
+        }
+
+        TRACUCOMP(g_trac_secure, "SecureRomManagerTest::test_hash_page_table_verify: "
+                  "signedFile info: addr = %p, size=0x%x",
+                  signedFile_pageAddr, signedFile_size);
+
+        /*******************************************************************/
+        /* Parse Secure Container Header                                   */
+        /*******************************************************************/
+
+        SECUREBOOT::ContainerHeader l_conHdr(signedFile_pageAddr);
+        size_t l_payloadTextSize = l_conHdr.payloadTextSize();
+        TRACUCOMP(g_trac_secure, "SecureRomManagerTest::test_hash_page_table_verify ContainerHeader payload_size = 0x%X",
+                  l_payloadTextSize);
+
+        /*******************************************************************/
+        /* Test Verifying a correct page                                   */
+        /*******************************************************************/
+
+        // Get base offset of test container with respect to the HBI section
+        signedFile_vaddr-=VFS_EXTENDED_MODULE_VADDR;
+        uint64_t l_hashPageTableOffset = signedFile_vaddr + PAGE_SIZE;
+        uint64_t l_baseOffset = signedFile_vaddr
+                                + PAGE_SIZE
+                                + l_payloadTextSize;
+
+        // Get offset of TEST_PAGE_NUM
+        uint64_t l_vaddr = l_baseOffset
+                           + (TEST_PAGE_NUM * PAGESIZE);
+
+        // Verify a page
+        TRACUCOMP(g_trac_secure, "SecureRomManagerTest::test_hash_page_table_verify vaddr = 0x%X, base offset = 0x%X, hash page table offset = 0x%X",
+                  l_vaddr, l_baseOffset, l_hashPageTableOffset);
+        l_errl = VFS::VfsRp::getInstance().verify_page(l_vaddr,
+                                                       l_baseOffset,
+                                                       l_hashPageTableOffset);
+        // Failed to pass secureboot verification
+        if (l_errl)
+        {
+            TS_FAIL("SecureRomManagerTest::test_hash_page_table_verify failed");
+            errlCommit(l_errl, SECURE_COMP_ID);
+            break;
+        }
+
+        /*******************************************************************/
+        /* Test verifying a corrupt page                                  */
+        /*******************************************************************/
+
+        // Calculate pnor vaddr and read original page so we can run test case
+        // in both secure and unsecure mode.
+        uint64_t l_pnorVaddr = VFS::VfsRp::getInstance().iv_pnor_vaddr
+                               + l_vaddr;
+        memcpy(l_originPage, reinterpret_cast<uint8_t*>(l_pnorVaddr), PAGESIZE);
+
+        // Corrupt page
+        uint8_t l_corruptByte = 0xFF;
+        memcpy(reinterpret_cast<uint8_t*>(l_pnorVaddr), &l_corruptByte, sizeof(uint8_t));
+        l_errl =  VFS::VfsRp::getInstance().verify_page(l_vaddr,
+                                                        l_baseOffset,
+                                                        l_hashPageTableOffset);
+
+        // Fix page back up
+        memcpy(reinterpret_cast<uint8_t*>(l_pnorVaddr), l_originPage, PAGESIZE);
+
+        // Failed to catch secureboot verification failure
+        if (!l_errl)
+        {
+            TS_FAIL("SecureRomManagerTest::test_hash_page_table_verify did not catch verification error");
+            break;
+        }
+        delete l_errl;
+        l_errl = nullptr;
+
+        } while(0);
+
+        if ( signedFile_pageAddr != nullptr   )
+        {
+            unloadSignedFile( signedFile_pageAddr, signedFile_size);
+        }
+        if (l_originPage != nullptr)
+        {
+            delete [] l_originPage;
+            l_originPage = nullptr;
+        }
+
+        TRACFCOMP(g_trac_secure,EXIT_MRK"SecureRomManagerTest::test_hash_page_table_verify");
+    }
+
 };
 
 /**********************************************************************/
@@ -190,8 +410,8 @@ errlHndl_t loadSignedFile( const char * i_signedFile_name,
                                 uint64_t & o_signedFile_virtAddr)
 {
 
-        errlHndl_t  l_errl  =   NULL;
-        const char * l_signedFile_virtAddr  =   NULL;
+        errlHndl_t  l_errl  =   nullptr;
+        const char * l_signedFile_virtAddr  =   nullptr;
 
         /*******************************************************************/
         /* Load file from PNOR to use for verification                     */
@@ -251,7 +471,7 @@ void unloadSignedFile( void * & io_signedFile_pageAddr,
         PageManager::freePage(io_signedFile_pageAddr, l_num_pages);
 
         // Reset pageAddr pointer
-        io_signedFile_pageAddr = NULL;
+        io_signedFile_pageAddr = nullptr;
 
         TRACUCOMP(g_trac_secure, "unloadSignedFile()> "
                   "Info: sF_pA=%p, size=0x%x (pages=%d)",

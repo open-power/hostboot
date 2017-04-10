@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,7 @@
 #define VFS_EXTENDED_MODULE_VADDR (1 * 1024 * 1024 * 1024)
 #define VFS_EXTENDED_MODULE_TABLE_ADDRESS (VFS_EXTENDED_MODULE_VADDR)
 #define VFS_EXTENDED_MODULE_TABLE_OFFSET 0
+// Note: VFS_EXTENDED_MODULE_MAX used in src/build/buildpnor/buildpnor.pl
 #define VFS_EXTENDED_MODULE_MAX 128
 #define VFS_MODULE_NAME_MAX 64
 #define VFS_SYMBOL_INIT _init
@@ -82,6 +83,8 @@ enum VfsMessages
     VFS_MSG_UNLOAD,        //!< Message to vfsrp to unload a module
 };
 
+// Note: size of VfsSystemModule (VFS_MODULE_TABLE_ENTRY_SIZE) used in
+// src/build/buildpnor/buildpnor.pl
 struct VfsSystemModule
 {
     char module[VFS_MODULE_NAME_MAX];           //!< Module name
@@ -96,6 +99,8 @@ struct VfsSystemModule
 extern VfsSystemModule VFS_MODULES[VFS_MODULE_MAX];
 
 extern uint64_t VFS_LAST_ADDRESS;
+
+#define VFS_MODULE_TABLE_SIZE (VFS_EXTENDED_MODULE_MAX * sizeof(VfsSystemModule))
 
 // Offset for TLS "dtv-relative displacement".
 // See http://www.uclibc.org/docs/tls-ppc64.txt

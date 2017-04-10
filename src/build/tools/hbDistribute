@@ -199,6 +199,13 @@ else
     export DEFAULT_PNOR=1
 fi
 
+# Clean up preivous rand files. Should only be needed if a previous call failed.
+# Done before dist.targets.mk because there are parallel operations that occur.
+# So if we delete in genPnorImages.pl we would wipe out stuff currently being
+# used elsewhere and cause a file not found error.
+# Note: Prefix is set by genPnorImages.pl
+rm -f ${SANDBOXROOT}/${SANDBOXNAME}/obj/ppc/hbfw/img/rand-*
+
 # Execute makefile for distribution.
 mkdir -p $TARGET_DIR
 mkdir -p $SBFW_DIR

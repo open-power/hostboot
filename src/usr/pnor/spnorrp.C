@@ -816,14 +816,11 @@ errlHndl_t SPnorRP::miscSectionVerification(const uint8_t *i_vaddr,
 
     // Do any additional verification needed for a specific PNOR section
     switch (i_secId) {
-        // TODO securebootp9 - remove the following #if 0 and address issues
-        #if 0
         case HB_EXT_CODE:
             // Compare HBB and HBI versions. Pass the vaddr of HBI's hash page
             // table by skipping past the container header.
             l_errl = baseExtVersCheck((i_vaddr + PAGESIZE));
             break;
-        #endif
         case SBKT:
             // Ensure the nested container of the SBKT partition has a valid key
             // transition container and that the outer containers' key
