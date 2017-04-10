@@ -51,6 +51,8 @@ namespace KernelMisc
     extern uint64_t g_payload_data;
     /** @brief master host boot instance number (node) */
     extern uint64_t g_masterHBInstance;
+    /** @brief master host boot additional error data (node) */
+    extern uint32_t g_error_data;
 
     /** @brief Indicate whether HB is running or not */
     enum HbRunning

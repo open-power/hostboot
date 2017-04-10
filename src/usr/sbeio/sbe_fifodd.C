@@ -149,7 +149,8 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
                              SBEIO_HWSV_COLLECT_SBE_RC,
                              orig_plid,
                              TWO_UINT32_TO_UINT64(orig_rc,orig_mod));
-        INITSERVICE::doShutdown( SBEIO_HWSV_COLLECT_SBE_RC );
+        INITSERVICE::doShutdownWithError( SBEIO_HWSV_COLLECT_SBE_RC,
+                                          TARGETING::get_huid(i_target) );
     }
 
     SBE_TRACD(EXIT_MRK "performFifoChipOp");

@@ -195,7 +195,8 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target * i_target,
         MAGIC_INST_GET_SBE_TRACES(
               i_target->getAttr<TARGETING::ATTR_POSITION>(),
               SBEIO_HWSV_COLLECT_SBE_RC);
-        INITSERVICE::doShutdown( SBEIO_HWSV_COLLECT_SBE_RC );
+        INITSERVICE::doShutdownWithError( SBEIO_HWSV_COLLECT_SBE_RC,
+                                          TARGETING::get_huid(i_target) );
     }
 
     SBE_TRACD(EXIT_MRK "performPsuChipOp");

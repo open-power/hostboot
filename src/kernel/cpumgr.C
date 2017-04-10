@@ -109,7 +109,7 @@ void CpuManager::init_slave_smp(cpu_t* cpu)
     Singleton<CpuManager>::instance().startSlaveCPU(cpu);
 }
 
-void CpuManager::requestShutdown(uint64_t i_status)
+void CpuManager::requestShutdown(uint64_t i_status, uint32_t i_error_data)
 {
     cv_shutdown_status = i_status;
     __sync_synchronize();
@@ -129,7 +129,7 @@ void CpuManager::requestShutdown(uint64_t i_status)
         }
         else
         {
-            termWriteSRC(TI_SHUTDOWN,i_status, 0);
+            termWriteSRC(TI_SHUTDOWN,i_status, 0, i_error_data);
         }
 
         printk("TI initiated on all threads (shutdown)\n");

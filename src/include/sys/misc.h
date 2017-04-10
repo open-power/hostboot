@@ -109,12 +109,14 @@ extern "C"
  *                              entry-point.
  *  @param[in] i_payload_data   Data pointer fo the payload.
  *  @param[in[ i_masterHBInstance  Hostboot instance number. for multinode
+ *  @param[in] i_error_info     Additional error data to be added to TI data
  */
 extern "C" void shutdown(uint64_t i_status,
                          uint64_t i_payload_base,
                          uint64_t i_payload_entry,
                          uint64_t i_payload_data,
-                         uint64_t i_masterHBInstance);
+                         uint64_t i_masterHBInstance,
+                         uint32_t i_error_info);
 #endif
 
 /** @enum ProcessorCoreType
