@@ -90,10 +90,6 @@ using namespace p9_hcodeImageBuild;
 
 namespace HBPM
 {
-    constexpr uint64_t OCC_HOST_AREA_SIZE_IN_MB = OCC_HOST_AREA_SIZE / ONE_MB;
-    constexpr uint64_t HOMER_INSTANCE_SIZE_IN_MB =
-        sizeof(Homerlayout_t) / ONE_MB;
-
     constexpr uint32_t OCC_SRAM_RSP_ADDR   = 0xFFFBF000;
     constexpr uint16_t OCC_CHKPT_COMPLETE  = 0x0EFF;
 
@@ -460,7 +456,7 @@ namespace HBPM
             TRACUCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        INFO_MRK"loadOCCSetup: OCC Address: 0x%0lX, size=0x%.8X",
                        i_occImgPaddr,
-                       HOMER_INSTANCE_SIZE_IN_MB);
+                       VMM_HOMER_INSTANCE_SIZE_IN_MB);
 
             // Remove bit 0, may be set for physical addresses
             uint64_t l_occ_addr = i_occImgPaddr & PHYSICAL_ADDR_MASK;
@@ -469,7 +465,7 @@ namespace HBPM
                              l_fapiTarg,
                              0,
                              l_occ_addr,
-                             HOMER_INSTANCE_SIZE_IN_MB,
+                             VMM_HOMER_INSTANCE_SIZE_IN_MB,
                              p9pba::LOCAL_NODAL,
                              0xFF );
 
@@ -491,7 +487,7 @@ namespace HBPM
                        INFO_MRK"loadOCCSetup: "
                        "OCC Common Addr: 0x%0lX,size=0x%.8X",
                        i_commonPhysAddr,
-                       OCC_HOST_AREA_SIZE_IN_MB);
+                       VMM_OCC_COMMON_SIZE_IN_MB);
 
             // Remove bit 0, may be set for physical addresses
             uint64_t l_common_addr = i_commonPhysAddr & PHYSICAL_ADDR_MASK;
@@ -500,7 +496,7 @@ namespace HBPM
                              l_fapiTarg,
                              2,
                              l_common_addr,
-                             OCC_HOST_AREA_SIZE_IN_MB,
+                             VMM_OCC_COMMON_SIZE_IN_MB,
                              p9pba::LOCAL_NODAL,
                              0xFF );
 
