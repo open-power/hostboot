@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,14 +34,16 @@ void shutdown(uint64_t i_status,
               uint64_t i_payload_base,
               uint64_t i_payload_entry,
               uint64_t i_payload_data,
-              uint64_t i_masterHBInstance)
+              uint64_t i_masterHBInstance,
+              uint32_t i_error_data)
 {
-    _syscall5(MISC_SHUTDOWN,
+    _syscall6(MISC_SHUTDOWN,
                 reinterpret_cast<void*>(i_status),
                 reinterpret_cast<void*>(i_payload_base),
                 reinterpret_cast<void*>(i_payload_entry),
                 reinterpret_cast<void*>(i_payload_data),
-                reinterpret_cast<void*>(i_masterHBInstance));
+                reinterpret_cast<void*>(i_masterHBInstance),
+                reinterpret_cast<void*>(i_error_data));
 }
 
 ProcessorCoreType cpu_core_type()

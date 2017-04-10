@@ -66,11 +66,14 @@ void termWritePlid(uint16_t i_source, uint32_t plid)
     kernel_TIDataArea.plid = plid;
 }
 
-void termWriteSRC(uint16_t i_source, uint16_t i_reasoncode,uint64_t i_failAddr)
+void termWriteSRC(uint16_t i_source, uint16_t i_reasoncode,uint64_t i_failAddr,
+                  uint32_t i_error_data)
 {
-    // Update the TI structure with the type of TI and who called.
+    // Update the TI structure with the type of TI, who called,
+    // and extra error data (if applicable, otherwise 0)
     kernel_TIDataArea.type = TI_WITH_SRC;
     kernel_TIDataArea.source = i_source;
+    kernel_TIDataArea.error_data = i_error_data;
 
     // Update TID data area with the SRC info we have avail
     kernel_TIDataArea.src.ID = 0xBC;

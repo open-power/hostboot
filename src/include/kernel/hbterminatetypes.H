@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,7 +78,6 @@ struct HB_T_SRC_DataArea
  */
 struct HB_TI_DataArea
 {
-
     union{
         struct {
             uint64_t type:16;       /**< indicates either plid or src  */
@@ -88,7 +87,11 @@ struct HB_TI_DataArea
         };
         uint64_t flag;              /**< Full word - flag */
     };
-    uint32_t reserved0;
+
+    union{
+        uint32_t error_data;        /**< Error Data */
+        uint32_t reserved0;
+    };
     uint32_t plid;                  /**< Plid  */
     HB_T_SRC_DataArea src;          /**< SRC  */
 };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,7 +78,7 @@ class CpuManager
         /** @fn requestShutdown
          *  Requests that all CPUs shutdown
          */
-        static void requestShutdown(uint64_t i_status);
+        static void requestShutdown(uint64_t i_status, uint32_t i_error_data=0);
 
         /** @fn isShutdownRequested
          *  Returns if a shutdown of all CPUs was requested

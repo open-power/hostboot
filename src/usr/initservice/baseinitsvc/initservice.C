@@ -657,7 +657,8 @@ void doShutdown(uint64_t i_status,
                 uint64_t i_payload_base,
                 uint64_t i_payload_entry,
                 uint64_t i_payload_data,
-                uint64_t i_masterHBInstance)
+                uint64_t i_masterHBInstance,
+                uint32_t i_error_info)
 {
     class ShutdownExecute
     {
@@ -666,12 +667,14 @@ void doShutdown(uint64_t i_status,
                             uint64_t i_payload_base,
                             uint64_t i_payload_entry,
                             uint64_t i_payload_data,
-                            uint64_t i_masterHBInstance)
+                            uint64_t i_masterHBInstance,
+                            uint32_t i_error_info)
                 : status(i_status),
                   payload_base(i_payload_base),
                   payload_entry(i_payload_entry),
                   payload_data(i_payload_data),
-                  masterHBInstance(i_masterHBInstance)
+                  masterHBInstance(i_masterHBInstance),
+                  error_info(i_error_info)
             { }
 
             void execute()
@@ -680,7 +683,8 @@ void doShutdown(uint64_t i_status,
                                                               payload_base,
                                                               payload_entry,
                                                               payload_data,
-                                                              masterHBInstance);
+                                                              masterHBInstance,
+                                                              error_info);
             }
             void startThread()
             {
@@ -693,6 +697,7 @@ void doShutdown(uint64_t i_status,
             uint64_t payload_entry;
             uint64_t payload_data;
             uint64_t masterHBInstance;
+            uint32_t error_info;
 
             static void* run(void* _self)
             {
@@ -709,7 +714,7 @@ void doShutdown(uint64_t i_status,
 
     ShutdownExecute* s = new ShutdownExecute(i_status, i_payload_base,
                                              i_payload_entry, i_payload_data,
-                                             i_masterHBInstance);
+                                             i_masterHBInstance, i_error_info);
 
     if (i_inBackground)
     {
@@ -744,7 +749,8 @@ void InitService::doShutdown(uint64_t i_status,
                              uint64_t i_payload_base,
                              uint64_t i_payload_entry,
                              uint64_t i_payload_data,
-                             uint64_t i_masterHBInstance)
+                             uint64_t i_masterHBInstance,
+                             uint32_t i_error_info)
 {
     int l_rc = 0;
     errlHndl_t l_err = NULL;
@@ -871,9 +877,17 @@ void InitService::doShutdown(uint64_t i_status,
              i_payload_base,
              i_payload_entry,
              i_payload_data,
-             i_masterHBInstance);
+             i_masterHBInstance,
+             i_error_info);
 }
 
+void doShutdownWithError ( uint64_t i_status, uint32_t i_error_info)
+{
+    INITSERVICE::doShutdown( i_status,
+                             false,
+                             0, 0, 0, THIS_NODE_NO_PAYLOAD,
+                             i_error_info);
+}
 
 
 bool InitService::registerShutdownEvent(msg_q_t i_msgQ,

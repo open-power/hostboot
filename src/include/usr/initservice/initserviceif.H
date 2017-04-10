@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -123,6 +123,8 @@ bool unregisterShutdownEvent(msg_q_t i_msgQ);
  *                                 Needed when starting payload
  *                                 on multi-node system.
  *
+ * @param[in]  i_error_info - Add'tl error data to be included in TI data area
+ *
  * @return Nothing
  *
  * @note If inBackground = true, the shutdown call will spawn a child task
@@ -135,7 +137,20 @@ void doShutdown ( uint64_t i_status,
                   uint64_t i_payload_base = 0,
                   uint64_t i_payload_entry = 0,
                   uint64_t i_payload_data = 0,
-                  uint64_t i_masterHBInstance = THIS_NODE_NO_PAYLOAD);
+                  uint64_t i_masterHBInstance = THIS_NODE_NO_PAYLOAD,
+                  uint32_t i_error_info =0);
+
+/**
+ * @brief Wrapper function to perform shutdown including error data
+ *     provided in the TI area. This function calls doShutdown() with
+ *     the appropriate default parms.
+ *
+ * @param[in] i_status - Shutdown status to be passed along on shutdown
+ * @param[in]  i_error_info - Add'tl error data to be included in TI data area
+ *
+ * @return Nothing
+ */
+void doShutdownWithError ( uint64_t i_status, uint32_t i_error_info);
 
 /**
  * @brief Returns if Service Processor Base Services are available

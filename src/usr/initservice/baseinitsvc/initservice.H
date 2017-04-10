@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -227,6 +227,7 @@ public:
      * @param[in] i_masterHBInstance - master hostboot instance number (node)
      *                                 Needed when starting payload on a
      *                                 multi-node system.
+     * @param[in] i_error_info - Additional error data to be included in TI data
      *
      * @return Nothing
      * @note This calls registered services to notify them of shutdown and it
@@ -236,7 +237,8 @@ public:
                       uint64_t i_payload_base = 0,
                       uint64_t i_payload_entry = 0,
                       uint64_t i_payload_data = 0,
-                      uint64_t i_masterHBInstance = 0xffffffffffffffffull);
+                      uint64_t i_masterHBInstance = 0xffffffffffffffffull,
+                      uint32_t i_error_info = 0);
 
 protected:
 

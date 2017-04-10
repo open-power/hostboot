@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -690,7 +690,8 @@ namespace Systemcalls
         KernelMisc::g_payload_entry = static_cast<uint64_t>(TASK_GETARG2(t));
         KernelMisc::g_payload_data = static_cast<uint64_t>(TASK_GETARG3(t));
         KernelMisc::g_masterHBInstance= static_cast<uint64_t>(TASK_GETARG4(t));
-        CpuManager::requestShutdown(status);
+        KernelMisc::g_error_data= static_cast<uint32_t>(TASK_GETARG5(t));
+        CpuManager::requestShutdown(status, KernelMisc::g_error_data);
         TASK_SETRTN(t, 0);
     }
 

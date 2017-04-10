@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,11 +49,13 @@ void termWritePlid(uint16_t i_source, uint32_t plid);
  *  @param[in] i_source:  indicates what type of fail forced the TI
  *  @param[in] i_reasoncode: reasoncode for the failure(assert or shutdown)
  *  @param[in] i_failAddr: i_linkRegister() value (address of failure)
+ *  @param[in] i_error_info: addt'l error info to add to TI data
  *  @param[out] NONE:
  */
 void termWriteSRC(uint16_t i_source,
                     uint16_t i_reasoncode,
-                    uint64_t i_failAddr = 0);
+                    uint64_t i_failAddr = 0,
+                    uint32_t i_error_info = 0);
 
 /** @fn termModifySRC
  *  Modify an SRC and the TI data area for Bootloader
