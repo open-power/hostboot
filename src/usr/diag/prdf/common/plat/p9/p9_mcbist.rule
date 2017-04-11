@@ -153,6 +153,7 @@ chip p9_mcbist
         reset       (&, 0x07012301);
         mask        (|, 0x07012305);
         capture     group default;
+        capture     group MaintCmdRegs_mcb;
     };
 
     register MCBISTFIR_MASK
