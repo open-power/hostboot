@@ -313,19 +313,24 @@ errlHndl_t powerDownSlaveQuads()
 
             //TODO 171763 Core state setup for MPIPL should be done in a HWP
             //Set WKUP_SELECT bit on slave cores
-            for(uint8_t x = 1; x < (l_coreTargetList.size()) ; x++)
+            for(const auto & l_core_target : l_coreTargetList)
             {
-                //Set WKUP_SELECT bit on non-master cores that are on
-                // the master quad
-                l_err = deviceWrite(l_coreTargetList[x],
-                                    &SET_WKUP_SELECT_MASK,
-                                    MASK_SIZE,
-                                    DEVICE_SCOM_ADDRESS(CPPM_CORE_POWMAN_MODE_REG));
-                if(l_err)
+                TARGETING::ATTR_CHIP_UNIT_type l_core_id = l_core_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+                if(l_core_id != l_masterCoreId)
                 {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "Error setting WKUP_SELECT bit of CPPM_CORE_REG on core %d", l_coreTargetList[x]->getAttr<TARGETING::ATTR_CHIP_UNIT>());
-                    break;
+
+                    //Set WKUP_SELECT bit on all slave cores on master EQ
+                    l_err = deviceWrite(l_core_target,
+                                        &SET_WKUP_SELECT_MASK,
+                                        MASK_SIZE,
+                                        DEVICE_SCOM_ADDRESS(CPPM_CORE_POWMAN_MODE_REG));
+                    if(l_err)
+                    {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                  "Error setting WKUP_SELECT bit of CPPM_CORE_REG on core %d", l_core_id);
+                        break;
+                    }
                 }
             }
 
