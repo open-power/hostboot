@@ -360,8 +360,7 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
     #ifdef BOOTLOADER
         return i_section == HB_BASE_CODE;
     #else
-        return i_section == HB_BOOTLOADER ||
-               i_section == HB_EXT_CODE ||
+        return i_section == HB_EXT_CODE ||
                i_section == HB_DATA ||
                i_section == SBE_IPL ||
                i_section == CENTAUR_SBE ||

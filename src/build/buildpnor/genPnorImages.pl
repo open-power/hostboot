@@ -42,9 +42,6 @@ use constant BASE_IMAGE_TOTAL_CONTAINER_SIZE => 0x000000000007EF80;
 use constant BASE_IMAGE_TARGET_HRMOR => 0x0000000008000000;
 use constant BASE_IMAGE_INSTRUCTION_START_STACK_POINTER => 0x0000000008280000;
 
-# Max HBBL content size is 20K
-my $MAX_HBBL_SIZE = 20480;
-
 ################################################################################
 # Be explicit with POSIX
 # Everything is exported by default (with a handful of exceptions). This is an
@@ -512,9 +509,7 @@ sub manipulateImages
                              #|| ($eyeCatch eq "CAPP")
                              #|| ($eyeCatch eq "BOOTKERNEL");
 
-
-        my $isSpecialSecure =  ($eyeCatch eq "HBB")
-                               || ($eyeCatch eq "HBBL");
+        my $isSpecialSecure =    ($eyeCatch eq "HBB");
                               #|| ($eyeCatch eq "HBI")
                               #|| ($eyeCatch eq "HBD");
 
@@ -545,15 +540,15 @@ sub manipulateImages
                 # Ensure there is enough room at the end of the HBBL partition
                 # to store the HW keys' hash.
                 my $hbblRawSize = (-s $bin_file or die "Cannot get size of file $bin_file");
-                print "HBBL raw size (no padding/ecc) = $hbblRawSize/$MAX_HBBL_SIZE\n";
-                if ($hbblRawSize > $MAX_HBBL_SIZE - HW_KEYS_HASH_SIZE)
+                print "HBBL raw size (no padding/ecc) = $hbblRawSize/$size\n";
+                if ($hbblRawSize > $size - HW_KEYS_HASH_SIZE)
                 {
                     die "HBBL cannot fit HW Keys' Hash (64 bytes) at the end without overwriting real data";
                 }
 
                 # Pad HBBL to max size
                 run_command("cp $bin_file $tempImages{TEMP_BIN}");
-                run_command("dd if=$tempImages{TEMP_BIN} of=$bin_file ibs=$MAX_HBBL_SIZE conv=sync");
+                run_command("dd if=$tempImages{TEMP_BIN} of=$bin_file ibs=$size conv=sync");
 
                 # Add HW key hash to end of HBBL - 64 Bytes
                 my $hwKeyHashStart = (-s $bin_file or die "Cannot get size of file $bin_file")
