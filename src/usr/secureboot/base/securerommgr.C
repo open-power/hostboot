@@ -264,7 +264,6 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
         // struct elements my_ecid, entry_point and log
         memset(&l_hw_parms, 0, sizeof(ROM_hw_params));
 
-        // Now set hw_key_hash, which is of type sha2_hash_t, to iv_key_hash
         if (i_hwKeyHash == nullptr)
         {
             // Use current hw hash key
