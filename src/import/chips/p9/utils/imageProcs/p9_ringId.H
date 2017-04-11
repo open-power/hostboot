@@ -216,7 +216,7 @@ enum CHIPLET_TYPE
 };
 
 #define SGPE_NOOF_CHIPLETS  1
-#define CME_NOOF_CHIPLETS  12
+#define CME_NOOF_CHIPLETS   1
 
 struct CHIPLET_DATA
 {
