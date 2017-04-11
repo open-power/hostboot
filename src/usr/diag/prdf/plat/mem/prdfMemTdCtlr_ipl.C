@@ -36,6 +36,7 @@
 #include <prdfMemScrubUtils.H>
 #include <prdfMemUtils.H>
 #include <prdfMemVcm.H>
+#include <prdfP9McaDataBundle.H>
 #include <prdfP9McaExtraSig.H>
 #include <UtilHash.H> // for Util::hashString
 
@@ -132,7 +133,7 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-template <TARGETING::TYPE T>
+template <TARGETING::TYPE T, typename D>
 uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
                      const MemAddr & i_addr, bool & o_errorsFound,
                      STEP_CODE_DATA_STRUCT & io_sc )
@@ -241,14 +242,18 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 }
 
 template
-uint32_t __checkEcc<TYPE_MCA>( ExtensibleChip * i_chip, TdQueue & io_queue,
-                               const MemAddr & i_addr, bool & o_errorsFound,
-                               STEP_CODE_DATA_STRUCT & io_sc );
+uint32_t __checkEcc<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
+                                                TdQueue & io_queue,
+                                                const MemAddr & i_addr,
+                                                bool & o_errorsFound,
+                                                STEP_CODE_DATA_STRUCT & io_sc );
 
+/* TODO RTC 157888
 template
 uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
                                const MemAddr & i_addr, bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
+*/
 
 //------------------------------------------------------------------------------
 

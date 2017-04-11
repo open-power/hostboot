@@ -30,7 +30,13 @@
 #include <prdfMemTdCtlr.H>
 
 // Platform includes
+#include <prdfMemEccAnalysis.H>
 #include <prdfMemScrubUtils.H>
+#include <prdfMemTps.H>
+#include <prdfMemUtils.H>
+#include <prdfMemVcm.H>
+#include <prdfP9McaDataBundle.H>
+#include <prdfP9McaExtraSig.H>
 #include <prdfPlatServices.H>
 
 using namespace TARGETING;
@@ -191,16 +197,24 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-template <TARGETING::TYPE T>
+template <TARGETING::TYPE T, typename D>
 uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
                      const MemAddr & i_addr, bool & o_errorsFound,
                      STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[__checkEcc] "
 
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( T == i_chip->getType() );
+
     uint32_t o_rc = SUCCESS;
 
     o_errorsFound = false;
+
+    TargetHandle_t trgt = i_chip->getTrgt();
+    HUID           huid = i_chip->getHuid();
+
+    MemRank rank = i_addr.getRank();
 
     do
     {
@@ -209,12 +223,156 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
         o_rc = checkEccFirs<T>( i_chip, eccAttns );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "checkEccFirs<T>(0x%08x) failed",
-                      i_chip->getHuid() );
+            PRDF_ERR( PRDF_FUNC "checkEccFirs<T>(0x%08x) failed", huid );
             break;
         }
 
-        // TODO RTC 171915
+        if ( 0 != (eccAttns & MAINT_INT_NCE_ETE) )
+        {
+            o_errorsFound = true;
+            io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintINTER_CTE);
+
+            // Can't do any more isolation at this time. So add the rank to the
+            // callout list.
+            MemoryMru mm { trgt, rank, MemoryMruData::CALLOUT_RANK };
+            io_sc.service_data->SetCallout( mm );
+
+            // Add a TPS procedure to the queue.
+            TdEntry * e = new TpsEvent<T>{ i_chip, rank };
+            io_queue.push( e );
+        }
+
+        if ( 0 != (eccAttns & MAINT_SOFT_NCE_ETE) )
+        {
+            o_errorsFound = true;
+            io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintSOFT_CTE );
+
+            // Can't do any more isolation at this time. So add the rank to the
+            // callout list.
+            MemoryMru mm { trgt, rank, MemoryMruData::CALLOUT_RANK };
+            io_sc.service_data->SetCallout( mm );
+
+            // Add a TPS procedure to the queue.
+            TdEntry * e = new TpsEvent<T>{ i_chip, rank };
+            io_queue.push( e );
+        }
+
+        if ( 0 != (eccAttns & MAINT_HARD_NCE_ETE) )
+        {
+            o_errorsFound = true;
+            io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintHARD_CTE );
+
+            // Query the per-symbol counters for the hard CE symbol.
+            MemUtils::MaintSymbols symData; MemSymbol junk;
+            o_rc = MemUtils::collectCeStats<T>( i_chip, rank, symData, junk );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats(0x%08x,m%ds%d) "
+                          "failed", huid, rank.getMaster(), rank.getSlave() );
+                break;
+            }
+
+            // The command will have stopped on the first occurrence. So there
+            // should only be one symbol in the list.
+            PRDF_ASSERT( 1 == symData.size() );
+
+            // Add the symbol to the callout list.
+            MemoryMru mm { trgt, rank, symData[0].symbol };
+            io_sc.service_data->SetCallout( mm );
+
+            // Any hard CEs in MNFG should be immediately reported.
+            if ( mfgMode() )
+                io_sc.service_data->setServiceCall();
+
+            // Add a TPS procedure to the queue.
+            TdEntry * e = new TpsEvent<T>{ i_chip, rank };
+            io_queue.push( e );
+
+            /* TODO RTC 136129
+            // Dynamically deallocation the page.
+            o_rc = MemDealloc::page<T>( i_chip, i_addr );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "MemDealloc::page(0x%08x) failed", huid );
+                break;
+            }
+            */
+        }
+
+        if ( 0 != (eccAttns & MAINT_MPE) )
+        {
+            o_errorsFound = true;
+            io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintMPE );
+
+            // Add entry to UE table.
+            D db = static_cast<D>(i_chip->getDataBundle());
+            db->iv_ueTable.addEntry( UE_TABLE::SCRUB_MPE, i_addr );
+
+            // Read the chip mark from markstore.
+            MemMark chipMark;
+            o_rc = MarkStore::readChipMark<T>( i_chip, rank, chipMark );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,%d) failed",
+                          huid, rank.getMaster() );
+                break;
+            }
+
+            // If the chip mark is not valid, then somehow the chip mark was
+            // placed on a rank other than the rank in which the command
+            // stopped. This would most likely be a code bug.
+            PRDF_ASSERT( chipMark.isValid() );
+
+            // Add the mark to the callout list.
+            MemoryMru mm { trgt, rank, chipMark.getSymbol() };
+            io_sc.service_data->SetCallout( mm );
+
+            // Add a VCM procedure to the queue.
+            TdEntry * e = new VcmEvent<T>{ i_chip, rank, chipMark };
+            io_queue.push( e );
+        }
+
+        if ( 0 != (eccAttns & MAINT_RCE_ETE) )
+        {
+            o_errorsFound = true;
+
+            // TODO: RTC 171867
+        }
+
+        if ( 0 != (eccAttns & MAINT_UE) )
+        {
+            o_errorsFound = true;
+            io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintUE );
+
+            // Since this will be a predictive callout, change the primary
+            // signature as well.
+            io_sc.service_data->setSignature( huid, PRDFSIG_MaintUE );
+
+            // Add entry to UE table.
+            D db = static_cast<D>(i_chip->getDataBundle());
+            db->iv_ueTable.addEntry( UE_TABLE::SCRUB_UE, i_addr );
+
+            // Add the rank to the callout list.
+            MemEcc::calloutMemUe<T>( i_chip, rank, io_sc );
+
+            // Make the error log predictive.
+            io_sc.service_data->setServiceCall();
+
+            // Add a TPS procedure to the queue.
+            TdEntry * e = new TpsEvent<T>{ i_chip, rank };
+            io_queue.push( e );
+
+            /* TODO RTC 136129
+            // Dynamically deallocation the rank.
+            o_rc = MemDealloc::rank<T>( i_chip, rank );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "MemDealloc::rank(0x%08x, m%ds%d) failed",
+                          huid, rank.getMaster(), rank.getSlave() );
+                break;
+            }
+            */
+        }
 
     } while (0);
 
@@ -224,14 +382,18 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 }
 
 template
-uint32_t __checkEcc<TYPE_MCA>( ExtensibleChip * i_chip, TdQueue & io_queue,
-                               const MemAddr & i_addr, bool & o_errorsFound,
-                               STEP_CODE_DATA_STRUCT & io_sc );
+uint32_t __checkEcc<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
+                                                TdQueue & io_queue,
+                                                const MemAddr & i_addr,
+                                                bool & o_errorsFound,
+                                                STEP_CODE_DATA_STRUCT & io_sc );
 
+/* TODO RTC 157888
 template
 uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
                                const MemAddr & i_addr, bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
+*/
 
 //------------------------------------------------------------------------------
 
