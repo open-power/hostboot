@@ -882,142 +882,140 @@ int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section
     // Instance specific single ring extract loop
     local = 0;
 
-    for (uint8_t z = 0; z < 12; z++)
+    for ( uint8_t i =  (ring_id_list_instance + 0)->instanceIdMin;
+          i <= (ring_id_list_instance + 0)->instanceIdMax;
+          i++ )
     {
-        local = 0;
-
-        for (uint8_t i = z * 2 + (ring_id_list_instance + 0)->instanceIdMin;
-             i < z * 2 + 2 + (ring_id_list_instance + 0)->instanceIdMin ; i++)
+        for (uint8_t j = 0; j < EC::g_ecData.iv_num_instance_rings; j++)
         {
-            for (uint8_t j = 0; j < EC::g_ecData.iv_num_instance_rings; j++)
+            for (uint8_t k = 0; k < l_num_variant ; k++)
             {
-                for (uint8_t k = 0; k < l_num_variant ; k++)
+                if (i_dbgl > 2)
                 {
-                    if (i_dbgl > 2)
-                    {
-                        MY_INF(" Ring name %s Cplt instance ring id %d Variant id %d",
-                               (ring_id_list_instance + j)->ringName, j, k);
-                    }
+                    MY_INF(" Ring name %s Cplt instance ring id %d Variant id %d",
+                           (ring_id_list_instance + j)->ringName, j, k);
+                }
 
-                    if (strcmp( (ring_id_list_instance + j)->ringName,
-                                RING_PROPERTIES[i_ringId].iv_name) == 0)
+                if (strcmp( (ring_id_list_instance + j)->ringName,
+                            RING_PROPERTIES[i_ringId].iv_name) == 0)
+                {
+                    if ( io_instanceId >=  (ring_id_list_instance + 0)->instanceIdMin
+                         &&  io_instanceId  <= (ring_id_list_instance + 0)->instanceIdMax )
                     {
-                        if ( io_instanceId >=  (ring_id_list_instance + 0)->instanceIdMin
-                             &&  io_instanceId  <= (ring_id_list_instance + 0)->instanceIdMax )
+                        if ( i == io_instanceId && k == i_RingVariant )
                         {
-                            if ( i == io_instanceId && k == i_RingVariant )
+                            strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
+                            uint32_t var = CPLT_OFFSET_SIZE + i_ddLevelOffset + temp;
+                            int temp1 =  var / CPLT_OFFSET_SIZE;
+                            ring_offset =  *((uint32_t*)i_ringSection + temp1);
+                            ring_offset = be32toh(ring_offset);
+                            var = ring_offset + i_ddLevelOffset + temp;
+                            temp1 = var / sizeof(uint16_t) + local;
+                            chiplet_offset = *((uint16_t*)i_ringSection + temp1);
+                            chiplet_offset = be16toh(chiplet_offset);
+
+                            if (i_RingBlockType == GET_SINGLE_RING)
                             {
-                                strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
-                                uint32_t var = z * CPLT_OFFSET_SIZE + i_ddLevelOffset + temp + CPLT_OFFSET_SIZE;
-                                int temp1 =  var / CPLT_OFFSET_SIZE;
-                                ring_offset =  *((uint32_t*)i_ringSection + temp1);
-                                ring_offset = be32toh(ring_offset);
-                                var = ring_offset + i_ddLevelOffset + temp;
-                                temp1 = var / sizeof(uint16_t) + local;
-                                chiplet_offset = *((uint16_t*)i_ringSection + temp1);
-                                chiplet_offset = be16toh(chiplet_offset);
+                                var = ring_offset + chiplet_offset + i_ddLevelOffset + temp;
+                                ringSize = be16toh( ((CompressedScanData*)
+                                                     ((uint8_t*)i_ringSection +
+                                                      var))->iv_size );
+                                io_RingType = INSTANCE;
 
-                                if (i_RingBlockType == GET_SINGLE_RING)
+                                if (chiplet_offset)
                                 {
-                                    var = ring_offset + chiplet_offset + i_ddLevelOffset + temp;
-                                    ringSize = be16toh( ((CompressedScanData*)
-                                                         ((uint8_t*)i_ringSection +
-                                                          var))->iv_size );
-                                    io_RingType = INSTANCE;
-
-                                    if (chiplet_offset)
-                                    {
-                                        if (io_ringBlockSize == 0)
-                                        {
-                                            if (i_dbgl > 0)
-                                            {
-                                                MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
-                                            }
-
-                                            io_ringBlockSize =  ringSize;
-                                            return 0;
-                                        }
-
-                                        if (io_ringBlockSize < ringSize)
-                                        {
-                                            MY_ERR("\tio_ringBlockSize is less than required size.\n");
-                                            return TOR_BUFFER_TOO_SMALL;
-                                        }
-
-                                        if (i_dbgl > 0)
-                                        {
-                                            MY_INF(" Hex details (CME):  Chiplet #%d offset 0x%08x  local offset 0x%08x  " \
-                                                   "ring offset 0x%08x  start adr 0x%08x  ringSize=0x%08x \n",
-                                                   i, var, temp, ring_offset, chiplet_offset, ringSize);
-                                        }
-
-                                        memcpy( (uint8_t*)(*io_ringBlockPtr), (uint8_t*)i_ringSection + var,
-                                                (size_t)ringSize);
-
-                                        io_ringBlockSize = ringSize;
-
-                                        if (i_dbgl > 0)
-                                        {
-                                            MY_INF(" After get_ring_from_cme_image Size %d \n", io_ringBlockSize);
-                                        }
-
-                                        if (i_dbgl > 1)
-                                        {
-                                            MY_INF("  0x%08x 0x%08x 0x%08x 0x%08x 0x%08x \n",
-                                                   var, temp, ring_offset, chiplet_offset, ringSize);
-                                            MY_INF("Chiplet %d   ChipletRing TOR offset  %d   %d  Size %d %d \t\n",
-                                                   i,  ring_offset, chiplet_offset, ringSize, temp);
-                                        }
-
-                                        return TOR_RING_FOUND;
-                                    }
-                                    else
+                                    if (io_ringBlockSize == 0)
                                     {
                                         if (i_dbgl > 0)
                                         {
-                                            MY_INF("   ring container of %s is not found in the CME image container \n",
-                                                   o_ringName);
+                                            MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
                                         }
 
-                                        return TOR_RING_NOT_FOUND;
-                                    }
-                                }
-                                else if (i_RingBlockType == PUT_SINGLE_RING)
-                                {
-                                    if (chiplet_offset)
-                                    {
-                                        MY_ERR("Ring container is already present in the CME section \n");
-                                        return TOR_RING_AVAILABLE_IN_RINGSECTION;
+                                        io_ringBlockSize =  ringSize;
+
+                                        return TOR_SUCCESS;
                                     }
 
-                                    acc_offset = var;
-                                    io_ringBlockSize =  acc_offset + (local * RING_OFFSET_SIZE);
-                                    memcpy( (uint8_t*)(*io_ringBlockPtr), &acc_offset, sizeof(acc_offset));
+                                    if (io_ringBlockSize < ringSize)
+                                    {
+                                        MY_ERR("\tio_ringBlockSize is less than required size.\n");
+
+                                        return TOR_BUFFER_TOO_SMALL;
+                                    }
+
+                                    if (i_dbgl > 0)
+                                    {
+                                        MY_INF(" Hex details (CME):  Chiplet #%d offset 0x%08x  local offset 0x%08x  " \
+                                               "ring offset 0x%08x  start adr 0x%08x  ringSize=0x%08x \n",
+                                               i, var, temp, ring_offset, chiplet_offset, ringSize);
+                                    }
+
+                                    memcpy( (uint8_t*)(*io_ringBlockPtr), (uint8_t*)i_ringSection + var,
+                                            (size_t)ringSize);
+
+                                    io_ringBlockSize = ringSize;
+
+                                    if (i_dbgl > 0)
+                                    {
+                                        MY_INF(" After get_ring_from_cme_image Size %d \n", io_ringBlockSize);
+                                    }
+
+                                    if (i_dbgl > 1)
+                                    {
+                                        MY_INF("  0x%08x 0x%08x 0x%08x 0x%08x 0x%08x \n",
+                                               var, temp, ring_offset, chiplet_offset, ringSize);
+                                        MY_INF("Chiplet %d   ChipletRing TOR offset  %d   %d  Size %d %d \t\n",
+                                               i,  ring_offset, chiplet_offset, ringSize, temp);
+                                    }
 
                                     return TOR_RING_FOUND;
                                 }
                                 else
                                 {
-                                    MY_ERR("Ring block type (i_RingBlockType=%d) is not supported for CME \n", i_RingBlockType);
-                                    return TOR_INVALID_RING_BLOCK_TYPE;
+                                    if (i_dbgl > 0)
+                                    {
+                                        MY_INF("   ring container of %s is not found in the CME image container \n",
+                                               o_ringName);
+                                    }
+
+                                    return TOR_RING_NOT_FOUND;
                                 }
                             }
-                        }
-                        else
-                        {
-                            if (i_dbgl > 0)
+                            else if (i_RingBlockType == PUT_SINGLE_RING)
                             {
-                                MY_INF(" CME ring instance ID %d is invalid, Valid ID is from %d  to %d \n",
-                                       io_instanceId, (ring_id_list_instance + 0)->instanceIdMin,
-                                       (ring_id_list_instance + 0)->instanceIdMax);
-                            }
+                                if (chiplet_offset)
+                                {
+                                    MY_ERR("Ring container is already present in the CME section \n");
+                                    return TOR_RING_AVAILABLE_IN_RINGSECTION;
+                                }
 
-                            return TOR_INVALID_INSTANCE_ID;
+                                acc_offset = var;
+                                io_ringBlockSize =  acc_offset + (local * RING_OFFSET_SIZE);
+                                memcpy( (uint8_t*)(*io_ringBlockPtr), &acc_offset, sizeof(acc_offset));
+
+                                return TOR_RING_FOUND;
+                            }
+                            else
+                            {
+                                MY_ERR("Ring block type (i_RingBlockType=%d) is not supported for CME \n", i_RingBlockType);
+                                return TOR_INVALID_RING_BLOCK_TYPE;
+                            }
                         }
                     }
+                    else
+                    {
+                        if (i_dbgl > 0)
+                        {
+                            MY_INF(" CME ring instance ID %d is invalid, Valid ID is from %d  to %d \n",
+                                   io_instanceId, (ring_id_list_instance + 0)->instanceIdMin,
+                                   (ring_id_list_instance + 0)->instanceIdMax);
+                        }
 
-                    local++;
+                        return TOR_INVALID_INSTANCE_ID;
+                    }
                 }
+
+                local++;
             }
         }
     }
