@@ -222,6 +222,7 @@
         name        "P9 Maint Current Address Trap Register";
         scomaddr    0x070123D7;
         capture     group default;
+        capture     group MaintCmdRegs_mcb;
     };
 
     register MCB_CNTL
@@ -240,6 +241,7 @@
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC0Q";
         scomaddr    0x07012358;
         capture     group default;
+        capture     group MaintCmdRegs_mcb;
     };
 
     register MCB_MBSSYMEC1
@@ -247,6 +249,7 @@
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC1Q";
         scomaddr    0x07012359;
         capture     group default;
+        capture     group MaintCmdRegs_mcb;
     };
 
     register MCB_MBSSYMEC2
@@ -254,6 +257,7 @@
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC2Q";
         scomaddr    0x0701235A;
         capture     group default;
+        capture     group MaintCmdRegs_mcb;
     };
 
     register MCB_MBSSYMEC3
@@ -261,6 +265,7 @@
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC3Q";
         scomaddr    0x0701235B;
         capture     group default;
+        capture     group MaintCmdRegs_mcb;
     };
 
     register MCB_MBSSYMEC4
@@ -268,6 +273,7 @@
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC4Q";
         scomaddr    0x0701235C;
         capture     group default;
+        capture     group MaintCmdRegs_mcb;
     };
 
     register MCB_MBSSYMEC5
@@ -275,6 +281,7 @@
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC5Q";
         scomaddr    0x0701235D;
         capture     group default;
+        capture     group MaintCmdRegs_mcb;
     };
 
     register MCB_MBSSYMEC6
@@ -282,6 +289,7 @@
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC6Q";
         scomaddr    0x0701235E;
         capture     group default;
+        capture     group MaintCmdRegs_mcb;
     };
 
     register MCB_MBSSYMEC7
@@ -289,6 +297,7 @@
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC7Q";
         scomaddr    0x0701235F;
         capture     group default;
+        capture     group MaintCmdRegs_mcb;
     };
 
     register MCB_MBSSYMEC8
@@ -296,4 +305,35 @@
         name        "MCP.MCBIST.MBA_SCOMFIR.MBSSYMEC8Q";
         scomaddr    0x07012360;
         capture     group default;
+        capture     group MaintCmdRegs_mcb;
     };
+
+    ############################################################################
+    # MBS Memory Scrub/Read Error Count Registers
+    ############################################################################
+
+    register MBSEC0
+    {
+        name        "MCP.MCBIST.MBA_SCOMFIR.MBSEC0Q";
+        scomaddr    0x7012355;
+        capture     group default;
+        capture     group MaintCmdRegs_mcb;
+    };
+
+    register MBSEC1
+    {
+        name        "MCP.MCBIST.MBA_SCOMFIR.MBSEC1Q";
+        scomaddr    0x7012356;
+        capture     group default;
+        capture     group MaintCmdRegs_mcb;
+    };
+
+    register MBSMSEC
+    {
+        name        "MCP.MCBIST.MBA_SCOMFIR.MBSMSECQ";
+        scomaddr    0x07012369;
+        capture     group default;
+        capture     group MaintCmdRegs_mcb;
+    };
+
+

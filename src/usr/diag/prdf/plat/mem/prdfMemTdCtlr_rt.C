@@ -29,6 +29,10 @@
 
 #include <prdfMemTdCtlr.H>
 
+// Framework includes
+#include <prdfRegisterCache.H>
+#include <UtilHash.H>
+
 // Platform includes
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemScrubUtils.H>
@@ -45,6 +49,117 @@ namespace PRDF
 {
 
 using namespace PlatServices;
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+void __recaptureRegs( STEP_CODE_DATA_STRUCT & io_sc, ExtensibleChip * i_chip );
+
+template<>
+void __recaptureRegs<TYPE_MCBIST>( STEP_CODE_DATA_STRUCT & io_sc,
+                                   ExtensibleChip * i_chip )
+{
+    #define PRDF_FUNC "[__recaptureRegs<TYPE_MCBIST>] "
+
+    RegDataCache & cache = RegDataCache::getCachedRegisters();
+    CaptureData & cd = io_sc.service_data->GetCaptureData();
+
+    // refresh and recapture the mcb registers
+    const char * mcbRegs[] =
+    {
+        "MCBISTFIR", "MBSEC0", "MBSEC1", "MCB_MBSSYMEC0",
+        "MCB_MBSSYMEC1", "MCB_MBSSYMEC2", "MCB_MBSSYMEC3",
+        "MCB_MBSSYMEC4", "MCB_MBSSYMEC5", "MCB_MBSSYMEC6",
+        "MCB_MBSSYMEC7", "MCB_MBSSYMEC8", "MBSMSEC", "MCBMCAT",
+    };
+
+    for ( uint32_t i = 0; i < sizeof(mcbRegs)/sizeof(char*); i++ )
+    {
+        SCAN_COMM_REGISTER_CLASS * reg =
+            i_chip->getRegister( mcbRegs[i] );
+        cache.flush( i_chip, reg );
+    }
+
+    i_chip->CaptureErrorData( cd, Util::hashString("MaintCmdRegs_mcb") );
+
+    // refresh and recapture the mca registers
+    const char * mcaRegs[] =
+    {
+        "MCAECCFIR",
+    };
+
+    ExtensibleChipList mcaList = getConnected( i_chip, TYPE_MCA );
+
+    for ( auto & mca : mcaList )
+    {
+        for ( uint32_t i = 0; i < sizeof(mcaRegs)/sizeof(char*); i++ )
+        {
+            SCAN_COMM_REGISTER_CLASS * reg = mca->getRegister( mcaRegs[i] );
+            cache.flush( mca, reg );
+        }
+        mca->CaptureErrorData( cd, Util::hashString("MaintCmdRegs_mca") );
+    }
+
+    #undef PRDF_FUNC
+}
+
+template<>
+void __recaptureRegs<TYPE_MBA>( STEP_CODE_DATA_STRUCT & io_sc,
+                                ExtensibleChip * i_chip )
+{
+    #define PRDF_FUNC "[__recaptureRegs<TYPE_MBA>] "
+
+    RegDataCache & cache = RegDataCache::getCachedRegisters();
+    ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
+    TargetHandle_t mbaTrgt = i_chip->GetChipHandle();
+    uint32_t mbaPos = getTargetPosition( mbaTrgt );
+
+    const char * membRegs[2][15] =
+    {
+        { "MBA0_MBSECCFIR", "MBA0_MBSECCERRPT_0","MBA0_MBSECCERRPT_1",
+          "MBA0_MBSEC0", "MBA0_MBSEC1", "MBA0_MBSTR",
+          "MBA0_MBSSYMEC0", "MBA0_MBSSYMEC1", "MBA0_MBSSYMEC2",
+          "MBA0_MBSSYMEC3", "MBA0_MBSSYMEC4", "MBA0_MBSSYMEC5",
+          "MBA0_MBSSYMEC6", "MBA0_MBSSYMEC7", "MBA0_MBSSYMEC8", },
+        { "MBA1_MBSECCFIR", "MBA1_MBSECCERRPT_0","MBA1_MBSECCERRPT_1",
+          "MBA1_MBSEC0", "MBA1_MBSEC1", "MBA1_MBSTR",
+          "MBA1_MBSSYMEC0", "MBA1_MBSSYMEC1", "MBA1_MBSSYMEC2",
+          "MBA1_MBSSYMEC3", "MBA1_MBSSYMEC4", "MBA1_MBSSYMEC5",
+          "MBA1_MBSSYMEC6", "MBA1_MBSSYMEC7", "MBA1_MBSSYMEC8", },
+    };
+    for ( uint32_t i = 0; i < 15; i++ )
+    {
+        SCAN_COMM_REGISTER_CLASS * reg
+            = membChip->getRegister( membRegs[mbaPos][i] );
+        cache.flush( membChip, reg );
+    }
+
+    const char * mbaRegs[] =
+    {
+        "MBASPA", "MBMCT", "MBMSR", "MBMACA", "MBMEA", "MBASCTL", "MBAECTL",
+    };
+    for ( uint32_t i = 0; i < sizeof(mbaRegs)/sizeof(char*); i++ )
+    {
+        SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( mbaRegs[i] );
+        cache.flush( i_chip, reg );
+    }
+
+    // Now recapture those registers.
+
+    CaptureData & cd = io_sc.service_data->GetCaptureData();
+
+    if ( 0 == mbaPos )
+    {
+        membChip->CaptureErrorData(cd, Util::hashString("MaintCmdRegs_mba0") );
+    }
+    else
+    {
+        membChip->CaptureErrorData(cd, Util::hashString("MaintCmdRegs_mba1") );
+    }
+    i_chip->CaptureErrorData(cd, Util::hashString("MaintCmdRegs"));
+
+    #undef PRDF_FUNC
+}
 
 //------------------------------------------------------------------------------
 
@@ -84,7 +199,7 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
 
         // Since we had to manually stop the maintenance command, refresh all
         // relevant registers that may have changed since the initial capture.
-        // TODO: RTC 166837
+        __recaptureRegs<T>( io_sc, iv_chip );
 
         // It is possible that background scrub could have found an ECC error
         // before we had a chance to stop the command. Therefore, we need to

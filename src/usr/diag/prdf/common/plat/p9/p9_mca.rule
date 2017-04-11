@@ -97,6 +97,7 @@ chip p9_mca
         mask        (|, 0x07010a05);
         capture     group default;
         capture     group McbistCapture;
+        capture     group MaintCmdRegs_mca;
     };
 
     register MCAECCFIR_MASK
