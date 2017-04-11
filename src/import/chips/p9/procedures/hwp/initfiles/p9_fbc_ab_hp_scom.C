@@ -108,6 +108,8 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         uint64_t l_def_LINK_X_AGGREGATE_EN = (l_TGT0_ATTR_PROC_FABRIC_X_AGGREGATE == ENUM_ATTR_PROC_FABRIC_X_AGGREGATE_ON);
         fapi2::ATTR_PROC_FABRIC_X_ADDR_DIS_Type l_TGT0_ATTR_PROC_FABRIC_X_ADDR_DIS;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ADDR_DIS, TGT0, l_TGT0_ATTR_PROC_FABRIC_X_ADDR_DIS));
+        fapi2::ATTR_CHIP_EC_FEATURE_HW407123_Type l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW407123, TGT0, l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123));
         fapi2::ATTR_FREQ_X_MHZ_Type l_TGT1_ATTR_FREQ_X_MHZ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_X_MHZ, TGT1, l_TGT1_ATTR_FREQ_X_MHZ));
         uint64_t l_def_X_CMD_RATE_4B_R = ((literal_6 * l_TGT1_ATTR_FREQ_PB_MHZ) % l_TGT1_ATTR_FREQ_X_MHZ);
@@ -1056,8 +1058,56 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             constexpr auto l_PB_COM_PB_CFG_X_GATHER_ENABLE_NEXT_ON = 0x7;
             l_scom_buffer.insert<50, 1, 61, uint64_t>(l_PB_COM_PB_CFG_X_GATHER_ENABLE_NEXT_ON );
 
-            if ((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
-                  && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_4B_R != literal_0)))
+            if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                   && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_4B_R != literal_0))
+                 && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_4B_N / l_def_X_CMD_RATE_D) + literal_3) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_4B_R == literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_4B_N / l_def_X_CMD_RATE_D) + literal_2) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_1)) && (l_def_X_CMD_RATE_4B_RA != literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_4B_NA / l_def_X_CMD_RATE_D) + literal_4) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_1)) && (l_def_X_CMD_RATE_4B_RA == literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_4B_NA / l_def_X_CMD_RATE_D) + literal_3) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_2B_R != literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_2B_N / l_def_X_CMD_RATE_D) + literal_3) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_2B_R == literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_2B_N / l_def_X_CMD_RATE_D) + literal_2) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_1)) && (l_def_X_CMD_RATE_2B_RA != literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_2B_NA / l_def_X_CMD_RATE_D) + literal_3) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_1)) && (l_def_X_CMD_RATE_2B_RA == literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_2B_NA / l_def_X_CMD_RATE_D) + literal_2) );
+            }
+            else if ((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                       && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_4B_R != literal_0)))
             {
                 l_scom_buffer.insert<56, 8, 56, uint64_t>((l_def_X_CMD_RATE_4B_N / l_def_X_CMD_RATE_D) );
             }
@@ -2033,8 +2083,56 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             constexpr auto l_PB_COM_PB_CFG_X_GATHER_ENABLE_NEXT_ON = 0x7;
             l_scom_buffer.insert<50, 1, 62, uint64_t>(l_PB_COM_PB_CFG_X_GATHER_ENABLE_NEXT_ON );
 
-            if ((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
-                  && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_4B_R != literal_0)))
+            if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                   && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_4B_R != literal_0))
+                 && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_4B_N / l_def_X_CMD_RATE_D) + literal_3) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_4B_R == literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_4B_N / l_def_X_CMD_RATE_D) + literal_2) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_1)) && (l_def_X_CMD_RATE_4B_RA != literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_4B_NA / l_def_X_CMD_RATE_D) + literal_4) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_1)) && (l_def_X_CMD_RATE_4B_RA == literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_4B_NA / l_def_X_CMD_RATE_D) + literal_3) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_2B_R != literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_2B_N / l_def_X_CMD_RATE_D) + literal_3) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_2B_R == literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_2B_N / l_def_X_CMD_RATE_D) + literal_2) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_1)) && (l_def_X_CMD_RATE_2B_RA != literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_2B_NA / l_def_X_CMD_RATE_D) + literal_3) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_1)) && (l_def_X_CMD_RATE_2B_RA == literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_2B_NA / l_def_X_CMD_RATE_D) + literal_2) );
+            }
+            else if ((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                       && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_4B_R != literal_0)))
             {
                 l_scom_buffer.insert<56, 8, 56, uint64_t>((l_def_X_CMD_RATE_4B_N / l_def_X_CMD_RATE_D) );
             }
@@ -3010,8 +3108,56 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             constexpr auto l_PB_COM_PB_CFG_X_GATHER_ENABLE_NEXT_ON = 0x7;
             l_scom_buffer.insert<50, 1, 63, uint64_t>(l_PB_COM_PB_CFG_X_GATHER_ENABLE_NEXT_ON );
 
-            if ((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
-                  && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_4B_R != literal_0)))
+            if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                   && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_4B_R != literal_0))
+                 && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_4B_N / l_def_X_CMD_RATE_D) + literal_3) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_4B_R == literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_4B_N / l_def_X_CMD_RATE_D) + literal_2) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_1)) && (l_def_X_CMD_RATE_4B_RA != literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_4B_NA / l_def_X_CMD_RATE_D) + literal_4) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_1)) && (l_def_X_CMD_RATE_4B_RA == literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_4B_NA / l_def_X_CMD_RATE_D) + literal_3) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_2B_R != literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_2B_N / l_def_X_CMD_RATE_D) + literal_3) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_2B_R == literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_2B_N / l_def_X_CMD_RATE_D) + literal_2) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_1)) && (l_def_X_CMD_RATE_2B_RA != literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_2B_NA / l_def_X_CMD_RATE_D) + literal_3) );
+            }
+            else if (((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_2_BYTE)
+                        && (l_def_LINK_X_AGGREGATE_EN == literal_1)) && (l_def_X_CMD_RATE_2B_RA == literal_0))
+                      && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW407123 != literal_0)))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(((l_def_X_CMD_RATE_2B_NA / l_def_X_CMD_RATE_D) + literal_2) );
+            }
+            else if ((((l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH == fapi2::ENUM_ATTR_PROC_FABRIC_X_BUS_WIDTH_4_BYTE)
+                       && (l_def_LINK_X_AGGREGATE_EN == literal_0)) && (l_def_X_CMD_RATE_4B_R != literal_0)))
             {
                 l_scom_buffer.insert<56, 8, 56, uint64_t>((l_def_X_CMD_RATE_4B_N / l_def_X_CMD_RATE_D) );
             }
