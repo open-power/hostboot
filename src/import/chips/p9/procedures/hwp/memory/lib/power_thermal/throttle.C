@@ -320,7 +320,7 @@ fapi_try_exit:
 fapi2::ReturnCode throttle::calc_port_power(const double i_idle_util [MAX_DIMM_PER_PORT],
         const double i_max_util [MAX_DIMM_PER_PORT],
         double& o_port_power_idle,
-        double& o_port_power_max)
+        double& o_port_power_max) const
 {
     //Playing it safe
     o_port_power_idle = 0;
@@ -375,7 +375,7 @@ fapi_try_exit:
 void throttle::calc_dimm_power(const double i_databus_idle,
                                const double i_databus_max,
                                double o_dimm_power_idle [MAX_DIMM_PER_PORT],
-                               double o_dimm_power_max [MAX_DIMM_PER_PORT])
+                               double o_dimm_power_max [MAX_DIMM_PER_PORT]) const
 {
     for ( const auto& l_dimm : mss::find_targets<TARGET_TYPE_DIMM>(iv_target) )
     {
@@ -409,7 +409,7 @@ void throttle::calc_dimm_power(const double i_databus_idle,
 fapi2::ReturnCode throttle::calc_power_curve(const double i_power_idle,
         const double i_power_max,
         uint32_t& o_slope,
-        uint32_t& o_int)
+        uint32_t& o_int) const
 {
     const double l_divisor = ((static_cast<double>(iv_databus_port_max) / UTIL_CONVERSION) - IDLE_UTIL);
     FAPI_ASSERT ((l_divisor > 0),
@@ -452,7 +452,7 @@ fapi_try_exit:
 void throttle::calc_util_usage(const uint32_t i_slope,
                                const uint32_t i_int,
                                const uint32_t i_power_limit,
-                               double& o_util)
+                               double& o_util) const
 {
     o_util = ((static_cast<double>(i_power_limit) - i_int) / i_slope ) * UTIL_CONVERSION;
 
@@ -470,7 +470,9 @@ void throttle::calc_util_usage(const uint32_t i_slope,
 /// @param[out] o_power the calculated power
 /// @return fapi2::ReturnCode iff it was a success
 ///
-fapi2::ReturnCode throttle::calc_power_from_n (const uint16_t i_n_slot, const uint16_t i_n_port, uint32_t& o_power)
+fapi2::ReturnCode throttle::calc_power_from_n (const uint16_t i_n_slot,
+        const uint16_t i_n_port,
+        uint32_t& o_power) const
 {
     double l_calc_util_port = 0;
     double l_calc_util_slot = 0;
@@ -570,7 +572,7 @@ fapi_try_exit:
 fapi2::ReturnCode throttle::calc_split_util(
     const double i_util_slot,
     const double i_util_port,
-    double o_util_dimm_max [MAX_DIMM_PER_PORT])
+    double o_util_dimm_max [MAX_DIMM_PER_PORT]) const
 {
     uint8_t l_count_dimms = count_dimm (iv_target);
     //The total utilization to be used is limited by either what the port can allow or what the dimms can use
@@ -776,11 +778,13 @@ fapi_try_exit:
 ///
 /// @brief Equalize the throttles and estimated power at those throttle levels
 /// @param[in] i_targets vector of MCS targets all on the same VDDR domain
+/// @param[in] i_throttle_type denotes if this was done for POWER (VMEM) or THERMAL (VMEM+VPP) throttles
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note sets the throttles and power to the worst case
 /// Called by p9_mss_bulk_pwr_throttles and by p9_mss_utils_to_throttle (so by IPL or by OCC)
 ///
-fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets)
+fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets,
+                                      const throttle_type i_throttle_type)
 {
     //Set to max values so every compare will change to min value
     uint16_t l_min_slot = ~(0);
@@ -821,9 +825,9 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<fapi2::TA
     {
         for (const auto& l_mcs : i_targets)
         {
-            uint16_t l_fin_slot [mss::PORTS_PER_MCS];
-            uint16_t l_fin_port [mss::PORTS_PER_MCS];
-            uint32_t l_fin_power [mss::PORTS_PER_MCS];
+            uint16_t l_fin_slot [mss::PORTS_PER_MCS] = {};
+            uint16_t l_fin_port [mss::PORTS_PER_MCS] = {};
+            uint32_t l_fin_power [mss::PORTS_PER_MCS] = {};
 
             for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(l_mcs))
             {
@@ -833,6 +837,8 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<fapi2::TA
                 }
 
                 const auto l_pos = mss::index(l_mca);
+                // Declaring above to avoid fapi2 jump
+                uint64_t l_power_limit = 0;
 
                 l_fin_slot[l_pos] = (mss::count_dimm(l_mca)) ? l_min_slot : 0;
                 l_fin_port[l_pos] = (mss::count_dimm(l_mca)) ? l_min_port : 0;
@@ -840,7 +846,8 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<fapi2::TA
                 //Need to create throttle object for each mca in order to get dimm configuration and power curves
                 //To calculate the slot/port utilization and total port power consumption
                 fapi2::ReturnCode l_rc;
-                auto l_dummy = mss::power_thermal::throttle(l_mca, l_rc);
+
+                const auto l_dummy = mss::power_thermal::throttle(l_mca, l_rc);
                 FAPI_TRY(l_rc, "Failed creating a throttle object in equalize_throttles");
 
                 FAPI_TRY( l_dummy.calc_power_from_n(l_fin_slot[l_pos], l_fin_port[l_pos], l_fin_power[l_pos]),
@@ -852,14 +859,20 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<fapi2::TA
                 //Only calculate the power for ports that have dimms
                 l_fin_power[l_pos] = (mss::count_dimm(l_mca) != 0 ) ? l_fin_power[l_pos] : 0;
 
-                FAPI_INF("Calculated power is %d, limit is %d", l_fin_power[l_pos], l_dummy.iv_port_power_limit);
+                // You may ask why this is not a variable within the throttle struct
+                // It's because POWER throttling is on a per port basis while the THERMAL throttle is per dimm
+                // Didn't feel like adding a variable just for this check
+                l_power_limit = (i_throttle_type == throttle_type::POWER) ?
+                                l_dummy.iv_port_power_limit : (l_dummy.iv_dimm_thermal_limit[0] + l_dummy.iv_dimm_thermal_limit[1]);
+
+                FAPI_INF("Calculated power is %d, limit is %d", l_fin_power[l_pos], l_power_limit);
 
                 //If there's an error with calculating port power, the wrong watt target was passed in
                 //Returns an error but doesn't deconfigure anything. Calling function can log if it wants to
                 //Called by OCC and by p9_mss_eff_config_thermal, thus different ways for error handling
                 //Continue setting throttles to prevent a possible throttle == 0
                 //The error will be the last bad port found
-                if (l_fin_power[l_pos] > l_dummy.iv_port_power_limit)
+                if (l_fin_power[l_pos] > l_power_limit)
                 {
                     //Need this because of pos traits and templating stuff
                     uint64_t l_fail = mss::fapi_pos(l_mca);
@@ -871,16 +884,21 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<fapi2::TA
                     FAPI_ASSERT_NOEXIT( false,
                                         fapi2::MSS_CALC_PORT_POWER_EXCEEDS_MAX()
                                         .set_CALCULATED_PORT_POWER(l_fin_power[l_pos])
-                                        .set_MAX_POWER_ALLOWED(l_dummy.iv_port_power_limit)
+                                        .set_MAX_POWER_ALLOWED(l_power_limit)
                                         .set_PORT_POS(mss::pos(l_mca))
                                         .set_MCA_TARGET(l_mca),
                                         "Error calculating the final port power value for target %s, calculated power is %d, max value can be %d",
                                         mss::c_str(l_mca),
                                         l_fin_power[l_pos],
-                                        l_dummy.iv_port_power_limit);
+                                        l_power_limit);
                 }
             }
 
+            FAPI_INF("%s Final throttles values for slot %d, for port %d, power value %d",
+                     mss::c_str(l_mcs),
+                     l_fin_port,
+                     l_fin_slot,
+                     l_fin_port);
             //Even if there's an error, still calculate and set the throttles.
             //OCC will set to safemode if there's an error
             //Better to set the throttles than leave them 0, and potentially brick the memory
