@@ -385,7 +385,8 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
         //  AVPs might enable a subset of the available threads
         uint64_t max_threads = cpu_thread_count();
-        uint64_t en_threads_master =
+        uint64_t en_threads, en_threads_master;
+        en_threads = en_threads_master =
                     sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
 
         // Core0_thread:  0 1 2 3  Core1_thread: 0 1 2 3
@@ -393,9 +394,15 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         //   FUSED (SMT8) - E - -                E E - -
         // * E=enable, Core0_t0=master already enabled
         const uint64_t SMT8_ENABLE_THREADS_MASK = 0xC000000000000000;
+        const uint64_t SMT8_FUSE0_THREADS_MASK  = 0xA000000000000000;
+        const uint64_t SMT8_FUSE1_THREADS_MASK  = 0x5000000000000000;
         if( l_smt8 )
         {
-            en_threads_master &= SMT8_ENABLE_THREADS_MASK;
+            // First capture if threads 0,2 are enabled.  Then eliminate
+            // odd threads and compress to bits 0,1
+            uint64_t threads = en_threads & SMT8_FUSE0_THREADS_MASK;
+            en_threads_master = threads & SMT8_ENABLE_THREADS_MASK;  //T0
+            en_threads_master |= (threads << 1) & SMT8_ENABLE_THREADS_MASK;//T2
         }
 
         TRACFCOMP( g_fapiTd,
@@ -538,7 +545,13 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                 break;
             }
 
-            uint64_t en_threads_c1 = SMT8_ENABLE_THREADS_MASK;
+            // First capture if threads 1,3 are enabled.  Then eliminate
+            // even threads and compress to bits 0,1
+            uint64_t en_threads_c1;
+            uint64_t threads = en_threads & SMT8_FUSE1_THREADS_MASK;
+            en_threads_c1 = (threads << 1) & SMT8_ENABLE_THREADS_MASK; //T1
+            en_threads_c1 |= (threads << 2) & SMT8_ENABLE_THREADS_MASK;//T3
+
 
             TRACFCOMP( g_fapiTd,
                     "activate_threads max_threads=%d, en_threads_c1=0x%016X",

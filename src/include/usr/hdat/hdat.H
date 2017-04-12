@@ -167,6 +167,8 @@ extern const uint8_t HDAT_HDIF_ALIGN;
 #define HDAT_MAX_THREADS_SUPPORTED           8
 #define HDAT_MAX_EIGHT_THREADS_SUPPORTED     8
 #define HDAT_MAX_FOUR_THREADS_SUPPORTED      4
+#define HDAT_MAX_TWO_THREADS_SUPPORTED       2
+
 
 /* @enum hdatProcStatus
  *       Status of a processor FRU.
