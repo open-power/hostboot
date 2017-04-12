@@ -54,6 +54,10 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <fapi2/target.H>
 
+//SBE interfacing
+#include    <sbeio/sbeioif.H>
+#include    <sys/misc.h>
+
 #include <p9_cpu_special_wakeup.H>
 #include <p9_query_core_access_state.H>
 #include <p9_query_cache_access_state.H>
@@ -223,6 +227,41 @@ bool deassertSpecialWakeupOnCores(ISTEP_ERROR::IStepError & io_istepError)
     }
 
     return l_success;
+}
+
+/**
+*  @brief  Walk through the cores and ensure special wakeup is disabled
+*          from all srcs.
+*
+*
+*  @return     errlHndl_t
+*/
+errlHndl_t sendContinueMpiplChipOp()
+{
+    errlHndl_t l_err = nullptr;
+
+    TARGETING::TargetHandleList l_procChips;
+    TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC, true);
+    TARGETING::PROC_SBE_MASTER_CHIP_ATTR l_is_master_chip = 1;
+
+    for(const auto & l_chip : l_procChips)
+    {
+        l_is_master_chip = l_chip->getAttr<TARGETING::ATTR_PROC_SBE_MASTER_CHIP>();
+        if(!l_is_master_chip)
+        {
+            l_err = SBEIO::sendContinueMpiplRequest(l_chip);
+
+            if(l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Failed sending continueMPIPL request on this proc = %x",
+                          l_chip->getAttr<TARGETING::ATTR_HUID>());
+                break;
+            }
+        }
+    }
+
+return l_err;
 }
 
 /**
@@ -553,6 +592,11 @@ void* host_discover_targets( void *io_pArgs )
         {
             //Need to power down the slave quads
             l_err = powerDownSlaveQuads();
+
+            if(!l_err)
+            {
+                l_err = sendContinueMpiplChipOp();
+            }
         }
 
     }
