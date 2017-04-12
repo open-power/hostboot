@@ -81,6 +81,7 @@ enum rank_functions
     GET_RANK_FIELD = 4,
     GET_PAIR_VALID = 5,
     SET_RANK_FIELD = 6,
+    RD_CTR_WORKAROUND_READ_DATA = 7,
 };
 ///
 /// @class rankPairTraits
