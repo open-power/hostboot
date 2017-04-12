@@ -337,6 +337,29 @@ fapi_try_exit:
 }
 
 ///
+/// @brief ATTR_CHIP_EC_FEATURE_MSS_RUN_RD_CTR_WOKRAROUND getter
+/// @tparam T the fapi2 target type of the target
+/// @param[in] const ref to the target
+/// @return bool true iff feature is enabled
+///
+template< fapi2::TargetType T >
+inline bool chip_ec_feature_mss_run_rd_ctr_workaround(const fapi2::Target<T>& i_target)
+{
+    const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
+    uint8_t l_value = 0;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_MSS_RUN_RD_CTR_WOKRAROUND, l_chip, l_value) );
+
+    return l_value != 0;
+
+fapi_try_exit:
+    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_RUN_RD_CTR_WOKRAROUND: 0x%lx (target: %s)",
+             uint64_t(fapi2::current_err), mss::c_str(i_target));
+    fapi2::Assert(false);
+    return false;
+}
+
+///
 /// @brief ATTR_SKIP_RD_VREF_VREFSENSE_OVERRIDE getter
 /// @tparam T the fapi2 target type of the target
 /// @param[in] const ref to the target
