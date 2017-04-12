@@ -63,6 +63,18 @@ namespace SBEIO
     errlHndl_t sendSystemConfig(const uint64_t i_systemConfig,
                                 TARGETING::Target * i_procChip);
 
+
+    /**
+    * @brief Send the signal to the sbe that we are performing a MPIPL
+    *
+    * @param[in] i_procChip The proc you would like to request continueMPIPL to
+    *                       NOTE: HB should only be sending this to slave procs
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t sendContinueMpiplRequest(TARGETING::Target * i_procChip);
+
     /**
      * @brief Sends a PSU chipOp to quiesce the SBE
      *
