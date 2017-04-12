@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -23,11 +23,10 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!--
-NOTE: This layout describes the standard PNOR layout for all P9 FSP systems
-Layout Description
+Layout Description - Used when building an FSP driver
 <metadata> Element -> Contains high-level information about the PNOR layout.
-    <imageSize>    -> Size of PNOR image in bytes.
     <chipSize>     -> Size of the chip that the pnor image will reside on
+    <imageSize>    -> Size of PNOR image in bytes.
     <blockSize>    -> size of erase blocks in bytes.
     <tocSize>      -> size of each partition table
     <!- TODO:RTC:123734 - remove side offsets once hwsv implements new layout ->
@@ -67,7 +66,7 @@ Layout Description
 <pnor>
     <metadata>
         <imageSize>0x4000000</imageSize>
-        <chipSize>0x8000000</chipSize>
+        <chipSize>0x4000000</chipSize>
         <blockSize>0x1000</blockSize>
         <tocSize>0x8000</tocSize>
         <!--TODO: RTC 123734 - remove side offsets once hwsv implements new
@@ -141,10 +140,10 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Extended image (22MB w/o ECC)</description>
+        <description>Hostboot Extended image (11MB w/o ECC)</description>
         <eyeCatch>HBI</eyeCatch>
         <physicalOffset>0x301000</physicalOffset>
-        <physicalRegionSize>0x18C0000</physicalRegionSize>
+        <physicalRegionSize>0xC60000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
@@ -163,7 +162,7 @@ Layout Description
     <section>
         <description>SBE-IPL (Staging Area) (288K)</description>
         <eyeCatch>SBE</eyeCatch>
-        <physicalOffset>0x1BC1000</physicalOffset>
+        <physicalOffset>0xF61000</physicalOffset>
         <physicalRegionSize>0x48000</physicalRegionSize>
         <sha512perEC/>
         <side>sideless</side>
@@ -172,24 +171,63 @@ Layout Description
     <section>
         <description>HCODE Ref Image (1.125MB)</description>
         <eyeCatch>HCODE</eyeCatch>
-        <physicalOffset>0x1C09000</physicalOffset>
+        <physicalOffset>0xFA9000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Bootloader (22.5K)</description>
+        <description>Hostboot Runtime Services for Sapphire (4.5MB)</description>
+        <eyeCatch>HBRT</eyeCatch>
+        <physicalOffset>0x10C9000</physicalOffset>
+        <physicalRegionSize>0x480000</physicalRegionSize>
+        <sha512Version/>
+        <side>sideless</side>
+        <ecc/>
+    </section>
+    <section>
+        <description>Payload (21.375MB)</description>
+        <eyeCatch>PAYLOAD</eyeCatch>
+        <physicalOffset>0x1549000</physicalOffset>
+        <physicalRegionSize>0x1560000</physicalRegionSize>
+        <side>sideless</side>
+        <ecc/>
+    </section>
+    <section>
+        <description>Special PNOR Test Space (36K)</description>
+        <eyeCatch>TEST</eyeCatch>
+        <physicalOffset>0x2AA9000</physicalOffset>
+        <physicalRegionSize>0x9000</physicalRegionSize>
+        <testonly/>
+        <side>sideless</side>
+        <ecc/>
+    </section>
+    <section>
+        <description>Special PNOR Test Space (36K)</description>
+        <eyeCatch>TESTRO</eyeCatch>
+        <physicalOffset>0x2AB2000</physicalOffset>
+        <physicalRegionSize>0x9000</physicalRegionSize>
+        <side>sideless</side>
+        <testonly/>
+        <preserved/>
+        <readOnly/>
+        <ecc/>
+    </section>
+    <section>
+        <description>Hostboot Bootloader (28K)</description>
         <eyeCatch>HBBL</eyeCatch>
-        <physicalOffset>0x1D29000</physicalOffset>
-        <physicalRegionSize>0x6000</physicalRegionSize>
+        <physicalOffset>0x2ABB000</physicalOffset>
+        <!-- Physical Size includes Header rounded to ECC valid size -->
+        <!-- Max size of actual HBBL content is 20K and 22.5K with ECC -->
+        <physicalRegionSize>0x7000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
     </section>
     <section>
         <description>Global Data (36K)</description>
         <eyeCatch>GLOBAL</eyeCatch>
-        <physicalOffset>0x1D2F000</physicalOffset>
+        <physicalOffset>0x2AC2000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -197,7 +235,7 @@ Layout Description
     <section>
         <description>Ref Image Ring Overrides (20K)</description>
         <eyeCatch>RINGOVD</eyeCatch>
-        <physicalOffset>0x1D38000</physicalOffset>
+        <physicalOffset>0x2ACB000</physicalOffset>
         <physicalRegionSize>0x5000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -205,8 +243,16 @@ Layout Description
     <section>
         <description>SecureBoot Key Transition Partition (16K)</description>
         <eyeCatch>SBKT</eyeCatch>
-        <physicalOffset>0x1D3D000</physicalOffset>
+        <physicalOffset>0x2AD0000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
+        <side>sideless</side>
+        <ecc/>
+    </section>
+  <section>
+        <description>OCC Lid (1.125M)</description>
+        <eyeCatch>OCC</eyeCatch>
+        <physicalOffset>0x2AD4000</physicalOffset>
+        <physicalRegionSize>0x120000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
     </section>
@@ -215,7 +261,7 @@ Layout Description
         <!-- We need 266KB per module sort, going to support
              10 sorts by default, plus ECC  -->
         <eyeCatch>WOFDATA</eyeCatch>
-        <physicalOffset>0x1D41000</physicalOffset>
+        <physicalOffset>0x2BF4000</physicalOffset>
         <physicalRegionSize>0x300000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>

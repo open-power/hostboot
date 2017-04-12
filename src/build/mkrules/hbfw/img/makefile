@@ -109,20 +109,26 @@ IMPRINT_HW_KEY_HASH = ${imprintHwKeyHash:P}
 #       the same --systemBinFiles parameter for genPnorImages
 GEN_PNOR_IMAGE_SCRIPT = ${genPnorImages.pl:P}
 
+# Default to using FSP layout for common file purposes and use existing hb
+# techniques to enable default layout when appropriate.
+PNOR_LAYOUT = ${pnorLayoutFSP.xml:P}
+.if(${DEFAULT_PNOR} == 1)
+    PNOR_LAYOUT = ${defaultPnorLayout.xml:P}
+.endif
+
 # Decide which PNOR to build
 .if(${FAKEPNOR} == "")
-    DEFAULT_PNOR_LAYOUT = ${defaultPnorLayout.xml:P}
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
     GEN_DEFAULT_BIN_FILES = HBBL=${HBBL_IMG},HBB=${HBB_IMG},HBI=${HBI_IMG},HBRT=${HBRT_IMG},TEST=EMPTY,TESTRO=EMPTY,HBEL=EMPTY,GUARD=EMPTY,GLOBAL=EMPTY,PAYLOAD=EMPTY,CVPD=EMPTY,MVPD=EMPTY,DJVPD=EMPTY,RINGOVD=EMPTY,SBKT=EMPTY,WOFDATA=EMPTY
-    DEFAULT_PARAMS = --build-all ${TARGET_TEST:b--test} \
+    DEFAULT_PARAMS = --build-all ${TARGET_TEST:b--test} ${HB_STANDALONE:b--hb-standalone} \
                      ${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
-                     --pnorLayout ${DEFAULT_PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS} \
+                     --pnorLayout ${PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS} \
                      --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
 .else
-    DEFAULT_PNOR_LAYOUT = ${pnorLayoutFake.xml:P}
+    PNOR_LAYOUT = ${pnorLayoutFake.xml:P}
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
     GEN_DEFAULT_BIN_FILES = HBI=${HBI_IMG},HBEL=EMPTY,MVPD=${${VPO_FAKE_MVPD}:P},DJVPD=${${VPO_FAKE_DJVPD}:P}
-    DEFAULT_PARAMS = --systemBinFiles ${GEN_DEFAULT_BIN_FILES} --pnorLayout ${DEFAULT_PNOR_LAYOUT}
+    DEFAULT_PARAMS = --systemBinFiles ${GEN_DEFAULT_BIN_FILES} --pnorLayout ${PNOR_LAYOUT}
 .endif
 
 cp_hbfiles: .SPECTARG
@@ -242,14 +248,14 @@ SBEC_FINAL_IMG = SBEC.bin
     # Paramemters passed into GEN_PNOR_IMAGE_SCRIPT.
     GEN_NIMBUS_BIN_FILES = ${NIMBUS}:SBE=${${NIMBUS_SBE_IMG}:P},HCODE=${${NIMBUS_HCODE_IMG}:P},OCC=${${NIMBUS_OCC_IMG}:P},HBD=${${NIMBUS_HBD_IMG}:P}
     #@TODO RTC:163810 - Put SBEC back "--systemBinFile  SBEC=${${SBEC_IMG}:P}"
-    SYSTEM_SPECIFIC_PARAMS = ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot} \
-                             --pnorLayout ${DEFAULT_PNOR_LAYOUT} ${CORRUPT_PARAMS} \
+    SYSTEM_SPECIFIC_PARAMS = --install-all ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
+                             --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} ${HB_STANDALONE:b--hb-standalone} \
                              --systemBinFiles ${GEN_NIMBUS_BIN_FILES} --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
 .else
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
     GEN_NIMBUS_BIN_FILES = ${NIMBUS}:HCODE=${${NIMBUS_HCODE_IMG}:P},HBD=${${NIMBUS_VPO_HBD_IMG}:P}
     #@TODO RTC:163810 - Put SBEC back "--systemBinFile  SBEC=${${SBEC_IMG}:P}"
-    SYSTEM_SPECIFIC_PARAMS = --pnorLayout ${DEFAULT_PNOR_LAYOUT} \
+    SYSTEM_SPECIFIC_PARAMS = --pnorLayout ${PNOR_LAYOUT} \
                              --systemBinFiles ${GEN_NIMBUS_BIN_FILES}
 .endif
 
@@ -266,7 +272,7 @@ HOSTBOOT_DEFAULT_SECTIONS = HBBL=${HBBL_FINAL_IMG},HBB=${HBB_FINAL_IMG},HBI=${HB
 #@TODO RTC:163810 - Put SBEC back "SBEC=${SBEC_FINAL_IMG},"
 NIMBUS_SECT = HBD=${NIMBUS_HBD_FINAL_IMG},SBE=${NIMBUS_SBE_FINAL_IMG},HCODE=${NIMBUS_HCODE_FINAL_IMG},OCC=${NIMBUS_OCC_FINAL_IMG}
 PNOR_IMG_INFO = \
-   nimbus.pnor:${DEFAULT_PNOR_LAYOUT}:${NIMBUS_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
+   nimbus.pnor:${PNOR_LAYOUT}:${NIMBUS_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
    ${FIPS_PNOR_INFO}
 
 # To build fake PNOR, set FAKEPNOR to filename of file to build,
@@ -279,13 +285,13 @@ PNOR_IMG_INFO = \
     HOSTBOOT_DEFAULT_SECTIONS = HBI=${HBI_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},MVPD=${MVPD_FINAL_IMG},DJVPD=${DJVPD_FINAL_IMG},CVPD=${VPO_FAKE_DVPD}
     NIMBUS_SECT = HBD=${NIMBUS_HBD_FINAL_IMG},HCODE=${NIMBUS_HCODE_FINAL_IMG}
     PNOR_IMG_INFO = \
-        ${FAKEPNOR}:${DEFAULT_PNOR_LAYOUT}:${NIMBUS_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
+        ${FAKEPNOR}:${PNOR_LAYOUT}:${NIMBUS_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
         ${FIPS_PNOR_INFO}
 .endif
 
-# Added a different dependency chain for hostboot standalone so we can compile
+# Added a different dependency chain for hostboot builds so we can compile
 # faster and call one rule in dist.targets.mk 'update_images_for_sandbox'
-.if( ${HB_STANDALONE} == 1)
+.if( ${HB_STANDALONE} == 1 )
 __IMAGE_BUILD/% : .SPECTARG .PMAKE gen_default_images gen_system_specific_images
 # In FSP this is run at install_all phase, so it's assumed all build_all rules
 # have completed. If build_all rule dependencies are added they will run again.
