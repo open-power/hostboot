@@ -38,19 +38,9 @@
 
 #include <fapi2.H>
 #include <vector>
-
-///
-/// @brief throttle_type used toset bulk_pwr_throttls to run POWER or THERMAL throttling
-/// @note OCC will be using the POWER option
-///
-enum throttle_type : uint8_t
-{
-    POWER = 0,
-    THERMAL = 1,
-};
-
+#include <lib/shared/mss_const.H>
 typedef fapi2::ReturnCode (*p9_mss_bulk_pwr_throttles_FP_t) (const
-        std::vector< fapi2::Target< fapi2::TARGET_TYPE_MCS>>&, const throttle_type i_throttle_type);
+        std::vector< fapi2::Target< fapi2::TARGET_TYPE_MCS>>&, const mss::throttle_type i_throttle_type);
 
 extern "C"
 {
@@ -67,7 +57,7 @@ extern "C"
     /// @note equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
     ///
     fapi2::ReturnCode p9_mss_bulk_pwr_throttles (const std::vector < fapi2::Target< fapi2::TARGET_TYPE_MCS>>& i_targets,
-            const throttle_type i_throttle_type );
+            const mss::throttle_type i_throttle_type );
 }
 
 #endif
