@@ -416,6 +416,315 @@ fapi2::ReturnCode modify_calibration_results( const fapi2::Target<fapi2::TARGET_
     return fix_blue_waterfall_gate( i_target );
 }
 
+namespace rd_dq
+{
+
+///
+/// @brief Reads out the read dq registers and stores the values in a vector
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rank_pair the rank pair to operate on
+/// @param[out] o_reg_data register conglomerate
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode get_delay_data(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                 const uint64_t i_rank_pair,
+                                 std::vector<delay_data>& o_reg_data)
+{
+    static const std::vector<std::vector<uint64_t>> REGISTER =
+    {
+        // RANK_PAIR0
+        {
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR0_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR0_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR0_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR0_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR0_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR0_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR0_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR0_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR0_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR0_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR0_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR0_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR0_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR0_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR0_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR0_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR0_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR0_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR0_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR0_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR0_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR0_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR0_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR0_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR0_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR0_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR0_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR0_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR0_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR0_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR0_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR0_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR0_P0_4,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR0_P0_4,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR0_P0_4,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR0_P0_4,
+        },
+        // RANK_PAIR1
+        {
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR1_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR1_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR1_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR1_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR1_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR1_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR1_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR1_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR1_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR1_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR1_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR1_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR1_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR1_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR1_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR1_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR1_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR1_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR1_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR1_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR1_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR1_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR1_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR1_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR1_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR1_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR1_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR1_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR1_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR1_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR1_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR1_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR1_P0_4,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR1_P0_4,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR1_P0_4,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR1_P0_4,
+        },
+        // RANK_PAIR2
+        {
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR2_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR2_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR2_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR2_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR2_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR2_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR2_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR2_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR2_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR2_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR2_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR2_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR2_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR2_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR2_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR2_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR2_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR2_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR2_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR2_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR2_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR2_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR2_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR2_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR2_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR2_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR2_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR2_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR2_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR2_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR2_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR2_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR2_P0_4,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR2_P0_4,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR2_P0_4,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR2_P0_4,
+        },
+        // RANK_PAIR3
+        {
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR3_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR3_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR3_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR3_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR3_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR3_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR3_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR3_P0_0,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR3_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR3_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR3_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR3_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR3_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR3_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR3_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR3_P0_1,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR3_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR3_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR3_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR3_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR3_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR3_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR3_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR3_P0_2,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR3_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR3_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR3_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR3_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY4_RANK_PAIR3_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY5_RANK_PAIR3_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY6_RANK_PAIR3_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY7_RANK_PAIR3_P0_3,
+            MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR3_P0_4,
+            MCA_DDRPHY_DP16_READ_DELAY1_RANK_PAIR3_P0_4,
+            MCA_DDRPHY_DP16_READ_DELAY2_RANK_PAIR3_P0_4,
+            MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR3_P0_4,
+        },
+    };
+
+    // Bombs out if the rank pair is out of range
+
+    FAPI_ASSERT( i_rank_pair < MAX_RANK_PAIRS,
+                 fapi2::MSS_INVALID_RANK_PAIR()
+                 .set_RANK_PAIR(i_rank_pair)
+                 .set_MCA_TARGET(i_target)
+                 .set_FUNCTION(RD_CTR_WORKAROUND_READ_DATA),
+                 "%s Invalid rank pair (%d) in get_ranks_in_pair",
+                 mss::c_str(i_target),
+                 i_rank_pair);
+
+    // loops and gets the registers
+    o_reg_data.clear();
+
+    for(const auto l_reg : REGISTER[i_rank_pair])
+    {
+        constexpr uint64_t EVEN_START = MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR0_P0_0_01_RD;
+        constexpr uint64_t ODD_START = MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR0_P0_0_01_RD_DELAY1;
+        fapi2::buffer<uint64_t> l_buff;
+        uint64_t l_data = 0;
+
+        // Reads the register information
+        FAPI_TRY(mss::getScom(i_target, l_reg, l_buff), "%s failed getscom to register 0x%016lx", mss::c_str(i_target), l_reg);
+
+        // Gets out the specific information and stores it
+        // Even delay
+        l_buff.extractToRight<EVEN_START, delay_data::LEN>(l_data);
+        o_reg_data.push_back({l_reg, EVEN_START, l_data});
+
+        // Odd delay
+        l_buff.extractToRight<ODD_START, delay_data::LEN>(l_data);
+        o_reg_data.push_back({l_reg, ODD_START, l_data});
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+///
+/// @brief Finds the median and sorts the vector
+/// @param[in,out] io_reg_data register data
+/// @param[out] o_median the median value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode find_median_and_sort(std::vector<delay_data>& io_reg_data, uint64_t& o_median)
+{
+
+    // The fapi_try is in an if statement, this ensures we have a good value
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Bomb out if the vector is empty to avoid accessing a non-existant element
+    FAPI_ASSERT(!io_reg_data.empty(),
+                fapi2::MSS_RD_CTR_WORKAROUND_EMPTY_VECTOR(),
+                "Empty vector passed in to find_median_and_sort"
+               );
+
+    // Sorts first
+    std::sort(io_reg_data.begin(), io_reg_data.end());
+
+    // TODO:RTC172759 Add generic median function - that can replace the below code
+    // Finding the median is simply a matter of finding the midway point and getting the data there
+    {
+        const auto l_median_it = io_reg_data.begin() + io_reg_data.size() / 2;
+        o_median = l_median_it->iv_data;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Overrides any bad (out of range) read delay values with the median value
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rank_pair the rank pair to operate on
+/// @param[in] i_percent the percentage below the median outside of which to override values to be the median - OPTIONAL - defaults to 66
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode fix_delay_values(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                   const uint64_t i_rank_pair,
+                                   const uint64_t i_percent)
+{
+    if(!mss::chip_ec_feature_mss_run_rd_ctr_workaround(i_target))
+    {
+        FAPI_INF("%s skipping the rd centering workaround!", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    std::vector<delay_data> l_reg_data;
+    uint64_t l_median = 0;
+
+    FAPI_TRY(get_delay_data(i_target, i_rank_pair, l_reg_data), "%s i_rank_pair %d failed to get the delay data",
+             mss::c_str(i_target), i_rank_pair);
+
+    FAPI_TRY(find_median_and_sort(l_reg_data, l_median), "%s i_rank_pair %d failed to find median value and sort",
+             mss::c_str(i_target), i_rank_pair);
+
+    FAPI_INF("%s i_rank_pair %d found a median of 0x%02x any value below %d %% of the median will be modified",
+             mss::c_str(i_target), i_rank_pair, l_median, i_percent);
+
+    // Overrides the bad delay values - the ones that are i_percent below the median
+    {
+        // Finds the iterator corresponding to the first location where we are within i_percent of the median
+        const auto l_last = std::find_if(l_reg_data.begin(), l_reg_data.end(), [ i_percent,
+                                         l_median]( const delay_data & i_rhs) -> bool
+        {
+            // Does this funky compare to avoid underflow
+            const auto l_comp_value = (i_percent * l_median) / 100;
+            return l_comp_value < i_rhs.iv_data;
+        });
+
+        // Loops and does the overrides
+        // Note: does a simple RMW, we can speed this up by doing a more complex algorithm to sort registers together.
+        // Keeping it simple for now
+        for( auto l_it = l_reg_data.begin(); l_it < l_last; ++l_it)
+        {
+            fapi2::buffer<uint64_t> l_buff;
+            FAPI_INF("%s i_rank_pair %d modifying delay position %d on register 0x%016lx from 0x%02x to be 0x%02x",
+                     mss::c_str(i_target), i_rank_pair, l_it->iv_bit, l_it->iv_register, l_it->iv_data, l_median);
+
+            // Read
+            FAPI_TRY(mss::getScom(i_target, l_it->iv_register, l_buff));
+
+            // Modify
+            FAPI_TRY(l_buff.insertFromRight(l_median, l_it->iv_bit, delay_data::LEN));
+
+            // Write
+            FAPI_TRY(mss::putScom(i_target, l_it->iv_register, l_buff));
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // close namespace rd_dq
+
 namespace wr_vref
 {
 

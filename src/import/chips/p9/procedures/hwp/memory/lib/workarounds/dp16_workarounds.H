@@ -279,6 +279,82 @@ fapi2::ReturnCode rd_vref_vref_sense_setup( const fapi2::Target<fapi2::TARGET_TY
 fapi2::ReturnCode post_training_workarounds( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const fapi2::buffer<uint16_t>& i_cal_steps_enabled );
 
+namespace rd_dq
+{
+
+///
+/// @brief Declares a struct to simplify the rd_dq workaround
+///
+struct delay_data
+{
+    // Deletes base constructor
+    delay_data() = delete;
+
+    ///
+    /// @brief Constructor
+    /// @param[in] i_register - register info
+    /// @param[in] i_bit - bit position info
+    /// @param[in] i_data - data stored in the register
+    ///
+    delay_data(const uint64_t i_register, const uint64_t i_bit, const uint64_t& i_data) :
+        iv_register(i_register),
+        iv_bit(i_bit),
+        iv_data(i_data)
+    {}
+
+    ///
+    /// @brief Default destructor
+    ///
+    ~delay_data() = default;
+
+    ///
+    /// @brief Comparison operator
+    /// @param[in] i_rhs - delay_info to compare against
+    /// @return bool - true if the right hand side is greater
+    bool operator<(const delay_data& i_rhs) const
+    {
+        // For this class, we only care about the delay value
+        return iv_data < i_rhs.iv_data;
+    }
+
+    static constexpr uint64_t LEN = MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR0_P0_0_01_RD_LEN;
+    uint64_t iv_register;
+    uint64_t iv_bit;
+    uint64_t iv_data;
+};
+
+///
+/// @brief Reads out the read dq registers and stores the values in a vector
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rank_pair the rank pair to operate on
+/// @param[out] o_reg_data register conglomerate
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode get_delay_data(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                 const uint64_t i_rank_pair,
+                                 std::vector<delay_data>& o_reg_data);
+
+///
+/// @brief Finds the median and sorts the vector
+/// @param[in,out] io_reg_data register data
+/// @param[out] o_median the median value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode find_median_and_sort(std::vector<delay_data>& io_reg_data, uint64_t& o_median);
+
+///
+/// @brief Overrides any bad (out of range) read delay values with the median value
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rank_pair the rank pair to operate on
+/// @param[in] i_percent the percentage below the median outside of which to override values to be the median - OPTIONAL - defaults to 66
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode fix_delay_values(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                   const uint64_t i_rank_pair,
+                                   const uint64_t i_percent = 66);
+
+} // close namespace rd_dq
+
 namespace wr_vref
 {
 

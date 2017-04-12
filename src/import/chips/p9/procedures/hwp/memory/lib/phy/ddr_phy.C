@@ -423,7 +423,7 @@ fapi2::ReturnCode rank_pair_primary_to_dimm( const fapi2::Target<TARGET_TYPE_MCA
     // Sanity check the rank pair
     FAPI_INF("%s rank pair: %d", mss::c_str(i_target), i_rp);
 
-    FAPI_ASSERT( i_rp < MAX_RANK_PER_DIMM,
+    FAPI_ASSERT( i_rp < MAX_RANK_PAIRS,
                  fapi2::MSS_INVALID_RANK_PAIR()
                  .set_RANK_PAIR(i_rp)
                  .set_MCA_TARGET(i_target)
@@ -1067,12 +1067,42 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
         }
     }
 
-    // Run cal steps after WR_LEVEL if any are selected
-    if (i_cal_steps_enabled.getBit<mss::cal_steps::DQS_ALIGN, mss::cal_steps::STEPS_AFTER_WR_LEVEL>())
+    // Run cal steps between WR_LEVEL and RD_CTR if any are selected - note DQS_ALIGN takes place after WR_LEVEL
+    if (i_cal_steps_enabled.getBit
+        < mss::cal_steps::DQS_ALIGN, mss::cal_steps::STEPS_FROM_DQS_ALIGN_TO_AFTER_RD_CTR_LEN > ())
     {
-        FAPI_DBG("%s Running remaining cal steps on RP%d", mss::c_str(i_target), i_rp);
+        // Sets up the cal steps in the buffer
         fapi2::buffer<uint16_t> l_steps_to_execute = i_cal_steps_enabled;
-        l_steps_to_execute.clearBit<mss::cal_steps::EXT_ZQCAL>().clearBit<mss::cal_steps::WR_LEVEL>();
+        l_steps_to_execute.clearBit<mss::cal_steps::EXT_ZQCAL>()
+        .clearBit<mss::cal_steps::WR_LEVEL>()
+        .clearBit<mss::cal_steps::WRITE_CTR, mss::cal_steps::STEPS_FROM_WR_CTR_TO_COARSE_RD_LEN>();
+
+        FAPI_INF("%s Running cal steps through read centering on RP%d 0x%04x", mss::c_str(i_target), i_rp,
+                 uint16_t(l_steps_to_execute));
+
+        // Undertake the calibration steps
+        FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
+
+        // Now run the read centering workaround
+        if(l_steps_to_execute.getBit<READ_CTR>())
+        {
+            FAPI_TRY(mss::workarounds::dp16::rd_dq::fix_delay_values(i_target, i_rp),
+                     "%s Failed to run read centering workaround on rp %d", mss::c_str(i_target), i_rp);
+        }
+    }
+
+    // Run cal steps after RD_CTR if any are selected - note: WRITE_CTR takes place after RD_CTR
+    if (i_cal_steps_enabled.getBit<mss::cal_steps::WRITE_CTR, mss::cal_steps::STEPS_FROM_WR_CTR_TO_COARSE_RD_LEN>())
+    {
+        fapi2::buffer<uint16_t> l_steps_to_execute = i_cal_steps_enabled;
+
+        // Clear until we hit write centering
+        l_steps_to_execute.clearBit<mss::cal_steps::EXT_ZQCAL, mss::cal_steps::WRITE_CTR>();
+
+        FAPI_INF("%s Running remaining cal steps after read centering on RP%d 0x%04x", mss::c_str(i_target), i_rp,
+                 uint16_t(l_steps_to_execute));
+
+        // Undertake the calibration steps
         FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
     }
 
