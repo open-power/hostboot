@@ -41,6 +41,7 @@
 #include <lib/power_thermal/decoder.H>
 #include <lib/dimm/kind.H>
 #include <lib/utils/count_dimm.H>
+#include <lib/shared/mss_const.H>
 #include <mss.H>
 extern "C"
 {
@@ -156,13 +157,13 @@ extern "C"
         FAPI_INF("Starting bulk_pwr");
         //get the thermal limits, done per dimm and set to worst case for the slot and port throttles
         //Bulk_pwr sets the general, all purpose ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, _PER_PORT, and MAXPOWER ATTRs
-        FAPI_EXEC_HWP(l_rc, p9_mss_bulk_pwr_throttles, i_targets, POWER);
+        FAPI_EXEC_HWP(l_rc, p9_mss_bulk_pwr_throttles, i_targets, mss::throttle_type::POWER);
         FAPI_TRY(l_rc, "Failed running p9_mss_bulk_pwr_throttles");
 
         //Set runtime throttles to worst case between ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT
         //and ATTR_MSS_MEM_RUNTIME_THROTTLED_N_COMMANDS_PER_SLOT and the _PORT equivalents also
         FAPI_INF("Starting update");
-        FAPI_TRY( mss::power_thermal::update_runtime_throttles (i_targets));
+        FAPI_TRY( mss::power_thermal::update_runtime_throttles (i_targets) );
         FAPI_INF("finished update");
 
         //Set VDDR+VPP power curve values
@@ -192,10 +193,10 @@ extern "C"
         }
 
         //Run thermal throttles with the VDDR+VPP power curves
-        FAPI_EXEC_HWP(l_rc, p9_mss_bulk_pwr_throttles, i_targets, THERMAL);
+        FAPI_EXEC_HWP(l_rc, p9_mss_bulk_pwr_throttles, i_targets, mss::throttle_type::THERMAL);
         FAPI_TRY(l_rc, "Failed running p9_mss_bulk_pwr_throttles with THERMAL throttling in p9_mss_eff_config_thermal");
         //Update everything to worst case
-        FAPI_TRY( mss::power_thermal::update_runtime_throttles (i_targets));
+        FAPI_TRY( mss::power_thermal::update_runtime_throttles (i_targets) );
 
         //Done
         FAPI_INF( "End effective config thermal");
