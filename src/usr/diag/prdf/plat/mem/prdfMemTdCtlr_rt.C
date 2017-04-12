@@ -197,6 +197,78 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
+template<TARGETING::TYPE T>
+uint32_t __handleRceEte( ExtensibleChip * i_chip, bool & o_errorsFound,
+                         STEP_CODE_DATA_STRUCT & io_sc );
+
+template<>
+uint32_t __handleRceEte<TYPE_MCA>( ExtensibleChip * i_chip,
+                                   bool & o_errorsFound,
+                                   STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[__handleRceEte] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // Should only get this attention in MNFG mode.
+    PRDF_ASSERT( mfgMode() );
+
+    do
+    {
+        // The RCE ETE attention could be from IUE, IMPE, or IRCD. Need to check
+        // MCAECCFIR[37] to determine if there was at least one IUE.
+        SCAN_COMM_REGISTER_CLASS * fir = i_chip->getRegister( "MCAECCFIR" );
+        o_rc = fir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MCAECCFIR: i_chip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+        if ( !fir->IsBitSet(37) ) break; // nothing else to do
+
+        // Handle the IUE.
+        o_errorsFound = true;
+        io_sc.service_data->AddSignatureList( i_chip->getTrgt(),
+                                              PRDFSIG_MaintIUE );
+        o_rc = MemEcc::analyzeMaintIue<TYPE_MCA,McaDataBundle *>(i_chip, io_sc);
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "analyzeMaintIue(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+/* TODO RTC 157888
+template<>
+uint32_t __handleRceEte<TYPE_MBA>( ExtensibleChip * i_chip,
+                                   bool & o_errorsFound,
+                                   STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[__handleRceEte] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+*/
+
+//------------------------------------------------------------------------------
+
 template <TARGETING::TYPE T, typename D>
 uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
                      const MemAddr & i_addr, bool & o_errorsFound,
@@ -334,9 +406,12 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 
         if ( 0 != (eccAttns & MAINT_RCE_ETE) )
         {
-            o_errorsFound = true;
-
-            // TODO: RTC 171867
+            o_rc = __handleRceEte<T>( i_chip, o_errorsFound, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "__handleRceEte<T>(0x%08x) failed", huid );
+                break;
+            }
         }
 
         if ( 0 != (eccAttns & MAINT_UE) )
