@@ -162,23 +162,42 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
         }
 
         l_coreThreadCount = l_pTopLevel->getAttr<ATTR_THREAD_COUNT>();
+        uint64_t en_thread_mask =
+          l_pTopLevel->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
+        //Check the enabled threads to see if user overrode to SMT1 or SMT2
+        //Note this only handles specific SMT1/2 -- no other permutations
+        size_t l_enabledThreads = l_coreThreadCount;
+        if (en_thread_mask == 0x8000000000000000)
+        {
+            l_enabledThreads = 1;
+        }
+        else if (en_thread_mask == 0xC000000000000000)
+        {
+             l_enabledThreads = 2;
+        }
         uint32_t l_procStatus;
-        HDAT_DBG("Core Thread Count[%d]",  l_coreThreadCount);
+        HDAT_DBG("Core Thread Count[%d], Enabled[%d]",
+                 l_coreThreadCount, l_enabledThreads);
 
-        if ( l_coreThreadCount == HDAT_MAX_EIGHT_THREADS_SUPPORTED )
+        if ( l_enabledThreads == HDAT_MAX_EIGHT_THREADS_SUPPORTED )
         {
             l_procStatus =
                 HDAT_PROC_NOT_INSTALLED | HDAT_PRIM_THREAD | HDAT_EIGHT_THREAD;
         }
-        else if ( l_coreThreadCount == HDAT_MAX_FOUR_THREADS_SUPPORTED )
+        else if ( l_enabledThreads == HDAT_MAX_FOUR_THREADS_SUPPORTED )
         {
             l_procStatus =
                 HDAT_PROC_NOT_INSTALLED | HDAT_PRIM_THREAD | HDAT_FOUR_THREAD;
         }
-        else
+        else if ( l_enabledThreads == HDAT_MAX_TWO_THREADS_SUPPORTED )
         {
             l_procStatus =
                 HDAT_PROC_NOT_INSTALLED | HDAT_PRIM_THREAD | HDAT_TWO_THREAD;
+        }
+        else // Single threaded
+        {
+            l_procStatus =
+                HDAT_PROC_NOT_INSTALLED | HDAT_PRIM_THREAD;
         }
         //for each procs in the system
         TARGETING::PredicateCTM l_procFilter(CLASS_CHIP, TYPE_PROC);
@@ -232,7 +251,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                             l_pTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
                 for ( uint32_t l_threadIndex=0;
-                        l_threadIndex < l_coreThreadCount; ++l_threadIndex)
+                        l_threadIndex < l_enabledThreads; ++l_threadIndex)
                 {
                     l_errl = hdatSetCoreInfo(index,
                                             l_pTarget,l_pProcTarget);
@@ -325,7 +344,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                     this->iv_spPcia[index].hdatThreadData.pciaThreadOffsetToData
                         = offsetof(hdatPciaThreadUniqueData_t, pciaThreadData);
                     this->iv_spPcia[index].hdatThreadData.pciaThreadNumEntries
-                        = l_coreThreadCount;
+                        = l_enabledThreads;
                     this->iv_spPcia[index].hdatThreadData.
                         pciaThreadSizeAllocated = sizeof(hdatPciaThreadArray_t);
                     this->iv_spPcia[index].hdatThreadData.pciaThreadSizeActual =

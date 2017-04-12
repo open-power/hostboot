@@ -86,11 +86,12 @@ namespace SPLESS
             uint32_t goToRuntime         :1;   //1
             uint32_t isMpipl             :1;   //2
             uint32_t fspAttached         :1;   //3
-            uint32_t reserved1           :1;   //4
+            uint32_t reserved1           :1;   //4 -- do not repurpose
             uint32_t sbeInternalFFDC     :1;   //5
             uint32_t overrideSecurity    :1;   //6
             uint32_t allowAttrOverrides  :1;   //7
-            uint32_t reserved2           :24;  //8:31
+            uint32_t smtMode             :2;   //8:9
+            uint32_t reserved2           :22;  //10:31 -- Available
         } PACKED;
         // NOTE: Used for debug tool communication during Hostboot IPL
     };

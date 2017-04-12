@@ -54,6 +54,7 @@
 #include <arch/pvrformat.H>
 #include <config.h>
 #include <p9_misc_scom_addresses.H>
+#include <util/utilmbox_scratch.H>
 
 #define INTR_TRACE_NAME INTR_COMP_NAME
 
@@ -3579,10 +3580,27 @@ uint64_t INTR::get_enabled_threads( void )
     uint64_t en_threads = sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
     if( en_threads == 0 )
     {
-        //TODO RTC 151022
-        //Read <SBE memory area> for enabled threads value
-        //  and set attribute appropriately
-        en_threads = 0xF000000000000000; //Enable all the threads
+        //Read mbox scratch regs for enabled threads value
+        //and set attribute appropriately
+        INITSERVICE::SPLESS::MboxScratch3_t l_scratch3;
+        TARGETING::ATTR_MASTER_MBOX_SCRATCH_type l_scratchRegs;
+        assert(sys->tryGetAttr
+              <TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
+              "INTR::get_enabled_threads() failed to get MASTER_MBOX_SCRATCH");
+        l_scratch3.data32 = l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_3];
+
+        if(l_scratch3.smtMode == 0x1)
+        {
+            en_threads = 0x8000000000000000; //SMT1 == thread 0
+        }
+        else if (l_scratch3.smtMode == 0x2)
+        {
+            en_threads = 0xC000000000000000; //SMT2 == thread 0,1
+        }
+        else
+        {
+           en_threads = 0xF000000000000000; //SMT4 == thread 0..3
+        }
         sys->setAttr<TARGETING::ATTR_ENABLED_THREADS>(en_threads);
     }
     return en_threads;
