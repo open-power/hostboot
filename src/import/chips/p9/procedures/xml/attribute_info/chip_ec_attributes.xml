@@ -2676,6 +2676,23 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_RUN_RD_CTR_WOKRAROUND</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      In below DD2 Nimbus, a workaround after read centering might need to be run.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MSS_ODT_CONFIG</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
