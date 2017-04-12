@@ -642,4 +642,15 @@
   </gard>
 </hwpError>
 
+<hwpError>
+  <rc>RC_MSS_RD_CTR_WORKAROUND_EMPTY_VECTOR</rc>
+  <description>
+    An empty vector was passed into the find_median_and_sort function
+  </description>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
 </hwpErrors>
