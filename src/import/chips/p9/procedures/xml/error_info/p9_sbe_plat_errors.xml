@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -28,6 +28,48 @@
     <platScomFail/>
     <rc>RC_SBE_SCOM_FAILURE</rc>
     <description>SBE encountered a SCOM failure</description>
+</hwpError>
+<hwpError>
+    <sbeError/>
+    <platScomFail/>
+    <rc>RC_SBE_PIB_XSCOM_ERROR</rc>
+    <description>SBE SCOM failure - PIB XSCOM failure</description>
+</hwpError>
+<hwpError>
+    <sbeError/>
+    <platScomFail/>
+    <rc>RC_SBE_PIB_OFFLINE_ERROR</rc>
+    <description>SBE SCOM failure - Chiplet offline</description>
+</hwpError>
+<hwpError>
+    <sbeError/>
+    <platScomFail/>
+    <rc>RC_SBE_PIB_PARTIAL_ERROR</rc>
+    <description>SBE SCOM failure - Partial SCOM failure</description>
+</hwpError>
+<hwpError>
+    <sbeError/>
+    <platScomFail/>
+    <rc>RC_SBE_PIB_ADDRESS_ERROR</rc>
+    <description>SBE SCOM failure - SCOM address failure</description>
+</hwpError>
+<hwpError>
+    <sbeError/>
+    <platScomFail/>
+    <rc>RC_SBE_PIB_CLOCK_ERROR</rc>
+    <description>SBE SCOM failure - Clock error</description>
+</hwpError>
+<hwpError>
+    <sbeError/>
+    <platScomFail/>
+    <rc>RC_SBE_PIB_PARITY_ERROR</rc>
+    <description>SBE SCOM failure - Parity error</description>
+</hwpError>
+<hwpError>
+    <sbeError/>
+    <platScomFail/>
+    <rc>RC_SBE_PIB_TIMEOUT_ERROR</rc>
+    <description>SBE SCOM failure - Timeout error</description>
 </hwpError>
 </hwpErrors>
 
