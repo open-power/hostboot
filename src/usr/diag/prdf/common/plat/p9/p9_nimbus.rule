@@ -761,21 +761,21 @@ chip p9_nimbus
         scomaddr    0x05011400;
         reset       (&, 0x05011401);
         mask        (|, 0x05011405);
-        capture     group default;
+        capture     group cNPU0FIR;
     };
 
     register NPU0FIR_MASK
     {
         name        "P9 chip NPU0FIR MASK";
         scomaddr    0x05011403;
-        capture     group default;
+        capture     group cNPU0FIR;
     };
 
     register NPU0FIR_ACT0
     {
         name        "P9 chip NPU0FIR ACT0";
         scomaddr    0x05011406;
-        capture     group default;
+        capture     group cNPU0FIR;
         capture     req nonzero("NPU0FIR");
     };
 
@@ -783,7 +783,7 @@ chip p9_nimbus
     {
         name        "P9 chip NPU0FIR ACT1";
         scomaddr    0x05011407;
-        capture     group default;
+        capture     group cNPU0FIR;
         capture     req nonzero("NPU0FIR");
     };
 
@@ -797,21 +797,21 @@ chip p9_nimbus
         scomaddr    0x05011440;
         reset       (&, 0x05011441);
         mask        (|, 0x05011445);
-        capture     group default;
+        capture     group cNPU1FIR;
     };
 
     register NPU1FIR_MASK
     {
         name        "P9 chip NPU1FIR MASK";
         scomaddr    0x05011443;
-        capture     group default;
+        capture     group cNPU1FIR;
     };
 
     register NPU1FIR_ACT0
     {
         name        "P9 chip NPU1FIR ACT0";
         scomaddr    0x05011446;
-        capture     group default;
+        capture     group cNPU1FIR;
         capture     req nonzero("NPU1FIR");
     };
 
@@ -819,7 +819,7 @@ chip p9_nimbus
     {
         name        "P9 chip NPU1FIR ACT1";
         scomaddr    0x05011447;
-        capture     group default;
+        capture     group cNPU1FIR;
         capture     req nonzero("NPU1FIR");
     };
 
@@ -4137,12 +4137,12 @@ group gN3_CHIPLET_FIR filter singlebit
     /** N3_CHIPLET_FIR[10]
      *  Attention from NPU0FIR
      */
-    (rN3_CHIPLET_FIR, bit(10)) ? analyze(gNPU0FIR);
+    (rN3_CHIPLET_FIR, bit(10)) ? analyzeNPU0FIR;
 
     /** N3_CHIPLET_FIR[11]
      *  Attention from NPU1FIR
      */
-    (rN3_CHIPLET_FIR, bit(11)) ? analyze(gNPU1FIR);
+    (rN3_CHIPLET_FIR, bit(11)) ? analyzeNPU1FIR;
 
     /** N3_CHIPLET_FIR[12]
      *  Attention from NMMUCQFIR
@@ -4226,12 +4226,12 @@ group gN3_CHIPLET_UCS_FIR filter singlebit
     /** N3_CHIPLET_UCS_FIR[7]
      *  Attention from NPU0FIR
      */
-    (rN3_CHIPLET_UCS_FIR, bit(7)) ? analyze(gNPU0FIR);
+    (rN3_CHIPLET_UCS_FIR, bit(7)) ? analyzeNPU0FIR;
 
     /** N3_CHIPLET_UCS_FIR[8]
      *  Attention from NPU1FIR
      */
-    (rN3_CHIPLET_UCS_FIR, bit(8)) ? analyze(gNPU1FIR);
+    (rN3_CHIPLET_UCS_FIR, bit(8)) ? analyzeNPU1FIR;
 
     /** N3_CHIPLET_UCS_FIR[9]
      *  Attention from NMMUCQFIR
@@ -7844,6 +7844,9 @@ actionclass analyzePciChipletFir2
     capture(PciChipletFir2);
     analyze(gPCI2_CHIPLET_FIR);
 };
+
+actionclass analyzeNPU0FIR { capture(cNPU0FIR); analyze(gNPU0FIR); };
+actionclass analyzeNPU1FIR { capture(cNPU1FIR); analyze(gNPU1FIR); };
 
 actionclass analyzeConnectedEQ0     { analyze(connected(TYPE_EQ,      0)); };
 actionclass analyzeConnectedEQ1     { analyze(connected(TYPE_EQ,      1)); };
