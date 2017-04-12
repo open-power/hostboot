@@ -57,6 +57,7 @@ enum sizes
     BITS_PER_DQS = 2,              ///< Differential clock pair
     MAX_RANKS_DIMM1 = 2,           ///< DIMM1 (inner DIMM) can't be a 4R DIMM
     MAX_PRIMARY_RANKS_PER_PORT = 4,
+    MAX_RANK_PAIRS = 4,
     MAX_MRANK_PER_PORT = MAX_DIMM_PER_PORT * MAX_RANK_PER_DIMM,
     RANK_MID_POINT = 4,            ///< Which rank number indicates the switch to the other DIMM
     DEFAULT_POLL_LIMIT = 50,       ///< the number of poll attempts in the event we can't calculate another
@@ -153,7 +154,11 @@ enum cal_steps
     WRITE_CTR_2D_VREF = 7,
     COARSE_WR         = 8,
     COARSE_RD         = 9,
-    STEPS_AFTER_WR_LEVEL = 8,   // represents the number of bits in cal_step_enable after the WR_LEVEL bit
+    // We can do math here, so this pretties up the code
+    // Note: a function was investigated but abandoned due to unresolvable compile issues
+    // Note: for STEPS_FROM_DQS_ALIGN_TO_AFTER_RD_CTR_LEN - READ_CTR/READ_CTR_2D_VREF are run together pick the larger of the steps
+    STEPS_FROM_DQS_ALIGN_TO_AFTER_RD_CTR_LEN = (READ_CTR_2D_VREF - DQS_ALIGN) + 1,
+    STEPS_FROM_WR_CTR_TO_COARSE_RD_LEN = (COARSE_RD - WRITE_CTR) + 1,
 };
 
 // Static consts for DDR4 voltages used in p9_mss_volt
