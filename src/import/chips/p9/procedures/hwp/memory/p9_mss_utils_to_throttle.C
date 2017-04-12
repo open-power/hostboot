@@ -49,6 +49,7 @@
 #include <lib/power_thermal/throttle.H>
 #include <lib/mss_attribute_accessors.H>
 #include <lib/utils/count_dimm.H>
+#include <lib/shared/mss_const.H>
 
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_MCA;
@@ -118,9 +119,10 @@ extern "C"
 
                 FAPI_TRY( l_throttle.calc_slots_and_power(l_databus_util));
 
-                FAPI_INF( "Calculated N commands per port %s = %d commands per %d dram clock window, maxpower is %d",
+                FAPI_INF( "%s Calculated N commands per port %d, per slot %d, commands per dram clock window %d, maxpower is %d",
                           mss::c_str(l_mca),
                           l_throttle.iv_n_port,
+                          l_throttle.iv_n_slot,
                           l_dram_clocks,
                           l_throttle.iv_calc_port_maxpower);
 
@@ -141,7 +143,7 @@ extern "C"
         }
 
         //equalize throttles to prevent variable performance
-        FAPI_TRY( mss::power_thermal::equalize_throttles (i_targets));
+        FAPI_TRY( mss::power_thermal::equalize_throttles (i_targets, mss::throttle_type::POWER));
 
     fapi_try_exit:
         return fapi2::current_err;

@@ -371,6 +371,16 @@ enum test_type
 
 } // namespace mcbist
 
+///
+/// @brief throttle_type used to set bulk_pwr_throttls to run POWER or THERMAL throttling
+/// @note OCC will be using the POWER option
+///
+enum class throttle_type
+{
+    POWER = 0,
+    THERMAL = 1,
+};
+
 enum class shmoo_edge : std::size_t
 {
     LEFT,

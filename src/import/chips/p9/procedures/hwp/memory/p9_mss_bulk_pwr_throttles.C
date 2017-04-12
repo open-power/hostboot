@@ -58,10 +58,10 @@ extern "C"
     /// @note equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
     ///
     fapi2::ReturnCode p9_mss_bulk_pwr_throttles( const std::vector< fapi2::Target<TARGET_TYPE_MCS> >& i_targets,
-            const throttle_type i_throttle_type)
+            const mss::throttle_type i_throttle_type)
     {
         FAPI_INF("Start p9_mss_bulk_pwr_throttles for %s type throttling",
-                 (( i_throttle_type == THERMAL) ? "THERMAL" : "POWER"));
+                 (( i_throttle_type == mss::throttle_type::THERMAL) ? "THERMAL" : "POWER"));
 
 
         for ( const auto& l_mcs : i_targets)
@@ -87,7 +87,7 @@ extern "C"
                          mss::c_str(l_mca));
 
                 //Let's do the actual work now
-                if ( i_throttle_type == THERMAL)
+                if ( i_throttle_type == mss::throttle_type::THERMAL)
                 {
                     FAPI_TRY (l_pwr_struct.thermal_throttles());
                 }
@@ -110,13 +110,13 @@ extern "C"
         }
 
         //Set all of the throttles to the lowest value per port for performance reasons
-        FAPI_TRY(mss::power_thermal::equalize_throttles(i_targets));
+        FAPI_TRY(mss::power_thermal::equalize_throttles(i_targets, i_throttle_type));
         FAPI_INF("End bulk_pwr_throttles");
         return fapi2::current_err;
 
     fapi_try_exit:
         FAPI_ERR("Error calculating bulk_pwr_throttles using %s throttling",
-                 ((i_throttle_type == POWER) ? "power" : "thermal"));
+                 ((i_throttle_type == mss::throttle_type::POWER) ? "power" : "thermal"));
         return fapi2::current_err;
     }
 } //extern C
