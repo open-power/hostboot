@@ -42,6 +42,9 @@ use constant BASE_IMAGE_TOTAL_CONTAINER_SIZE => 0x000000000007EF80;
 use constant BASE_IMAGE_TARGET_HRMOR => 0x0000000008000000;
 use constant BASE_IMAGE_INSTRUCTION_START_STACK_POINTER => 0x0000000008280000;
 
+# Max HBBL content size is 20K
+my $MAX_HBBL_SIZE = 20480;
+
 ################################################################################
 # Be explicit with POSIX
 # Everything is exported by default (with a handful of exceptions). This is an
@@ -115,6 +118,7 @@ my %partitionsToCorrupt = ();
 my $sign_mode = $DEVELOPMENT;
 my $sb_signing_config_file = "";
 my $hwKeyHashFile = "";
+my $hb_standalone="";
 
 GetOptions("binDir:s" => \$bin_dir,
            "secureboot" => \$secureboot,
@@ -128,6 +132,7 @@ GetOptions("binDir:s" => \$bin_dir,
            "sign-mode:s" => \$sign_mode,
            "sb-signing-config-file:s" => \$sb_signing_config_file,
            "hwKeyHashFile:s" => \$hwKeyHashFile,
+           "hb-standalone" => \$hb_standalone,
            "help" => \$help);
 
 if ($help)
@@ -318,6 +323,7 @@ my %sb_hdrs = (
 # Print all settings in one print statement to avoid parallel build to mess
 # up output.
 my $SETTINGS = "\n//========== Generate PNOR Image Settings ==========/\n";
+$SETTINGS .= "PNOR Layout = ".$pnorLayoutFile."\n";
 $SETTINGS .= $build_all ? "Build Phase = build_all\n" : "";
 $SETTINGS .= $install_all ? "Build Phase = install_all\n" : "";
 $SETTINGS .= $testRun ? "Test Mode = Yes\n" : "Test Mode = No\n";
@@ -500,18 +506,18 @@ sub manipulateImages
         # Sections that have secureboot support. Secureboot still must be
         # enabled for secureboot actions on these partitions to occur.
         # @TODO securebootp9 re-enable with SBE/SBEC/PAYLOAD secureboot ports
-        my $isNormalSecure =  ($eyeCatch eq "SBE");
-                             #|| ($eyeCatch eq "HBRT");
-                             #|| ($eyeCatch eq "SBEC")
-                             #|| ($eyeCatch eq "PAYLOAD")
-                             #|| ($eyeCatch eq "OCC")
-                             #|| ($eyeCatch eq "CAPP")
-                             #|| ($eyeCatch eq "BOOTKERNEL");
+        my $isNormalSecure = ($eyeCatch eq "SBE");
+        #$isNormalSecure ||= ($eyeCatch eq "HBRT");
+        #$isNormalSecure ||= ($eyeCatch eq "SBEC");
+        #$isNormalSecure ||= ($eyeCatch eq "PAYLOAD");
+        #$isNormalSecure ||= ($eyeCatch eq "OCC");
+        #$isNormalSecure ||= ($eyeCatch eq "CAPP");
+        #$isNormalSecure ||= ($eyeCatch eq "BOOTKERNEL");
 
-        my $isSpecialSecure =    ($eyeCatch eq "HBB")
-                              || ($eyeCatch eq "HBD");
-                             #|| ($eyeCatch eq "HBBL")
-                             #|| ($eyeCatch eq "HBI")
+        my $isSpecialSecure = ($eyeCatch eq "HBB");
+        $isSpecialSecure ||= ($eyeCatch eq "HBD");
+        $isSpecialSecure ||= ($eyeCatch eq "HBBL");
+        #$isSpecialSecure ||= ($eyeCatch eq "HBI");
 
         my $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{DEFAULT}{flags};
         my $secureboot_hdr =  $sb_hdrs{DEFAULT}{file};
@@ -540,15 +546,15 @@ sub manipulateImages
                 # Ensure there is enough room at the end of the HBBL partition
                 # to store the HW keys' hash.
                 my $hbblRawSize = (-s $bin_file or die "Cannot get size of file $bin_file");
-                print "HBBL raw size (no padding/ecc) = $hbblRawSize/$size\n";
-                if ($hbblRawSize > $size - HW_KEYS_HASH_SIZE)
+                print "HBBL raw size (no padding/ecc) = $hbblRawSize/$MAX_HBBL_SIZE\n";
+                if ($hbblRawSize > $MAX_HBBL_SIZE - HW_KEYS_HASH_SIZE)
                 {
                     die "HBBL cannot fit HW Keys' Hash (64 bytes) at the end without overwriting real data";
                 }
 
                 # Pad HBBL to max size
                 run_command("cp $bin_file $tempImages{TEMP_BIN}");
-                run_command("dd if=$tempImages{TEMP_BIN} of=$bin_file ibs=$size conv=sync");
+                run_command("dd if=$tempImages{TEMP_BIN} of=$bin_file ibs=$MAX_HBBL_SIZE conv=sync");
 
                 # Add HW key hash to end of HBBL - 64 Bytes
                 my $hwKeyHashStart = (-s $bin_file or die "Cannot get size of file $bin_file")
@@ -560,8 +566,7 @@ sub manipulateImages
             }
 
             # Header Phase
-            if(   ($sectionHash{$layoutKey}{sha512Version} eq "yes")
-               || ($secureboot && $isSpecialSecure) )
+            if($sectionHash{$layoutKey}{sha512Version} eq "yes")
             {
                 $fsp_prefix.=".header";
                 # Add secure container header

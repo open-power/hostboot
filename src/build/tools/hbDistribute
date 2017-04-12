@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -188,6 +188,15 @@ if [[ -f ${PROJECT_ROOT}/obj/genfiles/config.h ]]; then
 else
     echo "File DNE ${PROJECT_ROOT}/obj/genfiles/config.h"
     exit -1
+fi
+
+# Dynamically check if file exists indicating the fsprelease.config was used
+# Note this file is generated in the hb config file rule in top level makefile
+if [[ -f ${PROJECT_ROOT}/obj/genfiles/hb_fsp_release ]]; then
+    echo "FSP build, using fsp pnor xml layout"
+else
+    echo "Non FSP build, using default pnor xml layout"
+    export DEFAULT_PNOR=1
 fi
 
 # Execute makefile for distribution.
