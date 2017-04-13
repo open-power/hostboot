@@ -236,6 +236,25 @@ ReturnCode platGetPoundVBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                                   uint8_t * o_poundWData);
 
+///
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+/// ATTR_WOF_TABLE_DATA. It should not be called directly
+///
+///
+/// @param[in]  i_fapiTarget     FAPI2 Target reference
+///                                Currently system target and unused,
+///                                Could change to proc target later.
+///                                Don't need to check the type here, get macro
+///                                does it for us, thus use the all type to
+///                                allow streamlined dump of ATTR
+/// @param[out] o_pos            Output WOF table data
+/// @return ReturnCode           Always FAPI2_RC_SUCCESS, this cannot fail
+///                              if a toplevel target cannot be found then
+///                              an assert triggers in the platform call
+///
+ReturnCode platGetWOFTableData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                               uint8_t * o_wofTableData);
+
 // -----------------------------------------------------------------------------
 // End TODO: End to be supported functions
 // -----------------------------------------------------------------------------
@@ -316,5 +335,13 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platGetPoundWBucketData(TARGET,VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to route ATTR_WOF_TABLE_DATA access to the correct HB function
+//------------------------------------------------------------------------------
+#define ATTR_WOF_TABLE_DATA_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetWOFTableData(TARGET,VAL)
 
 #endif // ATTRIBUTESERVICE_H_

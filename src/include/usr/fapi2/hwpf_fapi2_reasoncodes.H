@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,7 @@ namespace fapi2
         MOD_FAPI2_SET_TARGETING_ATTR                = 0x0D,
         MOD_FAPI2_PLAT_GET_VPD                      = 0x0E,
         MOD_FAPI2_PIB_ERR_MASK                      = 0x0F,
+        MOD_FAPI2_PLAT_PARSE_WOF_TABLES             = 0x10,
     };
 
     /**
@@ -113,6 +114,11 @@ namespace fapi2
         RC_INVALID_TYPE                = FAPI2_COMP_ID | 0x28,
         RC_RETURNED_VPD_TOO_SMALL      = FAPI2_COMP_ID | 0x29,
         RC_INVALID_ATTRIBUTE           = FAPI2_COMP_ID | 0x2A,
+        RC_WOF_IMAGE_MAGIC_MISMATCH    = FAPI2_COMP_ID | 0x2B,
+        RC_WOF_TABLES_MAGIC_MISMATCH   = FAPI2_COMP_ID | 0x2C,
+        RC_WOF_TABLE_NOT_FOUND         = FAPI2_COMP_ID | 0x2D,
+        RC_WOF_IMAGE_VERSION_MISMATCH  = FAPI2_COMP_ID | 0x2E,
+        RC_WOF_TABLES_VERSION_MISMATCH = FAPI2_COMP_ID | 0x2F,
 
         // HWP generated errors
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,

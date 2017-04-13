@@ -756,6 +756,8 @@
     <attribute><id>SYSTEM_IPL_PHASE</id></attribute>
     <attribute><id>FREQ_CORE_CEILING_MHZ</id></attribute>
     <attribute><id>ULTRA_TURBO_FREQ_MHZ</id></attribute>
+    <attribute><id>SOCKET_POWER_NOMINAL</id></attribute>
+    <attribute><id>SOCKET_POWER_TURBO</id></attribute>
     <attribute><id>PROC_FABRIC_A_BUS_WIDTH</id></attribute>
     <attribute><id>PROC_FABRIC_X_BUS_WIDTH</id></attribute>
     <attribute><id>PROC_FABRIC_CCSM_MODE</id></attribute>
@@ -895,8 +897,8 @@
     <attribute><id>MSS_VMEM_REGULATOR_MAX_DIMM_COUNT</id></attribute>
     <attribute><id>SYSTEM_WOF_ENABLED</id></attribute>
     <attribute><id>WOF_POWER_LIMIT</id></attribute>
-    <attribute><id>WOF_TABLE_DATA</id></attribute>
     <attribute><id>SYS_VFRT_STATIC_DATA_ENABLE</id></attribute>
+    <attribute><id>WOF_TABLE_LID_NUMBER</id></attribute>
     <attribute><id>AVSBUS_FREQUENCY</id></attribute>
     <attribute><id>PROC_FABRIC_ASYNC_SAFE_MODE</id></attribute>
     <attribute><id>VDM_ENABLE</id></attribute>

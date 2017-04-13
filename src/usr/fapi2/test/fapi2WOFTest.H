@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/util/utillidpnor.H $                                  */
+/* $Source: src/usr/fapi2/test/fapi2WOFTest.H $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,52 +22,54 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef _UTILLIDPNOR_H
-#define _UTILLIDPNOR_H
+#ifndef __WOFTEST_H__
+#define __WOFTEST_H__
 
 /**
- * @file lidpnor.H
+ *  @file fapi2WOFTest.H
  *
- * @brief brief Provides the lid to pnor mapping currently used in the lidmgr
- *              In its own file to limit number of duplicate definitions for
- *              every user compared to being defined in utillidmgr
- *
+ *  @brief Test case for WOF access code
  */
 
-#include <util/utillidmgr.H>
-#include <utility>
+#include <stdio.h>
+#include <cxxtest/TestSuite.H>
+#include <errl/errlmanager.H>
+#include <errl/errlentry.H>
+#include <fapi2.H>
+#include <devicefw/userif.H>
+#include <utilFilter.H>
 
-namespace Util
+using   namespace   TARGETING;
+
+class WOFTest: public CxxTest::TestSuite
 {
+public:
 
-/**
- *  @brief Simple compare function for lidToPnor elements
- */
-bool cmpLidToPnor (const std::pair<uint32_t, PNOR::SectionId> p1,
-                   const std::pair<uint32_t, PNOR::SectionId> p2)
-{
-    return (p1.first < p2.first);
-}
-
-/**
- *  @brief Array containing lid to pnor mappings
- *         When adding maintain order by uint32_t (lidID)
- *         There is a test case to confirm this is sorted
- */
-const std::pair<uint32_t, PNOR::SectionId>
-    lidToPnor[] =
+    /**
+      * @brief Test WOF table access attribute
+      *
+      */
+    void testWOFTableAccess (void)
     {
-        std::make_pair(Util::TEST_LIDID, PNOR::TESTRO),         // 0x00000111
-        std::make_pair(Util::OCC_LIDID, PNOR::OCC),             // 0x81e00430
-        std::make_pair(Util::WOF_LIDID, PNOR::WOFDATA),         // 0x81e00440
-        std::make_pair(Util::NIMBUS_HCODE_LIDID, PNOR::HCODE),  // 0x81e00602
-        std::make_pair(Util::CUMULUS_HCODE_LIDID, PNOR::HCODE)  // 0x81e00603
-    };
+        //fapi2::ReturnCode l_rc;
+        fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sysParent;
 
-// Size of lidToPnor[]
-const size_t NUM_LID_TO_PNOR = ( sizeof(lidToPnor) /
-                                 sizeof(std::pair<uint32_t, PNOR::SectionId>));
+        FAPI_INF("testWOFTableAccess: ENTER");
 
-}
+        // TODO RTC 172778 Enable WOF test and check for correct table data
+        /*
+        //Set up a char array to hold the data from an attr read
+        fapi2::ATTR_WOF_TABLE_DATA_Type l_wofAttrData;
+
+        //Perform an ATTR_GET on sys target
+        FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA,
+                      l_sysParent,
+                      l_wofAttrData);
+        */
+        FAPI_INF("testWOFTableAccess: EXIT !!");
+
+  } // testWOFTableAccess
+
+};
 
 #endif

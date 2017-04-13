@@ -3838,6 +3838,42 @@
 </attribute>
 
 <attribute>
+    <id>SOCKET_POWER_NOMINAL</id>
+    <description>
+      The socket power in nominal mode.
+      Controls how much power can be used.
+      This is the same for all cores in the system.
+      Data is provided by MVPD #V.
+    </description>
+    <simpleType><uint32_t></uint32_t></simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SOCKET_POWER_NOMINAL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SOCKET_POWER_TURBO</id>
+    <description>
+      The socket power in turbo mode.
+      Controls how much power can be used.
+      This is the same for all cores in the system.
+      Data is provided by MVPD #V.
+    </description>
+    <simpleType><uint32_t></uint32_t></simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SOCKET_POWER_TURBO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>MNFG_FLAGS</id>
     <description>
         Provides the manufacturing flags. This is a bitfield.
@@ -20138,28 +20174,30 @@ Measured in GB</description>
         <default>0</default>
       </uint8_t>
     </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_WOF_POWER_LIMIT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
 </attribute>
 
 <attribute>
-    <id>WOF_TABLE_DATA</id>
+    <id>WOF_TABLE_LID_NUMBER</id>
     <description>
-       WOF data from PNOR which contains WOF header data + VFRT data (vfrt header +
-       data for 8 Vdn, 21Vdd and 6 Quads)
-       Consumed by p9_pstate_parameter_block procedure
+      LID id used to load tables for Workload Optimized
+      Frequency (WOF) algorithms.
+      Producer: TMGT
+      Consumers: FW that selects VFRT tables
     </description>
     <simpleType>
-      <uint8_t>
-      </uint8_t>
-      <array>131072</array>
+      <uint32_t>
+<!-- @todo-RTC:172776-Get rid of default value that points to ZZ -->
+        <default>0x81E00440</default>
+      </uint32_t>
     </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_WOF_TABLE_DATA</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
 </attribute>
@@ -20178,7 +20216,9 @@ Measured in GB</description>
      -->
      </description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint8_t>
+          <default>0</default>
+        </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>

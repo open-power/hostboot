@@ -117,6 +117,8 @@ void* call_host_voltage_config( void *io_pArgs )
     uint32_t l_ultraTurboFreq = 0;  //ATTR_ULTRA_TURBO_FREQ_MHZ
     uint32_t l_turboFreq = 0;       //ATTR_FREQ_CORE_MAX
     uint32_t l_nestFreq = 0;        //ATTR_FREQ_PB_MHZ
+    uint32_t l_powerModeNom = 0;    //ATTR_SOCKET_POWER_NOMINAL
+    uint32_t l_powerModeTurbo = 0;  //ATTR_SOCKET_POWER_TURBO
 
     bool l_firstPass = true;
 
@@ -239,11 +241,13 @@ void* call_host_voltage_config( void *io_pArgs )
                     l_ceilingFreq = l_voltageData.turboFreq;
                     l_ultraTurboFreq = l_voltageData.uTurboFreq;
                     l_turboFreq = l_voltageData.turboFreq;
+                    l_powerModeNom = l_voltageData.SortPowerNorm;
+                    l_powerModeTurbo = l_voltageData.SortPowerTurbo;
                     l_firstPass = false;
                 }
                 else
                 {
-                    // save it to variable and compare agains other nomFreq
+                    // save it to variable and compare against other nomFreq
                     // All of the buckets should report the same Nominal frequency
                     if( l_nominalFreq != l_voltageData.nomFreq )
                     {
@@ -251,6 +255,15 @@ void* call_host_voltage_config( void *io_pArgs )
                                 "NOMINAL FREQ MISMATCH! expected: %d actual: %d",
                                 l_nominalFreq, l_voltageData.nomFreq );
 
+                        /*@
+                        * @errortype
+                        * @moduleid    ISTEP::MOD_VOLTAGE_CONFIG
+                        * @reasoncode  ISTEP::RC_NOMINAL_FREQ_MISMATCH
+                        * @userdata1   Previous EQ nominal frequency
+                        * @userdata2   Current EQ nominal frequency
+                        * @devdesc     Nominal Frequency mismatch
+                        * @custdesc    A problem occurred during the IPL of the system.
+                        */
                         l_err = new ERRORLOG::ErrlEntry
                             (ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                              ISTEP::MOD_VOLTAGE_CONFIG,
@@ -264,7 +277,57 @@ void* call_host_voltage_config( void *io_pArgs )
                                             HWAS::DECONFIG,
                                             HWAS::GARD_NULL );
 
-                        // Create IStep error log and cross reference occurred error
+                        // Create IStep error log and
+                        // cross reference occurred error
+                        l_stepError.addErrorDetails( l_err );
+
+                        // Commit Error
+                        errlCommit( l_err, ISTEP_COMP_ID );
+
+                        continue;
+                    }
+
+                    // All of the buckets should report the same Sort Power
+                    if( (l_powerModeNom != l_voltageData.SortPowerNorm) ||
+                        (l_powerModeTurbo != l_voltageData.SortPowerTurbo) )
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                "Power Mode MISMATCH! "
+                                "expected Nominal %d actual Nominal %d "
+                                "expected Turbo %d actual Turbo %d",
+                                l_powerModeNom, l_voltageData.SortPowerNorm,
+                                l_powerModeTurbo, l_voltageData.SortPowerTurbo);
+
+                        /*@
+                        * @errortype
+                        * @moduleid    ISTEP::MOD_VOLTAGE_CONFIG
+                        * @reasoncode  ISTEP::RC_POWER_MODE_MISMATCH
+                        * @userdata1[00:31]  Previous EQ nominal power mode
+                        * @userdata1[32:63]  Current EQ nominal power mode
+                        * @userdata2[00:31]  Previous EQ turbo power mode
+                        * @userdata2[32:63]  Current EQ turbo power mode
+                        * @devdesc     Power Mode mismatch
+                        * @custdesc    A problem occurred during the IPL of the system.
+                        */
+                        l_err = new ERRORLOG::ErrlEntry
+                            (ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                             ISTEP::MOD_VOLTAGE_CONFIG,
+                             ISTEP::RC_POWER_MODE_MISMATCH,
+                             TWO_UINT32_TO_UINT64(
+                                l_powerModeNom,
+                                l_voltageData.SortPowerNorm),
+                             TWO_UINT32_TO_UINT64(
+                                l_powerModeTurbo,
+                                l_voltageData.SortPowerTurbo),
+                             false );
+
+                        l_err->addHwCallout(l_proc,
+                                            HWAS::SRCI_PRIORITY_HIGH,
+                                            HWAS::DECONFIG,
+                                            HWAS::GARD_NULL );
+
+                        // Create IStep error log and
+                        // cross reference occurred error
                         l_stepError.addErrorDetails( l_err );
 
                         // Commit Error
@@ -301,7 +364,7 @@ void* call_host_voltage_config( void *io_pArgs )
 
             // Don't set the boot voltage ATTR -- instead the
             // setup_evid will calculate from each chips #V and factor
-            // in loadline/distloss/etc 
+            // in loadline/distloss/etc
 
             // call p9_setup_evid for each processor
             fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
@@ -361,6 +424,9 @@ void* call_host_voltage_config( void *io_pArgs )
         // Setup the remaining attributes that are based on PB/Nest
         TARGETING::setFrequencyAttributes(l_sys,
                                           l_nestFreq);
+
+        l_sys->setAttr<ATTR_SOCKET_POWER_NOMINAL>(l_powerModeNom);
+        l_sys->setAttr<ATTR_SOCKET_POWER_TURBO>(l_powerModeTurbo);
 
     } while( 0 );
 

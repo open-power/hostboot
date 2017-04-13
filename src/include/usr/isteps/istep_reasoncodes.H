@@ -94,6 +94,7 @@ namespace ISTEP
         RC_UPDATE_SECURITY_CTRL_HWP_FAIL         = ISTEP_COMP_ID | 0x1D,
         RC_NO_FUNCTIONAL_MEMORY                  = ISTEP_COMP_ID | 0x1E,
         RC_NO_FUSED_CORE_TARGET                  = ISTEP_COMP_ID | 0x1F,
+        RC_POWER_MODE_MISMATCH                   = ISTEP_COMP_ID | 0x20,
     };
 
 };

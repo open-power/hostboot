@@ -417,7 +417,7 @@ ReturnCode platGetTargetPos(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
 
     if (l_errl)
     {
-        FAPI_ERR("getTargetName: Error from getTargetingTarget");
+        FAPI_ERR("platGetTargetPos: Error from getTargetingTarget");
         l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
     }
     else
@@ -459,7 +459,7 @@ ReturnCode platGetPoundVBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
     if (l_errl)
     {
-        FAPI_ERR("getTargetingAttr: Error from getTargetingTarget");
+        FAPI_ERR("platGetPoundVBucketData: Error from getTargetingTarget");
         rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
     }
     else
@@ -488,7 +488,7 @@ ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
     if (l_errl)
     {
-        FAPI_ERR("getTargetingAttr: Error from getTargetingTarget");
+        FAPI_ERR("platGetPoundWBucketData: Error from getTargetingTarget");
         rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
     }
     else
@@ -500,6 +500,21 @@ ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     return rc;
 }
 
+ReturnCode platParseWOFTables(uint8_t* o_wofData);
+
+//******************************************************************************
+// fapi2::platAttrSvc::platGetWOFTableData function
+//******************************************************************************
+ReturnCode platGetWOFTableData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                               uint8_t * o_wofTableData)
+{
+    fapi2::ReturnCode rc;
+
+    // Parse the tables and return a single wof table
+    rc = platParseWOFTables(o_wofTableData);
+
+    return rc;
+}
 
 
 } // End platAttrSvc namespace
