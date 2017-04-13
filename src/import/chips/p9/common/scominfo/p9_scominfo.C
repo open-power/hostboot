@@ -245,11 +245,46 @@ extern "C"
                         //DMI5           08     04       0   0x3F       0x21
                         //DMI6           08     04       0   0x3F       0x22
                         //DMI7           08     04       0   0x3F       0x23
+                        //
+                        //0 MC01.CHAN0  IOM01.TX_WRAP.TX3
+                        //1 MC01.CHAN1  IOM01.TX_WRAP.TX2
+                        //2 MC01.CHAN2  IOM01.TX_WRAP.TX0
+                        //3 MC01.CHAN3  IOM01.TX_WRAP.TX1
+                        //4 MC23.CHAN0  IOM23.TX_WRAP.TX3
+                        //5 MC23.CHAN1  IOM23.TX_WRAP.TX2
+                        //6 MC23.CHAN2  IOM23.TX_WRAP.TX0
+                        //7 MC23.CHAN3  IOM23.TX_WRAP.TX1
+                        // 3, 2, 0, 1
                         if (l_ring == P9C_MC_IO_RING_ID)
                         {
                             l_scom.set_chiplet_id(MC01_CHIPLET_ID + (i_chipUnitNum / 4));
                             uint8_t l_rxtx_grp = l_scom.get_rxtx_group_id();
-                            l_scom.set_rxtx_group_id((l_rxtx_grp & 0xF0) + (i_chipUnitNum % 4));
+                            l_rxtx_grp = l_rxtx_grp & 0xF0;
+
+                            switch ((i_chipUnitNum % 4))
+                            {
+                                case  0:
+                                    l_rxtx_grp += 3;
+                                    break;
+
+                                case  1:
+                                    l_rxtx_grp += 2;
+                                    break;
+
+                                case  2:
+                                    l_rxtx_grp += 0;
+                                    break;
+
+                                case  3:
+                                    l_rxtx_grp += 1;
+                                    break;
+
+                                default:
+                                    //escape to bunker - math broke
+                                    break;
+                            }
+
+                            l_scom.set_rxtx_group_id(l_rxtx_grp); // 3,2,0,1
                         }
 
                     }
@@ -817,6 +852,16 @@ extern "C"
                     //DMI5           08     04       0   0x3F       0x21
                     //DMI6           08     04       0   0x3F       0x22
                     //DMI7           08     04       0   0x3F       0x23
+                    //
+                    //0 MC01.CHAN0  IOM01.TX_WRAP.TX3
+                    //1 MC01.CHAN1  IOM01.TX_WRAP.TX2
+                    //2 MC01.CHAN2  IOM01.TX_WRAP.TX0
+                    //3 MC01.CHAN3  IOM01.TX_WRAP.TX1
+                    //4 MC23.CHAN0  IOM23.TX_WRAP.TX3
+                    //5 MC23.CHAN1  IOM23.TX_WRAP.TX2
+                    //6 MC23.CHAN2  IOM23.TX_WRAP.TX0
+                    //7 MC23.CHAN3  IOM23.TX_WRAP.TX1
+                    // 3, 2, 0, 1
                     if (l_ring == P9C_MC_IO_RING_ID && l_sat_id == MC_IND_SAT_ID &&
                         l_sat_offset == P9C_MC_OFFSET_IND )
                     {
@@ -827,10 +872,35 @@ extern "C"
                             l_rxtx_grp -= 0x20;
                         }
 
+                        uint8_t l_adder = 0;
+
+                        switch (l_rxtx_grp % 4)
+                        {
+                            case 3:
+                                l_adder = 0;
+                                break;
+
+                            case 2:
+                                l_adder = 1;
+                                break;
+
+                            case 0:
+                                l_adder = 2;
+                                break;
+
+                            case 1:
+                                l_adder = 3;
+                                break;
+
+                            default:
+                                //escape to bunker - math broke
+                                break;
+                        }
+
                         o_chipUnitRelated = true;
                         o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_DMI_CHIPUNIT,
                                                     ((l_chiplet_id == MC01_CHIPLET_ID ? (0) : (4))) +
-                                                    l_rxtx_grp));
+                                                    l_adder));
 
                     }
 
