@@ -47,6 +47,7 @@
 #include <targeting/common/utilFilter.H>
 
 #include "../../trace/entry.H"
+#include "../errlentry_consts.H"
 
 #define TEST_SEVERITY       ERRORLOG::ERRL_SEV_INFORMATIONAL
 
@@ -1074,6 +1075,29 @@ public:
         }while(0);
 #endif
     }
+
+   /**
+     * @brief Guarantee TARGET_TO_SUBSYS_TABLE is in order
+     */
+    void testErrl_subsysOrder(void)
+    {
+        // TARGET_TO_SUBSYS_TABLE must be sorted by type, this
+        //  test ensures that is true
+        TARGETING::TYPE l_lastType = TARGET_TO_SUBSYS_TABLE[0].xType;
+        for( size_t i = 1; //start on 2nd entry
+             i < (sizeof(TARGET_TO_SUBSYS_TABLE)/
+                  sizeof(TARGET_TO_SUBSYS_TABLE[0]));
+             i++ )
+        {
+            if( TARGET_TO_SUBSYS_TABLE[i].xType < l_lastType )
+            {
+                TS_FAIL( "testErrl_subsysOrder> %d is out of order",
+                         TARGET_TO_SUBSYS_TABLE[i].xType );
+            }
+            l_lastType = TARGET_TO_SUBSYS_TABLE[i].xType;
+        }
+    }
+
 };
 }
 
