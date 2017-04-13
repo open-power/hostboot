@@ -484,6 +484,24 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
         else if(TARGETING::is_sapphire_load())
         {
+            //@fixme-RTC:169478-Remove this workaround once HDAT is ready
+            // Check to see if HDAT has the space we need allocated
+            //   by looking for a 3rd instance
+            uint64_t l_rsvMemDataAddr = 0;
+            uint64_t l_rsvMemDataSizeMax = 0;
+            l_elog = RUNTIME::get_host_data_section( RUNTIME::RESERVED_MEM,
+                                                     3,
+                                                     l_rsvMemDataAddr,
+                                                     l_rsvMemDataSizeMax );
+            if(l_elog != nullptr)
+            {
+                TRACFCOMP( g_trac_runtime, "populate_HbRsvMem> HDAT doesn't have RHB allocated - HBRT is NOT supported here" );
+                delete l_elog;
+                l_elog = nullptr;
+                break;
+            }
+            //end workaround
+
             // Opal data goes at top_of_mem
             l_topMemAddr = TARGETING::get_top_mem_addr();
             assert (l_topMemAddr != 0,
@@ -1226,7 +1244,7 @@ errlHndl_t populate_hbRuntimeData( void )
                 }
             }
 
-            if(!TARGETING::is_no_load())
+            if( !TARGETING::is_no_load() )
             {
                 l_elog = populate_HbRsvMem(nodeid);
                 if(l_elog != nullptr)
