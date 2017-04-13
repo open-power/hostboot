@@ -40,6 +40,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/sbe/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 define __CLEAN_TARGET
@@ -57,6 +58,7 @@ OBJS += plat_hw_access.o
 OBJS += plat_spd_access.o
 OBJS += plat_mvpd_access.o
 OBJS += plat_vpd_access.o
+OBJS += plat_wof_access.o
 
 
 #Required include before all the procedure.mk are included

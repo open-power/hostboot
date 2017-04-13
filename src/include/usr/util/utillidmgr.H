@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,8 @@ enum LidId
 {
     TEST_LIDID = 0x00000111,
     OCC_LIDID = 0x81e00430,
+    // TODO RTC 172767 Make utillidmgr LIDID structure attribute driven
+    WOF_LIDID = 0x81e00440,
     // Hcode Reference Image LIDs
     NIMBUS_HCODE_LIDID = 0x81e00602,
     CUMULUS_HCODE_LIDID = 0x81e00603,
