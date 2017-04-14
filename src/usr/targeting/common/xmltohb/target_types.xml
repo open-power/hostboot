@@ -1345,6 +1345,8 @@
     <attribute><id>DO_BLUE_WATERFALL_ADJUST</id></attribute>
     <attribute><id>CME_CHTM_TRACE_ENABLE</id></attribute>
     <attribute><id>CME_CHTM_TRACE_MEMORY_CONFIG</id></attribute>
+    <attribute><id>PRD_HWP_PLID</id></attribute>
+
 </targetType><!-- chip-processor-power9 -->
 
 <!-- chip-processor-nimbus -->
@@ -1928,6 +1930,7 @@
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
     <attribute><id>VPD_OVERRIDE_MW_ENABLE</id></attribute>
     <attribute><id>VPD_OVERRIDE_MW</id></attribute>
+    <attribute><id>PRD_HWP_PLID</id></attribute>
 </targetType>
 
 <targetType>

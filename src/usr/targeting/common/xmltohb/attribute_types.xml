@@ -17774,6 +17774,24 @@ Measured in GB</description>
 <!-- === end RCD parity error reconfig loop attributes for PRD/MDIA === -->
 
 <attribute>
+    <id>PRD_HWP_PLID</id>
+    <description>
+      PRD will perform error isolation for certain errors that may cause a HWP
+      to fail. This attribute will be used by the HWP to store the PLID so that
+      PRD can subsequently check it for a non-zero value and link the HWP PLID
+      to the PRD error log.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
     <id>RESOURCE_IS_CRITICAL</id>
     <description>
         Used to tell if a resource is critical to perform an IPL. If this
