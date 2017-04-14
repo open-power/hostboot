@@ -761,7 +761,6 @@
     <attribute><id>PROC_FABRIC_CCSM_MODE</id></attribute>
     <attribute><id>PROC_FABRIC_SMP_OPTICS_MODE</id></attribute>
     <attribute><id>PROC_FABRIC_CAPI_MODE</id></attribute>
-    <attribute><id>PROC_FABRIC_ADDR_BAR_MODE</id></attribute>
     <!-- HDAT Hostboot Runtime Data Info -->
     <attribute><id>HDAT_RSV_MEM_NUM_SECTIONS</id></attribute>
     <attribute><id>HDAT_HBRT_NUM_SECTIONS</id></attribute>
