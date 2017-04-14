@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -460,15 +460,30 @@ enum
     MAGIC_BREAK_ON_ERROR      =  7018, // Breakpoint in error cases if
                                        //  env var HB_BREAK_ON_ERROR
     MAGIC_GET_SBE_TRACES      =  7019, // Collect SBE traces
+    MAGIC_PRINT_ISTEP         =  7020, // Print istep to simics console
 
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
 };
 
+/**
+ * @brief Collect SBE traces via external debug commands
+ * @param[in]  Processor number
+ * @param[in]  SBE Return Code
+ */
 #define MAGIC_INST_GET_SBE_TRACES(_procnum,_rc) \
     asm volatile("mr 4, %0; mr 5, %1" :: \
                  "r" (_procnum), "r" (_rc) : "4", "5"); \
     MAGIC_INSTRUCTION(MAGIC_GET_SBE_TRACES); \
 
+/**
+ * @brief Display istep numbers on the simics console
+ * @param[in]  Major istep number
+ * @param[in]  Minor istep number
+ */
+#define MAGIC_INST_PRINT_ISTEP(_major,_minor) \
+    asm volatile("mr 4, %0; mr 5, %1" :: \
+                 "r" (_major), "r" (_minor) : "4", "5"); \
+    MAGIC_INSTRUCTION(MAGIC_PRINT_ISTEP); \
 
 
 #endif

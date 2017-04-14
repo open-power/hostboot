@@ -587,6 +587,12 @@ def magic_instruction_callback(user_arg, cpu, arg):
         saveCommand = "%s; %s"%(cmd1,cmd2)
         SIM_run_alone(run_command, saveCommand )
 
+    if arg == 7020:   # MAGIC_PRINT_ISTEP
+        # Print current istep out to simics console
+        major_istep = cpu.r4
+        minor_istep = cpu.r5
+        print "ISTEP %d.%d" % (major_istep, minor_istep)
+
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         hb_tracBinaryBuffer = cpu.r4
         hb_tracBinaryBufferSz = cpu.r5

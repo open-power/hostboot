@@ -73,6 +73,8 @@
 
 #include <initservice/bootconfigif.H>
 #include <trace/trace.H>
+#include <util/utilmbox_scratch.H>
+
 
 namespace ISTEPS_TRACE
 {
@@ -855,6 +857,16 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                       "ATTR_RECONFIGURE_LOOP = %d", l_reconfigAttr);
             o_doReconfig = true;
         }
+
+
+        //--- Mark we have finished the istep in the scratch reg
+        SPLESS::MboxScratch5_HB_t l_scratch5;
+        l_scratch5.magic = SPLESS::ISTEP_PROGRESS_MAGIC;
+        l_scratch5.stepFinish = 1;
+        l_scratch5.majorStep = iv_curIStep;
+        l_scratch5.minorStep = iv_curSubStep;
+        Util::writeScratchReg( SPLESS::MBOX_SCRATCH_REG5,
+                               l_scratch5.data32 );
 
         TRACFCOMP(g_trac_initsvc, EXIT_MRK"doIstep: step %d, substep %d",
                   i_istep, i_substep);
@@ -1877,17 +1889,32 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
     TRACDCOMP( g_trac_initsvc,ENTER_MRK"IStepDispatcher::sendProgressCode()");
     errlHndl_t err = NULL;
 
-    // Put in rolling bit RTC: 84794
-    // If we send this multiple times, we may need to eliminate the console
-    // write on subsequent.  RTC: 84794
 
+    //--- Display istep in Simics console
+    MAGIC_INST_PRINT_ISTEP( iv_curIStep, iv_curSubStep );
+
+
+    //--- Save step to a scratch reg
+    SPLESS::MboxScratch5_HB_t l_scratch5;
+    l_scratch5.magic = SPLESS::ISTEP_PROGRESS_MAGIC;
+    l_scratch5.stepStart = 1;
+    l_scratch5.majorStep = iv_curIStep;
+    l_scratch5.minorStep = iv_curSubStep;
+    Util::writeScratchReg( SPLESS::MBOX_SCRATCH_REG5,
+                           l_scratch5.data32 );
+
+
+    //--- Display step on serial console
 #ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
+    // Note If we ever send progress codes multiple times, we may need to
+    // eliminate the console write on subsequent.
     CONSOLE::displayf(NULL, "ISTEP %2d.%2d", iv_curIStep, iv_curSubStep);
     CONSOLE::flush();
 #endif
 
+
+    //--- Reset the watchdog before every istep
 #ifdef CONFIG_BMC_IPMI
-    //Reset the watchdog before every istep
     errlHndl_t err_ipmi = IPMIWATCHDOG::resetWatchDogTimer();
 
     if(err_ipmi)
@@ -1897,22 +1924,27 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
         err_ipmi->collectTrace("INITSVC", 1024);
         errlCommit(err_ipmi, INITSVC_COMP_ID );
     }
-
 #endif
 
-    msg_t * myMsg = msg_allocate();
-    myMsg->type = IPL_PROGRESS_CODE;
-    myMsg->data[0] = iv_curIStep;
-    myMsg->data[1] = iv_curSubStep;
-    myMsg->extra_data = NULL;
-    err = MBOX::send(HWSVRQ, myMsg);
-    if (err && err->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
+
+    //--- Send the progress code to the FSP
+    if( iv_spBaseServicesEnabled )
     {
-        err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+        msg_t * myMsg = msg_allocate();
+        myMsg->type = IPL_PROGRESS_CODE;
+        myMsg->data[0] = iv_curIStep;
+        myMsg->data[1] = iv_curSubStep;
+        myMsg->extra_data = NULL;
+        err = MBOX::send(HWSVRQ, myMsg);
+        if (err && err->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
+        {
+            err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+        }
+        clock_gettime(CLOCK_MONOTONIC, &iv_lastProgressMsgTime);
+        TRACFCOMP( g_trac_initsvc,INFO_MRK"Progress Code %d.%d Sent",
+                   myMsg->data[0],myMsg->data[1]);
     }
-    clock_gettime(CLOCK_MONOTONIC, &iv_lastProgressMsgTime);
-    TRACFCOMP( g_trac_initsvc,INFO_MRK"Progress Code %d.%d Sent",
-               myMsg->data[0],myMsg->data[1]);
+
     TRACDCOMP( g_trac_initsvc,EXIT_MRK"IStepDispatcher::sendProgressCode()" );
 
     if (i_needsLock)
