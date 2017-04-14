@@ -159,7 +159,7 @@ chip p9_ec
     {
         name        "P9 EC target COREFIR WOF";
         scomaddr    0x20010a48;
-        reset       (&, 0x20010a41);
+        reset       (|, 0x20010a48);
         capture     group default;
     };
 
