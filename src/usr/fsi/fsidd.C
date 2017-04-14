@@ -2670,13 +2670,21 @@ errlHndl_t FsiDD::errorCleanup( FSI::FsiAddrInfo_t& i_addrInfo,
             l_err = write( i_addrInfo.fsiTarg, FSI::SLRES_34, &data );
             if(l_err) break;
 
-            //further step is to issue a PIB reset to the FSI2PIB engine
-            //in busy state, i.e. write arbitrary data to 101c
-            //(putcfam 1007) register of the previously failed FSI2PIB
-            //engine on Centaur.
-            data = 0xFFFFFFFF;
-            l_err = write( i_addrInfo.fsiTarg, FSI::FSI2PIB_STATUS, &data );
-            if(l_err) break;
+            //Note: Not issuing PIB reset here to recent chips as it
+            //      causes bad things to the rest of the logic
+            if( i_addrInfo.fsiTarg->getAttr<TARGETING::ATTR_MODEL>()
+                == TARGETING::MODEL_CENTAUR )
+            {
+                //further step is to issue a PIB reset to the FSI2PIB engine
+                //in busy state, i.e. write arbitrary data to 101c
+                //(putcfam 1007) register of the previously failed FSI2PIB
+                //engine on Centaur.
+                data = 0xFFFFFFFF;
+                l_err = write( i_addrInfo.fsiTarg,
+                               FSI::FSI2PIB_STATUS,
+                               &data );
+                if(l_err) break;
+            }
 
             //Need to save/restore the true/comp masks or the FSP will
             // get annoyed
