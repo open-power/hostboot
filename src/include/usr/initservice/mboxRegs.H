@@ -112,7 +112,7 @@ namespace SPLESS
         // NOTE: Used for sbe comm during runtime
     };
 
-    // Mailbox Scratch Register 5
+    // Mailbox Scratch Register 5 - SBE Usage
     union MboxScratch5_t
     {
         uint32_t data32;
@@ -128,6 +128,22 @@ namespace SPLESS
             uint32_t clockPllMux         :20;   //12:31
         } PACKED;
     };
+    // Mailbox Scratch Register 5 - HB Usage
+    union MboxScratch5_HB_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t magic               :8;    //0:7
+            uint32_t stepStart           :1;    //8
+            uint32_t stepFinish          :1;    //9
+            uint32_t reserved            :2;    //10:11
+            uint32_t internalStep        :4;    //12:15
+            uint32_t majorStep           :8;    //16:23
+            uint32_t minorStep           :8;    //24:31
+        } PACKED;
+    };
+    const uint8_t ISTEP_PROGRESS_MAGIC = 0xAA;
 
     // Mailbox Scratch Register 6
     union MboxScratch6_t
