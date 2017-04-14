@@ -34,7 +34,6 @@
 #include <vfs/vfs.H>
 #include <htmgt/htmgt.H>
 #include <runtime/runtime.H>
-#include <devtree/devtreeif.H>
 #include <runtime/customize_attrs_for_payload.H>
 #include <targeting/common/util.H>
 #include <vpd/vpd_if.H>
@@ -275,6 +274,7 @@ void* call_host_runtime_setup (void *io_pArgs)
         if( TARGETING::is_sapphire_load()
             && (!INITSERVICE::spBaseServicesEnabled()) )
         {
+            //@fixme-RTC:172836-broken for HDAT mode?
             // Update the VPD switches for golden side boot
             // Must do this before building the devtree
             l_err = VPD::goldenSwitchUpdate();

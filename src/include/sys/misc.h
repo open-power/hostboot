@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,8 +107,7 @@ extern "C"
  *  @param[in] i_payload_base   The base address (target HRMOR) of the payload.
  *  @param[in] i_payload_entry  The offset from base address of the payload
  *                              entry-point.
- *  @param[in] i_payload_data   Data pointer fo the payload.  For standalone
- *                              Saphire this is the devtree
+ *  @param[in] i_payload_data   Data pointer fo the payload.
  *  @param[in[ i_masterHBInstance  Hostboot instance number. for multinode
  */
 extern "C" void shutdown(uint64_t i_status,

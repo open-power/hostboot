@@ -116,7 +116,7 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & o_vpd_addr)
         {
             o_vpd_addr = TARGETING::get_top_mem_addr();
             assert (o_vpd_addr != 0,
-                    "bld_devtree: Top of memory was 0!");
+                    "vpd_load_rt_image: Top of memory was 0!");
 
             o_vpd_addr -= VMM_RT_VPD_OFFSET;
 
@@ -124,7 +124,7 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & o_vpd_addr)
                                 VMM_RT_VPD_SIZE);
             vpd_ptr = reinterpret_cast<uint8_t*>(vptr);
 
-            assert(vptr != NULL,"bld_devtree: Could not map VPD memory");
+            assert(vptr != NULL,"vpd_load_rt_image: Could not map VPD memory");
         }
 
         err = bld_vpd_image(PNOR::DIMM_JEDEC_VPD,
