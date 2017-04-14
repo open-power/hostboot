@@ -21726,41 +21726,6 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
-
-<enumerationType>
-    <id>PROC_FABRIC_ADDR_BAR_MODE</id>
-    <description>
-        Enumeration indicating the PROC_FABRIC_ADDR_BAR_MODE
-    </description>
-    <!--  Note: Values must match numbers from nest_attributes.xml -->
-    <enumerator>
-        <name>LARGE_SYSTEM</name>
-        <value>0x0</value>
-    </enumerator>
-</enumerationType>
-
-<attribute>
-  <id>PROC_FABRIC_ADDR_BAR_MODE</id>
-  <!-- <targetType>TARGET_TYPE_SYSTEM</targetType> -->
-  <description>
-    Processor memory map configuration.
-    0 = large system address map (default)
-    Provided by the MRW.
-  </description>
-  <simpleType>
-    <uint8_t>
-      <default>LARGE_SYSTEM</default>
-    </uint8_t>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-  <hwpfToHbAttrMap>
-    <id>ATTR_PROC_FABRIC_ADDR_BAR_MODE</id>
-    <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
-</attribute>
-
-
 <attribute>
   <id>PROC_FABRIC_SYSTEM_MASTER_CHIP</id>
   <!-- <targetType>TARGET_TYPE_PROC_CHIP</targetType> -->
