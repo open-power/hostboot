@@ -119,6 +119,10 @@ const uint16_t NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN_DD2              = 0x7333;
 // sample rate match threshold maximum (64k * 0.55 = 36,044)
 const uint16_t NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_DD2              = 0x8CCC;
 
+// RNG Read Delay Parameters Register
+// Read Retry Ratio (0 = 31/32, 1 = 15/16, 2 = 29/32 ... 15 = 1/2 ... 31 = disabled)
+const uint8_t  NX_RNG_CQ_RDELAY_READ_RTY_RATIO_DD1               = 0x1F;
+const uint8_t  NX_RNG_CQ_RDELAY_READ_RTY_RATIO_DD2               = 0x1F;
 
 // RNG Status And Control Register constants (Applies to both)
 const bool     NX_RNG_CFG_CONDITIONER_MASK_TOGGLE            = false;
@@ -152,6 +156,7 @@ p9_rng_init_phase1(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     fapi2::buffer<uint64_t> l_rng_st1_data;
     fapi2::buffer<uint64_t> l_rng_st2_data;
     fapi2::buffer<uint64_t> l_rng_st3_data;
+    fapi2::buffer<uint64_t> l_rng_rdelay_data;
 
     uint8_t l_dd1 = 0;
     uint8_t l_HW403701 = 0;
@@ -184,6 +189,8 @@ p9_rng_init_phase1(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
              "Error from getScom (NX RNG Self Test Register 1)");
     FAPI_TRY(fapi2::getScom(i_target, PU_NX_RNG_ST3, l_rng_st3_data),
              "Error from getScom (NX RNG Self Test Register 3)");
+    FAPI_TRY(fapi2::getScom(i_target, PU_NX_RNG_RDELAY, l_rng_rdelay_data),
+             "Error from putScom (NX RNG Read Delay Parameters Register)");
 
     if (l_dd1 != 0)
     {
@@ -222,6 +229,10 @@ p9_rng_init_phase1(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
         (NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN_DD1);
         l_rng_st3_data.insertFromRight<PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX, PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_LEN>
         (NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_DD1);
+
+        // configure RNG Read Delay Parameters Register
+        l_rng_rdelay_data.insertFromRight<PU_NX_RNG_RDELAY_CQ_READ_RTY_RATIO, PU_NX_RNG_RDELAY_CQ_READ_RTY_RATIO_LEN>
+        (NX_RNG_CQ_RDELAY_READ_RTY_RATIO_DD1);
     }
     else
     {
@@ -260,6 +271,10 @@ p9_rng_init_phase1(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
         (NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN_DD2);
         l_rng_st3_data.insertFromRight<PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX, PU_NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_LEN>
         (NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_DD2);
+
+        // configure RNG Read Delay Parameters Register
+        l_rng_rdelay_data.insertFromRight<PU_NX_RNG_RDELAY_CQ_READ_RTY_RATIO, PU_NX_RNG_RDELAY_CQ_READ_RTY_RATIO_LEN>
+        (NX_RNG_CQ_RDELAY_READ_RTY_RATIO_DD2);
     }
 
     FAPI_TRY(fapi2::putScom(i_target, PU_NX_RNG_ST0, l_rng_st0_data),
@@ -270,6 +285,9 @@ p9_rng_init_phase1(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 
     FAPI_TRY(fapi2::putScom(i_target, PU_NX_RNG_ST3, l_rng_st3_data),
              "Error from putScom (NX RNG Self Test Register 3)");
+
+    FAPI_TRY(fapi2::putScom(i_target, PU_NX_RNG_RDELAY, l_rng_rdelay_data),
+             "Error from putScom (NX RNG Read Delay Parameters Register)");
 
     // 4. If RNG is not broken then host boot sets rng_enable =1.
     // update RNG Status and Control Register to engage initialization test
@@ -308,4 +326,3 @@ fapi_try_exit:
     FAPI_INF("End");
     return fapi2::current_err;
 }
-
