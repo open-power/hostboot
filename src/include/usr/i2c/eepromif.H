@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,7 @@ bool eepromPresence ( TARGETING::Target * i_target );
 
 /**
  * @brief Define a set of information about all EEPROMs in the
- *        system (primarily used to populate the devtree)
+ *        system (primarily used to populate HDAT)
  */
 struct EepromInfo_t
 {

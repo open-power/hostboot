@@ -120,7 +120,6 @@ namespace   INITSERVICE
 const DepModInfo  g_istep21Dependancies = {
     {
         DEP_LIB(libistep21.so),
-        DEP_LIB(libdevtree.so),
         DEP_LIB(libruntime.so),
         DEP_LIB(libp9_cpuWkup.so),
         DEP_LIB(libpm.so),

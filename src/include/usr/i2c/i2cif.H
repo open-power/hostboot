@@ -155,7 +155,7 @@ void i2cSetAccessMode( i2cSetAccessModeType i_setModeType );
 
 /**
  * @brief Define a set of information about the I2C masters
- *   (primarily used to populate the devtree)
+ *   (primarily used to populate the HDAT)
  */
 struct MasterInfo_t
 {

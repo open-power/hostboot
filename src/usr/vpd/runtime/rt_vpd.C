@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,8 +64,8 @@ struct rtVpdInit
         // The VPD code that is common to IPL and runtime uses the
         // pnorCacheValid switch.  During a golden-side boot this switch
         // gets cleared when the VPD cache is invalidated.  At runtime
-        // we may need to use the VPD cache (really the devtree data in
-        // memory) so we copy the RT switch to the common switch.
+        // we may need to use the VPD cache in memory so we copy the RT
+        // switch to the common switch.
 
         // Find all the targets with VPD switches
         for (TARGETING::TargetIterator target =

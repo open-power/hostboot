@@ -56,7 +56,6 @@ SUBDIRS += runtime.d
 SUBDIRS += ibscom.d
 SUBDIRS += dump.d
 SUBDIRS += secureboot.d
-SUBDIRS += devtree.d
 SUBDIRS += sbe.d
 SUBDIRS += sbeio.d
 SUBDIRS += gpio.d

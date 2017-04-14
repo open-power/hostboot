@@ -42,7 +42,6 @@
 #include <kernel/console.H>
 #include <util/misc.H>
 #include <sys/mm.h>
-#include <devtree/devtreeif.H>
 #include <kernel/ipc.H> // for internode data areas
 #include <mbox/ipc_msg_types.H>
 #include <devicefw/userif.H>
