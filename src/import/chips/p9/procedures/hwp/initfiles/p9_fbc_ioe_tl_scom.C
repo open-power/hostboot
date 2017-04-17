@@ -34,7 +34,6 @@ constexpr uint64_t literal_0x1 = 0x1;
 constexpr uint64_t literal_0x20 = 0x20;
 constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_12 = 12;
-constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_10 = 10;
 constexpr uint64_t literal_0b0010001 = 0b0010001;
 constexpr uint64_t literal_11 = 11;
@@ -67,18 +66,12 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, TGT1, l_TGT1_ATTR_FREQ_PB_MHZ));
         fapi2::ATTR_FREQ_X_MHZ_Type l_TGT1_ATTR_FREQ_X_MHZ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_X_MHZ, TGT1, l_TGT1_ATTR_FREQ_X_MHZ));
-        uint64_t l_def_X_RATIO_12_10 = ((literal_10 * (l_TGT1_ATTR_FREQ_X_MHZ * literal_8)) >=
-                                        (literal_12 * l_TGT1_ATTR_FREQ_PB_MHZ));
-        uint64_t l_def_X_RATIO_11_10 = ((literal_10 * (l_TGT1_ATTR_FREQ_X_MHZ * literal_8)) >=
-                                        (literal_11 * l_TGT1_ATTR_FREQ_PB_MHZ));
-        uint64_t l_def_X_RATIO_10_10 = ((literal_10 * (l_TGT1_ATTR_FREQ_X_MHZ * literal_8)) >=
-                                        (literal_10 * l_TGT1_ATTR_FREQ_PB_MHZ));
-        uint64_t l_def_X_RATIO_10_11 = ((literal_11 * (l_TGT1_ATTR_FREQ_X_MHZ * literal_8)) >=
-                                        (literal_10 * l_TGT1_ATTR_FREQ_PB_MHZ));
-        uint64_t l_def_X_RATIO_10_12 = ((literal_12 * (l_TGT1_ATTR_FREQ_X_MHZ * literal_8)) >=
-                                        (literal_10 * l_TGT1_ATTR_FREQ_PB_MHZ));
-        uint64_t l_def_X_RATIO_10_13 = ((literal_13 * (l_TGT1_ATTR_FREQ_X_MHZ * literal_8)) >=
-                                        (literal_10 * l_TGT1_ATTR_FREQ_PB_MHZ));
+        uint64_t l_def_X_RATIO_12_10 = ((literal_10 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_12 * l_TGT1_ATTR_FREQ_PB_MHZ));
+        uint64_t l_def_X_RATIO_11_10 = ((literal_10 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_11 * l_TGT1_ATTR_FREQ_PB_MHZ));
+        uint64_t l_def_X_RATIO_10_10 = ((literal_10 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_10 * l_TGT1_ATTR_FREQ_PB_MHZ));
+        uint64_t l_def_X_RATIO_10_11 = ((literal_11 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_10 * l_TGT1_ATTR_FREQ_PB_MHZ));
+        uint64_t l_def_X_RATIO_10_12 = ((literal_12 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_10 * l_TGT1_ATTR_FREQ_PB_MHZ));
+        uint64_t l_def_X_RATIO_10_13 = ((literal_13 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_10 * l_TGT1_ATTR_FREQ_PB_MHZ));
         uint64_t l_def_X1_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_1] != literal_0);
         uint64_t l_def_X2_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_2] != literal_0);
         fapi2::ATTR_CHIP_EC_FEATURE_HW384245_Type l_TGT0_ATTR_CHIP_EC_FEATURE_HW384245;
