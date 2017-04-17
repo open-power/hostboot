@@ -33747,26 +33747,6 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>DO_BLUE_WATERFALL_ADJUST</id>
-    <description>
-      For Nimbus pre DD1.** we want to adjust the blue waterfall values
-      and their associated gate delays if the blue waterfalls are 0.
-      Post DD1.** will have a hardware enabled fix for this.
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_DO_BLUE_WATERFALL_ADJUST</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>NDL_MESHCTRL_SETUP</id>
     <description>Control NDL training:meshctrl setup</description>
     <simpleType>
