@@ -137,7 +137,18 @@ errlHndl_t IntrRp::resetIntpForMpipl()
             {
                 PSIHB_SW_INTERFACES_t * this_psihb_ptr = (*targ_itr)->psiHbBaseAddr;
                 this_psihb_ptr->icr = PSI_BRIDGE_INTP_STATUS_CTL_RESET;
-                resetIntUnit(*targ_itr);
+
+                // TODO RTC: 172905 due to a DD1 workaround we have to do a SW reset
+                // The SW is causing a recoverable fir when we attemp to pull
+                // the thread context. The workaround earlier in the SBE's
+                // MPIPL steps is clearing out the phys_thread_enable regs
+                // so we can't pull thread context. All the SW reset is doing
+                // is enabling LSI interrutps (we do later) and clear the
+                // phys_thread_enabled regs which are already 0
+                // Still need to determine if we can skip this in DD2
+
+                //resetIntUnit(*targ_itr);
+
                 //Turn off VPC error when in LSI mode
                 err = disableVPCPullErr(*targ_itr);
                 if (err)
@@ -153,8 +164,10 @@ errlHndl_t IntrRp::resetIntpForMpipl()
         this_psihb_ptr->icr = PSI_BRIDGE_INTP_STATUS_CTL_RESET;
         TRACFCOMP(g_trac_intr, "Reset PSIHB INTR Complete");
 
+        // TODO RTC: 172905 Still need to determine if we can skip this in DD2
+        // (same as above)
         //Reset XIVE Interrupt unit
-        resetIntUnit(iv_masterHdlr);
+        //resetIntUnit(iv_masterHdlr);
 
         //Turn off VPC error when in LSI mode
         err = disableVPCPullErr(iv_masterHdlr);
