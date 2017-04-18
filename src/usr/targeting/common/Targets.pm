@@ -42,6 +42,8 @@ use constant
     PERVASIVE_PARENT_PEC_OFFSET => 13,
     PERVASIVE_PARENT_PHB_OFFSET => 13,
     PERVASIVE_PARENT_NV_OFFSET => 5,
+
+    NUM_PROCS_PER_GROUP => 4,
 };
 
 my %maxInstance = (
@@ -734,9 +736,13 @@ sub buildAffinity
 
             $self->setAttribute($target, "FABRIC_GROUP_ID",
                   $self->getAttribute($socket,"FABRIC_GROUP_ID"));
-             $self->setAttribute($target, "FABRIC_CHIP_ID",
+            $self->setAttribute($target, "FABRIC_CHIP_ID",
                   $self->getAttribute($socket,"FABRIC_CHIP_ID"));
             $self->setAttribute($target, "VPD_REC_NUM",    $proc);
+            $self->setAttribute($target, "FAPI_POS",
+                 $self->getAttribute($socket,"FABRIC_GROUP_ID") *
+                 NUM_PROCS_PER_GROUP +
+                 $self->getAttribute($socket,"FABRIC_CHIP_ID"));
 
             $self->iterateOverChiplets($target, $sys_pos, $node, $proc);
         }
@@ -1131,16 +1137,17 @@ sub processDimms
             my $MCA_PER_CHIP = $self->{UNIT_COUNTS}->
               {$mcs_target}->{MCA} * $MCS_PER_CHIP;
             my $DIMM_PER_MCA = 2;
+            my $parent_proc_fapi_pos =
+                   $self->getAttribute($proc_target, "FAPI_POS");
 
-            my $mcbist_pos = ($proc * $MCBIST_PER_CHIP) +
+            my $mcbist_pos = ($parent_proc_fapi_pos * $MCBIST_PER_CHIP) +
               $self->getAttribute($mcbist_target,"REL_POS");
-            my $mcs_pos = ($proc * $MCS_PER_CHIP) +
+            my $mcs_pos = ($parent_proc_fapi_pos * $MCS_PER_CHIP) +
               $self->getAttribute($mcs_target,"REL_POS");
-            my $mca_pos = ($proc * $MCA_PER_CHIP) +
+            my $mca_pos = ($parent_proc_fapi_pos * $MCA_PER_CHIP) +
               $self->getAttribute($mca_target,"REL_POS");
             my $dimm_pos = ($mca_pos * $DIMM_PER_MCA) +
               $self->getAttribute($dimm,"REL_POS");
-
 
             $self->setAttribute($dimm,"FAPI_NAME",
                     getFapiName($type, $node, $dimm_pos));
