@@ -82,7 +82,7 @@ void ClearChipletParityError(ExtensibleChip * i_chip,
         case TYPE_PEC:
             errRegStr = "PCI_ERROR_REG";
             break;
-        case TYPE_MCA:
+        case TYPE_MCBIST:
             errRegStr = "MC_ERROR_REG";
             break;
         case TYPE_EQ:
@@ -138,7 +138,7 @@ void ClearChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
         case TYPE_PEC:
             errRegStr = "PCI_ERROR_REG";
             break;
-        case TYPE_MCA:
+        case TYPE_MCBIST:
             errRegStr = "MC_ERROR_REG";
             break;
         default:
@@ -200,7 +200,7 @@ void MaskChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
         case TYPE_PEC:
             cfgRegStr = "PCI_CONFIG_REG";
             break;
-        case TYPE_MCA:
+        case TYPE_MCBIST:
             cfgRegStr = "MC_CONFIG_REG";
             break;
         default:
@@ -263,7 +263,7 @@ bool CheckChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
             errRegStr = "PCI_ERROR_REG";
             cfgRegStr = "PCI_CONFIG_REG";
             break;
-        case TYPE_MCA:
+        case TYPE_MCBIST:
             errRegStr = "MC_ERROR_REG";
             cfgRegStr = "MC_CONFIG_REG";
             break;
@@ -359,7 +359,7 @@ int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
             if (CheckChipletPll(i_chip, TYPE_PROC) ||
                 CheckChipletPll(i_chip, TYPE_XBUS) ||
                 CheckChipletPll(i_chip, TYPE_OBUS) ||
-                CheckChipletPll(i_chip, TYPE_MCA))
+                CheckChipletPll(i_chip, TYPE_MCBIST))
             {
                 o_errType |= SYS_PLL_UNLOCK;
             }
@@ -395,7 +395,7 @@ int32_t clearParityError( ExtensibleChip * i_chip,
         ClearChipletParityError(i_chip, TYPE_PROC);
         ClearChipletParityError(i_chip, TYPE_XBUS);
         ClearChipletParityError(i_chip, TYPE_OBUS);
-        ClearChipletParityError(i_chip, TYPE_MCA);
+        ClearChipletParityError(i_chip, TYPE_MCBIST);
         ClearChipletParityError(i_chip, TYPE_PEC);
         ClearChipletParityError(i_chip, TYPE_EQ);
         ClearChipletParityError(i_chip, TYPE_CORE);
@@ -460,7 +460,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
         ClearChipletPll(i_chip, TYPE_PROC);
         ClearChipletPll(i_chip, TYPE_XBUS);
         ClearChipletPll(i_chip, TYPE_OBUS);
-        ClearChipletPll(i_chip, TYPE_MCA);
+        ClearChipletPll(i_chip, TYPE_MCBIST);
         ClearChipletPll(i_chip, TYPE_PEC);
 
         // Clear TP_LFIR
@@ -503,7 +503,7 @@ int32_t MaskPll( ExtensibleChip * i_chip,
         MaskChipletPll(i_chip, TYPE_PROC);
         MaskChipletPll(i_chip, TYPE_XBUS);
         MaskChipletPll(i_chip, TYPE_OBUS);
-        MaskChipletPll(i_chip, TYPE_MCA);
+        MaskChipletPll(i_chip, TYPE_MCBIST);
     }
 
     if (PCI_PLL_UNLOCK & i_errType)

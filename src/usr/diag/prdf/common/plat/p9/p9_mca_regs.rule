@@ -208,24 +208,6 @@
     };
 
     ############################################################################
-    # PCB Slave Error Regs
-    ############################################################################
-
-    register MC_ERROR_REG
-    {
-        name        "MC PCB Slave error reg";
-        scomaddr    0x070F001F;
-        capture     group PllFIRs;
-    };
-
-    register MC_CONFIG_REG
-    {
-        name        "MC PCB Slave config reg";
-        scomaddr    0x070F001E;
-        capture     group PllFIRs;
-    };
-
-    ############################################################################
     # Misc
     ############################################################################
 
