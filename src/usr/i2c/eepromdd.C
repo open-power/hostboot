@@ -1608,11 +1608,6 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
         o_i2cInfo.devSize_KB     = eepromData.maxMemorySizeKB;
         o_i2cInfo.chipCount      = eepromData.chipCount;
         o_i2cInfo.writeCycleTime = eepromData.writeCycleTime;
-        // @TODO RTC:164392 Adjust until MRW is corrected CMVC 1010449/SW371374
-        if (o_i2cInfo.writeCycleTime < 10)
-        {
-            o_i2cInfo.writeCycleTime = 10;
-        }
 
         // Convert attribute info to eeprom_addr_size_t enum
         if ( eepromData.byteAddrOffset == 0x3 )
