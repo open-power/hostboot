@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -60,17 +60,21 @@
 <hwpError>
     <rc>RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP_MC</rc>
     <description>
-        p9_mss_eff_grouping is unable to group this MC.
+        p9_mss_eff_grouping is unable to group this MCA/DMI port.
         This is a memory plugging error. Refer to memory plugging rules.
-        The attached target MC or MEMBUF chip is deconfigured as a result.
+        The target MCA/DMI is deconfigured as a result.
     </description>
-    <ffdc>MC_PORT_NUMBER</ffdc>
+    <ffdc>MC_PORT</ffdc>
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
         <priority>HIGH</priority>
     </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>MEDIUM</priority>
+    </callout>
     <deconfigure>
-        <target>TARGET</target>
+        <target>MC_TARGET</target>
     </deconfigure>
 </hwpError>
 
