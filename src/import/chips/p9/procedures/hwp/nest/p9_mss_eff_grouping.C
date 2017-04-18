@@ -401,41 +401,44 @@ fapi2::ReturnCode EffGroupingDmiAttrs::getAttrs(
     FAPI_DBG("Entering EffGroupingDmiAttrs::getAttrs");
     fapi2::ReturnCode l_rc;
 
-    // Get the amount of memory behind this DMI target
+    // Get the membuf attached to this DMI
+    auto l_attachedMembuf = i_target.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
+
+    if (l_attachedMembuf.size() > 0)
+    {
+        // Set the membuf associated with this DMI, supposed to be only 1
+        // Centaur per DMI
+        iv_membuf = l_attachedMembuf.front();
+
+        // Get the amount of memory behind this DMI target
+
+//TODO: RTC 173371
+//      Need Memory team's supports for function to be called on a DMI target.
 #if 0
-    // Note: For Cumulus, needs Memory team to support the function
-    //       to be called on DMI targets.
-    FAPI_TRY(mss::eff_memory_size(i_target, iv_dimmSize),
-             "Error returned from eff_memory_size, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
+        FAPI_TRY(mss::eff_memory_size(i_target, iv_dimmSize),
+                 "Error returned from eff_memory_size, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
 #endif
 
-    // Get the membufs attached to this DMI
-    // Note: For Cumulus, needs to have getAssociatedMembufs() supported
-    //auto l_associatedMembufs = i_target.getAssociatedMembufs();
-    fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_membuf1;
-    fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_membuf2;
-    auto l_associatedMembufs = {l_membuf1, l_membuf2};
+    }
 
     // Get the DMI unit position
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, iv_unitPos),
              "Error getting DMI ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
-    // Set the membuf target associated with this DMI
-    for (auto membuf_itr = l_associatedMembufs.begin();
-         membuf_itr != l_associatedMembufs.end();
-         ++membuf_itr)
-    {
-        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>l_membuf = (*membuf_itr);
 
-        // Set the membuf associated with this DMI
-        iv_membuf = l_membuf;
+//TODO: RTC 173371
+//      Force data for testing on AWAN
+    if ( (iv_unitPos >= 2) && (iv_unitPos <= 5) )
+    {
+        iv_dimmSize = 64;
     }
 
     // Display this DMI's attribute info
-    FAPI_INF("EffGroupingDmiAttrs::getAttrs: DMI %d: iv_dimmSize %d GB ",
-             iv_unitPos, iv_dimmSize);
+    FAPI_INF("EffGroupingDmiAttrs::getAttrs: DMI %d, Centaur attached %d, "
+             "iv_dimmSize %d GB ",
+             iv_unitPos, l_attachedMembuf.size(), iv_dimmSize);
 
 fapi_try_exit:
     FAPI_DBG("Exiting EffGroupingDmiAttrs::getAttrs");
@@ -583,11 +586,11 @@ fapi2::ReturnCode EffGroupingMemInfo::getMemInfo (
             FAPI_DBG("Number of DMIs found: %d", l_dmiChiplets.size());
 
             // DMI found, proc is a Cumulus.
-            for (auto l_dmmi : l_dmiChiplets)
+            for (auto l_dmi : l_dmiChiplets)
             {
                 // Get this DMI attribute info
                 EffGroupingDmiAttrs l_dmiAttrs;
-                FAPI_TRY(l_dmiAttrs.getAttrs(l_dmmi),
+                FAPI_TRY(l_dmiAttrs.getAttrs(l_dmi),
                          "l_dmiAttrs.getAttrs() returns error, l_rc 0x%.8X",
                          (uint64_t)fapi2::current_err);
 
@@ -1294,9 +1297,9 @@ fapi_try_exit:
 void grouping_group8PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
                                   EffGroupingData& o_groupData)
 {
-    // There are 8 MC ports (MCA) in a Nimbus and they can be grouped
-    // together if they all have the same memory size (assumed that no ports
-    // have already been grouped
+    // There are 8 MC ports (MCA/DMI) in a proc (Nimbus/Cumulus) and they can
+    // be grouped together if they all have the same memory size (assumed
+    // that no ports have already been grouped
     FAPI_DBG("Entering");
 
     FAPI_INF("grouping_group8PortsPerGroup: Attempting to group 8 MC ports");
@@ -1900,7 +1903,9 @@ void grouping_2groupsOf2_cross_MCS(const EffGroupingMemInfo& i_memInfo,
     const uint8_t PORTS_PER_GROUP = 2;
     uint8_t l_port = 0;
 
-    // Try 2 groups of 2 from 2 cross-MCS. Possible combinations:
+    // Try 2 groups of 2 from 2 cross-MCS/MI. Possible combinations:
+    // MCS and MCA --> Nimbus
+    // MI and DMI --> Cumulus
     //    MCS0 and MCS1 --> MCA0/MCA2 & MCA1/MCA3 or MCA0/MCA3 & MCA1/MCA2
     //    MCS0 and MCS2 --> MCA0/MCA4 & MCA1/MCA5 or MCA0/MCA5 & MCA1/MCA4
     //    MCS0 and MCS3 --> MCA0/MCA6 & MCA1/MCA7 or MCA0/MCA7 & MCA1/MCA6
@@ -2186,9 +2191,10 @@ void grouping_group1PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
 ///
 /// @brief Finds ungrouped ports
 ///
-/// If any are found then their associated MCA/Membuf chip is deconfigured
+/// If any are found then their associated Memory Controller (MCA/DMI)
+//  will be deconfigured
 ///
-/// @param[in] i_mcChiplets  Reference to MC targets (MCA or MEMBUF)
+/// @param[in] i_mcChiplets  Reference to MC targets (MCA or DMI)
 /// @param[in] i_memInfo     Reference to Memory Info
 /// @param[in] i_groupData   Reference to Group data
 ///
@@ -2198,20 +2204,13 @@ template<fapi2::TargetType T>
 fapi2::ReturnCode grouping_findUngroupedPorts(
     const std::vector< fapi2::Target<T> >& i_mcTargets,
     const EffGroupingMemInfo& i_memInfo,
-    const EffGroupingData& i_groupData);
-
-// Specialization for MCA targets
-template<>
-fapi2::ReturnCode grouping_findUngroupedPorts(
-    const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> >& i_mcTargets,
-    const EffGroupingMemInfo& i_memInfo,
     const EffGroupingData& i_groupData)
 {
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
 
     // std_pair<MC number, target>
-    std::map<uint8_t, fapi2::Target<fapi2::TARGET_TYPE_MCA>> l_unGroupedPair;
+    std::map<uint8_t, fapi2::Target<T>> l_unGroupedPair;
 
     // Mark the MCs that are not grouped
     for (uint8_t ii = 0; ii < NUM_MC_PORTS_PER_PROC; ii++)
@@ -2221,18 +2220,18 @@ fapi2::ReturnCode grouping_findUngroupedPorts(
         {
             FAPI_ERR("grouping_findUngroupedPorts: Unable to group port %u", ii);
 
-            for (auto l_mca : i_mcTargets)
+            for (auto l_mc : i_mcTargets)
             {
                 // Get the MCA position
                 uint8_t l_unitPos = 0;
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mca, l_unitPos),
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mc, l_unitPos),
                          "Error getting MCA ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
                          (uint64_t)fapi2::current_err);
 
                 if (l_unitPos == ii)
                 {
-                    l_unGroupedPair.insert(std::pair<uint8_t, fapi2::Target<fapi2::TARGET_TYPE_MCA>>
-                                           (ii, l_mca));
+                    l_unGroupedPair.insert(std::pair<uint8_t, fapi2::Target<T>>
+                                           (ii, l_mc));
                     break;
                 }
             }
@@ -2244,70 +2243,11 @@ fapi2::ReturnCode grouping_findUngroupedPorts(
     {
         // Assert with first failed port as FFDC
         uint8_t l_mcPortNum = l_unGroupedPair.begin()->first;
-        fapi2::Target<fapi2::TARGET_TYPE_MCA> l_portTarget =
-            l_unGroupedPair.begin()->second;
+        fapi2::Target<T> l_portTarget = l_unGroupedPair.begin()->second;
         FAPI_ASSERT(false,
                     fapi2::MSS_EFF_GROUPING_UNABLE_TO_GROUP_MC()
-                    .set_MC_PORT_NUMBER(l_mcPortNum)
-                    .set_TARGET(l_portTarget),
-                    "grouping_findUngroupedPorts: Unable to group port %u", l_mcPortNum);
-    }
-
-fapi_try_exit:
-    FAPI_DBG("Exiting");
-    return fapi2::current_err;
-}
-
-// Specialization for DMI targets
-template<>
-fapi2::ReturnCode grouping_findUngroupedPorts(
-    const std::vector< fapi2::Target<fapi2::TARGET_TYPE_DMI> >& i_mcTargets,
-    const EffGroupingMemInfo& i_memInfo,
-    const EffGroupingData& i_groupData)
-{
-    FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
-
-    // std_pair<MC number, target>
-    std::map<uint8_t, fapi2::Target<fapi2::TARGET_TYPE_DMI>> l_unGroupedPair;
-
-    // Mark the MCs that are not grouped
-    for (uint8_t ii = 0; ii < NUM_MC_PORTS_PER_PROC; ii++)
-    {
-        if ( (i_memInfo.iv_portSize[ii] != 0) &&
-             (i_groupData.iv_portGrouped[ii] == false) )
-        {
-            FAPI_ERR("grouping_findUngroupedPorts: Unable to group port %u", ii);
-
-            for (auto l_dmi : i_mcTargets)
-            {
-                // Get the DMI position
-                uint8_t l_unitPos = 0;
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_dmi, l_unitPos),
-                         "Error getting DMI ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
-                         (uint64_t)fapi2::current_err);
-
-                if (l_unitPos == ii)
-                {
-                    l_unGroupedPair.insert(std::pair<uint8_t, fapi2::Target<fapi2::TARGET_TYPE_DMI>>
-                                           (ii, l_dmi));
-                    break;
-                }
-            }
-        }
-    }
-
-    // There are some ungrouped MC ports
-    if (l_unGroupedPair.size() > 0)
-    {
-        // Assert with first failed port as FFDC
-        uint8_t l_mcPortNum = l_unGroupedPair.begin()->first;
-        fapi2::Target<fapi2::TARGET_TYPE_DMI> l_portTarget =
-            l_unGroupedPair.begin()->second;
-        FAPI_ASSERT(false,
-                    fapi2::MSS_EFF_GROUPING_UNABLE_TO_GROUP_MC()
-                    .set_MC_PORT_NUMBER(l_mcPortNum)
-                    .set_TARGET(l_portTarget),
+                    .set_MC_PORT(l_mcPortNum)
+                    .set_MC_TARGET(l_portTarget),
                     "grouping_findUngroupedPorts: Unable to group port %u", l_mcPortNum);
     }
 
@@ -2478,6 +2418,7 @@ fapi2::ReturnCode grouping_calcMirrorMemory(
         if (io_groupData.iv_data[pos][PORTS_IN_GROUP] > 1)
         {
             uint8_t l_mirrorOffset = pos + MIRR_OFFSET;
+
             // Mirrored size is half the group size
             io_groupData.iv_data[l_mirrorOffset][GROUP_SIZE] =
                 io_groupData.iv_data[pos][GROUP_SIZE] / 2;
@@ -2485,6 +2426,13 @@ fapi2::ReturnCode grouping_calcMirrorMemory(
                 io_groupData.iv_data[pos][PORT_SIZE];
             io_groupData.iv_data[l_mirrorOffset][PORTS_IN_GROUP] =
                 io_groupData.iv_data[pos][PORTS_IN_GROUP];
+
+            // Copy port members fron non-mirrored to mirrored group
+            for (uint8_t ii = 0; ii < io_groupData.iv_data[pos][PORTS_IN_GROUP]; ii++)
+            {
+                io_groupData.iv_data[l_mirrorOffset][MEMBER_IDX(ii)] =
+                    io_groupData.iv_data[pos][MEMBER_IDX(ii)];
+            }
 
             for (uint8_t l_altRegion = 0; l_altRegion < NUM_OF_ALT_MEM_REGIONS; l_altRegion++)
             {
