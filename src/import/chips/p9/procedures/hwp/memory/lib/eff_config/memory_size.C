@@ -27,18 +27,17 @@
 /// @file memory_size.C
 /// @brief Return the effective memory size behind a target
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #include <fapi2.H>
+
 #include <lib/mss_attribute_accessors.H>
-
 #include <lib/shared/mss_const.H>
-#include <lib/eff_config/memory_size.H>
-
+#include <generic/memory/lib/utils/memory_size.H>
 #include <generic/memory/lib/utils/find.H>
 
 namespace mss

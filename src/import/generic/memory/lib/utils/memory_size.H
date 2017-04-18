@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/eff_config/memory_size.H $ */
+/* $Source: src/import/generic/memory/lib/utils/memory_size.H $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -27,8 +27,8 @@
 /// @file memory_size.H
 /// @brief Return the effective memory size behind a target
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
@@ -37,8 +37,6 @@
 #define _MSS_EFF_MEMORY_SIZE_H_
 
 #include <fapi2.H>
-
-#include <lib/mss_attribute_accessors.H>
 
 namespace mss
 {

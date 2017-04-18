@@ -27,8 +27,8 @@
 /// @file mcbist.H
 /// @brief Run and manage the MCBIST engine
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
@@ -42,7 +42,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <lib/utils/poll.H>
-#include <lib/eff_config/memory_size.H>
+#include <generic/memory/lib/utils/memory_size.H>
 #include <lib/shared/mss_const.H>
 #include <lib/utils/bit_count.H>
 #include <lib/utils/num.H>
