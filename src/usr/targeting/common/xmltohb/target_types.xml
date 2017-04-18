@@ -743,6 +743,7 @@
     <attribute><id>PAYLOAD_IN_MIRROR_MEM</id></attribute>
     <!-- AVP override for fused cores or normal cores -->
     <attribute><id>FUSED_CORE_OPTION</id></attribute>
+    <attribute><id>FUSED_CORE_MODE</id></attribute>
     <attribute><id>MIRROR_BASE_ADDRESS</id></attribute>
     <attribute><id>EFFECTIVE_EC</id></attribute>
     <attribute><id>HB_RSV_MEM_SIZE_MB</id></attribute>
