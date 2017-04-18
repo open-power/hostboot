@@ -105,6 +105,9 @@ cen_pll_initf(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
     l_clk_region.setBit<21>();    // SEL_THOLD_NSL
     FAPI_TRY(fapi2::putScom(i_target, CEN_CLK_REGION_PCB, l_clk_region),
              "Error from putScom (CEN_CLK_REGION_PCB, setpulse)");
+
+    FAPI_TRY(fapi2::delay(0, 10000));
+
     l_clk_region.flush<0>();
     FAPI_TRY(fapi2::putScom(i_target, CEN_CLK_REGION_PCB, l_clk_region),
              "Error from putScom (CEN_CLK_REGION_PCB, clear)");
