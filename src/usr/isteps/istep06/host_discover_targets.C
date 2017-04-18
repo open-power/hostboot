@@ -230,9 +230,8 @@ bool deassertSpecialWakeupOnCores(ISTEP_ERROR::IStepError & io_istepError)
 }
 
 /**
-*  @brief  Walk through the cores and ensure special wakeup is disabled
-*          from all srcs.
-*
+*  @brief  Walk through list of PROC chip targets and send a continueMPIPL
+*          FIFO chip-op to all of the slave PROC chips
 *
 *  @return     errlHndl_t
 */
