@@ -18907,6 +18907,40 @@ Measured in GB</description>
     <writeable/>
 </attribute>
 
+<enumerationType>
+    <id>FUSED_CORE_MODE</id>
+    <description>Enum for FUSED_CORE_MODE</description>
+    <enumerator>
+        <name>SMT4_DEFAULT</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>SMT4_ONLY</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>SMT8_ONLY</name>
+        <value>2</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>FUSED_CORE_MODE</id>
+    <description>
+        Stores the SMT setting used to determine fused mode.
+        SMT4_DEFAULT: Nimbus_DD1, boot in SMT4 but can change to SMT8
+        SMT4_ONLY: Nimbus_DD2/Cumulus, set based on PVR info
+        SMT8_ONLY: Nimbus_DD2/Cumulus, set based on PVR info
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 <attribute>
     <id>ICACHE_LINE_SIZE</id>
     <description>Icache Line Size in bytes</description>
