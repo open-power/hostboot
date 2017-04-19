@@ -22,18 +22,50 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- TODO add callout, gard, deconfig info wherever applicable --> 
 <hwpErrors>
+  <!-- This will collect all the status/error registers for PBA -->
+  <registerFfdc>
+    <id>REG_FFDC_PBA_REGISTERS</id>
+    <scomRegister>PU_PBAMODE_PIB</scomRegister>
+    <scomRegister>PU_PBASLVRST_PIB</scomRegister>
+    <scomRegister>PU_PBASLVCTL3_PIB</scomRegister>
+    <scomRegister>PU_PBABAR3</scomRegister>
+    <scomRegister>PU_PBABARMSK3</scomRegister>
+    <scomRegister>PU_PBACFG</scomRegister>
+    <scomRegister>PU_PBAERRRPT0</scomRegister>
+    <scomRegister>PU_PBAERRRPT1</scomRegister>
+    <scomRegister>PU_PBAERRRPT2</scomRegister>
+    <scomRegister>PU_PBAFIR</scomRegister>
+    <scomRegister>PU_PBAFIRMASK</scomRegister>
+    <scomRegister>PU_PBAOCCACT</scomRegister>
+    <scomRegister>PU_PBARBUFVAL2</scomRegister>
+    <scomRegister>PU_PBARBUFVAL3</scomRegister>
+    <scomRegister>PU_PBAWBUFVAL0</scomRegister>
+    <scomRegister>PU_PBAWBUFVAL1</scomRegister>
+    <scomRegister>PU_PBAFIRACT0</scomRegister>
+    <scomRegister>PU_PBAFIRACT1</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBAR3</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBCSR3_RO</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBESR3</scomRegister>
+  </registerFfdc>
+
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
     <rc>RC_P9_PBA_COHERENT_UTILS_INVALID_ARGS</rc>
     <description>
       Procedure: p9_pba_coherent_utils
-      PBA access or setup not attempted, PBA access or setup is stopped
-    </description>
+      PBA access or setup not attempted, PBA access or setup is stopped.
+      There is an invalid argument (mislaigned address or address out of the
+      fabric address range) being passed ot the pba access or setup
+      procedure.
+     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>ADDRESS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -41,18 +73,57 @@
     <rc>RC_P9_PBA_COHERENT_UTILS_RESET_ERR</rc>
     <description>
       Procedure: p9_pba_coherent_utils
-      PBA Reset had a problem, the PBA was not actually reset
+      PBA reset did not finish (PBA_SLVRST_SLVCTL3 still in progress).
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>RDDATA</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PBA_REGISTERS</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
-    <rc>RC_P9_PBA_STATUS_ERR</rc>
+    <rc>RC_P9_PBA_STATUS_ERR_ADDR_ERR</rc>
     <description>
       Procedure: p9_pba_coherent_utils
-      PBA Read Status, Write Status, or Reset Register had a problem, the PBA was still busy
+      PBA Read Status, Write Status, or Reset Register indicated an error,
+      with an indication of a combined response address error.
+     </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RDBUF2</ffdc>
+    <ffdc>RDBUF3</ffdc>
+    <ffdc>WRBUF0</ffdc>
+    <ffdc>WRBUF1</ffdc>
+    <ffdc>SLVRSTDATA</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PBA_REGISTERS</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_PBA_STATUS_ERR_NO_ADDR_ERR</rc>
+    <description>
+      Procedure: p9_pba_coherent_utils
+      PBA Read Status, Write Status, or Reset Register indicated an error,
+      with no indication of a combined response address error.
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>RDBUF2</ffdc>
@@ -60,6 +131,19 @@
     <ffdc>WRBUF0</ffdc>
     <ffdc>WRBUF1</ffdc>
     <ffdc>SLVRSTDATA</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PBA_REGISTERS</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -67,11 +151,15 @@
     <rc>RC_P9_PBA_FBC_NOT_INITIALIZED_ERR</rc>
     <description>
       Procedure: p9_pba_coherent_utils
-      The fabric was not initialized or not running
+      The fabric was not initialized or not running.
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>INITIALIZED</ffdc>
     <ffdc>RUNNING</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -79,22 +167,81 @@
     <rc>RC_P9_PBA_COHERENT_UTILS_OCB_STATUS_MISMATCH</rc>
     <description>
       Procedure: p9_pba_coherent_utils
-      Mismatch in expected state for OCB Status register
+      Mismatch in expected state for OCB Status register.
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>DATA</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PBA_REGISTERS</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
-    <rc>RC_P9_PBA_COHERENT_UTILS_PBA_FIR_ERR</rc>
+    <rc>RC_P9_PBA_COHERENT_UTILS_PBA_FIR_ERR_ADDR_ERR</rc>
     <description>
       Procedure: p9_pba_coherent_utils
-      PBA FIR bit active after transaction.
+      PBA FIR bit active after transaction, with indication of a combined
+      reponse address error.
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>DATA</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PBA_REGISTERS</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_PBA_COHERENT_UTILS_PBA_FIR_ERR_NO_ADDR_ERR</rc>
+    <description>
+      Procedure: p9_pba_coherent_utils
+      PBA FIR bit active after transaction, with no indication of a combined
+      response address error.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PBA_REGISTERS</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_PBA_COHERENT_UTILS_EXTRA_INPUT_DATA</rc>
+    <description>
+      Procedure: p9_pba_coherent_utils
+      Error code used to collect HWP input arguments.
+    </description>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>RNW</ffdc>
+    <ffdc>FLAGS</ffdc>
+  </hwpError>
 </hwpErrors>
 
