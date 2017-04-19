@@ -215,7 +215,8 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     l_total_cycles += i_cal_steps_enabled.getBit<WRITE_CTR>()   ? l_write_cntr_cycles          : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<COARSE_WR>()   ? coarse_wr_cycles(i_target)   : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<COARSE_RD>()   ? coarse_rd_cycles(i_target)   : 0;
-    l_total_cycles += i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>() ? rc::vref_guess_time(i_target) : 0;
+    l_total_cycles += ((l_vref_cal_enable != 0)
+                       && i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>()) ? rc::vref_guess_time(i_target) : 0;
 
     // Now we have to decide if we're going to abort on an error or keep going. If we keep going,
     // then we want our initial delay to be the expected time to completion - we don't have much
@@ -251,7 +252,7 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     // Fudge some for sim irregularities. This will increase time to a complete timeout but won't
     // really effect valid training unless these cycles are needed. So this isn't a bad thing ...
     // AKA watchdog timer
-    i_poll.iv_poll_count *= 10;
+    i_poll.iv_poll_count *= 2;
 
     FAPI_INF("cal abort on error? %s. tc: %luc, id: %luns(%lusc), d: %lu(%lusc), pc: %lu",
              (cal_abort_on_error ? "yup" : "nope"), l_total_cycles, i_poll.iv_initial_delay,
