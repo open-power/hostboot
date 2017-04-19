@@ -378,7 +378,9 @@ StopReturnCode_t updateSprEntryInImage( uint32_t* i_pSprEntryLocation,
     StopReturnCode_t l_rc = STOP_SAVE_SUCCESS;
     uint32_t tempInst = 0;
     uint64_t tempRegData = 0;
-    bool newEntry = true;
+    bool newEntry  = true;
+    uint16_t regRs = 0; //to use R0 for SPR restore insruction generation
+    uint16_t regRa = 0;
 
     do
     {
@@ -396,58 +398,65 @@ StopReturnCode_t updateSprEntryInImage( uint32_t* i_pSprEntryLocation,
             newEntry = false;
         }
 
+        if( P9_STOP_SPR_MSR == i_regId )
+        {
+            regRs = 21; //use r21 for instruction generation
+            regRa = 21;
+        }
+
         //Add SPR search instruction i.e. "ori r0, r0, SPRID"
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
-        //clear GPR R0 i.e. "xor r0, r0, r0"
-        tempInst = getXorInstruction( 0, 0, 0 );
+        //clear R0 i.e. "xor ra, rs, rb"
+        tempInst = getXorInstruction( regRs, regRs, regRs );
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
         tempRegData = i_regData >> 48;
-        //get lower order 16 bits of SPR restore value in GPR R0
-        tempInst = getOrisInstruction( 0, 0, (uint16_t)tempRegData );
+        //get lower order 16 bits of SPR restore value in R0
+        tempInst = getOrisInstruction( regRs, regRa, (uint16_t)tempRegData );
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
         tempRegData = ((i_regData >> 32) & 0x0000FFFF );
-        //get bit b16-b31 of SPR restore value in GPR R0
-        tempInst = getOriInstruction( 0, 0, (uint16_t)tempRegData );
+        //get bit b16-b31 of SPR restore value in R0
+        tempInst = getOriInstruction( regRs, regRa, (uint16_t)tempRegData );
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
-        //Rotate GPR R0 to left by  32 bit position and zero lower order 32 bits.
+        //Rotate R0 to left by  32 bit position and zero lower order 32 bits.
         //Place the result in R0
-        tempInst = getRldicrInstruction(0, 0, 32, 31);
+        tempInst = getRldicrInstruction(regRa, regRs, 32, 31);
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
         tempRegData = ((i_regData >> 16) & 0x000000FFFF );
-        //get bit b32-b47 of SPR restore value to GPR R0
-        tempInst = getOrisInstruction( 0, 0, (uint16_t)tempRegData );
+        //get bit b32-b47 of SPR restore value to R0
+        tempInst = getOrisInstruction( regRs, regRa, (uint16_t)tempRegData );
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
         tempRegData = (uint16_t)i_regData;
-        //get bit b48-b63 of SPR restore value to GPR R0
-        tempInst = getOriInstruction( 0, 0, (uint16_t)i_regData );
+        //get bit b48-b63 of SPR restore value to R0
+        tempInst = getOriInstruction( regRs, regRa, (uint16_t)i_regData );
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
         if( P9_STOP_SPR_MSR == i_regId )
         {
-            // Case MSR, move contents of GPR R0 to an MSR
-            tempInst = getMtmsrdInstruction( 0 );
+            // Case MSR, move contents of R0 to an MSR
+            tempInst = getMtmsrdInstruction( regRa );
         }
         else if (P9_STOP_SPR_HRMOR == i_regId )
         {
-            //Case HRMOR, just move it to a placeholder GPR R0
+            //Case HRMOR, move contents of R0 to a placeholder GPR (R10)
+            //Thread Launcher expects HRMOR value in R10
             tempInst = SWIZZLE_4_BYTE(MR_INT);
         }
         else
         {
-            // Case other SPRs, move contents of GPR R0 to SPR
+            // Case other SPRs, move contents of R0 to SPR
             tempInst =
                 getMtsprInstruction( 0, (uint16_t)i_regId );
         }
