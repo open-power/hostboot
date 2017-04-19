@@ -27,10 +27,10 @@
 /// @file p9_adu_setup.C
 /// @brief Setup the registers for a read/write to the ADU
 //
-// *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
+// *HWP HWP Owner: Joshua Hannan jlhannan@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: SBE
 //
 //--------------------------------------------------------------------------
@@ -111,7 +111,6 @@ extern "C"
                  "Error from p9_adu_coherent_setup_registers");
 
     fapi_try_exit:
-        fapi2::ReturnCode saveError = fapi2::current_err;
 
         //if an error has occurred, ADU is dirty, and instructed to clean up,
         //attempt to reset ADU and free lock (propogate rc of original fail)
@@ -121,8 +120,18 @@ extern "C"
             (void) p9_adu_coherent_manage_lock(i_target, false, false, num_attempts);
         }
 
+        //Append the input data to an error if we got an error back
+#ifndef __PPE__
+
+        if (fapi2::current_err)
+        {
+            p9_adu_coherent_append_input_data(i_address, i_rnw, i_flags, fapi2::current_err);
+        }
+
+#endif
+
         FAPI_DBG("Exiting...");
-        return saveError;
+        return fapi2::current_err;
     }
 
 } // extern "C"

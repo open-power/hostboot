@@ -27,10 +27,10 @@
 /// @file p9_adu_setup.H
 /// @brief Setup the adu to do reads/writes
 //
-// *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
+// *HWP HWP Owner: Joshua Hannan jlhannan@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by:
 //-----------------------------------------------------------------------------------
 // *! ADDITIONAL COMMENTS:

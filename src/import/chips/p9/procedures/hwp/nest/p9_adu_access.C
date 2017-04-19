@@ -31,7 +31,7 @@
 // *HWP HWP Owner Christina Graves clgraves@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: SBE
 //
 //--------------------------------------------------------------------------
@@ -67,31 +67,28 @@ extern "C" {
         // Process input flag
         p9_ADU_oper_flag l_myAduFlag;
         l_myAduFlag.getFlag(i_flags);
-        FAPI_DBG("l_myAduFlag = %lu", l_myAduFlag);
 
-        //If autoinc is set and this is not a DMA operation unset autoinc before passing the flags through
+        //If autoinc is set and this is not a DMA operation unset autoinc before passing the flags through since autoinc is only allowed for DMA operations
         if (l_myAduFlag.getOperationType() != p9_ADU_oper_flag::DMA_PARTIAL)
         {
             l_myAduFlag.setAutoIncrement(false);
         }
 
-        FAPI_DBG("l_myAduFlag = %lu", l_myAduFlag);
-
+        //If we were using autoinc and this is the last granule we need to clear autoinc before the last read/write
         if( i_lastGranule && l_myAduFlag.getAutoIncrement() )
         {
-            //call this function to clear the altd_auto_inc bit before the last iteration
             FAPI_TRY(p9_adu_coherent_clear_autoinc(i_target), "Error from p9_adu_coherent_clear_autoinc");
         }
 
+        //If we are doing a read operation read the data
         if (i_rnw)
         {
-            //read the data
             FAPI_TRY(p9_adu_coherent_adu_read(i_target, i_firstGranule, i_address, l_myAduFlag, io_data),
                      "Error from p9_adu_coherent_adu_read");
         }
+        //Otherwise this is a write and write the data
         else
         {
-            //write the data
             FAPI_TRY(p9_adu_coherent_adu_write(i_target, i_firstGranule, i_address, l_myAduFlag, io_data),
                      "Error from p9_adu_coherent_adu_write");
         }
@@ -99,16 +96,18 @@ extern "C" {
         //If we are not in fastmode or this is the last granule, we want to check the status
         if ( (i_lastGranule) || (l_myAduFlag.getFastMode() == false) )
         {
+            //If we are using autoincrement and this is not the last granule we expect the busy bit to still be set
             if ( (l_myAduFlag.getAutoIncrement()) && !i_lastGranule )
             {
-                // Only expect ADU busy if in AUTOINC AND it's not the last granule
                 l_busyHandling = EXPECTED_BUSY_BIT_SET;
             }
+            //Otherwise we expect the busy bit to be cleared
             else
             {
                 l_busyHandling = EXPECTED_BUSY_BIT_CLEAR;
             }
 
+            //We only want to do the status check if this is not a ci operation
             if (l_myAduFlag.getOperationType() != p9_ADU_oper_flag::CACHE_INHIBIT)
             {
                 FAPI_TRY(p9_adu_coherent_status_check(i_target, l_busyHandling, false,
@@ -116,7 +115,7 @@ extern "C" {
                          "Error from p9_adu_coherent_status_check");
             }
 
-            //If it's the last read/write
+            //If it's the last read/write cleanup the adu
             if (i_lastGranule)
             {
                 FAPI_TRY(p9_adu_coherent_cleanup_adu(i_target),
@@ -125,17 +124,30 @@ extern "C" {
         }
 
     fapi_try_exit:
-        fapi2::ReturnCode saveError = fapi2::current_err;
 
+        //If there is an error and we want to cleanup the ADU
         if ( fapi2::current_err && l_myAduFlag.getOperFailCleanup() )
         {
+            //reset the ADU
             (void) p9_adu_coherent_utils_reset_adu(i_target);
             uint32_t num_attempts = l_myAduFlag.getNumLockAttempts();
+            //Unlock the ADU
             (void) p9_adu_coherent_manage_lock(i_target, false, false, num_attempts);
         }
 
+        //Append the input data to an error if we got an error back
+#ifndef __PPE__
+
+        if (fapi2::current_err)
+        {
+            p9_adu_coherent_append_input_data(i_address, i_rnw, i_flags, fapi2::current_err);
+        }
+
+#endif
+
         FAPI_DBG("Exiting...");
-        return saveError;
+        //Return the error that we got from up above
+        return fapi2::current_err;
     }
 
 } // extern "C"
