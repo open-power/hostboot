@@ -27,10 +27,10 @@
 /// @file p9_adu_access.H
 /// @brief Read coherent state of memory via the ADU (FAPI)
 ///
-// *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
+// *HWP HWP Owner: Joshua Hannan  jlhannan@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by:
 // ----------------------------------------------------------------------------------
 //
