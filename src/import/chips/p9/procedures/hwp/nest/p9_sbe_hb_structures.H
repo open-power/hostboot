@@ -27,10 +27,10 @@
 /// @file p9_sbe_hb_structures.H
 /// @brief Structures that the SBE and HB will both use
 //
-// *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
+// *HWP HWP Owner: Joshua Hannan jlhannan@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: SBE, HB
 //-----------------------------------------------------------------------------------
 
