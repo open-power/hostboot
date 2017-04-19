@@ -27,10 +27,10 @@
 /// @file p9_adu_coherent_utils.H
 /// @brief Common Code to support ADU get/putmem procedures (FAPI)
 ///
-// *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
+// *HWP HWP Owner: Joshua Hannan jlhannan@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by:
 // ---------------------------------------------------------------------------------
 // *! ADDITIONAL COMMENTS :
@@ -79,14 +79,14 @@ extern"C"
             // Type of ADU operations
             enum OperationType_t
             {
-                CACHE_INHIBIT = 0,
-                DMA_PARTIAL   = 1,
+                CACHE_INHIBIT = 0, //cache-inhibited 1, 2, 4, or 8 byte read/write
+                DMA_PARTIAL   = 1, //partial cache line direct memory access - always 8 byte read/write
                 PB_DIS_OPER   = 2,
                 PMISC_OPER    = 3,
                 PB_INIT_OPER  = 4
             };
 
-            // Transaction size
+            // Transaction size -- only checked if not DMA
             enum Transaction_size_t
             {
                 TSIZE_1 = 1,
@@ -647,6 +647,14 @@ extern"C"
         const bool i_lock_pick,
         const bool i_lock,
         const uint32_t i_num_attempts);
+
+///@brief appends input data to the fapi2 return code if we got an error back
+///@param[in] i_address => address for the read or write
+///@param[in] i_rnw => whether the operation is a read or write
+///@param[in] i_flags => flags that contain information that the PBA needs to know to set up registers
+///@param[inout] o_rc => fapi error code to be appended with input data
+    void p9_adu_coherent_append_input_data(const uint64_t i_address, const bool i_rnw, const uint32_t i_flags,
+                                           fapi2::ReturnCode& o_rc);
 
 } // extern "C"
 
