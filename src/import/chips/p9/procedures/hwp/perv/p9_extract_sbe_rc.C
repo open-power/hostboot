@@ -35,6 +35,7 @@
 ///     6) Read the value of XIRAMEDR 0xE0004 & Store IR and EDR
 ///     7) Check for Machine Check State(MCS) i.e XSR (29:31)
 ///     8) if MCS=0x4, Report error as Program Interrupt for the address stored in EDR
+///         Look for IAR range and report specific memory program error
 ///     9) if MCS=0x1, 0x2, 0x3, Set the flag as Data Machine Check - l_data_mchk
 /// Level 2 :
 ///     1) Based on IAR value identifying the Memory Address range
@@ -59,8 +60,8 @@
 /// Level 4 :
 ///     1) If Data Machine Check error is true then look for the edr data range in SEEPROM/PIBMEM/OTPROM scope
 ///     2) Collect the SIB Info from 0xE0006
-///     3) If in OTPROM data range report error if RSP_INFO is non-Zero response (0x7-PIB timeout Error, else-Scom Err)
-///     3) If in PIBMEM data range, read MEM_Info (E0007) and report error if RSP_INFO is non-Zero response as Scom Err
+///     3) If in OTPROM data range report error if RSP_INFO is non-Zero response (0x6-Ecc Error, 0x7-PIB timeout Error, else-Scom Err)
+///     3) If in PIBMEM data range, read MEM_Info (E0007) and report error if RSP_INFO is non-Zero response (0x6-Ecc Error, else-Scom Err)
 ///     4) If in SEEPROM data range, report error if RSP_INFO is non-zero response (0x7-FI2C timeout Error, 0x4-FI2C Seeprom cfg Err, else-FI2C PIB Err)
 ///
 ///     DEFAULT) If non of the above errors are detected then report as UNKNOWN_ERROR
@@ -260,6 +261,23 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
         if(MCS == 0x4)
         {
+            if((OTPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= OTPROM_MAX_RANGE))
+            {
+                FAPI_DBG("p9_extract_sbe_rc : Program Interrupt occured in OTPROM memory program");
+            }
+            else if((PIBMEM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= PIBMEM_MAX_RANGE))
+            {
+                FAPI_DBG("p9_extract_sbe_rc : Program Interrupt occured in PIBMEM memory program");
+            }
+            else if((SEEPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= SEEPROM_MAX_RANGE))
+            {
+                FAPI_DBG("p9_extract_sbe_rc : Program Interrupt occured in SEEPROM memory program");
+            }
+            else
+            {
+                FAPI_ERR("ERROR: IAR %08lX is out of range when MCS reported a Program Interrupt", l_data32_iar);
+            }
+
             o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
             FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_PROGRAM_INTERRUPT(), "ERROR:Program interrupt promoted for Address=%08lX",
                         l_data32_edr);
@@ -667,6 +685,10 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
             if(otprom_data_range)
             {
+                o_return_action = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+                FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_OTP_PARITY_ERR(),
+                            "Parity/ECC error detected in OTPROM memory, Check if OTPROM programmed correctly by dumping content");
+
                 o_return_action = P9_EXTRACT_SBE_RC::RESTART_CBS;
                 FAPI_ASSERT((!(sib_rsp_info == 0x7)), fapi2::EXTRACT_SBE_RC_PIB_TIMEOUT(), "PIB Timeout error detected");
 
@@ -684,6 +706,10 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_data32.flush<0>();
                 l_data64_mib_mem_info.extractToRight(l_data32, PU_MIB_XIMEM_MEM_ERROR, PU_MIB_XIMEM_MEM_ERROR_LEN);
                 mem_error = l_data32;
+
+                o_return_action = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+                FAPI_ASSERT((!(mem_error == 0x6)), fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR(),
+                            "ECC error detected during pibmem access, Run PIBMEM REPAIR test..");
 
                 o_return_action = P9_EXTRACT_SBE_RC::RESTART_CBS;
                 FAPI_ASSERT((!(mem_error != 0x0)), fapi2::EXTRACT_SBE_RC_PIBMEM_ERR(), "Error detected during pibmem access");

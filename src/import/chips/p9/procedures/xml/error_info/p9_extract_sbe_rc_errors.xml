@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -134,6 +134,14 @@
   <!-- Halt codes for Data Machine Check -->
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_OTP_PARITY_ERR</rc>
+    <description>
+    PIB Parity error detected in OTPROM memory
+    Action:No recovery action possible to correct this error [NO_RECOVERY_ACTION]
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_EXTRACT_SBE_RC_PIB_TIMEOUT</rc>
     <description>
     PIB Timeout error detected
@@ -148,6 +156,15 @@
     Action:Warm ipl where we don't switch off VSB just toggle start_cbs from FSP [RESTART_CBS]
     </description>
   </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_PIBMEM_ECC_ERR</rc>
+    <description>
+    ECC error detected during pibmem access, Check if REPAIR solution is applied
+    Action:No recovery action possible to correct this error [NO_RECOVERY_ACTION]
+    </description>
+  </hwpError>
+
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_EXTRACT_SBE_RC_PIBMEM_ERR</rc>
