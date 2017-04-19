@@ -50,7 +50,7 @@ enum RETURN_ACTION
     RESTART_CBS        = 2, // Trigger Warm ipl where we don't switch off VSB just toggle start_cbs from FSP
     REIPL_BKP_SEEPROM  = 3, // Run IPL by selecting backup seeprom
     RE_IPL             = 4, // Reload/update of SEEPROM required or deconfig the chip
-    NO_RECOVERY_ACTION = 5, // No recovery action possible to correct this error, Replace the chip with new one
+    NO_RECOVERY_ACTION = 5, // No recovery action possible to correct this error
     PPE_RUNNING        = 6  // Return action when PPE is in Running state
 };
 };
