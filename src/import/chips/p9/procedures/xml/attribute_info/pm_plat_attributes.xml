@@ -1877,4 +1877,22 @@
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+     <id>ATTR_NEST_LEAKAGE_PERCENT</id>
+     <description>
+     SYSTEM Attribute
+     Nest leakage percentage used to calculate the Core leakage.
+     Will eventually be read into OCC Pstate Parameter Block
+     so the OCC can see it for it's calculations.
+     Valid Values: 0% thru 100%
+     Producer: Machine Readable Workbook
+     Consumer: OCC Firmware
+     </description>
+     <targetType>TARGET_TYPE_SYSTEM</targetType>
+     <valueType>uint8</valueType>
+     <initToZero/>
+     <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+
 </attributes>
