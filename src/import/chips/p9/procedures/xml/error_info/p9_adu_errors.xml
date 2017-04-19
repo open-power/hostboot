@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -23,26 +23,33 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
+  <!-- This has all of the ADU registers that we need to collect for other errors -->
+  <registerFfdc>
+    <id>REG_FFDC_ADU_STATUS_REGISTER</id>
+    <scomRegister>PU_ALTD_STATUS_REG</scomRegister>
+    <scomRegister>PU_ALTD_CMD_REG</scomRegister>
+    <scomRegister>PU_ALTD_DATA_REG</scomRegister>
+    <scomRegister>PU_ALTD_OPTION_REG</scomRegister>
+    <scomRegister>PU_ALTD_ADDR_REG</scomRegister>
+    <scomRegister>PU_FORCE_ECC_REG</scomRegister>
+  </registerFfdc>
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
     <rc>RC_P9_ADU_COHERENT_UTILS_INVALID_ARGS</rc>
     <description>
       Procedure: p9_adu_coherent_utils
-      ADU access or setup not attempted, ADU access or setup is stopped
+      There is an invalid argument (misaligned address or address out of the
+      fabric address range) being passed to the adu access or adu setup
+      procedure
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>ADDRESS</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_P9_ADU_COHERENT_UTILS_RESET_ERR</rc>
-    <description>
-      Procedure: p9_adu_coherent_utils
-      ADU Reset had a problem, the ADU was not actually reset
-    </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>FLAGS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -55,18 +62,96 @@
     <ffdc>TARGET</ffdc>
     <ffdc>INITIALIZED</ffdc>
     <ffdc>RUNNING</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
-    <rc> RC_P9_ADU_STATUS_REG_ERR</rc>
+    <rc> RC_P9_ADU_STATUS_REG_ERR_NO_ADDR_ERR</rc>
     <description>
       Procedure: p9_adu_coherent_utils
-      The ALTD_STATUS_REGISTER has something high or low that was not expected 
+      The ALTD_STATUS_REGISTER contains unexpected status with no indication
+      of a combined response address error
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>ADDRESS</ffdc>
     <ffdc>STATUSREG</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ADU_STATUS_REGISTER</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc> RC_P9_ADU_STATUS_REG_ERR_ADDR_ERR</rc>
+    <description>
+      Procedure: p9_adu_coherent_utils
+      The ALTD_STATUS_REGISTER contains unexpected status with an indication
+      of a combined response address error
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>STATUSREG</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ADU_STATUS_REGISTER</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_ADU_COHERENT_UTILS_LOCK_ERR</rc>
+    <description>
+    Procedure:p9_adu_coherent_utils
+    Number of lock attempts exceeded when attempting to acquire the ADU lock or
+    error occured when attempting to pick the ADU lock
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>LOCK_PICK</ffdc>
+    <ffdc>LOCK</ffdc>
+    <ffdc>NUM_ATTEMPTS</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ADU_STATUS_REGISTER</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_ADU_COHERENT_UTILS_EXTRA_INPUT_DATA</rc>
+    <description>
+      Procedure:p9_adu_coherent_utils
+      Error code used to collect HWP input arguments
+    </description>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>RNW</ffdc>
+    <ffdc>FLAGS</ffdc>
+  </hwpError>
 </hwpErrors>
-
