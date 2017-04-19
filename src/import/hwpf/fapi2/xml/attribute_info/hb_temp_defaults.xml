@@ -228,6 +228,10 @@
         <id>ATTR_WOF_VRATIO_SELECT</id>
         <default>0x00</default>
     </attribute>
+    <attribute>
+        <id>ATTR_NEST_LEAKAGE_PERCENT</id>
+        <default>0x3C</default>
+    </attribute>
 
 <!-- =====================================================================
      End of temporary definitions
