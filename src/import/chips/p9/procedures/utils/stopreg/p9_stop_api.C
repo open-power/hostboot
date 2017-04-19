@@ -398,12 +398,6 @@ StopReturnCode_t updateSprEntryInImage( uint32_t* i_pSprEntryLocation,
             newEntry = false;
         }
 
-        if( P9_STOP_SPR_MSR == i_regId )
-        {
-            regRs = 21; //use r21 for instruction generation
-            regRa = 21;
-        }
-
         //Add SPR search instruction i.e. "ori r0, r0, SPRID"
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
@@ -445,14 +439,19 @@ StopReturnCode_t updateSprEntryInImage( uint32_t* i_pSprEntryLocation,
 
         if( P9_STOP_SPR_MSR == i_regId )
         {
-            // Case MSR, move contents of R0 to an MSR
-            tempInst = getMtmsrdInstruction( regRa );
+            //MSR cannot be restored completely with mtmsrd instruction.
+            //as it does not update ME, LE and HV bits. In self restore code
+            //inorder to restore MSR, contents of R21 is moved to SRR1. It also
+            //executes an RFID which causes contents of SRR1 to be copied to
+            //MSR. This allows copy of LE bit which are specifically interested
+            //in. Instruction below moves contents of MSR Value (in R0 ) to R21.
+            tempInst = SWIZZLE_4_BYTE( MR_R0_TO_R21 );
         }
         else if (P9_STOP_SPR_HRMOR == i_regId )
         {
             //Case HRMOR, move contents of R0 to a placeholder GPR (R10)
             //Thread Launcher expects HRMOR value in R10
-            tempInst = SWIZZLE_4_BYTE(MR_INT);
+            tempInst = SWIZZLE_4_BYTE( MR_R0_TO_R10 );
         }
         else
         {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,7 +60,8 @@ enum
     RLDICR_CONST      = 1,
     MTSPR_CONST1      = 467,
     MTMSRD_CONST1     = 178,
-    MR_INT            = 0x7c0a0378,
+    MR_R0_TO_R10      = 0x7c0a0378, //mr r10, r0
+    MR_R0_TO_R21      = 0x7c150378, //mr r21, r0
     BLR_INST          = 0x4e800020,
     MTSPR_BASE_OPCODE = 0x7c0003a6,
     ATTN_OPCODE       = 0x00000200,
