@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include <arch/ppc.H>
 #include <kernel/console.H>
 #include <xz/xz.h>
+#include <config.h>
 
 using namespace ERRORLOG;
 using namespace ISTEP;
@@ -136,11 +137,25 @@ void* call_host_load_payload (void *io_pArgs)
 static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
         uint64_t i_physAddr)
 {
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,ENTER_MRK"load_pnor_section()");
+    errlHndl_t err = nullptr;
+
+#ifdef CONFIG_SECUREBOOT
+    // Securely load section
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"load_pnor_section: secure section load of secId=0x%X (%s)",
+              i_section, PNOR::SectionIdToString(i_section));
+    err = PNOR::loadSecureSection(i_section);
+    if (err)
+    {
+        return err;
+    }
+    // Do not need to unload since we have plenty of memory at this point.
+#endif
+
     // Get the section info from PNOR.
     PNOR::SectionInfo_t pnorSectionInfo;
-    errlHndl_t err = PNOR::getSectionInfo( i_section,
-                    pnorSectionInfo );
-    if( err != NULL )
+    err = PNOR::getSectionInfo( i_section, pnorSectionInfo );
+    if( err != nullptr )
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                  "load_pnor_section: Could not get section info from %x",
