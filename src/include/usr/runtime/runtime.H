@@ -137,7 +137,8 @@ enum SectionId
     SPIRA_L,              //< Legacy SPIRA
     NACA,                 //< NACA
     HBRT,                 //< Hostboot Runtime
-    HBRT_DATA,            //< Hostboot Runtime  Data
+    HBRT_DATA,            //< Hostboot Runtime Data
+    PCRD,                 //< Processor Chip Related Data
     IPMI_DATA,            //< IPMI Sensor Mapping Data
     NODE_TPM_RELATED,     //< Node TPM Related Data
     RESERVED_MEM,         //< Hostboot's Reserved Mainstore Memory
@@ -163,6 +164,19 @@ errlHndl_t get_host_data_section( SectionId i_section,
                                   uint64_t& o_dataAddr,
                                   size_t& o_dataSize );
 const size_t DATA_SIZE_UNKNOWN = 0xFFFFFFFFFFFFFFFF;
+
+/**
+ * @brief Get the number of instances in a given section.
+ *
+ * @param[in] i_section The section for which the instance count is desired
+ *
+ * @param[out] o_count The number of instances in this section
+ *
+ * @return errlHndl_t Returns nullptr on success. Returns an error if the
+ *         section id used is invalid or has no concept of instances. Also, can
+ *         return an error if the n-tuple is either corrupt or unavailable.
+ */
+errlHndl_t get_instance_count( RUNTIME::SectionId i_section, uint64_t& o_count);
 
 /**
  * @brief  Store the actual count of a section in local memory.

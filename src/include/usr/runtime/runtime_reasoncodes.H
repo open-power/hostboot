@@ -43,6 +43,7 @@ namespace RUNTIME
         MOD_HDATSERVICE_FINDSPIRA       = 0x09, /** hdatservice.C */
         MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL = 0x0A, /**< hdatservice.C */
         MOD_HDATSERVICE_MAPREGION       = 0x0B, /**< hdatservice.C */
+        MOD_HDATSERVICE_GETINSTANCECOUNT = 0x0C, /**< hdatservice.C */
 
         // customize_attrs_for_payload.C
         MOD_CUST_COMP_NON_PHYP_RT_TARGET = 0x12,
@@ -52,43 +53,49 @@ namespace RUNTIME
         MOD_PM_RT_HCODE_UPDATE           = 0x16,  /**< rt_pm.C */
         MOD_MAP_PHYS_ADDR                = 0x17,  /**< populate_hbruntime.C */
         MOD_UNMAP_VIRT_ADDR              = 0x18,  /**< populate_hbruntime.C */
+        MOD_POPULATE_TPMINFOBYNODE       = 0x19,  /**< populate_hbruntime.C */
     };
 
     enum RuntimeReasonCode
     {
-        RC_DO_NOT_USE_THIS          = RUNTIME_COMP_ID | 0x00,
-        RC_ATTR_GET_FAIL            = RUNTIME_COMP_ID | 0x01,
-        RC_BAD_HDAT_HEADER          = RUNTIME_COMP_ID | 0x02,
-        RC_BAD_HDAT_TUPLE           = RUNTIME_COMP_ID | 0x03,
-        RC_INVALID_STANDALONE       = RUNTIME_COMP_ID | 0x04,
-        RC_CANNOT_MAP_MEMORY        = RUNTIME_COMP_ID | 0x05,
-        //RC_XXX                    = RUNTIME_COMP_ID | 0x06,
-        RC_CANNOT_MAP_MEMORY2       = RUNTIME_COMP_ID | 0x07,
-        RC_INVALID_PAYLOAD_KIND     = RUNTIME_COMP_ID | 0x08,
-        RC_NO_HSVC_NODE_DATA_FOUND  = RUNTIME_COMP_ID | 0x09,
-        RC_BAD_NACA                 = RUNTIME_COMP_ID | 0x0A,
-        RC_INVALID_ADDRESS          = RUNTIME_COMP_ID | 0x0B,
-        RC_INVALID_SECTION          = RUNTIME_COMP_ID | 0x0C,
-        RC_CANNOT_MAP_MEMORY3       = RUNTIME_COMP_ID | 0x0D,
-        RC_TCE_INVALID_SIZE         = RUNTIME_COMP_ID | 0x0E,
-        RC_TCE_ADDR_NOT_ALIGNED     = RUNTIME_COMP_ID | 0x0F,
-        RC_TCE_INIT_NOT_RUN         = RUNTIME_COMP_ID | 0x10,
-        RC_TCE_DEV_MAP_FAIL         = RUNTIME_COMP_ID | 0x11,
-        RC_TCE_DEV_UNMAP_FAIL       = RUNTIME_COMP_ID | 0x12,
-        RC_TCE_NO_ACTIVE_PSI        = RUNTIME_COMP_ID | 0x13,
+        RC_DO_NOT_USE_THIS             = RUNTIME_COMP_ID | 0x00,
+        RC_ATTR_GET_FAIL               = RUNTIME_COMP_ID | 0x01,
+        RC_BAD_HDAT_HEADER             = RUNTIME_COMP_ID | 0x02,
+        RC_BAD_HDAT_TUPLE              = RUNTIME_COMP_ID | 0x03,
+        RC_INVALID_STANDALONE          = RUNTIME_COMP_ID | 0x04,
+        RC_CANNOT_MAP_MEMORY           = RUNTIME_COMP_ID | 0x05,
+        //RC_XXX                       = RUNTIME_COMP_ID | 0x06,
+        RC_CANNOT_MAP_MEMORY2          = RUNTIME_COMP_ID | 0x07,
+        RC_INVALID_PAYLOAD_KIND        = RUNTIME_COMP_ID | 0x08,
+        RC_NO_HSVC_NODE_DATA_FOUND     = RUNTIME_COMP_ID | 0x09,
+        RC_BAD_NACA                    = RUNTIME_COMP_ID | 0x0A,
+        RC_INVALID_ADDRESS             = RUNTIME_COMP_ID | 0x0B,
+        RC_INVALID_SECTION             = RUNTIME_COMP_ID | 0x0C,
+        RC_CANNOT_MAP_MEMORY3          = RUNTIME_COMP_ID | 0x0D,
+        RC_TCE_INVALID_SIZE            = RUNTIME_COMP_ID | 0x0E,
+        RC_TCE_ADDR_NOT_ALIGNED        = RUNTIME_COMP_ID | 0x0F,
+        RC_TCE_INIT_NOT_RUN            = RUNTIME_COMP_ID | 0x10,
+        RC_TCE_DEV_MAP_FAIL            = RUNTIME_COMP_ID | 0x11,
+        RC_TCE_DEV_UNMAP_FAIL          = RUNTIME_COMP_ID | 0x12,
+        RC_TCE_NO_ACTIVE_PSI           = RUNTIME_COMP_ID | 0x13,
         RC_TCE_NOT_ENOUGH_FREE_ENTRIES = RUNTIME_COMP_ID | 0x14,
-        RC_TCE_ENTRY_NOT_CONTIGUOUS   = RUNTIME_COMP_ID | 0x15,
-        RC_NO_SPIRA                 = RUNTIME_COMP_ID | 0x16,
-        RC_CANNOT_MAP_HDAT          = RUNTIME_COMP_ID | 0x17,
-        RC_NOT_ENOUGH_SPACE         = RUNTIME_COMP_ID | 0x18,
-        RT_UNIT_TARGET_NOT_FOUND    = RUNTIME_COMP_ID | 0x19,
-        RT_TARGET_TYPE_NOT_SUPPORTED = RUNTIME_COMP_ID | 0x1A,
-        RT_NO_PROC_TARGET            = RUNTIME_COMP_ID | 0x1B,
-        RC_UNMAP_FAIL                = RUNTIME_COMP_ID | 0x1C,
-        RC_PM_RT_UNKNOWN_MODE        = RUNTIME_COMP_ID | 0x1D,
-        RC_PM_RT_INTERFACE_ERR       = RUNTIME_COMP_ID | 0x1E,
-        RC_PM_RT_HCODE_UPDATE_ERR    = RUNTIME_COMP_ID | 0x1F,
-        RC_INVALID_RHB_INSTANCE      = RUNTIME_COMP_ID | 0x20,
+        RC_TCE_ENTRY_NOT_CONTIGUOUS    = RUNTIME_COMP_ID | 0x15,
+        RC_NO_SPIRA                    = RUNTIME_COMP_ID | 0x16,
+        RC_CANNOT_MAP_HDAT             = RUNTIME_COMP_ID | 0x17,
+        RC_NOT_ENOUGH_SPACE            = RUNTIME_COMP_ID | 0x18,
+        RT_UNIT_TARGET_NOT_FOUND       = RUNTIME_COMP_ID | 0x19,
+        RT_TARGET_TYPE_NOT_SUPPORTED   = RUNTIME_COMP_ID | 0x1A,
+        RT_NO_PROC_TARGET              = RUNTIME_COMP_ID | 0x1B,
+        RC_UNMAP_FAIL                  = RUNTIME_COMP_ID | 0x1C,
+        RC_PM_RT_UNKNOWN_MODE          = RUNTIME_COMP_ID | 0x1D,
+        RC_PM_RT_INTERFACE_ERR         = RUNTIME_COMP_ID | 0x1E,
+        RC_PM_RT_HCODE_UPDATE_ERR      = RUNTIME_COMP_ID | 0x1F,
+        RC_INVALID_RHB_INSTANCE        = RUNTIME_COMP_ID | 0x20,
+        RC_DUPLICATE_I2C_LINK_IDS      = RUNTIME_COMP_ID | 0x21,
+        RC_I2C_DEVICE_NOT_IN_MRW       = RUNTIME_COMP_ID | 0x22,
+        RC_INSTANCES_UNSUPPORTED       = RUNTIME_COMP_ID | 0x23,
+        RC_I2C_DEVICE_DUPLICATE_IN_MRW = RUNTIME_COMP_ID | 0x24,
+        RC_EXTRA_I2C_DEVICE_IN_MRW     = RUNTIME_COMP_ID | 0x25,
     };
 
     enum UserDetailsTypes

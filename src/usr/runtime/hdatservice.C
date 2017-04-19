@@ -868,6 +868,38 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             o_dataSize = record_size;
             o_dataAddr = base_addr + i_instance * o_dataSize;
         }
+        else if( RUNTIME::PCRD == i_section )
+        {
+            hdat5Tuple_t* tuple = nullptr;
+            if( iv_spiraS )
+            {
+                tuple = &(iv_spiraS->hdatDataArea[SPIRAS_PCRD]);
+            }
+            else if( unlikely(iv_spiraL != nullptr) )
+            {
+                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_PCRD]);
+            }
+            TRACUCOMP( g_trac_runtime, "PCRD_DATA tuple=%p", tuple );
+
+            errhdl = check_tuple( i_section, tuple );
+            if( errhdl )
+            {
+                break;
+            }
+
+            uint64_t base_addr = 0;
+            errhdl = getSpiraTupleVA(tuple, base_addr);
+            if( errhdl )
+            {
+                break;
+            }
+
+            TRACUCOMP( g_trac_runtime, "pcrd_data=%p", base_addr );
+
+            record_size = tuple->hdatAllocSize;
+            o_dataSize = record_size;
+            o_dataAddr = base_addr + i_instance * o_dataSize;
+        }
         // MS DUMP Source Table - MDST
         else if( RUNTIME::MS_DUMP_SRC_TBL == i_section )
         {
@@ -1425,6 +1457,91 @@ void hdatService::rediscoverHDAT( void )
     iv_mem_regions.clear();
 }
 
+/*
+ * @brief Get the number of instances in an HDAT section
+ */
+errlHndl_t hdatService::getInstanceCount(RUNTIME::SectionId i_section,
+                                                  uint64_t& o_count)
+{
+    errlHndl_t errhdl = nullptr;
+    hdat5Tuple_t* tuple = nullptr;
+
+    do
+    {
+        hdatSpiraSDataAreas l_spiraS = SPIRAS_INVALID;
+        hdatSpiraLegacyDataAreas l_spiraL = SPIRAL_INVALID;
+        hdatSpiraHDataAreas l_spiraH = SPIRAH_INVALID;
+
+        switch(i_section)
+        {
+        case RUNTIME::NODE_TPM_RELATED:
+            l_spiraS = SPIRAS_TPM_DATA;
+            l_spiraL = SPIRAL_TPM_DATA;
+            break;
+        case RUNTIME::PCRD:
+            l_spiraS = SPIRAS_PCRD;
+            l_spiraL = SPIRAL_PCRD;
+            break;
+        case RUNTIME::MS_DUMP_SRC_TBL:
+            l_spiraH = SPIRAH_MS_DUMP_SRC_TBL;
+            l_spiraL = SPIRAL_MS_DUMP_SRC_TBL;
+            break;
+        case RUNTIME::MS_DUMP_DST_TBL:
+            l_spiraH = SPIRAH_MS_DUMP_DST_TBL;
+            l_spiraL = SPIRAL_MS_DUMP_DST_TBL;
+            break;
+        case RUNTIME::MS_DUMP_RESULTS_TBL:
+            l_spiraH = SPIRAH_MS_DUMP_RSLT_TBL;
+            l_spiraL = SPIRAL_MS_DUMP_RSLT_TBL;
+            break;
+        default:
+            TRACFCOMP( g_trac_runtime,
+                "getInstanceCount> section %d has no concept of instances",
+                 i_section );
+            /*@
+             * @errortype
+             * @moduleid     RUNTIME::MOD_HDATSERVICE_GETINSTANCECOUNT
+             * @reasoncode   RUNTIME::RC_INSTANCES_UNSUPPORTED
+             * @userdata1    Section Id
+             * @userdata2    <unused>
+             * @devdesc      Unsupported section requested
+             * @custdesc     Unexpected boot firmware error.
+             */
+            errhdl = new ERRORLOG::ErrlEntry(
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                           RUNTIME::MOD_HDATSERVICE_GETINSTANCECOUNT,
+                           RUNTIME::RC_INSTANCES_UNSUPPORTED,
+                           i_section,
+                           0,
+                           true /*Add HB Software Callout*/);
+            errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
+            break;
+        }
+
+        if( iv_spiraS )
+        {
+            tuple = &(iv_spiraS->hdatDataArea[l_spiraS]);
+        }
+        else if( iv_spiraH )
+        {
+            tuple = &(iv_spiraH->hdatDataArea[l_spiraH]);
+        }
+        else if( unlikely(iv_spiraL != nullptr) )
+        {
+            tuple = &(iv_spiraL->hdatDataArea[l_spiraL]);
+        }
+        errhdl = check_tuple( i_section, tuple );
+        if( errhdl )
+        {
+            break;
+        }
+        o_count = tuple->hdatActualCnt;
+
+    } while (0);
+
+    return errhdl;
+}
+
 /********************
  Public Methods
  ********************/
@@ -1475,6 +1592,12 @@ void add_host_data_ffdc( SectionId i_section,
 void rediscover_hdat( void )
 {
     Singleton<hdatService>::instance().rediscoverHDAT();
+}
+
+errlHndl_t get_instance_count( RUNTIME::SectionId i_section, uint64_t& o_count )
+{
+    return Singleton<RUNTIME::hdatService>::instance().
+                                           getInstanceCount(i_section, o_count);
 }
 
 };

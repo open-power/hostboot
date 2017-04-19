@@ -76,9 +76,6 @@ const HdatKeywordInfo l_mvpdKeywords[] =
 
 };
 
-//Max number of I2c devices for any given proc
-#define HDAT_PCRD_MAX_I2C_DEV  64
-
 /*******************************************************************************
  * hdatSetPcrdHdrs
  *

@@ -60,6 +60,7 @@ enum {
     TpmDataPtrCnt = 1,
     TpmDataChildStrCnt = 0,
     TpmDataChildStrOffset = 0,
+    TpmDataMinRqrdPcrdVersion = 0x1
 };
 
 /**
@@ -81,18 +82,6 @@ struct hdatTpmData_t
     hdatHDIFDataHdr_t hdatPhysInter; // Physical interaction mechanism details
     uint8_t hdatReserved1[16]; // Padding for alignment and growth/compatibility
 } __attribute__ ((packed));
-
-
-/**
- * @brief  Structure definition for Secureboot TPM Info Array
- */
-struct hdatSbTpmInfo_t
-{
-    uint32_t hdatSbTpmArrayOffset;
-    uint32_t hdatSbTpmArrayNumEntries;
-    uint32_t hdatSbTpmArrayEntrySize;
-} __attribute__ ((packed));
-
 
 /**
  *  @brief Structure definition for Secureboot TPM Instance Info

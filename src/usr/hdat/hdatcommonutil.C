@@ -86,7 +86,7 @@ uint32_t hdatTpmDataCalcMaxSize()
     l_size += sizeof(hdatTpmData_t);
 
     // account for the size of the TPM Info array header
-    l_size += sizeof(hdatSbTpmInfo_t);
+    l_size += sizeof(hdatHDIFDataArray_t);
 
     // account for each element of the TPM Info array
     l_size += ((sizeof(hdatSbTpmInstInfo_t) +

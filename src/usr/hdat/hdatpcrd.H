@@ -56,6 +56,9 @@ namespace HDAT
 const uint16_t HDAT_PCRD_VERSION    = 0x20;
 const char HDAT_PCRD_STRUCT_NAME[7] = "SPPCRD";
 
+//Max number of I2c devices for any given proc
+#define HDAT_PCRD_MAX_I2C_DEV  64
+
 /** @enum hdatDataPtrs
  * Enumeration which defines the data sections of the PCRD
  */
