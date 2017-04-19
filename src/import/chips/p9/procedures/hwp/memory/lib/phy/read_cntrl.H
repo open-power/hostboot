@@ -409,6 +409,7 @@ inline uint64_t vref_guess_time( const fapi2::Target<T>& i_target )
 {
     constexpr uint64_t THRESHOLD_KHZ = 500;
     constexpr uint64_t FUDGE = 100;
+    constexpr uint64_t NUM_LOOPS = 50;
     uint64_t l_guess_time = 0;
     uint64_t l_freq;
     FAPI_TRY( mss::freq(i_target.template getParent<fapi2::TARGET_TYPE_MCBIST>(), l_freq) );
@@ -421,7 +422,8 @@ inline uint64_t vref_guess_time( const fapi2::Target<T>& i_target )
     // exceeds the 500 KHz threshold.
     // For example, a 1333 MHz clock must have value be slight more than 1333 MHz /
     // 500 KHz = 2,666, rounded up to a final value of 2700.
-    l_guess_time = (l_freq * MHZ_TO_KHZ) / THRESHOLD_KHZ + FUDGE;
+    // That's all one loop, so we multiply by a constant number of loops for safety's sake
+    l_guess_time = NUM_LOOPS * ((l_freq * MHZ_TO_KHZ) / THRESHOLD_KHZ + FUDGE);
     FAPI_INF("VREF guess wait time: %u (freq: %lu)", l_guess_time, l_freq);
     return l_guess_time;
 
