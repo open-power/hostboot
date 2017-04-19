@@ -101,6 +101,13 @@ enum sbeioReasonCode
     SBEIO_HWSV_COLLECT_SBE_RC          = SBEIO_COMP_ID | 0xFF,
 };
 
+enum UserDetailsTypes
+{
+        SBEIO_UDT_NO_FORMAT       = 0x0,
+        SBEIO_UDT_PARAMETERS      = 0x1,
+};
+
+
 };  // end SBE
 
 #endif

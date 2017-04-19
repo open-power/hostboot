@@ -59,6 +59,7 @@ extern trace_desc_t* g_trac_sbeio;
 #define SBE_TRACU(printf_string,args...) \
     TRACFCOMP(g_trac_sbeio,"fifodd: " printf_string,##args)
 */
+#define READ_BUFFER_SIZE 2048
 
 using namespace ERRORLOG;
 
@@ -91,7 +92,7 @@ SbeFifo::~SbeFifo()
 }
 
 /**
- * @brief perform SBE PSU chip-op
+ * @brief perform SBE FIFO chip-op
  */
 errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
                              uint32_t          * i_pFifoRequest,
@@ -123,7 +124,7 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
 
     mutex_unlock(&l_fifoOpMux);
 
-    if( errl && (SBE_COMP_ID == errl->moduleId()) )
+    if( errl && (SBEIO_COMP_ID == errl->moduleId()) )
     {
         SBE_TRACF( "Forcing shutdown for FSP to collect FFDC" );
 
@@ -131,7 +132,7 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
         uint32_t orig_plid = errl->plid();
         uint32_t orig_rc = errl->reasonCode();
         uint32_t orig_mod = errl->moduleId();
-        ERRORLOG::errlCommit( errl, SBE_COMP_ID );
+        ERRORLOG::errlCommit( errl, SBEIO_COMP_ID );
         /*@
          * @errortype
          * @moduleid     SBEIO_FIFO
@@ -312,6 +313,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                         uint32_t   i_responseSize)
 {
     errlHndl_t errl = NULL;
+    uint32_t l_readBuffer[READ_BUFFER_SIZE];
 
     SBE_TRACD(ENTER_MRK "readResponse");
 
@@ -335,6 +337,8 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                                    // status header including the final
                                    // distance word.
         // receive words until EOT, but do not exceed response buffer size
+        bool       l_overRun  = false;
+
         do
         {
             // Wait for data to be ready to receive (download) or if the EOT
@@ -348,27 +352,41 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                 // ignore EOT dummy word
                 if (l_recWords >= (sizeof(statusHeader)/sizeof(uint32_t)) )
                 {
-                    l_pReceived--;
-                    l_recWords--;
-                    l_last = o_pFifoResponse[l_recWords-1];
+                    if(l_overRun == false) {
+                        l_pReceived--;
+                        l_recWords--;
+                        l_last = o_pFifoResponse[l_recWords-1];
+                    } else {
+                        l_last = (uint32_t) l_readBuffer[l_recWords-2];
+                    }
                 }
                 break;
             }
 
-            // Make sure response buffer not over run.
+            // When error occurs, SBE will write more than l_maxWords
+            // we have to keep reading 1 word at a time until we get EOT
+            // or more than READ_BUFFER_SIZE. Save what we read in the buffer
             if (l_recWords >= l_maxWords)
             {
-                break; //ran out of receive buffer before EOT
+                l_overRun = true;
             }
 
             // read next word
             errl = readFsi(i_target,SBE_FIFO_DNFIFO_DATA_OUT,&l_last);
             if (errl) break;
 
-            *l_pReceived = l_last; //copy to returned output buffer
-            l_pReceived++; //advance to next position
+            l_readBuffer[l_recWords] = l_last;
+
+            if(l_overRun == false) {
+                *l_pReceived = l_last; //copy to returned output buffer
+                l_pReceived++; //advance to next position
+            }
             l_recWords++;  //count word received
             SBE_TRACD("Read a byte from data reg: 0x%.8X",l_last);
+            if(l_recWords > READ_BUFFER_SIZE) {
+                SBE_TRACF(ERR_MRK "readResponse: data overflow without EOT");
+                break;
+            }
         }
         while (1); // exit check in middle of loop
         if (errl) break;
@@ -377,7 +395,6 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
         // l_recWords of words received.
         // l_pReceived points to 1 word past last word received.
         // l_last has last word received, which is "distance" to status
-
         // EOT is expected before running out of response buffer
         if (!l_EOT)
         {
@@ -424,7 +441,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
         {
             SBE_TRACF(ERR_MRK "readResponse: invalid status distance "
                       "cmd=0x%08x distance=%d allocated response size=%d "
-                      "recieved word size=%d" ,
+                      "received word size=%d" ,
                       i_pFifoRequest[1],
                       l_last,
                       i_responseSize,
@@ -466,7 +483,10 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
         // Check status for success.
         // l_pReceived points one word past last word received.
         // l_last has number of words to status header including self.
-        uint32_t * l_pStatusTmp = l_pReceived - l_last; //do word ptr math
+
+        uint32_t * l_pStatusTmp = (l_overRun == false) ?
+            l_pReceived - l_last : //do word ptr math
+            &l_readBuffer[l_recWords - 1];
         statusHeader * l_pStatusHeader = (statusHeader *)l_pStatusTmp;
         if ((FIFO_STATUS_MAGIC != l_pStatusHeader->magic) ||
             (SBE_PRI_OPERATION_SUCCESSFUL != l_pStatusHeader->primaryStatus) ||
@@ -507,8 +527,16 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
              * Size of the FFDC package should be l_maxWords - l_recWords
              */
 
-            writeFFDCBuffer(l_pReceived,
+            if(l_overRun == false) {
+                writeFFDCBuffer(l_pReceived,
                             sizeof(uint32_t) * (l_maxWords - l_recWords - 1));
+            } else {
+                // If Overrun, FFDC should be
+                // l_recWords (words read) - l_last (distance to status) + 1
+                // in l_readBuffer
+                writeFFDCBuffer(&l_readBuffer[l_recWords - l_last + 1],
+                            sizeof(uint32_t) * (l_last + 1));
+            }
             SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
             l_ffdc_parser->parseFFDCData(iv_ffdcPackageBuffer);
 
@@ -520,11 +548,11 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                  // If fapiRC, add data to errorlog
                  if(l_rc ==  fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA)
                  {
-                     errl->addFFDC( SBE_COMP_ID,
+                     errl->addFFDC( SBEIO_COMP_ID,
                                     l_ffdc_parser->getFFDCPackage(i),
                                     l_ffdc_parser->getPackageLength(i),
                                     0,
-                                    ERRORLOG::ERRL_UDT_NOFORMAT,
+                                    SBEIO_UDT_PARAMETERS,
                                     false );
                  }
                  else
@@ -546,6 +574,12 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                                 l_rc,
                                 l_ffdcBuf,
                                 i_target->getAttr<TARGETING::ATTR_FAPI_POS>());
+
+                     errlHndl_t sbe_errl = fapi2::rcToErrl(l_fapiRC);
+                     if( sbe_errl )
+                     {
+                         ERRORLOG::errlCommit( sbe_errl, SBEIO_COMP_ID );
+                     }
                  }
             }
 
