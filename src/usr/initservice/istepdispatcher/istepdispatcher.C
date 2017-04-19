@@ -366,6 +366,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
     uint32_t substep = 0;
     bool l_doReconfig = false;
     uint32_t numReconfigs = 0;
+    bool l_manufacturingMode = false;
 
     // soft reconfig loops happen really fast
     // and since for scale-out systems it only happens for istep 7
@@ -374,6 +375,24 @@ errlHndl_t IStepDispatcher::executeAllISteps()
     const uint32_t MAX_NUM_RECONFIG_ATTEMPTS = 30;
 
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::executeAllISteps()");
+
+    // Find out if in manufacturing mode
+    TARGETING::Target* l_pTopLevel = nullptr;
+    TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+    // Assert if we still have a nullptr target
+    assert(l_pTopLevel != nullptr,"IstepDispatcher::executeAllISteps()"
+        " expected top level target, but got nullptr.");
+
+    auto l_mnfgFlags =
+        l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
+
+    // Check to see if SRC_TERM bit is set in MNFG flags
+    if (l_mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM)
+    {
+        TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps:"
+                  " In manufacturing mode");
+        l_manufacturingMode = true;
+    }
 
     while (istep < MaxISteps)
     {
@@ -407,19 +426,6 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps:"
                           " Reconfig required after IStep %d:%d",
                           istep, substep);
-
-                // Find out if in manufacturing mode
-                bool l_manufacturingMode = false;
-                TARGETING::Target* l_pTopLevel = NULL;
-                TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
-                TARGETING::ATTR_MNFG_FLAGS_type l_mnfgFlags =
-                    l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
-                if (l_mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM)
-                {
-                    TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps:"
-                              " In manufacturing mode");
-                    l_manufacturingMode = true;
-                }
 
                 // Find out if in MPIPL mode
                 bool l_MPIPLMode = false;
@@ -582,7 +588,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                                 // records have been set. We will not increment
                                 // the reboot count.
                                 TRACFCOMP(g_trac_initsvc, "Reconfig loop needed "
-                                    "but no new gard records were commited. Do "
+                                    "but no new gard records were committed. Do "
                                     "not increment reboot count.");
                             }
 
@@ -606,6 +612,38 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                     // else return the error from doIstep
                 }
             }
+
+#ifdef CONFIG_BMC_IPMI
+            if(l_manufacturingMode &&
+                (ERRORLOG::ErrlManager::errlCommittedThisBoot()))
+            {
+                TRACFCOMP(g_trac_initsvc, "Manufacturing Mode is set and an "
+                    "error log has been committed. Stopping the IPL.");
+
+                // Turn off the watchdog so it doesn't trip
+                errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
+                                   IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN,
+                                   static_cast<uint8_t>
+                                              (IPMIWATCHDOG::DO_NOT_STOP |
+                                               IPMIWATCHDOG::BIOS_FRB2),
+                                   IPMIWATCHDOG::NO_ACTIONS); // do nothing
+                if(err_ipmi)
+                {
+                   TRACFCOMP(g_trac_initsvc,
+                                  "init: ERROR: Failed to disable IPMI "
+                                  " watchdog");
+                    err_ipmi->collectTrace("INITSVC");
+                    errlCommit(err_ipmi, INITSVC_COMP_ID );
+                }
+
+                // Flush out the error logs so we can get as much info as
+                // possible
+                ERRORLOG::ErrlManager::callFlushErrorLogs();
+
+                // Stop the IPL
+                stop();
+            }
+#endif
 
             if (err)
             {
