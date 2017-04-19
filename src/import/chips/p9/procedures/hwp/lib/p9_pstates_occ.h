@@ -98,11 +98,14 @@ typedef struct
     /// WOF Iddq Margin (aging factor) in 0.01% units
     uint16_t    wof_iddq_margin_factor;
 
-    /// Temperature Scale Factor per 10C in 0.01% units
-    uint16_t    temperature_scale_factor;
+    /// VDD Temperature Scale Factor per 10C in 0.01% units
+    uint16_t    vdd_temperature_scale_factor;
+
+    /// VDN Temperature Scale Factor per 10C in 0.01% units
+    uint16_t    vdn_temperature_scale_factor;
 
     /// Spare
-    uint8_t     spare[10];
+    uint8_t     spare[8];
 
     /// IVDD ALL Good Cores ON; 6.25mA units
     iddq_entry_t ivdd_all_good_cores_on_caches_on[IDDQ_MEASUREMENTS];
@@ -133,11 +136,15 @@ typedef struct
     avgtemp_entry_t avgtemp_quad_good_cores_on[MAXIMUM_QUADS][IDDQ_MEASUREMENTS];
 
     /// avgtempN ; 6.25mA units
-    avgtemp_entry_t avgtemp_vdn;
+    avgtemp_entry_t avgtemp_vdn[IDDQ_MEASUREMENTS];
 
     /// spare (per MVPD documentation
-    uint8_t spare_1[43];
-
+    ///
+    /// NOTE:  The MVPD documentation defines 43 spare bytes to lead to a 255B structure.  However,
+    /// some consuming code already assumed a 250B structure and the correction of this size was disruptive.
+    /// This is not a problem until the IQ keyword actually defines these bytes at which time a keyword
+    ///  version update will be need.  Thus, this structure will remain at 250B.
+    uint8_t spare_1[38];
 } IddqTable;
 
 
@@ -187,6 +194,18 @@ typedef struct
 
     /// Nest frequency in Mhz. This is used by FIT interrupt
     uint32_t nest_frequency_mhz;
+
+    //Nest leakage percentage used to calculate the Core leakage
+    uint16_t nest_leakage_percent;
+
+    uint16_t ceff_tdp_vdn;
+
+    // AC tdp vdd turbo
+    uint16_t lac_tdp_vdd_turbo_10ma;
+
+    // AC tdp vdd nominal
+    uint16_t lac_tdp_vdd_nominal_10ma;
+
 } __attribute__((aligned(128))) OCCPstateParmBlock;
 
 #ifdef __cplusplus
