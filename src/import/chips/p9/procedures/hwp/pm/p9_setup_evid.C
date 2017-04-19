@@ -218,8 +218,10 @@ avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             !attrs->vdn_voltage_mv)
         {
             uint8_t l_poundv_bucketId = 0;
+            fapi2::voltageBucketData_t l_poundv_data;
             // Get #V data from MVPD for VDD/VDN and VCS voltage values
-            FAPI_TRY(proc_get_mvpd_data(i_target, attr_mvpd_data, &valid_pdv_points, &present_chiplets, l_poundv_bucketId));
+            FAPI_TRY(proc_get_mvpd_data(i_target, attr_mvpd_data, &valid_pdv_points, &present_chiplets, l_poundv_bucketId,
+                                        &l_poundv_data));
 
             // set VDD voltage to PowerSave Voltage from MVPD data (if no override)
             if (attrs->vdd_voltage_mv)
