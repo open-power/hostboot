@@ -25,10 +25,10 @@
 /// @file p9_adu_constants.H
 /// @brief Constant enums to support ADU get/putmem procedures (FAPI)
 ///
-// *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
+// *HWP HWP Owner: Joshua Hannan jlhannan@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWp Consumed by: SBE
 
 #ifndef _P9_ADU_CONSTANTS_H_
