@@ -118,12 +118,11 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
              * Get the size of the ffdc package = the entire package length
              * minus the header (2 words), and the rc (1 word)
              */
-            uint8_t l_bufLenInBytes = iv_ffdcWordLen * l_packageLengthInWords -
-                 iv_headerWordInBytes - sizeof(l_rc);
+            uint32_t l_bufLenInBytes = iv_ffdcWordLen * l_packageLengthInWords -
+                 iv_headerWordInBytes;
 
             // Check to see if what we're copying is beyond the buffer size
-            uint8_t l_bufferMarker = i + iv_headerWordInBytes +
-                                       sizeof(l_rc) + l_bufLenInBytes;
+            uint32_t l_bufferMarker = i + iv_headerWordInBytes + l_bufLenInBytes;
             if(l_bufferMarker > PAGESIZE * iv_ffdcPackageSize)
             {
                 SBE_TRACF(ERR_MRK"parseFFDCData: FFDC Package buffer overflow detected.");
@@ -161,7 +160,7 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
                 // starting at 12 byte from current pointer
                 memcpy(l_wordBuffer,
                        static_cast<char *>(i_ffdcPackageBuffer) +
-                       i + iv_headerWordInBytes + sizeof(l_rc),
+                       i + iv_headerWordInBytes,
                        l_bufLenInBytes);
 
                 addFFDCPackage(l_wordBuffer, l_rc, l_bufLenInBytes);
@@ -195,9 +194,9 @@ uint8_t SbeFFDCParser::getTotalPackages()
 /*
  * @brief returns the size (bytes) of the FFDC package
  */
-uint8_t SbeFFDCParser::getPackageLength(uint8_t i_index)
+uint32_t SbeFFDCParser::getPackageLength(uint8_t i_index)
 {
-    uint8_t l_retLen = 0;
+    uint32_t l_retLen = 0;
     uint8_t l_size = getTotalPackages();
     if((i_index >= 0) && (i_index <= l_size))
     {
@@ -216,7 +215,8 @@ void * SbeFFDCParser::getFFDCPackage(uint8_t i_index)
     uint8_t l_size = getTotalPackages();
     if((i_index >= 0) && (i_index <= l_size))
     {
-        l_retPtr = iv_ffdcPackages.at(i_index);
+        ffdc_package *l_ffdcPkg = iv_ffdcPackages.at(i_index);
+        l_retPtr = l_ffdcPkg->ffdcPtr;
     }
     return l_retPtr;
 }
@@ -241,7 +241,7 @@ uint32_t SbeFFDCParser::getPackageRC(uint8_t i_index)
  * and push it to the list
  */
 void SbeFFDCParser::addFFDCPackage(void * i_ffdcPackage,
-                                   uint32_t i_rc, uint8_t i_packageLen)
+                                   uint32_t i_rc, uint32_t i_packageLen)
 {
     ffdc_package * l_ffdcPkg = new ffdc_package();
     l_ffdcPkg->rc = i_rc;

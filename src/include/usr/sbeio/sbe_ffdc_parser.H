@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,7 +92,7 @@ class SbeFFDCParser
          *  @retval: length of data stored
          *  @param[in]  i_index  index number
          */
-        uint8_t getPackageLength(uint8_t i_index);
+        uint32_t getPackageLength(uint8_t i_index);
 
     private:
 
@@ -117,7 +117,7 @@ class SbeFFDCParser
          */
 
         void addFFDCPackage(void * i_ffdcPackage, uint32_t i_rc,
-                            uint8_t i_packageLen);
+                            uint32_t i_packageLen);
 
 };
 

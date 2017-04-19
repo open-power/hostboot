@@ -338,8 +338,8 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
               l_cpu_target->setAttr<TARGETING::ATTR_HDAT_EC>(l_newHdatEC);
           }
       }
-    }  // end of going through all processors
 
+    }  // end of going through all processors
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "call_proc_check_slave_sbe_seeprom_complete exit");
