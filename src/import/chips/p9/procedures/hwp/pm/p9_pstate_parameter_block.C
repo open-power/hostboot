@@ -44,10 +44,10 @@
 // ----------------------------------------------------------------------
 #include <fapi2.H>
 #include <p9_pstate_parameter_block.H>
-#include "p9_pm_get_poundv_bucket.H"
 #include "p9_pm_get_poundw_bucket.H"
 #include "p9_resclk_defines.H"
 #include <attribute_ids.H>
+#include <math.h>
 
 fapi2::vdmData_t g_vpdData = {1,
                               2,
@@ -132,6 +132,8 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         memset (&l_localppb, 0, sizeof(LocalPstateParmBlock));
         memset (&l_occppb , 0, sizeof (OCCPstateParmBlock));
 
+        PoundW_data l_w_data;
+
         // Struct Variable for all attributes
         AttributeList attr;
         //ChipCharacterization* characterization;
@@ -184,9 +186,11 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         // clear MVPD array
         memset(attr_mvpd_voltage_control, 0, sizeof(attr_mvpd_voltage_control));
+        fapi2::voltageBucketData_t l_poundv_data;
+
 
         FAPI_TRY(proc_get_mvpd_data( i_target, attr_mvpd_voltage_control, &valid_pdv_points, &present_chiplets,
-                                     l_poundv_bucketId),
+                                     l_poundv_bucketId, &l_poundv_data),
                  "Get MVPD #V data failed");
 
         if (!present_chiplets)
@@ -237,7 +241,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
 
         FAPI_INF("Getting VDM points (#W) Data");
-        FAPI_TRY(proc_get_mvpd_poundw(i_target, l_poundv_bucketId, &l_vdmpb));
+        FAPI_TRY(proc_get_mvpd_poundw(i_target, l_poundv_bucketId, &l_vdmpb, &l_w_data));
 
         // ----------------
         // get IVRM Parameters data
@@ -402,6 +406,43 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         // frequency_step_khz
         l_occppb.frequency_step_khz = revle32(l_frequency_step_khz);
+
+        //nest leakage percent
+        l_occppb.nest_leakage_percent = attr.attr_nest_leakage_percent;
+
+        FAPI_INF("l_occppb.nest_leakage_percent %x", l_occppb.nest_leakage_percent);
+
+        l_occppb.lac_tdp_vdd_turbo_10ma   = revle16(l_w_data.poundw_turbo.ivdd_tdp_ac_current_10ma);
+        l_occppb.lac_tdp_vdd_nominal_10ma = revle16(l_w_data.poundw_nominal.ivdd_tdp_ac_current_10ma);
+
+        FAPI_INF("l_occppb.lac_tdp_vdd_turbo_10ma %x", revle16(l_occppb.lac_tdp_vdd_turbo_10ma));
+        FAPI_INF("l_occppb.lac_tdp_vdd_nominal_10ma %x", revle16(l_occppb.lac_tdp_vdd_nominal_10ma));
+
+        //Power bus vdn voltage
+        uint16_t l_vpd_vdn_mv = revle16(l_poundv_data.VdnPbVltg);
+        FAPI_INF("l_vpd_vdn_mv %x", (l_vpd_vdn_mv));
+
+        //Power bus nest freq
+        uint16_t l_pbus_nest_freq = revle16(l_poundv_data.pbFreq);
+
+        FAPI_INF("l_pbus_nest_freq %x", (l_pbus_nest_freq));
+
+        // I- VDN PB current
+        uint16_t l_vpd_idn_100ma = revle16(l_poundv_data.IdnPbCurr);
+        FAPI_INF("l_vpd_idn_100ma %x", (l_vpd_idn_100ma));
+
+        uint8_t l_nest_leakage_for_occ = 75;
+
+        uint16_t l_iac_tdp_vdn = get_iac_vdn_value (l_vpd_vdn_mv, l_iddqt, l_nest_leakage_for_occ,
+                                 l_vpd_idn_100ma);
+
+        FAPI_INF("l_iac_tdp_vdn %x", l_iac_tdp_vdn);
+
+        l_occppb.ceff_tdp_vdn =  revle16(pstate_calculate_effective_capacitance(l_iac_tdp_vdn,
+                                         l_vpd_vdn_mv * 1000,
+                                         l_pbus_nest_freq));
+
+        FAPI_INF("l_occppb.ceff_tdp_vdn %x", revle16(l_occppb.ceff_tdp_vdn));
 
 
         // @todo RTC 161279 - Need Pstate 0 definition and freq2pstate function to be coded
@@ -629,6 +670,8 @@ proc_get_attributes ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
     DATABLOCK_GET_ATTR(ATTR_EXTERNAL_VRM_STEPSIZE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                        attr_ext_vrm_step_size_mv);
 
+    DATABLOCK_GET_ATTR(ATTR_NEST_LEAKAGE_PERCENT, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                       attr_nest_leakage_percent);
 
     io_attr->attr_ext_vrm_transition_start_ns =
         (io_attr->attr_ext_vrm_transition_start_ns) ? io_attr->attr_ext_vrm_transition_start_ns : EXT_VRM_TRANSITION_START_NS;
@@ -661,8 +704,8 @@ proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                    uint32_t      o_attr_mvpd_data[PV_D][PV_W],
                    uint32_t*     o_valid_pdv_points,
                    uint8_t*      o_present_chiplets,
-                   uint8_t&      o_bucketId
-                  )
+                   uint8_t&      o_bucketId,
+                   fapi2::voltageBucketData_t* o_poundv_data)
 {
 
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_EQ>> l_eqChiplets;
@@ -703,11 +746,12 @@ proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             FAPI_INF("Chip Number => %u", l_chipNum);
 
             // clear out buffer to known value before calling fapiGetMvpdField
-            memset(l_buffer, 0, sizeof(l_poundv_data));
+            memset(l_buffer, 0, sizeof(o_poundv_data));
 
             FAPI_TRY(p9_pm_get_poundv_bucket(l_eqChiplets[j], l_poundv_data));
 
             memcpy(l_buffer, &l_poundv_data, sizeof(l_poundv_data));
+            memcpy(o_poundv_data, &l_poundv_data, sizeof(l_poundv_data));
 
             // clear array
             memset(chiplet_mvpd_data, 0, sizeof(chiplet_mvpd_data));
@@ -930,23 +974,29 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         // get RDP TO TDP scalling factor
         uint16_t l_rdp_to_tdp_scale_factor = *(reinterpret_cast<uint16_t*>(l_buffer_iq_inc));
         io_iddqt->rdp_to_tdp_scale_factor = revle16(l_rdp_to_tdp_scale_factor);
-        FAPI_INF("  RDP TO TDP scalling factor = %u", l_rdp_to_tdp_scale_factor );
+        FAPI_INF("  RDP TO TDP scalling factor = %u", io_iddqt->rdp_to_tdp_scale_factor);
         l_buffer_iq_inc += 2;
 
         // get WOF IDDQ margin factor
         uint16_t l_wof_iddq_margin_factor = *(reinterpret_cast<uint16_t*>(l_buffer_iq_inc));
         io_iddqt->wof_iddq_margin_factor = revle16(l_wof_iddq_margin_factor);
-        FAPI_INF("  WOF IDDQ margin factor     = %u", l_wof_iddq_margin_factor);
+        FAPI_INF("  WOF IDDQ margin factor     = %u", io_iddqt->wof_iddq_margin_factor);
         l_buffer_iq_inc += 2;
 
-        // get Temperature scaling factor
+        // get VDD Temperature scaling factor
         uint16_t l_temperature_scale_factor = *(reinterpret_cast<uint16_t*>(l_buffer_iq_inc));
-        io_iddqt->temperature_scale_factor = revle16(l_temperature_scale_factor);
-        FAPI_INF("  Temperature scaling factor = %u", l_temperature_scale_factor);
+        io_iddqt->vdd_temperature_scale_factor = revle16(l_temperature_scale_factor);
+        FAPI_INF(" VDD  Temperature scaling factor = %u", io_iddqt->vdd_temperature_scale_factor);
         l_buffer_iq_inc += 2;
 
-        // get spare data - 10B
-        for (i = 0; i < 9; i++)
+        // get VDN Temperature scaling factor
+        l_temperature_scale_factor = *(reinterpret_cast<uint16_t*>(l_buffer_iq_inc));
+        io_iddqt->vdn_temperature_scale_factor = revle16(l_temperature_scale_factor);
+        FAPI_INF(" VDN  Temperature scaling factor = %u", io_iddqt->vdn_temperature_scale_factor);
+        l_buffer_iq_inc += 2;
+
+        // get spare data - 8B
+        for (i = 0; i < 8; i++)
         {
             l_buffer_data = *l_buffer_iq_inc;
             io_iddqt->spare[i] = l_buffer_data;
@@ -974,7 +1024,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
             io_iddqt->ivdd_all_good_cores_on_caches_on[i] = revle16(l_iddq_data);
             l_buffer_iq_inc += sizeof(iddq_entry_t);
-            sprintf(l_buffer_str, "  %04u ", revle16(l_iddq_data));
+            sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdd_all_good_cores_on_caches_on[i]);
             strcat(l_line_str, l_buffer_str);
         }
 
@@ -989,7 +1039,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
             io_iddqt->ivdd_all_cores_off_caches_off[i] = revle16(l_iddq_data);
             l_buffer_iq_inc += sizeof(iddq_entry_t);
-            sprintf(l_buffer_str, "  %04u ", revle16(l_iddq_data));
+            sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdd_all_cores_off_caches_off[i]);
             strcat(l_line_str, l_buffer_str);
         }
 
@@ -1004,7 +1054,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
             io_iddqt->ivdd_all_good_cores_off_good_caches_on[i] = revle16(l_iddq_data);
             l_buffer_iq_inc += sizeof(iddq_entry_t);
-            sprintf(l_buffer_str, "  %04u ", revle16(l_iddq_data));
+            sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdd_all_good_cores_off_good_caches_on[i]);
             strcat(l_line_str, l_buffer_str);
         }
 
@@ -1023,7 +1073,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
                 io_iddqt->ivdd_quad_good_cores_on_good_caches_on[i][j] = revle16(l_iddq_data);
                 l_buffer_iq_inc += sizeof(iddq_entry_t);
-                sprintf(l_buffer_str, "  %04u ", revle16(l_iddq_data));
+                sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdd_quad_good_cores_on_good_caches_on[i][j]);
                 strcat(l_line_str, l_buffer_str);
             }
 
@@ -1039,7 +1089,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
             io_iddqt->ivdn[i] = revle16(l_iddq_data);
             l_buffer_iq_inc += sizeof(iddq_entry_t);
-            sprintf(l_buffer_str, "  %04u ", revle16(l_iddq_data));
+            sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdn[i]);
             strcat(l_line_str, l_buffer_str);
         }
 
@@ -1056,7 +1106,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         {
             l_avgtemp_data = *(reinterpret_cast<avgtemp_entry_t*>(l_buffer_iq_inc));
             io_iddqt->avgtemp_all_good_cores_on[i] = l_avgtemp_data;
-            sprintf(l_buffer_str, "   %02u  ", l_avgtemp_data);
+            sprintf(l_buffer_str, "   %02u  ", io_iddqt->avgtemp_all_good_cores_on[i]);
             strcat(l_line_str, l_buffer_str);
             l_buffer_iq_inc += sizeof(l_avgtemp_data);
         }
@@ -1072,7 +1122,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             l_avgtemp_data = *(reinterpret_cast<avgtemp_entry_t*>(l_buffer_iq_inc));
             io_iddqt->avgtemp_all_cores_off_caches_off[i] = l_avgtemp_data;
             l_buffer_iq_inc += sizeof(l_avgtemp_data);
-            sprintf(l_buffer_str, "   %02u  ", l_avgtemp_data);
+            sprintf(l_buffer_str, "   %02u  ", io_iddqt->avgtemp_all_cores_off_caches_off[i]);
             strcat(l_line_str, l_buffer_str);
         }
 
@@ -1087,7 +1137,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             l_avgtemp_data = *(reinterpret_cast<avgtemp_entry_t*>(l_buffer_iq_inc));
             io_iddqt->avgtemp_all_good_cores_off[i] = l_avgtemp_data;
             l_buffer_iq_inc += sizeof(l_avgtemp_data);
-            sprintf(l_buffer_str, "   %02u  ", l_avgtemp_data);
+            sprintf(l_buffer_str, "   %02u  ", io_iddqt->avgtemp_all_good_cores_off[i]);
             strcat(l_line_str, l_buffer_str);
         }
 
@@ -1106,7 +1156,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 l_avgtemp_data = *(reinterpret_cast<avgtemp_entry_t*>(l_buffer_iq_inc));
                 io_iddqt->avgtemp_quad_good_cores_on[i][j] = l_avgtemp_data;
                 l_buffer_iq_inc += sizeof(l_avgtemp_data);
-                sprintf(l_buffer_str, "   %02u  ", l_avgtemp_data);
+                sprintf(l_buffer_str, "   %02u  ", io_iddqt->avgtemp_quad_good_cores_on[i][j]);
                 strcat(l_line_str, l_buffer_str);
             }
 
@@ -1120,9 +1170,9 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         for (i = 0; i < IDDQ_MEASUREMENTS; i++)
         {
             l_avgtemp_data = *(reinterpret_cast<avgtemp_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->avgtemp_vdn = revle16(l_avgtemp_data);
+            io_iddqt->avgtemp_vdn[i] = (l_avgtemp_data);
             l_buffer_iq_inc += sizeof(l_avgtemp_data);
-            sprintf(l_buffer_str, "   %02u  ", l_avgtemp_data);
+            sprintf(l_buffer_str, "   %02u  ", io_iddqt->avgtemp_vdn[i]);
             strcat(l_line_str, l_buffer_str);
         }
 
@@ -2328,7 +2378,8 @@ int freq2pState (const GlobalPstateParmBlock* gppb,
 fapi2::ReturnCode
 proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                      uint8_t       i_poundv_bucketId,
-                     VDMParmBlock* o_vdmpb)
+                     VDMParmBlock* o_vdmpb,
+                     PoundW_data* o_data)
 {
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_EQ>> l_eqChiplets;
     fapi2::vdmData_t l_vdmBuf;
@@ -2390,11 +2441,15 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         {
             FAPI_INF("attribute ATTR_POUND_W_STATIC_DATA_ENABLE is set");
             memcpy (&l_vdmBuf, &g_vpdData, sizeof (g_vpdData));
+
+            // copy the data to the pound w structure
+            memcpy (o_data, &g_vpdData, sizeof (g_vpdData));
         }
         else
         {
             FAPI_INF("attribute ATTR_POUND_W_STATIC_DATA_ENABLE is NOT set");
-
+            // copy the data to the pound w structure
+            memcpy (o_data, l_vdmBuf.vdmData, sizeof (l_vdmBuf.vdmData));
         }
 
         const uint8_t pv_op_order[VPD_PV_POINTS] = VPD_PV_ORDER;
@@ -2616,4 +2671,131 @@ void p9_pstate_update_vfrt(uint8_t* i_pBuffer,
     }
     while(0);
 
+}
+
+/// Get IAC VDN vlue
+uint16_t get_iac_vdn_value (uint16_t i_vpd_vdn_mv,
+                            IddqTable i_iddq,
+                            uint8_t nest_leakage_percent,
+                            uint16_t i_vpd_idn_100ma)
+{
+    uint16_t l_ac_vdn_value = 0;
+    uint8_t l_iddq_index = 0;
+    const uint8_t MIN_IDDQ_VALUE = 6; //considering 0.6 as 6 here for easy math
+    const uint16_t IDDQ_MIN_VOLT_LEVEL = 600;
+    uint8_t l_measured_temp_C[2] = {0};
+    uint8_t l_Ivdnq_5ma[2] = {0};
+    float l_scaled_leakage_ma[2] = {0};
+    uint16_t l_Ivdnq_vpd_ma = 0;
+    uint8_t i = 0;
+    uint8_t j = 0;
+
+    //check bonunding is required or not
+    uint16_t l_bounding_value = i_vpd_vdn_mv % 100;
+    //Index to read from IDDQ table
+    //Assumption here i_vpd_vdn_mv value will be greater than 600 and lesser
+    //than 1100 mv
+    l_iddq_index = (i_vpd_vdn_mv / 100) - MIN_IDDQ_VALUE;
+    i = l_iddq_index;
+    j = l_iddq_index + 1;
+    uint16_t l_iq_mv[2] = {0};
+    l_iq_mv[0] = IDDQ_MIN_VOLT_LEVEL + (100 * i);
+    l_iq_mv[1] = IDDQ_MIN_VOLT_LEVEL + (100 * (i + 1));
+
+    if (!l_bounding_value)
+    {
+
+        //Read measured temp
+        l_measured_temp_C[0] = i_iddq.avgtemp_vdn[i];
+
+        //Read ivdnq_5ma
+        l_Ivdnq_5ma[0] = i_iddq.ivdn[i];
+
+        //Scale each bounding Ivdnq_5ma value to 75C in mA
+
+        l_scaled_leakage_ma[0] = l_Ivdnq_5ma[0] * 5 * pow (1.3, (l_measured_temp_C[0] - nest_leakage_percent) / 10);
+
+        l_Ivdnq_vpd_ma = l_scaled_leakage_ma[0];
+
+        l_ac_vdn_value = (i_vpd_idn_100ma * 10) - (l_Ivdnq_vpd_ma * 10);
+    }
+    else
+    {
+        //Read measured temp
+        l_measured_temp_C[0] = i_iddq.avgtemp_vdn[i];
+        l_measured_temp_C[1] = i_iddq.avgtemp_vdn[i + 1];
+
+        //Read ivdnq_5ma
+        l_Ivdnq_5ma[0] = i_iddq.ivdn[i];
+        l_Ivdnq_5ma[1] = i_iddq.ivdn[i + 1];
+
+        //Scale each bounding Ivdnq_5ma value to 75C in mA
+
+        for (j = 0; j < 2; j++)
+        {
+            l_scaled_leakage_ma[j] = l_Ivdnq_5ma[j] * 5 * pow (1.3, (l_measured_temp_C[j] - nest_leakage_percent) / 10);
+        }
+
+        //Interpolate between scaled_leakage_ma[i] and scaled_leakage_ma[i+1]
+        //using the same ratio as the VPD voltage is to the bounding volages) to
+        //arrive at  Ivdnq_vpd_ma
+        l_Ivdnq_vpd_ma = l_scaled_leakage_ma[i] + roundUp((i_vpd_vdn_mv - 600 + (100 * i)) / ((l_iq_mv[1] - l_iq_mv[0]) *
+                         (l_scaled_leakage_ma[1] - l_scaled_leakage_ma[0])));
+
+        l_ac_vdn_value = (i_vpd_idn_100ma * 10) - (l_Ivdnq_vpd_ma * 10);
+    }
+
+    return l_ac_vdn_value;
+}
+/**
+ * calculate_effective_capacitance
+ *
+ * Description: Generic function to perform the effective capacitance
+ *              calculations.
+ *              C_eff = I / (V^1.3 * F)
+ *
+ *              I is the AC component of Idd in 0.01 Amps (or10 mA)
+ *              V is the silicon voltage in 100 uV
+ *              F is the frequency in MHz
+ *
+ *              Note: Caller must ensure they check for a 0 return value
+ *                    and disable wof if that is the case
+ *
+ * Param[in]: i_iAC - the AC component
+ * Param[in]: i_voltage - the voltage component in 100uV
+ * Param[in]: i_frequency - the frequency component
+ *
+ * Return: The calculated effective capacitance
+ */
+uint16_t pstate_calculate_effective_capacitance( uint16_t i_iAC,
+        uint16_t i_voltage,
+        uint16_t i_frequency )
+{
+
+    // Compute V^1.3 using a best-fit equation
+    // (V^1.3) = (21374 * (voltage in 100uV) - 50615296)>>10
+    uint32_t v_exp_1_dot_3 = (21374 * i_voltage - 50615296) >> 10;
+
+    // Compute I / (V^1.3)
+    uint32_t I = i_iAC << 14; // * 16384
+
+    // Prevent divide by zero
+    if( v_exp_1_dot_3 == 0 )
+    {
+        // Return 0 causing caller to disable wof.
+        return 0;
+    }
+
+    uint32_t c_eff = (I / v_exp_1_dot_3);
+    c_eff = c_eff << 14; // * 16384
+
+    // Divide by frequency and return the final value.
+    // (I / (V^1.3 * F)) == I / V^1.3 /F
+    return c_eff / i_frequency;
+
+}
+
+uint16_t roundUp(float i_value)
+{
+    return ((uint16_t)(i_value == (uint16_t)i_value ? i_value : i_value + 1));
 }
