@@ -997,7 +997,8 @@ fapi2::ReturnCode execute_cal_steps_helper( const fapi2::Target<fapi2::TARGET_TY
 
     // If we got a cal timeout, or another CCS error just leave now. If we got success, check the error
     // bits for a cal failure. We'll return the proper ReturnCode so all we need to do is FAPI_TRY.
-    FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target) );
+    FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target), "%s failed to execute CCS program for cal steps 0x%04lx",
+              mss::c_str(i_target), uint16_t(i_cal_steps_enabled) );
 
 fapi_try_exit:
     return fapi2::current_err;
