@@ -25,12 +25,13 @@
 //------------------------------------------------------------------------------
 //
 /// @file p9_tod_save_config.C
-/// @brief Saves TOD configuration registers to i_tod_node->o_todRegs
+/// @brief Saves TOD configuration registers to topology structure
 //
-// *HWP Owner: Christina Graves clgraves@us.ibm.com
+// *HWP HWP Owner: Nick Klazynski jklazyns@us.ibm.com
+// *HWP HWP Owner: Joachim Fenkes fenkes@de.ibm.com
 // *FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: PRD
 //
 //------------------------------------------------------------------------------
@@ -40,60 +41,70 @@
 //------------------------------------------------------------------------------
 #include <p9_tod_save_config.H>
 
-extern "C"
-{
-
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
 // NOTE: description in header
-//------------------------------------------------------------------------------
-    fapi2::ReturnCode p9_tod_save_config(tod_topology_node* i_tod_node)
+fapi2::ReturnCode p9_tod_save_config(tod_topology_node* i_tod_node)
+{
+    FAPI_DBG("Start");
+
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_TOD_M_PATH_CTRL_REG,
+                            i_tod_node->o_todRegs.tod_m_path_ctrl_reg),
+             "Error from getScom (PERV_TOD_M_PATH_CTRL_REG)!");
+
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_TOD_PRI_PORT_0_CTRL_REG,
+                            i_tod_node->o_todRegs.tod_pri_port_0_ctrl_reg),
+             "Error from getScom (PERV_TOD_PRI_PORT_0_CTRL_REG)!");
+
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_TOD_PRI_PORT_1_CTRL_REG,
+                            i_tod_node->o_todRegs.tod_pri_port_1_ctrl_reg),
+             "Error from getScom (PERV_TOD_PRI_PORT_1_CTRL_REG)!");
+
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_TOD_SEC_PORT_0_CTRL_REG,
+                            i_tod_node->o_todRegs.tod_sec_port_0_ctrl_reg),
+             "Error from getScom (PERV_TOD_SEC_PORT_0_CTRL_REG)!");
+
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_TOD_SEC_PORT_1_CTRL_REG,
+                            i_tod_node->o_todRegs.tod_sec_port_1_ctrl_reg),
+             "Error from getScom (PERV_TOD_SEC_PORT_1_CTRL_REG)!");
+
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_TOD_S_PATH_CTRL_REG,
+                            i_tod_node->o_todRegs.tod_s_path_ctrl_reg),
+             "Error from getScom (PERV_TOD_S_PATH_CTRL_REG)!");
+
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_TOD_I_PATH_CTRL_REG,
+                            i_tod_node->o_todRegs.tod_i_path_ctrl_reg),
+             "Error from getScom (PERV_TOD_I_PATH_CTRL_REG)!");
+
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_TOD_PSS_MSS_CTRL_REG,
+                            i_tod_node->o_todRegs.tod_pss_mss_ctrl_reg),
+             "Error from getScom (PERV_TOD_PSS_MSS_CTRL_REG)!");
+
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_TOD_CHIP_CTRL_REG,
+                            i_tod_node->o_todRegs.tod_chip_ctrl_reg),
+             "Error from getScom (PERV_TOD_CHIP_CTRL_REG)!");
+
+    // Recurse to save configuration of children
+    for (auto l_child = (i_tod_node->i_children).begin();
+         l_child != (i_tod_node->i_children).end();
+         ++l_child)
     {
-        FAPI_DBG("Start");
-
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* target = i_tod_node->i_target;
-
-        FAPI_TRY(fapi2::getScom(*target, PERV_TOD_M_PATH_CTRL_REG, i_tod_node->o_todRegs.tod_m_path_ctrl_reg),
-                 "Error saving PERV_TOD_M_PATH_CTRL_REG...");
-
-        FAPI_TRY(fapi2::getScom(*target, PERV_TOD_PRI_PORT_0_CTRL_REG, i_tod_node->o_todRegs.tod_pri_port_0_ctrl_reg),
-                 "Error saving PERV_TOD_PRI_PORT_0_CTRL_REG...");
-
-        FAPI_TRY(fapi2::getScom(*target, PERV_TOD_PRI_PORT_1_CTRL_REG, i_tod_node->o_todRegs.tod_pri_port_1_ctrl_reg),
-                 "Error saving PERV_TOD_PRI_PORT_1_CTRL_REG...");
-
-        FAPI_TRY(fapi2::getScom(*target, PERV_TOD_SEC_PORT_0_CTRL_REG, i_tod_node->o_todRegs.tod_sec_port_0_ctrl_reg),
-                 "Error saving PERV_TOD_SEC_PORT_0_CTRL_REG...");
-
-        FAPI_TRY(fapi2::getScom(*target, PERV_TOD_SEC_PORT_1_CTRL_REG, i_tod_node->o_todRegs.tod_sec_port_1_ctrl_reg),
-                 "Error saving PERV_TOD_SEC_PORT_1_CTRL_REG...");
-
-        FAPI_TRY(fapi2::getScom(*target, PERV_TOD_S_PATH_CTRL_REG, i_tod_node->o_todRegs.tod_s_path_ctrl_reg),
-                 "Error saving PERV_TOD_S_PATH_CTRL_REG...");
-
-        FAPI_TRY(fapi2::getScom(*target, PERV_TOD_I_PATH_CTRL_REG, i_tod_node->o_todRegs.tod_i_path_ctrl_reg),
-                 "Error saving PERV_TOD_I_PATH_CTRL_REG...");
-
-        FAPI_TRY(fapi2::getScom(*target, PERV_TOD_PSS_MSS_CTRL_REG, i_tod_node->o_todRegs.tod_pss_mss_ctrl_reg),
-                 "Error saving PERV_TOD_PSS_MSS_CTRL_REG...");
-
-        FAPI_TRY(fapi2::getScom(*target, PERV_TOD_CHIP_CTRL_REG, i_tod_node->o_todRegs.tod_chip_ctrl_reg),
-                 "Error saving PERV_TOD_CHIP_CTRL_REG...");
-
-        // Recurse to save children configuration
-        for (std::list<tod_topology_node*>::iterator child = (i_tod_node->i_children).begin();
-             child != (i_tod_node->i_children).end();
-             ++child)
-        {
-            tod_topology_node* tod_node = *child;
-            FAPI_TRY(p9_tod_save_config(tod_node), "Failure saving downstream configurations!");
-        }
-
-    fapi_try_exit:
-        FAPI_DBG("End");
-        return fapi2::current_err;
+        FAPI_TRY(p9_tod_save_config(*l_child),
+                 "Failure saving downstream configurations!");
     }
-} // extern "C"
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
