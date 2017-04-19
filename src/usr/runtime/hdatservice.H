@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,6 +96,12 @@ namespace RUNTIME
                                        uint64_t i_instance,
                                        uint64_t& o_dataAddr,
                                        size_t& o_dataSize );
+
+        /**
+         * @brief See documentation for get_instance_count in runtime.H
+         */
+        errlHndl_t getInstanceCount( RUNTIME::SectionId i_section,
+                                             uint64_t& o_count);
 
         /**
          * @brief  Update the actual count of section.  Only supported for
@@ -267,7 +273,7 @@ namespace RUNTIME
 
       public:
         /**
-         * @brief  Store the actual count of a section.  
+         * @brief  Store the actual count of a section.
          *
          * @param[in] i_section  Chunk of data to update
          * @param[in] i_count   Actual count for MDRT entries

@@ -33883,6 +33883,14 @@ Measured in GB</description>
         <value>B</value>
     </enumerator>
     <enumerator>
+        <name>WINDOW_OPEN</name>
+        <value>0xD</value>
+    </enumerator>
+    <enumerator>
+        <name>PHYSICAL_PRESENCE</name>
+        <value>0xE</value>
+    </enumerator>
+    <enumerator>
         <name>UNKNOWN</name>
         <value>FF</value>
     </enumerator>

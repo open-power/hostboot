@@ -74,6 +74,7 @@ struct hdatNaca_t
  */
 enum hdatSpiraLegacyDataAreas
 {
+    SPIRAL_INVALID          = -1,
     SPIRAL_FIRST            = 0,
     SPIRAL_SP_SUBSYS        = 0,    // service processor subsystem
     SPIRAL_IPL_PARMS        = 1,    // IPL parameters
@@ -111,6 +112,7 @@ enum hdatSpiraLegacyDataAreas
  */
 enum hdatSpiraHDataAreas
 {
+    SPIRAH_INVALID          = -1,
     SPIRAH_FIRST            = 0,
     SPIRAH_HOST_DATA_AREAS  = 0,    // Reserved memory for FSP-filled data
     SPIRAH_PROC_INIT        = 1,    // phyp-supplied processor init data
@@ -127,6 +129,7 @@ enum hdatSpiraHDataAreas
  */
 enum hdatSpiraSDataAreas
 {
+    SPIRAS_INVALID          = -1,
     SPIRAS_FIRST            = 0,
     SPIRAS_SP_SUBSYS        = 0,    // service processor subsystem
     SPIRAS_IPL_PARMS        = 1,    // IPL parameters

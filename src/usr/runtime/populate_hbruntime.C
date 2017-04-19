@@ -57,6 +57,7 @@
 #include <hdat/hdat.H>
 #include <config.h>
 #include "../hdat/hdattpmdata.H"
+#include "../hdat/hdatpcrd.H"
 #include "../secureboot/trusted/tpmLogMgr.H"
 #include "../secureboot/trusted/trustedboot.H"
 #include <targeting/common/attributeTank.H>
@@ -1289,7 +1290,7 @@ errlHndl_t populate_TpmInfoByNode()
     // populated using the following start offset
     auto l_sbTpmInfoStart = l_currOffset;
 
-    auto const l_hdatSbTpmInfo = reinterpret_cast<HDAT::hdatSbTpmInfo_t*>
+    auto const l_hdatSbTpmInfo = reinterpret_cast<HDAT::hdatHDIFDataArray_t*>
                                                     (l_baseAddr + l_currOffset);
 
     TARGETING::TargetHandleList tpmList;
@@ -1302,9 +1303,10 @@ errlHndl_t populate_TpmInfoByNode()
     auto const l_numTpms = tpmList.size();
 
     // fill in the values for the Secure Boot TPM Info Array Header
-    l_hdatSbTpmInfo->hdatSbTpmArrayOffset = sizeof(*l_hdatSbTpmInfo);
-    l_hdatSbTpmInfo->hdatSbTpmArrayNumEntries = l_numTpms;
-    l_hdatSbTpmInfo->hdatSbTpmArrayEntrySize = sizeof(HDAT::hdatSbTpmInstInfo_t);
+    l_hdatSbTpmInfo->hdatOffset = sizeof(*l_hdatSbTpmInfo);
+    l_hdatSbTpmInfo->hdatArrayCnt = l_numTpms;
+    l_hdatSbTpmInfo->hdatAllocSize = sizeof(HDAT::hdatSbTpmInstInfo_t);
+    l_hdatSbTpmInfo->hdatActSize = l_hdatSbTpmInfo->hdatAllocSize;
 
     // advance current offset to after the Secure Boot TPM info array header
     l_currOffset += sizeof(*l_hdatSbTpmInfo);
@@ -1328,7 +1330,8 @@ errlHndl_t populate_TpmInfoByNode()
         assert(itr != l_procList.end(), "Bug! TPM must have a processor.");
         auto l_proc = *itr;
 
-        l_tpmInstInfo->hdatChipId = l_proc->getAttr<TARGETING::ATTR_CHIP_ID>();
+        l_tpmInstInfo->hdatChipId = l_proc->getAttr<
+                                                 TARGETING::ATTR_ORDINAL_ID>();
 
         l_tpmInstInfo->hdatDbobId = l_node->getAttr<
                                                  TARGETING::ATTR_ORDINAL_ID>();
@@ -1421,13 +1424,308 @@ errlHndl_t populate_TpmInfoByNode()
     // the following will be used to calculate the second part of pointer pair
     auto l_physInterStart = l_currOffset;
 
-    // set up the physical interaction mechanism info header
-    // @TODO RTC 170638: Calculate the real IDs
-    l_physInter->i2cLinkIdWindowOpen = HDAT::I2C_LINK_ID::NOT_APPLICABLE;
-    l_physInter->i2cLinkIdPhysicalPresence = HDAT::I2C_LINK_ID::NOT_APPLICABLE;
+    // start with an empty list of link IDs
+    std::vector<HDAT::i2cLinkId_t> l_linkIds;
 
-    // advance the current offset to account for the physical interaction
-    // mechanism info struct
+    // obtain a list of i2c targets
+    std::vector<I2C::DeviceInfo_t> l_i2cTargetList;
+    for (auto pProc : l_procList)
+    {
+        I2C::getDeviceInfo(pProc, l_i2cTargetList);
+    }
+    auto i2cDevItr = l_i2cTargetList.begin();
+    while(i2cDevItr != l_i2cTargetList.end())
+    {
+        switch((*i2cDevItr).devicePurpose)
+        {
+        case TARGETING::HDAT_I2C_DEVICE_PURPOSE_WINDOW_OPEN:
+        case TARGETING::HDAT_I2C_DEVICE_PURPOSE_PHYSICAL_PRESENCE:
+            // keep devices with these two purposes
+            ++i2cDevItr;
+            break;
+        default:
+            // remove devices with any other purpose
+            i2cDevItr = l_i2cTargetList.erase(i2cDevItr);
+            break;
+        }
+    }
+
+    uint64_t l_numInstances = 0;
+
+    l_elog = RUNTIME::get_instance_count(RUNTIME::PCRD, l_numInstances);
+    if (l_elog)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: get_instance_count() failed for PCRD HDAT section");
+        break;
+    }
+
+    uint64_t l_pcrdAddr = 0;
+    uint64_t l_pcrdSizeMax = 0;
+
+    // Initialize i2cLinkIds to NA before attempting populate
+    l_physInter->i2cLinkIdPhysicalPresence = HDAT::I2C_LINK_ID::NOT_APPLICABLE;
+    l_physInter->i2cLinkIdWindowOpen = HDAT::I2C_LINK_ID::NOT_APPLICABLE;
+
+    for (uint64_t l_pcrdInstance = 0;
+         l_pcrdInstance < l_numInstances;
+         ++l_pcrdInstance)
+    {
+
+        l_elog = RUNTIME::get_host_data_section(RUNTIME::PCRD,
+                                                l_pcrdInstance,
+                                                l_pcrdAddr,
+                                                l_pcrdSizeMax);
+        if(l_elog)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: get_host_data_section() failed for PCRD HDAT section, instance %d", l_pcrdInstance);
+            break;
+        }
+
+        // Get a pointer to the PCRD header
+        auto l_pcrd = reinterpret_cast<const HDAT::hdatSpPcrd_t*>(l_pcrdAddr);
+
+        // Check the version of the PCRD section header
+        assert(l_pcrd->hdatHdr.hdatVersion >= HDAT::TpmDataMinRqrdPcrdVersion,
+            "Bad PCRD section version 0x%X - must be 0x1 or greater",
+            l_pcrd->hdatHdr.hdatVersion);
+
+        // Get offset for the i2c array header
+        auto i2cAryOff =
+            l_pcrd->hdatPcrdIntData[HDAT::HDAT_PCRD_DA_HOST_I2C].hdatOffset;
+
+        // Convert i2c array header offset to a pointer to the i2c array header
+        const auto l_hostI2cPcrdHdrPtr =
+           reinterpret_cast<HDAT::hdatHDIFDataArray_t*>(l_pcrdAddr + i2cAryOff);
+
+        // make sure the array count is within reasonable limits
+        assert(l_hostI2cPcrdHdrPtr->hdatArrayCnt <= HDAT_PCRD_MAX_I2C_DEV,
+            "HDAT PCRD reported more than the max number of i2c devices! Count:%d",
+            l_hostI2cPcrdHdrPtr->hdatArrayCnt);
+
+        // Get the pointer to the first element in the i2c array
+        // This is the address of the header plus the offset given in the header
+        auto l_i2cDevStart =
+            reinterpret_cast<const uint8_t*>(l_hostI2cPcrdHdrPtr)
+            + l_hostI2cPcrdHdrPtr->hdatOffset;
+
+        // Calculate the stop pointer
+        auto l_i2cDevStop = l_i2cDevStart + (l_hostI2cPcrdHdrPtr->hdatArrayCnt *
+                                           l_hostI2cPcrdHdrPtr->hdatAllocSize);
+
+        // for each link ID in the PCRD
+        for (auto l_cur = l_i2cDevStart;
+             l_cur != l_i2cDevStop;
+             l_cur += l_hostI2cPcrdHdrPtr->hdatAllocSize )
+        {
+            // reinterpret the byte pointer as a struct pointer
+            auto l_i2cDev = reinterpret_cast<const HDAT::hdatI2cData_t*>(l_cur);
+
+            // if we've seen it already
+            auto it = std::find(l_linkIds.begin(),
+                            l_linkIds.end(),
+                            l_i2cDev->hdatI2cLinkId);
+            if (it != l_linkIds.end())
+            {
+                const auto l_linkId = *it;
+                TRACFCOMP(g_trac_runtime,
+                    "populate_TpmInfoByNode: A duplicate link Id was found. %d",
+                    l_linkId);
+
+#if 0
+                // TODO RTC 173541 - Renable when HB + FIPS have the uniqueness
+                // change.
+
+                // terminate the boot due to an integrity violation
+                /*@
+                 * @errortype
+                 * @reasoncode    RUNTIME::RC_DUPLICATE_I2C_LINK_IDS
+                 * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+                 * @severity      ERRL_SEV_UNRECOVERABLE
+                 * @userdata1     I2C Link ID
+                 * @devdesc       Found duplicate I2C link IDs in PCRD section
+                 *                of HDAT. System security cannot be guaranteed.
+                 * @custdesc      Platform security problem detected
+                 */
+                auto err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                    RUNTIME::RC_DUPLICATE_I2C_LINK_IDS,
+                    l_linkId,
+                    0,
+                    true);
+
+                SECUREBOOT::handleSecurebootFailure(err);
+
+                assert(true,"Bug! handleSecurebootFailure shouldn't return!");
+#endif
+
+            }
+            else
+            {
+                // add it to a known list to make sure we don't see it again
+                l_linkIds.push_back(l_i2cDev->hdatI2cLinkId);
+            }
+            // use this pointer to avoid having to repeat the switch statement
+            // later
+            HDAT::i2cLinkId_t* l_pLinkId = nullptr;
+
+            switch(l_i2cDev->hdatI2cSlaveDevPurp)
+            {
+            case TARGETING::HDAT_I2C_DEVICE_PURPOSE_WINDOW_OPEN:
+
+                l_pLinkId = &l_physInter->i2cLinkIdWindowOpen;
+                break;
+
+            case TARGETING::HDAT_I2C_DEVICE_PURPOSE_PHYSICAL_PRESENCE:
+
+                l_pLinkId = &l_physInter->i2cLinkIdPhysicalPresence;
+                break;
+
+            default:
+                // Physical Presence Info not supported for this I2c device
+                // purpose.  This device will not be referred to by the Node TPM
+                // Related Info Section, but we still ensure uniqueness of all
+                // link IDs in the I2c device list from the PCRD.
+            continue;
+            }
+
+            // now make sure we have a match in the mrw
+            auto itr = std::find_if(l_i2cTargetList.begin(),
+                                    l_i2cTargetList.end(),
+
+            [&l_i2cDev,&l_pcrd](const I2C::DeviceInfo_t & i_i2cDevMrw)
+            {
+                return
+                    i_i2cDevMrw.masterChip->getAttr<
+                        TARGETING::ATTR_ORDINAL_ID>() ==
+                            l_pcrd->hdatChipData.hdatPcrdProcChipId &&
+                    l_i2cDev->hdatI2cEngine == i_i2cDevMrw.engine &&
+                    l_i2cDev->hdatI2cMasterPort == i_i2cDevMrw.masterPort &&
+                    l_i2cDev->hdatI2cBusSpeed == i_i2cDevMrw.busFreqKhz &&
+                    l_i2cDev->hdatI2cSlaveDevType == i_i2cDevMrw.deviceType &&
+                    l_i2cDev->hdatI2cSlaveDevAddr == i_i2cDevMrw.addr &&
+                    l_i2cDev->hdatI2cSlavePort == i_i2cDevMrw.slavePort &&
+                    l_i2cDev->hdatI2cSlaveDevPurp == i_i2cDevMrw.devicePurpose;
+            });
+
+            if (itr == l_i2cTargetList.end())
+            {
+                // couldn't find it, physical presense will not be available
+                TRACFCOMP(g_trac_runtime,
+                    "populate_TpmInfoByNode: I2c device in the PCRD with link ID %d does not have a match in the MRW",
+                    l_i2cDev->hdatI2cLinkId);
+                /*@
+                 * @errortype
+                 * @reasoncode   RUNTIME::RC_I2C_DEVICE_NOT_IN_MRW
+                 * @moduleid     RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+                 * @severity     ERRL_SEV_INFORMATIONAL
+                 * @userdata1    I2C Link ID
+                 * @devdesc      An I2C device in the PCRD does not have a match
+                 *               in the MRW. Physical presence detection
+                 *               will not be available.
+                 * @custdesc     Platform security problem detected
+                 */
+                auto err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                    RUNTIME::RC_I2C_DEVICE_NOT_IN_MRW,
+                    l_i2cDev->hdatI2cLinkId,
+                    0,
+                    true);
+                ERRORLOG::errlCommit(err, RUNTIME_COMP_ID);
+            }
+            else
+            {
+                if (*l_pLinkId != HDAT::I2C_LINK_ID::NOT_APPLICABLE)
+                {
+                    // found a duplicate link id match indicating that there
+                    // was an error in the model
+                    TRACFCOMP(g_trac_runtime,
+                        "populate_TpmInfoByNode: I2c device in the PCRD with link ID %d has a duplicate match in the MRW",
+                        l_i2cDev->hdatI2cLinkId);
+                    /*@
+                     * @errortype
+                     * @reasoncode   RUNTIME::RC_I2C_DEVICE_DUPLICATE_IN_MRW
+                     * @moduleid     RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+                     * @severity     ERRL_SEV_INFORMATIONAL
+                     * @userdata1    I2C Link ID
+                     * @devdesc      An I2C device in the PCRD has a duplicate
+                     *               match in the MRW. Physical presence
+                     *               detection will still be available.
+                     * @custdesc     Platform security problem detected
+                     */
+                    auto err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                        RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                        RUNTIME::RC_I2C_DEVICE_DUPLICATE_IN_MRW,
+                        l_i2cDev->hdatI2cLinkId,
+                        0,
+                        true);
+                    ERRORLOG::errlCommit(err, RUNTIME_COMP_ID);
+                }
+                else // found a match
+                {
+                    *l_pLinkId = l_i2cDev->hdatI2cLinkId;
+                    l_i2cTargetList.erase(itr);
+                }
+            }
+
+        } // for each link ID in the current PCRD instance
+
+    } // for each instance
+
+    if (!l_i2cTargetList.empty())
+    {
+        for (auto i2cDev : l_i2cTargetList)
+        {
+            TRACFCOMP(g_trac_runtime,
+                "populate_TpmInfoByNode: I2c device in the MRW was not found in the PCRD having engine: 0x%X masterport: 0x%X devicetype: 0x%X address: 0x%X slaveport: 0x%X devicepurpose: 0x%X master HUID: %X",
+                i2cDev.engine,
+                i2cDev.masterPort,
+                i2cDev.deviceType,
+                i2cDev.addr,
+                i2cDev.slavePort,
+                i2cDev.devicePurpose,
+                TARGETING::get_huid(i2cDev.masterChip));
+           /*@
+            * @errortype
+            * @reasoncode   RUNTIME::RC_EXTRA_I2C_DEVICE_IN_MRW
+            * @moduleid     RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+            * @severity     ERRL_SEV_UNRECOVERABLE
+            * @userdata1    [0:7] I2C engine
+            * @userdata1    [8:15] I2C masterPort
+            * @userdata1    [16:23] I2C slave deviceType
+            * @userdata1    [24:31] I2C slave address
+            * @userdata1    [32:39] I2C slave port
+            * @userdata1    [40:47] I2C device purpose
+            * @userdata1    [48:63] Bus speed in KHz
+            * @userdata2    master chip HUID
+            * @devdesc      An I2C device in the MRW has no match
+            *               in the PCRD.
+            * @custdesc     Platform security problem detected
+            */
+            auto err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                RUNTIME::RC_EXTRA_I2C_DEVICE_IN_MRW,
+                TWO_UINT32_TO_UINT64(
+                    FOUR_UINT8_TO_UINT32(i2cDevItr->engine,
+                                     i2cDevItr->masterPort,
+                                     i2cDevItr->deviceType,
+                                     i2cDevItr->addr),
+                    TWO_UINT16_TO_UINT32(
+                        TWO_UINT8_TO_UINT16(i2cDevItr->slavePort,
+                                        i2cDevItr->devicePurpose),
+                        i2cDevItr->busFreqKhz)
+                ),
+                TARGETING::get_huid(i2cDevItr->masterChip),
+                true);
+            ERRORLOG::errlCommit(err, RUNTIME_COMP_ID);
+        }
+    }
+
+    // advance the current offset to account for the physical
+    // interaction mechanism info struct
     l_currOffset =+ sizeof(*l_physInter);
 
     // populate the second part of the pointer pair from earlier
