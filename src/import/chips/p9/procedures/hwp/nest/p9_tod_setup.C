@@ -28,11 +28,12 @@
 /// @file p9_tod_setup.C
 /// @brief Procedures to configure the TOD topology
 ///
-// *HWP HWP Owner Christina Graves clgraves@us.ibm.com
-// *HWP FW Owner: Thi Tran thi@us.ibm.com
+// *HWP HWP Owner: Nick Klazynski jklazyns@us.ibm.com
+// *HWP HWP Owner: Joachim Fenkes fenkes@de.ibm.com
+// *HWP FW Owner: Manish Chowdhary manichow@in.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
-// *HWP Consumed by: SBE
+// *HWP Level: 3
+// *HWP Consumed by: HB
 //
 //--------------------------------------------------------------------------
 
@@ -41,1111 +42,1438 @@
 //--------------------------------------------------------------------------
 #include <p9_tod_setup.H>
 
-extern "C"
+
+/// @brief Clear any previous topology that may have been set
+/// @param[in] i_tod_node Reference to TOD topology (including FAPI targets)
+/// @param[in] i_tod_sel Specifies the topology to clear
+/// @param[in] i_is_mpipl Indicates if this IPL is an MPIPL
+/// @return FAPI_RC_SUCCESS if TOD topology is successfully cleared, else error
+fapi2::ReturnCode clear_tod_node(
+    tod_topology_node* i_tod_node,
+    const p9_tod_setup_tod_sel i_tod_sel,
+    const fapi2::ATTR_IS_MPIPL_Type i_is_mpipl)
 {
+    uint32_t l_port_ctrl_reg = 0;
+    uint32_t l_port_ctrl_check_reg = 0;
+    char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
 
-    //--------------------------------------------------------------------------
-    //  HWP entry point
-    //--------------------------------------------------------------------------
-    fapi2::ReturnCode p9_tod_setup(
-        tod_topology_node* i_tod_node,
-        const p9_tod_setup_tod_sel i_tod_sel,
-        const p9_tod_setup_osc_sel i_osc_sel)
+    fapi2::toString(*(i_tod_node->i_target),
+                    l_targetStr,
+                    fapi2::MAX_ECMD_STRING_LEN);
+    FAPI_INF("Clearing previous %s topology from %s",
+             (i_tod_sel == TOD_PRIMARY) ? "Primary" : "Secondary", l_targetStr);
+
+    if (i_tod_sel == TOD_PRIMARY)
     {
-        fapi2::ATTR_IS_MPIPL_Type is_mpipl = 0x00;
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-        // mark HWP entry
-        FAPI_DBG("Entering ...\n");
-
-        FAPI_INF("Configuring %s topology (OSC0 is %s, OSC1 is %s)",
-                 (i_tod_sel == TOD_PRIMARY) ? "Primary" : "Secondary",
-                 (i_osc_sel == TOD_OSC_0             ||
-                  i_osc_sel == TOD_OSC_0_AND_1       ||
-                  i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
-                  i_osc_sel == TOD_OSC_0_AND_1_SEL_1) ? "connected" : "not connected",
-                 (i_osc_sel == TOD_OSC_1             ||
-                  i_osc_sel == TOD_OSC_0_AND_1       ||
-                  i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
-                  i_osc_sel == TOD_OSC_0_AND_1_SEL_1) ? "connected" : "not connected");
-
-        FAPI_TRY(calculate_node_delays(i_tod_node), "Failure calculating TOD delays!");
-
-        display_tod_nodes(i_tod_node, 0);
-
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, is_mpipl),
-                 "fapiGetAttribute of ATTR_IS_MPIPL failed!");
-
-        // If there is a previous topology, it needs to be cleared
-        FAPI_TRY(clear_tod_node(i_tod_node, i_tod_sel, is_mpipl),
-                 "Failure clearing previous TOD configuration!");
-
-        //Start configuring each node; (configure_tod_node will recurse on each child)
-        FAPI_TRY(configure_tod_node(i_tod_node, i_tod_sel, i_osc_sel), "Failure configuring TOD!");
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
+        FAPI_DBG("PERV_TOD_PRI_PORT_0_CTRL_REG and PERV_TOD_SEC_PORT_0_CTRL_REG will be cleared.");
+        l_port_ctrl_reg = PERV_TOD_PRI_PORT_0_CTRL_REG;
+        l_port_ctrl_check_reg = PERV_TOD_SEC_PORT_0_CTRL_REG;
+    }
+    else // (i_tod_sel==TOD_SECONDARY)
+    {
+        FAPI_DBG("PERV_TOD_PRI_PORT_1_CTRL_REG and PERV_TOD_SEC_PORT_1_CTRL_REG will be cleared.");
+        l_port_ctrl_reg = PERV_TOD_SEC_PORT_1_CTRL_REG;
+        l_port_ctrl_check_reg = PERV_TOD_PRI_PORT_1_CTRL_REG;
     }
 
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode clear_tod_node(tod_topology_node*             i_tod_node,
-                                     const p9_tod_setup_tod_sel   i_tod_sel,
-                                     const fapi2::ATTR_IS_MPIPL_Type i_is_mpipl)
+    // zero registers
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            l_port_ctrl_reg,
+                            0x0ULL),
+             "Error from putScom (0x%08X)!", l_port_ctrl_reg);
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            l_port_ctrl_check_reg,
+                            0x0ULL),
+             "Error from putScom (0x%08X)!", l_port_ctrl_check_reg);
+
+    if (i_is_mpipl)
     {
-        fapi2::buffer<uint64_t> data(0x0);
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* target = i_tod_node->i_target;
-        uint32_t port_ctrl_reg = 0;
-        uint32_t port_ctrl_check_reg = 0;
-        char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+        fapi2::buffer<uint64_t> l_rx_ttype_ctrl_reg = 0;
+        fapi2::buffer<uint64_t> l_tx_ttype5_reg = 0;
+        FAPI_INF("MPIPL: switch TOD to 'Not Set' state");
 
-        fapi2::toString(target, l_targetStr, fapi2::MAX_ECMD_STRING_LEN);
-        FAPI_INF("Clearing previous %s topology from %s",
-                 (i_tod_sel == TOD_PRIMARY) ? "Primary" : "Secondary", l_targetStr);
+        // Generate TType#5 (formats defined in section "TType Fabric Interface"
+        // in the TOD workbook)
+        l_rx_ttype_ctrl_reg.setBit<5>().setBit<56>();
+        FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                                PERV_TOD_RX_TTYPE_CTRL_REG,
+                                l_rx_ttype_ctrl_reg),
+                 "Error from putScom (PERV_TOD_RX_TTYPE_CTRL_REG)");
 
-        if (i_tod_sel == TOD_PRIMARY)
-        {
-            FAPI_DBG("PERV_TOD_PRI_PORT_0_CTRL_REG and PERV_TOD_SEC_PORT_0_CTRL_REG will be cleared.");
-            port_ctrl_reg = PERV_TOD_PRI_PORT_0_CTRL_REG;
-            port_ctrl_check_reg = PERV_TOD_SEC_PORT_0_CTRL_REG;
-        }
-        else // (i_tod_sel==TOD_SECONDARY)
-        {
-            FAPI_DBG("PERV_TOD_PRI_PORT_1_CTRL_REG and PERV_TOD_SEC_PORT_1_CTRL_REG will be cleared.");
-            port_ctrl_reg = PERV_TOD_SEC_PORT_1_CTRL_REG;
-            port_ctrl_check_reg = PERV_TOD_PRI_PORT_1_CTRL_REG;
-        }
-
-        FAPI_TRY(fapi2::putScom(*target, port_ctrl_reg, data), "fapiPutScom error for port_ctrl_reg SCOM.");
-        FAPI_TRY(fapi2::putScom(*target, port_ctrl_check_reg, data),
-                 "fapiPutScom error for port_ctrl_check_reg SCOM.");
-
-        if (i_is_mpipl)
-        {
-            FAPI_INF("MPIPL: switch TOD to 'Not Set' state");
-            data.flush<0>();
-
-            // Generate TType#5 (formats defined in section "TType Fabric Interface" in the TOD workbook)
-            data.setBit<5>().setBit<56>();
-            FAPI_TRY(fapi2::putScom(*target, PERV_TOD_RX_TTYPE_CTRL_REG, data),
-                     "Could not write PERV_TOD_RX_TTYPE_CTRL_REG");
-
-            FAPI_INF("MPIPL: switch all other TODs to 'Not Set' state");
-            data.flush<0>().setBit<PERV_TOD_TX_TTYPE_5_REG_TRIGGER>();
-            FAPI_TRY(fapi2::putScom(*target, PERV_TOD_TX_TTYPE_5_REG, data),
-                     "Could not write PERV_TOD_TX_TTYPE_5_REG");
-        }
-        else
-        {
-            FAPI_INF("Normal IPL: Bypass TTYPE#5");
-        }
-
-        // TOD is cleared for this node; if it has children, start clearing their registers
-        for (std::list<tod_topology_node*>::iterator child = (i_tod_node->i_children).begin();
-             child != (i_tod_node->i_children).end();
-             ++child)
-        {
-            tod_topology_node* tod_node = *child;
-            FAPI_TRY(clear_tod_node(tod_node, i_tod_sel, i_is_mpipl), "Failure clearing downstream TOD node!");
-        }
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
+        FAPI_INF("MPIPL: switch all other TODs to 'Not Set' state");
+        l_tx_ttype5_reg.setBit<PERV_TOD_TX_TTYPE_5_REG_TRIGGER>();
+        FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                                PERV_TOD_TX_TTYPE_5_REG,
+                                l_tx_ttype5_reg),
+                 "Error from putScom (PERV_TOD_TX_TTYPE_5_REG)");
+    }
+    else
+    {
+        FAPI_INF("Normal IPL: Bypass TTYPE#5");
     }
 
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
-                                         const p9_tod_setup_tod_sel i_tod_sel,
-                                         const p9_tod_setup_osc_sel i_osc_sel)
+    // TOD is cleared for this node; if it has children, start clearing
+    // their registers
+    for (auto l_child = (i_tod_node->i_children).begin();
+         l_child != (i_tod_node->i_children).end();
+         ++l_child)
     {
-        char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+        FAPI_TRY(clear_tod_node(*l_child,
+                                i_tod_sel,
+                                i_is_mpipl),
+                 "Failure clearing downstream TOD node!");
+    }
 
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* target = i_tod_node->i_target;
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
 
-        fapi2::toString(target, l_targetStr, fapi2::MAX_ECMD_STRING_LEN);
-        FAPI_DBG("Start: Configuring %s", l_targetStr);
 
-        const bool is_mdmt = (i_tod_node->i_tod_master && i_tod_node->i_drawer_master);
+/// @brief Configures the PSS_MSS_CTRL_REG; will be called by configure_tod_node
+/// @param[in]i_tod_node Reference to TOD topology (including FAPI targets)
+/// @param[in] i_tod_sel Specifies the topology to configure
+/// @param[in] i_osc_sel Specifies the oscillator to use for the master
+/// @return FAPI_RC_SUCCESS if the PSS_MSS_CTRL_REG is successfully configured
+///         else error
+fapi2::ReturnCode configure_pss_mss_ctrl_reg(
+    tod_topology_node* i_tod_node,
+    const p9_tod_setup_tod_sel i_tod_sel,
+    const p9_tod_setup_osc_sel i_osc_sel)
+{
+    fapi2::buffer<uint64_t> l_pss_mss_ctrl_reg = 0;
+    const bool is_mdmt = (i_tod_node->i_tod_master && i_tod_node->i_drawer_master);
 
-        FAPI_TRY(configure_pss_mss_ctrl_reg(i_tod_node, i_tod_sel, i_osc_sel), "Failure configuring pss_mss_ctrl_reg");
+    FAPI_DBG("Start");
 
-        if (!is_mdmt)
-        {
-            FAPI_TRY(configure_s_path_ctrl_reg(i_tod_node, i_tod_sel, i_osc_sel), "Failure configuring s_path_ctrl_reg");
-        }
+    // Read PERV_TOD_PSS_MSS_CTRL_REG in order to preserve any prior configuration
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_TOD_PSS_MSS_CTRL_REG,
+                            l_pss_mss_ctrl_reg),
+             "Error from getScom (PERV_TOD_PSS_MSS_CTRL_REG)!");
 
-        FAPI_TRY(configure_port_ctrl_regs(i_tod_node, i_tod_sel, i_osc_sel), "Failure configuring port_ctrl_regs");
+    FAPI_DBG("Set Master TOD/Slave TOD and Master Drawer/Slave Drawer");
 
+    if (i_tod_sel == TOD_PRIMARY)
+    {
         if (is_mdmt)
         {
-            FAPI_TRY(configure_m_path_ctrl_reg(i_tod_node, i_tod_sel, i_osc_sel), "Failure configuring m_path_ctrl_reg");
+            l_pss_mss_ctrl_reg.setBit<PERV_TOD_PSS_MSS_CTRL_REG_PRI_M_S_SELECT>();
+
+            if (i_osc_sel == TOD_OSC_0             ||
+                i_osc_sel == TOD_OSC_0_AND_1       ||
+                i_osc_sel == TOD_OSC_0_AND_1_SEL_0)
+            {
+                l_pss_mss_ctrl_reg.clearBit<PERV_TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SELECT>();
+            }
+            else if (i_osc_sel == TOD_OSC_1        ||
+                     i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
+            {
+                l_pss_mss_ctrl_reg.setBit<PERV_TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SELECT>();
+            }
+
+            FAPI_ASSERT(i_osc_sel != TOD_OSC_NONE,
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_OSCSEL(i_osc_sel)
+                        .set_TODSEL(i_tod_sel),
+                        "Invalid oscillator configuration!");
         }
-
-        FAPI_TRY(configure_i_path_ctrl_reg(i_tod_node, i_tod_sel, i_osc_sel), "Failure configuring i_path_ctrl_reg");
-
-        FAPI_TRY(init_chip_ctrl_reg(i_tod_node, i_tod_sel, i_osc_sel), "Failure configuring init_chip_ctrl_reg");
-
-        // TOD is configured for this node; if it has children, start their configuration
-        for (std::list<tod_topology_node*>::iterator child = (i_tod_node->i_children).begin();
-             child != (i_tod_node->i_children).end();
-             ++child)
+        else // Slave nodes (Drawer master is still a slave)
         {
-            tod_topology_node* tod_node = *child;
-            FAPI_TRY(configure_tod_node(tod_node, i_tod_sel, i_osc_sel),
-                     "Failure configuring downstream node!");
+            l_pss_mss_ctrl_reg.clearBit<PERV_TOD_PSS_MSS_CTRL_REG_PRI_M_S_SELECT>();
         }
 
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
+        if (i_tod_node->i_drawer_master)
+        {
+            l_pss_mss_ctrl_reg.setBit<PERV_TOD_PSS_MSS_CTRL_REG_PRI_M_S_DRAWER_SELECT>();
+        }
+    }
+    else // (i_tod_sel==TOD_SECONDARY)
+    {
+        if (is_mdmt)
+        {
+            l_pss_mss_ctrl_reg.setBit<PERV_TOD_PSS_MSS_CTRL_REG_SEC_M_S_SELECT>();
+
+            if (i_osc_sel == TOD_OSC_1       ||
+                i_osc_sel == TOD_OSC_0_AND_1 ||
+                i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
+            {
+                l_pss_mss_ctrl_reg.setBit<PERV_TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SELECT>();
+            }
+            else if (i_osc_sel == TOD_OSC_0  ||
+                     i_osc_sel == TOD_OSC_0_AND_1_SEL_0)
+            {
+                l_pss_mss_ctrl_reg.clearBit<PERV_TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SELECT>();
+            }
+
+            FAPI_ASSERT(i_osc_sel != TOD_OSC_NONE,
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_OSCSEL(i_osc_sel)
+                        .set_TODSEL(i_tod_sel),
+                        "Invalid oscillator configuration!");
+        }
+        else // Slave nodes (Drawer master is still a slave)
+        {
+            l_pss_mss_ctrl_reg.clearBit<PERV_TOD_PSS_MSS_CTRL_REG_SEC_M_S_SELECT>();
+        }
+
+        if (i_tod_node->i_drawer_master)
+        {
+            l_pss_mss_ctrl_reg.setBit<PERV_TOD_PSS_MSS_CTRL_REG_SEC_M_S_DRAWER_SELECT>();
+        }
     }
 
-    fapi2::ReturnCode configure_pss_mss_ctrl_reg(tod_topology_node*           i_tod_node,
-            const p9_tod_setup_tod_sel i_tod_sel,
-            const p9_tod_setup_osc_sel i_osc_sel)
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            PERV_TOD_PSS_MSS_CTRL_REG,
+                            l_pss_mss_ctrl_reg),
+             "Error from putScom (PERV_TOD_PSS_MSS_CTRL_REG)!");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+
+/// @brief Configures the S_PATH_CTRL_REG; will be called by configure_tod_node
+/// @param[in]i_tod_node Reference to TOD topology (including FAPI targets)
+/// @param[in] i_tod_sel Specifies the topology to configure
+/// @param[in] i_osc_sel Specifies the oscillator to use for the master
+/// @return FAPI_RC_SUCCESS if the S_PATH_CTRL_REG is successfully configured
+///         else error
+fapi2::ReturnCode configure_s_path_ctrl_reg(
+    tod_topology_node* i_tod_node,
+    const p9_tod_setup_tod_sel i_tod_sel,
+    const p9_tod_setup_osc_sel i_osc_sel)
+{
+    fapi2::buffer<uint64_t> l_s_path_ctrl_reg = 0;
+
+    // Read PERV_TOD_S_PATH_CTRL_REG in order to preserve any prior configuration
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_TOD_S_PATH_CTRL_REG,
+                            l_s_path_ctrl_reg),
+             "Error from getScom (PERV_TOD_S_PATH_CTRL_REG)!");
+
+    // Slave TODs are enabled on all but the MDMT
+    FAPI_DBG("Selection of Slave OSC path");
+
+    if (i_tod_sel == TOD_PRIMARY)
     {
-        fapi2::buffer<uint64_t> data(0x0);
+        // For primary slave, use slave path 0 (path_0_sel=OFF)
+        l_s_path_ctrl_reg.clearBit<PERV_TOD_S_PATH_CTRL_REG_PRI_SELECT>();
 
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* target = i_tod_node->i_target;
+        // Set CPS deviation to 75% (CPS deviation bits = 0xC, factor=1),
+        // 8 valid steps to enable step check
+        l_s_path_ctrl_reg.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR,
+                                          PERV_TOD_S_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR_LEN>
+                                          (STEP_CHECK_CPS_DEVIATION_FACTOR_1);
+        l_s_path_ctrl_reg.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION,
+                                          PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION_LEN>
+                                          (STEP_CHECK_CPS_DEVIATION_75_00_PCENT);
+        l_s_path_ctrl_reg.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT,
+                                          PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT_LEN>
+                                          (STEP_CHECK_VALIDITY_COUNT_8);
+        l_s_path_ctrl_reg.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION,
+                                          PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION_LEN>
+                                          (STEP_CHECK_CPS_DEVIATION_75_00_PCENT);
+        l_s_path_ctrl_reg.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR,
+                                          PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR_LEN>
+                                          (STEP_CHECK_CPS_DEVIATION_FACTOR_1);
+    }
+    else // (i_tod_sel==TOD_SECONDARY)
+    {
+        // For secondary slave, use slave path 1 (path_1_sel=ON)
+        l_s_path_ctrl_reg.setBit<PERV_TOD_S_PATH_CTRL_REG_SEC_SELECT>();
 
-        FAPI_DBG("Start");
+        // Set CPS deviation to 75% (CPS deviation bits = 0xC, factor=1),
+        // 8 valid steps to enable step check
+        l_s_path_ctrl_reg.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR,
+                                          PERV_TOD_S_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR_LEN>
+                                          (STEP_CHECK_CPS_DEVIATION_FACTOR_1);
+        l_s_path_ctrl_reg.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_1_STEP_CHECK_CPS_DEVIATION,
+                                          PERV_TOD_S_PATH_CTRL_REG_1_STEP_CHECK_CPS_DEVIATION_LEN>
+                                          (STEP_CHECK_CPS_DEVIATION_75_00_PCENT);
+        l_s_path_ctrl_reg.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_1_STEP_CHECK_VALIDITY_COUNT,
+                                          PERV_TOD_S_PATH_CTRL_REG_1_STEP_CHECK_VALIDITY_COUNT_LEN>
+                                          (STEP_CHECK_VALIDITY_COUNT_8);
+    }
 
-        const bool is_mdmt = (i_tod_node->i_tod_master && i_tod_node->i_drawer_master);
+    // In either case set the S_PATH_REMOTE_SYNC_MISS_COUNT_MAX to 1
+    l_s_path_ctrl_reg.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_MISS_COUNT_MAX,
+                                      PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_MISS_COUNT_MAX_LEN>
+                                      (TOD_S_PATH_CTRL_REG_REMOTE_SYNC_MISS_COUNT_2);
 
-        // Read PERV_TOD_PSS_MSS_CTRL_REG in order to perserve any prior configuration
-        FAPI_TRY(fapi2::getScom(*target, PERV_TOD_PSS_MSS_CTRL_REG, data),
-                 "Error from fapiGetScom when retrieving PERV_TOD_PSS_MSS_CTRL_REG!");
-        FAPI_DBG("Set Master TOD/Slave TOD and Master Drawer/Slave Drawer");
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            PERV_TOD_S_PATH_CTRL_REG,
+                            l_s_path_ctrl_reg),
+             "Error from putScom (PERV_TOD_S_PATH_CTRL_REG)!");
 
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+
+/// @brief Configures the PORT_CTRL_REG; will be called by configure_tod_node
+/// @param[in]i_tod_node Reference to TOD topology (including FAPI targets)
+/// @param[in] i_tod_sel Specifies the topology to configure
+/// @param[in] i_osc_sel Specifies the oscillator to use for the master
+/// @return FAPI_RC_SUCCESS if the PORT_CTRL_REG is successfully configured
+///         else error
+fapi2::ReturnCode configure_port_ctrl_regs(
+    tod_topology_node* i_tod_node,
+    const p9_tod_setup_tod_sel i_tod_sel,
+    const p9_tod_setup_osc_sel i_osc_sel)
+{
+    fapi2::buffer<uint64_t> l_port_ctrl_reg = 0;
+    uint32_t l_port_ctrl_addr = 0;
+    fapi2::buffer<uint64_t> l_port_ctrl_check_reg = 0;
+    uint32_t l_port_ctrl_check_addr = 0;
+    uint32_t l_port_rx_select_val = 0;
+    uint32_t l_path_sel = 0;
+    fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_x_attached_chip_cnfg;
+    fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_a_attached_chip_cnfg;
+
+    const bool is_mdmt = (i_tod_node->i_tod_master && i_tod_node->i_drawer_master);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG,
+                           *(i_tod_node->i_target),
+                           l_x_attached_chip_cnfg),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)!");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG,
+                           *(i_tod_node->i_target),
+                           l_a_attached_chip_cnfg),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)!");
+
+    // PERV_TOD_PRI_PORT_0_CTRL_REG is only used for Primary configurations
+    // PERV_TOD_SEC_PORT_1_CTRL_REG is only used for Secondary configurations
+    // In order to check primary and secondary networks are working
+    // simultaneously...
+    //  - The result of PERV_TOD_PRI_PORT_0_CTRL_REG are also inserted into
+    //    PERV_TOD_SEC_PORT_0_CTRL_REG (preserving i_path_delay which can be
+    //    different between 40001 and 40003)
+    //  - The result of PERV_TOD_SEC_PORT_1_CTRL_REG are also inserted into
+    //    PERV_TOD_PRI_PORT_1_CTRL_REG
+    if (i_tod_sel == TOD_PRIMARY)
+    {
+        FAPI_DBG("PERV_TOD_PRI_PORT_0_CTRL_REG will be configured for primary topology");
+        l_port_ctrl_addr = PERV_TOD_PRI_PORT_0_CTRL_REG;
+        l_port_ctrl_check_addr = PERV_TOD_SEC_PORT_0_CTRL_REG;
+    }
+    else // (i_tod_sel==TOD_SECONDARY)
+    {
+        FAPI_DBG("PERV_TOD_SEC_PORT_1_CTRL_REG will be configured for secondary topology");
+        l_port_ctrl_addr = PERV_TOD_SEC_PORT_1_CTRL_REG;
+        l_port_ctrl_check_addr = PERV_TOD_PRI_PORT_1_CTRL_REG;
+    }
+
+    // Read port_ctrl_reg in order to preserve any prior configuration
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            l_port_ctrl_addr,
+                            l_port_ctrl_reg),
+             "Error from getScom (0x%08X)!", l_port_ctrl_addr);
+
+    // Read port_ctrl_check_reg in order to preserve any prior configuration
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            l_port_ctrl_check_addr,
+                            l_port_ctrl_check_reg),
+             "Error from getScom (0x%08X)!", l_port_ctrl_check_addr);
+
+    //Determine RX port
+    switch (i_tod_node->i_bus_rx)
+    {
+        case (XBUS0):
+            // If XBUS0 is not enabled throw an error
+            FAPI_ASSERT((l_x_attached_chip_cnfg[0] != 0),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(XBUS0),
+                        "i_tod_node->i_bus_rx is set to XBUS0 and it is not enabled");
+            l_port_rx_select_val = TOD_PORT_CTRL_REG_RX_X0_SEL;
+            break;
+
+        case (XBUS1):
+            // If XBUS1 is not enabled throw an error
+            FAPI_ASSERT((l_x_attached_chip_cnfg[1] != 0),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(XBUS1),
+                        "i_tod_node->i_bus_rx is set to XBUS1 and it is not enabled");
+            l_port_rx_select_val = TOD_PORT_CTRL_REG_RX_X1_SEL;
+            break;
+
+        case (XBUS2):
+            // If XBUS2 is not enabled throw an error
+            FAPI_ASSERT((l_x_attached_chip_cnfg[2] != 0),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(XBUS2),
+                        "i_tod_node->i_bus_rx is set to XBUS2 and it is not enabled");
+            l_port_rx_select_val = TOD_PORT_CTRL_REG_RX_X2_SEL;
+            break;
+
+        case (OBUS0):
+            // If OBUS0 is not enabled throw an error
+            FAPI_ASSERT(((l_x_attached_chip_cnfg[3] != 0) ||
+                         (l_a_attached_chip_cnfg[0] != 0)),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(OBUS0),
+                        "i_tod_node->i_bus_rx is set to OBUS0 and it is not enabled");
+            l_port_rx_select_val = TOD_PORT_CTRL_REG_RX_X3_SEL;
+            break;
+
+        case (OBUS1):
+            // If OBUS1 is not enabled throw an error
+            FAPI_ASSERT(((l_x_attached_chip_cnfg[4] != 0) ||
+                         (l_a_attached_chip_cnfg[1] != 0)),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(OBUS1),
+                        "i_tod_node->i_bus_rx is set to OBUS1 and it is not enabled");
+            l_port_rx_select_val = TOD_PORT_CTRL_REG_RX_X4_SEL;
+            break;
+
+        case (OBUS2):
+            // If OBUS2 is not enabled throw an error
+            FAPI_ASSERT(((l_x_attached_chip_cnfg[5] != 0) ||
+                         (l_a_attached_chip_cnfg[2] != 0)),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(OBUS2),
+                        "i_tod_node->i_bus_rx is set to OBUS2 and it is not enabled");
+            l_port_rx_select_val = TOD_PORT_CTRL_REG_RX_X5_SEL;
+            break;
+
+        case (OBUS3):
+            // If OBUS3 is not enabled throw an error
+            FAPI_ASSERT(((l_x_attached_chip_cnfg[6] != 0) ||
+                         (l_a_attached_chip_cnfg[3] != 0)),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(OBUS3),
+                        "i_tod_node->i_bus_rx is set to OBUS3 and it is not enabled");
+            l_port_rx_select_val = TOD_PORT_CTRL_REG_RX_X6_SEL;
+            break;
+
+        case (XBUS7):
+            FAPI_ASSERT(false,
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(XBUS7),
+                        "i_tod_node->i_bus_rx is set to XBUS7");
+            break;
+
+        case (NONE):
+            break; //MDMT has no rx
+    }
+
+    l_port_ctrl_reg.insertFromRight<PERV_TOD_PRI_PORT_0_CTRL_REG_RX_SELECT,
+                                    PERV_TOD_PRI_PORT_0_CTRL_REG_RX_SELECT_LEN>(l_port_rx_select_val);
+    l_port_ctrl_check_reg.insertFromRight<PERV_TOD_PRI_PORT_0_CTRL_REG_RX_SELECT,
+                                          PERV_TOD_PRI_PORT_0_CTRL_REG_RX_SELECT_LEN>(l_port_rx_select_val);
+
+    //Determine which tx path should be selected for all children
+    if (is_mdmt)
+    {
         if (i_tod_sel == TOD_PRIMARY)
         {
-            if (is_mdmt)
+            if (i_osc_sel == TOD_OSC_0       ||
+                i_osc_sel == TOD_OSC_0_AND_1 ||
+                i_osc_sel == TOD_OSC_0_AND_1_SEL_0)
             {
-                data.setBit<PERV_TOD_PSS_MSS_CTRL_REG_PRI_M_S_SELECT>();
-
-                if (i_osc_sel == TOD_OSC_0             ||
-                    i_osc_sel == TOD_OSC_0_AND_1       ||
-                    i_osc_sel == TOD_OSC_0_AND_1_SEL_0)
-                {
-                    data.clearBit<PERV_TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SELECT>();
-                }
-                else if (i_osc_sel == TOD_OSC_1        ||
-                         i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
-                {
-                    data.setBit<PERV_TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SELECT>();
-                }
-
-                FAPI_ASSERT(i_osc_sel != TOD_OSC_NONE, fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY().set_TARGET(target).set_OSCSEL(i_osc_sel),
-                            "Invalid oscillator configuration!");
+                l_path_sel = TOD_PORT_CTRL_REG_M_PATH_0;
             }
-            else // Slave nodes (Drawer master is still a slave)
+            else if (i_osc_sel == TOD_OSC_1  ||
+                     i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
             {
-                data.clearBit<PERV_TOD_PSS_MSS_CTRL_REG_PRI_M_S_SELECT>();
+                l_path_sel = TOD_PORT_CTRL_REG_M_PATH_1;
             }
 
-            if (i_tod_node->i_drawer_master)
+            FAPI_ASSERT(i_osc_sel != TOD_OSC_NONE,
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_OSCSEL(i_osc_sel)
+                        .set_TODSEL(i_tod_sel),
+                        "Invalid oscillator configuration!");
+        }
+        else // i_tod_sel==TOD_SECONDARY
+        {
+            if (i_osc_sel == TOD_OSC_1       ||
+                i_osc_sel == TOD_OSC_0_AND_1 ||
+                i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
             {
-                data.setBit<PERV_TOD_PSS_MSS_CTRL_REG_PRI_M_S_DRAWER_SELECT>();
+                l_path_sel = TOD_PORT_CTRL_REG_M_PATH_1;
             }
+            else if (i_osc_sel == TOD_OSC_0  ||
+                     i_osc_sel == TOD_OSC_0_AND_1_SEL_0)
+            {
+                l_path_sel = TOD_PORT_CTRL_REG_M_PATH_0;
+            }
+
+            FAPI_ASSERT(i_osc_sel != TOD_OSC_NONE,
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_OSCSEL(i_osc_sel)
+                        .set_TODSEL(i_tod_sel),
+                        "Invalid oscillator configuration!");
+        }
+    }
+    else // Chip is not master; slave path selected
+    {
+        if (i_tod_sel == TOD_PRIMARY)
+        {
+            l_path_sel = TOD_PORT_CTRL_REG_S_PATH_0;
         }
         else // (i_tod_sel==TOD_SECONDARY)
         {
-            if (is_mdmt)
-            {
-                data.setBit<PERV_TOD_PSS_MSS_CTRL_REG_SEC_M_S_SELECT>();
-
-                if (i_osc_sel == TOD_OSC_1       ||
-                    i_osc_sel == TOD_OSC_0_AND_1 ||
-                    i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
-                {
-                    data.setBit<PERV_TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SELECT>();
-                }
-                else if (i_osc_sel == TOD_OSC_0  ||
-                         i_osc_sel == TOD_OSC_0_AND_1_SEL_0)
-                {
-                    data.clearBit<PERV_TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SELECT>();
-                }
-
-                FAPI_ASSERT(i_osc_sel != TOD_OSC_NONE, fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY().set_TARGET(target).set_OSCSEL(i_osc_sel),
-                            "Invalid oscillator configuration!");
-            }
-            else // Slave nodes (Drawer master is still a slave)
-            {
-                data.clearBit<PERV_TOD_PSS_MSS_CTRL_REG_SEC_M_S_SELECT>();
-            }
-
-            if (i_tod_node->i_drawer_master)
-            {
-                data.setBit<PERV_TOD_PSS_MSS_CTRL_REG_SEC_M_S_DRAWER_SELECT>();
-            }
+            l_path_sel = TOD_PORT_CTRL_REG_S_PATH_1;
         }
-
-        FAPI_TRY(fapi2::putScom(*target, PERV_TOD_PSS_MSS_CTRL_REG, data),
-                 "fapiPutScom error for PERV_TOD_PSS_MSS_CTRL_REG SCOM.");
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
     }
 
-    fapi2::ReturnCode configure_s_path_ctrl_reg(tod_topology_node*           i_tod_node,
-            const p9_tod_setup_tod_sel i_tod_sel,
-            const p9_tod_setup_osc_sel i_osc_sel)
+    for (auto l_child = (i_tod_node->i_children).begin();
+         l_child != (i_tod_node->i_children).end();
+         ++l_child)
     {
-        fapi2::buffer<uint64_t> data(0x0);
-
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* target = i_tod_node->i_target;
-
-        // Read PERV_TOD_S_PATH_CTRL_REG in order to perserve any prior configuration
-        FAPI_TRY(fapi2::getScom(*target, PERV_TOD_S_PATH_CTRL_REG, data),
-                 "Error from fapiGetScom when retrieving PERV_TOD_S_PATH_CTRL_REG!");
-
-        // Slave TODs are enabled on all but the MDMT
-        FAPI_DBG("Selection of Slave OSC path");
-
-        if (i_tod_sel == TOD_PRIMARY)
+        // Loop through all of the out busses, determine which tx buses to
+        // enable as senders
+        switch ((*l_child)->i_bus_tx)
         {
-            data.clearBit<PERV_TOD_S_PATH_CTRL_REG_PRI_SELECT>(); // For primary slave, use slave path 0 (path_0_sel=OFF)
-
-            // Set CPS deviation to 75% (CPS deviation bits = 0xC, factor=1), 8 valid steps to enable step check
-            data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR,
-                                 PERV_TOD_S_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR_LEN>(STEP_CHECK_CPS_DEVIATION_FACTOR_1);
-            data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION,
-                                 PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION_LEN>(STEP_CHECK_CPS_DEVIATION_75_00_PCENT);
-            data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT,
-                                 PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT_LEN>(STEP_CHECK_VALIDITY_COUNT_8);
-            data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION, PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION_LEN>
-            (STEP_CHECK_CPS_DEVIATION_75_00_PCENT);
-            data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR, PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR_LEN>
-            (STEP_CHECK_CPS_DEVIATION_FACTOR_1);
-        }
-        else // (i_tod_sel==TOD_SECONDARY)
-        {
-            data.setBit<PERV_TOD_S_PATH_CTRL_REG_SEC_SELECT>();   // For secondary slave, use slave path 1 (path_1_sel=ON)
-
-            // Set CPS deviation to 75% (CPS deviation bits = 0xC, factor=1), 8 valid steps to enable step check
-            data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR,
-                                 PERV_TOD_S_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR_LEN>(STEP_CHECK_CPS_DEVIATION_FACTOR_1);
-            data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_1_STEP_CHECK_CPS_DEVIATION,
-                                 PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION_LEN>(STEP_CHECK_CPS_DEVIATION_75_00_PCENT);
-            data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_1_STEP_CHECK_VALIDITY_COUNT,
-                                 PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT_LEN>(STEP_CHECK_VALIDITY_COUNT_8);
-        }
-
-        //In either case set the S_PATH_REMOTE_SYNC_MISS_COUNT_MAX to 1
-        data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_MISS_COUNT_MAX, PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_MISS_COUNT_MAX_LEN>
-        (S_PATH_REMOTE_SYNC_MISS_COUNT_2);
-
-        FAPI_TRY(fapi2::putScom(*target, PERV_TOD_S_PATH_CTRL_REG, data),
-                 "fapiPutScom error for PERV_TOD_S_PATH_CTRL_REG SCOM.");
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
-    }
-
-    fapi2::ReturnCode configure_port_ctrl_regs(tod_topology_node*           i_tod_node,
-            const p9_tod_setup_tod_sel i_tod_sel,
-            const p9_tod_setup_osc_sel i_osc_sel)
-    {
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* target = i_tod_node->i_target;
-        fapi2::buffer<uint64_t> data(0x0);
-        fapi2::buffer<uint64_t> data2(0x0);
-        uint32_t port_ctrl_reg = 0;
-        uint32_t port_ctrl_check_reg = 0;
-        uint32_t port_rx_select_val = 0;
-        uint32_t path_sel = 0;
-        uint8_t l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[7];
-        uint8_t l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[4];
-
-        const bool is_mdmt = (i_tod_node->i_tod_master && i_tod_node->i_drawer_master);
-
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, *target,
-                               l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG), "Error getting ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, *target,
-                               l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG), "Error getting ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG");
-
-        // PERV_TOD_PRI_PORT_0_CTRL_REG is only used for Primary configurations
-        // PERV_TOD_SEC_PORT_1_CTRL_REG is only used for Secondary configurations
-        // In order to check primary and secondary networks are working simultaneously...
-        //  - The result of PERV_TOD_PRI_PORT_0_CTRL_REG are also inserted into PERV_TOD_SEC_PORT_0_CTRL_REG
-        //    (preserving i_path_delay which can be different between 40001 and 40003)
-        //  - The result of PERV_TOD_SEC_PORT_1_CTRL_REG are also inserted into PERV_TOD_PRI_PORT_1_CTRL_REG
-        if (i_tod_sel == TOD_PRIMARY)
-        {
-            FAPI_DBG("PERV_TOD_PRI_PORT_0_CTRL_REG will be configured for primary topology");
-            port_ctrl_reg = PERV_TOD_PRI_PORT_0_CTRL_REG;
-            port_ctrl_check_reg = PERV_TOD_SEC_PORT_0_CTRL_REG;
-        }
-        else // (i_tod_sel==TOD_SECONDARY)
-        {
-            FAPI_DBG("PERV_TOD_SEC_PORT_1_CTRL_REG will be configured for secondary topology");
-            port_ctrl_reg = PERV_TOD_SEC_PORT_1_CTRL_REG;
-            port_ctrl_check_reg = PERV_TOD_PRI_PORT_1_CTRL_REG;
-        }
-
-        // Read port_ctrl_reg in order to perserve any prior configuration
-        FAPI_TRY(fapi2::getScom(*target, port_ctrl_reg, data),
-                 "Error from fapiGetScom when retrieving port_ctrl_reg!");
-
-        // Read port_ctrl_check_reg in order to perserve any prior configuration
-        FAPI_TRY(fapi2::getScom(*target, port_ctrl_check_reg, data2),
-                 "Error from fapiGetScom when retrieving port_ctrl_check_reg!");
-
-        //Determine RX port
-        switch (i_tod_node->i_bus_rx)
-        {
-            case(XBUS0):
-                //If XBUS0 is not enabled throw an error
-                FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[0] != 0),
-                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS0),
+            case (XBUS0):
+                // If XBUS0 is not enabled throw an error
+                FAPI_ASSERT((l_x_attached_chip_cnfg[0] != 0),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                            .set_TARGET(*(i_tod_node->i_target))
+                            .set_TX(XBUS0),
                             "i_tod_node->i_bus_rx is set to XBUS0 and it is not enabled");
-                port_rx_select_val = TOD_PORT_CTRL_REG_RX_X0_SEL;
+                l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X0_SEL,
+                                                TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
+                l_port_ctrl_reg.setBit<TOD_PORT_CTRL_REG_TX_X0_EN>();
+                l_port_ctrl_check_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X0_SEL,
+                                                      TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
+                l_port_ctrl_check_reg.setBit<TOD_PORT_CTRL_REG_TX_X0_EN>();
                 break;
 
-            case(XBUS1):
-                //If XBUS1 is not enabled throw an error
-                FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[1] != 0),
-                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS1),
+            case (XBUS1):
+                // If XBUS1 is not enabled throw an error
+                FAPI_ASSERT((l_x_attached_chip_cnfg[1] != 0),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                            .set_TARGET(*(i_tod_node->i_target))
+                            .set_TX(XBUS1),
                             "i_tod_node->i_bus_rx is set to XBUS1 and it is not enabled");
-                port_rx_select_val = TOD_PORT_CTRL_REG_RX_X1_SEL;
+                l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X1_SEL,
+                                                TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
+                l_port_ctrl_reg.setBit<TOD_PORT_CTRL_REG_TX_X1_EN>();
+                l_port_ctrl_check_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X1_SEL,
+                                                      TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
+                l_port_ctrl_check_reg.setBit<TOD_PORT_CTRL_REG_TX_X1_EN>();
                 break;
 
-            case(XBUS2):
-                //If XBUS2 is not enabled throw an error
-                FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[2] != 0),
-                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS2),
+            case (XBUS2):
+                // If XBUS2 is not enabled throw an error
+                FAPI_ASSERT((l_x_attached_chip_cnfg[2] != 0),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                            .set_TARGET(*(i_tod_node->i_target))
+                            .set_TX(XBUS2),
                             "i_tod_node->i_bus_rx is set to XBUS2 and it is not enabled");
-                port_rx_select_val = TOD_PORT_CTRL_REG_RX_X2_SEL;
+                l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X2_SEL,
+                                                TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
+                l_port_ctrl_reg.setBit<TOD_PORT_CTRL_REG_TX_X2_EN>();
+                l_port_ctrl_check_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X2_SEL,
+                                                      TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
+                l_port_ctrl_check_reg.setBit<TOD_PORT_CTRL_REG_TX_X2_EN>();
                 break;
 
-            case(OBUS0):
-                //If OBUS0 is not enabled throw an error
-                FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[3] != 0)
-                             || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[0] != 0)),
-                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS0),
+            case (OBUS0):
+                // If OBUS0 is not enabled throw an error
+                FAPI_ASSERT(((l_x_attached_chip_cnfg[3] != 0)
+                             || (l_a_attached_chip_cnfg[0] != 0)),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                            .set_TARGET(*(i_tod_node->i_target))
+                            .set_TX(OBUS0),
                             "i_tod_node->i_bus_rx is set to OBUS0 and it is not enabled");
-                port_rx_select_val = TOD_PORT_CTRL_REG_RX_X3_SEL;
+                l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X3_SEL,
+                                                TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
+                l_port_ctrl_reg.setBit<TOD_PORT_CTRL_REG_TX_X3_EN>();
+                l_port_ctrl_check_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X3_SEL,
+                                                      TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
+                l_port_ctrl_check_reg.setBit<TOD_PORT_CTRL_REG_TX_X3_EN>();
                 break;
 
-            case(OBUS1):
-                //If OBUS1 is not enabled throw an error
-                FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[4] != 0)
-                             || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[1] != 0)),
-                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS1),
+            case (OBUS1):
+                // If OBUS1 is not enabled throw an error
+                FAPI_ASSERT(((l_x_attached_chip_cnfg[4] != 0) ||
+                             (l_a_attached_chip_cnfg[1] != 0)),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                            .set_TARGET(*(i_tod_node->i_target))
+                            .set_TX(OBUS1),
                             "i_tod_node->i_bus_rx is set to OBUS1 and it is not enabled");
-                port_rx_select_val = TOD_PORT_CTRL_REG_RX_X4_SEL;
+                l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X4_SEL,
+                                                TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
+                l_port_ctrl_reg.setBit<TOD_PORT_CTRL_REG_TX_X4_EN>();
+                l_port_ctrl_check_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X4_SEL,
+                                                      TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
+                l_port_ctrl_check_reg.setBit<TOD_PORT_CTRL_REG_TX_X4_EN>();
                 break;
 
-            case(OBUS2):
-                //If OBUS2 is not enabled throw an error
-                FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[5] != 0)
-                             || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[2] != 0)),
-                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS2),
+            case (OBUS2):
+                // If OBUS2 is not enabled throw an error
+                FAPI_ASSERT(((l_x_attached_chip_cnfg[5] != 0) ||
+                             (l_a_attached_chip_cnfg[2] != 0)),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                            .set_TARGET(*(i_tod_node->i_target))
+                            .set_TX(OBUS2),
                             "i_tod_node->i_bus_rx is set to OBUS2 and it is not enabled");
-                port_rx_select_val = TOD_PORT_CTRL_REG_RX_X5_SEL;
+                l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X5_SEL,
+                                                TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
+                l_port_ctrl_reg.setBit<TOD_PORT_CTRL_REG_TX_X5_EN>();
+                l_port_ctrl_check_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X5_SEL,
+                                                      TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
+                l_port_ctrl_check_reg.setBit<TOD_PORT_CTRL_REG_TX_X5_EN>();
                 break;
 
-            case(OBUS3):
-                //If OBUS3 is not enabled throw an error
-                FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[6] != 0)
-                             || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[3] != 0)),
-                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS3),
+            case (OBUS3):
+                // If OBUS3 is not enabled throw an error
+                FAPI_ASSERT(((l_x_attached_chip_cnfg[6] != 0) ||
+                             (l_a_attached_chip_cnfg[3] != 0)),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                            .set_TARGET(*(i_tod_node->i_target))
+                            .set_TX(OBUS3),
                             "i_tod_node->i_bus_rx is set to OBUS3 and it is not enabled");
-                port_rx_select_val = TOD_PORT_CTRL_REG_RX_X6_SEL;
+                l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X6_SEL,
+                                                TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
+                l_port_ctrl_reg.setBit<TOD_PORT_CTRL_REG_TX_X6_EN>();
+                l_port_ctrl_check_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X6_SEL,
+                                                      TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
+                l_port_ctrl_check_reg.setBit<TOD_PORT_CTRL_REG_TX_X6_EN>();
                 break;
 
-            case(XBUS7):
+            case (XBUS7):
                 FAPI_ASSERT(false,
-                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS7),
-                            "i_tod_node->i_bus_rx is set to XBUS7");
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                            .set_TARGET(*(i_tod_node->i_target))
+                            .set_TX(XBUS7),
+                            "i_tod_node->i_bus_tx is set to XBUS7");
                 break;
 
-            case(NONE):
-                break; //MDMT has no rx
+            case (NONE):
+                FAPI_ASSERT(((*l_child)->i_bus_tx != NONE),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                            .set_TARGET(*(i_tod_node->i_target))
+                            .set_TX(NONE),
+                            "i_tod_node->i_bus_tx is set to NONE");
+                break;
         }
-
-        data.insertFromRight<TOD_PORT_CTRL_REG_RX_SEL,
-                             TOD_PORT_CTRL_REG_RX_LEN>(port_rx_select_val);
-        data2.insertFromRight<TOD_PORT_CTRL_REG_RX_SEL,
-                              TOD_PORT_CTRL_REG_RX_LEN>(port_rx_select_val);
-
-        //Determine which tx path should be selected for all children
-        if (is_mdmt)
-        {
-            if (i_tod_sel == TOD_PRIMARY)
-            {
-                if (i_osc_sel == TOD_OSC_0       ||
-                    i_osc_sel == TOD_OSC_0_AND_1 ||
-                    i_osc_sel == TOD_OSC_0_AND_1_SEL_0)
-                {
-                    path_sel = TOD_PORT_CTRL_REG_M_PATH_0;
-                }
-                else if (i_osc_sel == TOD_OSC_1  ||
-                         i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
-                {
-                    path_sel = TOD_PORT_CTRL_REG_M_PATH_1;
-                }
-
-                FAPI_ASSERT(i_osc_sel != TOD_OSC_NONE, fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY().set_TARGET(target).set_OSCSEL(i_osc_sel),
-                            "Invalid oscillator configuration!");
-            }
-            else // i_tod_sel==TOD_SECONDARY
-            {
-                if (i_osc_sel == TOD_OSC_1       ||
-                    i_osc_sel == TOD_OSC_0_AND_1 ||
-                    i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
-                {
-                    path_sel = TOD_PORT_CTRL_REG_M_PATH_1;
-                }
-                else if (i_osc_sel == TOD_OSC_0  ||
-                         i_osc_sel == TOD_OSC_0_AND_1_SEL_0)
-                {
-                    path_sel = TOD_PORT_CTRL_REG_M_PATH_0;
-                }
-
-                FAPI_ASSERT(i_osc_sel != TOD_OSC_NONE, fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY().set_TARGET(target).set_OSCSEL(i_osc_sel),
-                            "Invalid oscillator configuration!");
-            }
-        }
-        else // Chip is not master; slave path selected
-        {
-            if (i_tod_sel == TOD_PRIMARY)
-            {
-                path_sel = TOD_PORT_CTRL_REG_S_PATH_0;
-            }
-            else // (i_tod_sel==TOD_SECONDARY)
-            {
-                path_sel = TOD_PORT_CTRL_REG_S_PATH_1;
-            }
-        }
-
-        for (std::list<tod_topology_node*>::iterator child = (i_tod_node->i_children).begin();
-             child != (i_tod_node->i_children).end();
-             ++child)
-        {
-            // Loop through all of the out busses, determine which tx buses to enable as senders
-            tod_topology_node* tod_node = *child;
-
-            switch (tod_node->i_bus_tx)
-            {
-                case(XBUS0):
-                    //If XBUS0 is not enabled throw an error
-                    FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[0] != 0),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(XBUS0),
-                                "i_tod_node->i_bus_rx is set to XBUS0 and it is not enabled");
-                    data.insertFromRight<TOD_PORT_CTRL_REG_TX_X0_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data.setBit<TOD_PORT_CTRL_REG_TX_X0_EN>();
-                    data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X0_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data2.setBit<TOD_PORT_CTRL_REG_TX_X0_EN>();
-                    break;
-
-                case(XBUS1):
-                    //If XBUS1 is not enabled throw an error
-                    FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[1] != 0),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(XBUS1),
-                                "i_tod_node->i_bus_rx is set to XBUS1 and it is not enabled");
-                    data.insertFromRight<TOD_PORT_CTRL_REG_TX_X1_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data.setBit<TOD_PORT_CTRL_REG_TX_X1_EN>();
-                    data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X1_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data2.setBit<TOD_PORT_CTRL_REG_TX_X1_EN>();
-                    break;
-
-                case(XBUS2):
-                    //If XBUS2 is not enabled throw an error
-                    FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[2] != 0),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(XBUS2),
-                                "i_tod_node->i_bus_rx is set to XBUS2 and it is not enabled");
-                    data.insertFromRight<TOD_PORT_CTRL_REG_TX_X2_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data.setBit<TOD_PORT_CTRL_REG_TX_X2_EN>();
-                    data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X2_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data2.setBit<TOD_PORT_CTRL_REG_TX_X2_EN>();
-                    break;
-
-                case(OBUS0):
-                    //If OBUS0 is not enabled throw an error
-                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[3] != 0)
-                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[0] != 0)),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(OBUS0),
-                                "i_tod_node->i_bus_rx is set to OBUS0 and it is not enabled");
-                    data.insertFromRight<TOD_PORT_CTRL_REG_TX_X3_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data.setBit<TOD_PORT_CTRL_REG_TX_X3_EN>();
-                    data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X3_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data2.setBit<TOD_PORT_CTRL_REG_TX_X3_EN>();
-                    break;
-
-                case(OBUS1):
-                    //If OBUS1 is not enabled throw an error
-                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[4] != 0)
-                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[1] != 0)),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(OBUS1),
-                                "i_tod_node->i_bus_rx is set to OBUS1 and it is not enabled");
-                    data.insertFromRight<TOD_PORT_CTRL_REG_TX_X4_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data.setBit<TOD_PORT_CTRL_REG_TX_X4_EN>();
-                    data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X4_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data2.setBit<TOD_PORT_CTRL_REG_TX_X4_EN>();
-                    break;
-
-                case(OBUS2):
-                    //If OBUS2 is not enabled throw an error
-                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[5] != 0)
-                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[2] != 0)),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(OBUS2),
-                                "i_tod_node->i_bus_rx is set to OBUS2 and it is not enabled");
-                    data.insertFromRight<TOD_PORT_CTRL_REG_TX_X5_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data.setBit<TOD_PORT_CTRL_REG_TX_X5_EN>();
-                    data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X5_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data2.setBit<TOD_PORT_CTRL_REG_TX_X5_EN>();
-                    break;
-
-                case(OBUS3):
-                    //If OBUS3 is not enabled throw an error
-                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[6] != 0)
-                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[3] != 0)),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(OBUS3),
-                                "i_tod_node->i_bus_rx is set to OBUS3 and it is not enabled");
-                    data.insertFromRight<TOD_PORT_CTRL_REG_TX_X6_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data.setBit<TOD_PORT_CTRL_REG_TX_X6_EN>();
-                    data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X6_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data2.setBit<TOD_PORT_CTRL_REG_TX_X6_EN>();
-                    break;
-
-                case(XBUS7):
-                    FAPI_ASSERT(false,
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(XBUS7),
-                                "i_tod_node->i_bus_tx is set to XBUS7");
-                    break;
-
-                case(NONE):
-                    FAPI_ASSERT((tod_node->i_bus_tx != NONE),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(NONE), "i_tod_node->i_bus_tx is set to NONE");
-                    break;
-            }
-        }
-
-        // All children have been configured; save both port configurations!
-        FAPI_TRY(fapi2::putScom(*target, port_ctrl_reg, data), "fapiPutScom error for port_ctrl_reg SCOM.");
-        FAPI_TRY(fapi2::putScom(*target, port_ctrl_check_reg, data2),
-                 "fapiPutScom error for port_ctrl_check_reg SCOM.");
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
     }
 
-    fapi2::ReturnCode configure_m_path_ctrl_reg(tod_topology_node*           i_tod_node,
-            const p9_tod_setup_tod_sel i_tod_sel,
-            const p9_tod_setup_osc_sel i_osc_sel)
+    // All children have been configured; save both port configurations!
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            l_port_ctrl_addr,
+                            l_port_ctrl_reg),
+             "Error from putScom (0x%08X)!", l_port_ctrl_addr);
+
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            l_port_ctrl_check_addr,
+                            l_port_ctrl_check_reg),
+             "Error from putScom (0x%08X)!", l_port_ctrl_check_addr);
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+
+/// @brief Configures the M_PATH_CTRL_REG; will be called by configure_tod_node
+/// @param[in] i_tod_node Reference to TOD topology (including FAPI targets)
+/// @param[in] i_tod_sel Specifies the topology to configure
+/// @param[in] i_osc_sel Specifies the oscillator to use for the master
+/// @return FAPI_RC_SUCCESS if the M_PATH_CTRL_REG is successfully configured
+///         else error
+fapi2::ReturnCode configure_m_path_ctrl_reg(
+    tod_topology_node* i_tod_node,
+    const p9_tod_setup_tod_sel i_tod_sel,
+    const p9_tod_setup_osc_sel i_osc_sel)
+{
+    fapi2::buffer<uint64_t> l_m_path_ctrl_reg = 0;
+
+    // Read PERV_TOD_M_PATH_CTRL_REG to preserve any prior configuration
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_TOD_M_PATH_CTRL_REG,
+                            l_m_path_ctrl_reg),
+             "Error from getScom (PERV_TOD_M_PATH_CTRL_REG)!");
+
+    // Configure Master OSC0/OSC1 path
+    FAPI_DBG("Configuring Master OSC path in PERV_TOD_M_PATH_CTRL_REG");
+
+    if (i_osc_sel == TOD_OSC_0             ||
+        i_osc_sel == TOD_OSC_0_AND_1       ||
+        i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
+        i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
     {
-        fapi2::buffer<uint64_t> data(0x0);
+        FAPI_DBG("OSC0 is valid; master path-0 will be configured.");
 
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* target = i_tod_node->i_target;
+        // OSC0 is connected
+        l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_0_OSC_NOT_VALID>();
 
-        // Read PERV_TOD_M_PATH_CTRL_REG in order to perserve any prior configuration
-        FAPI_TRY(fapi2::getScom(*target, PERV_TOD_M_PATH_CTRL_REG, data),
-                 "Error from fapiGetScom when retrieving PERV_TOD_M_PATH_CTRL_REG!");
+        // OSC0 step alignment enabled
+        l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_0_STEP_ALIGN_DISABLE>();
 
-        // Configure Master OSC0/OSC1 path
-        FAPI_DBG("Configuring Master OSC path in PERV_TOD_M_PATH_CTRL_REG");
+        // Set 512 steps per sync for path 0
+        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT,
+                                          PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT_LEN>(
+                                              TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512);
 
-        if (i_osc_sel == TOD_OSC_0             ||
-            i_osc_sel == TOD_OSC_0_AND_1       ||
-            i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
-            i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
-        {
-            FAPI_DBG("OSC0 is valid; master path-0 will be configured.");
+        // Set step check CPS deviation to 50%
+        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION,
+                                          PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION_LEN>(
+                                              STEP_CHECK_CPS_DEVIATION_50_00_PCENT);
 
-            // OSC0 is connected
-            data.clearBit<PERV_TOD_M_PATH_CTRL_REG_0_OSC_NOT_VALID>();
-
-            // OSC0 step alignment enabled
-            data.clearBit<PERV_TOD_M_PATH_CTRL_REG_0_STEP_ALIGN_DISABLE>();
-
-            // Set 512 steps per sync for path 0
-            data.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT,
-                                 PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT_LEN>(TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512);
-
-            // Set step check CPS deviation to 50%
-            data.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION,
-                                 PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION_LEN>(STEP_CHECK_CPS_DEVIATION_50_00_PCENT);
-
-            // 8 valid steps are required before step check is enabled
-            data.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT,
-                                 PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT_LEN>(STEP_CHECK_VALIDITY_COUNT_8);
-        }
-        else
-        {
-            FAPI_DBG("OSC0 is not connected.");
-
-            // OSC0 is not connected; any previous path-0 settings will be ignored
-            data.setBit<PERV_TOD_M_PATH_CTRL_REG_0_OSC_NOT_VALID>();
-        }
-
-        if (i_osc_sel == TOD_OSC_1             ||
-            i_osc_sel == TOD_OSC_0_AND_1       ||
-            i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
-            i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
-        {
-            FAPI_DBG("OSC1 is valid; master path-1 will be configured.");
-
-            // OSC1 is connected
-            data.clearBit<PERV_TOD_M_PATH_CTRL_REG_1_OSC_NOT_VALID>();
-
-            // OSC1 step alignment enabled
-            data.clearBit<PERV_TOD_M_PATH_CTRL_REG_1_STEP_ALIGN_DISABLE>();
-
-            // Set 512 steps per sync for path 1
-            data.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT,
-                                 PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT_LEN>(TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512);
-
-            // Set step check CPS deviation to 50%
-            data.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_CPS_DEVIATION,
-                                 PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_CPS_DEVIATION_LEN>(STEP_CHECK_CPS_DEVIATION_50_00_PCENT);
-
-            // 8 valid steps are required before step check is enabled
-            data.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_VALIDITY_COUNT,
-                                 PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT_LEN>(STEP_CHECK_VALIDITY_COUNT_8);
-        }
-        else
-        {
-            FAPI_DBG("OSC1 is not connected.");
-
-            // OSC1 is not connected; any previous path-1 settings will be ignored
-            data.setBit<PERV_TOD_M_PATH_CTRL_REG_1_OSC_NOT_VALID>();
-        }
-
-        // CPS deviation factor configures both path-0 and path-1
-        data.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR,
-                             PERV_TOD_S_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR_LEN>(STEP_CHECK_CPS_DEVIATION_FACTOR_1);
-
-        FAPI_TRY(fapi2::putScom(*target, PERV_TOD_M_PATH_CTRL_REG, data),
-                 "fapiPutScom error for PERV_TOD_M_PATH_CTRL_REG SCOM.");
-
-
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
+        // 8 valid steps are required before step check is enabled
+        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT,
+                                          PERV_TOD_M_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT_LEN>(
+                                              STEP_CHECK_VALIDITY_COUNT_8);
     }
-
-    fapi2::ReturnCode configure_i_path_ctrl_reg(tod_topology_node*           i_tod_node,
-            const p9_tod_setup_tod_sel i_tod_sel,
-            const p9_tod_setup_osc_sel i_osc_sel)
+    else
     {
-        fapi2::buffer<uint64_t> data(0x0);
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* target = i_tod_node->i_target;
-        uint32_t port_ctrl_reg = 0;
+        FAPI_DBG("OSC0 is not connected.");
 
-        FAPI_DBG("Setting internal path delay");
-
-        // This is the number of TOD-grid-cycles to delay the internal path (0-0xFF valid); 1 TOD-grid-cycle = 400ps (default)
-        if (i_tod_sel == TOD_PRIMARY)
-        {
-            // Primary topology internal path delay set PERV_TOD_PRI_PORT_0_CTRL_REG, regardless of master/slave/port
-            FAPI_DBG("PERV_TOD_PRI_PORT_0_CTRL_REG will be used to set internal delay");
-            port_ctrl_reg = PERV_TOD_PRI_PORT_0_CTRL_REG;
-        }
-        else // (i_tod_sel==TOD_SECONDARY)
-        {
-            // Secondary topology internal path delay set PERV_TOD_SEC_PORT_0_CTRL_REG regardless of master/slave/port
-            FAPI_DBG("PERV_TOD_SEC_PORT_0_CTRL_REG will be used to set internal delay");
-            port_ctrl_reg = PERV_TOD_SEC_PORT_0_CTRL_REG;
-        }
-
-        FAPI_TRY(fapi2::getScom(*target, port_ctrl_reg, data),
-                 "Error from fapiGetScom when retrieving port_ctrl_reg!");
-        FAPI_DBG("configuring an internal delay of %d TOD-grid-cycles", i_tod_node->o_int_path_delay);
-        data.insertFromRight<TOD_PORT_CTRL_REG_I_PATH_DELAY,
-                             TOD_PORT_CTRL_REG_I_PATH_DELAY_LEN>(i_tod_node->o_int_path_delay);
-        FAPI_TRY(fapi2::putScom(*target, port_ctrl_reg, data), "fapiPutScom error for port_ctrl_reg SCOM.");
-
-        FAPI_DBG("Enable delay logic in PERV_TOD_I_PATH_CTRL_REG");
-        // Read PERV_TOD_I_PATH_CTRL_REG in order to perserve any prior configuration
-        FAPI_TRY(fapi2::getScom(*target, PERV_TOD_I_PATH_CTRL_REG, data),
-                 "Error from fapiGetScom when retrieving PERV_TOD_I_PATH_CTRL_REG!");
-
-        // Ensure delay is enabled
-        data.clearBit<PERV_TOD_I_PATH_CTRL_REG_DELAY_DISABLE>();
-        data.clearBit<PERV_TOD_I_PATH_CTRL_REG_DELAY_ADJUST_DISABLE>();
-
-        // Deviation for internal OSC should be set to max, allowing backup master TOD to run the active topology,
-        // when switching from Slave OSC path to Master OSC path
-        data.insertFromRight<PERV_TOD_I_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION,
-                             PERV_TOD_I_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_LEN>(STEP_CHECK_CPS_DEVIATION_93_75_PCENT);
-        data.insertFromRight<PERV_TOD_I_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR,
-                             PERV_TOD_I_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR_LEN>(STEP_CHECK_CPS_DEVIATION_FACTOR_1);
-        data.insertFromRight<PERV_TOD_I_PATH_CTRL_REG_STEP_CHECK_VALIDITY_COUNT,
-                             PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT_LEN>(STEP_CHECK_VALIDITY_COUNT_8);
-        FAPI_TRY(fapi2::putScom(*target, PERV_TOD_I_PATH_CTRL_REG, data),
-                 "fapiPutScom error for PERV_TOD_I_PATH_CTRL_REG SCOM.");
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
+        // OSC0 is not connected; any previous path-0 settings will be ignored
+        l_m_path_ctrl_reg.setBit<PERV_TOD_M_PATH_CTRL_REG_0_OSC_NOT_VALID>();
     }
 
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    void display_tod_nodes(const tod_topology_node* i_tod_node, const uint32_t i_depth)
+    if (i_osc_sel == TOD_OSC_1             ||
+        i_osc_sel == TOD_OSC_0_AND_1       ||
+        i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
+        i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
     {
-        char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+        FAPI_DBG("OSC1 is valid; master path-1 will be configured.");
 
-        if (i_tod_node == NULL || i_tod_node->i_target == NULL)
-        {
-            FAPI_ERR("NULL tod_node or target passed to display_tod_nodes()!");
-        }
+        // OSC1 is connected
+        l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_1_OSC_NOT_VALID>();
 
+        // OSC1 step alignment enabled
+        l_m_path_ctrl_reg.clearBit<PERV_TOD_M_PATH_CTRL_REG_1_STEP_ALIGN_DISABLE>();
 
-        fapi2::toString(i_tod_node->i_target, l_targetStr, fapi2::MAX_ECMD_STRING_LEN);
-        FAPI_INF("%s (Delay = %d)", l_targetStr, i_tod_node->o_int_path_delay);
+        // Set 512 steps per sync for path 1
+        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT,
+                                          PERV_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT_LEN>(
+                                              TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512);
 
-        for (std::list<tod_topology_node*>::const_iterator child = (i_tod_node->i_children).begin();
-             child != (i_tod_node->i_children).end();
-             ++child)
-        {
-            display_tod_nodes(*child, i_depth + 1);
-        }
+        // Set step check CPS deviation to 50%
+        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_CPS_DEVIATION,
+                                          PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_CPS_DEVIATION_LEN>(
+                                              STEP_CHECK_CPS_DEVIATION_50_00_PCENT);
+
+        // 8 valid steps are required before step check is enabled
+        l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_VALIDITY_COUNT,
+                                          PERV_TOD_M_PATH_CTRL_REG_1_STEP_CHECK_VALIDITY_COUNT_LEN>(
+                                              STEP_CHECK_VALIDITY_COUNT_8);
     }
-
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode calculate_node_delays(tod_topology_node* i_tod_node)
+    else
     {
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-        fapi2::buffer<uint64_t> data(0x0);
-        uint32_t longest_delay = 0;
-        uint32_t freq_x = 0;
-        uint32_t freq_o = 0;
+        FAPI_DBG("OSC1 is not connected.");
 
-
-        FAPI_DBG("Start");
-        // retrieve X-bus and A-bus frequencies
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_X_MHZ, FAPI_SYSTEM, freq_x),
-                 "Failure reading XBUS frequency attribute!");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_A_MHZ, FAPI_SYSTEM, freq_o),
-                 "Failure reading OBUS frequency attribute!");
-
-        // multiply attribute (mesh speed) speed by link factor
-        freq_x *= 8;
-        freq_o *= 16;
-
-        // Bus frequencies are global for the system (i.e. A0 and A1 will always run with the same frequency)
-        FAPI_DBG("XBUS=%dMHz OBUS=%dMHz", freq_x, freq_o);
-
-        // Find the most-delayed path in the topology; this is the MDMT's delay
-        FAPI_TRY(calculate_longest_topolopy_delay(i_tod_node, freq_x, freq_o, longest_delay),
-                 "Failure calculating longest topology delay!");
-        FAPI_DBG("the longest delay is %d TOD-grid-cycles.", longest_delay);
-
-        FAPI_TRY(set_topology_delays(i_tod_node, freq_x, freq_o, longest_delay),
-                 "Unable to set topology delays!");
-
-        // Finally, the MDMT delay must include additional TOD-grid-cycles to account for staging latches in slaves
-        i_tod_node->o_int_path_delay += MDMT_TOD_GRID_CYCLE_STAGING_DELAY;
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
+        // OSC1 is not connected; any previous path-1 settings will be ignored
+        l_m_path_ctrl_reg.setBit<PERV_TOD_M_PATH_CTRL_REG_1_OSC_NOT_VALID>();
     }
 
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode calculate_longest_topolopy_delay(tod_topology_node* i_tod_node,
-            const uint32_t     i_freq_x,
-            const uint32_t     i_freq_o,
-            uint32_t&          o_longest_delay)
+    // CPS deviation factor configures both path-0 and path-1
+    l_m_path_ctrl_reg.insertFromRight<PERV_TOD_M_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR,
+                                      PERV_TOD_M_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR_LEN>(
+                                          STEP_CHECK_CPS_DEVIATION_FACTOR_1);
+
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            PERV_TOD_M_PATH_CTRL_REG,
+                            l_m_path_ctrl_reg),
+             "Error from putScom (PERV_TOD_M_PATH_CTRL_REG)!");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+
+/// @brief Configures the I_PATH_CTRL_REG; will be called by configure_tod_node
+/// @param[in]i_tod_node Reference to TOD topology (including FAPI targets)
+/// @param[in] i_tod_sel Specifies the topology to configure
+/// @param[in] i_osc_sel Specifies the oscillator to use for the master
+/// @return FAPI_RC_SUCCESS if the I_PATH_CTRL_REG is successfully configured
+///         else error
+fapi2::ReturnCode configure_i_path_ctrl_reg(
+    tod_topology_node* i_tod_node,
+    const p9_tod_setup_tod_sel i_tod_sel,
+    const p9_tod_setup_osc_sel i_osc_sel)
+{
+    fapi2::buffer<uint64_t> l_i_path_ctrl_reg = 0;
+    fapi2::buffer<uint64_t> l_port_ctrl_reg = 0;
+    uint32_t l_port_ctrl_addr = 0;
+
+    FAPI_DBG("Setting internal path delay");
+
+    // This is the number of TOD-grid-cycles to delay the internal path
+    // (0-0xFF valid); 1 TOD-grid-cycle = 400ps (default)
+    if (i_tod_sel == TOD_PRIMARY)
     {
-        uint32_t node_delay = 0;
-        uint32_t current_longest_delay = 0;
-
-        FAPI_DBG("Start");
-
-        FAPI_TRY(calculate_node_link_delay(i_tod_node, i_freq_x, i_freq_o, node_delay),
-                 "Failure calculating single node delay!");
-        o_longest_delay = node_delay;
-
-        for (std::list<tod_topology_node*>::const_iterator child = (i_tod_node->i_children).begin();
-             child != (i_tod_node->i_children).end();
-             ++child)
-        {
-            tod_topology_node* tod_node = *child;
-            FAPI_TRY(calculate_longest_topolopy_delay(tod_node, i_freq_x, i_freq_o, node_delay),
-                     "Failure calculating topology delay!");
-
-            if (node_delay > current_longest_delay)
-            {
-                current_longest_delay = node_delay;
-            }
-        }
-
-        o_longest_delay += current_longest_delay;
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
+        // Primary topology internal path delay set PERV_TOD_PRI_PORT_0_CTRL_REG
+        // regardless of master/slave/port
+        FAPI_DBG("PERV_TOD_PRI_PORT_0_CTRL_REG will be used to set internal delay");
+        l_port_ctrl_addr = PERV_TOD_PRI_PORT_0_CTRL_REG;
     }
-
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode calculate_node_link_delay(tod_topology_node* i_tod_node,
-            const uint32_t     i_freq_x,
-            const uint32_t     i_freq_o,
-            uint32_t&          o_node_delay)
+    else // (i_tod_sel==TOD_SECONDARY)
     {
-        fapi2::buffer<uint64_t> data(0x0);
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* target = i_tod_node->i_target;
-
-        FAPI_DBG("Start");
-
-        // MDMT is originator and therefore has no node delay
-        if (i_tod_node->i_tod_master && i_tod_node->i_drawer_master)
-        {
-            o_node_delay = 0;
-        }
-        else // slave node
-        {
-            uint32_t bus_mode_addr = 0;
-            uint32_t bus_mode_sel_even = 0;
-            uint32_t bus_mode_sel_odd = 0;
-            uint32_t bus_freq = 0;
-            uint32_t bus_delay = 0;
-            uint32_t bus_delay_even = 0;
-            uint32_t bus_delay_odd = 0;
-
-            uint8_t l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[7];
-            uint8_t l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[4];
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, *target,
-                                   l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG), "Error getting ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG");
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, *target,
-                                   l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG), "Error getting ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG");
-
-            data.flush<0>();
-
-            switch (i_tod_node->i_bus_rx)
-            {
-                case(XBUS0):
-                    //If XBUS0 is not enabled throw an error
-                    FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[0] != 0),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS0),
-                                "i_tod_node->i_bus_rx is set to XBUS0 and it is not enabled");
-                    bus_freq = i_freq_x;
-                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_0>().setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_1>();
-                    bus_mode_addr = PU_PB_ELINK_DLY_0123_REG;
-                    bus_mode_sel_even = PB_ELINK_DLY_FMR0_LINK_DELAY_START_BIT;
-                    bus_mode_sel_odd = PB_ELINK_DLY_FMR1_LINK_DELAY_START_BIT;
-                    break;
-
-                case(XBUS1):
-                    //If XBUS1 is not enabled throw an error
-                    FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[1] != 0),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS1),
-                                "i_tod_node->i_bus_rx is set to XBUS1 and it is not enabled");
-                    bus_freq = i_freq_x;
-                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_2>().setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_3>();
-                    bus_mode_addr = PU_PB_ELINK_DLY_0123_REG;
-                    bus_mode_sel_even = PB_ELINK_DLY_FMR2_LINK_DELAY_START_BIT;
-                    bus_mode_sel_odd = PB_ELINK_DLY_FMR3_LINK_DELAY_START_BIT;
-                    break;
-
-                case(XBUS2):
-                    //If XBUS2 is not enabled throw an error
-                    FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[2] != 0),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS2),
-                                "i_tod_node->i_bus_rx is set to XBUS2 and it is not enabled");
-                    bus_freq = i_freq_x;
-                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_4>().setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_5>();
-                    bus_mode_addr = PU_PB_ELINK_DLY_45_REG;
-                    bus_mode_sel_even = PB_ELINK_DLY_FMR4_LINK_DELAY_START_BIT;
-                    bus_mode_sel_odd = PB_ELINK_DLY_FMR5_LINK_DELAY_START_BIT;
-                    break;
-
-                case(OBUS0):
-                    //If OBUS0 is not enabled throw an error
-                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[3] != 0)
-                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[0] != 0)),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS0),
-                                "i_tod_node->i_bus_rx is set to OBUS0 and it is not enabled");
-                    bus_freq = i_freq_o;
-                    data.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_0>().setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_1>();
-                    bus_mode_addr = PU_IOE_PB_OLINK_DLY_0123_REG;
-                    bus_mode_sel_even = PB_OLINK_DLY_FMR0_LINK_DELAY_START_BIT;
-                    bus_mode_sel_odd = PB_OLINK_DLY_FMR1_LINK_DELAY_START_BIT;
-                    break;
-
-                case(OBUS1):
-                    //If OBUS1 is not enabled throw an error
-                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[4] != 0)
-                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[1] != 0)),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS1),
-                                "i_tod_node->i_bus_rx is set to OBUS1 and it is not enabled");
-                    bus_freq = i_freq_o;
-                    data.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_2>().setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_3>();
-                    bus_mode_addr = PU_IOE_PB_OLINK_DLY_0123_REG;
-                    bus_mode_sel_even = PB_OLINK_DLY_FMR2_LINK_DELAY_START_BIT;
-                    bus_mode_sel_odd = PB_OLINK_DLY_FMR3_LINK_DELAY_START_BIT;
-                    break;
-
-                case(OBUS2):
-                    //If OBUS2 is not enabled throw an error
-                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[5] != 0)
-                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[2] != 0)),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS2),
-                                "i_tod_node->i_bus_rx is set to OBUS2 and it is not enabled");
-                    bus_freq = i_freq_o;
-                    data.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_4>().setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_5>();
-                    bus_mode_addr = PU_IOE_PB_OLINK_DLY_4567_REG;
-                    bus_mode_sel_even = PB_OLINK_DLY_FMR4_LINK_DELAY_START_BIT;
-                    bus_mode_sel_odd = PB_OLINK_DLY_FMR5_LINK_DELAY_START_BIT;
-                    break;
-
-                case(OBUS3):
-                    //If OBUS3 is not enabled throw an error
-                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[6] != 0)
-                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[3] != 0)),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS3),
-                                "i_tod_node->i_bus_rx is set to OBUS3 and it is not enabled");
-                    bus_freq = i_freq_o;
-                    data.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_6>().setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_7>();
-                    bus_mode_addr = PU_IOE_PB_OLINK_DLY_4567_REG;
-                    bus_mode_sel_even = PB_OLINK_DLY_FMR6_LINK_DELAY_START_BIT;
-                    bus_mode_sel_odd = PB_OLINK_DLY_FMR7_LINK_DELAY_START_BIT;
-                    break;
-
-                case(XBUS7):
-                    FAPI_ASSERT(false,
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS7), "i_tod_node->i_bus_rx is set to XBUS7");
-                    break;
-
-                case(NONE):
-                    FAPI_ASSERT((i_tod_node->i_bus_rx != NONE),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(NONE), "i_tod_node->i_bus_rx is set to NONE");
-                    break;
-            }
-
-            FAPI_TRY(fapi2::putScom(*target, PU_PB_ELINK_RT_DELAY_CTL_REG, data),
-                     "Error setting the Electrical Link Control register!");
-
-            FAPI_TRY(fapi2::getScom(*target, bus_mode_addr, data),
-                     "Error from fapiGetScom when retrieving bus_mode_addr!");
-            FAPI_TRY(data.extractToRight(bus_delay_even, bus_mode_sel_even, PB_ELINK_DLY_FMR_LINK_DELAY_LEN),
-                     "Error trying to extract delay");
-            FAPI_TRY(data.extractToRight(bus_delay_odd, bus_mode_sel_odd, PB_ELINK_DLY_FMR_LINK_DELAY_LEN),
-                     "Error trying to extract delay");
-            bus_delay = (bus_delay_even + bus_delay_odd) / 2;
-
-            //FAPI_ASSERT(!data.getBit<bus_mode_sel>(), fapi2::P9_TOD_LINK_DELAY_NOT_VALID.set_TARGET(target).set_ADDR(bus_mode_addr).set_DATA(data), "the TOD delay first bit is set to 1 so it is not valid");
-
-            // By default, the TOD grid runs at 400ps; TOD counts its delay based on this
-            // Example: Bus round trip delay is 35 cycles and the bus is running at 4800MHz
-            //            - Divide by 2 to get one-way delay time
-            //            - Divide by 4800 * 10^6 to get delay in seconds
-            //            - Multiply by 10^12 to get delay in picoseconds
-            //            - Divide by 400ps to get TOD-grid-cycles
-            //            - (To avoid including math.h) Add 1 and cast to uint32_t to round up to nearest TOD-grid-cycle
-            //            - (To avoid including math.h) 10^12/10^6=1000000
-            //            - (uint32_t)((        35        / 2 /        (4800      * 10^6) * 10^12 / 400        ) + 1) = 10 TOD-grid-cycles
-            o_node_delay = (uint32_t)(((double)bus_delay / 2 / (double)bus_freq  * 1000000       / TOD_GRID_PS) + 1);
-        }
-
-        // This is not the final internal path delay, only saved so two calls aren't needed to calculate_node_link_delay
-        i_tod_node->o_int_path_delay = o_node_delay;
-
-        FAPI_DBG("TOD-grid-cycles for single link: %d", o_node_delay);
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
+        // Secondary topology internal path delay set PERV_TOD_SEC_PORT_0_CTRL_REG
+        // regardless of master/slave/port
+        FAPI_DBG("PERV_TOD_SEC_PORT_0_CTRL_REG will be used to set internal delay");
+        l_port_ctrl_addr = PERV_TOD_SEC_PORT_0_CTRL_REG;
     }
 
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode set_topology_delays(tod_topology_node* i_tod_node,
-                                          const uint32_t     i_freq_x,
-                                          const uint32_t     i_freq_o,
-                                          const uint32_t     i_longest_delay)
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            l_port_ctrl_addr,
+                            l_port_ctrl_reg),
+             "Error from getScom (0x%08X)!", l_port_ctrl_addr);
+
+    FAPI_DBG("configuring an internal delay of %d TOD-grid-cycles",
+             i_tod_node->o_int_path_delay);
+    l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_I_PATH_DELAY,
+                                    TOD_PORT_CTRL_REG_I_PATH_DELAY_LEN>(i_tod_node->o_int_path_delay);
+
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            l_port_ctrl_addr,
+                            l_port_ctrl_reg),
+             "Error from putScom (0x%08X)!", l_port_ctrl_addr);
+
+    FAPI_DBG("Enable delay logic in PERV_TOD_I_PATH_CTRL_REG");
+    // Read PERV_TOD_I_PATH_CTRL_REG in order to preserve prior configuration
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_TOD_I_PATH_CTRL_REG,
+                            l_i_path_ctrl_reg),
+             "Error from getScom (PERV_TOD_I_PATH_CTRL_REG)!");
+
+    // Ensure delay is enabled
+    l_i_path_ctrl_reg.clearBit<PERV_TOD_I_PATH_CTRL_REG_DELAY_DISABLE>();
+    l_i_path_ctrl_reg.clearBit<PERV_TOD_I_PATH_CTRL_REG_DELAY_ADJUST_DISABLE>();
+
+    // Deviation for internal OSC should be set to max, allowing backup master
+    // TOD to run the active topology, when switching from Slave OSC path to
+    // Master OSC path
+    l_i_path_ctrl_reg.insertFromRight<PERV_TOD_I_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION,
+                                      PERV_TOD_I_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_LEN>(
+                                          STEP_CHECK_CPS_DEVIATION_93_75_PCENT);
+    l_i_path_ctrl_reg.insertFromRight<PERV_TOD_I_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR,
+                                      PERV_TOD_I_PATH_CTRL_REG_STEP_CHECK_CPS_DEVIATION_FACTOR_LEN>(
+                                          STEP_CHECK_CPS_DEVIATION_FACTOR_1);
+    l_i_path_ctrl_reg.insertFromRight<PERV_TOD_I_PATH_CTRL_REG_STEP_CHECK_VALIDITY_COUNT,
+                                      PERV_TOD_I_PATH_CTRL_REG_STEP_CHECK_VALIDITY_COUNT_LEN>(
+                                          STEP_CHECK_VALIDITY_COUNT_8);
+
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            PERV_TOD_I_PATH_CTRL_REG,
+                            l_i_path_ctrl_reg),
+             "Error from putScom (PERV_TOD_I_PATH_CTRL_REG)!");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+
+/// @brief Configures the INIT_CHIP_CTRL_REG; will be called by configure_tod_node
+/// @param[in]i_tod_node Reference to TOD topology (including FAPI targets)
+/// @param[in] i_tod_sel Specifies the topology to configure
+/// @param[in] i_osc_sel Specifies the oscillator to use for the master
+/// @return FAPI_RC_SUCCESS if the INIT_CHIP_CTRL_REG is successfully configured
+///         else error
+fapi2::ReturnCode init_chip_ctrl_reg(
+    tod_topology_node* i_tod_node,
+    const p9_tod_setup_tod_sel i_tod_sel,
+    const p9_tod_setup_osc_sel i_osc_sel)
+{
+    fapi2::buffer<uint64_t> l_chip_ctrl_reg = 0;
+
+    FAPI_DBG("Start");
+    FAPI_DBG("Set low order step value to 3F in PERV_TOD_CHIP_CTRL_REG");
+
+    // Read PERV_TOD_CHIP_CTRL_REG in order to preserve prior configuration
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_TOD_CHIP_CTRL_REG,
+                            l_chip_ctrl_reg),
+             "Error from getScom (PERV_TOD_CHIP_CTRL_REG)!");
+
+    // Default core sync period is 8us
+    l_chip_ctrl_reg.insertFromRight<PERV_TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SELECT,
+                                    PERV_TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SELECT_LEN>(
+                                        TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SEL_8);
+
+    // Enable internal path sync check
+    l_chip_ctrl_reg.clearBit<PERV_TOD_CHIP_CTRL_REG_I_PATH_SYNC_CHECK_DISABLE>();
+
+    // 1x sync boundaries for Move-TOD-To-Timebase
+    l_chip_ctrl_reg.clearBit<PERV_TOD_CHIP_CTRL_REG_MOVE_TO_TB_ON_2X_SYNC_ENABLE>();
+
+    // Use eclipz sync mechanism
+    l_chip_ctrl_reg.clearBit<PERV_TOD_CHIP_CTRL_REG_USE_TB_SYNC_MECHANISM>();
+
+    // Use timebase step sync from internal path
+    l_chip_ctrl_reg.clearBit<PERV_TOD_CHIP_CTRL_REG_USE_TB_STEP_SYNC>();
+
+    // Chip TOD WOF incrementer ratio (eclipz mode)
+    // 4-bit WOF counter is incremented with each 200MHz clock cycle
+    l_chip_ctrl_reg.insertFromRight<PERV_TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VALUE,
+                                    PERV_TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VALUE_LEN>(
+                                        TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VAL_3F);
+
+    // Stop TOD when system checkstop occurs
+    l_chip_ctrl_reg.clearBit<PERV_TOD_CHIP_CTRL_REG_XSTOP_GATE>();
+
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            PERV_TOD_CHIP_CTRL_REG,
+                            l_chip_ctrl_reg),
+             "Error from putScom (PERV_TOD_CHIP_CTRL_REG)!");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+
+/// @brief Configure the tod topology -- set up the oscilator select and the
+///        primary or secondary tod
+/// @param[in] i_tod_node Reference to TOD topology (including FAPI targets)
+/// @param[in] i_tod_sel Specifies the topology to configure
+/// @param[in] i_osc_sel Specifies the oscillator to use for the master
+/// @return FAPI_RC_SUCCESS if TOD topology is successfully configured
+///         else error
+fapi2::ReturnCode configure_tod_node(
+    tod_topology_node* i_tod_node,
+    const p9_tod_setup_tod_sel i_tod_sel,
+    const p9_tod_setup_osc_sel i_osc_sel)
+{
+    char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+    fapi2::toString(*(i_tod_node->i_target),
+                    l_targetStr,
+                    fapi2::MAX_ECMD_STRING_LEN);
+    FAPI_DBG("Start: Configuring %s", l_targetStr);
+
+    const bool is_mdmt = (i_tod_node->i_tod_master &&
+                          i_tod_node->i_drawer_master);
+
+    FAPI_TRY(configure_pss_mss_ctrl_reg(i_tod_node,
+                                        i_tod_sel,
+                                        i_osc_sel),
+             "Error from configure_pss_mss_ctrl_reg!");
+
+    if (!is_mdmt)
     {
-        FAPI_DBG("Start");
-
-        // Retrieve saved node_delay from calculate_node_link_delay instead of making a second call
-        i_tod_node->o_int_path_delay = i_longest_delay - (i_tod_node->o_int_path_delay);
-
-        // Verify the delay is between 0 and 255 inclusive.
-        FAPI_ASSERT((i_tod_node->o_int_path_delay >= MIN_TOD_DELAY &&
-                     i_tod_node->o_int_path_delay <= MAX_TOD_DELAY),
-                    fapi2::P9_TOD_SETUP_INVALID_NODE_DELAY().set_TARGET(i_tod_node->i_target).set_DELAY(i_tod_node->o_int_path_delay),
-                    "Invalid delay of %d calculated!");
-
-        // Recurse on downstream nodes
-        for (std::list<tod_topology_node*>::const_iterator child = (i_tod_node->i_children).begin();
-             child != (i_tod_node->i_children).end();
-             ++child)
-        {
-            tod_topology_node* tod_node = *child;
-            FAPI_TRY(set_topology_delays(tod_node, i_freq_x, i_freq_o, i_tod_node->o_int_path_delay),
-                     "Failure calculating topology delay!");
-        }
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
+        FAPI_TRY(configure_s_path_ctrl_reg(i_tod_node,
+                                           i_tod_sel,
+                                           i_osc_sel),
+                 "Error from configure_s_path_ctrl_reg!");
     }
 
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode init_chip_ctrl_reg (tod_topology_node*           i_tod_node,
-                                          const p9_tod_setup_tod_sel i_tod_sel,
-                                          const p9_tod_setup_osc_sel i_osc_sel)
+    FAPI_TRY(configure_port_ctrl_regs(i_tod_node,
+                                      i_tod_sel,
+                                      i_osc_sel),
+             "Error from configure_port_ctrl_regs!");
+
+    if (is_mdmt)
     {
-        fapi2::buffer<uint64_t> chic_ctrlReg_val(0x0);
-
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* target = i_tod_node->i_target;
-
-        FAPI_DBG("Start");
-
-        FAPI_DBG("Set low order step value to 3F in PERV_TOD_CHIP_CTRL_REG");
-        // Read PERV_TOD_CHIP_CTRL_REG in order to perserve any prior configuration
-        FAPI_TRY(fapi2::getScom(*target, PERV_TOD_CHIP_CTRL_REG, chic_ctrlReg_val),
-                 "Error from fapiGetScom when retrieving PERV_TOD_CHIP_CTRL_REG!");
-
-        // Default core sync period is 8us
-        chic_ctrlReg_val.insertFromRight<PERV_TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SELECT,
-                                         PERV_TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SELECT_LEN>(TOD_CHIP_CTRL_REG_I_PATH_CORE_SYNC_PERIOD_SEL_8);
-
-        // Enable internal path sync check
-        chic_ctrlReg_val.clearBit<PERV_TOD_CHIP_CTRL_REG_I_PATH_SYNC_CHECK_DISABLE>();
-
-        // 1x sync boundaries for Move-TOD-To-Timebase
-        chic_ctrlReg_val.clearBit<PERV_TOD_CHIP_CTRL_REG_MOVE_TO_TB_ON_2X_SYNC_ENABLE>();
-
-        // Use eclipz sync mechanism
-        chic_ctrlReg_val.clearBit<PERV_TOD_CHIP_CTRL_REG_USE_TB_SYNC_MECHANISM>();
-
-        // Use timebase step sync from internal path
-        chic_ctrlReg_val.clearBit<PERV_TOD_CHIP_CTRL_REG_USE_TB_STEP_SYNC>();
-
-        // Chip TOD WOF incrementer ratio (eclipz mode)
-        // 4-bit WOF counter is incremented with each 200MHz clock cycle
-        chic_ctrlReg_val.insertFromRight<PERV_TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VALUE,
-                                         PERV_TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VALUE_LEN>(TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VAL_3F);
-
-        // Stop TOD when system checkstop occurs
-        chic_ctrlReg_val.clearBit<PERV_TOD_CHIP_CTRL_REG_XSTOP_GATE>();
-
-        FAPI_TRY(fapi2::putScom(*target, PERV_TOD_CHIP_CTRL_REG, chic_ctrlReg_val),
-                 "fapiPutScom error for PERV_TOD_CHIP_CTRL_REG SCOM.");
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
+        FAPI_TRY(configure_m_path_ctrl_reg(i_tod_node,
+                                           i_tod_sel,
+                                           i_osc_sel),
+                 "Error from configure_m_path_ctrl_reg!");
     }
 
-} // extern "C"
+    FAPI_TRY(configure_i_path_ctrl_reg(i_tod_node,
+                                       i_tod_sel,
+                                       i_osc_sel),
+             "Error from configure_i_path_ctrl_reg!");
+
+    FAPI_TRY(init_chip_ctrl_reg(i_tod_node,
+                                i_tod_sel,
+                                i_osc_sel),
+             "Error from init_chip_ctrl_reg!");
+
+    // TOD is configured for this node; if it has children, start their
+    // configuration
+    for (auto l_child = (i_tod_node->i_children).begin();
+         l_child != (i_tod_node->i_children).end();
+         ++l_child)
+    {
+        FAPI_TRY(configure_tod_node(*l_child,
+                                    i_tod_sel,
+                                    i_osc_sel),
+                 "Failure configuring downstream node!");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+
+/// @brief Displays the TOD topology
+/// @param[in] i_tod_node Reference to TOD topology
+/// @param[in] depth Current depth into TOD topology network
+/// @return void
+void display_tod_nodes(
+    const tod_topology_node* i_tod_node,
+    const uint32_t i_depth)
+{
+    char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+
+    if (i_tod_node == NULL || i_tod_node->i_target == NULL)
+    {
+        FAPI_INF("NULL tod_node or target parameter!");
+        goto fapi_try_exit;
+    }
+
+    fapi2::toString(i_tod_node->i_target,
+                    l_targetStr,
+                    fapi2::MAX_ECMD_STRING_LEN);
+    FAPI_INF("%s (Delay = %d)",
+             l_targetStr, i_tod_node->o_int_path_delay);
+
+    for (auto l_child = (i_tod_node->i_children).begin();
+         l_child != (i_tod_node->i_children).end();
+         ++l_child)
+    {
+        display_tod_nodes(*l_child, i_depth + 1);
+    }
+
+fapi_try_exit:
+    return;
+}
+
+
+/// @brief Calculates the delay for a node in TOD-grid-cycles
+/// @param[in] i_tod_node Reference to TOD topology
+/// @param[in] i_freq_x XBUS frequency in MHz
+/// @param[in] i_freq_o OBUS frequency in MHz
+/// @param[out] o_node_delay => Delay of a single node in TOD-grid-cycles
+/// @return FAPI_RC_SUCCESS if TOD node delay is successfully calculated else
+///         error
+fapi2::ReturnCode calculate_node_link_delay(
+    tod_topology_node* i_tod_node,
+    const uint32_t i_freq_x,
+    const uint32_t i_freq_o,
+    uint32_t& o_node_delay)
+{
+    fapi2::buffer<uint64_t> l_rt_delay_ctl_reg = 0;
+    uint32_t l_rt_delay_ctl_addr = 0;
+    fapi2::buffer<uint64_t> l_bus_mode_reg = 0;
+    uint32_t l_bus_mode_addr = 0;
+    uint32_t l_bus_mode_sel_even = 0;
+    uint32_t l_bus_mode_sel_odd = 0;
+    uint32_t l_bus_freq = 0;
+    uint32_t l_bus_delay = 0;
+    uint32_t l_bus_delay_even = 0;
+    uint32_t l_bus_delay_odd = 0;
+
+    fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_x_attached_chip_cnfg;
+    fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_a_attached_chip_cnfg;
+
+    FAPI_DBG("Start");
+
+    // MDMT is originator and therefore has no node delay
+    if (i_tod_node->i_tod_master && i_tod_node->i_drawer_master)
+    {
+        o_node_delay = 0;
+        goto fapi_try_exit;
+    }
+
+    // else slave
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG,
+                           *(i_tod_node->i_target),
+                           l_x_attached_chip_cnfg),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)!");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG,
+                           *(i_tod_node->i_target),
+                           l_a_attached_chip_cnfg),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)!");
+
+    switch (i_tod_node->i_bus_rx)
+    {
+        case (XBUS0):
+            // If XBUS0 is not enabled throw an error
+            FAPI_ASSERT((l_x_attached_chip_cnfg[0] != 0),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(XBUS0),
+                        "i_tod_node->i_bus_rx is set to XBUS0 and it is not enabled");
+            l_bus_freq = i_freq_x;
+            l_rt_delay_ctl_reg.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_0>()
+            .setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_1>();
+            l_rt_delay_ctl_addr = PU_PB_ELINK_RT_DELAY_CTL_REG;
+            l_bus_mode_addr = PU_PB_ELINK_DLY_0123_REG;
+            l_bus_mode_sel_even = PU_PB_ELINK_DLY_0123_REG_FMR0_LINK_DELAY;
+            l_bus_mode_sel_odd = PU_PB_ELINK_DLY_0123_REG_FMR1_LINK_DELAY;
+            break;
+
+        case (XBUS1):
+            // If XBUS1 is not enabled throw an error
+            FAPI_ASSERT((l_x_attached_chip_cnfg[1] != 0),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(XBUS1),
+                        "i_tod_node->i_bus_rx is set to XBUS1 and it is not enabled");
+            l_bus_freq = i_freq_x;
+            l_rt_delay_ctl_reg.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_2>()
+            .setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_3>();
+            l_rt_delay_ctl_addr = PU_PB_ELINK_RT_DELAY_CTL_REG;
+            l_bus_mode_addr = PU_PB_ELINK_DLY_0123_REG;
+            l_bus_mode_sel_even = PU_PB_ELINK_DLY_0123_REG_FMR2_LINK_DELAY;
+            l_bus_mode_sel_odd = PU_PB_ELINK_DLY_0123_REG_FMR3_LINK_DELAY;
+            break;
+
+        case (XBUS2):
+            // If XBUS2 is not enabled throw an error
+            FAPI_ASSERT((l_x_attached_chip_cnfg[2] != 0),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(XBUS2),
+                        "i_tod_node->i_bus_rx is set to XBUS2 and it is not enabled");
+            l_bus_freq = i_freq_x;
+            l_rt_delay_ctl_reg.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_4>()
+            .setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_5>();
+            l_rt_delay_ctl_addr = PU_PB_ELINK_RT_DELAY_CTL_REG;
+            l_bus_mode_addr = PU_PB_ELINK_DLY_45_REG;
+            l_bus_mode_sel_even = PU_PB_ELINK_DLY_45_REG_FMR4_LINK_DELAY;
+            l_bus_mode_sel_odd = PU_PB_ELINK_DLY_45_REG_FMR5_LINK_DELAY;
+            break;
+
+        case (OBUS0):
+            // If OBUS0 is not enabled throw an error
+            FAPI_ASSERT(((l_x_attached_chip_cnfg[3] != 0) ||
+                         (l_a_attached_chip_cnfg[0] != 0)),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(OBUS0),
+                        "i_tod_node->i_bus_rx is set to OBUS0 and it is not enabled");
+            l_bus_freq = i_freq_o;
+            l_rt_delay_ctl_reg.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_0>()
+            .setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_1>();
+            l_rt_delay_ctl_addr = PU_IOE_PB_OLINK_RT_DELAY_CTL_REG;
+            l_bus_mode_addr = PU_IOE_PB_OLINK_DLY_0123_REG;
+            l_bus_mode_sel_even = PU_IOE_PB_OLINK_DLY_0123_REG_FMR0_LINK_DELAY;
+            l_bus_mode_sel_odd = PU_IOE_PB_OLINK_DLY_0123_REG_FMR1_LINK_DELAY;
+            break;
+
+        case (OBUS1):
+            // If OBUS1 is not enabled throw an error
+            FAPI_ASSERT(((l_x_attached_chip_cnfg[4] != 0) ||
+                         (l_a_attached_chip_cnfg[1] != 0)),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(OBUS1),
+                        "i_tod_node->i_bus_rx is set to OBUS1 and it is not enabled");
+            l_bus_freq = i_freq_o;
+            l_rt_delay_ctl_reg.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_2>()
+            .setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_3>();
+            l_rt_delay_ctl_addr = PU_IOE_PB_OLINK_RT_DELAY_CTL_REG;
+            l_bus_mode_addr = PU_IOE_PB_OLINK_DLY_0123_REG;
+            l_bus_mode_sel_even = PU_IOE_PB_OLINK_DLY_0123_REG_FMR2_LINK_DELAY;
+            l_bus_mode_sel_odd = PU_IOE_PB_OLINK_DLY_0123_REG_FMR3_LINK_DELAY;
+            break;
+
+        case (OBUS2):
+            // If OBUS2 is not enabled throw an error
+            FAPI_ASSERT(((l_x_attached_chip_cnfg[5] != 0) ||
+                         (l_a_attached_chip_cnfg[2] != 0)),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(OBUS2),
+                        "i_tod_node->i_bus_rx is set to OBUS2 and it is not enabled");
+            l_bus_freq = i_freq_o;
+            l_rt_delay_ctl_reg.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_4>()
+            .setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_5>();
+            l_rt_delay_ctl_addr = PU_IOE_PB_OLINK_RT_DELAY_CTL_REG;
+            l_bus_mode_addr = PU_IOE_PB_OLINK_DLY_4567_REG;
+            l_bus_mode_sel_even = PU_IOE_PB_OLINK_DLY_4567_REG_FMR4_LINK_DELAY;
+            l_bus_mode_sel_odd = PU_IOE_PB_OLINK_DLY_4567_REG_FMR5_LINK_DELAY;
+            break;
+
+        case (OBUS3):
+            // If OBUS3 is not enabled throw an error
+            FAPI_ASSERT(((l_x_attached_chip_cnfg[6] != 0) ||
+                         (l_a_attached_chip_cnfg[3] != 0)),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(OBUS3),
+                        "i_tod_node->i_bus_rx is set to OBUS3 and it is not enabled");
+            l_bus_freq = i_freq_o;
+            l_rt_delay_ctl_reg.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_6>()
+            .setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_7>();
+            l_rt_delay_ctl_addr = PU_IOE_PB_OLINK_RT_DELAY_CTL_REG;
+            l_bus_mode_addr = PU_IOE_PB_OLINK_DLY_4567_REG;
+            l_bus_mode_sel_even = PU_IOE_PB_OLINK_DLY_4567_REG_FMR6_LINK_DELAY;
+            l_bus_mode_sel_odd = PU_IOE_PB_OLINK_DLY_4567_REG_FMR7_LINK_DELAY;
+            break;
+
+        case (XBUS7):
+            FAPI_ASSERT(false,
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(XBUS7),
+                        "i_tod_node->i_bus_rx is set to XBUS7");
+            break;
+
+        case (NONE):
+            FAPI_ASSERT((i_tod_node->i_bus_rx != NONE),
+                        fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                        .set_TARGET(*(i_tod_node->i_target))
+                        .set_RX(NONE),
+                        "i_tod_node->i_bus_rx is set to NONE");
+            break;
+    }
+
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            l_rt_delay_ctl_addr,
+                            l_rt_delay_ctl_reg),
+             "Error from putScom (0x%08X)!", l_rt_delay_ctl_addr);
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            l_bus_mode_addr,
+                            l_bus_mode_reg),
+             "Error from getScom (0x%08X)!", l_bus_mode_addr);
+    FAPI_TRY(l_bus_mode_reg.extractToRight(l_bus_delay_even,
+                                           l_bus_mode_sel_even,
+                                           // all counters are the same length
+                                           PB_EOLINK_DLY_FMR_LINK_DELAY_LEN),
+             "Error trying to extract delay (even)!");
+    FAPI_TRY(l_bus_mode_reg.extractToRight(l_bus_delay_odd,
+                                           l_bus_mode_sel_odd,
+                                           // all counters are the same length
+                                           PB_EOLINK_DLY_FMR_LINK_DELAY_LEN),
+             "Error trying to extract delay (odd)!");
+
+    l_bus_delay = (l_bus_delay_even + l_bus_delay_odd) / 2;
+
+    // By default, the TOD grid runs at 400ps; TOD counts its delay based on this
+    // Example: Bus round trip delay is 35 cycles and the bus is running at 4800MHz
+    //            - Divide by 2 to get one-way delay time
+    //            - Divide by 4800 * 10^6 to get delay in seconds
+    //            - Multiply by 10^12 to get delay in picoseconds
+    //            - Divide by 400ps to get TOD-grid-cycles
+    //            - (To avoid including math.h) Add 1 and cast to uint32_t to round up to nearest TOD-grid-cycle
+    //            - (To avoid including math.h) 10^12/10^6=1000000
+    //            - (uint32_t)((         35        / 2 /        (4800        * 10^6) * 10^12 / 400        ) + 1) = 10 TOD-grid-cycles
+    o_node_delay = (uint32_t)(((double)l_bus_delay / 2 / (double)l_bus_freq  * 1000000       / TOD_GRID_PS) + 1);
+
+fapi_try_exit:
+    // This is not the final internal path delay, only saved so two calls aren't needed to calculate_node_link_delay
+    i_tod_node->o_int_path_delay = o_node_delay;
+
+    FAPI_DBG("TOD-grid-cycles for single link: %d", o_node_delay);
+
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+
+/// @brief Finds the longest delay in the topology (additionally sets each
+///        node delay)
+/// @param[in] i_tod_node Reference to TOD topology
+/// @param[in] i_freq_x XBUS frequency in MHz
+/// @param[in] i_freq_o OBUS frequency in MHz
+/// @param[out] o_longest_delay Longest delay in TOD-grid-cycles
+/// @return FAPI_RC_SUCCESS if a longest TOD delay was found in topology
+///         else error
+fapi2::ReturnCode calculate_longest_topolopy_delay(
+    tod_topology_node* i_tod_node,
+    const uint32_t i_freq_x,
+    const uint32_t i_freq_o,
+    uint32_t& o_longest_delay)
+{
+    uint32_t l_node_delay = 0;
+    uint32_t l_current_longest_delay = 0;
+
+    FAPI_DBG("Start");
+
+    FAPI_TRY(calculate_node_link_delay(i_tod_node,
+                                       i_freq_x,
+                                       i_freq_o,
+                                       l_node_delay),
+             "Error from calculate_node_link_delay!");
+    o_longest_delay = l_node_delay;
+
+    for (auto l_child = (i_tod_node->i_children).begin();
+         l_child != (i_tod_node->i_children).end();
+         ++l_child)
+    {
+        tod_topology_node* l_tod_node = *l_child;
+        FAPI_TRY(calculate_longest_topolopy_delay(l_tod_node,
+                 i_freq_x,
+                 i_freq_o,
+                 l_node_delay),
+                 "Error from calculate_longest_topology_delay!");
+
+        if (l_node_delay > l_current_longest_delay)
+        {
+            l_current_longest_delay = l_node_delay;
+        }
+    }
+
+    o_longest_delay += l_current_longest_delay;
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+
+/// @brief Updates the topology struct with the final delay values
+/// @param[in] i_tod_node Reference to TOD topology
+/// @param[in] i_freq_x  XBUS frequency in MHz
+/// @param[in] i_freq_o  OBUS frequency in MHz
+/// @param[in] i_longest_delay Longest delay in the topology
+/// @return FAPI_RC_SUCCESS if o_int_path_delay was set for every node in the
+///         topology else error
+fapi2::ReturnCode set_topology_delays(
+    tod_topology_node* i_tod_node,
+    const uint32_t i_freq_x,
+    const uint32_t i_freq_o,
+    const uint32_t i_longest_delay)
+{
+    FAPI_DBG("Start");
+
+    // Retrieve saved node_delay from calculate_node_link_delay instead of
+    // making a second call
+    i_tod_node->o_int_path_delay = i_longest_delay -
+                                   (i_tod_node->o_int_path_delay);
+
+    // Verify the delay is between 0 and 255 inclusive.
+    FAPI_ASSERT((i_tod_node->o_int_path_delay >= MIN_TOD_DELAY &&
+                 i_tod_node->o_int_path_delay <= MAX_TOD_DELAY),
+                fapi2::P9_TOD_SETUP_INVALID_NODE_DELAY()
+                .set_TARGET(i_tod_node->i_target)
+                .set_PATH_DELAY(i_tod_node->o_int_path_delay)
+                .set_LONGEST_DELAY(i_longest_delay)
+                .set_XBUS_FREQ(i_freq_x)
+                .set_OBUS_FREQ(i_freq_o),
+                "Invalid delay of %d calculated!");
+
+    // Recurse on downstream nodes
+    for (auto l_child = (i_tod_node->i_children).begin();
+         l_child != (i_tod_node->i_children).end();
+         ++l_child)
+    {
+        FAPI_TRY(set_topology_delays(*l_child,
+                                     i_freq_x,
+                                     i_freq_o,
+                                     i_tod_node->o_int_path_delay),
+                 "Error from set_topology_delays!");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+
+/// @brief Calculates and populates the topology delays
+/// @param[in] i_tod_node Reference to TOD topology
+/// @return FAPI_RC_SUCCESS if TOD topology is successfully configured with
+///         delays else error
+fapi2::ReturnCode calculate_node_delays(tod_topology_node* i_tod_node)
+{
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    uint32_t l_longest_delay = 0;
+    uint32_t l_freq_x = 0;
+    uint32_t l_freq_o = 0;
+
+    FAPI_DBG("Start");
+    // retrieve X-bus and A-bus frequencies
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_X_MHZ, FAPI_SYSTEM, l_freq_x),
+             "Failure reading XBUS frequency attribute!");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_A_MHZ, FAPI_SYSTEM, l_freq_o),
+             "Failure reading OBUS frequency attribute!");
+
+    // multiply attribute (mesh speed) speed by link factor
+    l_freq_x *= 8;
+    l_freq_o *= 16;
+
+    // Bus frequencies are global for the system (i.e. A0 and A1 will always
+    //  run with the same frequency)
+    FAPI_DBG("XBUS=%dMHz OBUS=%dMHz", l_freq_x, l_freq_o);
+
+    // Find the most-delayed path in the topology; this is the MDMT's delay
+    FAPI_TRY(calculate_longest_topolopy_delay(i_tod_node,
+             l_freq_x,
+             l_freq_o,
+             l_longest_delay),
+             "Error from calculate_longest_topology_delay!");
+    FAPI_DBG("The longest delay is %d TOD-grid-cycles.", l_longest_delay);
+    FAPI_TRY(set_topology_delays(i_tod_node,
+                                 l_freq_x,
+                                 l_freq_o,
+                                 l_longest_delay),
+             "Error from set_topology_delays!");
+
+    // Finally, the MDMT delay must include additional TOD-grid-cycles to
+    // account for staging latches in slaves
+    i_tod_node->o_int_path_delay += MDMT_TOD_GRID_CYCLE_STAGING_DELAY;
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+
+// NOTE: description in header
+fapi2::ReturnCode p9_tod_setup(
+    tod_topology_node* i_tod_node,
+    const p9_tod_setup_tod_sel i_tod_sel,
+    const p9_tod_setup_osc_sel i_osc_sel)
+{
+    fapi2::ATTR_IS_MPIPL_Type l_is_mpipl = 0x00;
+
+    FAPI_DBG("Entering ...\n");
+
+    FAPI_ASSERT((i_tod_node != NULL) &&
+                (i_tod_node->i_target != NULL),
+                fapi2::P9_TOD_SETUP_NULL_NODE(),
+                "Null node or target passed into function!");
+
+    FAPI_ASSERT((i_tod_node->i_tod_master) &&
+                (i_tod_node->i_drawer_master),
+                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY()
+                .set_TARGET(*(i_tod_node->i_target))
+                .set_OSCSEL(i_osc_sel)
+                .set_TODSEL(i_tod_sel),
+                "Non-root (slave) node passed into main function!");
+
+    FAPI_INF("Configuring %s topology (OSC0 is %s, OSC1 is %s)",
+             (i_tod_sel == TOD_PRIMARY) ? "Primary" : "Secondary",
+             (i_osc_sel == TOD_OSC_0             ||
+              i_osc_sel == TOD_OSC_0_AND_1       ||
+              i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
+              i_osc_sel == TOD_OSC_0_AND_1_SEL_1) ? "connected" : "not connected",
+             (i_osc_sel == TOD_OSC_1             ||
+              i_osc_sel == TOD_OSC_0_AND_1       ||
+              i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
+              i_osc_sel == TOD_OSC_0_AND_1_SEL_1) ? "connected" : "not connected");
+
+    FAPI_TRY(calculate_node_delays(i_tod_node),
+             "Error from calculate_node_delays!");
+
+    display_tod_nodes(i_tod_node, 0);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL,
+                           fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_is_mpipl),
+             "Error from FAPI_ATTR_GET (ATTR_IS_MPIPL)!");
+
+    // If there is a previous topology, it needs to be cleared
+    FAPI_TRY(clear_tod_node(i_tod_node, i_tod_sel, l_is_mpipl),
+             "Error from clear_tod_node!");
+
+    // Start configuring each node
+    // configure_tod_node will recurse on each child
+    FAPI_TRY(configure_tod_node(i_tod_node, i_tod_sel, i_osc_sel),
+             "Error from configure_tod_node!");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}

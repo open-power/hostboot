@@ -27,10 +27,11 @@
 /// @file p9_tod_save_config.H
 /// @brief Header for p9_tod_save_config.C
 //
-// *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
+// *HWP HWP Owner: Nick Klazynski jklazyns@us.ibm.com
+// *HWP HWP Owner: Joachim Fenkes fenkes@de.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: PRD
 //
 //------------------------------------------------------------------------------
@@ -41,32 +42,28 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-
 #include <fapi2.H>
 #include <p9_tod_utils.H>
-
-//------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
 
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode
-(*p9_tod_save_config_FP_t) (tod_topology_node*);
-
-extern "C"
-{
+typedef fapi2::ReturnCode (*p9_tod_save_config_FP_t) (tod_topology_node*);
 
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
 
-    /// @brief Saves TOD configuration registers to i_tod_node->o_todRegs
-    /// @param[in] i_tod_node  Reference to TOD topology (FAPI targets included within)
-    /// @return FAPI_RC_SUCCESS if all registers were read and saved in node structure else FAPI or ECMD error is sent through
+extern "C"
+{
+
+/// @brief Saves TOD configuration registers to topology structure
+/// @param[in] i_tod_node Reference to TOD topology (FAPI targets included
+///                       within)
+/// @return FAPI_RC_SUCCESS if all registers were read and saved in node
+///         structure else FAPI or ECMD error is sent through
     fapi2::ReturnCode p9_tod_save_config(tod_topology_node* i_tod_node);
 
 } // extern "C"

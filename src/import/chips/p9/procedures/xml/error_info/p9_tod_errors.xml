@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -24,117 +24,224 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
   <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_TOD_STATUS</id>
+    <scomRegister>PERV_TOD_M_PATH_CTRL_REG</scomRegister>
+    <scomRegister>PERV_TOD_PRI_PORT_0_CTRL_REG</scomRegister>
+    <scomRegister>PERV_TOD_PRI_PORT_1_CTRL_REG</scomRegister>
+    <scomRegister>PERV_TOD_SEC_PORT_0_CTRL_REG</scomRegister>
+    <scomRegister>PERV_TOD_SEC_PORT_1_CTRL_REG</scomRegister>
+    <scomRegister>PERV_TOD_S_PATH_CTRL_REG</scomRegister>
+    <scomRegister>PERV_TOD_I_PATH_CTRL_REG</scomRegister>
+    <scomRegister>PERV_TOD_PSS_MSS_CTRL_REG</scomRegister>
+    <scomRegister>PERV_TOD_PSS_MSS_STATUS_REG</scomRegister>
+    <scomRegister>PERV_TOD_M_PATH_STATUS_REG</scomRegister>
+    <scomRegister>PERV_TOD_S_PATH_STATUS_REG</scomRegister>
+    <scomRegister>PERV_TOD_M_PATH_0_STEP_STEER_REG</scomRegister>
+    <scomRegister>PERV_TOD_M_PATH_1_STEP_STEER_REG</scomRegister>
+    <scomRegister>PERV_TOD_CHIP_CTRL_REG</scomRegister>
+    <scomRegister>PERV_TOD_TRACE_DATA_1_REG</scomRegister>
+    <scomRegister>PERV_TOD_TRACE_DATA_2_REG</scomRegister>
+    <scomRegister>PERV_TOD_TRACE_DATA_3_REG</scomRegister>
+    <scomRegister>PERV_TOD_FSM_REG</scomRegister>
+    <scomRegister>PERV_TOD_TX_TTYPE_CTRL_REG</scomRegister>
+    <scomRegister>PERV_TOD_RX_TTYPE_CTRL_REG</scomRegister>
+    <scomRegister>PERV_TOD_ERROR_REG</scomRegister>
+    <scomRegister>PERV_TOD_ERROR_MASK_REG</scomRegister>
+    <scomRegister>PERV_TOD_ERROR_ROUTING_REG</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_TOD_SETUP_NULL_NODE</rc>
+    <description>
+      Procedure: p9_tod_setup
+      A null node has been passed into the procedure
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_TOD_SETUP_INVALID_NODE_DELAY</rc>
     <description>
       Procedure: p9_tod_setup
-      The delay is not between 0 and 255 
+      Delay is out of range.
+      Node delay must be between 0 and 255 inclusive.
     </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>DELAY</ffdc>
+    <ffdc>PATH_DELAY</ffdc>
+    <ffdc>LONGEST_DELAY</ffdc>
+    <ffdc>XBUS_FREQ</ffdc>
+    <ffdc>OBUS_FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_TOD_SETUP_INVALID_TOPOLOGY</rc>
     <description>
       Procedure: p9_tod_setup
-      the oscilattor that is selected is NONE 
+      Invalid TOD oscillator configuration
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>OSCSEL</ffdc>
+    <ffdc>TODSEL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_TOD_SETUP_INVALID_TOPOLOGY_RX</rc>
     <description>
       Procedure: p9_tod_setup
-      the rx is an invalid rx 
+      RX configuration specifies a deconfigured fabric link
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>RX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
-<!-- ******************************************************************** -->
+  <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_TOD_SETUP_INVALID_TOPOLOGY_TX</rc>
     <description>
       Procedure: p9_tod_setup
-      the tx is an invalid tx
+      TX configuration specifies a deconfigured fabric link
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>TX</ffdc>
-  </hwpError> 
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_TOD_INIT_NOT_RUNNING</rc>
     <description>
       Procedure: p9_tod_init
-      TOD never asserted that TOD_FSM_REG tod is running and there was a timeout
+      TOD FSM did not reach running state prior to timeout
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>COUNT</ffdc>
+    <ffdc>TOD_FSM_DATA</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_TOD_STATUS</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_TOD_INIT_M_PATH_0_STEP_CHECK_ERROR</rc>
     <description>
       Procedure: p9_tod_init
-      There is a master path 0 step check error so the bit was set 
+      TOD error register indicates master path 0 step check error
     </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>DATA</ffdc>
+    <ffdc>TOD_ERROR_REG</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_TOD_STATUS</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_TOD_INIT_M_PATH_1_STEP_CHECK_ERROR</rc>
     <description>
       Procedure: p9_tod_init
-      There is a master path 1 step check error so the bit was set 
+      TOD error register indicates master path 1 step check error
     </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>DATA</ffdc>
+    <ffdc>TOD_ERROR_REG</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_TOD_STATUS</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_TOD_INIT_ERROR</rc>
     <description>
       Procedure: p9_tod_init
-      There is some error set in the TOD_ERROR_REG, check DATA to see what 
-      errors were set 
+      Unexpected error bit(s) set in TOD error register
     </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>DATA</ffdc>
+    <ffdc>TOD_ERROR_REG</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_TOD_STATUS</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P9_TOD_INIT_TIMEOUT</rc>
+    <rc>RC_P9_TOD_MOVE_TOD_TO_TB_INIT_TIMEOUT</rc>
     <description>
       Procedure: p9_tod_move_tod_to_tb
-      There is a timeout going from one state to another 
+      Timeout reaching expected TFMR state
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>COUNT</ffdc>
+    <ffdc>TFMR_STATE</ffdc>
+    <ffdc>TFMR_EXPECTED_STATE</ffdc>
+    <ffdc>TFMR_REG</ffdc>
+    <!-- no callout, deconfig, gard tags as FW does not consume             -->
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P9_INVALID_THREAD_NUM</rc>
+    <rc>RC_P9_TOD_MOVE_TOD_TO_TB_INIT_ERROR</rc>
     <description>
-      Procedure: p9_tod_utils
+      Procedure: p9_tod_move_tod_to_tb
+      Step error detected or issue with the external TOD oscillator
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TFMR_REG</ffdc>
+    <!-- no callout, deconfig, gard tags as FW does not consume             -->
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_TOD_MOVE_TOD_TO_TB_INVALID_THREAD_NUM</rc>
+    <description>
+      Procedure: p9_tod_imove_tod_to_tb
       There is an invalid thread number
     </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>THREADNUMBER</ffdc>
-    </hwpError>
+    <ffdc>THREAD_NUMBER</ffdc>
+    <!-- no callout, deconfig, gard tags as FW does not consume             -->
+  </hwpError>
   <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_P9_TOD_LINK_DELAY_NOT_VALID</rc>
-    <description>
-      Procedure: p9_tod_setup
-      The link delay value is not valid 
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>ADDR</ffdc>
-    <ffdc>DATA</ffdc>
-    </hwpError>
-  <!-- ******************************************************************** --> 
 </hwpErrors>
 

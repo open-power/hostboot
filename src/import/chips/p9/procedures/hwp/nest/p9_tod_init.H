@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,79 +22,55 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
 /// @file p9_tod_init.H
 /// @brief Procedures to initialize the TOD to 'running' state
 ///
-// *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
-// *HWP FW Owner: Thi Tran thi@us.ibm.com
+// *HWP HWP Owner: Nick Klazynski jklazyns@us.ibm.com
+// *HWP HWP Owner: Joachim Fenkes fenkes@de.ibm.com
+// *HWP FW Owner: Manish Chowdhary manichow@in.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
-// *HWP Consumed by: SBE
-// ----------------------------------------------------------------------------------
-//
-// *! ADDITIONAL COMMENTS :
-// *!
-// *!
-// *!
-//-----------------------------------------------------------------------------------
+// *HWP Level: 3
+// *HWP Consumed by: HB
+// -----------------------------------------------------------------------------
 
 #ifndef _P9_TOD_INIT_H_
 #define _P9_TOD_INIT_H_
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Includes
-//-----------------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 #include <fapi2.H>
 #include <p9_tod_utils.H>
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Structure definitions
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 //function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode
-(*p9_tod_init_FP_t) (const tod_topology_node*,
-                     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* );
+typedef fapi2::ReturnCode (*p9_tod_init_FP_t) (
+    const tod_topology_node*,
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>*);
 
-//-----------------------------------------------------------------------------------
-// Constant definitions
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Function prototype
+//------------------------------------------------------------------------------
 
 extern "C" {
 
-//-----------------------------------------------------------------------------------
-// Function prototype
-//-----------------------------------------------------------------------------------
-
-    /// @brief Initialized the TOD to 'running' state
-    /// @param[in] i_tod_node => Pointer to TOD topology (FAPI targets are included in this)
-    /// @param[in] i_failingTodProc => Pointer to the fapi target, the memory location addressed by this parameter will be populated with processor target which is not able ot receive proper signals from OSC. Caller needs to look at this parameter only when p9_tod_init fail and reason code indicated OSC failure. Defaulted to NULL.
-    /// @return FAPI_RC_SUCCESS if TOD topology is successfully initialized else FAPI or ECMD error is sent through
-    fapi2::ReturnCode p9_tod_init(const tod_topology_node* i_tod_node,
-                                  fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* i_failingTodProc = NULL);
-
-    /// @brief Clears TOD error register
-    /// @param[in] i_tod_node => Pointer to TOD topology (FAPI targets included within)
-    /// @return FAPI_RC_SUCCESS if TOD topology is cleared of previous errors
-    ///         else FAPI or ECMD error is sent through
-    fapi2::ReturnCode p9_tod_clear_error_reg(const tod_topology_node* i_tod_node);
-
-    /// @brief Helper function for p9_tod_init
-    /// @param[in] i_tod_node => Pointer to TOD topology (FAPI targets included within)
-    /// @param[in] i_failingTodProc => Pointer to the fapi target, the memory location
-    ///            addressed by this parameter will be populated with processor target
-    ///            which is not able to recieve proper singals from OSC.
-    ///            Caller needs to look at this parameter only when proc_tod_init fails
-    ///            and reason code indicates OSC failure. It is defaulted to NULL.
-    /// @return FAPI_RC_SUCCESS if TOD topology is successfully initialized
-    ///          else FAPI or ECMD error is sent through
-    fapi2::ReturnCode init_tod_node(const tod_topology_node* i_tod_node,
-                                    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* i_failingTodProc = NULL);
+/// @brief Initialized the TOD to 'running' state
+/// @param[in] i_tod_node Pointer to TOD topology (including FAPI targets)
+/// @param[out] o_failingTodProc Pointer to the fapi target, will be populated
+///             with processor target unable to receive proper signals from OSC.
+//              Caller needs to look at this parameter only when p9_tod_init
+///             fails and reason code indicated OSC failure. Defaulted to NULL.
+/// @return FAPI_RC_SUCCESS if TOD topology is successfully initialized else
+///         error
+    fapi2::ReturnCode p9_tod_init(
+        const tod_topology_node* i_tod_node,
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* o_failingTodProc = NULL);
 
 } //extern "C"
 
 #endif //_P9_TOD_INIT_H_
-
