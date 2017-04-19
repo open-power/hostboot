@@ -40,6 +40,7 @@
 #include <p9_pstates_pgpe.h>
 #include <p9_pstates_cmeqm.h>
 #include <p9_pstates_occ.h>
+#include "p9_pm_get_poundv_bucket.H"
 
 // ssrivath- See if this is required
 #ifdef __cplusplus
@@ -236,6 +237,8 @@ typedef struct
     uint8_t attr_dpll_dynamic_fmin_enable;
     uint8_t attr_dpll_droop_protect_enable;
 
+    uint8_t attr_nest_leakage_percent;
+
 
 } AttributeList;
 
@@ -283,7 +286,8 @@ proc_get_mvpd_data ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                      uint32_t o_attr_mvpd_data[PV_D][PV_W],
                      uint32_t* o_valid_pdv_points,
                      uint8_t* o_present_chiplets,
-                     uint8_t& o_poundv_bucketId );
+                     uint8_t&      o_bucketId,
+                     fapi2::voltageBucketData_t* o_poundv_data);
 
 /// -------------------------------------------------------------------
 /// @brief Perform data validity check on #V data
@@ -317,12 +321,14 @@ proc_get_mvpd_iddq ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 /// @param[in]    i_target          => Chip Target
 /// @param[in]    i_poundv_bucketId => Pound V bucket id
 /// @param[out]   o_vdmpb           => Vdmparamblock data
+/// @param[out]   o_data            => Pound w data
 /// @return   FAPI2::SUCCESS
 /// ----------------------------------------------------------------
 fapi2::ReturnCode
 proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                      uint8_t       i_poundv_bucketId,
-                     VDMParmBlock* o_vdmpb
+                     VDMParmBlock* o_vdmpb,
+                     PoundW_data* o_data
                     );
 /// -----------------------------------------------------------------------
 /// @brief Get needed attributes
@@ -514,9 +520,43 @@ void p9_pstate_update_vfrt(uint8_t* i_pBuffer,
                            HomerVFRTLayout_t* o_vfrt_data,
                            uint32_t i_reference_freq);
 
+/**
+ * calculate_effective_capacitance
+ *
+ * Description: Generic function to perform the effective capacitance
+ *              calculations.
+ *              C_eff = I / (V^1.3 * F)
+ *
+ *              I is the AC component of Idd in 0.01 Amps (or10 mA)
+ *              V is the silicon voltage in 100 uV
+ *              F is the frequency in MHz
+ *
+ *              Note: Caller must ensure they check for a 0 return value
+ *                    and disable wof if that is the case
+ *
+ * Param[in]: i_iAC - the AC component
+ * Param[in]: i_voltage - the voltage component in 100uV
+ * Param[in]: i_frequency - the frequency component
+ *
+ * Return: The calculated effective capacitance
+ */
+uint16_t pstate_calculate_effective_capacitance( uint16_t i_iAC,
+        uint16_t i_voltage,
+        uint16_t i_frequency );
 
 
+///Get IAC VDN value
+/// param[in]: i_vdd_value VDD value from #V
+/// param[in]: i_iddq      IQ vpd data
+/// param[in]: nest_leakage_percent   leakage in 60C
+/// param[in]: i_vdn_vpd_value VPD value from power bus #V data
+uint16_t get_iac_vdn_value (uint16_t i_vdd_value,
+                            IddqTable i_iddq,
+                            uint8_t nest_leakage_percent,
+                            uint16_t i_vdn_vpd_value);
 
+///round up the floating point value
+uint16_t roundUp(float i_value);
 
 /// @typedef p9_pstate_parameter_block_FP_t
 /// function pointer typedef definition for HWP call support
