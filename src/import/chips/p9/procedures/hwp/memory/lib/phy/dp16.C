@@ -2114,8 +2114,8 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
 ///
 fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-                                    const fapi2::Target<TARGET_TYPE_DIMM>& i_dimm,
-                                    const uint64_t l_rp )
+                                    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                                    const uint64_t i_rp )
 {
     typedef dp16Traits<TARGET_TYPE_MCA> TT;
 
@@ -2232,7 +2232,7 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
 
     uint64_t l_which_port = mss::pos(i_target);
 
-    fapi2::buffer<uint64_t> l_rpb(l_rp);
+    fapi2::buffer<uint64_t> l_rpb(i_rp);
     std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> > > l_read;
 
     while (l_rpb != 0)
