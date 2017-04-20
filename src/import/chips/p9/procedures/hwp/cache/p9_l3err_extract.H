@@ -50,6 +50,7 @@ enum p9_l3err_extract_err_type
 {
     L3ERR_CE,
     L3ERR_UE,
+    L3ERR_SUE,
     L3ERR_CE_UE
 };
 
@@ -61,12 +62,14 @@ struct p9_l3err_extract_err_data
     uint8_t dw;      //3-bit
     uint8_t bank;    //3-bit
     uint8_t dataout; //decimal 0-144, 8-bit
-    uint16_t address;//13-bit
+    uint16_t hashed_real_address_45_56;//12-bit
+    uint16_t cache_read_address;//14-bit
 };
 
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_l3err_extract_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-        p9_l3err_extract_err_data& o_err_data);
+typedef fapi2::ReturnCode (*p9_l3err_extract_FP_t)( const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+        p9_l3err_extract_err_data& o_err_data,
+        bool& o_err_found);
 
 extern "C"
 {
@@ -80,9 +83,11 @@ extern "C"
 // parameters: i_ex_chiplet => chiplet target used for callouts
 //             i_err_type   => type of error that is to be extracted (CE,UE,both)
 //             o_err_data   => failing location information for CE or UE
+//             o_err_found  => error is found
 
     fapi2::ReturnCode p9_l3err_extract(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-                                       p9_l3err_extract_err_data& o_err_data);
+                                       p9_l3err_extract_err_data& o_err_data,
+                                       bool& o_error_found);
 
 } // extern "C"
 
