@@ -386,6 +386,15 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
             }
         }
 
+        l_errhdl = processFwKeyIndicators(l_conHdr,i_id);
+        if(l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor, ERR_MRK "SPnorrRP::verifySections: Failed "
+                "in call to processFwKeyIndicators().  PNOR section = %s.",
+                PNOR::SectionIdToString(i_id));
+            break;
+        }
+
         // verification succeeded
 
         // parse container header now that it is verified
@@ -763,6 +772,36 @@ errlHndl_t PNOR::unloadSecureSection(const SectionId i_section)
     // @TODO RTC 156118
     // Replace with call to secure provider to unload the section
     errlHndl_t pError=NULL;
+    return pError;
+}
+
+void SPnorRP::processLabOverride(
+    const sb_flags_t& i_flags) const
+{
+    TARGETING::Target* pSys = nullptr;
+    TARGETING::targetService().getTopLevelTarget(pSys);
+    assert(pSys != nullptr,"System target was nullptr.");
+    // ATTR_SECURITY_MODE attribute values are inverted with respect to the lab
+    // override flag for the same logical meaning
+    TARGETING::ATTR_SECURITY_MODE_type securityMode =
+        !(i_flags.hw_lab_override);
+    pSys->setAttr<TARGETING::ATTR_SECURITY_MODE>(securityMode);
+    TRACFCOMP(g_trac_pnor,INFO_MRK "Set lab security override policy to %s.",
+        securityMode ? "*NO* override" : "override if requested");
+}
+
+errlHndl_t SPnorRP::processFwKeyIndicators(
+    const SECUREBOOT::ContainerHeader& i_header,
+    const PNOR::SectionId              i_sectionId) const
+{
+    errlHndl_t pError = nullptr;
+
+    if(i_sectionId == PNOR::SBE_IPL)
+    {
+        auto const * const headerFlags = i_header.sb_flags();
+        processLabOverride(*headerFlags);
+    }
+
     return pError;
 }
 

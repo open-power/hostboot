@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,12 @@
 #include "pnor_common.H"
 #include "ffs.h"
 #include <config.h>
+#include <securerom/ROM.H>
+
+namespace SECUREBOOT
+{
+    class ContainerHeader;
+}
 
 /**
  * Secure PNOR Resource Provider
@@ -186,5 +192,39 @@ class SPnorRP
      * @return  errlHndl_t - NULL if success, errlHndl_t otherwise.
      */
     errlHndl_t keyTransitionCheck(const uint8_t *i_vaddr) const;
+
+    /**
+     *  @brief Apply lab override policy to the attribute model
+     *
+     *  @par Detailed Description:
+     *      Reads the lab override flag from the input flag set, inverts it, and
+     *      writes it to the ATTR_SECURITY_MODE attribute.  Later, SBE update
+     *      will customize that attribute into the SBEs.  If the policy is set
+     *      (attribute clear), the SBE will watch mailbox scratch register 3 bit
+     *      6 to be set.  In that case, SBE will disable security for the
+     *      processor, otherwise (policy clear/attribute set) it will not change
+     *      the security settings.
+     *
+     *  @param[in] i_flags Various flags read from the secure header
+     */
+    void processLabOverride(
+        const sb_flags_t& i_flags) const;
+
+    /**
+     *  @brief Apply firmware key indicator policies for the given section
+     *
+     *  @par Detailed Description:
+     *      Reads the HW/SW policy flags from the given section's container
+     *      header and applies any applicable policies.
+     *
+     *  @param[in] i_header Reference to requested section's container header
+     *  @param[in] i_sectionId Section's ID
+     *
+     *  @return errlHndl_t Error log handle; nullptr if success, pointer to
+     *      valid error log otherwise.
+     */
+    errlHndl_t processFwKeyIndicators(
+        const SECUREBOOT::ContainerHeader& i_header,
+        const PNOR::SectionId              i_sectionId) const;
 };
 #endif

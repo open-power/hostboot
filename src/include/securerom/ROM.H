@@ -248,6 +248,7 @@ enum HW_SB_FLAGS
     HB_FW_FLAG = 0x80000000,
     OPAL_FLAG = 0x40000000,
     PHYP_FLAG = 0x20000000,
+    LAB_OVERRIDE_FLAG = 0x00080000,
     KEY_TRANSITION_FLAG = 0x00000001
 };
 
@@ -260,12 +261,21 @@ enum SW_SB_FLAGS
 // Structure to store all hw and sw flag values in a container header
 struct sb_flags_t
 {
-    sb_flags_t() : hw_hb_fw(false), hw_opal(false), hw_phyp(false),
-                   hw_key_transition(false) {}
-    bool hw_hb_fw;
-    bool hw_opal;
-    bool hw_phyp;
-    bool hw_key_transition;
+    sb_flags_t() :
+        hw_hb_fw(false),
+        hw_opal(false),
+        hw_phyp(false),
+        hw_lab_override(false),
+        hw_key_transition(false)
+    {
+    }
+
+    bool hw_hb_fw;          ///< Signed using HB keys
+    bool hw_opal;           ///< Signed using OPAL keys
+    bool hw_phyp;           ///< Signed using PHyp keys
+    bool hw_lab_override;   ///< Whether to enable lab security override;
+                            ///< Only applicable for SBE partition
+    bool hw_key_transition; ///< Indicates this is a key transition container
 };
 
 
