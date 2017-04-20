@@ -212,7 +212,7 @@ void PNOR::checkHeader (ffs_hdr* i_ffs_hdr,
   * @brief Takes in an ffs_entry and returns the enum version of the section
   *         title.
   */
-void PNOR::getSectionEnum (ffs_entry* i_entry,
+void PNOR::getSectionEnum (const ffs_entry* i_entry,
                            uint32_t* o_secId)
 {
     *o_secId = PNOR::INVALID_SECTION;
@@ -321,7 +321,7 @@ PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
 
 #ifdef BOOTLOADER
         io_TOC[secId].secure = PNOR::isEnforcedSecureSection(secId);
-#else
+#elif !defined(__HOSTBOOT_RUNTIME) // runtime is handled by rt_pnor code
         // Check if PNOR section has a secureHeader or not.
         l_errhdl = PNOR::setSecure(secId, io_TOC);
         if (l_errhdl)

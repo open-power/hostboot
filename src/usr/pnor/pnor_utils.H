@@ -183,7 +183,7 @@ void checkHeader (ffs_hdr* i_ffs_hdr,
   *                        enums found in include/usr/pnor/pnor_const.H
   *
 */
-void getSectionEnum (ffs_entry* i_entry,
+void getSectionEnum (const ffs_entry* i_entry,
                       uint32_t* o_secId);
 /**
   * @brief Iterate through the entries, each which represent a section in pnor.
