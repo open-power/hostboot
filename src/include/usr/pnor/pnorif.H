@@ -36,6 +36,9 @@
 namespace PNOR
 {
 
+// @TODO RTC:155374 Remove this in the future
+extern const size_t BEST_EFFORT_NUM_BYTES;
+
 /**
  * Information about a side of PNOR
  */
@@ -177,6 +180,7 @@ errlHndl_t validateAltMaster( void );
  */
 void getPnorInfo( PnorInfo_t& o_pnorInfo );
 
+// @TODO RTC:155374 Remove this in the future
 /**
  * @brief  Check if PNOR section appears to be secure and sets the
  *         internal TOC of PnorRp accordingly.

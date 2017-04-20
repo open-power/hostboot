@@ -388,6 +388,7 @@ bool PNOR::isInhibitedSection(const uint32_t i_section)
 #endif
 }
 
+// @TODO RTC:155374 Remove this in the future
 errlHndl_t PNOR::setSecure(const uint32_t i_secId,
                            PNOR::SectionData_t* io_TOC)
 {
@@ -407,9 +408,9 @@ errlHndl_t PNOR::setSecure(const uint32_t i_secId,
         // Apply best effort policy by checking if the section appears to have a
         // secure header
         size_t l_size = sizeof(ROM_MAGIC_NUMBER);
-        auto l_buf = new uint8_t[l_size]();
+        uint8_t l_buf[l_size] = {0};
         auto l_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-        // Read first 8 bytes of section data from the PNOR DD
+        // Read first 4 bytes of section data from the PNOR DD
         // Note: Do not need to worry about ECC as the 9th byte is the first
         //       ECC byte.
         l_errhdl = DeviceFW::deviceRead(l_target, l_buf, l_size,
@@ -419,7 +420,7 @@ errlHndl_t PNOR::setSecure(const uint32_t i_secId,
             break;
         }
 
-        // Check if first 8 bytes match the Secureboot Magic Number
+        // Check if first 4 bytes match the Secureboot Magic Number
         io_TOC[i_secId].secure &= PNOR::cmpSecurebootMagicNumber(l_buf);
     }
 #endif

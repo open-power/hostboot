@@ -134,7 +134,7 @@ class RtPnor
                                    uint64_t i_offset,
                                    size_t i_size,
                                    bool i_ecc,
-                                   void* o_data);
+                                   void* o_data) const;
 
         /**
          * @brief  Write data back to the PNOR device
@@ -163,6 +163,33 @@ class RtPnor
          * @return Error from device
          */
         errlHndl_t readTOC();
+
+        // @TODO RTC:155374 Remove this in the future
+        /**
+         * @brief  Check if PNOR sections appear to be secure and sets the
+         *         internal TOC of PnorRp accordingly.
+         *         Note: The setting of the flag is based on the Secureboot policy.
+         *         Note: Done separately from pnor common code to prevent PNOR
+         *               deadlock when reading section bytes.
+         *
+         * @param[in] io_TOC  Pointer to internal array of section data that
+         *                    represents the TOC of pnor flash
+         *                    Asserts if nullptr
+         *
+         * @return errlHndl_t  Error log if request was invalid
+         */
+        errlHndl_t setSecure(const uint8_t* i_tocBuffer,
+                             PNOR::SectionData_t* io_TOC) const;
+
+        /**
+         * @brief Get processor id of master proc and cache in internal variable
+         *
+         * @return errlHndl_t - Error from runtime targeting call
+         */
+        errlHndl_t getMasterProcId();
+
+        // Cached master Proc Id
+        static uint64_t iv_masterProcId;
 
         //allow testcases to see inside the class
         friend class PnorRtTest;
