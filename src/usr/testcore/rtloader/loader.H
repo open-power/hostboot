@@ -43,6 +43,7 @@
 #include <pnor/ecc.H>
 #include <ipmi/ipmiif.H>
 #include <targeting/common/attributeTank.H>
+#include <config.h>
 
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 2*KILOBYTE);
@@ -54,11 +55,25 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         void testLoader()
         {
             static const uint64_t HEADER_OFFSET = 0x2000;
+            errlHndl_t l_errl = nullptr;
 
+#ifdef CONFIG_SECUREBOOT
+            // load secure section
+            // TODO RTC: 157475 Since this is a test case and unload is
+            // merely a stub function at this point in time, add a call
+            // to unload later when the aforementioned story is implemented.
+            l_errl = loadSecureSection(PNOR::HB_RUNTIME);
+            if(l_errl)
+            {
+                TS_WARN("Could not securely load runtime section.");
+                delete l_errl;
+                l_errl = nullptr;
+                return;
+            }
+#endif
             PNOR::SectionInfo_t runtimeSection;
 
-            errlHndl_t l_errl =
-                PNOR::getSectionInfo(PNOR::HB_RUNTIME, runtimeSection);
+            l_errl = PNOR::getSectionInfo(PNOR::HB_RUNTIME, runtimeSection);
 
             if (l_errl)
             {

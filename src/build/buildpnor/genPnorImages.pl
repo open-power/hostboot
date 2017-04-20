@@ -537,8 +537,9 @@ sub manipulateImages
         # Sections that have secureboot support. Secureboot still must be
         # enabled for secureboot actions on these partitions to occur.
         # @TODO securebootp9 re-enable with SBE/SBEC/PAYLOAD secureboot ports
-        my $isNormalSecure = ($eyeCatch eq "SBE");
-        #$isNormalSecure ||= ($eyeCatch eq "HBRT");
+        my $isNormalSecure ||= ($eyeCatch eq "HBBL");
+        $isNormalSecure ||= ($eyeCatch eq "SBE");
+        $isNormalSecure ||= ($eyeCatch eq "HBRT");
         #$isNormalSecure ||= ($eyeCatch eq "SBEC");
         $isNormalSecure ||= ($eyeCatch eq "PAYLOAD");
         #$isNormalSecure ||= ($eyeCatch eq "OCC");
@@ -547,8 +548,10 @@ sub manipulateImages
 
         my $isSpecialSecure = ($eyeCatch eq "HBB");
         $isSpecialSecure ||= ($eyeCatch eq "HBD");
-        $isSpecialSecure ||= ($eyeCatch eq "HBBL");
         #$isSpecialSecure ||= ($eyeCatch eq "HBI");
+
+        # Used to indicate security is supported in firmware
+        my $secureSupported = $isNormalSecure || $isSpecialSecure;
 
         # If there is a non-default header for this section, use it instead
         my $header = $sb_hdrs{DEFAULT};
@@ -609,7 +612,7 @@ sub manipulateImages
                 $fsp_prefix.=".header";
                 # Add secure container header
                 # @TODO RTC:155374 Remove when official signing supported
-                if ($secureboot && $isSpecialSecure)
+                if ($secureboot && $secureSupported)
                 {
                     $callerHwHdrFields{configure} = 1;
                     # @TODO securebootp9 re-enable hash page table with vfs page table port

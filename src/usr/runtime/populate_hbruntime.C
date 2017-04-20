@@ -913,6 +913,14 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             l_label = HBRT_RSVD_MEM__CODE;
             l_labelSize = strlen(l_label) + 1;
 
+#ifdef CONFIG_SECUREBOOT
+            l_elog = loadSecureSection(PNOR::HB_RUNTIME);
+            if(l_elog)
+            {
+                break;
+            }
+#endif
+
             PNOR::SectionInfo_t l_pnorInfo;
             l_elog = getSectionInfo( PNOR::HB_RUNTIME , l_pnorInfo);
             if (l_elog)
