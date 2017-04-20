@@ -69,7 +69,8 @@ extern "C"
 // HWP entry point
 //------------------------------------------------------------------------------
     fapi2::ReturnCode p9_l3err_extract(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-                                       p9_l3err_extract_err_data& o_err_data)
+                                       p9_l3err_extract_err_data& o_err_data,
+                                       bool& o_error_found)
     {
 
         fapi2::buffer<uint64_t> l_l3eDRAM_rd_err_stat_data0;
@@ -96,6 +97,13 @@ extern "C"
         uint8_t             member_select = 0;
         uint8_t             read_select = 0;
         bool                ce_ue = true;
+        bool                sue = false;
+
+        uint16_t            real_address45_52 = 0;
+        uint16_t            real_address53_54 = 0;
+        uint16_t            real_address55 = 0;
+        uint16_t            real_address56 = 0;
+        uint16_t            real_address45_56 = 0;
 
 
         // mark function entry
@@ -124,11 +132,16 @@ extern "C"
 
 
         FAPI_DBG("err_stat_val = %x", err_stat_val);
-        // no CE or UE error found by Scom registers
-        FAPI_ASSERT(err_stat_val,
-                    fapi2::P9_L3ERR_EXTRACT_NO_CEUE_FOUND()
-                    .set_TARGET(i_target),
-                    "No CE or UE captured.");
+
+        o_error_found = err_stat_val;
+
+        // Dont's panic if no CE or UE error found by Scom registers
+        if (!err_stat_val)
+        {
+            FAPI_DBG ("No error is found!");
+            return fapi2::current_err;
+        }
+
 
         // syndrome value
         l_l3eDRAM_rd_err_stat_data0.extractToRight<EX_ED_RD_ERR_STAT_REG0_L3_1ST_BEAT_SYNDROME, EX_ED_RD_ERR_STAT_REG0_L3_1ST_BEAT_SYNDROME_LEN>
@@ -145,12 +158,37 @@ extern "C"
             FAPI_DBG("Checking second beat for syndrome data.");
             syndrome = err_2nd_beat_syndrome;
             ce_ue = !(err_stat_2nd_beat_UE);
+
+            if (ce_ue == false)
+            {
+                if (err_2nd_beat_syndrome == 0xFE)
+                {
+                    sue = true;
+                }
+                else
+                {
+                    sue = false;
+                }
+            }
+
         }
         else
         {
             syndrome = err_1st_beat_syndrome;
             err_in_first_beat = 1;
             ce_ue = !(err_stat_1st_beat_UE);
+
+            if (ce_ue == false)
+            {
+                if (err_1st_beat_syndrome == 0xFE)
+                {
+                    sue = true;
+                }
+                else
+                {
+                    sue = false;
+                }
+            }
         }
 
         // if could not find syndrome
@@ -244,6 +282,17 @@ extern "C"
             member = err_stat_bank;
         }
 
+        // Translate cache read address to real address first
+        // The EDRAM read-address is made up of edram_ra(0:9) & edram_ca(0:2) & edram_rs.
+        // Edram_ra(0:9) are taken from hashed address(56, 55, 45:52)
+        // Edram_ca(0:2) are taken from hashed address(53:54)& memberGroup (member 0-9 vs.10-19)
+        // Edram_rs is taken from  address(57)
+        real_address45_52   = err_stat_ra & (0x0FF0);
+        real_address53_54   = err_stat_ra & (0x000C);
+        real_address55      = (err_stat_ra & (0x1000)) >> 11;
+        real_address56      = (err_stat_ra & (0x2000)) >> 13;
+        real_address45_56   = real_address45_52 | real_address53_54 | real_address55 | real_address56;
+
         //print out error location information
         if( ce_ue )
         {
@@ -251,22 +300,49 @@ extern "C"
         }
         else
         {
-            FAPI_DBG("UE Location Information");
+            if(!sue)
+            {
+
+                FAPI_DBG("UE Location Information");
+            }
+            else
+            {
+                FAPI_DBG("SUE Location Information");
+            }
+
         }
 
         FAPI_DBG("\tDW     = %u", dw);
         FAPI_DBG("\tBank   = %u", err_stat_bank);
         FAPI_DBG("\tMember = %u", member);
-        FAPI_DBG("\tAddress = 0x%X", err_stat_ra);
-        FAPI_DBG("\tDataout = %u", dataout);
+        FAPI_DBG("\tCache Read Address = 0x%X", err_stat_ra);
+        FAPI_DBG("\tHashed Real Address (45:56) = 0x%X", real_address45_56);
+        FAPI_DBG("\tDataout = 0x%X", dataout);
 
         // output error data
-        o_err_data.ce_ue = ce_ue ? L3ERR_CE : L3ERR_UE;
+        //o_err_data.ce_ue = ce_ue ? L3ERR_CE : L3ERR_UE;
+        if (ce_ue)
+        {
+            o_err_data.ce_ue = L3ERR_CE;
+        }
+        else
+        {
+            if(!sue)
+            {
+                o_err_data.ce_ue = L3ERR_UE;
+            }
+            else
+            {
+                o_err_data.ce_ue = L3ERR_SUE;
+            }
+        }
+
         o_err_data.member = member;
         o_err_data.dw = dw;
         o_err_data.bank = err_stat_bank;
         o_err_data.dataout = dataout;
-        o_err_data.address = err_stat_ra;
+        o_err_data.hashed_real_address_45_56 = real_address45_56;
+        o_err_data.cache_read_address = err_stat_ra;
 
     fapi_try_exit:
         // mark HWP exit

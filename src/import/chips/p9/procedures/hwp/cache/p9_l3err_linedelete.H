@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/cache/p9_l3err_extract.H $ */
+/* $Source: src/import/chips/p9/procedures/hwp/cache/p9_l3err_linedelete.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -24,72 +24,51 @@
 /* IBM_PROLOG_END_TAG                                                     */
 //------------------------------------------------------------------------------
 // *|
-// *! TITLE       : p3_l3err_extract.H
-// *! DESCRIPTION : Parse and extract error information from L3 Scom Register (FAPI2)
+// *! TITLE       : p9_l3err_linedelete.H
+// *! DESCRIPTION : Delete the L3 error cache line according to the error extraction information
 // *!
-// *! OWNER NAME  : Chen Qian              Email: qianqc@cn.ibm.com
+// *! OWNER NAME  : Alex Taft           Email: amtaft@us.ibm.com
 // *!
 // *! ADDITIONAL COMMENTS :
 // *!
+// *! EXP.L3.L3_MISC.L3CERRS.PRD_PURGE_REG
+// *! Write member, cgc address into PRD Purge Engine Command Register
+// *! SCOM Addr: 0x000000001001180E
+// *| bit 0 is the trigger, the act of writing this bit to 1 sets off the line delete
+// *| bits 1:4 is ttype 0b0010 = line delete
+// *| bits 12:16 is the member
+// *| bits 17:28 is the cgc address
+// *! NOTE: The error information is extracted by the HWP p9_l3err_extract.
+// *|       An output data structure is dumped to this proceder and wrapped
 //------------------------------------------------------------------------------
 
-#ifndef _P9_L3ERR_EXTRACT_H_
-#define _P9_L3ERR_EXTRACT_H_
+#ifndef _P9_L3ERR_LINEDELETE_H_
+#define _P9_L3ERR_LINEDELETE_H_
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
+#include <p9_l3err_extract.H>
 
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
 
-// enum used to denote what type of error occured or which we want to find
-enum p9_l3err_extract_err_type
-{
-    L3ERR_CE,
-    L3ERR_UE,
-    L3ERR_SUE,
-    L3ERR_CE_UE
-};
-
-// structure to document control/data registers for each supported trace array
-struct p9_l3err_extract_err_data
-{
-    p9_l3err_extract_err_type ce_ue;
-    uint8_t member;
-    uint8_t dw;      //3-bit
-    uint8_t bank;    //3-bit
-    uint8_t dataout; //decimal 0-144, 8-bit
-    uint16_t hashed_real_address_45_56;//12-bit
-    uint16_t cache_read_address;//14-bit
-};
-
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_l3err_extract_FP_t)( const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-        p9_l3err_extract_err_data& o_err_data,
-        bool& o_err_found);
+typedef fapi2::ReturnCode
+(*p9_l3err_linedelete_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_EX>&,
+                             const p9_l3err_extract_err_data&,
+                             const uint64_t p9_l3err_linedelete_TryBusyCounts);
 
 extern "C"
 {
 
-//------------------------------------------------------------------------------
-// Function prototype
-//------------------------------------------------------------------------------
 
-// function: FAPI p9_l3err_extract HWP entry point
-//           Parse and extract L3 error information from provided
-// parameters: i_ex_chiplet => chiplet target used for callouts
-//             i_err_type   => type of error that is to be extracted (CE,UE,both)
-//             o_err_data   => failing location information for CE or UE
-//             o_err_found  => error is found
-
-    fapi2::ReturnCode p9_l3err_extract(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-                                       p9_l3err_extract_err_data& o_err_data,
-                                       bool& o_error_found);
+    fapi2::ReturnCode p9_l3err_linedelete(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+                                          const p9_l3err_extract_err_data& i_err_data,
+                                          const uint64_t p9_l3err_linedelete_TryBusyCounts);
 
 } // extern "C"
 
-#endif // _P9_L3ERR_EXTRACT_H_
-
+#endif // _P9_L3ERR_LINEDELETE_H_
