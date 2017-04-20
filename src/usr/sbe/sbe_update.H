@@ -85,6 +85,10 @@ namespace SBE
     // (PERV_SB_CS_SCOM 0x00050008 or PERV_SB_CS_FSI 0x2808)
     const uint64_t SBE_BOOT_SELECT_MASK = 0x0000400000000000;
 
+    // Hard coded value, pass in 2KB max
+    const uint32_t RING_OVD_SIZE = 0x800;
+
+
     // PNOR SBE and SBEC Partition constants
     const uint32_t MAX_SBE_ENTRIES = 9;
     const uint32_t SBETOC_EYECATCH = 0x53424500;  //'SBE\0'
