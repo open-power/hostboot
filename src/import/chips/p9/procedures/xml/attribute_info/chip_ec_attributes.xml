@@ -2016,6 +2016,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DISABLE_CP_ME</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Disable cp_me from the L3 for Nimbus DD1 and DD2.0
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_OPTIMAL_LARX_STCX_PERF</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
