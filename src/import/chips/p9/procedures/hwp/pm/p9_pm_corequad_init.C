@@ -167,7 +167,6 @@ fapi2::ReturnCode pm_corequad_init(
     uint8_t l_chpltNumber = 0;
     uint64_t l_address = 0;
     uint32_t l_errMask = 0;
-    uint32_t l_firMask = 0;
 
     auto l_eqChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EQ>
                         (fapi2::TARGET_STATE_FUNCTIONAL);
@@ -193,10 +192,10 @@ fapi2::ReturnCode pm_corequad_init(
         // 13         : Enable DROOP protect upon heartbeat loss
         // 14         : Enable PFETs upon iVRMs dropout
         // 18 - 19    : PCB interrupt
-        // 20,22,24,26: CME InterPPM Communication
+        // 20,22,24,26: InterPPM Ivrm/Aclk/Vdata/Dpll enable
         FAPI_INF("Setup Quad PPM Mode register");
-        l_data64.flush<0>().setBit<0, 15>().setBit<18, 3>().setBit<22>().
-        setBit<24>().setBit<26>();
+        l_data64.flush<0>().setBit<0, 15>().setBit<18, 3>().
+        setBit<22>().setBit<24>().setBit<26>();
         l_address = EQ_QPPM_QPMMR_CLEAR;
         FAPI_TRY(fapi2::putScom(l_quad_chplt, l_address, l_data64),
                  "ERROR: Failed to setup Quad PMM register");
@@ -211,119 +210,58 @@ fapi2::ReturnCode pm_corequad_init(
         FAPI_TRY(fapi2::putScom(l_quad_chplt, l_address, l_data64),
                  "ERROR: Failed to restore the QUAD PPM Error Mask");
 
+        auto l_coreChiplets =
+            l_quad_chplt.getChildren<fapi2::TARGET_TYPE_CORE>
+            (fapi2::TARGET_STATE_FUNCTIONAL);
 
-        auto l_exChiplets = l_quad_chplt.getChildren<fapi2::TARGET_TYPE_EX>
-                            (fapi2::TARGET_STATE_FUNCTIONAL);
-
-        // For each functional EX chiplet
-        for (auto l_ex_chplt : l_exChiplets)
+        // For each core target
+        for (auto l_core_chplt : l_coreChiplets)
         {
-
-            // Fetch the position of the EX target
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_ex_chplt,
+            // Fetch the position of the Core target
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core_chplt,
                                    l_chpltNumber),
-                     "ERROR: Failed to get the position of the EX:0x%08X",
-                     l_ex_chplt);
-            FAPI_DBG("EX number = %d", l_chpltNumber);
+                     "ERROR: Failed to get the position of the CORE:0x%08X",
+                     l_core_chplt);
+            FAPI_DBG("CORE number = %d", l_chpltNumber);
 
-            // Clear CME Flags
-            FAPI_INF("Clear CME Flags");
+            // Clear the Core CME DoorBells
+            FAPI_INF("Clear the Core PPM CME Doorbells");
             l_data64.flush<1>();
-            // SCOM1 is the CLEAR address
-            l_address = EX_CME_SCOM_FLAGS_SCOM1;
-            FAPI_TRY(fapi2::putScom(l_ex_chplt, l_address, l_data64),
-                     "ERROR: Failed to reset CME Flags");
 
-
-            // Setup / Clear CME SRAM Scrub
-            // Set bit 1         : SRAM SCRUB enable
-            // Clear bits 47 - 59: SRAM SCRUB index
-            FAPI_INF("Setup CME SRAM SCRUB");
-            l_data64.flush<0>().setBit<1>();
-            l_address = EX_CSCR_OR;
-            FAPI_TRY(fapi2::putScom(l_ex_chplt, l_address, l_data64),
-                     "ERROR: Failed to enable CME SRAM SCRUB");
-            l_data64.flush<0>().setBit<47, 13>();
-            l_address = EX_CSCR_CLEAR;
-            FAPI_TRY(fapi2::putScom(l_ex_chplt, l_address, l_data64),
-                     "ERROR: Failed to reset CME SRAM SCRUB INDEX");
-
-            // Clear CME Scratch registers
-            FAPI_INF("Clear CME Scratch registers");
-            l_data64.flush<0>();
-            l_address = EX_CME_SCOM_SRTCH0_SCOM;
-            FAPI_TRY(fapi2::putScom(l_ex_chplt, l_address, l_data64),
-                     "ERROR: Failed to clear CME scratch register 0");
-            l_address = EX_CME_SCOM_SRTCH1_SCOM;
-            FAPI_TRY(fapi2::putScom(l_ex_chplt, l_address, l_data64),
-                     "ERROR: Failed to clear CME scratch register 1");
-
-            // Restore Local CME FIR Mask
-            FAPI_INF("Restore local CME FIR Mask");
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_LOCAL_FIRMASK, l_ex_chplt,
-                                   l_firMask),
-                     "ERROR: Failed to get local FIR Mask");
-            l_data64.flush<0>().insertFromRight<0, 32>(l_firMask);
-            l_address = EX_CME_SCOM_LFIRMASK;
-            FAPI_TRY(fapi2::putScom(l_ex_chplt, l_address, l_data64),
-                     "ERROR: Failed to restore the CME Local FIR");
-
-            auto l_coreChiplets =
-                l_ex_chplt.getChildren<fapi2::TARGET_TYPE_CORE>
-                (fapi2::TARGET_STATE_FUNCTIONAL);
-
-            // For each core target
-            for (auto l_core_chplt : l_coreChiplets)
+            for (uint8_t l_dbLoop = 0; l_dbLoop < DOORBELLS_COUNT; l_dbLoop++)
             {
-                // Fetch the position of the Core target
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core_chplt,
-                                       l_chpltNumber),
-                         "ERROR: Failed to get the position of the CORE:0x%08X",
-                         l_core_chplt);
-                FAPI_DBG("CORE number = %d", l_chpltNumber);
-
-                // Clear the Core CME DoorBells
-                FAPI_INF("Clear the Core PPM CME Doorbells");
-                l_data64.flush<1>();
-
-                for (uint8_t l_dbLoop = 0; l_dbLoop < DOORBELLS_COUNT; l_dbLoop++)
-                {
-                    l_address = CME_DOORBELL_CLEAR[l_dbLoop];
-                    FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_data64),
-                             "ERROR: Failed to clear the doorbells");
-                }
-
-                // Setup Core PPM Mode register
-                // Clear the following bits:
-                // 0 - 1  : PPM Write control
-                // 10     : Stop Exit interrupt type
-                // 11     : Block interrupts
-                // 12     : PPM response for CME error
-                // 14 - 15: wakeup interrupts
-                // Set the following bit:
-                // 13 : Wakeup notification
-                FAPI_INF("Setup Core PPM Mode register");
-                l_data64.flush<0>().setBit<0, 2>().setBit<10, 3>().
-                setBit<14, 2>();
-                l_address =  C_CPPM_CPMMR_CLEAR;
+                l_address = CME_DOORBELL_CLEAR[l_dbLoop];
                 FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_data64),
-                         "ERROR: Failed to setup Core PMM register");
-
-                l_data64.flush<0>().setBit<13>();
-                l_address = C_CPPM_CPMMR_OR;
-                FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_data64),
-                         "ERROR: Failed to setup Core PMM register");
-
-                // Restore CORE PPM Error Mask
-                FAPI_INF("Restore CORE PPM Error Mask");
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CORE_PPM_ERRMASK, l_core_chplt,
-                                       l_errMask),
-                         "ERROR: Failed to get CORE PPM error Mask");
-                l_data64.flush<0>().insertFromRight<0, 32>(l_errMask);
-                l_address = C_CPPM_ERRMSK;
-                FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_data64),
-                         "ERROR: Failed to restore the CORE PPM Error Mask");
+                         "ERROR: Failed to clear the doorbells");
             }
+
+            // Setup Core PPM Mode register
+            // Clear the following bits:
+            // 1      : PPM Write control override
+            // 11     : Block interrupts
+            // 12     : PPM response for CME error
+            // 14     : enable pece
+            // 15     : cme spwu done dis
+            // Bits Init or Reset in STOP Hcode:
+            // 0      : PPM Write control
+            // 9      : FUSED_CORE_MODE
+            // 10     : STOP_EXIT_TYPE_SEL
+            // 13     : WKUP_NOTIFY_SELECT
+            FAPI_INF("Setup Core PPM Mode register");
+            l_data64.flush<0>().setBit<1>().setBit<11, 2>().setBit<14, 2>();
+            l_address =  C_CPPM_CPMMR_CLEAR;
+            FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_data64),
+                     "ERROR: Failed to setup Core PMM register");
+
+            // Restore CORE PPM Error Mask
+            FAPI_INF("Restore CORE PPM Error Mask");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CORE_PPM_ERRMASK, l_core_chplt,
+                                   l_errMask),
+                     "ERROR: Failed to get CORE PPM error Mask");
+            l_data64.flush<0>().insertFromRight<0, 32>(l_errMask);
+            l_address = C_CPPM_ERRMSK;
+            FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_data64),
+                     "ERROR: Failed to restore the CORE PPM Error Mask");
         }
     }
 
@@ -397,6 +335,16 @@ fapi2::ReturnCode pm_corequad_reset(
         l_address = EQ_QPPM_ERR;
         FAPI_TRY(fapi2::putScom(l_quad_chplt, l_address, l_data64),
                  "ERROR: Failed to clear QUAD PPM ERROR");
+
+        // Insert the QPMMR operations to clear the inter-PPM enablement
+        // bit to allow for access to those functions for FFDC access.
+        // Remember, pm_init (reset) can be run without and subsequent
+        // pm_init(init) when left in safe mode.
+        FAPI_INF("Clear Quad PPM InterPPM Enablement for FFDC");
+        l_data64.flush<0>().setBit<20>().setBit<22>().setBit<24>().setBit<26>();
+        l_address = EQ_QPPM_QPMMR_CLEAR;
+        FAPI_TRY(fapi2::putScom(l_quad_chplt, l_address, l_data64),
+                 "ERROR: Failed to setup Quad PMM register");
 
         //Cannot always rely on HWAS state, during MPIPL attr are not
         //accurate, must use query_cache_access state prior to scomming
