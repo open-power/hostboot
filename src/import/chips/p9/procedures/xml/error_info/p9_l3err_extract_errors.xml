@@ -52,6 +52,15 @@
 	<ffdc>SYNDROME</ffdc>
   </hwpError> 
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_L3ERR_LINE_DELETE_REG_BUSY</rc>
+    <description>
+      Procedure: p9_l3err_linedelete
+      Error while trying to update PRD Purge Engine Command Register
+    </description>
+	<ffdc>TARGET</ffdc>
+  </hwpError> 
+  <!-- ******************************************************************** -->
 </hwpErrors>
 
 
