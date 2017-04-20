@@ -233,8 +233,10 @@ void ContainerHeader::parseFlags()
     iv_sbFlags.hw_hb_fw = iv_headerInfo.hw_prefix_hdr.flags & HB_FW_FLAG;
     iv_sbFlags.hw_opal = iv_headerInfo.hw_prefix_hdr.flags & OPAL_FLAG;
     iv_sbFlags.hw_phyp = iv_headerInfo.hw_prefix_hdr.flags & PHYP_FLAG;
-    iv_sbFlags.hw_key_transition = iv_headerInfo.hw_prefix_hdr.flags
-                                   & KEY_TRANSITION_FLAG;
+    iv_sbFlags.hw_lab_override =(  iv_headerInfo.hw_prefix_hdr.flags
+                                 & LAB_OVERRIDE_FLAG);
+    iv_sbFlags.hw_key_transition =(  iv_headerInfo.hw_prefix_hdr.flags
+                                   & KEY_TRANSITION_FLAG);
 }
 
 void ContainerHeader::genHwKeyHash()
