@@ -65,6 +65,8 @@ enum sizes
     MAX_NUM_CAL_SLEW_RATES = 4,    ///< 3V/ns, 4V/ns, 5V/ns, 6V/n
     MAX_DQ_BITS = 72,              /// TODO RTC:157753 This is Nimbus specific. Should be attribute/trait of processor.
     MAX_DQ_NIBBLES_X4 = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For x4's there are 18 DQ nibbles for DQ 72 bits
+    MAX_DRAMS_X8 = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For x8's there are 9 DRAM for 72 bits
+    MAX_DRAMS_X4 = MAX_DQ_BITS / BITS_PER_BYTE, ///< For x4's there are 18 DRAM for 72 bits
 
     MARK_STORE_COUNT = 8,          ///< Elements in a VPD mark/store array
     BAD_DQ_BYTE_COUNT = 10,        ///< Elements in a BAD_DQ_BITMAP attribute array
@@ -157,7 +159,7 @@ enum cal_steps
     // We can do math here, so this pretties up the code
     // Note: a function was investigated but abandoned due to unresolvable compile issues
     // Note: for STEPS_FROM_DQS_ALIGN_TO_AFTER_RD_CTR_LEN - READ_CTR/READ_CTR_2D_VREF are run together pick the larger of the steps
-    STEPS_FROM_DQS_ALIGN_TO_AFTER_RD_CTR_LEN = (READ_CTR_2D_VREF - DQS_ALIGN) + 1,
+    STEPS_FROM_RDCLK_ALIGN_TO_AFTER_RD_CTR_VREF_LEN = (READ_CTR_2D_VREF - RDCLK_ALIGN) + 1,
     STEPS_FROM_WR_CTR_TO_COARSE_RD_LEN = (COARSE_RD - WRITE_CTR) + 1,
 };
 

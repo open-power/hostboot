@@ -199,6 +199,35 @@
 </hwpError>
 
 <hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_DQS_ALIGNMENT_WORKAROUND_FAILED</rc>
+  <description>
+      DQS Alignment has returned a fail for a given position within this calibration.
+      Looping did not seem to fix the problem
+  </description>
+  <ffdc>NUM_LOOPS</ffdc>
+  <ffdc>RP</ffdc>
+  <ffdc>ABORT_ON_ERROR</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_WITH_REGISTERS</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
+    <target>TARGET_WITH_REGISTERS</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
   <rc>RC_MSS_DRAMINIT_TRAINING_RD_CLK_SYS_CLK_ALIGNMENT_ERROR</rc>
   <description>Read CLK to SYS CLK Alignment has returned a fail for a given position within this calibration.</description>
   <ffdc>PORT_POSITION</ffdc>
@@ -650,6 +679,75 @@
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_RDCLK_ALIGN_VECTOR_MISMATCH</rc>
+  <description>
+    Size of disable bit vector is not the same as rd clk vector size
+  </description>
+  <ffdc>BITVECTOR_SIZE</ffdc>
+  <ffdc>RDCLK_SIZE</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_WR_VREF_WORKAROUND_BIG_STEPS_OUTOFBOUNDS</rc>
+  <description>
+    Makes sure that the values passed in were not out of range
+  </description>
+  <ffdc>MAX_BIG_STEP</ffdc>
+  <ffdc>ACTUAL_BIG_STEP</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_WR_VREF_TRAIN_WORKAROUND_BIG_STEPS_OUTOFBOUNDS</rc>
+  <description>
+    Makes sure that the values passed in were not out of range
+  </description>
+  <ffdc>MAX_BIG_STEP</ffdc>
+  <ffdc>ACTUAL_BIG_STEP</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_WR_VREF_WORKAROUND_SMALL_STEPS_OUTOFBOUNDS</rc>
+  <description>
+    Makes sure that the values passed in were not out of range
+  </description>
+  <ffdc>MAX_SMALL_STEP</ffdc>
+  <ffdc>ACTUAL_SMALL_STEP</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_EXCEED_NUMBER_OF_DP</rc>
+  <description>
+    There is an error iterating over the bad bits and assigning them to DP16
+  </description>
+  <ffdc>BAD_DP_NUM</ffdc>
+  <ffdc>MAX_DP</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+  <callout>
+    <target>TARGET</target>
+    <priority>MEDIUM</priority>
   </callout>
 </hwpError>
 

@@ -2851,6 +2851,25 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_RUN_DQS_LOOP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        In DD1.** Nimbus, if we get a DQS fail from DQS_ALIGN in draminit_training,
+        we rerun DQS_ALIGN for the failing bit for a set number of times or until it passed
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MSS_CHECK_DIABLE_RD_VREF_CAL_VREFSENSE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>

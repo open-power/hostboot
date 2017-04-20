@@ -43,7 +43,10 @@
 #include <generic/memory/lib/utils/pos.H>
 #include <lib/workarounds/dp16_workarounds.H>
 #include <lib/phy/dp16.H>
+#include <lib/phy/ddr_phy.H>
+#include <lib/phy/phy_cntrl.H>
 #include <lib/dimm/rank.H>
+#include <lib/utils/bit_count.H>
 
 namespace mss
 {
@@ -415,6 +418,381 @@ fapi2::ReturnCode modify_calibration_results( const fapi2::Target<fapi2::TARGET_
 {
     return fix_blue_waterfall_gate( i_target );
 }
+
+namespace dqs_align
+{
+
+///
+/// @brief Runs the DQS workaround
+/// @param[in] i_target MCA target
+/// @param[in] i_rp the rank pair
+/// @param[in] i_abort_on_error CAL_ABORT_ON_ERROR override
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode dqs_align_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                       const uint64_t i_rp,
+                                       const uint8_t i_abort_on_error)
+{
+    constexpr uint64_t MAX_LOOPS = 10;
+
+    // Variable declarations
+    auto l_skip = mss::states::ON;
+    std::map<uint64_t, uint64_t> l_passing_values;
+    uint64_t l_num_loops = 0;
+    uint8_t l_dram_width[2] = {};
+    bool l_is_x8 = false;
+
+    // Let's check to see if we can run the workaround
+    // If we can't, exit with success
+    if (! chip_ec_feature_mss_dqs_workaround(i_target) )
+    {
+        FAPI_DBG("Skipping DQS workaround because of ec feature attribute");
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_TRY( eff_dram_width( i_target, l_dram_width) );
+
+    l_is_x8 = ((l_dram_width[0] == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ||
+               (l_dram_width[1] == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) );
+
+    // First check if the workaround is needed - we could have fails, just not due to DQS align
+    FAPI_TRY(mss::workarounds::dp16::dqs_align::check_workaround(i_target, i_rp, l_skip));
+
+    FAPI_INF("%s i_rp %lu %s the DQS align workaround", mss::c_str(i_target), i_rp,
+             l_skip == mss::states::OFF ? "running" : "skipping");
+
+    // Skip the workaround
+    if(l_skip == mss::states::ON)
+    {
+        // Clear the disable registers so we can keep running calibration on other ranks
+        FAPI_TRY(mss::workarounds::dp16::dqs_align::reset_disables(i_target, i_rp));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Now the fun begins....
+    // Note: adding this call outside the loop to avoid hitting calibration an extra time in case we're fully passing
+    // TK can I compress this?
+    FAPI_TRY(mss::workarounds::dp16::dqs_align::record_passing_values(i_target, i_rp, l_passing_values));
+
+    // Loop until we pass or timeout
+    while(!mss::workarounds::dp16::dqs_align::check_completed(l_passing_values, l_is_x8 ? MAX_DRAMS_X8 : MAX_DRAMS_X4)
+          && l_num_loops < MAX_LOOPS)
+    {
+        FAPI_INF("%s i_rp %lu starting DQS align workaround loop number %lu", mss::c_str(i_target), i_rp, l_num_loops);
+
+        // I'm making the bold(?) assumption that whenever we fail, disable bits get set. If that's not the case, this workaround will break - SPG
+
+        // Clear all disable bits - this will cause calibration to re-run everything that failed, including WR LVL fails
+        FAPI_TRY(mss::workarounds::dp16::dqs_align::reset_disables(i_target, i_rp));
+
+        // Hit calibration one more time
+        {
+            const auto l_dqs_align_cal = fapi2::buffer<uint16_t>().setBit<mss::cal_steps::DQS_ALIGN>();
+
+            FAPI_TRY(mss::execute_cal_steps_helper( i_target, i_rp, l_dqs_align_cal, i_abort_on_error));
+        }
+
+        // Get the current passing states
+        // We override any states that were passing previously and are still passing
+        // We really just want to add on new passing values
+        FAPI_TRY(mss::workarounds::dp16::dqs_align::record_passing_values(i_target, i_rp, l_passing_values));
+
+        ++l_num_loops;
+    }
+
+    // Clear all disable bits - this will cause calibration to re-run everything that failed, including WR LVL fails
+    FAPI_TRY(mss::workarounds::dp16::dqs_align::reset_disables(i_target, i_rp));
+
+
+    // If the loop timed out, bomb out
+    // If this is firmware, they'll log it as info and run to memdiags
+    // If we're cronus, we're bombing out
+    // Either way, let's do ffdc and collect the regs
+    FAPI_ASSERT( l_num_loops < MAX_LOOPS,
+                 fapi2::MSS_DRAMINIT_TRAINING_DQS_ALIGNMENT_WORKAROUND_FAILED()
+                 .set_NUM_LOOPS(l_num_loops)
+                 .set_RP(i_rp)
+                 .set_ABORT_ON_ERROR(i_abort_on_error)
+                 .set_TARGET_WITH_REGISTERS(i_target)
+                 .set_TARGET_WITH_REGISTERS(i_target),
+                 "%s i_rp %lu DQS workaround failed! 10 loops reached without everything passing",
+                 mss::c_str(i_target), i_rp);
+
+    // Now plop the delays back in to the registers
+    FAPI_TRY(mss::workarounds::dp16::dqs_align::set_passing_values( i_target, i_rp, l_passing_values));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Checks if the DQS align workaround needs to be run
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rp the rank pair to check
+/// @param[out] o_skip_workaround - YES if cal should be skipped
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note the workaround needs to be run IFF we failed DQS align
+///
+fapi2::ReturnCode check_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                    const uint64_t i_rp,
+                                    mss::states& o_skip_workaround )
+{
+    // bit location of the two DQS error bits in the dp16 error register
+    // Looking at NO_DQS and NO_LOCK which comes right after NO_DQS
+    constexpr uint64_t NO_DQS = MCA_DDRPHY_DP16_RD_STATUS0_P0_0_01_NO_DQS;
+    constexpr uint64_t NO_LOCK = MCA_DDRPHY_DP16_RD_STATUS0_P0_0_01_NO_LOCK;
+
+    static const std::vector<uint64_t> RD_STATUS0 =
+    {
+        MCA_DDRPHY_DP16_RD_STATUS0_P0_0,
+        MCA_DDRPHY_DP16_RD_STATUS0_P0_1,
+        MCA_DDRPHY_DP16_RD_STATUS0_P0_2,
+        MCA_DDRPHY_DP16_RD_STATUS0_P0_3,
+        MCA_DDRPHY_DP16_RD_STATUS0_P0_4,
+    };
+
+    // Default to skip
+    o_skip_workaround = mss::states::ON;
+    std::vector<fapi2::buffer<uint64_t>> l_data;
+
+    // Gets the reg
+    FAPI_TRY(mss::scom_suckah(i_target, RD_STATUS0, l_data), "%s failed to read RD_STATUS0 regs", mss::c_str(i_target));
+
+    // See if either of the the error bits signaling a DQS fail were triggered
+    for(const auto& l_val : l_data)
+    {
+        if(l_val.getBit<NO_DQS>() || l_val.getBit<NO_LOCK>())
+        {
+            o_skip_workaround = mss::states::OFF;
+            break;
+        }
+    }
+
+    FAPI_INF("%s the DQS workaround will be %s", mss::c_str(i_target),
+             o_skip_workaround == mss::states::OFF ? "run" : "skipped");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Resets bad DQ/DQS bits
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rp - the rank pair to operate on
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode reset_disables( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_rp )
+{
+    // Traits declaration
+    typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+    constexpr uint64_t RESET_VAL = 0;
+
+    return mss::scom_blastah(i_target, TT::BIT_DISABLE_REG[i_rp], RESET_VAL);
+}
+
+///
+/// @brief Sets the passing values from the map into the registers
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rp - the rank pair to operate on
+/// @param[in] i_passing_values - the passing values, a map from the DQS number to the value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode set_passing_values( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_rp,
+                                      std::map<uint64_t, uint64_t>& i_passing_values)
+{
+    // Declares constexprs to beautify the code
+    constexpr uint64_t NUM_BYTES = MAX_DQ_BITS / BITS_PER_BYTE;
+    constexpr uint64_t EVEN_START = MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_0_01_ROT_CLK_N0;
+    constexpr uint64_t ODD_START = MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_0_01_ROT_CLK_N1;
+    constexpr uint64_t LEN = MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_0_01_ROT_CLK_N0_LEN;
+
+    // Registers in terms of RP, then 0/1
+    static const std::vector<std::vector<uint64_t>> RD_CLK_REGS
+    {
+        // RANK_PAIR0
+        {
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_0, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR0_P0_0,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_1, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR0_P0_1,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_2, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR0_P0_2,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_3, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR0_P0_3,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_4, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR0_P0_4,
+        },
+        // RANK_PAIR1
+        {
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR1_P0_0, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR1_P0_0,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR1_P0_1, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR1_P0_1,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR1_P0_2, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR1_P0_2,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR1_P0_3, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR1_P0_3,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR1_P0_4, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR1_P0_4,
+        },
+        // RANK_PAIR2
+        {
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR2_P0_0, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR2_P0_0,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR2_P0_1, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR2_P0_1,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR2_P0_2, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR2_P0_2,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR2_P0_3, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR2_P0_3,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR2_P0_4, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR2_P0_4,
+        },
+        // RANK_PAIR3
+        {
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR3_P0_0, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR3_P0_0,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR3_P0_1, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR3_P0_1,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR3_P0_2, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR3_P0_2,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR3_P0_3, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR3_P0_3,
+            MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR3_P0_4, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR3_P0_4,
+        },
+    };
+
+    // Loop through all of the DP values
+    for(uint64_t l_byte = 0; l_byte < NUM_BYTES; ++l_byte)
+    {
+        const auto l_nibble = l_byte * NIBBLES_PER_BYTE;
+        const auto l_even = l_nibble;
+        const auto l_odd = l_nibble + 1;
+
+        // Sets up the data to plop into the register
+        fapi2::buffer<uint64_t> l_data;
+        const auto l_even_val = i_passing_values[l_even];
+        const auto l_odd_val = i_passing_values[l_odd];
+
+        // TK should we add get/insert into the API? we can then just call that function
+        l_data.insertFromRight<EVEN_START, LEN>(l_even_val);
+        l_data.insertFromRight<ODD_START, LEN>(l_odd_val);
+
+        FAPI_INF("%s setting good values for i_rp %lu  l_byte %lu to register 0x%016lx", mss::c_str(i_target), i_rp, l_byte,
+                 RD_CLK_REGS[i_rp][l_byte]);
+
+        // Scoms that reg
+        FAPI_TRY(mss::putScom(i_target, RD_CLK_REGS[i_rp][l_byte], l_data), "%s failed getscom 0x%016lx", mss::c_str(i_target),
+                 RD_CLK_REGS[i_rp][l_byte]);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Records the passing values into a map
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rp - the rank pair to operate on
+/// @param[in,out] io_passing_values - the passing values, a map from the DQS number to the value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode record_passing_values( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_rp,
+        std::map<uint64_t, uint64_t>& io_passing_values)
+{
+    // Traits declaration
+    typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+
+    constexpr uint64_t MAX_DP = 4;
+
+    // Registers in terms of RP, then 0/1
+    static const std::vector<std::vector<std::pair<uint64_t, uint64_t>>> RD_CLK_REGS
+    {
+        // RANK_PAIR0
+        {
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_0, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR0_P0_0,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_1, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR0_P0_1,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_2, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR0_P0_2,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_3, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR0_P0_3,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_4, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR0_P0_4,},
+        },
+        // RANK_PAIR1
+        {
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR1_P0_0, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR1_P0_0,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR1_P0_1, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR1_P0_1,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR1_P0_2, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR1_P0_2,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR1_P0_3, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR1_P0_3,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR1_P0_4, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR1_P0_4,},
+        },
+        // RANK_PAIR2
+        {
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR2_P0_0, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR2_P0_0,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR2_P0_1, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR2_P0_1,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR2_P0_2, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR2_P0_2,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR2_P0_3, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR2_P0_3,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR2_P0_4, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR2_P0_4,},
+        },
+        // RANK_PAIR3
+        {
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR3_P0_0, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR3_P0_0,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR3_P0_1, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR3_P0_1,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR3_P0_2, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR3_P0_2,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR3_P0_3, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR3_P0_3,},
+            {MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR3_P0_4, MCA_DDRPHY_DP16_DQSCLK_PR1_RANK_PAIR3_P0_4,},
+        },
+    };
+
+    // Gets out the values for DQS CLK and the disable bits
+    std::vector<std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>>> l_rd_clk_values;
+    std::vector<std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>>> l_disable_bits;
+
+    FAPI_TRY(mss::scom_suckah(i_target, RD_CLK_REGS[i_rp], l_rd_clk_values));
+    FAPI_TRY(mss::scom_suckah(i_target, TT::BIT_DISABLE_REG[i_rp], l_disable_bits));
+
+    FAPI_ASSERT( l_disable_bits.size() == l_rd_clk_values.size(),
+                 fapi2::MSS_RDCLK_ALIGN_VECTOR_MISMATCH()
+                 .set_BITVECTOR_SIZE(l_disable_bits.size())
+                 .set_RDCLK_SIZE(l_rd_clk_values.size()),
+                 "%s disable bit vector size %lu is not the same as rd clk vector size %lu", mss::c_str(i_target),
+                 l_disable_bits.size(), l_rd_clk_values.size());
+
+    // Now, loops through both vectors and checks the errors
+    {
+        auto l_rd_it = l_rd_clk_values.begin();
+        auto l_disable_it = l_disable_bits.begin();
+        uint64_t l_dp = 0;
+
+        FAPI_ASSERT( l_dp <= MAX_DP,
+                     fapi2::MSS_EXCEED_NUMBER_OF_DP()
+                     .set_BAD_DP_NUM(l_dp)
+                     .set_MAX_DP(MAX_DP)
+                     .set_TARGET(i_target),
+                     "%s error looping over DP's, found dp %d, max is %d?",
+                     mss::c_str(i_target),
+                     l_dp,
+                     MAX_DP);
+
+        // rd_clk_values == disabled_bits, asserted above
+        for(; l_rd_it < l_rd_clk_values.end(); ++ l_rd_it, ++l_dp, ++l_disable_it)
+        {
+            FAPI_INF("%s i_rp %lu checking on DP%lu for good values", mss::c_str(i_target), i_rp, l_dp);
+
+            FAPI_TRY(record_passing_values_per_dqs<0>(i_target,
+                     i_rp,
+                     l_dp,
+                     *l_disable_it,
+                     *l_rd_it,
+                     io_passing_values));
+
+            FAPI_TRY(record_passing_values_per_dqs<1>(i_target,
+                     i_rp,
+                     l_dp,
+                     *l_disable_it,
+                     *l_rd_it,
+                     io_passing_values));
+
+            FAPI_TRY(record_passing_values_per_dqs<2>(i_target,
+                     i_rp,
+                     l_dp,
+                     *l_disable_it,
+                     *l_rd_it,
+                     io_passing_values));
+
+            FAPI_TRY(record_passing_values_per_dqs<3>(i_target,
+                     i_rp,
+                     l_dp,
+                     *l_disable_it,
+                     *l_rd_it,
+                     io_passing_values));
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // close namespace dqs_align
 
 namespace rd_dq
 {
@@ -807,17 +1185,18 @@ fapi2::ReturnCode modify_small_step_for_big_step<fapi2::TARGET_TYPE_MCA>(const u
     };
 
     // Makes sure that the values passed in were not out of range
-    if(MAX_BIG_STEP <= i_big_step)
-    {
-        FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "WR VREF %s step is out of range. %s step 0x%02x max", "big", "big",
+    FAPI_ASSERT( MAX_BIG_STEP > i_big_step,
+                 fapi2::MSS_WR_VREF_WORKAROUND_BIG_STEPS_OUTOFBOUNDS()
+                 .set_MAX_BIG_STEP(MAX_BIG_STEP)
+                 .set_ACTUAL_BIG_STEP(i_big_step),
+                 "WR VREF %s step is out of range. %s step 0x%02x max", "big", "big",
                  i_big_step);
-    }
-
-    if(MAX_SMALL_STEP <= io_small_step)
-    {
-        FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "WR VREF %s step is out of range. %s step 0x%02x max", "small", "small",
-                 io_small_step);
-    }
+    FAPI_ASSERT( MAX_SMALL_STEP > io_small_step,
+                 fapi2::MSS_WR_VREF_WORKAROUND_SMALL_STEPS_OUTOFBOUNDS()
+                 .set_MAX_SMALL_STEP(MAX_SMALL_STEP)
+                 .set_ACTUAL_SMALL_STEP(io_small_step),
+                 "WR VREF %s step is out of range. %s step 0x%02x max", "big", "big",
+                 i_big_step);
 
     // Converts the value
     io_small_step = SMALL_STEP_CONVERSION[i_big_step][io_small_step];
@@ -912,8 +1291,13 @@ fapi2::ReturnCode convert_train_values<fapi2::TARGET_TYPE_MCA>( const uint8_t i_
     const uint8_t l_big_step_alg = i_big_step + 1;
 
     // Errors out if the big step is out of range
-    FAPI_TRY(i_big_step < NUM_BIG_STEP ? fapi2::FAPI2_RC_SUCCESS : fapi2::FAPI2_RC_INVALID_PARAMETER,
-             "Big step of %d passed in. Max allowable value is %d", i_big_step, NUM_BIG_STEP - 1);
+
+    // Makes sure that the values passed in were not out of range
+    FAPI_ASSERT( NUM_BIG_STEP > i_big_step,
+                 fapi2::MSS_WR_VREF_TRAIN_WORKAROUND_BIG_STEPS_OUTOFBOUNDS()
+                 .set_MAX_BIG_STEP(NUM_BIG_STEP)
+                 .set_ACTUAL_BIG_STEP(i_big_step),
+                 "Big step of %d passed in. Max allowable value is %d", i_big_step, NUM_BIG_STEP - 1);
 
     // Converts the values over to the algorithm's continuous range
     l_continuous_range = io_train_range == fapi2::ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE1 ?
