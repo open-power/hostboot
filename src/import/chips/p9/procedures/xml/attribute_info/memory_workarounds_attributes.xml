@@ -92,5 +92,4 @@
     <enum>NO = 0, YES = 1</enum>
     <writeable/>
   </attribute>
-
 </attributes>
