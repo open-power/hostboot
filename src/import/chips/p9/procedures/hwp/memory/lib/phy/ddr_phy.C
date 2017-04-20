@@ -56,6 +56,7 @@
 #include <lib/utils/dump_regs.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <lib/utils/count_dimm.H>
+#include <lib/dimm/rank.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_PROC_CHIP;
@@ -966,7 +967,7 @@ fapi2::ReturnCode execute_cal_steps_helper( const fapi2::Target<fapi2::TARGET_TY
 
     // Sanity check due to WR_LEVEL termination requirement
     if ((i_cal_steps_enabled.getBit<mss::cal_steps::WR_LEVEL>()) &&
-        (mss::bit_count(static_cast<uint64_t>(i_cal_steps_enabled)) != 1))
+        (mss::bit_count(static_cast<uint16_t>(i_cal_steps_enabled)) != 1))
     {
         FAPI_ERR("WR_LEVEL cal step requires special terminations, so must be run separately from other cal steps");
         fapi2::Assert(false);
@@ -1020,7 +1021,7 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
         const uint8_t i_abort_on_error)
 {
     const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
-
+    FAPI_INF("ABORT_ON_ERROR is %d", i_abort_on_error);
     // We run the cal steps in three chunks: pre-write-leveling, write-leveling, post-wirte-leveling.
     // This is because write-leveling requires a special set of termination values.
 
@@ -1068,18 +1069,35 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
         }
     }
 
-    // Run cal steps between WR_LEVEL and RD_CTR if any are selected - note DQS_ALIGN takes place after WR_LEVEL
-    if (i_cal_steps_enabled.getBit
-        < mss::cal_steps::DQS_ALIGN, mss::cal_steps::STEPS_FROM_DQS_ALIGN_TO_AFTER_RD_CTR_LEN > ())
+    // Lets run DQS
+    if (i_cal_steps_enabled.getBit< mss::cal_steps::DQS_ALIGN > ())
     {
         // Sets up the cal steps in the buffer
-        fapi2::buffer<uint16_t> l_steps_to_execute = i_cal_steps_enabled;
-        l_steps_to_execute.clearBit<mss::cal_steps::EXT_ZQCAL>()
-        .clearBit<mss::cal_steps::WR_LEVEL>()
-        .clearBit<mss::cal_steps::WRITE_CTR, mss::cal_steps::STEPS_FROM_WR_CTR_TO_COARSE_RD_LEN>();
+        fapi2::buffer<uint16_t> l_steps_to_execute;
+        l_steps_to_execute.setBit<mss::cal_steps::DQS_ALIGN>();
 
-        FAPI_INF("%s Running cal steps through read centering on RP%d 0x%04x", mss::c_str(i_target), i_rp,
+        FAPI_INF("%s Running DQS align on RP%d 0x%04x", mss::c_str(i_target), i_rp,
                  uint16_t(l_steps_to_execute));
+
+        // Undertake the calibration steps
+        FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
+
+        // Now run the DQS align workaround
+        FAPI_TRY(mss::workarounds::dp16::dqs_align::dqs_align_workaround(i_target, i_rp, i_abort_on_error),
+                 "%s Failed to run dqs align workaround on rp %d", mss::c_str(i_target), i_rp);
+    }
+
+    // Run cal steps between RDCLK_ALIGN and RD_CTR_VREF if any are selected - note RDCLK_ALIGN takes place after WR_LEVEL
+    if (i_cal_steps_enabled.getBit
+        < mss::cal_steps::RDCLK_ALIGN, mss::cal_steps::STEPS_FROM_RDCLK_ALIGN_TO_AFTER_RD_CTR_VREF_LEN > ())
+    {
+        // Sets up the cal steps in the buffer
+        fapi2::buffer<uint16_t> l_steps_to_execute;
+        i_cal_steps_enabled.extract<mss::cal_steps::RDCLK_ALIGN, mss::cal_steps::STEPS_FROM_RDCLK_ALIGN_TO_AFTER_RD_CTR_VREF_LEN, mss::cal_steps::RDCLK_ALIGN>
+        (l_steps_to_execute);
+
+        FAPI_INF("%s Running rd_clk align through read centering vref on RP%d 0x%04x", mss::c_str(i_target), i_rp,
+                 l_steps_to_execute);
 
         // Undertake the calibration steps
         FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
@@ -1110,6 +1128,7 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 
 // TODO RTC:167929 Can ODT VPD processing be shared between RD and WR?
 ///
