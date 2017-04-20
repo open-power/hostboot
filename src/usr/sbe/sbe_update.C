@@ -932,8 +932,6 @@ namespace SBE
             TRACFCOMP( g_trac_sbe,
                        INFO_MRK"ringOvd():Valid overrides, applying them");
 
-            // Hard coded value, pass in 2KB max
-            uint32_t RING_OVD_SIZE = 0x800;
             FAPI_INVOKE_HWP(l_err,p9_xip_section_append,
                             (void *)l_pnorRingOvd.vaddr,
                             RING_OVD_SIZE,
@@ -1049,31 +1047,6 @@ namespace SBE
                 // Check for no error and use of input cores
                 if ( (NULL == err) && (procIOMask == coreMask))
                 {
-                    // Check if we have a valid ring override section and
-                    // append it in if so
-                    uint32_t l_ovdImgSize = static_cast<uint32_t>(i_maxImgSize);
-                    err = ringOvd(io_imgPtr,l_ovdImgSize);
-                    if(err)
-                    {
-                        TRACFCOMP( g_trac_sbe,
-                              ERR_MRK"procCustomizeSbeImg(): "
-                              "Error in call to ringOvd!");
-                        break;
-                    }
-                    // If it's larger then the original size then we added some
-                    // overrides
-                    if(l_ovdImgSize > tmpImgSize)
-                    {
-                        // We added an override so adjust tmpImgSize
-                        TRACFCOMP( g_trac_sbe,
-                              INFO_MRK"procCustomizeSbeImg(): We added some "
-                              "ring overrides, initial image size:%u "
-                              "new image size:%u",
-                              tmpImgSize, l_ovdImgSize);
-
-                        tmpImgSize = l_ovdImgSize;
-                    }
-
                     // Procedure was successful
                     procedure_success = true;
 
@@ -1932,6 +1905,32 @@ namespace SBE
                            ERRL_GETRC_SAFE(err),
                            ERRL_GETPLID_SAFE(err));
                 break;
+            }
+
+            /*******************************************/
+            /*  Append RINGOVD Image from PNOR to SBE  */
+            /*******************************************/
+            // Check if we have a valid ring override section and
+            // append it in if so
+            uint32_t l_ovdImgSize =
+              static_cast<uint32_t>(sbeHbblImgSize+RING_OVD_SIZE);
+            err = ringOvd(sbeHbblImgPtr,l_ovdImgSize);
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe,
+                           ERR_MRK"procCustomizeSbeImg(): "
+                           "Error in call to ringOvd!");
+                break;
+            }
+
+            //If it's larger than the original size then we added some overrides
+            if(l_ovdImgSize > sbeHbblImgSize)
+            {
+                TRACFCOMP( g_trac_sbe,
+                           INFO_MRK"procCustomizeSbeImg(): We added some "
+                           "ring overrides, initial image size:%u "
+                           "new image size:%u",
+                           sbeHbblImgSize, l_ovdImgSize);
             }
 
 
