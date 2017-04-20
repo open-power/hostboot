@@ -79,6 +79,8 @@ use constant OP_SIGNING_FLAG => " -flags ";
 # Security bits HW flag strings
 use constant OP_BUILD_FLAG => 0x80000000;
 use constant FIPS_BUILD_FLAG => 0x40000000;
+# Applies to SBE image only
+use constant LAB_SECURITY_OVERRIDE_FLAG => 0x00080000;
 use constant KEY_TRANSITION_FLAG => 0x00000001;
 # Size of HW keys' Hash
 use constant HW_KEYS_HASH_SIZE => 64;
@@ -120,6 +122,12 @@ my $sb_signing_config_file = "";
 my $hwKeyHashFile = "";
 my $hb_standalone="";
 
+# @TODO RTC 170650: Set default to 0 after all environments provide external
+# control over this policy, plus remove '!' from 'lab-security-override'
+# command line option as well as documentation for
+# '--no-lab-security-override'
+my $labSecurityOverride = 1;
+
 GetOptions("binDir:s" => \$bin_dir,
            "secureboot" => \$secureboot,
            "test" => \$testRun,
@@ -133,6 +141,7 @@ GetOptions("binDir:s" => \$bin_dir,
            "sb-signing-config-file:s" => \$sb_signing_config_file,
            "hwKeyHashFile:s" => \$hwKeyHashFile,
            "hb-standalone" => \$hb_standalone,
+           "lab-security-override!" => \$labSecurityOverride,
            "help" => \$help);
 
 if ($help)
@@ -183,6 +192,21 @@ elsif ($key_transition =~ m/^$PRODUCTION/i)
 elsif ($key_transition ne "")
 {
     die "Invalid key transition mode = $key_transition";
+}
+
+my $labSecurityOverrideFlag = 0;
+if($labSecurityOverride)
+{
+    if($signMode{$DEVELOPMENT})
+    {
+        $labSecurityOverrideFlag = LAB_SECURITY_OVERRIDE_FLAG;
+    }
+    else
+    {
+        $labSecurityOverride = 0;
+        print "WARNING! Lab security override only valid in development/"
+            . "imprint mode, continuing with lab security override disabled.\n";
+    }
 }
 
 if ($secureboot)
@@ -302,6 +326,11 @@ my %sb_hdrs = (
         prefix => $SIGN_PREFIX_PARAMS,
         file => "$bin_dir/$randPrefix.default.secureboot.hdr.bin"
     },
+    SBE => {
+        flags =>  sprintf("0x%08X",($buildFlag | $labSecurityOverrideFlag)),
+        prefix => $SIGN_PREFIX_PARAMS,
+        file => "$bin_dir/$randPrefix.sbe.default.secureboot.hdr.bin"
+    },
     SBKT => {
         outer => {
             flags => sprintf("0x%08X", $buildFlag | KEY_TRANSITION_FLAG),
@@ -322,7 +351,7 @@ my %sb_hdrs = (
 
 # Print all settings in one print statement to avoid parallel build to mess
 # up output.
-my $SETTINGS = "\n//========== Generate PNOR Image Settings ==========/\n";
+my $SETTINGS = "\n//============= Generate PNOR Image Settings ===========//\n";
 $SETTINGS .= "PNOR Layout = ".$pnorLayoutFile."\n";
 $SETTINGS .= $build_all ? "Build Phase = build_all\n" : "";
 $SETTINGS .= $install_all ? "Build Phase = install_all\n" : "";
@@ -331,7 +360,9 @@ $SETTINGS .= $secureboot ? "Secureboot = Enabled\n" : "Secureboot = Disabled\n";
 $SETTINGS .= %partitionsToCorrupt && $secureboot ? "Corrupt Partitions: ".Dumper \%partitionsToCorrupt : "";
 $SETTINGS .= $secureboot ? "Sign Mode = $sign_mode\n" : "Sign Mode = NA\n";
 $SETTINGS .= $key_transition && $secureboot ? "Key Transition Mode = $key_transition\n" : "Key Transition Mode = NA\n";
-$SETTINGS .= "//====================================================//\n\n";
+$SETTINGS .= "Lab security override (valid for SBE partition only) = ";
+$SETTINGS .= $labSecurityOverride ? "Yes\n" : "No\n";
+$SETTINGS .= "//======================================================//\n\n";
 print $SETTINGS;
 
 if($secureboot && !$openSigningTool)
@@ -519,8 +550,15 @@ sub manipulateImages
         $isSpecialSecure ||= ($eyeCatch eq "HBBL");
         #$isSpecialSecure ||= ($eyeCatch eq "HBI");
 
-        my $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{DEFAULT}{flags};
-        my $secureboot_hdr =  $sb_hdrs{DEFAULT}{file};
+        # If there is a non-default header for this section, use it instead
+        my $header = $sb_hdrs{DEFAULT};
+        if(exists $sb_hdrs{$eyeCatch})
+        {
+            $header = $sb_hdrs{$eyeCatch};
+        }
+
+        my $openSigningFlags = OP_SIGNING_FLAG.$header->{flags};
+        my $secureboot_hdr =  $header->{file};
 
         my $CUR_OPEN_SIGN_REQUEST = "$OPEN_SIGN_REQUEST $openSigningFlags";
         if ($signMode{$PRODUCTION})
@@ -1160,6 +1198,23 @@ print <<"ENDUSAGE";
                                             Note: "--sign-mode production" is not allowed with "--key-transition imprint"
                                             With [--test] will transition to test dev keys, which are a fixed permutation of imprint keys.
     --sb-signing-config-file    Path to ini-formatted config file for production signing
+    --lab-security-override       If signing SBE image, set bit in signing
+                                      header which turns on security override
+                                      checking in the SBE the next time it is
+                                      updated and invoked.  When security
+                                      override checking is enabled, SBE will
+                                      check mailbox scratch register 3 bit 6 and
+                                      if set, disable security.  Otherwise, it
+                                      will retain the existing security
+                                      settings.  NOTE: Only allowed for
+                                      development/imprint signed images.
+    --no-lab-security-override    If signing SBE image, clear bit in signing
+                                      header which disables security override
+                                      checking in the SBE the next time it is
+                                      updated and invoked.  When security
+                                      override checking is disabled, the only
+                                      way to bypass security is by manipulating
+                                      physical jumpers on the system planar.
 
   Current Limitations:
     - Issues with dependency on ENGD build for certain files such as SBE. This is why [--build-all | --install-all ] are used.
