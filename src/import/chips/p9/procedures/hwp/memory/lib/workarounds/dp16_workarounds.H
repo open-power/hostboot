@@ -39,6 +39,7 @@
 #define _MSS_WORKAROUNDS_DP16_H_
 
 #include <fapi2.H>
+#include <map>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <mss_attribute_accessors.H>
@@ -278,6 +279,153 @@ fapi2::ReturnCode rd_vref_vref_sense_setup( const fapi2::Target<fapi2::TARGET_TY
 ///
 fapi2::ReturnCode post_training_workarounds( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const fapi2::buffer<uint16_t>& i_cal_steps_enabled );
+
+namespace dqs_align
+{
+
+///
+/// @brief Runs the DQS workaround
+/// @param[in] i_target
+/// @param[in] i_rp
+/// @param[in] i_abort_on_error CAL_ABORT_ON_ERROR override
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode dqs_align_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                       const uint64_t i_rp,
+                                       const uint8_t i_abort_on_error = fapi2::ENUM_ATTR_MSS_CAL_ABORT_ON_ERROR_NO);
+
+///
+/// @brief Checks if the DQS align workaround needs to be run
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rp rank pair to check
+/// @param[out] o_skip_workaround - YES if cal should be skipped
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note the workaround needs to be run IFF we failed DQS align
+///
+fapi2::ReturnCode check_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                    const uint64_t i_rp,
+                                    mss::states& o_skip_workaround );
+
+///
+/// @brief Resets bad DQ/DQS bits
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rp - the rank pair to operate on
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode reset_disables( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_rp );
+
+///
+/// @brief Records the passing values into a map
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rp - the rank pair to operate on
+/// @param[in,out] io_passing_values - the passing values, a map from the DQS number to the value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode record_passing_values( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_rp,
+        std::map<uint64_t, uint64_t>& io_passing_values);
+
+///
+/// @brief Sets the passing values from the map into the registers
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rp - the rank pair to operate on
+/// @param[in] i_passing_values - the passing values, a map from the DQS number to the value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode set_passing_values( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_rp,
+                                      std::map<uint64_t, uint64_t>& i_passing_values);
+
+///
+/// @brief Records the passing values for a DP/quad
+/// @tparam uint64_t QUAD - the quad to operate on
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rp - the rank pair to operate on
+/// @param[in] i_dp - the DP
+/// @param[in] i_quad - the quad
+/// @param[in] i_disable_bits - pair of disable bit 0/1's
+/// @param[in] i_rd_clk_reg - pair of RD clk registers
+/// @param[in,out] io_passing_values - the passing values, a map from the DQS number to the value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template <uint64_t QUAD>
+fapi2::ReturnCode record_passing_values_per_dqs( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dp,
+        const std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>>& i_disable_bits,
+        const std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>>& i_rd_clk_reg,
+        std::map<uint64_t, uint64_t>& io_passing_values)
+{
+    // Declares constexprs
+    constexpr uint64_t MAX_QUAD_PER_DP = NIBBLES_PER_DP;
+    constexpr uint64_t MAX_DP = 4;
+    constexpr uint64_t NUM_QUADS_PER_DP4 = 2;
+    constexpr uint64_t PHY_REG_START = 48;
+    constexpr uint64_t DISABLE0_BITS_PER_QUAD = 4;
+    constexpr uint64_t DISABLE1_BITS_PER_QUAD = 2;
+    constexpr uint64_t DISABLE0_START = PHY_REG_START + (QUAD * DISABLE0_BITS_PER_QUAD);
+    constexpr uint64_t DISABLE1_START = PHY_REG_START + (QUAD * DISABLE1_BITS_PER_QUAD);
+
+    static_assert(QUAD < MAX_QUAD_PER_DP, "QUAD value is not less than the maximum value");
+
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // TK make this a real error
+    if(i_dp > MAX_DP)
+    {
+        FAPI_ERR("%s i_rp %s DP %lu is out of bounds", mss::c_str(i_target), i_rp, i_dp);
+        return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
+
+    // Skips DP4 non-existant quads
+    if(QUAD >= NUM_QUADS_PER_DP4 && i_dp == MAX_DP)
+    {
+        FAPI_INF("%s i_rp %lu skipping non existant DP%lu QUAD%lu", mss::c_str(i_target), i_rp, i_dp, QUAD)
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Gets the bits to check
+    const auto l_disable0 = i_disable_bits.first.getBit<DISABLE0_START, DISABLE0_BITS_PER_QUAD>();
+    const auto l_disable1 = i_disable_bits.second.getBit<DISABLE1_START, DISABLE1_BITS_PER_QUAD>();
+    const auto l_disable = l_disable0 || l_disable1;
+
+    FAPI_DBG("%s i_rp %lu disable0 0x%016lx, disable1 0x%016lx %lu %lu", mss::c_str(i_target), i_rp,
+             uint64_t(i_disable_bits.first), uint64_t(i_disable_bits.second), DISABLE0_START, DISABLE1_START);
+
+    // Gets the register to operate on
+    const auto l_data = QUAD < 2 ? i_rd_clk_reg.first : i_rd_clk_reg.second;
+    constexpr uint64_t START = QUAD % 2 == 0 ? MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_0_01_ROT_CLK_N0 :
+                               MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_0_01_ROT_CLK_N1;
+    constexpr uint64_t LEN = MCA_DDRPHY_DP16_DQSCLK_PR0_RANK_PAIR0_P0_0_01_ROT_CLK_N0_LEN;
+
+    FAPI_INF("%s i_rp %lu DP%lu QUAD%lu %s", mss::c_str(i_target), i_rp, i_dp, QUAD,
+             l_disable ? "failed - skipping assignment" : "passed - assigning value");
+    FAPI_DBG("%s i_rp %lu DP%lu QUAD%lu value 0x%016lx bit pos %lu", mss::c_str(i_target), i_rp, i_dp, QUAD,
+             uint64_t(l_data), START);
+
+    // Only extract the values for the ones that passed
+    if(!l_disable)
+    {
+        const auto l_nibble = i_dp * MAX_QUAD_PER_DP + QUAD;
+        uint64_t l_value = 0;
+        l_data.extractToRight<START, LEN>(l_value);
+        io_passing_values[l_nibble] = l_value;
+        FAPI_INF("%s i_rp %lu DP%lu QUAD%lu value: %lu", mss::c_str(i_target), i_rp, i_dp, QUAD, l_value);
+    }
+
+    return fapi2::current_err;
+}
+
+///
+/// @brief Checks if the workaround has finished
+/// @param[in] i_passing_values - the passing values, a map from the DQS number to the value
+/// @param[in] i_expected - the number of DRAM/DQS expected
+/// @return bool - true if the the map of passing values is full
+///
+inline bool check_completed( const std::map<uint64_t, uint64_t>& i_passing_values, const uint64_t i_expected)
+{
+    return i_passing_values.size() == i_expected;
+}
+
+} // close namespace dqs_align
 
 namespace rd_dq
 {
