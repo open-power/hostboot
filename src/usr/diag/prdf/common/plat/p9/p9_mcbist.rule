@@ -266,9 +266,9 @@ group gMC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
     (rMC_CHIPLET_FIR, bit(13)) ? analyzeConnectedMCA1;
 
     /** MC_CHIPLET_FIR[14]
-     *  Attention from DDRPHYFIR 2
+     *  Attention from DDRPHYFIR 3
      */
-    (rMC_CHIPLET_FIR, bit(14)) ? analyzeConnectedMCA2;
+    (rMC_CHIPLET_FIR, bit(14)) ? analyzeConnectedMCA3;
 
     /** MC_CHIPLET_FIR[15]
      *  Attention from DDRPHYFIR 0
@@ -276,9 +276,9 @@ group gMC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
     (rMC_CHIPLET_FIR, bit(15)) ? analyzeConnectedMCA0;
 
     /** MC_CHIPLET_FIR[16]
-     *  Attention from DDRPHYFIR 3
+     *  Attention from DDRPHYFIR 2
      */
-    (rMC_CHIPLET_FIR, bit(16)) ? analyzeConnectedMCA3;
+    (rMC_CHIPLET_FIR, bit(16)) ? analyzeConnectedMCA2;
 
 };
 
