@@ -1302,65 +1302,120 @@ void* tpmDaemon(void* unused)
 
 bool isTpmRequired()
 {
-
     bool retVal = false;
-    TARGETING::Target* pTopLevel = nullptr;
 
+    do
+    {
+        // First check if sensor is available
+        if ( getTpmRequiredSensorValue(retVal) )
+        {
+            // Sensor is available so use its setting of retVal
+            TRACUCOMP( g_trac_trustedboot, "isTpmRequired: Sensor is "
+                       "available: using retVal=%d",
+                       retVal );
+            break;
+        }
+        else
+        {
+            // Sensor not available; reset retVal to be safe
+            retVal = false;
+        }
+
+
+        // Since sensor isn't available, use ATTR_TPM_REQUIRED
+        TARGETING::Target* pTopLevel = nullptr;
+        (void)TARGETING::targetService().getTopLevelTarget(pTopLevel);
+        assert(pTopLevel != nullptr, "Unable to get top level target");
+
+        retVal = pTopLevel->getAttr<TARGETING::ATTR_TPM_REQUIRED>();
+
+        TRACUCOMP( g_trac_trustedboot, "isTpmRequired: Using ATTR_TPM_REQUIRED:"
+                   " retVal=%d",
+                   retVal );
+
+    } while(0);
+
+    TRACFCOMP( g_trac_trustedboot,
+               "Tpm Required: %s",(retVal ? "Yes" : "No") );
+
+    return retVal;
+}
+
+bool getTpmRequiredSensorValue(bool& o_isTpmRequired)
+{
+    bool retVal = false;
+    o_isTpmRequired = false;
+
+    // Get TPM Required Sensor
+#ifdef CONFIG_BMC_IPMI
+
+    TARGETING::Target* pTopLevel = nullptr;
     (void)TARGETING::targetService().getTopLevelTarget(pTopLevel);
     assert(pTopLevel != nullptr, "Unable to get top level target");
 
-    TARGETING::ATTR_TPM_REQUIRED_type tpmRequired =
-        pTopLevel->getAttr<TARGETING::ATTR_TPM_REQUIRED>();
-
-    // TPM Required is on in the attributes, now let's check the BMC sensor
-    if (tpmRequired)
-    {
-#ifdef CONFIG_BMC_IPMI
-        uint32_t sensorNum = TARGETING::UTIL::getSensorNumber(pTopLevel,
+    uint32_t sensorNum = TARGETING::UTIL::getSensorNumber(pTopLevel,
                                         TARGETING::SENSOR_NAME_TPM_REQUIRED);
-        // VALID IPMI sensors are 0-0xFE
-        if (TARGETING::UTIL::INVALID_IPMI_SENSOR != sensorNum)
+
+    TRACUCOMP( g_trac_trustedboot,"getTpmRequiredSensorValue: sensorNum=0x%X, "
+               "enum=0x%X",
+               sensorNum, TARGETING::SENSOR_NAME_TPM_REQUIRED);
+
+    // VALID IPMI sensors are 0-0xFE
+    if (TARGETING::UTIL::INVALID_IPMI_SENSOR != sensorNum)
+    {
+        // Check if TPM is required by BMC
+        SENSOR::getSensorReadingData tpmRequiredData;
+        SENSOR::SensorBase tpmRequired(TARGETING::SENSOR_NAME_TPM_REQUIRED,
+                                       pTopLevel);
+        errlHndl_t err = tpmRequired.readSensorData(tpmRequiredData);
+        if (nullptr == err)
         {
-            // Check if TPM is required by BMC
-            SENSOR::getSensorReadingData tpmRequiredData;
-            SENSOR::SensorBase tpmRequired(TARGETING::SENSOR_NAME_TPM_REQUIRED,
-                                           pTopLevel);
-            errlHndl_t err = tpmRequired.readSensorData(tpmRequiredData);
-            if (nullptr == err)
+            // Sensor is available and found without error
+            retVal = true;
+
+            // 0x02 == Asserted bit (TPM is required)
+            if ((tpmRequiredData.event_status &
+                 (1 << SENSOR::ASSERTED)) ==
+                (1 << SENSOR::ASSERTED))
             {
-                // 0x02 == Asserted bit (TPM is required)
-                if ((tpmRequiredData.event_status &
-                     (1 << SENSOR::ASSERTED)) ==
-                    (1 << SENSOR::ASSERTED))
-                {
-                    retVal = true;
-                }
-            }
-            else
-            {
-                // error reading sensor, assume TPM is required
-                TRACFCOMP( g_trac_trustedboot,
-                           "Unable to read Tpm Required Sensor : rc = 0x%04X",
-                           err->reasonCode());
-                delete err;
-                err = nullptr;
-                retVal = true;
+                o_isTpmRequired = true;
             }
         }
         else
         {
-            // Sensor not supported so assume TPM required
-            retVal = true;
+            // error reading sensor, so consider sensor not available
+            TRACFCOMP( g_trac_trustedboot,ERR_MRK"getTpmRequiredSensorValue: "
+                       "Unable to read Tpm Required Sensor: rc = 0x%04X "
+                       "(sensorNum=0x%X, enum=0x%X) Deleting Error plid=0x%04X",
+                       err->reasonCode(), sensorNum,
+                       TARGETING::SENSOR_NAME_TPM_REQUIRED,
+                       err->plid());
+            delete err;
+            err = nullptr;
+            retVal = false;
         }
-#else
-        // IPMI support not there, assume true
-        retVal = true;
-#endif
     }
+    else
+    {
+        // Sensor not available
+        retVal = false;
+        TRACUCOMP( g_trac_trustedboot, "getTpmRequiredSensorValue: Sensor "
+                   "not available: retVal=%d (sensorNum=0x%X)",
+                   retVal, sensorNum );
+    }
+#else
+    // IPMI support not there, so consider sensor not available
+    retVal = false;
+    TRACUCOMP( g_trac_trustedboot, "getTpmRequiredSensorValue: IPMI Support "
+               "not found; retVal=%d",
+               retVal );
+#endif
 
 
     TRACFCOMP( g_trac_trustedboot,
-               "Tpm Required: %s",(retVal ? "Yes" : "No"));
+               "getTpmRequiredSensorValue: isAvail=%s, o_isTpmRequired=%s",
+               (retVal ? "Yes" : "No"),
+               (o_isTpmRequired ? "Yes" : "No") );
 
     return retVal;
 }
