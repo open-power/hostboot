@@ -585,7 +585,7 @@ fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImage
 
     FAPI_ASSERT( ( i_imgType.isBuildValid() ),
                  fapi2::HCODE_INVALID_IMG_TYPE(),
-                 "Invalid temp buffer passed for hcode image build" );
+                 "Invalid image type passed for hcode image build" );
     FAPI_DBG("Exiting validateInputArguments ...");
 
 fapi_try_exit:
@@ -662,6 +662,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     uint64_t     chtmVal   = 0;
     uint32_t     cmeFlag   = 0;
     uint32_t     sgpeFlag  = 0;
+    uint16_t     qmFlags   = 0;
     pgpe_flags_t pgpeFlags;
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
@@ -771,6 +772,42 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     FAPI_DBG("QUEUED_SCAN_DISABLE   :   %s", attrVal ? "TRUE" : "FALSE" );
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_ENABLE,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_RESCLK_ENABLE" );
+
+    if( attrVal )
+    {
+        qmFlags |= CME_QM_FLAG_RESCLK_ENABLE;
+    }
+
+    FAPI_DBG("Resonant Clock Enable  :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IVRMS_ENABLED,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_IVRMS_ENABLED" );
+
+    if( attrVal )
+    {
+        qmFlags |= CME_QM_FLAG_SYS_IVRM_ENABLE;
+    }
+
+    FAPI_DBG("System IVRM Enable   :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_ENABLED,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_WOF_ENABLED" );
+
+    if( attrVal )
+    {
+        qmFlags |= CME_QM_FLAG_SYS_WOF_ENABLE;
+    }
+
+    FAPI_DBG("System WOF Enable   :   %s", attrVal ? "TRUE" : "FALSE" );
+
     // Set PGPE Header Flags from Attributes
     FAPI_DBG(" -------------------- PGPE Flags -----------------");
     pgpeFlags.value = 0;
@@ -789,10 +826,12 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     // Updating flag fields in the headers
     pCmeHdr->g_cme_mode_flags       =   SWIZZLE_4_BYTE(cmeFlag);
+    pCmeHdr->g_cme_qm_mode_flags    =   SWIZZLE_2_BYTE(qmFlags);
     pSgpeHdr->g_sgpe_reserve_flags  =   SWIZZLE_4_BYTE(sgpeFlag);
     pPgpeHdr->g_pgpe_flags          =   SWIZZLE_2_BYTE(pgpeFlags.value);
 
     FAPI_INF("CME Flag Value        : 0x%08x", SWIZZLE_4_BYTE(pCmeHdr->g_cme_mode_flags));
+    FAPI_INF("CME QM Flag Value     : 0x%08x", SWIZZLE_2_BYTE(pCmeHdr->g_cme_qm_mode_flags));
     FAPI_INF("SGPE Flag Value       : 0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_reserve_flags));
     FAPI_INF("SGPE Chtm Config      : 0x%016llx", SWIZZLE_8_BYTE(pSgpeHdr->g_sgpe_chtm_mem_cfg));
     FAPI_INF("PGPE Flag Value       : 0x%08x", SWIZZLE_2_BYTE(pPgpeHdr->g_pgpe_flags));
