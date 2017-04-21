@@ -135,6 +135,11 @@ static void initTargeting(errlHndl_t& io_pError)
     {
         l_isIstepMode = true;
     }
+    if(l_scratch3.overrideSecurity)
+    {
+        TARG_INF("WARNING: External tool asked master proc to disable "
+            "security.");
+    }
 
     AttrRP::init(io_pError, l_isMpipl);
 

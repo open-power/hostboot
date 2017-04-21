@@ -82,13 +82,14 @@ namespace SPLESS
         uint32_t data32;
         struct
         {
-            uint32_t istepMode       :1;   //0
-            uint32_t goToRuntime     :1;   //1
-            uint32_t isMpipl         :1;   //2
-            uint32_t fspAttached     :1;   //3
-            uint32_t reserved1       :1;   //4
-            uint32_t sbeInternalFFDC :1;   //5
-            uint32_t reserved2       :26;  //6:31
+            uint32_t istepMode        :1;   //0
+            uint32_t goToRuntime      :1;   //1
+            uint32_t isMpipl          :1;   //2
+            uint32_t fspAttached      :1;   //3
+            uint32_t reserved1        :1;   //4
+            uint32_t sbeInternalFFDC  :1;   //5
+            uint32_t overrideSecurity :1;   //6
+            uint32_t reserved2        :25;  //7:31
         } PACKED;
     };
 
