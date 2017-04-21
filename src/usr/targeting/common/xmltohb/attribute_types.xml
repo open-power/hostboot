@@ -28582,24 +28582,6 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>SECURITY_MODE</id>
-    <description>
-        If SBE image has ATTR_SECURITY_MODE == 0b1, then leave SAB bit as is,
-        else ATTR_SECURITY_MODE == 0b0, then clear SAB bit
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_SECURITY_MODE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>PFET_OFF_CONTROLS</id>
     <description>
         To disable force pfet off control from fuse status

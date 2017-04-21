@@ -781,11 +781,11 @@ void SPnorRP::processLabOverride(
     TARGETING::Target* pSys = nullptr;
     TARGETING::targetService().getTopLevelTarget(pSys);
     assert(pSys != nullptr,"System target was nullptr.");
-    // ATTR_SECURITY_MODE attribute values are inverted with respect to the lab
-    // override flag for the same logical meaning
-    TARGETING::ATTR_SECURITY_MODE_type securityMode =
+    // ATTR_HB_SECURITY_MODE attribute values are inverted with respect to the
+    // lab override flag for the same logical meaning
+    TARGETING::ATTR_HB_SECURITY_MODE_type securityMode =
         !(i_flags.hw_lab_override);
-    pSys->setAttr<TARGETING::ATTR_SECURITY_MODE>(securityMode);
+    pSys->setAttr<TARGETING::ATTR_HB_SECURITY_MODE>(securityMode);
     TRACFCOMP(g_trac_pnor,INFO_MRK "Set lab security override policy to %s.",
         securityMode ? "*NO* override" : "override if requested");
 }
