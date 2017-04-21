@@ -48,7 +48,11 @@ fapi2::ReturnCode p9_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0,
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5010810ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<46, 4, 60, uint64_t>(literal_0b0111 );
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                l_scom_buffer.insert<46, 4, 60, uint64_t>(literal_0b0111 );
+            }
+
             l_scom_buffer.insert<62, 1, 63, uint64_t>(literal_0 );
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
@@ -57,7 +61,11 @@ fapi2::ReturnCode p9_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0,
                 l_scom_buffer.insert<61, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCPERF1_ENABLE_PF_DROP_CMDLIST_ON );
             }
 
-            l_scom_buffer.insert<32, 7, 57, uint64_t>(literal_8 );
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                l_scom_buffer.insert<32, 7, 57, uint64_t>(literal_8 );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010810ull, l_scom_buffer));
         }
         {
@@ -68,14 +76,17 @@ fapi2::ReturnCode p9_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0,
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010812ull, l_scom_buffer));
         }
         {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x5010813ull, l_scom_buffer ));
-
-            if ((l_TGT1_ATTR_RISK_LEVEL == literal_0))
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                l_scom_buffer.insert<1, 13, 51, uint64_t>(literal_0b0001100000000 );
-            }
+                FAPI_TRY(fapi2::getScom( TGT0, 0x5010813ull, l_scom_buffer ));
 
-            FAPI_TRY(fapi2::putScom(TGT0, 0x5010813ull, l_scom_buffer));
+                if ((l_TGT1_ATTR_RISK_LEVEL == literal_0))
+                {
+                    l_scom_buffer.insert<1, 13, 51, uint64_t>(literal_0b0001100000000 );
+                }
+
+                FAPI_TRY(fapi2::putScom(TGT0, 0x5010813ull, l_scom_buffer));
+            }
         }
 
     };
