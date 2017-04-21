@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -4062,6 +4062,15 @@ REG64( CAPP_0_FIR_REG_OR                                       , RULL(0x02010802
 REG64( CAPP_1_FIR_REG                                          , RULL(0x04010800), SH_UNT_CAPP_1   , SH_ACS_SCOM_RW   );
 REG64( CAPP_1_FIR_REG_AND                                      , RULL(0x04010801), SH_UNT_CAPP_1   , SH_ACS_SCOM1_AND );
 REG64( CAPP_1_FIR_REG_OR                                       , RULL(0x04010802), SH_UNT_CAPP_1   , SH_ACS_SCOM2_OR  );
+
+REG64( MBI_FIR_0x02010800                                  , RULL(0x02010800), SH_UNT          , SH_ACS_SCOM_RW   );
+REG64( MBI_FIR_AND                                         , RULL(0x02010801), SH_UNT          , SH_ACS_SCOM1_AND );
+REG64( MBI_FIR_OR                                          , RULL(0x02010802), SH_UNT          , SH_ACS_SCOM2_OR  );
+REG64( MBI_FIRMASK_0x02010803                              , RULL(0x02010803), SH_UNT          , SH_ACS_SCOM_RW   );
+REG64( MBI_FIRACT0_0x02010806                              , RULL(0x02010806), SH_UNT          , SH_ACS_SCOM_RW   );
+REG64( MBI_FIRACT1_0x02010807                              , RULL(0x02010807), SH_UNT          , SH_ACS_SCOM_RW   );
+REG64( MBI_CFG_0x0201080A                                  , RULL(0x0201080A), SH_UNT          , SH_ACS_SCOM_RW   );
+REG64( MBI_STAT_0x0201080B                                 , RULL(0x0201080B), SH_UNT          , SH_ACS_SCOM_RW   );
 
 REG64( PHB_FIR_REG                                             , RULL(0x0D010908), SH_UNT_PHB      , SH_ACS_SCOM_RW   );
 REG64( PHB_FIR_REG_AND                                         , RULL(0x0D010909), SH_UNT_PHB      , SH_ACS_SCOM1_AND );

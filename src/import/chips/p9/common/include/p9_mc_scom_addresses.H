@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38962,6 +38962,31 @@ REG64( MCA_6_MBACALFIRQ_OR                                     , RULL(0x08010982
 REG64( MCA_7_MBACALFIRQ                                        , RULL(0x080109C0), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
 REG64( MCA_7_MBACALFIRQ_AND                                    , RULL(0x080109C1), SH_UNT_MCA_7    , SH_ACS_SCOM1_AND );
 REG64( MCA_7_MBACALFIRQ_OR                                     , RULL(0x080109C2), SH_UNT_MCA_7    , SH_ACS_SCOM2_OR  );
+
+REG64( MCS_DATAPATHFIR_0x07010900                                          , RULL(0x07010900), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCS_DATAPATHFIR_AND_0x07010901                                      , RULL(0x07010901), SH_UNT_MCA      ,
+       SH_ACS_SCOM1_AND );
+REG64( MCS_DATAPATHFIR_OR_0x07010902                                       , RULL(0x07010902), SH_UNT_MCA      ,
+       SH_ACS_SCOM2_OR  );
+REG64( MCS_DATAPATHFIRMASK_0x07010903                                      , RULL(0x07010903), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCS_DATAPATHFIRMASK_AND_0x07010904                                  , RULL(0x07010904), SH_UNT_MCA      ,
+       SH_ACS_SCOM1_AND );
+REG64( MCS_DATAPATHFIRMASK_OR_0x07010905                                   , RULL(0x07010905), SH_UNT_MCA      ,
+       SH_ACS_SCOM2_OR  );
+REG64( MCS_DATAPATHFIRACT0_0x07010906                                      , RULL(0x07010906), SH_UNT_MCA      ,
+       SH_ACS_SCOM      );
+REG64( MCS_DATAPATHFIRACT1_0x07010907                                      , RULL(0x07010907), SH_UNT_MCA      ,
+       SH_ACS_SCOM      );
+REG64( MCS_MCICFG_0x0701090A                                               , RULL(0x0701090A), SH_UNT_MCA      ,
+       SH_ACS_SCOM      );
+REG64( MCS_MCISTAT_0x0701090B                                              , RULL(0x0701090B), SH_UNT_MCA      ,
+       SH_ACS_SCOM      );
+REG64( MC_MCMODE2_0x03010813                                               , RULL(0x03010813), SH_UNT_MCA      ,
+       SH_ACS_SCOM      );
+REG64( MCS_MCBCFG_0x070123E0                                               , RULL(0x070123E0), SH_UNT_MCA      ,
+       SH_ACS_SCOM      );
 
 REG64( MCA_MBACALFIR_ACTION0                                   , RULL(0x07010906), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
 REG64( MCA_0_MBACALFIR_ACTION0                                 , RULL(0x07010906), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );

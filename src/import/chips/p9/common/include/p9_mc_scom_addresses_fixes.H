@@ -43,6 +43,32 @@ REG64( MCA_MBA_MCP0XLT0                                     , RULL(0x05010820), 
 REG64( MCA_MBA_MCP0XLT1                                     , RULL(0x05010821), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
 REG64( MCA_MBA_MCP0XLT2                                     , RULL(0x05010822), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
 
+// Register define for Framelock
+REG64( DMI_DATAPATHFIR_0x07010900                                          , RULL(0x07010900), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( DMI_DATAPATHFIR_AND_0x07010901                                      , RULL(0x07010901), SH_UNT_MCA      ,
+       SH_ACS_SCOM1_AND );
+REG64( DMI_DATAPATHFIR_OR_0x07010902                                       , RULL(0x07010902), SH_UNT_MCA      ,
+       SH_ACS_SCOM2_OR  );
+REG64( DMI_DATAPATHFIRMASK_0x07010903                                      , RULL(0x07010903), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( DMI_DATAPATHFIRMASK_AND_0x07010904                                  , RULL(0x07010904), SH_UNT_MCA      ,
+       SH_ACS_SCOM1_AND );
+REG64( DMI_DATAPATHFIRMASK_OR_0x07010905                                   , RULL(0x07010905), SH_UNT_MCA      ,
+       SH_ACS_SCOM2_OR  );
+REG64( DMI_DATAPATHFIRACT0_0x07010906                                      , RULL(0x07010906), SH_UNT_MCA      ,
+       SH_ACS_SCOM      );
+REG64( DMI_DATAPATHFIRACT1_0x07010907                                      , RULL(0x07010907), SH_UNT_MCA      ,
+       SH_ACS_SCOM      );
+REG64( DMI_MCICFG_0x0701090A                                               , RULL(0x0701090A), SH_UNT_MCA      ,
+       SH_ACS_SCOM      );
+REG64( DMI_MCISTAT_0x0701090B                                              , RULL(0x0701090B), SH_UNT_MCA      ,
+       SH_ACS_SCOM      );
+REG64( MI_MCMODE2_0x05010813                                               , RULL(0x05010813), SH_UNT_MCA      ,
+       SH_ACS_SCOM      );
+REG64( DMI_MCBCFG_0x070123E0                                               , RULL(0x070123E0), SH_UNT_MCA      ,
+       SH_ACS_SCOM      );
+
 // DDRPHY registers renamed in DD2.0
 REG64( MCA_DDRPHY_DP16_RD_VREF_DAC_0_P0_0                  , RULL(0x800000160701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
