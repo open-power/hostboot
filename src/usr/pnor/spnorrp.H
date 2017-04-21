@@ -198,10 +198,11 @@ class SPnorRP
      *
      *  @par Detailed Description:
      *      Reads the lab override flag from the input flag set, inverts it, and
-     *      writes it to the ATTR_SECURITY_MODE attribute.  Later, SBE update
-     *      will customize that attribute into the SBEs.  If the policy is set
-     *      (attribute clear), the SBE will watch mailbox scratch register 3 bit
-     *      6 to be set.  In that case, SBE will disable security for the
+     *      writes it to the ATTR_HB_SECURITY_MODE attribute (which directly
+     *      maps to FAPI attribute ATTR_SECURITY_MODE).  Later, SBE update
+     *      will customize that FAPI attribute into the SBEs.  If the policy is
+     *      set (attribute clear), the SBE will watch mailbox scratch register 3
+     *      bit 6 to be set.  In that case, SBE will disable security for the
      *      processor, otherwise (policy clear/attribute set) it will not change
      *      the security settings.
      *
