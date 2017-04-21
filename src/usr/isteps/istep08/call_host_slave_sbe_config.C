@@ -103,6 +103,11 @@ void* call_host_slave_sbe_config(void *io_pArgs)
     l_sys->setAttr<ATTR_BOOT_FLAGS>(l_scratch3.data32);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "ATTR_BOOT_FLAGS=%.8X", l_scratch3.data32 );
+    if(l_scratch3.overrideSecurity)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+            "WARNING: Requesting security disable on non-master processors.");
+    }
 
     // grab the boot flags from the master proc
     INITSERVICE::SPLESS::MboxScratch5_t l_scratch5;
