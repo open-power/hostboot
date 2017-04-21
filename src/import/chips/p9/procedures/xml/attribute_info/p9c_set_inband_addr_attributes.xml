@@ -1,0 +1,54 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/attribute_info/p9c_set_inband_addr_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2017                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!--p9c_set_inband_addr_attributes.xml-->
+<attributes>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_DMI_INBAND_BAR_ENABLE</id>
+  <targetType>TARGET_TYPE_DMI</targetType>
+  <description> DMI inband BAR enable.
+                Set by platform.
+                Used by p9c_set_inband_addr.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+  <platInit/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_DMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+  <targetType>TARGET_TYPE_DMI</targetType>
+  <description> DMI inband BAR address offset (relative to chip MMIO origin).
+                Set by platform.
+                Used by p9c_set_inband_addr.
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************* -->
+
+</attributes>
