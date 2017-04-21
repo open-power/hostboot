@@ -1285,7 +1285,7 @@
     </enumerator>
     <enumerator>
         <name>TPM_REQUIRED</name>
-        <value>0xFFFF</value>
+        <value>0xCC03</value>
     </enumerator>
 </enumerationType>
 
@@ -1349,6 +1349,10 @@
     <enumerator>
         <name>FAULT</name>
         <value>0xC7</value>
+    </enumerator>
+    <enumerator>
+        <name>TPM_REQUIRED</name>
+        <value>0xCC</value>
     </enumerator>
 </enumerationType>
 
