@@ -549,5 +549,4 @@ REG64( PEC_1_PCS_PCLCK_CNTL_PLLB_REG                           , RULL(0x8000054F
 REG64( PEC_2_PCS_PCLCK_CNTL_PLLB_REG                           , RULL(0x8000054F0F010C3F), SH_UNT_PEC_2    ,
        SH_ACS_SCOM      );
 
-
 #endif
