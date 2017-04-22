@@ -617,7 +617,7 @@ sub manipulateImages
                 $eccless_prefix.=".header";
                 # Add secure container header
                 # @TODO RTC:155374 Remove when official signing supported
-                if ($secureboot && $secureSupported)
+                if ($secureboot && $isSpecialSecure)
                 {
                     $callerHwHdrFields{configure} = 1;
                     if (exists $hashPageTablePartitions{$eyeCatch})
@@ -737,30 +737,31 @@ sub manipulateImages
                         die "Error closing of $preReqImages{HBB_SW_SIG_FILE} failed" if $!;
                     }
                 }
-                # Add simiple version header
+                elsif($secureboot && $isNormalSecure)
+                {
+                    $callerHwHdrFields{configure} = 1;
+                    if($openSigningTool)
+                    {
+                        run_command("$CUR_OPEN_SIGN_REQUEST "
+                            . "-protectedPayload $bin_file "
+                            . "-out $tempImages{HDR_PHASE}");
+                    }
+                    else
+                    {
+                        # @TODO RTC:155374 Remove when official signing
+                        # supported
+                        run_command("$SIGNING_DIR/build -good -if "
+                            . "$secureboot_hdr -of $tempImages{HDR_PHASE} -bin "
+                            . "$bin_file $SIGN_BUILD_PARAMS");
+                    }
+                }
+                # Add simple version header
                 else
                 {
                     run_command("env echo -en VERSION\\\\0 > $tempImages{TEMP_SHA_IMG}");
                     run_command("sha512sum $bin_file | awk \'{print \$1}\' | xxd -pr -r >> $tempImages{TEMP_SHA_IMG}");
                     run_command("dd if=$tempImages{TEMP_SHA_IMG} of=$tempImages{HDR_PHASE} ibs=4k conv=sync");
                     run_command("cat $bin_file >> $tempImages{HDR_PHASE}");
-                }
-            }
-            elsif ($secureboot && $isNormalSecure)
-            {
-                $eccless_prefix .=".header";
-
-                $callerHwHdrFields{configure} = 1;
-                if($openSigningTool)
-                {
-                    run_command("$CUR_OPEN_SIGN_REQUEST "
-                        . "-protectedPayload $bin_file "
-                        . "-out $tempImages{HDR_PHASE}");
-                }
-                else
-                {
-                    # @TODO RTC:155374 Remove when official signing supported
-                    run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
                 }
             }
             else
@@ -830,17 +831,32 @@ sub manipulateImages
                 run_command("dd if=/dev/zero bs=$size count=1 | tr \"\\000\" \"\\377\" > $tempImages{PAD_PHASE}");
 
                 # Add secure container header
-                if ($secureboot && $isNormalSecure && $eyeCatch ne "SBKT")
+                if(   ($sectionHash{$layoutKey}{sha512Version} eq "yes")
+                   && ($eyeCatch ne "SBKT"))
                 {
-                    $callerHwHdrFields{configure} = 1;
-                    # Remove PAGE_SIZE bytes from generated dummy content of file
-                    # to make room for the secure header
+                    # Remove PAGE_SIZE bytes from generated dummy content of
+                    # file to make room for the secure header
                     my $fileSize = (-s $tempImages{PAD_PHASE}) - PAGE_SIZE;
-                    die "fileSize undefined: errno = $!" unless(defined $fileSize);
+                    die "fileSize undefined: errno = $!"
+                        unless(defined $fileSize);
                     run_command("dd if=$tempImages{PAD_PHASE} of=$tempImages{TEMP_BIN} count=1 bs=$fileSize");
-                    # @TODO RTC:155374 Remove when official signing supported
-                    run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PAD_PHASE} -bin $tempImages{TEMP_BIN} $SIGN_BUILD_PARAMS");
-                    setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{PAD_PHASE});
+
+                    if ($secureboot && $secureSupported)
+                    {
+                        $callerHwHdrFields{configure} = 1;
+                        # @TODO RTC:155374 Remove when official signing
+                        # supported
+                        run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PAD_PHASE} -bin $tempImages{TEMP_BIN} $SIGN_BUILD_PARAMS");
+                        setCallerHwHdrFields(\%callerHwHdrFields,
+                                             $tempImages{PAD_PHASE});
+                    }
+                    else
+                    {
+                        run_command("env echo -en VERSION\\\\0 > $tempImages{TEMP_SHA_IMG}");
+                        run_command("sha512sum $tempImages{TEMP_BIN} | awk \'{print \$1}\' | xxd -pr -r >> $tempImages{TEMP_SHA_IMG}");
+                        run_command("dd if=$tempImages{TEMP_SHA_IMG} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
+                        run_command("cat $tempImages{TEMP_BIN} >> $tempImages{PAD_PHASE}");
+                    }
                 }
             }
         }
