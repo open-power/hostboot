@@ -120,7 +120,7 @@ PNOR_LAYOUT = ${pnorLayoutFSP.xml:P}
 .if(${FAKEPNOR} == "")
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
     GEN_DEFAULT_BIN_FILES = HBBL=${HBBL_IMG},HBB=${HBB_IMG},HBI=${HBI_IMG},HBRT=${HBRT_IMG},TEST=EMPTY,TESTRO=EMPTY,HBEL=EMPTY,GUARD=EMPTY,GLOBAL=EMPTY,PAYLOAD=EMPTY,CVPD=EMPTY,MVPD=EMPTY,DJVPD=EMPTY,RINGOVD=EMPTY,SBKT=EMPTY,WOFDATA=EMPTY
-    DEFAULT_PARAMS = --build-all ${TARGET_TEST:b--test} ${HB_STANDALONE:b--hb-standalone} \
+    DEFAULT_PARAMS = --build-all --emit-eccless ${TARGET_TEST:b--test} ${HB_STANDALONE:b--hb-standalone} \
                      ${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
                      --pnorLayout ${PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS} \
                      --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
@@ -248,7 +248,7 @@ SBEC_FINAL_IMG = SBEC.bin
     # Paramemters passed into GEN_PNOR_IMAGE_SCRIPT.
     GEN_NIMBUS_BIN_FILES = ${NIMBUS}:SBE=${${NIMBUS_SBE_IMG}:P},HCODE=${${NIMBUS_HCODE_IMG}:P},OCC=${${NIMBUS_OCC_IMG}:P},HBD=${${NIMBUS_HBD_IMG}:P}
     #@TODO RTC:163810 - Put SBEC back "--systemBinFile  SBEC=${${SBEC_IMG}:P}"
-    SYSTEM_SPECIFIC_PARAMS = --install-all ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
+    SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
                              --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} ${HB_STANDALONE:b--hb-standalone} \
                              --systemBinFiles ${GEN_NIMBUS_BIN_FILES} --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
 .else
