@@ -149,6 +149,37 @@ errlHndl_t PNOR::fixECC(PNOR::SectionId i_section)
     return Singleton<PnorRP>::instance().fixECC(i_section);
 }
 
+// @TODO RTC 173489
+// Remove API once FSP fully supports signing of PNOR sections that did not
+// previously have a sha512 header
+errlHndl_t PNOR::readHeaderMagic(
+    const PNOR::SectionId      i_secId,
+    const PNOR::SectionData_t& i_TOC,
+    const size_t               i_size,
+          void* const          o_pData)
+{
+    errlHndl_t pError = nullptr;
+    assert(o_pData != nullptr,"Output buffer pointer was nullptr");
+
+    do {
+
+    size_t size = i_size;
+    auto pTarget = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+    // Read first <=8 bytes of section data from the PNOR DD
+    // Note: Do not need to worry about ECC as the 9th byte is the first
+    //       ECC byte.
+    pError = DeviceFW::deviceRead(pTarget, o_pData, size,
+                         DEVICE_PNOR_ADDRESS(0,i_TOC.flashAddr));
+    if (pError)
+    {
+        break;
+    }
+
+    } while(0);
+
+    return pError;
+}
+
 /**
  * STATIC
  * @brief Static Initializer

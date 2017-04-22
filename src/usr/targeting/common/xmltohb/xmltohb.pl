@@ -6138,8 +6138,8 @@ sub generateTargetingImage {
         $md5hex->add($associationsBinData);
         $md5hex->add($heapPnorInitBinData);
 
-        my $versionHeader = "VERSION";
-        my $versionHeader .= $md5hex->hexdigest;
+        my $versionHeader = "VERSION\0";
+        $versionHeader .= $md5hex->hexdigest;
 
         $outFile .= $versionHeader;
         my $versionHeaderPadSize =

@@ -430,3 +430,48 @@ errlHndl_t PNOR::setSecure(const uint32_t i_secId,
 
     return l_errhdl;
 }
+
+// @TODO RTC 173489
+// Remove API once FSP fully supports signing of PNOR sections that did not
+// previously have a sha512 header
+errlHndl_t PNOR::hasKnownHeader(
+    const PNOR::SectionId      i_secId,
+    const PNOR::SectionData_t& i_TOC,
+          bool&                o_knownHeader)
+{
+    errlHndl_t pError = nullptr;
+    bool knownHeader = true;
+
+    do {
+
+    // Left symbolic constant defined in the function so it's easier to strip
+    // out later and nothing becomes dependent on it
+    const char VERSION_MAGIC[] = "VERSION";
+    const auto versionMagicSize = sizeof(VERSION_MAGIC);
+    const auto secureMagicSize = sizeof(ROM_MAGIC_NUMBER);
+    auto size = std::max(versionMagicSize,secureMagicSize);
+    assert(size <= sizeof(uint64_t),"non-ECC request size exceeded. "
+        "Expected size of <= %d but got %d",sizeof(uint64_t),size);
+    uint8_t buf[size] = {0};
+
+    pError = readHeaderMagic(i_secId,i_TOC,size,buf);
+    if(pError)
+    {
+        break;
+    }
+
+    auto secureHeader = PNOR::cmpSecurebootMagicNumber(buf);
+    decltype(secureHeader) versionHeader =
+        (memcmp(buf,VERSION_MAGIC,versionMagicSize) == 0);
+    if(!secureHeader && !versionHeader)
+    {
+        knownHeader = false;
+    }
+
+    o_knownHeader = knownHeader;
+
+    } while (0);
+
+    return pError;
+}
+

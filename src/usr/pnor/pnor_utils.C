@@ -319,6 +319,28 @@ PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
                                 ((io_TOC[secId].size * 8 ) / 9);
         }
 
+        // @TODO RTC 173489
+        // Remove once FSP fully supports signing of PNOR sections that did
+        // not previously have a sha512 header.  Until then, turn off the SHA512
+        // bit if it doesn't match known header types
+#ifndef BOOTLOADER
+        if(io_TOC[secId].version & FFS_VERS_SHA512)
+        {
+            bool hasKnownHeader = true;
+            l_errhdl = PNOR::hasKnownHeader(static_cast<SectionId>(secId),
+                io_TOC[secId],hasKnownHeader);
+            if(l_errhdl)
+            {
+                break;
+            }
+
+            if(!hasKnownHeader)
+            {
+                io_TOC[secId].version &= ~FFS_VERS_SHA512;
+            }
+        }
+#endif
+
 #ifdef BOOTLOADER
         io_TOC[secId].secure = PNOR::isEnforcedSecureSection(secId);
 #elif !defined(__HOSTBOOT_RUNTIME) // runtime is handled by rt_pnor code
@@ -454,6 +476,6 @@ bool PNOR::cmpSecurebootMagicNumber(const uint8_t* i_vaddr)
 
 bool PNOR::hasNonSecureHeader(const PNOR::SectionData_t& i_secInfo)
 {
-    return i_secInfo.version == FFS_VERS_SHA512 &&
+    return (i_secInfo.version & FFS_VERS_SHA512) &&
            !i_secInfo.secure;
 }

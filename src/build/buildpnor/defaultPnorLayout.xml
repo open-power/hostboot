@@ -165,6 +165,7 @@ Layout Description
         <physicalOffset>0xF61000</physicalOffset>
         <physicalRegionSize>0x48000</physicalRegionSize>
         <sha512perEC/>
+        <sha512Version/>
         <side>sideless</side>
         <ecc/>
     </section>
@@ -191,6 +192,7 @@ Layout Description
         <eyeCatch>PAYLOAD</eyeCatch>
         <physicalOffset>0x1549000</physicalOffset>
         <physicalRegionSize>0x1560000</physicalRegionSize>
+        <sha512Version/>
         <side>sideless</side>
         <ecc/>
     </section>

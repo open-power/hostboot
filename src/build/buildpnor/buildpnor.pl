@@ -216,14 +216,16 @@ sub addUserData
         $dataInteg = 0x8000;
     }
 
-    # VerCheck Flag
+    # VerCheck Flag: sha512Version
     if( ($i_sectionHash{$i_key}{sha512Version} eq "yes") )
     {
-        $verCheck = 0x80;
+        $verCheck |= 0x80;
     }
-    elsif( ($i_sectionHash{$i_key}{sha512perEC} eq "yes") )
+
+    # VerCheck Flag: sha512perEC
+    if( ($i_sectionHash{$i_key}{sha512perEC} eq "yes") )
     {
-        $verCheck = 0x40;
+        $verCheck |= 0x40;
     }
 
     # Misc Flags
