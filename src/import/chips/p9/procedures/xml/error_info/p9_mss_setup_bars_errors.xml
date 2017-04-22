@@ -41,8 +41,6 @@
   <hwpError>
     <rc>RC_MSS_SETUP_BARS_MULTIPLE_GROUP_ERR</rc>
     <description>An MC port is grouped multiples times.</description>
-    <ffdc>MCS_TARGET</ffdc>
-    <ffdc>MCS_POS</ffdc>
     <ffdc>PORT_ID</ffdc>
     <ffdc>COUNTER</ffdc>
     <callout>
@@ -52,12 +50,12 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_SETUP_BARS_MCS_MEMSIZE_DISCREPENCY</rc>
-    <description>The amount of memory behind an MCS calculated from Group Data
-                 doesn't agree with the amount of memory currently reported
-                 behind the same MCS.</description>
-    <ffdc>MCS_TARGET</ffdc>
-    <ffdc>MCS_POS</ffdc>
+    <rc>RC_MSS_SETUP_BARS_MC_MEMSIZE_DISCREPENCY</rc>
+    <description>The amount of memory behind an MC (MCS/MI) calculated from
+                 Group Data doesn't agree with the amount of memory currently
+                 reported behind the same MC.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>MC_POS</ffdc>
     <ffdc>MEMSIZE_GROUP_DATA</ffdc>
     <ffdc>MEMSIZE_REPORTED</ffdc>
     <callout>
@@ -68,11 +66,10 @@
 
   <hwpError>
     <rc>RC_MSS_SETUP_BARS_INVALID_PORTS_CONFIG</rc>
-    <description>Invalid number in group for ports 0/1 of the MCS.
+    <description>Invalid number in group for ports 0/1 of the MC (MCS/MI).
                  The combination can not be found in the Channel Per Group
                  table.</description>
-    <ffdc>MCS_TARGET</ffdc>
-    <ffdc>MCS_POS</ffdc>
+    <ffdc>MC_TARGET</ffdc>
     <ffdc>PORT_0_PORTS_IN_GROUP</ffdc>
     <ffdc>PORT_0_GROUP</ffdc>
     <ffdc>PORT_1_PORTS_IN_GROUP</ffdc>
@@ -85,10 +82,10 @@
 
   <hwpError>
     <rc>RC_MSS_SETUP_BARS_INVALID_GROUP_SIZE</rc>
-    <description>Can't locate givem Group size in the GROUP_SIZE_TABLE in order
+    <description>Can't locate given Group size in the GROUP_SIZE_TABLE in order
                  to determine MCFGP/MCFGPM Group size value (bits 13:23).</description>
-    <ffdc>MCS_TARGET</ffdc>
-    <ffdc>MCS_POS</ffdc>
+    <ffdc>MC_TARGET</ffdc>
+    <ffdc>MC_POS</ffdc>
     <ffdc>GROUP_SIZE</ffdc>
     <callout>
         <procedure>CODE</procedure>
