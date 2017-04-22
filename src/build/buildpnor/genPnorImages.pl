@@ -113,6 +113,7 @@ my $testRun = 0;
 my $pnorLayoutFile = "";
 my $system_target = "";
 my $build_all = 0;
+my $emitEccless = 0;
 my $install_all = 0;
 my $key_transition = "";
 my $help = 0;
@@ -142,6 +143,7 @@ GetOptions("binDir:s" => \$bin_dir,
            "hwKeyHashFile:s" => \$hwKeyHashFile,
            "hb-standalone" => \$hb_standalone,
            "lab-security-override!" => \$labSecurityOverride,
+           "emit-eccless" => \$emitEccless,
            "help" => \$help);
 
 if ($help)
@@ -354,6 +356,8 @@ my %sb_hdrs = (
 my $SETTINGS = "\n//============= Generate PNOR Image Settings ===========//\n";
 $SETTINGS .= "PNOR Layout = ".$pnorLayoutFile."\n";
 $SETTINGS .= $build_all ? "Build Phase = build_all\n" : "";
+$SETTINGS .= "Emit ECC-less versions of output files, when possible = ";
+$SETTINGS .= $emitEccless ? "Yes\n" : "No\n";
 $SETTINGS .= $install_all ? "Build Phase = install_all\n" : "";
 $SETTINGS .= $testRun ? "Test Mode = Yes\n" : "Test Mode = No\n";
 $SETTINGS .= $secureboot ? "Secureboot = Enabled\n" : "Secureboot = Disabled\n";
@@ -577,9 +581,10 @@ sub manipulateImages
         # Handle partitions that have an input binary.
         if (-e $bin_file)
         {
-            # FSP workaround to keep original bin names
-            my $fsp_file = $bin_file;
-            my $fsp_prefix = "";
+            # Track original name and whether file has a header or not in order
+            # to emit eccless outputs, if requested
+            my $eccless_file = $bin_file;
+            my $eccless_prefix = "";
 
             # HBBL + ROM combination
             if ($eyeCatch eq "HBBL")
@@ -609,7 +614,7 @@ sub manipulateImages
             # Header Phase
             if($sectionHash{$layoutKey}{sha512Version} eq "yes")
             {
-                $fsp_prefix.=".header";
+                $eccless_prefix.=".header";
                 # Add secure container header
                 # @TODO RTC:155374 Remove when official signing supported
                 if ($secureboot && $secureSupported)
@@ -745,6 +750,8 @@ sub manipulateImages
             }
             elsif ($secureboot && $isNormalSecure)
             {
+                $eccless_prefix .=".header";
+
                 $callerHwHdrFields{configure} = 1;
                 if($openSigningTool)
                 {
@@ -783,11 +790,13 @@ sub manipulateImages
                 run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
             }
 
-            # Create .header.bin file for FSP
-            if ($build_all)
+            # If so instructed, retain pre-ECC versions of the output files
+            # using the appropriate naming convention
+            if ($emitEccless)
             {
-                $fsp_file =~ s/\.bin/$fsp_prefix.bin/;
-                run_command("cp $tempImages{PAD_PHASE} $fsp_file");
+                my($file,$dirs,$suffix) = fileparse($eccless_file);
+                $file =~ s/(\.\w+)$/$eccless_prefix$1/;
+                run_command("cp $tempImages{PAD_PHASE} $bin_dir/$file");
             }
 
             # Corrupt section if user specified to do so, before ECC injection.
@@ -1218,6 +1227,8 @@ print <<"ENDUSAGE";
                                       override checking is disabled, the only
                                       way to bypass security is by manipulating
                                       physical jumpers on the system planar.
+    --emit-eccless                In addition to typical output, also emit
+                                      ECC-less versions of any input binaries
 
   Current Limitations:
     - Issues with dependency on ENGD build for certain files such as SBE. This is why [--build-all | --install-all ] are used.
