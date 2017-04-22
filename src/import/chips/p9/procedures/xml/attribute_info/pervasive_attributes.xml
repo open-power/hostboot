@@ -462,8 +462,14 @@
 <attribute>
   <id>ATTR_SECURITY_MODE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>If SBE image has ATTR_SECURITY_MODE == 0b1, then leave SAB bit as is
-  Else ATTR_SECURITY_MODE == 0b0, then clear the SAB bit</description>
+  <description>SBE context: If SBE image has ATTR_SECURITY_MODE == 0b1, leave
+    SAB bit as is.  Otherwise (ATTR_SECURITY_MODE == 0b0), query mailbox scratch
+    register 3 bit 6 and if set, clear the SAB bit. Non-SBE context: If
+    ATTR_SECURITY_MODE == 0b1, do not attempt to clear the SAB bit via the FSI
+    path.  Otherwise (ATTR_SECURITY_MODE == 0b0), attempt to clear the SAB bit
+    via the FSI path.  Customer level chips will silently ignore such a request,
+    whereas early lab versions may honor it for debug purposes.
+  </description>
   <valueType>uint8</valueType>
   <platInit/>
   <writeable/>
