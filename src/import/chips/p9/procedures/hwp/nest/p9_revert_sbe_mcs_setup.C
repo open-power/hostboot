@@ -50,10 +50,10 @@
 // Constant definitions
 //------------------------------------------------------------------------------
 
-// MCS target type constants
-const uint8_t NUM_MCS_TARGETS = 4;
+// MCS/MI target type constants
+const uint8_t NUM_MCS_MI_TARGETS = 4;
 
-const uint64_t MCS_CPLT_CTRL1_ARR[NUM_MCS_TARGETS] =
+const uint64_t MCS_CPLT_CTRL1_ARR[NUM_MCS_MI_TARGETS] =
 {
     PERV_N3_CPLT_CTRL1,
     PERV_N3_CPLT_CTRL1,
@@ -61,7 +61,7 @@ const uint64_t MCS_CPLT_CTRL1_ARR[NUM_MCS_TARGETS] =
     PERV_N1_CPLT_CTRL1
 };
 
-const uint64_t MCS_CPLT_CTRL1_BIT_ARR[NUM_MCS_TARGETS] =
+const uint64_t MCS_CPLT_CTRL1_BIT_ARR[NUM_MCS_MI_TARGETS] =
 {
     10,
     10,
@@ -69,28 +69,28 @@ const uint64_t MCS_CPLT_CTRL1_BIT_ARR[NUM_MCS_TARGETS] =
     9
 };
 
-const uint64_t MCS_MCFGP_ARR[NUM_MCS_TARGETS] =
+const uint64_t MCS_MCFGP_ARR[NUM_MCS_MI_TARGETS] =
 {
     MCS_0_MCFGP,
     MCS_1_MCFGP,
     MCS_2_MCFGP,
     MCS_3_MCFGP
 };
-const uint64_t MCS_MCMODE1_ARR[NUM_MCS_TARGETS] =
+const uint64_t MCS_MCMODE1_ARR[NUM_MCS_MI_TARGETS] =
 {
     MCS_0_MCMODE1,
     MCS_1_MCMODE1,
     MCS_2_MCMODE1,
     MCS_3_MCMODE1
 };
-const uint64_t MCS_MCPERF1_ARR[NUM_MCS_TARGETS] =
+const uint64_t MCS_MCPERF1_ARR[NUM_MCS_MI_TARGETS] =
 {
     MCS_0_MCPERF1,
     MCS_1_MCPERF1,
     MCS_2_MCPERF1,
     MCS_3_MCPERF1
 };
-const uint64_t MCS_MCFIRMASK_OR_ARR[NUM_MCS_TARGETS] =
+const uint64_t MCS_MCFIRMASK_OR_ARR[NUM_MCS_MI_TARGETS] =
 {
     MCS_0_MCFIRMASK_OR,
     MCS_1_MCFIRMASK_OR,
@@ -104,82 +104,72 @@ const uint64_t MCS_MCFIRMASK_OR_ARR[NUM_MCS_TARGETS] =
 //------------------------------------------------------------------------------
 
 
-// helper function for MCS target type
+///
+/// @brief helper function revert the dcbz configuration
+///
+/// @param[in] i_target Reference to an MC target (MCS/MI)
+/// @param[in] i_mc the unit number.
+////// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+template<fapi2::TargetType T>
 fapi2::ReturnCode
-revert_mcs_hb_dcbz_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                          const uint8_t i_mcs)
+revert_mc_hb_dcbz_config(const fapi2::Target<T>& i_target,
+                         const uint8_t i_mc)
 {
-    FAPI_DBG("Start");
+    FAPI_DBG("Start revert_mc_hb_dcbz_config");
     fapi2::buffer<uint64_t> l_cplt_ctrl1;
     fapi2::buffer<uint64_t> l_mcfgp;
     fapi2::buffer<uint64_t> l_mcmode1;
     fapi2::buffer<uint64_t> l_mcperf1;
     fapi2::buffer<uint64_t> l_mcfirmask;
 
-    FAPI_TRY(fapi2::getScom(i_target, MCS_CPLT_CTRL1_ARR[i_mcs], l_cplt_ctrl1),
+    FAPI_TRY(fapi2::getScom(i_target, MCS_CPLT_CTRL1_ARR[i_mc], l_cplt_ctrl1),
              "Error from getscom (CPLT_CTRL1)");
 
-    if (!l_cplt_ctrl1.getBit(MCS_CPLT_CTRL1_BIT_ARR[i_mcs]))
+    if (!l_cplt_ctrl1.getBit(MCS_CPLT_CTRL1_BIT_ARR[i_mc]))
     {
         // MCFGP -- mark BAR invalid & reset grouping configuration fields
-        FAPI_TRY(fapi2::getScom(i_target, MCS_MCFGP_ARR[i_mcs], l_mcfgp),
-                 "Error from getScom (MCS%d_MCFGP)", i_mcs);
+        FAPI_TRY(fapi2::getScom(i_target, MCS_MCFGP_ARR[i_mc], l_mcfgp),
+                 "Error from getScom (MCS%d_MCFGP)", i_mc);
         l_mcfgp.clearBit<MCS_MCFGP_VALID>();
         l_mcfgp.clearBit<MCS_MCFGP_MC_CHANNELS_PER_GROUP,
                          MCS_MCFGP_MC_CHANNELS_PER_GROUP_LEN>();
         l_mcfgp.clearBit<MCS_MCFGP_CHANNEL_0_GROUP_MEMBER_IDENTIFICATION,
                          MCS_MCFGP_CHANNEL_0_GROUP_MEMBER_IDENTIFICATION_LEN>();
         l_mcfgp.clearBit<MCS_MCFGP_GROUP_SIZE, MCS_MCFGP_GROUP_SIZE_LEN>();
-        FAPI_TRY(fapi2::putScom(i_target, MCS_MCFGP_ARR[i_mcs], l_mcfgp),
-                 "Error from putScom (MCS%d_MCFGP)", i_mcs);
+        FAPI_TRY(fapi2::putScom(i_target, MCS_MCFGP_ARR[i_mc], l_mcfgp),
+                 "Error from putScom (MCS%d_MCFGP)", i_mc);
 
         // MCMODE1 -- enable speculation, cmd bypass, fp command bypass
-        FAPI_TRY(fapi2::getScom(i_target, MCS_MCMODE1_ARR[i_mcs], l_mcmode1),
-                 "Error from getScom (MCS%d_MCMODE1)", i_mcs);
+        FAPI_TRY(fapi2::getScom(i_target, MCS_MCMODE1_ARR[i_mc], l_mcmode1),
+                 "Error from getScom (MCS%d_MCMODE1)", i_mc);
         l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_ALL_SPEC_OPS>();
         l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_SPEC_OP,
                            MCS_MCMODE1_DISABLE_SPEC_OP_LEN>();
         l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_COMMAND_BYPASS,
                            MCS_MCMODE1_DISABLE_COMMAND_BYPASS_LEN>();
         l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_FP_COMMAND_BYPASS>();
-        FAPI_TRY(fapi2::putScom(i_target, MCS_MCMODE1_ARR[i_mcs], l_mcmode1),
-                 "Error from putScom (MCS%d_MCMODE1)", i_mcs);
+        FAPI_TRY(fapi2::putScom(i_target, MCS_MCMODE1_ARR[i_mc], l_mcmode1),
+                 "Error from putScom (MCS%d_MCMODE1)", i_mc);
 
         // MCS_MCPERF1 -- enable fast path
-        FAPI_TRY(fapi2::getScom(i_target, MCS_MCPERF1_ARR[i_mcs], l_mcperf1),
-                 "Error from getScom (MCS%d_MCPERF1)", i_mcs);
+        FAPI_TRY(fapi2::getScom(i_target, MCS_MCPERF1_ARR[i_mc], l_mcperf1),
+                 "Error from getScom (MCS%d_MCPERF1)", i_mc);
         l_mcperf1.clearBit<MCS_MCPERF1_DISABLE_FASTPATH>();
-        FAPI_TRY(fapi2::putScom(i_target, MCS_MCPERF1_ARR[i_mcs], l_mcperf1),
-                 "Error from putScom (MCS%d_MCPERF1)", i_mcs);
+        FAPI_TRY(fapi2::putScom(i_target, MCS_MCPERF1_ARR[i_mc], l_mcperf1),
+                 "Error from putScom (MCS%d_MCPERF1)", i_mc);
 
         // Re-mask MCFIR. We want to ensure all MCSs are masked
         // until the BARs are opened later during IPL.
         l_mcfirmask.flush<1>();
-        FAPI_TRY(fapi2::putScom(i_target, MCS_MCFIRMASK_OR_ARR[i_mcs], l_mcfirmask),
-                 "Error from putScom (MCS % d_MCFIRMASK_OR)", i_mcs);
+        FAPI_TRY(fapi2::putScom(i_target, MCS_MCFIRMASK_OR_ARR[i_mc], l_mcfirmask),
+                 "Error from putScom (MCS % d_MCFIRMASK_OR)", i_mc);
     }
 
 fapi_try_exit:
-    FAPI_DBG("End");
+    FAPI_DBG("End revert_mc_hb_dcbz_config");
     return fapi2::current_err;
 }
-
-
-// helper function for MI target type
-fapi2::ReturnCode
-revert_mi_hb_dcbz_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-{
-    FAPI_DBG("Start");
-
-    // TODO: implement for Cumulus/MI target type
-    (void) i_target;
-    goto fapi_try_exit;
-
-fapi_try_exit:
-    FAPI_DBG("End");
-    return fapi2::current_err;
-}
-
 
 // HWP entry point
 fapi2::ReturnCode
@@ -190,6 +180,7 @@ p9_revert_sbe_mcs_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_SYSTEM_IPL_PHASE_Type l_ipl_phase;
     auto l_mcs_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCS>(fapi2::TARGET_STATE_PRESENT);
+    auto l_mi_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_MI>(fapi2::TARGET_STATE_PRESENT);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IPL_PHASE, FAPI_SYSTEM, l_ipl_phase),
              "Error from FAPI_ATTR_GET (ATTR_SYSTEM_IPL_PHASE)");
@@ -203,16 +194,23 @@ p9_revert_sbe_mcs_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
 
     if (l_mcs_chiplets.size())
     {
-        for (uint8_t l_mcs = 0; l_mcs < NUM_MCS_TARGETS; l_mcs++)
+        for (uint8_t l_mcs = 0; l_mcs < NUM_MCS_MI_TARGETS; l_mcs++)
         {
-            FAPI_TRY(revert_mcs_hb_dcbz_config(i_target, l_mcs),
+            FAPI_TRY(revert_mc_hb_dcbz_config(i_target, l_mcs),
                      "Error from revert_mcs_hb_dcbz_config");
+        }
+    }
+    else if (l_mi_chiplets.size())
+    {
+        for (uint8_t l_mi = 0; l_mi < NUM_MCS_MI_TARGETS; l_mi++)
+        {
+            FAPI_TRY(revert_mc_hb_dcbz_config(i_target, l_mi),
+                     "Error from revert_mi_hb_dcbz_config");
         }
     }
     else
     {
-        FAPI_TRY(revert_mi_hb_dcbz_config(i_target),
-                 "Error from revert_mi_hb_dcbz_config");
+        FAPI_INF("No MCS/MI targets found! Nothing to do!");
     }
 
 fapi_try_exit:
