@@ -719,9 +719,12 @@
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_DMI_REFCLOCK_SWIZZLE</id>
-  <targetType>TARGET_TYPE_MCS</targetType>
-  <description>Define DMI Ref clock/Swizzle for Centaur.
-   Provided by the MRW</description>
+  <targetType>TARGET_TYPE_DMI</targetType>
+  <description>
+      Define DMI Ref clock/Swizzle for Centaur.
+      Mapper from DMI unit id -> ROOT CNTL 6 refclk drive enable bit
+      consumer: p9_cen_ref_clk_enable
+      </description>
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
