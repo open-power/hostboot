@@ -26,15 +26,15 @@
 /// @file p9_cen_ref_clk_enable.H
 /// @brief Enable Centaur reference clocks (FAPI2)
 ///
-/// @author Joe McGill <jmcgill@us.ibm.com>
+/// @author Peng Fei GOU <shgoupf@cn.ibm.com>
 ///
 
 //
-// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
+// *HWP HWP Owner: Peng Fei GOU <shgoupf@cn.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Perv
-// *HWP Level: 1
-// *HWP Consumed by: HB,FSP
+// *HWP Level: 3
+// *HWP Consumed by: HB
 //
 
 #ifndef _P9_CEN_REF_CLK_ENABLE_H_
@@ -52,7 +52,6 @@
 
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_cen_ref_clk_enable_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
-
 
 //------------------------------------------------------------------------------
 // Function prototypes
