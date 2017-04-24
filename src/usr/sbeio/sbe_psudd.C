@@ -345,8 +345,24 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
         errl = writeScom(i_target,PSU_HOST_DOORBELL_REG_AND,&l_data);
         if (errl) break;
 
+        //If the command is not supported, then print a statement and break out
+        if(o_pPsuResponse->primaryStatus == SBE_PRI_INVALID_COMMAND &&
+           o_pPsuResponse->secondaryStatus == SBE_SEC_COMMAND_NOT_SUPPORTED)
+        {
+            SBE_TRACF("sbe_psudd.C :: readResponse: COMMAND NOT SUPPORTED "
+                      " cmd=0x%02x%02x prim=0x%08x secondary=0x%08x"
+                      " expected seqID=%d actual seqID=%d",
+                      i_pPsuRequest->commandClass,
+                      i_pPsuRequest->command,
+                      o_pPsuResponse->primaryStatus,
+                      o_pPsuResponse->secondaryStatus,
+                      i_pPsuRequest->seqID,
+                      o_pPsuResponse->seqID);
+            SBE_TRACFBIN( "Full response:", o_pPsuResponse, sizeof(psuResponse) );
+            break;
+        }
         //check status and seq ID in response messages
-        if ((SBE_PRI_OPERATION_SUCCESSFUL != o_pPsuResponse->primaryStatus) ||
+        else if ((SBE_PRI_OPERATION_SUCCESSFUL != o_pPsuResponse->primaryStatus) ||
             (SBE_SEC_OPERATION_SUCCESSFUL != o_pPsuResponse->secondaryStatus) ||
             (i_pPsuRequest->seqID != o_pPsuResponse->seqID) )
         {
