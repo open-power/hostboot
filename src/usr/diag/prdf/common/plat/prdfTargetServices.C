@@ -761,14 +761,19 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
         }
         else if ( TYPE_MCA == trgtType && TYPE_DIMM == i_connType )
         {
-            // i_connPos is the DIMM select (0-1)
+            // i_connPos is the DIMM select (0-1). Note that we don't use
+            // getTargetPosition() on the DIMM because that does not return a
+            // value that is relative to the processor as we were expecting.
+            // There really isn't a good position attribute that matches the
+            // position in the affinity path. We can use ATTR_REL_POS, which
+            // will always match the DIMM select. This does not let us match the
+            // parent unit like all of the other checks in this functions.
+            // Fortunately, it will be very difficult to have a bug where the
+            // getConnected code returns DIMMs on a different MCA target. So
+            // this is an acceptible risk.
             itr = std::find_if( list.begin(), list.end(),
                     [&](const TargetHandle_t & t)
-                    {
-                        uint32_t dimmPos = getTargetPosition(t);
-                        return (trgtPos   == (dimmPos / MAX_DIMM_PER_PORT)) &&
-                               (i_connPos == (dimmPos % MAX_DIMM_PER_PORT));
-                    } );
+                    { return ( i_connPos == t->getAttr<ATTR_REL_POS>() ); } );
         }
         else
         {
