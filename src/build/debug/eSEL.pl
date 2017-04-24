@@ -30,8 +30,14 @@ use Switch;
 use Getopt::Long;
 use File::Basename;
 use Data::Dumper;
+use File::Copy qw(copy);
+use Fcntl qw(:seek);
 
-use constant ESEL_HEADER_LENGTH  => 16;
+use constant ESEL_HEADER_LENGTH   => 16;
+use constant PNOR_ERROR_LENGTH    => 4096;
+use constant WORD_5_OFFSET        => 100;
+use constant ACK_MASK             => 0x00200000;
+use constant EMPTY_ERRLOG_IN_PNOR => "ffffffff";
 
 # options and usage
 my $target = '';                        # Target BMC name / IP  (convert to IP)
@@ -44,17 +50,21 @@ my $img_path = $dirname;
 my $output_path = cwd();
 my $debug = 0;
 my $usage = 0;
-my $version = "201702221413";
 my $option = "";
 my $esel_file = "";
 my $bad_option = 0;
+my $removeEcc = 0;
+my $filterAcked = 0;
+my $keepTempFiles = 0;
+my @filesToDelete = ();
+my $ecc_executable  = "";
 
 my %options_table = (
     get_ami_data => 0,
     decode_ami_data => 0,
     get_and_decode_ami => 0,
     decode_obmc_data => 0,
-    decode_hberrl_data => 0
+    decode_hbel_data => 0
 );
 
 sub printUsage
@@ -66,17 +76,20 @@ sub printUsage
     print "                    [-f <fsp-trace dir>] # default $fspt_path(*)\n";
     print "                    [-i <img dir (for hbotStringFile & hbicore.syms>] # default $img_path(*)\n";
     print "                    [-l <eSEL file>]\n";
+    print "                    [-c] # remove ECC before processing the HBEL partition\n";
+    print "                    [-r] # filter out ACKed logs from HBEL\n";
+    print "                    [-k] # keep the temp files created by the script\n";
+    print "                    [--ecc <path>] # path to the ECC executable\n";
     print "                    [-p <option>]\n";
     print "                       where <option> can be one of:\n";
     print "                       get_ami_data (use IPMI to fetch eSEL data into binaries, no decode)\n";
     print "                       decode_ami_data (decode AMI binary eSEL file)\n";
     print "                       get_and_decode_ami (fetch and decode the AMI eSEL data)\n";
     print "                       decode_obmc_data (decode OpenBMC eSEL file)\n";
-    print "                       decode_hberrl_data (decode HBERRL PNOR file). Not implemented in v.201702221413.\n";
+    print "                       decode_hbel_data (decode HBEL PNOR file).\n";
     print " (*): Alternative to providing the paths to each of the files required, you may set the\n";
     print "      ESEL_PATH environment variable to point to the folder where all of the required\n";
     print "      files are. The script will automatically use that env variable's path.\n";
-    print "version: $version\n";
     print "\n";
     print "This tool will ONLY process hostboot eSEL entries that contain PEL data.\n";
     exit;
@@ -97,6 +110,10 @@ GetOptions(
     "o:s" => \$output_path,
     "l:s" => \$esel_file,
     "p:s" => \&HandleOption,
+    "c+"  => \$removeEcc,
+    "r+"  => \$filterAcked,
+    "k+"  => \$keepTempFiles,
+    "ecc:s" => \$ecc_executable,
     "v+" => \$debug,
     "h" => \$usage,
     ) || printUsage();
@@ -124,6 +141,11 @@ if (($options_table{"decode_ami_data"} or $options_table{"decode_obmc_data"})
     exit -1;
 }
 
+if($ecc_executable eq "")
+{
+    $ecc_executable = "/afs/awd.austin.ibm.com/projects/eclipz/lab/p8/gsiexe/ecc";
+}
+
 #################################
 # Variables used for the script #
 #################################
@@ -132,6 +154,7 @@ my $string_file = '';
 my $cd_syms_dir = '';
 my $log_file = '';
 my @eSEL_lengths;                   # size of each eSEL
+my $esel_file_name = basename($esel_file);
 ###############################################################
 # Add code to check that we have the needed fields filled in. #
 # Not applicable if the eSEL file is provided.                #
@@ -197,10 +220,10 @@ if ($debug > 0)
     print "string_file: $string_file\n";
     print "cd_syms_dir: $cd_syms_dir\n";
     print "eSEL file: $esel_file\n";
+    print "ECC executable: $ecc_executable\n";
     print "options:\n";
     print Dumper \%options_table;
     print "\n";
-    print "version: $version\n";
 }
 
 #########################################################################################
@@ -227,10 +250,23 @@ elsif ($options_table{"decode_obmc_data"})
     DecodeObmcEselData();
     DecodeBinarySelData();
 }
-elsif ($options_table{"decode_hberrl_data"})
+elsif ($options_table{"decode_hbel_data"})
 {
-    print "***ERROR: decode_hberrl_data is not supported in v.201702221413.\n";
-    exit -1;
+    if($removeEcc)
+    {
+        RemoveEccFromFile();
+    }
+    else
+    {
+        print "Remove ECC option was not given. ECC will not be removed.\n";
+    }
+
+    if($filterAcked)
+    {
+        FilterACKedLogs();
+    }
+
+    DecodeBinarySelData();
 }
 else
 {
@@ -238,6 +274,15 @@ else
     printUsage();
     exit -1;
 }
+
+if(not $keepTempFiles)
+{
+    if(@filesToDelete)
+    {
+        unlink @filesToDelete or warn "Unable to remove temp files: $!\n";
+    }
+}
+
 # all done
 exit;
 
@@ -259,6 +304,92 @@ sub HandleOption
     ($debug) && print Dumper \%options_table;
 }
 
+sub FilterACKedLogs
+{
+    my $fileSize = -s $esel_file;
+    my $numErrors = $fileSize / PNOR_ERROR_LENGTH;
+    my $data = "";
+
+    #Create a file where we would put the unacked errors.
+    #This way we preserve the original file.
+    open(my $tmpFileHandle, '>>', $esel_file.".tmp")
+        or die "Unable to create a temp file\n";
+    open(my $eselFileHandle, '<', $esel_file)
+        or die "Unable to open the eSEL file\n";
+
+    binmode($eselFileHandle);
+    binmode($tmpFileHandle);
+
+    ($debug) && print "Input file size: $fileSize\n";
+    ($debug) && print "The file contains $numErrors errors\n";
+
+    for(my $i = 0; $i < $numErrors; $i++)
+    {
+        my $offset = PNOR_ERROR_LENGTH * $i + WORD_5_OFFSET;
+        #Get the word 5 from the ith error (it contains the
+        #ACKed bit). Get 4 bytes to apply the mask directly
+        my $word5 = qx/xxd -p -seek $offset -l 4 $esel_file/;
+        if($?)
+        {
+            print "WARNING: Could not read word5
+                             at offset $offset: $!\n.";
+            next;
+        }
+        chomp($word5);
+
+        ($debug) && print "Error $i word5: $word5.\n";
+
+        if($word5 ne EMPTY_ERRLOG_IN_PNOR)
+        {
+            my $word5val = hex($word5);
+            ($debug) && print "ACKed bit: ", ($word5val & ACK_MASK), " \n";
+
+            if(($word5val & ACK_MASK) ne 0) #Error not ACKed
+            {
+                #Copy the current error to the temp file for further processing
+                sysseek($eselFileHandle, PNOR_ERROR_LENGTH * $i, SEEK_SET)
+                        or die "Unable to find specified offset\n";
+                sysread($eselFileHandle, $data, PNOR_ERROR_LENGTH)
+                        or die "Unable to read at specified offset\n";
+                ($debug) && print "Error $i: ", ord($data), "\n";
+                print $tmpFileHandle $data;
+            }
+        }
+    }
+
+    close $tmpFileHandle;
+    close $eselFileHandle;
+
+    #Point the script to the new file we created above.
+    $esel_file = $esel_file.".tmp";
+    push @filesToDelete, $esel_file;
+}
+
+sub RemoveEccFromFile
+{
+    my $fileExtension = (split(/\./, basename($esel_file)))[-1];
+    ($debug) && print "File extension: $fileExtension\n";
+    # The ECC script needs file extension to be ".ecc"
+    if($fileExtension ne "ecc")
+    {
+        ($debug) && print "Creating a .ecc file\n";
+        copy $esel_file, $output_path."/".$esel_file_name.".ecc"
+             or die "Copy failed: $!\n";
+        $esel_file = $output_path."/".$esel_file_name.".ecc";
+        push @filesToDelete, $esel_file;
+    }
+
+    qx/$ecc_executable -R $esel_file -o $output_path"\/"$esel_file_name".noecc" -p/;
+    if($?)
+    {
+        print "***ERROR: Failed to strip ECC from $esel_file\n";
+        exit -1;
+    }
+
+    $esel_file = $output_path."/".$esel_file_name.".noecc";
+    push @filesToDelete, $esel_file;
+}
+
 # open and create errorlog text output file, if possible
 sub DecodeBinarySelData
 {
@@ -266,13 +397,13 @@ sub DecodeBinarySelData
     my $bin_file_name = "";
     if (-e "$errl_path/errl")
     {
-        if ($options_table{"decode_ami_data"})
+        if ($options_table{"decode_ami_data"} or
+            $options_table{"decode_hbel_data"})
         {
-            # This is the only mode where eSEL file is not generated
+            # These are the only two modes where eSEL file is not generated
             # according to the script's conventions, so we need to
             # strip the actual eSEL file name and make an output file
             # using that name
-            my $esel_file_name = basename($esel_file);
             $txt_file_name = "$output_path/$esel_file_name.txt";
             $bin_file_name = $esel_file;
             ($debug) && print " esel_file_name = $esel_file_name.\n";
