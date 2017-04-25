@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,7 +137,7 @@ void test_fapi2GetChildren()
         std::vector<Target<fapi2::TARGET_TYPE_CORE> > l_childCores;
         std::vector<Target<fapi2::TARGET_TYPE_MCA> > l_childMCAs;
         std::vector<Target<fapi2::TARGET_TYPE_EQ> > l_childEQs;
-        std::vector<Target<fapi2::TARGET_TYPE_XBUS> > l_childXBUSs;
+        std::vector<Target<fapi2::TARGET_TYPE_EX> > l_childEXs;
 //      @TODO RTC:148761
 //      Need to figure out how we are going to set up this relationship
 //         l_childMCAs = fapi2_mcbistTarget.getChildren<fapi2::TARGET_TYPE_MCA>(TARGET_STATE_PRESENT);
@@ -221,6 +221,21 @@ void test_fapi2GetChildren()
         if(l_actualSize != l_expectedSize)
         {
             FAPI_INF("fapi2TargetTest:: cores per EQ mismatch");
+            numFails++;
+            break;
+        }
+
+        //Explicitly make sure getChildren for EX targets works
+        l_childEXs = fapi2_procTarget.getChildren<fapi2::TARGET_TYPE_EX>(TARGET_STATE_PRESENT);
+        l_targetHuid = TARGETING::get_huid(l_nimbusProc) ;
+        l_actualSize = l_childEXs.size();
+
+        //Set expected size to be the number of Exs per proc
+        l_expectedSize = EQ_PER_PROC * EX_PER_EQ;
+        numTests++;
+        if(l_actualSize != l_expectedSize)
+        {
+            FAPI_INF("fapi2TargetTest:: EXs per proc mismatch");
             numFails++;
             break;
         }
