@@ -46,7 +46,6 @@ enum consts : size_t
     NUM_RANK_GROUPS = 4,           ///< Maximum number of rank groups
     MAX_RANKS_PER_PORT = 8,        ///< Maximum number of ranks on a port
     DIMM_DQ_RANK_BITMAP_SIZE = 10, ///< Size in bytes of the Bad DQ bitmap for a rank.
-    NUM_MCS_PER_PROC = 8,          ///< Number of MCS instances per proc
     // This is the number of bits in DIMM_DQ_RANK_BITMAP_SIZE.
     DIMM_DQ_NUM_DQS = DIMM_DQ_RANK_BITMAP_SIZE * 8, ///< Number of DQs (data query pins).
 
