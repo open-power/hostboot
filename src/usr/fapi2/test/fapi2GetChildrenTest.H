@@ -138,21 +138,21 @@ void test_fapi2GetChildren()
         std::vector<Target<fapi2::TARGET_TYPE_MCA> > l_childMCAs;
         std::vector<Target<fapi2::TARGET_TYPE_EQ> > l_childEQs;
         std::vector<Target<fapi2::TARGET_TYPE_EX> > l_childEXs;
-//      @TODO RTC:148761
-//      Need to figure out how we are going to set up this relationship
-//         l_childMCAs = fapi2_mcbistTarget.getChildren<fapi2::TARGET_TYPE_MCA>(TARGET_STATE_PRESENT);
-//         l_targetHuid = TARGETING::get_huid(targeting_targets[MY_MCBIST]) ;
-//         l_actualSize = l_childMCAs.size();
-//
-//         //Set expected size to be the number of MCAs per MCBIST
-//         l_expectedSize = MCA_PER_MCS * MCS_PER_PROC / MCBIST_PER_PROC;
-//         numTests++;
-//         if(l_actualSize != l_expectedSize)
-//         {
-//             FAPI_INF("fapi2TargetTest:: MCAs per MCBIST mismatch");
-//             numFails++;
-//             break;
-//         }
+        std::vector<Target<fapi2::TARGET_TYPE_XBUS> > l_childXBUSs;
+
+        l_childMCAs = fapi2_mcbistTarget.getChildren<fapi2::TARGET_TYPE_MCA>(TARGET_STATE_PRESENT);
+        l_targetHuid = TARGETING::get_huid(targeting_targets[MY_MCBIST]) ;
+        l_actualSize = l_childMCAs.size();
+
+        //Set expected size to be the number of MCAs per MCBIST
+        l_expectedSize = MCA_PER_MCS * MCS_PER_PROC / MCBIST_PER_PROC;
+        numTests++;
+        if(l_actualSize != l_expectedSize)
+        {
+            FAPI_INF("fapi2TargetTest:: MCAs per MCBIST mismatch");
+            numFails++;
+            break;
+        }
 
         l_childCores = fapi2_procTarget.getChildren<fapi2::TARGET_TYPE_CORE>(TARGET_STATE_PRESENT);
         l_targetHuid = TARGETING::get_huid(l_nimbusProc) ;

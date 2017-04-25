@@ -33,9 +33,9 @@
      * Each Nimbus has 6 EQ units
      *     Each EQ unit has 2 EX units (a total of 12 per chip)
      *         Each EX has 2 cores, 1 L2, 1 L3 (a total of 24 cores per chip)
-     * Each Nimbus has 4 MCS
-     *     Each MCS has 2 MCA units (a total of 8 per chip)
-     * Each Nimbus has 2 MCBIST units (1 per MCU)
+     * Each Nimbus has has 2 MCBIST units
+     *     Each MCBIST unit has 2 MCS units (a total of 4 per chip)
+     *         Each MCS has 2 MCA units (a total of 8 per chip)
      * Each Nimbus has 3 PECs
      *     PEC 0 has 1 PHB
      *     PEC 1 has 2 PHBs
