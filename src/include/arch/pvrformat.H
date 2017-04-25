@@ -123,6 +123,8 @@ struct PVR_t
         // Field: smt
         SMT8_MODE = 0,
         SMT4_MODE = 1,
+        SMT_MASK  = 0x00001000,
+        SMT_SHIFT = 12,
 
         // Field: chipFamily
         P8_MURANO = 0x4B,

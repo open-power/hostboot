@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,13 +42,16 @@
 #include    <devicefw/userif.H>
 #include    <sys/misc.h>
 #include    <sys/mm.h>
+#include    <sys/mmio.h>
 #include    <p9_thread_control.H>
 #include    <arch/pirformat.H>
+#include    <arch/pvrformat.H>
 
 //  targeting support
 #include    <targeting/common/target.H>
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+#include    <targeting/common/util.H>
 
 //  fapi support
 #include    <fapi2.H>
@@ -64,6 +67,8 @@
 
 namespace   THREAD_ACTIVATE
 {
+
+const uint64_t SMT8_ENABLE_THREADS_MASK = 0xC000000000000000;
 
 /**
  * @brief This function will query MVPD and figure out if the master
@@ -239,6 +244,11 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
     TRACFCOMP( g_fapiTd,
                "activate_threads entry" );
 
+    // get the sys target
+    TARGETING::Target* sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(sys);
+    assert( sys != NULL );
+
     // get the master processor target
     TARGETING::Target* l_masterProc = NULL;
     TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
@@ -256,32 +266,61 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                                  TARGETING::TYPE_CORE,
                                  false);
 
-    // find the core/thread we're running on
-    task_affinity_pin();
-    task_affinity_migrate_to_master(); //just in case...
-    uint64_t cpuid = task_getcpuid();
-    task_affinity_unpin();
-
-    uint64_t l_masterCoreID = PIR_t::coreFromPir(cpuid);
-    uint64_t l_masterThreadID = PIR_t::threadFromPir(cpuid);
-
-    const TARGETING::Target* l_masterCore = NULL;
-    for( TARGETING::TargetHandleList::const_iterator
-         core_it = l_coreTargetList.begin();
-         core_it != l_coreTargetList.end();
-         ++core_it )
+    // set the fused core mode attribute
+    bool l_smt8 = false;
+    uint32_t l_pvr = mmio_pvr_read() & 0xFFFFFFFF;
+    if( (l_pvr & PVR_t::CHIP_DD_MASK) == PVR_t::IS_NIMBUS_DD1 )
     {
-        TARGETING::ATTR_CHIP_UNIT_type l_coreId =
-                (*core_it)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-        if( l_coreId == l_masterCoreID )
+        sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE>
+                (TARGETING::FUSED_CORE_MODE_SMT4_DEFAULT);
+    }
+    else
+    {
+        uint32_t l_smt = (l_pvr & PVR_t::SMT_MASK) >> PVR_t::SMT_SHIFT;
+        if( l_smt == PVR_t::SMT4_MODE )
         {
-            l_masterCore = (*core_it);
-            break;
+            sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE>
+                (TARGETING::FUSED_CORE_MODE_SMT4_ONLY);
+        }
+        else // SMT8_MODE
+        {
+            sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE>
+                (TARGETING::FUSED_CORE_MODE_SMT8_ONLY);
+            l_smt8 = true;
         }
     }
 
     do
     {
+        // -----------------------------------
+        // Activate threads on the master core
+        // -----------------------------------
+
+        // find the core/thread we're running on
+        task_affinity_pin();
+        task_affinity_migrate_to_master(); //just in case...
+        uint64_t cpuid = task_getcpuid();
+        task_affinity_unpin();
+
+        uint64_t l_masterCoreID = PIR_t::coreFromPir(cpuid);
+        uint64_t l_masterThreadID = PIR_t::threadFromPir(cpuid);
+
+        // find the master core
+        const TARGETING::Target* l_masterCore = NULL;
+        for( TARGETING::TargetHandleList::const_iterator
+            core_it = l_coreTargetList.begin();
+            core_it != l_coreTargetList.end();
+            ++core_it )
+        {
+            TARGETING::ATTR_CHIP_UNIT_type l_coreId =
+                    (*core_it)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+            if( l_coreId == l_masterCoreID )
+            {
+                l_masterCore = (*core_it);
+                break;
+            }
+        }
+
         if( l_masterCore == NULL )
         {
             TRACFCOMP( g_fapiImpTd,
@@ -316,16 +355,22 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                    TARGETING::get_huid(l_masterCore) );
 
         // cast OUR type of target to a FAPI type of target.
-        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& l_fapiCore =
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& l_fapiCore0 =
               (const_cast<TARGETING::Target*>(l_masterCore));
 
         //  AVPs might enable a subset of the available threads
         uint64_t max_threads = cpu_thread_count();
-        TARGETING::Target* sys = NULL;
-        TARGETING::targetService().getTopLevelTarget(sys);
-        assert( sys != NULL );
-        uint64_t en_threads = sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
+        uint64_t en_threads_master =
+                    sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
 
+        // Core0_thread: 0 1 2 3  Core1_thread: 0 1 2 3
+        //   NORMAL      - E E E                - - - -
+        //   FUSED       - E - -                E E - -
+        // * E=enable, Core0_t0=master already enabled
+        if( l_smt8 )
+        {
+            en_threads_master &= SMT8_ENABLE_THREADS_MASK;
+        }
 
         // --------------------------------------------------------------------
         //Enable the special wake-up on master core
@@ -346,10 +391,9 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         }
 
         FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup_core,
-                        l_fapiCore,
+                        l_fapiCore0,
                         p9specialWakeup::SPCWKUP_ENABLE,
                         p9specialWakeup::HOST);
-
         if(l_errl)
         {
             TRACFCOMP( g_fapiImpTd,
@@ -359,9 +403,9 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             break;
         }
 
-        TRACDCOMP( g_fapiTd,
-                   "activate_threads max_threads=%d, en_threads=0x%016X",
-                   max_threads, en_threads );
+        TRACFCOMP( g_fapiTd,
+                   "activate_threads max_threads=%d, en_threads_master=0x%016X",
+                   max_threads, en_threads_master );
 
         uint8_t thread_bitset = 0;
         for( uint64_t thread = 0; thread < max_threads; thread++ )
@@ -376,7 +420,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             }
 
             // Skip threads that we shouldn't be starting
-            if(!(en_threads & (0x8000000000000000>>thread)))
+            if(!(en_threads_master & (0x8000000000000000>>thread)))
             {
                 TRACDCOMP( g_fapiTd,
                            "activate_threads skipping thread=%d", thread );
@@ -414,7 +458,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         fapi2::buffer<uint64_t> l_rasStatus = 0;
         uint64_t l_threadState = 0;
         FAPI_INVOKE_HWP( l_errl, p9_thread_control,
-                         l_fapiCore,      //i_target
+                         l_fapiCore0,     //i_target
                          thread_bitset,   //i_threads
                          PTC_CMD_SRESET,  //i_command
                          false,           //i_warncheck
@@ -446,6 +490,154 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             break;
         }
 
+        // -----------------------------------------
+        // Activate threads on the master-fused core
+        // -----------------------------------------
+
+        if( l_smt8 )
+        {
+            uint64_t l_fusedCoreID = l_masterCoreID + 1;
+
+            // find the master-fused core
+            const TARGETING::Target* l_fusedCore = NULL;
+            for( TARGETING::TargetHandleList::const_iterator
+                core_it = l_coreTargetList.begin();
+                core_it != l_coreTargetList.end();
+                ++core_it )
+            {
+                TARGETING::ATTR_CHIP_UNIT_type l_coreId =
+                        (*core_it)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                if( l_coreId == l_fusedCoreID )
+                {
+                    l_fusedCore = (*core_it);
+                    break;
+                }
+            }
+
+            if( l_fusedCore == NULL )
+            {
+                TRACFCOMP( g_fapiImpTd,
+                        "Could not find a target for core %d",
+                        l_fusedCoreID );
+                /*@
+                * @errortype
+                * @moduleid     ISTEP::MOD_THREAD_ACTIVATE
+                * @reasoncode   ISTEP::RC_NO_FUSED_CORE_TARGET
+                * @userdata1    Master-fused core id
+                * @userdata2    Master-fused processor chip huid
+                * @devdesc      activate_threads> Could not find a target
+                *               for the master-fused core
+                * @custdesc     A problem occurred during the IPL
+                *               of the system.
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ISTEP::MOD_THREAD_ACTIVATE,
+                                    ISTEP::RC_NO_FUSED_CORE_TARGET,
+                                    l_fusedCoreID,
+                                    TARGETING::get_huid(l_masterProc));
+                l_errl->collectTrace("TARG",256);
+                l_errl->collectTrace(FAPI_TRACE_NAME,256);
+                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+
+                break;
+            }
+
+            TRACFCOMP( g_fapiTd,
+                       "Master-Fused CPU : c%d (HUID=%.8X)",
+                       l_fusedCoreID, TARGETING::get_huid(l_fusedCore) );
+
+            // cast OUR type of target to a FAPI type of target.
+            const fapi2::Target<fapi2::TARGET_TYPE_CORE>& l_fapiCore1 =
+                (const_cast<TARGETING::Target*>(l_fusedCore));
+
+            uint64_t en_threads_c1 = SMT8_ENABLE_THREADS_MASK;
+
+            // -------------------------------------------------------------
+            //Enable the special wake-up on master-fused core
+            FAPI_INF("Enable special wake-up on master-fused core");
+
+            FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup_core,
+                            l_fapiCore1,
+                            p9specialWakeup::SPCWKUP_ENABLE,
+                            p9specialWakeup::HOST);
+            if(l_errl)
+            {
+                TRACFCOMP( g_fapiImpTd,
+                    "ERROR: 0x%.8X : "
+                    "p9_cpu_special_wakeup_core set HWP(cpu %d)",
+                    l_errl->reasonCode(),
+                    l_masterCoreID);
+                break;
+            }
+
+            TRACFCOMP( g_fapiTd,
+                    "activate_threads max_threads=%d, en_threads_c1=0x%016X",
+                    max_threads, en_threads_c1 );
+
+            thread_bitset = 0;
+            for( uint64_t thread = 0; thread < max_threads; thread++ )
+            {
+                // Skip threads that we shouldn't be starting
+                if(!(en_threads_c1 & (0x8000000000000000>>thread)))
+                {
+                    TRACDCOMP( g_fapiTd,
+                            "activate_threads skipping thread=%d", thread );
+
+                    continue;
+                }
+                else
+                {
+                    TRACFCOMP( g_fapiTd,
+                            "activate_threads enabling thread=%d", thread );
+
+                    thread_bitset |= fapi2::thread_id2bitset(thread);
+
+                }
+            }
+
+            // send a magic instruction for PHYP Simics to work...
+            MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
+
+            // see HWP call above for parameter definitions
+            l_rasStatus = 0;
+            l_threadState = 0;
+            FAPI_INVOKE_HWP( l_errl, p9_thread_control,
+                            l_fapiCore1,     //i_target
+                            thread_bitset,   //i_threads
+                            PTC_CMD_SRESET,  //i_command
+                            false,           //i_warncheck
+                            l_rasStatus,     //o_rasStatusReg
+                            l_threadState);  //o_state
+
+            if ( l_errl != NULL )
+            {
+                TRACFCOMP( g_fapiImpTd,
+                        "ERROR: 0x%.8X :  proc_thread_control HWP"
+                        "( cpu %d, thread_bitset 0x%02X, "
+                        "l_rasStatus 0x%lx )",
+                        l_errl->reasonCode(),
+                        l_masterCoreID,
+                        thread_bitset,
+                        l_rasStatus );
+            }
+            else
+            {
+                TRACFCOMP(g_fapiTd,
+                        "SUCCESS: p9_thread_control HWP"
+                        "( cpu %d, thread_bitset 0x%02X )",
+                        l_masterCoreID,
+                        thread_bitset );
+            }
+
+            if(l_errl)
+            {
+                break;
+            }
+
+        }  // end if( l_smt8 )
+
+
         //Check if we are in MPIPL
         uint8_t is_mpipl = 0;
         sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL_HB>(is_mpipl);
@@ -454,7 +646,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         {
             TRACFCOMP( g_fapiTd,
                     "activate_threads: We are in MPIPL, extending cache to be real memory" );
-                    mm_extend(MM_EXTEND_REAL_MEMORY);
+            mm_extend(MM_EXTEND_REAL_MEMORY);
         }
         // Reclaim remainder of L3 cache if available.
         else if ((!PNOR::usingL3Cache()) &&

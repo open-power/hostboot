@@ -93,6 +93,7 @@ namespace ISTEP
         RC_PM_OCC_CHKPT_TIMEOUT                  = ISTEP_COMP_ID | 0x1C,
         RC_UPDATE_SECURITY_CTRL_HWP_FAIL         = ISTEP_COMP_ID | 0x1D,
         RC_NO_FUNCTIONAL_MEMORY                  = ISTEP_COMP_ID | 0x1E,
+        RC_NO_FUSED_CORE_TARGET                  = ISTEP_COMP_ID | 0x1F,
     };
 
 };
