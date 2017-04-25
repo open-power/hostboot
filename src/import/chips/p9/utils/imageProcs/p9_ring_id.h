@@ -118,7 +118,7 @@ enum RingID
     n3_repr = 71,
     n3_mcs01_repr = 72,
     n3_np_repr = 73,
-    // values 74 unused
+    n3_br_fure = 74,
 
     // X-Bus Chiplet Rings
     // Common - apply to all instances of X-Bus

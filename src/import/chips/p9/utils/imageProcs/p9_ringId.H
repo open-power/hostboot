@@ -414,6 +414,7 @@ enum RingOffset
     n3_np_fure = 6,
     n3_np_gptr = 7,
     n3_np_time = 8,
+    n3_br_fure = 9,
     // Instance Rings
     n3_repr       = (0 | INSTANCE_RING_MARK),
     n3_mcs01_repr = (1 | INSTANCE_RING_MARK),
@@ -423,7 +424,7 @@ enum RingOffset
 static const CHIPLET_DATA g_n3Data =
 {
     5, // N3 Chiplet ID is 5
-    9, // 9 common rings for N3 Chiplet
+    10,// 10 common rings for N3 Chiplet
     3, // 3 instance specific rings for N3 chiplet
     3
 };
@@ -946,7 +947,7 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { N3::n3_repr                        , "n3_repr"                     , N3_TYPE    }, // 71
     { N3::n3_mcs01_repr                  , "n3_mcs01_repr"               , N3_TYPE    }, // 72
     { N3::n3_np_repr                     , "n3_np_repr"                  , N3_TYPE    }, // 73
-    { INVALID_RING                       , "invalid"                     , N3_TYPE    }, // 74
+    { N3::n3_br_fure                     , "n3_br_fure"                  , N3_TYPE    }, // 74
     { XB::xb_fure                        , "xb_fure"                     , XB_TYPE    }, // 75
     { XB::xb_gptr                        , "xb_gptr"                     , XB_TYPE    }, // 76
     { XB::xb_time                        , "xb_time"                     , XB_TYPE    }, // 77
@@ -1203,7 +1204,7 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { N3::n3_repr                        , N3_TYPE    }, // 71
     { N3::n3_mcs01_repr                  , N3_TYPE    }, // 72
     { N3::n3_np_repr                     , N3_TYPE    }, // 73
-    { INVALID_RING                       , N3_TYPE    }, // 74
+    { N3::n3_br_fure                     , N3_TYPE    }, // 74
     { XB::xb_fure                        , XB_TYPE    }, // 75
     { XB::xb_gptr                        , XB_TYPE    }, // 76
     { XB::xb_time                        , XB_TYPE    }, // 77
