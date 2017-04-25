@@ -144,12 +144,13 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"n3_np_fure"          , 0x06, 0x05, 0x05, EKB_RING    , 0x0503080F},
     {"n3_np_gptr"          , 0x07, 0x05, 0x05, EKB_RING    , 0x05030802},
     {"n3_np_time"          , 0x08, 0x05, 0x05, VPD_RING    , 0x05030807},
+    {"n3_br_fure"          , 0x09, 0x05, 0x05, EKB_RING    , 0x0503100F},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
-    {"n3_repr"             , 0x09, 0x05, 0x05, VPD_RING    , 0x05037606},
-    {"n3_mcs01_repr"       , 0x0a, 0x05, 0x05, VPD_RING    , 0x05030106},
-    {"n3_np_repr"          , 0x0b, 0x05, 0x05, VPD_RING    , 0x05030806},
+    {"n3_repr"             , 0x0a, 0x05, 0x05, VPD_RING    , 0x05037606},
+    {"n3_mcs01_repr"       , 0x0b, 0x05, 0x05, VPD_RING    , 0x05030106},
+    {"n3_np_repr"          , 0x0c, 0x05, 0x05, VPD_RING    , 0x05030806},
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
 };
