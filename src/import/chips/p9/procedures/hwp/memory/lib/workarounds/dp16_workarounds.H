@@ -346,12 +346,12 @@ fapi2::ReturnCode find_median_and_sort(std::vector<delay_data>& io_reg_data, uin
 /// @brief Overrides any bad (out of range) read delay values with the median value
 /// @param[in] i_target the fapi2 target of the port
 /// @param[in] i_rank_pair the rank pair to operate on
-/// @param[in] i_percent the percentage below the median outside of which to override values to be the median - OPTIONAL - defaults to 66
+/// @param[in] i_percent the percentage below the median outside of which to override values to be the median - OPTIONAL - defaults to 75
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 fapi2::ReturnCode fix_delay_values(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                                    const uint64_t i_rank_pair,
-                                   const uint64_t i_percent = 66);
+                                   const uint64_t i_percent = 75);
 
 } // close namespace rd_dq
 

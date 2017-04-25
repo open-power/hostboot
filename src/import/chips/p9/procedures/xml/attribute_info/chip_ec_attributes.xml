@@ -71,7 +71,7 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Returns true if the chip has NDL IOValid bits
-      P9N dd2 
+      P9N dd2
     </description>
     <chipEcFeature>
       <chip>
@@ -162,7 +162,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
-  <!-- ********************************************************************* --> 
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_FSI_GP_SHADOWS_OVERWRITE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -257,7 +257,7 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
         Filter pll setting differences.
-        Cumulus matches nimbus dd2.  
+        Cumulus matches nimbus dd2.
     </description>
     <chipEcFeature>
       <chip>
@@ -345,7 +345,7 @@
     <id>ATTR_CHIP_EC_FEATURE_HW405413</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-       HW405413 : NCU sends data out of order 
+       HW405413 : NCU sends data out of order
     </description>
     <chipEcFeature>
       <chip>
@@ -1363,7 +1363,7 @@
     <id>ATTR_CHIP_EC_FEATURE_HW377094</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      DD1 only: HW377094 L2 stq and ncu stq deadlock. g/ord_g causes artificial dependency between barrier and snptlbcmp in NCU 
+      DD1 only: HW377094 L2 stq and ncu stq deadlock. g/ord_g causes artificial dependency between barrier and snptlbcmp in NCU
                 while lfsr bits being reused in L2 stq causes entry to never be selected due to high priority ld-hit-st override.
     </description>
     <chipEcFeature>
@@ -2459,7 +2459,7 @@
     <id>ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_DD1_ADDR</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      DD1 only: Use the DD1 register addresses for the PHY0 BAR registers, PHY1 BAR registers, and MMIO BAR registers 
+      DD1 only: Use the DD1 register addresses for the PHY0 BAR registers, PHY1 BAR registers, and MMIO BAR registers
     </description>
     <chipEcFeature>
       <chip>
@@ -2737,7 +2737,7 @@
   </attribute>
 
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_MSS_RUN_RD_CTR_WOKRAROUND</id>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_RUN_RD_CTR_WORKAROUND</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       In below DD2 Nimbus, a workaround after read centering might need to be run.
@@ -2897,7 +2897,7 @@
     <id>ATTR_CHIP_EC_FEATURE_RING_SAVE_MPIPL</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      For Nimbus DD2 we no longer need a workaround for Ring Save in MPIPL 
+      For Nimbus DD2 we no longer need a workaround for Ring Save in MPIPL
     </description>
     <chipEcFeature>
       <chip>
