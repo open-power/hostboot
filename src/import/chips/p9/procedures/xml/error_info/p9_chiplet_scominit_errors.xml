@@ -25,10 +25,10 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P9_CHIPLET_SCOMINIT_UNSUPPORTED_NV_POS_ERR</rc>
+    <rc>RC_P9_CHIPLET_SCOMINIT_UNSUPPORTED_OBRICK_POS_ERR</rc>
     <description>
       Procedure: p9_chiplet_scominit
-      NV target position not supported.
+      OBUS BRICK target position not supported.
     </description>
     <ffdc>TARGET</ffdc>
   </hwpError>
