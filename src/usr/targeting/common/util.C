@@ -306,32 +306,63 @@ uint8_t  is_fused_mode( )
     TARGETING::Target * sys = NULL;
     TARGETING::targetService().getTopLevelTarget( sys );
     assert(sys != NULL);
-    TARGETING::PAYLOAD_KIND l_payload = sys->getAttr<ATTR_PAYLOAD_KIND>();
-    uint8_t  l_attrValue = sys->getAttr<ATTR_FUSED_CORE_OPTION>();
 
+    /*
+        Fused Mode
 
-    if (FUSED_CORE_OPTION_USING_DEFAULT_CORES == l_attrValue)
+        ATTR_FUSED_CORE_MODE / ATTR_FUSED_CORE_OPTION / ATTR_PAYLOAD_KIND
+
+        smt4_default / default_cores / phyp --> fused
+        smt4_default / default_cores / opal --> notfused
+        smt4_default / normal_cores  / *    --> notfused
+        smt4_default / fused_cores   / *    --> fused
+
+        smt4_only / default_cores / *   --> notfused
+        smt4_only / normal_cores  / *   --> notfused
+        smt4_only / fused_cores   / *   --> fused
+
+        smt8_only / default_cores / *   --> fused
+        smt8_only / normal_cores  / *   --> notfused
+        smt8_only / fused_cores   / *   --> fused
+    */
+
+    uint8_t l_mode = sys->getAttr<ATTR_FUSED_CORE_MODE>();;
+    uint8_t l_option = sys->getAttr<ATTR_FUSED_CORE_OPTION>();;
+    PAYLOAD_KIND l_payload = sys->getAttr<ATTR_PAYLOAD_KIND>();
+
+    if (FUSED_CORE_OPTION_USING_DEFAULT_CORES == l_option)
     {
-        // if payload is PHYP, use FUSED mode
-        // Anything else, use NORMAL mode
-        if (PAYLOAD_KIND_PHYP == l_payload)
+        if (FUSED_CORE_MODE_SMT4_DEFAULT == l_mode)
         {
-            l_fused = true;
+            if (PAYLOAD_KIND_PHYP == l_payload)
+            {
+                l_fused = true;
+            }
+            else
+            {
+                l_fused = false;
+            }
         }
-        else
+        else if (FUSED_CORE_MODE_SMT4_ONLY == l_mode)
         {
             l_fused = false;
         }
+        else // SMT8_ONLY
+        {
+            l_fused = true;
+        }
     }
-    else
+    else if (FUSED_CORE_OPTION_USING_NORMAL_CORES == l_option)
     {
-        l_fused = (l_attrValue == FUSED_CORE_OPTION_USING_NORMAL_CORES) ?
-                   false : true;
+        l_fused = false;
     }
-
+    else // USING_FUSED_CORES
+    {
+        l_fused = true;
+    }
 
     return(l_fused);
 
 } // end is_fused_mode
 
-}
+} // end namespace TARGETING
