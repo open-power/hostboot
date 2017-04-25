@@ -323,13 +323,15 @@ uint32_t analyzeFetchMpe<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T, typename D>
-uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
-                               const MemSymbol & i_symbol,
-                               STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
+                      const MemSymbol & i_symbol, bool & o_doTps,
+                      STEP_CODE_DATA_STRUCT & io_sc, bool i_isHard )
 {
-    #define PRDF_FUNC "[MemEcc::__analyzeFetchNceTce] "
+    #define PRDF_FUNC "[MemEcc::handleMemCe] "
 
     uint32_t o_rc = SUCCESS;
+
+    o_doTps = i_isHard; // Do TPS on every hard CE.
 
     TargetHandle_t trgt = i_chip->getTrgt();
     MemRank        rank = i_addr.getRank();
@@ -340,8 +342,7 @@ uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
 
     // Add data to the CE table.
     D db = static_cast<D>(i_chip->getDataBundle());
-    uint32_t ceTableRc = db->iv_ceTable.addEntry( i_addr, i_symbol );
-    bool doTps = false;
+    uint32_t ceTableRc = db->iv_ceTable.addEntry( i_addr, i_symbol, i_isHard );
 
     // Check MNFG thresholds, if needed.
     if ( mfgMode() )
@@ -350,19 +351,19 @@ uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
         {
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MnfgDramCte );
             io_sc.service_data->setServiceCall();
-            doTps = true;
+            o_doTps = true;
         }
         else if ( 0 != (MemCeTable<T>::MNFG_TH_RANK & ceTableRc) )
         {
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MnfgRankCte );
             io_sc.service_data->setServiceCall();
-            doTps = true;
+            o_doTps = true;
         }
         else if ( 0 != (MemCeTable<T>::MNFG_TH_DIMM & ceTableRc) )
         {
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MnfgDimmCte );
             io_sc.service_data->setServiceCall();
-            doTps = true;
+            o_doTps = true;
         }
         else if ( 0 != (MemCeTable<T>::TABLE_FULL & ceTableRc) )
         {
@@ -377,7 +378,7 @@ uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
             io_sc.service_data->SetCallout( all_mm, MRU_MEDA );
             io_sc.service_data->SetCallout( trgt,   MRU_MEDA );
             io_sc.service_data->setServiceCall();
-            doTps = true;
+            o_doTps = true;
         }
         else if ( 0 != (MemCeTable<T>::ENTRY_TH_REACHED & ceTableRc) )
         {
@@ -387,7 +388,7 @@ uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
             // has been met. This is a potential flooding issue. So make
             // the DIMM callout predictive.
             io_sc.service_data->setServiceCall();
-            doTps = true;
+            o_doTps = true;
         }
     }
     else // field thresholds
@@ -396,27 +397,68 @@ uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
         // thresholds because of the scaling due to DRAM side. Therefore, we
         // cannot simply trigger TPS on any threshold. The field and MNFG
         // thresholds must be handled separately.
-        doTps = ( 0 != (MemCeTable<T>::FIELD_TH_ALL & ceTableRc) );
+        if ( !o_doTps )
+            o_doTps = ( 0 != (MemCeTable<T>::FIELD_TH_ALL & ceTableRc) );
     }
 
-    // Initiate a TPS procedure, if needed.
-    if ( doTps )
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T, typename D>
+uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
+                               STEP_CODE_DATA_STRUCT & io_sc,
+                               bool i_isTce = false )
+{
+    #define PRDF_FUNC "[MemEcc::__analyzeFetchNceTce] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
     {
-        #ifdef __HOSTBOOT_RUNTIME
-
-        // If a MNFG threshold has been reached (predictive callout), we
-        // will still try to start TPS just in case MNFG disables the
-        // termination policy.
-
-        o_rc = addTpsEvent<T,D>( i_chip, rank, io_sc );
+        // Get the symbol of the failure.
+        MemSymbol symbol;
+        o_rc = getMemReadSymbol<T>( i_chip, i_addr.getRank(), symbol, i_isTce );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "addTpsEvent(0x%08x, m%ds%d) failed",
-                      i_chip->getHuid(), rank.getMaster(), rank.getSlave() );
+            PRDF_ERR( PRDF_FUNC "getMemReadSymbol(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
         }
 
-        #endif
-    }
+        // Add the symbol to the callout list and CE table.
+        bool doTps;
+        o_rc = handleMemCe<T,D>( i_chip, i_addr, symbol, doTps, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "handleMemCe(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Initiate a TPS procedure, if needed.
+        if ( doTps )
+        {
+            #ifdef __HOSTBOOT_RUNTIME
+
+            // If a MNFG threshold has been reached (predictive callout), we
+            // will still try to start TPS just in case MNFG disables the
+            // termination policy.
+
+            o_rc = addTpsEvent<T,D>( i_chip, i_addr.getRank(), io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "addTpsEvent(0x%08x) failed",
+                          i_chip->getHuid() );
+            }
+
+            #endif
+        }
+
+    } while (0);
 
     return o_rc;
 
@@ -447,20 +489,9 @@ uint32_t analyzeFetchNce( ExtensibleChip * i_chip,
                       i_chip->getHuid() );
             break;
         }
-        MemRank rank = addr.getRank();
-
-        // Get the symbol of the failure.
-        MemSymbol symbol;
-        o_rc = getMemReadSymbol<T>( i_chip, rank, symbol );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemReadSymbol(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
 
         // Complete analysis.
-        o_rc = __analyzeFetchNceTce<T,D>( i_chip, addr, symbol, io_sc );
+        o_rc = __analyzeFetchNceTce<T,D>( i_chip, addr, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "__analyzeFetchNceTce(0x%08x) failed",
@@ -503,24 +534,13 @@ uint32_t analyzeFetchTce( ExtensibleChip * i_chip,
         o_rc = getMemReadAddr<T>( i_chip, MemAddr::READ_NCE_ADDR, addr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x, READ_TCE_ADDR) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-        MemRank rank = addr.getRank();
-
-        // Get the first symbol of the failure.
-        MemSymbol firstSymbol;
-        o_rc = getMemReadSymbol<T>( i_chip, rank, firstSymbol );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "first getMemReadSymbol(0x%08x) failed",
+            PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x) failed",
                       i_chip->getHuid() );
             break;
         }
 
         // Complete analysis for first symbol.
-        o_rc = __analyzeFetchNceTce<T,D>( i_chip, addr, firstSymbol, io_sc );
+        o_rc = __analyzeFetchNceTce<T,D>( i_chip, addr, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "first __analyzeFetchNceTce(0x%08x) failed",
@@ -528,18 +548,8 @@ uint32_t analyzeFetchTce( ExtensibleChip * i_chip,
             break;
         }
 
-        // Get the second symbol of the failure.
-        MemSymbol secondSymbol;
-        o_rc = getMemReadSymbol<T>( i_chip, rank, secondSymbol, true );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "second getMemReadSymbol(0x%08x, true) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
         // Complete analysis for second symbol.
-        o_rc = __analyzeFetchNceTce<T,D>( i_chip, addr, secondSymbol, io_sc );
+        o_rc = __analyzeFetchNceTce<T,D>( i_chip, addr, io_sc, true );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "second __analyzeFetchNceTce(0x%08x) failed",
