@@ -70,19 +70,16 @@ const uint64_t FBC_IOO_DL_FIR_MASK    = 0xFCFC3FFFFCFF000CULL;
 const uint64_t FBC_IOO_DL_FIR_MASK_SIM_DD1 = 0xFCFC3FFFFCFF000FULL;
 const uint64_t OBUS_3_LL3_FIR_MASK_SIM_DD1 = 0x300000000000000FULL;
 
-static const uint8_t NV0_POS = 0x0;
-static const uint8_t NV1_POS = 0x1;
-static const uint8_t NV2_POS = 0x2;
-static const uint8_t NV3_POS = 0x3;
-static const uint8_t NV4_POS = 0x4;
-static const uint8_t NV5_POS = 0x5;
+static const uint8_t OBRICK0_POS  = 0x0;
+static const uint8_t OBRICK1_POS  = 0x1;
+static const uint8_t OBRICK2_POS  = 0x2;
+static const uint8_t OBRICK9_POS  = 0x9;
+static const uint8_t OBRICK10_POS = 0xA;
+static const uint8_t OBRICK11_POS = 0xB;
 
-static const uint8_t PERV_OB_CPLT_CONF1_NVA_IOVALID = 0x6;
-static const uint8_t PERV_OB_CPLT_CONF1_NVB_IOVALID = 0x7;
-static const uint8_t PERV_OB_CPLT_CONF1_NVC_IOVALID = 0x8;
-
-static const uint8_t NV_OB0_MASK = 0x1;
-static const uint8_t NV_OB3_MASK = 0x2;
+static const uint8_t PERV_OB_CPLT_CONF1_OBRICKA_IOVALID = 0x6;
+static const uint8_t PERV_OB_CPLT_CONF1_OBRICKB_IOVALID = 0x7;
+static const uint8_t PERV_OB_CPLT_CONF1_OBRICKC_IOVALID = 0x8;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -97,7 +94,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_OBUS>> l_obus_chiplets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>> l_mcs_targets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_CAPP>> l_capp_targets;
-    std::vector<fapi2::Target<fapi2::TARGET_TYPE_NV>> l_nv_targets;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_OBUS_BRICK>> l_obrick_targets;
     fapi2::buffer<uint64_t> l_ob0data(0x0);
     fapi2::buffer<uint64_t> l_ob3data(0x0);
     uint8_t l_dd1 = 0;
@@ -119,15 +116,15 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     if (l_ndl_iovalid)
     {
 
-        l_nv_targets = i_target.getChildren<fapi2::TARGET_TYPE_NV>();
+        l_obrick_targets = i_target.getChildren<fapi2::TARGET_TYPE_OBUS_BRICK>();
 
-        for (auto l_nv_target : l_nv_targets)
+        for (auto l_obrick_target : l_obrick_targets)
         {
-            fapi2::toString(l_nv_target, l_chipletTargetStr, sizeof(l_chipletTargetStr));
+            fapi2::toString(l_obrick_target, l_chipletTargetStr, sizeof(l_chipletTargetStr));
             FAPI_DBG("Setting NDL IOValid for %s...", l_chipletTargetStr);
 
             uint8_t l_unit_pos;
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_nv_target, l_unit_pos),
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_obrick_target, l_unit_pos),
                      "Error from FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS)");
 
             //Mapping from John Irish (jdirish@us.ibm.com)
@@ -140,32 +137,32 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             //OB3    NV0 io_valid(A)    STK2.NTL1..   5
             switch (l_unit_pos)
             {
-                case NV0_POS:
-                    l_ob0data.setBit<PERV_OB_CPLT_CONF1_NVA_IOVALID>();
+                case OBRICK0_POS:
+                    l_ob0data.setBit<PERV_OB_CPLT_CONF1_OBRICKA_IOVALID>();
                     break;
 
-                case NV1_POS:
-                    l_ob0data.setBit<PERV_OB_CPLT_CONF1_NVB_IOVALID>();
+                case OBRICK1_POS:
+                    l_ob0data.setBit<PERV_OB_CPLT_CONF1_OBRICKB_IOVALID>();
                     break;
 
-                case NV2_POS:
-                    l_ob0data.setBit<PERV_OB_CPLT_CONF1_NVC_IOVALID>();
+                case OBRICK2_POS:
+                    l_ob0data.setBit<PERV_OB_CPLT_CONF1_OBRICKC_IOVALID>();
                     break;
 
-                case NV3_POS:
-                    l_ob3data.setBit<PERV_OB_CPLT_CONF1_NVC_IOVALID>();
+                case OBRICK9_POS:
+                    l_ob3data.setBit<PERV_OB_CPLT_CONF1_OBRICKC_IOVALID>();
                     break;
 
-                case NV4_POS:
-                    l_ob3data.setBit<PERV_OB_CPLT_CONF1_NVB_IOVALID>();
+                case OBRICK10_POS:
+                    l_ob3data.setBit<PERV_OB_CPLT_CONF1_OBRICKB_IOVALID>();
                     break;
 
-                case NV5_POS:
-                    l_ob3data.setBit<PERV_OB_CPLT_CONF1_NVA_IOVALID>();
+                case OBRICK11_POS:
+                    l_ob3data.setBit<PERV_OB_CPLT_CONF1_OBRICKA_IOVALID>();
                     break;
 
                 default:
-                    FAPI_ASSERT(false, fapi2::P9_CHIPLET_SCOMINIT_UNSUPPORTED_NV_POS_ERR().set_TARGET(l_nv_target),
+                    FAPI_ASSERT(false, fapi2::P9_CHIPLET_SCOMINIT_UNSUPPORTED_OBRICK_POS_ERR().set_TARGET(l_obrick_target),
                                 "ERROR; Unsupported NV position.");
 
             }
