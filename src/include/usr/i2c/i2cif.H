@@ -228,7 +228,7 @@ struct DeviceInfo_t
     uint8_t deviceType; //< Slave device Type (from enum)
     uint8_t addr; //< I2C Slave device address (relative to port)
     uint8_t slavePort; //< I2C Slave Port. 0xFF if N/A
-    uint8_t busFreqKhz; //< Bus speed in KHz
+    uint16_t busFreqKhz; //< Bus speed in KHz
     uint8_t devicePurpose; //< Slave device purpose (from enum)
 };
 
