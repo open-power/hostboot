@@ -23,7 +23,14 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Register FFDC defintions used by all PM procedures -->
-
+<!--
+     *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
+     *HWP HWP Backup Owner: Amit Kumar <akumar3@us.ibm.com>
+     *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
+     *HWP Team: PM
+     *HWP Level: 3
+     *HWP Consumed by: SBE:HS:FSP
+-->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <registerFfdc>
@@ -173,5 +180,62 @@
     <scomRegister>PU_SPIPSS_P2S_RESET_REGISTER</scomRegister>
     <scomRegister>PU_SPIPSS_P2S_WDATA_REG</scomRegister>
     <scomRegister>PU_SPIPSS_P2S_RDATA_REG</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>OCB_CHANNEL_FFDC_REGISTERS</id>
+    <scomRegister>PU_OCB_PIB_OCBAR0</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBAR1</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBAR2</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBAR3</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBDR0</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBDR1</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBDR2</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBDR3</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBCSR0_RO</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBCSR1_RO</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBCSR2_RO</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBCSR3_RO</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSHCS0_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSHCS1_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSHCS2_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSHCS3_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSLCS0_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSLCS1_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSLCS2_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSLCS3_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSLBR0_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSLBR1_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSLBR2_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSLBR3_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBLWSR0_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBLWSR1_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBLWSR2_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBLWSR3_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBLWCR0_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBLWCR1_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBLWCR2_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBLWCR3_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBLWSBR0_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBLWSBR1_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBLWSBR2_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBLWSBR3_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSES0_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSES1_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSES2_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCBSES3_SCOM</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBESR0</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBESR1</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBESR2</scomRegister>
+    <scomRegister>PU_OCB_PIB_OCBESR3</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+      <id>OCC_JTAG_FFDC_REGISTERS</id>
+      <scomRegister>PU_JTG_PIB_OJIC_SCOM</scomRegister>
+      <scomRegister>PU_JTG_PIB_OJSTAT</scomRegister>
+      <scomRegister>PU_JTG_PIB_OJTDI</scomRegister>
+      <scomRegister>PU_JTG_PIB_OJTDO</scomRegister>
+      <scomRegister>PU_JTG_PIB_OJCFG</scomRegister>
   </registerFfdc>
 </hwpErrors>
