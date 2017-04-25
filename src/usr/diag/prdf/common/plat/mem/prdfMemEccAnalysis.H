@@ -48,6 +48,22 @@ namespace MemEcc
 {
 
 /**
+ * @brief  Adds the given symbol to the callout list and CE table. Returns true
+ *         if TPS is required.
+ * @param  i_chip   MCA or MBA.
+ * @param  i_addr   Failed address.
+ * @param  i_symbol Failed symbol.
+ * @param  o_doTps  True if TPS is required. False otherwise.
+ * @param  io_sc    The step code data struct.
+ * @param  i_isHard True if this is a hard CE. Default is false.
+ * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T, typename D>
+uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
+                      const MemSymbol & i_symbol, bool & o_doTps,
+                      STEP_CODE_DATA_STRUCT & io_sc, bool i_isHard = false );
+
+/**
  * @brief  Will check if the UE is a side-effect attention and make a callout
  *         appropriately.
  * @param  i_chip   MCA or MBA.
