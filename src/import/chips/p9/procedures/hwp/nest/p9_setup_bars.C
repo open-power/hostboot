@@ -847,6 +847,12 @@ p9_setup_bars(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     FAPI_INF("Start");
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     p9_setup_bars_chip_info l_chip_info;
+    fapi2::buffer<uint16_t> l_pg_value = 0xFFFF;
+    uint8_t l_attr_chip_unit_pos = 0;
+
+    //Get perv target for later
+    auto l_perv_tgt = i_target.getChildren<fapi2::TARGET_TYPE_PERV>
+                      (fapi2::TARGET_FILTER_NEST_WEST, fapi2::TARGET_STATE_FUNCTIONAL);
 
     // process chip information
     FAPI_TRY(p9_setup_bars_build_chip_info(i_target,
@@ -862,7 +868,20 @@ p9_setup_bars(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
              "Error from p9_setup_bars_psi");
 
     // NPU
-    if (i_target.getChildren<fapi2::TARGET_TYPE_NV>(fapi2::TARGET_STATE_FUNCTIONAL).size())
+    //Check to see if NPU is valid in PG (N3 chiplet)
+    for (auto l_tgt : l_perv_tgt)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_tgt, l_attr_chip_unit_pos));
+
+        if (l_attr_chip_unit_pos == N3_CHIPLET_ID )
+        {
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_tgt, l_pg_value));
+            break;
+        }
+    }
+
+    //Bit7 == 0 means NPU is good
+    if (!l_pg_value.getBit<7>())
     {
         FAPI_TRY(p9_setup_bars_npu(i_target, FAPI_SYSTEM, l_chip_info),
                  "Error from p9_setup_bars_npu");
