@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -23,14 +23,29 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for p9_pm_ocb_indir_access procedure -->
+<!--
+     *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
+     *HWP HWP Backup Owner: Amit Kumar <akumar3@us.ibm.com>
+     *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
+     *HWP Team: PM
+     *HWP Level: 3
+     *HWP Consumed by: SBE:HS:FSP
+-->
+
 <hwpErrors>
     <!-- ******************************************************************* -->
     <hwpError>
     <sbeError/>
     <rc>RC_PM_OCB_PUT_NO_DATA_ERROR</rc>
     <description>
-    No data passed for Put operation.
+    Valid data not provided to be written via the OCB channel.
     </description>
+    <ffdc>CHANNEL</ffdc>
+    <ffdc>DATA_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
     </hwpError>
     <!-- ******************************************************************* -->
     <hwpError>
@@ -41,7 +56,22 @@
     before writing data. Is likely due to OCC firmware not pulling entries off
     of the queue in a timely manner.
     </description>
-    <ffdc>PUSHQ_STATE</ffdc>
+    <ffdc>CHANNEL</ffdc>
+    <ffdc>DATA_SIZE</ffdc>
+    <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>OCB_CHANNEL_FFDC_REGISTERS</id>
+      <target>TARGET</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
+    </callout>
     </hwpError>
     <!-- ******************************************************************* -->
 </hwpErrors>

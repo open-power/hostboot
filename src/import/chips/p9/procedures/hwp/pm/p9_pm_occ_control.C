@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,10 +27,11 @@
 /// @brief Initialize boot vector registers and control PPC405
 ///
 // *HWP HWP Owner: Greg Still <stillgs @us.ibm.com>
+// *HWP HWP Backup Owner: Amit Kumar <akumar3@us.ibm.com>
 // *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team: PM
-// *HWP Level: 2
-// *HWP Consumed by: FSP:HS
+// *HWP Level: 3
+// *HWP Consumed by: HS
 
 // -----------------------------------------------------------------------------
 //  Includes
@@ -42,9 +43,11 @@
 #include <p9_pm_ocb_indir_access.H>
 #include <p9_pm_utils.H>
 
-/**
- * @brief enumerates opcodes for few instructions.
- */
+// ----------------------------------------------------------------------------
+// Constant definitions
+// ----------------------------------------------------------------------------
+//
+/// @brief enumerates opcodes for few instructions.
 enum
 {
     ORI_OPCODE        = 24,
@@ -62,15 +65,43 @@ enum
     OCC_MEM_BOOT_PGMADDR = 0xFFF40000,
 };
 
-//-----------------------------------------------------------------------------
+enum PPC_BRANCH_INSTR
+{
+    // Branch Absolute 0xFFF40002  (boot from sram)
+    PPC405_BRANCH_SRAM_INSTR = 0x4BF40002,
+    // Branch Absolute 0x00000040  (boot from memory)
+    PPC405_BRANCH_MEM_INSTR  = 0x48000042,
+    // Branch Relative -16         (boot from sram)
+    PPC405_BRANCH_OLD_INSTR  = 0x4BFFFFF0
+};
 
-/**
- * @brief generates ori instruction code.
- * @param[in]   i_Rs    Source register number
- * @param[in]   i_Ra    Destination regiser number
- * @param[in]   i_data  16 bit immediate data
- * @return  returns 32 bit instruction representing ori instruction.
- */
+enum DELAY_VALUE
+{
+    NS_DELAY = 1000000,// 1,000,000 ns = 1ms
+    SIM_CYCLE_DELAY = 10000
+};
+
+// OCR Register Bits
+static const uint32_t OCB_PIB_OCR_CORE_RESET_BIT = 0;
+static const uint32_t OCB_PIB_OCR_OCR_DBG_HALT_BIT = 10;
+
+// OCC JTAG Register Bits
+static const uint32_t JTG_PIB_OJCFG_DBG_HALT_BIT = 6;
+
+// OCC LFIR Bits
+static const uint32_t OCCLFIR_PPC405_DBGSTOPACK_BIT = 31;
+
+
+//-----------------------------------------------------------------------------
+// Function definitions
+// ----------------------------------------------------------------------------
+///
+/// @brief generates ori instruction code.
+/// @param[in]   i_Rs    Source register number
+/// @param[in]   i_Ra    Destination regiser number
+/// @param[in]   i_data  16 bit immediate data
+/// @return  returns 32 bit instruction representing ori instruction.
+///
 uint32_t ppc_ori( const uint16_t i_Rs, const uint16_t i_Ra,
                   const uint16_t i_data )
 {
@@ -83,15 +114,12 @@ uint32_t ppc_ori( const uint16_t i_Rs, const uint16_t i_Ra,
     return oriInstOpcode;
 }
 
-
-//-----------------------------------------------------------------------------
-
-/**
- * @brief generates lis (eg addis to 0) instruction code.
- * @param[in]   i_Rt    Target register number
- * @param[in]   i_data  16 bit immediate data
- * @return  returns 32 bit instruction representing lis instruction.
- */
+///
+/// @brief generates lis (eg addis to 0) instruction code.
+/// @param[in]   i_Rt    Target register number
+/// @param[in]   i_data  16 bit immediate data
+/// @return  returns 32 bit instruction representing lis instruction.
+///
 uint32_t ppc_lis( const uint16_t i_Rt,
                   const uint16_t i_data )
 {
@@ -103,14 +131,11 @@ uint32_t ppc_lis( const uint16_t i_Rt,
     return lisInstOpcode;
 }
 
-
-//-----------------------------------------------------------------------------
-
-/**
- * @brief generates branch absolute instruction code.
- * @param[in]   i_TargetAddr  Target address
- * @return  returns 32 bit instruction representing branch absolute instruction.
- */
+///
+/// @brief generates branch absolute instruction code.
+/// @param[in]   i_TargetAddr  Target address
+/// @return  returns 32 bit instruction representing branch absolute instruction.
+///
 uint32_t ppc_b( const uint32_t i_TargetAddr)
 {
     uint32_t brInstOpcode = 0;
@@ -120,12 +145,10 @@ uint32_t ppc_b( const uint32_t i_TargetAddr)
     return brInstOpcode;
 }
 
-//-----------------------------------------------------------------------------
-
-/**
- * @brief generates branch conditional to count register instruction code.
- * @return  returns 32 bit instruction representing branch absolute instruction.
- */
+///
+/// @brief generates branch conditional to count register instruction code.
+/// @return  returns 32 bit instruction representing branch absolute instruction.
+//
 uint32_t ppc_bctr( )
 {
     uint32_t bctrInstOpcode = 0;
@@ -137,14 +160,12 @@ uint32_t ppc_bctr( )
     return bctrInstOpcode;
 }
 
-//-----------------------------------------------------------------------------
-
-/**
- * @brief generates instruction for mtspr
- * @param[in] i_Rs      source register number
- * @param[in] i_Spr represents spr where data is to be moved.
- * @return returns 32 bit instruction representing mtspr instruction.
- */
+///
+/// @brief generates instruction for mtspr
+/// @param[in] i_Rs      source register number
+/// @param[in] i_Spr represents spr where data is to be moved.
+/// @return returns 32 bit instruction representing mtspr instruction.
+///
 uint32_t ppc_mtspr( const uint16_t i_Rs, const uint16_t i_Spr )
 {
     uint32_t mtsprInstOpcode = 0;
@@ -158,14 +179,13 @@ uint32_t ppc_mtspr( const uint16_t i_Rs, const uint16_t i_Spr )
     return mtsprInstOpcode;
 }
 
-
-/**
- * @brief Creates and loads the OCC memory boot launcher
- * @param[in] i_target  Chip target
- * @param[in] i_data64  32 bit instruction representing the branch
- *                      instruction to the SRAM boot loader
- * @return returns RC
- */
+///
+/// @brief Creates and loads the OCC memory boot launcher
+/// @param[in] i_target  Chip target
+/// @param[in] i_data64  32 bit instruction representing the branch
+///                    instruction to the SRAM boot loader
+/// @return FAPI2_RC_SUCCESS on success, else error
+///
 fapi2::ReturnCode bootMemory(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     fapi2::buffer<uint64_t>& i_data64)
@@ -240,41 +260,6 @@ fapi_try_exit:
 }
 
 
-
-// -----------------------------------------------------------------------------
-//  Constant Defintions
-// -----------------------------------------------------------------------------
-
-enum PPC_BRANCH_INSTR
-{
-    // Branch Absolute 0xFFF40002  (boot from sram)
-    PPC405_BRANCH_SRAM_INSTR = 0x4BF40002,
-    // Branch Absolute 0x00000040  (boot from memory)
-    PPC405_BRANCH_MEM_INSTR  = 0x48000042,
-    // Branch Relative -16         (boot from sram)
-    PPC405_BRANCH_OLD_INSTR  = 0x4BFFFFF0
-};
-
-enum DELAY_VALUE
-{
-    NS_DELAY = 1000000,// 1,000,000 ns = 1ms
-    SIM_CYCLE_DELAY = 10000
-};
-
-// OCR Register Bits
-static const uint32_t OCB_PIB_OCR_CORE_RESET_BIT = 0;
-static const uint32_t OCB_PIB_OCR_OCR_DBG_HALT_BIT = 10;
-
-// OCC JTAG Register Bits
-static const uint32_t JTG_PIB_OJCFG_DBG_HALT_BIT = 6;
-
-// OCC LFIR Bits
-static const uint32_t OCCLFIR_PPC405_DBGSTOPACK_BIT = 31;
-
-
-// -----------------------------------------------------------------------------
-//   Procedure Defintion
-// -----------------------------------------------------------------------------
 fapi2::ReturnCode p9_pm_occ_control
 (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
  const p9occ_ctrl::PPC_CONTROL i_ppc405_reset_ctrl,
@@ -430,7 +415,8 @@ fapi2::ReturnCode p9_pm_occ_control
 
             FAPI_ASSERT (!(l_jtagcfg.getBit<JTG_PIB_OJCFG_DBG_HALT_BIT>()),
                          fapi2::OCC_CONTROL_NONSTART_DUE_TO_RISCWATCH()
-                         .set_JTAGCFG(l_jtagcfg),
+                         .set_JTAGCFG(l_jtagcfg)
+                         .set_TARGET(i_target),
                          "OCC will not start as the JTAG halt from RiscWatch is currently set");
 
             FAPI_INF("Starting the PPC405");

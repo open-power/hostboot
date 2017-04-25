@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,10 +27,11 @@
 /// @brief Initialize the SRAM in the OCC
 ///
 // *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
+// *HWP HWP Backup Owner: Amit Kumar <akumar3@us.ibm.com>
 // *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team: PM
-// *HWP Level: 1
-// *HWP Consumed by: FSP:HS
+// *HWP Level: 3
+// *HWP Consumed by: HS
 //
 
 // -----------------------------------------------------------------------------

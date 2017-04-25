@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,8 +29,8 @@
 // *HWP HWP Backup Owner: Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner        : Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team            : PM
-// *HWP Level           : 2
-// *HWP Consumed by     : FSP:HS
+// *HWP Level           : 3
+// *HWP Consumed by     : SBE:HS
 
 ///
 /// High-level procedure flow:
@@ -59,6 +59,10 @@ enum
     OCB_FULL_POLL_DELAY_HDW = 0,
     OCB_FULL_POLL_DELAY_SIM = 0
 };
+
+// ----------------------------------------------------------------------
+// Function definitions
+// ----------------------------------------------------------------------
 
 fapi2::ReturnCode p9_pm_ocb_indir_access(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
@@ -134,12 +138,15 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
         FAPI_TRY(fapi2::putScom(i_target, l_OCBAR_address, l_data64));
     }
 
-    // PUT Operation
+    // PUT Operation: Write data to the SRAM in the given location
+    //                via the OCB channel
     if ( i_ocb_op == p9ocb::OCB_PUT )
     {
         FAPI_INF("OCB access for data write operation");
         FAPI_ASSERT(io_ocb_buffer != NULL,
-                    fapi2::PM_OCB_PUT_NO_DATA_ERROR(),
+                    fapi2::PM_OCB_PUT_NO_DATA_ERROR().
+                    set_CHANNEL(i_ocb_chan).
+                    set_DATA_SIZE(i_ocb_req_length),
                     "No data provided for PUT operation");
 
         fapi2::buffer<uint64_t> l_data64;
@@ -186,7 +193,9 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
 
                 FAPI_ASSERT((true == l_push_ok_flag),
                             fapi2::PM_OCB_PUT_DATA_POLL_NOT_FULL_ERROR().
-                            set_PUSHQ_STATE(l_data64),
+                            set_CHANNEL(i_ocb_chan).
+                            set_DATA_SIZE(i_ocb_req_length).
+                            set_TARGET(i_target),
                             "Polling timeout waiting on push non-full");
             }
         }
@@ -196,6 +205,13 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
         for(uint32_t l_index = 0; l_index < i_ocb_req_length; l_index++)
         {
             l_data64.insertFromRight(io_ocb_buffer[l_index], 0, 64);
+            /* The data read is done via this getscom operation.
+             * A data write failure will be logged off as a simple scom failure.
+             * Need to find a way to distiniguish this error and collect
+             * additional information incase of a failure.*/
+            // @TODO RTC 173286 - FAPI2:  FAPI_TRY (or surrogate name)
+            //                    that allows access to the return code for
+            //                    HWP reaction
             FAPI_TRY(fapi2::putScom(i_target, l_OCBDR_address, l_data64),
                      "ERROR:Failed to complete write to channel data register");
             o_ocb_act_length++;
@@ -205,7 +221,7 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
 
         FAPI_DBG("%d blocks(64bits each) of data put", o_ocb_act_length);
     }
-    // GET Operation
+    // GET Operation: Data read from the given location in SRAM via OCB channel
     else if( i_ocb_op == p9ocb::OCB_GET )
     {
         FAPI_INF("OCB access for data read operation");
@@ -213,9 +229,17 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
         fapi2::buffer<uint64_t> l_data64;
         uint64_t l_data = 0;
 
+        // Read data from the Channel Data Register in blocks of 64 bits.
         for (uint32_t l_loopCount = 0; l_loopCount < i_ocb_req_length;
              l_loopCount++)
         {
+            /* The data read is done via this getscom operation.
+             * A data read failure will be logged off as a simple scom failure.
+             * Need to find a way to distiniguish this error and collect
+             * additional information incase of a failure.*/
+            // @TODO RTC 173286 - FAPI2:  FAPI_TRY (or surrogate name)
+            //                    that allows access to the return code for
+            //                    HWP reaction
             FAPI_TRY(fapi2::getScom(i_target, l_OCBDR_address, l_data64),
                      "ERROR: Failed to read data from channel %d", i_ocb_chan);
             l_data64.extract(l_data, 0, 64);

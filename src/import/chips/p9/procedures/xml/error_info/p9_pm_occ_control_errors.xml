@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,14 +22,15 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-
-<!-- *HWP HWP Owner: Greg Still <stillgs @us.ibm.com>                       -->
-<!-- *HWP FW Owner: Bilicon Patil <bilpatil@in.ibm.com>                     -->
-<!-- *HWP Team: PM                                                          -->
-<!-- *HWP Level: 1                                                          -->
-<!-- *HWP Consumed by: FSP:HS                                               -->
-
 <!-- Error definitions for p9_pm_occ_control procedure -->
+<!--
+     *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
+     *HWP HWP Backup Owner: Amit Kumar <akumar3@us.ibm.com>
+     *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
+     *HWP Team: PM
+     *HWP Level: 3
+     *HWP Consumed by: HS
+-->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -39,6 +40,16 @@
     that keeps it in the halt state.
     </description>
     <ffdc>JTAGCFG</ffdc>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <collectRegisterFfdc>
+      <id>OCC_JTAG_FFDC_REGISTERS</id>
+      <target>TARGET</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -49,5 +60,9 @@
     </description>
     <ffdc>ACTLENGTH</ffdc>
     <ffdc>LENGTH</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>

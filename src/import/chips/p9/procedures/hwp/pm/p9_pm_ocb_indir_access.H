@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,8 +31,8 @@
 // *HWP HWP Backup Owner: Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner        : Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team            : PM
-// *HWP Level           : 2
-// *HWP Consumed by     : FSP:HS
+// *HWP Level           : 3
+// *HWP Consumed by     : SBE:HS
 
 #ifndef _P9_PM_OCB_INDIR_ACCESS_H_
 #define _P9_PM_OCB_INDIR_ACCESS_H_

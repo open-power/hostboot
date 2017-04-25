@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,14 +26,13 @@
 /// @file  p9_pm_ocb_init.C
 /// @brief Setup and configure OCB channels
 ///
-// *HWP HWP Owner: Amit Kumar <akumar3@us.ibm.com>
-// *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
-// *HWP Team: PM
-// *HWP Level: 2
-// *HWP Consumed by: FSP:HS
+// *HWP HWP Owner       : Amit Kumar <akumar3@us.ibm.com>
+// *HWP HWP Backup Owner: Greg Still <stillgs@us.ibm.com>
+// *HWP FW Owner        : Sangeetha T S <sangeet2@in.ibm.com>
+// *HWP Team            : PM
+// *HWP Level           : 3
+// *HWP Consumed by     : SBE:HS
 
-///   Add support for linear window mode
-///
 ///   High-level procedure flow:
 ///
 ///   - if mode = PM_INIT
@@ -293,7 +292,9 @@ fapi2::ReturnCode pm_ocb_setup(
             FAPI_ASSERT(
                 false,
                 fapi2::PM_OCBINIT_BAD_Q_LENGTH_PARM().
-                set_BADQLENGTH(i_ocb_q_len),
+                set_BADQLENGTH(i_ocb_q_len).
+                set_CHANNEL(i_ocb_chan).
+                set_TYPE(i_ocb_type),
                 "ERROR: Bad Queue Length Passed to Procedure => %d",
                 i_ocb_q_len);
         }
