@@ -312,6 +312,72 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
+template<TARGETING::TYPE T, typename D>
+uint32_t __handleNceEte( ExtensibleChip * i_chip, TdQueue & io_queue,
+                         const MemAddr & i_addr, STEP_CODE_DATA_STRUCT & io_sc,
+                         bool i_isHard = false )
+{
+    #define PRDF_FUNC "[__handleNceEte] "
+
+    uint32_t o_rc = SUCCESS;
+
+    MemRank rank = i_addr.getRank();
+
+    do
+    {
+        // Query the per-symbol counters for the CE symbol(s).
+        MemUtils::MaintSymbols symData; MemSymbol junk;
+        o_rc = MemUtils::collectCeStats<T>( i_chip, rank, symData, junk );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats(0x%08x,m%ds%d) "
+                      "failed", i_chip->getHuid(), rank.getMaster(),
+                      rank.getSlave() );
+            break;
+        }
+
+        // Make sure the list size is correct. Note that Nimbus has two symbol
+        // correction. So it is possible to have two symbols in the counters
+        // even though the threshold is set to 1.
+        uint32_t count = symData.size();
+        switch ( T )
+        {
+            case TYPE_MCA: PRDF_ASSERT( 1 <= count && count <= 2 ); break;
+            case TYPE_MBA: PRDF_ASSERT( 1 == count               ); break;
+            default: PRDF_ASSERT( false );
+        }
+
+        for ( auto & d : symData )
+        {
+            // Add the symbol(s) to the callout list and CE table.
+            bool doTps;
+            o_rc = MemEcc::handleMemCe<T,D>( i_chip, i_addr, d.symbol, doTps,
+                                             io_sc, i_isHard );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "handleMemCe(0x%08x) failed",
+                          i_chip->getHuid() );
+                break;
+            }
+
+            // Add a TPS procedure to the queue, if needed.
+            if ( doTps )
+            {
+                TdEntry * e = new TpsEvent<T>{ i_chip, rank };
+                io_queue.push( e );
+            }
+        }
+        if ( SUCCESS != o_rc ) break;
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 template<TARGETING::TYPE T>
 uint32_t __handleRceEte( ExtensibleChip * i_chip, bool & o_errorsFound,
                          STEP_CODE_DATA_STRUCT & io_sc );
@@ -419,14 +485,13 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             o_errorsFound = true;
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintINTER_CTE);
 
-            // Can't do any more isolation at this time. So add the rank to the
-            // callout list.
-            MemoryMru mm { trgt, rank, MemoryMruData::CALLOUT_RANK };
-            io_sc.service_data->SetCallout( mm );
-
-            // Add a TPS procedure to the queue.
-            TdEntry * e = new TpsEvent<T>{ i_chip, rank };
-            io_queue.push( e );
+            o_rc = __handleNceEte<T,D>( i_chip, io_queue, i_addr, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "__handleNceEte<T,D>(0x%08x) failed",
+                          huid );
+                break;
+            }
         }
 
         if ( 0 != (eccAttns & MAINT_SOFT_NCE_ETE) )
@@ -434,14 +499,13 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             o_errorsFound = true;
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintSOFT_CTE );
 
-            // Can't do any more isolation at this time. So add the rank to the
-            // callout list.
-            MemoryMru mm { trgt, rank, MemoryMruData::CALLOUT_RANK };
-            io_sc.service_data->SetCallout( mm );
-
-            // Add a TPS procedure to the queue.
-            TdEntry * e = new TpsEvent<T>{ i_chip, rank };
-            io_queue.push( e );
+            o_rc = __handleNceEte<T,D>( i_chip, io_queue, i_addr, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "__handleNceEte<T,D>(0x%08x) failed",
+                          huid );
+                break;
+            }
         }
 
         if ( 0 != (eccAttns & MAINT_HARD_NCE_ETE) )
@@ -449,31 +513,20 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             o_errorsFound = true;
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintHARD_CTE );
 
-            // Query the per-symbol counters for the hard CE symbol.
-            MemUtils::MaintSymbols symData; MemSymbol junk;
-            o_rc = MemUtils::collectCeStats<T>( i_chip, rank, symData, junk );
+            o_rc = __handleNceEte<T,D>( i_chip, io_queue, i_addr, io_sc, true );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats(0x%08x,m%ds%d) "
-                          "failed", huid, rank.getMaster(), rank.getSlave() );
+                PRDF_ERR( PRDF_FUNC "__handleNceEte<T,D>(0x%08x) failed",
+                          huid );
                 break;
             }
 
-            // The command will have stopped on the first occurrence. So there
-            // should only be one symbol in the list.
-            PRDF_ASSERT( 1 == symData.size() );
-
-            // Add the symbol to the callout list.
-            MemoryMru mm { trgt, rank, symData[0].symbol };
-            io_sc.service_data->SetCallout( mm );
-
             // Any hard CEs in MNFG should be immediately reported.
             if ( mfgMode() )
+            {
+                io_sc.service_data->setSignature( huid, PRDFSIG_MaintHARD_CTE );
                 io_sc.service_data->setServiceCall();
-
-            // Add a TPS procedure to the queue.
-            TdEntry * e = new TpsEvent<T>{ i_chip, rank };
-            io_queue.push( e );
+            }
 
             /* TODO RTC 136129
             // Dynamically deallocation the page.
