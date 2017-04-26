@@ -3854,9 +3854,6 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                 case EEPROM::VPD_BACKUP:
                     l_currentDI.devicePurpose =
                             TARGETING::HDAT_I2C_DEVICE_PURPOSE_MODULE_VPD;
-                    //TODO RTC:165485 this isn't currently right. we'll need
-                    //to add the changes in the enum and possibly the other
-                    //struct/attribute.
                     break;
                 case EEPROM::SBE_PRIMARY:
                 case EEPROM::SBE_BACKUP:
@@ -3941,8 +3938,8 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
         TARGETING::ATTR_HDAT_I2C_MASTER_PORT_type l_i2cMasterPort;
         (*childItr)->tryGetAttr<TARGETING::ATTR_HDAT_I2C_MASTER_PORT>(
                                                     l_i2cMasterPort);
-        TARGETING::ATTR_HDAT_I2C_DEVTYPE_type l_i2cDevType;
-        (*childItr)->tryGetAttr<TARGETING::ATTR_HDAT_I2C_DEVTYPE>(
+        TARGETING::ATTR_HDAT_I2C_DEVICE_TYPE_type l_i2cDevType;
+        (*childItr)->tryGetAttr<TARGETING::ATTR_HDAT_I2C_DEVICE_TYPE>(
                                                     l_i2cDevType);
         TARGETING::ATTR_HDAT_I2C_ADDR_type l_i2cAddr;
         (*childItr)->tryGetAttr<TARGETING::ATTR_HDAT_I2C_ADDR>(l_i2cAddr);
@@ -3952,8 +3949,8 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
         TARGETING::ATTR_HDAT_I2C_BUS_FREQ_type l_i2cBusFreq;
         (*childItr)->tryGetAttr<TARGETING::ATTR_HDAT_I2C_BUS_FREQ>(
                                                     l_i2cBusFreq);
-        TARGETING::ATTR_HDAT_I2C_DEV_PURPOSE_type l_i2cDevPurpose;
-        (*childItr)->tryGetAttr<TARGETING::ATTR_HDAT_I2C_DEV_PURPOSE>(
+        TARGETING::ATTR_HDAT_I2C_DEVICE_PURPOSE_type l_i2cDevPurpose;
+        (*childItr)->tryGetAttr<TARGETING::ATTR_HDAT_I2C_DEVICE_PURPOSE>(
                                                     l_i2cDevPurpose);
 
         uint8_t l_arrayLength =
@@ -3969,6 +3966,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                     l_idx++)
         {
             DeviceInfo_t l_currentDevice;
+            l_currentDevice.masterChip = (*childItr);
             l_currentDevice.engine = l_i2cEngine[l_idx];
             l_currentDevice.masterPort = l_i2cMasterPort[l_idx];
             l_currentDevice.addr = l_i2cAddr[l_idx];
