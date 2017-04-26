@@ -68,6 +68,10 @@ REG64_FLD( MCS_MCMODE0_GROUP_INTERLEAVE_GRANULARITY                , 52  , SH_UN
            0 );
 REG64_FLD( MCS_MCMODE0_GROUP_INTERLEAVE_GRANULARITY_LEN            , 4   , SH_UNT_MCS      , SH_ACS_SCOM_RW  ,
            0 );
+REG64_FLD( MCS_MCMODE0_DISABLE_MC_SYNC                             , 27  , SH_UNT_MCS      , SH_ACS_SCOM_RW  ,
+           0 );
+REG64_FLD( MCS_MCMODE0_DISABLE_MC_PAIR_SYNC                        , 28  , SH_UNT_MCS      , SH_ACS_SCOM_RW  ,
+           0 );
 
 
 
