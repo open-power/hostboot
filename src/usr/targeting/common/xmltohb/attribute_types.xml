@@ -34429,31 +34429,31 @@ Measured in GB</description>
     </description>
     <enumerator>
         <name>955X</name>
-        <value>1</value>
+        <value>0x1</value>
     </enumerator>
     <enumerator>
         <name>SEEPROM</name>
-        <value>2</value>
+        <value>0x2</value>
     </enumerator>
     <enumerator>
         <name>NUVOTON_TPM</name>
-        <value>3</value>
+        <value>0x3</value>
     </enumerator>
     <enumerator>
         <name>MEX_FPGA</name>
-        <value>4</value>
+        <value>0x4</value>
     </enumerator>
     <enumerator>
         <name>UCX90XX</name>
-        <value>5</value>
+        <value>0x5</value>
     </enumerator>
     <enumerator>
         <name>NVLINK</name>
-        <value>6</value>
+        <value>0x6</value>
     </enumerator>
     <enumerator>
         <name>UNKNOWN</name>
-        <value>FF</value>
+        <value>0xFF</value>
     </enumerator>
 </enumerationType>
 
@@ -34464,47 +34464,47 @@ Measured in GB</description>
     </description>
     <enumerator>
         <name>CABLE_CARD_PRES</name>
-        <value>1</value>
+        <value>0x1</value>
     </enumerator>
     <enumerator>
         <name>CABLE_CARD_POWER_SENSE</name>
-        <value>2</value>
+        <value>0x2</value>
     </enumerator>
     <enumerator>
         <name>CABLE_CARD_POWER_CONTROL</name>
-        <value>3</value>
+        <value>0x3</value>
     </enumerator>
     <enumerator>
         <name>TPM</name>
-        <value>4</value>
+        <value>0x4</value>
     </enumerator>
     <enumerator>
         <name>MODULE_VPD</name>
-        <value>5</value>
+        <value>0x5</value>
     </enumerator>
     <enumerator>
         <name>DIMM_SPD</name>
-        <value>6</value>
+        <value>0x6</value>
     </enumerator>
     <enumerator>
         <name>PROC_MODULE_VPD</name>
-        <value>7</value>
+        <value>0x7</value>
     </enumerator>
     <enumerator>
         <name>SBE_SEEPROM</name>
-        <value>8</value>
+        <value>0x8</value>
     </enumerator>
     <enumerator>
         <name>PLANAR_VPD</name>
-        <value>9</value>
+        <value>0x9</value>
     </enumerator>
     <enumerator>
         <name>PCI_HOTPLUG</name>
-        <value>A</value>
+        <value>0xA</value>
     </enumerator>
     <enumerator>
         <name>NVLINK</name>
-        <value>B</value>
+        <value>0xB</value>
     </enumerator>
     <enumerator>
         <name>WINDOW_OPEN</name>
@@ -34516,7 +34516,7 @@ Measured in GB</description>
     </enumerator>
     <enumerator>
         <name>UNKNOWN</name>
-        <value>FF</value>
+        <value>0xFF</value>
     </enumerator>
 </enumerationType>
 
