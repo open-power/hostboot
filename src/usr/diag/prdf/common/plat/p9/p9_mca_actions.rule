@@ -115,6 +115,7 @@ actionclass maintenance_iaue_handling
 /** MCA/UE algroithm, threshold 5 per day */
 actionclass mca_ue_algorithm_th_5perDay
 {
+    funccall("HwpErrorIsolation");
     calloutSelfMed;
     threshold5pday;
     funccall("mcaUeAlgorithm"); # must be called last
@@ -126,5 +127,19 @@ actionclass mca_ue_algorithm_th_1
     calloutSelfMed;
     threshold1;
     funccall("mcaUeAlgorithm"); # must be called last
+};
+
+/** Excessive refreshes to a single rank */
+actionclass excessive_refreshes
+{
+    funccall("HwpErrorIsolation");
+    self_th_32perDay;
+};
+
+/** Calibration complete indication xout */
+actionclass calibration_complete
+{
+    funccall("HwpErrorIsolation");
+    self_th_1;
 };
 

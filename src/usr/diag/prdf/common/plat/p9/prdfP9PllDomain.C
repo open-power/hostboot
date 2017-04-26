@@ -162,11 +162,24 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
             }
         }
 
+        // In the case of a PLL_UNLOCK error, we want to do additional isolation
+        // in case of a HWP failure
+        ExtensibleChipFunction * l_hwpErrIsolation =
+            l_chip->getExtensibleFunction("HwpErrorIsolation");
+
         // Update error lists
         if (l_errType & SYS_PLL_UNLOCK)
+        {
             sysRefList.push_back( l_chip );
+            (*l_hwpErrIsolation)(l_chip,
+                PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
+        }
         if (l_errType & PCI_PLL_UNLOCK)
+        {
             pciList.push_back( l_chip );
+            (*l_hwpErrIsolation)(l_chip,
+                PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
+        }
         if (l_errType & SYS_OSC_FAILOVER)
             mfFoList.push_back( l_chip );
         if (l_errType & PCI_OSC_FAILOVER)

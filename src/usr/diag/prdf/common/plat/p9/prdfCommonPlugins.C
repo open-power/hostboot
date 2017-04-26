@@ -31,6 +31,10 @@
 #include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>
 #include <prdfPluginMap.H>
+#include <prdfPlatServices.H>
+#include <xspprdService.h>
+
+using namespace TARGETING;
 
 namespace PRDF
 {
@@ -91,6 +95,44 @@ int32_t ClearServiceCallFlag_mnfgInfo( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS(p9_nimbus, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+
+
+/**
+ * @brief   PRD will perform error isolation for certain errors that may cause
+ *          a HWP to fail.
+ * @param   i_chip PROC or MCA
+ * @param   i_sc   Step code data struct
+ * @returns SUCCESS always
+ */
+int32_t HwpErrorIsolation( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #if defined (__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+
+    TargetHandle_t trgt = i_chip->getTrgt();
+    uint32_t plid = trgt->getAttr<ATTR_PRD_HWP_PLID>();
+
+    // Check for non-zero value in PLID attribute
+    if ( 0 != plid )
+    {
+        // Link HWP PLID to PRD error log
+        errlHndl_t errl =
+            ServiceGeneratorClass::ThisServiceGenerator().getErrl();
+        errl->plid(plid);
+
+        // Make the error log and callouts predictive
+        io_sc.service_data->setServiceCall();
+
+        // Clear PRD_HWP_PLID attribute
+        trgt->setAttr<ATTR_PRD_HWP_PLID>( 0 );
+    }
+
+    #endif
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS(p9_nimbus, CommonPlugins, HwpErrorIsolation);
+PRDF_PLUGIN_DEFINE_NS(p9_mca, CommonPlugins, HwpErrorIsolation);
 
 } // namespace CommonPlugins ends
 
