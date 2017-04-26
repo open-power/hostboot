@@ -236,9 +236,27 @@ namespace KernelMisc
             updateScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
                         *reinterpret_cast<const uint64_t*>(hostboot_string));
         }
-        else
+        else if(i_status == HB_STARTED_PAYLOAD)
         {
             updateScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,0);
+        }
+        else if(i_status == HB_BOOTLOADER)
+        {
+            const char * hostboot_string = "bootload";
+            updateScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
+                        *reinterpret_cast<const uint64_t*>(hostboot_string));
+        }
+        else if(i_status == HB_START_BASE_IMAGE)
+        {
+            const char * hostboot_string = "starthbb";
+            updateScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
+                        *reinterpret_cast<const uint64_t*>(hostboot_string));
+        }
+        else if(i_status == HB_SHUTDOWN)
+        {
+            const char * hostboot_string = "shutdown";
+            updateScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
+                        *reinterpret_cast<const uint64_t*>(hostboot_string));
         }
     }
 

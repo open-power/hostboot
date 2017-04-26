@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,8 +55,11 @@ namespace KernelMisc
     /** @brief Indicate whether HB is running or not */
     enum HbRunning
     {
-        HB_RUNNING = 0,
-        HB_SHUTDOWN = 1,
+        HB_RUNNING          = 0,
+        HB_STARTED_PAYLOAD  = 1,
+        HB_BOOTLOADER       = 2,
+        HB_START_BASE_IMAGE = 3,
+        HB_SHUTDOWN         = 4,
     };
 
     /** @fn setHbScratchStatus
@@ -95,7 +98,7 @@ namespace KernelMisc
              *
              *  @param i_caller - Task calling cpu_master_winkle to be
              *                    restored after winkle is complete.
-             *  @param i_fusedCores - true if using 8 threaded cores 
+             *  @param i_fusedCores - true if using 8 threaded cores
              */
             WinkleCore(task_t* i_caller, bool i_fusedCores) :
                 iv_caller(i_caller), iv_timebase(0),

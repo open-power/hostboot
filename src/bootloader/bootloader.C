@@ -238,6 +238,11 @@ namespace Bootloader{
         bootloader_trace_index = 0;
         BOOTLOADER_TRACE(BTLDR_TRC_MAIN_START);
 
+        //Set core scratch 3 to say bootloader is active
+        //"bootload" = 0x626F6F746C6F6164 in ascii
+        uint64_t hostboot_string = 0x626F6F746C6F6164;
+        writeScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE, hostboot_string);
+
         // @TODO RTC:138268 Support multiple sides of PNOR in bootloader
 
         //pnorEnd is the end of flash, which is base of lpc, plus
@@ -331,6 +336,12 @@ namespace Bootloader{
                     l_dest_addr[i] = l_src_addr[i];
                 }
                 BOOTLOADER_TRACE(BTLDR_TRC_MAIN_COPY_HBB_DONE);
+
+                //Set core scratch 3 to say hbb image is starting
+                //"starthbb" = 0x7374617274686262 in ascii
+                hostboot_string = 0x7374617274686262;
+                writeScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
+                                hostboot_string);
 
                 // Start executing HBB
                 enterHBB(HBB_HRMOR, HBB_RUNNING_OFFSET);
