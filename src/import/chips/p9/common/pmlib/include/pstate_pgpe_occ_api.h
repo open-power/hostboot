@@ -139,7 +139,7 @@ typedef struct ipcmsg_wof_vfrt
     uint8_t         active_quads; // OCC updated with the Active Quads that it
     // is using for its Ceff calculations
     uint8_t         pad;
-    VFRT_Hcode_t*   vfrt_ptr;     // Voltage Frequency Ratio Table
+    HomerVFRTLayout_t* homer_vfrt_ptr;
 } ipcmsg_wof_vfrt_t;
 
 
