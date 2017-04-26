@@ -93,10 +93,12 @@ errlHndl_t lpcRead(DeviceFW::OperationType i_opType,
     uint64_t l_addr = va_arg(i_args,uint64_t);
     errlHndl_t l_err = NULL;
 
-    // Only able to do 1,2,4 byte LPC operations
+    // For speed, we support larger ops on FW space, otherwise
+    // we are only able to do 1,2,4 byte LPC operations
     assert( (io_buflen == sizeof(uint8_t)) ||
             (io_buflen == sizeof(uint16_t)) ||
-            (io_buflen == sizeof(uint32_t)) );
+            (io_buflen == sizeof(uint32_t)) ||
+                    (l_type == LPC::TRANS_FW) );
 
     // if the request is for something besides the master sentinel
     //  then we have to use our special side copy of the driver
@@ -182,10 +184,12 @@ errlHndl_t lpcWrite(DeviceFW::OperationType i_opType,
     uint64_t l_addr = va_arg(i_args,uint64_t);
     errlHndl_t l_err = NULL;
 
-    // Only able to do 1,2,4 byte LPC operations
+    // For speed, we support larger ops on FW space, otherwise
+    // we are only able to do 1,2,4 byte LPC operations
     assert( (io_buflen == sizeof(uint8_t)) ||
             (io_buflen == sizeof(uint16_t)) ||
-            (io_buflen == sizeof(uint32_t)) );
+            (io_buflen == sizeof(uint32_t)) ||
+                    (l_type == LPC::TRANS_FW) );
 
     // if the request is for something besides the master sentinel
     //  then we have to use our special side copy of the driver
@@ -753,6 +757,11 @@ errlHndl_t LpcDD::_readLPC(LPC::TransType i_type,
             uint32_t * o_ptr = reinterpret_cast<uint32_t*>(o_buffer);
             *o_ptr = *l_ptr;
         }
+        else if ( i_type == LPC::TRANS_FW
+                                 && (i_addr + io_buflen) < LPC::FW_WINDOW_SIZE)
+        {
+            memcpy( o_buffer, reinterpret_cast<void*>(l_addr), io_buflen );
+        }
 #endif
         else
         {
@@ -825,6 +834,11 @@ errlHndl_t LpcDD::_writeLPC(LPC::TransType i_type,
             uint32_t * l_ptr = reinterpret_cast<uint32_t*>(l_addr);
             const uint32_t * i_ptr =reinterpret_cast<const uint32_t*>(i_buffer);
             *l_ptr = *i_ptr;
+        }
+        else if ( i_type == LPC::TRANS_FW
+                                 && (i_addr + io_buflen) < LPC::FW_WINDOW_SIZE)
+        {
+            memcpy( reinterpret_cast<void*>(l_addr), i_buffer, io_buflen );
         }
         eieio();
 #endif
