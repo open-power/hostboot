@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/occ/occ_common.H $                            */
+/* $Source: src/include/usr/isteps/pm/occCheckstop.H $                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,8 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef OCC_COMMON_H
-#define OCC_COMMON_H
+#ifndef OCC_CHECKSTOP_H
+#define OCC_CHECKSTOP_H
 
 #include <limits.h>
 #include <errl/errlentry.H>
@@ -31,31 +31,6 @@
 
 namespace HBOCC
 {
-    /*
-     * @brief Host config data consumed by OCC
-     */
-    struct occHostConfigDataArea_t
-    {
-        uint32_t version;
-
-        //For computation of timebase frequency
-        uint32_t nestFrequency;
-
-        // For determining the interrupt type to Host
-        //  0x00000000 = Use FSI2HOST Mailbox
-        //  0x00000001 = Use OCC interrupt line through PSIHB complex
-        uint32_t interruptType;
-
-        // For informing OCC if it is the FIR master:
-        //  0x00000000 = Default
-        //  0x00000001 = FIR Master
-        uint32_t firMaster;
-
-        // FIR collection configuration data needed by FIR Master
-        //  OCC in the event of a checkstop
-        uint8_t firdataConfig[3072];
-    };
-
     enum
     {
         OccHostDataVersion = 3,
@@ -177,4 +152,4 @@ namespace HBOCC
 
 } //namespace HBOCC ends
 
-#endif
+#endif // OCC_CHECKSTOP_H

@@ -183,6 +183,29 @@ class UtilLidMgr
      */
     errlHndl_t releaseLidImage(void);
 
+// @todo RTC 155065 IPL Time Checkstop Analysis Enablement
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+    /**
+     *  @brief Get lid managers' pointer to the lid vaddr.
+     *
+     *  @return void* - Returns pointer to virtual address the lid lives in.
+     *                  Null if the lid is not in virtual address space.
+     *                  NOTE: Only supporting PNOR Virt Addr now
+     */
+    inline const void* getLidVirtAddr() const
+    {
+        const void* l_addr = NULL;
+        // Get pointer to PNOR vaddr
+        if (iv_isLidInPnor)
+        {
+            l_addr = reinterpret_cast<const void*>(iv_lidPnorInfo.vaddr);
+        }
+        // Add support for other virtual address spaces here
+
+        return l_addr;
+    }
+#endif
+
 #ifdef __HOSTBOOT_RUNTIME
     /**
      * @brief Get a list of LID numbers

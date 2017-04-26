@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,7 +26,7 @@
 #include    <stdint.h>
 
 #include    <errl/errlentry.H>
-#include    <occ/occAccess.H>
+#include    <isteps/pm/occAccess.H>
 #include    <targeting/common/utilFilter.H>
 
 // Fapi

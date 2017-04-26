@@ -63,7 +63,7 @@
 #include <p9_hcode_image_defines.H>
 
 #include <arch/ppc.H>
-#include <occ/occAccess.H>
+#include <isteps/pm/occAccess.H>
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
   #include <diag/prdf/prdfWriteHomerFirData.H>
@@ -185,6 +185,7 @@ namespace HBPM
         }
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+// @todo RTC 155065 IPL Time Checkstop Analysis Enablement
         // Figure out the FIR master
         TARGETING::Target* masterproc = nullptr;
         tS.masterProcChipTargetHandle( masterproc );
@@ -656,6 +657,35 @@ namespace HBPM
                 break;
             }
 
+// @todo RTC 155065 IPL Time Checkstop Analysis Enablement
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+            if (i_useSRAM)
+            {
+                void* occVirt = reinterpret_cast<void *>(i_occImgVaddr);
+                l_errl = loadOCCImageDuringIpl( i_target, occVirt );
+                if( l_errl )
+                {
+                    TRACFCOMP(g_fapiImpTd,
+                            ERR_MRK"loadOCC: loadOCCImageDuringIpl failed!");
+                    break;
+                }
+            }
+            else
+            {
+                // clear (up to and including) the IPL Flag
+                const uint32_t l_SramAddrApp = OCC_SRAM_ADDRESS;
+                ecmdDataBufferBase
+                    l_occAppData((OCC_OFFSET_IPL_FLAG + 6) * 8 /* bits */);
+                l_errl = HBOCC::writeSRAM(i_target,l_SramAddrApp,l_occAppData);
+                if(l_errl)
+                {
+                    TRACFCOMP( g_fapiImpTd,
+                            ERR_MRK"loadOCC: Error in writeSRAM of 0");
+                    break;
+                }
+            }
+#endif
+
             l_errl = loadOCCImageToHomer(i_target,
                                          l_occImgPaddr,
                                          l_occImgVaddr,
@@ -675,6 +705,24 @@ namespace HBPM
             void* l_occDataVaddr = reinterpret_cast <void *>(l_occImgVaddr +
                                             HOMER_OFFSET_TO_OCC_HOST_DATA);
 
+// @todo RTC 155065 IPL Time Checkstop Analysis Enablement
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+#ifndef __HOSTBOOT_RUNTIME
+            if (i_useSRAM)
+            {
+                //==============================
+                //Setup host data area in SRAM
+                //==============================
+                l_errl = HBOCC::loadHostDataToSRAM(i_target,
+                                        PRDF::MASTER_PROC_CORE);
+                if( l_errl != NULL )
+                {
+                    TRACFCOMP( g_fapiImpTd, ERR_MRK"loading Host Data Area failed!" );
+                    break;
+                }
+            }
+#endif
+#endif
             l_errl = loadHostDataToHomer(i_target,
                                          l_occDataVaddr);
             if(l_errl)

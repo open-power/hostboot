@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2015
+# Contributors Listed Below - COPYRIGHT 2014,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -32,7 +32,7 @@ MODULE = htmgt_rt
 include ../htmgt_common.mk
 
 #include unique object modules
-#OBJS +=
+OBJS += rt_occ.o
 
 #SUBDIRS += test.d
 

@@ -33,31 +33,6 @@
 
 namespace HBPM
 {
-    /*
-     * @brief Host config data consumed by OCC
-     */
-    struct occHostConfigDataArea_t
-    {
-        uint32_t version;
-
-        //For computation of timebase frequency
-        uint32_t nestFrequency;
-
-        // For determining the interrupt type to Host
-        //  0x00000000 = Use FSI2HOST Mailbox
-        //  0x00000001 = Use OCC interrupt line through PSIHB complex
-        uint32_t interruptType;
-
-        // For informing OCC if it is the FIR master:
-        //  0x00000000 = Default
-        //  0x00000001 = FIR Master
-        uint32_t firMaster;
-
-        // FIR collection configuration data needed by FIR Master
-        //  OCC in the event of a checkstop
-        uint8_t firdataConfig[3072];
-    };
-
     enum
     {
         OccHostDataVersion = 0x00000090,
