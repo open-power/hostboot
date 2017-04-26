@@ -32,14 +32,14 @@
      =====================================================================
  -->
 <targetTypeExtension>
-    <id>base</id>
+    <id>chip-processor</id>
     <attribute><id>HDAT_I2C_ENGINE</id></attribute>
     <attribute><id>HDAT_I2C_MASTER_PORT</id></attribute>
-    <attribute><id>HDAT_I2C_DEVTYPE</id></attribute>
+    <attribute><id>HDAT_I2C_DEVICE_TYPE</id></attribute>
     <attribute><id>HDAT_I2C_ADDR</id></attribute>
     <attribute><id>HDAT_I2C_SLAVE_PORT</id></attribute>
     <attribute><id>HDAT_I2C_BUS_FREQ</id></attribute>
-    <attribute><id>HDAT_I2C_DEV_PURPOSE</id></attribute>
+    <attribute><id>HDAT_I2C_DEVICE_PURPOSE</id></attribute>
     <attribute><id>HDAT_I2C_ELEMENTS</id></attribute>
     <attribute>
         <id>IPMI_INSTANCE</id>
