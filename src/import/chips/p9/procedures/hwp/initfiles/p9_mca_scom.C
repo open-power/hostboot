@@ -29,6 +29,7 @@
 
 using namespace fapi2;
 
+constexpr uint64_t literal_0b100000 = 0b100000;
 constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_0 = 0;
@@ -43,19 +44,21 @@ constexpr uint64_t literal_0b011 = 0b011;
 constexpr uint64_t literal_0b0100 = 0b0100;
 constexpr uint64_t literal_0b11100 = 0b11100;
 constexpr uint64_t literal_0b110 = 0b110;
+constexpr uint64_t literal_3 = 3;
+constexpr uint64_t literal_5 = 5;
+constexpr uint64_t literal_7 = 7;
 constexpr uint64_t literal_0b0000000000000000000000000 = 0b0000000000000000000000000;
+constexpr uint64_t literal_0b1100111111111111111111111 = 0b1100111111111111111111111;
 constexpr uint64_t literal_0x1 = 0x1;
 constexpr uint64_t literal_6 = 6;
+constexpr uint64_t literal_0x8 = 0x8;
 constexpr uint64_t literal_17 = 17;
 constexpr uint64_t literal_1867 = 1867;
-constexpr uint64_t literal_7 = 7;
 constexpr uint64_t literal_2134 = 2134;
 constexpr uint64_t literal_2401 = 2401;
 constexpr uint64_t literal_2666 = 2666;
-constexpr uint64_t literal_3 = 3;
 constexpr uint64_t literal_9 = 9;
 constexpr uint64_t literal_24 = 24;
-constexpr uint64_t literal_5 = 5;
 constexpr uint64_t literal_267 = 267;
 constexpr uint64_t literal_1866 = 1866;
 constexpr uint64_t literal_10 = 10;
@@ -76,6 +79,13 @@ constexpr uint64_t literal_768 = 768;
 constexpr uint64_t literal_939 = 939;
 constexpr uint64_t literal_2000 = 2000;
 constexpr uint64_t literal_2400 = 2400;
+constexpr uint64_t literal_1250 = 1250;
+constexpr uint64_t literal_1000 = 1000;
+constexpr uint64_t literal_963 = 963;
+constexpr uint64_t literal_1038 = 1038;
+constexpr uint64_t literal_1084 = 1084;
+constexpr uint64_t literal_1143 = 1143;
+constexpr uint64_t literal_1385 = 1385;
 
 fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
                               const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT2,
@@ -105,6 +115,8 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
         uint64_t l_def_refblock_off_special_case = (((l_def_is_dual_slot == literal_0)
                 && (l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0] == literal_4))
                 && (l_def_SLOT0_DRAM_STACK_HEIGHT == literal_2));
+        fapi2::ATTR_CHIP_EC_FEATURE_HW401780_Type l_TGT4_ATTR_CHIP_EC_FEATURE_HW401780;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW401780, TGT4, l_TGT4_ATTR_CHIP_EC_FEATURE_HW401780));
         fapi2::ATTR_PROC_EPS_READ_CYCLES_T0_Type l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T0, TGT3, l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0));
         uint64_t l_def_MC_EPSILON_CFG_T0 = ((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0 + literal_6) / literal_4);
@@ -183,7 +195,19 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, TGT3, l_TGT3_ATTR_FREQ_PB_MHZ));
         uint64_t l_def_perf_tune_case = (((l_TGT1_ATTR_MSS_FREQ == literal_2400) && (l_TGT3_ATTR_FREQ_PB_MHZ == literal_2000))
                                          && (l_TGT3_ATTR_RISK_LEVEL > literal_0));
+        fapi2::ATTR_MC_SYNC_MODE_Type l_TGT4_ATTR_MC_SYNC_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, TGT4, l_TGT4_ATTR_MC_SYNC_MODE));
+        uint64_t l_def_mn_freq_ratio = ((literal_1000 * l_TGT1_ATTR_MSS_FREQ) / l_TGT3_ATTR_FREQ_PB_MHZ);
         fapi2::buffer<uint64_t> l_scom_buffer;
+        {
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                FAPI_TRY(fapi2::getScom( TGT0, 0x5010823ull, l_scom_buffer ));
+
+                l_scom_buffer.insert<22, 6, 58, uint64_t>(literal_0b100000 );
+                FAPI_TRY(fapi2::putScom(TGT0, 0x5010823ull, l_scom_buffer));
+            }
+        }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5010824ull, l_scom_buffer ));
 
@@ -262,23 +286,67 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
                 l_scom_buffer.insert<13, 3, 61, uint64_t>(literal_0b100 );
             }
 
+            l_scom_buffer.insert<28, 4, 60, uint64_t>(literal_0b0100 );
+            l_scom_buffer.insert<50, 5, 59, uint64_t>(literal_0b11100 );
+
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                l_scom_buffer.insert<28, 4, 60, uint64_t>(literal_0b0100 );
+                l_scom_buffer.insert<37, 3, 61, uint64_t>(literal_0b110 );
             }
 
-            l_scom_buffer.insert<50, 5, 59, uint64_t>(literal_0b11100 );
-            l_scom_buffer.insert<37, 3, 61, uint64_t>(literal_0b110 );
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                l_scom_buffer.insert<0, 3, 61, uint64_t>(literal_1 );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                l_scom_buffer.insert<3, 3, 61, uint64_t>(literal_3 );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                l_scom_buffer.insert<6, 3, 61, uint64_t>(literal_5 );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                l_scom_buffer.insert<9, 3, 61, uint64_t>(literal_7 );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF2_ENABLE_REFRESH_BLOCK_DISP_OFF = 0x0;
+                l_scom_buffer.insert<18, 1, 63, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF2_ENABLE_REFRESH_BLOCK_DISP_OFF );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010824ull, l_scom_buffer));
         }
         {
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
-            {
-                FAPI_TRY(fapi2::getScom( TGT0, 0x5010825ull, l_scom_buffer ));
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5010825ull, l_scom_buffer ));
 
+            if ((l_TGT4_ATTR_CHIP_EC_FEATURE_HW401780 == literal_1))
+            {
                 l_scom_buffer.insert<4, 25, 39, uint64_t>(literal_0b0000000000000000000000000 );
-                FAPI_TRY(fapi2::putScom(TGT0, 0x5010825ull, l_scom_buffer));
             }
+            else if ((l_TGT4_ATTR_CHIP_EC_FEATURE_HW401780 != literal_1))
+            {
+                l_scom_buffer.insert<4, 25, 39, uint64_t>(literal_0b1100111111111111111111111 );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCAMOC_AMO_SIZE_SELECT_128B_RW_64B_DATA = 0x1;
+                l_scom_buffer.insert<29, 3, 61, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCAMOC_AMO_SIZE_SELECT_128B_RW_64B_DATA );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0_OFF );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5010825ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5010826ull, l_scom_buffer ));
@@ -290,6 +358,21 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             l_scom_buffer.insert<24, 8, 56, uint64_t>(l_def_MC_EPSILON_CFG_T1 );
             l_scom_buffer.insert<40, 8, 56, uint64_t>(l_def_MC_EPSILON_CFG_T2 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010826ull, l_scom_buffer));
+        }
+        {
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                FAPI_TRY(fapi2::getScom( TGT0, 0x501082bull, l_scom_buffer ));
+
+                l_scom_buffer.insert<45, 1, 63, uint64_t>(literal_0x8 );
+                constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_DISABLE_WRTO_IG_ON = 0x1;
+                l_scom_buffer.insert<44, 1, 63, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_DISABLE_WRTO_IG_ON );
+                constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_AMO_MSI_RMW_ONLY_ON = 0x1;
+                l_scom_buffer.insert<41, 1, 63, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_AMO_MSI_RMW_ONLY_ON );
+                constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CL0_ON = 0x1;
+                l_scom_buffer.insert<31, 1, 63, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CL0_ON );
+                FAPI_TRY(fapi2::putScom(TGT0, 0x501082bull, l_scom_buffer));
+            }
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x701090aull, l_scom_buffer ));
@@ -464,8 +547,17 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
                 l_scom_buffer.insert<17, 1, 63, uint64_t>(literal_0b0 );
             }
 
-            constexpr auto l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_OE_ALWAYS_ON_ON = 0x1;
-            l_scom_buffer.insert<55, 1, 63, uint64_t>(l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_OE_ALWAYS_ON_ON );
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                constexpr auto l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_OE_ALWAYS_ON_ON = 0x1;
+                l_scom_buffer.insert<55, 1, 63, uint64_t>(l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_OE_ALWAYS_ON_ON );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                l_scom_buffer.insert<61, 3, 61, uint64_t>(literal_0b011 );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x7010913ull, l_scom_buffer));
         }
         {
@@ -814,10 +906,10 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             FAPI_TRY(fapi2::putScom(TGT0, 0x7010935ull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x7010a0aull, l_scom_buffer ));
+
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                FAPI_TRY(fapi2::getScom( TGT0, 0x7010a0aull, l_scom_buffer ));
-
                 if ((l_def_perf_tune_case == literal_0))
                 {
                     l_scom_buffer.insert<16, 3, 61, uint64_t>(literal_3 );
@@ -826,7 +918,10 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
                 {
                     l_scom_buffer.insert<16, 3, 61, uint64_t>(literal_5 );
                 }
+            }
 
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
                 if ((l_def_perf_tune_case == literal_0))
                 {
                     l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_0 );
@@ -835,13 +930,180 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
                 {
                     l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_1 );
                 }
+            }
 
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
                 constexpr auto l_MCP_PORT0_ECC64_SCOM_MBSECCQ_DELAY_NONBYPASS_OFF = 0x0;
                 l_scom_buffer.insert<22, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_SCOM_MBSECCQ_DELAY_NONBYPASS_OFF );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
                 constexpr auto l_MCP_PORT0_ECC64_SCOM_MBSECCQ_DELAY_VALID_1X_OFF = 0x0;
                 l_scom_buffer.insert<19, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_SCOM_MBSECCQ_DELAY_VALID_1X_OFF );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                if ((l_TGT4_ATTR_MC_SYNC_MODE == literal_1))
+                {
+                    l_scom_buffer.insert<16, 3, 61, uint64_t>(literal_5 );
+                }
+                else if (((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio < literal_1250)))
+                {
+                    l_scom_buffer.insert<16, 3, 61, uint64_t>(literal_5 );
+                }
+                else if (((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_1250)))
+                {
+                    l_scom_buffer.insert<16, 3, 61, uint64_t>(literal_6 );
+                }
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                if ((l_TGT4_ATTR_MC_SYNC_MODE == literal_1))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_BYPASS_TENURE_3_OFF = 0x0;
+                    l_scom_buffer.insert<40, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_BYPASS_TENURE_3_OFF );
+                }
+                else if (((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio < literal_963)))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_BYPASS_TENURE_3_OFF = 0x0;
+                    l_scom_buffer.insert<40, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_BYPASS_TENURE_3_OFF );
+                }
+                else if ((((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_963))
+                          && (l_def_mn_freq_ratio < literal_1038)))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_BYPASS_TENURE_3_ON = 0x1;
+                    l_scom_buffer.insert<40, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_BYPASS_TENURE_3_ON );
+                }
+                else if ((((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_1038))
+                          && (l_def_mn_freq_ratio < literal_1084)))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_BYPASS_TENURE_3_OFF = 0x0;
+                    l_scom_buffer.insert<40, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_BYPASS_TENURE_3_OFF );
+                }
+                else if ((((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_1084))
+                          && (l_def_mn_freq_ratio < literal_1143)))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_BYPASS_TENURE_3_ON = 0x1;
+                    l_scom_buffer.insert<40, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_BYPASS_TENURE_3_ON );
+                }
+                else if ((((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_1143))
+                          && (l_def_mn_freq_ratio < literal_1250)))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_BYPASS_TENURE_3_ON = 0x1;
+                    l_scom_buffer.insert<40, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_BYPASS_TENURE_3_ON );
+                }
+                else if ((((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_1250))
+                          && (l_def_mn_freq_ratio < literal_1385)))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_BYPASS_TENURE_3_ON = 0x1;
+                    l_scom_buffer.insert<40, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_BYPASS_TENURE_3_ON );
+                }
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                if ((l_TGT4_ATTR_MC_SYNC_MODE == literal_1))
+                {
+                    l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_0 );
+                }
+                else if (((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio < literal_963)))
+                {
+                    l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_2 );
+                }
+                else if ((((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_963))
+                          && (l_def_mn_freq_ratio < literal_1038)))
+                {
+                    l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_2 );
+                }
+                else if ((((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_1038))
+                          && (l_def_mn_freq_ratio < literal_1084)))
+                {
+                    l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_0 );
+                }
+                else if ((((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_1084))
+                          && (l_def_mn_freq_ratio < literal_1143)))
+                {
+                    l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_2 );
+                }
+                else if ((((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_1143))
+                          && (l_def_mn_freq_ratio < literal_1250)))
+                {
+                    l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_0 );
+                }
+                else if (((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_1250)))
+                {
+                    l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_1 );
+                }
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_NONBYPASS_ON = 0x1;
+                l_scom_buffer.insert<22, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_NONBYPASS_ON );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                if ((l_TGT4_ATTR_MC_SYNC_MODE == literal_1))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_VALID_1X_OFF = 0x0;
+                    l_scom_buffer.insert<19, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_VALID_1X_OFF );
+                }
+                else if (((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio < literal_963)))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_VALID_1X_OFF = 0x0;
+                    l_scom_buffer.insert<19, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_VALID_1X_OFF );
+                }
+                else if ((((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_963))
+                          && (l_def_mn_freq_ratio < literal_1038)))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_VALID_1X_OFF = 0x0;
+                    l_scom_buffer.insert<19, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_VALID_1X_OFF );
+                }
+                else if ((((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_1038))
+                          && (l_def_mn_freq_ratio < literal_1084)))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_VALID_1X_ON = 0x1;
+                    l_scom_buffer.insert<19, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_VALID_1X_ON );
+                }
+                else if ((((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_1084))
+                          && (l_def_mn_freq_ratio < literal_1143)))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_VALID_1X_OFF = 0x0;
+                    l_scom_buffer.insert<19, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_VALID_1X_OFF );
+                }
+                else if ((((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_1143))
+                          && (l_def_mn_freq_ratio < literal_1250)))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_VALID_1X_OFF = 0x0;
+                    l_scom_buffer.insert<19, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_VALID_1X_OFF );
+                }
+                else if (((l_TGT4_ATTR_MC_SYNC_MODE == literal_0) && (l_def_mn_freq_ratio >= literal_1250)))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_VALID_1X_OFF = 0x0;
+                    l_scom_buffer.insert<19, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_ECC_SCOM_MBSECCQ_DELAY_VALID_1X_OFF );
+                }
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
                 l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0b0 );
-                FAPI_TRY(fapi2::putScom(TGT0, 0x7010a0aull, l_scom_buffer));
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x7010a0aull, l_scom_buffer));
+        }
+        {
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                FAPI_TRY(fapi2::getScom( TGT0, 0x7010a38ull, l_scom_buffer ));
+
+                constexpr auto l_MCP_PORT0_WRITE_NEW_WRITE_64B_MODE_ON = 0x1;
+                l_scom_buffer.insert<9, 1, 63, uint64_t>(l_MCP_PORT0_WRITE_NEW_WRITE_64B_MODE_ON );
+                FAPI_TRY(fapi2::putScom(TGT0, 0x7010a38ull, l_scom_buffer));
             }
         }
 

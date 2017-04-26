@@ -82,7 +82,7 @@ espy MC01.PBI01.SCOMFIR.MCMODE1_DISABLE_FP_M_BIT [when=S] {
 }
 
 # HW376110
-ispy MC01.PBI01.SCOMFIR.MCPERF1_MERGE_CAPACITY_LIMIT [when=S && ATTR_CHIP_EC_FEATURE_HW376110] {
+ispy MC01.PBI01.SCOMFIR.MCPERF1_MERGE_CAPACITY_LIMIT [when=S] { # still applies for dd2
   spyv;
   0b0111;
 }
@@ -104,12 +104,57 @@ ispy MC01.PBI01.SCOMFIR.MCMODE2_DISABLE_MDI0 [when=S && ATTR_CHIP_EC_FEATURE_HW4
 # when a prefetch gets dropped. DROP_CNT_THRESH determines the rate the counter decrements (in units
 # of 4 nest clocks) -- here, 8 * 4 nclks = 32 nclks, 32 nclks * 6 counts => takes 192 nest clocks
 # to drop a prefetch. This dial may need to be tuned for performance.
-espy MC01.PBI01.SCOMFIR.MCPERF1_ENABLE_PF_DROP_CMDLIST [when=S && ATTR_CHIP_EC_FEATURE_HW398139] {
+espy MC01.PBI01.SCOMFIR.MCPERF1_ENABLE_PF_DROP_CMDLIST [when=S] { # enable for dd1 and dd2
   spyv;
   ON;
 }
 
-ispy MC01.PBI01.SCOMFIR.MCPERF1_PF_DROP_CNT_THRESH [when=S && ATTR_CHIP_EC_FEATURE_HW398139] {
-  spyv;
-  8;
+ispy MC01.PBI01.SCOMFIR.MCPERF1_PF_DROP_CNT_THRESH [when=S] {
+  spyv, expr;
+  8,      (ATTR_CHIP_EC_FEATURE_HW398139==1); # dd1 (arbitrarily chosen, empirically found to be stable)
+  25,     (ATTR_CHIP_EC_FEATURE_HW398139!=1); # dd2 (performance chosen)
 }
+
+##################
+# DD2 NEW SETTINGS
+##################
+
+espy MC01.PBI01.SCOMFIR.MCMODE0_ENABLE_CENTAUR_SYNC [when=S && ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] {
+  spyv;
+  ON;
+}
+
+espy MC01.PBI01.SCOMFIR.MCMODE0_ENABLE_64_128B_READ [when=S && ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] {
+  spyv;
+  ON;
+}
+
+espy MC01.PBI01.SCOMFIR.MCMODE0_ENABLE_DROP_FP_DYN64_ACTIVE [when=S && ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] {
+  spyv;
+  ON;
+}
+
+ispy MC01.PBI01.SCOMFIR.MCPERF1_WRQ_CAPACITY_LIMIT [when=S && ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] {
+  spyv;
+  0b001111;
+}
+
+ispy MC01.PBI01.SCOMFIR.MCMODE2_COLLISION_MODES [when=S && ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] {
+  spyv;
+  0b0000000000001000;
+}
+
+espy MC01.PBI01.SCOMFIR.MCMODE0_CENTAURP_ENABLE_ECRESP [when=S && ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] {
+  spyv;
+  OFF;
+}
+
+espy MC01.PBI01.SCOMFIR.MCPERF1_ENABLE_PREFETCH_PROMOTE [when=S && ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] {
+  spyv;
+  ON;
+}
+
+#################
+# DD2 WORKAROUNDS
+#################
+

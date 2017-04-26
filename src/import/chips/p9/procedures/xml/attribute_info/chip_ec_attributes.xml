@@ -393,44 +393,10 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW376110</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-        HW376110
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>LESS_THAN</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ******************************************************************** -->
-  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW375534</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
         Max 24 64-byte read buffers (HW375534)
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>LESS_THAN</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ******************************************************************** -->
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW366164</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-        HW366164 - SRQ Fullness Control
     </description>
     <chipEcFeature>
       <chip>
@@ -2692,6 +2658,40 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW384794</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Workaround for defect where clock enables to PHY were incorrectly driven
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW375732</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Workaround for Data mismatch discovered by Geyzer at certain async frequency ratios
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MSS_TRAINING_BAD_BITS</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -2936,6 +2936,23 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW401131</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Since amo cache clean line disabled for dd2, fix for HW401131 must also be disabled.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_RING_SAVE_MPIPL</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -2985,6 +3002,58 @@
       </chip>
     </chipEcFeature>
   </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW399466</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Enable fix for HW399466 where all read data for amo smi ops is sent to rmw buffer.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW355538</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Enable fix for HW355538 that enables write MDI to 1 for retry UE.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Not workaround or defect related. Just new dials to be set that are new in memory controller for DD2.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
   <!-- ******************************************************************** -->
   <!-- End Memory Section                                                   -->
   <!-- ******************************************************************** -->
