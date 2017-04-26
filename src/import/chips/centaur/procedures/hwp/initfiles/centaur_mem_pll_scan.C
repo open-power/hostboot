@@ -30,7 +30,7 @@
 using namespace fapi2;
 
 constexpr uint64_t literal_1 = 1;
-constexpr uint64_t literal_0x128000000A0060D3 = 0x128000000A0060D3;
+constexpr uint64_t literal_0x128000000A0040D5 = 0x128000000A0040D5;
 constexpr uint64_t literal_1066 = 1066;
 constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_0x128000000A0030D2 = 0x128000000A0030D2;
@@ -40,7 +40,7 @@ constexpr uint64_t literal_1600 = 1600;
 constexpr uint64_t literal_0x128000000A0030D1 = 0x128000000A0030D1;
 constexpr uint64_t literal_1866 = 1866;
 constexpr uint64_t literal_0x128000000A0150D5 = 0x128000000A0150D5;
-constexpr uint64_t literal_0x7000000200040000 = 0x7000000200040000;
+constexpr uint64_t literal_0xB000000200040000 = 0xB000000200040000;
 constexpr uint64_t literal_0x5000000200040002 = 0x5000000200040002;
 constexpr uint64_t literal_0x3000000200040002 = 0x3000000200040002;
 constexpr uint64_t literal_0xB000000200040002 = 0xB000000200040002;
@@ -66,7 +66,7 @@ fapi2::ReturnCode centaur_mem_pll_scan(const fapi2::Target<fapi2::TARGET_TYPE_ME
 
         if (l_def_IS_SIM)
         {
-            l_PLLMEM_PLL_CNTRL0.insertFromRight<uint64_t>(literal_0x128000000A0060D3, 0, 64);
+            l_PLLMEM_PLL_CNTRL0.insertFromRight<uint64_t>(literal_0x128000000A0040D5, 0, 64);
             l_PLLMEM_PLL_CNTRL0_update = true;
         }
         else if ((l_def_IS_HW && (l_def_MEMB_MEM_FREQ == literal_1066)))
@@ -100,7 +100,7 @@ fapi2::ReturnCode centaur_mem_pll_scan(const fapi2::Target<fapi2::TARGET_TYPE_ME
 
         if (l_def_IS_SIM)
         {
-            l_PLLMEM_PLL_CNTRL1.insertFromRight<uint64_t>(literal_0x7000000200040000, 0, 64);
+            l_PLLMEM_PLL_CNTRL1.insertFromRight<uint64_t>(literal_0xB000000200040000, 0, 64);
             l_PLLMEM_PLL_CNTRL1_update = true;
         }
         else if ((l_def_IS_HW && (l_def_MEMB_MEM_FREQ == literal_1066)))

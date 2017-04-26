@@ -30,7 +30,7 @@
 using namespace fapi2;
 
 constexpr uint64_t literal_1 = 1;
-constexpr uint64_t literal_0x13CB1402001C0009 = 0x13CB1402001C0009;
+constexpr uint64_t literal_0x13CAB402001C0009 = 0x13CAB402001C0009;
 constexpr uint64_t literal_2000 = 2000;
 constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_0x18469406001C0048 = 0x18469406001C0048;
@@ -60,7 +60,7 @@ fapi2::ReturnCode centaur_nest_pll_scan(const fapi2::Target<fapi2::TARGET_TYPE_M
 
         if (l_def_IS_SIM)
         {
-            l_DMI_DMIPLL_CWRAP_PLL_CNTRL0.insertFromRight<uint64_t>(literal_0x13CB1402001C0009, 0, 64);
+            l_DMI_DMIPLL_CWRAP_PLL_CNTRL0.insertFromRight<uint64_t>(literal_0x13CAB402001C0009, 0, 64);
             l_DMI_DMIPLL_CWRAP_PLL_CNTRL0_update = true;
         }
         else if ((l_def_IS_HW && (l_def_NEST_FREQ == literal_2000)))
