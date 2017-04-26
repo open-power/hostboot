@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,8 @@ namespace LPC
 
         /** Physical addr of the start of LPC address space*/
         LPC_PHYS_BASE = 0x6030000000000,
+
+        FW_WINDOW_SIZE =  0x10000000, //Size of FW Window
     };
 }
 
