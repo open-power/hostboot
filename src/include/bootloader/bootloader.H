@@ -148,6 +148,11 @@ namespace Bootloader{
     }
 
 
+     /**Core Scratch Register 3 which tells the state of hostboot.
+        This is passed into writeScratchReg to select which scratch
+        reg you are writing */
+#define MMIO_SCRATCH_HOSTBOOT_ACTIVE          0x18
+
     /**
      * @brief Pointer to bootloader scratch space
      *
