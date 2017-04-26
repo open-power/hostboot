@@ -85,6 +85,7 @@ namespace fapi
         MOD_FIND_MIN_DMI_SPD                       = 0x2B,
         MOD_OCC_LOAD_HOST_DATA_TO_SRAM             = 0x2C,
         MOD_START_XZ_PAYLOAD                       = 0x2D,
+        MOD_LOAD_OCC_IMAGE_DURING_IPL              = 0x2E,
     };
 
     /**
@@ -147,6 +148,7 @@ namespace fapi
         RC_INVALID_WOF_INDEX          = HWPF_COMP_ID | 0x3C,
         RC_ECMD_INSERT_FAILED         = HWPF_COMP_ID | 0x3D,
         RC_INVALID_RETURN_XZ_CODE     = HWPF_COMP_ID | 0x3E,
+        RC_ECMD_INSERT_REMAINING_FAILED = HWPF_COMP_ID | 0x3F,
     };
 
     /**

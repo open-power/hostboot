@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,7 @@
 #include "occError.H"
 #include "htmgt_occcmd.H"
 
-#include <occ/occAccess.H>
+#include <isteps/pm/occAccess.H>
 #include <console/consoleif.H>
 #include <targeting/targplatutil.H>
 #include <variable_buffer.H>

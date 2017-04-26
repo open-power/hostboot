@@ -37,9 +37,7 @@
 #include <targeting/common/targetservice.H>
 #include <console/consoleif.H>
 #include <sys/time.h>
-#include <occ/occAccess.H>
-#include <occ/occ.H>
-#include <occ/occ_common.H>
+#include <isteps/pm/occAccess.H>
 #include <errl/errludlogregister.H>
 #include <fapi2.H>
 

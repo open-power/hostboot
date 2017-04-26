@@ -435,7 +435,11 @@ namespace RTPM
                  itr != procChips.end();
                  ++itr)
             {
-                (*itr)->setAttr<ATTR_HOMER_VIRT_ADDR>(0);
+                uint32_t l_instance = (*itr)->getAttr<ATTR_POSITION>();
+                uint64_t l_homerAddr = g_hostInterfaces->
+                            get_reserved_mem(HBRT_RSVD_MEM__HOMER,
+                                             l_instance);
+                (*itr)->setAttr<ATTR_HOMER_VIRT_ADDR>(l_homerAddr);
             }
         }
     };

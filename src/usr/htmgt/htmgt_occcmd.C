@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@
 #include <targeting/common/targetservice.H>
 
 #include <ecmdDataBufferBase.H>
-#include <occ/occAccess.H>
+#include <isteps/pm/occAccess.H>
 
 #include <sys/time.h>
 #include <trace/interface.H>

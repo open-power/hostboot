@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/occ/occ.H $                                   */
+/* $Source: src/include/usr/isteps/pm/occAccess.H $                       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,35 +22,52 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef OCC_H_
-#define OCC_H_
+#ifndef OCCACCESS_H_
+#define OCCACCESS_H_
 
-#include    <limits.h>
-#include    <errl/errlentry.H>
+#include <config.h>
+#include <errl/errlentry.H>
+#include <targeting/common/commontargeting.H>
 
-namespace HBOCC {
+namespace HBOCC
+{
     /**
-     * @brief Starts OCCs on all Processors in the node
-     *        This is intended to be used for AVP testing.
+     * @brief Read OCC SRAM
      *
-     * @param[out] o_failedOccTarget: Pointer to the target failing
-     *                       loadnStartAllOccs
-     * @param[in] i_useSRAM: bool - use SRAM for OCC image, ie during IPL
-     *     true if during IPL, false if at end of IPL (default)
-     * @return errlHndl_t  Error log if OCC load failed
+     * @param[in]     i_pTarget   PROC or OCC target pointer
+     * @param[in]     i_addr      OCI Address to be used for the operation
+     * @param[in,out] io_dataBuf  Reference to data buffer
+     * @param[in]     i_dataLen   Size of the data to read
+     * @return errlHndl_t   Error log if operation failed
      */
-    errlHndl_t loadnStartAllOccs(TARGETING::Target *& o_failedOccTarget,
-                                 bool i_useSRAM = false);
+    errlHndl_t readSRAM(const TARGETING::Target*i_pTarget,
+                        const uint32_t i_addr,
+                        uint64_t * io_dataBuf,
+                        size_t i_dataLen );
 
     /**
-     * @brief Starts OCCs on all Processors in the node
-     *        This is intended to be used for Open Power.
+     * @brief Write OCC SRAM
      *
-     * @param[in] i_useSRAM: bool - use SRAM for OCC image, ie during IPL
-     *     true if during IPL, false if at end of IPL (default)
-     * @return errlHndl_t  Error log if OCC load failed
+     * @param[in]     i_pTarget   PROC or OCC target pointer
+     * @param[in]     i_addr      OCI Address to be used for the operation
+     * @param[in]     i_dataBuf   Reference to data buffer
+     * @param[in]     i_dataLen   Size of the data to write
+     * @return errlHndl_t   Error log if operation failed
      */
-    errlHndl_t activateOCCs(bool i_useSRAM = false);
+    errlHndl_t writeSRAM(const TARGETING::Target*i_pTarget,
+                         const uint32_t i_addr,
+                         uint64_t * io_dataBuf,
+                         size_t i_dataLen );
+
+    /**
+     * @brief Write OCC Circular Buffer
+     *
+     * @param[in]     i_pTarget   PROC or OCC target pointer
+     * @param[in]     i_dataBuf   Reference to data buffer
+     * @return errlHndl_t   Error log if operation failed
+     */
+    errlHndl_t writeCircularBuffer(const TARGETING::Target*i_pTarget,
+                                   uint64_t * i_dataBuf);
 
 } //end OCC namespace
 

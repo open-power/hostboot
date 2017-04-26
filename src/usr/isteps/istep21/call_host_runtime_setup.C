@@ -45,9 +45,6 @@
 
 #include <hbotcompid.H>
 
-#include <occ/occ_common.H>
-#include <occ/occAccess.H>
-
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
