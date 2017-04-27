@@ -71,6 +71,7 @@ enum SectionId
     RINGOVD,        /**< Ring override data */
     WOFDATA,        /**< VFRT data tables for WOF */
     SBKT,           /**< SecureBoot Key Transition */
+    HB_VOLATILE,    /**< Semi volatile partition for reconfig */
 #endif
     NUM_SECTIONS,   /**< Number of defined sections */
 

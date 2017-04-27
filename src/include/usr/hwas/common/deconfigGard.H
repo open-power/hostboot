@@ -60,6 +60,19 @@ namespace HWAS
 errlHndl_t collectGard(const TARGETING::PredicateBase *i_pPredicate = NULL);
 
 /**
+ * @brief   clearGardByType   Common HWAS function to clear all GARD records of
+ *                            given type
+ *
+ *  It will call into hwas platform-specific functions.
+ *
+ * @param  i_type           Type of records to be cleared
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error
+ *                          NULL if no errors;
+ */
+errlHndl_t clearGardByType(const GARD_ErrorType i_type);
+
+/**
  * @brief Returns a reference to the DeconfigGard singleton.
  */
 class DeconfigGard;
@@ -237,6 +250,15 @@ public:
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t clearGardRecordsForReplacedTargets();
+
+    /**
+     * @brief Clears GARD Records that match requested error type
+     *
+     * @param i_type error type to clear
+     *
+     * @return errlHndl_t. Error log handle.
+     */
+    errlHndl_t clearGardRecordsByType(GARD_ErrorType i_type);
 
     /**
      * @brief Deconfigures Targets that have GARD Records in preparation to IPL.

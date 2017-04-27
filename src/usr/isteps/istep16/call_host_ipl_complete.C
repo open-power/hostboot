@@ -46,6 +46,9 @@
 #include    <runtime/runtime.H>
 #include    <util/utiltce.H>
 
+#include    <util/utilsemipersist.H>
+#include    <hwas/common/deconfigGard.H>
+
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   ISTEP;
@@ -64,6 +67,26 @@ void* call_host_ipl_complete (void *io_pArgs)
                "call_host_ipl_complete entry" );
     do
     {
+        //No more reconfig loops are supported from this point
+        //forward.  Clean up the semi persistent area
+        //   1) clear magic number (so next boot thinks it is cold)
+        //   2) clear any reconfig specific gard records
+        Util::semiPersistData_t l_semiData;  //inits to 0s
+        Util::writeSemiPersistData(l_semiData);
+
+        l_err = HWAS::clearGardByType(HWAS::GARD_Reconfig);
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: clearGardByType( )",
+                      l_err->reasonCode() );
+            // Create IStep error log and cross ref error that occurred
+            l_stepError.addErrorDetails( l_err );
+            errlCommit( l_err, ISTEP_COMP_ID );
+        }
+
+
+
         // Setup the TCEs needed for the FSP to DMA the PAYLOAD
 /*      @TODO RTC 168745 - make this call when FSP is ready for TCE Support
  *                         and add check that we're on a FSP system

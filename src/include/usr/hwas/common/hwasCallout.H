@@ -57,6 +57,7 @@ typedef enum {
     GARD_Predictive             = 0xE6, //Policy flag to disable.
     GARD_Power                  = 0xE9, //Needed since EID is NOT passed in.
     GARD_PHYP                   = 0xEA, //Needed since EID is NOT passed in.
+    GARD_Reconfig               = 0xEB, //Force deconfig on reconfig loop
     GARD_Void                   = 0xFF
 } GARD_ErrorType;
 

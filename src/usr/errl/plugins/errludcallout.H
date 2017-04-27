@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -114,6 +114,7 @@ case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
                     case_GARD_ERROR_TYPE(GARD_Predictive)
                     case_GARD_ERROR_TYPE(GARD_Power)
                     case_GARD_ERROR_TYPE(GARD_PHYP)
+                    case_GARD_ERROR_TYPE(GARD_Reconfig)
                     case_GARD_ERROR_TYPE(GARD_Void)
                     default:
                         i_parser.PrintNumber( "Deconfig State", "UNKNOWN: 0x%X",
@@ -171,6 +172,7 @@ case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
                     case_GARD_ERROR_TYPE(GARD_Predictive)
                     case_GARD_ERROR_TYPE(GARD_Power)
                     case_GARD_ERROR_TYPE(GARD_PHYP)
+                    case_GARD_ERROR_TYPE(GARD_Reconfig)
                     case_GARD_ERROR_TYPE(GARD_Void)
                     default:
                         i_parser.PrintNumber( "Deconfig State", "UNKNOWN: 0x%X",
@@ -246,6 +248,7 @@ case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
                     case_GARD_ERROR_TYPE(GARD_Predictive)
                     case_GARD_ERROR_TYPE(GARD_Power)
                     case_GARD_ERROR_TYPE(GARD_PHYP)
+                    case_GARD_ERROR_TYPE(GARD_Reconfig)
                     case_GARD_ERROR_TYPE(GARD_Void)
                     default:
                         i_parser.PrintNumber( "Deconfig State", "UNKNOWN: 0x%X",
