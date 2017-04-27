@@ -331,7 +331,7 @@ p9_fbc_eff_config_process_freq_attributes(
     FAPI_DBG("Start");
     uint32_t l_freq_core_floor;
     uint32_t l_freq_core_nom;
-    uint8_t l_async_safe_mode = fapi2::ENUM_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE_SAFE_MODE;
+    uint8_t l_async_safe_mode = fapi2::ENUM_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE_PERFORMANCE_MODE;
 
     // get core floor/nominal/ceiling frequency attributes
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ, i_target, l_freq_core_floor),
