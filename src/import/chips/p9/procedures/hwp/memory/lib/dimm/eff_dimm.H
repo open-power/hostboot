@@ -714,6 +714,12 @@ class eff_dimm
         fapi2::ReturnCode rdvref_enable_bit();
 
         ///
+        /// @brief Determines and sets ATTR_MSS_PHY_SEQ_REFRESH_
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode phy_seq_refresh();
+
+        ///
         /// @brief Sets the RTT_NOM value from SPD
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         /// @note used for MRS01
