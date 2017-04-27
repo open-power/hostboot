@@ -2579,10 +2579,10 @@ uint32_t layoutRingsForCME( Homerlayout_t*   i_pHomer,
 
 /**
  * @brief   selects the bucked id for EQ_INEX ring.
- * @param   o_buckedId bucket Id selected for eq_inex ring.
+ * @param   o_bucketId bucket Id selected for eq_inex ring.
  * @return  fapi2 return code.
  */
-fapi2::ReturnCode getSelectEqInexBucketAttr( uint32_t& o_buckedId )
+fapi2::ReturnCode getSelectEqInexBucketAttr( uint32_t& o_bucketId )
 {
     FAPI_DBG( "> getSelectEqInexBucketAttr");
     uint8_t l_fabAsyncSafeMode;
@@ -2601,27 +2601,28 @@ fapi2::ReturnCode getSelectEqInexBucketAttr( uint32_t& o_buckedId )
 
     if( fapi2::ENUM_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE_SAFE_MODE == l_fabAsyncSafeMode )
     {
-        o_buckedId = EQ_INEX_BUCKET_1;
+        o_bucketId = EQ_INEX_BUCKET_1;
     }
-    else if( fapi2::ENUM_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE_PERFORMANCE_MODE == l_fabAsyncSafeMode )
+    else
     {
-        switch( l_fabCoreFloorRatio )
+        if ( fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_8_8 == l_fabCoreFloorRatio )
         {
-            case fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_2_8:
-                o_buckedId  =  EQ_INEX_BUCKET_2;
-                break;
-
-            case fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_4_8:
-                o_buckedId  =  EQ_INEX_BUCKET_3;
-                break;
-
-            case fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_8_8:
-                o_buckedId  =  EQ_INEX_BUCKET_4;
-                break;
-
-            default:
-                o_buckedId  =  EQ_INEX_BUCKET_1;
-                break;
+            o_bucketId = EQ_INEX_BUCKET_4;
+        }
+        else if (( fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_7_8 == l_fabCoreFloorRatio ) ||
+                 ( fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_6_8 == l_fabCoreFloorRatio ) ||
+                 ( fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_5_8 == l_fabCoreFloorRatio ) ||
+                 ( fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_4_8 == l_fabCoreFloorRatio ))
+        {
+            o_bucketId = EQ_INEX_BUCKET_3;
+        }
+        else if ( fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_2_8 == l_fabCoreFloorRatio )
+        {
+            o_bucketId = EQ_INEX_BUCKET_2;
+        }
+        else
+        {
+            o_bucketId = EQ_INEX_BUCKET_1;
         }
     }
 
