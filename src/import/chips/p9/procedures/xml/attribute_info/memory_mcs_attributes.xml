@@ -3175,4 +3175,20 @@
         <mssAccessorName>rtt_nom_override_disable</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_MSS_PHY_SEQ_REFRESH</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Controls ENABLE/DISABLE of workaround that sets
+          the PHY sequencer to trigger refresh after draminit.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <enum>DISABLE = 0, ENABLE = 1</enum>
+        <mssUnits> bool </mssUnits>
+        <array> 2 </array>
+        <mssAccessorName>phy_seq_refresh</mssAccessorName>
+    </attribute>
+
 </attributes>
