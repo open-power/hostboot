@@ -205,6 +205,7 @@
         <id>ATTR_EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS</id>
         <default>0x00</default>
     </attribute>
+
     <attribute>
         <id>ATTR_VDM_ENABLE</id>
         <default>0x00</default>
@@ -216,9 +217,15 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_PHY_SEQ_REFRESH</id>
+        <default>0x01</default>
+    </attribute>
+
+    <attribute>
         <id>ATTR_WOF_ENABLE_FRATIO</id>
         <default>0x00</default>
     </attribute>
+
     <attribute>
         <id>ATTR_WOF_ENABLE_VRATIO</id>
         <default>0x00</default>
@@ -228,6 +235,7 @@
         <id>ATTR_WOF_VRATIO_SELECT</id>
         <default>0x00</default>
     </attribute>
+
     <attribute>
         <id>ATTR_NEST_LEAKAGE_PERCENT</id>
         <default>0x3C</default>
