@@ -81,6 +81,7 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
         static const uint64_t PC_RESETS_REG = MCA_DDRPHY_PC_RESETS_P0;
         static const uint64_t PC_CONFIG0_REG = MCA_DDRPHY_PC_CONFIG0_P0;
         static const uint64_t PC_CONFIG1_REG = MCA_DDRPHY_PC_CONFIG1_P0;
+        static const uint64_t PC_INIT_CAL_CONFIG1_REG = MCA_DDRPHY_PC_INIT_CAL_CONFIG1_P0;
 
         // MCA phy MR shadow registers, indexed by [rank_pair][MR index]
         static const std::vector< std::vector<uint64_t> > PC_MR_SHADOW_REGS;
@@ -101,6 +102,15 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
             INIT_CAL_ERROR_VREF = MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_VREF,
             INIT_CAL_ERROR_RANK_PAIR = MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_RANK_PAIR,
             INIT_CAL_ERROR_RANK_PAIR_LEN = MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_RANK_PAIR_LEN,
+
+            INIT_CAL_REFRESH_COUNT = MCA_DDRPHY_PC_INIT_CAL_CONFIG1_P0_REFRESH_COUNT,
+            INIT_CAL_REFRESH_COUNT_LEN = MCA_DDRPHY_PC_INIT_CAL_CONFIG1_P0_REFRESH_COUNT_LEN,
+            INIT_CAL_REFRESH_CONTROL = MCA_DDRPHY_PC_INIT_CAL_CONFIG1_P0_REFRESH_CONTROL,
+            INIT_CAL_REFRESH_CONTROL_LEN = MCA_DDRPHY_PC_INIT_CAL_CONFIG1_P0_REFRESH_CONTROL_LEN,
+            INIT_CAL_REFRESH_ALL_RANKS = MCA_DDRPHY_PC_INIT_CAL_CONFIG1_P0_REFRESH_ALL_RANKS,
+            INIT_CAL_SNOOP_DIS = MCA_DDRPHY_PC_INIT_CAL_CONFIG1_P0_SNOOP_DIS,
+            INIT_CAL_REFRESH_INTERVAL = MCA_DDRPHY_PC_INIT_CAL_CONFIG1_P0_REFRESH_INTERVAL,
+            INIT_CAL_REFRESH_INTERVAL_LEN = MCA_DDRPHY_PC_INIT_CAL_CONFIG1_P0_REFRESH_INTERVAL_LEN,
 
             // How many bits are in the field running from INIT_CAL_ERROR_WR_LEVEL to INIT_CAL_ERROR_VREF
             // Needed to pull the entire field out of the register.
@@ -246,6 +256,120 @@ fapi_try_exit:
 ///
 template< fapi2::TargetType T, typename TT = pcTraits<T> >
 fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target );
+
+///
+/// @brief read PC_INIT_CAL_CONFIG1
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode read_init_cal_config1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::PC_INIT_CAL_CONFIG1_REG, o_data) );
+    FAPI_INF("Read pc_init_cal_config1: 0x%016llx", o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief write PC_INIT_CAL_CONFIG1
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode write_init_cal_config1( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_INF("Writing to pc_init_cal_config1: 0x%016llx", i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::PC_INIT_CAL_CONFIG1_REG, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief set INIT_CAL_REFRESH_COUNT
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @param[in] i_value value to specify the number of cmds
+/// to insert at the start of init cal
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = pcTraits<T> >
+inline void set_refresh_count( fapi2::buffer<uint64_t>& o_data, const uint64_t i_state )
+{
+    FAPI_INF("set init_cal refresh_count: %d", i_state);
+    o_data.insertFromRight<TT::INIT_CAL_REFRESH_COUNT, TT::INIT_CAL_REFRESH_COUNT_LEN>(i_state);
+}
+
+///
+/// @brief set INIT_CAL_REFRESH_CONTROL
+/// @tparam T fapi2 Target Type - defaults to fapi2::TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[out] o_data the value of the register
+/// @param[in] i_value value to control refresh logic during init cal
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = pcTraits<T> >
+inline void set_refresh_control( fapi2::buffer<uint64_t>& o_data, const uint64_t i_state )
+{
+    FAPI_INF("set init_cal refresh_control: %d", i_state);
+    o_data.insertFromRight<TT::INIT_CAL_REFRESH_CONTROL, TT::INIT_CAL_REFRESH_CONTROL_LEN>(i_state);
+}
+
+///
+/// @brief set INIT_CAL_REFRESH_ALL_RANKS
+/// @tparam T fapi2 Target Type - defaults to fapi2::TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[out] o_data the value of the register
+/// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = pcTraits<T> >
+inline void set_refresh_all_ranks( fapi2::buffer<uint64_t>& o_data, const mss::states i_state )
+{
+    FAPI_INF("set init_cal refresh_all_ranks: %s", (i_state == mss::HIGH) ? "high" : "low");
+    o_data.writeBit<TT::INIT_CAL_REFRESH_ALL_RANKS>(i_state);
+}
+
+///
+/// @brief set INIT_CAL_SNOOP_DIS
+/// @tparam T fapi2 Target Type - defaults to fapi2::TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[out] o_data the value of the register
+/// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = pcTraits<T> >
+inline void set_snoop_dis( fapi2::buffer<uint64_t>& o_data, const mss::states i_state )
+{
+    FAPI_INF("set init_cal snoop_dis: %s", (i_state == mss::HIGH) ? "high" : "low");
+    o_data.writeBit<TT::INIT_CAL_SNOOP_DIS>(i_state);
+}
+
+///
+/// @brief set INIT_CAL_REFRESH_INTERVAL
+/// @tparam T fapi2 Target Type - defaults to fapi2::TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[out] o_data the value of the register
+/// @param[in] i_value tREFI in cycles
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = pcTraits<T> >
+inline void set_refresh_interval( fapi2::buffer<uint64_t>& o_data, const uint64_t i_value )
+{
+    FAPI_INF("set init_cal refresh_interval: %d", i_value);
+    o_data.insertFromRight<TT::INIT_CAL_REFRESH_INTERVAL, TT::INIT_CAL_REFRESH_INTERVAL_LEN>(i_value);
+}
 
 ///
 /// @brief read MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS
