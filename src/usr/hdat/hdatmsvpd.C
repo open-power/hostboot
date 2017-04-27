@@ -1155,10 +1155,10 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                               l_nhtmStartAddr & 0x00000000FFFFFFFFull;
                 l_hdatNhtmStartAddr.hi |= HDAT_REAL_ADDRESS_MASK;
 
-                l_nhtmSize = l_nhtmStartAddr + l_nhtmSize;
+                auto l_nhtmEndAddr = l_nhtmStartAddr + l_nhtmSize;
                 l_hdatNhtmEndAddr.hi =
-                             (l_nhtmSize & 0xFFFFFFFF00000000ull) >> 32;
-                l_hdatNhtmEndAddr.lo =  l_nhtmSize & 0x00000000FFFFFFFFull;
+                             (l_nhtmEndAddr & 0xFFFFFFFF00000000ull) >> 32;
+                l_hdatNhtmEndAddr.lo =  l_nhtmEndAddr & 0x00000000FFFFFFFFull;
                 l_hdatNhtmEndAddr.hi |= HDAT_REAL_ADDRESS_MASK;
 
                 HDAT_INF("hdatNhtmStartAddr = 0x%08X 0x%08X ",
@@ -1252,7 +1252,6 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                             //Skip this MCS is not under any group
                             continue;
                         }
-
                         uint32_t l_mcaFruId = 0;
                         hdatMemParentType l_parentType= HDAT_MEM_PARENT_CEC_FRU;
 
@@ -1301,6 +1300,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
 
                         TARGETING::ATTR_SLCA_INDEX_type l_procSlcaIndex =
                            l_pProcTarget->getAttr<TARGETING::ATTR_SLCA_INDEX>();
+
 
                         l_err = addMsAreaFru(l_procRid,
                                              l_procSlcaIndex,
@@ -1534,16 +1534,18 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                         // Further CHTM support needs to be added which contains
                         // the trace array for 24 cores
                         // Reinitializing the NHTM size
-                        l_nhtmSize =
-                            l_pProcTarget->getAttr
-                            <TARGETING::ATTR_PROC_NHTM_BAR_SIZE>();
 
-                        uint64_t l_end_addr =
-                         (((uint64_t)(l_end.hi) << 32 ) | (uint64_t)(l_end.lo));
-                        uint64_t l_start_addr =
-                                       (((uint64_t)(l_addr_range.hi) << 32 )
-                                       | (uint64_t)(l_addr_range.lo));
-                        uint64_t l_size_bytes = (l_areaSizeInMB) * 1024 * 1024;
+                        //Don't re-init NHTM size -- only one HTM region per proc
+                        uint64_t l_end_hi = l_end.hi;
+                        uint64_t l_end_lo = l_end.lo;
+                        uint64_t l_end_addr = ((l_end_hi << 32 ) | l_end_lo);
+
+
+                        uint64_t l_addr_range_hi = l_addr_range.hi;
+                        uint64_t l_addr_range_lo = l_addr_range.lo;
+                        uint64_t l_start_addr =((l_addr_range_hi << 32 )| l_addr_range_lo);
+
+                        uint64_t l_size_bytes = ((uint64_t)l_areaSizeInMB) * l_mcaSharingCount[l_mcaInGrp] * 1024 * 1024;
 
                         if((0 != l_nhtmSize) &&
                                (l_size_bytes != (l_end_addr - l_start_addr)))
