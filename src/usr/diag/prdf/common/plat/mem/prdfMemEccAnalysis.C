@@ -43,6 +43,114 @@ namespace MemEcc
 
 //------------------------------------------------------------------------------
 
+template<TARGETING::TYPE T, typename D>
+uint32_t __handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
+                        UE_TABLE::Type i_type, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemEcc::__handleMemUe] "
+
+    uint32_t o_rc = SUCCESS;
+
+    MemRank rank = i_addr.getRank();
+
+    // Add the rank to the callout list.
+    MemoryMru mm { i_chip->getTrgt(), rank, MemoryMruData::CALLOUT_RANK };
+    io_sc.service_data->SetCallout( mm );
+
+    // All memory UEs should be customer viewable.
+    io_sc.service_data->setServiceCall();
+
+    // Add entry to UE table.
+    D db = static_cast<D>(i_chip->getDataBundle());
+    db->iv_ueTable.addEntry( i_type, i_addr );
+
+    #ifdef __HOSTBOOT_RUNTIME
+
+    /* TODO RTC 136129
+    // Dynamically deallocate the rank.
+    o_rc = MemDealloc::rank<T>( i_chip, rank );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "MemDealloc::rank<T>(0x%08x,m%ds%d) failed",
+                  i_chip->getHuid(), rank.getMaster(), rank.getSlave() );
+    }
+    */
+
+    #endif
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t handleMemUe<TYPE_MCA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
+                                UE_TABLE::Type i_type,
+                                STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemEcc::handleMemUe] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // First check to see if this is a side-effect UE.
+        SCAN_COMM_REGISTER_CLASS * fir  = i_chip->getRegister("DDRPHYFIR");
+        o_rc = fir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on DDRPHYFIR: i_chip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Check DDRPHYFIR[54:55,57:59] to determine if this is a side-effect.
+        if ( 0 != (fir->GetBitFieldJustified(54,6) & 0x37) )
+        {
+            // This is a side-effect. Callout the MCA.
+            PRDF_TRAC( PRDF_FUNC "Memory UE is side-effect of DDRPHY error" );
+            io_sc.service_data->SetCallout( i_chip->getTrgt() );
+            io_sc.service_data->setServiceCall();
+        }
+        else
+        {
+            // Handle the memory UE.
+            o_rc = __handleMemUe<TYPE_MCA,McaDataBundle *>( i_chip, i_addr,
+                                                            i_type, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "__handleMemUe(0x%08x,%d) failed",
+                          i_chip->getHuid(), i_type );
+                break;
+            }
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+/* TODO RTC 157888
+template<>
+uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
+                                UE_TABLE::Type i_type,
+                                STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    return __handleMemUe<TYPE_MBA,CenMbaDataBundle *>( i_chip, i_addr,
+                                                       i_type, io_sc );
+}
+*/
+
+//------------------------------------------------------------------------------
+
 #ifdef __HOSTBOOT_MODULE
 
 uint32_t maskMemPort( ExtensibleChip * i_chip )
@@ -124,60 +232,6 @@ uint32_t iuePortFail(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
 }
 
 #endif // __HOSTBOOT_RUNTIME
-
-//------------------------------------------------------------------------------
-
-template<>
-void calloutMemUe<TYPE_MCA>( ExtensibleChip * i_chip, const MemRank & i_rank,
-                             STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[MemEcc::calloutMemUe] "
-
-    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
-
-    SCAN_COMM_REGISTER_CLASS * fir  = i_chip->getRegister( "DDRPHYFIR" );
-    int32_t l_rc = fir->Read();
-    if ( SUCCESS != l_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Read() failed on DDRPHYFIR: i_chip=0x%08x",
-                  i_chip->getHuid() );
-    }
-
-    // Check DDRPHYFIR[54:55,57:59] to determine if this UE is a side-effect.
-    if ( SUCCESS == l_rc && (0 != (fir->GetBitFieldJustified(54,6) & 0x37)) )
-    {
-        // Callout the MCA.
-        io_sc.service_data->SetCallout( i_chip->getTrgt() );
-    }
-    else
-    {
-        // Callout the rank anyway.
-        MemoryMru memmru ( i_chip->getTrgt(), i_rank,
-                           MemoryMruData::CALLOUT_RANK );
-        io_sc.service_data->SetCallout( memmru );
-    }
-
-    #undef PRDF_FUNC
-}
-
-template<>
-void calloutMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemRank & i_rank,
-                             STEP_CODE_DATA_STRUCT & io_sc )
-{
-    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
-
-    // TODO: RTC 169933 During Memory Diagnostics we'll want to call the
-    //       mssIplUeIsolation() HWP so that we can isolate to a single DIMM if
-    //       possible. This may be a difficult task to do at this point in the
-    //       code because it will run a maintenance command on the Centaur,
-    //       which may require some cleanup of the previous command. Since there
-    //       are no plans to support IS DIMMs attached to a Centaur in P9, we
-    //       may be able to get rid of this requirement because the FRU will be
-    //       the same regardless if one or two logical DIMMs are called out.
-
-    MemoryMru memmru ( i_chip->getTrgt(), i_rank, MemoryMruData::CALLOUT_RANK );
-    io_sc.service_data->SetCallout( memmru );
-}
 
 //------------------------------------------------------------------------------
 
@@ -401,6 +455,23 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
             o_doTps = ( 0 != (MemCeTable<T>::FIELD_TH_ALL & ceTableRc) );
     }
 
+    #ifdef __HOSTBOOT_RUNTIME
+
+    /* TODO RTC 136129
+    if ( i_isHard )
+    {
+        // Dynamically deallocate the page.
+        o_rc = MemDealloc::page<T>( i_chip, i_addr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "MemDealloc::page(0x%08x) failed",
+                      i_chip->getHuid() );
+        }
+    }
+    */
+
+    #endif
+
     return o_rc;
 
     #undef PRDF_FUNC
@@ -601,40 +672,28 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
             break;
         }
 
-        // Add address to UE table.
-        D db = static_cast<D>(i_chip->getDataBundle());
-        db->iv_ueTable.addEntry( UE_TABLE::FETCH_UE, addr );
-
-        // Make the hardware callout.
-        MemRank rank = addr.getRank();
-        calloutMemUe<T>( i_chip, rank, io_sc );
+        // Do memory UE handling.
+        o_rc = MemEcc::handleMemUe<T>( i_chip, addr, UE_TABLE::FETCH_UE, io_sc);
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "handleMemUe<T>(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
 
         #ifdef __HOSTBOOT_RUNTIME
 
         // Add a TPS request to the TD queue and ban any further TPS requests
         // for this rank.
+        MemRank rank = addr.getRank();
         o_rc = addTpsEvent<T,D>( i_chip, rank, io_sc, true );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "addTpsEvent() failed: i_chip=0x%08x "
                       "rank=%d,%d", i_chip->getHuid(), rank.getMaster(),
                       rank.getSlave() );
-            // NOTE: We are not adding a break here because we still want to do
-            //       dynamic memory deallocation of the rank. Any code added
-            //       after this will need to handled return codes judiciously.
+            break;
         }
-
-        /* TODO RTC 136129
-        // Dynamically deallocation the rank.
-        uint32_t dealloc_rc = MemDealloc::rank<T>( i_chip, rank );
-        if ( SUCCESS != dealloc_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "MemDealloc::rank() failed: i_chip=0x%08x "
-                      "rank=m%ds%d", i_chip->getHuid(), rank.getMaster(),
-                      rank.getSlave() );
-            o_rc = dealloc_rc; break;
-        }
-        */
 
         #endif // __HOSTBOOT_RUNTIME
 

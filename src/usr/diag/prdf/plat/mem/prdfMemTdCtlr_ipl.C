@@ -168,11 +168,15 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintUE );
             io_sc.service_data->setSignature(     huid, PRDFSIG_MaintUE );
 
-            // Add the rank to the callout list.
-            MemEcc::calloutMemUe<T>( i_chip, rank, io_sc );
-
-            // Make the error log predictive.
-            io_sc.service_data->setServiceCall();
+            // Do memory UE handling.
+            o_rc = MemEcc::handleMemUe<T>( i_chip, i_addr, UE_TABLE::SCRUB_UE,
+                                           io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "handleMemUe<T>(0x%08x) failed",
+                          i_chip->getHuid() );
+                break;
+            }
         }
         else if ( 0 != (eccAttns & MAINT_MPE) )
         {

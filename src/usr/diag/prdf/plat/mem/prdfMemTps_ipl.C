@@ -120,11 +120,16 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                                                       PRDFSIG_MaintIUE );
                 }
 
-                //Add the rank to the callout list (via MemoryMru)
-                MemEcc::calloutMemUe<TYPE_MCA>( iv_chip, iv_rank, io_sc );
-
-                //Make the error log predictive
-                io_sc.service_data->setServiceCall();
+                // Do memory UE handling.
+                o_rc = MemEcc::handleMemUe<TYPE_MCA>(iv_chip,
+                                                     MemAddr::fromRank(iv_rank),
+                                                     UE_TABLE::SCRUB_UE, io_sc);
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "handleMemUe<T>(0x%08x) failed",
+                              iv_chip->getHuid() );
+                    break;
+                }
 
                 //Abort this procedure
                 o_done = true;
