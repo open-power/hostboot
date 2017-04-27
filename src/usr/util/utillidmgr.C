@@ -40,6 +40,12 @@
 #include <pnor/pnorif.H>
 #endif
 
+#include <config.h>
+#ifdef CONFIG_SECUREBOOT
+#include <pnor/pnorif.H>
+#include <secureboot/service.H>
+#endif
+
 using namespace ERRORLOG;
 mutex_t UtilLidMgr::cv_mutex = MUTEX_INITIALIZER;
 
@@ -55,6 +61,17 @@ UtilLidMgr::UtilLidMgr(uint32_t i_lidId)
 {
     updateLid(i_lidId);
     iv_spBaseServicesEnabled = INITSERVICE::spBaseServicesEnabled();
+
+#ifdef CONFIG_SECUREBOOT
+    // In SECUREBOOT mode ensure that OpenPower systems only get LIDs from
+    // either PNOR or VFS where we can trust the security
+    assert( !(( iv_spBaseServicesEnabled == false  ) &&
+              ( iv_isLidInPnor           == false ) &&
+              ( iv_isLidInVFS            == false )
+             ), "UtilLidMgr::UtilLidMgr: Secureboot: OpenPower requesting LID "
+                "that is not in PNOR or VFS"
+          );
+#endif
 }
 
 ///////////////////////////////////////////////////////////
