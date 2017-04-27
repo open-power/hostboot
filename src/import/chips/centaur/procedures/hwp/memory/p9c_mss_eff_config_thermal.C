@@ -169,11 +169,11 @@ extern "C" {
 
         // Power Curve Determination
         // Iterate through the MBA ports to get power slope/intercept values
-        for (l_port = 0; l_port + MAX_PORTS_PER_MBA; l_port++)
+        for (l_port = 0; l_port < MAX_PORTS_PER_MBA; l_port++)
         {
             // iterate through the dimms on each port again to determine power slope and
             // intercept
-            for (l_dimm = 0; l_dimm + MAX_DIMM_PER_PORT; l_dimm++)
+            for (l_dimm = 0; l_dimm < MAX_DIMM_PER_PORT; l_dimm++)
             {
                 // initialize dimm entries to zero
                 l_power_slope_array[l_port][l_dimm] = 0;
@@ -464,7 +464,7 @@ extern "C" {
             const auto l_target_mba_array = l_target_chip.getChildren<fapi2::TARGET_TYPE_MBA>();
             l_num_mba_with_dimms = 0;
 
-            for (l_mba_index = 0; l_mba_index + l_target_mba_array.size(); l_mba_index++)
+            for (l_mba_index = 0; l_mba_index < l_target_mba_array.size(); l_mba_index++)
             {
                 const auto l_target_dimm_array = l_target_mba_array[l_mba_index].getChildren<fapi2::TARGET_TYPE_DIMM>();
 
