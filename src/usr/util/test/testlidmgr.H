@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -177,6 +177,18 @@ public:
                 break;
             }
 
+#ifdef CONFIG_SECUREBOOT
+            // For secureboot sections, PNOR .secureProtectedPayloadSize
+            // is used rather than full PNOR size
+            if (l_lidSize != l_lidPnorInfo.secureProtectedPayloadSize)
+            {
+                TS_FAIL("testLidInPnorOcc: lidSize does not match pnor OCC"
+                        " section size 0x%.8X != 0x%.8X",
+                        l_lidSize, l_lidPnorInfo.secureProtectedPayloadSize);
+                break;
+            }
+
+#else
             if (l_lidSize != l_lidPnorInfo.size)
             {
                 TS_FAIL("testLidInPnorOcc: lidSize does not match pnor OCC"
@@ -184,9 +196,10 @@ public:
                         l_lidSize, l_lidPnorInfo.size);
                 break;
             }
+#endif
 
-            char * l_ptrOcc = new char[l_lidPnorInfo.size];
-            l_errl = l_lidMgr.getLid(l_ptrOcc, l_lidPnorInfo.size);
+            char * l_ptrOcc = new char[l_lidSize];
+            l_errl = l_lidMgr.getLid(l_ptrOcc, l_lidSize);
             if(l_errl)
             {
                 errlCommit(l_errl, UTIL_COMP_ID);
@@ -204,11 +217,11 @@ public:
                 TS_FAIL("testLidInPnorOcc: failed to store lid from PNOR");
             }
 
-            if (l_lidImageSize != l_lidPnorInfo.size)
+            if (l_lidImageSize != l_lidSize)
             {
                 TS_FAIL("testLidInPnorOcc: lidImageSize does not match pnor OCC"
                         " section size 0x%.8X != 0x%.8X",
-                        l_lidImageSize, l_lidPnorInfo.size);
+                        l_lidImageSize, l_lidSize);
             }
 
             l_errl = l_lidMgr.releaseLidImage();

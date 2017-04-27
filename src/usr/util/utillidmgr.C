@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,11 @@
 #include "utilbase.H"
 #include <initservice/initserviceif.H>
 #include <sys/mm.h>
+
+#include <config.h>
+#ifdef CONFIG_SECUREBOOT
+#include <pnor/pnorif.H>
+#endif
 
 using namespace ERRORLOG;
 mutex_t UtilLidMgr::cv_mutex = MUTEX_INITIALIZER;
@@ -711,30 +716,64 @@ errlHndl_t UtilLidMgr::cleanup()
     // laying around
     if(iv_isLidInPnor)
     {
-        int rc = mm_remove_pages( RELEASE,
-                                  reinterpret_cast<void *>(iv_lidPnorInfo.vaddr),
-                                  iv_lidPnorInfo.size );
-        if( rc )
+        bool skip_remove_pages = false;
+
+#ifdef CONFIG_SECUREBOOT
+        // If in SECUREBOOT the lid could be securely signed in PNOR (like OCC)
+        // If so, unload it securely below rather than call mm_remove_pages
+        if (iv_lidPnorInfo.secure)
         {
-            UTIL_FT( ERR_MRK"rc=%d from mm_remove_pages(%llX,%llX)", iv_lidPnorInfo.vaddr, iv_lidPnorInfo.size );
-            /*@
-             *   @errortype
-             *   @moduleid      Util::UTIL_LIDMGR_CLEANUP
-             *   @reasoncode    Util::UTIL_LIDMGR_MM_FAIL
-             *   @userdata1[00:31]  LID ID
-             *   @userdata1[32:63]  rc from mm_remove_pages
-             *   @userdata2     Virtual address being removed
-             *   @devdesc       Error returned from mm_remove_pages
-             *                  when evicting lid from memory.
-             *   @custdesc      Firmware error during boot.
-             */
-            l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                  Util::UTIL_LIDMGR_CLEANUP,
-                                  Util::UTIL_LIDMGR_MM_FAIL,
-                                  TWO_UINT32_TO_UINT64(iv_lidId,rc),
-                                  iv_lidPnorInfo.vaddr,
-                                  true /*sw fail*/);
+            skip_remove_pages = true;
         }
+#endif
+
+        if (skip_remove_pages == false)
+        {
+            int rc = mm_remove_pages( RELEASE,
+                                      reinterpret_cast<void *>(
+                                        iv_lidPnorInfo.vaddr),
+                                      iv_lidPnorInfo.size );
+            if( rc )
+            {
+                UTIL_FT( ERR_MRK"rc=%d from mm_remove_pages(%llX,%llX)", iv_lidPnorInfo.vaddr, iv_lidPnorInfo.size );
+                /*@
+                 *   @errortype
+                 *   @moduleid      Util::UTIL_LIDMGR_CLEANUP
+                 *   @reasoncode    Util::UTIL_LIDMGR_MM_FAIL
+                 *   @userdata1[00:31]  LID ID
+                 *   @userdata1[32:63]  rc from mm_remove_pages
+                 *   @userdata2     Virtual address being removed
+                 *   @devdesc       Error returned from mm_remove_pages
+                 *                  when evicting lid from memory.
+                 *   @custdesc      Firmware error during boot.
+                 */
+                l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                      Util::UTIL_LIDMGR_CLEANUP,
+                                      Util::UTIL_LIDMGR_MM_FAIL,
+                                      TWO_UINT32_TO_UINT64(iv_lidId,rc),
+                                      iv_lidPnorInfo.vaddr,
+                                      true /*sw fail*/);
+            }
+        }
+
+#ifdef CONFIG_SECUREBOOT
+        // If in SECUREBOOT the lid could be securely signed in PNOR (like OCC)
+        // If so, unload it securely
+        // NOTE:  It is safe to unload it even if it was unloaded before
+        if (iv_lidPnorInfo.secure)
+        {
+            l_err = PNOR::unloadSecureSection(iv_lidPnorInfo.id);
+
+            if (l_err)
+            {
+                UTIL_FT(ERR_MRK"UtilLidMgr::cleanup: Error from "
+                               "unloadSecureSection(PNOR::OCC): "
+                               "unloading module : %s (id=0x%X)",
+                               iv_lidFileName, iv_lidId);
+            }
+        }
+#endif
+
     }
 
     if(iv_pLidImage != nullptr)
