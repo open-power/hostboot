@@ -443,6 +443,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "RINGOVD",     /**< PNOR::RINGOVD        : Ring overrides */
         "WOFDATA",     /**< PNOR::WOFDATA        : VFRT data tables for WOF */
         "SBKT",        /**< PNOR::SBKT           : SecureBoot Key Transition */
+        "HB_VOLATILE", /**< PNOR::HB_VOLATILE    : Semi volatile partition */
 #endif
     };
 

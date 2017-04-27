@@ -97,9 +97,18 @@ errlHndl_t platHandleHWCallout(
             }
             default:
             {
+
+#ifndef CONFIG_NO_GARD_SUPPORT
                 errl = HWAS::theDeconfigGard().platCreateGardRecord(i_pTarget,
                         io_errl->eid(),
                         i_gardErrorType);
+#elif CONFIG_RECALL_DECONFIG_ON_RECONFIG
+                //If Gard is turned off, always populate a reconfig type
+                //in case of a reconfig loop
+                errl = HWAS::theDeconfigGard()
+                  .platCreateGardRecord(i_pTarget,io_errl->eid(),
+                                        GARD_Reconfig);
+#endif
                 break;
             }
         } // switch i_gardErrorType
@@ -115,6 +124,19 @@ errlHndl_t platHandleHWCallout(
                 // call HWAS common function
                 errl = HWAS::theDeconfigGard().deconfigureTarget(*i_pTarget,
                             io_errl->eid());
+
+#ifdef CONFIG_RECALL_DECONFIG_ON_RECONFIG
+                //Always force a gard record on deconfig.  If already
+                //garded, won't update/harm anything
+                if(!errl)
+                {
+                    errl = HWAS::theDeconfigGard()
+                      .platCreateGardRecord(i_pTarget,
+                                            io_errl->eid(),
+                                            GARD_Reconfig);
+                }
+#endif
+
                 break;
             }
             case (DELAYED_DECONFIG):

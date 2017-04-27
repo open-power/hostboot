@@ -432,6 +432,7 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  GARD Error Type          : %s", #_t
                 case_GARD_ERROR_TYPE(GARD_Predictive)
                 case_GARD_ERROR_TYPE(GARD_Power)
                 case_GARD_ERROR_TYPE(GARD_PHYP)
+                case_GARD_ERROR_TYPE(GARD_Reconfig)
                 case_GARD_ERROR_TYPE(GARD_Void)
                 default:
                     CONSOLE::displayf(NULL, "  GARD Error Type          : UNKNOWN: 0x%X",

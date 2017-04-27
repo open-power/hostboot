@@ -105,6 +105,12 @@ errlHndl_t collectGard(const PredicateBase *i_pPredicate)
     }
     return errl;
 } // collectGard
+
+errlHndl_t clearGardByType(const GARD_ErrorType i_type)
+{
+    return theDeconfigGard().clearGardRecordsByType(i_type);
+}
+
 #endif
 
 //******************************************************************************
@@ -190,7 +196,7 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
 //******************************************************************************
 errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
 {
-    HWAS_INF("User Request: Clear GARD Records for replaced Targets");
+    HWAS_INF("Clear GARD Records for replaced Targets");
     errlHndl_t l_pErr = NULL;
 
     // Create the predicate with HWAS changed state and our GARD bit
@@ -353,6 +359,57 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
 
     return l_pErr;
 } // clearGardRecordsForReplacedTargets
+
+//******************************************************************************
+errlHndl_t DeconfigGard::clearGardRecordsByType(const GARD_ErrorType i_type)
+{
+    HWAS_INF("Clear GARD Records by type %x", i_type);
+    errlHndl_t l_pErr = nullptr;
+
+    do
+    {
+        GardRecords_t l_gardRecords;
+        l_pErr = platGetGardRecords(nullptr, l_gardRecords);
+        if (l_pErr)
+        {
+            HWAS_ERR("Error from platGetGardRecords");
+            break;
+        }
+
+        // For each GARD Record
+        for (const auto & l_gardRecord : l_gardRecords)
+        {
+            //If this is the type to clear
+            if(l_gardRecord.iv_errorType == i_type)
+            {
+                // Find the associated Target
+                Target* l_pTarget = targetService().
+                  toTarget(l_gardRecord.iv_targetId);
+
+                if (l_pTarget == nullptr)
+                {
+                    // could be a platform specific target for the other
+                    // ie, we are hostboot and this is an FSP target, or
+                    // vice-versa
+                    // we just skip this GARD record
+                    continue;
+                }
+
+                l_pErr = platClearGardRecords(l_pTarget);
+                if (l_pErr)
+                {
+                    HWAS_ERR("Error from platClearGardRecords");
+                    break;
+                }
+
+            }
+        }
+    }
+    while (0);
+
+    return l_pErr;
+} // clearGardRecordsByType
+
 
 //******************************************************************************
 errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(

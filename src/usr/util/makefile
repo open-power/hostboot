@@ -34,6 +34,7 @@ OBJS += utillidmgr.o
 OBJS += utillidpnor.o
 OBJS += utilmbox_scratch.o
 OBJS += utiltcemgr.o
+OBJS += utilsemipersist.o
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d
