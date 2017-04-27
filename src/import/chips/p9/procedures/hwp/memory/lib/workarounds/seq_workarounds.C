@@ -105,7 +105,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
 } // close namespace seq
 } // close namespace workarounds
 } // close namespace mss
