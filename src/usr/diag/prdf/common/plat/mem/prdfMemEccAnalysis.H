@@ -48,8 +48,9 @@ namespace MemEcc
 {
 
 /**
- * @brief  Adds the given symbol to the callout list and CE table. Returns true
- *         if TPS is required.
+ * @brief  Adds the memory CE to the callout list and CE table. Will also issue
+ *         dynamic memory deallocation when appropriate. Returns true if TPS is
+ *         required.
  * @param  i_chip   MCA or MBA.
  * @param  i_addr   Failed address.
  * @param  i_symbol Failed symbol.
@@ -64,15 +65,24 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
                       STEP_CODE_DATA_STRUCT & io_sc, bool i_isHard = false );
 
 /**
- * @brief  Will check if the UE is a side-effect attention and make a callout
- *         appropriately.
+ * @brief  Adds the memory UE to the callout list and UE table. Makes the error
+ *         log predictive. Will also issue dynamic memory deallocation when
+ *         appropriate.
+ *
+ * For UEs on Nimbus chips, it is possible that this UE is a side-effect of
+ * DDRPHY attentions. If so, the MCA will be added to the callout list instead
+ * of the DIMMs, the UE table will not be updated and no dynamic memory
+ * deallocation.
+ *
  * @param  i_chip   MCA or MBA.
- * @param  i_rank   Target rank.
+ * @param  i_addr   Failed address.
+ * @param  i_type   The type of UE.
  * @param  io_sc    The step code data struct.
+ * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-void calloutMemUe( ExtensibleChip * i_chip, const MemRank & i_rank,
-                   STEP_CODE_DATA_STRUCT & io_sc );
+uint32_t handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
+                      UE_TABLE::Type i_type, STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
  * @brief  Analyzes a fetch MPE attention.

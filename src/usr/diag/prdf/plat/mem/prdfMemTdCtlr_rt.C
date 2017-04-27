@@ -527,16 +527,6 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
                 io_sc.service_data->setSignature( huid, PRDFSIG_MaintHARD_CTE );
                 io_sc.service_data->setServiceCall();
             }
-
-            /* TODO RTC 136129
-            // Dynamically deallocation the page.
-            o_rc = MemDealloc::page<T>( i_chip, i_addr );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "MemDealloc::page(0x%08x) failed", huid );
-                break;
-            }
-            */
         }
 
         if ( 0 != (eccAttns & MAINT_MPE) )
@@ -591,30 +581,19 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             // signature as well.
             io_sc.service_data->setSignature( huid, PRDFSIG_MaintUE );
 
-            // Add entry to UE table.
-            D db = static_cast<D>(i_chip->getDataBundle());
-            db->iv_ueTable.addEntry( UE_TABLE::SCRUB_UE, i_addr );
-
             // Add the rank to the callout list.
-            MemEcc::calloutMemUe<T>( i_chip, rank, io_sc );
-
-            // Make the error log predictive.
-            io_sc.service_data->setServiceCall();
+            o_rc = MemEcc::handleMemUe<T>( i_chip, i_addr, UE_TABLE::SCRUB_UE,
+                                           io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "handleMemUe<T>(0x%08x) failed",
+                          i_chip->getHuid() );
+                break;
+            }
 
             // Add a TPS procedure to the queue.
             TdEntry * e = new TpsEvent<T>{ i_chip, rank };
             io_queue.push( e );
-
-            /* TODO RTC 136129
-            // Dynamically deallocation the rank.
-            o_rc = MemDealloc::rank<T>( i_chip, rank );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "MemDealloc::rank(0x%08x, m%ds%d) failed",
-                          huid, rank.getMaster(), rank.getSlave() );
-                break;
-            }
-            */
         }
 
     } while (0);

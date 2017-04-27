@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,6 +85,19 @@ class MemAddr
      */
     template<TARGETING::TYPE T>
     static MemAddr fromMaintAddr( uint64_t i_addr );
+
+    /**
+     * @brief Occassionally we will need a MemAddr, but all we have is a
+     *        MemRank. This mostly happens when adding FFDC during Targeted
+     *        Diagnostics procedures. In this case, we will input a valid rank
+     *        and this function will add invalid bank, row, and column
+     *        addresses.
+     * @param i_rank A valid rank for this address.
+     */
+    static MemAddr fromRank( const MemRank & i_rank )
+    {
+        return MemAddr( i_rank, 0xff, 0xffff, 0xffff );
+    }
 
     /** @return This address's rank. */
     const MemRank& getRank() const { return iv_rnk; }
