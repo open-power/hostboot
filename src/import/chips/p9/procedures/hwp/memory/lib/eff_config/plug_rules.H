@@ -71,6 +71,24 @@ fapi2::ReturnCode enforce_plug_rules(const fapi2::Target<fapi2::TARGET_TYPE_MCA>
 ///
 bool unsupported_rank_helper(const uint64_t i_dimm0_ranks, const uint64_t i_dimm1_ranks,
                              const fapi2::buffer<uint64_t>& i_attr);
+///
+/// @brief Enforces the DEAD LOAD rules
+/// @tparam T fapi2::Target, either MCA or MCS
+/// @param[in] i_target the MCA/ port target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note This function will deconfigure the port if it's dual drop and one of the dimms is deconfigured
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode check_dead_load( const fapi2::Target<T>& i_target);
+
+///
+/// @brief Enforce having one solitary DIMM plugged into slot 0
+/// @tparam T fapi2::Target, either MCA or MCS
+/// @param[in] i_target port target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode empty_slot_zero(const fapi2::Target<T>& i_target);
 
 ///
 /// @brief Helper to find the best represented DIMM type in a vector of dimm::kind
@@ -93,7 +111,7 @@ std::pair<uint8_t, uint64_t> dimm_type_helper(std::vector<dimm::kind>& io_kinds)
 /// gonna need it eventually.
 ///
 template< fapi2::TargetType T >
-inline void rank_violation(const fapi2::Target<T> i_target, const uint8_t l_dimm0_ranks, const uint8_t l_dimm1_ranks)
+inline void rank_violation(const fapi2::Target<T>& i_target, const uint8_t l_dimm0_ranks, const uint8_t l_dimm1_ranks)
 {
     // fapi2::current_err will NOT be set which is important for the caller - they can return
     // the original ReturnCode which got us here.
@@ -108,14 +126,13 @@ inline void rank_violation(const fapi2::Target<T> i_target, const uint8_t l_dimm
 
 ///
 /// @brief Enforce no mixing DIMM types
+/// @param[in] i_target the port to check
 /// @param[in] i_kinds a vector of DIMM (sorted while procesing)
 /// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
 /// @note This function will commit error logs representing the mixing failure
-/// @note The list of DIMM represents all the DIMM to check. So, if you want to
-/// check the consistency of types across an MCS, give the list of DIMM on that MCS.
-/// If you want to check across an MCBIST, system, etc., give that list of DIMM.
 ///
-fapi2::ReturnCode dimm_type_mixing(std::vector<dimm::kind>& io_kinds);
+fapi2::ReturnCode dimm_type_mixing(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                   const std::vector<dimm::kind>& i_kinds);
 
 ///
 /// @brief Enforce rank configs

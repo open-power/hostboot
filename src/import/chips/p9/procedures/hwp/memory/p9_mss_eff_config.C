@@ -65,6 +65,11 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
     // Caches
     FAPI_TRY( mss::spd::populate_decoder_caches(i_target, l_factory_caches) );
 
+    // Need to check dead load before we get the VPD.
+    // MR and MT VPD depends on DIMM ranks and freaks out if it recieves 0 ranks from DIMM 0 and 1 or more ranks for DIMM 1
+    FAPI_TRY( mss::plug_rule::check_dead_load (i_target) );
+    FAPI_TRY( mss::plug_rule::empty_slot_zero (i_target) );
+
     // We need to decode the VPD. We don't do this in the ctor as we need
     // the rank information and for that we need the SPD caches (which we get when we populate the cache.)
     // However, we need to do the VPD decode before the others so that they might
