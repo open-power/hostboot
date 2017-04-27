@@ -34084,4 +34084,23 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>MSS_PHY_SEQ_REFRESH</id>
+    <description>
+      Controls ENABLE/DISABLE of workaround that sets
+      the PHY sequencer to trigger refresh after draminit.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_PHY_SEQ_REFRESH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

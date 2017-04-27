@@ -1899,6 +1899,7 @@
     <attribute><id>MSS_RDVREF_CAL_ENABLE</id></attribute>
     <attribute><id>MSS_VREF_DAC_NIBBLE</id></attribute>
     <attribute><id>MSS_MVPD_FWMS</id></attribute>
+    <attribute><id>MSS_PHY_SEQ_REFRESH</id></attribute>
 </targetType>
 
 <targetType>
