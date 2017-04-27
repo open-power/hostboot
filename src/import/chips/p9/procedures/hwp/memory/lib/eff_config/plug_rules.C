@@ -27,7 +27,7 @@
 /// @file plug_rules.C
 /// @brief Enforcement of rules for plugging in DIMM
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob L Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
@@ -112,109 +112,179 @@ bool unsupported_rank_helper(const uint64_t i_dimm0_ranks, const uint64_t i_dimm
 }
 
 ///
-/// @brief Helper to find the best represented DIMM type in a vector of dimm::kind
-/// @param[in, out] io_kinds a vector of dimm::kind
-/// @return std::pair representing the type and the count.
-/// @note the vector of kinds comes back sorted by DIMM type.
+/// @brief Enforce no mixing DIMM types
+/// @param[in] i_target port target
+/// @param[in] i_kinds a vector of DIMMs plugged into target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note This function will commit error logs representing the mixing failure
 ///
-std::pair<uint8_t, uint64_t> dimm_type_helper(std::vector<dimm::kind>& io_kinds)
+fapi2::ReturnCode dimm_type_mixing(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                   const std::vector<dimm::kind>& i_kinds)
 {
-    std::pair<uint8_t, uint64_t> l_max = {fapi2::ENUM_ATTR_EFF_DIMM_TYPE_EMPTY, 0};
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    // Sort the vector of kinds and walk it looking for the most common DIMM Type. This
-    // is the 'winning' DIMM Type in that all the others are the one's which are incorrect.
-    // Once we know that, we can walk the list and error out the 'losing' DIMM. For an MCS
-    // there are only 4 DIMM possible, even for an MCBIST there are only 8. So this isn't
-    // terrible. If this becomes a burden we can partition the vector once we know the winner,
-    // and just error out the 'loser' partition.
-    std::sort(io_kinds.begin(), io_kinds.end(), [](const dimm::kind & a, const dimm::kind & b) -> bool
+    //If we have 1 or 0 DIMMs on the port, we don't care
+    if (i_kinds.size() == MAX_DIMM_PER_PORT)
     {
-        return a.iv_dimm_type > b.iv_dimm_type;
-    });
-
-    uint8_t  l_cur_type = 0;
-    uint64_t l_cur_type_count = 0;
-
-    for (const auto& k : io_kinds)
-    {
-        // Empty DIMM don't count.
-        if (k.iv_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_EMPTY)
-        {
-            continue;
-        }
-
-        // If we're on the same type, keep on keeping on
-        if (k.iv_dimm_type == l_cur_type)
-        {
-            l_cur_type_count += 1;
-        }
-
-        // If we're on a different DIMM type, reset.
-        else
-        {
-            l_cur_type = k.iv_dimm_type;
-            l_cur_type_count = 1;
-        }
-
-        // Check to see if this current type over ran the previous champion
-        if (l_cur_type_count > l_max.second)
-        {
-            l_max.first = l_cur_type;
-            l_max.second = l_cur_type_count;
-        }
+        FAPI_ASSERT( i_kinds[0].iv_dimm_type == i_kinds[1].iv_dimm_type,
+                     fapi2::MSS_PLUG_RULES_INVALID_DIMM_TYPE_MIX()
+                     .set_DIMM_SLOT_ZERO(i_kinds[0].iv_dimm_type)
+                     .set_DIMM_SLOT_ONE(i_kinds[1].iv_dimm_type)
+                     .set_MCA_TARGET(i_target),
+                     "%s has two different types of DIMM installed of type %d and of type %d. Cannot mix DIMM types on port",
+                     mss::c_str(i_target), i_kinds[0].iv_dimm_type, i_kinds[1].iv_dimm_type );
     }
 
-    // Don't need this output all that often. DBG is good.
-    FAPI_DBG("winning type: %d winning count: %d", l_max.first, l_max.second);
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-    return l_max;
+
+///
+/// @brief Enforce having one solitary DIMM plugged into slot 0
+/// @param[in] i_target port target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+template<>
+fapi2::ReturnCode empty_slot_zero(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(i_target);
+
+    if ( l_dimms.size() == 1 )
+    {
+        FAPI_ASSERT(  mss::index(l_dimms[0]) == 0,
+                      fapi2::MSS_PLUG_RULES_SINGLE_DIMM_IN_WRONG_SLOT()
+                      .set_MCA_TARGET(i_target)
+                      .set_DIMM_TARGET(l_dimms[0]),
+                      "%s DIMM is plugged into the wrong slot. Must plug into slot 0", mss::c_str(l_dimms[0]) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
-/// @brief Enforce no mixing DIMM types
-/// @param[in] io_kinds a vector of DIMM (sorted while processing)
+/// @brief Enforce having one solitary DIMM plugged into slot 0
+/// @param[in] i_target the MCS
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
-/// @note This function will commit error logs representing the mixing failure
-/// @note The list of DIMM represents all the DIMM to check. So, if you want to
-/// check the consistency of types across an MCS, give the list of DIMM on that MCS.
-/// If you want to check across an MCBIST, system, etc., give that list of DIMM.
 ///
-fapi2::ReturnCode dimm_type_mixing(std::vector<dimm::kind>& io_kinds)
+template<>
+fapi2::ReturnCode empty_slot_zero( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
 {
-    // We need to keep track of current_err ourselves as the FAPI_ASSERT_NOEXIT macro doesn't.
-    fapi2::current_err = FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc(fapi2::current_err);
 
-    // Find out which DIMM type has the most DIMM in the list. This type is the 'correct'
-    // type (by rule of majority) and the others are the one's who are incorrect.
-    // We walk all the DIMM and call-out all the losers, not just the first. We have to break apart
-    // the FAPI_ASSERT_NOEXIT macro a bit to do this.
-    std::pair<uint8_t, uint64_t> l_winner = dimm_type_helper(io_kinds);
-
-    for (const auto& k : io_kinds)
+    for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
     {
-        // Sets fapi2::current_err
-        MSS_ASSERT_NOEXIT( ((k.iv_dimm_type == l_winner.first) ||
-                            (k.iv_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_EMPTY)),
-                           fapi2::MSS_PLUG_RULES_INVALID_DIMM_TYPE_MIX()
-                           .set_DIMM_TYPE(k.iv_dimm_type)
-                           .set_MAJORITY_DIMM_TYPE(l_winner.first)
-                           .set_DIMM_TARGET(k.iv_target),
-                           "%s of type %d can not be plugged in with DIMM of type %d",
-                           mss::c_str(k.iv_target), k.iv_dimm_type, l_winner.first );
+        // Doing this so we can check both ports instead of just one mca
+        fapi2::current_err = empty_slot_zero( p );
 
+        if ( fapi2::current_err != fapi2::FAPI2_RC_SUCCESS )
+        {
+            fapi2::logError( (l_rc = fapi2::current_err));
+        }
+    }
+
+    // Need to return an error or else the logs will be ignored
+    fapi2::current_err = (fapi2::current_err == fapi2::FAPI2_RC_SUCCESS) ? l_rc : fapi2::current_err;
+
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enforces the DEAD LOAD rules
+/// @param[in] i_target the MCA/ port target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note This function will deconfigure the port if it's dual drop and one of the dimms is deconfigured
+///
+template<>
+fapi2::ReturnCode check_dead_load( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    const auto l_plugged_dimms = i_target.getChildren<TARGET_TYPE_DIMM>(fapi2::TARGET_STATE_PRESENT);
+    const auto l_functional_dimms = mss::find_targets<TARGET_TYPE_DIMM>(i_target);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // If we have one deconfigured dimm and one functional dimm, we need to deconfigure the functional dimm
+    FAPI_DBG(" Plugged dimm size is %d functional dimms size is %d",
+             l_plugged_dimms.size(),
+             l_functional_dimms.size());
+
+
+    // So we check to see if there are functional dimms on the port,
+    // if so, we check to see if there are less functional dimms than plugged in dimms (meaning one was deconfigured)
+    // Third let's just double check we have two plugged dimms
+    // The last check is for clarity
+    if ( (l_functional_dimms.size() != 0)
+         && (l_plugged_dimms.size() != l_functional_dimms.size())
+         && (l_plugged_dimms.size() == 2) )
+    {
+        auto l_dead_dimm = l_plugged_dimms[0];
+        auto l_live_dimm = l_plugged_dimms[1];
+
+        // Now we determine if present_dimm[0] is functional by searching functional dimms
+        const auto l_found = std::find(l_functional_dimms.begin(), l_functional_dimms.end(), l_dead_dimm);
+
+        // if we don't find the dimm in the list of functional dimms, then it's deconfigured and the guess was good
+        // Otherwise, we swap because our first guess was wrong
+        l_dead_dimm = ( l_found == l_functional_dimms.end() ) ? l_dead_dimm : l_plugged_dimms[1];
+        l_live_dimm = ( l_found == l_functional_dimms.end() ) ? l_live_dimm : l_plugged_dimms[0];
+        FAPI_ASSERT( false,
+                     fapi2::MSS_DEAD_LOAD_ON_PORT()
+                     .set_DEAD_DIMM(l_dead_dimm)
+                     .set_FUNCTIONAL_DIMM(l_live_dimm),
+                     "%s has two DIMMs installed, but one is deconfigured (%d), so deconfiguring the other (%d) because of dead load",
+                     mss::c_str(i_target), mss::index(l_dead_dimm), mss::index(l_live_dimm));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enforces the DEAD LOAD rules
+/// @param[in] i_target the MCA/ port target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+template<>
+fapi2::ReturnCode check_dead_load( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
+{
+    fapi2::ReturnCode l_rc(fapi2::current_err);
+
+    for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
+    {
+        fapi2::current_err = check_dead_load( p );
+
+        if ( fapi2::current_err != fapi2::FAPI2_RC_SUCCESS )
+        {
+            fapi2::logError( (l_rc = fapi2::current_err));
+        }
+    }
+
+    fapi2::current_err = (fapi2::current_err == fapi2::FAPI2_RC_SUCCESS) ? l_rc : fapi2::current_err;
+
+    return fapi2::current_err;
+}
+
+///
+/// @brief Function to check the DRAM generation for DDR4
+/// @param[in] i_kinds a vector of DIMM kind structs
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode check_gen( const std::vector<dimm::kind>& i_kinds )
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    for (const auto& k : i_kinds)
+    {
         // This should never fail ... but Just In Case a little belt-and-suspenders never hurt.
-        // Later on down the line we make the assumption that effective config caught any mimatched
-        // DRAM generations - so we ought to at least do that ...
-        // TODO RTC:160395 This needs to change for controllers which support different generations, of which
-        // Nimbus does not.
-        MSS_ASSERT_NOEXIT( ((k.iv_dram_generation == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4) ||
-                            (k.iv_dram_generation == fapi2::ENUM_ATTR_EFF_DRAM_GEN_EMPTY)),
-                           fapi2::MSS_PLUG_RULES_INVALID_DRAM_GEN()
-                           .set_DRAM_GEN(k.iv_dimm_type)
-                           .set_DIMM_TARGET(k.iv_target),
-                           "%s is not DDR4 it is %d",
-                           mss::c_str(k.iv_target), k.iv_dram_generation );
-
+        // TODO RTC:160395 This needs to change for controllers which support different generations
+        // Nimbus only supports DDR4 for now
+        FAPI_ASSERT_NOEXIT( k.iv_dram_generation == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4 ||
+                            k.iv_dram_generation == fapi2::ENUM_ATTR_EFF_DRAM_GEN_EMPTY,
+                            fapi2::MSS_PLUG_RULES_INVALID_DRAM_GEN()
+                            .set_DRAM_GEN(k.iv_dimm_type)
+                            .set_DIMM_TARGET(k.iv_target),
+                            "%s is not DDR4 it is %d", mss::c_str(k.iv_target), k.iv_dram_generation );
     }
 
     return fapi2::current_err;
@@ -234,8 +304,9 @@ fapi2::ReturnCode check_rank_config(const fapi2::Target<TARGET_TYPE_MCA>& i_targ
                                     const std::vector<dimm::kind>& i_kinds,
                                     const uint64_t i_ranks_override)
 {
-    // We need to keep trak of current_err ourselves as the FAPI_ASSERT_NOEXIT macro doesn't.
+    // We need to keep track of current_err ourselves as the FAPI_ASSERT_NOEXIT macro doesn't.
     fapi2::current_err = FAPI2_RC_SUCCESS;
+
 
     // The user can avoid plug rules with an attribute. This is handy in partial good scenarios
     uint8_t l_ignore_plug_rules = 0;
@@ -266,9 +337,6 @@ fapi2::ReturnCode check_rank_config(const fapi2::Target<TARGET_TYPE_MCA>& i_targ
                      .set_TARGET(i_target),
                      "MRW overrides this rank configuration (single DIMM) ranks: %d %s",
                      i_kinds[0].iv_total_ranks, mss::c_str(i_target) );
-
-        // Pass or fail, we're done as we only had one DIMM
-        return fapi2::current_err;
     }
 
     // So if we're here we know we have more than one DIMM on this port.
@@ -317,15 +385,17 @@ fapi2::ReturnCode check_rank_config(const fapi2::Target<TARGET_TYPE_MCA>& i_targ
         MSS_ASSERT_NOEXIT( l_rank_count <= MAX_PRIMARY_RANKS_PER_PORT,
                            fapi2::MSS_PLUG_RULES_INVALID_PRIMARY_RANK_COUNT()
                            .set_TOTAL_RANKS(l_rank_count)
-                           .set_TARGET(i_target),
+                           .set_DIMM_ZERO_MASTER_RANKS(l_dimm0_kind->iv_master_ranks)
+                           .set_DIMM_ONE_MASTER_RANKS(l_dimm1_kind->iv_master_ranks)
+                           .set_MCA_TARGET(i_target),
                            "There are more than %d master ranks on %s (%d)",
                            MAX_PRIMARY_RANKS_PER_PORT, mss::c_str(i_target), l_rank_count );
 
         FAPI_INF("DIMM in slot 0 %s has %d master ranks, DIMM1 has %d",
                  mss::c_str(l_dimm0_kind->iv_target), l_dimm0_kind->iv_master_ranks, l_dimm1_kind->iv_master_ranks);
 
-        // The DIMM in slot 0 has to have the largest number of master ranks on the port.
-        FAPI_ASSERT( l_dimm0_kind->iv_master_ranks >= l_dimm1_kind->iv_master_ranks,
+        // The DIMMs master ranks have to be the same, we allow different slave ranks
+        FAPI_ASSERT( l_dimm0_kind->iv_master_ranks == l_dimm1_kind->iv_master_ranks,
                      fapi2::MSS_PLUG_RULES_INVALID_RANK_CONFIG()
                      .set_RANKS_ON_DIMM0(l_dimm0_kind->iv_master_ranks)
                      .set_RANKS_ON_DIMM1(l_dimm1_kind->iv_master_ranks)
@@ -343,8 +413,6 @@ fapi2::ReturnCode check_rank_config(const fapi2::Target<TARGET_TYPE_MCA>& i_targ
                      .set_TARGET(i_target),
                      "MRW overrides this rank configuration ranks: %d, %d %s",
                      l_dimm0_kind->iv_total_ranks, l_dimm1_kind->iv_total_ranks, mss::c_str(i_target) );
-
-        return fapi2::current_err;
     }
 
 fapi_try_exit:
@@ -363,6 +431,7 @@ fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGE
     // Check per-MCS plug rules. If those all pass, check each of our MCA
 
     const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(i_target);
+    fapi2::ReturnCode l_rc (fapi2::FAPI2_RC_SUCCESS);
 
     // Check to see that we have DIMM on this MCS. If we don't, just carry on - this is valid.
     // Cronus does this often; they don't deconfigure empty ports or controllers. However, f/w
@@ -372,13 +441,6 @@ fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGE
         FAPI_INF("No DIMM configured for MCS %s, but it itself seems configured", mss::c_str(i_target));
         return FAPI2_RC_SUCCESS;
     }
-
-    auto l_dimm_kinds = mss::dimm::kind::vector(l_dimms);
-
-    // We want to be careful here. The idea is to execute all the plug rules and commit erros before
-    // failing out. That way, a giant configuration doesn't take 45m to boot, to find a DIMM out of place
-    // the another 45m to find the next DIMM, etc.
-    fapi2::ReturnCodes l_rc = FAPI2_RC_SUCCESS;
 
     // The user can avoid plug rules with an attribute. This is handy in partial good scenarios
     uint8_t l_ignore_plug_rules = 0;
@@ -390,16 +452,28 @@ fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGE
         return FAPI2_RC_SUCCESS;
     }
 
-    // We enforce DIMM type mixing per MCS
-    l_rc = (plug_rule::dimm_type_mixing(l_dimm_kinds) == FAPI2_RC_SUCCESS) ? l_rc : FAPI2_RC_INVALID_PARAMETER;
-
-    // All good, got check the ports.
+    // We want to be careful here. The idea is to execute all the plug rules and commit erros before
+    // failing out. That way, a giant configuration doesn't take 45m to boot, to find a DIMM out of place
+    // the another 45m to find the next DIMM, etc.
     for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
     {
-        l_rc = (enforce_plug_rules(p) == FAPI2_RC_SUCCESS) ? l_rc : FAPI2_RC_INVALID_PARAMETER;
+        // Cronus only exits if the procedure returns an error, so we need to keep track
+        // To do this, we are using l_rc and current_err
+        // current_err is not confined by scope,
+        // So current_err can be set to SUCCESS within the called function and could overwrite bad values
+        // l_rc will keep track if there are any errors and won't be overwritten by a success accidentally
+        fapi2::current_err = enforce_plug_rules(p);
+
+        if ( fapi2::current_err != fapi2::FAPI2_RC_SUCCESS )
+        {
+            // Sets current_err to bad and doesn't override with a "good" status
+            fapi2::logError( l_rc = fapi2::current_err );
+        }
     }
 
-    return l_rc;
+    // if current_err is marked as good, set to l_rc
+    // l_rc error has already been logged, so if current_err has an error report that
+    fapi2::current_err = (fapi2::current_err == fapi2::FAPI2_RC_SUCCESS) ? l_rc : fapi2::current_err;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -439,6 +513,10 @@ fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGE
         FAPI_INF("attribute set to ignore plug rules");
         return FAPI2_RC_SUCCESS;
     }
+
+    FAPI_TRY( check_gen( l_dimm_kinds ) );
+
+    FAPI_TRY( dimm_type_mixing( i_target, l_dimm_kinds ) );
 
     // Get the MRW blacklist for rank configurations
     FAPI_TRY( mss::mrw_unsupported_rank_config(i_target, l_ranks_override) );
