@@ -40,6 +40,7 @@
 #include <lib/utils/count_dimm.H>
 #include <lib/utils/conversions.H>
 #include <lib/dimm/bcw_load.H>
+#include <lib/workarounds/dqs_align_workarounds.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -168,6 +169,12 @@ extern "C"
 
         // Load MRS
         FAPI_TRY( mss::mrs_load(i_target) );
+
+        // DQS_ALIGN fail mitigation from Ryan King
+        for (const auto& p : l_mca)
+        {
+            FAPI_TRY( mss::workarounds::dqs_align::refresh(p) );
+        }
 
     fapi_try_exit:
         FAPI_INF("End draminit: %s (0x%lx)", mss::c_str(i_target), uint64_t(fapi2::current_err));
