@@ -172,8 +172,6 @@ template<TARGETING::TYPE T>
 uint32_t getMemReadAddr( ExtensibleChip * i_chip, MemAddr::ReadReg i_reg,
                          MemAddr & o_addr );
 
-#ifdef __HOSTBOOT_MODULE
-
 /**
  * @brief  Reads the maintenance address from hardware.
  *
@@ -193,6 +191,8 @@ uint32_t getMemReadAddr( ExtensibleChip * i_chip, MemAddr::ReadReg i_reg,
  */
 template<TARGETING::TYPE T>
 uint32_t getMemMaintAddr( ExtensibleChip * i_chip, MemAddr & o_addr );
+
+#ifdef __HOSTBOOT_MODULE
 
 /**
  * @brief  Queries broadcast mode information and determines which of the MCBIST

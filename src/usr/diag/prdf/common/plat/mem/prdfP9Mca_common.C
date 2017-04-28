@@ -272,6 +272,69 @@ PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeImpe );
 
 //------------------------------------------------------------------------------
 
+/**
+ * @brief  MCAECCFIR[13,16] - Mainline AUE and IAUE
+ * @param  i_chip MCA chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeFetchAueIaue( ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[p9_mca::AnalyzeFetchAueIaue] "
+
+    MemAddr addr;
+    if ( SUCCESS != getMemReadAddr<TYPE_MCA>(i_chip, MemAddr::READ_AUE_ADDR,
+                                             addr) )
+    {
+        PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x,READ_AUE_ADDR) failed",
+                  i_chip->getHuid() );
+    }
+    else
+    {
+        MemRank rank = addr.getRank();
+        MemoryMru mm { i_chip->getTrgt(), rank, MemoryMruData::CALLOUT_RANK };
+        io_sc.service_data->SetCallout( mm, MRU_HIGH );
+    }
+
+    return SUCCESS; // nothing to return to rule code
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchAueIaue );
+
+/**
+ * @brief  MCAECCFIR[33] - Maintenance AUE
+ * @param  i_chip MCA chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeMaintAue( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[p9_mca::AnalyzeMaintAue] "
+
+    MemAddr addr;
+    if ( SUCCESS != getMemMaintAddr<TYPE_MCA>(i_chip, addr) )
+    {
+        PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
+                  i_chip->getHuid() );
+    }
+    else
+    {
+        MemRank rank = addr.getRank();
+        MemoryMru mm { i_chip->getTrgt(), rank, MemoryMruData::CALLOUT_RANK };
+        io_sc.service_data->SetCallout( mm, MRU_HIGH );
+    }
+
+    return SUCCESS; // nothing to return to rule code
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeMaintAue );
+
+//------------------------------------------------------------------------------
+
 } // end namespace p9_mca
 
 } // end namespace PRDF

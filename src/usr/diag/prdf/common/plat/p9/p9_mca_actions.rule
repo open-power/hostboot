@@ -23,14 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 
-/** Callout all connected DIMMs HIGH on first occurence. */
-actionclass all_dimm_H_th_1
-{
-    callout(connected(TYPE_DIMM,0), MRU_HIGH);
-    callout(connected(TYPE_DIMM,1), MRU_HIGH);
-    threshold1;
-};
-
 /** Verify Chip Mark */
 actionclass verify_chip_mark_0 { funccall("AnalyzeFetchMpe_0"); };
 actionclass verify_chip_mark_1 { funccall("AnalyzeFetchMpe_1"); };
@@ -94,6 +86,31 @@ actionclass maintenance_iue_handling
 };
 
 actionclass impe_handling { funccall("AnalyzeImpe"); };
+
+/** Handle Mainline AUEs/IAUEs */
+actionclass mainline_aue_iaue_handling
+{
+    funccall("AnalyzeFetchAueIaue");
+    calloutSelfLow;
+    threshold1;
+};
+
+/** Handle Maintenance AUEs */
+actionclass maintenance_aue_handling
+{
+    funccall("AnalyzeMaintAue");
+    calloutSelfLow;
+    threshold1;
+};
+
+/** Handle Maintenance IAUEs */
+actionclass maintenance_iaue_handling
+{
+    callout(connected(TYPE_DIMM,0), MRU_HIGH);
+    callout(connected(TYPE_DIMM,1), MRU_HIGH);
+    calloutSelfLow;
+    threshold1;
+};
 
 /** MCA/UE algroithm, threshold 5 per day */
 actionclass mca_ue_algorithm_th_5perDay
