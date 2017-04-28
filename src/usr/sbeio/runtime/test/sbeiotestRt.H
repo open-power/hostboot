@@ -40,6 +40,7 @@
 #include <errl/errlmanager.H>
 #include <devicefw/userif.H>
 
+
 //trace
 extern trace_desc_t* g_trac_sbeio;
 
@@ -98,7 +99,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
 
             int rc = 0;
 
-            const uint32_t l_req_dataSize = 0xC;
+            const uint32_t l_req_dataSize = 0x00000001;
             o_request.sbeHdr.version = SBEHDRVER_LATEST;
             o_request.sbeHdr.msgSize =
                 sizeof(sbeHeader_t) + sizeof(cmdHeader_t) + l_req_dataSize;
@@ -109,19 +110,11 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 reinterpret_cast<uint64_t>(&(o_request.data))
                 - reinterpret_cast<uint64_t>(&(o_request.cmdHdr));
             o_request.cmdHdr.dataSize = l_req_dataSize;
-            o_request.cmdHdr.command = PASSTHRU_SET_OCC_STATE;
-            // Set pointer to request data as words
-            uint32_t *o_req_data =
-                reinterpret_cast<uint32_t*>(&o_request.data[0]);
-            o_request.data[0] = 0;
-            o_request.data[1] = 0xE0; // Command class = HTMGT Messages
-            o_request.data[2] = 0;
-            o_request.data[3] = 0x01; // Command = Generic HTMGT Message
-            o_req_data[1] = iv_seqId;
-            o_req_data[2] = 0;
+            o_request.cmdHdr.command = PASSTHRU_HTMGT_GENERIC;
+            o_request.data[0] = 0x01; // Get OCC State
 
 
-            const uint32_t l_rsp_dataSize = 0;
+            const uint32_t l_rsp_dataSize = 0x00000001;
             o_expected_response.sbeHdr.version = o_request.sbeHdr.version;
             o_expected_response.sbeHdr.msgSize =
                 sizeof(sbeHeader_t) + sizeof(cmdHeader_t) + l_rsp_dataSize;
@@ -133,6 +126,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 - reinterpret_cast<uint64_t>(&(o_expected_response.cmdHdr));
             o_expected_response.cmdHdr.dataSize = l_rsp_dataSize;
             o_expected_response.cmdHdr.command = o_request.cmdHdr.command;
+            o_expected_response.data[0] = 0x03; // Active
 
             do
             {
@@ -196,7 +190,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
         }
 
         /**
-         * @brief Function to process Set OCC State pass-through command
+         * @brief Function to process Generic HTMGT Message pass-through command
          *
          * @param[in]  i_procTgt      HB processor target
          * @param[in]  i_reqDataSize  Pass-through command request data size
@@ -208,12 +202,12 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
          * @return errlHndl_t    Error log handle on failure.
          */
         static
-        errlHndl_t processSetOCCState(TARGETING::TargetHandle_t i_procTgt,
-                                      uint32_t i_reqDataSize,
-                                      uint8_t  *i_reqData,
-                                      uint32_t *o_rspStatus,
-                                      uint32_t *o_rspDataSize,
-                                      uint8_t  *o_rspData)
+        errlHndl_t processGenericHtmgt(TARGETING::TargetHandle_t i_procTgt,
+                                       uint32_t i_reqDataSize,
+                                       uint8_t  *i_reqData,
+                                       uint32_t *o_rspStatus,
+                                       uint32_t *o_rspDataSize,
+                                       uint8_t  *o_rspData)
         {
             errlHndl_t l_errl = nullptr;
 
@@ -230,19 +224,21 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
             if(l_testOption)
             {
                 TRACDCOMP(g_trac_sbeio,
-                          "processSetOCCState: l_testOption %d",
+                          "processGenericHtmgt: l_testOption %d",
                           l_testOption);
 
                 TRACDBIN( g_trac_sbeio,
-                          "processSetOCCState: request",
+                          "processGenericHtmgt: request",
                           l_request,
                           l_request->sbeHdr.msgSize);
             }
 
             // Set default returns
             *o_rspStatus = 0;
-            *o_rspDataSize = 0;
+            *o_rspDataSize = 1;
+            o_rspData[0] = 0x03;
 
+            // Do special processing based on test option supplied
             switch(l_testOption)
             {
                 // Return with excess response data size
@@ -282,7 +278,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
 
                  // Return with altered Command Header command
                 case 7:
-                    l_response->cmdHdr.command = PASSTHRU_GET_PSTATE;
+                    l_response->cmdHdr.command = PASSTHRU_HTMGT_GET_PSTATE;
                     break;
 
               // Normal processing
@@ -295,11 +291,11 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
             if(l_testOption)
             {
                 TRACDCOMP(g_trac_sbeio,
-                          "processSetOCCState: response %p",
+                          "processGenericHtmgt: response %p",
                           l_response);
 
                 TRACDBIN( g_trac_sbeio,
-                          "processSetOCCState: response",
+                          "processGenericHtmgt: response",
                           l_response,
                           l_response->sbeHdr.msgSize);
             }
@@ -339,6 +335,14 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Get TARGETING::Target for runtime chip_id (target)
                 errl = RT_TARG::getHbTarget(i_procChipId,
                                             l_proc);
+
+                if(errl)
+                {
+                    TS_FAIL("Not able to get TARGETING::Target for runtime "
+                            "chip_id");
+
+                    break;
+                }
 
                 // Read SCOM_ADDR_5003B for target proc
                 errl = deviceRead(l_proc,
@@ -421,7 +425,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);
@@ -451,13 +455,13 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Increment Total Tests
                 g_TotalTests++;
 
-                // Change SBE Header version
+                // Change CMD Header version
                 l_request.cmdHdr.version -= 1;
 
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);
@@ -514,13 +518,16 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                                            l_sbeCommAddr,
                                            &rt_intf);
 
+                // Save size of message to copy
+                uint32_t l_sbeMsgSize = l_request.sbeHdr.msgSize;
+
                 // Change SBE Header message size
                 l_request.sbeHdr.msgSize = SBE_MSG_SIZE + 128;
 
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_sbeMsgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);
@@ -584,7 +591,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);
@@ -617,7 +624,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);
@@ -653,7 +660,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);
@@ -683,13 +690,16 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Increment Total Tests
                 g_TotalTests++;
 
+                // Save size of message to copy
+                uint32_t l_sbeMsgSize = l_request.sbeHdr.msgSize;
+
                 // Change SBE Header message size
                 l_request.sbeHdr.msgSize -= 1;
 
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_sbeMsgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);
@@ -740,6 +750,18 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
 
             do
             {
+                // Clear mapping for Generic HTMGT Message command
+                rc = setProcessCmdFunction(PASSTHRU_HTMGT_GENERIC,
+                                           nullptr);
+                if(0 != rc)
+                {
+                    TS_FAIL("Unexpected error during RT SBE message passing. "
+                            "chipID: 0x%08X, rc: 0x%08x, but expected 0 for "
+                            "setProcessCmdFunction",
+                            chipId, rc);
+                    break;
+                }
+
                 // Do initializations for SBE Message passing
                 rc = initSbeMessagePassing(l_request,
                                            l_expected_response,
@@ -750,7 +772,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);
@@ -758,6 +780,54 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 {
                     TS_FAIL("Unexpected return during RT SBE message passing. "
                             "Testing function not set for chipID: 0x%08X",
+                            chipId);
+                    break;
+                }
+
+                // Increment Total Tests
+                g_TotalTests++;
+
+                // Check setting of bits in CFAM register
+                rc = checkResetSbeMessagePassingCFAM(chipId,
+                                                     0x40000000);
+                if(0 != rc)
+                {
+                    TS_FAIL("Unexpected error during RT SBE message passing. "
+                            "chipID: 0x%08X, rc: 0x%08x, but expected 0 for "
+                            "CFAM register checking",
+                            chipId, rc);
+                    break;
+                }
+
+                // Erase mapping for Generic HTMGT Message command
+                rc = eraseProcessCmdFunction(PASSTHRU_HTMGT_GENERIC);
+                if(0 != rc)
+                {
+                    TS_FAIL("Unexpected error during RT SBE message passing. "
+                            "chipID: 0x%08X, rc: 0x%08x, but expected 0 for "
+                            "eraseProcessCmdFunction",
+                            chipId, rc);
+                    break;
+                }
+
+                // Do initializations for SBE Message passing
+                rc = initSbeMessagePassing(l_request,
+                                           l_expected_response,
+                                           chipId,
+                                           l_sbeCommAddr,
+                                           &rt_intf);
+
+                // Copy test request into SBE Communication area
+                memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
+                       reinterpret_cast<void*>(&l_request),
+                       l_request.sbeHdr.msgSize);
+
+                // Call the SBE message passing code
+                rc = rt_intf->sbe_message_passing(chipId);
+                if(0x2839 != rc)
+                {
+                    TS_FAIL("Unexpected error during RT SBE message passing. "
+                            "Testing function not found for chipID: 0x%08X",
                             chipId);
                     break;
                 }
@@ -795,8 +865,8 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
             do
             {
                 // Call Set Process Command Function
-                rc = setProcessCmdFunction(PASSTHRU_SET_OCC_STATE,
-                                           processSetOCCState);
+                rc = setProcessCmdFunction(PASSTHRU_HTMGT_GENERIC,
+                                           processGenericHtmgt);
                 if(0 != rc)
                 {
                     TS_FAIL("Unexpected return during RT SBE message passing. "
@@ -846,11 +916,11 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call Set Process Command Function
-                rc = setProcessCmdFunction(PASSTHRU_SET_OCC_STATE,
-                                           processSetOCCState);
+                rc = setProcessCmdFunction(PASSTHRU_HTMGT_GENERIC,
+                                           processGenericHtmgt);
                 if(0 != rc)
                 {
                     TS_FAIL("Unexpected return during RT SBE message passing. "
@@ -918,7 +988,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);
@@ -1009,11 +1079,11 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call Set Process Command Function
-                rc = setProcessCmdFunction(PASSTHRU_SET_OCC_STATE,
-                                           processSetOCCState);
+                rc = setProcessCmdFunction(PASSTHRU_HTMGT_GENERIC,
+                                           processGenericHtmgt);
                 if(0 != rc)
                 {
                     TS_FAIL("Unexpected return during RT SBE message passing. "
@@ -1071,13 +1141,13 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 l_request.cmdHdr.status = 0x2;
 
                 // Change back sizes in expected response
-                l_expected_response.sbeHdr.msgSize = l_hdrsSize;
-                l_expected_response.cmdHdr.dataSize = 0;
+                l_expected_response.sbeHdr.msgSize = l_hdrsSize + 1;
+                l_expected_response.cmdHdr.dataSize = 1;
 
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);
@@ -1113,7 +1183,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);
@@ -1167,7 +1237,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);
@@ -1201,7 +1271,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);
@@ -1238,7 +1308,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);
@@ -1272,7 +1342,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 // Copy test request into SBE Communication area
                 memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
                        reinterpret_cast<void*>(&l_request),
-                       sizeof(l_request));
+                       l_request.sbeHdr.msgSize);
 
                 // Call the SBE message passing code
                 rc = rt_intf->sbe_message_passing(chipId);

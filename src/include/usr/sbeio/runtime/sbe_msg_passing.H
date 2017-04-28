@@ -37,7 +37,7 @@ namespace SBE_MSG
     /**
      * @brief SBE Communication package size in number of pages
      */
-    const uint8_t SBE_COMM_PKG_SIZE = 1;
+    const uint8_t SBE_COMM_PKG_SIZE = 2;
 
     /**
      * @brief SBE Communication buffer size
@@ -77,13 +77,11 @@ namespace SBE_MSG
     // Pass-Through Command enums for Command Header command field
     enum passThruCmds
     {
-        PASSTHRU_SET_OCC_STATE      = 0x00E00001, // Set OCC State
-        PASSTHRU_GET_OCC_SENSOR     = 0x00E00002, // Get OCC Sensor Readings
-        PASSTHRU_SET_HYPER_ENV      = 0x00E00003, // Set Hypervisor Environment
-        PASSTHRU_QRY_MD_FN          = 0x00E00004, // Query Mode and Function
-        PASSTHRU_RST_PM_COMPLEX     = 0x00E00005, // Reset PM Complex
-        PASSTHRU_CTL_AUTOSLEW       = 0x00E00006, // Control Autoslew
-        PASSTHRU_GET_PSTATE         = 0x00E00007, // Get PState Table
+        // Command Class 0xE0 - HTMGT Messages
+        PASSTHRU_HTMGT_GENERIC      = 0x00E00001, // HTMGT Generic Message
+        PASSTHRU_HTMGT_GET_PSTATE   = 0x00E00002, // HTMGT Get PState Table
+        // Command Class 0xE1 - HBRT Messages
+        PASSTHRU_HBRT_GET_PSTATE    = 0x00E10001, // HBRT Get PState Table
     };
 
 
@@ -153,6 +151,16 @@ namespace SBE_MSG
      */
     int setProcessCmdFunction(enum passThruCmds    i_command,
                               processCmdFunction_t i_function);
+
+    /**
+     * @brief Erase process pass-through command function in Process Command Map
+     *
+     * @param[in]  i_command      Process pass-through command
+     *
+     * @return int    Return code.
+     */
+    int eraseProcessCmdFunction(enum passThruCmds i_command);
 } // namespace SBE_MSG
+
 
 #endif

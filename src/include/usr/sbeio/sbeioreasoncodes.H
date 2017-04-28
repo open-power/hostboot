@@ -95,6 +95,9 @@ enum sbeioReasonCode
     SBEIO_RT_DATA_TOO_LARGE            = SBEIO_COMP_ID | 0x36,
     SBEIO_RT_RSP_FIELD_ALTERED         = SBEIO_COMP_ID | 0x37,
     SBEIO_RT_NO_SBE_COMM_BUFFER        = SBEIO_COMP_ID | 0x38,
+    SBEIO_RT_FUNCTION_NOT_FOUND        = SBEIO_COMP_ID | 0x39,
+    SBEIO_RT_NO_INTERFACE_POINTER      = SBEIO_COMP_ID | 0x3A,
+    SBEIO_RT_NO_INTERFACE_FUNCTION     = SBEIO_COMP_ID | 0x3B,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc

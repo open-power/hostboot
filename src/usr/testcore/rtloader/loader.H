@@ -643,7 +643,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             cv_comm_phys_addr = TARGETING::get_top_mem_addr();
 
             assert (cv_comm_phys_addr != 0,
-                    "bld_devtree: Top of memory was 0!");
+                    "rt_get_comm: Top of memory was 0!");
 
             cv_comm_phys_addr -= (VMM_RT_VPD_OFFSET + 64*KILOBYTE);
 
