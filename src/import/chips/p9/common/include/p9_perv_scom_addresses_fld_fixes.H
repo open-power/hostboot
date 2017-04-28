@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,8 @@ static const uint64_t SH_FLD_SCAN_REGION_ALL_UNITS = 32014;
 static const uint64_t SH_FLD_SCAN_REGION_ALL_UNITS_LEN = 32015;
 static const uint64_t SH_FLD_SCAN_ALL_TYPES = 32016;
 static const uint64_t SH_FLD_SCAN_ALL_TYPES_LEN = 32017;
-
+static const uint64_t SH_FLD_TSFSI_NV_REFCLK_EN_DC = 22564;
+static const uint64_t SH_FLD_TSFSI_NV_REFCLK_EN_DC_LEN = 22565;
 
 REG64_FLD( PERV_1_CLK_REGION_CLOCK_REGION_ALL_UNITS           , 4   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
            SH_FLD_CLOCK_REGION_ALL_UNITS );
@@ -104,5 +105,11 @@ REG64_FLD( PERV_1_OPCG_REG0_OPCG_STARTS_BIST                       , 14  , SH_UN
            SH_FLD_STARTS_BIST );
 REG64_FLD( PERV_1_OPCG_REG0_OPCG_GO                                , 1   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
            SH_FLD_GO         );
+
+REG64_FLD( PERV_ROOT_CTRL6_TSFSI_NV_REFCLK_EN_DC                   , 20  , SH_UNT_PERV     , SH_ACS_SCOM     ,
+           SH_FLD_TSFSI_NV_REFCLK_EN_DC );
+REG64_FLD( PERV_ROOT_CTRL6_TSFSI_NV_REFCLK_EN_DC_LEN               , 4   , SH_UNT_PERV     , SH_ACS_SCOM     ,
+           SH_FLD_TSFSI_NV_REFCLK_EN_DC_LEN );
+
 
 #endif

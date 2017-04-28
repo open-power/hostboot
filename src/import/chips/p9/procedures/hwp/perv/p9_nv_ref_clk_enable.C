@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
-const uint16_t TPFSI_OFFCHIP_REFCLK_EN_NV = 0x7;
+const uint16_t TPFSI_OFFCHIP_REFCLK_EN_NV = 0xF;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -61,8 +61,8 @@ p9_nv_ref_clk_enable(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
     fapi2::buffer<uint64_t> l_root_ctrl6;
     FAPI_TRY(fapi2::getScom(i_target, PERV_ROOT_CTRL6_SCOM, l_root_ctrl6),
              "Error from getScom (PERV_ROOT_CTRL6_SCOM)");
-    l_root_ctrl6.insertFromRight<PERV_ROOT_CTRL6_TPFSI_OFFCHIP_REFCLK_EN_DC,
-                                 PERV_ROOT_CTRL6_TPFSI_OFFCHIP_REFCLK_EN_DC_LEN>(TPFSI_OFFCHIP_REFCLK_EN_NV);
+    l_root_ctrl6.insertFromRight<PERV_ROOT_CTRL6_TSFSI_NV_REFCLK_EN_DC,
+                                 PERV_ROOT_CTRL6_TSFSI_NV_REFCLK_EN_DC_LEN>(TPFSI_OFFCHIP_REFCLK_EN_NV);
     FAPI_TRY(fapi2::putScom(i_target, PERV_ROOT_CTRL6_SCOM, l_root_ctrl6),
              "Error from putScom (PERV_ROOT_CTRL6_SCOM)");
 
