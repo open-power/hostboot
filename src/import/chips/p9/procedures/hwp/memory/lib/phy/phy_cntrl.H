@@ -391,6 +391,44 @@ fapi_try_exit:
 
 ///
 /// @brief Get DP DLL Cal Status
+/// @param[in] l_good DLL CAL good status of DP or ADR
+/// @param[in] l_error DLL CAL error status of DP or ADR
+/// @param[in] l_error_fine DLL CAL error fine status of DP or ADR
+/// @return mss::states; YES == success, NO == fail, INVALID == still running
+/// @note Since the these indicators are a summary of all DLLs, all must be started to make
+/// them valid.
+///
+static mss::states dll_cal_status_helper( const bool l_good,
+        const bool l_error,
+        const bool l_error_fine )
+{
+    // Full calibration is still going on in at least 1 DLL while all 3 signals are 0.
+    if ((l_good == mss::LOW) && (l_error == mss::LOW) && (l_error_fine == mss::LOW))
+    {
+        return mss::INVALID;
+    }
+
+    // Full calibration was successful in all DLLs if CAL_GOOD = 1 and both CAL_ERROR and CAL_ERROR_FINE are 0.
+    if ((l_good == mss::HIGH) && (l_error == mss::LOW) && (l_error_fine == mss::LOW))
+    {
+        return mss::YES;
+    }
+
+    // Full calibration failed in at least 1 DLL if either CAL_ERROR or CAL_ERROR_FINE are 1.
+    if ((l_error == mss::HIGH) || (l_error_fine == mss::HIGH))
+    {
+        return mss::NO;
+    }
+
+    // All cases shoud be covered above
+    // we shouldn't reach here so we add
+    // a saftey net.
+    fapi2::Assert(false);
+    return mss::NO;
+}
+
+///
+/// @brief Get DP DLL Cal Status
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to dp16Traits<T>
 /// Combine the processing of Good, Error and Error Fine into one functional interface
@@ -402,32 +440,38 @@ fapi_try_exit:
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = pcTraits<T> >
 inline mss::states get_dll_cal_status( fapi2::buffer<uint64_t>& i_data )
 {
+    // Lets check the cal status of the DPs first
     const bool l_dp_good =  i_data.getBit<TT::DLL_CAL_STATUS_DP_GOOD>();
     const bool l_dp_error = i_data.getBit<TT::DLL_CAL_STATUS_DP_ERROR>();
     const bool l_dp_error_fine = i_data.getBit<TT::DLL_CAL_STATUS_DP_ERROR_FINE>();
 
+    const mss::states l_dp_status = dll_cal_status_helper(l_dp_good, l_dp_error, l_dp_error_fine);
+
+    // Lets check the cal status of the ADRs second
+    const bool l_adr_good =  i_data.getBit<TT::DLL_CAL_STATUS_ADR_GOOD>();
+    const bool l_adr_error = i_data.getBit<TT::DLL_CAL_STATUS_ADR_ERROR>();
+    const bool l_adr_error_fine = i_data.getBit<TT::DLL_CAL_STATUS_ADR_ERROR_FINE>();
+
+    const mss::states l_adr_status = dll_cal_status_helper(l_adr_good, l_adr_error, l_adr_error_fine);
     FAPI_INF("pc_dll_status: 0x%016llx", i_data);
 
-    // Full calibration is still going on in at least 1 DLL while all 3 signals are 0.
-    if ((l_dp_good == mss::LOW) && (l_dp_error == mss::LOW) && (l_dp_error_fine == mss::LOW))
+
+    if( l_dp_status == mss::INVALID || l_adr_status == mss::INVALID )
     {
         return mss::INVALID;
     }
 
-    // Full calibration was successful in all DLLs if CAL_GOOD = 1 and both CAL_ERROR and CAL_ERROR_FINE are 0.
-    if ((l_dp_good == mss::HIGH) && (l_dp_error == mss::LOW) && (l_dp_error_fine == mss::LOW))
-    {
-        return mss::YES;
-    }
-
-    // Full calibration failed in at least 1 DLL if either CAL_ERROR or CAL_ERROR_FINE are 1.
-    // Full calibration was successful in all DLLs if CAL_GOOD = 1 and both CAL_ERROR and CAL_ERROR_FINE are 0.
-    if ((l_dp_error == mss::HIGH) || (l_dp_error_fine == mss::HIGH))
+    if( l_dp_status == mss::NO || l_adr_status == mss::NO )
     {
         return mss::NO;
     }
 
-    // Not reached ... right?
+    if( l_dp_status == mss::YES && l_adr_status == mss::YES )
+    {
+        return mss::YES;
+    }
+
+    // Shouldn't get here, so we put some belt and suspenders
     FAPI_ERR("pc_dll_cal_status: 0x%016llx unable to calculate state", i_data);
     fapi2::Assert(false);
     return mss::NO;

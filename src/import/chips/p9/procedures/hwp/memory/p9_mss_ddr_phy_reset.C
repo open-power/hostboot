@@ -43,6 +43,7 @@
 #include <lib/utils/count_dimm.H>
 #include <lib/phy/adr32s.H>
 #include <lib/workarounds/dp16_workarounds.H>
+#include <lib/workarounds/dll_workarounds.H>
 #include <lib/fir/check.H>
 #include <lib/fir/unmask.H>
 
@@ -109,8 +110,20 @@ extern "C"
         // and DDRPHY_ADR_DLL_CNTL registers
         // 15. Monitor the DDRPHY_PC_DLL_ZCAL_CAL_STATUS register to determine when calibration is
         // complete. One of the 3 bits will be asserted for ADR and DP16.
-        FAPI_INF( "starting DLL calibration %s", mss::c_str(i_target) );
-        FAPI_TRY( mss::dll_calibration(i_target) );
+        {
+            FAPI_INF( "starting DLL calibration %s", mss::c_str(i_target) );
+            fapi2::ReturnCode l_rc = mss::dll_calibration(i_target);
+
+            // Only run DLL workaround if we fail DLL cal and we are a < DD2.0 part
+            if( l_rc != fapi2::FAPI2_RC_SUCCESS &&
+                mss::chip_ec_feature_mss_dll_workaround(i_target) )
+            {
+                FAPI_INF( "%s Applying DLL workaround", mss::c_str(i_target) );
+                l_rc = mss::workarounds::dll::fix_bad_voltage_settings(i_target);
+            }
+
+            FAPI_TRY( l_rc, "Failed DLL calibration" );
+        }
 
         //
         // Start bang-bang-lock
