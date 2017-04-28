@@ -314,6 +314,19 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
     //       background scrubbing never stops.
     mss::mcbist::stop_conditions stopCond;
 
+    // AUEs are checkstop attentions. Unfortunately, MCBIST commands do not stop
+    // when the system checkstops. Therefore, we must set the stop condition for
+    // AUEs so that we can use the MCBMCAT register to determine where the error
+    // occurred. Note that there isn't a stop condition specifically for IAUEs.
+    // Instead, there is the RCE threshold. Unfortunately, the RCE counter is a
+    // combination of IUE, IAUE, IMPE, and IRCD errors. It is possible to use
+    // this threshold and simply restart background scrubbing each time there is
+    // an IUE, IMPE, or IRCD but there is concern that PRD might get stuck
+    // handling those attentions on every address even after thresholds have
+    // been reached. Therefore, we simplified the design and will simply call
+    // out both DIMMs for maintenance IAUEs.
+    stopCond.set_pause_on_aue(mss::ON);
+
     #ifdef CONFIG_HBRT_PRD
 
     stopCond.set_thresh_nce_int(1)

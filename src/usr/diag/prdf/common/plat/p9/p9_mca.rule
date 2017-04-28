@@ -407,7 +407,7 @@ group gMCAECCFIR filter singlebit, cs_root_cause( 14, 17, 37 )
     /** MCAECCFIR[13]
      *  Mainline read AUE
      */
-    (rMCAECCFIR, bit(13)) ? all_dimm_H_th_1;
+    (rMCAECCFIR, bit(13)) ? mainline_aue_iaue_handling;
 
     /** MCAECCFIR[14]
      *  Mainline read UE
@@ -422,7 +422,7 @@ group gMCAECCFIR filter singlebit, cs_root_cause( 14, 17, 37 )
     /** MCAECCFIR[16]
      *  Mainline read IAUE
      */
-    (rMCAECCFIR, bit(16)) ? all_dimm_H_th_1;
+    (rMCAECCFIR, bit(16)) ? mainline_aue_iaue_handling;
 
     /** MCAECCFIR[17]
      *  Mainline read IUE
@@ -472,7 +472,7 @@ group gMCAECCFIR filter singlebit, cs_root_cause( 14, 17, 37 )
     /** MCAECCFIR[33]
      *  Maintenance AUE
      */
-    (rMCAECCFIR, bit(33)) ? all_dimm_H_th_1;
+    (rMCAECCFIR, bit(33)) ? maintenance_aue_handling;
 
     /** MCAECCFIR[34]
      *  Maintenance UE
@@ -487,7 +487,7 @@ group gMCAECCFIR filter singlebit, cs_root_cause( 14, 17, 37 )
     /** MCAECCFIR[36]
      *  Maintenance IAUE
      */
-    (rMCAECCFIR, bit(36)) ? all_dimm_H_th_1;
+    (rMCAECCFIR, bit(36)) ? maintenance_iaue_handling;
 
     /** MCAECCFIR[37]
      *  Maintenance IUE

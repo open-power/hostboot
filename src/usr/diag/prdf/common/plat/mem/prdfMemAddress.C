@@ -233,8 +233,6 @@ uint32_t getMemReadAddr<TYPE_MBA>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-#ifdef __HOSTBOOT_MODULE
-
 template<>
 uint32_t getMemMaintAddr<TYPE_MCBIST>( ExtensibleChip * i_chip,
                                        MemAddr & o_addr )
@@ -286,6 +284,7 @@ uint32_t getMemMaintAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr & o_addr )
 }
 
 //------------------------------------------------------------------------------
+
 template<>
 uint32_t getMemMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr & o_addr )
 {
@@ -318,6 +317,8 @@ uint32_t getMemMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr & o_addr )
 }
 
 //------------------------------------------------------------------------------
+
+#ifdef __HOSTBOOT_MODULE
 
 uint32_t getMcbistMaintPort( ExtensibleChip * i_mcbChip,
                              std::vector<ExtensibleChip *> & o_mcaList )
