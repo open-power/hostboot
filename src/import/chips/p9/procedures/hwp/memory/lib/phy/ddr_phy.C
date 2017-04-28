@@ -1514,35 +1514,38 @@ fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
         // Note: Keep INIT_RXDLL_CAL_UPDATE at 0 to ensure PC CAL_GOOD indicator is accurate.
         // Read, modify, write the DLL_RESET in the ADR_DLL registers
         {
-            std::vector<fapi2::buffer<uint64_t>> i_read;
+            typedef adr32sTraits<TARGET_TYPE_MCA> TT;
 
-            FAPI_TRY(mss::scom_suckah(p, adr32sTraits<TARGET_TYPE_MCA>::DLL_CNFG_REG, i_read));
-            std::for_each( i_read.begin(), i_read.end(),
-                           [](fapi2::buffer<uint64_t>& b)
+            std::vector<fapi2::buffer<uint64_t>> l_read;
+            FAPI_TRY(mss::scom_suckah(p, TT::DLL_CNFG_REG, l_read));
+
+            std::for_each( l_read.begin(), l_read.end(), [](fapi2::buffer<uint64_t>& b)
             {
                 adr32s::set_dll_cal_reset(b);
             } );
-            FAPI_TRY(mss::scom_blastah(p, adr32sTraits<TARGET_TYPE_MCA>::DLL_CNFG_REG, i_read));
+
+            FAPI_TRY(mss::scom_blastah(p, TT::DLL_CNFG_REG, l_read));
         }
 
         // Read, modify, write the DLL_RESET in the DP16_DLL registers
         {
-            std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> > > i_read;
+            typedef dp16Traits<TARGET_TYPE_MCA> TT;
 
-            FAPI_TRY(mss::scom_suckah(p, dp16Traits<TARGET_TYPE_MCA>::DLL_CNTRL_REG, i_read));
+            std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> > > l_read;
+            FAPI_TRY(mss::scom_suckah(p, TT::DLL_CNTRL_REG, l_read));
 
             size_t l_index = 0;
 
-            for (const auto& r : dp16Traits<TARGET_TYPE_MCA>::DLL_CNTRL_REG)
+            for (const auto& r : TT::DLL_CNTRL_REG)
             {
                 mss::states l_state = (r.second == MCA_DDRPHY_DP16_DLL_CNTL1_P0_4) ? mss::HIGH : mss::LOW;
 
-                dp16::set_dll_cal_reset(i_read[l_index].first,  mss::LOW);
-                dp16::set_dll_cal_reset(i_read[l_index].second, l_state);
+                dp16::set_dll_cal_reset(l_read[l_index].first,  mss::LOW);
+                dp16::set_dll_cal_reset(l_read[l_index].second, l_state);
                 l_index += 1;
             }
 
-            FAPI_TRY(mss::scom_blastah(p, dp16Traits<TARGET_TYPE_MCA>::DLL_CNTRL_REG, i_read));
+            FAPI_TRY(mss::scom_blastah(p, TT::DLL_CNTRL_REG, l_read));
         }
     }
 
@@ -1552,7 +1555,7 @@ fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
     // 32,772 dphy_nclk cycles from Reset=0 to VREG Calibration to exhaust all values
     // 37,382 dphy_nclk cycles for full calibration to start and fail (“worst case”)
     // More or less a fake value for sim delay as this isn't executed in sim.
-    fapi2::delay(mss::cycles_to_ns(i_target, 37382), DELAY_1US);
+    fapi2::delay(mss::cycles_to_ns(i_target, mss::FULL_DLL_CAL_DELAY), DELAY_1US);
 
     // 15. Monitor the DDRPHY_PC_DLL_ZCAL_CAL_STATUS register to determine when calibration is
     // complete. One of the 3 bits will be asserted for ADR and DP16.
@@ -1570,10 +1573,32 @@ fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
     {
         fapi2::buffer<uint64_t> l_read;
         FAPI_TRY( mss::getScom(p, l_dll_status_reg, l_read) );
-        FAPI_ASSERT(mss::pc::get_dll_cal_status(l_read) == mss::YES,
-                    fapi2::MSS_DLL_FAILED_TO_CALIBRATE().set_MCA_IN_ERROR(p),
-                    "dll fapiled to calibrate: %s", mss::c_str(p));
-    }
+
+        if( mss::pc::get_dll_cal_status(l_read) != mss::YES )
+        {
+            // For < DD2.0 parts we want to run DLL workaround so
+            // Instead of using FAPI_ASSERT and logging FFDC we will
+            // return a "bad" ReturnCode to trigger a workaround that
+            // will be run after DLL Calibration for all failing DLLs.
+            // FFDC will be collected there if it doesn't pass.
+            if( mss::chip_ec_feature_mss_dll_workaround(p) )
+            {
+                FAPI_INF("%s DLL failed to calibrate", mss::c_str(p));
+                return fapi2::FAPI2_RC_FALSE;
+            }
+
+            // If we are here than we are not running DLL workaround
+            // because this part is not < DD2.0, so we want to fail out here
+            // and log FFDC
+            FAPI_ASSERT( false,
+                         fapi2::MSS_DLL_FAILED_TO_CALIBRATE()
+                         .set_MCA_IN_ERROR(p),
+                         "%s DLL failed to calibrate",
+                         mss::c_str(i_target) );
+
+        }// endif
+
+    }// mca
 
 fapi_try_exit:
     return fapi2::current_err;
