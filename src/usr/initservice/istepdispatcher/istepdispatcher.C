@@ -626,6 +626,12 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 TRACFCOMP(g_trac_initsvc, "Manufacturing Mode is set and an "
                     "error log has been committed. Stopping the IPL.");
 
+                #ifdef CONFIG_CONSOLE
+                CONSOLE::displayf(NULL, "Manufacturing Mode is set and an "
+                    "error log has been committed. Stopping the IPL.");
+                CONSOLE::flush();
+                #endif
+
                 // Turn off the watchdog so it doesn't trip
                 errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
                                    IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN,
