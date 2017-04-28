@@ -149,7 +149,7 @@ revert_mcs_hb_dcbz_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_t
         FAPI_TRY(fapi2::getScom(i_target, MCS_MCPERF1_ARR[i_mcs], l_mcperf1),
                  "Error from getScom (MCS%d_MCPERF1)", i_mcs);
         l_mcperf1.clearBit<MCS_MCPERF1_DISABLE_FASTPATH>();
-        FAPI_TRY(fapi2::putScom(i_target, MCS_MCPERF1, l_mcperf1),
+        FAPI_TRY(fapi2::putScom(i_target, MCS_MCPERF1_ARR[i_mcs], l_mcperf1),
                  "Error from putScom (MCS%d_MCPERF1)", i_mcs);
 
         // Re-mask MCFIR. We want to ensure all MCSs are masked
