@@ -289,18 +289,19 @@ ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RDTAG_DLY [when=S] {         # ATTR_EFF_DIMM_T
   # rdtag_dly > PHY DELAY + CL - 3 - rdptrdly
   #     PHY DELAY = 12 for 1866 and 2133, 13 for 2400 and 2666, +1 for LRDIMM
   #     rdptrdly = 1
+  # 4/20/2017 during performance test, experimentally found can run at -1 value
 
   17,                                def_IS_SIM;
 
-  8  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_1866==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1) && def_IS_HW; # RDIMM
-  8  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2133==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1) && def_IS_HW; # RDIMM
-  9  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2400==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1) && def_IS_HW; # RDIMM
-  9  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2666==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1) && def_IS_HW; # RDIMM
+  7  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_1866==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1) && def_IS_HW; # RDIMM
+  7  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2133==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1) && def_IS_HW; # RDIMM
+  8  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2400==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1) && def_IS_HW; # RDIMM
+  8  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2666==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1) && def_IS_HW; # RDIMM
 
-  9  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_1866==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3) && def_IS_HW; # LRDIMM
-  9  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2133==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3) && def_IS_HW; # LRDIMM
-  10 + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2400==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3) && def_IS_HW; # LRDIMM
-  10 + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2666==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3) && def_IS_HW; # LRDIMM
+  8  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_1866==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3) && def_IS_HW; # LRDIMM
+  8  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2133==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3) && def_IS_HW; # LRDIMM
+  9  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2400==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3) && def_IS_HW; # LRDIMM
+  9  + MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX], (def_MSS_FREQ_EQ_2666==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3) && def_IS_HW; # LRDIMM
 
 }
 
@@ -668,6 +669,17 @@ ispy MCP.PORT0.SRQ.MBA_FARB0Q_CFG_2N_ADDR [when=S] {
   0b0,                      (SYS.ATTR_MSS_MRW_DRAM_2N_MODE==0x00) && (MCS.ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET==0x01); # use auto vpd val -> auto vpd val = 1n
 }
 
+ispy MCP.PORT0.SRQ.MBA_RRQ0Q_CFG_RRQ_ACT_NUM_READS_PENDING [when=S] {
+  spyv;
+  0b1000;
+}
+
+ispy MCP.PORT0.SRQ.MBA_WRQ0Q_CFG_WRQ_ACT_NUM_WRITES_PENDING [when=S] {
+  spyv;
+  0b1000;
+}
+
+
 # Epsilon Settings per Power Bus Spreadsheet
 
 ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_JITTER_EPSILON [when=S] {
@@ -705,6 +717,156 @@ ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_VECTOR_GROUP_EPSILON [when=S] {
   def_MC_EPSILON_CFG_T2;
 }
 
+
+##################
+# ASYNC SETTINGS
+##################
+
+define def_perf_tune_case = (MCBIST.ATTR_MSS_FREQ==2400) && (SYS.ATTR_FREQ_PB_MHZ==2000) && (SYS.ATTR_RISK_LEVEL>0);
+
+
+# DD1
+
+# "L" field
+ispy MCP.PORT0.ECC64.SCOM.MBSECCQ_VAL_TO_DATA_DELAY [when=S && ATTR_CHIP_EC_FEATURE_P9N_DD1_SPY_NAMES] {
+  spyv, expr;
+  3,      (def_perf_tune_case==0); # untuned
+  5,      (def_perf_tune_case==1); # tuned
+}
+
+# "D" field
+ispy MCP.PORT0.ECC64.SCOM.MBSECCQ_NEST_VAL_TO_DATA_DELAY [when=S && ATTR_CHIP_EC_FEATURE_P9N_DD1_SPY_NAMES] {
+  spyv, expr;
+  0,      (def_perf_tune_case==0); # untuned
+  1,      (def_perf_tune_case==1); # tuned
+}
+
+# "dn" field
+espy MCP.PORT0.ECC64.SCOM.MBSECCQ_DELAY_NONBYPASS [when=S && ATTR_CHIP_EC_FEATURE_P9N_DD1_SPY_NAMES] {
+  spyv;
+  OFF; # untuned and tuned same value
+}
+
+# "h" field
+espy MCP.PORT0.ECC64.SCOM.MBSECCQ_DELAY_VALID_1X [when=S && ATTR_CHIP_EC_FEATURE_P9N_DD1_SPY_NAMES] {
+  spyv;
+  OFF; # untuned and tuned same value
+}
+############################
+# DD2 REFRESH BLOCK SETTINGS
+############################
+# OVERVIEW
+#      Intention is to keep queues from filling up with commands that we
+#      wouldn't be able to service anyway due because they are being refreshed
+#      and starving out commands to another rank not being refreshed that could
+#      have been executed.
+#      If a portion of the command address matches the address range being
+#      refreshed, then the command will be blocked from getting into the queue.
+#      A hash of three rank bits are used to do the address matching and
+#      blocking. Which 3 rank bits are used for hash is configureable.
+# RULES FOR BEST USE/PERFORMANCE
+#      1) Refresh block should not be enabled if only 1 rank. No benefit in
+#         blocking traffic to save room for another rank if there is no other
+#         rank.
+#      2) Not worth it to choose a mode that will block extra ranks than the
+#         rank being refreshed. Obvious case is if more than 8 ranks exist
+#         because by matching on just 3 bits, you'll inevitably block
+#         additional unnecessary ranks. Essentially all existing rank bits
+#         must be covered by 3 bit hash. If bits exist that can't all be
+#         covered by hash, then not worth enabling feature.
+# DIALS
+#      (Enable bits) MCPERF2_ENABLE_REFRESH_BLOCK_SQ, MCPERF2_ENABLE_REFRESH_BLOCK_NSQ
+#           If enabled, commands will be blocked from getting into queues if their address bits
+#      (Mode select) MCPERF2_REFRESH_BLOCK_CONFIG
+#           CONFIG  | HASH BITS  | DESCRIPTION
+#           (0) 000 | s0, s1, s2 | Single slot, 1 mrank up to 8-high stack
+#           (1) 001 | m2, s1, s2 | Single-slot, 2 mrank, up to 4-high stack
+#           (2) 010 |  d, s1, s2 | Dual-slot, 1 mrank/slot, up to 4-high stack
+#           (3) 011 |  d, m2, s2 | Dual-slot, 2 mrank/slot, up to 2-high stack
+#           (4) 100 |  d, m1, m2 | Dual-slot, 4 mrank/slot
+#           This field is DON'T CARE if not enabled (helps for simlplification)
+# TABLE FOR IDEAL CONFIGS
+#       # of     # of     # of  | # of  | CONFIGS | SIMPLIFIED |
+#      d-bits   m-bits   s-bits | ranks | ALLOWED | CONFIG     | NOTES
+#      -------------------------------------------------------------------
+#        0        0        0    |   1   | DISABLE | 0          | 1 rank only
+#        0        0        1    |   2   | 0,1,2,3 | 0          |
+#        0        0        2    |   4   | 0,1,2   | 0          |
+#        0        0        3    |   8   | 0       | 0          |
+#        0        1        0    |   2   | 1,3,4   | 1          |
+#        0        1        1    |   4   | 1       | 1          |
+#        0        1        2    |   8   | 1       | 1          |
+#        0        1        3    |  16   | DISABLE | 1          | >8 ranks
+#        0        2        0    |   4   | 4       | 4          |
+#        0        2        1    |   8   | DISABLE | 4          | no exact match
+#        0        2        2    |  16   | DISABLE | 4          | >8 ranks
+#        0        2        3    |  32   | DISABLE | 4          | >8 ranks
+#        1        0        0    |   2   | 2,3,4   | 2          |
+#        1        0        1    |   4   | 2,3     | 2          |
+#        1        0        2    |   8   | 2       | 2          |
+#        1        0        3    |  16   | DISABLE | 2          | >8 ranks
+#        1        1        0    |   4   | 3,4     | 3          |
+#        1        1        1    |   8   | 3       | 3          |
+#        1        1        2    |  16   | DISABLE | 3          | >8 ranks
+#        1        1        3    |  32   | DISABLE | 3          | >8 ranks
+#        1        2        0    |   8   | 4       | 4          |
+#        1        2        1    |  16   | DISABLE | 4          | >8 ranks
+#        1        2        2    |  32   | DISABLE | 4          | >8 ranks
+#        1        2        3    |  64   | DISABLE | 4          | >8 ranks
+# SIMPLIFIED CONFIGS
+#      CHOOSING TO ENABLE
+#           ENABLE | CONDITION
+#             OFF  | if total number of ranks = 1
+#             OFF  | if total number of ranks > 8
+#             OFF  | if it's the one 8 rank case that doesn't match exact
+#                  |         (0 d-bits, 2 m-bits, 1 s-bit)
+#             ON   | Else
+#      CHOOSING CONFIG VALUE
+#            # of     # of  | SIMPLIFIED
+#           d-bits   m-bits | CONFIG
+#           ----------------------------
+#             0        0    | 0
+#             0        1    | 1
+#             0        2    | 4
+#             1        0    | 2
+#             1        1    | 3
+#             1        2    | 4
+
+# def_NUM_RANKS
+
+define def_is_dual_slot = (MCS.ATTR_EFF_NUM_RANKS_PER_DIMM[def_PORT_INDEX][0]>0)
+                       && (MCS.ATTR_EFF_NUM_RANKS_PER_DIMM[def_PORT_INDEX][1]>0);
+
+# Variable to indicate special 8 rank case we want refresh block disabled
+# Note: 4 master ranks == 2 m-bits; height of 2 == 2 slave ranks == 1 s-bit
+define def_refblock_off_special_case = (def_is_dual_slot==0) && (MCS.ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[def_PORT_INDEX][0]==4) && (def_SLOT0_DRAM_STACK_HEIGHT==2);
+
+espy MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_ENABLE_REFRESH_BLOCK_SQ [when=S] {
+  spyv, expr;
+  OFF,     (def_NUM_RANKS==1);
+  OFF,     (def_NUM_RANKS>8);
+  OFF,     (def_refblock_off_special_case==1);
+  ON,      (def_NUM_RANKS>1) && (def_NUM_RANKS<=8) && (def_refblock_off_special_case==0);
+}
+
+espy MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_ENABLE_REFRESH_BLOCK_NSQ [when=S] {
+  spyv, expr;
+  OFF,     (def_NUM_RANKS==1);
+  OFF,     (def_NUM_RANKS>8);
+  OFF,     (def_refblock_off_special_case==1);
+  ON,      (def_NUM_RANKS>1) && (def_NUM_RANKS<=8) && (def_refblock_off_special_case==0);
+}
+
+
+ispy MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_REFRESH_BLOCK_CONFIG [when=S] {
+  spyv, expr;
+  0b000,     (def_is_dual_slot==0) && (MCS.ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[def_PORT_INDEX][0]==1); # 0 d-bit, 0-m-bits
+  0b001,     (def_is_dual_slot==0) && (MCS.ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[def_PORT_INDEX][0]==2); # 0 d-bit, 1-m-bits
+  0b100,     (def_is_dual_slot==0) && (MCS.ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[def_PORT_INDEX][0]==4); # 0 d-bit, 2-m-bits
+  0b010,     (def_is_dual_slot==1) && (MCS.ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[def_PORT_INDEX][0]==1); # 1 d-bit, 0-m-bits
+  0b011,     (def_is_dual_slot==1) && (MCS.ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[def_PORT_INDEX][0]==2); # 1 d-bit, 1-m-bits
+  0b100,     (def_is_dual_slot==1) && (MCS.ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[def_PORT_INDEX][0]==4); # 1 d-bit, 2-m-bits
+}
 
 ####################################################
 # DD1 WORKAROUNDS
