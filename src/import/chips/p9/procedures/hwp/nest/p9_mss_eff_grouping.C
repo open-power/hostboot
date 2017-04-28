@@ -2522,23 +2522,23 @@ fapi2::ReturnCode grouping_calcMirrorMemory(
                 // The 2nd memory hole was intended for use with 12Gb DRAM parts,
                 // which we do not have to support - so it will not be used in Nimbus.
                 io_groupData.iv_data[pos][BASE_ADDR] = memBaseAddr_GB;
-
-                if (io_groupData.iv_data[pos][ALT_VALID(0)])
-                {
-                    io_groupData.iv_data[pos][ALT_BASE_ADDR(0)] = io_groupData.iv_data[pos][BASE_ADDR] +
-                            (io_groupData.iv_data[pos][GROUP_SIZE] / 2);
-                }
             }
             else
             {
-                io_groupData.iv_data[pos][BASE_ADDR] = io_groupData.iv_data[pos - 1][BASE_ADDR] +
-                                                       io_groupData.iv_data[pos - 1][GROUP_SIZE];
+                io_groupData.iv_data[pos][BASE_ADDR] =
+                    io_groupData.iv_data[pos - 1][BASE_ADDR] +
+                    io_groupData.iv_data[pos - 1][GROUP_SIZE];
+            }
 
-                if (io_groupData.iv_data[pos][ALT_VALID(0)])
-                {
-                    io_groupData.iv_data[pos][ALT_BASE_ADDR(0)] = io_groupData.iv_data[pos][BASE_ADDR] +
-                            io_groupData.iv_data[pos][GROUP_SIZE] / 2;
-                }
+            // Note:
+            // The 2nd memory hole was intended for use with 12Gb DRAM parts,
+            // which we do not have to support - so it will not be used in Nimbus.
+            if (io_groupData.iv_data[pos][ALT_VALID(0)])
+            {
+                io_groupData.iv_data[pos][ALT_BASE_ADDR(0)] =
+                    io_groupData.iv_data[pos][BASE_ADDR] +
+                    io_groupData.iv_data[pos][GROUP_SIZE] -
+                    io_groupData.iv_data[pos][ALT_SIZE(0)];
             }
 
             if (io_groupData.iv_data[pos][PORTS_IN_GROUP] > 1)
@@ -2598,31 +2598,22 @@ void grouping_calcNonMirrorMemory(const EffGroupingProcAttrs& i_procAttrs,
         {
             io_groupData.iv_data[pos][BASE_ADDR] =
                 (i_procAttrs.iv_memBaseAddr >> 30);
-
-            for (uint8_t ii = 0; ii < NUM_OF_ALT_MEM_REGIONS; ii++)
-            {
-                if (io_groupData.iv_data[pos][ALT_VALID(ii)])
-                {
-                    io_groupData.iv_data[pos][ALT_BASE_ADDR(ii)] =
-                        io_groupData.iv_data[pos][GROUP_SIZE] -
-                        io_groupData.iv_data[pos][ALT_SIZE(ii)];
-                }
-            }
         }
         else
         {
             io_groupData.iv_data[pos][BASE_ADDR] =
                 io_groupData.iv_data[pos - 1][BASE_ADDR] +
                 io_groupData.iv_data[pos - 1][GROUP_SIZE];
+        }
 
-            for (uint8_t ii = 0; ii < NUM_OF_ALT_MEM_REGIONS; ii++)
+        for (uint8_t ii = 0; ii < NUM_OF_ALT_MEM_REGIONS; ii++)
+        {
+            if (io_groupData.iv_data[pos][ALT_VALID(ii)])
             {
-                if (io_groupData.iv_data[pos][ALT_VALID(ii)])
-                {
-                    io_groupData.iv_data[pos][ALT_BASE_ADDR(ii)] =
-                        io_groupData.iv_data[pos][GROUP_SIZE] -
-                        io_groupData.iv_data[pos][ALT_SIZE(ii)];
-                }
+                io_groupData.iv_data[pos][ALT_BASE_ADDR(ii)] =
+                    io_groupData.iv_data[pos][BASE_ADDR] +
+                    io_groupData.iv_data[pos][GROUP_SIZE] -
+                    io_groupData.iv_data[pos][ALT_SIZE(ii)];
             }
         }
     }
