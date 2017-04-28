@@ -34,6 +34,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errlreasoncodes.H>
 #include <devicefw/userif.H>
+#include <occ/occ_common.H>
 
 //  targeting support
 #include    <targeting/common/target.H>
@@ -348,6 +349,43 @@ namespace RT_SBEIO
         {
             TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: process "
                       "command, function pointer not found for command 0x%08x",
+                      l_command);
+
+            /*@
+             * @errortype
+             * @moduleid     SBEIO::SBEIO_RUNTIME
+             * @reasoncode   SBEIO::SBEIO_RT_FUNCTION_NOT_FOUND
+             * @userdata1[0:31]   Processor HUID
+             * @userdata1[32:63]  Request Command
+             * @userdata2    Sequence ID
+             *
+             * @devdesc      SBEIO RT Process Pass-through command function not
+             *                found.
+             * @custdesc     Firmware error communicating with boot device
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 SBEIO::SBEIO_RUNTIME,
+                                 SBEIO::SBEIO_RT_FUNCTION_NOT_FOUND,
+                                 TWO_UINT32_TO_UINT64(
+                                     get_huid(i_proc),
+                                     l_command),
+                                 i_request.sbeHdr.seqId);
+
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_request),
+                           sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
+                           0,                 // Version
+                           ERRL_UDT_NOFORMAT, // parser ignores data
+                                              // ^^^ @TODO RTC:172362
+                           false );           // merge
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
+            errl->collectTrace(SBEIO_COMP_NAME);
+        }
+        else if(g_processCmdMap[l_command] == nullptr)
+        {
+            TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: process "
+                      "command, function pointer not set for command 0x%08x",
                       l_command);
 
             /*@
@@ -686,6 +724,101 @@ namespace RT_SBEIO
 
     //------------------------------------------------------------------------
 
+#ifdef CONFIG_HTMGT
+    /**
+     * @brief Function to process pass-through command from SBE message
+     *
+     * @param[in]  i_procTgt      HB processor target
+     * @param[in]  i_reqDataSize  Pass-through command request data size
+     * @param[in]  i_reqData      Pass-through command request data
+     * @param[out] o_rspStatus    Pass-through command response status
+     * @param[out] o_rspDataSize  Pass-through command response data size
+     * @param[out] o_rspData      Pass-through command response data
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t htmgt_pass_thru_wrapper(TARGETING::TargetHandle_t i_procTgt,
+                                       uint32_t i_reqDataSize,
+                                       uint8_t* i_reqData,
+                                       uint32_t* o_rspStatus,
+                                       uint32_t* o_rspDataSize,
+                                       uint8_t* o_rspData)
+    {
+        errlHndl_t errl = nullptr;
+        uint16_t l_rspDataSize = 0;
+
+        runtimeInterfaces_t *rt_intf = getRuntimeInterfaces();
+
+        // Check runtime interface pointer
+        if(nullptr == rt_intf)
+        {
+            TRACFCOMP(g_trac_sbeio, ERR_MRK"htmgt_pass_thru_wrapper: NULL "
+                      "runtime interface pointer from getRuntimeInterfaces");
+
+            /*@
+             * @errortype
+             * @moduleid     SBEIO::SBEIO_RUNTIME
+             * @reasoncode   SBEIO::SBEIO_RT_NO_INTERFACE_POINTER
+             * @userdata1    Processor HUID
+             * @userdata2    Reserved
+             *
+             * @devdesc      SBEIO RT Process Pass-through command Runtime
+             *                Interface pointer not set.
+             * @custdesc     Firmware error communicating with boot device
+             */
+            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                 SBEIO::SBEIO_RUNTIME,
+                                 SBEIO::SBEIO_RT_NO_INTERFACE_POINTER,
+                                 get_huid(i_procTgt),
+                                 0);
+
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
+            errl->collectTrace(SBEIO_COMP_NAME);
+        }
+        // Check runtime interface function pointer
+        else if(nullptr == rt_intf->mfg_htmgt_pass_thru)
+        {
+            TRACFCOMP(g_trac_sbeio, ERR_MRK"htmgt_pass_thru_wrapper: function "
+                      "pointer for mfg_htmgt_pass_thru not set");
+
+            /*@
+             * @errortype
+             * @moduleid     SBEIO::SBEIO_RUNTIME
+             * @reasoncode   SBEIO::SBEIO_RT_NO_INTERFACE_FUNCTION
+             * @userdata1    Processor HUID
+             * @userdata2    Reserved
+             *
+             * @devdesc      SBEIO RT Process Pass-through command Runtime
+             *                Interface function pointer not set.
+             * @custdesc     Firmware error communicating with boot device
+             */
+            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                 SBEIO::SBEIO_RUNTIME,
+                                 SBEIO::SBEIO_RT_NO_INTERFACE_FUNCTION,
+                                 get_huid(i_procTgt),
+                                 0);
+
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
+            errl->collectTrace(SBEIO_COMP_NAME);
+        }
+        else
+        {
+            *o_rspStatus = rt_intf->mfg_htmgt_pass_thru(i_reqDataSize,
+                                                        i_reqData,
+                                                        &l_rspDataSize,
+                                                        o_rspData);
+        }
+
+        *o_rspDataSize = l_rspDataSize;
+
+        return errl;
+    }
+#endif
+
+    //------------------------------------------------------------------------
+
     struct registerSbeio
     {
         registerSbeio()
@@ -698,11 +831,16 @@ namespace RT_SBEIO
             for (const auto & l_procChip: procChips)
             {
                 uint64_t l_instance = l_procChip->getAttr<ATTR_POSITION>();
-                uint64_t l_sbeCommAddr =
-                         g_hostInterfaces->get_reserved_mem("ibm,sbe-comm",
-                                                            l_instance);
+                uint64_t l_sbeCommAddr = g_hostInterfaces->get_reserved_mem(
+                                         HBRT_RSVD_MEM__SBE_COMM,
+                                         l_instance);
                 l_procChip->setAttr<ATTR_SBE_COMM_ADDR>(l_sbeCommAddr);
             }
+
+#ifdef CONFIG_HTMGT
+            SBE_MSG::setProcessCmdFunction(PASSTHRU_HTMGT_GENERIC,
+                                           htmgt_pass_thru_wrapper);
+#endif
         }
     };
 
@@ -712,7 +850,7 @@ namespace RT_SBEIO
 
 namespace SBE_MSG
 {
-    // Set an entry in list of process command functions
+    // Set an entry in map of process command functions
     int setProcessCmdFunction(enum passThruCmds    i_command,
                               processCmdFunction_t i_function)
     {
@@ -726,6 +864,32 @@ namespace SBE_MSG
             {
                 TRACFCOMP(g_trac_sbeio, ERR_MRK"setProcessCmdFunction: "
                           "process command function not set for command 0x%08x",
+                          i_command);
+
+                rc = -1;
+
+                break;
+            }
+        } while(0);
+
+        return rc;
+    }
+
+    // Erase an entry in map of process command functions
+    int eraseProcessCmdFunction(enum passThruCmds i_command)
+    {
+        int rc = 0;
+
+        do
+        {
+            RT_SBEIO::g_processCmdMap.erase(i_command);
+
+            if(RT_SBEIO::g_processCmdMap.find(i_command) !=
+               RT_SBEIO::g_processCmdMap.end())
+            {
+                TRACFCOMP(g_trac_sbeio, ERR_MRK"eraseProcessCmdFunction: "
+                          "process command function not erased for command "
+                          "0x%08x",
                           i_command);
 
                 rc = -1;
