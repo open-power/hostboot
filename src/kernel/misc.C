@@ -651,3 +651,15 @@ namespace KernelMemState
     }
 
 };
+
+const char* ProcessorCoreTypeStrings[]
+{
+    "Murano",
+    "Venice",
+    "Naples",
+    "Nimbus",
+    "Cumulus",
+    "Unknown"
+};
+
+

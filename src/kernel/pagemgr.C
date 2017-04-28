@@ -207,7 +207,7 @@ void PageManager::_initialize()
 
     page_t* startAddr = reinterpret_cast<page_t*>(firstPageAddr());
     page_t* endAddr = reinterpret_cast<page_t*>(VmmManager::INITIAL_MEM_SIZE);
-    printk("Initializing PageManager starting at %p...", startAddr);
+    printk("PageManager starts at %p...", startAddr);
 
     // Add on secureboot data size to end of reserved space
     size_t securebootDataSize = 0;

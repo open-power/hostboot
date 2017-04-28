@@ -49,7 +49,7 @@ namespace CpuID
             case PVR_t::P9_ALL:
             {
                 // Nimbus DD1.0 has a different PVR format
-                if( (l_pvr.word & PVR_t::CHIP_DD_MASK) == PVR_t::IS_NIMBUS_DD1)
+                if( l_pvr.isNimbusDD1() )
                 {
                     return CORE_POWER9_NIMBUS;
                 }

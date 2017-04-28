@@ -113,8 +113,8 @@ struct PVR_t
      */
     enum
     {
-        CHIP_DD_MASK  = 0x00FF0F0F,
-        IS_NIMBUS_DD1 = 0x004E0100,
+        NIMBUS_DD1_MASK = 0x00FF2F0F,
+        IS_NIMBUS_DD1   = 0x004E0100,
 
         // Field: chipType
         NIMBUS_CHIP = 0,
@@ -132,6 +132,14 @@ struct PVR_t
         P8_VENICE = 0x4D,
         P9_ALL    = 0x4E,
     };
+
+    /**
+     * @brief Return Major.Minor DD level
+     * @return 8-bit DD level
+     */
+    inline bool isNimbusDD1() {
+        return ((word & NIMBUS_DD1_MASK) == IS_NIMBUS_DD1);
+    }
 };
 
 #endif //_PVRFORMAT_H

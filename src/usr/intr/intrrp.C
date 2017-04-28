@@ -426,8 +426,8 @@ errlHndl_t IntrRp::resetIntUnit(intr_hdlr_t* i_proc)
     do {
         //Anything greater than DD10 should do the HW-based reset
         bool l_doHwReset = true;
-        uint32_t l_pvr = mmio_pvr_read() & 0xFFFFFFFF;
-        if( (l_pvr & PVR_t::CHIP_DD_MASK) == PVR_t::IS_NIMBUS_DD1 )
+        PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
+        if( l_pvr.isNimbusDD1() )
         {
             l_doHwReset = false;
         }
