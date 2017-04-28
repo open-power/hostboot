@@ -138,6 +138,12 @@ enum ProcessorCoreType
     CORE_UNKNOWN,
 };
 
+/**
+ * Strings for ProcessorCoreType
+ *   declared in misc.C
+ */
+extern const char* ProcessorCoreTypeStrings[CORE_UNKNOWN+1];
+
 /** @fn cpu_core_type()
  *  @brief Determine the procesore core type.
  *

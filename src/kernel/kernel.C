@@ -40,12 +40,14 @@
 #include <util/align.H>
 #include <securerom/sha512.H>
 #include <kernel/bltohbdatamgr.H>
+#include <kernel/cpuid.H>
 
 #include <stdlib.h>
 
 extern "C" void kernel_dispatch_task();
 extern void* init_main(void* unused);
 extern uint64_t kernel_other_thread_spinlock;
+
 
 class Kernel
 {
@@ -63,6 +65,8 @@ extern "C"
 int main()
 {
     printk("Booting %s kernel...\n\n", "Hostboot");
+    printk("CPU=%s\n",
+           ProcessorCoreTypeStrings[CpuID::getCpuType()]);
 
     // Erase task-pointer so that TaskManager::getCurrentTask() returns NULL.
     setSPRG3(NULL);
@@ -76,7 +80,7 @@ int main()
 
     if ( Bootloader::BlToHbDataValid(l_pBltoHbData) )
     {
-        printk("Valid BL to HB communication data\n");
+        printk("BL to HB comm valid\n");
 
         // Make copy of structure so to not modify original pointers
         auto l_blToHbDataCopy = *l_pBltoHbData;
@@ -112,7 +116,7 @@ int main()
     }
     else
     {
-        printk("Invalid BL to HB communication data\n");
+        printk("BL to HB commun invalid\n");
         // Force invalidation of securebootdata
         g_BlToHbDataManager.initInvalid();
     }

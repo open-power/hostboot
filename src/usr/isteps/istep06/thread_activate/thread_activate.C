@@ -268,16 +268,15 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
     // set the fused core mode attribute
     bool l_smt8 = false;
-    uint32_t l_pvr = mmio_pvr_read() & 0xFFFFFFFF;
-    if( (l_pvr & PVR_t::CHIP_DD_MASK) == PVR_t::IS_NIMBUS_DD1 )
+    PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
+    if( l_pvr.isNimbusDD1() )
     {
         sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE>
                 (TARGETING::FUSED_CORE_MODE_SMT4_DEFAULT);
     }
     else
     {
-        uint32_t l_smt = (l_pvr & PVR_t::SMT_MASK) >> PVR_t::SMT_SHIFT;
-        if( l_smt == PVR_t::SMT4_MODE )
+        if( l_pvr.smt == PVR_t::SMT4_MODE )
         {
             sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE>
                 (TARGETING::FUSED_CORE_MODE_SMT4_ONLY);
