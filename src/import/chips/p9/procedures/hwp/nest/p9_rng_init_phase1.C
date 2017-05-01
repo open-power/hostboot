@@ -134,8 +134,8 @@ const bool     NX_RNG_CFG_REPTEST_ENABLE                     = true;
 const bool     NX_RNG_CFG_ADAPTEST_1BIT_ENABLE               = true;
 // adaptive proportion test enable
 const bool     NX_RNG_CFG_ADAPTEST_ENABLE                    = true;
-// self test register 2 reset period (~63min/clear)
-const uint8_t  NX_RNG_CFG_ST2_RESET_PERIOD                   = 0x07;
+// self test register 2 reset period (~59min/clear = 27)
+const uint8_t  NX_RNG_CFG_ST2_RESET_PERIOD                   = 0x1B;
 // pace rate (2000)
 const uint16_t NX_RNG_CFG_PACE_RATE                          = 0x07d0;
 // pace rate (300) for HW403701
