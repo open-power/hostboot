@@ -110,6 +110,10 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
     // The callouts have already been made in the rule code. All other actions
     // documented below.
 
+    // Nothing more to do if this is a checkstop attention.
+    if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
+        return SUCCESS;
+
     #ifdef __HOSTBOOT_RUNTIME // TPS only supported at runtime.
 
     // Recovery is always enabled during runtime. Start TPS on all slave ranks
