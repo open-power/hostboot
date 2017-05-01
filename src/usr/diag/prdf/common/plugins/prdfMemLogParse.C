@@ -3072,10 +3072,10 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
     i_parser.PrintNumber( " MEM_CE_TABLE", "%d", entries );
 
-    const char * hh = "  A H Count RC";
+    const char * hh = "   A H Count RC";
     const char * hd = "Rank P Bank Row     Column DRAM Pins S E Site";
     i_parser.PrintString( hh, hd );
-    hh = "  - - ----- ----";
+    hh = "   - - ----- ----";
     hd = "---- - ---- ------- ------ ---- ---- - - ------";
     i_parser.PrintString( hh, hd );
 
@@ -3087,8 +3087,9 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
     // Bytes 2-7 are currently unused.
 
     // Get the entry info.
-    for ( uint32_t idx = METADATA_SIZE; idx < i_buflen;
-          idx += CE_TABLE::ENTRY_SIZE )
+    for ( uint32_t idx = METADATA_SIZE, entry = 0;
+          idx < i_buflen && entry < entries;
+          idx += CE_TABLE::ENTRY_SIZE, entry++ )
     {
         uint32_t count    =  i_buffer[idx  ];                           // 8-bit
         // 5 spare bits                                                 // 5-bit
@@ -3157,7 +3158,7 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
         // Build the header string.
         char header[HEADER_SIZE] = { '\0' };
-        snprintf( header, HEADER_SIZE, "  %c %c  %3d  %s ", active_char,
+        snprintf( header, HEADER_SIZE, "   %c %c  %3d  %s ", active_char,
                   isHard_char, count, cardName_str );
 
         // Build the data string.
