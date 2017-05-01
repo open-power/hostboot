@@ -350,6 +350,46 @@ void cmd_errorlog( char*& o_output,
     sprintf( o_output, "Committed plid 0x%.8X", l_plid );
 }
 
+
+/**
+ * @brief Process an SBE Message with a pass-through request
+ * @param[out] o_output  Output display buffer, memory allocated here
+ * @param[in] i_chipId   Processor chip ID
+ */
+void cmd_sbemsg( char*& o_output,
+                 uint32_t i_chipId)
+{
+    UTIL_FT( "cmd_sbemsg> chipId=%.8X",
+             i_chipId);
+    o_output = new char[100];
+
+    int rc = 0;
+
+    do
+    {
+        // Get the runtime interface object
+        runtimeInterfaces_t *l_rt_intf = getRuntimeInterfaces();
+        if(nullptr == l_rt_intf)
+        {
+            rc = -2;
+            sprintf( o_output, "Not able to get run time interface object");
+            return;
+        }
+
+        rc = l_rt_intf->sbe_message_passing(i_chipId);
+        if(0 != rc)
+        {
+            sprintf( o_output, "Unexpected return from RT SBE message passing. "
+                     "Return code: 0x%.8X for chipID: 0x%.8X", rc, i_chipId);
+            return;
+        }
+    }while (0);
+
+    sprintf( o_output, "SBE message passing command for chipID 0x%.8X returned "
+                       "rc 0x%.8X", i_chipId, rc );
+}
+
+
 /**
  * @brief  Execute an arbitrary command inside Hostboot Runtime
  * @param[in]   Number of arguments (standard C args)
@@ -485,6 +525,20 @@ int hbrtCommand( int argc,
             sprintf( *l_output, "ERROR: errorlog <word1> <word2>\n" );
         }
     }
+    else if( !strcmp( argv[0], "sbemsg" ) )
+    {
+        // sbemsg <chipid>
+        if( argc == 2 )
+        {
+            cmd_sbemsg( *l_output,
+                         strtou64( argv[1], NULL, 16 ) );
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf( *l_output, "ERROR: sbemsg <chipid>\n" );
+        }
+    }
     else
     {
         *l_output = new char[50+100*6];
@@ -501,6 +555,8 @@ int hbrtCommand( int argc,
         sprintf( l_tmpstr, "putscom <huid> <address> <data>\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "errorlog <word1> <word2> [<huid to callout>]\n" );
+        strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "sbemsg <chipid>\n" );
         strcat( *l_output, l_tmpstr );
     }
 
