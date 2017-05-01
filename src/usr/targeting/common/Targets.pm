@@ -64,6 +64,7 @@ my %maxInstance = (
     "CAPP"          => 2,
     "SBE"           => 1,
     "OBUS_BRICK"    => 12,
+    "NPU"           => 1,
     "MI"            => 4,
     "OCC"           => 1,
 );

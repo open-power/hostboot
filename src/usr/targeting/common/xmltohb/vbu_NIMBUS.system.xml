@@ -3339,6 +3339,58 @@
     </attribute>
 </targetInstance>
 
+<targetInstance>
+	<id>sys0node0proc0npu0</id>
+	<type>unit-npu-nimbus</type>
+	<attribute>
+		<id>AFFINITY_PATH</id>
+		<default>affinity:sys-0/node-0/proc-0/npu-0</default>
+	</attribute>
+	<attribute>
+		<id>CHIPLET_ID</id>
+		<default>0x05</default>
+	</attribute>
+	<attribute>
+		<id>CHIP_UNIT</id>
+		<default>0</default>
+	</attribute>
+	<attribute>
+		<id>CLASS</id>
+		<default>UNIT</default>
+	</attribute>
+	<attribute>
+		<id>DECONFIG_GARDABLE</id>
+		<default>1</default>
+	</attribute>
+	<attribute>
+		<id>FAPI_NAME</id>
+		<default>NA</default>
+	</attribute>
+	<attribute>
+		<id>FAPI_POS</id>
+		<default>0</default>
+	</attribute>
+	<attribute>
+		<id>HUID</id>
+		<default>0x00440000</default>
+	</attribute>
+	<attribute>
+		<id>ORDINAL_ID</id>
+		<default>0</default>
+	</attribute>
+	<attribute>
+		<id>PARENT_PERVASIVE</id>
+		<default>physical:sys-0/node-0/proc-0/perv-5</default>
+	</attribute>
+	<attribute>
+		<id>PHYS_PATH</id>
+		<default>physical:sys-0/node-0/proc-0/npu-0</default>
+	</attribute>
+	<attribute>
+		<id>TYPE</id>
+		<default>NPU</default>
+	</attribute>
+</targetInstance>
 <!-- Nimbus n0p0 PPE units
      Up to 18 PPEs per Nimbus, only create 2 in this config for now -->
 <targetInstance>
@@ -8665,6 +8717,59 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-1/perv-12</default>
     </attribute>
+</targetInstance>
+
+<targetInstance>
+	<id>sys0node0proc1npu0</id>
+	<type>unit-npu-nimbus</type>
+	<attribute>
+		<id>AFFINITY_PATH</id>
+		<default>affinity:sys-0/node-0/proc-1/npu-0</default>
+	</attribute>
+	<attribute>
+		<id>CHIPLET_ID</id>
+		<default>0x05</default>
+	</attribute>
+	<attribute>
+		<id>CHIP_UNIT</id>
+		<default>0</default>
+	</attribute>
+	<attribute>
+		<id>CLASS</id>
+		<default>UNIT</default>
+	</attribute>
+	<attribute>
+		<id>DECONFIG_GARDABLE</id>
+		<default>1</default>
+	</attribute>
+	<attribute>
+		<id>FAPI_NAME</id>
+		<default>NA</default>
+	</attribute>
+	<attribute>
+		<id>FAPI_POS</id>
+		<default>1</default>
+	</attribute>
+	<attribute>
+		<id>HUID</id>
+		<default>0x00440001</default>
+	</attribute>
+	<attribute>
+		<id>ORDINAL_ID</id>
+		<default>0</default>
+	</attribute>
+	<attribute>
+		<id>PARENT_PERVASIVE</id>
+		<default>physical:sys-0/node-0/proc-1/perv-5</default>
+	</attribute>
+	<attribute>
+		<id>PHYS_PATH</id>
+		<default>physical:sys-0/node-0/proc-1/npu-0</default>
+	</attribute>
+	<attribute>
+		<id>TYPE</id>
+		<default>NPU</default>
+	</attribute>
 </targetInstance>
 
 <targetInstance>

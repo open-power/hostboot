@@ -2264,6 +2264,37 @@
     </attribute>
 </targetType>
 
+<!-- One NPU per proc -->
+<targetType>
+    <id>unit-npu-power9</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>NPU</default>
+    </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HUID</id></attribute>
+    <attribute><id>PARENT_PERVASIVE</id></attribute>
+</targetType>
+
+<targetType>
+    <id>unit-npu-nimbus</id>
+    <parent>unit-npu-power9</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>NIMBUS</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-npu-cumulus</id>
+    <parent>unit-npu-power9</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>CUMULUS</default>
+    </attribute>
+</targetType>
+
 <!-- PPE
      Nimbus : 21, including the SBE (1 SBE, 1 Powerbus/Fabric PPE,
               4 GPEs, 12 CMEs, and 3 IO PPEs.

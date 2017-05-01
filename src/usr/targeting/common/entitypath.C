@@ -418,6 +418,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "NV";
         case TYPE_OBUS_BRICK:
             return "OBUS_BRICK";
+        case TYPE_NPU:
+            return "NPU";
         case TYPE_SBE:
             return "SBE";
         case TYPE_PPE:
