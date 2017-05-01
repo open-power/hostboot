@@ -84,6 +84,7 @@ use constant
     MAX_MBA_PER_MEMBUF => 2,
     MAX_OBUS_PER_PROC => 4,
     MAX_OBUS_BRICK_PER_PROC => 12,
+    MAX_NPU_PER_PROC => 1,
     MAX_PPE_PER_PROC => 51,   #Only 21, but they are sparsely populated
     MAX_PERV_PER_PROC => 56,  #Only 42, but they are sparsely populated
     MAX_CAPP_PER_PROC => 2,
@@ -117,6 +118,7 @@ use constant
     ARCH_LIMIT_MI_PER_PROC => MAX_MI_PER_PROC,
     ARCH_LIMIT_CAPP_PER_PROC => MAX_CAPP_PER_PROC,
     ARCH_LIMIT_DMI_PER_MI => 2,
+    ARCH_LIMIT_NPU_PER_PROC => MAX_NPU_PER_PROC,
     ARCH_LIMIT_OBUS_PER_PROC => MAX_OBUS_PER_PROC,
     ARCH_LIMIT_OBUS_BRICK_PER_OBUS => MAX_OBUS_BRICK_PER_PROC / MAX_OBUS_PER_PROC,
     ARCH_LIMIT_SBE_PER_PROC => MAX_SBE_PER_PROC,
@@ -2215,6 +2217,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
                       $proc_ordinal_id, \@fsi, \@altfsi, $fru_id, $hwTopology,
                       \%fapiPosH,\%voltageRails );
 
+        generate_npu($proc,0,0,$ipath);
         generate_occ($proc, $proc_ordinal_id);
         generate_nx($proc,$proc_ordinal_id,$node);
 
@@ -5504,6 +5507,48 @@ sub generate_sbe
     do_plugin('fsp_sbe', $proc, $sbe, $ordinalId );
 
     print "
+</targetInstance>
+";
+}
+
+sub generate_npu
+{
+    my ($proc, $npu, $ordinalId, $ipath) = @_;
+    my $uidstr = sprintf("0x%02X44%04X",${node},$proc*MAX_NPU_PER_PROC + $npu);
+
+    my $fapi_name    = "NA";
+    my $path = "sys-$sys/node-$node/proc-$proc/npu-$npu";
+
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}npu$npu</id>
+    <type>unit-npu-power9</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:$path</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:$path</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath/npu$npu</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>$npu</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$npu</default>
+    </attribute>
 </targetInstance>
 ";
 }

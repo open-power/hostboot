@@ -354,14 +354,18 @@
         <name>OBUS_BRICK</name>
         <value>66</value>
     </enumerator>
+    <enumerator>
+        <name>NPU</name>
+        <value>67</value>
+    </enumerator>
     <!-- add any new types here, and increment TEST_FAIL and LAST_IN_RANGE -->
     <enumerator>
         <name>TEST_FAIL</name>
-        <value>67</value>
+        <value>68</value>
     </enumerator>
     <enumerator>
         <name>LAST_IN_RANGE</name>
-        <value>68</value>
+        <value>69</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>
