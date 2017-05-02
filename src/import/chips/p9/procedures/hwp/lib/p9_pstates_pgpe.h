@@ -120,6 +120,30 @@ typedef struct
 
 } WOFElements;
 
+/// VDM/Droop Parameter Block
+///
+typedef struct
+{
+    uint8_t  vid_compare_override_mv[VDM_DROOP_OP_POINTS];
+    uint8_t  vdm_response;
+
+    // For the following *_enable fields, bits are defined to indicate
+    // which of the respective *override* array entries are valid.
+    // bit 0: UltraTurbo; bit 1: Turbo; bit 2: Nominal; bit 3: PowSave
+
+    // The respecitve *_enable above indicate which index values are valid
+    uint8_t  droop_small_override[VDM_DROOP_OP_POINTS];
+    uint8_t  droop_large_override[VDM_DROOP_OP_POINTS];
+    uint8_t  droop_extreme_override[VDM_DROOP_OP_POINTS];
+    uint8_t  overvolt_override[VDM_DROOP_OP_POINTS];
+    uint16_t fmin_override_khz[VDM_DROOP_OP_POINTS];
+    uint16_t fmax_override_khz[VDM_DROOP_OP_POINTS];
+
+    /// Pad structure to 8-byte alignment
+    /// @todo pad once fully structure is complete.
+    // uint8_t pad[1];
+
+} GP_VDMParmBlock;
 
 /// Global Pstate Parameter Block
 ///
@@ -162,14 +186,14 @@ typedef struct
     /// VPD operating points are stored without load-line correction.  Frequencies
     /// are in MHz, voltages are specified in units of 5mV, and currents are
     /// in units of 500mA.
-    VpdOperatingPoint operating_points[VPD_PV_POINTS];
+    VpdOperatingPoint operating_points[NUM_OP_POINTS];
 
     /// Biases
     ///
     /// Biases applied to the VPD operating points prior to load-line correction
     /// in setting the external voltages.
     /// Values in 0.5%
-    VpdBias ext_biases[VPD_PV_POINTS];
+    VpdBias ext_biases[NUM_OP_POINTS];
 
     /// Loadlines and Distribution values for the VDD rail
     SysPowerDistParms vdd_sysparm;
@@ -199,7 +223,7 @@ typedef struct
     uint8_t vrm_stepdelay_value;
 
     /// VDM Data
-    VDMParmBlock vdm;
+    GP_VDMParmBlock vdm;
 
     /// The following are needed to generated the Pstate Table to HOMER.
 
@@ -209,7 +233,7 @@ typedef struct
     /// in setting the internal voltages (eg Vout to the iVRMs) as part of the
     /// Local Actual Pstate.
     /// Values in 0.5%
-    VpdBias int_biases[VPD_PV_POINTS];
+    VpdBias int_biases[NUM_OP_POINTS];
 
     /// IVRM Data
     IvrmParmBlock ivrm;
@@ -242,7 +266,7 @@ typedef struct
     uint16_t VPsSlopes[VPD_NUM_SLOPES_SET][VPD_NUM_SLOPES_REGION];
 
     /// All operating points
-    VpdOperatingPoint operating_points_set[NUM_VPD_PTS_SET][VPD_PV_POINTS];
+    VpdOperatingPoint operating_points_set[NUM_VPD_PTS_SET][NUM_OP_POINTS];
 
     //DPLL pstate 0 value
     uint32_t dpll_pstate0_value;

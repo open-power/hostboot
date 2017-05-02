@@ -168,11 +168,12 @@ typedef struct
 {
     uint16_t ivdd_tdp_ac_current_10ma;
     uint16_t ivdd_tdp_dc_current_10ma;
-    uint8_t  vdm_overvold_small_thresholds;
+    uint8_t  vdm_overvolt_small_thresholds;
     uint8_t  vdm_large_extreme_thresholds;
-    uint8_t  vdm_small_frequency_drop;
-    uint8_t  vdm_large_frequency_drop;
-    uint16_t vdm_spare;
+    uint8_t  vdm_small_large_normal_freq;
+    uint8_t  vdm_large_small_normal_freq;
+    uint8_t  vdm_vid_compare_ivid;
+    uint8_t  vdm_spare;
 } poundw_entry_t;
 
 typedef struct
@@ -186,45 +187,18 @@ typedef struct
 
 typedef struct
 {
-    poundw_entry_t poundw_nominal;
-    poundw_entry_t poundw_powersave;
-    poundw_entry_t poundw_turbo;
-    poundw_entry_t poundw_ultraturbo;
+    poundw_entry_t poundw[NUM_OP_POINTS];
     resistance_entry_t resistance_data;
     uint64_t reserved1;
     uint16_t reserved2;
 } PoundW_data;
+
 /// VDM/Droop Parameter Block
 ///
 typedef struct
 {
-    uint8_t  vid_compare_override_mv_enable;
-    uint8_t  vid_compare_override_mv[VPD_PV_POINTS];
-    uint8_t  vdm_response;
-
-    // For the following *_enable fields, bits are defined to indicate
-    // which of the respective *override* array entries are valid.
-    // bit 0: UltraTurbo; bit 1: Turbo; bit 2: Nominal; bit 3: PowSave
-    uint8_t  droop_small_override_enable;
-    uint8_t  droop_large_override_enable;
-    uint8_t  droop_extreme_override_enable;
-    uint8_t  overvolt_override_enable;
-    uint8_t fmin_override_khz_enable;
-    uint8_t fmax_override_khz_enable;
-
-    // The respecitve *_enable above indicate which index values are valid
-    uint8_t  droop_small_override[VPD_PV_POINTS];
-    uint8_t  droop_large_override[VPD_PV_POINTS];
-    uint8_t  droop_extreme_override[VPD_PV_POINTS];
-    uint8_t  overvolt_override[VPD_PV_POINTS];
-    uint8_t fmin_override_khz[VPD_PV_POINTS];
-    uint8_t fmax_override_khz[VPD_PV_POINTS];
-
-    /// Pad structure to 8-byte alignment
-    /// @todo pad once fully structure is complete.
-    // uint8_t pad[1];
-
-} VDMParmBlock;
+    PoundW_data vpd_w_data;
+} LP_VDMParmBlock;
 
 
 /// The layout of the data created by the Pstate table creation firmware for
@@ -278,6 +252,7 @@ typedef struct iVRMInfo
 
 } IvrmParmBlock;
 
+typedef uint8_t CompareVIDPoints;
 
 /// The layout of the data created by the Pstate table creation firmware for
 /// comsumption by the CME Quad Manager.  This data will reside in the Core
@@ -297,7 +272,7 @@ typedef struct
     /// VPD operating points are stored without load-line correction.  Frequencies
     /// are in MHz, voltages are specified in units of 5mV, and currents are
     /// in units of 500mA.
-    VpdOperatingPoint operating_points[VPD_PV_POINTS];
+    VpdOperatingPoint operating_points[NUM_OP_POINTS];
 
     /// Loadlines and Distribution values for the VDD rail
     SysPowerDistParms vdd_sysparm;
@@ -308,7 +283,7 @@ typedef struct
     /// in setting the external voltages.  This is used to recompute the Vin voltage
     /// based on the Global Actual Pstate .
     /// Values in 0.5%
-    VpdBias ext_biases[VPD_PV_POINTS];
+    VpdBias ext_biases[NUM_OP_POINTS];
 
     /// Internal Biases
     ///
@@ -316,7 +291,7 @@ typedef struct
     /// in setting the internal voltages (eg Vout to the iVRMs) as part of the
     /// Local Actual Pstate.
     /// Values in 0.5%
-    VpdBias int_biases[VPD_PV_POINTS];
+    VpdBias int_biases[NUM_OP_POINTS];
 
     /// IVRM Data
     IvrmParmBlock ivrm;
@@ -325,10 +300,22 @@ typedef struct
     ResonantClockingSetup resclk;
 
     /// VDM Data
-    VDMParmBlock vdm;
+    LP_VDMParmBlock vdm;
 
     /// DPLL pstate 0 value
     uint32_t dpll_pstate0_value;
+
+    // Biased Compare VID operating points
+    CompareVIDPoints vid_point_set[NUM_OP_POINTS];
+
+    // Biased Threshold operation points
+    int8_t threshold_set[NUM_OP_POINTS][NUM_THRESHOLD_POINTS];
+
+    //pstate-volt compare slopes
+    uint16_t PsVIDCompSlopes[VPD_NUM_SLOPES_REGION];
+
+    //pstate-volt threshold slopes
+    uint16_t PsVDMThreshSlopes[VPD_NUM_SLOPES_REGION][NUM_THRESHOLD_POINTS];
 
 } LocalPstateParmBlock;
 

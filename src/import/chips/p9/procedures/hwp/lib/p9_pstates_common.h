@@ -90,15 +90,17 @@
 // are warrented
 
 /// VPD #V Data from keyword (eg VPD order)
-#define VPD_PV_POINTS 4
+#define NUM_OP_POINTS 4
+#define NUM_THRESHOLD_POINTS 4
 #define VPD_PV_POWERSAVE   1
 #define VPD_PV_NOMINAL     0
 #define VPD_PV_TURBO       2
 #define VPD_PV_ULTRA       3
 #define VPD_PV_ORDER {VPD_PV_POWERSAVE, VPD_PV_NOMINAL, VPD_PV_TURBO, VPD_PV_ULTRA}
 #define VPD_PV_ORDER_STR {"Nominal   ","PowerSave ", "Turbo     ", "UltraTurbo"}
+#define VPD_THRESHOLD_ORDER_STR {"Overvolt", "Small", "Large", "Extreme" }
 
-/// VPD #V Operating Points (eg Natureal order)
+/// VPD #V Operating Points (eg Natural order)
 #define POWERSAVE   0
 #define NOMINAL     1
 #define TURBO       2
@@ -133,7 +135,12 @@
 #define VPD_PT_SET_ORDER {VPD_PT_SET_RAW, VPD_PT_SET_SYSP, VPD_PT_SET_BIASED, VPD_PT_SET_BIASED_SYSP}
 #define VPD_PT_SET_ORDER_STR {"Raw          ", "SysParam       ","Biased        ", "Biased/SysParam"}
 
-#define EVID_SLOPE_FP_SHIFT         13
+#define VID_SLOPE_FP_SHIFT         13
+#define THRESH_SLOPE_FP_SHIFT       12
+
+// 0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo; 4 = Enable
+#define VDM_DROOP_OP_POINTS   5
+
 
 
 /// IDDQ readings,

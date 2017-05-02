@@ -1337,6 +1337,7 @@
     <attribute><id>CME_CHTM_TRACE_ENABLE</id></attribute>
     <attribute><id>CME_CHTM_TRACE_MEMORY_CONFIG</id></attribute>
     <attribute><id>PRD_HWP_PLID</id></attribute>
+    <attribute><id>VDM_VID_COMPARE_BIAS_0P5PCT</id></attribute>
 
 </targetType><!-- chip-processor-power9 -->
 

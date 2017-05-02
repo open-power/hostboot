@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,7 +143,7 @@ typedef struct IVRM_PARM_DATA
 
 //Section added back by ssrivath
 // START OF PARMS REQUIRED VPD parsing procedures
-//#define S132A_POINTS       4 - Replaced by  VPD_PV_POINTS
+//#define S132A_POINTS       4 - Replaced by  NUM_OP_POINTS
 #define PSTATE_STEPSIZE    1
 #define EVRM_DELAY_NS      100
 #define DEAD_ZONE_5MV      20       // 100mV
@@ -399,8 +399,8 @@ load_wof_attributes ( PstateSuperStructure* pss,
 
 /// ------------------------------------------------------------
 /// @brief Copy VPD operating point into destination in assending order
-/// @param[in]  &src[VPD_PV_POINTS]   => reference to source VPD structure (array)
-/// @param[out] *dest[VPD_PV_POINTS]  => pointer to destination VpdOperatingPoint structure
+/// @param[in]  &src[NUM_OP_POINTS]   => reference to source VPD structure (array)
+/// @param[out] *dest[NUM_OP_POINTS]  => pointer to destination VpdOperatingPoint structure
 /// @return   FAPI2::SUCCESS
 /// ------------------------------------------------------------
 
