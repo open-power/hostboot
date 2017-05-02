@@ -289,7 +289,7 @@ static uint32_t getRldicrInstruction( const uint16_t i_Ra, const uint16_t i_Rs,
 }
 
 //-----------------------------------------------------------------------------
-
+#if 0
 /**
  * @brief generates instruction for mtmsrd instruction.
  * @param[in]   i_Rs      source register number
@@ -305,7 +305,7 @@ static uint32_t getMtmsrdInstruction( const uint16_t i_Rs )
 
     return SWIZZLE_4_BYTE(mtmsrdInstOpcode);
 }
-
+#endif
 //-----------------------------------------------------------------------------
 
 /**
