@@ -25,7 +25,7 @@
 ///
 /// @file p9_chiplet_scominit.C
 ///
-/// @brief SCOM inits to all chiplets (sans Quad)
+/// @brief SCOM inits to all chiplets (sans Quad/fabric)
 ///
 
 //
@@ -40,9 +40,6 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p9_chiplet_scominit.H>
-#include <p9_fbc_no_hp_scom.H>
-#include <p9_fbc_ioe_tl_scom.H>
-#include <p9_fbc_ioe_dl_scom.H>
 #include <p9_fbc_ioo_tl_scom.H>
 #include <p9_fbc_ioo_dl_scom.H>
 #include <p9_mcs_scom.H>
@@ -61,17 +58,9 @@
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
-const uint64_t FBC_IOE_TL_FIR_ACTION0 = 0x0000000000000000ULL;
-const uint64_t FBC_IOE_TL_FIR_ACTION1 = 0x004B000000000000ULL;
-const uint64_t FBC_IOE_TL_FIR_MASK    = 0xFF24F0303FFFFFFFULL;
-
 const uint64_t FBC_IOO_TL_FIR_ACTION0 = 0x0000000000000000ULL;
 const uint64_t FBC_IOO_TL_FIR_ACTION1 = 0x0002400000000000ULL;
 const uint64_t FBC_IOO_TL_FIR_MASK    = 0xFF6DB0000FFFFFFFULL;
-
-const uint64_t FBC_IOE_DL_FIR_ACTION0 = 0x0000000000000000ULL;
-const uint64_t FBC_IOE_DL_FIR_ACTION1 = 0x0303C00000001FFCULL;
-const uint64_t FBC_IOE_DL_FIR_MASK    = 0xFCFC3FFFFFFFE003ULL;
 
 const uint64_t FBC_IOO_DL_FIR_ACTION0 = 0x0000000000000000ULL;
 const uint64_t FBC_IOO_DL_FIR_ACTION1 = 0x0303C0000300FFFCULL;
@@ -94,6 +83,7 @@ static const uint8_t PERV_OB_CPLT_CONF1_NVC_IOVALID = 0x8;
 
 static const uint8_t NV_OB0_MASK = 0x1;
 static const uint8_t NV_OB3_MASK = 0x2;
+
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -104,7 +94,6 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     char l_procTargetStr[fapi2::MAX_ECMD_STRING_LEN];
     char l_chipletTargetStr[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    std::vector<fapi2::Target<fapi2::TARGET_TYPE_XBUS>> l_xbus_chiplets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_OBUS>> l_obus_chiplets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>> l_mcs_targets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_CAPP>> l_capp_targets;
@@ -115,9 +104,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     uint8_t l_ndl_iovalid = 0;
     uint8_t l_is_simulation = 0;
 
-    fapi2::ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_Type l_fbc_optics_cfg_mode = { fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_SMP };
     FAPI_DBG("Start");
-
     // Get attribute to check if it is dd1 or dd2
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_P9N_DD1_SPY_NAMES, i_target, l_dd1));
     // Get attribute to check if NDL IOValids need set (dd2+)
@@ -214,86 +201,9 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
 
     }
 
-    // apply FBC non-hotplug initfile
-    FAPI_DBG("Invoking p9.fbc.no_hp.scom.initfile on target %s...", l_procTargetStr);
-    FAPI_EXEC_HWP(l_rc, p9_fbc_no_hp_scom, i_target, FAPI_SYSTEM);
-
-    if (l_rc)
-    {
-        FAPI_ERR("Error from p9_fbc_no_hp_scom");
-        fapi2::current_err = l_rc;
-        goto fapi_try_exit;
-    }
-
-    // setup IOE (XBUS FBC IO) TL SCOMs
-    FAPI_DBG("Invoking p9.fbc.ioe_tl.scom.initfile on target %s...", l_procTargetStr);
-    FAPI_EXEC_HWP(l_rc, p9_fbc_ioe_tl_scom, i_target, FAPI_SYSTEM);
-
-    if (l_rc)
-    {
-        FAPI_ERR("Error from p9_fbc_ioe_tl_scom");
-        fapi2::current_err = l_rc;
-        goto fapi_try_exit;
-    }
-
-    l_xbus_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_XBUS>();
-
-    if (l_xbus_chiplets.size())
-    {
-        FAPI_TRY(fapi2::putScom(i_target, PU_PB_IOE_FIR_ACTION0_REG, FBC_IOE_TL_FIR_ACTION0),
-                 "Error from putScom (PU_PB_IOE_FIR_ACTION0_REG)");
-        FAPI_TRY(fapi2::putScom(i_target, PU_PB_IOE_FIR_ACTION1_REG, FBC_IOE_TL_FIR_ACTION1),
-                 "Error from putScom (PU_PB_IOE_FIR_ACTION1_REG)");
-        FAPI_TRY(fapi2::putScom(i_target, PU_PB_IOE_FIR_MASK_REG, FBC_IOE_TL_FIR_MASK),
-                 "Error from putScom (PU_PB_IOE_FIR_MASK_REG)");
-    }
-
-    // setup IOE (XBUS FBC IO) DL SCOMs
-    for (auto l_iter = l_xbus_chiplets.begin();
-         l_iter != l_xbus_chiplets.end();
-         l_iter++)
-    {
-        fapi2::toString(*l_iter, l_chipletTargetStr, sizeof(l_chipletTargetStr));
-        FAPI_DBG("Invoking p9.fbc.ioe_dl.scom.initfile on target %s...", l_chipletTargetStr);
-        FAPI_EXEC_HWP(l_rc, p9_fbc_ioe_dl_scom, *l_iter, i_target);
-
-        if (l_rc)
-        {
-            FAPI_ERR("Error from p9_fbc_ioe_dl_scom");
-            fapi2::current_err = l_rc;
-            goto fapi_try_exit;
-        }
-
-        // configure action registers & unmask
-        FAPI_TRY(fapi2::putScom(*l_iter, XBUS_LL0_IOEL_FIR_ACTION0_REG, FBC_IOE_DL_FIR_ACTION0),
-                 "Error from putScom (XBUS_LL0_IOEL_FIR_ACTION0_REG)");
-        FAPI_TRY(fapi2::putScom(*l_iter, XBUS_LL0_IOEL_FIR_ACTION1_REG, FBC_IOE_DL_FIR_ACTION1),
-                 "Error from putScom (XBUS_LL0_IOEL_FIR_ACTION1_REG)");
-        FAPI_TRY(fapi2::putScom(*l_iter, XBUS_LL0_LL0_LL0_IOEL_FIR_MASK_REG, FBC_IOE_DL_FIR_MASK),
-                 "Error from putScom (XBUS_LL0_LL0_LL0_IOEL_FIR_MASK_REG)");
-    }
-
-    // set FBC optics config mode attribute
+    // invoke IOO (OBUS FBC IO) SCOM initfiles
     l_obus_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_OBUS>();
 
-    for (auto l_iter = l_obus_chiplets.begin();
-         l_iter != l_obus_chiplets.end();
-         l_iter++)
-    {
-        uint8_t l_unit_pos;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, *l_iter, l_unit_pos),
-                 "Error from FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS)");
-        FAPI_INF("Updating index: %d\n", l_unit_pos);
-        FAPI_INF("  before: %d\n", l_fbc_optics_cfg_mode[l_unit_pos]);
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OPTICS_CONFIG_MODE, *l_iter, l_fbc_optics_cfg_mode[l_unit_pos]),
-                 "Error from FAPI_ATTR_GET(ATTR_OPTICS_CONFIG_MODE)");
-        FAPI_INF("  after: %d\n", l_fbc_optics_cfg_mode[l_unit_pos]);
-    }
-
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE, i_target, l_fbc_optics_cfg_mode),
-             "Error from FAPI_ATTR_SET(ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE)");
-
-    // invoke IOO (OBUS FBC IO) SCOM initfiles
     FAPI_DBG("Invoking p9.fbc.ioo_tl.scom.initfile on target %s...", l_procTargetStr);
     FAPI_EXEC_HWP(l_rc, p9_fbc_ioo_tl_scom, i_target);
 
