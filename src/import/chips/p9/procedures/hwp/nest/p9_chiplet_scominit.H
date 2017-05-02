@@ -25,7 +25,7 @@
 ///
 /// @file p9_chiplet_scominit.H
 ///
-/// @brief SCOM inits to all chiplets (sans Quad)
+/// @brief SCOM inits to all chiplets (sans Quad/fabric)
 ///
 
 //
@@ -57,7 +57,7 @@ typedef fapi2::ReturnCode (*p9_chiplet_scominit_FP_t)(const fapi2::Target<fapi2:
 extern "C"
 {
 
-/// @brief SCOM inits to all chiplets (sans Quad)
+/// @brief SCOM inits to all chiplets (sans Quad/fabric)
 ///
 /// @param[in] i_target Reference to processor chip target
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
