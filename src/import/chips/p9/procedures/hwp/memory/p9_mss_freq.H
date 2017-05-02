@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,26 +48,44 @@ namespace mss
 ///
 /// @brief      Sets DRAM CAS latency attributes
 /// @param[in]  i_target the controller target
-/// @param[in]  i_cas_latency final selected CAS ltency
+/// @param[in]  i_cas_latency vector of the two final selected CAS latencies
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
 inline fapi2::ReturnCode set_CL_attr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-                                     uint64_t i_cas_latency)
+                                     std::vector< uint64_t >& i_cas_latency)
 {
-    std::vector<uint8_t> l_cls(PORTS_PER_MCS, 0);
+    // I wish I could do the reinterpret cast or set the pointer to the vector :(
+    // But no can do, manual copy pasta
+    uint8_t l_temp [mss::PORTS_PER_MCS] = {};
 
-    // Set configured ports
     for( const auto& p : find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
     {
-        l_cls[mss::index(p)] = i_cas_latency;
-        FAPI_INF( "Final Chosen CL: %d for %s",  i_cas_latency, mss::c_str(p));
+        // Local variable instead of calling it three times. Hopefully compiler can optimize this better
+        const auto l_index = mss::index(p);
+
+        if ( l_index >= PORTS_PER_MCS)
+        {
+            FAPI_ERR("%s mss::index returned a value greater than PORTS_PER_MCS", mss::c_str(i_target) );
+            fapi2::Assert(false);
+        }
+
+        l_temp[l_index] = i_cas_latency[l_index];
+        FAPI_ASSERT( l_temp[l_index] == i_cas_latency[l_index],
+                     fapi2::MSS_BAD_CL_CAST()
+                     .set_CL(i_cas_latency[l_index])
+                     .set_MCA_TARGET(p),
+                     "%s bad cast for cas latency from %d to %d",
+                     mss::c_str(i_target),
+                     i_cas_latency[l_index],
+                     l_temp[l_index]);
+        FAPI_INF( "Final Chosen CL: %d for %s", l_temp[l_index], mss::c_str(p));
     }
 
     // set CAS latency attribute
     // casts vector into the type FAPI_ATTR_SET is expecting by deduction
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_CL,
                             i_target,
-                            UINT8_VECTOR_TO_1D_ARRAY(l_cls, PORTS_PER_MCS)) ,
+                            l_temp) ,
               "Failed to set CAS latency attribute");
 
 fapi_try_exit:
@@ -81,17 +99,20 @@ fapi_try_exit:
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
 inline fapi2::ReturnCode set_freq_attrs(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-                                        const std::vector<uint64_t>& i_dimm_freq)
+                                        const std::vector< std::vector<uint64_t> >& i_dimm_freq)
 {
     // Find the minimum (but non-0) freq in the vector. If we see all 0's we'll write a 0. However,
     // we shouldn't as the caller should have been dealing with no DIMM before we got here.
     uint64_t l_final_freq = UINT64_MAX;
 
-    for (const auto l_freq : i_dimm_freq)
+    for (const auto l_vec : i_dimm_freq)
     {
-        if (l_freq != 0)
+        for (const auto l_freq : l_vec)
         {
-            l_final_freq = std::min(l_final_freq, l_freq);
+            if (l_freq != 0)
+            {
+                l_final_freq = std::min(l_final_freq, l_freq);
+            }
         }
     }
 

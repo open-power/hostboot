@@ -84,7 +84,7 @@ class cas_latency
         /// @param[in]  i_caches decoder caches
         /// @param[out] o_rc returns FAPI2_RC_SUCCESS if constructor initialzed successfully
         ///
-        cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target_mcs,
+        cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target_mcs,
                     const std::vector< std::shared_ptr<spd::decoder> >& i_caches,
                     fapi2::ReturnCode& o_rc);
 
@@ -96,7 +96,7 @@ class cas_latency
         /// @param[in]  i_is_3ds loading::IS_3DS if this is for 3DS,
         ///             loading::NOT_3DS otherwise (default)
         ///
-        cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+        cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                     const uint64_t i_taa_min,
                     const uint64_t i_tck_min,
                     const uint64_t i_common_cl_mask,
@@ -144,7 +144,7 @@ class cas_latency
         /////////////////////////
         // Private variables
         /////////////////////////
-        fapi2::Target<fapi2::TARGET_TYPE_MCS> iv_target;
+        fapi2::Target<fapi2::TARGET_TYPE_MCA> iv_target;
         uint64_t iv_largest_taamin;// cas latency time
         uint64_t iv_proposed_tck;// cycle time
         uint64_t iv_common_cl; // common cas latency

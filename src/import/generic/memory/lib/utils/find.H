@@ -38,7 +38,6 @@
 
 #include <fapi2.H>
 #include <vector>
-
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/c_str.H>
 
@@ -50,9 +49,17 @@ namespace mss
 /// @tparam T the fapi2 target type of the argument
 /// @param[in] i_target the fapi2 target T
 /// @return a vector of M targets.
+/// @note Only works for valid parent-child relationships
+/// So calling find_targets<TARGET_TYPE_DIMM>(l_mca) will work here
+/// but calling find_targets<TARGET_TYPE_DIMM>(l_mcs) will not work
+/// Compiler will freak out and we'll never get a bad relationship/ error at runtime
+/// If we do, it's on fapi2
 ///
 template< fapi2::TargetType M, fapi2::TargetType T >
-inline std::vector< fapi2::Target<M> > find_targets( const fapi2::Target<T>& i_target);
+inline std::vector< fapi2::Target<M> > find_targets( const fapi2::Target<T>& i_target)
+{
+    return i_target.template getChildren<M>();
+}
 
 ///
 /// @brief find an element based on a fapi2 target
@@ -60,6 +67,10 @@ inline std::vector< fapi2::Target<M> > find_targets( const fapi2::Target<T>& i_t
 /// @tparam T the fapi2 target type of the argument
 /// @param[in] i_target the fapi2 target T
 /// @return an M target.
+/// @note Only works for valid parent-child relationships
+/// Will work for MCA and DIMM
+/// Will not work for MCS and DIMM
+/// The compiler will let you know if it doesn't work
 ///
 template< fapi2::TargetType M, fapi2::TargetType T >
 inline fapi2::Target<M> find_target( const fapi2::Target<T>& i_target )
@@ -220,6 +231,19 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets
 ( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
 {
     return i_target.getChildren<fapi2::TARGET_TYPE_MCA>();
+}
+
+///
+/// @brief find all the MCA connected to an MCBIST
+/// @param[in] i_target a fapi2::Target MCBIST
+/// @return a vector of fapi2::TARGET_TYPE_MCA
+///
+template<>
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets
+( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > l_temp  = {i_target};
+    return l_temp;
 }
 
 ///

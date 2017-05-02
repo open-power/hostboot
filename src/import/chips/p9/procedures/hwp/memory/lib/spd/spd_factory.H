@@ -42,9 +42,11 @@
 
 // fapi2
 #include <fapi2.H>
+#include <fapi2_spd_access.H>
 
 // mss lib
 #include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
+#include <generic/memory/lib/utils/find.H>
 
 namespace mss
 {
@@ -147,9 +149,22 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
                           const std::vector<uint8_t>& i_spd_data,
                           std::shared_ptr<decoder>& o_fact_obj);
 
+
+///
+/// @brief Determines & sets effective config for number of master ranks per dimm
+/// @param[in] i_target DIMM fapi2::Target
+/// @param[in] i_pDecoder shared_ptr to SPD decoder
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note This is done after the SPD cache is configured so that it can reflect the results of the
+/// factory and we don't need to worry about SPD versions. This is expressly different than the dram and dimm setters
+///
+fapi2::ReturnCode master_ranks_per_dimm_setter(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const std::shared_ptr<decoder>& i_pDecoder);
+
 ///
 /// @brief       Creates factory object & SPD data caches
-/// @param[in]   i_target the fapi2 target
+/// @tparam T    fapi2::TargetType, MCA, MCS, MCBIST, PROC_CHIP are possible TargetTypes
+/// @param[in]   i_target the fapi2 target to find DIMMs on
 /// @param[out]  o_factory_caches vector of factory objects
 /// @param[in]   i_pDecoder optional input decoder to insert custom decoder (nullptr default)
 /// @return      FAPI2_RC_SUCCESS if okay
@@ -157,8 +172,44 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
 template<fapi2::TargetType T>
 fapi2::ReturnCode populate_decoder_caches(const fapi2::Target<T>& i_target,
         std::vector< std::shared_ptr<decoder> >& o_factory_caches,
-        const std::shared_ptr<decoder>& i_pDecoder = nullptr);
+        const std::shared_ptr<decoder>& i_pDecoder = nullptr)
+{
+    // Input decoder for this version of populating cache would get overriden
+    // so I don't bother with it in this specialization
+    std::shared_ptr<decoder> l_pDecoder;
 
+    for( const auto& l_dimm : find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
+    {
+        size_t l_size = 0;
+        FAPI_TRY( fapi2::getSPD(l_dimm, nullptr, l_size),
+                  "%s. Failed to retrieve SPD blob size", mss::c_str(i_target) );
+
+        {
+            // "Container" for SPD data
+            std::vector<uint8_t> l_spd(l_size);
+
+            // Retrieve SPD data
+            FAPI_TRY( fapi2::getSPD(l_dimm, l_spd.data(), l_size),
+                      "%s. Failed to retrieve SPD data", mss::c_str(i_target) );
+
+            // Retrieve factory object instance & populate spd data for that instance
+            FAPI_TRY( factory(l_dimm, l_spd, l_pDecoder),
+                      "%s. Failed SPD factory, could not instantiate decoder object", mss::c_str(i_target) );
+
+            // Populate spd caches
+            o_factory_caches.push_back( l_pDecoder );
+        }
+
+        // Populate some of the DIMM attributes early. This allows the following code to make
+        // decisions based on DIMM information. Expressly done after the factory has decided on the SPD version
+        FAPI_TRY( master_ranks_per_dimm_setter(l_dimm, l_pDecoder),
+                  "%s. Failed master_ranks_per_dimm_setter()", mss::c_str(i_target) );
+
+    }// end dimm
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 }// spd
 }// mss

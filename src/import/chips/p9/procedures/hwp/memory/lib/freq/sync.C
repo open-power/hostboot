@@ -300,14 +300,14 @@ fapi_try_exit:
 
 ///
 /// @brief Create and sort a vector of supported MT/s (freq)
-/// @param[in] MCS target for which to get the DIMM configs
+/// @param[in] MCA target for which to get the DIMM configs
 /// @param[in,out] reference to a std::vector<uint32_t> space to put the sorted vector
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note Taken from ATTR_MSS_MRW_SUPPORTED_FREQ. The result is sorted so such that the min
 /// supported freq is std::vector<>.begin and the max is std::vector<>.end - 1. You can
 /// search the resulting vector for valid frequencies as it is sorted.
 ///
-fapi2::ReturnCode supported_freqs(const fapi2::Target<TARGET_TYPE_MCS>& i_target, std::vector<uint32_t>& io_freqs)
+fapi2::ReturnCode supported_freqs(const fapi2::Target<TARGET_TYPE_MCA>& i_target, std::vector<uint32_t>& io_freqs)
 {
     std::vector<uint32_t> l_freqs(NUM_VPD_FREQS, 0);
     std::vector<uint32_t> l_max_freqs(NUM_MAX_FREQS, 0);
@@ -337,7 +337,7 @@ fapi_try_exit:
 
 ///
 /// @brief Create and sort a vector of supported MT/s (freq) - helper for testing purposes
-/// @param[in] MCS target for which to get the DIMM configs
+/// @param[in] MCA target for which to get the DIMM configs
 /// @param[in] vector of MVPD freqs
 /// @param[in] vector of max allowed freqs
 /// @param[in] bool whether or not we're forced into sync mode
@@ -347,7 +347,7 @@ fapi_try_exit:
 /// testing. So this helper allows us to use the attributes for the main path but
 /// have a path for testing (DFT I think the cool kids call it.)
 ///
-fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCS>& i_target,
+fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
         const std::vector<uint32_t>& i_freqs,
         const std::vector<uint32_t>& i_max_freqs,
         const bool i_req_sync_mode,
@@ -388,55 +388,53 @@ fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCS>& i
     FAPI_INF("max supported freqs %d %d %d %d %d",
              i_max_freqs[0], i_max_freqs[1], i_max_freqs[2], i_max_freqs[3], i_max_freqs[4]);
 
-    // Given the max supported freqs, find the config based on our DIMMs. There's no great way to do this ...
-    for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
+    const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(i_target);
+    uint64_t l_dimms_on_port = l_dimms.size();
+
+    FAPI_ASSERT( (l_dimms_on_port <= MAX_DIMM_PER_PORT),
+                 fapi2::MSS_TOO_MANY_DIMMS_ON_PORT()
+                 .set_DIMM_COUNT(l_dimms_on_port)
+                 .set_MCA_TARGET(i_target),
+                 "Seeing %d DIMM on port %s",
+                 l_dimms_on_port,
+                 mss::c_str(i_target));
+
+    for (const auto& d : l_dimms)
     {
-        const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(p);
-        uint64_t l_dimms_on_port = l_dimms.size();
+        uint8_t l_num_master_ranks = 0;
+        size_t l_index = 0xFF;
 
-        FAPI_ASSERT( (l_dimms_on_port <= MAX_DIMM_PER_PORT),
-                     fapi2::MSS_TOO_MANY_DIMMS_ON_PORT()
-                     .set_DIMM_COUNT(l_dimms_on_port)
-                     .set_MCA_TARGET(p),
-                     "Seeing %d DIMM on port %s",
+        FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_num_master_ranks) );
+
+        // Just a quick check but we're in deep yogurt if this triggers
+        FAPI_ASSERT( (l_num_master_ranks <= MAX_RANK_PER_DIMM),
+                     fapi2::MSS_TOO_MANY_PRIMARY_RANKS_ON_DIMM()
+                     .set_RANK_COUNT(l_num_master_ranks)
+                     .set_DIMM_TARGET(d),
+                     "seeing %d primary ranks on DIMM %s",
                      l_dimms_on_port,
-                     mss::c_str(p));
+                     mss::c_str(d));
 
-        for (const auto& d : l_dimms)
-        {
-            uint8_t l_num_master_ranks = 0;
-            size_t l_index = 0xFF;
+        l_index = l_indexes[l_dimms_on_port - 1][l_num_master_ranks - 1];
 
-            FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_num_master_ranks) );
+        FAPI_INF("%s rank config %d drop %d yields max freq attribute index of %d (%d)",
+                 mss::c_str(d),
+                 l_num_master_ranks,
+                 l_dimms_on_port,
+                 l_index,
+                 i_max_freqs[l_index] );
 
-            // Just a quick check but we're in deep yogurt if this triggers
-            FAPI_ASSERT( (l_num_master_ranks <= MAX_RANK_PER_DIMM),
-                         fapi2::MSS_TOO_MANY_PRIMARY_RANKS_ON_DIMM()
-                         .set_RANK_COUNT(l_num_master_ranks)
-                         .set_DIMM_TARGET(p),
-                         "seeing %d primary ranks on DIMM %s",
-                         l_dimms_on_port,
-                         mss::c_str(d));
+        FAPI_ASSERT( (l_index < NUM_MAX_FREQS),
+                     fapi2::MSS_FREQ_INDEX_TOO_LARGE()
+                     .set_INDEX(l_index)
+                     .set_NUM_MAX_FREQS(NUM_MAX_FREQS),
+                     "seeing %d index for %d DIMM and %d ranks on DIMM %s",
+                     l_index,
+                     l_dimms_on_port,
+                     l_num_master_ranks,
+                     mss::c_str(d));
 
-            FAPI_INF("%s rank config %d drop %d yields max freq attribute index of %d (%d)",
-                     mss::c_str(d), l_num_master_ranks, l_dimms_on_port,
-                     l_indexes[l_dimms_on_port - 1][l_num_master_ranks - 1],
-                     i_max_freqs[l_indexes[l_dimms_on_port - 1][l_num_master_ranks - 1]] );
-
-            l_index = l_indexes[l_dimms_on_port - 1][l_num_master_ranks - 1];
-
-            FAPI_ASSERT( (l_index < NUM_MAX_FREQS),
-                         fapi2::MSS_FREQ_INDEX_TOO_LARGE()
-                         .set_INDEX(l_index)
-                         .set_NUM_MAX_FREQS(NUM_MAX_FREQS),
-                         "seeing %d index for %d DIMM and %d ranks on DIMM %s",
-                         l_index,
-                         l_dimms_on_port,
-                         l_num_master_ranks,
-                         mss::c_str(d));
-
-            l_our_max_freq = std::min(l_our_max_freq, i_max_freqs[l_index]);
-        }
+        l_our_max_freq = std::min(l_our_max_freq, i_max_freqs[l_index]);
     }
 
     FAPI_INF("after processing DIMM, max freq is %d", l_our_max_freq);

@@ -90,7 +90,7 @@ fapi2::ReturnCode select_sync_mode(const std::map< fapi2::Target<fapi2::TARGET_T
 
 ///
 /// @brief Create and sort a vector of supported MT/s (freq) - helper for testing purposes
-/// @param[in] MCS target for which to get the DIMM configs
+/// @param[in] MCA target for which to get the DIMM configs
 /// @param[in] vector of MVPD freqs
 /// @param[in] vector of max allowed freqs
 /// @param[in] bool whether or not we're forced into sync mode
@@ -100,7 +100,7 @@ fapi2::ReturnCode select_sync_mode(const std::map< fapi2::Target<fapi2::TARGET_T
 /// supported freq is std::vector<>.begin and the max is std::vector<>.end - 1. You can
 /// search the resulting vector for valid frequencies as it is sorted.
 ///
-fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const std::vector<uint32_t>& i_freqs,
         const std::vector<uint32_t>& i_max_freqs,
         const bool i_req_sync_mode,
@@ -108,14 +108,14 @@ fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
 
 ///
 /// @brief Create and sort a vector of supported MT/s (freq)
-/// @param[in] MCS target for which to get the DIMM configs
+/// @param[in] MCA target for which to get the DIMM configs
 /// @param[in,out] reference to a std::vector<uint32_t> space to put the sorted vector
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note Taken from ATTR_MSS_MRW_SUPPORTED_FREQ. The result is sorted so such that the min
 /// supported freq is std::vector<>.begin and the max is std::vector<>.end - 1. You can
 /// search the resulting vector for valid frequencies as it is sorted.
 ///
-fapi2::ReturnCode supported_freqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+fapi2::ReturnCode supported_freqs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                                   std::vector<uint32_t>& io_freqs);
 
 ///

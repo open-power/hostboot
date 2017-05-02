@@ -77,7 +77,7 @@ enum invalid_timing_function_encoding
 /// @param[in]  i_caches decoder caches
 /// @param[out] o_rc returns FAPI2_RC_SUCCESS if constructor initialzed successfully
 ///
-cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                          const std::vector< std::shared_ptr<spd::decoder> >& i_caches,
                          fapi2::ReturnCode& o_rc ):
     iv_dimm_list_empty(false),
@@ -86,7 +86,6 @@ cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
     iv_proposed_tck(0),
     iv_common_cl(UINT64_MAX) // Masks out supported CLs
 {
-
     if( i_caches.empty() )
     {
         FAPI_INF("cas latency ctor seeing no SPD caches for %s", mss::c_str(i_target) );
@@ -96,7 +95,7 @@ cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
 
     for ( const auto& l_cache : i_caches )
     {
-        // Retrive timing values from the SPD
+        // Retrieve timing values from the SPD
         uint64_t l_taa_min_in_ps = 0;
         uint64_t l_tckmax_in_ps = 0;
         uint64_t l_tck_min_in_ps = 0;
@@ -191,7 +190,7 @@ fapi_try_exit:
 /// @param[in]  i_common_cl_mask common CAS latency mask we want to force (bitmap)
 /// @param[in]  i_is_3ds boolean for whether this is a 3DS SDRAM, 3DS is true, false otherwise (default)
 ///
-cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                          const uint64_t i_taa_min,
                          const uint64_t i_tck_min,
                          const uint64_t i_common_cl_mask,
@@ -244,7 +243,7 @@ fapi2::ReturnCode cas_latency::find_cl(uint64_t& o_cas_latency,
     }
 
     // Update output values after all criteria is met
-    // If the MCS has no dimm configured than both
+    // If the MCA has no dimm configured than both
     // l_desired_latency & iv_proposed_tck is 0 by initialization
     o_cas_latency = l_desired_cas_latency;
     o_tck = iv_proposed_tck;
