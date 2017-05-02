@@ -25,7 +25,7 @@
 //------------------------------------------------------------------------------
 /// @file  p9_chiplet_enable_ridi.C
 ///
-/// @brief Enable RI/DI chip wide
+/// @brief Enable RI/DI for all IO chiplets (excluding XBUS)
 //------------------------------------------------------------------------------
 // *HWP HW Owner        : Abhishek Agarwal <abagarw8@in.ibm.com>
 // *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
@@ -50,7 +50,10 @@ fapi2::ReturnCode p9_chiplet_enable_ridi(const
     FAPI_DBG("Entering ...");
 
     for(auto l_target_cplt : i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
-        (fapi2::TARGET_FILTER_SYNC_MODE_ALL_IO_EXCEPT_NEST, fapi2::TARGET_STATE_FUNCTIONAL))
+        (static_cast<fapi2::TargetFilter>(fapi2::TARGET_FILTER_ALL_MC  |
+                                          fapi2::TARGET_FILTER_ALL_PCI |
+                                          fapi2::TARGET_FILTER_ALL_OBUS),
+         fapi2::TARGET_STATE_FUNCTIONAL))
     {
         FAPI_INF("Call p9_chiplet_enable_ridi_net_ctrl_action_function");
         FAPI_TRY(p9_chiplet_enable_ridi_net_ctrl_action_function(l_target_cplt));
@@ -63,7 +66,7 @@ fapi_try_exit:
 
 }
 
-/// @brief Enable Drivers/Recievers of MC, ABUS, OBUS, XBUS chiplet
+/// @brief Enable Drivers/Recievers of O, PCIE, MC chiplets
 ///
 /// @param[in]     i_target_chiplet   Reference to TARGET_TYPE_PERV target
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
