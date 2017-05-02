@@ -901,6 +901,13 @@ fapi2::ReturnCode writeMCBarData(
     fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_scomData(0);
 
+    fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY_Type l_interleave_granule_size;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY,
+                           fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_interleave_granule_size),
+             "Error getting ATTR_MSS_INTERLEAVE_GRANULARITY, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
     for (auto l_pair : i_mcBarDataPair)
     {
         fapi2::Target<fapi2::TARGET_TYPE_MCS> l_target = l_pair.first;
@@ -935,6 +942,21 @@ fapi2::ReturnCode writeMCBarData(
             l_scomData.insertFromRight<MCS_MCFGP_GROUP_BASE_ADDRESS,
                                        MCS_MCFGP_GROUP_BASE_ADDRESS_LEN>(
                                            (l_data.MCFGP_groupBaseAddr >> 2));
+
+            // configure interleave granularity if 2/4/8 MC per group only
+            if ((l_data.MCFGP_chan_per_group == 0b0100) || // 2 MC/group
+                (l_data.MCFGP_chan_per_group == 0b0101) ||
+                (l_data.MCFGP_chan_per_group == 0b0110) || // 4 MC/group
+                (l_data.MCFGP_chan_per_group == 0b1000))   // 8 MC/group
+            {
+                fapi2::buffer<uint64_t> l_mcmode0_scom_data;
+                FAPI_TRY(fapi2::getScom(l_target, MCS_MCMODE0, l_mcmode0_scom_data),
+                         "Error reading from MCS_MCMODE0 reg");
+                l_mcmode0_scom_data.insertFromRight<MCS_MCMODE0_GROUP_INTERLEAVE_GRANULARITY,
+                                                    MCS_MCMODE0_GROUP_INTERLEAVE_GRANULARITY_LEN>(l_interleave_granule_size);
+                FAPI_TRY(fapi2::putScom(l_target, MCS_MCMODE0, l_mcmode0_scom_data),
+                         "Error writing to MCS_MCMODE0 reg");
+            }
         }
 
         // Channel per group (bits 1:4)

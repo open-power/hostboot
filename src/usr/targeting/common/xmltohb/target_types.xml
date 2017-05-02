@@ -841,6 +841,7 @@
     <attribute><id>MSS_VOLT_VPP_SLOPE</id></attribute>
     <attribute><id>MSS_VOLT_VPP_INTERCEPT</id></attribute>
     <attribute><id>MSS_INTERLEAVE_ENABLE</id></attribute>
+    <attribute><id>MSS_INTERLEAVE_GRANULARITY</id></attribute>
 
 <!-- Enable memory voltages -->
     <attribute><id>SUPPORTS_DYNAMIC_MEM_VOLT</id></attribute>
