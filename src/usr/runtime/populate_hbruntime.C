@@ -998,107 +998,108 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         }
 
 
+        ///////////////////////////////////////////////////
         // SBE Communications buffer entry
+        // SBE FFDC entry
         uint64_t l_sbeCommAddr = 0x0;
-        l_label = HBRT_RSVD_MEM__SBE_COMM;
-        l_labelSize = strlen(l_label) + 1;
         uint64_t l_sbeCommSize = SBE_MSG::SBE_COMM_BUFFER_SIZE;
 
-        // Minimum 64K size for Opal
-        size_t l_sbeCommSizeAligned = ALIGN_X( l_sbeCommSize, 64*KILOBYTE );
-
-        if(TARGETING::is_phyp_load())
-        {
-            l_sbeCommAddr = l_prevDataAddr + l_prevDataSize;
-        }
-        else if(TARGETING::is_sapphire_load())
-        {
-            l_sbeCommAddr = l_prevDataAddr - l_sbeCommSizeAligned;
-        }
-
-        // Get a pointer to the next available HDAT HB Rsv Mem entry
-        l_rngPtr = nullptr;
-        l_elog = getNextRhbAddrRange(l_rngPtr);
-        if(l_elog)
-        {
-            break;
-        }
-
-        // Fill in the entry
-        l_rngPtr->hdatRhbRngType =
-                static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
-        l_rngPtr->hdatRhbRngId = i_nodeId;
-        l_rngPtr->hdatRhbAddrRngStrAddr =
-                l_sbeCommAddr | VmmManager::FORCE_PHYS_ADDR;
-        l_rngPtr->hdatRhbAddrRngEndAddr =
-                (l_sbeCommAddr | VmmManager::FORCE_PHYS_ADDR)
-                    + l_sbeCommSizeAligned - 1 ;
-        l_rngPtr->hdatRhbLabelSize = l_labelSize;
-        memcpy( l_rngPtr->hdatRhbLabelString,
-                l_label,
-                l_labelSize );
-        l_prevDataAddr = l_sbeCommAddr;
-        l_prevDataSize = l_sbeCommSizeAligned;
-
-        traceHbRsvMemRange(l_rngPtr);
-
-        // Loop through all functional Procs
-        for (const auto & l_procChip: l_procChips)
-        {
-            l_procChip->setAttr<TARGETING::ATTR_SBE_COMM_ADDR>(l_sbeCommAddr);
-
-        }
-
-
-        // SBE FFDC entry
         uint64_t l_sbeffdcAddr = 0x0;
-        l_label = HBRT_RSVD_MEM__SBE_FFDC;
-        l_labelSize = strlen(l_label) + 1;
         uint64_t l_sbeffdcSize =
             SBEIO::SbePsu::getTheInstance().getSbeFFDCBufferSize();
 
         // Minimum 64K size for Opal
+        size_t l_sbeCommSizeAligned = ALIGN_X( l_sbeCommSize, 64*KILOBYTE );
         size_t l_sbeffdcSizeAligned = ALIGN_X( l_sbeffdcSize, 64*KILOBYTE );
 
-        if(TARGETING::is_phyp_load())
-        {
-            l_sbeffdcAddr = l_prevDataAddr + l_prevDataSize;
-        }
-        else if(TARGETING::is_sapphire_load())
-        {
-            l_sbeffdcAddr = l_prevDataAddr - l_sbeffdcSizeAligned;
-        }
-
-        // Get a pointer to the next available HDAT HB Rsv Mem entry
-        l_rngPtr = nullptr;
-        l_elog = getNextRhbAddrRange(l_rngPtr);
-        if(l_elog)
-        {
-            break;
-        }
-
-        // Fill in the entry
-        l_rngPtr->hdatRhbRngType =
-                static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
-        l_rngPtr->hdatRhbRngId = i_nodeId;
-        l_rngPtr->hdatRhbAddrRngStrAddr =
-                l_sbeffdcAddr | VmmManager::FORCE_PHYS_ADDR;
-        l_rngPtr->hdatRhbAddrRngEndAddr =
-                (l_sbeffdcAddr | VmmManager::FORCE_PHYS_ADDR)
-                    + l_sbeffdcSizeAligned - 1 ;
-        l_rngPtr->hdatRhbLabelSize = l_labelSize;
-        memcpy( l_rngPtr->hdatRhbLabelString,
-                l_label,
-                l_labelSize );
-        l_prevDataAddr = l_sbeffdcAddr;
-        l_prevDataSize = l_sbeffdcSizeAligned;
-
-        traceHbRsvMemRange(l_rngPtr);
-
-        // Send Set FFDC Address for each functional proc
+        // Loop through all functional Procs
         for (const auto & l_procChip: l_procChips)
         {
-            // Call sendSetFFDCAddr, tell SBE where to write FFDC and messages
+            // -- SBE Communications buffer entry
+            if(TARGETING::is_phyp_load())
+            {
+                l_sbeCommAddr = l_prevDataAddr + l_prevDataSize;
+            }
+            else if(TARGETING::is_sapphire_load())
+            {
+                l_sbeCommAddr = l_prevDataAddr - l_sbeCommSizeAligned;
+            }
+
+            // Get a pointer to the next available HDAT HB Rsv Mem entry
+            l_rngPtr = nullptr;
+            l_elog = getNextRhbAddrRange(l_rngPtr);
+            if(l_elog)
+            {
+                break;
+            }
+
+            // SBE Communications buffer label
+            l_label = HBRT_RSVD_MEM__SBE_COMM;
+            l_labelSize = strlen(l_label) + 1;
+
+            // Fill in the entry
+            l_rngPtr->hdatRhbRngType =
+                    static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
+            l_rngPtr->hdatRhbRngId = i_nodeId;
+            l_rngPtr->hdatRhbAddrRngStrAddr =
+                    l_sbeCommAddr | VmmManager::FORCE_PHYS_ADDR;
+            l_rngPtr->hdatRhbAddrRngEndAddr =
+                    (l_sbeCommAddr | VmmManager::FORCE_PHYS_ADDR)
+                        + l_sbeCommSizeAligned - 1 ;
+            l_rngPtr->hdatRhbLabelSize = l_labelSize;
+            memcpy( l_rngPtr->hdatRhbLabelString,
+                    l_label,
+                    l_labelSize );
+            l_prevDataAddr = l_sbeCommAddr;
+            l_prevDataSize = l_sbeCommSizeAligned;
+
+            traceHbRsvMemRange(l_rngPtr);
+
+            // Save SBE Communication buffer address to attribute
+            l_procChip->setAttr<TARGETING::ATTR_SBE_COMM_ADDR>(l_sbeCommAddr);
+
+            // -- SBE FFDC entry
+
+            if(TARGETING::is_phyp_load())
+            {
+                l_sbeffdcAddr = l_prevDataAddr + l_prevDataSize;
+            }
+            else if(TARGETING::is_sapphire_load())
+            {
+                l_sbeffdcAddr = l_prevDataAddr - l_sbeffdcSizeAligned;
+            }
+
+            // Get a pointer to the next available HDAT HB Rsv Mem entry
+            l_rngPtr = nullptr;
+            l_elog = getNextRhbAddrRange(l_rngPtr);
+            if(l_elog)
+            {
+                break;
+            }
+
+            // SBE FFDC label
+            l_label = HBRT_RSVD_MEM__SBE_FFDC;
+            l_labelSize = strlen(l_label) + 1;
+
+            // Fill in the entry
+            l_rngPtr->hdatRhbRngType =
+                    static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
+            l_rngPtr->hdatRhbRngId = i_nodeId;
+            l_rngPtr->hdatRhbAddrRngStrAddr =
+                    l_sbeffdcAddr | VmmManager::FORCE_PHYS_ADDR;
+            l_rngPtr->hdatRhbAddrRngEndAddr =
+                    (l_sbeffdcAddr | VmmManager::FORCE_PHYS_ADDR)
+                        + l_sbeffdcSizeAligned - 1 ;
+            l_rngPtr->hdatRhbLabelSize = l_labelSize;
+            memcpy( l_rngPtr->hdatRhbLabelString,
+                    l_label,
+                    l_labelSize );
+            l_prevDataAddr = l_sbeffdcAddr;
+            l_prevDataSize = l_sbeffdcSizeAligned;
+
+            traceHbRsvMemRange(l_rngPtr);
+
+            // Send Set FFDC Address, tell SBE where to write FFDC and messages
             l_elog = SBEIO::sendSetFFDCAddr(l_sbeffdcSize,
                                             l_sbeCommSize,
                                             l_sbeffdcAddr,
