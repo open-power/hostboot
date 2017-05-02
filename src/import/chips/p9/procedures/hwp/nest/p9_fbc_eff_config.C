@@ -63,9 +63,17 @@ const uint32_t EPSILON_W_T1_LE[] = {    9,   10,   11,   13,   15,   27 };
 // HE epsilon (4 chips per-group)
 const uint32_t EPSILON_R_T0_HE[] = {    7,    7,    8,    8,   10,   22 };
 const uint32_t EPSILON_R_T1_HE[] = {   77,   78,   81,   84,   89,  113 };
-const uint32_t EPSILON_R_T2_HE[] = {  168,  170,  172,  175,  180,  204 };
+const uint32_t EPSILON_R_T2_HE[] = {  187,  189,  191,  194,  199,  223 };
 const uint32_t EPSILON_W_T0_HE[] = {   12,   13,   14,   16,   18,   30 };
-const uint32_t EPSILON_W_T1_HE[] = {   76,   77,   78,   80,   82,   94 };
+const uint32_t EPSILON_W_T1_HE[] = {   96,   97,   98,   99,  102,  114 };
+
+// TODO: These values need to be selected for flat 8 topology systems.
+// HE epsilon (1x8)
+// const uint32_t EPSILON_R_T0_F8[] = {    7,    7,    8,    8,   10,   22 };
+// const uint32_t EPSILON_R_T1_F8[] = {    7,    7,    8,    8,   10,   22 };
+// const uint32_t EPSILON_R_T2_F8[] = {  145,  146,  149,  152,  157,  181 };
+// const uint32_t EPSILON_W_T0_F8[] = {    0,    0,    0,    0,    0,    5 };
+// const uint32_t EPSILON_W_T1_F8[] = {   73,   74,   75,   77,   79,   91 };
 
 
 //------------------------------------------------------------------------------

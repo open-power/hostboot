@@ -202,7 +202,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     l_obus_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_OBUS>();
 
     FAPI_DBG("Invoking p9.fbc.ioo_tl.scom.initfile on target %s...", l_procTargetStr);
-    FAPI_EXEC_HWP(l_rc, p9_fbc_ioo_tl_scom, i_target);
+    FAPI_EXEC_HWP(l_rc, p9_fbc_ioo_tl_scom, i_target, FAPI_SYSTEM);
 
     if (l_rc)
     {
