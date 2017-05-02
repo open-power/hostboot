@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/host_proc_pcie_scominit.H $            */
+/* $Source: src/usr/isteps/istep10/host_proc_pcie_scominit.H $            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -30,7 +30,7 @@
 /******************************************************************************/
 #include    <stdint.h>
 
-namespace   ISTEP_08
+namespace   ISTEP_10
 {
 
 /**

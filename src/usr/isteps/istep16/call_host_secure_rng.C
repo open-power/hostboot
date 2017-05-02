@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/call_proc_pcie_scominit.C $            */
+/* $Source: src/usr/isteps/istep16/call_host_secure_rng.C $               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,18 +22,21 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 /**
-   @file call_proc_pcie_scominit.C
+ * @file call_host_secure_rng.C
  *
- *  Support file for IStep: nest_chiplets
- *   Nest Chiplets
+ *  Support file for IStep: core_activate
+ *   Core Activate
  *
  *  HWP_IGNORE_VERSION_CHECK
  *
  */
+
 /******************************************************************************/
 // Includes
 /******************************************************************************/
+
 #include    <stdint.h>
 
 #include    <trace/interface.H>
@@ -41,7 +44,6 @@
 #include    <errl/errlentry.H>
 
 #include    <isteps/hwpisteperror.H>
-
 #include    <errl/errludtarget.H>
 
 #include    <initservice/isteps_trace.H>
@@ -51,18 +53,15 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
-#include <fapi2/target.H>
-#include <fapi2/plat_hwp_invoker.H>
-
 //  MVPD
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
-#include "host_proc_pcie_scominit.H"
-#include <p9_pcie_scominit.H>
+#include <fapi2/plat_hwp_invoker.H>
+#include <p9_rng_init_phase2.H>
 
-namespace   ISTEP_08
+namespace   ISTEP_16
 {
 
 using   namespace   ISTEP;
@@ -70,75 +69,49 @@ using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 
-//*****************************************************************************
-// wrapper function to call proc_pcie_scominit
 //******************************************************************************
-void*    call_proc_pcie_scominit( void    *io_pArgs )
+// wrapper function to call host_secure_rng
+//******************************************************************************
+void* call_host_secure_rng( void *io_pArgs )
 {
-    errlHndl_t          l_errl      =   NULL;
-    IStepError          l_StepError;
 
+    errlHndl_t l_err = NULL;
+    IStepError l_StepError;
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_secure_rng entry" );
     //
     //  get a list of all the procs in the system
     //
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
+    // Loop through all processors including master
     for (const auto & l_cpu_target: l_cpuTargetList)
     {
-        // Compute the PCIE attribute config on all systems
-        l_errl = computeProcPcieConfigAttrs(l_cpu_target);
-        if(l_errl != NULL)
-        {
-            // Any failure to configure PCIE that makes it to this handler
-            // implies a firmware bug that should be fixed, everything else
-            // is tolerated internally (usually as disabled PHBs)
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       ERR_MRK "call_proc_pcie_scominit> Failed in call to "
-                       "computeProcPcieConfigAttrs for target with HUID = "
-                       "0x%08X",
-                       l_cpu_target->getAttr<TARGETING::ATTR_HUID>() );
-            l_StepError.addErrorDetails(l_errl);
-            errlCommit( l_errl, ISTEP_COMP_ID );
-        }
+      const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
+                l_cpu_target);
 
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2_proc_target(
-                                                                 l_cpu_target);
+      TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+          "Running host_secure_rng HWP on processor target %.8X",
+          TARGETING::get_huid(l_cpu_target) );
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Running p9_pcie_scominit HWP on "
-                   "target HUID %.8X", TARGETING::get_huid(l_cpu_target) );
+      FAPI_INVOKE_HWP(l_err, p9_rng_init_phase2, l_fapi2_proc_target);
+      if(l_err)
+      {
+          TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR: call p9_rng_init_phase2, PLID=0x%x",
+                    l_err->plid());
+          l_StepError.addErrorDetails(l_err);
+          errlCommit(l_err, HWPF_COMP_ID);
+      }
 
-        //  call the HWP with each fapi2::Target
-        FAPI_INVOKE_HWP(l_errl, p9_pcie_scominit, l_fapi2_proc_target);
+    } // end of going through all processors
 
-        if (l_errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR 0x%.8X : p9_pcie_scominit HWP returned error",
-                       l_errl->reasonCode() );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_secure_rng exit");
 
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
-
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_errl );
-
-            // Commit Error
-            errlCommit( l_errl, HWPF_COMP_ID );
-
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS :  proc_pcie_scominit HWP" );
-        }
-    } // end of looping through all processors
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-             "call_proc_pcie_scominit exit" );
-
-    // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }
-};
+
+};   // end namespace

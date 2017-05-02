@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/call_host_set_voltages.C $             */
+/* $Source: src/usr/isteps/istep10/call_host_set_voltages.C $             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -47,7 +47,7 @@ using namespace TARGETING;
 using namespace ERRORLOG;
 using namespace ISTEP_ERROR;
 
-namespace ISTEP_08
+namespace ISTEP_10
 {
 
 //*****************************************************************************

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/host_proc_pcie_scominit.C $            */
+/* $Source: src/usr/isteps/istep10/host_proc_pcie_scominit.C $            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -48,7 +48,7 @@
 #include <hwas/common/deconfigGard.H>
 
 
-namespace   ISTEP_08
+namespace   ISTEP_10
 {
 
 using   namespace   ISTEP;

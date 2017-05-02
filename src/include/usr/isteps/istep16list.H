@@ -71,14 +71,14 @@ void*    call_host_activate_slave_cores( void    *io_pArgs );
 
 
 /**
- *  @brief   p9_rng_init_phase2
+ *  @brief   host_secure_rng
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any errlogs to istep
  *
  */
-void*    call_p9_rng_init_phase2( void    *io_pArgs );
+void*    call_host_secure_rng( void    *io_pArgs );
 
 /**
  *  @brief   mss_scrub
@@ -122,8 +122,8 @@ namespace   INITSERVICE
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
         {
-                ISTEPNAME(16,03,"p9_rng_init_phase2"),
-                ISTEP_16::call_p9_rng_init_phase2,
+                ISTEPNAME(16,03,"host_secure_rng"),
+                ISTEP_16::call_host_secure_rng,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
