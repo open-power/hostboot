@@ -70,7 +70,7 @@ class I2CTest: public CxxTest::TestSuite
          *      Add other targets to this testcase when their support is
          *      added.
          */
-        void testI2CDirect ( void )
+        void _testI2CDirect ( void ) //@fixme-RTC:123019
         {
             errlHndl_t err = NULL;
             int cmds = 0;
@@ -354,7 +354,7 @@ class I2CTest: public CxxTest::TestSuite
          *      Add other targets to this testcase when their support is
          *      added.
          */
-        void testI2COffset ( void )
+        void _testI2COffset ( void ) //@fixme-RTC:123019
         {
             errlHndl_t err = NULL;
             int cmds = 0;
@@ -631,7 +631,7 @@ class I2CTest: public CxxTest::TestSuite
          *      needed by PHYP to ensure that the I2C masters are
          *      setup correctly on the system.
          */
-        void testI2CSetupActiveMasters ( void )
+        void _testI2CSetupActiveMasters ( void ) //@fixme-RTC:123019
         {
             errlHndl_t err = NULL;
             int fails = 0;
@@ -662,7 +662,7 @@ class I2CTest: public CxxTest::TestSuite
          *      Test that i2cSetBusVariables() and the functions it uses
          *      are returning expected values.
          */
-        void testI2cSetBusVariables ( void )
+        void _testI2cSetBusVariables ( void ) //@fixme-RTC:123019
         {
             errlHndl_t err = NULL;
             int fails = 0;
@@ -820,7 +820,7 @@ class I2CTest: public CxxTest::TestSuite
          *      to be sure that an error is returned, and that the error returned
          *      is the correct error.
          */
-        void testI2CInvalidTarget ( void )
+        void _testI2CInvalidTarget ( void ) //@fixme-RTC:123019
         {
             errlHndl_t err = NULL;
             int fails = 0;
@@ -864,7 +864,7 @@ class I2CTest: public CxxTest::TestSuite
          *      This test will pass in an invalid Operation type.  It
          *      is expected that an error log is to be returned.
          */
-        void testI2CInvalidOperation ( void )
+        void _testI2CInvalidOperation ( void ) //@fixme-RTC:123019
         {
             errlHndl_t err = NULL;
             int64_t fails = 0, num_ops = 0;
@@ -921,7 +921,7 @@ class I2CTest: public CxxTest::TestSuite
                        fails, num_ops );
         }
 
-        void testI2cForceReset(void)
+        void _testI2cForceReset(void) //@fixme-RTC:123019
         {
 
 
@@ -1031,24 +1031,36 @@ class I2CTest: public CxxTest::TestSuite
 
         void test_getDeviceInfo( void )
         {
-            TRACFCOMP(g_trac_i2c, "test_getDeviceInfo - Start");
-
-            TARGETING::TargetService& tS = TARGETING::targetService();
-            TARGETING::Target * sys = NULL;
-            tS.getTopLevelTarget(sys);
+            TRACFCOMP(g_trac_i2c, ENTER_MRK"test_getDeviceInfo");
 
             std::vector<I2C::DeviceInfo_t> l_deviceInfo;
 
-            getDeviceInfo( sys, l_deviceInfo);
+            // Loop through every chip
+            TARGETING::TargetHandleList allchips;
+            TARGETING::getAllChips( allchips, TARGETING::TYPE_NA );
+            for( auto &tgt : allchips )
+            {
+                getDeviceInfo( tgt, l_deviceInfo);
+            }
 
             std::vector<I2C::DeviceInfo_t>::const_iterator devInfo_iter;
             for(devInfo_iter = l_deviceInfo.begin();
                 devInfo_iter != l_deviceInfo.end();
                 devInfo_iter++)
             {
-                TRACFCOMP(g_trac_i2c, "Found Device Info: Engine %d",devInfo_iter->engine);
+                TRACFCOMP(g_trac_i2c, "Found Device Info: Engine=%d, Port=%d",
+                          devInfo_iter->engine,
+                          devInfo_iter->masterPort);
+                TRACFCOMP(g_trac_i2c, "Type=%.2X, addr=%X, slavePort=%d",
+                          devInfo_iter->deviceType,
+                          devInfo_iter->addr,
+                          devInfo_iter->slavePort);
+                TRACFCOMP(g_trac_i2c, "busFreqKhz=%d, purpose=%X",
+                          devInfo_iter->busFreqKhz,
+                          devInfo_iter->devicePurpose)
             }
 
+            TRACFCOMP(g_trac_i2c, EXIT_MRK"test_getDeviceInfo");
         }
 
         /**

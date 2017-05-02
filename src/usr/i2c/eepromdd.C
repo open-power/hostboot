@@ -1843,7 +1843,7 @@ class isSameEeprom
 void add_to_list( std::list<EepromInfo_t>& i_list,
                   TARGETING::Target* i_targ )
 {
-    TRACDCOMP(g_trac_eeprom,"Targ %.8X",TARGETING::get_huid(i_targ));
+    TRACFCOMP(g_trac_eeprom,"Targ %.8X",TARGETING::get_huid(i_targ));
 
     // try all defined types of EEPROMs
     for( eeprom_chip_types_t eep_type = FIRST_CHIP_TYPE;
@@ -1906,6 +1906,7 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
 
         if( !found_eep )
         {
+            TRACDCOMP(g_trac_eeprom,"eep_type=%d not found",eep_type);
             //nothing to do
             continue;
         }
@@ -1916,6 +1917,7 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
                                            exists );
         if( !exists )
         {
+            TRACDCOMP(g_trac_eeprom,"no master path");
             continue;
         }
 
@@ -1925,6 +1927,7 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
         if( NULL == i2cm )
         {
             //not sure how this could happen, but just skip it
+            TRACDCOMP(g_trac_eeprom,"no target");
             continue;
         }
 
@@ -1933,6 +1936,7 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
         TARGETING::targetService().getTopLevelTarget( sys );
         if( i2cm == sys )
         {
+            TRACDCOMP(g_trac_eeprom,"sys target");
             continue;
         }
 
@@ -1955,6 +1959,7 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
             if( (eep_info.engine > I2C_BUS_MAX_ENGINE(speeds))
                 || (eep_info.port > I2C_BUS_MAX_PORT(speeds)) )
             {
+                TRACDCOMP(g_trac_eeprom,"bad engine/port");
                 continue;
             }
             eep_info.busFreq = speeds[eep_info.engine][eep_info.port];
@@ -1962,6 +1967,7 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
         }
         else
         {
+            TRACDCOMP(g_trac_eeprom,"eep_type=%d, Speed=0",eep_type);
             continue;
         }
 
@@ -1973,11 +1979,11 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
         {
             // didn't find it in our list so stick it into the output list
             i_list.push_back(eep_info);
-            TRACDCOMP(g_trac_eeprom,"--Adding i2cm=%.8X, type=%d, eng=%d, port=%d, addr=%.2X for %.8X", TARGETING::get_huid(i2cm),eep_type,eepromData.engine,eepromData.port, eep_info.devAddr,  TARGETING::get_huid(eep_info.assocTarg));
+            TRACFCOMP(g_trac_eeprom,"--Adding i2cm=%.8X, type=%d, eng=%d, port=%d, addr=%.2X for %.8X", TARGETING::get_huid(i2cm),eep_type,eepromData.engine,eepromData.port, eep_info.devAddr,  TARGETING::get_huid(eep_info.assocTarg));
         }
         else
         {
-            TRACDCOMP(g_trac_eeprom,"--Skipping duplicate i2cm=%.8X, type=%d, eng=%d, port=%d, addr=%.2X for %.8X", TARGETING::get_huid(i2cm),eep_type,eepromData.engine,eepromData.port, eep_info.devAddr,  TARGETING::get_huid(eep_info.assocTarg));
+            TRACFCOMP(g_trac_eeprom,"--Skipping duplicate i2cm=%.8X, type=%d, eng=%d, port=%d, addr=%.2X for %.8X", TARGETING::get_huid(i2cm),eep_type,eepromData.engine,eepromData.port, eep_info.devAddr,  TARGETING::get_huid(eep_info.assocTarg));
         }
     }
 }
@@ -1988,7 +1994,7 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
  */
 void getEEPROMs( std::list<EepromInfo_t>& o_info )
 {
-    TRACDCOMP(g_trac_eeprom,">>getEEPROMs()");
+    TRACFCOMP(g_trac_eeprom,">>getEEPROMs()");
 
     // We only want to have a single entry in our list per
     //  physical EEPROM.  Since multiple targets could be
@@ -2056,7 +2062,7 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
         add_to_list( o_info, *dimm_itr );
     }
 
-    TRACDCOMP(g_trac_eeprom,"<<getEEPROMs()");
+    TRACFCOMP(g_trac_eeprom,"<<getEEPROMs()");
 }
 
 

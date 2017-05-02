@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -656,6 +656,7 @@ class EEPROMTest: public CxxTest::TestSuite
          */
         void test_getEEPROMs( void )
         {
+            TRACFCOMP( g_trac_eeprom, ENTER_MRK"test_getEEPROMs" );
             std::list<EEPROM::EepromInfo_t> info;
             getEEPROMs( info );
             for( std::list<EEPROM::EepromInfo_t>::iterator eep = info.begin();
@@ -664,6 +665,7 @@ class EEPROMTest: public CxxTest::TestSuite
             {
                 TRACFCOMP( g_trac_eeprom, "Found EEPROM: Master=%.8X, Eng=%d, Port=%d, Freq=%d, Addr=%.2X, Dev=%d, Targ=%.8X", TARGETING::get_huid(eep->i2cMaster), eep->engine, eep->port, eep->busFreq, eep->devAddr, eep->device, eep->assocTarg );
             }
+            TRACFCOMP( g_trac_eeprom, EXIT_MRK"test_getEEPROMs" );
         }
 
 };
