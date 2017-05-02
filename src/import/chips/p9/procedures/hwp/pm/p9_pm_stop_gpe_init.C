@@ -307,7 +307,7 @@ fapi2::ReturnCode stop_gpe_init(
                  l_iar,
                  l_ir,
                  l_timeout_in_MS);
-        fapi2::delay(SGPE_POLLTIME_MS * 1000, SGPE_POLLTIME_MCYCLES * 1000 * 1000);
+        fapi2::delay(SGPE_POLLTIME_MS * 1000  * 1000, SGPE_POLLTIME_MCYCLES * 1000 * 1000);
     }
     while((!((l_occ_flag.getBit<p9hcd::SGPE_ACTIVE>() == 1) &&
              (l_xsr.getBit<p9hcd::HALTED_STATE>() == 0))) &&
@@ -366,7 +366,7 @@ fapi2::ReturnCode stop_gpe_reset(
     do
     {
         FAPI_TRY(getScom(i_target, PU_GPE3_GPEXIXSR_SCOM, l_data64));
-        fapi2::delay(SGPE_POLLTIME_MS * 1000, SGPE_POLLTIME_MCYCLES * 1000 * 1000);
+        fapi2::delay(SGPE_POLLTIME_MS * 1000 * 1000, SGPE_POLLTIME_MCYCLES * 1000 * 1000);
     }
     while((l_data64.getBit<p9hcd::HALTED_STATE>() == 0) && (--l_timeout_in_MS != 0));
 
