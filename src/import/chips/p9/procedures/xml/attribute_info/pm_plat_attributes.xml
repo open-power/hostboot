@@ -1902,4 +1902,26 @@
   </attribute>
   <!-- ********************************************************************* -->
 
+  <attribute>
+      <id>ATTR_VDM_VID_COMPARE_BIAS_0P5PCT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      VDM Voltage Compare Bias - % of bias (signed twos
+      complement in
+      0.5 percent steps) that is applied to the #W VDM
+      VID Compare before placement in the respective Pstate
+      Paramter Blocks that will be consumed
+      by Hcode.
+      Array of 4 entries: 0 = PowerSave, 1 =
+      Nominal; 2 = Turbo; 3 = UltraTurbo
+      If index 4 is non-zero, the
+      other entries are considered
+      valid.Producer:MRWB.
+      </description>
+      <valueType>int8</valueType>
+      <array>4</array>
+      <initToZero/>
+      <platInit/>
+  </attribute> 
+
 </attributes>
