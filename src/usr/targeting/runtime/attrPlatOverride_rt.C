@@ -91,6 +91,7 @@ void applyTempOverrides()
 {
     TRACFCOMP(g_trac_targeting, ENTER_MRK"applyTempOverrides");
     errlHndl_t l_err = NULL;
+    bool l_usingStash = false;
 
     // Get a pointer to the reserved memory where HB
     //  saved the overrides during boot
@@ -108,6 +109,7 @@ void applyTempOverrides()
         }
         else
         {
+            //@fixme-RTC:169478-Remove this workaround once HDAT+PHYP is ready
             // grab the data we stashed at the end of the targeting data
             l_overAddr = g_hostInterfaces
               ->get_reserved_mem("ibm,hbrt-target-image",0);
@@ -116,6 +118,7 @@ void applyTempOverrides()
                 l_overAddr += (1*MEGABYTE - 64*KILOBYTE);
                 TRACFCOMP(g_trac_targeting, "NULL from get_reserved_mem, using stashed value at %.llX instead", l_overAddr );
                 l_overPtr = reinterpret_cast<uint8_t*>(l_overAddr);
+                l_usingStash = true;
             }
         }
     }
@@ -141,7 +144,16 @@ void applyTempOverrides()
     if (l_err)
     {
         TRACFCOMP(g_trac_targeting," HBRT: Failed applying overrides");
-        errlCommit( l_err, TARG_COMP_ID );
+        if( l_usingStash )
+        {
+            // if the new RHB is in use, this will always fail
+            //  so just delete the error
+            delete l_err;
+        }
+        else
+        {
+            errlCommit( l_err, TARG_COMP_ID );
+        }
     }
 
     TRACFCOMP(g_trac_targeting, EXIT_MRK"applyTempOverrides");
