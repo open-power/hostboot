@@ -27,6 +27,8 @@
 
 #ifdef _AIX
     #define __BYTE_ORDER __BIG_ENDIAN
+#elif __SKIBOOT__
+	#include <skiboot.h>
 #else
     #include <endian.h>
 #endif

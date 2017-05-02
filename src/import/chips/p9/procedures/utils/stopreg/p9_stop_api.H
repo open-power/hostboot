@@ -27,6 +27,10 @@
 
 #include <stdint.h>
 
+#ifdef __SKIBOOT__
+   #include <skiboot.h>
+#endif
+
 ///
 /// @file   p9_stop_api.H
 /// @brief  describes STOP API which  create/manipulate STOP image.
