@@ -50,6 +50,7 @@
 fapi2::ReturnCode p9_sys_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     fapi2::ReturnCode l_rc;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_OBUS>> l_obus_chiplets;
     FAPI_DBG("Start");
 
@@ -57,7 +58,7 @@ fapi2::ReturnCode p9_sys_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE
     {
         // Invoke IOO (OBUS FBC IO) SCOM initfiles
         FAPI_DBG("Invoking p9.fbc.ioo_tl.scom.initfile...");
-        FAPI_EXEC_HWP(l_rc, p9_fbc_ioo_tl_scom, i_target);
+        FAPI_EXEC_HWP(l_rc, p9_fbc_ioo_tl_scom, i_target, FAPI_SYSTEM);
 
         if (l_rc)
         {
