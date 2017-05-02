@@ -422,7 +422,14 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
                         const HWAS::DeconfigEnum i_deconfigState,
                         const HWAS::GARD_ErrorType i_gardErrorType)
 {
-
+    if (i_target == nullptr)
+    {
+        TRACFCOMP(g_trac_errl, ENTER_MRK
+                  "addHwCallout called with NULL target");
+        addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                             HWAS::SRCI_PRIORITY_HIGH);
+        return;
+    }
 
     if (i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
     {
