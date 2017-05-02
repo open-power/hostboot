@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/call_proc_cen_ref_clk_enable.C $       */
+/* $Source: src/usr/isteps/istep10/call_proc_cen_ref_clk_enable.C $       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,7 +65,7 @@ using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
 using namespace TARGETING;
 
-namespace ISTEP_08
+namespace ISTEP_10
 {
 
 uint8_t getMembufsAttachedBitMask( TARGETING::Target * i_procChipHandle  );

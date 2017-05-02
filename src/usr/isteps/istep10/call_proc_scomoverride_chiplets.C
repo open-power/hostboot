@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/call_p9_rng_init_phase1.C $            */
+/* $Source: src/usr/isteps/istep10/call_proc_scomoverride_chiplets.C $    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
-   @file call_p9_rng_init_phase1.C
+   @file call_proc_scomoverride_chiplets.C
  *
  *  Support file for IStep: nest_chiplets
  *   Nest Chiplets
@@ -50,15 +50,20 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
+#include    <fapi2/target.H>
+#include    <fapi2/plat_hwp_invoker.H>
+#include    <errl/errlmanager.H>
+
 //  MVPD
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
-#include <fapi2/plat_hwp_invoker.H>
-#include <p9_rng_init_phase1.H>
 
-namespace   ISTEP_08
+#include <p9_scomoverride_chiplets.H>
+
+
+namespace   ISTEP_10
 {
 
 using   namespace   ISTEP;
@@ -66,49 +71,59 @@ using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 
-//******************************************************************************
-// wrapper function to call proc_chiplet_enable_ridi
-//******************************************************************************
-void* call_p9_rng_init_phase1( void *io_pArgs )
+//*****************************************************************************
+// wrapper function to call proc_scomoverride_chiplets
+//*****************************************************************************
+void* call_proc_scomoverride_chiplets( void *io_pArgs )
 {
-
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_errl = NULL;
     IStepError l_StepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_p9_rng_init_phase1 entry" );
+             "call_proc_scomoverride_chiplets entry" );
+
     //
     //  get a list of all the procs in the system
     //
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    // Loop through all processors including master
+    // Loop through all processors, including master
     for (const auto & l_cpu_target: l_cpuTargetList)
     {
-      const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
-                l_cpu_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+            l_fapi2_proc_target (l_cpu_target);
 
-      TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-          "Running p9_rng_init_phase1 HWP on processor target %.8X",
-          TARGETING::get_huid(l_cpu_target) );
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running p9_scomoverride_chiplets HWP on processor target %.8X",
+                TARGETING::get_huid(l_cpu_target) );
 
-      FAPI_INVOKE_HWP(l_err, p9_rng_init_phase1, l_fapi2_proc_target);
-      if(l_err)
-      {
-          TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR: call p9_rng_init_phase1, PLID=0x%x",
-                    l_err->plid());
-          l_StepError.addErrorDetails(l_err);
-          errlCommit(l_err, HWPF_COMP_ID);
-      }
+        FAPI_INVOKE_HWP(l_errl, p9_scomoverride_chiplets, l_fapi2_proc_target);
 
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "ERROR 0x%.8X : proc_scomoverride_chiplets "
+                     "HWP returns error",
+                     l_errl->reasonCode() );
+
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_errl );
+
+            // Commit Error
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "SUCCESS :  proc_scomoverride_chiplets HWP" );
+        }
     } // end of going through all processors
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_p9_rng_init_phase1 exit");
+             "call_proc_scomoverride_chiplets exit" );
 
+    // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }
-
-};   // end namespace
+};

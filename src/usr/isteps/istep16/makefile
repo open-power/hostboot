@@ -41,7 +41,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 
 OBJS += call_host_activate_master.o
 OBJS += call_host_activate_slave_cores.o
-OBJS += call_p9_rng_init_phase2.o
+OBJS += call_host_secure_rng.o
 OBJS += call_mss_scrub.o
 OBJS += call_host_ipl_complete.o
 

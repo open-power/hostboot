@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/call_proc_enable_osclite.C $           */
+/* $Source: src/usr/isteps/istep10/call_host_rng_bist.C $                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
-   @file call_proc_enable_osclite.C
+   @file call_host_rng_bist.C
  *
  *  Support file for IStep: nest_chiplets
  *   Nest Chiplets
@@ -41,7 +41,6 @@
 #include    <errl/errlentry.H>
 
 #include    <isteps/hwpisteperror.H>
-
 #include    <errl/errludtarget.H>
 
 #include    <initservice/isteps_trace.H>
@@ -56,13 +55,10 @@
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
+#include <fapi2/plat_hwp_invoker.H>
+#include <p9_rng_init_phase1.H>
 
-//  --  prototype   includes    --
-//  Add any customized routines that you don't want overwritten into
-//      "start_clocks_on_nest_chiplets_custom.C" and include
-//      the prototypes here.
-//  #include    "nest_chiplets_custom.H"
-namespace   ISTEP_08
+namespace   ISTEP_10
 {
 
 using   namespace   ISTEP;
@@ -70,27 +66,49 @@ using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 
-//*****************************************************************************
-// wrapper function to call proc_enable_osclite
-//*****************************************************************************
-void* call_proc_enable_osclite(void *io_pArgs)
+//******************************************************************************
+// wrapper function to call host_rng_bist
+//******************************************************************************
+void* call_host_rng_bist( void *io_pArgs )
 {
-    errlHndl_t l_errl = NULL;
-    IStepError  l_stepError;
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_enable_osclite" );
 
-    //@TODO RTC:144076
-    //call p9_enable_osclite
-    //Cumulus only
-    //FAPI_INVOKE_HWP(l_errl,p9_enable_osclite);
-    if(l_errl)
+    errlHndl_t l_err = NULL;
+    IStepError l_StepError;
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_rng_bist entry" );
+    //
+    //  get a list of all the procs in the system
+    //
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
+
+    // Loop through all processors including master
+    for (const auto & l_cpu_target: l_cpuTargetList)
     {
-        l_stepError.addErrorDetails(l_errl);
-        errlCommit(l_errl, HWPF_COMP_ID);
-    }
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_enable_osclite" );
-    return l_stepError.getErrorHandle();
+      const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
+                l_cpu_target);
+
+      TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+          "Running p9_rng_init_phase1 HWP on processor target %.8X",
+          TARGETING::get_huid(l_cpu_target) );
+
+      FAPI_INVOKE_HWP(l_err, p9_rng_init_phase1, l_fapi2_proc_target);
+      if(l_err)
+      {
+          TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR: call p9_rng_init_phase1, PLID=0x%x",
+                    l_err->plid());
+          l_StepError.addErrorDetails(l_err);
+          errlCommit(l_err, HWPF_COMP_ID);
+      }
+
+    } // end of going through all processors
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_rng_bist exit");
+
+    return l_StepError.getErrorHandle();
 }
-};
+
+};   // end namespace

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/nest/p9_chiplet_scominit.H $ */
+/* $Source: src/import/chips/p9/procedures/hwp/nest/p9_chiplet_fabric_scominit.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,9 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file p9_chiplet_scominit.H
+/// @file p9_chiplet_fabric_scominit.H
 ///
-/// @brief SCOM inits to all chiplets (sans Quad/fabric)
+/// @brief apply fabric SCOM inits
 ///
 
 //
@@ -36,8 +36,8 @@
 // *HWP Consumed by : HB
 //
 
-#ifndef _P9_CHIPLET_SCOMINIT_H_
-#define _P9_CHIPLET_SCOMINIT_H_
+#ifndef _P9_CHIPLET_FABRIC_SCOMINIT_H_
+#define _P9_CHIPLET_FABRIC_SCOMINIT_H_
 
 //------------------------------------------------------------------------------
 // Includes
@@ -48,7 +48,7 @@
 // Structure definitions
 //------------------------------------------------------------------------------
 
-typedef fapi2::ReturnCode (*p9_chiplet_scominit_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+typedef fapi2::ReturnCode (*p9_chiplet_fabric_scominit_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -57,13 +57,13 @@ typedef fapi2::ReturnCode (*p9_chiplet_scominit_FP_t)(const fapi2::Target<fapi2:
 extern "C"
 {
 
-/// @brief SCOM inits to all chiplets (sans Quad/fabric)
+/// @brief apply fabric SCOM inits
 ///
 /// @param[in] i_target Reference to processor chip target
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-    fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    fapi2::ReturnCode p9_chiplet_fabric_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 } // extern "C"
 
-#endif // _P9_CHIPLET_SCOMINIT_H_
+#endif // _P9_CHIPLET_FABRIC_SCOMINIT_H_
 

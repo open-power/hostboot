@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,7 @@
 //------------------------------------------------------------------------------
 /// @file  p9_chiplet_enable_ridi.H
 ///
-/// @brief Enable RI/DI chip wide
+/// @brief Enable RI/DI for all IO chiplets (excluding XBUS)
 //------------------------------------------------------------------------------
 // *HWP HW Owner        : Abhishek Agarwal <abagarw8@in.ibm.com>
 // *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
@@ -46,7 +46,7 @@
 typedef fapi2::ReturnCode (*p9_chiplet_enable_ridi_FP_t)(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
-/// @brief Drop RI/DI for all chiplets being used (A, X, O, Pcie, DMI)
+/// @brief Drop RI/DI for O, PCIE, MC
 ///
 /// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
 /// @return  FAPI2_RC_SUCCESS if success, else error code.

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/call_proc_obus_scominit.C $            */
+/* $Source: src/usr/isteps/istep10/call_proc_chiplet_enable_ridi.C $      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
-   @file call_proc_obus_scominit.C
+   @file call_proc_chiplet_enable_ridi.C
  *
  *  Support file for IStep: nest_chiplets
  *   Nest Chiplets
@@ -50,19 +50,13 @@
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
 
-#include  <pbusLinkSvc.H>
-#include  <fapi2/target.H>
-#include  <fapi2/plat_hwp_invoker.H>
+#include <p9_chiplet_enable_ridi.H>
 
-//  MVPD
-#include <devicefw/userif.H>
-#include <vpd/mvpdenums.H>
 
-#include <config.h>
-#include <p9_io_obus_scominit.H>
-
-namespace   ISTEP_08
+namespace   ISTEP_10
 {
 
 using   namespace   ISTEP;
@@ -71,53 +65,47 @@ using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 
 //******************************************************************************
-// wrapper function to call proc_obus_scominit
+// wrapper function to call proc_chiplet_enable_ridi
 //******************************************************************************
-void* call_proc_obus_scominit( void *io_pArgs )
+void* call_proc_chiplet_enable_ridi( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
     IStepError l_StepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-             "call_proc_obus_scominit entry" );
+               "call_proc_chiplet_enable_ridi entry" );
+    //
+    //  get a list of all the procs in the system
+    //
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    do {
+    // Loop through all processors including master
+    for (const auto & l_cpu_target: l_cpuTargetList)
+    {
+      const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
+                l_cpu_target);
 
-        // Get all OBUS targets
-        TARGETING::TargetHandleList l_obusTargetList;
-        getAllChiplets(l_obusTargetList, TYPE_OBUS);
+      TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+          "Running p9_chiplet_enable_ridi HWP on processor target %.8X",
+          TARGETING::get_huid(l_cpu_target) );
 
-        for (const auto & l_obusTarget: l_obusTargetList)
-        {
+      FAPI_INVOKE_HWP(l_err, p9_chiplet_enable_ridi, l_fapi2_proc_target);
+      if(l_err)
+      {
+          TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR: call p9_chiplet_enable_ridi, PLID=0x%x",
+                    l_err->plid());
+          l_StepError.addErrorDetails(l_err);
+          errlCommit(l_err, HWPF_COMP_ID);
+      }
 
-            const fapi2::Target<fapi2::TARGET_TYPE_OBUS>
-                l_obusFapi2Target(
-                (const_cast<TARGETING::Target*>(l_obusTarget)));
+    } // end of going through all processors
 
-
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "Running p9_io_obus_scominit HWP on "
-                     "This OBUS target %.8X",
-                       TARGETING::get_huid(l_obusTarget));
-
-            FAPI_INVOKE_HWP(l_err, p9_io_obus_scominit,
-                            l_obusFapi2Target);
-
-            if(l_err)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                         "ERROR 0x%x: returned from p9_io_obus_scominit on "
-                         "OBUS target %.8X, PLID=0x%x",
-                        TARGETING::get_huid(l_obusTarget),
-                        l_err->plid());
-                l_StepError.addErrorDetails(l_err);
-                errlCommit(l_err, HWPF_COMP_ID);
-            }
-        } // end of looping through Obus pairs
-    } while (0);
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-             "call_proc_obus_scominit exit" );
+               "call_proc_chiplet_enable_ridi exit");
 
     return l_StepError.getErrorHandle();
 }
-};
+
+};   // end namespace
