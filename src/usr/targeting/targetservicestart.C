@@ -41,6 +41,7 @@
 // Other components
 #include <sys/misc.h>
 #include <sys/task.h>
+#include <sys/sync.h>
 #include <targeting/common/trace.H>
 #include <targeting/adapters/assertadapter.H>
 #include <initservice/taskargs.H>
@@ -359,6 +360,22 @@ static void initializeAttributes(TargetService& i_targetService,
                 l_chip->setAttr<ATTR_XSCOM_VIRTUAL_ADDR>(0);
                 l_chip->setAttr<ATTR_HOMER_VIRT_ADDR>(0);
                 //TODO RTC:172534 Need to clear volatile attributes during MPIPL for cumulus
+            }
+
+            TargetHandleList tpms;
+            TARGETING::PredicateCTM tpmFilter(CLASS_CHIP, TYPE_TPM);
+            i_targetService.getAssociated(
+                tpms,
+                l_pTopLevel,
+                TargetService::CHILD,
+                TARGETING::TargetService::ALL,
+                &tpmFilter);
+            for (auto & tpm : tpms)
+            {
+                tpm->setAttr<ATTR_HB_TPM_INIT_ATTEMPTED>(0);
+                tpm->setAttr<ATTR_HB_TPM_LOG_MGR_PTR>(0);
+                auto tpmMutex=tpm->getHbMutexAttr<ATTR_HB_TPM_MUTEX>();
+                mutex_init(tpmMutex);
             }
         }
         else
