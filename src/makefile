@@ -253,8 +253,7 @@ TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
 # @thi - Disable to isolate  libtestfapi2.so crash
 #TESTCASE_MODULES += testfapi2
 
-#@TODO RTC: 123019 (p9 work in progress)
-#TESTCASE_MODULES += testi2c
+TESTCASE_MODULES += testi2c
 
 #TESTCASE_MODULES += testsbe   @fixme RTC:173733
 TESTCASE_MODULES += testsbeio

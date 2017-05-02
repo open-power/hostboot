@@ -3762,7 +3762,7 @@ errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
 void getMasterInfo( const TARGETING::Target* i_chip,
                     std::list<MasterInfo_t>& o_info )
 {
-    TRACDCOMP(g_trac_i2c,"getMasterInfo(%.8X)",TARGETING::get_huid(i_chip));
+    TRACFCOMP(g_trac_i2c,"getMasterInfo(%.8X)",TARGETING::get_huid(i_chip));
     TARGETING::TYPE l_type = i_chip->getAttr<TARGETING::ATTR_TYPE>();
     for( uint32_t engine = 0;
          engine < I2C_BUS_ATTR_MAX_ENGINE;
@@ -3786,7 +3786,7 @@ void getMasterInfo( const TARGETING::Target* i_chip,
         // Local Bus = PIB_CLK / 4
         info.freq = info.freq/16; //convert nest to local bus
 
-        TRACDCOMP(g_trac_i2c,"getMasterInfo(%.8X): pushing back engine=%d, scomAddr=0x%X",TARGETING::get_huid(i_chip), engine, info.scomAddr);
+        TRACFCOMP(g_trac_i2c,"getMasterInfo(%.8X): pushing back engine=%d, scomAddr=0x%X",TARGETING::get_huid(i_chip), engine, info.scomAddr);
 
         o_info.push_back(info);
     }
@@ -3821,15 +3821,18 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
          i2cm != l_i2cInfo.end();
          ++i2cm )
     {
+        TRACDCOMP(g_trac_i2c,"i2c loop - eng=%.8X", TARGETING::get_huid(i_i2cMaster));
         /* I2C Busses */
         std::list<EEPROM::EepromInfo_t>::iterator l_eep = l_eepromInfo.begin();
         while( l_eep != l_eepromInfo.end() )
         {
+            TRACDCOMP(g_trac_i2c,"eeprom loop - eng=%.8X, port=%.8X", TARGETING::get_huid(l_eep->i2cMaster), l_eep->engine );
             DeviceInfo_t l_currentDI;
 
             //ignore the devices that aren't on the current target
             if( l_eep->i2cMaster != i_i2cMaster )
             {
+                TRACDCOMP(g_trac_i2c,"skipping unmatched i2cmaster");
                 l_eep = l_eepromInfo.erase(l_eep);
                 continue;
             }
@@ -3837,6 +3840,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
             //skip the devices that are on a different engine
             else if( l_eep->engine != i2cm->engine)
             {
+                TRACDCOMP(g_trac_i2c,"skipping umatched engine");
                 ++l_eep;
                 continue;
             }
@@ -3864,6 +3868,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                     break;
             }
 
+            TRACDCOMP(g_trac_i2c,"Adding addr=%X", l_eep->devAddr);
             o_deviceInfo.push_back(l_currentDI);
             l_eep = l_eepromInfo.erase(l_eep);
         } //end of eeprom iter
