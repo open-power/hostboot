@@ -115,7 +115,8 @@ fapi2::ReturnCode pstate_gpe_init(
         FAPI_TRY(getScom(i_target, PU_GPE2_GPEXIXSR_SCOM, l_xsr));
         FAPI_DBG("OCC Scratch2: 0x%016lx; XSR: 0x%016lx Timeout: %d",
                  l_occ_scratch2, l_xsr, l_timeout_counter);
-        fapi2::delay(PGPE_POLLTIME_MS * 1000, PGPE_POLLTIME_MCYCLES * 1000 * 1000);
+        // fapi2::delay takes ns as the arg
+        fapi2::delay(PGPE_POLLTIME_MS * 1000 * 1000, PGPE_POLLTIME_MCYCLES * 1000 * 1000);
     }
     while((l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>() != 1) &&
           (l_xsr.getBit<p9hcd::HALTED_STATE>() != 1) &&
@@ -195,7 +196,7 @@ fapi2::ReturnCode pstate_gpe_reset(
     do
     {
         FAPI_TRY(getScom(i_target, PU_GPE2_GPEXIXSR_SCOM, l_data64));
-        fapi2::delay(PGPE_POLLTIME_MS * 1000, PGPE_POLLTIME_MCYCLES * 1000 * 1000);
+        fapi2::delay(PGPE_POLLTIME_MS * 1000 * 1000, PGPE_POLLTIME_MCYCLES * 1000 * 1000);
     }
     while((l_data64.getBit<p9hcd::HALTED_STATE>() == 0) &&
           (--l_timeout_in_MS != 0));
