@@ -38,6 +38,21 @@
 
 <hwpErrors>
 
+  <hwpError>
+    <rc>RC_MSS_BAD_CL_CAST</rc>
+    <description>
+        Calculated Cas Latency exceeds the 8-bit limit. Error calculating
+    </description>
+    <ffdc>CL</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCA_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
 
   <hwpError>
     <rc>RC_MSS_INVALID_TIMING_VALUE</rc>
