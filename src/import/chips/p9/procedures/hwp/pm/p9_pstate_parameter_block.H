@@ -127,7 +127,7 @@ typedef struct
 
 //Section added back by ssrivath
 // START OF PARMS REQUIRED VPD parsing procedures
-//#define S132A_POINTS       4 - Replaced by  VPD_PV_POINTS
+//#define S132A_POINTS       4 - Replaced by  NUM_OP_POINTS
 #define PSTATE_STEPSIZE    1
 #define EVRM_DELAY_NS      100
 #define DEAD_ZONE_5MV      20       // 100mV
@@ -319,16 +319,18 @@ proc_get_mvpd_iddq ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 /// ----------------------------------------------------------------
 /// @brief Get #W data and put into array
 /// @param[in]    i_target          => Chip Target
-/// @param[in]    i_poundv_bucketId => Pound V bucket id
+/// @param[in]    i_poundv_bucketId => #V bucket id
 /// @param[out]   o_vdmpb           => Vdmparamblock data
-/// @param[out]   o_data            => Pound w data
+/// @param[out]   o_poundw_data     => #W data
+/// @paramg[in]   i_poundv_data     => #V data
 /// @return   FAPI2::SUCCESS
 /// ----------------------------------------------------------------
 fapi2::ReturnCode
 proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                      uint8_t       i_poundv_bucketId,
-                     VDMParmBlock* o_vdmpb,
-                     PoundW_data* o_data
+                     LP_VDMParmBlock* o_vdmpb,
+                     PoundW_data* o_poundw_data,
+                     fapi2::voltageBucketData_t i_poundv_data
                     );
 /// -----------------------------------------------------------------------
 /// @brief Get needed attributes
@@ -352,7 +354,7 @@ proc_get_attributes ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
 fapi2::ReturnCode
 proc_get_extint_bias ( uint32_t io_attr_mvpd_data[PV_D][PV_W],
                        const AttributeList* i_attr,
-                       VpdBias o_vpdbias[VPD_PV_POINTS] );
+                       VpdBias o_vpdbias[NUM_OP_POINTS] );
 
 /// -------------------------------------------------------------------
 /// @brief Boost max frequency in pstate table based on boost attribute
@@ -411,8 +413,8 @@ load_wof_attributes ( PstateSuperStructure* io_pss,
 
 /// ------------------------------------------------------------
 /// @brief Copy VPD operating point into destination in assending order
-/// @param[in]    i_src[VPD_PV_POINTS]   => Source VPD structure (array)
-/// @param[out] * o_dest[VPD_PV_POINTS]  => pointer to destination VpdOperatingPoint structure
+/// @param[in]    i_src[NUM_OP_POINTS]   => Source VPD structure (array)
+/// @param[out] * o_dest[NUM_OP_POINTS]  => pointer to destination VpdOperatingPoint structure
 /// @return   FAPI2::SUCCESS
 /// ------------------------------------------------------------
 
@@ -430,7 +432,8 @@ load_mvpd_operating_point ( const uint32_t i_src[PV_D][PV_W],
 
 fapi2::ReturnCode
 proc_get_vdm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                     VDMParmBlock* o_vdmpb);
+                     GP_VDMParmBlock* o_vdmpb);
+
 
 /// ----------------------------------------------------------------
 /// @brief Get resonant clocking parameters from attributes
@@ -467,7 +470,7 @@ proc_set_resclk_table_attrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
 //
 // p9_pstate_compute_vpd_pts
 //
-void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[VPD_PV_POINTS],
+void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_POINTS],
                                GlobalPstateParmBlock* i_gppb);
 //
 // p9_pstate_compute_PsV_slopes
@@ -557,6 +560,22 @@ uint16_t get_iac_vdn_value (uint16_t i_vdd_value,
 
 ///round up the floating point value
 uint16_t roundUp(float i_value);
+
+
+///Compute VID points
+void p9_pstate_compute_vdm_threshold_pts(PoundW_data i_data,
+        LocalPstateParmBlock* io_lppb);
+
+///Biased slope calculation
+void p9_pstate_compute_PsVIDCompSlopes_slopes(PoundW_data i_data,
+        LocalPstateParmBlock* io_lppb,
+        uint8_t* i_pstate);
+
+// p9_pstate_compute_PsVDMThreshSlopes
+//
+void p9_pstate_compute_PsVDMThreshSlopes(
+    LocalPstateParmBlock* io_lppb,
+    uint8_t* i_pstate);
 
 /// @typedef p9_pstate_parameter_block_FP_t
 /// function pointer typedef definition for HWP call support
