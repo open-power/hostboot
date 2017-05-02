@@ -378,7 +378,7 @@ fapi_try_exit:
 /// @note This is done after the SPD cache is configured so that it can reflect the results of the
 /// factory and we don't need to worry about SPD versions. This is expressly different than the dram and dimm setters
 ///
-static fapi2::ReturnCode master_ranks_per_dimm_setter(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode master_ranks_per_dimm_setter(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         const std::shared_ptr<decoder>& i_pDecoder)
 {
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -752,57 +752,6 @@ fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
               l_dimm_type,
               l_encoding_rev,
               l_additions_rev );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief       Creates factory object & SPD data caches
-/// @param[in]   i_target controller target
-/// @param[out]  o_factory_caches vector of factory objects
-/// @param[in]   i_pDecoder custom decoder to populate cache (ignored for this specialization)
-/// @return      FAPI2_RC_SUCCESS if okay
-/// @note        This specialization is suited for creating a cache with platform
-///              SPD data.
-///
-template<>
-fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_MCS>& i_target,
-        std::vector< std::shared_ptr<decoder> >& o_factory_caches,
-        const std::shared_ptr<decoder>& i_pDecoder)
-{
-    // Input decoder for this version of populating cache would get overriden
-    // so I don't bother with it in this specialization
-    std::shared_ptr<decoder> l_pDecoder;
-
-    for( const auto& l_dimm : find_targets<TARGET_TYPE_DIMM>(i_target) )
-    {
-        size_t l_size = 0;
-        FAPI_TRY( fapi2::getSPD(l_dimm, nullptr, l_size),
-                  "%s. Failed to retrieve SPD blob size", mss::c_str(i_target) );
-
-        {
-            // "Container" for SPD data
-            std::vector<uint8_t> l_spd(l_size);
-
-            // Retrive SPD data
-            FAPI_TRY( fapi2::getSPD(l_dimm, l_spd.data(), l_size),
-                      "%s. Failed to retrieve SPD data", mss::c_str(i_target) );
-
-            // Retrieve factory object instance & populate spd data for that instance
-            FAPI_TRY( factory(l_dimm, l_spd, l_pDecoder),
-                      "%s. Failed SPD factory, could not instantiate decoder object", mss::c_str(i_target) );
-
-            // Populate spd caches
-            o_factory_caches.push_back( l_pDecoder );
-        }
-
-        // Populate some of the DIMM attributes early. This allows the following code to make
-        // decisions based on DIMM information. Expressly done after the factory has decided on the SPD version
-        FAPI_TRY( master_ranks_per_dimm_setter(l_dimm, l_pDecoder),
-                  "%s. Failed master_ranks_per_dimm_setter()", mss::c_str(i_target) );
-
-    }// end dimm
 
 fapi_try_exit:
     return fapi2::current_err;
