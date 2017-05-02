@@ -48,7 +48,7 @@ namespace stopImageSection
  * @param   o_fusedMode  points to fuse mode information.
  * @return  STOP_SAVE_SUCCESS if functions succeeds, error code otherwise.
  */
-StopReturnCode_t  isFusedMode( void* const i_pImage, bool* o_fusedMode )
+static StopReturnCode_t  isFusedMode( void* const i_pImage, bool* o_fusedMode )
 {
     *o_fusedMode = false;
     StopReturnCode_t l_rc = STOP_SAVE_SUCCESS;
