@@ -931,6 +931,36 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+    <id>ATTR_MSS_INTERLEAVE_GRANULARITY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Determines the stride covered by each granule in an interleaving
+      group.  The default stride -- 128B -- is the only value intended for
+      production FW use.  All other combinations are for experimental
+      performance evaluation.
+
+      Regardless of this attribute value, groups of size 1, 3, and 6
+      will be forced to 128B stride based on the logic capabilities.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+    <enum>
+      128_B = 0x00,
+      256_B = 0x01,
+      512_B = 0x02,
+      1_KB  = 0x03,
+      2_KB  = 0x04,
+      4_KB  = 0x05,
+      8_KB  = 0x06,
+      16_KB = 0x07,
+      32_KB = 0x08
+    </enum>
+    <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
     <id>ATTR_MSS_MEM_MC_IN_GROUP</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
