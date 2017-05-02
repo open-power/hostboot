@@ -167,7 +167,7 @@ typedef struct
     /// VPD operating points are stored without load-line correction.  Frequencies
     /// are in MHz, voltages are specified in units of 5mV, and currents are
     /// in units of 500mA.
-    VpdOperatingPoint operating_points[VPD_PV_POINTS];
+    VpdOperatingPoint operating_points[NUM_OP_POINTS];
 
     /// Loadlines and Distribution values for the VDD rail
     SysPowerDistParms vdd_sysparm;
