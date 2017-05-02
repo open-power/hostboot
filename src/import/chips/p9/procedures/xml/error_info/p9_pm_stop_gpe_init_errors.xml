@@ -43,6 +43,20 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_STOP_GPE_VREF_CALIBRATION_FAILED</rc>
+    <description>VDMs/IVRM enabled but necessary VREF calibration failed.
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>VREF_CALIBRATION_ADDRESS</ffdc>
+    <ffdc>IS_VDM_ENABLED</ffdc>
+    <ffdc>IS_IVRM_ENABLED</ffdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_STOP_GPE_INIT_TIMEOUT</rc>
     <description> Stop GPE init timed out while waiting for SGPE Active in OCCFLG register.
     </description>

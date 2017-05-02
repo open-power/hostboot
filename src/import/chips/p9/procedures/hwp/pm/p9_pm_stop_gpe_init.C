@@ -204,8 +204,44 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
                      "ERROR: Failed to assert DPLL in mode 1 and set slew rate to 1");
         }
 
+        uint8_t l_ivrms_attrval = 0;
+        uint8_t l_vdm_attrval = 0;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IVRMS_ENABLED,
+                               FAPI_SYSTEM,
+                               l_ivrms_attrval),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_IVRMS_ENABLED" );
+
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_ENABLE,
+                               FAPI_SYSTEM,
+                               l_vdm_attrval),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_VDM_ENABLE" );
+
+        if((l_vdm_attrval || l_ivrms_attrval))
+        {
+            //check vref calibration bit set or not
+            //PERV_TP_KVREF_AND_VMEAS_MODE_STATUS_REG
+            //--> 0x01020007
+            FAPI_TRY(fapi2::getScom(i_target, 0x01020007, l_data64));
+
+            if ( !(l_data64.getBit<16>()))
+            {
+                FAPI_ERR("VDMs/IVRM are enabled but necessary VREF calibration failed");
+                FAPI_ASSERT(false,
+                            fapi2::STOP_GPE_VREF_CALIBRATION_FAILED()
+                            .set_CHIP(i_target)
+                            .set_VREF_CALIBRATION_ADDRESS(0x01020007)
+                            .set_IS_VDM_ENABLED(l_vdm_attrval)
+                            .set_IS_IVRM_ENABLED(l_ivrms_attrval),
+                            "ERROR; VREF calibration bit is not set %x",
+                            (uint32_t)l_data64);
+            }
+        }
+
         // Boot the STOP GPE
         FAPI_TRY(stop_gpe_init(i_target), "ERROR: failed to initialize Stop GPE");
+
 
     }
 
