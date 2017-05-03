@@ -83,11 +83,11 @@ use constant
     MAX_PHB_PER_PROC => 6,    # PHB is same as PCIE
     MAX_MBA_PER_MEMBUF => 2,
     MAX_OBUS_PER_PROC => 4,
+    MAX_OBUS_BRICK_PER_PROC => 12,
     MAX_PPE_PER_PROC => 51,   #Only 21, but they are sparsely populated
     MAX_PERV_PER_PROC => 56,  #Only 42, but they are sparsely populated
     MAX_CAPP_PER_PROC => 2,
     MAX_SBE_PER_PROC => 1,
-    MAX_NV_PER_PROC => 1,     # FW only for GARD purposes
     MAX_MI_PER_PROC => 4,
 };
 
@@ -118,7 +118,7 @@ use constant
     ARCH_LIMIT_CAPP_PER_PROC => MAX_CAPP_PER_PROC,
     ARCH_LIMIT_DMI_PER_MI => 2,
     ARCH_LIMIT_OBUS_PER_PROC => MAX_OBUS_PER_PROC,
-    ARCH_LIMIT_NV_PER_PROC => MAX_NV_PER_PROC,
+    ARCH_LIMIT_OBUS_BRICK_PER_OBUS => MAX_OBUS_BRICK_PER_PROC / MAX_OBUS_PER_PROC,
     ARCH_LIMIT_SBE_PER_PROC => MAX_SBE_PER_PROC,
     # There are 20+ PPE, but lots of holes in the mapping.   Further the
     # architecture supports potentially many more PPEs.  So, for now we'll pick
@@ -2217,7 +2217,6 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
 
         generate_occ($proc, $proc_ordinal_id);
         generate_nx($proc,$proc_ordinal_id,$node);
-        generate_nv($proc,$proc_ordinal_id,$node);
 
         # call to do any fsp per-proc targets (ie, occ, psi)
         do_plugin('fsp_proc_targets', $proc, $i, $proc_ordinal_id,
@@ -2364,6 +2363,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         generate_obus($proc,$obus,$STargets[$i][ORDINAL_FIELD],$ipath,
             \%fapiPosH);
         $obus_count++;
+        #function to add all the obus bricks under this obus
+        generate_obus_brick($proc,$obus, $ipath);
         if ($STargets[$i+1][NAME_FIELD] eq "pu")
         {
             $obus_count = 0;
@@ -3477,7 +3478,6 @@ sub calcAndAddFapiPos
         $typeToLimit{"capp"}   = ARCH_LIMIT_CAPP_PER_PROC;
         $typeToLimit{"dmi"}    = ARCH_LIMIT_DMI_PER_MI;
         $typeToLimit{"obus"}   = ARCH_LIMIT_OBUS_PER_PROC;
-        $typeToLimit{"nv"}     = ARCH_LIMIT_NV_PER_PROC;
         $typeToLimit{"sbe"}    = ARCH_LIMIT_SBE_PER_PROC;
         $typeToLimit{"ppe"}    = ARCH_LIMIT_PPE_PER_PROC;
         $typeToLimit{"perv"}   = ARCH_LIMIT_PERV_PER_PROC;
@@ -4300,9 +4300,12 @@ sub getPervasiveForUnit
         {
             $unitToPervasive{"phb$phb"} = 13 + ($phb>0) + ($phb>2);
         }
-        for my $nv (0..MAX_NV_PER_PROC-1)
+        my $offset = 0;
+        for my $obrick (0..MAX_OBUS_BRICK_PER_PROC-1)
         {
-            $unitToPervasive{"nv$nv"} = 5;
+            $offset += (($obrick%3 == 0) && ($obrick != 0)) ? 1 : 0;
+            $unitToPervasive{"obus_brick$obrick"}
+                = 9 + $offset;
         }
     }
 
@@ -5505,75 +5508,42 @@ sub generate_sbe
 ";
 }
 
-sub generate_nv
+sub generate_obus_brick
 {
-    my ($proc,$ordinalId) = @_;
+    my ($proc, $obus, $ipath) = @_;
     my $proc_name = "n${node}:p${proc}";
-    print "\n<!-- $SYSNAME n${node}p${proc} NV units -->\n";
+    print "\n<!-- $SYSNAME n${node}p${proc} OBUS BRICK units -->\n";
 
-    for my $i ( 0 .. MAX_NV_PER_PROC-1 )
+    for my $i ( 0 .. ARCH_LIMIT_OBUS_BRICK_PER_OBUS-1 )
     {
-        generate_a_nv( $proc, $i, MAX_NV_PER_PROC,
-            ($ordinalId*MAX_NV_PER_PROC)+$i );
+        generate_a_obus_brick( $proc, $obus, $i, $ipath);
     }
 }
 
-my $nvIpathInit = 0;
-my %nvList = ();
-sub generate_nv_ipath
+sub generate_a_obus_brick
 {
-    #get the nv ipath detail using previously computed $eTargets
-    foreach my $Target (@{$eTargets->{target}})
-    {
-        #get the nv ipath detail
-        #@TODO-RTC:156600
-        if($Target->{'ecmd-common-name'} eq "nvbus")
-        {
-            my $node     = $Target->{'node'};
-            my $position = $Target->{'position'};
-            my $chipUnit = $Target->{'chip-unit'};
-            my $ipath    = $Target->{'instance-path'};
+    my ($proc, $obus, $obus_brick, $ipath) = @_;
 
-            $nvList{$node}{$position}{$chipUnit} = {
-                'node'        => $node,
-                'position'     => $position,
-                'nvChipUnit'   => $chipUnit,
-                'nvIpath'      => $ipath,
-            }
-        }
-    }
-}
-
-sub generate_a_nv
-{
-    my ($proc, $nv, $max_nv, $ordinalId) = @_;
-    my $uidstr = sprintf("0x%02X29%04X",${node},$proc*$max_nv + $nv);
-
-    # Get the NV info
-    if ($nvIpathInit == 0)
-    {
-        generate_nv_ipath;
-        $nvIpathInit = 1;
-    }
-
-    my $fapi_name = "NA"; # NV not FAPI target
-
-    #Chiplet IDs for nv 0,1 => 0x5
+    my $ordinalId = ($proc * MAX_OBUS_BRICK_PER_PROC) +
+                    ($obus * ARCH_LIMIT_OBUS_BRICK_PER_OBUS) +
+                    ($obus_brick);
+    my $uidstr    = sprintf("0x%02X42%04X",${node},$ordinalId);
+    my $fapi_name = sprintf("pu.obrick:k0:n0:s0:p%02d:c%d", $proc,$ordinalId);
     my $chipletId = sprintf("0x%X",(0x5));
 
     print "
 <targetInstance>
-    <id>sys${sys}node${node}proc${proc}nv${nv}</id>
-    <type>unit-nv-power9</type>
+    <id>sys${sys}node${node}proc${proc}obus${obus}obus-brick${obus_brick}</id>
+    <type>unit-obus-brick-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/nv-$nv</default>
+        <default>physical:sys-$sys/node-$node/proc-$proc/obus-$obus/obus_brick-$obus_brick</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/nv-$nv</default>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/obus-$obus/obus_brick-$obus_brick</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -5581,11 +5551,11 @@ sub generate_a_nv
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
-        <default>instance:$nvList{$node}{$proc}{$nv}->{'nvIpath'}</default>
+        <default>instance:$ipath/obus_brick$obus_brick</default>
     </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>$nv</default>
+        <default>$obus_brick</default>
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
@@ -5593,11 +5563,11 @@ sub generate_a_nv
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>$nv</default>
+        <default>$obus_brick</default>
     </attribute>
     ";
 
-    addPervasiveParentLink($sys,$node,$proc,$nv,"nv");
+    addPervasiveParentLink($sys,$node,$proc,$obus_brick,"obus_brick");
 
     print "
 </targetInstance>
