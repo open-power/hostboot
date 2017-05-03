@@ -34,6 +34,7 @@ constexpr uint64_t literal_0x0000000000000000 = 0x0000000000000000;
 constexpr uint64_t literal_0x00DF0201C0000000 = 0x00DF0201C0000000;
 constexpr uint64_t literal_0x0080000000000000 = 0x0080000000000000;
 constexpr uint64_t literal_0x1 = 0x1;
+constexpr uint64_t literal_0xFC = 0xFC;
 
 fapi2::ReturnCode p9_vas_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0,
                               const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
@@ -126,6 +127,8 @@ fapi2::ReturnCode p9_vas_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 l_scom_buffer.insert<14, 1, 63, uint64_t>(l_VA_VA_SOUTH_VA_EG_EG_SCF_SKIP_G_OFF );
             }
 
+            l_scom_buffer.insert<20, 8, 56, uint64_t>(literal_0xFC );
+            l_scom_buffer.insert<28, 8, 56, uint64_t>(literal_0xFC );
             FAPI_TRY(fapi2::putScom(TGT0, 0x301184eull, l_scom_buffer));
         }
         {
