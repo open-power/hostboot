@@ -587,8 +587,52 @@ void* host_discover_targets( void *io_pArgs )
                   "information has already been loaded from memory"
                   "when the targeting service started");
 
+        //TODO RTC: 173716
+        // Remove workaround clearing OCB Linear Window security bit during MPIPL
+        TARGETING::TargetHandleList l_procChips;
+        getAllChips( l_procChips, TARGETING::TYPE_PROC   );
+
+        uint64_t l_ocb_lw_control_value = 0;
+        size_t l_size = sizeof(l_ocb_lw_control_value);
+
+        for (const auto & l_procChip: l_procChips)
+        {
+            //We are doing a Read-Modify-Write on the Linear Window Control reg
+            l_err = deviceRead(l_procChip,
+                            &l_ocb_lw_control_value,
+                            l_size,
+                            DEVICE_SCOM_ADDRESS(PU_OCB_OCI_OCBLWCR0_SCOM)); //0x6C208
+
+            if(l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "host_discover_targets: Failed to read scom address 0x%lx",
+                          PU_OCB_OCI_OCBLWCR0_SCOM);
+                ERRORLOG::ErrlUserDetailsTarget(l_procChip).addToLog(l_err);
+                l_err->collectTrace(TARG_COMP_NAME);
+                break;
+            }
+
+            //Clear bit 0
+            l_ocb_lw_control_value &= 0x7FFFFFFFFFFFFFFF;
+
+            l_err = deviceWrite(l_procChip,
+                                &l_ocb_lw_control_value,
+                                l_size,
+                                DEVICE_SCOM_ADDRESS(PU_OCB_OCI_OCBLWCR0_SCOM)); //0x6C208
+            if(l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "host_discover_targets: Failed to write 0x%lx scom address 0x%lx",
+                          l_ocb_lw_control_value, PU_OCB_OCI_OCBLWCR0_SCOM);
+                ERRORLOG::ErrlUserDetailsTarget(l_procChip).addToLog(l_err);
+                l_err->collectTrace(TARG_COMP_NAME);
+                break;
+            }
+        }
+
         //Make sure that all special wakeups are disabled
-        if(deassertSpecialWakeupOnCores(l_stepError))
+        if(!l_err && deassertSpecialWakeupOnCores(l_stepError))
         {
             //Need to power down the slave quads
             l_err = powerDownSlaveQuads();
