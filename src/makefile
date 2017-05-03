@@ -248,7 +248,8 @@ TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
 #@TODO RTC: 137561 Enable this test case when interupt story is complete
 #TESTCASE_MODULES += testintr
 
-TESTCASE_MODULES += testfapi2
+# @thi - Disable to isolate  libtestfapi2.so crash
+#TESTCASE_MODULES += testfapi2
 
 #@TODO RTC: 123019 (p9 work in progress)
 #TESTCASE_MODULES += testi2c
@@ -310,7 +311,10 @@ RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testprdf_rt)
 RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testattn_rt)
 RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_BMC_IPMI),testipmi_rt)
 RUNTIME_TESTCASE_MODULES += testpnor_rt
-RUNTIME_TESTCASE_MODULES += testfapi2_rt
+
+# @thi - Disable to isolate  libtestfapi2.so crash
+#RUNTIME_TESTCASE_MODULES += testfapi2_rt
+
 RUNTIME_TESTCASE_MODULES += testsecureboot_rt
 RUNTIME_TESTCASE_MODULES += testtargeting_rt
 RUNTIME_TESTCASE_MODULES += testsbeio_rt
