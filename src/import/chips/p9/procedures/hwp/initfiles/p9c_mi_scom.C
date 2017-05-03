@@ -1,0 +1,104 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/import/chips/p9/procedures/hwp/initfiles/p9c_mi_scom.C $  */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+#include "p9c_mi_scom.H"
+#include <stdint.h>
+#include <stddef.h>
+#include <fapi2.H>
+
+using namespace fapi2;
+
+constexpr uint64_t literal_7 = 7;
+constexpr uint64_t literal_1 = 1;
+constexpr uint64_t literal_0x19 = 0x19;
+constexpr uint64_t literal_0b0000000000001000 = 0b0000000000001000;
+
+fapi2::ReturnCode p9c_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
+                              const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
+{
+    {
+        uint64_t l_def_ENABLE_PREFETCH_DROP_PROMOTE_BASIC = literal_1;
+        uint64_t l_def_ENABLE_DYNAMIC_64_128B_READS = literal_1;
+        uint64_t l_def_ENABLE_ECRESP = literal_1;
+        uint64_t l_def_ENABLE_AMO_CACHING = literal_1;
+        fapi2::buffer<uint64_t> l_scom_buffer;
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5010810ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<46, 4, 60, uint64_t>(literal_7 );
+
+            if (l_def_ENABLE_PREFETCH_DROP_PROMOTE_BASIC)
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCPERF1_ENABLE_PF_DROP_CMDLIST_ON = 0x1;
+                l_scom_buffer.insert<61, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCPERF1_ENABLE_PF_DROP_CMDLIST_ON );
+            }
+
+            if (l_def_ENABLE_PREFETCH_DROP_PROMOTE_BASIC)
+            {
+                l_scom_buffer.insert<32, 7, 57, uint64_t>(literal_0x19 );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5010810ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5010811ull, l_scom_buffer ));
+
+            constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_CENTAUR_PERFMON_COMMAND_ON = 0x1;
+            l_scom_buffer.insert<48, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_CENTAUR_PERFMON_COMMAND_ON );
+            constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_EMERGENCY_THROTTLE_ON = 0x1;
+            l_scom_buffer.insert<21, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_EMERGENCY_THROTTLE_ON );
+            constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_CENTAUR_CHECKSTOP_COMMAND_ON = 0x1;
+            l_scom_buffer.insert<22, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_CENTAUR_CHECKSTOP_COMMAND_ON );
+            constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_CENTAUR_TRACESTOP_COMMAND_ON = 0x1;
+            l_scom_buffer.insert<23, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_CENTAUR_TRACESTOP_COMMAND_ON );
+
+            if (l_def_ENABLE_DYNAMIC_64_128B_READS)
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_64_128B_READ_ON = 0x1;
+                l_scom_buffer.insert<9, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_64_128B_READ_ON );
+            }
+
+            if (l_def_ENABLE_ECRESP)
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_CENTAURP_ENABLE_ECRESP_ON = 0x1;
+                l_scom_buffer.insert<7, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_CENTAURP_ENABLE_ECRESP_ON );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5010811ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x5010813ull, l_scom_buffer ));
+
+            if (l_def_ENABLE_AMO_CACHING)
+            {
+                l_scom_buffer.insert<24, 16, 48, uint64_t>(literal_0b0000000000001000 );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x5010813ull, l_scom_buffer));
+        }
+
+    };
+fapi_try_exit:
+    return fapi2::current_err;
+}
