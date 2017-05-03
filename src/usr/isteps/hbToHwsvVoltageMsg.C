@@ -72,8 +72,8 @@ HBToHwsvVoltageMsg::~HBToHwsvVoltageMsg()
 ///////////////////////////////////////////////////////////////////////////////
 
 bool compareVids(
-    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t i_lhs,
-    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t i_rhs)
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t& i_lhs,
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t& i_rhs)
 {
     bool lhsLogicallyBeforeRhs = (i_lhs.domain < i_rhs.domain);
 
@@ -90,8 +90,8 @@ bool compareVids(
 // compareSequenceOrder
 ///////////////////////////////////////////////////////////////////////////////
 bool compareSequenceOrder(
-    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t i_lhs,
-    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t i_rhs)
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t& i_lhs,
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t& i_rhs)
 {
     // Sequencing order is VDN->VDD->VCS
     // true means lhs should be ordered before rhs
@@ -112,8 +112,8 @@ bool compareSequenceOrder(
 ///////////////////////////////////////////////////////////////////////////////
 
 bool areVidsEqual(
-    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t i_lhs,
-    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t i_rhs)
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t& i_lhs,
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t& i_rhs)
 {
     return(   (   i_lhs.domain
                == i_rhs.domain)
@@ -128,7 +128,7 @@ bool areVidsEqual(
 ///////////////////////////////////////////////////////////////////////////////
 
 bool isUnusedVoltageDomain(
-    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t i_vid)
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t& i_vid)
 {
     return (!i_vid.voltageMillivolts);
 }
