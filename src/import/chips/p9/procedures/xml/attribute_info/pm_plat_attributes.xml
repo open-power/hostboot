@@ -900,18 +900,12 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_SYSTEM_IVRMS_ENABLED</id>
+    <id>ATTR_SYSTEM_WOF_ENABLED</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>System control to allow (if all other attribute tests yield
-    true values) or categorically disallow IVRM enablement
-
-    Producer: MRWB
-
-    Consumers: p9_build_pstate_datablock ->
-                      Pstate Parameter Block (PSPB) for PGPE/OCC
-                      CME Quad Pstate Region (CQPR) for CM Quad Manager
-
-    Platform default: FALSE
+    <description>
+    <!-- @todo RTC 173736 -->
+    !!!!! Deprecated for ATTR_SYSTEM_WOF_DISABLE
+    !!!!! Will be removed in the future
     </description>
     <valueType>uint8</valueType>
     <enum>FALSE=0, TRUE=1</enum>
@@ -920,20 +914,58 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_SYSTEM_WOF_ENABLED</id>
+    <id>ATTR_SYSTEM_WOF_DISABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>System control to allow Work Load Optimized Frequency (WOF)
-    algorithms to modify frequency based on active core count and other inputs.
+    <description>Disables Work Load Optimized Frequency (WOF) algorithms to
+    modify frequency based on active core count and other inputs.
 
-    Producer: MRWB
+    OFF:            Will enable WOF given all validity check pass.  If
+                    validity checks fail, WOF will be disabled for the
+                    present IPL.
+    ON:             Will disable WOF
+    OFF_SKIP_DD:    Same as OFF but skips any validity checking of the chip
+                    design level (lab use only).
+
+    Producer: Override
 
     Consumers: p9_build_pstate_datablock ->
                       Pstate Parameter Block (PSPB) for PGPE/OCC
 
-    Platform default:   FALSE
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF=0, ON=1, OFF_SKIP_DD=2</enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_IVRMS_ENABLED</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <!-- @todo RTC 173736 -->
+    <description>
+    !!!!! Deprecated for ATTR_SYSTEM_IVRM_DISABLE
+    !!!!! Will be removed in the future
     </description>
     <valueType>uint8</valueType>
     <enum>FALSE=0, TRUE=1</enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_IVRM_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Disables IVRM enablement in the system
+
+    Producer: Override
+
+    Consumers: p9_build_pstate_datablock ->
+                      Pstate Parameter Block (PSPB) for PGPE/OCC
+                      CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF=0, ON=1</enum>
     <platInit/>
     <initToZero/>
   </attribute>
@@ -1138,15 +1170,28 @@
   <attribute>
       <id>ATTR_VDM_ENABLE</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <!-- @todo RTC 173736 -->
       <description>
-      Controls the enablement of Voltage Droop Monitors (VDM) in the system.
+      !!!!! Deprecated for ATTR_SYSTEM_VDM_ENABLE
+      !!!!! Will be removed in the future
+      </description>
+      <valueType>uint8</valueType>
+      <enum>OFF = 0x00, ON = 0x01</enum>
+      <initToZero/>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_SYSTEM_VDM_DISABLE</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+      Disables the enablement of Voltage Droop Monitors (VDM) in the system.
 
-      Producer:  Machine Readable Workbook
+      Producer:  Override
 
       Consumers:
-        p9_pstate_parameter_block to set flag for CME QuadManager Hcode
+        p9_pstate_parameter_block to clear flag for CME QuadManager Hcode
             reaction
-        p9_hcd_cache procedures to power on VDMs before CME booting
       </description>
       <valueType>uint8</valueType>
       <enum>OFF = 0x00, ON = 0x01</enum>
@@ -1158,16 +1203,16 @@
       <id>ATTR_VDM_DROOP_SMALL_OVERRIDE</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <description>
-          Voltage Droop Monitor (VDM) Small Threshold Select Value per VPD point
-          The enum indicates a negative value below the VDM setting that will
-          trigger a small droop event.
+      Voltage Droop Monitor (VDM) Small Threshold Select Value per VPD point
+      The enum indicates a negative value below the VDM setting that will
+      trigger a small droop event.
 
-          Array of 5 entries:
-            0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo; 4 = Enable
+      Array of 5 entries:
+        0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo; 4 = Enable
 
-          If index 4 is non-zero, the other entries are considered valid.
+      If index 4 is non-zero, the other entries are considered valid.
 
-          Producer: MRWB.
+      Producer: Override
       </description>
       <valueType>uint8</valueType>
       <enum>
@@ -1204,7 +1249,7 @@
 
       If index 4 is non-zero, the other entries are considered valid.
 
-      Producer: Firmware override
+      Producer: Override
       </description>
       <valueType>uint8</valueType>
       <enum>
@@ -1241,7 +1286,7 @@
 
       If index 4 is non-zero, the other entries are considered valid.
 
-      Producer: MRWB.
+      Producer: Override
       </description>
       <valueType>uint8</valueType>
       <enum>
@@ -1278,7 +1323,7 @@
 
       If index 4 is non-zero, the other entries are considered valid.
 
-      Producer: MRWB.
+      Producer: Override
       </description>
       <valueType>uint8</valueType>
       <enum>
@@ -1298,11 +1343,114 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+      <id>ATTR_VDM_SMALL_FREQ_DROP_N_S_OVERRIDE</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+      DPLL response override of the respective #W VPD content for a Voltage Droop
+      Monitor (VDM) Small Frequency Drop (eg Normal to Small). Values are in
+      1/32ths with legal values being of N being less than or equal to 8.
+
+      Array of 5 entries:
+        0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo; 4 = Enable
+
+      If index 4 is non-zero, the other entries are considered valid.
+
+      Producer: Override
+      </description>
+      <valueType>uint8</valueType>
+      <array>5</array>
+      <initToZero/>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_VDM_LARGE_FREQ_DROP_N_L_OVERRIDE</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+      DPLL response override of the respective #W VPD content for a Voltage Droop
+      Monitor (VDM) Large Frequency Drop (eg Normal to Large). Values are in
+      1/32ths with legal values being of N being less than or equal to 8.
+
+      Array of 5 entries:
+        0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo; 4 = Enable
+
+      If index 4 is non-zero, the other entries are considered valid.
+
+      Producer: Override
+      </description>
+      <valueType>uint8</valueType>
+      <array>5</array>
+      <initToZero/>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_VDM_FREQ_RETURN_L_S_OVERRIDE</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+      DPLL response override of the respective #W VPD content for returning
+      from a Large Frequency Droop value to the Small value. Values are in
+      1/32ths with legal values being of N being less than or equal to 8.
+
+      Array of 5 entries:
+        0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo; 4 = Enable
+
+      If index 4 is non-zero, the other entries are considered valid.
+
+      Producer: Override
+      </description>
+      <valueType>uint8</valueType>
+      <array>5</array>
+      <initToZero/>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_VDM_FREQ_RETURN_S_N_OVERRIDE</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+      DPLL response override of the respective #W VPD content for returning
+      from a Small Frequency Droop value to the Normal value. Values are in
+      1/32ths with legal values being of N being less than or equal to 8.
+
+      Array of 5 entries:
+        0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo; 4 = Enable
+
+      If index 4 is non-zero, the other entries are considered valid.
+
+      Producer: Override
+      </description>
+      <valueType>uint8</valueType>
+      <array>5</array>
+      <initToZero/>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_VDM_EXTREME_THOTTLE_ENABLE</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+      Controls the enablement of Voltage Droop Monitors (VDM) to throttle
+      the core upon an extreme droop event.
+
+      Producer:  Machine Readable Workbook
+
+      Consumers:
+        p9_hcode_image_build to set flag for CME QuadManager Hcode
+            reaction
+      </description>
+      <valueType>uint8</valueType>
+      <enum>OFF = 0x00, ON = 0x01</enum>
+      <initToZero/>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
       <id>ATTR_VDM_FMAX_OVERRIDE_KHZ</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <description>
 
-          Producer: MRWB.
+      Producer: Override
       </description>
       <valueType>uint16</valueType>
       <array>5</array>
@@ -1316,7 +1464,7 @@
       <description>
 
 
-          Producer: MRWB.
+      Producer: Override
       </description>
       <valueType>uint16</valueType>
       <array>5</array>
@@ -1329,17 +1477,37 @@
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <description>
       Voltage Droop Monitor (VDM) Voltage Compare Voltage to expect when no
-      droop is present (binary in mV)
+      droop is present (binary in mV).  A default value of 0 indicates no
+      override
 
       Array of 5 entries:
         0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo; 4 = Enable
 
-      If index 4 is non-zero, the other entries are considered valid.
-
-      Producer: MRWB.
+      Producer: Override
       </description>
       <valueType>uint8</valueType>
       <array>5</array>
+      <initToZero/>
+      <platInit/>
+      <!-- RTC 173957 Reduce to 4 entry array.  Remove Enable -->
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_VDM_VID_COMPARE_BIAS_0P5PCT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      VDM Voltage Compare Bias - % of bias (signed twos complement in
+      0.5 percent steps) that is applied to the #W VDM VID Compare before
+      placement in the respective Pstate Paramter Blocks that will be consumed
+      by Hcode.
+
+      Array of 4 entries:
+        0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo
+
+      Producer: Override
+      </description>
+      <valueType>int8</valueType>
+      <array>4</array>
       <initToZero/>
       <platInit/>
   </attribute>
@@ -1347,10 +1515,8 @@
   <attribute>
       <id>ATTR_DPLL_DYNAMIC_FMAX_ENABLE</id>
       <description>
-      Allow increased dynamic frequency in response to excess voltage margin
-      Controlled by VDM_OVERVOLT threshold value in VDM Configuration Register.
-
-      Producer: MRWB.
+        !!!!! Deprecated for ATTR_DPLL_VDM_RESPONSE
+        !!!!! Will be removed in the future
       </description>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <valueType>uint8</valueType>
@@ -1364,11 +1530,8 @@
   <attribute>
       <id>ATTR_DPLL_DYNAMIC_FMIN_ENABLE</id>
       <description>
-      Allow decreased dynamic frequency in response to loss of voltage margin.
-      Controlled by VDM_DROOP_SMALL threshold value in VDM Configuration
-      Register.
-
-      Producer: MRWB.
+        !!!!! Deprecated for ATTR_DPLL_VDM_RESPONSE
+        !!!!! Will be removed in the future
       </description>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <valueType>uint8</valueType>
@@ -1382,12 +1545,8 @@
   <attribute>
       <id>ATTR_DPLL_DROOP_PROTECT_ENABLE</id>
       <description>
-      Enable instantaneous frequency reduction in response to droop events
-      Controlled by VDM_DROOP_SMALL, _LARGE and _XTREME threshold values in VDM
-      Configuration Register. The amount of reduction is controlled by chip
-      initialization values
-
-      Producer: MRWB.
+        !!!!! Deprecated for ATTR_DPLL_VDM_RESPONSE
+        !!!!! Will be removed in the future
       </description>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <valueType>uint8</valueType>
@@ -1402,18 +1561,24 @@
       <id>ATTR_DPLL_VDM_RESPONSE</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <description>
-      Indicates the response of the DPLL frequency upon VDM events.  This
-      control will only apply if ATTR_DPLL_VDM_JUMP_ENABLE is ON;
-      Hardware WOF =  DROOP_PROTECT_OVERVOLT (slew to Fmax if margin exists)
+      Indicates the response of the DPLL frequency upon VDM events if
+      ATTR_SYSTEM_VDM_DISABLE is not ON.
+
+         NONE                   -> DPLL Mode 2
+         DROOP_PROTECT          -> DPLL Mode 3
+         DROOP_PROTECT_OVERVOLT -> DPLL Mode 3.5
+         DYNAMIC                -> DPLL Mode 4
+         DYNAMIC_PROTECT        -> DPLL Mode 5
 
       Producer: MRWB.
       </description>
       <valueType>uint8</valueType>
       <enum>
-          STATIC_FREQ = 0x00,
-          STATIC_DROOP_PROTECT = 0x01,
-          DROOP_PROTECT_OVERVOLT = 0x02,
-          DYNAMIC_FREQ = 0x04
+          DROOP_PROTECT = 0x00,
+          DROOP_PROTECT_OVERVOLT = 0x01,
+          DYNAMIC = 0x02,
+          DYNAMIC_PROTECT = 0x03,
+          NONE = 0x04
       </enum>
       <initToZero/>
       <platInit/>
@@ -1431,7 +1596,7 @@
       voltage.  If this difference is smaller than the value of this attribute,
       the iVRM is forced in to bypass to use the external voltage.
 
-      Producer: MRWB.
+      Producer: Override
 
       Consumer: p9_pstate_parameter_block ->
                     CME pstate parameter block
@@ -1450,10 +1615,10 @@
       <id>ATTR_IVRM_STRENGTH_LOOKUP</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <description>
-      Lookup table used to as part of determining the PFET width to use based
-      on the voltage across the PFET header.
+      Override Lookup table used to as part of determining the PFET width to use
+      based on the voltage across the PFET header.
 
-      Producer: MRWB via the iVRM team
+      Producer: Override
 
       Consumer: p9_pstate_parameter_block ->
                     CME pstate parameter block
@@ -1469,10 +1634,10 @@
   <attribute>
       <id>ATTR_IVRM_VIN_MULTIPLIER</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>Multiplier used with the strength lookup to determine the IVRM
-      PFET width.
+      <description>Overide the hardcoded multiplier table used with the strength
+      lookup to determine the IVRM PFET width.
 
-      Producer: MRWB via the iVRM team
+      Producer: Override
 
       Consumer: p9_pstate_parameter_block ->
                     CME pstate parameter block
@@ -1491,7 +1656,7 @@
       calculation.  Setting to 0 will use the default 1100mV.  Setting this to a
       non-zero value will cause this value to be used instead.
 
-      Producer: MRWB.
+      Producer: Override
 
       Consumer: p9_pstate_parameter_block ->
                     CME pstate parameter block
@@ -1505,11 +1670,10 @@
   <attribute>
       <id>ATTR_IVRM_STEP_DELAY_NS</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>Time (in nanoseconds) to wait between IVRM steps that are
-      part of a larger transition to the ultimate destination voltage.  The
-      value of 0 is valid to indicate that no delay is necessary.
+      <description>Override time (in nanoseconds) to wait between IVRM steps that
+      are part of a larger transition to the ultimate destination voltage.
 
-      Producer: MRWB.
+      Producer: Override
 
       Consumer: p9_pstate_parameter_block ->
                     CME pstate parameter block
@@ -1524,8 +1688,9 @@
       <id>ATTR_IVRM_STABILIZATION_DELAY_NS</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <description>
-      Time (in nanoseconds) to wait after the iVRMs indicate "done" in the event
-      extra time is required.
+      Override time (in nanoseconds) to wait after the iVRM indicates "done" in
+      the event extra time is required.  A zero value will have the hardcoded
+      default to be used.
 
       Producer: MRWB.
 
@@ -1557,12 +1722,26 @@
       <id>ATTR_SYSTEM_RESCLK_ENABLE</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <description>
-      Controls the enablement of resonant clocking in the system.
+      <!-- @todo RTC 173736 -->
+      !!!!! Deprecated for ATTR_SYSTEM_RESCLK_DISABLE
+      !!!!! Will be removed in the future
+      </description>
+      <valueType>uint8</valueType>
+      <enum>OFF = 0x00, ON = 0x01</enum>
+      <initToZero/>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_SYSTEM_RESCLK_DISABLE</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+      Disables the enablement of resonant clocking in the system.
 
-      Producer:  Machine Readable Workbook
+      Producer:  Override
 
       Consumers:
-        p9_pstate_parameter_block to set flag for CME QuadManager Hcode
+        p9_pstate_parameter_block to clear the flag for CME QuadManager Hcode
             reaction
       </description>
       <valueType>uint8</valueType>
@@ -1901,27 +2080,70 @@
      <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
-
   <attribute>
-      <id>ATTR_VDM_VID_COMPARE_BIAS_0P5PCT</id>
-      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <id>ATTR_SYSTEM_PSTATES_MODE</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
       <description>
-      VDM Voltage Compare Bias - % of bias (signed twos
-      complement in
-      0.5 percent steps) that is applied to the #W VDM
-      VID Compare before placement in the respective Pstate
-      Paramter Blocks that will be consumed
-      by Hcode.
-      Array of 4 entries: 0 = PowerSave, 1 =
-      Nominal; 2 = Turbo; 3 = UltraTurbo
-      If index 4 is non-zero, the
-      other entries are considered
-      valid.Producer:MRWB.
+      Controls the mode of Pstate Protocol for testing.
+        ON: Boots the PGPE in "OCC Pstate Mode" but does NOT start the Pstate
+        protocol
+
+        OFF:  Does NOT boot the PGPE
+        AUTO: Boots the PGPE and automatically starts the Pstate protocol.
+        PMCR operations to move Pstates are honored
+
+      Producer:  Override
+
+      Consumers:
+        p9_pstate_parameter_block and p9_pm_pstate_gpe_init
       </description>
-      <valueType>int8</valueType>
-      <array>4</array>
+      <valueType>uint8</valueType>
+      <enum>ON = 0x00, OFF = 0x01, AUTO = 0x02</enum>
       <initToZero/>
       <platInit/>
-  </attribute> 
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_CORE_THROTTLE_ASSERT_COUNT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      The number of PGPE Fixed Timer Interrupts (see Hcode documentation for
+      durations) to assert a core throttle when
+      OCC Scratch 2[Core Throttle Continuous Change Enable] is set.
 
+      A value of 0 when Continuous Change Enable is set will deassert throttle.
+
+      Producer:  Override/Lab
+
+      Consumers:
+        p9_hcode_image_build.c ->
+                  PGPE Header field
+      </description>
+      <valueType>uint32</valueType>
+      <initToZero/>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_CORE_THROTTLE_DEASSERT_COUNT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      The number of PGPE Fixed Timer Interrupts (see Hcode documentation for
+      machine dependent durations) to deassert core throttle when
+      OCC Scratch 2[Core Throttle Continuous Change Enable] is set.
+
+      A value of 0 when Continuous Change Enable is set and
+      ATTR_CORE_THROTTLE_ASSERT_COUNT is non-0, throttling is always on.
+
+      Producer:  Override/Lab
+
+      Consumers:
+        p9_hcode_image_build.c ->
+                  PGPE Header field
+      </description>
+      <valueType>uint32</valueType>
+      <initToZero/>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
