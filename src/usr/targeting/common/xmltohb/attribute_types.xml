@@ -32731,7 +32731,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint32_t>
-       <default>0x80000000</default>
+       <default>0xEC900000</default>
     </uint32_t>
   </simpleType>
   <persistency>non-volatile</persistency>
