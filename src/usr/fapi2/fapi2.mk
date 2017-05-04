@@ -36,6 +36,7 @@ HWP_PATH += ${HWP_PATH_1}/ ${HWP_PATH_2}/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
