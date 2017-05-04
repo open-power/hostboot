@@ -245,6 +245,8 @@
     <attribute><id>PM_SPIVID_MAJORITY_VOTE_ENABLE</id></attribute>
     <attribute><id>PM_SPIVID_MAX_RETRIES</id></attribute>
     <attribute><id>PROC_DPLL_DIVIDER</id></attribute>
+    <attribute><id>PSTATES_ENABLED</id></attribute>
+    <attribute><id>IVRMS_ENABLED</id></attribute>
     <!-- End pm_hwp_attributes.xml -->
     <attribute><id>SKIP_HW_VREF_CAL</id></attribute>
     <attribute><id>SKIP_RD_VREF_VREFSENSE_OVERRIDE</id></attribute>
@@ -311,6 +313,7 @@
     <attribute><id>TLB_RESERVE_SIZE</id></attribute>
     <attribute><id>TIME_BASE</id></attribute>
     <attribute><id>CPU_ATTR</id></attribute>
+    <attribute><id>ADU_XSCOM_BAR_BASE_ADDR</id></attribute>
     <attribute><id>PROC_OCC_SANDBOX_SIZE</id></attribute>
     <attribute><id>PROC_FABRIC_SYSTEM_MASTER_CHIP</id></attribute>
     <attribute><id>PROC_FABRIC_GROUP_MASTER_CHIP</id></attribute>
@@ -879,6 +882,11 @@
     <attribute><id>VDM_DROOP_LARGE_OVERRIDE</id></attribute>
     <attribute><id>VDM_DROOP_EXTREME_OVERRIDE</id></attribute>
     <attribute><id>VDM_OVERVOLT_OVERRIDE</id></attribute>
+    <attribute><id>VDM_EXTREME_THOTTLE_ENABLE</id></attribute>
+    <attribute><id>VDM_SMALL_FREQ_DROP_N_S_OVERRIDE</id></attribute>
+    <attribute><id>VDM_LARGE_FREQ_DROP_N_L_OVERRIDE</id></attribute>
+    <attribute><id>VDM_FREQ_RETURN_L_S_OVERRIDE</id></attribute>
+    <attribute><id>VDM_FREQ_RETURN_S_N_OVERRIDE</id></attribute>
     <attribute><id>VDM_FMAX_OVERRIDE_KHZ</id></attribute>
     <attribute><id>VDM_FMIN_OVERRIDE_KHZ</id></attribute>
     <attribute><id>VDM_VID_COMPARE_OVERRIDE_MV</id></attribute>
@@ -1181,6 +1189,8 @@
     <attribute><id>DUMP_STOP_INFO_ENABLE_ERRORLOG</id></attribute>
     <attribute><id>SBE_IS_STARTED</id></attribute>
     <attribute><id>HTM_QUEUES</id></attribute>
+    <attribute><id>CORE_THROTTLE_ASSERT_COUNT</id></attribute>
+    <attribute><id>CORE_THROTTLE_DEASSERT_COUNT</id></attribute>
 
     <!-- Processor characteristics for HDAT -->
     <attribute>
@@ -1260,6 +1270,7 @@
         <default>8</default>
     </attribute>
     <!-- End processor characteristics for HDAT -->
+    <attribute><id>LPC_BASE_ADDR</id></attribute>
     <attribute><id>BOOT_FREQ_MHZ</id></attribute>
 
 <!-- p9_setup_bars - Begin -->
