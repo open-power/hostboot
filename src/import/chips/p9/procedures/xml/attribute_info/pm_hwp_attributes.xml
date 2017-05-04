@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -325,6 +325,108 @@
     </description>
     <valueType>uint32</valueType>
     <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PSTATES_ENABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Indicator that all relevant attributes and required data for
+    Pstates to be enabled is present and valid
+
+    Producer: p9_build_pstate_datablock
+
+    Consumers: p9_pm_pstate_gpe_init
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_RESCLK_ENABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Indicator that all relevant attributes and required data for
+    Resonant Clocking to be enabled is present and valid
+
+    Producer: p9_build_pstate_datablock
+
+    Consumers: p9_hcode_image_build ->
+                      PGPE Header
+                      CME Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VDM_ENABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Indicator that all relevant attributes and required data for
+    Voltage Droop Monitors (VDM) to be enabled is present and valid
+
+    Producer: p9_build_pstate_datablock
+
+    Consumers: p9_hcode_image_build ->
+                      SGPE Header
+                      CME Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_IVRMS_ENABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    <!-- @todo RTC 173736 -->
+    !!!!! Deprecated for ATTR_IVRM_ENABLED
+    !!!!! Will be removed in the future
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_IVRM_ENABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Indicator that all relevant attributes and required data for
+    Internal Voltage Regulator Macros (IVRMs) to be enabled is present and valid
+
+    Producer: p9_build_pstate_datablock
+
+    Consumers: p9_hcode_image_build ->
+                      PGPE Header
+                      CME Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOF_ENABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Indicator that all relevent attributes and required data for
+    WOF to be enabled is present and valid
+
+    Producer: p9_build_pstate_datablock
+
+    Consumers: p9_hcode_image_build ->
+                      PGPE Header
+                      CME Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>
