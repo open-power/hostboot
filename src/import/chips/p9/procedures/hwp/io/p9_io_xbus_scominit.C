@@ -139,27 +139,23 @@ fapi2::ReturnCode p9_io_xbus_scominit(
     // on writeback
     FAPI_TRY( io::rmw( EDIP_RX_IORESET, i_target, i_group, LANE_00, 1 ),
               "I/O Xbus Scominit: Primary Set Reset Hard Failed." );
-    FAPI_TRY( io::rmw( EDIP_TX_IORESET, i_target, i_group, LANE_00, 1 ),
-              "I/O Xbus Scominit: Primary Set Reset Hard Failed." );
     FAPI_TRY( io::rmw( EDIP_RX_IORESET, i_connected_target, i_group, LANE_00, 1 ),
               "I/O Xbus Scominit: Connected Set Reset Hard Failed." );
-    FAPI_TRY( io::rmw( EDIP_TX_IORESET, i_connected_target, i_group, LANE_00, 1 ),
-              "I/O Xbus Scominit: Primary Set Reset Hard Failed." );
 
     // Calculated HW Delay needed based on counter size and clock speed.
     // 50us -- Based on Counter Size, 40us minimum
     // 1 Million sim cycles -- Based on sim learning
     FAPI_TRY( fapi2::delay( 50000, 1000000 ) );
 
-    FAPI_TRY( io::rmw( EDIP_RX_IORESET, i_target, i_group, LANE_00, 0 ),
+    FAPI_TRY( io::rmw( EDIP_TX_IORESET, i_target, i_group, LANE_00, 1 ),
               "I/O Xbus Scominit: Primary Set Reset Hard Failed." );
-    FAPI_TRY( io::rmw( EDIP_TX_IORESET, i_target, i_group, LANE_00, 0 ),
-              "I/O Xbus Scominit: Primary Set Reset Hard Failed." );
-    FAPI_TRY( io::rmw( EDIP_RX_IORESET, i_connected_target, i_group, LANE_00, 0 ),
+    FAPI_TRY( io::rmw( EDIP_TX_IORESET, i_connected_target, i_group, LANE_00, 1 ),
               "I/O Xbus Scominit: Connected Set Reset Hard Failed." );
-    FAPI_TRY( io::rmw( EDIP_TX_IORESET, i_connected_target, i_group, LANE_00, 0 ),
-              "I/O Xbus Scominit: Primary Set Reset Hard Failed." );
 
+    // Calculated HW Delay needed based on counter size and clock speed.
+    // 50us -- Based on Counter Size, 40us minimum
+    // 1 Million sim cycles -- Based on sim learning
+    FAPI_TRY( fapi2::delay( 50000, 1000000 ) );
 
     // Set rx master/slave attribute prior to calling the scominit procedures.
     // The scominit procedure will reference the attribute to set the register field.
