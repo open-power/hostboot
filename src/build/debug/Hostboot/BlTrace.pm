@@ -129,30 +129,25 @@ sub main
 {
     ::setBootloader();
 
-    my $btLdrHrmor  = 0x0000000008200000;
+    my $dataAddr = 0x0000000008208000;
 
-    my ($indexAddr, $indexSize) = ::findSymbolAddress("bootloader_trace_index");
-    if (not defined $indexAddr) { ::userDisplay "Cannot find symbol.\n"; die; }
-
-    my $addr = $indexAddr + $btLdrHrmor;
-    ::sendIPCMsg("read-data", "$addr,1"); # Trace index is 1 byte
+    my $indexAddr = $dataAddr + 64;
+    ::sendIPCMsg("read-data", "$indexAddr,1"); # Trace index is 1 byte
     my ($type1, $index) = ::recvIPCMsg();
     $index =~ s/\0+//g; #strip off nulls
     my $indexStr = sprintf("0x%02X", ord($index));
 
-    my ($traceAddr, $traceSize) = ::findSymbolAddress("bootloader_trace");
-    if (not defined $traceAddr) { ::userDisplay "Cannot find symbol.\n"; die; }
+    ::userDisplay "\n------------Bootloader Trace------------";
+    ::userDisplay "\nNext Entry Index: ";
+    ::userDisplay $indexStr;
 
-    $addr = $traceAddr + $btLdrHrmor;
-    my $traceAddrStr = sprintf("0x%08X", $addr);
-    ::sendIPCMsg("read-data", "$addr,64"); # Trace buffer is 64 bytes
+    my $traceAddr = $dataAddr;
+    my $traceAddrStr = sprintf("0x%08X", $traceAddr);
+    ::sendIPCMsg("read-data", "$traceAddr,64"); # Trace buffer is 64 bytes
     my ($type2, $trace) = ::recvIPCMsg();
     $trace =~ s/\0+//g; #strip off nulls
     my $traceData = formatTrace($trace);
 
-    ::userDisplay "------------Bootloader Trace------------";
-    ::userDisplay "\nNext Entry Index: ";
-    ::userDisplay $indexStr;
     ::userDisplay "\n\nTrace Buffer Address: ";
     ::userDisplay $traceAddrStr;
     ::userDisplay "\n\nTrace Data:\n";

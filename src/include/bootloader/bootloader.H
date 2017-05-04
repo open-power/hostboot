@@ -40,6 +40,7 @@
 #include <kernel/hbterminatetypes.H>
 #include <bootloader/bootloaderif.H>
 #include <bootloader/bootloader_trace.H>
+#include <bootloader/bootloader_data.H>
 #include <bootloader/hbblreasoncodes.H>
 
 extern "C" void task_end_stub();
@@ -224,6 +225,10 @@ namespace Bootloader{
 
     /** Location of working copy of HBB without ECC */
 #define HBB_WORKING_ADDR        (getHRMOR() - ( 1*MEGABYTE))
+
+    /** Location of HBBL data */
+#define HBBL_DATA_ADDR          (getHRMOR() + HBBL_EXCEPTION_VECTOR_SIZE \
+                                 + MAX_HBBL_SIZE)
 
     /** Location of HBBL scratch space */
 #define HBBL_SCRATCH_SPACE_ADDR (getHRMOR() + (64*KILOBYTE))

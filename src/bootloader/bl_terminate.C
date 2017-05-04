@@ -28,6 +28,9 @@
 
 #define bl_terminate_C
 
+// Redefine kernel_TIDataArea to use space in Bootloader data
+#define kernel_TIDataArea Bootloader::g_blData->bl_TIDataArea
+
 #include <../kernel/terminate.C>
 
 #define UINT64_HIGH(data) ((data & 0xFFFFFFFF00000000) >> 32)

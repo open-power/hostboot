@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 extern "C" void p8_force_attn() NO_RETURN;
 
 
+#ifndef bl_terminate_C
 /* Instance of the TI Data Area */
 HB_TI_DataArea kernel_TIDataArea;
 
@@ -45,13 +46,10 @@ HB_TI_DataArea kernel_TIDataArea;
 HB_Descriptor kernel_hbDescriptor =
 {
     &kernel_TIDataArea,
-#ifndef bl_terminate_C
     &KernelIpc::ipc_data_area,
-#else
-    NULL,
-#endif // bl_terminate_C
     0
 };
+#endif // bl_terminate_C
 
 
 

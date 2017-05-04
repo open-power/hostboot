@@ -38,8 +38,7 @@
 #define BOOTLOADER_TRACE_SIZE 64
 #endif
 
-extern uint8_t bootloader_trace_index;
-extern uint8_t bootloader_trace[BOOTLOADER_TRACE_SIZE];
+#include <bootloader/bootloader_data.H> // include after trace size is set
 
 /** @enum BootloaderTraces
  *  @brief List of Hostboot Bootloader Trace values.
@@ -187,8 +186,9 @@ enum BootloaderTraces
 #ifndef BOOTLOADER_TRACE
 #define BOOTLOADER_TRACE(trace_value) \
 { \
-    bootloader_trace[bootloader_trace_index++] = trace_value; \
-    bootloader_trace_index %= BOOTLOADER_TRACE_SIZE; \
+    Bootloader::g_blData->bl_trace[Bootloader::g_blData->bl_trace_index++] = \
+        trace_value; \
+    Bootloader::g_blData->bl_trace_index %= BOOTLOADER_TRACE_SIZE; \
     lwsync(); \
 }
 #endif
