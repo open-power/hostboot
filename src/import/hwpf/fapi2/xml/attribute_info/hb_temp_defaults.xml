@@ -202,13 +202,69 @@
         <default>0x00</default>
     </attribute>
 
+    <!--  set to 0 to allow automatic enablement when underlying support is available
+          VDM will simply not be enabled if any of the validation fails
+          eg ATTR_VDM_ENABLED will not be set by the HWP -->
+    <attribute>
+        <id>ATTR_SYSTEM_VDM_DISABLE</id>
+        <default>0x00</default>
+    </attribute>
+
+    <!-- Deprecated in deference to ATTR_VDM_ENABLED.  Will be deleted in the future -->
     <attribute>
         <id>ATTR_VDM_ENABLE</id>
         <default>0x00</default>
     </attribute>
+    <!-- End Deprecated -->
 
+    <!-- HWP attribute -->
+    <attribute>
+        <id>ATTR_VDM_ENABLED</id>
+    </attribute>
+
+    <!--  set to 0 to allow automatic enablement when underlying support is available -->
+    <attribute>
+        <id>ATTR_SYSTEM_RESCLK_DISABLE</id>
+        <default>0x00</default>
+    </attribute>
+
+    <!-- HWP attribute -->
+    <attribute>
+        <id>ATTR_RESCLK_ENABLED</id>
+    </attribute>
+
+    <!--  set to 0 to allow automatic enablement when underlying support is available -->
+    <attribute>
+        <id>ATTR_SYSTEM_IVRM_DISABLE</id>
+        <default>0x00</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_IVRM_ENABLED</id>
+    </attribute>
+
+    <!-- Deprecated in deference to ATTR_SYSTEM_WOF_ENABLE.  Will be deleted in the future -->
     <attribute>
         <id>ATTR_SYSTEM_WOF_ENABLED</id>
+        <default>0x00</default>
+    </attribute>
+    <!-- End Deprecated -->
+
+    <!--  set to 0 to allow automatic enablement when underlying support is available
+          WOF will simply not be enabled if any of the validation fails
+          eg ATTR_WOF_ENABLED will not be set by the pstate_parameter_block HWP -->
+    <attribute>
+        <id>ATTR_SYSTEM_WOF_DISABLE</id>
+        <default>0x00</default>
+    </attribute>
+
+    <!-- HWP attribute -->
+    <attribute>
+        <id>ATTR_WOF_ENABLED</id>
+        <default>0x00</default>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_SYSTEM_PSTATES_MODE</id>
         <default>0x00</default>
     </attribute>
 
