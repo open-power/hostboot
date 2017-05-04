@@ -63,7 +63,7 @@ extern "C" {
     /**
      * @brief HWP that calls the Centaur SCOM initfiles
      *
-     * Should be called for all valid/connected OBUS endpoints
+     * Should be called for all valid/connected CEN endpoints
      *
      * @param[in] i_tgt           Reference to CEN chiplet target
      *                                    - p9.cen.scom.initfile

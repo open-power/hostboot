@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/centaur/procedures/hwp/io/p9_io_cen_scominit.mk $
+# $Source: src/import/chips/p9/procedures/hwp/io/p9_io_dmi_scominit.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -23,6 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 
-PROCEDURE=p9_io_cen_scominit
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/centaur/procedures/hwp/initfiles)
+PROCEDURE=p9_io_dmi_scominit
 $(call BUILD_PROCEDURE)

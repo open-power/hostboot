@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/centaur/procedures/hwp/io/p9_io_cen_scominit.C $ */
+/* $Source: src/import/chips/p9/procedures/hwp/io/p9_io_dmi_scominit.H $  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,64 +23,53 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file p9_io_cen_scominit.C
-/// @brief Invoke OBUS initfile
+/// @file p9_io_dmi_scominit.H
+/// @brief Invoke DMI processor side initfile (FAPI2)
 ///
-///----------------------------------------------------------------------------
-/// *HWP HWP Owner       : Chris Steffen <cwsteffen@us.ibm.com>
-/// *HWP HWP Backup Owner: Gary Peterson <garyp@us.ibm.com>
-/// *HWP FW Owner        : Jamie Knight <rjknight@us.ibm.com>
-/// *HWP Team            : IO
-/// *HWP Level           : 1
-/// *HWP Consumed by     : FSP:HB
-///----------------------------------------------------------------------------
-///
-/// @verbatim
-/// High-level procedure flow:
-///
-///   Invoke CEN scominit file.
-///
-/// Procedure Prereq:
-///   - System clocks are running.
-/// @endverbatim
-///----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+// *HWP HWP Owner       : Chris Steffen <cwsteffen@us.ibm.com>
+// *HWP HWP Backup Owner: Gary Peterson <garyp@us.ibm.com>
+// *HWP FW Owner        : Sumit Kumar <sumit_kumar@in.ibm.com>
+// *HWP Team            : IO
+// *HWP Level           : 2
+// *HWP Consumed by     : FSP:HB
+//----------------------------------------------------------------------------
+
+
+#ifndef P9_IO_DMI_SCOMINIT_H_
+#define P9_IO_DMI_SCOMINIT_H_
 
 //------------------------------------------------------------------------------
-//  Includes
+// Includes
 //------------------------------------------------------------------------------
-#include <p9_io_cen_scominit.H>
-#include <centaur_dmi_scom.H>
-
-//------------------------------------------------------------------------------
-//  Constant definitions
-//------------------------------------------------------------------------------
+#include <fapi2.H>
 
 //------------------------------------------------------------------------------
-// Function definitions
+// Structure definitions
+//------------------------------------------------------------------------------
+typedef fapi2::Target<fapi2::TARGET_TYPE_DMI> DMI_TGT;
+
+// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p9_io_dmi_scominit_FP_t)(const DMI_TGT&);
+
+extern "C" {
+
+//------------------------------------------------------------------------------
+// Function prototypes
 //------------------------------------------------------------------------------
 
-// HWP entry point, comments in header
-fapi2::ReturnCode p9_io_cen_scominit(const CEN_TGT& i_tgt)
-{
-    // mark HWP entry
-    FAPI_INF("p9_io_cen_scominit: Entering...");
+    /**
+     * @brief HWP that calls the DMI SCOM initfiles
+     *
+     * Should be called for all valid/connected DMI endpoints
+     *
+     * @param[in] i_tgt  Reference to DMI chiplet target
+     *
+     * @return FAPI2_RC_SUCCESS on success, error otherwise
+     */
+    fapi2::ReturnCode p9_io_dmi_scominit(const DMI_TGT& i_tgt);
 
-    fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
 
-    // Get system target
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> sys_tgt;
+} // extern "C"
 
-    FAPI_INF("Invoke FAPI procedure core: input_target");
-    FAPI_EXEC_HWP(rc, centaur_dmi_scom, i_tgt, sys_tgt);
-
-    if(rc)
-    {
-        FAPI_ERR("P9 I/O Cen Scominit Failed");
-        fapi2::current_err = rc;
-    }
-
-    // mark HWP exit
-    FAPI_INF("p9_io_cen_scominit: ...Exiting");
-    return fapi2::current_err;
-}
-
+#endif // P9_IO_DMI_SCOMINIT_H_
