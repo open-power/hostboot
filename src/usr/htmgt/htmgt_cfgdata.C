@@ -43,6 +43,7 @@ namespace HTMGT
 {
 
     bool G_wofSupported = true;
+    uint8_t G_opalMode = OCC_CFGDATA_OPENPOWER_OPALVM;
 
     // Send config format data to all OCCs
     void sendOccConfigData(const occCfgDataFormat i_requestedFormat)
@@ -694,7 +695,7 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
     o_data[index++] = OCC_CFGDATA_SYS_CONFIG_VERSION;
 
     //System Type
-    o_data[index++] = OCC_CFGDATA_OPENPOWER_SYSTEMTYPE;
+    o_data[index++] = G_opalMode;
 
     //processor sensor ID
     ConstTargetHandle_t proc = getParentChip(i_occ);

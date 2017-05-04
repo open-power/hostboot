@@ -260,7 +260,8 @@ namespace HTMGT
             }
 
             if ((OCC_STATE_ACTIVE == pollRsp->state) ||
-                (OCC_STATE_OBSERVATION == pollRsp->state))
+                (OCC_STATE_OBSERVATION == pollRsp->state) ||
+                (OCC_STATE_CHARACTERIZATION == pollRsp->state))
             {
                 errlHndl_t l_err = NULL;
 
@@ -358,6 +359,3 @@ namespace HTMGT
 
 
 } // end namespace
-
-
-

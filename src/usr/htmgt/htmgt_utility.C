@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -147,6 +147,7 @@ namespace HTMGT
             case OCC_STATE_ACTIVE:        return("ACTIVE"); break;
             case OCC_STATE_SAFE:          return("SAFE"); break;
             case OCC_STATE_RESET:         return("RESET"); break;
+            case OCC_STATE_CHARACTERIZATION:  return("CHARACTERIZATION"); break;
             case OCC_STATE_IN_TRANSITION: return("IN TRANSITION"); break;
             case OCC_STATE_LOADING:       return("LOADING"); break;
             case OCC_STATE_UNKNOWN:       return("UNKNOWN"); break;

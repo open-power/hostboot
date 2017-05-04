@@ -655,7 +655,8 @@ namespace HTMGT
         }
 
         if ((requestedState == OCC_STATE_ACTIVE) ||
-            (requestedState == OCC_STATE_OBSERVATION))
+            (requestedState == OCC_STATE_OBSERVATION) ||
+            (requestedState == OCC_STATE_CHARACTERIZATION) )
         {
             // Function is only called on initial IPL and when user/mfg
             // requests a new state, so we can update target here.
@@ -768,10 +769,15 @@ namespace HTMGT
                             TMGT_CONSOLE("OCCs are now running in ACTIVE "
                                          "state");
                         }
-                        else
+                        else if (OCC_STATE_OBSERVATION == requestedState)
                         {
                             TMGT_CONSOLE("OCCs are now running in OBSERVATION "
                                          "state");
+                        }
+                        else if (OCC_STATE_CHARACTERIZATION == requestedState)
+                        {
+                            TMGT_CONSOLE("OCCs are now running in "
+                                         "CHARACTERIZATION state");
                         }
                     }
 
@@ -924,6 +930,11 @@ namespace HTMGT
                     {
                         TMGT_ERR("_resetOCCs: loadAndStartPMAll failed. ");
                         err->collectTrace("HTMGT");
+                        processOccStartStatus(false, l_proc_target);
+                    }
+                    else
+                    {
+                        processOccStartStatus(true, l_proc_target);
                     }
                 }
                 else if (!err) // Reset Threshold reached and no other err

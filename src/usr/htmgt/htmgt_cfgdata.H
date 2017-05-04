@@ -61,8 +61,10 @@ namespace HTMGT
 
     enum  // constants
     {
-        //KVM mode + single node
-        OCC_CFGDATA_OPENPOWER_SYSTEMTYPE = 0x81,
+        //KVM or OPAL mode + single node
+        OCC_CFGDATA_OPENPOWER_OPALVM  = 0x81,
+        //PowerVM mode + single node
+        OCC_CFGDATA_OPENPOWER_POWERVM = 0x01,
 
         CFGDATA_CORES = 24,
 
