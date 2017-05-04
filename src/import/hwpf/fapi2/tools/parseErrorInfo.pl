@@ -1457,7 +1457,7 @@ foreach my $argnum ( 0 .. $#ARGV )
             {
                 $constructor .= "    $class_name()\n";
                 $constructor .=
-                    "    {\n        fapi2::current_err = RC_$class_name;\n        FAPI_ERR(\"$err->{description}\");\n";
+                    "    {\n        fapi2::current_err = RC_$class_name;\n#if !defined(MINIMUM_FFDC)\n        FAPI_ERR(\"$err->{description}\");\n#endif\n";
                 $constructor .= "        fapi2::g_FfdcData.fapiRc = RC_$class_name;\n";
             }
         }
