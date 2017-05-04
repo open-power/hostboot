@@ -48,7 +48,6 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 
-
 // Buffer with all good data (CUMULUS chip)
 const uint16_t pgDataAllGood[HWAS::VPD_CP00_PG_DATA_ENTRIES] =
                      {(uint16_t)HWAS::VPD_CP00_PG_FSI_GOOD,
@@ -700,6 +699,18 @@ public:
                             sprintf(l_type_str, "OBUS");
                             sprintf(l_pgData, ", pgData = 0x%04x",
                                 pgData[VPD_CP00_PG_OB0_INDEX + l_chipUnit]);
+                            break;
+
+                        case TYPE_OBUS_BRICK:
+                            sprintf(l_type_str, "OBUS_BRICK");
+                            sprintf(l_pgData, ", pgData = 0x%04x",
+                                pgData[VPD_CP00_PG_N3_INDEX]);
+                            break;
+
+                        case TYPE_NPU:
+                            sprintf(l_type_str, "NPU");
+                            sprintf(l_pgData, ", pgData = 0x%04x",
+                                pgData[VPD_CP00_PG_N3_INDEX]);
                             break;
 
                         case TYPE_PERV:
@@ -1412,8 +1423,59 @@ public:
                         break;
 
                     case TYPE_OBUS_BRICK:
+                        {
+                            //Two cases here:
+                            //OBRICK==SMP --> Target should be present regardless of PG
+                            //OBRICK!=SMP --> Target should follow PG
+                            //marking PG bad
+                            pgData[VPD_CP00_PG_N3_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N3_NPU;
+
+                            ATTR_OPTICS_CONFIG_MODE_type config_mode =
+                                pDesc->getAttr<ATTR_OPTICS_CONFIG_MODE>();
+
+                            if (OPTICS_CONFIG_MODE_SMP == config_mode)
+                            {
+                                //Calling with target set as SMP
+                                TS_INFO( "testHWASisDescFunctional: "
+                                          "OBUS_BRICK PG is bad and target is SMP");
+
+                                //Since SMP, should always be true, but fail test if false
+                                if (!isDescFunctional(pDesc, pgData))
+                                {
+                                    TS_FAIL("testHWASisDescFunctional>"
+                                            "functional = 0x%x, should be true because"
+                                            "OBUS_BRICK is SMP: PG = 0x%04x.",
+                                            isDescFunctional(pDesc, pgData),
+                                            pgData[VPD_CP00_PG_N3_INDEX]);
+                                }
+                            }
+                            else
+                            {
+                                TS_INFO( "testHWASisDescFunctional: "
+                                          "OBUS_BRICK PG is bad and target is NVLINK");
+
+                                //Since non-SMP, should return false, but fail test if true
+                                if (isDescFunctional(pDesc, pgData))
+                                {
+                                    TS_FAIL("testHWASisDescFunctional>"
+                                            "functional = 0x%x, should be false because"
+                                            "OBUS_BRICK is NVLINK: PG = 0x%04x.",
+                                            isDescFunctional(pDesc, pgData),
+                                            pgData[VPD_CP00_PG_N3_INDEX]);
+                                }
+                            }
+
+                            //Setting PG back to good data
+                            pgData[VPD_CP00_PG_N3_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N3_GOOD;
+
+                            break;
+                        }
+
+                    case TYPE_NPU:
                         TS_INFO( "testHWASisDescFunctional: "
-                                  "NV is not functional");
+                                  "NPU is not functional");
                         pgData[VPD_CP00_PG_N3_INDEX] |=
                             (uint16_t)VPD_CP00_PG_N3_NPU;
 
@@ -1421,7 +1483,7 @@ public:
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                     "functional = 0x%x, should be false, "
-                                    "NV = 0x%04x.",
+                                    "NPU = 0x%04x.",
                                     isDescFunctional(pDesc, pgData),
                                     pgData[VPD_CP00_PG_N3_INDEX]);
                         }

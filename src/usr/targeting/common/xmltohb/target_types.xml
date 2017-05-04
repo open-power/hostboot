@@ -2205,7 +2205,7 @@
         <default>0</default> <!-- GARD -->
     </attribute>
     <attribute><id>OBUS_BRICK_LANE_MASK</id></attribute>
-    <attribute><id>OPTICS_CONFIG_MODE</id><default>SMP</default></attribute>
+    <attribute><id>OPTICS_CONFIG_MODE</id></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
 </targetType>
 
