@@ -31,6 +31,8 @@
 .set SBE_HB_PNORSIZEMB,   sbe_hb_structures+6  ;// uint16_t
 .set SBE_HB_BLLOADSIZE,   sbe_hb_structures+8  ;// uint64_t
 .set SBE_HB_SECUREACCESSBIT, sbe_hb_structures+16  ;// uint8_t
+.set SBE_HB_XSCOMMMIOBAR, sbe_hb_structures+17 ;// uint64_t
+.set SBE_HB_LPCMMIOBAR,   sbe_hb_structures+25 ;// uint64_t
 .set HBBL_BASE_ADDRESS,   base_load_address
 .set HBBL_END_ADDRESS,    end_load_address
 .set HBBL_system_reset,          0x100
@@ -397,28 +399,7 @@ switchToHBB:
 kernel_other_thread_spinlock:
     .space 8
 
-    ;// @name bootloader_trace_index
-    ;// @brief Index for Bootloader Trace entries
-    ;// One-byte index for next entry to use in bootloader_trace.
-.global bootloader_trace_index
-bootloader_trace_index:
-    .space 1
-
     .balign 16
-    ;// @name bootloader_trace
-    ;// @brief Buffer for Bootloader Trace data
-    ;// Buffer with bootloader trace entries.  There are 64 one-byte entries
-    ;// in the buffer.  They are used to track events that have occurred in
-    ;// the bootloader code.  After all entries have been used, the buffer
-    ;// wraps and the oldest entry is overwritten by the newest trace data.
-.global bootloader_trace
-bootloader_trace:
-    .space 64
-
-.global bootloader_hbbSection
-bootloader_hbbSection:
-    .space 32
-
 .global hbi_ImageId
 hbi_ImageId:
     .space 128

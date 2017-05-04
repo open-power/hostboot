@@ -49,9 +49,8 @@
 
 #include <pnor/pnorif.H>
 
-extern uint64_t kernel_other_thread_spinlock;
-extern PNOR::SectionData_t bootloader_hbbSection;
 extern char bootloader_end_address;
+
 
 namespace Bootloader{
     /**
@@ -60,13 +59,15 @@ namespace Bootloader{
      * Pointer to location in main storage which bootloader uses as
      * scratch space
      */
-    uint8_t *g_blScratchSpace = NULL;
+    uint8_t *g_blScratchSpace = nullptr;
 
-    // Global Object that will be stored where the SBE HB structure indicates
-    BlToHbData g_blToHbData;
-
-    // Global bool indicating if the secureROM is valid. Toggles verification.
-    bool g_secureRomValid = false;
+    /**
+     * @brief Pointer to bootloader external data
+     *
+     * Pointer to location in main storage which bootloader uses for
+     * storing data
+     */
+    blData_t *g_blData = nullptr;
 
     /**
      * @brief Set Secureboot Config Data structure so it is accessible via
@@ -86,7 +87,8 @@ namespace Bootloader{
         // Ensure SBE to Bootloader structure has the SAB member
         if (l_blConfigData->version >= SAB_ADDED)
         {
-            g_blToHbData.secureAccessBit = l_blConfigData->secureAccessBit;
+            g_blData->blToHbData.secureAccessBit =
+                                                l_blConfigData->secureAccessBit;
         }
 
         // Find secure ROM addr
@@ -101,10 +103,10 @@ namespace Bootloader{
 
         // Create BlToHbData
         // Set Rom Size
-        memcpy (&g_blToHbData.secureRomSize,
+        memcpy (&g_blData->blToHbData.secureRomSize,
                 l_pRomStart,
-                sizeof(g_blToHbData.secureRomSize));
-        l_pRomStart += sizeof(g_blToHbData.secureRomSize);
+                sizeof(g_blData->blToHbData.secureRomSize));
+        l_pRomStart += sizeof(g_blData->blToHbData.secureRomSize);
 
         // Get Secure ROM info
         const auto l_pSecRomInfo = reinterpret_cast<const SecureRomInfo*>(
@@ -115,27 +117,43 @@ namespace Bootloader{
         {
             // Store valid check local to bootloader, as another validation
             // is required in code outside the bootloader.
-            g_secureRomValid = true;
+            g_blData->secureRomValid = true;
 
-            g_blToHbData.eyeCatch = BLTOHB_EYECATCHER;
-            g_blToHbData.version = BLTOHB_SAB;
-            g_blToHbData.branchtableOffset = l_pSecRomInfo->branchtableOffset;
-            g_blToHbData.secureRom = l_pRomStart;
+            g_blData->blToHbData.eyeCatch = BLTOHB_EYECATCHER;
+            if (l_blConfigData->version == BLTOHB_SAB + 1 /* MMIO_BARS_ADDED @TODO RTC:173526*/ )
+            {
+                g_blData->blToHbData.version = BLTOHB_MMIOBARS;
+            }
+            else
+            {
+                g_blData->blToHbData.version = BLTOHB_SAB;
+            }
+            g_blData->blToHbData.branchtableOffset =
+                                               l_pSecRomInfo->branchtableOffset;
+            g_blData->blToHbData.secureRom = l_pRomStart;
 
             // Set HW key hash pointer (20K - 64 bytes) and size
-            g_blToHbData.hwKeysHash = reinterpret_cast<const void *>
+            g_blData->blToHbData.hwKeysHash = reinterpret_cast<const void *>
                                                             (HW_KEYS_HASH_ADDR);
-            g_blToHbData.hwKeysHashSize = SHA512_DIGEST_LENGTH;
+            g_blData->blToHbData.hwKeysHashSize = SHA512_DIGEST_LENGTH;
 
             // Set HBB header and size
-            g_blToHbData.hbbHeader = i_pHbbSrc;
-            g_blToHbData.hbbHeaderSize = PAGE_SIZE;
+            g_blData->blToHbData.hbbHeader = i_pHbbSrc;
+            g_blData->blToHbData.hbbHeaderSize = PAGE_SIZE;
+
+            // Set the MMIO BAR information if appropriate
+            if (l_blConfigData->version >= BLTOHB_SAB + 1 /* MMIO_BARS_ADDED @TODO RTC:173526*/ )
+            {
+                g_blData->blToHbData.xscomBAR = 0 /* l_blConfigData->xscomBAR @TODO RTC:173526*/ ;
+                g_blData->blToHbData.lpcBAR = 0 /* l_blConfigData->lpcBAR @TODO RTC:173526*/ ;
+            }
+
         }
 
         // Place structure into proper location for HB to find
         memcpy(reinterpret_cast<void *>(BLTOHB_COMM_DATA_ADDR |
                                         IGNORE_HRMOR_MASK),
-               &g_blToHbData,
+               &g_blData->blToHbData,
                sizeof(BlToHbData));
     }
 
@@ -157,13 +175,13 @@ namespace Bootloader{
         uint64_t l_rc = 0;
 
         // Check if Secure Access Bit is set
-        if (!g_blToHbData.secureAccessBit)
+        if (!g_blData->blToHbData.secureAccessBit)
         {
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_SAB_UNSET);
         }
         // # @TODO RTC:170136 terminate in this case
         // Ensure SecureRom is actually present
-        else if ( !g_secureRomValid )
+        else if ( !g_blData->secureRomValid )
         {
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_NO_EYECATCH);
         }
@@ -177,9 +195,9 @@ namespace Bootloader{
         {
             // Set startAddr to ROM_verify() function at an offset of Secure ROM
             uint64_t l_rom_verify_startAddr =
-                    reinterpret_cast<const uint64_t>(g_blToHbData.secureRom)
-                    + g_blToHbData.branchtableOffset
-                    + ROM_VERIFY_FUNCTION_OFFSET;
+                reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
+                + g_blData->blToHbData.branchtableOffset
+                + ROM_VERIFY_FUNCTION_OFFSET;
 
             // Declare local input struct
             ROM_hw_params l_hw_parms;
@@ -189,7 +207,7 @@ namespace Bootloader{
             memset(&l_hw_parms, 0, sizeof(ROM_hw_params));
 
             // Use current hw hash key
-            memcpy (&l_hw_parms.hw_key_hash, g_blToHbData.hwKeysHash,
+            memcpy (&l_hw_parms.hw_key_hash, g_blData->blToHbData.hwKeysHash,
                     sizeof(sha2_hash_t));
 
             const auto l_container = reinterpret_cast<const ROM_container_raw*>
@@ -235,7 +253,8 @@ namespace Bootloader{
     int main()
     {
         // Initialization
-        bootloader_trace_index = 0;
+        g_blData = reinterpret_cast<blData_t *>(HBBL_DATA_ADDR);
+        g_blData->bl_trace_index = 0;
         BOOTLOADER_TRACE(BTLDR_TRC_MAIN_START);
 
         //Set core scratch 3 to say bootloader is active
@@ -256,11 +275,12 @@ namespace Bootloader{
         uint32_t l_errCode = PNOR::NO_ERROR;
         uint8_t l_tocUsed = 0;
         g_blScratchSpace = reinterpret_cast<uint8_t*>(HBBL_SCRATCH_SPACE_ADDR);
+        g_blData->secureRomValid = false;
 
         // Get location of HB base code in PNOR from TOC
         // @TODO RTC:138268 Support multiple sides of PNOR in bootloader
         bl_pnorAccess::getHBBSection(l_pnorEnd,
-                                     bootloader_hbbSection,
+                                     g_blData->bl_hbbSection,
                                      l_errCode,
                                      l_tocUsed,
                                      l_pnorStart);
@@ -269,12 +289,12 @@ namespace Bootloader{
         if(PNOR::NO_ERROR == l_errCode)
         {
             // get hbbFlashOffset
-            uint64_t l_hbbFlashOffset = bootloader_hbbSection.flashAddr;
+            uint64_t l_hbbFlashOffset = g_blData->bl_hbbSection.flashAddr;
             // get hbbLength without size of ECC data
-            uint32_t l_hbbLength = bootloader_hbbSection.size;
+            uint32_t l_hbbLength = g_blData->bl_hbbSection.size;
             // get hbbEcc
             bool l_hbbEcc =
-                ( bootloader_hbbSection.integrity == FFS_INTEG_ECC_PROTECT);
+                ( g_blData->bl_hbbSection.integrity == FFS_INTEG_ECC_PROTECT);
 
             // Copy HB base code from PNOR to working location
             handleMMIO(l_pnorStart + l_hbbFlashOffset,
