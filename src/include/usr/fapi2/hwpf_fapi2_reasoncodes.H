@@ -58,6 +58,7 @@ namespace fapi2
         MOD_FAPI2_PIB_ERR_MASK                      = 0x0F,
         MOD_FAPI2_PLAT_PARSE_WOF_TABLES             = 0x10,
         MOD_FAPI2_CVPD_ACCESS                       = 0x11,
+        MOD_FAPI2_BAD_DQ_BITMAP                     = 0x12,
     };
 
     /**
@@ -124,6 +125,9 @@ namespace fapi2
         // HWP generated errors
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,
 
+        // DIMM SPD generated errors
+        RC_BAD_DQ_MFG_MODE_BITS        = HWPF_COMP_ID | 0x30,
+
     };
 
     /**
@@ -135,6 +139,22 @@ namespace fapi2
         HWPF_FAPI2_UDT_HWP_FFDC           = 0x02,
         HWPF_FAPI2_UDT_STEP_ERROR_DETAILS = 0x03,
     };
+
+    /**
+     * @brief Defines the BAD_DQ_BITMAP error log detail data sections
+     */
+    enum fapi2BadDqBitmapDataSection
+    {
+        CLEAN_BAD_DQ_BITMAP_RANK0   = 0x01,
+        CLEAN_BAD_DQ_BITMAP_RANK1   = 0x02,
+        CLEAN_BAD_DQ_BITMAP_RANK2   = 0x03,
+        CLEAN_BAD_DQ_BITMAP_RANK3   = 0x04,
+        CURRENT_BAD_DQ_BITMAP_RANK0 = 0x05,
+        CURRENT_BAD_DQ_BITMAP_RANK1 = 0x06,
+        CURRENT_BAD_DQ_BITMAP_RANK2 = 0x07,
+        CURRENT_BAD_DQ_BITMAP_RANK3 = 0x08,
+    };
+
 };
 
 #endif // HWPF_FAPI2_REASONCODES_H_

@@ -50,7 +50,6 @@
 #include <plat_attr_override_sync.H>
 #include <vpd/spdenums.H>
 
-
 //******************************************************************************
 // Interface
 //******************************************************************************
@@ -255,6 +254,28 @@ ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 ReturnCode platGetWOFTableData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                                uint8_t * o_wofTableData);
 
+///
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+/// the Bad DQ Bitmap attribute. It should not be called directly.
+///
+/// @param[in]  i_fapiTarget  DIMM target pointer
+/// @param[out] o_data        Bad DIMM DQ Bitmap
+/// @return     ReturnCode.   Zero on success, else platform specified error
+///
+ReturnCode fapiAttrGetBadDqBitmap( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                   ATTR_BAD_DQ_BITMAP_Type (&o_data) );
+
+///
+/// @brief This function is called by the FAPI_ATTR_SET macro when setting
+/// the Bad DQ Bitmap attribute. It should not be called directly.
+///
+/// @param[in]  i_fapiTarget  DIMM target pointer
+/// @param[in]  i_data        Bad DIMM DQ Bitmap
+/// @return     ReturnCode.   Zero on success, else platform specified error
+///
+ReturnCode fapiAttrSetBadDqBitmap( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                   ATTR_BAD_DQ_BITMAP_Type (&i_data) );
+
 // -----------------------------------------------------------------------------
 // End TODO: End to be supported functions
 // -----------------------------------------------------------------------------
@@ -343,5 +364,21 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platGetWOFTableData(TARGET,VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to route ATTR_BAD_DQ_BITMAP read access to the correct HB function
+//------------------------------------------------------------------------------
+#define ATTR_BAD_DQ_BITMAP_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::fapiAttrGetBadDqBitmap(TARGET, VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to route ATTR_BAD_DQ_BITMAP write access to the correct HB function
+//------------------------------------------------------------------------------
+#define ATTR_BAD_DQ_BITMAP_SETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::fapiAttrSetBadDqBitmap(TARGET, VAL)
 
 #endif // ATTRIBUTESERVICE_H_

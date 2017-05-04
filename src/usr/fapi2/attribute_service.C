@@ -60,6 +60,7 @@
 #include <targeting/common/predicates/predicatectm.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/util.H>
+#include <../memory/lib/shared/mss_const.H>
 
 //******************************************************************************
 // Implementation
@@ -516,6 +517,602 @@ ReturnCode platGetWOFTableData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     return rc;
 }
 
+//******************************************************************************
+// fapi2::platAttrSvc::__getMcsAndPortSlct function
+//******************************************************************************
+ReturnCode __getMcsAndPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
+                                TARGETING::TargetHandle_t &o_mcsTarget,
+                                uint32_t o_ps )
+{
+    fapi2::ReturnCode l_rc;
+    errlHndl_t l_errl = nullptr;
+
+    do
+    {
+        // determine whether this is a Nimbus or Cumulus chip
+        TARGETING::Target * masterProc = nullptr;
+        TARGETING::targetService().masterProcChipTargetHandle(masterProc);
+        TARGETING::ATTR_MODEL_type procType =
+            masterProc->getAttr<TARGETING::ATTR_MODEL>();
+
+        TARGETING::TargetHandle_t l_port = nullptr;
+
+        // If the proc is Cumulus, we need to get the MBA.
+        if ( TARGETING::MODEL_CUMULUS == procType )
+        {
+            Target<TARGET_TYPE_MBA> l_fapiMba =
+                i_fapiDimm.getParent<TARGET_TYPE_MBA>();
+            l_errl = getTargetingTarget( l_fapiMba, l_port );
+            if ( l_errl )
+            {
+                FAPI_ERR( "__getMcsAndPortSlct: Error from "
+                          "getTargetingTarget getting MBA." );
+                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                break;
+            }
+
+            // Get the MCS.
+            TARGETING::TargetHandleList l_memBufList;
+            getParentAffinityTargets( l_memBufList, l_port,
+                TARGETING::CLASS_CHIP, TARGETING::TYPE_MEMBUF );
+
+            TARGETING::TargetHandleList l_mcsList;
+            getParentAffinityTargets( l_mcsList, l_memBufList[0],
+                TARGETING::CLASS_UNIT, TARGETING::TYPE_MCS );
+            o_mcsTarget = l_mcsList[0];
+
+        }
+        // If the proc is Nimbus, we need to get the MCA.
+        else
+        {
+            Target<TARGET_TYPE_MCA> l_fapiMca =
+                i_fapiDimm.getParent<TARGET_TYPE_MCA>();
+            l_errl = getTargetingTarget( l_fapiMca, l_port );
+            if ( l_errl )
+            {
+                FAPI_ERR( "__getMcsAndPortSlct: Error from "
+                          "getTargetingTarget getting MCA." );
+                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                break;
+            }
+
+            // Get the MCS.
+            Target<TARGET_TYPE_MCS> l_fapiMcs;
+            l_fapiMcs = l_fapiMca.getParent<TARGET_TYPE_MCS>();
+
+            l_errl = getTargetingTarget( l_fapiMcs, o_mcsTarget );
+            if ( l_errl )
+            {
+                FAPI_ERR( "__getMcsAndPortSlct: Error from "
+                        "getTargetingTarget getting MCS." );
+                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                break;
+            }
+
+        }
+
+        o_ps = l_port->getAttr<TARGETING::ATTR_CHIP_UNIT>() %
+               mss::PORTS_PER_MCS;
+
+    }while(0);
+
+    return l_rc;
+}
+
+
+//******************************************************************************
+// fapi2::platAttrSvc::__badDqBitmapGetHelperAttrs function
+//******************************************************************************
+ReturnCode __badDqBitmapGetHelperAttrs(
+    const TARGETING::TargetHandle_t i_dimmTarget,
+    uint8_t  (&o_wiringData)[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS],
+    uint64_t &o_allMnfgFlags, uint32_t o_ps )
+{
+    fapi2::ReturnCode l_rc;
+
+    do
+    {
+        // memset to avoid known syntax issue with previous compiler versions
+        // and ensure zero initialized array.
+        memset( o_wiringData, 0, sizeof(o_wiringData) );
+
+        Target<TARGET_TYPE_DIMM> l_fapiDimm( i_dimmTarget );
+        TARGETING::TargetHandle_t l_mcsTarget = nullptr;
+
+        __getMcsAndPortSlct( l_fapiDimm, l_mcsTarget, o_ps );
+
+        // Get the DQ to DIMM Connector DQ Wiring attribute.
+        // Note that for C-DIMMs, this will return a simple 1:1 mapping.
+        // This code cannot tell the difference between C-DIMMs and IS-DIMMs.
+        l_rc = FAPI_ATTR_GET( fapi2::ATTR_MSS_VPD_DQ_MAP, l_mcsTarget,
+                              o_wiringData );
+        if ( l_rc )
+        {
+            FAPI_ERR( "__badDqBitmapGetHelperAttrs: Unable to read attribute - "
+                      "ATTR_MSS_VPD_DQ_MAP" );
+            break;
+        }
+
+        // Manufacturing flags attribute
+        o_allMnfgFlags = 0;
+
+        // Get the manufacturing flags bitmap to be used in both get and set
+        l_rc = FAPI_ATTR_GET( fapi2::ATTR_MNFG_FLAGS,
+                              fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                              o_allMnfgFlags );
+        if ( l_rc )
+        {
+            FAPI_ERR( "__badDqBitmapGetHelperAttrs: Unable to read attribute - "
+                      "ATTR_MNFG_FLAGS" );
+            break;
+        }
+
+    }while(0);
+
+    return l_rc;
+}
+
+//******************************************************************************
+// fapi2::platAttrSvc::__dimmUpdateDqBitmapEccByte function
+//******************************************************************************
+errlHndl_t __dimmUpdateDqBitmapEccByte(
+    TARGETING::TargetHandle_t i_dimm,
+    uint8_t (&o_data)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT] )
+{
+    errlHndl_t l_errl = nullptr;
+
+    const uint8_t ECC_DQ_BYTE_NUMBER_INDEX = 8;
+    const uint8_t ENUM_ATTR_SPD_MODULE_MEMORY_BUS_WIDTH_WE8 = 0x08;
+    size_t MEM_BUS_WIDTH_SIZE = 0x01;
+
+    do
+    {
+        uint8_t *l_eccBits = static_cast<uint8_t*>(malloc(MEM_BUS_WIDTH_SIZE));
+
+        l_errl = deviceRead( i_dimm,
+                l_eccBits,
+                MEM_BUS_WIDTH_SIZE,
+                DEVICE_SPD_ADDRESS(SPD::MODULE_MEMORY_BUS_WIDTH) );
+        if ( l_errl )
+        {
+            FAPI_ERR( "__dimmUpdateDqBitmapEccByte: Failed to get "
+                      "SPD::MODULE_MEMORY_BUS_WIDTH." );
+            break;
+        }
+
+        // The ATTR_SPD_MODULE_MEMORY_BUS_WIDTH contains ENUM values
+        // for bus widths of 8, 16, 32, and 64 bits both with ECC
+        // and without ECC.  WExx ENUMS denote the ECC extension
+        // is present, and all have bit 3 set.  Therefore,
+        // it is only required to check against the WE8 = 0x08 ENUM
+        // value in order to determine if ECC lines are present.
+        if ( !(ENUM_ATTR_SPD_MODULE_MEMORY_BUS_WIDTH_WE8 & *l_eccBits) )
+        {
+            // Iterate through each rank and set DQ bits in
+            // caller's data.
+            for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
+            {
+                // Set DQ bits in caller's data
+                o_data[i][ECC_DQ_BYTE_NUMBER_INDEX] = 0xFF;
+            }
+        }
+    }while(0);
+
+    return l_errl;
+}
+
+//******************************************************************************
+// fapi2::platAttrSvc::__dimmGetDqBitmapSpareByte function
+//******************************************************************************
+ReturnCode __dimmGetDqBitmapSpareByte( TARGETING::TargetHandle_t i_dimm,
+    uint8_t (&o_spareByte)[mss::MAX_RANK_PER_DIMM])
+{
+    ReturnCode l_rc;
+
+    do
+    {
+        // Spare DRAM Attribute: Returns spare DRAM availability for
+        // all DIMMs associated with the target MCS.
+        uint8_t l_dramSpare[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT]
+                           [mss::MAX_RANK_PER_DIMM] = {};
+
+        Target<TARGET_TYPE_DIMM> l_fapiDimm( i_dimm );
+
+        uint32_t l_ds = i_dimm->getAttr<TARGETING::ATTR_FAPI_POS>() %
+                        mss::MAX_DIMM_PER_PORT;
+
+        TARGETING::TargetHandle_t l_mcsTarget = nullptr;
+        uint32_t l_ps = 0;
+        __getMcsAndPortSlct( l_fapiDimm, l_mcsTarget, l_ps );
+
+        l_rc = FAPI_ATTR_GET( fapi2::ATTR_EFF_DIMM_SPARE, l_mcsTarget,
+                              l_dramSpare );
+        if ( l_rc )
+        {
+            FAPI_ERR( "__dimmGetDqBitmapSpareByte: Error getting DRAM Spare "
+                     "data." );
+            break;
+        }
+
+        // Iterate through each rank of this DIMM
+        for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
+        {
+            // Handle spare DRAM configuration cases
+            switch ( l_dramSpare[l_ps][l_ds][i] )
+            {
+                case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE:
+                    // Set DQ bits reflecting unconnected
+                    // spare DRAM in caller's data
+                    o_spareByte[i] = 0xFF;
+                    break;
+
+                case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_LOW_NIBBLE:
+                    o_spareByte[i] = 0x0F;
+                    break;
+
+                case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_HIGH_NIBBLE:
+                    o_spareByte[i] = 0xF0;
+                    break;
+
+                // As erroneous value will not be encountered.
+                case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_FULL_BYTE:
+                default:
+                    o_spareByte[i] = 0x0;
+                    break;
+            }
+        }
+
+    }while(0);
+
+    return l_rc;
+
+}
+
+//******************************************************************************
+// fapi2::platAttrSvc::__dimmUpdateDqBitmapSpareByte function
+//******************************************************************************
+ReturnCode __dimmUpdateDqBitmapSpareByte(
+    TARGETING::TargetHandle_t i_dimm,
+    uint8_t (&o_data)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT] )
+{
+    ReturnCode l_rc;
+    const uint8_t SPARE_DRAM_DQ_BYTE_NUMBER_INDEX = 9;
+
+    do
+    {
+        uint8_t spareByte[mss::MAX_RANK_PER_DIMM];
+        memset( spareByte, 0, sizeof(spareByte) );
+
+        l_rc = __dimmGetDqBitmapSpareByte( i_dimm, spareByte );
+
+        if ( l_rc )
+        {
+            FAPI_ERR("__dimmUpdateDqBitmapSpareByte: Error getting spare byte");
+            break;
+        }
+
+        for ( uint32_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
+        {
+            o_data[i][SPARE_DRAM_DQ_BYTE_NUMBER_INDEX] |= spareByte[i];
+        }
+
+    }while(0);
+
+    return l_rc;
+}
+
+//******************************************************************************
+// fapi2::platAttrSvc::__compareEccAndSpare function
+//******************************************************************************
+ReturnCode __compareEccAndSpare(TARGETING::TargetHandle_t i_dimm,
+    bool & o_mfgModeBadBitsPresent,
+    uint8_t i_callersData[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
+    uint8_t (&o_eccSpareBitmap)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT])
+{
+
+    // This function will compare o_eccSpareBitmap, which represents a bad dq
+    // bitmap with the appropriate spare/ECC bits set (if any) and all other DQ
+    // lines functional, to the caller's data. If discrepancies are found, we
+    // know this is the result of a manufacturing mode process and these bits
+    // should not be recorded.
+
+    ReturnCode l_rc;
+    errlHndl_t l_errl = nullptr;
+
+    do
+    {
+        // Zero-initialize the o_eccSpareBitmap bad dq bitmap.
+        memset( o_eccSpareBitmap, 0, sizeof(o_eccSpareBitmap) );
+
+        // Check ECC.
+        l_errl = __dimmUpdateDqBitmapEccByte(i_dimm, o_eccSpareBitmap);
+        if ( l_errl )
+        {
+            FAPI_ERR( "__compareEccAndSpare: Error getting ECC data "
+                      "(Mfg mode)" );
+            l_rc = fapi2::FAPI2_RC_INVALID_ATTR_GET;
+            break;
+        }
+
+        // Check spare DRAM.
+        l_rc = __dimmUpdateDqBitmapSpareByte(i_dimm, o_eccSpareBitmap);
+        if ( l_rc )
+        {
+            FAPI_ERR( "__compareEccAndSpare: Error getting spare DRAM data "
+                      "(Mfg mode)" );
+            break;
+        }
+
+        // Compare o_eccSpareBitmap to i_callersData.
+        for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
+        {
+            for (uint8_t j = 0; j < mss::BAD_DQ_BYTE_COUNT; j++)
+            {
+                if ( i_callersData[i][j] !=
+                     o_eccSpareBitmap[i][j] )
+                {
+                    o_mfgModeBadBitsPresent = true;
+                    break;
+                }
+            }
+            if ( o_mfgModeBadBitsPresent ) break;
+        }
+
+        // Create and log error if discrepancies were found.
+        if ( o_mfgModeBadBitsPresent )
+        {
+            FAPI_ERR( "__compareEccAndSpare: Read/write requested while in "
+                      "DISABLE_DRAM_REPAIRS mode found extra bad bits set for "
+                      "DIMM" );
+
+            /*@
+             * @errortype
+             * @moduleid     MOD_FAPI2_BAD_DQ_BITMAP
+             * @reasoncode   RC_BAD_DQ_MFG_MODE_BITS
+             * @userdata1    DIMM Target HUID
+             * @userdata2    <unused>
+             * @devdesc      Extra bad bits set for DIMM
+             * @custdesc     Read/write requested while in
+             *               DISABLE_DRAM_REPAIRS mode found
+             *               extra bad bits set for DIMM
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    MOD_FAPI2_BAD_DQ_BITMAP,
+                    RC_BAD_DQ_MFG_MODE_BITS,
+                    TARGETING::get_huid(i_dimm) );
+
+            l_errl->addFFDC( HWPF_COMP_ID, &o_eccSpareBitmap[0],
+                             sizeof(o_eccSpareBitmap[0]), 1,
+                             CLEAN_BAD_DQ_BITMAP_RANK0 );
+
+            l_errl->addFFDC( HWPF_COMP_ID, &o_eccSpareBitmap[1],
+                             sizeof(o_eccSpareBitmap[1]), 1,
+                             CLEAN_BAD_DQ_BITMAP_RANK1 );
+
+            l_errl->addFFDC( HWPF_COMP_ID, &o_eccSpareBitmap[2],
+                             sizeof(o_eccSpareBitmap[2]), 1,
+                             CLEAN_BAD_DQ_BITMAP_RANK2 );
+
+            l_errl->addFFDC( HWPF_COMP_ID, &o_eccSpareBitmap[3],
+                             sizeof(o_eccSpareBitmap[3]), 1,
+                             CLEAN_BAD_DQ_BITMAP_RANK3 );
+
+            l_errl->addFFDC( HWPF_COMP_ID, &i_callersData[0],
+                             sizeof(i_callersData[0]), 1,
+                             CURRENT_BAD_DQ_BITMAP_RANK0 );
+
+            l_errl->addFFDC( HWPF_COMP_ID, &i_callersData[1],
+                             sizeof(i_callersData[1]), 1,
+                             CURRENT_BAD_DQ_BITMAP_RANK1 );
+
+            l_errl->addFFDC( HWPF_COMP_ID, &i_callersData[2],
+                             sizeof(i_callersData[2]), 1,
+                             CURRENT_BAD_DQ_BITMAP_RANK2 );
+
+            l_errl->addFFDC( HWPF_COMP_ID, &i_callersData[3],
+                             sizeof(i_callersData[3]), 1,
+                             CURRENT_BAD_DQ_BITMAP_RANK3 );
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
+    }while(0);
+
+    return l_rc;
+}
+
+//******************************************************************************
+// fapi2::platAttrSvc::fapiAttrGetBadDqBitmap function
+//******************************************************************************
+ReturnCode fapiAttrGetBadDqBitmap(
+    const Target<TARGET_TYPE_ALL>& i_dimmFapiTarget,
+    ATTR_BAD_DQ_BITMAP_Type (&o_data) )
+{
+    FAPI_INF(">>fapiAttrGetBadDqBitmap: Getting bitmap");
+
+    // define structure for the format of DIMM_BAD_DQ_DATA
+    struct dimmBadDqDataFormat
+    {
+        uint32_t iv_magicNumber;
+        uint8_t  iv_version;
+        uint8_t  iv_reserved1;
+        uint8_t  iv_reserved2;
+        uint8_t  iv_reserved3;
+        uint8_t  iv_bitmaps[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
+    };
+
+    // constant definitions
+    const uint32_t DIMM_BAD_DQ_MAGIC_NUMBER = 0xbadd4471;
+    const uint8_t  DIMM_BAD_DQ_VERSION = 1;
+    size_t DIMM_BAD_DQ_SIZE_BYTES = 0x50;
+
+    fapi2::ReturnCode l_rc;
+    errlHndl_t l_errl = nullptr;
+    TARGETING::TargetHandle_t l_dimmTarget = nullptr;
+
+    do
+    {
+        l_errl = getTargetingTarget( i_dimmFapiTarget, l_dimmTarget );
+        if ( l_errl )
+        {
+            FAPI_ERR( "fapiAttrGetBadDqBitmap: Error from getTargetingTarget" );
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+        uint8_t  l_wiringData[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS];
+        uint64_t l_allMnfgFlags;
+        uint32_t l_ps = 0;
+
+        l_rc = __badDqBitmapGetHelperAttrs( l_dimmTarget, l_wiringData,
+                                            l_allMnfgFlags, l_ps );
+        if ( l_rc )
+        {
+            FAPI_ERR( "fapiAttrGetBadDqBitmap: Error - unable to read "
+                      "attributes" );
+            break;
+        }
+
+        uint8_t * l_badDqData =
+            static_cast<uint8_t*>( malloc(DIMM_BAD_DQ_SIZE_BYTES) );
+
+        l_errl = deviceRead(l_dimmTarget, l_badDqData,
+                            DIMM_BAD_DQ_SIZE_BYTES,
+                            DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA));
+        if ( l_errl )
+        {
+            FAPI_ERR( "fapiAttrGetBadDqBitmap: Failed to read DIMM Bad DQ "
+                      "data." );
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+        dimmBadDqDataFormat l_spdData;
+        memcpy( &l_spdData, l_badDqData, sizeof(dimmBadDqDataFormat) );
+
+        // Zero caller's data
+        memset(o_data, 0, sizeof(o_data));
+
+        // Check the magic number and version number. Note that the
+        // magic number is stored in SPD in big endian format and
+        // platforms of any endianness can access it
+        if ( (be32toh(l_spdData.iv_magicNumber) !=
+                    DIMM_BAD_DQ_MAGIC_NUMBER) ||
+                (l_spdData.iv_version != DIMM_BAD_DQ_VERSION) )
+        {
+            FAPI_INF( "fapiAttrGetBadDqBitmap: SPD DQ not initialized." );
+        }
+        else
+        {
+            // Translate bitmap from DIMM DQ to Centaur DQ point of view
+            // for each rank
+            for (uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++)
+            {
+                // Iterate through all the DQ bits in the rank
+                for (uint8_t j = 0; j < mss::MAX_DQ_BITS; j++)
+                {
+                    // There is a byte for each 8 DQs, j/8 gives the
+                    // byte number. The MSB in each byte is the lowest
+                    // DQ, (0x80 >> (j % 8)) gives the bit mask
+                    // corresponding to the DQ within the byte
+                    if ((l_spdData.iv_bitmaps[i][j/8]) &
+                            (0x80 >> (j % 8)))
+                    {
+                        // DIMM DQ bit is set in SPD data.
+                        // Set Centaur DQ bit in caller's data.
+                        // The wiring data maps Centaur DQ to DIMM DQ
+                        // Find the Centaur DQ that maps to this DIMM DQ
+                        uint8_t k = 0;
+                        for (; k < mss::MAX_DQ_BITS; k++)
+                        {
+                            if (l_wiringData[l_ps][k] == j)
+                            {
+                                o_data[i][k/8] |= (0x80 >> (k % 8));
+                                break;
+                            }
+                        }
+
+                        if (k == mss::MAX_DQ_BITS)
+                        {
+                            FAPI_INF( "fapiAttrGetBadDqBitmap: "
+                                      "Centaur DQ not found for %d!",j);
+                        }
+                    }
+                }
+            }
+
+            // Set bits for any unconnected DQs.
+            // First, check ECC.
+            l_errl = __dimmUpdateDqBitmapEccByte( l_dimmTarget, o_data );
+            if ( l_errl )
+            {
+                FAPI_ERR( "fapiAttrGetBadDqBitmap: Error getting ECC data" );
+                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                break;
+            }
+
+            // Check spare DRAM.
+            l_rc = __dimmUpdateDqBitmapSpareByte( l_dimmTarget, o_data );
+            if ( l_rc )
+            {
+                FAPI_ERR( "fapiAttrGetBadDqBitmap: Error getting spare DRAM "
+                          "data" );
+                break;
+            }
+
+            if ( l_allMnfgFlags &
+                    fapi2::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_DRAM_REPAIRS )
+            {
+                // Flag to set if the discrepancies are found.
+                bool mfgModeBadBitsPresent = false;
+
+                uint8_t l_eccSpareBitmap[mss::MAX_RANK_PER_DIMM]
+                                        [mss::BAD_DQ_BYTE_COUNT];
+
+                l_rc = __compareEccAndSpare( l_dimmTarget,
+                                             mfgModeBadBitsPresent, o_data,
+                                             l_eccSpareBitmap);
+                if ( l_rc )
+                {
+                    FAPI_ERR( "fapiAttrGetBadDqBitmap: Error comparing bitmap "
+                              "with ECC/Spare bits set with caller's data" );
+                    break;
+                }
+
+                if ( mfgModeBadBitsPresent )
+                {
+                    // correct the output bit map
+                    for (uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++)
+                    {
+                        for ( uint8_t j=0; j < (mss::BAD_DQ_BYTE_COUNT);
+                                j++ )
+                        {
+                            o_data[i][j] = l_eccSpareBitmap[i][j];
+                        }
+                    }
+                }
+            }
+
+        }
+
+    }while(0);
+
+    return l_rc;
+}
+
+//******************************************************************************
+// fapi2::platAttrSvc::fapiAttrSetBadDqBitmap function
+//******************************************************************************
+ReturnCode fapiAttrSetBadDqBitmap(
+    const Target<TARGET_TYPE_ALL>& i_mcsFapiTarget,
+    ATTR_BAD_DQ_BITMAP_Type (&i_data) )
+{
+    fapi2::ReturnCode l_rc;
+
+    // TODO RTC 173476
+
+    return l_rc;
+}
 
 } // End platAttrSvc namespace
 
