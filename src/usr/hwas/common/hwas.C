@@ -989,17 +989,36 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
     else
     if (i_desc->getAttr<ATTR_TYPE>() == TYPE_OBUS_BRICK)
     {
+        //If NPU is bad and Bricks are non-SMP, then mark them bad
+        if ((i_desc->getAttr<ATTR_OPTICS_CONFIG_MODE>()
+                    != OPTICS_CONFIG_MODE_SMP) &&
+            ((i_pgData[VPD_CP00_PG_N3_INDEX] & VPD_CP00_PG_N3_NPU) != 0))
+        {
+            HWAS_INF("pDesc %.8X - OBUS_BRICK pgData[%d]: "
+                 "actual 0x%04X, expected 0x%04X - bad",
+                 i_desc->getAttr<ATTR_HUID>(),
+                 VPD_CP00_PG_N3_INDEX,
+                 i_pgData[VPD_CP00_PG_N3_INDEX],
+                 (i_pgData[VPD_CP00_PG_N3_INDEX] &
+                  ~VPD_CP00_PG_N3_NPU));
+            l_descFunctional = false;
+
+        }
+    }
+    else
+    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_NPU)
+    {
         // Check NPU bit in N3 entry
         if ((i_pgData[VPD_CP00_PG_N3_INDEX] &
              VPD_CP00_PG_N3_NPU) != 0)
         {
-            HWAS_INF("pDesc %.8X - OBUS_BRICK pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(),
-                     VPD_CP00_PG_N3_INDEX,
-                     i_pgData[VPD_CP00_PG_N3_INDEX],
-                     (i_pgData[VPD_CP00_PG_N3_INDEX] &
-                      ~VPD_CP00_PG_N3_NPU));
+            HWAS_INF("pDesc %.8X - NPU pgData[%d]: "
+                 "actual 0x%04X, expected 0x%04X - bad",
+                 i_desc->getAttr<ATTR_HUID>(),
+                 VPD_CP00_PG_N3_INDEX,
+                 i_pgData[VPD_CP00_PG_N3_INDEX],
+                 (i_pgData[VPD_CP00_PG_N3_INDEX] &
+                  ~VPD_CP00_PG_N3_NPU));
             l_descFunctional = false;
         }
     }

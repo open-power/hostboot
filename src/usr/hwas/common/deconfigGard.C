@@ -1951,6 +1951,58 @@ void DeconfigGard::_deconfigureByAssoc(
 
                 break;
             } // TYPE_PHB
+            case TYPE_OBUS_BRICK:
+            {
+                TargetHandleList pParentObusList;
+                getParentAffinityTargetsByState(pParentObusList, &i_target,
+                                                CLASS_UNIT, TYPE_OBUS, UTIL_FILTER_PRESENT);
+                HWAS_ASSERT((pParentObusList.size() == 1),
+                            "HWAS _deconfigureByAssoc: pParentObusList != 1");
+
+                Target *l_parentObus = pParentObusList[0];
+                if ((isFunctional(l_parentObus)) &&
+                   (!anyChildFunctional(*l_parentObus)))
+                {
+                    _deconfigureTarget(*l_parentObus,
+                                       i_errlEid, NULL, i_deconfigRule);
+                    _deconfigureByAssoc(*l_parentObus,
+                                       i_errlEid,i_deconfigRule);
+                }
+
+                break;
+            } // TYPE_OBUS_BRICK
+            case TYPE_NPU:
+            {
+                //Get the parent proc associated with this npu
+                auto l_proc = getParentChip(&i_target);
+
+                //Get all the obus brick children associated with this proc
+                PredicateCTM l_obrickFilter (CLASS_UNIT, TYPE_OBUS_BRICK);
+                PredicateHwas l_predPres;
+                l_predPres.present(true);
+                PredicatePostfixExpr l_presentObricks;
+                l_presentObricks.push(&l_obrickFilter).push(&l_predPres).And();
+
+                TargetHandleList l_obrickList;
+                targetService().getAssociated(l_obrickList, l_proc,
+                                TargetService::CHILD_BY_AFFINITY,
+                                TargetService::ALL, &l_presentObricks);
+
+                for (auto l_obrick : l_obrickList)
+                {
+                    //deconfigure each obrick that is non-smp
+                    if (l_obrick->getAttr<ATTR_OPTICS_CONFIG_MODE>() !=
+                            OPTICS_CONFIG_MODE_SMP)
+                    {
+                        _deconfigureTarget(*l_obrick,
+                                           i_errlEid, NULL, i_deconfigRule);
+                        _deconfigureByAssoc(*l_obrick,
+                                           i_errlEid,i_deconfigRule);
+                    }
+                }
+
+                break;
+            } // TYPE_NPU
             default:
                 // no action
             break;

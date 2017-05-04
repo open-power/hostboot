@@ -41,7 +41,7 @@ use constant
     PERVASIVE_PARENT_MCA_OFFSET => 7,
     PERVASIVE_PARENT_PEC_OFFSET => 13,
     PERVASIVE_PARENT_PHB_OFFSET => 13,
-
+    PERVASIVE_PARENT_NPU_OFFSET => 5,
     NUM_PROCS_PER_GROUP => 4,
 };
 
@@ -859,6 +859,7 @@ sub getFapiName
         $nonFapiTargets{"TPM"}   = "NA";
         $nonFapiTargets{"NVBUS"} = "NA";
         $nonFapiTargets{"OCC"}   = "NA";
+        $nonFapiTargets{"NPU"}   = "NA";
     }
 
     if ($nonFapiTargets{$target} eq "NA")
@@ -960,6 +961,10 @@ sub getPervasiveForUnit
             $offset += (($obrick%3 == 0) && ($obrick != 0)) ? 1 : 0;
             $unitToPervasive{"OBUS_BRICK$obrick"}
                 = PERVASIVE_PARENT_OBUS_OFFSET + $offset;
+        }
+        for my $npu (0..$maxInstance{"NPU"}-1)
+        {
+            $unitToPervasive{"NPU$npu"} = PERVASIVE_PARENT_NPU_OFFSET;
         }
     }
 
