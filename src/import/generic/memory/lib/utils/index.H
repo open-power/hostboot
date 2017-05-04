@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/utils/index.H $ */
+/* $Source: src/import/generic/memory/lib/utils/index.H $                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -27,8 +27,8 @@
 /// @file index.H
 /// @brief Tools to return attribute array index from a fapi2 target
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
@@ -37,12 +37,28 @@
 #define _MSS_INDEX_H_
 
 #include <fapi2.H>
-
 #include <generic/memory/lib/utils/pos.H>
-#include <lib/shared/mss_const.H>
+
+///
+/// @brief Trait classes for the mss::index functions
+///
+template<fapi2::TargetType T>
+class indexTraits
+{
+    public:
+        enum
+        {
+            MCS_PER_MC = 2,
+            PORTS_PER_MCBIST = 4,
+            PORTS_PER_MCS = 2,
+            DIMMS_PER_PORT = 2,
+            MBA_PER_MC = 2,
+        };
+};
 
 namespace mss
 {
+
 ///
 /// @brief Return an attribute array index from a fapi2 target
 /// @tparam T the fapi2::TargetType
@@ -55,19 +71,22 @@ inline size_t index(const fapi2::Target<T>& i_target);
 template<>
 inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
 {
-    return mss::pos(i_target) % MAX_DIMM_PER_PORT;
+    typedef indexTraits<fapi2::TARGET_TYPE_DIMM> TT;
+    return mss::pos(i_target) % TT::DIMMS_PER_PORT;
 }
 
 template<>
 inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
-    return mss::pos(i_target) % PORTS_PER_MCS;
+    typedef indexTraits<fapi2::TARGET_TYPE_MCA> TT;
+    return mss::pos(i_target) % TT::PORTS_PER_MCS;
 }
 
 template<>
 inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
 {
-    return mss::pos(i_target) % MCS_PER_MC;
+    typedef indexTraits<fapi2::TARGET_TYPE_MCS> TT;
+    return mss::pos(i_target) % TT::MCS_PER_MC;
 }
 
 ///
@@ -77,6 +96,7 @@ inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
 ///
 inline size_t index(const uint64_t i_rank)
 {
+    constexpr size_t RANK_MID_POINT = 4;
     return i_rank % RANK_MID_POINT;
 }
 

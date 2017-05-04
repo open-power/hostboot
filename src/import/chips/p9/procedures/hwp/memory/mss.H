@@ -45,7 +45,7 @@
 #include <lib/shared/mss_const.H>
 #include <lib/shared/mss_kind.H>
 
-#include <lib/utils/index.H>
+#include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/utils/num.H>
 

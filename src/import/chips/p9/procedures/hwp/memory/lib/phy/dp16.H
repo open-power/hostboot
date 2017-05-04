@@ -44,6 +44,7 @@
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/mss_attribute_accessors.H>
+#include <lib/shared/mss_const.H>
 
 namespace mss
 {

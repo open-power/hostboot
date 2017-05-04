@@ -52,7 +52,7 @@
 #include <lib/freq/cycle_time.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/utils/count_dimm.H>
-#include <lib/utils/index.H>
+#include <generic/memory/lib/utils/index.H>
 #include <lib/shared/mss_const.H>
 
 using fapi2::TARGET_TYPE_MCS;

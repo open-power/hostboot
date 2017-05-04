@@ -38,7 +38,7 @@
 
 //TK: what is this for? BRS
 
-#include <lib/utils/index.H>
+#include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/c_str.H>
 
 #endif // _MSS_P9_ATTR_UTILS_H_
