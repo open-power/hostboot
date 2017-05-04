@@ -53,10 +53,12 @@ namespace HTMGT
         OCC_STATE_OBSERVATION              = 0x02,
         OCC_STATE_ACTIVE                   = 0x03,
         OCC_STATE_SAFE                     = 0x04,
-        OCC_STATE_RESET                    = 0x05,
-        OCC_STATE_IN_TRANSITION            = 0x07,
-        OCC_STATE_LOADING                  = 0x08,
-        OCC_STATE_UNKNOWN                  = 0x09,
+        OCC_STATE_CHARACTERIZATION         = 0x05,
+        // the following states are internal to TMGT
+        OCC_STATE_RESET                    = 0x85,
+        OCC_STATE_IN_TRANSITION            = 0x87,
+        OCC_STATE_LOADING                  = 0x88,
+        OCC_STATE_UNKNOWN                  = 0x89,
     };
 
     enum occRole

@@ -375,7 +375,7 @@ public:
             }
 
 
-            if (data[2] != OCC_CFGDATA_OPENPOWER_SYSTEMTYPE)
+            if (data[2] != OCC_CFGDATA_OPENPOWER_OPALVM)
             {
                 TS_FAIL("wrong system type 0x%X for system config data command",
                         data[2]);

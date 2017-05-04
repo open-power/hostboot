@@ -97,6 +97,11 @@ namespace HTMGT
 
     // Debug flags
     extern uint32_t G_debug_data;
+
+    // Global to set OCC into OpalVM or PowerVM mode
+    extern uint8_t G_opalMode;  //defined in htmgt_cfgdata.C
+
+
     enum debugTraceTypes
     {
         // Types are bit flags so can enable multiple at once
@@ -150,9 +155,10 @@ namespace HTMGT
         PASSTHRU_SEND_OCC_COMMAND       = 0x03, // send raw OCC command
         PASSTHRU_CLEAR_RESET_COUNTS     = 0x04,
         PASSTHRU_EXIT_SAFE_MODE         = 0x05,
-        PASSTHRU_GENERATE_MFG_PSTATE    = 0x81,
-        PASSTHRU_LOAD_PSTATE            = 0x82,
-        PASSTHRU_DUMP_ATTRIBUTE         = 0x83
+        PASSTHRU_RESET_PM_COMPLEX       = 0x06,
+        //HOLD for future need.  PASSTHRU_QUERY_MODE_FUNCTION    = 0x07,
+        PASSTHRU_ENA_DIS_OPAL_STATE     = 0x08,
+        PASSTHRU_SET_OCC_STATE          = 0x09,
     };
 
     enum htmgtAttrName
