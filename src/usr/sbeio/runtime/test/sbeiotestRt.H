@@ -161,9 +161,9 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                     TS_INFO("SBE Communication area not available from "
                             "SBE_COMM_ADDR attribute");
                     uint64_t l_instance = proc->getAttr<ATTR_POSITION>();
-                    o_sbeCommAddr =
-                        g_hostInterfaces->get_reserved_mem("ibm,sbe-comm",
-                                                           l_instance);
+                    o_sbeCommAddr = g_hostInterfaces->get_reserved_mem(
+                                    HBRT_RSVD_MEM__SBE_COMM,
+                                    l_instance);
                     if(NULL == o_sbeCommAddr)
                     {
                         rc = -1;
@@ -728,6 +728,97 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
             // Test exit
             TRACFCOMP(g_trac_sbeio, EXIT_MRK "SbeMessagePassingRtTest::"
                                     "testSbeMessagePassingDataOffset");
+        }
+
+        /**
+         * @brief testSbeMessagePassing Unit test for the
+         *              SBE message passing default path.
+         */
+        void testSbeMessagePassingDefaultPath(void)
+        {
+#ifdef CONFIG_HTMGT
+            // Test entry
+            TRACFCOMP(g_trac_sbeio, ENTER_MRK "SbeMessagePassingRtTest::"
+                                    "testSbeMessagePassingDefaultPath");
+
+            sbeMessage_t l_request;
+            sbeMessage_t l_expected_response;
+            RT_TARG::rtChipId_t chipId = 0;
+            uint64_t l_sbeCommAddr = 0;
+            runtimeInterfaces_t *rt_intf = nullptr;
+
+            int rc = 0;
+
+            do
+            {
+                // Do initializations for SBE Message passing
+                rc = initSbeMessagePassing(l_request,
+                                           l_expected_response,
+                                           chipId,
+                                           l_sbeCommAddr,
+                                           &rt_intf);
+
+                // Get the response address in the SBE Communication area
+                sbeMessage_t *l_sbeCommAddr_rsp =
+                    reinterpret_cast<sbeMessage_t*>(l_sbeCommAddr);
+
+                // Copy test request into SBE Communication area
+                memcpy(reinterpret_cast<void*>(l_sbeCommAddr),
+                       reinterpret_cast<void*>(&l_request),
+                       l_request.sbeHdr.msgSize);
+
+                // Call the SBE message passing code
+                TRACFCOMP(g_trac_sbeio, "SbeMessagePassingRtTest::"
+                                    "testSbeMessagePassingDefaultPath "
+                                    "calling sbe_message_passing");
+                rc = rt_intf->sbe_message_passing(chipId);
+                if(0 != rc)
+                {
+                    TS_FAIL("Unexpected return during RT SBE message passing. "
+                            "Testing default path for chipID: 0x%08X, rc: "
+                            "0x%08x, but expected 0",
+                            chipId, rc);
+                    break;
+                }
+
+                // Compare test response from SBE Communication area
+                if(cmpSbeHdr(*l_sbeCommAddr_rsp, l_expected_response) ||
+                   cmpCmdHdr(*l_sbeCommAddr_rsp, l_expected_response))
+                {
+                    TRACFBIN( g_trac_sbeio,
+                              "testSbeMessagePassingDefaultPath: expected rsp",
+                              &l_expected_response,
+                              l_expected_response.sbeHdr.msgSize);
+                    TRACFBIN( g_trac_sbeio,
+                              "testSbeMessagePassingDefaultPath: actual rsp",
+                              l_sbeCommAddr_rsp,
+                              l_sbeCommAddr_rsp->sbeHdr.msgSize);
+                    TS_FAIL("Unexpected response from RT SBE message passing. "
+                            "Testing default path for chipID: 0x%08X",
+                            chipId);
+                    break;
+                }
+
+                // Check setting of bits in CFAM register
+                rc = checkResetSbeMessagePassingCFAM(chipId);
+                if(0 != rc)
+                {
+                    TS_FAIL("Unexpected error during RT SBE message passing. "
+                            "chipID: 0x%08X, rc: 0x%08x, but expected 0 for "
+                            "CFAM register checking",
+                            chipId, rc);
+                    break;
+                }
+            }while (0);
+
+            // Test exit
+            TRACFCOMP(g_trac_sbeio, EXIT_MRK "SbeMessagePassingRtTest::"
+                                    "testSbeMessagePassingDefaultPath");
+#else
+            TRACFCOMP(g_trac_sbeio, "SbeMessagePassingRtTest::"
+                                    "testSbeMessagePassingDefaultPath skipped "
+                                    "because HTMGT is not supported");
+#endif
         }
 
         /**
