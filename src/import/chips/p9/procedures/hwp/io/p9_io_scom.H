@@ -56,8 +56,7 @@
 #define P9_OBUS1_PHY_BASE_0x0A010C00     0x0A010C00
 #define P9_OBUS2_PHY_BASE_0x0B010C00     0x0B010C00
 #define P9_OBUS3_PHY_BASE_0x0C010C00     0x0C010C00
-#define P9_DMI0_PHY_BASE_0x02011A00      0x02011A00
-#define P9_DMI1_PHY_BASE_0x02011E00      0x02011E00
+#define P9_DMI0_PHY_BASE_0x0701103F      0x0701103F
 #define CEN_PHY_BASE_0x02010400          0x02010400
 
 //-----------------------------------------------------------------------------
@@ -133,7 +132,7 @@ inline uint32_t get_base_address( const fapi2::Target < K > i_target, uint32_t& 
             break;
 
         case fapi2::TargetType::TARGET_TYPE_DMI:
-            o_base_addr = P9_DMI0_PHY_BASE_0x02011A00;
+            o_base_addr = P9_DMI0_PHY_BASE_0x0701103F;
             break;
 
         case fapi2::TargetType::TARGET_TYPE_ABUS:
