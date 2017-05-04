@@ -37,7 +37,7 @@
 #include <lib/phy/apb.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/c_str.H>
-#include <lib/utils/index.H>
+#include <generic/memory/lib/utils/index.H>
 
 namespace mss
 {
