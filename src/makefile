@@ -72,7 +72,7 @@ BOOTLDR_OBJECTS += bl_pnor_utils.o
 BOOTLDR_OBJECTS += bl_pnor_ecc.o
 BOOTLDR_OBJECTS += bl_terminate.o
 BOOTLDR_OBJECTS += forceattn_p8.o
-BOOTLDR_OBJECTS += string_utils.o
+BOOTLDR_OBJECTS += bl_string_utils.o
 BOOTLDR_OBJECTS += rom_entry.o
 
 SECUREROM_OBJECTS += ROM.o
