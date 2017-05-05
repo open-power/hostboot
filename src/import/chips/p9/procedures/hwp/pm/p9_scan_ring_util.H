@@ -288,8 +288,7 @@ class P9FuncModel
         /**
          * @brief   constructor
          */
-        P9FuncModel( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP >& i_procTgt,
-                     uint8_t i_ddLevel );
+        P9FuncModel( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP >& i_procTgt );
         /**
          * brief    destructor
          */
@@ -316,6 +315,12 @@ class P9FuncModel
         uint8_t getChipLevel()  const;
 
         /**
+         * uint8_t returns an ID pertaining to chip name.
+         */
+
+        uint8_t getChipName() const;
+
+        /**
          * @brief   constructor
          */
         P9FuncModel(  );
@@ -327,6 +332,8 @@ class P9FuncModel
         uint16_t iv_funcExes;
         uint8_t  iv_funcQuads;
         uint8_t  iv_ddLevel;
+        uint8_t iv_chipName;
+        uint8_t iv_reserve[3];
 };
 
 }// namesapce p9_hcodeImageBuild ends
