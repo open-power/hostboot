@@ -360,6 +360,52 @@ fapi_try_exit:
 }
 
 ///
+/// @brief ATTR_CHIP_EC_FEATURE_DCD_WORKAROUND getter
+/// @tparam T the fapi2 target type of the target
+/// @param[in] const ref to the target
+/// @return bool true iff feature is enabled
+///
+template< fapi2::TargetType T >
+inline bool chip_ec_feature_dcd_workaround(const fapi2::Target<T>& i_target)
+{
+    const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
+    uint8_t l_value = 0;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DCD_WORKAROUND, l_chip, l_value) );
+
+    return l_value != 0;
+
+fapi_try_exit:
+    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_DCD_WORKAROUND: 0x%lx (target: %s)",
+             uint64_t(fapi2::current_err), mss::c_str(i_target));
+    fapi2::Assert(false);
+    return false;
+}
+
+///
+/// @brief ATTR_MSS_RUN_DCD_CALIBRATION getter
+/// @tparam T the fapi2 target type of the target
+/// @param[in] const ref to the target
+/// @return bool true iff feature is enabled
+///
+template< fapi2::TargetType T >
+inline bool run_dcd_calibration(const fapi2::Target<T>& i_target)
+{
+    const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
+    uint8_t l_value = 0;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_RUN_DCD_CALIBRATION, l_chip, l_value) );
+
+    return l_value != 0;
+
+fapi_try_exit:
+    FAPI_ERR("failed accessing ATTR_MSS_RUN_DCD_CALIBRATION: 0x%lx (target: %s)",
+             uint64_t(fapi2::current_err), mss::c_str(i_target));
+    fapi2::Assert(false);
+    return false;
+}
+
+///
 /// @brief ATTR_SKIP_RD_VREF_VREFSENSE_OVERRIDE getter
 /// @tparam T the fapi2 target type of the target
 /// @param[in] const ref to the target
