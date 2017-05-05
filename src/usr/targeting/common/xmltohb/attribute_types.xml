@@ -34007,4 +34007,21 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>MSS_RUN_DCD_CALIBRATION</id>
+    <description>
+        Selects whether or not DCD should be run
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_RUN_DCD_CALIBRATION</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
