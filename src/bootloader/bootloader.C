@@ -204,7 +204,8 @@ namespace Bootloader{
 
             // Clear/zero-out the struct since we want 0 ('zero') values for
             // struct elements my_ecid, entry_point and log
-            memset(&l_hw_parms, 0, sizeof(ROM_hw_params));
+            uint8_t *p_hw_parms = reinterpret_cast<uint8_t *>(&l_hw_parms);
+            for(uint8_t i = 0; i < sizeof(ROM_hw_params); p_hw_parms[i++] = 0){}
 
             // Use current hw hash key
             memcpy (&l_hw_parms.hw_key_hash, g_blData->blToHbData.hwKeysHash,
