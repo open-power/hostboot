@@ -242,6 +242,11 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_RUN_DCD_CALIBRATION</id>
+        <default>0x00</default>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_INTERLEAVE_GRANULARITY</id>
         <default>0x00</default>
     </attribute>

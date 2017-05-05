@@ -370,6 +370,13 @@ fapi2::ReturnCode duty_cycle_distortion_calibration( const fapi2::Target<fapi2::
 
     const auto l_mca = mss::find_targets<TARGET_TYPE_MCA>(i_target);
 
+    // Skips DCD calibration if we're a DD2 part
+    if (!mss::chip_ec_feature_dcd_workaround(i_target))
+    {
+        FAPI_INF("%s Skipping DCD calibration algorithm due to part revision", mss::c_str(i_target));
+        return FAPI2_RC_SUCCESS;
+    }
+
     // Clears the FIRs created by DCD calibration, if needed
     FAPI_TRY(mss::workarounds::adr32s::clear_dcd_firs(i_target));
 
