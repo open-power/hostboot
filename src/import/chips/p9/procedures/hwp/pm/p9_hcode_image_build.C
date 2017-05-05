@@ -546,15 +546,21 @@ fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImage
 
     FAPI_DBG("Entering validateInputArguments ...");
 
-    FAPI_ASSERT( (( i_pImageIn != NULL ) && ( i_pImageOut != NULL ) &&
+    FAPI_ASSERT( (( i_pImageIn != NULL ) &&
                   ( i_pImageIn != i_pImageOut )),
-                 fapi2::IMG_PTR_ERROR()
+                 fapi2::HW_IMG_PTR_ERROR()
                  .set_HW_IMG_BUF_PTR( i_pImageIn )
                  .set_HOMER_IMG_BUF_PTR( i_pImageOut ),
-                 "Bad pointer to HW Image or HOMER Image" );
+                 "Bad pointer to HW Image" );
+
+    FAPI_ASSERT( ( i_pImageOut != NULL ),
+                 fapi2::HOMER_IMG_PTR_ERROR()
+                 .set_HOMER_IMG_BUF_PTR( i_pImageOut ),
+                 "Bad pointer to HOMER Image" );
+
     l_rc = p9_xip_image_size( i_pImageIn, &hwImagSize );
 
-    FAPI_DBG("size is 0x%08X; xip_image_size RC is 0x%02x HARDWARE_IMG_SIZE 0x%08X  Sz 0x%08X",
+    FAPI_INF("size is 0x%08X; xip_image_size RC is 0x%02x HARDWARE_IMG_SIZE 0x%08X  Sz 0x%08X",
              hwImagSize, l_rc, HARDWARE_IMG_SIZE,  hwImagSize );
 
     FAPI_ASSERT( (( IMG_BUILD_SUCCESS == l_rc ) && ( hwImagSize > 0 ) &&
@@ -563,32 +569,41 @@ fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImage
                  .set_HW_IMG_SIZE( hwImagSize )
                  .set_MAX_HW_IMG_SIZE( HARDWARE_IMG_SIZE ),
                  "Hardware image size found out of range" );
+
     FAPI_ASSERT( (( i_phase  > PHASE_NA ) && ( i_phase < PHASE_END )),
                  fapi2::HCODE_INVALID_PHASE()
                  .set_SYS_PHASE( i_phase ),
                  "Invalid value passed as build phase" );
 
     FAPI_ASSERT( ( i_pBuf1 != NULL ),
-                 fapi2::HCODE_INVALID_TEMP_BUF()
-                 .set_TEMP_BUF_PTR( i_pBuf1 ),
+                 fapi2::HCODE_INVALID_TEMP1_BUF()
+                 .set_TEMP1_BUF_SIZE( i_bufSize1 ),
                  "Invalid temp buffer1 passed for hcode image build" );
 
-    FAPI_ASSERT( (( i_bufSize1 != 0  ) && ( i_bufSize2 != 0 ) && ( i_bufSize3 != 0 )),
-                 fapi2::HCODE_TEMP_BUF_SIZE()
-                 .set_TEMP_BUF1_SIZE( i_bufSize1 )
-                 .set_TEMP_BUF2_SIZE( i_bufSize2 )
-                 .set_TEMP_BUF3_SIZE( i_bufSize3 ),
-                 "Invalid work buffer size " );
-
     FAPI_ASSERT( ( i_pBuf2 != NULL ),
-                 fapi2::HCODE_INVALID_TEMP_BUF()
-                 .set_TEMP_BUF_PTR( i_pBuf2 ),
+                 fapi2::HCODE_INVALID_TEMP2_BUF()
+                 .set_TEMP2_BUF_SIZE( i_bufSize2 ),
                  "Invalid temp buffer2 passed for hcode image build" );
 
     FAPI_ASSERT( ( i_pBuf3 != NULL ),
-                 fapi2::HCODE_INVALID_TEMP_BUF()
-                 .set_TEMP_BUF_PTR( i_pBuf3 ),
+                 fapi2::HCODE_INVALID_TEMP3_BUF()
+                 .set_TEMP3_BUF_SIZE( i_bufSize3 ),
                  "Invalid temp buffer3 passed for hcode image build" );
+
+    FAPI_ASSERT( ( i_bufSize1 != 0  ) ,
+                 fapi2::HCODE_INVALID_TEMP1_BUF_SIZE()
+                 .set_TEMP1_BUF_SIZE( i_bufSize1 ),
+                 "Invalid size for temp buf1 passed for hcode image build" );
+
+    FAPI_ASSERT( ( i_bufSize2 != 0 ),
+                 fapi2::HCODE_INVALID_TEMP2_BUF_SIZE()
+                 .set_TEMP2_BUF_SIZE( i_bufSize2 ),
+                 "Invalid size for temp buf2 passed for hcode image build" );
+
+    FAPI_ASSERT( ( i_bufSize3 != 0 ),
+                 fapi2::HCODE_INVALID_TEMP3_BUF_SIZE()
+                 .set_TEMP3_BUF_SIZE( i_bufSize3 ),
+                 "Invalid size for temp buf3 passed for hcode image build" );
 
     FAPI_ASSERT( ( i_imgType.isBuildValid() ),
                  fapi2::HCODE_INVALID_IMG_TYPE(),
