@@ -92,4 +92,17 @@
     <enum>NO = 0, YES = 1</enum>
     <writeable/>
   </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_RUN_DCD_CALIBRATION</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Selects whether or not DCD should be run
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>NO = 0, YES = 1</enum>
+    <writeable/>
+  </attribute>
+
 </attributes>
