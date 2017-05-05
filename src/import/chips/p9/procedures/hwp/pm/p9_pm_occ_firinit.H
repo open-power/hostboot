@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,12 +26,13 @@
 /// @file p9_pm_occ_firinit.C
 /// @brief Configures the OCC LFIR Mask and Action
 ///
-/// *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
-/// *HWP FW  Owner: Sangeetha T S <sangeet2@in.ibm.com>
-/// *HWP Team: PM
-/// *HWP Level: 2
-/// *HWP Consumed by: HS
-///
+// *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
+// *HWP Backup HWP Owner : Amit Kumar <akumar3@us.ibm.com>
+// *HWP FW  Owner: Sangeetha T S <sangeet2@in.ibm.com>
+// *HWP Team: PM
+// *HWP Level: 3
+// *HWP Consumed by: HS
+//
 
 #ifndef _P9_PM_OCC_FIRINIT_H_
 #define _P9_PM_OCC_FIRINIT_H_

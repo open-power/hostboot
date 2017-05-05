@@ -30,13 +30,13 @@
 // *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team: PM
-// *HWP Level: 2
-// *HWP Consumed by: FSP:HS
+// *HWP Level: 3
+// *HWP Consumed by: HS
 
 ///
 /// High-level procedure flow:
 ///
-/// \verbatim
+/// @verbatim
 ///     - call p9_pm_pba_firinit.C
 ///     - evaluate RC
 ///
@@ -46,7 +46,7 @@
 ///     - call p9_pm_cme_firinit.C
 ///     - evaluate RC
 ///
-///  \endverbatim
+///  @endverbatim
 ///
 ///  Procedure Prereq:
 ///  - System clocks are running

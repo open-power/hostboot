@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,8 +30,8 @@
 // *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team: PM
-// *HWP Level: 1
-// *HWP Consumed by: FSP:HS
+// *HWP Level: 3
+// *HWP Consumed by: HS
 
 #ifndef _P9_PM_FIRINIT_H_
 #define _P9_PM_FIRINIT_H_
@@ -59,15 +59,14 @@ extern "C"
 ///
 /// @brief Calls each PM unit firinit procedures based on the input mode,
 ///        to configure the FIRs of the chip to  predefined types.
-///        The procdures invoked are:
-///        p9_pm_pmc_firinit
+///        The procedures invoked are:
 ///        p9_pm_pba_firinit
 ///        p9_pm_ppm_firinit
-///        p9_pm_occ_firinit
+///        p9_pm_cme_firinit
 ///
 /// @param[in] i_target   Chip target which will be passed to all the procedures
 /// @param[in] i_mode     Control mode for the procedure:
-///                       PM_INIT, PM_RESET, PM_RESET_SOFT
+///                       PM_INIT, PM_RESET
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///

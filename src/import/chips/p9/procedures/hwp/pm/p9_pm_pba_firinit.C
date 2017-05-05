@@ -27,14 +27,15 @@
 /// @brief Configures the PBA LFIR, Mask and Action
 ///
 // *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
+// *HWP Backup HWP Owner : Amit Kumar <akumar3@us.ibm.com>
 // *HWP FW  Owner: Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team: PM
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HS
 //
 
 /// High-level procedure flow:
-/// \verbatim
+/// @verbatim
 ///   if reset:
 ///      Mask all bits of FIR
 ///   else if init:
@@ -44,7 +45,7 @@
 ///          3) Recoverable Attention
 ///          4) Recoverable Interrupt
 ///
-/// \endverbatim
+/// @endverbatim
 ///
 /// Procedure Prereq:
 ///   o System clocks are running
