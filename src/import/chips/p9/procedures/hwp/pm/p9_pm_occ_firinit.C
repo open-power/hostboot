@@ -26,16 +26,16 @@
 /// @file p9_pm_occ_firinit.C
 /// @brief Configures the OCC LFIR Mask and Action
 ///
-// *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW  Owner: Sangeetha T S <sangeet2@in.ibm.com>
+// *HWP HWP Owner        : Greg Still <stillgs@us.ibm.com>
+// *HWP Backup HWP Owner : Amit Kumar <akumar3@us.ibm.com>
+// *HWP FW  Owner        : Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team: PM
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HS
 //
 
-/// \todo
 /// High-level procedure flow:
-/// \verbatim
+/// @verbatim
 ///   if reset:
 ///      Mask all bits of FIR
 ///   else if init:
@@ -44,10 +44,10 @@
 ///          2) Malf Alert
 ///          3) Recoverable Attention
 ///          4) Recoverable Interrupt
+/// @endverbatim
 ///
 /// Procedure Prereq:
 ///   o System clocks are running
-/// \endverbatim
 ///
 
 // ----------------------------------------------------------------------
