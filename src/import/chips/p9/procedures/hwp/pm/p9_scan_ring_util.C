@@ -101,7 +101,7 @@ char* RingName::c_str()
 void getScanRing( void* o_pRingBuffer, uint32_t& o_size,
                   uint32_t i_ringId, PlatId i_plat )
 {
-    FAPI_DBG("> getScanRing Plat %s", (i_plat == PLAT_SGPE) ? "SGPE" : "CME");
+    FAPI_DBG(">> getScanRing Plat %s", (i_plat == PLAT_SGPE) ? "SGPE" : "CME");
 #ifdef __CRONUS_VER
 
     do
@@ -122,7 +122,7 @@ void getScanRing( void* o_pRingBuffer, uint32_t& o_size,
     while(0);
 
 #endif
-    FAPI_DBG("< getScanRing");
+    FAPI_DBG("<< getScanRing");
 }
 //-------------------------------------------------------------------------
 
@@ -775,16 +775,16 @@ P9FuncModel::P9FuncModel(  ):
     iv_funcCores(0),
     iv_funcExes(0),
     iv_funcQuads(0),
-    iv_ddLevel(0)
+    iv_ddLevel(0),
+    iv_chipName(0)
 { }
 //-------------------------------------------------------------------------
 
-P9FuncModel::P9FuncModel( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP >& i_procTgt , uint8_t i_ddLevel )
+P9FuncModel::P9FuncModel( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP >& i_procTgt )
 {
     iv_funcCores = 0;
     iv_funcExes  = 0;
     iv_funcQuads = 0;
-    iv_ddLevel   = i_ddLevel;
 
     auto l_core_functional_vector =
         i_procTgt.getChildren<fapi2::TARGET_TYPE_CORE>(fapi2::TARGET_STATE_FUNCTIONAL);
@@ -799,8 +799,13 @@ P9FuncModel::P9FuncModel( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP >& i_
         iv_funcQuads    =   iv_funcQuads  | (1 << (l_corePos >> 2) );
     }
 
-    FAPI_DBG("functional core 0x%08x, Ex 0x%08x quad 0x%08x",
-             iv_funcCores, iv_funcExes, iv_funcQuads );
+    FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_procTgt, iv_ddLevel);
+    FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, i_procTgt, iv_chipName);
+
+    FAPI_DBG("functional core : 0x%08x Ex  : 0x%08x quad 0x%08x"
+             "EC : 0x%02x ChipName : 0x%02x",
+             iv_funcCores, iv_funcExes, iv_funcQuads, iv_ddLevel,
+             iv_chipName );
 }
 
 //---------------------------------------------------------------------------
@@ -837,4 +842,8 @@ uint8_t P9FuncModel::getChipLevel() const
     return iv_ddLevel;
 }
 
+uint8_t P9FuncModel::getChipName() const
+{
+    return iv_chipName;
+}
 }
