@@ -1951,7 +1951,9 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
 #ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
     // Note If we ever send progress codes multiple times, we may need to
     // eliminate the console write on subsequent.
-    CONSOLE::displayf(NULL, "ISTEP %2d.%2d", iv_curIStep, iv_curSubStep);
+    const TaskInfo *taskinfo = findTaskInfo(iv_curIStep, iv_curSubStep);
+    CONSOLE::displayf(NULL, "ISTEP %2d.%2d - %s", iv_curIStep, iv_curSubStep,
+                      taskinfo && taskinfo->taskname ? taskinfo->taskname : "");
     CONSOLE::flush();
 #endif
 
