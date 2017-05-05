@@ -30,7 +30,7 @@
 // *HWP HWP Owner:      Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner:       Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team:           PM
-// *HWP Level:          2
+// *HWP Level:          3
 // *HWP Consumed by:    Hostboot: Phyp
 
 // *INDENT-OFF*
@@ -335,7 +335,7 @@ uint32_t ImgSizeBank::isSizeGood( PlatId i_plat, uint8_t i_sec,
 uint32_t ImgSizeBank::getImgSectn( PlatId i_plat, uint8_t i_sec, uint32_t& o_secSize,
                                    char* i_pSecName, uint8_t i_bufLength )
 {
-    uint32_t rc = -1;
+    uint32_t rc = BUILD_ERR_INTERNAL;
     ImgSec key( i_plat, i_sec );
     std::map< ImgSec, uint32_t>::iterator it;
     o_secSize = 0;
@@ -480,7 +480,7 @@ uint32_t ExIdMap::getInstanceId( uint32_t i_eqId, uint32_t i_ringOrder )
 //-------------------------------------------------------------------------
 fapi2::ReturnCode validateSramImageSize( Homerlayout_t* i_pChipHomer, uint32_t& o_sramImgSize )
 {
-    FAPI_DBG(">validateSramImageSize" );
+    FAPI_INF(">> validateSramImageSize" );
     uint32_t rc = IMG_BUILD_SUCCESS;
 
     ImgSizeBank sizebank;
@@ -524,7 +524,7 @@ fapi2::ReturnCode validateSramImageSize( Homerlayout_t* i_pChipHomer, uint32_t& 
                  .set_MAX_PGPE_IMG_SIZE_ALLOWED( rc ),
                  "PGPE Image Size Exceeded Max Allowed Size" );
 
-    FAPI_DBG("<validateSramImageSize" );
+    FAPI_INF("<< validateSramImageSize" );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -546,7 +546,7 @@ fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImage
     uint32_t l_rc = IMG_BUILD_SUCCESS;
     uint32_t hwImagSize = 0;
 
-    FAPI_DBG("Entering validateInputArguments ...");
+    FAPI_INF(">> validateInputArguments ...");
 
     FAPI_ASSERT( (( i_pImageIn != NULL ) &&
                   ( i_pImageIn != i_pImageOut )),
@@ -610,7 +610,7 @@ fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImage
     FAPI_ASSERT( ( i_imgType.isBuildValid() ),
                  fapi2::HCODE_INVALID_IMG_TYPE(),
                  "Invalid image type passed for hcode image build" );
-    FAPI_DBG("Exiting validateInputArguments ...");
+    FAPI_INF("<< validateInputArguments ...");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -663,7 +663,6 @@ uint32_t getXipImageSectn( uint8_t * i_srcPtr, uint8_t i_secId, uint8_t i_ecLeve
 uint32_t copySectionToHomer( uint8_t* i_destPtr, uint8_t* i_srcPtr, uint8_t i_secId, PlatId i_platId ,
                              uint8_t i_ecLevel, P9XipSection&   o_ppeSection )
 {
-    FAPI_INF("> copySectionToHomer");
     uint32_t retCode = IMG_BUILD_SUCCESS;
     ImgSizeBank sizebank;
 
@@ -694,10 +693,10 @@ uint32_t copySectionToHomer( uint8_t* i_destPtr, uint8_t* i_srcPtr, uint8_t i_se
 
         if ( rcTemp )
         {
-            FAPI_ERR("??????????Size Exceeds the permissible limit???????" );
+            FAPI_ERR("Size Exceeds the permissible limit" );
             FAPI_ERR("Sec Name: %s Max Allowed 0x%08X (%08d) Actual Size 0x%08X (%08d)",
                      secName, rcTemp, rcTemp, o_ppeSection.iv_size, o_ppeSection.iv_size);
-            retCode = BUILD_SEC_SIZE_OVERFLOW;
+            retCode = rcTemp;
             break;
         }
 
@@ -705,7 +704,6 @@ uint32_t copySectionToHomer( uint8_t* i_destPtr, uint8_t* i_srcPtr, uint8_t i_se
     }
     while(0);
 
-    FAPI_INF("< copySectionToHomer");
     return retCode;
 }
 
@@ -718,6 +716,8 @@ uint32_t copySectionToHomer( uint8_t* i_destPtr, uint8_t* i_srcPtr, uint8_t i_se
  */
 fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PROC& i_procTgt )
 {
+    FAPI_INF(">> updateImageFlags");
+
     uint8_t      attrVal   = 0;
     uint64_t     chtmVal   = 0;
     uint32_t     cmeFlag   = 0;
@@ -948,6 +948,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     FAPI_INF("PGPE Flag Value               : 0x%08x", SWIZZLE_2_BYTE(pPgpeHdr->g_pgpe_flags));
     FAPI_DBG(" -------------------- CME/SGPE Flags Ends -----------------");
 
+    FAPI_INF("<< updateImageFlags");
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -960,6 +961,7 @@ fapi_try_exit:
  */
 void updateCpmrCmeRegion( Homerlayout_t* i_pChipHomer )
 {
+    FAPI_INF(">> updateCpmrCmeRegion");
     cpmrHeader_t* pCpmrHdr =
         (cpmrHeader_t*) & (i_pChipHomer->cpmrRegion.selfRestoreRegion.CPMR_SR.elements.CPMRHeader);
     cmeHeader_t* pCmeHdr = (cmeHeader_t*) & i_pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
@@ -1030,6 +1032,7 @@ void updateCpmrCmeRegion( Homerlayout_t* i_pChipHomer )
     FAPI_INF(" Core SCOM Length : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->coreScomLength ));
     FAPI_INF("==================================CPMR Ends=====================================");
 
+    FAPI_INF("<< updateCpmrCmeRegion");
 }
 
 //------------------------------------------------------------------------------
@@ -1040,7 +1043,7 @@ void updateCpmrCmeRegion( Homerlayout_t* i_pChipHomer )
  */
 void updateCpmrHeaderSR( Homerlayout_t* i_pChipHomer, uint8_t i_fusedState )
 {
-    FAPI_INF("> updateCpmrHeaderSR");
+    FAPI_INF(">> updateCpmrHeaderSR");
     cpmrHeader_t* pCpmrHdr =
         (cpmrHeader_t*) & (i_pChipHomer->cpmrRegion.selfRestoreRegion.CPMR_SR.elements.CPMRHeader);
 
@@ -1058,7 +1061,7 @@ void updateCpmrHeaderSR( Homerlayout_t* i_pChipHomer, uint8_t i_fusedState )
              SWIZZLE_4_BYTE(pCpmrHdr->cmeImgOffset));
     FAPI_DBG("  Size      = 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmeImgLength));
 
-    FAPI_INF("< updateCpmrHeaderSR");
+    FAPI_INF("<< updateCpmrHeaderSR");
 }
 
 //------------------------------------------------------------------------------
@@ -1069,6 +1072,7 @@ void updateCpmrHeaderSR( Homerlayout_t* i_pChipHomer, uint8_t i_fusedState )
  */
 void updateQpmrHeader( Homerlayout_t* i_pChipHomer, QpmrHeaderLayout_t& io_qpmrHdr )
 {
+    FAPI_INF(">> updateQpmrHeader");
     QpmrHeaderLayout_t* pQpmrHdr = ( QpmrHeaderLayout_t*) & (i_pChipHomer->qpmrRegion.sgpeRegion.qpmrHeader);
     sgpeHeader_t* pSgpeHdr = (sgpeHeader_t*)& i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
     io_qpmrHdr.sgpeSramImageSize = SWIZZLE_4_BYTE(io_qpmrHdr.sgpeImgLength) +
@@ -1110,6 +1114,7 @@ void updateQpmrHeader( Homerlayout_t* i_pChipHomer, QpmrHeaderLayout_t& io_qpmrH
     FAPI_DBG(" Auxiliary Func Length    :  0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_aux_length ));
     FAPI_DBG("========================SGPE Image Hdr Ends===========================");
 
+    FAPI_INF("<< updateQpmrHeader");
 }
 
 //------------------------------------------------------------------------------
@@ -1118,36 +1123,35 @@ void updateQpmrHeader( Homerlayout_t* i_pChipHomer, QpmrHeaderLayout_t& io_qpmrH
  * @param[in]   i_pImageIn      points to start of hardware image.
  * @param[in]   i_pChipHomer    points to HOMER image.
  * @param[in]   i_imgType       image sections  to be built
+ * @param[out]  o_qpmrHdr       an instance of QpmrHeaderLayout_t
+ * @param[in]   i_procFuncModel information pertraining to given P9 chip
+ * @return      fapi2 return code.
  */
-uint32_t buildSgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer, ImageType_t i_imgType,
-                         QpmrHeaderLayout_t& o_qpmrHdr, uint8_t i_ecLevel )
+fapi2::ReturnCode buildSgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer, ImageType_t i_imgType,
+                                  QpmrHeaderLayout_t& o_qpmrHdr, P9FuncModel & i_procFuncModel )
 {
-    FAPI_INF("> buildSgpeImage");
-    uint32_t retCode = IMG_BUILD_SUCCESS;
+    FAPI_INF(">> buildSgpeImage");
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    do
+    uint32_t rcTemp = IMG_BUILD_SUCCESS;
+    //Let us find XIP Header for SGPE
+    P9XipSection ppeSection;
+    uint8_t* pSgpeImg = NULL;
+
+    if( i_imgType.sgpeHcodeBuild )
     {
-        uint32_t rcTemp = 0;
-        //Let us find XIP Header for SGPE
-        P9XipSection ppeSection;
-        uint8_t* pSgpeImg = NULL;
 
-        if(!i_imgType.sgpeHcodeBuild )
-        {
-            break;
-        }
-
-        // Let us start with a clean slate in quad common ring area.
+        // Let us start with a clean slate.
         memset( (uint8_t*)&i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage, 0x00, SGPE_IMAGE_SIZE );
 
         rcTemp = p9_xip_get_section( i_pImageIn, P9_XIP_SECTION_HW_SGPE, &ppeSection );;
 
-        if( rcTemp )
-        {
-            FAPI_ERR("Failed to get SGPE XIP Image Header" );
-            retCode = BUILD_FAIL_SGPE_IMAGE;
-            break;
-        }
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::SGPE_IMG_NOT_FOUND_IN_HW_IMG()
+                     .set_XIP_FAILURE_CODE( rcTemp )
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() ),
+                     "Failed to find SGPE sub-image in HW Image" );
 
         pSgpeImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
         FAPI_DBG("HW image SGPE Offset = 0x%08X", ppeSection.iv_offset);
@@ -1157,15 +1161,16 @@ uint32_t buildSgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer, Im
                                      pSgpeImg,
                                      P9_XIP_SECTION_SGPE_QPMR,
                                      PLAT_SGPE,
-                                     i_ecLevel,
+                                     i_procFuncModel.getChipLevel(),
                                      ppeSection );
 
-        if( rcTemp )
-        {
-            FAPI_ERR("Failed to copy QPMR Header");
-            retCode = BUILD_FAIL_SGPE_QPMR;
-            break;
-        }
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::QPMR_HDR_BUILD_FAILURE()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed to update QPMR Header in HOMER" );
 
         //updating local instance of QPMR header
         memcpy( &o_qpmrHdr, i_pChipHomer->qpmrRegion.sgpeRegion.qpmrHeader, sizeof(QpmrHeaderLayout_t));
@@ -1175,15 +1180,16 @@ uint32_t buildSgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer, Im
                                      pSgpeImg,
                                      P9_XIP_SECTION_SGPE_LVL1_BL,
                                      PLAT_SGPE,
-                                     i_ecLevel,
+                                     i_procFuncModel.getChipLevel(),
                                      ppeSection );
 
-        if( rcTemp )
-        {
-            FAPI_ERR("Failed to copy Level1 bootloader");
-            retCode = BUILD_FAIL_SGPE_BL1;
-            break;
-        }
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::SGPE_BOOT_COPIER_BUILD_FAILURE()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed to update SGPE Boot Copier in HOMER" );
 
         o_qpmrHdr.bootCopierOffset = QPMR_HEADER_SIZE;
         FAPI_DBG("SGPE Boot Copier Size = 0x%08X",
@@ -1195,15 +1201,16 @@ uint32_t buildSgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer, Im
                                      pSgpeImg,
                                      P9_XIP_SECTION_SGPE_LVL2_BL,
                                      PLAT_SGPE,
-                                     i_ecLevel,
+                                     i_procFuncModel.getChipLevel(),
                                      ppeSection );
 
-        if( rcTemp )
-        {
-            FAPI_ERR("Failed to copy Level2 bootloader");
-            retCode = BUILD_FAIL_SGPE_BL2;
-            break;
-        }
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::SGPE_BOOT_LOADER_BUILD_FAILURE()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed to update SGPE Boot Loader in HOMER" );
 
         o_qpmrHdr.bootLoaderOffset = o_qpmrHdr.bootCopierOffset + SGPE_BOOT_COPIER_SIZE;
         o_qpmrHdr.bootLoaderLength = ppeSection.iv_size;
@@ -1215,15 +1222,16 @@ uint32_t buildSgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer, Im
                                      pSgpeImg,
                                      P9_XIP_SECTION_SGPE_HCODE,
                                      PLAT_SGPE,
-                                     i_ecLevel,
+                                     i_procFuncModel.getChipLevel(),
                                      ppeSection );
 
-        if( rcTemp )
-        {
-            FAPI_ERR("Failed to copy SGPE hcode");
-            retCode = BUILD_FAIL_SGPE_HCODE;
-            break;
-        }
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::SGPE_HCODE_BUILD_FAILURE()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed to update SGPE Hcode in HOMER" );
 
         memset( i_pChipHomer->qpmrRegion.cacheScomRegion, 0x00,
                 QUAD_SCOM_RESTORE_SIZE_TOTAL );
@@ -1260,12 +1268,11 @@ uint32_t buildSgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer, Im
         FAPI_INF("  Version         = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_build_ver));
         FAPI_INF("  CR OCC Offset   = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_cmn_ring_occ_offset));
         FAPI_INF("  CR Ovrd Offset  = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_cmn_ring_ovrd_occ_offset));
-
     }
-    while(0);
 
-    FAPI_INF("< buildSgpeImage")
-    return retCode;
+fapi_try_exit:
+    FAPI_INF("<< buildSgpeImage")
+    return fapi2::current_err;
 }
 
 //------------------------------------------------------------------------------
@@ -1276,111 +1283,114 @@ uint32_t buildSgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer, Im
  * @param[in]   i_pChipHomer    points to HOMER image.
  * @param[in]   i_imgType       image sections  to be built
  * @param[in]   i_fuseState     fuse state of core.
- * @return IMG_BUILD_SUCCESS if function succeeds, error code otherwise.
+ * @return      fapi2 return code.
  */
-uint32_t buildCoreRestoreImage( void* const i_pImageIn,
+fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
                                 Homerlayout_t* i_pChipHomer, ImageType_t i_imgType,
-                                uint8_t i_fusedState, uint8_t i_ecLevel )
+                                uint8_t i_fusedState,
+                                P9FuncModel & i_procFuncModel )
 {
-    uint32_t retCode = IMG_BUILD_SUCCESS;
 
-    do
+    FAPI_INF(">> buildCoreRestoreImage");
+    uint32_t rcTemp = IMG_BUILD_SUCCESS;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    //Let us find XIP Header for Core Self Restore Image
+    P9XipSection ppeSection;
+    uint8_t* pSelfRestImg = NULL;
+    uint32_t wordCnt = 0;
+    uint32_t l_fillBlr  = SWIZZLE_4_BYTE(SELF_RESTORE_BLR_INST);
+    uint32_t l_fillAttn = SWIZZLE_4_BYTE(CORE_RESTORE_PAD_OPCODE);
+
+    rcTemp = p9_xip_get_section( i_pImageIn, P9_XIP_SECTION_HW_RESTORE, &ppeSection );
+
+    FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                 fapi2::SELF_REST_IMG_NOT_FOUND_IN_HW_IMG()
+                 .set_XIP_FAILURE_CODE( rcTemp )
+                 .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                 .set_CHIP_TYPE( i_procFuncModel.getChipName() ),
+                 "Failed to find Self Restore sub-image in HW Image" );
+
+    pSelfRestImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
+
+    if( i_imgType.selfRestoreBuild )
     {
-        uint32_t rcTemp = 0;
-        //Let us find XIP Header for Core Self Restore Image
-        P9XipSection ppeSection;
-        uint8_t* pSelfRestImg = NULL;
-
-        rcTemp = p9_xip_get_section( i_pImageIn, P9_XIP_SECTION_HW_RESTORE, &ppeSection );
-
-        if( rcTemp )
-        {
-            FAPI_ERR("Failed to get P9 Self restore Image Header" );
-            retCode = BUILD_FAIL_SELF_REST_IMAGE;
-            break;
-        }
-
-        pSelfRestImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
-
-        if( i_imgType.selfRestoreBuild )
-        {
-            // first 256 bytes is expected to be zero here. It is by purpose. Just after this step,
-            // we will add CPMR header in that area.
-            FAPI_INF("Self Restore Image install");
-            FAPI_INF("  Offset = 0x%08X, Size = 0x%08X",
-                     ppeSection.iv_offset, ppeSection.iv_size);
-            rcTemp = copySectionToHomer( i_pChipHomer->cpmrRegion.selfRestoreRegion.CPMR_SR.region,
-                                         pSelfRestImg,
-                                         P9_XIP_SECTION_RESTORE_SELF,
-                                         PLAT_SELF,
-                                         i_ecLevel,
-                                         ppeSection );
-
-            if( rcTemp )
-            {
-                FAPI_ERR("Failed to copy SRESET Handler");
-                retCode = BUILD_FAIL_SRESET_HNDLR;
-                break;
-            }
-        }
-
-        // adding CPMR header in first 256 bytes of the CPMR.
-        FAPI_INF("Overlay CPMR Header at the beginning of CPMR");
+        // first 256 bytes is expected to be zero here. It is by purpose. Just after this step,
+        // we will add CPMR header in that area.
+        FAPI_INF("Self Restore Image install");
+        FAPI_INF("  Offset = 0x%08X, Size = 0x%08X",
+                 ppeSection.iv_offset, ppeSection.iv_size);
         rcTemp = copySectionToHomer( i_pChipHomer->cpmrRegion.selfRestoreRegion.CPMR_SR.region,
                                      pSelfRestImg,
-                                     P9_XIP_SECTION_RESTORE_CPMR,
+                                     P9_XIP_SECTION_RESTORE_SELF,
                                      PLAT_SELF,
-                                     i_ecLevel,
+                                     i_procFuncModel.getChipLevel(),
                                      ppeSection );
 
-        if( rcTemp )
-        {
-            FAPI_ERR("Failed to copy CPMR header");
-            retCode = BUILD_FAIL_CPMR_HDR;
-            break;
-        }
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::SELF_REST_IMG_BUILD_FAIL()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp  )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed to update self restore image in HOMER" );
 
-        //Pad undefined or runtime section with  ATTN Opcode
-        //Padding SPR restore area with ATTN Opcode
-        FAPI_INF("Padding CPMR Core Restore portion with Attn opcodes");
-        uint32_t wordCnt = 0;
-        uint32_t l_fillBlr  = SWIZZLE_4_BYTE(SELF_RESTORE_BLR_INST);
-        uint32_t l_fillAttn = SWIZZLE_4_BYTE(CORE_RESTORE_PAD_OPCODE);
-
-        while( wordCnt < SELF_RESTORE_CORE_REGS_SIZE )
-        {
-
-            uint32_t l_fillPattern = 0;
-
-            if( ( 0 == wordCnt ) || ( 0 == ( wordCnt % CORE_RESTORE_SIZE_PER_THREAD ) ))
-            {
-                l_fillPattern = l_fillBlr;
-            }
-            else
-            {
-                l_fillPattern = l_fillAttn;
-            }
-
-            //Lab Need: First instruction in thread SPR restore region should be a blr instruction.
-            //This helps in a specific lab scenario. If Self Restore region is populated only for
-            //select number of threads, other threads will not hit attention during the self restore
-            //sequence. Instead, execution will hit a blr and control should return to thread launcher
-            //region.
-
-            memcpy( (uint32_t*)&i_pChipHomer->cpmrRegion.selfRestoreRegion.coreSelfRestore[wordCnt],
-                    &l_fillPattern,
-                    sizeof( uint32_t ));
-            wordCnt += 4;
-        }
-
-        updateCpmrHeaderSR( i_pChipHomer, i_fusedState );
-
-        memset( i_pChipHomer->cpmrRegion.selfRestoreRegion.coreScom,
-                0x00, CORE_SCOM_RESTORE_SIZE_TOTAL );
     }
-    while(0);
 
-    return retCode;
+    // adding CPMR header in first 256 bytes of the CPMR.
+    FAPI_INF("Overlay CPMR Header at the beginning of CPMR");
+    rcTemp = copySectionToHomer( i_pChipHomer->cpmrRegion.selfRestoreRegion.CPMR_SR.region,
+                                 pSelfRestImg,
+                                 P9_XIP_SECTION_RESTORE_CPMR,
+                                 PLAT_SELF,
+                                 i_procFuncModel.getChipLevel(),
+                                 ppeSection );
+
+    FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                 fapi2::CPMR_HDR_BUILD_FAIL()
+                 .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                 .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                 .set_MAX_ALLOWED_SIZE( rcTemp  )
+                 .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                 "Failed to update CPMR Header in HOMER" );
+
+    //Pad undefined or runtime section with  ATTN Opcode
+    //Padding SPR restore area with ATTN Opcode
+    FAPI_INF("Padding CPMR Core Restore portion with Attn opcodes");
+
+    while( wordCnt < SELF_RESTORE_CORE_REGS_SIZE )
+    {
+
+        uint32_t l_fillPattern = 0;
+
+        if( ( 0 == wordCnt ) || ( 0 == ( wordCnt % CORE_RESTORE_SIZE_PER_THREAD ) ))
+        {
+            l_fillPattern = l_fillBlr;
+        }
+        else
+        {
+            l_fillPattern = l_fillAttn;
+        }
+
+        //Lab Need: First instruction in thread SPR restore region should be a blr instruction.
+        //This helps in a specific lab scenario. If Self Restore region is populated only for
+        //select number of threads, other threads will not hit attention during the self restore
+        //sequence. Instead, execution will hit a blr and control should return to thread launcher
+        //region.
+
+        memcpy( (uint32_t*)&i_pChipHomer->cpmrRegion.selfRestoreRegion.coreSelfRestore[wordCnt],
+                &l_fillPattern,
+                sizeof( uint32_t ));
+        wordCnt += 4;
+    }
+
+    updateCpmrHeaderSR( i_pChipHomer, i_fusedState );
+
+    memset( i_pChipHomer->cpmrRegion.selfRestoreRegion.coreScom,
+            0x00, CORE_SCOM_RESTORE_SIZE_TOTAL );
+fapi_try_exit:
+    FAPI_INF("<< buildCoreRestoreImage")
+
+    return fapi2::current_err;
 }
 
 //------------------------------------------------------------------------------
@@ -1390,33 +1400,31 @@ uint32_t buildCoreRestoreImage( void* const i_pImageIn,
  * @param[in]   i_pImageIn      points to start of hardware image.
  * @param[in]   i_pChipHomer    points to HOMER image.
  * @param[in]   i_imgType       image sections  to be built
- * @return IMG_BUILD_SUCCESS if function succeeds, error code otherwise.
+ * @param[in]   i_cpmrPhyAdd    Base address of CPMR region
+ * @param[in]   i_procFuncModel info pertaining to P9 chip
+ * @return      fapi2 return code.
  */
-uint32_t buildCmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
-                        ImageType_t i_imgType, uint64_t i_cpmrPhyAdd, uint8_t i_ecLevel )
+fapi2::ReturnCode buildCmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
+                                 ImageType_t i_imgType, uint64_t i_cpmrPhyAdd,
+                                 P9FuncModel & i_procFuncModel )
 {
-    uint32_t retCode = IMG_BUILD_SUCCESS;
 
-    do
+    FAPI_INF(">> buildCmeImage")
+    uint32_t rcTemp = IMG_BUILD_SUCCESS;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    //Let us find XIP Header for CME Image
+    P9XipSection ppeSection;
+    uint8_t* pCmeImg = NULL;
+
+    if( i_imgType.cmeHcodeBuild )
     {
-        uint32_t rcTemp = 0;
-        //Let us find XIP Header for CME Image
-        P9XipSection ppeSection;
-        uint8_t* pCmeImg = NULL;
-
-        if( !i_imgType.cmeHcodeBuild )
-        {
-            break;
-        }
-
         rcTemp = p9_xip_get_section( i_pImageIn, P9_XIP_SECTION_HW_CME, &ppeSection );
 
-        if( rcTemp )
-        {
-            FAPI_ERR("Failed to get CME Image XIP header" );
-            retCode = BUILD_FAIL_CME_IMAGE;
-            break;
-        }
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::CME_IMG_NOT_FOUND_IN_HW_IMG()
+                     .set_XIP_FAILURE_CODE( rcTemp )
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() ),
+                     "Failed to find CME sub-image in HW Image" );
 
         pCmeImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
         FAPI_DBG("ppeSection.iv_offset = 0x%08X, ppeSection.iv_size = 0x%08X",
@@ -1430,15 +1438,16 @@ uint32_t buildCmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
         rcTemp = copySectionToHomer(  i_pChipHomer->cpmrRegion.cmeSramRegion, pCmeImg,
                                       P9_XIP_SECTION_CME_HCODE,
                                       PLAT_CME,
-                                      i_ecLevel,
+                                      i_procFuncModel.getChipLevel(),
                                       ppeSection );
 
-        if( rcTemp )
-        {
-            FAPI_ERR("Failed to append CME Hcode");
-            retCode = BUILD_FAIL_CME_HCODE;
-            break;
-        }
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::CME_HCODE_BUILD_FAIL()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed to find CME Hcode in CME XIP Image" );
 
         // Initializing CME Image header
         // Names have g_ prefix as these global variables for CME Hcode
@@ -1465,10 +1474,13 @@ uint32_t buildCmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
         pImgHdr->g_cme_hcode_length         =  SWIZZLE_4_BYTE(pImgHdr->g_cme_hcode_length);
         pImgHdr->g_cme_scom_length          =  SWIZZLE_4_BYTE(pImgHdr->g_cme_scom_length);
         pImgHdr->g_cme_cpmr_PhyAddr         =  SWIZZLE_8_BYTE(pImgHdr->g_cme_cpmr_PhyAddr);
-    }
-    while(0);
 
-    return retCode;
+    }   //i_imgType.cmeHcodeBuild
+
+fapi_try_exit:
+    FAPI_INF("<< buildCmeImage")
+
+    return fapi2::current_err;
 }
 
 //------------------------------------------------------------------------------
@@ -1478,39 +1490,36 @@ uint32_t buildCmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
  * @param[in]   i_pChipHomer    points to HOMER image in main memory.
  * @param[io]   io_ppmrHdr      an instance of PpmrHeader_t
  * @param[in]   i_imgType       image sections  to be built
- * @return IMG_BUILD_SUCCESS if function succeeds, error code otherwise.
+ * @param[in]   i_procFuncModel info pertaining to P9 chip
+ * @return      fapi2 return code.
  */
-uint32_t buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
-                         PpmrHeader_t& io_ppmrHdr, ImageType_t i_imgType, uint8_t i_ecLevel )
+fapi2::ReturnCode buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
+                                  PpmrHeader_t& io_ppmrHdr, ImageType_t i_imgType,
+                                  P9FuncModel & i_procFuncModel )
 {
-    uint32_t retCode = IMG_BUILD_SUCCESS;
-    FAPI_INF("> PGPE Img build")
+    FAPI_INF(">> buildPgpeImage")
 
-    do
+    uint32_t rcTemp = IMG_BUILD_SUCCESS;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    //Let us find XIP Header for SGPE
+    P9XipSection ppeSection;
+    uint8_t* pPgpeImg = NULL;
+
+    if( i_imgType.pgpeImageBuild )
     {
-        uint32_t rcTemp = 0;
+        //Init PGPE region with zero
+        memset( i_pChipHomer->ppmrRegion.ppmrHeader, 0x00, ONE_MB );
 
-        if(!i_imgType.pgpeImageBuild )
-        {
-            break;
-        }
-
-        //Let us find XIP Header for SGPE
-        P9XipSection ppeSection;
-        uint8_t* pPgpeImg = NULL;
+        PpmrHeader_t* pPpmrHdr = ( PpmrHeader_t* ) i_pChipHomer->ppmrRegion.ppmrHeader;
 
         rcTemp = p9_xip_get_section( i_pImageIn, P9_XIP_SECTION_HW_PGPE, &ppeSection );
 
-        if( rcTemp )
-        {
-            FAPI_ERR("Failed to get PGPE XIP Image Header" );
-            retCode = BUILD_FAIL_PGPE_IMAGE;
-            break;
-        }
-
-        //Init PGPE region with zero
-        memset( i_pChipHomer->ppmrRegion.ppmrHeader, 0x00, ONE_MB );
-        PpmrHeader_t* pPpmrHdr = ( PpmrHeader_t* ) i_pChipHomer->ppmrRegion.ppmrHeader;
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::PGPE_IMG_NOT_FOUND_IN_HW_IMG()
+                     .set_XIP_FAILURE_CODE( rcTemp )
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() ),
+                     "Failed to find PGPE sub-image in HW Image" );
 
         pPgpeImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
         FAPI_DBG("HW image PGPE Offset = 0x%08X", ppeSection.iv_offset);
@@ -1520,15 +1529,16 @@ uint32_t buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
                                      pPgpeImg,
                                      P9_XIP_SECTION_PGPE_PPMR,
                                      PLAT_PGPE,
-                                     i_ecLevel,
+                                     i_procFuncModel.getChipLevel(),
                                      ppeSection );
 
-        if( rcTemp )
-        {
-            FAPI_ERR("Failed to copy PPMR Header");
-            retCode = BUILD_FAIL_PGPE_PPMR;
-            break;
-        }
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::P9_XIP_SECTION_PGPE_PPMR()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed to update PPMR region of HOMER" );
 
         memcpy( &io_ppmrHdr, pPpmrHdr, sizeof(PpmrHeader_t));
 
@@ -1536,15 +1546,16 @@ uint32_t buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
                                      pPgpeImg,
                                      P9_XIP_SECTION_PGPE_LVL1_BL,
                                      PLAT_PGPE,
-                                     i_ecLevel,
+                                     i_procFuncModel.getChipLevel(),
                                      ppeSection );
 
-        if( rcTemp )
-        {
-            FAPI_ERR("Failed to copy PGPE Level1 bootloader");
-            retCode = BUILD_FAIL_PGPE_BL1;
-            break;
-        }
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::P9_PGPE_BOOT_COPIER_BUILD_FAIL()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed to update PGPE boot copier region of HOMER" );
 
         io_ppmrHdr.g_ppmr_bc_offset = PPMR_HEADER_SIZE;
 
@@ -1553,15 +1564,16 @@ uint32_t buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
                                      pPgpeImg,
                                      P9_XIP_SECTION_PGPE_LVL2_BL,
                                      PLAT_PGPE,
-                                     i_ecLevel,
+                                     i_procFuncModel.getChipLevel(),
                                      ppeSection );
 
-        if( rcTemp )
-        {
-            FAPI_ERR("Failed to copy PGPE Level2 bootloader");
-            retCode = BUILD_FAIL_PGPE_BL2;
-            break;
-        }
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::P9_PGPE_BOOT_LOADER_BUILD_FAIL()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed to update PGPE boot loader region of HOMER" );
 
         io_ppmrHdr.g_ppmr_bl_offset = io_ppmrHdr.g_ppmr_bc_offset + PGPE_BOOT_COPIER_SIZE;
         io_ppmrHdr.g_ppmr_bl_length = ppeSection.iv_size;
@@ -1570,15 +1582,17 @@ uint32_t buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
                                      pPgpeImg,
                                      P9_XIP_SECTION_PGPE_HCODE,
                                      PLAT_PGPE,
-                                     i_ecLevel,
+                                     i_procFuncModel.getChipLevel(),
                                      ppeSection );
 
-        if( rcTemp )
-        {
-            FAPI_ERR("Failed to copy PGPE hcode");
-            retCode = BUILD_FAIL_PGPE_HCODE;
-            break;
-        }
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::P9_PGPE_HCODE_BUILD_FAIL()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed to update PGPE hcode region of HOMER" );
+
 
         io_ppmrHdr.g_ppmr_hcode_offset = io_ppmrHdr.g_ppmr_bl_offset + PGPE_BOOT_LOADER_SIZE;
         io_ppmrHdr.g_ppmr_hcode_length = ppeSection.iv_size;
@@ -1589,20 +1603,24 @@ uint32_t buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
         io_ppmrHdr.g_ppmr_bl_length    = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_bl_length);
         io_ppmrHdr.g_ppmr_hcode_offset = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_hcode_offset);
         io_ppmrHdr.g_ppmr_hcode_length = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_hcode_length);
-    }
-    while(0);
 
-    FAPI_INF("< PGPE Img build")
-    return retCode;
+    }
+
+fapi_try_exit:
+    FAPI_INF("<< buildPgpeImage")
+    return fapi2::current_err;
 }
 
 //------------------------------------------------------------------------------
 
 /**
  * @brief   get a blob of platform rings in a temp buffer.
- * @param   i_hwImage   points to hardware image.
- * @param   i_procTgt   processor target
- * @param   i_ringData  temp data struct
+ * @param[in]   i_hwImage   points to hardware image.
+ * @param[in]   i_ppeType   Platform Type e.g. SGPE
+ * @param[in]   i_procTgt   processor target
+ * @param[in]   i_ringData  a temp struct
+ * @param[in]   i_imgType   image region to be built.
+ * @note        function expects just CME and SGPE platform as input parameter.
  */
 uint32_t getPpeScanRings( void* const     i_pHwImage,
                           PlatId          i_ppeType,
@@ -1610,14 +1628,14 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
                           RingBufData&       i_ringData,
                           ImageType_t i_imgType )
 {
-    FAPI_INF(">getPpeScanRings");
+    FAPI_INF(">> getPpeScanRings");
     uint32_t retCode = IMG_BUILD_SUCCESS;
     uint32_t hwImageSize = 0;
 
     do
     {
         if(( !i_imgType.cmeCommonRingBuild && !i_imgType.cmeCoreSpecificRingBuild ) ||
-           ( i_imgType.sgpeCommonRingBuild && !i_imgType.sgpeCacheSpecificRingBuild ))
+           ( !i_imgType.sgpeCommonRingBuild && !i_imgType.sgpeCacheSpecificRingBuild ))
         {
             break;
         }
@@ -1685,7 +1703,7 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
     }
     while(0);
 
-    FAPI_INF("<getPpeScanRings " );
+    FAPI_INF("<< getPpeScanRings " );
     return retCode;
 }
 
@@ -1699,7 +1717,7 @@ uint32_t layoutSgpeScanOverride( Homerlayout_t*   i_pHomer,
                                  QpmrHeaderLayout_t& i_qpmrHdr,
                                  ImageType_t i_imgType )
 {
-    FAPI_INF("> layoutSgpeScanOverride ");
+    FAPI_INF(">> layoutSgpeScanOverride ");
     uint32_t rc = IMG_BUILD_SUCCESS;
     sgpeHeader_t* pSgpeImgHdr = (sgpeHeader_t*)&i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
     RingBucket sgpeOvrdRings( PLAT_SGPE,
@@ -1800,7 +1818,7 @@ uint32_t layoutSgpeScanOverride( Homerlayout_t*   i_pHomer,
 
     sgpeOvrdRings.dumpOverrideRings();
 
-    FAPI_INF("< layoutSgpeScanOverride")
+    FAPI_INF("<< layoutSgpeScanOverride")
     return rc;
 }
 
@@ -1814,7 +1832,7 @@ uint32_t layoutSgpeScanOverride( Homerlayout_t*   i_pHomer,
 
 fapi2::ReturnCode updatePgpeHeader( void* const i_pHomer, CONST_FAPI2_PROC& i_procTgt )
 {
-    FAPI_DBG(">> updatePgpeHeader");
+    FAPI_INF(">> updatePgpeHeader");
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     Homerlayout_t* pHomerLayout = (Homerlayout_t*)i_pHomer;
     PgpeHeader_t*  pPgpeHdr = (PgpeHeader_t*)&pHomerLayout->ppmrRegion.pgpeSramImage[PGPE_INT_VECTOR_SIZE];
@@ -1966,14 +1984,12 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
                                        PpmrHeader_t& io_ppmrHdr, ImageType_t i_imgType,
                                        void * const i_pBuf1, uint32_t i_sizeBuf1 )
 {
-    FAPI_INF("buildParameterBlock entered");
+    FAPI_INF(">> buildParameterBlock");
 
-    do
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    if( i_imgType.pgpePstateParmBlockBuild )
     {
-        if( !i_imgType.pgpePstateParmBlockBuild )
-        {
-            break;
-        }
 
         fapi2::ReturnCode retCode;
         Homerlayout_t* pHomerLayout = (Homerlayout_t*)i_pHomer;
@@ -2041,8 +2057,8 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         FAPI_DBG("Copying Global P-State Parameter Block" );
         sizePStateBlock = sizeof(GlobalPstateParmBlock);
 
-        FAPI_ASSERT( ( sizePStateBlock <= PGPE_PSTATE_OUTPUT_TABLES_SIZE ),
-                     fapi2::PARAM_BLOCK_SIZE_ERR()
+        FAPI_ASSERT( ( sizePStateBlock <= OCC_PSTATE_PARAM_BLOCK_SIZE ),
+                     fapi2::PSTATE_SUP_STRUCT_SIZE_ERR()
                      .set_SUPER_STRUCT_SIZE(sizeof(PstateSuperStructure))
                      .set_MAX_SIZE_ALLOCATED(PGPE_PSTATE_OUTPUT_TABLES_SIZE)
                      .set_ACTUAL_SIZE( sizePStateBlock ),
@@ -2077,9 +2093,8 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
                  sizeAligned, sizeAligned );
 
         FAPI_ASSERT( ( sizePStateBlock <= OCC_PSTATE_PARAM_BLOCK_SIZE ),
-                     fapi2::PARAM_BLOCK_SIZE_ERR()
-                     .set_SUPER_STRUCT_SIZE(sizeof(OCCPstateParmBlock))
-                     .set_MAX_SIZE_ALLOCATED(PGPE_PSTATE_OUTPUT_TABLES_SIZE)
+                     fapi2::OCC_PARAM_BLOCK_SIZE_ERR()
+                     .set_MAX_SIZE_ALLOCATED(OCC_PSTATE_PARAM_BLOCK_SIZE)
                      .set_ACTUAL_SIZE( sizePStateBlock ),
                      "Size of OCC Parameter Block Exceeds Max Size Allowed" );
 
@@ -2139,11 +2154,11 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         io_ppmrHdr.g_ppmr_pgpe_sram_img_size =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_pgpe_sram_img_size);
         io_ppmrHdr.g_ppmr_wof_table_offset   =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_wof_table_offset);
         io_ppmrHdr.g_ppmr_wof_table_length   =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_wof_table_length);
-    }
-    while(0);
+
+    }//i_imgType.pgpePstateParmBlockBuild
 
 fapi_try_exit:
-    FAPI_INF("buildParameterBlock exit");
+    FAPI_INF("<< buildParameterBlock");
 
     return fapi2::current_err;
 }
@@ -2174,7 +2189,7 @@ uint32_t layoutCmnRingsForCme( Homerlayout_t*   i_pHomer,
                                RingBucket& io_cmeRings,
                                uint32_t& io_cmnRingSize )
 {
-    FAPI_DBG( "> layoutCmnRingsForCme");
+    FAPI_DBG( ">> layoutCmnRingsForCme");
     uint32_t rc = IMG_BUILD_SUCCESS;
 
     do
@@ -2243,7 +2258,7 @@ uint32_t layoutCmnRingsForCme( Homerlayout_t*   i_pHomer,
     }
     while(0);
 
-    FAPI_DBG( "< layoutCmnRingsForCme");
+    FAPI_DBG( "<< layoutCmnRingsForCme");
 
     return rc;
 }
@@ -2271,7 +2286,7 @@ uint32_t layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
                                    RingBucket& io_cmeRings,
                                    uint32_t& io_ringLength )
 {
-    FAPI_DBG( "> layoutInstRingsForCme");
+    FAPI_DBG( ">> layoutInstRingsForCme");
     uint32_t rc = IMG_BUILD_SUCCESS;
     // Let us find out ring-pair which is biggest in list of 12 ring pairs
     uint32_t maxCoreSpecRingLength = 0;
@@ -2407,7 +2422,7 @@ uint32_t layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
     }
     while(0);
 
-    FAPI_DBG( "< layoutInstRingsForCme");
+    FAPI_DBG( "<< layoutInstRingsForCme");
 
     return rc;
 }
@@ -2422,7 +2437,7 @@ uint32_t layoutCmeScanOverride( Homerlayout_t*   i_pHomer,
                                 ImageType_t i_imgType,
                                 uint32_t& io_ovrdRingLength )
 {
-    FAPI_INF("> layoutCmeScanOverride" );
+    FAPI_INF(">> layoutCmeScanOverride" );
     uint32_t rc = IMG_BUILD_SUCCESS;
     uint32_t tempRingLength = io_ovrdRingLength;
     uint32_t tempBufSize = 0;
@@ -2506,7 +2521,7 @@ uint32_t layoutCmeScanOverride( Homerlayout_t*   i_pHomer,
 
     cmeOvrdRings.dumpOverrideRings();
 
-    FAPI_INF("< layoutCmeScanOverride" );
+    FAPI_INF("<< layoutCmeScanOverride" );
     return rc;
 }
 
@@ -2531,7 +2546,7 @@ uint32_t layoutRingsForCME( Homerlayout_t*   i_pHomer,
                             ImageType_t i_imgType,
                             void* i_pOverride )
 {
-    FAPI_DBG( "> layoutRingsForCME");
+    FAPI_DBG( ">> layoutRingsForCME");
     uint32_t rc = IMG_BUILD_SUCCESS;
     uint32_t ringLength = 0;
     uint32_t tempLength = 0;
@@ -2646,7 +2661,7 @@ uint32_t layoutRingsForCME( Homerlayout_t*   i_pHomer,
 
              SWIZZLE_4_BYTE(pCmeHdr->g_cme_max_spec_ring_length));
 
-    FAPI_DBG( "< layoutRingsForCME");
+    FAPI_DBG( "<< layoutRingsForCME");
 
     return rc;
 }
@@ -2661,7 +2676,7 @@ uint32_t layoutRingsForCME( Homerlayout_t*   i_pHomer,
  */
 fapi2::ReturnCode getSelectEqInexBucketAttr( uint32_t& o_bucketId )
 {
-    FAPI_DBG( "> getSelectEqInexBucketAttr");
+    FAPI_INF( ">> getSelectEqInexBucketAttr");
     uint8_t l_fabAsyncSafeMode;
     uint8_t l_fabCoreFloorRatio;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
@@ -2706,8 +2721,8 @@ fapi2::ReturnCode getSelectEqInexBucketAttr( uint32_t& o_bucketId )
     FAPI_DBG( "Safe Mode 0x%08x Fab Core Floor Ratio 0x%08x",
               l_fabAsyncSafeMode, l_fabCoreFloorRatio );
 
-    FAPI_DBG( "< getSelectEqInexBucketAttr");
 fapi_try_exit:
+    FAPI_INF( "<< getSelectEqInexBucketAttr");
     return fapi2::current_err;
 }
 
@@ -2721,6 +2736,7 @@ fapi_try_exit:
 
 uint32_t resolveEqInexBucket( RingID& o_eqInexBucketId )
 {
+    FAPI_INF( ">> resolveEqInexBucket");
     uint32_t rc = IMG_BUILD_SUCCESS;
     fapi2::ReturnCode fapiRc ;
     uint32_t bucketId = 0;
@@ -2759,6 +2775,7 @@ uint32_t resolveEqInexBucket( RingID& o_eqInexBucketId )
     }
     while(0);
 
+    FAPI_INF( "<< resolveEqInexBucket");
     return rc;
 }
 
@@ -2785,7 +2802,7 @@ uint32_t layoutCmnRingsForSgpe( Homerlayout_t*     i_pHomer,
                                 ImageType_t i_imgType,
                                 RingBucket& io_sgpeRings )
 {
-    FAPI_DBG("> layoutCmnRingsForSgpe");
+    FAPI_INF(">> layoutCmnRingsForSgpe");
 
     uint32_t rc = IMG_BUILD_SUCCESS;
     uint32_t sgpeHcodeSize      =   SWIZZLE_4_BYTE(io_qpmrHdr.sgpeImgLength);
@@ -2875,7 +2892,7 @@ uint32_t layoutCmnRingsForSgpe( Homerlayout_t*     i_pHomer,
     }
     while(0);   //building common rings
 
-    FAPI_DBG("< layoutCmnRingsForSgpe");
+    FAPI_INF("<< layoutCmnRingsForSgpe");
 
     return rc;
 }
@@ -2904,6 +2921,7 @@ uint32_t layoutInstRingsForSgpe( Homerlayout_t*     i_pHomer,
                                  RingBucket& io_sgpeRings )
 {
     uint32_t rc = IMG_BUILD_SUCCESS;
+    FAPI_INF(">> layoutInstRingsForSgpe");
 
     do
     {
@@ -2984,6 +3002,7 @@ uint32_t layoutInstRingsForSgpe( Homerlayout_t*     i_pHomer,
     }
     while(0);
 
+    FAPI_INF("<< layoutInstRingsForSgpe");
     return rc;
 }
 
@@ -3009,7 +3028,7 @@ uint32_t layoutRingsForSGPE( Homerlayout_t*     i_pHomer,
                              QpmrHeaderLayout_t& io_qpmrHdr,
                              ImageType_t i_imgType )
 {
-    FAPI_DBG( "> layoutRingsForSGPE");
+    FAPI_INF( ">> layoutRingsForSGPE");
     uint32_t rc = IMG_BUILD_SUCCESS;
     RingVariant_t l_ringVariant = BASE;
     sgpeHeader_t* pSgpeImgHdr   =   (sgpeHeader_t*)& i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
@@ -3092,6 +3111,7 @@ uint32_t layoutRingsForSGPE( Homerlayout_t*     i_pHomer,
              SWIZZLE_4_BYTE(pSgpeImgHdr->g_sgpe_spec_ring_occ_offset));
 
 
+    FAPI_INF( "<< layoutRingsForSGPE");
     return rc;
 }
 //---------------------------------------------------------------------------
@@ -3101,6 +3121,7 @@ uint32_t layoutRingsForSGPE( Homerlayout_t*     i_pHomer,
  */
 fapi2::ReturnCode updateGpeAttributes( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PROC& i_procTgt )
 {
+    FAPI_INF(">> updateGpeAttributes");
     QpmrHeaderLayout_t* pQpmrHdr = (QpmrHeaderLayout_t*)i_pChipHomer->qpmrRegion.sgpeRegion.qpmrHeader;
     PpmrHeader_t* pPpmrHdr = (PpmrHeader_t*) i_pChipHomer->ppmrRegion.ppmrHeader;
 
@@ -3125,6 +3146,7 @@ fapi2::ReturnCode updateGpeAttributes( Homerlayout_t* i_pChipHomer, CONST_FAPI2_
     FAPI_DBG("Set ATTR_PSTATEGPE_BOOT_COPIER_IVPR_OFFSET to 0x%08X", attrVal );
 
 fapi_try_exit:
+    FAPI_INF(">> updateGpeAttributes");
     return fapi2::current_err;
 }
 
@@ -3136,11 +3158,13 @@ fapi_try_exit:
 fapi2::ReturnCode setFabricIds( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PROC& i_procTgt )
 {
 
+    FAPI_INF(">> setFabricIds");
     uint32_t l_system_id;
     uint8_t  l_group_id;
     uint8_t  l_chip_id;
     fapi2::buffer<uint16_t> l_location_id = 0;
     uint16_t l_locationVal = 0;
+
 
     cmeHeader_t* pCmeHdr = (cmeHeader_t*) & i_pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
     sgpeHeader_t* pSgpeHdr = (sgpeHeader_t*)& i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
@@ -3188,6 +3212,7 @@ fapi2::ReturnCode setFabricIds( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PROC& i
     pSgpeHdr->g_sgpe_location_id = SWIZZLE_2_BYTE(l_locationVal);
 
 fapi_try_exit:
+    FAPI_INF("<< setFabricIds");
     return fapi2::current_err;
 
 }
@@ -3202,7 +3227,7 @@ fapi_try_exit:
  */
 fapi2::ReturnCode populateNcuRingBarScomReg( void* i_pChipHomer, CONST_FAPI2_PROC& i_procTgt )
 {
-    FAPI_DBG("> populateNcuRingBarScomReg");
+    FAPI_INF(">> populateNcuRingBarScomReg");
 
     do
     {
@@ -3269,8 +3294,8 @@ fapi2::ReturnCode populateNcuRingBarScomReg( void* i_pChipHomer, CONST_FAPI2_PRO
     }
     while(0);
 
-    FAPI_DBG("< populateNcuRingBarScomReg");
 fapi_try_exit:
+    FAPI_INF("<< populateNcuRingBarScomReg");
     return fapi2::current_err;
 }
 
@@ -3283,7 +3308,7 @@ fapi_try_exit:
  */
 fapi2::ReturnCode populateEpsilonL2ScomReg( void*    i_pChipHomer )
 {
-    FAPI_DBG("> populateEpsilonL2ScomReg");
+    FAPI_INF(">> populateEpsilonL2ScomReg");
 
     do
     {
@@ -3449,8 +3474,8 @@ fapi2::ReturnCode populateEpsilonL2ScomReg( void*    i_pChipHomer )
     }
     while(0);
 
-    FAPI_DBG("< populateEpsilonL2ScomReg");
 fapi_try_exit:
+    FAPI_INF("<< populateEpsilonL2ScomReg");
     return fapi2::current_err;
 }
 
@@ -3463,7 +3488,7 @@ fapi_try_exit:
  */
 fapi2::ReturnCode populateEpsilonL3ScomReg( void*    i_pChipHomer )
 {
-    FAPI_DBG("> populateEpsilonL3ScomReg");
+    FAPI_DBG(">> populateEpsilonL3ScomReg");
 
     do
     {
@@ -3634,8 +3659,8 @@ fapi2::ReturnCode populateEpsilonL3ScomReg( void*    i_pChipHomer )
     }
     while(0);
 
-    FAPI_DBG("< populateEpsilonL3ScomReg");
 fapi_try_exit:
+    FAPI_INF("<< populateEpsilonL3ScomReg");
     return fapi2::current_err;
 }
 
@@ -3749,7 +3774,7 @@ fapi_try_exit:
  */
 fapi2::ReturnCode initReadIntervalForAuxFunc( Homerlayout_t*     i_pHomer, uint32_t& o_auxFuncIntControl )
 {
-    FAPI_DBG("> initReadIntervalForAuxFunc");
+    FAPI_INF(">> initReadIntervalForAuxFunc");
     uint8_t readInterAttr = 0;
     o_auxFuncIntControl = 0;
 
@@ -3766,8 +3791,8 @@ fapi2::ReturnCode initReadIntervalForAuxFunc( Homerlayout_t*     i_pHomer, uint3
         FAPI_DBG("sgpeReadAttrInterval 0x%08x", o_auxFuncIntControl );
     }
 
-    FAPI_DBG("< initReadIntervalForAuxFunc");
 fapi_try_exit:
+    FAPI_INF("<< initReadIntervalForAuxFunc");
     return fapi2::current_err;
 }
 
@@ -3782,6 +3807,7 @@ fapi_try_exit:
 fapi2::ReturnCode buildSgpeAux( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t*     i_pHomer,
                                 QpmrHeaderLayout_t& o_qpmrHdr )
 {
+    FAPI_INF(">> buildSgpeAux");
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     sgpeHeader_t* pSgpeHdr = (sgpeHeader_t*)& i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
     uint32_t l_sgpeAuxFunc = 0;
@@ -3800,6 +3826,7 @@ fapi2::ReturnCode buildSgpeAux( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t*     
     pSgpeHdr->g_sgpe_aux_control = SWIZZLE_4_BYTE(l_sgpeAuxFunc);
 
 fapi_try_exit:
+    FAPI_INF("<< buildSgpeAux");
     return fapi2::current_err;
 
 }
@@ -3863,239 +3890,239 @@ void customizeMagicWord( Homerlayout_t*     i_pHomer, uint8_t i_ecLevel )
 fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                                         void* const     i_pImageIn,
                                         void*           i_pHomerImage,
-                                        void* const i_pRingOverride,
-                                        SysPhase_t i_phase,
-                                        ImageType_t i_imgType,
-                                        void* const i_pBuf1,
-                                        const uint32_t    i_sizeBuf1,
-                                        void* const i_pBuf2,
-                                        const uint32_t    i_sizeBuf2,
-                                        void* const i_pBuf3,
-                                        const uint32_t    i_sizeBuf3 )
+                                        void* const     i_pRingOverride,
+                                        SysPhase_t      i_phase,
+                                        ImageType_t     i_imgType,
+                                        void* const     i_pBuf1,
+                                        const uint32_t  i_sizeBuf1,
+                                        void* const     i_pBuf2,
+                                        const uint32_t  i_sizeBuf2,
+                                        void* const     i_pBuf3,
+                                        const uint32_t  i_sizeBuf3 )
 
 
 {
-    FAPI_IMP("Entering p9_hcode_image_build ");
+    FAPI_IMP(">> p9_hcode_image_build ");
 
-    do
-    {
-        FAPI_DBG("validating argument ..");
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    uint32_t ppeImgRc = IMG_BUILD_SUCCESS;
+    QpmrHeaderLayout_t l_qpmrHdr;
+    uint8_t l_riskLevel = 0 ;
+    uint8_t fuseModeState = 0;
+    uint64_t cpmrPhyAdd = 0;
+    uint8_t l_ringDebug = 0;
+    uint32_t sramImgSize = 0;
+    P9FuncModel l_chipFuncModel( i_procTgt );
 
-        FAPI_TRY( validateInputArguments( i_pImageIn, i_pHomerImage, i_phase,
-                                          i_imgType,
-                                          i_pBuf1,
-                                          i_sizeBuf1,
-                                          i_pBuf2,
-                                          i_sizeBuf2,
-                                          i_pBuf3,
-                                          i_sizeBuf3 ),
-                  "Invalid arguments, escaping hcode image build" );
+    Homerlayout_t* pChipHomer = ( Homerlayout_t*) i_pHomerImage;
 
-        uint8_t ecLevel = 0;
-        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC,
-                                          i_procTgt,
-                                          ecLevel),
-                 "Error from for attribute ATTR_EC");
+    RingBufData l_ringData( i_pBuf1,
+                            i_sizeBuf1,
+                            i_pBuf2,
+                            i_sizeBuf2,
+                            i_pBuf3,
+                            i_sizeBuf3 );
 
-        FAPI_INF("Creating chip functional model");
+    FAPI_TRY( validateInputArguments( i_pImageIn, i_pHomerImage, i_phase,
+                                      i_imgType,
+                                      i_pBuf1,
+                                      i_sizeBuf1,
+                                      i_pBuf2,
+                                      i_sizeBuf2,
+                                      i_pBuf3,
+                                      i_sizeBuf3 ),
+              "Invalid arguments, escaping hcode image build" );
 
-        P9FuncModel l_chipFuncModel( i_procTgt, ecLevel );
-        Homerlayout_t* pChipHomer = ( Homerlayout_t*) i_pHomerImage;
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-        uint32_t ppeImgRc = IMG_BUILD_SUCCESS;
-        QpmrHeaderLayout_t l_qpmrHdr;
-        // HW Image is a nested XIP Image. Let us read global TOC of hardware image
-        // and find out if XIP header of PPE image is contained therein.
-        // Let us start with SGPE
-        FAPI_INF("SGPE building");
-        ppeImgRc = buildSgpeImage( i_pImageIn, pChipHomer, i_imgType, l_qpmrHdr, ecLevel );
+    // HW Image is a nested XIP Image. Let us read global TOC of hardware image
+    // and find out if XIP header of PPE image is contained therein.
+    // Let us start with SGPE
+    FAPI_INF("SGPE building");
+    FAPI_TRY( buildSgpeImage( i_pImageIn, pChipHomer, i_imgType, l_qpmrHdr, l_chipFuncModel ),
+              "Failed to build QPMR-SGPE region of HOMER" );
 
-        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
-                     fapi2::SGPE_BUILD_FAIL()
-                     .set_SGPE_FAIL_SECTN( ppeImgRc ),
-                     "Failed to copy SGPE section in HOMER" );
+    FAPI_TRY( buildSgpeAux( i_procTgt, pChipHomer, l_qpmrHdr ),
+              "Failed to build Auxiliary section" );
 
-        FAPI_TRY( buildSgpeAux( i_procTgt, pChipHomer, l_qpmrHdr ),
-                  "Failed to build Auxiliary section" );
+    FAPI_INF("SGPE built");
 
-        FAPI_INF("SGPE built");
+    // copy sections pertaining to self restore
+    // Note: this creates the CPMR header portion
 
-        // copy sections pertaining to self restore
-        // Note: this creates the CPMR header portion
+    //let us determine if system is configured in fuse mode. This needs to
+    //be updated in a CPMR region.
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUSED_CORE_MODE,
+                           FAPI_SYSTEM,
+                           fuseModeState),
+             "Error from FAPI_ATTR_GET for attribute ATTR_FUSED_CORE_MODE");
 
-        //let us determine if system is configured in fuse mode. This needs to
-        //be updated in a CPMR region.
-        uint8_t fuseModeState = 0;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUSED_CORE_MODE,
-                               FAPI_SYSTEM,
-                               fuseModeState),
-                 "Error from FAPI_ATTR_GET for attribute ATTR_FUSED_CORE_MODE");
+    FAPI_INF("CPMR / Self Restore building");
 
-        FAPI_INF("CPMR / Self Restore building");
-        ppeImgRc = buildCoreRestoreImage( i_pImageIn, pChipHomer, i_imgType, fuseModeState, ecLevel );
+    FAPI_TRY( buildCoreRestoreImage( i_pImageIn, pChipHomer, i_imgType, fuseModeState, l_chipFuncModel ),
+              "Failed to copy core self restore section in HOMER" );
 
-        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
-                     fapi2::SELF_RESTORE_BUILD_FAIL()
-                     .set_SELF_RESTORE_FAIL_SECTN( ppeImgRc ),
-                     "Failed to copy core self restore section in HOMER" );
-        FAPI_INF("Self Restore built ");
+    FAPI_INF("CPMR / Self Restore built ");
 
-        // copy sections pertaining to CME
-        FAPI_INF("CPMR / CME building");
-        uint64_t cpmrPhyAdd = 0;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HOMER_PHYS_ADDR, i_procTgt, cpmrPhyAdd ),
-                 "Error from FAPI_ATTR_GET for ATTR_HOMER_PHYS_ADDR");
-        FAPI_DBG("HOMER base address 0x%016lX", cpmrPhyAdd );
-        ppeImgRc = buildCmeImage( i_pImageIn, pChipHomer, i_imgType, cpmrPhyAdd, ecLevel );
+    // copy sections pertaining to CME
+    FAPI_INF("CPMR / CME building");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HOMER_PHYS_ADDR, i_procTgt, cpmrPhyAdd ),
+             "Error from FAPI_ATTR_GET for ATTR_HOMER_PHYS_ADDR");
 
-        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
-                     fapi2::CME_BUILD_FAIL()
-                     .set_CME_FAIL_SECTN( ppeImgRc ),
-                     "Failed to copy CME section in HOMER" );
+    FAPI_DBG("HOMER base address 0x%016lX", cpmrPhyAdd );
+    FAPI_TRY( buildCmeImage( i_pImageIn, pChipHomer, i_imgType, cpmrPhyAdd, l_chipFuncModel ),
+              "Failed to copy CME section in HOMER" );
+    FAPI_INF("CPMR / CME built");
 
-        FAPI_INF("CME built");
+    FAPI_INF("PGPE building");
+    PpmrHeader_t l_ppmrHdr;
+    FAPI_TRY( buildPgpeImage( i_pImageIn, pChipHomer, l_ppmrHdr, i_imgType, l_chipFuncModel ),
+              "Failed to copy PGPE region in HOMER" );
 
-        FAPI_INF("PGPE building");
-        PpmrHeader_t l_ppmrHdr;
-        ppeImgRc = buildPgpeImage( i_pImageIn, pChipHomer, l_ppmrHdr, i_imgType, ecLevel );
+    //Update P State parameter block info in HOMER
+    FAPI_TRY( buildParameterBlock( pChipHomer, i_procTgt, l_ppmrHdr, i_imgType, i_pBuf1, i_sizeBuf1 ),
+              "Failed to add parameter block" );
 
-        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
-                     fapi2::PGPE_BUILD_FAIL()
-                     .set_PGPE_FAIL_SECTN( ppeImgRc ),
-                     "Failed to copy PGPE section in HOMER" );
+    FAPI_INF("PGPE built");
+    //Let us add Scan Rings to the image.
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RING_DBG_MODE,
+                           FAPI_SYSTEM,
+                           l_ringDebug),
+             "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_RING_DBG_MODE");
+    FAPI_DBG("Ring Debug Level 0x%02x", l_ringDebug );
 
-        //Update P State parameter block info in HOMER
-        FAPI_TRY( buildParameterBlock( pChipHomer, i_procTgt, l_ppmrHdr, i_imgType, i_pBuf1, i_sizeBuf1 ),
-                  "Failed to add parameter block" );
+    //Extract all the rings for CME platform from HW Image and VPD
+    ppeImgRc = getPpeScanRings( i_pImageIn,
+                                PLAT_CME,
+                                i_procTgt,
+                                l_ringData,
+                                i_imgType );
 
-        FAPI_INF("PGPE built");
-        //Let us add Scan Rings to the image.
-        uint8_t l_ringDebug = 0;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RING_DBG_MODE,
-                               FAPI_SYSTEM,
-                               l_ringDebug),
-                 "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_RING_DBG_MODE");
-        FAPI_DBG("Ring Debug Level 0x%02x", l_ringDebug );
+    FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
+                 fapi2::SCAN_RING_EXTRACTION_FAIL()
+                 .set_EXTRACTION_FAIL_PLAT( PLAT_CME )
+                 .set_EXTRACTION_FAILURE_CODE( ppeImgRc )
+                 .set_RISK_LEVEL( l_riskLevel )
+                 .set_IMG_TYPE( i_imgType ),
+                 "Failed to extract core scan rings" );
 
-        RingBufData l_ringData( i_pBuf1,
-                                i_sizeBuf1,
-                                i_pBuf2,
-                                i_sizeBuf2,
-                                i_pBuf3,
-                                i_sizeBuf3 );
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RISK_LEVEL,
+                           FAPI_SYSTEM,
+                           l_riskLevel),
+             "Error from FAPI_ATTR_GET for ATTR_RISK_LEVEL");
 
-        //Extract all the rings for CME platform from HW Image and VPD
-        ppeImgRc = getPpeScanRings( i_pImageIn,
-                                    PLAT_CME,
-                                    i_procTgt,
+    // create a layout of rings in HOMER for consumption of CME
+    ppeImgRc = layoutRingsForCME(  pChipHomer,
+                                   l_chipFuncModel,
+                                   l_ringData,
+                                   (RingDebugMode_t)l_ringDebug,
+                                   l_riskLevel,
+                                   i_imgType,
+                                   i_pRingOverride );
+
+    FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
+                 fapi2::SCAN_RING_PLACEMENT_FAIL()
+                 .set_PLACEMENT_FAIL_PLAT( PLAT_CME )
+                 .set_PLACEMENT_FAILURE_CODE( ppeImgRc )
+                 .set_RISK_LEVEL( l_riskLevel )
+                 .set_IMG_TYPE( i_imgType ),
+                 "Failed to place core scan rings" );
+
+    l_ringData.iv_ringBufSize = i_sizeBuf1;
+    ppeImgRc = getPpeScanRings( i_pImageIn,
+                                PLAT_SGPE,
+                                i_procTgt,
+                                l_ringData,
+                                i_imgType );
+
+    FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
+                 fapi2::SCAN_RING_EXTRACTION_FAIL()
+                 .set_EXTRACTION_FAIL_PLAT( PLAT_SGPE )
+                 .set_EXTRACTION_FAILURE_CODE( ppeImgRc )
+                 .set_RISK_LEVEL( l_riskLevel )
+                 .set_IMG_TYPE( i_imgType ),
+                 "Failed to extract quad scan rings" );
+
+    // create a layout of rings in HOMER for consumption of SGPE
+    ppeImgRc = layoutRingsForSGPE(  pChipHomer,
+                                    i_pRingOverride,
+                                    l_chipFuncModel,
                                     l_ringData,
+                                    (RingDebugMode_t)l_ringDebug,
+                                    l_riskLevel,
+                                    l_qpmrHdr,
                                     i_imgType );
 
-        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
-                     fapi2::SCAN_RING_EXTRACTION_FAIL()
-                     .set_EXTRACTION_FAIL_PLAT( PLAT_CME )
-                     .set_EXTRACTION_FAILURE_CODE( ppeImgRc ),
-                     "Failed to extract core scan rings" );
+    FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
+                 fapi2::SCAN_RING_EXTRACTION_FAIL()
+                 .set_EXTRACTION_FAIL_PLAT( PLAT_SGPE )
+                 .set_EXTRACTION_FAILURE_CODE( ppeImgRc )
+                 .set_RISK_LEVEL( l_riskLevel )
+                 .set_IMG_TYPE( i_imgType ),
+                 "Failed to extract quad scan rings" );
 
-        uint8_t l_iplPhase = 0 ;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RISK_LEVEL,
-                               FAPI_SYSTEM,
-                               l_iplPhase),
-                 "Error from FAPI_ATTR_GET for ATTR_RISK_LEVEL");
-
-        // create a layout of rings in HOMER for consumption of CME
-        ppeImgRc = layoutRingsForCME(  pChipHomer,
-                                       l_chipFuncModel,
-                                       l_ringData,
-                                       (RingDebugMode_t)l_ringDebug,
-                                       l_iplPhase,
-                                       i_imgType,
-                                       i_pRingOverride );
-
-        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
-                     fapi2::SCAN_RING_PLACEMENT_FAIL()
-                     .set_PLACEMENT_FAIL_PLAT( PLAT_CME )
-                     .set_PLACEMENT_FAILURE_CODE( ppeImgRc ),
-                     "Failed to place core scan rings" );
-
-        l_ringData.iv_ringBufSize = i_sizeBuf1;
-        ppeImgRc = getPpeScanRings( i_pImageIn,
-                                    PLAT_SGPE,
-                                    i_procTgt,
+    // create a layout of rings in HOMER for consumption of SGPE
+    ppeImgRc = layoutRingsForSGPE(  pChipHomer,
+                                    i_pRingOverride,
+                                    l_chipFuncModel,
                                     l_ringData,
+                                    (RingDebugMode_t)l_ringDebug,
+                                    l_riskLevel,
+                                    l_qpmrHdr,
                                     i_imgType );
 
-        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
-                     fapi2::SCAN_RING_EXTRACTION_FAIL()
-                     .set_EXTRACTION_FAIL_PLAT( PLAT_SGPE )
-                     .set_EXTRACTION_FAILURE_CODE( ppeImgRc ),
-                     "Failed to extract quad scan rings" );
+    FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
+                 fapi2::SCAN_RING_PLACEMENT_FAIL()
+                 .set_PLACEMENT_FAIL_PLAT( PLAT_SGPE )
+                 .set_PLACEMENT_FAILURE_CODE( ppeImgRc )
+                 .set_RISK_LEVEL( l_riskLevel )
+                 .set_IMG_TYPE( i_imgType ),
+                 "Failed to place quad scan rings" );
 
-        // create a layout of rings in HOMER for consumption of SGPE
-        ppeImgRc = layoutRingsForSGPE(  pChipHomer,
-                                        i_pRingOverride,
-                                        l_chipFuncModel,
-                                        l_ringData,
-                                        (RingDebugMode_t)l_ringDebug,
-                                        l_iplPhase,
-                                        l_qpmrHdr,
-                                        i_imgType );
+    //Update CPMR Header with Scan Ring details
+    updateCpmrCmeRegion( pChipHomer );
 
-        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
-                     fapi2::SCAN_RING_PLACEMENT_FAIL()
-                     .set_PLACEMENT_FAIL_PLAT( PLAT_SGPE )
-                     .set_PLACEMENT_FAILURE_CODE( ppeImgRc ),
-                     "Failed to place quad scan rings" );
+    //Update QPMR Header area in HOMER
+    updateQpmrHeader( pChipHomer, l_qpmrHdr );
 
-        //Update CPMR Header with Scan Ring details
-        updateCpmrCmeRegion( pChipHomer );
+    //update PPMR Header area in HOMER
+    FAPI_TRY( updatePpmrHeader( pChipHomer, l_ppmrHdr, i_procTgt ),
+              "Failed to update PPMR Header" );
 
-        //Update QPMR Header area in HOMER
-        updateQpmrHeader( pChipHomer, l_qpmrHdr );
+    //Update L2 Epsilon SCOM Registers
+    FAPI_TRY( populateEpsilonL2ScomReg( pChipHomer ),
+              "populateEpsilonL2ScomReg failed" );
 
-        //update PPMR Header area in HOMER
-        FAPI_TRY( updatePpmrHeader( pChipHomer, l_ppmrHdr, i_procTgt ),
-                  "Failed to update PPMR Header" );
+    //Update L3 Epsilon SCOM Registers
+    FAPI_TRY( populateEpsilonL3ScomReg( pChipHomer ),
+              "populateEpsilonL3ScomReg failed" );
 
-        //Update L2 Epsilon SCOM Registers
-        FAPI_TRY( populateEpsilonL2ScomReg( pChipHomer ),
-                  "populateEpsilonL2ScomReg failed" );
+    //Update L3 Refresh Timer Control SCOM Registers
+    FAPI_TRY( populateL3RefreshScomReg( pChipHomer, i_procTgt),
+              "populateL3RefreshScomReg failed" );
 
-        //Update L3 Epsilon SCOM Registers
-        FAPI_TRY( populateEpsilonL3ScomReg( pChipHomer ),
-                  "populateEpsilonL3ScomReg failed" );
+    //populate HOMER with SCOM restore value of NCU RNG BAR SCOM Register
+    FAPI_TRY( populateNcuRingBarScomReg( pChipHomer, i_procTgt ),
+              "populateNcuRingBarScomReg failed" );
 
-        //Update L3 Refresh Timer Control SCOM Registers
-        FAPI_TRY( populateL3RefreshScomReg( pChipHomer, i_procTgt),
-                  "populateL3RefreshScomReg failed" );
+    //validate SRAM Image Sizes of PPE's
+    FAPI_TRY( validateSramImageSize( pChipHomer, sramImgSize ),
+              "Final SRAM Image Size Check Failed" );
 
-        //populate HOMER with SCOM restore value of NCU RNG BAR SCOM Register
-        FAPI_TRY( populateNcuRingBarScomReg( pChipHomer, i_procTgt ),
-                  "populateNcuRingBarScomReg failed" );
+    //Update CME/SGPE Flags in respective image header.
+    FAPI_TRY( updateImageFlags( pChipHomer, i_procTgt ),
+              "updateImageFlags Failed" );
 
-        //validate SRAM Image Sizes of PPE's
-        uint32_t sramImgSize = 0;
-        FAPI_TRY( validateSramImageSize( pChipHomer, sramImgSize ),
-                  "Final SRAM Image Size Check Failed" );
+    //Set the Fabric IDs
+    FAPI_TRY(setFabricIds( pChipHomer, i_procTgt ),
+             "Failed to set Fabric IDs");
 
-        //Update CME/SGPE Flags in respective image header.
-        FAPI_TRY( updateImageFlags( pChipHomer, i_procTgt ),
-                  "updateImageFlags Failed" );
+    //Update the attributes storing PGPE and SGPE's boot copier offset.
+    FAPI_TRY( updateGpeAttributes( pChipHomer, i_procTgt ),
+              "Failed to update SGPE/PGPE IVPR attributes" );
 
-        //Set the Fabric IDs
-        FAPI_TRY(setFabricIds( pChipHomer, i_procTgt ),
-                 "Failed to set Fabric IDs");
+    //customize magic word based on endianess
+    customizeMagicWord( pChipHomer, l_chipFuncModel.getChipLevel() );
 
-        //Update the attributes storing PGPE and SGPE's boot copier offset.
-        FAPI_TRY( updateGpeAttributes( pChipHomer, i_procTgt ),
-                  "Failed to update SGPE/PGPE IVPR attributes" );
-
-        //customize magic word based on endianess
-        customizeMagicWord( pChipHomer, ecLevel );
-    }
-    while(0);
-
-    FAPI_IMP("Exit p9_hcode_image_build" );
+    FAPI_IMP("<< p9_hcode_image_build" );
 
 fapi_try_exit:
     return fapi2::current_err;
