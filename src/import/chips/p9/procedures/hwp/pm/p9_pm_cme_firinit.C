@@ -30,11 +30,11 @@
 // *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team: PM
-// *HWP Level: 2
-// *HWP Consumed by: FSP:HS
+// *HWP Level: 3
+// *HWP Consumed by: HS
 
 /// High-level procedure flow:
-/// \verbatim
+/// @verbatim
 ///   if reset:
 ///      loop over all functional chiplets {
 ///         Mask all bits of FIR
@@ -50,7 +50,7 @@
 ///
 /// Procedure Prereq:
 ///   o System clocks are running
-/// \endverbatim
+/// @endverbatim
 
 // ----------------------------------------------------------------------
 // Includes
