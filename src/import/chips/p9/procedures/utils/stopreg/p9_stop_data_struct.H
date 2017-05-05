@@ -41,6 +41,10 @@
 
 #include "p9_hcd_memmap_base.H"
 
+#ifdef __SKIBOOT__
+    #include <skiboot.h>
+#endif
+
 #ifdef __FAPI_2_
     #include <fapi2.H>
 #endif
