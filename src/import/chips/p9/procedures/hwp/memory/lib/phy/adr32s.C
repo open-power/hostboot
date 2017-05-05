@@ -103,6 +103,13 @@ fapi2::ReturnCode duty_cycle_distortion_calibration( const fapi2::Target<fapi2::
         return FAPI2_RC_SUCCESS;
     }
 
+    // If we're supposed to skip DCD, just return success
+    if (!mss::run_dcd_calibration(i_target))
+    {
+        FAPI_INF("%s Skipping DCD calibration algorithm per ATTR set", mss::c_str(i_target));
+        return FAPI2_RC_SUCCESS;
+    }
+
     // Do a quick check to make sure this chip doesn't have the DCD logic built in (e.g., DD1 Nimbus)
     // TODO RTC:159687 For DD2 all we need to do is kick off the h/w cal and wait. We can check any ADR_DCD
     // register, they all should reflect the inclusion of the DCD logic.
