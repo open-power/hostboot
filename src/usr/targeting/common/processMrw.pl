@@ -439,6 +439,7 @@ sub processProcessor
 
     ## Copy PCIE attributes from socket
     ## Copy Position attribute from socket
+    ## Copy PBAX attributes from socket
     foreach my $attr (sort (keys
            %{ $targetObj->getTarget($socket_target)->{TARGET}->{attribute} }))
     {
@@ -447,6 +448,22 @@ sub processProcessor
             $targetObj->copyAttribute($socket_target,$target,$attr);
         }
         elsif ($attr =~/POSITION/)
+        {
+            $targetObj->copyAttribute($socket_target,$target,$attr);
+        }
+        elsif ($attr =~/PBAX_BRDCST_ID_VECTOR/)
+        {
+            $targetObj->copyAttribute($socket_target,$target,$attr);
+        }
+        elsif ($attr =~/PBAX_CHIPID/)
+        {
+            $targetObj->copyAttribute($socket_target,$target,$attr);
+        }
+        elsif ($attr =~/PBAX_GROUPID/)
+        {
+            $targetObj->copyAttribute($socket_target,$target,$attr);
+        }
+        elsif ($attr =~/PM_PBAX_NODEID/)
         {
             $targetObj->copyAttribute($socket_target,$target,$attr);
         }
