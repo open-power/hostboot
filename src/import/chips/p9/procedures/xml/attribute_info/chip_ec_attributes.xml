@@ -2895,6 +2895,23 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DCD_WORKAROUND</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      In DD1 Nimbus, the sofware DCD calibration needs to be run, as it does not exist in HW
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MSS_DQS_POLARITY</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
