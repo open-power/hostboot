@@ -177,6 +177,19 @@ errlHndl_t IntrRp::resetIntpForMpipl()
             break;
         }
 
+        //Hostboot routes all interrupts to the master proc. This gets set up during istep 8
+        //of a normal IPL but later the Hypervisor will reset the routing. During an mpipl,
+        //istep 8 wont get ran so we need to set the routing up now.
+        for(ChipList_t::iterator targ_itr = iv_chipList.begin();
+        targ_itr != iv_chipList.end(); ++targ_itr)
+        {
+            if (*targ_itr != iv_masterHdlr)
+            {
+                TRACDCOMP(g_trac_intr, "IntrRp::resetIntpForMpipl() Setting up Slave Proc Interrupt Routing for proc %lx", get_huid((*targ_itr)->proc));
+                enableSlaveProcInterruptRouting(*targ_itr);
+            }
+        }
+
         //Clear out the mask list because pq state buffer gets cleared after
         //resetting the XIVE Interrupt unit
         iv_maskList.clear();
