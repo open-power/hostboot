@@ -138,9 +138,11 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_SGPE_BUILD_FAIL</rc>
-    <description>hcode image build procedure failed to add SGPE image</description>
-    <ffdc>SGPE_FAIL_SECTN</ffdc>
+    <rc>RC_SGPE_IMG_NOT_FOUND_IN_HW_IMG</rc>
+    <description>SGPE Image not found in hardware image</description>
+    <ffdc>XIP_FAILURE_CODE</ffdc>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -148,9 +150,14 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_SELF_RESTORE_BUILD_FAIL</rc>
-    <description>hcode image build procedure failed to add core self restore image</description>
-    <ffdc>SELF_RESTORE_FAIL_SECTN</ffdc>
+    <rc>RC_QPMR_HDR_BUILD_FAILURE</rc>
+    <description>Failed to update QPMR Header region of HOMER.
+    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
+    section is not found</description>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -158,9 +165,14 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_CME_BUILD_FAIL</rc>
-    <description>hcode image build procedure failed to add CME image</description>
-    <ffdc>CME_FAIL_SECTN</ffdc>
+    <rc>RC_SGPE_BOOT_COPIER_BUILD_FAILURE</rc>
+    <description>Failed to update SGPE boot copier region of HOMER.
+    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
+    section is not found</description>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -168,9 +180,174 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PGPE_BUILD_FAIL</rc>
-    <description>hcode image build procedure failed to add PGPE image</description>
-    <ffdc>PGPE_FAIL_SECTN</ffdc>
+    <rc>RC_SGPE_BOOT_LOADER_BUILD_FAILURE</rc>
+    <description>Failed to update SGPE boot loader region of HOMER.
+    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
+    section is not found</description>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SGPE_HCODE_BUILD_FAILURE</rc>
+    <description>Failed to update SGPE Hcode region of HOMER.
+    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
+    section is not found</description>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SELF_REST_IMG_NOT_FOUND_IN_HW_IMG</rc>
+    <description>Self Restore Image not found in hardware image</description>
+    <ffdc>XIP_FAILURE_CODE</ffdc>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SELF_REST_IMG_BUILD_FAIL</rc>
+    <description>Failed to update Self Restore region of HOMER.
+    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
+    section is not found</description>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_CPMR_HDR_BUILD_FAIL</rc>
+    <description>Failed to update CPMR Header region HOMER.
+    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
+    section is not found</description>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_CME_IMG_NOT_FOUND_IN_HW_IMG</rc>
+    <description>CME Image not found in hardware image.
+    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
+    section is not found</description>
+    <ffdc>XIP_FAILURE_CODE</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_CME_HCODE_BUILD_FAIL</rc>
+    <description>hcode image build procedure failed to update CME Hcode region of HOMER.
+    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
+    section is not found</description>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PGPE_IMG_NOT_FOUND_IN_HW_IMG</rc>
+    <description>PGPE Image not found in hardware image</description>
+    <ffdc>XIP_FAILURE_CODE</ffdc>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_XIP_SECTION_PGPE_PPMR</rc>
+    <description>hcode image build procedure failed to update PPMR region of HOMER.
+    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
+    section is not found</description>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_PGPE_BOOT_COPIER_BUILD_FAIL</rc>
+    <description>hcode image build procedure failed to update PGPE boot copier region of HOMER.
+    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
+    section is not found</description>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_PGPE_BOOT_LOADER_BUILD_FAIL</rc>
+    <description>hcode image build procedure failed to update PGPE boot loader region of HOMER.
+    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
+    section is not found</description>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_PGPE_HCODE_BUILD_FAIL</rc>
+    <description>hcode image build procedure failed to update PGPE hcode region of HOMER.
+    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
+    section is not found</description>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -182,6 +359,8 @@
     <description>hcode image build procedure failed to extract scan rings</description>
     <ffdc>EXTRACTION_FAIL_PLAT</ffdc>
     <ffdc>EXTRACTION_FAILURE_CODE</ffdc>
+    <ffdc>RISK_LEVEL</ffdc>
+    <ffdc>IMG_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -193,6 +372,8 @@
     <description>hcode image build procedure failed to place rings in HOMER</description>
     <ffdc>PLACEMENT_FAIL_PLAT</ffdc>
     <ffdc>PLACEMENT_FAILURE_CODE</ffdc>
+    <ffdc>RISK_LEVEL</ffdc>
+    <ffdc>IMG_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -261,9 +442,21 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PARAM_BLOCK_SIZE_ERR</rc>
-    <description>hcode image build procedure failed due to size error P-State parameter block super struct</description>
+    <rc>RC_PSTATE_SUP_STRUCT_SIZE_ERR</rc>
+    <description>hcode image build procedure failed due to P-State parameter block super struct size error</description>
     <ffdc>SUPER_STRUCT_SIZE</ffdc>
+    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_OCC_PARAM_BLOCK_SIZE_ERR</rc>
+    <description>hcode image build procedure failed due to OCC P-State parameter block struct size error</description>
+    <ffdc>OCC_PSTATE_STRUCT_SIZE</ffdc>
     <ffdc>MAX_SIZE_ALLOCATED</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
     <callout>
