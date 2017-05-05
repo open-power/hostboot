@@ -27,9 +27,19 @@
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_IMG_PTR_ERROR</rc>
-    <description>Image pointers passed are either bad or point to same location.</description>
+    <rc>RC_HW_IMG_PTR_ERROR</rc>
+    <description>HW Image pointer is either NULL or points to same location as HOMER base</description>
     <ffdc>HW_IMG_BUF_PTR</ffdc>
+    <ffdc>HOMER_IMG_BUF_PTR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_HOMER_IMG_PTR_ERROR</rc>
+    <description>HOMER Image pointer is NULL</description>
     <ffdc>HOMER_IMG_BUF_PTR</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -50,7 +60,7 @@
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_HCODE_INVALID_PHASE</rc>
-    <description>System phase is neither IPL nor Hypervisor</description>
+    <description>Invalid or unsupported build phase passed to the HOMER build procedure</description>
     <ffdc>SYS_PHASE</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -59,10 +69,9 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_HCODE_INVALID_TEMP_BUF</rc>
-    <description>Temporary buffer is invalid.</description>
-    <ffdc>TEMP_BUF_PTR</ffdc>
-    <ffdc>TEMP_BUF_SIZE</ffdc>
+    <rc>RC_HCODE_INVALID_TEMP1_BUF</rc>
+    <description>Temporary buffer1 is invalid</description>
+    <ffdc>TEMP1_BUF_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -70,11 +79,49 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_HCODE_TEMP_BUF_SIZE</rc>
-    <description>Temporary buffer size invalid</description>
-    <ffdc>TEMP_BUF1_SIZE</ffdc>
-    <ffdc>TEMP_BUF2_SIZE</ffdc>
-    <ffdc>TEMP_BUF3_SIZE</ffdc>
+    <rc>RC_HCODE_INVALID_TEMP1_BUF_SIZE</rc>
+    <description>Invalid size for temp buf1</description>
+    <ffdc>TEMP1_BUF_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_HCODE_INVALID_TEMP2_BUF</rc>
+    <description>Temporary buffer2 is invalid</description>
+    <ffdc>TEMP2_BUF_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_HCODE_INVALID_TEMP2_BUF_SIZE</rc>
+    <description>Invalid size for temp buf2</description>
+    <ffdc>TEMP2_BUF_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_HCODE_INVALID_TEMP3_BUF</rc>
+    <description>Temporary buffer3 is invalid.</description>
+    <ffdc>TEMP3_BUF_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_HCODE_INVALID_TEMP3_BUF_SIZE</rc>
+    <description>Invalid size for temp buf3</description>
+    <ffdc>TEMP3_BUF_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -154,7 +201,9 @@
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_CME_IMG_EXCEED_SRAM_SIZE</rc>
-    <description>Size of CME image exceeded the SRAM size</description>
+    <description>Size of CME image exceeded the SRAM size.
+    Note: 0xFFFFFFFF in field MAX_CME_IMG_SIZE_ALLOWED indicates an invalid size.
+    </description>
     <ffdc>BAD_IMG_SIZE</ffdc>
     <ffdc>MAX_CME_IMG_SIZE_ALLOWED</ffdc>
     <callout>
@@ -166,6 +215,7 @@
   <hwpError>
     <rc>RC_SGPE_IMG_EXCEED_SRAM_SIZE</rc>
     <description>Size of SGPE image exceeded the size allowed in OCC SRAM</description>
+    Note: 0xFFFFFFFF in field MAX_SGPE_IMG_SIZE_ALLOWED indicates an invalid size.
     <ffdc>BAD_IMG_SIZE</ffdc>
     <ffdc>MAX_SGPE_IMG_SIZE_ALLOWED</ffdc>
     <callout>
@@ -177,6 +227,7 @@
   <hwpError>
     <rc>RC_PGPE_IMG_EXCEED_SRAM_SIZE</rc>
     <description>Size of PGPE image exceeded the size allowed in OCC SRAM</description>
+    Note: 0xFFFFFFFF in field MAX_PGPE_IMG_SIZE_ALLOWED indicates an invalid size.
     <ffdc>BAD_IMG_SIZE</ffdc>
     <ffdc>MAX_PGPE_IMG_SIZE_ALLOWED</ffdc>
     <callout>
