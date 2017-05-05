@@ -5,7 +5,8 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1880,7 +1881,9 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
     // write on subsequent.  RTC: 84794
 
 #ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
-    CONSOLE::displayf(NULL, "ISTEP %2d.%2d", iv_curIStep, iv_curSubStep);
+    const TaskInfo *taskinfo = findTaskInfo(iv_curIStep, iv_curSubStep);
+    CONSOLE::displayf(NULL, "ISTEP %2d.%2d - %s", iv_curIStep, iv_curSubStep,
+                      taskinfo && taskinfo->taskname ? taskinfo->taskname : "");
     CONSOLE::flush();
 #endif
 
