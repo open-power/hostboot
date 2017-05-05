@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,7 +109,15 @@ errlHndl_t UtilLidMgr::getStoredLidImage(void*& o_pLidImage,
 
 errlHndl_t UtilLidMgr::releaseLidImage(void)
 {
+    // we already figured out where the data is, remember that
+    bool l_inPnor = iv_isLidInPnor;
+    bool l_inVFS = iv_isLidInVFS;
+
     errlHndl_t l_err = cleanup();
+
+    // restore the presence info
+    iv_isLidInPnor = l_inPnor;
+    iv_isLidInVFS = l_inVFS;
 
     return l_err;
 }
