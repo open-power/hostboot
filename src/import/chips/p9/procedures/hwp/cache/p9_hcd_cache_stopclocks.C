@@ -265,7 +265,11 @@ p9_hcd_cache_stopclocks(
 
     if (l_attr_vdm_enable == fapi2::ENUM_ATTR_VDM_ENABLE_ON)
     {
-        FAPI_DBG("Drop vdm enable via QPPM_VDMCR[0]");
+        FAPI_DBG("Clear Jump Protect Enable via DPLL_CTRL[1] (no need to poll DPLL_STAT)");
+        FAPI_TRY(putScom(i_target, EQ_QPPM_DPLL_CTRL_CLEAR, MASK_SET(1)));
+        FAPI_DBG("Set VDM Disable via QPPM_VDMCR[1]");
+        FAPI_TRY(putScom(i_target, EQ_PPM_VDMCR_OR, MASK_SET(1)));
+        FAPI_DBG("Drop VDM Poweron via QPPM_VDMCR[0]");
         FAPI_TRY(putScom(i_target, EQ_PPM_VDMCR_CLEAR, MASK_SET(0)));
     }
 
