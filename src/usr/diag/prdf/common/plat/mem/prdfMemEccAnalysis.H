@@ -85,6 +85,27 @@ uint32_t handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
                       UE_TABLE::Type i_type, STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
+ * @brief Does mainline and maintenance IUE handling.
+ *
+ * Adds the memory IUE to the callout list. At threshold, will make the error
+ * log predictive. When threshold is reached at runtime there is a good chance
+ * these IUEs are going to lead to a data integrity issue. Therefore, the port
+ * will be forced to fail, the entire port will be masked off, and dynamic
+ * memory deallocation will be applied. Note that this function will not issue
+ * the port failure because it is possible that it may crash the host. Instead,
+ * the port failure is issued in the PostAnalysis plugin after the error log has
+ * been committed.
+ *
+ * @param  i_chip MCA chip.
+ * @param  i_rank Rank containing the IUE.
+ * @param  io_sc  The step code data struct.
+ * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T, typename D>
+uint32_t handleMemIue( ExtensibleChip * i_chip, const MemRank & i_rank,
+                       STEP_CODE_DATA_STRUCT & io_sc );
+
+/**
  * @brief  Analyzes a fetch MPE attention.
  * @param  i_chip   MCA or MBA.
  * @param  i_rank   Target rank.
@@ -158,22 +179,25 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 #ifdef __HOSTBOOT_RUNTIME
 
 /**
- * @brief  Will trigger a port fail if the number of IUEs is over threshold
- * @param  i_chip   MCA chip
- * @param  io_sc    The step code data struct.
+ * @brief  Will trigger a port fail if the number of IUEs is over threshold.
+ * @param  i_chip MCA chip
+ * @param  io_sc  The step code data struct.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise
  */
-uint32_t iuePortFail(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc);
+template<TARGETING::TYPE T>
+uint32_t iuePortFail( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 
 #endif // __HOSTBOOT_RUNTIME
 
 #ifdef __HOSTBOOT_MODULE
 
 /**
- * @brief  Will mask off the entire mem port
- * @param  i_chip   MCA chip
+ * @brief  Will mask off an entire memory port. At runtime will issue dynamic
+ *         memory deallocation of the port.
+ * @param  i_chip MCA chip
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise
  */
+template<TARGETING::TYPE T>
 uint32_t maskMemPort( ExtensibleChip * i_chip );
 
 template<TARGETING::TYPE T, typename D>

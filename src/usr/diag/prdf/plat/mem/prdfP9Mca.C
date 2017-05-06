@@ -69,16 +69,14 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     #ifdef __HOSTBOOT_RUNTIME
 
-
     // If the IUE threshold in our data bundle has been reached, we trigger
     // a port fail. Once we trigger the port fail, the system may crash
     // right away. Since PRD is running in the hypervisor, it is possible we
     // may not get the error log. To better our chances, we trigger the port
     // fail here after the error log has been committed.
-    if ( SUCCESS != MemEcc::iuePortFail(i_chip, io_sc) )
+    if ( SUCCESS != MemEcc::iuePortFail<TYPE_MCA>(i_chip, io_sc) )
     {
-        PRDF_ERR( PRDF_FUNC "iuePortFail failed: i_chip=0x%08x",
-                  i_chip->getHuid() );
+        PRDF_ERR( PRDF_FUNC "iuePortFail(0x%08x) failed", i_chip->getHuid() );
     }
 
     #endif // __HOSTBOOT_RUNTIME
@@ -197,14 +195,13 @@ int32_t MemPortFailure( ExtensibleChip * i_chip,
 
     if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
     {
-        // The port is dead mask off the entire port.
-        uint32_t l_rc = MemEcc::maskMemPort( i_chip );
+        // The port is dead. Mask off the entire port.
+        uint32_t l_rc = MemEcc::maskMemPort<TYPE_MCA>( i_chip );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC "MemEcc::maskMemPort failed: i_chip=0x%08x",
+            PRDF_ERR( PRDF_FUNC "MemEcc::maskMemPort<TYPE_MCA>(0x%08x) failed",
                       i_chip->getHuid() );
         }
-
     }
 
     return SUCCESS; // nothing to return to rule code

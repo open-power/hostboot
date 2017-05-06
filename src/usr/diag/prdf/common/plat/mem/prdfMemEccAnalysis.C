@@ -153,19 +153,49 @@ uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
 
 #ifdef __HOSTBOOT_MODULE
 
-uint32_t maskMemPort( ExtensibleChip * i_chip )
+template<>
+uint32_t maskMemPort<TYPE_MCA>( ExtensibleChip * i_chip )
 {
-    #define PRDF_FUNC "[MemEcc::maskMemPort] "
+    #define PRDF_FUNC "[MemEcc::maskMemPort<TYPE_MCA>] "
 
+    PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
-    SCAN_COMM_REGISTER_CLASS * c = i_chip->getRegister("MCACALFIR_MASK_OR");
-    SCAN_COMM_REGISTER_CLASS * d = i_chip->getRegister("DDRPHYFIR_MASK_OR");
-    SCAN_COMM_REGISTER_CLASS * e = i_chip->getRegister("MCAECCFIR_MASK_OR");
+    uint32_t o_rc = SUCCESS;
 
-    c->setAllBits(); d->setAllBits(); e->setAllBits();
+    do
+    {
+        // Mask all FIRs on the port.
+        SCAN_COMM_REGISTER_CLASS * c = i_chip->getRegister("MCACALFIR_MASK_OR");
+        SCAN_COMM_REGISTER_CLASS * d = i_chip->getRegister("DDRPHYFIR_MASK_OR");
+        SCAN_COMM_REGISTER_CLASS * e = i_chip->getRegister("MCAECCFIR_MASK_OR");
 
-    return ( c->Write() | d->Write() | e->Write() );
+        c->setAllBits(); d->setAllBits(); e->setAllBits();
+
+        o_rc = c->Write() | d->Write() | e->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on 0x%08x", i_chip->getHuid() );
+            break;
+        }
+
+        #ifdef __HOSTBOOT_RUNTIME
+
+        /* TODO RTC 136129
+        // Dynamically deallocate the port.
+        o_rc = MemDealloc::port<TYPE_MCA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "MemDealloc::port<TYPE_MCA>(0x%08x) failed",
+                      i_chip->getHuid() );
+        }
+        */
+
+        #endif
+
+    } while (0);
+
+    return o_rc;
 
     #undef PRDF_FUNC
 }
@@ -176,10 +206,13 @@ uint32_t maskMemPort( ExtensibleChip * i_chip )
 
 #ifdef __HOSTBOOT_RUNTIME
 
-uint32_t iuePortFail(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
+template<>
+uint32_t iuePortFail<TYPE_MCA>( ExtensibleChip * i_chip,
+                                STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[MemEcc::iuePortFail] "
+    #define PRDF_FUNC "[MemEcc::iuePortFail<TYPE_MCA>] "
 
+    PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
@@ -714,88 +747,67 @@ uint32_t analyzeFetchUe<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-#ifdef __HOSTBOOT_MODULE
-
 template<TARGETING::TYPE T, typename D>
-uint32_t __analyzeIue( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
-                       MemAddr i_addr )
+uint32_t handleMemIue( ExtensibleChip * i_chip, const MemRank & i_rank,
+                       STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[MemEcc::__analyzeIue] "
+    #define PRDF_FUNC "[MemEcc::handleMemIue] "
 
+    PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( T == i_chip->getType() );
+
     uint32_t o_rc = SUCCESS;
+
+    // Add the DIMM to the callout list.
+    MemoryMru mm { i_chip->getTrgt(), i_rank, MemoryMruData::CALLOUT_RANK };
+    io_sc.service_data->SetCallout( mm );
+
+    #ifdef __HOSTBOOT_MODULE
 
     do
     {
-        // get data bundle from chip
+        // Nothing else to do if handling a system checkstop.
+        if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() ) break;
+
+        // Get the data bundle from chip.
         D db = static_cast<D>( i_chip->getDataBundle() );
 
-        // get the rank
-        MemRank rank = i_addr.getRank();
+        // Get the DIMM select.
+        uint8_t ds = i_rank.getDimmSlct();
 
-        TargetHandle_t trgt = i_chip->getTrgt();
-
-        // Add the DIMM to the callout list
-        MemoryMru memmru(trgt, rank, MemoryMruData::CALLOUT_RANK);
-        io_sc.service_data->SetCallout( memmru );
-
-        uint8_t ds = rank.getDimmSlct();
-
-        // Initialize threshold if it doesn't exist yet
+        // Initialize threshold if it doesn't exist yet.
         if ( 0 == db->iv_iueTh.count(ds) )
         {
             db->iv_iueTh[ds] = TimeBasedThreshold( getIueTh() );
         }
 
-        // increment the threshold - check if at threshold
+        // Increment the count and check if at threshold.
         if ( db->iv_iueTh[ds].inc(io_sc) )
         {
-            // Make the error log predictive
+            // Make the error log predictive.
             io_sc.service_data->setServiceCall();
 
-            #ifdef __HOSTBOOT_RUNTIME
+            // The port fail will be triggered in the PostAnalysis plugin after
+            // the error log has been committed.
 
-            /* TODO RTC 136129
-            // Dynamically deallocate the rank.
-            uint32_t dealloc_rc = MemDealloc::rank<T>( i_chip, rank );
-            if ( SUCCESS != dealloc_rc )
-            {
-            PRDF_ERR( PRDF_FUNC "MemDealloc::rank() failed: i_chip=0x%08x "
-            "rank=m%ds%d", i_chip->getHuid(), rank.getMaster(),
-            rank.getSlave() );
-            o_rc = dealloc_rc; break;
-            }
-            */
-
-            #endif // __HOSTBOOT_RUNTIME
-
-            // mask off the entire port to avoid collateral
-            o_rc = maskMemPort( i_chip );
+            // Mask off the entire port to avoid collateral.
+            o_rc = MemEcc::maskMemPort<T>( i_chip );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "MemEcc::maskMemPort failed: i_chip=0x%08x",
-                        i_chip->getHuid() );
+                PRDF_ERR( PRDF_FUNC "MemEcc::maskMemPort<T>(0x%08x) failed",
+                          i_chip->getHuid() );
                 break;
             }
-
-            // Port fail will be triggered in PostAnalysis after the error log
-            // has been committed.
         }
 
-    }while(0);
+    } while (0);
+
+    #endif // __HOSTBOOT_MODULE
 
     return o_rc;
 
     #undef PRDF_FUNC
 }
-
-// To resolve template linker errors.
-template
-uint32_t __analyzeIue<TYPE_MCA, McaDataBundle*>(ExtensibleChip * i_chip,
-                                                STEP_CODE_DATA_STRUCT & io_sc,
-                                                MemAddr i_addr );
-
-#endif // __HOSTBOOT_MODULE
 
 //------------------------------------------------------------------------------
 
@@ -805,44 +817,39 @@ uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
 {
     #define PRDF_FUNC "[MemEcc::analyzeMainlineIue] "
 
+    PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( T == i_chip->getType() );
-    uint32_t o_rc = SUCCESS;
 
-    #ifdef __HOSTBOOT_MODULE
+    uint32_t o_rc = SUCCESS;
 
     do
     {
-
-        // get the address of the failure
-        MemAddr addr;
-
         // Use the address in MBRCER. This address also traps IRCDs, but it is
         // not likely that we will have two independent failure modes at the
         // same time. So we just assume the address is correct.
+        MemAddr addr;
         o_rc = getMemReadAddr<T>( i_chip, MemAddr::READ_RCE_ADDR, addr );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x, READ_RCE_ADDR) failed",
-                    i_chip->getHuid() );
-            break;
-        }
-
-        o_rc = __analyzeIue<T,D>( i_chip, io_sc, addr );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "__analyzeIue failed. Chip HUID: 0x%08x",
                       i_chip->getHuid() );
             break;
         }
+        MemRank rank = addr.getRank();
 
-    }while(0);
+        o_rc = handleMemIue<T,D>( i_chip, rank, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "handleMemIue<T,D>(0x%08x,m%ds%d) failed",
+                      i_chip->getHuid(), rank.getMaster(), rank.getSlave() );
+            break;
+        }
 
-    #endif
+    } while (0);
 
     return o_rc;
 
     #undef PRDF_FUNC
-
 }
 
 // To resolve template linker errors.
@@ -858,40 +865,37 @@ uint32_t analyzeMaintIue( ExtensibleChip * i_chip,
 {
     #define PRDF_FUNC "[MemEcc::analyzeMaintIue] "
 
+    PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( T == i_chip->getType() );
-    uint32_t o_rc = SUCCESS;
 
-    #ifdef __HOSTBOOT_MODULE
+    uint32_t o_rc = SUCCESS;
 
     do
     {
+        // Use the current address in the MCBMCAT.
         MemAddr addr;
-
-        // Use the current address in the MCBMCAT
         o_rc = getMemMaintAddr<T>( i_chip, addr );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
-                    i_chip->getHuid() );
+                      i_chip->getHuid() );
             break;
         }
+        MemRank rank = addr.getRank();
 
-        o_rc = __analyzeIue<T,D>( i_chip, io_sc, addr );
+        o_rc = handleMemIue<T,D>( i_chip, rank, io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "__analyzeIue failed. Chip HUID: "
-                    "0x%08x", i_chip->getHuid() );
+            PRDF_ERR( PRDF_FUNC "handleMemIue<T,D>(0x%08x,m%ds%d) failed",
+                      i_chip->getHuid(), rank.getMaster(), rank.getSlave() );
             break;
         }
 
-    }while(0);
-
-    #endif
+    } while (0);
 
     return o_rc;
 
     #undef PRDF_FUNC
-
 }
 
 // To resolve template linker errors.

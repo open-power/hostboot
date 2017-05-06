@@ -112,10 +112,10 @@ int32_t PostAnalysis( ExtensibleChip * i_mcbChip,
             // if there's an IUE and we've reached threshold trigger a port fail
             if ( eccAttns & MAINT_IUE )
             {
-                if ( SUCCESS != MemEcc::iuePortFail(mca, io_sc) )
+                if ( SUCCESS != MemEcc::iuePortFail<TYPE_MCA>(mca, io_sc) )
                 {
-                    PRDF_ERR( PRDF_FUNC "iuePortFail failed: i_mcbChip="
-                              "0x%08x", i_mcbChip->getHuid() );
+                    PRDF_ERR( PRDF_FUNC "iuePortFail(0x%08x) failed",
+                              i_mcbChip->getHuid() );
                 }
             }
         }
