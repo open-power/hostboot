@@ -242,7 +242,9 @@ p9_hcd_core_stopclocks(
 
     if (l_attr_vdm_enable == fapi2::ENUM_ATTR_VDM_ENABLE_ON)
     {
-        FAPI_DBG("Drop vdm enable via CPPM_VDMCR[0]");
+        FAPI_DBG("Set VDM Disable via CPPM_VDMCR[1]");
+        FAPI_TRY(putScom(i_target, C_PPM_VDMCR_OR, MASK_SET(1)));
+        FAPI_DBG("Drop VDM Poweron via CPPM_VDMCR[0]");
         FAPI_TRY(putScom(i_target, C_PPM_VDMCR_CLEAR, MASK_SET(0)));
     }
 
