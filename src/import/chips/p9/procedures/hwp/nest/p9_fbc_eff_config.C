@@ -29,7 +29,7 @@
 /// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 /// *HWP Team: Nest
-/// *HWP Level: 2
+/// *HWP Level: 3
 /// *HWP Consumed by: HB
 ///
 
@@ -59,7 +59,6 @@ const uint32_t EPSILON_R_T2_LE[] = {   61,   63,   65,   68,   73,   97 };
 const uint32_t EPSILON_W_T0_LE[] = {    0,    0,    0,    0,    0,    5 };
 const uint32_t EPSILON_W_T1_LE[] = {    9,   10,   11,   13,   15,   27 };
 
-// TODO: These values need to be updated whenever HE system info is available.
 // HE epsilon (4 chips per-group)
 const uint32_t EPSILON_R_T0_HE[] = {    7,    7,    8,    8,   10,   22 };
 const uint32_t EPSILON_R_T1_HE[] = {   77,   78,   81,   84,   89,  113 };
@@ -67,13 +66,12 @@ const uint32_t EPSILON_R_T2_HE[] = {  187,  189,  191,  194,  199,  223 };
 const uint32_t EPSILON_W_T0_HE[] = {   12,   13,   14,   16,   18,   30 };
 const uint32_t EPSILON_W_T1_HE[] = {   96,   97,   98,   99,  102,  114 };
 
-// TODO: These values need to be selected for flat 8 topology systems.
-// HE epsilon (1x8)
-// const uint32_t EPSILON_R_T0_F8[] = {    7,    7,    8,    8,   10,   22 };
-// const uint32_t EPSILON_R_T1_F8[] = {    7,    7,    8,    8,   10,   22 };
-// const uint32_t EPSILON_R_T2_F8[] = {  145,  146,  149,  152,  157,  181 };
-// const uint32_t EPSILON_W_T0_F8[] = {    0,    0,    0,    0,    0,    5 };
-// const uint32_t EPSILON_W_T1_F8[] = {   73,   74,   75,   77,   79,   91 };
+// HE epsilon (flat 8 configuration)
+const uint32_t EPSILON_R_T0_F8[] = {    7,    7,    8,    8,   10,   22 };
+const uint32_t EPSILON_R_T1_F8[] = {    7,    7,    8,    8,   10,   22 };
+const uint32_t EPSILON_R_T2_F8[] = {  145,  146,  149,  152,  157,  181 };
+const uint32_t EPSILON_W_T0_F8[] = {    0,    0,    0,    0,    0,    5 };
+const uint32_t EPSILON_W_T1_F8[] = {   73,   74,   75,   77,   79,   91 };
 
 
 //------------------------------------------------------------------------------
@@ -140,8 +138,8 @@ void p9_fbc_eff_config_guardband_epsilon(
 ///        system configuration
 ///
 /// @param[in] i_target                System target
-/// @param[in] io_core_floor_ratio     Fabric/core floor enum
-/// @param[in] io_core_ceiling_ratio   Fabric/core ceiling enum
+/// @param[in] i_core_floor_ratio      Fabric/core floor enum
+/// @param[in] i_core_ceiling_ratio    Fabric/core ceiling enum
 /// @param[in] i_freq_fbc              Absolute fabric frequency
 /// @param[in] i_freq_core_ceiling     Absolute core ceiling frequency
 ///
@@ -150,10 +148,10 @@ void p9_fbc_eff_config_guardband_epsilon(
 fapi2::ReturnCode
 p9_fbc_eff_config_calc_epsilons(
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
-    fapi2::ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_Type i_core_floor_ratio,
-    fapi2::ATTR_PROC_FABRIC_CORE_CEILING_RATIO_Type i_core_ceiling_ratio,
-    fapi2::ATTR_FREQ_PB_MHZ_Type i_freq_fbc,
-    fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type i_freq_core_ceiling)
+    const fapi2::ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_Type i_core_floor_ratio,
+    const fapi2::ATTR_PROC_FABRIC_CORE_CEILING_RATIO_Type i_core_ceiling_ratio,
+    const fapi2::ATTR_FREQ_PB_MHZ_Type i_freq_fbc,
+    const fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type i_freq_core_ceiling)
 {
     FAPI_DBG("Start");
 
@@ -190,6 +188,23 @@ p9_fbc_eff_config_calc_epsilons(
             l_eps_w[1] = EPSILON_W_T1_HE[i_core_floor_ratio];
             break;
 
+        case fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_HE_F8:
+            if (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE)
+            {
+                l_eps_r[0] = EPSILON_R_T0_F8[i_core_floor_ratio];
+            }
+            else
+            {
+                l_eps_r[0] = EPSILON_R_T1_F8[i_core_floor_ratio];
+            }
+
+            l_eps_r[1] = EPSILON_R_T1_F8[i_core_floor_ratio];
+            l_eps_r[2] = EPSILON_R_T2_F8[i_core_floor_ratio];
+
+            l_eps_w[0] = EPSILON_W_T0_F8[i_core_floor_ratio];
+            l_eps_w[1] = EPSILON_W_T1_F8[i_core_floor_ratio];
+            break;
+
         case fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_LE:
             if (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE)
             {
@@ -209,7 +224,7 @@ p9_fbc_eff_config_calc_epsilons(
 
         default:
             FAPI_ASSERT(false,
-                        fapi2::P9_FBC_EFF_CONFIG_EPSILON_INVALID_TABLE_ERR()
+                        fapi2::P9_FBC_EFF_CONFIG_EPSILON_INVALID_TABLE_TYPE_ERR()
                         .set_TABLE_TYPE(l_eps_table_type),
                         "Invalid epsilon table type 0x%.8X", l_eps_table_type);
             break;
@@ -284,7 +299,7 @@ p9_fbc_eff_config_calc_epsilons(
         FAPI_DBG(" W_T[%d] = %d", ii, l_eps_w[ii]);
     }
 
-    // check relationship of epsilon counters rules:
+    // check relationship of epsilon counters:
     //   read tier values are strictly increasing
     //   write tier values are strictly increaing
     if ((l_eps_r[0] > l_eps_r[1]) ||
@@ -293,7 +308,14 @@ p9_fbc_eff_config_calc_epsilons(
     {
         FAPI_ASSERT(false,
                     fapi2::P9_FBC_EFF_CONFIG_EPSILON_INVALID_TABLE_ERR()
-                    .set_TABLE_TYPE(l_eps_table_type),
+                    .set_TABLE_TYPE(l_eps_table_type)
+                    .set_EPS_GB_PERCENTAGE(l_eps_gb)
+                    .set_PUMP_MODE(l_pump_mode)
+                    .set_R_T0(l_eps_r[0])
+                    .set_R_T1(l_eps_r[1])
+                    .set_R_T2(l_eps_r[2])
+                    .set_W_T0(l_eps_w[0])
+                    .set_W_T1(l_eps_w[1]),
                     "Invalid relationship between base epsilon values");
     }
 
@@ -354,7 +376,7 @@ p9_fbc_eff_config_process_freq_attributes(
     // verify the floor/nominal/ceiling frequencies
     // expect ceiling >= nominal, nominal >= floor
     FAPI_ASSERT(((io_freq_core_ceiling >= l_freq_core_nom) &&
-                 (l_freq_core_nom     >= l_freq_core_floor)),
+                 (l_freq_core_nom >= l_freq_core_floor)),
                 fapi2::P9_FBC_EFF_CONFIG_CORE_FREQ_RANGE_ERR()
                 .set_FREQ_CORE_CEILING(io_freq_core_ceiling)
                 .set_FREQ_CORE_NOM(l_freq_core_nom)
@@ -403,7 +425,8 @@ p9_fbc_eff_config_process_freq_attributes(
         FAPI_ASSERT(false,
                     fapi2::P9_FBC_EFF_CONFIG_CORE_FLOOR_FREQ_RATIO_ERR()
                     .set_FREQ_PB(io_freq_fbc)
-                    .set_FREQ_CORE_FLOOR(l_freq_core_floor),
+                    .set_FREQ_CORE_FLOOR(l_freq_core_floor)
+                    .set_FREQ_CORE_FLOOR_MIN_SUPPORTED(io_freq_fbc / 2),
                     "Unsupported core floor/PB frequency ratio = (%d/%d)",
                     l_freq_core_floor, io_freq_fbc);
     }
@@ -445,7 +468,8 @@ p9_fbc_eff_config_process_freq_attributes(
         FAPI_ASSERT(false,
                     fapi2::P9_FBC_EFF_CONFIG_CORE_CEILING_FREQ_RATIO_ERR()
                     .set_FREQ_PB(io_freq_fbc)
-                    .set_FREQ_CORE_CEILING(io_freq_core_ceiling),
+                    .set_FREQ_CORE_CEILING(io_freq_core_ceiling)
+                    .set_FREQ_CORE_CEILING_MIN_SUPPORTED(io_freq_fbc / 2),
                     "Unsupported core ceiling/PB frequency ratio = (%d/%d)",
                     io_freq_core_ceiling, io_freq_fbc);
     }
