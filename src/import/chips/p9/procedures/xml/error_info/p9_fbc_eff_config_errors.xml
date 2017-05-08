@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,9 +26,26 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_P9_FBC_EFF_CONFIG_EPSILON_INVALID_TABLE_TYPE_ERR</rc>
+    <description>Invalid epsilon table type or content detected.</description>
+    <ffdc>TABLE_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_P9_FBC_EFF_CONFIG_EPSILON_INVALID_TABLE_ERR</rc>
     <description>Invalid epsilon table type or content detected.</description>
     <ffdc>TABLE_TYPE</ffdc>
+    <ffdc>EPS_GB_PERCENTAGE</ffdc>
+    <ffdc>PUMP_MODE</ffdc>
+    <ffdc>R_T0</ffdc>
+    <ffdc>R_T1</ffdc>
+    <ffdc>R_T2</ffdc>
+    <ffdc>W_T0</ffdc>
+    <ffdc>W_T1</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -52,6 +69,7 @@
     <description>Unsupported core floor to PB frequency ratio.</description>
     <ffdc>FREQ_PB</ffdc>
     <ffdc>FREQ_CORE_FLOOR</ffdc>
+    <ffdc>FREQ_CORE_FLOOR_MIN_SUPPORTED</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -63,6 +81,7 @@
     <description>Unsupported core ceiling to PB frequency ratio.</description>
     <ffdc>FREQ_PB</ffdc>
     <ffdc>FREQ_CORE_CEILING</ffdc>
+    <ffdc>FREQ_CORE_CEILING_MIN_SUPPORTED</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
