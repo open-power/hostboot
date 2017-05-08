@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Joe McGill jmcgill@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB
 
 #ifndef _P9_SETUP_BARS_DEFS_H_
@@ -154,16 +154,6 @@ struct p9_setup_bars_mcd_grp_size
         return m;
     }
     static const std::map<uint64_t, uint64_t> xlate_map;
-};
-
-// structure to represent chip configuration information
-struct p9_setup_bars_chip_info
-{
-    uint8_t fbc_group_id;
-    uint8_t fbc_chip_id;
-    uint64_t base_address_nm[2];
-    uint64_t base_address_m;
-    uint64_t base_address_mmio;
 };
 
 // structure to represent range of FBC real address space
@@ -294,10 +284,35 @@ struct p9_setup_bars_addr_range
     uint64_t size;
 };
 
+// structure to represent chip configuration information
+struct p9_setup_bars_chip_info
+{
+    uint8_t fbc_group_id;
+    uint8_t fbc_chip_id;
+    uint64_t base_address_nm[2];
+    uint64_t base_address_m;
+    uint64_t base_address_mmio;
+    std::vector<p9_setup_bars_addr_range> ranges;
+};
 
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
+
+
+//
+// FSP
+//
+
+const uint64_t FSP_BAR_SIZE_ATTR_MASK = 0x00000000FFFFFFFFULL;
+
+
+//
+// INT
+//
+
+const uint64_t INT_PC_BAR_SIZE_ATTR_MASK = 0x0000003FFFFFFFFFULL;
+const uint64_t INT_VC_BAR_SIZE_ATTR_MASK = 0x000007FFFFFFFFFFULL;
 
 //
 // MCD
@@ -317,12 +332,15 @@ const uint64_t MCD_FIR_MASK    = 0x4C70000000000000ULL;
 // NPU
 //
 
+// N3 NPU region partial good mask
+const uint16_t N3_NPU_REGION_PG_MASK = 0x0100;
+
 // NPU BAR address constants
 const uint8_t NPU_NUM_BAR_SHADOWS = 4;
 const uint64_t NPU_BAR_BASE_ADDR_MASK = 0x0001FFFFFFFFFFFFULL;
 const uint64_t NPU_BAR_ADDR_SHIFT = 12;
 
-const uint64_t NPU_PHY0_BAR_REGS[NPU_NUM_BAR_SHADOWS] =
+const uint64_t NPU_PHY0_BAR_REGS_NDD1[NPU_NUM_BAR_SHADOWS] =
 {
     PU_NPU0_SM0_PHY_BAR,
     PU_NPU0_SM1_PHY_BAR,
@@ -330,7 +348,7 @@ const uint64_t NPU_PHY0_BAR_REGS[NPU_NUM_BAR_SHADOWS] =
     PU_NPU0_SM3_PHY_BAR
 };
 
-const uint64_t NPU_PHY0_BAR_REGS_DD2[NPU_NUM_BAR_SHADOWS] =
+const uint64_t NPU_PHY0_BAR_REGS[NPU_NUM_BAR_SHADOWS] =
 {
     0x05011006,
     0x05011036,
@@ -338,7 +356,7 @@ const uint64_t NPU_PHY0_BAR_REGS_DD2[NPU_NUM_BAR_SHADOWS] =
     0x05011096
 };
 
-const uint64_t NPU_PHY1_BAR_REGS[NPU_NUM_BAR_SHADOWS] =
+const uint64_t NPU_PHY1_BAR_REGS_NDD1[NPU_NUM_BAR_SHADOWS] =
 {
     PU_NPU1_SM0_PHY_BAR,
     PU_NPU1_SM1_PHY_BAR,
@@ -346,7 +364,7 @@ const uint64_t NPU_PHY1_BAR_REGS[NPU_NUM_BAR_SHADOWS] =
     PU_NPU1_SM3_PHY_BAR
 };
 
-const uint64_t NPU_PHY1_BAR_REGS_DD2[NPU_NUM_BAR_SHADOWS] =
+const uint64_t NPU_PHY1_BAR_REGS[NPU_NUM_BAR_SHADOWS] =
 {
     0x05011206,
     0x05011236,
@@ -354,7 +372,7 @@ const uint64_t NPU_PHY1_BAR_REGS_DD2[NPU_NUM_BAR_SHADOWS] =
     0x05011296
 };
 
-const uint64_t NPU_MMIO_BAR_REGS[NPU_NUM_BAR_SHADOWS] =
+const uint64_t NPU_MMIO_BAR_REGS_NDD1[NPU_NUM_BAR_SHADOWS] =
 {
     PU_NPU2_SM0_PHY_BAR,
     PU_NPU2_SM1_PHY_BAR,
@@ -362,7 +380,7 @@ const uint64_t NPU_MMIO_BAR_REGS[NPU_NUM_BAR_SHADOWS] =
     PU_NPU2_SM3_PHY_BAR
 };
 
-const uint64_t NPU_MMIO_BAR_REGS_DD2[NPU_NUM_BAR_SHADOWS] =
+const uint64_t NPU_MMIO_BAR_REGS[NPU_NUM_BAR_SHADOWS] =
 {
     0x05011406,
     0x05011436,
