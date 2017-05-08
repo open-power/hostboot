@@ -624,37 +624,40 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 #ifdef CONFIG_START_OCC_DURING_BOOT
             ///////////////////////////////////////////////////
             // OCC Common entry
-            TARGETING::Target * l_sys = nullptr;
-            TARGETING::targetService().getTopLevelTarget( l_sys );
-            assert(l_sys != nullptr);
-            uint64_t l_occCommonAddr = l_sys->getAttr
-                <TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
-            l_label = HBRT_RSVD_MEM__OCC_COMMON;
-            l_labelSize = strlen(l_label) + 1;
-
-            // Get a pointer to the next available HDAT HB Rsv Mem entry
-            l_rngPtr = nullptr;
-            l_elog = getNextRhbAddrRange(l_rngPtr);
-            if(l_elog)
+            if( !(TARGETING::is_phyp_load()) )
             {
-                break;
+                TARGETING::Target * l_sys = nullptr;
+                TARGETING::targetService().getTopLevelTarget( l_sys );
+                assert(l_sys != nullptr);
+                uint64_t l_occCommonAddr = l_sys->getAttr
+                    <TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
+                l_label = HBRT_RSVD_MEM__OCC_COMMON;
+                l_labelSize = strlen(l_label) + 1;
+
+                // Get a pointer to the next available HDAT HB Rsv Mem entry
+                l_rngPtr = nullptr;
+                l_elog = getNextRhbAddrRange(l_rngPtr);
+                if(l_elog)
+                {
+                    break;
+                }
+
+                // Fill in the entry
+                l_rngPtr->hdatRhbRngType =
+                        static_cast<uint8_t>(HDAT::RHB_TYPE_HOMER_OCC);
+                l_rngPtr->hdatRhbRngId = i_nodeId;
+                l_rngPtr->hdatRhbAddrRngStrAddr =
+                        l_occCommonAddr | VmmManager::FORCE_PHYS_ADDR;
+                l_rngPtr->hdatRhbAddrRngEndAddr =
+                        (l_occCommonAddr | VmmManager::FORCE_PHYS_ADDR)
+                            + VMM_OCC_COMMON_SIZE - 1 ;
+                l_rngPtr->hdatRhbLabelSize = l_labelSize;
+                memcpy( l_rngPtr->hdatRhbLabelString,
+                        l_label,
+                        l_labelSize );
+
+                traceHbRsvMemRange(l_rngPtr);
             }
-
-            // Fill in the entry
-            l_rngPtr->hdatRhbRngType =
-                    static_cast<uint8_t>(HDAT::RHB_TYPE_HOMER_OCC);
-            l_rngPtr->hdatRhbRngId = i_nodeId;
-            l_rngPtr->hdatRhbAddrRngStrAddr =
-                    l_occCommonAddr | VmmManager::FORCE_PHYS_ADDR;
-            l_rngPtr->hdatRhbAddrRngEndAddr =
-                    (l_occCommonAddr | VmmManager::FORCE_PHYS_ADDR)
-                        + VMM_OCC_COMMON_SIZE - 1 ;
-            l_rngPtr->hdatRhbLabelSize = l_labelSize;
-            memcpy( l_rngPtr->hdatRhbLabelString,
-                    l_label,
-                    l_labelSize );
-
-            traceHbRsvMemRange(l_rngPtr);
 #endif
         }
 
