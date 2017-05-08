@@ -384,7 +384,7 @@ typedef struct
     uint64_t iv_reserved64[3];
 
     //////////////////////////////////////////////////////////////////////
-    // Section Table - 4-byte aligned; 16 entries
+    // Section Table - 4-byte aligned; 15 entries
     //////////////////////////////////////////////////////////////////////
 
     P9XipSection iv_section[P9_XIP_SECTIONS];
@@ -1873,7 +1873,8 @@ typedef enum
     P9_XIP_SECTION_HW_IOPPE     = P9_XIP_SECTIONS_PLUS(4),
     P9_XIP_SECTION_HW_FPPE      = P9_XIP_SECTIONS_PLUS(5),
     P9_XIP_SECTION_HW_RINGS     = P9_XIP_SECTIONS_PLUS(6),
-    P9_XIP_SECTIONS_HW          = P9_XIP_SECTIONS_PLUS(7) // # sections
+    P9_XIP_SECTION_HW_OVERLAYS  = P9_XIP_SECTIONS_PLUS(7),
+    P9_XIP_SECTIONS_HW          = P9_XIP_SECTIONS_PLUS(8) // # sections
 } p9_xip_section_hw_t;
 
 #define P9_XIP_SECTION_NAMES_HW(var)      \
@@ -1884,7 +1885,8 @@ typedef enum
                          ".pgpe",         \
                          ".ioppe",        \
                          ".fppe",         \
-                         ".rings")
+                         ".rings",        \
+                         ".overlays")
 
 /**************************************************************************/
 /* SGPE Image                                                             */
