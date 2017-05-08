@@ -51,6 +51,9 @@ constexpr uint64_t literal_0b00001 = 0b00001;
 constexpr uint64_t literal_0b0001 = 0b0001;
 constexpr uint64_t literal_0b0010 = 0b0010;
 constexpr uint64_t literal_0b0010001 = 0b0010001;
+constexpr uint64_t literal_0b0001111 = 0b0001111;
+constexpr uint64_t literal_0b101 = 0b101;
+constexpr uint64_t literal_0b0111111 = 0b0111111;
 constexpr uint64_t literal_0b0000000000000000 = 0b0000000000000000;
 constexpr uint64_t literal_0b01111111 = 0b01111111;
 constexpr uint64_t literal_0b10 = 0b10;
@@ -3062,6 +3065,23 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             l_scom_buffer.insert<48, 7, 57, uint64_t>(literal_0b0010001 );
             l_scom_buffer.insert<55, 7, 57, uint64_t>(literal_0b0010001 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8009b82006010c3full, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8009c82006010c3full, l_scom_buffer ));
+
+            l_scom_buffer.insert<48, 7, 57, uint64_t>(literal_0b0001111 );
+            constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR1_DURATION_TAP5 = 0x5;
+            l_scom_buffer.insert<55, 4, 60, uint64_t>(l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR1_DURATION_TAP5 );
+            l_scom_buffer.insert<61, 3, 61, uint64_t>(literal_0b101 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8009c82006010c3full, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8009d02006010c3full, l_scom_buffer ));
+
+            l_scom_buffer.insert<48, 7, 57, uint64_t>(literal_0b0111111 );
+            constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR2_DURATION_TAP5 = 0x5;
+            l_scom_buffer.insert<55, 4, 60, uint64_t>(l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR2_DURATION_TAP5 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8009d02006010c3full, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8009e02006010c3full, l_scom_buffer ));
