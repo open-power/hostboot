@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -83,6 +83,26 @@ Examples: \n
     hb-trace \n
     hb-trace ERRL\n
     hb-trace "ERRL,INITSERVICE" \n
+    """)
+
+#------------------------------------------------
+#------------------------------------------------
+new_command("hb-bldata",
+    lambda: run_hb_debug_framework("BlData", outputFile = "hb-bldata.output"),
+    #alias = "hbt",
+    type = ["hostboot-commands"],
+    #see_also = ["hb-trace"],
+    see_also = [ ],
+    short = "Display Bootloader data",
+    doc = """
+Parameters: \n
+
+Defaults: \n
+        'syms' = './hbibl.syms' \n\n
+
+Examples: \n
+    hb-bldata \n\n
+    NOTE: Results are unpredictable after control is passed to Hostboot Base.\n
     """)
 
 #------------------------------------------------

@@ -53,18 +53,20 @@ namespace Bootloader{
         // @brief Index for Bootloader Trace entries
         // One-byte index for next entry to use in bootloader_trace.
         uint8_t bl_trace_index;
+        uint8_t bl_reserved1[15];
 
-        // Object that will be stored where the SBE HB structure indicates
-        BlToHbData blToHbData;
-
-        // Bool indicating if the secureROM is valid. Toggles verification.
-        bool secureRomValid;
+        // Instance of the TI Data Area
+        HB_TI_DataArea bl_TIDataArea;
 
         // Buffer to save HBB PNOR section data
         PNOR::SectionData_t bl_hbbSection;
 
-        // Instance of the TI Data Area
-        HB_TI_DataArea bl_TIDataArea;
+        // Bool indicating if the secureROM is valid. Toggles verification.
+        bool secureRomValid;
+        uint8_t bl_reserved2[15];
+
+        // Object that will be stored where the SBE HB structure indicates
+        BlToHbData blToHbData;
     } blData_t;
 
     /**

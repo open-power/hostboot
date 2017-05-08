@@ -34,6 +34,7 @@
 
 #include <lpc_const.H>
 #include <pnor_utils.H>
+#include <arch/memorymap.H>
 
 #include <ecc.H>
 
@@ -112,35 +113,21 @@ namespace Bootloader{
         const auto l_pSecRomInfo = reinterpret_cast<const SecureRomInfo*>(
                                                                    l_pRomStart);
 
-        // Set the MMIO BAR information as is appropriate
-        if (l_blConfigData->version >= MMIO_BARS_ADDED)
+        // Translate SBE to BL version into BL to HB version
+        switch(l_blConfigData->version)
         {
-            // Translate SBE to BL version into BL to HB version
-            switch(l_blConfigData->version)
-            {
-                // Add cases as additional versions are created
-                default:
-                    g_blData->blToHbData.version = BLTOHB_MMIOBARS;
-                    break;
-            }
-
-            // Copy values for MMIO BARs
-            g_blData->blToHbData.xscomBAR = l_blConfigData->xscomBAR;
-            g_blData->blToHbData.lpcBAR = l_blConfigData->lpcBAR;
+            // Add cases as additional versions are created
+            default:
+                g_blData->blToHbData.version = BLTOHB_MMIOBARS;
+                break;
         }
-        else
-        {
-            // Use MMIO BARs version since default values are being set
-            g_blData->blToHbData.version = BLTOHB_MMIOBARS;
 
-            // Set default values for MMIO BARs
-            // @TODO RTC: 173526 or RTC: 173525
-            // Use constants MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR and
-            // MMIO_GROUP0_CHIP0_LPC_BASE_ADDR from
-            // src/include/arch/memorymap.H for setting values
-            g_blData->blToHbData.xscomBAR = 0x000603FC00000000;
-            g_blData->blToHbData.lpcBAR = 0x0006030000000000;
-        }
+        // Copy values for MMIO BARs
+        g_blData->blToHbData.xscomBAR
+            = (l_blConfigData->version >= MMIO_BARS_ADDED)
+            ? l_blConfigData->xscomBAR
+            : MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR;
+        /* lpcBAR already copied in main() */
 
         // Only set rest of BlToHbData if SecureROM is valid
         if ( secureRomInfoValid(l_pSecRomInfo) )
@@ -302,10 +289,18 @@ namespace Bootloader{
 
         // @TODO RTC:138268 Support multiple sides of PNOR in bootloader
 
+        // Copy SBE BL shared data into BL HB shared data
+        const auto l_blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
+                                                              SBE_HB_COMM_ADDR);
+        g_blData->blToHbData.lpcBAR
+            = (l_blConfigData->version >= MMIO_BARS_ADDED)
+            ? l_blConfigData->lpcBAR
+            : MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
+
         //pnorEnd is the end of flash, which is base of lpc, plus
         //the offset of the FW space, plus the TOP memory address in FW space
-        uint64_t l_pnorEnd = LPC::LPC_PHYS_BASE + LPC::LPCHC_FW_SPACE
-        + PNOR::LPC_TOP_OF_FLASH_OFFSET;
+        uint64_t l_pnorEnd = g_blData->blToHbData.lpcBAR + LPC::LPCHC_FW_SPACE
+                           + PNOR::LPC_TOP_OF_FLASH_OFFSET;
 
         //We dont know what the start of pnor is because we dont know the size
         uint64_t l_pnorStart = 0;
