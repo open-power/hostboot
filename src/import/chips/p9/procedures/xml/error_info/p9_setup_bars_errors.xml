@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,7 +22,6 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Halt codes for p9_setup_bars -->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -35,6 +34,10 @@
     <ffdc>BAR_OFFSET</ffdc>
     <ffdc>BAR_OFFSET_MASK</ffdc>
     <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -47,6 +50,10 @@
     <ffdc>BAR_OFFSET</ffdc>
     <ffdc>BAR_OFFSET_MASK</ffdc>
     <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -59,6 +66,10 @@
     <ffdc>BAR_OFFSET</ffdc>
     <ffdc>BAR_OFFSET_MASK</ffdc>
     <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -71,6 +82,10 @@
     <ffdc>BAR_OFFSET</ffdc>
     <ffdc>BAR_OFFSET_MASK</ffdc>
     <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -83,6 +98,10 @@
     <ffdc>BAR_OFFSET</ffdc>
     <ffdc>BAR_OFFSET_MASK</ffdc>
     <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -96,6 +115,10 @@
     <ffdc>NM_RANGE_BASE_ADDR</ffdc>
     <ffdc>NM_RANGE_SIZE</ffdc>
     <ffdc>NM_CHIP_BASE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -109,6 +132,10 @@
     <ffdc>M_RANGE_BASE_ADDR</ffdc>
     <ffdc>M_RANGE_SIZE</ffdc>
     <ffdc>M_CHIP_BASE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -118,18 +145,97 @@
       Unsupported MCD group size
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>RANGE_BASE_ADDR</ffdc>
     <ffdc>RANGE_SIZE</ffdc>
+    <ffdc>MCD0_REG_ADDR</ffdc>
+    <ffdc>MCD1_REG_ADDR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P9_SETUP_BARS_INT_BAR_ATTR_ERR</rc>
+    <rc>RC_P9_SETUP_BARS_INT_PC_BAR_ATTR_ERR</rc>
     <description>
       Procedure: p9_setup_bars
-      INT BAR attributes are not aligned to HW implementation
+      INT PC BAR attributes are not aligned to HW implementation
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>BAR_OFFSET</ffdc>
     <ffdc>BAR_OFFSET_MASK</ffdc>
     <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SETUP_BARS_INT_VC_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p9_setup_bars
+      INT VC BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SETUP_BARS_INT_TM1_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p9_setup_bars
+      INT TM1 BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SETUP_BARS_INT_IC_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p9_setup_bars
+      INT IC BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SETUP_BARS_RANGE_OVERLAP_ERR</rc>
+    <description>
+      Procedure: p9_setup_bars
+      Overlapping memory/MMIO address ranges detected
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BASE_ADDR1</ffdc>
+    <ffdc>END_ADDR1</ffdc>
+    <ffdc>ENABLED1</ffdc>
+    <ffdc>BASE_ADDR2</ffdc>
+    <ffdc>END_ADDR2</ffdc>
+    <ffdc>ENABLED2</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
