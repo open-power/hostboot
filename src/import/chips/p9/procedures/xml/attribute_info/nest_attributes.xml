@@ -661,7 +661,8 @@
   <valueType>uint8</valueType>
   <enum>
     EPS_TYPE_LE = 0x01,
-    EPS_TYPE_HE = 0x02
+    EPS_TYPE_HE = 0x02,
+    EPS_TYPE_HE_F8 = 0x03
   </enum>
   <platInit/>
 </attribute>
