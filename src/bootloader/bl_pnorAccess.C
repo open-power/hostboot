@@ -201,6 +201,7 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
     {
         //@TODO RTC:138268 Set up multiple side of PNOR for bootloader
         o_errCode = 0;
+
         //Copy Table of Contents from PNOR flash to a local buffer
         Bootloader::handleMMIO(l_mmioAddr,
                     reinterpret_cast<uint64_t>(l_tocBuffer),
@@ -232,7 +233,8 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
             }
 
             // Check that address is still in FW space
-            if(l_mmioAddr < (LPC::LPC_PHYS_BASE + LPC::LPCHC_FW_SPACE))
+            if(l_mmioAddr <
+                (Bootloader::g_blData->blToHbData.lpcBAR + LPC::LPCHC_FW_SPACE))
             {
                 BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_FINDTOC_READTOC_ERR);
 

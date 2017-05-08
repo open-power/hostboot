@@ -27,7 +27,7 @@
 
 #include <arch/ppc.H>
 #include <securerom/ROM.H>
-#include <usr/lpc/lpc_const.H>
+#include <arch/memorymap.H>
 
 namespace Bootloader{
 // Max size of HBBL without ECC. Must match PNOR layout for eyeCatch HBBL
@@ -76,11 +76,8 @@ struct BlToHbData
                    secureRomSize(0), hwKeysHash(nullptr),
                    hwKeysHashSize(0), hbbHeader(nullptr),
                    hbbHeaderSize(0), secureAccessBit(false),
-            // @TODO RTC: 173526 or RTC: 173525
-            // Use constants MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR and
-            // MMIO_GROUP0_CHIP0_LPC_BASE_ADDR from
-            // src/include/arch/memorymap.H for setting values
-                   xscomBAR(0x000603FC00000000), lpcBAR(LPC::LPC_PHYS_BASE) {}
+                   xscomBAR(MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR),
+                   lpcBAR(MMIO_GROUP0_CHIP0_LPC_BASE_ADDR) {}
 
     // Simple way to tell if data is valid
     uint64_t eyeCatch;
