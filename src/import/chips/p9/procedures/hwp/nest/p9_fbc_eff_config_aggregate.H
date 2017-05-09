@@ -31,7 +31,7 @@
 /// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 /// *HWP Team: Nest
-/// *HWP Level: 2
+/// *HWP Level: 3
 /// *HWP Consumed by: HB,FSP
 ///
 
@@ -63,7 +63,7 @@ extern "C"
 ///
 /// @brief Set fabric effective configuration attributes
 ///
-/// @param[in] i_target              Chip level target
+/// @param[in] i_target Chip level target
 ///
 /// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
