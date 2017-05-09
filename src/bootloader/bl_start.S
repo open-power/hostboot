@@ -267,28 +267,22 @@ _main_loop:
 #define STD_INTERRUPT(name, address) \
     intvect_##name: \
         or 2,2,2; /* Ensure thread priority is high. */ \
-        mtsprg1 r1; /* Save GPR1 */ \
-        li r1, address; /* Save exception address. */ \
-        mtsprg2 r1; /* Move exception address to SPRG2 */ \
-        mfsprg1 r1; /* Restore GPR1 */ \
+        li r17, address; /* Save exception address. */ \
+        mtsprg2 r17; /* Move exception address to SPRG2 */ \
         b kernel_std_exception; /* Process interrupt. */
 
 #define STD_INTERRUPT_WITH(name, address, with) \
     intvect_##name: \
         or 2,2,2; /* Ensure thread priority is high. */ \
-        mtsprg1 r1; /* Save GPR1 */ \
-        li r1, address; /* Save exception address. */ \
-        mtsprg2 r1; /* Move exception address to SPRG2 */ \
-        mfsprg1 r1; /* Restore GPR1 */ \
+        li r17, address; /* Save exception address. */ \
+        mtsprg2 r17; /* Move exception address to SPRG2 */ \
         b kernel_std_exception_w_##with; /* Process interrupt. */
 
 #define HYPE_INTERRUPT(name, address) \
     intvect_##name: \
         or 2,2,2; /* Ensure thread priority is high. */ \
-        mtsprg1 r1; /* Save GPR1 */ \
-        li r1, address; /* Save exception address. */ \
-        mtsprg2 r1; /* Move exception address to SPRG2 */ \
-        mfsprg1 r1; /* Restore GPR1 */ \
+        li r17, address; /* Save exception address. */ \
+        mtsprg2 r17; /* Move exception address to SPRG2 */ \
         b kernel_hype_exception; /* Process interrupt. */
 
 STD_INTERRUPT(system_reset, HBBL_system_reset)
