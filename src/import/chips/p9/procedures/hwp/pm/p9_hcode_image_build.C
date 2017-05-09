@@ -64,8 +64,8 @@ extern "C"
 {
 /**
  * @brief   aligns DATA_SIZE  to 8B.
- * @param   TEMP_LEN    temp storage
- * @param   DATA_SIZE   size to be aligned. Aligned size is saved in same variable.
+ * @param[in]  TEMP_LEN    temp storage
+ * @param[io]  DATA_SIZE   size to be aligned. Aligned size is saved in same variable.
  */
 #define ALIGN_DWORD(TEMP_LEN, DATA_SIZE)                \
     {TEMP_LEN = (DATA_SIZE % RING_ALIGN_BOUNDARY);      \
@@ -77,8 +77,8 @@ extern "C"
 
 /**
  * @brief aligns start of scan ring to 8B boundary.
- * @param   RING_REGION_BASE start location of scan ring region in HOMER.
- * @param   RING_LOC         start of scan ring.
+ * @param[in]   RING_REGION_BASE start location of scan ring region in HOMER.
+ * @param[io]   RING_LOC         start of scan ring.
  */
 #define ALIGN_RING_LOC(RING_REGION_BASE, RING_LOC)  \
     {                                                   \
@@ -91,7 +91,8 @@ extern "C"
     }
 
 /**
- * @brief       round of ring size to multiple of 32B
+ * @brief      round of ring size to multiple of 32B
+ * @param[io]  ROUND_SIZE input size/rounded size
  */
 #define ROUND_OFF_32B( ROUND_SIZE)                          \
     {                                                       \
@@ -284,11 +285,11 @@ ImgSizeBank::ImgSizeBank()
 
 /**
  * @brief   verifies actual section size against max size allowed.
- * @param   i_plat  platform associated with image section.
- * @param   i_sec   image section.
- * @param   i_size  actual image section size.
- * @param   i_pSecName  points to a buffer with section name.
- * @param   i_bufLength length of the buffer.
+ * @param[in]   i_plat  platform associated with image section.
+ * @param[in]   i_sec   image section.
+ * @param[in]   i_size  actual image section size.
+ * @param[in]   i_pSecName  points to a buffer with section name.
+ * @param[in]   i_bufLength length of the buffer.
  * @return  zero if size within limit else max size allowed.
  */
 uint32_t ImgSizeBank::isSizeGood( PlatId i_plat, uint8_t i_sec,
@@ -325,11 +326,11 @@ uint32_t ImgSizeBank::isSizeGood( PlatId i_plat, uint8_t i_sec,
 }
 /**
  * @brief   returns max size for a given image section
- * @param   i_plat      platform associated with image section.
- * @param   i_sec       image section.
- * @param   i_size      actual image section size.
- * @param   i_pSecName  points to a buffer with section name.
- * @param   i_bufLength length of the buffer.
+ * @param[in]   i_plat      platform associated with image section.
+ * @param[in]   i_sec       image section.
+ * @param[out]  o_secSize   actual image section size.
+ * @param[in]   i_pSecName  points to a buffer with section name.
+ * @param[in]   i_bufLength length of the buffer.
  * @return  zero if section found, error code otherwise.
  */
 uint32_t ImgSizeBank::getImgSectn( PlatId i_plat, uint8_t i_sec, uint32_t& o_secSize,
@@ -428,8 +429,8 @@ ExIdMap::ExIdMap()
 
 /**
  * @brief   returns ex chiplet ID associated with a scan ring and EQ id.
- * @param   i_eqId      chiplet id for a given quad.
- * @param   i_ringOrder serial number associated with a scan ring in HOMER.
+ * @param[in]   i_eqId      chiplet id for a given quad.
+ * @param[in]   i_ringOrder serial number associated with a scan ring in HOMER.
  * @return  chiplet Id associated with a scan ring.
  */
 uint32_t ExIdMap::getInstanceId( uint32_t i_eqId, uint32_t i_ringOrder )
@@ -478,6 +479,13 @@ uint32_t ExIdMap::getInstanceId( uint32_t i_eqId, uint32_t i_ringOrder )
 }
 
 //-------------------------------------------------------------------------
+
+/**
+ * @brief   verifies SRAM image size of SGPE/CME/PGPE .
+ * @param[in]   i_pChipHomer    points to HOMER
+ * @param[out]  o_sramImgSize   size of image
+ * @return  fapi2 return code.
+ */
 fapi2::ReturnCode validateSramImageSize( Homerlayout_t* i_pChipHomer, uint32_t& o_sramImgSize )
 {
     FAPI_INF(">> validateSramImageSize" );
@@ -535,7 +543,7 @@ fapi_try_exit:
 
 /**
  * @brief   validates arguments passed for hcode image build
- * @param   refer to p9_hcode_image_build arguments
+ * @param[in]   refer to p9_hcode_image_build arguments
  * @return  fapi2 return code
 */
 fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImageOut,
@@ -653,11 +661,12 @@ uint32_t getXipImageSectn( uint8_t * i_srcPtr, uint8_t i_secId, uint8_t i_ecLeve
 
 /**
  * @brief   Copies section of hardware image to HOMER
- * @param   i_destPtr       a location in HOMER
- * @param   i_srcPtr        a location in HW Image.
- * @param   i_secId         XIP Section id to be copied.
- * @param   i_platId        platform associated with the given section.
- * @param   o_ppeSection    contains section details.
+ * @param[in]   i_destPtr       a location in HOMER
+ * @param[in]   i_srcPtr        a location in HW Image.
+ * @param[in]   i_secId         XIP Section id to be copied.
+ * @param[in]   i_platId        platform associated with the given section.
+ * @param[in]   i_ecLevel       ec level of chip
+ * @param[out]  o_ppeSection    contains section details.
  * @return  IMG_BUILD_SUCCESS if successful, error code otherwise.
  */
 uint32_t copySectionToHomer( uint8_t* i_destPtr, uint8_t* i_srcPtr, uint8_t i_secId, PlatId i_platId ,
@@ -711,7 +720,8 @@ uint32_t copySectionToHomer( uint8_t* i_destPtr, uint8_t* i_srcPtr, uint8_t i_se
 
 /**
  * @brief   Update the CME/SGPE Image Header Flag field.
- * @param   i_pChipHomer    points to HOMER image.
+ * @param[in]   i_pChipHomer    points to HOMER image.
+ * @param[in]   i_procTgt       fapi2 target for P9 chip.
  * @return  fapi2 return code.
  */
 fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PROC& i_procTgt )
@@ -957,7 +967,7 @@ fapi_try_exit:
 
 /**
  * @brief   updates various CPMR fields which are associated with scan rings.
- * @param   i_pChipHomer    points to start of P9 HOMER.
+ * @param[in]   i_pChipHomer    points to start of P9 HOMER.
  */
 void updateCpmrCmeRegion( Homerlayout_t* i_pChipHomer )
 {
@@ -1038,8 +1048,8 @@ void updateCpmrCmeRegion( Homerlayout_t* i_pChipHomer )
 //------------------------------------------------------------------------------
 /**
  * @brief   updates various CPMR fields which are associated with self restore code.
- * @param   i_pChipHomer    points to start of P9 HOMER.
- * @param   i_fuseState     core fuse status
+ * @param[in]   i_pChipHomer    points to start of P9 HOMER.
+ * @param[in]   i_fuseState     core fuse status
  */
 void updateCpmrHeaderSR( Homerlayout_t* i_pChipHomer, uint8_t i_fusedState )
 {
@@ -1067,8 +1077,8 @@ void updateCpmrHeaderSR( Homerlayout_t* i_pChipHomer, uint8_t i_fusedState )
 //------------------------------------------------------------------------------
 /**
  * @brief   updates various QPMR header region in HOMER.
- * @param   i_pChipHomer    points to start of P9 HOMER.
- * @param   io_qpmrHdr      temp instance of QpmrHeaderLayout_t used for data collection.
+ * @param[in]       i_pChipHomer    points to start of P9 HOMER.
+ * @param[inout]    io_qpmrHdr      temp instance of QpmrHeaderLayout_t used for data collection.
  */
 void updateQpmrHeader( Homerlayout_t* i_pChipHomer, QpmrHeaderLayout_t& io_qpmrHdr )
 {
@@ -1143,8 +1153,7 @@ fapi2::ReturnCode buildSgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChip
 
         // Let us start with a clean slate.
         memset( (uint8_t*)&i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage, 0x00, SGPE_IMAGE_SIZE );
-
-        rcTemp = p9_xip_get_section( i_pImageIn, P9_XIP_SECTION_HW_SGPE, &ppeSection );;
+        rcTemp = p9_xip_get_section( i_pImageIn, P9_XIP_SECTION_HW_SGPE, &ppeSection );
 
         FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
                      fapi2::SGPE_IMG_NOT_FOUND_IN_HW_IMG()
@@ -1408,7 +1417,6 @@ fapi2::ReturnCode buildCmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipH
                                  ImageType_t i_imgType, uint64_t i_cpmrPhyAdd,
                                  P9FuncModel & i_procFuncModel )
 {
-
     FAPI_INF(">> buildCmeImage")
     uint32_t rcTemp = IMG_BUILD_SUCCESS;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -1478,20 +1486,20 @@ fapi2::ReturnCode buildCmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipH
     }   //i_imgType.cmeHcodeBuild
 
 fapi_try_exit:
-    FAPI_INF("<< buildCmeImage")
 
+    FAPI_INF("<< buildCmeImage")
     return fapi2::current_err;
 }
 
 //------------------------------------------------------------------------------
 /**
  * @brief       copies PGPE section from hardware image to HOMER.
- * @param[in]   i_pImageIn      points to start of hardware image.
- * @param[in]   i_pChipHomer    points to HOMER image in main memory.
- * @param[io]   io_ppmrHdr      an instance of PpmrHeader_t
- * @param[in]   i_imgType       image sections  to be built
- * @param[in]   i_procFuncModel info pertaining to P9 chip
- * @return      fapi2 return code.
+ * @param[in]       i_pImageIn      points to start of hardware image.
+ * @param[in]       i_pChipHomer    points to HOMER image in main memory.
+ * @param[inout]    io_ppmrHdr      an instance of PpmrHeader_t
+ * @param[in]       i_imgType       image sections  to be built
+ * @param[in]       i_procFuncModel info pertaining to P9 chip
+ * @return          fapi2 return code.
  */
 fapi2::ReturnCode buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
                                   PpmrHeader_t& io_ppmrHdr, ImageType_t i_imgType,
@@ -1634,8 +1642,12 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
 
     do
     {
-        if(( !i_imgType.cmeCommonRingBuild && !i_imgType.cmeCoreSpecificRingBuild ) ||
-           ( !i_imgType.sgpeCommonRingBuild && !i_imgType.sgpeCacheSpecificRingBuild ))
+        if( PLAT_CME == i_ppeType  && !i_imgType.cmeHcodeBuild )
+        {
+            break;
+        }
+
+        if( PLAT_SGPE == i_ppeType  && !i_imgType.sgpeHcodeBuild )
         {
             break;
         }
@@ -1695,7 +1707,7 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
 
         if( l_fapiRc )
         {
-            retCode = BUILD_FAIL_RING_EXTRACTN;
+            retCode = BUILD_FAIL_XIP_CUST_ERR;
             FAPI_ERR("p9_xip_customize failed to extract rings for  %s",
                      (i_ppeType == PLAT_CME ) ? "CME" : "SGPE" );
             break;
@@ -1709,32 +1721,37 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
 
 //------------------------------------------------------------------------------
 
-uint32_t layoutSgpeScanOverride( Homerlayout_t*   i_pHomer,
-                                 void* i_pOverride,
-                                 const P9FuncModel& i_chipState,
-                                 RingBufData& i_ringData,
-                                 RingDebugMode_t i_debugMode,
-                                 QpmrHeaderLayout_t& i_qpmrHdr,
-                                 ImageType_t i_imgType )
+/**
+ * @brief   get a blob of platform rings in a temp buffer.
+ * @param[in]   i_pHomer     points to base of HOMER.
+ * @param[in]   i_pOverride  points to override binary.
+ * @param[in]   i_chipState  functional state summary of P9 chip
+ * @param[in]   i_ringData   temp data struct
+ * @param[in]   i_debugMode  ring debug mode
+ * @param[in]   i_qpmrHdr    an instance of QpmrHeaderLayout_t
+ * @param[in]   i_imgType    image types to be built
+ * @return  fapi2 return code
+ */
+ fapi2::ReturnCode layoutSgpeScanOverride( Homerlayout_t*   i_pHomer,
+                                         void* i_pOverride,
+                                         const P9FuncModel& i_chipState,
+                                         RingBufData& i_ringData,
+                                         RingDebugMode_t i_debugMode,
+                                         QpmrHeaderLayout_t& i_qpmrHdr,
+                                         ImageType_t i_imgType )
 {
     FAPI_INF(">> layoutSgpeScanOverride ");
     uint32_t rc = IMG_BUILD_SUCCESS;
-    sgpeHeader_t* pSgpeImgHdr = (sgpeHeader_t*)&i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
+    bool overrideNotFound = true;
+
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     RingBucket sgpeOvrdRings( PLAT_SGPE,
                               (uint8_t*)&i_pHomer->qpmrRegion,
                               i_debugMode );
 
-    do
+    if( i_imgType.sgpeHcodeBuild && i_pOverride )
     {
-        if( !i_imgType.sgpeCommonRingBuild )
-        {
-            break;
-        }
-
-        if( !i_pOverride )
-        {
-            break;
-        }
+        FAPI_IMP("Found SGPE Override Ring" );
 
         uint32_t commonRingLength = i_qpmrHdr.quadCommonRingLength;
 
@@ -1742,26 +1759,27 @@ uint32_t layoutSgpeScanOverride( Homerlayout_t*   i_pHomer,
         //earmarked for common rings
         uint8_t* pOverrideStart =
             &i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[commonRingLength + SWIZZLE_4_BYTE(i_qpmrHdr.sgpeImgLength)];
-        uint16_t*  pScanRingIndex = (uint16_t*)pOverrideStart;
 
         //get core common rings
         uint8_t* pOvrdRingPayload = pOverrideStart + QUAD_COMMON_RING_INDEX_SIZE;
         uint32_t tempRingLength = 0;
         uint32_t tempBufSize = 0;
-        bool overrideNotFound = true;
-        uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
         FAPI_DBG("TOR Version :  0x%02x", P9_TOR::tor_version() );
 
+        RingID quadCmnOvrdRingId;
         for( uint32_t ringIndex = 0; ringIndex < MAX_HOMER_QUAD_CMN_RINGS;
              ringIndex++ )
         {
             tempBufSize = i_ringData.iv_sizeWorkBuf1;
+            quadCmnOvrdRingId = sgpeOvrdRings.getCommonRingId( ringIndex );
 
-            FAPI_DBG("Calling P9_TOR::tor_get_single_ring ring 0x%08X", ringIndex);
+            FAPI_DBG( "Requesting Override For Ring %s",
+                      sgpeOvrdRings.getRingName( quadCmnOvrdRingId ) );
+
             rc = tor_get_single_ring( i_pOverride,
                                       P9_XIP_MAGIC_SEEPROM,
                                       i_chipState.getChipLevel(),
-                                      sgpeOvrdRings.getCommonRingId( ringIndex ),
+                                      quadCmnOvrdRingId,
                                       P9_TOR::SBE,
                                       OVERRIDE,
                                       CACHE0_CHIPLET_ID,
@@ -1769,19 +1787,28 @@ uint32_t layoutSgpeScanOverride( Homerlayout_t*   i_pHomer,
                                       tempBufSize,
                                       i_debugMode );
 
-            if( (i_ringData.iv_sizeWorkBuf2 == tempBufSize) || (0 == tempBufSize ) ||
-                ( 0 != rc ) )
+            if( TOR_RING_NOT_FOUND == rc )
             {
                 tempBufSize = 0;
                 continue;
             }
 
-            overrideNotFound = false;
             ALIGN_DWORD(tempRingLength, tempBufSize)
             ALIGN_RING_LOC( pOverrideStart, pOvrdRingPayload );
 
+            overrideNotFound = false;
+
+            FAPI_ASSERT( ( TOR_SUCCESS  == rc ),
+                     fapi2::QUAD_CMN_RING_OVRD_LAYOUT_ERR()
+                     .set_OVRD_SIZE( pOvrdRingPayload - pOverrideStart )
+                     .set_FAILURE_CODE( rc )
+                     .set_MAX_SIZE_ALLOCATED( QUAD_OVERRIDE_RING_SIZE ),
+                     "Failed To Complete Quad Ring Override Layout" );
 
             memcpy( pOvrdRingPayload, i_ringData.iv_pWorkBuf2, tempBufSize);
+            uint16_t*  pScanRingIndex = (uint16_t*)pOverrideStart;
+            uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
+
             *(pScanRingIndex + ringIndex) = SWIZZLE_2_BYTE((pOvrdRingPayload - pOverrideStart) + ringStartToHdrOffset);
 
             sgpeOvrdRings.setRingOffset(pOvrdRingPayload, sgpeOvrdRings.getCommonRingId( ringIndex ));
@@ -1794,14 +1821,15 @@ uint32_t layoutSgpeScanOverride( Homerlayout_t*   i_pHomer,
             memset( i_ringData.iv_pWorkBuf2, 0x00, tempBufSize );
         }
 
+        //Not regarded as an error
         if( overrideNotFound )
         {
-            FAPI_INF("Overrides not found for SGPE");
-            rc = BUILD_FAIL_OVERRIDE;   // Not considered an error
-            break;
+            FAPI_INF("Quad Scan Ring Overrides Not Found");
+            goto fapi_try_exit;
         }
 
         tempRingLength = (pOvrdRingPayload - pOverrideStart );
+        sgpeHeader_t* pSgpeImgHdr = (sgpeHeader_t*)&i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
         pSgpeImgHdr->g_sgpe_cmn_ring_ovrd_occ_offset =
             SWIZZLE_4_BYTE(pSgpeImgHdr->g_sgpe_cmn_ring_occ_offset) + commonRingLength;
         i_qpmrHdr.quadCommonRingLength = commonRingLength + tempRingLength;
@@ -1809,17 +1837,16 @@ uint32_t layoutSgpeScanOverride( Homerlayout_t*   i_pHomer,
         i_qpmrHdr.quadCommonOvrdOffset = i_qpmrHdr.quadCommonRingOffset + commonRingLength;
         pSgpeImgHdr->g_sgpe_cmn_ring_ovrd_occ_offset = SWIZZLE_4_BYTE(pSgpeImgHdr->g_sgpe_cmn_ring_ovrd_occ_offset);
 
-    }
-    while(0);
+        FAPI_DBG("--------------------SGPE Override Rings---------------=" );
+        FAPI_DBG("--------------------SGPE Header --------------------====");
+        FAPI_DBG("Override Ring Offset 0x%08X", SWIZZLE_4_BYTE(pSgpeImgHdr->g_sgpe_cmn_ring_ovrd_occ_offset));
+        sgpeOvrdRings.dumpOverrideRings();
 
-    FAPI_DBG("--------------------SGPE Override Rings---------------=" );
-    FAPI_DBG("--------------------SGPE Header --------------------====");
-    FAPI_DBG("Override Ring Offset 0x%08X", SWIZZLE_4_BYTE(pSgpeImgHdr->g_sgpe_cmn_ring_ovrd_occ_offset));
+    }   //i_imgType.sgpeHcodeBuild && i_pOverride
 
-    sgpeOvrdRings.dumpOverrideRings();
-
+fapi_try_exit:
     FAPI_INF("<< layoutSgpeScanOverride")
-    return rc;
+    return fapi2::current_err;
 }
 
 /**
@@ -1828,8 +1855,6 @@ uint32_t layoutSgpeScanOverride( Homerlayout_t*   i_pHomer,
  * @param[in]   i_procTgt   P9 chip target.
  * @return      FAPI2 return code.
  */
-
-
 fapi2::ReturnCode updatePgpeHeader( void* const i_pHomer, CONST_FAPI2_PROC& i_procTgt )
 {
     FAPI_INF(">> updatePgpeHeader");
@@ -1932,9 +1957,10 @@ fapi_try_exit:
 //---------------------------------------------------------------------------
 
 /**
- * @brief   Updates PPMR and PGPE Image header in P9 HOMER.
- * @param[in]   i_pHomer    points to P9 HOMER base.
- * @param[in]   i_procTgt   chip pertaining to P9 chip.
+ * @brief   Updates PPMR and PGPE Image header in P9 HOMER
+ * @param[in]       i_pHomer    points to P9 HOMER base
+ * @param[in]       i_procTgt   chip pertaining to P9 chip
+ * @param[inout]    io_ppmrHdr  an instance of struct containing PPMR Header info
  * @return      FAPI2 return code
  */
 fapi2::ReturnCode updatePpmrHeader( void* const i_pHomer, PpmrHeader_t& io_ppmrHdr, CONST_FAPI2_PROC& i_procTgt  )
@@ -1974,11 +2000,14 @@ fapi_try_exit:
 //---------------------------------------------------------------------------
 
 /**
- * @brief   updates the PState parameter block info in CPMR and PPMR region.
- * @param   i_pHomer    points to start of of chip's HOMER.
- * @param   i_procTgt   fapi2 target associated with P9 chip.
- * @param   i_imgType   image type to be built.
- * return   fapi2::Returncode
+ * @brief       updates the PState parameter block info in CPMR and PPMR region
+ * @param[in]   i_pHomer    points to start of of chip's HOMER
+ * @param[in]   i_procTgt   fapi2 target associated with P9 chip
+ * @param[in]   io_ppmrHdr  an instance of PPMR header struct
+ * @param[in]   i_imgType   image type to be built
+ * @param[in]   i_pBuf1     points to a buffer
+ * @param[in]   i_sizeBuf1  size of buffer pointed to by i_pBuf1
+ * @return      fapi2::Returncode
  */
 fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i_procTgt,
                                        PpmrHeader_t& io_ppmrHdr, ImageType_t i_imgType,
@@ -1986,7 +2015,7 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
 {
     FAPI_INF(">> buildParameterBlock");
 
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
     if( i_imgType.pgpePstateParmBlockBuild )
     {
@@ -2166,55 +2195,50 @@ fapi_try_exit:
 //---------------------------------------------------------------------------
 
 /**
- * @brief   copies override flavor of scan rings
- * @param   i_pImageIn          points to start of hardware image.
- * @param   i_pOverride         points to override rings.
- * @param   o_pImageOut         points to HOMER image.
- * @param   i_ddLevel           dd level associated with P9 chip.
- * @param   i_pBuf1             work buffer1
- * @param   i_bufSize1          work buffer1 size.
- * @param   i_pBuf2             work buffer2
- * @param   i_bufSize2          work buffer2 size.
- * @param   i_imgType           image type to be built.
- * @param   o_qpmr              temp instance of QpmrHeaderLayout_t
- * @param   i_platId            platform associated with scan ring.
- * @return  IMG_BUILD_SUCCESS if successful else error code.
+ * @brief       copies core common rings into HOMER
+ * @param[in]    i_pHomer        points to HOMER base
+ * @param[in]    i_chipState     functional state of P9 chiplets
+ * @param[in]    i_ringData      a temp struct
+ * @param[in]    i_debugMode     debug type set for scan rings
+ * @param[in]    i_ringVariant   scan ring variant to be copied to HOMER
+ * @param[in]    i_imgType       image section to be copied
+ * @param[inout] io_cmeRings     struct containing core common debug info
+ * @param[inout] io_cmnRingSize  IN: offset to end of hcode OUT: offset to end of cmn ring
+ * @return      fapi2 return code
  */
-uint32_t layoutCmnRingsForCme( Homerlayout_t*   i_pHomer,
-                               const P9FuncModel& i_chipState,
-                               RingBufData& i_ringData,
-                               RingDebugMode_t i_debugMode,
-                               RingVariant_t i_ringVariant,
-                               ImageType_t i_imgType,
-                               RingBucket& io_cmeRings,
-                               uint32_t& io_cmnRingSize )
+fapi2::ReturnCode layoutCmnRingsForCme( Homerlayout_t*   i_pHomer,
+                                       const P9FuncModel& i_chipState,
+                                       RingBufData& i_ringData,
+                                       RingDebugMode_t i_debugMode,
+                                       RingVariant_t i_ringVariant,
+                                       ImageType_t i_imgType,
+                                       RingBucket& io_cmeRings,
+                                       uint32_t& io_cmnRingSize )
 {
     FAPI_DBG( ">> layoutCmnRingsForCme");
     uint32_t rc = IMG_BUILD_SUCCESS;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    do
+    uint32_t tempSize = 0;
+    uint32_t ringSize = 0;
+    uint8_t* pRingStart = &i_pHomer->cpmrRegion.cmeSramRegion[io_cmnRingSize];
+    uint8_t* pRingPayload = pRingStart + CORE_COMMON_RING_INDEX_SIZE;
+
+    if( i_imgType.cmeHcodeBuild )
     {
 
-        uint32_t tempSize = 0;
-        uint32_t ringSize = 0;
-        uint8_t* pRingStart = &i_pHomer->cpmrRegion.cmeSramRegion[io_cmnRingSize];
-        uint16_t* pScanRingIndex = (uint16_t*) pRingStart;
-        uint8_t* pRingPayload = pRingStart + CORE_COMMON_RING_INDEX_SIZE;
-        uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
-
-        if( !i_imgType.cmeCommonRingBuild )
-        {
-            break;
-        }
+        RingID coreCmnRingId;
 
         for( uint32_t ringIndex = 0; ringIndex < MAX_HOMER_CORE_CMN_RINGS;
              ringIndex++ )
         {
             ringSize = i_ringData.iv_sizeWorkBuf1;
+            coreCmnRingId = io_cmeRings.getCommonRingId( ringIndex );
+
             rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
                                       P9_XIP_MAGIC_CME,
                                       i_chipState.getChipLevel(),
-                                      io_cmeRings.getCommonRingId( ringIndex ),
+                                      coreCmnRingId,
                                       P9_TOR::CME,
                                       i_ringVariant,
                                       CORE0_CHIPLET_ID ,
@@ -2222,11 +2246,10 @@ uint32_t layoutCmnRingsForCme( Homerlayout_t*   i_pHomer,
                                       ringSize,
                                       i_debugMode );
 
-            if( ( i_ringData.iv_sizeWorkBuf1 == ringSize ) || ( 0 == ringSize ) ||
-                ( 0 != rc ) )
+            if( TOR_RING_NOT_FOUND == rc )
             {
-                FAPI_INF( "Did not find core common ring Id %d ", ringIndex );
-                rc = 0;
+                FAPI_INF( "Did not find core common ring %s ",
+                          io_cmeRings.getRingName( coreCmnRingId ) );
                 ringSize = 0;
                 continue;
             }
@@ -2234,6 +2257,16 @@ uint32_t layoutCmnRingsForCme( Homerlayout_t*   i_pHomer,
             ALIGN_DWORD(tempSize, ringSize)
             ALIGN_RING_LOC( pRingStart, pRingPayload );
 
+            FAPI_DBG( "TOR RC : 0x%08x", rc );
+            FAPI_ASSERT( ( TOR_SUCCESS == rc ),
+                     fapi2::CORE_CMN_RING_LAYOUT_ERR()
+                     .set_CORE_CMN_RING_SIZE( (pRingPayload - pRingStart) + ringSize )
+                     .set_FAILURE_CODE( rc )
+                     .set_MAX_SIZE_ALLOCATED(CORE_COMMON_RING_SIZE),
+                     "Failed To Complete CME Ring Layout" );
+
+            uint16_t* pScanRingIndex = (uint16_t*) pRingStart;
+            uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
             memcpy( pRingPayload, i_ringData.iv_pWorkBuf1, ringSize );
             *(pScanRingIndex + ringIndex) = SWIZZLE_2_BYTE((pRingPayload - pRingStart) + ringStartToHdrOffset);
 
@@ -2256,38 +2289,38 @@ uint32_t layoutCmnRingsForCme( Homerlayout_t*   i_pHomer,
             ALIGN_DWORD(tempSize, io_cmnRingSize)
         }
     }
-    while(0);
 
-    FAPI_DBG( "<< layoutCmnRingsForCme");
-
-    return rc;
+fapi_try_exit:
+    FAPI_INF( "<< layoutCmnRingsForCme");
+    return fapi2::current_err;
 }
 
 //------------------------------------------------------------------------------
 /**
  * @brief   creates a lean scan ring layout for core specific rings in HOMER.
- * @param   i_pHOMER        points to HOMER image.
- * @param   i_chipState     functional state of all cores within P9 chip
- * @param   i_ringData      scan ring related data
- * @param   i_debugMode     debug type set for scan rings
- * @param   i_ringVariant   scan ring flavor
- * @param   i_imgType       image type to be built
- * @param   io_cmeRings     instance of RingBucket
- * @param   io_ringLength   input: CME region length populated. Output: Max possible size of instance spec ring
+ * @param[in]       i_pHomer        points to HOMER image.
+ * @param[in]       i_chipState     functional state of all cores within P9 chip
+ * @param[in]       i_ringData      scan ring related data
+ * @param[in]       i_debugMode     debug type set for scan rings
+ * @param[in]       i_ringVariant   scan ring flavor
+ * @param[in]       i_imgType       image type to be built
+ * @param[inout]    io_cmeRings     instance of RingBucket
+ * @param[inout]    io_ringLength   input: CME region length populated. Output: Max possible size of core spec ring
  * @param   IMG_BUILD_SUCCESS   if function succeeds else error code.
  */
 
-uint32_t layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
-                                   const P9FuncModel& i_chipState,
-                                   RingBufData& i_ringData,
-                                   RingDebugMode_t i_debugMode,
-                                   RingVariant_t i_ringVariant,
-                                   ImageType_t i_imgType,
-                                   RingBucket& io_cmeRings,
-                                   uint32_t& io_ringLength )
+fapi2::ReturnCode layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
+                                           const P9FuncModel& i_chipState,
+                                           RingBufData& i_ringData,
+                                           RingDebugMode_t i_debugMode,
+                                           RingVariant_t i_ringVariant,
+                                           ImageType_t i_imgType,
+                                           RingBucket& io_cmeRings,
+                                           uint32_t& io_ringLength )
 {
     FAPI_DBG( ">> layoutInstRingsForCme");
     uint32_t rc = IMG_BUILD_SUCCESS;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     // Let us find out ring-pair which is biggest in list of 12 ring pairs
     uint32_t maxCoreSpecRingLength = 0;
     uint32_t ringLength = 0;
@@ -2295,12 +2328,8 @@ uint32_t layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
     uint32_t tempRepairLength = 0;
     uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
 
-    do
+    if( i_imgType.cmeHcodeBuild )
     {
-        if( !i_imgType.cmeCoreSpecificRingBuild )
-        {
-            break;
-        }
 
         for( uint32_t exId = 0; exId < MAX_CMES_PER_CHIP; exId++ )
         {
@@ -2332,13 +2361,18 @@ uint32_t layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
                                           tempSize,
                                           i_debugMode );
 
-                if( (i_ringData.iv_sizeWorkBuf1 == tempSize) || (0 == tempSize ) ||
-                    ( 0 != rc ) )
+                if( TOR_RING_NOT_FOUND == rc )
                 {
                     FAPI_DBG( "could not determine size of ring id %d of core %d",
                               io_cmeRings.getInstRingId(0), ((2 * exId) + coreId) );
                     continue;
                 }
+
+                FAPI_ASSERT( (TOR_SUCCESS == rc ),
+                         fapi2::FAILED_TO_CALCULATE_CORE_REPAIR_RING()
+                         .set_FAILURE_CODE( rc )
+                         .set_CORE_ID( coreId ),
+                         "Failed To Find Max Size Of Repair Ring Pair" );
 
                 ALIGN_DWORD(tempRepairLength, tempSize);
                 ringLength += tempSize;
@@ -2392,17 +2426,24 @@ uint32_t layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
                                           tempSize,
                                           i_debugMode );
 
-                if( (i_ringData.iv_sizeWorkBuf1 == tempSize) || (0 == tempSize ) ||
-                    ( 0 != rc ) )
+                if( TOR_RING_NOT_FOUND == rc )
                 {
                     FAPI_INF("Instance ring Id %d not found for EX %d core %d",
                              io_cmeRings.getInstRingId(0), exId, coreId );
-                    rc = 0;
                     tempSize = 0;
                     continue;
                 }
 
+                FAPI_ASSERT( (TOR_SUCCESS == rc ),
+                         fapi2::CORE_SPEC_RING_LAYOUT_ERR()
+                         .set_CORE_SPEC_RING_SIZE( tempSize )
+                         .set_FAILURE_CODE( rc )
+                         .set_MAX_SIZE_ALLOCATED(CORE_SPECIFIC_RING_SIZE_PER_CORE),
+                         "Failed To Complete Core Specific Ring Layout" );
+
                 ALIGN_RING_LOC( pRingStart, pRingPayload );
+
+
                 memcpy( pRingPayload, i_ringData.iv_pWorkBuf1, tempSize);
                 io_cmeRings.extractRing( i_ringData.iv_pWorkBuf1, tempSize, io_cmeRings.getInstRingId(0) );
                 io_cmeRings.setRingOffset( pRingPayload,
@@ -2420,25 +2461,37 @@ uint32_t layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
 
         io_ringLength = maxCoreSpecRingLength;
     }
-    while(0);
 
-    FAPI_DBG( "<< layoutInstRingsForCme");
 
-    return rc;
+fapi_try_exit:
+    FAPI_INF( "<< layoutInstRingsForCme");
+    return fapi2::current_err;
 }
 
 //------------------------------------------------------------------------------
 
-uint32_t layoutCmeScanOverride( Homerlayout_t*   i_pHomer,
-                                void* i_pOverride,
-                                const P9FuncModel& i_chipState,
-                                RingBufData& i_ringData,
-                                RingDebugMode_t i_debugMode,
-                                ImageType_t i_imgType,
-                                uint32_t& io_ovrdRingLength )
+/**
+ * @brief   creates a lean scan ring layout for core specific rings in HOMER.
+ * @param[in]     i_pHomer        points to HOMER image.
+ * @param[in]     i_pOverride     points to override binary
+ * @param[in]     i_chipState     functional state of all cores/ex/eq within P9 chip
+ * @param[in]     i_ringData      scan ring related data
+ * @param[in]     i_debugMode     debug type set for scan rings
+ * @param[in]     i_imgType       image type to be built
+ * @param[inout]  io_ovrdRingLength size of override ring region
+ * @return  fapi2 return code
+ */
+fapi2::ReturnCode layoutCmeScanOverride( Homerlayout_t*   i_pHomer,
+                                        void* i_pOverride,
+                                        const P9FuncModel& i_chipState,
+                                        RingBufData& i_ringData,
+                                        RingDebugMode_t i_debugMode,
+                                        ImageType_t i_imgType,
+                                        uint32_t& io_ovrdRingLength )
 {
     FAPI_INF(">> layoutCmeScanOverride" );
     uint32_t rc = IMG_BUILD_SUCCESS;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     uint32_t tempRingLength = io_ovrdRingLength;
     uint32_t tempBufSize = 0;
     uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
@@ -2447,12 +2500,8 @@ uint32_t layoutCmeScanOverride( Homerlayout_t*   i_pHomer,
                              (uint8_t*)&i_pHomer->cpmrRegion,
                              i_debugMode );
 
-    do
+    if( i_imgType.cmeHcodeBuild )
     {
-        if( !i_imgType.cmeCommonRingBuild )
-        {
-            break;
-        }
 
         //Start override ring from the actual end of base common rings. Remember overrides reside within
         //common rings region
@@ -2462,17 +2511,21 @@ uint32_t layoutCmeScanOverride( Homerlayout_t*   i_pHomer,
         //get core common rings
         uint8_t* pOverrideRingPayload = pOverrideStart + CORE_COMMON_RING_INDEX_SIZE;
         bool overrideNotFound = true;
+        RingID coreCmnOvrdRingId;
 
         for( uint8_t ringIndex = 0; ringIndex < MAX_HOMER_CORE_CMN_RINGS;
              ringIndex++ )
         {
             tempBufSize = i_ringData.iv_sizeWorkBuf2;
+            coreCmnOvrdRingId = cmeOvrdRings.getCommonRingId( ringIndex );
 
-            FAPI_DBG("Calling P9_TOR::tor_get_single_ring ring 0x%08X", ringIndex);
+            FAPI_DBG( "Requesting Override Ring For %s",
+                      cmeOvrdRings.getRingName( coreCmnOvrdRingId ) );
+
             rc = tor_get_single_ring( i_pOverride,
                                       P9_XIP_MAGIC_SEEPROM,
                                       i_chipState.getChipLevel(),
-                                      cmeOvrdRings.getCommonRingId( ringIndex ),
+                                      coreCmnOvrdRingId,
                                       P9_TOR::SBE,
                                       OVERRIDE,
                                       CORE0_CHIPLET_ID,
@@ -2480,17 +2533,22 @@ uint32_t layoutCmeScanOverride( Homerlayout_t*   i_pHomer,
                                       tempBufSize,
                                       i_debugMode );
 
-            if( (i_ringData.iv_sizeWorkBuf2 == tempBufSize) || (0 == tempBufSize ) ||
-                ( 0 != rc ) )
-
+            if( TOR_RING_NOT_FOUND == rc )
             {
                 tempBufSize = 0;
                 continue;
             }
 
-            overrideNotFound = false;
             ALIGN_DWORD(tempRingLength, tempBufSize)
             ALIGN_RING_LOC( pOverrideStart, pOverrideRingPayload );
+            overrideNotFound = false;
+
+            FAPI_ASSERT( ( TOR_SUCCESS == rc ),
+                     fapi2::CORE_CMN_RING_OVRD_LAYOUT_ERR()
+                     .set_OVRD_SIZE( tempBufSize )
+                     .set_FAILURE_CODE( rc )
+                     .set_MAX_SIZE_ALLOCATED(CORE_OVERRIDE_RING_SIZE),
+                     "Failed To Complete Scan Ring Override Layout" );
 
             memcpy( pOverrideRingPayload, i_ringData.iv_pWorkBuf2, tempBufSize);
             *(pScanRingIndex + ringIndex) = SWIZZLE_2_BYTE((pOverrideRingPayload - pOverrideStart) + ringStartToHdrOffset);
@@ -2507,47 +2565,45 @@ uint32_t layoutCmeScanOverride( Homerlayout_t*   i_pHomer,
 
         if( overrideNotFound )
         {
-            FAPI_INF("Overrides not found for CME");
-            rc = BUILD_FAIL_OVERRIDE;   // Not considered an error
-            break;
+            FAPI_INF("Core Scan Ring Overrides Not Found");
+            goto fapi_try_exit;
         }
 
         io_ovrdRingLength += (pOverrideRingPayload - pOverrideStart );
         ALIGN_DWORD(tempRingLength, io_ovrdRingLength)
 
         FAPI_DBG( "Override Ring Length 0x%08X", io_ovrdRingLength );
+        cmeOvrdRings.dumpOverrideRings();
     }
-    while(0);
 
-    cmeOvrdRings.dumpOverrideRings();
-
+fapi_try_exit:
     FAPI_INF("<< layoutCmeScanOverride" );
-    return rc;
+    return fapi2::current_err;
 }
 
 //------------------------------------------------------------------------------
 
 /**
  * @brief   creates a lean scan ring layout for core rings in HOMER.
- * @param   i_pHOMER        points to HOMER image.
- * @param   i_chipState     functional state of all cores within P9 chip
- * @param   i_ringData      processor target
- * @param   i_debugMode     debug mode type for scan rings
- * @param   i_riskLevel     IPL type
- * @param   i_imgType       image type to be built
- * @param   i_pOverride     points to override binary.
- * @param   IMG_BUILD_SUCCESS   if function succeeds else error code.
+ * @param[in]   i_pHomer        points to HOMER image.
+ * @param[in]   i_chipState     functional state of all cores within P9 chip
+ * @param[in]   i_ringData      processor target
+ * @param[in]   i_debugMode     debug mode type for scan rings
+ * @param[in]   i_riskLevel     IPL type
+ * @param[in]   i_imgType       image type to be built
+ * @param[in]   i_pOverride     points to override binary.
+ * @return  fapi2 return code
  */
-uint32_t layoutRingsForCME( Homerlayout_t*   i_pHomer,
-                            const P9FuncModel& i_chipState,
-                            RingBufData& i_ringData,
-                            RingDebugMode_t i_debugMode,
-                            uint32_t i_riskLevel,
-                            ImageType_t i_imgType,
-                            void* i_pOverride )
+fapi2::ReturnCode layoutRingsForCME( Homerlayout_t*   i_pHomer,
+                                     const P9FuncModel& i_chipState,
+                                     RingBufData& i_ringData,
+                                     RingDebugMode_t i_debugMode,
+                                     uint32_t i_riskLevel,
+                                     ImageType_t i_imgType,
+                                     void* i_pOverride )
 {
     FAPI_DBG( ">> layoutRingsForCME");
-    uint32_t rc = IMG_BUILD_SUCCESS;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     uint32_t ringLength = 0;
     uint32_t tempLength = 0;
     RingVariant_t l_ringVariant = BASE;
@@ -2556,94 +2612,66 @@ uint32_t layoutRingsForCME( Homerlayout_t*   i_pHomer,
                          (uint8_t*)&i_pHomer->cpmrRegion,
                          i_debugMode );
 
-    do
+    // get all the rings pertaining to CME in a work buffer first.
+    if( i_riskLevel )
     {
-        if( !i_imgType.cmeCommonRingBuild )
-        {
-            break;
-        }
-
-        // get all the rings pertaining to CME in a work buffer first.
-        if( i_riskLevel )
-        {
-            l_ringVariant = RL;
-        }
-
-        ringLength  =  SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_offset) + SWIZZLE_4_BYTE(
-                           pCmeHdr->g_cme_pstate_region_length);
-        //save the length where hcode ends
-        tempLength  =  ringLength;
-
-        layoutCmnRingsForCme( i_pHomer,
-                              i_chipState,
-                              i_ringData,
-                              i_debugMode,
-                              l_ringVariant,
-                              i_imgType,
-                              cmeRings,
-                              ringLength );
-
-        if( i_pOverride )
-        {
-            uint32_t temp = 0;
-            uint32_t tempRc = 0;
-            ALIGN_DWORD( temp, ringLength );
-            temp = ringLength;
-
-            tempRc = layoutCmeScanOverride( i_pHomer,
-                                            i_pOverride,
-                                            i_chipState,
-                                            i_ringData,
-                                            i_debugMode,
-                                            i_imgType,
-                                            ringLength );
-
-            if( BUILD_FAIL_OVERRIDE == tempRc )
-            {
-                //found no core overrides
-                pCmeHdr->g_cme_cmn_ring_ovrd_offset = 0;
-            }
-            else
-            {
-                pCmeHdr->g_cme_cmn_ring_ovrd_offset = temp;
-            }
-        }
-
-        pCmeHdr->g_cme_common_ring_length = ringLength - tempLength; //cmn ring end - hcode end
-
-        if( !pCmeHdr->g_cme_common_ring_length )
-        {
-            //No common ring , so force offset to be 0
-            pCmeHdr->g_cme_common_ring_offset = 0;
-        }
-
-        tempLength = ringLength;
-        tempLength = (( tempLength + CME_BLOCK_READ_LEN - 1 ) >> CME_BLK_SIZE_SHIFT ); //multiple of 32B
-        ringLength = tempLength << CME_BLK_SIZE_SHIFT; //start position of instance rings
-
-        layoutInstRingsForCme( i_pHomer,
-                               i_chipState,
-                               i_ringData,
-                               i_debugMode,
-                               BASE,           // VPD rings are always BASE
-                               i_imgType,
-                               cmeRings,
-                               ringLength );
-
-        if( ringLength )
-        {
-            pCmeHdr->g_cme_max_spec_ring_length     =
-                ( ringLength + CME_BLOCK_READ_LEN - 1 ) >> CME_BLK_SIZE_SHIFT;
-            pCmeHdr->g_cme_core_spec_ring_offset    =   tempLength;
-        }
-
-        //Let us handle endianess now
-        pCmeHdr->g_cme_common_ring_length       =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_length);
-        pCmeHdr->g_cme_core_spec_ring_offset    =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_core_spec_ring_offset);
-        pCmeHdr->g_cme_max_spec_ring_length     =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_max_spec_ring_length);
-        pCmeHdr->g_cme_cmn_ring_ovrd_offset     =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_cmn_ring_ovrd_offset);
+        l_ringVariant = RL;
     }
-    while(0);
+
+    ringLength  =  SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_offset) + SWIZZLE_4_BYTE(
+                       pCmeHdr->g_cme_pstate_region_length);
+    //save the length where hcode ends
+    tempLength  =  ringLength;
+
+    FAPI_TRY( layoutCmnRingsForCme( i_pHomer, i_chipState, i_ringData,
+                                    i_debugMode, l_ringVariant,
+                                    i_imgType, cmeRings, ringLength ),
+              "Core Common Ring Layout Failed" );
+
+    if( i_pOverride )
+    {
+        uint32_t temp = 0;
+        ALIGN_DWORD( temp, ringLength );
+        temp = ringLength;
+
+        FAPI_TRY( layoutCmeScanOverride( i_pHomer, i_pOverride, i_chipState,
+                                         i_ringData, i_debugMode,
+                                         i_imgType, ringLength ),
+                  "Core Common Ring Ovrd Layout Failed" );
+
+        pCmeHdr->g_cme_cmn_ring_ovrd_offset = temp;
+
+    }
+
+    pCmeHdr->g_cme_common_ring_length = ringLength - tempLength; //cmn ring end - hcode end
+
+    if( !pCmeHdr->g_cme_common_ring_length )
+    {
+        //No common ring , so force offset to be 0
+        pCmeHdr->g_cme_common_ring_offset = 0;
+    }
+
+    tempLength = ringLength;
+    tempLength = (( tempLength + CME_BLOCK_READ_LEN - 1 ) >> CME_BLK_SIZE_SHIFT ); //multiple of 32B
+    ringLength = tempLength << CME_BLK_SIZE_SHIFT; //start position of instance rings
+
+    FAPI_TRY( layoutInstRingsForCme( i_pHomer, i_chipState, i_ringData,
+                                     i_debugMode, BASE, i_imgType,
+                                     cmeRings, ringLength),
+              "Core Specific Ring Layout Failed");
+
+    if( ringLength )
+    {
+        pCmeHdr->g_cme_max_spec_ring_length     =
+            ( ringLength + CME_BLOCK_READ_LEN - 1 ) >> CME_BLK_SIZE_SHIFT;
+        pCmeHdr->g_cme_core_spec_ring_offset    =   tempLength;
+    }
+
+    //Let us handle endianess now
+    pCmeHdr->g_cme_common_ring_length       =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_length);
+    pCmeHdr->g_cme_core_spec_ring_offset    =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_core_spec_ring_offset);
+    pCmeHdr->g_cme_max_spec_ring_length     =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_max_spec_ring_length);
+    pCmeHdr->g_cme_cmn_ring_ovrd_offset     =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_cmn_ring_ovrd_offset);
 
     cmeRings.dumpRings();
     FAPI_DBG("CME Header Ring Details ");
@@ -2661,18 +2689,19 @@ uint32_t layoutRingsForCME( Homerlayout_t*   i_pHomer,
 
              SWIZZLE_4_BYTE(pCmeHdr->g_cme_max_spec_ring_length));
 
-    FAPI_DBG( "<< layoutRingsForCME");
 
-    return rc;
+fapi_try_exit:
+    FAPI_INF( "<< layoutRingsForCME");
+    return fapi2::current_err;
 }
 
 
 //------------------------------------------------------------------------------
 
 /**
- * @brief   selects the bucked id for EQ_INEX ring.
- * @param   o_bucketId bucket Id selected for eq_inex ring.
- * @return  fapi2 return code.
+ * @brief       selects the bucked id for EQ_INEX ring.
+ * @param[out]  o_bucketId      bucket Id selected for eq_inex ring.
+ * @return      fapi2 return code.
  */
 fapi2::ReturnCode getSelectEqInexBucketAttr( uint32_t& o_bucketId )
 {
@@ -2729,27 +2758,20 @@ fapi_try_exit:
 //------------------------------------------------------------------------------
 
 /**
- * @brief   returns ringId based on bucket no. selcected for eq_inex ring.
- * @param   o_eqInexBucketId ring id for the selected bucket.
- * @return  IMG_BUILD_SUCCESS if success, error code otherwise.
+ * @brief       returns ringId based on bucket no. selected for eq_inex ring.
+ * @param[out]  o_eqInexBucketId ring id for the selected bucket.
+ * @return      fapi2 return code.
  */
 
-uint32_t resolveEqInexBucket( RingID& o_eqInexBucketId )
+fapi2::ReturnCode resolveEqInexBucket( RingID& o_eqInexBucketId )
 {
     FAPI_INF( ">> resolveEqInexBucket");
-    uint32_t rc = IMG_BUILD_SUCCESS;
-    fapi2::ReturnCode fapiRc ;
     uint32_t bucketId = 0;
 
     do
     {
-        fapiRc = getSelectEqInexBucketAttr( bucketId );
-
-        if( fapiRc )
-        {
-            rc = BUILD_FAIL_RING_SEL_EQ_INEX;
-            break;
-        }
+        FAPI_TRY( getSelectEqInexBucketAttr( bucketId ),
+                  "Failed to select eq_inex ring bucket due to attribute read failure");
 
         switch( bucketId )
         {
@@ -2775,32 +2797,33 @@ uint32_t resolveEqInexBucket( RingID& o_eqInexBucketId )
     }
     while(0);
 
+fapi_try_exit:
     FAPI_INF( "<< resolveEqInexBucket");
-    return rc;
+    return fapi2::current_err;
 }
 
 //------------------------------------------------------------------------------
 
 /**
  * @brief   creates a scan ring layout for quad common rings in HOMER.
- * @param   i_pHOMER        points to HOMER image.
- * @param   i_chipState     functional state of all cores within P9 chip
- * @param   i_ringData      contains ring buffers and respective sizes
- * @param   i_debugMode     scan ring debug state
- * @param   i_ringVariant   variant of the scan ring to be copied.
- * @param   io_qpmrHdr       instance of QPMR header.
- * @param   i_imgType       image type to be built
- * @param   io_sgpeRings    stores position and length of all quad common rings.
- * @param   IMG_BUILD_SUCCESS   if function succeeds else error code.
+ * @param[in]    i_pHomer        points to HOMER image.
+ * @param[in]    i_chipState     functional state of all cores within P9 chip
+ * @param[in]    i_ringData      contains ring buffers and respective sizes
+ * @param[in]    i_debugMode     scan ring debug state
+ * @param[in]    i_ringVariant   variant of the scan ring to be copied.
+ * @param[inout] io_qpmrHdr       instance of QPMR header.
+ * @param[in]    i_imgType       image type to be built
+ * @param[inout] io_sgpeRings    stores position and length of all quad common rings.
+ * @return       fapi2 return code
  */
-uint32_t layoutCmnRingsForSgpe( Homerlayout_t*     i_pHomer,
-                                const P9FuncModel& i_chipState,
-                                RingBufData&       i_ringData,
-                                RingDebugMode_t i_debugMode,
-                                RingVariant_t i_ringVariant,
-                                QpmrHeaderLayout_t& io_qpmrHdr,
-                                ImageType_t i_imgType,
-                                RingBucket& io_sgpeRings )
+fapi2::ReturnCode layoutCmnRingsForSgpe( Homerlayout_t*     i_pHomer,
+                                        const P9FuncModel&  i_chipState,
+                                        RingBufData&        i_ringData,
+                                        RingDebugMode_t     i_debugMode,
+                                        RingVariant_t       i_ringVariant,
+                                        QpmrHeaderLayout_t& io_qpmrHdr,
+                                        ImageType_t         i_imgType,
+                                        RingBucket&         io_sgpeRings )
 {
     FAPI_INF(">> layoutCmnRingsForSgpe");
 
@@ -2820,21 +2843,12 @@ uint32_t layoutCmnRingsForSgpe( Homerlayout_t*     i_pHomer,
                           (uint8_t*)&i_pHomer->qpmrRegion,
                           i_debugMode );
 
-    do
+    if( i_imgType.sgpeHcodeBuild )
     {
-        if( !i_imgType.sgpeCommonRingBuild )
-        {
-            break;
-        }
-
         RingID eqInexBucketId;
 
-        rc = resolveEqInexBucket( eqInexBucketId );
-
-        if( rc )
-        {
-            break;
-        }
+        FAPI_TRY( resolveEqInexBucket( eqInexBucketId ),
+                  "Failed to determine eq_inex ring bucket" );
 
         //get core common rings
         for( ; ringIndex < MAX_HOMER_QUAD_CMN_RINGS; ringIndex++ )
@@ -2858,17 +2872,24 @@ uint32_t layoutCmnRingsForSgpe( Homerlayout_t*     i_pHomer,
                                       tempBufSize,
                                       i_debugMode );
 
-            if( (i_ringData.iv_sizeWorkBuf1 == tempBufSize) || (0 == tempBufSize ) ||
-                ( 0 != rc ) )
+
+            if( TOR_RING_NOT_FOUND == rc )
             {
-                FAPI_INF( "did not find quad common ring %d", ringIndex );
-                rc = IMG_BUILD_SUCCESS;
+                FAPI_INF( "did not find quad common ring %s",
+                          io_sgpeRings.getRingName( torRingId ) );
                 tempBufSize = 0;
                 continue;
             }
 
             ALIGN_DWORD(tempLength, tempBufSize)
             ALIGN_RING_LOC( pRingStart, pCmnRingPayload );
+
+            FAPI_ASSERT( ( TOR_SUCCESS == rc ),
+                     fapi2::QUAD_CMN_RING_OVRD_LAYOUT_ERR()
+                     .set_OVRD_SIZE( pCmnRingPayload - pRingStart )
+                     .set_FAILURE_CODE( rc )
+                     .set_MAX_SIZE_ALLOCATED( QUAD_COMMON_RING_SIZE ),
+                     "Failed To Complete Quad Common Ring Layout" );
 
             memcpy( pCmnRingPayload, i_ringData.iv_pWorkBuf1, tempBufSize);
             io_sgpeRings.setRingOffset( pCmnRingPayload, io_sgpeRings.getCommonRingId( ringIndex ) );
@@ -2889,53 +2910,50 @@ uint32_t layoutCmnRingsForSgpe( Homerlayout_t*     i_pHomer,
         io_qpmrHdr.quadCommonRingOffset          +=  sgpeHcodeSize;
         FAPI_DBG("Quad Cmn Ring Length 0x%08X", io_qpmrHdr.quadCommonRingLength );
 
-    }
-    while(0);   //building common rings
+    } //building common rings
 
+fapi_try_exit:
     FAPI_INF("<< layoutCmnRingsForSgpe");
-
-    return rc;
+    return fapi2::current_err;
 }
 
 //------------------------------------------------------------------------------
 
 /**
- * @brief   creates a scan ring layout for quad common rings in HOMER.
- * @param   i_pHOMER        points to HOMER image.
- * @param   i_chipState     functional state of all cores within P9 chip
- * @param   i_ringData      contains ring buffers and respective sizes
- * @param   i_debugMode     scan ring debug state
- * @param   i_ringVariant   variant of the scan ring to be copied.
- * @param   io_qpmrHdr       instance of QPMR header.
- * @param   i_imgType       image type to be built
- * @param   io_sgpeRings    stores position and length of all quad common rings.
- * @param   IMG_BUILD_SUCCESS   if function succeeds else error code.
+ * @brief       creates a scan ring layout for quad common rings in HOMER.
+ * @param[in]    i_pHomer        points to HOMER image.
+ * @param[in]    i_chipState     functional state of all cores within P9 chip
+ * @param[in]    i_ringData      contains ring buffers and respective sizes
+ * @param[in]    i_debugMode     scan ring debug state
+ * @param[in]    i_ringVariant   variant of the scan ring to be copied.
+ * @param[inout] io_qpmrHdr      instance of QPMR header.
+ * @param[in]    i_imgType       image type to be built
+ * @param[inout] io_sgpeRings    stores position and length of all quad common rings.
+ * @return       fapi2 return code
  */
-uint32_t layoutInstRingsForSgpe( Homerlayout_t*     i_pHomer,
-                                 const P9FuncModel& i_chipState,
-                                 RingBufData&       i_ringData,
-                                 RingDebugMode_t i_debugMode,
-                                 RingVariant_t i_ringVariant,
-                                 QpmrHeaderLayout_t& io_qpmrHdr,
-                                 ImageType_t i_imgType,
-                                 RingBucket& io_sgpeRings )
+fapi2::ReturnCode layoutInstRingsForSgpe( Homerlayout_t*     i_pHomer,
+                                         const P9FuncModel& i_chipState,
+                                         RingBufData&       i_ringData,
+                                         RingDebugMode_t i_debugMode,
+                                         RingVariant_t i_ringVariant,
+                                         QpmrHeaderLayout_t& io_qpmrHdr,
+                                         ImageType_t i_imgType,
+                                         RingBucket& io_sgpeRings )
 {
-    uint32_t rc = IMG_BUILD_SUCCESS;
     FAPI_INF(">> layoutInstRingsForSgpe");
+    uint32_t rc = IMG_BUILD_SUCCESS;
 
-    do
+    if( i_imgType.sgpeHcodeBuild )
     {
-        if( !i_imgType.sgpeCacheSpecificRingBuild )
-        {
-            break;
-        }
-
         uint32_t quadSpecRingStart = SWIZZLE_4_BYTE(io_qpmrHdr.sgpeImgLength) + io_qpmrHdr.quadCommonRingLength;
         uint16_t* pCmnRingIndex   = (uint16_t*)&i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[ quadSpecRingStart ];
         uint8_t* pRingStart       = &i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[quadSpecRingStart];
         uint8_t* instRingPayLoad  = &i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[ quadSpecRingStart +
                                     QUAD_SPEC_RING_INDEX_LEN ];
+
         uint32_t ringStartToHdrOffset = ( TOR_VER_ONE == P9_TOR::tor_version() ) ? RING_START_TO_RS4_OFFSET : 0;
+
+        RingID quadSpecRingId;
 
         for( uint32_t cacheInst = 0; cacheInst < MAX_QUADS_PER_CHIP; cacheInst++ )
         {
@@ -2958,10 +2976,11 @@ uint32_t layoutInstRingsForSgpe( Homerlayout_t*     i_pHomer,
                 tempBufSize = i_ringData.iv_sizeWorkBuf1;
                 chipletId = ExChipletRingMap.getInstanceId( CACHE0_CHIPLET_ID + cacheInst , ringIndex );
 
+                quadSpecRingId = io_sgpeRings.getInstRingId( ringIndex );
                 rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
                                           P9_XIP_MAGIC_SGPE,
                                           i_chipState.getChipLevel(),
-                                          io_sgpeRings.getInstRingId( ringIndex ),
+                                          quadSpecRingId,
                                           P9_TOR::SGPE,
                                           i_ringVariant,
                                           chipletId,
@@ -2969,17 +2988,23 @@ uint32_t layoutInstRingsForSgpe( Homerlayout_t*     i_pHomer,
                                           tempBufSize,
                                           i_debugMode );
 
-                if( (i_ringData.iv_sizeWorkBuf1 == tempBufSize) || (0 == tempBufSize ) ||
-                    ( 0 != rc ) )
+                if( TOR_RING_NOT_FOUND == rc )
                 {
-                    FAPI_DBG( "did not find quad spec ring %d for cache Inst %d", ringIndex , cacheInst );
-                    rc = 0;
+                    FAPI_DBG( "did not find quad spec ring %s for cache Inst %d",
+                              io_sgpeRings.getRingName( quadSpecRingId ), cacheInst );
                     tempBufSize = 0;
                     continue;
                 }
 
                 ALIGN_DWORD(tempLength, tempBufSize)
                 ALIGN_RING_LOC( pRingStart, instRingPayLoad );
+
+                FAPI_ASSERT( ( TOR_SUCCESS == rc ),
+                            fapi2::QUAD_SPEC_RING_LAYOUT_ERR()
+                            .set_QUAD_SPEC_RING_SIZE( instRingPayLoad - pRingStart )
+                            .set_FAILURE_CODE( rc )
+                            .set_MAX_SIZE_ALLOCATED( QUAD_SPECIFIC_RING_SIZE_TOTAL ),
+                            "Failed to Complete Quad Specific Ring Layout" );
 
                 memcpy( instRingPayLoad, i_ringData.iv_pWorkBuf1, tempBufSize);
                 io_sgpeRings.setRingOffset( instRingPayLoad, io_sgpeRings.getInstRingId( ringIndex ), chipletId );
@@ -3000,43 +3025,43 @@ uint32_t layoutInstRingsForSgpe( Homerlayout_t*     i_pHomer,
         io_qpmrHdr.quadSpecRingLength                =   (instRingPayLoad - pRingStart);
         FAPI_DBG("Instance Ring Length 0x%08X", io_qpmrHdr.quadSpecRingLength);
     }
-    while(0);
 
+fapi_try_exit:
     FAPI_INF("<< layoutInstRingsForSgpe");
-    return rc;
+    return fapi2::current_err;
 }
 
 //------------------------------------------------------------------------------
 
 /**
- * @brief   creates a scan ring layout for quad common rings in HOMER.
- * @param   i_pHOMER        points to HOMER image.
- * @param   i_chipState     functional state of all cores within P9 chip
- * @param   i_ringData      contains ring buffers and respective sizes
- * @param   i_debugMode     scan ring debug state
- * @param   i_riskLevel     true if system IPL is in risk level mode else false.
- * @param   io_qpmrHdr      instance of QPMR header.
- * @param   i_imgType       image type to be built
- * @param   IMG_BUILD_SUCCESS   if function succeeds else error code.
+ * @brief       creates a scan ring layout for quad common rings in HOMER.
+ * @param[in]    i_pHomer        points to HOMER image.
+ * @param[in]    i_pOverride     points to override binary.
+ * @param[in]    i_chipState     functional state of all cores within P9 chip
+ * @param[in]    i_ringData      contains ring buffers and respective sizes
+ * @param[in]    i_debugMode     scan ring debug state
+ * @param[in]    i_riskLevel     true if system IPL is in risk level mode else false.
+ * @param[inout] io_qpmrHdr      instance of QPMR header.
+ * @param[in]    i_imgType       image type to be built
+ * @return       fapi2 return code
  */
-uint32_t layoutRingsForSGPE( Homerlayout_t*     i_pHomer,
-                             void* i_pOverride,
-                             const P9FuncModel& i_chipState,
-                             RingBufData&       i_ringData,
-                             RingDebugMode_t i_debugMode,
-                             uint32_t i_riskLevel,
-                             QpmrHeaderLayout_t& io_qpmrHdr,
-                             ImageType_t i_imgType )
+fapi2::ReturnCode layoutRingsForSGPE( Homerlayout_t*     i_pHomer,
+                                 void* i_pOverride,
+                                 const P9FuncModel& i_chipState,
+                                 RingBufData&       i_ringData,
+                                 RingDebugMode_t i_debugMode,
+                                 uint32_t i_riskLevel,
+                                 QpmrHeaderLayout_t& io_qpmrHdr,
+                                 ImageType_t i_imgType )
 {
     FAPI_INF( ">> layoutRingsForSGPE");
-    uint32_t rc = IMG_BUILD_SUCCESS;
     RingVariant_t l_ringVariant = BASE;
     sgpeHeader_t* pSgpeImgHdr   =   (sgpeHeader_t*)& i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
     RingBucket sgpeRings( PLAT_SGPE,
                           (uint8_t*)&i_pHomer->qpmrRegion,
                           i_debugMode );
 
-    do
+    if( i_imgType.sgpeHcodeBuild )
     {
 
         // get all the rings pertaining to CME in a work buffer first.
@@ -3046,33 +3071,23 @@ uint32_t layoutRingsForSGPE( Homerlayout_t*     i_pHomer,
         }
 
         //Manage the Quad Common rings in HOMER
-        layoutCmnRingsForSgpe( i_pHomer,
-                               i_chipState,
-                               i_ringData,
-                               i_debugMode,
-                               l_ringVariant,
-                               io_qpmrHdr,
-                               i_imgType,
-                               sgpeRings );
+
+        FAPI_TRY( layoutCmnRingsForSgpe( i_pHomer, i_chipState, i_ringData,
+                                         i_debugMode, l_ringVariant, io_qpmrHdr,
+                                         i_imgType, sgpeRings),
+                  "Quad Common Ring Layout Failed");
 
         //Manage the Quad Override rings in HOMER
-        layoutSgpeScanOverride( i_pHomer,
-                                i_pOverride,
-                                i_chipState,
-                                i_ringData,
-                                i_debugMode,
-                                io_qpmrHdr,
-                                i_imgType );
+
+        FAPI_TRY( layoutSgpeScanOverride( i_pHomer, i_pOverride, i_chipState,
+                                          i_ringData, i_debugMode, io_qpmrHdr, i_imgType ),
+                  "Quad Ring Override Layout Failed");
 
         //Manage the Quad specific rings in HOMER
-        layoutInstRingsForSgpe( i_pHomer,
-                                i_chipState,
-                                i_ringData,
-                                i_debugMode,
-                                BASE,           // VPD rings are always BASE
-                                io_qpmrHdr,
-                                i_imgType,
-                                sgpeRings );
+
+        FAPI_TRY( layoutInstRingsForSgpe( i_pHomer, i_chipState, i_ringData,
+                                          i_debugMode, BASE, io_qpmrHdr, i_imgType, sgpeRings ),
+                  "Quad Spec Ring Layout Failed");
 
         if( 0 == io_qpmrHdr.quadCommonRingLength )
         {
@@ -3088,8 +3103,8 @@ uint32_t layoutRingsForSGPE( Homerlayout_t*     i_pHomer,
                 SWIZZLE_4_BYTE(io_qpmrHdr.sgpeImgLength) + io_qpmrHdr.quadCommonRingLength +
                 io_qpmrHdr.quadSpecRingLength;
         }
-    }
-    while(0);   //building instance rings
+
+    } //building instance rings
 
     //Let us handle endianes at last
     io_qpmrHdr.quadCommonRingOffset              =   SWIZZLE_4_BYTE(io_qpmrHdr.quadCommonRingOffset);
@@ -3111,13 +3126,18 @@ uint32_t layoutRingsForSGPE( Homerlayout_t*     i_pHomer,
              SWIZZLE_4_BYTE(pSgpeImgHdr->g_sgpe_spec_ring_occ_offset));
 
 
+fapi_try_exit:
     FAPI_INF( "<< layoutRingsForSGPE");
-    return rc;
+    return fapi2::current_err;
 }
+
 //---------------------------------------------------------------------------
+
 /**
  * @brief updates the IVPR attributes for SGPE, PGPE.
- * @brief   i_pChipHomer points to start of HOMER
+ * @param[in]   i_pChipHomer    points to start of HOMER
+ * @param[in]   i_procTgt       target associated with P9 chip
+ * @return      fapi2 return code
  */
 fapi2::ReturnCode updateGpeAttributes( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PROC& i_procTgt )
 {
@@ -3152,8 +3172,10 @@ fapi_try_exit:
 
 //---------------------------------------------------------------------------
 /**
- * @brief Set the Fabric System, Group and Chip IDs into SGPE and CME headers
- * @brief   i_pChipHomer points to start of HOMER
+ * @brief   Set the Fabric System, Group and Chip IDs into SGPE and CME headers
+ * @param[in]   i_pChipHomer    points to start of HOMER
+ * @param[in]   i_procTgt       fapi2 target associated with P9 chip
+ * @return      fapi2 return code.
  */
 fapi2::ReturnCode setFabricIds( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PROC& i_procTgt )
 {
@@ -3221,9 +3243,9 @@ fapi_try_exit:
 
 /**
  * @brief   populates EQ SCOM restore region of HOMER with SCOM restore value for NCU RNG BAR ENABLE.
- * @param   i_pChipHomer    points to start of P9 HOMER
- * @param   i_procTgt       fapi2 target for p9 chip.
- * @return  faip2 return code.
+ * @param[in]   i_pChipHomer    points to start of P9 HOMER
+ * @param[in]   i_procTgt       fapi2 target for p9 chip.
+ * @return      faip2 return code.
  */
 fapi2::ReturnCode populateNcuRingBarScomReg( void* i_pChipHomer, CONST_FAPI2_PROC& i_procTgt )
 {
@@ -3294,18 +3316,19 @@ fapi2::ReturnCode populateNcuRingBarScomReg( void* i_pChipHomer, CONST_FAPI2_PRO
     }
     while(0);
 
+
 fapi_try_exit:
-    FAPI_INF("<< populateNcuRingBarScomReg");
+    FAPI_DBG("<< populateNcuRingBarScomReg");
     return fapi2::current_err;
 }
-
 //--------------------------------------------------------------------------------------------
 
 /**
- * @brief   populate L2 Epsilon SCOM register.
- * @param   i_pChipHomer    points to start of P9 HOMER.
- * @return  fapi2 return code.
+ * @brief       populate L2 Epsilon SCOM register.
+ * @param[in]   i_pChipHomer    points to start of P9 HOMER.
+ * @return      fapi2 return code.
  */
+
 fapi2::ReturnCode populateEpsilonL2ScomReg( void*    i_pChipHomer )
 {
     FAPI_INF(">> populateEpsilonL2ScomReg");
@@ -3469,10 +3492,11 @@ fapi2::ReturnCode populateEpsilonL2ScomReg( void*    i_pChipHomer )
                      .set_STOP_API_SCOM_ERR( rc )
                      .set_EPSILON_REG_ADDR( scomAddr )
                      .set_EPSILON_REG_DATA( l_epsilonScomVal ),
-                     "Failed to create restore entry for L2 Epsilon register" );
+                     "Failed To Create Restore Entry For L2 Epsilon Register" );
 
     }
     while(0);
+
 
 fapi_try_exit:
     FAPI_INF("<< populateEpsilonL2ScomReg");
@@ -3482,9 +3506,9 @@ fapi_try_exit:
 //---------------------------------------------------------------------------
 
 /**
- * @brief   populate L3 Epsilon SCOM register.
- * @param   i_pChipHomer    points to start of P9 HOMER.
- * @return  fapi2 return code.
+ * @brief       populate L3 Epsilon SCOM register.
+ * @param[in]   i_pChipHomer    points to start of P9 HOMER.
+ * @return      fapi2 return code.
  */
 fapi2::ReturnCode populateEpsilonL3ScomReg( void*    i_pChipHomer )
 {
@@ -3654,13 +3678,14 @@ fapi2::ReturnCode populateEpsilonL3ScomReg( void*    i_pChipHomer )
                      .set_STOP_API_SCOM_ERR( rc )
                      .set_EPSILON_REG_ADDR( scomAddr )
                      .set_EPSILON_REG_DATA( l_epsilonScomVal ),
-                     "Failed to create restore entry for L3 Epsilon register" );
+                     "Failed To Create Restore Entry For L3 Epsilon Register" );
 
     }
     while(0);
 
-fapi_try_exit:
     FAPI_INF("<< populateEpsilonL3ScomReg");
+
+fapi_try_exit:
     return fapi2::current_err;
 }
 
@@ -3767,10 +3792,10 @@ fapi_try_exit:
 //---------------------------------------------------------------------------
 
 /**
- * @brief   Reads an attribute to determine aux function invocation interval.
- * @param   i_pHomer                points to HOMER.
- * @param   o_auxFuncIntControl     Invocation interval for the auxiliary function.
- * return   fapi2 return code.
+ * @brief       Reads an attribute to determine aux function invocation interval.
+ * @param[in]   i_pHomer                points to HOMER.
+ * @param[out]  o_auxFuncIntControl     Invocation interval for the auxiliary function.
+ * @return       fapi2 return code.
  */
 fapi2::ReturnCode initReadIntervalForAuxFunc( Homerlayout_t*     i_pHomer, uint32_t& o_auxFuncIntControl )
 {
@@ -3783,7 +3808,7 @@ fapi2::ReturnCode initReadIntervalForAuxFunc( Homerlayout_t*     i_pHomer, uint3
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PERF_24x7_INVOCATION_TIME_MS,
                            FAPI_SYSTEM,
                            readInterAttr),
-             "Error from FAPI_ATTR_GET for attribute ATTR_PERF_24x7_INVOCATION_TIME_MS");
+             "Error From FAPI_ATTR_GET For Attribute ATTR_PERF_24x7_INVOCATION_TIME_MS");
 
     if( readInterAttr )
     {
@@ -3800,9 +3825,10 @@ fapi_try_exit:
 
 /**
  * @brief   builds HOMER section supporting Auxiliary functions.
- * @param   i_procTgt   fapi2 target for P9 chip
- * @param   i_pHomer    points to HOMER.
- * @param   o_qpmrHdr   instance of QpmrHeaderLayout_t
+ * @param[in]   i_procTgt   fapi2 target for P9 chip
+ * @param[in]   i_pHomer    points to HOMER.
+ * @param[out]  o_qpmrHdr   instance of QpmrHeaderLayout_t
+ * @return  fapi2 return code
  */
 fapi2::ReturnCode buildSgpeAux( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t*     i_pHomer,
                                 QpmrHeaderLayout_t& o_qpmrHdr )
@@ -3836,10 +3862,9 @@ fapi_try_exit:
 /**
  * @brief customizes the magic words in various HOMER headers.
  * @param[in]   i_pHomer    points to HOMER
- * @param[in]   i_ecLevel   ec level of the chip.
  */
 
-void customizeMagicWord( Homerlayout_t*     i_pHomer, uint8_t i_ecLevel )
+void customizeMagicWord( Homerlayout_t*     i_pHomer )
 {
     FAPI_INF( ">> customizeMagicWord")
     cpmrHeader_t* pCpmrHdr =
@@ -3923,7 +3948,9 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                             i_pBuf3,
                             i_sizeBuf3 );
 
-    FAPI_TRY( validateInputArguments( i_pImageIn, i_pHomerImage, i_phase,
+    FAPI_TRY( validateInputArguments( i_pImageIn,
+                                      i_pHomerImage,
+                                      i_phase,
                                       i_imgType,
                                       i_pBuf1,
                                       i_sizeBuf1,
@@ -3958,7 +3985,7 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
     FAPI_INF("CPMR / Self Restore building");
 
     FAPI_TRY( buildCoreRestoreImage( i_pImageIn, pChipHomer, i_imgType, fuseModeState, l_chipFuncModel ),
-              "Failed to copy core self restore section in HOMER" );
+                  "Failed To Copy Core Self Restore Section in HOMER" );
 
     FAPI_INF("CPMR / Self Restore built ");
 
@@ -3975,18 +4002,18 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
     FAPI_INF("PGPE building");
     PpmrHeader_t l_ppmrHdr;
     FAPI_TRY( buildPgpeImage( i_pImageIn, pChipHomer, l_ppmrHdr, i_imgType, l_chipFuncModel ),
-              "Failed to copy PGPE region in HOMER" );
+                  "Failed To Copy PGPE region in HOMER" );
 
     //Update P State parameter block info in HOMER
     FAPI_TRY( buildParameterBlock( pChipHomer, i_procTgt, l_ppmrHdr, i_imgType, i_pBuf1, i_sizeBuf1 ),
-              "Failed to add parameter block" );
+              "Failed to Add Parameter Block" );
 
     FAPI_INF("PGPE built");
     //Let us add Scan Rings to the image.
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RING_DBG_MODE,
                            FAPI_SYSTEM,
                            l_ringDebug),
-             "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_RING_DBG_MODE");
+                 "Error From FAPI_ATTR_GET For Attribute ATTR_SYSTEM_RING_DBG_MODE");
     FAPI_DBG("Ring Debug Level 0x%02x", l_ringDebug );
 
     //Extract all the rings for CME platform from HW Image and VPD
@@ -3997,12 +4024,11 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                                 i_imgType );
 
     FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
-                 fapi2::SCAN_RING_EXTRACTION_FAIL()
-                 .set_EXTRACTION_FAIL_PLAT( PLAT_CME )
+                 fapi2::CORE_SCAN_RING_EXTRACTION_FAIL()
                  .set_EXTRACTION_FAILURE_CODE( ppeImgRc )
                  .set_RISK_LEVEL( l_riskLevel )
                  .set_IMG_TYPE( i_imgType ),
-                 "Failed to extract core scan rings" );
+                 "Failed To Extract Core Scan Rings" );
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RISK_LEVEL,
                            FAPI_SYSTEM,
@@ -4010,23 +4036,13 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
              "Error from FAPI_ATTR_GET for ATTR_RISK_LEVEL");
 
     // create a layout of rings in HOMER for consumption of CME
-    ppeImgRc = layoutRingsForCME(  pChipHomer,
-                                   l_chipFuncModel,
-                                   l_ringData,
-                                   (RingDebugMode_t)l_ringDebug,
-                                   l_riskLevel,
-                                   i_imgType,
-                                   i_pRingOverride );
-
-    FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
-                 fapi2::SCAN_RING_PLACEMENT_FAIL()
-                 .set_PLACEMENT_FAIL_PLAT( PLAT_CME )
-                 .set_PLACEMENT_FAILURE_CODE( ppeImgRc )
-                 .set_RISK_LEVEL( l_riskLevel )
-                 .set_IMG_TYPE( i_imgType ),
-                 "Failed to place core scan rings" );
+    FAPI_TRY( layoutRingsForCME( pChipHomer, l_chipFuncModel, l_ringData,
+                                 (RingDebugMode_t)l_ringDebug, l_riskLevel,
+                                 i_imgType, i_pRingOverride),
+              "Failed To Layout Core Rings");
 
     l_ringData.iv_ringBufSize = i_sizeBuf1;
+
     ppeImgRc = getPpeScanRings( i_pImageIn,
                                 PLAT_SGPE,
                                 i_procTgt,
@@ -4034,48 +4050,17 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                                 i_imgType );
 
     FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
-                 fapi2::SCAN_RING_EXTRACTION_FAIL()
-                 .set_EXTRACTION_FAIL_PLAT( PLAT_SGPE )
+                 fapi2::QUAD_SCAN_RING_EXTRACTION_FAIL()
                  .set_EXTRACTION_FAILURE_CODE( ppeImgRc )
                  .set_RISK_LEVEL( l_riskLevel )
                  .set_IMG_TYPE( i_imgType ),
-                 "Failed to extract quad scan rings" );
+                 "Failed To Extract Quad Scan Rings" );
 
     // create a layout of rings in HOMER for consumption of SGPE
-    ppeImgRc = layoutRingsForSGPE(  pChipHomer,
-                                    i_pRingOverride,
-                                    l_chipFuncModel,
-                                    l_ringData,
-                                    (RingDebugMode_t)l_ringDebug,
-                                    l_riskLevel,
-                                    l_qpmrHdr,
-                                    i_imgType );
-
-    FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
-                 fapi2::SCAN_RING_EXTRACTION_FAIL()
-                 .set_EXTRACTION_FAIL_PLAT( PLAT_SGPE )
-                 .set_EXTRACTION_FAILURE_CODE( ppeImgRc )
-                 .set_RISK_LEVEL( l_riskLevel )
-                 .set_IMG_TYPE( i_imgType ),
-                 "Failed to extract quad scan rings" );
-
-    // create a layout of rings in HOMER for consumption of SGPE
-    ppeImgRc = layoutRingsForSGPE(  pChipHomer,
-                                    i_pRingOverride,
-                                    l_chipFuncModel,
-                                    l_ringData,
-                                    (RingDebugMode_t)l_ringDebug,
-                                    l_riskLevel,
-                                    l_qpmrHdr,
-                                    i_imgType );
-
-    FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
-                 fapi2::SCAN_RING_PLACEMENT_FAIL()
-                 .set_PLACEMENT_FAIL_PLAT( PLAT_SGPE )
-                 .set_PLACEMENT_FAILURE_CODE( ppeImgRc )
-                 .set_RISK_LEVEL( l_riskLevel )
-                 .set_IMG_TYPE( i_imgType ),
-                 "Failed to place quad scan rings" );
+    FAPI_TRY( layoutRingsForSGPE( pChipHomer, i_pRingOverride, l_chipFuncModel,
+                                  l_ringData, (RingDebugMode_t)l_ringDebug,
+                                  l_riskLevel, l_qpmrHdr, i_imgType ),
+              "Failed To Layout Quad Rings" );
 
     //Update CPMR Header with Scan Ring details
     updateCpmrCmeRegion( pChipHomer );
@@ -4120,7 +4105,7 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
               "Failed to update SGPE/PGPE IVPR attributes" );
 
     //customize magic word based on endianess
-    customizeMagicWord( pChipHomer, l_chipFuncModel.getChipLevel() );
+    customizeMagicWord( pChipHomer );
 
     FAPI_IMP("<< p9_hcode_image_build" );
 
