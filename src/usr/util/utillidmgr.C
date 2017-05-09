@@ -38,11 +38,6 @@
 #include <config.h>
 #ifdef CONFIG_SECUREBOOT
 #include <pnor/pnorif.H>
-#endif
-
-#include <config.h>
-#ifdef CONFIG_SECUREBOOT
-#include <pnor/pnorif.H>
 #include <secureboot/service.H>
 #endif
 
@@ -736,12 +731,14 @@ errlHndl_t UtilLidMgr::cleanup()
         bool skip_remove_pages = false;
 
 #ifdef CONFIG_SECUREBOOT
+#ifndef __HOSTBOOT_RUNTIME
         // If in SECUREBOOT the lid could be securely signed in PNOR (like OCC)
         // If so, unload it securely below rather than call mm_remove_pages
         if (iv_lidPnorInfo.secure)
         {
             skip_remove_pages = true;
         }
+#endif
 #endif
 
         if (skip_remove_pages == false)
@@ -784,9 +781,9 @@ errlHndl_t UtilLidMgr::cleanup()
             if (l_err)
             {
                 UTIL_FT(ERR_MRK"UtilLidMgr::cleanup: Error from "
-                               "unloadSecureSection(PNOR::OCC): "
+                               "unloadSecureSection(0x%X): "
                                "unloading module : %s (id=0x%X)",
-                               iv_lidFileName, iv_lidId);
+                               iv_lidPnorInfo.id, iv_lidFileName, iv_lidId);
             }
         }
 #endif
