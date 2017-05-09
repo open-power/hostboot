@@ -1140,17 +1140,19 @@ int32_t isMembufOnDimm( TARGETING::TargetHandle_t i_memTarget,
 
     do
     {
-        // The DIMMs in an node should either all be buffered or all not. So
-        // we can check the attribute from ANY MBA.
-        TargetHandleList list = getConnected( i_memTarget, TYPE_MBA );
-        if ( 0 == list.size() )
-        {
-            PRDF_ERR( "[isMembufOnDimm] Couldn't find an MBA target" );
-            break;
-        }
-
-
-//         @TODO RTC: 153297 ATTR_EFF_CUSTOM_DIMM Type has changed
+//         @TODO RTC: 153297 ATTR_EFF_CUSTOM_DIMM Type does not exist yet for P9
+//                           and will change from how it was defined in P8
+//
+//        // The DIMMs in an node should either all be buffered or all not. So
+//        // we can check the attribute from ANY MBA.
+//        TargetHandleList list = getConnected( i_memTarget, TYPE_MBA );
+//        if ( 0 == list.size() )
+//        {
+//            PRDF_ERR( "[isMembufOnDimm] Couldn't find an MBA target" );
+//            break;
+//        }
+//
+//
 //         const TargetHandle_t mbaTarget = list[0];
 //         o_isBuffered = mbaTarget->getAttr<ATTR_EFF_CUSTOM_DIMM>();
 
