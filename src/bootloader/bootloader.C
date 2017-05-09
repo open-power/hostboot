@@ -144,8 +144,8 @@ namespace Bootloader{
             // Set the MMIO BAR information if appropriate
             if (l_blConfigData->version >= BLTOHB_SAB + 1 /* MMIO_BARS_ADDED @TODO RTC:173526*/ )
             {
-                g_blData->blToHbData.xscomBAR = 0 /* l_blConfigData->xscomBAR @TODO RTC:173526*/ ;
-                g_blData->blToHbData.lpcBAR = 0 /* l_blConfigData->lpcBAR @TODO RTC:173526*/ ;
+                g_blData->blToHbData.xscomBAR = 0x000603FC00000000 /* l_blConfigData->xscomBAR @TODO RTC:173526*/ ;
+                g_blData->blToHbData.lpcBAR = 0x0006030000000000 /* l_blConfigData->lpcBAR @TODO RTC:173526*/ ;
             }
 
         }
