@@ -6,6 +6,7 @@
 # OpenPOWER HostBoot Project
 #
 # Contributors Listed Below - COPYRIGHT 2015,2017
+# [+] Google Inc.
 # [+] International Business Machines Corp.
 #
 #
@@ -351,11 +352,6 @@ switchToHBB:
 
 
 .section .data
-
-    .balign 16
-.global hbi_ImageId
-hbi_ImageId:
-    .space 128
 
 .global bootloader_end_address
 bootloader_end_address:
