@@ -745,13 +745,6 @@ sub setupBars
     my @bars=(  "FSP_BASE_ADDR",
                 "PSI_BRIDGE_BASE_ADDR",
                 "INTP_BASE_ADDR",
-                "PHB_MMIO_ADDRS_64",
-                "PHB_MMIO_ADDRS_32",
-                "PHB_XIVE_ESB_ADDRS",
-                "PHB_REG_ADDRS",
-                "XIVE_ROUTING_ESB_ADDR",
-                "XIVE_ROUTING_END_ADDR",
-                "XIVE_PRESENTATION_NVT_ADDR",
                 "VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR",
                 "VAS_USER_WINDOW_CONTEXT_ADDR",
                 "LPC_BUS_ADDR",
@@ -761,7 +754,6 @@ sub setupBars
                 "NVIDIA_PHY1_REG_ADDR",
                 "PSI_HB_ESB_ADDR",
                 "XIVE_CONTROLLER_BAR_ADDR",
-                "XIVE_PRESENTATION_BAR_ADDR",
                 "XSCOM_BASE_ADDRESS",
                 "NX_RNG_ADDR");
 

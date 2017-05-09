@@ -18859,94 +18859,6 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>PHB_MMIO_ADDRS_64</id>
-    <description>PHB0-PHB5 64 bits addresses
-        MMIO consumed by PHYP
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-        <array>6</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>PHB_MMIO_ADDRS_32</id>
-    <description>PHB0-PHB5 32 bit addresses
-        MMIO consumed by PHYP
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-        <array>6</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>`
-
-<attribute>
-    <id>PHB_XIVE_ESB_ADDRS</id>
-    <description>PHB0-PHB5 XIVE ESB addresses
-        MMIO consumed by PHYP
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-        <array>6</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>PHB_REG_ADDRS</id>
-    <description>PHB0-PHB5 Register Space addresses
-        MMIO consumed by PHYP
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-        <array>6</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>XIVE_ROUTING_ESB_ADDR</id>
-    <description>XIVE Routing ESB address
-        MMIO consumed by PHYP
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>XIVE_ROUTING_END_ADDR</id>
-    <description>XIVE Routing END address
-        MMIO consumed by PHYP
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>XIVE_PRESENTATION_NVT_ADDR</id>
-    <description>XIVE Presentation NVT address
-        MMIO consumed by PHYP
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
     <id>VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR</id>
     <description>VAS - Hypervisor Window Contexts address
         MMIO consumed by PHYP
@@ -19038,18 +18950,6 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
-
-<attribute>
-    <id>XIVE_PRESENTATION_BAR_ADDR</id>
-    <description>XIVE - Presentation Bar address
-        MMIO consumed by PHYP
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-   </simpleType>
-   <persistency>non-volatile</persistency>
-   <readable/>
 </attribute>
 
 <attribute>
