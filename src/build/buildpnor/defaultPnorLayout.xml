@@ -256,6 +256,7 @@ Layout Description
         <eyeCatch>OCC</eyeCatch>
         <physicalOffset>0x2AD4000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
+        <sha512Version/>
         <side>sideless</side>
         <ecc/>
     </section>
