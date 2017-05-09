@@ -82,18 +82,7 @@ _start:
 
 _start_postmsr:
 
-    ;// Determine if this is the first thread.
-    li r4, 2
-    ;// Read spinlock value.
-    lis r2, kernel_other_thread_spinlock@h
-    ori r2, r2, kernel_other_thread_spinlock@l
     lwsync
-1:
-    ldarx r3, 0, r2
-    cmpwi r3, 0 ;// Non-zero means this thread wasn't first.
-    bnel cr0, _other_thread_error ;// Handle having multiple threads started
-    stdcx. r4, 0, r2    ;// Attempt to store 2.
-    bne 1b ;// Loop until sucessful at stwcx.
     isync
 
 ;// _main:
@@ -313,31 +302,6 @@ HYPE_INTERRUPT(hype_fac_unavail, HBBL_hype_fac_unavail)
 STD_INTERRUPT(softpatch, HBBL_softpatch)
 STD_INTERRUPT(debug, HBBL_debug)
 
-;// @fn _other_thread_error:
-;//     Used for threads other than first to handle this unexpected condition.
-_other_thread_error:
-    ;// Read spinlock value.
-    lis r2, kernel_other_thread_spinlock@h
-    ori r2, r2, kernel_other_thread_spinlock@l
-1:
-    ld r3, 0(r2)
-    ;// Loop until value is 1...
-    cmpi cr0, r3, 1
-    beq task_end_stub ;// End the multiple threads
-    or 1,1,1 ;// Lower thread priority.
-    b 1b
-
-
-    ;// @fn task_end_stub
-    ;// Stub to call a TASK_END syscall in the event that a task 'returns' from
-    ;// its entry point.  We cannot call task_end() directly because profiling
-    ;// inserts garbage code into the task_end C function.
-.global task_end_stub
-task_end_stub:
-    mr r4, r3 ;// Move current rc (r3) to status value (r4)
-    li r3, 2  ;// TASK_END -> r3 (syscall number)
-    sc
-
 
     ;// @fn enterHBB
     ;// Leave the Bootloader and switch to the Hostboot Base (HBB).
@@ -387,11 +351,6 @@ switchToHBB:
 
 
 .section .data
-
-    .balign 8
-.global kernel_other_thread_spinlock
-kernel_other_thread_spinlock:
-    .space 8
 
     .balign 16
 .global hbi_ImageId
