@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -29,24 +29,34 @@
     <rc>RC_P9_FBC_EFF_CONFIG_LINKS_CHIP_ID_ERR</rc>
     <description>
       Procedure: p9_fbc_eff_config_links
-      Two A connected chips do not have the same chip ID
+      Two chips expected to lie in different FBC groups (X connected with
+      CHIP_IS_GROUP, OR A connected) do not have the same FBC chip ID
     </description>
     <ffdc>LOC_TARGET</ffdc>
     <ffdc>REM_TARGET</ffdc>
     <ffdc>LOC_FBC_CHIP_ID</ffdc>
     <ffdc>REM_FBC_CHIP_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_FBC_EFF_CONFIG_LINKS_GROUP_ID_ERR</rc>
     <description>
       Procedure: p9_fbc_eff_config_links
-      Two X connected chips do not have the same group ID
+      Two chips expected to lie in the same FBC group (X connected with
+      CHIP_IS_NODE) do not have the same FBC group ID
     </description>
     <ffdc>LOC_TARGET</ffdc>
     <ffdc>REM_TARGET</ffdc>
     <ffdc>LOC_FBC_GROUP_ID</ffdc>
     <ffdc>REM_FBC_GROUP_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -57,6 +67,10 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>UNIT_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

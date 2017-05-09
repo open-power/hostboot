@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,7 @@
 /// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 /// *HWP Team: Nest
-/// *HWP Level: 2
+/// *HWP Level: 3
 /// *HWP Consumed by: HB,FSP
 ///
 
@@ -227,7 +227,7 @@ fapi2::ReturnCode p9_fbc_eff_config_links_query_endp(
                         .set_REM_TARGET(l_rem_target)
                         .set_LOC_FBC_GROUP_ID(i_loc_fbc_group_id)
                         .set_REM_FBC_GROUP_ID(l_rem_fbc_group_id),
-                        "X connected chips do not have the same group ID");
+                        "Local and remote endpoints expected to lie in the same group have different group IDs");
             o_rem_fbc_id[l_loc_link_id] = l_rem_fbc_chip_id;
         }
         else
@@ -239,7 +239,7 @@ fapi2::ReturnCode p9_fbc_eff_config_links_query_endp(
                         .set_REM_TARGET(l_rem_target)
                         .set_LOC_FBC_CHIP_ID(i_loc_fbc_chip_id)
                         .set_REM_FBC_CHIP_ID(l_rem_fbc_chip_id),
-                        "A connected chips do not have the same chip ID");
+                        "Local and remote endpoints expected to lie in different groups have different chip IDs");
             o_rem_fbc_id[l_loc_link_id] = l_rem_fbc_group_id;
         }
     }
@@ -397,7 +397,7 @@ p9_fbc_eff_config_links(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID, i_target, l_a_rem_fbc_group_id),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID)");
 
-    // initialize all link realted attributes?
+    // initialize all aggregate link related attributes?
     if (i_op == SMP_ACTIVATE_PHASE1)
     {
         // aggregate (local+remote) delays
