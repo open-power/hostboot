@@ -128,25 +128,8 @@ void* call_host_mpipl_service (void *io_pArgs)
 
 #endif
 
-    //Determine if we should perform dump ops
-    //Note that this is only called in MPIPL context, so don't
-    //have to check MPIPL
-    bool collect_dump = false;
-    TARGETING::Target * sys = NULL;
-    TARGETING::targetService().getTopLevelTarget( sys );
-    TARGETING::CecIplType type;
-    if(sys &&
-       sys->tryGetAttr<TARGETING::ATTR_CEC_IPL_TYPE>(type) &&
-       type.PostDump)
-    {
-        collect_dump = true;
-    }
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "Ready to collect dump -- yes/no [%d]", collect_dump);
-
     // No error on the procedure.. proceed to collect the dump.
-    if (!l_err && collect_dump)
+    if (!l_err)
     {
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
