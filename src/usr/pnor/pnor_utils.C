@@ -390,6 +390,7 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
                i_section == PAYLOAD ||
                i_section == SBKT ||
                i_section == OCC ||
+               i_section == HCODE ||
                i_section == HB_RUNTIME;
     #endif
 #else

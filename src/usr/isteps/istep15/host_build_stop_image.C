@@ -31,6 +31,7 @@
 #include    <usr/vmmconst.h>
 #include    <arch/pirformat.H>
 #include    <isteps/pm/pm_common_ext.H>
+#include    <config.h>
 
 //Error handling and tracing
 #include    <errl/errlentry.H>
@@ -84,7 +85,22 @@ errlHndl_t  loadHcodeImage(  char                    *& o_rHcodeAddr)
 
     do
     {
-        // Get WINK PNOR section info from PNOR RP
+
+#ifdef CONFIG_SECUREBOOT
+        l_errl = loadSecureSection(PNOR::HCODE);
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       ERR_MRK"loadHcodeImage() - Error from "
+                       "loadSecureSection(PNOR::HCODE)");
+
+            //No need to commit error here, it gets handled later
+            //just break out to escape this function
+            break;
+        }
+#endif
+
+        // Get HCODE/WINK PNOR section info from PNOR RP
         l_errl = PNOR::getSectionInfo( PNOR::HCODE, l_info );
         if( l_errl )
         {
@@ -339,6 +355,11 @@ void* host_build_stop_image (void *io_pArgs)
     errlHndl_t  l_errl           = NULL;
     ISTEP_ERROR::IStepError     l_StepError;
 
+    // unload of HCODE PNOR section only necessary if SECUREBOOT compiled in
+#ifdef CONFIG_SECUREBOOT
+    bool unload_hcode_pnor_section = false;
+#endif
+
     char*       l_pHcodeImage     = NULL;
     void*       l_pRealMemBase   = NULL;
     void*       l_pVirtMemBase   = NULL;
@@ -404,6 +425,9 @@ void* host_build_stop_image (void *io_pArgs)
             // drop out of do block with errorlog.
             break;
         }
+#ifdef CONFIG_SECUREBOOT
+        unload_hcode_pnor_section = true;
+#endif
 
         //  Loop through all functional Procs and generate images for them.
         TARGETING::TargetHandleList l_procChips;
@@ -550,6 +574,27 @@ void* host_build_stop_image (void *io_pArgs)
     if( l_temp_buffer0 ) { free(l_temp_buffer0); }
     if( l_temp_buffer1 ) { free(l_temp_buffer1); }
     if( l_temp_buffer2 ) { free(l_temp_buffer2); }
+
+#ifdef CONFIG_SECUREBOOT
+    // securely unload HCODE PNOR section, if necessary
+    if ( unload_hcode_pnor_section == true )
+    {
+        l_errl = unloadSecureSection(PNOR::HCODE);
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       ERR_MRK"host_build_stop_image() - Error from "
+                       "unloadSecureSection(PNOR::HCODE)");
+
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl );
+
+            // Commit error
+            errlCommit( l_errl, ISTEP_COMP_ID );
+        }
+    }
+#endif
+
 
     if(l_pVirtMemBase)
     {
