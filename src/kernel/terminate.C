@@ -26,19 +26,19 @@
 #include <kernel/hbdescriptor.H>
 #include <kernel/hbterminatetypes.H>
 #include <kernel/terminate.H>
-#ifndef bl_terminate_C
+#ifndef BOOTLOADER
 #include <stdint.h>
 #include <kernel/console.H>
 #include <kernel/ipc.H>
 
 #include <builtins.h>
 #include <kernel/kernel_reasoncodes.H>
-#endif // bl_terminate_C
+#endif // BOOTLOADER
 
 extern "C" void p8_force_attn() NO_RETURN;
 
 
-#ifndef bl_terminate_C
+#ifndef BOOTLOADER
 /* Instance of the TI Data Area */
 HB_TI_DataArea kernel_TIDataArea;
 
@@ -49,7 +49,7 @@ HB_Descriptor kernel_hbDescriptor =
     &KernelIpc::ipc_data_area,
     0
 };
-#endif // bl_terminate_C
+#endif // BOOTLOADER
 
 
 
@@ -59,12 +59,14 @@ void terminateExecuteTI()
     p8_force_attn();
 }
 
+#ifndef BOOTLOADER
 void termWritePlid(uint16_t i_source, uint32_t plid)
 {
     kernel_TIDataArea.type = TI_WITH_PLID;
     kernel_TIDataArea.source = i_source;
     kernel_TIDataArea.plid = plid;
 }
+#endif // BOOTLOADER
 
 void termWriteSRC(uint16_t i_source, uint16_t i_reasoncode,uint64_t i_failAddr,
                   uint32_t i_error_data)
