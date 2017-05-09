@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/p9/prdfP9ProcMbCommonExtraSig.H $ */
+/* $Source: src/usr/diag/prdf/common/plat/p9/prdfLaneRepair.H $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,17 +22,53 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef _PRDFLANEREPAIR_H
+#define _PRDFLANEREPAIR_H
 
-#ifndef __prdfP9ProcMbCommonExtraSig_H
-#define __prdfP9ProcMbCommonExtraSig_H
+/** @file  prdfLaneRepair.H
+ *  @brief Common Lane Repair code for Lane Spared, Spares Exceeded, and
+ *         Too Many Bus Errors conditions.
+ */
 
-#include <prdrSignatures.H>
+#include <iipconst.h>
+#include <targeting/common/target.H>
+#include <prdfErrlUtil.H>
+#include <prdfCalloutMap.H>
 
-/* ERepair Extra signatures */
-PRDR_ERROR_SIGNATURE( ERepair_ERROR, 0xffff0000, "","ERepair Internal error" );
-PRDR_ERROR_SIGNATURE( ERepair_FWThrExceeded, 0xffff0001, "",
-                      "ERepair FW threshold exceeded" );
+namespace PRDF
+{
 
-/* PLL Extra signatures */
-PRDR_ERROR_SIGNATURE( PLL_ERROR, 0x00ed0000, "","PLL error" );
-#endif // __prdfP9ProcMbCommonExtraSig_H
+class ExtensibleChip;
+struct STEP_CODE_DATA_STRUCT;
+
+namespace LaneRepair
+{
+/**
+ * @brief Handles a Lane Repair Event
+ * @param i_chip    Chip that detected the lane repair event
+ * @param i_sc      The step code data struct.
+ * @param i_spareDeployed  True if FIR bit indicates a spare was deployed
+ * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc,
+                               bool i_spareDeployed);
+/**
+ * @brief  Will add target bus interface endpoints and all parts in between the
+ *         endpoints to the global error log in RasServices.
+ * @param  i_chip    RX-side chip of bus interface
+ * @param  i_sc      The step code data struct.
+ * @param  i_priority Callout priority (default MRU_LOW).
+ * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
+ */
+int32_t calloutBusInterface( ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & i_sc,
+                             PRDpriority i_priority = MRU_LOW );
+
+
+
+} // end namespace LaneRepair
+} // end namespace PRDF
+
+#endif /* _PRDFLANEREPAIR_H */
+

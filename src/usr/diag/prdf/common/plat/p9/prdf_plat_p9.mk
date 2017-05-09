@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -43,10 +43,12 @@ prd_obj += prdfP9PllDomain.o
 prd_obj += prdfFsiCapUtil.o
 prd_obj += prdfP9ProcDomain.o
 prd_obj += prdfLineDelete.o
+prd_obj += prdfLaneRepair.o
 
 # rule plugin related
 prd_rule_plugin += prdfP9Proc.o
 prd_rule_plugin += prdfP9Pll.o
 prd_rule_plugin += prdfCommonPlugins.o
 prd_rule_plugin += prdfP9Ex.o
+prd_rule_plugin += prdfP9Xbus.o
 

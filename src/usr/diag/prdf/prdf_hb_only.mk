@@ -60,6 +60,7 @@ prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/utils/
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 prd_incpath += ${ROOTPATH}/src/import/hwpf/fapi2/include
 prd_incpath += ${ROOTPATH}/src/import/
@@ -143,6 +144,12 @@ EXTRA_CLEAN += ${MFG_THRES_PATH}
 CLEAN_TARGETS += ${MFG_THRES_PATH}
 
 ################################################################################
+# Hardware procedure files needed for both IPL and RT
+################################################################################
+prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/
+prd_obj_no_sim += p9_io_xbus_read_erepair.o
+
+################################################################################
 # The following are hardware procedure utilities that we are pulling into the
 # PRD library (only needed here for HBRT). This code is already compiled in
 # istep14 for Hostboot
@@ -153,6 +160,8 @@ ifeq (${HOSTBOOT_RUNTIME},1)
 # This is really the only file we need, but all of the other files below are
 # required because of dependencies.
 prd_obj_no_sim += memdiags.o
+prd_obj_no_sim += p9_io_xbus_clear_firs.o
+prd_obj_no_sim += p9_io_xbus_pdwn_lanes.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/eff_config/

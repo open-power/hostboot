@@ -45,13 +45,11 @@
 
 //#include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap() TODO RTC 164707
 
-//#include <io_read_erepair.H> TODO RTC 136120
-//#include <io_power_down_lanes.H> TODO RTC 136120
-//#include <io_clear_firs.H> TODO RTC 136120
-//#include <erepairAccessorHwpFuncs.H> TODO RTC 136120
-//#include <io_fir_isolation.H> TODO RTC 136120
-//#include <fapiAttributeIds.H> TODO RTC 136120
 #ifdef __HOSTBOOT_MODULE
+#include <p9_io_xbus_read_erepair.H>
+#include <p9_io_xbus_pdwn_lanes.H>
+#include <p9_io_xbus_clear_firs.H>
+//#include <erepairAccessorHwpFuncs.H> TODO RTC 174013
 #include <config.h>
 #endif
 
@@ -90,19 +88,24 @@ src/hwsv/server/hwpf2/fapi2/target_types.H for a list of all the TargetTypes
 //##                       Lane Repair functions
 //##############################################################################
 
-/* TODO RTC 136120
-int32_t readErepair(TargetHandle_t i_rxBusTgt,
-                    std::vector<uint8_t> &o_rxFailLanes)
+int32_t readErepairXbus(TargetHandle_t i_rxBusTgt,
+                        std::vector<uint8_t> &o_rxFailLanes, uint8_t i_clkGrp)
 {
     int32_t o_rc = SUCCESS;
-    errlHndl_t err = NULL;
 
+    #ifdef __HOSTBOOT_MODULE
+    PRDF_ASSERT( nullptr != i_rxBusTgt);
+    PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
+    errlHndl_t err = nullptr;
+
+    fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
     FAPI_INVOKE_HWP(err,
-                    io_read_erepair,
-                    getFapiTarget(i_rxBusTgt),
+                    p9_io_xbus_read_erepair,
+                    fapiTrgt,
+                    i_clkGrp,
                     o_rxFailLanes);
 
-    if(NULL != err)
+    if(nullptr != err)
     {
         PRDF_ERR( "[PlatServices::readErepair] HUID: 0x%08x io_read_erepair "
                   "failed", getHuid(i_rxBusTgt) );
@@ -110,160 +113,146 @@ int32_t readErepair(TargetHandle_t i_rxBusTgt,
         o_rc = FAIL;
     }
 
+    #endif
     return o_rc;
 }
 
-int32_t clearIOFirs(TargetHandle_t i_rxBusTgt)
+int32_t clearIOFirsXbus(TargetHandle_t i_rxBusTgt)
 {
-    int32_t o_rc = SUCCESS;
-    errlHndl_t err = NULL;
+    int32_t o_rc = SUCCESS; 
 
-    FAPI_INVOKE_HWP(err,
-                    io_clear_firs,
-                    getFapiTarget(i_rxBusTgt));
+    #ifdef __HOSTBOOT_MODULE
+    PRDF_ASSERT( nullptr != i_rxBusTgt);
+    PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
 
-    if(NULL != err)
+    errlHndl_t err = nullptr;
+
+    fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
+
+    for (uint8_t i=0; i<2; ++i) // clear both clock groups
     {
-        PRDF_ERR( "[PlatServices::clearIOFirs] HUID: 0x%08x io_clear_firs "
-                  "failed", getHuid(i_rxBusTgt) );
-        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
+        FAPI_INVOKE_HWP(err, p9_io_xbus_clear_firs, fapiTrgt, i);
+        if(nullptr != err)
+        {
+            PRDF_ERR( "[PlatServices::clearIOFirs] HUID: 0x%08x io_clear_firs "
+                      "failed", getHuid(i_rxBusTgt) );
+            PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+        }
     }
 
+    #endif
     return o_rc;
 }
 
-int32_t powerDownLanes(TargetHandle_t i_rxBusTgt,
-                       const std::vector<uint8_t> &i_rxFailLanes,
-                       const std::vector<uint8_t> &i_txFailLanes)
+int32_t powerDownLanesXbus(TargetHandle_t i_rxBusTgt,
+                           const std::vector<uint8_t> &i_rxFailLanes,
+                           const std::vector<uint8_t> &i_txFailLanes,
+                           uint8_t i_clkGrp)
 {
     int32_t o_rc = SUCCESS;
-    errlHndl_t err = NULL;
 
+    #ifdef __HOSTBOOT_MODULE
+    PRDF_ASSERT( nullptr != i_rxBusTgt);
+    PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
+    errlHndl_t err = nullptr;
+
+    fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
     FAPI_INVOKE_HWP(err,
-                    io_power_down_lanes,
-                    getFapiTarget(i_rxBusTgt),
+                    p9_io_xbus_pdwn_lanes,
+                    fapiTrgt,
+                    i_clkGrp,
                     i_txFailLanes,
                     i_rxFailLanes);
 
-    if(NULL != err)
+    if(nullptr != err)
     {
         PRDF_ERR( "[PlatServices::powerDownLanes] HUID: 0x%08x "
                   "io_power_down_lanes failed", getHuid(i_rxBusTgt) );
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
+
+    #endif
     return o_rc;
 }
 
-
-int32_t getVpdFailedLanes(TargetHandle_t i_rxBusTgt,
-                          std::vector<uint8_t> &o_rxFailLanes,
-                          std::vector<uint8_t> &o_txFailLanes)
+int32_t getVpdFailedLanesXbus(TargetHandle_t i_rxBusTgt,
+                              std::vector<uint8_t> &o_rxFailLanes,
+                              std::vector<uint8_t> &o_txFailLanes,
+                              uint8_t i_clkGrp)
 {
     int32_t o_rc = SUCCESS;
-    do
+
+    #ifdef __HOSTBOOT_MODULE
+    PRDF_ASSERT( nullptr != i_rxBusTgt);
+    PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
+
+    errlHndl_t err = nullptr;
+
+    fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
+
+// TODO RTC 174013
+//    FAPI_INVOKE_HWP(err,
+//                    erepairGetFailedLanes,
+//                    fapiTrgt,
+//                    o_txFailLanes,
+//                    o_rxFailLanes,
+//                    i_clkGrp);
+
+    if(nullptr != err)
     {
-
-        // Some hardware configurations do not have Memory Buffer VPD.
-        // Hence, reading of DMI lane eRepair data from MBVPD need
-        // to be skipped.
-#if defined(__HOSTBOOT_MODULE) and !defined(CONFIG_HAVE_MBVPD)
-        if(TYPE_MEMBUF == getTargetType(i_rxBusTgt))
-        {
-            // Return zero fail lanes when we are not reading the MBVPD.
-            o_rxFailLanes.clear();
-            o_txFailLanes.clear();
-            break;
-        }
-#endif
-
-        errlHndl_t err = NULL;
-        FAPI_INVOKE_HWP(err,
-                        erepairGetFailedLanes,
-                        getFapiTarget(i_rxBusTgt),
-                        o_txFailLanes,
-                        o_rxFailLanes);
-
-        if(NULL != err)
-        {
-            PRDF_ERR( "[PlatServices::getVpdFailedLanes] HUID: 0x%08x "
-                    "erepairGetFailedLanes failed",
-                    getHuid(i_rxBusTgt));
-            PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
-            break;
-        }
-    }while(0);
-
-    return o_rc;
-}
-
-int32_t setVpdFailedLanes(TargetHandle_t i_rxBusTgt,
-                          TargetHandle_t i_txBusTgt,
-                          std::vector<uint8_t> &i_rxFailLanes,
-                          bool & o_thrExceeded)
-{
-    int32_t o_rc = SUCCESS;
-    do
-    {
-
-        // Some hardware configurations do not have Memory Buffer VPD.
-        // Hence, writing of DMI lane eRepair data into MBVPD need
-        // to be skipped.
-#if defined(__HOSTBOOT_MODULE) and !defined(CONFIG_HAVE_MBVPD)
-        if(TYPE_MEMBUF == getTargetType(i_rxBusTgt) ||
-           TYPE_MEMBUF == getTargetType(i_txBusTgt))
-        {
-            // Threshold is not exceeded when there is no
-            // MBVPD and hence no checking of any existing faillanes.
-            o_thrExceeded = false;
-            break;
-        }
-#endif
-
-        errlHndl_t err = NULL;
-        FAPI_INVOKE_HWP(err,
-                        erepairSetFailedLanes,
-                        getFapiTarget(i_txBusTgt),
-                        getFapiTarget(i_rxBusTgt),
-                        i_rxFailLanes,
-                        o_thrExceeded);
-        if(NULL != err)
-        {
-            PRDF_ERR( "[PlatServices::setVpdFailedLanes] rxHUID: 0x%08x "
-                    "txHUID: 0x%08x erepairSetFailedLanes failed",
-                    getHuid(i_rxBusTgt), getHuid(i_txBusTgt));
-            PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
-            break;
-        }
-    }while(0);
-
-    return o_rc;
-}
-
-int32_t erepairFirIsolation(TargetHandle_t i_rxBusTgt)
-{
-    #define PRDF_FUNC "[PlatServices::erepairFirIsolation] "
-
-    errlHndl_t err = NULL;
-
-    FAPI_INVOKE_HWP(err, io_fir_isolation, getFapiTarget(i_rxBusTgt));
-
-    if(NULL != err)
-    {
-        PRDF_ERR( PRDF_FUNC "rxHUID: 0x%08x committing io_fir_isolation log",
+        PRDF_ERR( "[PlatServices::getVpdFailedLanes] HUID: 0x%08x "
+                  "erepairGetFailedLanes failed",
                   getHuid(i_rxBusTgt));
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
     }
 
-    // Return SUCCESS since we expect this procedure to generate an error
-    return SUCCESS;
-
-    #undef PRDF_FUNC
+    #endif
+    return o_rc;
 }
-*/
+
+int32_t setVpdFailedLanesXbus(TargetHandle_t i_rxBusTgt,
+                              TargetHandle_t i_txBusTgt,
+                              std::vector<uint8_t> &i_rxFailLanes,
+                              bool & o_thrExceeded,
+                              uint8_t i_clkGrp)
+{
+    int32_t o_rc = SUCCESS;
+
+    #ifdef __HOSTBOOT_MODULE
+    PRDF_ASSERT( nullptr != i_rxBusTgt);
+    PRDF_ASSERT( nullptr != i_txBusTgt);
+    PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
+    PRDF_ASSERT( TYPE_XBUS == getTargetType(i_txBusTgt) );
+
+
+    errlHndl_t err = nullptr;
+
+    fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiRxTrgt (i_rxBusTgt);
+    fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTxTrgt (i_rxBusTgt);
+
+// TODO RTC 174013
+//    FAPI_INVOKE_HWP(err,
+//                    erepairSetFailedLanes,
+//                    fapiTxTrgt,
+//                    fapiRxTrgt,
+//                    i_rxFailLanes,
+//                    o_thrExceeded);
+
+    if(nullptr != err)
+    {
+        PRDF_ERR( "[PlatServices::setVpdFailedLanes] rxHUID: 0x%08x "
+                  "txHUID: 0x%08x erepairSetFailedLanes failed",
+                  getHuid(i_rxBusTgt), getHuid(i_txBusTgt));
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+
+    #endif
+    return o_rc;
+}
 
 //##############################################################################
 //##                        Memory specific functions
