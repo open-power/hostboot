@@ -35,7 +35,12 @@ my $imgBase = $img;
 $imgBase =~ s/.*\///;
 
 my $PREFIX = $ENV{'CROSS_PREFIX'};
-my $address = hex `${PREFIX}nm $src -C | grep $imageIdSym | colrm 17`;
+my $addressStr = `${PREFIX}nm $src -C | grep $imageIdSym | colrm 17`;
+if ($addressStr eq '')
+{
+    exit 0;
+}
+my $address = hex $addressStr;
 my $imageId = $ENV{'HOSTBOOT_VERSION'};
 if ($imageId eq '')
 {
