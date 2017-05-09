@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,7 +22,6 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Error definitions for p9_fbc_eff_config_aggregate -->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -30,7 +29,19 @@
     <description>
       Procedure: p9_fbc_eff_config_aggregate
       Invalid aggregate link conifguration detected
+      Each chip may have at most:
+        One aggregate X link destination
+        One aggregate A link destination
     </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NUM_LINKS</ffdc>
+    <ffdc>LOCAL_FBC_ID</ffdc>
+    <ffdc>REMOTE_FBC_ID1</ffdc>
+    <ffdc>REMOTE_FBC_ID2</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

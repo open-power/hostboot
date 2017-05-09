@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,7 @@
 /// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 /// *HWP Team: Nest
-/// *HWP Level: 2
+/// *HWP Level: 3
 /// *HWP Consumed by: HB,FSP
 ///
 
@@ -46,6 +46,7 @@
 
 /// @brief Determine link address/data & aggregation settings
 ///
+/// @param[in]  i_target          Chip target
 /// @param[in]  i_max_links       Size of input/output arrays
 /// @param[in]  i_en              Set of local link enables (index = local link ID)
 /// @param[in]  i_loc_fbc_id      Local chip fabric ID
@@ -58,6 +59,7 @@
 ///
 /// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p9_fbc_eff_config_aggregate_link_setup(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint8_t i_max_links,
     const uint8_t i_en[],
     const uint8_t i_loc_fbc_id,
@@ -72,6 +74,7 @@ fapi2::ReturnCode p9_fbc_eff_config_aggregate_link_setup(
     // mark number of links targeting each fabric ID
     // set output defaults to disable aggregate mode (all links carry coherent traffic)
     uint8_t l_fbc_id_active_count[P9_FBC_UTILS_NUM_CHIP_IDS] = { 0 };
+    uint8_t l_aggregate_rem_fbc_id;
 
     for (uint8_t l_loc_link_id = 0; l_loc_link_id < i_max_links; l_loc_link_id++)
     {
@@ -94,9 +97,15 @@ fapi2::ReturnCode p9_fbc_eff_config_aggregate_link_setup(
         {
             // only one set of aggregate links are supported
             FAPI_ASSERT(!o_aggregate_mode,
-                        fapi2::P9_FBC_EFF_CONFIG_AGGREGATE_INVALID_CONFIG_ERR(),
+                        fapi2::P9_FBC_EFF_CONFIG_AGGREGATE_INVALID_CONFIG_ERR().
+                        set_TARGET(i_target).
+                        set_NUM_LINKS(i_max_links).
+                        set_LOCAL_FBC_ID(i_loc_fbc_id).
+                        set_REMOTE_FBC_ID1(l_aggregate_rem_fbc_id).
+                        set_REMOTE_FBC_ID2(l_rem_fbc_id),
                         "Invalid aggregate link configuration!");
             o_aggregate_mode = 1;
+            l_aggregate_rem_fbc_id = l_rem_fbc_id;
 
             // flip default value for link address disable
             for (uint8_t l_loc_link_id = 0; l_loc_link_id < i_max_links; l_loc_link_id++)
@@ -134,7 +143,6 @@ fapi2::ReturnCode p9_fbc_eff_config_aggregate_link_setup(
             // ties must be broken consistenty on both connected chips (i.e., we
             // need to pick both ends of the same link to carry coherency
             // select link with lowest link ID number on chip with smaller fabric ID
-            // (chip ID if X links, group ID if A links)
             if (l_matches != 1)
             {
                 FAPI_DBG("Breaking tie");
@@ -193,8 +201,7 @@ p9_fbc_eff_config_aggregate(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
     uint8_t l_loc_fbc_chip_id;
     uint8_t l_loc_fbc_group_id;
 
-    // logical link (X/A) configuration parameters
-    // arrays indexed by link ID on local end
+    // logical link (X/A) configuration parameters, arrays indexed by link ID on local end
     // enable on local end
     uint8_t l_x_en[P9_FBC_UTILS_MAX_X_LINKS];
     uint8_t l_a_en[P9_FBC_UTILS_MAX_A_LINKS];
@@ -206,7 +213,7 @@ p9_fbc_eff_config_aggregate(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
     // aggregate (local+remote) delays
     uint32_t l_x_agg_link_delay[P9_FBC_UTILS_MAX_X_LINKS];
     uint32_t l_a_agg_link_delay[P9_FBC_UTILS_MAX_A_LINKS];
-    // aggregate model/address disable on local end
+    // aggregate mode/address disable on local end
     uint8_t l_x_addr_dis[P9_FBC_UTILS_MAX_X_LINKS];
     uint8_t l_x_aggregate;
     uint8_t l_a_addr_dis[P9_FBC_UTILS_MAX_A_LINKS];
@@ -262,6 +269,7 @@ p9_fbc_eff_config_aggregate(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
 
     // calculate aggregate configuration
     FAPI_TRY(p9_fbc_eff_config_aggregate_link_setup(
+                 i_target,
                  P9_FBC_UTILS_MAX_X_LINKS,
                  l_x_en,
                  (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE) ? (l_loc_fbc_chip_id) : (l_loc_fbc_group_id),
@@ -272,14 +280,16 @@ p9_fbc_eff_config_aggregate(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
                  l_x_addr_dis),
              "Error from p9_fbc_eff_config_aggregate_link_setup (X)");
 
-    FAPI_TRY(p9_fbc_eff_config_aggregate_link_setup(P9_FBC_UTILS_MAX_A_LINKS,
-             l_a_en,
-             l_loc_fbc_group_id,
-             l_a_rem_link_id,
-             l_a_rem_fbc_group_id,
-             l_a_agg_link_delay,
-             l_a_aggregate,
-             l_a_addr_dis),
+    FAPI_TRY(p9_fbc_eff_config_aggregate_link_setup(
+                 i_target,
+                 P9_FBC_UTILS_MAX_A_LINKS,
+                 l_a_en,
+                 l_loc_fbc_group_id,
+                 l_a_rem_link_id,
+                 l_a_rem_fbc_group_id,
+                 l_a_agg_link_delay,
+                 l_a_aggregate,
+                 l_a_addr_dis),
              "Error from p9_fbc_eff_config_aggregate_link_setup (A)");
 
     // set attributes
