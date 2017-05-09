@@ -32,11 +32,14 @@ HCODE_UTIL+=$(ROOTPATH)/chips/p9/procedures/hwp/customize/
 HCODE_UTIL+=$(ROOTPATH)/chips/p9/common/include/
 HCODE_UTIL+=$(ROOTPATH)/chips/p9/procedures/utils/stopreg/
 HCODE_UTIL+=$(ROOTPATH)/chips/p9/procedures/hwp/nest
+HCODE_UTIL+=$(ROOTPATH)/chips/p9/procedures/hwp/accessors/
 
 lib$(PROCEDURE)_DEPLIBS += p9_scan_ring_util
 lib$(PROCEDURE)_DEPLIBS += p9_xip_image
-lib$(PROCEDURE)_DEPLIBS += p9_pstate_parameter_block
 lib$(PROCEDURE)_DEPLIBS += p9_tor
+lib$(PROCEDURE)_DEPLIBS += p9_ring_identification
+lib$(PROCEDURE)_DEPLIBS += p9_xip_customize
+lib$(PROCEDURE)_DEPLIBS += p9_pstate_parameter_block
 lib$(PROCEDURE)_DEPLIBS += p9_ringId
 lib$(PROCEDURE)_DEPLIBS += p9_stop_util
 lib$(PROCEDURE)_DEPLIBS += p9_stop_api

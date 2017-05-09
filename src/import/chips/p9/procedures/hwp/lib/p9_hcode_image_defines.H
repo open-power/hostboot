@@ -405,6 +405,7 @@ enum ImgBldRetCode_t
     PGPE_SRAM_IMG_SIZE_ERR      =   33,
     BUILD_FAIL_PGPE_PPMR        =   34,
     BUILD_FAIL_RING_SEL_EQ_INEX =   35,
+    BUILD_FAIL_XIP_CUST_ERR     =   36,
     BUILD_ERR_INTERNAL          =   0xffff,
 };
 

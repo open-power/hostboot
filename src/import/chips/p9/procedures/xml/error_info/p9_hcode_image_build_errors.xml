@@ -355,9 +355,8 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_SCAN_RING_EXTRACTION_FAIL</rc>
-    <description>hcode image build procedure failed to extract scan rings</description>
-    <ffdc>EXTRACTION_FAIL_PLAT</ffdc>
+    <rc>RC_CORE_SCAN_RING_EXTRACTION_FAIL</rc>
+    <description>hcode image build procedure failed to extract core scan rings</description>
     <ffdc>EXTRACTION_FAILURE_CODE</ffdc>
     <ffdc>RISK_LEVEL</ffdc>
     <ffdc>IMG_TYPE</ffdc>
@@ -368,10 +367,9 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_SCAN_RING_PLACEMENT_FAIL</rc>
-    <description>hcode image build procedure failed to place rings in HOMER</description>
-    <ffdc>PLACEMENT_FAIL_PLAT</ffdc>
-    <ffdc>PLACEMENT_FAILURE_CODE</ffdc>
+    <rc>RC_QUAD_SCAN_RING_EXTRACTION_FAIL</rc>
+    <description>hcode image build procedure failed to extract cache scan rings</description>
+    <ffdc>EXTRACTION_FAILURE_CODE</ffdc>
     <ffdc>RISK_LEVEL</ffdc>
     <ffdc>IMG_TYPE</ffdc>
     <callout>
@@ -469,6 +467,89 @@
     <rc>RC_PARAM_WOF_TABLE_SIZE_ERR</rc>
     <description>hcode image build procedure failed due to WOF Table exceeding permissible size limit</description>
     <ffdc>ACTUAL_WOF_TABLE_SIZE</ffdc>
+    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_CORE_CMN_RING_LAYOUT_ERR</rc>
+    <description>hcode image build procedure failed to layout core common rings</description>
+    <ffdc>CORE_CMN_RING_SIZE</ffdc>
+    <ffdc>FAILURE_CODE</ffdc>
+    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_CORE_CMN_RING_OVRD_LAYOUT_ERR</rc>
+    <description>hcode image build procedure failed to layout core common override rings</description>
+    <ffdc>OVRD_SIZE</ffdc>
+    <ffdc>FAILURE_CODE</ffdc>
+    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_CORE_SPEC_RING_LAYOUT_ERR</rc>
+    <description>hcode image build procedure failed to layout core common override rings</description>
+    <ffdc>CORE_SPEC_RING_SIZE</ffdc>
+    <ffdc>FAILURE_CODE</ffdc>
+    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_FAILED_TO_CALCULATE_CORE_REPAIR_RING</rc>
+    <description>hcode image build procedure failed to determine max size of repair ring pair</description>
+    <ffdc>FAILURE_CODE</ffdc>
+    <ffdc>CORE_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_QUAD_CMN_RING_LAYOUT_ERR</rc>
+    <description>hcode image build procedure failed to layout quad common rings</description>
+    <ffdc>QUAD_CMN_RING_SIZE</ffdc>
+    <ffdc>FAILURE_CODE</ffdc>
+    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_QUAD_CMN_RING_OVRD_LAYOUT_ERR</rc>
+    <description>hcode image build procedure failed to layout quad common override rings</description>
+    <ffdc>OVRD_SIZE</ffdc>
+    <ffdc>FAILURE_CODE</ffdc>
+    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_QUAD_SPEC_RING_LAYOUT_ERR</rc>
+    <description>hcode image build procedure failed to layout quad spec rings</description>
+    <ffdc>QUAD_SPEC_RING_SIZE</ffdc>
+    <ffdc>FAILURE_CODE</ffdc>
     <ffdc>MAX_SIZE_ALLOCATED</ffdc>
     <callout>
       <procedure>CODE</procedure>
