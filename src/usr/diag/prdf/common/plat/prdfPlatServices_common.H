@@ -132,47 +132,46 @@ void collectSBE_FFDC(TARGETING::TargetHandle_t i_procTarget);
  * @brief   Calls HWP to read newly failed bus lanes
  * @param   i_rxBusTgt    Target of the receiving end of the bus
  * @param   o_rxFailLanes Vector of failed lanes
+ * @param   i_clkGrp      Clock group
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136120
-int32_t readErepair(TARGETING::TargetHandle_t i_rxBusTgt,
-                    std::vector<uint8_t> &o_rxFailLanes);
-*/
+int32_t readErepairXbus(TARGETING::TargetHandle_t i_rxBusTgt,
+                        std::vector<uint8_t> &o_rxFailLanes,
+                        uint8_t i_clkGrp);
 
 /**
  * @brief   Calls HWP to clear FIRs after a lane repair event
  * @param   i_rxBusTgt    Target of the receiving end of the bus
+ * @param   i_clkGrp      Clock group
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136120
-int32_t clearIOFirs(TARGETING::TargetHandle_t i_rxBusTgt);
-*/
+int32_t clearIOFirsXbus(TARGETING::TargetHandle_t i_rxBusTgt);
 
 /**
  * @brief   Calls HWP to power down failed lanes
  * @param   i_rxBusTgt    Target of the receiving end of the bus
  * @param   i_rxFailLanes Vector of  rx failed lanes
  * @param   i_txFailLanes Vector of  tx failed lanes
+ * @param   i_clkGrp      Clock group
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136120
-int32_t powerDownLanes(TARGETING::TargetHandle_t i_rxBusTgt,
-                       const std::vector<uint8_t> &i_rxFailLanes,
-                       const std::vector<uint8_t> &i_txFailLanes);
-*/
+int32_t powerDownLanesXbus(TARGETING::TargetHandle_t i_rxBusTgt,
+                           const std::vector<uint8_t> &i_rxFailLanes,
+                           const std::vector<uint8_t> &i_txFailLanes,
+                           uint8_t i_clkGrp);
 
 /**
  * @brief   Calls erepair accessor procedure get failed lanes from VPD
  * @param   i_rxBusTgt    Target of the receiving end of the bus
  * @param   o_rxFailLanes Vector of  rx failed lanes
  * @param   o_txFailLanes Vector of  tx failed lanes
+ * @param   i_clkGrp      Clock group
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136120
-int32_t getVpdFailedLanes(TARGETING::TargetHandle_t i_rxBusTgt,
-                          std::vector<uint8_t> &o_rxFailLanes,
-                          std::vector<uint8_t> &o_txFailLanes);
-*/
+int32_t getVpdFailedLanesXbus(TARGETING::TargetHandle_t i_rxBusTgt,
+                              std::vector<uint8_t> &o_rxFailLanes,
+                              std::vector<uint8_t> &o_txFailLanes,
+                              uint8_t i_clkGrp);
 
 /**
  * @brief   Calls erepair prcd to set failed lanes in vpd and check threshold
@@ -180,24 +179,15 @@ int32_t getVpdFailedLanes(TARGETING::TargetHandle_t i_rxBusTgt,
  * @param   i_txBusTgt    Target of the tranmitting end of the bus
  * @param   i_rxFailLanes Vector of  rx failed lanes
  * @param   o_thrExceeded True if these failed lanes exceeded erepair threshold
+ * @param   i_clkGrp      Clock group
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136120
-int32_t setVpdFailedLanes(TARGETING::TargetHandle_t i_rxBusTgt,
-                          TARGETING::TargetHandle_t i_txBusTgt,
-                          std::vector<uint8_t> &i_rxFailLanes,
-                          bool & o_thrExceeded);
-*/
+int32_t setVpdFailedLanesXbus(TARGETING::TargetHandle_t i_rxBusTgt,
+                              TARGETING::TargetHandle_t i_txBusTgt,
+                              std::vector<uint8_t> &i_rxFailLanes,
+                              bool & o_thrExceeded,
+                              uint8_t i_clkGrp);
 
-/**
- * @brief   Calls io_fir_isolation HWP and commits FAPI errorlog containing
- *          additional FFDC
- * @param   i_rxBusTgt    Target of the receiving end of the bus
- * @return  SUCCESS
- */
-/* TODO RTC 136120
-int32_t erepairFirIsolation(TARGETING::TargetHandle_t i_rxBusTgt);
-*/
 
 //##############################################################################
 //##                        Memory specific functions

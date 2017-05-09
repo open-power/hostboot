@@ -187,7 +187,7 @@ group gIOXBFIR filter singlebit, cs_root_cause
     /** IOXBFIR[2]
      *  GCR_HANG_ERROR
      */
-    (rIOXBFIR, bit(2)) ? defaultMaskedError;
+    (rIOXBFIR, bit(2)) ? calloutXbusInterface;
 
     /** IOXBFIR[3:7]
      *  spare
@@ -202,12 +202,12 @@ group gIOXBFIR filter singlebit, cs_root_cause
     /** IOXBFIR[9]
      *  RX_BUS0_SPARE_DEPLOYED
      */
-    (rIOXBFIR, bit(9)) ? defaultMaskedError;
+    (rIOXBFIR, bit(9)) ? spareDeployed;
 
     /** IOXBFIR[10]
      *  RX_BUS0_MAX_SPARES_EXCEEDED
      */
-    (rIOXBFIR, bit(10)) ? defaultMaskedError;
+    (rIOXBFIR, bit(10)) ? maxSparesExceeded;
 
     /** IOXBFIR[11]
      *  RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
@@ -217,7 +217,7 @@ group gIOXBFIR filter singlebit, cs_root_cause
     /** IOXBFIR[12]
      *  RX_BUS0_TOO_MANY_BUS_ERRORS
      */
-    (rIOXBFIR, bit(12)) ? defaultMaskedError;
+    (rIOXBFIR, bit(12)) ? tooManyBusErrors;
 
     /** IOXBFIR[13:15]
      *  spare
