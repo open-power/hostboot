@@ -3914,84 +3914,6 @@ sub generate_proc
     printf( "        <default>0x%016X</default>\n", $psiBase );
     printf( "    </attribute>\n" );
 
-    #PHB 64 bit MMIO address (PHB0-PHB5)
-    printf( "    <attribute><id>PHB_MMIO_ADDRS_64</id>\n" );
-    printf( "        <default>\n" );
-    printf( "            0x%016X,0x%016X,\n",
-       0x0006000000000000 + $nodeSize*$lognode + $chipSize*$logid,
-       0x0006002000000000 + $nodeSize*$lognode + $chipSize*$logid);
-    printf( "            0x%016X,0x%016X,\n",
-       0x0006004000000000 + $nodeSize*$lognode + $chipSize*$logid,
-       0x0006006000000000 + $nodeSize*$lognode + $chipSize*$logid);
-    printf( "            0x%016X,0x%016X,\n",
-       0x0006008000000000 + $nodeSize*$lognode + $chipSize*$logid,
-       0x000600A000000000 + $nodeSize*$lognode + $chipSize*$logid);
-    printf( "        </default>\n" );
-    printf( "    </attribute>\n" );
-
-    #PHB 32 Bit MMIO address (PHB0-PHB5)
-    printf( "    <attribute><id>PHB_MMIO_ADDRS_32</id>\n" );
-    printf( "        <default>\n" );
-    printf( "            0x%016X,0x%016X,\n",
-       0x000600C000000000 + $nodeSize*$lognode + $chipSize*$logid,
-       0x000600C080000000 + $nodeSize*$lognode + $chipSize*$logid);
-    printf( "            0x%016X,0x%016X,\n",
-       0x000600C100000000 + $nodeSize*$lognode + $chipSize*$logid,
-       0x000600C180000000 + $nodeSize*$lognode + $chipSize*$logid);
-    printf( "            0x%016X,0x%016X,\n",
-       0x000600C200000000 + $nodeSize*$lognode + $chipSize*$logid,
-       0x000600C280000000 + $nodeSize*$lognode + $chipSize*$logid);
-    printf( "        </default>\n" );
-    printf( "    </attribute>\n" );
-
-    #PHB XIVE ESB address (PHB0-PHB5)
-    printf( "    <attribute><id>PHB_XIVE_ESB_ADDRS</id>\n" );
-    printf( "        <default>\n" );
-    printf( "            0x%016X,0x%016X,\n",
-       0x000600C300000000 + $nodeSize*$lognode + $chipSize*$logid,
-       0x000600C320000000 + $nodeSize*$lognode + $chipSize*$logid);
-    printf( "            0x%016X,0x%016X,\n",
-       0x000600C340000000 + $nodeSize*$lognode + $chipSize*$logid,
-       0x000600C360000000 + $nodeSize*$lognode + $chipSize*$logid);
-    printf( "            0x%016X,0x%016X,\n",
-       0x000600C380000000 + $nodeSize*$lognode + $chipSize*$logid,
-       0x000600C3A0000000 + $nodeSize*$lognode + $chipSize*$logid);
-    printf( "        </default>\n" );
-    printf( "    </attribute>\n" );
-
-    #PHB Register Space address (PHB0-PHB5)
-    printf( "    <attribute><id>PHB_REG_ADDRS</id>\n" );
-    printf( "        <default>\n" );
-    printf( "            0x%016X,0x%016X,\n",
-       0x000600C3C0000000 + $nodeSize*$lognode + $chipSize*$logid,
-       0x000600C3C0100000 + $nodeSize*$lognode + $chipSize*$logid);
-    printf( "            0x%016X,0x%016X,\n",
-       0x000600C3C0200000 + $nodeSize*$lognode + $chipSize*$logid,
-       0x000600C3C0300000 + $nodeSize*$lognode + $chipSize*$logid);
-    printf( "            0x%016X,0x%016X,\n",
-       0x000600C3C0400000 + $nodeSize*$lognode + $chipSize*$logid,
-       0x000600C3C0500000 + $nodeSize*$lognode + $chipSize*$logid);
-    printf( "        </default>\n" );
-    printf( "    </attribute>\n" );
-
-    #XIVE Routing ESB address
-    printf( "    <attribute><id>XIVE_ROUTING_ESB_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0006010000000000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
-    #XIVE Routing END address
-    printf( "    <attribute><id>XIVE_ROUTING_END_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0006011000000000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
-    #XIVE Presentation NVT address
-    printf( "    <attribute><id>XIVE_PRESENTATION_NVT_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0006012000000000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
     #VAS Hypervisor Window Contexts address
     printf( "    <attribute><id>VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
@@ -4038,12 +3960,6 @@ sub generate_proc
     printf( "    <attribute><id>XIVE_CONTROLLER_BAR_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
        0x0006030203100000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
-    #XIVE - Presentation Bar address
-    printf( "    <attribute><id>XIVE_PRESENTATION_BAR_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0006030203180000 + $nodeSize*$lognode + $chipSize*$logid );
     printf( "    </attribute>\n" );
 
     #XIVE - Thread Management Bar Address register 1

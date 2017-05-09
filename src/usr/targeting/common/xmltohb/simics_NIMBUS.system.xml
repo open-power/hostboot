@@ -5379,43 +5379,6 @@
     <attribute><id>INTP_BASE_ADDR</id>
         <default>0x0003FFFF80100000</default>
     </attribute>
-    <attribute><id>PHB_MMIO_ADDRS_64</id>
-        <default>
-            0x0006040000000000,0x0006042000000000,
-            0x0006044000000000,0x0006046000000000,
-            0x0006048000000000,0x000604A000000000,
-        </default>
-    </attribute>
-    <attribute><id>PHB_MMIO_ADDRS_32</id>
-        <default>
-            0x000604C000000000,0x000604C080000000,
-            0x000604C100000000,0x000604C180000000,
-            0x000604C200000000,0x000604C280000000,
-        </default>
-    </attribute>
-    <attribute><id>PHB_XIVE_ESB_ADDRS</id>
-        <default>
-            0x000604C300000000,0x000604C320000000,
-            0x000604C340000000,0x000604C360000000,
-            0x000604C380000000,0x000604C3A0000000,
-        </default>
-    </attribute>
-    <attribute><id>PHB_REG_ADDRS</id>
-        <default>
-            0x000604C3C0000000,0x000604C3C0100000,
-            0x000604C3C0200000,0x000604C3C0300000,
-            0x000604C3C0400000,0x000604C3C0500000,
-        </default>
-    </attribute>
-    <attribute><id>XIVE_ROUTING_ESB_ADDR</id>
-        <default>0x0006050000000000</default>
-    </attribute>
-    <attribute><id>XIVE_ROUTING_END_ADDR</id>
-        <default>0x0006051000000000</default>
-    </attribute>
-    <attribute><id>XIVE_PRESENTATION_NVT_ADDR</id>
-        <default>0x0006052000000000</default>
-    </attribute>
     <attribute><id>VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR</id>
         <default>0x0006053000000000</default>
     </attribute>
@@ -5439,9 +5402,6 @@
     </attribute>
     <attribute><id>XIVE_CONTROLLER_BAR_ADDR</id>
         <default>0x0006070201100000</default>
-    </attribute>
-    <attribute><id>XIVE_PRESENTATION_BAR_ADDR</id>
-        <default>0x0006070203180000</default>
     </attribute>
 <!--    <attribute><id>XIVE_THREAD_MGMT1_BAR_ADDR</id>
         <default>0x0006060000000000</default>
