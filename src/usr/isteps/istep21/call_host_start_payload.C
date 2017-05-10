@@ -539,7 +539,7 @@ errlHndl_t disableSpecialWakeup()
         FAPI_INVOKE_HWP( l_errl,
                          p9_cpu_special_wakeup_core,
                          l_fapi2_coreTarget,
-                         SPCWKUP_ENABLE,
+                         SPCWKUP_DISABLE,
                          HOST);
         if( l_errl )
         {
