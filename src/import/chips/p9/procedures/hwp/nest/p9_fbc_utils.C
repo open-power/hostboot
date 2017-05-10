@@ -39,7 +39,7 @@
 // *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: SBE,HB,FSP
 //
 
@@ -48,39 +48,34 @@
 //------------------------------------------------------------------------------
 #include <p9_fbc_utils.H>
 #include <p9_misc_scom_addresses.H>
+#include <p9_misc_scom_addresses_fld.H>
 
 
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
 
-// ADU PMisc Register field/bit definitions
-const uint32_t ALTD_SND_MODE_DISABLE_CHECKSTOP_BIT = 19;
-const uint32_t ALTD_SND_MODE_MANUAL_CLR_PB_STOP_BIT = 21;
-const uint32_t ALTD_SND_MODE_PB_STOP_BIT = 22;
-
-// FBC Mode Register field/bit definitions
-const uint32_t PU_FBC_MODE_PB_INITIALIZED_BIT = 0;
-
 // FBC base address determination constants
 // system ID (large system)
 const uint8_t FABRIC_ADDR_LS_SYSTEM_ID_START_BIT = 8;
 const uint8_t FABRIC_ADDR_LS_SYSTEM_ID_END_BIT = 12;
+// msel bits (large & small system)
+const uint8_t FABRIC_ADDR_MSEL_START_BIT = 13;
+const uint8_t FABRIC_ADDR_MSEL_END_BIT = 14;
 // group ID (large system)
 const uint8_t FABRIC_ADDR_LS_GROUP_ID_START_BIT = 15;
 const uint8_t FABRIC_ADDR_LS_GROUP_ID_END_BIT = 18;
 // chip ID (large system)
 const uint8_t FABRIC_ADDR_LS_CHIP_ID_START_BIT = 19;
 const uint8_t FABRIC_ADDR_LS_CHIP_ID_END_BIT = 21;
-// msel bits (large & small system)
-const uint8_t FABRIC_ADDR_MSEL_START_BIT = 13;
-const uint8_t FABRIC_ADDR_MSEL_END_BIT = 14;
 
 
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
 
+
+// NOTE: see comments above function prototype in header
 fapi2::ReturnCode p9_fbc_utils_get_fbc_state(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     bool& o_is_initialized,
@@ -88,25 +83,34 @@ fapi2::ReturnCode p9_fbc_utils_get_fbc_state(
 {
     FAPI_DBG("Start");
 
-    // TODO: HW328175
-    // fapi2::buffer<uint64_t> l_fbc_mode_data;
-    // FAPI_TRY(fapi2::getScom(i_target, PU_FBC_MODE_REG, l_fbc_mode_data),
-    //          "Error reading FBC Mode Register");
-    // // fabric is initialized if PB_INITIALIZED bit is one/set
-    // o_is_initialized = l_fbc_mode_data.getBit<PU_FBC_MODE_PB_INITIALIZED_BIT>();
+    fapi2::ATTR_CHIP_EC_FEATURE_HW328175_Type l_hw328175;
+    fapi2::buffer<uint64_t> l_fbc_mode_data;
+    fapi2::buffer<uint64_t> l_pmisc_mode_data;
 
-    // currently, sampling FBC init from PB Mode register is unreliable
-    // as init can drop perodically at runtime (based on legacy sleep backoff)
-    // until this issue is fixed, just return true to caller
-    o_is_initialized = true;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW328175, i_target, l_hw328175),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW328175");
+
+    if (l_hw328175)
+    {
+        // sampling FBC init from PB Mode register is unreliable
+        // as init can drop perodically at runtime (based on legacy sleep backoff),
+        // just return true to caller
+        o_is_initialized = true;
+    }
+    else
+    {
+        FAPI_TRY(fapi2::getScom(i_target, PU_PB_CENT_SM0_PB_CENT_MODE, l_fbc_mode_data),
+                 "Error reading FBC Mode Register");
+        // fabric is initialized if PB_INITIALIZED bit is one/set
+        o_is_initialized = l_fbc_mode_data.getBit<PU_PB_CENT_SM0_PB_CENT_MODE_PB_CENT_PBIXXX_INIT>();
+    }
 
     // read ADU PMisc Mode Register state
-    fapi2::buffer<uint64_t> l_pmisc_mode_data;
     FAPI_TRY(fapi2::getScom(i_target, PU_SND_MODE_REG, l_pmisc_mode_data),
              "Error reading ADU PMisc Mode register");
 
     // fabric is running if FBC_STOP bit is zero/clear
-    o_is_running = !(l_pmisc_mode_data.getBit<ALTD_SND_MODE_PB_STOP_BIT>());
+    o_is_running = !(l_pmisc_mode_data.getBit<PU_SND_MODE_REG_PB_STOP>());
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -114,6 +118,7 @@ fapi_try_exit:
 }
 
 
+// NOTE: see comments above function prototype in header
 fapi2::ReturnCode p9_fbc_utils_override_fbc_stop(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
@@ -125,12 +130,12 @@ fapi2::ReturnCode p9_fbc_utils_override_fbc_stop(
              "Error reading ADU PMisc Mode register");
 
     // set bit to disable checkstop forwarding and write back
-    l_pmisc_mode_data.setBit<ALTD_SND_MODE_DISABLE_CHECKSTOP_BIT>();
+    l_pmisc_mode_data.setBit<PU_SND_MODE_REG_DISABLE_CHECKSTOP>();
     FAPI_TRY(fapi2::putScom(i_target, PU_SND_MODE_REG, l_pmisc_mode_data),
              "Error writing ADU PMisc Mode register to disable checkstop forwarding to FBC");
 
     // set bit to manually clear stop control and write back
-    l_pmisc_mode_data.setBit<ALTD_SND_MODE_MANUAL_CLR_PB_STOP_BIT>();
+    l_pmisc_mode_data.setBit<PU_SND_MODE_REG_MANUAL_CLR_PB_STOP>();
     FAPI_TRY(fapi2::putScom(i_target, PU_SND_MODE_REG, l_pmisc_mode_data),
              "Error writing ADU PMisc Mode register to manually clear FBC stop control");
 
@@ -140,6 +145,7 @@ fapi_try_exit:
 }
 
 
+// NOTE: see comments above function prototype in header
 fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const p9_fbc_utils_addr_mode_t i_addr_mode,
@@ -154,7 +160,6 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
     uint8_t l_mirror_policy;
     fapi2::buffer<uint64_t> l_base_address;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-
 
     FAPI_DBG("Start");
 
@@ -186,7 +191,7 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
              "Error from FAPI_ATTR_GET (ATTR_MEM_MIRROR_PLACEMENT_POLICY)");
 
     // apply system ID
-    // occupies one field for large system map (three fields for small system map)
+    // occupies one field for large system map
     l_base_address.insertFromRight < FABRIC_ADDR_LS_SYSTEM_ID_START_BIT,
                                    (FABRIC_ADDR_LS_SYSTEM_ID_END_BIT - FABRIC_ADDR_LS_SYSTEM_ID_START_BIT + 1) > (l_fabric_system_id);
 
