@@ -190,7 +190,7 @@ BUILD_SPECIFIC_SBEPART: .SPECTARG ${SBEPART_TARGET}
 	#@echo BINARIES ${SBEPART_BINS}
 	#@echo BIN_OPTION ${SBEPART_BIN_OPTION}
 
-${SBEPART_TARGET}: ${SBEPART_LAYOUT} ${SBEPART_BINS} ${PNOR_BUILD_SCRIPT}
+${SBEPART_TARGET}: ${SBEPART_LAYOUT} ${SBEPART_BINS} ${PNOR_BUILD_SCRIPT} ${GEN_PNOR_IMAGE_SCRIPT}
 	 ${SBE_BUILD_SCRIPT}  --sbeOutBin ${SBEPART_TARGET} \
 		${SBEPART_BIN_OPTION}
 
@@ -259,7 +259,7 @@ SBEC_FINAL_IMG = SBEC.bin
                              --systemBinFiles ${GEN_NIMBUS_BIN_FILES}
 .endif
 
-gen_system_specific_images: build_sbe_partitions
+gen_system_specific_images_bypass_cache :
 	# Call script to generate final bin file for system specific images
 	${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS}
 
@@ -267,6 +267,13 @@ gen_system_specific_images: build_sbe_partitions
 	.if(${FAKEPNOR} != "")
 	dd if=${${NIMBUS_VPO_HBD_IMG}:P} of=${NIMBUS_HBD_FINAL_IMG} ibs=4k skip=1 conv=sync
 	.endif
+
+# build_sbe_partitions build step generates SBE partition files that ODE is
+# unaware of due to the file cache that we cannot disable.  To work around that,
+# build the PNOR images under recursive make, which gets a fresh view of the
+# updated file system
+gen_system_specific_images: build_sbe_partitions .PMAKE
+	@${MAKE:T:R} gen_system_specific_images_bypass_cache
 
 HOSTBOOT_DEFAULT_SECTIONS = HBBL=${HBBL_FINAL_IMG},HBB=${HBB_FINAL_IMG},HBI=${HBI_FINAL_IMG},HBRT=${HBRT_FINAL_IMG},TEST=${TEST_FINAL_IMG},TESTRO=${TESTRO_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},GUARD=${GUARD_FINAL_IMG},GLOBAL=${GLOBAL_FINAL_IMG},PAYLOAD=${PAYLOAD_FINAL_IMG},CVPD=${CVPD_FINAL_IMG},MVPD=${MVPD_FINAL_IMG},DJVPD=${DJVPD_FINAL_IMG},RINGOVD=${RINGOVD_FINAL_IMG},SBKT=${SBKT_FINAL_IMG},WOFDATA=${WOFDATA_FINAL_IMG}
 #@TODO RTC:163810 - Put SBEC back "SBEC=${SBEC_FINAL_IMG},"
