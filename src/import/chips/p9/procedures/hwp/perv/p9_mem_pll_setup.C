@@ -55,6 +55,7 @@ fapi2::ReturnCode p9_mem_pll_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     uint8_t l_read_attr = 0;
     fapi2::buffer<uint64_t> l_data64;
     uint8_t l_mem_bypass;
+    uint8_t l_use_dmi_buckets = 0;
 
     FAPI_INF("Entering ...");
 
@@ -64,7 +65,10 @@ fapi2::ReturnCode p9_mem_pll_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, i_target_chip, l_read_attr),
              "Error from FAPI_ATTR_GET (ATTR_MC_SYNC_MODE)");
 
-    if (!l_read_attr )
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DMI_MC_PLL_SCAN_BUCKETS, i_target_chip, l_use_dmi_buckets),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_DMI_MC_PLL_SCAN_BUCKETS)");
+
+    if ( !l_read_attr && !l_use_dmi_buckets )
     {
         for (auto l_chplt_trgt :  i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
              (fapi2::TARGET_FILTER_ALL_MC, fapi2::TARGET_STATE_FUNCTIONAL))
