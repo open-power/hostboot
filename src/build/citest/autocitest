@@ -360,7 +360,7 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
     if [ "$loopcount" -ge 150 ];   then
         timestamp=`date +'%H:%M:%S'`
         echo    "$timestamp ERROR: timed out after 50 minutes waiting for until test completion"
-        autosim $NOWIN --simcmd   "hb-Ps"
+        autosim $NOWIN --simcmd   "hb-Ps with-backtrace"
         timeout=$(($modsstarted - $modscompleted))
         break
     fi
