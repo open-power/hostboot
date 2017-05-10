@@ -591,7 +591,9 @@ def magic_instruction_callback(user_arg, cpu, arg):
         # Print current istep out to simics console
         major_istep = cpu.r4
         minor_istep = cpu.r5
-        print "ISTEP %d.%d" % (major_istep, minor_istep)
+        percent_s = "%s"
+        dateCommand = "shell \" date +'%s > ISTEP %d.%d' \""%(percent_s,major_istep,minor_istep)
+        SIM_run_alone(run_command, dateCommand )
 
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         hb_tracBinaryBuffer = cpu.r4
