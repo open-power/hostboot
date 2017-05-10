@@ -33,7 +33,7 @@
 // *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB,FSP
 //
 
@@ -54,6 +54,22 @@ const uint8_t IOVALID_FIELD_NUM_BITS = 2;
 const uint8_t DL_FIR_LINK0_TRAINED_BIT = 0;
 const uint8_t DL_FIR_LINK1_TRAINED_BIT = 1;
 
+// DL register FFDC address offset constants
+const uint64_t DL_CONFIG_REG_OFFSET = 0x0A;
+const uint64_t DL_CONTROL_REG_OFFSET = 0x0B;
+const uint64_t DL_CONFIG_PHY_REG_OFFSET = 0x0C;        // Optical only
+const uint64_t DL_SECONDARY_CONFIG_REG_OFFSET = 0x0D;
+const uint64_t DL_LATENCY_REG_OFFSET = 0x0E;
+const uint64_t DL_OPTICAL_CONFIG_REG_OFFSET = 0x0F;    // Optical only
+const uint64_t DL_TX0_LANE_CONTROL_REG_OFFSET = 0x10;  // Optical only
+const uint64_t DL_TX1_LANE_CONTROL_REG_OFFSET = 0x11;  // Optical only
+const uint64_t DL_RX0_LANE_CONTROL_REG_OFFSET = 0x12;  // Optical only
+const uint64_t DL_RX1_LANE_CONTROL_REG_OFFSET = 0x13;  // Optical only
+const uint64_t DL_ERR0_STATUS_REG_OFFSET = 0x16;
+const uint64_t DL_ERR1_STATUS_REG_OFFSET = 0x17;
+const uint64_t DL_STATUS_REG_OFFSET = 0x28;
+const uint64_t DL_ERR_MISC_REG_OFFSET = 0x29;          // Optical only
+
 // TL FIR register field constants
 const uint8_t TL_FIR_TRAINED_FIELD_LENGTH = 2;
 const uint8_t TL_FIR_TRAINED_LINK_TRAINED = 0x3;
@@ -61,55 +77,463 @@ const uint8_t TL_FIR_TRAINED_LINK_TRAINED = 0x3;
 // TL Link Delay register field constants
 const uint8_t TL_LINK_DELAY_FIELD_NUM_BITS = 12;
 
+// TL register FFDC address offset constants
+const uint64_t TL_CONFIG01_REG_OFFSET = 0x0A;
+const uint64_t TL_CONFIG23_REG_OFFSET = 0x0B;
+const uint64_t TL_CONFIG45_REG_OFFSET = 0x0C;
+const uint64_t TL_CONFIG67_REG_OFFSET = 0x0D;          // Optical only
+const uint64_t TL_MISC_CONFIG_REG_OFFSET = 0x23;
+const uint64_t TL_FRAMER0123_ERR_REG_OFFSET = 0x25;
+const uint64_t TL_FRAMER4567_ERR_REG_OFFSET = 0x26;
+const uint64_t TL_PARSER0123_ERR_REG_OFFSET = 0x27;
+const uint64_t TL_PARSER4567_ERR_REG_OFFSET = 0x28;
+
 
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
 
+/// @brief Append DL layer specific FFDC in the event of a training failure
+///
+/// @tparam T template parameter, defines endpoint type
+/// @param[in]    i_chip_target  Processor chip target
+/// @param[in]    i_link_ctl     X/A link control structure for link
+/// @param[inout] o_rc           Return code object to be appended
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+template<fapi2::TargetType T>
+void
+p9_fab_iovalid_append_dl_ffdc(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_chip_target,
+    const p9_fbc_link_ctl_t& i_link_ctl,
+    fapi2::ReturnCode& o_rc)
+{
+    uint64_t l_base_scom_addr = i_link_ctl.dl_fir_addr;
+    fapi2::buffer<uint64_t> l_scom_data;
+
+    uint64_t l_fir_reg;
+    fapi2::ffdc_t FIR_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr, l_scom_data);
+    l_fir_reg = l_scom_data();
+    FIR_REG.ptr() = static_cast<void*>(&l_fir_reg);
+    FIR_REG.size() = sizeof(l_fir_reg);
+
+    uint64_t l_config_reg;
+    fapi2::ffdc_t CONFIG_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + DL_CONFIG_REG_OFFSET, l_scom_data);
+    l_config_reg = l_scom_data();
+    CONFIG_REG.ptr() = static_cast<void*>(&l_config_reg);
+    CONFIG_REG.size() = sizeof(l_config_reg);
+
+    uint64_t l_control_reg;
+    fapi2::ffdc_t CONTROL_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + DL_CONTROL_REG_OFFSET, l_scom_data);
+    l_control_reg = l_scom_data();
+    CONTROL_REG.ptr() = static_cast<void*>(&l_control_reg);
+    CONTROL_REG.size() = sizeof(l_control_reg);
+
+    uint64_t l_config_phy_reg;
+    fapi2::ffdc_t CONFIG_PHY_REG;
+    l_scom_data.flush<1>();
+
+    if (T == fapi2::TARGET_TYPE_OBUS)
+    {
+        (void) fapi2::getScom(i_chip_target, l_base_scom_addr + DL_CONFIG_PHY_REG_OFFSET, l_scom_data);
+    }
+
+    l_config_phy_reg = l_scom_data();
+    CONFIG_PHY_REG.ptr() = static_cast<void*>(&l_config_phy_reg);
+    CONFIG_PHY_REG.size() = sizeof(l_config_phy_reg);
+
+    uint64_t l_secondary_config_reg;
+    fapi2::ffdc_t SECONDARY_CONFIG_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + DL_SECONDARY_CONFIG_REG_OFFSET, l_scom_data);
+    l_secondary_config_reg = l_scom_data();
+    SECONDARY_CONFIG_REG.ptr() = static_cast<void*>(&l_secondary_config_reg);
+    SECONDARY_CONFIG_REG.size() = sizeof(l_secondary_config_reg);
+
+    uint64_t l_latency_reg;
+    fapi2::ffdc_t LATENCY_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + DL_LATENCY_REG_OFFSET, l_scom_data);
+    l_latency_reg = l_scom_data();
+    LATENCY_REG.ptr() = static_cast<void*>(&l_latency_reg);
+    LATENCY_REG.size() = sizeof(l_latency_reg);
+
+    uint64_t l_optical_config_reg;
+    fapi2::ffdc_t OPTICAL_CONFIG_REG;
+    l_scom_data.flush<1>();
+
+    if (T == fapi2::TARGET_TYPE_OBUS)
+    {
+        (void) fapi2::getScom(i_chip_target, l_base_scom_addr + DL_OPTICAL_CONFIG_REG_OFFSET, l_scom_data);
+    }
+
+    l_optical_config_reg = l_scom_data();
+    OPTICAL_CONFIG_REG.ptr() = static_cast<void*>(&l_optical_config_reg);
+    OPTICAL_CONFIG_REG.size() = sizeof(l_optical_config_reg);
+
+    uint64_t l_tx0_lane_control_reg;
+    fapi2::ffdc_t TX0_LANE_CONTROL_REG;
+    l_scom_data.flush<1>();
+
+    if (T == fapi2::TARGET_TYPE_OBUS)
+    {
+        (void) fapi2::getScom(i_chip_target, l_base_scom_addr + DL_TX0_LANE_CONTROL_REG_OFFSET, l_scom_data);
+    }
+
+    l_tx0_lane_control_reg = l_scom_data();
+    TX0_LANE_CONTROL_REG.ptr() = static_cast<void*>(&l_tx0_lane_control_reg);
+    TX0_LANE_CONTROL_REG.size() = sizeof(l_tx0_lane_control_reg);
+
+    uint64_t l_tx1_lane_control_reg;
+    fapi2::ffdc_t TX1_LANE_CONTROL_REG;
+    l_scom_data.flush<1>();
+
+    if (T == fapi2::TARGET_TYPE_OBUS)
+    {
+        (void) fapi2::getScom(i_chip_target, l_base_scom_addr + DL_TX1_LANE_CONTROL_REG_OFFSET, l_scom_data);
+    }
+
+    l_tx1_lane_control_reg = l_scom_data();
+    TX1_LANE_CONTROL_REG.ptr() = static_cast<void*>(&l_tx1_lane_control_reg);
+    TX1_LANE_CONTROL_REG.size() = sizeof(l_tx1_lane_control_reg);
+
+    uint64_t l_rx0_lane_control_reg;
+    fapi2::ffdc_t RX0_LANE_CONTROL_REG;
+    l_scom_data.flush<1>();
+
+    if (T == fapi2::TARGET_TYPE_OBUS)
+    {
+        (void) fapi2::getScom(i_chip_target, l_base_scom_addr + DL_RX0_LANE_CONTROL_REG_OFFSET, l_scom_data);
+    }
+
+    l_rx0_lane_control_reg = l_scom_data();
+    RX0_LANE_CONTROL_REG.ptr() = static_cast<void*>(&l_rx0_lane_control_reg);
+    RX0_LANE_CONTROL_REG.size() = sizeof(l_rx0_lane_control_reg);
+
+    uint64_t l_rx1_lane_control_reg;
+    fapi2::ffdc_t RX1_LANE_CONTROL_REG;
+    l_scom_data.flush<1>();
+
+    if (T == fapi2::TARGET_TYPE_OBUS)
+    {
+        (void) fapi2::getScom(i_chip_target, l_base_scom_addr + DL_RX1_LANE_CONTROL_REG_OFFSET, l_scom_data);
+    }
+
+    l_rx1_lane_control_reg = l_scom_data();
+    RX1_LANE_CONTROL_REG.ptr() = static_cast<void*>(&l_rx1_lane_control_reg);
+    RX1_LANE_CONTROL_REG.size() = sizeof(l_rx1_lane_control_reg);
+
+    uint64_t l_err0_status_reg;
+    fapi2::ffdc_t ERR0_STATUS_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + DL_ERR0_STATUS_REG_OFFSET, l_scom_data);
+    l_err0_status_reg = l_scom_data();
+    ERR0_STATUS_REG.ptr() = static_cast<void*>(&l_err0_status_reg);
+    ERR0_STATUS_REG.size() = sizeof(l_err0_status_reg);
+
+    uint64_t l_err1_status_reg;
+    fapi2::ffdc_t ERR1_STATUS_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + DL_ERR1_STATUS_REG_OFFSET, l_scom_data);
+    l_err1_status_reg = l_scom_data();
+    ERR1_STATUS_REG.ptr() = static_cast<void*>(&l_err1_status_reg);
+    ERR1_STATUS_REG.size() = sizeof(l_err1_status_reg);
+
+    uint64_t l_status_reg;
+    fapi2::ffdc_t STATUS_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + DL_STATUS_REG_OFFSET, l_scom_data);
+    l_status_reg = l_scom_data();
+    STATUS_REG.ptr() = static_cast<void*>(&l_status_reg);
+    STATUS_REG.size() = sizeof(l_status_reg);
+
+    uint64_t l_err_misc_reg;
+    fapi2::ffdc_t ERR_MISC_REG;
+    l_scom_data.flush<1>();
+
+    if (T == fapi2::TARGET_TYPE_OBUS)
+    {
+        (void) fapi2::getScom(i_chip_target, l_base_scom_addr + DL_ERR_MISC_REG_OFFSET, l_scom_data);
+    }
+
+    l_err_misc_reg = l_scom_data();
+    ERR_MISC_REG.ptr() = static_cast<void*>(&l_err_misc_reg);
+    ERR_MISC_REG.size() = sizeof(l_err_misc_reg);
+
+    FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_P9_FAB_IOVALID_DL_FFDC_ERR);
+}
+
+
+/// @brief Append TL layer specific FFDC in the event of a training failure
+///
+/// @tparam T template parameter, defines endpoint type
+/// @param[in]    i_chip_target  Processor chip target
+/// @param[in]    i_link_ctl     X/A link control structure for link
+/// @param[inout] o_rc           Return code object to be appended
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+template<fapi2::TargetType T>
+void
+p9_fab_iovalid_append_tl_ffdc(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_chip_target,
+    const p9_fbc_link_ctl_t& i_link_ctl,
+    fapi2::ReturnCode& o_rc)
+{
+    uint64_t l_base_scom_addr = i_link_ctl.tl_fir_addr;
+    fapi2::buffer<uint64_t> l_scom_data;
+
+    uint64_t l_fir_reg;
+    fapi2::ffdc_t FIR_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr, l_scom_data);
+    l_fir_reg = l_scom_data();
+    FIR_REG.ptr() = static_cast<void*>(&l_fir_reg);
+    FIR_REG.size() = sizeof(l_fir_reg);
+
+    uint64_t l_config01_reg;
+    fapi2::ffdc_t CONFIG01_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + TL_CONFIG01_REG_OFFSET, l_scom_data);
+    l_config01_reg = l_scom_data();
+    CONFIG01_REG.ptr() = static_cast<void*>(&l_config01_reg);
+    CONFIG01_REG.size() = sizeof(l_config01_reg);
+
+    uint64_t l_config23_reg;
+    fapi2::ffdc_t CONFIG23_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + TL_CONFIG23_REG_OFFSET, l_scom_data);
+    l_config23_reg = l_scom_data();
+    CONFIG23_REG.ptr() = static_cast<void*>(&l_config23_reg);
+    CONFIG23_REG.size() = sizeof(l_config23_reg);
+
+    uint64_t l_config45_reg;
+    fapi2::ffdc_t CONFIG45_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + TL_CONFIG45_REG_OFFSET, l_scom_data);
+    l_config45_reg = l_scom_data();
+    CONFIG45_REG.ptr() = static_cast<void*>(&l_config45_reg);
+    CONFIG45_REG.size() = sizeof(l_config45_reg);
+
+    uint64_t l_config67_reg;
+    fapi2::ffdc_t CONFIG67_REG;
+    l_scom_data.flush<1>();
+
+    if (T == fapi2::TARGET_TYPE_OBUS)
+    {
+        (void) fapi2::getScom(i_chip_target, l_base_scom_addr + TL_CONFIG67_REG_OFFSET, l_scom_data);
+    }
+
+    l_config67_reg = l_scom_data();
+    CONFIG67_REG.ptr() = static_cast<void*>(&l_config67_reg);
+    CONFIG67_REG.size() = sizeof(l_config67_reg);
+
+    uint64_t l_misc_config_reg;
+    fapi2::ffdc_t MISC_CONFIG_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + TL_MISC_CONFIG_REG_OFFSET, l_scom_data);
+    l_misc_config_reg = l_scom_data();
+    MISC_CONFIG_REG.ptr() = static_cast<void*>(&l_misc_config_reg);
+    MISC_CONFIG_REG.size() = sizeof(l_misc_config_reg);
+
+    uint64_t l_framer0123_err_reg;
+    fapi2::ffdc_t FRAMER0123_ERR_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + TL_FRAMER0123_ERR_REG_OFFSET, l_scom_data);
+    l_framer0123_err_reg = l_scom_data();
+    FRAMER0123_ERR_REG.ptr() = static_cast<void*>(&l_framer0123_err_reg);
+    FRAMER0123_ERR_REG.size() = sizeof(l_framer0123_err_reg);
+
+    uint64_t l_framer4567_err_reg;
+    fapi2::ffdc_t FRAMER4567_ERR_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + TL_FRAMER4567_ERR_REG_OFFSET, l_scom_data);
+    l_framer4567_err_reg = l_scom_data();
+    FRAMER4567_ERR_REG.ptr() = static_cast<void*>(&l_framer4567_err_reg);
+    FRAMER4567_ERR_REG.size() = sizeof(l_framer4567_err_reg);
+
+    uint64_t l_parser0123_err_reg;
+    fapi2::ffdc_t PARSER0123_ERR_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + TL_PARSER0123_ERR_REG_OFFSET, l_scom_data);
+    l_parser0123_err_reg = l_scom_data();
+    PARSER0123_ERR_REG.ptr() = static_cast<void*>(&l_parser0123_err_reg);
+    PARSER0123_ERR_REG.size() = sizeof(l_parser0123_err_reg);
+
+    uint64_t l_parser4567_err_reg;
+    fapi2::ffdc_t PARSER4567_ERR_REG;
+    l_scom_data.flush<1>();
+    (void) fapi2::getScom(i_chip_target, l_base_scom_addr + TL_PARSER4567_ERR_REG_OFFSET, l_scom_data);
+    l_parser4567_err_reg = l_scom_data();
+    PARSER4567_ERR_REG.ptr() = static_cast<void*>(&l_parser4567_err_reg);
+    PARSER4567_ERR_REG.size() = sizeof(l_parser4567_err_reg);
+
+    FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_P9_FAB_IOVALID_TL_FFDC_ERR);
+}
+
+
+/// @brief Return endpoint targets for local/remote ends of link, via local end
+///        link control structure
+///
+/// @tparam T template parameter, defines endpoint type
+/// @param[in]  i_loc_chip_target    Processor chip target
+/// @param[in]  i_loc_link_ctl       X/A link control structure for link local end
+/// @param[in]  i_rem_link_ctl       X/A link control structure for link remote end
+/// @param[out] io_loc_endp_target   Link endpoint target (local end)
+/// @param[out] io_rem_endp_target   Link endpoint target (remote end)
+/// @param[out] io_rem_chip_target   Processor chip target (remote end)
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+template<fapi2::TargetType T>
+fapi2::ReturnCode p9_fab_iovalid_get_link_endpoints(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_loc_chip_target,
+    const p9_fbc_link_ctl_t& i_loc_link_ctl,
+    const p9_fbc_link_ctl_t& i_rem_link_ctl,
+    fapi2::Target<T>& io_loc_endp_target,
+    fapi2::Target<T>& io_rem_endp_target,
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& io_rem_chip_target)
+{
+    FAPI_DBG("Start");
+
+    // use local end link control structure to find associated endpoint target
+    auto l_endp_targets = i_loc_chip_target.getChildren<T>();
+    bool l_found = false;
+
+    for (auto l_iter = l_endp_targets.begin();
+         (l_iter != l_endp_targets.end()) && !l_found;
+         l_iter++)
+    {
+        uint8_t l_loc_endp_unit_id;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, *l_iter, l_loc_endp_unit_id),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS, local)");
+
+        if ((static_cast<fapi2::TargetType>(i_loc_link_ctl.endp_type) == T) &&
+            (i_loc_link_ctl.endp_unit_id == l_loc_endp_unit_id))
+        {
+            // associated endpoint target found, use getOtherEnd/getParent to reach chip
+            // target of connected chip
+            fapi2::Target<T> l_rem_endp_target;
+            fapi2::ReturnCode l_rc = l_iter->getOtherEnd(l_rem_endp_target);
+            FAPI_ASSERT(!l_rc,
+                        fapi2::P9_FAB_IOVALID_REM_ENDP_TARGET_ERR()
+                        .set_LOC_TARGET(i_loc_chip_target)
+                        .set_LOC_ENDP_TYPE(i_loc_link_ctl.endp_type)
+                        .set_LOC_ENDP_UNIT_ID(i_loc_link_ctl.endp_unit_id)
+                        .set_REM_ENDP_UNIT_ID(i_rem_link_ctl.endp_unit_id)
+                        .set_LOC_ENDP_TARGET(*l_iter),
+                        "Endpoint target at other end of link is invalid!");
+            l_found = true;
+            io_loc_endp_target = *l_iter;
+            io_rem_endp_target = l_rem_endp_target;
+            io_rem_chip_target = io_rem_endp_target.template getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+        }
+    }
+
+    FAPI_ASSERT(l_found,
+                fapi2::P9_FAB_IOVALID_LOC_ENDP_TARGET_ERR()
+                .set_LOC_TARGET(i_loc_chip_target)
+                .set_LOC_ENDP_TYPE(i_loc_link_ctl.endp_type)
+                .set_LOC_ENDP_UNIT_ID(i_loc_link_ctl.endp_unit_id)
+                .set_LOC_ENDP_TARGETS(l_endp_targets),
+                "No matching local endpoint target found!");
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
 
 /// @brief Validate DL/TL link layers are trained
 ///
 /// @param[in]  i_target          Processor chip target
+/// @param[in]  i_loc_link_ctl    X/A link control structure for link local end
+/// @param[in]  i_rem_link_ctl    X/A link control structure for link remote end
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+template<fapi2::TargetType T>
 fapi2::ReturnCode p9_fab_iovalid_link_validate(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const p9_fbc_link_ctl_t& i_link_ctl)
+    const p9_fbc_link_ctl_t& i_loc_link_ctl,
+    const p9_fbc_link_ctl_t& i_rem_link_ctl)
 {
     FAPI_DBG("Start");
     fapi2::buffer<uint64_t> l_dl_fir_reg;
     fapi2::buffer<uint64_t> l_tl_fir_reg;
     uint8_t l_tl_fir_trained_state = 0;
+    fapi2::Target<T> l_loc_endp_target;
+    fapi2::Target<T> l_rem_endp_target;
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_rem_chip_target;
+
+    // obtain link endpoints for FFDC
+    FAPI_TRY(p9_fab_iovalid_get_link_endpoints(i_target,
+             i_loc_link_ctl,
+             i_rem_link_ctl,
+             l_loc_endp_target,
+             l_rem_endp_target,
+             l_rem_chip_target),
+             "Error from p9_fab_iovalid_get_link_endpoints");
 
     // validate DL training state
-    FAPI_TRY(fapi2::getScom(i_target, i_link_ctl.dl_fir_addr, l_dl_fir_reg),
-             "Error from getScom (0x%.16llX)", i_link_ctl.dl_fir_addr);
+    FAPI_TRY(fapi2::getScom(i_target, i_loc_link_ctl.dl_fir_addr, l_dl_fir_reg),
+             "Error from getScom (0x%.16llX)", i_loc_link_ctl.dl_fir_addr);
+
     FAPI_ASSERT(l_dl_fir_reg.getBit<DL_FIR_LINK0_TRAINED_BIT>() &&
                 l_dl_fir_reg.getBit<DL_FIR_LINK1_TRAINED_BIT>(),
                 fapi2::P9_FAB_IOVALID_DL_NOT_TRAINED_ERR()
                 .set_TARGET(i_target)
-                .set_LOC_ENDP_TYPE(i_link_ctl.endp_type)
-                .set_LOC_ENDP_UNIT_ID(i_link_ctl.endp_unit_id)
-                .set_DL_FIR_REG(l_dl_fir_reg),
+                .set_LOC_ENDP_TARGET(l_loc_endp_target)
+                .set_LOC_ENDP_TYPE(i_loc_link_ctl.endp_type)
+                .set_LOC_ENDP_UNIT_ID(i_loc_link_ctl.endp_unit_id)
+                .set_REM_ENDP_TARGET(l_rem_endp_target)
+                .set_REM_ENDP_TYPE(i_rem_link_ctl.endp_type)
+                .set_REM_ENDP_UNIT_ID(i_rem_link_ctl.endp_unit_id),
                 "Link DL training did not complete successfully!");
 
     // validate TL training state
-    FAPI_TRY(fapi2::getScom(i_target, i_link_ctl.tl_fir_addr, l_tl_fir_reg),
-             "Error from getScom (0x%.16llX)", i_link_ctl.tl_fir_addr);
+    FAPI_TRY(fapi2::getScom(i_target, i_loc_link_ctl.tl_fir_addr, l_tl_fir_reg),
+             "Error from getScom (0x%.16llX)", i_loc_link_ctl.tl_fir_addr);
     FAPI_TRY(l_tl_fir_reg.extractToRight(l_tl_fir_trained_state,
-                                         i_link_ctl.tl_fir_trained_field_start_bit,
+                                         i_loc_link_ctl.tl_fir_trained_field_start_bit,
                                          TL_FIR_TRAINED_FIELD_LENGTH),
              "Error extracting TL layer training state");
 
     FAPI_ASSERT(l_tl_fir_trained_state == TL_FIR_TRAINED_LINK_TRAINED,
                 fapi2::P9_FAB_IOVALID_TL_NOT_TRAINED_ERR()
                 .set_TARGET(i_target)
-                .set_LOC_ENDP_TYPE(i_link_ctl.endp_type)
-                .set_LOC_ENDP_UNIT_ID(i_link_ctl.endp_unit_id)
-                .set_TL_FIR_REG(l_tl_fir_reg),
+                .set_LOC_ENDP_TARGET(l_loc_endp_target)
+                .set_LOC_ENDP_TYPE(i_loc_link_ctl.endp_type)
+                .set_LOC_ENDP_UNIT_ID(i_loc_link_ctl.endp_unit_id)
+                .set_REM_ENDP_TARGET(l_rem_endp_target)
+                .set_REM_ENDP_TYPE(i_rem_link_ctl.endp_type)
+                .set_REM_ENDP_UNIT_ID(i_rem_link_ctl.endp_unit_id),
                 "Link TL training did not complete successfully!");
 
 fapi_try_exit:
+
+    if (fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P9_FAB_IOVALID_DL_NOT_TRAINED_ERR)
+    {
+        p9_fab_iovalid_append_dl_ffdc<T>(i_target,
+                                         i_loc_link_ctl,
+                                         fapi2::current_err);
+        p9_fab_iovalid_append_dl_ffdc<T>(l_rem_chip_target,
+                                         i_rem_link_ctl,
+                                         fapi2::current_err);
+    }
+    else if (fapi2::current_err == (fapi2::ReturnCode) fapi2::RC_P9_FAB_IOVALID_TL_NOT_TRAINED_ERR)
+    {
+        p9_fab_iovalid_append_tl_ffdc<T>(i_target,
+                                         i_loc_link_ctl,
+                                         fapi2::current_err);
+        p9_fab_iovalid_append_tl_ffdc<T>(l_rem_chip_target,
+                                         i_rem_link_ctl,
+                                         fapi2::current_err);
+    }
+
     FAPI_DBG("End");
     return fapi2::current_err;
 }
@@ -169,48 +593,21 @@ fapi2::ReturnCode p9_fab_iovalid_get_link_delays(
 {
     FAPI_DBG("Start");
 
-    bool l_found = false;
     uint32_t l_loc_link_delay = 0xFFF;
     uint32_t l_rem_link_delay = 0xFFF;
+    fapi2::Target<T> l_loc_endp_target;
+    fapi2::Target<T> l_rem_endp_target;
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_rem_chip_target;
 
-    // use local end link control structure to find associated endpoint target
-    auto l_endp_targets = i_loc_chip_target.getChildren<T>();
-
-    for (auto l_iter = l_endp_targets.begin();
-         (l_iter != l_endp_targets.end()) && !l_found;
-         l_iter++)
-    {
-        uint8_t l_loc_endp_unit_id;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, *l_iter, l_loc_endp_unit_id),
-                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS, local)");
-
-        if ((static_cast<fapi2::TargetType>(i_loc_link_ctl.endp_type) == T) &&
-            (i_loc_link_ctl.endp_unit_id == l_loc_endp_unit_id))
-        {
-            // associated endpoint target found, use getOtherEnd/getParent to reach chip
-            // target of connected chip
-            fapi2::Target<T> l_rem_endp_target;
-            fapi2::ReturnCode l_rc = l_iter->getOtherEnd(l_rem_endp_target);
-            FAPI_ASSERT(!l_rc,
-                        fapi2::P9_FAB_IOVALID_REM_ENDP_TARGET_ERR()
-                        .set_LOC_TARGET(i_loc_chip_target)
-                        .set_LOC_ENDP_TYPE(i_loc_link_ctl.endp_type)
-                        .set_LOC_ENDP_UNIT_ID(i_loc_link_ctl.endp_unit_id)
-                        .set_REM_ENDP_UNIT_ID(i_rem_link_ctl.endp_unit_id),
-                        "Endpoint target at other end of link is invalid!");
-
-            l_rem_chip_target = l_rem_endp_target.template getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-            l_found = true;
-        }
-    }
-
-    FAPI_ASSERT(l_found,
-                fapi2::P9_FAB_IOVALID_LOC_ENDP_TARGET_ERR()
-                .set_LOC_TARGET(i_loc_chip_target)
-                .set_LOC_ENDP_TYPE(i_loc_link_ctl.endp_type)
-                .set_LOC_ENDP_UNIT_ID(i_loc_link_ctl.endp_unit_id),
-                "No matching local endpoint target found!");
+    // get link endpoint targets
+    FAPI_TRY(p9_fab_iovalid_get_link_endpoints(
+                 i_loc_chip_target,
+                 i_loc_link_ctl,
+                 i_rem_link_ctl,
+                 l_loc_endp_target,
+                 l_rem_endp_target,
+                 l_rem_chip_target),
+             "Error from p9_fab_iovalid_get_link_endpoints");
 
     // read link delay from local/remote chip targets
     // link control structures provide register/bit offsets to collect
@@ -266,13 +663,14 @@ p9_fab_iovalid_update_link(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         l_ras_fir_mask.flush<1>();
         FAPI_TRY(l_ras_fir_mask.clearBit(i_ctl.ras_fir_field_bit));
 
-        //Get the value of the action 0 command register, clear the bit and write it
+        // get the value of the action 0 register, clear the bit and write it
         FAPI_TRY(fapi2::getScom(i_target, PU_PB_CENT_SM1_EXTFIR_ACTION0_REG, l_extfir_action),
                  "Error reading Action 0 register");
         FAPI_TRY(l_extfir_action.clearBit(i_ctl.ras_fir_field_bit));
         FAPI_TRY(fapi2::putScom(i_target, PU_PB_CENT_SM1_EXTFIR_ACTION0_REG, l_extfir_action),
                  "Error writing Action 0 register");
-        //Get the value of the action 1 registers, clear the bit, and write it
+
+        // get the value of the action 1 registers, clear the bit, and write it
         FAPI_TRY(fapi2::getScom(i_target, PU_PB_CENT_SM1_EXTFIR_ACTION1_REG, l_extfir_action),
                  "Error reading Action 1 register");
         FAPI_TRY(l_extfir_action.clearBit(i_ctl.ras_fir_field_bit));
@@ -295,12 +693,14 @@ p9_fab_iovalid_update_link(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     FAPI_TRY(fapi2::putScom(i_target,
                             (i_set_not_clear) ? (i_ctl.iovalid_or_addr) : (i_ctl.iovalid_clear_addr),
                             l_iovalid_mask),
-             "Error writing iovalid control register!");
+             "Error writing iovalid control register (0x%08X)!",
+             (i_set_not_clear) ? (i_ctl.iovalid_or_addr) : (i_ctl.iovalid_clear_addr));
 
     FAPI_TRY(fapi2::putScom(i_target,
                             (i_set_not_clear) ? (PU_PB_CENT_SM1_EXTFIR_MASK_REG_AND) : (PU_PB_CENT_SM1_EXTFIR_MASK_REG_OR),
                             l_ras_fir_mask),
-             "Error writing RAS FIR mask register!");
+             "Error writing RAS FIR mask register (0x%08X)!",
+             (i_set_not_clear) ? (PU_PB_CENT_SM1_EXTFIR_MASK_REG_AND) : (PU_PB_CENT_SM1_EXTFIR_MASK_REG_OR));
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -375,6 +775,12 @@ p9_fab_iovalid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                      P9_FBC_XBUS_LINK_CTL_ARR[l_x_rem_link_id[l_link_id]],
                                      l_x_agg_link_delay[l_link_id]),
                                  "Error from p9_fab_iovalid_get_link_delays (X, electrical)");
+
+                        FAPI_TRY(p9_fab_iovalid_link_validate<fapi2::TARGET_TYPE_XBUS>(
+                                     i_target,
+                                     P9_FBC_XBUS_LINK_CTL_ARR[l_link_id],
+                                     P9_FBC_XBUS_LINK_CTL_ARR[l_x_rem_link_id[l_link_id]]),
+                                 "Error from p9_fab_iovalid_link_validate (X, electrical)");
                     }
                     else
                     {
@@ -384,11 +790,13 @@ p9_fab_iovalid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                      P9_FBC_XBUS_LINK_CTL_ARR[l_x_rem_link_id[l_link_id]],
                                      l_x_agg_link_delay[l_link_id]),
                                  "Error from p9_fab_iovalid_get_link_delays (X, optical)");
-                    }
 
-                    FAPI_TRY(p9_fab_iovalid_link_validate(i_target,
-                                                          P9_FBC_XBUS_LINK_CTL_ARR[l_link_id]),
-                             "Error from p9_fab_iovalid_link_validate (X)");
+                        FAPI_TRY(p9_fab_iovalid_link_validate<fapi2::TARGET_TYPE_OBUS>(
+                                     i_target,
+                                     P9_FBC_XBUS_LINK_CTL_ARR[l_link_id],
+                                     P9_FBC_XBUS_LINK_CTL_ARR[l_x_rem_link_id[l_link_id]]),
+                                 "Error from p9_fab_iovalid_link_validate (X, optical)");
+                    }
                 }
             }
         }
@@ -421,8 +829,10 @@ p9_fab_iovalid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                  l_a_agg_link_delay[l_link_id]),
                              "Error from p9_fab_iovalid_get_link_delays (A)");
 
-                    FAPI_TRY(p9_fab_iovalid_link_validate(i_target,
-                                                          P9_FBC_ABUS_LINK_CTL_ARR[l_link_id]),
+                    FAPI_TRY(p9_fab_iovalid_link_validate<fapi2::TARGET_TYPE_OBUS>(
+                                 i_target,
+                                 P9_FBC_ABUS_LINK_CTL_ARR[l_link_id],
+                                 P9_FBC_ABUS_LINK_CTL_ARR[l_a_rem_link_id[l_link_id]]),
                              "Error from p9_fab_iovalid_link_validate (A)");
                 }
             }
