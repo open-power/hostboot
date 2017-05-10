@@ -30,7 +30,7 @@
 /// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 /// *HWP Team: Nest
-/// *HWP Level: 2
+/// *HWP Level: 3
 /// *HWP Consumed by: HB,FSP
 ///
 
@@ -89,14 +89,11 @@ const uint32_t P9_BUILD_SMP_FFDC_REGS[P9_BUILD_SMP_FFDC_NUM_REGS] =
 ///
 /// @param[in] i_target                P9 target
 /// @param[in] i_smp                   Structure encapsulating SMP topology
-/// @param[in] i_dump_all_targets      Dump FFDC for all targets in SMP?
-///                                    true=yes; false=no (only for i_target)
 /// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p9_build_smp_adu_check_status(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    p9_build_smp_system& i_smp,
-    const bool i_dump_all_targets)
+    p9_build_smp_system& i_smp)
 {
     FAPI_DBG("Start");
     fapi2::ReturnCode l_rc;
@@ -145,97 +142,72 @@ fapi2::ReturnCode p9_build_smp_adu_check_status(
     {
         fapi2::current_err = l_rc;
         // collect FFDC
-        std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>*> l_targets_to_collect;
-        fapi2::buffer<uint64_t> l_scomData;
-        fapi2::variable_buffer l_group_ids;
-        fapi2::variable_buffer l_chip_ids;
-        fapi2::variable_buffer l_ffdc_reg_data[P9_BUILD_SMP_FFDC_NUM_REGS];
+        fapi2::variable_buffer l_chip_data_valid(8 * P9_BUILD_SMP_MAX_SIZE);
+        fapi2::variable_buffer l_group_ids(8 * P9_BUILD_SMP_MAX_SIZE);
+        fapi2::variable_buffer l_chip_ids(8 * P9_BUILD_SMP_MAX_SIZE);
+        fapi2::variable_buffer l_ffdc_addrs(64 * P9_BUILD_SMP_FFDC_NUM_REGS);
+        fapi2::variable_buffer l_ffdc_reg_data(64 * P9_BUILD_SMP_MAX_SIZE * P9_BUILD_SMP_FFDC_NUM_REGS);
+        uint8_t l_idx = 0;
 
-        // determine set of chips to collect
-        for (auto n_iter = i_smp.groups.begin();
-             n_iter != i_smp.groups.end();
-             ++n_iter)
+        // init buffers
+        l_chip_data_valid.flush<0>();
+        l_group_ids.flush<1>();
+        l_chip_ids.flush<1>();
+        l_ffdc_reg_data.flush<1>();
+
+        for (uint8_t jj = 0; jj < P9_BUILD_SMP_FFDC_NUM_REGS; jj++)
         {
-            for (auto p_iter = n_iter->second.chips.begin();
-                 p_iter != n_iter->second.chips.end();
-                 ++p_iter)
-            {
-                if (i_dump_all_targets ||
-                    (*(p_iter->second.target) == i_target))
-                {
-                    l_targets_to_collect.push_back(p_iter->second.target);
-                }
-            }
-        }
-
-        // size the FFDC buffers
-        l_group_ids.resize(8 * l_targets_to_collect.size());
-        l_chip_ids.resize(8 * l_targets_to_collect.size());
-
-        for (uint8_t i = 0; i < P9_BUILD_SMP_FFDC_NUM_REGS; i++)
-        {
-            l_ffdc_reg_data[i].resize(64 * l_targets_to_collect.size());
+            l_ffdc_addrs.set<uint64_t>(jj, P9_BUILD_SMP_FFDC_REGS[jj]);
         }
 
         // extract FFDC data
-//        for (std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>*>::iterator t_iter = l_targets_to_collect.begin();
-//             t_iter != l_targets_to_collect.end();
-//             t_iter++)
-//        {
-//            // log groupd/chip ID
-//            for (auto n_iter = i_smp.groups.begin();
-//                 n_iter != i_smp.groups.end();
-//                 n_iter++)
-//            {
-//                for (auto p_iter = n_iter->second.chips.begin();
-//                     p_iter != n_iter->second.chips.end();
-//                     p_iter++)
-//                {
-//                    if (p_iter->second.target == *t_iter)
-//                    {
-//                        (void) l_group_ids.set<uint8_t>(t_iter - l_targets_to_collect.begin(), n_iter->first);
-//                        (void) l_chip_ids.set<uint8_t>(t_iter - l_targets_to_collect.begin(), p_iter->first);
-//                    }
-//                }
-//            }
-//
-//            // collect SCOM data
-//            for (uint8_t i = 0; i < P9_BUILD_SMP_FFDC_NUM_REGS; i++)
-//            {
-//                fapi2::buffer<uint64_t> l_scom_data;
-//                fapi2::ReturnCode l_rc = fapi2::getScom(*(*t_iter), P9_BUILD_SMP_FFDC_REGS[i], l_scom_data);
-//
-//                if (l_rc)
-//                {
-//                    l_scom_data.flush<1>();
-//                }
-//
-//                (void) l_ffdc_reg_data[i].set<uint64_t>(t_iter - l_targets_to_collect.begin(), l_scom_data());
-//            }
-//        }
+        for (auto n_iter = i_smp.groups.begin();
+             n_iter != i_smp.groups.end();
+             n_iter++)
+        {
+            for (auto p_iter = n_iter->second.chips.begin();
+                 p_iter != n_iter->second.chips.end();
+                 p_iter++)
+            {
+                // mark valid
+                (void) l_chip_data_valid.set<uint8_t>(l_idx, 0x1);
+                // log group/chip ID
+                (void) l_group_ids.set<uint8_t>(l_idx, n_iter->first);
+                (void) l_chip_ids.set<uint8_t>(l_idx, p_iter->first);
+
+                // collect SCOM data
+                for (uint8_t jj = 0; jj < P9_BUILD_SMP_FFDC_NUM_REGS; jj++)
+                {
+                    fapi2::buffer<uint64_t> l_scom_data;
+                    fapi2::ReturnCode l_scom_rc;
+                    // discard bad SCOM return codes, mark data as all ones
+                    // and keep collecting
+                    l_scom_rc = fapi2::getScom(*(p_iter->second.target),
+                                               P9_BUILD_SMP_FFDC_REGS[jj],
+                                               l_scom_data);
+
+                    if (l_scom_rc)
+                    {
+                        l_scom_data.flush<1>();
+                    }
+
+                    (void) l_ffdc_reg_data.set<uint64_t>((P9_BUILD_SMP_FFDC_NUM_REGS * l_idx) + jj,
+                                                         l_scom_data());
+                }
+
+                l_idx++;
+            }
+        }
 
         FAPI_ASSERT(false,
                     fapi2::P9_BUILD_SMP_ADU_STATUS_MISMATCH_ERR()
                     .set_TARGET(i_target)
                     .set_ADU_NUM_POLLS(l_num_polls)
-                    .set_NUM_CHIPS(l_targets_to_collect.size())
+                    .set_CHIP_DATA_VALID(&l_chip_data_valid)
                     .set_GROUP_IDS(l_group_ids)
                     .set_CHIP_IDS(l_chip_ids)
-                    .set_PB_CENT_MODE(l_ffdc_reg_data[0])
-                    .set_PB_CENT_HP_MODE_CURR(l_ffdc_reg_data[1])
-                    .set_PB_CENT_HP_MODE_NEXT(l_ffdc_reg_data[2])
-                    .set_PB_CENT_HPX_MODE_CURR(l_ffdc_reg_data[3])
-                    .set_PB_CENT_HPX_MODE_NEXT(l_ffdc_reg_data[4])
-                    .set_PB_CENT_HPA_MODE_CURR(l_ffdc_reg_data[5])
-                    .set_PB_CENT_HPA_MODE_NEXT(l_ffdc_reg_data[6])
-                    .set_XB_CPLT_CONF1(l_ffdc_reg_data[7])
-                    .set_PB_IOE_FIR_REG(l_ffdc_reg_data[8])
-                    .set_OB0_CPLT_CONF1(l_ffdc_reg_data[9])
-                    .set_OB1_CPLT_CONF1(l_ffdc_reg_data[10])
-                    .set_OB2_CPLT_CONF1(l_ffdc_reg_data[11])
-                    .set_OB3_CPLT_CONF1(l_ffdc_reg_data[12])
-                    .set_IOE_PB_IOO_FIR_REG(l_ffdc_reg_data[13])
-                    .set_ADU_SND_MODE_REG(l_ffdc_reg_data[14]),
+                    .set_FFDC_ADDRS(l_ffdc_addrs)
+                    .set_FFDC_REG_DATA(l_ffdc_reg_data),
                     "Status mismatch detected on ADU operation");
     }
 
@@ -428,8 +400,7 @@ fapi2::ReturnCode p9_build_smp_sequence_adu(p9_build_smp_system& i_smp,
                 // Check status
                 l_rc = p9_build_smp_adu_check_status(
                            *(p_iter->second.target),
-                           i_smp,
-                           (i_op == SMP_ACTIVATE_PHASE2));
+                           i_smp);
 
                 if (l_rc)
                 {
@@ -440,7 +411,7 @@ fapi2::ReturnCode p9_build_smp_sequence_adu(p9_build_smp_system& i_smp,
                 // workaround for HW397129 to re-enable fastpath for DD1
                 uint8_t l_hw397129_workaround;
                 FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW397129, *(p_iter->second.target), l_hw397129_workaround),
-                         "Error getting the ATTR_CHIP_EC_FEATURE_HW397129");
+                         "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW397129)");
 
                 if ((i_action == SWITCH_AB) && l_hw397129_workaround)
                 {
@@ -456,18 +427,17 @@ fapi2::ReturnCode p9_build_smp_sequence_adu(p9_build_smp_system& i_smp,
 
                     if (l_rc)
                     {
-                        FAPI_ERR("Error from p9_adu_coherent_setup_adu (op)");
+                        FAPI_ERR("Error from p9_adu_coherent_setup_adu (op, reinit)");
                         goto adu_reset_unlock;
                     }
 
                     // Check status
                     l_rc = p9_build_smp_adu_check_status(*(p_iter->second.target),
-                                                         i_smp,
-                                                         true);
+                                                         i_smp);
 
                     if (l_rc)
                     {
-                        FAPI_ERR("Error from p9_build_smp_adu_check_status (op)");
+                        FAPI_ERR("Error from p9_build_smp_adu_check_status (op, reinit)");
                         goto adu_reset_unlock;
                     }
                 }
