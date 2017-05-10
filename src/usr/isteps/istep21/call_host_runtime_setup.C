@@ -188,7 +188,7 @@ void* call_host_runtime_setup (void *io_pArgs)
         }
 
 #ifdef CONFIG_START_OCC_DURING_BOOT
-        bool l_activatePM = !(TARGETING::is_phyp_load());
+        bool l_activatePM = TARGETING::is_sapphire_load();
 #else
         bool l_activatePM = false;
 #endif
