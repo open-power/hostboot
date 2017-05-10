@@ -23,23 +23,16 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #ifdef WIN32
-#include "win32_stdint.h"
-#include "endian.h"
-#include "win_sim_fapi.h"
-#include "p9_xip_customize.H"
-#include "p9_xip_image.h"
-#include "p9_ring_identification.H"
-#include "p9_tor.H"
-#include "p9_scan_compression.H"
-#include "p9_infrastruct_help.H"
-#include "p9_ringId.H"
-
-using namespace fapi2;
+    #include "win32_stdint.h"
+    #include "endian.h"
+    #include "win_sim_fapi.h"
 #else
+    #include <p9_get_mvpd_ring.H>
+#endif
+
 #include <p9_xip_customize.H>
 #include <p9_xip_image.h>
 #include <p9_ring_identification.H>
-#include <p9_get_mvpd_ring.H>
 #include <p9_tor.H>
 #include <p9_scan_compression.H>
 #include <p9_infrastruct_help.H>
@@ -93,6 +86,8 @@ typedef struct
 } VpdInsInsertProg_t;
 
 using namespace fapi2;
+
+#ifndef WIN32
 
 #define MBOX_ATTR_WRITE(ID,TARGET,IMAGE) \
     { \
@@ -522,7 +517,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                 break;
         } // End switch(sysPhase)
     }
-    else if (l_fapiRc.isRC(RC_MVPD_RING_NOT_FOUND))
+    else if ((uint32_t)l_fapiRc == RC_MVPD_RING_NOT_FOUND)
     {
         // Update for ring not found in mvpd
         io_ringStatusInMvpd = RING_NOT_FOUND;
@@ -547,7 +542,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         // getMvpdRing failed due to insufficient ring buffer space.
         // Assumption here is that getMvpdRing returns required buffer size
         //   in l_vpdRingSize (and which it does!).
-        FAPI_ASSERT( !l_fapiRc.isRC(RC_MVPD_RING_BUFFER_TOO_SMALL),
+        FAPI_ASSERT( (uint32_t)l_fapiRc != RC_MVPD_RING_BUFFER_TOO_SMALL,
                      fapi2::XIPC_MVPD_RING_SIZE_TOO_BIG().
                      set_CHIP_TARGET(i_procTarget).
                      set_RING_ID(i_ring.ringId).
@@ -559,7 +554,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                      l_vpdRingSize, i_vpdRingSize );
 
         // getMvpdRing failed due to invalid record data magic word.
-        FAPI_ASSERT( !l_fapiRc.isRC(RC_MVPD_INVALID_RS4_HEADER),
+        FAPI_ASSERT( (uint32_t)l_fapiRc != RC_MVPD_INVALID_RS4_HEADER,
                      fapi2::XIPC_MVPD_INVALID_RECORD_DATA().
                      set_CHIP_TARGET(i_procTarget).
                      set_RING_ID(i_ring.ringId).
@@ -569,19 +564,8 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         // getMvpdRing failed for some other reason aside from above handled cases.
         if (l_fapiRc != fapi2::FAPI2_RC_SUCCESS)
         {
-#ifdef WIN32
-
-            if (l_fapiRc == SKIP_RING_ID)
-            {
-                l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
-                FAPI_DBG("N/A MVPD ring for chiptype: ringId=0x%02X, chipletId=0x%02X ",
-                         i_ring.ringId, l_chipletId);
-            }
-
-#else
             FAPI_ERR("_fetch_and_insert_vpd_ring(): getMvpdRing failed "
                      " w/rc=0x%08X", (uint64_t)l_fapiRc);
-#endif
             fapi2::current_err = l_fapiRc;
         }
     }
@@ -711,9 +695,9 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                    l_bImgOutOfSpace,
                                    io_bootCoreMask );
 
-                        if ( (l_fapiRc.isRC(RC_XIPC_IMAGE_WOULD_OVERFLOW)) ||
-                             (!(l_fapiRc.isRC(RC_MVPD_RING_REDUNDANT_DATA)) &&
-                              (l_fapiRc != fapi2::FAPI2_RC_SUCCESS)) )
+                        if (   (uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW ||
+                               ( (uint32_t)l_fapiRc != RC_MVPD_RING_REDUNDANT_DATA &&
+                                 l_fapiRc != fapi2::FAPI2_RC_SUCCESS ) )
                         {
                             fapi2::current_err = l_fapiRc;
                             FAPI_DBG("_fetch_and_insert_vpd_rings() for common rings w/rc:0x%.8x",
@@ -821,7 +805,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                 (0x00F00000 >> (eq * CORES_PER_QUAD));
                         }
 
-                        if (l_fapiRc.isRC(RC_XIPC_IMAGE_WOULD_OVERFLOW))
+                        if ((uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW)
                         {
                             // Capture EQ number when image ran out-of-space while appending ring
                             l_eqNumWhenOutOfSpace = eq;
@@ -830,8 +814,8 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                             l_instanceVpdRing.chipletUnderProcess     = EQ_CHIPLET;
                             l_instanceVpdRing.chipletNumUnderProcess = eq;
                         }
-                        else if ( !(l_fapiRc.isRC(RC_MVPD_RING_REDUNDANT_DATA)) &&
-                                  ( l_fapiRc != fapi2::FAPI2_RC_SUCCESS) )
+                        else if ( (uint32_t)l_fapiRc != RC_MVPD_RING_REDUNDANT_DATA &&
+                                  l_fapiRc != fapi2::FAPI2_RC_SUCCESS )
                         {
                             fapi2::current_err = l_fapiRc;
                             FAPI_DBG("_fetch_and_insert_vpd_rings() for EQ rings w/rc:0x%.8x", (uint64_t)fapi2::current_err );
@@ -926,7 +910,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                         (0x00C00000 >> (ex * (CORES_PER_QUAD / 2)));
                                 }
 
-                                if (l_fapiRc.isRC(RC_XIPC_IMAGE_WOULD_OVERFLOW))
+                                if ((uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW)
                                 {
                                     // Capture EQ number when image ran out-of-space while appending ring
                                     l_eqNumWhenOutOfSpace = eq;
@@ -936,8 +920,8 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                     l_instanceVpdRing.exReprRingNum       = inst;
                                     l_instanceVpdRing.chipletNumUnderProcess = ex;
                                 }
-                                else if ( !(l_fapiRc.isRC(RC_MVPD_RING_REDUNDANT_DATA)) &&
-                                          (l_fapiRc != fapi2::FAPI2_RC_SUCCESS) )
+                                else if ( (uint32_t)l_fapiRc != RC_MVPD_RING_REDUNDANT_DATA &&
+                                          l_fapiRc != fapi2::FAPI2_RC_SUCCESS )
                                 {
                                     fapi2::current_err = l_fapiRc;
                                     FAPI_DBG("_fetch_and_insert_vpd_rings() for EX rings w/rc:0x%.8x", (uint64_t)fapi2::current_err );
@@ -1007,7 +991,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                         (0x00800000 >> ec);
                                 }
 
-                                if (l_fapiRc.isRC(RC_XIPC_IMAGE_WOULD_OVERFLOW))
+                                if ((uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW)
                                 {
                                     // Capture EQ number when image ran out-of-space while appending ring
                                     l_eqNumWhenOutOfSpace = eq;
@@ -1016,17 +1000,17 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                     l_instanceVpdRing.chipletUnderProcess     = EC_CHIPLET;
                                     l_instanceVpdRing.chipletNumUnderProcess = ec;
                                 }
-                                else if ( !(l_fapiRc.isRC(RC_MVPD_RING_REDUNDANT_DATA)) &&
-                                          (l_fapiRc != fapi2::FAPI2_RC_SUCCESS) )
+                                else if ( (uint32_t)l_fapiRc != RC_MVPD_RING_REDUNDANT_DATA &&
+                                          l_fapiRc != fapi2::FAPI2_RC_SUCCESS )
                                 {
                                     fapi2::current_err = l_fapiRc;
                                     FAPI_DBG("_fetch_and_insert_vpd_rings() for EC rings w/rc:0x%.8x", (uint64_t)fapi2::current_err );
                                     goto fapi_try_exit;
                                 }
-                                else if ( ((l_fapiRc == fapi2::FAPI2_RC_SUCCESS)        ||
-                                           (l_fapiRc.isRC(RC_MVPD_RING_REDUNDANT_DATA)) ||
-                                           (l_fapiRc.isRC(RC_MVPD_RING_NOT_FOUND))) &&
-                                          (l_bImgOutOfSpace == false) )
+                                else if ( (           l_fapiRc == fapi2::FAPI2_RC_SUCCESS     ||
+                                                      (uint32_t)l_fapiRc == RC_MVPD_RING_REDUNDANT_DATA ||
+                                                      (uint32_t)l_fapiRc == RC_MVPD_RING_NOT_FOUND ) &&
+                                          l_bImgOutOfSpace == false )
                                 {
                                     FAPI_DBG("(INS) io_ringSectionSize = %d", io_ringSectionSize);
                                     l_activeCoreMask |= (uint32_t)( 1 << ((NUM_OF_CORES - 1) - ec) );
@@ -1603,7 +1587,7 @@ ReturnCode p9_xip_customize (
             // Adjust the local size of MAX_SEEPROM_IMAGE_SIZE to accommodate enlarged image for Cronus
             l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_MAX_SBE_SEEPROM_SIZE, FAPI_SYSTEM, attrMaxSbeSeepromSize);
 
-            FAPI_ASSERT( l_fapiRc2.isRC(fapi2::FAPI2_RC_SUCCESS),
+            FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
                          fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
                          set_CHIP_TARGET(i_procTarget).
                          set_OCCURRENCE(2),
@@ -1745,9 +1729,7 @@ ReturnCode p9_xip_customize (
             if (l_fapiRc)
             {
 
-#ifndef WIN32
-
-                if (l_fapiRc.isRC(RC_XIPC_IMAGE_WOULD_OVERFLOW))
+                if ((uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW)
                 {
                     FAPI_INF("p9_xip_customize(): Image is full. Ran out of space appending VPD rings"
                              " to the .rings section");
@@ -1758,7 +1740,7 @@ ReturnCode p9_xip_customize (
 
                     l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SBE_IMAGE_MINIMUM_VALID_ECS, FAPI_SYSTEM, attrMinReqdEcs);
 
-                    FAPI_ASSERT( l_fapiRc2.isRC(fapi2::FAPI2_RC_SUCCESS),
+                    FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
                                  fapi2::XIPC_IMAGE_WOULD_OVERFLOW_ADDL_INFO().
                                  set_CHIP_TARGET(i_procTarget).
                                  set_REQUESTED_BOOT_CORE_MASK(l_requestedBootCoreMask).
@@ -1790,22 +1772,8 @@ ReturnCode p9_xip_customize (
                                  "Image buffer would overflow before reaching the minimum required"
                                  " number of EC boot cores" );
 
-                    //@TODO: Enable following lines in RTC158106 (Vpd column insertion order)
-#if 0
-                    FAPI_INF( "Image is full and with sufficient boot cores:\n"
-                              "  Final bootCoreMask: 0x%08X\n"
-                              "  Number of boot cores: %d\n"
-                              "  Min req'd boot cores: %d",
-                              io_bootCoreMask, l_actualEcCount, attrMinReqdEcs );
-
-                    l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
-#endif
-
                 }
 
-#else
-                FAPI_INF("fetch_and_insert_vpd_rings returned error rc=0x%08x", l_fapiRc);
-#endif
                 fapi2::current_err = l_fapiRc;
                 goto fapi_try_exit;
 
@@ -1922,7 +1890,7 @@ ReturnCode p9_xip_customize (
             // Extract the DD level to enable retrieval of correct CME/SGPE ring blocks
             l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_procTarget, attrDdLevel);
 
-            FAPI_ASSERT( l_fapiRc.isRC(fapi2::FAPI2_RC_SUCCESS),
+            FAPI_ASSERT( l_fapiRc == fapi2::FAPI2_RC_SUCCESS,
                          fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
                          set_CHIP_TARGET(i_procTarget).
                          set_OCCURRENCE(1),
