@@ -177,10 +177,13 @@ sub processSystem
         $targetObj->{NUM_PROCS_PER_NODE});
     parseBitwise($targetObj,$target,"CDM_POLICIES");
 
-    my ($num,$base,$group_offset,$proc_offset,$offset) = split(/,/,
-         $targetObj->getAttribute($target,"XSCOM_BASE_ADDRESS"));
-
-    $targetObj->setAttribute($target, "XSCOM_BASE_ADDRESS", $base);
+    #@fixme-RTC:174616-Remove deprecated support
+    if (!$targetObj->isBadAttribute($target,"XSCOM_BASE_ADDRESS") )
+    {
+        my ($num,$base,$group_offset,$proc_offset,$offset) = split(/,/,
+            $targetObj->getAttribute($target,"XSCOM_BASE_ADDRESS"));
+        $targetObj->setAttribute($target, "XSCOM_BASE_ADDRESS", $base);
+    }
 
     # TODO RTC:170860 - Remove this after dimm connector defines VDDR_ID
     my $system_name = $targetObj->getAttribute($target,"SYSTEM_NAME");
@@ -751,19 +754,25 @@ sub setupBars
                 "INTP_BASE_ADDR",
                 "VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR",
                 "VAS_USER_WINDOW_CONTEXT_ADDR",
-                "LPC_BUS_ADDR",
                 "NVIDIA_NPU_PRIVILEGED_ADDR",
                 "NVIDIA_NPU_USER_REG_ADDR",
                 "NVIDIA_PHY0_REG_ADDR",
                 "NVIDIA_PHY1_REG_ADDR",
                 "PSI_HB_ESB_ADDR",
                 "XIVE_CONTROLLER_BAR_ADDR",
-                "XSCOM_BASE_ADDRESS",
                 "NX_RNG_ADDR");
 
     # Attribute only valid in naples-based systems
     if (!$targetObj->isBadAttribute($target,"NPU_MMIO_BAR_BASE_ADDR") ) {
           push(@bars,"NPU_MMIO_BAR_BASE_ADDR");
+    }
+
+    #@fixme-RTC:174616-Remove deprecated support
+    if (!$targetObj->isBadAttribute($target,"LPC_BUS_ADDR") ) {
+          push(@bars,"LPC_BUS_ADDR");
+    }
+    if (!$targetObj->isBadAttribute($target,"XSCOM_BASE_ADDRESS") ) {
+          push(@bars,"XSCOM_BASE_ADDRESS");
     }
 
     foreach my $bar (@bars)

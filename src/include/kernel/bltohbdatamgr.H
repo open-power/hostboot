@@ -163,6 +163,20 @@ class BlToHbDataManager
          * @return bool     true if valid; false otherwise
          */
         const bool isValid() const;
+
+        /*
+         * @brief Returns LPC BAR setup by SBE
+         *
+         * @return uint64_t     LPC BAR
+         */
+        const uint64_t getLpcBAR() const;
+
+        /*
+         * @brief Returns XSCOM BAR setup by SBE
+         *
+         * @return size_t     XSCP< BAR
+         */
+        const uint64_t getXscomBAR() const;
 };
 
 // Extern global instance of the class
