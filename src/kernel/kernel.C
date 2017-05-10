@@ -67,6 +67,7 @@ int main()
     printk("Booting %s kernel...\n\n", "Hostboot");
     printk("CPU=%s\n",
            ProcessorCoreTypeStrings[CpuID::getCpuType()]);
+    MAGIC_INST_PRINT_ISTEP(6,2);
 
     // Erase task-pointer so that TaskManager::getCurrentTask() returns NULL.
     setSPRG3(NULL);

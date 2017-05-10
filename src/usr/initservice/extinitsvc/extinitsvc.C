@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -153,6 +153,7 @@ errlHndl_t ExtInitSvc::executeUnitTests ( void )
 
     TRACDCOMP( g_trac_initsvc,
                ENTER_MRK"executeUnitTests()" );
+    MAGIC_INST_PRINT_ISTEP(99,1);
 
     do
     {

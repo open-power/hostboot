@@ -872,6 +872,7 @@ void InitService::doShutdown(uint64_t i_status,
     nanosleep(0,TEN_CTX_SWITCHES_NS);
 
     TRACFCOMP(g_trac_initsvc, "doShutdown> Final status=%.16X",worst_status);
+    MAGIC_INST_PRINT_ISTEP(21,4);
 
     shutdown(worst_status,
              i_payload_base,
