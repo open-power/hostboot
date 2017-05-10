@@ -40,12 +40,14 @@
 extern trace_desc_t* g_trac_pnor;
 #define PNOR_UTIL_TRACE(arg0, args...) TRACFCOMP(g_trac_pnor, args)
 #define PNOR_UTIL_TRACE_W_BRK(arg0, args...) TRACFCOMP(g_trac_pnor, args)
+#define PNOR_UTIL_TRACE_BL_SKIP(arg0, args...) TRACFCOMP(g_trac_pnor, args)
 #else
 #include <bootloader/bootloader_trace.H>
 #include <bootloader/bootloader.H>
 #include <bootloader/hbblreasoncodes.H>
 #define PNOR_UTIL_TRACE(arg0, args...) BOOTLOADER_TRACE(arg0)
 #define PNOR_UTIL_TRACE_W_BRK(arg0, args...) BOOTLOADER_TRACE_W_BRK(arg0)
+#define PNOR_UTIL_TRACE_BL_SKIP(arg0, args...)
 #endif
 
 
@@ -272,11 +274,11 @@ PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
 
         if(secId == PNOR::INVALID_SECTION)
         {
-            PNOR_UTIL_TRACE(BTLDR_TRC_UTILS_PARSE_INVALID_SECTION,
-                            "PNOR::parseEntries: "
-                            "Unsupported section found while parsing entry ",
-                            "%d in TOC \n Entry name is \"%s\"", i,
-                            cur_entry->name);
+            PNOR_UTIL_TRACE_BL_SKIP(BTLDR_TRC_UTILS_PARSE_INVALID_SECTION,
+                                    "PNOR::parseEntries: "
+                                    "Unsupported section found while parsing ",
+                                    "entry %d in TOC \n Entry name is \"%s\"",
+                                    i, cur_entry->name);
             //continue to skip invalid section
             continue;
         }
@@ -409,9 +411,12 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
     static const char* SectionIdToStringArr[] =
     {
         "part",        /**< PNOR::TOC            : Table of Contents */
+#ifndef BOOTLOADER
         "HBI",         /**< PNOR::HB_EXT_CODE    : Hostboot Extended Image */
         "GLOBAL",      /**< PNOR::GLOBAL_DATA    : Global Data */
+#endif
         "HBB",         /**< PNOR::HB_BASE_CODE   : Hostboot Base Image */
+#ifndef BOOTLOADER
         "SBEC",        /**< PNOR::CENTAUR_SBE    : Centaur Self-Boot Engine image */
         "SBE",         /**< PNOR::SBE_IPL        : Self-Boot Enginer IPL image */
         "HCODE",       /**< PNOR::HCODE          : HCODE Reference image */
@@ -438,6 +443,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "RINGOVD",     /**< PNOR::RINGOVD        : Ring overrides */
         "WOFDATA",     /**< PNOR::WOFDATA        : VFRT data tables for WOF */
         "SBKT",        /**< PNOR::SBKT           : SecureBoot Key Transition */
+#endif
     };
 
     // Get actual number of entries of array.

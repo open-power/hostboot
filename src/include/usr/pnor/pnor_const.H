@@ -39,9 +39,12 @@ enum SectionId
 {
     TOC,            /**< Table of Contents */
             // Value of HB_EXT_CODE must be 1 for debug framework.
+#ifndef BOOTLOADER
     HB_EXT_CODE,    /**< Hostboot Extended Image */
     GLOBAL_DATA,    /**< Global Data */
+#endif
     HB_BASE_CODE,   /**< Hostboot Base Image */
+#ifndef BOOTLOADER
     CENTAUR_SBE,    /**< Centaur Self-Boot Engine image */
     SBE_IPL,        /**< Self-Boot Engine IPL image */
     HCODE,          /**< HCODE Reference image */
@@ -68,6 +71,7 @@ enum SectionId
     RINGOVD,        /**< Ring override data */
     WOFDATA,        /**< VFRT data tables for WOF */
     SBKT,           /**< SecureBoot Key Transition */
+#endif
     NUM_SECTIONS,   /**< Number of defined sections */
 
     FIRST_SECTION = TOC,  /**< First section (for looping) */
