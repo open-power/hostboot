@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,30 +22,84 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Error definitions for p9_fab_iovalid_errors -->
 <hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_FAB_IOVALID_DL_FFDC_ERR</rc>
+    <description>
+      Procedure: p9_fab_iovalid
+      FFDC collected for DL layer training failure
+    </description>
+    <ffdc>FIR_REG</ffdc>
+    <ffdc>CONFIG_REG</ffdc>
+    <ffdc>CONTROL_REG</ffdc>
+    <ffdc>CONFIG_PHY_REG</ffdc>
+    <ffdc>SECONDARY_CONFIG_REG</ffdc>
+    <ffdc>LATENCY_REG</ffdc>
+    <ffdc>OPTICAL_CONFIG_REG</ffdc>
+    <ffdc>TX0_LANE_CONTROL_REG</ffdc>
+    <ffdc>TX1_LANE_CONTROL_REG</ffdc>
+    <ffdc>RX0_LANE_CONTROL_REG</ffdc>
+    <ffdc>RX1_LANE_CONTROL_REG</ffdc>
+    <ffdc>ERR0_STATUS_REG</ffdc>
+    <ffdc>ERR1_STATUS_REG</ffdc>
+    <ffdc>STATUS_REG</ffdc>
+    <ffdc>ERR_MISC_REG</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_FAB_IOVALID_TL_FFDC_ERR</rc>
+    <description>
+      Procedure: p9_fab_iovalid
+      FFDC collected for TL layer training failure
+    </description>
+    <ffdc>FIR_REG</ffdc>
+    <ffdc>CONFIG01_REG</ffdc>
+    <ffdc>CONFIG23_REG</ffdc>
+    <ffdc>CONFIG45_REG</ffdc>
+    <ffdc>CONFIG67_REG</ffdc>
+    <ffdc>MISC_CONFIG_REG</ffdc>
+    <ffdc>FRAMER0123_ERR_REG</ffdc>
+    <ffdc>FRAMER4567_ERR_REG</ffdc>
+    <ffdc>PARSER0123_ERR_REG</ffdc>
+    <ffdc>PARSER4567_ERR_REG</ffdc>
+  </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_FAB_IOVALID_REM_ENDP_TARGET_ERR</rc>
     <description>
       Procedure: p9_fab_iovalid
-      No matching remote endpoint target found
+      Attribute state (ATTR_PROC_FABRIC_[XA]_ATTACHED_CHIP_CNFG) is
+      inconsistent with targeting model -- no matching remote endpoint
+      target found for link which should be enabled.
     </description>
     <ffdc>LOC_TARGET</ffdc>
     <ffdc>LOC_ENDP_TYPE</ffdc>
     <ffdc>LOC_ENDP_UNIT_ID</ffdc>
     <ffdc>REM_ENDP_UNIT_ID</ffdc>
+    <ffdc>LOC_ENDP_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_FAB_IOVALID_LOC_ENDP_TARGET_ERR</rc>
     <description>
       Procedure: p9_fab_iovalid
-      No matching local endpoint target found
+      Attribute state (ATTR_PROC_FABRIC_[XA]_ATTACHED_CHIP_CNFG) is
+      inconsistent with targeting model -- no matching local endpoint
+      target found for link which should be enabled.
     </description>
     <ffdc>LOC_TARGET</ffdc>
     <ffdc>LOC_ENDP_TYPE</ffdc>
     <ffdc>LOC_ENDP_UNIT_ID</ffdc>
+    <ffdc>LOC_ENDP_TARGETS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -55,9 +109,36 @@
       Link DL training did not complete successfully
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>LOC_ENDP_TARGET</ffdc>
     <ffdc>LOC_ENDP_TYPE</ffdc>
     <ffdc>LOC_ENDP_UNIT_ID</ffdc>
-    <ffdc>DL_FIR_REG</ffdc>
+    <ffdc>REM_ENDP_TARGET</ffdc>
+    <ffdc>REM_ENDP_TYPE</ffdc>
+    <ffdc>REM_ENDP_UNIT_ID</ffdc>
+    <callout>
+      <target>LOC_ENDP_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>REM_ENDP_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>LOC_ENDP_TARGET,REM_ENDP_TARGET</bus>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>LOC_ENDP_TARGET</target>
+    </deconfigure>
+    <deconfigure>
+      <target>REM_ENDP_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>LOC_ENDP_TARGET</target>
+    </gard>
+    <gard>
+      <target>REM_ENDP_TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -67,9 +148,36 @@
       Link TL training did not complete successfully
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>LOC_ENDP_TARGET</ffdc>
     <ffdc>LOC_ENDP_TYPE</ffdc>
     <ffdc>LOC_ENDP_UNIT_ID</ffdc>
-    <ffdc>TL_FIR_REG</ffdc>
+    <ffdc>REM_ENDP_TARGET</ffdc>
+    <ffdc>REM_ENDP_TYPE</ffdc>
+    <ffdc>REM_ENDP_UNIT_ID</ffdc>
+    <callout>
+      <target>LOC_ENDP_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>REM_ENDP_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>LOC_ENDP_TARGET,REM_ENDP_TARGET</bus>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>LOC_ENDP_TARGET</target>
+    </deconfigure>
+    <deconfigure>
+      <target>REM_ENDP_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>LOC_ENDP_TARGET</target>
+    </gard>
+    <gard>
+      <target>REM_ENDP_TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
