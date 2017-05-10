@@ -34,7 +34,7 @@
 // *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: SBE,HB,FSP
 //
 
@@ -78,9 +78,9 @@ const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
 /// @brief Read FBC/ADU registers to determine state of fabric init and stop
 /// control signals
 ///
-/// @param[in] i_target           Reference to processor chip target
-/// @param[out] o_is_initialized  State of fabric init signal
-/// @param[out] o_is_running      State of fabric pervasive stop control
+/// @param[in] i_target Reference to processor chip target
+/// @param[out] o_is_initialized State of fabric init signal
+/// @param[out] o_is_running State of fabric pervasive stop control
 /// @return fapi::ReturnCode, FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p9_fbc_utils_get_fbc_state(
@@ -92,7 +92,7 @@ fapi2::ReturnCode p9_fbc_utils_get_fbc_state(
 /// @brief Use ADU pMisc Mode register to clear fabric stop signal, overriding
 /// a stop condition caused by a checkstop
 ///
-/// @param[in] i_target            Reference to processor chip target
+/// @param[in] i_target Reference to processor chip target
 /// @return fapi::ReturnCode, FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p9_fbc_utils_override_fbc_stop(

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,7 @@
 /// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 /// *HWP Team: Nest
-/// *HWP Level: 2
+/// *HWP Level: 3
 /// *HWP Consumed by: HB,FSP
 ///
 
@@ -65,6 +65,11 @@
 
 
 //------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+const uint8_t P9_BUILD_SMP_MAX_SIZE = 16;
+
+//------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
 
@@ -74,7 +79,7 @@ enum p9_build_smp_operation
     // used to initialize scope of HBI drawer
     // call from HB (switch C/D + A/B),
     SMP_ACTIVATE_PHASE1 = 1,
-    // used to stitch drawers/CCM
+    // used to stitch drawers
     // call from FSP (only switch A/B)
     SMP_ACTIVATE_PHASE2 = 2
 };
@@ -101,7 +106,7 @@ struct p9_build_smp_chip
     bool quiesced_next;
 };
 
-// Structure to represent properties for a single node in the SMP topology
+// Structure to represent properties for a single group in the SMP topology
 struct p9_build_smp_group
 {
     // chips which reside in this node
@@ -112,10 +117,10 @@ struct p9_build_smp_group
     uint8_t group_id;
 };
 
-// Structure to represent collection of nodes in SMP topology
+// Structure to represent collection of groups in SMP topology
 struct p9_build_smp_system
 {
-    // nodes which reside in this SMP
+    // groups which reside in this SMP
     std::map<uint8_t, p9_build_smp_group> groups;
 };
 

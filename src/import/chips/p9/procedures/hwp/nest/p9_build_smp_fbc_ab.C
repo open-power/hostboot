@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,13 +24,12 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p9_build_smp_fbc_ab.C
-///
 /// @brief Fabric configuration (hotplug, AB) functions.
 ///
 /// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 /// *HWP Team: Nest
-/// *HWP Level: 2
+/// *HWP Level: 3
 /// *HWP Consumed by: HB,FSP
 ///
 
@@ -50,7 +49,7 @@
 // PB shadow register constant definition
 const uint8_t P9_BUILD_SMP_NUM_SHADOWS = 3;
 
-// HP
+// HP (HotPlug Mode Register)
 const uint64_t PB_HP_MODE_CURR_SHADOWS[P9_BUILD_SMP_NUM_SHADOWS] =
 {
     PU_PB_WEST_SM0_PB_WEST_HP_MODE_CURR,
@@ -65,7 +64,7 @@ const uint64_t PB_HP_MODE_NEXT_SHADOWS[P9_BUILD_SMP_NUM_SHADOWS] =
     PU_PB_EAST_HP_MODE_NEXT
 };
 
-// HPX
+// HPX (Hotplug Mode Register Extension)
 const uint64_t PB_HPX_MODE_CURR_SHADOWS[P9_BUILD_SMP_NUM_SHADOWS] =
 {
     PU_PB_WEST_SM0_PB_WEST_HPX_MODE_CURR,

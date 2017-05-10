@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,7 @@
 /// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 /// *HWP Team: Nest
-/// *HWP Level: 2
+/// *HWP Level: 3
 /// *HWP Consumed by: HB,FSP
 ///
 
@@ -93,7 +93,8 @@ p9_build_smp_process_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
              "Error from getScom (PU_PB_CENT_SM0_PB_CENT_HP_MODE_CURR)");
     io_smp_chip.master_chip_group_curr =
         l_hp_mode_curr.getBit<PU_PB_CENT_SM0_PB_CENT_HP_MODE_CURR_CFG_CHG_RATE_GP_MASTER>();
-    io_smp_chip.master_chip_sys_curr = l_hp_mode_curr.getBit<PU_PB_CENT_SM0_PB_CENT_HP_MODE_CURR_CFG_MASTER_CHIP>();
+    io_smp_chip.master_chip_sys_curr =
+        l_hp_mode_curr.getBit<PU_PB_CENT_SM0_PB_CENT_HP_MODE_CURR_CFG_MASTER_CHIP>();
     FAPI_DBG("   Master chip GROUP CURR = %d",
              io_smp_chip.master_chip_group_curr);
     FAPI_DBG("   Master chip SYS CURR = %d",
@@ -131,9 +132,9 @@ p9_build_smp_process_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         // this chip will not be quiesced, to enable switch AB
         io_smp_chip.issue_quiesce_next = false;
 
-        // in both activation scenarios, we expect that:
-        //  - the newly designated master is currently configured
-        //    as a master within the scope of its current enclosing fabric
+        // in both activation scenarios, we expect that
+        // the newly designated master is currently configured
+        // as a master within the scope of its current enclosing fabric
         if (!io_smp_chip.master_chip_sys_curr)
         {
             l_err = true;
@@ -166,6 +167,8 @@ p9_build_smp_process_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 fapi2::P9_BUILD_SMP_MASTER_DESIGNATION_ERR()
                 .set_TARGET(i_target)
                 .set_OP(i_op)
+                .set_GROUP_ID(io_smp_chip.group_id)
+                .set_CHIP_ID(io_smp_chip.chip_id)
                 .set_MASTER_CHIP_SYS_CURR(io_smp_chip.master_chip_sys_curr)
                 .set_MASTER_CHIP_GROUP_CURR(io_smp_chip.master_chip_group_curr)
                 .set_MASTER_CHIP_SYS_NEXT(io_smp_chip.master_chip_sys_next)
@@ -260,7 +263,7 @@ p9_build_smp_insert_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 .set_TARGET2(*(p_iter->second.target))
                 .set_GROUP_ID(l_group_id)
                 .set_CHIP_ID(l_chip_id),
-                "Duplicate fabric groupID/chipID found");
+                "Multiple chips found with the same fabric group ID / chip ID attribute values");
 
     // process/fill chip data structure
     FAPI_TRY(p9_build_smp_process_chip(i_target,
@@ -322,7 +325,7 @@ fapi2::ReturnCode p9_build_smp_insert_chips(
             // ensure that we haven't already designated one
             FAPI_ASSERT(!l_master_chip_sys_next_found,
                         fapi2::P9_BUILD_SMP_MULTIPLE_MASTER_DESIGNATION_ERR()
-                        .set_TARGET(*l_iter)
+                        .set_MASTER_CHIP_SYS_NEXT_TARGET(i_master_chip_sys_next)
                         .set_OP(i_op),
                         "Muliple chips found in input vector which match target designated as master");
             l_master_chip_sys_next_found = true;
@@ -333,7 +336,7 @@ fapi2::ReturnCode p9_build_smp_insert_chips(
                                           i_op,
                                           io_smp,
                                           l_group_id),
-                 "Error from p9_buil_smp_insert_chip");
+                 "Error from p9_build_smp_insert_chip");
 
         if (l_master_chip_sys_next)
         {
@@ -343,9 +346,18 @@ fapi2::ReturnCode p9_build_smp_insert_chips(
 
     // ensure that new system master was designated
     FAPI_ASSERT(l_master_chip_sys_next_found,
-                fapi2::P9_BUILD_SMP_NO_MASTER_SPECIFIED_ERR()
+                fapi2::P9_BUILD_SMP_NO_MASTER_DESIGNATION_ERR()
+                .set_MASTER_CHIP_SYS_NEXT_TARGET(i_master_chip_sys_next)
                 .set_OP(i_op),
-                "No system master specified/found");
+                "No chips found in input vector which match target designated as master");
+
+    // check that SMP size does not exceed maximum number of chips supported
+    FAPI_ASSERT(i_chips.size() < P9_BUILD_SMP_MAX_SIZE,
+                fapi2::P9_BUILD_SMP_MAX_SIZE_ERR()
+                .set_SIZE(i_chips.size())
+                .set_MAX_SIZE(P9_BUILD_SMP_MAX_SIZE)
+                .set_OP(i_op),
+                "Number of chips found in input vector exceeds supported SMP size");
 
     // based on master designation, and operation phase,
     // determine whether each chip will be quiesced as a result
@@ -381,18 +393,20 @@ fapi_try_exit:
 ///
 /// @brief Check validity of SMP topology
 ///
+/// @param[in] i_op    Enumerated type representing SMP build phase (HB or FSP)
 /// @param[in] i_smp   Fully specified structure encapsulating SMP
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode
-p9_build_smp_check_topology(p9_build_smp_system& i_smp)
+p9_build_smp_check_topology(const p9_build_smp_operation i_op,
+                            p9_build_smp_system& i_smp)
 {
     // check that fabric topology is logically valid
     // 1) in a given group, all chips are connected to every other
-    //    chip in the group, by an X bus
+    //    chip in the group, by an X bus (if pump mode = chip_is_node)
     // 2) each chip is connected to its partner chip (with same chip id)
-    //    in every other group, by an A bus (or X bus if pump mode = chip_is_group)
+    //    in every other group, by an A bus or X bus (if pump mode = chip_is_group)
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_PROC_FABRIC_PUMP_MODE_Type l_pump_mode;
@@ -451,8 +465,8 @@ p9_build_smp_check_topology(p9_build_smp_system& i_smp)
             FAPI_TRY(l_connected_chip_ids.setBit(p_iter->second.chip_id),
                      "Error from setBit (l_connected_chip_ids)");
 
-            // process links, mark reachable group/chip IDs
-            FAPI_INF("Processing links for g%d:p%d", g_iter->first, p_iter->first);
+            // process X links, mark reachable group/chip IDs
+            FAPI_INF("Processing X links for g%d:p%d", g_iter->first, p_iter->first);
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, *(p_iter->second.target), l_x_en),
                      "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
 
@@ -477,6 +491,8 @@ p9_build_smp_check_topology(p9_build_smp_system& i_smp)
 
             }
 
+            // process A links, mark reachable group/chip IDs
+            FAPI_INF("Processing A links for g%d:p%d", g_iter->first, p_iter->first);
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, *(p_iter->second.target), l_a_en),
                      "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
 
@@ -511,20 +527,25 @@ p9_build_smp_check_topology(p9_build_smp_system& i_smp)
 
                 if (!intergroup_set_match)
                 {
-                    FAPI_ERR("Target %s is not fully connected (A) to all other groups",
+                    FAPI_ERR("Target %s is not fully connected (X/A) to all other groups in the system",
                              l_target_str);
                 }
 
                 FAPI_ASSERT(false,
                             fapi2::P9_BUILD_SMP_INVALID_TOPOLOGY()
                             .set_TARGET(*(p_iter->second.target))
-                            .set_A_CONNECTIONS_OK(intergroup_set_match)
-                            .set_A_CONNECTED_GROUP_IDS(l_connected_group_ids)
-                            .set_X_CONNECTIONS_OK(intragroup_set_match)
-                            .set_X_CONNECTED_CHIP_IDS(l_connected_chip_ids),
+                            .set_OP(i_op)
+                            .set_GROUP_ID(p_iter->second.group_id)
+                            .set_CHIP_ID(p_iter->second.chip_id)
+                            .set_INTERGROUP_CONNECTIONS_OK(intergroup_set_match)
+                            .set_CONNECTED_GROUP_IDS(l_connected_group_ids)
+                            .set_GROUP_IDS_IN_SYSTEM(l_group_ids_in_system)
+                            .set_INTRAGROUP_CONNECTIONS_OK(intragroup_set_match)
+                            .set_CONNECTED_CHIP_IDS(l_connected_chip_ids)
+                            .set_CHIP_IDS_IN_GROUPS(l_chip_ids_in_groups)
+                            .set_FBC_PUMP_MODE(l_pump_mode),
                             "Invalid fabric topology detected");
             }
-
         }
     }
 
@@ -553,7 +574,8 @@ fapi2::ReturnCode p9_build_smp(std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC
              "Error from p9_build_smp_insert_chips");
 
     // check topology before continuing
-    FAPI_TRY(p9_build_smp_check_topology(l_smp),
+    FAPI_TRY(p9_build_smp_check_topology(i_op,
+                                         l_smp),
              "Error from p9_build_smp_check_topology");
 
     // activate new SMP configuration

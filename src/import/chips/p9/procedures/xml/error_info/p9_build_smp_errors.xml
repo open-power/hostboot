@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,14 +22,17 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Error definitions for p9_build_smp HWP -->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_BUILD_SMP_MASTER_DESIGNATION_ERR</rc>
-    <description>Node or system master chip designation error.</description>
+    <description>
+      Node or system master chip designation error.
+    </description>
     <ffdc>TARGET</ffdc>
     <ffdc>OP</ffdc>
+    <ffdc>GROUP_ID</ffdc>
+    <ffdc>CHIP_ID</ffdc>
     <ffdc>MASTER_CHIP_SYS_CURR</ffdc>
     <ffdc>MASTER_CHIP_GROUP_CURR</ffdc>
     <ffdc>MASTER_CHIP_SYS_NEXT</ffdc>
@@ -42,7 +45,10 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_BUILD_SMP_GROUP_ADD_INTERNAL_ERR</rc>
-    <description>Internal Error.  Error encountered adding node to SMP structure.</description>
+    <description>
+      Internal program error.
+      SMP data structure map insert failed.
+    </description>
     <ffdc>TARGET</ffdc>
     <ffdc>GROUP_ID</ffdc>
     <callout>
@@ -53,7 +59,9 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_BUILD_SMP_DUPLICATE_FABRIC_ID_ERR</rc>
-    <description>Multiple chips found with identifcal fabric node/chip ID attribute values.</description>
+    <description>
+      Multiple chips found with identical fabric node/chip ID attribute values.
+    </description>
     <ffdc>TARGET1</ffdc>
     <ffdc>TARGET2</ffdc>
     <ffdc>GROUP_ID</ffdc>
@@ -66,8 +74,11 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_BUILD_SMP_MULTIPLE_MASTER_DESIGNATION_ERR</rc>
-    <description>Input parameter designating master matches more than one chip in HWP input targets.</description>
-    <ffdc>TARGET</ffdc>
+    <description>
+      Input parameter designating post-reconfiguration master chip
+      matches more than one chip in HWP input targets to process.
+    </description>
+    <ffdc>MASTER_CHIP_SYS_NEXT_TARGET</ffdc>
     <ffdc>OP</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -76,8 +87,26 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P9_BUILD_SMP_NO_MASTER_SPECIFIED_ERR</rc>
-    <description>Input parameters do not specify a new fabric system master.</description>
+    <rc>RC_P9_BUILD_SMP_NO_MASTER_DESIGNATION_ERR</rc>
+    <description>
+      Input parameter designating post-reconfiguration master chip
+      does not match any chips in HWP input targets to process.
+    </description>
+    <ffdc>MASTER_CHIP_SYS_NEXT_TARGET</ffdc>
+    <ffdc>OP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_BUILD_SMP_MAX_SIZE_ERR</rc>
+    <description>
+      Number of chips in HWP input arguments exceeds supported SMP size
+    </description>
+    <ffdc>SIZE</ffdc>
+    <ffdc>MAX_SIZE</ffdc>
     <ffdc>OP</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -87,12 +116,20 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_BUILD_SMP_INVALID_TOPOLOGY</rc>
-    <description>Invalid fabric topology specified by input parameters.</description>
+    <description>
+      Invalid fabric topology specified by input parameters.
+    </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>A_CONNECTIONS_OK</ffdc>
-    <ffdc>A_CONNECTED_GROUP_IDS</ffdc>
-    <ffdc>X_CONNECTIONS_OK</ffdc>
-    <ffdc>X_CONNECTED_CHIP_IDS</ffdc>
+    <ffdc>OP</ffdc>
+    <ffdc>GROUP_ID</ffdc>
+    <ffdc>CHIP_ID</ffdc>
+    <ffdc>INTERGROUP_CONNECTIONS_OK</ffdc>
+    <ffdc>CONNECTED_GROUP_IDS</ffdc>
+    <ffdc>GROUP_IDS_IN_SYSTEM</ffdc>
+    <ffdc>INTRAGROUP_CONNECTIONS_OK</ffdc>
+    <ffdc>CONNECTED_CHIP_IDS</ffdc>
+    <ffdc>CHIP_IDS_IN_GROUPS</ffdc>
+    <ffdc>FBC_PUMP_MODE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -101,7 +138,10 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_BUILD_SMP_HOTPLUG_SHADOW_ERR</rc>
-    <description>Inconsistent state in hotplug (CURR) shadow copies.</description>
+    <description>
+      Fabric hotplug (CURR or NEXT) shadow register contents are not
+      equivalent.
+    </description>
     <ffdc>TARGET</ffdc>
     <ffdc>ADDRESS0</ffdc>
     <ffdc>ADDRESS1</ffdc>
@@ -126,27 +166,20 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_BUILD_SMP_ADU_STATUS_MISMATCH_ERR</rc>
-    <description>Status mismatch detected on ADU operation execution for SMP configuration.</description>
+    <description>
+      Status mismatch detected on ADU operation execution for SMP configuration.
+    </description>
     <ffdc>TARGET</ffdc>
     <ffdc>ADU_NUM_POLLS</ffdc>
-    <ffdc>NUM_CHIPS</ffdc>
+    <ffdc>CHIP_DATA_VALID</ffdc>
     <ffdc>GROUP_IDS</ffdc>
     <ffdc>CHIP_IDS</ffdc>
-    <ffdc>PB_CENT_MODE</ffdc>
-    <ffdc>PB_CENT_HP_MODE_CURR</ffdc>
-    <ffdc>PB_CENT_HP_MODE_NEXT</ffdc>
-    <ffdc>PB_CENT_HPX_MODE_CURR</ffdc>
-    <ffdc>PB_CENT_HPX_MODE_NEXT</ffdc>
-    <ffdc>PB_CENT_HPA_MODE_CURR</ffdc>
-    <ffdc>PB_CENT_HPA_MODE_NEXT</ffdc>
-    <ffdc>XB_CPLT_CONF1</ffdc>
-    <ffdc>PB_IOE_FIR_REG</ffdc>
-    <ffdc>OB0_CPLT_CONF1</ffdc>
-    <ffdc>OB1_CPLT_CONF1</ffdc>
-    <ffdc>OB2_CPLT_CONF1</ffdc>
-    <ffdc>OB3_CPLT_CONF1</ffdc>
-    <ffdc>IOE_PB_IOO_FIR_REG</ffdc>
-    <ffdc>ADU_SND_MODE_REG</ffdc>
+    <ffdc>FFDC_ADDRS</ffdc>
+    <ffdc>FFDC_REG_DATA</ffdc>
+    <callout>
+      <procedure>LVL_SUPPORT</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

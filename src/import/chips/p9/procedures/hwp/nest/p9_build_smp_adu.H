@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 /// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 /// *HWP Team: Nest
-/// *HWP Level: 2
+/// *HWP Level: 3
 /// *HWP Consumed by: HB,FSP
 ///
 
@@ -43,23 +43,23 @@
 #include <p9_build_smp.H>
 
 
-extern "C" {
-
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
 
-    enum p9_build_smp_adu_action
-    {
-        SWITCH_AB = 1,
-        SWITCH_CD = 2,
-        QUIESCE   = 4
-    };
+enum p9_build_smp_adu_action
+{
+    SWITCH_AB = 1,
+    SWITCH_CD = 2,
+    QUIESCE   = 4
+};
 
 
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
+
+extern "C" {
 
 ///
 /// @brief Perform fabric quiesce/switch operation via ADU
@@ -73,7 +73,6 @@ extern "C" {
     fapi2::ReturnCode p9_build_smp_sequence_adu(p9_build_smp_system& i_smp,
             const p9_build_smp_operation i_op,
             const p9_build_smp_adu_action i_action);
-
 
 } // extern "C"
 

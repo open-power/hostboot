@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,12 +24,13 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p9_build_smp_fbc_cd.H
-/// @brief  Fabric configuration (hotplug, CD) functions
+/// @brief Fabric configuration (hotplug, CD) functions
 ///
 /// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 /// *HWP Team: Nest
-/// *HWP Level: 2
+/// *HWP Level: 3
+/// *HWP Consumed by: HB,FSP
 ///
 
 #ifndef _P9_BUILD_SMP_FBC_CD_H_
@@ -51,7 +52,7 @@ extern "C"
 ///
 /// @brief Program fabric configuration register (hotplug, C/D set)
 ///
-/// @param[in]   i_smp     Structure encapsulating SMP topology
+/// @param[in] i_smp     Structure encapsulating SMP topology
 ///
 /// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
