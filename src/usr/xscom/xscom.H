@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,17 +31,12 @@
 
 #include <stdint.h>
 #include <limits.h>
+#include <arch/memorymap.H>
 
 /**
  *  @brief  The (fixed) base address value for master proc
  */
 constexpr uint64_t MASTER_PROC_XSCOM_BASE_ADDR = 0x000603FC00000000;
-
-/**
- *  @brief  Static offsets into other chips
- */
-constexpr uint64_t  MMIO_OFFSET_PER_CHIP  = (4*TERABYTE);
-constexpr uint64_t  MMIO_OFFSET_PER_GROUP = (32*TERABYTE);
 
 /**
  *  @brief  Type definition for XSCom address and Base

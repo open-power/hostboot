@@ -58,6 +58,10 @@
 #include <config.h>
 #include <initservice/initserviceif.H>
 #include <util/misc.H>
+#include <kernel/bltohbdatamgr.H>
+#include <map>
+#include <arch/memorymap.H>
+#include <lpc/lpcif.H>
 
 #ifdef CONFIG_DRTM
 #include <secureboot/drtm.H>
@@ -93,6 +97,12 @@ static void initializeAttributes(TargetService& i_targetService,
  *  @brief Check that at least one processor of our cpu type is being targeted
  */
 static void checkProcessorTargeting(TargetService& i_targetService);
+
+/**
+ *  @brief Compute any values that might change based on a remap of memory
+ *  @param[in]  Pointer to targeting service
+ */
+static void adjustMemoryMap(TargetService& i_targetService);
 
 /**
  *  @brief Entry point for initialization service to initialize the targeting
@@ -381,6 +391,9 @@ static void initializeAttributes(TargetService& i_targetService,
         else
         {
             l_pTopLevel->setAttr<ATTR_IS_MPIPL_HB>(0);
+
+            // Compute any values that might change based on a remap of memory
+            adjustMemoryMap(i_targetService);
         }
     }
     else // top level is NULL - never expected
@@ -391,6 +404,135 @@ static void initializeAttributes(TargetService& i_targetService,
     TARG_EXIT();
     #undef TARG_FN
 }
+
+/**
+ *  @brief Utility macro to swap attributes
+ *  @param[in]  _attr    Attribute ID
+ *  @param[in]  _master  Master proc target
+ *  @param[in]  _victim  Victim proc target
+ *  @param[in]  _cache   Cache of victime attributes
+ */
+#define SWAP_ATTRIBUTE( _attr, _master, _victim, _cache ) \
+{ \
+    _attr##_type l_masterVal = _master->getAttr<_attr>(); \
+    _victim->setAttr<_attr>(l_masterVal); \
+    TARG_INF( "%.8X>" #_attr "=%.16llX", get_huid(_victim), l_masterVal ); \
+    _master->setAttr<_attr>(_cache[_attr]); \
+    TARG_INF( "%.8X>" #_attr "=%.16llX", get_huid(_master), _cache[_attr] ); \
+}
+
+// Compute any values that might change based on a remap of memory
+static void adjustMemoryMap( TargetService& i_targetService )
+{
+    // Grab the value of the BARs that SBE booted with
+    uint64_t l_curXscomBAR = g_BlToHbDataManager.getXscomBAR();
+    uint64_t l_curLpcBAR = g_BlToHbDataManager.getLpcBAR();
+    TARG_INF( "adjustMemoryMap> xscom=%X, lpc=%X", l_curXscomBAR, l_curLpcBAR );
+
+    // Get the master proc
+    Target* l_pMasterProcChip = nullptr;
+    i_targetService.masterProcChipTargetHandle(l_pMasterProcChip);
+    assert(l_pMasterProcChip,"No Master Proc");
+
+    // Save off the base (group0-chip0) value for the BARs
+    Target* l_pTopLevel = nullptr;
+    i_targetService.getTopLevelTarget(l_pTopLevel);
+    ATTR_XSCOM_BASE_ADDRESS_type l_xscomBase =
+      l_pTopLevel->getAttr<ATTR_XSCOM_BASE_ADDRESS>();
+    ATTR_LPC_BUS_ADDR_type l_lpcBase =
+      l_pTopLevel->getAttr<ATTR_LPC_BUS_ADDR>();
+
+    // Loop through all the procs to recompute all the BARs
+    //  also find the victim to swap with
+    Target* l_swapVictim = nullptr;
+    std::map<ATTRIBUTE_ID,uint64_t> l_swapAttrs;
+
+    TARGETING::TargetHandleList l_funcProcs;
+    getAllChips(l_funcProcs, TYPE_PROC, false );
+    for( auto & l_procChip : l_funcProcs )
+    {
+        TARG_INF( "Proc=%.8X", get_huid(l_procChip) );
+        // Set effective fabric ids back to default values
+        ATTR_FABRIC_GROUP_ID_type l_groupId =
+          l_procChip->getAttr<ATTR_FABRIC_GROUP_ID>();
+        l_procChip->setAttr<ATTR_PROC_EFF_FABRIC_GROUP_ID>(l_groupId);
+
+        ATTR_FABRIC_CHIP_ID_type l_chipId =
+          l_procChip->getAttr<ATTR_FABRIC_CHIP_ID>();
+        l_procChip->setAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>(l_chipId);
+
+        // Compute default xscom BAR
+        ATTR_XSCOM_BASE_ADDRESS_type l_xscomBAR =
+          computeMemoryMapOffset( l_xscomBase, l_groupId, l_chipId );
+        TARG_INF( " XSCOM=%.16llX", l_xscomBAR );
+        l_procChip->setAttr<ATTR_XSCOM_BASE_ADDRESS>(l_xscomBAR);
+
+        // See if this chip's space now belongs to the master
+        if( l_xscomBAR == l_curXscomBAR )
+        {
+            l_swapVictim = l_procChip;
+            TARG_INF( "Master Proc %.8X is using XSCOM BAR from %.8X, BAR=%.16llX", get_huid(l_pMasterProcChip), get_huid(l_swapVictim), l_curXscomBAR );
+            l_swapAttrs[ATTR_PROC_EFF_FABRIC_GROUP_ID] = l_groupId;
+            l_swapAttrs[ATTR_PROC_EFF_FABRIC_CHIP_ID] = l_chipId;
+            l_swapAttrs[ATTR_XSCOM_BASE_ADDRESS] = l_xscomBAR;
+        }
+
+        // Compute default LPC BAR
+        ATTR_LPC_BUS_ADDR_type l_lpcBAR =
+          computeMemoryMapOffset( l_lpcBase, l_groupId, l_chipId );
+        TARG_INF( " LPC=%.16llX", l_lpcBAR );
+        l_procChip->setAttr<ATTR_LPC_BUS_ADDR>(l_lpcBAR);
+        if( l_swapVictim == l_procChip )
+        {
+            l_swapAttrs[ATTR_LPC_BUS_ADDR] = l_lpcBAR;
+        }
+
+        // Paranoid double-check that LPC matches XSCOM...
+        if( ((l_lpcBAR == l_curLpcBAR) && (l_swapVictim != l_procChip))
+            ||
+            ((l_lpcBAR != l_curLpcBAR) && (l_swapVictim == l_procChip)) )
+        {
+            TARG_ERR("BARs do not match : LPC=%.16llX, XSCOM=%.16llX",
+                     l_curLpcBAR, l_curXscomBAR );
+            TARG_ASSERT(false,"Mismatch between LPC and XSCOM BARs");
+        }
+
+        // Set the rest of the BARs...
+    }
+
+    // We must have found a match somewhere
+    TARG_ASSERT( l_swapVictim != nullptr, "No swap match found" );
+
+    // Now swap the BARs between the master and the victim if needed
+    if( l_swapVictim != l_pMasterProcChip )
+    {
+        // Walk through all of the attributes we cached above
+        SWAP_ATTRIBUTE( ATTR_PROC_EFF_FABRIC_GROUP_ID, l_pMasterProcChip,
+                        l_swapVictim, l_swapAttrs );
+        SWAP_ATTRIBUTE( ATTR_PROC_EFF_FABRIC_CHIP_ID, l_pMasterProcChip,
+                        l_swapVictim, l_swapAttrs );
+        SWAP_ATTRIBUTE( ATTR_XSCOM_BASE_ADDRESS, l_pMasterProcChip,
+                        l_swapVictim, l_swapAttrs );
+        SWAP_ATTRIBUTE( ATTR_LPC_BUS_ADDR, l_pMasterProcChip,
+                        l_swapVictim, l_swapAttrs );
+        // Handle the rest of the BARs...
+    }
+
+
+    // Cross-check that what we ended up setting in the attributes
+    //  matches the non-TARGETING values that the XSCOM and LPC
+    //  drivers computed
+    if( l_pMasterProcChip->getAttr<ATTR_LPC_BUS_ADDR>()
+        != LPC::get_lpc_bar() )
+    {
+        TARG_ERR( "LPC attribute=%.16llX, live=%.16llX",
+           l_pMasterProcChip->getAttr<ATTR_LPC_BUS_ADDR>(),
+           LPC::get_lpc_bar() );
+        TARG_ASSERT( true, "LPC BARs are inconsistent" );
+    }
+    //@todo-RTC:173519-Add xscom cross-check
+}
+
 
 #undef TARG_CLASS
 

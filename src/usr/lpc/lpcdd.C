@@ -47,7 +47,7 @@
 #include <errl/errludlogregister.H>
 #include <initservice/taskargs.H>
 #include <config.h>
-
+#include <arch/memorymap.H>
 
 trace_desc_t* g_trac_lpc;
 TRAC_INIT( & g_trac_lpc, LPC_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -379,6 +379,16 @@ void block_lpc_ops( bool i_block )
     //  this function is only applicable for DD1
     Singleton<LpcDD>::instance().lock(i_block);
 }
+
+/**
+ * @brief Return the value of the LPC BAR that the driver is using
+ */
+uint64_t get_lpc_bar( void )
+{
+    //@todo-RTC:173521-Return live value
+    return MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
+}
+
 
 }; //namespace LPC
 

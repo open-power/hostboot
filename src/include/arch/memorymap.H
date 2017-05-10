@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/lpc/lpcif.H $                                 */
+/* $Source: src/include/arch/memorymap.H $                                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
-/* [+] Google Inc.                                                        */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,54 +22,40 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __LPCIF_H
-#define __LPCIF_H
+#ifndef _MEMORYMAP_H
+#define _MEMORYMAP_H
 
-#include <errl/errlentry.H>
-
-namespace LPC
-{
+#include <limits.h>
 
 /**
- * @enum LPC::TransType
- * @brief LPC Transaction Types
+ * Collection of constants and utility functions related to the
+ * static memory map defined for the POWER9 family of processors.
  */
-enum TransType {
-    TRANS_IO,  // LPC IO Space
-    TRANS_MEM, // LPC Memory Space
-    TRANS_FW,  // LPC Firmware Space
-    TRANS_REG, // LPCHC Register space
-    TRANS_ABS, // Address parm is absolute
-    TRANS_LAST //Invalid, used for looping and tests
+
+/**
+ *  @brief  Static offsets into other chips
+ */
+constexpr uint64_t  MMIO_OFFSET_PER_CHIP  = (4*TERABYTE);  //0x40000000000
+constexpr uint64_t  MMIO_OFFSET_PER_GROUP = (32*TERABYTE); //0x200000000000
+
+/**
+ * @brief Compute MMIO value for a given chip and base value
+ */
+inline uint64_t computeMemoryMapOffset( uint64_t i_baseAddr,
+                                        uint8_t i_group,
+                                        uint8_t i_chip )
+{
+    return (i_baseAddr +
+      (MMIO_OFFSET_PER_GROUP * i_group) +
+      (MMIO_OFFSET_PER_CHIP * i_chip));
 };
 
 /**
- * @brief Create/delete software objects to support non-master access
- *
- * Only a single altmaster object can be active at any given time.  The
- * previous object must be destroyed before creating another one.
- *
- * @param i_create  true: create objects, false: destroy previous objects
- * @param i_proc  Processor target to use for LPC access
- *
- * @return Error if invalid parms or ordering occurs
+ *  @brief  A few default values that will need to be known
+ *          by low-level code
  */
-errlHndl_t create_altmaster_objects( bool i_create,
-                                     TARGETING::Target* i_proc );
-
-/**
- * @brief Block/unblock all LPC operations
- * @param[in] i_block  true: block ops, false: allow ops
- */
-void block_lpc_ops( bool i_block );
-
-/**
- * @brief Return the value of the LPC BAR that the driver is using
- * @return LPC BAR physical address
- */
-uint64_t get_lpc_bar( void );
+constexpr uint64_t  MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR = 0x000603FC00000000;
+constexpr uint64_t  MMIO_GROUP0_CHIP0_LPC_BASE_ADDR   = 0x0006030000000000;
 
 
-};  // namespace LPC
-
-#endif  // end __LPCIF_H
+#endif //#ifndef _MEMORYMAP_H

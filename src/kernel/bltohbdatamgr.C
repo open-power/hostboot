@@ -26,6 +26,7 @@
 #include <util/align.H>
 #include <kernel/console.H>
 #include <assert.h>
+#include <arch/memorymap.H>
 
 // Global and only BlToHbDataManager instance
 BlToHbDataManager g_BlToHbDataManager;
@@ -122,11 +123,30 @@ void BlToHbDataManager::initValid (const Bootloader::BlToHbData& i_data)
     iv_data.hbbHeader = i_data.hbbHeader;
     iv_data.hbbHeaderSize = i_data.hbbHeaderSize;
 
+printk("Version=%lX\n",i_data.version);
     // Ensure Bootloader to HB structure has the SAB member
     if(iv_data.version >= Bootloader::BLTOHB_SAB)
     {
         iv_data.secureAccessBit = i_data.secureAccessBit;
     }
+
+    // Ensure Bootloader to HB structure has the MMIO members
+    if( iv_data.version >= Bootloader::BLTOHB_MMIOBARS )
+    {
+printk("lpc=%lX, xscom=%lX\n", i_data.lpcBAR, i_data.xscomBAR );
+        kassert(i_data.lpcBar>0);
+        kassert(i_data.xscomBar>0);
+        iv_data.lpcBAR = i_data.lpcBAR;
+        iv_data.xscomBAR = i_data.xscomBAR;
+    }
+    else
+    {
+        //default to group0-proc0 values for down-level SBE
+        iv_data.lpcBAR = MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
+        iv_data.xscomBAR = MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR;
+
+    }
+
 
     // Size of data that needs to be preserved and pinned.
     iv_preservedSize = ALIGN_PAGE(iv_data.secureRomSize +
@@ -139,12 +159,17 @@ void BlToHbDataManager::initValid (const Bootloader::BlToHbData& i_data)
 
 void BlToHbDataManager::initInvalid ()
 {
+    printkd("BlToHbDataManager::initInvalid\n");
     // Allow only one initializer call
     if (iv_initialized)
     {
         printk("E> BlToHbDataManager class previously initialized\n");
         kassert(!iv_initialized);
     }
+
+    //default to group0-proc0 values for down-level SBE
+    iv_data.lpcBAR = MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
+    iv_data.xscomBAR = MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR;
 
     iv_initialized = true;
     iv_dataValid = false;
@@ -227,3 +252,14 @@ const bool BlToHbDataManager::isValid() const
 {
     return iv_dataValid;
 }
+
+const uint64_t BlToHbDataManager::getLpcBAR() const
+{
+    return reinterpret_cast<uint64_t>(iv_data.lpcBAR);
+}
+
+const uint64_t BlToHbDataManager::getXscomBAR() const
+{
+    return reinterpret_cast<uint64_t>(iv_data.xscomBAR);
+}
+

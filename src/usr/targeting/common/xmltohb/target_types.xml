@@ -311,7 +311,6 @@
     <attribute><id>TLB_RESERVE_SIZE</id></attribute>
     <attribute><id>TIME_BASE</id></attribute>
     <attribute><id>CPU_ATTR</id></attribute>
-    <attribute><id>ADU_XSCOM_BAR_BASE_ADDR</id></attribute>
     <attribute><id>PROC_OCC_SANDBOX_SIZE</id></attribute>
     <attribute><id>PROC_FABRIC_SYSTEM_MASTER_CHIP</id></attribute>
     <attribute><id>PROC_FABRIC_GROUP_MASTER_CHIP</id></attribute>
@@ -592,7 +591,7 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0</default>
     </attribute>
-    <attribute><id>XSCOM_BASE_ADDRESS</id></attribute>
+    <attribute><id>XSCOM_BASE_ADDRESS</id><default>0x000603FC00000000</default></attribute>
     <attribute>
         <id>IS_SIMULATION</id>
         <default>0</default>
@@ -799,6 +798,7 @@
     <attribute><id>MSS_MRW_RESET_DELAY_BEFORE_CAL</id></attribute>
     <attribute><id>MSS_MRW_DRAM_2N_MODE</id></attribute>
     <attribute><id>MRW_HW_MIRRORING_ENABLE</id></attribute>
+    <attribute><id>LPC_BUS_ADDR</id><default>0x0006030000000000</default></attribute>
 
     <!-- attributes for sbe_start -->
     <attribute><id>SBE_UPDATE_DISABLE</id></attribute>
@@ -1066,6 +1066,7 @@
     <attribute><id>PROC_PCIE_PHB_ACTIVE</id></attribute>
     <attribute><id>PROC_DCM_INSTALLED</id></attribute>
     <attribute><id>XSCOM_BASE_ADDRESS</id></attribute>
+    <attribute><id>PROC_LPC_BAR_BASE_ADDR_OFFSET</id></attribute>
     <attribute><id>PSTATEGPE_BOOT_COPIER_IVPR_OFFSET</id></attribute>
     <attribute><id>STOPGPE_BOOT_COPIER_IVPR_OFFSET</id></attribute>
     <attribute><id>EQ_GARD</id></attribute>
@@ -1259,7 +1260,6 @@
         <default>8</default>
     </attribute>
     <!-- End processor characteristics for HDAT -->
-    <attribute><id>LPC_BASE_ADDR</id></attribute>
     <attribute><id>BOOT_FREQ_MHZ</id></attribute>
 
 <!-- p9_setup_bars - Begin -->

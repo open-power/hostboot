@@ -3085,13 +3085,6 @@ sub generate_sys
 ";
     }
 
-    #adding XSCOM_BASE_ADDRESS to the system target for HDAT
-    print "
-    <attribute><id>XSCOM_BASE_ADDRESS</id>
-        <default>0x000603FC00000000</default>
-    </attribute>
-";
-
     if( $haveFSPs == 0 )
     {
         generate_apss_adc_config()
@@ -3929,12 +3922,6 @@ sub generate_proc
        0x0006013100000000 + $nodeSize*$lognode + $chipSize*$logid );
     printf( "    </attribute>\n" );
 
-    #LPC Bus address
-    printf( "    <attribute><id>LPC_BUS_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0006030000000000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
     #Nvidia Link - NPU Priviledged address
     printf( "    <attribute><id>NVIDIA_NPU_PRIVILEGED_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
@@ -3981,12 +3968,6 @@ sub generate_proc
     printf( "    <attribute><id>NX_RNG_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
        0x00060302031D0000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
-    #XSCOM address
-    printf( "    <attribute><id>XSCOM_BASE_ADDRESS</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x000603FC00000000 + $nodeSize*$lognode + $chipSize*$logid );
     printf( "    </attribute>\n" );
 
     print "    <!-- End PHYP Memory Map -->\n\n";
