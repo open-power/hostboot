@@ -47,10 +47,14 @@ fapi2::ReturnCode p9_mem_pll_initf(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     FAPI_INF("Entering ...");
 
     uint8_t l_sync_mode;
+    uint8_t l_use_dmi_buckets = 0;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, i_target_chip, l_sync_mode),
              "Error from FAPI_ATTR_GET (ATTR_MC_SYNC_MODE)");
 
-    if (l_sync_mode == 0)
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DMI_MC_PLL_SCAN_BUCKETS, i_target_chip, l_use_dmi_buckets),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_DMI_MC_PLL_SCAN_BUCKETS)");
+
+    if (l_sync_mode == 0 && l_use_dmi_buckets == 0)
     {
         FAPI_DBG("Re-scanning PLL ring to set final frequency");
 

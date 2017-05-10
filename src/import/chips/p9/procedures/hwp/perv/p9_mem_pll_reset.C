@@ -140,13 +140,16 @@ fapi_try_exit:
 fapi2::ReturnCode p9_mem_pll_reset(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chiplet)
 {
     uint8_t l_read_attr = 0;
+    uint8_t l_use_dmi_buckets = 0;
     fapi2::buffer<uint64_t> l_data64;
 
     FAPI_INF("Entering ...");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, i_target_chiplet, l_read_attr));
 
-    if ( !l_read_attr )
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DMI_MC_PLL_SCAN_BUCKETS, i_target_chiplet, l_use_dmi_buckets));
+
+    if ( !l_read_attr && !l_use_dmi_buckets )
     {
         for (auto l_chplt_trgt :  i_target_chiplet.getChildren<fapi2::TARGET_TYPE_PERV>
              (fapi2::TARGET_FILTER_ALL_MC, fapi2::TARGET_STATE_FUNCTIONAL))
