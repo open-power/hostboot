@@ -22,8 +22,17 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Halt codes for p9_sbe_fabricinit -->
 <hwpErrors>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_SBE_FABRICINIT</id>
+    <scomRegister>PU_PB_CENT_SM0_PB_CENT_MODE</scomRegister>
+    <scomRegister>PU_PB_CENT_SM0_PB_CENT_HP_MODE_NEXT</scomRegister>
+    <scomRegister>PU_PB_CENT_SM0_PB_CENT_HP_MODE_CURR</scomRegister>
+    <scomRegister>PU_PB_CENT_SM0_PB_CENT_HPX_MODE_NEXT</scomRegister>
+    <scomRegister>PU_PB_CENT_SM0_PB_CENT_HPX_MODE_CURR</scomRegister>
+    <scomRegister>PU_SND_MODE_REG</scomRegister>
+  </registerFfdc>
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
@@ -33,7 +42,21 @@
       Fabric init sequence not attempted, fabric arbitration is stopped.
     </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>FBC_RUNNING</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_FABRICINIT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -44,8 +67,22 @@
       Fabric init failed, or mismatch in expected ADU status.
     </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>ADU_STATUS_EXP</ffdc>
     <ffdc>ADU_STATUS_ACT</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_FABRICINIT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -56,8 +93,21 @@
       ADU operation completed successfully, but fabric was not initialized.
     </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>FBC_INITIALIZED</ffdc>
-    <ffdc>FBC_RUNNING</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_FABRICINIT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
