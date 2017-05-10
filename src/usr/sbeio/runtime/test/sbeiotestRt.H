@@ -339,7 +339,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 if(errl)
                 {
                     TS_FAIL("Not able to get TARGETING::Target for runtime "
-                            "chip_id");
+                            "chip_id 0x%08X", i_procChipId);
 
                     break;
                 }

@@ -34,7 +34,6 @@
 #include <errl/errlmanager.H>
 #include <errl/errlreasoncodes.H>
 #include <devicefw/userif.H>
-#include <occ/occ_common.H>
 
 //  targeting support
 #include    <targeting/common/target.H>
