@@ -48,6 +48,23 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DMI_MC_PLL_SCAN_BUCKETS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Use nest buckets for mc_pll_bndy for cumulus
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_EARLYMODE_FIX</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
