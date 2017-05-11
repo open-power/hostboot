@@ -497,13 +497,9 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                                l_sys_vfrt_static_data),
                  "Error from FAPI_ATTR_GET for attribute ATTR_SYS_VFRT_STATIC_DATA_ENABLE");
 
-        // Read System VFRT data
-        fapi2::ATTR_WOF_TABLE_DATA_Type l_wof_table_data;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA, FAPI_SYSTEM,
-                               l_wof_table_data), "fapiGetAttribute of ATTR_WOF_TABLE_DATA failed");
-
         //this structure has VFRT header + data
         HomerVFRTLayout_t l_vfrt;
+        memset (&l_vfrt, 0, sizeof(l_vfrt));
         uint32_t l_base_state_frequency = attr_mvpd_voltage_control[VPD_PV_ULTRA][0];
         FAPI_INF("Entering WOF initialization part");
 
@@ -526,6 +522,11 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         }
         else
         {
+            // Read System VFRT data
+            fapi2::ATTR_WOF_TABLE_DATA_Type l_wof_table_data;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA, FAPI_SYSTEM,
+                                   l_wof_table_data), "fapiGetAttribute of ATTR_WOF_TABLE_DATA failed");
+
             FAPI_DBG("ATTR_SYS_VFRT_STATIC_DATA_ENABLE is not SET");
             // Copy WOF header data
             memcpy (o_buf, l_wof_table_data, sizeof (WofTablesHeader_t));
