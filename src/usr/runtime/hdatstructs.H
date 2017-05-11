@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <vmmconst.h>
 #include <string.h>
+#include <hdat/hdat.H>
 
 // Copied from FipS:src/hdat/fsp/hdatnaca.H
 // offset in mainstore where NACA starts
@@ -329,7 +330,25 @@ struct hdatMsReservedMemArrayHeader_t
 */
 struct hdatMsVpdRhbAddrRange_t
 {
-    uint8_t  hdatRhbRngType;           // 0x0000 Range type
+    hdatMsVpdRhbAddrRange_t(): hdatRhbRngType(HDAT::RHB_TYPE_INVALID),
+                               hdatRhbRngId(0), hdatRhbAddrRngStrAddr(0),
+                               hdatRhbAddrRngEndAddr(0), hdatRhbLabelSize(1),
+                               hdatRhbLabelString{}, reserved{} {}
+
+    /**
+     * Set all member variables of class
+     * @param[in] i_type, Range type
+     * @param[in] i_rangeId, Range ID
+     * @param[in] i_startAddr, Range Starting Address
+     * @param[in] i_size, Size of memory region
+     * @param[in] i_label, Label String Ptr
+     * @note size of i_label is calculated in function versus a input parameter.
+     */
+    void set(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
+             const uint16_t i_rangeId, const uint64_t i_startAddr,
+             const uint64_t i_endAddr, const char* i_label);
+
+    HDAT::hdatMsVpdRhbAddrRangeType hdatRhbRngType; // 0x0000 Range type
     uint8_t  hdatRhbRngRes;            // 0x0001 Reserved
     uint16_t hdatRhbRngId;             // 0x0002 Range ID
     uint64_t hdatRhbAddrRngStrAddr;    // 0x0004 Range starting
@@ -338,6 +357,5 @@ struct hdatMsVpdRhbAddrRange_t
     uint8_t  hdatRhbLabelString[64];   // 0x0018 Label string Ptr
     uint8_t  reserved[8];              // 0x0058 Reserved
 }  __attribute__ ((packed));
-
 
 #endif

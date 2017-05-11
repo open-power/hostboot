@@ -203,7 +203,7 @@ struct hdatSpira_t
 
 /** @enum List of possible Range Types for Reserved Hostboot Memory (RHB)
  */
-enum hdatMsVpdRhbAddrRangeType
+enum hdatMsVpdRhbAddrRangeType : uint8_t
 {
     RHB_TYPE_PRIMARY         = 0,
     RHB_TYPE_HBRT            = 1,

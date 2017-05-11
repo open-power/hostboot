@@ -1576,6 +1576,23 @@ errlHndl_t get_instance_count(const SectionId i_section,
 
 };
 
+void hdatMsVpdRhbAddrRange_t::set(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
+                                  const uint16_t i_rangeId,
+                                  const uint64_t i_startAddr,
+                                  const uint64_t i_size,
+                                  const char* i_label)
+{
+    assert(i_label != nullptr, "Null label for hdatMsVpdRhbAddrRange_t");
+
+    hdatRhbRngType = i_type;
+    hdatRhbRngId = i_rangeId;
+    hdatRhbAddrRngStrAddr = i_startAddr;
+    hdatRhbAddrRngEndAddr = (i_startAddr + i_size - 1);
+    hdatRhbLabelSize = strlen(i_label) + 1;
+    memset(hdatRhbLabelString, 0, hdatRhbLabelSize);
+    memcpy(hdatRhbLabelString, i_label, hdatRhbLabelSize);
+}
+
 /********************
  Private/Protected Methods
  ********************/
