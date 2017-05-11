@@ -41,6 +41,7 @@
 #include <lib/shared/mss_const.H>
 #include <lib/workarounds/dp16_workarounds.H>
 #include <lib/fir/unmask.H>
+#include <lib/dimm/ddr4/zqcal.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -55,12 +56,12 @@ extern "C"
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
     fapi2::ReturnCode p9_mss_draminit_training( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-            const uint16_t i_special_training,
+            const uint32_t i_special_training,
             const uint8_t i_abort_on_error)
     {
         // Keep track of the last error seen by a port
         fapi2::ReturnCode l_port_error = fapi2::FAPI2_RC_SUCCESS;
-        fapi2::buffer<uint16_t> l_cal_steps_enabled = i_special_training;
+        fapi2::buffer<uint32_t> l_cal_steps_enabled = i_special_training;
 
         FAPI_INF("Start draminit training");
 
@@ -99,11 +100,24 @@ extern "C"
         for( const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
         {
             // Keep track of the last error seen by a rank pair
-            fapi2::ReturnCode l_rank_pair_error = fapi2::FAPI2_RC_SUCCESS;
+            fapi2::ReturnCode l_rank_pair_error(fapi2::FAPI2_RC_SUCCESS);
 
             // Returned from set_rank_pairs, it tells us how many rank pairs
             // we configured on this port.
             std::vector<uint64_t> l_pairs;
+
+            // Grab the attribute which contains the information on what cal steps we should run
+            // if the i_specal_training bits have not been specified.
+            if (i_special_training == 0)
+            {
+                FAPI_TRY( mss::cal_step_enable(p, l_cal_steps_enabled) );
+            }
+
+            FAPI_DBG("cal steps enabled: 0x%x special training: 0x%x", l_cal_steps_enabled, i_special_training);
+
+            // ZQCAL (for DRAMs and LRDIMM data buffers) isn't a PHY calibration,
+            // so we don't add it in the PHY calibration setup and do it separately here.
+            FAPI_TRY( mss::setup_and_execute_zqcal(p, l_cal_steps_enabled) );
 
             FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_ERROR_P0, 0) );
             FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0, 0) );
@@ -124,18 +138,7 @@ extern "C"
             FAPI_TRY( mss::rank::get_rank_pairs(p, l_pairs) );
 
             // Setup the config register
-            //
-            // Grab the attribute which contains the information on what cal steps we should run
-            // if the i_specal_training bits have not been specified.
-            // TODO RTC:166422 update training code to set cal step enable and consume it everywhere locally
-            if (i_special_training == 0)
-            {
-                FAPI_TRY( mss::cal_step_enable(p, l_cal_steps_enabled) );
-            }
 
-            FAPI_DBG("cal steps enabled: 0x%x special training: 0x%x", l_cal_steps_enabled, i_special_training);
-
-            // Check to see if we're supposed to reset the delay values before starting training
             // don't reset if we're running special training - assumes there's a checkpoint which has valid state.
             if ((l_reset_disable == fapi2::ENUM_ATTR_MSS_MRW_RESET_DELAY_BEFORE_CAL_YES) && (i_special_training == 0))
             {
@@ -150,18 +153,15 @@ extern "C"
             // THE PROCESSING OF THE ERRORS. (it's hard to figure out which DIMM failed, too) BRS.
             for (const auto& rp : l_pairs)
             {
-                uint8_t cal_abort_on_error = i_abort_on_error;
+                uint8_t l_cal_abort_on_error = i_abort_on_error;
 
                 if (i_abort_on_error == CAL_ABORT_SENTINAL)
                 {
-                    FAPI_TRY( mss::cal_abort_on_error(cal_abort_on_error) );
+                    FAPI_TRY( mss::cal_abort_on_error(l_cal_abort_on_error) );
                 }
 
                 // Execute selected cal steps
                 FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, i_abort_on_error) );
-
-                // Conducts workarounds after training if needed
-                FAPI_TRY( mss::workarounds::dp16::post_training_workarounds( p, l_cal_steps_enabled ) );
 
                 // If we're aborting on error we can just FAPI_TRY. If we're not, we don't want to exit if there's
                 // an error but we want to log the error and keep on keeping on.
@@ -169,7 +169,7 @@ extern "C"
                 {
                     fapi2::logError(fapi2::current_err);
 
-                    if (cal_abort_on_error)
+                    if (l_cal_abort_on_error)
                     {
                         goto fapi_try_exit;
                     }
@@ -177,7 +177,10 @@ extern "C"
                     // Keep tack of the last cal error we saw.
                     l_rank_pair_error = fapi2::current_err;
                 }
-            }
+            }// rank pairs
+
+            // Conducts workarounds after training if needed
+            FAPI_TRY( mss::workarounds::dp16::post_training_workarounds( p, l_cal_steps_enabled ) );
 
             // Once we've trained all the rank pairs we can record the bad bits in the attributes if we have an error
             // This error is the most recent error seen on a port, too, so we keep track of that.
