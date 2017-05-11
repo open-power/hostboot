@@ -41,6 +41,7 @@ lib$(PROCEDURE)_DEPLIBS += p9_ringId
 lib$(PROCEDURE)_DEPLIBS += p9_stop_util
 lib$(PROCEDURE)_DEPLIBS += p9_stop_api
 lib$(PROCEDURE)_DEPLIBS += p9_fbc_utils
+lib$(PROCEDURE)_DEPLIBS += p9_dd_container
 
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(HCODE_UTIL))
 $(call BUILD_PROCEDURE)
