@@ -1122,15 +1122,16 @@
     <id>ATTR_CHIP_EC_FEATURE_DISABLE_SPEC_STWCX</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Nimbus DD1 only: HW353069 / HW358383 / HW358418 / HW358662 / HW358824 / HW363605
+      Nimbus DD1.0 DD2.0
+                       HW353069 / HW358383 / HW358418 / HW358662 / HW358824 / HW363605
                        Not doing Performance: MB State - Need to disable speculative stwcx
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x20</value>
-          <test>LESS_THAN</test>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -2429,7 +2430,8 @@
     <id>ATTR_CHIP_EC_FEATURE_HW403465</id>>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Nimbus DD1: L1 access latency increases when data footprint should still
+      Nimbus DD1.0 DD2.0
+                  L1 access latency increases when data footprint should still
                   be within L1 cache size. Revert L1 LRU changes
     </description>
     <chipEcFeature>
@@ -2437,7 +2439,7 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>LESS_THAN</test>
+          <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -2523,6 +2525,313 @@
         <ec>
           <value>0x20</value>
           <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW403766</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW403766
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW405047</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW405047
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW405602</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW405602
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW405605</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW405605
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW405865</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW405865
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW406641</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW406641
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW406972</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW406972
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW407065</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW407065
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW407165</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW407165
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW408628</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW408628
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW408876</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW408876
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW408917</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW408917
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW408988</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW408988
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW409270</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW409270
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW409365</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW409365
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW408891</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Nimbus DD1.0 DD2.0
+                  HW408891 - Recovery WAT
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW405021</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW409194
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW409194</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW409194
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
