@@ -194,6 +194,7 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_dimm->dram_rtt_nom () );
         FAPI_TRY( l_eff_dimm->dram_rtt_wr  () );
         FAPI_TRY( l_eff_dimm->dram_rtt_park() );
+        FAPI_TRY(  l_eff_dimm->phy_seq_refresh() );
 
         // Sets up the calibration steps
         FAPI_TRY( l_eff_dimm->cal_step_enable() );

@@ -43,6 +43,7 @@
 #include <lib/dimm/bcw_load_ddr4.H>
 #include <lib/phy/dp16.H>
 #include <lib/dimm/ddr4/control_word_ddr4.H>
+#include <lib/eff_config/timing.H>
 
 namespace mss
 {

@@ -182,7 +182,7 @@ fapi2::ReturnCode rd_vref_vref_sense_setup( const fapi2::Target<fapi2::TARGET_TY
 /// @note This function is called after training - it will only be run after coarse wr/rd
 ///
 fapi2::ReturnCode post_training_workarounds( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const fapi2::buffer<uint16_t>& i_cal_steps_enabled )
+        const fapi2::buffer<uint32_t>& i_cal_steps_enabled )
 {
     // Only runs on the last cal steps (coarse wr/rd)
     if (i_cal_steps_enabled.getBit<mss::cal_steps::COARSE_RD>() ||
@@ -439,7 +439,7 @@ fapi2::ReturnCode dqs_align_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MC
     auto l_skip = mss::states::ON;
     std::map<uint64_t, uint64_t> l_passing_values;
     uint64_t l_num_loops = 0;
-    uint8_t l_dram_width[2] = {};
+    uint8_t l_dram_width[mss::PORTS_PER_MCS] = {};
     bool l_is_x8 = false;
 
     // Let's check to see if we can run the workaround
@@ -487,7 +487,7 @@ fapi2::ReturnCode dqs_align_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MC
 
         // Hit calibration one more time
         {
-            const auto l_dqs_align_cal = fapi2::buffer<uint16_t>().setBit<mss::cal_steps::DQS_ALIGN>();
+            const auto l_dqs_align_cal = fapi2::buffer<uint32_t>().setBit<mss::cal_steps::DQS_ALIGN>();
 
             FAPI_TRY(mss::execute_cal_steps_helper( i_target, i_rp, l_dqs_align_cal, i_abort_on_error));
         }

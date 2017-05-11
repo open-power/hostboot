@@ -278,7 +278,7 @@ fapi2::ReturnCode rd_vref_vref_sense_setup( const fapi2::Target<fapi2::TARGET_TY
 /// @note This function is called after training - it will only be run after coarse wr/rd
 ///
 fapi2::ReturnCode post_training_workarounds( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const fapi2::buffer<uint16_t>& i_cal_steps_enabled );
+        const fapi2::buffer<uint32_t>& i_cal_steps_enabled );
 
 namespace dqs_align
 {

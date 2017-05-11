@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@
 #include <fapi2.H>
 
 typedef fapi2::ReturnCode (*p9_mss_draminit_training_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&,
-        const uint16_t,
+        const uint32_t,
         const uint8_t);
 
 // Use a special sentinal to let you know you need to read the attribute (which is 1/0)
@@ -55,7 +55,7 @@ extern "C"
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
     fapi2::ReturnCode p9_mss_draminit_training( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-            const uint16_t i_special_training = 0,
+            const uint32_t i_special_training = 0,
             const uint8_t i_abort_on_error = CAL_ABORT_SENTINAL);
 }
 

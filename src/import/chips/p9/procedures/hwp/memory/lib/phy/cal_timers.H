@@ -194,7 +194,7 @@ uint64_t coarse_rd_cycles(const fapi2::Target<T>& i_target )
 template<fapi2::TargetType T>
 inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
         poll_parameters& i_poll,
-        const fapi2::buffer<uint16_t>& i_cal_steps_enabled)
+        const fapi2::buffer<uint32_t>& i_cal_steps_enabled)
 {
     uint64_t l_write_cntr_cycles = 0;
     uint64_t l_total_cycles = 0;

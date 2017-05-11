@@ -131,31 +131,31 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<T>& i_target )
 /// @tparam T, the target type of the MCA/MBA
 /// @param[in] i_target the target associated with this cal setup
 /// @param[in] i_rank_pairs the vector of currently configured rank pairs
-/// @param[in] i_cal_steps_enabled fapi2::buffer<uint16_t> representing the cal steps to enable
+/// @param[in] i_cal_steps_enabled fapi2::buffer<uint32_t> representing the cal steps to enable
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode setup_cal_config( const fapi2::Target<T>& i_target,
-                                    const std::vector<uint64_t> i_rank_pairs,
-                                    const fapi2::buffer<uint16_t> i_cal_steps_enabled);
+                                    const std::vector<uint64_t>& i_rank_pairs,
+                                    const fapi2::buffer<uint32_t>& i_cal_steps_enabled);
 
 ///
 /// @brief Setup all the cal config register
 /// @param[in] i_target the target associated with this cal setup
 /// @param[in] i_rank one currently configured rank pairs
-/// @param[in] i_cal_steps_enabled fapi2::buffer<uint16_t> representing the cal steps to enable
+/// @param[in] i_cal_steps_enabled fapi2::buffer representing the cal steps to enable
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                                     const uint64_t i_rank,
-                                    const fapi2::buffer<uint16_t> i_cal_steps_enabled);
+                                    const fapi2::buffer<uint32_t>& i_cal_steps_enabled);
 
 ///
 /// @brief Execute a set of PHY cal steps
-/// @tparam T, the target type of the MCA/MBA
+/// @tparam T the target type associated with this cal
 /// @param[in] i_target the target associated with this cal
 /// @param[in] i_rp one of the currently configured rank pairs
-/// @param[in] i_cal_steps_enabled fapi2::buffer<uint16_t> representing the cal steps to enable
+/// @param[in] i_cal_steps_enabled fapi2::buffer representing the cal steps to enable
 /// @param[in] i_abort_on_error CAL_ABORT_ON_ERROR override
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 /// @note This is a helper function. Library users are required to call setup_and_execute_cal
@@ -163,7 +163,7 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
 template< fapi2::TargetType T >
 fapi2::ReturnCode execute_cal_steps_helper( const fapi2::Target<T>& i_target,
         const uint64_t i_rp,
-        const fapi2::buffer<uint16_t> i_cal_steps_enabled,
+        const fapi2::buffer<uint32_t>& i_cal_steps_enabled,
         const uint8_t i_abort_on_error);
 
 ///
@@ -171,14 +171,14 @@ fapi2::ReturnCode execute_cal_steps_helper( const fapi2::Target<T>& i_target,
 /// @tparam T, the target type of the MCA/MBA
 /// @param[in] i_target the target associated with this cal
 /// @param[in] i_rp one of the currently configured rank pairs
-/// @param[in] i_cal_steps_enabled fapi2::buffer<uint16_t> representing the cal steps to enable
+/// @param[in] i_cal_steps_enabled fapi2::buffer representing the cal steps to enable
 /// @param[in] i_abort_on_error CAL_ABORT_ON_ERROR override
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<T>& i_target,
         const uint64_t i_rp,
-        const fapi2::buffer<uint16_t> i_cal_steps_enabled,
+        const fapi2::buffer<uint32_t>& i_cal_steps_enabled,
         const uint8_t i_abort_on_error);
 
 // TODO RTC:167929 Can ODT VPD processing be shared between RD and WR?

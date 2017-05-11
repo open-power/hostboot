@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,7 @@ namespace wr_vref
 ///
 fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                            const uint64_t i_rp,
-                           const fapi2::buffer<uint16_t>& i_cal_steps_enabled,
+                           const fapi2::buffer<uint32_t>& i_cal_steps_enabled,
                            uint8_t& o_vrefdq_train_range,
                            uint8_t& o_vrefdq_train_value )
 {
