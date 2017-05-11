@@ -4574,20 +4574,17 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::cal_step_enable()
 {
-    // These constexpr values are taken from the defiitions in ATTR_MSS_CAL_STEP_ENABLE
-    // RD/WR VREF correspond to 0x0400 and 0x0100 respectively.
-    constexpr uint64_t ONLY_1D = 0xFAC0;
-    constexpr uint64_t RD_VREF_WR_VREF_1D = 0xFFC0;
-    const uint16_t l_cal_step_value = (mss::chip_ec_feature_skip_hw_vref_cal(iv_mcs) ? ONLY_1D : RD_VREF_WR_VREF_1D);
+    const uint32_t l_cal_step_value = (mss::chip_ec_feature_skip_hw_vref_cal(iv_mcs) ?
+                                       RUN_CAL_SKIP_WR_RD_2D_VREF : RUN_ALL_CAL_STEPS);
 
     FAPI_DBG("%s %s running HW VREF cal. cal_step value: 0x%0x VREF", mss::c_str(iv_mcs),
              mss::chip_ec_feature_skip_hw_vref_cal(iv_mcs) ? "not" : "", l_cal_step_value);
 
     // Sets up the vector
-    std::vector<uint16_t> l_cal_step(PORTS_PER_MCS, l_cal_step_value);
+    std::vector<uint32_t> l_cal_step(PORTS_PER_MCS, l_cal_step_value);
 
-    // Sets the values
-    return FAPI_ATTR_SET(fapi2::ATTR_MSS_CAL_STEP_ENABLE, iv_mcs, UINT16_VECTOR_TO_1D_ARRAY(l_cal_step, PORTS_PER_MCS));
+    // Sets the value
+    return FAPI_ATTR_SET(fapi2::ATTR_MSS_CAL_STEP_ENABLE, iv_mcs, UINT32_VECTOR_TO_1D_ARRAY(l_cal_step, PORTS_PER_MCS));
 }
 
 ///
@@ -4597,8 +4594,9 @@ fapi2::ReturnCode eff_dimm::cal_step_enable()
 fapi2::ReturnCode eff_dimm::rdvref_enable_bit()
 {
     // This enables which bits should be run for RD VREF, all 1's indicates that all bits should be run
-    constexpr uint64_t DISABLE = 0x0000;
-    constexpr uint64_t ENABLE = 0xFFFF;
+    constexpr uint16_t DISABLE = 0x0000;
+    constexpr uint16_t ENABLE = 0xFFFF;
+
     const uint16_t l_vref_enable_value = (mss::chip_ec_feature_skip_hw_vref_cal(iv_mcs) ? DISABLE : ENABLE);
 
     FAPI_DBG("%s %s running HW VREF cal. VREF enable value: 0x%0x", mss::c_str(iv_mcs),
@@ -4608,16 +4606,21 @@ fapi2::ReturnCode eff_dimm::rdvref_enable_bit()
     std::vector<uint16_t> l_vref_enable(PORTS_PER_MCS, l_vref_enable_value);
 
     // Sets the values
-    return FAPI_ATTR_SET(fapi2::ATTR_MSS_RDVREF_CAL_ENABLE, iv_mcs, UINT16_VECTOR_TO_1D_ARRAY(l_vref_enable,
-                         PORTS_PER_MCS));
+    return FAPI_ATTR_SET(fapi2::ATTR_MSS_RDVREF_CAL_ENABLE,
+                         iv_mcs,
+                         UINT16_VECTOR_TO_1D_ARRAY(l_vref_enable, PORTS_PER_MCS));
 }
 
 ///
-/// @brief Determines and sets ATTR_MSS_PHY_SEQ_REFRESH_
+/// @brief Determines and sets ATTR_MSS_PHY_SEQ_REFRESH
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
 fapi2::ReturnCode eff_dimm::phy_seq_refresh()
 {
+    // default setting is to turn on this workaround, this
+    // isn't an ec_chip_feature attribute because there is no
+    // known fix for this coming in DD2.0 modules. But the
+    // lab wants a control switch
     constexpr size_t ENABLE = 1;
 
     FAPI_DBG("Setting PHY_SEQ_REFRESH to %d on %s", ENABLE, mss::c_str(iv_mcs));
