@@ -461,6 +461,50 @@ void traceHbRsvMemRange(hdatMsVpdRhbAddrRange_t* & i_rngPtr )
               i_rngPtr->hdatRhbAddrRngEndAddr);
 }
 
+/**
+ *  @brief Get the next Reserved HB memory range and set all member variables
+ *         of struct. Additionally trace out relevant parts of the struct
+ * @param[in] i_type, Range type
+ * @param[in] i_rangeId, Range ID
+ * @param[in] i_startAddr, Range Starting Address
+ * @param[in] i_size, Size of address space to reserve
+ * @param[in] i_label, Label String Ptr
+ *
+ * @return errlHndl_t, nullptr on success; otherwise errlog
+ */
+errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
+                                const uint16_t i_rangeId,
+                                const uint64_t i_startAddr,
+                                const uint64_t i_size,
+                                const char* i_label)
+{
+    errlHndl_t l_elog = nullptr;
+
+    do {
+
+    // Get a pointer to the next available HDAT HB Rsv Mem entry
+    hdatMsVpdRhbAddrRange_t* l_rngPtr = nullptr;
+    l_elog = getNextRhbAddrRange(l_rngPtr);
+    if(l_elog)
+    {
+        break;
+    }
+
+    assert(l_rngPtr != nullptr, "getNextRhbAddrRange returned nullptr");
+
+    // Determine starting address
+    // Logical OR staring adddress with enum FORCE_PHYS_ADDR to
+    //        ignore the HRMOR bit
+    uint64_t l_startAddr = i_startAddr | VmmManager::FORCE_PHYS_ADDR;
+
+    // Fill in the entry
+    l_rngPtr->set(i_type, i_rangeId, l_startAddr, i_size, i_label);
+    traceHbRsvMemRange(l_rngPtr);
+
+    } while(0);
+
+    return l_elog;
+}
 
 /**
  *  @brief Load the HDAT HB Reserved Memory
@@ -478,9 +522,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         RUNTIME::rediscover_hdat();
 
         uint64_t l_topMemAddr = 0x0;
-        const char* l_label = nullptr;
-        uint32_t l_labelSize = 0;
-        hdatMsVpdRhbAddrRange_t* l_rngPtr;
         uint64_t l_vAddr = 0x0;
 
         // Get list of processor chips
@@ -494,32 +535,15 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             // First phyp entry is for the entire 256M HB space
             uint64_t l_hbAddr = cpu_spr_value(CPU_SPR_HRMOR)
                                                 - VMM_HRMOR_OFFSET;
-            l_label = HBRT_RSVD_MEM__PRIMARY;
-            l_labelSize = strlen(l_label) + 1;
-
-            // Get a pointer to the next available HDAT HB Rsv Mem entry
-            l_rngPtr = nullptr;
-            l_elog = getNextRhbAddrRange(l_rngPtr);
-            if(l_elog)
+            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_PRIMARY,
+                                          i_nodeId,
+                                          l_hbAddr,
+                                          VMM_HB_RSV_MEM_SIZE,
+                                          HBRT_RSVD_MEM__PRIMARY);
+            if(l_elog != nullptr)
             {
                 break;
             }
-
-            // Fill in the entry
-            l_rngPtr->hdatRhbRngType =
-                    static_cast<uint8_t>(HDAT::RHB_TYPE_PRIMARY);
-            l_rngPtr->hdatRhbRngId = i_nodeId;
-            l_rngPtr->hdatRhbAddrRngStrAddr =
-                    l_hbAddr | VmmManager::FORCE_PHYS_ADDR;
-            l_rngPtr->hdatRhbAddrRngEndAddr =
-                    (l_hbAddr | VmmManager::FORCE_PHYS_ADDR)
-                        + VMM_HB_RSV_MEM_SIZE - 1 ;
-            l_rngPtr->hdatRhbLabelSize = l_labelSize;
-            memcpy( l_rngPtr->hdatRhbLabelString,
-                    l_label,
-                    l_labelSize );
-
-            traceHbRsvMemRange(l_rngPtr);
 
             //@fixme-RTC:169478-Remove this workaround once HDAT is ready
             // Check to see if HDAT has the space we need allocated
@@ -580,39 +604,22 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
             // First opal entries are for the HOMERs
             uint64_t l_homerAddr = l_topMemAddr;
-            l_label = HBRT_RSVD_MEM__HOMER;
-            l_labelSize = strlen(l_label) + 1;
 
             // Loop through all functional Procs
             for (const auto & l_procChip: l_procChips)
             {
-                l_homerAddr = l_procChip->getAttr
-                    <TARGETING::ATTR_HOMER_PHYS_ADDR>();
 
-                // Get a pointer to the next available HDAT HB Rsv Mem entry
-                l_rngPtr = nullptr;
-                l_elog = getNextRhbAddrRange(l_rngPtr);
+                l_homerAddr = l_procChip->getAttr
+                                <TARGETING::ATTR_HOMER_PHYS_ADDR>();
+                l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HOMER_OCC,
+                            l_procChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>(),
+                            l_homerAddr,
+                            VMM_HOMER_INSTANCE_SIZE,
+                            HBRT_RSVD_MEM__HOMER);
                 if(l_elog)
                 {
                     break;
                 }
-
-                // Fill in the entry
-                l_rngPtr->hdatRhbRngType =
-                        static_cast<uint8_t>(HDAT::RHB_TYPE_HOMER_OCC);
-                l_rngPtr->hdatRhbRngId =
-                        l_procChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>();
-                l_rngPtr->hdatRhbAddrRngStrAddr =
-                        l_homerAddr | VmmManager::FORCE_PHYS_ADDR;
-                l_rngPtr->hdatRhbAddrRngEndAddr =
-                        (l_homerAddr | VmmManager::FORCE_PHYS_ADDR)
-                            + VMM_HOMER_INSTANCE_SIZE - 1 ;
-                l_rngPtr->hdatRhbLabelSize = l_labelSize;
-                memcpy( l_rngPtr->hdatRhbLabelString,
-                        l_label,
-                        l_labelSize );
-
-                traceHbRsvMemRange(l_rngPtr);
             }
 
             if(l_elog)
@@ -631,32 +638,15 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                 assert(l_sys != nullptr);
                 uint64_t l_occCommonAddr = l_sys->getAttr
                     <TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
-                l_label = HBRT_RSVD_MEM__OCC_COMMON;
-                l_labelSize = strlen(l_label) + 1;
-
-                // Get a pointer to the next available HDAT HB Rsv Mem entry
-                l_rngPtr = nullptr;
-                l_elog = getNextRhbAddrRange(l_rngPtr);
+                l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HOMER_OCC,
+                                              i_nodeId,
+                                              l_occCommonAddr,
+                                              VMM_OCC_COMMON_SIZE,
+                                              HBRT_RSVD_MEM__OCC_COMMON);
                 if(l_elog)
                 {
                     break;
                 }
-
-                // Fill in the entry
-                l_rngPtr->hdatRhbRngType =
-                        static_cast<uint8_t>(HDAT::RHB_TYPE_HOMER_OCC);
-                l_rngPtr->hdatRhbRngId = i_nodeId;
-                l_rngPtr->hdatRhbAddrRngStrAddr =
-                        l_occCommonAddr | VmmManager::FORCE_PHYS_ADDR;
-                l_rngPtr->hdatRhbAddrRngEndAddr =
-                        (l_occCommonAddr | VmmManager::FORCE_PHYS_ADDR)
-                            + VMM_OCC_COMMON_SIZE - 1 ;
-                l_rngPtr->hdatRhbLabelSize = l_labelSize;
-                memcpy( l_rngPtr->hdatRhbLabelString,
-                        l_label,
-                        l_labelSize );
-
-                traceHbRsvMemRange(l_rngPtr);
             }
 #endif
         }
@@ -678,8 +668,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         ///////////////////////////////////////////////////
         // VPD entry
         uint64_t l_vpdAddr = 0x0;
-        l_label = HBRT_RSVD_MEM__VPD_CACHE;
-        l_labelSize = strlen(l_label) + 1;
 
         if(TARGETING::is_phyp_load())
         {
@@ -693,32 +681,18 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                     - VMM_RT_VPD_OFFSET;
         }
 
-        // Get a pointer to the next available HDAT HB Rsv Mem entry
-        l_rngPtr = nullptr;
-        l_elog = getNextRhbAddrRange(l_rngPtr);
+        l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
+                                      i_nodeId,
+                                      l_vpdAddr,
+                                      VMM_RT_VPD_SIZE,
+                                      HBRT_RSVD_MEM__VPD_CACHE);
         if(l_elog)
         {
             break;
         }
 
-        // Fill in the entry
-        l_rngPtr->hdatRhbRngType =
-                static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
-        l_rngPtr->hdatRhbRngId = i_nodeId;
-        l_rngPtr->hdatRhbAddrRngStrAddr =
-                l_vpdAddr | VmmManager::FORCE_PHYS_ADDR;
-        // Note: VMM_RT_VPD_SIZE is already 64KB aligned
-        l_rngPtr->hdatRhbAddrRngEndAddr =
-                (l_vpdAddr | VmmManager::FORCE_PHYS_ADDR)
-                    + VMM_RT_VPD_SIZE - 1 ;
-        l_rngPtr->hdatRhbLabelSize = l_labelSize;
-        memcpy( l_rngPtr->hdatRhbLabelString,
-                l_label,
-                l_labelSize );
         l_prevDataAddr = l_vpdAddr;
         l_prevDataSize = VMM_RT_VPD_SIZE;
-
-        traceHbRsvMemRange(l_rngPtr);
 
         // Load the VPD into memory
         l_elog = mapPhysAddr(l_vpdAddr, VMM_RT_VPD_SIZE, l_vAddr);
@@ -745,8 +719,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         ///////////////////////////////////////////////////
         // ATTR Data entry
         uint64_t l_attrDataAddr = 0x0;
-        l_label = HBRT_RSVD_MEM__ATTRIBUTES;
-        l_labelSize = strlen(l_label) + 1;
         uint64_t l_attrSize = TARGETING::AttrRP::maxSize();
 
         // Minimum 64K size for Opal
@@ -761,31 +733,18 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             l_attrDataAddr = l_prevDataAddr - l_attrSizeAligned;
         }
 
-        // Get a pointer to the next available HDAT HB Rsv Mem entry
-        l_rngPtr = nullptr;
-        l_elog = getNextRhbAddrRange(l_rngPtr);
+        l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
+                                      i_nodeId,
+                                      l_attrDataAddr,
+                                      l_attrSizeAligned,
+                                      HBRT_RSVD_MEM__ATTRIBUTES);
         if(l_elog)
         {
             break;
         }
 
-        // Fill in the entry
-        l_rngPtr->hdatRhbRngType =
-                static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
-        l_rngPtr->hdatRhbRngId = i_nodeId;
-        l_rngPtr->hdatRhbAddrRngStrAddr =
-                l_attrDataAddr | VmmManager::FORCE_PHYS_ADDR;
-        l_rngPtr->hdatRhbAddrRngEndAddr =
-                (l_attrDataAddr | VmmManager::FORCE_PHYS_ADDR)
-                    + l_attrSizeAligned - 1 ;
-        l_rngPtr->hdatRhbLabelSize = l_labelSize;
-        memcpy( l_rngPtr->hdatRhbLabelString,
-                l_label,
-                l_labelSize );
         l_prevDataAddr = l_attrDataAddr;
         l_prevDataSize = l_attrSizeAligned;
-
-        traceHbRsvMemRange(l_rngPtr);
 
         // Load the attribute data into memory
         l_elog = mapPhysAddr(l_attrDataAddr, l_attrSize, l_vAddr);
@@ -806,8 +765,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         ///////////////////////////////////////////////////
         // ATTR Overrides entry
         uint64_t l_attrOverDataAddr = 0x0;
-        l_label = HBRT_RSVD_MEM__OVERRIDES;
-        l_labelSize = strlen(l_label) + 1;
 
         // default to the minimum space we have to allocate anyway
         size_t l_attrOverMaxSize = 64*KILOBYTE;
@@ -859,31 +816,18 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                 l_attrOverDataAddr = l_prevDataAddr - l_actualSizeAligned;
             }
 
-            // Get a pointer to the next available HDAT HB Rsv Mem entry
-            l_rngPtr = nullptr;
-            l_elog = getNextRhbAddrRange(l_rngPtr);
+            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
+                                          i_nodeId,
+                                          l_attrOverDataAddr,
+                                          l_actualSizeAligned,
+                                          HBRT_RSVD_MEM__OVERRIDES);
             if(l_elog)
             {
                 break;
             }
 
-            // Fill in the entry
-            l_rngPtr->hdatRhbRngType =
-              static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
-            l_rngPtr->hdatRhbRngId = i_nodeId;
-            l_rngPtr->hdatRhbAddrRngStrAddr =
-              l_attrOverDataAddr | VmmManager::FORCE_PHYS_ADDR;
-            l_rngPtr->hdatRhbAddrRngEndAddr =
-              (l_attrOverDataAddr | VmmManager::FORCE_PHYS_ADDR)
-              + l_actualSizeAligned - 1 ;
-            l_rngPtr->hdatRhbLabelSize = l_labelSize;
-            memcpy( l_rngPtr->hdatRhbLabelString,
-                    l_label,
-                    l_labelSize );
             l_prevDataAddr = l_attrOverDataAddr;
             l_prevDataSize = l_actualSizeAligned;
-
-            traceHbRsvMemRange(l_rngPtr);
 
             // Load the attribute data into memory
             l_elog = mapPhysAddr(l_attrOverDataAddr,
@@ -914,8 +858,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                 (!INITSERVICE::spBaseServicesEnabled()))
         {
             uint64_t l_hbrtImageAddr = 0x0;
-            l_label = HBRT_RSVD_MEM__CODE;
-            l_labelSize = strlen(l_label) + 1;
 
 #ifdef CONFIG_SECUREBOOT
             l_elog = loadSecureSection(PNOR::HB_RUNTIME);
@@ -955,33 +897,18 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             l_hbrtImageAddr = ALIGN_PAGE_DOWN(l_hbrtImageAddr - l_imageSize);
             l_hbrtImageAddr = ALIGN_DOWN_X(l_hbrtImageAddr,64*KILOBYTE);
 
-            // Get a pointer to the next available HDAT HB Rsv Mem entry
-            l_rngPtr = nullptr;
-            l_elog = getNextRhbAddrRange(l_rngPtr);
+            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
+                                          i_nodeId,
+                                          l_hbrtImageAddr,
+                                          l_attrSizeAligned,
+                                          HBRT_RSVD_MEM__CODE);
             if(l_elog)
             {
                 break;
             }
 
-            // Fill in the entry
-            l_rngPtr->hdatRhbRngType =
-                    static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
-            l_rngPtr->hdatRhbRngId = i_nodeId;
-            l_rngPtr->hdatRhbAddrRngStrAddr =
-                    l_hbrtImageAddr | VmmManager::FORCE_PHYS_ADDR;
-            // Minimum 64K size for Opal
-            size_t l_attrSizeAligned = ALIGN_X( l_imageSize, 64*KILOBYTE );
-            l_rngPtr->hdatRhbAddrRngEndAddr =
-                    (l_hbrtImageAddr | VmmManager::FORCE_PHYS_ADDR)
-                        + l_attrSizeAligned - 1 ;
-            l_rngPtr->hdatRhbLabelSize = l_labelSize;
-            memcpy( l_rngPtr->hdatRhbLabelString,
-                    l_label,
-                    l_labelSize );
             l_prevDataAddr = l_hbrtImageAddr;
             l_prevDataSize = l_attrSizeAligned;
-
-            traceHbRsvMemRange(l_rngPtr);
 
             // Load the HBRT image into memory
             l_elog = mapPhysAddr(l_hbrtImageAddr, l_imageSize, l_vAddr);
@@ -1029,35 +956,18 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                 l_sbeCommAddr = l_prevDataAddr - l_sbeCommSizeAligned;
             }
 
-            // Get a pointer to the next available HDAT HB Rsv Mem entry
-            l_rngPtr = nullptr;
-            l_elog = getNextRhbAddrRange(l_rngPtr);
+            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
+                                          i_nodeId,
+                                          l_sbeCommAddr,
+                                          l_sbeCommSizeAligned,
+                                          HBRT_RSVD_MEM__SBE_COMM);
             if(l_elog)
             {
                 break;
             }
 
-            // SBE Communications buffer label
-            l_label = HBRT_RSVD_MEM__SBE_COMM;
-            l_labelSize = strlen(l_label) + 1;
-
-            // Fill in the entry
-            l_rngPtr->hdatRhbRngType =
-                    static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
-            l_rngPtr->hdatRhbRngId = i_nodeId;
-            l_rngPtr->hdatRhbAddrRngStrAddr =
-                    l_sbeCommAddr | VmmManager::FORCE_PHYS_ADDR;
-            l_rngPtr->hdatRhbAddrRngEndAddr =
-                    (l_sbeCommAddr | VmmManager::FORCE_PHYS_ADDR)
-                        + l_sbeCommSizeAligned - 1 ;
-            l_rngPtr->hdatRhbLabelSize = l_labelSize;
-            memcpy( l_rngPtr->hdatRhbLabelString,
-                    l_label,
-                    l_labelSize );
             l_prevDataAddr = l_sbeCommAddr;
             l_prevDataSize = l_sbeCommSizeAligned;
-
-            traceHbRsvMemRange(l_rngPtr);
 
             // Save SBE Communication buffer address to attribute
             l_procChip->setAttr<TARGETING::ATTR_SBE_COMM_ADDR>(l_sbeCommAddr);
@@ -1073,35 +983,19 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                 l_sbeffdcAddr = l_prevDataAddr - l_sbeffdcSizeAligned;
             }
 
-            // Get a pointer to the next available HDAT HB Rsv Mem entry
-            l_rngPtr = nullptr;
-            l_elog = getNextRhbAddrRange(l_rngPtr);
+            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
+                                          i_nodeId,
+                                          l_sbeffdcAddr,
+                                          l_sbeffdcSizeAligned,
+                                          HBRT_RSVD_MEM__SBE_FFDC);
             if(l_elog)
             {
                 break;
             }
 
-            // SBE FFDC label
-            l_label = HBRT_RSVD_MEM__SBE_FFDC;
-            l_labelSize = strlen(l_label) + 1;
-
-            // Fill in the entry
-            l_rngPtr->hdatRhbRngType =
-                    static_cast<uint8_t>(HDAT::RHB_TYPE_HBRT);
-            l_rngPtr->hdatRhbRngId = i_nodeId;
-            l_rngPtr->hdatRhbAddrRngStrAddr =
-                    l_sbeffdcAddr | VmmManager::FORCE_PHYS_ADDR;
-            l_rngPtr->hdatRhbAddrRngEndAddr =
-                    (l_sbeffdcAddr | VmmManager::FORCE_PHYS_ADDR)
-                        + l_sbeffdcSizeAligned - 1 ;
-            l_rngPtr->hdatRhbLabelSize = l_labelSize;
-            memcpy( l_rngPtr->hdatRhbLabelString,
-                    l_label,
-                    l_labelSize );
             l_prevDataAddr = l_sbeffdcAddr;
             l_prevDataSize = l_sbeffdcSizeAligned;
 
-            traceHbRsvMemRange(l_rngPtr);
 
             // Send Set FFDC Address, tell SBE where to write FFDC and messages
             l_elog = SBEIO::sendSetFFDCAddr(l_sbeffdcSize,
