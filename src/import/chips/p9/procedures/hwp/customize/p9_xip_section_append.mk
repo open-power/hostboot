@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -24,5 +24,6 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_xip_section_append
 lib$(PROCEDURE)_DEPLIBS+=p9_xip_image
+lib$(PROCEDURE)_DEPLIBS+=p9_dd_container
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/xip)
 $(call BUILD_PROCEDURE)

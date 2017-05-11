@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -30,6 +30,7 @@ lib$(PROCEDURE)_DEPLIBS+=p9_get_mvpd_ring
 lib$(PROCEDURE)_DEPLIBS+=p9_mvpd_ring_funcs
 lib$(PROCEDURE)_DEPLIBS+=p9_tor
 lib$(PROCEDURE)_DEPLIBS+=p9_ringId
+lib$(PROCEDURE)_DEPLIBS+=p9_dd_container
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/xip)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/utils/imageProcs)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/accessors/)

@@ -699,7 +699,7 @@ p9_xip_image_size(void* i_image, uint32_t* o_size);
 int
 p9_xip_get_section(const void* i_image,
                    const int i_sectionId,
-#ifdef __PPE__
+#if defined(__PPE__) || defined(WIN32)
                    P9XipSection* o_hostSection);
 #else
                    P9XipSection* o_hostSection,
@@ -1380,7 +1380,7 @@ p9_xip_get_toc(void* i_image,
 /// \retval 0 Success
 ///
 /// \retval non-0 See \ref p9_xip_image_errors
-#ifndef __PPE__
+#if !defined(__PPE__) && !defined(WIN32)
 int
 p9_xip_dd_section_support(const void* i_image,
                           const int i_sectionId,
@@ -1504,6 +1504,9 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
 /// Specified ddLevel was not found in section
 #define P9_XIP_DDLEVEL_NOT_FOUND 21
 
+/// Code bug in the ddLevel handling codes
+#define P9_XIP_DDLEVEL_CODE_BUG 22
+
 /// Applications can expand this macro to declare an array of string forms of
 /// the error codes if desired.
 #define P9_XIP_ERROR_STRINGS(var)    \
@@ -1530,6 +1533,7 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
         "P9_XIP_SBE_DD_SIZE_ERR",    \
         "P9_XIP_NO_DDLEVEL_SUPPORT", \
         "P9_XIP_DDLEVEL_NOT_FOUND",  \
+        "P9_XIP_DDLEVEL_CODE_BUG",  \
     }
 
 /// Applications can use this macro to safely index the array of error
