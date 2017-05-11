@@ -44,6 +44,9 @@
 #else
     #include <stdint.h>
     #include <endian.h>
+    #ifndef __PPE__
+        #include "p9_dd_container.h"
+    #endif
 #endif
 #include <stdlib.h>
 #include <string.h>
@@ -555,6 +558,25 @@ xipSetSectionSize(void* io_image, const int i_section, const uint32_t i_size)
 }
 
 
+/// Set the properties of a section
+//
+XIP_STATIC int
+xipSetSectionProps(void* io_image, const int i_section, const uint8_t i_props)
+{
+    P9XipSection* section;
+    int rc;
+
+    rc = xipGetSectionPointer(io_image, i_section, &section);
+
+    if (!rc)
+    {
+        section->iv_ddSupport = i_props;
+    }
+
+    return rc;
+}
+
+
 /// Translate a IMAGE address in the image to a section and offset
 
 // We first check to be sure that the IMAGE address is contained in the image,
@@ -650,7 +672,7 @@ xipDeleteLastSection(void* io_image,
 
         xipSetSectionOffset(io_image, i_sectionId, 0);
         xipSetSectionSize(io_image, i_sectionId, 0);
-
+        xipSetSectionProps(io_image, i_sectionId, 0);
 
         // For cleanliness we also remove any alignment padding that had been
         // appended between the now-last section and the deleted section, then
@@ -2004,7 +2026,7 @@ p9_xip_image_size(void* io_image, uint32_t* o_size)
 }
 
 
-#ifdef __PPE__
+#if defined(__PPE__) || defined(WIN32)
 int
 p9_xip_get_section(const void* i_image,
                    const int i_sectionId,
@@ -2031,19 +2053,63 @@ p9_xip_get_section(const void* i_image,
                    P9XipSection* o_hostSection,
                    const uint8_t i_ddLevel)
 {
-    int rc;
+    int rc = 0;
     P9XipSection* imageSection;
-
-    if (i_ddLevel !=  P9_XIP_UNDEFINED_DDLEVEL)
-    {
-        return P9_XIP_NO_DDLEVEL_SUPPORT;
-    }
 
     rc = xipGetSectionPointer(i_image, i_sectionId, &imageSection);
 
     if (!rc)
     {
         xipTranslateSection(o_hostSection, imageSection);
+    }
+
+    if (i_ddLevel == P9_XIP_UNDEFINED_DDLEVEL)
+    {
+        //Here we always return the entire XIP section. Nothing more to do.
+    }
+    else if (o_hostSection->iv_ddSupport == 1)
+    {
+        uint8_t* buf;
+        uint32_t size;
+        rc = p9_dd_get( (uint8_t*)i_image + o_hostSection->iv_offset,
+                        i_ddLevel,
+                        &buf,
+                        &size );
+
+        if (!rc)
+        {
+            o_hostSection->iv_offset = (uint32_t)(buf - (uint8_t*)i_image);
+            o_hostSection->iv_size = size;
+            o_hostSection->iv_alignment = 0;
+            o_hostSection->iv_ddSupport = 0;
+            //@FIXME: In order to inform caller more clearly, we could do this instead
+            //        where the idea is to clear the DD support flag which no longer
+            //        applies and to clear the flag that indicates this section is no
+            //        longer the full/original XIP section.
+            //o_hostSection->iv_support = o_hostSection->iv_support & ~SECTION_ATTRIBS_DD_SUPP
+            //o_hostSection->iv_support = o_hostSection->iv_support & ~SECTION_ATTRIBS_XIP_SECTION
+        }
+        else
+        {
+            switch (rc)
+            {
+                case P9_DD_FAILURE_NOT_FOUND:
+                    rc = P9_XIP_DDLEVEL_NOT_FOUND;
+                    break;
+
+                case P9_DD_FAILURE_DOES_NOT_EXIST:
+                    rc = P9_XIP_NULL_BUFFER;
+                    break;
+
+                case P9_DD_FAILURE_BROKEN:
+                    rc = P9_XIP_NO_DDLEVEL_SUPPORT;
+                    break;
+
+                default:
+                    rc = P9_XIP_DDLEVEL_CODE_BUG;
+                    break;
+            }
+        }
     }
 
     return rc;
@@ -3188,7 +3254,7 @@ p9_xip_map_toc(void* io_image,
 }
 
 
-#ifndef __PPE__
+#if !defined(__PPE__) && !defined(WIN32)
 //
 // Inform caller if specified sectionId has DD support
 //
