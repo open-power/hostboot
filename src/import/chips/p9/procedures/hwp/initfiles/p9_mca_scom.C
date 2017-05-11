@@ -51,6 +51,9 @@ constexpr uint64_t literal_0b0000000000000000000000000 = 0b000000000000000000000
 constexpr uint64_t literal_0b1100111111111111111111111 = 0b1100111111111111111111111;
 constexpr uint64_t literal_0x1 = 0x1;
 constexpr uint64_t literal_6 = 6;
+constexpr uint64_t literal_38 = 38;
+constexpr uint64_t literal_51 = 51;
+constexpr uint64_t literal_64 = 64;
 constexpr uint64_t literal_0x8 = 0x8;
 constexpr uint64_t literal_17 = 17;
 constexpr uint64_t literal_1867 = 1867;
@@ -363,6 +366,21 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
         {
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
             {
+                FAPI_TRY(fapi2::getScom( TGT0, 0x5010827ull, l_scom_buffer ));
+
+                constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCBUSYQ_ENABLE_BUSY_COUNTERS_ON = 0x1;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCBUSYQ_ENABLE_BUSY_COUNTERS_ON );
+                constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCBUSYQ_BUSY_COUNTER_WINDOW_SELECT_1024_CYCLES = 0x1;
+                l_scom_buffer.insert<1, 3, 61, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCBUSYQ_BUSY_COUNTER_WINDOW_SELECT_1024_CYCLES );
+                l_scom_buffer.insert<4, 10, 54, uint64_t>(literal_38 );
+                l_scom_buffer.insert<14, 10, 54, uint64_t>(literal_51 );
+                l_scom_buffer.insert<24, 10, 54, uint64_t>(literal_64 );
+                FAPI_TRY(fapi2::putScom(TGT0, 0x5010827ull, l_scom_buffer));
+            }
+        }
+        {
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
                 FAPI_TRY(fapi2::getScom( TGT0, 0x501082bull, l_scom_buffer ));
 
                 l_scom_buffer.insert<45, 1, 63, uint64_t>(literal_0x8 );
@@ -508,6 +526,13 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
 
             l_scom_buffer.insert<5, 1, 63, uint64_t>(l_TGT1_ATTR_MSS_REORDER_QUEUE_SETTING );
             l_scom_buffer.insert<55, 4, 60, uint64_t>(literal_0b1000 );
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                constexpr auto l_MCP_PORT0_SRQ_MBA_WRQ0Q_CFG_DISABLE_WR_PG_MODE_ON = 0x1;
+                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MCP_PORT0_SRQ_MBA_WRQ0Q_CFG_DISABLE_WR_PG_MODE_ON );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x701090dull, l_scom_buffer));
         }
         {
