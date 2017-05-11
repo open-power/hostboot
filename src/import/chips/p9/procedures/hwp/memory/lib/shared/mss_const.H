@@ -37,6 +37,7 @@
 #define _MSS_CONST_H_
 
 #include <cstdint>
+#include <generic/memory/lib/utils/mss_math.H>
 
 namespace mss
 {
@@ -145,23 +146,37 @@ enum states
 
 // Static consts describing the bits used in the cal_step_enable attribute
 // These are bit positions. 0 is the left most bit.
-enum cal_steps
+enum cal_steps : uint64_t
 {
-    EXT_ZQCAL         = 0,
-    WR_LEVEL          = 1,
-    DQS_ALIGN         = 2,
-    RDCLK_ALIGN       = 3,
-    READ_CTR          = 4,
-    READ_CTR_2D_VREF  = 5,
-    WRITE_CTR         = 6,
-    WRITE_CTR_2D_VREF = 7,
-    COARSE_WR         = 8,
-    COARSE_RD         = 9,
-    // We can do math here, so this pretties up the code
-    // Note: a function was investigated but abandoned due to unresolvable compile issues
-    // Note: for STEPS_FROM_DQS_ALIGN_TO_AFTER_RD_CTR_LEN - READ_CTR/READ_CTR_2D_VREF are run together pick the larger of the steps
-    STEPS_FROM_RDCLK_ALIGN_TO_AFTER_RD_CTR_VREF_LEN = (READ_CTR_2D_VREF - RDCLK_ALIGN) + 1,
-    STEPS_FROM_WR_CTR_TO_COARSE_RD_LEN = (COARSE_RD - WRITE_CTR) + 1,
+    DRAM_ZQCAL        = 0,  ///< DRAM ZQ Calibration Long
+    DB_ZQCAL          = 1,  ///< (LRDIMM) Data Buffer ZQ Calibration Long
+    MREP              = 2,  ///< (LRDIMM) DRAM Interface MDQ Receive Enable Phase
+    MRD_COARSE        = 3,  ///< (LRDIMM) DRAM-to-DB Read Delay - Coarse
+    MRD_FINE          = 4,  ///< (LRDIMM) DRAM-to-DB Read Delay - Fine
+    WR_LEVEL          = 5,  ///< Write Leveling
+    INITIAL_PAT_WR    = 6,  ///< Initial Pattern Write
+    WR_VREF_LATCH     = 7,  ///< Write VREF Latching
+    DWL               = 8,  ///< (LRDIMM) DRAM Interface Write Leveling
+    MWD_COARSE        = 9,  ///< (LRDIMM) DB-to-DRAM Write Delay - Coarse
+    MWD_FINE          = 10, ///< (LRDIMM) DB-to-DRAM Write Delay - Fine
+    HWL               = 11, ///< (LRDIMM) Host Interface Write Leveling
+    DQS_ALIGN         = 12, ///< DQS (read) alignment
+    RDCLK_ALIGN       = 13, ///< Alignment of the internal SysClk to the Read clock
+    READ_CTR_2D_VREF  = 14, ///< Read Vref
+    READ_CTR          = 15, ///< Read Centering
+    WRITE_CTR_2D_VREF = 16, ///< Write Vref
+    WRITE_CTR         = 17, ///< Write Centering
+    COARSE_WR         = 18, ///< Initial Coarse Pattern Write
+    COARSE_RD         = 19, ///< Coarse Read Centering
+
+    // Not *exactly* a cal step but go w/it
+    RUN_ALL_CAL_STEPS          = 0xFFFFF000,
+    RUN_CAL_SKIP_WR_RD_2D_VREF = 0xFFFD7000,
+
+    DRAM_ZQCAL_TO_WR_LEVEL_LEN = inclusive_range(DRAM_ZQCAL, WR_LEVEL),
+    INITIAL_PAT_WR_TO_RD_CTR_LEN = inclusive_range(INITIAL_PAT_WR, READ_CTR),
+    WR_VREF_TO_COARSE_RD_LEN = inclusive_range(WRITE_CTR_2D_VREF, COARSE_RD),
+    RDCLK_ALIGN_TO_RD_CTR_LEN = inclusive_range(RDCLK_ALIGN, READ_CTR),
 };
 
 // Static consts for DDR4 voltages used in p9_mss_volt
