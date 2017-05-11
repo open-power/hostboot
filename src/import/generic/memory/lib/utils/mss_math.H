@@ -22,3 +22,33 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#ifndef _MSS_MATH_H_
+#define _MSS_MATH_H_
+
+#include <cstdint>
+
+namespace mss
+{
+///
+/// @brief Calculates inclusive range
+/// @tparam T input and output type
+/// @param[in] i_start starting point
+/// @param[in] i_end ending point
+/// @return inclusive range calculation
+///
+// TODO RTC:174277 - create unit test structure for generic/memory
+template<typename T >
+inline constexpr T inclusive_range( const T i_start, const T i_end)
+{
+    return (i_end - i_start) + 1;
+}
+
+}// mss
+
+#endif
