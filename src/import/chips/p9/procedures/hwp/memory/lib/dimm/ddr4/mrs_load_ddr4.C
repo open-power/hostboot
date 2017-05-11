@@ -84,11 +84,7 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
 {
     FAPI_INF("ddr4::mrs_load %s", mss::c_str(i_target));
 
-    fapi2::buffer<uint16_t> l_cal_steps;
-    uint64_t tDLLK = 0;
-    uint8_t l_dimm_type = 0;
-
-    static std::vector< mrs_data<TARGET_TYPE_MCBIST> > l_mrs_data =
+    static const std::vector< mrs_data<TARGET_TYPE_MCBIST> > MRS_DATA =
     {
         // JEDEC ordering of MRS per DDR4 power on sequence
         {  3, mrs03, mrs03_decode, mss::tmrd()  },
@@ -97,62 +93,20 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         {  4, mrs04, mrs04_decode, mss::tmrd()  },
         {  2, mrs02, mrs02_decode, mss::tmrd()  },
         {  1, mrs01, mrs01_decode, mss::tmrd()  },
-
-        // We need to wait either tmod or tmrd before zqcl.
-        {  0, mrs00, mrs00_decode, std::max(mss::tmrd(), mss::tmod(i_target))  },
+        // We need to wait tmod before zqcl, a non-mrs command
+        {  0, mrs00, mrs00_decode, mss::tmod(i_target) },
     };
 
     std::vector< uint64_t > l_ranks;
     FAPI_TRY( mss::rank::ranks(i_target, l_ranks) );
-    FAPI_TRY( mss::tdllk(i_target, tDLLK) );
 
     // Load MRS
-    for (const auto& d : l_mrs_data)
+    for (const auto& d : MRS_DATA)
     {
         for (const auto& r : l_ranks)
         {
             FAPI_TRY( mrs_engine(i_target, d, r, io_inst) );
         }
-    }
-
-    // Load ZQ Cal Long instruction only if the bit in the cal steps says to do so.
-    FAPI_TRY( mss::cal_step_enable(i_target, l_cal_steps) );
-
-    if (l_cal_steps.getBit<EXT_ZQCAL>() != 0)
-    {
-        for (const auto& r : l_ranks)
-        {
-            // Note: this isn't general - assumes Nimbus via MCBIST instruction here BRS
-            ccs::instruction_t<TARGET_TYPE_MCBIST> l_inst_a_side = ccs::zqcl_command<TARGET_TYPE_MCBIST>(i_target, r);
-            ccs::instruction_t<TARGET_TYPE_MCBIST> l_inst_b_side;
-
-            FAPI_TRY( mss::address_mirror(i_target, r, l_inst_a_side) );
-            l_inst_b_side = mss::address_invert(l_inst_a_side);
-
-            l_inst_a_side.arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
-                                               MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(tDLLK + mss::tzqinit());
-            l_inst_b_side.arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
-                                               MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(tDLLK + mss::tzqinit());
-
-            // There's nothing to decode here.
-            FAPI_INF("ZQCL 0x%016llx:0x%016llx %s:rank %d a-side",
-                     l_inst_a_side.arr0, l_inst_a_side.arr1, mss::c_str(i_target), r);
-            FAPI_INF("ZQCL 0x%016llx:0x%016llx %s:rank %d b-side",
-                     l_inst_b_side.arr0, l_inst_b_side.arr1, mss::c_str(i_target), r);
-
-            // Add both to the CCS program
-            io_inst.push_back(l_inst_a_side);
-            io_inst.push_back(l_inst_b_side);
-        }
-    }
-
-    // For LRDIMMs, program BCW to send ZQCal Long command to all databuffers
-    // in broadcast mode
-    FAPI_TRY( eff_dimm_type(i_target, l_dimm_type) );
-
-    if( l_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
-    {
-        FAPI_TRY( set_command_space(i_target, command::ZQCL, io_inst) );
     }
 
 fapi_try_exit:
