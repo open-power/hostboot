@@ -1807,12 +1807,11 @@ fapi2::ReturnCode reset_wr_vref_config0( const fapi2::Target<TARGET_TYPE_MCA>& i
     .insertFromRight<TT::WR_VREF_CONFIG0_NUM_NO_INC_COMP, TT::WR_VREF_CONFIG0_NUM_NO_INC_COMP_LEN>(0b001);
 
     // Whether the 2D VREF is enabled or not varies by the calibration attribute
-    constexpr uint16_t WR_VREF_CAL_ENABLED_BIT = 7;
-    fapi2::buffer<uint16_t> l_cal_steps_enabled;
+    fapi2::buffer<uint32_t> l_cal_steps_enabled;
     FAPI_TRY( mss::cal_step_enable(i_target, l_cal_steps_enabled) );
 
     // adds the information to the buffer
-    l_config0_data.writeBit<TT::WR_VREF_CONFIG0_1D_ONLY_SWITCH>(l_cal_steps_enabled.getBit<WR_VREF_CAL_ENABLED_BIT>());
+    l_config0_data.writeBit<TT::WR_VREF_CONFIG0_1D_ONLY_SWITCH>(!l_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>());
 
     //blast out the scoms
     FAPI_TRY( mss::scom_blastah(i_target, TT::WR_VREF_CONFIG0_REG, l_config0_data) );
