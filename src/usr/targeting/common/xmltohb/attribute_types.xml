@@ -10315,23 +10315,39 @@ firmware notes: Used as override attribute for pstate procedure
 <attribute>
     <id>MSS_CAL_STEP_ENABLE</id>
     <description>
-    A bit map ofvector denoting valid cal steps to run (0 is left most bit)
-    [0] EXT_ZQCAL
-    [1] WR_LEVEL
-    [2] DQS_ALIGN
-    [3] RDCLK_ALIGN
-    [4] READ_CTR
-    [5] READ_CTR_2D_VREF
-    [6] WRITE_CTR
-    [7] WRITE_CTR_2D_VREF
-    [8] COARSE_WR
-    [9] COARSE_RD
-    [10]:[15] Reserved for future use
-    COARSE_WR and COARSE_RD  will be consumed together to form COARSE_LVL.
+        A bit map of vector denoting valid steps to run (0 is left most bit)
+        [0]  DRAM_ZQCAL
+        [1]  DB_ZQCAL (LRDIMM)
+        [2]  MREP (LRDIMM)
+        [3]  MRD - Coarse (LRDIMM)
+        [4]  MRD - Fine (LRDIMM)
+        [5]  WR_LEVEL
+        [6]  INITIAL_PAT_WR
+        [7]  WR_VREF_LATCH
+        [8]  DWL (LRDIMM)
+        [9]  MWD - Coarse (LRDIMM)
+        [10] MWD - Fine (LRDIMM)
+        [11] HWL (LRDIMM)
+        [12] DQS_ALIGN
+        [13] RDCLK_ALIGN
+        [14] READ_CTR_2D_VREF
+        [15] READ_CTR
+        [16] WRITE_CTR_2D_VREF
+        [17] WRITE_CTR
+        [18] COARSE_WR
+        [19] COARSE_RD
+        [20]:[31] Reserved for future use
+
+        COARSE_WR and COARSE_RD  will be consumed together to form COARSE_LVL.
+
+        WRITE_CTR will be run, even if only WRITE_CTR_2D_VREF is enabled,
+        as the WR 2D VREF HW cal depends upon WRITE_CTR 1D to function.
+
+        Note: LRDIMM steps will only be enabled for LRDIMMs and won't run on RDIMMs.
     </description>
     <simpleType>
-        <uint16_t>
-        </uint16_t>
+        <uint32_t>
+        </uint32_t>
         <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
