@@ -66,6 +66,7 @@
 #include <sbeio/sbeioif.H>
 #include <sbeio/sbe_psudd.H>
 #include <sbeio/runtime/sbe_msg_passing.H>
+#include <kernel/bltohbdatamgr.H>
 
 
 namespace RUNTIME
@@ -608,6 +609,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             // -----HBRT Image-----------
             // -----SBE Comm---------
             // -----SBE FFDC---------
+            // -----Secureboot cryptographic algorithms code---------
 
             // First opal entries are for the HOMERs
             uint64_t l_homerAddr = l_topMemAddr;
@@ -1019,6 +1021,57 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                 break;
             }
         }
+
+        // -- Secureboot cryptographic algorithms code
+        //    Only add if SecureROM is available and valid.
+        if (g_BlToHbDataManager.isValid())
+        {
+            size_t l_secureRomSize = g_BlToHbDataManager.getSecureRomSize();
+            // Minimum 64K size for Opal
+            size_t l_secRomSizeAligned = ALIGN_X(l_secureRomSize, 64*KILOBYTE);
+
+            uint64_t l_secureRomAddr = 0x0;
+            if(TARGETING::is_phyp_load())
+            {
+                l_secureRomAddr = l_prevDataAddr + l_prevDataSize;
+            }
+            else if(TARGETING::is_sapphire_load())
+            {
+                l_secureRomAddr = l_prevDataAddr - l_secRomSizeAligned;
+            }
+            assert(l_secureRomAddr>0, "populate_HbRsvMem: SecureROM address cannot be 0");
+
+            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_SECUREBOOT,
+                                          i_nodeId,
+                                          l_secureRomAddr,
+                                          l_secRomSizeAligned,
+                                          HBRT_RSVD_MEM__SECUREBOOT);
+            if(l_elog)
+            {
+                break;
+            }
+
+            l_prevDataAddr = l_secureRomAddr;
+            l_prevDataSize = l_secRomSizeAligned;
+
+            // Load the Cached SecureROM into memory
+            l_elog = mapPhysAddr(l_secureRomAddr, l_secureRomSize, l_vAddr);
+            if(l_elog)
+            {
+                break;
+            }
+
+            memcpy(reinterpret_cast<void*>(l_vAddr),
+                   g_BlToHbDataManager.getSecureRom(),
+                   l_secureRomSize);
+
+            l_elog = unmapVirtAddr(l_vAddr);
+            if(l_elog)
+            {
+                break;
+            }
+        }
+
     } while(0);
 
     TRACFCOMP( g_trac_runtime, EXIT_MRK"populate_HbRsvMem> l_elog=%.8X", ERRL_GETRC_SAFE(l_elog) );
@@ -1152,6 +1205,10 @@ errlHndl_t populate_TpmInfoByNode()
     // as we fill the section
     uint32_t l_currOffset = 0;
 
+    ////////////////////////////////////////////////////////////////////////////
+    // Section Node Secure and Trusted boot Related Data
+    ////////////////////////////////////////////////////////////////////////////
+
     auto const l_hdatTpmData
                     = reinterpret_cast<HDAT::hdatTpmData_t*>(l_baseAddr);
 
@@ -1187,6 +1244,10 @@ errlHndl_t populate_TpmInfoByNode()
     // go past the end of the first struct to get to the next one
     l_currOffset += sizeof(*l_hdatTpmData);
 
+    ////////////////////////////////////////////////////////////////////////////
+    // Section Secure Boot and Trusted boot info array
+    ////////////////////////////////////////////////////////////////////////////
+
     // populate first part of pointer pair for secure boot TPM info
     l_hdatTpmData->hdatSbTpmInfo.hdatOffset = l_currOffset;
 
@@ -1214,6 +1275,10 @@ errlHndl_t populate_TpmInfoByNode()
 
     // advance current offset to after the Secure Boot TPM info array header
     l_currOffset += sizeof(*l_hdatSbTpmInfo);
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Section Secure Boot and TPM Instance Info
+    ////////////////////////////////////////////////////////////////////////////
 
     // fill in the values for each Secure Boot TPM Instance Info in the array
     for (auto pTpm : tpmList)
@@ -1266,6 +1331,10 @@ errlHndl_t populate_TpmInfoByNode()
         // advance the current offset to account for this tpm instance info
         l_currOffset += sizeof(*l_tpmInstInfo);
 
+        ////////////////////////////////////////////////////////////////////////
+        // Section Secure Boot TPM Event Log
+        ////////////////////////////////////////////////////////////////////////
+
         // use the current offset for the beginning of the SRTM event log
         l_tpmInstInfo->hdatTpmSrtmEventLogOffset = sizeof(*l_tpmInstInfo);
 
@@ -1316,6 +1385,10 @@ errlHndl_t populate_TpmInfoByNode()
 
     // populate second part of pointer pair for secure boot TPM info
     l_hdatTpmData->hdatSbTpmInfo.hdatSize = l_currOffset - l_sbTpmInfoStart;
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Section User physical interaction mechanism information
+    ////////////////////////////////////////////////////////////////////////////
 
     // the current offset now corresponds to the physical interaction mechanism
     // info array header
@@ -1630,10 +1703,79 @@ errlHndl_t populate_TpmInfoByNode()
 
     // advance the current offset to account for the physical
     // interaction mechanism info struct
-    l_currOffset =+ sizeof(*l_physInter);
+    l_currOffset += sizeof(*l_physInter);
 
     // populate the second part of the pointer pair from earlier
     l_hdatTpmData->hdatPhysInter.hdatSize = l_currOffset - l_physInterStart;
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Section Hash and Verification Function offsets array
+    ////////////////////////////////////////////////////////////////////////////
+
+    // Only add if SecureROM is available and valid.
+    if (g_BlToHbDataManager.isValid())
+    {
+        // populate the first part of pointer pair from earlier to point here
+        l_hdatTpmData->hdatHashVerifyFunc.hdatOffset = l_currOffset;
+
+        // the following will be used to calculate the second part of pointer pair
+        auto l_hdatHashVerifyStart = l_currOffset;
+
+        // the current offset now corresponds to the hash and verification function
+        // info array header
+        auto const l_hdatHashVerifyFunc = reinterpret_cast<
+                            HDAT::hdatHDIFDataArray_t*>(l_baseAddr + l_currOffset);
+
+        // fill in the values for the Secure Boot TPM Info Array Header
+        l_hdatHashVerifyFunc->hdatOffset = sizeof(*l_hdatHashVerifyFunc);
+
+        // Assert the number of function types does not exceed the HDAT spec
+        assert(SecRomFuncTypes.size() <= SB_FUNC_TYPES::MAX_TYPES, "Number entries per node exceeds HDAT spec");
+        l_hdatHashVerifyFunc->hdatArrayCnt = SecRomFuncTypes.size();
+        l_hdatHashVerifyFunc->hdatAllocSize = sizeof(HDAT::hdatHashVerifyFunc_t);
+        l_hdatHashVerifyFunc->hdatActSize = sizeof(HDAT::hdatHashVerifyFunc_t);
+
+        // advance current offset to after the Hash and Verification Function
+        // offsets array header
+        l_currOffset += sizeof(*l_hdatHashVerifyFunc);
+
+        // Iterate through all function types available and obtain their current
+        // version and offset
+        for (auto const &funcType : SecRomFuncTypes)
+        {
+            auto l_hdatHashVerifyInfo =
+                reinterpret_cast<HDAT::hdatHashVerifyFunc_t*>(l_baseAddr +
+                                                              l_currOffset);
+
+            // Set Function type
+            l_hdatHashVerifyInfo->sbFuncType = funcType;
+
+            // Get version of function currently selected
+            l_hdatHashVerifyInfo->sbFuncVer =
+                                         SECUREBOOT::getSecRomFuncVersion(funcType);
+
+            // Set DbobID
+            l_hdatHashVerifyInfo->dbobId = l_node->getAttr<
+                                                      TARGETING::ATTR_ORDINAL_ID>();
+
+            // Obtain function offset based on the current version
+            l_hdatHashVerifyInfo->sbFuncOffset =
+                                         SECUREBOOT::getSecRomFuncOffset(funcType);
+
+            // advance the current offset and instance pointer
+            l_currOffset += sizeof(*l_hdatHashVerifyInfo);
+        }
+
+        // populate the second part of the pointer pair from earlier
+        l_hdatTpmData->hdatHashVerifyFunc.hdatSize = l_currOffset -
+                                                     l_hdatHashVerifyStart;
+    }
+    else
+    {
+        // SecureROM not available or valid set pointer pair to 0's
+        l_hdatTpmData->hdatHashVerifyFunc.hdatOffset = 0;
+        l_hdatTpmData->hdatHashVerifyFunc.hdatSize = 0;
+    }
 
     // set the total structure length to the current offset
     l_hdatTpmData->hdatHdr.hdatSize = l_currOffset;

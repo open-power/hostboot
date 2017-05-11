@@ -208,7 +208,7 @@ enum hdatMsVpdRhbAddrRangeType : uint8_t
     RHB_TYPE_PRIMARY         = 0,
     RHB_TYPE_HBRT            = 1,
     RHB_TYPE_VERIFIED_LIDS   = 2,
-    RHB_TYPE_TPM_LOG         = 3,
+    RHB_TYPE_SECUREBOOT      = 3,
     RHB_TYPE_HOMER_OCC       = 4,
 
     RHB_TYPE_INVALID         = 0xFF

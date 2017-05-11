@@ -128,6 +128,7 @@ enum MemoryError_t
 #define HBRT_RSVD_MEM__OCC_COMMON         "ibm,occ-common-area"
 #define HBRT_RSVD_MEM__SBE_COMM           "ibm,sbe-comm"
 #define HBRT_RSVD_MEM__SBE_FFDC           "ibm,sbe-ffdc"
+#define HBRT_RSVD_MEM__SECUREBOOT         "ibm,secure-crypt-algo-code"
 
 
 /** @typedef hostInterfaces_t
