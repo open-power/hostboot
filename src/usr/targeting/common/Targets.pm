@@ -1258,6 +1258,13 @@ sub setFsiAttributes
 
 }
 
+## remove target
+sub removeTarget
+{
+    my $self   = shift;
+    my $target = shift;
+    delete $self->{data}->{TARGETS}->{$target};
+}
 
 ## returns pointer to target from target name
 sub getTarget
@@ -1976,6 +1983,10 @@ C</sys-0/node-0/motherboard-0/dimm-0>
 
 Reads ServerWiz2 XML C<FILENAME> and stores into a data structure for
 manipulation and printing.
+
+=item removeTarget(C<TARGET_STRING>)
+
+Removes the given target from the data structure (C<TARGET>)
 
 =item getTarget(C<TARGET_STRING>)
 

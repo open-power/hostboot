@@ -506,6 +506,10 @@ sub processProcessor
         {
             processXbus($targetObj, $child);
         }
+        elsif ($child_type eq "OBUS")
+        {
+            processObus($targetObj, $child);
+        }
         elsif ($child_type eq "FSIM" || $child_type eq "FSICM")
         {
             processFsi($targetObj, $child, $target);
@@ -886,6 +890,62 @@ sub processMcbist
 #         $i_base+$i_node_offset*$group+
 #         $i_proc_offset*$proc+$i_offset*$mcs)->as_hex(),2));
 #    $targetObj->setAttribute($target, "IBSCOM_MCS_BASE_ADDR", $mcsStr);
+}
+#--------------------------------------------------
+## OBUS
+##
+## Finds OBUS connections and copy the slot position to obus brick target
+
+sub processObus
+{
+    my $targetObj = shift;
+    my $target    = shift;
+
+        my $obus = $targetObj->findConnections($target,"OBUS", "");
+
+        if ($obus eq "")
+        {
+            #No connections mean, we need to remove all the children and the obus
+            $targetObj->log($target,"no bus connection found");
+            $targetObj->log($target,"removing target and it's children");
+            foreach my $obrick (@{ $targetObj->getTargetChildren($target) })
+            {
+                $targetObj->removeTarget($obrick);
+            }
+            $targetObj->removeTarget($target);
+        }
+        else
+        {
+            #Loop through all the bricks and figure out if it connected to an
+            #obusslot. If it is connected, then store the slot information (position)
+            #in the obus_brick target as OBUS_SLOT_INDEX. If it is not connected,
+            #remove obus brick target.
+            my $match = 0;
+            foreach my $obrick (@{ $targetObj->getTargetChildren($target) })
+            {
+                 foreach my $obrick_conn (@{$obus->{CONN}})
+                 {
+                    $match = ($obrick_conn->{SOURCE} eq $obrick);
+                    if ($match eq 1)
+                    {
+                        my $obus_slot    = $targetObj->getTargetParent(
+                            $obrick_conn->{DEST_PARENT});
+                        my $obus_slot_pos = $targetObj->getAttribute(
+                            $obus_slot, "POSITION");
+                        $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX",
+                            $obus_slot_pos);
+                        last;
+                    }
+                 }
+
+                 #This brick is not connected to anything, remove
+                 if ($match eq 0)
+                 {
+                    $targetObj->log($target,"no bus conn, removing target");
+                    $targetObj->removeTarget($obrick);
+                 }
+            }
+        }
 }
 #--------------------------------------------------
 ## XBUS

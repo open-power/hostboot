@@ -21993,6 +21993,28 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+  <id>OBUS_SLOT_INDEX</id>
+  <description>
+      Position of the obus slot that the Obus brick is connected to
+      (represented in decimal). There is only one slot that a given
+      brick connects to and there are only 6 slots per proc,
+      so, we just need a single uint8_t representing the position
+      of the slot.
+      Provided by the MRW.
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_OBUS_SLOT_INDEX</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
 <enumerationType>
     <id>PROC_FABRIC_SMP_OPTICS_MODE</id>
     <description>
