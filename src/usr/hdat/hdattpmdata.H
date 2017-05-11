@@ -39,6 +39,7 @@
 #include "hdatutil.H"
 #include <hdat/hdat.H>
 #include <sys/misc.h>
+#include <securerom/ROM.H>
 
 #define TPM_SRTM_EVENT_LOG_MAX (64 * KILOBYTE)
 
@@ -54,7 +55,7 @@ namespace HDAT
  */
 enum {
     TpmDataInstance = 0,
-    TpmDataVersion = 0x10,
+    TpmDataVersion = 0x11,
     TpmDataHdrSize = 0x20,
     TpmDataPtrOffset = 0x20,
     TpmDataPtrCnt = 1,
@@ -80,7 +81,8 @@ struct hdatTpmData_t
     hdatHDIF_t hdatHdr;
     hdatHDIFDataHdr_t hdatSbTpmInfo; // Pointer pair to secure boot TPM info
     hdatHDIFDataHdr_t hdatPhysInter; // Physical interaction mechanism details
-    uint8_t hdatReserved1[16]; // Padding for alignment and growth/compatibility
+    hdatHDIFDataHdr_t hdatHashVerifyFunc; // Hash and Verification functions
+    uint8_t hdatReserved1[8]; // Padding for alignment and growth/compatibility
 } __attribute__ ((packed));
 
 /**
@@ -129,6 +131,17 @@ struct hdatPhysInterMechInfo_t
     i2cLinkId_t i2cLinkIdPhysicalPresence;
 
 } __attribute__ ((packed));
+
+/**
+ * @brief Structure definition for HDAT Hash and Verification Function instances
+ */
+struct hdatHashVerifyFunc_t
+{
+    sbFuncType_t sbFuncType; // Type of secureboot function
+    sbFuncVer_t sbFuncVer; // Version of verify function
+    uint32_t dbobId; // Drawer/Book/Octant/Blade ID
+    uint32_t sbFuncOffset; // Offset of function within SecureROM
+};
 
 extern const char g_hdatTpmDataEyeCatch[];
 

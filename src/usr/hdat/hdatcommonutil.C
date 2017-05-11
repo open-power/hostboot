@@ -30,6 +30,7 @@
 #include <targeting/common/util.H>
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
+#include <securerom/ROM.H>
 
 namespace HDAT
 {
@@ -97,6 +98,12 @@ uint32_t hdatTpmDataCalcMaxSize()
     // account for User physical interaction mechanism info struct
     // and Host I2C device information pointers
     l_size += sizeof(hdatPhysInterMechInfo_t);
+
+    // account for the size of the Hash and Verfication Function array header
+    l_size += sizeof(hdatHDIFDataArray_t);
+
+    // account for each element of the Hash and Verfication Function array
+    l_size += sizeof(hdatHashVerifyFunc_t) * SecRomFuncTypes.size();
 
     // Align size value to match actual allocated size, because we also want to
     // zero the padded part, and thus simplify multinode support going forward.
