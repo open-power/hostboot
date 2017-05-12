@@ -42,6 +42,7 @@
 #include <sbeio/sbe_ffdc_parser.H>
 #include <arch/ppc.H>
 #include <kernel/pagemgr.H>
+#include <sbeio/sbeioif.H>
 
 trace_desc_t* g_trac_sbeio;
 TRAC_INIT(&g_trac_sbeio, SBEIO_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -69,31 +70,6 @@ SbePsu & SbePsu::getTheInstance()
  **/
 SbePsu::SbePsu()
 {
-    iv_ffdcPackageBuffer = PageManager::allocatePage(ffdcPackageSize, true);
-    initFFDCPackageBuffer();
-
-    /*
-    * TODO RTC 164405
-    *
-    * call performPsuChipOp to tell SBE where to write when SBE is ready
-    *
-    * psuCommand   l_psuCommand(
-    *         SBE_REQUIRE_RESPONSE,
-    *         SBE_PSU_GENERIC_MESSAGE,
-    *         SBE_CMD_CONTROL_SYSTEM_CONFIG);
-    *
-    * psuResponse  l_psuResponse;
-    *
-    * // Create FFDCPackage struct in psuCommand union
-    * uint64_t cd4_FFDCPackage_MbxReg2reserved = &iv_ffdcPackageBuffer;
-    *
-    * performPsuChipOp(&l_psuCommand,
-    *        &l_psuResponse,
-    *        MAX_PSU_SHORT_TIMEOUT_NS,
-    *        SBE_SYSTEM_CONFIG_REQ_USED_REGS,
-    *        SBE_SYSTEM_CONFIG_RSP_USED_REGS);
-    *
-    */
 }
 
 /**
@@ -101,9 +77,14 @@ SbePsu::SbePsu()
  **/
 SbePsu::~SbePsu()
 {
-    if(iv_ffdcPackageBuffer != NULL)
+    std::map<TARGETING::Target *, void *>::iterator l_iter;
+    for(l_iter = iv_ffdcPackageBuffer.begin();
+        l_iter != iv_ffdcPackageBuffer.end(); l_iter++)
     {
-        PageManager::freePage(iv_ffdcPackageBuffer);
+        if(l_iter->second != NULL)
+        {
+            PageManager::freePage(l_iter->second);
+        }
     }
 }
 
@@ -129,6 +110,19 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target * i_target,
     static mutex_t l_psuOpMux = MUTEX_INITIALIZER;
 
     SBE_TRACD(ENTER_MRK "performPsuChipOp");
+
+    // If not a SBE_PSU_SET_FFDC_ADDRESS command, we allocate an FFDC buffer
+    // and set FFDC adress
+    if(i_pPsuRequest->command != SBE_PSU_SET_FFDC_ADDRESS)
+    {
+        errl = allocateFFDCBuffer(i_target);
+    }
+    if (errl)
+    {
+        SBE_TRACF(ERR_MRK"performPsuChipOp::"
+            " setFFDC address returned an error");
+        return errl;
+    }
 
     //Serialize access to PSU
     mutex_lock(&l_psuOpMux);
@@ -165,9 +159,7 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target * i_target,
 
     mutex_unlock(&l_psuOpMux);
 
-    //@todo-RTC:144313-Remove when we have our FFDC in place
-    //Temporarily crash with a known RC so that HWSV collects the SBE FFDC
-    if( errl && (SBE_COMP_ID == errl->moduleId()) )
+    if( errl && (SBEIO_PSU == errl->moduleId()) )
     {
         SBE_TRACF( "Forcing shutdown for FSP to collect FFDC" );
 
@@ -175,7 +167,7 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target * i_target,
         uint32_t orig_plid = errl->plid();
         uint32_t orig_rc = errl->reasonCode();
         uint32_t orig_mod = errl->moduleId();
-        ERRORLOG::errlCommit( errl, SBE_COMP_ID );
+        ERRORLOG::errlCommit( errl, SBEIO_COMP_ID );
         /*@
          * @errortype
          * @moduleid     SBEIO_PSU
@@ -256,18 +248,23 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
                                  i_pPsuRequest->mbxReg0,
                                  l_data);
 
-            SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
-            l_ffdc_parser->parseFFDCData(iv_ffdcPackageBuffer);
-            uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
-            uint8_t i;
-            for(i = 0; i < l_pkgs; i++)
+            void * l_ffdcPkg = findFFDCBufferByTarget(i_target);
+            if(l_ffdcPkg != NULL)
             {
-                errl->addFFDC( SBE_COMP_ID,
-                           l_ffdc_parser->getFFDCPackage(i),
-                           l_ffdc_parser->getPackageLength(i),
-                           0,                           // version
-                           ERRORLOG::ERRL_UDT_NOFORMAT, // subversion
-                           false );
+                SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
+                l_ffdc_parser->parseFFDCData(l_ffdcPkg);
+                uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
+                uint8_t i;
+                for(i = 0; i < l_pkgs; i++)
+                {
+                    errl->addFFDC( SBEIO_COMP_ID,
+                               l_ffdc_parser->getFFDCPackage(i),
+                               l_ffdc_parser->getPackageLength(i),
+                               0,
+                               SBEIO_UDT_PARAMETERS,
+                               false );
+                }
+                delete l_ffdc_parser;
             }
 
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -277,7 +274,6 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
                   i_target->getAttr<TARGETING::ATTR_POSITION>(),
                   SBEIO_PSU_NOT_READY);
 
-            delete l_ffdc_parser;
             break; // return with error
         }
 
@@ -403,18 +399,23 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
                                  i_pPsuRequest->mbxReg0,
                                  o_pPsuResponse->mbxReg4);
 
-            SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
-            l_ffdc_parser->parseFFDCData(iv_ffdcPackageBuffer);
-            uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
-            uint8_t i;
-            for(i = 0; i < l_pkgs; i++)
+            void * l_ffdcPkg = findFFDCBufferByTarget(i_target);
+            if(l_ffdcPkg != NULL)
             {
-                errl->addFFDC( SBE_COMP_ID,
-                           l_ffdc_parser->getFFDCPackage(i),
-                           l_ffdc_parser->getPackageLength(i),
-                           0,                           // version
-                           ERRORLOG::ERRL_UDT_NOFORMAT, // subversion
-                           false );
+                SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
+                l_ffdc_parser->parseFFDCData(l_ffdcPkg);
+                uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
+                uint8_t i;
+                for(i = 0; i < l_pkgs; i++)
+                {
+                    errl->addFFDC( SBEIO_COMP_ID,
+                               l_ffdc_parser->getFFDCPackage(i),
+                               l_ffdc_parser->getPackageLength(i),
+                               0,
+                               SBEIO_UDT_PARAMETERS,
+                               false );
+                }
+                delete l_ffdc_parser;
             }
 
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -424,7 +425,6 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
                   i_target->getAttr<TARGETING::ATTR_POSITION>(),
                   SBEIO_PSU_RESPONSE_ERROR);
 
-            delete l_ffdc_parser;
             break;
         }
 
@@ -483,18 +483,23 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                                  i_timeout,
                                  0);
 
-            SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
-            l_ffdc_parser->parseFFDCData(iv_ffdcPackageBuffer);
-            uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
-            uint8_t i;
-            for(i = 0; i < l_pkgs; i++)
+            void * l_ffdcPkg = findFFDCBufferByTarget(i_target);
+            if(l_ffdcPkg != NULL)
             {
-                errl->addFFDC( SBE_COMP_ID,
-                           l_ffdc_parser->getFFDCPackage(i),
-                           l_ffdc_parser->getPackageLength(i),
-                           0,                           // version
-                           ERRORLOG::ERRL_UDT_NOFORMAT, // subversion
-                           false );
+                SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
+                l_ffdc_parser->parseFFDCData(l_ffdcPkg);
+                uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
+                uint8_t i;
+                for(i = 0; i < l_pkgs; i++)
+                {
+                    errl->addFFDC( SBEIO_COMP_ID,
+                               l_ffdc_parser->getFFDCPackage(i),
+                               l_ffdc_parser->getPackageLength(i),
+                               0,
+                               SBEIO_UDT_PARAMETERS,
+                               false );
+                }
+                delete l_ffdc_parser;
             }
 
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -504,7 +509,6 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                   i_target->getAttr<TARGETING::ATTR_POSITION>(),
                   SBEIO_PSU_RESPONSE_TIMEOUT);
 
-            delete l_ffdc_parser;
             break;
         }
 
@@ -576,30 +580,67 @@ errlHndl_t SbePsu::writeScom(TARGETING::Target * i_target,
 }
 
 /**
- * @brief zero out FFDC Package Buffer
+ * @brief allocates buffer and sets ffdc address for the proc
  */
 
-void SbePsu::initFFDCPackageBuffer()
+errlHndl_t SbePsu::allocateFFDCBuffer(TARGETING::Target * i_target)
 {
-    memset(iv_ffdcPackageBuffer, 0x00, PAGESIZE * ffdcPackageSize);
+
+    static mutex_t l_alloMux = MUTEX_INITIALIZER;
+
+    uint32_t l_bufSize = getSbeFFDCBufferSize();
+    errlHndl_t errl = NULL;
+
+    uint32_t l_huid = TARGETING::get_huid(i_target);
+
+    // Check to see if the buffer has been allocated before allocating
+    // and setting FFDC address
+    mutex_lock(&l_alloMux);
+
+    if(iv_ffdcPackageBuffer.find(i_target) == iv_ffdcPackageBuffer.end())
+    {
+        void * l_ffdcPtr = PageManager::allocatePage(ffdcPackageSize, true);
+        memset(l_ffdcPtr, 0x00, l_bufSize);
+
+        errl = sendSetFFDCAddr(l_bufSize,
+                          0,
+                          mm_virt_to_phys(l_ffdcPtr),
+                          0,
+                          i_target);
+
+        if(errl)
+        {
+            PageManager::freePage(l_ffdcPtr);
+            SBE_TRACF(ERR_MRK"Error setting FFDC address for proc huid=0x%08lx", l_huid);
+        }
+        else
+        {
+            iv_ffdcPackageBuffer.insert(std::pair<TARGETING::Target *, void *>
+                          (i_target, l_ffdcPtr));
+            SBE_TRACD("Allocated FFDC buffer for proc huid=0x%08lx", l_huid);
+        }
+    }
+
+    mutex_unlock(&l_alloMux);
+    return errl;
 }
 
 /**
- * @brief populate FFDC package buffer
- * @param[in]  i_data        FFDC error data
- * @param[in]  i_len         data buffer len to copy
+ * @brief find allocated FFDC buffer by the target
  */
-void SbePsu::writeFFDCBuffer( void * i_data, uint8_t i_len) {
-    if(i_len <= PAGESIZE * ffdcPackageSize)
+void * SbePsu::findFFDCBufferByTarget(TARGETING::Target * i_target)
+{
+    void * ffdcBuffer = NULL;
+
+    std::map<TARGETING::Target *, void *>::iterator l_iter =
+        iv_ffdcPackageBuffer.find(i_target);
+
+    if(l_iter != iv_ffdcPackageBuffer.end())
     {
-        initFFDCPackageBuffer();
-        memcpy(iv_ffdcPackageBuffer, i_data, i_len);
+         ffdcBuffer = l_iter->second;
     }
-    else
-    {
-        SBE_TRACF(ERR_MRK"writeFFDCBuffer: Buffer size too large: %d",
-                      i_len);
-    }
+
+    return ffdcBuffer;
 }
 
 } //end of namespace SBEIO
