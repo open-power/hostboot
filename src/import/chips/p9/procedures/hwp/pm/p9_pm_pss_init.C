@@ -25,12 +25,12 @@
 /// @file p9_pm_pss_init.C
 /// @brief Initializes P2S and HWC logic
 ///
-// *HWP HWP Owner: Amit Kumar <akumar3@us.ibm.com>
-// *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
-// *HWP Team: PM
-// *HWP Level: 2
-// *HWP Consumed by: FSP:HS
+// *HWP HW Owner        :   Greg Still <stillgs@us.ibm.com>
+// *HWP Backup Owner    :   Prasad BG Ranganath <prasadbgr@in.ibm.com>
+// *HWP FW Owner        :   Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team            :   PM
+// *HWP Level           :   3
+// *HWP Consumed by     :   HS
 
 // -----------------------------------------------------------------------------
 // Includes
@@ -73,7 +73,7 @@ fapi2::ReturnCode p9_pm_pss_init(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const p9pm::PM_FLOW_MODE i_mode)
 {
-    FAPI_IMP("p9_pm_pss_init Enter");
+    FAPI_IMP(">> p9_pm_pss_init");
 
     // Initialization:  perform order or dynamic operations to initialize
     // the PMC using necessary Platform or Feature attributes.
@@ -88,19 +88,18 @@ fapi2::ReturnCode p9_pm_pss_init(
     }
 
 fapi_try_exit:
-    FAPI_IMP("p9_pm_pss_init Exit");
+    FAPI_IMP("<< p9_pm_pss_init");
     return fapi2::current_err;
 }
 
 fapi2::ReturnCode pm_pss_init(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    FAPI_IMP("pm_pss_init Enter");
+    FAPI_IMP(">> pm_pss_init Enter");
 
     fapi2::buffer<uint64_t> l_data64;
 
-    const uint32_t l_default_attr_proc_pss_init_nest_frequency = 2400;
-    const uint8_t  l_default_apss_chip_select = 1;
+    const uint8_t  l_default_apss_chip_select = 0;
     const uint8_t  l_default_spipss_frame_size = 0x20;
     const uint8_t  l_default_spipss_in_delay = 0;
     const uint8_t  l_default_spipss_clock_polarity = 0;
@@ -125,9 +124,9 @@ fapi2::ReturnCode pm_pss_init(
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sysTarget =
         i_target.getParent<fapi2::TARGET_TYPE_SYSTEM>();
 
-    GETATTR_DEFAULT(fapi2::ATTR_FREQ_PB_MHZ, "ATTR_FREQ_PB_MHZ", l_sysTarget,
-                    l_attr_proc_pss_init_nest_frequency,
-                    l_default_attr_proc_pss_init_nest_frequency);
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, l_sysTarget,
+                           l_attr_proc_pss_init_nest_frequency),
+             "Error: Could not fetch the system Frequency")
 
     GETATTR_DEFAULT(fapi2::ATTR_PM_APSS_CHIP_SELECT,
                     "ATTR_PM_APSS_CHIP_SELECT",
@@ -281,6 +280,7 @@ fapi2::ReturnCode pm_pss_init(
              "Error: Failed to set 100ns clear SPI PSS P2S WDATA");
 
 fapi_try_exit:
+    FAPI_IMP("<< pm_pss_init");
     return fapi2::current_err;
 }
 
@@ -288,7 +288,7 @@ fapi_try_exit:
 fapi2::ReturnCode pm_pss_reset(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    FAPI_IMP("pm_pss_reset Enter");
+    FAPI_IMP(">> pm_pss_reset");
 
     fapi2::buffer<uint64_t> l_data64;
     uint32_t l_pollcount = 0;
@@ -319,7 +319,8 @@ fapi2::ReturnCode pm_pss_reset(
         // ADC error
         FAPI_ASSERT(l_data64.getBit<7>() != 1,
                     fapi2::PM_PSS_ADC_ERROR()
-                    .set_CHIP(i_target),
+                    .set_CHIP(i_target)
+                    .set_POLLCOUNT(l_pollcount),
                     "Error while sending the frames from ADC to APSS device");
 
         FAPI_DBG("Delay before next poll");
@@ -361,7 +362,8 @@ fapi2::ReturnCode pm_pss_reset(
         // P2S error
         FAPI_ASSERT(l_data64.getBit<7>() != 1,
                     fapi2::PM_PSS_P2S_ERROR()
-                    .set_CHIP(i_target),
+                    .set_CHIP(i_target)
+                    .set_POLLCOUNT(l_pollcount),
                     "Error while sending the frames from P2S to APSS device");
 
         FAPI_DBG("Delay before next poll");
@@ -404,5 +406,6 @@ fapi2::ReturnCode pm_pss_reset(
              "Error: Could not clear the P2S reset register");
 
 fapi_try_exit:
+    FAPI_IMP("<< pm_pss_reset");
     return fapi2::current_err;
 }
