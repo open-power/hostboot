@@ -4175,7 +4175,7 @@ group gN3_CHIPLET_FIR filter singlebit
     /** N3_CHIPLET_FIR[9]
      *  Attention from ENHCAFIR
      */
-    (rN3_CHIPLET_FIR, bit(9)) ? analyze(gENHCAFIR);
+    (rN3_CHIPLET_FIR, bit(9)) ? analyze(gENHCAFIR); # DD1.0 only
 
     /** N3_CHIPLET_FIR[10]
      *  Attention from NPU0FIR
@@ -4231,6 +4231,11 @@ group gN3_CHIPLET_FIR filter singlebit
      *  Attention from PBAMFIR
      */
     (rN3_CHIPLET_FIR, bit(20)) ? analyze(gPBAMFIR);
+
+    /** N3_CHIPLET_FIR[22]
+     *  Attention from ENHCAFIR
+     */
+    (rN3_CHIPLET_FIR, bit(22)) ? analyze(gENHCAFIR); # DD2.0+
 
 };
 
