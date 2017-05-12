@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -84,7 +84,7 @@ foreach my $i (0 .. $#tgt_files)
     print "Loading TGT XML: $tgt_file in $i\n";
     $tgt_xmls[$i] =
            XMLin($tgt_file,
-                forcearray => ['attribute', 'targetType', 'field']);
+                forcearray => ['attribute', 'targetType', 'field', 'targetTypeExtension']);
 }
 
 #Load MRW XML
@@ -137,7 +137,21 @@ sub findAttribute
     foreach my $i (0 .. $#tgt_xmls)
     {
         my $tgt_xml = $tgt_xmls[$i];
-        if (defined $tgt_xml->{targetType}{$tgt}{attribute}{$attr})
+        my $targetType;
+        if (defined $tgt_xml->{targetType})
+        {
+            $targetType = "targetType";
+        }
+        elsif (defined $tgt_xml->{targetTypeExtension})
+        {
+            $targetType = "targetTypeExtension";
+        }
+        else
+        {
+            next;
+        }
+
+        if (defined $tgt_xml->{$targetType}{$tgt}{attribute}{$attr})
         {
             #attribute found under the passed in target in this xml
             return 1;
@@ -147,7 +161,7 @@ sub findAttribute
             my %tgt_hash = %$tgt_xml;
             #if not found in this target, look under parent target
             #some targets are inherrited
-            if (lookAtParentAttributes (\%tgt_hash, $tgt, $attr) eq 1)
+            if (lookAtParentAttributes (\%tgt_hash, $tgt, $attr, $targetType) eq 1)
             {
                 return 1;
             }
@@ -165,21 +179,21 @@ sub findAttribute
 # retval: true == attr found, false == attr not found
 sub lookAtParentAttributes
 {
-    my ($tgt_xml, $tgt, $attr) = @_;
+    my ($tgt_xml, $tgt, $attr, $targetType) = @_;
 
-    my $parent = $tgt_xml->{targetType}{$tgt}{parent};
+    my $parent = $tgt_xml->{$targetType}{$tgt}{parent};
     if ($parent eq "")
     {
         return 0;
     }
     elsif ($parent eq "base")
     {
-         return (defined  $tgt_xml->{targetType}{$parent}{attribute}{$attr}) ?
+         return (defined  $tgt_xml->{$targetType}{$parent}{attribute}{$attr}) ?
                         1 : 0;
     }
     else
     {
-        if (defined  $tgt_xml->{targetType}{$parent}{attribute}{$attr})
+        if (defined  $tgt_xml->{$targetType}{$parent}{attribute}{$attr})
         {
             return 1;
         }
@@ -191,7 +205,7 @@ sub lookAtParentAttributes
             #We will look until we find the attribute, or there is no parent
             #(parent == "") or we have reached the "base" target
             #"base" is the topmost target defined in target_type xml
-            return lookAtParentAttributes(\%tgt_hash, $parent, $attr);
+            return lookAtParentAttributes(\%tgt_hash, $parent, $attr, $targetType);
         }
     }
 }

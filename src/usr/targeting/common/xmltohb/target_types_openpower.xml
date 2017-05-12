@@ -103,6 +103,11 @@
 </targetTypeExtension>
 
 <targetTypeExtension>
+    <id>unit-occ-power9</id>
+    <attribute><id>IPMI_SENSORS</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
     <id>occ</id>
     <attribute><id>IPMI_SENSORS</id></attribute>
 </targetTypeExtension>
