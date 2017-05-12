@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,23 +26,13 @@
 /// @file: p9_pm_pba_init.H
 /// @brief: Initialize PBA registers for modes PM_INIT, PM_RESET
 ///
-// *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
-// *HWP Team: PM
-// *HWP Level: 1
-// *HWP Consumed by: HS
-//
+// *HWP HWP Owner           :   Greg Still  <stillgs@us.ibm.com>
+// *HWP Backup Owner        :   Prasad BG Ranganath <prasadbgr@in.ibm.com>
+// *HWP FW  Owner           :   Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team                :   PM
+// *HWP Level               :   3
+// *HWP Consumed by         :   HS
 
-///
-///   @verbatim
-///
-///       high level flow:
-///           if {i_mode == PM_INIT)
-///               rc =  pba_init_init(i_target);
-///           else if (i_mode == PM_RESET)
-///               rc =  pba_init_reset(i_target);
-///   @endverbatim
-///
 
 #ifndef _P9_PBAINIT_H_
 #define _P9_PBAINIT_H_

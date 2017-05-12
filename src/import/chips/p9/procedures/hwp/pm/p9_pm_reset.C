@@ -28,10 +28,10 @@
 ///        Reset function when needing to restart the OCC complex.
 ///
 // *HWP HWP Owner        : Greg Still <stillgs@us.ibm.com>
-// *HWP HWP Backup Owner :
-// *HWP FW Owner         : Sangeetha T S <sangeet2@in.ibm.com>
+// *HWP HWP Backup Owner : Prasad BG Ranganath <prasadbgr@in.ibm.com>
+// *HWP FW Owner         : Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team             : PM
-// *HWP Level            : 2
+// *HWP Level            : 3
 // *HWP Consumed by      : HS
 
 ///
@@ -75,28 +75,13 @@ enum PPM_MASK
 };
 
 // -----------------------------------------------------------------------------
-// Function prototypes
-// -----------------------------------------------------------------------------
-
-///
-/// @brief Clear the Deep Exit Masks
-///
-/// @param[in] i_target Chip target
-///
-/// @return FAPI2_RC_SUCCESS If the special wake-up is successful,
-///         else error code.
-///
-fapi2::ReturnCode clear_deep_exit_mask(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
-
-// -----------------------------------------------------------------------------
 // Function definitions
 // -----------------------------------------------------------------------------
 
 fapi2::ReturnCode p9_pm_reset(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    FAPI_IMP("Entering p9_pm_reset ...");
+    FAPI_IMP(">> p9_pm_reset");
 
     fapi2::buffer<uint64_t> l_data64;
     fapi2::ReturnCode l_rc;
@@ -222,21 +207,6 @@ fapi2::ReturnCode p9_pm_reset(
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After reset of PSS"));
 
 fapi_try_exit:
-    FAPI_IMP("Exiting p9_pm_reset ...");
+    FAPI_IMP("<< p9_pm_reset");
     return fapi2::current_err;
-}
-
-///
-/// @brief Clear deep exit mask
-///
-/// @param[in] i_target Chip target
-///
-/// @return FAPI2_RC_SUCCESS on success, else error.
-///
-fapi2::ReturnCode clear_deep_exit_mask(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-{
-    FAPI_INF("clear_deep_exit_mask Enter");
-
-    return fapi2::FAPI2_RC_SUCCESS;
 }

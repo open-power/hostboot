@@ -84,13 +84,10 @@
   </registerFfdc>
   <!-- ******************************************************************** -->
   <registerFfdc>
-    <id>OCCGPE_FFDC_REGISTERS</id>
+    <id>OCCGPE0_FFDC_REGISTERS</id>
     <scomRegister>PU_GPE0_GPEXIXSR_SCOM</scomRegister>
     <scomRegister>PU_GPE0_GPEXIIAR_SCOM</scomRegister>
     <scomRegister>PU_GPE0_GPEXIIR_SCOM</scomRegister>
-    <scomRegister>PU_GPE1_GPEXIXSR_SCOM</scomRegister>
-    <scomRegister>PU_GPE1_GPEXIIAR_SCOM</scomRegister>
-    <scomRegister>PU_GPE1_GPEXIIR_SCOM</scomRegister>
     <scomRegister>PU_GPE0_GPETSEL_SCOM</scomRegister>
     <scomRegister>PU_GPE0_GPEIVPR_SCOM</scomRegister>
     <scomRegister>PU_GPE0_GPESTR_SCOM</scomRegister>
@@ -98,6 +95,13 @@
     <scomRegister>PU_GPE0_MIB_XISGB</scomRegister>
     <scomRegister>PU_GPE0_MIB_XIICAC</scomRegister>
     <scomRegister>PU_GPE0_MIB_XIDCAC_SCOM</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>OCCGPE1_FFDC_REGISTERS</id>
+    <scomRegister>PU_GPE1_GPEXIXSR_SCOM</scomRegister>
+    <scomRegister>PU_GPE1_GPEXIIAR_SCOM</scomRegister>
+    <scomRegister>PU_GPE1_GPEXIIR_SCOM</scomRegister>
     <scomRegister>PU_GPE1_GPETSEL_SCOM</scomRegister>
     <scomRegister>PU_GPE1_GPEIVPR_SCOM</scomRegister>
     <scomRegister>PU_GPE1_GPESTR_SCOM</scomRegister>

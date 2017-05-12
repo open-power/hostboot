@@ -26,30 +26,29 @@
 /// @file p9_pm_pba_init.C
 /// @brief Initialize PBA registers for modes PM_INIT, PM_RESET
 ///
+// *HWP HW Owner     :  Greg Still <stillgs@us.ibm.com>
+// *HWP Backup Owner :  Prasad BG Ranganath <prasadbgr@in.ibm.com>
+// *HWP FW Owner     :  Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team         :  PM
+// *HWP Level        :  3
+// *HWP Consumed by  :  HS
 
-/*
-
-    RESET flow
-        Sets up PBA Mode register (in general)
-        Set the values of PBASLV 0 to allow the IPL phase accesses for
-            SGPE and PPC405 boot
-        Set the values of PBASLV 2 to allow the IPL phase accesses for
-            PGPE boot - upon boot of the OCC, OCC FW will re-establish
-            this slave for its use
-    INIT flow
-        Set the values of PBASLV 0 to allow Runtime phase access for
-            SGPE STOP (read accesses)
-        Set the values of PBASLV 1 to allow Runtime phase access for
-            SGPE 24x7 (read accesses).  SGPE 24x7 thread will re-establish
-            this slave for write access as necessary
-
-*/
 ///
-// *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner:  Sangeetha T S <sangeet2@in.ibm.com>
-// *HWP Team: PM
-// *HWP Level: 2
-// *HWP Consumed by: HS
+/// @verbatim
+///    RESET flow
+///        Sets up PBA Mode register (in general)
+///        Set the values of PBASLV 0 to allow the IPL phase accesses for
+///            SGPE and PPC405 boot
+///        Set the values of PBASLV 2 to allow the IPL phase accesses for
+///            PGPE boot - upon boot of the OCC, OCC FW will re-establish
+///            this slave for its use
+///    INIT flow
+///        Set the values of PBASLV 0 to allow Runtime phase access for
+///            SGPE STOP (read accesses)
+///        Set the values of PBASLV 1 to allow Runtime phase access for
+///            SGPE 24x7 (read accesses).  SGPE 24x7 thread will re-establish
+///            this slave for write access as necessary
+///@endverbatim
 
 // ----------------------------------------------------------------------
 // Includes
@@ -241,6 +240,7 @@ fapi2::ReturnCode pba_slave_reset(
 ///
 fapi2::ReturnCode pba_bc_stop(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
 
 // -----------------------------------------------------------------------------
 // Function definition
@@ -497,7 +497,6 @@ fapi2::ReturnCode pba_slave_reset(
         }
 
         // Check if the slave is still actually busy.
-        // Slave %x still busy after reset,consider whether this should be polled.
         if ( l_data64 & 0x0000000000000001 << (63 - ( 8 + sl)) )
         {
             const uint64_t& l_BUFFCONT =  uint64_t(l_data64);

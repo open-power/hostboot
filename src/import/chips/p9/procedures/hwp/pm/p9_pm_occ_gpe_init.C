@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,15 +26,16 @@
 /// @file p9_pm_occ_gpe_init.C
 /// @brief Initialize or reset the targeted GPE0 and/or GPE1
 ///
-// *HWP HWP Owner: Greg Still  <stillgs@us.ibm.com>
-// *HWP FW  Owner: Sangeetha T S <sangeet2@in.ibm.com>
-// *HWP Team: PM
-// *HWP Level: 2
-// *HWP Consumed by: HS
+// *HWP HWP Owner           :   Greg Still  <stillgs@us.ibm.com>
+// *HWP Backup Owner        :   Prasad BG Ranganath <prasadbgr@in.ibm.com>
+// *HWP FW  Owner           :   Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team                :   PM
+// *HWP Level               :   3
+// *HWP Consumed by         :   HS
 
 ///
 /// High-level procedure flow:
-/// \verbatim
+/// @verbatim
 ///
 ///     Check for valid parameters
 ///     if PM_RESET {
@@ -45,25 +46,22 @@
 ///             clear interrupt vector prefix register
 ///     }
 ///     if PM_INIT {
-///         operation performed by OC firmware.
+///         operation performed by OCC firmware.
 ///         Thus, noop
 ///     }
 ///
 ///  Procedure Prereq:
 ///     - System clocks are running
 ///
-/// \endverbatim
+/// @endverbatim
 ///
 
 // -----------------------------------------------------------------------------
 // Includes
 // -----------------------------------------------------------------------------
 #include <p9_pm_occ_gpe_init.H>
-
-// -----------------------------------------------------------------------------
-// Constants
-// -----------------------------------------------------------------------------
-const uint64_t OCC_GPE_HALT = 0x1;
+#include <p9_ppe_defs.H>
+#include <p9_ppe_utils.H>
 
 // -----------------------------------------------------------------------------
 // Function prototypes
@@ -92,7 +90,7 @@ fapi2::ReturnCode p9_pm_occ_gpe_init(
     const p9pm::PM_FLOW_MODE i_mode,
     const p9occgpe::GPE_ENGINES i_engine)
 {
-    FAPI_IMP("p9_pm_occ_gpe_init Enter");
+    FAPI_IMP(">> p9_pm_occ_gpe_init");
 
     // Initialization:  perform order or dynamic operations to initialize
     // the GPEs using necessary Platform or Feature attributes.
@@ -125,7 +123,7 @@ fapi2::ReturnCode p9_pm_occ_gpe_init(
     }
 
 fapi_try_exit:
-    FAPI_IMP("p9_pm_occ_gpe_init Exit");
+    FAPI_IMP("<< p9_pm_occ_gpe_init");
     return fapi2::current_err;
 }
 
@@ -133,7 +131,7 @@ fapi2::ReturnCode pm_occ_gpe_reset(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const p9occgpe::GPE_ENGINES i_engine)
 {
-    FAPI_IMP("pm_occ_gpe_reset Enter");
+    FAPI_IMP(">> pm_occ_gpe_reset");
 
     fapi2::buffer<uint64_t> l_data64;
     uint64_t l_controlReg = 0;
@@ -145,10 +143,22 @@ fapi2::ReturnCode pm_occ_gpe_reset(
 
     if (i_engine == p9occgpe::GPE0)
     {
-        l_controlReg = PU_GPE0_PPE_XIXCR;
-        l_statusReg = PU_GPE0_GPEXIXSR_SCOM;
-        l_instrAddrReg = PU_GPE0_PPE_XIDBGPRO;
-        l_intVecReg = PU_GPE0_GPEIVPR_SCOM;
+        l_controlReg    =   PU_GPE0_PPE_XIXCR;
+        l_statusReg     =   PU_GPE0_GPEXIXSR_SCOM;
+        l_instrAddrReg  =   PU_GPE0_PPE_XIDBGPRO;
+        l_intVecReg     =   PU_GPE0_GPEIVPR_SCOM;
+
+        //Check if GPE0 is already halted
+        FAPI_TRY(fapi2::getScom(i_target, l_statusReg, l_data64),
+                 "ERROR: Failed to get the OCC GPE0 status");
+
+        FAPI_ASSERT( (l_data64.getBit<0>() != 1),
+                     fapi2::GPE0_IN_HALT_BEFORE_RESET()
+                     .set_CHIP( i_target )
+                     .set_GPE0_STATUS( l_data64 )
+                     .set_GPE0_MODE( HALT )
+                     .set_GPE0_BASE_ADDRESS( GPE0_BASE_ADDRESS ),
+                     "OCC GPE0 in Halt State Before Reset");
     }
     else if (i_engine == p9occgpe::GPE1)
     {
@@ -156,10 +166,23 @@ fapi2::ReturnCode pm_occ_gpe_reset(
         l_statusReg = PU_GPE1_GPEXIXSR_SCOM;
         l_instrAddrReg = PU_GPE1_PPE_XIDBGPRO;
         l_intVecReg = PU_GPE1_GPEIVPR_SCOM;
+
+        //Check if GPE1 is already halted
+        FAPI_TRY(fapi2::getScom(i_target, l_statusReg, l_data64),
+                 "ERROR: Failed to get the OCC GPE1 status");
+
+        FAPI_ASSERT( (l_data64.getBit<0>() != 1),
+                     fapi2::GPE1_IN_HALT_BEFORE_RESET()
+                     .set_CHIP( i_target )
+                     .set_GPE1_STATUS( l_data64 )
+                     .set_GPE1_MODE( HALT )
+                     .set_GPE1_BASE_ADDRESS( GPE1_BASE_ADDRESS ),
+                     "OCC GPE1 in Halt State Before Reset");
     }
 
+
     // Halt the OCC GPE
-    l_data64.flush<0>().insertFromRight(OCC_GPE_HALT, 1, 3);
+    l_data64.flush<0>().insertFromRight(p9hcd::HALT, 1, 3);
     FAPI_TRY(putScom(i_target, l_controlReg, l_data64),
              "ERROR: Failed to halt the OCC GPE");
 
@@ -180,10 +203,24 @@ fapi2::ReturnCode pm_occ_gpe_reset(
     }
     while(--l_pollCount != 0);
 
-    FAPI_ASSERT((l_pollCount != 0),
-                fapi2::PM_OCC_GPE_RESET_TIMEOUT()
-                .set_CHIP(i_target),
-                "OCC GPE could not be halted during reset operation.");
+    if (i_engine == p9occgpe::GPE0)
+    {
+        FAPI_ASSERT((l_pollCount != 0),
+                    fapi2::PM_OCC_GPE0_RESET_TIMEOUT()
+                    .set_CHIP( i_target )
+                    .set_GPE0_MODE( HALT )
+                    .set_GPE0_BASE_ADDRESS( GPE0_BASE_ADDRESS ),
+                    "OCC GPE0 could not be halted during reset operation.");
+    }
+    else if (i_engine == p9occgpe::GPE1)
+    {
+        FAPI_ASSERT((l_pollCount != 0),
+                    fapi2::PM_OCC_GPE1_RESET_TIMEOUT()
+                    .set_CHIP( i_target )
+                    .set_GPE1_MODE( HALT )
+                    .set_GPE1_BASE_ADDRESS( GPE1_BASE_ADDRESS ),
+                    "OCC GPE1 could not be halted during reset operation.");
+    }
 
     //Clear status (Instruction Address) register
     l_data64.flush<0>();
@@ -195,5 +232,6 @@ fapi2::ReturnCode pm_occ_gpe_reset(
              "ERROR: Failed to clear interrupt vector prefix register");
 
 fapi_try_exit:
+    FAPI_IMP("<< pm_occ_gpe_reset");
     return fapi2::current_err;
 }

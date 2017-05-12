@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,12 +26,13 @@
 /// @file p9_pm_occ_gpe_init.H
 /// @brief Initialize or reset the targeted GPE0 and/or GPE1
 ///
-/// *HWP HWP Owner: Greg Still  <stillgs@us.ibm.com>
-/// *HWP FW  Owner: Sangeetha T S <sangeet2@in.ibm.com>
-/// *HWP Team: PM
-/// *HWP Level: 2
-/// *HWP Consumed by: HS
-///
+// *HWP HWP Owner       :   Greg Still <stillgs@us.ibm.com>
+// *HWP Backup Owner    :   Prasad BG Ranganath <prasadbgr@in.ibm.com>
+// *HWP FW  Owner       :   Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team            :   PM
+// *HWP Level           :   3
+// *HWP Consumed by     :   HS
+//
 
 #ifndef _P9_PM_OCC_GPE_INIT_H
 #define _P9_PM_OCC_GPE_INIT_H
@@ -42,6 +43,7 @@
 #include <fapi2.H>
 #include <p9_pm.H>
 #include <p9_misc_scom_addresses.H>
+#include <p9_hcd_common.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -56,9 +58,6 @@ enum GPE_ENGINES
 };
 }
 
-//------------------------------------------------------------------------------
-// Parameter structure definitions
-//------------------------------------------------------------------------------
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_pm_occ_gpe_init_FP_t) (

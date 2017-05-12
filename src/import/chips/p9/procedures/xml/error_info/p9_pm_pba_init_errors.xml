@@ -23,6 +23,14 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for p9_pm_pba_init procedure -->
+<!--
+     *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
+     *HWP HWP Backup Owner: Amit Kumar <akumar3@us.ibm.com>
+     *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
+     *HWP Team: PM
+     *HWP Level: 3
+     *HWP Consumed by: FSP:HS
+-->
 <hwpErrors>
   <!-- *********************************************************************-->
   <hwpError>
@@ -43,6 +51,7 @@
     <ffdc>POLLCOUNT</ffdc>
     <ffdc>SLAVENUM</ffdc>
     <ffdc>PBASLVREG</ffdc>
+    <ffdc>CHIP</ffdc>
     <collectRegisterFfdc>
       <id>PBA_FFDC_REGISTERS</id>
       <target>CHIP</target>
@@ -61,6 +70,7 @@
     <ffdc>POLLCOUNT</ffdc>
     <ffdc>SLAVENUM</ffdc>
     <ffdc>PBASLVREG</ffdc>
+    <ffdc>CHIP</ffdc>
     <collectRegisterFfdc>
       <id>PBA_FFDC_REGISTERS</id>
       <target>CHIP</target>
@@ -79,6 +89,7 @@
     </description>
     <ffdc>POLLCOUNT</ffdc>
     <ffdc>POLLVALUE</ffdc>
+    <ffdc>CHIP</ffdc>
     <collectRegisterFfdc>
       <id>PBA_FFDC_REGISTERS</id>
       <target>CHIP</target>
@@ -97,6 +108,7 @@
     </description>
     <ffdc>POLLCOUNT</ffdc>
     <ffdc>POLLVALUE</ffdc>
+    <ffdc>CHIP</ffdc>
     <collectRegisterFfdc>
       <id>PBA_FFDC_REGISTERS</id>
       <target>CHIP</target>
