@@ -36,6 +36,7 @@
 
 #include <errl/errlentry.H>
 #include <util/singleton.H>
+#include <map>
 
 namespace SBEIO
 {
@@ -513,24 +514,16 @@ class SbePsu
 
         ~SbePsu();
 
-        /**
-         * @brief populate the iv_ffdcPackageBuffer
-         * @param[in]  i_data        FFDC error data
-         * @param[in]  i_len         data buffer len to copy
-         */
-
-        void writeFFDCBuffer(void * i_data, uint8_t i_len);
-
     private:
     //---------------------------------------------------------------------
     // Local definitions for the device driver
     //---------------------------------------------------------------------
 
         /**
-         * @brief Write FFDC package buffer - holds information exchanged
-         * between SBE and HB
+         * @brief Write FFDC package buffer - map of memory allocated
+         * for each target's FFDC package.  Indexed by TARGETING
          */
-        void * iv_ffdcPackageBuffer;
+        std::map<TARGETING::Target *, void *> iv_ffdcPackageBuffer;
 
         /**
          * @brief FFDC package needs to be 2 pages
@@ -538,9 +531,16 @@ class SbePsu
         const uint8_t ffdcPackageSize = 2;
 
         /**
-         * @brief zero out the FFDC package buffer
+         * @brief allocate an ffdc buffer for the proc target
+         * @param[in]  i_target       proc to have ffdc buffer allocated
          */
-        void initFFDCPackageBuffer();
+        errlHndl_t allocateFFDCBuffer(TARGETING::Target * i_target);
+
+        /**
+         * @brief utility to find an allocated FFDC buffer
+         * @param[in]  i_target       proc to that had ffdc buffer allocated
+         */
+        void * findFFDCBufferByTarget(TARGETING::Target * i_target);
 
         /**
          * @brief Write request to PSU
