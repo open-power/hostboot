@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -36,12 +36,14 @@ my $payloadTextSize=0;
 my $payloadDataSize=0;
 my $help=0;
 my $man=0;
+my $prefixFlags="0x00000000";
 
 GetOptions(
     "output-file=s" => \$outputFile,
     "payload-text-hash=s" => \$payloadTextHash,
     "payload-text-size=s" => \$payloadTextSize,
     "payload-data-size=s" => \$payloadDataSize,
+    "prefix-flags=s" => \$prefixFlags,
     "help" => \$help,
     "man" => \$man) || pod2usage(-verbose=>0);
 
@@ -52,12 +54,24 @@ if(   (length($payloadTextHash) != 128)
    || ($payloadTextHash =~ /[^a-fA-F0-9]/ ))
 {
     print STDERR "\nERROR: --payload-text-hash must "
-        . "be 64 ASCII hex bytes.  Example: --payload-text-hash="
+        . "specify exactly 64 ASCII hex bytes.  Example: --payload-text-hash="
         . "e41110deec6c3bd7914bf792a2e51b0c8eaebe8d30f9360324598"
         . "1b32106a13beafb6cdddd36e48947d35723d166ac08f0be93d2c6"
         . "8e2640b539952e6fe819c6\n\n";
     pod2usage(-verbose=>1);
 }
+
+if(   (length($prefixFlags) != 10)
+   || !($prefixFlags =~ /^0[xX][a-fA-F0-9]{8}$/ ))
+{
+    print STDERR "\nERROR: --prefix-flags must specify a 4-byte hex formatted "
+        . "value.  Example: --prefix-flags=0x80000000\n\n";
+    pod2usage(-verbose=>1);
+}
+
+# Convert the string to a hex number, which is guaranteed to work given the
+# above checks
+$prefixFlags = hex($prefixFlags);
 
 if($payloadTextSize == 0)
 {
@@ -95,7 +109,7 @@ sub pack1byte {
 sub createFakeHeader {
 
     my ($containerSize,$hrmor,
-        $stack,$textSize,$textHash) = @_;
+        $stack,$textSize,$textHash,$prefixFlags) = @_;
 
     # Array of [ field size (bytes), field value ] pairs
     my @sizeValAoA = (
@@ -110,7 +124,7 @@ sub createFakeHeader {
         [1,1],              # Sign algo
         [8,0],              # Unused
         [8,0],              # Reserved
-        [4,0],              # Flags
+        [4,$prefixFlags],   # Prefix flags (firmware key indicator)
         [1,1],              # SW key count
         [8,132],            # Size of SW key payload
         [64,0],             # Hash of SW key payload
@@ -168,7 +182,7 @@ open(OUTFILE, "> $outputFile")
 my $containerSize=  HEADER_SIZE
                   + $payloadTextSize + $payloadDataSize;
 my $data = createFakeHeader (
-    $containerSize,0,0,$payloadTextSize, $payloadTextHash ) ;
+    $containerSize,0,0,$payloadTextSize, $payloadTextHash,$prefixFlags ) ;
 
 print OUTFILE $data;
 
@@ -188,6 +202,7 @@ genfakeheader.pl
     --payload-text-hash=TEXT_HASH
     --payload-text-size=TEXT_SIZE
     [--payload-data-size=DATA_SIZE]
+    [--prefix-flags=FLAGS]
 
 =head1 OPTIONS
 
@@ -212,6 +227,24 @@ Size of protected payload, in bytes.
 =item B<--payload-data-size>=SIZE
 
 Size of the unprotected payload, in bytes.
+
+=item B<--prefix-flags>=FLAGS
+
+Prefix key header's flags field (a.k.a. firmware key indicator).  Should be
+supplied as a 4-byte hex value (example: 0x80000000), where each bit represents
+a specific flag.  Flag values are as follows:
+
+ 0x80000000: Images signed by key set 1 (op-build)
+ 0x40000000: Images signed by key set 2 (FSP build)
+ 0x20000000: Images signed by key set 3 (ODM, i.e. IBM AIX kernel)
+ 0x00080000: Enable SBE checking of mailbox scratch register 3 bit 6 for
+             secureboot disable request (only applicable to SBE partition for
+             non-production-signed images)
+ 0x00000001: Container is key transition container with nested payload image
+             signed by new key (only applicable to SBKT partition for
+             non-production-signed images)
+
+ Default value is 0x00000000.
 
 =back
 
