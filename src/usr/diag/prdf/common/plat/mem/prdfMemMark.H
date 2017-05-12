@@ -26,7 +26,11 @@
 #ifndef __prdfMemMark_H
 #define __prdfMemMark_H
 
+// Framework includes
+#include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>
+
+// Platform includes
 #include <prdfMemAddress.H>
 #include <prdfMemSymbol.H>
 #include <prdfPlatServices.H>
@@ -150,13 +154,15 @@ uint32_t clearSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank );
 /**
  * @brief  If a rank contains a symbol mark that is on the same DRAM as the chip
  *         mark, the symbol mark is removed. This is done to free up available
- *         repairs.
+ *         repairs. Will also apply RAS policies where necessary.
  * @param  i_chip MBA or MCA chip.
  * @param  i_rank Target rank.
+ * @param  io_sc  The step code data struct.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-uint32_t balance( ExtensibleChip * i_chip, const MemRank & i_rank )
+uint32_t balance( ExtensibleChip * i_chip, const MemRank & i_rank,
+                  STEP_CODE_DATA_STRUCT & io_sc )
 {
     uint32_t o_rc = SUCCESS;
 
@@ -180,6 +186,12 @@ uint32_t balance( ExtensibleChip * i_chip, const MemRank & i_rank )
         {
             o_rc = clearSymbolMark<T>( i_chip, i_rank );
             if ( SUCCESS != o_rc ) break;
+        }
+        else
+        {
+            // Both a chip and symbol mark exist, but they are on separate
+            // DRAMs. So, make the error log predictive.
+            io_sc.service_data->setServiceCall();
         }
 
     } while (0);

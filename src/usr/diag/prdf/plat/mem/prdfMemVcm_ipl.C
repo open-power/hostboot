@@ -199,7 +199,7 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
 
                 // If there is a symbol mark on the same DRAM as the newly
                 // verified chip mark, remove the symbol mark.
-                o_rc = MarkStore::balance<TYPE_MCA>( iv_chip, iv_rank );
+                o_rc = MarkStore::balance<TYPE_MCA>( iv_chip, iv_rank, io_sc );
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "MarkStore::balance(0x%08x, %d) failed",
