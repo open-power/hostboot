@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,6 +143,15 @@ namespace HTMGT
         uint16_t         checksum;
     };
 
+
+#ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
+    // Dump header information and set of binary data to the console.
+    // NOTE: Data is dumped in groups of 16 bytes. If i_len is not a
+    // multiple of 16, additional data data will be dumped.
+    void dumpToConsole(const char * i_header,
+                       const uint8_t * i_data,
+                       uint16_t i_len);
+#endif
 
 
     /**
