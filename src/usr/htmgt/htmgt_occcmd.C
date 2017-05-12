@@ -862,6 +862,14 @@ namespace HTMGT
                                       (uint32_t)MAX_FFDC),
                                       1,  // version
                                       exceptionType); // subsection
+#ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
+                    char header[64];
+                    sprintf(header, "OCC%d 0x%02X Exception: (0x%04X bytes)",
+                            iv_Occ->iv_instance, exceptionType,
+                            exceptionLength);
+                    dumpToConsole(header, (const uint8_t *)sramRspPtr,
+                                  exceptionLength);
+#endif
 
                     if (0xE1 == exceptionType)
                     {
@@ -1062,8 +1070,7 @@ namespace HTMGT
         sprintf(header, "OCC%d Command: %s (0x%04X bytes)",
                 iv_Occ->iv_instance, command_string(iv_OccCmd.cmdType),
                 l_send_length);
-        dumpToConsole(header, cmdBuffer,
-                      std::min(l_send_length,(uint16_t)256));
+        dumpToConsole(header, cmdBuffer, l_send_length);
 #endif
 
 #ifdef SIMICS_TESTING
@@ -1101,7 +1108,7 @@ namespace HTMGT
             char header[64];
             sprintf(header, "OCC%d Response: (0x%04X bytes)",
                     iv_Occ->iv_instance, rspLen);
-            dumpToConsole(header, rspBuffer, std::min(rspLen,(uint16_t)256));
+            dumpToConsole(header, rspBuffer, rspLen);
 #endif
             iv_OccRsp.sequenceNumber = rspBuffer[l_index++];
             iv_OccRsp.cmdType = (enum occCommandType)rspBuffer[l_index++];

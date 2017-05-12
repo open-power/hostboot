@@ -131,13 +131,11 @@ namespace HTMGT
      * including the format and version numbers.
      *
      * @param[in] i_occ - the OCC to gather data for
-     * @param[in] i_monitoringEnabled - set it to true if mem monitoring on
      * @param[out] o_data - preallocated buffer to fill in
      * @param[out] o_size - set to the message size
      * @pre o_data is large enough.
      */
     void getMemConfigMessageData(const TARGETING::TargetHandle_t i_occ,
-                                 bool i_monitoringEnabled,
                                  uint8_t* o_data, uint64_t & o_size);
 
 

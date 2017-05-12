@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +81,14 @@ inline void UINT32_PUT(uint8_t * i_ptr, uint32_t i_value)
     *(i_ptr + 3) = (uint8_t)(i_value);
 }
 
+inline void INT32_PUT(uint8_t * i_ptr, int32_t i_value)
+{
+    *i_ptr       = (int8_t)(i_value >> 24);
+    *(i_ptr + 1) = (int8_t)(i_value >> 16);
+    *(i_ptr + 2) = (int8_t)(i_value >> 8);
+    *(i_ptr + 3) = (int8_t)(i_value);
+}
+
 
 namespace HTMGT
 {
@@ -104,6 +112,7 @@ namespace HTMGT
     enum internalFlagTypes
     {
         FLAG_HALT_ON_OCC_SRC       = 0x00800000, // Prevent resets after SRC
+        FLAG_SEND_MEM_CONFIG       = 0x00000800, // Enables sending mem config
         FLAG_HALT_ON_RESET_FAIL    = 0x00000100, // Stop additional resets
         FLAG_EXT_RESET_DISABLED    = 0x00000080, // Ignore opal-prd/BMC resets
         FLAG_DISABLE_MEM_THROTTLE  = 0x00000040,

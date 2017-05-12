@@ -260,7 +260,7 @@ namespace HTMGT
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C217));//OCB_OCI_OCBICR1
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C218));//OCB_OCI_OCBLWCR1
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C21A));//OCB_OCI_OCBLWSR1
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C21C));//OCB_OCI_OCBLWSBR1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C21C));//*_OCI_OCBLWSBR1
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6D010));//OCB_PIB_OCBAR0
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6D030));//OCB_PIB_OCBAR1
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6D031));//OCB_PIB_OCBCSR1
@@ -318,6 +318,13 @@ namespace HTMGT
                               l_dataSize,
                               1, //version
                               SUBSEC_ADDITIONAL_SRC );
+#ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
+                    char header[64];
+                    sprintf(header, "OCC Trace 0x%08X: (0x%04X bytes)",
+                            i_address, l_dataSize);
+                    dumpToConsole(header, (const uint8_t *)l_sramData,
+                                  l_dataSize);
+#endif
 
         }
         else
@@ -467,7 +474,8 @@ namespace HTMGT
 
                         TMGT_INF("_buildOccs: Found OCC%d - HUID: 0x%0lX, "
                                  "masterCapable: %c, homer: 0x%0lX",
-                                 instance, huid, masterCapable?'Y':'N', homer);
+                                 instance, huid, masterCapable?'Y':'N',
+                                 homer);
                         _addOcc(instance, masterCapable, homer, occs[0]);
                     }
                     else
@@ -490,8 +498,9 @@ namespace HTMGT
                          * @reasoncode HTMGT_RC_OCC_CRIT_FAILURE
                          * @userdata1  OCC Instance
                          * @userdata2  homer virtual address
-                         * @devdesc Homer pointer is nullptr, unable to communicate
-                         *          with the OCCs.  Leaving system in safe mode.
+                         * @devdesc Homer pointer is nullptr, unable to
+                         *          communicate with the OCCs.
+                         *          Leaving system in safe mode.
                          */
                         bldErrLog(err,
                                   HTMGT_MOD_BUILD_OCCS,

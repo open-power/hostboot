@@ -267,6 +267,13 @@ namespace HTMGT
                 }
             }
 
+#ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
+            char header[64];
+            sprintf(header, "OCC%d ELOG: (0x%04X bytes)", iv_instance, i_length);
+            dumpToConsole(header, (const uint8_t *)l_occElog,
+                          std::min(i_length,(uint16_t)512));
+#endif
+
             // Add full OCC error log data as a User Details section
             l_errlHndl->addFFDC(OCCC_COMP_ID,
                                 l_occElog,

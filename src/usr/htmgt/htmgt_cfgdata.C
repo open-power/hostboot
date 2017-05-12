@@ -145,7 +145,7 @@ namespace HTMGT
                                 break;
 
                             case OCC_CFGDATA_MEM_CONFIG:
-                                getMemConfigMessageData(occ->getTarget(), true,
+                                getMemConfigMessageData(occ->getTarget(),
                                                         cmdData, cmdDataLen);
                                 break;
 
@@ -159,8 +159,11 @@ namespace HTMGT
                                 break;
 
                             case OCC_CFGDATA_MEM_THROTTLE:
-                                getMemThrottleMessageData(occ->getTarget(),
+                                if (int_flags_set(FLAG_SEND_MEM_CONFIG))
+                                {
+                                    getMemThrottleMessageData(occ->getTarget(),
                                                           cmdData, cmdDataLen);
+                                }
                                 break;
 
                             case OCC_CFGDATA_TCT_CONFIG:
@@ -292,7 +295,6 @@ void writeMemConfigData( uint8_t *& o_data,
 
 
 void getMemConfigMessageData(const TargetHandle_t i_occ,
-                             bool i_monitoringEnabled,
                              uint8_t* o_data, uint64_t & o_size)
 {
     uint64_t index = 0;
@@ -302,11 +304,9 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
     o_data[index++] = OCC_CFGDATA_MEM_CONFIG;
     o_data[index++] = OCC_CFGDATA_MEM_CONFIG_VERSION;
 
-
     //System reference needed for these ATTR.
     Target* sys = nullptr;
     targetService().getTopLevelTarget(sys);
-
 
     if( is_sapphire_load() )//if OPAL then no "Power Control Default" support.
     {
@@ -326,14 +326,10 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
                     sys->getAttr<ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED>();
     }
 
-
-
-
     //Byte 5:   Number of data sets.
     size_t numSetsOffset = index++; //Will fill in numSets at the end
 
-
-    if (i_monitoringEnabled)
+    if (int_flags_set(FLAG_SEND_MEM_CONFIG))
     {
         TargetHandleList centaurs;
         TargetHandleList mbas;
@@ -341,7 +337,6 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
         uint8_t centPos = 0;
         uint8_t dimmPos = 0;
         uint8_t numSets = 0;
-
 
         ConstTargetHandle_t proc = getParentChip(i_occ);
         assert(proc != nullptr);
@@ -356,7 +351,6 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
             TRACUCOMP("Proc 0x%X has %d centaurs",
                       proc->getAttr<ATTR_HUID>(),
                       centaurs.size());
-
 
             for ( const auto & centaur : centaurs )
             {
@@ -378,7 +372,6 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
                                     0,    //Reserved for CUMULUS
                                     0,    //" "
                                     index );
-
 
                 mbas.clear();
                 getChildAffinityTargets(mbas, centaur,
@@ -449,7 +442,7 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
                  numSets, i_occ->getAttr<ATTR_HUID>());
 
         o_data[numSetsOffset] = numSets;
-    }//END i_monitoringEnabled
+    }
     else
     {
         TMGT_INF("getMemConfigMessageData: Mem monitoring is disabled");
@@ -652,44 +645,39 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     o_data[index++] = OCC_CFGDATA_PCAP_CONFIG;
     o_data[index++] = OCC_CFGDATA_PCAP_CONFIG_VERSION;
 
-
     // Minimum HARD Power Cap
-    ATTR_OPEN_POWER_MIN_POWER_CAP_WATTS_type pcap =
+    ATTR_OPEN_POWER_MIN_POWER_CAP_WATTS_type min_pcap =
         sys->getAttr<ATTR_OPEN_POWER_MIN_POWER_CAP_WATTS>();
-
 
     // Minimum SOFT Power Cap
     ATTR_OPEN_POWER_SOFT_MIN_PCAP_WATTS_type soft_pcap;
-     //if attr does not exists.
     if ( ! sys->tryGetAttr
             <ATTR_OPEN_POWER_SOFT_MIN_PCAP_WATTS>(soft_pcap))
     {
-        soft_pcap = pcap;
+        // attr does not exist (us min)
+        soft_pcap = min_pcap;
     }
-
-
-    // Minimum Soft Power Cap
-    TMGT_INF("getPowerCapMessageData: minimum soft power cap =%dW",soft_pcap);
-    memcpy(&o_data[index], &soft_pcap, 2);
+    UINT16_PUT(&o_data[index], soft_pcap);
     index += 2;
 
     // Minimum Hard Power Cap
-    TMGT_INF("getPowerCapMessageData: minimum hard power cap = %dW",pcap);
-    memcpy(&o_data[index], &pcap, 2);
+    UINT16_PUT(&o_data[index], min_pcap);
     index += 2;
 
     // System Maximum Power Cap
-    pcap = getMaxPowerCap(sys);
-    memcpy(&o_data[index], &pcap, 2);
+    const uint16_t max_pcap = getMaxPowerCap(sys);
+    UINT16_PUT(&o_data[index], max_pcap);
     index += 2;
 
     // Quick Power Drop Power Cap
-    pcap = sys->getAttr<ATTR_OPEN_POWER_N_BULK_POWER_LIMIT_WATTS>();
-    TMGT_INF("getPowerCapMessageData: oversubscription power cap = %dW",
-             pcap);
-    memcpy(&o_data[index], &pcap, 2);
+    ATTR_OPEN_POWER_N_BULK_POWER_LIMIT_WATTS_type qpd_pcap =
+        sys->getAttr<ATTR_OPEN_POWER_N_BULK_POWER_LIMIT_WATTS>();
+    UINT16_PUT(&o_data[index], qpd_pcap);
     index += 2;
 
+    TMGT_INF("getPowerCapMessageData: pcaps - soft min: %d, min: %d, max: %d,"
+             " qpd: %d (in Watts)",
+             soft_pcap, min_pcap, max_pcap, qpd_pcap);
     o_size = index;
 }
 
@@ -942,7 +930,7 @@ void getFrequencyPointMessageData(uint8_t* o_data,
         turbo = sys->getAttr<ATTR_FREQ_CORE_MAX>();
 
         //Ultra Turbo Frequency in MHz
-        const uint16_t wofSupported = sys->getAttr<ATTR_WOF_ENABLED>();
+        const uint16_t wofSupported = sys->getAttr<ATTR_SYSTEM_WOF_ENABLED>();
         if (0 != wofSupported)
         {
             ultra = sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
@@ -1001,8 +989,8 @@ void getApssMessageData(uint8_t* o_data,
     ATTR_ADC_CHANNEL_FUNC_IDS_type function;
     sys->tryGetAttr<ATTR_ADC_CHANNEL_FUNC_IDS>(function);
 
-    ATTR_ADC_CHANNEL_GNDS_type ground;
-    sys->tryGetAttr<ATTR_ADC_CHANNEL_GNDS>(ground);
+    ATTR_ADC_CHANNEL_GROUNDS_type ground;
+    sys->tryGetAttr<ATTR_ADC_CHANNEL_GROUNDS>(ground);
 
     ATTR_ADC_CHANNEL_GAINS_type gain;
     sys->tryGetAttr<ATTR_ADC_CHANNEL_GAINS>(gain);
@@ -1035,14 +1023,13 @@ void getApssMessageData(uint8_t* o_data,
     o_data[2] = 0;
     o_data[3] = 0;
     uint64_t idx = 4;
-    uint32_t sensorId = 0;
 
     for(uint64_t channel = 0; channel < sizeof(function); ++channel)
     {
         o_data[idx] = function[channel]; // ADC Channel assignement
         idx += sizeof(uint8_t);
 
-        sensorId = 0;
+        uint32_t sensorId = 0;
         if (sensors != nullptr)
         {
             sensorId = (*sensors)[channel];
@@ -1053,11 +1040,15 @@ void getApssMessageData(uint8_t* o_data,
         o_data[idx] = ground[channel];   // Ground Select
         idx += sizeof(uint8_t);
 
-        memcpy(o_data+idx, &gain[channel], sizeof(uint32_t));  // Gain
-        idx += sizeof(uint32_t);
+        INT32_PUT(o_data+idx, gain[channel]);
+        idx += sizeof(int32_t);
 
-        memcpy(o_data+idx, &offset[channel], sizeof(uint32_t));   // offset
-        idx += sizeof(uint32_t);
+        INT32_PUT(o_data+idx, offset[channel]);
+        idx += sizeof(int32_t);
+
+        TMGT_INF("APSS channel[%2d]: 0x%02X 0x%08X 0x%02X 0x%08X 0x%08X",
+                 channel, function[channel], sensorId, ground[channel],
+                 gain[channel], offset[channel]);
     }
 
     ATTR_APSS_GPIO_PORT_MODES_type  gpioMode;
@@ -1077,6 +1068,9 @@ void getApssMessageData(uint8_t* o_data,
         o_data[idx] = 0;
         idx += sizeof(uint8_t);
         memcpy(o_data + idx, gpioPin+pinIdx, pinsPerPort);
+        TMGT_INF("APSS GPIO port[%2d]: 0x%02X 0x%08X 0x%08X",
+                 port, gpioMode[port], UINT32_GET(o_data+idx),
+                 UINT32_GET(o_data+idx+4));
         idx += pinsPerPort;
         pinIdx += pinsPerPort;
     }

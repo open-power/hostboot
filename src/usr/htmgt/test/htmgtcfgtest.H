@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -232,7 +232,7 @@ public:
         {
             memset(data, 0, 4*KILOBYTE);
 
-            getMemConfigMessageData(*occ, true, data, size);
+            getMemConfigMessageData(*occ, data, size);
 
             if (data[0] != OCC_CFGDATA_MEM_CONFIG)
             {
