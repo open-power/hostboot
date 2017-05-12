@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,6 +70,27 @@ extern "C"
  */
 runtimeInterfaces_t* rt_start(hostInterfaces_t*) NEVER_INLINE;
 
+
+/** @fn rt_version_fixup
+ *
+ *  @brief Make any adjustments needed to handle old versions
+ */
+void rt_version_fixup( void )
+{
+    uint64_t hostver = g_hostInterfaces->interfaceVersion;
+    if( HOSTBOOT_RUNTIME_INTERFACE_VERSION == hostver )
+    {
+        return; //nothing to do, we match
+    }
+
+    char verstring[100];
+    sprintf( verstring,
+             "HRBT Ver=%X, HostVer=%X\n",
+             HOSTBOOT_RUNTIME_INTERFACE_VERSION,
+             hostver );
+    (g_hostInterfaces->puts)(verstring);
+}
+
 /** Call C++ constructors present in this image. */
 void rt_cppBootstrap();
 
@@ -110,6 +131,9 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     // apply temp overrides
     postInitCalls_t* rtPost = getPostInitCalls();
     rtPost->callApplyTempOverrides();
+
+    // do any version mismatch fixups
+    rt_version_fixup();
 
     // Return our interface pointer structure.
     return rtInterfaces;
