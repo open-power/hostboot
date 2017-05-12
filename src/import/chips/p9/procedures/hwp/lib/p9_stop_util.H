@@ -27,6 +27,8 @@
 
 #ifdef _AIX
     #define __BYTE_ORDER __BIG_ENDIAN
+#elif __SKIBOOT__
+	#include <skiboot.h>
 #else
     #include <endian.h>
 #endif
@@ -49,8 +51,10 @@
 // *HWP Level       :  2
 // *HWP Consumed by :  HB:HYP
 #ifndef __PPE_PLAT
+#ifdef __cplusplus
 namespace stopImageSection
 {
+#endif
 #endif  //__PPE_PLAT
 /**
  * @brief  helper function to swizzle given input data
@@ -131,9 +135,10 @@ StopReturnCode_t getCoreAndThread( void* const i_pStopImage,
                                    const uint64_t i_pir,
                                    uint32_t* o_coreId,
                                    uint32_t* o_threadId );
-
+#ifdef __cplusplus
 } // namespace stopImageSection ends
 
+#endif
 #endif //__PPE_PLAT
 #endif
 

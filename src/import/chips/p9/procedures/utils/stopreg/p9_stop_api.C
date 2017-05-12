@@ -83,12 +83,13 @@ const uint32_t MAX_SPR_SUPPORTED =
  * @note    for register of scope core, function shall force io_threadId to
  *          zero.
  */
-StopReturnCode_t validateSprImageInputs( void*   const i_pImage,
+static StopReturnCode_t validateSprImageInputs( void*   const i_pImage,
         const CpuReg_t i_regId,
         const uint32_t  i_coreId,
         uint32_t*     i_pThreadId,
         bool* i_pThreadLevelReg )
 {
+    uint32_t index = 0;
     StopReturnCode_t l_rc = STOP_SAVE_SUCCESS;
     bool sprSupported = false;
     *i_pThreadLevelReg = false;
@@ -134,8 +135,6 @@ StopReturnCode_t validateSprImageInputs( void*   const i_pImage,
             break;
         }
 
-        uint32_t index = 0;
-
         for( index = 0; index < MAX_SPR_SUPPORTED; ++index )
         {
             if( i_regId == (CpuReg_t )g_sprRegister[index].sprId )
@@ -180,7 +179,7 @@ StopReturnCode_t validateSprImageInputs( void*   const i_pImage,
  * @param[in]   i_data  16 bit immediate data
  * @return  returns 32 bit number representing ori instruction.
  */
-uint32_t getOriInstruction( const uint16_t i_Rs, const uint16_t i_Ra,
+static uint32_t getOriInstruction( const uint16_t i_Rs, const uint16_t i_Ra,
                             const uint16_t i_data )
 {
     uint32_t oriInstOpcode = 0;
@@ -198,7 +197,7 @@ uint32_t getOriInstruction( const uint16_t i_Rs, const uint16_t i_Ra,
 /**
  * @brief generates 32 bit key used for SPR lookup in core section.
  */
-uint32_t genKeyForSprLookup( const CpuReg_t i_regId )
+static uint32_t genKeyForSprLookup( const CpuReg_t i_regId )
 {
     return getOriInstruction( 0, 0, (uint16_t) i_regId );
 }
@@ -212,7 +211,7 @@ uint32_t genKeyForSprLookup( const CpuReg_t i_regId )
  * @param[in] i_Rb source register number for xor operation
  * @return returns 32 bit number representing xor  immediate instruction.
  */
-uint32_t getXorInstruction( const uint16_t i_Ra, const uint16_t i_Rs,
+static uint32_t getXorInstruction( const uint16_t i_Ra, const uint16_t i_Rs,
                             const uint16_t i_Rb )
 {
     uint32_t xorRegInstOpcode;
@@ -234,7 +233,7 @@ uint32_t getXorInstruction( const uint16_t i_Ra, const uint16_t i_Rs,
  * @param[in] i_data    16 bit immediate data
  * @return returns 32 bit number representing oris  immediate instruction.
  */
-uint32_t getOrisInstruction( const uint16_t i_Rs, const uint16_t i_Ra,
+static uint32_t getOrisInstruction( const uint16_t i_Rs, const uint16_t i_Ra,
                              const uint16_t i_data )
 {
     uint32_t orisInstOpcode;
@@ -254,7 +253,7 @@ uint32_t getOrisInstruction( const uint16_t i_Rs, const uint16_t i_Ra,
  * @param[in] i_Spr represents spr where data is to be moved.
  * @return returns 32 bit number representing mtspr instruction.
  */
-uint32_t getMtsprInstruction( const uint16_t i_Rs, const uint16_t i_Spr )
+static uint32_t getMtsprInstruction( const uint16_t i_Rs, const uint16_t i_Spr )
 {
     uint32_t mtsprInstOpcode = 0;
     uint32_t temp = (( i_Spr & 0x03FF ) << 11);
@@ -276,7 +275,7 @@ uint32_t getMtsprInstruction( const uint16_t i_Rs, const uint16_t i_Spr )
  * @param[in] i_me      bit position up to which mask should be 1.
  * @return returns 32 bit number representing rldicr instruction.
  */
-uint32_t getRldicrInstruction( const uint16_t i_Ra, const uint16_t i_Rs,
+static uint32_t getRldicrInstruction( const uint16_t i_Ra, const uint16_t i_Rs,
                                const uint16_t i_sh, uint16_t i_me )
 {
     uint32_t rldicrInstOpcode = 0;
@@ -290,14 +289,14 @@ uint32_t getRldicrInstruction( const uint16_t i_Ra, const uint16_t i_Rs,
 }
 
 //-----------------------------------------------------------------------------
-
+#if 0
 /**
  * @brief generates instruction for mtmsrd instruction.
  * @param[in]   i_Rs      source register number
  * @return  returns 32 bit number representing mtmsrd instruction.
  * @note    moves contents of register i_Rs to MSR register.
  */
-uint32_t getMtmsrdInstruction( const uint16_t i_Rs )
+static uint32_t getMtmsrdInstruction( const uint16_t i_Rs )
 {
     uint32_t mtmsrdInstOpcode = 0;
     mtmsrdInstOpcode = 0;
@@ -306,7 +305,7 @@ uint32_t getMtmsrdInstruction( const uint16_t i_Rs )
 
     return SWIZZLE_4_BYTE(mtmsrdInstOpcode);
 }
-
+#endif
 //-----------------------------------------------------------------------------
 
 /**
@@ -320,14 +319,14 @@ uint32_t getMtmsrdInstruction( const uint16_t i_Rs )
  * @return      STOP_SAVE_SUCCESS if entry is found, STOP_SAVE_FAIL in case of
  *              an error.
  */
-StopReturnCode_t lookUpSprInImage( uint32_t* i_pThreadSectLoc,
+static StopReturnCode_t lookUpSprInImage( uint32_t* i_pThreadSectLoc,
                                    const uint32_t i_lookUpKey,
                                    const bool i_isCoreReg,
                                    void** io_pSprEntryLoc )
 {
     StopReturnCode_t l_rc = STOP_SAVE_FAIL;
-    uint32_t temp = i_isCoreReg ? uint32_t(CORE_RESTORE_CORE_AREA_SIZE) :
-                    uint32_t(CORE_RESTORE_THREAD_AREA_SIZE);
+    uint32_t temp = i_isCoreReg ? (uint32_t)(CORE_RESTORE_CORE_AREA_SIZE) :
+                    (uint32_t)(CORE_RESTORE_THREAD_AREA_SIZE);
     uint32_t* i_threadSectEnd = i_pThreadSectLoc + temp;
     uint32_t bctr_inst = SWIZZLE_4_BYTE(BLR_INST);
     *io_pSprEntryLoc = NULL;
@@ -371,7 +370,7 @@ StopReturnCode_t lookUpSprInImage( uint32_t* i_pThreadSectLoc,
  * @param[in] i_regData     data needs to be written to SPR entry.
  * @return    STOP_SAVE_SUCCESS if update works, STOP_SAVE_FAIL otherwise.
  */
-StopReturnCode_t updateSprEntryInImage( uint32_t* i_pSprEntryLocation,
+static StopReturnCode_t updateSprEntryInImage( uint32_t* i_pSprEntryLocation,
                                         const CpuReg_t i_regId,
                                         const uint64_t i_regData )
 {
@@ -591,7 +590,7 @@ StopReturnCode_t p9_stop_save_cpureg(  void* const i_pImage,
  * @note        Function does not validate that the given SCOM address really
  *              belongs to the given section.
  */
-StopReturnCode_t validateScomImageInputs( void* const i_pImage,
+static StopReturnCode_t validateScomImageInputs( void* const i_pImage,
         const uint32_t i_scomAddress,
         const uint8_t i_chipletId,
         const ScomOperation_t i_operation,
@@ -684,7 +683,7 @@ StopReturnCode_t validateScomImageInputs( void* const i_pImage,
  * @return      STOP_SAVE_SUCCESS if existing entry is updated, STOP_SAVE_FAIL
  *              otherwise.
  */
-StopReturnCode_t editScomEntry( uint32_t i_scomAddr, uint64_t i_scomData,
+static StopReturnCode_t editScomEntry( uint32_t i_scomAddr, uint64_t i_scomData,
                                 ScomEntry_t* i_pEntryLocation,
                                 uint32_t i_operation )
 {
@@ -745,7 +744,7 @@ StopReturnCode_t editScomEntry( uint32_t i_scomAddr, uint64_t i_scomData,
  *              place of NOP, at the end of table or as first entry of the cache
  *              sub-section(L2, L3 or EQ ).
  */
-StopReturnCode_t updateScomEntry( uint32_t i_scomAddr, uint64_t i_scomData,
+static StopReturnCode_t updateScomEntry( uint32_t i_scomAddr, uint64_t i_scomData,
                                   ScomEntry_t* i_scomEntry   )
 {
     StopReturnCode_t l_rc = STOP_SAVE_SUCCESS;
@@ -783,6 +782,16 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
     uint32_t entryLimit = 0;
     uint8_t chipletId = 0;
 
+    uint32_t nopInst;
+    ScomEntry_t* pEntryLocation = NULL;
+    ScomEntry_t* pNopLocation = NULL;
+    ScomEntry_t* pTableEndLocationtable = NULL;
+    uint32_t swizzleAddr;
+    uint64_t swizzleData;
+    uint32_t swizzleAttn;
+    uint32_t swizzleEntry;
+    uint32_t index = 0;
+    uint32_t swizzleBlr = SWIZZLE_4_BYTE(BLR_INST);
     do
     {
         chipletId = i_scomAddress >> 24;
@@ -865,17 +874,11 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
             break;
         }
 
-        uint32_t nopInst = getOriInstruction( 0, 0, 0 );
-
-        ScomEntry_t* pEntryLocation = NULL;
-        ScomEntry_t* pNopLocation = NULL;
-        ScomEntry_t* pTableEndLocationtable = NULL;
-        uint32_t swizzleAddr = SWIZZLE_4_BYTE(i_scomAddress);
-        uint64_t swizzleData = SWIZZLE_8_BYTE(i_scomData);
-        uint32_t swizzleAttn = SWIZZLE_4_BYTE(ATTN_OPCODE);
-        uint32_t swizzleEntry = SWIZZLE_4_BYTE(SCOM_ENTRY_START);
-        uint32_t index = 0;
-        uint32_t swizzleBlr = SWIZZLE_4_BYTE(BLR_INST);
+	nopInst = getOriInstruction( 0, 0, 0 );
+	swizzleAddr = SWIZZLE_4_BYTE(i_scomAddress);
+	swizzleData = SWIZZLE_8_BYTE(i_scomData);
+	swizzleAttn = SWIZZLE_4_BYTE(ATTN_OPCODE);
+	swizzleEntry = SWIZZLE_4_BYTE(SCOM_ENTRY_START);
 
         for( index = 0; index < entryLimit; ++index )
         {
