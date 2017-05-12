@@ -394,6 +394,7 @@
     <valueType>uint8</valueType>
     <enum>NONE = 0xFF, CS0 = 0x00, CS1 = 0x01</enum>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
