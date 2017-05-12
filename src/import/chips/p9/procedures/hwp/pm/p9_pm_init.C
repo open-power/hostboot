@@ -27,10 +27,10 @@
 /// @brief Wrapper that initializes or resets the OCC complex.
 ///
 // *HWP HWP Owner        : Greg Still <stillgs@us.ibm.com>
-// *HWP HWP Backup Owner :
-// *HWP FW Owner         : Sangeetha T S <sangeet2@in.ibm.com>
+// *HWP HWP Backup Owner : Prasad BG Ranganath <prasadbgr@in.ibm.com>
+// *HWP FW Owner         : Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team             : PM
-// *HWP Level            : 2
+// *HWP Level            : 3
 // *HWP Consumed by      : HS
 
 ///
