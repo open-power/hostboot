@@ -4090,10 +4090,11 @@ sub generate_proc
 
     my $bootFreqMult;
     {
-        use integer;
+        use Math::BigFloat ':constant';
         $bootFreqMult = $bootFreq / ($divisorRefclk / $dpllDivider);
     }
 
+    $bootFreqMult = int ($bootFreqMult);
     print "    <attribute>\n";
     print "        <id>BOOT_FREQ_MULT</id>\n";
     print "        <default>$bootFreqMult</default>\n";
