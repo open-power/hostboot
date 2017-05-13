@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,16 +55,48 @@
 // Constant definitions
 //------------------------------------------------------------------------------
 
+// ----------------------------------------------------------------------
+// Data Structure Definitions
+// ----------------------------------------------------------------------
+
+typedef struct
+{
+    uint8_t  l2_hasclocks;
+    uint8_t  l3_hasclocks;
+    uint8_t  c0_exec_hasclocks;   // these could be put in an array, but is broken out since attributes are separate
+    uint8_t  c1_exec_hasclocks;
+    uint8_t  c0_pc_hasclocks;
+    uint8_t  c1_pc_hasclocks;
+
+    uint8_t  l2_haspower;
+    uint8_t  l3_haspower;
+    uint8_t  c0_haspower;
+    uint8_t  c1_haspower;
+} stop_attrs_t;
+
+//------------------------------------------------------------------------------
+// Function prototype
+//------------------------------------------------------------------------------
+
+/// @brief Determine the state of cores, L2, and L3 of the targeted EX, and
+///        put the results into data structure stop_attrs_t.
+///
+/// @param[in]  i_target       EX target
+/// @param[out] o_stop_attrs   Output data structure to hold the state value.
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+
+fapi2::ReturnCode
+query_stop_state(
+    const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_ex_target,
+    stop_attrs_t& o_stop_attrs);
+
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_query_stop_state_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_EX>&);
 
 extern "C"
 {
-
-//------------------------------------------------------------------------------
-// Function prototype
-//------------------------------------------------------------------------------
 
 /// @brief Determine the state of cores, L2, and L3 of the targeted EX and set ATTRS if powered up and clocking
 ///

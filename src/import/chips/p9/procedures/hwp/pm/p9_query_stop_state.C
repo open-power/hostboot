@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,21 +77,6 @@
 
 typedef struct
 {
-    uint8_t  l2_hasclocks;
-    uint8_t  l3_hasclocks;
-    uint8_t  c0_exec_hasclocks;   // these could be put in an array, but is broken out since attributes are separate
-    uint8_t  c1_exec_hasclocks;
-    uint8_t  c0_pc_hasclocks;
-    uint8_t  c1_pc_hasclocks;
-
-    uint8_t  l2_haspower;
-    uint8_t  l3_haspower;
-    uint8_t  c0_haspower;
-    uint8_t  c1_haspower;
-} stop_attrs_t;
-
-typedef struct
-{
 
     uint8_t  l2_hasclocks;
     uint8_t  l3_hasclocks;
@@ -156,20 +141,18 @@ void compare_ss_hw(const char* msg, const uint8_t hw_state, uint8_t& stop_state)
 }
 
 fapi2::ReturnCode
-p9_query_stop_state(
-    const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_ex_target)
+query_stop_state(
+    const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_ex_target,
+    stop_attrs_t& o_stop_attrs)
 {
-
-
     fapi2::buffer<uint64_t>  l_qsshsrc, l_csshsrc[2], l_qpfetsense, l_cpfetsense[2];
     fapi2::buffer<uint64_t> l_data64;
     uint8_t  l_chpltNumber = 0;
     uint32_t l_quadStopLevel = 0;
     uint32_t l_exPos = 0;
     uint32_t l_coreStopLevel[2] = {0, 0};
-    uint8_t  l_data8;
+    uint8_t  l_data8 = 0;
 
-    stop_attrs_t  l_stop_attrs = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}; // Initialize all fields to 1
     hw_state_t l_clk_pfet = {0, 0, {0, 0}, {0, 0}, 0, 0, {0, 0}}; // Initialize all fields to 0
 
 
@@ -234,12 +217,12 @@ p9_query_stop_state(
     //  VSU, ISU are clocked off
     if (l_coreStopLevel[0] >= 1)
     {
-        l_stop_attrs.c0_exec_hasclocks = 0;
+        o_stop_attrs.c0_exec_hasclocks = 0;
     }
 
     if (l_coreStopLevel[1] >= 1)
     {
-        l_stop_attrs.c1_exec_hasclocks = 0;
+        o_stop_attrs.c1_exec_hasclocks = 0;
     }
 
     // STOP2 - Fast Sleep
@@ -248,12 +231,12 @@ p9_query_stop_state(
     //   PC, Core EPS are clocked off
     if (l_coreStopLevel[0] >= 2)
     {
-        l_stop_attrs.c0_pc_hasclocks = 0;
+        o_stop_attrs.c0_pc_hasclocks = 0;
     }
 
     if (l_coreStopLevel[1] >= 2)
     {
-        l_stop_attrs.c1_pc_hasclocks = 0;
+        o_stop_attrs.c1_pc_hasclocks = 0;
     }
 
     // STOP4 - Deep Sleep  (special exception for stop 9 - lab use only)
@@ -262,12 +245,12 @@ p9_query_stop_state(
     //   PC, Core EPS are powered off
     if (l_coreStopLevel[0] >= 4 && l_coreStopLevel[0] != 9)
     {
-        l_stop_attrs.c0_haspower = 0;
+        o_stop_attrs.c0_haspower = 0;
     }
 
     if (l_coreStopLevel[1] >= 4 && l_coreStopLevel[1] != 9)
     {
-        l_stop_attrs.c1_haspower = 0;
+        o_stop_attrs.c1_haspower = 0;
     }
 
 
@@ -281,22 +264,22 @@ p9_query_stop_state(
     {
 
         // The FAPI_ASSERT above ensures both cores are >= the quad stop state
-        l_stop_attrs.l2_hasclocks = 0;
+        o_stop_attrs.l2_hasclocks = 0;
     }
 
     // STOP9 - Fast Winkle (lab use only)
     // Both cores and cache are clocked off
     if (l_quadStopLevel >= 9)
     {
-        l_stop_attrs.l3_hasclocks = 0;
+        o_stop_attrs.l3_hasclocks = 0;
     }
 
     // STOP11 - Deep Winkle
     // Both cores and cache are powered off
     if (l_quadStopLevel >= 11)
     {
-        l_stop_attrs.l2_haspower = 0;
-        l_stop_attrs.l3_haspower = 0;
+        o_stop_attrs.l2_haspower = 0;
+        o_stop_attrs.l3_haspower = 0;
     }
 
     //----------------------------------------------------------------------------------
@@ -375,39 +358,54 @@ p9_query_stop_state(
     }
 
     FAPI_DBG("Comparing Stop State vs Actual HW settings");
-    FAPI_DBG("C0_EXEC_HASCLOCKS   ATTR(%d)  HW(%d)", l_stop_attrs.c0_exec_hasclocks, l_clk_pfet.c_exec_hasclocks[0]);
-    FAPI_DBG("C1_EXEC_HASCLOCKS   ATTR(%d)  HW(%d)", l_stop_attrs.c1_exec_hasclocks, l_clk_pfet.c_exec_hasclocks[1]);
+    FAPI_DBG("C0_EXEC_HASCLOCKS   ATTR(%d)  HW(%d)", o_stop_attrs.c0_exec_hasclocks, l_clk_pfet.c_exec_hasclocks[0]);
+    FAPI_DBG("C1_EXEC_HASCLOCKS   ATTR(%d)  HW(%d)", o_stop_attrs.c1_exec_hasclocks, l_clk_pfet.c_exec_hasclocks[1]);
 
-    FAPI_DBG("C0_PC_HASCLOCKS     ATTR(%d)  HW(%d)", l_stop_attrs.c0_pc_hasclocks, l_clk_pfet.c_pc_hasclocks[0]);
-    FAPI_DBG("C1_PC_HASCLOCKS     ATTR(%d)  HW(%d)", l_stop_attrs.c1_pc_hasclocks, l_clk_pfet.c_pc_hasclocks[1]);
+    FAPI_DBG("C0_PC_HASCLOCKS     ATTR(%d)  HW(%d)", o_stop_attrs.c0_pc_hasclocks, l_clk_pfet.c_pc_hasclocks[0]);
+    FAPI_DBG("C1_PC_HASCLOCKS     ATTR(%d)  HW(%d)", o_stop_attrs.c1_pc_hasclocks, l_clk_pfet.c_pc_hasclocks[1]);
 
-    FAPI_DBG("L2_HASCLOCKS        ATTR(%d)  HW(%d)", l_stop_attrs.l2_hasclocks, l_clk_pfet.l2_hasclocks);
-    FAPI_DBG("L3_HASCLOCKS        ATTR(%d)  HW(%d)", l_stop_attrs.l3_hasclocks, l_clk_pfet.l3_hasclocks);
+    FAPI_DBG("L2_HASCLOCKS        ATTR(%d)  HW(%d)", o_stop_attrs.l2_hasclocks, l_clk_pfet.l2_hasclocks);
+    FAPI_DBG("L3_HASCLOCKS        ATTR(%d)  HW(%d)", o_stop_attrs.l3_hasclocks, l_clk_pfet.l3_hasclocks);
 
 
 
-    FAPI_DBG("C0_HASPOWER         ATTR(%d)  HW(%d)", l_stop_attrs.c0_haspower, l_clk_pfet.c0_haspower());
-    FAPI_DBG("C1_HASPOWER         ATTR(%d)  HW(%d)", l_stop_attrs.c1_haspower, l_clk_pfet.c1_haspower());
+    FAPI_DBG("C0_HASPOWER         ATTR(%d)  HW(%d)", o_stop_attrs.c0_haspower, l_clk_pfet.c0_haspower());
+    FAPI_DBG("C1_HASPOWER         ATTR(%d)  HW(%d)", o_stop_attrs.c1_haspower, l_clk_pfet.c1_haspower());
 
-    FAPI_DBG("L2_HASPOWER         ATTR(%d)  HW(%d)", l_stop_attrs.l2_haspower, l_clk_pfet.l2_haspower());
-    FAPI_DBG("L3_HASPOWER         ATTR(%d)  HW(%d)", l_stop_attrs.l3_haspower, l_clk_pfet.l3_haspower());
+    FAPI_DBG("L2_HASPOWER         ATTR(%d)  HW(%d)", o_stop_attrs.l2_haspower, l_clk_pfet.l2_haspower());
+    FAPI_DBG("L3_HASPOWER         ATTR(%d)  HW(%d)", o_stop_attrs.l3_haspower, l_clk_pfet.l3_haspower());
 
     //----------------------------------------------------------------------------------
     // Compare Hardware status vs stop state status.   If there is a mismatch, the HW value overrides the stop state
     //----------------------------------------------------------------------------------
 
-    compare_ss_hw("C0_exec_HASCLOCKS", l_clk_pfet.c_exec_hasclocks[0], l_stop_attrs.c0_exec_hasclocks);
-    compare_ss_hw("C1_exec_HASCLOCKS", l_clk_pfet.c_exec_hasclocks[1], l_stop_attrs.c1_exec_hasclocks);
-    compare_ss_hw("C0_pc_HASCLOCKS",   l_clk_pfet.c_pc_hasclocks[0],   l_stop_attrs.c0_pc_hasclocks);
-    compare_ss_hw("C1_pc_HASCLOCKS",   l_clk_pfet.c_pc_hasclocks[1],   l_stop_attrs.c1_pc_hasclocks);
-    compare_ss_hw("L2_HASCLOCKS",      l_clk_pfet.l2_hasclocks,        l_stop_attrs.l2_hasclocks);
-    compare_ss_hw("L3_HASCLOCKS",      l_clk_pfet.l3_hasclocks,        l_stop_attrs.l3_hasclocks);
+    compare_ss_hw("C0_exec_HASCLOCKS", l_clk_pfet.c_exec_hasclocks[0], o_stop_attrs.c0_exec_hasclocks);
+    compare_ss_hw("C1_exec_HASCLOCKS", l_clk_pfet.c_exec_hasclocks[1], o_stop_attrs.c1_exec_hasclocks);
+    compare_ss_hw("C0_pc_HASCLOCKS",   l_clk_pfet.c_pc_hasclocks[0],   o_stop_attrs.c0_pc_hasclocks);
+    compare_ss_hw("C1_pc_HASCLOCKS",   l_clk_pfet.c_pc_hasclocks[1],   o_stop_attrs.c1_pc_hasclocks);
+    compare_ss_hw("L2_HASCLOCKS",      l_clk_pfet.l2_hasclocks,        o_stop_attrs.l2_hasclocks);
+    compare_ss_hw("L3_HASCLOCKS",      l_clk_pfet.l3_hasclocks,        o_stop_attrs.l3_hasclocks);
 
-    compare_ss_hw("C0_HASPOWER",       l_clk_pfet.c0_haspower(),       l_stop_attrs.c0_haspower);
-    compare_ss_hw("C1_HASPOWER",       l_clk_pfet.c1_haspower(),       l_stop_attrs.c1_haspower);
-    compare_ss_hw("L2_HASPOWER",       l_clk_pfet.l2_haspower(),       l_stop_attrs.l2_haspower);
-    compare_ss_hw("L3_HASPOWER",       l_clk_pfet.l3_haspower(),       l_stop_attrs.l3_haspower);
+    compare_ss_hw("C0_HASPOWER",       l_clk_pfet.c0_haspower(),       o_stop_attrs.c0_haspower);
+    compare_ss_hw("C1_HASPOWER",       l_clk_pfet.c1_haspower(),       o_stop_attrs.c1_haspower);
+    compare_ss_hw("L2_HASPOWER",       l_clk_pfet.l2_haspower(),       o_stop_attrs.l2_haspower);
+    compare_ss_hw("L3_HASPOWER",       l_clk_pfet.l3_haspower(),       o_stop_attrs.l3_haspower);
 
+
+fapi_try_exit:
+    FAPI_INF("< p9_query_stop_state...");
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode
+p9_query_stop_state(
+    const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_ex_target)
+{
+
+
+    stop_attrs_t  l_stop_attrs = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}; // Initialize all fields to 1
+
+    FAPI_TRY(query_stop_state(i_ex_target, l_stop_attrs));
 
     //----------------------------------------------------------------------------------
     // Set the Attributes
