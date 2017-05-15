@@ -500,6 +500,13 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
         uint64_t l_def_not_ddr4 = (l_TGT0_ATTR_CEN_EFF_DRAM_GEN != ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4);
         fapi2::ATTR_CEN_VPD_WLO_Type l_TGT0_ATTR_CEN_VPD_WLO;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_WLO, TGT0, l_TGT0_ATTR_CEN_VPD_WLO));
+        fapi2::ATTR_CEN_VPD_RLO_Type l_TGT0_ATTR_CEN_VPD_RLO;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_RLO, TGT0, l_TGT0_ATTR_CEN_VPD_RLO));
+        uint64_t l_def_is_custom = (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES);
+        fapi2::ATTR_CEN_EFF_DIMM_TYPE_Type l_TGT0_ATTR_CEN_EFF_DIMM_TYPE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_TYPE, TGT0, l_TGT0_ATTR_CEN_EFF_DIMM_TYPE));
+        uint64_t l_def_is_lrdimm = (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == ENUM_ATTR_CEN_EFF_DIMM_TYPE_LRDIMM);
+        uint64_t l_def_is_rdimm = (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == ENUM_ATTR_CEN_EFF_DIMM_TYPE_RDIMM);
         fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM_Type l_TGT0_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM, TGT0, l_TGT0_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM));
         fapi2::ATTR_CEN_EFF_DRAM_WR_VREF_Type l_TGT0_ATTR_CEN_EFF_DRAM_WR_VREF;
@@ -11298,6 +11305,57 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             if (literal_1)
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(l_TGT0_ATTR_CEN_VPD_WLO[literal_0] );
+            }
+
+            if (literal_1)
+            {
+                l_scom_buffer.insert<52, 4, 60, uint64_t>(l_TGT0_ATTR_CEN_VPD_RLO[literal_0] );
+            }
+
+            if (literal_1)
+            {
+                l_scom_buffer.insert<56, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if (literal_1)
+            {
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if (literal_1)
+            {
+                l_scom_buffer.insert<58, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if (l_def_is_custom)
+            {
+                l_scom_buffer.insert<59, 1, 63, uint64_t>(literal_0b0 );
+            }
+            else if (l_def_is_ddr4)
+            {
+                l_scom_buffer.insert<59, 1, 63, uint64_t>(literal_0b1 );
+            }
+            else if (literal_1)
+            {
+                l_scom_buffer.insert<59, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if (l_def_is_lrdimm)
+            {
+                l_scom_buffer.insert<60, 1, 63, uint64_t>(literal_0b1 );
+            }
+            else if (literal_1)
+            {
+                l_scom_buffer.insert<60, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if ((l_def_is_lrdimm || l_def_is_rdimm))
+            {
+                l_scom_buffer.insert<61, 1, 63, uint64_t>(literal_0b1 );
+            }
+            else if (literal_1)
+            {
+                l_scom_buffer.insert<61, 1, 63, uint64_t>(literal_0b0 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c00d0301143full, l_scom_buffer));
@@ -23545,6 +23603,57 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             if (literal_1)
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(l_TGT0_ATTR_CEN_VPD_WLO[literal_1] );
+            }
+
+            if (literal_1)
+            {
+                l_scom_buffer.insert<52, 4, 60, uint64_t>(l_TGT0_ATTR_CEN_VPD_RLO[literal_1] );
+            }
+
+            if (literal_1)
+            {
+                l_scom_buffer.insert<56, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if (literal_1)
+            {
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if (literal_1)
+            {
+                l_scom_buffer.insert<58, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if (l_def_is_custom)
+            {
+                l_scom_buffer.insert<59, 1, 63, uint64_t>(literal_0b0 );
+            }
+            else if (l_def_is_ddr4)
+            {
+                l_scom_buffer.insert<59, 1, 63, uint64_t>(literal_0b1 );
+            }
+            else if (literal_1)
+            {
+                l_scom_buffer.insert<59, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if (l_def_is_lrdimm)
+            {
+                l_scom_buffer.insert<60, 1, 63, uint64_t>(literal_0b1 );
+            }
+            else if (literal_1)
+            {
+                l_scom_buffer.insert<60, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if ((l_def_is_lrdimm || l_def_is_rdimm))
+            {
+                l_scom_buffer.insert<61, 1, 63, uint64_t>(literal_0b1 );
+            }
+            else if (literal_1)
+            {
+                l_scom_buffer.insert<61, 1, 63, uint64_t>(literal_0b0 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8001c00d0301143full, l_scom_buffer));

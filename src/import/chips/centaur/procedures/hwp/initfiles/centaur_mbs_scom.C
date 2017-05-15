@@ -116,8 +116,8 @@ constexpr uint64_t literal_0xAAAAAAAAAAAAAAAA = 0xAAAAAAAAAAAAAAAA;
 constexpr uint64_t literal_0xAA = 0xAA;
 
 fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& TGT0,
-                                   const fapi2::Target<fapi2::TARGET_TYPE_MBA>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_MBA>& TGT2,
-                                   const fapi2::Target<fapi2::TARGET_TYPE_L4>& TGT3, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT4)
+                                   const fapi2::Target<fapi2::TARGET_TYPE_MBA>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_L4>& TGT2,
+                                   const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT3)
 {
     {
         fapi2::ATTR_EC_Type   l_chip_ec;
@@ -139,241 +139,277 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_DROPS_PER_PORT, TGT1, l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT));
         fapi2::ATTR_CEN_EFF_IBM_TYPE_Type l_TGT1_ATTR_CEN_EFF_IBM_TYPE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_IBM_TYPE, TGT1, l_TGT1_ATTR_CEN_EFF_IBM_TYPE));
-        uint64_t l_def_mba01_4c_ddr4_cdimm = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_13)
-                                               && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                       && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba01_3c_2socket_ddr4 = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_10)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_4c_ddr4_cdimm);
-        uint64_t l_def_mba01_3c_1socket_ddr4 = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_10)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_TGT1_ATTR_CHIP_UNIT_POS;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, TGT1, l_TGT1_ATTR_CHIP_UNIT_POS));
+        uint64_t l_def_mba01 = (l_TGT1_ATTR_CHIP_UNIT_POS == literal_0);
+        uint64_t l_def_mba01_4c_ddr4_cdimm = (l_def_mba01
+                                              && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_13)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba01_3c_2socket_ddr4 = (l_def_mba01
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_10)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_4c_ddr4_cdimm));
+        uint64_t l_def_mba01_3c_1socket_ddr4 = (l_def_mba01
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_10)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)));
         uint64_t l_def_mba01_mtype_3c = ((l_def_mba01_3c_1socket_ddr4 || l_def_mba01_3c_2socket_ddr4)
                                          || l_def_mba01_4c_ddr4_cdimm);
-        uint64_t l_def_mba01_4b_ddr4_cdimm = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_12)
-                                               && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                       && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba01_3b_2socket = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_9)
-                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2));
-        uint64_t l_def_mba01_3b_1socket = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_9)
-                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
+        uint64_t l_def_mba01_4b_ddr4_cdimm = (l_def_mba01
+                                              && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_12)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba01_3b_2socket = (l_def_mba01 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_9)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)));
+        uint64_t l_def_mba01_3b_1socket = (l_def_mba01 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_9)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)));
         uint64_t l_def_mba01_mtype_3b = ((l_def_mba01_3b_1socket || l_def_mba01_3b_2socket) || l_def_mba01_4b_ddr4_cdimm);
-        uint64_t l_def_mba01_4a_ddr4_cdimm = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_11)
-                                               && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                       && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba01_4a_cdimm = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_11)
-                                          && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba01_3a_2socket_ddr4 = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_4a_ddr4_cdimm);
-        uint64_t l_def_mba01_3a_1socket_ddr4 = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
-        uint64_t l_def_mba01_3a_2socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_4a_cdimm);
-        uint64_t l_def_mba01_3a_1socket = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)
-                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
+        uint64_t l_def_mba01_4a_ddr4_cdimm = (l_def_mba01
+                                              && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_11)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba01_4a_cdimm = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_11)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba01_3a_2socket_ddr4 = (l_def_mba01
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_4a_ddr4_cdimm));
+        uint64_t l_def_mba01_3a_1socket_ddr4 = (l_def_mba01
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)));
+        uint64_t l_def_mba01_3a_2socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_4a_cdimm));
+        uint64_t l_def_mba01_3a_1socket = (l_def_mba01 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)));
         uint64_t l_def_mba01_mtype_3a = (((((l_def_mba01_3a_1socket || l_def_mba01_3a_2socket) || l_def_mba01_3a_1socket_ddr4)
                                            || l_def_mba01_3a_2socket_ddr4) || l_def_mba01_4a_cdimm) || l_def_mba01_4a_ddr4_cdimm);
         uint64_t l_def_mba01_type3_memory_populated_behind_MBA01 = ((l_def_mba01_mtype_3a || l_def_mba01_mtype_3b)
                 || l_def_mba01_mtype_3c);
         fapi2::ATTR_CEN_EFF_DIMM_RANKS_CONFIGED_Type l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_RANKS_CONFIGED, TGT1, l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED));
-        uint64_t l_def_mba01_nomem = ((l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_0] == literal_0b00000000)
-                                      && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_1] == literal_0b00000000));
-        uint64_t l_def_mba01_5d_2socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_17)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba01_5d_1socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_17)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
+        uint64_t l_def_mba01_nomem = (l_def_mba01
+                                      && ((l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_0] == literal_0b00000000)
+                                          && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_1] == literal_0b00000000)));
+        uint64_t l_def_mba01_5d_2socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_17)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba01_5d_1socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_17)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
         uint64_t l_def_mba01_mtype_5d = (l_def_mba01_5d_1socket || l_def_mba01_5d_2socket);
-        uint64_t l_def_mba01_3c_ddr4_cdimm = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_10)
-                                               && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                       && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba01_3c_cdimm = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_10)
-                                          && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba01_2c_2socket_ddr4 = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_3c_ddr4_cdimm);
-        uint64_t l_def_mba01_2a_ddr4_cdimm = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)
-                                               && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                       && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba01_2c_1socket_ddr4 = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba01_2a_ddr4_cdimm);
-        uint64_t l_def_mba01_2c_2socket = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)
-                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2));
-        uint64_t l_def_mba01_2a_cdimm = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)
-                                          && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba01_2c_1socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba01_2a_cdimm);
+        uint64_t l_def_mba01_3c_ddr4_cdimm = (l_def_mba01
+                                              && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_10)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba01_3c_cdimm = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_10)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba01_2c_2socket_ddr4 = (l_def_mba01
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_3c_ddr4_cdimm));
+        uint64_t l_def_mba01_2a_ddr4_cdimm = (l_def_mba01
+                                              && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba01_2c_1socket_ddr4 = (l_def_mba01
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba01_2a_ddr4_cdimm));
+        uint64_t l_def_mba01_2c_2socket = (l_def_mba01 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)));
+        uint64_t l_def_mba01_2a_cdimm = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba01_2c_1socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba01_2a_cdimm));
         uint64_t l_def_mba01_mtype_2c = (((((l_def_mba01_2c_1socket || l_def_mba01_2c_2socket) || l_def_mba01_2c_1socket_ddr4)
                                            || l_def_mba01_2c_2socket_ddr4) || l_def_mba01_3c_cdimm) || l_def_mba01_3c_ddr4_cdimm);
-        uint64_t l_def_mba01_3b_ddr4_cdimm = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_9)
-                                               && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                       && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba01_3b_cdimm = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_9)
-                                          && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba01_2b_2socket_ddr4 = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_3b_ddr4_cdimm);
-        uint64_t l_def_mba01_2b_ddr4_cdimm = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)
-                                               && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                       && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba01_2b_1socket_ddr4 = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba01_2b_ddr4_cdimm);
-        uint64_t l_def_mba01_2b_2socket = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)
-                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2));
-        uint64_t l_def_mba01_2b_cdimm = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)
-                                          && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba01_2b_1socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba01_2b_cdimm);
+        uint64_t l_def_mba01_3b_ddr4_cdimm = (l_def_mba01
+                                              && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_9)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba01_3b_cdimm = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_9)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba01_2b_2socket_ddr4 = (l_def_mba01
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_3b_ddr4_cdimm));
+        uint64_t l_def_mba01_2b_ddr4_cdimm = (l_def_mba01
+                                              && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba01_2b_1socket_ddr4 = (l_def_mba01
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba01_2b_ddr4_cdimm));
+        uint64_t l_def_mba01_2b_2socket = (l_def_mba01 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)));
+        uint64_t l_def_mba01_2b_cdimm = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba01_2b_1socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba01_2b_cdimm));
         uint64_t l_def_mba01_mtype_2b = (((((l_def_mba01_2b_1socket || l_def_mba01_2b_2socket) || l_def_mba01_2b_1socket_ddr4)
                                            || l_def_mba01_2b_2socket_ddr4) || l_def_mba01_3b_cdimm) || l_def_mba01_3b_ddr4_cdimm);
         fapi2::ATTR_CEN_EFF_DRAM_GEN_Type l_TGT1_ATTR_CEN_EFF_DRAM_GEN;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, TGT1, l_TGT1_ATTR_CEN_EFF_DRAM_GEN));
-        uint64_t l_def_mba01_3a_ddr4_cdimm = ((((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                        && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))) && (l_TGT1_ATTR_CEN_EFF_DRAM_GEN == literal_2));
-        uint64_t l_def_mba01_3a_cdimm = ((((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)
-                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                   && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))) && (l_TGT1_ATTR_CEN_EFF_DRAM_GEN == literal_1));
-        uint64_t l_def_mba01_2a_2socket_ddr4 = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_3a_ddr4_cdimm);
-        uint64_t l_def_mba01_2a_1socket_ddr4 = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba01_2a_ddr4_cdimm);
-        uint64_t l_def_mba01_2c_cdimm = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)
-                                          && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba01_2a_2socket = ((((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)
-                                             && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_2c_cdimm) || l_def_mba01_3a_cdimm);
-        uint64_t l_def_mba01_2a_1socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba01_2a_cdimm);
+        uint64_t l_def_mba01_3a_ddr4_cdimm = (l_def_mba01
+                                              && ((((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))) && (l_TGT1_ATTR_CEN_EFF_DRAM_GEN == literal_2)));
+        uint64_t l_def_mba01_3a_cdimm = (l_def_mba01 && ((((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))) && (l_TGT1_ATTR_CEN_EFF_DRAM_GEN == literal_1)));
+        uint64_t l_def_mba01_2a_2socket_ddr4 = (l_def_mba01
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_3a_ddr4_cdimm));
+        uint64_t l_def_mba01_2a_1socket_ddr4 = (l_def_mba01
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba01_2a_ddr4_cdimm));
+        uint64_t l_def_mba01_2c_cdimm = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba01_2a_2socket = (l_def_mba01 && ((((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_2c_cdimm) || l_def_mba01_3a_cdimm));
+        uint64_t l_def_mba01_2a_1socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba01_2a_cdimm));
         uint64_t l_def_mba01_mtype_2a = (((((l_def_mba01_2a_1socket || l_def_mba01_2a_2socket) || l_def_mba01_2a_1socket_ddr4)
                                            || l_def_mba01_2a_2socket_ddr4) || l_def_mba01_3a_cdimm) || l_def_mba01_3a_ddr4_cdimm);
         uint64_t l_def_mba01_type2_memory_populated_behind_MBA01 = (((l_def_mba01_mtype_2a || l_def_mba01_mtype_2b)
                 || l_def_mba01_mtype_2c) || l_def_mba01_mtype_5d);
-        uint64_t l_def_mba01_5c_2socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_16)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba01_5c_1socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_16)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
+        uint64_t l_def_mba01_5c_2socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_16)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba01_5c_1socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_16)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
         uint64_t l_def_mba01_mtype_5c = (l_def_mba01_5c_1socket || l_def_mba01_5c_2socket);
-        uint64_t l_def_mba01_5b_2socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_15)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba01_5b_1socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_15)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
+        uint64_t l_def_mba01_5b_2socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_15)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba01_5b_1socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_15)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
         uint64_t l_def_mba01_mtype_5b = (l_def_mba01_5b_1socket || l_def_mba01_5b_2socket);
         fapi2::ATTR_CEN_MSS_FREQ_Type l_TGT0_ATTR_CEN_MSS_FREQ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_FREQ, TGT0, l_TGT0_ATTR_CEN_MSS_FREQ));
-        uint64_t l_def_mba01_mtype_5a = (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400);
+        uint64_t l_def_mba01_mtype_5a = (l_def_mba01 && (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400));
         uint64_t l_def_mba01_type5_memory_populated_behind_MBA01 = ((l_def_mba01_mtype_5a || l_def_mba01_mtype_5b)
                 || l_def_mba01_mtype_5c);
-        uint64_t l_def_mba01_7c_2socket_ddr4 = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba01_7c_1socket_ddr4 = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba01_7c_2socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba01_7c_1socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
+        uint64_t l_def_mba01_7c_2socket_ddr4 = (l_def_mba01
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba01_7c_1socket_ddr4 = (l_def_mba01
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba01_7c_2socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba01_7c_1socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
         uint64_t l_def_mba01_mtype_7c = (((l_def_mba01_7c_1socket || l_def_mba01_7c_2socket) || l_def_mba01_7c_1socket_ddr4)
                                          || l_def_mba01_7c_2socket_ddr4);
-        uint64_t l_def_mba01_7b_2socket_ddr4 = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_22)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba01_7b_1socket_ddr4 = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_22)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba01_7b_2socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_22)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba01_7b_1socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_22)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
+        uint64_t l_def_mba01_7b_2socket_ddr4 = (l_def_mba01
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_22)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba01_7b_1socket_ddr4 = (l_def_mba01
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_22)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba01_7b_2socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_22)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba01_7b_1socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_22)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
         uint64_t l_def_mba01_mtype_7b = (((l_def_mba01_7b_1socket || l_def_mba01_7b_2socket) || l_def_mba01_7b_1socket_ddr4)
                                          || l_def_mba01_7b_2socket_ddr4);
-        uint64_t l_def_mba01_7a_2socket_ddr4 = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba01_7a_1socket_ddr4 = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)
-                                                && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba01_7a_2socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba01_7a_1socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
+        uint64_t l_def_mba01_7a_2socket_ddr4 = (l_def_mba01
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba01_7a_1socket_ddr4 = (l_def_mba01
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba01_7a_2socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba01_7a_1socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
         uint64_t l_def_mba01_mtype_7a = (((l_def_mba01_7a_1socket || l_def_mba01_7a_2socket) || l_def_mba01_7a_1socket_ddr4)
                                          || l_def_mba01_7a_2socket_ddr4);
         uint64_t l_def_mba01_type7_memory_populated_behind_MBA01 = ((l_def_mba01_mtype_7a || l_def_mba01_mtype_7b)
                 || l_def_mba01_mtype_7c);
-        uint64_t l_def_mba01_mtype_6c = (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400);
-        uint64_t l_def_mba01_mtype_6b = (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400);
-        uint64_t l_def_mba01_mtype_6a = (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400);
+        uint64_t l_def_mba01_mtype_6c = (l_def_mba01 && (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400));
+        uint64_t l_def_mba01_mtype_6b = (l_def_mba01 && (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400));
+        uint64_t l_def_mba01_mtype_6a = (l_def_mba01 && (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400));
         uint64_t l_def_mba01_type6_memory_populated_behind_MBA01 = ((l_def_mba01_mtype_6a || l_def_mba01_mtype_6b)
                 || l_def_mba01_mtype_6c);
-        uint64_t l_def_mba01_1d_2socket = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_4)
-                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2));
-        uint64_t l_def_mba01_1c_2socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_3)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_1d_2socket);
-        uint64_t l_def_mba01_1d_1socket = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_4)
-                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
-        uint64_t l_def_mba01_1c_1socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_3)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba01_1d_1socket);
+        uint64_t l_def_mba01_1d_2socket = (l_def_mba01 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_4)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)));
+        uint64_t l_def_mba01_1c_2socket = ((l_def_mba01 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_3)
+                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2))) || l_def_mba01_1d_2socket);
+        uint64_t l_def_mba01_1d_1socket = (l_def_mba01 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_4)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)));
+        uint64_t l_def_mba01_1c_1socket = ((l_def_mba01 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_3)
+                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1))) || l_def_mba01_1d_1socket);
         uint64_t l_def_mba01_mtype_1c = (l_def_mba01_1c_1socket || l_def_mba01_1c_2socket);
-        uint64_t l_def_mba01_1c_cdimm = ((((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_3)
-                                           || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_3))
-                                          && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba01_1b_2socket = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_2)
-                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_1c_cdimm);
-        uint64_t l_def_mba01_1b_1socket = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_2)
-                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
+        uint64_t l_def_mba01_1c_cdimm = (l_def_mba01 && ((((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_3)
+                                         || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_3))
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba01_1b_2socket = (l_def_mba01 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_2)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba01_1c_cdimm));
+        uint64_t l_def_mba01_1b_1socket = (l_def_mba01 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_2)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)));
         uint64_t l_def_mba01_mtype_1b = ((l_def_mba01_1b_1socket || l_def_mba01_1b_2socket) || l_def_mba01_1c_cdimm);
-        uint64_t l_def_mba01_1a_2socket = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_1)
-                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2));
-        uint64_t l_def_mba01_1a_1socket = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_1)
-                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
+        uint64_t l_def_mba01_1a_2socket = (l_def_mba01 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_1)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)));
+        uint64_t l_def_mba01_1a_1socket = (l_def_mba01 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_1)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)));
         uint64_t l_def_mba01_mtype_1a = (l_def_mba01_1a_1socket || l_def_mba01_1a_2socket);
         uint64_t l_def_mba01_type1_memory_populated_behind_MBA01 = ((l_def_mba01_mtype_1a || l_def_mba01_mtype_1b)
                 || l_def_mba01_mtype_1c);
-        uint64_t l_def_mba01_mtype_4c = (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400);
-        uint64_t l_def_mba01_mtype_4b = (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400);
-        uint64_t l_def_mba01_mtype_4a = (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400);
+        uint64_t l_def_mba01_mtype_4c = (l_def_mba01 && (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400));
+        uint64_t l_def_mba01_mtype_4b = (l_def_mba01 && (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400));
+        uint64_t l_def_mba01_mtype_4a = (l_def_mba01 && (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400));
         uint64_t l_def_mba01_type4_memory_populated_behind_MBA01 = ((l_def_mba01_mtype_4a || l_def_mba01_mtype_4b)
                 || l_def_mba01_mtype_4c);
-        uint64_t l_def_mba01_hash0_type3c_7c = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_10)
-                                                || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23));
-        uint64_t l_def_mba01_hash0_type3b_7b = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_9)
-                                                || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_22));
-        uint64_t l_def_mba01_hash0_type2c = (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7);
-        uint64_t l_def_mba01_hash0_type2b = (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6);
-        uint64_t l_def_mba01_hash0_type2a = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)
+        uint64_t l_def_mba01_hash0_type3c_7c = (l_def_mba01
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_10)
+                                                        || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)));
+        uint64_t l_def_mba01_hash0_type3b_7b = (l_def_mba01
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_9)
+                                                        || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_22)));
+        uint64_t l_def_mba01_hash0_type2c = (l_def_mba01 && (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7));
+        uint64_t l_def_mba01_hash0_type2b = (l_def_mba01 && (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6));
+        uint64_t l_def_mba01_hash0_type2a = ((l_def_mba01 && (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5))
                                              && ((l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_0] == literal_0)
                                                      || (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_1] == literal_0)));
-        uint64_t l_def_mba01_hash0_type1a = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_1)
-                                              || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_1] == literal_1))
+        uint64_t l_def_mba01_hash0_type1a = ((l_def_mba01 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_1)
+                                              || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_1] == literal_1)))
                                              && ((l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_0] == literal_0)
                                                      || (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_1] == literal_0)));
-        uint64_t l_def_mba01_hash0_sel = (((((l_def_mba01_hash0_type1a || l_def_mba01_hash0_type2a)
+        uint64_t l_def_mba01_hash0_sel = ((((((l_def_mba01 && l_def_mba01_hash0_type1a) || l_def_mba01_hash0_type2a)
                                              || l_def_mba01_hash0_type2b) || l_def_mba01_hash0_type2c) || l_def_mba01_hash0_type3b_7b)
                                           || l_def_mba01_hash0_type3c_7c);
-        uint64_t l_def_mba01_hash2_type1d_5c = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_4)
-                                                || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_16));
-        uint64_t l_def_mba01_hash2_type1b_5b = ((((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_2)
-                                                || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_15))
+        uint64_t l_def_mba01_hash2_type1d_5c = (l_def_mba01
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_4)
+                                                        || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_16)));
+        uint64_t l_def_mba01_hash2_type1b_5b = (((l_def_mba01
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_2)
+                                                        || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_15)))
                                                 && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_0] != literal_0))
                                                 && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_1] != literal_0));
-        uint64_t l_def_mba01_hash2_sel = (l_def_mba01_hash2_type1b_5b || l_def_mba01_hash2_type1d_5c);
-        uint64_t l_def_mba01_hash1_type3a_7a = ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)
-                                                || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21));
-        uint64_t l_def_mba01_hash1_type2a = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)
+        uint64_t l_def_mba01_hash2_sel = ((l_def_mba01 && l_def_mba01_hash2_type1b_5b) || l_def_mba01_hash2_type1d_5c);
+        uint64_t l_def_mba01_hash1_type3a_7a = (l_def_mba01
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)
+                                                        || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)));
+        uint64_t l_def_mba01_hash1_type2a = (((l_def_mba01
+                                               && (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5))
                                               && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_0] != literal_0))
                                              && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_1] != literal_0));
-        uint64_t l_def_mba01_hash1_type1b_5b = (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_2)
-                                                || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_15))
+        uint64_t l_def_mba01_hash1_type1b_5b = ((l_def_mba01
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_2)
+                                                        || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_15)))
                                                 && ((l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_0] == literal_0)
                                                         || (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_1] == literal_0)));
-        uint64_t l_def_mba01_hash1_type1a = ((((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_1)
-                                               || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_1] == literal_1))
+        uint64_t l_def_mba01_hash1_type1a = (((l_def_mba01
+                                               && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_1)
+                                                       || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_1] == literal_1)))
                                               && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_0] != literal_0))
                                              && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_0][literal_1] != literal_0));
-        uint64_t l_def_mba01_hash1_sel = (((l_def_mba01_hash1_type1a || l_def_mba01_hash1_type1b_5b)
+        uint64_t l_def_mba01_hash1_sel = ((((l_def_mba01 && l_def_mba01_hash1_type1a) || l_def_mba01_hash1_type1b_5b)
                                            || l_def_mba01_hash1_type2a) || l_def_mba01_hash1_type3a_7a);
         fapi2::ATTR_CEN_MSS_CACHE_ENABLE_Type l_TGT0_ATTR_CEN_MSS_CACHE_ENABLE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_CACHE_ENABLE, TGT0, l_TGT0_ATTR_CEN_MSS_CACHE_ENABLE));
-        fapi2::ATTR_FUNCTIONAL_Type l_TGT3_ATTR_FUNCTIONAL;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUNCTIONAL, TGT3, l_TGT3_ATTR_FUNCTIONAL));
+        fapi2::ATTR_FUNCTIONAL_Type l_TGT2_ATTR_FUNCTIONAL;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUNCTIONAL, TGT2, l_TGT2_ATTR_FUNCTIONAL));
         fapi2::ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE_Type
         l_TGT0_ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE, TGT0,
@@ -402,74 +438,75 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                                           || l_def_mba01_mtype_7c);
         uint64_t l_def_mba01_subtype_B = ((((((l_def_mba01_mtype_1b || l_def_mba01_mtype_2b) || l_def_mba01_mtype_3b)
                                              || l_def_mba01_mtype_4b) || l_def_mba01_mtype_5b) || l_def_mba01_mtype_6b) || l_def_mba01_mtype_7b);
-        fapi2::ATTR_CEN_EFF_DRAM_DENSITY_Type l_TGT2_ATTR_CEN_EFF_DRAM_DENSITY;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_DENSITY, TGT2, l_TGT2_ATTR_CEN_EFF_DRAM_DENSITY));
-        fapi2::ATTR_CEN_EFF_DIMM_TYPE_Type l_TGT2_ATTR_CEN_EFF_DIMM_TYPE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_TYPE, TGT2, l_TGT2_ATTR_CEN_EFF_DIMM_TYPE));
-        fapi2::ATTR_CEN_EFF_NUM_DROPS_PER_PORT_Type l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_DROPS_PER_PORT, TGT2, l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT));
-        fapi2::ATTR_CEN_EFF_IBM_TYPE_Type l_TGT2_ATTR_CEN_EFF_IBM_TYPE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_IBM_TYPE, TGT2, l_TGT2_ATTR_CEN_EFF_IBM_TYPE));
-        uint64_t l_def_mba23_7c_1socket_ddr4 = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_7b_1socket_ddr4 = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_22)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_7a_1socket_ddr4 = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_7c_1socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_7b_1socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_22)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_7a_1socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_5d_1socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_17)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_5c_1socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_16)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_5b_1socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_15)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_3c_1socket_ddr4 = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_10)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
-        uint64_t l_def_mba23_3b_1socket = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_9)
-                                           && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
-        uint64_t l_def_mba23_3a_1socket_ddr4 = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
-        uint64_t l_def_mba23_3a_1socket = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)
-                                           && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
-        fapi2::ATTR_CEN_EFF_CUSTOM_DIMM_Type l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_CUSTOM_DIMM, TGT2, l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM));
-        uint64_t l_def_mba23_2a_ddr4_cdimm = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)
-                                               && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                       && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba23_2c_1socket_ddr4 = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba23_2a_ddr4_cdimm);
-        uint64_t l_def_mba23_2a_cdimm = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)
-                                          && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba23_2c_1socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba23_2a_cdimm);
-        uint64_t l_def_mba23_2b_ddr4_cdimm = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)
-                                               && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                       && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba23_2b_1socket_ddr4 = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba23_2b_ddr4_cdimm);
-        uint64_t l_def_mba23_2b_cdimm = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)
-                                          && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba23_2b_1socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba23_2b_cdimm);
-        uint64_t l_def_mba23_2a_1socket_ddr4 = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba23_2a_ddr4_cdimm);
-        uint64_t l_def_mba23_2a_1socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba23_2a_cdimm);
-        uint64_t l_def_mba23_1d_1socket = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_4)
-                                           && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
-        uint64_t l_def_mba23_1c_1socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_3)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba23_1d_1socket);
-        uint64_t l_def_mba23_1b_1socket = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_2)
-                                           && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
-        uint64_t l_def_mba23_1a_1socket = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_1)
-                                           && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
+        uint64_t l_def_mba23 = (l_TGT1_ATTR_CHIP_UNIT_POS == literal_1);
+        uint64_t l_def_mba23_7c_1socket_ddr4 = (l_def_mba23
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_7b_1socket_ddr4 = (l_def_mba23
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_22)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_7a_1socket_ddr4 = (l_def_mba23
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_7c_1socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_7b_1socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_22)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_7a_1socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_5d_1socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_17)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_5c_1socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_16)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_5b_1socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_15)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_3c_1socket_ddr4 = (l_def_mba23
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_10)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)));
+        uint64_t l_def_mba23_3b_1socket = (l_def_mba23 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_9)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)));
+        uint64_t l_def_mba23_3a_1socket_ddr4 = (l_def_mba23
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)));
+        uint64_t l_def_mba23_3a_1socket = (l_def_mba23 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)));
+        uint64_t l_def_mba23_2a_ddr4_cdimm = (l_def_mba23
+                                              && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba23_2c_1socket_ddr4 = (l_def_mba23
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba23_2a_ddr4_cdimm));
+        uint64_t l_def_mba23_2a_cdimm = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba23_2c_1socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba23_2a_cdimm));
+        uint64_t l_def_mba23_2b_ddr4_cdimm = (l_def_mba23
+                                              && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba23_2b_1socket_ddr4 = (l_def_mba23
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba23_2b_ddr4_cdimm));
+        uint64_t l_def_mba23_2b_cdimm = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba23_2b_1socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba23_2b_cdimm));
+        uint64_t l_def_mba23_2a_1socket_ddr4 = (l_def_mba23
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba23_2a_ddr4_cdimm));
+        uint64_t l_def_mba23_2a_1socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_mba23_2a_cdimm));
+        uint64_t l_def_mba23_1d_1socket = (l_def_mba23 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_4)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)));
+        uint64_t l_def_mba23_1c_1socket = ((l_def_mba23 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_3)
+                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1))) || l_def_mba23_1d_1socket);
+        uint64_t l_def_mba23_1b_1socket = (l_def_mba23 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_2)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)));
+        uint64_t l_def_mba23_1a_1socket = (l_def_mba23 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_1)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)));
         uint64_t l_def_mba23_Centaur_or_Planar_DIMM_with_only_DIMM_slot0_populated = (((((((((((((((((((((
                     l_def_mba23_1a_1socket || l_def_mba23_1b_1socket) || l_def_mba23_1c_1socket) || l_def_mba23_2a_1socket)
                 || l_def_mba23_2a_1socket_ddr4) || l_def_mba23_2b_1socket) || l_def_mba23_2b_1socket_ddr4) || l_def_mba23_2c_1socket)
@@ -477,90 +514,102 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                 || l_def_mba23_3c_1socket_ddr4) || l_def_mba23_5b_1socket) || l_def_mba23_5c_1socket) || l_def_mba23_5d_1socket)
                 || l_def_mba23_7a_1socket) || l_def_mba23_7b_1socket) || l_def_mba23_7c_1socket) || l_def_mba23_7a_1socket_ddr4)
                 || l_def_mba23_7b_1socket_ddr4) || l_def_mba23_7c_1socket_ddr4);
-        uint64_t l_def_mba23_4c_ddr4_cdimm = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_13)
-                                               && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                       && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba23_4b_ddr4_cdimm = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_12)
-                                               && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                       && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba23_4a_ddr4_cdimm = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_12)
-                                               && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                       && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba23_4a_cdimm = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_12)
-                                          && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba23_3c_ddr4_cdimm = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_10)
-                                               && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                       && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba23_3b_ddr4_cdimm = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_9)
-                                               && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                       && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        fapi2::ATTR_CEN_EFF_DRAM_GEN_Type l_TGT2_ATTR_CEN_EFF_DRAM_GEN;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, TGT2, l_TGT2_ATTR_CEN_EFF_DRAM_GEN));
-        uint64_t l_def_mba23_3a_ddr4_cdimm = ((((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                        && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))) && (l_TGT2_ATTR_CEN_EFF_DRAM_GEN == literal_2));
-        uint64_t l_def_mba23_3c_cdimm = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_10)
-                                          && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba23_3b_cdimm = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_9)
-                                          && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba23_3a_cdimm = ((((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)
-                                           && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                   && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))) && (l_TGT2_ATTR_CEN_EFF_DRAM_GEN == literal_1));
-        uint64_t l_def_mba23_1c_cdimm = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_3)
-                                          && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba23_7c_2socket_ddr4 = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_7b_2socket_ddr4 = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_22)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_7a_2socket_ddr4 = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_7c_2socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_7b_2socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_22)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_7a_2socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_5d_2socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_17)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_5c_2socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_16)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_5b_2socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_15)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_mba23_3c_2socket_ddr4 = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_10)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_4c_ddr4_cdimm);
-        uint64_t l_def_mba23_3b_2socket = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_9)
-                                           && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2));
-        uint64_t l_def_mba23_3a_2socket_ddr4 = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_4a_ddr4_cdimm);
-        uint64_t l_def_mba23_3a_2socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_4a_cdimm);
-        uint64_t l_def_mba23_2c_2socket_ddr4 = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_3c_ddr4_cdimm);
-        uint64_t l_def_mba23_2c_2socket = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)
-                                           && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2));
-        uint64_t l_def_mba23_2b_2socket_ddr4 = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_3b_ddr4_cdimm);
-        uint64_t l_def_mba23_2b_2socket = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)
-                                           && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2));
-        uint64_t l_def_mba23_2a_2socket_ddr4 = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)
-                                                && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_3a_ddr4_cdimm);
-        uint64_t l_def_mba23_2c_cdimm = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)
-                                          && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT2_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT2_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_mba23_2a_2socket = ((((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)
-                                             && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_2c_cdimm) || l_def_mba23_3a_cdimm);
-        uint64_t l_def_mba23_1d_2socket = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_4)
-                                           && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2));
-        uint64_t l_def_mba23_1c_2socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_3)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_1d_2socket);
-        uint64_t l_def_mba23_1b_2socket = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_2)
-                                            && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_1c_cdimm);
-        uint64_t l_def_mba23_1a_2socket = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_1)
-                                           && (l_TGT2_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2));
+        uint64_t l_def_mba23_4c_ddr4_cdimm = (l_def_mba23
+                                              && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_13)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba23_4b_ddr4_cdimm = (l_def_mba23
+                                              && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_12)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba23_4a_ddr4_cdimm = (l_def_mba23
+                                              && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_12)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba23_4a_cdimm = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_12)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba23_3c_ddr4_cdimm = (l_def_mba23
+                                              && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_10)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba23_3b_ddr4_cdimm = (l_def_mba23
+                                              && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_9)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba23_3a_ddr4_cdimm = (l_def_mba23
+                                              && ((((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)
+                                                      && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                              && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))) && (l_TGT1_ATTR_CEN_EFF_DRAM_GEN == literal_2)));
+        uint64_t l_def_mba23_3c_cdimm = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_10)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba23_3b_cdimm = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_9)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba23_3a_cdimm = (l_def_mba23 && ((((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))) && (l_TGT1_ATTR_CEN_EFF_DRAM_GEN == literal_1)));
+        uint64_t l_def_mba23_1c_cdimm = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_3)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba23_7c_2socket_ddr4 = (l_def_mba23
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_7b_2socket_ddr4 = (l_def_mba23
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_22)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_7a_2socket_ddr4 = (l_def_mba23
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_7c_2socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_7b_2socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_22)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_7a_2socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_5d_2socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_17)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_5c_2socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_16)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_5b_2socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_15)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_3)));
+        uint64_t l_def_mba23_3c_2socket_ddr4 = (l_def_mba23
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_10)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_4c_ddr4_cdimm));
+        uint64_t l_def_mba23_3b_2socket = (l_def_mba23 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_9)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)));
+        uint64_t l_def_mba23_3a_2socket_ddr4 = (l_def_mba23
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_4a_ddr4_cdimm));
+        uint64_t l_def_mba23_3a_2socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_4a_cdimm));
+        uint64_t l_def_mba23_2c_2socket_ddr4 = (l_def_mba23
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_3c_ddr4_cdimm));
+        uint64_t l_def_mba23_2c_2socket = (l_def_mba23 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)));
+        uint64_t l_def_mba23_2b_2socket_ddr4 = (l_def_mba23
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_3b_ddr4_cdimm));
+        uint64_t l_def_mba23_2b_2socket = (l_def_mba23 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)));
+        uint64_t l_def_mba23_2a_2socket_ddr4 = (l_def_mba23
+                                                && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)
+                                                        && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_3a_ddr4_cdimm));
+        uint64_t l_def_mba23_2c_cdimm = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)
+                                         && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT1_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT1_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))));
+        uint64_t l_def_mba23_2a_2socket = (l_def_mba23 && ((((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_2c_cdimm) || l_def_mba23_3a_cdimm));
+        uint64_t l_def_mba23_1d_2socket = (l_def_mba23 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_4)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)));
+        uint64_t l_def_mba23_1c_2socket = ((l_def_mba23 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_3)
+                                            && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2))) || l_def_mba23_1d_2socket);
+        uint64_t l_def_mba23_1b_2socket = (l_def_mba23 && (((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_2)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_mba23_1c_cdimm));
+        uint64_t l_def_mba23_1a_2socket = (l_def_mba23 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_1)
+                                           && (l_TGT1_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)));
         uint64_t l_def_mba23_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated = ((((((((((((((((((((((((((((((((
                     l_def_mba23_1a_2socket || l_def_mba23_1b_2socket) || l_def_mba23_1c_2socket) || l_def_mba23_2a_2socket)
                 || l_def_mba23_2a_2socket_ddr4) || l_def_mba23_2b_2socket) || l_def_mba23_2b_2socket_ddr4) || l_def_mba23_2c_2socket)
@@ -571,45 +620,51 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                 || l_def_mba23_3b_cdimm) || l_def_mba23_3c_cdimm) || l_def_mba23_3a_ddr4_cdimm) || l_def_mba23_3b_ddr4_cdimm)
                 || l_def_mba23_3c_ddr4_cdimm) || l_def_mba23_4a_cdimm) || l_def_mba23_4a_ddr4_cdimm) || l_def_mba23_4b_ddr4_cdimm)
                 || l_def_mba23_4c_ddr4_cdimm);
-        uint64_t l_def_mba23_hash0_type3c_7c = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_10)
-                                                || (l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23));
-        uint64_t l_def_mba23_hash0_type3b_7b = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_9)
-                                                || (l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_22));
-        uint64_t l_def_mba23_hash0_type2c = (l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7);
-        uint64_t l_def_mba23_hash0_type2b = (l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6);
-        fapi2::ATTR_CEN_EFF_DIMM_RANKS_CONFIGED_Type l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_RANKS_CONFIGED, TGT2, l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED));
-        uint64_t l_def_mba23_hash0_type2a = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)
-                                             && ((l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_0] == literal_0)
-                                                     || (l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_1] == literal_0)));
-        uint64_t l_def_mba23_hash0_type1a = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_1)
-                                              || (l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_1] == literal_1))
-                                             && ((l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_0] == literal_0)
-                                                     || (l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_1] == literal_0)));
-        uint64_t l_def_mba23_hash0_sel = (((((l_def_mba23_hash0_type1a || l_def_mba23_hash0_type2a)
+        uint64_t l_def_mba23_hash0_type3c_7c = (l_def_mba23
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_10)
+                                                        || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23)));
+        uint64_t l_def_mba23_hash0_type3b_7b = (l_def_mba23
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_9)
+                                                        || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_22)));
+        uint64_t l_def_mba23_hash0_type2c = (l_def_mba23 && (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7));
+        uint64_t l_def_mba23_hash0_type2b = (l_def_mba23 && (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6));
+        uint64_t l_def_mba23_hash0_type2a = ((l_def_mba23 && (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5))
+                                             && ((l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_0] == literal_0)
+                                                     || (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_1] == literal_0)));
+        uint64_t l_def_mba23_hash0_type1a = ((l_def_mba23 && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_1)
+                                              || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_1] == literal_1)))
+                                             && ((l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_0] == literal_0)
+                                                     || (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_1] == literal_0)));
+        uint64_t l_def_mba23_hash0_sel = ((((((l_def_mba23 && l_def_mba23_hash0_type1a) || l_def_mba23_hash0_type2a)
                                              || l_def_mba23_hash0_type2b) || l_def_mba23_hash0_type2c) || l_def_mba23_hash0_type3b_7b)
                                           || l_def_mba23_hash0_type3c_7c);
-        uint64_t l_def_mba23_hash2_type1d_5c = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_4)
-                                                || (l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_16));
-        uint64_t l_def_mba23_hash2_type1b_5b = ((((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_2)
-                                                || (l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_15))
-                                                && (l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_0] != literal_0))
-                                                && (l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_1] != literal_0));
-        uint64_t l_def_mba23_hash2_sel = (l_def_mba23_hash2_type1b_5b || l_def_mba23_hash2_type1d_5c);
-        uint64_t l_def_mba23_hash1_type3a_7a = ((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)
-                                                || (l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21));
-        uint64_t l_def_mba23_hash1_type2a = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)
-                                              && (l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_0] != literal_0))
-                                             && (l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_1] != literal_0));
-        uint64_t l_def_mba23_hash1_type1b_5b = (((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_2)
-                                                || (l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_15))
-                                                && ((l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_0] == literal_0)
-                                                        || (l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_1] == literal_0)));
-        uint64_t l_def_mba23_hash1_type1a = ((((l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_1)
-                                               || (l_TGT2_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_1] == literal_1))
-                                              && (l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_0] != literal_0))
-                                             && (l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_1] != literal_0));
-        uint64_t l_def_mba23_hash1_sel = (((l_def_mba23_hash1_type1a || l_def_mba23_hash1_type1b_5b)
+        uint64_t l_def_mba23_hash2_type1d_5c = (l_def_mba23
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_4)
+                                                        || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_16)));
+        uint64_t l_def_mba23_hash2_type1b_5b = (((l_def_mba23
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_2)
+                                                        || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_15)))
+                                                && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_0] != literal_0))
+                                                && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_1] != literal_0));
+        uint64_t l_def_mba23_hash2_sel = ((l_def_mba23 && l_def_mba23_hash2_type1b_5b) || l_def_mba23_hash2_type1d_5c);
+        uint64_t l_def_mba23_hash1_type3a_7a = (l_def_mba23
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)
+                                                        || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)));
+        uint64_t l_def_mba23_hash1_type2a = (((l_def_mba23
+                                               && (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5))
+                                              && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_0] != literal_0))
+                                             && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_1] != literal_0));
+        uint64_t l_def_mba23_hash1_type1b_5b = ((l_def_mba23
+                                                && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_2)
+                                                        || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_15)))
+                                                && ((l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_0] == literal_0)
+                                                        || (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_1] == literal_0)));
+        uint64_t l_def_mba23_hash1_type1a = (((l_def_mba23
+                                               && ((l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_1)
+                                                       || (l_TGT1_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_1] == literal_1)))
+                                              && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_0] != literal_0))
+                                             && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_1] != literal_0));
+        uint64_t l_def_mba23_hash1_sel = ((((l_def_mba23 && l_def_mba23_hash1_type1a) || l_def_mba23_hash1_type1b_5b)
                                            || l_def_mba23_hash1_type2a) || l_def_mba23_hash1_type3a_7a);
         uint64_t l_def_mba23_mtype_3c = ((l_def_mba23_3c_1socket_ddr4 || l_def_mba23_3c_2socket_ddr4)
                                          || l_def_mba23_4c_ddr4_cdimm);
@@ -618,8 +673,9 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                                            || l_def_mba23_3a_2socket_ddr4) || l_def_mba23_4a_cdimm) || l_def_mba23_4a_ddr4_cdimm);
         uint64_t l_def_mba23_type3_memory_populated_behind_MBA23 = ((l_def_mba23_mtype_3a || l_def_mba23_mtype_3b)
                 || l_def_mba23_mtype_3c);
-        uint64_t l_def_mba23_nomem = ((l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_0] == literal_0b00000000)
-                                      && (l_TGT2_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_1] == literal_0b00000000));
+        uint64_t l_def_mba23_nomem = (l_def_mba23
+                                      && ((l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_0] == literal_0b00000000)
+                                          && (l_TGT1_ATTR_CEN_EFF_DIMM_RANKS_CONFIGED[literal_1][literal_1] == literal_0b00000000)));
         uint64_t l_def_mba23_mtype_5d = (l_def_mba23_5d_1socket || l_def_mba23_5d_2socket);
         uint64_t l_def_mba23_mtype_2c = (((((l_def_mba23_2c_1socket || l_def_mba23_2c_2socket) || l_def_mba23_2c_1socket_ddr4)
                                            || l_def_mba23_2c_2socket_ddr4) || l_def_mba23_3c_cdimm) || l_def_mba23_3c_ddr4_cdimm);
@@ -631,7 +687,7 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                 || l_def_mba23_mtype_2c) || l_def_mba23_mtype_5d);
         uint64_t l_def_mba23_mtype_5c = (l_def_mba23_5c_1socket || l_def_mba23_5c_2socket);
         uint64_t l_def_mba23_mtype_5b = (l_def_mba23_5b_1socket || l_def_mba23_5b_2socket);
-        uint64_t l_def_mba23_mtype_5a = (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400);
+        uint64_t l_def_mba23_mtype_5a = (l_def_mba23 && (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400));
         uint64_t l_def_mba23_type5_memory_populated_behind_MBA23 = ((l_def_mba23_mtype_5a || l_def_mba23_mtype_5b)
                 || l_def_mba23_mtype_5c);
         uint64_t l_def_mba23_mtype_7c = (((l_def_mba23_7c_1socket || l_def_mba23_7c_2socket) || l_def_mba23_7c_1socket_ddr4)
@@ -642,9 +698,9 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                                          || l_def_mba23_7a_2socket_ddr4);
         uint64_t l_def_mba23_type7_memory_populated_behind_MBA23 = ((l_def_mba23_mtype_7a || l_def_mba23_mtype_7b)
                 || l_def_mba23_mtype_7c);
-        uint64_t l_def_mba23_mtype_6c = (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400);
-        uint64_t l_def_mba23_mtype_6b = (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400);
-        uint64_t l_def_mba23_mtype_6a = (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400);
+        uint64_t l_def_mba23_mtype_6c = (l_def_mba23 && (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400));
+        uint64_t l_def_mba23_mtype_6b = (l_def_mba23 && (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400));
+        uint64_t l_def_mba23_mtype_6a = (l_def_mba23 && (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400));
         uint64_t l_def_mba23_type6_memory_populated_behind_MBA23 = ((l_def_mba23_mtype_6a || l_def_mba23_mtype_6b)
                 || l_def_mba23_mtype_6c);
         uint64_t l_def_mba23_mtype_1c = (l_def_mba23_1c_1socket || l_def_mba23_1c_2socket);
@@ -652,13 +708,11 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
         uint64_t l_def_mba23_mtype_1a = (l_def_mba23_1a_1socket || l_def_mba23_1a_2socket);
         uint64_t l_def_mba23_type1_memory_populated_behind_MBA23 = ((l_def_mba23_mtype_1a || l_def_mba23_mtype_1b)
                 || l_def_mba23_mtype_1c);
-        uint64_t l_def_mba23_mtype_4c = (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400);
-        uint64_t l_def_mba23_mtype_4b = (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400);
-        uint64_t l_def_mba23_mtype_4a = (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400);
+        uint64_t l_def_mba23_mtype_4c = (l_def_mba23 && (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400));
+        uint64_t l_def_mba23_mtype_4b = (l_def_mba23 && (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400));
+        uint64_t l_def_mba23_mtype_4a = (l_def_mba23 && (l_TGT0_ATTR_CEN_MSS_FREQ == literal_1400));
         uint64_t l_def_mba23_type4_memory_populated_behind_MBA23 = ((l_def_mba23_mtype_4a || l_def_mba23_mtype_4b)
                 || l_def_mba23_mtype_4c);
-        fapi2::ATTR_CEN_EFF_DRAM_WIDTH_Type l_TGT2_ATTR_CEN_EFF_DRAM_WIDTH;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, TGT2, l_TGT2_ATTR_CEN_EFF_DRAM_WIDTH));
         uint64_t l_def_mba23_subtype_A = ((((((l_def_mba23_mtype_1a || l_def_mba23_mtype_2a) || l_def_mba23_mtype_3a)
                                              || l_def_mba23_mtype_4a) || l_def_mba23_mtype_5a) || l_def_mba23_mtype_6a) || l_def_mba23_mtype_7a);
         uint64_t l_def_mba23_subtype_C = (((((((l_def_mba23_mtype_1c || l_def_mba23_mtype_2c) || l_def_mba23_mtype_3c)
@@ -666,22 +720,22 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                                           || l_def_mba23_mtype_7c);
         uint64_t l_def_mba23_subtype_B = ((((((l_def_mba23_mtype_1b || l_def_mba23_mtype_2b) || l_def_mba23_mtype_3b)
                                              || l_def_mba23_mtype_4b) || l_def_mba23_mtype_5b) || l_def_mba23_mtype_6b) || l_def_mba23_mtype_7b);
-        fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM_Type l_TGT2_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM, TGT2, l_TGT2_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM));
-        uint64_t l_def_num_mba23_ranks = (l_TGT2_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_1][literal_0] +
-                                          l_TGT2_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_1][literal_1]);
-        fapi2::ATTR_CEN_MSS_CLEANER_ENABLE_Type l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_CLEANER_ENABLE, TGT4, l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE));
         fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM_Type l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM, TGT1, l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM));
-        uint64_t l_def_num_mba01_ranks = (l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_0][literal_0] +
-                                          l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_0][literal_1]);
-        fapi2::ATTR_CEN_MSS_PREFETCH_ENABLE_Type l_TGT4_ATTR_CEN_MSS_PREFETCH_ENABLE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_PREFETCH_ENABLE, TGT4, l_TGT4_ATTR_CEN_MSS_PREFETCH_ENABLE));
+        uint64_t l_def_num_mba23_ranks = (l_def_mba23
+                                          && (l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_1][literal_0] +
+                                              l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_1][literal_1]));
+        fapi2::ATTR_CEN_MSS_CLEANER_ENABLE_Type l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_CLEANER_ENABLE, TGT3, l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE));
+        uint64_t l_def_num_mba01_ranks = (l_def_mba01
+                                          && (l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_0][literal_0] +
+                                              l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_0][literal_1]));
+        fapi2::ATTR_CEN_MSS_PREFETCH_ENABLE_Type l_TGT3_ATTR_CEN_MSS_PREFETCH_ENABLE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_PREFETCH_ENABLE, TGT3, l_TGT3_ATTR_CEN_MSS_PREFETCH_ENABLE));
         uint64_t l_def_num_mbs_ranks = (((l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_0][literal_0] +
                                           l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_0][literal_1]) +
-                                         l_TGT2_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_1][literal_0]) +
-                                        l_TGT2_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_1][literal_1]);
+                                         l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_1][literal_0]) +
+                                        l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_1][literal_1]);
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x201080aull, l_scom_buffer ));
@@ -972,13 +1026,13 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                 l_scom_buffer.insert<10, 2, 62, uint64_t>(literal_0b01 );
             }
 
-            if (((l_TGT0_ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE == literal_1) && ((l_TGT3_ATTR_FUNCTIONAL == literal_1)
+            if (((l_TGT0_ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE == literal_1) && ((l_TGT2_ATTR_FUNCTIONAL == literal_1)
                     && (l_TGT0_ATTR_CEN_MSS_CACHE_ENABLE != literal_0))))
             {
                 l_scom_buffer.insert<12, 1, 63, uint64_t>(literal_0b1 );
             }
             else if (((l_TGT0_ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE == literal_0)
-                      || ((l_TGT3_ATTR_FUNCTIONAL == literal_0) || (l_TGT0_ATTR_CEN_MSS_CACHE_ENABLE == literal_0))))
+                      || ((l_TGT2_ATTR_FUNCTIONAL == literal_0) || (l_TGT0_ATTR_CEN_MSS_CACHE_ENABLE == literal_0))))
             {
                 l_scom_buffer.insert<12, 1, 63, uint64_t>(literal_0b0 );
             }
@@ -1010,26 +1064,26 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x201140cull, l_scom_buffer ));
 
-            if ((l_TGT2_ATTR_CEN_EFF_DRAM_DENSITY == literal_2))
+            if ((l_TGT1_ATTR_CEN_EFF_DRAM_DENSITY == literal_2))
             {
                 l_scom_buffer.insert<6, 2, 62, uint64_t>(literal_0b00 );
             }
-            else if ((l_TGT2_ATTR_CEN_EFF_DRAM_DENSITY == literal_8))
+            else if ((l_TGT1_ATTR_CEN_EFF_DRAM_DENSITY == literal_8))
             {
                 l_scom_buffer.insert<6, 2, 62, uint64_t>(literal_0b10 );
             }
-            else if ((l_TGT2_ATTR_CEN_EFF_DRAM_DENSITY == literal_4))
+            else if ((l_TGT1_ATTR_CEN_EFF_DRAM_DENSITY == literal_4))
             {
                 l_scom_buffer.insert<6, 2, 62, uint64_t>(literal_0b01 );
             }
 
-            if (((l_TGT0_ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE == literal_0) || ((l_TGT3_ATTR_FUNCTIONAL == literal_0)
+            if (((l_TGT0_ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE == literal_0) || ((l_TGT2_ATTR_FUNCTIONAL == literal_0)
                     || (l_TGT0_ATTR_CEN_MSS_CACHE_ENABLE == literal_0))))
             {
                 l_scom_buffer.insert<12, 1, 63, uint64_t>(literal_0b0 );
             }
             else if (((l_TGT0_ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE == literal_1)
-                      && ((l_TGT3_ATTR_FUNCTIONAL == literal_1) && (l_TGT0_ATTR_CEN_MSS_CACHE_ENABLE != literal_0))))
+                      && ((l_TGT2_ATTR_FUNCTIONAL == literal_1) && (l_TGT0_ATTR_CEN_MSS_CACHE_ENABLE != literal_0))))
             {
                 l_scom_buffer.insert<12, 1, 63, uint64_t>(literal_0b1 );
             }
@@ -1089,11 +1143,11 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                 l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_0b0100 );
             }
 
-            if ((l_TGT2_ATTR_CEN_EFF_DRAM_WIDTH == literal_8))
+            if ((l_TGT1_ATTR_CEN_EFF_DRAM_WIDTH == literal_8))
             {
                 l_scom_buffer.insert<9, 1, 63, uint64_t>(literal_0b0 );
             }
-            else if ((l_TGT2_ATTR_CEN_EFF_DRAM_WIDTH == literal_4))
+            else if ((l_TGT1_ATTR_CEN_EFF_DRAM_WIDTH == literal_4))
             {
                 l_scom_buffer.insert<9, 1, 63, uint64_t>(literal_0b1 );
             }
@@ -1117,10 +1171,6 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
             FAPI_TRY(fapi2::getScom( TGT0, 0x201140dull, l_scom_buffer ));
 
             if (literal_1)
-            {
-                l_scom_buffer.insert<24, 3, 61, uint64_t>(literal_0b000 );
-            }
-            else if (literal_1)
             {
                 l_scom_buffer.insert<24, 3, 61, uint64_t>(literal_0b000 );
             }
@@ -1191,36 +1241,36 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                 l_scom_buffer.insert<23, 6, 58, uint64_t>(literal_0b000111 );
             }
 
-            if (((l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba23_ranks == literal_2)))
+            if (((l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba23_ranks == literal_2)))
             {
                 l_scom_buffer.insert<17, 6, 58, uint64_t>(literal_0b010000 );
             }
-            else if (((l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba01_ranks == literal_4)))
+            else if (((l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba01_ranks == literal_4)))
             {
                 l_scom_buffer.insert<17, 6, 58, uint64_t>(literal_0b001000 );
             }
-            else if (((l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba01_ranks == literal_1)))
+            else if (((l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba01_ranks == literal_1)))
             {
                 l_scom_buffer.insert<17, 6, 58, uint64_t>(literal_0b100000 );
             }
-            else if (((l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba01_ranks == literal_2)))
+            else if (((l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba01_ranks == literal_2)))
             {
                 l_scom_buffer.insert<17, 6, 58, uint64_t>(literal_0b010000 );
             }
-            else if (((l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba23_ranks == literal_1)))
+            else if (((l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba23_ranks == literal_1)))
             {
                 l_scom_buffer.insert<17, 6, 58, uint64_t>(literal_0b100000 );
             }
-            else if (((l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba23_ranks == literal_4)))
+            else if (((l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba23_ranks == literal_4)))
             {
                 l_scom_buffer.insert<17, 6, 58, uint64_t>(literal_0b001000 );
             }
 
-            if (((l_TGT3_ATTR_FUNCTIONAL == literal_0) || (l_TGT0_ATTR_CEN_MSS_CACHE_ENABLE == literal_0)))
+            if (((l_TGT2_ATTR_FUNCTIONAL == literal_0) || (l_TGT0_ATTR_CEN_MSS_CACHE_ENABLE == literal_0)))
             {
                 l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_0b0 );
             }
-            else if (((l_TGT3_ATTR_FUNCTIONAL == literal_1) && (l_TGT0_ATTR_CEN_MSS_CACHE_ENABLE != literal_0)))
+            else if (((l_TGT2_ATTR_FUNCTIONAL == literal_1) && (l_TGT0_ATTR_CEN_MSS_CACHE_ENABLE != literal_0)))
             {
                 l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_0b1 );
             }
@@ -1230,12 +1280,12 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                 l_scom_buffer.insert<1, 1, 63, uint64_t>(literal_0b0 );
             }
 
-            if (((l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE == literal_0) || ((l_TGT3_ATTR_FUNCTIONAL == literal_0)
+            if (((l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE == literal_0) || ((l_TGT2_ATTR_FUNCTIONAL == literal_0)
                     || (l_TGT0_ATTR_CEN_MSS_CACHE_ENABLE == literal_0))))
             {
                 l_scom_buffer.insert<2, 1, 63, uint64_t>(literal_0b0 );
             }
-            else if (((l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && ((l_TGT3_ATTR_FUNCTIONAL == literal_1)
+            else if (((l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && ((l_TGT2_ATTR_FUNCTIONAL == literal_1)
                       && (l_TGT0_ATTR_CEN_MSS_CACHE_ENABLE != literal_0))))
             {
                 l_scom_buffer.insert<2, 1, 63, uint64_t>(literal_0b1 );
@@ -1281,48 +1331,48 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                 l_scom_buffer.insert<10, 1, 63, uint64_t>(literal_0b0 );
             }
 
-            if ((l_TGT4_ATTR_CEN_MSS_PREFETCH_ENABLE == literal_1))
+            if ((l_TGT3_ATTR_CEN_MSS_PREFETCH_ENABLE == literal_1))
             {
                 l_scom_buffer.insert<11, 1, 63, uint64_t>(literal_0b0 );
             }
-            else if ((l_TGT4_ATTR_CEN_MSS_PREFETCH_ENABLE == literal_0))
+            else if ((l_TGT3_ATTR_CEN_MSS_PREFETCH_ENABLE == literal_0))
             {
                 l_scom_buffer.insert<11, 1, 63, uint64_t>(literal_0b1 );
             }
 
-            if ((l_TGT4_ATTR_CEN_MSS_PREFETCH_ENABLE == literal_1))
+            if ((l_TGT3_ATTR_CEN_MSS_PREFETCH_ENABLE == literal_1))
             {
                 l_scom_buffer.insert<12, 1, 63, uint64_t>(literal_0b0 );
             }
-            else if ((l_TGT4_ATTR_CEN_MSS_PREFETCH_ENABLE == literal_0))
+            else if ((l_TGT3_ATTR_CEN_MSS_PREFETCH_ENABLE == literal_0))
             {
                 l_scom_buffer.insert<12, 1, 63, uint64_t>(literal_0b1 );
             }
 
-            if (((l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && ((l_def_num_mbs_ranks == literal_2)
+            if (((l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && ((l_def_num_mbs_ranks == literal_2)
                     || (l_def_num_mbs_ranks == literal_4))))
             {
                 l_scom_buffer.insert<13, 4, 60, uint64_t>(literal_0b1111 );
             }
-            else if (((l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mbs_ranks == literal_8)))
+            else if (((l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mbs_ranks == literal_8)))
             {
                 l_scom_buffer.insert<13, 4, 60, uint64_t>(literal_0b0111 );
             }
-            else if (((l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && ((l_def_num_mba01_ranks == literal_1)
+            else if (((l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && ((l_def_num_mba01_ranks == literal_1)
                       || (l_def_num_mba01_ranks == literal_2))))
             {
                 l_scom_buffer.insert<13, 4, 60, uint64_t>(literal_0b1111 );
             }
-            else if (((l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba01_ranks == literal_4)))
+            else if (((l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba01_ranks == literal_4)))
             {
                 l_scom_buffer.insert<13, 4, 60, uint64_t>(literal_0b0111 );
             }
-            else if (((l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && ((l_def_num_mba23_ranks == literal_1)
+            else if (((l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && ((l_def_num_mba23_ranks == literal_1)
                       || (l_def_num_mba23_ranks == literal_2))))
             {
                 l_scom_buffer.insert<13, 4, 60, uint64_t>(literal_0b1111 );
             }
-            else if (((l_TGT4_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba23_ranks == literal_4)))
+            else if (((l_TGT3_ATTR_CEN_MSS_CLEANER_ENABLE == literal_1) && (l_def_num_mba23_ranks == literal_4)))
             {
                 l_scom_buffer.insert<13, 4, 60, uint64_t>(literal_0b0111 );
             }
