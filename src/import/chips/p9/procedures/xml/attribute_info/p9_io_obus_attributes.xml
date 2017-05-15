@@ -50,6 +50,7 @@
     FALSE = 0x0,
     TRUE = 0x1
   </enum>
+  <initToZero/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -60,6 +61,7 @@
     Value to select amount of margin to be applied.
   </description>
   <valueType>uint8</valueType>
+  <initToZero/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -70,6 +72,7 @@
     Value to select amount of tx ffe precusor to apply.
   </description>
   <valueType>uint8</valueType>
+  <initToZero/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -80,6 +83,7 @@
     Value to select amount of tx ffe postcusor to apply.
   </description>
   <valueType>uint8</valueType>
+  <initToZero/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
