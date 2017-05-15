@@ -156,6 +156,26 @@ void* call_host_voltage_config( void *io_pArgs )
         // for each proc target
         for( const auto & l_proc : l_procList )
         {
+            //Nimbus DD1 only supports XBUS with freq 1800MHz
+            //DD2 supports 2000MHz freq
+            //ATTR_CHIP_EC_FEATURE_HW393297 is used to pick the lower
+            //freq for dd1 chips
+            fapi2::ATTR_CHIP_EC_FEATURE_HW393297_Type l_dd1_xbus_pll;
+            FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW393297, l_proc,
+                        l_dd1_xbus_pll);
+            if (l_dd1_xbus_pll)
+            {
+                l_sys->setAttr<ATTR_FREQ_X_MHZ>( 1800 );
+            }
+            else
+            {
+                l_sys->setAttr<ATTR_FREQ_X_MHZ>( 2000 );
+            }
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "call_host_voltage_config.C::"
+                    "ATTR_FREQ_X_MHZ = %d",
+                    l_sys->getAttr<ATTR_FREQ_X_MHZ>());
+
             // get the child EQ targets
             targetService().getAssociated(
                     l_eqList,

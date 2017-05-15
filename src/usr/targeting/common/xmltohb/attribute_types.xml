@@ -2726,8 +2726,12 @@
         This is the same for all X-bus chiplets in the system.
         Provided by the MRW.
     </description>
-    <simpleType><uint32_t></uint32_t></simpleType>
-    <persistency>non-volatile</persistency>
+    <simpleType>
+        <uint32_t>
+            <default>2000</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
