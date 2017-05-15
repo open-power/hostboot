@@ -47,6 +47,10 @@
     <ffdc>FFDC_PORT</ffdc>
     <ffdc>FFDC_DIMM</ffdc>
     <ffdc>FFDC_RANK</ffdc>
+    <callout>
+      <target>MBA</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -59,6 +63,10 @@
     <ffdc>FFDC_MBA_TARGET</ffdc>
     <ffdc>FFDC_PORT</ffdc>
     <ffdc>FFDC_DIMM</ffdc>
+    <callout>
+      <target>MBA</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>

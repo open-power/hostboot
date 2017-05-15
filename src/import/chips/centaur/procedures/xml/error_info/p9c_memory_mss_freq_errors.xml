@@ -117,6 +117,10 @@
     <rc>RC_CEN_MSS_UNSUPPORTED_FREQ_CALCULATED</rc>
     <description>The frequency calculated with spd data is not supported by the jedec standards.</description>
     <ffdc>DIMM_MIN_FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
 </hwpError>
 
 

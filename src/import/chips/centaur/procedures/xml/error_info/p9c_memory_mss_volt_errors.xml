@@ -108,7 +108,7 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_CEN_MSS_VOLT_OVERIDE_UKNOWN</rc>
+    <rc>RC_CEN_MSS_VOLT_OVERRIDE_UNKNOWN</rc>
     <description>An uknown override is trying to be applied to the voltage domain.  It needs to be none, 1.2 or 1.35V. </description>
     <ffdc>OVERRIDE_TYPE</ffdc>
     <callout>

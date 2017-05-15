@@ -239,7 +239,7 @@
         <parent>TARGET_MBA</parent>
         <childType>TARGET_TYPE_DIMM</childType>
         </childTargets>
-        <priority>HIGH</priority>
+        <priority>MEDIUM</priority>
     </callout>
 
     <deconfigure>
@@ -271,7 +271,7 @@
         <parent>TARGET_MBA</parent>
         <childType>TARGET_TYPE_DIMM</childType>
         </childTargets>
-        <priority>HIGH</priority>
+        <priority>MEDIUM</priority>
     </callout>
 
     <deconfigure>
@@ -304,7 +304,7 @@
         <parent>TARGET_MBA</parent>
         <childType>TARGET_TYPE_DIMM</childType>
         </childTargets>
-        <priority>HIGH</priority>
+        <priority>MEDIUM</priority>
     </callout>
 
     <deconfigure>
@@ -336,7 +336,7 @@
         <parent>TARGET_MBA</parent>
         <childType>TARGET_TYPE_DIMM</childType>
         </childTargets>
-        <priority>HIGH</priority>
+        <priority>MEDIUM</priority>
     </callout>
 
     <deconfigure>
@@ -368,7 +368,7 @@
         <parent>TARGET_MBA</parent>
         <childType>TARGET_TYPE_DIMM</childType>
         </childTargets>
-        <priority>HIGH</priority>
+        <priority>MEDIUM</priority>
     </callout>
 
     <deconfigure>
@@ -400,7 +400,7 @@
         <parent>TARGET_MBA</parent>
         <childType>TARGET_TYPE_DIMM</childType>
         </childTargets>
-        <priority>HIGH</priority>
+        <priority>MEDIUM</priority>
     </callout>
 
     <deconfigure>
@@ -432,7 +432,7 @@
         <parent>TARGET_MBA</parent>
         <childType>TARGET_TYPE_DIMM</childType>
         </childTargets>
-        <priority>HIGH</priority>
+        <priority>MEDIUM</priority>
     </callout>
 
     <deconfigure>
@@ -464,7 +464,7 @@
         <parent>TARGET_MBA</parent>
         <childType>TARGET_TYPE_DIMM</childType>
         </childTargets>
-        <priority>HIGH</priority>
+        <priority>MEDIUM</priority>
     </callout>
 
     <deconfigure>
@@ -496,7 +496,7 @@
         <parent>TARGET_MBA</parent>
         <childType>TARGET_TYPE_DIMM</childType>
         </childTargets>
-        <priority>HIGH</priority>
+        <priority>MEDIUM</priority>
     </callout>
 
     <deconfigure>
@@ -528,7 +528,7 @@
         <parent>TARGET_MBA</parent>
         <childType>TARGET_TYPE_DIMM</childType>
         </childTargets>
-        <priority>HIGH</priority>
+        <priority>MEDIUM</priority>
     </callout>
 
     <deconfigure>
@@ -589,7 +589,7 @@
         <parent>TARGET_MBA</parent>
         <childType>TARGET_TYPE_DIMM</childType>
         </childTargets>
-        <priority>HIGH</priority>
+        <priority>MEDIUM</priority>
     </callout>
 
     <deconfigure>
@@ -797,7 +797,7 @@
     <rc>RC_CEN_MSS_EFF_CONFIG_DRAM_WIDTH_ERROR</rc>
     <description>Unknown DRAM width
         </description>
-    <FFDC>DRAM_WIDTH</FFDC>
+    <ffdc>DRAM_WIDTH</ffdc>
     <FFDC>TARGET_MBA</FFDC>
     <callout>
         <procedure>CODE</procedure>
