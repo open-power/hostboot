@@ -400,8 +400,12 @@ fapi2::ReturnCode set_rank_pairs(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     // Set the CSID to all 'unused' and we'll reset them as we configure rank pairs.
     // Note: Centaur configured this as 0xff00 all the time - it's unclear if we need
     // to set only the bits for the rank pairs configured, or whether 0xff00 will suffice. BRS
-    fapi2::buffer<uint64_t> l_csid_data(0xFF00);
+    // Updating for DD2 0xF000, as bits 4-7 (in terms of the phy reg) are removed
+    constexpr uint64_t DD1_CSID = 0xff00;
+    constexpr uint64_t DD2_CSID = 0xf000;
+    const fapi2::buffer<uint64_t> l_csid_data = mss::chip_ec_nimbus_lt_2_0(i_target) ? DD1_CSID : DD2_CSID;
 
+    // Gets the rankpairs
     std::pair<uint64_t, uint64_t> l_rp_registers;
     FAPI_TRY( get_rank_pair_assignments(i_target, l_rp_registers) );
 
