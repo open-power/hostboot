@@ -317,6 +317,54 @@ uint32_t startSfRead<TYPE_MBA>( ExtensibleChip * i_mbaChip,
 
 //------------------------------------------------------------------------------
 
+template<>
+uint32_t startVcmPhase1<TYPE_MBA>( ExtensibleChip * i_chip,
+                                   const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::startVcmPhase1<TYPE_MBA>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    // TODO RTC 157888
+    //  - Start a targeted steer cleanup.
+    //  - Stop on RCE ETE (threshold 1).
+    //  - The command should always stop at the end of the master rank.
+
+    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startVcmPhase2<TYPE_MBA>( ExtensibleChip * i_chip,
+                                   const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::startVcmPhase2<TYPE_MBA>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    // TODO RTC 157888
+    //  - Start a targeted super fast read.
+    //  - No stop-on-error conditions. Note that RCEs will report as UEs during
+    //    read operations. You can still set stop-on-RCE-ETE to be consistent
+    //    with phase 1, but it will not have any effect and is not required.
+    //  - The command should always stop at the end of the master rank.
+
+    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 } // end namespace PlatServices
 
 } // end namespace PRDF

@@ -120,7 +120,7 @@ uint32_t startBgScrub( ExtensibleChip * i_chip, const MemRank & i_rank );
 /**
  * @brief  Starts a targeted scrub command on the target rank for VCM phase 1.
  * @param  i_chip MCA or MBA chip.
- * @param  i_rank      The rank to target.
+ * @param  i_rank The rank to target.
  * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
  */
 template<TARGETING::TYPE T>
@@ -129,7 +129,7 @@ uint32_t startVcmPhase1( ExtensibleChip * i_chip, const MemRank & i_rank );
 /**
  * @brief  Starts a targeted scrub command on the target rank for VCM phase 2.
  * @param  i_chip MCA or MBA chip.
- * @param  i_rank      The rank to target.
+ * @param  i_rank The rank to target.
  * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
  */
 template<TARGETING::TYPE T>
@@ -138,7 +138,7 @@ uint32_t startVcmPhase2( ExtensibleChip * i_chip, const MemRank & i_rank );
 /**
  * @brief  Starts a targeted scrub command on the target rank for TPS phase 1.
  * @param  i_chip MCA or MBA chip.
- * @param  i_rank      The rank to target.
+ * @param  i_rank The rank to target.
  * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
  */
 template<TARGETING::TYPE T>
@@ -147,7 +147,7 @@ uint32_t startTpsPhase1( ExtensibleChip * i_chip, const MemRank & i_rank );
 /**
  * @brief  Starts a targeted scrub command on the target rank for TPS phase 2.
  * @param  i_chip MCA or MBA chip.
- * @param  i_rank      The rank to target.
+ * @param  i_rank The rank to target.
  * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
  */
 template<TARGETING::TYPE T>
