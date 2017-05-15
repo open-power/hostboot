@@ -521,6 +521,13 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         // Wipe out our cache of the NACA/SPIRA pointers
         RUNTIME::rediscover_hdat();
 
+        // Wipe out all HB reserved memory sections
+        l_elog = RUNTIME::clear_host_data_section(RUNTIME::RESERVED_MEM);
+        if(l_elog)
+        {
+            break;
+        }
+
         uint64_t l_topMemAddr = 0x0;
         uint64_t l_vAddr = 0x0;
 
