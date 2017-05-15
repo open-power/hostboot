@@ -84,19 +84,25 @@ class TdEntry
      * @brief  Each entry will have a set of steps that need to be performed.
      *         This function tells the procedure to move onto the next step.
      * @param  io_sc  The step code data struct.
-     * @param  o_done Returns true if this procedure is complete, false
+     * @param  o_done True if the procedure is complete or has aborted, false
      *                otherwise.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
     virtual uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                                bool & o_done ) = 0;
 
+    /** @return Each event type will have a unique key identifier used for each
+     *          procedure. The value is arbitrary. The only requirement is that
+     *          it is unique to the hardware it is targeting. For example, VCM
+     *          events will use only the master rank, where TPS events will use
+     *          both the master and slave rank. */
+    virtual uint32_t getKey() const = 0;
+
     /** @brief '==' operator */
     bool operator==( const TdEntry & i_e ) const
     {
-        return ( this->iv_chip   == i_e.iv_chip   &&
-                 this->iv_tdType == i_e.iv_tdType &&
-                 this->iv_rank   == i_e.iv_rank      );
+        return ( this->iv_tdType == i_e.iv_tdType &&
+                 this->getKey()  == i_e.getKey()     );
     }
 
     /**
@@ -126,21 +132,19 @@ class TdEntry
      * @param i_rank    Target rank
      */
     TdEntry( TdType i_tdType, ExtensibleChip * i_chip, MemRank i_rank ) :
-        iv_chip(i_chip), iv_tdType(i_tdType), iv_rank(i_rank)
-    {
-        PRDF_ASSERT( (TARGETING::TYPE_MCA == iv_chip->getType()) ||
-                     (TARGETING::TYPE_MBA == iv_chip->getType())    );
-    }
+        iv_tdType(i_tdType), iv_chip(i_chip), iv_rank(i_rank)
+    {}
 
   protected: // instance variables
 
-    /** The chip associated with this entry. This isn't used for any
-     *  comparisons, but is needed for every TD procedure. */
-    ExtensibleChip * const iv_chip;
-
-    const TdType  iv_tdType;     ///< The event type (see enum TdType).
-    const MemRank iv_rank;       ///< The rank in which this event occurred.
+    const TdType iv_tdType;      ///< The event type (see enum TdType).
     Phase iv_phase = TD_PHASE_0; ///< The event phase (see enum Phase).
+
+    // These are not used for comparisons, but used by all procedures and also
+    // used for displaying FFDC in the TD controller.
+    ExtensibleChip * const iv_chip; ///< The chip in which this event occurred.
+    const MemRank          iv_rank; ///< The rank in which this event occurred.
+
 };
 
 //------------------------------------------------------------------------------

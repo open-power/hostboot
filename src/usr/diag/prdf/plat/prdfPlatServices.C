@@ -432,7 +432,7 @@ uint32_t __startTdScrub_mca( ExtensibleChip * i_mcaChip,
         // startBgScrub() for the reasons why.
         i_stopCond.set_pause_on_aue(mss::ON);
 
-        // Start the super fast read command.
+        // Start targeted scrub command.
         errlHndl_t errl;
         FAPI_INVOKE_HWP( errl, memdiags::targeted_scrub, fapiTrgt, i_stopCond,
                          i_saddr, i_eaddr, mss::mcbist::NONE );
@@ -568,26 +568,6 @@ uint32_t startBgScrub<TYPE_MBA>( ExtensibleChip * i_mbaChip,
     return o_rc;
 
     #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t startVcmPhase1<TYPE_MBA>( ExtensibleChip * i_mbaChip,
-                                   const MemRank & i_rank )
-{
-    PRDF_ERR( "function not implemented yet" ); // TODO RTC 157888
-    return SUCCESS;
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t startVcmPhase2<TYPE_MBA>( ExtensibleChip * i_mbaChip,
-                                   const MemRank & i_rank )
-{
-    PRDF_ERR( "function not implemented yet" ); // TODO RTC 157888
-    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------

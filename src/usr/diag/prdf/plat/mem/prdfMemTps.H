@@ -48,9 +48,16 @@ class TpsEvent : public TdEntry
      */
     TpsEvent<T>( ExtensibleChip * i_chip, MemRank i_rank, bool i_ban = false ) :
         TdEntry(TPS_EVENT, i_chip, i_rank)
-    {}
+    {
+        PRDF_ASSERT( nullptr != i_chip );
+        PRDF_ASSERT( T == i_chip->getType() );
+    }
+
+  public: // overloaded functions from parent class
 
     uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
+
+    uint32_t getKey() const { return iv_rank.getKey(); } // Master and slave
 
 };
 

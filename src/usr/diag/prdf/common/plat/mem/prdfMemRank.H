@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,6 +86,12 @@ class MemRank
 
     /** @return The master rank select. */
     uint8_t getRankSlct() const { return iv_mrnk & 0x3; }
+
+    /** @return This value will mostly be used for traces. The first nibble will
+     *          contain the master rank, including DIMM select. The second
+     *          nibble will contain the slave rank. For example, 0x41 will be
+     *          master rank 4, slave rank 1. */
+    uint8_t getKey() const { return getMaster() << 4 | getSlave(); }
 
     /** @brief '==' operator */
     bool operator==( const MemRank & i_rank ) const

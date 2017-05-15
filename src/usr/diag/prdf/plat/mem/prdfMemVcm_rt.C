@@ -27,26 +27,75 @@
 
 // Platform includes
 #include <prdfMemVcm.H>
+#include <prdfP9McaDataBundle.H>
 
 using namespace TARGETING;
 
 namespace PRDF
 {
 
-//------------------------------------------------------------------------------
+using namespace PlatServices;
 
-// TODO: RTC 171913 Actual implementation of this procedure will be done later.
-template<>
-uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
-                                       bool & o_done )
+//##############################################################################
+//
+//                          Generic template functions
+//
+//##############################################################################
+
+template<TARGETING::TYPE T>
+uint32_t VcmEvent<T>::falseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[VcmEvent<TYPE_MCA>::nextStep] "
+    #define PRDF_FUNC "[VcmEvent::falseAlarm] "
 
     uint32_t o_rc = SUCCESS;
 
-    o_done = true;
+    PRDF_TRAC( PRDF_FUNC "Chip mark false alarm: 0x%08x,0x%02x",
+               iv_chip->getHuid(), getKey() );
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                      PRDFSIG_VcmFalseAlarm );
+
+    do
+    {
+        // If DRAM repairs are disabled, make the error log predictive.
+        if ( areDramRepairsDisabled() )
+        {
+            io_sc.service_data->setServiceCall();
+            break; // Nothing more to do.
+        }
+
+        // Increment the false alarm counter and check threshold.
+        if ( cv_falseAlarm.inc(iv_chip, getKey(), io_sc) )
+        {
+            // False alarm threshold has been reached. Leave the mark in place
+            // and treat the chip mark as verified.
+
+            io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
+                                                  PRDFSIG_VcmFalseAlarm );
+
+            PRDF_TRAC( PRDF_FUNC "False alarm threshold: 0x%08x,0x%02x",
+                       iv_chip->getHuid(), getKey() );
+
+            o_rc = verified( io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "verified() failed" );
+                break;
+            }
+        }
+        else
+        {
+            // Remove the chip mark.
+            o_rc = MarkStore::clearChipMark<T>( iv_chip, iv_rank );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "clearChipMark(0x%08x,0x%02x) failed",
+                          iv_chip->getHuid(), getKey() );
+                break;
+            }
+        }
+
+    } while (0);
 
     return o_rc;
 
@@ -55,18 +104,150 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
 
 //------------------------------------------------------------------------------
 
-// TODO: RTC 157888 Actual implementation of this procedure will be done later.
+// Avoid linker errors with the template.
+template class VcmEvent<TYPE_MCA>;
+template class VcmEvent<TYPE_MBA>;
+
+//##############################################################################
+//
+//                          Specializations for MCA
+//
+//##############################################################################
+
 template<>
-uint32_t VcmEvent<TYPE_MBA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
+TdFalseAlarm VcmEvent<TYPE_MCA>::cv_falseAlarm
+                            = TdFalseAlarm { 4, ThresholdResolution::ONE_DAY };
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
+                                       STEP_CODE_DATA_STRUCT & io_sc,
                                        bool & o_done )
 {
-    #define PRDF_FUNC "[VcmEvent<TYPE_MBA>::nextStep] "
+    #define PRDF_FUNC "[VcmEvent<TYPE_MCA>::checkEcc] "
 
     uint32_t o_rc = SUCCESS;
 
-    o_done = true;
+    do
+    {
+        if ( i_eccAttns & MAINT_UE )
+        {
+            PRDF_TRAC( PRDF_FUNC "UE Detected: 0x%08x,0x%02x",
+                       iv_chip->getHuid(), getKey() );
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_MaintUE );
+
+            o_rc = MemEcc::handleMemUe<TYPE_MCA>( iv_chip,
+                                                  MemAddr::fromRank(iv_rank),
+                                                  UE_TABLE::SCRUB_UE, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "handleMemUe(0x%08x,0x%02x) failed",
+                          iv_chip->getHuid(), getKey() );
+                break;
+            }
+
+            // Leave the mark in place and abort this procedure.
+            o_done = true; break;
+        }
+
+        if ( mfgMode() && (i_eccAttns & MAINT_IUE) )
+        {
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_MaintIUE );
+
+            o_rc = MemEcc::handleMemIue<TYPE_MCA, McaDataBundle *>( iv_chip,
+                                                                    iv_rank,
+                                                                    io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,0x%02x) failed",
+                          iv_chip->getHuid(), getKey() );
+                break;
+            }
+
+            // If service call is set, then IUE threshold was reached.
+            if ( io_sc.service_data->queryServiceCall() )
+            {
+                PRDF_TRAC( PRDF_FUNC "IUE threshold detected: 0x%08x,0x%02x",
+                           iv_chip->getHuid(), getKey() );
+
+                // Leave the mark in place and abort this procedure.
+                o_done = true; break;
+            }
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//##############################################################################
+//
+//                          Specializations for MBA
+//
+//##############################################################################
+
+template<>
+TdFalseAlarm VcmEvent<TYPE_MBA>::cv_falseAlarm
+                        = TdFalseAlarm { 4, 7 * ThresholdResolution::ONE_DAY };
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t VcmEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
+                                       STEP_CODE_DATA_STRUCT & io_sc,
+                                       bool & o_done )
+{
+    #define PRDF_FUNC "[VcmEvent<TYPE_MBA>::checkEcc] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( i_eccAttns & MAINT_UE )
+        {
+            PRDF_TRAC( PRDF_FUNC "UE Detected: 0x%08x,0x%02x",
+                       iv_chip->getHuid(), getKey() );
+
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_MaintUE );
+
+            /* TODO: RTC 157888
+            o_rc = MemEcc::handleMemUe<TYPE_MBA>( iv_chip,
+                                                  MemAddr::fromRank(iv_rank),
+                                                  UE_TABLE::SCRUB_UE, io_sc );
+            */
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "handleMemUe(0x%08x,0x%02x) failed",
+                          iv_chip->getHuid(), getKey() );
+                break;
+            }
+
+            // Leave the mark in place and abort this procedure.
+            o_done = true; break;
+        }
+
+        if ( i_eccAttns & MAINT_RCE_ETE )
+        {
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_MaintRETRY_CTE );
+
+            // Add the rank to the callout list.
+            MemoryMru mm { iv_chip->getTrgt(), iv_rank,
+                           MemoryMruData::CALLOUT_RANK };
+            io_sc.service_data->SetCallout( mm );
+
+            // Make the error log predictive.
+            io_sc.service_data->setServiceCall();
+        }
+
+    } while (0);
 
     return o_rc;
 

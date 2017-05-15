@@ -26,11 +26,7 @@
 /** @file prdfMemVcm_ipl.C */
 
 // Platform includes
-#include <prdfMemEccAnalysis.H>
 #include <prdfMemVcm.H>
-#include <prdfMemScrubUtils.H>
-#include <prdfPlatServices.H>
-#include <prdfP9McaExtraSig.H>
 
 using namespace TARGETING;
 
@@ -39,201 +35,44 @@ namespace PRDF
 
 using namespace PlatServices;
 
-//------------------------------------------------------------------------------
+//##############################################################################
+//
+//                          Generic template functions
+//
+//##############################################################################
 
-template<>
-uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
-                                       bool & o_done )
+template<TARGETING::TYPE T>
+uint32_t VcmEvent<T>::falseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[VcmEvent<TYPE_MCA>::nextStep] "
+    #define PRDF_FUNC "[VcmEvent::falseAlarm] "
 
     uint32_t o_rc = SUCCESS;
-    o_done = false;
 
-    // add iv_mark to the callout list
-    MemoryMru memmru( iv_chip->getTrgt(), iv_rank, iv_mark.getSymbol() );
-    io_sc.service_data->SetCallout( memmru );
+    PRDF_TRAC( PRDF_FUNC "Chip mark false alarm: 0x%08x,0x%02x",
+               iv_chip->getHuid(), getKey() );
+
+    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                      PRDFSIG_VcmFalseAlarm );
 
     do
     {
-        //phase 0
-        if ( TD_PHASE_0 == iv_phase )
+        // If DRAM repairs are disabled, make the error log predictive.
+        if ( areDramRepairsDisabled() )
         {
-            // Start VCM phase 1
-            io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
-                                                  PRDFSIG_StartVcmPhase1 );
-
-            PRDF_TRAC( PRDF_FUNC "Starting VCM Phase 1" );
-
-            o_rc = startVcmPhase1<TYPE_MCA>( iv_chip, iv_rank );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "startVcmPhase1(0x%08x, %d) failed",
-                          iv_chip->getHuid(), iv_rank.getMaster() );
-                break;
-            }
-
-            iv_phase = TD_PHASE_1;
+            io_sc.service_data->setServiceCall();
+            break; // Nothing more to do.
         }
-        //phase 1
-        else if ( TD_PHASE_1 == iv_phase )
+
+        // Remove the chip mark.
+        o_rc = MarkStore::clearChipMark<T>( iv_chip, iv_rank );
+        if ( SUCCESS != o_rc )
         {
-            //get the ecc attentions
-            uint32_t eccAttns;
-            o_rc = checkEccFirs<TYPE_MCA>( iv_chip, eccAttns );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x) failed",
-                          iv_chip->getHuid() );
-                break;
-            }
-
-            //if there was a UE or IUE
-            if ( (eccAttns & MAINT_UE) || (eccAttns & MAINT_IUE) )
-            {
-                PRDF_TRAC( PRDF_FUNC "UE Detected. Aborting this procedure." );
-                //UE
-                if ( eccAttns & MAINT_UE )
-                {
-                    io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                                      PRDFSIG_MaintUE );
-                }
-                //IUE
-                else
-                {
-                    io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                                      PRDFSIG_MaintIUE );
-                }
-
-                // Do memory UE handling.
-                o_rc = MemEcc::handleMemUe<TYPE_MCA>(iv_chip,
-                                                     MemAddr::fromRank(iv_rank),
-                                                     UE_TABLE::SCRUB_UE, io_sc);
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "handleMemUe<T>(0x%08x) failed",
-                              iv_chip->getHuid() );
-                    break;
-                }
-
-                //Leave the mark in place
-                //Abort this procedure
-                o_done = true;
-            }
-            else
-            {
-                // Start VCM phase 2
-                io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
-                                                      PRDFSIG_StartVcmPhase2 );
-
-                PRDF_TRAC( PRDF_FUNC "Starting VCM Phase 2" );
-
-                o_rc = startVcmPhase2<TYPE_MCA>( iv_chip, iv_rank );
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "startVcmPhase2(0x%08x, %d) failed",
-                              iv_chip->getHuid(), iv_rank.getMaster() );
-                    break;
-                }
-
-                iv_phase = TD_PHASE_2;
-            }
+            PRDF_ERR( PRDF_FUNC "clearChipMark(0x%08x,0x%02x) failed",
+                      iv_chip->getHuid(), getKey() );
+            break;
         }
-        //phase 2
-        else if ( TD_PHASE_2 == iv_phase )
-        {
-            //get the ecc attentions
-            uint32_t eccAttns;
-            o_rc = checkEccFirs<TYPE_MCA>( iv_chip, eccAttns );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "Call to 'checkEccFirs' failed on chip: "
-                          "0x%08x", iv_chip->getHuid() );
-                break;
-            }
 
-            //If DRAM repairs is disabled (via MNFG policy)
-            if ( areDramRepairsDisabled() )
-            {
-                //Make the error log predictive
-                io_sc.service_data->setServiceCall();
-            }
-
-            //if there was a UE or IUE
-            if ( (eccAttns & MAINT_UE) || (eccAttns & MAINT_IUE) )
-            {
-                //UE
-                if ( eccAttns & MAINT_UE )
-                {
-                    io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                                      PRDFSIG_MaintUE );
-                }
-                //IUE
-                else
-                {
-                    io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                                      PRDFSIG_MaintIUE );
-                }
-
-                // Do memory UE handling.
-                o_rc = MemEcc::handleMemUe<TYPE_MCA>(iv_chip,
-                                                     MemAddr::fromRank(iv_rank),
-                                                     UE_TABLE::SCRUB_UE, io_sc);
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "handleMemUe<T>(0x%08x) failed",
-                              iv_chip->getHuid() );
-                    break;
-                }
-
-                //Leave the mark in place
-            }
-            //else if there was a MCE
-            else if ( eccAttns & MAINT_MCE )
-            {
-                PRDF_TRAC( PRDF_FUNC "Chip mark verified" );
-
-                //The chip mark is verified
-                io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                                  PRDFSIG_VcmVerified );
-
-                // If there is a symbol mark on the same DRAM as the newly
-                // verified chip mark, remove the symbol mark.
-                o_rc = MarkStore::balance<TYPE_MCA>( iv_chip, iv_rank, io_sc );
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "MarkStore::balance(0x%08x, %d) failed",
-                              iv_chip->getHuid(), iv_rank.getMaster() );
-                }
-
-                // Set entire chip in DRAM Repairs VPD.
-                // TODO: RTC 169939
-            }
-            //else - verification failed
-            else
-            {
-                PRDF_TRAC( PRDF_FUNC "Chip mark false alarm" );
-
-                io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                                  PRDFSIG_VcmFalseAlarm );
-
-                //Remove the chip mark
-                o_rc = MarkStore::clearChipMark<TYPE_MCA>( iv_chip, iv_rank );
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "Failure to clear chip mark on chip: "
-                              "0x%08x", iv_chip->getHuid() );
-                }
-
-            }
-            //Abort the procedure
-            o_done = true;
-        }
-        else
-        {
-            PRDF_ASSERT( false ); //invalid value in iv_phase
-        }
-    }while(0);
+    } while (0);
 
     return o_rc;
 
@@ -242,18 +81,103 @@ uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
 
 //------------------------------------------------------------------------------
 
-// TODO: RTC 157888 Actual implementation of this procedure will be done later.
+// Avoid linker errors with the template.
+template class VcmEvent<TYPE_MCA>;
+template class VcmEvent<TYPE_MBA>;
+
+//##############################################################################
+//
+//                          Specializations for MCA
+//
+//##############################################################################
+
 template<>
-uint32_t VcmEvent<TYPE_MBA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
+uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
+                                       STEP_CODE_DATA_STRUCT & io_sc,
                                        bool & o_done )
 {
-    #define PRDF_FUNC "[VcmEvent<TYPE_MBA>::nextStep] "
+    #define PRDF_FUNC "[VcmEvent<TYPE_MCA>::checkEcc] "
 
     uint32_t o_rc = SUCCESS;
 
-    o_done = true;
+    do
+    {
+        // IUEs are reported as UEs during read operations. Therefore, we will
+        // treat IUEs like UEs for these scrub operations simply to maintain
+        // consistency during all of Memory Diagnostics.
+        if ( (i_eccAttns & MAINT_UE) || (i_eccAttns & MAINT_IUE) )
+        {
+            PRDF_TRAC( PRDF_FUNC "UE Detected: 0x%08x,0x%02x",
+                       iv_chip->getHuid(), getKey() );
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              (i_eccAttns & MAINT_UE)
+                                                           ? PRDFSIG_MaintUE
+                                                           : PRDFSIG_MaintIUE );
+
+            o_rc = MemEcc::handleMemUe<TYPE_MCA>( iv_chip,
+                                                  MemAddr::fromRank(iv_rank),
+                                                  UE_TABLE::SCRUB_UE, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "handleMemUe(0x%08x,0x%02x) failed",
+                          iv_chip->getHuid(), getKey() );
+                break;
+            }
+
+            // Leave the mark in place and abort this procedure.
+            o_done = true; break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//##############################################################################
+//
+//                          Specializations for MBA
+//
+//##############################################################################
+
+template<>
+uint32_t VcmEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
+                                       STEP_CODE_DATA_STRUCT & io_sc,
+                                       bool & o_done )
+{
+    #define PRDF_FUNC "[VcmEvent<TYPE_MBA>::checkEcc] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // IUEs (reported via RCE ETE) are reported as UEs during read
+        // operations. Therefore, we will treat IUEs like UEs for these scrub
+        // operations simply to maintain consistency during all of Memory
+        // Diagnostics.
+        if ( (i_eccAttns & MAINT_UE) || (i_eccAttns & MAINT_RCE_ETE) )
+        {
+            PRDF_TRAC( PRDF_FUNC "UE Detected: 0x%08x,0x%02x",
+                       iv_chip->getHuid(), getKey() );
+
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              (i_eccAttns & MAINT_UE)
+                                                    ? PRDFSIG_MaintUE
+                                                    : PRDFSIG_MaintRETRY_CTE );
+            // TODO: RTC 157888
+            // - Call mssIplUeIsolation() and add all DIMMs with bad bits to the
+            //   callout list.
+            // - Make the error log predictive.
+            // - Might be able to tuck this into MemEcc::handleMemUe().
+            PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+
+            // Leave the mark in place and abort this procedure.
+            o_done = true;
+        }
+
+    } while (0);
 
     return o_rc;
 

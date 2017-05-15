@@ -260,6 +260,61 @@ uint32_t resumeBgScrub<TYPE_MBA>( ExtensibleChip * i_chip )
 
 //------------------------------------------------------------------------------
 
+template<>
+uint32_t startVcmPhase1<TYPE_MBA>( ExtensibleChip * i_chip,
+                                   const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::startVcmPhase1<TYPE_MBA>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    // TODO RTC 157888
+    //  - Start a time based scrub.
+    //  - If fast scrub is enabled use FAST_MAX_BW_IMPACT speed, otherwise use
+    //    FAST_MIN_BW_IMPACT speed.
+    //  - Stop on UE.
+    //  - Stop on RCE ETE (threshold 2047 field, 1 mnfg).
+    //  - The command should stop immediately on error, or at the end of the
+    //    master rank if no errors are found.
+
+    PRDF_ERR( "function not implemented yet" );
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startVcmPhase2<TYPE_MBA>( ExtensibleChip * i_chip,
+                                   const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::startVcmPhase2<TYPE_MBA>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    // TODO RTC 157888
+    //  - Start a time based scrub.
+    //  - If fast scrub is enabled use FAST_MAX_BW_IMPACT speed, otherwise use
+    //    FAST_MIN_BW_IMPACT speed.
+    //  - Stop on UE.
+    //  - Stop on MCE.
+    //  - Stop on RCE ETE (threshold 2047 field, 1 mnfg).
+    //  - The command should stop immediately on error, or at the end of the
+    //    master rank if no errors are found.
+
+    PRDF_ERR( "function not implemented yet" );
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 } // end namespace PlatServices
 
 } // end namespace PRDF
