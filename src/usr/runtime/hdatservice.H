@@ -96,7 +96,19 @@ namespace RUNTIME
         errlHndl_t getHostDataSection( SectionId i_section,
                                        uint64_t i_instance,
                                        uint64_t& o_dataAddr,
-                                       size_t& o_dataSize );
+                                       size_t& o_dataSize);
+
+        /**
+         * @brief  Clear or invalidate a particular section of the host data
+         *         memory.
+         *         NOTE: Section must be supported by getInstanceCount to
+         *               actually clear.
+         *
+         * @param[in] i_section  Chunk of data to clear
+         *
+         * @return errlHndl_t  NULL on success; errlog otherwise
+         */
+        errlHndl_t clearHostDataSection(const RUNTIME::SectionId i_section);
 
         /**
          * @brief See documentation for get_instance_count in runtime.H
@@ -248,6 +260,16 @@ namespace RUNTIME
          */
         errlHndl_t getAndCheckTuple(const SectionId i_section,
                                     hdat5Tuple_t*& o_tuple);
+
+        /**
+         * @brief Get pointer to reserved memory array header
+         *
+         * @param[out] o_resvMemArrHdr Pointer, by reference, to the array header
+         *
+         * @return errlHndl_t Returns nullptr on success; otherwise errlog
+         */
+        errlHndl_t getResvMemArrHdr(hdatMsReservedMemArrayHeader_t*&
+                                    o_resvMemArrHdr);
 
         /********************************************
          * VARIABLES

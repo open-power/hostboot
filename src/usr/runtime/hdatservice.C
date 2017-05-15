@@ -546,7 +546,7 @@ errlHndl_t hdatService::loadHostData(void)
 errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                                             uint64_t i_instance,
                                             uint64_t& o_dataAddr,
-                                            size_t& o_dataSize )
+                                            size_t& o_dataSize)
 {
     errlHndl_t errhdl = NULL;
     TRACFCOMP( g_trac_runtime, "RUNTIME::getHostDataSection( i_section=%d, i_instance=%d )", i_section, i_instance );
@@ -670,40 +670,15 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         }
         else if (RUNTIME::RESERVED_MEM == i_section)
         {
-            // Find the right tuple and verify it makes sense
-            errhdl = getAndCheckTuple(i_section, tuple);
-            if( errhdl ) { break; }
-            TRACUCOMP(g_trac_runtime, "MDT_DATA tuple=%p", tuple);
-
-            uint64_t base_addr;
-            errhdl = getSpiraTupleVA(tuple, base_addr);
+            hdatMsReservedMemArrayHeader_t* reservedMemArrayHeader = nullptr;
+            errhdl = getResvMemArrHdr(reservedMemArrayHeader);
             if( errhdl ) { break; }
 
-            hdatHDIF_t* mdt_header =
-              reinterpret_cast<hdatHDIF_t*>(base_addr);
-            TRACUCOMP( g_trac_runtime, "mdt_header=%p", mdt_header );
-
-            // Check the headers and version info
-            errhdl = check_header( mdt_header,
-                                   MDT_HEADER );
-            if( errhdl ) { break; }
-
-            hdatHDIFDataHdr_t* mdt_data_header =
-              reinterpret_cast<hdatHDIFDataHdr_t*>
-              (mdt_header->hdatDataPtrOffset + base_addr);
-
-            errhdl = verify_hdat_address(mdt_data_header,
-                                         mdt_header->hdatDataPtrCnt * sizeof(hdatHDIFDataHdr_t) );
-            if( errhdl ) { break; }
-
-            uint64_t resvMemHdatAddr = mdt_data_header[MDT_RESERVED_HB_MEM_SECTION].hdatOffset + base_addr;
-
-            hdatMsReservedMemArrayHeader_t* reservedMemArrayHeader =
-                reinterpret_cast<hdatMsReservedMemArrayHeader_t *>(resvMemHdatAddr);
-
-            if( i_instance >= reservedMemArrayHeader->arrayEntryCount )
+            uint64_t l_arrCount = reservedMemArrayHeader->arrayEntryCount;
+            if( i_instance >= l_arrCount )
             {
-                TRACFCOMP( g_trac_runtime, "Instance %d exceeds max reserved mem entry count %d", i_instance, reservedMemArrayHeader->arrayEntryCount );
+                TRACFCOMP( g_trac_runtime, "Instance %d exceeds max reserved mem entry count %d",
+                          i_instance, l_arrCount);
                 /*@
                  * @errortype
                  * @moduleid     RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION
@@ -719,16 +694,19 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                                 RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION,
                                 RUNTIME::RC_INVALID_RHB_INSTANCE,
                                 i_instance,
-                                reservedMemArrayHeader->arrayEntryCount,
+                                l_arrCount,
                                 true /*Add HB Software Callout*/);
                 errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
                 break;
             }
 
-            o_dataAddr = reinterpret_cast<uint64_t>(
-                resvMemHdatAddr + reservedMemArrayHeader->offsetToArray + (i_instance * sizeof(hdatMsVpdRhbAddrRange_t)));
             //Array Header addr
-            o_dataSize = sizeof(hdatMsVpdRhbAddrRange_t);
+            o_dataAddr = reinterpret_cast<uint64_t>(
+                reinterpret_cast<uint64_t>(reservedMemArrayHeader) +
+                reservedMemArrayHeader->offsetToArray +
+                (i_instance * reservedMemArrayHeader->entrySize));
+            //Array Header size
+            o_dataSize = reservedMemArrayHeader->entrySize;
         }
         // HB Runtime Data
         else if ( (RUNTIME::HBRT        == i_section) ||
@@ -1370,7 +1348,6 @@ errlHndl_t hdatService::getInstanceCount(const SectionId i_section,
                                          uint64_t& o_count)
 {
     errlHndl_t errhdl = nullptr;
-    hdat5Tuple_t* tuple = nullptr;
     o_count = 0;
 
     do {
@@ -1379,6 +1356,8 @@ errlHndl_t hdatService::getInstanceCount(const SectionId i_section,
     switch(i_section)
     {
         case RUNTIME::PCRD:
+        {
+            hdat5Tuple_t* tuple = nullptr;
             errhdl = getAndCheckTuple(i_section, tuple);
             if( errhdl )
             {
@@ -1386,6 +1365,18 @@ errlHndl_t hdatService::getInstanceCount(const SectionId i_section,
             }
             o_count = tuple->hdatActualCnt;
             break;
+        }
+        case RUNTIME::RESERVED_MEM:
+        {
+            hdatMsReservedMemArrayHeader_t* reservedMemArrayHeader = nullptr;
+            errhdl = getResvMemArrHdr(reservedMemArrayHeader);
+            if( errhdl )
+            {
+                break;
+            }
+            o_count = reservedMemArrayHeader->arrayEntryCount;
+            break;
+        }
         default:
             TRACFCOMP( g_trac_runtime, ERR_MRK"getInstanceCount> section %d has no concept of instances",
                        i_section );
@@ -1515,6 +1506,133 @@ errlHndl_t hdatService::getAndCheckTuple(const SectionId i_section,
     return errhdl;
 }
 
+errlHndl_t hdatService::clearHostDataSection(const RUNTIME::SectionId i_section)
+{
+    TRACFCOMP(g_trac_runtime, ENTER_MRK"clearHostDataSection> section = %d",
+              i_section);
+
+    errlHndl_t l_elog = nullptr;
+
+    do {
+
+    //Always force a load (mapping)
+    l_elog = loadHostData();
+    if(l_elog)
+    {
+        break;
+    }
+
+    // Setup the SPIRA pointers
+    l_elog = findSpira();
+    if(l_elog)
+    {
+        break;
+    }
+
+    uint64_t l_count = 0;
+    l_elog = getInstanceCount(i_section, l_count);
+    if(l_elog)
+    {
+        break;
+    }
+
+    // Clear each instance of a host data section
+    for (uint64_t instance = 0; instance < l_count; ++instance)
+    {
+        // Call getHostDataSection with clear flag set
+        uint64_t l_hostDataAddr = 0;
+        uint64_t l_hostDataSize = 0;
+        l_elog = getHostDataSection(i_section,
+                                    instance,
+                                    l_hostDataAddr,
+                                    l_hostDataSize);
+        if(l_elog)
+        {
+            break;
+        }
+
+        assert(l_hostDataAddr>0, "Clear address 0x%X is <= 0", l_hostDataAddr);
+        assert(l_hostDataSize>0, "Clear size 0x%X is <= 0", l_hostDataSize);
+
+        // Sections differ in how they should be "cleared" or invalidated
+        switch (i_section)
+        {
+            case RUNTIME::RESERVED_MEM:
+            {
+                // Set Reserved Memory Type to Invalid
+                memset(reinterpret_cast<void*>(l_hostDataAddr),
+                       HDAT::RHB_TYPE_INVALID,
+                       sizeof(HDAT::hdatMsVpdRhbAddrRangeType));
+                // Clear rest of entries in range with zero
+                memset(reinterpret_cast<void*>(l_hostDataAddr +
+                                       sizeof(HDAT::hdatMsVpdRhbAddrRangeType)),
+                       0,
+                       l_hostDataSize - sizeof(HDAT::hdatMsVpdRhbAddrRangeType));
+                break;
+            }
+            default:
+            {
+                // Clear entire range with zero
+                memset(reinterpret_cast<void*>(l_hostDataAddr),
+                       0,
+                       l_hostDataSize);
+                break;
+            }
+        }
+    }
+    // If for loop broke with error
+    if(l_elog)
+    {
+        break;
+    }
+
+    } while(0);
+
+    return l_elog;
+}
+
+errlHndl_t hdatService::getResvMemArrHdr(hdatMsReservedMemArrayHeader_t*&
+                                         o_resvMemArrHdr)
+{
+    errlHndl_t errhdl = nullptr;
+    hdat5Tuple_t* tuple = nullptr;
+    uint64_t base_addr = 0;
+
+    do {
+        // Find the right tuple and verify it makes sense
+        errhdl = getAndCheckTuple(RUNTIME::RESERVED_MEM, tuple);
+        if( errhdl ) { break; }
+        TRACUCOMP(g_trac_runtime, "getNumResvMemEntries: MDT_DATA tuple=%p", tuple);
+
+        errhdl = getSpiraTupleVA(tuple, base_addr);
+        if( errhdl ) { break; }
+
+        hdatHDIF_t* mdt_header =
+          reinterpret_cast<hdatHDIF_t*>(base_addr);
+        TRACUCOMP( g_trac_runtime, "getNumResvMemEntries: mdt_header=%p", mdt_header );
+
+        // Check the headers and version info
+        errhdl = check_header( mdt_header,
+                               MDT_HEADER );
+        if( errhdl ) { break; }
+
+        hdatHDIFDataHdr_t* mdt_data_header =
+          reinterpret_cast<hdatHDIFDataHdr_t*>
+          (mdt_header->hdatDataPtrOffset + base_addr);
+
+        errhdl = verify_hdat_address(mdt_data_header,
+                                     mdt_header->hdatDataPtrCnt * sizeof(hdatHDIFDataHdr_t) );
+        if( errhdl ) { break; }
+
+        uint64_t resvMemHdatAddr = mdt_data_header[MDT_RESERVED_HB_MEM_SECTION].hdatOffset + base_addr;
+
+        o_resvMemArrHdr = reinterpret_cast<hdatMsReservedMemArrayHeader_t *>(resvMemHdatAddr);
+        assert(o_resvMemArrHdr != nullptr, "Reserved Memory Array Header is a nullptr");
+    } while (0);
+
+    return errhdl;
+}
+
 /********************
  Public Methods
  ********************/
@@ -1535,7 +1653,7 @@ errlHndl_t load_host_data( void )
 errlHndl_t get_host_data_section( SectionId i_section,
                                   uint64_t i_instance,
                                   uint64_t& o_dataAddr,
-                                  size_t& o_dataSize )
+                                  size_t& o_dataSize)
 {
     return Singleton<hdatService>::instance().
       getHostDataSection(i_section,i_instance, o_dataAddr, o_dataSize);
@@ -1572,6 +1690,11 @@ errlHndl_t get_instance_count(const SectionId i_section,
 {
     return Singleton<hdatService>::instance().getInstanceCount(i_section,
                                                                o_count);
+}
+
+errlHndl_t clear_host_data_section(const RUNTIME::SectionId i_section)
+{
+    return Singleton<hdatService>::instance().clearHostDataSection(i_section);
 }
 
 };

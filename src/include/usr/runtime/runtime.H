@@ -30,6 +30,7 @@
 #include <builtins.h>
 #include <errl/errlentry.H>
 #include <hdat/hdat.H>
+#include "../../../src/usr/runtime/hdatstructs.H"
 
 namespace RUNTIME
 {
@@ -163,8 +164,17 @@ enum SectionId
 errlHndl_t get_host_data_section( SectionId i_section,
                                   uint64_t i_instance,
                                   uint64_t& o_dataAddr,
-                                  size_t& o_dataSize );
+                                  size_t& o_dataSize);
 const size_t DATA_SIZE_UNKNOWN = 0xFFFFFFFFFFFFFFFF;
+
+/**
+ * @brief  Clear section of host data memory one instance at a time.
+ *
+ * @param[in] i_section  Chunk of data to clear
+ *
+ * @return errlHndl_t  nullptr on success, pointer to error log on failure
+ */
+errlHndl_t clear_host_data_section(const RUNTIME::SectionId i_section);
 
 /**
  * @brief Get the number of instances in a given section.
