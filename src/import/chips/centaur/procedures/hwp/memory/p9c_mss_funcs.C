@@ -251,8 +251,8 @@ fapi2::ReturnCode mss_ccs_inst_arry_0(
 
     if ((io_instruction_number >= 30) && (i_port != 0xFFFFFFFF))
     {
-        l_num_retry = 10;
-        l_timer = 10;
+        l_num_retry = 20;
+        l_timer = DELAY_100US;
         FAPI_DBG("CCS: Set end bit.\n");
         FAPI_TRY(mss_ccs_set_end_bit( i_target, 29));
         FAPI_TRY(mss_execute_ccs_inst_array( i_target, l_num_retry, l_timer));
@@ -409,8 +409,8 @@ fapi2::ReturnCode mss_ccs_inst_arry_1(
 
     if ((io_instruction_number >= 30) && (i_ccs_end.isBitClear(0)))
     {
-        l_num_retry = 10;
-        l_timer = 10;
+        l_num_retry = 20;
+        l_timer = DELAY_100US;
         FAPI_TRY(mss_ccs_set_end_bit( i_target, 29));
         FAPI_TRY(mss_execute_ccs_inst_array( i_target, l_num_retry, l_timer));
         io_instruction_number = 0;
@@ -650,24 +650,24 @@ fapi2::ReturnCode mss_ccs_fail_type(
     fapi2::buffer<uint64_t> l_data_buffer;
     FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_CCS_STATQ, l_data_buffer));
 
-    if (l_data_buffer.getBit<3>())
-    {
-        //DECONFIG and FFDC INFO
-        FAPI_ASSERT(false, fapi2::CEN_MSS_CCS_READ_MISCOMPARE().set_TARGET_MBA_ERROR(i_target).set_REG_CONTENTS(l_data_buffer),
-                    "CCS returned a FAIL condtion of \"Read Miscompare\" ");
-    }
-    else if (l_data_buffer.getBit<4>())
-    {
-        //DECONFIG and FFDC INFO
-        FAPI_ASSERT(false, fapi2::CEN_MSS_CCS_UE_SUE().set_TARGET_MBA_ERROR(i_target).set_REG_CONTENTS(l_data_buffer),
-                    "CCS returned a FAIL condition of \"UE or SUE Error\" ");
-    }
-    else if (l_data_buffer.getBit<5>())
-    {
-        //DECONFIG and FFDC INFO
-        FAPI_ASSERT(false, fapi2::CEN_MSS_CCS_CAL_TIMEOUT().set_TARGET_MBA_ERROR(i_target).set_REG_CONTENTS(l_data_buffer),
-                    "CCS returned a FAIL condition of \"Calibration Operation Time Out\" ");
-    }
+    //DECONFIG and FFDC INFO
+    FAPI_ASSERT(!l_data_buffer.getBit<3>(),
+                fapi2::CEN_MSS_CCS_READ_MISCOMPARE().
+                set_TARGET_MBA_ERROR(i_target).
+                set_REG_CONTENTS(l_data_buffer),
+                "CCS returned a FAIL condtion of \"Read Miscompare\" ");
+    //DECONFIG and FFDC INFO
+    FAPI_ASSERT(!l_data_buffer.getBit<4>(),
+                fapi2::CEN_MSS_CCS_UE_SUE().
+                set_TARGET_MBA_ERROR(i_target).
+                set_REG_CONTENTS(l_data_buffer),
+                "CCS returned a FAIL condition of \"UE or SUE Error\" ");
+    //DECONFIG and FFDC INFO
+    FAPI_ASSERT(!l_data_buffer.getBit<5>(),
+                fapi2::CEN_MSS_CCS_CAL_TIMEOUT().
+                set_TARGET_MBA_ERROR(i_target).
+                set_REG_CONTENTS(l_data_buffer),
+                "CCS returned a FAIL condition of \"Calibration Operation Time Out\" ");
 
 fapi_try_exit:
     return fapi2::FAPI2_RC_SUCCESS;
@@ -712,7 +712,10 @@ fapi2::ReturnCode mss_execute_ccs_inst_array(
         FAPI_ERR("CCS Operation Hung");
         FAPI_ERR("CCS has returned a IN_PROGRESS status and considered Hung.");
         FAPI_TRY(mss_ccs_fail_type(i_target));
-        FAPI_ASSERT(false, fapi2::CEN_MSS_CCS_HUNG().set_TARGET_MBA_ERROR(i_target), "Returning a CCS HUNG RC Value.");
+        FAPI_ASSERT(false,
+                    fapi2::CEN_MSS_CCS_HUNG().
+                    set_TARGET_MBA_ERROR(i_target),
+                    "Returning a CCS HUNG RC Value.");
     }
     else if (l_status == MSS_STAT_QUERY_PASS)
     {

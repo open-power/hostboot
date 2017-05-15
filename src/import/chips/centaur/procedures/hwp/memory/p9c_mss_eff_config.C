@@ -163,7 +163,8 @@ extern "C"
 
             // AST HERE: !If DDR4 spec changes to include other values, this section needs to be updated!
             FAPI_ASSERT((l_spd_tb_mtb_ddr4 == 0) && (l_spd_tb_ftb_ddr4 == 0),
-                        fapi2::CEN_MSS_EFF_CONFIG_INVALID_DDR4_SPD_TB(),
+                        fapi2::CEN_MSS_EFF_CONFIG_INVALID_DDR4_SPD_TB().
+                        set_TARGET_DIMM(i_target_dimm),
                         "Invalid DDR4 MTB/FTB Timebase received from SPD attribute on %s!", mss::c_str(i_target_dimm));
 
             // for 1000fs = 1ps = 1000 * 1 / 1
@@ -212,7 +213,8 @@ extern "C"
         else
         {
             FAPI_ASSERT(false,
-                        fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_SPD_DRAM_GEN(),
+                        fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_SPD_DRAM_GEN().
+                        set_TARGET_DIMM(i_target_dimm),
                         "Incompatable SPD DRAM generation on %s!", mss::c_str(i_target_dimm));
         }
 
@@ -345,6 +347,7 @@ extern "C"
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_MSS_EFF_CONFIG_MISMATCH_EMPTY().
+                        set_TARGET_MBA(i_target_mba).
                         set_CUR_DIMM_SPD_VALID_U8ARRAY_0_0(i_mss_eff_config_data->cur_dimm_spd_valid_u8array[0][0]).
                         set_CUR_DIMM_SPD_VALID_U8ARRAY_0_1(i_mss_eff_config_data->cur_dimm_spd_valid_u8array[0][1]).
                         set_CUR_DIMM_SPD_VALID_U8ARRAY_1_0(i_mss_eff_config_data->cur_dimm_spd_valid_u8array[1][0]).
@@ -372,6 +375,7 @@ extern "C"
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_MSS_EFF_CONFIG_MISMATCH_SIDE().
+                        set_TARGET_MBA(i_target_mba).
                         set_CUR_DIMM_SPD_VALID_U8ARRAY_0_0(i_mss_eff_config_data->cur_dimm_spd_valid_u8array[0][0]).
                         set_CUR_DIMM_SPD_VALID_U8ARRAY_0_1(i_mss_eff_config_data->cur_dimm_spd_valid_u8array[0][1]).
                         set_CUR_DIMM_SPD_VALID_U8ARRAY_1_0(i_mss_eff_config_data->cur_dimm_spd_valid_u8array[1][0]).
@@ -398,6 +402,7 @@ extern "C"
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_MSS_EFF_CONFIG_MISMATCH_TOP().
+                        set_TARGET_MBA(i_target_mba).
                         set_CUR_DIMM_SPD_VALID_U8ARRAY_0_0(i_mss_eff_config_data->cur_dimm_spd_valid_u8array[0][0]).
                         set_CUR_DIMM_SPD_VALID_U8ARRAY_0_1(i_mss_eff_config_data->cur_dimm_spd_valid_u8array[0][1]).
                         set_CUR_DIMM_SPD_VALID_U8ARRAY_1_0(i_mss_eff_config_data->cur_dimm_spd_valid_u8array[1][0]).
@@ -472,6 +477,7 @@ extern "C"
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN().
+                        set_TARGET_MBA(i_target_mba).
                         set_DRAM_DEVICE_TYPE_0_0( i_data->dram_device_type[0][0]).
                         set_DRAM_DEVICE_TYPE_0_1( i_data->dram_device_type[0][1]).
                         set_DRAM_DEVICE_TYPE_1_0( i_data->dram_device_type[1][0]).
@@ -500,6 +506,7 @@ extern "C"
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DIMM_TYPE().
+                        set_TARGET_MBA(i_target_mba).
                         set_MODULE_TYPE_0_0(i_data->module_type[0][0]).
                         set_MODULE_TYPE_0_1(i_data->module_type[0][1]).
                         set_MODULE_TYPE_1_0(i_data->module_type[1][0]).
@@ -527,6 +534,7 @@ extern "C"
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DIMM_RANKS().
+                        set_TARGET_MBA(i_target_mba).
                         set_NUM_RANKS_0_0(i_data->num_ranks[0][0]).
                         set_NUM_RANKS_0_1(i_data->num_ranks[0][1]).
                         set_NUM_RANKS_1_0(i_data->num_ranks[1][0]).
@@ -554,6 +562,7 @@ extern "C"
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DIMM_BANKS().
+                        set_TARGET_MBA(i_target_mba).
                         set_SDRAM_BANKS_0_0(i_data->sdram_banks[0][0]).
                         set_SDRAM_BANKS_0_1(i_data->sdram_banks[0][1]).
                         set_SDRAM_BANKS_1_0(i_data->sdram_banks[1][0]).
@@ -581,6 +590,7 @@ extern "C"
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DIMM_ROWS().
+                        set_TARGET_MBA(i_target_mba).
                         set_SDRAM_ROWS_0_0( i_data->sdram_rows[0][0]).
                         set_SDRAM_ROWS_0_1(i_data->sdram_rows[0][1]).
                         set_SDRAM_ROWS_1_0(i_data->sdram_rows[1][0]).
@@ -608,6 +618,7 @@ extern "C"
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DIMM_COLUMNS().
+                        set_TARGET_MBA(i_target_mba).
                         set_SDRAM_COLS_0_0(i_data->sdram_columns[0][0]).
                         set_SDRAM_COLS_0_1(i_data->sdram_columns[0][1]).
                         set_SDRAM_COLS_1_0(i_data->sdram_columns[1][0]).
@@ -635,6 +646,7 @@ extern "C"
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_BUS_WIDTH().
+                        set_TARGET_MBA(i_target_mba).
                         set_BUS_WIDTH_0_0( i_data->module_memory_bus_width[0][0]).
                         set_BUS_WIDTH_0_1( i_data->module_memory_bus_width[0][1]).
                         set_BUS_WIDTH_1_0( i_data->module_memory_bus_width[1][0]).
@@ -649,6 +661,7 @@ extern "C"
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_MSS_EFF_CONFIG_UNSUPPORTED_MODULE_MEMORY_BUS_WIDTH().
+                        set_TARGET_MBA(i_target_mba).
                         set_MODULE_MEMORY_BUS_WIDTH( i_data->module_memory_bus_width[0][0]),
                         "Unsupported DRAM bus width on %s!",
                         mss::c_str(i_target_mba));
@@ -674,6 +687,7 @@ extern "C"
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_WIDTH().
+                        set_TARGET_MBA(i_target_mba).
                         set_DRAM_WIDTH_0_0(i_data->dram_width[0][0]).
                         set_DRAM_WIDTH_0_1(i_data->dram_width[0][1]).
                         set_DRAM_WIDTH_1_0(i_data->dram_width[1][0]).
@@ -772,6 +786,7 @@ extern "C"
             default:
                 FAPI_ASSERT(false,
                             fapi2::CEN_MSS_EFF_CONFIG_DRAM_DEVICE_ERROR().
+                            set_TARGET_MBA(i_target_mba).
                             set_DRAM_DEVICE_TYPE(i_data->dram_device_type[0][0]),
                             "Unknown DRAM type on %s!", mss::c_str(i_target_mba));
         }
@@ -799,6 +814,7 @@ extern "C"
             default:
                 FAPI_ASSERT(false,
                             fapi2::CEN_MSS_EFF_CONFIG_MOD_TYPE_ERROR().
+                            set_TARGET_MBA(i_target_mba).
                             set_MOD_TYPE(i_data->module_type[0][0]),
                             "Unknown DIMM type on %s!", mss::c_str(i_target_mba));
         }
@@ -848,6 +864,7 @@ extern "C"
             default:
                 FAPI_ASSERT(false,
                             fapi2::CEN_MSS_EFF_CONFIG_SDRAM_BANK_ERROR().
+                            set_TARGET_MBA(i_target_mba).
                             set_SDRAM_BANKS(i_data->sdram_banks[0][0]),
                             "Unknown DRAM banks on %s!", mss::c_str(i_target_mba));
         }
@@ -886,6 +903,7 @@ extern "C"
             default:
                 FAPI_ASSERT(false,
                             fapi2::CEN_MSS_EFF_CONFIG_SDRAM_ROWS_ERROR().
+                            set_TARGET_MBA(i_target_mba).
                             set_SDRAM_ROWS(i_data->sdram_rows[0][0]),
                             "Unknown DRAM rows on %s!", mss::c_str(i_target_mba));
         }
@@ -912,6 +930,7 @@ extern "C"
             default:
                 FAPI_ASSERT(false,
                             fapi2::CEN_MSS_EFF_CONFIG_SDRAM_COLS_ERROR().
+                            set_TARGET_MBA(i_target_mba).
                             set_SDRAM_COLS(i_data->sdram_columns[0][0]),
                             "Unknown DRAM cols on %s!", mss::c_str(i_target_mba));
         }
@@ -944,7 +963,9 @@ extern "C"
         {
             o_atts->eff_dram_width = fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X16;
             FAPI_ASSERT(false,
-                        fapi2::CEN_MSS_EFF_CONFIG_DRAM_WIDTH_16_ERROR(),
+                        fapi2::CEN_MSS_EFF_CONFIG_DRAM_WIDTH_16_ERROR().
+                        set_DRAM_WIDTH(i_data->dram_width[0][0]).
+                        set_TARGET_MBA(i_target_mba),
                         "Unsupported DRAM width x16 on %s!",
                         mss::c_str(i_target_mba));
         }
@@ -953,14 +974,18 @@ extern "C"
         {
             o_atts->eff_dram_width = fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X32;
             FAPI_ASSERT(false,
-                        fapi2::CEN_MSS_EFF_CONFIG_DRAM_WIDTH_32_ERROR(),
+                        fapi2::CEN_MSS_EFF_CONFIG_DRAM_WIDTH_32_ERROR().
+                        set_DRAM_WIDTH(i_data->dram_width[0][0]).
+                        set_TARGET_MBA(i_target_mba),
                         "Unsupported DRAM width x32 on %s!",
                         mss::c_str(i_target_mba));
         }
         else
         {
             FAPI_ASSERT(false,
-                        fapi2::CEN_MSS_EFF_CONFIG_DRAM_WIDTH_ERROR(),
+                        fapi2::CEN_MSS_EFF_CONFIG_DRAM_WIDTH_ERROR().
+                        set_DRAM_WIDTH(i_data->dram_width[0][0]).
+                        set_TARGET_MBA(i_target_mba),
                         "Unknown DRAM width on %s!", mss::c_str(i_target_mba));
         }
 
@@ -1007,6 +1032,7 @@ extern "C"
                     i_mss_eff_config_data->cur_dram_density = 1;
                     FAPI_ASSERT(i_mss_eff_config_data->allow_single_port != fapi2::ENUM_ATTR_CEN_MSS_ALLOW_SINGLE_PORT_FALSE,
                                 fapi2::CEN_MSS_EFF_CONFIG_DRAM_DENSITY_ERR().
+                                set_TARGET_MBA(i_target_mba).
                                 set_SDRAM_DENSITY(i_data->sdram_density[l_cur_mba_port][l_cur_mba_dimm]),
                                 "Unsupported DRAM density on %s!",
                                 mss::c_str(i_target_mba));
@@ -1293,6 +1319,7 @@ extern "C"
                 {
                     FAPI_ASSERT(false,
                                 fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN().
+                                set_TARGET_MBA(i_target_mba).
                                 set_DRAM_DEVICE_TYPE_0_0(i_data->dram_device_type[0][0]).
                                 set_DRAM_DEVICE_TYPE_0_1(i_data->dram_device_type[0][1]).
                                 set_DRAM_DEVICE_TYPE_1_0(i_data->dram_device_type[1][0]).
@@ -1319,6 +1346,7 @@ extern "C"
                     {
                         FAPI_ASSERT(false,
                                     fapi2::CEN_MSS_EFF_CONFIG_MSS_FREQ().
+                                    set_TARGET_MBA(i_target_mba).
                                     set_FREQ_VAL(i_mss_eff_config_data->mss_freq),
                                     "Invalid ATTR_MSS_FREQ = %d on %s!", i_mss_eff_config_data->mss_freq, mss::c_str(i_target_mba));
                     }
@@ -1404,6 +1432,7 @@ extern "C"
                 {
                     FAPI_ASSERT(false,
                                 fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN().
+                                set_TARGET_MBA(i_target_mba).
                                 set_DRAM_DEVICE_TYPE_0_0(i_data->dram_device_type[0][0]).
                                 set_DRAM_DEVICE_TYPE_0_1(i_data->dram_device_type[0][1]).
                                 set_DRAM_DEVICE_TYPE_1_0(i_data->dram_device_type[1][0]).
@@ -1445,6 +1474,7 @@ extern "C"
                 {
                     FAPI_ASSERT(false,
                                 fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN().
+                                set_TARGET_MBA(i_target_mba).
                                 set_DRAM_DEVICE_TYPE_0_0(i_data->dram_device_type[0][0]).
                                 set_DRAM_DEVICE_TYPE_0_1(i_data->dram_device_type[0][1]).
                                 set_DRAM_DEVICE_TYPE_1_0(i_data->dram_device_type[1][0]).
@@ -1544,6 +1574,7 @@ extern "C"
                 {
                     FAPI_ASSERT(false,
                                 fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN().
+                                set_TARGET_MBA(i_target_mba).
                                 set_DRAM_DEVICE_TYPE_0_0(i_data->dram_device_type[0][0]).
                                 set_DRAM_DEVICE_TYPE_0_1(i_data->dram_device_type[0][1]).
                                 set_DRAM_DEVICE_TYPE_1_0(i_data->dram_device_type[1][0]).
@@ -1642,6 +1673,7 @@ extern "C"
                 {
                     FAPI_ASSERT(false,
                                 fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN().
+                                set_TARGET_MBA(i_target_mba).
                                 set_DRAM_DEVICE_TYPE_0_0(i_data->dram_device_type[0][0]).
                                 set_DRAM_DEVICE_TYPE_0_1(i_data->dram_device_type[0][1]).
                                 set_DRAM_DEVICE_TYPE_1_0(i_data->dram_device_type[1][0]).
@@ -1690,6 +1722,7 @@ extern "C"
             {
                 FAPI_ASSERT(false,
                             fapi2::CEN_MSS_EFF_CONFIG_CWL_CALC_ERR().
+                            set_TARGET_MBA(i_target_mba).
                             set_CWL_VAL((TWO_MHZ / i_mss_eff_config_data->mss_freq)),
                             "Error calculating CWL");
             }
@@ -1726,6 +1759,7 @@ extern "C"
             {
                 FAPI_ASSERT(false,
                             fapi2::CEN_MSS_EFF_CONFIG_CWL_CALC_ERR().
+                            set_TARGET_MBA(i_target_mba).
                             set_CWL_VAL(TWO_MHZ / i_mss_eff_config_data->mss_freq),
                             "Error calculating CWL");
             }
@@ -1734,6 +1768,7 @@ extern "C"
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN().
+                        set_TARGET_MBA(i_target_mba).
                         set_DRAM_DEVICE_TYPE_0_0(i_data->dram_device_type[0][0]).
                         set_DRAM_DEVICE_TYPE_0_1(i_data->dram_device_type[0][1]).
                         set_DRAM_DEVICE_TYPE_1_0(i_data->dram_device_type[1][0]).
@@ -1904,6 +1939,7 @@ extern "C"
                             o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi2::ENUM_ATTR_CEN_EFF_IBM_TYPE_UNDEFINED;
                             FAPI_ASSERT(false,
                                         fapi2::CEN_MSS_EFF_CONFIG_RDIMM_UNSUPPORTED_TYPE().
+                                        set_TARGET_MBA(i_target_mba).
                                         set_UNSUPPORTED_VAL(o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm]),
                                         "Currently unsupported IBM_TYPE on %s!", mss::c_str(i_target_mba));
                         }
@@ -1926,6 +1962,7 @@ extern "C"
                                 o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi2::ENUM_ATTR_CEN_EFF_IBM_TYPE_UNDEFINED;
                                 FAPI_ASSERT(false,
                                             fapi2::CEN_MSS_EFF_CONFIG_UDIMM_UNSUPPORTED_TYPE().
+                                            set_TARGET_MBA(i_target_mba).
                                             set_UNSUPPORTED_VAL(o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm]),
                                             "Currently unsupported IBM_TYPE on %s!", mss::c_str(i_target_mba));
                             }
@@ -1949,6 +1986,7 @@ extern "C"
                                 o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi2::ENUM_ATTR_CEN_EFF_IBM_TYPE_UNDEFINED;
                                 FAPI_ASSERT(false,
                                             fapi2::CEN_MSS_EFF_CONFIG_UDIMM_UNSUPPORTED_TYPE().
+                                            set_TARGET_MBA(i_target_mba).
                                             set_UNSUPPORTED_VAL(o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm]),
                                             "Currently unsupported IBM_TYPE on %s!", mss::c_str(i_target_mba));
                             }
@@ -1975,6 +2013,7 @@ extern "C"
                         {
                             FAPI_ASSERT(false,
                                         fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN().
+                                        set_TARGET_MBA(i_target_mba).
                                         set_DRAM_DEVICE_TYPE_0_0(i_data->dram_device_type[0][0]).
                                         set_DRAM_DEVICE_TYPE_0_1(i_data->dram_device_type[0][1]).
                                         set_DRAM_DEVICE_TYPE_1_0(i_data->dram_device_type[1][0]).
@@ -1987,6 +2026,7 @@ extern "C"
                         o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi2::ENUM_ATTR_CEN_EFF_IBM_TYPE_UNDEFINED;
                         FAPI_ASSERT(false,
                                     fapi2::CEN_MSS_EFF_CONFIG_DIMM_UNSUPPORTED_TYPE().
+                                    set_TARGET_MBA(i_target_mba).
                                     set_UNSUPPORTED_VAL(o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm]),
                                     "Currently unsupported DIMM_TYPE on %s!", mss::c_str(i_target_mba));
                     }
@@ -2065,7 +2105,8 @@ extern "C"
                     {
                         o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
                         FAPI_ASSERT(false,
-                                    fapi2::CEN_MSS_EFF_CONFIG_DIMM_UNSUPPORTED_TYPE(),
+                                    fapi2::CEN_MSS_EFF_CONFIG_DIMM_UNSUPPORTED_TYPE().
+                                    set_TARGET_MBA(i_target_mba),
                                     "Currently unsupported DIMM_TYPE on %s!", mss::c_str(i_target_mba));
                     }
                 }
@@ -2183,6 +2224,7 @@ extern "C"
                     {
                         FAPI_ASSERT(false,
                                     fapi2::CEN_MSS_EFF_CONFIG_INVALID_RDIMM_FREQ().
+                                    set_TARGET_MBA(i_target_mba).
                                     set_INVALID_RDIMM_FREQ(i_mss_eff_config_data->mss_freq),
                                     "Invalid RDIMM ATTR_MSS_FREQ = %d on %s!", i_mss_eff_config_data->mss_freq, mss::c_str(i_target_mba));
                     }
@@ -2202,6 +2244,7 @@ extern "C"
                     {
                         FAPI_ASSERT(false,
                                     fapi2::CEN_MSS_EFF_CONFIG_INVALID_RDIMM_VOLT().
+                                    set_TARGET_MBA(i_target_mba).
                                     set_INVALID_RDIMM_VOLT( i_mss_eff_config_data->mss_volt),
                                     "Invalid RDIMM ATTR_MSS_VOLT = %d on %s!", i_mss_eff_config_data->mss_volt, mss::c_str(i_target_mba));
                     }
@@ -2230,6 +2273,7 @@ extern "C"
                     {
                         FAPI_ASSERT(false,
                                     fapi2::CEN_MSS_EFF_CONFIG_INVALID_RDIMM_RCD_IBT().
+                                    set_TARGET_MBA(i_target_mba).
                                     set_INVALID_RDIMM_RCD_IBT_U32ARRAY_0_0(l_rdimm_rcd_ibt[0][0]).
                                     set_INVALID_RDIMM_RCD_IBT_U32ARRAY_0_1(l_rdimm_rcd_ibt[0][1]).
                                     set_INVALID_RDIMM_RCD_IBT_U32ARRAY_1_0(l_rdimm_rcd_ibt[1][0]).
@@ -2251,6 +2295,7 @@ extern "C"
                     {
                         FAPI_ASSERT(false,
                                     fapi2::CEN_MSS_EFF_CONFIG_INVALID_RDIMM_RCD_OUTPUT_TIMING().
+                                    set_TARGET_MBA(i_target_mba).
                                     set_INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_0_0(l_rdimm_rcd_output_timing[0][0]).
                                     set_INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_0_0(l_rdimm_rcd_output_timing[0][1]).
                                     set_INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_0_0(l_rdimm_rcd_output_timing[1][0]).
@@ -2330,6 +2375,7 @@ extern "C"
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN().
+                        set_TARGET_MBA(i_target_mba).
                         set_DRAM_DEVICE_TYPE_0_0(i_data->dram_device_type[0][0]).
                         set_DRAM_DEVICE_TYPE_0_1(i_data->dram_device_type[0][1]).
                         set_DRAM_DEVICE_TYPE_1_0(i_data->dram_device_type[1][0]).
@@ -2632,6 +2678,7 @@ extern "C"
 
         FAPI_ASSERT(l_mss_eff_config_data->mss_freq != 0,
                     fapi2::CEN_MSS_EFF_CONFIG_MSS_FREQ().
+                    set_TARGET_MBA(i_target_mba).
                     set_FREQ_VAL(l_mss_eff_config_data->mss_freq),
                     "Invalid ATTR_MSS_FREQ = %d on %s!",
                     l_mss_eff_config_data->mss_freq,

@@ -334,6 +334,7 @@ extern "C" {
             {
                 FAPI_ASSERT(false,
                             fapi2::CEN_DRAM_GEN_NOT_RECOGNIZED().
+                            set_TARGET_MBA_ERROR(i_target).
                             set_DRAM_GEN(l_dram_gen).
                             set_PORT(l_port_number).
                             set_TARGET(i_target),
@@ -346,7 +347,7 @@ extern "C" {
         {
             // Set the End bit on the last CCS Instruction
             FAPI_TRY(mss_ccs_set_end_bit( i_target, l_ccs_inst_cnt - 1), "CCS_SET_END_BIT FAILED");
-            FAPI_TRY(mss_execute_ccs_inst_array(i_target, 10, 10), " EXECUTE_CCS_INST_ARRAY FAILED");
+            FAPI_TRY(mss_execute_ccs_inst_array(i_target, DELAY_200000SIMCYCLES, 20), " EXECUTE_CCS_INST_ARRAY FAILED");
 
             l_ccs_inst_cnt = 0;
         }

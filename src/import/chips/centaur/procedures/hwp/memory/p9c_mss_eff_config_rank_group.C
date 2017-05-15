@@ -161,7 +161,8 @@ extern "C" {
                 if (num_ranks_per_dimm_u8array[cur_port][0] != num_ranks_per_dimm_u8array[cur_port][1])
                 {
                     FAPI_ASSERT(false,
-                                fapi2::CEN_MSS_EFF_CONFIG_RANK_GROUP_NON_MATCH_RANKS(),
+                                fapi2::CEN_MSS_EFF_CONFIG_RANK_GROUP_NON_MATCH_RANKS().
+                                set_TARGET_MBA(i_target_mba),
                                 "Plug rule violation, num_ranks_per_dimm=%d[0],%d[1] on %s PORT%d!", num_ranks_per_dimm_u8array[cur_port][0],
                                 num_ranks_per_dimm_u8array[cur_port][1], mss::c_str(i_target_mba), cur_port);
                 }
@@ -192,7 +193,8 @@ extern "C" {
                 else if (num_ranks_per_dimm_u8array[cur_port][0] != 1)
                 {
                     FAPI_ASSERT(false,
-                                fapi2::CEN_MSS_EFF_CONFIG_RANK_GROUP_NUM_RANKS_NEQ1(),
+                                fapi2::CEN_MSS_EFF_CONFIG_RANK_GROUP_NUM_RANKS_NEQ1().
+                                set_TARGET_MBA(i_target_mba),
                                 "Plug rule violation, num_ranks_per_dimm=%d[0],%d[1] on %s PORT%d!", num_ranks_per_dimm_u8array[cur_port][0],
                                 num_ranks_per_dimm_u8array[cur_port][1], mss::c_str(i_target_mba), cur_port);
 
@@ -251,7 +253,8 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_EFF_CONFIG_RANK_GROUP_NO_MATCH(),
+                            fapi2::CEN_MSS_EFF_CONFIG_RANK_GROUP_NO_MATCH().
+                            set_TARGET_MBA(i_target_mba),
                             "Plug rule violation, num_ranks_per_dimm=%d[0],%d[1] on %s PORT%d!", num_ranks_per_dimm_u8array[cur_port][0],
                             num_ranks_per_dimm_u8array[cur_port][1], mss::c_str(i_target_mba), cur_port);
 

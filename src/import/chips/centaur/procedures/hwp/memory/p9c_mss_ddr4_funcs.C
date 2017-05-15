@@ -584,6 +584,7 @@ fapi2::ReturnCode mss_create_rcd_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             {
                 FAPI_ASSERT(false,
                             fapi2::CEN_DRAM_INVALID_FREQ().
+                            set_TARGET_MBA_ERROR(i_target_mba).
                             set_FREQ(l_mss_freq).
                             set_TARGET(i_target_mba),
                             "Invalid LRDIMM ATTR_CEN_MSS_FREQ = %d on %s!",
@@ -604,6 +605,7 @@ fapi2::ReturnCode mss_create_rcd_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             {
                 FAPI_ASSERT(false,
                             fapi2::CEN_DRAM_INVALID_VOLT().
+                            set_TARGET_MBA_ERROR(i_target_mba).
                             set_VOLT(l_mss_volt).
                             set_TARGET(i_target_mba),
                             "Invalid LRDIMM ATTR_CEN_MSS_VOLT = %d on %s!", l_mss_volt,
@@ -691,7 +693,14 @@ fapi2::ReturnCode mss_create_rcd_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             }
             else
             {
-                FAPI_ASSERT(false, fapi2::CEN_MSS_PLACE_HOLDER_ERROR(), "Invalid DIMM ATTR_CEN_MSS_FREQ = %d on %s!", l_mss_freq,
+                FAPI_ASSERT(false,
+                            fapi2::CEN_DRAM_INVALID_FREQ().
+                            set_TARGET_MBA_ERROR(i_target_mba).
+                            set_FREQ(l_mss_freq).
+                            set_PORT(l_port).
+                            set_TARGET(i_target_mba),
+                            "Invalid DIMM ATTR_CEN_MSS_FREQ = %d on %s!",
+                            l_mss_freq,
                             mss::c_str(i_target_mba));
             }
 
@@ -3535,8 +3544,9 @@ fapi2::ReturnCode mss_ddr4_modify_mrs_pda(const fapi2::Target<fapi2::TARGET_TYPE
 
         //MRS attribute not found, error out
         default:
-            FAPI_ASSERT(false, fapi2::CEN_MSS_PDA_NONMRS_ATTR_NAME().set_NONMRS_ATTR_NAME(i_attribute_name).set_MBA_TARGET(
-                            i_target),
+            FAPI_ASSERT(false, fapi2::CEN_MSS_PDA_NONMRS_ATTR_NAME().
+                        set_NONMRS_ATTR_NAME(i_attribute_name).
+                        set_MBA_TARGET(i_target),
                         "ERROR!! Found attribute name not associated with an MRS! Exiting...");
     }
 
@@ -4385,7 +4395,10 @@ fapi2::ReturnCode mss_ddr4_load_nominal_mrs_pda(const fapi2::Target<fapi2::TARGE
     }
     else
     {
-        FAPI_ASSERT(false, fapi2::CEN_MSS_PDA_MRS_NOT_FOUND().set_MRS_VALUE(i_MRS).set_MBA_TARGET(i_target),
+        FAPI_ASSERT(false,
+                    fapi2::CEN_MSS_PDA_MRS_NOT_FOUND().
+                    set_MRS_VALUE(i_MRS).
+                    set_MBA_TARGET(i_target),
                     "ERROR!! Found attribute name not associated with an MRS! Exiting...");
     }
 

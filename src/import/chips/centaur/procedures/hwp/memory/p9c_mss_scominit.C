@@ -59,12 +59,12 @@ extern "C" {
         const auto l_mba_targets = i_target.getChildren<fapi2::TARGET_TYPE_MBA>();
         const auto l_l4_targets = i_target.getChildren<fapi2::TARGET_TYPE_L4>(fapi2::TARGET_STATE_PRESENT);
 
-        FAPI_ASSERT(l_mba_targets.size() == MAX_MBA_PER_CEN,
-                    fapi2::CEN_MSS_SCOMINIT_NUM_MBA_ERROR().
-                    set_MEMBUF(i_target).
-                    set_NUM_MBAS(l_mba_targets.size()),
-                    "getChildren returned %d functional MBAs, expected 2.  Mulkey to review plug rule.",
-                    l_mba_targets.size());
+        FAPI_ASSERT_NOEXIT(l_mba_targets.size() == MAX_MBA_PER_CEN,
+                           fapi2::CEN_MSS_SCOMINIT_NUM_MBA_ERROR().
+                           set_MEMBUF(i_target).
+                           set_NUM_MBAS(l_mba_targets.size()),
+                           "getChildren returned %d functional MBAs, expected 2.",
+                           l_mba_targets.size());
 
         FAPI_ASSERT(l_l4_targets.size() > 0,
                     fapi2::CEN_MSS_SCOMINIT_NUM_L4_ERROR().
@@ -95,17 +95,20 @@ extern "C" {
         }
 
         //################ MBS ######################
-        FAPI_DBG("Running MBS scom initfile\n");
-        FAPI_EXEC_HWP(l_rc, centaur_mbs_scom, i_target, l_mba_targets[0], l_mba_targets[1], l_l4_targets[0], FAPI_SYSTEM);
+        for (const auto& mba : l_mba_targets)
+        {
+            FAPI_DBG("Running MBS scom initfile\n");
+            FAPI_EXEC_HWP(l_rc, centaur_mbs_scom, i_target, mba, l_l4_targets[0], FAPI_SYSTEM);
 
-        if (l_rc)
-        {
-            FAPI_ERR("  !!!  Error running MBS scom initfile on %s\n", mss::c_str(i_target));
-            return (l_rc);
-        }
-        else
-        {
-            FAPI_DBG("MBS scom initfile passed on %s\n", mss::c_str(i_target));
+            if (l_rc)
+            {
+                FAPI_ERR("  !!!  Error running MBS scom initfile on %s\n", mss::c_str(i_target));
+                return (l_rc);
+            }
+            else
+            {
+                FAPI_DBG("MBS scom initfile passed on %s\n", mss::c_str(i_target));
+            }
         }
 
         //################ MBA ######################

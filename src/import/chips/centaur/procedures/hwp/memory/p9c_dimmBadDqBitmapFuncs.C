@@ -66,6 +66,7 @@ extern "C"
                     (i_dimm < MAX_DIMM_PER_PORT) &&
                     (i_rank < MAX_RANKS_PER_DIMM),
                     fapi2::CEN_BAD_DQ_DIMM_BAD_PARAM().
+                    set_MBA(i_mba).
                     set_FFDC_PORT(i_port).
                     set_FFDC_DIMM(i_dimm).
                     set_FFDC_RANK(i_rank),
@@ -94,6 +95,7 @@ extern "C"
 
         FAPI_ASSERT(dimmIter != l_dimms.end(),
                     fapi2::CEN_BAD_DQ_DIMM_NOT_FOUND().
+                    set_MBA(i_mba).
                     set_FFDC_PORT(i_port).
                     set_FFDC_DIMM(i_dimm),
                     "dimmBadDqCheckParamFindDimm: "

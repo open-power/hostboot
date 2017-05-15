@@ -665,7 +665,8 @@ extern "C" {
                         fapi2::CEN_MSS_DRAMINIT_TRAINING_WR_LVL_ERROR().
                         set_MBA_POSITION(l_mbaPosition).
                         set_PORT_POSITION(i_port).
-                        set_RANKGROUP_POSITION(i_group),
+                        set_RANKGROUP_POSITION(i_group).
+                        set_TARGET_MBA_ERROR(i_target),
                         "+++ Write leveling error occured on %s port: %d rank group: %d! +++",
                         mss::c_str(i_target), i_port, i_group);
 
@@ -717,6 +718,7 @@ extern "C" {
                                       i_group);
                             FAPI_ASSERT(false,
                                         fapi2::CEN_MSS_DRAMINIT_TRAINING_DQS_ALIGNMENT_ERROR().
+                                        set_TARGET_MBA_ERROR(i_target).
                                         set_MBA_POSITION(l_mbaPosition).
                                         set_PORT_POSITION(i_port).
                                         set_RANKGROUP_POSITION(i_group),

@@ -228,7 +228,7 @@ fapi2::ReturnCode p9c_mss_volt(const std::vector<fapi2::Target<fapi2::TARGET_TYP
         else
         {
             FAPI_ASSERT(false,
-                        fapi2::CEN_MSS_VOLT_OVERIDE_UKNOWN().
+                        fapi2::CEN_MSS_VOLT_OVERRIDE_UNKNOWN().
                         set_OVERRIDE_TYPE(l_volt_override),
                         "Unknown volt override request.  Override Request: 0x%x", l_volt_override);
         }
