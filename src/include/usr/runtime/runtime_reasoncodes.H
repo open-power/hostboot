@@ -44,6 +44,7 @@ namespace RUNTIME
         MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL = 0x0A, /**< hdatservice.C */
         MOD_HDATSERVICE_MAPREGION       = 0x0B, /**< hdatservice.C */
         MOD_HDATSERVICE_GETINSTANCECOUNT = 0x0C, /**< hdatservice.C */
+        MOD_HDATSERVICE_GETANDCHECKTUPLE = 0x0D, /**< hdatservice.C */
 
         // customize_attrs_for_payload.C
         MOD_CUST_COMP_NON_PHYP_RT_TARGET = 0x12,
@@ -96,6 +97,7 @@ namespace RUNTIME
         RC_INSTANCES_UNSUPPORTED       = RUNTIME_COMP_ID | 0x23,
         RC_I2C_DEVICE_DUPLICATE_IN_MRW = RUNTIME_COMP_ID | 0x24,
         RC_EXTRA_I2C_DEVICE_IN_MRW     = RUNTIME_COMP_ID | 0x25,
+        RC_GETTUPLE_UNSUPPORTED        = RUNTIME_COMP_ID | 0x26,
     };
 
     enum UserDetailsTypes
