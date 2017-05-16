@@ -222,11 +222,14 @@ fapi_try_exit:
 //  void*      i_ringSection:        Ptr to ring section.
 //  uint32_t&  io_ringSectionSize:   Running ring section size
 //  uint32_t   i_maxRingSectionSize: Max ring section size
+//  void*      i_overlaysSection:    Overlays ring section
 //  uint8_t    i_sysPhase:           ={HB_SBE, RT_CME, RT_SGPE}
 //  void*      i_vpdRing:            VPD ring buffer.
 //  uint32_t   i_vpdRingSize:        Size of VPD ring buffer.
 //  void*      i_ringBuf2:           Ring work buffer.
 //  uint32_t   i_ringBufSize2:       Size of ring work buffer.
+//  void*      i_ringBuf3:           Ring work buffer.
+//  uint32_t   i_ringBufSize3:       Size of ring work buffer.
 //  uint8_t    i_chipletId:          Chiplet Id
 //  uint8_t    i_evenOdd:            Even/Odd for EX instances
 //  const RingIdList i_ring:         The ring ID list (#G or #R list)
@@ -244,11 +247,14 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     void*           i_ringSection,
     uint32_t&       io_ringSectionSize,
     uint32_t        i_maxRingSectionSize,
+    void*           i_overlaysSection,
     uint8_t         i_sysPhase,
     void*           i_vpdRing,
     uint32_t        i_vpdRingSize,
     void*           i_ringBuf2,
     uint32_t        i_ringBufSize2,
+    void*           i_ringBuf3,
+    uint32_t        i_ringBufSize3,
     uint8_t         i_chipletId,
     uint8_t         i_evenOdd,
     const RingIdList     i_ring,
@@ -299,8 +305,51 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                             (uint8_t*)i_vpdRing,
                             l_vpdRingSize );
 
+#if 0 //@TODO RTC174306 stage 2
+
     ///////////////////////////////////////////////////////////////////////
-    //Append VPD ring to the ring section
+    // Fetch overlay ring
+    ///////////////////////////////////////////////////////////////////////
+    if ring is CLASS_GPTR then
+    l_fapiRc = get_overlays_ring(  // Create this FAPI function like resolve_gptr_overlays()
+                   i_overlaysSection,        // and which will do the following
+                   i_ring.ringId,            // 1. look for ringId in i_overlaysSection using
+                   i_ringBuf2,               //    tor_get_single_ring(),
+                   i_ringBuf3 );             // 2. copy compressed ring into io_ringBuf2,
+
+    // 3. uncompress ring into io_ringBuf3,
+    // 4. return io_ringBuf2 into i_ringBuf2, and
+    // 5. return io_ringBuf3 into i_ringBuf3.
+    // NB! Above io_ringBufs are local to get_overlays_ring.
+    // So now you got both the compressed and the uncompressed versions of the
+    //   overlay ring ready in i_ringBuf2 and i_ringBuf3.
+    // Whether you find a #G GPTR ring or not in the Mvpd, you must apply the overlays
+    //   ring in i_ringBuf2 or in i_ringBuf3 to i_vpdRing as follows. There are three
+    //   cases:
+    //   a. You found a ring in Mvpd. In this case you'll need i_ringBuf3 only. Here
+    //      you'll uncompress i_vpdRing into i_ringBuf2 and do an overlays (OO) operation
+    //      between i_ringBuf2 and i_ringBuf3 as shown further below and then compress
+    //      the result into i_vpdRing.
+    //   b. You found a redundant ring in Mvpd. In this case you'll need i_ringBuf2
+    //      only. Here you'll simply copy i_ringBuf2 into i_vpdRing. No need to
+    //      uncompress i_vpdRing. Also, you don't need the care part of the overlays
+    //      ring.
+    //   c. You didn't find a ring in Mvpd, but you did find one in overlays. This
+    //      scenario, I believe, is illegal. Please verify with Mike Sgro. But if it
+    //      is a possibility, treat like case b.
+if case a above then
+        l_fapiRc = apply_overlays_ring( // Create a FAPI function to do this and which
+                       i_ringVpd,                 // 1. uncompresses i_ringVpd into i_ringBuf2,
+                       i_ringBuf2,                // 2. does the overlays operation (OO),
+                       i_ringBuf3 );              // 3. compresses the result into io_ringVpd, and
+    // 4. returns io_ringVpd into i_ringVpd.
+    // You'll have to pu this latter call strategically later after some of the below
+    //   error checks, I think.
+    // NB! The overlays operation  AND  how to handle the data and care parts have been
+    //     sent in an email.
+#endif
+    ///////////////////////////////////////////////////////////////////////
+    // Append VPD ring to the ring section
     ///////////////////////////////////////////////////////////////////////
 
     if (l_fapiRc == fapi2::FAPI2_RC_SUCCESS)
@@ -578,6 +627,109 @@ fapi_try_exit:
 
 
 
+//  Function: resolve_gptr_overlays()
+//
+//  Parameter list:
+//  const fapi::Target &i_target:    Processor chip target.
+//  void*      i_hwImage:            Ptr to ring section.
+//  void**     o_overlaysSection:    Ptr to extracted DD section in hwImage.
+//  bool&      o_bGptrMvpdSupport:   Boolean art indicating whether Gptr support or not.
+#ifdef WIN32
+int resolve_gptr_overlays(
+    int i_procTarget,
+#else
+fapi2::ReturnCode resolve_gptr_overlays(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
+#endif
+    void*   i_hwImage,
+    void**  o_overlaysSection,
+    bool&   o_bGptrMvpdSupport )
+{
+
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    int      l_rc = 0;
+    uint8_t  l_nimbusDd1 = 1;
+    bool     l_bDdSupport = false;
+
+    FAPI_DBG("Entering resolve_gptr_overlays");
+
+    //------------------------------
+    // Stage 1 & 2 (shared section)
+    //------------------------------
+    // Determine if there is GPTR support through MVPD which there will NOT be if
+    // - Nimbus DD1, and
+    // - XIP DD section does not support overlays
+
+    // First determine if we're on Nimbus < DD20. If we are, continue, else err out.
+    FAPI_TRY( FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_NO_GPTR_SUPPORT_VIA_MVPD,
+                            i_procTarget,
+                            l_nimbusDd1),
+              "FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_HAS_GPTR_SUPPORT_VIA_MVPD) failed w/rc=0x%08x",
+              (uint64_t)current_err );
+
+    // Second determine if there's no overlays support. If no, continue, else err out.
+    l_rc = p9_xip_dd_section_support(i_hwImage, P9_XIP_SECTION_HW_OVERLAYS, l_bDdSupport);
+
+    FAPI_ASSERT( l_rc == 0,
+                 fapi2::XIPC_XIP_API_MISC_ERROR().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_XIP_RC(l_rc).
+                 set_OCCURRENCE(10),
+                 "xip_dd_section_support() failed w/rc=0x%08x.\n",
+                 (uint32_t)l_rc );
+
+    // Now do the checks of the above return vars, l_nimbusDd1, l_bDdSupport and l_rc.
+    if ( l_nimbusDd1 )
+    {
+        o_bGptrMvpdSupport = false;
+        FAPI_DBG("There's no Mvpd-GPTR support in Nimbus DD1.");
+    }
+    else if ( !l_bDdSupport )
+    {
+        o_bGptrMvpdSupport = false;
+        FAPI_DBG("The image has no DD support in overlays, thus there's no Mvpd-GPTR support either. (This is probably an old image w/Gptr but with new Mvpd-GPTR code and Nimbus DD2.)");
+    }
+    else
+    {
+#if 0
+
+        //--------------------------------
+        // Stage 2 (suggested pseudo steps)
+        // @TODO RTC174306
+        // Assumes commit 40046
+        //--------------------------------
+        if (bDdSupport)
+        {
+            <extract_ddLlevel_via_attr_svc>(<attr>, <target>, l_ddLevel) // see how elsewhere in this file
+            p9_xip_get_section((i_hwImage, P9_XIP_SECTION_OVERLAYS, l_xipSection, l_ddLevel);
+        }
+        else
+        {
+            // Get the whole overlays section since there's no DD specific levels yet.
+            // (Temporary only to test early overlays support before Jamie has
+            //  the DD packaging all down right. At least you can still test how
+            //  to apply the overlays rings onto the Gptr rings. After Jamie's got
+            //  the DD assembly going, error out here instead.)
+            p9_xip_get_section((i_hwImage, P9_XIP_SECTION_OVERLAYS, l_xipSection);
+        }
+
+        *o_overlaysSection = (void*)((uint8_t*)i_hwImage + l_xipSection.iv_offset);
+#endif
+
+        o_bGptrMvpdSupport = true;
+    }
+
+    P9XipSection l_xipSection;
+    *o_overlaysSection = (void*)((uint8_t*)i_hwImage + l_xipSection.iv_offset);
+
+fapi_try_exit:
+    FAPI_DBG("Exiting resolve_gptr_overlays");
+    return fapi2::current_err;
+
+}
+
+
+
 //  Function: fetch_and_insert_vpd_rings()
 //
 //  Parameter list:
@@ -585,11 +737,14 @@ fapi_try_exit:
 //  void*      i_ringSection:        Ptr to ring section.
 //  uint32_t&  io_ringSectionSize:   Running size
 //  uint32_t   i_maxRingSectionSize: Max size
+//  void*      i_hwImage:            HW image
 //  uint8_t    i_sysPhase:           ={IPL, RT_CME, RT_SGPE}
 //  void*      i_vpdRing:            VPD ring buffer.
 //  uint32_t   i_vpdRingSize:        Size of VPD ring buffer.
 //  void*      i_ringBuf2:           Ring work buffer.
 //  uint32_t   i_ringBufSize2:       Size of ring work buffer.
+//  void*      i_ringBuf3:           Ring work buffer.
+//  uint32_t   i_ringBufSize3:       Size of ring work buffer.
 //  uint32_t&  io_bootCoreMask:      Desired (in) and actual (out) boot cores.
 //
 #ifdef WIN32
@@ -602,11 +757,14 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
     void*           i_ringSection,
     uint32_t&       io_ringSectionSize,     // Running size
     uint32_t        i_maxRingSectionSize,   // Max size
+    void*           i_hwImage,
     uint8_t         i_sysPhase,
     void*           i_vpdRing,
     uint32_t        i_vpdRingSize,
     void*           i_ringBuf2,
     uint32_t        i_ringBufSize2,
+    void*           i_ringBuf3,
+    uint32_t        i_ringBufSize3,
     uint32_t&       io_bootCoreMask )
 {
 
@@ -618,13 +776,24 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
     uint8_t l_ringStatusInMvpd            = RING_SCAN;
     bool    l_bImgOutOfSpace              = false;
     uint8_t l_eqNumWhenOutOfSpace         = 0xF;   // Assign invalid value to check for correctness of value when used
-    uint8_t l_ringType;
+    uint8_t l_ringType                    = RING_TYPES::COMMON_RING;
 
     // Initialize activeCoreMask to be filled up with EC column filling as it progresses
     uint32_t l_activeCoreMask  = 0x0;
     uint32_t l_bootCoreMaskMin = 0x0;
+    void*    l_overlaysSection;
+    bool     bGptrMvpdSupport = false;
+
 
     FAPI_DBG("Entering fetch_and_insert_vpd_rings");
+
+    FAPI_TRY( resolve_gptr_overlays( i_procTarget,
+                                     i_hwImage,
+                                     &l_overlaysSection,
+                                     bGptrMvpdSupport ),
+              "resolve_gptr_overlays() failed w/rc=0x%08x",
+              (uint32_t)current_err );
+
 
     // Walk through all Vpd rings and add any that's there to the image.
     // Do this in two steps:
@@ -645,11 +814,14 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
 
         for (size_t iRing = 0; iRing < l_ringIdListSize; iRing++)
         {
-            // Filter out GPTR requests. Not supported in DD1. Coming in through initfiles instead.
-            if (l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_EQ_INS &&
-                l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_EX_INS &&
-                l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_EC_INS &&
-                l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_GPTR)
+            if ( l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_EQ_INS &&
+                 l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_EX_INS &&
+                 l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_EC_INS &&
+                 //@FIXME Remove the next three checks in a cleanup commit after
+                 //       stage 2 (RTC174306) has merged and stabilized.
+                 ( l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_GPTR ||
+                   ( l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR &&
+                     bGptrMvpdSupport ) ) )
             {
                 // We use ring.instanceIdMax column to govern max value of instanceIdMax (i.e., the
                 // max chipletId). But unlike in P8, in P9 we will not search for chipletId=0xff in P9
@@ -679,21 +851,25 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                           (l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EX ||
                            l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EQ)) )
                     {
-                        l_fapiRc = _fetch_and_insert_vpd_rings ( i_procTarget,
-                                   i_ringSection,
-                                   io_ringSectionSize,
-                                   i_maxRingSectionSize,
-                                   i_sysPhase,
-                                   i_vpdRing,
-                                   i_vpdRingSize,
-                                   i_ringBuf2,
-                                   i_ringBufSize2,
-                                   l_chipletId,
-                                   l_evenOdd,
-                                   l_ringIdList[iRing],
-                                   l_ringStatusInMvpd,
-                                   l_bImgOutOfSpace,
-                                   io_bootCoreMask );
+                        l_fapiRc = _fetch_and_insert_vpd_rings (
+                                       i_procTarget,
+                                       i_ringSection,
+                                       io_ringSectionSize,
+                                       i_maxRingSectionSize,
+                                       l_overlaysSection,
+                                       i_sysPhase,
+                                       i_vpdRing,
+                                       i_vpdRingSize,
+                                       i_ringBuf2,
+                                       i_ringBufSize2,
+                                       i_ringBuf3,
+                                       i_ringBufSize3,
+                                       l_chipletId,
+                                       l_evenOdd,
+                                       l_ringIdList[iRing],
+                                       l_ringStatusInMvpd,
+                                       l_bImgOutOfSpace,
+                                       io_bootCoreMask );
 
                         if (   (uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW ||
                                ( (uint32_t)l_fapiRc != RC_MVPD_RING_REDUNDANT_DATA &&
@@ -786,11 +962,14 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                        i_ringSection,
                                        io_ringSectionSize,
                                        i_maxRingSectionSize,
+                                       l_overlaysSection,
                                        i_sysPhase,
                                        i_vpdRing,
                                        i_vpdRingSize,
                                        i_ringBuf2,
                                        i_ringBufSize2,
+                                       i_ringBuf3,
+                                       i_ringBufSize3,
                                        l_chipletId,
                                        l_evenOdd,
                                        l_ringEQ,
@@ -891,11 +1070,14 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                                i_ringSection,
                                                io_ringSectionSize,
                                                i_maxRingSectionSize,
+                                               l_overlaysSection,
                                                i_sysPhase,
                                                i_vpdRing,
                                                i_vpdRingSize,
                                                i_ringBuf2,
                                                i_ringBufSize2,
+                                               i_ringBuf3,
+                                               i_ringBufSize3,
                                                l_chipletId,
                                                l_evenOdd,
                                                l_ringEX[inst],
@@ -972,11 +1154,14 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                                i_ringSection,
                                                io_ringSectionSize,
                                                i_maxRingSectionSize,
+                                               l_overlaysSection,
                                                i_sysPhase,
                                                i_vpdRing,
                                                i_vpdRingSize,
                                                i_ringBuf2,
                                                i_ringBufSize2,
+                                               i_ringBuf3,
+                                               i_ringBufSize3,
                                                l_chipletId,
                                                l_evenOdd,
                                                l_ringEC,
@@ -1286,16 +1471,19 @@ fapi2::ReturnCode p9_xip_customize (
 ReturnCode p9_xip_customize (
     int& i_procTarget,
 #endif
+    void*     i_hwImage,
     void*     io_image,
     uint32_t& io_imageSize,             // In: Max, Out: Actual
     void*     io_ringSectionBuf,
     uint32_t& io_ringSectionBufSize,    // In: Max, Out: Actual
     uint8_t   i_sysPhase,
     uint8_t   i_modeBuild,
-    void*     io_ringBuf1,
+    void*     i_ringBuf1,
     uint32_t  i_ringBufSize1,
-    void*     io_ringBuf2,
+    void*     i_ringBuf2,
     uint32_t  i_ringBufSize2,
+    void*     i_ringBuf3,
+    uint32_t  i_ringBufSize3,
     uint32_t& io_bootCoreMask )         // Bits(8:31) = EC00:EC23
 {
 #ifndef WIN32
@@ -1306,7 +1494,7 @@ ReturnCode p9_xip_customize (
     ReturnCode   l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
     ReturnCode   l_fapiRc2 = fapi2::FAPI2_RC_SUCCESS;
 #endif
-    int                 l_rc = 0; // Non-fapi RC
+    int             l_rc = 0; // Non-fapi RC
 
     P9XipSection    l_xipRingsSection;
     uint32_t        l_inputImageSize;
@@ -1335,25 +1523,33 @@ ReturnCode p9_xip_customize (
     // - more buffer size checks in big switch()
     //-------------------------------------------
 
-    FAPI_ASSERT( io_image != NULL &&
+    FAPI_ASSERT( i_hwImage != NULL &&
+                 io_image != NULL &&
                  io_ringSectionBuf != NULL &&
-                 io_ringBuf1 != NULL &&
-                 io_ringBuf2 != NULL,
+                 i_ringBuf1 != NULL &&
+                 i_ringBuf2 != NULL &&
+                 i_ringBuf3 != NULL,
                  fapi2::XIPC_INVALID_INPUT_BUFFER_PARM().
                  set_CHIP_TARGET(i_procTarget).
+                 set_HW_IMAGE(i_hwImage).
                  set_IMAGE_BUF(io_image).
                  set_RING_SECTION_BUF(io_ringSectionBuf).
-                 set_RING_BUF1(io_ringBuf1).
-                 set_RING_BUF2(io_ringBuf2),
+                 set_RING_BUF1(i_ringBuf1).
+                 set_RING_BUF2(i_ringBuf2).
+                 set_RING_BUF3(i_ringBuf3),
                  "One or more invalid input buffer pointers:\n"
+                 "  i_hwImage=0x%016llx\n"
                  "  io_image=0x%016llx\n"
                  "  io_ringSectionBuf=0x%016llx\n"
-                 "  io_ringBuf1=0x%016llx\n"
-                 "  io_ringBuf2=0x%016llx\n",
+                 "  i_ringBuf1=0x%016llx\n"
+                 "  i_ringBuf2=0x%016llx\n"
+                 "  i_ringBuf3=0x%016llx\n",
+                 (uintptr_t)i_hwImage,
                  (uintptr_t)io_image,
                  (uintptr_t)io_ringSectionBuf,
-                 (uintptr_t)io_ringBuf1,
-                 (uintptr_t)io_ringBuf2 );
+                 (uintptr_t)i_ringBuf1,
+                 (uintptr_t)i_ringBuf2,
+                 (uintptr_t)i_ringBuf3 );
 
     l_rc = p9_xip_image_size(io_image, &l_inputImageSize);
 
@@ -1371,7 +1567,8 @@ ReturnCode p9_xip_customize (
     FAPI_ASSERT( (io_imageSize >= l_inputImageSize || io_imageSize >= MAX_SEEPROM_IMAGE_SIZE) &&
                  io_ringSectionBufSize >= MAX_SEEPROM_IMAGE_SIZE &&
                  i_ringBufSize1 == MAX_RING_BUF_SIZE &&
-                 i_ringBufSize2 == MAX_RING_BUF_SIZE,
+                 i_ringBufSize2 == MAX_RING_BUF_SIZE &&
+                 i_ringBufSize3 == MAX_RING_BUF_SIZE,
                  fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
                  set_CHIP_TARGET(i_procTarget).
                  set_INPUT_IMAGE_SIZE(l_inputImageSize).
@@ -1379,18 +1576,21 @@ ReturnCode p9_xip_customize (
                  set_RING_SECTION_BUF_SIZE(io_ringSectionBufSize).
                  set_RING_BUF_SIZE1(i_ringBufSize1).
                  set_RING_BUF_SIZE2(i_ringBufSize2).
+                 set_RING_BUF_SIZE3(i_ringBufSize3).
                  set_OCCURRENCE(1),
                  "One or more invalid input buffer sizes:\n"
                  "  l_inputImageSize=0x%016llx\n"
                  "  io_imageSize=0x%016llx\n"
                  "  io_ringSectionBufSize=0x%016llx\n"
                  "  i_ringBufSize1=0x%016llx\n"
-                 "  i_ringBufSize2=0x%016llx\n",
+                 "  i_ringBufSize2=0x%016llx\n"
+                 "  i_ringBufSize3=0x%016llx\n",
                  (uintptr_t)l_inputImageSize,
                  (uintptr_t)io_imageSize,
                  (uintptr_t)io_ringSectionBufSize,
                  (uintptr_t)i_ringBufSize1,
-                 (uintptr_t)i_ringBufSize2 );
+                 (uintptr_t)i_ringBufSize2,
+                 (uintptr_t)i_ringBufSize3 );
 
     FAPI_DBG("Input image size: %d", l_inputImageSize);
 
@@ -1425,7 +1625,7 @@ ReturnCode p9_xip_customize (
         uint64_t   l_pibmemRepData[4] = {0};
         uint32_t   l_sizeMvpdFieldExpected = sizeof(l_pibmemRepVersion) + sizeof(l_pibmemRepData);
         uint32_t   l_sizeMvpdField = 0;
-        uint8_t*   l_bufMvpdField = (uint8_t*)io_ringBuf1;
+        uint8_t*   l_bufMvpdField = (uint8_t*)i_ringBuf1;
 
         FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
                                MVPD_KEYWORD_PB,
@@ -1574,6 +1774,7 @@ ReturnCode p9_xip_customize (
     // - Copy image's sysPhase specific [sub-]section into separate ring
     //   section buffer
     // - Delete (IPL sysPhase only) .rings, since we need to append later
+    // - Determine if there GPTR support, and overlays support, through Mvpd
     //////////////////////////////////////////////////////////////////////////
 
     switch (i_sysPhase)
@@ -1710,11 +1911,14 @@ ReturnCode p9_xip_customize (
                                                    io_ringSectionBuf,
                                                    io_ringSectionBufSize, // Running section size
                                                    l_maxRingSectionSize,  // Max section size
+                                                   i_hwImage,
                                                    i_sysPhase,
-                                                   io_ringBuf1,
+                                                   i_ringBuf1,
                                                    i_ringBufSize1,
-                                                   io_ringBuf2,
+                                                   i_ringBuf2,
                                                    i_ringBufSize2,
+                                                   i_ringBuf3,
+                                                   i_ringBufSize3,
                                                    io_bootCoreMask );
 
             FAPI_DBG("-----------------------------------------------------------------------");
@@ -1941,11 +2145,14 @@ ReturnCode p9_xip_customize (
                                                    io_ringSectionBuf,
                                                    io_ringSectionBufSize, // Running section size
                                                    l_maxRingSectionSize,  // Max section size
+                                                   i_hwImage,
                                                    i_sysPhase,
-                                                   io_ringBuf1,
+                                                   i_ringBuf1,
                                                    i_ringBufSize1,
-                                                   io_ringBuf2,
+                                                   i_ringBuf2,
                                                    i_ringBufSize2,
+                                                   i_ringBuf3,
+                                                   i_ringBufSize3,
                                                    io_bootCoreMask );
 
             FAPI_DBG("Size of .rings section after VPD update: %d", io_ringSectionBufSize );
