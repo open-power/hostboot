@@ -1506,6 +1506,8 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
 
 /// Code bug in the ddLevel handling codes
 #define P9_XIP_DDLEVEL_CODE_BUG 22
+/// Temporary error code to help prevent image co-req for stage 2 release of RTC174302
+#define P9_XIP_OVERLAYS_NOT_SUPPORTED 23
 
 /// Applications can expand this macro to declare an array of string forms of
 /// the error codes if desired.
@@ -1534,6 +1536,7 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
         "P9_XIP_NO_DDLEVEL_SUPPORT", \
         "P9_XIP_DDLEVEL_NOT_FOUND",  \
         "P9_XIP_DDLEVEL_CODE_BUG",  \
+        "P9_XIP_OVERLAYS_NOT_SUPPORTED",  \
     }
 
 /// Applications can use this macro to safely index the array of error
