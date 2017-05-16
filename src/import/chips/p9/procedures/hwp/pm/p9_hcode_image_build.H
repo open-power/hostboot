@@ -138,7 +138,9 @@ extern "C"
       void*  const    i_pBuf2,
       const  uint32_t  i_sizeBuf2,
       void*  const    i_pBuf3,
-      const  uint32_t  i_sizeBuf3 );
+      const  uint32_t  i_sizeBuf3,
+      void*  const    i_pBuf4,
+      const  uint32_t  i_sizeBuf4 );
 
     /**
     * @brief   builds a STOP image using a refrence image as input.
@@ -152,8 +154,10 @@ extern "C"
     * @param   i_sizeBuf1       size of work buffer1. Minimum size expected HW_IMG_RING_SIZE.
     * @param   i_pBuf2          pointer to a work buffer2. Minimum size expected WORK_BUF_SIZE.
     * @param   i_sizeBuf2       size of work buffer2
-    * @param   i_pBuf3          pointer to a work buffer2. Minimum size expected WORK_BUF_SIZE.
-    * @param   i_sizeBuf3       size of work buffer2
+    * @param   i_pBuf3          pointer to a work buffer3. Minimum size expected WORK_BUF_SIZE.
+    * @param   i_sizeBuf3       size of work buffer3
+    * @param   i_pBuf4          pointer to a work buffer4. Minimum size expected WORK_BUF_SIZE.
+    * @param   i_sizeBuf4       size of work buffer4
     * @note    needs attribute ATTR_EC
     */
     fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
@@ -167,6 +171,8 @@ extern "C"
                                             void* const    i_pBuf2,
                                             const uint32_t  i_sizeBuf2,
                                             void* const    i_pBuf3,
-                                            const uint32_t  i_sizeBuf3 );
+                                            const uint32_t  i_sizeBuf3,
+                                            void* const    i_pBuf4,
+                                            const uint32_t  i_sizeBuf4 );
 } // extern C
 #endif //__HCODE_IMG_BUILD_H_
