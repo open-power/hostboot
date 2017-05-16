@@ -30,16 +30,19 @@
 
 typedef fapi2::ReturnCode (*p9_xip_customize_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
+    void*     i_hwImage,
     void*     io_image,
     uint32_t& io_imageSize,
     void*     io_ringSectionBuf,
     uint32_t& io_ringSectionBufSize,
     uint8_t   i_sysPhase,
     uint8_t   i_modeBuild,
-    void*     io_ringBuf1,
+    void*     i_ringBuf1,
     uint32_t  i_ringBufSize1,
-    void*     io_ringBuf2,
+    void*     i_ringBuf2,
     uint32_t  i_ringBufSize2,
+    void*     i_ringBuf3,
+    uint32_t  i_ringBufSize3,
     uint32_t& io_bootCoreMask);
 
 extern "C"
@@ -48,6 +51,7 @@ extern "C"
 ///        mailbox attributes, VPD rings and other stuff.
 ///
 /// @param[in] i_proc_target             => P9 proc chip target
+/// @param[in] i_hwImage                 => HW image
 /// @param[in/out] io_image              => Pointer to an in-memory image
 ///                                         HB_SBE:
 ///                                             In:  SBE image
@@ -80,13 +84,17 @@ extern "C"
 ///                                             Out: Final size
 /// @param[in] i_sysPhase                => ={HB_SBE, RT_CME, RT_SGPE}
 /// @param[in] i_modeBuild               => ={IPL, REBUILD}
-/// @param[in/out] io_ringBuf1           => Caller supplied in-memory buffer
-///                                         for uncompressed VPD rings in
+/// @param[in] i_ringBuf1                => Caller supplied in-memory buffer
+///                                         for VPD rings
 /// @param[in] i_ringBufSize1            => Max size of VPD ring buffer
 ///                                         (Should equal MAX_RING_BUF_SIZE)
-/// @param[in/out] io_ringBuf2           => Caller supplied in-memory buffer
-///                                         for uncompressed overlay rings
+/// @param[in] i_ringBuf2                => Caller supplied in-memory buffer
+///                                         for overlay rings
 /// @param[in] i_ringBufSize2            => Max size of overlay ring buffer
+///                                         (Should equal MAX_RING_BUF_SIZE)
+/// @param[in] i_ringBuf3                => Caller supplied in-memory buffer
+///                                         to hold scratchpad rings
+/// @param[in] i_ringBufSize3            => Max size of overlay ring buffer
 ///                                         (Should equal MAX_RING_BUF_SIZE)
 /// @param[in/out] io_bootCoreMask       => In: Mask of the desired boot cores
 ///                                         Out: Actual boot cores
@@ -97,26 +105,10 @@ extern "C"
 ///
     fapi2::ReturnCode p9_xip_customize (
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
+        void*     i_hwImage,
         void*     io_image,
         uint32_t& io_imageSize,
         void*     io_ringSectionBuf,
-        uint32_t& io_ringSectionBufSize,
-        uint8_t   i_sysPhase,
-        uint8_t   i_modeBuild,
-        void*     io_ringBuf1,
-        uint32_t  i_ringBufSize1,
-        void*     io_ringBuf2,
-        uint32_t  i_ringBufSize2,
-        uint32_t& io_bootCoreMask);
-
-}
-#else
-extern "C" {
-    int p9_xip_customize (
-        int& i_proc_target,
-        void*     i_image,
-        uint32_t& io_imageSize,
-        void*     i_ringSectionBuf,
         uint32_t& io_ringSectionBufSize,
         uint8_t   i_sysPhase,
         uint8_t   i_modeBuild,
@@ -124,6 +116,27 @@ extern "C" {
         uint32_t  i_ringBufSize1,
         void*     i_ringBuf2,
         uint32_t  i_ringBufSize2,
+        void*     i_ringBuf3,
+        uint32_t  i_ringBufSize3,
+        uint32_t& io_bootCoreMask);
+}
+#else
+extern "C" {
+    int p9_xip_customize (
+        int& i_proc_target,
+        void*     i_hwImage,
+        void*     io_image,
+        uint32_t& io_imageSize,
+        void*     io_ringSectionBuf,
+        uint32_t& io_ringSectionBufSize,
+        uint8_t   i_sysPhase,
+        uint8_t   i_modeBuild,
+        void*     i_ringBuf1,
+        uint32_t  i_ringBufSize1,
+        void*     i_ringBuf2,
+        uint32_t  i_ringBufSize2,
+        void*     i_ringBuf3,
+        uint32_t  i_ringBufSize3,
         uint32_t& io_bootCoreMask);
 }
 #endif
