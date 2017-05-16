@@ -49,6 +49,7 @@
 #include "../trustedboot.H"
 #include "../trustedbootCmds.H"
 #include "../trustedbootUtils.H"
+#include "../../pnor/pnor_utils.H"
 #include "trustedbootMsg.H"
 
 // ----------------------------------------------
@@ -331,11 +332,17 @@ errlHndl_t extendPnorSectionHash(
 
     TPM_Pcr pnorHashPcr = PCR_0;
     EventTypes swKeyHashEventType = TRUSTEDBOOT::EV_PLATFORM_CONFIG_FLAGS;
+    EventTypes pnorHashEventType = TRUSTEDBOOT::EV_POST_CODE;
     // PAYLOAD is the only section that needs its hash extended to PCR_4
     if (i_sec == PNOR::PAYLOAD)
     {
         pnorHashPcr = PCR_4;
         swKeyHashEventType = TRUSTEDBOOT::EV_COMPACT_HASH;
+        pnorHashEventType = TRUSTEDBOOT::EV_COMPACT_HASH;
+    }
+    else if(PNOR::isCoreRootOfTrustSection(i_sec))
+    {
+        pnorHashEventType = TRUSTEDBOOT::EV_S_CRTM_CONTENTS;
     }
     // Extend swKeyHash to the next PCR after the hash extension PCR.
     const TPM_Pcr swKeyHashPcr = static_cast<TPM_Pcr>(pnorHashPcr + 1);
@@ -343,10 +350,8 @@ errlHndl_t extendPnorSectionHash(
     if (SECUREBOOT::enabled())
     {
         // If secureboot is enabled, use protected hash in header
-        /// @todo RTC 172332 Update log type based on what is being extended
-        /// EV_POST_CODE or EV_S_CRTM_CONTENTS or EV_COMPACT_HASH
         pError = TRUSTEDBOOT::pcrExtend(pnorHashPcr,
-              TRUSTEDBOOT::EV_POST_CODE,
+              pnorHashEventType,
               reinterpret_cast<const uint8_t*>(i_conHdr.payloadTextHash()),
               sizeof(SHA512_t),
               sectionInfo.name);
@@ -375,14 +380,13 @@ errlHndl_t extendPnorSectionHash(
     else
     {
         // If secureboot is not enabled, measure protected section
-        /// @todo RTC 172332 Update log type based on what is being extended
-        /// EV_POST_CODE or EV_S_CRTM_CONTENTS or EV_COMPACT_HASH
         SHA512_t hash = {0};
         SECUREBOOT::hashBlob(i_vaddr, protectedSize, hash);
         pError = TRUSTEDBOOT::pcrExtend(pnorHashPcr,
-                                        TRUSTEDBOOT::EV_POST_CODE,
-                                        hash, sizeof(SHA512_t),
-                                        sectionInfo.name);
+                pnorHashEventType,
+                hash,
+                sizeof(SHA512_t),
+                sectionInfo.name);
         if (pError)
         {
             TRACFCOMP(g_trac_trustedboot, ERR_MRK " Failed in call to "
