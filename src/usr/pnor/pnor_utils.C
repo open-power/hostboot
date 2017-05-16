@@ -215,7 +215,7 @@ void PNOR::checkHeader (ffs_hdr* i_ffs_hdr,
   *         title.
   */
 void PNOR::getSectionEnum (const ffs_entry* i_entry,
-                           uint32_t* o_secId)
+                           SectionId* o_secId)
 {
     *o_secId = PNOR::INVALID_SECTION;
     //Figure out section enum
@@ -224,7 +224,7 @@ void PNOR::getSectionEnum (const ffs_entry* i_entry,
     {
         if(strcmp(PNOR::SectionIdToString(eyeIndex),i_entry->name) == 0)
         {
-            *o_secId = eyeIndex;
+            *o_secId = SectionId(eyeIndex);
             break;
         }
     }
@@ -253,7 +253,7 @@ PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
     for(uint32_t i=0; i<i_ffs_hdr->entry_count; i++)
     {
         ffs_entry* cur_entry = (&i_ffs_hdr->entries[i]);
-        uint32_t secId = PNOR::INVALID_SECTION;
+        PNOR::SectionId secId = PNOR::INVALID_SECTION;
 
         // ffs entry check, 0 if checksums match
         if( PNOR::pnor_ffs_checksum(cur_entry, FFS_ENTRY_SIZE) != 0)
@@ -394,6 +394,23 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
                i_section == OCC ||
                i_section == HCODE ||
                i_section == HB_RUNTIME;
+    #endif
+#else
+    return false;
+#endif
+}
+
+bool PNOR::isCoreRootOfTrustSection(const PNOR::SectionId i_section)
+{
+#ifdef CONFIG_SECUREBOOT
+    #ifdef BOOTLOADER
+        return i_section == HB_BASE_CODE;
+    #else
+        return i_section == HB_BOOTLOADER ||
+               i_section == HB_EXT_CODE ||
+               i_section == HB_DATA ||
+               i_section == SBE_IPL ||
+               i_section == HB_BASE_CODE;
     #endif
 #else
     return false;

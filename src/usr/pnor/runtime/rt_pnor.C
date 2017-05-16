@@ -743,7 +743,7 @@ errlHndl_t RtPnor::setSecure(const uint8_t* i_tocBuffer,
         auto const l_ffs_hdr = reinterpret_cast<const ffs_hdr*>(i_tocBuffer);
         for(uint32_t i=0; i<l_ffs_hdr->entry_count; ++i)
         {
-            uint32_t l_secId = PNOR::INVALID_SECTION;
+            PNOR::SectionId l_secId = PNOR::INVALID_SECTION;
 
             // Get current entry section id
             auto cur_entry = &(l_ffs_hdr->entries[i]);

@@ -184,7 +184,7 @@ void checkHeader (ffs_hdr* i_ffs_hdr,
   *
 */
 void getSectionEnum (const ffs_entry* i_entry,
-                      uint32_t* o_secId);
+                      SectionId* o_secId);
 /**
   * @brief Iterate through the entries, each which represent a section in pnor.
   *         During the iteration we are checking that the entries are valid
@@ -225,6 +225,17 @@ parseEntries (ffs_hdr* i_ffs_hdr,
  * @return bool True if secure section, false otherwise.
  */
 bool isEnforcedSecureSection(const uint32_t i_section);
+
+/**
+ * @brief Determines whether the given section is a "core root of trust" section
+ *        for the purposes of trusted boot. The set of "core root of trust"
+ *        sections are a distinct subset of secure sections that form the basis
+ *        of security for the remaining secure sections.
+ * @param[in] i_section PNOR section to test.
+ *
+ * @return bool True if core root of test section, false otherwise
+ */
+bool isCoreRootOfTrustSection(const PNOR::SectionId i_section);
 
 /**
  * @brief Determines if a section has a Header and that it is not a Secure Header

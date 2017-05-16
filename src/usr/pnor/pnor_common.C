@@ -274,7 +274,7 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
         //Walk through all the entries in the table and record some info
         for(uint32_t i=0; i<l_ffs_hdr->entry_count; i++)
         {
-            uint32_t l_secId = PNOR::INVALID_SECTION;
+            PNOR::SectionId l_secId = PNOR::INVALID_SECTION;
             ffs_entry* cur_entry = &(l_ffs_hdr->entries[i]);
             TRACUCOMP(g_trac_pnor, "PNOR::parseTOC: TOC %d,  Entry %d, name=%s, pointer=0x%X",l_tocBeingChecked, i,cur_entry->name, (uint64_t)cur_entry);
 
@@ -314,8 +314,7 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
                        PAGESIZE_PLUS_ECC : PAGESIZE;
                    addr -= headerSize;
 
-                   l_errhdl = PNOR::extendHash(addr, headerSize,
-                                               PNOR::SectionIdToString(l_secId));
+                   l_errhdl = PNOR::extendHash(addr, headerSize, l_secId);
                    if (l_errhdl)
                    {
                        break;
@@ -341,12 +340,16 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
 
 // @TODO RTC 168021 Remove legacy extensions when all secure sections are
 // supported
-errlHndl_t PNOR::extendHash(uint64_t i_addr, size_t i_size, const char* i_name)
+errlHndl_t PNOR::extendHash(uint64_t i_addr,
+    size_t i_size,
+    const PNOR::SectionId i_sectionId)
 {
     errlHndl_t l_errhdl = NULL;
 
     do {
         #ifndef __HOSTBOOT_RUNTIME
+        const char* l_name = PNOR::SectionIdToString(i_sectionId);
+
         // Read data from the PNOR DD
         uint8_t* l_buf = new uint8_t[i_size]();
         TARGETING::Target* l_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
@@ -360,9 +363,14 @@ errlHndl_t PNOR::extendHash(uint64_t i_addr, size_t i_size, const char* i_name)
         SHA512_t l_hash = {0};
         SECUREBOOT::hashBlob(l_buf, i_size, l_hash);
         l_errhdl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_0,
-                                          TRUSTEDBOOT::EV_S_CRTM_CONTENTS,
-                                          l_hash,
-                                          sizeof(SHA512_t), i_name);
+            PNOR::PAYLOAD == i_sectionId?
+                TRUSTEDBOOT::EV_COMPACT_HASH:
+                (PNOR::isCoreRootOfTrustSection(i_sectionId)?
+                    TRUSTEDBOOT::EV_S_CRTM_CONTENTS:
+                    TRUSTEDBOOT::EV_POST_CODE),
+            l_hash,
+            sizeof(SHA512_t),
+            l_name);
         delete[] l_buf;
 
         if (l_errhdl)
