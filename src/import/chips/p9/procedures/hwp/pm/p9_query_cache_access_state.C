@@ -140,31 +140,33 @@ p9_query_cache_access_state(
         o_l2_is_scannable = 0;
         o_l3_is_scannable = 0;
     }
-
-    //Read clock status to confirm stop state history is accurate
-    //If we trust the stop state history, this could be removed to save on code size
-    //Compare Hardware status vs stop state status. If there is a mismatch the HW value overrides the stop state
-
-    FAPI_TRY(fapi2::getScom(i_target, EQ_CLOCK_STAT_SL, l_data64), "Error reading data from EQ_CLOCK_STAT_SL");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_chpltNumber),
-             "Error: Failed to get the position of the EX:0x%08X", i_target);
-    l_exPos = l_chpltNumber % 2;
-
-    l_is_scomable = !l_data64.getBit(eq_clk_l2_pos[l_exPos]);
-
-    if (o_l2_is_scomable != l_is_scomable)
+    else
     {
-        FAPI_INF("Clock status didn't match stop state, overriding is_scomable status");
-        o_l2_is_scomable = l_is_scomable;
-    }
+        //Read clock status to confirm stop state history is accurate
+        //If we trust the stop state history, this could be removed to save on code size
+        //Compare Hardware status vs stop state status. If there is a mismatch the HW value overrides the stop state
 
-    l_is_scomable = !l_data64.getBit(eq_clk_l3_pos[l_exPos]);
+        FAPI_TRY(fapi2::getScom(i_target, EQ_CLOCK_STAT_SL, l_data64), "Error reading data from EQ_CLOCK_STAT_SL");
 
-    if (o_l3_is_scomable != l_is_scomable)
-    {
-        FAPI_INF("Clock status didn't match stop state, overriding is_scomable status");
-        o_l3_is_scomable = l_is_scomable;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_chpltNumber),
+                 "Error: Failed to get the position of the EX:0x%08X", i_target);
+        l_exPos = l_chpltNumber % 2;
+
+        l_is_scomable = !l_data64.getBit(eq_clk_l2_pos[l_exPos]);
+
+        if (o_l2_is_scomable != l_is_scomable)
+        {
+            FAPI_INF("Clock status didn't match stop state, overriding is_scomable status");
+            o_l2_is_scomable = l_is_scomable;
+        }
+
+        l_is_scomable = !l_data64.getBit(eq_clk_l3_pos[l_exPos]);
+
+        if (o_l3_is_scomable != l_is_scomable)
+        {
+            FAPI_INF("Clock status didn't match stop state, overriding is_scomable status");
+            o_l3_is_scomable = l_is_scomable;
+        }
     }
 
 fapi_try_exit:
