@@ -767,18 +767,6 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     FAPI_DBG("CME CHTM Memory Config :   %016llx", chtmVal);
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_DISABLE_QUEUED_SCAN,
-                           FAPI_SYSTEM,
-                           attrVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_DISABLE_QUEUED_SCAN" );
-
-    if( attrVal )
-    {
-        cmeFlag |= CME_QUEUED_SCAN_DISABLE_BIT_POS;
-    }
-
-    FAPI_DBG("QUEUED_SCAN_DISABLE   :   %s", attrVal ? "TRUE" : "FALSE" );
-
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_ENABLE,
                            FAPI_SYSTEM,
                            attrVal),
