@@ -74,6 +74,7 @@
 // Includes
 // -----------------------------------------------------------------------------
 #include <p9_pm_corequad_init.H>
+#include <p9_query_cache_access_state.H>
 
 // -----------------------------------------------------------------------------
 // Constant definitions
@@ -339,11 +340,16 @@ fapi2::ReturnCode pm_corequad_reset(
     FAPI_IMP("Entering pm_corequad_reset...");
 
     fapi2::buffer<uint64_t> l_data64;
+    fapi2::ReturnCode l_rc;
     uint8_t l_chpltNumber = 0;
     uint64_t l_address = 0;
     uint32_t l_errMask = 0;
     uint32_t l_firMask = 0;
     uint32_t l_pollCount = 20;
+    bool l_l2_is_scanable = false;
+    bool l_l3_is_scanable = false;
+    bool l_l2_is_scomable = false;
+    bool l_l3_is_scomable = false;
 
     auto l_eqChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EQ>
                         (fapi2::TARGET_STATE_FUNCTIONAL);
@@ -391,6 +397,21 @@ fapi2::ReturnCode pm_corequad_reset(
         l_address = EQ_QPPM_ERR;
         FAPI_TRY(fapi2::putScom(l_quad_chplt, l_address, l_data64),
                  "ERROR: Failed to clear QUAD PPM ERROR");
+
+        //Cannot always rely on HWAS state, during MPIPL attr are not
+        //accurate, must use query_cache_access state prior to scomming
+        //ex targets
+        FAPI_EXEC_HWP(l_rc, p9_query_cache_access_state, l_quad_chplt,
+                      l_l2_is_scomable, l_l2_is_scanable,
+                      l_l3_is_scomable, l_l3_is_scanable);
+        FAPI_TRY(l_rc, "ERROR: failed to query cache access state for EQ %d",
+                 l_chpltNumber);
+
+        if(!l_l2_is_scomable)
+        {
+            //Skip all of the scoms for this EQ if its not scommable
+            continue;
+        }
 
         auto l_exChiplets = l_quad_chplt.getChildren<fapi2::TARGET_TYPE_EX>
                             (fapi2::TARGET_STATE_FUNCTIONAL);
