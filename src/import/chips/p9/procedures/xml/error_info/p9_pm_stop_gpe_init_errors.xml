@@ -22,6 +22,15 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p9_pm_stop_gpe_init procedure -->
+<!--
+     *HWP HWP Owner     :   Greg Still <stillgs@us.ibm.com>
+     *HWP Backup Owner  :   David Du   <daviddu@us.ibm.com>
+     *HWP FW Owner      :   Prem S Jha <premjha2@in.ibm.com>
+     *HWP Team          :   PM
+     *HWP Level         :   3
+     *HWP Consumed by   :   HS
+-->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -29,6 +38,10 @@
     <description>Unknown mode passed to p9_pm_stop_gpe_init.
     </description>
     <ffdc>BADMODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -49,22 +62,53 @@
     <rc>RC_STOP_GPE_INIT_TIMEOUT</rc>
     <description> Stop GPE init timed out while waiting for SGPE Active in OCCFLG register.
     </description>
+
+    <ffdc>CHIP</ffdc>
+    <ffdc>PPE_STATE_MODE</ffdc>
+    <ffdc>OCC_FLAG_REG_VAL</ffdc>
+    <ffdc>XSR_REG_VAL</ffdc>
+
+    <collectFfdc>p9_collect_ppe_state, CHIP, PPE_STATE_MODE, PPE_BASE_ADDRESS_LIST</collectFfdc>
+  
     <collectRegisterFfdc>
       <id>SGPE_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
+
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_STOP_GPE_RESET_TIMEOUT</rc>
     <description> Stop GPE init timedout while waiting for HALT status in XSR register.
     </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>PPE_STATE_MODE</ffdc>
+
     <collectRegisterFfdc>
       <id>SGPE_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
+
+    <collectFfdc>p9_collect_ppe_state, CHIP, PPE_STATE_MODE, PPE_BASE_ADDRESS_LIST</collectFfdc>
+    
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -72,11 +116,20 @@
     <description> Stop GPE called to p9_pm_pfet_init failed.
     </description>
     <ffdc>MODE</ffdc>
+    <ffdc>CHIP</ffdc>
     <collectRegisterFfdc>
       <id>SGPE_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -84,6 +137,7 @@
     <description> Stop GPE called to p9_pm_pba_init failed.
     </description>
     <ffdc>MODE</ffdc>
+    <ffdc>CHIP</ffdc>
     <collectRegisterFfdc>
       <id>PBA_FFDC_REGISTERS</id>
       <target>CHIP</target>
@@ -94,6 +148,14 @@
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
