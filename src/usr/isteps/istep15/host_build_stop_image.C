@@ -372,6 +372,22 @@ void* host_build_stop_image (void *io_pArgs)
     void* l_temp_buffer2 = malloc(MAX_RING_BUF_SIZE);
 
     do  {
+        //Determine top-level system target
+        TARGETING::Target* l_sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(l_sys);
+        assert( l_sys != NULL );
+
+        if (l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+        {
+            l_errl = HBPM::resetPMAll();
+            if(l_errl)
+            {
+                //Break out of the do-while loop..
+                //we should have been able to do a PM reset
+                break;
+            }
+        }
+
         // Get the node-offset for our instance by looking at the HRMOR
         uint64_t l_memBase = cpu_spr_value(CPU_SPR_HRMOR);
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "HRMOR=%.16X", l_memBase );
@@ -406,9 +422,6 @@ void* host_build_stop_image (void *io_pArgs)
 
         //Since we have the HOMER location defined, set the
         // OCC common attribute to be used later by pm code
-        TARGETING::Target* l_sys = NULL;
-        TARGETING::targetService().getTopLevelTarget(l_sys);
-        assert( l_sys != NULL );
         l_sys->setAttr<TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>
             (reinterpret_cast<uint64_t>(l_pRealMemBase)
                 + VMM_HOMER_REGION_SIZE);
@@ -430,12 +443,13 @@ void* host_build_stop_image (void *io_pArgs)
 #endif
 
         //  Loop through all functional Procs and generate images for them.
+        //get a list of all the functional Procs
         TARGETING::TargetHandleList l_procChips;
         getAllChips( l_procChips,
                      TARGETING::TYPE_PROC   );
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Found %d procs in system",
+                   "Found %d functional procs in system",
                    l_procChips.size()   );
 
         for (const auto & l_procChip: l_procChips)
