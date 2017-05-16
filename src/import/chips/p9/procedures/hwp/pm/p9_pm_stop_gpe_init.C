@@ -25,12 +25,12 @@
 /// @file p9_pm_stop_gpe_init.C
 /// @brief Initialize the Stop GPE and related functions
 
-// *HWP HWP Owner       : Amit Kumar <akumar3@us.ibm.com>
-// *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner        : Bilicon Patil <bilpatil@in.ibm.com>
-// *HWP Team            : PM
-// *HWP Level           : 1
-// *HWP Consumed by     : HS
+// *HWP HWP Owner       :   Greg Still <stillgs@us.ibm.com>
+// *HWP Backup Owner    :   David Du   <daviddu@us.ibm.com>
+// *HWP FW Owner        :   Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team            :   PM
+// *HWP Level           :   3
+// *HWP Consumed by     :   HS
 
 ///
 /// High-level procedure flow:
@@ -56,11 +56,21 @@
 //  Includes
 // -----------------------------------------------------------------------------
 
+#include <vector>
+#include <algorithm>
 #include <p9_hcd_common.H>
 #include <p9_pm_stop_gpe_init.H>
 #include <p9_pm_pba_init.H>
 #include <p9_pm_pfet_init.H>
 #include <p9_pm_hcd_flags.h>
+#include <p9_ppe_defs.H>
+#include <p9_ppe_utils.H>
+#include <p9_eq_clear_atomic_lock.H>
+#include <p9_quad_scom_addresses.H>
+#include <p9_quad_scom_addresses_fld.H>
+#include <p9_misc_scom_addresses.H>
+#include <p9_misc_scom_addresses_fld.H>
+
 //#include <p9_ppe_state.H>  @todo RTC 147996 to incorporate PPE state removing strings.
 
 
@@ -78,8 +88,6 @@ static const uint32_t SGPE_POLLTIME_MS      = 20;       // Guess at this time
 static const uint32_t SGPE_POLLTIME_MCYCLES = 2;        // Guess at this time
 static const uint32_t TIMEOUT_COUNT = SGPE_TIMEOUT_MS / SGPE_POLLTIME_MS;
 
-static const uint64_t GPE3_BASE_ADDRESS = 0x00066010;
-static const uint64_t SGPE_BASE_ADDRESS = GPE3_BASE_ADDRESS;
 
 
 
@@ -96,6 +104,10 @@ fapi2::ReturnCode stop_gpe_reset(
 fapi2::ReturnCode stop_corecache_setup(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
+fapi2::ReturnCode get_functional_chiplet_info(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target ,
+    std::vector<uint64_t>& o_ppe_addr_list,
+    std::vector< fapi2::Target<fapi2::TARGET_TYPE_EQ > >& o_eq_target_list );
 // -----------------------------------------------------------------------------
 //  Function definitions
 // -----------------------------------------------------------------------------
@@ -113,7 +125,7 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const p9pm::PM_FLOW_MODE i_mode)
 {
-    FAPI_IMP("> p9_pm_stop_gpe_init");
+    FAPI_IMP(">> p9_pm_stop_gpe_init");
 
     const char* PM_MODE_NAME_VAR; //Defines storage for PM_MODE_NAME
     FAPI_INF("Executing p9_stop_gpe_init in mode %s", PM_MODE_NAME(i_mode));
@@ -316,7 +328,7 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
     }
 
 fapi_try_exit:
-    FAPI_INF("< p9_pm_stop_gpe_init");
+    FAPI_INF("<< p9_pm_stop_gpe_init");
     return fapi2::current_err;
 }
 
@@ -342,8 +354,13 @@ fapi2::ReturnCode stop_gpe_init(
     fapi2::buffer<uint64_t> l_slave_cfg;
     uint32_t                l_ivpr_offset;
     uint32_t                l_timeout_in_MS = TIMEOUT_COUNT;
+    std::vector<uint64_t> l_ppe_base_addr_list;
+    std::vector< fapi2::Target<fapi2::TARGET_TYPE_EQ> > l_eq_list;
 
-    FAPI_IMP(">> stop_gpe_init......");
+    FAPI_IMP(">> stop_gpe_init");
+
+    FAPI_TRY( get_functional_chiplet_info( i_target, l_ppe_base_addr_list, l_eq_list ),
+              "Failed to get PPE Base Address List and Func EQ List" );
 
     // First check if SGPE_ACTIVE is not set in OCCFLAG register
     FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCFLG_SCOM, l_occ_flag));
@@ -368,7 +385,6 @@ fapi2::ReturnCode stop_gpe_init(
     FAPI_TRY(putScom(i_target, PU_GPE3_GPEIVPR_SCOM, l_ivpr));
 
     // Program XCR to ACTIVATE SGPE
-    // @todo 146665 Operations to PPEs should use a p9ppe namespace when created
     l_xcr.flush<0>().insertFromRight(p9hcd::HARD_RESET, 1 , 3);
     FAPI_TRY(putScom(i_target, PU_GPE3_PPE_XIXCR, l_xcr));
     l_xcr.flush<0>().insertFromRight(p9hcd::TOGGLE_XSR_TRH, 1 , 3);
@@ -393,7 +409,7 @@ fapi2::ReturnCode stop_gpe_init(
                  l_iar,
                  l_ir,
                  l_timeout_in_MS);
-        fapi2::delay(SGPE_POLLTIME_MS * 1000  * 1000, SGPE_POLLTIME_MCYCLES * 1000 * 1000);
+        fapi2::delay(SGPE_POLLTIME_MS * 1000, SGPE_POLLTIME_MCYCLES * 1000 * 1000);
     }
     while((!((l_occ_flag.getBit<p9hcd::SGPE_ACTIVE>() == 1) &&
              (l_xsr.getBit<p9hcd::HALTED_STATE>() == 0))) &&
@@ -404,15 +420,31 @@ fapi2::ReturnCode stop_gpe_init(
         FAPI_INF("SGPE was activated successfully!!!!");
     }
 
-    // @todo 146665 Operations to PPEs should use a p9ppe namespace when created
 
-    FAPI_ASSERT((l_timeout_in_MS != 0),
-                fapi2::STOP_GPE_INIT_TIMEOUT()
-                .set_CHIP(i_target),
-                "STOP GPE Init timeout");
+    if( 0 == l_timeout_in_MS )
+    {
+        // SGPE failed to boot or one more CME failed to boot.
+        // We need to collec the FFDC. Let us clear the atomic
+        // lock first to enable collection of CME's FFDC.
+
+        for( auto eq : l_eq_list )
+        {
+            p9_clear_atomic_lock( eq );
+        }
+
+        FAPI_ASSERT( false,
+                     fapi2::STOP_GPE_INIT_TIMEOUT()
+                     .set_CHIP(i_target)
+                     .set_OCC_FLAG_REG_VAL( l_occ_flag )
+                     .set_XSR_REG_VAL( l_xsr )
+                     .set_PPE_STATE_MODE(HALT)
+                     .set_PPE_BASE_ADDRESS_LIST(l_ppe_base_addr_list),
+                     "STOP GPE Init Timeout");
+    }
+
 
 fapi_try_exit:
-    FAPI_IMP("<< stop_gpe_init......");
+    FAPI_IMP("<< stop_gpe_init");
     return fapi2::current_err;
 }
 
@@ -433,33 +465,46 @@ fapi2::ReturnCode stop_gpe_reset(
 
     fapi2::buffer<uint64_t> l_data64;
     uint32_t                l_timeout_in_MS = 100;
+    std::vector<uint64_t> l_ppe_base_addr_list;
+    std::vector< fapi2::Target<fapi2::TARGET_TYPE_EQ> > l_eq_list;
 
     FAPI_IMP(">> stop_gpe_reset...");
+    FAPI_TRY( get_functional_chiplet_info( i_target, l_ppe_base_addr_list, l_eq_list ),
+              "Failed to get PPE Base Address List and Func EQ List" );
 
     // Program XCR to HALT SGPE
-    // @todo This should be replace by a call to a common PPE service class
-    // ppe<PPE_TYPE_GPE>gpe3(3);
-    // gpe3.hard_reset();
     FAPI_INF("   Send HALT command via XCR...");
     l_data64.flush<0>().insertFromRight(p9hcd::HALT, 1, 3);
     FAPI_TRY(putScom(i_target, PU_GPE3_PPE_XIXCR, l_data64));
 
     //Now wait for SGPE to be halted.
-    // @todo This loop should be replace by a call to a common PPE service class
-    // FAPI_TRY(gpe3.is_halted(&b_halted_state, timeout_value_ns, timeout_value_simcycles));
     FAPI_INF("   Poll for HALT State via XSR...");
 
     do
     {
         FAPI_TRY(getScom(i_target, PU_GPE3_GPEXIXSR_SCOM, l_data64));
-        fapi2::delay(SGPE_POLLTIME_MS * 1000 * 1000, SGPE_POLLTIME_MCYCLES * 1000 * 1000);
+        fapi2::delay(SGPE_POLLTIME_MS * 1000, SGPE_POLLTIME_MCYCLES * 1000 * 1000);
     }
     while((l_data64.getBit<p9hcd::HALTED_STATE>() == 0) && (--l_timeout_in_MS != 0));
 
-    FAPI_ASSERT((l_timeout_in_MS != 0),
-                fapi2::STOP_GPE_RESET_TIMEOUT()
-                .set_CHIP(i_target),
-                "STOP GPE Init timeout");
+    if( 0 == l_timeout_in_MS )
+    {
+        // SGPE Reset Failed.
+        // We need to collect the FFDC. Let us clear the atomic
+        // lock first to enable collection of CME's FFDC.
+
+        for( auto eq : l_eq_list )
+        {
+            p9_clear_atomic_lock( eq );
+        }
+
+        FAPI_ASSERT( false,
+                     fapi2::STOP_GPE_RESET_TIMEOUT()
+                     .set_CHIP(i_target)
+                     .set_PPE_STATE_MODE(HALT)
+                     .set_PPE_BASE_ADDRESS_LIST(l_ppe_base_addr_list),
+                     "STOP Reset Timeout");
+    }
 
     FAPI_INF("   Clear SGPE_ACTIVE in OCC Flag Register...");
     l_data64.flush<0>().setBit<p9hcd::SGPE_ACTIVE>();
@@ -501,3 +546,56 @@ fapi2::ReturnCode stop_corecache_setup(
 
     return fapi2::current_err;
 }
+
+// @brief Returns target for all functional EQ and base address of SGPE and all functional CMEs
+// @param[in]   i_target            fapi2 target for P9 chip
+// @param[out]  o_ppe_addr_list     list of base addresses for CMEs and SGPE
+// @param[out]  o_eq_target_list    list of EQ target
+// @return      fapi2 return code
+// @note        instead of  getting functional status from platform targeting, for better reliability
+//              we shall use value of QCSR register.
+fapi2::ReturnCode get_functional_chiplet_info(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    std::vector<uint64_t>& o_ppe_addr_list,
+    std::vector< fapi2::Target<fapi2::TARGET_TYPE_EQ > >& o_eq_target_list )
+{
+
+    FAPI_INF(">> get_functional_chiplet_info");
+
+    fapi2::buffer<uint64_t>    l_qcsrBuf;
+    uint8_t l_exPos = 0;
+
+    auto l_ex_vector = i_target.getChildren<fapi2::TARGET_TYPE_EX>( fapi2::TARGET_STATE_PRESENT );
+    FAPI_TRY(getScom(i_target, PU_OCB_OCI_QCSR_SCOM, l_qcsrBuf));
+    FAPI_INF( "QCS  Val 0x%16llX", l_qcsrBuf );
+
+    o_ppe_addr_list.push_back( SGPE_BASE_ADDRESS );
+
+    for ( auto ex : l_ex_vector )
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, ex, l_exPos ));
+
+        if( l_qcsrBuf.getBit( l_exPos ) )
+        {
+            FAPI_INF("Func EX %d ", l_exPos );
+            o_ppe_addr_list.push_back( getCmeBaseAddress( l_exPos ) );
+            fapi2::Target< fapi2::TARGET_TYPE_EQ > l_parentEq = ex.getParent<fapi2::TARGET_TYPE_EQ>();
+            std::vector< fapi2::Target< fapi2::TARGET_TYPE_EQ > >::iterator l_eq;
+            l_eq = std::find ( o_eq_target_list.begin(), o_eq_target_list.end(), l_parentEq );
+
+            if ( l_eq != o_eq_target_list.end() )
+            {
+                continue;
+            }
+
+            FAPI_INF("Func EQ %d ", (l_exPos >> 1 ) );
+            o_eq_target_list.push_back( l_parentEq );
+        }
+
+    }
+
+fapi_try_exit:
+    FAPI_INF("<< get_functional_chiplet_info");
+    return fapi2::current_err;
+}
+

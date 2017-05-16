@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,12 +26,12 @@
 /// @file  p9_pm_stop_gpe_init.H
 /// @brief Initialize the STOP GPE Engine in the OCC
 ///
-// *HWP HWP Owner: Amit Kumar <akumar3@us.ibm.com>
-// *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner: Bilicon Patil <bilpatil@in.ibm.com>
-// *HWP Team: PM
-// *HWP Level: 1
-// *HWP Consumed by: FSP:HS
+// *HWP Owner           :   Greg Still  <stillgs@us.ibm.com>
+// *HWP Backup Owner    :   David Du    <daviddu@us.ibm.com>
+// *HWP FW Owner        :   Prem S Jha  <premjha2@in.ibm.com>
+// *HWP Team            :   PM
+// *HWP Level           :   3
+// *HWP Consumed by     :   HS
 ///
 ///-----------------------------------------------------------------------------
 
@@ -44,10 +44,6 @@
 
 #include <p9_pm.H>
 #include <fapi2.H>
-#include <p9_quad_scom_addresses.H>
-#include <p9_quad_scom_addresses_fld.H>
-#include <p9_misc_scom_addresses.H>
-#include <p9_misc_scom_addresses_fld.H>
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_pm_stop_gpe_init_FP_t) (

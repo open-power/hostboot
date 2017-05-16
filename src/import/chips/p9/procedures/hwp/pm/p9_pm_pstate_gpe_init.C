@@ -26,18 +26,21 @@
 /// @file p9_pm_pstate_gpe_init.C
 /// @brief  Stop, reset and initalize/start the Pstate GPE
 ///
-// *HWP HWP Owner:          Greg Still <stillgs@us.ibm.com>
-// *HWP BackupHWP Owner:    Amit Kumar <akumar3@us.ibm.com>
-// *HWP FW Owner:           Sangeetha T S <sangeet2@in.ibm.com>
-// *HWP Team: PM
-// *HWP Level: 2
-// *HWP Consumed by: FSP:HS
+// *HWP HWP Owner       :    Greg Still  <stillgs@us.ibm.com>
+// *HWP Backup Owner    :    Rahul Batra <rbatra@us.ibm.com>
+// *HWP FW Owner        :    Prem S Jha  <premjha2@in.ibm.com>
+// *HWP Team            :    PM
+// *HWP Level           :    3
+// *HWP Consumed by     :    HS
 
 // -----------------------------------------------------------------------------
 //  Includes
 // -----------------------------------------------------------------------------
 #include <p9_pm_pstate_gpe_init.H>
 #include <p9_pm_hcd_flags.h>
+#include <p9_ppe_defs.H>
+#include <p9_ppe_utils.H>
+#include <vector>
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -74,13 +77,13 @@ fapi2::ReturnCode pstate_gpe_init(
     fapi2::buffer<uint64_t> l_ivpr;
     uint32_t                l_xsr_halt_condition = 0;
     uint32_t                l_timeout_counter = TIMEOUT_COUNT;
-
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>      FAPI_SYSTEM;
     fapi2::ATTR_PSTATEGPE_BOOT_COPIER_IVPR_OFFSET_Type  l_ivpr_offset = 0;
     fapi2::ATTR_VDD_AVSBUS_BUSNUM_Type                  l_avsbus_number = 0;
     fapi2::ATTR_VDD_AVSBUS_RAIL_Type                    l_avsbus_rail = 0;
     fapi2::ATTR_SYSTEM_PSTATES_MODE_Type                l_pstates_mode = 0;
-
+    std::vector<uint64_t> l_pgpe_base_addr;
+    l_pgpe_base_addr.push_back( PGPE_BASE_ADDRESS );
 
     FAPI_IMP(">> pstate_gpe_init......");
 
@@ -152,7 +155,6 @@ fapi2::ReturnCode pstate_gpe_init(
         FAPI_TRY(fapi2::putScom(i_target, PU_GPE2_GPETSEL_SCOM, l_data64));
 
         // Program XCR to ACTIVATE PGPE
-        // @todo RTC 146665 Operations to PPEs should use a p9ppe namespace
         FAPI_INF("   Starting the PGPE...");
         l_xcr.flush<0>().insertFromRight(p9hcd::HARD_RESET, 1, 3);
         FAPI_TRY(putScom(i_target, PU_GPE2_PPE_XIXCR, l_xcr));
@@ -192,18 +194,19 @@ fapi2::ReturnCode pstate_gpe_init(
                       ((l_xsr_halt_condition == p9hcd::DEBUG_HALT ||
                         l_xsr_halt_condition == p9hcd::DBCR_HALT)   )),
                     fapi2::PSTATE_GPE_INIT_DEBUG_HALT()
-                    .set_CHIP(i_target),
+                    .set_CHIP(i_target)
+                    .set_PGPE_BASE_ADDRESS(l_pgpe_base_addr)
+                    .set_PGPE_STATE_MODE(HALT),
                     "Pstate GPE Debug Halt detected");
-
-        // @todo 146665 Need to collect PGPE state. Operations to PPEs should
-        // use a p9ppe namespace class when created
 
         // When PGPE fails to boot, assert out
         FAPI_ASSERT((l_timeout_counter != 0 &&
                      l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>() == 1 &&
                      l_xsr_iar.getBit<p9hcd::HALTED_STATE>() != 1),
                     fapi2::PSTATE_GPE_INIT_TIMEOUT()
-                    .set_CHIP(i_target),
+                    .set_CHIP(i_target)
+                    .set_PGPE_BASE_ADDRESS(l_pgpe_base_addr)
+                    .set_PGPE_STATE_MODE(HALT),
                     "Pstate GPE Init timeout");
 
         if(l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>())
@@ -245,7 +248,6 @@ fapi2::ReturnCode pstate_gpe_init(
         FAPI_INF("  PGPE booting is disabled and is NOT running!!!!");
     }
 
-
 fapi_try_exit:
     FAPI_IMP("<< pstate_gpe_init......");
     return fapi2::current_err;
@@ -267,20 +269,18 @@ fapi2::ReturnCode pstate_gpe_reset(
 
     fapi2::buffer<uint64_t> l_data64;
     uint32_t                l_timeout_in_MS = 100;
+    std::vector<uint64_t> l_pgpe_base_addr;
+    l_pgpe_base_addr.push_back( PGPE_BASE_ADDRESS );
 
 
     FAPI_IMP(">> pstate_gpe_reset...");
 
     // Program XCR to HALT PGPE
-    // @todo This should be replaced by a call to a common PPE service class
-    // ppe<PPE_TYPE_GPE>GPE2(3);
-    // GPE2.hard_reset();
     FAPI_INF("   Send HALT command via XCR...");
     l_data64.flush<0>().insertFromRight(p9hcd::HALT, 1, 3);
     FAPI_TRY(putScom(i_target, PU_GPE2_PPE_XIXCR, l_data64));
 
     // Now wait for PGPE to be halted.
-    // @todo This loop should be replace by a call to a common PPE service class
     // FAPI_TRY(GPE2.is_halted(&b_halted_state,
     //                         timeout_value_ns,
     //                         timeout_value_simcycles));
@@ -297,8 +297,10 @@ fapi2::ReturnCode pstate_gpe_reset(
     // When PGPE fails to halt, then assert ot
     FAPI_ASSERT((l_timeout_in_MS != 0),
                 fapi2::PSTATE_GPE_RESET_TIMEOUT()
-                .set_CHIP(i_target),
-                "PSTATE GPE Init timeout");
+                .set_CHIP(i_target)
+                .set_PGPE_BASE_ADDRESS(l_pgpe_base_addr)
+                .set_PGPE_STATE_MODE(SNAPSHOT),
+                "PSTATE GPE Reset timeout");
 
     FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_data64));
     FAPI_INF("   Clear PGPE_ACTIVE in OCC Flag Register...");
@@ -339,7 +341,7 @@ fapi2::ReturnCode p9_pm_pstate_gpe_init(
                     fapi2::PSTATE_GPE_PBA_INIT_FAILED()
                     .set_CHIP(i_target)
                     .set_MODE(p9pm::PM_INIT),
-                    "PBA setup failed");
+                    "PBA Setup Failed" );
     }
 
     // Reset the PSTATE GPE
@@ -351,7 +353,6 @@ fapi2::ReturnCode p9_pm_pstate_gpe_init(
     // Unsupported Mode
     else
     {
-        FAPI_ERR("Unknown mode %x passed to p9_pstate_gpe_init.", i_mode);
         FAPI_ASSERT(false,
                     fapi2::PSTATE_GPE_BAD_MODE()
                     .set_BADMODE(i_mode),
