@@ -149,16 +149,21 @@ struct RingBufData
     uint32_t     iv_sizeWorkBuf1;
     void* iv_pWorkBuf2;
     uint32_t     iv_sizeWorkBuf2;
+    void* iv_pWorkBuf3;
+    uint32_t     iv_sizeWorkBuf3;
 
     RingBufData( void* i_pRingBuf1, const uint32_t i_ringSize,
                  void* i_pWorkBuf1, const uint32_t i_sizeWorkBuf1,
-                 void* i_pWorkBuf2, const uint32_t i_sizeWorkBuf2 ) :
+                 void* i_pWorkBuf2, const uint32_t i_sizeWorkBuf2,
+                 void* i_pWorkBuf3, const uint32_t i_sizeWorkBuf3 ) :
         iv_pRingBuffer( i_pRingBuf1),
         iv_ringBufSize(i_ringSize),
         iv_pWorkBuf1( i_pWorkBuf1 ),
         iv_sizeWorkBuf1( i_sizeWorkBuf1 ),
         iv_pWorkBuf2( i_pWorkBuf2 ),
-        iv_sizeWorkBuf2( i_sizeWorkBuf2 )
+        iv_sizeWorkBuf2( i_sizeWorkBuf2 ),
+        iv_pWorkBuf3( i_pWorkBuf3 ),
+        iv_sizeWorkBuf3( i_sizeWorkBuf3 )
 
     {}
 
@@ -168,7 +173,9 @@ struct RingBufData
         iv_pWorkBuf1( NULL ),
         iv_sizeWorkBuf1( 0 ),
         iv_pWorkBuf2( NULL ),
-        iv_sizeWorkBuf2( 0 )
+        iv_sizeWorkBuf2( 0 ),
+        iv_pWorkBuf3( NULL ),
+        iv_sizeWorkBuf3( 0 )
     { }
 };
 
@@ -549,7 +556,8 @@ fapi_try_exit:
 fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImageOut,
         SysPhase_t i_phase, ImageType_t i_imgType,
         void* i_pBuf1, uint32_t i_bufSize1, void* i_pBuf2,
-        uint32_t i_bufSize2, void* i_pBuf3, uint32_t i_bufSize3 )
+        uint32_t i_bufSize2, void* i_pBuf3, uint32_t i_bufSize3,
+        void* i_pBuf4, uint32_t i_bufSize4 )
 {
     uint32_t l_rc = IMG_BUILD_SUCCESS;
     uint32_t hwImagSize = 0;
@@ -600,6 +608,11 @@ fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImage
                  .set_TEMP3_BUF_SIZE( i_bufSize3 ),
                  "Invalid temp buffer3 passed for hcode image build" );
 
+    FAPI_ASSERT( ( i_pBuf4 != NULL ),
+                 fapi2::HCODE_INVALID_TEMP4_BUF()
+                 .set_TEMP4_BUF_SIZE( i_bufSize4 ),
+                 "Invalid temp buffer4 passed for hcode image build" );
+
     FAPI_ASSERT( ( i_bufSize1 != 0  ) ,
                  fapi2::HCODE_INVALID_TEMP1_BUF_SIZE()
                  .set_TEMP1_BUF_SIZE( i_bufSize1 ),
@@ -614,6 +627,11 @@ fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImage
                  fapi2::HCODE_INVALID_TEMP3_BUF_SIZE()
                  .set_TEMP3_BUF_SIZE( i_bufSize3 ),
                  "Invalid size for temp buf3 passed for hcode image build" );
+
+    FAPI_ASSERT( ( i_bufSize4 != 0 ),
+                 fapi2::HCODE_INVALID_TEMP4_BUF_SIZE()
+                 .set_TEMP4_BUF_SIZE( i_bufSize4 ),
+                 "Invalid size for temp buf4 passed for hcode image build" );
 
     FAPI_ASSERT( ( i_imgType.isBuildValid() ),
                  fapi2::HCODE_INVALID_IMG_TYPE(),
@@ -1679,6 +1697,8 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
                  (uintptr_t)(i_ringData.iv_pWorkBuf1), i_ringData.iv_sizeWorkBuf1);
         FAPI_DBG("Work buf2 (buf,size)=(0x%016llX,0x%08X)",
                  (uintptr_t)(i_ringData.iv_pWorkBuf2), i_ringData.iv_sizeWorkBuf2);
+        FAPI_DBG("Work buf2 (buf,size)=(0x%016llX,0x%08X)",
+                 (uintptr_t)(i_ringData.iv_pWorkBuf3), i_ringData.iv_sizeWorkBuf3);
         FAPI_DBG("---------------=== Buffer Specs Ends --------------------");
 
         FAPI_DBG("--------------- Buffer Initializaiton to 0 --------------------");
@@ -1686,6 +1706,7 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
         memset( (uint8_t*) i_ringData.iv_pRingBuffer,  0x00, i_ringData.iv_ringBufSize );
         memset( (uint8_t*) i_ringData.iv_pWorkBuf1, 0x00, i_ringData.iv_sizeWorkBuf1 );
         memset( (uint8_t*) i_ringData.iv_pWorkBuf2, 0x00, i_ringData.iv_sizeWorkBuf2 );
+        memset( (uint8_t*) i_ringData.iv_pWorkBuf3, 0x00, i_ringData.iv_sizeWorkBuf3 );
 
         uint32_t l_bootMask = ENABLE_ALL_CORE;
         fapi2::ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
@@ -1693,6 +1714,7 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
         FAPI_EXEC_HWP( l_fapiRc,
                        p9_xip_customize,
                        i_procTgt,
+                       i_pHwImage,
                        i_pHwImage,
                        hwImageSize,
                        i_ringData.iv_pRingBuffer,
@@ -1703,6 +1725,8 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
                        i_ringData.iv_sizeWorkBuf1,
                        i_ringData.iv_pWorkBuf2,
                        i_ringData.iv_sizeWorkBuf2,
+                       i_ringData.iv_pWorkBuf3,
+                       i_ringData.iv_sizeWorkBuf3,
                        l_bootMask );
 
         if( l_fapiRc )
@@ -3923,7 +3947,9 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                                         void* const     i_pBuf2,
                                         const uint32_t  i_sizeBuf2,
                                         void* const     i_pBuf3,
-                                        const uint32_t  i_sizeBuf3 )
+                                        const uint32_t  i_sizeBuf3,
+                                        void* const     i_pBuf4,
+                                        const uint32_t  i_sizeBuf4 )
 
 
 {
@@ -3946,7 +3972,9 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                             i_pBuf2,
                             i_sizeBuf2,
                             i_pBuf3,
-                            i_sizeBuf3 );
+                            i_sizeBuf3,
+                            i_pBuf4,
+                            i_sizeBuf4 );
 
     FAPI_TRY( validateInputArguments( i_pImageIn,
                                       i_pHomerImage,
@@ -3957,7 +3985,9 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                                       i_pBuf2,
                                       i_sizeBuf2,
                                       i_pBuf3,
-                                      i_sizeBuf3 ),
+                                      i_sizeBuf3,
+                                      i_pBuf4,
+                                      i_sizeBuf4 ),
               "Invalid arguments, escaping hcode image build" );
 
     // HW Image is a nested XIP Image. Let us read global TOC of hardware image

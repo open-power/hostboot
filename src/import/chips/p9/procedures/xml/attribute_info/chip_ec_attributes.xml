@@ -4178,4 +4178,23 @@
     </chipEcFeature>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_NO_GPTR_SUPPORT_VIA_MVPD</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        indicaes if there is  GPTR support through MVPD which there will NOT be if
+        Nimbus DD1
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+
 </attributes>

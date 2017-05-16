@@ -366,10 +366,11 @@ void* host_build_stop_image (void *io_pArgs)
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_build_stop_image entry" );
 
-    // allocate three temporary work buffers
+    // allocate four temporary work buffers
     void* l_temp_buffer0 = malloc(HW_IMG_RING_SIZE);
     void* l_temp_buffer1 = malloc(MAX_RING_BUF_SIZE);
     void* l_temp_buffer2 = malloc(MAX_RING_BUF_SIZE);
+    void* l_temp_buffer3 = malloc(MAX_RING_BUF_SIZE);
 
     do  {
         //Determine top-level system target
@@ -528,7 +529,9 @@ void* host_build_stop_image (void *io_pArgs)
                                  l_temp_buffer1,
                                  MAX_RING_BUF_SIZE,
                                  l_temp_buffer2,
-                                 MAX_RING_BUF_SIZE );
+                                 MAX_RING_BUF_SIZE,
+                                 l_temp_buffer3,
+                                 MAX_RING_BUF_SIZE);
 
                 if ( l_errl )
                 {
@@ -592,6 +595,7 @@ void* host_build_stop_image (void *io_pArgs)
     if( l_temp_buffer0 ) { free(l_temp_buffer0); }
     if( l_temp_buffer1 ) { free(l_temp_buffer1); }
     if( l_temp_buffer2 ) { free(l_temp_buffer2); }
+    if( l_temp_buffer3 ) { free(l_temp_buffer3); }
 
 #ifdef CONFIG_SECUREBOOT
     // securely unload HCODE PNOR section, if necessary

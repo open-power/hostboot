@@ -44,10 +44,12 @@
       <priority>HIGH</priority>
     </callout>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>HW_IMAGE</ffdc>
     <ffdc>IMAGE_BUF</ffdc>
     <ffdc>RING_SECTION_BUF</ffdc>
     <ffdc>RING_BUF1</ffdc>
     <ffdc>RING_BUF2</ffdc>
+    <ffdc>RING_BUF3</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -63,6 +65,7 @@
     <ffdc>RING_SECTION_BUF_SIZE</ffdc>
     <ffdc>RING_BUF_SIZE1</ffdc>
     <ffdc>RING_BUF_SIZE2</ffdc>
+    <ffdc>RING_BUF_SIZE3</ffdc>
     <ffdc>OCCURRENCE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->

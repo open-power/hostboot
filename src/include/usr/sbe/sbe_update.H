@@ -139,15 +139,17 @@ namespace SBE
     //
     // 256K - 316K  = Ring buf1
     // 316K - 376K  = Ring buf2
-    // 376K - 632K  = Ring Section buf
+    // 376k - 436k  = Ring buf3
+    // 436K - 692K  = Ring Section buf
     // ---- ALT use 256K-632K for SBE ECC image
-    // 632K - 888K  = SBE + HBBL image
+    // 692K - 948K  = SBE + HBBL image
     enum {
         FIXED_SEEPROM_WORK_SPACE = 256 * 1024,
         SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE,
         RING_BUF1_VADDR = FIXED_SEEPROM_WORK_SPACE + SBE_IMG_VADDR,
         RING_BUF2_VADDR = RING_BUF1_VADDR + MAX_RING_BUF_SIZE,
-        RING_SEC_VADDR  = RING_BUF2_VADDR + MAX_RING_BUF_SIZE,
+        RING_BUF3_VADDR = RING_BUF2_VADDR + MAX_RING_BUF_SIZE,
+        RING_SEC_VADDR  = RING_BUF3_VADDR + MAX_RING_BUF_SIZE,
         //NOTE: recycling the same memory space for different
         //steps in the process.
         SBE_ECC_IMG_VADDR = RING_BUF1_VADDR,
@@ -431,6 +433,7 @@ namespace SBE
      * @return errlHndl_t    Error log handle on failure.
      */
     errlHndl_t procCustomizeSbeImg(TARGETING::Target* i_target,
+                                   void* i_hwImgPtr,
                                    void* i_sbeImgPtr,
                                    size_t i_maxImgSize,
                                    void* io_imgPtr,
