@@ -238,6 +238,7 @@ namespace HBPM
         void *l_buffer0 = (void*)malloc(HW_IMG_RING_SIZE);
         void *l_buffer1 = (void*)malloc(MAX_RING_BUF_SIZE);
         void *l_buffer2 = (void*)malloc(MAX_RING_BUF_SIZE);
+        void *l_buffer3 = (void*)malloc(MAX_RING_BUF_SIZE);
 
         do
         {
@@ -323,7 +324,9 @@ namespace HBPM
                              l_buffer1,
                              MAX_RING_BUF_SIZE,
                              l_buffer2,
-                             MAX_RING_BUF_SIZE );
+                             MAX_RING_BUF_SIZE,
+                             l_buffer3,
+                             MAX_RING_BUF_SIZE);
 
             if (l_errl)
             {
@@ -413,6 +416,7 @@ namespace HBPM
         free(l_buffer0);
         free(l_buffer1);
         free(l_buffer2);
+        free(l_buffer3);
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    EXIT_MRK"loadHcode: RC=0x%X, PLID=0x%lX",

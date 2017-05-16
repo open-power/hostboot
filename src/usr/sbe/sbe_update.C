@@ -962,6 +962,7 @@ namespace SBE
 
 /////////////////////////////////////////////////////////////////////
     errlHndl_t procCustomizeSbeImg(TARGETING::Target* i_target,
+                                   void* i_hwImgPtr,
                                    void* i_sbeImgPtr,
                                    size_t i_maxImgSize,
                                    void* io_imgPtr,
@@ -1035,6 +1036,7 @@ namespace SBE
                 FAPI_INVOKE_HWP( err,
                                  p9_xip_customize,
                                  l_fapiTarg,
+                                 i_hwImgPtr,
                                  io_imgPtr, //image in/out
                                  tmpImgSize,
                                  (void*)RING_SEC_VADDR,
@@ -1044,6 +1046,8 @@ namespace SBE
                                  (void*)RING_BUF1_VADDR,
                                  (uint32_t)MAX_RING_BUF_SIZE,
                                  (void*)RING_BUF2_VADDR,
+                                 (uint32_t)MAX_RING_BUF_SIZE,
+                                 (void*)RING_BUF3_VADDR,
                                  (uint32_t)MAX_RING_BUF_SIZE,
                                  procIOMask ); // Bits(8:31) = EC00:EC23
 
@@ -1705,6 +1709,36 @@ namespace SBE
     }
 
 /////////////////////////////////////////////////////////////////////
+    errlHndl_t sbeLoadHcode(char*& o_hcodeAddr)
+    {
+        errlHndl_t l_errl = NULL;
+        PNOR::SectionInfo_t l_info;
+
+        do
+        {
+
+            // Get HCODE PNOR section info from PNOR RP
+            l_errl = PNOR::getSectionInfo( PNOR::HCODE, l_info );
+            if( l_errl )
+            {
+                //No need to commit error here, it gets handled later
+                //just break out to escape this function
+                break;
+            }
+
+            o_hcodeAddr = reinterpret_cast<char*>(l_info.vaddr);
+
+            TRACUCOMP( g_trac_sbe,
+                    ERR_MRK"sbeLoadHcode() - Error from "
+                    "HCODE addr = 0x%p ",
+                    o_hcodeAddr);
+
+        } while ( 0 );
+
+        return  l_errl;
+    }
+
+    /////////////////////////////////////////////////////////////////////
     errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState)
     {
 
@@ -1965,7 +1999,25 @@ namespace SBE
             /*  Calculate CRC of the image             */
             /*******************************************/
             size_t sbeImgSize = 0;
+
+
+            // get a pointer to the hcode for the .overlays
+            char* l_hCodeAddr = NULL;
+
+            err = sbeLoadHcode(l_hCodeAddr);
+
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"ge() - "
+                        "Error from sbeLoadHcode(), "
+                        "RC=0x%X, PLID=0x%lX",
+                        ERRL_GETRC_SAFE(err),
+                        ERRL_GETPLID_SAFE(err));
+                break;
+            }
+
             err = procCustomizeSbeImg(io_sbeState.target,
+                                      l_hCodeAddr,    // HCODE in memory
                                       sbeHbblImgPtr,  //SBE, HBBL in memory
                                       sbeHbblImgSize,
                                       reinterpret_cast<void*>
@@ -1981,6 +2033,8 @@ namespace SBE
                            ERRL_GETPLID_SAFE(err));
                 break;
             }
+
+
 
             // Verify that HW Key Hash is included in customized image
             SHA512_t hash = {0};
@@ -3800,6 +3854,14 @@ namespace SBE
                 TRACFCOMP( g_trac_sbe, ERR_MRK,"createSbeImageVmmSpace() - Error from loadSecureSection(PNOR::HB_BOOTLOADER)");
                 break;
             }
+
+            err = loadSecureSection(PNOR::HCODE);
+
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK,"createSbeImageVmmSpace() - Error from loadSecureSection(PNOR::HCODE)");
+                break;
+            }
 #endif
 
         }while(0);
@@ -3911,6 +3973,13 @@ namespace SBE
                 TRACFCOMP( g_trac_sbe, ERR_MRK,"cleanupSbeImageVmmSpace() - Error from unloadSecureSection(PNOR::HB_BOOTLOADER)");
                 break;
             }
+            err = unloadSecureSection(PNOR::HCODE);
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK,"cleanupSbeImageVmmSpace() - Error from unloadSecureSection(PNOR::HCODE)");
+                break;
+            }
+
 #endif
 
         }while(0);

@@ -100,7 +100,7 @@
 
 /** SBE Update process is at 3GB, uses 512KB */
 #define VMM_VADDR_SBE_UPDATE (3 * GIGABYTE)
-#define VMM_SBE_UPDATE_SIZE (900 * KILOBYTE)
+#define VMM_SBE_UPDATE_SIZE (1024 * KILOBYTE)
 #define VMM_VADDR_SBE_UPDATE_END (VMM_VADDR_SBE_UPDATE + VMM_SBE_UPDATE_SIZE)
 /** Debug Comm Channel is at 3.5GB, uses 32KB */
 #define VMM_VADDR_DEBUG_COMM ((3 * GIGABYTE) + (500 * MEGABYTE))
