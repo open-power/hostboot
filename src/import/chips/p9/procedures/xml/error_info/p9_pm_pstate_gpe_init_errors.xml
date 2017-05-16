@@ -22,8 +22,15 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-
 <!-- Error definitions for p9_pm_pstate_gpe_init procedure -->
+<!--
+     *HWP HWP Owner     :   Greg Still  <stillgs@us.ibm.com>
+     *HWP Backup Owner  :   Rahul Batra <rbatra@us.ibm.com>
+     *HWP FW Owner      :   Prem S Jha  <premjha2@in.ibm.com>
+     *HWP Team          :   PM
+     *HWP Level         :   3
+     *HWP Consumed by   :   HS
+-->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -42,11 +49,16 @@
     <description> Pstate GPE init timed out while waiting for PGPE Active in OCC
     SCRATCH2.
     </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>PGPE_BASE_ADDRESS</ffdc>
+    <ffdc>PGPE_STATE_MODE</ffdc>
     <collectRegisterFfdc>
       <id>PGPE_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
+
+     <collectFfdc>p9_collect_ppe_state, CHIP, PGPE_STATE_MODE, PGPE_BASE_ADDRESS</collectFfdc>
     <callout>
       <target>CHIP</target>
       <priority>LOW</priority>
@@ -78,11 +90,18 @@
     <description> Pstate GPE init detected a Debug Halt condition.  This should only
     assert in a development debug environment.
     </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>PGPE_BASE_ADDRESS</ffdc>
+    <ffdc>PGPE_STATE_MODE</ffdc>
+
     <collectRegisterFfdc>
       <id>PGPE_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
+
+    <collectFfdc>p9_collect_ppe_state, CHIP, PGPE_STATE_MODE, PGPE_BASE_ADDRESS</collectFfdc>
+
     <callout>
       <target>CHIP</target>
       <priority>LOW</priority>
@@ -97,11 +116,18 @@
     <rc>RC_PSTATE_GPE_RESET_TIMEOUT</rc>
     <description> Pstate GPE init timed out while waiting for HALT status in XSR register.
     </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>PGPE_BASE_ADDRESS</ffdc>
+    <ffdc>PGPE_STATE_MODE</ffdc>
+
     <collectRegisterFfdc>
       <id>PGPE_FFDC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
+
+    <collectFfdc>p9_collect_ppe_state, CHIP, PGPE_STATE_MODE, PGPE_BASE_ADDRESS</collectFfdc>
+
     <callout>
       <procedure>CODE</procedure>
       <priority>LOW</priority>
@@ -114,10 +140,11 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PSTATE_GPE_PBA_INIT_FAILED</rc>
-    <description> Pstate GPE called to p9_pm_pba_init failed.
+    <description>p9_pm_pba_init failed in PM_INIT mode.
     </description>
-    <ffdc>TARGET</ffdc>
     <ffdc>MODE</ffdc>
+    <ffdc>CHIP</ffdc>
+
     <callout>
       <procedure>CODE</procedure>
       <priority>LOW</priority>
@@ -131,6 +158,7 @@
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
+
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
