@@ -79,6 +79,7 @@ include ${HWP_PM_PATH}/p9_pm_occ_control.mk
 include ${HWP_PM_PATH}/p9_pm_occ_firinit.mk
 include ${HWP_PM_PATH}/p9_pm_corequad_init.mk
 include ${HWP_PM_PATH}/p9_pm_firinit.mk
+include ${HWP_PM_PATH}/p9_query_cache_access_state.mk
 include ${HWP_PM_PATH}/p9_pm_pss_init.mk
 include ${HWP_PM_PATH}/p9_pm_cme_firinit.mk
 include ${HWP_PM_PATH}/p9_hcode_image_build.mk
