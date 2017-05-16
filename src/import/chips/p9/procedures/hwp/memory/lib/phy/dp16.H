@@ -164,7 +164,8 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
 
         static const std::vector< std::pair<uint64_t, uint64_t> > AC_BOOST_CNTRL_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > CTLE_CNTRL_REG;
-        static const std::vector< std::pair<uint64_t, uint64_t> > RD_VREF_CNTRL_REG;
+        static const std::vector< uint64_t > DD1_RD_VREF_CNTRL_REG;
+        static const std::vector< uint64_t > DD2_RD_VREF_CNTRL_REG;
 
         static const std::vector<std::vector<std::pair<uint64_t, uint64_t>>> BIT_DISABLE_REG;
 

@@ -275,21 +275,21 @@ fapi2::ReturnCode after_phy_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
     // below does its own checking for applicable feature/ec levels.
     for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
     {
-        std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>> > l_vreg_coarse;
-        std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>> > l_vref_cntl;
+        std::vector< fapi2::buffer<uint64_t> > l_vref_cntl;
 
         // Fix up vref dac
         if (!l_sim)
         {
-            FAPI_TRY( mss::scom_suckah(p, TT::RD_VREF_CNTRL_REG, l_vref_cntl) );
+            const auto& RD_VREF_CNTRL_REG = mss::chip_ec_nimbus_lt_2_0(i_target) ? TT::DD1_RD_VREF_CNTRL_REG :
+                                            TT::DD2_RD_VREF_CNTRL_REG;
+            FAPI_TRY( mss::scom_suckah(p, RD_VREF_CNTRL_REG, l_vref_cntl) );
             std::for_each(l_vref_cntl.begin(), l_vref_cntl.end(),
-                          [&p](std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> >& v)
+                          [&p](fapi2::buffer<uint64_t>& b)
             {
                 // Checks for EC level
-                v.first  = mss::workarounds::dp16::vref_dac(p, v.first);
-                v.second = mss::workarounds::dp16::vref_dac(p, v.second);
+                b  = mss::workarounds::dp16::vref_dac(p, b);
             });
-            FAPI_TRY( mss::scom_blastah(p, TT::RD_VREF_CNTRL_REG, l_vref_cntl) );
+            FAPI_TRY( mss::scom_blastah(p, RD_VREF_CNTRL_REG, l_vref_cntl) );
         }
     }
 
