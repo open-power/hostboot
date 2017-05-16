@@ -54,7 +54,6 @@ namespace HTMGT
         }
 
         uint8_t cmdData[OCC_MAX_DATA_LENGTH] = {0};
-        uint64_t cmdDataLen = OCC_MAX_DATA_LENGTH;
 
         const occCfgDataTable_t* start = &occCfgDataTable[0];
         const occCfgDataTable_t* end =
@@ -125,7 +124,7 @@ namespace HTMGT
 
                     if (sendData)
                     {
-                        cmdDataLen = OCC_MAX_DATA_LENGTH;
+                        uint64_t cmdDataLen = 0;
                         switch(format)
                         {
                             case OCC_CFGDATA_FREQ_POINT:
@@ -182,7 +181,6 @@ namespace HTMGT
                                 TMGT_ERR("sendOccConfigData: Unsupported"
                                          " format type 0x%02X",
                                          format);
-                                cmdDataLen = 0;
                         }
 
                         if (cmdDataLen > 0)
@@ -931,7 +929,11 @@ void getFrequencyPointMessageData(uint8_t* o_data,
         turbo = sys->getAttr<ATTR_FREQ_CORE_MAX>();
 
         //Ultra Turbo Frequency in MHz
-        const uint16_t wofSupported = sys->getAttr<ATTR_SYSTEM_WOF_ENABLED>();
+        ATTR_SYSTEM_WOF_ENABLED_type wofSupported;
+        if (!sys->tryGetAttr<ATTR_SYSTEM_WOF_ENABLED>(wofSupported))
+        {
+            wofSupported = 0;
+        }
         if (0 != wofSupported)
         {
             ultra = sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
@@ -990,8 +992,8 @@ void getApssMessageData(uint8_t* o_data,
     ATTR_ADC_CHANNEL_FUNC_IDS_type function;
     sys->tryGetAttr<ATTR_ADC_CHANNEL_FUNC_IDS>(function);
 
-    ATTR_ADC_CHANNEL_GROUNDS_type ground;
-    sys->tryGetAttr<ATTR_ADC_CHANNEL_GROUNDS>(ground);
+    ATTR_ADC_CHANNEL_GNDS_type ground;
+    sys->tryGetAttr<ATTR_ADC_CHANNEL_GNDS>(ground);
 
     ATTR_ADC_CHANNEL_GAINS_type gain;
     sys->tryGetAttr<ATTR_ADC_CHANNEL_GAINS>(gain);
