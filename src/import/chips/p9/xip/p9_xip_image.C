@@ -3264,11 +3264,6 @@ int p9_xip_dd_section_support(const void* i_image,
     int rc;
     P9XipSection section;
 
-    if (i_sectionId == P9_XIP_SECTION_HW_OVERLAYS)
-    {
-        return P9_XIP_OVERLAYS_NOT_SUPPORTED;
-    }
-
     rc = p9_xip_get_section(i_image, i_sectionId, &section);
 
     if (!rc)
