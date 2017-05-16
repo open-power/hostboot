@@ -105,6 +105,7 @@ fapi2::ReturnCode during_phy_reset( const fapi2::Target<TARGET_TYPE_MCBIST>& i_t
     fapi2::buffer<uint64_t> l_phyfir_mask;
     l_phyfir_mask.setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_0>()
     .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_1>()
+    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_2>()
     .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_3>()
     .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_4>()
     .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_5>()

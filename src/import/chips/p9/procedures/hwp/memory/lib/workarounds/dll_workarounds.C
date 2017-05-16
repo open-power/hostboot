@@ -32,9 +32,11 @@
 #include <map>
 #include <fapi2.H>
 #include <lib/workarounds/dll_workarounds.H>
+#include <lib/fir/check.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <lib/phy/dp16.H>
+#include <lib/fir/fir.H>
 #include <lib/shared/mss_const.H>
 #include <lib/utils/conversions.H>
 
@@ -138,6 +140,33 @@ namespace workarounds
 {
 namespace dll
 {
+
+///
+/// @brief Clears the DLL firs
+/// @param[in] i_target the MCA target
+/// @return FAPI2_RC_SUCCESS if the scoms don't fail
+/// @note Need to clear the DLL firs when we notice a DLL fail for workarounds
+///
+fapi2::ReturnCode clear_dll_fir( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target  )
+{
+    fapi2::buffer<uint64_t> l_phyfir_data;
+
+    fir::reg<MCA_IOM_PHY0_DDRPHY_FIR_REG> l_mca_fir_reg(i_target, fapi2::current_err);
+    FAPI_TRY(fapi2::current_err, "%s unable to create fir::reg for 0x%016llx", mss::c_str(i_target),
+             MCA_IOM_PHY0_DDRPHY_FIR_REG);
+
+    FAPI_TRY(l_mca_fir_reg.clear<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_2>()); // bit 56
+    FAPI_TRY(l_mca_fir_reg.clear<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_4>()); // bit 58
+
+    FAPI_TRY( mss::getScom(i_target, MCA_IOM_PHY0_DDRPHY_FIR_REG, l_phyfir_data),
+              "Failed getScom() operation on %s reg 0x%016llx",
+              mss::c_str(i_target), MCA_IOM_PHY0_DDRPHY_FIR_REG);
+
+    FAPI_INF("%s PHY FIR register is now 0x%016llx", mss::c_str(i_target), l_phyfir_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Checks if CAL_ERROR and CAL_ERROR_FINE bits are set
@@ -362,6 +391,7 @@ fapi_try_exit:
 template< >
 fapi2::ReturnCode fix_bad_voltage_settings(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target)
 {
+
     constexpr uint64_t SKIP_VREG = 0b10;
 
     for( const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
@@ -383,13 +413,17 @@ fapi2::ReturnCode fix_bad_voltage_settings(const fapi2::Target<fapi2::TARGET_TYP
 
             for( const auto& d : l_failing_dll_cntrl )
             {
+                // Need to clear out the error bits even though we set the reset bit
                 FAPI_TRY(mss::getScom(p, d, l_read),
                          "Failed getScom() operation on %s reg 0x%016llx",
                          mss::c_str(i_target), d );
-
-
+                FAPI_DBG("%s DLL CNTRL register is 0x%016llx", mss::c_str(p), l_read);
                 mss::dp16::set_dll_cal_reset(l_read, mss::HIGH);
                 mss::dp16::set_dll_cal_skip(l_read, SKIP_VREG);
+                l_read.clearBit<mss::dll_map::DLL_CNTL_CAL_ERROR>();
+                l_read.clearBit<mss::dll_map::DLL_CNTL_CAL_ERROR_FINE>();
+
+                FAPI_DBG("%s new setting for DLL CNTRL register is 0x%016llx", mss::c_str(p), l_read);
 
                 FAPI_TRY(mss::putScom(p, d, l_read),
                          "Failed putScom() operation on %s reg 0x%016llx",
@@ -398,6 +432,8 @@ fapi2::ReturnCode fix_bad_voltage_settings(const fapi2::Target<fapi2::TARGET_TYP
             }
 
         }
+
+        FAPI_TRY( clear_dll_fir(p) );
 
         // Write the VREG DAC value found in log_fails to the failing DLL VREG DAC
         FAPI_TRY( change_vreg_coarse(p, l_failing_dll_vreg_coarse),
@@ -439,11 +475,13 @@ fapi2::ReturnCode fix_bad_voltage_settings(const fapi2::Target<fapi2::TARGET_TYP
 
         FAPI_TRY( check_status(p, l_failing_dll_cntrl),
                   "%s check_status() failed", mss::c_str(p));
+
     }// mca
 
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 
 } // close namespace dll
 } // close namespace workarounds

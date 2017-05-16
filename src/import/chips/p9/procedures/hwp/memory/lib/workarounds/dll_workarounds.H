@@ -52,6 +52,7 @@ struct dll_map
         MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_1_01_REGS_RXDLL_DAC_COARSE_LEN;
     static constexpr uint64_t DLL_CNTL_CAL_ERROR = MCA_DDRPHY_DP16_DLL_CNTL0_P0_1_01_CAL_ERROR;
     static constexpr uint64_t DLL_CNTL_CAL_ERROR_FINE = MCA_DDRPHY_DP16_DLL_CNTL0_P0_1_01_CAL_ERROR_FINE;
+    static constexpr uint64_t DLL_CAL_GOOD = MCA_DDRPHY_DP16_DLL_CNTL0_P0_1_01_CAL_GOOD;
 
     // Value for UPPER and LOWER DAC are the same
     // Used LOWER DAC enumeration...just because
@@ -89,6 +90,13 @@ namespace workarounds
 {
 namespace dll
 {
+
+///
+/// @brief Clears the DLL firs
+/// @param[in] i_target the MCA target
+/// @return returns true unless if scom errors
+///
+fapi2::ReturnCode clear_dll_fir( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target  );
 
 ///
 /// @brief Checks if CAL_ERROR and CAL_ERROR_FINE bits are set
