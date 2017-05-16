@@ -402,7 +402,7 @@ uint32_t startBgScrub<TYPE_MCBIST>( ExtensibleChip * i_mcaChip,
 uint32_t __startTdScrub_mca( ExtensibleChip * i_mcaChip,
                              mss::mcbist::address i_saddr,
                              mss::mcbist::address i_eaddr,
-                             const mss::mcbist::stop_conditions & i_stopCond )
+                             mss::mcbist::stop_conditions & i_stopCond )
 {
     #define PRDF_FUNC "[PlatServices::__startTdScrub_mca] "
 
@@ -425,6 +425,10 @@ uint32_t __startTdScrub_mca( ExtensibleChip * i_mcaChip,
                       mcbChip->getHuid() );
             break;
         }
+
+        // Set stop-on-AUE for all target scrubs. See explanation in
+        // startBgScrub() for the reasons why.
+        i_stopCond.set_pause_on_aue(mss::ON);
 
         // Start the super fast read command.
         errlHndl_t errl;
@@ -449,8 +453,8 @@ uint32_t __startTdScrub_mca( ExtensibleChip * i_mcaChip,
 //------------------------------------------------------------------------------
 
 uint32_t __startTdScrubMaster_mca( ExtensibleChip * i_mcaChip,
-                              const MemRank & i_rank,
-                              const mss::mcbist::stop_conditions & i_stopCond )
+                                   const MemRank & i_rank,
+                                   mss::mcbist::stop_conditions & i_stopCond )
 {
     // Get the address rank of the master rank.
     uint32_t port = i_mcaChip->getPos() % MAX_MCA_PER_MCBIST;
@@ -466,8 +470,8 @@ uint32_t __startTdScrubMaster_mca( ExtensibleChip * i_mcaChip,
 //------------------------------------------------------------------------------
 
 uint32_t __startTdScrubSlave_mca( ExtensibleChip * i_mcaChip,
-                              const MemRank & i_rank,
-                              const mss::mcbist::stop_conditions & i_stopCond )
+                                  const MemRank & i_rank,
+                                  mss::mcbist::stop_conditions & i_stopCond )
 {
     // Get the address rank of the slave rank.
     uint32_t port = i_mcaChip->getPos() % MAX_MCA_PER_MCBIST;

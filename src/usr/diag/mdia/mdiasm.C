@@ -1084,7 +1084,8 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
                     //set stop conditions
                     stopCond.set_pause_on_mpe(mss::ON);
-                    stopCond.set_pause_on_ue(mss::ON);
+                    stopCond.set_pause_on_ue( mss::ON);
+                    stopCond.set_pause_on_aue(mss::ON);
                     stopCond.set_nce_inter_symbol_count_enable(mss::ON);
                     stopCond.set_nce_soft_symbol_count_enable( mss::ON);
                     stopCond.set_nce_hard_symbol_count_enable( mss::ON);
