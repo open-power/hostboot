@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -82,6 +82,8 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
          * @reasoncode   FSI::RC_INVALID_LENGTH
          * @userdata1    Data Length
          * @devdesc      presenceDetect> Invalid data length (!= 1 bytes)
+         * @custdesc     FSI buffer length is not 1 byte when finding
+         *               processor
          */
         l_errl =
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -163,6 +165,7 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
          * @userdata2[0:31]    FSI Presence
          * @userdata2[32:63]   MVPD Presence
          * @devdesc      presenceDetect> FSI and MVPD do not agree
+         * @custdesc     FSI and MVPD do not agree
          */
         l_errl =
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -254,6 +257,8 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
          * @reasoncode   FSI::RC_INVALID_LENGTH
          * @userdata1    Data Length
          * @devdesc      presenceDetect> Invalid data length (!= 1 bytes)
+         * @custdesc     FSI buffer length is not 1 byte when finding
+         *               a memory buffer chip
          */
         l_errl =
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -325,6 +330,7 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
          * @userdata2[0:31]    FSI Presence
          * @userdata2[32:63]   VPD Presence
          * @devdesc      presenceDetect> FSI and CVPD do not agree
+         * @custdesc     FSI and CVPD do not agree
          */
         l_errl =
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,

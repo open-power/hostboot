@@ -592,6 +592,7 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                          * @userdata2    <unused>
                          * @devdesc      LpcDD::hwReset> Unsupported Reset Level
                          *               requested
+                         * @custdesc     Unsupported Reset Level requested
                          */
                         l_err = new ERRORLOG::ErrlEntry(
                                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1007,6 +1008,7 @@ errlHndl_t LpcDD::checkForOpbErrors( ResetLevels &o_resetLevel )
          * @userdata2    Reset Level
          * @devdesc      LpcDD::checkForOpbErrors> Error(s) found in OPB
          *               and/or LPCHC Status Register
+         * @custdesc     Error(s) found in OPB and/or LPCHC Status Register
          */
         l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         LPC::MOD_LPCDD_CHECKFOROPBERRORS,

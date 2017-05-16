@@ -116,6 +116,7 @@ errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
          * @userdata1    Target HUID
          * @userdata2    <unused>
          * @devdesc      platReadIDEC> Invalid chipid from hardware (all FFs)
+         * @custdesc     Invalid chipid from hardware (all FFs)
          */
         errl = new ERRORLOG::ErrlEntry(
                                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -323,6 +324,7 @@ errlHndl_t platReadLx(const TargetHandle_t &i_mca,
          * @userdata1    0
          * @userdata2    0
          * @devdesc      platReadLx> Bad MCA target
+         * @custdesc     Bad MCA target
          */
         errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                        HWAS::MOD_PLAT_READLX,
@@ -355,6 +357,7 @@ errlHndl_t platReadLx(const TargetHandle_t &i_mca,
              * @userdata1    Target MCA HUID
              * @userdata2    Value of x for Lx keyword
              * @devdesc      platReadLx> Invalid Lx keyword
+             * @custdesc     Invalid Lx keyword
              */
             errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            HWAS::MOD_PLAT_READLX,

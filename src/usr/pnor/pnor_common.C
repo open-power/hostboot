@@ -153,8 +153,8 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
             * @userdata2 Error code
             * @devdesc Expected buffer to have contents of TOC,
             *                      instead was NULL
-            * @custdesc A problem occurred while reading PNOR
-            *                       partition table
+            * @custdesc A problem occurred while reading
+            *           Processor NOR flash partition table
             */
             l_errhdl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -183,8 +183,8 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
             * @userdata1 Address of toc buffer
             * @userdata2 Error Code
             * @devdesc Hdr of TOC of PNOR failed checksum
-            * @custdesc A problem occurred while reading PNOR
-            *                     partition table
+            * @custdesc A problem occurred while reading
+            *           Processor NOR flash partition table
             */
             l_errhdl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -211,8 +211,8 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
             * @userdata1 Address of toc buffer
             * @userdata2 Error Code
             * @devdesc Hdr of TOC of PNOR failed series of tests
-            * @custdesc A problem occurred while reading PNOR
-            *                     partition table
+            * @custdesc A problem occurred while reading
+            *           Processor NOR flash partition table
             */
             l_errhdl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -251,8 +251,8 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
             * @userdata1 Address of toc buffer
             * @userdata2 Error Code
             * @devdesc Error while parsing pnor TOC entries
-            * @custdesc A problem occurred while reading PNOR
-            *                     partition table
+            * @custdesc A problem occurred while reading
+            *           Processor NOR flash partition table
             */
             l_errhdl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
