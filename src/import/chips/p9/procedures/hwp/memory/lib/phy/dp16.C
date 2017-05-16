@@ -251,16 +251,75 @@ const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::IO_TX_PFET_TERM_REG
     MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_4,
 };
 
-// Definition of the DP16 RD_VREF Control registers
+// Definition of the DD1 DP16 RD_VREF Control registers
+// Note: For DD2 if we use the DD2_PERBIT_RDVREF_DISABLE, then these registers are still valid
 // DP16 RD_VREF Control registers all come in pairs - one per 8 bits
 // 5 DP16 per MCA gives us 10  Registers.
-const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::RD_VREF_CNTRL_REG =
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::DD1_RD_VREF_CNTRL_REG =
 {
-    { MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_0 },
-    { MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_1, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_1 },
-    { MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_2, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_2 },
-    { MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_3, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_3 },
-    { MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_4, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_4 },
+    {
+        MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_0  ,
+        MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_1, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_1  ,
+        MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_2, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_2  ,
+        MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_3, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_3  ,
+        MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_4, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_4
+    },
+};
+
+// Definition of the DD2 DP16 RD_VREF Control registers
+// Note: DO NOT use this for DD1 as it will lead to a runtime scom access error
+// DD2 DP16 RD_VREF Control registers all come in one register per pair of bits
+// One register per two bits DP16 per MCA gives us 36  Registers.
+// TK update the below constants with the DD2 register fixes
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::DD2_RD_VREF_CNTRL_REG =
+{
+    {
+        // DP0
+        MCA_DDRPHY_DP16_RD_VREF_DAC_0_P0_0,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_1_P0_0,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_2_P0_0,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_3_P0_0,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_4_P0_0,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_5_P0_0,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_6_P0_0,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_7_P0_0,
+
+        // DP1
+        MCA_DDRPHY_DP16_RD_VREF_DAC_0_P0_1,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_1_P0_1,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_2_P0_1,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_3_P0_1,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_4_P0_1,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_5_P0_1,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_6_P0_1,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_7_P0_1,
+
+        // DP2
+        MCA_DDRPHY_DP16_RD_VREF_DAC_0_P0_2,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_1_P0_2,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_2_P0_2,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_3_P0_2,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_4_P0_2,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_5_P0_2,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_6_P0_2,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_7_P0_2,
+
+        // DP3
+        MCA_DDRPHY_DP16_RD_VREF_DAC_0_P0_3,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_1_P0_3,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_2_P0_3,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_3_P0_3,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_4_P0_3,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_5_P0_3,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_6_P0_3,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_7_P0_3,
+
+        // DP4 - we only have 8 bits here, so 4 registers
+        MCA_DDRPHY_DP16_RD_VREF_DAC_0_P0_4,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_1_P0_4,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_2_P0_4,
+        MCA_DDRPHY_DP16_RD_VREF_DAC_3_P0_4,
+    },
 };
 
 // Definition of the DP16 RD_VREF Calibration enable registers
@@ -1468,7 +1527,7 @@ fapi2::ReturnCode reset_rd_vref( const fapi2::Target<TARGET_TYPE_MCA>& i_target 
 {
     typedef dp16Traits<TARGET_TYPE_MCA> TT;
 
-    std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> > > l_data;
+    std::vector< fapi2::buffer< uint64_t > > l_data;
     uint64_t l_vref_bitfield = 0;
     uint8_t l_sim = 0;
     uint32_t l_vref = 0;
@@ -1485,20 +1544,20 @@ fapi2::ReturnCode reset_rd_vref( const fapi2::Target<TARGET_TYPE_MCA>& i_target 
         // Setup the rd vref from VPD
         {
             // Do a read/modify/write
-            FAPI_TRY( mss::scom_suckah(i_target, TT::RD_VREF_CNTRL_REG, l_data) );
+            const auto& RD_VREF_CNTRL_REG = mss::chip_ec_nimbus_lt_2_0(i_target) ? TT::DD1_RD_VREF_CNTRL_REG :
+                                            TT::DD2_RD_VREF_CNTRL_REG;
+            FAPI_TRY( mss::scom_suckah(i_target, RD_VREF_CNTRL_REG, l_data) );
 
-            for (auto& l_regpair : l_data)
+            for (auto& l_reg_data : l_data)
             {
                 // Write the same value for all the DQ and DQS nibbles
-                l_regpair.first.insertFromRight<TT::RD_VREF_BYTE0_NIB0, TT::RD_VREF_BYTE0_NIB0_LEN>(l_vref_bitfield);
-                l_regpair.first.insertFromRight<TT::RD_VREF_BYTE0_NIB1, TT::RD_VREF_BYTE0_NIB1_LEN>(l_vref_bitfield);
-                l_regpair.second.insertFromRight<TT::RD_VREF_BYTE1_NIB2, TT::RD_VREF_BYTE1_NIB2_LEN>(l_vref_bitfield);
-                l_regpair.second.insertFromRight<TT::RD_VREF_BYTE1_NIB3, TT::RD_VREF_BYTE1_NIB3_LEN>(l_vref_bitfield);
+                l_reg_data.insertFromRight<TT::RD_VREF_BYTE0_NIB0, TT::RD_VREF_BYTE0_NIB0_LEN>(l_vref_bitfield);
+                l_reg_data.insertFromRight<TT::RD_VREF_BYTE0_NIB1, TT::RD_VREF_BYTE0_NIB1_LEN>(l_vref_bitfield);
             }
 
-            FAPI_INF("blasting VREF settings from VPD to dp16 RD_VREF byte0 and byte1");
+            FAPI_INF("blasting VREF settings from VPD to dp16 RD_VREF registers");
 
-            FAPI_TRY( mss::scom_blastah(i_target, TT::RD_VREF_CNTRL_REG, l_data) );
+            FAPI_TRY( mss::scom_blastah(i_target, RD_VREF_CNTRL_REG, l_data) );
         }
 
         // Turn on the rd vref calibration. We leverage an attribute to control this.
