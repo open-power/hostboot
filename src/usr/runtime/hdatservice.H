@@ -59,6 +59,7 @@ namespace RUNTIME
         };
 
         typedef std::vector<hdatMemRegion_t>::iterator    memRegionItr;
+        typedef std::vector<hdatMemRegion_t>::const_iterator    cmemRegionItr;
 
       public:
 
@@ -100,8 +101,8 @@ namespace RUNTIME
         /**
          * @brief See documentation for get_instance_count in runtime.H
          */
-        errlHndl_t getInstanceCount( RUNTIME::SectionId i_section,
-                                             uint64_t& o_count);
+        errlHndl_t getInstanceCount( const SectionId i_section,
+                                     uint64_t& o_count);
 
         /**
          * @brief  Update the actual count of section.  Only supported for
@@ -179,7 +180,7 @@ namespace RUNTIME
            * @param i_size  Number of bytes to check
            * @return Error if address seems wrong
            */
-          errlHndl_t verify_hdat_address( void* i_addr,
+          errlHndl_t verify_hdat_address( const void* i_addr,
                                           size_t i_size );
 
         /**
@@ -188,7 +189,7 @@ namespace RUNTIME
          * @param i_exp  Expected header data
          * @return Error on mismatch
          */
-        errlHndl_t check_header( hdatHDIF_t* i_header,
+        errlHndl_t check_header( const hdatHDIF_t* i_header,
                                  const hdatHeaderExp_t& i_exp );
 
           /**
@@ -197,7 +198,7 @@ namespace RUNTIME
            * @param i_tuple  Tuple to check
            * @return Error if Tuple is unallocated
            */
-          errlHndl_t check_tuple( const RUNTIME::SectionId i_section,
+          errlHndl_t check_tuple( const SectionId i_section,
                                   hdat5Tuple_t* i_tuple );
 
 
@@ -216,7 +217,7 @@ namespace RUNTIME
          *
          * @return errlHndl_t  NULL on success
          */
-        errlHndl_t get_standalone_section( RUNTIME::SectionId i_section,
+        errlHndl_t get_standalone_section( SectionId i_section,
                                            uint64_t i_instance,
                                            uint64_t& o_dataAddr,
                                            size_t& o_dataSize );
@@ -232,6 +233,21 @@ namespace RUNTIME
         errlHndl_t findSpira( void );
 
       private:
+
+        /**
+         * @brief Get the tuple associated with a section and check it's valid
+         *        Note: Asserts on unsupported section
+         *
+         * @param[in] i_section The section for which the instance count is
+         *            desired
+         *
+         * @param[out] o_tuple The tuple associated with the section
+         *
+         * @return errlHndl_t Returns nullptr on success. otherwise errlog
+         *
+         */
+        errlHndl_t getAndCheckTuple(const SectionId i_section,
+                                    hdat5Tuple_t*& o_tuple);
 
         /********************************************
          * VARIABLES
@@ -279,7 +295,7 @@ namespace RUNTIME
          * @param[in] i_count   Actual count for MDRT entries
          *
          */
-        void saveActualCount( RUNTIME::SectionId i_id,
+        void saveActualCount( SectionId i_id,
                               uint16_t i_count )
         {
             iv_actuals[i_id] = i_count;
@@ -292,7 +308,7 @@ namespace RUNTIME
          *
          * @return errlHndl_t  NULL on success
          */
-        errlHndl_t writeActualCount( RUNTIME::SectionId i_id )
+        errlHndl_t writeActualCount( SectionId i_id )
         {
             errlHndl_t l_err = NULL;
             if(iv_actuals[i_id] != ACTUAL_NOT_SET)

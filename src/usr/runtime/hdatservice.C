@@ -95,7 +95,7 @@ const uint64_t HDAT_MEM_SIZE = 128*MEGABYTE;
  * @param i_size  Number of bytes to check
  * @return Error if address seems wrong
  */
-errlHndl_t hdatService::verify_hdat_address( void* i_addr,
+errlHndl_t hdatService::verify_hdat_address( const void* i_addr,
                                              size_t i_size )
 {
     errlHndl_t errhdl = NULL;
@@ -105,7 +105,7 @@ errlHndl_t hdatService::verify_hdat_address( void* i_addr,
 
     // Make sure that the entire range is within the memory
     //  space that we allocated
-    for(memRegionItr region = iv_mem_regions.begin();
+    for(cmemRegionItr region = iv_mem_regions.begin();
         (region != iv_mem_regions.end()) && !found; ++region)
     {
         hdatMemRegion_t memR = *region;
@@ -123,7 +123,7 @@ errlHndl_t hdatService::verify_hdat_address( void* i_addr,
     if(!found)
     {
         TRACFCOMP( g_trac_runtime, "Invalid HDAT Address : i_addr=%p, i_size=0x%X", i_addr, i_size );
-        for(memRegionItr region = iv_mem_regions.begin();
+        for(cmemRegionItr region = iv_mem_regions.begin();
             (region != iv_mem_regions.end()) && !found; ++region)
         {
             hdatMemRegion_t memR = *region;
@@ -157,7 +157,7 @@ errlHndl_t hdatService::verify_hdat_address( void* i_addr,
     return errhdl;
 }
 
-errlHndl_t hdatService::check_header( hdatHDIF_t* i_header,
+errlHndl_t hdatService::check_header( const hdatHDIF_t* i_header,
                                       const hdatHeaderExp_t& i_exp )
 {
     TRACUCOMP( g_trac_runtime, "check_header(%s)> %.4X : %.4X : %s", i_exp.name, i_header->hdatStructId, i_header->hdatVersion, i_header->hdatStructName );
@@ -216,7 +216,7 @@ errlHndl_t hdatService::check_header( hdatHDIF_t* i_header,
     return errhdl;
 }
 
-errlHndl_t hdatService::check_tuple( const RUNTIME::SectionId i_section,
+errlHndl_t hdatService::check_tuple( const SectionId i_section,
                                      hdat5Tuple_t* i_tuple )
 {
     errlHndl_t errhdl = NULL;
@@ -265,7 +265,7 @@ errlHndl_t hdatService::check_tuple( const RUNTIME::SectionId i_section,
 
 
 errlHndl_t hdatService::get_standalone_section(
-                                               RUNTIME::SectionId i_section,
+                                               SectionId i_section,
                                                uint64_t i_instance,
                                                uint64_t& o_dataAddr,
                                                size_t& o_dataSize )
@@ -579,6 +579,8 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         payload_kind = TARGETING::PAYLOAD_KIND_PHYP;
 #endif
 
+        hdat5Tuple_t* tuple = nullptr;
+
         if( TARGETING::PAYLOAD_KIND_NONE == payload_kind )
         {
             errhdl = get_standalone_section( i_section,
@@ -669,19 +671,9 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         else if (RUNTIME::RESERVED_MEM == i_section)
         {
             // Find the right tuple and verify it makes sense
-            hdat5Tuple_t* tuple = NULL;
-            if( iv_spiraS )
-            {
-                tuple = &(iv_spiraS->hdatDataArea[SPIRAS_MDT]);
-            }
-            else if( unlikely(iv_spiraL != NULL) )
-            {
-                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_MDT]);
-            }
-            TRACUCOMP(g_trac_runtime, "MDT_DATA tuple=%p", tuple);
-            errhdl = check_tuple( i_section,
-                                  tuple );
+            errhdl = getAndCheckTuple(i_section, tuple);
             if( errhdl ) { break; }
+            TRACUCOMP(g_trac_runtime, "MDT_DATA tuple=%p", tuple);
 
             uint64_t base_addr;
             errhdl = getSpiraTupleVA(tuple, base_addr);
@@ -746,19 +738,9 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             bool l_needBlob = (RUNTIME::HBRT_DATA == i_section);
 
             // Find the right tuple and verify it makes sense
-            hdat5Tuple_t* tuple = NULL;
-            if( iv_spiraS )
-            {
-                tuple = &(iv_spiraS->hdatDataArea[SPIRAS_HBRT_DATA]);
-            }
-            else if( unlikely(iv_spiraL != NULL) )
-            {
-                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_HBRT_DATA]);
-            }
-            TRACUCOMP(g_trac_runtime, "HBRT_DATA tuple=%p", tuple);
-            errhdl = check_tuple( i_section,
-                                  tuple );
+            errhdl = getAndCheckTuple(i_section, tuple);
             if( errhdl ) { break; }
+            TRACUCOMP(g_trac_runtime, "HBRT_DATA tuple=%p", tuple);
 
             uint64_t base_addr;
             errhdl = getSpiraTupleVA(tuple, base_addr);
@@ -800,19 +782,9 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         else if( RUNTIME::IPLPARMS_SYSTEM == i_section )
         {
             // Find the right tuple and verify it makes sense
-            hdat5Tuple_t* tuple = NULL;
-            if( iv_spiraS )
-            {
-                tuple = &(iv_spiraS->hdatDataArea[SPIRAS_IPL_PARMS]);
-            }
-            else if( unlikely(iv_spiraL != NULL) )
-            {
-                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_IPL_PARMS]);
-            }
-            TRACUCOMP( g_trac_runtime, "IPLPARMS_SYSTEM tuple=%p", tuple );
-            errhdl = check_tuple( i_section,
-                                  tuple );
+            errhdl = getAndCheckTuple(i_section, tuple);
             if( errhdl ) { break; }
+            TRACUCOMP( g_trac_runtime, "IPLPARMS_SYSTEM tuple=%p", tuple );
 
             uint64_t base_addr;
             errhdl = getSpiraTupleVA(tuple, base_addr);
@@ -843,19 +815,9 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         else if( RUNTIME::NODE_TPM_RELATED == i_section )
         {
             // Find the right tuple and verify it makes sense
-            hdat5Tuple_t* tuple = nullptr;
-            if( iv_spiraS )
-            {
-                tuple = &(iv_spiraS->hdatDataArea[SPIRAS_TPM_DATA]);
-            }
-            else if( unlikely(iv_spiraL != nullptr) )
-            {
-                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_TPM_DATA]);
-            }
-            TRACUCOMP( g_trac_runtime, "NODE_TPM_DATA tuple=%p", tuple );
-
-            errhdl = check_tuple( i_section, tuple );
+            errhdl = getAndCheckTuple(i_section, tuple);
             if( errhdl ) { break; }
+            TRACUCOMP( g_trac_runtime, "NODE_TPM_DATA tuple=%p", tuple );
 
             uint64_t base_addr = 0;
             errhdl = getSpiraTupleVA(tuple, base_addr);
@@ -870,22 +832,10 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         }
         else if( RUNTIME::PCRD == i_section )
         {
-            hdat5Tuple_t* tuple = nullptr;
-            if( iv_spiraS )
-            {
-                tuple = &(iv_spiraS->hdatDataArea[SPIRAS_PCRD]);
-            }
-            else if( unlikely(iv_spiraL != nullptr) )
-            {
-                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_PCRD]);
-            }
+            // Find the right tuple and verify it makes sense
+            errhdl = getAndCheckTuple(i_section, tuple);
+            if( errhdl ) { break; }
             TRACUCOMP( g_trac_runtime, "PCRD_DATA tuple=%p", tuple );
-
-            errhdl = check_tuple( i_section, tuple );
-            if( errhdl )
-            {
-                break;
-            }
 
             uint64_t base_addr = 0;
             errhdl = getSpiraTupleVA(tuple, base_addr);
@@ -908,19 +858,9 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             //@todo: RTC:59171
 
             // Find the right tuple and verify it makes sense
-            hdat5Tuple_t* tuple = NULL;
-            if( iv_spiraH )
-            {
-                tuple = &(iv_spiraH->hdatDataArea[SPIRAH_MS_DUMP_SRC_TBL]);
-            }
-            else if( unlikely(iv_spiraL != NULL) )
-            {
-                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_MS_DUMP_SRC_TBL]);
-            }
-            TRACUCOMP( g_trac_runtime, "MS_DUMP_SRC_TBL tuple=%p", tuple );
-            errhdl = check_tuple( i_section,
-                                  tuple );
+            errhdl = getAndCheckTuple(i_section, tuple);
             if( errhdl ) { break; }
+            TRACUCOMP( g_trac_runtime, "MS_DUMP_SRC_TBL tuple=%p", tuple );
 
             //Note - there is no header for the MDST
             o_dataSize = tuple->hdatActualCnt * tuple->hdatActualSize;
@@ -936,19 +876,10 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             //@todo: RTC:59171
 
             // Find the right tuple and verify it makes sense
-            hdat5Tuple_t* tuple = NULL;
-            if( iv_spiraH )
-            {
-                tuple = &(iv_spiraH->hdatDataArea[SPIRAH_MS_DUMP_DST_TBL]);
-            }
-            else if( unlikely(iv_spiraL != NULL) )
-            {
-                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_MS_DUMP_DST_TBL]);
-            }
-            TRACUCOMP( g_trac_runtime, "MS_DUMP_DST_TBL tuple=%p", tuple );
-            errhdl = check_tuple( i_section,
-                                  tuple );
+            errhdl = getAndCheckTuple(i_section, tuple);
             if( errhdl ) { break; }
+            TRACUCOMP( g_trac_runtime, "MS_DUMP_DST_TBL tuple=%p", tuple );
+
 
             //Note - there is no header for the MDDT
             o_dataSize = tuple->hdatActualCnt * tuple->hdatActualSize;
@@ -964,19 +895,9 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             //@todo: RTC:59171
 
             // Find the right tuple and verify it makes sense
-            hdat5Tuple_t* tuple = NULL;
-            if( iv_spiraH )
-            {
-                tuple = &(iv_spiraH->hdatDataArea[SPIRAH_MS_DUMP_RSLT_TBL]);
-            }
-            else if( unlikely(iv_spiraL != NULL) )
-            {
-                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_MS_DUMP_RSLT_TBL]);
-            }
-            TRACUCOMP( g_trac_runtime, "MS_DUMP_RESULTS_TBL tuple=%p", tuple );
-            errhdl = check_tuple( i_section,
-                                  tuple );
+            errhdl = getAndCheckTuple(i_section, tuple);
             if( errhdl ) { break; }
+            TRACUCOMP( g_trac_runtime, "MS_DUMP_RESULTS_TBL tuple=%p", tuple );
 
             //Note - there is no header for the MDRT
             //return the total allocated size since it is empty at first
@@ -1362,7 +1283,7 @@ void hdatService::addFFDC( SectionId i_section,
 {
     uint64_t addr = 0;
     uint64_t size = 0;
-    errlHndl_t errlog = NULL;
+    errlHndl_t errlog = nullptr;
 
     if( RUNTIME::NACA == i_section )
     {
@@ -1370,6 +1291,7 @@ void hdatService::addFFDC( SectionId i_section,
         if( errlog )
         {
             delete errlog;
+            errlog = nullptr;
         }
         else if( (addr != 0) && (size != 0) )
         {
@@ -1389,6 +1311,7 @@ void hdatService::addFFDC( SectionId i_section,
         if( errlog )
         {
             delete errlog;
+            errlog = nullptr;
         }
         else if( (addr != 0) && (size != 0) )
         {
@@ -1397,7 +1320,8 @@ void hdatService::addFFDC( SectionId i_section,
         }
         return;
     }
-    else if( RUNTIME::HSVC_SYSTEM_DATA == i_section )
+    else if( RUNTIME::HSVC_SYSTEM_DATA == i_section ||
+             RUNTIME::HSVC_NODE_DATA == i_section )
     {
         // grab the SPIRA data
         if( iv_spiraL) { addFFDC( SPIRA_L, io_errlog ); }
@@ -1405,35 +1329,17 @@ void hdatService::addFFDC( SectionId i_section,
         if( iv_spiraS) { addFFDC( SPIRA_S, io_errlog ); }
 
         // grab the Tuple it is part of
-        hdat5Tuple_t* tuple = NULL;
-        if( iv_spiraS )
+        hdat5Tuple_t* tuple = nullptr;
+        errlog = getAndCheckTuple(i_section, tuple);
+        if( errlog )
         {
-            tuple = &(iv_spiraS->hdatDataArea[SPIRAS_HSVC_DATA]);
+            delete errlog;
+            errlog = nullptr;
         }
-        else if( unlikely(iv_spiraL != NULL) )
+        else if( tuple )
         {
-            tuple = &(iv_spiraL->hdatDataArea[SPIRAL_HSVC_DATA]);
+            UdTuple(tuple).addToLog(io_errlog);
         }
-        if( tuple ) { RUNTIME::UdTuple(tuple).addToLog(io_errlog); }
-    }
-    else if( RUNTIME::HSVC_NODE_DATA == i_section )
-    {
-        // grab the SPIRA data
-        if( iv_spiraL) { addFFDC( SPIRA_L, io_errlog ); }
-        if( iv_spiraH) { addFFDC( SPIRA_H, io_errlog ); }
-        if( iv_spiraS) { addFFDC( SPIRA_S, io_errlog ); }
-
-        // grab the Tuple it is part of
-        hdat5Tuple_t* tuple = NULL;
-        if( iv_spiraS )
-        {
-            tuple = &(iv_spiraS->hdatDataArea[SPIRAS_HSVC_DATA]);
-        }
-        else if( unlikely(iv_spiraL != NULL) )
-        {
-            tuple = &(iv_spiraL->hdatDataArea[SPIRAL_HSVC_DATA]);
-        }
-        if( tuple ) { RUNTIME::UdTuple(tuple).addToLog(io_errlog); }
     }
 }
 
@@ -1460,11 +1366,62 @@ void hdatService::rediscoverHDAT( void )
 /*
  * @brief Get the number of instances in an HDAT section
  */
-errlHndl_t hdatService::getInstanceCount(RUNTIME::SectionId i_section,
-                                                  uint64_t& o_count)
+errlHndl_t hdatService::getInstanceCount(const SectionId i_section,
+                                         uint64_t& o_count)
 {
     errlHndl_t errhdl = nullptr;
     hdat5Tuple_t* tuple = nullptr;
+    o_count = 0;
+
+    do {
+
+    // Instance count is not provided the same way for each section
+    switch(i_section)
+    {
+        case RUNTIME::PCRD:
+            errhdl = getAndCheckTuple(i_section, tuple);
+            if( errhdl )
+            {
+                break;
+            }
+            o_count = tuple->hdatActualCnt;
+            break;
+        default:
+            TRACFCOMP( g_trac_runtime, ERR_MRK"getInstanceCount> section %d has no concept of instances",
+                       i_section );
+            /*@
+             * @errortype
+             * @moduleid     RUNTIME::MOD_HDATSERVICE_GETINSTANCECOUNT
+             * @reasoncode   RUNTIME::RC_INSTANCES_UNSUPPORTED
+             * @userdata1    Section Id
+             * @userdata2    <unused>
+             * @devdesc      Unsupported section requested
+             * @custdesc     Unexpected boot firmware error.
+             */
+            errhdl = new ERRORLOG::ErrlEntry(
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                           RUNTIME::MOD_HDATSERVICE_GETINSTANCECOUNT,
+                           RUNTIME::RC_INSTANCES_UNSUPPORTED,
+                           i_section,
+                           0,
+                           true /*Add HB Software Callout*/);
+            errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);;
+            break;
+    }
+
+    } while (0);
+
+    return errhdl;
+}
+
+/*
+ * @brief Get the tuple associated with a section and check it's valid
+ */
+errlHndl_t hdatService::getAndCheckTuple(const SectionId i_section,
+                                         hdat5Tuple_t*& o_tuple)
+{
+    errlHndl_t errhdl = nullptr;
+    o_tuple = nullptr;
 
     do
     {
@@ -1474,6 +1431,19 @@ errlHndl_t hdatService::getInstanceCount(RUNTIME::SectionId i_section,
 
         switch(i_section)
         {
+        case RUNTIME::RESERVED_MEM:
+            l_spiraS = SPIRAS_MDT;
+            l_spiraL = SPIRAL_MDT;
+            break;
+        case RUNTIME::HBRT:
+        case RUNTIME::HBRT_DATA:
+            l_spiraS = SPIRAS_HBRT_DATA;
+            l_spiraL = SPIRAL_HBRT_DATA;
+            break;
+        case RUNTIME::IPLPARMS_SYSTEM:
+            l_spiraS = SPIRAS_IPL_PARMS;
+            l_spiraL = SPIRAL_IPL_PARMS;
+            break;
         case RUNTIME::NODE_TPM_RELATED:
             l_spiraS = SPIRAS_TPM_DATA;
             l_spiraL = SPIRAL_TPM_DATA;
@@ -1494,14 +1464,18 @@ errlHndl_t hdatService::getInstanceCount(RUNTIME::SectionId i_section,
             l_spiraH = SPIRAH_MS_DUMP_RSLT_TBL;
             l_spiraL = SPIRAL_MS_DUMP_RSLT_TBL;
             break;
+        case RUNTIME::HSVC_SYSTEM_DATA:
+        case RUNTIME::HSVC_NODE_DATA:
+            l_spiraS = SPIRAS_HSVC_DATA;
+            l_spiraL = SPIRAL_HSVC_DATA;
+            break;
         default:
-            TRACFCOMP( g_trac_runtime,
-                "getInstanceCount> section %d has no concept of instances",
-                 i_section );
+            TRACFCOMP(g_trac_runtime, ERR_MRK"getAndCheckTuple> section %d not supported",
+                      i_section );
             /*@
              * @errortype
-             * @moduleid     RUNTIME::MOD_HDATSERVICE_GETINSTANCECOUNT
-             * @reasoncode   RUNTIME::RC_INSTANCES_UNSUPPORTED
+             * @moduleid     RUNTIME::MOD_HDATSERVICE_GETANDCHECKTUPLE
+             * @reasoncode   RUNTIME::RC_GETTUPLE_UNSUPPORTED
              * @userdata1    Section Id
              * @userdata2    <unused>
              * @devdesc      Unsupported section requested
@@ -1509,33 +1483,32 @@ errlHndl_t hdatService::getInstanceCount(RUNTIME::SectionId i_section,
              */
             errhdl = new ERRORLOG::ErrlEntry(
                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                           RUNTIME::MOD_HDATSERVICE_GETINSTANCECOUNT,
-                           RUNTIME::RC_INSTANCES_UNSUPPORTED,
+                           RUNTIME::MOD_HDATSERVICE_GETANDCHECKTUPLE,
+                           RUNTIME::RC_GETTUPLE_UNSUPPORTED,
                            i_section,
                            0,
                            true /*Add HB Software Callout*/);
-            errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
+            errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);;
             break;
         }
 
         if( iv_spiraS )
         {
-            tuple = &(iv_spiraS->hdatDataArea[l_spiraS]);
+            o_tuple = &(iv_spiraS->hdatDataArea[l_spiraS]);
         }
         else if( iv_spiraH )
         {
-            tuple = &(iv_spiraH->hdatDataArea[l_spiraH]);
+            o_tuple = &(iv_spiraH->hdatDataArea[l_spiraH]);
         }
         else if( unlikely(iv_spiraL != nullptr) )
         {
-            tuple = &(iv_spiraL->hdatDataArea[l_spiraL]);
+            o_tuple = &(iv_spiraL->hdatDataArea[l_spiraL]);
         }
-        errhdl = check_tuple( i_section, tuple );
+        errhdl = check_tuple( i_section, o_tuple );
         if( errhdl )
         {
             break;
         }
-        o_count = tuple->hdatActualCnt;
 
     } while (0);
 
@@ -1568,13 +1541,13 @@ errlHndl_t get_host_data_section( SectionId i_section,
       getHostDataSection(i_section,i_instance, o_dataAddr, o_dataSize);
 }
 
-void saveActualCount( RUNTIME::SectionId i_id,
+void saveActualCount( SectionId i_id,
                       uint16_t i_count )
 {
     Singleton<hdatService>::instance().saveActualCount(i_id,i_count);
 }
 
-errlHndl_t writeActualCount( RUNTIME::SectionId i_id )
+errlHndl_t writeActualCount( SectionId i_id )
 {
     return Singleton<hdatService>::instance().writeActualCount(i_id);
 }
@@ -1594,10 +1567,11 @@ void rediscover_hdat( void )
     Singleton<hdatService>::instance().rediscoverHDAT();
 }
 
-errlHndl_t get_instance_count( RUNTIME::SectionId i_section, uint64_t& o_count )
+errlHndl_t get_instance_count(const SectionId i_section,
+                              uint64_t& o_count )
 {
-    return Singleton<RUNTIME::hdatService>::instance().
-                                           getInstanceCount(i_section, o_count);
+    return Singleton<hdatService>::instance().getInstanceCount(i_section,
+                                                               o_count);
 }
 
 };

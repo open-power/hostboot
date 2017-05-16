@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <builtins.h>
 #include <errl/errlentry.H>
+#include <hdat/hdat.H>
 
 namespace RUNTIME
 {
@@ -172,11 +173,9 @@ const size_t DATA_SIZE_UNKNOWN = 0xFFFFFFFFFFFFFFFF;
  *
  * @param[out] o_count The number of instances in this section
  *
- * @return errlHndl_t Returns nullptr on success. Returns an error if the
- *         section id used is invalid or has no concept of instances. Also, can
- *         return an error if the n-tuple is either corrupt or unavailable.
+ * @return errlHndl_t Returns nullptr on success; otherwise errlog
  */
-errlHndl_t get_instance_count( RUNTIME::SectionId i_section, uint64_t& o_count);
+errlHndl_t get_instance_count( const SectionId i_section, uint64_t& o_count);
 
 /**
  * @brief  Store the actual count of a section in local memory.
@@ -185,7 +184,7 @@ errlHndl_t get_instance_count( RUNTIME::SectionId i_section, uint64_t& o_count);
  * @param[in] i_count   Actual number of entries
  *
  */
-void saveActualCount( RUNTIME::SectionId i_id,
+void saveActualCount( SectionId i_id,
                       uint16_t i_count );
 
 /**
@@ -195,7 +194,7 @@ void saveActualCount( RUNTIME::SectionId i_id,
  *
  * @return errlHndl_t  NULL on success
  */
-errlHndl_t writeActualCount( RUNTIME::SectionId i_id );
+errlHndl_t writeActualCount( SectionId i_id );
 
 /**
  * @brief  Retrieve and log FFDC data relevant to a given section of
