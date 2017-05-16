@@ -130,6 +130,7 @@ errlHndl_t PNOR::flush( PNOR::SectionId i_section)
              *  @userdata1      section Id
              *  @userdata2      RC
              *  @devdesc        mm_remove_pages failed
+             *  @custdesc       Failed to remove pages
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         PNOR::MOD_PNORRP_FLUSH,
@@ -445,6 +446,7 @@ errlHndl_t PnorRP::getSideInfo( PNOR::SideId i_side,
              * @userdata1    Requested SIDE
              * @userdata2    0
              * @devdesc      PnorRP::getSideInfo> Side not supported
+             * @custdesc     Processor NOR flash: Side not supported
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORRP_GETSIDEINFO,
@@ -481,7 +483,8 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
              * @userdata1    Requested Section
              * @userdata2    Startup RC
              * @devdesc      PnorRP::getSectionInfo> RP not properly initialized
-             * @custdesc     A problem occurred while accessing the boot flash.
+             * @custdesc     Processor NOR flash:
+             *               A problem occurred while accessing the boot flash.
              */
             l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                PNOR::MOD_PNORRP_GETSECTIONINFO,
@@ -1063,6 +1066,8 @@ errlHndl_t PnorRP::setSideInfo ()
                  * @userdata2[00:31] primary toc
                  * @userdata2[32:63] backup toc
                  * @devdesc          PnorRP::setSideInfo> No valid TOCs found
+                 * @custdesc         No valid Table of Contents (TOC) found
+                 *                   for Processor NOR flash
                  */
                 l_err = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -1773,9 +1778,9 @@ errlHndl_t PnorRP::setVirtAddrs(void)
                 * @userdata1 PNOR section id
                 * @userdata2 PNOR section vaddr
                 * @devdesc Could not set permissions of the
-                * given PNOR section to WRITABLE
+                *          given PNOR section to WRITABLE
                 * @custdesc A problem occurred while reading
-                *           PNOR partition table
+                *           Processor NOR flash partition table
                 */
                 l_errhdl = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1806,10 +1811,10 @@ errlHndl_t PnorRP::setVirtAddrs(void)
                 * @userdata1 PNOR section id
                 * @userdata2 PNOR section vaddr
                 * @devdesc Could not set permissions of the
-                * given PNOR section to
-                * WRITABLE/WRITE_TRACKED
+                *          given PNOR section to
+                *          WRITABLE/WRITE_TRACKED
                 * @custdesc A problem occurred while reading
-                * PNOR partition table
+                *           Processor NOR flash partition table
                 */
                 l_errhdl = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,

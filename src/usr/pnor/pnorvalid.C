@@ -246,6 +246,9 @@ errlHndl_t validateAltMaster( void )
                  * @userdata2    <unused>
                  * @devdesc      PNOR::validateAltMaster> Fail verifying FFS
                  *               Header on Master Candidate PNOR TOC0
+                 * @custdesc     Fail verifying Flash File System (FFS) Header
+                 *               on Master Candidate Processor NOR flash Table
+                 *               of Contents 0 (TOC)
                  */
                 l_err = new ERRORLOG::ErrlEntry(
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -374,6 +377,8 @@ errlHndl_t validateMagic(PnorDD*  i_pnordd,
                  * @userdata1    Magic Number read
                  * @userdata2    <unused>
                  * @devdesc      PNOR::validateMagic> Fail verifying FFS Magic
+                 *               Number in Header on Master
+                 * @custdesc     Fail verifying Flash File System (FFS) Magic
                  *               Number in Header on Master
                  */
                 l_err = new ERRORLOG::ErrlEntry(

@@ -2355,6 +2355,8 @@ namespace SBE
                      * @userdata2[32:63]    Size - ECC
                      * @devdesc      ECC or Data Miscompare Fail Reading Back
                      *               SBE Version Information
+                     * @custdesc     ECC or Data Miscompare Fail Reading Back
+                     *               Self Boot Engine (SBE) Version Information
                      */
                     err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                         SBE_UPDATE_SEEPROMS,
@@ -3531,6 +3533,8 @@ namespace SBE
              * @userdata2[32:63]  Original SEEPROM 1 CRC
              * @devdesc      Successful Update of SBE SEEPROM
              *               SBE Version Information
+             * @custdesc     Successful Update of Self Boot Engine
+             *               (SBE) SEEPROM SBE Version Information
              */
             err_info = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                      SBE_PERFORM_UPDATE_ACTIONS,
@@ -4230,6 +4234,8 @@ namespace SBE
                          * @userdata2    Master Target Loop Index
                          * @devdesc      SBE Image Version Miscompare with
                          *               Master Target
+                         * @custdesc     Self Boot Engine (SBE) Image Version
+                         *               Miscompare with Master Target
                          */
                         err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                             SBE_MASTER_VERSION_COMPARE,
@@ -4387,6 +4393,8 @@ namespace SBE
                      * @userdata1    Master Target HUID
                      * @userdata2    Comparison Target HUID
                      * @devdesc      SBE Version Miscompare with Master Target
+                     * @custdesc     Self Boot Engine (SBE) Version Miscompare
+                     *               with Master Target
                      */
                     err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                         SBE_MASTER_VERSION_COMPARE,

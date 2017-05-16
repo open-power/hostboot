@@ -102,7 +102,8 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                  * @userdata2    Size of AttrOverrideSection
                  * @devdesc      AttrOverrideSection too big to fit in remaining
                  *               chunck of pnor section
-                 * @custdesc     Invalid configuration data in firmware pnor
+                 * @custdesc     Invalid configuration data in firmware Processor
+                 *               NOR flash
                  */
                 l_err =
                     new ERRORLOG::ErrlEntry
@@ -131,7 +132,8 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                  * @userdata2    Size of Serialized attribute override
                  * @devdesc      Serialized attribute override chunk too big to
                  *               fit in remaining chunck of pnor section
-                 * @custdesc     Invalid configuration data in firmware pnor
+                 * @custdesc     Invalid configuration data in firmware Processor
+                 *               NOR flash
                  */
                 l_err =
                     new ERRORLOG::ErrlEntry
@@ -159,7 +161,8 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                  * @userdata2    Chunk location with no tank layer
                  * @devdesc      No tank layer was specified for attribute
                  *               override.
-                 * @custdesc     Invalid configuration data in firmware pnor
+                 * @custdesc     Invalid configuration data in firmware Processor
+                 *               NOR flash
                  */
                 l_err =
                     new ERRORLOG::ErrlEntry
@@ -191,7 +194,8 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                  * @devdesc      Attribute override is in the wrong pnor section
                  *               needs to be moved to the section associated
                  *               with its attribute tank layer
-                 * @custdesc     Invalid configuration data in firmware pnor
+                 * @custdesc     Invalid configuration data in firmware Processor
+                 *               NOR flash
                  */
                 l_err =
                     new ERRORLOG::ErrlEntry
