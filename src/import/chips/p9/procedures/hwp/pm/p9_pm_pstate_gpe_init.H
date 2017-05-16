@@ -26,12 +26,12 @@
 /// @file  p9_pm_pstate_gpe_init.H
 /// @brief Initialize the STOP GPE Engine in the OCC
 ///
-// *HWP HWP Owner:          Greg Still <stillgs@us.ibm.com>
-// *HWP BackupHWP Owner:    Amit Kumar <akumar3@us.ibm.com>
-// *HWP FW Owner:           Sangeetha T S <sangeet2@in.ibm.com>
-// *HWP Team: PM
-// *HWP Level: 2
-// *HWP Consumed by: FSP:HS
+// *HWP HWP Owner           :   Greg Still <stillgs@us.ibm.com>
+// *HWP Backup Owner        :   Rahul Batra <rbatra@us.ibm.com>
+// *HWP FW Owner            :   Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team                :   PM
+// *HWP Level               :   3
+// *HWP Consumed by         :   HS
 ///
 /// High-level procedure flow:
 /// @verbatim
