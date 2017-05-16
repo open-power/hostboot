@@ -25,13 +25,13 @@
 # IBM_PROLOG_END_TAG
 execute_in_sandbox()
 {
-    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
-    [ -z "${SANDBOXROOT}" ] && echo "Missing SANDBOXROOT." && exit -1
-    [ -z "${SANDBOXNAME}" ] && echo "Missing SANDBOXNAME." && exit -1
+    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit 1
+    [ -z "${SANDBOXROOT}" ] && echo "Missing SANDBOXROOT." && exit 1
+    [ -z "${SANDBOXNAME}" ] && echo "Missing SANDBOXNAME." && exit 1
 
     if [ ! -d "${SANDBOXBASE}" ]; then
         echo "Sandbox does not exist.  Create with 'hb simsetup."
-        exit -1
+        exit 1
     fi
 
     SANDBOXRC="${SANDBOXROOT}/hbsandboxrc"
@@ -45,7 +45,7 @@ execute_in_sandbox()
     if [ $? -ne 0 ]; then
         echo "Sandbox cmd failed"
         rm ${SANDBOXBASE}/src/sandbox_execute_cmd
-        exit -1
+        exit 1
     fi
 
     rm ${SANDBOXBASE}/src/sandbox_execute_cmd
@@ -274,11 +274,11 @@ hb_workon()
 {
     if [ -n "${HOSTBOOT_INSIDE_WORKON}" ]; then
         echo "Already in a workon."
-        exit -1
+        exit 1
     else
         export HOSTBOOT_INSIDE_WORKON=1
         echo "Setting environment variables..."
-        source ./env.bash
+        . ./env.bash
 
         echo "Spawning new shell (${SHELL})..."
         ${SHELL} && exit 0
@@ -287,12 +287,12 @@ hb_workon()
 
 hb_prime()
 {
-    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
-    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
+    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit 1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
 
     if [ ! -d "${SANDBOXBASE}" ]; then
         echo "Sandbox does not exist.  Create with 'hb simsetup."
-        exit -1
+        exit 1
     fi
 
     # Prevent error message in cases where SANDBOXBASE is set but hb simsetup
@@ -306,7 +306,7 @@ hb_prime()
              echo "ERROR: Driver mismatch between sandbox and src/build/citest/etc/bbuild."
              echo "Sandbox at ${SBDRIVER}"
              echo "Update sandbox with 'hb simsetup'."
-             exit -1
+             exit 1
          fi
     fi
 
@@ -315,10 +315,10 @@ hb_prime()
 
 hb_fipssetup()
 {
-    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
-    [ -z "${SANDBOXROOT}" ] && echo "Missing SANDBOXROOT." && exit -1
-    [ -z "${SANDBOXNAME}" ] && echo "Missing SANDBOXNAME." && exit -1
-    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
+    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit 1
+    [ -z "${SANDBOXROOT}" ] && echo "Missing SANDBOXROOT." && exit 1
+    [ -z "${SANDBOXNAME}" ] && echo "Missing SANDBOXNAME." && exit 1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
 
     SANDBOXRC="${SANDBOXROOT}/hbsandboxrc"
     DRIVER=`cat ${PROJECT_ROOT}/src/build/citest/etc/bbuild`
@@ -335,7 +335,7 @@ hb_fipssetup()
 
     if [ ! -d "${DRIVER}" ]; then
         echo "ERROR: Backing build in src/build/citest/etc/bbuild not found!"
-        exit -1
+        exit 1
     fi
 
     echo "Creating new sandbox."
@@ -372,12 +372,12 @@ hb_simsetup()
 
 hb_startsimics()
 {
-    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
-    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
+    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit 1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
 
     if [ ! -d "${SANDBOXBASE}" ]; then
         echo "Sandbox does not exist.  Create with 'hb simsetup."
-        exit -1
+        exit 1
     fi
 
     SBDRIVER=`cat ${SANDBOXBASE}/rc_files/sb.conf | \
@@ -388,7 +388,7 @@ hb_startsimics()
         echo "Driver mismatch between sandbox and src/build/citest/etc/bbuild."
         echo "Sandbox at ${SBDRIVER}"
         echo "Update sandbox with 'hb simsetup'."
-        exit -1
+        exit 1
     fi
 
     needs_machine_variable
@@ -424,8 +424,8 @@ hb_rsync_helper()
 
 hb_rsync()
 {
-    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
-    [ -z "${RSYNCDIR}" ] && echo "Missing RSYNCDIR." && exit -1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
+    [ -z "${RSYNCDIR}" ] && echo "Missing RSYNCDIR." && exit 1
 
     # Parse arguments
     case $1 in
@@ -463,7 +463,7 @@ hb_rsync()
 
 hb_objsizes()
 {
-    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
 
     echo "Object,Text Size,RO Data Size,Data Size"
 
@@ -486,17 +486,17 @@ hb_copyright_check()
 
 hb_errlparser()
 {
-    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
-    [ -z "${SANDBOXROOT}" ] && echo "Missing SANDBOXROOT." && exit -1
-    [ -z "${SANDBOXNAME}" ] && echo "Missing SANDBOXNAME." && exit -1
-    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
+    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit 1
+    [ -z "${SANDBOXROOT}" ] && echo "Missing SANDBOXROOT." && exit 1
+    [ -z "${SANDBOXNAME}" ] && echo "Missing SANDBOXNAME." && exit 1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
 
     DRIVER=`cat ${PROJECT_ROOT}/src/build/citest/etc/bbuild`
 
     # sanity checks
     if [ ! -f ${DRIVER}/src/makefile ]; then
         echo "Cannot reach backing build: $DRIVER. You may need tokens."
-        exit -1
+        exit 1
     fi
 
     ${PROJECT_ROOT}/src/build/citest/build-errl-parsers
@@ -505,7 +505,7 @@ hb_errlparser()
 
 hb_cachesync()
 {
-    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
 
     rsync -av /gsa/ausgsa/projects/h/hostboot/.binary_cache/ \
               ${PROJECT_ROOT}/.git/hb_cache
@@ -515,7 +515,7 @@ hb_cachesync()
         echo "`basename $files`  $files" | sha1sum --check >> /dev/null
         if [ $? -ne 0 ]; then
             echo "Failed SHA1 verification! $files"
-            failure=-1
+            failure=1
         fi
     done
 
@@ -524,7 +524,7 @@ hb_cachesync()
 
 hb_cacheadd()
 {
-    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit 1
 
     CACHE_PATH=/gsa/ausgsa/projects/h/hostboot/.binary_cache/
     FILE=$1
@@ -540,8 +540,8 @@ hb_cacheadd()
 
     MESSAGE=$*
 
-    [ ! -e "${FILE}" ] && echo "File $FILE does not exist." && exit -1
-    [ -z "${MESSAGE}" ] && echo "No message given." && exit -1
+    [ ! -e "${FILE}" ] && echo "File $FILE does not exist." && exit 1
+    [ -z "${MESSAGE}" ] && echo "No message given." && exit 1
 
     FILE_BASE=`basename $FILE`
     SHA1SUM=`sha1sum -b $FILE | sed 's/ .*//'`
@@ -558,9 +558,9 @@ hb_cacheadd()
 
 
 
-if [ 0 == $# ]; then
+if [ 0 -eq $# ]; then
     hb_helptext
-    exit -1
+    exit 1
 fi
 
 FIRST_PARAM=$1
@@ -602,6 +602,6 @@ cacheadd)
     ;;
 *)
     hb_helptext $*
-    exit -1
+    exit 1
     ;;
 esac
