@@ -129,6 +129,26 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
+    <rc>RC_HCODE_INVALID_TEMP4_BUF</rc>
+    <description>Temporary buffer4 is invalid.</description>
+    <ffdc>TEMP4_BUF_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_HCODE_INVALID_TEMP4_BUF_SIZE</rc>
+    <description>Invalid size for temp buf4</description>
+    <ffdc>TEMP4_BUF_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
     <rc>RC_HCODE_INVALID_IMG_TYPE</rc>
     <description>Invalid image type passed for hcode image build.</description>
     <callout>
