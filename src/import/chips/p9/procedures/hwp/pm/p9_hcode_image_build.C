@@ -130,6 +130,8 @@ enum
     EQ_INEX_BUCKET_2            =   1,
     EQ_INEX_BUCKET_3            =   2,
     EQ_INEX_BUCKET_4            =   3,
+    L3_EPS_DIVIDER              =   1,
+    L2_EPS_DIVIDER              =   1,
 };
 
 /**
@@ -3243,7 +3245,7 @@ fapi2::ReturnCode populateEpsilonL2ScomReg( void*    i_pChipHomer )
                                attrValT0 ),
                  "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T0");
 
-        attrValT0 = attrValT0 / 8 + 1;
+        attrValT0 = attrValT0 / 8 / L2_EPS_DIVIDER + 1;
         epsilonValBuf.insert<0, 12, 20, uint32_t>( attrValT0 );
 
         //----------------------------- Tier1(T1)--------------------------------------
@@ -3253,7 +3255,7 @@ fapi2::ReturnCode populateEpsilonL2ScomReg( void*    i_pChipHomer )
                                attrValT1 ),
                  "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T1");
 
-        attrValT1 = attrValT1 / 8 + 1;
+        attrValT1 = attrValT1 / 8 / L2_EPS_DIVIDER + 1;
         epsilonValBuf.insert<12, 12, 20, uint32_t>( attrValT1 );
 
         //----------------------------- Tier2(T2)--------------------------------------
@@ -3264,7 +3266,7 @@ fapi2::ReturnCode populateEpsilonL2ScomReg( void*    i_pChipHomer )
                  "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T2");
 
 
-        attrValT2 = attrValT2 / 8 + 1;
+        attrValT2 = attrValT2 / 8 / L2_EPS_DIVIDER + 1;
         epsilonValBuf.insert<24, 12, 20, uint32_t>( attrValT2 );
 
         epsilonValBuf.extract<0, 64>(l_epsilonScomVal);
@@ -3314,7 +3316,7 @@ fapi2::ReturnCode populateEpsilonL2ScomReg( void*    i_pChipHomer )
                                attrValT1 ),
                  "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_WRITE_CYCLES_T1");
 
-        attrValT1 = attrValT1 / 8 + 1;
+        attrValT1 = attrValT1 / 8 / L2_EPS_DIVIDER + 1;
         epsilonValBuf.insert< 0, 12, 20, uint32_t >(attrValT1);
 
         //----------------------------- Tier2(T2)--------------------------------------
@@ -3324,15 +3326,15 @@ fapi2::ReturnCode populateEpsilonL2ScomReg( void*    i_pChipHomer )
                                attrValT2 ),
                  "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_WRITE_CYCLES_T2");
 
-        attrValT2 = attrValT2 / 8 + 1;
+        attrValT2 = attrValT2 / 8 / L2_EPS_DIVIDER + 1;
         epsilonValBuf.insert< 12, 12, 20, uint32_t >(attrValT2);
 
         // p9.l2.scom.inifile:
-        // EPS_DIVIDER_MODE          = 0001
+        // EPS_DIVIDER_MODE          = L2_EPS_DIVIDER
         // EPS_MODE_SEL              = 0
         // EPS_CNT_USE_L2_DIVIDER_EN = 0
         // L2_EPS_STEP_MODE          = 0000
-        epsilonValBuf.setBit<27>();
+        epsilonValBuf.insert<24, 4, 28, uint32_t>(L2_EPS_DIVIDER);
 
         epsilonValBuf.extract<0, 64>(l_epsilonScomVal);
 
@@ -3422,7 +3424,7 @@ fapi2::ReturnCode populateEpsilonL3ScomReg( void*    i_pChipHomer )
                                attrValT0 ),
                  "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T0");
 
-        attrValT0 = attrValT0 / 8 + 1;
+        attrValT0 = attrValT0 / 8 / L3_EPS_DIVIDER + 1;
         epsilonValBuf.insert<0, 12, 20, uint32_t>( attrValT0 );
 
         //----------------------------- Tier1(T1)--------------------------------------
@@ -3432,7 +3434,7 @@ fapi2::ReturnCode populateEpsilonL3ScomReg( void*    i_pChipHomer )
                                attrValT1 ),
                  "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T1");
 
-        attrValT1 = attrValT1 / 8 + 1;
+        attrValT1 = attrValT1 / 8 / L3_EPS_DIVIDER + 1;
         epsilonValBuf.insert<12, 12, 20, uint32_t>( attrValT1 );
 
         //----------------------------- Tier2(T2)--------------------------------------
@@ -3442,7 +3444,7 @@ fapi2::ReturnCode populateEpsilonL3ScomReg( void*    i_pChipHomer )
                                attrValT2 ),
                  "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_READ_CYCLES_T2");
 
-        attrValT2 = attrValT2 / 8 + 1;
+        attrValT2 = attrValT2 / 8 / L3_EPS_DIVIDER + 1;
         epsilonValBuf.insert<24, 12, 20, uint32_t>( attrValT2 );
 
         epsilonValBuf.extract<0, 64>(l_epsilonScomVal);
@@ -3499,7 +3501,7 @@ fapi2::ReturnCode populateEpsilonL3ScomReg( void*    i_pChipHomer )
                                attrValT1 ),
                  "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_WRITE_CYCLES_T1");
 
-        attrValT1 = attrValT1 / 8 + 1;
+        attrValT1 = attrValT1 / 8 / L3_EPS_DIVIDER + 1;
         epsilonValBuf.insert< 0, 12, 20, uint32_t >(attrValT1);
 
         //----------------------------- Tier2(T2)--------------------------------------
@@ -3509,14 +3511,14 @@ fapi2::ReturnCode populateEpsilonL3ScomReg( void*    i_pChipHomer )
                                attrValT2 ),
                  "Error from FAPI_ATTR_GET for attribute ATTR_PROC_EPS_WRITE_CYCLES_T2");
 
-        attrValT2 = attrValT2 / 8 + 1;
+        attrValT2 = attrValT2 / 8 / L3_EPS_DIVIDER + 1;
         epsilonValBuf.insert< 12, 12, 20, uint32_t >(attrValT2);
 
         // p9.l3.scom.initfile:
         // L3_EPS_STEP_MODE          = 0000
-        // L3_EPS_DIVIDER_MODE       = 0001
+        // L3_EPS_DIVIDER_MODE       = L3_EPS_DIVIDER
         // EPS_CNT_USE_L3_DIVIDER_EN = 0
-        epsilonValBuf.setBit<33>();
+        epsilonValBuf.insert<30, 4, 28, uint32_t>(L3_EPS_DIVIDER);
 
         epsilonValBuf.extract<0, 64>(l_epsilonScomVal);
 
