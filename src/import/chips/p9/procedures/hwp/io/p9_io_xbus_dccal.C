@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -184,45 +184,45 @@ uint32_t convert_4r_with_2r( const uint32_t i_4r_val, const uint8_t i_width )
  * @retval ReturnCode
  */
 fapi2::ReturnCode tx_zcal_verify_results(
-    uint32_t& io_pval,
-    uint32_t& io_nval )
+    uint32_t& io_pvalx4,
+    uint32_t& io_nvalx4 )
 {
     // l_zcal_p and l_zcal_n are 9 bit registers
     // These are also 4x of a 1R segment
-    const uint32_t ZCAL_MIN = 16 * 4; // 16 segments * 4 = 64 (0x40)
-    const uint32_t ZCAL_MAX = 33 * 4; // 33 segments * 4 = 132(0x84)
+    const uint32_t X4_MIN = 16 * 4; // 16 segments * 4 = 64 (0x40)
+    const uint32_t X4_MAX = 33 * 4; // 33 segments * 4 = 132(0x84)
     FAPI_IMP( "tx_zcal_verify_results: I/O EDI+ Xbus Entering" );
 
-    FAPI_DBG( "tx_zcal_verify_results: Min/Max Allowed(0x%X,0x%X) Read Pval/Nval(0x%X,0x%X)",
-              ZCAL_MIN, ZCAL_MAX,
-              io_pval, io_nval );
+    FAPI_INF( "tx_zcal_verify_results: Min/Max Allowed(0x%X,0x%X) Read Pval/Nval(0x%X,0x%X)",
+              X4_MIN, X4_MAX,
+              io_pvalx4, io_nvalx4 );
 
-    if( io_pval > ZCAL_MAX )
+    if( io_pvalx4 > X4_MAX )
     {
-        io_pval = ZCAL_MAX;
-        FAPI_ERR( "tx_zcal_verify_results: Tx Zcal Pval(0x%X) > Max Allowed(0x%X)",
-                  io_pval, ZCAL_MAX );
+        FAPI_INF("Warning: IO Xbus Tx Zcal Pval(0x%X) > Max Allowed(0x%X); Code will override with 0x%X and continue.",
+                 io_pvalx4, X4_MAX, X4_MAX);
+        io_pvalx4 = X4_MAX;
     }
 
-    if( io_nval > ZCAL_MAX )
+    if( io_nvalx4 > X4_MAX )
     {
-        io_nval = ZCAL_MAX;
-        FAPI_ERR( "tx_zcal_verify_results: Tx Zcal Nval(0x%X) > Max Allowed(0x%X)",
-                  io_nval, ZCAL_MAX );
+        FAPI_INF("Warning: IO Xbus Tx Zcal Nval(0x%X) > Max Allowed(0x%X); Code will override with 0x%X and continue.",
+                 io_nvalx4, X4_MAX, X4_MAX);
+        io_nvalx4 = X4_MAX;
     }
 
-    if( io_pval < ZCAL_MIN )
+    if( io_pvalx4 < X4_MIN )
     {
-        io_pval = ZCAL_MIN;
-        FAPI_ERR( "tx_zcal_verify_results: Tx Zcal Pval(0x%X) < Min Allowed(0x%X)",
-                  io_pval, ZCAL_MIN );
+        FAPI_INF("Warning: IO Xbus Tx Zcal Pval(0x%X) < Min Allowed(0x%X); Code will override with 0x%X and continue.",
+                 io_pvalx4, X4_MIN, X4_MIN);
+        io_pvalx4 = X4_MIN;
     }
 
-    if( io_nval < ZCAL_MIN )
+    if( io_nvalx4 < X4_MIN )
     {
-        io_nval = ZCAL_MIN;
-        FAPI_ERR( "tx_zcal_verify_results: Tx Zcal Nval(0x%X) < Min Allowed(0x%X)",
-                  io_nval, ZCAL_MIN );
+        FAPI_INF("Warning: IO Xbus Tx Zcal Nval(0x%X) < Min Allowed(0x%X); Code will override with 0x%X and continue.",
+                 io_nvalx4, X4_MIN, X4_MIN);
+        io_nvalx4 = X4_MIN;
     }
 
     FAPI_IMP( "tx_zcal_verify_results: I/O EDI+ Xbus Exiting" );
@@ -297,11 +297,11 @@ fapi2::ReturnCode tx_zcal_run_bus( const XBUS_TGT i_tgt )
     }
     else if( io::get( EDIP_TX_ZCAL_ERROR, l_data ) == 1 )
     {
-        FAPI_ERR( "tx_zcal_run_sm: WARNING: Tx Z Calibration Error" );
+        FAPI_INF( "tx_zcal_run_sm: WARNING: Tx Z Calibration Error" );
     }
     else
     {
-        FAPI_ERR( "tx_zcal_run_sm: WARNING: Tx Z Calibration Timeout: Loops(%d)", l_count );
+        FAPI_INF( "tx_zcal_run_sm: WARNING: Tx Z Calibration Timeout: Loops(%d)", l_count );
     }
 
 fapi_try_exit:
@@ -614,7 +614,7 @@ fapi2::ReturnCode tx_zcal_set_grp( const XBUS_TGT i_tgt, const uint8_t i_grp )
     }
     else
     {
-        FAPI_ERR( "WARNING: Using Default Tx Zcal Segments." );
+        FAPI_INF("Warning: P9 IO Xbus Using Default Tx Zcal Segments." );
     }
 
     // Convert the results of the zCal to actual segments.
