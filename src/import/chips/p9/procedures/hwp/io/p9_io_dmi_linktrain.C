@@ -61,8 +61,7 @@
 //-----------------------------------------------------------------------------
 #include <p9_io_dmi_linktrain.H>
 
-// TODO Create DMI Clear Firs File
-//#include <p9_io_dmi_clear_firs.H>
+#include <p9_io_dmi_clear_firs.H>
 
 #include <p9_io_scom.H>
 #include <p9_io_regs.H>
@@ -679,8 +678,7 @@ fapi2::ReturnCode check_bad_lane_data(
         {
             FAPI_DBG("I/O EDI+ DMI Clearing Firs");
 
-            // TODO Create DMI Clear Firs File
-            //FAPI_TRY(p9_io_dmi_clear_firs(i_tgt, GRP0));
+            FAPI_TRY(p9_io_dmi_clear_firs(i_tgt));
 
             // Clear BUS0_SPARE_DEPLOYED (Bit 9).
             FAPI_TRY(io::read(EDIP_SCOM_FIR_PB, i_tgt, GRP0, LN0, l_data));
