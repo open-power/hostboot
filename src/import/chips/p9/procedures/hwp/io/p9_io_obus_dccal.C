@@ -103,31 +103,35 @@ fapi2::ReturnCode tx_zcal_verify_results( uint32_t& io_pvalx4, uint32_t& io_nval
     const uint32_t X4_MAX = 33 * 4; // 33 segments * 4 = 132(0x84)
     FAPI_IMP( "tx_zcal_verify_results: I/O Obus Entering" );
 
-    FAPI_DBG( "Min/Max Allowed(0x%X,0x%X) Read Pval/Nval(0x%X,0x%X)",
+    FAPI_INF( "Min/Max Allowed(0x%X,0x%X) Read Pval/Nval(0x%X,0x%X)",
               X4_MIN, X4_MAX, io_pvalx4, io_nvalx4 );
 
     if( io_pvalx4 > X4_MAX )
     {
+        FAPI_INF("Warning: IO Obus Tx Zcal Pval(0x%X) > Max Allowed(0x%X); Code will override with 0x%X and continue.",
+                 io_pvalx4, X4_MAX, X4_MAX);
         io_pvalx4 = X4_MAX;
-        FAPI_ERR( "Tx Zcal Pval(0x%X) > Max Allowed(0x%X)", io_pvalx4, X4_MAX );
     }
 
     if( io_nvalx4 > X4_MAX )
     {
+        FAPI_INF("Warning: IO Obus Tx Zcal Nval(0x%X) > Max Allowed(0x%X); Code will override with 0x%X and continue.",
+                 io_nvalx4, X4_MAX, X4_MAX);
         io_nvalx4 = X4_MAX;
-        FAPI_ERR( "Tx Zcal Nval(0x%X) > Max Allowed(0x%X)", io_nvalx4, X4_MAX );
     }
 
     if( io_pvalx4 < X4_MIN )
     {
+        FAPI_INF("Warning: IO Obus Tx Zcal Pval(0x%X) < Min Allowed(0x%X); Code will override with 0x%X and continue.",
+                 io_pvalx4, X4_MIN, X4_MIN);
         io_pvalx4 = X4_MIN;
-        FAPI_ERR( "Tx Zcal Pval(0x%X) < Min Allowed(0x%X)", io_pvalx4, X4_MIN );
     }
 
     if( io_nvalx4 < X4_MIN )
     {
+        FAPI_INF("Warning: IO Obus Tx Zcal Nval(0x%X) < Min Allowed(0x%X); Code will override with 0x%X and continue.",
+                 io_nvalx4, X4_MIN, X4_MIN);
         io_nvalx4 = X4_MIN;
-        FAPI_ERR( "Tx Zcal Nval(0x%X) < Min Allowed(0x%X)", io_nvalx4, X4_MIN );
     }
 
     FAPI_IMP( "tx_zcal_verify_results: I/O Obus Exiting" );
@@ -197,11 +201,11 @@ fapi2::ReturnCode tx_run_zcal( const OBUS_TGT i_tgt )
     }
     else if( io::get( OPT_TX_ZCAL_ERROR, l_data ) == 1 )
     {
-        FAPI_ERR( "tx_run_zcal: WARNING: Tx Z Calibration Error" );
+        FAPI_INF( "tx_run_zcal: WARNING: Tx Z Calibration Error" );
     }
     else
     {
-        FAPI_ERR( "tx_run_zcal: WARNING: Tx Z Calibration Timeout: Loops(%d)", l_count );
+        FAPI_INF( "tx_run_zcal: WARNING: Tx Z Calibration Timeout: Loops(%d)", l_count );
     }
 
 fapi_try_exit:
@@ -219,7 +223,7 @@ fapi_try_exit:
  */
 fapi2::ReturnCode tx_zcal_apply( const OBUS_TGT i_tgt, const uint32_t i_pvalx4, const uint32_t i_nvalx4 )
 {
-    FAPI_IMP( "tx_zcal_apply: I/O EDI+ Xbus Entering" );
+    FAPI_IMP( "tx_zcal_apply: I/O OPT Obus Entering" );
     const uint8_t  GRP0              = 0;
     const uint8_t  LN0               = 0;
     const uint8_t  PRE_WIDTH         = 5;
@@ -406,7 +410,7 @@ fapi2::ReturnCode tx_set_zcal_ffe( const OBUS_TGT i_tgt )
     }
     else
     {
-        FAPI_ERR( "WARNING: Using Default Tx Zcal Segments." );
+        FAPI_INF("Warning: P9 IO Obus Using Default Tx Zcal Segments." );
     }
 
     // Convert the results of the zCal to actual segments.
@@ -502,7 +506,7 @@ fapi2::ReturnCode rx_poll_dccal_done( const OBUS_TGT i_tgt, const uint32_t i_lan
 
     }
 
-    FAPI_DBG( "I/O EDI+ Xbus Rx Poll Dccal Successful." );
+    FAPI_DBG( "I/O OPT Obus Rx Poll Dccal Successful." );
 
 fapi_try_exit:
     FAPI_IMP( "rx_poll_dccal_done: I/O Obus Exiting" );
