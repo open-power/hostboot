@@ -35,9 +35,153 @@
  *  Registers & Fields
  * *****************************
 */
+#define OPT_TX_ZCAL_N                                      0x800f0c000000003f, 48,  9 // calibration circuit nseg enable value this holds the current value of the enabled segments and is 4x multiple of the actual segment count. may be read for current calibration result set during calibration sequence. may be written to immediately update circuit enables on each write. used with tx_zcal_swo_* for manual calibration. do not write when tx_zcal_req = 1. (binary code - 0x00 is zero slices and 0xa1 is maximum slices).
+#define OPT_TX_ZCAL_P                                      0x800f14000000003f, 48,  9 // calibration circuit pseg enable value this holds the current value of the enabled segments and is 4x multiple of the actual segment count. may be read for current calibration result set during calibration sequence. may be written to immediately update circuit enables on each write. used with tx_zcal_swo_* for manual calibration. do not write when tx_zcal_req = 1. (binary code - 0x00 is zero slices and 0xa1 is maximum slices).
+#define OPT_TX_PSEG_PRE_EN                                 0x800d34000000003f, 51,  5 // pre bank pseg enable
+#define OPT_TX_PSEG_PRE_SEL                                0x800d34000000003f, 56,  5 // pre bank pseg mode selection
+#define OPT_TX_NSEG_PRE_EN                                 0x800d3c000000003f, 51,  5 // pre bank nseg enable
+#define OPT_TX_NSEG_PRE_SEL                                0x800d3c000000003f, 56,  5 // pre bank nseg mode selection
+#define OPT_TX_PSEG_MARGINPU_EN                            0x800d44000000003f, 48,  8 // margin pull-up bank pseg enable
+#define OPT_TX_PSEG_MARGINPD_EN                            0x800d44000000003f, 56,  8 // margin pull-down bank pseg enable
+#define OPT_TX_NSEG_MARGINPU_EN                            0x800d4c000000003f, 48,  8 // margin pull-up bank nseg enable
+#define OPT_TX_NSEG_MARGINPD_EN                            0x800d4c000000003f, 56,  8 // margin pull-down bank nseg enable
+#define OPT_TX_MARGINPU_SEL                                0x800d54000000003f, 48,  8 // margin pull-up bank mode selection
+#define OPT_TX_MARGINPD_SEL                                0x800d54000000003f, 56,  8 // margin pull-down bank mode selection
+#define OPT_TX_PSEG_MAIN_EN                                0x800d5c000000003f, 51,  7 // main bank pseg enable
+#define OPT_TX_NSEG_MAIN_EN                                0x800d64000000003f, 51,  7 // main bank nseg enable
+#define OPT_TX_PSEG_POST_EN                                0x800d84000000003f, 49,  7 // post bank pseg enable
+#define OPT_TX_PSEG_POST_SEL                               0x800d84000000003f, 56,  7 // post bank pseg mode selection
+#define OPT_TX_NSEG_POST_EN                                0x800d8c000000003f, 49,  7 // post bank nseg enable
+#define OPT_TX_NSEG_POST_SEL                               0x800d8c000000003f, 56,  7 // post bank nseg mode selection
+#define OPT_TX_ZCAL_REQ                                    0x800f04000000003f, 49,  1 // impedance calibration sequence enable\r\n\t rising edge initiates calibration seqeunce and clears all status. tx_zcal_done indicates completion and valid results available(default)\r\n\t0:(disabled) inactive. must be set prior to enable. \r\n\t1:(enabled) enable.
+#define OPT_TX_ZCAL_DONE                                   0x800f04000000003f, 50,  1 // impedance calibration sequence complete\r\n\t results are valid when 1.
+#define OPT_TX_ZCAL_ERROR                                  0x800f04000000003f, 51,  1 // impedance calibration sequence error\r\n\t indicates, independent of tx_zcal_done, whether no calibration answer was found, or state machine failed. cleared on tx_zcal_req.
+#define OPT_TX_ZCAL_BUSY                                   0x800f04000000003f, 52,  1 // impedance calibration sequence busy\r\n\t processing tx_zcal_req, or tx_zcal_swo_en, or an internal bist mode. look for tx_zcal_done.
+#define OPT_TX_IMPCAL_PB                                   0x800f04000000003f, 48, 16 // register -- description
+#define OPT_TX_ZCAL_SM_MIN_VAL                             0x800f2c000000003f, 48,  7 // impedance calibration minimum search threshold low-side segment count limit used in calibration process. see circuit spec (binary code - 0x00 is zero slices and 0x50 is maximum slices).
+#define OPT_TX_ZCAL_SM_MAX_VAL                             0x800f2c000000003f, 55,  7 // impedance calibration maximum search threshold high-side segment count limit used in calibration process. see circuit spec (binary code - 0x00 is zero slices and 0x50 is maximum slices).
+#define OPT_TX_IMPCAL_SWO2_PB                              0x800f2c000000003f, 48, 16 // register -- description
+#define OPT_RX_RUN_DCCAL                                   0x800320000000003f, 49,  1 // run on-die dc training on given lane
+#define OPT_RX_DCCAL_DONE                                  0x800328000000003f, 49,  1 // on-die dc training complete on given lane
+#define OPT_RX_B_BANK_CONTROLS                             0x800008000000003f, 58,  6 // power down pins, 0=cml2cmos, 1=ctle, 2=dac, 3=deserializer, 4=integrator, 5=phase rotator
+#define OPT_IORESET_HARD_BUS0                              0x0000000000000020,  2,  1 // io hard reset per-bus and gcr reset
 
+
+#define EDIP_RX_FIR_RESET                                  0x800ab0000000003f, 63,  1 // fir reset\r\n\ttoggle this field 0->1->0 to reset all rx fir related latches including the isolation and parity error latches.
+#define EDIP_TX_ZCAL_REQ                                   0x800f04000000003f, 49,  1 // impedance calibration sequence enable\r\n\t rising edge initiates calibration seqeunce and clears all status. tx_zcal_done indicates completion and valid results available(default)\r\n\t0:(disabled) inactive. must be set prior to enable. \r\n\t1:(enabled) enable.
+#define EDIP_TX_ZCAL_DONE                                  0x800f04000000003f, 50,  1 // impedance calibration sequence complete\r\n\t results are valid when 1.
+#define EDIP_TX_ZCAL_ERROR                                 0x800f04000000003f, 51,  1 // impedance calibration sequence error\r\n\t indicates, independent of tx_zcal_done, whether no calibration answer was found, or state machine failed. cleared on tx_zcal_req.
+#define EDIP_TX_IMPCAL_PB                                  0x800f04000000003f, 48, 16 // register -- description
+#define EDIP_TX_ZCAL_N                                     0x800f0c000000003f, 48,  9 // calibration circuit nseg enable value this holds the current value of the enabled segments and is 4x multiple of the actual segment count. may be read for current calibration result set during calibration sequence. may be written to immediately update circuit enables on each write. used with tx_zcal_swo_* for manual calibration. do not write when tx_zcal_req = 1. (binary code - 0x00 is zero slices and 0xa1 is maximum slices).
+#define EDIP_TX_ZCAL_P                                     0x800f14000000003f, 48,  9 // calibration circuit pseg enable value this holds the current value of the enabled segments and is 4x multiple of the actual segment count. may be read for current calibration result set during calibration sequence. may be written to immediately update circuit enables on each write. used with tx_zcal_swo_* for manual calibration. do not write when tx_zcal_req = 1. (binary code - 0x00 is zero slices and 0xa1 is maximum slices).
+#define EDIP_TX_ZCAL_SM_MIN_VAL                            0x800f2c000000003f, 48,  7 // impedance calibration minimum search threshold low-side segment count limit used in calibration process. see circuit spec (binary code - 0x00 is zero slices and 0x50 is maximum slices).
+#define EDIP_TX_ZCAL_SM_MAX_VAL                            0x800f2c000000003f, 55,  7 // impedance calibration maximum search threshold high-side segment count limit used in calibration process. see circuit spec (binary code - 0x00 is zero slices and 0x50 is maximum slices).
+#define EDIP_TX_IMPCAL_SWO2_PB                             0x800f2c000000003f, 48, 16 // register -- description
+#define EDIP_TX_PSEG_PRE_EN                                0x800d34000000003f, 51,  5 // pre bank pseg enable
+#define EDIP_TX_PSEG_PRE_SEL                               0x800d34000000003f, 56,  5 // pre bank pseg mode selection
+#define EDIP_TX_NSEG_PRE_EN                                0x800d3c000000003f, 51,  5 // pre bank nseg enable
+#define EDIP_TX_NSEG_PRE_SEL                               0x800d3c000000003f, 56,  5 // pre bank nseg mode selection
+#define EDIP_TX_PSEG_MARGINPU_EN                           0x800d44000000003f, 48,  8 // margin pull-up bank pseg enable
+#define EDIP_TX_PSEG_MARGINPD_EN                           0x800d44000000003f, 56,  8 // margin pull-down bank pseg enable
+#define EDIP_TX_NSEG_MARGINPU_EN                           0x800d4c000000003f, 48,  8 // margin pull-up bank nseg enable
+#define EDIP_TX_NSEG_MARGINPD_EN                           0x800d4c000000003f, 56,  8 // margin pull-down bank nseg enable
+#define EDIP_TX_MARGINPU_SEL                               0x800d54000000003f, 48,  8 // margin pull-up bank mode selection
+#define EDIP_TX_MARGINPD_SEL                               0x800d54000000003f, 56,  8 // margin pull-down bank mode selection
+#define EDIP_TX_PSEG_MAIN_EN                               0x800d5c000000003f, 51, 13 // main bank pseg enable
+#define EDIP_TX_NSEG_MAIN_EN                               0x800d64000000003f, 51, 13 // main bank nseg enable
+#define EDIP_RX_LANE_INVALID                               0x800240000000003f, 50,  1 // marks this rx slice as invalid and fences other operations.  use this bit, for example, to broadcast a setting to all good lanes but not bad or disabled ones.
+#define EDIP_RX_WT_CU_PLL_PGOOD                            0x8009f8000000003f, 48,  1 // rx pll/dll enable\r\n\t1:(pgood) sets pgood on rx pll for locking \r\n\t0:(reset) places rx pll in reset
+#define EDIP_RX_WT_CU_BYP_PLL_LOCK                         0x8009f8000000003f, 49,  1 // override rx pll/dll lock.  this should be ored into places where pll locked is checked (i.e. wt state machine), used to bypass waiting for a pll lock
+#define EDIP_RX_WT_PLL_REFCLKSEL                           0x8009f8000000003f, 50,  1 // select between io clock and bist/refclock\r\n\t0:(io_clock) selects io clock \r\n\t1:(alt_refclk) selects bist refclock
+#define EDIP_RX_PLL_REFCLKSEL_SCOM_EN                      0x8009f8000000003f, 51,  1 // selects between pll controls and gcr register to select refclk\r\n\t0:(pll_refclk_cntl) uses pll control to select refclk \r\n\t1:(scom_refclk) uses gcr register, rx_wt_pll_refclksel, to select refclock
+#define EDIP_RX_IORESET                                    0x8009f8000000003f, 52,  1 // reset the given rx clock group including gcr slave
+#define EDIP_RX_CTL_CNTL4_E_PG                             0x8009f8000000003f, 48, 16 // register -- description
+#define EDIP_RX_START_DC_CALIBRATE                         0x8009f0000000003f, 53,  1 // when this register is written to a 1 the training state machine will run the dc calibrate substeps definedin eye optimizations.
+#define EDIP_RX_DC_CALIBRATE_DONE                          0x800a38000000003f, 53,  1 // when this bit is read as a 1, the dc calibration steps have been completed. check the corresponding rx_dc_calibration_failed register field for the pass/fail status of operation state.
+#define EDIP_RX_START_WDERF_ALIAS                          0x8009f0000000003f, 48,  5 // alias for rx_start_* bits
+#define EDIP_RX_CTL_CNTL1_E_PG                             0x8009f0000000003f, 48, 16 // register -- description
+#define EDIP_RX_WDERF_DONE_ALIAS                           0x800a38000000003f, 48,  5 // alias for rx_*_done bits
+#define EDIP_RX_WDERF_FAILED_ALIAS                         0x800a38000000003f, 56,  5 // alias for rx_*_failed bits
+#define EDIP_RX_CTL_STAT1_E_PG                             0x800a38000000003f, 48, 16 // register -- description
+#define EDIP_RX_LANE_BAD_VEC_0_15                          0x800a40000000003f, 48, 16 // lanes found bad by hw (status) or method to force lane bad from software (control).  the bad_lane vector is only updated during initial training.  
+#define EDIP_RX_CTL_STAT2_E_PG                             0x800a40000000003f, 48, 16 // register -- description
+#define EDIP_RX_LANE_BAD_VEC_16_23                         0x800a50000000003f, 48,  8 // lanes found bad by hw (status) or method to force lane bad from software (control).
+#define EDIP_RX_CTL_STAT4_E_PG                             0x800a50000000003f, 48, 16 // register -- description
+#define EDIP_RX_LANE_DISABLED_VEC_0_15                     0x8009e0000000003f, 48, 16 // used to set which of group lanes 0-15 are ignored by training logic.  these do not affect powerdown. assumption: disabled lanes must be contiguous.
+#define EDIP_RX_CTL_MODE11_E_PG                            0x8009e0000000003f, 48, 16 // register -- description
+#define EDIP_RX_LANE_DISABLED_VEC_16_23                    0x8009e8000000003f, 48,  8 // used to set which of group lanes 16-23 are ignored by training logic.  these do not affect powerdown. assumption: disabled lanes must be contiguous.
+#define EDIP_RX_CTL_MODE12_E_PG                            0x8009e8000000003f, 48, 16 // register -- description
+#define EDIP_RX_MAIN_INIT_STATE                            0x800b18000000003f, 48,  4 // main initialization state machine(rjr):\r\n\t0000: idle\r\n\t0001: wiretest running\r\n\t0010: deskew running\r\n\t0011: eye optimization running\r\n\t0100: repair running\r\n\t0101: go functional running\r\n\t1001: wiretest failed\r\n\t:1010: deskew failed\r\n\t1011: eye optimization failed\r\n\t1100: repair failed\r\n\t1101: go functional failed\r\n\tothers:  unused
+#define EDIP_RX_WTM_STATE                                  0x800b18000000003f, 52,  6 // main wiretest state machine current state (rjr)): \r\n\tx00: idle \r\n\tx01: drv data  wt \r\n\tx02: drv clock wt \r\n\tx03: drv data  0 \r\n\tx04: drv clock 0 \r\n\tx05: rx wt \r\n\tx06: wait all ones \r\n\tx07: reset pll \r\n\tx08: wait pll \r\n\tx09: drive clock \r\n\tx0a: drive data 1 \r\n\tx0b: wait all zeroes \r\n\tx0c: drive data 0 \r\n\tx0d: done \r\n\tx0e: unused \r\n\tx0f: unused \r\n\tx10: wait prev done \r\n\tx11: drv prev done \r\n\tx12: drv all done \r\n\tx13: wait all done \r\n\tx14: init tx fifo \r\n\tx15: unused \r\n\tx16: unused \r\n\tx17: unused \r\n\tx18: set c & d dr strength \r\n\tx19: set data only dr strength \r\n\tx1a: clock fail \r\n\tx1b: all bad lanes \r\n\tx1c: wt timeout fail \r\n\tx1d: pll/dll fail \r\n\tx1e: all ones fail \r\n\tx1f: all zeroes fail 
+#define EDIP_RX_WTR_STATE                                  0x800b18000000003f, 58,  5 // receiver wiretest state machine current state (rjr):x0: idle\r\n\tx1: check clock\r\n\tx2: check lane disabled\r\n\tx3: check data lane\r\n\tx4: store data lane results\r\n\tx5: check if done\r\n\tx6: done--passed\r\n\t: done--failed\r\n\t:x8-xf: unused
+#define EDIP_RX_GLBSM_STAT1_E_PG                           0x800b18000000003f, 48, 16 // register -- description
+#define EDIP_RX_WTL_SM_STATUS                              0x800960000000003f, 48,  5 // wiretest lane machine status    
+#define EDIP_RX_CTL_STAT3_EO_PG                            0x800960000000003f, 48, 16 // register -- description
+#define EDIP_RX_WTR_BAD_LANE_COUNT                         0x800b20000000003f, 59,  5 // wiretest current number of bad lanes in this clk group
+#define EDIP_RX_GLBSM_STAT2_E_PG                           0x800b20000000003f, 48, 16 // register -- description
+#define EDIP_RX_WT_CLK_LANE_INVERTED                       0x800a58000000003f, 49,  1 // clock wiretest lane inverted/swapped status \r\n\t0:(now_swapped) not swapped or inverted \r\n\t1:(swapped) p-n swapped or inverted
+#define EDIP_RX_WT_CLK_LANE_BAD_CODE                       0x800a58000000003f, 50,  3 // clock wiretest lane bad code\r\n\t000:(no_error) lane tested good \r\n\t001:(n_stuck_1) n leg stuck at 1 \r\n\t010:(n_stuck_0) n leg stuck at 0 \r\n\t011:(p_stuck_1) p leg stuck at 1 \r\n\t100:(p_stuck_0) p leg stuck at 0 \r\n\t101:(n_or_p_floating) n  or p leg floating or swapping undetermined \r\n\t110:(not_used_110)unused.\r\n\t111:(not_used_111)unused
+#define EDIP_RX_CTL_STAT5_E_PG                             0x800a58000000003f, 48, 16 // register -- description
+#define EDIP_RX_EYE_OPT_STATE                              0x800ab8000000003f, 48, 12 // eye optimizaton state machine current state 
+#define EDIP_RX_GLBSM_STAT1_EO_PG                          0x800ab8000000003f, 48, 16 // register -- description
+#define EDIP_RX_HIST_MIN_EYE_WIDTH_VALID                   0x800938000000003f, 48,  1 // rx historic eye width minimum value and lane are valid.
+#define EDIP_RX_HIST_MIN_EYE_WIDTH_LANE                    0x800938000000003f, 49,  5 // rx historic eye width lane number
+#define EDIP_RX_HIST_MIN_EYE_WIDTH                         0x800938000000003f, 54,  8 // rx historic eye width minimum value.
+#define EDIP_RX_CTL_CNTL13_EO_PG                           0x800938000000003f, 48, 16 // register -- description
+#define EDIP_RX_RPR_STATE                                  0x800b30000000003f, 48,  7 // static repair state machine\r\n\tdetailed drawing can be found in the workbook by searching for rx_rpr_state
+#define EDIP_RX_GLBSM_STAT4_E_PG                           0x800b30000000003f, 48, 16 // register -- description
+#define EDIP_RX_BAD_LANE1                                  0x800b58000000003f, 48,  7 // encoded bad lane one in relation to the entire rx bus
+#define EDIP_RX_BAD_LANE2                                  0x800b58000000003f, 55,  7 // encoded bad lane two in relation to the entire rx bus
+#define EDIP_RX_BAD_LANE_CODE                              0x800b58000000003f, 62,  2 // rx bad lane code\r\n\t00:(0_bad_lns) zero bad lanes\r\n\t01:(bad_ln1_val) bad lane 1 valid\r\n\t10:(bad_lns12_val) bad lanes 1 and 2 valid\r\n\t11:(3plus_bad_lns) 3+ bad lanes
+#define EDIP_RX_GLBSM_STAT9_E_PG                           0x800b58000000003f, 48, 16 // register -- description
+#define EDIP_TX_CLK_UNLOAD_CLK_DISABLE                     0x800c1c000000003f, 50,  1 // set to 0 to clock off sync logic on the clock slice and save power.  it should not be necessary to use the sync logic on the clock slice since it has no fifo but control is available just in case.
+#define EDIP_TX_CLK_RUN_COUNT                              0x800c1c000000003f, 51,  1 // set to 1 to enable the tx clock slice serializer.  this should be enabled at all times but control is available just in case.
+#define EDIP_TX_UNLOAD_CLK_DISABLE                         0x80040c000000003f, 56,  1 // set to 0 to enable sync of tx custom serializer via tx_fifo_init register.  set to 1 to clock off sync logic and save power.
+#define EDIP_SCOM_FIR_PB                                   0x0000000000000000,  0, 64 // fir scom rw reg -- description
+#define EDIP_RX_LANE_DIG_PDWN                              0x800220000000003f, 48,  1 // used to power down digital logic for a lane. 
+#define EDIP_RX_LANE_ANA_PDWN                              0x800008000000003f, 54,  1 // lane power down of analog and custom circuits
+#define EDIP_TX_MSBSWAP                                    0x800c14000000003f, 58,  1 // used to enable end-for-end or msb swap of tx lanes.  for example, lanes 0 and n-1 swap, lanes 1 and n-2 swap, etc. \r\n\t0:(nomsbswap) no swap (default)\r\n\t1:(msbswap) end-for-end swap mode
+#define EDIP_TX_END_LANE_ID                                0x800c84000000003f, 57,  7 // this field is used to programmably set the last lane position in the group but relative to the bus.
+#define EDIP_TX_LANE_PDWN                                  0x800404000000003f, 48,  1 // used to drive inhibit (tristate) and fully power down a lane independent of the logical lane disable.  \r\n\t0:(enabled) lane powered up \r\n\t1:(disabled) lane drive inhibited (tristated) and powered down (default). 
+#define EDIP_RX_HIST_MIN_EYE_WIDTH_VALID                   0x800938000000003f, 48,  1 // rx historic eye width minimum value and lane are valid.
+#define EDIP_RX_HIST_MIN_EYE_WIDTH_LANE                    0x800938000000003f, 49,  5 // rx historic eye width lane number
+#define EDIP_RX_HIST_MIN_EYE_WIDTH                         0x800938000000003f, 54,  8 // rx historic eye width minimum value.
+#define EDIP_RX_CTL_CNTL13_EO_PG                           0x800938000000003f, 48, 16 // register -- description
+#define EDIP_TX_IORESET                                    0x800c9c000000003f, 48,  1 // reset the given tx clock group and gcr slave
+#define EDIP_TX_FIR_RESET                                  0x800d14000000003f, 63,  1 // fir reset\r\n\ttoggle this field 0->1->0 to reset all tx fir related latches including parity error latches, including the parity error latches.
+#define EDIP_RX_ABORT_CHECK_TIMEOUT_SEL                    0x800840000000003f, 48,  4 // selects abort check timeout. \r\n\t0000:(tap0) 1k ui or 53.3ns \r\n\t0001:(tap1) 64k ui or 3.4us \r\n\t0010:(tap2) 128k ui or 6.8us \r\n\t0011:(tap3) 256k ui or 13.7us \r\n\t0100:(tap4) 512k ui or 27.3us \r\n\t0101:(tap5) 1m ui or 54,6us \r\n\t0110:(tap6) 2m ui or 109.2us \r\n\t0111:(tap7) 4m ui or 218.4us \r\n\t1000:(tap8) 8m ui or 436.7us \r\n\t1001:(tap9) 16m ui or 873.7us \r\n\t1010:(tap10) 32 ui or 1.7ms \r\n\t1011:(tap11) 64m ui or 3.5ms \r\n\t1100:(tap12) 8k us or 426.0ns \r\n\t1101:(tap13) 16k us or 852.0ns \r\n\t1110:(tap14) 32k us or 1.7us \r\n\t1111:inifinite\r\n\trjr
+#define EDIP_RX_POLLING_TIMEOUT_SEL                        0x800840000000003f, 52,  4 // selects polling read timeout. \r\n\t0000:(tap0) 1k ui or 53.3ns \r\n\t0001:(tap1) 64k ui or 3.4us \r\n\t0010:(tap2) 128k ui or 6.8us \r\n\t0011:(tap3) 256k ui or 13.7us \r\n\t0100:(tap4) 512k ui or 27.3us \r\n\t0101:(tap5) 1m ui or 54,6us \r\n\t0110:(tap6) 2m ui or 109.2us \r\n\t0111:(tap7) 4m ui or 218.4us \r\n\t1000:(tap8) 8m ui or 436.7us \r\n\t1001:(tap9) 16m ui or 873.7us \r\n\t1010:(tap10) 32 ui or 1.7ms \r\n\t1011:(tap11) 64m ui or 3.5ms \r\n\t1100:(tap12) 8k us or 426.0ns \r\n\t1101:(tap13) 16k us or 852.0ns \r\n\t1110:(tap14) 32k us or 1.7us \r\n\t1111:inifinite\r\n\trjr
+#define EDIP_RX_CTL_MODE7_EO_PG                            0x800840000000003f, 48, 16 // register -- description
+#define EDIP_RX_SERVO_CHG_CFG                              0x800868000000003f, 48,  4 // this register controls the minimum acceptable changes of the accum for a valid servo op. assures we have reached a stable point. 
+#define EDIP_RX_AMP_INIT_TIMEOUT                           0x800878000000003f, 48,  4 // rx_amp_init_timeout   used for amplitude masurements during init.  (see workbook table 4.10 for timer settings)
+#define EDIP_RX_AMP_RECAL_TIMEOUT                          0x800878000000003f, 52,  4 // rx_amp_recal_timeout  used for amplitude masurements during recal. (see workbook table 4.10 for timer settings)
+#define EDIP_RX_PEAK_INIT_TIMEOUT                          0x800878000000003f, 56,  4 // rx_peak_init_timeout  used for peaking masurements during init.    (see workbook table 4.10 for timer settings)
+#define EDIP_RX_PEAK_RECAL_TIMEOUT                         0x800878000000003f, 60,  4 // rx_peak_recal_timeout  used for peaking masurements during recal   (see workbook table 4.10 for timer settings)
+#define EDIP_RX_CTL_MODE14_EO_PG                           0x800878000000003f, 48, 16 // register -- description
+#define EDIP_RX_OFF_INIT_TIMEOUT                           0x800880000000003f, 48,  4 // rx_off_init_timeout   used for offset masurements during init.     (see workbook table 4.10 for timer settings)
+#define EDIP_RX_OFF_RECAL_TIMEOUT                          0x800880000000003f, 52,  4 // rx_off_recal_timeout  used for offset masurements during recal.    (see workbook table 4.10 for timer settings)
+#define EDIP_RX_CM_TIMEOUT                                 0x800880000000003f, 56,  4 // rx_cm_timeout            used for common mode measurements         (see workbook table 4.10 for timer settings)
+#define EDIP_RX_AMIN_TIMEOUT                               0x800880000000003f, 60,  4 // rx_amin_timeout        used for amin masurements                   (see workbook table 4.10 for timer settings)
+#define EDIP_RX_CTL_MODE15_EO_PG                           0x800880000000003f, 48, 16 // register -- description
+#define EDIP_RX_AMP_TIMEOUT                                0x800888000000003f, 48,  4 // rx_amp_timeout timeout used when running the generic amplitude servo ops    (see workbook table 4.10 for timer settings)
+#define EDIP_RX_USERDEF_TIMEOUT                            0x800888000000003f, 52,  4 // rx_userdef_timeout timeout used when using the user defined servo ops       (see workbook table 4.10 for timer settings)
+#define EDIP_RX_BER_TIMEOUT                                0x800888000000003f, 56,  4 // rx_ber_timeout, used for when making bit error measurements with a servo op (see workbook table 4.10 for timer settings)
+#define EDIP_RX_CTL_MODE16_EO_PG                           0x800888000000003f, 48, 16 // register -- description
+
+
+
+
+
+
+
+
+
+
+/*
+ * Leaving these as comments until we close out OPT RAS discussions and write Abus link training
+ *
 #define OPT_TX_MODE1_PL_FULL_REG                           0x800404000000003f, 48, 16 // iotk alias: for entire tx_mode1_pl register
-#define OPT_TX_LANE_PDWN                                   0x800404000000003f, 48,  1 // used to drive inhibit (tristate) and fully power down a lane independent of the logical lane disable.  \r\n\t0:(enabled) lane powered up \r\n\t1:(disabled) lane drive inhibited (tristated) and powered down (default). 
+#define OPT_TX_LANE_PDWN                                   0x800404000000003f, 48,  1 // used to drive inhibit (tristate) and fully power down a lane independent of the logical lane disable.  \r\n\t0:(enabled) lane powered up \r\n\t1:(disabled) lane drive inhibited (tristated) and powered down (default).
 #define OPT_TX_LANE_INVERT                                 0x800404000000003f, 49,  1 // used to invert the polarity of a lane.\r\n\t0:(normal) normal lane polarity (default)\r\n\t1:(inverted) lane inverted.
 #define OPT_TX_LANE_QUIESCE                                0x800404000000003f, 50,  2 // used to force the output of a lane to a particular logical value.\r\n\t00:(functional) functional data (default)\r\n\t01:(quiesce_to_0) quiesce lane to a static 0 value\r\n\t10:(quiesce_to_1) quiesce lane to a static 1 value\r\n\t11:(quiesce_to_z) tri-state lane output.
 #define OPT_TX_PSAVE_REQ_DIS                               0x800404000000003f, 54,  1 // disable tx slice power gating from link layer psav_req control
@@ -102,13 +246,13 @@
 #define OPT_TX_CTL_CNTLG1_EO_PG                            0x800c24000000003f, 48, 16 // register -- description
 #define OPT_TX_ERR_INJ_A_FINE_SEL                          0x800c2c000000003f, 48,  3 // random lsb/fine-grained cycle offset variation control for pattern a, where cycles are deserialized domain cycles. \r\n\t000:(1_33) random offset in range of 1-32 cycles(default)\r\n\t001:(1_16) random offset in range of 1-16 cycles\r\n\t010:(1_8) random offset in range of 1-8 cycles\r\n\t011:(1_4) random offset in range of 1-4 cycles\r\n\t100:(1_2) random offset in range of 1-2 cycles\r\n\t101:(fixed1) fixed offset of 1 cycle\r\n\t110:(fixed3) fixed offset of 3 cycles \r\n\t111:(fixed7) fixed offset of 7 cycles.
 #define OPT_TX_ERR_INJ_A_COARSE_SEL                        0x800c2c000000003f, 51,  4 // random msb/coarse-grained multiplier for the base error rate counter, which controls bit error rate variation for pattern a.  there are also a number of nonrandom settings which are specifically chosen to avoid powers of two.  \r\n\t0000:(1_32) range of 1-32, mean of 16.5 (default)\r\n\t0001:(9_24) range of 9-24, mean of 16.5\r\n\t0010:(13_20) range of 13-20, mean of 16.5\r\n\t0011:(16_19) range of 16-19, mean of 16.5\r\n\t100:(17_18) range of 16-17, mean of 16.5\r\n\t0101:(1_8) range of 1-8, mean of 4.5\r\n\t0110:(3_6)  range of 3-6, mean of 4.5\r\n\t0111:(4_5)  range of 4-5, mean of 4.5\r\n\t1000:(fixed1) fixed 1\r\n\t1001:(fixed3) fixed 3\r\n\t1010:(fixed5) fixed 5\r\n\t1011:(fixed6) fixed 6\r\n\t1100:(fixed7) fixed 7\r\n\t1101:(fixed17) fixed 17\r\n\t1110:(fixed21) fixed 21\r\n\t1111:(fixed25) fixed 25
-#define OPT_TX_ERR_INJ_A_BER_SEL                           0x800c2c000000003f, 55,  6 // used to set the random bit error injection rate for pattern a.  when set to a binary value of n, the average bit error rate is 1/(2^n*beats*mean(msb)). 
+#define OPT_TX_ERR_INJ_A_BER_SEL                           0x800c2c000000003f, 55,  6 // used to set the random bit error injection rate for pattern a.  when set to a binary value of n, the average bit error rate is 1/(2^n*beats*mean(msb)).
 #define OPT_TX_ERR_INJ_ENABLE                              0x800c2c000000003f, 61,  1 // overall error injection enable.  when set to 0, all other injection is gated.
 #define OPT_TX_ERR_INJ_CLOCK_ENABLE                        0x800c2c000000003f, 62,  1 // enable clocks to larger counter and prbs logic.  use this to stagger start times and effectively seed the injection mechanism randomly.
 #define OPT_TX_CTL_CNTL2_EO_PG                             0x800c2c000000003f, 48, 16 // register -- description
 #define OPT_TX_ERR_INJ_B_FINE_SEL                          0x800c34000000003f, 48,  3 // random lsb/fine-grained cycle offset variation control for pattern b, where cycles are deserialized domain cycles. \r\n\t000:(1_33) random offset in range of 1-32 cycles(default)\r\n\t001:(1_16) random offset in range of 1-16 cycles\r\n\t010:(1_8) random offset in range of 1-8 cycles\r\n\t011:(1_4) random offset in range of 1-4 cycles\r\n\t100:(1_2) random offset in range of 1-2 cycles\r\n\t101:(fixed1) fixed offset of 1 cycle\r\n\t110:(fixed3) fixed offset of 3 cycles \r\n\t111:(fixed7) fixed offset of 7 cycles.
 #define OPT_TX_ERR_INJ_B_COARSE_SEL                        0x800c34000000003f, 51,  4 // random msb/coarse-grained multiplier for the base error rate counter, which controls bit error rate variation for pattern b.  there are also a number of nonrandom settings which are specifically chosen to avoid powers of two.  \r\n\t0000:(1_32) range of 1-32, mean of 16.5 (default)\r\n\t0001:(9_24) range of 9-24, mean of 16.5\r\n\t0010:(13_20) range of 13-20, mean of 16.5\r\n\t0011:(16_19) range of 16-19, mean of 16.5\r\n\t100:(17_18) range of 16-17, mean of 16.5\r\n\t0101:(1_8) range of 1-8, mean of 4.5\r\n\t0110:(3_6)  range of 3-6, mean of 4.5\r\n\t0111:(4_5)  range of 4-5, mean of 4.5\r\n\t1000:(fixed1) fixed 1\r\n\t1001:(fixed3) fixed 3\r\n\t1010:(fixed5) fixed 5\r\n\t1011:(fixed6) fixed 6\r\n\t1100:(fixed7) fixed 7\r\n\t1101:(fixed17) fixed 17\r\n\t1110:(fixed21) fixed 21\r\n\t1111:(fixed25) fixed 25
-#define OPT_TX_ERR_INJ_B_BER_SEL                           0x800c34000000003f, 55,  6 // used to set the random bit error injection rate for pattern b.  when set to a binary value of n, the average bit error rate is 1/(2^n*beats*mean(msb)). 
+#define OPT_TX_ERR_INJ_B_BER_SEL                           0x800c34000000003f, 55,  6 // used to set the random bit error injection rate for pattern b.  when set to a binary value of n, the average bit error rate is 1/(2^n*beats*mean(msb)).
 #define OPT_TX_CTL_CNTL3_EO_PG                             0x800c34000000003f, 48, 16 // register -- description
 #define OPT_TX_TDR_DAC_CNTL                                0x800ccc000000003f, 48,  8 // controls variable threshold receiver for tdr function
 #define OPT_TX_TDR_PHASE_SEL                               0x800ccc000000003f, 57,  1 // controls phase select for tdr function, 0 is for _n leg, 1 is for _p leg.
@@ -159,7 +303,7 @@
 #define OPT_TX_PG_CTL_SM_SPARE_MODE_7                      0x800d24000000003f, 55,  1 // per-group spare mode latch.
 #define OPT_TX_CTLSM_SPARE_MODE_PG                         0x800d24000000003f, 48, 16 // register -- description
 #define OPT_TX_SEG_TEST_MODE                               0x800d2c000000003f, 50,  8 // driver segment test mode: all 0 means normal function mode, when this is not 0, segment test begins
-#define OPT_TX_FFE_BOOST_EN                                0x800d2c000000003f, 59,  1 // driver segment test: to enable boost function of nvlink tx 
+#define OPT_TX_FFE_BOOST_EN                                0x800d2c000000003f, 59,  1 // driver segment test: to enable boost function of nvlink tx
 #define OPT_TX_SEG_TEST_LEAKAGE_CTRL                       0x800d2c000000003f, 61,  1 // control txr_txc_sst_ctl_dc in every tx slice. 1 means run segment test in low leakage mode.
 #define OPT_TX_CTLSM_MODE1_EO_PG                           0x800d2c000000003f, 48, 16 // register -- description
 #define OPT_TX_PSEG_PRE_EN                                 0x800d34000000003f, 51,  5 // pre bank pseg enable
@@ -259,12 +403,12 @@
 #define OPT_RX_A_OFFSET_O0                                 0x800020000000003f, 48,  7 // this is the vertical offset of the odd low threshold sampling latch.
 #define OPT_RX_A_OFFSET_O1                                 0x800020000000003f, 56,  7 // this is the vertical offset of the odd high threshold sampling latch.
 #define OPT_RX_DAC_CNTL4_EO_PL                             0x800020000000003f, 48, 16 // register -- description
-#define OPT_RX_A_INTEG_COARSE_GAIN                         0x800028000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments. 
+#define OPT_RX_A_INTEG_COARSE_GAIN                         0x800028000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments.
 #define OPT_RX_A_EVEN_INTEG_FINE_GAIN                      0x800028000000003f, 52,  5 // this is integrator gain control used in making common mode adjustments.
-#define OPT_RX_A_ODD_INTEG_FINE_GAIN                       0x800028000000003f, 57,  5 // this is integrator gain control used in making common mode adjustments. 
+#define OPT_RX_A_ODD_INTEG_FINE_GAIN                       0x800028000000003f, 57,  5 // this is integrator gain control used in making common mode adjustments.
 #define OPT_RX_DAC_CNTL5_EO_PL                             0x800028000000003f, 48, 16 // register -- description
-#define OPT_RX_A_CTLE_COARSE                               0x800030000000003f, 48,  5 // this is the ctle coarse peak value, only 4 bits currently used thinking future  
-#define OPT_RX_A_CTLE_GAIN                                 0x800030000000003f, 53,  4 // this is the ctle gain setting           
+#define OPT_RX_A_CTLE_COARSE                               0x800030000000003f, 48,  5 // this is the ctle coarse peak value, only 4 bits currently used thinking future
+#define OPT_RX_A_CTLE_GAIN                                 0x800030000000003f, 53,  4 // this is the ctle gain setting
 #define OPT_RX_DAC_CNTL6_EO_PL                             0x800030000000003f, 48, 16 // register -- description
 #define OPT_RX_A_H1E_VAL                                   0x800038000000003f, 48,  7 // dfe h1 value for even samplers
 #define OPT_RX_A_H1O_VAL                                   0x800038000000003f, 56,  7 // dfe h1 value for odd samplers
@@ -279,12 +423,12 @@
 #define OPT_RX_B_OFFSET_O0                                 0x800090000000003f, 48,  7 // this is the vertical offset of the odd low threshold sampling latch. the step size is vio/256.
 #define OPT_RX_B_OFFSET_O1                                 0x800090000000003f, 56,  7 // this is the vertical offset of the odd high threshold sampling latch. the step size is vio/256.
 #define OPT_RX_DAC_CNTL3_O_PL                              0x800090000000003f, 48, 16 // register -- description
-#define OPT_RX_B_INTEG_COARSE_GAIN                         0x800098000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments. 
-#define OPT_RX_B_EVEN_INTEG_FINE_GAIN                      0x800098000000003f, 52,  5 // this is integrator gain control used in making common mode adjustments        
-#define OPT_RX_B_ODD_INTEG_FINE_GAIN                       0x800098000000003f, 57,  5 // this is integrator gain control used in making common mode adjustments. 
+#define OPT_RX_B_INTEG_COARSE_GAIN                         0x800098000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments.
+#define OPT_RX_B_EVEN_INTEG_FINE_GAIN                      0x800098000000003f, 52,  5 // this is integrator gain control used in making common mode adjustments
+#define OPT_RX_B_ODD_INTEG_FINE_GAIN                       0x800098000000003f, 57,  5 // this is integrator gain control used in making common mode adjustments.
 #define OPT_RX_DAC_CNTL4_O_PL                              0x800098000000003f, 48, 16 // register -- description
-#define OPT_RX_B_CTLE_COARSE                               0x8000a0000000003f, 48,  5 // this is the ctle coarse peak value                      
-#define OPT_RX_B_CTLE_GAIN                                 0x8000a0000000003f, 53,  4 // this is the ctle gain setting           
+#define OPT_RX_B_CTLE_COARSE                               0x8000a0000000003f, 48,  5 // this is the ctle coarse peak value
+#define OPT_RX_B_CTLE_GAIN                                 0x8000a0000000003f, 53,  4 // this is the ctle gain setting
 #define OPT_RX_DAC_CNTL5_O_PL                              0x8000a0000000003f, 48, 16 // register -- description
 #define OPT_RX_B_H1E_VAL                                   0x8000a8000000003f, 48,  7 // dfe h1 value for even samplers
 #define OPT_RX_B_H1O_VAL                                   0x8000a8000000003f, 56,  7 // dfe h1 value for odd samplers
@@ -294,12 +438,12 @@
 #define OPT_RX_E_OFFSET_E                                  0x8000b8000000003f, 48,  7 // this is the vertical offset of the even low threshold sampling latch. the step size is vio/256.
 #define OPT_RX_E_OFFSET_O                                  0x8000b8000000003f, 56,  7 // this is the vertical offset of the odd low threshold sampling latch. the step size is vio/256.
 #define OPT_RX_DAC_CNTL8_O_PL                              0x8000b8000000003f, 48, 16 // register -- description
-#define OPT_RX_E_INTEG_COARSE_GAIN                         0x8000c0000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments. 
-#define OPT_RX_E_EVEN_INTEG_FINE_GAIN                      0x8000c0000000003f, 52,  5 // this is integrator gain control used in making common mode adjustments        
-#define OPT_RX_E_ODD_INTEG_FINE_GAIN                       0x8000c0000000003f, 57,  5 // this is integrator gain control used in making common mode adjustments. 
+#define OPT_RX_E_INTEG_COARSE_GAIN                         0x8000c0000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments.
+#define OPT_RX_E_EVEN_INTEG_FINE_GAIN                      0x8000c0000000003f, 52,  5 // this is integrator gain control used in making common mode adjustments
+#define OPT_RX_E_ODD_INTEG_FINE_GAIN                       0x8000c0000000003f, 57,  5 // this is integrator gain control used in making common mode adjustments.
 #define OPT_RX_DAC_CNTL9_O_PL                              0x8000c0000000003f, 48, 16 // register -- description
-#define OPT_RX_E_CTLE_COARSE                               0x8000c8000000003f, 48,  5 // this is the ctle coarse peak value                      
-#define OPT_RX_E_CTLE_GAIN                                 0x8000c8000000003f, 53,  4 // this is the ctle gain setting           
+#define OPT_RX_E_CTLE_COARSE                               0x8000c8000000003f, 48,  5 // this is the ctle coarse peak value
+#define OPT_RX_E_CTLE_GAIN                                 0x8000c8000000003f, 53,  4 // this is the ctle gain setting
 #define OPT_RX_DAC_CNTL10_O_PL                             0x8000c8000000003f, 48, 16 // register -- description
 #define OPT_RX_PL_SPARE_MODE_0                             0x800200000000003f, 48,  1 // per-lane spare mode latch.
 #define OPT_RX_PL_SPARE_MODE_1                             0x800200000000003f, 49,  1 // per-lane spare mode latch.
@@ -329,7 +473,7 @@
 #define OPT_RX_PL_FIR_ERR_INJ_DAC_REGS                     0x800218000000003f, 50,  1 // iotk alias: while a 1, invert the parity check bit to force an error on the per-lane rx data dac regs.
 #define OPT_RX_FIR_ERROR_INJECT_PL                         0x800218000000003f, 48, 16 // register -- description
 #define OPT_RX_MODE_PL_FULL_REG                            0x800220000000003f, 48, 16 // alias for entire rx_mode_pl register
-#define OPT_RX_LANE_DIG_PDWN                               0x800220000000003f, 48,  1 // used to power down digital logic for a lane. 
+#define OPT_RX_LANE_DIG_PDWN                               0x800220000000003f, 48,  1 // used to power down digital logic for a lane.
 #define OPT_RX_BER_DPIPE_MUX_SEL                           0x800220000000003f, 49,  1 // diag ber data pipe mux select. when set to a 1 the xor of the main and alt data is muxed onto the main data path feeding the data pipe.
 #define OPT_RX_DECOUPLE_EDGE_A                             0x800220000000003f, 50,  1 // this bit enables a mode where phase rotator a is decoupled from edge. its position is directly equal to the rx_pr_data_a_offset value.
 #define OPT_RX_DECOUPLE_EDGE_B                             0x800220000000003f, 51,  1 // this bit enables a mode where phase rotator b is decoupled from edge. its position is directly equal to the rx_pr_data_b_offset value.
@@ -340,8 +484,8 @@
 #define OPT_RX_PR_FW_INERTIA_AMT                           0x800228000000003f, 57,  3 // amount to be added or subtracted from flywheel intertia.  note, setting this to zero may not turn off the flywheel if the flywheel accumulator already has a value (as if it were turned off after having run for some time).
 #define OPT_RX_PR_PHASE_STEP                               0x800228000000003f, 60,  4 // amount to be added or subtracted from to phase rotator accumulator on each shift left or right.  0000: decoded as b10000 in logic, so pr will update every 4 shifts; other values will update with every 4*(16/phase_step) shifts.
 #define OPT_RX_BIT_MODE2_EO_PL                             0x800228000000003f, 48, 16 // register -- description
-#define OPT_RX_BER_CFG                                     0x800230000000003f, 48,  3 // this register controls the bit error rate threshold used for ddc. 
-#define OPT_RX_FIFO_DLY_CFG                                0x800230000000003f, 51,  2 // this register controls how many parallel clock cycles we wait after every change to the phase rotator before we begin using the data again. 
+#define OPT_RX_BER_CFG                                     0x800230000000003f, 48,  3 // this register controls the bit error rate threshold used for ddc.
+#define OPT_RX_FIFO_DLY_CFG                                0x800230000000003f, 51,  2 // this register controls how many parallel clock cycles we wait after every change to the phase rotator before we begin using the data again.
 #define OPT_RX_DDC_CFG                                     0x800230000000003f, 53,  2 // this register controls how many parallel clock cycles we wait looking for errors as we march further into the edge.
 #define OPT_RX_BIT_MODE3_EO_PL                             0x800230000000003f, 48, 16 // register -- description
 #define OPT_RX_PR_COARSE_MODE_EN                           0x800238000000003f, 48,  1 // allow the cdr to switch into coarse mode as needed - on a cdr stop/start or invalid lock (if enabled)
@@ -351,8 +495,8 @@
 #define OPT_RX_PR_COARSE_MODE_TIMER_SEL                    0x800238000000003f, 57,  2 // selects how long to remain in coarse mode; the timer is always reset on an invalid lock.  00: ~1.3us, 01: ~2.6us, 10: ~5.2us, 11: ~10.5us
 #define OPT_RX_BIT_MODE4_EO_PL                             0x800238000000003f, 48, 16 // register -- description
 #define OPT_RX_CAL_LANE_SEL                                0x800240000000003f, 48,  1 // selects which lane to recalibrate.
-#define OPT_RX_PIPE_SEL                                    0x800240000000003f, 49,  2 // selects what to mux onto the data pipe bus going to the calibration logic. \r\n\t00: first half main data, second half alt data \r\n\t01: first half main data, second half edge data \r\n\t10: double width deserialized main data \r\n\t11: reserved 
-#define OPT_RX_BANK_SEL_A                                  0x800240000000003f, 51,  1 // selects which data bank to select for main data samples and alt data samples. \r\n\t0:(datab) data bank b is selected for main data, and data bank a is selected for alt data \r\n\t1:(dataa) data bank a is selected for main data, and data bank b is selected for alt data. 
+#define OPT_RX_PIPE_SEL                                    0x800240000000003f, 49,  2 // selects what to mux onto the data pipe bus going to the calibration logic. \r\n\t00: first half main data, second half alt data \r\n\t01: first half main data, second half edge data \r\n\t10: double width deserialized main data \r\n\t11: reserved
+#define OPT_RX_BANK_SEL_A                                  0x800240000000003f, 51,  1 // selects which data bank to select for main data samples and alt data samples. \r\n\t0:(datab) data bank b is selected for main data, and data bank a is selected for alt data \r\n\t1:(dataa) data bank a is selected for main data, and data bank b is selected for alt data.
 #define OPT_RX_PIPE_MARGIN                                 0x800240000000003f, 52,  1 // adds extra cycles of padding on the async data pipe handshake
 #define OPT_RX_SCOPE_MODE                                  0x800240000000003f, 53,  2 // adds extra cycles in the asyc crossing for scope mode
 #define OPT_RX_BIST_PIPE_DATA_SHIFT                        0x800240000000003f, 57,  1 // selects what to mux onto the data pipe bus going to the rx_bist engine to get upper order lanes on edge and alt only \r\n\t0: no shift \r\n\t1: shift data
@@ -361,8 +505,8 @@
 #define OPT_RX_PR_WOBBLE_A                                 0x800248000000003f, 50,  1 // wobbles the pr position for pr a for offset function.  done by first shifting 1 ui away in one direction, and then back and forth 2 ui to cover the entire range of pr values.  when de-asserted, the pr will then return to the original value.
 #define OPT_RX_PR_WOBBLE_B                                 0x800248000000003f, 51,  1 // wobbles the pr position for pr b for offset function.  done by first shifting 1 ui away in one direction, and then back and forth 2 ui to cover the entire range of pr values.  when de-asserted, the pr will then return to the original value.
 #define OPT_RX_PR_WOBBLE_EDGE                              0x800248000000003f, 52,  1 // wobbles the pr position for pr edge for offset function.  done by first shifting 1 ui away in one direction, and then back and forth 2 ui to cover the entire range of pr values.  when de-asserted, the pr will then return to the original value.
-#define OPT_RX_PR_DDC_A                                    0x800248000000003f, 53,  1 // enables ddc state machine to go through its ddc routine on pr a.  works by shifting to the left and right looking for errors to find the edges, then adds an offset that centers the data between the 2 edges. 
-#define OPT_RX_PR_DDC_B                                    0x800248000000003f, 54,  1 // enables ddc state machine to go through its ddc routine on pr b.  works by shifting to the left and right looking for errors to find the edges, then adds an offset that centers the data between the 2 edges. 
+#define OPT_RX_PR_DDC_A                                    0x800248000000003f, 53,  1 // enables ddc state machine to go through its ddc routine on pr a.  works by shifting to the left and right looking for errors to find the edges, then adds an offset that centers the data between the 2 edges.
+#define OPT_RX_PR_DDC_B                                    0x800248000000003f, 54,  1 // enables ddc state machine to go through its ddc routine on pr b.  works by shifting to the left and right looking for errors to find the edges, then adds an offset that centers the data between the 2 edges.
 #define OPT_RX_PR_BUMP_TO_EDGE_A                           0x800248000000003f, 55,  1 // bumps pr a position to the edge => +(16 - clkadj).
 #define OPT_RX_PR_BUMP_TO_EDGE_B                           0x800248000000003f, 56,  1 // bumps pr b position to the edge. (not supported)
 #define OPT_RX_PR_BUMP_SL_1UI                              0x800248000000003f, 57,  1 // bumps the pr position of all prs to the next eye by shifting 32-steps. (not supported)
@@ -397,7 +541,7 @@
 #define OPT_RX_PR_DDC_DONE                                 0x800270000000003f, 53,  1 // dynamic data centering in done on pr a or b.
 #define OPT_RX_PR_DDC_FAILED                               0x800270000000003f, 54,  1 // dynamic data centering in failed on pr a or b.
 #define OPT_RX_PR_BUMP_SL_1UI_DONE                         0x800270000000003f, 56,  1 // bump forward 1-ui into the next eye done.  becomes active when the bump_ui op is set, turns off when the pr has been moved 32 steps away.
-#define OPT_RX_PR_BUMP_SR_1UI_DONE                         0x800270000000003f, 57,  1 // bump minus 1-ui into the next eye done   becomes active when the bump_ui op is set, turns off when the pr has been moved 32 steps away. 
+#define OPT_RX_PR_BUMP_SR_1UI_DONE                         0x800270000000003f, 57,  1 // bump minus 1-ui into the next eye done   becomes active when the bump_ui op is set, turns off when the pr has been moved 32 steps away.
 #define OPT_RX_PR_TRACE_STOPPED                            0x800270000000003f, 58,  1 // indicates that the trace bus stop command has asserted.
 #define OPT_RX_BIT_STAT2_EO_PL                             0x800270000000003f, 48, 16 // register -- description
 #define OPT_RX_PR_L_R_EDGE_A_ALIAS                         0x800278000000003f, 48, 12 // rx phase rotator a bank leftand right edge alias
@@ -513,7 +657,7 @@
 #define OPT_RX_AMIN_CFG                                    0x800860000000003f, 57,  3 // rx_amin_cfg        this register controls the servo filtering used for amin measuremnts. see workbook table 4.4 for settings
 #define OPT_RX_USERDEF_CFG                                 0x800860000000003f, 60,  4 // rx_user_cfg      this register controls the servo filtering when running the user defined servo ops table 4.4 for settings
 #define OPT_RX_CTL_MODE11_EO_PG                            0x800860000000003f, 48, 16 // register -- description
-#define OPT_RX_SERVO_CHG_CFG                               0x800868000000003f, 48,  4 // this register controls the minimum acceptable changes of the accum for a valid servo op. assures we have reached a stable point. 
+#define OPT_RX_SERVO_CHG_CFG                               0x800868000000003f, 48,  4 // this register controls the minimum acceptable changes of the accum for a valid servo op. assures we have reached a stable point.
 #define OPT_RX_DAC_BO_CFG                                  0x800868000000003f, 52,  3 // this register controls the time of the dac black out time.  see workbook dfe section
 #define OPT_RX_FILTER_MODE                                 0x800868000000003f, 55,  2 // servo filter mode. 00 means normal filter duirng entire op. 01 means use the 1/4-1/2 mode, 10 means 1/8-1/4 mode and 11 means the automatic convergence detect mode
 #define OPT_RX_MISC_CFG                                    0x800868000000003f, 57,  2 // per group rx misc configureation bits, bit 0 is chicken bit to re-enable the progressive filter mode for peaking, bit 1 when a 1 will enable the clearing of h1 during the amp0, amp1, and usrdef servo ops
@@ -742,14 +886,14 @@
 #define OPT_RX_CLR_PAR_ERRS                                0x800ab0000000003f, 62,  1 // clear all rx parity error latches\r\n\ttoggle this field 0->1->0 to clear all rx parity error latches.
 #define OPT_RX_FIR_RESET                                   0x800ab0000000003f, 63,  1 // fir reset\r\n\ttoggle this field 0->1->0 to reset all rx fir related latches including the isolation and parity error latches.
 #define OPT_RX_GLBSM_CNTLX1_EO_PG                          0x800ab0000000003f, 48, 16 // register -- description
-#define OPT_RX_EYE_OPT_STATE                               0x800ab8000000003f, 48, 12 // eye optimizaton state machine current state 
+#define OPT_RX_EYE_OPT_STATE                               0x800ab8000000003f, 48, 12 // eye optimizaton state machine current state
 #define OPT_RX_GLBSM_STAT1_EO_PG                           0x800ab8000000003f, 48, 16 // register -- description
 #define OPT_RX_RECAL_CNT                                   0x800ac0000000003f, 48, 16 // number of times bus has been recalibrated since initialization
 #define OPT_RX_GLBSM_STAT2_EO_PG                           0x800ac0000000003f, 48, 16 // register -- description
 #define OPT_RX_DACTEST_ISGT                                0x800ac8000000003f, 48,  1 // rx dactest control register : is greater than
 #define OPT_RX_DACTEST_ISLT                                0x800ac8000000003f, 49,  1 // rx dactest control register : is lesser than
 #define OPT_RX_DACTEST_ISEQ                                0x800ac8000000003f, 50,  1 // rx dactest control register : is equal to
-#define OPT_RX_DACTEST_DIFF                                0x800ac8000000003f, 51,  9 // rx dactest control register : difference 
+#define OPT_RX_DACTEST_DIFF                                0x800ac8000000003f, 51,  9 // rx dactest control register : difference
 #define OPT_RX_GLBSM_STAT3_EO_PG                           0x800ac8000000003f, 48, 16 // register -- description
 #define OPT_RX_INT_REQ                                     0x800ad0000000003f, 48, 16 // rx interrupt request isolation latch
 #define OPT_RX_GLBSM_STAT4_EO_PG                           0x800ad0000000003f, 48, 16 // register -- description
@@ -919,6 +1063,9 @@
 #define OPT_SCOM_PPE_FLAGS_SET_REG                         0x0000000000000024,  0, 64 // normal scom mode reg in ppe macro -- description
 #define OPT_SCOM_PPE_FLAGS_CLR                             0x0000000000000025,  0, 16 // ppe register
 #define OPT_SCOM_PPE_FLAGS_CLR_REG                         0x0000000000000025,  0, 64 // normal scom mode reg in ppe macro -- description
+*/
+
+
 #define EDI_TX_MODE_PL_FULL_REG                            0x800404000000003f, 48, 16 // iotk alias: for entire tx_mode_pl register
 #define EDI_TX_LANE_PDWN                                   0x800404000000003f, 48,  1 // used to drive inhibit (tristate) and fully power down a lane independent of the logical lane disable. this control is independent from the per-group logical lane disable settings (tx_lane_disable_vec*) in order to allow for flexibility. note that this control routes through the boundary scan logic, which has dominance.  also note that per-group registers tx_lane_disabled_vec_0_15 and tx_lane_disabled_vec_16_31 are used to logically disable a lane with respect to the training, recalibration, and repair machines so both this per-lane and the per-group registers need to be set in order to logically disable and powerdown a lane. note that this per-lane register is adjusted for lane swizzling automatically in hw but it is not adjusted automatically in hw when in the msb-lsb swap mode so the erepair procedure needs to take care to power down the correct lane when in this mode. \r\n\t0:(enabled) lane powered up (default)\r\n\t1:(disabled) lane drive inhibited (tristated) and powered down. the lane_disable_vec_* per-group registers configure the state machine but do not automatically power down or tristate the lanes. debug note: you have to account for swizzle when correlating the per-pack latch to the per-group latch setting.\r\n\tmbs
 #define EDI_TX_LANE_INVERT                                 0x800404000000003f, 49,  1 // used to invert the polarity of a lane.\r\n\t0:(normal) normal lane polarity (default)\r\n\t1:(inverted) lane inverted.\r\n\tmbs
@@ -1893,8 +2040,12 @@
 #define EDI_SCOM_FIR_ACTION0_PB                            0x0000000000000006,  0, 64 // fir scom action0 reg -- description
 #define EDI_SCOM_FIR_ACTION1_PB                            0x0000000000000007,  0, 64 // fir scom action1 reg -- description
 #define EDI_SCOM_FIR_WOF_PB                                0x0000000000000008,  0, 64 // fir scom wof reg -- description
+
+/*
+ * Leaving these as comments until we close out EDI+ RAS discussions
+ *
 #define EDIP_TX_MODE1_PL_FULL_REG                          0x800404000000003f, 48, 16 // iotk alias: for entire tx_mode1_pl register
-#define EDIP_TX_LANE_PDWN                                  0x800404000000003f, 48,  1 // used to drive inhibit (tristate) and fully power down a lane independent of the logical lane disable.  \r\n\t0:(enabled) lane powered up \r\n\t1:(disabled) lane drive inhibited (tristated) and powered down (default). 
+#define EDIP_TX_LANE_PDWN                                  0x800404000000003f, 48,  1 // used to drive inhibit (tristate) and fully power down a lane independent of the logical lane disable.  \r\n\t0:(enabled) lane powered up \r\n\t1:(disabled) lane drive inhibited (tristated) and powered down (default).
 #define EDIP_TX_LANE_INVERT                                0x800404000000003f, 49,  1 // used to invert the polarity of a lane.\r\n\t0:(normal) normal lane polarity (default)\r\n\t1:(inverted) lane inverted.
 #define EDIP_TX_LANE_QUIESCE                               0x800404000000003f, 50,  2 // used to force the output of a lane to a particular logical value.\r\n\t00:(functional) functional data (default)\r\n\t01:(quiesce_to_0) quiesce lane to a static 0 value\r\n\t10:(quiesce_to_1) quiesce lane to a static 1 value\r\n\t11:(quiesce_to_z) tri-state lane output.
 #define EDIP_TX_LANE_SCRAMBLE_DISABLE                      0x800404000000003f, 54,  1 // used to disable the tx scrambler on a specific lane or all lanes by using a per-lane/per-group global write.
@@ -1983,13 +2134,13 @@
 #define EDIP_TX_CTL_CNTLG1_EO_PG                           0x800c24000000003f, 48, 16 // register -- description
 #define EDIP_TX_ERR_INJ_A_FINE_SEL                         0x800c2c000000003f, 48,  3 // random lsb/fine-grained cycle offset variation control for pattern a, where cycles are deserialized domain cycles. \r\n\t000:(1_33) random offset in range of 1-32 cycles(default)\r\n\t001:(1_16) random offset in range of 1-16 cycles\r\n\t010:(1_8) random offset in range of 1-8 cycles\r\n\t011:(1_4) random offset in range of 1-4 cycles\r\n\t100:(1_2) random offset in range of 1-2 cycles\r\n\t101:(fixed1) fixed offset of 1 cycle\r\n\t110:(fixed3) fixed offset of 3 cycles \r\n\t111:(fixed7) fixed offset of 7 cycles.
 #define EDIP_TX_ERR_INJ_A_COARSE_SEL                       0x800c2c000000003f, 51,  4 // random msb/coarse-grained multiplier for the base error rate counter, which controls bit error rate variation for pattern a.  there are also a number of nonrandom settings which are specifically chosen to avoid powers of two.  \r\n\t0000:(1_32) range of 1-32, mean of 16.5 (default)\r\n\t0001:(9_24) range of 9-24, mean of 16.5\r\n\t0010:(13_20) range of 13-20, mean of 16.5\r\n\t0011:(16_19) range of 16-19, mean of 16.5\r\n\t100:(17_18) range of 16-17, mean of 16.5\r\n\t0101:(1_8) range of 1-8, mean of 4.5\r\n\t0110:(3_6)  range of 3-6, mean of 4.5\r\n\t0111:(4_5)  range of 4-5, mean of 4.5\r\n\t1000:(fixed1) fixed 1\r\n\t1001:(fixed3) fixed 3\r\n\t1010:(fixed5) fixed 5\r\n\t1011:(fixed6) fixed 6\r\n\t1100:(fixed7) fixed 7\r\n\t1101:(fixed17) fixed 17\r\n\t1110:(fixed21) fixed 21\r\n\t1111:(fixed25) fixed 25
-#define EDIP_TX_ERR_INJ_A_BER_SEL                          0x800c2c000000003f, 55,  6 // used to set the random bit error injection rate for pattern a.  when set to a binary value of n, the average bit error rate is 1/(2^n*beats*mean(msb)). 
+#define EDIP_TX_ERR_INJ_A_BER_SEL                          0x800c2c000000003f, 55,  6 // used to set the random bit error injection rate for pattern a.  when set to a binary value of n, the average bit error rate is 1/(2^n*beats*mean(msb)).
 #define EDIP_TX_ERR_INJ_ENABLE                             0x800c2c000000003f, 61,  1 // overall error injection enable.  when set to 0, all other injection is gated.
 #define EDIP_TX_ERR_INJ_CLOCK_ENABLE                       0x800c2c000000003f, 62,  1 // enable clocks to larger counter and prbs logic.  use this to stagger start times and effectively seed the injection mechanism randomly.
 #define EDIP_TX_CTL_CNTL2_EO_PG                            0x800c2c000000003f, 48, 16 // register -- description
 #define EDIP_TX_ERR_INJ_B_FINE_SEL                         0x800c34000000003f, 48,  3 // random lsb/fine-grained cycle offset variation control for pattern b, where cycles are deserialized domain cycles. \r\n\t000:(1_33) random offset in range of 1-32 cycles(default)\r\n\t001:(1_16) random offset in range of 1-16 cycles\r\n\t010:(1_8) random offset in range of 1-8 cycles\r\n\t011:(1_4) random offset in range of 1-4 cycles\r\n\t100:(1_2) random offset in range of 1-2 cycles\r\n\t101:(fixed1) fixed offset of 1 cycle\r\n\t110:(fixed3) fixed offset of 3 cycles \r\n\t111:(fixed7) fixed offset of 7 cycles.
 #define EDIP_TX_ERR_INJ_B_COARSE_SEL                       0x800c34000000003f, 51,  4 // random msb/coarse-grained multiplier for the base error rate counter, which controls bit error rate variation for pattern b.  there are also a number of nonrandom settings which are specifically chosen to avoid powers of two.  \r\n\t0000:(1_32) range of 1-32, mean of 16.5 (default)\r\n\t0001:(9_24) range of 9-24, mean of 16.5\r\n\t0010:(13_20) range of 13-20, mean of 16.5\r\n\t0011:(16_19) range of 16-19, mean of 16.5\r\n\t100:(17_18) range of 16-17, mean of 16.5\r\n\t0101:(1_8) range of 1-8, mean of 4.5\r\n\t0110:(3_6)  range of 3-6, mean of 4.5\r\n\t0111:(4_5)  range of 4-5, mean of 4.5\r\n\t1000:(fixed1) fixed 1\r\n\t1001:(fixed3) fixed 3\r\n\t1010:(fixed5) fixed 5\r\n\t1011:(fixed6) fixed 6\r\n\t1100:(fixed7) fixed 7\r\n\t1101:(fixed17) fixed 17\r\n\t1110:(fixed21) fixed 21\r\n\t1111:(fixed25) fixed 25
-#define EDIP_TX_ERR_INJ_B_BER_SEL                          0x800c34000000003f, 55,  6 // used to set the random bit error injection rate for pattern b.  when set to a binary value of n, the average bit error rate is 1/(2^n*beats*mean(msb)). 
+#define EDIP_TX_ERR_INJ_B_BER_SEL                          0x800c34000000003f, 55,  6 // used to set the random bit error injection rate for pattern b.  when set to a binary value of n, the average bit error rate is 1/(2^n*beats*mean(msb)).
 #define EDIP_TX_CTL_CNTL3_EO_PG                            0x800c34000000003f, 48, 16 // register -- description
 #define EDIP_TX_START_LANE_ID                              0x800c84000000003f, 49,  7 // this field is used to programmably set the first lane position in the group but relative to the bus.
 #define EDIP_TX_END_LANE_ID                                0x800c84000000003f, 57,  7 // this field is used to programmably set the last lane position in the group but relative to the bus.
@@ -2001,8 +2152,8 @@
 #define EDIP_TX_DYN_RECAL_STATUS_RPT_TIMEOUT_SEL           0x800c8c000000003f, 58,  2 // tx dynamic recalibration status reporting timeout selects \r\n\t  this timeout determines the time that a status reporting timeout lasts.  the first 1/4 is a blank period, the middle 1/2 is the command message, and the last 1/4 is another blank period. \r\n\t the time between messages is selected with rx_dyn_recal_interval_timeout_sel. \r\n\t00:(tap0) 512ui or 53.2ns\r\n\t01:(tap1) 1024ui or 106.5ns\r\n\t10:(tap2) 2048ui or 212.9ns\r\n\t11:(tap3) 4096ui or 426.0ns\r\n\t(note that the first 1/4 and last 1/4 of this time are actually sending the prbs pattern, so the actual time the sls command is on the lane is 1/2 of this value.  for more info see figure 2.4 eye-opening initialization step/recalibration timing description in the workbook.)
 #define EDIP_TX_CTL_MODE1_E_PG                             0x800c8c000000003f, 48, 16 // register -- description
 #define EDIP_TX_IORESET                                    0x800c9c000000003f, 48,  1 // reset the given tx clock group and gcr slave
-#define EDIP_TX_ERR_INJ_SLS_MODE                           0x800c9c000000003f, 51,  1 // used to set the random bit error injection for pattern a to work during sls transmission only. 
-#define EDIP_TX_ERR_INJ_SLS_ALL_CMD                        0x800c9c000000003f, 52,  1 // used to qualify the sls mode error injection for pattern a, to inject on all sls command transmissions. 
+#define EDIP_TX_ERR_INJ_SLS_MODE                           0x800c9c000000003f, 51,  1 // used to set the random bit error injection for pattern a to work during sls transmission only.
+#define EDIP_TX_ERR_INJ_SLS_ALL_CMD                        0x800c9c000000003f, 52,  1 // used to qualify the sls mode error injection for pattern a, to inject on all sls command transmissions.
 #define EDIP_TX_ERR_INJ_SLS_RECAL                          0x800c9c000000003f, 53,  1 // used to qualify the sls mode error injection for pattern a, to inject on the calibration lane only when not sending an sls command. see workbook for details.
 #define EDIP_TX_ERR_INJ_SLS_CMD                            0x800c9c000000003f, 54,  6 // used to qualify the sls mode error injection for pattern a, to inject on only this sls command transmission. see workbook for sls command codes.
 #define EDIP_TX_CTL_CNTL2_E_PG                             0x800c9c000000003f, 48, 16 // register -- description
@@ -2093,7 +2244,7 @@
 #define EDIP_TX_PSAVE_WAKEUP_LANE0_ENABLE                  0x800d2c000000003f, 48,  1 // enable lane 0 at all times as the wakeup lane from psave mode
 #define EDIP_TX_PSAVE_FENCE_ENABLE                         0x800d2c000000003f, 49,  1 // enable fencing of transmitter when psave_mode_ip output of rx is high
 #define EDIP_TX_SEG_TEST_MODE                              0x800d2c000000003f, 50,  8 // driver segment test mode: all 0 means normal function mode, when this is not 0, segment test begins
-#define EDIP_TX_FFE_BOOST_EN                               0x800d2c000000003f, 59,  1 // driver segment test: to enable boost function of nvlink tx 
+#define EDIP_TX_FFE_BOOST_EN                               0x800d2c000000003f, 59,  1 // driver segment test: to enable boost function of nvlink tx
 #define EDIP_TX_SEG_TEST_LEAKAGE_CTRL                      0x800d2c000000003f, 61,  1 // control txr_txc_sst_ctl_dc in every tx slice. 1 means run segment test in low leakage mode.
 #define EDIP_TX_HALF_RATE_MODE                             0x800d2c000000003f, 62,  1 // when set to 1, enables timers on the slow clock domain to consistently count ui when in 4-bit legacy mode.  otherwise, slow clock domain counts only half of the ui noted in the timeouts documentation when in 4-bit legacy mode.
 #define EDIP_TX_CTLSM_MODE1_EO_PG                          0x800d2c000000003f, 48, 16 // register -- description
@@ -2193,12 +2344,12 @@
 #define EDIP_RX_A_OFFSET_O0                                0x800020000000003f, 48,  7 // this is the vertical offset of the odd low threshold sampling latch.
 #define EDIP_RX_A_OFFSET_O1                                0x800020000000003f, 56,  7 // this is the vertical offset of the odd high threshold sampling latch.
 #define EDIP_RX_DAC_CNTL4_EO_PL                            0x800020000000003f, 48, 16 // register -- description
-#define EDIP_RX_A_INTEG_COARSE_GAIN                        0x800028000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments. 
+#define EDIP_RX_A_INTEG_COARSE_GAIN                        0x800028000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments.
 #define EDIP_RX_A_EVEN_INTEG_FINE_GAIN                     0x800028000000003f, 52,  5 // this is integrator gain control used in making common mode adjustments.
-#define EDIP_RX_A_ODD_INTEG_FINE_GAIN                      0x800028000000003f, 57,  5 // this is integrator gain control used in making common mode adjustments. 
+#define EDIP_RX_A_ODD_INTEG_FINE_GAIN                      0x800028000000003f, 57,  5 // this is integrator gain control used in making common mode adjustments.
 #define EDIP_RX_DAC_CNTL5_EO_PL                            0x800028000000003f, 48, 16 // register -- description
-#define EDIP_RX_A_CTLE_PEAK                                0x800030000000003f, 48,  5 // this is the ctle coarse peak value, only 4 bits currently used thinking future  
-#define EDIP_RX_A_CTLE_GAIN                                0x800030000000003f, 53,  4 // this is the ctle gain setting           
+#define EDIP_RX_A_CTLE_PEAK                                0x800030000000003f, 48,  5 // this is the ctle coarse peak value, only 4 bits currently used thinking future
+#define EDIP_RX_A_CTLE_GAIN                                0x800030000000003f, 53,  4 // this is the ctle gain setting
 #define EDIP_RX_DAC_CNTL6_EO_PL                            0x800030000000003f, 48, 16 // register -- description
 #define EDIP_RX_A_H1E_VAL                                  0x800038000000003f, 48,  7 // dfe h1 value for even samplers
 #define EDIP_RX_A_H1O_VAL                                  0x800038000000003f, 56,  7 // dfe h1 value for odd samplers
@@ -2260,25 +2411,25 @@
 #define EDIP_RX_PL_FIR_ERR_INJ_DAC_REGS                    0x800218000000003f, 50,  1 // iotk alias: while a 1, invert the parity check bit to force an error on the per-lane rx data dac regs.
 #define EDIP_RX_FIR_ERROR_INJECT_PL                        0x800218000000003f, 48, 16 // register -- description
 #define EDIP_RX_MODE_PL_FULL_REG                           0x800220000000003f, 48, 16 // alias for entire rx_mode_pl register
-#define EDIP_RX_LANE_DIG_PDWN                              0x800220000000003f, 48,  1 // used to power down digital logic for a lane. 
+#define EDIP_RX_LANE_DIG_PDWN                              0x800220000000003f, 48,  1 // used to power down digital logic for a lane.
 #define EDIP_RX_BER_DPIPE_MUX_SEL                          0x800220000000003f, 49,  1 // diag ber data pipe mux select. when set to a 1 the xor of the main and alt data is muxed onto the main data path feeding the data pipe.
 #define EDIP_RX_LANE_SCRAMBLE_DISABLE                      0x800220000000003f, 52,  1 // used to disable the rx descrambler on a specific lane or all lanes by using a per-lane/per-group global write.
-#define EDIP_RX_PRBS_SCRAMBLE_MODE                         0x800220000000003f, 56,  2 // selects prbs scramble sequence length.  \r\n\t00:(prbs23) prbs 23 (default) \r\n\t01:(prbs7) prbs 7 (used by rx bist)\r\n\t10:(prbs11) prbs 11 \r\n\t11:(prbs15) prbs 15 
+#define EDIP_RX_PRBS_SCRAMBLE_MODE                         0x800220000000003f, 56,  2 // selects prbs scramble sequence length.  \r\n\t00:(prbs23) prbs 23 (default) \r\n\t01:(prbs7) prbs 7 (used by rx bist)\r\n\t10:(prbs11) prbs 11 \r\n\t11:(prbs15) prbs 15
 #define EDIP_RX_FIFO_HALF_WIDTH_MODE                       0x800220000000003f, 58,  1 // selects half width mode for rx fifo for slower frequency connections. \r\n\t0: normal width \r\n\t1: half width (bits starting from 0 used, and the second half is unused)
 #define EDIP_RX_PRBS_SYNC_MODE                             0x800220000000003f, 60,  1 // selects prbs sync sequence length.  \r\n\t0: 24-bit ones sequence (default) \r\n\t1: 12-bit ones sequence (legacy)
 #define EDIP_RX_PRBS_RXBIST_MODE                           0x800220000000003f, 61,  1 // force prbs_en on for running edi+ rx_bist.  \r\n\t0: off (default) \r\n\t1: on stay whole time rx_bist is running
 #define EDIP_RX_BIT_MODE1_EO_PL                            0x800220000000003f, 48, 16 // register -- description
 #define EDIP_RX_PR_PHASE_STEP                              0x800228000000003f, 60,  4 // amount to be added or subtracted from to phase rotator accumulator on each shift left or right.  0000: decoded as b10000 in logic, so pr will update every 4 shifts; other values will update with every 4*(16/phase_step) shifts.
 #define EDIP_RX_BIT_MODE2_EO_PL                            0x800228000000003f, 48, 16 // register -- description
-#define EDIP_RX_BER_CFG                                    0x800230000000003f, 48,  3 // this register controls the bit error rate threshold used for ddc. 
-#define EDIP_RX_FIFO_DLY_CFG                               0x800230000000003f, 51,  2 // this register controls how many parallel clock cycles we wait after every change to the phase rotator before we begin using the data again. 
+#define EDIP_RX_BER_CFG                                    0x800230000000003f, 48,  3 // this register controls the bit error rate threshold used for ddc.
+#define EDIP_RX_FIFO_DLY_CFG                               0x800230000000003f, 51,  2 // this register controls how many parallel clock cycles we wait after every change to the phase rotator before we begin using the data again.
 #define EDIP_RX_DDC_CFG                                    0x800230000000003f, 53,  2 // this register controls how many parallel clock cycles we wait looking for errors as we march further into the edge.
 #define EDIP_RX_BIT_MODE3_EO_PL                            0x800230000000003f, 48, 16 // register -- description
 #define EDIP_RX_BIT_MODE4_EO_PL                            0x800238000000003f, 48, 16 // register -- description
 #define EDIP_RX_CAL_LANE_SEL                               0x800240000000003f, 48,  1 // selects which lane to recalibrate.
 #define EDIP_RX_LANE_INVERT                                0x800240000000003f, 49,  1 // invert the rx lane data
 #define EDIP_RX_LANE_INVALID                               0x800240000000003f, 50,  1 // marks this rx slice as invalid and fences other operations.  use this bit, for example, to broadcast a setting to all good lanes but not bad or disabled ones.
-#define EDIP_RX_PIPE_SEL                                   0x800240000000003f, 51,  1 // selects what to mux onto the data pipe bus going to the calibration logic. \r\n\t0:(disabled) data \r\n\t1:(enabled) descrambler output 
+#define EDIP_RX_PIPE_SEL                                   0x800240000000003f, 51,  1 // selects what to mux onto the data pipe bus going to the calibration logic. \r\n\t0:(disabled) data \r\n\t1:(enabled) descrambler output
 #define EDIP_RX_PDWN_LITE                                  0x800240000000003f, 53,  1 // when set, partially powers down unused spare lanes when not being recalibrated
 #define EDIP_RX_PRBS_CHECK_SYNC                            0x800240000000003f, 54,  1 // enables checking for the 12/24 ui scramble sync pulse in the descramble prbs block. \r\n\t0:(disabled) disable checking (forces prbs_sync_done to 0)\r\n\t1:(enabled) enable checking (prbs_sync_done may go to 1 after identifying the sync pulse)
 #define EDIP_RX_PRBS_SEED_DDC                              0x800240000000003f, 55,  1 // set this bit to enable seeding of the ddc prbs block from the data pipe output (either the data stream or the descramble prbs block depending on the value of rx_pipe_sel).
@@ -2292,7 +2443,7 @@
 #define EDIP_RX_BIT_CNTLX1_EO_PL                           0x800240000000003f, 48, 16 // register -- description
 #define EDIP_RX_PR_EDGE_TRACK_CNTL                         0x800248000000003f, 48,  2 // runs edge tracking on the selected bank.  00: no edge tracking, 01: tracks against a data, 10: tracks against b data, 11: unused.
 #define EDIP_RX_PR_WOBBLE_A                                0x800248000000003f, 50,  1 // wobbles the pr position for pr a for offset function.  done by first shifting 1 ui away in one direction, and then back and forth 2 ui to cover the entire range of pr values.  when de-asserted, the pr will then return to the original value.
-#define EDIP_RX_PR_DDC_A                                   0x800248000000003f, 53,  1 // enables ddc state machine to go through its ddc routine on pr a.  works by shifting to the left and right looking for errors to find the edges, then adds an offset that centers the data between the 2 edges. 
+#define EDIP_RX_PR_DDC_A                                   0x800248000000003f, 53,  1 // enables ddc state machine to go through its ddc routine on pr a.  works by shifting to the left and right looking for errors to find the edges, then adds an offset that centers the data between the 2 edges.
 #define EDIP_RX_PR_BUMP_TO_EDGE_A                          0x800248000000003f, 55,  1 // bumps pr a position to the edge => +(16 - clkadj).
 #define EDIP_RX_PR_BUMP_TO_CENTER                          0x800248000000003f, 56,  1 // bumps pr a position to the center => -(16-clkadj).
 #define EDIP_RX_PR_BUMP_SL_1UI                             0x800248000000003f, 57,  1 // bumps the pr position of all prs to the next eye by shifting 32-steps. (not supported)
@@ -2330,7 +2481,7 @@
 #define EDIP_RX_PR_DDC_FAILED                              0x800270000000003f, 54,  1 // dynamic data centering in failed on pr a or b.
 #define EDIP_RX_PR_BUMP_TO_FROM_EDGE_A_DONE                0x800270000000003f, 55,  1 // operation to move data pr a to or from the edge is done. (not supported)
 #define EDIP_RX_PR_BUMP_SL_1UI_DONE                        0x800270000000003f, 56,  1 // bump forward 1-ui into the next eye done.  becomes active when the bump_ui op is set, turns off when the pr has been moved 32 steps away.
-#define EDIP_RX_PR_BUMP_SR_1UI_DONE                        0x800270000000003f, 57,  1 // bump minus 1-ui into the next eye done   becomes active when the bump_ui op is set, turns off when the pr has been moved 32 steps away. 
+#define EDIP_RX_PR_BUMP_SR_1UI_DONE                        0x800270000000003f, 57,  1 // bump minus 1-ui into the next eye done   becomes active when the bump_ui op is set, turns off when the pr has been moved 32 steps away.
 #define EDIP_RX_PR_TRACE_STOPPED                           0x800270000000003f, 58,  1 // indicates that the trace bus stop command has asserted.
 #define EDIP_RX_DDC_DFE_OFFSET_SWITCH_IP                   0x800270000000003f, 59,  1 // ddc to dfe offset switch in progress on pr.
 #define EDIP_RX_BIT_STAT2_EO_PL                            0x800270000000003f, 48, 16 // register -- description
@@ -2423,7 +2574,7 @@
 #define EDIP_RX_CTL_MODE3_EO_PG                            0x800820000000003f, 48, 16 // register -- description
 #define EDIP_RX_DISABLE_2TO12_CLEAR                        0x800828000000003f, 48,  1 // connect a config bit to disable the clear function when running h1a_ratio cal
 #define EDIP_RX_PEAK_ENABLE_DAC_CFG                        0x800828000000003f, 49,  1 // connect to a config bit to allow us to disable the dac disable during peaking
-#define EDIP_RX_AMIN_ENABLE_HDAC                           0x800828000000003f, 50,  1 // to enable hdacs during amin measurements. 
+#define EDIP_RX_AMIN_ENABLE_HDAC                           0x800828000000003f, 50,  1 // to enable hdacs during amin measurements.
 #define EDIP_RX_USE_PREV_COARSE_VAL                        0x800828000000003f, 51,  1 // to cause us to read previous integ coarse value as starting point
 #define EDIP_RX_CTL_MODE4_EO_PG                            0x800828000000003f, 48, 16 // register -- description
 #define EDIP_RX_DYN_RECAL_INTERVAL_TIMEOUT_SEL             0x800830000000003f, 51,  3 // rx dynamic recalibration interval timeout selects \r\n\t this timeout determines the time between status reporting timeouts. \r\n\t the actual time of sending a message is selected with rx_dyn_recal_status_rpt_timeout_sel. \r\n\t000:(tap0) 1024ui or 106.5ns\r\n\t001:(tap1) 16kui or 1.7us\r\n\t010:(tap2) 32kui or 3.4us\r\n\t011:(tap3) 64kui or 6.8us\r\n\t100:(tap4) 128kui or 13.6us\r\n\t101:(tap5) 256kui or 27.3us\r\n\t110:(tap6) 8192kui or 872.4us\r\n\t111:(tap7) infinite
@@ -2458,7 +2609,7 @@
 #define EDIP_RX_AMIN_CFG                                   0x800860000000003f, 57,  3 // rx_amin_cfg        this register controls the servo filtering used for amin measuremnts. see workbook table 4.4 for settings
 #define EDIP_RX_USERDEF_CFG                                0x800860000000003f, 60,  4 // rx_user_cfg      this register controls the servo filtering when running the user defined servo ops table 4.4 for settings
 #define EDIP_RX_CTL_MODE11_EO_PG                           0x800860000000003f, 48, 16 // register -- description
-#define EDIP_RX_SERVO_CHG_CFG                              0x800868000000003f, 48,  4 // this register controls the minimum acceptable changes of the accum for a valid servo op. assures we have reached a stable point. 
+#define EDIP_RX_SERVO_CHG_CFG                              0x800868000000003f, 48,  4 // this register controls the minimum acceptable changes of the accum for a valid servo op. assures we have reached a stable point.
 #define EDIP_RX_DAC_BO_CFG                                 0x800868000000003f, 52,  3 // this register controls the time of the dac black out time.  see workbook dfe section
 #define EDIP_RX_FILTER_MODE                                0x800868000000003f, 55,  2 // servo filter mode. 00 means normal filter duirng entire op. 01 means use the 1/4-1/2 mode, 10 means 1/8-1/4 mode and 11 means the automatic convergence detect mode
 #define EDIP_RX_MISC_CFG                                   0x800868000000003f, 57,  2 // per group rx misc configureation bits, bit 0 is chicken bit to re-enable the progressive filter mode for peaking, bit 1 when a 1 will enable the clearing of h1 during the amp0, amp1, and usrdef servo ops
@@ -2532,11 +2683,11 @@
 #define EDIP_RX_RC_ENABLE_DAC_H1_TO_A_CAL                  0x8008b8000000003f, 61,  1 // rx recalibration    h! dac to amplitude dac cross-calibration
 #define EDIP_RX_CTL_MODE22_EO_PG                           0x8008b8000000003f, 48, 16 // register -- description
 #define EDIP_RX_QUAD_SEL                                   0x8008c0000000003f, 48,  2 // select 1 of 4 possible phases for the deserialized rx io clock to send along with the data for integration flexibility and tuning for slack into the rx digital logic.
-#define EDIP_RX_PEAK_TUNE                                  0x8008c0000000003f, 55,  1 // peak tune bit to analog             
-#define EDIP_RX_LTE_EN                                     0x8008c0000000003f, 56,  1 // lte enable                          
-#define EDIP_RX_IQSPD_CFG                                  0x8008c0000000003f, 57,  2 // when 00 7.8gb/s to < 9.6gb/s, 01 9.6gb/s to 12gb/s, 10 unused, 11 > 12gb/s to 16gb/s 
+#define EDIP_RX_PEAK_TUNE                                  0x8008c0000000003f, 55,  1 // peak tune bit to analog
+#define EDIP_RX_LTE_EN                                     0x8008c0000000003f, 56,  1 // lte enable
+#define EDIP_RX_IQSPD_CFG                                  0x8008c0000000003f, 57,  2 // when 00 7.8gb/s to < 9.6gb/s, 01 9.6gb/s to 12gb/s, 10 unused, 11 > 12gb/s to 16gb/s
 #define EDIP_RX_DFEHISPD_EN                                0x8008c0000000003f, 59,  1 // when 1, put the dfe in high speed mode according to per-system settings in customer_matrix.xls
-#define EDIP_RX_DFE12_EN                                   0x8008c0000000003f, 60,  1 // when 1, we enable logic for dfe h2-h12  
+#define EDIP_RX_DFE12_EN                                   0x8008c0000000003f, 60,  1 // when 1, we enable logic for dfe h2-h12
 #define EDIP_RX_CTL_MODE23_EO_PG                           0x8008c0000000003f, 48, 16 // register -- description
 #define EDIP_RX_H1AP_CFG                                   0x8008c8000000003f, 48,  2 // this register controls the maximum allowed ration of h1 and ap. this is not a servo setting but rather the setting of a ration between h1 and the value of ap. \r\n\t00:.5 \r\n\t01:.625 \r\n\t10:.25 \r\n\t11:.375
 #define EDIP_RX_CTLE_UPDATE_MODE                           0x8008c8000000003f, 50,  1 // controls updating of ctle_coarse (peaking) values: \r\n\t0: update edge and a or b peaking values while servoing \r\n\t1: update a or b peaking values after edge bank servoing complete
@@ -2608,12 +2759,12 @@
 #define EDIP_RX_CTL_STAT1_EO_PG                            0x800950000000003f, 48, 16 // register -- description
 #define EDIP_RX_BIST_INIT_DONE                             0x800958000000003f, 48,  1 // this bit signals completion of the rx bist init state machine.
 #define EDIP_RX_BIST_DONE                                  0x800958000000003f, 49,  1 // this bit signals completion of the entire rx bist procedure.
-#define EDIP_RX_BIST_CU_PLL_ERR                            0x800958000000003f, 50,  1 // this bit indicates an error was detected during rx_cu_pll lock error \r\n\t0 no error \r\n\t1 error 
+#define EDIP_RX_BIST_CU_PLL_ERR                            0x800958000000003f, 50,  1 // this bit indicates an error was detected during rx_cu_pll lock error \r\n\t0 no error \r\n\t1 error
 #define EDIP_RX_BIST_NO_EDGE_DET                           0x800958000000003f, 51,  1 // this bit indicates that one eye was counted to be significantly large (over 60 phase rotator steps).
 #define EDIP_RX_BIST_EYE_A_WIDTH                           0x800958000000003f, 52,  6 // this register holds the counted eye a width of one particular lane.
 #define EDIP_RX_BIST_EYE_B_WIDTH                           0x800958000000003f, 58,  6 // this register holds the counted eye b width of one particular lane.
 #define EDIP_RX_CTL_STAT2_EO_PG                            0x800958000000003f, 48, 16 // register -- description
-#define EDIP_RX_WTL_SM_STATUS                              0x800960000000003f, 48,  5 // wiretest lane machine status    
+#define EDIP_RX_WTL_SM_STATUS                              0x800960000000003f, 48,  5 // wiretest lane machine status
 #define EDIP_RX_CTL_STAT3_EO_PG                            0x800960000000003f, 48, 16 // register -- description
 #define EDIP_RX_EO_STEP_CNTL2_EDI_ALIAS                    0x800968000000003f, 48, 16 // rx eye optimization step control edi alias
 #define EDIP_RX_EO_ENABLE_CTLE_1ST_LATCH_OFFSET_CAL        0x800968000000003f, 48,  1 // rx eye optimization first latch offsett adjustment enable with ctle-based disable
@@ -2644,7 +2795,7 @@
 #define EDIP_RX_END_LANE_ID                                0x800980000000003f, 57,  7 // this field is used to programmably set the last lane position in the group but relative to the bus.
 #define EDIP_RX_ID2_PG                                     0x800980000000003f, 48, 16 // register -- description
 #define EDIP_RX_MASTER_MODE                                0x800990000000003f, 48,  1 // master mode\r\n\tused to set a chip bus as the master side of the interface. the master side of the interface is where training is kicked off and coordinated in the logic.\r\n\t0:(slave) slave\r\n\t1:(master) master
-#define EDIP_RX_DISABLE_FENCE_RESET                        0x800990000000003f, 49,  1 // set to disable clearing of the rx and tx fence controls at the end of training. \r\n\t0:(enable) clear the fence bit (default) \r\n\t1:(disable) leave the fence in its current state 
+#define EDIP_RX_DISABLE_FENCE_RESET                        0x800990000000003f, 49,  1 // set to disable clearing of the rx and tx fence controls at the end of training. \r\n\t0:(enable) clear the fence bit (default) \r\n\t1:(disable) leave the fence in its current state
 #define EDIP_RX_FENCE                                      0x800990000000003f, 57,  1 // rx & tx fence bit\r\n\t0:(unfenced) functional data is being driven to & front nest logic\r\n\t1:(fenced) functional data is gated to zeroes to & from nest logic. also indicates that link training not yet complete.
 #define EDIP_RX_PDWN_LITE_DISABLE                          0x800990000000003f, 58,  1 // disables the power down lite feature of unused spare lanes (generally should match tx_pdwn_lite_disable)
 #define EDIP_RX_USE_SLS_AS_SPR                             0x800990000000003f, 59,  1 // determines whether the rx sls lane can be used as a spare lane on the bus to repair bad lanes (note: if yes, recal is disabled once the sls lane has been used as a spare lane.)\r\n\t(note: applies to tx side as well)
@@ -2660,7 +2811,7 @@
 #define EDIP_RX_DS_SKEW_TIMEOUT_SEL                        0x8009a0000000003f, 56,  4 // selects deskew  timeout value. (see workbook table 4.4 for timer settings)
 #define EDIP_RX_DS_TIMEOUT_SEL                             0x8009a0000000003f, 60,  4 // selects deskew  timeout value. (see workbook table 4.4 for timer settings)
 #define EDIP_RX_CTL_MODE3_E_PG                             0x8009a0000000003f, 48, 16 // register -- description
-#define EDIP_RX_WT_CHECK_COUNT                             0x8009a8000000003f, 48,  5 // selects number of extra times the wiretest pattern is checked for a good lane 
+#define EDIP_RX_WT_CHECK_COUNT                             0x8009a8000000003f, 48,  5 // selects number of extra times the wiretest pattern is checked for a good lane
 #define EDIP_RX_PGOOD_TIMEOUT_SEL                          0x8009a8000000003f, 53,  4 // selects pll pgood reset timeout value. \r\n\t000:(tap0) 64k ui or 6.8us \r\n\t001:(tap1) 128k ui or 13.6us \r\n\t010:(tap2) 256k ui or 27.3us \r\n\t011:(tap3) 1m ui or 109.2us \r\n\t100:(tap4) 2m ui or 218.5us \r\n\t101:(tap5) 4m ui or 436.9us \r\n\t110:(tap6) 8m ui or 873.8us \r\n\t111:(tap7) infinite
 #define EDIP_RX_PLL_LOCK_TIMEOUT_SEL                       0x8009a8000000003f, 57,  4 // selects pll lock timeout value. \r\n\t000:(tap0) 64k ui or 6.8us \r\n\t001:(tap1) 128k ui or 13.6us \r\n\t010:(tap2) 256k ui or 27.3us \r\n\t011:(tap3) 1m ui or 109.2us \r\n\t100:(tap4) 2m ui or 218.5us \r\n\t101:(tap5) 4m ui or 436.9us \r\n\t110:(tap6) 8m ui or 873.8us \r\n\t111:(tap7) infinite
 #define EDIP_RX_PSAVE_TIMER_WAKEUP_MODE                    0x8009a8000000003f, 61,  1 // enable wakeup timer on psave mode wakeup
@@ -2691,7 +2842,7 @@
 #define EDIP_RX_DYN_RPR_CLR_ERR_CNTR2                      0x8009d0000000003f, 59,  1 // crc/ecc dynamic repair: firmware-based clear of bus error counter2 register
 #define EDIP_RX_DYN_RPR_DISABLE2                           0x8009d0000000003f, 60,  1 // crc/ecc dynamic repair: when set, disables the repair from the dynamic repair error tallying (both per lane and per bus error counters...cntr1 & cntr2), however leaves the counters running
 #define EDIP_RX_CTL_MODE9_E_PG                             0x8009d0000000003f, 48, 16 // register -- description
-#define EDIP_RX_DESKEW_MAX_LIMIT                           0x8009d8000000003f, 48,  4 // maximum deskewable skew fail threshold \r\n\t000000:   0 ui \r\n\t000001:   2 ui \r\n\t000010:   4 ui \r\n\t000011:   6 ui \r\n\t000100:   8 ui \r\n\t000101:  10 ui \r\n\t000110:  12 ui \r\n\t000111:  14 ui \r\n\t001000:  16 ui \r\n\t001001:  18 ui \r\n\t001010:  20 ui \r\n\t001011:  22 ui > ei-4 max \r\n\t001100:  24 ui > ei-4 max \r\n\t001101:  26 ui > ei-4 max \r\n\t001110:  28 ui > ei-4 max \r\n\t001111:  30 ui > ei-4 max \r\n\t010000:  32 ui > ei-4 max \r\n\t010001:  34 ui > ei-4 max \r\n\t010010:  36 ui > ei-4 max \r\n\t010011:  38 ui > ei-4 max \r\n\t010100:  40 ui > ei-4 max \r\n\t010101:  42 ui > ei-4 max \r\n\t010110:  44 ui > ei-4 max \r\n\t010111:  46 ui > ei-4 & edi max \r\n\t011000:  48 ui > ei-4 & edi max \r\n\t011001:  50 ui > ei-4 & edi max \r\n\t011010:  52 ui > ei-4 & edi max \r\n\t011011:  54 ui > ei-4 & edi max \r\n\t011100:  56 ui > ei-4 & edi max \r\n\t011101:  58 ui > ei-4 & edi max \r\n\t011110:  60 ui > ei-4 & edi max \r\n\t011111:  62 ui > ei-4 & edi max \r\n\t100000:  64 ui > ei-4 & edi max \r\n\t100001:  66 ui > ei-4 & edi max \r\n\t100010:  68 ui > ei-4 & edi max \r\n\t100011:  70 ui > ei-4 & edi max \r\n\t100100:  72 ui > ei-4 & edi max \r\n\t100101:  74 ui > ei-4 & edi max \r\n\t100110:  76 ui > ei-4 & edi max \r\n\t100111:  78 ui > ei-4 & edi max \r\n\t101000:  80 ui > ei-4 & edi max \r\n\t101001:  82 ui > ei-4 & edi max \r\n\t101010:  84 ui > ei-4 & edi max \r\n\t101011:  86 ui > ei-4 & edi max \r\n\t101100:  88 ui > ei-4 max \r\n\t101101:  90 ui > ei-4 max \r\n\t101110:  92 ui > ei-4 max \r\n\t101111:  94 ui > ei-4 max \r\n\t110000:  96 ui > ei-4 max \r\n\t110001:  98 ui > ei-4 max \r\n\t110010: 100 ui > ei-4 max \r\n\t110011: 102 ui > ei-4 max \r\n\t110100: 104 ui > ei-4 max \r\n\t110101: 106 ui > ei-4 max \r\n\t110110: 108 ui > ei-4 max \r\n\t110111: 110 ui > ei-4 max \r\n\t111000: 112 ui > ei-4 & edi max \r\n\t111001: 114 ui > ei-4 & edi max \r\n\t111010: 116 ui > ei-4 & edi max \r\n\t111011: 118 ui > ei-4 & edi max \r\n\t111100: 120 ui > ei-4 & edi max \r\n\t111101: 122 ui > ei-4 & edi max \r\n\t111110: 124 ui > ei-4 & edi max \r\n\t111111: 126 ui > ei-4 & edi max 
+#define EDIP_RX_DESKEW_MAX_LIMIT                           0x8009d8000000003f, 48,  4 // maximum deskewable skew fail threshold \r\n\t000000:   0 ui \r\n\t000001:   2 ui \r\n\t000010:   4 ui \r\n\t000011:   6 ui \r\n\t000100:   8 ui \r\n\t000101:  10 ui \r\n\t000110:  12 ui \r\n\t000111:  14 ui \r\n\t001000:  16 ui \r\n\t001001:  18 ui \r\n\t001010:  20 ui \r\n\t001011:  22 ui > ei-4 max \r\n\t001100:  24 ui > ei-4 max \r\n\t001101:  26 ui > ei-4 max \r\n\t001110:  28 ui > ei-4 max \r\n\t001111:  30 ui > ei-4 max \r\n\t010000:  32 ui > ei-4 max \r\n\t010001:  34 ui > ei-4 max \r\n\t010010:  36 ui > ei-4 max \r\n\t010011:  38 ui > ei-4 max \r\n\t010100:  40 ui > ei-4 max \r\n\t010101:  42 ui > ei-4 max \r\n\t010110:  44 ui > ei-4 max \r\n\t010111:  46 ui > ei-4 & edi max \r\n\t011000:  48 ui > ei-4 & edi max \r\n\t011001:  50 ui > ei-4 & edi max \r\n\t011010:  52 ui > ei-4 & edi max \r\n\t011011:  54 ui > ei-4 & edi max \r\n\t011100:  56 ui > ei-4 & edi max \r\n\t011101:  58 ui > ei-4 & edi max \r\n\t011110:  60 ui > ei-4 & edi max \r\n\t011111:  62 ui > ei-4 & edi max \r\n\t100000:  64 ui > ei-4 & edi max \r\n\t100001:  66 ui > ei-4 & edi max \r\n\t100010:  68 ui > ei-4 & edi max \r\n\t100011:  70 ui > ei-4 & edi max \r\n\t100100:  72 ui > ei-4 & edi max \r\n\t100101:  74 ui > ei-4 & edi max \r\n\t100110:  76 ui > ei-4 & edi max \r\n\t100111:  78 ui > ei-4 & edi max \r\n\t101000:  80 ui > ei-4 & edi max \r\n\t101001:  82 ui > ei-4 & edi max \r\n\t101010:  84 ui > ei-4 & edi max \r\n\t101011:  86 ui > ei-4 & edi max \r\n\t101100:  88 ui > ei-4 max \r\n\t101101:  90 ui > ei-4 max \r\n\t101110:  92 ui > ei-4 max \r\n\t101111:  94 ui > ei-4 max \r\n\t110000:  96 ui > ei-4 max \r\n\t110001:  98 ui > ei-4 max \r\n\t110010: 100 ui > ei-4 max \r\n\t110011: 102 ui > ei-4 max \r\n\t110100: 104 ui > ei-4 max \r\n\t110101: 106 ui > ei-4 max \r\n\t110110: 108 ui > ei-4 max \r\n\t110111: 110 ui > ei-4 max \r\n\t111000: 112 ui > ei-4 & edi max \r\n\t111001: 114 ui > ei-4 & edi max \r\n\t111010: 116 ui > ei-4 & edi max \r\n\t111011: 118 ui > ei-4 & edi max \r\n\t111100: 120 ui > ei-4 & edi max \r\n\t111101: 122 ui > ei-4 & edi max \r\n\t111110: 124 ui > ei-4 & edi max \r\n\t111111: 126 ui > ei-4 & edi max
 #define EDIP_RX_CTL_MODE10_E_PG                            0x8009d8000000003f, 48, 16 // register -- description
 #define EDIP_RX_LANE_DISABLED_VEC_0_15                     0x8009e0000000003f, 48, 16 // used to set which of group lanes 0-15 are ignored by training logic.  these do not affect powerdown. assumption: disabled lanes must be contiguous.
 #define EDIP_RX_CTL_MODE11_E_PG                            0x8009e0000000003f, 48, 16 // register -- description
@@ -2729,7 +2880,7 @@
 #define EDIP_RX_EYE_OPT_FAILED                             0x800a38000000003f, 58,  1 // when this bit is read as a 1, the eye optimization training state encountered an error.
 #define EDIP_RX_REPAIR_FAILED                              0x800a38000000003f, 59,  1 // when this bit is read as a 1, the static lane repair training state encountered an error.
 #define EDIP_RX_CTL_STAT1_E_PG                             0x800a38000000003f, 48, 16 // register -- description
-#define EDIP_RX_LANE_BAD_VEC_0_15                          0x800a40000000003f, 48, 16 // lanes found bad by hw (status) or method to force lane bad from software (control).  the bad_lane vector is only updated during initial training.  
+#define EDIP_RX_LANE_BAD_VEC_0_15                          0x800a40000000003f, 48, 16 // lanes found bad by hw (status) or method to force lane bad from software (control).  the bad_lane vector is only updated during initial training.
 #define EDIP_RX_CTL_STAT2_E_PG                             0x800a40000000003f, 48, 16 // register -- description
 #define EDIP_RX_LANE_BAD_VEC_16_23                         0x800a50000000003f, 48,  8 // lanes found bad by hw (status) or method to force lane bad from software (control).
 #define EDIP_RX_CTL_STAT4_E_PG                             0x800a50000000003f, 48, 16 // register -- description
@@ -2833,14 +2984,14 @@
 #define EDIP_RX_CLR_PAR_ERRS                               0x800ab0000000003f, 62,  1 // clear all rx parity error latches\r\n\ttoggle this field 0->1->0 to clear all rx parity error latches.
 #define EDIP_RX_FIR_RESET                                  0x800ab0000000003f, 63,  1 // fir reset\r\n\ttoggle this field 0->1->0 to reset all rx fir related latches including the isolation and parity error latches.
 #define EDIP_RX_GLBSM_CNTLX1_EO_PG                         0x800ab0000000003f, 48, 16 // register -- description
-#define EDIP_RX_EYE_OPT_STATE                              0x800ab8000000003f, 48, 12 // eye optimizaton state machine current state 
+#define EDIP_RX_EYE_OPT_STATE                              0x800ab8000000003f, 48, 12 // eye optimizaton state machine current state
 #define EDIP_RX_GLBSM_STAT1_EO_PG                          0x800ab8000000003f, 48, 16 // register -- description
 #define EDIP_RX_RECAL_CNT                                  0x800ac0000000003f, 48, 16 // number of times bus has been recalibrated since initialization
 #define EDIP_RX_GLBSM_STAT2_EO_PG                          0x800ac0000000003f, 48, 16 // register -- description
 #define EDIP_RX_DACTEST_ISGT                               0x800ac8000000003f, 48,  1 // rx dactest control register : is greater than
 #define EDIP_RX_DACTEST_ISLT                               0x800ac8000000003f, 49,  1 // rx dactest control register : is lesser than
 #define EDIP_RX_DACTEST_ISEQ                               0x800ac8000000003f, 50,  1 // rx dactest control register : is equal to
-#define EDIP_RX_DACTEST_DIFF                               0x800ac8000000003f, 51,  9 // rx dactest control register : difference 
+#define EDIP_RX_DACTEST_DIFF                               0x800ac8000000003f, 51,  9 // rx dactest control register : difference
 #define EDIP_RX_GLBSM_STAT3_EO_PG                          0x800ac8000000003f, 48, 16 // register -- description
 #define EDIP_RX_INT_REQ                                    0x800ad0000000003f, 48, 16 // rx interrupt request isolation latch
 #define EDIP_RX_GLBSM_STAT4_EO_PG                          0x800ad0000000003f, 48, 16 // register -- description
@@ -2927,7 +3078,7 @@
 #define EDIP_RX_PG_FIR_ERR_INJ_RXDSM_SM                    0x800b10000000003f, 63,  1 // iotk alias: while a 1, invert the parity check bit to force an error on the per-group rx deskew state machine parity checker.
 #define EDIP_RX_FIR2_ERROR_INJECT_PG                       0x800b10000000003f, 48, 16 // register -- description
 #define EDIP_RX_MAIN_INIT_STATE                            0x800b18000000003f, 48,  4 // main initialization state machine(rjr):\r\n\t0000: idle\r\n\t0001: wiretest running\r\n\t0010: deskew running\r\n\t0011: eye optimization running\r\n\t0100: repair running\r\n\t0101: go functional running\r\n\t1001: wiretest failed\r\n\t:1010: deskew failed\r\n\t1011: eye optimization failed\r\n\t1100: repair failed\r\n\t1101: go functional failed\r\n\tothers:  unused
-#define EDIP_RX_WTM_STATE                                  0x800b18000000003f, 52,  6 // main wiretest state machine current state (rjr)): \r\n\tx00: idle \r\n\tx01: drv data  wt \r\n\tx02: drv clock wt \r\n\tx03: drv data  0 \r\n\tx04: drv clock 0 \r\n\tx05: rx wt \r\n\tx06: wait all ones \r\n\tx07: reset pll \r\n\tx08: wait pll \r\n\tx09: drive clock \r\n\tx0a: drive data 1 \r\n\tx0b: wait all zeroes \r\n\tx0c: drive data 0 \r\n\tx0d: done \r\n\tx0e: unused \r\n\tx0f: unused \r\n\tx10: wait prev done \r\n\tx11: drv prev done \r\n\tx12: drv all done \r\n\tx13: wait all done \r\n\tx14: init tx fifo \r\n\tx15: unused \r\n\tx16: unused \r\n\tx17: unused \r\n\tx18: set c & d dr strength \r\n\tx19: set data only dr strength \r\n\tx1a: clock fail \r\n\tx1b: all bad lanes \r\n\tx1c: wt timeout fail \r\n\tx1d: pll/dll fail \r\n\tx1e: all ones fail \r\n\tx1f: all zeroes fail 
+#define EDIP_RX_WTM_STATE                                  0x800b18000000003f, 52,  6 // main wiretest state machine current state (rjr)): \r\n\tx00: idle \r\n\tx01: drv data  wt \r\n\tx02: drv clock wt \r\n\tx03: drv data  0 \r\n\tx04: drv clock 0 \r\n\tx05: rx wt \r\n\tx06: wait all ones \r\n\tx07: reset pll \r\n\tx08: wait pll \r\n\tx09: drive clock \r\n\tx0a: drive data 1 \r\n\tx0b: wait all zeroes \r\n\tx0c: drive data 0 \r\n\tx0d: done \r\n\tx0e: unused \r\n\tx0f: unused \r\n\tx10: wait prev done \r\n\tx11: drv prev done \r\n\tx12: drv all done \r\n\tx13: wait all done \r\n\tx14: init tx fifo \r\n\tx15: unused \r\n\tx16: unused \r\n\tx17: unused \r\n\tx18: set c & d dr strength \r\n\tx19: set data only dr strength \r\n\tx1a: clock fail \r\n\tx1b: all bad lanes \r\n\tx1c: wt timeout fail \r\n\tx1d: pll/dll fail \r\n\tx1e: all ones fail \r\n\tx1f: all zeroes fail
 #define EDIP_RX_WTR_STATE                                  0x800b18000000003f, 58,  5 // receiver wiretest state machine current state (rjr):x0: idle\r\n\tx1: check clock\r\n\tx2: check lane disabled\r\n\tx3: check data lane\r\n\tx4: store data lane results\r\n\tx5: check if done\r\n\tx6: done--passed\r\n\t: done--failed\r\n\t:x8-xf: unused
 #define EDIP_RX_WT_CU_PLL_LOCK                             0x800b18000000003f, 63,  1 // rx pll locked
 #define EDIP_RX_GLBSM_STAT1_E_PG                           0x800b18000000003f, 48, 16 // register -- description
@@ -3017,7 +3168,7 @@
 #define EDIP_RX_BAD_BUS_LANE_ERR_CNTR                      0x800bf8000000003f, 49,  7 // bad bus lane error counter (aka counter1)
 #define EDIP_RX_LAST_BAD_BUS_LANE                          0x800bf8000000003f, 57,  7 // last bad bus lane (bus lane causing the last crc or ecc error)
 #define EDIP_RX_DATASM_STAT13_E_PG                         0x800bf8000000003f, 48, 16 // register -- description
-#define EDIP_RX_PG_PRBS_SCRAMBLE_MODE                      0x800be8000000003f, 48,  2 // selects prbs scramble sequence length. \r\n\t00:(prbs23) prbs 23 (default) \r\n\t01:(prbs7) prbs 7 (used by rx bist)\r\n\t10:(prbs11) prbs 11 \r\n\t11:(prbs15) prbs 15 
+#define EDIP_RX_PG_PRBS_SCRAMBLE_MODE                      0x800be8000000003f, 48,  2 // selects prbs scramble sequence length. \r\n\t00:(prbs23) prbs 23 (default) \r\n\t01:(prbs7) prbs 7 (used by rx bist)\r\n\t10:(prbs11) prbs 11 \r\n\t11:(prbs15) prbs 15
 #define EDIP_RX_PG_PRBS_SEED_MODE                          0x800be8000000003f, 50,  1 // set this bit to enable seeding of the descramble prbs block from the incoming data stream.
 #define EDIP_RX_DESKEW_RATE                                0x800be8000000003f, 51,  1 // tx deskew rate\r\n\tselects between a div1 (1100) and div2 (11110000) deskew pattern rate for both pattern a and b. \r\n\t0: (div2) divided deskew pattern for p9\r\n\t1: (div1) regular deskew pattern for centaur
 #define EDIP_RX_RUN_DYN_RECAL_TIMER                        0x800be8000000003f, 52,  1 // enables checking for the 12/24 ui scramble sync pulse that enables the sls status reporting timer. \r\n\tthis bit should remain set to 1 to run the dynamic recal interval timer until a new full initialization is attempted. \r\n\t0:(disabled) disable checking (forces run_dyn_recal_timer to 0)\r\n\t1:(enabled) enable checking (run_dyn_recal_timer may go to 1 and stay that way after identifying the sync pulse)
@@ -3025,10 +3176,10 @@
 #define EDIP_RX_PG_PRBS_SLS_EXPECT                         0x800be8000000003f, 55,  8 // when an sls message is expected on the incoming data stream but it must be masked to complete prbs seeding, write the expected value here and it will be reverted and the pure prbs pattern will enter the prbs block.
 #define EDIP_RX_HALF_RATE_MODE_DATASM                      0x800be8000000003f, 63,  1 // when set to 1, enables timers on the slow clock domain to consistently count ui when in 4-bit legacy mode.  otherwise, slow clock domain counts only half of the ui noted in the timeouts documentation when in 4-bit legacy mode.
 #define EDIP_RX_DATASM_CNTL1_E_PG                          0x800be8000000003f, 48, 16 // register -- description
-#define EDIP_RX_POFF_EOFF_TIMEOUT                          0x800b78000000003f, 48,  4 // selects timeout value for running eoff and poff opps 
+#define EDIP_RX_POFF_EOFF_TIMEOUT                          0x800b78000000003f, 48,  4 // selects timeout value for running eoff and poff opps
 #define EDIP_RX_POFF_EOFF_CFG                              0x800b78000000003f, 52,  3 // selects filter value  for running eoff and poff opps
-#define EDIP_RX_POFF_EOFF_BLOCK_ERROR                      0x800b78000000003f, 55,  1 // when set to a 1 we will block error caused by servo op not reversing 
-#define EDIP_RX_FILTER_OPTIONS                             0x800b78000000003f, 56,  4 // servo filter options. bit zero will cause accelerated behavior of amplitude ops 
+#define EDIP_RX_POFF_EOFF_BLOCK_ERROR                      0x800b78000000003f, 55,  1 // when set to a 1 we will block error caused by servo op not reversing
+#define EDIP_RX_FILTER_OPTIONS                             0x800b78000000003f, 56,  4 // servo filter options. bit zero will cause accelerated behavior of amplitude ops
 #define EDIP_RX_DATASM_CNTL2_EO_PG                         0x800b78000000003f, 48, 16 // register -- description
 #define EDIP_RX_PB_CLR_PAR_ERRS                            0x800f80000000003f, 62,  1 // clear all rx parity error latches\r\n\ttoggle this field 0->1->0 to clear parity error latches in the busctl logic.
 #define EDIP_RX_PB_FIR_RESET                               0x800f80000000003f, 63,  1 // fir reset\r\n\ttoggle this field 0->1->0 to reset the busctl logic fir related latches, including the isolation and parity error latches.
@@ -3132,6 +3283,6 @@
 #define EDIP_SCOM_PPE_FLAGS_SET_REG                        0x0000000000000024,  0, 64 // normal scom mode reg in ppe macro -- description
 #define EDIP_SCOM_PPE_FLAGS_CLR                            0x0000000000000025,  0, 16 // ppe register
 #define EDIP_SCOM_PPE_FLAGS_CLR_REG                        0x0000000000000025,  0, 64 // normal scom mode reg in ppe macro -- description
-
+*/
 
 #endif /*IO_HW_REGS_H_*/
