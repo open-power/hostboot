@@ -64,7 +64,7 @@
 //------------------------------------------------------------------------------
 
 // HWP entry point, comments in header
-fapi2::ReturnCode p9_io_cen_scominit( const CEN_TGT& i_target )
+fapi2::ReturnCode p9_io_cen_scominit(const CEN_TGT& i_tgt)
 {
     // mark HWP entry
     FAPI_INF("p9_io_cen_scominit: Entering...");

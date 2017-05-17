@@ -52,7 +52,7 @@
 typedef fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> CEN_TGT;
 
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_io_cen_scominit_FP_t)(const CEN_TGT& i_target);
+typedef fapi2::ReturnCode (*p9_io_cen_scominit_FP_t)(const CEN_TGT&);
 
 extern "C" {
 
@@ -65,12 +65,12 @@ extern "C" {
      *
      * Should be called for all valid/connected OBUS endpoints
      *
-     * @param[in] i_target           Reference to CEN chiplet target
+     * @param[in] i_tgt           Reference to CEN chiplet target
      *                                    - p9.cen.scom.initfile
      *
      * @return FAPI2_RC_SUCCESS on success, error otherwise
      */
-    fapi2::ReturnCode p9_io_cen_scominit(const CEN_TGT& i_target);
+    fapi2::ReturnCode p9_io_cen_scominit(const CEN_TGT& i_tgt);
 
 
 } // extern "C"
