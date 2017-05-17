@@ -111,6 +111,9 @@ int32_t mcaUeAlgorithm( ExtensibleChip * i_chip,
 
     if ( maskDoNotClearAttn )
     {
+        // Make the error log predictive.
+        io_sc.service_data->setServiceCall();
+
         // Get the active attentions of DDRPHYFIR[54:55,57:59] and mask.
         fir = i_chip->getRegister("DDRPHYFIR");
 
