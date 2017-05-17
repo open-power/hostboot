@@ -1,0 +1,80 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/attribute_info/p9_io_dmi_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_DMI_PROC_DCCAL_FLAGS</id>
+  <targetType>TARGET_TYPE_DMI</targetType>
+  <description>
+    Flags to indicate if rx / tx dccal has been run.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    NONE = 0x0,
+    TX = 0x1,
+    RX = 0x2
+  </enum>
+  <initToZero/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_DMI_PROC_DEBUG</id>
+  <targetType>TARGET_TYPE_DMI</targetType>
+  <description>
+    Indicate if debug data should be taken pre / post linktraining.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <initToZero/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_DMI_PROC_TX_MARGIN_RATIO</id>
+  <targetType>TARGET_TYPE_DMI</targetType>
+  <description>
+    Value to select amount of margin to be applied.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_DMI_PROC_TX_FFE_PRECURSOR</id>
+  <targetType>TARGET_TYPE_DMI</targetType>
+  <description>
+    Value to select amount of tx ffe precusor to apply.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+</attributes>

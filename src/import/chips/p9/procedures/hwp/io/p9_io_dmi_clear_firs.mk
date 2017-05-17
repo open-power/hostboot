@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p9/procedures/hwp/io/p9_io_dmi_linktrain.mk $
+# $Source: src/import/chips/p9/procedures/hwp/io/p9_io_dmi_clear_firs.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,7 +22,5 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE=p9_io_dmi_linktrain
-OBJS+=p9_io_common.o
-OBJS+=p9_io_dmi_clear_firs.o
+PROCEDURE=p9_io_dmi_clear_firs
 $(call BUILD_PROCEDURE)
