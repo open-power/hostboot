@@ -43,7 +43,7 @@
 #include <fapi2.H>
 
 typedef fapi2::Target<fapi2::TARGET_TYPE_DMI> DMI_TGT;
-typedef fapi2::ReturnCode (*p9_io_dmi_dccal_FP_t)(const DMI_TGT);
+typedef fapi2::ReturnCode (*p9_io_dmi_dccal_FP_t)(const DMI_TGT&);
 
 extern "C"
 {
