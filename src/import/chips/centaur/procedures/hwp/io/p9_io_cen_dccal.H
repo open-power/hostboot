@@ -43,7 +43,7 @@
 #include <fapi2.H>
 
 typedef fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> CEN_TGT;
-typedef fapi2::ReturnCode (*p9_io_cen_dccal_FP_t)(const CEN_TGT);
+typedef fapi2::ReturnCode (*p9_io_cen_dccal_FP_t)(const CEN_TGT&);
 
 extern "C"
 {
@@ -54,7 +54,7 @@ extern "C"
      * @param[in] i_tgt   FAPI2 Target
      * @retval ReturnCode
      */
-    fapi2::ReturnCode p9_io_cen_dccal(const CEN_TGT& iTgt);
+    fapi2::ReturnCode p9_io_cen_dccal(const CEN_TGT& i_tgt);
 
 } // extern "C"
 
