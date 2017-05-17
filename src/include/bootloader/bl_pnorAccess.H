@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,8 +56,6 @@ class bl_pnorAccess
  *
  * @param[out] o_errCode        Anything besides PNOR:NO_ERROR is an error
  *
- * @param[out] o_tocUsed        Tells you which table of contents was used
- *
  * @param[out] o_pnorStart      The MMIO address of the start of PNOR
  *
  * @return void
@@ -65,7 +63,6 @@ class bl_pnorAccess
 static void getHBBSection(uint64_t i_pnorEnd,
                           PNOR::SectionData_t& o_hbbSection,
                           uint32_t& o_errCode,
-                          uint8_t& o_tocUsed,
                           uint64_t& o_pnorStart);
 
   private:
@@ -85,7 +82,8 @@ static void getHBBSection(uint64_t i_pnorEnd,
  * @return void
  */
 static void readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],  uint32_t & o_errCode,
-                    PNOR::SectionData_t * o_TOC, uint64_t& o_pnorStart, uint64_t i_pnorEnd);
+                    PNOR::SectionData_t * o_TOC, uint64_t& o_pnorStart,
+                    uint64_t i_pnorEnd);
 
 /**
  * @brief Find a valid TOC within specified side of pnor flash
@@ -97,14 +95,12 @@ static void readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],  uint32_t & o_errCode,
  *
  * @param[out] o_errCode     Anything besides PNOR:NO_ERROR is an error
  *
- * @param[out] o_tocUsed     Tells you which table of contents was used
- *
  * @param[out] o_pnorStart   The MMIO address of the start of PNOR
  *
  * @return void
  */
 static void findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
-                    uint32_t& o_errCode, uint8_t& o_tocUsed, uint64_t& o_pnorStart);
+                    uint32_t& o_errCode, uint64_t& o_pnorStart);
 
 };
 

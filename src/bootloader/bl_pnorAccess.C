@@ -28,6 +28,7 @@
 #include <bootloader/hbblreasoncodes.H>
 #include <util/singleton.H>
 #include <bootloader/bootloader.H>
+#include <lpc_const.H>
 #ifdef PNORUTILSTEST_H
 #define BOOTLOADER_TRACE(args) TRACFCOMP(g_trac_pnor,"##args")
 #define BOOTLOADER_TRACE_W_BRK(args) TRACFCOMP(g_trac_pnor,"##args")
@@ -61,7 +62,7 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
         if(o_errCode != PNOR::NO_ERROR)
         {
             BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_READTOC_CHKNULLBUFFER_NULL);
-            // Set TI information but caller decides to TI or not
+            // Always TI if NULL pointer is passed in
             /*@
              * @errortype
              * @moduleid     Bootloader::MOD_PNORACC_READTOC
@@ -78,16 +79,11 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
             bl_terminate(Bootloader::MOD_PNORACC_READTOC,
                          Bootloader::RC_CHK_NULL_BUFFER,
                          reinterpret_cast<uint64_t>(i_tocBuffer),
-                         o_errCode,
-                         false);
+                         o_errCode);
             break;
         }
 
         BOOTLOADER_TRACE(BTLDR_TRC_PA_READTOC_CHECKNULLBUFFER_RTN);
-
-        //Subtract the size of the pnor from the end address to find the start
-        o_pnorStart = i_pnorEnd -
-                        (l_ffs_hdr->block_size * l_ffs_hdr->block_count) + 1;
 
         //Do a checksum on the header
         if(PNOR::pnor_ffs_checksum(l_ffs_hdr, FFS_HDR_SIZE) != 0)
@@ -149,8 +145,12 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
                          false);
             break;
         }
+
         BOOTLOADER_TRACE(BTLDR_TRC_PA_READTOC_CHECKHEADER_RTN);
 
+        //Subtract the size of the pnor from the end address to find the start
+        o_pnorStart = i_pnorEnd -
+                        (l_ffs_hdr->block_size * l_ffs_hdr->block_count) + 1;
 
         //if an error is found with an entry we use this variable to hold
         //the value of the entry. That way we can record which entry is causing
@@ -184,25 +184,25 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
                          false);
             break;
         }
+
         BOOTLOADER_TRACE(BTLDR_TRC_PA_READTOC_PARSEENTRIES_RTN);
-
-
     } while(0);
 }
 
 void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
-                            uint32_t& o_errCode,  uint8_t& o_tocUsed,
-                            uint64_t& o_pnorStart)
+                            uint32_t& o_errCode, uint64_t& o_pnorStart)
 {
     uint8_t *l_tocBuffer = Bootloader::g_blScratchSpace;
+
+    //The first TOC is 1 TOC size + 1 page back from the end of the flash (+ 1)
+    uint64_t l_mmioAddr = i_pnorEnd - PNOR::TOC_OFFSET_FROM_TOP_OF_FLASH;
+
     do
     {
         //@TODO RTC:138268 Set up multiple side of PNOR for bootloader
         o_errCode = 0;
-        o_tocUsed = 0;
         //Copy Table of Contents from PNOR flash to a local buffer
-        //The first TOC is 2 TOC sizes back from the end of the flash (+ 1)
-        Bootloader::handleMMIO(i_pnorEnd - PNOR::TOC_OFFSET_FROM_TOP_OF_FLASH,
+        Bootloader::handleMMIO(l_mmioAddr,
                     reinterpret_cast<uint64_t>(l_tocBuffer),
                     (PNOR::TOC_SIZE),
                     Bootloader::WORDSIZE);
@@ -214,35 +214,35 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
         if(o_errCode == PNOR::NO_ERROR)
         {
             BOOTLOADER_TRACE(BTLDR_TRC_PA_FINDTOC_TOC1_READTOC_RTN);
-            o_tocUsed = 0;
             break;
         }
         else
         {
-            // @TODO RTC:164445 Can remove if there is a way to find another TOC
-            // TI with data from readTOC
-            terminateExecuteTI();
-
-            //If the first toc was invalid, look for the backup in the start
-            Bootloader::handleMMIO(o_pnorStart,
-                              reinterpret_cast<uint64_t>(l_tocBuffer),
-                              (PNOR::TOC_SIZE),
-                              Bootloader::WORDSIZE);
-
-            o_errCode = 0;
-            readTOC(l_tocBuffer, o_errCode, o_TOC, o_pnorStart, i_pnorEnd);
-            if(o_errCode == PNOR::NO_ERROR)
+            if(o_pnorStart != NULL)
             {
-                o_tocUsed = 1;
+                // Use PNOR start address for next MMIO
+                BOOTLOADER_TRACE(BTLDR_TRC_PA_FINDTOC_USE_PNOR_START);
+                l_mmioAddr = o_pnorStart;
+            }
+            else
+            {
+                // Adjust to new location in PNOR flash for next MMIO
+                BOOTLOADER_TRACE(BTLDR_TRC_PA_FINDTOC_ADJUST_PNOR_ADDR);
+                l_mmioAddr -= PAGESIZE;
+            }
+
+            // Check that address is still in FW space
+            if(l_mmioAddr < (LPC::LPC_PHYS_BASE + LPC::LPCHC_FW_SPACE))
+            {
+                BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_FINDTOC_READTOC_ERR);
+
+                // TI with data from readTOC
+                terminateExecuteTI();
+
                 break;
             }
-            BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_FINDTOC_READTOC_ERR);
-            // TI with data from readTOC
-            terminateExecuteTI();
         }
-
-        break;
-    }while(0);
+    }while(1);
 }
 
 /**
@@ -251,7 +251,6 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
 void bl_pnorAccess::getHBBSection(uint64_t i_pnorEnd,
                                   PNOR::SectionData_t& o_hbbSection,
                                   uint32_t& o_errCode,
-                                  uint8_t& o_tocUsed,
                                   uint64_t& o_pnorStart)
 {
     BOOTLOADER_TRACE(BTLDR_TRC_PA_GETHBBSECTION_START);
@@ -259,7 +258,7 @@ void bl_pnorAccess::getHBBSection(uint64_t i_pnorEnd,
     {
         PNOR::SectionData_t l_TOC[PNOR::NUM_SECTIONS+1];
 
-        findTOC(i_pnorEnd, l_TOC, o_errCode, o_tocUsed, o_pnorStart);
+        findTOC(i_pnorEnd, l_TOC, o_errCode, o_pnorStart);
 
         if(o_errCode != PNOR::NO_ERROR)
         {

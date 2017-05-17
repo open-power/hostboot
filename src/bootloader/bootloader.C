@@ -297,7 +297,6 @@ namespace Bootloader{
         uint64_t l_pnorStart = 0;
 
         uint32_t l_errCode = PNOR::NO_ERROR;
-        uint8_t l_tocUsed = 0;
         g_blScratchSpace = reinterpret_cast<uint8_t*>(HBBL_SCRATCH_SPACE_ADDR);
         g_blData->secureRomValid = false;
 
@@ -306,7 +305,6 @@ namespace Bootloader{
         bl_pnorAccess::getHBBSection(l_pnorEnd,
                                      g_blData->bl_hbbSection,
                                      l_errCode,
-                                     l_tocUsed,
                                      l_pnorStart);
         BOOTLOADER_TRACE(BTLDR_TRC_MAIN_GETHBBSECTION_RTN );
 

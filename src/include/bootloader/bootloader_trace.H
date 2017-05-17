@@ -89,11 +89,11 @@ enum BootloaderTraces
     /** Bootloader PNOR Access findTOC readTOC for TOC ONE returned */
     BTLDR_TRC_PA_FINDTOC_TOC1_READTOC_RTN    = 0x32,
 
-    /** Bootloader PNOR Access findTOC handleMMIO to copy TOC TWO returned */
-    BTLDR_TRC_PA_FINDTOC_TOC2_HANDLEMMIO_RTN = 0x33,
+    /** Bootloader PNOR Access findTOC use PNOR start address */
+    BTLDR_TRC_PA_FINDTOC_USE_PNOR_START      = 0x33,
 
-    /** Bootloader PNOR Access findTOC readTOC for TOC TWO returned */
-    BTLDR_TRC_PA_FINDTOC_TOC2_READTOC_RTN    = 0x34,
+    /** Bootloader PNOR Access findTOC adjust PNOR address */
+    BTLDR_TRC_PA_FINDTOC_ADJUST_PNOR_ADDR    = 0x34,
 
     /** Bootloader PNOR Access getHBBSection findTOC returned */
     BTLDR_TRC_PA_GETHBBSECTION_FINDTOC_RTN   = 0x35,
