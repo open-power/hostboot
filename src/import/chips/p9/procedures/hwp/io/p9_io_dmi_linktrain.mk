@@ -24,8 +24,5 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_io_dmi_linktrain
 OBJS+=p9_io_common.o
-
-# TODO Create DMI Clear Firs
-# OBJS+=p9_io_dmi_clear_firs.o
-
+OBJS+=p9_io_dmi_clear_firs.o
 $(call BUILD_PROCEDURE)
