@@ -108,7 +108,10 @@ namespace HTMGT
             {OCC_CMD_SETUP_CFG_DATA, "SET_CFG_DATA"},
             {OCC_CMD_SET_POWER_CAP, "SET_POWER_CAP"},
             {OCC_CMD_RESET_PREP, "RESET_PREP"},
+            {OCC_CMD_DEBUG_PASS_THROUGH, "DEBUG_PASSTHRU"},
+            {OCC_CMD_AME_PASS_THROUGH, "AME_PASSTHRU"},
             {OCC_CMD_GET_FIELD_DEBUG_DATA, "GET_FIELD_DEBUG_DATA"},
+            {OCC_CMD_MFG_TEST, "MFG_TEST"},
             // OCC_CMD_END_OF_TABLE should be the last entry
             {OCC_CMD_END_OF_TABLE, "Unknown Command"}
         };

@@ -80,7 +80,10 @@ namespace HTMGT
         OCC_CMD_SETUP_CFG_DATA          = 0x21,
         OCC_CMD_SET_POWER_CAP           = 0x22,
         OCC_CMD_RESET_PREP              = 0x25,
+        OCC_CMD_DEBUG_PASS_THROUGH      = 0x40,
+        OCC_CMD_AME_PASS_THROUGH        = 0x41,
         OCC_CMD_GET_FIELD_DEBUG_DATA    = 0x42,
+        OCC_CMD_MFG_TEST                = 0x53,
 
         OCC_CMD_END_OF_TABLE            = 0xFF
     };
