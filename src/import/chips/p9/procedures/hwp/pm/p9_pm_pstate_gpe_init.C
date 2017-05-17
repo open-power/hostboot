@@ -74,6 +74,8 @@ fapi2::ReturnCode pstate_gpe_init(
     uint32_t                l_ivpr_offset = 0;
     uint32_t                l_xsr_halt_condition = 0;
     uint32_t                l_timeout_counter = TIMEOUT_COUNT;
+    uint8_t                 l_avsbus_number = 0;
+    uint8_t                 l_avsbus_rail = 0;
 
     FAPI_IMP(">> pstate_gpe_init......");
 
@@ -88,10 +90,27 @@ fapi2::ReturnCode pstate_gpe_init(
     FAPI_INF("   Writing IVPR with 0x%16llX", l_ivpr);
     FAPI_TRY(putScom(i_target, PU_GPE2_GPEIVPR_SCOM, l_ivpr));
 
-    // Clear the PGPE active bit before attempting the boot
+    // Set up the OCC Scratch 2 register before PGPE boot
     FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_occ_scratch2));
+
     FAPI_INF("   Clear PGPE_ACTIVE in OCC Scratch 2 Register...");
     l_occ_scratch2.clearBit<p9hcd::PGPE_ACTIVE>();
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_VDD_AVSBUS_BUSNUM,
+                            i_target,
+                            l_avsbus_number),
+              "Error getting ATTR_VDD_AVSBUS_BUSNUM");
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_VDD_AVSBUS_RAIL,
+                            i_target,
+                            l_avsbus_rail),
+              "Error getting ATTR_VDD_AVSBUS_RAIL");
+
+    l_occ_scratch2.insertFromRight<27, 1>(l_avsbus_number)
+    .insertFromRight<28, 4>(l_avsbus_rail);
+
+    FAPI_INF("   AVSBus VDD topology set in OCC Scratch 2 Register:  Bus = %d, Rail = %d ...",
+             l_avsbus_number, l_avsbus_rail);
+
     FAPI_TRY(putScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_occ_scratch2));
 
     // Program XCR to ACTIVATE PGPE
