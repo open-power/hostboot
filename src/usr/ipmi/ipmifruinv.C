@@ -437,16 +437,44 @@ errlHndl_t IpmiFruInv::formatMfgData(std::vector<uint8_t> i_mfgDateData,
         // Subtract month
         uint8_t numOfMonths = month - 1;
         // Subtract day
-        uint8_t numOfDays = day - 1;
+        uint16_t numOfDays = day - 1;
+
+        // Add the specific number of days for the months given
+        for (uint8_t i=0; i < numOfMonths; i++)
+        {
+            numOfDays += daysInMonth[i];
+        }
+
+        // Add the number of days for the number of year given
+        numOfDays += (numOfYears*365);
+
+        // Add a day for every leap year
+        // Check if we need to consider the current year
+        if (month <= 2)
+        {
+            // We don't need to consider this year for a leap year, as it
+            // wouldn't have happened yet. Decrement a year.
+            year = year - 1;
+        }
+
+        uint8_t numLeapYears = 0;
+        // For every year from 1996 until the build date year, check if it's a
+        // leap year
+        for(uint16_t i = 1996; i <= (century*100 + year); i++)
+        {
+            // If the year is divisible by 4, its a leap year. Don't have to
+            // worry about centuries since the only possible century is 2000
+            // and it was a leap year.
+            if(i % 4 == 0)
+            {
+                numLeapYears++;
+            }
+        }
+
+        numOfDays += numLeapYears;
 
         // Convert into minutes
-
-        // TODO: RTC 172125
-        // At some point we should take into account leap year and specific
-        // days in a month.
-        o_mfgDate = ((((numOfYears*365)*24)*60) +
-            (((numOfMonths*30.42)*24)*60) + ((numOfDays*24)*60) +
-                (hour*60) + minute);
+        o_mfgDate = (((numOfDays*24)*60) + (hour*60) + minute);
 
     }
 
