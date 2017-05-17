@@ -161,6 +161,7 @@
     </description>
     <valueType>uint32</valueType>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -174,9 +175,13 @@
                  p9_set_voltage (tool);
                  p9_build_pstate_datablock ->
                         Pstate Parameter Block (PSPB) for PGPE
+
+     *MOST* systems use Bus 0 for VDD.  If this is not the case, the value
+     must be appropriately set by the platform (eg MRWB or equivalent
     </description>
     <valueType>uint8</valueType>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -190,6 +195,9 @@
                  p9_set_voltage (tool);
                  p9_build_pstate_datablock ->
                         Pstate Parameter Block (PSPB) for PGPE
+
+     *MOST* systems use Bus 1 for VDD.  If this is not the case, the value
+     must be appropriately set by the platform (eg MRWB or equivalent)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -206,6 +214,8 @@
                  p9_set_voltage (tool);
                  p9_build_pstate_datablock ->
                         Pstate Parameter Block (PSPB) for PGPE
+
+    For systems where VCS is not connected via AVSBus, set to 0xFF.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -223,9 +233,14 @@
                  p9_set_voltage (tool);
                  p9_build_pstate_datablock ->
                         Pstate Parameter Block (PSPB) for PGPE
+
+     *MOST* systems use Rail 0 for VDD for the bus on which they are connected.
+     If this is not the case, the value must be appropriately set by the platform
+     (eg MRWB or equivalent)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -240,9 +255,14 @@
       p9_set_avsbus_voltage (tool);
                  p9_build_pstate_datablock ->
                         Pstate Parameter Block (PSPB) for PGPE
+
+     *MOST* systems use Rail 0 for VDN for the bus on which they are connected.
+     If this is not the case, the value must be appropriately set by the platform
+     (eg MRWB or equivalent)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
  <attribute>
@@ -250,16 +270,18 @@
    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
    <description>
     Defines the AVSBus rail selector number (0 - 15) for the VCS VRM on the bus
-    defined by ATTR_AVSBUS_VDN_BUSNUM.
+    defined by ATTR_AVSBUS_VCS_BUSNUM.
 
      Producer:  Machine Readable Workbook
      Consumers:
      p9_set_avsbus_voltage (tool);
             p9_build_pstate_datablock ->
                Pstate Parameter Block (PSPB) for PGPE
+
    </description>
    <valueType>uint8</valueType>
    <platInit/>
+    <initToZero/>  <!-- This here strictly to allocate the attribute in Cronus -->
  </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -961,7 +983,7 @@
     <platInit/>
     <initToZero/>
   </attribute>
-
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PBAX_GROUPID</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
