@@ -80,7 +80,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief ATTR_CHIP_EC_FEATURE_MSS_UT_EC_NIMBUS_LESS_THAN_TWO_OH getter
+/// @brief ATTR_CHIP_EC_FEATURE_MSS_NIMBUS_EC_LESS_THAN_TWO_OH getter
 /// @tparam T the fapi2 target type of the target
 /// @param[in] const ref to the target
 /// @return bool true iff we're on a Nimbus < EC 2.0
@@ -91,12 +91,12 @@ inline bool chip_ec_nimbus_lt_2_0(const fapi2::Target<T>& i_target)
     const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
     uint8_t l_value = 0;
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_MSS_UT_EC_NIMBUS_LESS_THAN_TWO_OH, l_chip, l_value) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_MSS_NIMBUS_EC_LESS_THAN_TWO_OH, l_chip, l_value) );
 
     return l_value != 0;
 
 fapi_try_exit:
-    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_UT_EC_NIMBUS_LESS_THAN_TWO_OH: 0x%lx (target: %s)",
+    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_NIMBUS_EC_LESS_THAN_TWO_OH: 0x%lx (target: %s)",
              uint64_t(fapi2::current_err), mss::c_str(i_target));
     fapi2::Assert(false);
     return false;
