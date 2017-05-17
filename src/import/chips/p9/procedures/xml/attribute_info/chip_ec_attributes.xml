@@ -2878,10 +2878,10 @@
   </attribute>
 
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_MSS_UT_EC_NIMBUS_LESS_THAN_TWO_OH</id>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_NIMBUS_EC_LESS_THAN_TWO_OH</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Attribute used only for memory subsystem unit tests. Tells us whether
+      Attribute used only for memory subsystem procedures. Tells us whether
       the chip EC we're running on is less than 2.0 and we're on a Nimbus
     </description>
     <chipEcFeature>
