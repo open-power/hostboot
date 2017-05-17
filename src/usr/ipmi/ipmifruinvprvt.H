@@ -256,6 +256,10 @@ class IpmiFruInv
         VPD_SN_PN_VPD_SIZE = 16,
     };
 
+    // Store number of days in a each month for computation of build date
+    const uint8_t daysInMonth[12] = {31, 28, 31, 30, 31, 30,
+                                     31, 31, 30, 31, 30, 31};
+
   private:
     /**
      * @brief Compute and Add data checsum to data record
