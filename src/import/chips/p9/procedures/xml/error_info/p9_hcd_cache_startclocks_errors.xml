@@ -27,67 +27,170 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
-    <rc>RC_PMPROC_CACHECPLTALIGN_TIMEOUT</rc>
+    <rc>RC_CACHE_CPLT_ALIGN_TIMEOUT</rc>
     <description>
         cache chiplets alignment timed out.
     </description>
-    <ffdc>EQCPLTSTAT0</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_CACHE_XSTOP</rc>
-    <description>
-        cache checkstops.
-    </description>
-    <ffdc>EQXFIR</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_CACHECLKSYNC_TIMEOUT</rc>
-    <description>
-        L2 EXs clock sync done timed out.
-    </description>
-    <ffdc>EQPPMQACSR</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_CACHECLKSTART_FAILED</rc>
-    <description>
-        cache clock start failed.
-    </description>
-    <ffdc>EQCLKSTAT</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_CACHECLKSTART_TIMEOUT</rc>
-    <description>
-        cache clock start timed out.
-    </description>
-    <ffdc>EQCPLTSTAT</ffdc>
+    <ffdc>EQ_CPLT_STAT0</ffdc>
+    <ffdc>CACHE_CPLT_ALIGN_POLL_DELAY_HW_NS</ffdc>
+    <ffdc>CACHE_CPLT_ALIGN_POLL_TIMEOUT_HW_NS</ffdc>
+    <ffdc>CACHE_TARGET</ffdc>
     <callout>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
       </childTargets>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
       </childTargets>
     </deconfigure>
     <gard>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CACHE_CHECKSTOP_AFTER_CLK_START</rc>
+    <description>
+        cache chiplet detects a checkstop after cache chiplet clock starts.
+    </description>
+    <ffdc>EQ_XFIR</ffdc>
+    <ffdc>CACHE_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CACHE_CLK_SYNC_TIMEOUT</rc>
+    <description>
+        L2 EXs clock sync done timed out.
+    </description>
+    <ffdc>EQ_QPPM_QACSR</ffdc>
+    <ffdc>CACHE_CLK_SYNC_POLL_DELAY_HW_NS</ffdc>
+    <ffdc>CACHE_CLK_SYNC_POLL_TIMEOUT_HW_NS</ffdc>
+    <ffdc>CACHE_TARGET</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CACHE_CLK_START_FAILED</rc>
+    <description>
+        cache clock start failed.
+    </description>
+    <ffdc>EQ_CLK_STAT</ffdc>
+    <ffdc>CACHE_TARGET</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CACHE_CLK_START_TIMEOUT</rc>
+    <description>
+        cache clock start timed out.
+    </description>
+    <ffdc>EQ_CPLT_STAT</ffdc>
+    <ffdc>CACHE_CLK_START_POLL_DELAY_HW_NS</ffdc>
+    <ffdc>CACHE_CLK_START_POLL_TIMEOUT_HW_NS</ffdc>
+    <ffdc>CACHE_TARGET</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
       </childTargets>
     </gard>
   </hwpError>
