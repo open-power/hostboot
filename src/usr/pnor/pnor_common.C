@@ -385,12 +385,10 @@ errlHndl_t PNOR::extendHash(uint64_t i_addr,
 
 bool PNOR::isInhibitedSection(const uint32_t i_section)
 {
-// TODO securebootp9 for now we won't be inhibiting overrides
 #ifdef CONFIG_SECUREBOOT
-//    return (i_section == ATTR_PERM ||
-//            i_section == ATTR_TMP) &&
-//            SECUREBOOT::enabled();
-    return false;
+    return (i_section == ATTR_PERM ||
+            i_section == ATTR_TMP) &&
+            SECUREBOOT::enabled();
 #else
     return false;
 #endif

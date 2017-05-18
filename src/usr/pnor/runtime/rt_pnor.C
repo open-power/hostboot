@@ -40,6 +40,7 @@
 #include <util/align.H>
 #include <runtime/customize_attrs_for_payload.H>
 #include <securerom/ROM.H>
+#include <config.h>
 
 // Trace definition
 extern trace_desc_t* g_trac_pnor;
@@ -109,9 +110,9 @@ void PNOR::getPnorInfo( PnorInfo_t& o_pnorInfo )
     o_pnorInfo.mmioOffset = LPC_SFC_MMIO_OFFSET | LPC_FW_SPACE;
 
     //Using sys target
-    TARGETING::Target* sys = NULL;
+    TARGETING::Target* sys = nullptr;
     TARGETING::targetService().getTopLevelTarget( sys );
-    assert(sys != NULL);
+    assert(sys != nullptr);
 
     o_pnorInfo.norWorkarounds = sys->getAttr<
             TARGETING::ATTR_PNOR_FLASH_WORKAROUNDS>();
@@ -154,24 +155,37 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
                               PNOR::SectionInfo_t& o_info)
 {
     TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::getSectionInfo");
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     do
     {
-        if (i_section == PNOR::INVALID_SECTION)
+        bool l_inhibited = false;
+        #ifdef CONFIG_SECUREBOOT
+        l_inhibited = PNOR::isInhibitedSection(i_section);
+        #endif
+        if (i_section == PNOR::INVALID_SECTION || l_inhibited)
         {
             TRACFCOMP(g_trac_pnor, "RtPnor::getSectionInfo: Invalid Section"
                     " %d", (int)i_section);
+            #ifdef CONFIG_SECUREBOOT
+            if (l_inhibited)
+            {
+                TRACFCOMP(g_trac_pnor, "RtPnor::getSectionInfo: "
+                    "attribute overrides inhibited by secureboot");
+            }
+            #endif
             /*@
              * @errortype
              * @moduleid    PNOR::MOD_RTPNOR_GETSECTIONINFO
              * @reasoncode  PNOR::RC_RTPNOR_INVALID_SECTION
              * @userdata1   PNOR::SectionId
-             * @devdesc     invalid section passed to getSectionInfo
+             * @userdata2   Inhibited by secureboot
+             * @devdesc     invalid section passed to getSectionInfo  or
+             *              section prohibited by secureboot
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_RTPNOR_GETSECTIONINFO,
                                             PNOR::RC_RTPNOR_INVALID_SECTION,
-                                            i_section, 0,true);
+                                            i_section, l_inhibited, true);
             break;
         }
 
@@ -199,8 +213,8 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
         bool l_ecc = (iv_TOC[i_section].integrity&FFS_INTEG_ECC_PROTECT) ?
                       true : false;
 
-        void* l_pWorking = NULL;
-        void* l_pClean   = NULL;
+        void* l_pWorking = nullptr;
+        void* l_pClean   = nullptr;
 
         //find the section in the map first
         if(iv_pnorMap.find(i_section) != iv_pnorMap.end())
@@ -263,7 +277,7 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
 errlHndl_t RtPnor::flush( PNOR::SectionId i_section)
 {
     TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::flush");
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     do
     {
         if (i_section == PNOR::INVALID_SECTION)
@@ -388,8 +402,8 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
     TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::readFromDevice: i_offset=0x%X, "
            "i_procId=%d sec=%d size=0x%X ecc=%d", i_offset, i_procId, i_section,
              i_size, i_ecc);
-    errlHndl_t l_err        = NULL;
-    uint8_t*   l_eccBuffer  = NULL;
+    errlHndl_t l_err        = nullptr;
+    uint8_t*   l_eccBuffer  = nullptr;
     do
     {
 
@@ -587,8 +601,8 @@ errlHndl_t RtPnor::writeToDevice( uint64_t i_procId,
     TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::writeToDevice: i_offset=0x%X, "
            "i_procId=%d sec=%d size=0x%X ecc=%d", i_offset, i_procId, i_section,
              i_size, i_ecc);
-    errlHndl_t l_err        = NULL;
-    uint8_t*   l_eccBuffer  = NULL;
+    errlHndl_t l_err        = nullptr;
+    uint8_t*   l_eccBuffer  = nullptr;
 
     do
     {
@@ -804,7 +818,7 @@ RtPnor& RtPnor::getInstance()
 errlHndl_t RtPnor::getSideInfo( PNOR::SideId i_side,
                                 PNOR::SideInfo_t& o_info)
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     do {
         // We only support the working side at runtime
@@ -850,10 +864,10 @@ errlHndl_t RtPnor::getSideInfo( PNOR::SideId i_side,
 errlHndl_t RtPnor::clearSection(PNOR::SectionId i_section)
 {
     TRACFCOMP(g_trac_pnor, "RtPnor::clearSection Section id = %d", i_section);
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     const uint64_t CLEAR_BYTE = 0xFF;
     uint8_t* l_buf = new uint8_t[PAGESIZE]();
-    uint8_t* l_eccBuf = NULL;
+    uint8_t* l_eccBuf = nullptr;
 
     do
     {

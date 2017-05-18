@@ -83,12 +83,11 @@ namespace SECUREBOOT
 
     /** @brief Determines if Secureboot is enabled.
      */
-#if defined(CONFIG_SECUREBOOT) && !defined(__HOSTBOOT_RUNTIME)
+#if defined(CONFIG_SECUREBOOT)
     bool enabled();
 #else
     inline bool enabled() { return false; };
 #endif
-    //@fixme-RTC:163094-Remove RUNTIME check once the code is there
 
     /** @brief Get security switch register value
      *  @par Detailed Description:
