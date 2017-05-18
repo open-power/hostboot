@@ -278,5 +278,43 @@ struct sb_flags_t
     bool hw_key_transition; ///< Indicates this is a key transition container
 };
 
+/**
+ *  @brief Type used to specify Secure Boot function types
+ */
+typedef uint32_t sbFuncType_t;
+/**
+ *  @brief Secure Boot function types
+ */
+enum SB_FUNC_TYPES : sbFuncType_t
+{
+    SHA512 = 0x0000,
+    ECDSA521 = 0x0001,
+    MAX_TYPES,
+    INVALID = 0xFFFF
+};
+
+/**
+ *  @brief Type used to specify Secure Boot function type versions
+ */
+typedef uint32_t sbFuncVer_t;
+/**
+ *  @brief Secure Boot function type versions
+ */
+enum SB_FUNC_VERS : sbFuncVer_t
+{
+    // All external function definitions extern'd in ROM.H and implemented in
+    // rom_entry.S
+
+    // SHA512 Hash function definition(s) per version
+    SHA512_INIT = 0x0001, // void call_rom_SHA512(void*, const sha2_byte *, size_t, sha2_hash_t*);
+
+    // ECDSA521 function definition(s) per version
+    ECDSA521_INIT = 0x0001, // ROM_response call_rom_verify(void*, const ROM_container_raw*, ROM_hw_params*);
+};
+
+/**
+ * @brief Array of current secure rom function types used
+ */
+extern const std::array<sbFuncType_t, SB_FUNC_TYPES::MAX_TYPES> SecRomFuncTypes;
 
 #endif

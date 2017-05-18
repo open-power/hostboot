@@ -39,10 +39,18 @@
 #include <secureboot/settings.H>
 #include <config.h>
 #include <console/consoleif.H>
+#include <array>
 
 // Quick change for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
+
+// Definition in ROM.H
+const std::array<sbFuncType_t, SB_FUNC_TYPES::MAX_TYPES> SecRomFuncTypes =
+{
+    SB_FUNC_TYPES::SHA512,
+    SB_FUNC_TYPES::ECDSA521
+};
 
 namespace SECUREBOOT
 {
@@ -111,6 +119,18 @@ void getHwKeyHash(sha2_hash_t o_hash)
     {
         return Singleton<SecureRomManager>::instance().getHwKeyHash(o_hash);
     }
+}
+
+sbFuncVer_t getSecRomFuncVersion(const sbFuncType_t i_funcType)
+{
+    return Singleton<SecureRomManager>::instance().
+                                               getSecRomFuncVersion(i_funcType);
+}
+
+uint64_t getSecRomFuncOffset(const sbFuncType_t i_funcType)
+{
+    return Singleton<SecureRomManager>::instance().
+                                                getSecRomFuncOffset(i_funcType);
 }
 
 }; //end SECUREBOOT namespace
@@ -218,8 +238,24 @@ errlHndl_t SecureRomManager::initialize()
         /***************************************************************/
         SecureRomManager::getHwKeyHash();
 
+
         TRACDCOMP(g_trac_secure,INFO_MRK"SecureRomManager::initialize(): SUCCESSFUL:"
-        " iv_securerom=%p", iv_securerom);
+                  " iv_securerom=%p", iv_securerom);
+
+#ifdef HOSTBOOT_DEBUG
+        TRACFCOMP(g_trac_secure,">> iv_SecRomFuncTypeOffset Map");
+        for (auto const &funcType : iv_SecRomFuncTypeOffset)
+        {
+            TRACFCOMP(g_trac_secure,">>>> Func Type = 0x%X",
+                      funcType.first);
+            for (auto const &version : funcType.second)
+            {
+                TRACFCOMP(g_trac_secure,">>>>>> Version = 0x%X, Offset = 0x%X",
+                          version.first, version.second);
+            }
+        }
+        TRACFCOMP(g_trac_secure,"<<<< iv_SecRomFuncTypeOffset map");
+#endif
 
     }while(0);
 
@@ -282,9 +318,8 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
 
         // Set startAddr to ROM_verify() function at an offset of Secure ROM
         uint64_t l_rom_verify_startAddr =
-                                reinterpret_cast<uint64_t>(iv_securerom)
-                                + g_BlToHbDataManager.getBranchtableOffset()
-                                + ROM_VERIFY_FUNCTION_OFFSET;
+                                reinterpret_cast<uint64_t>(iv_securerom) +
+                                getSecRomFuncOffset(SB_FUNC_TYPES::ECDSA521);
 
         TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
                   " Calling ROM_verify() via call_rom_verify: l_rc=0x%x, "
@@ -292,7 +327,8 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
                   l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
                  iv_securerom);
 
-        ROM_container_raw* l_container = reinterpret_cast<ROM_container_raw*>(i_container);
+        ROM_container_raw* l_container = reinterpret_cast<ROM_container_raw*>(
+                                                                   i_container);
         l_rc = call_rom_verify(reinterpret_cast<void*>
                                (l_rom_verify_startAddr),
                                l_container,
@@ -366,9 +402,8 @@ void SecureRomManager::hashBlob(const void * i_blob, size_t i_size, SHA512_t o_b
 
         // Set startAddr to ROM_SHA512() function at an offset of Secure ROM
         uint64_t l_rom_SHA512_startAddr =
-                                    reinterpret_cast<uint64_t>(iv_securerom)
-                                    + g_BlToHbDataManager.getBranchtableOffset()
-                                    + SHA512_HASH_FUNCTION_OFFSET;
+                                    reinterpret_cast<uint64_t>(iv_securerom) +
+                                    getSecRomFuncOffset(SB_FUNC_TYPES::SHA512);
 
         call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
                         reinterpret_cast<const sha2_byte*>(i_blob),
@@ -440,4 +475,56 @@ void SecureRomManager::getHwKeyHash(sha2_hash_t o_hash)
     {
         memcpy(o_hash, iv_key_hash, sizeof(sha2_hash_t));
     }
+}
+
+const SecureRomManager::SecRomFuncTypeOffsetMap_t
+            SecureRomManager::iv_SecRomFuncTypeOffset =
+{
+    // SHA512 Hash Function
+    { SB_FUNC_TYPES::SHA512,
+        {
+            { SB_FUNC_VERS::SHA512_INIT,
+              g_BlToHbDataManager.getBranchtableOffset() +
+                SHA512_HASH_FUNCTION_OFFSET
+            }
+        }
+    } ,
+    // ECDSA521 Verify Function
+    { SB_FUNC_TYPES::ECDSA521,
+        {
+            { SB_FUNC_VERS::ECDSA521_INIT,
+              g_BlToHbDataManager.getBranchtableOffset() +
+                ROM_VERIFY_FUNCTION_OFFSET
+            }
+        }
+    }
+};
+
+sbFuncVer_t SecureRomManager::getSecRomFuncVersion(const sbFuncType_t
+                                                         i_funcType) const
+{
+    sbFuncVer_t l_funcVer = SB_FUNC_TYPES::INVALID;
+
+    switch (i_funcType)
+    {
+        case SB_FUNC_TYPES::SHA512:
+            l_funcVer = iv_curSHA512Ver;
+            break;
+        case SB_FUNC_TYPES::ECDSA521:
+            l_funcVer = iv_curECDSA521Ver;
+            break;
+        default:
+            assert(false, "getCurFuncVer:: Function type 0x%X not supported", i_funcType);
+            break;
+    }
+
+    return l_funcVer;
+}
+
+uint64_t SecureRomManager::getSecRomFuncOffset(const sbFuncType_t i_funcType)
+                                                                           const
+{
+    sbFuncVer_t l_funcVer = getSecRomFuncVersion(i_funcType);
+
+    return iv_SecRomFuncTypeOffset.at(i_funcType).at(l_funcVer);
 }

@@ -29,6 +29,7 @@
 #include <errl/errlentry.H>
 #include <securerom/ROM.H>
 #include <utility>
+#include <map>
 
 typedef std::vector< std::pair<void*,size_t> > blobPair_t;
 
@@ -46,7 +47,6 @@ class SecureRomManager
          * @return errlHndl_t  NULL on success
          */
         errlHndl_t initialize();
-
 
         /**
          * @brief Verify Container against system hash keys
@@ -103,6 +103,26 @@ class SecureRomManager
          */
         bool isValid();
 
+        /*
+         * @brief Get offset of function from the start of the SecureROM
+         *
+         * @param[in]  i_funcType   Secure Boot function type to get version of
+         *
+         * @return uint64_t - offset of the function
+         */
+        sbFuncVer_t getSecRomFuncVersion(const sbFuncType_t i_funcType) const;
+
+        /*
+         * @brief Get offset of function from the start of the SecureROM
+         *
+         *
+         * @param[in]  i_funcType   Secure Boot function type to get offset of
+         *
+         * @return uint64_t - offset of the function
+         */
+        uint64_t getSecRomFuncOffset(const sbFuncType_t i_funcType) const;
+
+
     protected:
 
         /**
@@ -110,7 +130,9 @@ class SecureRomManager
          */
         SecureRomManager():iv_securerom(nullptr),
                            iv_secureromValid(false),
-                           iv_key_hash(nullptr) {}
+                           iv_key_hash(nullptr),
+                           iv_curSHA512Ver(SB_FUNC_VERS::SHA512_INIT),
+                           iv_curECDSA521Ver(SB_FUNC_VERS::ECDSA521_INIT) {}
 
         /**
          * @brief Destructor
@@ -137,6 +159,25 @@ class SecureRomManager
          * HW key' hash retrieved from system
          */
         const sha2_hash_t* iv_key_hash;
+
+        /**
+         * @brief Map to find verify SecureROM function types and their
+         *        respective versions and offsets.
+         *
+         * Description: Nested Map where key is the function type and the
+         *              value is a map of versions to offsets
+         *
+         */
+        // Type of nest map in SecRomFuncTypeOffset
+        typedef std::map<sbFuncVer_t, uint64_t> FuncVerToOffsetMap_t;
+        typedef std::map<sbFuncType_t, FuncVerToOffsetMap_t > SecRomFuncTypeOffsetMap_t;
+        static const SecRomFuncTypeOffsetMap_t iv_SecRomFuncTypeOffset;
+
+        // SHA512 function version
+        sbFuncVer_t iv_curSHA512Ver;
+
+        // ECDSA521 function version
+        sbFuncVer_t iv_curECDSA521Ver;
 
         /********************************************
          * Private Functions
