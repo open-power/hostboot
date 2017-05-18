@@ -45,6 +45,8 @@ OBJS += hw_utils.o
 OBJS += rom_entry.o
 OBJS += secureromasm.o
 
+VPATH += contrib
+
 OPT_LEVEL = -Os
 
 include ${ROOTPATH}/config.mk
