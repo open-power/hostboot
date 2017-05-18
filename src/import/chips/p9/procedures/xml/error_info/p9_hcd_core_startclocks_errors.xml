@@ -27,85 +27,202 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
-    <rc>RC_PMPROC_CORECPLTALIGN_TIMEOUT</rc>
+    <rc>RC_CORE_CPLT_ALIGN_TIMEOUT</rc>
     <description>
         core chiplets alignment timed out.
     </description>
-    <ffdc>CORECPLTSTAT0</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_QUADCPLTALIGN_FAILED</rc>
-    <description>
-        quad chiplets alignment failed.
-    </description>
-    <ffdc>QUADCPLTSTAT0</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_CORECPLTALIGN_FAILED</rc>
-    <description>
-        core chiplets alignment failed.
-    </description>
-    <ffdc>CORECPLTSTAT0</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_CORE_XSTOP</rc>
-    <description>
-        core checkstops.
-    </description>
-    <ffdc>COREXFIR</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_CORECLKSYNC_TIMEOUT</rc>
-    <description>
-        core clock sync done timed out.
-    </description>
-    <ffdc>COREPPMCACSR</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_CORECLKSTART_FAILED</rc>
-    <description>
-        core clock start failed.
-    </description>
-    <ffdc>CORECLKSTAT</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_CORECLKSTART_TIMEOUT</rc>
-    <description>
-        core clock start timed out.
-    </description>
-    <ffdc>CORECPLTSTAT</ffdc>
+    <ffdc>CORE_CPLT_STAT0</ffdc>
+    <ffdc>CORE_CPLT_ALIGN_POLL_DELAY_HW_NS</ffdc>
+    <ffdc>CORE_CPLT_ALIGN_POLL_TIMEOUT_HW_NS</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
     <callout>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
       </childTargets>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
       </childTargets>
     </deconfigure>
     <gard>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CORE_CPLT_ALIGN_FAILED</rc>
+    <description>
+        core chiplets alignment failed.
+    </description>
+    <ffdc>CORE_CPLT_STAT0</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CORE_CHECKSTOP_AFTER_CLK_START</rc>
+    <description>
+        core chiplet detects a checkstop after core chiplet clock starts.
+    </description>
+    <ffdc>CORE_XFIR</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CORE_CLK_SYNC_TIMEOUT</rc>
+    <description>
+        core clock sync done timed out.
+    </description>
+    <ffdc>CORE_CPPM_CACSR</ffdc>
+    <ffdc>CORE_CLK_SYNC_POLL_DELAY_HW_NS</ffdc>
+    <ffdc>CORE_CLK_SYNC_POLL_TIMEOUT_HW_NS</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CORE_CLK_START_FAILED</rc>
+    <description>
+        core clock start failed.
+    </description>
+    <ffdc>CORE_CLK_STAT</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CORE_CLK_START_TIMEOUT</rc>
+    <description>
+        core clock start timed out.
+    </description>
+    <ffdc>CORE_CPLT_STAT</ffdc>
+    <ffdc>CORE_CLK_START_POLL_DELAY_HW_NS</ffdc>
+    <ffdc>CORE_CLK_START_POLL_TIMEOUT_HW_NS</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
       </childTargets>
     </gard>
   </hwpError>
